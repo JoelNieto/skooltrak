@@ -62,7 +62,11 @@
           "buildTarget": "web-dashboard:build:development"
         }
       },
-      "defaultConfiguration": "development"
+      "defaultConfiguration": "development",
+      "dependsOn": ["dashboard-backend:serve"],
+      "options": {
+        "proxyConfig": "apps/web-dashboard/proxy.conf.json"
+      }
     },
     "extract-i18n": {
       "executor": "@angular/build:extract-i18n",

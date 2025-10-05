@@ -1,0 +1,415 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type Course {
+  """Code of the course"""
+  code: String!
+
+  """Created at of the course"""
+  createdAt: DateTime!
+
+  """ID of the course"""
+  id: String!
+
+  """Name of the course"""
+  name: String!
+
+  """School of the course"""
+  school: School!
+
+  """Short name of the course"""
+  shortName: String!
+
+  """Study plan of the course"""
+  studyPlan: StudyPlan!
+
+  """Subject of the course"""
+  subject: Subject!
+
+  """Updated at of the course"""
+  updatedAt: DateTime!
+}
+
+input CreateCourseInput {
+  """Code of the course"""
+  code: String!
+
+  """Name of the course"""
+  name: String!
+
+  """School ID of the course"""
+  schoolId: String!
+
+  """Short name of the course"""
+  shortName: String!
+
+  """Study plan ID of the course"""
+  studyPlanId: String!
+
+  """Subject ID of the course"""
+  subjectId: String!
+}
+
+input CreateDegreeInput {
+  """Name of the degree"""
+  name: String!
+
+  """School ID"""
+  schoolId: String!
+
+  """Short name of the degree"""
+  shortName: String!
+}
+
+input CreateSchoolInput {
+  """Address of the school"""
+  address: String! = ""
+
+  """City of the school"""
+  city: String! = ""
+
+  """Country of the school"""
+  country: String! = ""
+
+  """Email of the school"""
+  email: String! = ""
+
+  """Logo of the school"""
+  logo: String! = ""
+
+  """Name of the school"""
+  name: String!
+
+  """Phone number of the school"""
+  phone: String! = ""
+
+  """Short name of the school"""
+  shortName: String!
+
+  """State of the school"""
+  state: String! = ""
+
+  """Website of the school"""
+  website: String! = ""
+
+  """Zip code of the school"""
+  zip: String! = ""
+}
+
+input CreateStudyPlanInput {
+  """Code of the study plan"""
+  code: String!
+
+  """Degree ID of the study plan"""
+  degreeId: String!
+
+  """Description of the study plan"""
+  description: String!
+
+  """Level of the study plan"""
+  level: Int!
+
+  """Name of the study plan"""
+  name: String!
+
+  """School ID of the study plan"""
+  schoolId: String!
+
+  """Short name of the study plan"""
+  shortName: String!
+}
+
+input CreateSubjectInput {
+  """Code of the subject"""
+  code: String!
+
+  """Name of the subject"""
+  name: String!
+
+  """School ID"""
+  schoolId: String!
+
+  """Short name of the subject"""
+  shortName: String!
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+type Degree {
+  """Created at of the degree"""
+  createdAt: DateTime!
+
+  """ID of the degree"""
+  id: String!
+
+  """Name of the degree"""
+  name: String!
+
+  """School of the degree"""
+  school: School!
+
+  """School ID of the degree"""
+  schoolId: String!
+
+  """Short name of the degree"""
+  shortName: String!
+
+  """Study plans of the degree"""
+  studyPlans: [StudyPlan!]!
+
+  """Updated at of the degree"""
+  updatedAt: DateTime!
+}
+
+type Mutation {
+  createCourse(createCourseInput: CreateCourseInput!): Course!
+  createDegree(createDegreeInput: CreateDegreeInput!): Degree!
+  createSchool(createSchoolInput: CreateSchoolInput!): School!
+  createStudyPlan(createStudyPlanInput: CreateStudyPlanInput!): StudyPlan!
+  createSubject(createSubjectInput: CreateSubjectInput!): Subject!
+  removeCourse(id: String!): Course!
+  removeDegree(id: String!): Degree!
+  removeSchool(id: String!): School!
+  removeStudyPlan(id: String!): StudyPlan!
+  removeSubject(id: String!): Subject!
+  updateCourse(updateCourseInput: UpdateCourseInput!): Course!
+  updateDegree(updateDegreeInput: UpdateDegreeInput!): Degree!
+  updateSchool(updateSchoolInput: UpdateSchoolInput!): School!
+  updateStudyPlan(updateStudyPlanInput: UpdateStudyPlanInput!): StudyPlan!
+  updateSubject(updateSubjectInput: UpdateSubjectInput!): Subject!
+}
+
+type Query {
+  course(id: String!): Course!
+  courses: [Course!]!
+  degree(id: String!): Degree!
+  degrees: [Degree!]!
+  school(id: String!): School!
+  schools: [School!]!
+  studyPlan(id: String!): StudyPlan!
+  studyPlans: [StudyPlan!]!
+  subject(id: String!): Subject!
+  subjects: [Subject!]!
+}
+
+type School {
+  """Address of the school"""
+  address: String!
+
+  """City of the school"""
+  city: String!
+
+  """Country of the school"""
+  country: String!
+
+  """Created at"""
+  createdAt: DateTime!
+
+  """Email of the school"""
+  email: String!
+
+  """ID of the school (auto-generated)"""
+  id: String!
+
+  """Logo of the school"""
+  logo: String!
+
+  """Name of the school"""
+  name: String!
+
+  """Phone number of the school"""
+  phone: String!
+
+  """Short name of the school"""
+  shortName: String!
+
+  """State of the school"""
+  state: String!
+
+  """Updated at"""
+  updatedAt: DateTime!
+
+  """Website of the school"""
+  website: String!
+
+  """Zip code of the school"""
+  zip: String!
+}
+
+type StudyPlan {
+  """Code of the study plan"""
+  code: String!
+
+  """Courses of the study plan"""
+  courses: [Course!]!
+
+  """Created at of the study plan"""
+  createdAt: DateTime!
+
+  """Degree of the study plan"""
+  degree: Degree!
+
+  """Degree ID of the study plan"""
+  degreeId: String!
+
+  """Description of the study plan"""
+  description: String!
+
+  """ID of the study plan"""
+  id: String!
+
+  """Level of the study plan"""
+  level: Int!
+
+  """Name of the study plan"""
+  name: String!
+
+  """School of the study plan"""
+  school: School!
+
+  """School ID of the study plan"""
+  schoolId: String!
+
+  """Short name of the study plan"""
+  shortName: String!
+
+  """Updated at of the study plan"""
+  updatedAt: DateTime!
+}
+
+type Subject {
+  """Code of the subject"""
+  code: String!
+
+  """Created at"""
+  createdAt: String!
+
+  """ID of the subject (auto-generated)"""
+  id: String!
+
+  """Name of the subject"""
+  name: String!
+
+  """School ID"""
+  school: School!
+
+  """School ID"""
+  schoolId: String!
+
+  """Short name of the subject"""
+  shortName: String!
+  updatedAt: String!
+}
+
+input UpdateCourseInput {
+  """Code of the course"""
+  code: String
+  id: String!
+
+  """Name of the course"""
+  name: String
+
+  """School ID of the course"""
+  schoolId: String
+
+  """Short name of the course"""
+  shortName: String
+
+  """Study plan ID of the course"""
+  studyPlanId: String
+
+  """Subject ID of the course"""
+  subjectId: String
+}
+
+input UpdateDegreeInput {
+  id: String!
+
+  """Name of the degree"""
+  name: String
+
+  """School ID"""
+  schoolId: String
+
+  """Short name of the degree"""
+  shortName: String
+}
+
+input UpdateSchoolInput {
+  """Address of the school"""
+  address: String = ""
+
+  """City of the school"""
+  city: String = ""
+
+  """Country of the school"""
+  country: String = ""
+
+  """Email of the school"""
+  email: String = ""
+  id: String!
+
+  """Logo of the school"""
+  logo: String = ""
+
+  """Name of the school"""
+  name: String
+
+  """Phone number of the school"""
+  phone: String = ""
+
+  """Short name of the school"""
+  shortName: String
+
+  """State of the school"""
+  state: String = ""
+
+  """Website of the school"""
+  website: String = ""
+
+  """Zip code of the school"""
+  zip: String = ""
+}
+
+input UpdateStudyPlanInput {
+  """Code of the study plan"""
+  code: String
+
+  """Degree ID of the study plan"""
+  degreeId: String
+
+  """Description of the study plan"""
+  description: String
+  id: String!
+
+  """Level of the study plan"""
+  level: Int
+
+  """Name of the study plan"""
+  name: String
+
+  """School ID of the study plan"""
+  schoolId: String
+
+  """Short name of the study plan"""
+  shortName: String
+}
+
+input UpdateSubjectInput {
+  """Code of the subject"""
+  code: String
+  id: String!
+
+  """Name of the subject"""
+  name: String
+
+  """School ID"""
+  schoolId: String
+
+  """Short name of the subject"""
+  shortName: String
+}

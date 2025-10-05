@@ -1,0 +1,23 @@
+import { Field, InputType } from '@nestjs/graphql';
+import { Prisma } from '@prisma/client';
+
+@InputType()
+export class CreateCourseInput implements Prisma.CourseUncheckedCreateInput {
+  @Field(() => String, { description: 'Name of the course' })
+  name: string;
+
+  @Field(() => String, { description: 'Code of the course' })
+  code: string;
+
+  @Field(() => String, { description: 'Short name of the course' })
+  shortName: string;
+
+  @Field(() => String, { description: 'School ID of the course' })
+  schoolId: string;
+
+  @Field(() => String, { description: 'Subject ID of the course' })
+  subjectId: string;
+
+  @Field(() => String, { description: 'Study plan ID of the course' })
+  studyPlanId: string;
+}

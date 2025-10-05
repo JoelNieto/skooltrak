@@ -5,6 +5,8 @@ import { Prisma } from '@prisma/client';
 export class CreateSubjectInput implements Prisma.SubjectUncheckedCreateInput {
   @Field(() => String, { description: 'Short name of the subject' })
   shortName: string;
+  @Field(() => String, { description: 'Organization ID' })
+  organizationId: string;
   @Field(() => String, { description: 'Code of the subject' })
   code: string;
   createdAt?: string | Date;

@@ -64,7 +64,10 @@
       "options": {
         "targetName": "test"
       },
-      "exclude": ["apps/dashboard-backend-e2e/**/*"]
+      "exclude": [
+        "apps/dashboard-backend-e2e/**/*",
+        "apps/admin-backend-e2e/**/*"
+      ]
     }
   ],
   "generators": {
@@ -78,7 +81,6 @@
       "style": "css",
       "inlineStyle": true,
       "inlineTemplate": true,
-      "linter": "eslint",
       "changeDetection": "OnPush"
     }
   }

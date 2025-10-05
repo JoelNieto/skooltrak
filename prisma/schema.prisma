@@ -14,13 +14,15 @@ datasource db {
 }
 
 model Organization {
-  id      String    @id @default(cuid())
-  name    String
-  active  Boolean   @default(true)
-  users   User[]
-  roles   Role[]
-  School  School[]
-  Subject Subject[]
+  id        String    @id @default(cuid())
+  name      String
+  active    Boolean   @default(true)
+  users     User[]
+  roles     Role[]
+  School    School[]
+  Subject   Subject[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 }
 
 model User {
@@ -31,6 +33,8 @@ model User {
   roleId         String
   organization   Organization @relation(fields: [organizationId], references: [id])
   organizationId String
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
 }
 
 model Role {
@@ -38,18 +42,22 @@ model Role {
   name           String
   description    String
   users          User[]
-  RolePermission RolePermission[]
+  permissions    RolePermission[]
   organization   Organization     @relation(fields: [organizationId], references: [id])
   organizationId String
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
 
   @@unique([organizationId, name])
 }
 
 model Permission {
-  id             String           @id @default(cuid())
-  descriptiveId  String           @unique
-  description    String
-  RolePermission RolePermission[]
+  id            String           @id @default(cuid())
+  descriptiveId String           @unique
+  description   String
+  roles         RolePermission[]
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
 }
 
 model RolePermission {

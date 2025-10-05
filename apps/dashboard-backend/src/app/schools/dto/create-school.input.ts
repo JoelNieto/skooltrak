@@ -2,7 +2,13 @@ import { Field, InputType } from '@nestjs/graphql';
 import { Prisma } from '@prisma/client';
 
 @InputType()
-export class CreateSchoolInput implements Prisma.SchoolCreateInput {
+export class CreateSchoolInput implements Prisma.SchoolUncheckedCreateInput {
+  @Field(() => String, {
+    description: 'Organization ID of the school',
+    nullable: false,
+  })
+  organizationId: string;
+
   @Field(() => String, { description: 'Name of the school', nullable: false })
   name: string;
   @Field(() => String, {

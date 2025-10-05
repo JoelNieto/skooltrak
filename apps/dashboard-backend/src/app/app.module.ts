@@ -11,8 +11,9 @@ import { CoursesModule } from './courses/courses.module';
 import { DegreesModule } from './degrees/degrees.module';
 import { PrismaModule } from './prisma.module';
 import { SchoolsModule } from './schools/schools.module';
-import { SubjectsModule } from './subjects/subjects.module';
 import { StudyPlansModule } from './study-plans/study-plans.module';
+import { SubjectsModule } from './subjects/subjects.module';
+import { OrganizationsModule } from './organizations/organizations.module';
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { StudyPlansModule } from './study-plans/study-plans.module';
     DegreesModule,
     CoursesModule,
     StudyPlansModule,
+    OrganizationsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -7,6 +7,11 @@ export class CreateOrganizationInput
 {
   @Field(() => String, { description: 'Name of the organization' })
   name: string;
-  @Field(() => Boolean, { description: 'Active status of the organization' })
+  @Field(() => String, { description: 'Description of the organization' })
+  description: string;
+  @Field(() => Boolean, {
+    description: 'Active status of the organization',
+    defaultValue: true,
+  })
   active?: boolean;
 }

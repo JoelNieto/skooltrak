@@ -14,58 +14,63 @@ datasource db {
 }
 
 model Organization {
-  id        String    @id @default(cuid())
-  name      String
-  active    Boolean   @default(true)
-  users     User[]
-  roles     Role[]
-  School    School[]
-  Subject   Subject[]
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  id          String       @id @default(cuid())
+  name        String
+  description String
+  active      Boolean      @default(true)
+  users       User[]
+  roles       Role[]
+  schools     School[]
+  subjects    Subject[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  groups      ClassGroup[]
+  courses     Course[]
+  Teacher     Teacher[]
+  Student     Student[]
 }
 
 model User {
-  id             String       @id @default(cuid())
-  email          String       @unique
-  name           String
-  role           Role         @relation(fields: [roleId], references: [id])
+  id             String        @id @default(cuid())
+  email          String        @unique
+  firstName      String
+  lastName       String
+  password       String
+  role           Role          @relation(fields: [roleId], references: [id])
   roleId         String
-  organization   Organization @relation(fields: [organizationId], references: [id])
-  organizationId String
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
+  organization   Organization? @relation(fields: [organizationId], references: [id])
+  organizationId String?
+  school         School?       @relation(fields: [schoolId], references: [id])
+  schoolId       String?
+  lastLogin      DateTime?
+  isBlocked      Boolean       @default(false)
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  student        Student?
+  teacher        Teacher?
 }
 
 model Role {
-  id             String           @id @default(cuid())
+  id             String        @id @default(cuid())
   name           String
   description    String
   users          User[]
-  permissions    RolePermission[]
-  organization   Organization     @relation(fields: [organizationId], references: [id])
-  organizationId String
-  createdAt      DateTime         @default(now())
-  updatedAt      DateTime         @updatedAt
+  permissions    Permission[]
+  organization   Organization? @relation(fields: [organizationId], references: [id])
+  organizationId String?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
 
   @@unique([organizationId, name])
 }
 
 model Permission {
-  id            String           @id @default(cuid())
-  descriptiveId String           @unique
+  id            String   @id @default(cuid())
+  descriptiveId String   @unique
   description   String
-  roles         RolePermission[]
-  createdAt     DateTime         @default(now())
-  updatedAt     DateTime         @updatedAt
-}
-
-model RolePermission {
-  id           String     @id @default(cuid())
-  roleId       String
-  permissionId String
-  role         Role       @relation(fields: [roleId], references: [id])
-  permission   Permission @relation(fields: [permissionId], references: [id])
+  roles         Role[]
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 }
 
 model School {
@@ -85,10 +90,12 @@ model School {
   website        String
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
-  subjects       Subject[]
   studyPlans     StudyPlan[]
   degrees        Degree[]
   courses        Course[]
+  users          User[]
+  classGroups    ClassGroup[]
+  students       Student[]
 }
 
 model Subject {
@@ -98,22 +105,11 @@ model Subject {
   name           String
   code           String
   shortName      String
-  schoolId       String
-  school         School       @relation(fields: [schoolId], references: [id])
   courses        Course[]
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
 
-  @@unique([schoolId, name])
-  @@unique([schoolId, code])
-}
-
-model DefaultSubject {
-  id        String   @id @default(cuid())
-  name      String
-  shortName String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  @@unique([name, code])
 }
 
 model Degree {
@@ -147,19 +143,86 @@ model StudyPlan {
 }
 
 model Course {
-  id          String    @id @default(cuid())
-  name        String
-  code        String
-  shortName   String
-  schoolId    String
-  school      School    @relation(fields: [schoolId], references: [id])
-  subjectId   String
-  subject     Subject   @relation(fields: [subjectId], references: [id])
-  studyPlanId String
-  studyPlan   StudyPlan @relation(fields: [studyPlanId], references: [id])
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  id             String       @id @default(cuid())
+  name           String
+  code           String
+  shortName      String
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  schoolId       String
+  school         School       @relation(fields: [schoolId], references: [id])
+  subjectId      String
+  subject        Subject      @relation(fields: [subjectId], references: [id])
+  studyPlanId    String
+  studyPlan      StudyPlan    @relation(fields: [studyPlanId], references: [id])
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  groups         ClassGroup[]
+  students       Student[]
+  teacher        Teacher?     @relation(fields: [teacherId], references: [id])
+  teacherId      String?
 
   @@unique([schoolId, name])
   @@unique([schoolId, code])
+}
+
+model ClassGroup {
+  id             String       @id @default(cuid())
+  name           String
+  shortName      String
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  schoolId       String
+  school         School       @relation(fields: [schoolId], references: [id])
+  courses        Course[]
+  active         Boolean
+  stdents        Student[]
+  teacher        Teacher?     @relation(fields: [teacherId], references: [id])
+  teacherId      String?
+}
+
+model Student {
+  id             String       @id @default(cuid())
+  firstName      String
+  middleName     String
+  fatherName     String
+  motherName     String
+  documentId     String
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  school         School       @relation(fields: [schoolId], references: [id])
+  schoolId       String
+  classGroup     ClassGroup   @relation(fields: [classGroupId], references: [id])
+  classGroupId   String
+  birthDate      DateTime
+  gender         Gender
+  courses        Course[]
+  userId         String       @unique
+  user           User         @relation(fields: [userId], references: [id])
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+}
+
+model Teacher {
+  id             String       @id @default(cuid())
+  firstName      String
+  middleName     String
+  fatherName     String
+  motherName     String
+  documentId     String
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  birthDate      DateTime
+  gender         Gender
+  classGroups    ClassGroup[]
+  courses        Course[]
+  user           User         @relation(fields: [userId], references: [id])
+  userId         String       @unique
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+}
+
+enum Gender {
+  FEMALE
+  MALE
 }

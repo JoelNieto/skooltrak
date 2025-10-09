@@ -9,21 +9,36 @@ export class SchoolsService {
   create(createSchoolInput: CreateSchoolInput) {
     return this.prisma.school.create({
       data: createSchoolInput,
+      include: {
+        organization: true,
+      },
     });
   }
 
   findAll() {
-    return this.prisma.school.findMany();
+    return this.prisma.school.findMany({
+      include: {
+        organization: true,
+      },
+    });
   }
 
   findOne(id: string) {
-    return this.prisma.school.findUnique({ where: { id } });
+    return this.prisma.school.findUnique({
+      include: {
+        organization: true,
+      },
+      where: { id },
+    });
   }
 
   update(id: string, updateSchoolInput: UpdateSchoolInput) {
     return this.prisma.school.update({
       where: { id },
       data: updateSchoolInput,
+      include: {
+        organization: true,
+      },
     });
   }
 

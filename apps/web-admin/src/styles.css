@@ -1,13 +1,11 @@
 /* You can add global styles to this file, and also import other style files */
 /* You can add global styles to this file, and also import other style files */
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Nata+Sans:wght@100..900&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Inclusive+Sans:ital,wght@0,300..700;1,300..700&display=swap');
 @import 'tailwindcss';
 @plugin 'daisyui';
 
 @plugin "daisyui/theme" {
-  name: 'skool';
+  name: 'light';
   default: true;
   prefersdark: false;
   color-scheme: 'light';
@@ -15,13 +13,13 @@
   --color-base-200: oklch(98% 0 0);
   --color-base-300: oklch(95% 0 0);
   --color-base-content: oklch(21% 0.006 285.885);
-  --color-primary: oklch(45% 0.24 277.023);
-  --color-primary-content: oklch(93% 0.034 272.788);
+  --color-primary: oklch(60% 0.126 221.723);
+  --color-primary-content: oklch(96% 0.018 272.314);
   --color-secondary: oklch(65% 0.241 354.308);
   --color-secondary-content: oklch(94% 0.028 342.258);
   --color-accent: oklch(77% 0.152 181.912);
   --color-accent-content: oklch(38% 0.063 188.416);
-  --color-neutral: oklch(14% 0.005 285.823);
+  --color-neutral: oklch(27% 0.006 286.033);
   --color-neutral-content: oklch(92% 0.004 286.32);
   --color-info: oklch(74% 0.16 232.661);
   --color-info-content: oklch(29% 0.066 243.157);
@@ -29,14 +27,14 @@
   --color-success-content: oklch(37% 0.077 168.94);
   --color-warning: oklch(82% 0.189 84.429);
   --color-warning-content: oklch(41% 0.112 45.904);
-  --color-error: oklch(57% 0.245 27.325);
-  --color-error-content: oklch(93% 0.032 17.717);
-  --radius-selector: 0.5rem;
-  --radius-field: 0.5rem;
-  --radius-box: 0.5rem;
-  --size-selector: 0.25rem;
-  --size-field: 0.25rem;
-  --border: 1.5px;
+  --color-error: oklch(71% 0.194 13.428);
+  --color-error-content: oklch(27% 0.105 12.094);
+  --radius-selector: 0.25rem;
+  --radius-field: 0.25rem;
+  --radius-box: 0.25rem;
+  --size-selector: 0.28125rem;
+  --size-field: 0.28125rem;
+  --border: 1px;
   --depth: 0;
   --noise: 0;
 }
@@ -66,12 +64,92 @@
   --color-warning-content: oklch(41% 0.112 45.904);
   --color-error: oklch(71% 0.194 13.428);
   --color-error-content: oklch(27% 0.105 12.094);
-  --radius-selector: 0.5rem;
-  --radius-field: 0.5rem;
-  --radius-box: 0.5rem;
-  --size-selector: 0.25rem;
-  --size-field: 0.25rem;
+  --radius-selector: 0.25rem;
+  --radius-field: 0.25rem;
+  --radius-box: 0.25rem;
+  --size-selector: 0.28125rem;
+  --size-field: 0.28125rem;
   --border: 1.5px;
   --depth: 0;
   --noise: 0;
+}
+
+@theme {
+  --font-sans: 'Inclusive Sans', sans-serif !important;
+  --tab-border-color: var(--color-primary);
+}
+
+.fieldset {
+  @apply gap-1;
+}
+
+.fieldset {
+  label {
+    @apply block text-sm/6 font-medium text-gray-700 dark:text-gray-100 mb-0;
+  }
+}
+
+.input {
+  @apply placeholder:text-gray-400 dark:placeholder:text-gray-600 text-sm/6;
+}
+
+.input-primary,
+.select-primary,
+.checkbox-primary {
+  --input-color: color-mix(in oklab, var(--color-base-content) 20%, #0000);
+  &:focus,
+  &:focus-within {
+    --input-color: var(--color-primary);
+  }
+}
+
+.input:focus,
+.input:focus-within,
+.select:focus,
+.select:focus-within,
+.textarea:focus,
+.textarea:focus-within {
+  outline: none;
+}
+
+input.ng-invalid.ng-dirty,
+select.ng-invalid.ng-dirty,
+textarea.ng-invalid.ng-dirty {
+  --input-color: var(--color-error);
+}
+
+.input,
+.select {
+  @apply w-full;
+}
+
+.table {
+  @apply overflow-x-auto;
+  thead > tr {
+    @apply border-b border-gray-300 dark:border-gray-700;
+    th {
+      @apply text-gray-800 dark:text-gray-200 font-medium pl-0;
+    }
+    th:first-child {
+      @apply pl-4;
+    }
+    th:last-child {
+      @apply pr-4;
+    }
+  }
+  tbody > tr {
+    @apply border-b border-gray-200 last:border-b-0 dark:border-gray-700;
+    td {
+      @apply text-gray-700 dark:text-gray-200 pl-0;
+    }
+    td:first-child {
+      @apply font-semibold pl-4;
+    }
+    td:last-child {
+      @apply pr-4;
+    }
+  }
+  td {
+    @apply whitespace-nowrap;
+  }
 }

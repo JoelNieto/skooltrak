@@ -1,10 +1,10 @@
 import { Field, ObjectType } from '@nestjs/graphql';
 import { Prisma } from '@prisma/client';
 import { Organization } from '../../organizations/entities/organization.entity';
-import { School } from '../../schools/entities/school.entity';
 
 @ObjectType()
-export class Subject implements Prisma.SubjectCreateInput {
+export class Subject implements Prisma.SubjectGetPayload<true> {
+  schoolId: string;
   @Field(() => String, { description: 'ID of the subject (auto-generated)' })
   id: string;
   @Field(() => String, { description: 'Name of the subject' })
@@ -18,7 +18,14 @@ export class Subject implements Prisma.SubjectCreateInput {
   @Field(() => Date, { description: 'Updated at' })
   updatedAt: Date;
   @Field(() => Organization, { description: 'Organization of the subject' })
-  organization: Prisma.OrganizationCreateNestedOneWithoutSubjectInput;
-  @Field(() => School, { description: 'School of the subject' })
-  school: Prisma.SchoolCreateNestedOneWithoutSubjectsInput;
+  organization: {
+    id: string;
+    description: string;
+    name: string;
+    createdAt: Date;
+    updatedAt: Date;
+    active: boolean;
+  };
+  @Field(() => String, { description: 'ID of the organization' })
+  organizationId: string;
 }

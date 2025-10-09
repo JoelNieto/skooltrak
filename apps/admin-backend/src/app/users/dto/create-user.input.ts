@@ -3,12 +3,23 @@ import { Prisma } from '@prisma/client';
 
 @InputType()
 export class CreateUserInput implements Prisma.UserUncheckedCreateInput {
+  id?: string;
+
   @Field(() => String, { description: 'Email of the user' })
   email: string;
-  @Field(() => String, { description: 'Name of the user' })
-  name: string;
   @Field(() => String, { description: 'Role ID of the user' })
   roleId: string;
-  @Field(() => String, { description: 'Organization ID of the user' })
-  organizationId: string;
+  @Field(() => String, {
+    description: 'Organization ID of the user',
+    nullable: true,
+  })
+  organizationId?: string;
+  @Field(() => String, { description: 'First name of the user' })
+  firstName: string;
+  @Field(() => String, { description: 'Last name of the user' })
+  lastName: string;
+  @Field(() => String, { description: 'Password of the user' })
+  password: string;
+  @Field(() => String, { description: 'School ID of the user', nullable: true })
+  schoolId?: string;
 }

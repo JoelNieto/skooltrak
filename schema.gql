@@ -4,7 +4,10 @@
 
 input CreateOrganizationInput {
   """Active status of the organization"""
-  active: Boolean!
+  active: Boolean! = true
+
+  """Description of the organization"""
+  description: String!
 
   """Name of the organization"""
   name: String!
@@ -26,24 +29,27 @@ input CreateRoleInput {
   name: String!
 
   """Organization ID of the role"""
-  organizationId: String!
+  organizationId: String
+
+  """Permissions of the role"""
+  permissionIds: [String!]!
 }
 
 input CreateSchoolInput {
   """Address of the school"""
-  address: String!
+  address: String! = ""
 
   """City of the school"""
-  city: String!
+  city: String! = ""
 
   """Country of the school"""
-  country: String!
+  country: String! = ""
 
   """Email of the school"""
-  email: String!
+  email: String! = ""
 
   """Logo of the school"""
-  logo: String!
+  logo: String! = ""
 
   """Name of the school"""
   name: String!
@@ -52,19 +58,19 @@ input CreateSchoolInput {
   organizationId: String!
 
   """Phone of the school"""
-  phone: String!
+  phone: String! = ""
 
   """Short name of the school"""
   shortName: String!
 
   """State of the school"""
-  state: String!
+  state: String! = ""
 
   """Website of the school"""
-  website: String!
+  website: String! = ""
 
   """Zip code of the school"""
-  zip: String!
+  zip: String! = ""
 }
 
 input CreateSubjectInput {
@@ -88,14 +94,23 @@ input CreateUserInput {
   """Email of the user"""
   email: String!
 
-  """Name of the user"""
-  name: String!
+  """First name of the user"""
+  firstName: String!
+
+  """Last name of the user"""
+  lastName: String!
 
   """Organization ID of the user"""
-  organizationId: String!
+  organizationId: String
+
+  """Password of the user"""
+  password: String!
 
   """Role ID of the user"""
   roleId: String!
+
+  """School ID of the user"""
+  schoolId: String
 }
 
 """
@@ -125,17 +140,14 @@ type Mutation {
 }
 
 type Organization {
-  """Schools of the organization"""
-  School: [School!]!
-
-  """Subjects of the organization"""
-  Subject: [Subject!]!
-
   """Active status of the organization"""
   active: Boolean!
 
   """Created at"""
   createdAt: DateTime!
+
+  """Description of the organization"""
+  description: String!
 
   """ID of the organization (auto-generated)"""
   id: String!
@@ -143,22 +155,31 @@ type Organization {
   """Name of the organization"""
   name: String!
 
-  """Roles of the organization"""
-  roles: [Role!]!
+  """Schools of the organization"""
+  schools: [School!]!
+
+  """Subjects of the organization"""
+  subjects: [Subject!]!
 
   """Updated at"""
   updatedAt: DateTime!
-
-  """Users of the organization"""
-  users: [User!]!
 }
 
 type Permission {
+  """Created at"""
+  createdAt: DateTime!
+
   """Description of the permission"""
   description: String!
 
   """Descriptive ID of the permission"""
   descriptiveId: String!
+
+  """ID of the permission (auto-generated)"""
+  id: String!
+
+  """Updated at"""
+  updatedAt: DateTime!
 }
 
 type Query {
@@ -190,16 +211,16 @@ type Role {
   name: String!
 
   """Organization of the role"""
-  organization: Organization!
+  organization: Organization
+
+  """Organization ID of the role"""
+  organizationId: String
 
   """Permissions of the role"""
   permissions: [Permission!]!
 
   """Updated at"""
   updatedAt: DateTime!
-
-  """Users of the role"""
-  users: [User!]!
 }
 
 type School {
@@ -229,6 +250,9 @@ type School {
 
   """Organization of the school"""
   organization: Organization!
+
+  """ID of the organization"""
+  organizationId: String!
 
   """Phone of the school"""
   phone: String!
@@ -265,8 +289,8 @@ type Subject {
   """Organization of the subject"""
   organization: Organization!
 
-  """School of the subject"""
-  school: School!
+  """ID of the organization"""
+  organizationId: String!
 
   """Short name of the subject"""
   shortName: String!
@@ -277,7 +301,10 @@ type Subject {
 
 input UpdateOrganizationInput {
   """Active status of the organization"""
-  active: Boolean
+  active: Boolean = true
+
+  """Description of the organization"""
+  description: String
   id: String!
 
   """Name of the organization"""
@@ -303,24 +330,27 @@ input UpdateRoleInput {
 
   """Organization ID of the role"""
   organizationId: String
+
+  """Permissions of the role"""
+  permissionIds: [String!]
 }
 
 input UpdateSchoolInput {
   """Address of the school"""
-  address: String
+  address: String = ""
 
   """City of the school"""
-  city: String
+  city: String = ""
 
   """Country of the school"""
-  country: String
+  country: String = ""
 
   """Email of the school"""
-  email: String
+  email: String = ""
   id: String!
 
   """Logo of the school"""
-  logo: String
+  logo: String = ""
 
   """Name of the school"""
   name: String
@@ -329,19 +359,19 @@ input UpdateSchoolInput {
   organizationId: String
 
   """Phone of the school"""
-  phone: String
+  phone: String = ""
 
   """Short name of the school"""
   shortName: String
 
   """State of the school"""
-  state: String
+  state: String = ""
 
   """Website of the school"""
-  website: String
+  website: String = ""
 
   """Zip code of the school"""
-  zip: String
+  zip: String = ""
 }
 
 input UpdateSubjectInput {
@@ -365,16 +395,25 @@ input UpdateSubjectInput {
 input UpdateUserInput {
   """Email of the user"""
   email: String
+
+  """First name of the user"""
+  firstName: String
   id: String!
 
-  """Name of the user"""
-  name: String
+  """Last name of the user"""
+  lastName: String
 
   """Organization ID of the user"""
   organizationId: String
 
+  """Password of the user"""
+  password: String
+
   """Role ID of the user"""
   roleId: String
+
+  """School ID of the user"""
+  schoolId: String
 }
 
 type User {
@@ -384,17 +423,41 @@ type User {
   """Email of the user"""
   email: String!
 
+  """First name of the user"""
+  firstName: String!
+
   """ID of the user (auto-generated)"""
   id: String!
 
-  """Name of the user"""
-  name: String!
+  """Is the user blocked"""
+  isBlocked: Boolean!
+
+  """Last login of the user"""
+  lastLogin: DateTime!
+
+  """Last name of the user"""
+  lastName: String!
 
   """Organization of the user"""
-  organization: Organization!
+  organization: Organization
+
+  """Organization ID of the user"""
+  organizationId: String
+
+  """Password of the user"""
+  password: String!
 
   """Role of the user"""
   role: Role!
+
+  """Role ID of the user"""
+  roleId: String!
+
+  """School of the user"""
+  school: School
+
+  """School ID of the user"""
+  schoolId: String
 
   """Updated at"""
   updatedAt: DateTime!

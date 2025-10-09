@@ -7,6 +7,12 @@ export class CreateRoleInput implements Prisma.RoleUncheckedCreateInput {
   name: string;
   @Field(() => String, { description: 'Description of the role' })
   description: string;
-  @Field(() => String, { description: 'Organization ID of the role' })
-  organizationId: string;
+  @Field(() => String, {
+    description: 'Organization ID of the role',
+    nullable: true,
+  })
+  organizationId?: string;
+
+  @Field(() => [String], { description: 'Permissions of the role' })
+  permissionIds: string[];
 }

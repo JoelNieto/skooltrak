@@ -82,6 +82,10 @@
       "inlineStyle": true,
       "inlineTemplate": true,
       "changeDetection": "OnPush"
+    },
+    "@nx/angular:library": {
+      "linter": "eslint",
+      "unitTestRunner": "vitest"
     }
   }
 }

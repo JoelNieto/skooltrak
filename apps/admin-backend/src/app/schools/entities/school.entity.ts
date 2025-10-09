@@ -3,7 +3,9 @@ import { Prisma } from '@prisma/client';
 import { Organization } from '../../organizations/entities/organization.entity';
 
 @ObjectType()
-export class School implements Prisma.SchoolCreateInput {
+export class School
+  implements Prisma.SchoolGetPayload<{ include: { organization: true } }>
+{
   @Field(() => String, { description: 'ID of the school (auto-generated)' })
   id: string;
   @Field(() => String, { description: 'Name of the school' })
@@ -32,7 +34,15 @@ export class School implements Prisma.SchoolCreateInput {
   createdAt: Date;
   @Field(() => Date, { description: 'Updated at' })
   updatedAt: Date;
-
   @Field(() => Organization, { description: 'Organization of the school' })
-  organization: Prisma.OrganizationCreateNestedOneWithoutSchoolInput;
+  organization: {
+    id: string;
+    description: string;
+    name: string;
+    createdAt: Date;
+    updatedAt: Date;
+    active: boolean;
+  };
+  @Field(() => String, { description: 'ID of the organization' })
+  organizationId: string;
 }

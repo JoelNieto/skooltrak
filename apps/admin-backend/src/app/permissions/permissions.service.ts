@@ -13,7 +13,9 @@ export class PermissionsService {
   }
 
   findAll() {
-    return this.prisma.permission.findMany();
+    return this.prisma.permission.findMany({
+      orderBy: { descriptiveId: 'asc' },
+    });
   }
 
   findOne(id: string) {

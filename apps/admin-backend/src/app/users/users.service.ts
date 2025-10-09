@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../prisma.service';
 import { CreateUserInput } from './dto/create-user.input';
 import { UpdateUserInput } from './dto/update-user.input';
@@ -8,12 +9,26 @@ export class UsersService {
   constructor(private readonly prisma: PrismaService) {}
   create(createUserInput: CreateUserInput) {
     return this.prisma.user.create({
-      data: createUserInput,
+      include: {
+        role: true,
+        organization: true,
+        school: true,
+      },
+      data: {
+        ...createUserInput,
+        password: bcrypt.hashSync(createUserInput.password, 10),
+      },
     });
   }
 
   findAll() {
-    return this.prisma.user.findMany();
+    return this.prisma.user.findMany({
+      include: {
+        role: true,
+        organization: true,
+        school: true,
+      },
+    });
   }
 
   findOne(id: string) {

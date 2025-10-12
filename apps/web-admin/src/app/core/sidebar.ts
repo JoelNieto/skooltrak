@@ -5,6 +5,7 @@ import {
   phosphorBuildingOfficeDuotone,
   phosphorFolderSimpleLockDuotone,
   phosphorHouseLineDuotone,
+  phosphorTreeViewDuotone,
   phosphorUserGearDuotone,
   phosphorUsersThreeDuotone,
 } from '@ng-icons/phosphor-icons/duotone';
@@ -20,6 +21,7 @@ import {
       phosphorUserGearDuotone,
       phosphorFolderSimpleLockDuotone,
       phosphorUsersThreeDuotone,
+      phosphorTreeViewDuotone,
     }),
   ],
   template: `<div class="flex items-center justify-between px-4 pt-4 pb-2">
@@ -53,7 +55,7 @@ import {
             ]"
             class="flex items-center p-2 text-base-content rounded-lg hover:bg-primary-50 hover:text-primary-600 group"
           >
-            <ng-icon name="phosphorHouseLineDuotone" class="text-xl" />
+            <ng-icon name="phosphorTreeViewDuotone" class="text-xl" />
             <span class="ml-3">Organizaciones</span>
           </a>
         </li>

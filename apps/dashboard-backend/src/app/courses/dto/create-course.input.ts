@@ -12,6 +12,9 @@ export class CreateCourseInput implements Prisma.CourseUncheckedCreateInput {
   @Field(() => String, { description: 'Short name of the course' })
   shortName: string;
 
+  @Field(() => String, { description: 'Organization ID of the course' })
+  organizationId: string;
+
   @Field(() => String, { description: 'School ID of the course' })
   schoolId: string;
 
@@ -20,4 +23,10 @@ export class CreateCourseInput implements Prisma.CourseUncheckedCreateInput {
 
   @Field(() => String, { description: 'Study plan ID of the course' })
   studyPlanId: string;
+
+  @Field(() => String, {
+    description: 'Teacher ID of the course',
+    nullable: true,
+  })
+  teacherId?: string;
 }

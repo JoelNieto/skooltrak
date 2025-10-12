@@ -74,3 +74,83 @@
   --depth: 0;
   --noise: 0;
 }
+
+@theme {
+  --font-sans: 'Inclusive Sans', sans-serif !important;
+  --tab-border-color: var(--color-primary);
+}
+
+.fieldset {
+  @apply gap-1;
+}
+
+.fieldset {
+  label {
+    @apply block text-sm/6 font-medium text-gray-700 dark:text-gray-100 mb-0;
+  }
+}
+
+.input {
+  @apply placeholder:text-gray-400 dark:placeholder:text-gray-600 text-sm/6;
+}
+
+.input-primary,
+.select-primary,
+.checkbox-primary {
+  --input-color: color-mix(in oklab, var(--color-base-content) 20%, #0000);
+  &:focus,
+  &:focus-within {
+    --input-color: var(--color-primary);
+  }
+}
+
+.input:focus,
+.input:focus-within,
+.select:focus,
+.select:focus-within,
+.textarea:focus,
+.textarea:focus-within {
+  outline: none;
+}
+
+input.ng-invalid.ng-dirty,
+select.ng-invalid.ng-dirty,
+textarea.ng-invalid.ng-dirty {
+  --input-color: var(--color-error);
+}
+
+.input,
+.select {
+  @apply w-full;
+}
+
+.table {
+  @apply overflow-x-auto;
+  thead > tr {
+    @apply border-b border-gray-300 dark:border-gray-700;
+    th {
+      @apply text-gray-800 dark:text-gray-200 font-medium pl-0;
+    }
+    th:first-child {
+      @apply pl-4;
+    }
+    th:last-child {
+      @apply pr-4;
+    }
+  }
+  tbody > tr {
+    @apply border-b border-gray-200 last:border-b-0 dark:border-gray-700;
+    td {
+      @apply text-gray-700 dark:text-gray-200 pl-0;
+    }
+    td:first-child {
+      @apply font-semibold pl-4;
+    }
+    td:last-child {
+      @apply pr-4;
+    }
+  }
+  td {
+    @apply whitespace-nowrap;
+  }
+}

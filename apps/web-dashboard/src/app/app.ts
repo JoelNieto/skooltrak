@@ -1,11 +1,15 @@
-import { Component } from '@angular/core';
+import { Toast, ToastsContainer } from '@/ui';
+import { Component, inject } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-
 @Component({
-  imports: [RouterOutlet],
+  imports: [RouterOutlet, ToastsContainer],
   selector: 'app-root',
-  template: ` <router-outlet /> `,
+  template: `
+    <lib-toasts-container [toasts]="toasts.toastList()" />
+    <router-outlet />
+  `,
 })
 export class App {
   protected title = 'web-dashboard';
+  public toasts = inject(Toast);
 }

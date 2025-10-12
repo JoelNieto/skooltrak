@@ -1,8 +1,8 @@
-import { Resolver, Query, Mutation, Args, Int } from '@nestjs/graphql';
-import { OrganizationsService } from './organizations.service';
-import { Organization } from './entities/organization.entity';
+import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { CreateOrganizationInput } from './dto/create-organization.input';
 import { UpdateOrganizationInput } from './dto/update-organization.input';
+import { Organization } from './entities/organization.entity';
+import { OrganizationsService } from './organizations.service';
 
 @Resolver(() => Organization)
 export class OrganizationsResolver {
@@ -22,7 +22,7 @@ export class OrganizationsResolver {
   }
 
   @Query(() => Organization, { name: 'organization' })
-  findOne(@Args('id', { type: () => Int }) id: number) {
+  findOne(@Args('id', { type: () => String }) id: string) {
     return this.organizationsService.findOne(id);
   }
 
@@ -38,7 +38,7 @@ export class OrganizationsResolver {
   }
 
   @Mutation(() => Organization)
-  removeOrganization(@Args('id', { type: () => Int }) id: number) {
+  removeOrganization(@Args('id', { type: () => String }) id: string) {
     return this.organizationsService.remove(id);
   }
 }

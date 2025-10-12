@@ -2,37 +2,167 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+type Assignment {
+  """Example field (placeholder)"""
+  exampleField: Int!
+}
+
+type ClassGroup {
+  """Active status of the class group"""
+  active: Boolean!
+
+  """Created at of the class group"""
+  createdAt: DateTime!
+
+  """ID of the class group"""
+  id: String!
+
+  """Name of the class group"""
+  name: String!
+
+  """Organization ID of the class group"""
+  organizationId: String!
+
+  """School ID of the class group"""
+  schoolId: String!
+
+  """Short name of the class group"""
+  shortName: String!
+
+  """Study plan of the class group"""
+  studyPlan: StudyPlan!
+
+  """Study plan ID of the class group"""
+  studyPlanId: String!
+
+  """Teacher of the class group"""
+  teacher: Teacher!
+
+  """Teacher ID of the class group"""
+  teacherId: String!
+
+  """Updated at of the class group"""
+  updatedAt: DateTime!
+}
+
+type Course {
+  """Code of the course"""
+  code: String!
+
+  """Created at"""
+  createdAt: DateTime!
+
+  """ID of the course (auto-generated)"""
+  id: String!
+
+  """Name of the course"""
+  name: String!
+
+  """Organization ID of the course"""
+  organizationId: String!
+
+  """School of the course"""
+  school: School!
+
+  """School ID of the course"""
+  schoolId: String!
+
+  """Short name of the course"""
+  shortName: String!
+
+  """Study plan of the course"""
+  studyPlan: StudyPlan!
+
+  """Study plan ID of the course"""
+  studyPlanId: String!
+
+  """Subject of the course"""
+  subject: Subject!
+
+  """Subject ID of the course"""
+  subjectId: String!
+
+  """Teacher ID of the course"""
+  teacherId: String!
+
+  """Updated at"""
+  updatedAt: DateTime!
+}
+
+input CreateAssignmentInput {
+  """Example field (placeholder)"""
+  exampleField: Int!
+}
+
+input CreateClassGroupInput {
+  """Active status of the class group"""
+  active: Boolean!
+
+  """Name of the class group"""
+  name: String!
+
+  """Organization ID of the class group"""
+  organizationId: String!
+
+  """School ID of the class group"""
+  schoolId: String!
+
+  """Short name of the class group"""
+  shortName: String!
+
+  """Study plan ID of the class group"""
+  studyPlanId: String!
+
+  """Subject ID of the class group"""
+  subjectId: String!
+}
+
+input CreateCourseInput {
+  """Code of the course"""
+  code: String!
+
+  """Name of the course"""
+  name: String!
+
+  """Organization ID of the course"""
+  organizationId: String!
+
+  """School ID of the course"""
+  schoolId: String!
+
+  """Short name of the course"""
+  shortName: String!
+
+  """Study plan ID of the course"""
+  studyPlanId: String!
+
+  """Subject ID of the course"""
+  subjectId: String!
+
+  """Teacher ID of the course"""
+  teacherId: String
+}
+
+input CreateDegreeInput {
+  """Name of the degree"""
+  name: String!
+
+  """School ID"""
+  schoolId: String!
+
+  """Short name of the degree"""
+  shortName: String!
+}
+
 input CreateOrganizationInput {
   """Active status of the organization"""
-  active: Boolean! = true
+  active: Boolean!
 
   """Description of the organization"""
   description: String!
 
   """Name of the organization"""
   name: String!
-}
-
-input CreatePermissionInput {
-  """Description of the permission"""
-  description: String!
-
-  """Descriptive ID of the permission"""
-  descriptiveId: String!
-}
-
-input CreateRoleInput {
-  """Description of the role"""
-  description: String!
-
-  """Name of the role"""
-  name: String!
-
-  """Organization ID of the role"""
-  organizationId: String
-
-  """Permissions of the role"""
-  permissionIds: [String!]!
 }
 
 input CreateSchoolInput {
@@ -57,7 +187,7 @@ input CreateSchoolInput {
   """Organization ID of the school"""
   organizationId: String!
 
-  """Phone of the school"""
+  """Phone number of the school"""
   phone: String! = ""
 
   """Short name of the school"""
@@ -73,6 +203,64 @@ input CreateSchoolInput {
   zip: String! = ""
 }
 
+input CreateStudentInput {
+  """Birth date of the student"""
+  birthDate: DateTime!
+
+  """Class group ID of the student"""
+  classGroupId: String!
+
+  """Document ID of the student"""
+  documentId: String!
+
+  """Father name of the student"""
+  fatherName: String!
+
+  """First name of the student"""
+  firstName: String!
+
+  """Gender of the student"""
+  gender: String!
+
+  """Middle name of the student"""
+  middleName: String!
+
+  """Mother name of the student"""
+  motherName: String!
+
+  """Organization ID of the student"""
+  organizationId: String!
+
+  """School ID of the student"""
+  schoolId: String!
+
+  """User ID of the student"""
+  userId: String!
+}
+
+input CreateStudyPlanInput {
+  """Code of the study plan"""
+  code: String!
+
+  """Degree ID of the study plan"""
+  degreeId: String!
+
+  """Description of the study plan"""
+  description: String!
+
+  """Level of the study plan"""
+  level: Int!
+
+  """Name of the study plan"""
+  name: String!
+
+  """School ID of the study plan"""
+  schoolId: String!
+
+  """Short name of the study plan"""
+  shortName: String!
+}
+
 input CreateSubjectInput {
   """Code of the subject"""
   code: String!
@@ -80,37 +268,43 @@ input CreateSubjectInput {
   """Name of the subject"""
   name: String!
 
-  """Organization ID of the subject"""
+  """Organization ID"""
   organizationId: String!
 
-  """School ID of the subject"""
+  """School ID"""
   schoolId: String!
 
   """Short name of the subject"""
   shortName: String!
 }
 
-input CreateUserInput {
-  """Email of the user"""
-  email: String!
+input CreateTeacherInput {
+  """Birth date of the teacher"""
+  birthDate: DateTime!
 
-  """First name of the user"""
+  """Document ID of the teacher"""
+  documentId: String!
+
+  """Father name of the teacher"""
+  fatherName: String!
+
+  """First name of the teacher"""
   firstName: String!
 
-  """Last name of the user"""
-  lastName: String!
+  """Gender of the teacher"""
+  gender: String!
 
-  """Organization ID of the user"""
-  organizationId: String
+  """Middle name of the teacher"""
+  middleName: String!
 
-  """Password of the user"""
-  password: String!
+  """Mother name of the teacher"""
+  motherName: String!
 
-  """Role ID of the user"""
-  roleId: String!
+  """Organization ID of the teacher"""
+  organizationId: String!
 
-  """School ID of the user"""
-  schoolId: String
+  """User ID of the teacher"""
+  userId: String!
 }
 
 """
@@ -118,25 +312,63 @@ A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date
 """
 scalar DateTime
 
+type Degree {
+  """Created at of the degree"""
+  createdAt: DateTime!
+
+  """ID of the degree"""
+  id: String!
+
+  """Name of the degree"""
+  name: String!
+
+  """School of the degree"""
+  school: School!
+
+  """School ID of the degree"""
+  schoolId: String!
+
+  """Short name of the degree"""
+  shortName: String!
+
+  """Study plans of the degree"""
+  studyPlans: [StudyPlan!]!
+
+  """Updated at of the degree"""
+  updatedAt: DateTime!
+}
+
 type Mutation {
+  createAssignment(createAssignmentInput: CreateAssignmentInput!): Assignment!
+  createClassGroup(createClassGroupInput: CreateClassGroupInput!): ClassGroup!
+  createCourse(createCourseInput: CreateCourseInput!): Course!
+  createDegree(createDegreeInput: CreateDegreeInput!): Degree!
   createOrganization(createOrganizationInput: CreateOrganizationInput!): Organization!
-  createPermission(createPermissionInput: CreatePermissionInput!): Permission!
-  createRole(createRoleInput: CreateRoleInput!): Role!
   createSchool(createSchoolInput: CreateSchoolInput!): School!
+  createStudent(createStudentInput: CreateStudentInput!): Student!
+  createStudyPlan(createStudyPlanInput: CreateStudyPlanInput!): StudyPlan!
   createSubject(createSubjectInput: CreateSubjectInput!): Subject!
-  createUser(createUserInput: CreateUserInput!): User!
+  createTeacher(createTeacherInput: CreateTeacherInput!): Teacher!
+  removeAssignment(id: Int!): Assignment!
+  removeClassGroup(id: String!): ClassGroup!
+  removeCourse(id: String!): Course!
+  removeDegree(id: String!): Degree!
   removeOrganization(id: String!): Organization!
-  removePermission(id: String!): Permission!
-  removeRole(id: String!): Role!
   removeSchool(id: String!): School!
+  removeStudent(id: Int!): Student!
+  removeStudyPlan(id: String!): StudyPlan!
   removeSubject(id: String!): Subject!
-  removeUser(id: String!): User!
+  removeTeacher(id: String!): Teacher!
+  updateAssignment(updateAssignmentInput: UpdateAssignmentInput!): Assignment!
+  updateClassGroup(updateClassGroupInput: UpdateClassGroupInput!): ClassGroup!
+  updateCourse(updateCourseInput: UpdateCourseInput!): Course!
+  updateDegree(updateDegreeInput: UpdateDegreeInput!): Degree!
   updateOrganization(updateOrganizationInput: UpdateOrganizationInput!): Organization!
-  updatePermission(updatePermissionInput: UpdatePermissionInput!): Permission!
-  updateRole(updateRoleInput: UpdateRoleInput!): Role!
   updateSchool(updateSchoolInput: UpdateSchoolInput!): School!
+  updateStudent(updateStudentInput: UpdateStudentInput!): Student!
+  updateStudyPlan(updateStudyPlanInput: UpdateStudyPlanInput!): StudyPlan!
   updateSubject(updateSubjectInput: UpdateSubjectInput!): Subject!
-  updateUser(updateUserInput: UpdateUserInput!): User!
+  updateTeacher(updateTeacherInput: UpdateTeacherInput!): Teacher!
 }
 
 type Organization {
@@ -155,72 +387,31 @@ type Organization {
   """Name of the organization"""
   name: String!
 
-  """Schools of the organization"""
-  schools: [School!]!
-
-  """Subjects of the organization"""
-  subjects: [Subject!]!
-
-  """Updated at"""
-  updatedAt: DateTime!
-}
-
-type Permission {
-  """Created at"""
-  createdAt: DateTime!
-
-  """Description of the permission"""
-  description: String!
-
-  """Descriptive ID of the permission"""
-  descriptiveId: String!
-
-  """ID of the permission (auto-generated)"""
-  id: String!
-
   """Updated at"""
   updatedAt: DateTime!
 }
 
 type Query {
+  assignment(id: Int!): Assignment!
+  assignments: [Assignment!]!
+  classGroup(id: String!): ClassGroup!
+  classGroups: [ClassGroup!]!
+  course(id: String!): Course!
+  courses: [Course!]!
+  degree(id: String!): Degree!
+  degrees: [Degree!]!
   organization(id: String!): Organization!
   organizations: [Organization!]!
-  permission(id: String!): Permission!
-  permissions: [Permission!]!
-  role(id: String!): Role!
-  roles: [Role!]!
   school(id: String!): School!
   schools: [School!]!
+  student(id: Int!): Student!
+  students: [Student!]!
+  studyPlan(id: String!): StudyPlan!
+  studyPlans: [StudyPlan!]!
   subject(id: String!): Subject!
   subjects: [Subject!]!
-  user(id: String!): User!
-  users: [User!]!
-}
-
-type Role {
-  """Created at"""
-  createdAt: DateTime!
-
-  """Description of the role"""
-  description: String!
-
-  """ID of the role (auto-generated)"""
-  id: String!
-
-  """Name of the role"""
-  name: String!
-
-  """Organization of the role"""
-  organization: Organization
-
-  """Organization ID of the role"""
-  organizationId: String
-
-  """Permissions of the role"""
-  permissions: [Permission!]!
-
-  """Updated at"""
-  updatedAt: DateTime!
+  teacher(id: String!): Teacher!
+  teachers: [Teacher!]!
 }
 
 type School {
@@ -239,7 +430,7 @@ type School {
   """Email of the school"""
   email: String!
 
-  """ID of the school (auto-generated)"""
+  """ID of the school"""
   id: String!
 
   """Logo of the school"""
@@ -251,10 +442,10 @@ type School {
   """Organization of the school"""
   organization: Organization!
 
-  """ID of the organization"""
+  """Organization ID of the school"""
   organizationId: String!
 
-  """Phone of the school"""
+  """Phone number of the school"""
   phone: String!
 
   """Short name of the school"""
@@ -273,6 +464,91 @@ type School {
   zip: String!
 }
 
+type Student {
+  """Birth date of the student"""
+  birthDate: DateTime!
+
+  """Class group of the student"""
+  classGroup: ClassGroup!
+
+  """Class group ID of the student"""
+  classGroupId: String!
+
+  """Created at of the student"""
+  createdAt: DateTime!
+
+  """Document ID of the student"""
+  documentId: String!
+
+  """Father name of the student"""
+  fatherName: String!
+
+  """First name of the student"""
+  firstName: String!
+
+  """Gender of the student"""
+  gender: String!
+
+  """ID of the student"""
+  id: String!
+
+  """Middle name of the student"""
+  middleName: String!
+
+  """Mother name of the student"""
+  motherName: String!
+
+  """Organization ID of the student"""
+  organizationId: String!
+
+  """School ID of the student"""
+  schoolId: String!
+
+  """Updated at of the student"""
+  updatedAt: DateTime!
+
+  """User ID of the student"""
+  userId: String!
+}
+
+type StudyPlan {
+  """Code of the study plan"""
+  code: String!
+
+  """Created at of the study plan"""
+  createdAt: DateTime!
+
+  """Degree of the study plan"""
+  degree: Degree!
+
+  """Degree ID of the study plan"""
+  degreeId: String!
+
+  """Description of the study plan"""
+  description: String!
+
+  """ID of the study plan"""
+  id: String!
+
+  """Level of the study plan"""
+  level: Int!
+
+  """Name of the study plan"""
+  name: String!
+
+  """School of the study plan"""
+  school: School!
+
+  """School ID of the study plan"""
+  schoolId: String!
+
+  """Short name of the study plan"""
+  shortName: String!
+
+  """Updated at of the study plan"""
+  updatedAt: DateTime!
+}
+
 type Subject {
   """Code of the subject"""
   code: String!
@@ -289,19 +565,125 @@ type Subject {
   """Organization of the subject"""
   organization: Organization!
 
-  """ID of the organization"""
+  """Organization ID of the subject"""
   organizationId: String!
 
   """Short name of the subject"""
   shortName: String!
+  updatedAt: DateTime!
+}
+
+type Teacher {
+  """Birth date of the teacher"""
+  birthDate: DateTime!
+
+  """Created at"""
+  createdAt: DateTime!
+
+  """Document ID of the teacher"""
+  documentId: String!
+
+  """Father name of the teacher"""
+  fatherName: String!
+
+  """First name of the teacher"""
+  firstName: String!
+
+  """Gender of the teacher"""
+  gender: String!
+
+  """ID of the teacher (auto-generated)"""
+  id: String!
+
+  """Middle name of the teacher"""
+  middleName: String!
+
+  """Mother name of the teacher"""
+  motherName: String!
+
+  """Organization ID of the teacher"""
+  organizationId: String!
 
   """Updated at"""
   updatedAt: DateTime!
+
+  """User ID of the teacher"""
+  userId: String!
+}
+
+input UpdateAssignmentInput {
+  """Example field (placeholder)"""
+  exampleField: Int
+  id: Int!
+}
+
+input UpdateClassGroupInput {
+  """Active status of the class group"""
+  active: Boolean
+  id: String!
+
+  """Name of the class group"""
+  name: String
+
+  """Organization ID of the class group"""
+  organizationId: String
+
+  """School ID of the class group"""
+  schoolId: String
+
+  """Short name of the class group"""
+  shortName: String
+
+  """Study plan ID of the class group"""
+  studyPlanId: String
+
+  """Subject ID of the class group"""
+  subjectId: String
+}
+
+input UpdateCourseInput {
+  """Code of the course"""
+  code: String
+  id: String!
+
+  """Name of the course"""
+  name: String
+
+  """Organization ID of the course"""
+  organizationId: String
+
+  """School ID of the course"""
+  schoolId: String
+
+  """Short name of the course"""
+  shortName: String
+
+  """Study plan ID of the course"""
+  studyPlanId: String
+
+  """Subject ID of the course"""
+  subjectId: String
+
+  """Teacher ID of the course"""
+  teacherId: String
+}
+
+input UpdateDegreeInput {
+  id: String!
+
+  """Name of the degree"""
+  name: String
+
+  """School ID"""
+  schoolId: String
+
+  """Short name of the degree"""
+  shortName: String
 }
 
 input UpdateOrganizationInput {
   """Active status of the organization"""
-  active: Boolean = true
+  active: Boolean
 
   """Description of the organization"""
   description: String
@@ -309,30 +691,6 @@ input UpdateOrganizationInput {
 
   """Name of the organization"""
   name: String
-}
-
-input UpdatePermissionInput {
-  """Description of the permission"""
-  description: String
-
-  """Descriptive ID of the permission"""
-  descriptiveId: String
-  id: String!
-}
-
-input UpdateRoleInput {
-  """Description of the role"""
-  description: String
-  id: String!
-
-  """Name of the role"""
-  name: String
-
-  """Organization ID of the role"""
-  organizationId: String
-
-  """Permissions of the role"""
-  permissionIds: [String!]
 }
 
 input UpdateSchoolInput {
@@ -358,7 +716,7 @@ input UpdateSchoolInput {
   """Organization ID of the school"""
   organizationId: String
 
-  """Phone of the school"""
+  """Phone number of the school"""
   phone: String = ""
 
   """Short name of the school"""
@@ -374,6 +732,66 @@ input UpdateSchoolInput {
   zip: String = ""
 }
 
+input UpdateStudentInput {
+  """Birth date of the student"""
+  birthDate: DateTime
+
+  """Class group ID of the student"""
+  classGroupId: String
+
+  """Document ID of the student"""
+  documentId: String
+
+  """Father name of the student"""
+  fatherName: String
+
+  """First name of the student"""
+  firstName: String
+
+  """Gender of the student"""
+  gender: String
+  id: Int!
+
+  """Middle name of the student"""
+  middleName: String
+
+  """Mother name of the student"""
+  motherName: String
+
+  """Organization ID of the student"""
+  organizationId: String
+
+  """School ID of the student"""
+  schoolId: String
+
+  """User ID of the student"""
+  userId: String
+}
+
+input UpdateStudyPlanInput {
+  """Code of the study plan"""
+  code: String
+
+  """Degree ID of the study plan"""
+  degreeId: String
+
+  """Description of the study plan"""
+  description: String
+  id: String!
+
+  """Level of the study plan"""
+  level: Int
+
+  """Name of the study plan"""
+  name: String
+
+  """School ID of the study plan"""
+  schoolId: String
+
+  """Short name of the study plan"""
+  shortName: String
+}
+
 input UpdateSubjectInput {
   """Code of the subject"""
   code: String
@@ -382,83 +800,42 @@ input UpdateSubjectInput {
   """Name of the subject"""
   name: String
 
-  """Organization ID of the subject"""
+  """Organization ID"""
   organizationId: String
 
-  """School ID of the subject"""
+  """School ID"""
   schoolId: String
 
   """Short name of the subject"""
   shortName: String
 }
 
-input UpdateUserInput {
-  """Email of the user"""
-  email: String
+input UpdateTeacherInput {
+  """Birth date of the teacher"""
+  birthDate: DateTime
 
-  """First name of the user"""
+  """Document ID of the teacher"""
+  documentId: String
+
+  """Father name of the teacher"""
+  fatherName: String
+
+  """First name of the teacher"""
   firstName: String
+
+  """Gender of the teacher"""
+  gender: String
   id: String!
 
-  """Last name of the user"""
-  lastName: String
+  """Middle name of the teacher"""
+  middleName: String
 
-  """Organization ID of the user"""
+  """Mother name of the teacher"""
+  motherName: String
+
+  """Organization ID of the teacher"""
   organizationId: String
 
-  """Password of the user"""
-  password: String
-
-  """Role ID of the user"""
-  roleId: String
-
-  """School ID of the user"""
-  schoolId: String
-}
-
-type User {
-  """Created at"""
-  createdAt: DateTime!
-
-  """Email of the user"""
-  email: String!
-
-  """First name of the user"""
-  firstName: String!
-
-  """ID of the user (auto-generated)"""
-  id: String!
-
-  """Is the user blocked"""
-  isBlocked: Boolean!
-
-  """Last login of the user"""
-  lastLogin: DateTime!
-
-  """Last name of the user"""
-  lastName: String!
-
-  """Organization of the user"""
-  organization: Organization
-
-  """Organization ID of the user"""
-  organizationId: String
-
-  """Password of the user"""
-  password: String!
-
-  """Role of the user"""
-  role: Role!
-
-  """Role ID of the user"""
-  roleId: String!
-
-  """School of the user"""
-  school: School
-
-  """School ID of the user"""
-  schoolId: String
-
-  """Updated at"""
-  updatedAt: DateTime!
+  """User ID of the teacher"""
+  userId: String
 }

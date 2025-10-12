@@ -1,4 +1,5 @@
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
+import { FetchDataInput } from '../fetch-data.input';
 import { CreateSchoolInput } from './dto/create-school.input';
 import { UpdateSchoolInput } from './dto/update-school.input';
 import { School } from './entities/school.entity';
@@ -16,8 +17,11 @@ export class SchoolsResolver {
   }
 
   @Query(() => [School], { name: 'schools' })
-  findAll() {
-    return this.schoolsService.findAll();
+  findAll(
+    @Args()
+    fetchDataInput: FetchDataInput
+  ) {
+    return this.schoolsService.findAll(fetchDataInput);
   }
 
   @Query(() => School, { name: 'school' })

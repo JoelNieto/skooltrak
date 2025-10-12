@@ -51,15 +51,15 @@ import { OrganizationsForm } from './organizations-form';
             <td>{{ organization.createdAt | date : 'medium' }}</td>
             <td>{{ organization.updatedAt | date : 'medium' }}</td>
             <td>
-              <div class="join">
+              <div class="flex gap-2 items-center">
                 <button
-                  class="join-item btn btn-primary btn-xs"
+                  class="btn btn-primary btn-xs"
                   (click)="editOrganization(organization)"
                 >
                   Editar
                 </button>
                 <button
-                  class="join-item btn btn-error btn-xs"
+                  class="btn btn-error btn-xs"
                   (click)="deleteOrganization(organization)"
                 >
                   Eliminar

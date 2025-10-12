@@ -12,7 +12,6 @@ export class UsersService {
       include: {
         role: true,
         organization: true,
-        school: true,
       },
       data: {
         ...createUserInput,
@@ -26,7 +25,6 @@ export class UsersService {
       include: {
         role: true,
         organization: true,
-        school: true,
       },
     });
   }

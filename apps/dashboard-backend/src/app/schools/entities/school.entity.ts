@@ -1,21 +1,25 @@
 import { Field, ObjectType } from '@nestjs/graphql';
 import { Prisma } from '@prisma/client';
-import { Course } from '../../courses/entities/course.entity';
-import { Degree } from '../../degrees/entities/degree.entity';
 
 import { Organization } from '../../organizations/entities/organization.entity';
-import { StudyPlan } from '../../study-plans/entities/study-plan.entity';
-import { Subject } from '../../subjects/entities/subject.entity';
 
 @ObjectType()
-export class School implements Prisma.SchoolCreateInput {
+export class School
+  implements
+    Prisma.SchoolGetPayload<{
+      include: {
+        organization: true;
+      };
+    }>
+{
+  @Field(() => String, { description: 'ID of the school' })
+  id: string;
   @Field(() => Organization, { description: 'Organization of the school' })
-  organization: Prisma.OrganizationCreateNestedOneWithoutSchoolInput;
-
-  @Field(() => String, { description: 'ID of the school (auto-generated)' })
-  id?: string;
+  organization: Organization;
   @Field(() => String, { description: 'Name of the school' })
   name: string;
+  @Field(() => String, { description: 'Organization ID of the school' })
+  organizationId: string;
   @Field(() => String, { description: 'Short name of the school' })
   shortName: string;
   @Field(() => String, { description: 'Logo of the school' })
@@ -36,16 +40,8 @@ export class School implements Prisma.SchoolCreateInput {
   phone: string;
   @Field(() => String, { description: 'Website of the school' })
   website: string;
-  @Field(() => [Subject], { description: 'Subjects of the school' })
-  subjects?: Prisma.SubjectCreateNestedManyWithoutSchoolInput;
-  @Field(() => [StudyPlan], { description: 'Study plans of the school' })
-  studyPlans?: Prisma.StudyPlanCreateNestedManyWithoutSchoolInput;
-  @Field(() => [Degree], { description: 'Degrees of the school' })
-  degrees?: Prisma.DegreeCreateNestedManyWithoutSchoolInput;
-  @Field(() => [Course], { description: 'Courses of the school' })
-  courses?: Prisma.CourseCreateNestedManyWithoutSchoolInput;
   @Field(() => Date, { description: 'Created at' })
-  createdAt?: Date;
+  createdAt: Date;
   @Field(() => Date, { description: 'Updated at' })
-  updatedAt?: Date;
+  updatedAt: Date;
 }

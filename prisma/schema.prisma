@@ -40,8 +40,6 @@ model User {
   roleId         String
   organization   Organization? @relation(fields: [organizationId], references: [id])
   organizationId String?
-  school         School?       @relation(fields: [schoolId], references: [id])
-  schoolId       String?
   lastLogin      DateTime?
   isBlocked      Boolean       @default(false)
   createdAt      DateTime      @default(now())
@@ -93,9 +91,9 @@ model School {
   studyPlans     StudyPlan[]
   degrees        Degree[]
   courses        Course[]
-  users          User[]
   classGroups    ClassGroup[]
   students       Student[]
+  assignments    Assignment[]
 }
 
 model Subject {
@@ -124,19 +122,20 @@ model Degree {
 }
 
 model StudyPlan {
-  id          String   @id @default(cuid())
+  id          String       @id @default(cuid())
   name        String
   shortName   String
   level       Int
   degreeId    String
-  degree      Degree   @relation(fields: [degreeId], references: [id])
+  degree      Degree       @relation(fields: [degreeId], references: [id])
   description String
   code        String
   schoolId    String
-  school      School   @relation(fields: [schoolId], references: [id])
+  school      School       @relation(fields: [schoolId], references: [id])
   courses     Course[]
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  classGroups ClassGroup[]
 
   @@unique([schoolId, name])
   @@unique([schoolId, code])
@@ -161,24 +160,28 @@ model Course {
   students       Student[]
   teacher        Teacher?     @relation(fields: [teacherId], references: [id])
   teacherId      String?
+  assignments    Assignment[]
 
   @@unique([schoolId, name])
   @@unique([schoolId, code])
 }
 
 model ClassGroup {
-  id             String       @id @default(cuid())
-  name           String
-  shortName      String
-  organizationId String
-  organization   Organization @relation(fields: [organizationId], references: [id])
-  schoolId       String
-  school         School       @relation(fields: [schoolId], references: [id])
-  courses        Course[]
-  active         Boolean
-  stdents        Student[]
-  teacher        Teacher?     @relation(fields: [teacherId], references: [id])
-  teacherId      String?
+  id              String          @id @default(cuid())
+  name            String
+  shortName       String
+  organizationId  String
+  organization    Organization    @relation(fields: [organizationId], references: [id])
+  schoolId        String
+  school          School          @relation(fields: [schoolId], references: [id])
+  courses         Course[]
+  studyPlan       StudyPlan       @relation(fields: [studyPlanId], references: [id])
+  active          Boolean
+  stdents         Student[]
+  teacher         Teacher?        @relation(fields: [teacherId], references: [id])
+  teacherId       String?
+  studyPlanId     String
+  assignmentDates AssigmentDate[]
 }
 
 model Student {
@@ -220,9 +223,46 @@ model Teacher {
   userId         String       @unique
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
+  assignments    Assignment[]
+}
+
+model Assignment {
+  id                String          @id @default(cuid())
+  title             String
+  details           String
+  type              AssignmentType
+  school            School          @relation(fields: [schoolId], references: [id])
+  course            Course          @relation(fields: [courseId], references: [id])
+  date              DateTime
+  schoolId          String
+  courseId          String
+  dates             AssigmentDate[]
+  requireSubmission Boolean
+  teacher           Teacher         @relation(fields: [teacherId], references: [id])
+  teacherId         String
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+}
+
+model AssigmentDate {
+  id           String     @id @default(cuid())
+  date         DateTime
+  assignment   Assignment @relation(fields: [assignmentId], references: [id])
+  assignmentId String
+  classGroup   ClassGroup @relation(fields: [classGroupId], references: [id])
+  classGroupId String
 }
 
 enum Gender {
   FEMALE
   MALE
+}
+
+enum AssignmentType {
+  HOMEWORK
+  EXAM
+  QUIZ
+  PROJECT
+  PAPER
+  NEW
 }

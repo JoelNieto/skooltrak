@@ -94,7 +94,7 @@ export class Users {
       this.apollo
         .watchQuery<{
           users: Prisma.UserGetPayload<{
-            include: { organization: true; school: true; role: true };
+            include: { organization: true; role: true };
           }>[];
         }>({
           query: gql`
@@ -116,10 +116,6 @@ export class Users {
                   id
                   name
                 }
-                school {
-                  id
-                  name
-                }
               }
             }
           `,
@@ -129,7 +125,7 @@ export class Users {
 
   public editUser(
     user?: Prisma.UserGetPayload<{
-      include: { organization: true; school: true; role: true };
+      include: { organization: true; role: true };
     }>
   ) {
     this.modal.open(UsersForm, {
@@ -142,7 +138,7 @@ export class Users {
 
   public deleteUser(
     user: Prisma.UserGetPayload<{
-      include: { organization: true; school: true; role: true };
+      include: { organization: true; role: true };
     }>
   ) {
     this.confirmation

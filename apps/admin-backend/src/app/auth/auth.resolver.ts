@@ -1,6 +1,10 @@
-import { Args, Mutation, Resolver } from '@nestjs/graphql';
+import { Args, Context, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { AuthPayload } from './auth.payload';
 import { AuthService } from './auth.service';
+
+import { UseGuards } from '@nestjs/common';
+import { User } from '../users/entities/user.entity';
+import { JwtAuthGuard } from './auth.guard';
 
 @Resolver()
 export class AuthResolver {
@@ -12,5 +16,11 @@ export class AuthResolver {
     @Args('password') password: string
   ) {
     return this.authService.login(email, password);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Query(() => User)
+  async me(@Context() context: any) {
+    return this.authService.getUser(context.req.user.userId);
   }
 }

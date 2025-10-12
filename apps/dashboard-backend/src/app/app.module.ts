@@ -14,6 +14,10 @@ import { SchoolsModule } from './schools/schools.module';
 import { StudyPlansModule } from './study-plans/study-plans.module';
 import { SubjectsModule } from './subjects/subjects.module';
 import { OrganizationsModule } from './organizations/organizations.module';
+import { TeachersModule } from './teachers/teachers.module';
+import { StudentsModule } from './students/students.module';
+import { AssignmentsModule } from './assignments/assignments.module';
+import { ClassGroupsModule } from './class-groups/class-groups.module';
 
 @Module({
   imports: [
@@ -36,6 +40,10 @@ import { OrganizationsModule } from './organizations/organizations.module';
     CoursesModule,
     StudyPlansModule,
     OrganizationsModule,
+    TeachersModule,
+    StudentsModule,
+    AssignmentsModule,
+    ClassGroupsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

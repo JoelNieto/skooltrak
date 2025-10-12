@@ -6,13 +6,14 @@ import { GraphQLModule } from '@nestjs/graphql';
 import { join } from 'path';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { PrismaModule } from './prisma.module';
+import { AuthModule } from './auth/auth.module';
 import { OrganizationsModule } from './organizations/organizations.module';
-import { SchoolsModule } from './schools/schools.module';
+import { PermissionsModule } from './permissions/permissions.module';
+import { PrismaModule } from './prisma.module';
 import { RolesModule } from './roles/roles.module';
+import { SchoolsModule } from './schools/schools.module';
 import { SubjectsModule } from './subjects/subjects.module';
 import { UsersModule } from './users/users.module';
-import { PermissionsModule } from './permissions/permissions.module';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { PermissionsModule } from './permissions/permissions.module';
     SubjectsModule,
     UsersModule,
     PermissionsModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],

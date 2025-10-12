@@ -4,13 +4,15 @@ import { School } from '../../schools/entities/school.entity';
 import { StudyPlan } from '../../study-plans/entities/study-plan.entity';
 
 @ObjectType()
-export class Degree implements Prisma.DegreeCreateInput {
+export class Degree
+  implements Prisma.DegreeGetPayload<{ include: { studyPlans: true } }>
+{
   @Field(() => String, { description: 'ID of the degree' })
-  id?: string;
+  id: string;
   @Field(() => School, { description: 'School of the degree' })
-  school: Prisma.SchoolCreateNestedOneWithoutDegreesInput;
+  school: School;
   @Field(() => [StudyPlan], { description: 'Study plans of the degree' })
-  studyPlans?: Prisma.StudyPlanCreateNestedManyWithoutDegreeInput;
+  studyPlans: StudyPlan[];
 
   @Field(() => String, { description: 'Name of the degree' })
   name: string;
@@ -22,8 +24,8 @@ export class Degree implements Prisma.DegreeCreateInput {
   schoolId: string;
 
   @Field(() => Date, { description: 'Created at of the degree' })
-  createdAt?: string | Date;
+  createdAt: Date;
 
   @Field(() => Date, { description: 'Updated at of the degree' })
-  updatedAt?: string | Date;
+  updatedAt: Date;
 }

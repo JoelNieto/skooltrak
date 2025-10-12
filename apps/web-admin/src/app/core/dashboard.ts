@@ -2,11 +2,16 @@ import {
   ChangeDetectionStrategy,
   Component,
   ElementRef,
+  inject,
+  OnInit,
   viewChild,
 } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { phosphorListDuotone } from '@ng-icons/phosphor-icons/duotone';
+import { Prisma } from '@prisma/client';
+import { Apollo, gql } from 'apollo-angular';
+import { Auth } from '../auth/auth';
 import { Sidebar } from './sidebar';
 
 @Component({
@@ -61,7 +66,9 @@ import { Sidebar } from './sidebar';
   styles: ``,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class Dashboard {
+export class Dashboard implements OnInit {
+  private apollo = inject(Apollo);
+  private auth = inject(Auth);
   public sidebarOverlay =
     viewChild.required<ElementRef<HTMLDivElement>>('sidebarOverlay');
 
@@ -71,6 +78,41 @@ export class Dashboard {
 
   public sidebarToggle =
     viewChild.required<ElementRef<HTMLElement>>('sidebarToggle');
+
+  ngOnInit() {
+    this.apollo
+      .watchQuery<{
+        me: Prisma.UserGetPayload<{
+          include: { role: { include: { permissions: true } } };
+        }>;
+      }>({
+        query: gql`
+          query me {
+            me {
+              id
+              email
+              firstName
+              lastName
+              role {
+                name
+                permissions {
+                  id
+                  descriptiveId
+                  description
+                }
+              }
+            }
+          }
+        `,
+      })
+      .valueChanges.subscribe((res) => {
+        console.log(res.data);
+        const { me } = res.data;
+        if (me) {
+          this.auth.user.set(me);
+        }
+      });
+  }
 
   public openSidebar() {
     this.sidebarOverlay().nativeElement.classList.remove('hidden');

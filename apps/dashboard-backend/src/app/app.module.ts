@@ -18,6 +18,8 @@ import { TeachersModule } from './teachers/teachers.module';
 import { StudentsModule } from './students/students.module';
 import { AssignmentsModule } from './assignments/assignments.module';
 import { ClassGroupsModule } from './class-groups/class-groups.module';
+import { UsersModule } from './users/users.module';
+import { RolesModule } from './roles/roles.module';
 
 @Module({
   imports: [
@@ -44,6 +46,8 @@ import { ClassGroupsModule } from './class-groups/class-groups.module';
     StudentsModule,
     AssignmentsModule,
     ClassGroupsModule,
+    UsersModule,
+    RolesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

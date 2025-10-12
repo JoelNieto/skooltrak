@@ -165,6 +165,11 @@ input CreateOrganizationInput {
   name: String!
 }
 
+input CreateRoleInput {
+  """Example field (placeholder)"""
+  exampleField: Int!
+}
+
 input CreateSchoolInput {
   """Address of the school"""
   address: String! = ""
@@ -307,6 +312,14 @@ input CreateTeacherInput {
   userId: String!
 }
 
+input CreateUserInput {
+  email: String!
+  firstName: String!
+  lastName: String!
+  password: String!
+  roleId: String!
+}
+
 """
 A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
 """
@@ -344,31 +357,37 @@ type Mutation {
   createCourse(createCourseInput: CreateCourseInput!): Course!
   createDegree(createDegreeInput: CreateDegreeInput!): Degree!
   createOrganization(createOrganizationInput: CreateOrganizationInput!): Organization!
+  createRole(createRoleInput: CreateRoleInput!): Role!
   createSchool(createSchoolInput: CreateSchoolInput!): School!
   createStudent(createStudentInput: CreateStudentInput!): Student!
   createStudyPlan(createStudyPlanInput: CreateStudyPlanInput!): StudyPlan!
   createSubject(createSubjectInput: CreateSubjectInput!): Subject!
   createTeacher(createTeacherInput: CreateTeacherInput!): Teacher!
+  createUser(createUserInput: CreateUserInput!): User!
   removeAssignment(id: Int!): Assignment!
   removeClassGroup(id: String!): ClassGroup!
   removeCourse(id: String!): Course!
   removeDegree(id: String!): Degree!
   removeOrganization(id: String!): Organization!
+  removeRole(id: Int!): Role!
   removeSchool(id: String!): School!
   removeStudent(id: Int!): Student!
   removeStudyPlan(id: String!): StudyPlan!
   removeSubject(id: String!): Subject!
   removeTeacher(id: String!): Teacher!
+  removeUser(id: Int!): User!
   updateAssignment(updateAssignmentInput: UpdateAssignmentInput!): Assignment!
   updateClassGroup(updateClassGroupInput: UpdateClassGroupInput!): ClassGroup!
   updateCourse(updateCourseInput: UpdateCourseInput!): Course!
   updateDegree(updateDegreeInput: UpdateDegreeInput!): Degree!
   updateOrganization(updateOrganizationInput: UpdateOrganizationInput!): Organization!
+  updateRole(updateRoleInput: UpdateRoleInput!): Role!
   updateSchool(updateSchoolInput: UpdateSchoolInput!): School!
   updateStudent(updateStudentInput: UpdateStudentInput!): Student!
   updateStudyPlan(updateStudyPlanInput: UpdateStudyPlanInput!): StudyPlan!
   updateSubject(updateSubjectInput: UpdateSubjectInput!): Subject!
   updateTeacher(updateTeacherInput: UpdateTeacherInput!): Teacher!
+  updateUser(updateUserInput: UpdateUserInput!): User!
 }
 
 type Organization {
@@ -402,6 +421,8 @@ type Query {
   degrees: [Degree!]!
   organization(id: String!): Organization!
   organizations: [Organization!]!
+  role(id: Int!): Role!
+  roles: [Role!]!
   school(id: String!): School!
   schools: [School!]!
   student(id: Int!): Student!
@@ -412,6 +433,13 @@ type Query {
   subjects: [Subject!]!
   teacher(id: String!): Teacher!
   teachers: [Teacher!]!
+  user(id: Int!): User!
+  users: [User!]!
+}
+
+type Role {
+  """Example field (placeholder)"""
+  exampleField: Int!
 }
 
 type School {
@@ -693,6 +721,12 @@ input UpdateOrganizationInput {
   name: String
 }
 
+input UpdateRoleInput {
+  """Example field (placeholder)"""
+  exampleField: Int
+  id: Int!
+}
+
 input UpdateSchoolInput {
   """Address of the school"""
   address: String = ""
@@ -838,4 +872,26 @@ input UpdateTeacherInput {
 
   """User ID of the teacher"""
   userId: String
+}
+
+input UpdateUserInput {
+  email: String
+  firstName: String
+  id: Int!
+  lastName: String
+  password: String
+  roleId: String
+}
+
+type User {
+  createdAt: DateTime!
+  email: String!
+  firstName: String!
+  id: String!
+  isBlocked: Boolean!
+  lastLogin: DateTime!
+  lastName: String!
+  organizationId: String!
+  roleId: String!
+  updatedAt: DateTime!
 }

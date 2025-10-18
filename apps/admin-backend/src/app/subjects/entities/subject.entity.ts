@@ -1,6 +1,6 @@
+import { Organization } from '@/auth';
 import { Field, ObjectType } from '@nestjs/graphql';
 import { Prisma } from '@prisma/client';
-import { Organization } from '../../organizations/entities/organization.entity';
 
 @ObjectType()
 export class Subject implements Prisma.SubjectGetPayload<true> {
@@ -18,14 +18,7 @@ export class Subject implements Prisma.SubjectGetPayload<true> {
   @Field(() => Date, { description: 'Updated at' })
   updatedAt: Date;
   @Field(() => Organization, { description: 'Organization of the subject' })
-  organization: {
-    id: string;
-    description: string;
-    name: string;
-    createdAt: Date;
-    updatedAt: Date;
-    active: boolean;
-  };
+  organization: Organization;
   @Field(() => String, { description: 'ID of the organization' })
   organizationId: string;
 }

@@ -20,6 +20,14 @@ export class StudyPlansResolver {
     return this.studyPlansService.findAll();
   }
 
+  @Query(() => [StudyPlan], { name: 'studyPlansBySchoolId' })
+  findAllBySchoolId(
+    @Args('schoolId', { type: () => String }) schoolId: string,
+    @Args('degreeId', { type: () => String, nullable: true }) degreeId?: string
+  ) {
+    return this.studyPlansService.findAllBySchoolId(schoolId, degreeId);
+  }
+
   @Query(() => StudyPlan, { name: 'studyPlan' })
   findOne(@Args('id', { type: () => String }) id: string) {
     return this.studyPlansService.findOne(id);

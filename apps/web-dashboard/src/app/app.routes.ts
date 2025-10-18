@@ -1,9 +1,11 @@
 import { Route } from '@angular/router';
+import { authGuard } from './auth/auth.guard';
 
 export const appRoutes: Route[] = [
   { path: 'login', loadComponent: () => import('./auth/login') },
   {
     path: '',
+    canActivateChild: [authGuard],
     loadComponent: () => import('./core/dashboard'),
     children: [
       {
@@ -26,6 +28,29 @@ export const appRoutes: Route[] = [
         path: '',
         redirectTo: 'home',
         pathMatch: 'full',
+      },
+      {
+        path: 'admin',
+        loadComponent: () => import('./admin/admin'),
+        children: [
+          {
+            path: 'subjects',
+            loadComponent: () => import('./admin/pages/subjects'),
+          },
+          {
+            path: 'courses',
+            loadComponent: () => import('./admin/pages/courses'),
+          },
+          {
+            path: 'study-plans',
+            loadComponent: () => import('./admin/pages/study-plans'),
+          },
+          {
+            path: 'degrees',
+            loadComponent: () => import('./admin/pages/degrees'),
+          },
+          { path: '', redirectTo: 'subjects', pathMatch: 'full' },
+        ],
       },
     ],
   },

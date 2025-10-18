@@ -1,6 +1,6 @@
+import { Organization } from '@/auth';
 import { Field, ObjectType } from '@nestjs/graphql';
 import { Prisma } from '@prisma/client';
-import { Organization } from '../../organizations/entities/organization.entity';
 
 @ObjectType()
 export class School
@@ -35,14 +35,7 @@ export class School
   @Field(() => Date, { description: 'Updated at' })
   updatedAt: Date;
   @Field(() => Organization, { description: 'Organization of the school' })
-  organization: {
-    id: string;
-    description: string;
-    name: string;
-    createdAt: Date;
-    updatedAt: Date;
-    active: boolean;
-  };
+  organization: Organization;
   @Field(() => String, { description: 'ID of the organization' })
   organizationId: string;
 }

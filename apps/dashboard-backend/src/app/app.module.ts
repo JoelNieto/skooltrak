@@ -7,19 +7,17 @@ import { join } from 'path';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 
+import { AuthModule } from '@/auth';
+import { AssignmentsModule } from './assignments/assignments.module';
+import { ClassGroupsModule } from './class-groups/class-groups.module';
 import { CoursesModule } from './courses/courses.module';
 import { DegreesModule } from './degrees/degrees.module';
 import { PrismaModule } from './prisma.module';
 import { SchoolsModule } from './schools/schools.module';
+import { StudentsModule } from './students/students.module';
 import { StudyPlansModule } from './study-plans/study-plans.module';
 import { SubjectsModule } from './subjects/subjects.module';
-import { OrganizationsModule } from './organizations/organizations.module';
 import { TeachersModule } from './teachers/teachers.module';
-import { StudentsModule } from './students/students.module';
-import { AssignmentsModule } from './assignments/assignments.module';
-import { ClassGroupsModule } from './class-groups/class-groups.module';
-import { UsersModule } from './users/users.module';
-import { RolesModule } from './roles/roles.module';
 
 @Module({
   imports: [
@@ -41,13 +39,11 @@ import { RolesModule } from './roles/roles.module';
     DegreesModule,
     CoursesModule,
     StudyPlansModule,
-    OrganizationsModule,
     TeachersModule,
     StudentsModule,
     AssignmentsModule,
     ClassGroupsModule,
-    UsersModule,
-    RolesModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],

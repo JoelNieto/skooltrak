@@ -20,6 +20,27 @@ export class CoursesResolver {
     return this.coursesService.findAll();
   }
 
+  @Query(() => [Course], { name: 'coursesBySchoolId' })
+  findManyBySchoolId(
+    @Args('schoolId', { type: () => String }) schoolId: string
+  ) {
+    return this.coursesService.findManyBySchoolId(schoolId);
+  }
+
+  @Query(() => [Course], { name: 'coursesBySubjectId' })
+  findManyBySubjectId(
+    @Args('subjectId', { type: () => String }) subjectId: string
+  ) {
+    return this.coursesService.findManyBySubjectId(subjectId);
+  }
+
+  @Query(() => [Course], { name: 'coursesByStudyPlanId' })
+  findManyByStudyPlanId(
+    @Args('studyPlanId', { type: () => String }) studyPlanId: string
+  ) {
+    return this.coursesService.findManyByStudyPlanId(studyPlanId);
+  }
+
   @Query(() => Course, { name: 'course' })
   findOne(@Args('id', { type: () => String }) id: string) {
     return this.coursesService.findOne(id);

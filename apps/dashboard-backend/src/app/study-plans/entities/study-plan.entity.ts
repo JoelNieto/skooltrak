@@ -8,10 +8,10 @@ export class StudyPlan
   implements
     Prisma.StudyPlanGetPayload<{ include: { degree: true; school: true } }>
 {
-  @Field(() => Degree, { description: 'Degree of the study plan' })
-  degree: Degree;
   @Field(() => String, { description: 'ID of the study plan' })
   id: string;
+  @Field(() => Degree, { description: 'Degree of the study plan' })
+  degree: Degree;
   @Field(() => String, { description: 'Degree ID of the study plan' })
   degreeId: string;
   @Field(() => School, { description: 'School of the study plan' })

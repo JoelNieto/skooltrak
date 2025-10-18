@@ -13,13 +13,14 @@ import { phosphorHouseLineBold } from '@ng-icons/phosphor-icons/bold';
 import { Prisma } from '@prisma/client';
 import { Apollo, gql } from 'apollo-angular';
 import { map } from 'rxjs';
-import { Store } from './store';
+import Auth from '../auth/auth';
+import Store from './store';
 
 @Component({
   selector: 'app-dashboard',
   imports: [RouterLink, RouterOutlet, RouterLinkActive, NgIcon],
   viewProviders: [provideIcons({ phosphorHouseLineBold })],
-  template: `<nav class="navbar bg-base-100 border-b border-base-200">
+  template: `<nav class="navbar bg-base-100 border-b border-base-200 px-4">
       <div class="navbar-start">
         <div class="dropdown">
           <div tabindex="0" role="button" class="btn btn-ghost lg:hidden">
@@ -65,27 +66,27 @@ import { Store } from './store';
           <li>
             <a
               routerLink="/courses"
-              routerLinkActive="bg-primary text-primary-content font-semibold"
+              routerLinkActive="bg-primary text-primary-content"
               >Cursos</a
             >
           </li>
           <li>
             <a
               routerLink="/assignments"
-              routerLinkActive="bg-primary text-primary-content font-semibold"
+              routerLinkActive="bg-primary text-primary-content"
               >Asignaciones</a
             >
           </li>
           <li>
             <a
               routerLink="/grades"
-              routerLinkActive="bg-primary text-primary-content font-semibold"
+              routerLinkActive="bg-primary text-primary-content"
               >Calificaciones</a
             >
           </li>
         </ul>
       </div>
-      <div class="navbar-end">
+      <div class="navbar-end flex items-center gap-2">
         <div class="dropdown dropdown-end">
           <div tabindex="0" role="button" class="btn btn-ghost">
             {{ store.currentSchool()?.name }}
@@ -109,9 +110,33 @@ import { Store } from './store';
             }
           </ul>
         </div>
+
+        <div class="dropdown dropdown-end">
+          <div
+            tabindex="0"
+            role="button"
+            class="btn btn-ghost btn-circle avatar"
+          >
+            <div class="avatar avatar-placeholder">
+              <div class="bg-primary text-primary-content w-8 rounded-full">
+                <span>{{ auth.userInitials() }}</span>
+              </div>
+            </div>
+          </div>
+          <ul
+            tabindex="-1"
+            class="menu menu-sm dropdown-content bg-base-100 rounded-box z-1 mt-3 w-52 p-2 shadow"
+          >
+            <li>
+              <a routerLink="/admin"> Admin </a>
+            </li>
+            <li><a>Settings</a></li>
+            <li><a>Logout</a></li>
+          </ul>
+        </div>
       </div>
     </nav>
-    <main class="p-4 w-full max-w-screen-xl mx-auto">
+    <main class="w-full x-auto">
       <router-outlet />
     </main>`,
   styles: ``,
@@ -121,6 +146,7 @@ export default class Dashboard implements OnInit {
   public store = inject(Store);
   private apollo = inject(Apollo);
   private injector = inject(Injector);
+  public auth = inject(Auth);
   public schools = rxResource({
     stream: () =>
       this.apollo
@@ -135,6 +161,7 @@ export default class Dashboard implements OnInit {
               schools {
                 id
                 name
+                organizationId
                 shortName
                 logo
                 address
@@ -155,6 +182,37 @@ export default class Dashboard implements OnInit {
   });
 
   ngOnInit(): void {
+    this.apollo
+      .watchQuery<{
+        me: Prisma.UserGetPayload<{
+          include: { role: { include: { permissions: true } } };
+        }>;
+      }>({
+        query: gql`
+          query me {
+            me {
+              id
+              email
+              firstName
+              lastName
+              role {
+                name
+                permissions {
+                  id
+                  descriptiveId
+                  description
+                }
+              }
+            }
+          }
+        `,
+      })
+      .valueChanges.subscribe((res) => {
+        const { me } = res.data;
+        if (me) {
+          this.auth.user.set(me);
+        }
+      });
     effect(
       () => {
         const schools = this.schools.value();

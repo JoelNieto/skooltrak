@@ -1,7 +1,6 @@
 /* You can add global styles to this file, and also import other style files */
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Nata+Sans:wght@100..900&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Inclusive+Sans:ital,wght@0,300..700;1,300..700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=TikTok+Sans:opsz,wght@12..36,300..900&display=swap');
+
 @import 'tailwindcss';
 @plugin 'daisyui';
 
@@ -76,7 +75,7 @@
 }
 
 @theme {
-  --font-sans: 'Inclusive Sans', sans-serif !important;
+  --font-sans: 'TikTok Sans', sans-serif !important;
   --tab-border-color: var(--color-primary);
 }
 
@@ -86,7 +85,7 @@
 
 .fieldset {
   label {
-    @apply block text-sm/6 font-medium text-gray-700 dark:text-gray-100 mb-0;
+    @apply block text-sm/6 font-medium text-gray-800 dark:text-gray-100 mb-0;
   }
 }
 
@@ -153,4 +152,8 @@ textarea.ng-invalid.ng-dirty {
   td {
     @apply whitespace-nowrap;
   }
+}
+
+.layout-padding {
+  @apply mx-auto mt-4 max-w-7xl px-4 sm:px-6 lg:px-8;
 }

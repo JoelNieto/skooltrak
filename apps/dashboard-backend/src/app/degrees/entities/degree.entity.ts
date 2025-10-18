@@ -5,12 +5,12 @@ import { StudyPlan } from '../../study-plans/entities/study-plan.entity';
 
 @ObjectType()
 export class Degree
-  implements Prisma.DegreeGetPayload<{ include: { studyPlans: true } }>
+  implements
+    Prisma.DegreeGetPayload<{ include: { studyPlans: true; school: true } }>
 {
   @Field(() => String, { description: 'ID of the degree' })
   id: string;
-  @Field(() => School, { description: 'School of the degree' })
-  school: School;
+
   @Field(() => [StudyPlan], { description: 'Study plans of the degree' })
   studyPlans: StudyPlan[];
 
@@ -22,6 +22,9 @@ export class Degree
 
   @Field(() => String, { description: 'School ID of the degree' })
   schoolId: string;
+
+  @Field(() => School, { description: 'School of the degree' })
+  school: School;
 
   @Field(() => Date, { description: 'Created at of the degree' })
   createdAt: Date;

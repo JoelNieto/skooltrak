@@ -11,7 +11,7 @@ import {
   provideClientHydration,
   withEventReplay,
 } from '@angular/platform-browser';
-import { provideRouter } from '@angular/router';
+import { provideRouter, withViewTransitions } from '@angular/router';
 import { InMemoryCache } from '@apollo/client/cache';
 import { ApolloLink } from '@apollo/client/core';
 import { setContext } from '@apollo/client/link/context';
@@ -24,7 +24,7 @@ export const appConfig: ApplicationConfig = {
     provideClientHydration(withEventReplay()),
     provideBrowserGlobalErrorListeners(),
     provideZoneChangeDetection({ eventCoalescing: true }),
-    provideRouter(appRoutes),
+    provideRouter(appRoutes, withViewTransitions()),
     provideHttpClient(withFetch()),
     provideApollo(() => {
       const httpLink = inject(HttpLink);

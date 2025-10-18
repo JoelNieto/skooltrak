@@ -14,8 +14,10 @@ export class SubjectsService {
     });
   }
 
-  findAll() {
-    return this.prisma.subject.findMany();
+  findAll(organizationId: string) {
+    return this.prisma.subject.findMany({
+      where: { organizationId },
+    });
   }
 
   findOne(id: string) {

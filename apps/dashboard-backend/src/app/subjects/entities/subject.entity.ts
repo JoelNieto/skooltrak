@@ -1,6 +1,6 @@
+import { Organization } from '@/auth';
 import { Field, ObjectType } from '@nestjs/graphql';
 import { Prisma } from '@prisma/client';
-import { Organization } from '../../organizations/entities/organization.entity';
 
 @ObjectType()
 export class Subject

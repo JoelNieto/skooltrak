@@ -9,10 +9,6 @@ export class CreateSubjectInput implements Prisma.SubjectUncheckedCreateInput {
   organizationId: string;
   @Field(() => String, { description: 'Code of the subject' })
   code: string;
-  createdAt?: string | Date;
-  updatedAt?: string | Date;
-  @Field(() => String, { description: 'School ID' })
-  schoolId: string;
   @Field(() => String, { description: 'Name of the subject' })
   name: string;
 }

@@ -164,6 +164,7 @@ model Course {
 
   @@unique([schoolId, name])
   @@unique([schoolId, code])
+  @@unique([schoolId, subjectId, studyPlanId])
 }
 
 model ClassGroup {

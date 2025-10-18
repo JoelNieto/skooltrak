@@ -3,13 +3,16 @@ import { Prisma } from '@prisma/client';
 
 @InputType()
 export class CreateCourseInput implements Prisma.CourseUncheckedCreateInput {
-  @Field(() => String, { description: 'Name of the course' })
+  @Field(() => String, { description: 'Name of the course', nullable: true })
   name: string;
 
   @Field(() => String, { description: 'Code of the course' })
   code: string;
 
-  @Field(() => String, { description: 'Short name of the course' })
+  @Field(() => String, {
+    description: 'Short name of the course',
+    nullable: true,
+  })
   shortName: string;
 
   @Field(() => String, { description: 'Organization ID of the course' })

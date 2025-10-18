@@ -69,6 +69,7 @@ import { Sidebar } from './sidebar';
 export class Dashboard implements OnInit {
   private apollo = inject(Apollo);
   private auth = inject(Auth);
+
   public sidebarOverlay =
     viewChild.required<ElementRef<HTMLDivElement>>('sidebarOverlay');
 

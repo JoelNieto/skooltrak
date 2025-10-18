@@ -20,6 +20,19 @@ export class StudyPlansService {
     });
   }
 
+  findAllBySchoolId(schoolId: string, degreeId?: string) {
+    if (degreeId) {
+      return this.prisma.studyPlan.findMany({
+        where: { schoolId, degreeId },
+        include: { degree: true, school: true },
+      });
+    }
+    return this.prisma.studyPlan.findMany({
+      where: { schoolId },
+      include: { degree: true, school: true },
+    });
+  }
+
   findOne(id: string) {
     return this.prisma.studyPlan.findUnique({
       where: { id },

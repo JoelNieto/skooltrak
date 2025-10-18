@@ -1,3 +1,4 @@
+import { AuthModule } from '@/auth';
 import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin/landingPage/default';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { Module } from '@nestjs/common';
@@ -6,14 +7,9 @@ import { GraphQLModule } from '@nestjs/graphql';
 import { join } from 'path';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { AuthModule } from './auth/auth.module';
-import { OrganizationsModule } from './organizations/organizations.module';
-import { PermissionsModule } from './permissions/permissions.module';
 import { PrismaModule } from './prisma.module';
-import { RolesModule } from './roles/roles.module';
 import { SchoolsModule } from './schools/schools.module';
 import { SubjectsModule } from './subjects/subjects.module';
-import { UsersModule } from './users/users.module';
 
 @Module({
   imports: [
@@ -30,12 +26,8 @@ import { UsersModule } from './users/users.module';
       }),
       driver: ApolloDriver,
     }),
-    OrganizationsModule,
     SchoolsModule,
-    RolesModule,
     SubjectsModule,
-    UsersModule,
-    PermissionsModule,
     AuthModule,
   ],
   controllers: [AppController],

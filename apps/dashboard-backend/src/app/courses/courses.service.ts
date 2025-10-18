@@ -7,15 +7,53 @@ import { UpdateCourseInput } from './dto/update-course.input';
 export class CoursesService {
   constructor(private readonly prisma: PrismaService) {}
 
-  create(createCourseInput: CreateCourseInput) {
+  async create(createCourseInput: CreateCourseInput) {
+    const subject = await this.prisma.subject.findUnique({
+      where: { id: createCourseInput.subjectId },
+    });
+    const studyPlan = await this.prisma.studyPlan.findUnique({
+      where: { id: createCourseInput.studyPlanId },
+    });
     return this.prisma.course.create({
-      data: createCourseInput,
+      data: {
+        ...createCourseInput,
+        shortName: createCourseInput.shortName
+          ? `${createCourseInput.shortName}`
+          : `${subject?.shortName} - ${studyPlan?.shortName}`,
+        name: createCourseInput.name
+          ? `${createCourseInput.name}`
+          : `${subject?.name} - ${studyPlan?.name}`,
+        code: createCourseInput.code
+          ? `${createCourseInput.code}`
+          : `${subject?.code} - ${studyPlan?.code}`,
+      },
       include: { school: true, subject: true, studyPlan: true },
     });
   }
 
   findAll() {
     return this.prisma.course.findMany({
+      include: { school: true, subject: true, studyPlan: true },
+    });
+  }
+
+  findManyBySchoolId(schoolId: string) {
+    return this.prisma.course.findMany({
+      where: { schoolId },
+      include: { school: true, subject: true, studyPlan: true },
+    });
+  }
+
+  findManyBySubjectId(subjectId: string) {
+    return this.prisma.course.findMany({
+      where: { subjectId },
+      include: { school: true, subject: true, studyPlan: true },
+    });
+  }
+
+  findManyByStudyPlanId(studyPlanId: string) {
+    return this.prisma.course.findMany({
+      where: { studyPlanId },
       include: { school: true, subject: true, studyPlan: true },
     });
   }

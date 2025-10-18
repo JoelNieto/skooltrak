@@ -7,6 +7,10 @@ type Assignment {
   exampleField: Int!
 }
 
+type AuthPayload {
+  accessToken: String!
+}
+
 type ClassGroup {
   """Active status of the class group"""
   active: Boolean!
@@ -122,7 +126,7 @@ input CreateCourseInput {
   code: String!
 
   """Name of the course"""
-  name: String!
+  name: String
 
   """Organization ID of the course"""
   organizationId: String!
@@ -131,7 +135,7 @@ input CreateCourseInput {
   schoolId: String!
 
   """Short name of the course"""
-  shortName: String!
+  shortName: String
 
   """Study plan ID of the course"""
   studyPlanId: String!
@@ -155,19 +159,28 @@ input CreateDegreeInput {
 }
 
 input CreateOrganizationInput {
-  """Active status of the organization"""
-  active: Boolean!
-
-  """Description of the organization"""
+  active: Boolean
   description: String!
-
-  """Name of the organization"""
   name: String!
 }
 
+input CreatePermissionInput {
+  description: String!
+  descriptiveId: String!
+}
+
 input CreateRoleInput {
-  """Example field (placeholder)"""
-  exampleField: Int!
+  """Description of the role"""
+  description: String!
+
+  """Name of the role"""
+  name: String!
+
+  """Organization ID of the role"""
+  organizationId: String
+
+  """Permissions of the role"""
+  permissionIds: [String!]!
 }
 
 input CreateSchoolInput {
@@ -276,9 +289,6 @@ input CreateSubjectInput {
   """Organization ID"""
   organizationId: String!
 
-  """School ID"""
-  schoolId: String!
-
   """Short name of the subject"""
   shortName: String!
 }
@@ -313,10 +323,19 @@ input CreateTeacherInput {
 }
 
 input CreateUserInput {
+  """Email of the user"""
   email: String!
+
+  """First name of the user"""
   firstName: String!
+
+  """Last name of the user"""
   lastName: String!
+
+  """Password of the user"""
   password: String!
+
+  """Role ID of the user"""
   roleId: String!
 }
 
@@ -357,6 +376,7 @@ type Mutation {
   createCourse(createCourseInput: CreateCourseInput!): Course!
   createDegree(createDegreeInput: CreateDegreeInput!): Degree!
   createOrganization(createOrganizationInput: CreateOrganizationInput!): Organization!
+  createPermission(createPermissionInput: CreatePermissionInput!): Permission!
   createRole(createRoleInput: CreateRoleInput!): Role!
   createSchool(createSchoolInput: CreateSchoolInput!): School!
   createStudent(createStudentInput: CreateStudentInput!): Student!
@@ -364,23 +384,26 @@ type Mutation {
   createSubject(createSubjectInput: CreateSubjectInput!): Subject!
   createTeacher(createTeacherInput: CreateTeacherInput!): Teacher!
   createUser(createUserInput: CreateUserInput!): User!
+  login(email: String!, password: String!): AuthPayload!
   removeAssignment(id: Int!): Assignment!
   removeClassGroup(id: String!): ClassGroup!
   removeCourse(id: String!): Course!
   removeDegree(id: String!): Degree!
   removeOrganization(id: String!): Organization!
-  removeRole(id: Int!): Role!
+  removePermission(id: String!): Permission!
+  removeRole(id: String!): Role!
   removeSchool(id: String!): School!
   removeStudent(id: Int!): Student!
   removeStudyPlan(id: String!): StudyPlan!
   removeSubject(id: String!): Subject!
   removeTeacher(id: String!): Teacher!
-  removeUser(id: Int!): User!
+  removeUser(id: String!): User!
   updateAssignment(updateAssignmentInput: UpdateAssignmentInput!): Assignment!
   updateClassGroup(updateClassGroupInput: UpdateClassGroupInput!): ClassGroup!
   updateCourse(updateCourseInput: UpdateCourseInput!): Course!
   updateDegree(updateDegreeInput: UpdateDegreeInput!): Degree!
   updateOrganization(updateOrganizationInput: UpdateOrganizationInput!): Organization!
+  updatePermission(updatePermissionInput: UpdatePermissionInput!): Permission!
   updateRole(updateRoleInput: UpdateRoleInput!): Role!
   updateSchool(updateSchoolInput: UpdateSchoolInput!): School!
   updateStudent(updateStudentInput: UpdateStudentInput!): Student!
@@ -391,22 +414,30 @@ type Mutation {
 }
 
 type Organization {
-  """Active status of the organization"""
+  """Organization active status"""
   active: Boolean!
 
-  """Created at"""
+  """Organization created at"""
   createdAt: DateTime!
 
-  """Description of the organization"""
+  """Organization description"""
   description: String!
 
-  """ID of the organization (auto-generated)"""
+  """Organization id"""
   id: String!
 
-  """Name of the organization"""
+  """Organization name"""
   name: String!
 
-  """Updated at"""
+  """Organization updated at"""
+  updatedAt: DateTime!
+}
+
+type Permission {
+  createdAt: DateTime!
+  description: String!
+  descriptiveId: String!
+  id: String!
   updatedAt: DateTime!
 }
 
@@ -417,11 +448,18 @@ type Query {
   classGroups: [ClassGroup!]!
   course(id: String!): Course!
   courses: [Course!]!
+  coursesBySchoolId(schoolId: String!): [Course!]!
+  coursesByStudyPlanId(studyPlanId: String!): [Course!]!
+  coursesBySubjectId(subjectId: String!): [Course!]!
   degree(id: String!): Degree!
   degrees: [Degree!]!
+  degreesBySchoolId(schoolId: String!): [Degree!]!
+  me: User!
   organization(id: String!): Organization!
   organizations: [Organization!]!
-  role(id: Int!): Role!
+  permission(id: String!): Permission!
+  permissions: [Permission!]!
+  role(id: String!): Role!
   roles: [Role!]!
   school(id: String!): School!
   schools: [School!]!
@@ -429,17 +467,24 @@ type Query {
   students: [Student!]!
   studyPlan(id: String!): StudyPlan!
   studyPlans: [StudyPlan!]!
+  studyPlansBySchoolId(degreeId: String, schoolId: String!): [StudyPlan!]!
   subject(id: String!): Subject!
-  subjects: [Subject!]!
+  subjects(organizationId: String!): [Subject!]!
   teacher(id: String!): Teacher!
   teachers: [Teacher!]!
-  user(id: Int!): User!
+  user(id: String!): User!
   users: [User!]!
 }
 
 type Role {
-  """Example field (placeholder)"""
-  exampleField: Int!
+  createdAt: DateTime!
+  description: String!
+  id: String!
+  name: String!
+  organization: Organization
+  organizationId: String
+  permissions: [Permission!]!
+  updatedAt: DateTime!
 }
 
 type School {
@@ -710,21 +755,31 @@ input UpdateDegreeInput {
 }
 
 input UpdateOrganizationInput {
-  """Active status of the organization"""
   active: Boolean
-
-  """Description of the organization"""
   description: String
   id: String!
-
-  """Name of the organization"""
   name: String
 }
 
+input UpdatePermissionInput {
+  description: String
+  descriptiveId: String
+  id: String!
+}
+
 input UpdateRoleInput {
-  """Example field (placeholder)"""
-  exampleField: Int
-  id: Int!
+  """Description of the role"""
+  description: String
+  id: String!
+
+  """Name of the role"""
+  name: String
+
+  """Organization ID of the role"""
+  organizationId: String
+
+  """Permissions of the role"""
+  permissionIds: [String!]
 }
 
 input UpdateSchoolInput {
@@ -837,9 +892,6 @@ input UpdateSubjectInput {
   """Organization ID"""
   organizationId: String
 
-  """School ID"""
-  schoolId: String
-
   """Short name of the subject"""
   shortName: String
 }
@@ -875,11 +927,20 @@ input UpdateTeacherInput {
 }
 
 input UpdateUserInput {
+  """Email of the user"""
   email: String
+
+  """First name of the user"""
   firstName: String
-  id: Int!
+  id: String!
+
+  """Last name of the user"""
   lastName: String
+
+  """Password of the user"""
   password: String
+
+  """Role ID of the user"""
   roleId: String
 }
 
@@ -891,7 +952,9 @@ type User {
   isBlocked: Boolean!
   lastLogin: DateTime!
   lastName: String!
+  organization: Organization
   organizationId: String!
+  role: Role!
   roleId: String!
   updatedAt: DateTime!
 }

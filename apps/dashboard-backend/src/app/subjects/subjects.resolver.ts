@@ -16,8 +16,10 @@ export class SubjectsResolver {
   }
 
   @Query(() => [Subject], { name: 'subjects' })
-  findAll() {
-    return this.subjectsService.findAll();
+  findAll(
+    @Args('organizationId', { type: () => String }) organizationId: string
+  ) {
+    return this.subjectsService.findAll(organizationId);
   }
 
   @Query(() => Subject, { name: 'subject' })

@@ -20,6 +20,13 @@ export class DegreesService {
     });
   }
 
+  findManyBySchoolId(schoolId: string) {
+    return this.prisma.degree.findMany({
+      where: { schoolId },
+      include: { school: true, studyPlans: true },
+    });
+  }
+
   findOne(id: string) {
     return this.prisma.degree.findUnique({
       where: { id },

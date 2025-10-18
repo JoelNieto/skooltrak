@@ -25,6 +25,13 @@ export class DegreesResolver {
     return this.degreesService.findOne(id);
   }
 
+  @Query(() => [Degree], { name: 'degreesBySchoolId' })
+  findManyBySchoolId(
+    @Args('schoolId', { type: () => String }) schoolId: string
+  ) {
+    return this.degreesService.findManyBySchoolId(schoolId);
+  }
+
   @Mutation(() => Degree)
   updateDegree(
     @Args('updateDegreeInput') updateDegreeInput: UpdateDegreeInput

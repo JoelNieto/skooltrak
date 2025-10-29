@@ -1,26 +1,84 @@
 import { Injectable } from '@nestjs/common';
+import * as bcrypt from 'bcrypt';
+import { PrismaService } from '../prisma.service';
 import { CreateStudentInput } from './dto/create-student.input';
 import { UpdateStudentInput } from './dto/update-student.input';
 
 @Injectable()
 export class StudentsService {
-  create(createStudentInput: CreateStudentInput) {
-    return 'This action adds a new student';
+  constructor(private readonly prisma: PrismaService) {}
+  async create(createStudentInput: CreateStudentInput) {
+    const { email, organizationId, schoolId, classGroupId, ...rest } =
+      createStudentInput;
+    const role = await this.prisma.role.findFirstOrThrow({
+      where: {
+        organizationId: null,
+        name: 'STUDENT',
+      },
+    });
+    const user = await this.prisma.user.create({
+      data: {
+        firstName: rest.firstName,
+        lastName: rest.fatherName,
+        email: email,
+        password: bcrypt.hashSync(rest.documentId, 10),
+        organizationId,
+        roleId: role.id,
+      },
+    });
+
+    const group = await this.prisma.classGroup.findUniqueOrThrow({
+      where: {
+        id: classGroupId,
+      },
+    });
+
+    const courses = await this.prisma.course.findMany({
+      where: {
+        studyPlanId: group.studyPlanId,
+      },
+    });
+
+    return this.prisma.student.create({
+      data: {
+        ...rest,
+        userId: user.id,
+        organizationId,
+        schoolId,
+        classGroupId,
+        courses: {
+          connect: courses.map((course) => ({ id: course.id })),
+        },
+      },
+    });
   }
 
   findAll() {
-    return `This action returns all students`;
+    return this.prisma.student.findMany();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} student`;
+  findManyBySchoolId(schoolId: string) {
+    return this.prisma.student.findMany({
+      where: { schoolId },
+      include: { classGroup: true, user: true },
+    });
   }
 
-  update(id: number, updateStudentInput: UpdateStudentInput) {
-    return `This action updates a #${id} student`;
+  findOne(id: string) {
+    return this.prisma.student.findUniqueOrThrow({
+      where: { id },
+      include: { classGroup: true, courses: true },
+    });
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} student`;
+  update(id: string, updateStudentInput: UpdateStudentInput) {
+    return this.prisma.student.update({
+      where: { id },
+      data: updateStudentInput,
+    });
+  }
+
+  async remove(id: string) {
+    return this.prisma.student.delete({ where: { id } });
   }
 }

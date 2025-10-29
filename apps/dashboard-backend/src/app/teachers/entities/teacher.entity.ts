@@ -1,3 +1,4 @@
+import { User } from '@/auth';
 import { Field, ObjectType } from '@nestjs/graphql';
 import { $Enums, Prisma } from '@prisma/client';
 
@@ -23,6 +24,9 @@ export class Teacher implements Prisma.TeacherGetPayload<undefined> {
   gender: $Enums.Gender;
   @Field(() => String, { description: 'User ID of the teacher' })
   userId: string;
+
+  @Field(() => User, { description: 'User of the teacher' })
+  user: User;
   @Field(() => Date, { description: 'Created at' })
   createdAt: Date;
   @Field(() => Date, { description: 'Updated at' })

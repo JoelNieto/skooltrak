@@ -14,6 +14,34 @@ export class ClassGroupsService {
     return this.prisma.classGroup.findMany();
   }
 
+  findAllByOrganizationId(organizationId: string) {
+    return this.prisma.classGroup.findMany({
+      where: { organizationId },
+      include: {
+        teacher: true,
+        studyPlan: {
+          include: {
+            degree: true,
+          },
+        },
+      },
+    });
+  }
+
+  findAllBySchoolId(schoolId: string) {
+    return this.prisma.classGroup.findMany({
+      where: { schoolId },
+      include: {
+        teacher: true,
+        studyPlan: {
+          include: {
+            degree: true,
+          },
+        },
+      },
+    });
+  }
+
   findOne(id: string) {
     return this.prisma.classGroup.findUnique({ where: { id } });
   }

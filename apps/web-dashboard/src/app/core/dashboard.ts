@@ -131,7 +131,9 @@ import Store from './store';
               <a routerLink="/admin"> Admin </a>
             </li>
             <li><a>Settings</a></li>
-            <li><a>Logout</a></li>
+            <li>
+              <a (click)="auth.logout()" tabindex="0" role="button">Logout</a>
+            </li>
           </ul>
         </div>
       </div>

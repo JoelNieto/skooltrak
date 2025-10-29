@@ -1,10 +1,15 @@
+import { User } from '@/auth';
 import { Field, ObjectType } from '@nestjs/graphql';
 import { $Enums, Prisma } from '@prisma/client';
 import { ClassGroup } from '../../class-groups/entities/class-group.entity';
+import { Course } from '../../courses/entities/course.entity';
 
 @ObjectType()
 export class Student
-  implements Prisma.StudentGetPayload<{ include: { classGroup: true } }>
+  implements
+    Prisma.StudentGetPayload<{
+      include: { classGroup: true; user: true; courses: true };
+    }>
 {
   @Field(() => String, { description: 'ID of the student' })
   id: string;
@@ -30,8 +35,19 @@ export class Student
   birthDate: Date;
   @Field(() => String, { description: 'Gender of the student' })
   gender: $Enums.Gender;
+  @Field(() => String, { description: 'Address of the student' })
+  address: string;
+  @Field(() => String, { description: 'Phone of the student' })
+  phone: string;
+  @Field(() => String, { description: 'Email of the student' })
+  email: string;
+  @Field(() => User, { description: 'User of the student' })
+  user: User;
   @Field(() => String, { description: 'User ID of the student' })
   userId: string;
+  @Field(() => [Course], { description: 'Courses of the student' })
+  courses: Course[];
+
   @Field(() => Date, { description: 'Created at of the student' })
   createdAt: Date;
   @Field(() => Date, { description: 'Updated at of the student' })

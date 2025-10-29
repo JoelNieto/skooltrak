@@ -30,6 +30,14 @@ export const appRoutes: Route[] = [
         pathMatch: 'full',
       },
       {
+        path: 'students',
+        loadComponent: () => import('./admin/pages/students'),
+      },
+      {
+        path: 'students/:id',
+        loadComponent: () => import('./admin/pages/student'),
+      },
+      {
         path: 'admin',
         loadComponent: () => import('./admin/admin'),
         children: [
@@ -42,16 +50,33 @@ export const appRoutes: Route[] = [
             loadComponent: () => import('./admin/pages/courses'),
           },
           {
+            path: 'class-groups',
+            loadComponent: () => import('./admin/pages/class-groups'),
+          },
+          {
             path: 'study-plans',
             loadComponent: () => import('./admin/pages/study-plans'),
+          },
+          {
+            path: 'teachers',
+            loadComponent: () => import('./admin/pages/teachers'),
           },
           {
             path: 'degrees',
             loadComponent: () => import('./admin/pages/degrees'),
           },
+          {
+            path: 'students',
+            loadComponent: () => import('./admin/pages/students'),
+          },
+
           { path: '', redirectTo: 'subjects', pathMatch: 'full' },
         ],
       },
     ],
+  },
+  {
+    path: '**',
+    loadComponent: () => import('./not-found'),
   },
 ];

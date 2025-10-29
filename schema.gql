@@ -100,7 +100,7 @@ input CreateAssignmentInput {
 
 input CreateClassGroupInput {
   """Active status of the class group"""
-  active: Boolean!
+  active: Boolean! = true
 
   """Name of the class group"""
   name: String!
@@ -117,8 +117,8 @@ input CreateClassGroupInput {
   """Study plan ID of the class group"""
   studyPlanId: String!
 
-  """Subject ID of the class group"""
-  subjectId: String!
+  """Teacher ID of the class group"""
+  teacherId: String
 }
 
 input CreateCourseInput {
@@ -222,6 +222,9 @@ input CreateSchoolInput {
 }
 
 input CreateStudentInput {
+  """Address of the student"""
+  address: String!
+
   """Birth date of the student"""
   birthDate: DateTime!
 
@@ -230,6 +233,9 @@ input CreateStudentInput {
 
   """Document ID of the student"""
   documentId: String!
+
+  """Email of the student"""
+  email: String!
 
   """Father name of the student"""
   fatherName: String!
@@ -249,11 +255,11 @@ input CreateStudentInput {
   """Organization ID of the student"""
   organizationId: String!
 
+  """Phone of the student"""
+  phone: String!
+
   """School ID of the student"""
   schoolId: String!
-
-  """User ID of the student"""
-  userId: String!
 }
 
 input CreateStudyPlanInput {
@@ -295,10 +301,13 @@ input CreateSubjectInput {
 
 input CreateTeacherInput {
   """Birth date of the teacher"""
-  birthDate: DateTime!
+  birthDate: DateTime = "2025-10-29T02:30:15.691Z"
 
   """Document ID of the teacher"""
   documentId: String!
+
+  """Email of the teacher"""
+  email: String!
 
   """Father name of the teacher"""
   fatherName: String!
@@ -310,16 +319,13 @@ input CreateTeacherInput {
   gender: String!
 
   """Middle name of the teacher"""
-  middleName: String!
+  middleName: String = ""
 
   """Mother name of the teacher"""
-  motherName: String!
+  motherName: String = ""
 
   """Organization ID of the teacher"""
   organizationId: String!
-
-  """User ID of the teacher"""
-  userId: String!
 }
 
 input CreateUserInput {
@@ -393,7 +399,7 @@ type Mutation {
   removePermission(id: String!): Permission!
   removeRole(id: String!): Role!
   removeSchool(id: String!): School!
-  removeStudent(id: Int!): Student!
+  removeStudent(id: String!): Student!
   removeStudyPlan(id: String!): StudyPlan!
   removeSubject(id: String!): Subject!
   removeTeacher(id: String!): Teacher!
@@ -446,6 +452,8 @@ type Query {
   assignments: [Assignment!]!
   classGroup(id: String!): ClassGroup!
   classGroups: [ClassGroup!]!
+  classGroupsByOrganizationId(organizationId: String!): [ClassGroup!]!
+  classGroupsBySchoolId(schoolId: String!): [ClassGroup!]!
   course(id: String!): Course!
   courses: [Course!]!
   coursesBySchoolId(schoolId: String!): [Course!]!
@@ -463,8 +471,9 @@ type Query {
   roles: [Role!]!
   school(id: String!): School!
   schools: [School!]!
-  student(id: Int!): Student!
+  student(id: String!): Student!
   students: [Student!]!
+  studentsBySchoolId(schoolId: String!): [Student!]!
   studyPlan(id: String!): StudyPlan!
   studyPlans: [StudyPlan!]!
   studyPlansBySchoolId(degreeId: String, schoolId: String!): [StudyPlan!]!
@@ -472,6 +481,7 @@ type Query {
   subjects(organizationId: String!): [Subject!]!
   teacher(id: String!): Teacher!
   teachers: [Teacher!]!
+  teachersByOrganizationId(organizationId: String!): [Teacher!]!
   user(id: String!): User!
   users: [User!]!
 }
@@ -538,6 +548,9 @@ type School {
 }
 
 type Student {
+  """Address of the student"""
+  address: String!
+
   """Birth date of the student"""
   birthDate: DateTime!
 
@@ -547,11 +560,17 @@ type Student {
   """Class group ID of the student"""
   classGroupId: String!
 
+  """Courses of the student"""
+  courses: [Course!]!
+
   """Created at of the student"""
   createdAt: DateTime!
 
   """Document ID of the student"""
   documentId: String!
+
+  """Email of the student"""
+  email: String!
 
   """Father name of the student"""
   fatherName: String!
@@ -570,15 +589,22 @@ type Student {
 
   """Mother name of the student"""
   motherName: String!
+  name: String!
 
   """Organization ID of the student"""
   organizationId: String!
+
+  """Phone of the student"""
+  phone: String!
 
   """School ID of the student"""
   schoolId: String!
 
   """Updated at of the student"""
   updatedAt: DateTime!
+
+  """User of the student"""
+  user: User!
 
   """User ID of the student"""
   userId: String!
@@ -661,6 +687,7 @@ type Teacher {
 
   """First name of the teacher"""
   firstName: String!
+  fullName: String!
 
   """Gender of the teacher"""
   gender: String!
@@ -673,12 +700,16 @@ type Teacher {
 
   """Mother name of the teacher"""
   motherName: String!
+  name: String!
 
   """Organization ID of the teacher"""
   organizationId: String!
 
   """Updated at"""
   updatedAt: DateTime!
+
+  """User of the teacher"""
+  user: User!
 
   """User ID of the teacher"""
   userId: String!
@@ -692,7 +723,7 @@ input UpdateAssignmentInput {
 
 input UpdateClassGroupInput {
   """Active status of the class group"""
-  active: Boolean
+  active: Boolean = true
   id: String!
 
   """Name of the class group"""
@@ -710,8 +741,8 @@ input UpdateClassGroupInput {
   """Study plan ID of the class group"""
   studyPlanId: String
 
-  """Subject ID of the class group"""
-  subjectId: String
+  """Teacher ID of the class group"""
+  teacherId: String
 }
 
 input UpdateCourseInput {
@@ -822,6 +853,9 @@ input UpdateSchoolInput {
 }
 
 input UpdateStudentInput {
+  """Address of the student"""
+  address: String
+
   """Birth date of the student"""
   birthDate: DateTime
 
@@ -831,6 +865,9 @@ input UpdateStudentInput {
   """Document ID of the student"""
   documentId: String
 
+  """Email of the student"""
+  email: String
+
   """Father name of the student"""
   fatherName: String
 
@@ -839,7 +876,7 @@ input UpdateStudentInput {
 
   """Gender of the student"""
   gender: String
-  id: Int!
+  id: String!
 
   """Middle name of the student"""
   middleName: String
@@ -850,11 +887,11 @@ input UpdateStudentInput {
   """Organization ID of the student"""
   organizationId: String
 
+  """Phone of the student"""
+  phone: String
+
   """School ID of the student"""
   schoolId: String
-
-  """User ID of the student"""
-  userId: String
 }
 
 input UpdateStudyPlanInput {
@@ -898,10 +935,13 @@ input UpdateSubjectInput {
 
 input UpdateTeacherInput {
   """Birth date of the teacher"""
-  birthDate: DateTime
+  birthDate: DateTime = "2025-10-29T02:30:15.691Z"
 
   """Document ID of the teacher"""
   documentId: String
+
+  """Email of the teacher"""
+  email: String
 
   """Father name of the teacher"""
   fatherName: String
@@ -914,16 +954,13 @@ input UpdateTeacherInput {
   id: String!
 
   """Middle name of the teacher"""
-  middleName: String
+  middleName: String = ""
 
   """Mother name of the teacher"""
-  motherName: String
+  motherName: String = ""
 
   """Organization ID of the teacher"""
   organizationId: String
-
-  """User ID of the teacher"""
-  userId: String
 }
 
 input UpdateUserInput {

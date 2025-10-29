@@ -1,11 +1,15 @@
-import { Modal, Toast } from '@/ui';
+import { Confirmation, Modal, Toast } from '@/ui';
 import { Component, inject } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { NgIcon, provideIcons } from '@ng-icons/core';
-import { phosphorPlusCircleDuotone } from '@ng-icons/phosphor-icons/duotone';
+import {
+  phosphorPencilDuotone,
+  phosphorPlusCircleDuotone,
+  phosphorTrashDuotone,
+} from '@ng-icons/phosphor-icons/duotone';
 import { Prisma } from '@prisma/client';
 import { Apollo, gql } from 'apollo-angular';
-import { map, of } from 'rxjs';
+import { filter, map, of, switchMap } from 'rxjs';
 import Store from '../../core/store';
 import CoursesForm from '../forms/courses-form';
 
@@ -15,6 +19,8 @@ import CoursesForm from '../forms/courses-form';
   viewProviders: [
     provideIcons({
       phosphorPlusCircleDuotone,
+      phosphorTrashDuotone,
+      phosphorPencilDuotone,
     }),
   ],
   template: `<div class="flex justify-end">
@@ -43,12 +49,22 @@ import CoursesForm from '../forms/courses-form';
             <td>{{ course.subject.name }}</td>
             <td>{{ course.studyPlan.name }}</td>
             <td>
-              <button
-                class="btn btn-primary btn-xs"
-                (click)="editCourse(course)"
-              >
-                Editar
-              </button>
+              <div class="flex gap-2">
+                <button
+                  class="btn btn-primary btn-xs btn-soft"
+                  (click)="editCourse(course)"
+                >
+                  <ng-icon name="phosphorPencilDuotone" />
+                  Editar
+                </button>
+                <button
+                  class="btn btn-error btn-xs btn-soft"
+                  (click)="deleteCourse(course)"
+                >
+                  <ng-icon name="phosphorTrashDuotone" />
+                  Eliminar
+                </button>
+              </div>
             </td>
           </tr>
           }
@@ -59,6 +75,7 @@ import CoursesForm from '../forms/courses-form';
 export default class Courses {
   private modal = inject(Modal);
   private apollo = inject(Apollo);
+  private confirmation = inject(Confirmation);
   private store = inject(Store);
   private toast = inject(Toast);
   public courses = rxResource({
@@ -119,6 +136,41 @@ export default class Courses {
       })
       .closed.subscribe(() => {
         this.courses.reload();
+      });
+  }
+
+  public deleteCourse(course: Prisma.CourseGetPayload<false>) {
+    this.confirmation
+      .confirm({
+        title: 'Eliminar Curso',
+        message: `¿Estás seguro de eliminar el curso ${course.name}?`,
+      })
+      .pipe(
+        filter((confirmed: boolean) => confirmed === true),
+        switchMap(() =>
+          this.apollo.mutate({
+            mutation: gql`
+              mutation RemoveCourse($removeCourseId: String!) {
+                removeCourse(id: $removeCourseId) {
+                  id
+                }
+              }
+            `,
+            variables: {
+              removeCourseId: course.id,
+            },
+          })
+        )
+      )
+      .subscribe({
+        next: () => {
+          this.courses.reload();
+          this.toast.showSuccess('Curso eliminado correctamente');
+        },
+        error: (error) => {
+          console.error(error);
+          this.toast.showError('Error al eliminar el curso');
+        },
       });
   }
 }

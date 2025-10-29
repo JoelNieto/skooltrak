@@ -21,6 +21,11 @@ export class AuthService {
       throw new Error('Invalid password');
     }
 
+    await this.prisma.user.update({
+      where: { id: user.id },
+      data: { lastLogin: new Date() },
+    });
+
     return {
       accessToken: this.jwtService.sign({ userId: user.id }),
     };

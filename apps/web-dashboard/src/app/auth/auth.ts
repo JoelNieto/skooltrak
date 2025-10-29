@@ -6,6 +6,7 @@ import {
   inject,
   signal,
 } from '@angular/core';
+import { Router } from '@angular/router';
 import { JwtHelperService } from '@auth0/angular-jwt';
 import { Prisma } from '@prisma/client';
 
@@ -15,6 +16,7 @@ import { Prisma } from '@prisma/client';
 export default class Auth {
   private platformId = inject(PLATFORM_ID);
   private jwtHelper = new JwtHelperService();
+  private router = inject(Router);
   public user = signal<Prisma.UserGetPayload<{
     include: { role: { include: { permissions: true } } };
   }> | null>(null);
@@ -43,5 +45,13 @@ export default class Auth {
   public isAuthenticated() {
     const token = this.getAccessToken();
     return token && !this.jwtHelper.isTokenExpired(token);
+  }
+
+  public logout() {
+    if (isPlatformBrowser(this.platformId)) {
+      localStorage.removeItem('access_token');
+    }
+    this.router.navigate(['/login']);
+    this.user.set(null);
   }
 }

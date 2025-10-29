@@ -1,5 +1,5 @@
 import { markGroupDirty, Modal, Toast } from '@/ui';
-import { Component, inject, input, output } from '@angular/core';
+import { Component, inject, input, OnInit, output } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import {
   NonNullableFormBuilder,
@@ -63,7 +63,7 @@ import Store from '../../core/store';
     </div>
   </form>`,
 })
-export default class CoursesForm {
+export default class CoursesForm implements OnInit {
   private fb = inject(NonNullableFormBuilder);
   public data = input<{
     course?: Prisma.CourseGetPayload<{
@@ -139,6 +139,12 @@ export default class CoursesForm {
     subjectId: ['', [Validators.required]],
     studyPlanId: ['', [Validators.required]],
   });
+
+  public ngOnInit() {
+    if (this.data()?.course) {
+      this.form.patchValue(this.data()!.course!);
+    }
+  }
 
   public onSubmit() {
     if (this.form.invalid) {

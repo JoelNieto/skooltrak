@@ -20,6 +20,20 @@ export class ClassGroupsResolver {
     return this.classGroupsService.findAll();
   }
 
+  @Query(() => [ClassGroup], { name: 'classGroupsByOrganizationId' })
+  findAllByOrganizationId(
+    @Args('organizationId', { type: () => String }) organizationId: string
+  ) {
+    return this.classGroupsService.findAllByOrganizationId(organizationId);
+  }
+
+  @Query(() => [ClassGroup], { name: 'classGroupsBySchoolId' })
+  findAllBySchoolId(
+    @Args('schoolId', { type: () => String }) schoolId: string
+  ) {
+    return this.classGroupsService.findAllBySchoolId(schoolId);
+  }
+
   @Query(() => ClassGroup, { name: 'classGroup' })
   findOne(@Args('id', { type: () => String }) id: string) {
     return this.classGroupsService.findOne(id);

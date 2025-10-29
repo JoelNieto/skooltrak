@@ -11,7 +11,7 @@ import {
   provideClientHydration,
   withEventReplay,
 } from '@angular/platform-browser';
-import { provideRouter } from '@angular/router';
+import { provideRouter, withComponentInputBinding } from '@angular/router';
 import { ApolloLink, InMemoryCache } from '@apollo/client/core';
 import { setContext } from '@apollo/client/link/context';
 import { provideApollo } from 'apollo-angular';
@@ -23,19 +23,19 @@ export const appConfig: ApplicationConfig = {
     provideClientHydration(withEventReplay()),
     provideBrowserGlobalErrorListeners(),
     provideZoneChangeDetection({ eventCoalescing: true }),
-    provideRouter(appRoutes),
+    provideRouter(appRoutes, withComponentInputBinding()),
     provideHttpClient(withFetch()),
     provideApollo(() => {
       const httpLink = inject(HttpLink);
       const platformId = inject(PLATFORM_ID);
 
-      const basic = setContext((_, __) => ({
+      const basic = setContext(() => ({
         headers: {
           Accept: 'application/json, charset=utf-8',
         },
       }));
 
-      const auth = setContext((_, __) => {
+      const auth = setContext(() => {
         if (!isPlatformBrowser(platformId)) {
           return {};
         }

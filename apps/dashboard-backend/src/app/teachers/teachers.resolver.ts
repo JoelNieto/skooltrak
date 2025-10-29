@@ -1,4 +1,11 @@
-import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
+import {
+  Args,
+  Mutation,
+  Parent,
+  Query,
+  ResolveField,
+  Resolver,
+} from '@nestjs/graphql';
 import { CreateTeacherInput } from './dto/create-teacher.input';
 import { UpdateTeacherInput } from './dto/update-teacher.input';
 import { Teacher } from './entities/teacher.entity';
@@ -23,6 +30,23 @@ export class TeachersResolver {
   @Query(() => Teacher, { name: 'teacher' })
   findOne(@Args('id', { type: () => String }) id: string) {
     return this.teachersService.findOne(id);
+  }
+
+  @Query(() => [Teacher], { name: 'teachersByOrganizationId' })
+  findManyByOrganizationId(
+    @Args('organizationId', { type: () => String }) organizationId: string
+  ) {
+    return this.teachersService.findManyByOrganizationId(organizationId);
+  }
+
+  @ResolveField(() => String)
+  name(@Parent() teacher: Teacher) {
+    return `${teacher.firstName} ${teacher.fatherName}`;
+  }
+
+  @ResolveField(() => String)
+  fullName(@Parent() teacher: Teacher) {
+    return `${teacher.firstName} ${teacher.middleName} ${teacher.fatherName} ${teacher.motherName}`;
   }
 
   @Mutation(() => Teacher)

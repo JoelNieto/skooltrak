@@ -51,6 +51,13 @@ import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
             >Grupos</a
           >
         </li>
+        <li>
+          <a
+            routerLink="teachers"
+            routerLinkActive="bg-primary text-primary-content"
+            >Profesores</a
+          >
+        </li>
       </ul>
     </div>
     <div class="layout-padding">

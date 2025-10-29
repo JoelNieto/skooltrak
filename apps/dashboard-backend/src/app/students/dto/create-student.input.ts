@@ -1,8 +1,13 @@
 import { Field, InputType } from '@nestjs/graphql';
 import { $Enums, Prisma } from '@prisma/client';
-
+type CreateStudentInputType = Omit<
+  Prisma.StudentUncheckedCreateInput,
+  'userId'
+> & {
+  email: string;
+};
 @InputType()
-export class CreateStudentInput implements Prisma.StudentUncheckedCreateInput {
+export class CreateStudentInput implements CreateStudentInputType {
   @Field(() => String, { description: 'First name of the student' })
   firstName: string;
   @Field(() => String, { description: 'Middle name of the student' })
@@ -23,6 +28,10 @@ export class CreateStudentInput implements Prisma.StudentUncheckedCreateInput {
   birthDate: string | Date;
   @Field(() => String, { description: 'Gender of the student' })
   gender: $Enums.Gender;
-  @Field(() => String, { description: 'User ID of the student' })
-  userId: string;
+  @Field(() => String, { description: 'Address of the student' })
+  address: string;
+  @Field(() => String, { description: 'Phone of the student' })
+  phone: string;
+  @Field(() => String, { description: 'Email of the student' })
+  email: string;
 }

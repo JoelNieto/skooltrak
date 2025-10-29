@@ -13,10 +13,16 @@ export class CreateClassGroupInput
   organizationId: string;
   @Field(() => String, { description: 'School ID of the class group' })
   schoolId: string;
-  @Field(() => String, { description: 'Subject ID of the class group' })
-  subjectId: string;
   @Field(() => String, { description: 'Study plan ID of the class group' })
   studyPlanId: string;
-  @Field(() => Boolean, { description: 'Active status of the class group' })
+  @Field(() => String, {
+    description: 'Teacher ID of the class group',
+    nullable: true,
+  })
+  teacherId: string;
+  @Field(() => Boolean, {
+    description: 'Active status of the class group',
+    defaultValue: true,
+  })
   active: boolean;
 }

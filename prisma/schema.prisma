@@ -107,7 +107,7 @@ model Subject {
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
 
-  @@unique([name, code])
+  @@unique([organizationId, name, code])
 }
 
 model Degree {
@@ -178,11 +178,13 @@ model ClassGroup {
   courses         Course[]
   studyPlan       StudyPlan       @relation(fields: [studyPlanId], references: [id])
   active          Boolean
-  stdents         Student[]
+  students        Student[]
   teacher         Teacher?        @relation(fields: [teacherId], references: [id])
   teacherId       String?
   studyPlanId     String
   assignmentDates AssigmentDate[]
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
 }
 
 model Student {
@@ -200,6 +202,8 @@ model Student {
   classGroupId   String
   birthDate      DateTime
   gender         Gender
+  address        String
+  phone          String
   courses        Course[]
   userId         String       @unique
   user           User         @relation(fields: [userId], references: [id])

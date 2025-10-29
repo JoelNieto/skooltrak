@@ -1,8 +1,15 @@
-import { Resolver, Query, Mutation, Args, Int } from '@nestjs/graphql';
-import { StudentsService } from './students.service';
-import { Student } from './entities/student.entity';
+import {
+  Args,
+  Mutation,
+  Parent,
+  Query,
+  ResolveField,
+  Resolver,
+} from '@nestjs/graphql';
 import { CreateStudentInput } from './dto/create-student.input';
 import { UpdateStudentInput } from './dto/update-student.input';
+import { Student } from './entities/student.entity';
+import { StudentsService } from './students.service';
 
 @Resolver(() => Student)
 export class StudentsResolver {
@@ -20,9 +27,25 @@ export class StudentsResolver {
     return this.studentsService.findAll();
   }
 
+  @Query(() => [Student], { name: 'studentsBySchoolId' })
+  findManyBySchoolId(
+    @Args('schoolId', { type: () => String }) schoolId: string
+  ) {
+    return this.studentsService.findManyBySchoolId(schoolId);
+  }
+
   @Query(() => Student, { name: 'student' })
-  findOne(@Args('id', { type: () => Int }) id: number) {
+  findOne(@Args('id', { type: () => String }) id: string) {
     return this.studentsService.findOne(id);
+  }
+
+  @ResolveField(() => String)
+  name(@Parent() student: Student) {
+    return `${student.firstName} ${student.fatherName}`;
+  }
+  @ResolveField(() => String)
+  email(@Parent() student: Student) {
+    return student.user.email;
   }
 
   @Mutation(() => Student)
@@ -36,7 +59,7 @@ export class StudentsResolver {
   }
 
   @Mutation(() => Student)
-  removeStudent(@Args('id', { type: () => Int }) id: number) {
+  removeStudent(@Args('id', { type: () => String }) id: string) {
     return this.studentsService.remove(id);
   }
 }

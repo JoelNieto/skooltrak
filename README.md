@@ -1,82 +1,213 @@
-# SkooltrakPlatform
+# Skooltrak Platform
 
-<a alt="Nx logo" href="https://nx.dev" target="_blank" rel="noreferrer"><img src="https://raw.githubusercontent.com/nrwl/nx/master/images/nx-logo.png" width="45"></a>
+<p align="center">
+  <img src="apps/web-dashboard/public/skooltrak.png" alt="Skooltrak logo" width="160">
+  
+</p>
 
-✨ Your new, shiny [Nx workspace](https://nx.dev) is almost ready ✨.
+Monorepo managed with Nx containing Angular frontends and NestJS GraphQL backends.
 
-[Learn more about this workspace setup and its capabilities](https://nx.dev/getting-started/tutorials/angular-monorepo-tutorial?utm_source=nx_project&amp;utm_medium=readme&amp;utm_campaign=nx_projects) or run `npx nx graph` to visually explore what was created. Now, let's get you up to speed!
+## Purpose
 
-## Finish your CI setup
+Skooltrak is an educational platform for schools to manage academic processes, users, and communication across dashboards and admin tools.
 
-[Click here to finish setting up your workspace!](https://cloud.nx.app/connect/sXoKBh3Zyd)
+## Apps
 
+- **web-dashboard** — Angular 20 dashboard app
+- **dashboard-backend** — NestJS 11 GraphQL API
+- **web-admin** — Angular 20 admin app
+- **admin-backend** — NestJS 11 GraphQL API
 
-## Run tasks
+E2E projects are colocated under `apps/*-e2e`.
 
-To run the dev server for your app, use:
+## Getting started
 
-```sh
-npx nx serve web-dashboard
-```
+- **Install dependencies**
+  - Using Bun (preferred, bun.lock present):
+    ```sh
+    bun install
+    ```
+  - Or npm:
+    ```sh
+    npm install
+    ```
+  - Or pnpm:
+    ```sh
+    pnpm install
+    ```
 
-To create a production bundle:
+- **Environment**
+  - Copy `.env` and set required variables for web and backend apps.
 
-```sh
-npx nx build web-dashboard
-```
+## Development
 
-To see all available targets to run for a project, run:
+- **Start Dashboard (web + api)**
+  ```sh
+  npm run serve:dev
+  ```
 
-```sh
-npx nx show project web-dashboard
-```
+- **Start Admin (web + api)**
+  ```sh
+  npm run serve:dev:admin
+  ```
 
-These targets are either [inferred automatically](https://nx.dev/concepts/inferred-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) or defined in the `project.json` or `package.json` files.
+- **Serve a single project**
+  ```sh
+  npx nx serve web-dashboard
+  npx nx serve dashboard-backend
+  npx nx serve web-admin
+  npx nx serve admin-backend
+  ```
 
-[More about running tasks in the docs &raquo;](https://nx.dev/features/run-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+- **Build**
+  ```sh
+  npx nx build <project-name>
+  ```
 
-## Add new projects
+- **Project info / graph**
+  ```sh
+  npx nx show project <project-name>
+  npx nx graph
+  ```
 
-While you could add new projects to your workspace manually, you might want to leverage [Nx plugins](https://nx.dev/concepts/nx-plugins?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) and their [code generation](https://nx.dev/features/generate-code?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) feature.
+## Testing & Linting
 
-Use the plugin's generator to create new projects.
+- **Unit tests (Vitest/Jest as configured by project)**
+  ```sh
+  npx nx test <project-name>
+  ```
+- **E2E (Playwright)**
+  ```sh
+  npx nx e2e <e2e-project>
+  ```
+- **Lint**
+  ```sh
+  npx nx lint <project-name>
+  ```
 
-To generate a new application, use:
+## Tech stack
 
-```sh
-npx nx g @nx/angular:app demo
-```
+- **Nx 22** for monorepo orchestration
+- **Angular 20** for frontends (Vite build via @nx/vite)
+- **NestJS 11** for APIs
+- **GraphQL 16** with Apollo
+- **Prisma 6** for database access
+- **Tailwind CSS 4** + **DaisyUI** for styling
 
-To generate a new library, use:
+## Project structure
 
-```sh
-npx nx g @nx/angular:lib mylib
-```
+- **apps/** — application projects (frontends, backends, e2e)
+- **libs/** — shared libraries
+- **prisma/** — Prisma schema and assets
+- **generated/** — generated artifacts (e.g., Prisma client)
 
-You can use `npx nx list` to get a list of installed plugins. Then, run `npx nx list <plugin-name>` to learn about more specific capabilities of a particular plugin. Alternatively, [install Nx Console](https://nx.dev/getting-started/editor-setup?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) to browse plugins and generators in your IDE.
+Use `npx nx g` to generate code (apps, libs, components, etc.).
 
-[Learn more about Nx plugins &raquo;](https://nx.dev/concepts/nx-plugins?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) | [Browse the plugin registry &raquo;](https://nx.dev/plugin-registry?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+---
 
+## Español
 
-[Learn more about Nx on CI](https://nx.dev/ci/intro/ci-with-nx#ready-get-started-with-your-provider?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+# Plataforma Skooltrak
 
-## Install Nx Console
+<p align="center">
+  <img src="apps/web-dashboard/public/skooltrak.png" alt="Logo Skooltrak" width="160">
+  
+</p>
 
-Nx Console is an editor extension that enriches your developer experience. It lets you run tasks, generate code, and improves code autocompletion in your IDE. It is available for VSCode and IntelliJ.
+Monorepo gestionado con Nx que contiene frontends en Angular y backends GraphQL en NestJS.
 
-[Install Nx Console &raquo;](https://nx.dev/getting-started/editor-setup?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+## Propósito
 
-## Useful links
+Skooltrak es una plataforma educativa para escuelas que permite gestionar procesos académicos, usuarios y comunicación mediante paneles y herramientas de administración.
 
-Learn more:
+## Aplicaciones
 
-- [Learn more about this workspace setup](https://nx.dev/getting-started/tutorials/angular-monorepo-tutorial?utm_source=nx_project&amp;utm_medium=readme&amp;utm_campaign=nx_projects)
-- [Learn about Nx on CI](https://nx.dev/ci/intro/ci-with-nx?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Releasing Packages with Nx release](https://nx.dev/features/manage-releases?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [What are Nx plugins?](https://nx.dev/concepts/nx-plugins?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+- **web-dashboard** — Aplicación Angular 20 (dashboard)
+- **dashboard-backend** — API GraphQL con NestJS 11
+- **web-admin** — Aplicación Angular 20 (admin)
+- **admin-backend** — API GraphQL con NestJS 11
 
-And join the Nx community:
-- [Discord](https://go.nx.dev/community)
-- [Follow us on X](https://twitter.com/nxdevtools) or [LinkedIn](https://www.linkedin.com/company/nrwl)
-- [Our Youtube channel](https://www.youtube.com/@nxdevtools)
-- [Our blog](https://nx.dev/blog?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+Los proyectos E2E están en `apps/*-e2e`.
+
+## Comenzando
+
+- **Instalar dependencias**
+  - Con Bun (preferido, hay bun.lock):
+    ```sh
+    bun install
+    ```
+  - O npm:
+    ```sh
+    npm install
+    ```
+  - O pnpm:
+    ```sh
+    pnpm install
+    ```
+
+- **Entorno**
+  - Copia `.env` y define las variables requeridas para web y backend.
+
+## Desarrollo
+
+- **Iniciar Dashboard (web + api)**
+  ```sh
+  npm run serve:dev
+  ```
+
+- **Iniciar Admin (web + api)**
+  ```sh
+  npm run serve:dev:admin
+  ```
+
+- **Servir un proyecto específico**
+  ```sh
+  npx nx serve web-dashboard
+  npx nx serve dashboard-backend
+  npx nx serve web-admin
+  npx nx serve admin-backend
+  ```
+
+- **Build**
+  ```sh
+  npx nx build <project-name>
+  ```
+
+- **Información / grafo del proyecto**
+  ```sh
+  npx nx show project <project-name>
+  npx nx graph
+  ```
+
+## Pruebas y Linting
+
+- **Unitarias (Vitest/Jest según el proyecto)**
+  ```sh
+  npx nx test <project-name>
+  ```
+- **E2E (Playwright)**
+  ```sh
+  npx nx e2e <e2e-project>
+  ```
+- **Lint**
+  ```sh
+  npx nx lint <project-name>
+  ```
+
+## Tecnologías
+
+- **Nx 22** para orquestación de monorepo
+- **Angular 20** para frontends (build con Vite mediante @nx/vite)
+- **NestJS 11** para APIs
+- **GraphQL 16** con Apollo
+- **Prisma 6** para acceso a base de datos
+- **Tailwind CSS 4** + **DaisyUI** para estilos
+
+## Estructura del proyecto
+
+- **apps/** — aplicaciones (frontends, backends, e2e)
+- **libs/** — librerías compartidas
+- **prisma/** — esquema y recursos de Prisma
+- **generated/** — artefactos generados (p.ej., Prisma client)
+
+Usa `npx nx g` para generar código (apps, libs, componentes, etc.).

@@ -5,9 +5,9 @@ import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
   selector: 'app-admin',
   imports: [RouterOutlet, RouterLink, RouterLinkActive],
   template: `
-    <h1 class="text-2xl font-bold layout-padding">Admin</h1>
-    <div class="border-b border-base-300 layout-padding">
-      <ul class="menu menu-horizontal gap-2">
+    <h1 class="text-2xl font-bold">Admin</h1>
+    <div class="border-b border-base-300">
+      <ul class="menu menu-horizontal gap-2 ">
         <li>
           <a
             routerLink="subjects"
@@ -60,7 +60,7 @@ import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
         </li>
       </ul>
     </div>
-    <div class="layout-padding">
+    <div class="pt-4">
       <router-outlet />
     </div>
   `,

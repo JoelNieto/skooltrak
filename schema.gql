@@ -301,7 +301,7 @@ input CreateSubjectInput {
 
 input CreateTeacherInput {
   """Birth date of the teacher"""
-  birthDate: DateTime = "2025-10-29T02:30:15.691Z"
+  birthDate: DateTime = "2025-10-29T03:51:32.627Z"
 
   """Document ID of the teacher"""
   documentId: String!
@@ -935,7 +935,7 @@ input UpdateSubjectInput {
 
 input UpdateTeacherInput {
   """Birth date of the teacher"""
-  birthDate: DateTime = "2025-10-29T02:30:15.691Z"
+  birthDate: DateTime = "2025-10-29T03:51:32.627Z"
 
   """Document ID of the teacher"""
   documentId: String

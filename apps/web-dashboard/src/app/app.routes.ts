@@ -38,6 +38,10 @@ export const appRoutes: Route[] = [
         loadComponent: () => import('./admin/pages/student'),
       },
       {
+        path: 'groups',
+        loadComponent: () => import('./admin/pages/class-groups'),
+      },
+      {
         path: 'admin',
         loadComponent: () => import('./admin/admin'),
         children: [

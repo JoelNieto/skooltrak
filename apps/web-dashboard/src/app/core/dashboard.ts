@@ -58,7 +58,7 @@ import Store from './store';
           <li>
             <a
               routerLink="/home"
-              routerLinkActive="bg-primary text-primary-content font-semibold"
+              routerLinkActive="bg-primary text-primary-content"
             >
               <ng-icon name="phosphorHouseLineBold" />Inicio</a
             >
@@ -138,7 +138,7 @@ import Store from './store';
         </div>
       </div>
     </nav>
-    <main class="w-full x-auto">
+    <main class="w-full x-auto layout-padding">
       <router-outlet />
     </main>`,
   styles: ``,

@@ -2,12 +2,16 @@ import { Field, ObjectType } from '@nestjs/graphql';
 import { Prisma } from '@prisma/client';
 import { Organization } from '../../organizations/entities/organization.entity';
 import { Role } from '../../roles/entities/role.entity';
+import { UserStudent } from './student.entity';
+import { UserTeacher } from './teacher.entity';
 
 @ObjectType()
 export class User
   implements
     Prisma.UserGetPayload<{
-      include: { role: { include: { permissions: true } } };
+      include: {
+        role: { include: { permissions: true }; teacher: true; student: true };
+      };
     }>
 {
   @Field(() => String)
@@ -32,6 +36,10 @@ export class User
   lastLogin: Date | null;
   @Field(() => Boolean)
   isBlocked: boolean;
+  @Field(() => UserTeacher, { nullable: true })
+  teacher: UserTeacher | null;
+  @Field(() => UserStudent, { nullable: true })
+  student: UserStudent | null;
   @Field(() => Date)
   createdAt: Date;
   @Field(() => Date)

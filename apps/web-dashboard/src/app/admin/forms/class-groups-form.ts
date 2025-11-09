@@ -201,9 +201,15 @@ export default class ClassGroupsForm implements OnInit {
             },
           },
         })
-        .subscribe(() => {
-          this.toast.showSuccess('Grupo actualizado correctamente');
-          this.closeModal.emit();
+        .subscribe({
+          next: () => {
+            this.toast.showSuccess('Grupo actualizado correctamente');
+            this.closeModal.emit();
+          },
+          error: (err) => {
+            console.error(err);
+            this.toast.showError('Error al actualizar el grupo');
+          },
         });
     } else {
       this.apollo
@@ -227,9 +233,15 @@ export default class ClassGroupsForm implements OnInit {
             },
           },
         })
-        .subscribe(() => {
-          this.toast.showSuccess('Grupo creado correctamente');
-          this.closeModal.emit();
+        .subscribe({
+          next: () => {
+            this.toast.showSuccess('Grupo creado correctamente');
+            this.closeModal.emit();
+          },
+          error: (err) => {
+            console.error(err);
+            this.toast.showError('Error al crear el grupo');
+          },
         });
     }
   }

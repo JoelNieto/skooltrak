@@ -3,6 +3,7 @@ import { Prisma } from '@prisma/client';
 import { School } from '../../schools/entities/school.entity';
 import { StudyPlan } from '../../study-plans/entities/study-plan.entity';
 import { Subject } from '../../subjects/entities/subject.entity';
+import { Teacher } from '../../teachers/entities/teacher.entity';
 
 @ObjectType()
 export class Course
@@ -39,4 +40,9 @@ export class Course
   updatedAt: Date;
   @Field(() => String, { description: 'Teacher ID of the course' })
   teacherId: string;
+  @Field(() => Teacher, {
+    description: 'Teacher of the course',
+    nullable: true,
+  })
+  teacher: Teacher;
 }

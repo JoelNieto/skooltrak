@@ -49,6 +49,13 @@ export class TeachersResolver {
     return `${teacher.firstName} ${teacher.middleName} ${teacher.fatherName} ${teacher.motherName}`;
   }
 
+  @ResolveField(() => String)
+  initials(@Parent() teacher: Teacher) {
+    return `${teacher.firstName.charAt(0).toUpperCase()}${teacher.fatherName
+      .charAt(0)
+      .toUpperCase()}`;
+  }
+
   @Mutation(() => Teacher)
   updateTeacher(
     @Args('updateTeacherInput') updateTeacherInput: UpdateTeacherInput

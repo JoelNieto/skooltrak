@@ -3,8 +3,55 @@
 # ------------------------------------------------------
 
 type Assignment {
-  """Example field (placeholder)"""
-  exampleField: Int!
+  """Course of the assignment"""
+  course: Course!
+
+  """Course ID of the assignment"""
+  courseId: String!
+
+  """Created at"""
+  createdAt: DateTime!
+
+  """Date of the assignment"""
+  date: DateTime!
+
+  """Details of the assignment"""
+  details: String!
+
+  """ID of the assignment (auto-generated)"""
+  id: String!
+
+  """Require submission of the assignment"""
+  requireSubmission: Boolean!
+
+  """School ID of the assignment"""
+  schoolId: String!
+
+  """Teacher of the assignment"""
+  teacher: Teacher!
+
+  """Teacher ID of the assignment"""
+  teacherId: String!
+
+  """Title of the assignment"""
+  title: String!
+
+  """Type of the assignment"""
+  type: String!
+
+  """Updated at"""
+  updatedAt: DateTime!
+}
+
+input AssignmentDateInput {
+  """Id de la asignacion"""
+  assignmentId: String!
+
+  """Id del grupo"""
+  classGroupId: String!
+
+  """Fecha de la asignacion"""
+  date: DateTime!
 }
 
 type AuthPayload {
@@ -14,6 +61,9 @@ type AuthPayload {
 type ClassGroup {
   """Active status of the class group"""
   active: Boolean!
+
+  """Courses of the class group"""
+  courses: [Course!]!
 
   """Created at of the class group"""
   createdAt: DateTime!
@@ -33,6 +83,9 @@ type ClassGroup {
   """Short name of the class group"""
   shortName: String!
 
+  """Students of the class group"""
+  students: [Student!]!
+
   """Study plan of the class group"""
   studyPlan: StudyPlan!
 
@@ -40,10 +93,10 @@ type ClassGroup {
   studyPlanId: String!
 
   """Teacher of the class group"""
-  teacher: Teacher!
+  teacher: Teacher
 
   """Teacher ID of the class group"""
-  teacherId: String!
+  teacherId: String
 
   """Updated at of the class group"""
   updatedAt: DateTime!
@@ -86,6 +139,9 @@ type Course {
   """Subject ID of the course"""
   subjectId: String!
 
+  """Teacher of the course"""
+  teacher: Teacher
+
   """Teacher ID of the course"""
   teacherId: String!
 
@@ -94,8 +150,32 @@ type Course {
 }
 
 input CreateAssignmentInput {
-  """Example field (placeholder)"""
-  exampleField: Int!
+  """Id del curso"""
+  courseId: String!
+
+  """Fecha de la asignacion"""
+  date: String!
+
+  """Detalles de la asignacion"""
+  details: String!
+
+  """Fechas de la asignacion"""
+  groupDates: [AssignmentDateInput!]
+
+  """Requiere envio"""
+  requireSubmission: Boolean!
+
+  """Id de la escuela"""
+  schoolId: String!
+
+  """Id del profesor"""
+  teacherId: String!
+
+  """Titulo de la asignacion"""
+  title: String!
+
+  """Tipo de la asignacion"""
+  type: String!
 }
 
 input CreateClassGroupInput {
@@ -301,7 +381,7 @@ input CreateSubjectInput {
 
 input CreateTeacherInput {
   """Birth date of the teacher"""
-  birthDate: DateTime = "2025-10-29T03:51:32.627Z"
+  birthDate: DateTime = "2025-11-09T17:52:33.691Z"
 
   """Document ID of the teacher"""
   documentId: String!
@@ -391,7 +471,7 @@ type Mutation {
   createTeacher(createTeacherInput: CreateTeacherInput!): Teacher!
   createUser(createUserInput: CreateUserInput!): User!
   login(email: String!, password: String!): AuthPayload!
-  removeAssignment(id: Int!): Assignment!
+  removeAssignment(id: String!): Assignment!
   removeClassGroup(id: String!): ClassGroup!
   removeCourse(id: String!): Course!
   removeDegree(id: String!): Degree!
@@ -448,8 +528,10 @@ type Permission {
 }
 
 type Query {
-  assignment(id: Int!): Assignment!
+  assignment(id: String!): Assignment!
   assignments: [Assignment!]!
+  assignmentsByCourseId(courseId: String!, endDate: String!, startDate: String!): [Assignment!]!
+  assignmentsBySchoolId(endDate: String!, schoolId: String!, startDate: String!): [Assignment!]!
   classGroup(id: String!): ClassGroup!
   classGroups: [ClassGroup!]!
   classGroupsByOrganizationId(organizationId: String!): [ClassGroup!]!
@@ -568,8 +650,6 @@ type Student {
 
   """Document ID of the student"""
   documentId: String!
-
-  """Email of the student"""
   email: String!
 
   """Father name of the student"""
@@ -583,6 +663,7 @@ type Student {
 
   """ID of the student"""
   id: String!
+  initials: String!
 
   """Middle name of the student"""
   middleName: String!
@@ -694,6 +775,7 @@ type Teacher {
 
   """ID of the teacher (auto-generated)"""
   id: String!
+  initials: String!
 
   """Middle name of the teacher"""
   middleName: String!
@@ -716,9 +798,33 @@ type Teacher {
 }
 
 input UpdateAssignmentInput {
-  """Example field (placeholder)"""
-  exampleField: Int
-  id: Int!
+  """Id del curso"""
+  courseId: String
+
+  """Fecha de la asignacion"""
+  date: String
+
+  """Detalles de la asignacion"""
+  details: String
+
+  """Fechas de la asignacion"""
+  groupDates: [AssignmentDateInput!]
+  id: String!
+
+  """Requiere envio"""
+  requireSubmission: Boolean
+
+  """Id de la escuela"""
+  schoolId: String
+
+  """Id del profesor"""
+  teacherId: String
+
+  """Titulo de la asignacion"""
+  title: String
+
+  """Tipo de la asignacion"""
+  type: String
 }
 
 input UpdateClassGroupInput {
@@ -935,7 +1041,7 @@ input UpdateSubjectInput {
 
 input UpdateTeacherInput {
   """Birth date of the teacher"""
-  birthDate: DateTime = "2025-10-29T03:51:32.627Z"
+  birthDate: DateTime = "2025-11-09T17:52:33.691Z"
 
   """Document ID of the teacher"""
   documentId: String
@@ -993,5 +1099,41 @@ type User {
   organizationId: String!
   role: Role!
   roleId: String!
+  student: UserStudent
+  teacher: UserTeacher
   updatedAt: DateTime!
+}
+
+type UserStudent {
+  address: String!
+  birthDate: DateTime!
+  classGroupId: String!
+  createdAt: DateTime!
+  documentId: String!
+  fatherName: String!
+  firstName: String!
+  gender: String!
+  id: String!
+  middleName: String!
+  motherName: String!
+  organizationId: String!
+  phone: String!
+  schoolId: String!
+  updatedAt: DateTime!
+  userId: String!
+}
+
+type UserTeacher {
+  birthDate: DateTime!
+  createdAt: DateTime!
+  documentId: String!
+  fatherName: String!
+  firstName: String!
+  gender: String!
+  id: String!
+  middleName: String!
+  motherName: String!
+  organizationId: String!
+  updatedAt: DateTime!
+  userId: String!
 }

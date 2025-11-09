@@ -14,8 +14,7 @@ type StudentType = Prisma.StudentGetPayload<{
 @Component({
   selector: 'app-student',
   imports: [RouterLink],
-  template: `<div class="layout-padding">
-    <div class="breadcrumbs text-sm">
+  template: ` <div class="breadcrumbs text-sm">
       <ul>
         <li><a routerLink="/">Inicio</a></li>
         <li><a routerLink="/students">Alumnos</a></li>
@@ -533,8 +532,7 @@ type StudentType = Prisma.StudentGetPayload<{
           </div>
         </div>
       </div>
-    </div>
-  </div>`,
+    </div>`,
 })
 export default class Student {
   public id = input.required<string>();

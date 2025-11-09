@@ -39,8 +39,7 @@ export class Student
   address: string;
   @Field(() => String, { description: 'Phone of the student' })
   phone: string;
-  @Field(() => String, { description: 'Email of the student' })
-  email: string;
+
   @Field(() => User, { description: 'User of the student' })
   user: User;
   @Field(() => String, { description: 'User ID of the student' })

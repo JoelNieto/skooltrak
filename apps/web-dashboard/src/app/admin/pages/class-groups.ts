@@ -2,6 +2,7 @@ import { Confirmation, Modal, Toast } from '@/ui';
 import { DatePipe } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
+import { RouterLink } from '@angular/router';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
   phosphorPencilDuotone,
@@ -10,13 +11,13 @@ import {
 } from '@ng-icons/phosphor-icons/duotone';
 import { Prisma } from '@prisma/client';
 import { Apollo, gql } from 'apollo-angular';
-import { map, of } from 'rxjs';
+import { filter, map, of, switchMap } from 'rxjs';
 import Store from '../../core/store';
 import ClassGroupsForm from '../forms/class-groups-form';
 
 @Component({
   selector: 'app-groups',
-  imports: [NgIcon, DatePipe],
+  imports: [NgIcon, DatePipe, RouterLink],
   viewProviders: [
     provideIcons({
       phosphorPlusCircleDuotone,
@@ -46,7 +47,13 @@ import ClassGroupsForm from '../forms/class-groups-form';
         <tbody>
           @for (group of classGroups.value(); track group.id) {
           <tr>
-            <td>{{ group.name }}</td>
+            <td>
+              <a
+                class="link link-primary"
+                [routerLink]="['/groups', group.id]"
+                >{{ group.name }}</a
+              >
+            </td>
             <td>{{ group.shortName }}</td>
             <td>{{ group.teacher?.name }}</td>
             <td>{{ group.studyPlan.name }}</td>
@@ -105,6 +112,8 @@ export default class ClassGroups {
                 shortName
                 createdAt
                 updatedAt
+                teacherId
+                studyPlanId
                 teacher {
                   id
                   name
@@ -129,12 +138,16 @@ export default class ClassGroups {
       include: { teacher: true; studyPlan: true };
     }>
   ) {
-    this.modal.open(ClassGroupsForm, {
-      title: group ? 'Editar grupo' : 'Nuevo grupo',
-      data: {
-        group,
-      },
-    });
+    this.modal
+      .open(ClassGroupsForm, {
+        title: group ? 'Editar grupo' : 'Nuevo grupo',
+        data: {
+          group,
+        },
+      })
+      .closed.subscribe(() => {
+        this.classGroups.reload();
+      });
   }
 
   public deleteClassGroup(id: string) {
@@ -143,24 +156,26 @@ export default class ClassGroups {
         title: 'Eliminar grupo',
         message: '¿Estás seguro de eliminar este grupo?',
       })
-      .subscribe((result) => {
-        if (result) {
-          this.apollo
-            .mutate({
-              mutation: gql`
-                mutation DeleteClassGroup($id: String!) {
-                  deleteClassGroup(id: $id)
+      .pipe(
+        filter((result) => result),
+        switchMap(() =>
+          this.apollo.mutate({
+            mutation: gql`
+              mutation DeleteClassGroup($id: String!) {
+                removeClassGroup(id: $id) {
+                  id
                 }
-              `,
-              variables: {
-                id,
-              },
-            })
-            .subscribe(() => {
-              this.toasts.showSuccess('Grupo eliminado correctamente');
-              this.classGroups.reload();
-            });
-        }
+              }
+            `,
+            variables: {
+              id,
+            },
+          })
+        )
+      )
+      .subscribe(() => {
+        this.toasts.showSuccess('Grupo eliminado correctamente');
+        this.classGroups.reload();
       });
   }
 }

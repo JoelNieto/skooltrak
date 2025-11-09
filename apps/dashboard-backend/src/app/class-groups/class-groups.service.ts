@@ -6,8 +6,20 @@ import { UpdateClassGroupInput } from './dto/update-class-group.input';
 @Injectable()
 export class ClassGroupsService {
   constructor(private readonly prisma: PrismaService) {}
-  create(createClassGroupInput: CreateClassGroupInput) {
-    return this.prisma.classGroup.create({ data: createClassGroupInput });
+  async create(createClassGroupInput: CreateClassGroupInput) {
+    const coursesToConnect = await this.prisma.course.findMany({
+      where: {
+        studyPlanId: createClassGroupInput.studyPlanId,
+        schoolId: createClassGroupInput.schoolId,
+      },
+      select: { id: true },
+    });
+    return this.prisma.classGroup.create({
+      data: {
+        ...createClassGroupInput,
+        courses: { connect: coursesToConnect.map((c) => ({ id: c.id })) },
+      },
+    });
   }
 
   findAll() {
@@ -43,7 +55,25 @@ export class ClassGroupsService {
   }
 
   findOne(id: string) {
-    return this.prisma.classGroup.findUnique({ where: { id } });
+    return this.prisma.classGroup.findUnique({
+      where: { id },
+      include: {
+        teacher: true,
+        students: {
+          include: { user: true },
+          orderBy: { user: { firstName: 'asc' } },
+        },
+        courses: {
+          include: { teacher: true, subject: true },
+          orderBy: { subject: { name: 'asc' } },
+        },
+        studyPlan: {
+          include: {
+            degree: true,
+          },
+        },
+      },
+    });
   }
 
   update(id: string, updateClassGroupInput: UpdateClassGroupInput) {

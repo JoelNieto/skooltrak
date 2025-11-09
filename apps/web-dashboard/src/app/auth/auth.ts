@@ -18,7 +18,11 @@ export default class Auth {
   private jwtHelper = new JwtHelperService();
   private router = inject(Router);
   public user = signal<Prisma.UserGetPayload<{
-    include: { role: { include: { permissions: true } } };
+    include: {
+      role: { include: { permissions: true } };
+      teacher: true;
+      student: true;
+    };
   }> | null>(null);
 
   public userName = computed(
@@ -41,6 +45,8 @@ export default class Auth {
     }
     return null;
   }
+
+  public isAdmin = computed(() => this.user()?.role.name === 'ADMIN');
 
   public isAuthenticated() {
     const token = this.getAccessToken();

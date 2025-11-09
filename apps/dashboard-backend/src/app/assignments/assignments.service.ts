@@ -1,26 +1,63 @@
 import { Injectable } from '@nestjs/common';
+import { PrismaService } from '../prisma.service';
 import { CreateAssignmentInput } from './dto/create-assignment.input';
 import { UpdateAssignmentInput } from './dto/update-assignment.input';
 
 @Injectable()
 export class AssignmentsService {
+  constructor(private readonly prisma: PrismaService) {}
+
   create(createAssignmentInput: CreateAssignmentInput) {
-    return 'This action adds a new assignment';
+    return this.prisma.assignment.create({
+      data: {
+        ...createAssignmentInput,
+        dates: {
+          create: createAssignmentInput.groupDates,
+        },
+      },
+    });
   }
 
   findAll() {
-    return `This action returns all assignments`;
+    return this.prisma.assignment.findMany({
+      include: { course: true, teacher: true },
+    });
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} assignment`;
+  findAssignmentBySchoolId(schoolId: string, startDate: Date, endDate: Date) {
+    return this.prisma.assignment.findMany({
+      where: { schoolId, date: { gte: startDate, lte: endDate } },
+      include: {
+        course: { include: { subject: true, studyPlan: true } },
+        teacher: true,
+      },
+      orderBy: { date: 'asc' },
+    });
   }
 
-  update(id: number, updateAssignmentInput: UpdateAssignmentInput) {
-    return `This action updates a #${id} assignment`;
+  findAssignmentByCourseId(courseId: string, startDate: Date, endDate: Date) {
+    return this.prisma.assignment.findMany({
+      where: { courseId, date: { gte: startDate, lte: endDate } },
+      include: { course: true, teacher: true },
+      orderBy: { date: 'asc' },
+    });
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} assignment`;
+  findOne(id: string) {
+    return this.prisma.assignment.findUnique({
+      where: { id },
+      include: { course: true, teacher: true },
+    });
+  }
+
+  update(id: string, updateAssignmentInput: UpdateAssignmentInput) {
+    return this.prisma.assignment.update({
+      where: { id },
+      data: updateAssignmentInput,
+    });
+  }
+
+  remove(id: string) {
+    return this.prisma.assignment.delete({ where: { id } });
   }
 }

@@ -2,10 +2,15 @@ import { Route } from '@angular/router';
 import { authGuard } from './auth/auth.guard';
 
 export const appRoutes: Route[] = [
-  { path: 'login', loadComponent: () => import('./auth/login') },
+  {
+    path: 'login',
+    loadComponent: () => import('./auth/login'),
+    title: 'Inicio de sesión | Skooltrak',
+  },
   {
     path: '',
     canActivateChild: [authGuard],
+    title: 'Software Educativo | Skooltrak',
     loadComponent: () => import('./core/dashboard'),
     children: [
       {
@@ -16,9 +21,14 @@ export const appRoutes: Route[] = [
         path: 'courses',
         loadComponent: () => import('./courses/courses'),
       },
+      { path: 'courses/:id', loadComponent: () => import('./courses/course') },
       {
         path: 'assignments',
         loadComponent: () => import('./assignments/assignments'),
+      },
+      {
+        path: 'assignments/:id',
+        loadComponent: () => import('./assignments/assignment'),
       },
       {
         path: 'grades',
@@ -39,7 +49,11 @@ export const appRoutes: Route[] = [
       },
       {
         path: 'groups',
-        loadComponent: () => import('./admin/pages/class-groups'),
+        loadComponent: () => import('./groups/groups'),
+      },
+      {
+        path: 'groups/:id',
+        loadComponent: () => import('./groups/group'),
       },
       {
         path: 'admin',

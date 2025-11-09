@@ -1,3 +1,5 @@
+export * from './lib/ui/components/calendar';
+export * from './lib/ui/components/loader';
 export * from './lib/ui/components/paginator';
 export * from './lib/ui/components/toasts-container';
 export * from './lib/ui/services/confirmation';

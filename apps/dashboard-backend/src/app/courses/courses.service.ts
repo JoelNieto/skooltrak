@@ -14,7 +14,7 @@ export class CoursesService {
     const studyPlan = await this.prisma.studyPlan.findUnique({
       where: { id: createCourseInput.studyPlanId },
     });
-    return this.prisma.course.create({
+    const course = await this.prisma.course.create({
       data: {
         ...createCourseInput,
         shortName: createCourseInput.shortName
@@ -29,6 +29,42 @@ export class CoursesService {
       },
       include: { school: true, subject: true, studyPlan: true },
     });
+
+    // Find all students in the same study plan (and school) to enroll in the new course
+    const studentsToConnect = await this.prisma.student.findMany({
+      where: {
+        classGroup: { studyPlanId: createCourseInput.studyPlanId },
+        schoolId: createCourseInput.schoolId,
+      },
+      select: { id: true },
+    });
+
+    const groupsToConnect = await this.prisma.classGroup.findMany({
+      where: {
+        studyPlanId: createCourseInput.studyPlanId,
+        schoolId: createCourseInput.schoolId,
+      },
+      select: { id: true },
+    });
+
+    if (studentsToConnect.length > 0) {
+      await this.prisma.course.update({
+        where: { id: course.id },
+        data: {
+          students: {
+            connect: studentsToConnect.map((s) => ({ id: s.id })),
+          },
+          groups: {
+            connect: groupsToConnect.map((g) => ({ id: g.id })),
+          },
+        },
+      });
+    }
+
+    return this.prisma.course.findUnique({
+      where: { id: course.id },
+      include: { school: true, subject: true, studyPlan: true },
+    });
   }
 
   findAll() {
@@ -40,21 +76,33 @@ export class CoursesService {
   findManyBySchoolId(schoolId: string) {
     return this.prisma.course.findMany({
       where: { schoolId },
-      include: { school: true, subject: true, studyPlan: true },
+      include: {
+        school: true,
+        subject: true,
+        studyPlan: { include: { degree: true } },
+      },
     });
   }
 
   findManyBySubjectId(subjectId: string) {
     return this.prisma.course.findMany({
       where: { subjectId },
-      include: { school: true, subject: true, studyPlan: true },
+      include: {
+        school: true,
+        subject: true,
+        studyPlan: { include: { degree: true } },
+      },
     });
   }
 
   findManyByStudyPlanId(studyPlanId: string) {
     return this.prisma.course.findMany({
       where: { studyPlanId },
-      include: { school: true, subject: true, studyPlan: true },
+      include: {
+        school: true,
+        subject: true,
+        studyPlan: { include: { degree: true } },
+      },
     });
   }
 

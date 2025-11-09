@@ -5,7 +5,13 @@ import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
   selector: 'app-admin',
   imports: [RouterOutlet, RouterLink, RouterLinkActive],
   template: `
-    <h1 class="text-2xl font-bold">Admin</h1>
+    <div class="breadcrumbs text-sm">
+      <ul>
+        <li><a routerLink="/">Inicio</a></li>
+        <li>Admin</li>
+      </ul>
+    </div>
+    <h1 class="text-2xl font-semibold">Admin</h1>
     <div class="border-b border-base-300">
       <ul class="menu menu-horizontal gap-2 ">
         <li>

@@ -40,9 +40,15 @@ export class StudentsResolver {
   }
 
   @ResolveField(() => String)
+  initials(@Parent() student: Student) {
+    return `${student.firstName.charAt(0)}${student.fatherName.charAt(0)}`;
+  }
+
+  @ResolveField(() => String)
   name(@Parent() student: Student) {
     return `${student.firstName} ${student.fatherName}`;
   }
+
   @ResolveField(() => String)
   email(@Parent() student: Student) {
     return student.user.email;

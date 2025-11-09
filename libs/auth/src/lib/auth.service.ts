@@ -34,7 +34,11 @@ export class AuthService {
   getUser(userId: string) {
     return this.prisma.user.findUnique({
       where: { id: userId },
-      include: { role: { include: { permissions: true } } },
+      include: {
+        role: { include: { permissions: true } },
+        teacher: true,
+        student: true,
+      },
     });
   }
 }

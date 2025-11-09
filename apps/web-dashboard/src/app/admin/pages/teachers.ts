@@ -23,12 +23,13 @@ type Teacher = Prisma.TeacherGetPayload<false> & {
       phosphorPlusCircleDuotone,
     }),
   ],
-  template: ` <div class="flex justify-end">
+  template: `
+    <div class="flex justify-end">
       <button class="btn btn-primary" (click)="editTeacher()">
         <ng-icon name="phosphorPlusCircleDuotone" /> Agregar Profesor
       </button>
     </div>
-    <div class="layout-padding">
+    <div class="overflow-x-auto">
       <table class="table">
         <thead>
           <tr>
@@ -62,7 +63,8 @@ type Teacher = Prisma.TeacherGetPayload<false> & {
           }
         </tbody>
       </table>
-    </div>`,
+    </div>
+  `,
 })
 export default class Teachers {
   public store = inject(Store);

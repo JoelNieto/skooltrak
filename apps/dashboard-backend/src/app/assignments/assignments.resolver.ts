@@ -1,8 +1,8 @@
-import { Resolver, Query, Mutation, Args, Int } from '@nestjs/graphql';
+import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { AssignmentsService } from './assignments.service';
-import { Assignment } from './entities/assignment.entity';
 import { CreateAssignmentInput } from './dto/create-assignment.input';
 import { UpdateAssignmentInput } from './dto/update-assignment.input';
+import { Assignment } from './entities/assignment.entity';
 
 @Resolver(() => Assignment)
 export class AssignmentsResolver {
@@ -21,8 +21,34 @@ export class AssignmentsResolver {
   }
 
   @Query(() => Assignment, { name: 'assignment' })
-  findOne(@Args('id', { type: () => Int }) id: number) {
+  findOne(@Args('id', { type: () => String }) id: string) {
     return this.assignmentsService.findOne(id);
+  }
+
+  @Query(() => [Assignment], { name: 'assignmentsBySchoolId' })
+  findAssignmentBySchoolId(
+    @Args('schoolId', { type: () => String }) schoolId: string,
+    @Args('startDate', { type: () => String }) startDate: string,
+    @Args('endDate', { type: () => String }) endDate: string
+  ) {
+    return this.assignmentsService.findAssignmentBySchoolId(
+      schoolId,
+      new Date(startDate),
+      new Date(endDate)
+    );
+  }
+
+  @Query(() => [Assignment], { name: 'assignmentsByCourseId' })
+  findAssignmentByCourseId(
+    @Args('courseId', { type: () => String }) courseId: string,
+    @Args('startDate', { type: () => String }) startDate: string,
+    @Args('endDate', { type: () => String }) endDate: string
+  ) {
+    return this.assignmentsService.findAssignmentByCourseId(
+      courseId,
+      new Date(startDate),
+      new Date(endDate)
+    );
   }
 
   @Mutation(() => Assignment)
@@ -36,7 +62,7 @@ export class AssignmentsResolver {
   }
 
   @Mutation(() => Assignment)
-  removeAssignment(@Args('id', { type: () => Int }) id: number) {
+  removeAssignment(@Args('id', { type: () => String }) id: string) {
     return this.assignmentsService.remove(id);
   }
 }

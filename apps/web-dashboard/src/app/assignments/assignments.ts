@@ -2,6 +2,8 @@ import { DatePipe } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
+  Pipe,
+  PipeTransform,
   computed,
   inject,
   signal,
@@ -20,9 +22,17 @@ import { addDays, endOfWeek, startOfWeek, subDays } from 'date-fns';
 import { map, of } from 'rxjs';
 import Store from '../core/store';
 
+@Pipe({ name: 'stripHtml', standalone: true })
+export class StripHtmlPipe implements PipeTransform {
+  transform(value: string | null | undefined): string {
+    if (!value) return '';
+    return value.replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim();
+  }
+}
+
 @Component({
   selector: 'app-assignments',
-  imports: [RouterLink, DatePipe, NgIcon],
+  imports: [RouterLink, DatePipe, NgIcon, StripHtmlPipe],
   viewProviders: [
     provideIcons({
       phosphorArrowLeftDuotone,
@@ -85,7 +95,7 @@ import Store from '../core/store';
                 assignment.title
               }}</a>
             </td>
-            <td>{{ assignment.details }}</td>
+            <td class="max-w-[24rem] truncate">{{ assignment.details | stripHtml }}</td>
             <td>{{ assignment.date | date : 'medium' }}</td>
             <td>{{ assignment.course.name }}</td>
             <td>

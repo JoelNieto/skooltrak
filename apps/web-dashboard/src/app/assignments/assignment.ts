@@ -1,4 +1,4 @@
-import { Loader } from '@/ui';
+import { EditorViewer, Loader } from '@/ui';
 import { DatePipe } from '@angular/common';
 import { Component, inject, input } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
@@ -13,7 +13,7 @@ import { Apollo, gql } from 'apollo-angular';
 import { map } from 'rxjs';
 
 @Component({
-  imports: [RouterLink, DatePipe, Loader, NgIcon],
+  imports: [RouterLink, DatePipe, Loader, NgIcon, EditorViewer],
   viewProviders: [
     provideIcons({
       phosphorCalendarDotsDuotone,
@@ -32,13 +32,13 @@ import { map } from 'rxjs';
     </div>
     <div class="card card-border border-base-300 mt-4">
       <div class="card-body">
+        <h1 class="text-xl font-semibold mb-2">{{ assignment.title }}</h1>
         <a
           class="badge badge-primary badge-soft"
           [routerLink]="['/courses', assignment.course.id]"
         >
           {{ assignment.course.name }}
         </a>
-        <h1 class="text-xl font-semibold mb-2">{{ assignment.title }}</h1>
         <p class="flex items-center gap-2">
           <ng-icon name="phosphorCalendarDotsDuotone" />
           {{ assignment.date | date : 'medium' }}
@@ -48,7 +48,7 @@ import { map } from 'rxjs';
     <div class="card card-border border-base-300 mt-4">
       <div class="card-body">
         <h3 class="card-title">Detalles</h3>
-        <p>{{ assignment.details }}</p>
+        <lib-editor-viewer [innerHTML]="assignment.details" />
       </div>
     </div>
     <div class="card card-border border-base-300 mt-4">

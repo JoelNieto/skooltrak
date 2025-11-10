@@ -1,4 +1,4 @@
-import { markGroupDirty, Toast } from '@/ui';
+import { markGroupDirty, TextEditor, Toast } from '@/ui';
 import { Component, inject, input, OnInit, output } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import {
@@ -19,7 +19,7 @@ type Teacher = Prisma.TeacherGetPayload<false> & {
 
 @Component({
   selector: 'app-assignment-form',
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, TextEditor],
   template: `<form [formGroup]="form" (ngSubmit)="onSubmit()">
     <div class="flex flex-col md:grid md:grid-cols-2 gap-4">
       <div class="fieldset col-span-2">
@@ -32,10 +32,7 @@ type Teacher = Prisma.TeacherGetPayload<false> & {
       </div>
       <div class="fieldset col-span-2">
         <label for="details">Detalles</label>
-        <textarea
-          formControlName="details"
-          class="textarea textarea-primary"
-        ></textarea>
+        <lib-text-editor formControlName="details" />
       </div>
       <div class="fieldset col-span-2">
         <label for="courseId">Curso</label>
@@ -81,7 +78,9 @@ type Teacher = Prisma.TeacherGetPayload<false> & {
       </div>
     </div>
     <div class="mt-4 flex justify-end gap-2">
-      <button class="btn btn-ghost" type="button">Cancelar</button>
+      <button class="btn btn-ghost" type="button" (click)="closeModal.emit()">
+        Cancelar
+      </button>
       <button class="btn btn-neutral" type="submit">Guardar</button>
     </div>
   </form>`,

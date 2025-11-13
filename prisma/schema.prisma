@@ -162,28 +162,29 @@ model StudyPlan {
 }
 
 model Course {
-  id              String       @id @default(cuid())
+  id              String        @id @default(cuid())
   name            String
   code            String
   shortName       String
   organizationId  String
-  organization    Organization @relation(fields: [organizationId], references: [id])
+  organization    Organization  @relation(fields: [organizationId], references: [id])
   schoolId        String
-  school          School       @relation(fields: [schoolId], references: [id])
+  school          School        @relation(fields: [schoolId], references: [id])
   subjectId       String
-  subject         Subject      @relation(fields: [subjectId], references: [id])
+  subject         Subject       @relation(fields: [subjectId], references: [id])
   studyPlanId     String
-  studyPlan       StudyPlan    @relation(fields: [studyPlanId], references: [id])
-  createdAt       DateTime     @default(now())
-  updatedAt       DateTime     @updatedAt
+  studyPlan       StudyPlan     @relation(fields: [studyPlanId], references: [id])
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
   groups          ClassGroup[]
   students        Student[]
-  teacher         Teacher?     @relation(fields: [teacherId], references: [id])
+  teacher         Teacher?      @relation(fields: [teacherId], references: [id])
   teacherId       String?
   assignments     Assignment[]
   quizzes         Quiz[]
-  currentPeriod   Period?      @relation(fields: [currentPeriodId], references: [id])
+  currentPeriod   Period?       @relation(fields: [currentPeriodId], references: [id])
   currentPeriodId String?
+  gradeBuckets    GradeBucket[]
 
   @@unique([schoolId, name])
   @@unique([schoolId, code])
@@ -373,6 +374,16 @@ model GradeMetric {
   createdAt         DateTime    @default(now())
   updatedAt         DateTime    @updatedAt
   studyPlans        StudyPlan[]
+}
+
+model GradeBucket {
+  id        String   @id @default(cuid())
+  name      String
+  weight    Decimal
+  courseId  String
+  course    Course   @relation(fields: [courseId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 enum Gender {

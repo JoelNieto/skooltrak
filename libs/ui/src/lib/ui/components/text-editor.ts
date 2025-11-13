@@ -40,7 +40,7 @@ import { EditorMenu } from './editor-menu';
   styles: `
     @reference "tailwindcss";
       .ProseMirror p.is-editor-empty:first-child::before {
-        @apply text-neutral-500 italic float-left pointer-events-none h-0;
+        @apply text-neutral-400 float-left pointer-events-none h-0;
         content: attr(data-placeholder);
       }
       .tiptap ul,

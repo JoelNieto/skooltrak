@@ -249,6 +249,51 @@ input CreatePermissionInput {
   descriptiveId: String!
 }
 
+input CreateQuizInput {
+  """Course ID"""
+  courseId: String!
+
+  """Details"""
+  details: String!
+
+  """Organization ID"""
+  organizationId: String!
+
+  """Questions"""
+  questions: [CreateQuizQuestionInput!]!
+
+  """Teacher ID"""
+  teacherId: String!
+
+  """Title"""
+  title: String!
+}
+
+input CreateQuizQuestionInput {
+  """Options"""
+  options: [CreateQuizQuestionOptionInput!]!
+
+  """Question"""
+  question: String!
+
+  """Time Limit"""
+  timeLimit: Float! = 0
+
+  """Type"""
+  type: String!
+
+  """Value"""
+  value: String!
+}
+
+input CreateQuizQuestionOptionInput {
+  """Is Correct"""
+  isCorrect: Boolean!
+
+  """Option"""
+  option: String!
+}
+
 input CreateRoleInput {
   """Description of the role"""
   description: String!
@@ -381,7 +426,7 @@ input CreateSubjectInput {
 
 input CreateTeacherInput {
   """Birth date of the teacher"""
-  birthDate: DateTime = "2025-11-10T17:32:18.971Z"
+  birthDate: DateTime = "2025-11-11T12:14:41.589Z"
 
   """Document ID of the teacher"""
   documentId: String!
@@ -463,6 +508,7 @@ type Mutation {
   createDegree(createDegreeInput: CreateDegreeInput!): Degree!
   createOrganization(createOrganizationInput: CreateOrganizationInput!): Organization!
   createPermission(createPermissionInput: CreatePermissionInput!): Permission!
+  createQuiz(createQuizInput: CreateQuizInput!): Quiz!
   createRole(createRoleInput: CreateRoleInput!): Role!
   createSchool(createSchoolInput: CreateSchoolInput!): School!
   createStudent(createStudentInput: CreateStudentInput!): Student!
@@ -477,6 +523,7 @@ type Mutation {
   removeDegree(id: String!): Degree!
   removeOrganization(id: String!): Organization!
   removePermission(id: String!): Permission!
+  removeQuiz(id: String!): Quiz!
   removeRole(id: String!): Role!
   removeSchool(id: String!): School!
   removeStudent(id: String!): Student!
@@ -490,6 +537,7 @@ type Mutation {
   updateDegree(updateDegreeInput: UpdateDegreeInput!): Degree!
   updateOrganization(updateOrganizationInput: UpdateOrganizationInput!): Organization!
   updatePermission(updatePermissionInput: UpdatePermissionInput!): Permission!
+  updateQuiz(updateQuizInput: UpdateQuizInput!): Quiz!
   updateRole(updateRoleInput: UpdateRoleInput!): Role!
   updateSchool(updateSchoolInput: UpdateSchoolInput!): School!
   updateStudent(updateStudentInput: UpdateStudentInput!): Student!
@@ -549,6 +597,8 @@ type Query {
   organizations: [Organization!]!
   permission(id: String!): Permission!
   permissions: [Permission!]!
+  quiz(id: String!): Quiz!
+  quizzes(organizationId: String!): [Quiz!]!
   role(id: String!): Role!
   roles: [Role!]!
   school(id: String!): School!
@@ -566,6 +616,78 @@ type Query {
   teachersByOrganizationId(organizationId: String!): [Teacher!]!
   user(id: String!): User!
   users: [User!]!
+}
+
+type Quiz {
+  """Course"""
+  course: Course!
+
+  """Course ID"""
+  courseId: String!
+
+  """Created At"""
+  createdAt: DateTime!
+
+  """Details"""
+  details: String!
+
+  """ID"""
+  id: String!
+
+  """Organization ID"""
+  organizationId: String!
+
+  """Questions"""
+  questions: [QuizQuestion!]!
+
+  """Teacher"""
+  teacher: Teacher!
+
+  """Teacher ID"""
+  teacherId: String!
+
+  """Title"""
+  title: String!
+
+  """Updated At"""
+  updatedAt: DateTime!
+}
+
+type QuizQuestion {
+  """ID"""
+  id: String!
+
+  """Options"""
+  options: [QuizQuestionOption!]!
+
+  """Question"""
+  question: String!
+
+  """Quiz ID"""
+  quizId: String!
+
+  """Time Limit"""
+  timeLimit: Float!
+
+  """Type"""
+  type: String!
+
+  """Value"""
+  value: Float!
+}
+
+type QuizQuestionOption {
+  """ID"""
+  id: String!
+
+  """Is Correct"""
+  isCorrect: Boolean!
+
+  """Option"""
+  option: String!
+
+  """Question ID"""
+  questionId: String!
 }
 
 type Role {
@@ -904,6 +1026,27 @@ input UpdatePermissionInput {
   id: String!
 }
 
+input UpdateQuizInput {
+  """Course ID"""
+  courseId: String
+
+  """Details"""
+  details: String
+  id: String!
+
+  """Organization ID"""
+  organizationId: String
+
+  """Questions"""
+  questions: [CreateQuizQuestionInput!]
+
+  """Teacher ID"""
+  teacherId: String
+
+  """Title"""
+  title: String
+}
+
 input UpdateRoleInput {
   """Description of the role"""
   description: String
@@ -1041,7 +1184,7 @@ input UpdateSubjectInput {
 
 input UpdateTeacherInput {
   """Birth date of the teacher"""
-  birthDate: DateTime = "2025-11-10T17:32:18.971Z"
+  birthDate: DateTime = "2025-11-11T12:14:41.589Z"
 
   """Document ID of the teacher"""
   documentId: String

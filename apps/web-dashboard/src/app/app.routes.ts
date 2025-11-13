@@ -34,6 +34,11 @@ export const appRoutes: Route[] = [
         path: 'grades',
         loadComponent: () => import('./grades/grades'),
       },
+      { path: 'quizzes', loadComponent: () => import('./quizzes/quizzes') },
+      {
+        path: 'quizzes/:id',
+        loadComponent: () => import('./quizzes/quiz-form'),
+      },
       {
         path: '',
         redirectTo: 'home',

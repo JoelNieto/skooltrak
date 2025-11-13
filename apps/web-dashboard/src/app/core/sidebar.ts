@@ -14,6 +14,7 @@ import {
   phosphorBookBookmarkDuotone,
   phosphorBookmarksSimpleDuotone,
   phosphorBuildingApartmentDuotone,
+  phosphorExamDuotone,
   phosphorGearFineDuotone,
   phosphorHouseLineDuotone,
   phosphorSealCheckDuotone,
@@ -40,6 +41,7 @@ import Store from './store';
       phosphorSignOutDuotone,
       phosphorUsersFourDuotone,
       phosphorBuildingApartmentDuotone,
+      phosphorExamDuotone,
     }),
   ],
   template: `<div class="flex items-center justify-between px-4 py-4">
@@ -117,6 +119,20 @@ import Store from './store';
           >
             <ng-icon name="phosphorUsersFourDuotone" class="text-xl" />
             <span class="ml-3">Grupos</span>
+          </a>
+        </li>
+        <li>
+          <a
+            routerLink="quizzes"
+            [routerLinkActive]="[
+              'bg-primary/5',
+              'text-primary',
+              'dark:text-white'
+            ]"
+            class="flex items-center p-2 text-base-content rounded-lg hover:bg-primary-50 hover:text-primary-600 group"
+          >
+            <ng-icon name="phosphorExamDuotone" class="text-xl" />
+            <span class="ml-3">Quizes</span>
           </a>
         </li>
       </ul>

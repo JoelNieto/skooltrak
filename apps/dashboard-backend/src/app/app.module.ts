@@ -18,6 +18,7 @@ import { StudentsModule } from './students/students.module';
 import { StudyPlansModule } from './study-plans/study-plans.module';
 import { SubjectsModule } from './subjects/subjects.module';
 import { TeachersModule } from './teachers/teachers.module';
+import { QuizzesModule } from './quizzes/quizzes.module';
 
 @Module({
   imports: [
@@ -44,6 +45,7 @@ import { TeachersModule } from './teachers/teachers.module';
     AssignmentsModule,
     ClassGroupsModule,
     AuthModule,
+    QuizzesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

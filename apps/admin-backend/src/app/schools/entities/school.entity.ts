@@ -1,5 +1,5 @@
 import { Organization } from '@/auth';
-import { Field, ObjectType } from '@nestjs/graphql';
+import { Field, Int, ObjectType } from '@nestjs/graphql';
 import { Prisma } from '@prisma/client';
 
 @ObjectType()
@@ -38,4 +38,6 @@ export class School
   organization: Organization;
   @Field(() => String, { description: 'ID of the organization' })
   organizationId: string;
+  @Field(() => Int, { description: 'Current year of the school' })
+  currentYear: number;
 }

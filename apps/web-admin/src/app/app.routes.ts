@@ -34,6 +34,10 @@ export const appRoutes: Route[] = [
           import('./permissions/permissions').then((m) => m.Permissions),
       },
       {
+        path: 'grade-metrics',
+        loadComponent: () => import('./grade-metrics/grade-metrics'),
+      },
+      {
         path: 'users',
         loadComponent: () => import('./users/users').then((m) => m.Users),
       },

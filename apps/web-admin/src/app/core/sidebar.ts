@@ -5,6 +5,7 @@ import {
   phosphorBuildingOfficeDuotone,
   phosphorFolderSimpleLockDuotone,
   phosphorHouseLineDuotone,
+  phosphorTableDuotone,
   phosphorTreeViewDuotone,
   phosphorUserGearDuotone,
   phosphorUsersThreeDuotone,
@@ -22,6 +23,7 @@ import {
       phosphorFolderSimpleLockDuotone,
       phosphorUsersThreeDuotone,
       phosphorTreeViewDuotone,
+      phosphorTableDuotone,
     }),
   ],
   template: `<div class="flex items-center justify-between px-4 pt-4 pb-2">
@@ -85,6 +87,20 @@ import {
           >
             <ng-icon name="phosphorUserGearDuotone" class="text-xl" />
             <span class="ml-3">Roles</span>
+          </a>
+        </li>
+        <li>
+          <a
+            routerLink="grade-metrics"
+            [routerLinkActive]="[
+              'bg-base-200',
+              'text-primary',
+              'dark:text-white'
+            ]"
+            class="flex items-center p-2 text-base-content rounded-lg hover:bg-primary-50 hover:text-primary-600 group"
+          >
+            <ng-icon name="phosphorTableDuotone" class="text-xl" />
+            <span class="ml-3">Metricas</span>
           </a>
         </li>
         <li>

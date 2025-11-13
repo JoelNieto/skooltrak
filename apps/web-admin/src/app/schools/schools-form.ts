@@ -108,12 +108,12 @@ const UPDATE_SCHOOL = gql`
         </select>
       </div>
       <div class="fieldset">
-        <label for="logo">Logo</label>
+        <label for="currentYear">Año actual</label>
         <input
-          type="text"
-          id="logo"
+          type="number"
+          id="currentYear"
           class="input input-primary"
-          formControlName="logo"
+          formControlName="currentYear"
         />
       </div>
       <div class="fieldset">
@@ -233,6 +233,7 @@ export class SchoolsForm implements OnInit {
     email: ['', []],
     phone: ['', []],
     website: ['', []],
+    currentYear: [2025, [Validators.required]],
   });
 
   public ngOnInit() {

@@ -50,6 +50,7 @@ import { SchoolsForm } from './schools-form';
           <tr>
             <th>Nombre</th>
             <th>Organización</th>
+            <th>Año actual</th>
             <th>Fecha de creación</th>
             <th>Fecha de actualización</th>
             <th></th>
@@ -60,6 +61,7 @@ import { SchoolsForm } from './schools-form';
           <tr>
             <td>{{ school.name }}</td>
             <td>{{ school.organization.name }}</td>
+            <td>{{ school.currentYear }}</td>
             <td>{{ school.createdAt | date : 'medium' }}</td>
             <td>{{ school.updatedAt | date : 'medium' }}</td>
             <td>
@@ -123,6 +125,7 @@ export class Schools {
                 email
                 phone
                 website
+                currentYear
                 createdAt
                 updatedAt
               }

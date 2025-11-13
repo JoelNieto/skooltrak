@@ -28,8 +28,7 @@ model Organization {
   courses     Course[]
   Teacher     Teacher[]
   Student     Student[]
-
-  quizzes Quiz[]
+  quizzes     Quiz[]
 }
 
 model User {
@@ -112,6 +111,8 @@ model Period {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   courses   Course[]
+
+  grades Grade[]
 }
 
 model Subject {
@@ -185,6 +186,7 @@ model Course {
   currentPeriod   Period?       @relation(fields: [currentPeriodId], references: [id])
   currentPeriodId String?
   gradeBuckets    GradeBucket[]
+  grades          Grade[]
 
   @@unique([schoolId, name])
   @@unique([schoolId, code])
@@ -236,6 +238,8 @@ model Student {
   createdAt       DateTime         @default(now())
   updatedAt       DateTime         @updatedAt
   quizSubmissions QuizSubmission[]
+
+  gradeStudents GradeStudent[]
 }
 
 model Teacher {
@@ -384,6 +388,48 @@ model GradeBucket {
   course    Course   @relation(fields: [courseId], references: [id])
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  grades Grade[]
+}
+
+model Grade {
+  id            String         @id @default(cuid())
+  title         String
+  comments      String?
+  courseId      String
+  course        Course         @relation(fields: [courseId], references: [id])
+  bucketId      String
+  bucket        GradeBucket    @relation(fields: [bucketId], references: [id])
+  periodId      String
+  period        Period         @relation(fields: [periodId], references: [id])
+  date          DateTime
+  published     Boolean        @default(false)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  gradeStudents GradeStudent[]
+}
+
+model GradeStudent {
+  id        String                 @id @default(cuid())
+  comments  String?
+  gradeId   String
+  grade     Grade                  @relation(fields: [gradeId], references: [id])
+  studentId String
+  student   Student                @relation(fields: [studentId], references: [id])
+  score     Decimal
+  createdAt DateTime               @default(now())
+  updatedAt DateTime               @updatedAt
+  revisions GradeStudentRevision[]
+}
+
+model GradeStudentRevision {
+  id             String       @id @default(cuid())
+  reason         String
+  gradeStudentId String
+  gradeStudent   GradeStudent @relation(fields: [gradeStudentId], references: [id])
+  score          Decimal
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
 }
 
 enum Gender {

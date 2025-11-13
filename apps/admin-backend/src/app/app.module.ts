@@ -10,6 +10,7 @@ import { AppService } from './app.service';
 import { PrismaModule } from './prisma.module';
 import { SchoolsModule } from './schools/schools.module';
 import { SubjectsModule } from './subjects/subjects.module';
+import { GradeMetricsModule } from './grade-metrics/grade-metrics.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { SubjectsModule } from './subjects/subjects.module';
     SchoolsModule,
     SubjectsModule,
     AuthModule,
+    GradeMetricsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

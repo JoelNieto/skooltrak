@@ -96,6 +96,22 @@ model School {
   classGroups    ClassGroup[]
   students       Student[]
   assignments    Assignment[]
+  currentYear    Int          @default(2025)
+  periods        Period[]
+}
+
+model Period {
+  id        String   @id @default(cuid())
+  schoolId  String
+  school    School   @relation(fields: [schoolId], references: [id])
+  name      String
+  shortName String
+  year      Int
+  startDate DateTime
+  endDate   DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  courses   Course[]
 }
 
 model Subject {
@@ -124,46 +140,50 @@ model Degree {
 }
 
 model StudyPlan {
-  id          String       @id @default(cuid())
-  name        String
-  shortName   String
-  level       Int
-  degreeId    String
-  degree      Degree       @relation(fields: [degreeId], references: [id])
-  description String
-  code        String
-  schoolId    String
-  school      School       @relation(fields: [schoolId], references: [id])
-  courses     Course[]
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
-  classGroups ClassGroup[]
+  id            String       @id @default(cuid())
+  name          String
+  shortName     String
+  level         Int
+  degreeId      String
+  degree        Degree       @relation(fields: [degreeId], references: [id])
+  description   String
+  code          String
+  schoolId      String
+  school        School       @relation(fields: [schoolId], references: [id])
+  courses       Course[]
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  classGroups   ClassGroup[]
+  gradeMetric   GradeMetric? @relation(fields: [gradeMetricId], references: [id])
+  gradeMetricId String?
 
   @@unique([schoolId, name])
   @@unique([schoolId, code])
 }
 
 model Course {
-  id             String       @id @default(cuid())
-  name           String
-  code           String
-  shortName      String
-  organizationId String
-  organization   Organization @relation(fields: [organizationId], references: [id])
-  schoolId       String
-  school         School       @relation(fields: [schoolId], references: [id])
-  subjectId      String
-  subject        Subject      @relation(fields: [subjectId], references: [id])
-  studyPlanId    String
-  studyPlan      StudyPlan    @relation(fields: [studyPlanId], references: [id])
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
-  groups         ClassGroup[]
-  students       Student[]
-  teacher        Teacher?     @relation(fields: [teacherId], references: [id])
-  teacherId      String?
-  assignments    Assignment[]
-  quizzes        Quiz[]
+  id              String       @id @default(cuid())
+  name            String
+  code            String
+  shortName       String
+  organizationId  String
+  organization    Organization @relation(fields: [organizationId], references: [id])
+  schoolId        String
+  school          School       @relation(fields: [schoolId], references: [id])
+  subjectId       String
+  subject         Subject      @relation(fields: [subjectId], references: [id])
+  studyPlanId     String
+  studyPlan       StudyPlan    @relation(fields: [studyPlanId], references: [id])
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+  groups          ClassGroup[]
+  students        Student[]
+  teacher         Teacher?     @relation(fields: [teacherId], references: [id])
+  teacherId       String?
+  assignments     Assignment[]
+  quizzes         Quiz[]
+  currentPeriod   Period?      @relation(fields: [currentPeriodId], references: [id])
+  currentPeriodId String?
 
   @@unique([schoolId, name])
   @@unique([schoolId, code])
@@ -341,6 +361,18 @@ model QuizSubmissionQuestion {
   isCorrect        Boolean
   score            Decimal
   comment          String?
+}
+
+model GradeMetric {
+  id                String      @id @default(cuid())
+  name              String
+  minimum           Decimal
+  maximum           Decimal
+  minimumApproval   Decimal
+  minimumExcellence Decimal
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+  studyPlans        StudyPlan[]
 }
 
 enum Gender {

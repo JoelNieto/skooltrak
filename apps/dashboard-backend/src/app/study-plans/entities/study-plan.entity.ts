@@ -1,12 +1,15 @@
 import { Field, Int, ObjectType } from '@nestjs/graphql';
 import { Prisma } from '@prisma/client';
 import { Degree } from '../../degrees/entities/degree.entity';
+import { GradeMetric } from '../../grade-metrics/entities/grade-metric.entity';
 import { School } from '../../schools/entities/school.entity';
 
 @ObjectType()
 export class StudyPlan
   implements
-    Prisma.StudyPlanGetPayload<{ include: { degree: true; school: true } }>
+    Prisma.StudyPlanGetPayload<{
+      include: { degree: true; school: true; gradeMetric: true };
+    }>
 {
   @Field(() => String, { description: 'ID of the study plan' })
   id: string;
@@ -28,6 +31,17 @@ export class StudyPlan
   code: string;
   @Field(() => String, { description: 'School ID of the study plan' })
   schoolId: string;
+
+  @Field(() => GradeMetric, {
+    description: 'Grade metric of the study plan',
+    nullable: true,
+  })
+  gradeMetric: GradeMetric;
+  @Field(() => String, {
+    description: 'Grade metric ID of the study plan',
+    nullable: true,
+  })
+  gradeMetricId: string;
   @Field(() => Date, { description: 'Created at of the study plan' })
   createdAt: Date;
   @Field(() => Date, { description: 'Updated at of the study plan' })

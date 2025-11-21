@@ -19,6 +19,11 @@ import { StudyPlansModule } from './study-plans/study-plans.module';
 import { SubjectsModule } from './subjects/subjects.module';
 import { TeachersModule } from './teachers/teachers.module';
 import { QuizzesModule } from './quizzes/quizzes.module';
+import { GradeMetricsModule } from './grade-metrics/grade-metrics.module';
+import { PeriodsModule } from './periods/periods.module';
+import { GradesModule } from './grades/grades.module';
+import { GradeBucketsModule } from './grade-buckets/grade-buckets.module';
+import { GradeStudentsModule } from './grade-students/grade-students.module';
 
 @Module({
   imports: [
@@ -46,6 +51,11 @@ import { QuizzesModule } from './quizzes/quizzes.module';
     ClassGroupsModule,
     AuthModule,
     QuizzesModule,
+    GradeMetricsModule,
+    PeriodsModule,
+    GradesModule,
+    GradeBucketsModule,
+    GradeStudentsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

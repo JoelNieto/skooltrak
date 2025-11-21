@@ -6,6 +6,7 @@ import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
   phosphorCalendarDotsDuotone,
   phosphorCalendarPlusDuotone,
+  phosphorExamDuotone,
   phosphorFolderStarDuotone,
   phosphorListChecksDuotone,
   phosphorPencilDuotone,
@@ -15,10 +16,19 @@ import { Prisma } from '@prisma/client';
 import { Apollo, gql } from 'apollo-angular';
 import { map, of } from 'rxjs';
 import AssignmentForm from '../assignments/assignment-form';
+import CourseGrades from '../grades/course-grades';
 import CourseAssignments from './course-assignments';
+import CourseGradeBuckets from './course-grade-buckets';
 
 @Component({
-  imports: [Loader, RouterLink, NgIcon, CourseAssignments],
+  imports: [
+    Loader,
+    RouterLink,
+    NgIcon,
+    CourseAssignments,
+    CourseGradeBuckets,
+    CourseGrades,
+  ],
   viewProviders: [
     provideIcons({
       phosphorCalendarDotsDuotone,
@@ -27,6 +37,7 @@ import CourseAssignments from './course-assignments';
       phosphorFolderStarDuotone,
       phosphorCalendarPlusDuotone,
       phosphorPencilDuotone,
+      phosphorExamDuotone,
     }),
   ],
   template: ` @if(courseResource.isLoading()) {
@@ -77,30 +88,40 @@ import CourseAssignments from './course-assignments';
             checked="checked"
           />
           <span class="flex items-center gap-2">
-            <ng-icon name="phosphorCalendarDotsDuotone" />Calendario</span
+            <ng-icon
+              name="phosphorCalendarDotsDuotone"
+              class="text-xl"
+            />Calendario</span
           >
         </label>
         <div class="tab-content bg-base-100 border-base-300 p-6">
-          Tab content 1
+          <app-course-assignments [courseId]="id()" />
         </div>
         <label class="tab">
           <input type="radio" name="my_tabs_6" aria-label="Participantes" />
           <span class="flex items-center gap-2">
-            <ng-icon name="phosphorUsersThreeDuotone" />Participantes</span
+            <ng-icon
+              name="phosphorUsersThreeDuotone"
+              class="text-xl"
+            />Participantes</span
           >
         </label>
         <div class="tab-content bg-base-100 border-base-300 p-6">
           Tab content 2
         </div>
         <label class="tab">
-          <input type="radio" name="my_tabs_6" aria-label="Asignaciones" />
+          <input type="radio" name="my_tabs_6" aria-label="Calificaciones" />
           <span class="flex items-center gap-2">
-            <ng-icon name="phosphorListChecksDuotone" />Asignaciones</span
-          >
+            <ng-icon name="phosphorExamDuotone" class="text-xl" />
+            Calificaciones
+          </span>
         </label>
 
         <div class="tab-content bg-base-100 border-base-300 p-6">
-          <app-course-assignments [courseId]="id()" />
+          <app-course-grades
+            [courseId]="id()"
+            [currentPeriod]="course.currentPeriodId"
+          />
         </div>
         <label class="tab">
           <input type="radio" name="my_tabs_6" aria-label="Archivos" />
@@ -111,6 +132,16 @@ import CourseAssignments from './course-assignments';
 
         <div class="tab-content bg-base-100 border-base-300 p-6">
           Tab content 4
+        </div>
+        <label class="tab">
+          <input type="radio" name="my_tabs_6" aria-label="Ponderacion" />
+          <span class="flex items-center gap-2">
+            <ng-icon name="phosphorFolderStarDuotone" />Ponderacion</span
+          >
+        </label>
+
+        <div class="tab-content bg-base-100 border-base-300 p-6">
+          <app-course-grade-buckets [courseId]="id()" />
         </div>
       </div>
     </div>
@@ -144,6 +175,7 @@ export default class Course {
                 code
                 createdAt
                 updatedAt
+                currentPeriodId
                 subject {
                   id
                   name

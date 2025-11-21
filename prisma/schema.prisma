@@ -238,8 +238,7 @@ model Student {
   createdAt       DateTime         @default(now())
   updatedAt       DateTime         @updatedAt
   quizSubmissions QuizSubmission[]
-
-  gradeStudents GradeStudent[]
+  gradeStudents   GradeStudent[]
 }
 
 model Teacher {
@@ -388,8 +387,7 @@ model GradeBucket {
   course    Course   @relation(fields: [courseId], references: [id])
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
-  grades Grade[]
+  grades    Grade[]
 }
 
 model Grade {
@@ -413,10 +411,10 @@ model GradeStudent {
   id        String                 @id @default(cuid())
   comments  String?
   gradeId   String
-  grade     Grade                  @relation(fields: [gradeId], references: [id])
+  grade     Grade                  @relation(fields: [gradeId], references: [id], onDelete: Cascade)
   studentId String
-  student   Student                @relation(fields: [studentId], references: [id])
-  score     Decimal
+  student   Student                @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  score     Decimal?
   createdAt DateTime               @default(now())
   updatedAt DateTime               @updatedAt
   revisions GradeStudentRevision[]

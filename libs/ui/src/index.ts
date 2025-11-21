@@ -1,6 +1,7 @@
 export * from './lib/ui/components/calendar';
 export * from './lib/ui/components/editor-menu';
 export * from './lib/ui/components/editor-viewer';
+export * from './lib/ui/components/error';
 export * from './lib/ui/components/loader';
 export * from './lib/ui/components/paginator';
 export * from './lib/ui/components/text-editor';

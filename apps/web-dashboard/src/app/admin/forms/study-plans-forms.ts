@@ -55,10 +55,21 @@ import Store from '../../core/store';
         <div class="fieldset">
           <label for="degreeId">Nivel</label>
           <select formControlName="degreeId" class="select select-primary">
-            <option value="" disabled>---Seleccionar---</option>
+            <option value="" disabled>Selecciona nivel...</option>
             @for (degree of degrees.value(); track degree.id) {
             <option [value]="degree.id">
               {{ degree.name }}
+            </option>
+            }
+          </select>
+        </div>
+        <div class="fieldset">
+          <label for="gradeMetricId">Metrica de calificaciones</label>
+          <select formControlName="gradeMetricId" class="select select-primary">
+            <option value="" disabled>Selecciona metrica...</option>
+            @for (metric of metrics.value(); track metric.id) {
+            <option [value]="metric.id">
+              {{ metric.name }}
             </option>
             }
           </select>
@@ -92,6 +103,24 @@ export default class StudyPlanForm implements OnInit {
   private apollo = inject(Apollo);
   private toast = inject(Toast);
   private store = inject(Store);
+  public metrics = rxResource({
+    stream: () =>
+      this.apollo
+        .watchQuery<{
+          gradeMetrics: Prisma.GradeMetricGetPayload<{ include: undefined }>[];
+        }>({
+          query: gql`
+            query GetGradeMetrics {
+              gradeMetrics {
+                id
+                name
+              }
+            }
+          `,
+          fetchPolicy: 'cache-first',
+        })
+        .valueChanges.pipe(map((result) => result.data.gradeMetrics)),
+  });
   public degrees = rxResource({
     params: () => ({
       schoolId: this.store.currentSchoolId(),
@@ -129,6 +158,7 @@ export default class StudyPlanForm implements OnInit {
     description: ['', []],
     level: [0, [Validators.required]],
     degreeId: ['', [Validators.required]],
+    gradeMetricId: this.fb.control<string | null>('', [Validators.required]),
   });
 
   ngOnInit(): void {

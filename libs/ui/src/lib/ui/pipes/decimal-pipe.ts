@@ -5,8 +5,7 @@ import { Prisma } from '@prisma/client';
   name: 'decimal',
 })
 export class PrismaDecimalPipe implements PipeTransform {
-  transform(value: Prisma.Decimal): number | string {
-    console.log(typeof value);
+  transform(value: Prisma.Decimal | null | undefined): number | string {
     return (value as unknown as number) || '';
   }
 }

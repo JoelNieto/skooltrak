@@ -25,4 +25,7 @@ export class CreateStudyPlanInput
 
   @Field(() => String, { description: 'School ID of the study plan' })
   schoolId: string;
+
+  @Field(() => String, { description: 'Grade metric ID of the study plan' })
+  gradeMetricId: string;
 }

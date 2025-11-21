@@ -116,7 +116,7 @@ import { phosphorEnvelopeDuotone } from '@ng-icons/phosphor-icons/duotone';
         </div>
       </div>
       <p class="text-base-200 text-center">
-        2025 © SkoolTrak. Todos los derechos reservados.
+        2025 © Skooltrak. Todos los derechos reservados.
       </p>
     </div>
     } @placeholder {

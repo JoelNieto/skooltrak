@@ -15,5 +15,8 @@
   },
   "[prisma]": {
     "editor.defaultFormatter": "Prisma.prisma-insider"
+  },
+  "[jsonc]": {
+    "editor.defaultFormatter": "vscode.json-language-features"
   }
 }

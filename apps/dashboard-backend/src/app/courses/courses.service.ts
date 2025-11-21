@@ -63,7 +63,11 @@ export class CoursesService {
 
     return this.prisma.course.findUnique({
       where: { id: course.id },
-      include: { school: true, subject: true, studyPlan: true },
+      include: {
+        school: true,
+        subject: true,
+        studyPlan: { include: { gradeMetric: true } },
+      },
     });
   }
 
@@ -80,6 +84,7 @@ export class CoursesService {
         school: true,
         subject: true,
         studyPlan: { include: { degree: true } },
+        currentPeriod: true,
       },
     });
   }
@@ -91,6 +96,7 @@ export class CoursesService {
         school: true,
         subject: true,
         studyPlan: { include: { degree: true } },
+        currentPeriod: true,
       },
     });
   }
@@ -102,6 +108,7 @@ export class CoursesService {
         school: true,
         subject: true,
         studyPlan: { include: { degree: true } },
+        currentPeriod: true,
       },
     });
   }

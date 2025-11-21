@@ -103,7 +103,7 @@ import Store from './store';
             ]"
             class="flex items-center p-2 text-base-content rounded-lg hover:bg-primary-50 hover:text-primary-600 group"
           >
-            <ng-icon name="phosphorSealCheckDuotone" class="text-xl" />
+            <ng-icon name="phosphorExamDuotone" class="text-xl" />
             <span class="ml-3">Calificaciones</span>
           </a>
         </li>
@@ -131,7 +131,8 @@ import Store from './store';
             ]"
             class="flex items-center p-2 text-base-content rounded-lg hover:bg-primary-50 hover:text-primary-600 group"
           >
-            <ng-icon name="phosphorExamDuotone" class="text-xl" />
+            <ng-icon name="phosphorSealCheckDuotone" class="text-xl" />
+
             <span class="ml-3">Quizes</span>
           </a>
         </li>

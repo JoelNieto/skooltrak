@@ -91,7 +91,7 @@ export default class StudyPlans {
       return this.apollo
         .watchQuery<{
           studyPlansBySchoolId: Prisma.StudyPlanGetPayload<{
-            include: { degree: true; school: true };
+            include: { degree: true; school: true; gradeMetric: true };
           }>[];
         }>({
           query: gql`
@@ -103,6 +103,11 @@ export default class StudyPlans {
                 shortName
                 level
                 degreeId
+                gradeMetricId
+                gradeMetric {
+                  id
+                  name
+                }
                 degree {
                   id
                   name

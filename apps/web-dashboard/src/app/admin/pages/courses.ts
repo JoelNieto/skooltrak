@@ -37,6 +37,7 @@ import CoursesForm from '../forms/courses-form';
             <th>Código</th>
             <th>Asignatura</th>
             <th>Plan de estudio</th>
+            <th>Periodo actual</th>
             <th>Acciones</th>
           </tr>
         </thead>
@@ -48,6 +49,7 @@ import CoursesForm from '../forms/courses-form';
             <td>{{ course.code }}</td>
             <td>{{ course.subject.name }}</td>
             <td>{{ course.studyPlan.name }}</td>
+            <td>{{ course.currentPeriod?.name }}</td>
             <td>
               <div class="flex gap-2">
                 <button
@@ -90,7 +92,7 @@ export default class Courses {
       return this.apollo
         .watchQuery<{
           coursesBySchoolId: Prisma.CourseGetPayload<{
-            include: { subject: true; studyPlan: true };
+            include: { subject: true; studyPlan: true; currentPeriod: true };
           }>[];
         }>({
           query: gql`
@@ -104,6 +106,9 @@ export default class Courses {
                   name
                 }
                 studyPlan {
+                  name
+                }
+                currentPeriod {
                   name
                 }
                 subjectId

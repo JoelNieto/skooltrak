@@ -64,6 +64,13 @@ import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
             >Profesores</a
           >
         </li>
+        <li>
+          <a
+            routerLink="periods"
+            routerLinkActive="bg-primary text-primary-content"
+            >Periodos</a
+          >
+        </li>
       </ul>
     </div>
     <div class="pt-4">

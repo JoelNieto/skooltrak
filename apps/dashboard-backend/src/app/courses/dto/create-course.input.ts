@@ -32,4 +32,10 @@ export class CreateCourseInput implements Prisma.CourseUncheckedCreateInput {
     nullable: true,
   })
   teacherId?: string;
+
+  @Field(() => String, {
+    description: 'Current period ID of the course',
+    nullable: true,
+  })
+  currentPeriodId?: string;
 }

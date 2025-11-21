@@ -16,7 +16,7 @@ export class StudyPlansService {
 
   findAll() {
     return this.prisma.studyPlan.findMany({
-      include: { degree: true, school: true },
+      include: { degree: true, school: true, gradeMetric: true },
     });
   }
 
@@ -24,19 +24,19 @@ export class StudyPlansService {
     if (degreeId) {
       return this.prisma.studyPlan.findMany({
         where: { schoolId, degreeId },
-        include: { degree: true, school: true },
+        include: { degree: true, school: true, gradeMetric: true },
       });
     }
     return this.prisma.studyPlan.findMany({
       where: { schoolId },
-      include: { degree: true, school: true },
+      include: { degree: true, school: true, gradeMetric: true },
     });
   }
 
   findOne(id: string) {
     return this.prisma.studyPlan.findUnique({
       where: { id },
-      include: { degree: true, school: true },
+      include: { degree: true, school: true, gradeMetric: true },
     });
   }
 

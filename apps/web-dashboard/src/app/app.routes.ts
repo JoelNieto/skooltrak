@@ -34,6 +34,7 @@ export const appRoutes: Route[] = [
         path: 'grades',
         loadComponent: () => import('./grades/grades'),
       },
+      { path: 'grades/:id', loadComponent: () => import('./grades/grade') },
       { path: 'quizzes', loadComponent: () => import('./quizzes/quizzes') },
       {
         path: 'quizzes/:id',
@@ -91,6 +92,10 @@ export const appRoutes: Route[] = [
           {
             path: 'students',
             loadComponent: () => import('./admin/pages/students'),
+          },
+          {
+            path: 'periods',
+            loadComponent: () => import('./admin/pages/periods'),
           },
 
           { path: '', redirectTo: 'subjects', pathMatch: 'full' },

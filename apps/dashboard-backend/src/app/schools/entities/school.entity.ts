@@ -39,6 +39,8 @@ export class School
   phone: string;
   @Field(() => String, { description: 'Website of the school' })
   website: string;
+  @Field(() => Number, { description: 'Current year of the school' })
+  currentYear: number;
   @Field(() => Date, { description: 'Created at' })
   createdAt: Date;
   @Field(() => Date, { description: 'Updated at' })

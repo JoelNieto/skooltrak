@@ -1,5 +1,6 @@
 import { Field, ObjectType } from '@nestjs/graphql';
 import { Prisma } from '@prisma/client';
+import { Period } from '../../periods/entities/period.entity';
 import { School } from '../../schools/entities/school.entity';
 import { StudyPlan } from '../../study-plans/entities/study-plan.entity';
 import { Subject } from '../../subjects/entities/subject.entity';
@@ -34,15 +35,26 @@ export class Course
   subjectId: string;
   @Field(() => String, { description: 'Study plan ID of the course' })
   studyPlanId: string;
-  @Field(() => Date, { description: 'Created at' })
-  createdAt: Date;
-  @Field(() => Date, { description: 'Updated at' })
-  updatedAt: Date;
+
   @Field(() => String, { description: 'Teacher ID of the course' })
   teacherId: string;
+  @Field(() => String, {
+    description: 'Current period ID of the course',
+    nullable: true,
+  })
+  currentPeriodId: string;
+  @Field(() => Period, {
+    description: 'Current period of the course',
+    nullable: true,
+  })
+  currentPeriod: Period;
   @Field(() => Teacher, {
     description: 'Teacher of the course',
     nullable: true,
   })
   teacher: Teacher;
+  @Field(() => Date, { description: 'Created at' })
+  createdAt: Date;
+  @Field(() => Date, { description: 'Updated at' })
+  updatedAt: Date;
 }

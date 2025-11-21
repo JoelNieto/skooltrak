@@ -1,6 +1,12 @@
 import { Calendar } from '@/ui';
 import { DatePipe } from '@angular/common';
-import { Component, inject, input, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  inject,
+  input,
+  signal,
+} from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import { Prisma } from '@prisma/client';
@@ -37,9 +43,10 @@ import { map } from 'rxjs';
         }
       </div>
     </ng-template>`,
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class CourseAssignments {
-  private apollo = inject(Apollo);
+  #apollo = inject(Apollo);
   public currentMonth = signal({ start: new Date(), end: new Date() });
   public courseId = input.required<string>();
 
@@ -51,7 +58,7 @@ export default class CourseAssignments {
     params: () => this.currentMonth(),
     stream: ({ params }) => {
       const { start, end } = params;
-      return this.apollo
+      return this.#apollo
         .watchQuery<{
           assignmentsByCourseId: Prisma.AssignmentGetPayload<{
             include: undefined;

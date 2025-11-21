@@ -1,4 +1,4 @@
-import { markGroupDirty, Modal, Toast } from '@/ui';
+import { markGroupDirty, Toast } from '@/ui';
 import { Component, inject, input, OnInit, output } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import {
@@ -54,6 +54,20 @@ import Store from '../../core/store';
           }
         </select>
       </div>
+      <div class="fieldset">
+        <label for="currentPeriodId">Periodo actual</label>
+        <select
+          id="currentPeriodId"
+          name="currentPeriodId"
+          formControlName="currentPeriodId"
+          class="select select-primary"
+        >
+          <option value="" disabled>Seleccionar periodo...</option>
+          @for(period of periods.value(); track period.id) {
+          <option [value]="period.id">{{ period.name }}</option>
+          }
+        </select>
+      </div>
     </div>
     <div class="flex justify-end gap-2 mt-4">
       <button type="button" class="btn btn-ghost" (click)="closeModal.emit()">
@@ -71,10 +85,35 @@ export default class CoursesForm implements OnInit {
     }>;
   }>();
   public closeModal = output<void>();
-  private modal = inject(Modal);
   private toast = inject(Toast);
   private apollo = inject(Apollo);
   private store = inject(Store);
+  public periods = rxResource({
+    params: () => ({
+      schoolId: this.store.currentSchoolId(),
+    }),
+    stream: ({ params }) => {
+      if (!params.schoolId) {
+        return of([]);
+      }
+      return this.apollo
+        .watchQuery<{ periodsBySchoolId: Prisma.PeriodGetPayload<false>[] }>({
+          query: gql`
+            query GetPeriodsBySchoolId($schoolId: String!) {
+              periodsBySchoolId(schoolId: $schoolId) {
+                id
+                name
+              }
+            }
+          `,
+          variables: {
+            schoolId: params.schoolId,
+          },
+          fetchPolicy: 'cache-first',
+        })
+        .valueChanges.pipe(map((result) => result.data.periodsBySchoolId));
+    },
+  });
   public subjects = rxResource({
     params: () => ({
       organizationId: this.store.currentOrganizationId(),
@@ -138,6 +177,7 @@ export default class CoursesForm implements OnInit {
     code: [''],
     subjectId: ['', [Validators.required]],
     studyPlanId: ['', [Validators.required]],
+    currentPeriodId: this.fb.control<string | null>('', [Validators.required]),
   });
 
   public ngOnInit() {
@@ -153,6 +193,39 @@ export default class CoursesForm implements OnInit {
       return;
     }
     const req = this.form.getRawValue();
+    if (this.data()?.course) {
+      this.apollo
+        .mutate({
+          mutation: gql`
+            mutation UpdateCourse($updateCourseInput: UpdateCourseInput!) {
+              updateCourse(updateCourseInput: $updateCourseInput) {
+                id
+                name
+                shortName
+                code
+                subjectId
+                studyPlanId
+              }
+            }
+          `,
+          variables: {
+            updateCourseInput: {
+              ...req,
+              id: this.data()!.course!.id,
+            },
+          },
+        })
+        .subscribe({
+          next: () => {
+            this.closeModal.emit();
+            this.toast.showSuccess('Curso actualizado exitosamente');
+          },
+          error: (err) => {
+            this.toast.showError(err.message);
+          },
+        });
+      return;
+    }
     this.apollo
       .mutate({
         mutation: gql`

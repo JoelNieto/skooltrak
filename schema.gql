@@ -115,6 +115,9 @@ type Course {
   """Current period ID of the course"""
   currentPeriodId: String
 
+  """Grades of the course"""
+  grades: [Grade!]!
+
   """ID of the course (auto-generated)"""
   id: String!
 
@@ -506,7 +509,7 @@ input CreateSubjectInput {
 
 input CreateTeacherInput {
   """Birth date of the teacher"""
-  birthDate: DateTime = "2025-11-21T18:24:12.924Z"
+  birthDate: DateTime = "2025-11-23T04:59:54.262Z"
 
   """Document ID of the teacher"""
   documentId: String!
@@ -857,6 +860,7 @@ type Query {
   schools: [School!]!
   student(id: String!): Student!
   students: [Student!]!
+  studentsByCourseId(courseId: String!): [Student!]!
   studentsBySchoolId(schoolId: String!): [Student!]!
   studyPlan(id: String!): StudyPlan!
   studyPlans: [StudyPlan!]!
@@ -1525,7 +1529,7 @@ input UpdateSubjectInput {
 
 input UpdateTeacherInput {
   """Birth date of the teacher"""
-  birthDate: DateTime = "2025-11-21T18:24:12.924Z"
+  birthDate: DateTime = "2025-11-23T04:59:54.262Z"
 
   """Document ID of the teacher"""
   documentId: String

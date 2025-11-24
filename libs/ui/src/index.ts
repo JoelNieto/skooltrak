@@ -11,3 +11,4 @@ export * from './lib/ui/services/confirmation';
 export * from './lib/ui/services/modal';
 export * from './lib/ui/services/toast';
 export * from './lib/ui/services/util';
+export * from './lib/ui/types/decimal';

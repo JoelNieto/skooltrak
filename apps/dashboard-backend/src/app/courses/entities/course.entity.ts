@@ -1,5 +1,6 @@
 import { Field, ObjectType } from '@nestjs/graphql';
 import { Prisma } from '@prisma/client';
+import { Grade } from '../../grades/entities/grade.entity';
 import { Period } from '../../periods/entities/period.entity';
 import { School } from '../../schools/entities/school.entity';
 import { StudyPlan } from '../../study-plans/entities/study-plan.entity';
@@ -15,46 +16,64 @@ export class Course
 {
   @Field(() => String, { description: 'ID of the course (auto-generated)' })
   id: string;
+
   @Field(() => School, { description: 'School of the course' })
   school: School;
+
   @Field(() => Subject, { description: 'Subject of the course' })
   subject: Subject;
+
   @Field(() => StudyPlan, { description: 'Study plan of the course' })
   studyPlan: StudyPlan;
+
   @Field(() => String, { description: 'Name of the course' })
   name: string;
+
   @Field(() => String, { description: 'Code of the course' })
   code: string;
+
   @Field(() => String, { description: 'Short name of the course' })
   shortName: string;
+
   @Field(() => String, { description: 'Organization ID of the course' })
   organizationId: string;
+
   @Field(() => String, { description: 'School ID of the course' })
   schoolId: string;
+
   @Field(() => String, { description: 'Subject ID of the course' })
   subjectId: string;
+
   @Field(() => String, { description: 'Study plan ID of the course' })
   studyPlanId: string;
 
+  @Field(() => [Grade], { description: 'Grades of the course' })
+  grades: Grade[];
+
   @Field(() => String, { description: 'Teacher ID of the course' })
   teacherId: string;
+
   @Field(() => String, {
     description: 'Current period ID of the course',
     nullable: true,
   })
   currentPeriodId: string;
+
   @Field(() => Period, {
     description: 'Current period of the course',
     nullable: true,
   })
   currentPeriod: Period;
+
   @Field(() => Teacher, {
     description: 'Teacher of the course',
     nullable: true,
   })
   teacher: Teacher;
+
   @Field(() => Date, { description: 'Created at' })
   createdAt: Date;
+
   @Field(() => Date, { description: 'Updated at' })
   updatedAt: Date;
 }

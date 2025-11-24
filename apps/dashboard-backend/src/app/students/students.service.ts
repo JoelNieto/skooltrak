@@ -64,6 +64,14 @@ export class StudentsService {
     });
   }
 
+  findManyByCourseId(courseId: string) {
+    return this.prisma.student.findMany({
+      where: { courses: { some: { id: courseId } } },
+      include: { classGroup: true, user: true },
+      orderBy: { user: { firstName: 'asc' } },
+    });
+  }
+
   findOne(id: string) {
     return this.prisma.student.findUniqueOrThrow({
       where: { id },

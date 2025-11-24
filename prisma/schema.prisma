@@ -134,7 +134,7 @@ model Degree {
   name       String
   shortName  String
   schoolId   String
-  school     School      @relation(fields: [schoolId], references: [id])
+  school     School      @relation(fields: [schoolId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   createdAt  DateTime    @default(now())
   updatedAt  DateTime    @updatedAt
   studyPlans StudyPlan[]
@@ -155,7 +155,7 @@ model StudyPlan {
   createdAt     DateTime     @default(now())
   updatedAt     DateTime     @updatedAt
   classGroups   ClassGroup[]
-  gradeMetric   GradeMetric? @relation(fields: [gradeMetricId], references: [id])
+  gradeMetric   GradeMetric? @relation(fields: [gradeMetricId], references: [id], onDelete: SetNull)
   gradeMetricId String?
 
   @@unique([schoolId, name])
@@ -179,11 +179,11 @@ model Course {
   updatedAt       DateTime      @updatedAt
   groups          ClassGroup[]
   students        Student[]
-  teacher         Teacher?      @relation(fields: [teacherId], references: [id])
+  teacher         Teacher?      @relation(fields: [teacherId], references: [id], onDelete: SetNull, onUpdate: Cascade)
   teacherId       String?
   assignments     Assignment[]
   quizzes         Quiz[]
-  currentPeriod   Period?       @relation(fields: [currentPeriodId], references: [id])
+  currentPeriod   Period?       @relation(fields: [currentPeriodId], references: [id], onDelete: SetNull, onUpdate: Cascade)
   currentPeriodId String?
   gradeBuckets    GradeBucket[]
   grades          Grade[]
@@ -413,7 +413,7 @@ model GradeStudent {
   gradeId   String
   grade     Grade                  @relation(fields: [gradeId], references: [id], onDelete: Cascade)
   studentId String
-  student   Student                @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  student   Student                @relation(fields: [studentId], references: [id])
   score     Decimal?
   createdAt DateTime               @default(now())
   updatedAt DateTime               @updatedAt

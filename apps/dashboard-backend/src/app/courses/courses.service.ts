@@ -116,7 +116,12 @@ export class CoursesService {
   findOne(id: string) {
     return this.prisma.course.findUnique({
       where: { id },
-      include: { school: true, subject: true, studyPlan: true },
+      include: {
+        school: true,
+        subject: true,
+        studyPlan: { include: { gradeMetric: true } },
+        grades: { include: { gradeStudents: { include: { student: true } } } },
+      },
     });
   }
 

@@ -1,4 +1,4 @@
-import { Loader, Modal } from '@/ui';
+import { DecimalToNumber, Loader, Modal } from '@/ui';
 import { Component, inject, input } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
@@ -162,9 +162,15 @@ export default class Course {
       }
       return this.apollo
         .query<{
-          course: Prisma.CourseGetPayload<{
-            include: { studyPlan: true; subject: true; teacher: true };
-          }>;
+          course: DecimalToNumber<
+            Prisma.CourseGetPayload<{
+              include: {
+                studyPlan: { include: { gradeMetric: true } };
+                subject: true;
+                teacher: true;
+              };
+            }>
+          >;
         }>({
           query: gql`
             query Course($id: String!) {
@@ -187,6 +193,14 @@ export default class Course {
                 studyPlan {
                   id
                   name
+                  gradeMetric {
+                    id
+                    name
+                    minimumApproval
+                    minimumExcellence
+                    maximum
+                    minimum
+                  }
                 }
               }
             }

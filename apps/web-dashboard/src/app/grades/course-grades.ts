@@ -1,14 +1,12 @@
-import { Modal } from '@/ui';
-import { DatePipe, JsonPipe } from '@angular/common';
+import { DecimalToNumber, Modal } from '@/ui';
+import { DecimalPipe } from '@angular/common';
 import {
+  afterRenderEffect,
   ChangeDetectionStrategy,
   Component,
   computed,
-  effect,
   inject,
-  Injector,
   input,
-  OnInit,
   signal,
 } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
@@ -22,7 +20,7 @@ import GradesForm from './grades-form';
 
 @Component({
   selector: 'app-course-grades',
-  imports: [FormsModule, DatePipe, RouterLink, JsonPipe],
+  imports: [FormsModule, DecimalPipe, RouterLink],
   template: ` <div class="flex justify-end gap-2">
       <select
         class="select select-primary w-64!"
@@ -39,32 +37,28 @@ import GradesForm from './grades-form';
       </button>
     </div>
     <div class="overflow-x-auto">
-      <table class="table">
+      <table class="table table-zebra !w-fit">
         <thead>
           <tr>
-            <th>Titulo</th>
-            <th>Fecha</th>
-            <th>Tipo</th>
-            <th>Publicada</th>
-            <th>Fecha de creacion</th>
-            <th>Fecha de actualizacion</th>
+            <th class="w-[10rem]">Estudiante</th>
+            @for(grade of gradesResource.value(); track grade.id) {
+            <th class="w-[2rem]">
+              <a [routerLink]="['/grades', grade.id]" class="link link-primary">
+                {{ grade.title }}</a
+              >
+            </th>
+            }
           </tr>
         </thead>
         <tbody>
-          @for(grade of gradesResource.value(); track grade.id) {
+          @for(student of groupedGrades(); track student.id) {
           <tr>
-            <td>
-              <a
-                [routerLink]="['/grades', grade.id]"
-                class="link link-primary"
-                >{{ grade.title }}</a
-              >
+            <td>{{ student.firstName }} {{ student.fatherName }}</td>
+            @for(grade of student.grades; track grade.id) {
+            <td class="text-center font-semibold">
+              {{ grade.item?.score | number : '1.1-1' }}
             </td>
-            <td>{{ grade.date | date }}</td>
-            <td>{{ grade.bucket.name }}</td>
-            <td>{{ grade.published }}</td>
-            <td>{{ grade.createdAt | date : 'short' }}</td>
-            <td>{{ grade.updatedAt | date : 'short' }}</td>
+            }
           </tr>
           } @empty {
           <tr>
@@ -75,17 +69,15 @@ import GradesForm from './grades-form';
           }
         </tbody>
       </table>
-      {{ groupedGrades() | json }}
     </div>`,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export default class CourseGrades implements OnInit {
+export default class CourseGrades {
   public courseId = input.required<string>();
   public currentPeriod = input<string | null>();
   #store = inject(Store);
   #apollo = inject(Apollo);
   #modal = inject(Modal);
-  #injector = inject(Injector);
 
   public periodId = signal<string>('');
 
@@ -122,14 +114,49 @@ export default class CourseGrades implements OnInit {
     },
   });
 
-  ngOnInit() {
-    effect(
-      () => {
-        this.periodId.set(this.currentPeriod() || '');
-      },
-      { injector: this.#injector }
-    );
-  }
+  public students = rxResource({
+    params: () => ({
+      courseId: this.courseId(),
+    }),
+    stream: ({ params }) => {
+      const { courseId } = params;
+      if (!courseId) {
+        return of([]);
+      }
+      return this.#apollo
+        .watchQuery<{
+          studentsByCourseId: Prisma.StudentGetPayload<{
+            include: {
+              classGroup: true;
+              user: true;
+            };
+          }>[];
+        }>({
+          query: gql`
+            query StudentsByCourseId($courseId: String!) {
+              studentsByCourseId(courseId: $courseId) {
+                id
+                firstName
+                fatherName
+                user {
+                  id
+                  email
+                }
+                classGroup {
+                  id
+                  name
+                }
+              }
+            }
+          `,
+          variables: {
+            courseId,
+          },
+          fetchPolicy: 'cache-first',
+        })
+        .valueChanges.pipe(map((result) => result.data.studentsByCourseId));
+    },
+  });
 
   public gradesResource = rxResource({
     params: () => ({
@@ -143,16 +170,18 @@ export default class CourseGrades implements OnInit {
       }
       return this.#apollo
         .watchQuery<{
-          gradesByCourseId: Prisma.GradeGetPayload<{
-            include: {
-              bucket: true;
-              gradeStudents: {
-                include: {
-                  student: { include: { classGroup: true } };
+          gradesByCourseId: DecimalToNumber<
+            Prisma.GradeGetPayload<{
+              include: {
+                bucket: true;
+                gradeStudents: {
+                  include: {
+                    student: { include: { classGroup: true } };
+                  };
                 };
               };
-            };
-          }>[];
+            }>
+          >[];
         }>({
           query: gql`
             query GradesByCourseId($courseId: String!, $periodId: String!) {
@@ -193,23 +222,30 @@ export default class CourseGrades implements OnInit {
 
   public groupedGrades = computed(() => {
     const grades = this.gradesResource.value();
-    if (!grades) {
+    const students = this.students.value();
+    if (!grades || !students) {
       return [];
     }
-    console.log(grades);
-    const groupedGrades = grades.reduce((acc, grade) => {
-      const classGroup = grade.gradeStudents[0].student.classGroup;
-      if (!acc[classGroup.id]) {
-        acc[classGroup.id] = {
-          classGroup,
-          grades: [],
-        };
-      }
-      acc[classGroup.id].grades.push(grade);
-      return acc;
-    }, {} as Record<string, { classGroup: Prisma.ClassGroupGetPayload<{ include: undefined }>; grades: Prisma.GradeGetPayload<{ include: { bucket: true; gradeStudents: { include: { student: { include: { classGroup: true } } } } } }>[] }>);
-    return Object.values(groupedGrades);
+    return students.map((student) => {
+      return {
+        ...student,
+        grades: grades.map((grade) => {
+          return {
+            ...grade,
+            item: grade.gradeStudents.find((gradeStudent) => {
+              return gradeStudent.student.id === student.id;
+            }),
+          };
+        }),
+      };
+    });
   });
+
+  constructor() {
+    afterRenderEffect(() => {
+      this.periodId.set(this.currentPeriod() || '');
+    });
+  }
 
   editGrade() {
     this.#modal.open(GradesForm, {

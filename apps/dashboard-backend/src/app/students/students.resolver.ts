@@ -39,6 +39,13 @@ export class StudentsResolver {
     return this.studentsService.findOne(id);
   }
 
+  @Query(() => [Student], { name: 'studentsByCourseId' })
+  findManyByCourseId(
+    @Args('courseId', { type: () => String }) courseId: string
+  ) {
+    return this.studentsService.findManyByCourseId(courseId);
+  }
+
   @ResolveField(() => String)
   initials(@Parent() student: Student) {
     return `${student.firstName.charAt(0)}${student.fatherName.charAt(0)}`;

@@ -1,5 +1,5 @@
-import { EditorViewer, Error, Loader, Modal, PrismaDecimalPipe } from '@/ui';
-import { DatePipe, DecimalPipe } from '@angular/common';
+import { DecimalToNumber, EditorViewer, Error, Loader, Modal } from '@/ui';
+import { DatePipe, DecimalPipe, NgClass } from '@angular/common';
 import { Component, computed, inject, input } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
@@ -20,7 +20,7 @@ import GradeStudentForm from './grade-student-form';
     DatePipe,
     Error,
     DecimalPipe,
-    PrismaDecimalPipe,
+    NgClass,
   ],
   viewProviders: [
     provideIcons({
@@ -64,8 +64,8 @@ import GradeStudentForm from './grade-student-form';
           <thead>
             <tr>
               <th>Nombre</th>
-              <th>Calificacion</th>
-              <th>Comentarios</th>
+              <th class="text-center px-0">Calificacion</th>
+              <th class="!px-2">Comentarios</th>
               <th>Actualizado</th>
               <th></th>
             </tr>
@@ -77,11 +77,25 @@ import GradeStudentForm from './grade-student-form';
                 {{ gradeStudent.student.firstName }}
                 {{ gradeStudent.student.fatherName }}
               </td>
-              <td class="font-semibold">
-                {{ gradeStudent.score | decimal | number : '1.1-1' }}
+              <td
+                class="font-semibold text-center !px-0"
+                [ngClass]="{
+                  '!text-success bg-success/10':
+                    gradeStudent.score &&
+                    gradeStudent.score! >= metric()!.minimumApproval,
+                  '!text-warning bg-warning/10':
+                    gradeStudent.score &&
+                    (gradeStudent.score! >= metric()!.minimumApproval &&
+                      gradeStudent.score! < metric()!.minimumExcellence),
+                  '!text-error bg-error/10':
+                    gradeStudent.score &&
+                    gradeStudent.score! < metric()!.minimumApproval,
+                }"
+              >
+                {{ gradeStudent.score | number : '1.1-1' }}
               </td>
               <td
-                class="overflow-hidden text-ellipsis whitespace-nowrap max-w-[200px]"
+                class="overflow-hidden text-ellipsis whitespace-nowrap max-w-[200px] !pl-2"
               >
                 {{ gradeStudent.comments }}
               </td>
@@ -126,16 +140,18 @@ export default class Grade {
       const { id } = params;
       return this.#apollo
         .watchQuery<{
-          grade: Prisma.GradeGetPayload<{
-            include: {
-              course: {
-                include: { studyPlan: { include: { gradeMetric: true } } };
+          grade: DecimalToNumber<
+            Prisma.GradeGetPayload<{
+              include: {
+                course: {
+                  include: { studyPlan: { include: { gradeMetric: true } } };
+                };
+                bucket: true;
+                period: true;
+                gradeStudents: { include: { student: true } };
               };
-              bucket: true;
-              period: true;
-              gradeStudents: { include: { student: true } };
-            };
-          }>;
+            }>
+          >;
         }>({
           query: gql`
             query Grade($id: String!) {
@@ -196,15 +212,11 @@ export default class Grade {
   public metric = computed(
     () => this.gradeResource.value()?.course.studyPlan?.gradeMetric
   );
-  public minimumApproval = computed(
-    () => this.metric()?.minimumApproval as unknown as number
-  );
-  public minimumExcellence = computed(
-    () => this.metric()?.minimumExcellence as unknown as number
-  );
 
   editGradeItem(
-    gradeStudent: Prisma.GradeStudentGetPayload<{ include: { student: true } }>
+    gradeStudent: DecimalToNumber<
+      Prisma.GradeStudentGetPayload<{ include: { student: true } }>
+    >
   ) {
     this.#modal.open(GradeStudentForm, {
       data: {

@@ -30,40 +30,44 @@ import SubjectsForm from '../forms/subjects-form';
         <ng-icon name="phosphorPlusCircleDuotone" /> Nueva asignatura
       </button>
     </div>
-    <table class="table">
-      <thead>
-        <tr>
-          <th>Nombre</th>
-          <th>Nombre corto</th>
-          <th>Código</th>
-          <th>Fecha de creación</th>
-          <th>Fecha de actualización</th>
-          <th>Acciones</th>
-        </tr>
-      </thead>
-      <tbody>
-        @for (subject of subjects.value() ?? []; track subject.id) {
-        <tr>
-          <td>{{ subject.name }}</td>
-          <td>{{ subject.shortName }}</td>
-          <td>{{ subject.code }}</td>
-          <td>{{ subject.createdAt | date : 'short' }}</td>
-          <td>{{ subject.updatedAt | date : 'short' }}</td>
-          <td class="flex gap-2">
-            <button
-              class="btn btn-primary btn-xs btn-soft"
-              (click)="editSubject(subject)"
-            >
-              <ng-icon name="phosphorPencilDuotone" /> Editar
-            </button>
-            <button class="btn btn-error btn-xs btn-soft">
-              <ng-icon name="phosphorTrashDuotone" /> Eliminar
-            </button>
-          </td>
-        </tr>
-        }
-      </tbody>
-    </table>
+    <div
+      class="overflow-x-auto bg-base-100 rounded-lg mt-4 border border-base-300"
+    >
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Nombre</th>
+            <th>Nombre corto</th>
+            <th>Código</th>
+            <th>Fecha de creación</th>
+            <th>Fecha de actualización</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (subject of subjects.value() ?? []; track subject.id) {
+          <tr>
+            <td>{{ subject.name }}</td>
+            <td>{{ subject.shortName }}</td>
+            <td>{{ subject.code }}</td>
+            <td>{{ subject.createdAt | date : 'short' }}</td>
+            <td>{{ subject.updatedAt | date : 'short' }}</td>
+            <td class="flex gap-2">
+              <button
+                class="btn btn-primary btn-xs btn-soft"
+                (click)="editSubject(subject)"
+              >
+                <ng-icon name="phosphorPencilDuotone" /> Editar
+              </button>
+              <button class="btn btn-error btn-xs btn-soft">
+                <ng-icon name="phosphorTrashDuotone" /> Eliminar
+              </button>
+            </td>
+          </tr>
+          }
+        </tbody>
+      </table>
+    </div>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

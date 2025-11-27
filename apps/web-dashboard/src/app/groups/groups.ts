@@ -2,20 +2,27 @@ import { DatePipe } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
+import { Prisma } from '@prisma/client';
 import { Apollo, gql } from 'apollo-angular';
 import { map, of } from 'rxjs';
 import Store from '../core/store';
-
+type Teacher = Prisma.TeacherGetPayload<undefined> & { name: string };
+type GroupType = Prisma.ClassGroupGetPayload<{
+  include: {
+    studyPlan: { include: { degree: true } };
+    courses: { include: { teacher: true; subject: true } };
+  };
+}> & { teacher?: Teacher };
 @Component({
   imports: [RouterLink, DatePipe],
-  template: `<div class="breadcrumbs">
+  template: `<div class="breadcrumbs text-sm">
       <ul>
         <li><a routerLink="/">Inicio</a></li>
         <li>Grupos</li>
       </ul>
     </div>
     <h1 class="text-2xl font-semibold">Grupos</h1>
-    <div class="overflow-x-auto">
+    <div class="overflow-x-auto bg-base-100 rounded-lg shadow-sm mt-4">
       <table class="table">
         <thead>
           <tr>
@@ -62,7 +69,7 @@ export default class Groups {
       }
       return this.apollo
         .watchQuery<{
-          classGroupsBySchoolId: any[];
+          classGroupsBySchoolId: GroupType[];
         }>({
           query: gql`
             query ClassGroupsBySchoolId($schoolId: String!) {

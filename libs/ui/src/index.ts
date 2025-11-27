@@ -7,6 +7,7 @@ export * from './lib/ui/components/paginator';
 export * from './lib/ui/components/text-editor';
 export * from './lib/ui/components/toasts-container';
 export * from './lib/ui/pipes/decimal-pipe';
+export * from './lib/ui/pipes/time-ago.pipe';
 export * from './lib/ui/services/confirmation';
 export * from './lib/ui/services/modal';
 export * from './lib/ui/services/toast';

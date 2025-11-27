@@ -41,6 +41,18 @@ export const appRoutes: Route[] = [
         loadComponent: () => import('./quizzes/quiz-form'),
       },
       {
+        path: 'messages',
+        loadComponent: () => import('./messages/messages'),
+      },
+      {
+        path: 'messages/compose',
+        loadComponent: () => import('./messages/compose'),
+      },
+      {
+        path: 'messages/:id',
+        loadComponent: () => import('./messages/message'),
+      },
+      {
         path: '',
         redirectTo: 'home',
         pathMatch: 'full',

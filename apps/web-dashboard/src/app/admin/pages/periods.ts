@@ -30,7 +30,9 @@ import PeriodsForm from '../forms/periods-form';
         <ng-icon name="phosphorPlusCircleDuotone" /> Agregar periodo
       </button>
     </div>
-    <div class="overflow-x-auto">
+    <div
+      class="overflow-x-auto bg-base-100 rounded-lg mt-4 border border-base-300"
+    >
       <table class="table">
         <thead>
           <tr>

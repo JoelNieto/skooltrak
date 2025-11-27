@@ -1,13 +1,4 @@
-import { Confirmation } from '@/ui';
-import {
-  ChangeDetectionStrategy,
-  Component,
-  effect,
-  inject,
-  Injector,
-  OnInit,
-} from '@angular/core';
-import { rxResource } from '@angular/core/rxjs-interop';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
@@ -15,17 +6,10 @@ import {
   phosphorBookmarksSimpleDuotone,
   phosphorBuildingApartmentDuotone,
   phosphorExamDuotone,
-  phosphorGearFineDuotone,
   phosphorHouseLineDuotone,
   phosphorSealCheckDuotone,
-  phosphorSignOutDuotone,
   phosphorUsersFourDuotone,
 } from '@ng-icons/phosphor-icons/duotone';
-import { Prisma } from '@prisma/client';
-import { Apollo, gql } from 'apollo-angular';
-import { map } from 'rxjs';
-import Auth from '../auth/auth';
-import Store from './store';
 
 @Component({
   // eslint-disable-next-line @angular-eslint/component-selector
@@ -37,8 +21,6 @@ import Store from './store';
       phosphorBookBookmarkDuotone,
       phosphorBookmarksSimpleDuotone,
       phosphorSealCheckDuotone,
-      phosphorGearFineDuotone,
-      phosphorSignOutDuotone,
       phosphorUsersFourDuotone,
       phosphorBuildingApartmentDuotone,
       phosphorExamDuotone,
@@ -137,133 +119,8 @@ import Store from './store';
           </a>
         </li>
       </ul>
-      <div>
-        <ul class="flex flex-col gap-2 py-6">
-          <li>
-            <div class="dropdown w-full">
-              <div
-                role="button"
-                tabindex="0"
-                class="flex items-center p-2 text-base-content rounded-lg hover:bg-primary-50 hover:text-primary-600 group"
-              >
-                <ng-icon
-                  name="phosphorBuildingApartmentDuotone"
-                  class="text-xl"
-                />
-                <span class="ml-3">{{ store.currentSchool()?.name }}</span>
-              </div>
-              <ul
-                tabindex="0"
-                class="dropdown-content menu bg-base-100 rounded-box z-1 w-52 p-2 shadow-sm"
-              >
-                @for(school of schools.value(); track school.id) {
-                <li>
-                  <div
-                    (click)="store.currentSchool.set(school)"
-                    (keydown)="store.currentSchool.set(school)"
-                    tabindex="0"
-                  >
-                    {{ school.name }}
-                  </div>
-                </li>
-                }
-              </ul>
-            </div>
-          </li>
-          @if(auth.isAdmin()) {
-          <li>
-            <a
-              routerLink="admin"
-              [routerLinkActive]="[
-                'bg-primary/5',
-                'text-primary',
-                'dark:text-white'
-              ]"
-              class="flex items-center p-2 text-base-content rounded-lg hover:bg-primary-50 hover:text-primary-600 group"
-            >
-              <ng-icon name="phosphorGearFineDuotone" class="text-xl" />
-              <span class="ml-3">Admin</span>
-            </a>
-          </li>
-          }
-          <li>
-            <button
-              class="flex items-center p-2 text-base-content rounded-lg hover:bg-primary-50 hover:text-primary-600 group"
-              (click)="logout()"
-            >
-              <ng-icon name="phosphorSignOutDuotone" class="text-xl" />
-              <span class="ml-3">Cerrar sesión</span>
-            </button>
-          </li>
-        </ul>
-      </div>
     </nav>`,
   styles: ``,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class Sidebar implements OnInit {
-  public auth = inject(Auth);
-  private confirmation = inject(Confirmation);
-  private apollo = inject(Apollo);
-  public store = inject(Store);
-  private injector = inject(Injector);
-
-  public schools = rxResource({
-    stream: () =>
-      this.apollo
-        .watchQuery<{
-          schools: Prisma.SchoolGetPayload<{
-            include: undefined;
-          }>[];
-        }>({
-          fetchPolicy: 'cache-and-network',
-          query: gql`
-            query GetSchools {
-              schools {
-                id
-                name
-                organizationId
-                shortName
-                logo
-                address
-                city
-                state
-                zip
-                country
-                email
-                phone
-                website
-                createdAt
-                updatedAt
-              }
-            }
-          `,
-        })
-        .valueChanges.pipe(map((result) => result.data.schools)),
-  });
-
-  ngOnInit() {
-    effect(
-      () => {
-        const schools = this.schools.value();
-        if (schools?.length) {
-          this.store.currentSchool.set(schools[0]);
-        }
-      },
-      { injector: this.injector }
-    );
-  }
-
-  public logout() {
-    this.confirmation
-      .confirm({
-        title: 'Cerrar sesión',
-        message: '¿Estás seguro de que quieres cerrar sesión?',
-      })
-      .subscribe((confirmed) => {
-        if (confirmed) {
-          this.auth.logout();
-        }
-      });
-  }
-}
+export class Sidebar {}

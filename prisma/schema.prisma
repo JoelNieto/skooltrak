@@ -29,24 +29,55 @@ model Organization {
   Teacher     Teacher[]
   Student     Student[]
   quizzes     Quiz[]
+  messages    Message[]
 }
 
 model User {
-  id             String        @id @default(cuid())
-  email          String        @unique
-  firstName      String
-  lastName       String
-  password       String
-  role           Role          @relation(fields: [roleId], references: [id])
-  roleId         String
-  organization   Organization? @relation(fields: [organizationId], references: [id])
-  organizationId String?
-  lastLogin      DateTime?
-  isBlocked      Boolean       @default(false)
-  createdAt      DateTime      @default(now())
-  updatedAt      DateTime      @updatedAt
-  student        Student?
-  teacher        Teacher?
+  id                String             @id @default(cuid())
+  email             String             @unique
+  firstName         String
+  lastName          String
+  password          String
+  role              Role               @relation(fields: [roleId], references: [id])
+  roleId            String
+  organization      Organization?      @relation(fields: [organizationId], references: [id])
+  organizationId    String?
+  lastLogin         DateTime?
+  isBlocked         Boolean            @default(false)
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  student           Student?
+  teacher           Teacher?
+  sentMessages      Message[]
+  messageRecipients MessageRecipient[]
+}
+
+model Message {
+  id             String             @id @default(cuid())
+  subject        String
+  content        String
+  organization   Organization       @relation(fields: [organizationId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  organizationId String
+  sender         User?              @relation(fields: [senderId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  senderId       String?
+  recipients     MessageRecipient[]
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
+  deletedAt      DateTime?
+}
+
+model MessageRecipient {
+  id        String    @id @default(cuid())
+  messageId String
+  userId    String
+  message   Message   @relation(fields: [messageId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  readAt    DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@unique([messageId, userId])
 }
 
 model Role {

@@ -42,6 +42,10 @@ export class UsersService {
   }
 
   update(id: string, updateUserInput: UpdateUserInput) {
+    if (updateUserInput.password) {
+      const password = bcrypt.hashSync(updateUserInput.password, 10);
+      updateUserInput.password = password;
+    }
     return this.prisma.user.update({
       where: { id },
       data: updateUserInput,

@@ -23,7 +23,10 @@ import Store from '../../core/store';
         />
       </div>
       <div class="fieldset col-span-2">
-        <label for="middleName">Segundo nombre</label>
+        <label for="middleName"
+          >Segundo nombre
+          <span class="text-neutral-400 text-xs">(opcional)</span></label
+        >
         <input
           type="text"
           formControlName="middleName"
@@ -39,7 +42,10 @@ import Store from '../../core/store';
         />
       </div>
       <div class="fieldset col-span-2">
-        <label for="motherName">Apellido Materno</label>
+        <label for="motherName"
+          >Apellido Materno
+          <span class="text-neutral-400 text-xs">(opcional)</span></label
+        >
         <input
           type="text"
           formControlName="motherName"
@@ -80,7 +86,11 @@ import Store from '../../core/store';
       </div>
     </div>
     <div class="flex justify-end gap-2">
-      <button type="button" class="btn btn-ghost" (click)="closeModal.emit()">
+      <button
+        type="button"
+        class="btn btn-ghost"
+        (click)="closeModal.emit(false)"
+      >
         Cancelar
       </button>
       <button type="submit" class="btn btn-primary">Guardar</button>
@@ -89,7 +99,7 @@ import Store from '../../core/store';
 })
 export default class TeachersForm implements OnInit {
   public data = input<{ teacher?: Prisma.TeacherGetPayload<false> }>();
-  public closeModal = output<void>();
+  public closeModal = output<boolean>();
   private fb = inject(NonNullableFormBuilder);
   private apollo = inject(Apollo);
   private toast = inject(Toast);
@@ -139,7 +149,7 @@ export default class TeachersForm implements OnInit {
         })
         .subscribe(() => {
           this.toast.showSuccess('Profesor actualizado exitosamente');
-          this.closeModal.emit();
+          this.closeModal.emit(true);
         });
     } else {
       this.apollo
@@ -162,7 +172,7 @@ export default class TeachersForm implements OnInit {
         })
         .subscribe(() => {
           this.toast.showSuccess('Profesor creado exitosamente');
-          this.closeModal.emit();
+          this.closeModal.emit(true);
         });
     }
   }

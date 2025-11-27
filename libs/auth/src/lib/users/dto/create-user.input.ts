@@ -13,4 +13,9 @@ export class CreateUserInput implements Prisma.UserUncheckedCreateInput {
   password: string;
   @Field(() => String, { description: 'Role ID of the user' })
   roleId: string;
+  @Field(() => String, {
+    description: 'Organization ID of the user',
+    nullable: true,
+  })
+  organizationId: string;
 }

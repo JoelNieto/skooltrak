@@ -19,7 +19,7 @@ import Store from '../core/store';
   imports: [RouterLink, NgIcon, Loader],
   viewProviders: [provideIcons({ phosphorMagnifyingGlassDuotone })],
   template: `
-    <div class="breadcrumbs">
+    <div class="breadcrumbs text-sm">
       <ul>
         <li><a routerLink="/">Inicio</a></li>
         <li>Cursos</li>

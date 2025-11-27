@@ -1,5 +1,11 @@
 import { markGroupDirty, Toast } from '@/ui';
-import { Component, inject, input, OnInit, output } from '@angular/core';
+import {
+  afterRenderEffect,
+  Component,
+  inject,
+  input,
+  output,
+} from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import {
   NonNullableFormBuilder,
@@ -77,7 +83,7 @@ import Store from '../../core/store';
     </div>
   </form>`,
 })
-export default class CoursesForm implements OnInit {
+export default class CoursesForm {
   private fb = inject(NonNullableFormBuilder);
   public data = input<{
     course?: Prisma.CourseGetPayload<{
@@ -180,10 +186,12 @@ export default class CoursesForm implements OnInit {
     currentPeriodId: this.fb.control<string | null>('', [Validators.required]),
   });
 
-  public ngOnInit() {
-    if (this.data()?.course) {
-      this.form.patchValue(this.data()!.course!);
-    }
+  constructor() {
+    afterRenderEffect(() => {
+      if (this.data()?.course) {
+        this.form.patchValue(this.data()!.course!);
+      }
+    });
   }
 
   public onSubmit() {

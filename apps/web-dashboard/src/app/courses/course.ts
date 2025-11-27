@@ -46,14 +46,14 @@ import CourseGradeBuckets from './course-grade-buckets';
     <p>Error al cargar curso</p>
     } @if(courseResource.hasValue()) { @let course = courseResource.value()!;
     <div>
-      <div class="breadcrumbs">
+      <div class="breadcrumbs text-sm">
         <ul>
           <li><a routerLink="/">Inicio</a></li>
           <li><a routerLink="/courses">Cursos</a></li>
           <li>{{ course.shortName }}</li>
         </ul>
       </div>
-      <div class="card card-border border-base-300 mt-4">
+      <div class="card card-border border-base-300 mt-4 bg-base-100">
         <div class="card-body flex md:flex-row md:gap-4 md:items-center">
           <img
             src="course-default.jpg"
@@ -77,7 +77,6 @@ import CourseGradeBuckets from './course-grade-buckets';
           </div>
         </div>
       </div>
-      <!-- name of each tab group should be unique -->
       <div class="tabs tabs-box mt-4">
         <label class="tab">
           <input

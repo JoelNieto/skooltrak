@@ -298,6 +298,20 @@ input CreateGradeStudentInput {
   studentId: String!
 }
 
+input CreateMessageInput {
+  """The content of the message."""
+  content: String!
+
+  """The ID of the organization associated with the message."""
+  organizationId: String!
+
+  """The IDs of the recipients associated with the message."""
+  recipientIds: [String!]!
+
+  """The subject of the message."""
+  subject: String!
+}
+
 input CreateOrganizationInput {
   active: Boolean
   description: String!
@@ -509,7 +523,7 @@ input CreateSubjectInput {
 
 input CreateTeacherInput {
   """Birth date of the teacher"""
-  birthDate: DateTime = "2025-11-23T04:59:54.262Z"
+  birthDate: DateTime = "2025-11-27T22:53:09.482Z"
 
   """Document ID of the teacher"""
   documentId: String!
@@ -545,6 +559,9 @@ input CreateUserInput {
 
   """Last name of the user"""
   lastName: String!
+
+  """Organization ID of the user"""
+  organizationId: String
 
   """Password of the user"""
   password: String!
@@ -703,6 +720,67 @@ type GradeStudent {
   updatedAt: DateTime!
 }
 
+type Message {
+  """The content of the message."""
+  content: String!
+
+  """The date and time the message was created."""
+  createdAt: DateTime!
+
+  """The date and time the message was deleted."""
+  deletedAt: DateTime
+
+  """The unique identifier for the message."""
+  id: String!
+
+  """The ID of the organization associated with the message."""
+  organizationId: String!
+
+  """The recipients of the message."""
+  recipients: [MessageRecipient!]!
+
+  """The sender associated with the message."""
+  sender: User!
+
+  """The ID of the sender associated with the message."""
+  senderId: String!
+
+  """The subject of the message."""
+  subject: String!
+
+  """The date and time the message was last updated."""
+  updatedAt: DateTime!
+}
+
+type MessageRecipient {
+  """The date and time the message recipient was created."""
+  createdAt: DateTime!
+
+  """The date and time the message recipient was deleted."""
+  deletedAt: DateTime
+
+  """The unique identifier for the message recipient."""
+  id: String!
+
+  """The message associated with the message recipient."""
+  message: Message!
+
+  """The ID of the message associated with the message recipient."""
+  messageId: String!
+
+  """The date and time the message was read."""
+  readAt: DateTime
+
+  """The date and time the message recipient was last updated."""
+  updatedAt: DateTime!
+
+  """The user associated with the message recipient."""
+  user: User!
+
+  """The ID of the user associated with the message recipient."""
+  userId: String!
+}
+
 type Mutation {
   createAssignment(createAssignmentInput: CreateAssignmentInput!): Assignment!
   createClassGroup(createClassGroupInput: CreateClassGroupInput!): ClassGroup!
@@ -711,6 +789,7 @@ type Mutation {
   createGrade(createGradeInput: CreateGradeInput!): Grade!
   createGradeBucket(createGradeBucketInput: CreateGradeBucketInput!): GradeBucket!
   createGradeStudent(createGradeStudentInput: CreateGradeStudentInput!): GradeStudent!
+  createMessage(createMessageInput: CreateMessageInput!): Message!
   createOrganization(createOrganizationInput: CreateOrganizationInput!): Organization!
   createPeriod(createPeriodInput: CreatePeriodInput!): Period!
   createPermission(createPermissionInput: CreatePermissionInput!): Permission!
@@ -730,6 +809,7 @@ type Mutation {
   removeGrade(id: String!): Grade!
   removeGradeBucket(id: String!): GradeBucket!
   removeGradeStudent(id: String!): GradeStudent!
+  removeMessage(id: String!): Message!
   removeOrganization(id: String!): Organization!
   removePeriod(id: String!): Period!
   removePermission(id: String!): Permission!
@@ -835,6 +915,9 @@ type Query {
   degree(id: String!): Degree!
   degrees: [Degree!]!
   degreesBySchoolId(schoolId: String!): [Degree!]!
+  findManyMessages(orderBy: String, skip: Int, take: Int): [MessageRecipient!]!
+  findManyMessagesCount: Int!
+  findMyMessages(orderBy: String, skip: Int, take: Int): [Message!]!
   grade(id: String!): Grade!
   gradeBucket(id: String!): GradeBucket!
   gradeBucketsByCourseId(courseId: String!): [GradeBucket!]!
@@ -845,6 +928,7 @@ type Query {
   grades: [Grade!]!
   gradesByCourseId(courseId: String!, periodId: String!): [Grade!]!
   me: User!
+  message(id: String!): Message!
   organization(id: String!): Organization!
   organizations: [Organization!]!
   period(id: String!): Period!
@@ -1529,7 +1613,7 @@ input UpdateSubjectInput {
 
 input UpdateTeacherInput {
   """Birth date of the teacher"""
-  birthDate: DateTime = "2025-11-23T04:59:54.262Z"
+  birthDate: DateTime = "2025-11-27T22:53:09.482Z"
 
   """Document ID of the teacher"""
   documentId: String
@@ -1568,6 +1652,9 @@ input UpdateUserInput {
   """Last name of the user"""
   lastName: String
 
+  """Organization ID of the user"""
+  organizationId: String
+
   """Password of the user"""
   password: String
 
@@ -1580,9 +1667,11 @@ type User {
   email: String!
   firstName: String!
   id: String!
+  initials: String!
   isBlocked: Boolean!
   lastLogin: DateTime!
   lastName: String!
+  name: String!
   organization: Organization
   organizationId: String!
   role: Role!

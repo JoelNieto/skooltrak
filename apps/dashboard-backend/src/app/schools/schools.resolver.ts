@@ -1,3 +1,5 @@
+import { JwtAuthGuard } from '@/auth';
+import { UseGuards } from '@nestjs/common';
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { CreateSchoolInput } from './dto/create-school.input';
 import { UpdateSchoolInput } from './dto/update-school.input';
@@ -15,6 +17,7 @@ export class SchoolsResolver {
     return this.schoolsService.create(createSchoolInput);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Query(() => [School], { name: 'schools' })
   findAll() {
     return this.schoolsService.findAll();

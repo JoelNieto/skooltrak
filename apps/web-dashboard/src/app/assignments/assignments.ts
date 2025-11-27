@@ -26,7 +26,10 @@ import Store from '../core/store';
 export class StripHtmlPipe implements PipeTransform {
   transform(value: string | null | undefined): string {
     if (!value) return '';
-    return value.replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim();
+    return value
+      .replace(/<[^>]*>/g, '')
+      .replace(/\s+/g, ' ')
+      .trim();
   }
 }
 
@@ -40,7 +43,7 @@ export class StripHtmlPipe implements PipeTransform {
       phosphorCalendarCheckDuotone,
     }),
   ],
-  template: `<div class="breadcrumbs">
+  template: `<div class="breadcrumbs text-sm">
       <ul>
         <li><a routerLink="/">Inicio</a></li>
         <li>Asignaciones</li>
@@ -72,7 +75,7 @@ export class StripHtmlPipe implements PipeTransform {
         </button>
       </div>
     </div>
-    <div class="overflow-x-auto">
+    <div class="overflow-x-auto bg-base-100 rounded-lg shadow-sm mt-4">
       <table class="table">
         <thead>
           <tr>
@@ -95,7 +98,9 @@ export class StripHtmlPipe implements PipeTransform {
                 assignment.title
               }}</a>
             </td>
-            <td class="max-w-[24rem] truncate">{{ assignment.details | stripHtml }}</td>
+            <td class="max-w-[24rem] truncate">
+              {{ assignment.details | stripHtml }}
+            </td>
             <td>{{ assignment.date | date : 'medium' }}</td>
             <td>{{ assignment.course.name }}</td>
             <td>

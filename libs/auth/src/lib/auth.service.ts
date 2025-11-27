@@ -17,6 +17,8 @@ export class AuthService {
       throw new Error('User not found');
     }
 
+    const { id, role, organizationId } = user;
+
     if (!(await bcrypt.compare(password, user.password))) {
       throw new Error('Invalid password');
     }
@@ -27,7 +29,14 @@ export class AuthService {
     });
 
     return {
-      accessToken: this.jwtService.sign({ userId: user.id }),
+      accessToken: this.jwtService.sign(
+        {
+          userId: id,
+          role: { id: role.id, name: role.name },
+          organizationId: organizationId,
+        },
+        { secret: process.env['JWT_SECRET'] }
+      ),
     };
   }
 

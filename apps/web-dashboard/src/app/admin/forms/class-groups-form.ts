@@ -1,5 +1,11 @@
 import { markGroupDirty, Toast } from '@/ui';
-import { Component, inject, input, OnInit, output } from '@angular/core';
+import {
+  afterRenderEffect,
+  Component,
+  inject,
+  input,
+  output,
+} from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import {
   NonNullableFormBuilder,
@@ -83,7 +89,7 @@ import Store from '../../core/store';
     </div>
   </form>`,
 })
-export default class ClassGroupsForm implements OnInit {
+export default class ClassGroupsForm {
   public data = input<{
     group?: Prisma.ClassGroupGetPayload<{
       include: { teacher: true; studyPlan: true };
@@ -165,10 +171,12 @@ export default class ClassGroupsForm implements OnInit {
     active: [true],
   });
 
-  public ngOnInit(): void {
-    if (this.data()?.group) {
-      this.form.patchValue(this.data()!.group!);
-    }
+  constructor() {
+    afterRenderEffect(() => {
+      if (this.data()?.group) {
+        this.form.patchValue(this.data()!.group!);
+      }
+    });
   }
 
   public onSubmit() {

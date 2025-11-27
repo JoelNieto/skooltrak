@@ -29,7 +29,7 @@ import GradeStudentForm from './grade-student-form';
   ],
   template: `
     @defer{ @if(gradeResource.hasValue()) { @let grade = gradeResource.value()!;
-    <div class="breadcrumbs">
+    <div class="breadcrumbs text-sm">
       <ul>
         <li><a routerLink="/">Inicio</a></li>
         <li><a routerLink="/grades">Calificaciones</a></li>

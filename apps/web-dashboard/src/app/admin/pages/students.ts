@@ -23,7 +23,9 @@ type Student = Prisma.StudentGetPayload<{
         Agregar Alumno
       </button>
     </div>
-    <div class="overflow-x-auto">
+    <div
+      class="overflow-x-auto bg-base-100 rounded-lg border border-base-300 mt-4"
+    >
       <table class="table">
         <thead>
           <tr>

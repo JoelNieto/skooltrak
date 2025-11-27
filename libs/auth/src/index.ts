@@ -1,3 +1,4 @@
+export * from './lib/auth.guard';
 export * from './lib/auth.module';
 export * from './lib/organizations/entities/organization.entity';
 export * from './lib/permissions/entities/permission.entity';

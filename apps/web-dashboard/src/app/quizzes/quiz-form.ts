@@ -36,7 +36,7 @@ import { QuizQuestionControl } from './quiz-question-control';
   viewProviders: [
     provideIcons({ phosphorTrashDuotone, phosphorPlusCircleDuotone }),
   ],
-  template: `<div class="breadcrumbs">
+  template: `<div class="breadcrumbs text-sm">
       <ul>
         <li><a routerLink="/">Inicio</a></li>
         <li><a routerLink="/quizzes">Quizes</a></li>

@@ -29,7 +29,9 @@ type Teacher = Prisma.TeacherGetPayload<false> & {
         <ng-icon name="phosphorPlusCircleDuotone" /> Agregar Profesor
       </button>
     </div>
-    <div class="overflow-x-auto">
+    <div
+      class="overflow-x-auto bg-base-100 rounded-lg mt-4 border border-base-300"
+    >
       <table class="table">
         <thead>
           <tr>

@@ -38,7 +38,7 @@ type GroupType = Prisma.ClassGroupGetPayload<{
     @let group = groupResource.value(); @if(groupResource.isLoading()) {
     <lib-loader />
     } @else { @if(group) {
-    <div class="breadcrumbs">
+    <div class="breadcrumbs text-sm">
       <ul>
         <li><a routerLink="/">Inicio</a></li>
         <li><a routerLink="/groups">Grupos</a></li>

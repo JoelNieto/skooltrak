@@ -16,7 +16,7 @@ import Store from '../core/store';
 @Component({
   selector: 'app-grades',
   imports: [RouterLink, FormsModule],
-  template: `<div class="breadcrumbs">
+  template: `<div class="breadcrumbs text-sm">
       <ul>
         <li><a routerLink="/">Inicio</a></li>
         <li>Calificaciones</li>

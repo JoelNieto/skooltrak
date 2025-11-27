@@ -29,49 +29,51 @@ import StudyPlanForm from '../forms/study-plans-forms';
         <ng-icon name="phosphorPlusCircleDuotone" /> Nuevo plan
       </button>
     </div>
-    <table class="table">
-      <thead>
-        <tr>
-          <th>Nombre</th>
-          <th>Nombre corto</th>
-          <th>Código</th>
-          <th>Nivel</th>
-          <th>Grado</th>
-          <th>Creado</th>
-          <th>Actualizado</th>
-          <th>Acciones</th>
-        </tr>
-      </thead>
-      <tbody>
-        @for (studyPlan of studyPlans.value(); track studyPlan.id) {
-        <tr>
-          <td>{{ studyPlan.name }}</td>
-          <td>{{ studyPlan.shortName }}</td>
-          <td>{{ studyPlan.code }}</td>
-          <td>{{ studyPlan.level }}</td>
-          <td>{{ studyPlan.degree.name }}</td>
-          <td>{{ studyPlan.createdAt | date : 'short' }}</td>
-          <td>{{ studyPlan.updatedAt | date : 'short' }}</td>
-          <td>
-            <div class="flex gap-2">
-              <button
-                class="btn btn-primary btn-xs btn-soft"
-                (click)="editStudyPlan(studyPlan)"
-              >
-                <ng-icon name="phosphorPencilDuotone" /> Editar
-              </button>
-              <button
-                class="btn btn-error btn-xs btn-soft"
-                (click)="deleteStudyPlan(studyPlan)"
-              >
-                <ng-icon name="phosphorTrashDuotone" /> Eliminar
-              </button>
-            </div>
-          </td>
-        </tr>
-        }
-      </tbody>
-    </table>`,
+    <div class="bg-base-100 rounded-lg border border-base-300 mt-4">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Nombre</th>
+            <th>Nombre corto</th>
+            <th>Código</th>
+            <th>Nivel</th>
+            <th>Grado</th>
+            <th>Creado</th>
+            <th>Actualizado</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (studyPlan of studyPlans.value(); track studyPlan.id) {
+          <tr>
+            <td>{{ studyPlan.name }}</td>
+            <td>{{ studyPlan.shortName }}</td>
+            <td>{{ studyPlan.code }}</td>
+            <td>{{ studyPlan.level }}</td>
+            <td>{{ studyPlan.degree.name }}</td>
+            <td>{{ studyPlan.createdAt | date : 'short' }}</td>
+            <td>{{ studyPlan.updatedAt | date : 'short' }}</td>
+            <td>
+              <div class="flex gap-2">
+                <button
+                  class="btn btn-primary btn-xs btn-soft"
+                  (click)="editStudyPlan(studyPlan)"
+                >
+                  <ng-icon name="phosphorPencilDuotone" /> Editar
+                </button>
+                <button
+                  class="btn btn-error btn-xs btn-soft"
+                  (click)="deleteStudyPlan(studyPlan)"
+                >
+                  <ng-icon name="phosphorTrashDuotone" /> Eliminar
+                </button>
+              </div>
+            </td>
+          </tr>
+          }
+        </tbody>
+      </table>
+    </div>`,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class StudyPlans {

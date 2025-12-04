@@ -1,31 +1,49 @@
-import { Confirmation, Modal, Toast } from '@/ui';
+import { Confirmation, Modal, Paginator, Toast } from '@/ui';
 import { DatePipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  inject,
+  signal,
+} from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
+  phosphorMagnifyingGlassDuotone,
   phosphorPencilDuotone,
   phosphorPlusCircleDuotone,
+  phosphorSortAscendingDuotone,
+  phosphorSortDescendingDuotone,
   phosphorTrashDuotone,
 } from '@ng-icons/phosphor-icons/duotone';
 import { Prisma } from '@prisma/client';
 import { Apollo, gql } from 'apollo-angular';
-import { filter, map, of, switchMap } from 'rxjs';
-import Store from '../../core/store';
+import { filter, map, switchMap, tap } from 'rxjs';
 import SubjectsForm from '../forms/subjects-form';
 
 @Component({
   selector: 'app-subjects',
-  imports: [DatePipe, NgIcon],
+  imports: [DatePipe, NgIcon, Paginator],
   viewProviders: [
     provideIcons({
       phosphorPencilDuotone,
       phosphorTrashDuotone,
       phosphorPlusCircleDuotone,
+      phosphorMagnifyingGlassDuotone,
+      phosphorSortAscendingDuotone,
+      phosphorSortDescendingDuotone,
     }),
   ],
   template: `
-    <div class="flex justify-end">
+    <div class="flex flex-col gap-4 md:flex-row md:justify-between">
+      <div class="md:w-96 w-full">
+        <label class="input input-primary ">
+          <ng-icon name="phosphorMagnifyingGlassDuotone" />
+          <input class="pl-0" type="search" placeholder="Buscar..." />
+        </label>
+      </div>
+
       <button class="btn btn-primary" (click)="editSubject()">
         <ng-icon name="phosphorPlusCircleDuotone" /> Nueva asignatura
       </button>
@@ -36,12 +54,19 @@ import SubjectsForm from '../forms/subjects-form';
       <table class="table">
         <thead>
           <tr>
-            <th>Nombre</th>
-            <th>Nombre corto</th>
-            <th>Código</th>
-            <th>Fecha de creación</th>
-            <th>Fecha de actualización</th>
-            <th>Acciones</th>
+            <th class="hover:bg-base-200 cursor-pointer">
+              <div class="flex items-center gap-2">
+                Nombre
+                <ng-icon name="phosphorSortAscendingDuotone" class="text-xl" />
+              </div>
+            </th>
+            <th class="hover:bg-base-200 cursor-pointer">Nombre corto</th>
+            <th class="hover:bg-base-200 cursor-pointer">Código</th>
+            <th class="hover:bg-base-200 cursor-pointer">Fecha de creación</th>
+            <th class="hover:bg-base-200 cursor-pointer">
+              Fecha de actualización
+            </th>
+            <th></th>
           </tr>
         </thead>
         <tbody>
@@ -67,30 +92,56 @@ import SubjectsForm from '../forms/subjects-form';
           }
         </tbody>
       </table>
+      <div class="p-4 rounded-b-lg ">
+        <lib-paginator
+          [count]="pagination().count"
+          [take]="pagination().take"
+          [skip]="pagination().skip"
+          (skipChange)="updateSkip($event)"
+          (takeChange)="updateTake($event)"
+        />
+      </div>
     </div>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class Subjects {
-  private apollo = inject(Apollo);
-  private store = inject(Store);
-  private confirmation = inject(Confirmation);
-  private modal = inject(Modal);
-  private toast = inject(Toast);
+  #apollo = inject(Apollo);
+  #confirmation = inject(Confirmation);
+  #modal = inject(Modal);
+  #toast = inject(Toast);
+
+  public updateSkip(skip: number) {
+    this.pagination.update((prev) => ({ ...prev, skip }));
+  }
+
+  public updateTake(take: number) {
+    this.pagination.update((prev) => ({ ...prev, take }));
+  }
+  public take = computed(() => this.pagination().take);
+  public skip = computed(() => this.pagination().skip);
+
+  public pagination = signal({
+    take: 10,
+    skip: 0,
+    count: 0,
+  });
   public subjects = rxResource({
     params: () => ({
-      organizationId: this.store.currentOrganizationId(),
+      take: this.take(),
+      skip: this.skip(),
     }),
     stream: ({ params }) => {
-      const { organizationId } = params;
-      if (!organizationId) {
-        return of([]);
-      }
-      return this.apollo
-        .watchQuery<{ subjects: Prisma.SubjectGetPayload<false>[] }>({
+      const { take, skip } = params;
+      return this.#apollo
+        .watchQuery<{
+          count: number;
+          subjects: Prisma.SubjectGetPayload<false>[];
+        }>({
           query: gql`
-            query GetSubjects($organizationId: String!) {
-              subjects(organizationId: $organizationId) {
+            query GetSubjects($take: Int!, $skip: Int!) {
+              count: findManySubjectsCount
+              subjects(take: $take, skip: $skip) {
                 id
                 name
                 shortName
@@ -101,15 +152,24 @@ export default class Subjects {
             }
           `,
           variables: {
-            organizationId: params.organizationId,
+            take,
+            skip,
           },
         })
-        .valueChanges.pipe(map((result) => result.data.subjects));
+        .valueChanges.pipe(
+          tap((result) => {
+            this.pagination.update((prev) => ({
+              ...prev,
+              count: result.data.count,
+            }));
+          }),
+          map((result) => result.data.subjects)
+        );
     },
   });
 
   public editSubject(subject?: Prisma.SubjectGetPayload<false>) {
-    this.modal
+    this.#modal
       .open(SubjectsForm, {
         title: subject ? 'Editar Asignatura' : 'Agregar Asignatura',
         data: {
@@ -122,7 +182,7 @@ export default class Subjects {
   }
 
   public deleteSubject(subject: Prisma.SubjectGetPayload<false>) {
-    this.confirmation
+    this.#confirmation
       .confirm({
         title: 'Eliminar Asignatura',
         message: `¿Estás seguro de eliminar la asignatura ${subject.name}?`,
@@ -130,7 +190,7 @@ export default class Subjects {
       .pipe(
         filter((confirmed: boolean) => confirmed === true),
         switchMap(() =>
-          this.apollo.mutate({
+          this.#apollo.mutate({
             mutation: gql`
               mutation RemoveSubject($removeSubjectId: String!) {
                 removeSubject(id: $removeSubjectId) {
@@ -147,11 +207,11 @@ export default class Subjects {
       .subscribe({
         next: () => {
           this.subjects.reload();
-          this.toast.showSuccess('Asignatura eliminada correctamente');
+          this.#toast.showSuccess('Asignatura eliminada correctamente');
         },
         error: (error) => {
           console.error(error);
-          this.toast.showError('Error al eliminar la asignatura');
+          this.#toast.showError('Error al eliminar la asignatura');
         },
       });
   }

@@ -1,8 +1,12 @@
-import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
+import { Args, Int, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { CreateSubjectInput } from './dto/create-subject.input';
 import { UpdateSubjectInput } from './dto/update-subject.input';
 import { Subject } from './entities/subject.entity';
 import { SubjectsService } from './subjects.service';
+
+import { JwtAuthGuard } from '@/auth';
+import { UseGuards } from '@nestjs/common';
+import { FetchDataInput } from '../fetch-data.input';
 
 @Resolver(() => Subject)
 export class SubjectsResolver {
@@ -15,18 +19,28 @@ export class SubjectsResolver {
     return this.subjectsService.create(createSubjectInput);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Query(() => [Subject], { name: 'subjects' })
   findAll(
-    @Args('organizationId', { type: () => String }) organizationId: string
+    @Args()
+    fetchDataInput: FetchDataInput
   ) {
-    return this.subjectsService.findAll(organizationId);
+    return this.subjectsService.findAll(fetchDataInput);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Query(() => Subject, { name: 'subject' })
   findOne(@Args('id', { type: () => String }) id: string) {
     return this.subjectsService.findOne(id);
   }
 
+  @UseGuards(JwtAuthGuard)
+  @Query(() => Int, { name: 'findManySubjectsCount' })
+  findManySubjectsCount() {
+    return this.subjectsService.findCount();
+  }
+
+  @UseGuards(JwtAuthGuard)
   @Mutation(() => Subject)
   updateSubject(
     @Args('updateSubjectInput') updateSubjectInput: UpdateSubjectInput

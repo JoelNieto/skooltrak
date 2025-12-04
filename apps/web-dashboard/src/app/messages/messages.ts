@@ -76,9 +76,9 @@ type MessageRecipientType = Prisma.MessageRecipientGetPayload<undefined> & {
                     class="checkbox"
                   />
                 </th>
-                <th>Remitente</th>
-                <th>Asunto</th>
-                <th>Fechas</th>
+                <th class="w-[15rem]"></th>
+                <th></th>
+                <th></th>
                 <th></th>
               </tr>
             </thead>
@@ -106,7 +106,9 @@ type MessageRecipientType = Prisma.MessageRecipientGetPayload<undefined> & {
                   {{ item.message.sender.name }}
                 </td>
                 <td class="text-neutral-500!">
-                  {{ item.message.subject }}
+                  <a [routerLink]="['/messages', item.message.id]">{{
+                    item.message.subject
+                  }}</a>
                 </td>
                 <td class="text-neutral-500!">
                   {{ item.message.createdAt | timeAgo }}

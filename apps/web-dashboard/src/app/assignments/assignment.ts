@@ -30,7 +30,7 @@ import { map } from 'rxjs';
         <li>{{ assignment.title }}</li>
       </ul>
     </div>
-    <div class="card card-border border-base-300 mt-4">
+    <div class="card card-border border-base-300 bg-base-100 mt-4">
       <div class="card-body">
         <h1 class="text-xl font-semibold mb-2">{{ assignment.title }}</h1>
         <a
@@ -45,13 +45,13 @@ import { map } from 'rxjs';
         </p>
       </div>
     </div>
-    <div class="card card-border border-base-300 mt-4">
+    <div class="card card-border border-base-300 bg-base-100 mt-4">
       <div class="card-body">
         <h3 class="card-title">Detalles</h3>
         <lib-editor-viewer [innerHTML]="assignment.details" />
       </div>
     </div>
-    <div class="card card-border border-base-300 mt-4">
+    <div class="card card-border border-base-300 bg-base-100 mt-4">
       <div class="card-body">
         <h3 class="card-title">Profesor</h3>
         <p>

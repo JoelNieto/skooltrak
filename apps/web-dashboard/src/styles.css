@@ -134,7 +134,7 @@ textarea.ng-invalid.ng-dirty {
   thead > tr {
     @apply border-b border-gray-300 dark:border-gray-700;
     th {
-      @apply text-gray-800 dark:text-gray-200 font-medium pl-0;
+      @apply text-gray-800 dark:text-gray-200 font-medium;
     }
     th:first-child {
       @apply pl-4;
@@ -146,7 +146,7 @@ textarea.ng-invalid.ng-dirty {
   tbody > tr {
     @apply border-b border-gray-200 last:border-b-0 dark:border-gray-700;
     td {
-      @apply text-gray-700 dark:text-gray-200 pl-0;
+      @apply text-gray-700 dark:text-gray-200;
     }
     td:first-child {
       @apply font-medium pl-4;

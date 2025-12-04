@@ -32,7 +32,7 @@ type Teacher = Prisma.TeacherGetPayload<false> & {
       </div>
       <div class="fieldset col-span-2">
         <label for="details">Detalles</label>
-        <lib-text-editor formControlName="details" />
+        <lib-text-editor formControlName="details" [bordered]="true" />
       </div>
       <div class="fieldset col-span-2">
         <label for="courseId">Curso</label>

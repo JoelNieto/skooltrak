@@ -1,4 +1,4 @@
-import { Inject, Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { CONTEXT } from '@nestjs/graphql';
 import { Request } from 'express';
 import { FetchDataInput } from '../fetch-data.input';
@@ -13,12 +13,13 @@ export class MessagesService {
   ) {}
   create(createMessageInput: CreateMessageInput) {
     const { req } = this.context;
-    const { userId } = req.user as any;
+    const { userId, organizationId } = req.user as any;
     const { recipientIds, ...rest } = createMessageInput;
 
     return this.prisma.message.create({
       data: {
         ...rest,
+        organizationId,
         senderId: userId,
         recipients: {
           create: recipientIds.map((recipientId) => ({
@@ -39,13 +40,13 @@ export class MessagesService {
   findManyBySender(query: FetchDataInput) {
     const { req } = this.context;
     const { userId } = req.user as any;
-    const { skip, take, orderBy } = query;
+    const { skip, take } = query;
 
     return this.prisma.message.findMany({
       where: { senderId: userId, deletedAt: null },
       skip,
       take,
-      orderBy: orderBy || { createdAt: 'desc' },
+      orderBy: { createdAt: 'desc' },
       include: {
         recipients: {
           include: {
@@ -59,14 +60,13 @@ export class MessagesService {
   findMany(query: FetchDataInput) {
     const { req } = this.context;
     const { userId } = req.user as any;
-    Logger.log('user', req.user);
-    const { skip, take, orderBy } = query;
+    const { skip, take } = query;
 
     return this.prisma.messageRecipient.findMany({
       where: { userId, deletedAt: null },
       skip,
       take,
-      orderBy: orderBy || { createdAt: 'desc' },
+      orderBy: { createdAt: 'desc' },
       include: {
         message: {
           include: { sender: true, recipients: { include: { user: true } } },
@@ -75,9 +75,25 @@ export class MessagesService {
     });
   }
 
-  findContacts() {
+  findContacts(queryText?: string) {
     const { req } = this.context;
-    const { userId } = req.user as any;
+    const { organizationId } = req.user as any;
+
+    return this.prisma.user.findMany({
+      include: {
+        student: { include: { classGroup: true } },
+        teacher: { include: { classGroups: true } },
+        role: true,
+      },
+      where: {
+        organizationId,
+        OR: [
+          { firstName: { contains: queryText, mode: 'insensitive' } },
+          { lastName: { contains: queryText, mode: 'insensitive' } },
+        ],
+      },
+      orderBy: { firstName: 'asc' },
+    });
   }
 
   findCount() {
@@ -97,9 +113,10 @@ export class MessagesService {
         OR: [{ recipients: { some: { userId } } }, { senderId: id }],
       },
       include: {
+        sender: { include: { role: true, student: true, teacher: true } },
         recipients: {
           include: {
-            user: true,
+            user: { include: { role: true, student: true, teacher: true } },
           },
         },
       },

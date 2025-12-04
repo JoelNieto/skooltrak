@@ -43,20 +43,6 @@ import Store from '../../core/store';
         />
       </div>
       <div class="fieldset">
-        <label for="teacherId">Profesor</label>
-        <select
-          id="teacherId"
-          name="teacherId"
-          formControlName="teacherId"
-          class="select select-primary"
-        >
-          <option [value]="null" disabled>Seleccionar profesor</option>
-          @for(teacher of teachers.value(); track teacher.id) {
-          <option [value]="teacher.id">{{ teacher.name }}</option>
-          }
-        </select>
-      </div>
-      <div class="fieldset">
         <label for="studyPlanId">Plan de estudio</label>
         <select
           id="studyPlanId"
@@ -64,9 +50,26 @@ import Store from '../../core/store';
           formControlName="studyPlanId"
           class="select select-primary"
         >
-          <option value="" disabled>Seleccionar plan</option>
+          <option value="" disabled>Seleccionar plan...</option>
           @for(studyPlan of studyPlans.value(); track studyPlan.id) {
           <option [value]="studyPlan.id">{{ studyPlan.name }}</option>
+          }
+        </select>
+      </div>
+      <div class="fieldset">
+        <label for="teacherId"
+          >Profesor
+          <span class="text-base-content/50 text-xs">(opcional)</span></label
+        >
+        <select
+          id="teacherId"
+          name="teacherId"
+          formControlName="teacherId"
+          class="select select-primary"
+        >
+          <option [value]="null" disabled>Seleccionar profesor...</option>
+          @for(teacher of teachers.value(); track teacher.id) {
+          <option [value]="teacher.id">{{ teacher.name }}</option>
           }
         </select>
       </div>

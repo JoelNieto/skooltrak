@@ -23,7 +23,10 @@ import Store from '../../core/store';
   template: `<form [formGroup]="form" (ngSubmit)="onSubmit()">
     <div class="flex flex-col gap-2">
       <div class="fieldset">
-        <label for="code">Código</label>
+        <label for="code"
+          >Código
+          <span class="text-base-content/50 text-xs">(opcional)</span></label
+        >
         <input
           type="text"
           id="code"
@@ -121,27 +124,18 @@ export default class CoursesForm {
     },
   });
   public subjects = rxResource({
-    params: () => ({
-      organizationId: this.store.currentOrganizationId(),
-    }),
-    stream: ({ params }) => {
-      const { organizationId } = params;
-      if (!organizationId) {
-        return of([]);
-      }
+    stream: () => {
       return this.apollo
         .watchQuery<{ subjects: Prisma.SubjectGetPayload<false>[] }>({
           query: gql`
-            query GetSubjects($organizationId: String!) {
-              subjects(organizationId: $organizationId) {
+            query GetSubjects {
+              subjects {
                 id
                 name
               }
             }
           `,
-          variables: {
-            organizationId: params.organizationId,
-          },
+          fetchPolicy: 'cache-first',
         })
         .valueChanges.pipe(map((result) => result.data.subjects));
     },
@@ -172,6 +166,7 @@ export default class CoursesForm {
           variables: {
             schoolId: params.schoolId,
           },
+          fetchPolicy: 'cache-first',
         })
         .valueChanges.pipe(map((result) => result.data.studyPlansBySchoolId));
     },

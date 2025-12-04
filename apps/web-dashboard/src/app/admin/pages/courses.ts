@@ -1,5 +1,5 @@
-import { Confirmation, Modal, Toast } from '@/ui';
-import { Component, inject } from '@angular/core';
+import { Confirmation, Modal, Paginator, Toast } from '@/ui';
+import { Component, computed, inject, signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
@@ -9,13 +9,13 @@ import {
 } from '@ng-icons/phosphor-icons/duotone';
 import { Prisma } from '@prisma/client';
 import { Apollo, gql } from 'apollo-angular';
-import { filter, map, of, switchMap } from 'rxjs';
+import { filter, map, of, switchMap, tap } from 'rxjs';
 import Store from '../../core/store';
 import CoursesForm from '../forms/courses-form';
 
 @Component({
   selector: 'app-courses',
-  imports: [NgIcon],
+  imports: [NgIcon, Paginator],
   viewProviders: [
     provideIcons({
       phosphorPlusCircleDuotone,
@@ -74,32 +74,62 @@ import CoursesForm from '../forms/courses-form';
           }
         </tbody>
       </table>
+      <div class="p-4 rounded-b-lg ">
+        <lib-paginator
+          [count]="pagination().count"
+          [take]="pagination().take"
+          [skip]="pagination().skip"
+          (skipChange)="updateSkip($event)"
+          (takeChange)="updateTake($event)"
+        />
+      </div>
     </div> `,
 })
 export default class Courses {
-  private modal = inject(Modal);
-  private apollo = inject(Apollo);
-  private confirmation = inject(Confirmation);
-  private store = inject(Store);
-  private toast = inject(Toast);
+  #modal = inject(Modal);
+  #apollo = inject(Apollo);
+  #confirmation = inject(Confirmation);
+  #store = inject(Store);
+  #toast = inject(Toast);
+
+  public updateSkip(skip: number) {
+    this.pagination.update((prev) => ({ ...prev, skip }));
+  }
+
+  public updateTake(take: number) {
+    this.pagination.update((prev) => ({ ...prev, take }));
+  }
+  public take = computed(() => this.pagination().take);
+  public skip = computed(() => this.pagination().skip);
+
+  public pagination = signal({
+    take: 10,
+    skip: 0,
+    count: 0,
+  });
+
   public courses = rxResource({
     params: () => ({
-      schoolId: this.store.currentSchoolId(),
+      schoolId: this.#store.currentSchoolId(),
+      take: this.take(),
+      skip: this.skip(),
     }),
     stream: ({ params }) => {
-      const { schoolId } = params;
+      const { schoolId, take, skip } = params;
       if (!schoolId) {
         return of([]);
       }
-      return this.apollo
+      return this.#apollo
         .watchQuery<{
-          coursesBySchoolId: Prisma.CourseGetPayload<{
+          count: number;
+          courses: Prisma.CourseGetPayload<{
             include: { subject: true; studyPlan: true; currentPeriod: true };
           }>[];
         }>({
           query: gql`
-            query coursesBySchoolId($schoolId: String!) {
-              coursesBySchoolId(schoolId: $schoolId) {
+            query getCourses($schoolId: String!, $take: Int!, $skip: Int!) {
+              count: coursesCount(schoolId: $schoolId)
+              courses(schoolId: $schoolId, take: $take, skip: $skip) {
                 id
                 name
                 shortName
@@ -113,6 +143,7 @@ export default class Courses {
                 currentPeriod {
                   name
                 }
+                currentPeriodId
                 subjectId
                 studyPlanId
                 code
@@ -122,10 +153,20 @@ export default class Courses {
             }
           `,
           variables: {
-            schoolId: params.schoolId,
+            schoolId,
+            take,
+            skip,
           },
         })
-        .valueChanges.pipe(map((result) => result.data.coursesBySchoolId));
+        .valueChanges.pipe(
+          tap((result) => {
+            this.pagination.update((prev) => ({
+              ...prev,
+              count: result.data.count,
+            }));
+          }),
+          map((result) => result.data.courses)
+        );
     },
   });
 
@@ -134,7 +175,7 @@ export default class Courses {
       include: { subject: true; studyPlan: true };
     }>
   ) {
-    this.modal
+    this.#modal
       .open(CoursesForm, {
         title: course ? 'Editar Curso' : 'Agregar Curso',
         data: {
@@ -147,7 +188,7 @@ export default class Courses {
   }
 
   public deleteCourse(course: Prisma.CourseGetPayload<false>) {
-    this.confirmation
+    this.#confirmation
       .confirm({
         title: 'Eliminar Curso',
         message: `¿Estás seguro de eliminar el curso ${course.name}?`,
@@ -155,7 +196,7 @@ export default class Courses {
       .pipe(
         filter((confirmed: boolean) => confirmed === true),
         switchMap(() =>
-          this.apollo.mutate({
+          this.#apollo.mutate({
             mutation: gql`
               mutation RemoveCourse($removeCourseId: String!) {
                 removeCourse(id: $removeCourseId) {
@@ -172,11 +213,11 @@ export default class Courses {
       .subscribe({
         next: () => {
           this.courses.reload();
-          this.toast.showSuccess('Curso eliminado correctamente');
+          this.#toast.showSuccess('Curso eliminado correctamente');
         },
         error: (error) => {
           console.error(error);
-          this.toast.showError('Error al eliminar el curso');
+          this.#toast.showError('Error al eliminar el curso');
         },
       });
   }

@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { FetchDataInput } from '../fetch-data.input';
 import { PrismaService } from '../prisma.service';
 import { CreateCourseInput } from './dto/create-course.input';
 import { UpdateCourseInput } from './dto/update-course.input';
@@ -71,9 +72,34 @@ export class CoursesService {
     });
   }
 
-  findAll() {
+  findAll(fetchDataInput: FetchDataInput) {
+    const { skip, take, schoolId, search } = fetchDataInput;
     return this.prisma.course.findMany({
+      where: {
+        schoolId,
+        OR: [
+          { name: { contains: search } },
+          { code: { contains: search } },
+          { shortName: { contains: search } },
+        ],
+      },
+      skip,
+      take,
       include: { school: true, subject: true, studyPlan: true },
+    });
+  }
+
+  count(fetchDataInput: FetchDataInput) {
+    const { schoolId, search } = fetchDataInput;
+    return this.prisma.course.count({
+      where: {
+        schoolId,
+        OR: [
+          { name: { contains: search } },
+          { code: { contains: search } },
+          { shortName: { contains: search } },
+        ],
+      },
     });
   }
 

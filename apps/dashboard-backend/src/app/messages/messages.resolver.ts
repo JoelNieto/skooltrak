@@ -1,4 +1,4 @@
-import { JwtAuthGuard } from '@/auth';
+import { JwtAuthGuard, User } from '@/auth';
 import { UseGuards } from '@nestjs/common';
 import { Args, Int, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { FetchDataInput } from '../fetch-data.input';
@@ -36,8 +36,18 @@ export class MessagesResolver {
     return this.messagesService.findCount();
   }
 
-  @Query(() => Message, { name: 'message' })
-  findOne(@Args('id', { type: () => String }) id: string) {
+  @UseGuards(JwtAuthGuard)
+  @Query(() => [User], { name: 'findContacts' })
+  findContacts(
+    @Args('queryText', { type: () => String, nullable: true, defaultValue: '' })
+    queryText?: string
+  ) {
+    return this.messagesService.findContacts(queryText);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Query(() => Message, { name: 'findMessageById' })
+  findMessageById(@Args('id', { type: () => String }) id: string) {
     return this.messagesService.findOne(id);
   }
 

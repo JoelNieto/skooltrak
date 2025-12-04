@@ -1,11 +1,16 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
+import { CONTEXT } from '@nestjs/graphql';
+import { Request } from 'express';
+import { FetchDataInput } from '../fetch-data.input';
 import { PrismaService } from '../prisma.service';
 import { CreateSubjectInput } from './dto/create-subject.input';
 import { UpdateSubjectInput } from './dto/update-subject.input';
-
 @Injectable()
 export class SubjectsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    @Inject(CONTEXT) private readonly context: { req: Request }
+  ) {}
 
   create(createSubjectInput: CreateSubjectInput) {
     return this.prisma.subject.create({
@@ -14,8 +19,24 @@ export class SubjectsService {
     });
   }
 
-  findAll(organizationId: string) {
+  findAll(fetchDataInput: FetchDataInput) {
+    const { skip, take, orderBy, orderDirection } = fetchDataInput;
+    const { req } = this.context;
+    const { organizationId } = req.user as any;
     return this.prisma.subject.findMany({
+      where: { organizationId },
+      skip,
+      take,
+      orderBy: {
+        [orderBy ?? 'name']: orderDirection,
+      },
+    });
+  }
+
+  findCount() {
+    const { req } = this.context;
+    const { organizationId } = req.user as any;
+    return this.prisma.subject.count({
       where: { organizationId },
     });
   }

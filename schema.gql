@@ -302,9 +302,6 @@ input CreateMessageInput {
   """The content of the message."""
   content: String!
 
-  """The ID of the organization associated with the message."""
-  organizationId: String!
-
   """The IDs of the recipients associated with the message."""
   recipientIds: [String!]!
 
@@ -523,7 +520,7 @@ input CreateSubjectInput {
 
 input CreateTeacherInput {
   """Birth date of the teacher"""
-  birthDate: DateTime = "2025-11-27T22:53:09.482Z"
+  birthDate: DateTime = "2025-12-04T02:11:55.422Z"
 
   """Document ID of the teacher"""
   documentId: String!
@@ -908,16 +905,92 @@ type Query {
   classGroupsByOrganizationId(organizationId: String!): [ClassGroup!]!
   classGroupsBySchoolId(schoolId: String!): [ClassGroup!]!
   course(id: String!): Course!
-  courses: [Course!]!
+  courses(
+    """Order by"""
+    orderBy: String
+
+    """Order direction"""
+    orderDirection: String = "asc"
+
+    """School ID"""
+    schoolId: String
+
+    """Search query"""
+    search: String = ""
+
+    """Skip"""
+    skip: Int
+
+    """Take"""
+    take: Int
+  ): [Course!]!
   coursesBySchoolId(schoolId: String!): [Course!]!
   coursesByStudyPlanId(studyPlanId: String!): [Course!]!
   coursesBySubjectId(subjectId: String!): [Course!]!
+  coursesCount(
+    """Order by"""
+    orderBy: String
+
+    """Order direction"""
+    orderDirection: String = "asc"
+
+    """School ID"""
+    schoolId: String
+
+    """Search query"""
+    search: String = ""
+
+    """Skip"""
+    skip: Int
+
+    """Take"""
+    take: Int
+  ): Int!
   degree(id: String!): Degree!
   degrees: [Degree!]!
   degreesBySchoolId(schoolId: String!): [Degree!]!
-  findManyMessages(orderBy: String, skip: Int, take: Int): [MessageRecipient!]!
+  findContacts(queryText: String = ""): [User!]!
+  findManyMessages(
+    """Order by"""
+    orderBy: String
+
+    """Order direction"""
+    orderDirection: String = "asc"
+
+    """School ID"""
+    schoolId: String
+
+    """Search query"""
+    search: String = ""
+
+    """Skip"""
+    skip: Int
+
+    """Take"""
+    take: Int
+  ): [MessageRecipient!]!
   findManyMessagesCount: Int!
-  findMyMessages(orderBy: String, skip: Int, take: Int): [Message!]!
+  findManySubjectsCount: Int!
+  findMessageById(id: String!): Message!
+  findMyMessages(
+    """Order by"""
+    orderBy: String
+
+    """Order direction"""
+    orderDirection: String = "asc"
+
+    """School ID"""
+    schoolId: String
+
+    """Search query"""
+    search: String = ""
+
+    """Skip"""
+    skip: Int
+
+    """Take"""
+    take: Int
+  ): [Message!]!
   grade(id: String!): Grade!
   gradeBucket(id: String!): GradeBucket!
   gradeBucketsByCourseId(courseId: String!): [GradeBucket!]!
@@ -928,7 +1001,6 @@ type Query {
   grades: [Grade!]!
   gradesByCourseId(courseId: String!, periodId: String!): [Grade!]!
   me: User!
-  message(id: String!): Message!
   organization(id: String!): Organization!
   organizations: [Organization!]!
   period(id: String!): Period!
@@ -950,7 +1022,25 @@ type Query {
   studyPlans: [StudyPlan!]!
   studyPlansBySchoolId(degreeId: String, schoolId: String!): [StudyPlan!]!
   subject(id: String!): Subject!
-  subjects(organizationId: String!): [Subject!]!
+  subjects(
+    """Order by"""
+    orderBy: String
+
+    """Order direction"""
+    orderDirection: String = "asc"
+
+    """School ID"""
+    schoolId: String
+
+    """Search query"""
+    search: String = ""
+
+    """Skip"""
+    skip: Int
+
+    """Take"""
+    take: Int
+  ): [Subject!]!
   teacher(id: String!): Teacher!
   teachers: [Teacher!]!
   teachersByOrganizationId(organizationId: String!): [Teacher!]!
@@ -1613,7 +1703,7 @@ input UpdateSubjectInput {
 
 input UpdateTeacherInput {
   """Birth date of the teacher"""
-  birthDate: DateTime = "2025-11-27T22:53:09.482Z"
+  birthDate: DateTime = "2025-12-04T02:11:55.422Z"
 
   """Document ID of the teacher"""
   documentId: String

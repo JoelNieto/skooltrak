@@ -1,6 +1,7 @@
 import {
   Component,
   forwardRef,
+  input,
   OnDestroy,
   ViewEncapsulation,
 } from '@angular/core';
@@ -20,11 +21,15 @@ import { EditorMenu } from './editor-menu';
 @Component({
   selector: 'lib-text-editor',
   imports: [TiptapEditorDirective, EditorMenu, FormsModule],
-  template: `<div class="flex flex-col textarea textarea-primary">
+  template: `<div
+    class="flex flex-col"
+    [class]="bordered() ? 'textarea textarea-primary' : ''"
+  >
     <div class="flex gap-2">
       <lib-editor-menu [editor]="editor" />
     </div>
     <tiptap-editor
+      class="min-h-[10rem]"
       [editor]="editor"
       [ngModel]="value"
       (ngModelChange)="changeValue($event)"
@@ -38,7 +43,11 @@ import { EditorMenu } from './editor-menu';
     },
   ],
   styles: `
+    lib-text-editor {
+      width: 100%;
+    }
     @reference "tailwindcss";
+
       .ProseMirror p.is-editor-empty:first-child::before {
         @apply text-neutral-400 float-left pointer-events-none h-0;
         content: attr(data-placeholder);
@@ -85,6 +94,7 @@ import { EditorMenu } from './editor-menu';
   encapsulation: ViewEncapsulation.None,
 })
 export class TextEditor implements ControlValueAccessor, OnDestroy {
+  bordered = input<boolean>();
   value = '';
   onChange: any = () => {
     /* empty */
@@ -129,6 +139,7 @@ export class TextEditor implements ControlValueAccessor, OnDestroy {
     if (!this.disabled) {
       this.value = value;
       this.onChange(value);
+
       this.onTouched();
     }
   }

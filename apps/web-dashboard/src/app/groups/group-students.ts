@@ -2,7 +2,9 @@ import { Component, computed, input, signal } from '@angular/core';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { phosphorMagnifyingGlassDuotone } from '@ng-icons/phosphor-icons/duotone';
 import { Prisma } from '@prisma/client';
-type Student = Prisma.StudentGetPayload<undefined> & {
+type Student = Prisma.StudentGetPayload<{
+  include: { user: true };
+}> & {
   name: string;
   initials: string;
 };
@@ -30,7 +32,10 @@ type Student = Prisma.StudentGetPayload<undefined> & {
       <li>
         <div class="flex items-center gap-4">
           <div class="avatar avatar-online avatar-placeholder">
-            <div class="bg-primary text-primary-content w-10 rounded-full">
+            <div
+              class="text-primary-content w-10 rounded-full"
+              [style.background]="student.user.color"
+            >
               <span class="text-sm">{{ student.initials }}</span>
             </div>
           </div>

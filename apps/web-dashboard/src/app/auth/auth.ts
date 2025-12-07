@@ -34,6 +34,8 @@ export default class Auth {
         ?.lastName.charAt(0)
         .toUpperCase()}`
   );
+
+  public userColor = computed(() => this.user()?.color);
   public role = computed(() => this.user()?.role.name);
   public permissions = computed(() =>
     this.user()?.role.permissions.map((p) => p.descriptiveId)

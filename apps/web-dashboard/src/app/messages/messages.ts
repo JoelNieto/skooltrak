@@ -98,7 +98,8 @@ type MessageRecipientType = Prisma.MessageRecipientGetPayload<undefined> & {
                 >
                   <div class="avatar avatar-placeholder">
                     <div
-                      class="bg-neutral text-neutral-content w-7 rounded-full"
+                      class="text-neutral-content w-7 rounded-full"
+                      [style.background]="item.message.sender.color"
                     >
                       <span>{{ item.message.sender.initials }}</span>
                     </div>
@@ -230,6 +231,7 @@ export default class Messages {
                     name
                     initials
                     email
+                    color
                   }
                   recipients {
                     id
@@ -238,6 +240,7 @@ export default class Messages {
                       initials
                       name
                       email
+                      color
                     }
                   }
                 }

@@ -20,11 +20,18 @@ export class SubjectsService {
   }
 
   findAll(fetchDataInput: FetchDataInput) {
-    const { skip, take, orderBy, orderDirection } = fetchDataInput;
+    const { skip, take, orderBy, orderDirection, search } = fetchDataInput;
     const { req } = this.context;
     const { organizationId } = req.user as any;
     return this.prisma.subject.findMany({
-      where: { organizationId },
+      where: {
+        organizationId,
+        OR: [
+          { name: { contains: search, mode: 'insensitive' } },
+          { shortName: { contains: search, mode: 'insensitive' } },
+          { code: { contains: search, mode: 'insensitive' } },
+        ],
+      },
       skip,
       take,
       orderBy: {
@@ -33,11 +40,19 @@ export class SubjectsService {
     });
   }
 
-  findCount() {
+  findCount(fetchDataInput: FetchDataInput) {
+    const { search } = fetchDataInput;
     const { req } = this.context;
     const { organizationId } = req.user as any;
     return this.prisma.subject.count({
-      where: { organizationId },
+      where: {
+        organizationId,
+        OR: [
+          { name: { contains: search, mode: 'insensitive' } },
+          { shortName: { contains: search, mode: 'insensitive' } },
+          { code: { contains: search, mode: 'insensitive' } },
+        ],
+      },
     });
   }
 

@@ -8,7 +8,11 @@ export class FetchDataInput {
   @Field(() => Int, { nullable: true, description: 'Take' })
   take?: number;
 
-  @Field(() => String, { nullable: true, description: 'Order by' })
+  @Field(() => String, {
+    nullable: true,
+    description: 'Order by',
+    defaultValue: 'name',
+  })
   orderBy?: string;
 
   @Field(() => String, {

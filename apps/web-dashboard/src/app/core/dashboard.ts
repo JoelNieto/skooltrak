@@ -58,7 +58,7 @@ import Store from './store';
       <div
         class="p-4 border-b border-neutral-200 dark:border-white/10 sticky top-0 z-10 flex justify-between items-center"
       >
-        <div>
+        <div class="flex gap-2 items-center">
           <button
             #sidebarToggle
             id="sidebar-toggle"
@@ -109,7 +109,10 @@ import Store from './store';
               role="button"
               tabindex="0"
             >
-              <div class="bg-neutral text-neutral-content w-8 rounded-full">
+              <div
+                class="text-neutral-content w-8 rounded-full"
+                [style.background]="auth.userColor()"
+              >
                 <span>{{ auth.userInitials() }}</span>
               </div>
             </div>
@@ -224,6 +227,7 @@ export default class Dashboard {
                 email
                 firstName
                 lastName
+                color
                 teacher {
                   id
                   firstName

@@ -36,6 +36,18 @@ export class CreateTeacherInput implements CreateTeacherInputType {
     defaultValue: new Date(),
   })
   birthDate: Date;
+
+  @Field(() => String, { nullable: true, defaultValue: '' })
+  address?: string;
+
+  @Field(() => String, { nullable: true, defaultValue: '' })
+  about?: string;
+
+  @Field(() => String, { nullable: true, defaultValue: '' })
+  phoneNumber?: string;
+
+  @Field(() => String, { nullable: true, defaultValue: '' })
+  personalEmail?: string;
   @Field(() => String, { description: 'Gender of the teacher' })
   gender: $Enums.Gender;
   @Field(() => String, { description: 'Email of the teacher' })

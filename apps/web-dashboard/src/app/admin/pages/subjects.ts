@@ -1,13 +1,14 @@
-import { Confirmation, Modal, Paginator, Toast } from '@/ui';
+import { Confirmation, Modal, Pagination, Paginator, Toast } from '@/ui';
 import { DatePipe } from '@angular/common';
 import {
+  afterRenderEffect,
   ChangeDetectionStrategy,
   Component,
-  computed,
   inject,
   signal,
 } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
+import { FormsModule } from '@angular/forms';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
   phosphorMagnifyingGlassDuotone,
@@ -24,7 +25,8 @@ import SubjectsForm from '../forms/subjects-form';
 
 @Component({
   selector: 'app-subjects',
-  imports: [DatePipe, NgIcon, Paginator],
+  imports: [DatePipe, NgIcon, Paginator, FormsModule],
+  providers: [Pagination],
   viewProviders: [
     provideIcons({
       phosphorPencilDuotone,
@@ -40,7 +42,12 @@ import SubjectsForm from '../forms/subjects-form';
       <div class="md:w-96 w-full">
         <label class="input input-primary ">
           <ng-icon name="phosphorMagnifyingGlassDuotone" />
-          <input class="pl-0" type="search" placeholder="Buscar..." />
+          <input
+            class="pl-0"
+            type="search"
+            placeholder="Buscar..."
+            [(ngModel)]="searchText"
+          />
         </label>
       </div>
 
@@ -51,20 +58,113 @@ import SubjectsForm from '../forms/subjects-form';
     <div
       class="overflow-x-auto bg-base-100 rounded-lg mt-4 border border-base-300"
     >
-      <table class="table">
+      <table class="table table-transition">
         <thead>
           <tr>
-            <th class="hover:bg-base-200 cursor-pointer">
+            <th
+              class="cursor-pointer hover:bg-base-200"
+              [class]="
+                pagination.sortBy() === 'name'
+                  ? 'bg-primary/10 !text-primary hover:bg-primary/20'
+                  : ''
+              "
+              (click)="pagination.setOrder('name')"
+            >
               <div class="flex items-center gap-2">
-                Nombre
-                <ng-icon name="phosphorSortAscendingDuotone" class="text-xl" />
+                Nombre @if(pagination.sortBy() === 'name') {
+                <ng-icon
+                  [name]="
+                    pagination.sortOrder() === 'asc'
+                      ? 'phosphorSortAscendingDuotone'
+                      : 'phosphorSortDescendingDuotone'
+                  "
+                  class="text-xl"
+                />}
               </div>
             </th>
-            <th class="hover:bg-base-200 cursor-pointer">Nombre corto</th>
-            <th class="hover:bg-base-200 cursor-pointer">Código</th>
-            <th class="hover:bg-base-200 cursor-pointer">Fecha de creación</th>
-            <th class="hover:bg-base-200 cursor-pointer">
-              Fecha de actualización
+            <th
+              class="hover:bg-base-200 cursor-pointer"
+              [class]="
+                pagination.sortBy() === 'shortName'
+                  ? 'bg-primary/10 !text-primary hover:bg-primary/20'
+                  : ''
+              "
+              (click)="pagination.setOrder('shortName')"
+            >
+              <div class="flex items-center gap-2">
+                Nombre corto @if(pagination.sortBy() === 'shortName') {
+                <ng-icon
+                  [name]="
+                    pagination.sortOrder() === 'asc'
+                      ? 'phosphorSortAscendingDuotone'
+                      : 'phosphorSortDescendingDuotone'
+                  "
+                  class="text-xl"
+                />}
+              </div>
+            </th>
+            <th
+              class="hover:bg-base-200 cursor-pointer"
+              [class]="
+                pagination.sortBy() === 'code'
+                  ? 'bg-primary/10 !text-primary hover:bg-primary/20'
+                  : ''
+              "
+              (click)="pagination.setOrder('code')"
+            >
+              <div class="flex items-center gap-2">
+                Código @if(pagination.sortBy() === 'code') {
+                <ng-icon
+                  [name]="
+                    pagination.sortOrder() === 'asc'
+                      ? 'phosphorSortAscendingDuotone'
+                      : 'phosphorSortDescendingDuotone'
+                  "
+                  class="text-xl"
+                />}
+              </div>
+            </th>
+            <th
+              class="hover:bg-base-200 cursor-pointer"
+              [class]="
+                pagination.sortBy() === 'createdAt'
+                  ? 'bg-primary/10 !text-primary hover:bg-primary/20'
+                  : ''
+              "
+              (click)="pagination.setOrder('createdAt')"
+            >
+              <div class="flex items-center gap-2">
+                Creado @if(pagination.sortBy() === 'createdAt') {
+                <ng-icon
+                  [name]="
+                    pagination.sortOrder() === 'asc'
+                      ? 'phosphorSortAscendingDuotone'
+                      : 'phosphorSortDescendingDuotone'
+                  "
+                  class="text-xl"
+                />}
+              </div>
+            </th>
+            <th
+              class="hover:bg-base-200 cursor-pointer"
+              [class]="
+                pagination.sortBy() === 'updatedAt'
+                  ? 'bg-primary/10 !text-primary hover:bg-primary/20'
+                  : ''
+              "
+              (click)="pagination.setOrder('updatedAt')"
+            >
+              <div class="flex items-center gap-2">
+                Actualizado @if(pagination.sortBy() === 'updatedAt') {
+                <ng-icon
+                  [name]="
+                    pagination.sortOrder() === 'asc'
+                      ? 'phosphorSortAscendingDuotone'
+                      : 'phosphorSortDescendingDuotone'
+                  "
+                  class="text-xl"
+                />}
+              </div>
             </th>
             <th></th>
           </tr>
@@ -89,16 +189,63 @@ import SubjectsForm from '../forms/subjects-form';
               </button>
             </td>
           </tr>
-          }
+          }@empty { @if (subjects.isLoading()) {
+          <tr>
+            <td><div class="skeleton h-4 w-full"></div></td>
+            <td><div class="skeleton h-4 w-full"></div></td>
+            <td><div class="skeleton h-4 w-full"></div></td>
+            <td><div class="skeleton h-4 w-full"></div></td>
+            <td><div class="skeleton h-4 w-full"></div></td>
+            <td><div class="skeleton h-4 w-full"></div></td>
+          </tr>
+          <tr>
+            <td><div class="skeleton h-4 w-full"></div></td>
+            <td><div class="skeleton h-4 w-full"></div></td>
+            <td><div class="skeleton h-4 w-full"></div></td>
+            <td><div class="skeleton h-4 w-full"></div></td>
+            <td><div class="skeleton h-4 w-full"></div></td>
+            <td><div class="skeleton h-4 w-full"></div></td>
+          </tr>
+          <tr>
+            <td><div class="skeleton h-4 w-full"></div></td>
+            <td><div class="skeleton h-4 w-full"></div></td>
+            <td><div class="skeleton h-4 w-full"></div></td>
+            <td><div class="skeleton h-4 w-full"></div></td>
+            <td><div class="skeleton h-4 w-full"></div></td>
+            <td><div class="skeleton h-4 w-full"></div></td>
+          </tr>
+          <tr>
+            <td><div class="skeleton h-4 w-full"></div></td>
+            <td><div class="skeleton h-4 w-full"></div></td>
+            <td><div class="skeleton h-4 w-full"></div></td>
+            <td><div class="skeleton h-4 w-full"></div></td>
+            <td><div class="skeleton h-4 w-full"></div></td>
+            <td><div class="skeleton h-4 w-full"></div></td>
+          </tr>
+          <tr>
+            <td><div class="skeleton h-4 w-full"></div></td>
+            <td><div class="skeleton h-4 w-full"></div></td>
+            <td><div class="skeleton h-4 w-full"></div></td>
+            <td><div class="skeleton h-4 w-full"></div></td>
+            <td><div class="skeleton h-4 w-full"></div></td>
+            <td><div class="skeleton h-4 w-full"></div></td>
+          </tr>
+          }@else {
+          <tr>
+            <td colspan="6" class="text-center">
+              Sin valores para este filtro
+            </td>
+          </tr>
+          } }
         </tbody>
       </table>
       <div class="p-4 rounded-b-lg ">
         <lib-paginator
-          [count]="pagination().count"
-          [take]="pagination().take"
-          [skip]="pagination().skip"
-          (skipChange)="updateSkip($event)"
-          (takeChange)="updateTake($event)"
+          [count]="pagination.count()"
+          [take]="pagination.take()"
+          [skip]="pagination.skip()"
+          (skipChange)="pagination.updateSkip($event)"
+          (takeChange)="pagination.updateTake($event)"
         />
       </div>
     </div>
@@ -110,38 +257,40 @@ export default class Subjects {
   #confirmation = inject(Confirmation);
   #modal = inject(Modal);
   #toast = inject(Toast);
+  pagination = inject(Pagination);
+  searchText = signal('');
 
-  public updateSkip(skip: number) {
-    this.pagination.update((prev) => ({ ...prev, skip }));
-  }
-
-  public updateTake(take: number) {
-    this.pagination.update((prev) => ({ ...prev, take }));
-  }
-  public take = computed(() => this.pagination().take);
-  public skip = computed(() => this.pagination().skip);
-
-  public pagination = signal({
-    take: 10,
-    skip: 0,
-    count: 0,
-  });
   public subjects = rxResource({
     params: () => ({
-      take: this.take(),
-      skip: this.skip(),
+      take: this.pagination.take(),
+      skip: this.pagination.skip(),
+      search: this.pagination.search(),
+      orderBy: this.pagination.sortBy(),
+      orderDirection: this.pagination.sortOrder(),
     }),
     stream: ({ params }) => {
-      const { take, skip } = params;
+      const { take, skip, search, orderBy, orderDirection } = params;
       return this.#apollo
         .watchQuery<{
           count: number;
           subjects: Prisma.SubjectGetPayload<false>[];
         }>({
           query: gql`
-            query GetSubjects($take: Int!, $skip: Int!) {
-              count: findManySubjectsCount
-              subjects(take: $take, skip: $skip) {
+            query GetSubjects(
+              $take: Int!
+              $skip: Int!
+              $search: String
+              $orderBy: String
+              $orderDirection: String
+            ) {
+              count: findManySubjectsCount(search: $search)
+              subjects(
+                take: $take
+                skip: $skip
+                search: $search
+                orderBy: $orderBy
+                orderDirection: $orderDirection
+              ) {
                 id
                 name
                 shortName
@@ -154,19 +303,26 @@ export default class Subjects {
           variables: {
             take,
             skip,
+            search,
+            orderBy,
+            orderDirection,
           },
         })
         .valueChanges.pipe(
-          tap((result) => {
-            this.pagination.update((prev) => ({
-              ...prev,
-              count: result.data.count,
-            }));
+          tap(({ data }) => {
+            this.pagination.updateCount(data.count);
           }),
           map((result) => result.data.subjects)
         );
     },
   });
+
+  constructor() {
+    afterRenderEffect(() => {
+      console.log(this.searchText());
+      this.pagination.updateSearch(this.searchText());
+    });
+  }
 
   public editSubject(subject?: Prisma.SubjectGetPayload<false>) {
     this.#modal

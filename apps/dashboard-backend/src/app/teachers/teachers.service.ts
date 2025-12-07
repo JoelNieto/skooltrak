@@ -1,12 +1,20 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
+import { CONTEXT } from '@nestjs/graphql';
 import * as bcrypt from 'bcrypt';
+import { Request } from 'express';
+import { FetchDataInput } from '../fetch-data.input';
 import { PrismaService } from '../prisma.service';
 import { CreateTeacherInput } from './dto/create-teacher.input';
 import { UpdateTeacherInput } from './dto/update-teacher.input';
 
 @Injectable()
 export class TeachersService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    @Inject(CONTEXT) private readonly context: { req: Request }
+  ) {
+    //this.initColors();
+  }
   async create(createTeacherInput: CreateTeacherInput) {
     const { email, ...rest } = createTeacherInput;
     const role = await this.prisma.role.findFirst({
@@ -20,6 +28,7 @@ export class TeachersService {
         firstName: rest.firstName,
         lastName: rest.fatherName,
         email: email,
+        color: this.getRandomPastelColor(),
         password: bcrypt.hashSync(rest.documentId, 10),
         organization: {
           connect: {
@@ -42,14 +51,49 @@ export class TeachersService {
     });
   }
 
-  findAll() {
-    return this.prisma.teacher.findMany();
+  async initColors() {
+    const users = await this.prisma.user.findMany();
+    const update = users.map((user) => {
+      return this.prisma.user.update({
+        where: { id: user.id },
+        data: { color: this.getRandomPastelColor() },
+      });
+    });
+
+    await Promise.all(update);
+  }
+
+  getRandomPastelColor() {
+    const hue = Math.floor(Math.random() * 360);
+    return `hsl(${hue}, 70%, 70%)`;
+  }
+
+  findAll(fetchDataInput: FetchDataInput) {
+    const { skip, take, search, orderBy, orderDirection } = fetchDataInput;
+    const { req } = this.context;
+    const { organizationId } = req.user as any;
+    return this.prisma.teacher.findMany({
+      where: {
+        organizationId,
+        OR: [
+          { firstName: { contains: search, mode: 'insensitive' } },
+          { fatherName: { contains: search, mode: 'insensitive' } },
+          { user: { email: { contains: search, mode: 'insensitive' } } },
+        ],
+      },
+      include: { user: true },
+      skip,
+      take,
+      orderBy: {
+        [orderBy ?? 'createdAt']: orderDirection,
+      },
+    });
   }
 
   findManyByOrganizationId(organizationId: string) {
     return this.prisma.teacher.findMany({
       where: { organizationId },
-      include: { user: { select: { id: true, email: true } } },
+      include: { user: true },
     });
   }
 
@@ -57,10 +101,27 @@ export class TeachersService {
     return this.prisma.teacher.findUnique({
       where: { id },
       include: {
-        user: { select: { id: true, email: true } },
+        user: { select: { id: true, email: true, color: true } },
         classGroups: true,
         courses: true,
         assignments: true,
+        subjects: true,
+      },
+    });
+  }
+
+  findCount(fetchDataInput: FetchDataInput) {
+    const { search } = fetchDataInput;
+    const { req } = this.context;
+    const { organizationId } = req.user as any;
+    return this.prisma.teacher.count({
+      where: {
+        organizationId,
+        OR: [
+          { firstName: { contains: search, mode: 'insensitive' } },
+          { fatherName: { contains: search, mode: 'insensitive' } },
+          { user: { email: { contains: search, mode: 'insensitive' } } },
+        ],
       },
     });
   }

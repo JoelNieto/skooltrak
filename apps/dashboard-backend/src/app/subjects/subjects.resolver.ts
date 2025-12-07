@@ -36,8 +36,11 @@ export class SubjectsResolver {
 
   @UseGuards(JwtAuthGuard)
   @Query(() => Int, { name: 'findManySubjectsCount' })
-  findManySubjectsCount() {
-    return this.subjectsService.findCount();
+  findManySubjectsCount(
+    @Args()
+    fetchDataInput: FetchDataInput
+  ) {
+    return this.subjectsService.findCount(fetchDataInput);
   }
 
   @UseGuards(JwtAuthGuard)

@@ -14,7 +14,9 @@ import { catchError, map, of, throwError } from 'rxjs';
 import GroupCourses from './group-courses';
 import GroupStudents from './group-students';
 type Teacher = Prisma.TeacherGetPayload<undefined> & { name: string };
-type Student = Prisma.StudentGetPayload<undefined> & {
+type Student = Prisma.StudentGetPayload<{
+  include: { user: true };
+}> & {
   name: string;
   initials: string;
 };
@@ -115,6 +117,9 @@ export default class Group {
                   email
                   documentId
                   initials
+                  user {
+                    color
+                  }
                 }
                 courses {
                   id

@@ -9,7 +9,7 @@ import {
   model,
   output,
   signal,
-  ViewChild,
+  viewChild,
 } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
@@ -26,6 +26,7 @@ export type Contact = {
   avatar?: string;
   name: string;
   email: string;
+  color?: string;
   role: { name: string };
   student?: { id: string };
   teacher?: { id: string };
@@ -102,7 +103,8 @@ export interface SelectedContact extends Contact {
             </div>
             } @else {
             <div
-              class="w-8 h-8 rounded-full bg-blue-500 text-white mr-3 flex-shrink-0 flex items-center justify-center text-sm font-medium"
+              class="w-8 h-8 rounded-full text-white mr-3 flex-shrink-0 flex items-center justify-center text-sm font-medium"
+              [style.background]="contact.color"
             >
               {{ contact.initials }}
             </div>
@@ -148,7 +150,8 @@ export interface SelectedContact extends Contact {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class Contacts {
-  @ViewChild('inputElement') inputElement!: ElementRef<HTMLInputElement>;
+  inputElement =
+    viewChild.required<ElementRef<HTMLInputElement>>('inputElement');
   #apollo = inject(Apollo);
   contactsResource = rxResource({
     params: () => ({
@@ -167,6 +170,7 @@ export default class Contacts {
                 initials
                 name
                 email
+                color
                 role {
                   id
                   name
@@ -307,7 +311,7 @@ export default class Contacts {
 
   focusInput(): void {
     setTimeout(() => {
-      this.inputElement.nativeElement.focus();
+      this.inputElement().nativeElement.focus();
     });
   }
 

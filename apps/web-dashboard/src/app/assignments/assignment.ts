@@ -22,7 +22,7 @@ import { map } from 'rxjs';
   ],
   template: `
     @defer { @if(assignmentResource.hasValue()) { @let assignment =
-    assignmentResource.value()!;
+    assignmentResource.value();
     <div class="breadcrumbs text-sm">
       <ul>
         <li><a routerLink="/">Inicio</a></li>

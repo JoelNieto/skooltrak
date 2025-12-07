@@ -519,8 +519,11 @@ input CreateSubjectInput {
 }
 
 input CreateTeacherInput {
+  about: String = ""
+  address: String = ""
+
   """Birth date of the teacher"""
-  birthDate: DateTime = "2025-12-04T02:11:55.422Z"
+  birthDate: DateTime = "2025-12-07T12:56:55.219Z"
 
   """Document ID of the teacher"""
   documentId: String!
@@ -545,6 +548,8 @@ input CreateTeacherInput {
 
   """Organization ID of the teacher"""
   organizationId: String!
+  personalEmail: String = ""
+  phoneNumber: String = ""
 }
 
 input CreateUserInput {
@@ -907,7 +912,7 @@ type Query {
   course(id: String!): Course!
   courses(
     """Order by"""
-    orderBy: String
+    orderBy: String = "name"
 
     """Order direction"""
     orderDirection: String = "asc"
@@ -929,7 +934,7 @@ type Query {
   coursesBySubjectId(subjectId: String!): [Course!]!
   coursesCount(
     """Order by"""
-    orderBy: String
+    orderBy: String = "name"
 
     """Order direction"""
     orderDirection: String = "asc"
@@ -952,7 +957,7 @@ type Query {
   findContacts(queryText: String = ""): [User!]!
   findManyMessages(
     """Order by"""
-    orderBy: String
+    orderBy: String = "name"
 
     """Order direction"""
     orderDirection: String = "asc"
@@ -970,11 +975,48 @@ type Query {
     take: Int
   ): [MessageRecipient!]!
   findManyMessagesCount: Int!
-  findManySubjectsCount: Int!
+  findManySubjectsCount(
+    """Order by"""
+    orderBy: String = "name"
+
+    """Order direction"""
+    orderDirection: String = "asc"
+
+    """School ID"""
+    schoolId: String
+
+    """Search query"""
+    search: String = ""
+
+    """Skip"""
+    skip: Int
+
+    """Take"""
+    take: Int
+  ): Int!
+  findManyTeachersCount(
+    """Order by"""
+    orderBy: String = "name"
+
+    """Order direction"""
+    orderDirection: String = "asc"
+
+    """School ID"""
+    schoolId: String
+
+    """Search query"""
+    search: String = ""
+
+    """Skip"""
+    skip: Int
+
+    """Take"""
+    take: Int
+  ): Int!
   findMessageById(id: String!): Message!
   findMyMessages(
     """Order by"""
-    orderBy: String
+    orderBy: String = "name"
 
     """Order direction"""
     orderDirection: String = "asc"
@@ -1024,7 +1066,7 @@ type Query {
   subject(id: String!): Subject!
   subjects(
     """Order by"""
-    orderBy: String
+    orderBy: String = "name"
 
     """Order direction"""
     orderDirection: String = "asc"
@@ -1042,7 +1084,25 @@ type Query {
     take: Int
   ): [Subject!]!
   teacher(id: String!): Teacher!
-  teachers: [Teacher!]!
+  teachers(
+    """Order by"""
+    orderBy: String = "name"
+
+    """Order direction"""
+    orderDirection: String = "asc"
+
+    """School ID"""
+    schoolId: String
+
+    """Search query"""
+    search: String = ""
+
+    """Skip"""
+    skip: Int
+
+    """Take"""
+    take: Int
+  ): [Teacher!]!
   teachersByOrganizationId(organizationId: String!): [Teacher!]!
   user(id: String!): User!
   users: [User!]!
@@ -1315,8 +1375,20 @@ type Subject {
 }
 
 type Teacher {
+  """About the teacher"""
+  about: String!
+
+  """Address of the teacher"""
+  address: String!
+
   """Birth date of the teacher"""
   birthDate: DateTime!
+
+  """Groups of the teacher"""
+  classGroups: [ClassGroup!]!
+
+  """Courses of the teacher"""
+  courses: [Course!]!
 
   """Created at"""
   createdAt: DateTime!
@@ -1338,6 +1410,9 @@ type Teacher {
   id: String!
   initials: String!
 
+  """Member since date"""
+  memberSince: DateTime!
+
   """Middle name of the teacher"""
   middleName: String!
 
@@ -1347,6 +1422,18 @@ type Teacher {
 
   """Organization ID of the teacher"""
   organizationId: String!
+
+  """Personal email of the teacher"""
+  personalEmail: String!
+
+  """Phone number of the teacher"""
+  phoneNumber: String!
+
+  """Subject of the teacher"""
+  subjects: [Subject!]!
+
+  """Teacher since year"""
+  teacherSince: Float!
 
   """Updated at"""
   updatedAt: DateTime!
@@ -1702,8 +1789,11 @@ input UpdateSubjectInput {
 }
 
 input UpdateTeacherInput {
+  about: String = ""
+  address: String = ""
+
   """Birth date of the teacher"""
-  birthDate: DateTime = "2025-12-04T02:11:55.422Z"
+  birthDate: DateTime = "2025-12-07T12:56:55.219Z"
 
   """Document ID of the teacher"""
   documentId: String
@@ -1729,6 +1819,8 @@ input UpdateTeacherInput {
 
   """Organization ID of the teacher"""
   organizationId: String
+  personalEmail: String = ""
+  phoneNumber: String = ""
 }
 
 input UpdateUserInput {
@@ -1753,6 +1845,7 @@ input UpdateUserInput {
 }
 
 type User {
+  color: String!
   createdAt: DateTime!
   email: String!
   firstName: String!

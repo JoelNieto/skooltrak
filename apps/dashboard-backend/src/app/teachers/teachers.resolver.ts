@@ -1,11 +1,15 @@
+import { JwtAuthGuard } from '@/auth';
+import { UseGuards } from '@nestjs/common';
 import {
   Args,
+  Int,
   Mutation,
   Parent,
   Query,
   ResolveField,
   Resolver,
 } from '@nestjs/graphql';
+import { FetchDataInput } from '../fetch-data.input';
 import { CreateTeacherInput } from './dto/create-teacher.input';
 import { UpdateTeacherInput } from './dto/update-teacher.input';
 import { Teacher } from './entities/teacher.entity';
@@ -22,9 +26,13 @@ export class TeachersResolver {
     return this.teachersService.create(createTeacherInput);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Query(() => [Teacher], { name: 'teachers' })
-  findAll() {
-    return this.teachersService.findAll();
+  findAll(
+    @Args()
+    fetchDataInput: FetchDataInput
+  ) {
+    return this.teachersService.findAll(fetchDataInput);
   }
 
   @Query(() => Teacher, { name: 'teacher' })
@@ -37,6 +45,15 @@ export class TeachersResolver {
     @Args('organizationId', { type: () => String }) organizationId: string
   ) {
     return this.teachersService.findManyByOrganizationId(organizationId);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Query(() => Int, { name: 'findManyTeachersCount' })
+  findManyTeachersCount(
+    @Args()
+    fetchDataInput: FetchDataInput
+  ) {
+    return this.teachersService.findCount(fetchDataInput);
   }
 
   @ResolveField(() => String)

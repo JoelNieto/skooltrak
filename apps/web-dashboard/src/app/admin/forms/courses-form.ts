@@ -97,6 +97,7 @@ export default class CoursesForm {
   private toast = inject(Toast);
   private apollo = inject(Apollo);
   private store = inject(Store);
+
   public periods = rxResource({
     params: () => ({
       schoolId: this.store.currentSchoolId(),
@@ -123,18 +124,23 @@ export default class CoursesForm {
         .valueChanges.pipe(map((result) => result.data.periodsBySchoolId));
     },
   });
+
   public subjects = rxResource({
     stream: () => {
       return this.apollo
         .watchQuery<{ subjects: Prisma.SubjectGetPayload<false>[] }>({
           query: gql`
-            query GetSubjects {
-              subjects {
+            query GetSubjects($take: Int!, $orderBy: String) {
+              subjects(take: $take, orderBy: $orderBy) {
                 id
                 name
               }
             }
           `,
+          variables: {
+            take: 100,
+            orderBy: 'name',
+          },
           fetchPolicy: 'cache-first',
         })
         .valueChanges.pipe(map((result) => result.data.subjects));

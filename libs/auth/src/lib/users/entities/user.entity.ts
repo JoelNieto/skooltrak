@@ -20,6 +20,9 @@ export class User
   role: Role;
 
   @Field(() => String)
+  color: string;
+
+  @Field(() => String)
   email: string;
   @Field(() => String)
   firstName: string;

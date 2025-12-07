@@ -157,6 +157,7 @@ model Subject {
   courses        Course[]
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
+  teachers       Teacher[]
 
   @@unique([organizationId, name, code])
 }
@@ -283,6 +284,13 @@ model Teacher {
   organizationId String
   organization   Organization @relation(fields: [organizationId], references: [id])
   birthDate      DateTime
+  address        String       @default("")
+  phoneNumber    String       @default("")
+  personalEmail  String       @default("")
+  about          String       @default("")
+  teacherSince   Int?
+  memberSince    DateTime?
+  subjects       Subject[]
   gender         Gender
   classGroups    ClassGroup[]
   courses        Course[]

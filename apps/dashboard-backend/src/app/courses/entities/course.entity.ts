@@ -11,7 +11,7 @@ import { Teacher } from '../../teachers/entities/teacher.entity';
 export class Course
   implements
     Prisma.CourseGetPayload<{
-      include: { school: true; subject: true; studyPlan: true };
+      include: { school: true; subject: true; studyPlan: true; teacher: true };
     }>
 {
   @Field(() => String, { description: 'ID of the course (auto-generated)' })

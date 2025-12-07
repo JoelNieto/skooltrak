@@ -5,6 +5,12 @@ import { $Enums, Prisma } from '@prisma/client';
 export class UserTeacher
   implements Prisma.TeacherGetPayload<{ include: undefined }>
 {
+  teacherSince: number | null;
+  memberSince: Date | null;
+  address: string;
+  phoneNumber: string;
+  personalEmail: string;
+  about: string;
   @Field(() => String)
   id: string;
   @Field(() => String)

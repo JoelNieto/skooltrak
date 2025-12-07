@@ -8,11 +8,17 @@ import { UpdateUserInput } from './dto/update-user.input';
 export class UsersService {
   constructor(private prisma: PrismaService) {}
 
+  getRandomPastelColor() {
+    const hue = Math.floor(Math.random() * 360);
+    return `hsl(${hue}, 70%, 80%)`;
+  }
+
   create(createUserInput: CreateUserInput) {
     const password = bcrypt.hashSync(createUserInput.password, 10);
     return this.prisma.user.create({
       data: {
         ...createUserInput,
+        color: this.getRandomPastelColor(),
         password,
       },
       include: {
@@ -48,7 +54,7 @@ export class UsersService {
     }
     return this.prisma.user.update({
       where: { id },
-      data: updateUserInput,
+      data: { ...updateUserInput, color: this.getRandomPastelColor() },
       include: {
         role: { include: { permissions: true } },
         organization: true,

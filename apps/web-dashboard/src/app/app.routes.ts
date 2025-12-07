@@ -30,6 +30,15 @@ export const appRoutes: Route[] = [
         path: 'assignments/:id',
         loadComponent: () => import('./assignments/assignment'),
       },
+      { path: 'teachers', loadComponent: () => import('./teachers/teachers') },
+      {
+        path: 'teachers/:id',
+        loadComponent: () => import('./teachers/teacher'),
+      },
+      {
+        path: 'teachers/:id/edit',
+        loadComponent: () => import('./teachers/teacher-form'),
+      },
       {
         path: 'grades',
         loadComponent: () => import('./grades/grades'),

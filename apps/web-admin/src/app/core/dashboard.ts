@@ -94,6 +94,7 @@ export class Dashboard implements OnInit {
               email
               firstName
               lastName
+              color
               role {
                 name
                 permissions {

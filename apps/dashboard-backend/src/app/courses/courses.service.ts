@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { FetchDataInput } from '../fetch-data.input';
 import { PrismaService } from '../prisma.service';
 import { CreateCourseInput } from './dto/create-course.input';
@@ -73,33 +74,50 @@ export class CoursesService {
   }
 
   findAll(fetchDataInput: FetchDataInput) {
-    const { skip, take, schoolId, search } = fetchDataInput;
+    const { skip, take, schoolId, search, studyPlanId } = fetchDataInput;
+    let where: Prisma.CourseWhereInput = {
+      schoolId,
+      OR: [
+        { name: { contains: search } },
+        { code: { contains: search } },
+        { shortName: { contains: search } },
+      ],
+    };
+
+    if (studyPlanId) {
+      where = { ...where, studyPlanId };
+    }
+
     return this.prisma.course.findMany({
-      where: {
-        schoolId,
-        OR: [
-          { name: { contains: search } },
-          { code: { contains: search } },
-          { shortName: { contains: search } },
-        ],
-      },
+      where,
       skip,
       take,
-      include: { school: true, subject: true, studyPlan: true },
+      include: {
+        school: true,
+        subject: true,
+        studyPlan: true,
+        currentPeriod: true,
+        teacher: true,
+      },
     });
   }
 
   count(fetchDataInput: FetchDataInput) {
-    const { schoolId, search } = fetchDataInput;
+    const { schoolId, search, studyPlanId } = fetchDataInput;
+    let where: Prisma.CourseWhereInput = {
+      schoolId,
+      OR: [
+        { name: { contains: search } },
+        { code: { contains: search } },
+        { shortName: { contains: search } },
+      ],
+    };
+
+    if (studyPlanId) {
+      where = { ...where, studyPlanId };
+    }
     return this.prisma.course.count({
-      where: {
-        schoolId,
-        OR: [
-          { name: { contains: search } },
-          { code: { contains: search } },
-          { shortName: { contains: search } },
-        ],
-      },
+      where,
     });
   }
 
@@ -145,6 +163,7 @@ export class CoursesService {
       include: {
         school: true,
         subject: true,
+        teacher: { include: { user: true } },
         studyPlan: { include: { gradeMetric: true } },
         grades: { include: { gradeStudents: { include: { student: true } } } },
       },

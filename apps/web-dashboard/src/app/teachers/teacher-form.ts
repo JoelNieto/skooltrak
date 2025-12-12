@@ -99,11 +99,7 @@ type TeacherType = Prisma.TeacherGetPayload<{
                   </div>
                   <div class="fieldset col-span-2">
                     <label for="birthDate">Fecha de nacimiento</label>
-                    <input
-                      id="birthDate"
-                      type="date"
-                      class="input input-primary w-full"
-                    />
+                    <lib-multiselect />
                   </div>
                   <div class="fieldset col-span-2">
                     <label for="gender">Género</label>
@@ -217,13 +213,7 @@ type TeacherType = Prisma.TeacherGetPayload<{
                   </div>
                   <div class="fieldset col-span-2">
                     <label for="gender">Género</label>
-                    <lib-multiselect
-                      [options]="fruitOptions"
-                      formControlName="colors"
-                      [showFilter]="true"
-                      placeholder="Select colors..."
-                    >
-                    </lib-multiselect>
+                    <lib-multiselect />
                   </div>
                 </div>
               </div>

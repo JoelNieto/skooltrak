@@ -152,7 +152,7 @@ type Course {
   teacher: Teacher
 
   """Teacher ID of the course"""
-  teacherId: String!
+  teacherId: String
 
   """Updated at"""
   updatedAt: DateTime!
@@ -523,7 +523,7 @@ input CreateTeacherInput {
   address: String = ""
 
   """Birth date of the teacher"""
-  birthDate: DateTime = "2025-12-07T12:56:55.219Z"
+  birthDate: DateTime = "2025-12-12T00:28:38.891Z"
 
   """Document ID of the teacher"""
   documentId: String!
@@ -925,6 +925,7 @@ type Query {
 
     """Skip"""
     skip: Int
+    studyPlanId: String
 
     """Take"""
     take: Int
@@ -947,6 +948,7 @@ type Query {
 
     """Skip"""
     skip: Int
+    studyPlanId: String
 
     """Take"""
     take: Int
@@ -970,6 +972,7 @@ type Query {
 
     """Skip"""
     skip: Int
+    studyPlanId: String
 
     """Take"""
     take: Int
@@ -990,6 +993,7 @@ type Query {
 
     """Skip"""
     skip: Int
+    studyPlanId: String
 
     """Take"""
     take: Int
@@ -1009,6 +1013,7 @@ type Query {
 
     """Skip"""
     skip: Int
+    studyPlanId: String
 
     """Take"""
     take: Int
@@ -1029,6 +1034,7 @@ type Query {
 
     """Skip"""
     skip: Int
+    studyPlanId: String
 
     """Take"""
     take: Int
@@ -1079,6 +1085,7 @@ type Query {
 
     """Skip"""
     skip: Int
+    studyPlanId: String
 
     """Take"""
     take: Int
@@ -1099,6 +1106,7 @@ type Query {
 
     """Skip"""
     skip: Int
+    studyPlanId: String
 
     """Take"""
     take: Int
@@ -1386,6 +1394,7 @@ type Teacher {
 
   """Groups of the teacher"""
   classGroups: [ClassGroup!]!
+  color: String!
 
   """Courses of the teacher"""
   courses: [Course!]!
@@ -1793,7 +1802,7 @@ input UpdateTeacherInput {
   address: String = ""
 
   """Birth date of the teacher"""
-  birthDate: DateTime = "2025-12-07T12:56:55.219Z"
+  birthDate: DateTime = "2025-12-12T00:28:38.891Z"
 
   """Document ID of the teacher"""
   documentId: String

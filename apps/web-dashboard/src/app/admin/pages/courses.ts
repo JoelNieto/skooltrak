@@ -1,8 +1,11 @@
 import { Confirmation, Modal, Paginator, Toast } from '@/ui';
 import { Component, computed, inject, signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
+import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
+  phosphorMagnifyingGlassDuotone,
   phosphorPencilDuotone,
   phosphorPlusCircleDuotone,
   phosphorTrashDuotone,
@@ -12,18 +15,49 @@ import { Apollo, gql } from 'apollo-angular';
 import { filter, map, of, switchMap, tap } from 'rxjs';
 import Store from '../../core/store';
 import CoursesForm from '../forms/courses-form';
+type Teacher = Prisma.TeacherGetPayload<{ include: { user: true } }> & {
+  name: string;
+  initials: string;
+};
+
+type CourseType = Prisma.CourseGetPayload<{
+  include: { subject: true; studyPlan: true; currentPeriod: true };
+}> & {
+  teacher: Teacher;
+};
 
 @Component({
   selector: 'app-courses',
-  imports: [NgIcon, Paginator],
+  imports: [NgIcon, Paginator, RouterLink, FormsModule],
   viewProviders: [
     provideIcons({
       phosphorPlusCircleDuotone,
       phosphorTrashDuotone,
       phosphorPencilDuotone,
+      phosphorMagnifyingGlassDuotone,
     }),
   ],
-  template: `<div class="flex justify-end">
+  template: `<div class="flex justify-between">
+      <div class="flex gap-2">
+        <div class="md:w-96 w-full">
+          <label class="input input-primary ">
+            <ng-icon name="phosphorMagnifyingGlassDuotone" />
+            <input
+              class="pl-0"
+              type="search"
+              placeholder="Buscar..."
+              [(ngModel)]="searchText"
+            />
+          </label>
+        </div>
+        <select class="select select-primary" [(ngModel)]="studyPlanId">
+          <option [ngValue]="null">Elija nivel...</option>
+          @for (studyPlan of studyPlans.value(); track studyPlan.id) {
+          <option [value]="studyPlan.id">{{ studyPlan.name }}</option>
+          }
+        </select>
+      </div>
+
       <button class="btn btn-primary" (click)="editCourse()">
         <ng-icon name="phosphorPlusCircleDuotone" /> Nuevo curso
       </button>
@@ -39,18 +73,26 @@ import CoursesForm from '../forms/courses-form';
             <th>Código</th>
             <th>Asignatura</th>
             <th>Plan de estudio</th>
+            <th>Docente</th>
             <th>Periodo actual</th>
-            <th>Acciones</th>
+            <th></th>
           </tr>
         </thead>
         <tbody>
           @for (course of courses.value(); track course.id) {
           <tr>
-            <td>{{ course.name }}</td>
+            <td>
+              <a
+                class="link link-primary"
+                [routerLink]="['/courses', course.id]"
+                >{{ course.name }}</a
+              >
+            </td>
             <td>{{ course.shortName }}</td>
             <td>{{ course.code }}</td>
             <td>{{ course.subject.name }}</td>
             <td>{{ course.studyPlan.name }}</td>
+            <td>{{ course.teacher?.name ?? '--' }}</td>
             <td>{{ course.currentPeriod?.name }}</td>
             <td>
               <div class="flex gap-2">
@@ -91,6 +133,8 @@ export default class Courses {
   #confirmation = inject(Confirmation);
   #store = inject(Store);
   #toast = inject(Toast);
+  public searchText = signal('');
+  public studyPlanId = signal<string | null>(null);
 
   public updateSkip(skip: number) {
     this.pagination.update((prev) => ({ ...prev, skip }));
@@ -108,28 +152,74 @@ export default class Courses {
     count: 0,
   });
 
+  public studyPlans = rxResource({
+    params: () => ({
+      schoolId: this.#store.currentSchoolId(),
+    }),
+    stream: ({ params }) => {
+      if (!params.schoolId) {
+        return of([]);
+      }
+      return this.#apollo
+        .watchQuery<{
+          studyPlansBySchoolId: Prisma.StudyPlanGetPayload<{
+            include: { degree: true; school: true; gradeMetric: true };
+          }>[];
+        }>({
+          query: gql`
+            query StudyPlansBySchoolId($schoolId: String!) {
+              studyPlansBySchoolId(schoolId: $schoolId) {
+                id
+                name
+              }
+            }
+          `,
+          variables: {
+            schoolId: params.schoolId,
+          },
+        })
+        .valueChanges.pipe(map((result) => result.data.studyPlansBySchoolId));
+    },
+  });
+
   public courses = rxResource({
     params: () => ({
       schoolId: this.#store.currentSchoolId(),
+      search: this.searchText(),
+      studyPlanId: this.studyPlanId(),
       take: this.take(),
       skip: this.skip(),
     }),
     stream: ({ params }) => {
-      const { schoolId, take, skip } = params;
+      const { schoolId, take, skip, search, studyPlanId } = params;
       if (!schoolId) {
         return of([]);
       }
       return this.#apollo
         .watchQuery<{
           count: number;
-          courses: Prisma.CourseGetPayload<{
-            include: { subject: true; studyPlan: true; currentPeriod: true };
-          }>[];
+          courses: CourseType[];
         }>({
           query: gql`
-            query getCourses($schoolId: String!, $take: Int!, $skip: Int!) {
-              count: coursesCount(schoolId: $schoolId)
-              courses(schoolId: $schoolId, take: $take, skip: $skip) {
+            query getCourses(
+              $schoolId: String!
+              $take: Int!
+              $skip: Int!
+              $search: String
+              $studyPlanId: String
+            ) {
+              count: coursesCount(
+                schoolId: $schoolId
+                studyPlanId: $studyPlanId
+                search: $search
+              )
+              courses(
+                schoolId: $schoolId
+                take: $take
+                skip: $skip
+                studyPlanId: $studyPlanId
+                search: $search
+              ) {
                 id
                 name
                 shortName
@@ -143,9 +233,14 @@ export default class Courses {
                 currentPeriod {
                   name
                 }
+                teacher {
+                  id
+                  name
+                }
                 currentPeriodId
                 subjectId
                 studyPlanId
+                teacherId
                 code
                 createdAt
                 updatedAt
@@ -156,6 +251,8 @@ export default class Courses {
             schoolId,
             take,
             skip,
+            search,
+            studyPlanId,
           },
         })
         .valueChanges.pipe(

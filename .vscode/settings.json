@@ -9,7 +9,9 @@
     "source.fixAll.eslint": "explicit",
     "source.sortImports": "always"
   },
-  "cSpell.words": ["peopletrak"],
+  "cSpell.words": [
+    "peopletrak"
+  ],
   "[json]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
@@ -18,5 +20,6 @@
   },
   "[jsonc]": {
     "editor.defaultFormatter": "vscode.json-language-features"
-  }
+  },
+  "nxConsole.generateAiAgentRules": true
 }

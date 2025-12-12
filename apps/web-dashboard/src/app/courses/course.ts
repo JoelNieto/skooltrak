@@ -20,6 +20,22 @@ import CourseGrades from '../grades/course-grades';
 import CourseAssignments from './course-assignments';
 import CourseGradeBuckets from './course-grade-buckets';
 
+type Teacher = Prisma.TeacherGetPayload<{ include: { user: true } }> & {
+  name: string;
+  initials: string;
+  color: string;
+};
+
+type CourseType = Prisma.CourseGetPayload<{
+  include: {
+    studyPlan: { include: { gradeMetric: true } };
+    subject: true;
+    currentPeriod: true;
+  };
+}> & {
+  teacher?: Teacher;
+};
+
 @Component({
   imports: [
     Loader,
@@ -58,12 +74,12 @@ import CourseGradeBuckets from './course-grade-buckets';
           <img
             src="course-default.jpg"
             alt="Course"
-            class="h-18 w-18 rounded"
+            class="h-18 w-18 rounded-lg"
           />
           <div class="flex justify-between items-center w-full">
             <div>
-              <h2 class="card-title text-xl">{{ course.name }}</h2>
-              <p>{{ course.shortName }}</p>
+              <h2 class="card-title text-2xl">{{ course.name }}</h2>
+              <p>{{ course.teacher?.name }}</p>
               <p class="text-base-200">{{ course.code }}</p>
             </div>
             <div class="flex gap-2">
@@ -161,15 +177,7 @@ export default class Course {
       }
       return this.apollo
         .query<{
-          course: DecimalToNumber<
-            Prisma.CourseGetPayload<{
-              include: {
-                studyPlan: { include: { gradeMetric: true } };
-                subject: true;
-                teacher: true;
-              };
-            }>
-          >;
+          course: DecimalToNumber<CourseType>;
         }>({
           query: gql`
             query Course($id: String!) {
@@ -188,6 +196,8 @@ export default class Course {
                 teacher {
                   id
                   name
+                  color
+                  initials
                 }
                 studyPlan {
                   id

@@ -50,7 +50,10 @@ export class Course
   @Field(() => [Grade], { description: 'Grades of the course' })
   grades: Grade[];
 
-  @Field(() => String, { description: 'Teacher ID of the course' })
+  @Field(() => String, {
+    description: 'Teacher ID of the course',
+    nullable: true,
+  })
   teacherId: string;
 
   @Field(() => String, {

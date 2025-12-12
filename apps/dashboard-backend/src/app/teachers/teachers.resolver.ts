@@ -67,6 +67,11 @@ export class TeachersResolver {
   }
 
   @ResolveField(() => String)
+  color(@Parent() teacher: Teacher) {
+    return teacher.user.color;
+  }
+
+  @ResolveField(() => String)
   initials(@Parent() teacher: Teacher) {
     return `${teacher.firstName.charAt(0).toUpperCase()}${teacher.fatherName
       .charAt(0)

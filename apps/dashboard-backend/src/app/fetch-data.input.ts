@@ -31,4 +31,9 @@ export class FetchDataInput {
     description: 'Search query',
   })
   search?: string;
+
+  @Field(() => String, {
+    nullable: true,
+  })
+  studyPlanId?: string;
 }

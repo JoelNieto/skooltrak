@@ -64,6 +64,20 @@ import Store from '../../core/store';
         </select>
       </div>
       <div class="fieldset">
+        <label for="teacherId">Docente</label>
+        <select
+          id="teacherId"
+          name="teacherId"
+          formControlName="teacherId"
+          class="select select-primary"
+        >
+          <option [value]="null" disabled>Seleccionar docente...</option>
+          @for(teacher of teachers.value(); track teacher.id) {
+          <option [value]="teacher.id">{{ teacher.name }}</option>
+          }
+        </select>
+      </div>
+      <div class="fieldset">
         <label for="currentPeriodId">Periodo actual</label>
         <select
           id="currentPeriodId"
@@ -184,7 +198,47 @@ export default class CoursesForm {
     code: [''],
     subjectId: ['', [Validators.required]],
     studyPlanId: ['', [Validators.required]],
+    teacherId: this.fb.control<string | null>(null),
     currentPeriodId: this.fb.control<string | null>('', [Validators.required]),
+  });
+
+  public teachers = rxResource({
+    stream: () =>
+      this.apollo
+        .watchQuery<{
+          teachers: { id: string; name: string }[];
+        }>({
+          query: gql`
+            query getTeachers(
+              $take: Int!
+              $skip: Int!
+              $search: String
+              $orderBy: String
+              $orderDirection: String
+            ) {
+              teachers(
+                take: $take
+                skip: $skip
+                search: $search
+                orderBy: $orderBy
+                orderDirection: $orderDirection
+              ) {
+                id
+                name
+                initials
+              }
+            }
+          `,
+          variables: {
+            take: 100,
+            skip: 0,
+            search: '',
+            orderBy: 'firstName',
+            orderDirection: 'asc',
+          },
+          fetchPolicy: 'cache-first',
+        })
+        .valueChanges.pipe(map((result) => result.data.teachers)),
   });
 
   constructor() {

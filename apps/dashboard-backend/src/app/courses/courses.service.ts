@@ -73,14 +73,26 @@ export class CoursesService {
     });
   }
 
+  async replicate(targetStudyPlanId: string, sourceStudyPlanId: string) {
+    const courses = await this.prisma.course.findMany({
+      where: { studyPlanId: sourceStudyPlanId },
+    });
+    return this.prisma.course.createMany({
+      data: courses.map((course) => ({
+        ...course,
+        studyPlanId: targetStudyPlanId,
+      })),
+    });
+  }
+
   findAll(fetchDataInput: FetchDataInput) {
     const { skip, take, schoolId, search, studyPlanId } = fetchDataInput;
     let where: Prisma.CourseWhereInput = {
       schoolId,
       OR: [
-        { name: { contains: search } },
-        { code: { contains: search } },
-        { shortName: { contains: search } },
+        { name: { contains: search, mode: 'insensitive' } },
+        { code: { contains: search, mode: 'insensitive' } },
+        { shortName: { contains: search, mode: 'insensitive' } },
       ],
     };
 
@@ -107,9 +119,9 @@ export class CoursesService {
     let where: Prisma.CourseWhereInput = {
       schoolId,
       OR: [
-        { name: { contains: search } },
-        { code: { contains: search } },
-        { shortName: { contains: search } },
+        { name: { contains: search, mode: 'insensitive' } },
+        { code: { contains: search, mode: 'insensitive' } },
+        { shortName: { contains: search, mode: 'insensitive' } },
       ],
     };
 

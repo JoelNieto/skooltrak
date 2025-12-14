@@ -36,7 +36,7 @@ import GradeStudentForm from './grade-student-form';
         <li>{{ grade.title }}</li>
       </ul>
     </div>
-    <div class="card card-border border-base-300 mt-4">
+    <div class="card card-border border-base-300 mt-4 bg-base-100">
       <div class="card-body">
         <h1 class="text-xl font-semibold mb-2">{{ grade.title }}</h1>
         <a
@@ -51,20 +51,20 @@ import GradeStudentForm from './grade-student-form';
         </p>
       </div>
     </div>
-    <div class="card card-border border-base-300 mt-4">
+    <div class="card card-border border-base-300 mt-4 bg-base-100">
       <div class="card-body">
         <h3 class="card-title">Detalles</h3>
         <lib-editor-viewer [innerHTML]="grade.comments" />
       </div>
     </div>
-    <div class="card card-border border-base-300 mt-4">
+    <div class="card card-border border-base-300 mt-4 bg-base-100">
       <div class="card-body">
         <h3 class="card-title">Calificaciones</h3>
         <table class="table">
           <thead>
             <tr>
               <th>Nombre</th>
-              <th class="text-center px-0">Calificacion</th>
+              <th class="text-center px-0 w-[100px]">Calificacion</th>
               <th class="!px-2">Comentarios</th>
               <th>Actualizado</th>
               <th></th>

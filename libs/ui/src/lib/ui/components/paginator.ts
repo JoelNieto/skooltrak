@@ -8,9 +8,10 @@ import {
 
 @Component({
   selector: 'lib-paginator',
-  template: ` <div class="flex justify-between items-center w-full bg-base-100">
-    <p class="text-sm text-gray-500 dark:text-gray-400 font-medium">
-      Mostrando de {{ start() }} a {{ end() }} de {{ count() }}
+  template: ` <div class="flex justify-between items-center w-full">
+    <p class="text-sm text-base-content font-medium">
+      Mostrando de <strong>{{ start() }}</strong> a
+      <strong>{{ end() }}</strong> de <strong>{{ count() }}</strong>
     </p>
     <div>
       <div class="join">

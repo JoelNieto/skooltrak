@@ -249,6 +249,7 @@ export default class Dashboard {
               }
             }
           `,
+          fetchPolicy: 'cache-first',
         })
         .valueChanges.subscribe((res) => {
           const { me } = res.data;

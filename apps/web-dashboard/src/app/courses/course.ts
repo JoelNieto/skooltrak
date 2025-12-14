@@ -78,12 +78,12 @@ type CourseType = Prisma.CourseGetPayload<{
           />
           <div class="flex justify-between items-center w-full">
             <div>
-              <h2 class="card-title text-2xl">{{ course.name }}</h2>
+              <h2 class="card-title text-xl">{{ course.name }}</h2>
               <p>{{ course.teacher?.name }}</p>
               <p class="text-base-200">{{ course.code }}</p>
             </div>
             <div class="flex gap-2">
-              <button class="btn btn-accent" (click)="addAssignment()">
+              <button class="btn btn-neutral" (click)="addAssignment()">
                 <ng-icon name="phosphorCalendarPlusDuotone" /> Nueva asignacion
               </button>
               <button class="btn btn-primary btn-soft">
@@ -136,6 +136,7 @@ type CourseType = Prisma.CourseGetPayload<{
           <app-course-grades
             [courseId]="id()"
             [currentPeriod]="course.currentPeriodId"
+            [metric]="course.studyPlan.gradeMetric!"
           />
         </div>
         <label class="tab">

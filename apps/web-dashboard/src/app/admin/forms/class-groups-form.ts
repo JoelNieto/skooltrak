@@ -208,7 +208,7 @@ export default class ClassGroupsForm {
           variables: {
             updateClassGroupInput: {
               ...req,
-              id: this.data()!.group!.id,
+              id: this.data()?.group?.id,
             },
           },
         })
@@ -239,8 +239,8 @@ export default class ClassGroupsForm {
           variables: {
             createClassGroupInput: {
               ...req,
-              schoolId: this.store.currentSchoolId()!,
-              organizationId: this.store.currentOrganizationId()!,
+              schoolId: this.store.currentSchoolId(),
+              organizationId: this.store.currentOrganizationId(),
             },
           },
         })

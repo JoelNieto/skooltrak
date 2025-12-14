@@ -1,11 +1,15 @@
+import { JwtAuthGuard } from '@/auth';
+import { UseGuards } from '@nestjs/common';
 import {
   Args,
+  Int,
   Mutation,
   Parent,
   Query,
   ResolveField,
   Resolver,
 } from '@nestjs/graphql';
+import { FetchDataInput } from '../fetch-data.input';
 import { CreateStudentInput } from './dto/create-student.input';
 import { UpdateStudentInput } from './dto/update-student.input';
 import { Student } from './entities/student.entity';
@@ -22,9 +26,10 @@ export class StudentsResolver {
     return this.studentsService.create(createStudentInput);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Query(() => [Student], { name: 'students' })
-  findAll() {
-    return this.studentsService.findAll();
+  findAll(@Args() fetchDataInput: FetchDataInput) {
+    return this.studentsService.findAll(fetchDataInput);
   }
 
   @Query(() => [Student], { name: 'studentsBySchoolId' })
@@ -57,8 +62,23 @@ export class StudentsResolver {
   }
 
   @ResolveField(() => String)
+  fullName(@Parent() student: Student) {
+    return `${student.firstName} ${student.middleName} ${student.fatherName} ${student.motherName}`;
+  }
+
+  @Query(() => Int, { name: 'findManyStudentsCount' })
+  findManyStudentsCount(@Args() fetchDataInput: FetchDataInput) {
+    return this.studentsService.getCount(fetchDataInput);
+  }
+
+  @ResolveField(() => String)
   email(@Parent() student: Student) {
     return student.user.email;
+  }
+
+  @ResolveField(() => String)
+  color(@Parent() student: Student) {
+    return student.user.color;
   }
 
   @Mutation(() => Student)

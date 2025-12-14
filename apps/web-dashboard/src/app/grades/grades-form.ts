@@ -37,7 +37,7 @@ import { map, of } from 'rxjs';
       </div>
       <div class="fieldset md:col-span-4">
         <label for="comments">Comentarios</label>
-        <lib-text-editor formControlName="comments" />
+        <lib-text-editor formControlName="comments" [bordered]="true" />
       </div>
 
       <div class="fieldset">

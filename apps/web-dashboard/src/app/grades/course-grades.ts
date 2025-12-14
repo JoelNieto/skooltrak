@@ -1,5 +1,5 @@
 import { DecimalToNumber, Modal } from '@/ui';
-import { DecimalPipe } from '@angular/common';
+import { DecimalPipe, NgClass } from '@angular/common';
 import {
   afterRenderEffect,
   ChangeDetectionStrategy,
@@ -20,7 +20,7 @@ import GradesForm from './grades-form';
 
 @Component({
   selector: 'app-course-grades',
-  imports: [FormsModule, DecimalPipe, RouterLink],
+  imports: [FormsModule, DecimalPipe, RouterLink, NgClass],
   template: ` <div class="flex justify-end gap-2">
       <select
         class="select select-primary w-64!"
@@ -55,8 +55,22 @@ import GradesForm from './grades-form';
           <tr>
             <td>{{ student.firstName }} {{ student.fatherName }}</td>
             @for(grade of student.grades; track grade.id) {
-            <td class="text-center font-semibold">
-              {{ grade.item?.score | number : '1.1-1' }}
+            <td
+              class="text-center font-semibold"
+              [ngClass]="{
+              '!text-success bg-success/10':
+                grade.item?.score &&
+                grade.item?.score! >= metric().minimumApproval,
+              '!text-warning bg-warning/10':
+                grade.item?.score &&
+                (grade.item?.score! >= metric().minimumApproval &&
+                  grade.item?.score! < metric().minimumExcellence),
+              '!text-error bg-error/10':
+                grade.item?.score &&
+                grade.item?.score! < metric().minimumApproval,
+            }"
+            >
+              {{ (grade.item?.score | number : '1.1-1') ?? '-' }}
             </td>
             }
           </tr>
@@ -74,6 +88,8 @@ import GradesForm from './grades-form';
 })
 export default class CourseGrades {
   public courseId = input.required<string>();
+  public metric =
+    input.required<DecimalToNumber<Prisma.GradeMetricGetPayload<undefined>>>();
   public currentPeriod = input<string | null>();
   #store = inject(Store);
   #apollo = inject(Apollo);

@@ -1,22 +1,36 @@
-import { Loader } from '@/ui';
+import { debounceSignal, Loader, Pagination, Paginator } from '@/ui';
 import {
   ChangeDetectionStrategy,
   Component,
   inject,
+  Signal,
   signal,
 } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
+import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { phosphorMagnifyingGlassDuotone } from '@ng-icons/phosphor-icons/duotone';
 import { Prisma } from '@prisma/client';
 import { Apollo, gql } from 'apollo-angular';
-import { map, of } from 'rxjs';
+import { map, of, tap } from 'rxjs';
 import Store from '../core/store';
+
+type Teacher = Prisma.TeacherGetPayload<{ include: { user: true } }> & {
+  name: string;
+  initials: string;
+};
+
+type CourseType = Prisma.CourseGetPayload<{
+  include: { subject: true; studyPlan: true; currentPeriod: true };
+}> & {
+  teacher: Teacher;
+};
 
 @Component({
   selector: 'app-courses',
-  imports: [RouterLink, NgIcon, Loader],
+  imports: [RouterLink, NgIcon, Loader, Paginator, FormsModule],
+  providers: [Pagination],
   viewProviders: [provideIcons({ phosphorMagnifyingGlassDuotone })],
   template: `
     <div class="breadcrumbs text-sm">
@@ -32,15 +46,14 @@ import Store from '../core/store';
         class="pl-0"
         type="search"
         placeholder="Buscar..."
-        [value]="search()"
-        (input)="search.set($event.target.value)"
+        [(ngModel)]="searchText"
       />
     </label>
     @if(coursesResource.isLoading()) {
     <lib-loader />
     } @if(coursesResource.error()) {
     <p>Error al cargar cursos</p>
-    } @if(coursesResource.value()) {
+    } @if(coursesResource.hasValue()) {
     <div class="flex flex-col md:grid md:grid-cols-2 lg:grid-cols-4 gap-8 mt-4">
       @for(course of coursesResource.value(); track course.id) {
       <div class="card bg-base-100 card-border border-base-300">
@@ -68,62 +81,111 @@ import Store from '../core/store';
           </div>
         </div>
       </div>
+      } @empty {
+      <p class="text-center text-base-200">
+        No se encontraron cursos para la busqueda
+        <strong class="text-primary">"{{ searchText() }}"</strong>
+      </p>
       }
     </div>
     }
+    <div class="flex justify-end mt-4">
+      <lib-paginator
+        [count]="pagination.count()"
+        [take]="pagination.take()"
+        [skip]="pagination.skip()"
+        (skipChange)="pagination.updateSkip($event)"
+        (takeChange)="pagination.updateTake($event)"
+      />
+    </div>
   `,
   styles: ``,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class Courses {
-  public search = signal<string>('');
-  private apollo = inject(Apollo);
-  private store = inject(Store);
+  #apollo = inject(Apollo);
+  #store = inject(Store);
+  public pagination = inject(Pagination);
+  public searchText = signal<string>('');
+  #debouncedSearch: Signal<string>;
 
   public coursesResource = rxResource({
     params: () => ({
-      schoolId: this.store.currentSchoolId(),
+      schoolId: this.#store.currentSchoolId(),
+      search: this.#debouncedSearch(),
+      take: this.pagination.take(),
+      skip: this.pagination.skip(),
     }),
     stream: ({ params }) => {
-      const { schoolId } = params;
+      const { schoolId, take, skip, search } = params;
       if (!schoolId) {
         return of([]);
       }
-      return this.apollo
+      return this.#apollo
         .watchQuery<{
-          coursesBySchoolId: Prisma.CourseGetPayload<{
-            include: { studyPlan: true; subject: true; teacher: true };
-          }>[];
+          count: number;
+          courses: CourseType[];
         }>({
           query: gql`
-            query CoursesBySchoolId($schoolId: String!) {
-              coursesBySchoolId(schoolId: $schoolId) {
+            query getCourses(
+              $schoolId: String!
+              $take: Int!
+              $skip: Int!
+              $search: String
+            ) {
+              count: coursesCount(schoolId: $schoolId, search: $search)
+              courses(
+                schoolId: $schoolId
+                take: $take
+                skip: $skip
+                search: $search
+              ) {
                 id
                 name
                 shortName
-                code
-                createdAt
-                updatedAt
+                schoolId
                 subject {
-                  id
+                  name
+                }
+                studyPlan {
+                  name
+                }
+                currentPeriod {
                   name
                 }
                 teacher {
                   id
                   name
                 }
-                studyPlan {
-                  id
-                  name
-                }
+                currentPeriodId
+                subjectId
+                studyPlanId
+                teacherId
+                code
+                createdAt
+                updatedAt
               }
             }
           `,
           variables: {
-            schoolId: params.schoolId,
+            schoolId,
+            take,
+            skip,
+            search,
           },
         })
-        .valueChanges.pipe(map((result) => result.data.coursesBySchoolId));
+        .valueChanges.pipe(
+          tap((result) => {
+            this.pagination.updateCount(result.data.count);
+          }),
+          map((result) => result.data.courses)
+        );
     },
   });
+
+  constructor() {
+    this.pagination.updateTake(8);
+
+    this.#debouncedSearch = debounceSignal(this.searchText, 400);
+  }
 }

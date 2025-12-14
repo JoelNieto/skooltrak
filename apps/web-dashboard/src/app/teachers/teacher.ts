@@ -1,4 +1,5 @@
 import { Loader } from '@/ui';
+import { DatePipe } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -11,7 +12,7 @@ import { Prisma } from '@prisma/client';
 import { Apollo, gql } from 'apollo-angular';
 import { map } from 'rxjs';
 type TeacherType = Prisma.TeacherGetPayload<{
-  include: { user: true; courses: true };
+  include: { user: true; courses: true; classGroups: true };
 }> & {
   name: string;
   fullName: string;
@@ -19,7 +20,7 @@ type TeacherType = Prisma.TeacherGetPayload<{
 };
 
 @Component({
-  imports: [Loader, RouterLink],
+  imports: [Loader, RouterLink, DatePipe],
   template: `@defer { @if(teacherResource.hasValue()) { @let teacher =
     teacherResource.value();
     <div class="breadcrumbs text-sm">
@@ -83,110 +84,69 @@ type TeacherType = Prisma.TeacherGetPayload<{
               </div>
               <div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
                 <dt class="text-sm/6 font-medium text-gray-900">
-                  Application for
+                  Documento de identidad
                 </dt>
                 <dd class="mt-1 text-sm/6 text-gray-700 sm:col-span-2 sm:mt-0">
-                  Backend Developer
+                  {{ teacher.documentId }}
                 </dd>
               </div>
               <div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
                 <dt class="text-sm/6 font-medium text-gray-900">
-                  Email address
+                  Fecha de nacimiento
                 </dt>
                 <dd class="mt-1 text-sm/6 text-gray-700 sm:col-span-2 sm:mt-0">
-                  margotfoster@example.com
+                  {{ teacher.birthDate | date : 'dd/MM/yyyy' }}
                 </dd>
               </div>
               <div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
-                <dt class="text-sm/6 font-medium text-gray-900">
-                  Salary expectation
-                </dt>
+                <dt class="text-sm/6 font-medium text-gray-900">Genero</dt>
                 <dd class="mt-1 text-sm/6 text-gray-700 sm:col-span-2 sm:mt-0">
-                  $120,000
+                  {{ teacher.gender === 'MALE' ? 'Masculino' : 'Femenino' }}
                 </dd>
               </div>
               <div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
-                <dt class="text-sm/6 font-medium text-gray-900">About</dt>
+                <dt class="text-sm/6 font-medium text-gray-900">Dirección</dt>
                 <dd class="mt-1 text-sm/6 text-gray-700 sm:col-span-2 sm:mt-0">
-                  Fugiat ipsum ipsum deserunt culpa aute sint do nostrud anim
-                  incididunt cillum culpa consequat. Excepteur qui ipsum aliquip
-                  consequat sint. Sit id mollit nulla mollit nostrud in ea
-                  officia proident. Irure nostrud pariatur mollit ad adipisicing
-                  reprehenderit deserunt qui eu.
+                  {{ teacher.address }}
+                </dd>
+              </div>
+
+              <div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
+                <dt class="text-sm/6 font-medium text-gray-900">Cursos</dt>
+                <dd class="mt-1 text-sm/6 text-gray-700 sm:col-span-2 sm:mt-0">
+                  <div class="flex flex-wrap gap-2">
+                    @for (course of teacher.courses; track course.id) {
+                    <a
+                      [routerLink]="['/courses', course.id]"
+                      class="badge badge-primary badge-soft"
+                    >
+                      {{ course.name }}
+                    </a>
+                    } @empty {
+                    <span class="text-sm/6 text-gray-700 sm:col-span-2 sm:mt-0">
+                      No hay cursos asignados
+                    </span>
+                    }
+                  </div>
                 </dd>
               </div>
               <div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
-                <dt class="text-sm/6 font-medium text-gray-900">Attachments</dt>
+                <dt class="text-sm/6 font-medium text-gray-900">Grupos</dt>
                 <dd class="mt-2 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
-                  <ul
-                    role="list"
-                    class="divide-y divide-gray-100 rounded-md border border-gray-200"
-                  >
-                    <li
-                      class="flex items-center justify-between py-4 pr-5 pl-4 text-sm/6"
+                  <div class="flex flex-wrap gap-2">
+                    @for (group of teacher.classGroups; track group.id) {
+                    <a
+                      [routerLink]="['/groups', group.id]"
+                      class="badge badge-neutral badge-soft"
                     >
-                      <div class="flex w-0 flex-1 items-center">
-                        <svg
-                          viewBox="0 0 20 20"
-                          fill="currentColor"
-                          data-slot="icon"
-                          aria-hidden="true"
-                          class="size-5 shrink-0 text-gray-400"
-                        >
-                          <path
-                            d="M15.621 4.379a3 3 0 0 0-4.242 0l-7 7a3 3 0 0 0 4.241 4.243h.001l.497-.5a.75.75 0 0 1 1.064 1.057l-.498.501-.002.002a4.5 4.5 0 0 1-6.364-6.364l7-7a4.5 4.5 0 0 1 6.368 6.36l-3.455 3.553A2.625 2.625 0 1 1 9.52 9.52l3.45-3.451a.75.75 0 1 1 1.061 1.06l-3.45 3.451a1.125 1.125 0 0 0 1.587 1.595l3.454-3.553a3 3 0 0 0 0-4.242Z"
-                            clip-rule="evenodd"
-                            fill-rule="evenodd"
-                          />
-                        </svg>
-                        <div class="ml-4 flex min-w-0 flex-1 gap-2">
-                          <span class="truncate font-medium text-gray-900"
-                            >resume_back_end_developer.pdf</span
-                          >
-                          <span class="shrink-0 text-gray-400">2.4mb</span>
-                        </div>
-                      </div>
-                      <div class="ml-4 shrink-0">
-                        <a
-                          href="#"
-                          class="font-medium text-indigo-600 hover:text-indigo-500"
-                          >Download</a
-                        >
-                      </div>
-                    </li>
-                    <li
-                      class="flex items-center justify-between py-4 pr-5 pl-4 text-sm/6"
-                    >
-                      <div class="flex w-0 flex-1 items-center">
-                        <svg
-                          viewBox="0 0 20 20"
-                          fill="currentColor"
-                          data-slot="icon"
-                          aria-hidden="true"
-                          class="size-5 shrink-0 text-gray-400"
-                        >
-                          <path
-                            d="M15.621 4.379a3 3 0 0 0-4.242 0l-7 7a3 3 0 0 0 4.241 4.243h.001l.497-.5a.75.75 0 0 1 1.064 1.057l-.498.501-.002.002a4.5 4.5 0 0 1-6.364-6.364l7-7a4.5 4.5 0 0 1 6.368 6.36l-3.455 3.553A2.625 2.625 0 1 1 9.52 9.52l3.45-3.451a.75.75 0 1 1 1.061 1.06l-3.45 3.451a1.125 1.125 0 0 0 1.587 1.595l3.454-3.553a3 3 0 0 0 0-4.242Z"
-                            clip-rule="evenodd"
-                            fill-rule="evenodd"
-                          />
-                        </svg>
-                        <div class="ml-4 flex min-w-0 flex-1 gap-2">
-                          <span class="truncate font-medium text-gray-900"
-                            >coverletter_back_end_developer.pdf</span
-                          >
-                          <span class="shrink-0 text-gray-400">4.5mb</span>
-                        </div>
-                      </div>
-                      <div class="ml-4 shrink-0">
-                        <a
-                          href="#"
-                          class="font-medium text-indigo-600 hover:text-indigo-500"
-                          >Download</a
-                        >
-                      </div>
-                    </li>
-                  </ul>
+                      {{ group.name }}
+                    </a>
+                    } @empty {
+                    <span class="text-sm/6 text-gray-700 sm:col-span-2 sm:mt-0">
+                      No hay grupos asignados
+                    </span>
+                    }
+                  </div>
                 </dd>
               </div>
             </dl>
@@ -230,6 +190,10 @@ export default class Teacher {
                   color
                 }
                 courses {
+                  id
+                  name
+                }
+                classGroups {
                   id
                   name
                 }

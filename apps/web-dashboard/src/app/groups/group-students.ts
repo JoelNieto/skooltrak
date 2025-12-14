@@ -1,4 +1,5 @@
 import { Component, computed, input, signal } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { phosphorMagnifyingGlassDuotone } from '@ng-icons/phosphor-icons/duotone';
 import { Prisma } from '@prisma/client';
@@ -10,7 +11,7 @@ type Student = Prisma.StudentGetPayload<{
 };
 @Component({
   selector: 'app-group-students',
-  imports: [NgIcon],
+  imports: [NgIcon, RouterLink],
   providers: [
     provideIcons({
       phosphorMagnifyingGlassDuotone,
@@ -30,20 +31,22 @@ type Student = Prisma.StudentGetPayload<{
     <ul class="flex flex-col gap-4 mt-4">
       @for(student of filteredStudents(); track student.id) {
       <li>
-        <div class="flex items-center gap-4">
-          <div class="avatar avatar-online avatar-placeholder">
-            <div
-              class="text-primary-content w-10 rounded-full"
-              [style.background]="student.user.color"
-            >
-              <span class="text-sm">{{ student.initials }}</span>
+        <a [routerLink]="['/students', student.id]">
+          <div class="flex items-center gap-4">
+            <div class="avatar avatar-placeholder">
+              <div
+                class="text-primary-content w-10 rounded-full"
+                [style.background]="student.user.color"
+              >
+                <span class="text-sm">{{ student.initials }}</span>
+              </div>
+            </div>
+            <div>
+              <p>{{ student.name }}</p>
+              <p class="text-base-200 text-sm">{{ student.documentId }}</p>
             </div>
           </div>
-          <div>
-            <p>{{ student.name }}</p>
-            <p class="text-base-200 text-sm">{{ student.documentId }}</p>
-          </div>
-        </div>
+        </a>
       </li>
       }
     </ul> `,

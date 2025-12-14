@@ -1,4 +1,4 @@
-import { Paginator, TimeAgoPipe } from '@/ui';
+import { Confirmation, Paginator, TimeAgoPipe, Toast } from '@/ui';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -16,7 +16,7 @@ import {
 } from '@ng-icons/phosphor-icons/duotone';
 import { Prisma } from '@prisma/client';
 import { Apollo, gql } from 'apollo-angular';
-import { map, tap } from 'rxjs';
+import { filter, map, switchMap, tap } from 'rxjs';
 type User = Prisma.UserGetPayload<undefined> & {
   name: string;
   initials: string;
@@ -115,7 +115,10 @@ type MessageRecipientType = Prisma.MessageRecipientGetPayload<undefined> & {
                   {{ item.message.createdAt | timeAgo }}
                 </td>
                 <td>
-                  <button class="hover:text-error cursor-pointer">
+                  <button
+                    class="hover:text-error cursor-pointer"
+                    (click)="deleteMessage(item)"
+                  >
                     <ng-icon name="phosphorTrashDuotone" class="text-lg" />
                   </button>
                 </td>
@@ -152,7 +155,8 @@ export default class Messages {
     skip: 0,
     count: 0,
   });
-
+  #confirmation = inject(Confirmation);
+  #toast = inject(Toast);
   readonly selectedStates = signal<Record<string, boolean>>({});
   public selectedIds = computed(() => {
     const states = this.selectedStates();
@@ -263,4 +267,39 @@ export default class Messages {
         );
     },
   });
+
+  public deleteMessage(message: MessageRecipientType) {
+    this.#confirmation
+      .confirm({
+        title: 'Eliminar mensaje',
+        message: '¿Estás seguro de eliminar este mensaje?',
+      })
+      .pipe(
+        filter((result) => result),
+        switchMap(() =>
+          this.#apollo.mutate({
+            mutation: gql`
+              mutation removeMessageRecipient($id: String!) {
+                removeMessageRecipient(id: $id) {
+                  id
+                }
+              }
+            `,
+            variables: {
+              id: message.id,
+            },
+          })
+        )
+      )
+      .subscribe({
+        next: () => {
+          this.#toast.showSuccess('Mensaje eliminado correctamente');
+          this.messagesResource.reload();
+        },
+        error: (error) => {
+          console.error(error);
+          this.#toast.showError('Error al eliminar el mensaje');
+        },
+      });
+  }
 }

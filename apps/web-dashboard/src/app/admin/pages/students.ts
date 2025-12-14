@@ -1,12 +1,17 @@
-import { Confirmation, Modal, Toast } from '@/ui';
+import { Confirmation, Modal, Pagination, Paginator, Toast } from '@/ui';
 import { DatePipe } from '@angular/common';
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
+import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
+import { NgIcon, provideIcons } from '@ng-icons/core';
+import {
+  phosphorMagnifyingGlassDuotone,
+  phosphorPlusCircleDuotone,
+} from '@ng-icons/phosphor-icons/duotone';
 import { Prisma } from '@prisma/client';
 import { Apollo, gql } from 'apollo-angular';
-import { filter, map, of, switchMap } from 'rxjs';
-import Store from '../../core/store';
+import { filter, map, switchMap, tap } from 'rxjs';
 import StudentsForm from '../forms/students-form';
 
 type Student = Prisma.StudentGetPayload<{
@@ -17,10 +22,29 @@ type Student = Prisma.StudentGetPayload<{
 };
 
 @Component({
-  imports: [DatePipe, RouterLink],
-  template: `<div class="flex justify-end">
+  imports: [DatePipe, RouterLink, Paginator, NgIcon, FormsModule],
+  providers: [Pagination],
+  viewProviders: [
+    provideIcons({
+      phosphorPlusCircleDuotone,
+      phosphorMagnifyingGlassDuotone,
+    }),
+  ],
+  template: `<div class="flex flex-col gap-4 md:flex-row md:justify-between">
+      <div class="md:w-96 w-full">
+        <label class="input input-primary ">
+          <ng-icon name="phosphorMagnifyingGlassDuotone" />
+          <input
+            class="pl-0"
+            type="search"
+            placeholder="Buscar..."
+            [(ngModel)]="searchText"
+            (input)="pagination.updateSearch($event.target.value)"
+          />
+        </label>
+      </div>
       <button class="btn btn-primary" (click)="editStudent()">
-        Agregar Alumno
+        <ng-icon name="phosphorPlusCircleDuotone" /> Agregar Alumno
       </button>
     </div>
     <div
@@ -50,7 +74,13 @@ type Student = Prisma.StudentGetPayload<{
             </td>
             <td>{{ student.email }}</td>
             <td>{{ student.documentId }}</td>
-            <td>{{ student.classGroup.name }}</td>
+            <td>
+              <a
+                class="badge badge-primary badge-sm badge-soft"
+                [routerLink]="['/groups', student.classGroupId]"
+                >{{ student.classGroup.name }}</a
+              >
+            </td>
             <td>{{ student.createdAt | date : 'short' }}</td>
             <td>{{ student.updatedAt | date : 'short' }}</td>
             <td>
@@ -73,28 +103,50 @@ type Student = Prisma.StudentGetPayload<{
           }
         </tbody>
       </table>
+      <div class="p-4 rounded-b-lg ">
+        <lib-paginator
+          [count]="pagination.count()"
+          [take]="pagination.take()"
+          [skip]="pagination.skip()"
+        />
+      </div>
     </div> `,
 })
 export default class Students {
   private modal = inject(Modal);
   private apollo = inject(Apollo);
-  private store = inject(Store);
   private toasts = inject(Toast);
   private confirmation = inject(Confirmation);
+  public searchText = signal('');
+  public pagination = inject(Pagination);
   public students = rxResource({
     params: () => ({
-      schoolId: this.store.currentSchoolId(),
+      take: this.pagination.take(),
+      skip: this.pagination.skip(),
+      search: this.pagination.search(),
+      orderBy: this.pagination.sortBy(),
+      orderDirection: this.pagination.sortOrder(),
     }),
     stream: ({ params }) => {
-      const { schoolId } = params;
-      if (!schoolId) {
-        return of([]);
-      }
+      const { take, skip, search, orderBy, orderDirection } = params;
       return this.apollo
-        .watchQuery<{ studentsBySchoolId: Student[] }>({
+        .watchQuery<{ count: number; students: Student[] }>({
           query: gql`
-            query StudentsBySchoolId($schoolId: String!) {
-              studentsBySchoolId(schoolId: $schoolId) {
+            query getStudents(
+              $take: Int!
+              $skip: Int!
+              $search: String
+              $orderBy: String
+              $orderDirection: String
+            ) {
+              count: findManyStudentsCount(search: $search)
+              students(
+                take: $take
+                skip: $skip
+                search: $search
+                orderBy: $orderBy
+                orderDirection: $orderDirection
+              ) {
                 id
                 name
                 firstName
@@ -117,10 +169,19 @@ export default class Students {
             }
           `,
           variables: {
-            schoolId: params.schoolId,
+            take,
+            skip,
+            search,
+            orderBy,
+            orderDirection,
           },
         })
-        .valueChanges.pipe(map((result) => result.data.studentsBySchoolId));
+        .valueChanges.pipe(
+          tap(({ data }) => {
+            this.pagination.updateCount(data.count);
+          }),
+          map((result) => result.data.students)
+        );
     },
   });
 

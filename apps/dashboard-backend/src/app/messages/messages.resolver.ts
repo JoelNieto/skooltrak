@@ -51,8 +51,15 @@ export class MessagesResolver {
     return this.messagesService.findOne(id);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Mutation(() => Message)
   removeMessage(@Args('id', { type: () => String }) id: string) {
     return this.messagesService.remove(id);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Mutation(() => MessageRecipient)
+  removeMessageRecipient(@Args('id', { type: () => String }) id: string) {
+    return this.messagesService.removeRecipient(id);
   }
 }

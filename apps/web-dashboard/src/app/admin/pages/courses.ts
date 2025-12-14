@@ -92,7 +92,16 @@ type CourseType = Prisma.CourseGetPayload<{
             <td>{{ course.code }}</td>
             <td>{{ course.subject.name }}</td>
             <td>{{ course.studyPlan.name }}</td>
-            <td>{{ course.teacher?.name ?? '--' }}</td>
+            <td>
+              @if(course.teacher) {
+              <a
+                [routerLink]="['/teachers', course.teacher.id]"
+                class="link link-primary"
+              >
+                {{ course.teacher.name }}
+              </a>
+              } @else { -- }
+            </td>
             <td>{{ course.currentPeriod?.name }}</td>
             <td>
               <div class="flex gap-2">

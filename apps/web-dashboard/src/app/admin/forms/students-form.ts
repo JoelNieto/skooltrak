@@ -1,5 +1,11 @@
 import { markGroupDirty, Toast } from '@/ui';
-import { Component, inject, input, OnInit, output } from '@angular/core';
+import {
+  afterRenderEffect,
+  Component,
+  inject,
+  input,
+  output,
+} from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import {
   NonNullableFormBuilder,
@@ -122,7 +128,7 @@ import Store from '../../core/store';
     </div>
   </form>`,
 })
-export default class StudentsForm implements OnInit {
+export default class StudentsForm {
   public data = input<{
     student?: Prisma.StudentGetPayload<{ include: undefined }>;
   }>();
@@ -141,7 +147,7 @@ export default class StudentsForm implements OnInit {
       }
       return this.apollo
         .watchQuery<{
-          classGroupsBySchoolId: any[];
+          classGroupsBySchoolId: { id: string; name: string }[];
         }>({
           query: gql`
             query ClassGroupsBySchoolId($schoolId: String!) {
@@ -175,10 +181,12 @@ export default class StudentsForm implements OnInit {
     phone: ['', [Validators.required]],
   });
 
-  ngOnInit(): void {
-    if (this.data()?.student) {
-      this.form.patchValue(this.data()!.student!);
-    }
+  constructor() {
+    afterRenderEffect(() => {
+      if (this.data()?.student) {
+        this.form.patchValue(this.data()!.student!);
+      }
+    });
   }
 
   onSubmit() {

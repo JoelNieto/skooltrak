@@ -12,9 +12,8 @@ import {
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
-import { Prisma } from '@prisma/client';
+import { Prisma } from '@generated/prisma';
 import { Apollo, gql } from 'apollo-angular';
-
 const CREATE_ORGANIZATION = gql`
   mutation CreateOrganization(
     $createOrganizationInput: CreateOrganizationInput!

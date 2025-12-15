@@ -9,12 +9,12 @@ import {
 import { rxResource } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
+import { Prisma } from '@generated/prisma';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
   phosphorEyeDuotone,
   phosphorTrashDuotone,
 } from '@ng-icons/phosphor-icons/duotone';
-import { Prisma } from '@prisma/client';
 import { Apollo, gql } from 'apollo-angular';
 import { filter, map, switchMap, tap } from 'rxjs';
 type User = Prisma.UserGetPayload<undefined> & {

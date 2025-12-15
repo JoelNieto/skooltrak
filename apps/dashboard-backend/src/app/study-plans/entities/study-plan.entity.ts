@@ -1,9 +1,8 @@
+import { Prisma } from '@generated/prisma';
 import { Field, Int, ObjectType } from '@nestjs/graphql';
-import { Prisma } from '@prisma/client';
 import { Degree } from '../../degrees/entities/degree.entity';
 import { GradeMetric } from '../../grade-metrics/entities/grade-metric.entity';
 import { School } from '../../schools/entities/school.entity';
-
 @ObjectType()
 export class StudyPlan
   implements

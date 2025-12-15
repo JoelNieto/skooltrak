@@ -3,18 +3,17 @@ import { DatePipe } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
+import { Prisma } from '@generated/prisma';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
   phosphorPencilDuotone,
   phosphorPlusCircleDuotone,
   phosphorTrashDuotone,
 } from '@ng-icons/phosphor-icons/duotone';
-import { Prisma } from '@prisma/client';
 import { Apollo, gql } from 'apollo-angular';
 import { filter, map, of, switchMap } from 'rxjs';
 import Store from '../../core/store';
 import ClassGroupsForm from '../forms/class-groups-form';
-
 @Component({
   selector: 'app-groups',
   imports: [NgIcon, DatePipe, RouterLink],

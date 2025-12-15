@@ -2,13 +2,13 @@ import { Loader } from '@/ui';
 import { Component, inject, input } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
+import { Prisma } from '@generated/prisma';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
   phosphorBookBookmarkDuotone,
   phosphorChalkboardTeacherDuotone,
   phosphorUsersFourDuotone,
 } from '@ng-icons/phosphor-icons/duotone';
-import { Prisma } from '@prisma/client';
 import { Apollo, gql } from 'apollo-angular';
 import { catchError, map, of, throwError } from 'rxjs';
 import GroupCourses from './group-courses';

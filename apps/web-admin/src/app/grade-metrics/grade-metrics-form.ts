@@ -5,9 +5,8 @@ import {
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
-import { Prisma } from '@prisma/client';
+import { Prisma } from '@generated/prisma';
 import { Apollo, gql } from 'apollo-angular';
-
 @Component({
   selector: 'app-grade-metrics-form',
   imports: [ReactiveFormsModule],

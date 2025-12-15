@@ -9,6 +9,7 @@ import {
 } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
+import { Prisma } from '@generated/prisma';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
   phosphorMagnifyingGlassDuotone,
@@ -18,11 +19,9 @@ import {
   phosphorSortDescendingDuotone,
   phosphorTrashDuotone,
 } from '@ng-icons/phosphor-icons/duotone';
-import { Prisma } from '@prisma/client';
 import { Apollo, gql } from 'apollo-angular';
 import { filter, map, switchMap, tap } from 'rxjs';
 import SubjectsForm from '../forms/subjects-form';
-
 @Component({
   selector: 'app-subjects',
   imports: [DatePipe, NgIcon, Paginator, FormsModule],

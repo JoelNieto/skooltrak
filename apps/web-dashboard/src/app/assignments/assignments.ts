@@ -10,18 +10,17 @@ import {
 } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
+import { Prisma } from '@generated/prisma';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
   phosphorArrowLeftDuotone,
   phosphorArrowRightDuotone,
   phosphorCalendarCheckDuotone,
 } from '@ng-icons/phosphor-icons/duotone';
-import { Prisma } from '@prisma/client';
 import { Apollo, gql } from 'apollo-angular';
 import { addDays, endOfWeek, startOfWeek, subDays } from 'date-fns';
 import { map, of } from 'rxjs';
 import Store from '../core/store';
-
 @Pipe({ name: 'stripHtml', standalone: true })
 export class StripHtmlPipe implements PipeTransform {
   transform(value: string | null | undefined): string {

@@ -7,13 +7,12 @@ import {
   viewChild,
 } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
+import { Prisma } from '@generated/prisma';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { phosphorListDuotone } from '@ng-icons/phosphor-icons/duotone';
-import { Prisma } from '@prisma/client';
 import { Apollo, gql } from 'apollo-angular';
 import { Auth } from '../auth/auth';
 import { Sidebar } from './sidebar';
-
 @Component({
   selector: 'app-dashboard',
   imports: [RouterOutlet, Sidebar, NgIcon],

@@ -1,5 +1,5 @@
+import { $Enums, Prisma } from '@generated/prisma';
 import { Field, ObjectType } from '@nestjs/graphql';
-import { $Enums, Prisma } from '@prisma/client';
 import { Course } from '../../courses/entities/course.entity';
 import { Teacher } from '../../teachers/entities/teacher.entity';
 

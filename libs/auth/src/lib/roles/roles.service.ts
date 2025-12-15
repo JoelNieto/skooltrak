@@ -1,9 +1,8 @@
+import { Prisma } from '@generated/prisma';
 import { Injectable } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma.service';
 import { CreateRoleInput } from './dto/create-role.input';
 import { UpdateRoleInput } from './dto/update-role.input';
-
 @Injectable()
 export class RolesService {
   constructor(private readonly prisma: PrismaService) {}

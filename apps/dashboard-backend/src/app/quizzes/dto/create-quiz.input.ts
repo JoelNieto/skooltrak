@@ -1,6 +1,5 @@
+import { $Enums, Prisma } from '@generated/prisma';
 import { Field, InputType } from '@nestjs/graphql';
-import { $Enums, Prisma } from '@prisma/client';
-import { DecimalJsLike } from '@prisma/client/runtime/library';
 
 @InputType()
 export class CreateQuizInput {
@@ -29,7 +28,7 @@ export class CreateQuizQuestionInput {
   question: string;
 
   @Field(() => String, { description: 'Value' })
-  value: string | number | Prisma.Decimal | DecimalJsLike;
+  value: string | number | Prisma.Decimal;
 
   @Field(() => String, { description: 'Type' })
   type: $Enums.QuizQuestionType;

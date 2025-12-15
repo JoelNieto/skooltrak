@@ -1,8 +1,7 @@
+import { Prisma } from '@generated/prisma';
 import { Field, ObjectType } from '@nestjs/graphql';
-import { Prisma } from '@prisma/client';
 import { Grade } from '../../grades/entities/grade.entity';
 import { Student } from '../../students/entities/student.entity';
-
 @ObjectType()
 export class GradeStudent
   implements

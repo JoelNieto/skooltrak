@@ -7,10 +7,9 @@ import {
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
-import { Prisma } from '@prisma/client';
+import { Prisma } from '@generated/prisma';
 import { Apollo, gql } from 'apollo-angular';
 import { map } from 'rxjs';
-
 @Component({
   selector: 'app-roles-form',
   imports: [ReactiveFormsModule, FormsModule],

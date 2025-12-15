@@ -1,8 +1,7 @@
 import { isPlatformBrowser } from '@angular/common';
 import { Injectable, PLATFORM_ID, inject, signal } from '@angular/core';
 import { JwtHelperService } from '@auth0/angular-jwt';
-import { Prisma } from '@prisma/client';
-
+import { Prisma } from '@generated/prisma';
 @Injectable({
   providedIn: 'root',
 })

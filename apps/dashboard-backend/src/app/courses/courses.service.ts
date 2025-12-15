@@ -1,10 +1,9 @@
+import { Prisma } from '@generated/prisma';
 import { Injectable } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
 import { FetchDataInput } from '../fetch-data.input';
 import { PrismaService } from '../prisma.service';
 import { CreateCourseInput } from './dto/create-course.input';
 import { UpdateCourseInput } from './dto/update-course.input';
-
 @Injectable()
 export class CoursesService {
   constructor(private readonly prisma: PrismaService) {}

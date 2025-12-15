@@ -3,13 +3,12 @@ import { DatePipe, DecimalPipe } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
+import { Prisma } from '@generated/prisma';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { phosphorPlusCircleDuotone } from '@ng-icons/phosphor-icons/duotone';
-import { Prisma } from '@prisma/client';
 import { Apollo, gql } from 'apollo-angular';
 import { map } from 'rxjs';
 import GradeMetricsForm from './grade-metrics-form';
-
 @Component({
   selector: 'app-grade-metrics',
   imports: [RouterLink, NgIcon, DecimalPipe, PrismaDecimalPipe, DatePipe],

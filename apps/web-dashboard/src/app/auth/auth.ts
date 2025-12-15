@@ -8,8 +8,7 @@ import {
 } from '@angular/core';
 import { Router } from '@angular/router';
 import { JwtHelperService } from '@auth0/angular-jwt';
-import { Prisma } from '@prisma/client';
-
+import { Prisma } from '@generated/prisma';
 @Injectable({
   providedIn: 'root',
 })

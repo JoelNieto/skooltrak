@@ -6,7 +6,7 @@ import {
   FormGroup,
   ReactiveFormsModule,
 } from '@angular/forms';
-import { $Enums, Prisma } from '@prisma/client';
+import { $Enums, Prisma } from '@generated/prisma';
 import QuestionOptionControl from './question-option-control';
 
 @Component({

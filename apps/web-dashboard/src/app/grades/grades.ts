@@ -7,12 +7,11 @@ import {
 import { rxResource } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { Prisma } from '@prisma/client';
+import { Prisma } from '@generated/prisma';
 import { Apollo, gql } from 'apollo-angular';
 import { of } from 'rxjs';
 import { map } from 'rxjs/operators';
 import Store from '../core/store';
-
 @Component({
   selector: 'app-grades',
   imports: [RouterLink, FormsModule],

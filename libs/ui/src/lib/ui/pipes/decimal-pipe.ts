@@ -1,6 +1,5 @@
 import { Pipe, PipeTransform } from '@angular/core';
-import { Prisma } from '@prisma/client';
-
+import { Prisma } from '@generated/prisma';
 @Pipe({
   name: 'decimal',
 })

@@ -5,10 +5,9 @@ import {
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
-import { Prisma } from '@prisma/client';
+import { Prisma } from '@generated/prisma';
 import { Apollo, gql } from 'apollo-angular';
 import Store from '../../core/store';
-
 @Component({
   selector: 'app-periods-form',
   imports: [ReactiveFormsModule],

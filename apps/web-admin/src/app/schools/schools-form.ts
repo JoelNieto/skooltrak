@@ -13,10 +13,9 @@ import {
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
-import { Prisma } from '@prisma/client';
+import { Prisma } from '@generated/prisma';
 import { Apollo, gql } from 'apollo-angular';
 import { map } from 'rxjs';
-
 const CREATE_SCHOOL = gql`
   mutation CreateSchool($createSchoolInput: CreateSchoolInput!) {
     createSchool(createSchoolInput: $createSchoolInput) {

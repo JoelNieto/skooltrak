@@ -2,6 +2,7 @@ import { DecimalToNumber, Loader, Modal } from '@/ui';
 import { Component, inject, input } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
+import { Prisma } from '@generated/prisma';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
   phosphorCalendarDotsDuotone,
@@ -12,14 +13,12 @@ import {
   phosphorPencilDuotone,
   phosphorUsersThreeDuotone,
 } from '@ng-icons/phosphor-icons/duotone';
-import { Prisma } from '@prisma/client';
 import { Apollo, gql } from 'apollo-angular';
 import { map, of } from 'rxjs';
 import AssignmentForm from '../assignments/assignment-form';
 import CourseGrades from '../grades/course-grades';
 import CourseAssignments from './course-assignments';
 import CourseGradeBuckets from './course-grade-buckets';
-
 type Teacher = Prisma.TeacherGetPayload<{ include: { user: true } }> & {
   name: string;
   initials: string;

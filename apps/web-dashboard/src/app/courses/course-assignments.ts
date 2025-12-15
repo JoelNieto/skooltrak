@@ -9,10 +9,9 @@ import {
 } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
-import { Prisma } from '@prisma/client';
+import { Prisma } from '@generated/prisma';
 import { Apollo, gql } from 'apollo-angular';
 import { map } from 'rxjs';
-
 @Component({
   selector: 'app-course-assignments',
   imports: [Calendar, DatePipe, RouterLink],

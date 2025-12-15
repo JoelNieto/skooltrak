@@ -6,11 +6,10 @@ import {
   input,
 } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
-import { Prisma } from '@prisma/client';
+import { Prisma } from '@generated/prisma';
 import { Apollo, gql } from 'apollo-angular';
 import { map, of } from 'rxjs';
 import GradeBucketForm from './grade-buckets-form';
-
 @Component({
   selector: 'app-course-grade-buckets',
   template: `

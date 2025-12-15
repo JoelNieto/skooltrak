@@ -1,7 +1,6 @@
 import { Organization } from '@/auth';
+import { Prisma } from '@generated/prisma';
 import { Field, Int, ObjectType } from '@nestjs/graphql';
-import { Prisma } from '@prisma/client';
-
 @ObjectType()
 export class School
   implements Prisma.SchoolGetPayload<{ include: { organization: true } }>

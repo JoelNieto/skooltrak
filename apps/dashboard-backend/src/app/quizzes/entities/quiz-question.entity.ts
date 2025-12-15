@@ -1,5 +1,5 @@
+import { $Enums, Prisma } from '@generated/prisma';
 import { Field, ObjectType } from '@nestjs/graphql';
-import { $Enums, Prisma } from '@prisma/client';
 import { QuizQuestionOption } from './quiz-question-option.entity';
 
 @ObjectType()

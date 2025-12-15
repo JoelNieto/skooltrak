@@ -1,12 +1,11 @@
 import { Component, computed, input, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { Prisma } from '@generated/prisma';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
   phosphorBookBookmarkDuotone,
   phosphorMagnifyingGlassDuotone,
 } from '@ng-icons/phosphor-icons/duotone';
-import { Prisma } from '@prisma/client';
-
 @Component({
   selector: 'app-group-courses',
   imports: [NgIcon, RouterLink],

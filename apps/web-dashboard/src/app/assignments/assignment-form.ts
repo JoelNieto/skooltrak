@@ -6,7 +6,7 @@ import {
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
-import { $Enums, Prisma } from '@prisma/client';
+import { $Enums, Prisma } from '@generated/prisma';
 import { Apollo, gql } from 'apollo-angular';
 import { addDays, format, setHours, setMinutes } from 'date-fns';
 import { map, of } from 'rxjs';

@@ -1,6 +1,5 @@
+import { Prisma } from '@generated/prisma';
 import { Field, ObjectType } from '@nestjs/graphql';
-import { Prisma } from '@prisma/client';
-
 @ObjectType()
 export class QuizQuestionOption
   implements

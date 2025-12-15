@@ -24,6 +24,9 @@
       ],
       "@/ui": [
         "libs/ui/src/index.ts"
+      ],
+      "@generated/prisma": [
+        "generated/prisma"
       ]
     }
   },

@@ -1,7 +1,5 @@
+import { Prisma } from '@generated/prisma';
 import { Field, InputType } from '@nestjs/graphql';
-import { Prisma } from '@prisma/client';
-import { DecimalJsLike } from '@prisma/client/runtime/library';
-
 @InputType()
 export class CreateGradeStudentInput
   implements Prisma.GradeStudentUncheckedCreateInput
@@ -16,5 +14,5 @@ export class CreateGradeStudentInput
   studentId: string;
 
   @Field(() => Number, { description: 'Score for the grade student' })
-  score: number | Prisma.Decimal | DecimalJsLike;
+  score: number | Prisma.Decimal;
 }

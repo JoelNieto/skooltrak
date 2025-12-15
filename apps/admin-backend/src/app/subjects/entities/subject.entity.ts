@@ -1,7 +1,6 @@
 import { Organization } from '@/auth';
+import { Prisma } from '@generated/prisma';
 import { Field, ObjectType } from '@nestjs/graphql';
-import { Prisma } from '@prisma/client';
-
 @ObjectType()
 export class Subject implements Prisma.SubjectGetPayload<true> {
   schoolId: string;

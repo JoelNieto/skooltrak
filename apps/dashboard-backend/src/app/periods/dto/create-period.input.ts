@@ -1,6 +1,5 @@
+import { Prisma } from '@generated/prisma';
 import { Field, InputType, Int } from '@nestjs/graphql';
-import { Prisma } from '@prisma/client';
-
 @InputType()
 export class CreatePeriodInput implements Prisma.PeriodUncheckedCreateInput {
   @Field(() => String, { description: 'School ID of the period' })

@@ -3,17 +3,16 @@ import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
+import { Prisma } from '@generated/prisma';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
   phosphorPencilDuotone,
   phosphorPlusCircleDuotone,
   phosphorTrashDuotone,
 } from '@ng-icons/phosphor-icons/duotone';
-import { Prisma } from '@prisma/client';
 import { Apollo, gql } from 'apollo-angular';
 import { map } from 'rxjs';
 import { UsersForm } from './users-form';
-
 @Component({
   selector: 'app-users',
   imports: [RouterLink, NgIcon, DatePipe],

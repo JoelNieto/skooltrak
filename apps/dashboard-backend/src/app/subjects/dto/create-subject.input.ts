@@ -1,6 +1,5 @@
+import { Prisma } from '@generated/prisma';
 import { Field, InputType } from '@nestjs/graphql';
-import { Prisma } from '@prisma/client';
-
 @InputType()
 export class CreateSubjectInput implements Prisma.SubjectUncheckedCreateInput {
   @Field(() => String, { description: 'Short name of the subject' })

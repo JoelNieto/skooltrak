@@ -11,12 +11,12 @@ import {
   Validators,
 } from '@angular/forms';
 import { RouterLink } from '@angular/router';
+import { $Enums, Prisma } from '@generated/prisma';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
   phosphorPlusCircleDuotone,
   phosphorTrashDuotone,
 } from '@ng-icons/phosphor-icons/duotone';
-import { $Enums, Prisma } from '@prisma/client';
 import { Apollo, gql } from 'apollo-angular';
 import { of } from 'rxjs';
 import { map } from 'rxjs/operators';

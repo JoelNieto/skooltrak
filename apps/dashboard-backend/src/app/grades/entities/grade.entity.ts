@@ -1,10 +1,9 @@
+import { Prisma } from '@generated/prisma';
 import { Field, ObjectType } from '@nestjs/graphql';
-import { Prisma } from '@prisma/client';
 import { Course } from '../../courses/entities/course.entity';
 import { GradeBucket } from '../../grade-buckets/entities/grade-bucket.entity';
 import { GradeStudent } from '../../grade-students/entities/grade-student.entity';
 import { Period } from '../../periods/entities/period.entity';
-
 @ObjectType()
 export class Grade
   implements

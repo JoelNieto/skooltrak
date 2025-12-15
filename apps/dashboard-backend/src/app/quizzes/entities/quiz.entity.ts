@@ -1,9 +1,8 @@
+import { Prisma } from '@generated/prisma';
 import { Field, ObjectType } from '@nestjs/graphql';
-import { Prisma } from '@prisma/client';
 import { Course } from '../../courses/entities/course.entity';
 import { Teacher } from '../../teachers/entities/teacher.entity';
 import { QuizQuestion } from './quiz-question.entity';
-
 @ObjectType()
 export class Quiz
   implements

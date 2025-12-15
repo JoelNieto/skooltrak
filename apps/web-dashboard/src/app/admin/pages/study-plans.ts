@@ -2,18 +2,17 @@ import { Confirmation, Modal, Toast } from '@/ui';
 import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
+import { Prisma } from '@generated/prisma';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
   phosphorPencilDuotone,
   phosphorPlusCircleDuotone,
   phosphorTrashDuotone,
 } from '@ng-icons/phosphor-icons/duotone';
-import { Prisma } from '@prisma/client';
 import { Apollo, gql } from 'apollo-angular';
 import { map, of, switchMap } from 'rxjs';
 import Store from '../../core/store';
 import StudyPlanForm from '../forms/study-plans-forms';
-
 @Component({
   selector: 'app-study-plans',
   imports: [NgIcon, DatePipe],

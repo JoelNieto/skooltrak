@@ -1,6 +1,6 @@
 import { User } from '@/auth';
+import { $Enums, Prisma } from '@generated/prisma';
 import { Field, ObjectType } from '@nestjs/graphql';
-import { $Enums, Prisma } from '@prisma/client';
 import { ClassGroup } from '../../class-groups/entities/class-group.entity';
 import { Course } from '../../courses/entities/course.entity';
 

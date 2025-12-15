@@ -6,9 +6,8 @@ import {
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
-import { Prisma } from '@prisma/client';
+import { Prisma } from '@generated/prisma';
 import { Apollo } from 'apollo-angular';
-
 import { gql } from 'apollo-angular';
 import { map, of } from 'rxjs';
 import Store from '../../core/store';

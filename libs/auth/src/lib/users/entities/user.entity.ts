@@ -1,10 +1,9 @@
+import { Prisma } from '@generated/prisma';
 import { Field, ObjectType } from '@nestjs/graphql';
-import { Prisma } from '@prisma/client';
 import { Organization } from '../../organizations/entities/organization.entity';
 import { Role } from '../../roles/entities/role.entity';
 import { UserStudent } from './student.entity';
 import { UserTeacher } from './teacher.entity';
-
 @ObjectType()
 export class User
   implements

@@ -1,8 +1,8 @@
 import { Component, computed, input, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { Prisma } from '@generated/prisma';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { phosphorMagnifyingGlassDuotone } from '@ng-icons/phosphor-icons/duotone';
-import { Prisma } from '@prisma/client';
 type Student = Prisma.StudentGetPayload<{
   include: { user: true };
 }> & {

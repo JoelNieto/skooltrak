@@ -1,7 +1,5 @@
+import { Prisma } from '@generated/prisma';
 import { Field, InputType } from '@nestjs/graphql';
-import { Prisma } from '@prisma/client';
-import { DecimalJsLike } from '@prisma/client/runtime/library';
-
 @InputType()
 export class CreateGradeBucketInput
   implements Prisma.GradeBucketUncheckedCreateInput
@@ -9,7 +7,7 @@ export class CreateGradeBucketInput
   @Field(() => String, { description: 'Nombre del bucket' })
   name: string;
   @Field(() => Number, { description: 'Peso del bucket' })
-  weight: number | Prisma.Decimal | DecimalJsLike;
+  weight: number | Prisma.Decimal;
   @Field(() => String, { description: 'Id del curso' })
   courseId: string;
 }

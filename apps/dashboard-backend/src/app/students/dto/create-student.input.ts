@@ -1,5 +1,5 @@
+import { $Enums, Prisma } from '@generated/prisma';
 import { Field, InputType } from '@nestjs/graphql';
-import { $Enums, Prisma } from '@prisma/client';
 type CreateStudentInputType = Omit<
   Prisma.StudentUncheckedCreateInput,
   'userId'

@@ -9,6 +9,7 @@ import {
 } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { RouterLink, RouterOutlet } from '@angular/router';
+import { Prisma } from '@generated/prisma';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
   phosphorBuildingApartmentDuotone,
@@ -17,13 +18,11 @@ import {
   phosphorListDuotone,
   phosphorSignOutDuotone,
 } from '@ng-icons/phosphor-icons/duotone';
-import { Prisma } from '@prisma/client';
 import { Apollo, gql } from 'apollo-angular';
 import { map } from 'rxjs';
 import Auth from '../auth/auth';
 import { Sidebar } from './sidebar';
 import Store from './store';
-
 @Component({
   selector: 'app-dashboard',
   imports: [RouterOutlet, Sidebar, NgIcon, RouterLink],

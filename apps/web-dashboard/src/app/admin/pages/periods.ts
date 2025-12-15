@@ -2,18 +2,17 @@ import { Confirmation, Modal, Toast } from '@/ui';
 import { DatePipe } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
+import { Prisma } from '@generated/prisma';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
   phosphorPencilDuotone,
   phosphorPlusCircleDuotone,
   phosphorTrashDuotone,
 } from '@ng-icons/phosphor-icons/duotone';
-import { Prisma } from '@prisma/client';
 import { Apollo, gql } from 'apollo-angular';
 import { filter, map, of, switchMap } from 'rxjs';
 import Store from '../../core/store';
 import PeriodsForm from '../forms/periods-form';
-
 @Component({
   selector: 'app-periods',
   imports: [NgIcon, DatePipe],

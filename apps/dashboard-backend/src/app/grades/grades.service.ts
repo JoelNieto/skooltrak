@@ -56,6 +56,11 @@ export class GradesService {
           include: {
             student: { include: { classGroup: true } },
           },
+          orderBy: {
+            student: {
+              firstName: 'asc',
+            },
+          },
         },
       },
       orderBy: { createdAt: 'asc' },

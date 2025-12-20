@@ -4,8 +4,6 @@ import { Component, computed, inject, input } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import { Prisma } from '@generated/prisma';
-import { NgIcon, provideIcons } from '@ng-icons/core';
-import { phosphorCalendarDotsDuotone } from '@ng-icons/phosphor-icons/duotone';
 import { Apollo, gql } from 'apollo-angular';
 import { map } from 'rxjs';
 type User = Prisma.UserGetPayload<undefined> & {
@@ -22,12 +20,8 @@ type MessageType = Prisma.MessageGetPayload<undefined> & {
 
 @Component({
   selector: 'app-message',
-  imports: [Loader, RouterLink, NgIcon, DatePipe, EditorViewer],
-  viewProviders: [
-    provideIcons({
-      phosphorCalendarDotsDuotone,
-    }),
-  ],
+  imports: [Loader, RouterLink, DatePipe, EditorViewer],
+
   template: `@defer{ @if(messageResource.hasValue()){ @let message =
     messageResource.value();
     <div class="breadcrumbs text-sm">

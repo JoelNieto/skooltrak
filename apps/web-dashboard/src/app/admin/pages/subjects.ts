@@ -318,7 +318,6 @@ export default class Subjects {
 
   constructor() {
     afterRenderEffect(() => {
-      console.log(this.searchText());
       this.pagination.updateSearch(this.searchText());
     });
   }

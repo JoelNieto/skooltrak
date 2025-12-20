@@ -5,7 +5,7 @@ import {
   inject,
   PLATFORM_ID,
   provideBrowserGlobalErrorListeners,
-  provideZoneChangeDetection,
+  provideZonelessChangeDetection,
 } from '@angular/core';
 import {
   provideClientHydration,
@@ -22,7 +22,7 @@ export const appConfig: ApplicationConfig = {
   providers: [
     provideClientHydration(withEventReplay()),
     provideBrowserGlobalErrorListeners(),
-    provideZoneChangeDetection({ eventCoalescing: true }),
+    provideZonelessChangeDetection(),
     provideRouter(appRoutes, withComponentInputBinding()),
     provideHttpClient(withFetch()),
     provideApollo(() => {

@@ -1,5 +1,5 @@
 import { Toast, ToastsContainer } from '@/ui';
-import { Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 @Component({
   imports: [RouterOutlet, ToastsContainer],
@@ -8,6 +8,7 @@ import { RouterOutlet } from '@angular/router';
     <lib-toasts-container [toasts]="toasts.toastList()" />
     <router-outlet />
   `,
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class App {
   protected title = 'web-dashboard';

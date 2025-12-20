@@ -16,6 +16,7 @@ export default class Auth {
   private platformId = inject(PLATFORM_ID);
   private jwtHelper = new JwtHelperService();
   private router = inject(Router);
+  public readonly isInitialized = signal(false);
   public user = signal<Prisma.UserGetPayload<{
     include: {
       role: { include: { permissions: true } };
@@ -49,7 +50,22 @@ export default class Auth {
 
   public isAdmin = computed(() => this.user()?.role.name === 'ADMIN');
 
-  public isAuthenticated() {
+  public isAuthenticated = computed(() => {
+    // With RenderMode.Client for protected routes, this will only run in browser
+    // localStorage is always available when this computed runs
+    const token = this.getAccessToken();
+    return token !== null && !this.jwtHelper.isTokenExpired(token);
+  });
+
+  constructor() {
+    // Mark as initialized immediately in browser
+    // For SSR with RenderMode.Client, this won't run on server anyway
+    if (isPlatformBrowser(this.platformId)) {
+      this.isInitialized.set(true);
+    }
+  }
+
+  public isAuthenticatedSync() {
     const token = this.getAccessToken();
     return token && !this.jwtHelper.isTokenExpired(token);
   }

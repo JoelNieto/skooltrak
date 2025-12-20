@@ -1,4 +1,4 @@
-export default {
+module.exports = {
   displayName: 'admin-backend',
   preset: '../../jest.preset.js',
   testEnvironment: 'node',

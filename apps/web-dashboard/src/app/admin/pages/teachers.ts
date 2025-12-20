@@ -198,7 +198,6 @@ export default class Teachers {
 
   constructor() {
     afterRenderEffect(() => {
-      console.log(this.searchText());
       this.pagination.updateSearch(this.searchText());
     });
   }

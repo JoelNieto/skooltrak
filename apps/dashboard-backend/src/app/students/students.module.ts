@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
-import { PrismaModule } from '../prisma.module';
 import { GradesModule } from '../grades/grades.module';
+import { PrismaModule } from '../prisma.module';
 import { StudentsResolver } from './students.resolver';
 import { StudentsService } from './students.service';
 

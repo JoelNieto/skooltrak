@@ -12,7 +12,7 @@
       "options": {
         "outputPath": "dist/apps/web-dashboard",
         "browser": "apps/web-dashboard/src/main.ts",
-        "polyfills": ["zone.js"],
+        "polyfills": [],
         "tsConfig": "apps/web-dashboard/tsconfig.app.json",
         "assets": [
           {
@@ -78,7 +78,7 @@
       "executor": "@nx/eslint:lint"
     },
     "test": {
-      "executor": "@nx/vite:test",
+      "executor": "@nx/vitest:test",
       "outputs": ["{options.reportsDirectory}"],
       "options": {
         "reportsDirectory": "../../coverage/apps/web-dashboard"

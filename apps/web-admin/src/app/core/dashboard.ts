@@ -107,7 +107,6 @@ export class Dashboard implements OnInit {
         `,
       })
       .valueChanges.subscribe((res) => {
-        console.log(res.data);
         const { me } = res.data;
         if (me) {
           this.auth.user.set(me);

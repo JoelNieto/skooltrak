@@ -1,4 +1,4 @@
-export default {
+module.exports = {
   displayName: 'dashboard-backend',
   preset: '../../jest.preset.js',
   testEnvironment: 'node',

@@ -1,5 +1,11 @@
 import { markGroupDirty, Toast } from '@/ui';
-import { Component, inject, input, OnInit, output } from '@angular/core';
+import {
+  afterRenderEffect,
+  Component,
+  inject,
+  input,
+  output,
+} from '@angular/core';
 import {
   NonNullableFormBuilder,
   ReactiveFormsModule,
@@ -49,7 +55,7 @@ import Store from '../../core/store';
     </div>
   </form>`,
 })
-export default class SubjectsForm implements OnInit {
+export default class SubjectsForm {
   public closeModal = output<void>();
   public data = input<{ subject?: Prisma.SubjectGetPayload<false> }>();
   private toast = inject(Toast);
@@ -62,11 +68,12 @@ export default class SubjectsForm implements OnInit {
     code: ['', [Validators.required]],
   });
 
-  ngOnInit(): void {
-    const subject = this.data()?.subject;
-    if (subject) {
-      this.form.patchValue(subject);
-    }
+  constructor() {
+    afterRenderEffect(() => {
+      if (this.data()?.subject) {
+        this.form.patchValue(this.data()!.subject!);
+      }
+    });
   }
 
   onSubmit(): void {

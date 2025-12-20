@@ -2,6 +2,7 @@ import { JwtAuthGuard } from '@/auth';
 import { UseGuards } from '@nestjs/common';
 import {
   Args,
+  Float,
   Int,
   Mutation,
   Parent,
@@ -10,6 +11,7 @@ import {
   Resolver,
 } from '@nestjs/graphql';
 import { FetchDataInput } from '../fetch-data.input';
+import { GradesService } from '../grades/grades.service';
 import { CreateStudentInput } from './dto/create-student.input';
 import { UpdateStudentInput } from './dto/update-student.input';
 import { Student } from './entities/student.entity';
@@ -17,7 +19,10 @@ import { StudentsService } from './students.service';
 
 @Resolver(() => Student)
 export class StudentsResolver {
-  constructor(private readonly studentsService: StudentsService) {}
+  constructor(
+    private readonly studentsService: StudentsService,
+    private readonly gradesService: GradesService
+  ) {}
 
   @Mutation(() => Student)
   createStudent(
@@ -79,6 +84,19 @@ export class StudentsResolver {
   @ResolveField(() => String)
   color(@Parent() student: Student) {
     return student.user.color;
+  }
+
+  @ResolveField(() => Float, { name: 'averageScoreForStudent' })
+  getAverageScoreForStudent(
+    @Parent() student: Student,
+    @Args('courseId', { type: () => String }) courseId: string,
+    @Args('periodId', { type: () => String }) periodId: string
+  ) {
+    return this.gradesService.getAverageScoreForStudent(
+      courseId,
+      periodId,
+      student.id
+    );
   }
 
   @Mutation(() => Student)

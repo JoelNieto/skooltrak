@@ -47,6 +47,7 @@ import GradesForm from './grades-form';
               >
             </th>
             }
+            <th class="w-[2rem]">Promedio</th>
           </tr>
         </thead>
         <tbody>
@@ -72,6 +73,7 @@ import GradesForm from './grades-form';
               {{ (grade.item?.score | number : '1.1-1') ?? '-' }}
             </td>
             }
+            <td class="text-center font-semibold">-</td>
           </tr>
           } @empty {
           <tr>
@@ -214,6 +216,10 @@ export default class CourseGrades {
                     id
                     firstName
                     fatherName
+                    averageScoreForStudent(
+                      courseId: $courseId
+                      periodId: $periodId
+                    )
                   }
                   score
                   comments

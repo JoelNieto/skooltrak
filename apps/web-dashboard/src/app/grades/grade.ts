@@ -1,13 +1,25 @@
-import { DecimalToNumber, EditorViewer, Error, Loader, Modal } from '@/ui';
+import {
+  Confirmation,
+  DecimalToNumber,
+  EditorViewer,
+  Error,
+  Loader,
+  Modal,
+  Toast,
+} from '@/ui';
 import { DatePipe, DecimalPipe, NgClass } from '@angular/common';
 import { Component, computed, inject, input } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { Prisma } from '@generated/prisma';
 import { NgIcon, provideIcons } from '@ng-icons/core';
-import { phosphorCalendarDotsDuotone } from '@ng-icons/phosphor-icons/duotone';
+import {
+  phosphorCalendarDotsDuotone,
+  phosphorPencilDuotone,
+  phosphorTrashDuotone,
+} from '@ng-icons/phosphor-icons/duotone';
 import { Apollo, gql } from 'apollo-angular';
-import { map } from 'rxjs';
+import { filter, map, switchMap } from 'rxjs';
 import GradeStudentForm from './grade-student-form';
 @Component({
   selector: 'app-grade',
@@ -24,6 +36,8 @@ import GradeStudentForm from './grade-student-form';
   viewProviders: [
     provideIcons({
       phosphorCalendarDotsDuotone,
+      phosphorPencilDuotone,
+      phosphorTrashDuotone,
     }),
   ],
   template: `
@@ -37,22 +51,26 @@ import GradeStudentForm from './grade-student-form';
     </div>
     <div class="card card-border border-base-300 mt-4 bg-base-100">
       <div class="card-body">
-        <h1 class="text-xl font-semibold mb-2">{{ grade.title }}</h1>
+        <div class="flex justify-between items-center">
+          <h1 class="text-2xl font-medium">{{ grade.title }}</h1>
+          <div class="flex items-center gap-2">
+            <button class="btn btn-neutral btn-sm btn-soft">
+              <ng-icon name="phosphorPencilDuotone" /> Editar
+            </button>
+            <button
+              class="btn btn-error btn-sm btn-soft"
+              (click)="deleteGrade(grade)"
+            >
+              <ng-icon name="phosphorTrashDuotone" /> Eliminar
+            </button>
+          </div>
+        </div>
         <a
-          class="badge badge-primary badge-soft"
+          class="text-sm text-link"
           [routerLink]="['/courses', grade.course.id]"
         >
           {{ grade.course.name }}
         </a>
-        <p class="flex items-center gap-2">
-          <ng-icon name="phosphorCalendarDotsDuotone" />
-          {{ grade.date | date : 'mediumDate' }}
-        </p>
-      </div>
-    </div>
-    <div class="card card-border border-base-300 mt-4 bg-base-100">
-      <div class="card-body">
-        <h3 class="card-title">Detalles</h3>
         <lib-editor-viewer [innerHTML]="grade.comments" />
       </div>
     </div>
@@ -66,7 +84,6 @@ import GradeStudentForm from './grade-student-form';
               <th class="text-center px-0 w-[100px]">Calificacion</th>
               <th class="!px-2">Comentarios</th>
               <th>Actualizado</th>
-              <th></th>
             </tr>
           </thead>
           <tbody>
@@ -77,7 +94,8 @@ import GradeStudentForm from './grade-student-form';
                 {{ gradeStudent.student.fatherName }}
               </td>
               <td
-                class="font-semibold text-center !px-0"
+                class="font-semibold text-center !px-0 cursor-pointer hover:bg-base-200"
+                (click)="editGradeItem(gradeStudent)"
                 [ngClass]="{
                   '!text-success bg-success/10':
                     gradeStudent.score &&
@@ -99,16 +117,6 @@ import GradeStudentForm from './grade-student-form';
                 {{ gradeStudent.comments }}
               </td>
               <td>{{ gradeStudent.updatedAt | date : 'medium' }}</td>
-              <td>
-                <div class="flex items-center gap-2 ">
-                  <button
-                    class="btn btn-xs btn-primary btn-soft"
-                    (click)="editGradeItem(gradeStudent)"
-                  >
-                    Editar
-                  </button>
-                </div>
-              </td>
             </tr>
             }
           </tbody>
@@ -132,7 +140,10 @@ import GradeStudentForm from './grade-student-form';
 export default class Grade {
   public id = input.required<string>();
   #apollo = inject(Apollo);
+  #router = inject(Router);
   #modal = inject(Modal);
+  #confirmation = inject(Confirmation);
+  #toast = inject(Toast);
   public gradeResource = rxResource({
     params: () => ({ id: this.id() }),
     stream: ({ params }) => {
@@ -159,6 +170,7 @@ export default class Grade {
                 title
                 comments
                 date
+                courseId
                 course {
                   id
                   name
@@ -224,5 +236,39 @@ export default class Grade {
       },
       title: 'Editar calificacion',
     });
+  }
+
+  deleteGrade(grade: Prisma.GradeGetPayload<{ include: undefined }>) {
+    this.#confirmation
+      .confirm({
+        title: 'Eliminar calificacion',
+        message: '¿Estás seguro de eliminar esta calificacion?',
+      })
+      .pipe(
+        filter((result: boolean) => result === true),
+        switchMap(() =>
+          this.#apollo.mutate({
+            mutation: gql`
+              mutation RemoveGrade($id: String!) {
+                removeGrade(id: $id) {
+                  id
+                }
+              }
+            `,
+            variables: { id: grade.id },
+          })
+        )
+      )
+      .subscribe({
+        next: () => {
+          this.#router.navigate(['/courses', grade.courseId]);
+          this.#toast.showSuccess('Calificacion eliminada correctamente');
+        },
+
+        error: (error) => {
+          console.error(error);
+          this.#toast.showError('Error al eliminar la calificacion');
+        },
+      });
   }
 }

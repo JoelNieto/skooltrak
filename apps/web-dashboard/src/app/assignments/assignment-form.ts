@@ -6,11 +6,20 @@ import {
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
-import { $Enums, Prisma } from '@generated/prisma';
+import { Prisma } from '@generated/prisma';
 import { Apollo, gql } from 'apollo-angular';
 import { addDays, format, setHours, setMinutes } from 'date-fns';
 import { map, of } from 'rxjs';
 import Store from '../core/store';
+
+enum AssignmentType {
+  HOMEWORK = 'HOMEWORK',
+  EXAM = 'EXAM',
+  QUIZ = 'QUIZ',
+  PROJECT = 'PROJECT',
+  PAPER = 'PAPER',
+  NEW = 'NEW',
+}
 
 type Teacher = Prisma.TeacherGetPayload<false> & {
   name: string;
@@ -160,18 +169,18 @@ export default class AssignmentForm implements OnInit {
   });
 
   public types = [
-    { label: 'Nuevo', value: $Enums.AssignmentType.NEW },
-    { label: 'Tarea', value: $Enums.AssignmentType.HOMEWORK },
-    { label: 'Examen', value: $Enums.AssignmentType.EXAM },
-    { label: 'Proyecto', value: $Enums.AssignmentType.PROJECT },
-    { label: 'Quiz', value: $Enums.AssignmentType.QUIZ },
-    { label: 'Ensayo', value: $Enums.AssignmentType.PAPER },
+    { label: 'Nuevo', value: AssignmentType.NEW },
+    { label: 'Tarea', value: AssignmentType.HOMEWORK },
+    { label: 'Examen', value: AssignmentType.EXAM },
+    { label: 'Proyecto', value: AssignmentType.PROJECT },
+    { label: 'Quiz', value: AssignmentType.QUIZ },
+    { label: 'Ensayo', value: AssignmentType.PAPER },
   ];
 
   public form = this.fb.group({
     title: ['', [Validators.required]],
     details: [''],
-    type: this.fb.control<$Enums.AssignmentType>($Enums.AssignmentType.NEW, [
+    type: this.fb.control<AssignmentType>(AssignmentType.NEW, [
       Validators.required,
     ]),
     date: [

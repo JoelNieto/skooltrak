@@ -30,6 +30,7 @@
         "@ng-icons/core": "^32.1.0",
         "@ng-icons/phosphor-icons": "^32.1.0",
         "@prisma/client": "7",
+        "@prisma/client-runtime-utils": "^7.1.0",
         "@tiptap/core": "^3.10.4",
         "@tiptap/extension-highlight": "^3.10.5",
         "@tiptap/extension-placeholder": "^3.10.5",

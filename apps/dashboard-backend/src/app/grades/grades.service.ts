@@ -40,6 +40,11 @@ export class GradesService {
           include: {
             student: true,
           },
+          orderBy: {
+            student: {
+              firstName: 'asc',
+            },
+          },
         },
       },
     });
@@ -65,6 +70,40 @@ export class GradesService {
       },
       orderBy: { createdAt: 'asc' },
     });
+  }
+
+  async getAverageScoreForStudent(
+    courseId: string,
+    periodId: string,
+    studentId: string
+  ) {
+    const grades = await this.prisma.gradeStudent.findMany({
+      where: { grade: { courseId, periodId }, studentId },
+      include: {
+        grade: {
+          include: {
+            bucket: true,
+          },
+        },
+      },
+    });
+    return (
+      grades
+        .filter((grade) => grade.score !== null)
+        .reduce(
+          (acc, grade) =>
+            acc +
+            (grade.score?.toNumber() ?? 0) *
+              grade.grade.bucket.weight.toNumber(),
+          0
+        ) /
+        grades
+          .filter((grade) => grade.score !== null)
+          .reduce(
+            (acc, grade) => acc + grade.grade.bucket.weight.toNumber(),
+            0
+          ) || 0
+    );
   }
 
   update(id: string, updateGradeInput: UpdateGradeInput) {

@@ -6,5 +6,6 @@ import { GradesService } from './grades.service';
 @Module({
   providers: [GradesResolver, GradesService],
   imports: [PrismaModule],
+  exports: [GradesService],
 })
 export class GradesModule {}

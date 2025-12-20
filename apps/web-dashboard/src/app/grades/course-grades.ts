@@ -17,6 +17,16 @@ import { Apollo, gql } from 'apollo-angular';
 import { map, of } from 'rxjs';
 import Store from '../core/store';
 import GradesForm from './grades-form';
+
+export type StudentType = {
+  id: string;
+  firstName: string;
+  fatherName: string;
+  averageScore: number;
+  user: { id: string; email: string };
+  classGroup: { id: string; name: string };
+};
+
 @Component({
   selector: 'app-course-grades',
   imports: [FormsModule, DecimalPipe, RouterLink, NgClass],
@@ -36,18 +46,21 @@ import GradesForm from './grades-form';
       </button>
     </div>
     <div class="overflow-x-auto">
-      <table class="table table-zebra !w-fit">
+      <table class="table table-zebra table-fixed">
         <thead>
           <tr>
             <th class="w-[10rem]">Estudiante</th>
             @for(grade of gradesResource.value(); track grade.id) {
-            <th class="w-[2rem]">
-              <a [routerLink]="['/grades', grade.id]" class="link link-primary">
+            <th class="w-[2rem] min-w-[2rem] max-w-[2rem]">
+              <a
+                [routerLink]="['/grades', grade.id]"
+                class="link link-primary text-nowrap overflow-hidden text-ellipsis block"
+              >
                 {{ grade.title }}</a
               >
             </th>
             }
-            <th class="w-[2rem]">Promedio</th>
+            <th class="w-[2rem] min-w-[2rem] max-w-[2rem]">Promedio actual</th>
           </tr>
         </thead>
         <tbody>
@@ -56,7 +69,7 @@ import GradesForm from './grades-form';
             <td>{{ student.firstName }} {{ student.fatherName }}</td>
             @for(grade of student.grades; track grade.id) {
             <td
-              class="text-center font-semibold"
+              class="text-center w-[2rem] min-w-[2rem] max-w-[2rem]"
               [ngClass]="{
               '!text-success bg-success/10':
                 grade.item?.score &&
@@ -73,7 +86,27 @@ import GradesForm from './grades-form';
               {{ (grade.item?.score | number : '1.1-1') ?? '-' }}
             </td>
             }
-            <td class="text-center font-semibold">-</td>
+            <td
+              class="text-center font-bold w-[2rem] min-w-[2rem] max-w-[2rem]"
+              [ngClass]="{
+              '!text-success bg-success/10':
+                student.averageScore &&
+                student.averageScore >= metric().minimumApproval,
+              '!text-warning bg-warning/10':
+                student.averageScore &&
+                (student.averageScore >= metric().minimumApproval &&
+                  student.averageScore < metric().minimumExcellence),
+              '!text-error bg-error/10':
+                student.averageScore &&
+                student.averageScore < metric().minimumApproval,
+            }"
+            >
+              {{
+                student.averageScore
+                  ? (student.averageScore | number : '1.1-1')
+                  : '-'
+              }}
+            </td>
           </tr>
           } @empty {
           <tr>
@@ -134,27 +167,27 @@ export default class CourseGrades {
   public students = rxResource({
     params: () => ({
       courseId: this.courseId(),
+      periodId: this.periodId(),
     }),
     stream: ({ params }) => {
-      const { courseId } = params;
+      const { courseId, periodId } = params;
       if (!courseId) {
         return of([]);
       }
       return this.#apollo
         .watchQuery<{
-          studentsByCourseId: Prisma.StudentGetPayload<{
-            include: {
-              classGroup: true;
-              user: true;
-            };
-          }>[];
+          studentsByCourseId: StudentType[];
         }>({
           query: gql`
-            query StudentsByCourseId($courseId: String!) {
+            query StudentsByCourseId($courseId: String!, $periodId: String!) {
               studentsByCourseId(courseId: $courseId) {
                 id
                 firstName
                 fatherName
+                averageScore: averageScoreForStudent(
+                  courseId: $courseId
+                  periodId: $periodId
+                )
                 user {
                   id
                   email
@@ -168,6 +201,7 @@ export default class CourseGrades {
           `,
           variables: {
             courseId,
+            periodId,
           },
           fetchPolicy: 'cache-first',
         })

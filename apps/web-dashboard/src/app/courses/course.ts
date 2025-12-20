@@ -78,7 +78,17 @@ type CourseType = Prisma.CourseGetPayload<{
           <div class="flex justify-between items-center w-full">
             <div>
               <h2 class="card-title text-xl">{{ course.name }}</h2>
-              <p>{{ course.teacher?.name }}</p>
+              <div class="flex items-center gap-1">
+                <div class="avatar avatar-placeholder">
+                  <div
+                    class="text-white w-6 rounded-full"
+                    [style.background]="course.teacher?.color"
+                  >
+                    <span class="text-xs">{{ course?.teacher?.initials }}</span>
+                  </div>
+                </div>
+                {{ course.teacher?.name }}
+              </div>
               <p class="text-base-200">{{ course.code }}</p>
             </div>
             <div class="flex gap-2">
@@ -98,8 +108,28 @@ type CourseType = Prisma.CourseGetPayload<{
             type="radio"
             name="my_tabs_6"
             class="tab"
-            aria-label="Calendario"
+            aria-label="Calificaciones"
             checked="checked"
+          />
+          <span class="flex items-center gap-2">
+            <ng-icon name="phosphorExamDuotone" class="text-xl" />
+            Calificaciones
+          </span>
+        </label>
+
+        <div class="tab-content bg-base-100 border-base-300 p-6">
+          <app-course-grades
+            [courseId]="id()"
+            [currentPeriod]="course.currentPeriodId"
+            [metric]="course.studyPlan.gradeMetric!"
+          />
+        </div>
+        <label class="tab">
+          <input
+            type="radio"
+            name="my_tabs_6"
+            class="tab"
+            aria-label="Calendario"
           />
           <span class="flex items-center gap-2">
             <ng-icon
@@ -123,21 +153,7 @@ type CourseType = Prisma.CourseGetPayload<{
         <div class="tab-content bg-base-100 border-base-300 p-6">
           Tab content 2
         </div>
-        <label class="tab">
-          <input type="radio" name="my_tabs_6" aria-label="Calificaciones" />
-          <span class="flex items-center gap-2">
-            <ng-icon name="phosphorExamDuotone" class="text-xl" />
-            Calificaciones
-          </span>
-        </label>
 
-        <div class="tab-content bg-base-100 border-base-300 p-6">
-          <app-course-grades
-            [courseId]="id()"
-            [currentPeriod]="course.currentPeriodId"
-            [metric]="course.studyPlan.gradeMetric!"
-          />
-        </div>
         <label class="tab">
           <input type="radio" name="my_tabs_6" aria-label="Archivos" />
           <span class="flex items-center gap-2">

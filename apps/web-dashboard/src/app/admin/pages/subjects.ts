@@ -57,7 +57,7 @@ import SubjectsForm from '../forms/subjects-form';
     <div
       class="overflow-x-auto bg-base-100 rounded-lg mt-4 border border-base-300"
     >
-      <table class="table table-transition">
+      <table class="table">
         <thead>
           <tr>
             <th

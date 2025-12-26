@@ -12,6 +12,7 @@ import { FetchDataInput } from '../fetch-data.input';
 export class SubjectsResolver {
   constructor(private readonly subjectsService: SubjectsService) {}
 
+  @UseGuards(JwtAuthGuard)
   @Mutation(() => Subject)
   createSubject(
     @Args('createSubjectInput') createSubjectInput: CreateSubjectInput

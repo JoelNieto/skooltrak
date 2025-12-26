@@ -15,12 +15,14 @@ import { Prisma } from '@generated/prisma';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
   phosphorCalendarDotsDuotone,
+  phosphorDotsThreeDuotone,
   phosphorPencilDuotone,
   phosphorTrashDuotone,
 } from '@ng-icons/phosphor-icons/duotone';
 import { Apollo, gql } from 'apollo-angular';
 import { filter, map, switchMap } from 'rxjs';
 import GradeStudentForm from './grade-student-form';
+
 @Component({
   selector: 'app-grade',
   imports: [
@@ -38,6 +40,7 @@ import GradeStudentForm from './grade-student-form';
       phosphorCalendarDotsDuotone,
       phosphorPencilDuotone,
       phosphorTrashDuotone,
+      phosphorDotsThreeDuotone,
     }),
   ],
   template: `
@@ -109,7 +112,11 @@ import GradeStudentForm from './grade-student-form';
                     gradeStudent.score! < metric()!.minimumApproval,
                 }"
               >
+                @if(gradeStudent.score) {
                 {{ gradeStudent.score | number : '1.1-1' }}
+                } @else {
+                <ng-icon name="phosphorDotsThreeDuotone" class="text-2xl" />
+                }
               </td>
               <td
                 class="overflow-hidden text-ellipsis whitespace-nowrap max-w-[200px] !pl-2"

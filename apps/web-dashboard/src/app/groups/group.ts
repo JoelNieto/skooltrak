@@ -13,7 +13,11 @@ import { Apollo, gql } from 'apollo-angular';
 import { catchError, map, of, throwError } from 'rxjs';
 import GroupCourses from './group-courses';
 import GroupStudents from './group-students';
-type Teacher = Prisma.TeacherGetPayload<undefined> & { name: string };
+type Teacher = Prisma.TeacherGetPayload<undefined> & {
+  name: string;
+  color: string;
+  initials: string;
+};
 type Student = Prisma.StudentGetPayload<{
   include: { user: true };
 }> & {
@@ -47,15 +51,29 @@ type GroupType = Prisma.ClassGroupGetPayload<{
         <li>{{ group.name }}</li>
       </ul>
     </div>
-    <h1 class="text-2xl  font-semibold">{{ group.name }}</h1>
-    <h3 class="text-lg text-base-200">
-      {{ group.studyPlan.name }} / {{ group.studyPlan.degree.name }}
-    </h3>
-    <p class="flex items-center gap-2">
-      <ng-icon name="phosphorChalkboardTeacherDuotone" />{{
-        group.teacher?.name
-      }}
-    </p>
+    <div class="card card-border border-base-300 bg-base-100">
+      <div class="card-body flex flex-row justify-between items-center">
+        <div>
+          <h1 class="text-xl  font-semibold">{{ group.name }}</h1>
+          <h3 class="text-base-200">
+            {{ group.studyPlan.name }} / {{ group.studyPlan.degree.name }}
+          </h3>
+          <div class="flex items-center gap-2">
+            <div class="avatar avatar-placeholder">
+              <div
+                class="text-white w-6 rounded-full"
+                [style.background]="group.teacher?.color"
+              >
+                <span class="text-xs">{{ group.teacher?.initials }}</span>
+              </div>
+            </div>
+            {{ group.teacher?.name }}
+          </div>
+        </div>
+        <div></div>
+      </div>
+    </div>
+
     <div class="tabs tabs-box mt-4">
       <label class="tab">
         <input type="radio" name="my_tabs_1" class="tab" checked />
@@ -132,12 +150,13 @@ export default class Group {
                   teacher {
                     id
                     name
-                    initials
                   }
                 }
                 teacher {
                   id
                   name
+                  color
+                  initials
                 }
                 studyPlan {
                   id

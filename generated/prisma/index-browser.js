@@ -373,6 +373,17 @@ exports.Prisma.QuizScheduleScalarFieldEnum = {
   updatedAt: 'updatedAt'
 };
 
+exports.Prisma.ClassGroupWeeklyScheduleScalarFieldEnum = {
+  id: 'id',
+  classGroupId: 'classGroupId',
+  courseId: 'courseId',
+  weekday: 'weekday',
+  startTime: 'startTime',
+  endTime: 'endTime',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
 exports.Prisma.QuizSubmissionScalarFieldEnum = {
   id: 'id',
   quizId: 'quizId',
@@ -481,6 +492,16 @@ exports.QuizQuestionType = exports.$Enums.QuizQuestionType = {
   MATCH: 'MATCH'
 };
 
+exports.WeekDay = exports.$Enums.WeekDay = {
+  MONDAY: 'MONDAY',
+  TUESDAY: 'TUESDAY',
+  WEDNESDAY: 'WEDNESDAY',
+  THURSDAY: 'THURSDAY',
+  FRIDAY: 'FRIDAY',
+  SATURDAY: 'SATURDAY',
+  SUNDAY: 'SUNDAY'
+};
+
 exports.Prisma.ModelName = {
   Organization: 'Organization',
   User: 'User',
@@ -503,6 +524,7 @@ exports.Prisma.ModelName = {
   QuizQuestion: 'QuizQuestion',
   QuizQuestionOption: 'QuizQuestionOption',
   QuizSchedule: 'QuizSchedule',
+  ClassGroupWeeklySchedule: 'ClassGroupWeeklySchedule',
   QuizSubmission: 'QuizSubmission',
   QuizSubmissionQuestion: 'QuizSubmissionQuestion',
   GradeMetric: 'GradeMetric',

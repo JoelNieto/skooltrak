@@ -54,11 +54,15 @@ export class ClassGroupsService {
     });
   }
 
-  findOne(id: string) {
+  async findOne(id: string) {
     return this.prisma.classGroup.findUnique({
       where: { id },
       include: {
-        teacher: true,
+        teacher: {
+          include: {
+            user: true,
+          },
+        },
         students: {
           include: { user: true },
           orderBy: { user: { firstName: 'asc' } },

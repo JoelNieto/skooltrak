@@ -119,6 +119,11 @@ export type QuizQuestionOption = $Result.DefaultSelection<Prisma.$QuizQuestionOp
  */
 export type QuizSchedule = $Result.DefaultSelection<Prisma.$QuizSchedulePayload>
 /**
+ * Model ClassGroupWeeklySchedule
+ * 
+ */
+export type ClassGroupWeeklySchedule = $Result.DefaultSelection<Prisma.$ClassGroupWeeklySchedulePayload>
+/**
  * Model QuizSubmission
  * 
  */
@@ -188,6 +193,19 @@ export const QuizQuestionType: {
 
 export type QuizQuestionType = (typeof QuizQuestionType)[keyof typeof QuizQuestionType]
 
+
+export const WeekDay: {
+  MONDAY: 'MONDAY',
+  TUESDAY: 'TUESDAY',
+  WEDNESDAY: 'WEDNESDAY',
+  THURSDAY: 'THURSDAY',
+  FRIDAY: 'FRIDAY',
+  SATURDAY: 'SATURDAY',
+  SUNDAY: 'SUNDAY'
+};
+
+export type WeekDay = (typeof WeekDay)[keyof typeof WeekDay]
+
 }
 
 export type Gender = $Enums.Gender
@@ -201,6 +219,10 @@ export const AssignmentType: typeof $Enums.AssignmentType
 export type QuizQuestionType = $Enums.QuizQuestionType
 
 export const QuizQuestionType: typeof $Enums.QuizQuestionType
+
+export type WeekDay = $Enums.WeekDay
+
+export const WeekDay: typeof $Enums.WeekDay
 
 /**
  * ##  Prisma Client ʲˢ
@@ -528,6 +550,16 @@ export class PrismaClient<
     * ```
     */
   get quizSchedule(): Prisma.QuizScheduleDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.classGroupWeeklySchedule`: Exposes CRUD operations for the **ClassGroupWeeklySchedule** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more ClassGroupWeeklySchedules
+    * const classGroupWeeklySchedules = await prisma.classGroupWeeklySchedule.findMany()
+    * ```
+    */
+  get classGroupWeeklySchedule(): Prisma.ClassGroupWeeklyScheduleDelegate<ExtArgs, ClientOptions>;
 
   /**
    * `prisma.quizSubmission`: Exposes CRUD operations for the **QuizSubmission** model.
@@ -1053,6 +1085,7 @@ export namespace Prisma {
     QuizQuestion: 'QuizQuestion',
     QuizQuestionOption: 'QuizQuestionOption',
     QuizSchedule: 'QuizSchedule',
+    ClassGroupWeeklySchedule: 'ClassGroupWeeklySchedule',
     QuizSubmission: 'QuizSubmission',
     QuizSubmissionQuestion: 'QuizSubmissionQuestion',
     GradeMetric: 'GradeMetric',
@@ -1075,7 +1108,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "organization" | "user" | "message" | "messageRecipient" | "role" | "permission" | "school" | "period" | "subject" | "degree" | "studyPlan" | "course" | "classGroup" | "student" | "teacher" | "assignment" | "assignmentDate" | "quiz" | "quizQuestion" | "quizQuestionOption" | "quizSchedule" | "quizSubmission" | "quizSubmissionQuestion" | "gradeMetric" | "gradeBucket" | "grade" | "gradeStudent" | "gradeStudentRevision"
+      modelProps: "organization" | "user" | "message" | "messageRecipient" | "role" | "permission" | "school" | "period" | "subject" | "degree" | "studyPlan" | "course" | "classGroup" | "student" | "teacher" | "assignment" | "assignmentDate" | "quiz" | "quizQuestion" | "quizQuestionOption" | "quizSchedule" | "classGroupWeeklySchedule" | "quizSubmission" | "quizSubmissionQuestion" | "gradeMetric" | "gradeBucket" | "grade" | "gradeStudent" | "gradeStudentRevision"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -2633,6 +2666,80 @@ export namespace Prisma {
           }
         }
       }
+      ClassGroupWeeklySchedule: {
+        payload: Prisma.$ClassGroupWeeklySchedulePayload<ExtArgs>
+        fields: Prisma.ClassGroupWeeklyScheduleFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.ClassGroupWeeklyScheduleFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ClassGroupWeeklySchedulePayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.ClassGroupWeeklyScheduleFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ClassGroupWeeklySchedulePayload>
+          }
+          findFirst: {
+            args: Prisma.ClassGroupWeeklyScheduleFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ClassGroupWeeklySchedulePayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.ClassGroupWeeklyScheduleFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ClassGroupWeeklySchedulePayload>
+          }
+          findMany: {
+            args: Prisma.ClassGroupWeeklyScheduleFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ClassGroupWeeklySchedulePayload>[]
+          }
+          create: {
+            args: Prisma.ClassGroupWeeklyScheduleCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ClassGroupWeeklySchedulePayload>
+          }
+          createMany: {
+            args: Prisma.ClassGroupWeeklyScheduleCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.ClassGroupWeeklyScheduleCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ClassGroupWeeklySchedulePayload>[]
+          }
+          delete: {
+            args: Prisma.ClassGroupWeeklyScheduleDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ClassGroupWeeklySchedulePayload>
+          }
+          update: {
+            args: Prisma.ClassGroupWeeklyScheduleUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ClassGroupWeeklySchedulePayload>
+          }
+          deleteMany: {
+            args: Prisma.ClassGroupWeeklyScheduleDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.ClassGroupWeeklyScheduleUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.ClassGroupWeeklyScheduleUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ClassGroupWeeklySchedulePayload>[]
+          }
+          upsert: {
+            args: Prisma.ClassGroupWeeklyScheduleUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ClassGroupWeeklySchedulePayload>
+          }
+          aggregate: {
+            args: Prisma.ClassGroupWeeklyScheduleAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateClassGroupWeeklySchedule>
+          }
+          groupBy: {
+            args: Prisma.ClassGroupWeeklyScheduleGroupByArgs<ExtArgs>
+            result: $Utils.Optional<ClassGroupWeeklyScheduleGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.ClassGroupWeeklyScheduleCountArgs<ExtArgs>
+            result: $Utils.Optional<ClassGroupWeeklyScheduleCountAggregateOutputType> | number
+          }
+        }
+      }
       QuizSubmission: {
         payload: Prisma.$QuizSubmissionPayload<ExtArgs>
         fields: Prisma.QuizSubmissionFieldRefs
@@ -3280,6 +3387,7 @@ export namespace Prisma {
     quizQuestion?: QuizQuestionOmit
     quizQuestionOption?: QuizQuestionOptionOmit
     quizSchedule?: QuizScheduleOmit
+    classGroupWeeklySchedule?: ClassGroupWeeklyScheduleOmit
     quizSubmission?: QuizSubmissionOmit
     quizSubmissionQuestion?: QuizSubmissionQuestionOmit
     gradeMetric?: GradeMetricOmit
@@ -3863,6 +3971,7 @@ export namespace Prisma {
     quizzes: number
     gradeBuckets: number
     grades: number
+    weeklySchedules: number
   }
 
   export type CourseCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -3872,6 +3981,7 @@ export namespace Prisma {
     quizzes?: boolean | CourseCountOutputTypeCountQuizzesArgs
     gradeBuckets?: boolean | CourseCountOutputTypeCountGradeBucketsArgs
     grades?: boolean | CourseCountOutputTypeCountGradesArgs
+    weeklySchedules?: boolean | CourseCountOutputTypeCountWeeklySchedulesArgs
   }
 
   // Custom InputTypes
@@ -3927,6 +4037,13 @@ export namespace Prisma {
     where?: GradeWhereInput
   }
 
+  /**
+   * CourseCountOutputType without action
+   */
+  export type CourseCountOutputTypeCountWeeklySchedulesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: ClassGroupWeeklyScheduleWhereInput
+  }
+
 
   /**
    * Count Type ClassGroupCountOutputType
@@ -3938,6 +4055,7 @@ export namespace Prisma {
     assignmentDates: number
     quizSchedules: number
     quizSubmissions: number
+    weeklySchedules: number
   }
 
   export type ClassGroupCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -3946,6 +4064,7 @@ export namespace Prisma {
     assignmentDates?: boolean | ClassGroupCountOutputTypeCountAssignmentDatesArgs
     quizSchedules?: boolean | ClassGroupCountOutputTypeCountQuizSchedulesArgs
     quizSubmissions?: boolean | ClassGroupCountOutputTypeCountQuizSubmissionsArgs
+    weeklySchedules?: boolean | ClassGroupCountOutputTypeCountWeeklySchedulesArgs
   }
 
   // Custom InputTypes
@@ -3992,6 +4111,13 @@ export namespace Prisma {
    */
   export type ClassGroupCountOutputTypeCountQuizSubmissionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: QuizSubmissionWhereInput
+  }
+
+  /**
+   * ClassGroupCountOutputType without action
+   */
+  export type ClassGroupCountOutputTypeCountWeeklySchedulesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: ClassGroupWeeklyScheduleWhereInput
   }
 
 
@@ -17904,6 +18030,7 @@ export namespace Prisma {
     currentPeriod?: boolean | Course$currentPeriodArgs<ExtArgs>
     gradeBuckets?: boolean | Course$gradeBucketsArgs<ExtArgs>
     grades?: boolean | Course$gradesArgs<ExtArgs>
+    weeklySchedules?: boolean | Course$weeklySchedulesArgs<ExtArgs>
     _count?: boolean | CourseCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["course"]>
 
@@ -17978,6 +18105,7 @@ export namespace Prisma {
     currentPeriod?: boolean | Course$currentPeriodArgs<ExtArgs>
     gradeBuckets?: boolean | Course$gradeBucketsArgs<ExtArgs>
     grades?: boolean | Course$gradesArgs<ExtArgs>
+    weeklySchedules?: boolean | Course$weeklySchedulesArgs<ExtArgs>
     _count?: boolean | CourseCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type CourseIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -18012,6 +18140,7 @@ export namespace Prisma {
       currentPeriod: Prisma.$PeriodPayload<ExtArgs> | null
       gradeBuckets: Prisma.$GradeBucketPayload<ExtArgs>[]
       grades: Prisma.$GradePayload<ExtArgs>[]
+      weeklySchedules: Prisma.$ClassGroupWeeklySchedulePayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -18432,6 +18561,7 @@ export namespace Prisma {
     currentPeriod<T extends Course$currentPeriodArgs<ExtArgs> = {}>(args?: Subset<T, Course$currentPeriodArgs<ExtArgs>>): Prisma__PeriodClient<$Result.GetResult<Prisma.$PeriodPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     gradeBuckets<T extends Course$gradeBucketsArgs<ExtArgs> = {}>(args?: Subset<T, Course$gradeBucketsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$GradeBucketPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     grades<T extends Course$gradesArgs<ExtArgs> = {}>(args?: Subset<T, Course$gradesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$GradePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    weeklySchedules<T extends Course$weeklySchedulesArgs<ExtArgs> = {}>(args?: Subset<T, Course$weeklySchedulesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ClassGroupWeeklySchedulePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -19051,6 +19181,30 @@ export namespace Prisma {
   }
 
   /**
+   * Course.weeklySchedules
+   */
+  export type Course$weeklySchedulesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ClassGroupWeeklySchedule
+     */
+    select?: ClassGroupWeeklyScheduleSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ClassGroupWeeklySchedule
+     */
+    omit?: ClassGroupWeeklyScheduleOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ClassGroupWeeklyScheduleInclude<ExtArgs> | null
+    where?: ClassGroupWeeklyScheduleWhereInput
+    orderBy?: ClassGroupWeeklyScheduleOrderByWithRelationInput | ClassGroupWeeklyScheduleOrderByWithRelationInput[]
+    cursor?: ClassGroupWeeklyScheduleWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: ClassGroupWeeklyScheduleScalarFieldEnum | ClassGroupWeeklyScheduleScalarFieldEnum[]
+  }
+
+  /**
    * Course without action
    */
   export type CourseDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -19282,6 +19436,7 @@ export namespace Prisma {
     assignmentDates?: boolean | ClassGroup$assignmentDatesArgs<ExtArgs>
     quizSchedules?: boolean | ClassGroup$quizSchedulesArgs<ExtArgs>
     quizSubmissions?: boolean | ClassGroup$quizSubmissionsArgs<ExtArgs>
+    weeklySchedules?: boolean | ClassGroup$weeklySchedulesArgs<ExtArgs>
     _count?: boolean | ClassGroupCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["classGroup"]>
 
@@ -19343,6 +19498,7 @@ export namespace Prisma {
     assignmentDates?: boolean | ClassGroup$assignmentDatesArgs<ExtArgs>
     quizSchedules?: boolean | ClassGroup$quizSchedulesArgs<ExtArgs>
     quizSubmissions?: boolean | ClassGroup$quizSubmissionsArgs<ExtArgs>
+    weeklySchedules?: boolean | ClassGroup$weeklySchedulesArgs<ExtArgs>
     _count?: boolean | ClassGroupCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type ClassGroupIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -19370,6 +19526,7 @@ export namespace Prisma {
       assignmentDates: Prisma.$AssignmentDatePayload<ExtArgs>[]
       quizSchedules: Prisma.$QuizSchedulePayload<ExtArgs>[]
       quizSubmissions: Prisma.$QuizSubmissionPayload<ExtArgs>[]
+      weeklySchedules: Prisma.$ClassGroupWeeklySchedulePayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -19785,6 +19942,7 @@ export namespace Prisma {
     assignmentDates<T extends ClassGroup$assignmentDatesArgs<ExtArgs> = {}>(args?: Subset<T, ClassGroup$assignmentDatesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AssignmentDatePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     quizSchedules<T extends ClassGroup$quizSchedulesArgs<ExtArgs> = {}>(args?: Subset<T, ClassGroup$quizSchedulesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$QuizSchedulePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     quizSubmissions<T extends ClassGroup$quizSubmissionsArgs<ExtArgs> = {}>(args?: Subset<T, ClassGroup$quizSubmissionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$QuizSubmissionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    weeklySchedules<T extends ClassGroup$weeklySchedulesArgs<ExtArgs> = {}>(args?: Subset<T, ClassGroup$weeklySchedulesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ClassGroupWeeklySchedulePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -20356,6 +20514,30 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: QuizSubmissionScalarFieldEnum | QuizSubmissionScalarFieldEnum[]
+  }
+
+  /**
+   * ClassGroup.weeklySchedules
+   */
+  export type ClassGroup$weeklySchedulesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ClassGroupWeeklySchedule
+     */
+    select?: ClassGroupWeeklyScheduleSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ClassGroupWeeklySchedule
+     */
+    omit?: ClassGroupWeeklyScheduleOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ClassGroupWeeklyScheduleInclude<ExtArgs> | null
+    where?: ClassGroupWeeklyScheduleWhereInput
+    orderBy?: ClassGroupWeeklyScheduleOrderByWithRelationInput | ClassGroupWeeklyScheduleOrderByWithRelationInput[]
+    cursor?: ClassGroupWeeklyScheduleWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: ClassGroupWeeklyScheduleScalarFieldEnum | ClassGroupWeeklyScheduleScalarFieldEnum[]
   }
 
   /**
@@ -29881,6 +30063,1111 @@ export namespace Prisma {
 
 
   /**
+   * Model ClassGroupWeeklySchedule
+   */
+
+  export type AggregateClassGroupWeeklySchedule = {
+    _count: ClassGroupWeeklyScheduleCountAggregateOutputType | null
+    _min: ClassGroupWeeklyScheduleMinAggregateOutputType | null
+    _max: ClassGroupWeeklyScheduleMaxAggregateOutputType | null
+  }
+
+  export type ClassGroupWeeklyScheduleMinAggregateOutputType = {
+    id: string | null
+    classGroupId: string | null
+    courseId: string | null
+    weekday: $Enums.WeekDay | null
+    startTime: string | null
+    endTime: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type ClassGroupWeeklyScheduleMaxAggregateOutputType = {
+    id: string | null
+    classGroupId: string | null
+    courseId: string | null
+    weekday: $Enums.WeekDay | null
+    startTime: string | null
+    endTime: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type ClassGroupWeeklyScheduleCountAggregateOutputType = {
+    id: number
+    classGroupId: number
+    courseId: number
+    weekday: number
+    startTime: number
+    endTime: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type ClassGroupWeeklyScheduleMinAggregateInputType = {
+    id?: true
+    classGroupId?: true
+    courseId?: true
+    weekday?: true
+    startTime?: true
+    endTime?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type ClassGroupWeeklyScheduleMaxAggregateInputType = {
+    id?: true
+    classGroupId?: true
+    courseId?: true
+    weekday?: true
+    startTime?: true
+    endTime?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type ClassGroupWeeklyScheduleCountAggregateInputType = {
+    id?: true
+    classGroupId?: true
+    courseId?: true
+    weekday?: true
+    startTime?: true
+    endTime?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type ClassGroupWeeklyScheduleAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which ClassGroupWeeklySchedule to aggregate.
+     */
+    where?: ClassGroupWeeklyScheduleWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ClassGroupWeeklySchedules to fetch.
+     */
+    orderBy?: ClassGroupWeeklyScheduleOrderByWithRelationInput | ClassGroupWeeklyScheduleOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: ClassGroupWeeklyScheduleWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ClassGroupWeeklySchedules from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ClassGroupWeeklySchedules.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned ClassGroupWeeklySchedules
+    **/
+    _count?: true | ClassGroupWeeklyScheduleCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: ClassGroupWeeklyScheduleMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: ClassGroupWeeklyScheduleMaxAggregateInputType
+  }
+
+  export type GetClassGroupWeeklyScheduleAggregateType<T extends ClassGroupWeeklyScheduleAggregateArgs> = {
+        [P in keyof T & keyof AggregateClassGroupWeeklySchedule]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateClassGroupWeeklySchedule[P]>
+      : GetScalarType<T[P], AggregateClassGroupWeeklySchedule[P]>
+  }
+
+
+
+
+  export type ClassGroupWeeklyScheduleGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: ClassGroupWeeklyScheduleWhereInput
+    orderBy?: ClassGroupWeeklyScheduleOrderByWithAggregationInput | ClassGroupWeeklyScheduleOrderByWithAggregationInput[]
+    by: ClassGroupWeeklyScheduleScalarFieldEnum[] | ClassGroupWeeklyScheduleScalarFieldEnum
+    having?: ClassGroupWeeklyScheduleScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: ClassGroupWeeklyScheduleCountAggregateInputType | true
+    _min?: ClassGroupWeeklyScheduleMinAggregateInputType
+    _max?: ClassGroupWeeklyScheduleMaxAggregateInputType
+  }
+
+  export type ClassGroupWeeklyScheduleGroupByOutputType = {
+    id: string
+    classGroupId: string
+    courseId: string
+    weekday: $Enums.WeekDay
+    startTime: string
+    endTime: string
+    createdAt: Date
+    updatedAt: Date
+    _count: ClassGroupWeeklyScheduleCountAggregateOutputType | null
+    _min: ClassGroupWeeklyScheduleMinAggregateOutputType | null
+    _max: ClassGroupWeeklyScheduleMaxAggregateOutputType | null
+  }
+
+  type GetClassGroupWeeklyScheduleGroupByPayload<T extends ClassGroupWeeklyScheduleGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<ClassGroupWeeklyScheduleGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof ClassGroupWeeklyScheduleGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], ClassGroupWeeklyScheduleGroupByOutputType[P]>
+            : GetScalarType<T[P], ClassGroupWeeklyScheduleGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type ClassGroupWeeklyScheduleSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    classGroupId?: boolean
+    courseId?: boolean
+    weekday?: boolean
+    startTime?: boolean
+    endTime?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    classGroup?: boolean | ClassGroupDefaultArgs<ExtArgs>
+    course?: boolean | CourseDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["classGroupWeeklySchedule"]>
+
+  export type ClassGroupWeeklyScheduleSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    classGroupId?: boolean
+    courseId?: boolean
+    weekday?: boolean
+    startTime?: boolean
+    endTime?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    classGroup?: boolean | ClassGroupDefaultArgs<ExtArgs>
+    course?: boolean | CourseDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["classGroupWeeklySchedule"]>
+
+  export type ClassGroupWeeklyScheduleSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    classGroupId?: boolean
+    courseId?: boolean
+    weekday?: boolean
+    startTime?: boolean
+    endTime?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    classGroup?: boolean | ClassGroupDefaultArgs<ExtArgs>
+    course?: boolean | CourseDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["classGroupWeeklySchedule"]>
+
+  export type ClassGroupWeeklyScheduleSelectScalar = {
+    id?: boolean
+    classGroupId?: boolean
+    courseId?: boolean
+    weekday?: boolean
+    startTime?: boolean
+    endTime?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type ClassGroupWeeklyScheduleOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "classGroupId" | "courseId" | "weekday" | "startTime" | "endTime" | "createdAt" | "updatedAt", ExtArgs["result"]["classGroupWeeklySchedule"]>
+  export type ClassGroupWeeklyScheduleInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    classGroup?: boolean | ClassGroupDefaultArgs<ExtArgs>
+    course?: boolean | CourseDefaultArgs<ExtArgs>
+  }
+  export type ClassGroupWeeklyScheduleIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    classGroup?: boolean | ClassGroupDefaultArgs<ExtArgs>
+    course?: boolean | CourseDefaultArgs<ExtArgs>
+  }
+  export type ClassGroupWeeklyScheduleIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    classGroup?: boolean | ClassGroupDefaultArgs<ExtArgs>
+    course?: boolean | CourseDefaultArgs<ExtArgs>
+  }
+
+  export type $ClassGroupWeeklySchedulePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "ClassGroupWeeklySchedule"
+    objects: {
+      classGroup: Prisma.$ClassGroupPayload<ExtArgs>
+      course: Prisma.$CoursePayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      classGroupId: string
+      courseId: string
+      weekday: $Enums.WeekDay
+      startTime: string
+      endTime: string
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["classGroupWeeklySchedule"]>
+    composites: {}
+  }
+
+  type ClassGroupWeeklyScheduleGetPayload<S extends boolean | null | undefined | ClassGroupWeeklyScheduleDefaultArgs> = $Result.GetResult<Prisma.$ClassGroupWeeklySchedulePayload, S>
+
+  type ClassGroupWeeklyScheduleCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<ClassGroupWeeklyScheduleFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: ClassGroupWeeklyScheduleCountAggregateInputType | true
+    }
+
+  export interface ClassGroupWeeklyScheduleDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['ClassGroupWeeklySchedule'], meta: { name: 'ClassGroupWeeklySchedule' } }
+    /**
+     * Find zero or one ClassGroupWeeklySchedule that matches the filter.
+     * @param {ClassGroupWeeklyScheduleFindUniqueArgs} args - Arguments to find a ClassGroupWeeklySchedule
+     * @example
+     * // Get one ClassGroupWeeklySchedule
+     * const classGroupWeeklySchedule = await prisma.classGroupWeeklySchedule.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends ClassGroupWeeklyScheduleFindUniqueArgs>(args: SelectSubset<T, ClassGroupWeeklyScheduleFindUniqueArgs<ExtArgs>>): Prisma__ClassGroupWeeklyScheduleClient<$Result.GetResult<Prisma.$ClassGroupWeeklySchedulePayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one ClassGroupWeeklySchedule that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {ClassGroupWeeklyScheduleFindUniqueOrThrowArgs} args - Arguments to find a ClassGroupWeeklySchedule
+     * @example
+     * // Get one ClassGroupWeeklySchedule
+     * const classGroupWeeklySchedule = await prisma.classGroupWeeklySchedule.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends ClassGroupWeeklyScheduleFindUniqueOrThrowArgs>(args: SelectSubset<T, ClassGroupWeeklyScheduleFindUniqueOrThrowArgs<ExtArgs>>): Prisma__ClassGroupWeeklyScheduleClient<$Result.GetResult<Prisma.$ClassGroupWeeklySchedulePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first ClassGroupWeeklySchedule that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ClassGroupWeeklyScheduleFindFirstArgs} args - Arguments to find a ClassGroupWeeklySchedule
+     * @example
+     * // Get one ClassGroupWeeklySchedule
+     * const classGroupWeeklySchedule = await prisma.classGroupWeeklySchedule.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends ClassGroupWeeklyScheduleFindFirstArgs>(args?: SelectSubset<T, ClassGroupWeeklyScheduleFindFirstArgs<ExtArgs>>): Prisma__ClassGroupWeeklyScheduleClient<$Result.GetResult<Prisma.$ClassGroupWeeklySchedulePayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first ClassGroupWeeklySchedule that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ClassGroupWeeklyScheduleFindFirstOrThrowArgs} args - Arguments to find a ClassGroupWeeklySchedule
+     * @example
+     * // Get one ClassGroupWeeklySchedule
+     * const classGroupWeeklySchedule = await prisma.classGroupWeeklySchedule.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends ClassGroupWeeklyScheduleFindFirstOrThrowArgs>(args?: SelectSubset<T, ClassGroupWeeklyScheduleFindFirstOrThrowArgs<ExtArgs>>): Prisma__ClassGroupWeeklyScheduleClient<$Result.GetResult<Prisma.$ClassGroupWeeklySchedulePayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more ClassGroupWeeklySchedules that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ClassGroupWeeklyScheduleFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all ClassGroupWeeklySchedules
+     * const classGroupWeeklySchedules = await prisma.classGroupWeeklySchedule.findMany()
+     * 
+     * // Get first 10 ClassGroupWeeklySchedules
+     * const classGroupWeeklySchedules = await prisma.classGroupWeeklySchedule.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const classGroupWeeklyScheduleWithIdOnly = await prisma.classGroupWeeklySchedule.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends ClassGroupWeeklyScheduleFindManyArgs>(args?: SelectSubset<T, ClassGroupWeeklyScheduleFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ClassGroupWeeklySchedulePayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a ClassGroupWeeklySchedule.
+     * @param {ClassGroupWeeklyScheduleCreateArgs} args - Arguments to create a ClassGroupWeeklySchedule.
+     * @example
+     * // Create one ClassGroupWeeklySchedule
+     * const ClassGroupWeeklySchedule = await prisma.classGroupWeeklySchedule.create({
+     *   data: {
+     *     // ... data to create a ClassGroupWeeklySchedule
+     *   }
+     * })
+     * 
+     */
+    create<T extends ClassGroupWeeklyScheduleCreateArgs>(args: SelectSubset<T, ClassGroupWeeklyScheduleCreateArgs<ExtArgs>>): Prisma__ClassGroupWeeklyScheduleClient<$Result.GetResult<Prisma.$ClassGroupWeeklySchedulePayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many ClassGroupWeeklySchedules.
+     * @param {ClassGroupWeeklyScheduleCreateManyArgs} args - Arguments to create many ClassGroupWeeklySchedules.
+     * @example
+     * // Create many ClassGroupWeeklySchedules
+     * const classGroupWeeklySchedule = await prisma.classGroupWeeklySchedule.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends ClassGroupWeeklyScheduleCreateManyArgs>(args?: SelectSubset<T, ClassGroupWeeklyScheduleCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many ClassGroupWeeklySchedules and returns the data saved in the database.
+     * @param {ClassGroupWeeklyScheduleCreateManyAndReturnArgs} args - Arguments to create many ClassGroupWeeklySchedules.
+     * @example
+     * // Create many ClassGroupWeeklySchedules
+     * const classGroupWeeklySchedule = await prisma.classGroupWeeklySchedule.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many ClassGroupWeeklySchedules and only return the `id`
+     * const classGroupWeeklyScheduleWithIdOnly = await prisma.classGroupWeeklySchedule.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends ClassGroupWeeklyScheduleCreateManyAndReturnArgs>(args?: SelectSubset<T, ClassGroupWeeklyScheduleCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ClassGroupWeeklySchedulePayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a ClassGroupWeeklySchedule.
+     * @param {ClassGroupWeeklyScheduleDeleteArgs} args - Arguments to delete one ClassGroupWeeklySchedule.
+     * @example
+     * // Delete one ClassGroupWeeklySchedule
+     * const ClassGroupWeeklySchedule = await prisma.classGroupWeeklySchedule.delete({
+     *   where: {
+     *     // ... filter to delete one ClassGroupWeeklySchedule
+     *   }
+     * })
+     * 
+     */
+    delete<T extends ClassGroupWeeklyScheduleDeleteArgs>(args: SelectSubset<T, ClassGroupWeeklyScheduleDeleteArgs<ExtArgs>>): Prisma__ClassGroupWeeklyScheduleClient<$Result.GetResult<Prisma.$ClassGroupWeeklySchedulePayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one ClassGroupWeeklySchedule.
+     * @param {ClassGroupWeeklyScheduleUpdateArgs} args - Arguments to update one ClassGroupWeeklySchedule.
+     * @example
+     * // Update one ClassGroupWeeklySchedule
+     * const classGroupWeeklySchedule = await prisma.classGroupWeeklySchedule.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends ClassGroupWeeklyScheduleUpdateArgs>(args: SelectSubset<T, ClassGroupWeeklyScheduleUpdateArgs<ExtArgs>>): Prisma__ClassGroupWeeklyScheduleClient<$Result.GetResult<Prisma.$ClassGroupWeeklySchedulePayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more ClassGroupWeeklySchedules.
+     * @param {ClassGroupWeeklyScheduleDeleteManyArgs} args - Arguments to filter ClassGroupWeeklySchedules to delete.
+     * @example
+     * // Delete a few ClassGroupWeeklySchedules
+     * const { count } = await prisma.classGroupWeeklySchedule.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends ClassGroupWeeklyScheduleDeleteManyArgs>(args?: SelectSubset<T, ClassGroupWeeklyScheduleDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more ClassGroupWeeklySchedules.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ClassGroupWeeklyScheduleUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many ClassGroupWeeklySchedules
+     * const classGroupWeeklySchedule = await prisma.classGroupWeeklySchedule.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends ClassGroupWeeklyScheduleUpdateManyArgs>(args: SelectSubset<T, ClassGroupWeeklyScheduleUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more ClassGroupWeeklySchedules and returns the data updated in the database.
+     * @param {ClassGroupWeeklyScheduleUpdateManyAndReturnArgs} args - Arguments to update many ClassGroupWeeklySchedules.
+     * @example
+     * // Update many ClassGroupWeeklySchedules
+     * const classGroupWeeklySchedule = await prisma.classGroupWeeklySchedule.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more ClassGroupWeeklySchedules and only return the `id`
+     * const classGroupWeeklyScheduleWithIdOnly = await prisma.classGroupWeeklySchedule.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends ClassGroupWeeklyScheduleUpdateManyAndReturnArgs>(args: SelectSubset<T, ClassGroupWeeklyScheduleUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ClassGroupWeeklySchedulePayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one ClassGroupWeeklySchedule.
+     * @param {ClassGroupWeeklyScheduleUpsertArgs} args - Arguments to update or create a ClassGroupWeeklySchedule.
+     * @example
+     * // Update or create a ClassGroupWeeklySchedule
+     * const classGroupWeeklySchedule = await prisma.classGroupWeeklySchedule.upsert({
+     *   create: {
+     *     // ... data to create a ClassGroupWeeklySchedule
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the ClassGroupWeeklySchedule we want to update
+     *   }
+     * })
+     */
+    upsert<T extends ClassGroupWeeklyScheduleUpsertArgs>(args: SelectSubset<T, ClassGroupWeeklyScheduleUpsertArgs<ExtArgs>>): Prisma__ClassGroupWeeklyScheduleClient<$Result.GetResult<Prisma.$ClassGroupWeeklySchedulePayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of ClassGroupWeeklySchedules.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ClassGroupWeeklyScheduleCountArgs} args - Arguments to filter ClassGroupWeeklySchedules to count.
+     * @example
+     * // Count the number of ClassGroupWeeklySchedules
+     * const count = await prisma.classGroupWeeklySchedule.count({
+     *   where: {
+     *     // ... the filter for the ClassGroupWeeklySchedules we want to count
+     *   }
+     * })
+    **/
+    count<T extends ClassGroupWeeklyScheduleCountArgs>(
+      args?: Subset<T, ClassGroupWeeklyScheduleCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], ClassGroupWeeklyScheduleCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a ClassGroupWeeklySchedule.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ClassGroupWeeklyScheduleAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends ClassGroupWeeklyScheduleAggregateArgs>(args: Subset<T, ClassGroupWeeklyScheduleAggregateArgs>): Prisma.PrismaPromise<GetClassGroupWeeklyScheduleAggregateType<T>>
+
+    /**
+     * Group by ClassGroupWeeklySchedule.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ClassGroupWeeklyScheduleGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends ClassGroupWeeklyScheduleGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: ClassGroupWeeklyScheduleGroupByArgs['orderBy'] }
+        : { orderBy?: ClassGroupWeeklyScheduleGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, ClassGroupWeeklyScheduleGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetClassGroupWeeklyScheduleGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the ClassGroupWeeklySchedule model
+   */
+  readonly fields: ClassGroupWeeklyScheduleFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for ClassGroupWeeklySchedule.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__ClassGroupWeeklyScheduleClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    classGroup<T extends ClassGroupDefaultArgs<ExtArgs> = {}>(args?: Subset<T, ClassGroupDefaultArgs<ExtArgs>>): Prisma__ClassGroupClient<$Result.GetResult<Prisma.$ClassGroupPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    course<T extends CourseDefaultArgs<ExtArgs> = {}>(args?: Subset<T, CourseDefaultArgs<ExtArgs>>): Prisma__CourseClient<$Result.GetResult<Prisma.$CoursePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the ClassGroupWeeklySchedule model
+   */
+  interface ClassGroupWeeklyScheduleFieldRefs {
+    readonly id: FieldRef<"ClassGroupWeeklySchedule", 'String'>
+    readonly classGroupId: FieldRef<"ClassGroupWeeklySchedule", 'String'>
+    readonly courseId: FieldRef<"ClassGroupWeeklySchedule", 'String'>
+    readonly weekday: FieldRef<"ClassGroupWeeklySchedule", 'WeekDay'>
+    readonly startTime: FieldRef<"ClassGroupWeeklySchedule", 'String'>
+    readonly endTime: FieldRef<"ClassGroupWeeklySchedule", 'String'>
+    readonly createdAt: FieldRef<"ClassGroupWeeklySchedule", 'DateTime'>
+    readonly updatedAt: FieldRef<"ClassGroupWeeklySchedule", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * ClassGroupWeeklySchedule findUnique
+   */
+  export type ClassGroupWeeklyScheduleFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ClassGroupWeeklySchedule
+     */
+    select?: ClassGroupWeeklyScheduleSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ClassGroupWeeklySchedule
+     */
+    omit?: ClassGroupWeeklyScheduleOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ClassGroupWeeklyScheduleInclude<ExtArgs> | null
+    /**
+     * Filter, which ClassGroupWeeklySchedule to fetch.
+     */
+    where: ClassGroupWeeklyScheduleWhereUniqueInput
+  }
+
+  /**
+   * ClassGroupWeeklySchedule findUniqueOrThrow
+   */
+  export type ClassGroupWeeklyScheduleFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ClassGroupWeeklySchedule
+     */
+    select?: ClassGroupWeeklyScheduleSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ClassGroupWeeklySchedule
+     */
+    omit?: ClassGroupWeeklyScheduleOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ClassGroupWeeklyScheduleInclude<ExtArgs> | null
+    /**
+     * Filter, which ClassGroupWeeklySchedule to fetch.
+     */
+    where: ClassGroupWeeklyScheduleWhereUniqueInput
+  }
+
+  /**
+   * ClassGroupWeeklySchedule findFirst
+   */
+  export type ClassGroupWeeklyScheduleFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ClassGroupWeeklySchedule
+     */
+    select?: ClassGroupWeeklyScheduleSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ClassGroupWeeklySchedule
+     */
+    omit?: ClassGroupWeeklyScheduleOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ClassGroupWeeklyScheduleInclude<ExtArgs> | null
+    /**
+     * Filter, which ClassGroupWeeklySchedule to fetch.
+     */
+    where?: ClassGroupWeeklyScheduleWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ClassGroupWeeklySchedules to fetch.
+     */
+    orderBy?: ClassGroupWeeklyScheduleOrderByWithRelationInput | ClassGroupWeeklyScheduleOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for ClassGroupWeeklySchedules.
+     */
+    cursor?: ClassGroupWeeklyScheduleWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ClassGroupWeeklySchedules from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ClassGroupWeeklySchedules.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of ClassGroupWeeklySchedules.
+     */
+    distinct?: ClassGroupWeeklyScheduleScalarFieldEnum | ClassGroupWeeklyScheduleScalarFieldEnum[]
+  }
+
+  /**
+   * ClassGroupWeeklySchedule findFirstOrThrow
+   */
+  export type ClassGroupWeeklyScheduleFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ClassGroupWeeklySchedule
+     */
+    select?: ClassGroupWeeklyScheduleSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ClassGroupWeeklySchedule
+     */
+    omit?: ClassGroupWeeklyScheduleOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ClassGroupWeeklyScheduleInclude<ExtArgs> | null
+    /**
+     * Filter, which ClassGroupWeeklySchedule to fetch.
+     */
+    where?: ClassGroupWeeklyScheduleWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ClassGroupWeeklySchedules to fetch.
+     */
+    orderBy?: ClassGroupWeeklyScheduleOrderByWithRelationInput | ClassGroupWeeklyScheduleOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for ClassGroupWeeklySchedules.
+     */
+    cursor?: ClassGroupWeeklyScheduleWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ClassGroupWeeklySchedules from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ClassGroupWeeklySchedules.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of ClassGroupWeeklySchedules.
+     */
+    distinct?: ClassGroupWeeklyScheduleScalarFieldEnum | ClassGroupWeeklyScheduleScalarFieldEnum[]
+  }
+
+  /**
+   * ClassGroupWeeklySchedule findMany
+   */
+  export type ClassGroupWeeklyScheduleFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ClassGroupWeeklySchedule
+     */
+    select?: ClassGroupWeeklyScheduleSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ClassGroupWeeklySchedule
+     */
+    omit?: ClassGroupWeeklyScheduleOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ClassGroupWeeklyScheduleInclude<ExtArgs> | null
+    /**
+     * Filter, which ClassGroupWeeklySchedules to fetch.
+     */
+    where?: ClassGroupWeeklyScheduleWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ClassGroupWeeklySchedules to fetch.
+     */
+    orderBy?: ClassGroupWeeklyScheduleOrderByWithRelationInput | ClassGroupWeeklyScheduleOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing ClassGroupWeeklySchedules.
+     */
+    cursor?: ClassGroupWeeklyScheduleWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ClassGroupWeeklySchedules from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ClassGroupWeeklySchedules.
+     */
+    skip?: number
+    distinct?: ClassGroupWeeklyScheduleScalarFieldEnum | ClassGroupWeeklyScheduleScalarFieldEnum[]
+  }
+
+  /**
+   * ClassGroupWeeklySchedule create
+   */
+  export type ClassGroupWeeklyScheduleCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ClassGroupWeeklySchedule
+     */
+    select?: ClassGroupWeeklyScheduleSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ClassGroupWeeklySchedule
+     */
+    omit?: ClassGroupWeeklyScheduleOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ClassGroupWeeklyScheduleInclude<ExtArgs> | null
+    /**
+     * The data needed to create a ClassGroupWeeklySchedule.
+     */
+    data: XOR<ClassGroupWeeklyScheduleCreateInput, ClassGroupWeeklyScheduleUncheckedCreateInput>
+  }
+
+  /**
+   * ClassGroupWeeklySchedule createMany
+   */
+  export type ClassGroupWeeklyScheduleCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many ClassGroupWeeklySchedules.
+     */
+    data: ClassGroupWeeklyScheduleCreateManyInput | ClassGroupWeeklyScheduleCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * ClassGroupWeeklySchedule createManyAndReturn
+   */
+  export type ClassGroupWeeklyScheduleCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ClassGroupWeeklySchedule
+     */
+    select?: ClassGroupWeeklyScheduleSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the ClassGroupWeeklySchedule
+     */
+    omit?: ClassGroupWeeklyScheduleOmit<ExtArgs> | null
+    /**
+     * The data used to create many ClassGroupWeeklySchedules.
+     */
+    data: ClassGroupWeeklyScheduleCreateManyInput | ClassGroupWeeklyScheduleCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ClassGroupWeeklyScheduleIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * ClassGroupWeeklySchedule update
+   */
+  export type ClassGroupWeeklyScheduleUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ClassGroupWeeklySchedule
+     */
+    select?: ClassGroupWeeklyScheduleSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ClassGroupWeeklySchedule
+     */
+    omit?: ClassGroupWeeklyScheduleOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ClassGroupWeeklyScheduleInclude<ExtArgs> | null
+    /**
+     * The data needed to update a ClassGroupWeeklySchedule.
+     */
+    data: XOR<ClassGroupWeeklyScheduleUpdateInput, ClassGroupWeeklyScheduleUncheckedUpdateInput>
+    /**
+     * Choose, which ClassGroupWeeklySchedule to update.
+     */
+    where: ClassGroupWeeklyScheduleWhereUniqueInput
+  }
+
+  /**
+   * ClassGroupWeeklySchedule updateMany
+   */
+  export type ClassGroupWeeklyScheduleUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update ClassGroupWeeklySchedules.
+     */
+    data: XOR<ClassGroupWeeklyScheduleUpdateManyMutationInput, ClassGroupWeeklyScheduleUncheckedUpdateManyInput>
+    /**
+     * Filter which ClassGroupWeeklySchedules to update
+     */
+    where?: ClassGroupWeeklyScheduleWhereInput
+    /**
+     * Limit how many ClassGroupWeeklySchedules to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * ClassGroupWeeklySchedule updateManyAndReturn
+   */
+  export type ClassGroupWeeklyScheduleUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ClassGroupWeeklySchedule
+     */
+    select?: ClassGroupWeeklyScheduleSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the ClassGroupWeeklySchedule
+     */
+    omit?: ClassGroupWeeklyScheduleOmit<ExtArgs> | null
+    /**
+     * The data used to update ClassGroupWeeklySchedules.
+     */
+    data: XOR<ClassGroupWeeklyScheduleUpdateManyMutationInput, ClassGroupWeeklyScheduleUncheckedUpdateManyInput>
+    /**
+     * Filter which ClassGroupWeeklySchedules to update
+     */
+    where?: ClassGroupWeeklyScheduleWhereInput
+    /**
+     * Limit how many ClassGroupWeeklySchedules to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ClassGroupWeeklyScheduleIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * ClassGroupWeeklySchedule upsert
+   */
+  export type ClassGroupWeeklyScheduleUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ClassGroupWeeklySchedule
+     */
+    select?: ClassGroupWeeklyScheduleSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ClassGroupWeeklySchedule
+     */
+    omit?: ClassGroupWeeklyScheduleOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ClassGroupWeeklyScheduleInclude<ExtArgs> | null
+    /**
+     * The filter to search for the ClassGroupWeeklySchedule to update in case it exists.
+     */
+    where: ClassGroupWeeklyScheduleWhereUniqueInput
+    /**
+     * In case the ClassGroupWeeklySchedule found by the `where` argument doesn't exist, create a new ClassGroupWeeklySchedule with this data.
+     */
+    create: XOR<ClassGroupWeeklyScheduleCreateInput, ClassGroupWeeklyScheduleUncheckedCreateInput>
+    /**
+     * In case the ClassGroupWeeklySchedule was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<ClassGroupWeeklyScheduleUpdateInput, ClassGroupWeeklyScheduleUncheckedUpdateInput>
+  }
+
+  /**
+   * ClassGroupWeeklySchedule delete
+   */
+  export type ClassGroupWeeklyScheduleDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ClassGroupWeeklySchedule
+     */
+    select?: ClassGroupWeeklyScheduleSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ClassGroupWeeklySchedule
+     */
+    omit?: ClassGroupWeeklyScheduleOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ClassGroupWeeklyScheduleInclude<ExtArgs> | null
+    /**
+     * Filter which ClassGroupWeeklySchedule to delete.
+     */
+    where: ClassGroupWeeklyScheduleWhereUniqueInput
+  }
+
+  /**
+   * ClassGroupWeeklySchedule deleteMany
+   */
+  export type ClassGroupWeeklyScheduleDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which ClassGroupWeeklySchedules to delete
+     */
+    where?: ClassGroupWeeklyScheduleWhereInput
+    /**
+     * Limit how many ClassGroupWeeklySchedules to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * ClassGroupWeeklySchedule without action
+   */
+  export type ClassGroupWeeklyScheduleDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ClassGroupWeeklySchedule
+     */
+    select?: ClassGroupWeeklyScheduleSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ClassGroupWeeklySchedule
+     */
+    omit?: ClassGroupWeeklyScheduleOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ClassGroupWeeklyScheduleInclude<ExtArgs> | null
+  }
+
+
+  /**
    * Model QuizSubmission
    */
 
@@ -38250,6 +39537,20 @@ export namespace Prisma {
   export type QuizScheduleScalarFieldEnum = (typeof QuizScheduleScalarFieldEnum)[keyof typeof QuizScheduleScalarFieldEnum]
 
 
+  export const ClassGroupWeeklyScheduleScalarFieldEnum: {
+    id: 'id',
+    classGroupId: 'classGroupId',
+    courseId: 'courseId',
+    weekday: 'weekday',
+    startTime: 'startTime',
+    endTime: 'endTime',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type ClassGroupWeeklyScheduleScalarFieldEnum = (typeof ClassGroupWeeklyScheduleScalarFieldEnum)[keyof typeof ClassGroupWeeklyScheduleScalarFieldEnum]
+
+
   export const QuizSubmissionScalarFieldEnum: {
     id: 'id',
     quizId: 'quizId',
@@ -38474,6 +39775,20 @@ export namespace Prisma {
    * Reference to a field of type 'QuizQuestionType[]'
    */
   export type ListEnumQuizQuestionTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'QuizQuestionType[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'WeekDay'
+   */
+  export type EnumWeekDayFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'WeekDay'>
+    
+
+
+  /**
+   * Reference to a field of type 'WeekDay[]'
+   */
+  export type ListEnumWeekDayFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'WeekDay[]'>
     
 
 
@@ -39433,6 +40748,7 @@ export namespace Prisma {
     currentPeriod?: XOR<PeriodNullableScalarRelationFilter, PeriodWhereInput> | null
     gradeBuckets?: GradeBucketListRelationFilter
     grades?: GradeListRelationFilter
+    weeklySchedules?: ClassGroupWeeklyScheduleListRelationFilter
   }
 
   export type CourseOrderByWithRelationInput = {
@@ -39460,6 +40776,7 @@ export namespace Prisma {
     currentPeriod?: PeriodOrderByWithRelationInput
     gradeBuckets?: GradeBucketOrderByRelationAggregateInput
     grades?: GradeOrderByRelationAggregateInput
+    weeklySchedules?: ClassGroupWeeklyScheduleOrderByRelationAggregateInput
   }
 
   export type CourseWhereUniqueInput = Prisma.AtLeast<{
@@ -39493,6 +40810,7 @@ export namespace Prisma {
     currentPeriod?: XOR<PeriodNullableScalarRelationFilter, PeriodWhereInput> | null
     gradeBuckets?: GradeBucketListRelationFilter
     grades?: GradeListRelationFilter
+    weeklySchedules?: ClassGroupWeeklyScheduleListRelationFilter
   }, "id" | "schoolId_name" | "schoolId_code" | "schoolId_subjectId_studyPlanId">
 
   export type CourseOrderByWithAggregationInput = {
@@ -39554,6 +40872,7 @@ export namespace Prisma {
     assignmentDates?: AssignmentDateListRelationFilter
     quizSchedules?: QuizScheduleListRelationFilter
     quizSubmissions?: QuizSubmissionListRelationFilter
+    weeklySchedules?: ClassGroupWeeklyScheduleListRelationFilter
   }
 
   export type ClassGroupOrderByWithRelationInput = {
@@ -39576,6 +40895,7 @@ export namespace Prisma {
     assignmentDates?: AssignmentDateOrderByRelationAggregateInput
     quizSchedules?: QuizScheduleOrderByRelationAggregateInput
     quizSubmissions?: QuizSubmissionOrderByRelationAggregateInput
+    weeklySchedules?: ClassGroupWeeklyScheduleOrderByRelationAggregateInput
   }
 
   export type ClassGroupWhereUniqueInput = Prisma.AtLeast<{
@@ -39601,6 +40921,7 @@ export namespace Prisma {
     assignmentDates?: AssignmentDateListRelationFilter
     quizSchedules?: QuizScheduleListRelationFilter
     quizSubmissions?: QuizSubmissionListRelationFilter
+    weeklySchedules?: ClassGroupWeeklyScheduleListRelationFilter
   }, "id">
 
   export type ClassGroupOrderByWithAggregationInput = {
@@ -40327,6 +41648,80 @@ export namespace Prisma {
     published?: BoolWithAggregatesFilter<"QuizSchedule"> | boolean
     createdAt?: DateTimeWithAggregatesFilter<"QuizSchedule"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"QuizSchedule"> | Date | string
+  }
+
+  export type ClassGroupWeeklyScheduleWhereInput = {
+    AND?: ClassGroupWeeklyScheduleWhereInput | ClassGroupWeeklyScheduleWhereInput[]
+    OR?: ClassGroupWeeklyScheduleWhereInput[]
+    NOT?: ClassGroupWeeklyScheduleWhereInput | ClassGroupWeeklyScheduleWhereInput[]
+    id?: StringFilter<"ClassGroupWeeklySchedule"> | string
+    classGroupId?: StringFilter<"ClassGroupWeeklySchedule"> | string
+    courseId?: StringFilter<"ClassGroupWeeklySchedule"> | string
+    weekday?: EnumWeekDayFilter<"ClassGroupWeeklySchedule"> | $Enums.WeekDay
+    startTime?: StringFilter<"ClassGroupWeeklySchedule"> | string
+    endTime?: StringFilter<"ClassGroupWeeklySchedule"> | string
+    createdAt?: DateTimeFilter<"ClassGroupWeeklySchedule"> | Date | string
+    updatedAt?: DateTimeFilter<"ClassGroupWeeklySchedule"> | Date | string
+    classGroup?: XOR<ClassGroupScalarRelationFilter, ClassGroupWhereInput>
+    course?: XOR<CourseScalarRelationFilter, CourseWhereInput>
+  }
+
+  export type ClassGroupWeeklyScheduleOrderByWithRelationInput = {
+    id?: SortOrder
+    classGroupId?: SortOrder
+    courseId?: SortOrder
+    weekday?: SortOrder
+    startTime?: SortOrder
+    endTime?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    classGroup?: ClassGroupOrderByWithRelationInput
+    course?: CourseOrderByWithRelationInput
+  }
+
+  export type ClassGroupWeeklyScheduleWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    classGroupId_courseId_weekday_startTime?: ClassGroupWeeklyScheduleClassGroupIdCourseIdWeekdayStartTimeCompoundUniqueInput
+    AND?: ClassGroupWeeklyScheduleWhereInput | ClassGroupWeeklyScheduleWhereInput[]
+    OR?: ClassGroupWeeklyScheduleWhereInput[]
+    NOT?: ClassGroupWeeklyScheduleWhereInput | ClassGroupWeeklyScheduleWhereInput[]
+    classGroupId?: StringFilter<"ClassGroupWeeklySchedule"> | string
+    courseId?: StringFilter<"ClassGroupWeeklySchedule"> | string
+    weekday?: EnumWeekDayFilter<"ClassGroupWeeklySchedule"> | $Enums.WeekDay
+    startTime?: StringFilter<"ClassGroupWeeklySchedule"> | string
+    endTime?: StringFilter<"ClassGroupWeeklySchedule"> | string
+    createdAt?: DateTimeFilter<"ClassGroupWeeklySchedule"> | Date | string
+    updatedAt?: DateTimeFilter<"ClassGroupWeeklySchedule"> | Date | string
+    classGroup?: XOR<ClassGroupScalarRelationFilter, ClassGroupWhereInput>
+    course?: XOR<CourseScalarRelationFilter, CourseWhereInput>
+  }, "id" | "classGroupId_courseId_weekday_startTime">
+
+  export type ClassGroupWeeklyScheduleOrderByWithAggregationInput = {
+    id?: SortOrder
+    classGroupId?: SortOrder
+    courseId?: SortOrder
+    weekday?: SortOrder
+    startTime?: SortOrder
+    endTime?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: ClassGroupWeeklyScheduleCountOrderByAggregateInput
+    _max?: ClassGroupWeeklyScheduleMaxOrderByAggregateInput
+    _min?: ClassGroupWeeklyScheduleMinOrderByAggregateInput
+  }
+
+  export type ClassGroupWeeklyScheduleScalarWhereWithAggregatesInput = {
+    AND?: ClassGroupWeeklyScheduleScalarWhereWithAggregatesInput | ClassGroupWeeklyScheduleScalarWhereWithAggregatesInput[]
+    OR?: ClassGroupWeeklyScheduleScalarWhereWithAggregatesInput[]
+    NOT?: ClassGroupWeeklyScheduleScalarWhereWithAggregatesInput | ClassGroupWeeklyScheduleScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"ClassGroupWeeklySchedule"> | string
+    classGroupId?: StringWithAggregatesFilter<"ClassGroupWeeklySchedule"> | string
+    courseId?: StringWithAggregatesFilter<"ClassGroupWeeklySchedule"> | string
+    weekday?: EnumWeekDayWithAggregatesFilter<"ClassGroupWeeklySchedule"> | $Enums.WeekDay
+    startTime?: StringWithAggregatesFilter<"ClassGroupWeeklySchedule"> | string
+    endTime?: StringWithAggregatesFilter<"ClassGroupWeeklySchedule"> | string
+    createdAt?: DateTimeWithAggregatesFilter<"ClassGroupWeeklySchedule"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"ClassGroupWeeklySchedule"> | Date | string
   }
 
   export type QuizSubmissionWhereInput = {
@@ -41854,6 +43249,7 @@ export namespace Prisma {
     currentPeriod?: PeriodCreateNestedOneWithoutCoursesInput
     gradeBuckets?: GradeBucketCreateNestedManyWithoutCourseInput
     grades?: GradeCreateNestedManyWithoutCourseInput
+    weeklySchedules?: ClassGroupWeeklyScheduleCreateNestedManyWithoutCourseInput
   }
 
   export type CourseUncheckedCreateInput = {
@@ -41875,6 +43271,7 @@ export namespace Prisma {
     quizzes?: QuizUncheckedCreateNestedManyWithoutCourseInput
     gradeBuckets?: GradeBucketUncheckedCreateNestedManyWithoutCourseInput
     grades?: GradeUncheckedCreateNestedManyWithoutCourseInput
+    weeklySchedules?: ClassGroupWeeklyScheduleUncheckedCreateNestedManyWithoutCourseInput
   }
 
   export type CourseUpdateInput = {
@@ -41896,6 +43293,7 @@ export namespace Prisma {
     currentPeriod?: PeriodUpdateOneWithoutCoursesNestedInput
     gradeBuckets?: GradeBucketUpdateManyWithoutCourseNestedInput
     grades?: GradeUpdateManyWithoutCourseNestedInput
+    weeklySchedules?: ClassGroupWeeklyScheduleUpdateManyWithoutCourseNestedInput
   }
 
   export type CourseUncheckedUpdateInput = {
@@ -41917,6 +43315,7 @@ export namespace Prisma {
     quizzes?: QuizUncheckedUpdateManyWithoutCourseNestedInput
     gradeBuckets?: GradeBucketUncheckedUpdateManyWithoutCourseNestedInput
     grades?: GradeUncheckedUpdateManyWithoutCourseNestedInput
+    weeklySchedules?: ClassGroupWeeklyScheduleUncheckedUpdateManyWithoutCourseNestedInput
   }
 
   export type CourseCreateManyInput = {
@@ -41974,6 +43373,7 @@ export namespace Prisma {
     assignmentDates?: AssignmentDateCreateNestedManyWithoutClassGroupInput
     quizSchedules?: QuizScheduleCreateNestedManyWithoutClassGroupInput
     quizSubmissions?: QuizSubmissionCreateNestedManyWithoutClassGroupInput
+    weeklySchedules?: ClassGroupWeeklyScheduleCreateNestedManyWithoutClassGroupInput
   }
 
   export type ClassGroupUncheckedCreateInput = {
@@ -41992,6 +43392,7 @@ export namespace Prisma {
     assignmentDates?: AssignmentDateUncheckedCreateNestedManyWithoutClassGroupInput
     quizSchedules?: QuizScheduleUncheckedCreateNestedManyWithoutClassGroupInput
     quizSubmissions?: QuizSubmissionUncheckedCreateNestedManyWithoutClassGroupInput
+    weeklySchedules?: ClassGroupWeeklyScheduleUncheckedCreateNestedManyWithoutClassGroupInput
   }
 
   export type ClassGroupUpdateInput = {
@@ -42010,6 +43411,7 @@ export namespace Prisma {
     assignmentDates?: AssignmentDateUpdateManyWithoutClassGroupNestedInput
     quizSchedules?: QuizScheduleUpdateManyWithoutClassGroupNestedInput
     quizSubmissions?: QuizSubmissionUpdateManyWithoutClassGroupNestedInput
+    weeklySchedules?: ClassGroupWeeklyScheduleUpdateManyWithoutClassGroupNestedInput
   }
 
   export type ClassGroupUncheckedUpdateInput = {
@@ -42028,6 +43430,7 @@ export namespace Prisma {
     assignmentDates?: AssignmentDateUncheckedUpdateManyWithoutClassGroupNestedInput
     quizSchedules?: QuizScheduleUncheckedUpdateManyWithoutClassGroupNestedInput
     quizSubmissions?: QuizSubmissionUncheckedUpdateManyWithoutClassGroupNestedInput
+    weeklySchedules?: ClassGroupWeeklyScheduleUncheckedUpdateManyWithoutClassGroupNestedInput
   }
 
   export type ClassGroupCreateManyInput = {
@@ -42796,6 +44199,81 @@ export namespace Prisma {
     startDate?: DateTimeFieldUpdateOperationsInput | Date | string
     dueDate?: DateTimeFieldUpdateOperationsInput | Date | string
     published?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ClassGroupWeeklyScheduleCreateInput = {
+    id?: string
+    weekday: $Enums.WeekDay
+    startTime: string
+    endTime: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    classGroup: ClassGroupCreateNestedOneWithoutWeeklySchedulesInput
+    course: CourseCreateNestedOneWithoutWeeklySchedulesInput
+  }
+
+  export type ClassGroupWeeklyScheduleUncheckedCreateInput = {
+    id?: string
+    classGroupId: string
+    courseId: string
+    weekday: $Enums.WeekDay
+    startTime: string
+    endTime: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type ClassGroupWeeklyScheduleUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    weekday?: EnumWeekDayFieldUpdateOperationsInput | $Enums.WeekDay
+    startTime?: StringFieldUpdateOperationsInput | string
+    endTime?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    classGroup?: ClassGroupUpdateOneRequiredWithoutWeeklySchedulesNestedInput
+    course?: CourseUpdateOneRequiredWithoutWeeklySchedulesNestedInput
+  }
+
+  export type ClassGroupWeeklyScheduleUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    classGroupId?: StringFieldUpdateOperationsInput | string
+    courseId?: StringFieldUpdateOperationsInput | string
+    weekday?: EnumWeekDayFieldUpdateOperationsInput | $Enums.WeekDay
+    startTime?: StringFieldUpdateOperationsInput | string
+    endTime?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ClassGroupWeeklyScheduleCreateManyInput = {
+    id?: string
+    classGroupId: string
+    courseId: string
+    weekday: $Enums.WeekDay
+    startTime: string
+    endTime: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type ClassGroupWeeklyScheduleUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    weekday?: EnumWeekDayFieldUpdateOperationsInput | $Enums.WeekDay
+    startTime?: StringFieldUpdateOperationsInput | string
+    endTime?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ClassGroupWeeklyScheduleUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    classGroupId?: StringFieldUpdateOperationsInput | string
+    courseId?: StringFieldUpdateOperationsInput | string
+    weekday?: EnumWeekDayFieldUpdateOperationsInput | $Enums.WeekDay
+    startTime?: StringFieldUpdateOperationsInput | string
+    endTime?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -44151,7 +45629,17 @@ export namespace Prisma {
     none?: GradeBucketWhereInput
   }
 
+  export type ClassGroupWeeklyScheduleListRelationFilter = {
+    every?: ClassGroupWeeklyScheduleWhereInput
+    some?: ClassGroupWeeklyScheduleWhereInput
+    none?: ClassGroupWeeklyScheduleWhereInput
+  }
+
   export type GradeBucketOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type ClassGroupWeeklyScheduleOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -44773,6 +46261,63 @@ export namespace Prisma {
     published?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+  }
+
+  export type EnumWeekDayFilter<$PrismaModel = never> = {
+    equals?: $Enums.WeekDay | EnumWeekDayFieldRefInput<$PrismaModel>
+    in?: $Enums.WeekDay[] | ListEnumWeekDayFieldRefInput<$PrismaModel>
+    notIn?: $Enums.WeekDay[] | ListEnumWeekDayFieldRefInput<$PrismaModel>
+    not?: NestedEnumWeekDayFilter<$PrismaModel> | $Enums.WeekDay
+  }
+
+  export type ClassGroupWeeklyScheduleClassGroupIdCourseIdWeekdayStartTimeCompoundUniqueInput = {
+    classGroupId: string
+    courseId: string
+    weekday: $Enums.WeekDay
+    startTime: string
+  }
+
+  export type ClassGroupWeeklyScheduleCountOrderByAggregateInput = {
+    id?: SortOrder
+    classGroupId?: SortOrder
+    courseId?: SortOrder
+    weekday?: SortOrder
+    startTime?: SortOrder
+    endTime?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type ClassGroupWeeklyScheduleMaxOrderByAggregateInput = {
+    id?: SortOrder
+    classGroupId?: SortOrder
+    courseId?: SortOrder
+    weekday?: SortOrder
+    startTime?: SortOrder
+    endTime?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type ClassGroupWeeklyScheduleMinOrderByAggregateInput = {
+    id?: SortOrder
+    classGroupId?: SortOrder
+    courseId?: SortOrder
+    weekday?: SortOrder
+    startTime?: SortOrder
+    endTime?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type EnumWeekDayWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.WeekDay | EnumWeekDayFieldRefInput<$PrismaModel>
+    in?: $Enums.WeekDay[] | ListEnumWeekDayFieldRefInput<$PrismaModel>
+    notIn?: $Enums.WeekDay[] | ListEnumWeekDayFieldRefInput<$PrismaModel>
+    not?: NestedEnumWeekDayWithAggregatesFilter<$PrismaModel> | $Enums.WeekDay
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumWeekDayFilter<$PrismaModel>
+    _max?: NestedEnumWeekDayFilter<$PrismaModel>
   }
 
   export type StudentScalarRelationFilter = {
@@ -46732,6 +48277,13 @@ export namespace Prisma {
     connect?: GradeWhereUniqueInput | GradeWhereUniqueInput[]
   }
 
+  export type ClassGroupWeeklyScheduleCreateNestedManyWithoutCourseInput = {
+    create?: XOR<ClassGroupWeeklyScheduleCreateWithoutCourseInput, ClassGroupWeeklyScheduleUncheckedCreateWithoutCourseInput> | ClassGroupWeeklyScheduleCreateWithoutCourseInput[] | ClassGroupWeeklyScheduleUncheckedCreateWithoutCourseInput[]
+    connectOrCreate?: ClassGroupWeeklyScheduleCreateOrConnectWithoutCourseInput | ClassGroupWeeklyScheduleCreateOrConnectWithoutCourseInput[]
+    createMany?: ClassGroupWeeklyScheduleCreateManyCourseInputEnvelope
+    connect?: ClassGroupWeeklyScheduleWhereUniqueInput | ClassGroupWeeklyScheduleWhereUniqueInput[]
+  }
+
   export type ClassGroupUncheckedCreateNestedManyWithoutCoursesInput = {
     create?: XOR<ClassGroupCreateWithoutCoursesInput, ClassGroupUncheckedCreateWithoutCoursesInput> | ClassGroupCreateWithoutCoursesInput[] | ClassGroupUncheckedCreateWithoutCoursesInput[]
     connectOrCreate?: ClassGroupCreateOrConnectWithoutCoursesInput | ClassGroupCreateOrConnectWithoutCoursesInput[]
@@ -46770,6 +48322,13 @@ export namespace Prisma {
     connectOrCreate?: GradeCreateOrConnectWithoutCourseInput | GradeCreateOrConnectWithoutCourseInput[]
     createMany?: GradeCreateManyCourseInputEnvelope
     connect?: GradeWhereUniqueInput | GradeWhereUniqueInput[]
+  }
+
+  export type ClassGroupWeeklyScheduleUncheckedCreateNestedManyWithoutCourseInput = {
+    create?: XOR<ClassGroupWeeklyScheduleCreateWithoutCourseInput, ClassGroupWeeklyScheduleUncheckedCreateWithoutCourseInput> | ClassGroupWeeklyScheduleCreateWithoutCourseInput[] | ClassGroupWeeklyScheduleUncheckedCreateWithoutCourseInput[]
+    connectOrCreate?: ClassGroupWeeklyScheduleCreateOrConnectWithoutCourseInput | ClassGroupWeeklyScheduleCreateOrConnectWithoutCourseInput[]
+    createMany?: ClassGroupWeeklyScheduleCreateManyCourseInputEnvelope
+    connect?: ClassGroupWeeklyScheduleWhereUniqueInput | ClassGroupWeeklyScheduleWhereUniqueInput[]
   }
 
   export type OrganizationUpdateOneRequiredWithoutCoursesNestedInput = {
@@ -46906,6 +48465,20 @@ export namespace Prisma {
     deleteMany?: GradeScalarWhereInput | GradeScalarWhereInput[]
   }
 
+  export type ClassGroupWeeklyScheduleUpdateManyWithoutCourseNestedInput = {
+    create?: XOR<ClassGroupWeeklyScheduleCreateWithoutCourseInput, ClassGroupWeeklyScheduleUncheckedCreateWithoutCourseInput> | ClassGroupWeeklyScheduleCreateWithoutCourseInput[] | ClassGroupWeeklyScheduleUncheckedCreateWithoutCourseInput[]
+    connectOrCreate?: ClassGroupWeeklyScheduleCreateOrConnectWithoutCourseInput | ClassGroupWeeklyScheduleCreateOrConnectWithoutCourseInput[]
+    upsert?: ClassGroupWeeklyScheduleUpsertWithWhereUniqueWithoutCourseInput | ClassGroupWeeklyScheduleUpsertWithWhereUniqueWithoutCourseInput[]
+    createMany?: ClassGroupWeeklyScheduleCreateManyCourseInputEnvelope
+    set?: ClassGroupWeeklyScheduleWhereUniqueInput | ClassGroupWeeklyScheduleWhereUniqueInput[]
+    disconnect?: ClassGroupWeeklyScheduleWhereUniqueInput | ClassGroupWeeklyScheduleWhereUniqueInput[]
+    delete?: ClassGroupWeeklyScheduleWhereUniqueInput | ClassGroupWeeklyScheduleWhereUniqueInput[]
+    connect?: ClassGroupWeeklyScheduleWhereUniqueInput | ClassGroupWeeklyScheduleWhereUniqueInput[]
+    update?: ClassGroupWeeklyScheduleUpdateWithWhereUniqueWithoutCourseInput | ClassGroupWeeklyScheduleUpdateWithWhereUniqueWithoutCourseInput[]
+    updateMany?: ClassGroupWeeklyScheduleUpdateManyWithWhereWithoutCourseInput | ClassGroupWeeklyScheduleUpdateManyWithWhereWithoutCourseInput[]
+    deleteMany?: ClassGroupWeeklyScheduleScalarWhereInput | ClassGroupWeeklyScheduleScalarWhereInput[]
+  }
+
   export type ClassGroupUncheckedUpdateManyWithoutCoursesNestedInput = {
     create?: XOR<ClassGroupCreateWithoutCoursesInput, ClassGroupUncheckedCreateWithoutCoursesInput> | ClassGroupCreateWithoutCoursesInput[] | ClassGroupUncheckedCreateWithoutCoursesInput[]
     connectOrCreate?: ClassGroupCreateOrConnectWithoutCoursesInput | ClassGroupCreateOrConnectWithoutCoursesInput[]
@@ -46988,6 +48561,20 @@ export namespace Prisma {
     deleteMany?: GradeScalarWhereInput | GradeScalarWhereInput[]
   }
 
+  export type ClassGroupWeeklyScheduleUncheckedUpdateManyWithoutCourseNestedInput = {
+    create?: XOR<ClassGroupWeeklyScheduleCreateWithoutCourseInput, ClassGroupWeeklyScheduleUncheckedCreateWithoutCourseInput> | ClassGroupWeeklyScheduleCreateWithoutCourseInput[] | ClassGroupWeeklyScheduleUncheckedCreateWithoutCourseInput[]
+    connectOrCreate?: ClassGroupWeeklyScheduleCreateOrConnectWithoutCourseInput | ClassGroupWeeklyScheduleCreateOrConnectWithoutCourseInput[]
+    upsert?: ClassGroupWeeklyScheduleUpsertWithWhereUniqueWithoutCourseInput | ClassGroupWeeklyScheduleUpsertWithWhereUniqueWithoutCourseInput[]
+    createMany?: ClassGroupWeeklyScheduleCreateManyCourseInputEnvelope
+    set?: ClassGroupWeeklyScheduleWhereUniqueInput | ClassGroupWeeklyScheduleWhereUniqueInput[]
+    disconnect?: ClassGroupWeeklyScheduleWhereUniqueInput | ClassGroupWeeklyScheduleWhereUniqueInput[]
+    delete?: ClassGroupWeeklyScheduleWhereUniqueInput | ClassGroupWeeklyScheduleWhereUniqueInput[]
+    connect?: ClassGroupWeeklyScheduleWhereUniqueInput | ClassGroupWeeklyScheduleWhereUniqueInput[]
+    update?: ClassGroupWeeklyScheduleUpdateWithWhereUniqueWithoutCourseInput | ClassGroupWeeklyScheduleUpdateWithWhereUniqueWithoutCourseInput[]
+    updateMany?: ClassGroupWeeklyScheduleUpdateManyWithWhereWithoutCourseInput | ClassGroupWeeklyScheduleUpdateManyWithWhereWithoutCourseInput[]
+    deleteMany?: ClassGroupWeeklyScheduleScalarWhereInput | ClassGroupWeeklyScheduleScalarWhereInput[]
+  }
+
   export type OrganizationCreateNestedOneWithoutGroupsInput = {
     create?: XOR<OrganizationCreateWithoutGroupsInput, OrganizationUncheckedCreateWithoutGroupsInput>
     connectOrCreate?: OrganizationCreateOrConnectWithoutGroupsInput
@@ -47046,6 +48633,13 @@ export namespace Prisma {
     connect?: QuizSubmissionWhereUniqueInput | QuizSubmissionWhereUniqueInput[]
   }
 
+  export type ClassGroupWeeklyScheduleCreateNestedManyWithoutClassGroupInput = {
+    create?: XOR<ClassGroupWeeklyScheduleCreateWithoutClassGroupInput, ClassGroupWeeklyScheduleUncheckedCreateWithoutClassGroupInput> | ClassGroupWeeklyScheduleCreateWithoutClassGroupInput[] | ClassGroupWeeklyScheduleUncheckedCreateWithoutClassGroupInput[]
+    connectOrCreate?: ClassGroupWeeklyScheduleCreateOrConnectWithoutClassGroupInput | ClassGroupWeeklyScheduleCreateOrConnectWithoutClassGroupInput[]
+    createMany?: ClassGroupWeeklyScheduleCreateManyClassGroupInputEnvelope
+    connect?: ClassGroupWeeklyScheduleWhereUniqueInput | ClassGroupWeeklyScheduleWhereUniqueInput[]
+  }
+
   export type CourseUncheckedCreateNestedManyWithoutGroupsInput = {
     create?: XOR<CourseCreateWithoutGroupsInput, CourseUncheckedCreateWithoutGroupsInput> | CourseCreateWithoutGroupsInput[] | CourseUncheckedCreateWithoutGroupsInput[]
     connectOrCreate?: CourseCreateOrConnectWithoutGroupsInput | CourseCreateOrConnectWithoutGroupsInput[]
@@ -47078,6 +48672,13 @@ export namespace Prisma {
     connectOrCreate?: QuizSubmissionCreateOrConnectWithoutClassGroupInput | QuizSubmissionCreateOrConnectWithoutClassGroupInput[]
     createMany?: QuizSubmissionCreateManyClassGroupInputEnvelope
     connect?: QuizSubmissionWhereUniqueInput | QuizSubmissionWhereUniqueInput[]
+  }
+
+  export type ClassGroupWeeklyScheduleUncheckedCreateNestedManyWithoutClassGroupInput = {
+    create?: XOR<ClassGroupWeeklyScheduleCreateWithoutClassGroupInput, ClassGroupWeeklyScheduleUncheckedCreateWithoutClassGroupInput> | ClassGroupWeeklyScheduleCreateWithoutClassGroupInput[] | ClassGroupWeeklyScheduleUncheckedCreateWithoutClassGroupInput[]
+    connectOrCreate?: ClassGroupWeeklyScheduleCreateOrConnectWithoutClassGroupInput | ClassGroupWeeklyScheduleCreateOrConnectWithoutClassGroupInput[]
+    createMany?: ClassGroupWeeklyScheduleCreateManyClassGroupInputEnvelope
+    connect?: ClassGroupWeeklyScheduleWhereUniqueInput | ClassGroupWeeklyScheduleWhereUniqueInput[]
   }
 
   export type OrganizationUpdateOneRequiredWithoutGroupsNestedInput = {
@@ -47183,6 +48784,20 @@ export namespace Prisma {
     deleteMany?: QuizSubmissionScalarWhereInput | QuizSubmissionScalarWhereInput[]
   }
 
+  export type ClassGroupWeeklyScheduleUpdateManyWithoutClassGroupNestedInput = {
+    create?: XOR<ClassGroupWeeklyScheduleCreateWithoutClassGroupInput, ClassGroupWeeklyScheduleUncheckedCreateWithoutClassGroupInput> | ClassGroupWeeklyScheduleCreateWithoutClassGroupInput[] | ClassGroupWeeklyScheduleUncheckedCreateWithoutClassGroupInput[]
+    connectOrCreate?: ClassGroupWeeklyScheduleCreateOrConnectWithoutClassGroupInput | ClassGroupWeeklyScheduleCreateOrConnectWithoutClassGroupInput[]
+    upsert?: ClassGroupWeeklyScheduleUpsertWithWhereUniqueWithoutClassGroupInput | ClassGroupWeeklyScheduleUpsertWithWhereUniqueWithoutClassGroupInput[]
+    createMany?: ClassGroupWeeklyScheduleCreateManyClassGroupInputEnvelope
+    set?: ClassGroupWeeklyScheduleWhereUniqueInput | ClassGroupWeeklyScheduleWhereUniqueInput[]
+    disconnect?: ClassGroupWeeklyScheduleWhereUniqueInput | ClassGroupWeeklyScheduleWhereUniqueInput[]
+    delete?: ClassGroupWeeklyScheduleWhereUniqueInput | ClassGroupWeeklyScheduleWhereUniqueInput[]
+    connect?: ClassGroupWeeklyScheduleWhereUniqueInput | ClassGroupWeeklyScheduleWhereUniqueInput[]
+    update?: ClassGroupWeeklyScheduleUpdateWithWhereUniqueWithoutClassGroupInput | ClassGroupWeeklyScheduleUpdateWithWhereUniqueWithoutClassGroupInput[]
+    updateMany?: ClassGroupWeeklyScheduleUpdateManyWithWhereWithoutClassGroupInput | ClassGroupWeeklyScheduleUpdateManyWithWhereWithoutClassGroupInput[]
+    deleteMany?: ClassGroupWeeklyScheduleScalarWhereInput | ClassGroupWeeklyScheduleScalarWhereInput[]
+  }
+
   export type CourseUncheckedUpdateManyWithoutGroupsNestedInput = {
     create?: XOR<CourseCreateWithoutGroupsInput, CourseUncheckedCreateWithoutGroupsInput> | CourseCreateWithoutGroupsInput[] | CourseUncheckedCreateWithoutGroupsInput[]
     connectOrCreate?: CourseCreateOrConnectWithoutGroupsInput | CourseCreateOrConnectWithoutGroupsInput[]
@@ -47250,6 +48865,20 @@ export namespace Prisma {
     update?: QuizSubmissionUpdateWithWhereUniqueWithoutClassGroupInput | QuizSubmissionUpdateWithWhereUniqueWithoutClassGroupInput[]
     updateMany?: QuizSubmissionUpdateManyWithWhereWithoutClassGroupInput | QuizSubmissionUpdateManyWithWhereWithoutClassGroupInput[]
     deleteMany?: QuizSubmissionScalarWhereInput | QuizSubmissionScalarWhereInput[]
+  }
+
+  export type ClassGroupWeeklyScheduleUncheckedUpdateManyWithoutClassGroupNestedInput = {
+    create?: XOR<ClassGroupWeeklyScheduleCreateWithoutClassGroupInput, ClassGroupWeeklyScheduleUncheckedCreateWithoutClassGroupInput> | ClassGroupWeeklyScheduleCreateWithoutClassGroupInput[] | ClassGroupWeeklyScheduleUncheckedCreateWithoutClassGroupInput[]
+    connectOrCreate?: ClassGroupWeeklyScheduleCreateOrConnectWithoutClassGroupInput | ClassGroupWeeklyScheduleCreateOrConnectWithoutClassGroupInput[]
+    upsert?: ClassGroupWeeklyScheduleUpsertWithWhereUniqueWithoutClassGroupInput | ClassGroupWeeklyScheduleUpsertWithWhereUniqueWithoutClassGroupInput[]
+    createMany?: ClassGroupWeeklyScheduleCreateManyClassGroupInputEnvelope
+    set?: ClassGroupWeeklyScheduleWhereUniqueInput | ClassGroupWeeklyScheduleWhereUniqueInput[]
+    disconnect?: ClassGroupWeeklyScheduleWhereUniqueInput | ClassGroupWeeklyScheduleWhereUniqueInput[]
+    delete?: ClassGroupWeeklyScheduleWhereUniqueInput | ClassGroupWeeklyScheduleWhereUniqueInput[]
+    connect?: ClassGroupWeeklyScheduleWhereUniqueInput | ClassGroupWeeklyScheduleWhereUniqueInput[]
+    update?: ClassGroupWeeklyScheduleUpdateWithWhereUniqueWithoutClassGroupInput | ClassGroupWeeklyScheduleUpdateWithWhereUniqueWithoutClassGroupInput[]
+    updateMany?: ClassGroupWeeklyScheduleUpdateManyWithWhereWithoutClassGroupInput | ClassGroupWeeklyScheduleUpdateManyWithWhereWithoutClassGroupInput[]
+    deleteMany?: ClassGroupWeeklyScheduleScalarWhereInput | ClassGroupWeeklyScheduleScalarWhereInput[]
   }
 
   export type OrganizationCreateNestedOneWithoutStudentInput = {
@@ -48150,6 +49779,38 @@ export namespace Prisma {
     update?: XOR<XOR<ClassGroupUpdateToOneWithWhereWithoutQuizSchedulesInput, ClassGroupUpdateWithoutQuizSchedulesInput>, ClassGroupUncheckedUpdateWithoutQuizSchedulesInput>
   }
 
+  export type ClassGroupCreateNestedOneWithoutWeeklySchedulesInput = {
+    create?: XOR<ClassGroupCreateWithoutWeeklySchedulesInput, ClassGroupUncheckedCreateWithoutWeeklySchedulesInput>
+    connectOrCreate?: ClassGroupCreateOrConnectWithoutWeeklySchedulesInput
+    connect?: ClassGroupWhereUniqueInput
+  }
+
+  export type CourseCreateNestedOneWithoutWeeklySchedulesInput = {
+    create?: XOR<CourseCreateWithoutWeeklySchedulesInput, CourseUncheckedCreateWithoutWeeklySchedulesInput>
+    connectOrCreate?: CourseCreateOrConnectWithoutWeeklySchedulesInput
+    connect?: CourseWhereUniqueInput
+  }
+
+  export type EnumWeekDayFieldUpdateOperationsInput = {
+    set?: $Enums.WeekDay
+  }
+
+  export type ClassGroupUpdateOneRequiredWithoutWeeklySchedulesNestedInput = {
+    create?: XOR<ClassGroupCreateWithoutWeeklySchedulesInput, ClassGroupUncheckedCreateWithoutWeeklySchedulesInput>
+    connectOrCreate?: ClassGroupCreateOrConnectWithoutWeeklySchedulesInput
+    upsert?: ClassGroupUpsertWithoutWeeklySchedulesInput
+    connect?: ClassGroupWhereUniqueInput
+    update?: XOR<XOR<ClassGroupUpdateToOneWithWhereWithoutWeeklySchedulesInput, ClassGroupUpdateWithoutWeeklySchedulesInput>, ClassGroupUncheckedUpdateWithoutWeeklySchedulesInput>
+  }
+
+  export type CourseUpdateOneRequiredWithoutWeeklySchedulesNestedInput = {
+    create?: XOR<CourseCreateWithoutWeeklySchedulesInput, CourseUncheckedCreateWithoutWeeklySchedulesInput>
+    connectOrCreate?: CourseCreateOrConnectWithoutWeeklySchedulesInput
+    upsert?: CourseUpsertWithoutWeeklySchedulesInput
+    connect?: CourseWhereUniqueInput
+    update?: XOR<XOR<CourseUpdateToOneWithWhereWithoutWeeklySchedulesInput, CourseUpdateWithoutWeeklySchedulesInput>, CourseUncheckedUpdateWithoutWeeklySchedulesInput>
+  }
+
   export type QuizCreateNestedOneWithoutQuizSubmissionsInput = {
     create?: XOR<QuizCreateWithoutQuizSubmissionsInput, QuizUncheckedCreateWithoutQuizSubmissionsInput>
     connectOrCreate?: QuizCreateOrConnectWithoutQuizSubmissionsInput
@@ -48853,6 +50514,23 @@ export namespace Prisma {
     _max?: NestedEnumQuizQuestionTypeFilter<$PrismaModel>
   }
 
+  export type NestedEnumWeekDayFilter<$PrismaModel = never> = {
+    equals?: $Enums.WeekDay | EnumWeekDayFieldRefInput<$PrismaModel>
+    in?: $Enums.WeekDay[] | ListEnumWeekDayFieldRefInput<$PrismaModel>
+    notIn?: $Enums.WeekDay[] | ListEnumWeekDayFieldRefInput<$PrismaModel>
+    not?: NestedEnumWeekDayFilter<$PrismaModel> | $Enums.WeekDay
+  }
+
+  export type NestedEnumWeekDayWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.WeekDay | EnumWeekDayFieldRefInput<$PrismaModel>
+    in?: $Enums.WeekDay[] | ListEnumWeekDayFieldRefInput<$PrismaModel>
+    notIn?: $Enums.WeekDay[] | ListEnumWeekDayFieldRefInput<$PrismaModel>
+    not?: NestedEnumWeekDayWithAggregatesFilter<$PrismaModel> | $Enums.WeekDay
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumWeekDayFilter<$PrismaModel>
+    _max?: NestedEnumWeekDayFilter<$PrismaModel>
+  }
+
   export type NestedDecimalNullableFilter<$PrismaModel = never> = {
     equals?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel> | null
     in?: Decimal[] | DecimalJsLike[] | number[] | string[] | ListDecimalFieldRefInput<$PrismaModel> | null
@@ -49063,6 +50741,7 @@ export namespace Prisma {
     assignmentDates?: AssignmentDateCreateNestedManyWithoutClassGroupInput
     quizSchedules?: QuizScheduleCreateNestedManyWithoutClassGroupInput
     quizSubmissions?: QuizSubmissionCreateNestedManyWithoutClassGroupInput
+    weeklySchedules?: ClassGroupWeeklyScheduleCreateNestedManyWithoutClassGroupInput
   }
 
   export type ClassGroupUncheckedCreateWithoutOrganizationInput = {
@@ -49080,6 +50759,7 @@ export namespace Prisma {
     assignmentDates?: AssignmentDateUncheckedCreateNestedManyWithoutClassGroupInput
     quizSchedules?: QuizScheduleUncheckedCreateNestedManyWithoutClassGroupInput
     quizSubmissions?: QuizSubmissionUncheckedCreateNestedManyWithoutClassGroupInput
+    weeklySchedules?: ClassGroupWeeklyScheduleUncheckedCreateNestedManyWithoutClassGroupInput
   }
 
   export type ClassGroupCreateOrConnectWithoutOrganizationInput = {
@@ -49110,6 +50790,7 @@ export namespace Prisma {
     currentPeriod?: PeriodCreateNestedOneWithoutCoursesInput
     gradeBuckets?: GradeBucketCreateNestedManyWithoutCourseInput
     grades?: GradeCreateNestedManyWithoutCourseInput
+    weeklySchedules?: ClassGroupWeeklyScheduleCreateNestedManyWithoutCourseInput
   }
 
   export type CourseUncheckedCreateWithoutOrganizationInput = {
@@ -49130,6 +50811,7 @@ export namespace Prisma {
     quizzes?: QuizUncheckedCreateNestedManyWithoutCourseInput
     gradeBuckets?: GradeBucketUncheckedCreateNestedManyWithoutCourseInput
     grades?: GradeUncheckedCreateNestedManyWithoutCourseInput
+    weeklySchedules?: ClassGroupWeeklyScheduleUncheckedCreateNestedManyWithoutCourseInput
   }
 
   export type CourseCreateOrConnectWithoutOrganizationInput = {
@@ -50854,6 +52536,7 @@ export namespace Prisma {
     currentPeriod?: PeriodCreateNestedOneWithoutCoursesInput
     gradeBuckets?: GradeBucketCreateNestedManyWithoutCourseInput
     grades?: GradeCreateNestedManyWithoutCourseInput
+    weeklySchedules?: ClassGroupWeeklyScheduleCreateNestedManyWithoutCourseInput
   }
 
   export type CourseUncheckedCreateWithoutSchoolInput = {
@@ -50874,6 +52557,7 @@ export namespace Prisma {
     quizzes?: QuizUncheckedCreateNestedManyWithoutCourseInput
     gradeBuckets?: GradeBucketUncheckedCreateNestedManyWithoutCourseInput
     grades?: GradeUncheckedCreateNestedManyWithoutCourseInput
+    weeklySchedules?: ClassGroupWeeklyScheduleUncheckedCreateNestedManyWithoutCourseInput
   }
 
   export type CourseCreateOrConnectWithoutSchoolInput = {
@@ -50901,6 +52585,7 @@ export namespace Prisma {
     assignmentDates?: AssignmentDateCreateNestedManyWithoutClassGroupInput
     quizSchedules?: QuizScheduleCreateNestedManyWithoutClassGroupInput
     quizSubmissions?: QuizSubmissionCreateNestedManyWithoutClassGroupInput
+    weeklySchedules?: ClassGroupWeeklyScheduleCreateNestedManyWithoutClassGroupInput
   }
 
   export type ClassGroupUncheckedCreateWithoutSchoolInput = {
@@ -50918,6 +52603,7 @@ export namespace Prisma {
     assignmentDates?: AssignmentDateUncheckedCreateNestedManyWithoutClassGroupInput
     quizSchedules?: QuizScheduleUncheckedCreateNestedManyWithoutClassGroupInput
     quizSubmissions?: QuizSubmissionUncheckedCreateNestedManyWithoutClassGroupInput
+    weeklySchedules?: ClassGroupWeeklyScheduleUncheckedCreateNestedManyWithoutClassGroupInput
   }
 
   export type ClassGroupCreateOrConnectWithoutSchoolInput = {
@@ -51349,6 +53035,7 @@ export namespace Prisma {
     quizzes?: QuizCreateNestedManyWithoutCourseInput
     gradeBuckets?: GradeBucketCreateNestedManyWithoutCourseInput
     grades?: GradeCreateNestedManyWithoutCourseInput
+    weeklySchedules?: ClassGroupWeeklyScheduleCreateNestedManyWithoutCourseInput
   }
 
   export type CourseUncheckedCreateWithoutCurrentPeriodInput = {
@@ -51369,6 +53056,7 @@ export namespace Prisma {
     quizzes?: QuizUncheckedCreateNestedManyWithoutCourseInput
     gradeBuckets?: GradeBucketUncheckedCreateNestedManyWithoutCourseInput
     grades?: GradeUncheckedCreateNestedManyWithoutCourseInput
+    weeklySchedules?: ClassGroupWeeklyScheduleUncheckedCreateNestedManyWithoutCourseInput
   }
 
   export type CourseCreateOrConnectWithoutCurrentPeriodInput = {
@@ -51585,6 +53273,7 @@ export namespace Prisma {
     currentPeriod?: PeriodCreateNestedOneWithoutCoursesInput
     gradeBuckets?: GradeBucketCreateNestedManyWithoutCourseInput
     grades?: GradeCreateNestedManyWithoutCourseInput
+    weeklySchedules?: ClassGroupWeeklyScheduleCreateNestedManyWithoutCourseInput
   }
 
   export type CourseUncheckedCreateWithoutSubjectInput = {
@@ -51605,6 +53294,7 @@ export namespace Prisma {
     quizzes?: QuizUncheckedCreateNestedManyWithoutCourseInput
     gradeBuckets?: GradeBucketUncheckedCreateNestedManyWithoutCourseInput
     grades?: GradeUncheckedCreateNestedManyWithoutCourseInput
+    weeklySchedules?: ClassGroupWeeklyScheduleUncheckedCreateNestedManyWithoutCourseInput
   }
 
   export type CourseCreateOrConnectWithoutSubjectInput = {
@@ -52019,6 +53709,7 @@ export namespace Prisma {
     currentPeriod?: PeriodCreateNestedOneWithoutCoursesInput
     gradeBuckets?: GradeBucketCreateNestedManyWithoutCourseInput
     grades?: GradeCreateNestedManyWithoutCourseInput
+    weeklySchedules?: ClassGroupWeeklyScheduleCreateNestedManyWithoutCourseInput
   }
 
   export type CourseUncheckedCreateWithoutStudyPlanInput = {
@@ -52039,6 +53730,7 @@ export namespace Prisma {
     quizzes?: QuizUncheckedCreateNestedManyWithoutCourseInput
     gradeBuckets?: GradeBucketUncheckedCreateNestedManyWithoutCourseInput
     grades?: GradeUncheckedCreateNestedManyWithoutCourseInput
+    weeklySchedules?: ClassGroupWeeklyScheduleUncheckedCreateNestedManyWithoutCourseInput
   }
 
   export type CourseCreateOrConnectWithoutStudyPlanInput = {
@@ -52066,6 +53758,7 @@ export namespace Prisma {
     assignmentDates?: AssignmentDateCreateNestedManyWithoutClassGroupInput
     quizSchedules?: QuizScheduleCreateNestedManyWithoutClassGroupInput
     quizSubmissions?: QuizSubmissionCreateNestedManyWithoutClassGroupInput
+    weeklySchedules?: ClassGroupWeeklyScheduleCreateNestedManyWithoutClassGroupInput
   }
 
   export type ClassGroupUncheckedCreateWithoutStudyPlanInput = {
@@ -52083,6 +53776,7 @@ export namespace Prisma {
     assignmentDates?: AssignmentDateUncheckedCreateNestedManyWithoutClassGroupInput
     quizSchedules?: QuizScheduleUncheckedCreateNestedManyWithoutClassGroupInput
     quizSubmissions?: QuizSubmissionUncheckedCreateNestedManyWithoutClassGroupInput
+    weeklySchedules?: ClassGroupWeeklyScheduleUncheckedCreateNestedManyWithoutClassGroupInput
   }
 
   export type ClassGroupCreateOrConnectWithoutStudyPlanInput = {
@@ -52450,6 +54144,7 @@ export namespace Prisma {
     assignmentDates?: AssignmentDateCreateNestedManyWithoutClassGroupInput
     quizSchedules?: QuizScheduleCreateNestedManyWithoutClassGroupInput
     quizSubmissions?: QuizSubmissionCreateNestedManyWithoutClassGroupInput
+    weeklySchedules?: ClassGroupWeeklyScheduleCreateNestedManyWithoutClassGroupInput
   }
 
   export type ClassGroupUncheckedCreateWithoutCoursesInput = {
@@ -52467,6 +54162,7 @@ export namespace Prisma {
     assignmentDates?: AssignmentDateUncheckedCreateNestedManyWithoutClassGroupInput
     quizSchedules?: QuizScheduleUncheckedCreateNestedManyWithoutClassGroupInput
     quizSubmissions?: QuizSubmissionUncheckedCreateNestedManyWithoutClassGroupInput
+    weeklySchedules?: ClassGroupWeeklyScheduleUncheckedCreateNestedManyWithoutClassGroupInput
   }
 
   export type ClassGroupCreateOrConnectWithoutCoursesInput = {
@@ -52742,6 +54438,36 @@ export namespace Prisma {
 
   export type GradeCreateManyCourseInputEnvelope = {
     data: GradeCreateManyCourseInput | GradeCreateManyCourseInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type ClassGroupWeeklyScheduleCreateWithoutCourseInput = {
+    id?: string
+    weekday: $Enums.WeekDay
+    startTime: string
+    endTime: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    classGroup: ClassGroupCreateNestedOneWithoutWeeklySchedulesInput
+  }
+
+  export type ClassGroupWeeklyScheduleUncheckedCreateWithoutCourseInput = {
+    id?: string
+    classGroupId: string
+    weekday: $Enums.WeekDay
+    startTime: string
+    endTime: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type ClassGroupWeeklyScheduleCreateOrConnectWithoutCourseInput = {
+    where: ClassGroupWeeklyScheduleWhereUniqueInput
+    create: XOR<ClassGroupWeeklyScheduleCreateWithoutCourseInput, ClassGroupWeeklyScheduleUncheckedCreateWithoutCourseInput>
+  }
+
+  export type ClassGroupWeeklyScheduleCreateManyCourseInputEnvelope = {
+    data: ClassGroupWeeklyScheduleCreateManyCourseInput | ClassGroupWeeklyScheduleCreateManyCourseInput[]
     skipDuplicates?: boolean
   }
 
@@ -53133,6 +54859,36 @@ export namespace Prisma {
     data: XOR<GradeUpdateManyMutationInput, GradeUncheckedUpdateManyWithoutCourseInput>
   }
 
+  export type ClassGroupWeeklyScheduleUpsertWithWhereUniqueWithoutCourseInput = {
+    where: ClassGroupWeeklyScheduleWhereUniqueInput
+    update: XOR<ClassGroupWeeklyScheduleUpdateWithoutCourseInput, ClassGroupWeeklyScheduleUncheckedUpdateWithoutCourseInput>
+    create: XOR<ClassGroupWeeklyScheduleCreateWithoutCourseInput, ClassGroupWeeklyScheduleUncheckedCreateWithoutCourseInput>
+  }
+
+  export type ClassGroupWeeklyScheduleUpdateWithWhereUniqueWithoutCourseInput = {
+    where: ClassGroupWeeklyScheduleWhereUniqueInput
+    data: XOR<ClassGroupWeeklyScheduleUpdateWithoutCourseInput, ClassGroupWeeklyScheduleUncheckedUpdateWithoutCourseInput>
+  }
+
+  export type ClassGroupWeeklyScheduleUpdateManyWithWhereWithoutCourseInput = {
+    where: ClassGroupWeeklyScheduleScalarWhereInput
+    data: XOR<ClassGroupWeeklyScheduleUpdateManyMutationInput, ClassGroupWeeklyScheduleUncheckedUpdateManyWithoutCourseInput>
+  }
+
+  export type ClassGroupWeeklyScheduleScalarWhereInput = {
+    AND?: ClassGroupWeeklyScheduleScalarWhereInput | ClassGroupWeeklyScheduleScalarWhereInput[]
+    OR?: ClassGroupWeeklyScheduleScalarWhereInput[]
+    NOT?: ClassGroupWeeklyScheduleScalarWhereInput | ClassGroupWeeklyScheduleScalarWhereInput[]
+    id?: StringFilter<"ClassGroupWeeklySchedule"> | string
+    classGroupId?: StringFilter<"ClassGroupWeeklySchedule"> | string
+    courseId?: StringFilter<"ClassGroupWeeklySchedule"> | string
+    weekday?: EnumWeekDayFilter<"ClassGroupWeeklySchedule"> | $Enums.WeekDay
+    startTime?: StringFilter<"ClassGroupWeeklySchedule"> | string
+    endTime?: StringFilter<"ClassGroupWeeklySchedule"> | string
+    createdAt?: DateTimeFilter<"ClassGroupWeeklySchedule"> | Date | string
+    updatedAt?: DateTimeFilter<"ClassGroupWeeklySchedule"> | Date | string
+  }
+
   export type OrganizationCreateWithoutGroupsInput = {
     id?: string
     name: string
@@ -53247,6 +55003,7 @@ export namespace Prisma {
     currentPeriod?: PeriodCreateNestedOneWithoutCoursesInput
     gradeBuckets?: GradeBucketCreateNestedManyWithoutCourseInput
     grades?: GradeCreateNestedManyWithoutCourseInput
+    weeklySchedules?: ClassGroupWeeklyScheduleCreateNestedManyWithoutCourseInput
   }
 
   export type CourseUncheckedCreateWithoutGroupsInput = {
@@ -53267,6 +55024,7 @@ export namespace Prisma {
     quizzes?: QuizUncheckedCreateNestedManyWithoutCourseInput
     gradeBuckets?: GradeBucketUncheckedCreateNestedManyWithoutCourseInput
     grades?: GradeUncheckedCreateNestedManyWithoutCourseInput
+    weeklySchedules?: ClassGroupWeeklyScheduleUncheckedCreateNestedManyWithoutCourseInput
   }
 
   export type CourseCreateOrConnectWithoutGroupsInput = {
@@ -53495,6 +55253,36 @@ export namespace Prisma {
 
   export type QuizSubmissionCreateManyClassGroupInputEnvelope = {
     data: QuizSubmissionCreateManyClassGroupInput | QuizSubmissionCreateManyClassGroupInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type ClassGroupWeeklyScheduleCreateWithoutClassGroupInput = {
+    id?: string
+    weekday: $Enums.WeekDay
+    startTime: string
+    endTime: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    course: CourseCreateNestedOneWithoutWeeklySchedulesInput
+  }
+
+  export type ClassGroupWeeklyScheduleUncheckedCreateWithoutClassGroupInput = {
+    id?: string
+    courseId: string
+    weekday: $Enums.WeekDay
+    startTime: string
+    endTime: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type ClassGroupWeeklyScheduleCreateOrConnectWithoutClassGroupInput = {
+    where: ClassGroupWeeklyScheduleWhereUniqueInput
+    create: XOR<ClassGroupWeeklyScheduleCreateWithoutClassGroupInput, ClassGroupWeeklyScheduleUncheckedCreateWithoutClassGroupInput>
+  }
+
+  export type ClassGroupWeeklyScheduleCreateManyClassGroupInputEnvelope = {
+    data: ClassGroupWeeklyScheduleCreateManyClassGroupInput | ClassGroupWeeklyScheduleCreateManyClassGroupInput[]
     skipDuplicates?: boolean
   }
 
@@ -53825,6 +55613,22 @@ export namespace Prisma {
     updatedAt?: DateTimeFilter<"QuizSubmission"> | Date | string
   }
 
+  export type ClassGroupWeeklyScheduleUpsertWithWhereUniqueWithoutClassGroupInput = {
+    where: ClassGroupWeeklyScheduleWhereUniqueInput
+    update: XOR<ClassGroupWeeklyScheduleUpdateWithoutClassGroupInput, ClassGroupWeeklyScheduleUncheckedUpdateWithoutClassGroupInput>
+    create: XOR<ClassGroupWeeklyScheduleCreateWithoutClassGroupInput, ClassGroupWeeklyScheduleUncheckedCreateWithoutClassGroupInput>
+  }
+
+  export type ClassGroupWeeklyScheduleUpdateWithWhereUniqueWithoutClassGroupInput = {
+    where: ClassGroupWeeklyScheduleWhereUniqueInput
+    data: XOR<ClassGroupWeeklyScheduleUpdateWithoutClassGroupInput, ClassGroupWeeklyScheduleUncheckedUpdateWithoutClassGroupInput>
+  }
+
+  export type ClassGroupWeeklyScheduleUpdateManyWithWhereWithoutClassGroupInput = {
+    where: ClassGroupWeeklyScheduleScalarWhereInput
+    data: XOR<ClassGroupWeeklyScheduleUpdateManyMutationInput, ClassGroupWeeklyScheduleUncheckedUpdateManyWithoutClassGroupInput>
+  }
+
   export type OrganizationCreateWithoutStudentInput = {
     id?: string
     name: string
@@ -53936,6 +55740,7 @@ export namespace Prisma {
     assignmentDates?: AssignmentDateCreateNestedManyWithoutClassGroupInput
     quizSchedules?: QuizScheduleCreateNestedManyWithoutClassGroupInput
     quizSubmissions?: QuizSubmissionCreateNestedManyWithoutClassGroupInput
+    weeklySchedules?: ClassGroupWeeklyScheduleCreateNestedManyWithoutClassGroupInput
   }
 
   export type ClassGroupUncheckedCreateWithoutStudentsInput = {
@@ -53953,6 +55758,7 @@ export namespace Prisma {
     assignmentDates?: AssignmentDateUncheckedCreateNestedManyWithoutClassGroupInput
     quizSchedules?: QuizScheduleUncheckedCreateNestedManyWithoutClassGroupInput
     quizSubmissions?: QuizSubmissionUncheckedCreateNestedManyWithoutClassGroupInput
+    weeklySchedules?: ClassGroupWeeklyScheduleUncheckedCreateNestedManyWithoutClassGroupInput
   }
 
   export type ClassGroupCreateOrConnectWithoutStudentsInput = {
@@ -53978,6 +55784,7 @@ export namespace Prisma {
     currentPeriod?: PeriodCreateNestedOneWithoutCoursesInput
     gradeBuckets?: GradeBucketCreateNestedManyWithoutCourseInput
     grades?: GradeCreateNestedManyWithoutCourseInput
+    weeklySchedules?: ClassGroupWeeklyScheduleCreateNestedManyWithoutCourseInput
   }
 
   export type CourseUncheckedCreateWithoutStudentsInput = {
@@ -53998,6 +55805,7 @@ export namespace Prisma {
     quizzes?: QuizUncheckedCreateNestedManyWithoutCourseInput
     gradeBuckets?: GradeBucketUncheckedCreateNestedManyWithoutCourseInput
     grades?: GradeUncheckedCreateNestedManyWithoutCourseInput
+    weeklySchedules?: ClassGroupWeeklyScheduleUncheckedCreateNestedManyWithoutCourseInput
   }
 
   export type CourseCreateOrConnectWithoutStudentsInput = {
@@ -54240,6 +56048,7 @@ export namespace Prisma {
     assignmentDates?: AssignmentDateUpdateManyWithoutClassGroupNestedInput
     quizSchedules?: QuizScheduleUpdateManyWithoutClassGroupNestedInput
     quizSubmissions?: QuizSubmissionUpdateManyWithoutClassGroupNestedInput
+    weeklySchedules?: ClassGroupWeeklyScheduleUpdateManyWithoutClassGroupNestedInput
   }
 
   export type ClassGroupUncheckedUpdateWithoutStudentsInput = {
@@ -54257,6 +56066,7 @@ export namespace Prisma {
     assignmentDates?: AssignmentDateUncheckedUpdateManyWithoutClassGroupNestedInput
     quizSchedules?: QuizScheduleUncheckedUpdateManyWithoutClassGroupNestedInput
     quizSubmissions?: QuizSubmissionUncheckedUpdateManyWithoutClassGroupNestedInput
+    weeklySchedules?: ClassGroupWeeklyScheduleUncheckedUpdateManyWithoutClassGroupNestedInput
   }
 
   export type CourseUpsertWithWhereUniqueWithoutStudentsInput = {
@@ -54450,6 +56260,7 @@ export namespace Prisma {
     assignmentDates?: AssignmentDateCreateNestedManyWithoutClassGroupInput
     quizSchedules?: QuizScheduleCreateNestedManyWithoutClassGroupInput
     quizSubmissions?: QuizSubmissionCreateNestedManyWithoutClassGroupInput
+    weeklySchedules?: ClassGroupWeeklyScheduleCreateNestedManyWithoutClassGroupInput
   }
 
   export type ClassGroupUncheckedCreateWithoutTeacherInput = {
@@ -54467,6 +56278,7 @@ export namespace Prisma {
     assignmentDates?: AssignmentDateUncheckedCreateNestedManyWithoutClassGroupInput
     quizSchedules?: QuizScheduleUncheckedCreateNestedManyWithoutClassGroupInput
     quizSubmissions?: QuizSubmissionUncheckedCreateNestedManyWithoutClassGroupInput
+    weeklySchedules?: ClassGroupWeeklyScheduleUncheckedCreateNestedManyWithoutClassGroupInput
   }
 
   export type ClassGroupCreateOrConnectWithoutTeacherInput = {
@@ -54497,6 +56309,7 @@ export namespace Prisma {
     currentPeriod?: PeriodCreateNestedOneWithoutCoursesInput
     gradeBuckets?: GradeBucketCreateNestedManyWithoutCourseInput
     grades?: GradeCreateNestedManyWithoutCourseInput
+    weeklySchedules?: ClassGroupWeeklyScheduleCreateNestedManyWithoutCourseInput
   }
 
   export type CourseUncheckedCreateWithoutTeacherInput = {
@@ -54517,6 +56330,7 @@ export namespace Prisma {
     quizzes?: QuizUncheckedCreateNestedManyWithoutCourseInput
     gradeBuckets?: GradeBucketUncheckedCreateNestedManyWithoutCourseInput
     grades?: GradeUncheckedCreateNestedManyWithoutCourseInput
+    weeklySchedules?: ClassGroupWeeklyScheduleUncheckedCreateNestedManyWithoutCourseInput
   }
 
   export type CourseCreateOrConnectWithoutTeacherInput = {
@@ -54891,6 +56705,7 @@ export namespace Prisma {
     currentPeriod?: PeriodCreateNestedOneWithoutCoursesInput
     gradeBuckets?: GradeBucketCreateNestedManyWithoutCourseInput
     grades?: GradeCreateNestedManyWithoutCourseInput
+    weeklySchedules?: ClassGroupWeeklyScheduleCreateNestedManyWithoutCourseInput
   }
 
   export type CourseUncheckedCreateWithoutAssignmentsInput = {
@@ -54911,6 +56726,7 @@ export namespace Prisma {
     quizzes?: QuizUncheckedCreateNestedManyWithoutCourseInput
     gradeBuckets?: GradeBucketUncheckedCreateNestedManyWithoutCourseInput
     grades?: GradeUncheckedCreateNestedManyWithoutCourseInput
+    weeklySchedules?: ClassGroupWeeklyScheduleUncheckedCreateNestedManyWithoutCourseInput
   }
 
   export type CourseCreateOrConnectWithoutAssignmentsInput = {
@@ -55085,6 +56901,7 @@ export namespace Prisma {
     currentPeriod?: PeriodUpdateOneWithoutCoursesNestedInput
     gradeBuckets?: GradeBucketUpdateManyWithoutCourseNestedInput
     grades?: GradeUpdateManyWithoutCourseNestedInput
+    weeklySchedules?: ClassGroupWeeklyScheduleUpdateManyWithoutCourseNestedInput
   }
 
   export type CourseUncheckedUpdateWithoutAssignmentsInput = {
@@ -55105,6 +56922,7 @@ export namespace Prisma {
     quizzes?: QuizUncheckedUpdateManyWithoutCourseNestedInput
     gradeBuckets?: GradeBucketUncheckedUpdateManyWithoutCourseNestedInput
     grades?: GradeUncheckedUpdateManyWithoutCourseNestedInput
+    weeklySchedules?: ClassGroupWeeklyScheduleUncheckedUpdateManyWithoutCourseNestedInput
   }
 
   export type AssignmentDateUpsertWithWhereUniqueWithoutAssignmentInput = {
@@ -55232,6 +57050,7 @@ export namespace Prisma {
     teacher?: TeacherCreateNestedOneWithoutClassGroupsInput
     quizSchedules?: QuizScheduleCreateNestedManyWithoutClassGroupInput
     quizSubmissions?: QuizSubmissionCreateNestedManyWithoutClassGroupInput
+    weeklySchedules?: ClassGroupWeeklyScheduleCreateNestedManyWithoutClassGroupInput
   }
 
   export type ClassGroupUncheckedCreateWithoutAssignmentDatesInput = {
@@ -55249,6 +57068,7 @@ export namespace Prisma {
     students?: StudentUncheckedCreateNestedManyWithoutClassGroupInput
     quizSchedules?: QuizScheduleUncheckedCreateNestedManyWithoutClassGroupInput
     quizSubmissions?: QuizSubmissionUncheckedCreateNestedManyWithoutClassGroupInput
+    weeklySchedules?: ClassGroupWeeklyScheduleUncheckedCreateNestedManyWithoutClassGroupInput
   }
 
   export type ClassGroupCreateOrConnectWithoutAssignmentDatesInput = {
@@ -55321,6 +57141,7 @@ export namespace Prisma {
     teacher?: TeacherUpdateOneWithoutClassGroupsNestedInput
     quizSchedules?: QuizScheduleUpdateManyWithoutClassGroupNestedInput
     quizSubmissions?: QuizSubmissionUpdateManyWithoutClassGroupNestedInput
+    weeklySchedules?: ClassGroupWeeklyScheduleUpdateManyWithoutClassGroupNestedInput
   }
 
   export type ClassGroupUncheckedUpdateWithoutAssignmentDatesInput = {
@@ -55338,6 +57159,7 @@ export namespace Prisma {
     students?: StudentUncheckedUpdateManyWithoutClassGroupNestedInput
     quizSchedules?: QuizScheduleUncheckedUpdateManyWithoutClassGroupNestedInput
     quizSubmissions?: QuizSubmissionUncheckedUpdateManyWithoutClassGroupNestedInput
+    weeklySchedules?: ClassGroupWeeklyScheduleUncheckedUpdateManyWithoutClassGroupNestedInput
   }
 
   export type OrganizationCreateWithoutQuizzesInput = {
@@ -55399,6 +57221,7 @@ export namespace Prisma {
     currentPeriod?: PeriodCreateNestedOneWithoutCoursesInput
     gradeBuckets?: GradeBucketCreateNestedManyWithoutCourseInput
     grades?: GradeCreateNestedManyWithoutCourseInput
+    weeklySchedules?: ClassGroupWeeklyScheduleCreateNestedManyWithoutCourseInput
   }
 
   export type CourseUncheckedCreateWithoutQuizzesInput = {
@@ -55419,6 +57242,7 @@ export namespace Prisma {
     assignments?: AssignmentUncheckedCreateNestedManyWithoutCourseInput
     gradeBuckets?: GradeBucketUncheckedCreateNestedManyWithoutCourseInput
     grades?: GradeUncheckedCreateNestedManyWithoutCourseInput
+    weeklySchedules?: ClassGroupWeeklyScheduleUncheckedCreateNestedManyWithoutCourseInput
   }
 
   export type CourseCreateOrConnectWithoutQuizzesInput = {
@@ -55647,6 +57471,7 @@ export namespace Prisma {
     currentPeriod?: PeriodUpdateOneWithoutCoursesNestedInput
     gradeBuckets?: GradeBucketUpdateManyWithoutCourseNestedInput
     grades?: GradeUpdateManyWithoutCourseNestedInput
+    weeklySchedules?: ClassGroupWeeklyScheduleUpdateManyWithoutCourseNestedInput
   }
 
   export type CourseUncheckedUpdateWithoutQuizzesInput = {
@@ -55667,6 +57492,7 @@ export namespace Prisma {
     assignments?: AssignmentUncheckedUpdateManyWithoutCourseNestedInput
     gradeBuckets?: GradeBucketUncheckedUpdateManyWithoutCourseNestedInput
     grades?: GradeUncheckedUpdateManyWithoutCourseNestedInput
+    weeklySchedules?: ClassGroupWeeklyScheduleUncheckedUpdateManyWithoutCourseNestedInput
   }
 
   export type TeacherUpsertWithoutQuizzesInput = {
@@ -56110,6 +57936,7 @@ export namespace Prisma {
     teacher?: TeacherCreateNestedOneWithoutClassGroupsInput
     assignmentDates?: AssignmentDateCreateNestedManyWithoutClassGroupInput
     quizSubmissions?: QuizSubmissionCreateNestedManyWithoutClassGroupInput
+    weeklySchedules?: ClassGroupWeeklyScheduleCreateNestedManyWithoutClassGroupInput
   }
 
   export type ClassGroupUncheckedCreateWithoutQuizSchedulesInput = {
@@ -56127,6 +57954,7 @@ export namespace Prisma {
     students?: StudentUncheckedCreateNestedManyWithoutClassGroupInput
     assignmentDates?: AssignmentDateUncheckedCreateNestedManyWithoutClassGroupInput
     quizSubmissions?: QuizSubmissionUncheckedCreateNestedManyWithoutClassGroupInput
+    weeklySchedules?: ClassGroupWeeklyScheduleUncheckedCreateNestedManyWithoutClassGroupInput
   }
 
   export type ClassGroupCreateOrConnectWithoutQuizSchedulesInput = {
@@ -56197,6 +58025,7 @@ export namespace Prisma {
     teacher?: TeacherUpdateOneWithoutClassGroupsNestedInput
     assignmentDates?: AssignmentDateUpdateManyWithoutClassGroupNestedInput
     quizSubmissions?: QuizSubmissionUpdateManyWithoutClassGroupNestedInput
+    weeklySchedules?: ClassGroupWeeklyScheduleUpdateManyWithoutClassGroupNestedInput
   }
 
   export type ClassGroupUncheckedUpdateWithoutQuizSchedulesInput = {
@@ -56214,6 +58043,195 @@ export namespace Prisma {
     students?: StudentUncheckedUpdateManyWithoutClassGroupNestedInput
     assignmentDates?: AssignmentDateUncheckedUpdateManyWithoutClassGroupNestedInput
     quizSubmissions?: QuizSubmissionUncheckedUpdateManyWithoutClassGroupNestedInput
+    weeklySchedules?: ClassGroupWeeklyScheduleUncheckedUpdateManyWithoutClassGroupNestedInput
+  }
+
+  export type ClassGroupCreateWithoutWeeklySchedulesInput = {
+    id?: string
+    name: string
+    shortName: string
+    active: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    organization: OrganizationCreateNestedOneWithoutGroupsInput
+    school: SchoolCreateNestedOneWithoutClassGroupsInput
+    courses?: CourseCreateNestedManyWithoutGroupsInput
+    studyPlan: StudyPlanCreateNestedOneWithoutClassGroupsInput
+    students?: StudentCreateNestedManyWithoutClassGroupInput
+    teacher?: TeacherCreateNestedOneWithoutClassGroupsInput
+    assignmentDates?: AssignmentDateCreateNestedManyWithoutClassGroupInput
+    quizSchedules?: QuizScheduleCreateNestedManyWithoutClassGroupInput
+    quizSubmissions?: QuizSubmissionCreateNestedManyWithoutClassGroupInput
+  }
+
+  export type ClassGroupUncheckedCreateWithoutWeeklySchedulesInput = {
+    id?: string
+    name: string
+    shortName: string
+    organizationId: string
+    schoolId: string
+    active: boolean
+    teacherId?: string | null
+    studyPlanId: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    courses?: CourseUncheckedCreateNestedManyWithoutGroupsInput
+    students?: StudentUncheckedCreateNestedManyWithoutClassGroupInput
+    assignmentDates?: AssignmentDateUncheckedCreateNestedManyWithoutClassGroupInput
+    quizSchedules?: QuizScheduleUncheckedCreateNestedManyWithoutClassGroupInput
+    quizSubmissions?: QuizSubmissionUncheckedCreateNestedManyWithoutClassGroupInput
+  }
+
+  export type ClassGroupCreateOrConnectWithoutWeeklySchedulesInput = {
+    where: ClassGroupWhereUniqueInput
+    create: XOR<ClassGroupCreateWithoutWeeklySchedulesInput, ClassGroupUncheckedCreateWithoutWeeklySchedulesInput>
+  }
+
+  export type CourseCreateWithoutWeeklySchedulesInput = {
+    id?: string
+    name: string
+    code: string
+    shortName: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    organization: OrganizationCreateNestedOneWithoutCoursesInput
+    school: SchoolCreateNestedOneWithoutCoursesInput
+    subject: SubjectCreateNestedOneWithoutCoursesInput
+    studyPlan: StudyPlanCreateNestedOneWithoutCoursesInput
+    groups?: ClassGroupCreateNestedManyWithoutCoursesInput
+    students?: StudentCreateNestedManyWithoutCoursesInput
+    teacher?: TeacherCreateNestedOneWithoutCoursesInput
+    assignments?: AssignmentCreateNestedManyWithoutCourseInput
+    quizzes?: QuizCreateNestedManyWithoutCourseInput
+    currentPeriod?: PeriodCreateNestedOneWithoutCoursesInput
+    gradeBuckets?: GradeBucketCreateNestedManyWithoutCourseInput
+    grades?: GradeCreateNestedManyWithoutCourseInput
+  }
+
+  export type CourseUncheckedCreateWithoutWeeklySchedulesInput = {
+    id?: string
+    name: string
+    code: string
+    shortName: string
+    organizationId: string
+    schoolId: string
+    subjectId: string
+    studyPlanId: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    teacherId?: string | null
+    currentPeriodId?: string | null
+    groups?: ClassGroupUncheckedCreateNestedManyWithoutCoursesInput
+    students?: StudentUncheckedCreateNestedManyWithoutCoursesInput
+    assignments?: AssignmentUncheckedCreateNestedManyWithoutCourseInput
+    quizzes?: QuizUncheckedCreateNestedManyWithoutCourseInput
+    gradeBuckets?: GradeBucketUncheckedCreateNestedManyWithoutCourseInput
+    grades?: GradeUncheckedCreateNestedManyWithoutCourseInput
+  }
+
+  export type CourseCreateOrConnectWithoutWeeklySchedulesInput = {
+    where: CourseWhereUniqueInput
+    create: XOR<CourseCreateWithoutWeeklySchedulesInput, CourseUncheckedCreateWithoutWeeklySchedulesInput>
+  }
+
+  export type ClassGroupUpsertWithoutWeeklySchedulesInput = {
+    update: XOR<ClassGroupUpdateWithoutWeeklySchedulesInput, ClassGroupUncheckedUpdateWithoutWeeklySchedulesInput>
+    create: XOR<ClassGroupCreateWithoutWeeklySchedulesInput, ClassGroupUncheckedCreateWithoutWeeklySchedulesInput>
+    where?: ClassGroupWhereInput
+  }
+
+  export type ClassGroupUpdateToOneWithWhereWithoutWeeklySchedulesInput = {
+    where?: ClassGroupWhereInput
+    data: XOR<ClassGroupUpdateWithoutWeeklySchedulesInput, ClassGroupUncheckedUpdateWithoutWeeklySchedulesInput>
+  }
+
+  export type ClassGroupUpdateWithoutWeeklySchedulesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    shortName?: StringFieldUpdateOperationsInput | string
+    active?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    organization?: OrganizationUpdateOneRequiredWithoutGroupsNestedInput
+    school?: SchoolUpdateOneRequiredWithoutClassGroupsNestedInput
+    courses?: CourseUpdateManyWithoutGroupsNestedInput
+    studyPlan?: StudyPlanUpdateOneRequiredWithoutClassGroupsNestedInput
+    students?: StudentUpdateManyWithoutClassGroupNestedInput
+    teacher?: TeacherUpdateOneWithoutClassGroupsNestedInput
+    assignmentDates?: AssignmentDateUpdateManyWithoutClassGroupNestedInput
+    quizSchedules?: QuizScheduleUpdateManyWithoutClassGroupNestedInput
+    quizSubmissions?: QuizSubmissionUpdateManyWithoutClassGroupNestedInput
+  }
+
+  export type ClassGroupUncheckedUpdateWithoutWeeklySchedulesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    shortName?: StringFieldUpdateOperationsInput | string
+    organizationId?: StringFieldUpdateOperationsInput | string
+    schoolId?: StringFieldUpdateOperationsInput | string
+    active?: BoolFieldUpdateOperationsInput | boolean
+    teacherId?: NullableStringFieldUpdateOperationsInput | string | null
+    studyPlanId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    courses?: CourseUncheckedUpdateManyWithoutGroupsNestedInput
+    students?: StudentUncheckedUpdateManyWithoutClassGroupNestedInput
+    assignmentDates?: AssignmentDateUncheckedUpdateManyWithoutClassGroupNestedInput
+    quizSchedules?: QuizScheduleUncheckedUpdateManyWithoutClassGroupNestedInput
+    quizSubmissions?: QuizSubmissionUncheckedUpdateManyWithoutClassGroupNestedInput
+  }
+
+  export type CourseUpsertWithoutWeeklySchedulesInput = {
+    update: XOR<CourseUpdateWithoutWeeklySchedulesInput, CourseUncheckedUpdateWithoutWeeklySchedulesInput>
+    create: XOR<CourseCreateWithoutWeeklySchedulesInput, CourseUncheckedCreateWithoutWeeklySchedulesInput>
+    where?: CourseWhereInput
+  }
+
+  export type CourseUpdateToOneWithWhereWithoutWeeklySchedulesInput = {
+    where?: CourseWhereInput
+    data: XOR<CourseUpdateWithoutWeeklySchedulesInput, CourseUncheckedUpdateWithoutWeeklySchedulesInput>
+  }
+
+  export type CourseUpdateWithoutWeeklySchedulesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    code?: StringFieldUpdateOperationsInput | string
+    shortName?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    organization?: OrganizationUpdateOneRequiredWithoutCoursesNestedInput
+    school?: SchoolUpdateOneRequiredWithoutCoursesNestedInput
+    subject?: SubjectUpdateOneRequiredWithoutCoursesNestedInput
+    studyPlan?: StudyPlanUpdateOneRequiredWithoutCoursesNestedInput
+    groups?: ClassGroupUpdateManyWithoutCoursesNestedInput
+    students?: StudentUpdateManyWithoutCoursesNestedInput
+    teacher?: TeacherUpdateOneWithoutCoursesNestedInput
+    assignments?: AssignmentUpdateManyWithoutCourseNestedInput
+    quizzes?: QuizUpdateManyWithoutCourseNestedInput
+    currentPeriod?: PeriodUpdateOneWithoutCoursesNestedInput
+    gradeBuckets?: GradeBucketUpdateManyWithoutCourseNestedInput
+    grades?: GradeUpdateManyWithoutCourseNestedInput
+  }
+
+  export type CourseUncheckedUpdateWithoutWeeklySchedulesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    code?: StringFieldUpdateOperationsInput | string
+    shortName?: StringFieldUpdateOperationsInput | string
+    organizationId?: StringFieldUpdateOperationsInput | string
+    schoolId?: StringFieldUpdateOperationsInput | string
+    subjectId?: StringFieldUpdateOperationsInput | string
+    studyPlanId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    teacherId?: NullableStringFieldUpdateOperationsInput | string | null
+    currentPeriodId?: NullableStringFieldUpdateOperationsInput | string | null
+    groups?: ClassGroupUncheckedUpdateManyWithoutCoursesNestedInput
+    students?: StudentUncheckedUpdateManyWithoutCoursesNestedInput
+    assignments?: AssignmentUncheckedUpdateManyWithoutCourseNestedInput
+    quizzes?: QuizUncheckedUpdateManyWithoutCourseNestedInput
+    gradeBuckets?: GradeBucketUncheckedUpdateManyWithoutCourseNestedInput
+    grades?: GradeUncheckedUpdateManyWithoutCourseNestedInput
   }
 
   export type QuizCreateWithoutQuizSubmissionsInput = {
@@ -56309,6 +58327,7 @@ export namespace Prisma {
     teacher?: TeacherCreateNestedOneWithoutClassGroupsInput
     assignmentDates?: AssignmentDateCreateNestedManyWithoutClassGroupInput
     quizSchedules?: QuizScheduleCreateNestedManyWithoutClassGroupInput
+    weeklySchedules?: ClassGroupWeeklyScheduleCreateNestedManyWithoutClassGroupInput
   }
 
   export type ClassGroupUncheckedCreateWithoutQuizSubmissionsInput = {
@@ -56326,6 +58345,7 @@ export namespace Prisma {
     students?: StudentUncheckedCreateNestedManyWithoutClassGroupInput
     assignmentDates?: AssignmentDateUncheckedCreateNestedManyWithoutClassGroupInput
     quizSchedules?: QuizScheduleUncheckedCreateNestedManyWithoutClassGroupInput
+    weeklySchedules?: ClassGroupWeeklyScheduleUncheckedCreateNestedManyWithoutClassGroupInput
   }
 
   export type ClassGroupCreateOrConnectWithoutQuizSubmissionsInput = {
@@ -56479,6 +58499,7 @@ export namespace Prisma {
     teacher?: TeacherUpdateOneWithoutClassGroupsNestedInput
     assignmentDates?: AssignmentDateUpdateManyWithoutClassGroupNestedInput
     quizSchedules?: QuizScheduleUpdateManyWithoutClassGroupNestedInput
+    weeklySchedules?: ClassGroupWeeklyScheduleUpdateManyWithoutClassGroupNestedInput
   }
 
   export type ClassGroupUncheckedUpdateWithoutQuizSubmissionsInput = {
@@ -56496,6 +58517,7 @@ export namespace Prisma {
     students?: StudentUncheckedUpdateManyWithoutClassGroupNestedInput
     assignmentDates?: AssignmentDateUncheckedUpdateManyWithoutClassGroupNestedInput
     quizSchedules?: QuizScheduleUncheckedUpdateManyWithoutClassGroupNestedInput
+    weeklySchedules?: ClassGroupWeeklyScheduleUncheckedUpdateManyWithoutClassGroupNestedInput
   }
 
   export type QuizSubmissionQuestionUpsertWithWhereUniqueWithoutQuizSubmissionInput = {
@@ -56735,6 +58757,7 @@ export namespace Prisma {
     quizzes?: QuizCreateNestedManyWithoutCourseInput
     currentPeriod?: PeriodCreateNestedOneWithoutCoursesInput
     grades?: GradeCreateNestedManyWithoutCourseInput
+    weeklySchedules?: ClassGroupWeeklyScheduleCreateNestedManyWithoutCourseInput
   }
 
   export type CourseUncheckedCreateWithoutGradeBucketsInput = {
@@ -56755,6 +58778,7 @@ export namespace Prisma {
     assignments?: AssignmentUncheckedCreateNestedManyWithoutCourseInput
     quizzes?: QuizUncheckedCreateNestedManyWithoutCourseInput
     grades?: GradeUncheckedCreateNestedManyWithoutCourseInput
+    weeklySchedules?: ClassGroupWeeklyScheduleUncheckedCreateNestedManyWithoutCourseInput
   }
 
   export type CourseCreateOrConnectWithoutGradeBucketsInput = {
@@ -56827,6 +58851,7 @@ export namespace Prisma {
     quizzes?: QuizUpdateManyWithoutCourseNestedInput
     currentPeriod?: PeriodUpdateOneWithoutCoursesNestedInput
     grades?: GradeUpdateManyWithoutCourseNestedInput
+    weeklySchedules?: ClassGroupWeeklyScheduleUpdateManyWithoutCourseNestedInput
   }
 
   export type CourseUncheckedUpdateWithoutGradeBucketsInput = {
@@ -56847,6 +58872,7 @@ export namespace Prisma {
     assignments?: AssignmentUncheckedUpdateManyWithoutCourseNestedInput
     quizzes?: QuizUncheckedUpdateManyWithoutCourseNestedInput
     grades?: GradeUncheckedUpdateManyWithoutCourseNestedInput
+    weeklySchedules?: ClassGroupWeeklyScheduleUncheckedUpdateManyWithoutCourseNestedInput
   }
 
   export type GradeUpsertWithWhereUniqueWithoutBucketInput = {
@@ -56883,6 +58909,7 @@ export namespace Prisma {
     quizzes?: QuizCreateNestedManyWithoutCourseInput
     currentPeriod?: PeriodCreateNestedOneWithoutCoursesInput
     gradeBuckets?: GradeBucketCreateNestedManyWithoutCourseInput
+    weeklySchedules?: ClassGroupWeeklyScheduleCreateNestedManyWithoutCourseInput
   }
 
   export type CourseUncheckedCreateWithoutGradesInput = {
@@ -56903,6 +58930,7 @@ export namespace Prisma {
     assignments?: AssignmentUncheckedCreateNestedManyWithoutCourseInput
     quizzes?: QuizUncheckedCreateNestedManyWithoutCourseInput
     gradeBuckets?: GradeBucketUncheckedCreateNestedManyWithoutCourseInput
+    weeklySchedules?: ClassGroupWeeklyScheduleUncheckedCreateNestedManyWithoutCourseInput
   }
 
   export type CourseCreateOrConnectWithoutGradesInput = {
@@ -57023,6 +59051,7 @@ export namespace Prisma {
     quizzes?: QuizUpdateManyWithoutCourseNestedInput
     currentPeriod?: PeriodUpdateOneWithoutCoursesNestedInput
     gradeBuckets?: GradeBucketUpdateManyWithoutCourseNestedInput
+    weeklySchedules?: ClassGroupWeeklyScheduleUpdateManyWithoutCourseNestedInput
   }
 
   export type CourseUncheckedUpdateWithoutGradesInput = {
@@ -57043,6 +59072,7 @@ export namespace Prisma {
     assignments?: AssignmentUncheckedUpdateManyWithoutCourseNestedInput
     quizzes?: QuizUncheckedUpdateManyWithoutCourseNestedInput
     gradeBuckets?: GradeBucketUncheckedUpdateManyWithoutCourseNestedInput
+    weeklySchedules?: ClassGroupWeeklyScheduleUncheckedUpdateManyWithoutCourseNestedInput
   }
 
   export type GradeBucketUpsertWithoutGradesInput = {
@@ -57730,6 +59760,7 @@ export namespace Prisma {
     assignmentDates?: AssignmentDateUpdateManyWithoutClassGroupNestedInput
     quizSchedules?: QuizScheduleUpdateManyWithoutClassGroupNestedInput
     quizSubmissions?: QuizSubmissionUpdateManyWithoutClassGroupNestedInput
+    weeklySchedules?: ClassGroupWeeklyScheduleUpdateManyWithoutClassGroupNestedInput
   }
 
   export type ClassGroupUncheckedUpdateWithoutOrganizationInput = {
@@ -57747,6 +59778,7 @@ export namespace Prisma {
     assignmentDates?: AssignmentDateUncheckedUpdateManyWithoutClassGroupNestedInput
     quizSchedules?: QuizScheduleUncheckedUpdateManyWithoutClassGroupNestedInput
     quizSubmissions?: QuizSubmissionUncheckedUpdateManyWithoutClassGroupNestedInput
+    weeklySchedules?: ClassGroupWeeklyScheduleUncheckedUpdateManyWithoutClassGroupNestedInput
   }
 
   export type ClassGroupUncheckedUpdateManyWithoutOrganizationInput = {
@@ -57779,6 +59811,7 @@ export namespace Prisma {
     currentPeriod?: PeriodUpdateOneWithoutCoursesNestedInput
     gradeBuckets?: GradeBucketUpdateManyWithoutCourseNestedInput
     grades?: GradeUpdateManyWithoutCourseNestedInput
+    weeklySchedules?: ClassGroupWeeklyScheduleUpdateManyWithoutCourseNestedInput
   }
 
   export type CourseUncheckedUpdateWithoutOrganizationInput = {
@@ -57799,6 +59832,7 @@ export namespace Prisma {
     quizzes?: QuizUncheckedUpdateManyWithoutCourseNestedInput
     gradeBuckets?: GradeBucketUncheckedUpdateManyWithoutCourseNestedInput
     grades?: GradeUncheckedUpdateManyWithoutCourseNestedInput
+    weeklySchedules?: ClassGroupWeeklyScheduleUncheckedUpdateManyWithoutCourseNestedInput
   }
 
   export type CourseUncheckedUpdateManyWithoutOrganizationInput = {
@@ -58420,6 +60454,7 @@ export namespace Prisma {
     currentPeriod?: PeriodUpdateOneWithoutCoursesNestedInput
     gradeBuckets?: GradeBucketUpdateManyWithoutCourseNestedInput
     grades?: GradeUpdateManyWithoutCourseNestedInput
+    weeklySchedules?: ClassGroupWeeklyScheduleUpdateManyWithoutCourseNestedInput
   }
 
   export type CourseUncheckedUpdateWithoutSchoolInput = {
@@ -58440,6 +60475,7 @@ export namespace Prisma {
     quizzes?: QuizUncheckedUpdateManyWithoutCourseNestedInput
     gradeBuckets?: GradeBucketUncheckedUpdateManyWithoutCourseNestedInput
     grades?: GradeUncheckedUpdateManyWithoutCourseNestedInput
+    weeklySchedules?: ClassGroupWeeklyScheduleUncheckedUpdateManyWithoutCourseNestedInput
   }
 
   export type CourseUncheckedUpdateManyWithoutSchoolInput = {
@@ -58471,6 +60507,7 @@ export namespace Prisma {
     assignmentDates?: AssignmentDateUpdateManyWithoutClassGroupNestedInput
     quizSchedules?: QuizScheduleUpdateManyWithoutClassGroupNestedInput
     quizSubmissions?: QuizSubmissionUpdateManyWithoutClassGroupNestedInput
+    weeklySchedules?: ClassGroupWeeklyScheduleUpdateManyWithoutClassGroupNestedInput
   }
 
   export type ClassGroupUncheckedUpdateWithoutSchoolInput = {
@@ -58488,6 +60525,7 @@ export namespace Prisma {
     assignmentDates?: AssignmentDateUncheckedUpdateManyWithoutClassGroupNestedInput
     quizSchedules?: QuizScheduleUncheckedUpdateManyWithoutClassGroupNestedInput
     quizSubmissions?: QuizSubmissionUncheckedUpdateManyWithoutClassGroupNestedInput
+    weeklySchedules?: ClassGroupWeeklyScheduleUncheckedUpdateManyWithoutClassGroupNestedInput
   }
 
   export type ClassGroupUncheckedUpdateManyWithoutSchoolInput = {
@@ -58684,6 +60722,7 @@ export namespace Prisma {
     quizzes?: QuizUpdateManyWithoutCourseNestedInput
     gradeBuckets?: GradeBucketUpdateManyWithoutCourseNestedInput
     grades?: GradeUpdateManyWithoutCourseNestedInput
+    weeklySchedules?: ClassGroupWeeklyScheduleUpdateManyWithoutCourseNestedInput
   }
 
   export type CourseUncheckedUpdateWithoutCurrentPeriodInput = {
@@ -58704,6 +60743,7 @@ export namespace Prisma {
     quizzes?: QuizUncheckedUpdateManyWithoutCourseNestedInput
     gradeBuckets?: GradeBucketUncheckedUpdateManyWithoutCourseNestedInput
     grades?: GradeUncheckedUpdateManyWithoutCourseNestedInput
+    weeklySchedules?: ClassGroupWeeklyScheduleUncheckedUpdateManyWithoutCourseNestedInput
   }
 
   export type CourseUncheckedUpdateManyWithoutCurrentPeriodInput = {
@@ -58790,6 +60830,7 @@ export namespace Prisma {
     currentPeriod?: PeriodUpdateOneWithoutCoursesNestedInput
     gradeBuckets?: GradeBucketUpdateManyWithoutCourseNestedInput
     grades?: GradeUpdateManyWithoutCourseNestedInput
+    weeklySchedules?: ClassGroupWeeklyScheduleUpdateManyWithoutCourseNestedInput
   }
 
   export type CourseUncheckedUpdateWithoutSubjectInput = {
@@ -58810,6 +60851,7 @@ export namespace Prisma {
     quizzes?: QuizUncheckedUpdateManyWithoutCourseNestedInput
     gradeBuckets?: GradeBucketUncheckedUpdateManyWithoutCourseNestedInput
     grades?: GradeUncheckedUpdateManyWithoutCourseNestedInput
+    weeklySchedules?: ClassGroupWeeklyScheduleUncheckedUpdateManyWithoutCourseNestedInput
   }
 
   export type CourseUncheckedUpdateManyWithoutSubjectInput = {
@@ -58997,6 +61039,7 @@ export namespace Prisma {
     currentPeriod?: PeriodUpdateOneWithoutCoursesNestedInput
     gradeBuckets?: GradeBucketUpdateManyWithoutCourseNestedInput
     grades?: GradeUpdateManyWithoutCourseNestedInput
+    weeklySchedules?: ClassGroupWeeklyScheduleUpdateManyWithoutCourseNestedInput
   }
 
   export type CourseUncheckedUpdateWithoutStudyPlanInput = {
@@ -59017,6 +61060,7 @@ export namespace Prisma {
     quizzes?: QuizUncheckedUpdateManyWithoutCourseNestedInput
     gradeBuckets?: GradeBucketUncheckedUpdateManyWithoutCourseNestedInput
     grades?: GradeUncheckedUpdateManyWithoutCourseNestedInput
+    weeklySchedules?: ClassGroupWeeklyScheduleUncheckedUpdateManyWithoutCourseNestedInput
   }
 
   export type CourseUncheckedUpdateManyWithoutStudyPlanInput = {
@@ -59048,6 +61092,7 @@ export namespace Prisma {
     assignmentDates?: AssignmentDateUpdateManyWithoutClassGroupNestedInput
     quizSchedules?: QuizScheduleUpdateManyWithoutClassGroupNestedInput
     quizSubmissions?: QuizSubmissionUpdateManyWithoutClassGroupNestedInput
+    weeklySchedules?: ClassGroupWeeklyScheduleUpdateManyWithoutClassGroupNestedInput
   }
 
   export type ClassGroupUncheckedUpdateWithoutStudyPlanInput = {
@@ -59065,6 +61110,7 @@ export namespace Prisma {
     assignmentDates?: AssignmentDateUncheckedUpdateManyWithoutClassGroupNestedInput
     quizSchedules?: QuizScheduleUncheckedUpdateManyWithoutClassGroupNestedInput
     quizSubmissions?: QuizSubmissionUncheckedUpdateManyWithoutClassGroupNestedInput
+    weeklySchedules?: ClassGroupWeeklyScheduleUncheckedUpdateManyWithoutClassGroupNestedInput
   }
 
   export type ClassGroupUncheckedUpdateManyWithoutStudyPlanInput = {
@@ -59122,6 +61168,16 @@ export namespace Prisma {
     updatedAt?: Date | string
   }
 
+  export type ClassGroupWeeklyScheduleCreateManyCourseInput = {
+    id?: string
+    classGroupId: string
+    weekday: $Enums.WeekDay
+    startTime: string
+    endTime: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
   export type ClassGroupUpdateWithoutCoursesInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
@@ -59137,6 +61193,7 @@ export namespace Prisma {
     assignmentDates?: AssignmentDateUpdateManyWithoutClassGroupNestedInput
     quizSchedules?: QuizScheduleUpdateManyWithoutClassGroupNestedInput
     quizSubmissions?: QuizSubmissionUpdateManyWithoutClassGroupNestedInput
+    weeklySchedules?: ClassGroupWeeklyScheduleUpdateManyWithoutClassGroupNestedInput
   }
 
   export type ClassGroupUncheckedUpdateWithoutCoursesInput = {
@@ -59154,6 +61211,7 @@ export namespace Prisma {
     assignmentDates?: AssignmentDateUncheckedUpdateManyWithoutClassGroupNestedInput
     quizSchedules?: QuizScheduleUncheckedUpdateManyWithoutClassGroupNestedInput
     quizSubmissions?: QuizSubmissionUncheckedUpdateManyWithoutClassGroupNestedInput
+    weeklySchedules?: ClassGroupWeeklyScheduleUncheckedUpdateManyWithoutClassGroupNestedInput
   }
 
   export type ClassGroupUncheckedUpdateManyWithoutCoursesInput = {
@@ -59371,6 +61429,36 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type ClassGroupWeeklyScheduleUpdateWithoutCourseInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    weekday?: EnumWeekDayFieldUpdateOperationsInput | $Enums.WeekDay
+    startTime?: StringFieldUpdateOperationsInput | string
+    endTime?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    classGroup?: ClassGroupUpdateOneRequiredWithoutWeeklySchedulesNestedInput
+  }
+
+  export type ClassGroupWeeklyScheduleUncheckedUpdateWithoutCourseInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    classGroupId?: StringFieldUpdateOperationsInput | string
+    weekday?: EnumWeekDayFieldUpdateOperationsInput | $Enums.WeekDay
+    startTime?: StringFieldUpdateOperationsInput | string
+    endTime?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ClassGroupWeeklyScheduleUncheckedUpdateManyWithoutCourseInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    classGroupId?: StringFieldUpdateOperationsInput | string
+    weekday?: EnumWeekDayFieldUpdateOperationsInput | $Enums.WeekDay
+    startTime?: StringFieldUpdateOperationsInput | string
+    endTime?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type StudentCreateManyClassGroupInput = {
     id?: string
     firstName: string
@@ -59414,6 +61502,16 @@ export namespace Prisma {
     updatedAt?: Date | string
   }
 
+  export type ClassGroupWeeklyScheduleCreateManyClassGroupInput = {
+    id?: string
+    courseId: string
+    weekday: $Enums.WeekDay
+    startTime: string
+    endTime: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
   export type CourseUpdateWithoutGroupsInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
@@ -59432,6 +61530,7 @@ export namespace Prisma {
     currentPeriod?: PeriodUpdateOneWithoutCoursesNestedInput
     gradeBuckets?: GradeBucketUpdateManyWithoutCourseNestedInput
     grades?: GradeUpdateManyWithoutCourseNestedInput
+    weeklySchedules?: ClassGroupWeeklyScheduleUpdateManyWithoutCourseNestedInput
   }
 
   export type CourseUncheckedUpdateWithoutGroupsInput = {
@@ -59452,6 +61551,7 @@ export namespace Prisma {
     quizzes?: QuizUncheckedUpdateManyWithoutCourseNestedInput
     gradeBuckets?: GradeBucketUncheckedUpdateManyWithoutCourseNestedInput
     grades?: GradeUncheckedUpdateManyWithoutCourseNestedInput
+    weeklySchedules?: ClassGroupWeeklyScheduleUncheckedUpdateManyWithoutCourseNestedInput
   }
 
   export type CourseUncheckedUpdateManyWithoutGroupsInput = {
@@ -59606,6 +61706,36 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type ClassGroupWeeklyScheduleUpdateWithoutClassGroupInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    weekday?: EnumWeekDayFieldUpdateOperationsInput | $Enums.WeekDay
+    startTime?: StringFieldUpdateOperationsInput | string
+    endTime?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    course?: CourseUpdateOneRequiredWithoutWeeklySchedulesNestedInput
+  }
+
+  export type ClassGroupWeeklyScheduleUncheckedUpdateWithoutClassGroupInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    courseId?: StringFieldUpdateOperationsInput | string
+    weekday?: EnumWeekDayFieldUpdateOperationsInput | $Enums.WeekDay
+    startTime?: StringFieldUpdateOperationsInput | string
+    endTime?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ClassGroupWeeklyScheduleUncheckedUpdateManyWithoutClassGroupInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    courseId?: StringFieldUpdateOperationsInput | string
+    weekday?: EnumWeekDayFieldUpdateOperationsInput | $Enums.WeekDay
+    startTime?: StringFieldUpdateOperationsInput | string
+    endTime?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type QuizSubmissionCreateManyStudentInput = {
     id?: string
     quizId: string
@@ -59642,6 +61772,7 @@ export namespace Prisma {
     currentPeriod?: PeriodUpdateOneWithoutCoursesNestedInput
     gradeBuckets?: GradeBucketUpdateManyWithoutCourseNestedInput
     grades?: GradeUpdateManyWithoutCourseNestedInput
+    weeklySchedules?: ClassGroupWeeklyScheduleUpdateManyWithoutCourseNestedInput
   }
 
   export type CourseUncheckedUpdateWithoutStudentsInput = {
@@ -59662,6 +61793,7 @@ export namespace Prisma {
     quizzes?: QuizUncheckedUpdateManyWithoutCourseNestedInput
     gradeBuckets?: GradeBucketUncheckedUpdateManyWithoutCourseNestedInput
     grades?: GradeUncheckedUpdateManyWithoutCourseNestedInput
+    weeklySchedules?: ClassGroupWeeklyScheduleUncheckedUpdateManyWithoutCourseNestedInput
   }
 
   export type CourseUncheckedUpdateManyWithoutStudentsInput = {
@@ -59833,6 +61965,7 @@ export namespace Prisma {
     assignmentDates?: AssignmentDateUpdateManyWithoutClassGroupNestedInput
     quizSchedules?: QuizScheduleUpdateManyWithoutClassGroupNestedInput
     quizSubmissions?: QuizSubmissionUpdateManyWithoutClassGroupNestedInput
+    weeklySchedules?: ClassGroupWeeklyScheduleUpdateManyWithoutClassGroupNestedInput
   }
 
   export type ClassGroupUncheckedUpdateWithoutTeacherInput = {
@@ -59850,6 +61983,7 @@ export namespace Prisma {
     assignmentDates?: AssignmentDateUncheckedUpdateManyWithoutClassGroupNestedInput
     quizSchedules?: QuizScheduleUncheckedUpdateManyWithoutClassGroupNestedInput
     quizSubmissions?: QuizSubmissionUncheckedUpdateManyWithoutClassGroupNestedInput
+    weeklySchedules?: ClassGroupWeeklyScheduleUncheckedUpdateManyWithoutClassGroupNestedInput
   }
 
   export type ClassGroupUncheckedUpdateManyWithoutTeacherInput = {
@@ -59882,6 +62016,7 @@ export namespace Prisma {
     currentPeriod?: PeriodUpdateOneWithoutCoursesNestedInput
     gradeBuckets?: GradeBucketUpdateManyWithoutCourseNestedInput
     grades?: GradeUpdateManyWithoutCourseNestedInput
+    weeklySchedules?: ClassGroupWeeklyScheduleUpdateManyWithoutCourseNestedInput
   }
 
   export type CourseUncheckedUpdateWithoutTeacherInput = {
@@ -59902,6 +62037,7 @@ export namespace Prisma {
     quizzes?: QuizUncheckedUpdateManyWithoutCourseNestedInput
     gradeBuckets?: GradeBucketUncheckedUpdateManyWithoutCourseNestedInput
     grades?: GradeUncheckedUpdateManyWithoutCourseNestedInput
+    weeklySchedules?: ClassGroupWeeklyScheduleUncheckedUpdateManyWithoutCourseNestedInput
   }
 
   export type CourseUncheckedUpdateManyWithoutTeacherInput = {

@@ -20,10 +20,10 @@ import GradesForm from './grades-form';
 
 export type StudentType = {
   id: string;
-  firstName: string;
-  fatherName: string;
+  name: string;
+  initials: string;
+  color: string;
   averageScore: number;
-  user: { id: string; email: string };
   classGroup: { id: string; name: string };
 };
 
@@ -66,7 +66,22 @@ export type StudentType = {
         <tbody>
           @for(student of groupedGrades(); track student.id) {
           <tr>
-            <td>{{ student.firstName }} {{ student.fatherName }}</td>
+            <td>
+              <a
+                [routerLink]="['/students', student.id]"
+                class="flex items-center gap-2 cursor-pointer"
+              >
+                <div class="avatar avatar-placeholder">
+                  <div
+                    class="text-white w-7 rounded-full"
+                    [style.background]="student.color"
+                  >
+                    <span class="text-xs">{{ student.initials }}</span>
+                  </div>
+                </div>
+                {{ student.name }}
+              </a>
+            </td>
             @for(grade of student.grades; track grade.id) {
             <td
               class="text-center w-[2rem] min-w-[2rem] max-w-[2rem]"
@@ -182,16 +197,13 @@ export default class CourseGrades {
             query StudentsByCourseId($courseId: String!, $periodId: String!) {
               studentsByCourseId(courseId: $courseId) {
                 id
-                firstName
-                fatherName
+                name
+                initials
+                color
                 averageScore: averageScoreForStudent(
                   courseId: $courseId
                   periodId: $periodId
                 )
-                user {
-                  id
-                  email
-                }
                 classGroup {
                   id
                   name

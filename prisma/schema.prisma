@@ -195,30 +195,31 @@ model StudyPlan {
 }
 
 model Course {
-  id              String        @id @default(cuid())
+  id              String                    @id @default(cuid())
   name            String
   code            String
   shortName       String
   organizationId  String
-  organization    Organization  @relation(fields: [organizationId], references: [id])
+  organization    Organization              @relation(fields: [organizationId], references: [id])
   schoolId        String
-  school          School        @relation(fields: [schoolId], references: [id])
+  school          School                    @relation(fields: [schoolId], references: [id])
   subjectId       String
-  subject         Subject       @relation(fields: [subjectId], references: [id])
+  subject         Subject                   @relation(fields: [subjectId], references: [id])
   studyPlanId     String
-  studyPlan       StudyPlan     @relation(fields: [studyPlanId], references: [id])
-  createdAt       DateTime      @default(now())
-  updatedAt       DateTime      @updatedAt
+  studyPlan       StudyPlan                 @relation(fields: [studyPlanId], references: [id])
+  createdAt       DateTime                  @default(now())
+  updatedAt       DateTime                  @updatedAt
   groups          ClassGroup[]
   students        Student[]
-  teacher         Teacher?      @relation(fields: [teacherId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  teacher         Teacher?                  @relation(fields: [teacherId], references: [id], onDelete: SetNull, onUpdate: Cascade)
   teacherId       String?
   assignments     Assignment[]
   quizzes         Quiz[]
-  currentPeriod   Period?       @relation(fields: [currentPeriodId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  currentPeriod   Period?                   @relation(fields: [currentPeriodId], references: [id], onDelete: SetNull, onUpdate: Cascade)
   currentPeriodId String?
   gradeBuckets    GradeBucket[]
   grades          Grade[]
+  weeklySchedules ClassGroupWeeklySchedule[]
 
   @@unique([schoolId, name])
   @@unique([schoolId, code])
@@ -226,25 +227,26 @@ model Course {
 }
 
 model ClassGroup {
-  id              String           @id @default(cuid())
+  id              String                    @id @default(cuid())
   name            String
   shortName       String
   organizationId  String
-  organization    Organization     @relation(fields: [organizationId], references: [id])
+  organization    Organization              @relation(fields: [organizationId], references: [id])
   schoolId        String
-  school          School           @relation(fields: [schoolId], references: [id])
+  school          School                    @relation(fields: [schoolId], references: [id])
   courses         Course[]
-  studyPlan       StudyPlan        @relation(fields: [studyPlanId], references: [id])
+  studyPlan       StudyPlan                 @relation(fields: [studyPlanId], references: [id])
   active          Boolean
   students        Student[]
-  teacher         Teacher?         @relation(fields: [teacherId], references: [id])
+  teacher         Teacher?                   @relation(fields: [teacherId], references: [id])
   teacherId       String?
   studyPlanId     String
   assignmentDates AssignmentDate[]
   quizSchedules   QuizSchedule[]
   quizSubmissions QuizSubmission[]
-  createdAt       DateTime         @default(now())
-  updatedAt       DateTime         @updatedAt
+  weeklySchedules ClassGroupWeeklySchedule[]
+  createdAt       DateTime                  @default(now())
+  updatedAt       DateTime                  @updatedAt
 }
 
 model Student {
@@ -272,6 +274,7 @@ model Student {
   quizSubmissions QuizSubmission[]
   gradeStudents   GradeStudent[]
 }
+
 
 model Teacher {
   id             String       @id @default(cuid())
@@ -377,6 +380,21 @@ model QuizSchedule {
   published    Boolean
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @updatedAt
+}
+
+model ClassGroupWeeklySchedule {
+  id           String     @id @default(cuid())
+  classGroup   ClassGroup @relation(fields: [classGroupId], references: [id], onDelete: Cascade)
+  classGroupId String
+  course       Course     @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  courseId     String
+  weekday      WeekDay
+  startTime    String     // Format: "HH:mm" (e.g., "09:00", "14:30")
+  endTime      String     // Format: "HH:mm" (e.g., "10:30", "16:00")
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  @@unique([classGroupId, courseId, weekday, startTime])
 }
 
 model QuizSubmission {
@@ -489,4 +507,14 @@ enum QuizQuestionType {
   MULTIPLE_CHOICE
   TRUE_FALSE
   MATCH
+}
+
+enum WeekDay {
+  MONDAY
+  TUESDAY
+  WEDNESDAY
+  THURSDAY
+  FRIDAY
+  SATURDAY
+  SUNDAY
 }

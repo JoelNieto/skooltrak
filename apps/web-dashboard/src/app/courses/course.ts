@@ -78,10 +78,10 @@ type CourseType = Prisma.CourseGetPayload<{
           <div class="flex justify-between items-center w-full">
             <div>
               <h2 class="card-title text-xl">{{ course.name }}</h2>
-              <div class="flex items-center gap-1">
+              <div class="flex items-center gap-1 text-sm">
                 <div class="avatar avatar-placeholder">
                   <div
-                    class="text-white w-6 rounded-full"
+                    class="text-white w-7 rounded-full"
                     [style.background]="course.teacher?.color"
                   >
                     <span class="text-xs">{{ course?.teacher?.initials }}</span>

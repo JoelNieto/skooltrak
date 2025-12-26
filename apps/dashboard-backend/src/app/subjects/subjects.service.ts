@@ -13,8 +13,13 @@ export class SubjectsService {
   ) {}
 
   create(createSubjectInput: CreateSubjectInput) {
+    const { req } = this.context;
+    const { organizationId } = req.user as any;
     return this.prisma.subject.create({
-      data: createSubjectInput,
+      data: {
+        ...createSubjectInput,
+        organizationId,
+      },
       include: { organization: true },
     });
   }

@@ -1,4 +1,5 @@
 import { Loader } from '@/ui';
+import { Tab, TabContent, TabList, TabPanel, Tabs } from '@angular/aria/tabs';
 import { DatePipe } from '@angular/common';
 import { Component, inject, input } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
@@ -6,6 +7,7 @@ import { RouterLink } from '@angular/router';
 import { Prisma } from '@generated/prisma';
 import { Apollo, gql } from 'apollo-angular';
 import { map } from 'rxjs';
+
 type StudentType = Prisma.StudentGetPayload<{
   include: { classGroup: true; courses: true };
 }> & {
@@ -18,7 +20,16 @@ type StudentType = Prisma.StudentGetPayload<{
 
 @Component({
   selector: 'app-student',
-  imports: [RouterLink, Loader, DatePipe],
+  imports: [
+    RouterLink,
+    Loader,
+    DatePipe,
+    TabList,
+    Tab,
+    Tabs,
+    TabPanel,
+    TabContent,
+  ],
   template: `
     @if (studentResource.isLoading()) {
     <lib-loader />
@@ -55,88 +66,116 @@ type StudentType = Prisma.StudentGetPayload<{
         </div>
       </div>
     </div>
-    <div class="tabs tabs-box mt-4">
-      <input
-        class="tab"
-        type="radio"
-        name="messages_tabs"
-        aria-label="Informacion"
-        checked="checked"
-      />
 
-      <div class="tab-content bg-base-100 border-base-300 p-4">
-        <div>
-          <div class="px-4 sm:px-0">
-            <h3 class="text-base/7 font-semibold">Informacion</h3>
-            <p class="mt-1 max-w-2xl text-sm/6 text-base-content/60">
-              Detalles personales y de contacto
-            </p>
-          </div>
-          <div class="mt-6 border-t border-gray-100">
-            <dl class="divide-y divide-gray-100">
-              <div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
-                <dt class="text-sm/6 font-medium text-base-content">
-                  Nombre completo
-                </dt>
-                <dd
-                  class="mt-1 text-sm/6 text-base-content/90 sm:col-span-2 sm:mt-0"
-                >
-                  {{ student.fullName }}
-                </dd>
+    <div ngTabs>
+      <div
+        ngTabList
+        selectionMode="follow"
+        selectedTab="info"
+        class="tabs tabs-box mt-4"
+      >
+        <div ngTab value="info" class="tab">Informacion Personal</div>
+        <div ngTab value="courses" class="tab">Cursos</div>
+      </div>
+      <div class="p-1">
+        <div ngTabPanel value="info">
+          <ng-template ngTabContent>
+            <div class="bg-base-100 border-base-300 p-4 rounded-lg">
+              <div class="px-4 sm:px-0">
+                <h3 class="text-base/7 font-semibold">Informacion</h3>
+                <p class="mt-1 max-w-2xl text-sm/6 text-base-content/60">
+                  Detalles personales y de contacto
+                </p>
               </div>
-              <div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
-                <dt class="text-sm/6 font-medium text-base-content">
-                  Documento de identidad
-                </dt>
-                <dd
-                  class="mt-1 text-sm/6 text-base-content/90 sm:col-span-2 sm:mt-0"
-                >
-                  {{ student.documentId }}
-                </dd>
+              <div class="mt-6 border-t border-gray-100">
+                <dl class="divide-y divide-gray-100">
+                  <div
+                    class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0"
+                  >
+                    <dt class="text-sm/6 font-medium text-base-content">
+                      Nombre completo
+                    </dt>
+                    <dd
+                      class="mt-1 text-sm/6 text-base-content/90 sm:col-span-2 sm:mt-0"
+                    >
+                      {{ student.fullName }}
+                    </dd>
+                  </div>
+                  <div
+                    class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0"
+                  >
+                    <dt class="text-sm/6 font-medium text-base-content">
+                      Documento de identidad
+                    </dt>
+                    <dd
+                      class="mt-1 text-sm/6 text-base-content/90 sm:col-span-2 sm:mt-0"
+                    >
+                      {{ student.documentId }}
+                    </dd>
+                  </div>
+                  <div
+                    class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0"
+                  >
+                    <dt class="text-sm/6 font-medium text-base-content">
+                      Grupo
+                    </dt>
+                    <dd
+                      class="mt-1 text-sm/6 text-base-content/90 sm:col-span-2 sm:mt-0"
+                    >
+                      <a
+                        [routerLink]="['/groups', student.classGroup.id]"
+                        class="badge badge-soft badge-primary cursor-pointer"
+                      >
+                        <span class="text-sm">{{
+                          student.classGroup.name
+                        }}</span>
+                      </a>
+                    </dd>
+                  </div>
+                  <div
+                    class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0"
+                  >
+                    <dt class="text-sm/6 font-medium text-base-content">
+                      Fecha de nacimiento
+                    </dt>
+                    <dd
+                      class="mt-1 text-sm/6 text-base-content/90 sm:col-span-2 sm:mt-0"
+                    >
+                      {{ student.birthDate | date : 'dd/MM/yyyy' }}
+                    </dd>
+                  </div>
+                  <div
+                    class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0"
+                  >
+                    <dt class="text-sm/6 font-medium text-base-content">
+                      Dirección
+                    </dt>
+                    <dd
+                      class="mt-1 text-sm/6 text-base-content/90 sm:col-span-2 sm:mt-0"
+                    >
+                      {{ student.address }}
+                    </dd>
+                  </div>
+                  <div
+                    class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0"
+                  >
+                    <dt class="text-sm/6 font-medium text-base-content">
+                      Teléfono
+                    </dt>
+                    <dd
+                      class="mt-1 text-sm/6 text-base-content/90 sm:col-span-2 sm:mt-0"
+                    >
+                      {{ student.phone }}
+                    </dd>
+                  </div>
+                </dl>
               </div>
-              <div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
-                <dt class="text-sm/6 font-medium text-base-content">Grupo</dt>
-                <dd
-                  class="mt-1 text-sm/6 text-base-content/90 sm:col-span-2 sm:mt-0"
-                >
-                  {{ student.classGroup.name }}
-                </dd>
-              </div>
-              <div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
-                <dt class="text-sm/6 font-medium text-base-content">
-                  Fecha de nacimiento
-                </dt>
-                <dd
-                  class="mt-1 text-sm/6 text-base-content/90 sm:col-span-2 sm:mt-0"
-                >
-                  {{ student.birthDate | date : 'dd/MM/yyyy' }}
-                </dd>
-              </div>
-              <div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
-                <dt class="text-sm/6 font-medium text-base-content">
-                  Dirección
-                </dt>
-                <dd
-                  class="mt-1 text-sm/6 text-base-content/90 sm:col-span-2 sm:mt-0"
-                >
-                  {{ student.address }}
-                </dd>
-              </div>
-              <div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
-                <dt class="text-sm/6 font-medium text-base-content">
-                  Teléfono
-                </dt>
-                <dd
-                  class="mt-1 text-sm/6 text-base-content/90 sm:col-span-2 sm:mt-0"
-                >
-                  {{ student.phone }}
-                </dd>
-              </div>
-            </dl>
-          </div>
+            </div>
+          </ng-template>
         </div>
       </div>
     </div>
+
     } }
   `,
 })
@@ -161,6 +200,7 @@ export default class Student {
                 fullName
                 name
                 classGroup {
+                  id
                   name
                 }
                 courses {

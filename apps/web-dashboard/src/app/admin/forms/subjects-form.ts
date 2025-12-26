@@ -1,30 +1,27 @@
-import { markGroupDirty, Toast } from '@/ui';
+import { Toast } from '@/ui';
 import {
   afterRenderEffect,
   Component,
   inject,
   input,
   output,
+  signal,
 } from '@angular/core';
-import {
-  NonNullableFormBuilder,
-  ReactiveFormsModule,
-  Validators,
-} from '@angular/forms';
+import { Field, form, required } from '@angular/forms/signals';
 import { Prisma } from '@generated/prisma';
 import { Apollo, gql } from 'apollo-angular';
-import Store from '../../core/store';
+
 @Component({
   selector: 'app-subjects-form',
-  imports: [ReactiveFormsModule],
-  template: `<form [formGroup]="form" (ngSubmit)="onSubmit()">
+  imports: [Field],
+  template: `<form (submit)="onSubmit($event)">
     <div class="flex flex-col gap-2">
       <div class="fieldset">
         <label for="name">Nombre</label>
         <input
           type="text"
           id="name"
-          formControlName="name"
+          [field]="form.name"
           class="input input-primary"
         />
       </div>
@@ -33,7 +30,7 @@ import Store from '../../core/store';
         <input
           type="text"
           id="shortName"
-          formControlName="shortName"
+          [field]="form.shortName"
           class="input input-primary"
         />
       </div>
@@ -42,7 +39,7 @@ import Store from '../../core/store';
         <input
           type="text"
           id="code"
-          formControlName="code"
+          [field]="form.code"
           class="input input-primary"
         />
       </div>
@@ -59,34 +56,41 @@ export default class SubjectsForm {
   public closeModal = output<void>();
   public data = input<{ subject?: Prisma.SubjectGetPayload<false> }>();
   private toast = inject(Toast);
-  private store = inject(Store);
   private apollo = inject(Apollo);
-  private fb = inject(NonNullableFormBuilder);
-  public form = this.fb.group({
-    name: ['', [Validators.required]],
-    shortName: ['', [Validators.required]],
-    code: ['', [Validators.required]],
+  #subject = signal<Omit<Prisma.SubjectUncheckedCreateInput, 'organizationId'>>(
+    {
+      name: '',
+      shortName: '',
+      code: '',
+    }
+  );
+  public form = form(this.#subject, (schemaPath) => {
+    required(schemaPath.name, { message: 'Nombre es requerido' });
+    required(schemaPath.shortName, { message: 'Nombre corto es requerido' });
   });
 
   constructor() {
     afterRenderEffect(() => {
-      if (this.data()?.subject) {
-        this.form.patchValue(this.data()!.subject!);
+      const subject = this.data()?.subject;
+      if (subject) {
+        this.#subject.set({
+          name: subject.name,
+          shortName: subject.shortName,
+          code: subject.code,
+        });
       }
     });
   }
 
-  onSubmit(): void {
-    if (this.form.invalid) {
+  onSubmit(event: Event): void {
+    event.preventDefault();
+    if (this.form().invalid()) {
       this.toast.showError('Datos inválidos');
-      markGroupDirty(this.form);
+      this.form().markAsDirty();
       return;
     }
 
-    const subject = {
-      ...this.form.getRawValue(),
-      organizationId: this.store.currentOrganizationId(),
-    };
+    const subject = this.form().value();
 
     if (this.data()?.subject) {
       this.apollo

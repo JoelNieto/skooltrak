@@ -298,6 +298,32 @@ input CreateGradeStudentInput {
   studentId: String!
 }
 
+input CreateGroupsScheduleInput {
+  """Class group ID"""
+  classGroupId: String!
+
+  """Course ID"""
+  courseId: String!
+
+  """End time"""
+  endTime: String!
+
+  """Location"""
+  location: String!
+
+  """Remote"""
+  remote: Boolean!
+
+  """Remote link"""
+  remoteLink: String!
+
+  """Start time"""
+  startTime: String!
+
+  """Week day"""
+  weekday: String!
+}
+
 input CreateMessageInput {
   """The content of the message."""
   content: String!
@@ -520,7 +546,7 @@ input CreateTeacherInput {
   address: String = ""
 
   """Birth date of the teacher"""
-  birthDate: DateTime = "2025-12-26T19:15:45.433Z"
+  birthDate: DateTime = "2025-12-26T20:38:19.271Z"
 
   """Document ID of the teacher"""
   documentId: String!
@@ -719,6 +745,38 @@ type GradeStudent {
   updatedAt: DateTime!
 }
 
+type GroupsSchedule {
+  """Class group of the groups schedule"""
+  classGroup: ClassGroup!
+
+  """Class group ID of the groups schedule"""
+  classGroupId: String!
+
+  """Course of the groups schedule"""
+  course: Course!
+
+  """Course ID of the groups schedule"""
+  courseId: String!
+
+  """Created at of the groups schedule"""
+  createdAt: DateTime!
+
+  """End time of the groups schedule"""
+  endTime: String!
+
+  """ID of the groups schedule"""
+  id: String!
+
+  """Start time of the groups schedule"""
+  startTime: String!
+
+  """Updated at of the groups schedule"""
+  updatedAt: DateTime!
+
+  """Week day of the groups schedule"""
+  weekday: String!
+}
+
 type Message {
   """The content of the message."""
   content: String!
@@ -788,6 +846,7 @@ type Mutation {
   createGrade(createGradeInput: CreateGradeInput!): Grade!
   createGradeBucket(createGradeBucketInput: CreateGradeBucketInput!): GradeBucket!
   createGradeStudent(createGradeStudentInput: CreateGradeStudentInput!): GradeStudent!
+  createGroupsSchedule(createGroupsScheduleInput: CreateGroupsScheduleInput!): GroupsSchedule!
   createMessage(createMessageInput: CreateMessageInput!): Message!
   createOrganization(createOrganizationInput: CreateOrganizationInput!): Organization!
   createPeriod(createPeriodInput: CreatePeriodInput!): Period!
@@ -808,6 +867,7 @@ type Mutation {
   removeGrade(id: String!): Grade!
   removeGradeBucket(id: String!): GradeBucket!
   removeGradeStudent(id: String!): GradeStudent!
+  removeGroupsSchedule(id: String!): GroupsSchedule!
   removeMessage(id: String!): Message!
   removeMessageRecipient(id: String!): MessageRecipient!
   removeOrganization(id: String!): Organization!
@@ -828,6 +888,7 @@ type Mutation {
   updateGrade(updateGradeInput: UpdateGradeInput!): Grade!
   updateGradeBucket(updateGradeBucketInput: UpdateGradeBucketInput!): GradeBucket!
   updateGradeStudent(updateGradeStudentInput: UpdateGradeStudentInput!): GradeStudent!
+  updateGroupsSchedule(updateGroupsScheduleInput: UpdateGroupsScheduleInput!): GroupsSchedule!
   updateOrganization(updateOrganizationInput: UpdateOrganizationInput!): Organization!
   updatePeriod(updatePeriodInput: UpdatePeriodInput!): Period!
   updatePermission(updatePermissionInput: UpdatePermissionInput!): Permission!
@@ -1066,6 +1127,8 @@ type Query {
   gradeStudents: [GradeStudent!]!
   grades: [Grade!]!
   gradesByCourseId(courseId: String!, periodId: String!): [Grade!]!
+  groupsSchedule(id: String!): GroupsSchedule!
+  groupsSchedules: [GroupsSchedule!]!
   me: User!
   organization(id: String!): Organization!
   organizations: [Organization!]!
@@ -1642,6 +1705,33 @@ input UpdateGradeStudentInput {
   studentId: String
 }
 
+input UpdateGroupsScheduleInput {
+  """Class group ID"""
+  classGroupId: String
+
+  """Course ID"""
+  courseId: String
+
+  """End time"""
+  endTime: String
+  id: String!
+
+  """Location"""
+  location: String
+
+  """Remote"""
+  remote: Boolean
+
+  """Remote link"""
+  remoteLink: String
+
+  """Start time"""
+  startTime: String
+
+  """Week day"""
+  weekday: String
+}
+
 input UpdateOrganizationInput {
   active: Boolean
   description: String
@@ -1839,7 +1929,7 @@ input UpdateTeacherInput {
   address: String = ""
 
   """Birth date of the teacher"""
-  birthDate: DateTime = "2025-12-26T19:15:45.433Z"
+  birthDate: DateTime = "2025-12-26T20:38:19.271Z"
 
   """Document ID of the teacher"""
   documentId: String

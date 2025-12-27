@@ -6,6 +6,7 @@ import { Prisma } from '@generated/prisma';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
   phosphorBookBookmarkDuotone,
+  phosphorCalendarDotsDuotone,
   phosphorChalkboardTeacherDuotone,
   phosphorUsersFourDuotone,
 } from '@ng-icons/phosphor-icons/duotone';
@@ -38,6 +39,7 @@ type GroupType = Prisma.ClassGroupGetPayload<{
       phosphorChalkboardTeacherDuotone,
       phosphorUsersFourDuotone,
       phosphorBookBookmarkDuotone,
+      phosphorCalendarDotsDuotone,
     }),
   ],
   template: `
@@ -77,7 +79,10 @@ type GroupType = Prisma.ClassGroupGetPayload<{
     <div class="tabs tabs-box mt-4">
       <label class="tab">
         <input type="radio" name="my_tabs_1" class="tab" checked />
-        <ng-icon name="phosphorUsersFourDuotone" /> Estudiantes
+        <span class="flex items-center gap-2">
+          <ng-icon name="phosphorUsersFourDuotone" class="text-xl" />
+          Estudiantes</span
+        >
       </label>
 
       <div class="tab-content bg-base-100 border-base-300 p-6">
@@ -85,16 +90,22 @@ type GroupType = Prisma.ClassGroupGetPayload<{
       </div>
       <label class="tab">
         <input type="radio" name="my_tabs_1" class="tab" />
-        <ng-icon name="phosphorBookBookmarkDuotone" /> Cursos
+        <span class="flex items-center gap-2">
+          <ng-icon name="phosphorBookBookmarkDuotone" class="text-xl" />
+          Cursos
+        </span>
       </label>
 
       <div class="tab-content bg-base-100 border-base-300 p-6">
         <app-group-courses [courses]="group.courses" />
       </div>
-      <input type="radio" name="my_tabs_1" class="tab" aria-label="Tab 3" />
-      <div class="tab-content bg-base-100 border-base-300 p-6">
-        Tab content 3
-      </div>
+      <label class="tab">
+        <input type="radio" name="my_tabs_1" class="tab" />
+        <span class="flex items-center gap-2">
+          <ng-icon name="phosphorCalendarDotsDuotone" class="text-xl" />
+          Calendario
+        </span>
+      </label>
     </div>
     } @else {
     <div>No group found</div>

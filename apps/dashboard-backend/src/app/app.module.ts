@@ -25,6 +25,7 @@ import { GradesModule } from './grades/grades.module';
 import { GradeBucketsModule } from './grade-buckets/grade-buckets.module';
 import { GradeStudentsModule } from './grade-students/grade-students.module';
 import { MessagesModule } from './messages/messages.module';
+import { GroupsSchedulesModule } from './groups-schedules/groups-schedules.module';
 
 @Module({
   imports: [
@@ -58,6 +59,7 @@ import { MessagesModule } from './messages/messages.module';
     GradeBucketsModule,
     GradeStudentsModule,
     MessagesModule,
+    GroupsSchedulesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

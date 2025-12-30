@@ -389,7 +389,8 @@ model ClassGroupWeeklySchedule {
   courseId     String
   location     String     @default("")
   remote       Boolean    @default(false)
-  remoteLink   String?
+  remoteLink   String     @default("")
+  recess       Boolean    @default(false)
   weekday      WeekDay
   startTime    String // Format: "HH:mm" (e.g., "09:00", "14:30")
   endTime      String // Format: "HH:mm" (e.g., "10:30", "16:00")

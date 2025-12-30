@@ -25,6 +25,12 @@ export class GroupsSchedule
   classGroupId: string;
   @Field(() => String, { description: 'Course ID of the groups schedule' })
   courseId: string;
+  @Field(() => String, { description: 'Location of the groups schedule' })
+  location: string;
+  @Field(() => Boolean, { description: 'Remote of the groups schedule' })
+  remote: boolean;
+  @Field(() => String, { description: 'Remote link of the groups schedule' })
+  remoteLink: string;
   @Field(() => String, { description: 'Week day of the groups schedule' })
   weekday: $Enums.WeekDay;
   @Field(() => String, { description: 'Start time of the groups schedule' })

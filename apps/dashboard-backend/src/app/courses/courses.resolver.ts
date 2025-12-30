@@ -1,3 +1,5 @@
+import { JwtAuthGuard } from '@/auth';
+import { UseGuards } from '@nestjs/common';
 import { Args, Int, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { FetchDataInput } from '../fetch-data.input';
 import { CoursesService } from './courses.service';
@@ -16,11 +18,13 @@ export class CoursesResolver {
     return this.coursesService.create(createCourseInput);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Query(() => [Course], { name: 'courses' })
   findAll(@Args() fetchDataInput: FetchDataInput) {
     return this.coursesService.findAll(fetchDataInput);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Query(() => Int, { name: 'coursesCount' })
   count(@Args() fetchDataInput: FetchDataInput) {
     return this.coursesService.count(fetchDataInput);
@@ -45,6 +49,11 @@ export class CoursesResolver {
     @Args('studyPlanId', { type: () => String }) studyPlanId: string
   ) {
     return this.coursesService.findManyByStudyPlanId(studyPlanId);
+  }
+
+  @Query(() => [Course], { name: 'coursesByGroupId' })
+  findManyByGroupId(@Args('groupId', { type: () => String }) groupId: string) {
+    return this.coursesService.findManyByGroupId(groupId);
   }
 
   @Query(() => Course, { name: 'course' })

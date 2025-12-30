@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { FetchDataInput } from '../fetch-data-input';
 import { PrismaService } from '../prisma.service';
 import { CreatePermissionInput } from './dto/create-permission.input';
 import { UpdatePermissionInput } from './dto/update-permission.input';
@@ -13,8 +14,30 @@ export class PermissionsService {
     });
   }
 
-  findAll() {
-    return this.prisma.permission.findMany();
+  findAll(fetchDataInput: FetchDataInput) {
+    const { skip, take, search } = fetchDataInput;
+    return this.prisma.permission.findMany({
+      skip,
+      take,
+      where: {
+        OR: [
+          { description: { contains: search, mode: 'insensitive' } },
+          { descriptiveId: { contains: search, mode: 'insensitive' } },
+        ],
+      },
+    });
+  }
+
+  count(fetchDataInput: FetchDataInput) {
+    const { search } = fetchDataInput;
+    return this.prisma.permission.count({
+      where: {
+        OR: [
+          { description: { contains: search, mode: 'insensitive' } },
+          { descriptiveId: { contains: search, mode: 'insensitive' } },
+        ],
+      },
+    });
   }
 
   findOne(id: string) {

@@ -1,12 +1,18 @@
 import { Prisma } from '@generated/prisma';
-import { Injectable } from '@nestjs/common';
+
+import { Inject, Injectable, Logger } from '@nestjs/common';
+import { CONTEXT } from '@nestjs/graphql';
+import { Request } from 'express';
 import { FetchDataInput } from '../fetch-data.input';
 import { PrismaService } from '../prisma.service';
 import { CreateCourseInput } from './dto/create-course.input';
 import { UpdateCourseInput } from './dto/update-course.input';
 @Injectable()
 export class CoursesService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    @Inject(CONTEXT) private readonly context: { req: Request }
+  ) {}
 
   async create(createCourseInput: CreateCourseInput) {
     const subject = await this.prisma.subject.findUnique({
@@ -85,7 +91,11 @@ export class CoursesService {
   }
 
   findAll(fetchDataInput: FetchDataInput) {
+    const { req } = this.context;
+    const { role, userId } = req.user as any;
     const { skip, take, schoolId, search, studyPlanId } = fetchDataInput;
+    Logger.log('role', role);
+    Logger.log('userId', userId);
     let where: Prisma.CourseWhereInput = {
       schoolId,
       OR: [
@@ -94,6 +104,17 @@ export class CoursesService {
         { shortName: { contains: search, mode: 'insensitive' } },
       ],
     };
+
+    if (role.name === 'STUDENT') {
+      where = {
+        ...where,
+        groups: { some: { students: { some: { userId } } } },
+      };
+    }
+
+    if (role === 'TEACHER') {
+      where = { ...where, teacherId: userId };
+    }
 
     if (studyPlanId) {
       where = { ...where, studyPlanId };
@@ -114,6 +135,8 @@ export class CoursesService {
   }
 
   count(fetchDataInput: FetchDataInput) {
+    const { req } = this.context;
+    const { role, userId } = req.user as any;
     const { schoolId, search, studyPlanId } = fetchDataInput;
     let where: Prisma.CourseWhereInput = {
       schoolId,
@@ -123,6 +146,17 @@ export class CoursesService {
         { shortName: { contains: search, mode: 'insensitive' } },
       ],
     };
+
+    if (role.name === 'STUDENT') {
+      where = {
+        ...where,
+        groups: { some: { students: { some: { userId: userId } } } },
+      };
+    }
+
+    if (role === 'TEACHER') {
+      where = { ...where, teacherId: userId };
+    }
 
     if (studyPlanId) {
       where = { ...where, studyPlanId };
@@ -171,6 +205,20 @@ export class CoursesService {
   findOne(id: string) {
     return this.prisma.course.findUnique({
       where: { id },
+      include: {
+        school: true,
+        subject: true,
+        teacher: { include: { user: true } },
+        studyPlan: { include: { gradeMetric: true } },
+        grades: { include: { gradeStudents: { include: { student: true } } } },
+      },
+    });
+  }
+
+  findManyByGroupId(groupId: string) {
+    return this.prisma.course.findMany({
+      where: { groups: { some: { id: groupId } } },
+      orderBy: { name: 'asc' },
       include: {
         school: true,
         subject: true,

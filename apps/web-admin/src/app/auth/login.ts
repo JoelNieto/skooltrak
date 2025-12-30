@@ -1,10 +1,8 @@
 import { Toast } from '@/ui';
-import { isPlatformBrowser } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
   inject,
-  PLATFORM_ID,
   signal,
 } from '@angular/core';
 import {
@@ -12,10 +10,9 @@ import {
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
-import { Apollo, gql } from 'apollo-angular';
 
-import { Router } from '@angular/router';
 import { markGroupDirty } from '../core/util';
+import Auth from './auth';
 
 @Component({
   selector: 'app-login',
@@ -25,9 +22,9 @@ import { markGroupDirty } from '../core/util';
   >
     <div class="max-w-md w-full bg-white rounded-2xl shadow-xl overflow-hidden">
       <!-- Header Section -->
-      <div class="bg-primary p-6 text-white text-center">
+      <div class="bg-neutral p-6 text-white text-center">
         <h1 class="text-2xl font-bold">Bienvenido</h1>
-        <p class="text-primary-content mt-2">Inicia sesión para continuar</p>
+        <p class="text-neutral-content mt-2">Inicia sesión para continuar</p>
       </div>
 
       <!-- Form Section -->
@@ -55,7 +52,7 @@ import { markGroupDirty } from '../core/util';
                 type="email"
                 id="email"
                 name="email"
-                class="input input-primary"
+                class="input"
                 placeholder="you@example.com"
                 formControlName="email"
               />
@@ -75,9 +72,7 @@ import { markGroupDirty } from '../core/util';
                 class="block text-sm font-medium text-gray-700"
                 >Contraseña</label
               >
-              <a href="#" class="text-sm link link-primary"
-                >¿Olvidaste tu contraseña?</a
-              >
+              <a href="#" class="text-sm link ">¿Olvidaste tu contraseña?</a>
             </div>
             <div class="relative">
               <div
@@ -89,7 +84,7 @@ import { markGroupDirty } from '../core/util';
                 type="password"
                 id="password"
                 name="password"
-                class="input input-primary"
+                class="input"
                 placeholder="••••••••"
                 formControlName="password"
               />
@@ -110,7 +105,7 @@ import { markGroupDirty } from '../core/util';
             }
           </div>
 
-          <button type="submit" class="btn btn-primary w-full">
+          <button type="submit" class="btn btn-neutral w-full">
             Iniciar Sesión
           </button>
         </form>
@@ -120,8 +115,8 @@ import { markGroupDirty } from '../core/util';
   styles: ``,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class Login {
-  private apollo = inject(Apollo);
+export default class Login {
+  #auth = inject(Auth);
   private fb = inject(NonNullableFormBuilder);
   public form = this.fb.group({
     email: ['', [Validators.required, Validators.email]],
@@ -129,8 +124,6 @@ export class Login {
   });
   private toasts = inject(Toast);
   public loading = signal(false);
-  private router = inject(Router);
-  private platformId = inject(PLATFORM_ID);
 
   public onSubmit() {
     if (this.form.invalid) {
@@ -138,38 +131,9 @@ export class Login {
       markGroupDirty(this.form);
       return;
     }
-    const { email, password } = this.form.value;
-    this.loading.set(true);
-    this.apollo
-      .mutate<{ login: { accessToken: string } }>({
-        mutation: gql`
-          mutation Login($email: String!, $password: String!) {
-            login(email: $email, password: $password) {
-              accessToken
-            }
-          }
-        `,
-        variables: {
-          email,
-          password,
-        },
-      })
-      .subscribe({
-        next: (res) => {
-          const { accessToken } = res.data!.login;
 
-          if (!isPlatformBrowser(this.platformId)) {
-            return;
-          }
-          localStorage.setItem('access_token', accessToken);
-          this.loading.set(false);
-          this.router.navigate(['/home']);
-          this.toasts.showSuccess('Inicio de sesión exitoso');
-        },
-        error: (err) => {
-          this.loading.set(false);
-          this.toasts.showError(err.message);
-        },
-      });
+    this.loading.set(true);
+    const { email, password } = this.form.getRawValue();
+    this.#auth.signIn(email, password);
   }
 }

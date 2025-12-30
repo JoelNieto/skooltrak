@@ -1,6 +1,7 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { Prisma } from '@generated/prisma';
 import Auth from '../auth/auth';
+
 @Injectable({
   providedIn: 'root',
 })

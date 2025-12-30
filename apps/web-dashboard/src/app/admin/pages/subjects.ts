@@ -183,7 +183,10 @@ import SubjectsForm from '../forms/subjects-form';
               >
                 <ng-icon name="phosphorPencilDuotone" /> Editar
               </button>
-              <button class="btn btn-error btn-xs btn-soft">
+              <button
+                class="btn btn-error btn-xs btn-soft"
+                (click)="deleteSubject(subject)"
+              >
                 <ng-icon name="phosphorTrashDuotone" /> Eliminar
               </button>
             </td>

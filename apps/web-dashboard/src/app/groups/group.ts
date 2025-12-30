@@ -13,6 +13,7 @@ import {
 import { Apollo, gql } from 'apollo-angular';
 import { catchError, map, of, throwError } from 'rxjs';
 import GroupCourses from './group-courses';
+import GroupSchedule from './group-schedule';
 import GroupStudents from './group-students';
 type Teacher = Prisma.TeacherGetPayload<undefined> & {
   name: string;
@@ -33,7 +34,14 @@ type GroupType = Prisma.ClassGroupGetPayload<{
 }> & { teacher?: Teacher; students: Student[] };
 
 @Component({
-  imports: [RouterLink, Loader, NgIcon, GroupStudents, GroupCourses],
+  imports: [
+    RouterLink,
+    Loader,
+    NgIcon,
+    GroupStudents,
+    GroupCourses,
+    GroupSchedule,
+  ],
   viewProviders: [
     provideIcons({
       phosphorChalkboardTeacherDuotone,
@@ -63,7 +71,7 @@ type GroupType = Prisma.ClassGroupGetPayload<{
           <div class="flex items-center gap-2">
             <div class="avatar avatar-placeholder">
               <div
-                class="text-white w-6 rounded-full"
+                class="text-white w-7 rounded-full"
                 [style.background]="group.teacher?.color"
               >
                 <span class="text-xs">{{ group.teacher?.initials }}</span>
@@ -103,9 +111,12 @@ type GroupType = Prisma.ClassGroupGetPayload<{
         <input type="radio" name="my_tabs_1" class="tab" />
         <span class="flex items-center gap-2">
           <ng-icon name="phosphorCalendarDotsDuotone" class="text-xl" />
-          Calendario
+          Horario
         </span>
       </label>
+      <div class="tab-content bg-base-100 border-base-300 p-6">
+        <app-group-schedule [id]="id()" />
+      </div>
     </div>
     } @else {
     <div>No group found</div>

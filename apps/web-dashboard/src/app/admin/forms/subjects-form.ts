@@ -7,14 +7,14 @@ import {
   output,
   signal,
 } from '@angular/core';
-import { Field, form, required } from '@angular/forms/signals';
+import { Field, form, required, submit } from '@angular/forms/signals';
 import { Prisma } from '@generated/prisma';
 import { Apollo, gql } from 'apollo-angular';
 
 @Component({
   selector: 'app-subjects-form',
   imports: [Field],
-  template: `<form (submit)="onSubmit($event)">
+  template: `<form (submit)="onSubmit($event)" novalidate="novalidate">
     <div class="flex flex-col gap-2">
       <div class="fieldset">
         <label for="name">Nombre</label>
@@ -23,7 +23,17 @@ import { Apollo, gql } from 'apollo-angular';
           id="name"
           [field]="form.name"
           class="input input-primary"
+          [class.ng-dirty]="form.name().dirty()"
+          [class.ng-invalid]="form.name().invalid()"
         />
+        @if (form.name().invalid() && form.name().dirty()) {
+
+        <ul>
+          @for (error of form.name().errors(); track error) {
+          <li class="text-error">{{ error.message }}</li>
+          }
+        </ul>
+        }
       </div>
       <div class="fieldset">
         <label for="shortName">Nombre corto</label>
@@ -31,8 +41,17 @@ import { Apollo, gql } from 'apollo-angular';
           type="text"
           id="shortName"
           [field]="form.shortName"
+          [class.ng-dirty]="form.shortName().dirty()"
+          [class.ng-invalid]="form.shortName().invalid()"
           class="input input-primary"
         />
+        @if (form.shortName().invalid() && form.shortName().dirty()) {
+        <ul>
+          @for (error of form.shortName().errors(); track error) {
+          <li class="text-error">{{ error.message }}</li>
+          }
+        </ul>
+        }
       </div>
       <div class="fieldset">
         <label for="code">Código</label>
@@ -41,7 +60,16 @@ import { Apollo, gql } from 'apollo-angular';
           id="code"
           [field]="form.code"
           class="input input-primary"
+          [class.ng-dirty]="form.code().dirty()"
+          [class.ng-invalid]="form.code().invalid()"
         />
+        @if (form.code().invalid() && form.code().dirty()) {
+        <ul>
+          @for (error of form.code().errors(); track error) {
+          <li class="text-error">{{ error.message }}</li>
+          }
+        </ul>
+        }
       </div>
     </div>
     <div class="flex justify-end gap-2 mt-4">
@@ -86,61 +114,63 @@ export default class SubjectsForm {
     event.preventDefault();
     if (this.form().invalid()) {
       this.toast.showError('Datos inválidos');
-      this.form().markAsDirty();
-      return;
     }
+    this.form.name().markAsDirty();
+    this.form.shortName().markAsDirty();
+    this.form.code().markAsDirty();
+    submit(this.form, async () => {
+      const subject = this.form().value();
 
-    const subject = this.form().value();
-
-    if (this.data()?.subject) {
-      this.apollo
-        .mutate({
-          mutation: gql`
-            mutation UpdateSubject($updateSubjectInput: UpdateSubjectInput!) {
-              updateSubject(updateSubjectInput: $updateSubjectInput) {
-                id
+      if (this.data()?.subject) {
+        this.apollo
+          .mutate({
+            mutation: gql`
+              mutation UpdateSubject($updateSubjectInput: UpdateSubjectInput!) {
+                updateSubject(updateSubjectInput: $updateSubjectInput) {
+                  id
+                }
               }
-            }
-          `,
-          variables: {
-            updateSubjectInput: {
-              ...subject,
-              id: this.data()?.subject?.id,
+            `,
+            variables: {
+              updateSubjectInput: {
+                ...subject,
+                id: this.data()?.subject?.id,
+              },
             },
-          },
-        })
-        .subscribe({
-          next: () => {
-            this.toast.showSuccess('Asignatura actualizada');
-            this.closeModal.emit();
-          },
-          error: (error) => {
-            this.toast.showError(error.message);
-          },
-        });
-    } else {
-      this.apollo
-        .mutate({
-          mutation: gql`
-            mutation CreateSubject($createSubjectInput: CreateSubjectInput!) {
-              createSubject(createSubjectInput: $createSubjectInput) {
-                id
+          })
+          .subscribe({
+            next: () => {
+              this.toast.showSuccess('Asignatura actualizada');
+              this.closeModal.emit();
+            },
+            error: (error) => {
+              this.toast.showError(error.message);
+            },
+          });
+      } else {
+        this.apollo
+          .mutate({
+            mutation: gql`
+              mutation CreateSubject($createSubjectInput: CreateSubjectInput!) {
+                createSubject(createSubjectInput: $createSubjectInput) {
+                  id
+                }
               }
-            }
-          `,
-          variables: {
-            createSubjectInput: subject,
-          },
-        })
-        .subscribe({
-          next: () => {
-            this.toast.showSuccess('Asignatura creada');
-            this.closeModal.emit();
-          },
-          error: (error) => {
-            this.toast.showError(error.message);
-          },
-        });
-    }
+            `,
+            variables: {
+              createSubjectInput: subject,
+            },
+          })
+          .subscribe({
+            next: () => {
+              this.toast.showSuccess('Asignatura creada');
+              this.closeModal.emit();
+            },
+            error: (error) => {
+              this.toast.showError(error.message);
+            },
+          });
+      }
+    });
   }
 }

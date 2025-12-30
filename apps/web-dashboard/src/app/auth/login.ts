@@ -1,10 +1,8 @@
 import { Toast } from '@/ui';
-import { isPlatformBrowser } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
   inject,
-  PLATFORM_ID,
   signal,
 } from '@angular/core';
 import {
@@ -12,12 +10,11 @@ import {
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
-import { Apollo, gql } from 'apollo-angular';
 
 import { Loader, markGroupDirty } from '@/ui';
-import { Router } from '@angular/router';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { phosphorEnvelopeDuotone } from '@ng-icons/phosphor-icons/duotone';
+import Auth from './auth';
 
 @Component({
   selector: 'app-login',
@@ -129,16 +126,14 @@ import { phosphorEnvelopeDuotone } from '@ng-icons/phosphor-icons/duotone';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class Login {
-  private apollo = inject(Apollo);
   private fb = inject(NonNullableFormBuilder);
+  private auth = inject(Auth);
   public form = this.fb.group({
     email: ['', [Validators.required, Validators.email]],
     password: ['', [Validators.required]],
   });
   private toasts = inject(Toast);
   public loading = signal(false);
-  private router = inject(Router);
-  private platformId = inject(PLATFORM_ID);
 
   public onSubmit() {
     if (this.form.invalid) {
@@ -146,38 +141,8 @@ export default class Login {
       markGroupDirty(this.form);
       return;
     }
-    const { email, password } = this.form.value;
+    const { email, password } = this.form.getRawValue();
     this.loading.set(true);
-    this.apollo
-      .mutate<{ login: { accessToken: string } }>({
-        mutation: gql`
-          mutation Login($email: String!, $password: String!) {
-            login(email: $email, password: $password) {
-              accessToken
-            }
-          }
-        `,
-        variables: {
-          email,
-          password,
-        },
-      })
-      .subscribe({
-        next: (res) => {
-          const { accessToken } = res.data!.login;
-
-          if (!isPlatformBrowser(this.platformId)) {
-            return;
-          }
-          localStorage.setItem('access_token', accessToken);
-          this.loading.set(false);
-          this.router.navigate(['/home']);
-          this.toasts.showSuccess('Inicio de sesión exitoso');
-        },
-        error: (err) => {
-          this.loading.set(false);
-          this.toasts.showError(err.message);
-        },
-      });
+    this.auth.signIn(email, password);
   }
 }

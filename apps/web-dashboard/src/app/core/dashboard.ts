@@ -122,7 +122,7 @@ import Store from './store';
               <span class="text-neutral-400 text-medium px-2 mb-3">{{
                 auth.userName()
               }}</span>
-              <li><a href="#">Profile</a></li>
+              <li><a routerLink="profile">Perfil</a></li>
               @if(auth.isAdmin()) {
               <li>
                 <a routerLink="admin"
@@ -207,55 +207,6 @@ export default class Dashboard {
       if (schools?.length) {
         this.store.currentSchool.set(schools[0]);
       }
-    });
-    afterRenderEffect(() => {
-      this.apollo
-        .watchQuery<{
-          me: Prisma.UserGetPayload<{
-            include: {
-              role: { include: { permissions: true } };
-              teacher: true;
-              student: true;
-            };
-          }>;
-        }>({
-          query: gql`
-            query me {
-              me {
-                id
-                email
-                firstName
-                lastName
-                color
-                teacher {
-                  id
-                  firstName
-                  fatherName
-                }
-                student {
-                  id
-                  firstName
-                  fatherName
-                }
-                role {
-                  name
-                  permissions {
-                    id
-                    descriptiveId
-                    description
-                  }
-                }
-              }
-            }
-          `,
-          fetchPolicy: 'cache-first',
-        })
-        .valueChanges.subscribe((res) => {
-          const { me } = res.data;
-          if (me) {
-            this.auth.user.set(me);
-          }
-        });
     });
   }
 

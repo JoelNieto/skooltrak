@@ -1,5 +1,10 @@
 import { Route } from '@angular/router';
-import { authGuard } from './auth/auth.guard';
+import {
+  adminGuard,
+  authGuard,
+  studentGuard,
+  teacherGuard,
+} from './auth/auth.guard';
 
 export const appRoutes: Route[] = [
   {
@@ -15,7 +20,19 @@ export const appRoutes: Route[] = [
     children: [
       {
         path: 'home',
+        canMatch: [adminGuard],
         loadComponent: () => import('./home'),
+      },
+
+      {
+        path: 'home',
+        canMatch: [teacherGuard],
+        loadComponent: () => import('./teacher-home'),
+      },
+      {
+        path: 'home',
+        canMatch: [studentGuard],
+        loadComponent: () => import('./student-home'),
       },
       {
         path: 'courses',
@@ -81,6 +98,10 @@ export const appRoutes: Route[] = [
       {
         path: 'groups/:id',
         loadComponent: () => import('./groups/group'),
+      },
+      {
+        path: 'profile',
+        loadComponent: () => import('./profile'),
       },
       {
         path: 'admin',

@@ -2,337 +2,25 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
-type Assignment {
-  """Course of the assignment"""
-  course: Course!
-
-  """Course ID of the assignment"""
-  courseId: String!
-
-  """Created at"""
-  createdAt: DateTime!
-
-  """Date of the assignment"""
-  date: DateTime!
-
-  """Details of the assignment"""
-  details: String!
-
-  """ID of the assignment (auto-generated)"""
-  id: String!
-
-  """Require submission of the assignment"""
-  requireSubmission: Boolean!
-
-  """School ID of the assignment"""
-  schoolId: String!
-
-  """Teacher of the assignment"""
-  teacher: Teacher!
-
-  """Teacher ID of the assignment"""
-  teacherId: String!
-
-  """Title of the assignment"""
-  title: String!
-
-  """Type of the assignment"""
-  type: String!
-
-  """Updated at"""
-  updatedAt: DateTime!
-}
-
-input AssignmentDateInput {
-  """Id de la asignacion"""
-  assignmentId: String!
-
-  """Id del grupo"""
-  classGroupId: String!
-
-  """Fecha de la asignacion"""
-  date: DateTime!
-}
-
 type AuthPayload {
   accessToken: String!
 }
 
-type ClassGroup {
-  """Active status of the class group"""
-  active: Boolean!
+input CreateGradeMetricInput {
+  """Valor máximo del grado"""
+  maximum: Float!
 
-  """Courses of the class group"""
-  courses: [Course!]!
+  """Valor mínimo del grado"""
+  minimum: Float!
 
-  """Created at of the class group"""
-  createdAt: DateTime!
+  """Valor mínimo de aprobación del grado"""
+  minimumApproval: Float!
 
-  """ID of the class group"""
-  id: String!
+  """Valor mínimo de excelencia del grado"""
+  minimumExcellence: Float!
 
-  """Name of the class group"""
+  """Nombre del grado"""
   name: String!
-
-  """Organization ID of the class group"""
-  organizationId: String!
-
-  """School ID of the class group"""
-  schoolId: String!
-
-  """Short name of the class group"""
-  shortName: String!
-
-  """Students of the class group"""
-  students: [Student!]!
-
-  """Study plan of the class group"""
-  studyPlan: StudyPlan!
-
-  """Study plan ID of the class group"""
-  studyPlanId: String!
-
-  """Teacher of the class group"""
-  teacher: Teacher
-
-  """Teacher ID of the class group"""
-  teacherId: String
-
-  """Updated at of the class group"""
-  updatedAt: DateTime!
-}
-
-type Course {
-  """Code of the course"""
-  code: String!
-
-  """Created at"""
-  createdAt: DateTime!
-
-  """Current period of the course"""
-  currentPeriod: Period
-
-  """Current period ID of the course"""
-  currentPeriodId: String
-
-  """Grades of the course"""
-  grades: [Grade!]!
-
-  """ID of the course (auto-generated)"""
-  id: String!
-
-  """Name of the course"""
-  name: String!
-
-  """Organization ID of the course"""
-  organizationId: String!
-
-  """School of the course"""
-  school: School!
-
-  """School ID of the course"""
-  schoolId: String!
-
-  """Short name of the course"""
-  shortName: String!
-
-  """Study plan of the course"""
-  studyPlan: StudyPlan!
-
-  """Study plan ID of the course"""
-  studyPlanId: String!
-
-  """Subject of the course"""
-  subject: Subject!
-
-  """Subject ID of the course"""
-  subjectId: String!
-
-  """Teacher of the course"""
-  teacher: Teacher
-
-  """Teacher ID of the course"""
-  teacherId: String
-
-  """Updated at"""
-  updatedAt: DateTime!
-}
-
-input CreateAssignmentInput {
-  """Id del curso"""
-  courseId: String!
-
-  """Fecha de la asignacion"""
-  date: String!
-
-  """Detalles de la asignacion"""
-  details: String!
-
-  """Fechas de la asignacion"""
-  groupDates: [AssignmentDateInput!]
-
-  """Requiere envio"""
-  requireSubmission: Boolean!
-
-  """Id de la escuela"""
-  schoolId: String!
-
-  """Id del profesor"""
-  teacherId: String!
-
-  """Titulo de la asignacion"""
-  title: String!
-
-  """Tipo de la asignacion"""
-  type: String!
-}
-
-input CreateClassGroupInput {
-  """Active status of the class group"""
-  active: Boolean! = true
-
-  """Name of the class group"""
-  name: String!
-
-  """Organization ID of the class group"""
-  organizationId: String!
-
-  """School ID of the class group"""
-  schoolId: String!
-
-  """Short name of the class group"""
-  shortName: String!
-
-  """Study plan ID of the class group"""
-  studyPlanId: String!
-
-  """Teacher ID of the class group"""
-  teacherId: String
-}
-
-input CreateCourseInput {
-  """Code of the course"""
-  code: String!
-
-  """Current period ID of the course"""
-  currentPeriodId: String
-
-  """Name of the course"""
-  name: String
-
-  """Organization ID of the course"""
-  organizationId: String!
-
-  """School ID of the course"""
-  schoolId: String!
-
-  """Short name of the course"""
-  shortName: String
-
-  """Study plan ID of the course"""
-  studyPlanId: String!
-
-  """Subject ID of the course"""
-  subjectId: String!
-
-  """Teacher ID of the course"""
-  teacherId: String
-}
-
-input CreateDegreeInput {
-  """Name of the degree"""
-  name: String!
-
-  """School ID"""
-  schoolId: String!
-
-  """Short name of the degree"""
-  shortName: String!
-}
-
-input CreateGradeBucketInput {
-  """Id del curso"""
-  courseId: String!
-
-  """Nombre del bucket"""
-  name: String!
-
-  """Peso del bucket"""
-  weight: Float!
-}
-
-input CreateGradeInput {
-  """Id del bucket"""
-  bucketId: String!
-
-  """Comentarios"""
-  comments: String!
-
-  """Id del curso"""
-  courseId: String!
-
-  """Fecha de la calificacion"""
-  date: DateTime!
-
-  """Id del periodo"""
-  periodId: String!
-
-  """¿Publicada?"""
-  published: Boolean! = false
-
-  """Titulo de la calificacion  """
-  title: String!
-}
-
-input CreateGradeStudentInput {
-  """Comments for the grade student"""
-  comments: String!
-
-  """Grade ID for the grade student"""
-  gradeId: String!
-
-  """Score for the grade student"""
-  score: Float!
-
-  """Student ID for the grade student"""
-  studentId: String!
-}
-
-input CreateGroupsScheduleInput {
-  """Class group ID"""
-  classGroupId: String!
-
-  """Course ID"""
-  courseId: String!
-
-  """End time"""
-  endTime: String!
-
-  """Location"""
-  location: String!
-
-  """Remote"""
-  remote: Boolean!
-
-  """Remote link"""
-  remoteLink: String!
-
-  """Start time"""
-  startTime: String!
-
-  """Week day"""
-  weekday: String!
-}
-
-input CreateMessageInput {
-  """The content of the message."""
-  content: String!
-
-  """The IDs of the recipients associated with the message."""
-  recipientIds: [String!]!
-
-  """The subject of the message."""
-  subject: String!
 }
 
 input CreateOrganizationInput {
@@ -341,74 +29,9 @@ input CreateOrganizationInput {
   name: String!
 }
 
-input CreatePeriodInput {
-  """End date of the period"""
-  endDate: DateTime!
-
-  """Name of the period"""
-  name: String!
-
-  """School ID of the period"""
-  schoolId: String!
-
-  """Short name of the period"""
-  shortName: String!
-
-  """Start date of the period"""
-  startDate: DateTime!
-
-  """Year of the period"""
-  year: Int!
-}
-
 input CreatePermissionInput {
   description: String!
   descriptiveId: String!
-}
-
-input CreateQuizInput {
-  """Course ID"""
-  courseId: String!
-
-  """Details"""
-  details: String!
-
-  """Organization ID"""
-  organizationId: String!
-
-  """Questions"""
-  questions: [CreateQuizQuestionInput!]!
-
-  """Teacher ID"""
-  teacherId: String!
-
-  """Title"""
-  title: String!
-}
-
-input CreateQuizQuestionInput {
-  """Options"""
-  options: [CreateQuizQuestionOptionInput!]!
-
-  """Question"""
-  question: String!
-
-  """Time Limit"""
-  timeLimit: Float! = 0
-
-  """Type"""
-  type: String!
-
-  """Value"""
-  value: String!
-}
-
-input CreateQuizQuestionOptionInput {
-  """Is Correct"""
-  isCorrect: Boolean!
-
-  """Option"""
-  option: String!
 }
 
 input CreateRoleInput {
@@ -435,6 +58,9 @@ input CreateSchoolInput {
   """Country of the school"""
   country: String! = ""
 
+  """Current year of the school"""
+  currentYear: Int! = 2025
+
   """Email of the school"""
   email: String! = ""
 
@@ -447,7 +73,7 @@ input CreateSchoolInput {
   """Organization ID of the school"""
   organizationId: String!
 
-  """Phone number of the school"""
+  """Phone of the school"""
   phone: String! = ""
 
   """Short name of the school"""
@@ -463,73 +89,6 @@ input CreateSchoolInput {
   zip: String! = ""
 }
 
-input CreateStudentInput {
-  """Address of the student"""
-  address: String!
-
-  """Birth date of the student"""
-  birthDate: DateTime!
-
-  """Class group ID of the student"""
-  classGroupId: String!
-
-  """Document ID of the student"""
-  documentId: String!
-
-  """Email of the student"""
-  email: String!
-
-  """Father name of the student"""
-  fatherName: String!
-
-  """First name of the student"""
-  firstName: String!
-
-  """Gender of the student"""
-  gender: String!
-
-  """Middle name of the student"""
-  middleName: String!
-
-  """Mother name of the student"""
-  motherName: String!
-
-  """Organization ID of the student"""
-  organizationId: String!
-
-  """Phone of the student"""
-  phone: String!
-
-  """School ID of the student"""
-  schoolId: String!
-}
-
-input CreateStudyPlanInput {
-  """Code of the study plan"""
-  code: String!
-
-  """Degree ID of the study plan"""
-  degreeId: String!
-
-  """Description of the study plan"""
-  description: String!
-
-  """Grade metric ID of the study plan"""
-  gradeMetricId: String!
-
-  """Level of the study plan"""
-  level: Int!
-
-  """Name of the study plan"""
-  name: String!
-
-  """School ID of the study plan"""
-  schoolId: String!
-
-  """Short name of the study plan"""
-  shortName: String!
-}
-
 input CreateSubjectInput {
   """Code of the subject"""
   code: String!
@@ -537,42 +96,14 @@ input CreateSubjectInput {
   """Name of the subject"""
   name: String!
 
+  """Organization ID of the subject"""
+  organizationId: String!
+
+  """School ID of the subject"""
+  schoolId: String!
+
   """Short name of the subject"""
   shortName: String!
-}
-
-input CreateTeacherInput {
-  about: String = ""
-  address: String = ""
-
-  """Birth date of the teacher"""
-  birthDate: DateTime = "2025-12-26T20:38:19.271Z"
-
-  """Document ID of the teacher"""
-  documentId: String!
-
-  """Email of the teacher"""
-  email: String!
-
-  """Father name of the teacher"""
-  fatherName: String!
-
-  """First name of the teacher"""
-  firstName: String!
-
-  """Gender of the teacher"""
-  gender: String!
-
-  """Middle name of the teacher"""
-  middleName: String = ""
-
-  """Mother name of the teacher"""
-  motherName: String = ""
-
-  """Organization ID of the teacher"""
-  organizationId: String!
-  personalEmail: String = ""
-  phoneNumber: String = ""
 }
 
 input CreateUserInput {
@@ -600,305 +131,54 @@ A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date
 """
 scalar DateTime
 
-type Degree {
-  """Created at of the degree"""
-  createdAt: DateTime!
-
-  """ID of the degree"""
-  id: String!
-
-  """Name of the degree"""
-  name: String!
-
-  """School of the degree"""
-  school: School!
-
-  """School ID of the degree"""
-  schoolId: String!
-
-  """Short name of the degree"""
-  shortName: String!
-
-  """Study plans of the degree"""
-  studyPlans: [StudyPlan!]!
-
-  """Updated at of the degree"""
-  updatedAt: DateTime!
-}
-
-type Grade {
-  """Bucket de la calificacion"""
-  bucket: GradeBucket!
-
-  """ID del bucket"""
-  bucketId: String!
-
-  """Comentarios de la calificacion"""
-  comments: String!
-
-  """Curso de la calificacion"""
-  course: Course!
-
-  """ID del curso"""
-  courseId: String!
-
-  """Fecha de creacion"""
-  createdAt: DateTime!
-
-  """Fecha de la calificacion"""
-  date: DateTime!
-
-  """Estudiantes de la calificacion"""
-  gradeStudents: [GradeStudent!]!
-
-  """ID de la calificacion"""
-  id: String!
-
-  """Periodo de la calificacion"""
-  period: Period!
-
-  """ID del periodo"""
-  periodId: String!
-
-  """¿Publicada?"""
-  published: Boolean!
-
-  """Titulo de la calificacion"""
-  title: String!
-
-  """Fecha de actualizacion"""
-  updatedAt: DateTime!
-}
-
-type GradeBucket {
-  """Id del curso"""
-  courseId: String!
-
-  """Fecha de creación"""
-  createdAt: DateTime!
-
-  """Id del bucket"""
-  id: String!
-
-  """Nombre del bucket"""
-  name: String!
-
-  """Fecha de actualización"""
-  updatedAt: DateTime!
-
-  """Peso del bucket"""
-  weight: Float!
-}
-
 type GradeMetric {
-  """Fecha de creacion"""
+  """Fecha de creación del grado"""
   createdAt: DateTime!
 
-  """ID"""
+  """ID del grado"""
   id: String!
 
-  """Maximo"""
+  """Valor máximo del grado"""
   maximum: Float!
 
-  """Minimo"""
+  """Valor mínimo del grado"""
   minimum: Float!
 
-  """Minimo de aprobacion"""
+  """Valor mínimo de aprobación del grado"""
   minimumApproval: Float!
 
-  """Minimo de excelencia"""
+  """Valor mínimo de excelencia del grado"""
   minimumExcellence: Float!
 
-  """Nombre"""
+  """Nombre del grado"""
   name: String!
 
-  """Fecha de actualizacion"""
+  """Fecha de actualización del grado"""
   updatedAt: DateTime!
-}
-
-type GradeStudent {
-  """Comments for the grade student"""
-  comments: String
-
-  """Created at of the grade student"""
-  createdAt: DateTime!
-
-  """Grade of the grade student"""
-  grade: Grade!
-
-  """Grade ID of the grade student"""
-  gradeId: String!
-
-  """ID of the grade student"""
-  id: String!
-
-  """Score of the grade student"""
-  score: Float
-
-  """Student of the grade student"""
-  student: Student!
-
-  """Student ID of the grade student"""
-  studentId: String!
-
-  """Updated at of the grade student"""
-  updatedAt: DateTime!
-}
-
-type GroupsSchedule {
-  """Class group of the groups schedule"""
-  classGroup: ClassGroup!
-
-  """Class group ID of the groups schedule"""
-  classGroupId: String!
-
-  """Course of the groups schedule"""
-  course: Course!
-
-  """Course ID of the groups schedule"""
-  courseId: String!
-
-  """Created at of the groups schedule"""
-  createdAt: DateTime!
-
-  """End time of the groups schedule"""
-  endTime: String!
-
-  """ID of the groups schedule"""
-  id: String!
-
-  """Start time of the groups schedule"""
-  startTime: String!
-
-  """Updated at of the groups schedule"""
-  updatedAt: DateTime!
-
-  """Week day of the groups schedule"""
-  weekday: String!
-}
-
-type Message {
-  """The content of the message."""
-  content: String!
-
-  """The date and time the message was created."""
-  createdAt: DateTime!
-
-  """The date and time the message was deleted."""
-  deletedAt: DateTime
-
-  """The unique identifier for the message."""
-  id: String!
-
-  """The ID of the organization associated with the message."""
-  organizationId: String!
-
-  """The recipients of the message."""
-  recipients: [MessageRecipient!]!
-
-  """The sender associated with the message."""
-  sender: User!
-
-  """The ID of the sender associated with the message."""
-  senderId: String!
-
-  """The subject of the message."""
-  subject: String!
-
-  """The date and time the message was last updated."""
-  updatedAt: DateTime!
-}
-
-type MessageRecipient {
-  """The date and time the message recipient was created."""
-  createdAt: DateTime!
-
-  """The date and time the message recipient was deleted."""
-  deletedAt: DateTime
-
-  """The unique identifier for the message recipient."""
-  id: String!
-
-  """The message associated with the message recipient."""
-  message: Message!
-
-  """The ID of the message associated with the message recipient."""
-  messageId: String!
-
-  """The date and time the message was read."""
-  readAt: DateTime
-
-  """The date and time the message recipient was last updated."""
-  updatedAt: DateTime!
-
-  """The user associated with the message recipient."""
-  user: User!
-
-  """The ID of the user associated with the message recipient."""
-  userId: String!
 }
 
 type Mutation {
-  createAssignment(createAssignmentInput: CreateAssignmentInput!): Assignment!
-  createClassGroup(createClassGroupInput: CreateClassGroupInput!): ClassGroup!
-  createCourse(createCourseInput: CreateCourseInput!): Course!
-  createDegree(createDegreeInput: CreateDegreeInput!): Degree!
-  createGrade(createGradeInput: CreateGradeInput!): Grade!
-  createGradeBucket(createGradeBucketInput: CreateGradeBucketInput!): GradeBucket!
-  createGradeStudent(createGradeStudentInput: CreateGradeStudentInput!): GradeStudent!
-  createGroupsSchedule(createGroupsScheduleInput: CreateGroupsScheduleInput!): GroupsSchedule!
-  createMessage(createMessageInput: CreateMessageInput!): Message!
+  createGradeMetric(createGradeMetricInput: CreateGradeMetricInput!): GradeMetric!
   createOrganization(createOrganizationInput: CreateOrganizationInput!): Organization!
-  createPeriod(createPeriodInput: CreatePeriodInput!): Period!
   createPermission(createPermissionInput: CreatePermissionInput!): Permission!
-  createQuiz(createQuizInput: CreateQuizInput!): Quiz!
   createRole(createRoleInput: CreateRoleInput!): Role!
   createSchool(createSchoolInput: CreateSchoolInput!): School!
-  createStudent(createStudentInput: CreateStudentInput!): Student!
-  createStudyPlan(createStudyPlanInput: CreateStudyPlanInput!): StudyPlan!
   createSubject(createSubjectInput: CreateSubjectInput!): Subject!
-  createTeacher(createTeacherInput: CreateTeacherInput!): Teacher!
   createUser(createUserInput: CreateUserInput!): User!
   login(email: String!, password: String!): AuthPayload!
-  removeAssignment(id: String!): Assignment!
-  removeClassGroup(id: String!): ClassGroup!
-  removeCourse(id: String!): Course!
-  removeDegree(id: String!): Degree!
-  removeGrade(id: String!): Grade!
-  removeGradeBucket(id: String!): GradeBucket!
-  removeGradeStudent(id: String!): GradeStudent!
-  removeGroupsSchedule(id: String!): GroupsSchedule!
-  removeMessage(id: String!): Message!
-  removeMessageRecipient(id: String!): MessageRecipient!
+  removeGradeMetric(id: String!): GradeMetric!
   removeOrganization(id: String!): Organization!
-  removePeriod(id: String!): Period!
   removePermission(id: String!): Permission!
-  removeQuiz(id: String!): Quiz!
   removeRole(id: String!): Role!
   removeSchool(id: String!): School!
-  removeStudent(id: String!): Student!
-  removeStudyPlan(id: String!): StudyPlan!
   removeSubject(id: String!): Subject!
-  removeTeacher(id: String!): Teacher!
   removeUser(id: String!): User!
-  updateAssignment(updateAssignmentInput: UpdateAssignmentInput!): Assignment!
-  updateClassGroup(updateClassGroupInput: UpdateClassGroupInput!): ClassGroup!
-  updateCourse(updateCourseInput: UpdateCourseInput!): Course!
-  updateDegree(updateDegreeInput: UpdateDegreeInput!): Degree!
-  updateGrade(updateGradeInput: UpdateGradeInput!): Grade!
-  updateGradeBucket(updateGradeBucketInput: UpdateGradeBucketInput!): GradeBucket!
-  updateGradeStudent(updateGradeStudentInput: UpdateGradeStudentInput!): GradeStudent!
-  updateGroupsSchedule(updateGroupsScheduleInput: UpdateGroupsScheduleInput!): GroupsSchedule!
+  updateGradeMetric(updateGradeMetricInput: UpdateGradeMetricInput!): GradeMetric!
   updateOrganization(updateOrganizationInput: UpdateOrganizationInput!): Organization!
-  updatePeriod(updatePeriodInput: UpdatePeriodInput!): Period!
   updatePermission(updatePermissionInput: UpdatePermissionInput!): Permission!
-  updateQuiz(updateQuizInput: UpdateQuizInput!): Quiz!
   updateRole(updateRoleInput: UpdateRoleInput!): Role!
   updateSchool(updateSchoolInput: UpdateSchoolInput!): School!
-  updateStudent(updateStudentInput: UpdateStudentInput!): Student!
-  updateStudyPlan(updateStudyPlanInput: UpdateStudyPlanInput!): StudyPlan!
   updateSubject(updateSubjectInput: UpdateSubjectInput!): Subject!
-  updateTeacher(updateTeacherInput: UpdateTeacherInput!): Teacher!
   updateUser(updateUserInput: UpdateUserInput!): User!
 }
 
@@ -922,35 +202,6 @@ type Organization {
   updatedAt: DateTime!
 }
 
-type Period {
-  """Created at"""
-  createdAt: DateTime!
-
-  """End date of the period"""
-  endDate: DateTime!
-
-  """ID of the period"""
-  id: String!
-
-  """Name of the period"""
-  name: String!
-
-  """School ID of the period"""
-  schoolId: String!
-
-  """Short name of the period"""
-  shortName: String!
-
-  """Start date of the period"""
-  startDate: DateTime!
-
-  """Updated at"""
-  updatedAt: DateTime!
-
-  """Year of the period"""
-  year: Int!
-}
-
 type Permission {
   createdAt: DateTime!
   description: String!
@@ -960,332 +211,75 @@ type Permission {
 }
 
 type Query {
-  assignment(id: String!): Assignment!
-  assignments: [Assignment!]!
-  assignmentsByCourseId(courseId: String!, endDate: String!, startDate: String!): [Assignment!]!
-  assignmentsBySchoolId(endDate: String!, schoolId: String!, startDate: String!): [Assignment!]!
-  classGroup(id: String!): ClassGroup!
-  classGroups: [ClassGroup!]!
-  classGroupsByOrganizationId(organizationId: String!): [ClassGroup!]!
-  classGroupsBySchoolId(schoolId: String!): [ClassGroup!]!
-  course(id: String!): Course!
-  courses(
-    """Order by"""
-    orderBy: String = "name"
-
-    """Order direction"""
-    orderDirection: String = "asc"
-
-    """School ID"""
-    schoolId: String
-
-    """Search query"""
-    search: String = ""
-
-    """Skip"""
-    skip: Int
-    studyPlanId: String
-
-    """Take"""
-    take: Int
-  ): [Course!]!
-  coursesBySchoolId(schoolId: String!): [Course!]!
-  coursesByStudyPlanId(studyPlanId: String!): [Course!]!
-  coursesBySubjectId(subjectId: String!): [Course!]!
-  coursesCount(
-    """Order by"""
-    orderBy: String = "name"
-
-    """Order direction"""
-    orderDirection: String = "asc"
-
-    """School ID"""
-    schoolId: String
-
-    """Search query"""
-    search: String = ""
-
-    """Skip"""
-    skip: Int
-    studyPlanId: String
-
-    """Take"""
-    take: Int
-  ): Int!
-  degree(id: String!): Degree!
-  degrees: [Degree!]!
-  degreesBySchoolId(schoolId: String!): [Degree!]!
-  findContacts(queryText: String = ""): [User!]!
-  findManyMessages(
-    """Order by"""
-    orderBy: String = "name"
-
-    """Order direction"""
-    orderDirection: String = "asc"
-
-    """School ID"""
-    schoolId: String
-
-    """Search query"""
-    search: String = ""
-
-    """Skip"""
-    skip: Int
-    studyPlanId: String
-
-    """Take"""
-    take: Int
-  ): [MessageRecipient!]!
-  findManyMessagesCount: Int!
-  findManyStudentsCount(
-    """Order by"""
-    orderBy: String = "name"
-
-    """Order direction"""
-    orderDirection: String = "asc"
-
-    """School ID"""
-    schoolId: String
-
-    """Search query"""
-    search: String = ""
-
-    """Skip"""
-    skip: Int
-    studyPlanId: String
-
-    """Take"""
-    take: Int
-  ): Int!
-  findManySubjectsCount(
-    """Order by"""
-    orderBy: String = "name"
-
-    """Order direction"""
-    orderDirection: String = "asc"
-
-    """School ID"""
-    schoolId: String
-
-    """Search query"""
-    search: String = ""
-
-    """Skip"""
-    skip: Int
-    studyPlanId: String
-
-    """Take"""
-    take: Int
-  ): Int!
-  findManyTeachersCount(
-    """Order by"""
-    orderBy: String = "name"
-
-    """Order direction"""
-    orderDirection: String = "asc"
-
-    """School ID"""
-    schoolId: String
-
-    """Search query"""
-    search: String = ""
-
-    """Skip"""
-    skip: Int
-    studyPlanId: String
-
-    """Take"""
-    take: Int
-  ): Int!
-  findMessageById(id: String!): Message!
-  findMyMessages(
-    """Order by"""
-    orderBy: String = "name"
-
-    """Order direction"""
-    orderDirection: String = "asc"
-
-    """School ID"""
-    schoolId: String
-
-    """Search query"""
-    search: String = ""
-
-    """Skip"""
-    skip: Int
-    studyPlanId: String
-
-    """Take"""
-    take: Int
-  ): [Message!]!
-  grade(id: String!): Grade!
-  gradeBucket(id: String!): GradeBucket!
-  gradeBucketsByCourseId(courseId: String!): [GradeBucket!]!
   gradeMetric(id: String!): GradeMetric!
   gradeMetrics: [GradeMetric!]!
-  gradeStudent(id: String!): GradeStudent!
-  gradeStudents: [GradeStudent!]!
-  grades: [Grade!]!
-  gradesByCourseId(courseId: String!, periodId: String!): [Grade!]!
-  groupsSchedule(id: String!): GroupsSchedule!
-  groupsSchedules: [GroupsSchedule!]!
   me: User!
   organization(id: String!): Organization!
   organizations: [Organization!]!
-  period(id: String!): Period!
-  periods: [Period!]!
-  periodsBySchoolId(schoolId: String!): [Period!]!
   permission(id: String!): Permission!
-  permissions: [Permission!]!
-  quiz(id: String!): Quiz!
-  quizzes(organizationId: String!): [Quiz!]!
+  permissions(
+    """Order by"""
+    orderBy: String = "name"
+
+    """Order direction"""
+    orderDirection: String = "asc"
+
+    """School ID"""
+    schoolId: String
+
+    """Search query"""
+    search: String = ""
+
+    """Skip"""
+    skip: Int
+    studyPlanId: String
+
+    """Take"""
+    take: Int
+  ): [Permission!]!
+  permissionsCount(
+    """Order by"""
+    orderBy: String = "name"
+
+    """Order direction"""
+    orderDirection: String = "asc"
+
+    """School ID"""
+    schoolId: String
+
+    """Search query"""
+    search: String = ""
+
+    """Skip"""
+    skip: Int
+    studyPlanId: String
+
+    """Take"""
+    take: Int
+  ): Int!
   role(id: String!): Role!
   roles: [Role!]!
   school(id: String!): School!
-  schools: [School!]!
-  student(id: String!): Student!
-  students(
-    """Order by"""
-    orderBy: String = "name"
-
-    """Order direction"""
-    orderDirection: String = "asc"
+  schools(
+    """Organization ID"""
+    organizationId: String
 
     """School ID"""
     schoolId: String
 
-    """Search query"""
-    search: String = ""
-
     """Skip"""
     skip: Int
-    studyPlanId: String
 
     """Take"""
     take: Int
-  ): [Student!]!
-  studentsByCourseId(courseId: String!): [Student!]!
-  studentsBySchoolId(schoolId: String!): [Student!]!
-  studyPlan(id: String!): StudyPlan!
-  studyPlans: [StudyPlan!]!
-  studyPlansBySchoolId(degreeId: String, schoolId: String!): [StudyPlan!]!
+
+    """Teacher ID"""
+    teacherId: String
+  ): [School!]!
   subject(id: String!): Subject!
-  subjects(
-    """Order by"""
-    orderBy: String = "name"
-
-    """Order direction"""
-    orderDirection: String = "asc"
-
-    """School ID"""
-    schoolId: String
-
-    """Search query"""
-    search: String = ""
-
-    """Skip"""
-    skip: Int
-    studyPlanId: String
-
-    """Take"""
-    take: Int
-  ): [Subject!]!
-  teacher(id: String!): Teacher!
-  teachers(
-    """Order by"""
-    orderBy: String = "name"
-
-    """Order direction"""
-    orderDirection: String = "asc"
-
-    """School ID"""
-    schoolId: String
-
-    """Search query"""
-    search: String = ""
-
-    """Skip"""
-    skip: Int
-    studyPlanId: String
-
-    """Take"""
-    take: Int
-  ): [Teacher!]!
-  teachersByOrganizationId(organizationId: String!): [Teacher!]!
+  subjects: [Subject!]!
   user(id: String!): User!
   users: [User!]!
-}
-
-type Quiz {
-  """Course"""
-  course: Course!
-
-  """Course ID"""
-  courseId: String!
-
-  """Created At"""
-  createdAt: DateTime!
-
-  """Details"""
-  details: String!
-
-  """ID"""
-  id: String!
-
-  """Organization ID"""
-  organizationId: String!
-
-  """Questions"""
-  questions: [QuizQuestion!]!
-
-  """Teacher"""
-  teacher: Teacher!
-
-  """Teacher ID"""
-  teacherId: String!
-
-  """Title"""
-  title: String!
-
-  """Updated At"""
-  updatedAt: DateTime!
-}
-
-type QuizQuestion {
-  """ID"""
-  id: String!
-
-  """Options"""
-  options: [QuizQuestionOption!]!
-
-  """Question"""
-  question: String!
-
-  """Quiz ID"""
-  quizId: String!
-
-  """Time Limit"""
-  timeLimit: Float!
-
-  """Type"""
-  type: String!
-
-  """Value"""
-  value: Float!
-}
-
-type QuizQuestionOption {
-  """ID"""
-  id: String!
-
-  """Is Correct"""
-  isCorrect: Boolean!
-
-  """Option"""
-  option: String!
-
-  """Question ID"""
-  questionId: String!
 }
 
 type Role {
@@ -1313,12 +307,12 @@ type School {
   createdAt: DateTime!
 
   """Current year of the school"""
-  currentYear: Float!
+  currentYear: Int!
 
   """Email of the school"""
   email: String!
 
-  """ID of the school"""
+  """ID of the school (auto-generated)"""
   id: String!
 
   """Logo of the school"""
@@ -1330,10 +324,10 @@ type School {
   """Organization of the school"""
   organization: Organization!
 
-  """Organization ID of the school"""
+  """ID of the organization"""
   organizationId: String!
 
-  """Phone number of the school"""
+  """Phone of the school"""
   phone: String!
 
   """Short name of the school"""
@@ -1352,115 +346,6 @@ type School {
   zip: String!
 }
 
-type Student {
-  """Address of the student"""
-  address: String!
-  averageScoreForStudent(courseId: String!, periodId: String!): Float!
-
-  """Birth date of the student"""
-  birthDate: DateTime!
-
-  """Class group of the student"""
-  classGroup: ClassGroup!
-
-  """Class group ID of the student"""
-  classGroupId: String!
-  color: String!
-
-  """Courses of the student"""
-  courses: [Course!]!
-
-  """Created at of the student"""
-  createdAt: DateTime!
-
-  """Document ID of the student"""
-  documentId: String!
-  email: String!
-
-  """Father name of the student"""
-  fatherName: String!
-
-  """First name of the student"""
-  firstName: String!
-  fullName: String!
-
-  """Gender of the student"""
-  gender: String!
-
-  """ID of the student"""
-  id: String!
-  initials: String!
-
-  """Middle name of the student"""
-  middleName: String!
-
-  """Mother name of the student"""
-  motherName: String!
-  name: String!
-
-  """Organization ID of the student"""
-  organizationId: String!
-
-  """Phone of the student"""
-  phone: String!
-
-  """School ID of the student"""
-  schoolId: String!
-
-  """Updated at of the student"""
-  updatedAt: DateTime!
-
-  """User of the student"""
-  user: User!
-
-  """User ID of the student"""
-  userId: String!
-}
-
-type StudyPlan {
-  """Code of the study plan"""
-  code: String!
-
-  """Created at of the study plan"""
-  createdAt: DateTime!
-
-  """Degree of the study plan"""
-  degree: Degree!
-
-  """Degree ID of the study plan"""
-  degreeId: String!
-
-  """Description of the study plan"""
-  description: String!
-
-  """Grade metric of the study plan"""
-  gradeMetric: GradeMetric
-
-  """Grade metric ID of the study plan"""
-  gradeMetricId: String
-
-  """ID of the study plan"""
-  id: String!
-
-  """Level of the study plan"""
-  level: Int!
-
-  """Name of the study plan"""
-  name: String!
-
-  """School of the study plan"""
-  school: School!
-
-  """School ID of the study plan"""
-  schoolId: String!
-
-  """Short name of the study plan"""
-  shortName: String!
-
-  """Updated at of the study plan"""
-  updatedAt: DateTime!
-}
-
 type Subject {
   """Code of the subject"""
   code: String!
@@ -1477,259 +362,33 @@ type Subject {
   """Organization of the subject"""
   organization: Organization!
 
-  """Organization ID of the subject"""
+  """ID of the organization"""
   organizationId: String!
 
   """Short name of the subject"""
   shortName: String!
-  updatedAt: DateTime!
-}
-
-type Teacher {
-  """About the teacher"""
-  about: String!
-
-  """Address of the teacher"""
-  address: String!
-
-  """Birth date of the teacher"""
-  birthDate: DateTime!
-
-  """Groups of the teacher"""
-  classGroups: [ClassGroup!]!
-  color: String!
-
-  """Courses of the teacher"""
-  courses: [Course!]!
-
-  """Created at"""
-  createdAt: DateTime!
-
-  """Document ID of the teacher"""
-  documentId: String!
-
-  """Father name of the teacher"""
-  fatherName: String!
-
-  """First name of the teacher"""
-  firstName: String!
-  fullName: String!
-
-  """Gender of the teacher"""
-  gender: String!
-
-  """ID of the teacher (auto-generated)"""
-  id: String!
-  initials: String!
-
-  """Member since date"""
-  memberSince: DateTime!
-
-  """Middle name of the teacher"""
-  middleName: String!
-
-  """Mother name of the teacher"""
-  motherName: String!
-  name: String!
-
-  """Organization ID of the teacher"""
-  organizationId: String!
-
-  """Personal email of the teacher"""
-  personalEmail: String!
-
-  """Phone number of the teacher"""
-  phoneNumber: String!
-
-  """Subject of the teacher"""
-  subjects: [Subject!]!
-
-  """Teacher since year"""
-  teacherSince: Float!
 
   """Updated at"""
   updatedAt: DateTime!
-
-  """User of the teacher"""
-  user: User!
-
-  """User ID of the teacher"""
-  userId: String!
 }
 
-input UpdateAssignmentInput {
-  """Id del curso"""
-  courseId: String
-
-  """Fecha de la asignacion"""
-  date: String
-
-  """Detalles de la asignacion"""
-  details: String
-
-  """Fechas de la asignacion"""
-  groupDates: [AssignmentDateInput!]
+input UpdateGradeMetricInput {
   id: String!
 
-  """Requiere envio"""
-  requireSubmission: Boolean
+  """Valor máximo del grado"""
+  maximum: Float
 
-  """Id de la escuela"""
-  schoolId: String
+  """Valor mínimo del grado"""
+  minimum: Float
 
-  """Id del profesor"""
-  teacherId: String
+  """Valor mínimo de aprobación del grado"""
+  minimumApproval: Float
 
-  """Titulo de la asignacion"""
-  title: String
+  """Valor mínimo de excelencia del grado"""
+  minimumExcellence: Float
 
-  """Tipo de la asignacion"""
-  type: String
-}
-
-input UpdateClassGroupInput {
-  """Active status of the class group"""
-  active: Boolean = true
-  id: String!
-
-  """Name of the class group"""
+  """Nombre del grado"""
   name: String
-
-  """Organization ID of the class group"""
-  organizationId: String
-
-  """School ID of the class group"""
-  schoolId: String
-
-  """Short name of the class group"""
-  shortName: String
-
-  """Study plan ID of the class group"""
-  studyPlanId: String
-
-  """Teacher ID of the class group"""
-  teacherId: String
-}
-
-input UpdateCourseInput {
-  """Code of the course"""
-  code: String
-
-  """Current period ID of the course"""
-  currentPeriodId: String
-  id: String!
-
-  """Name of the course"""
-  name: String
-
-  """Organization ID of the course"""
-  organizationId: String
-
-  """School ID of the course"""
-  schoolId: String
-
-  """Short name of the course"""
-  shortName: String
-
-  """Study plan ID of the course"""
-  studyPlanId: String
-
-  """Subject ID of the course"""
-  subjectId: String
-
-  """Teacher ID of the course"""
-  teacherId: String
-}
-
-input UpdateDegreeInput {
-  id: String!
-
-  """Name of the degree"""
-  name: String
-
-  """School ID"""
-  schoolId: String
-
-  """Short name of the degree"""
-  shortName: String
-}
-
-input UpdateGradeBucketInput {
-  """Id del curso"""
-  courseId: String
-  id: String!
-
-  """Nombre del bucket"""
-  name: String
-
-  """Peso del bucket"""
-  weight: Float
-}
-
-input UpdateGradeInput {
-  """Id del bucket"""
-  bucketId: String
-
-  """Comentarios"""
-  comments: String
-
-  """Id del curso"""
-  courseId: String
-
-  """Fecha de la calificacion"""
-  date: DateTime
-  id: String!
-
-  """Id del periodo"""
-  periodId: String
-
-  """¿Publicada?"""
-  published: Boolean = false
-
-  """Titulo de la calificacion  """
-  title: String
-}
-
-input UpdateGradeStudentInput {
-  """Comments for the grade student"""
-  comments: String
-
-  """Grade ID for the grade student"""
-  gradeId: String
-  id: String!
-
-  """Score for the grade student"""
-  score: Float
-
-  """Student ID for the grade student"""
-  studentId: String
-}
-
-input UpdateGroupsScheduleInput {
-  """Class group ID"""
-  classGroupId: String
-
-  """Course ID"""
-  courseId: String
-
-  """End time"""
-  endTime: String
-  id: String!
-
-  """Location"""
-  location: String
-
-  """Remote"""
-  remote: Boolean
-
-  """Remote link"""
-  remoteLink: String
-
-  """Start time"""
-  startTime: String
-
-  """Week day"""
-  weekday: String
 }
 
 input UpdateOrganizationInput {
@@ -1739,54 +398,10 @@ input UpdateOrganizationInput {
   name: String
 }
 
-input UpdatePeriodInput {
-  """End date of the period"""
-  endDate: DateTime
-
-  """ID of the period"""
-  id: String!
-
-  """Name of the period"""
-  name: String
-
-  """School ID of the period"""
-  schoolId: String
-
-  """Short name of the period"""
-  shortName: String
-
-  """Start date of the period"""
-  startDate: DateTime
-
-  """Year of the period"""
-  year: Int
-}
-
 input UpdatePermissionInput {
   description: String
   descriptiveId: String
   id: String!
-}
-
-input UpdateQuizInput {
-  """Course ID"""
-  courseId: String
-
-  """Details"""
-  details: String
-  id: String!
-
-  """Organization ID"""
-  organizationId: String
-
-  """Questions"""
-  questions: [CreateQuizQuestionInput!]
-
-  """Teacher ID"""
-  teacherId: String
-
-  """Title"""
-  title: String
 }
 
 input UpdateRoleInput {
@@ -1814,6 +429,9 @@ input UpdateSchoolInput {
   """Country of the school"""
   country: String = ""
 
+  """Current year of the school"""
+  currentYear: Int = 2025
+
   """Email of the school"""
   email: String = ""
   id: String!
@@ -1827,7 +445,7 @@ input UpdateSchoolInput {
   """Organization ID of the school"""
   organizationId: String
 
-  """Phone number of the school"""
+  """Phone of the school"""
   phone: String = ""
 
   """Short name of the school"""
@@ -1843,75 +461,6 @@ input UpdateSchoolInput {
   zip: String = ""
 }
 
-input UpdateStudentInput {
-  """Address of the student"""
-  address: String
-
-  """Birth date of the student"""
-  birthDate: DateTime
-
-  """Class group ID of the student"""
-  classGroupId: String
-
-  """Document ID of the student"""
-  documentId: String
-
-  """Email of the student"""
-  email: String
-
-  """Father name of the student"""
-  fatherName: String
-
-  """First name of the student"""
-  firstName: String
-
-  """Gender of the student"""
-  gender: String
-  id: String!
-
-  """Middle name of the student"""
-  middleName: String
-
-  """Mother name of the student"""
-  motherName: String
-
-  """Organization ID of the student"""
-  organizationId: String
-
-  """Phone of the student"""
-  phone: String
-
-  """School ID of the student"""
-  schoolId: String
-}
-
-input UpdateStudyPlanInput {
-  """Code of the study plan"""
-  code: String
-
-  """Degree ID of the study plan"""
-  degreeId: String
-
-  """Description of the study plan"""
-  description: String
-
-  """Grade metric ID of the study plan"""
-  gradeMetricId: String
-  id: String!
-
-  """Level of the study plan"""
-  level: Int
-
-  """Name of the study plan"""
-  name: String
-
-  """School ID of the study plan"""
-  schoolId: String
-
-  """Short name of the study plan"""
-  shortName: String
-}
-
 input UpdateSubjectInput {
   """Code of the subject"""
   code: String
@@ -1920,43 +469,14 @@ input UpdateSubjectInput {
   """Name of the subject"""
   name: String
 
+  """Organization ID of the subject"""
+  organizationId: String
+
+  """School ID of the subject"""
+  schoolId: String
+
   """Short name of the subject"""
   shortName: String
-}
-
-input UpdateTeacherInput {
-  about: String = ""
-  address: String = ""
-
-  """Birth date of the teacher"""
-  birthDate: DateTime = "2025-12-26T20:38:19.271Z"
-
-  """Document ID of the teacher"""
-  documentId: String
-
-  """Email of the teacher"""
-  email: String
-
-  """Father name of the teacher"""
-  fatherName: String
-
-  """First name of the teacher"""
-  firstName: String
-
-  """Gender of the teacher"""
-  gender: String
-  id: String!
-
-  """Middle name of the teacher"""
-  middleName: String = ""
-
-  """Mother name of the teacher"""
-  motherName: String = ""
-
-  """Organization ID of the teacher"""
-  organizationId: String
-  personalEmail: String = ""
-  phoneNumber: String = ""
 }
 
 input UpdateUserInput {

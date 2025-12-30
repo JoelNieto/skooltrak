@@ -680,8 +680,8 @@ export namespace Prisma {
   export import Exact = $Public.Exact
 
   /**
-   * Prisma Client JS version: 7.1.0
-   * Query Engine version: ab635e6b9d606fa5c8fb8b1a7f909c3c3c1c98ba
+   * Prisma Client JS version: 7.2.0
+   * Query Engine version: 0c8ef2ce45c83248ab3df073180d5eda9e8be7a3
    */
   export type PrismaVersion = {
     client: string
@@ -30076,6 +30076,9 @@ export namespace Prisma {
     id: string | null
     classGroupId: string | null
     courseId: string | null
+    location: string | null
+    remote: boolean | null
+    remoteLink: string | null
     weekday: $Enums.WeekDay | null
     startTime: string | null
     endTime: string | null
@@ -30087,6 +30090,9 @@ export namespace Prisma {
     id: string | null
     classGroupId: string | null
     courseId: string | null
+    location: string | null
+    remote: boolean | null
+    remoteLink: string | null
     weekday: $Enums.WeekDay | null
     startTime: string | null
     endTime: string | null
@@ -30098,6 +30104,9 @@ export namespace Prisma {
     id: number
     classGroupId: number
     courseId: number
+    location: number
+    remote: number
+    remoteLink: number
     weekday: number
     startTime: number
     endTime: number
@@ -30111,6 +30120,9 @@ export namespace Prisma {
     id?: true
     classGroupId?: true
     courseId?: true
+    location?: true
+    remote?: true
+    remoteLink?: true
     weekday?: true
     startTime?: true
     endTime?: true
@@ -30122,6 +30134,9 @@ export namespace Prisma {
     id?: true
     classGroupId?: true
     courseId?: true
+    location?: true
+    remote?: true
+    remoteLink?: true
     weekday?: true
     startTime?: true
     endTime?: true
@@ -30133,6 +30148,9 @@ export namespace Prisma {
     id?: true
     classGroupId?: true
     courseId?: true
+    location?: true
+    remote?: true
+    remoteLink?: true
     weekday?: true
     startTime?: true
     endTime?: true
@@ -30217,6 +30235,9 @@ export namespace Prisma {
     id: string
     classGroupId: string
     courseId: string
+    location: string
+    remote: boolean
+    remoteLink: string
     weekday: $Enums.WeekDay
     startTime: string
     endTime: string
@@ -30245,6 +30266,9 @@ export namespace Prisma {
     id?: boolean
     classGroupId?: boolean
     courseId?: boolean
+    location?: boolean
+    remote?: boolean
+    remoteLink?: boolean
     weekday?: boolean
     startTime?: boolean
     endTime?: boolean
@@ -30258,6 +30282,9 @@ export namespace Prisma {
     id?: boolean
     classGroupId?: boolean
     courseId?: boolean
+    location?: boolean
+    remote?: boolean
+    remoteLink?: boolean
     weekday?: boolean
     startTime?: boolean
     endTime?: boolean
@@ -30271,6 +30298,9 @@ export namespace Prisma {
     id?: boolean
     classGroupId?: boolean
     courseId?: boolean
+    location?: boolean
+    remote?: boolean
+    remoteLink?: boolean
     weekday?: boolean
     startTime?: boolean
     endTime?: boolean
@@ -30284,6 +30314,9 @@ export namespace Prisma {
     id?: boolean
     classGroupId?: boolean
     courseId?: boolean
+    location?: boolean
+    remote?: boolean
+    remoteLink?: boolean
     weekday?: boolean
     startTime?: boolean
     endTime?: boolean
@@ -30291,7 +30324,7 @@ export namespace Prisma {
     updatedAt?: boolean
   }
 
-  export type ClassGroupWeeklyScheduleOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "classGroupId" | "courseId" | "weekday" | "startTime" | "endTime" | "createdAt" | "updatedAt", ExtArgs["result"]["classGroupWeeklySchedule"]>
+  export type ClassGroupWeeklyScheduleOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "classGroupId" | "courseId" | "location" | "remote" | "remoteLink" | "weekday" | "startTime" | "endTime" | "createdAt" | "updatedAt", ExtArgs["result"]["classGroupWeeklySchedule"]>
   export type ClassGroupWeeklyScheduleInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     classGroup?: boolean | ClassGroupDefaultArgs<ExtArgs>
     course?: boolean | CourseDefaultArgs<ExtArgs>
@@ -30315,6 +30348,9 @@ export namespace Prisma {
       id: string
       classGroupId: string
       courseId: string
+      location: string
+      remote: boolean
+      remoteLink: string
       weekday: $Enums.WeekDay
       startTime: string
       endTime: string
@@ -30748,6 +30784,9 @@ export namespace Prisma {
     readonly id: FieldRef<"ClassGroupWeeklySchedule", 'String'>
     readonly classGroupId: FieldRef<"ClassGroupWeeklySchedule", 'String'>
     readonly courseId: FieldRef<"ClassGroupWeeklySchedule", 'String'>
+    readonly location: FieldRef<"ClassGroupWeeklySchedule", 'String'>
+    readonly remote: FieldRef<"ClassGroupWeeklySchedule", 'Boolean'>
+    readonly remoteLink: FieldRef<"ClassGroupWeeklySchedule", 'String'>
     readonly weekday: FieldRef<"ClassGroupWeeklySchedule", 'WeekDay'>
     readonly startTime: FieldRef<"ClassGroupWeeklySchedule", 'String'>
     readonly endTime: FieldRef<"ClassGroupWeeklySchedule", 'String'>
@@ -39541,6 +39580,9 @@ export namespace Prisma {
     id: 'id',
     classGroupId: 'classGroupId',
     courseId: 'courseId',
+    location: 'location',
+    remote: 'remote',
+    remoteLink: 'remoteLink',
     weekday: 'weekday',
     startTime: 'startTime',
     endTime: 'endTime',
@@ -41657,6 +41699,9 @@ export namespace Prisma {
     id?: StringFilter<"ClassGroupWeeklySchedule"> | string
     classGroupId?: StringFilter<"ClassGroupWeeklySchedule"> | string
     courseId?: StringFilter<"ClassGroupWeeklySchedule"> | string
+    location?: StringFilter<"ClassGroupWeeklySchedule"> | string
+    remote?: BoolFilter<"ClassGroupWeeklySchedule"> | boolean
+    remoteLink?: StringFilter<"ClassGroupWeeklySchedule"> | string
     weekday?: EnumWeekDayFilter<"ClassGroupWeeklySchedule"> | $Enums.WeekDay
     startTime?: StringFilter<"ClassGroupWeeklySchedule"> | string
     endTime?: StringFilter<"ClassGroupWeeklySchedule"> | string
@@ -41670,6 +41715,9 @@ export namespace Prisma {
     id?: SortOrder
     classGroupId?: SortOrder
     courseId?: SortOrder
+    location?: SortOrder
+    remote?: SortOrder
+    remoteLink?: SortOrder
     weekday?: SortOrder
     startTime?: SortOrder
     endTime?: SortOrder
@@ -41687,6 +41735,9 @@ export namespace Prisma {
     NOT?: ClassGroupWeeklyScheduleWhereInput | ClassGroupWeeklyScheduleWhereInput[]
     classGroupId?: StringFilter<"ClassGroupWeeklySchedule"> | string
     courseId?: StringFilter<"ClassGroupWeeklySchedule"> | string
+    location?: StringFilter<"ClassGroupWeeklySchedule"> | string
+    remote?: BoolFilter<"ClassGroupWeeklySchedule"> | boolean
+    remoteLink?: StringFilter<"ClassGroupWeeklySchedule"> | string
     weekday?: EnumWeekDayFilter<"ClassGroupWeeklySchedule"> | $Enums.WeekDay
     startTime?: StringFilter<"ClassGroupWeeklySchedule"> | string
     endTime?: StringFilter<"ClassGroupWeeklySchedule"> | string
@@ -41700,6 +41751,9 @@ export namespace Prisma {
     id?: SortOrder
     classGroupId?: SortOrder
     courseId?: SortOrder
+    location?: SortOrder
+    remote?: SortOrder
+    remoteLink?: SortOrder
     weekday?: SortOrder
     startTime?: SortOrder
     endTime?: SortOrder
@@ -41717,6 +41771,9 @@ export namespace Prisma {
     id?: StringWithAggregatesFilter<"ClassGroupWeeklySchedule"> | string
     classGroupId?: StringWithAggregatesFilter<"ClassGroupWeeklySchedule"> | string
     courseId?: StringWithAggregatesFilter<"ClassGroupWeeklySchedule"> | string
+    location?: StringWithAggregatesFilter<"ClassGroupWeeklySchedule"> | string
+    remote?: BoolWithAggregatesFilter<"ClassGroupWeeklySchedule"> | boolean
+    remoteLink?: StringWithAggregatesFilter<"ClassGroupWeeklySchedule"> | string
     weekday?: EnumWeekDayWithAggregatesFilter<"ClassGroupWeeklySchedule"> | $Enums.WeekDay
     startTime?: StringWithAggregatesFilter<"ClassGroupWeeklySchedule"> | string
     endTime?: StringWithAggregatesFilter<"ClassGroupWeeklySchedule"> | string
@@ -44205,6 +44262,9 @@ export namespace Prisma {
 
   export type ClassGroupWeeklyScheduleCreateInput = {
     id?: string
+    location?: string
+    remote?: boolean
+    remoteLink?: string
     weekday: $Enums.WeekDay
     startTime: string
     endTime: string
@@ -44218,6 +44278,9 @@ export namespace Prisma {
     id?: string
     classGroupId: string
     courseId: string
+    location?: string
+    remote?: boolean
+    remoteLink?: string
     weekday: $Enums.WeekDay
     startTime: string
     endTime: string
@@ -44227,6 +44290,9 @@ export namespace Prisma {
 
   export type ClassGroupWeeklyScheduleUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
+    location?: StringFieldUpdateOperationsInput | string
+    remote?: BoolFieldUpdateOperationsInput | boolean
+    remoteLink?: StringFieldUpdateOperationsInput | string
     weekday?: EnumWeekDayFieldUpdateOperationsInput | $Enums.WeekDay
     startTime?: StringFieldUpdateOperationsInput | string
     endTime?: StringFieldUpdateOperationsInput | string
@@ -44240,6 +44306,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     classGroupId?: StringFieldUpdateOperationsInput | string
     courseId?: StringFieldUpdateOperationsInput | string
+    location?: StringFieldUpdateOperationsInput | string
+    remote?: BoolFieldUpdateOperationsInput | boolean
+    remoteLink?: StringFieldUpdateOperationsInput | string
     weekday?: EnumWeekDayFieldUpdateOperationsInput | $Enums.WeekDay
     startTime?: StringFieldUpdateOperationsInput | string
     endTime?: StringFieldUpdateOperationsInput | string
@@ -44251,6 +44320,9 @@ export namespace Prisma {
     id?: string
     classGroupId: string
     courseId: string
+    location?: string
+    remote?: boolean
+    remoteLink?: string
     weekday: $Enums.WeekDay
     startTime: string
     endTime: string
@@ -44260,6 +44332,9 @@ export namespace Prisma {
 
   export type ClassGroupWeeklyScheduleUpdateManyMutationInput = {
     id?: StringFieldUpdateOperationsInput | string
+    location?: StringFieldUpdateOperationsInput | string
+    remote?: BoolFieldUpdateOperationsInput | boolean
+    remoteLink?: StringFieldUpdateOperationsInput | string
     weekday?: EnumWeekDayFieldUpdateOperationsInput | $Enums.WeekDay
     startTime?: StringFieldUpdateOperationsInput | string
     endTime?: StringFieldUpdateOperationsInput | string
@@ -44271,6 +44346,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     classGroupId?: StringFieldUpdateOperationsInput | string
     courseId?: StringFieldUpdateOperationsInput | string
+    location?: StringFieldUpdateOperationsInput | string
+    remote?: BoolFieldUpdateOperationsInput | boolean
+    remoteLink?: StringFieldUpdateOperationsInput | string
     weekday?: EnumWeekDayFieldUpdateOperationsInput | $Enums.WeekDay
     startTime?: StringFieldUpdateOperationsInput | string
     endTime?: StringFieldUpdateOperationsInput | string
@@ -46281,6 +46359,9 @@ export namespace Prisma {
     id?: SortOrder
     classGroupId?: SortOrder
     courseId?: SortOrder
+    location?: SortOrder
+    remote?: SortOrder
+    remoteLink?: SortOrder
     weekday?: SortOrder
     startTime?: SortOrder
     endTime?: SortOrder
@@ -46292,6 +46373,9 @@ export namespace Prisma {
     id?: SortOrder
     classGroupId?: SortOrder
     courseId?: SortOrder
+    location?: SortOrder
+    remote?: SortOrder
+    remoteLink?: SortOrder
     weekday?: SortOrder
     startTime?: SortOrder
     endTime?: SortOrder
@@ -46303,6 +46387,9 @@ export namespace Prisma {
     id?: SortOrder
     classGroupId?: SortOrder
     courseId?: SortOrder
+    location?: SortOrder
+    remote?: SortOrder
+    remoteLink?: SortOrder
     weekday?: SortOrder
     startTime?: SortOrder
     endTime?: SortOrder
@@ -54443,6 +54530,9 @@ export namespace Prisma {
 
   export type ClassGroupWeeklyScheduleCreateWithoutCourseInput = {
     id?: string
+    location?: string
+    remote?: boolean
+    remoteLink?: string
     weekday: $Enums.WeekDay
     startTime: string
     endTime: string
@@ -54454,6 +54544,9 @@ export namespace Prisma {
   export type ClassGroupWeeklyScheduleUncheckedCreateWithoutCourseInput = {
     id?: string
     classGroupId: string
+    location?: string
+    remote?: boolean
+    remoteLink?: string
     weekday: $Enums.WeekDay
     startTime: string
     endTime: string
@@ -54882,6 +54975,9 @@ export namespace Prisma {
     id?: StringFilter<"ClassGroupWeeklySchedule"> | string
     classGroupId?: StringFilter<"ClassGroupWeeklySchedule"> | string
     courseId?: StringFilter<"ClassGroupWeeklySchedule"> | string
+    location?: StringFilter<"ClassGroupWeeklySchedule"> | string
+    remote?: BoolFilter<"ClassGroupWeeklySchedule"> | boolean
+    remoteLink?: StringFilter<"ClassGroupWeeklySchedule"> | string
     weekday?: EnumWeekDayFilter<"ClassGroupWeeklySchedule"> | $Enums.WeekDay
     startTime?: StringFilter<"ClassGroupWeeklySchedule"> | string
     endTime?: StringFilter<"ClassGroupWeeklySchedule"> | string
@@ -55258,6 +55354,9 @@ export namespace Prisma {
 
   export type ClassGroupWeeklyScheduleCreateWithoutClassGroupInput = {
     id?: string
+    location?: string
+    remote?: boolean
+    remoteLink?: string
     weekday: $Enums.WeekDay
     startTime: string
     endTime: string
@@ -55269,6 +55368,9 @@ export namespace Prisma {
   export type ClassGroupWeeklyScheduleUncheckedCreateWithoutClassGroupInput = {
     id?: string
     courseId: string
+    location?: string
+    remote?: boolean
+    remoteLink?: string
     weekday: $Enums.WeekDay
     startTime: string
     endTime: string
@@ -61171,6 +61273,9 @@ export namespace Prisma {
   export type ClassGroupWeeklyScheduleCreateManyCourseInput = {
     id?: string
     classGroupId: string
+    location?: string
+    remote?: boolean
+    remoteLink?: string
     weekday: $Enums.WeekDay
     startTime: string
     endTime: string
@@ -61431,6 +61536,9 @@ export namespace Prisma {
 
   export type ClassGroupWeeklyScheduleUpdateWithoutCourseInput = {
     id?: StringFieldUpdateOperationsInput | string
+    location?: StringFieldUpdateOperationsInput | string
+    remote?: BoolFieldUpdateOperationsInput | boolean
+    remoteLink?: StringFieldUpdateOperationsInput | string
     weekday?: EnumWeekDayFieldUpdateOperationsInput | $Enums.WeekDay
     startTime?: StringFieldUpdateOperationsInput | string
     endTime?: StringFieldUpdateOperationsInput | string
@@ -61442,6 +61550,9 @@ export namespace Prisma {
   export type ClassGroupWeeklyScheduleUncheckedUpdateWithoutCourseInput = {
     id?: StringFieldUpdateOperationsInput | string
     classGroupId?: StringFieldUpdateOperationsInput | string
+    location?: StringFieldUpdateOperationsInput | string
+    remote?: BoolFieldUpdateOperationsInput | boolean
+    remoteLink?: StringFieldUpdateOperationsInput | string
     weekday?: EnumWeekDayFieldUpdateOperationsInput | $Enums.WeekDay
     startTime?: StringFieldUpdateOperationsInput | string
     endTime?: StringFieldUpdateOperationsInput | string
@@ -61452,6 +61563,9 @@ export namespace Prisma {
   export type ClassGroupWeeklyScheduleUncheckedUpdateManyWithoutCourseInput = {
     id?: StringFieldUpdateOperationsInput | string
     classGroupId?: StringFieldUpdateOperationsInput | string
+    location?: StringFieldUpdateOperationsInput | string
+    remote?: BoolFieldUpdateOperationsInput | boolean
+    remoteLink?: StringFieldUpdateOperationsInput | string
     weekday?: EnumWeekDayFieldUpdateOperationsInput | $Enums.WeekDay
     startTime?: StringFieldUpdateOperationsInput | string
     endTime?: StringFieldUpdateOperationsInput | string
@@ -61505,6 +61619,9 @@ export namespace Prisma {
   export type ClassGroupWeeklyScheduleCreateManyClassGroupInput = {
     id?: string
     courseId: string
+    location?: string
+    remote?: boolean
+    remoteLink?: string
     weekday: $Enums.WeekDay
     startTime: string
     endTime: string
@@ -61708,6 +61825,9 @@ export namespace Prisma {
 
   export type ClassGroupWeeklyScheduleUpdateWithoutClassGroupInput = {
     id?: StringFieldUpdateOperationsInput | string
+    location?: StringFieldUpdateOperationsInput | string
+    remote?: BoolFieldUpdateOperationsInput | boolean
+    remoteLink?: StringFieldUpdateOperationsInput | string
     weekday?: EnumWeekDayFieldUpdateOperationsInput | $Enums.WeekDay
     startTime?: StringFieldUpdateOperationsInput | string
     endTime?: StringFieldUpdateOperationsInput | string
@@ -61719,6 +61839,9 @@ export namespace Prisma {
   export type ClassGroupWeeklyScheduleUncheckedUpdateWithoutClassGroupInput = {
     id?: StringFieldUpdateOperationsInput | string
     courseId?: StringFieldUpdateOperationsInput | string
+    location?: StringFieldUpdateOperationsInput | string
+    remote?: BoolFieldUpdateOperationsInput | boolean
+    remoteLink?: StringFieldUpdateOperationsInput | string
     weekday?: EnumWeekDayFieldUpdateOperationsInput | $Enums.WeekDay
     startTime?: StringFieldUpdateOperationsInput | string
     endTime?: StringFieldUpdateOperationsInput | string
@@ -61729,6 +61852,9 @@ export namespace Prisma {
   export type ClassGroupWeeklyScheduleUncheckedUpdateManyWithoutClassGroupInput = {
     id?: StringFieldUpdateOperationsInput | string
     courseId?: StringFieldUpdateOperationsInput | string
+    location?: StringFieldUpdateOperationsInput | string
+    remote?: BoolFieldUpdateOperationsInput | boolean
+    remoteLink?: StringFieldUpdateOperationsInput | string
     weekday?: EnumWeekDayFieldUpdateOperationsInput | $Enums.WeekDay
     startTime?: StringFieldUpdateOperationsInput | string
     endTime?: StringFieldUpdateOperationsInput | string

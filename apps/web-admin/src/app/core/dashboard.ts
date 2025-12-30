@@ -2,16 +2,11 @@ import {
   ChangeDetectionStrategy,
   Component,
   ElementRef,
-  inject,
-  OnInit,
   viewChild,
 } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import { Prisma } from '@generated/prisma';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { phosphorListDuotone } from '@ng-icons/phosphor-icons/duotone';
-import { Apollo, gql } from 'apollo-angular';
-import { Auth } from '../auth/auth';
 import { Sidebar } from './sidebar';
 @Component({
   selector: 'app-dashboard',
@@ -65,10 +60,7 @@ import { Sidebar } from './sidebar';
   styles: ``,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class Dashboard implements OnInit {
-  private apollo = inject(Apollo);
-  private auth = inject(Auth);
-
+export default class Dashboard {
   public sidebarOverlay =
     viewChild.required<ElementRef<HTMLDivElement>>('sidebarOverlay');
 
@@ -78,41 +70,6 @@ export class Dashboard implements OnInit {
 
   public sidebarToggle =
     viewChild.required<ElementRef<HTMLElement>>('sidebarToggle');
-
-  ngOnInit() {
-    this.apollo
-      .watchQuery<{
-        me: Prisma.UserGetPayload<{
-          include: { role: { include: { permissions: true } } };
-        }>;
-      }>({
-        query: gql`
-          query me {
-            me {
-              id
-              email
-              firstName
-              lastName
-              color
-              role {
-                name
-                permissions {
-                  id
-                  descriptiveId
-                  description
-                }
-              }
-            }
-          }
-        `,
-      })
-      .valueChanges.subscribe((res) => {
-        const { me } = res.data;
-        if (me) {
-          this.auth.user.set(me);
-        }
-      });
-  }
 
   public openSidebar() {
     this.sidebarOverlay().nativeElement.classList.remove('hidden');

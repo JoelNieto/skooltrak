@@ -1,4 +1,5 @@
-import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
+import { Args, Int, Mutation, Query, Resolver } from '@nestjs/graphql';
+import { FetchDataInput } from '../fetch-data-input';
 import { CreatePermissionInput } from './dto/create-permission.input';
 import { UpdatePermissionInput } from './dto/update-permission.input';
 import { Permission } from './entities/permission.entity';
@@ -16,8 +17,13 @@ export class PermissionsResolver {
   }
 
   @Query(() => [Permission], { name: 'permissions' })
-  findAll() {
-    return this.permissionsService.findAll();
+  findAll(@Args() fetchDataInput: FetchDataInput) {
+    return this.permissionsService.findAll(fetchDataInput);
+  }
+
+  @Query(() => Int, { name: 'permissionsCount' })
+  count(@Args() fetchDataInput: FetchDataInput) {
+    return this.permissionsService.count(fetchDataInput);
   }
 
   @Query(() => Permission, { name: 'permission' })

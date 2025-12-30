@@ -28,6 +28,24 @@ export class GroupsSchedulesResolver {
     return this.groupsSchedulesService.findOne(id);
   }
 
+  @Query(() => [GroupsSchedule], { name: 'groupsSchedulesByClassGroupId' })
+  findAllByClassGroupId(
+    @Args('classGroupId', { type: () => String }) classGroupId: string
+  ) {
+    return this.groupsSchedulesService.findAllByClassGroupId(classGroupId);
+  }
+
+  @Query(() => [GroupsSchedule], {
+    name: 'groupsSchedulesByClassGroupIdGrouped',
+  })
+  findAllByClassGroupIdGrouped(
+    @Args('classGroupId', { type: () => String }) classGroupId: string
+  ) {
+    return this.groupsSchedulesService.findAllByClassGroupIdGrouped(
+      classGroupId
+    );
+  }
+
   @Mutation(() => GroupsSchedule)
   updateGroupsSchedule(
     @Args('updateGroupsScheduleInput')

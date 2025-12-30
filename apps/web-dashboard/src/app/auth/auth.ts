@@ -180,6 +180,10 @@ export default class Auth {
       });
   }
 
+  public hasPermission(permission: string) {
+    return this.permissions()?.includes(permission);
+  }
+
   public isAuthenticatedSync() {
     const token = this.getAccessToken();
     return token && !this.jwtHelper.isTokenExpired(token);

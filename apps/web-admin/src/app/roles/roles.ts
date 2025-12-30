@@ -1,18 +1,46 @@
 import { Confirmation, Modal, Toast } from '@/ui';
+import { Menu, MenuContent, MenuItem, MenuTrigger } from '@angular/aria/menu';
+import { OverlayModule } from '@angular/cdk/overlay';
 import { DatePipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  inject,
+  viewChild,
+} from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import { Prisma } from '@generated/prisma';
 import { NgIcon, provideIcons } from '@ng-icons/core';
-import { phosphorPlusCircleDuotone } from '@ng-icons/phosphor-icons/duotone';
+import {
+  phosphorDotsThreeOutlineDuotone,
+  phosphorPencilDuotone,
+  phosphorPlusCircleDuotone,
+  phosphorTrashDuotone,
+} from '@ng-icons/phosphor-icons/duotone';
 import { Apollo, gql } from 'apollo-angular';
 import { map } from 'rxjs';
 import { RolesForm } from './roles-form';
 @Component({
   selector: 'app-roles',
-  imports: [RouterLink, NgIcon, DatePipe],
-  viewProviders: [provideIcons({ phosphorPlusCircleDuotone })],
+  imports: [
+    RouterLink,
+    NgIcon,
+    DatePipe,
+    Menu,
+    MenuContent,
+    MenuItem,
+    MenuTrigger,
+    OverlayModule,
+  ],
+  viewProviders: [
+    provideIcons({
+      phosphorPlusCircleDuotone,
+      phosphorDotsThreeOutlineDuotone,
+      phosphorPencilDuotone,
+      phosphorTrashDuotone,
+    }),
+  ],
   template: `<div class="breadcrumbs text-sm">
       <ul>
         <li><a routerLink="/">Inicio</a></li>
@@ -50,20 +78,59 @@ import { RolesForm } from './roles-form';
             <td>{{ role.createdAt | date : 'medium' }}</td>
             <td>{{ role.updatedAt | date : 'medium' }}</td>
             <td>
-              <div class="join">
-                <button
-                  class="join-item btn btn-primary btn-xs"
-                  (click)="editRole(role)"
+              <button
+                class="cursor-pointer hover:bg-base-200 p-1 rounded-lg flex items-center justify-center"
+                ngMenuTrigger
+                #origin
+                #trigger="ngMenuTrigger"
+                [menu]="formatMenu()"
+              >
+                <ng-icon
+                  name="phosphorDotsThreeOutlineDuotone"
+                  class="text-xl"
+                />
+              </button>
+              <ng-template
+                [cdkConnectedOverlayOpen]="trigger.expanded()"
+                [cdkConnectedOverlay]="{origin, usePopover: 'inline'}"
+                [cdkConnectedOverlayPositions]="[
+                  {
+                    originX: 'end',
+                    originY: 'bottom',
+                    overlayX: 'end',
+                    overlayY: 'top',
+                    offsetY: 4
+                  }
+                ]"
+                cdkAttachPopoverAsChild
+              >
+                <div
+                  ngMenu
+                  class="bg-base-100 shadow-sm rounded-lg p-1 w-48"
+                  #formatMenu="ngMenu"
                 >
-                  Editar
-                </button>
-                <button
-                  class="join-item btn btn-error btn-xs"
-                  (click)="deleteRole(role)"
-                >
-                  Eliminar
-                </button>
-              </div>
+                  <ng-template ngMenuContent>
+                    <button
+                      ngMenuItem
+                      value="Edit"
+                      class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-base-200 w-full"
+                      (click)="editRole(role)"
+                    >
+                      <ng-icon name="phosphorPencilDuotone" class="text-lg" />
+                      <span>Editar</span>
+                    </button>
+                    <button
+                      ngMenuItem
+                      value="Delete"
+                      class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-base-200 w-full"
+                      (click)="deleteRole(role)"
+                    >
+                      <ng-icon name="phosphorTrashDuotone" class="text-lg" />
+                      <span>Eliminar</span>
+                    </button>
+                  </ng-template>
+                </div>
+              </ng-template>
             </td>
           </tr>
           }
@@ -76,6 +143,7 @@ import { RolesForm } from './roles-form';
 export class Roles {
   private modal = inject(Modal);
   private apollo = inject(Apollo);
+  formatMenu = viewChild<Menu<string>>('formatMenu');
   private confirmation = inject(Confirmation);
   private toast = inject(Toast);
 

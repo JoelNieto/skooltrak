@@ -4,12 +4,14 @@ import { authGuard } from './auth/guards/auth.guard';
 export const appRoutes: Route[] = [
   {
     path: 'login',
-    loadComponent: () => import('./auth/login').then((m) => m.Login),
+    loadComponent: () => import('./auth/login'),
+    title: 'Inicio de sesión | Skooltrak',
   },
   {
     path: '',
     canActivateChild: [authGuard],
-    loadComponent: () => import('./core/dashboard').then((m) => m.Dashboard),
+    title: 'Panel de control | Skooltrak',
+    loadComponent: () => import('./core/dashboard'),
     children: [
       {
         path: 'home',

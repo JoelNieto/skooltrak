@@ -28,25 +28,28 @@ type Student = Prisma.StudentGetPayload<{
         (input)="search.set($event.target.value)"
       />
     </label>
-    <ul class="flex flex-col gap-4 mt-4">
+    <ul
+      class="flex-col gap-4 mt-4 md:grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
+    >
       @for(student of filteredStudents(); track student.id) {
-      <li>
-        <a [routerLink]="['/students', student.id]">
-          <div class="flex items-center gap-4">
-            <div class="avatar avatar-placeholder">
-              <div
-                class="text-primary-content w-10 rounded-full"
-                [style.background]="student.user.color"
-              >
-                <span class="text-sm">{{ student.initials }}</span>
-              </div>
-            </div>
-            <div>
-              <p>{{ student.name }}</p>
-              <p class="text-base-200 text-sm">{{ student.documentId }}</p>
+      <li
+        class="card card-border border-base-300 bg-base-100 p-4 hover:bg-base-200 cursor-pointer"
+        [routerLink]="['/students', student.id]"
+      >
+        <div class="flex items-center gap-4">
+          <div class="avatar avatar-placeholder">
+            <div
+              class="text-primary-content w-10 rounded-full"
+              [style.background]="student.user.color"
+            >
+              <span class="text-sm">{{ student.initials }}</span>
             </div>
           </div>
-        </a>
+          <div>
+            <p>{{ student.name }}</p>
+            <p class="text-base-200 text-sm">{{ student.documentId }}</p>
+          </div>
+        </div>
       </li>
       }
     </ul> `,

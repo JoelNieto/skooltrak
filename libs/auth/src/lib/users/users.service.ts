@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
+import { FetchDataInput } from '../fetch-data-input';
 import { PrismaService } from '../prisma.service';
 import { CreateUserInput } from './dto/create-user.input';
 import { UpdateUserInput } from './dto/update-user.input';
@@ -28,11 +29,34 @@ export class UsersService {
     });
   }
 
-  findAll() {
+  findAll(fetchDataInput: FetchDataInput) {
+    const { skip, take, search } = fetchDataInput;
     return this.prisma.user.findMany({
       include: {
         role: { include: { permissions: true } },
         organization: true,
+      },
+      skip,
+      take,
+      where: {
+        OR: [
+          { firstName: { contains: search, mode: 'insensitive' } },
+          { lastName: { contains: search, mode: 'insensitive' } },
+          { email: { contains: search, mode: 'insensitive' } },
+        ],
+      },
+    });
+  }
+
+  count(fetchDataInput: FetchDataInput) {
+    const { search } = fetchDataInput;
+    return this.prisma.user.count({
+      where: {
+        OR: [
+          { firstName: { contains: search, mode: 'insensitive' } },
+          { lastName: { contains: search, mode: 'insensitive' } },
+          { email: { contains: search, mode: 'insensitive' } },
+        ],
       },
     });
   }

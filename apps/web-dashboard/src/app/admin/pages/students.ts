@@ -1,14 +1,20 @@
 import { Confirmation, Modal, Pagination, Paginator, Toast } from '@/ui';
+import { Menu, MenuContent, MenuItem, MenuTrigger } from '@angular/aria/menu';
+import { OverlayModule } from '@angular/cdk/overlay';
 import { DatePipe } from '@angular/common';
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, viewChild } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { Prisma } from '@generated/prisma';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
+  phosphorDotsThreeOutlineDuotone,
+  phosphorEyeDuotone,
   phosphorMagnifyingGlassDuotone,
+  phosphorPencilDuotone,
   phosphorPlusCircleDuotone,
+  phosphorTrashDuotone,
 } from '@ng-icons/phosphor-icons/duotone';
 import { Apollo, gql } from 'apollo-angular';
 import { filter, map, switchMap, tap } from 'rxjs';
@@ -21,12 +27,27 @@ type Student = Prisma.StudentGetPayload<{
 };
 
 @Component({
-  imports: [DatePipe, RouterLink, Paginator, NgIcon, FormsModule],
+  imports: [
+    DatePipe,
+    RouterLink,
+    Paginator,
+    NgIcon,
+    FormsModule,
+    Menu,
+    MenuContent,
+    MenuItem,
+    MenuTrigger,
+    OverlayModule,
+  ],
   providers: [Pagination],
   viewProviders: [
     provideIcons({
       phosphorPlusCircleDuotone,
       phosphorMagnifyingGlassDuotone,
+      phosphorDotsThreeOutlineDuotone,
+      phosphorEyeDuotone,
+      phosphorPencilDuotone,
+      phosphorTrashDuotone,
     }),
   ],
   template: `<div class="flex flex-col gap-4 md:flex-row md:justify-between">
@@ -65,11 +86,7 @@ type Student = Prisma.StudentGetPayload<{
           @for(student of students.value(); track student.id) {
           <tr>
             <td>
-              <a
-                class="link link-primary"
-                [routerLink]="['/students', student.id]"
-                >{{ student.name }}</a
-              >
+              {{ student.name }}
             </td>
             <td>{{ student.email }}</td>
             <td>{{ student.documentId }}</td>
@@ -83,20 +100,68 @@ type Student = Prisma.StudentGetPayload<{
             <td>{{ student.createdAt | date : 'short' }}</td>
             <td>{{ student.updatedAt | date : 'short' }}</td>
             <td>
-              <div class="flex gap-2">
-                <button
-                  class="btn btn-primary btn-xs btn-soft"
-                  (click)="editStudent(student)"
+              <button
+                class="cursor-pointer hover:bg-base-200 p-1 rounded-lg flex items-center justify-center"
+                ngMenuTrigger
+                #origin
+                #trigger="ngMenuTrigger"
+                [menu]="actionsMenu()"
+              >
+                <ng-icon
+                  name="phosphorDotsThreeOutlineDuotone"
+                  class="text-xl"
+                />
+              </button>
+              <ng-template
+                [cdkConnectedOverlayOpen]="trigger.expanded()"
+                [cdkConnectedOverlay]="{origin, usePopover: 'inline'}"
+                [cdkConnectedOverlayPositions]="[
+                  {
+                    originX: 'end',
+                    originY: 'bottom',
+                    overlayX: 'end',
+                    overlayY: 'top',
+                    offsetY: 4
+                  }
+                ]"
+                cdkAttachPopoverAsChild
+              >
+                <div
+                  ngMenu
+                  class="bg-base-100 shadow-sm rounded-lg p-1 w-48"
+                  #actionsMenu="ngMenu"
                 >
-                  Editar
-                </button>
-                <button
-                  class="btn btn-error btn-xs btn-soft"
-                  (click)="deleteStudent(student)"
-                >
-                  Eliminar
-                </button>
-              </div>
+                  <ng-template ngMenuContent>
+                    <a
+                      ngMenuItem
+                      value="view"
+                      [routerLink]="['/students', student.id]"
+                      class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-base-200 w-full"
+                    >
+                      <ng-icon name="phosphorEyeDuotone" class="text-lg" />
+                      <span>Ver</span>
+                    </a>
+                    <button
+                      ngMenuItem
+                      value="edit"
+                      class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-base-200 w-full"
+                      (click)="editStudent(student)"
+                    >
+                      <ng-icon name="phosphorPencilDuotone" class="text-lg" />
+                      <span>Editar</span>
+                    </button>
+                    <button
+                      ngMenuItem
+                      value="delete"
+                      class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-base-200 w-full"
+                      (click)="deleteStudent(student)"
+                    >
+                      <ng-icon name="phosphorTrashDuotone" class="text-lg" />
+                      <span>Eliminar</span>
+                    </button>
+                  </ng-template>
+                </div>
+              </ng-template>
             </td>
           </tr>
           }
@@ -118,6 +183,7 @@ export default class Students {
   private confirmation = inject(Confirmation);
   public searchText = signal('');
   public pagination = inject(Pagination);
+  actionsMenu = viewChild<Menu<string>>('actionsMenu');
   public students = rxResource({
     params: () => ({
       take: this.pagination.take(),

@@ -71,10 +71,7 @@ type CourseType = Prisma.CourseGetPayload<{
           </h2>
           <p class="text-base-200">{{ course.studyPlan.name }}</p>
           <div class="card-actions justify-end">
-            <a
-              class="btn btn-neutral btn-soft"
-              [routerLink]="['/courses', course.id]"
-            >
+            <a class="btn btn-neutral" [routerLink]="['/courses', course.id]">
               Ver curso
             </a>
           </div>

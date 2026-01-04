@@ -1,26 +1,43 @@
 import { Confirmation, Modal, Toast } from '@/ui';
+import { Menu, MenuContent, MenuItem, MenuTrigger } from '@angular/aria/menu';
+import { OverlayModule } from '@angular/cdk/overlay';
 import { DatePipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  inject,
+  viewChild,
+} from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { Prisma } from '@generated/prisma';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
+  phosphorDotsThreeOutlineDuotone,
   phosphorPencilDuotone,
   phosphorPlusCircleDuotone,
   phosphorTrashDuotone,
 } from '@ng-icons/phosphor-icons/duotone';
 import { Apollo, gql } from 'apollo-angular';
-import { map, of, switchMap } from 'rxjs';
+import { filter, map, of, switchMap } from 'rxjs';
 import Store from '../../core/store';
 import StudyPlanForm from '../forms/study-plans-forms';
 @Component({
   selector: 'app-study-plans',
-  imports: [NgIcon, DatePipe],
+  imports: [
+    NgIcon,
+    DatePipe,
+    Menu,
+    MenuContent,
+    MenuItem,
+    MenuTrigger,
+    OverlayModule,
+  ],
   viewProviders: [
     provideIcons({
       phosphorPencilDuotone,
       phosphorTrashDuotone,
       phosphorPlusCircleDuotone,
+      phosphorDotsThreeOutlineDuotone,
     }),
   ],
   template: `<div class="flex justify-end">
@@ -53,20 +70,59 @@ import StudyPlanForm from '../forms/study-plans-forms';
             <td>{{ studyPlan.createdAt | date : 'short' }}</td>
             <td>{{ studyPlan.updatedAt | date : 'short' }}</td>
             <td>
-              <div class="flex gap-2">
-                <button
-                  class="btn btn-primary btn-xs btn-soft"
-                  (click)="editStudyPlan(studyPlan)"
+              <button
+                class="cursor-pointer hover:bg-base-200 p-1 rounded-lg flex items-center justify-center"
+                ngMenuTrigger
+                #origin
+                #trigger="ngMenuTrigger"
+                [menu]="actionsMenu()"
+              >
+                <ng-icon
+                  name="phosphorDotsThreeOutlineDuotone"
+                  class="text-xl"
+                />
+              </button>
+              <ng-template
+                [cdkConnectedOverlayOpen]="trigger.expanded()"
+                [cdkConnectedOverlay]="{origin, usePopover: 'inline'}"
+                [cdkConnectedOverlayPositions]="[
+                  {
+                    originX: 'end',
+                    originY: 'bottom',
+                    overlayX: 'end',
+                    overlayY: 'top',
+                    offsetY: 4
+                  }
+                ]"
+                cdkAttachPopoverAsChild
+              >
+                <div
+                  ngMenu
+                  class="bg-base-100 shadow-sm rounded-lg p-1 w-48"
+                  #actionsMenu="ngMenu"
                 >
-                  <ng-icon name="phosphorPencilDuotone" /> Editar
-                </button>
-                <button
-                  class="btn btn-error btn-xs btn-soft"
-                  (click)="deleteStudyPlan(studyPlan)"
-                >
-                  <ng-icon name="phosphorTrashDuotone" /> Eliminar
-                </button>
-              </div>
+                  <ng-template ngMenuContent>
+                    <button
+                      ngMenuItem
+                      value="Edit"
+                      class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-base-200 w-full"
+                      (click)="editStudyPlan(studyPlan)"
+                    >
+                      <ng-icon name="phosphorPencilDuotone" class="text-lg" />
+                      <span>Editar</span>
+                    </button>
+                    <button
+                      ngMenuItem
+                      value="Delete"
+                      class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-base-200 w-full"
+                      (click)="deleteStudyPlan(studyPlan)"
+                    >
+                      <ng-icon name="phosphorTrashDuotone" class="text-lg" />
+                      <span>Eliminar</span>
+                    </button>
+                  </ng-template>
+                </div>
+              </ng-template>
             </td>
           </tr>
           }
@@ -81,6 +137,7 @@ export default class StudyPlans {
   private toast = inject(Toast);
   private modal = inject(Modal);
   private confirmation = inject(Confirmation);
+  actionsMenu = viewChild<Menu<string>>('actionsMenu');
   public studyPlans = rxResource({
     params: () => ({
       schoolId: this.store.currentSchoolId(),
@@ -156,30 +213,33 @@ export default class StudyPlans {
         message: '¿Estás seguro de eliminar este plan de estudio?',
         confirmText: 'Eliminar',
         cancelText: 'Cancelar',
-        severity: 'warning',
       })
       .pipe(
-        switchMap((result) => {
-          if (result) {
-            return this.apollo.mutate({
-              mutation: gql`
-                mutation DeleteStudyPlan($id: String!) {
-                  deleteStudyPlan(id: $id) {
-                    id
-                  }
+        filter((result) => result === true),
+        switchMap(() => {
+          return this.apollo.mutate({
+            mutation: gql`
+              mutation DeleteStudyPlan($id: String!) {
+                deleteStudyPlan(id: $id) {
+                  id
                 }
-              `,
-              variables: {
-                id: studyPlan.id,
-              },
-            });
-          }
-          return of(null);
+              }
+            `,
+            variables: {
+              id: studyPlan.id,
+            },
+          });
         })
       )
-      .subscribe(() => {
-        this.studyPlans.reload();
-        this.toast.showSuccess('Plan de estudio eliminado');
+      .subscribe({
+        next: () => {
+          this.studyPlans.reload();
+          this.toast.showSuccess('Plan de estudio eliminado');
+        },
+        error: (error) => {
+          console.error(error);
+          this.toast.showError('Error al eliminar el plan de estudio');
+        },
       });
   }
 }

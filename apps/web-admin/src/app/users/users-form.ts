@@ -118,7 +118,7 @@ const UPDATE_USER = gql`
       <button class="btn btn-ghost" (click)="closeModal.emit()">
         Cancelar
       </button>
-      <button class="btn btn-primary" type="submit">Guardar</button>
+      <button class="btn btn-neutral" type="submit">Guardar</button>
     </div>
   </form>`,
   styles: ``,

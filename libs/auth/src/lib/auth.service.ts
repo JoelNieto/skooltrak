@@ -32,8 +32,9 @@ export class AuthService {
       accessToken: this.jwtService.sign(
         {
           userId: id,
-          role: { id: role.id, name: role.name },
+          role: role.name,
           organizationId: organizationId,
+          permissions: role.permissions.map((p) => p.descriptiveId),
         },
         { secret: process.env['JWT_SECRET'] }
       ),

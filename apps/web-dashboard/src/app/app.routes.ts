@@ -14,6 +14,7 @@ export const appRoutes: Route[] = [
   },
   {
     path: '',
+    canActivate: [authGuard],
     canActivateChild: [authGuard],
     title: 'Software Educativo | Skooltrak',
     loadComponent: () => import('./core/dashboard'),

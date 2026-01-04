@@ -1,4 +1,6 @@
-import { Modal, Pagination, Paginator } from '@/ui';
+import { Confirmation, Modal, Pagination, Paginator, Toast } from '@/ui';
+import { Menu, MenuContent, MenuItem, MenuTrigger } from '@angular/aria/menu';
+import { OverlayModule } from '@angular/cdk/overlay';
 import { DatePipe } from '@angular/common';
 import {
   afterRenderEffect,
@@ -6,6 +8,7 @@ import {
   Component,
   inject,
   signal,
+  viewChild,
 } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
@@ -13,11 +16,15 @@ import { RouterLink } from '@angular/router';
 import { Prisma } from '@generated/prisma';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
+  phosphorDotsThreeOutlineDuotone,
+  phosphorEyeDuotone,
   phosphorMagnifyingGlassDuotone,
+  phosphorPencilDuotone,
   phosphorPlusCircleDuotone,
+  phosphorTrashDuotone,
 } from '@ng-icons/phosphor-icons/duotone';
 import { Apollo, gql } from 'apollo-angular';
-import { map, tap } from 'rxjs';
+import { filter, map, switchMap, tap } from 'rxjs';
 import Store from '../../core/store';
 import TeachersForm from '../forms/teachers-form';
 type Teacher = Prisma.TeacherGetPayload<{ include: { user: true } }> & {
@@ -27,12 +34,27 @@ type Teacher = Prisma.TeacherGetPayload<{ include: { user: true } }> & {
 
 @Component({
   selector: 'app-teachers',
-  imports: [NgIcon, DatePipe, Paginator, FormsModule, RouterLink],
+  imports: [
+    NgIcon,
+    DatePipe,
+    Paginator,
+    FormsModule,
+    RouterLink,
+    Menu,
+    MenuTrigger,
+    OverlayModule,
+    MenuContent,
+    MenuItem,
+  ],
   providers: [Pagination],
   viewProviders: [
     provideIcons({
       phosphorPlusCircleDuotone,
       phosphorMagnifyingGlassDuotone,
+      phosphorEyeDuotone,
+      phosphorPencilDuotone,
+      phosphorTrashDuotone,
+      phosphorDotsThreeOutlineDuotone,
     }),
   ],
   template: `
@@ -98,11 +120,67 @@ type Teacher = Prisma.TeacherGetPayload<{ include: { user: true } }> & {
             <td>{{ teacher.updatedAt | date : 'short' }}</td>
             <td>
               <button
-                class="btn btn-primary btn-xs btn-soft"
-                (click)="editTeacher(teacher)"
+                class="cursor-pointer hover:bg-base-200 p-1 rounded-lg flex items-center justify-center"
+                ngMenuTrigger
+                #origin
+                #trigger="ngMenuTrigger"
+                [menu]="actionsMenu()"
               >
-                Editar
+                <ng-icon
+                  name="phosphorDotsThreeOutlineDuotone"
+                  class="text-xl"
+                />
               </button>
+              <ng-template
+                [cdkConnectedOverlayOpen]="trigger.expanded()"
+                [cdkConnectedOverlay]="{origin, usePopover: 'inline'}"
+                [cdkConnectedOverlayPositions]="[
+                  {
+                    originX: 'end',
+                    originY: 'bottom',
+                    overlayX: 'end',
+                    overlayY: 'top',
+                    offsetY: 4
+                  }
+                ]"
+                cdkAttachPopoverAsChild
+              >
+                <div
+                  ngMenu
+                  class="bg-base-100 shadow-sm rounded-lg p-1 w-48"
+                  #actionsMenu="ngMenu"
+                >
+                  <ng-template ngMenuContent>
+                    <a
+                      ngMenuItem
+                      value="view"
+                      [routerLink]="['/teachers', teacher.id]"
+                      class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-base-200 w-full"
+                    >
+                      <ng-icon name="phosphorEyeDuotone" class="text-lg" />
+                      <span>Ver</span>
+                    </a>
+                    <button
+                      ngMenuItem
+                      value="edit"
+                      class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-base-200 w-full"
+                      (click)="editTeacher(teacher)"
+                    >
+                      <ng-icon name="phosphorPencilDuotone" class="text-lg" />
+                      <span>Editar</span>
+                    </button>
+                    <button
+                      ngMenuItem
+                      value="delete"
+                      class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-base-200 w-full"
+                      (click)="deleteTeacher(teacher)"
+                    >
+                      <ng-icon name="phosphorTrashDuotone" class="text-lg" />
+                      <span>Eliminar</span>
+                    </button>
+                  </ng-template>
+                </div>
+              </ng-template>
             </td>
           </tr>
           }
@@ -126,6 +204,9 @@ export default class Teachers {
   private apollo = inject(Apollo);
   public modal = inject(Modal);
   public pagination = inject(Pagination);
+  #confirmation = inject(Confirmation);
+  #toasts = inject(Toast);
+  actionsMenu = viewChild<Menu<string>>('actionsMenu');
   searchText = signal('');
 
   public teachers = rxResource({
@@ -214,6 +295,35 @@ export default class Teachers {
         if (result) {
           this.teachers.reload();
         }
+      });
+  }
+
+  public deleteTeacher(teacher: Teacher) {
+    this.#confirmation
+      .confirm({
+        title: 'Eliminar Profesor',
+        message: '¿Estás seguro de eliminar este profesor?',
+      })
+      .pipe(
+        filter((result) => result),
+        switchMap(() => {
+          return this.apollo.mutate({
+            mutation: gql`
+              mutation DeleteTeacher($id: String!) {
+                deleteTeacher(id: $id) {
+                  id
+                }
+              }
+            `,
+            variables: {
+              id: teacher.id,
+            },
+          });
+        })
+      )
+      .subscribe(() => {
+        this.#toasts.showSuccess('Profesor eliminado correctamente');
+        this.teachers.reload();
       });
   }
 }

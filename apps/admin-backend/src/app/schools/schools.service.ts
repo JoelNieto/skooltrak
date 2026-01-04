@@ -17,7 +17,7 @@ export class SchoolsService {
   }
 
   findAll(fetchDataInput: FetchDataInput) {
-    const { organizationId } = fetchDataInput;
+    const { organizationId, search, skip, take } = fetchDataInput;
     if (organizationId) {
       return this.prisma.school.findMany({
         include: {
@@ -31,6 +31,30 @@ export class SchoolsService {
     return this.prisma.school.findMany({
       include: {
         organization: true,
+      },
+      skip,
+      take,
+      where: {
+        OR: [
+          { name: { contains: search, mode: 'insensitive' } },
+          { shortName: { contains: search, mode: 'insensitive' } },
+          { address: { contains: search, mode: 'insensitive' } },
+          { phone: { contains: search, mode: 'insensitive' } },
+        ],
+      },
+    });
+  }
+
+  count(fetchDataInput: FetchDataInput) {
+    const { search } = fetchDataInput;
+    return this.prisma.school.count({
+      where: {
+        OR: [
+          { name: { contains: search, mode: 'insensitive' } },
+          { shortName: { contains: search, mode: 'insensitive' } },
+          { address: { contains: search, mode: 'insensitive' } },
+          { phone: { contains: search, mode: 'insensitive' } },
+        ],
       },
     });
   }

@@ -14,7 +14,16 @@ import { Router } from '@angular/router';
 import { JwtHelperService } from '@auth0/angular-jwt';
 import { Prisma } from '@generated/prisma';
 import { Apollo, gql } from 'apollo-angular';
-import { catchError, map, of, tap } from 'rxjs';
+import { catchError, map, of } from 'rxjs';
+
+export type DecodedToken = {
+  userId: string;
+  role: string;
+  organizationId: string;
+  permissions: string[];
+  iat: number;
+  exp: number;
+};
 
 @Injectable({
   providedIn: 'root',
@@ -87,12 +96,7 @@ export default class Auth {
         })
         .valueChanges.pipe(
           map((res) => res.data.me),
-          tap(() => {
-            if (this.isSigning()) {
-              this.router.navigate(['/home']);
-              this.isSigning.set(false);
-            }
-          }),
+
           catchError((err) => {
             this.#toasts.showError(err.message);
             this.isSigning.set(false);
@@ -103,12 +107,15 @@ export default class Auth {
   });
 
   public user = computed(() => this.userResource.value());
+  public decodedToken = computed<DecodedToken | null>(() =>
+    this.jwtHelper.decodeToken(this.token() || '')
+  );
   public isUserLoading = computed(() => this.userResource.isLoading());
 
   public userColor = computed(() => this.user()?.color);
-  public role = computed(() => this.user()?.role.name);
-  public permissions = computed(() =>
-    this.user()?.role.permissions.map((p) => p.descriptiveId)
+  public role = computed(() => this.decodedToken()?.role);
+  public permissions = computed<string[]>(
+    () => this.decodedToken()?.permissions || []
   );
 
   public userName = computed(
@@ -128,10 +135,12 @@ export default class Auth {
     return null;
   }
 
-  public isAdmin = computed(() => this.user()?.role.name === 'ADMIN');
-  public isTeacher = computed(() => this.user()?.role.name === 'TEACHER');
-  public isStudent = computed(() => this.user()?.role.name === 'STUDENT');
-  public isAuthenticated = computed(() => !!this.user());
+  public isAdmin = computed(() => this.decodedToken()?.role === 'ADMIN');
+  public isTeacher = computed(() => this.decodedToken()?.role === 'TEACHER');
+  public isStudent = computed(() => this.decodedToken()?.role === 'STUDENT');
+  public isAuthenticated = computed(
+    () => !this.jwtHelper.isTokenExpired(this.token() || '')
+  );
 
   constructor() {
     // Mark as initialized immediately in browser
@@ -172,6 +181,7 @@ export default class Auth {
           const { accessToken } = res.data!.login;
           this.token.set(accessToken);
           this.isSigning.set(true);
+          this.router.navigate(['/home']);
         },
         error: (err) => {
           console.error(err);

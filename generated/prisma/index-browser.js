@@ -380,6 +380,7 @@ exports.Prisma.ClassGroupWeeklyScheduleScalarFieldEnum = {
   location: 'location',
   remote: 'remote',
   remoteLink: 'remoteLink',
+  recess: 'recess',
   weekday: 'weekday',
   startTime: 'startTime',
   endTime: 'endTime',
@@ -440,7 +441,7 @@ exports.Prisma.GradeScalarFieldEnum = {
   updatedAt: 'updatedAt'
 };
 
-exports.Prisma.GradeStudentScalarFieldEnum = {
+exports.Prisma.StudentGradeScalarFieldEnum = {
   id: 'id',
   comments: 'comments',
   gradeId: 'gradeId',
@@ -450,10 +451,10 @@ exports.Prisma.GradeStudentScalarFieldEnum = {
   updatedAt: 'updatedAt'
 };
 
-exports.Prisma.GradeStudentRevisionScalarFieldEnum = {
+exports.Prisma.StudentGradeRevisionScalarFieldEnum = {
   id: 'id',
   reason: 'reason',
-  gradeStudentId: 'gradeStudentId',
+  studentGradeId: 'studentGradeId',
   score: 'score',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
@@ -533,8 +534,8 @@ exports.Prisma.ModelName = {
   GradeMetric: 'GradeMetric',
   GradeBucket: 'GradeBucket',
   Grade: 'Grade',
-  GradeStudent: 'GradeStudent',
-  GradeStudentRevision: 'GradeStudentRevision'
+  StudentGrade: 'StudentGrade',
+  StudentGradeRevision: 'StudentGradeRevision'
 };
 
 /**

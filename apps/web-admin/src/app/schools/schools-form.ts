@@ -189,7 +189,7 @@ const UPDATE_SCHOOL = gql`
       </div>
     </div>
     <div class="flex justify-end mt-4">
-      <button class="btn btn-primary" type="submit">Guardar</button>
+      <button class="btn btn-neutral" type="submit">Guardar</button>
     </div>
   </form>`,
   styles: ``,

@@ -272,7 +272,7 @@ model Student {
   createdAt       DateTime         @default(now())
   updatedAt       DateTime         @updatedAt
   quizSubmissions QuizSubmission[]
-  gradeStudents   GradeStudent[]
+  studentGrades   StudentGrade[]
 }
 
 model Teacher {
@@ -390,6 +390,7 @@ model ClassGroupWeeklySchedule {
   location     String     @default("")
   remote       Boolean    @default(false)
   remoteLink   String     @default("")
+  recess       Boolean    @default(false)
   weekday      WeekDay
   startTime    String // Format: "HH:mm" (e.g., "09:00", "14:30")
   endTime      String // Format: "HH:mm" (e.g., "10:30", "16:00")
@@ -463,10 +464,10 @@ model Grade {
   published     Boolean        @default(false)
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
-  gradeStudents GradeStudent[]
+  studentGrades StudentGrade[]
 }
 
-model GradeStudent {
+model StudentGrade {
   id        String                 @id @default(cuid())
   comments  String?
   gradeId   String
@@ -476,14 +477,14 @@ model GradeStudent {
   score     Decimal?
   createdAt DateTime               @default(now())
   updatedAt DateTime               @updatedAt
-  revisions GradeStudentRevision[]
+  revisions StudentGradeRevision[]
 }
 
-model GradeStudentRevision {
+model StudentGradeRevision {
   id             String       @id @default(cuid())
   reason         String
-  gradeStudentId String
-  gradeStudent   GradeStudent @relation(fields: [gradeStudentId], references: [id])
+  studentGradeId String
+  studentGrade   StudentGrade @relation(fields: [studentGradeId], references: [id])
   score          Decimal
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt

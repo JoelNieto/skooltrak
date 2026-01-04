@@ -1,4 +1,4 @@
-import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
+import { Args, Int, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { FetchDataInput } from '../fetch-data.input';
 import { CreateSchoolInput } from './dto/create-school.input';
 import { UpdateSchoolInput } from './dto/update-school.input';
@@ -22,6 +22,11 @@ export class SchoolsResolver {
     fetchDataInput: FetchDataInput
   ) {
     return this.schoolsService.findAll(fetchDataInput);
+  }
+
+  @Query(() => Int, { name: 'schoolsCount' })
+  count(@Args() fetchDataInput: FetchDataInput) {
+    return this.schoolsService.count(fetchDataInput);
   }
 
   @Query(() => School, { name: 'school' })

@@ -1,26 +1,50 @@
-import { Confirmation, Modal, Toast } from '@/ui';
+import { Confirmation, Modal, Pagination, Paginator, Toast } from '@/ui';
+import { Menu, MenuContent, MenuItem, MenuTrigger } from '@angular/aria/menu';
+import { OverlayModule } from '@angular/cdk/overlay';
 import { DatePipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import {
+  afterRenderEffect,
+  ChangeDetectionStrategy,
+  Component,
+  inject,
+  signal,
+  viewChild,
+} from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
+import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { Prisma } from '@generated/prisma';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
+  phosphorDotsThreeOutlineDuotone,
   phosphorPencilDuotone,
   phosphorPlusCircleDuotone,
   phosphorTrashDuotone,
 } from '@ng-icons/phosphor-icons/duotone';
 import { Apollo, gql } from 'apollo-angular';
-import { map } from 'rxjs';
+import { map, tap } from 'rxjs';
 import { UsersForm } from './users-form';
 @Component({
   selector: 'app-users',
-  imports: [RouterLink, NgIcon, DatePipe],
+  imports: [
+    RouterLink,
+    NgIcon,
+    DatePipe,
+    Menu,
+    MenuContent,
+    MenuItem,
+    MenuTrigger,
+    OverlayModule,
+    Paginator,
+    FormsModule,
+  ],
+  providers: [Pagination],
   viewProviders: [
     provideIcons({
       phosphorPlusCircleDuotone,
       phosphorPencilDuotone,
       phosphorTrashDuotone,
+      phosphorDotsThreeOutlineDuotone,
     }),
   ],
   template: `<div class="breadcrumbs text-sm">
@@ -37,9 +61,19 @@ import { UsersForm } from './users-form';
         </p>
       </div>
 
-      <button class="btn btn-primary" (click)="editUser()">
+      <button class="btn btn-neutral" (click)="editUser()">
         <ng-icon name="phosphorPlusCircleDuotone" /> Nuevo Usuario
       </button>
+    </div>
+    <div class="flex justify-between items-center mb-4">
+      <div class="md:w-96 w-full">
+        <input
+          type="text"
+          class="input"
+          placeholder="Buscar"
+          [(ngModel)]="searchText"
+        />
+      </div>
     </div>
     <div class="overflow-x-auto">
       <table class="table">
@@ -64,41 +98,100 @@ import { UsersForm } from './users-form';
             <td>{{ user.createdAt | date : 'medium' }}</td>
             <td>{{ user.updatedAt | date : 'medium' }}</td>
             <td>
-              <div class="flex gap-2 items-center">
-                <button class="btn btn-xs btn-primary" (click)="editUser(user)">
-                  <ng-icon name="phosphorPencilDuotone" />
-                  Editar
-                </button>
-                <button class="btn btn-xs btn-error" (click)="deleteUser(user)">
-                  <ng-icon name="phosphorTrashDuotone" />
-                  Eliminar
-                </button>
-              </div>
+              <button
+                class="cursor-pointer hover:bg-base-200 p-1 rounded-lg flex items-center justify-center"
+                ngMenuTrigger
+                #origin
+                #trigger="ngMenuTrigger"
+                [menu]="formatMenu()"
+              >
+                <ng-icon
+                  name="phosphorDotsThreeOutlineDuotone"
+                  class="text-xl"
+                />
+              </button>
+              <ng-template
+                [cdkConnectedOverlayOpen]="trigger.expanded()"
+                [cdkConnectedOverlay]="{origin, usePopover: 'inline'}"
+                [cdkConnectedOverlayPositions]="[
+                  {
+                    originX: 'end',
+                    originY: 'bottom',
+                    overlayX: 'end',
+                    overlayY: 'top',
+                    offsetY: 4
+                  }
+                ]"
+                cdkAttachPopoverAsChild
+              >
+                <div
+                  ngMenu
+                  class="bg-base-100 shadow-sm rounded-lg p-1 w-48"
+                  #formatMenu="ngMenu"
+                >
+                  <ng-template ngMenuContent>
+                    <button
+                      ngMenuItem
+                      value="Edit"
+                      class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-base-200 w-full"
+                      (click)="editUser(user)"
+                    >
+                      <ng-icon name="phosphorPencilDuotone" class="text-lg" />
+                      <span>Editar</span>
+                    </button>
+                    <button
+                      ngMenuItem
+                      value="Delete"
+                      class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-base-200 w-full"
+                      (click)="deleteUser(user)"
+                    >
+                      <ng-icon name="phosphorTrashDuotone" class="text-lg" />
+                      <span>Eliminar</span>
+                    </button>
+                  </ng-template>
+                </div>
+              </ng-template>
             </td>
           </tr>
           }
         </tbody>
       </table>
+      <lib-paginator
+        [count]="pagination.count()"
+        [take]="pagination.take()"
+        [skip]="pagination.skip()"
+        (skipChange)="pagination.updateSkip($event)"
+        (takeChange)="pagination.updateTake($event)"
+      />
     </div>`,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Users {
+  public pagination = inject(Pagination);
   private modal = inject(Modal);
   private apollo = inject(Apollo);
   private toasts = inject(Toast);
+  formatMenu = viewChild<Menu<string>>('formatMenu');
   private confirmation = inject(Confirmation);
-
+  public searchText = signal('');
   public users = rxResource({
-    stream: () =>
+    params: () => ({
+      take: this.pagination.take(),
+      skip: this.pagination.skip(),
+      search: this.pagination.search(),
+    }),
+    stream: ({ params }) =>
       this.apollo
         .watchQuery<{
+          count: number;
           users: Prisma.UserGetPayload<{
             include: { organization: true; role: true };
           }>[];
         }>({
           query: gql`
-            query GetUsers {
-              users {
+            query GetUsers($take: Int!, $skip: Int!, $search: String!) {
+              count: usersCount(search: $search)
+              users(take: $take, skip: $skip, search: $search) {
                 id
                 firstName
                 lastName
@@ -118,9 +211,25 @@ export class Users {
               }
             }
           `,
+          variables: {
+            take: params.take,
+            skip: params.skip,
+            search: params.search,
+          },
         })
-        .valueChanges.pipe(map((res) => res.data.users)),
+        .valueChanges.pipe(
+          tap((res) => {
+            this.pagination.updateCount(res.data.count);
+          }),
+          map((res) => res.data.users)
+        ),
   });
+
+  constructor() {
+    afterRenderEffect(() => {
+      this.pagination.updateSearch(this.searchText());
+    });
+  }
 
   public editUser(
     user?: Prisma.UserGetPayload<{

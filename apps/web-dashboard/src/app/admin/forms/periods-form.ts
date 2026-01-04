@@ -1,5 +1,11 @@
 import { markGroupDirty, Toast } from '@/ui';
-import { Component, inject, input, output } from '@angular/core';
+import {
+  afterRenderEffect,
+  Component,
+  inject,
+  input,
+  output,
+} from '@angular/core';
 import {
   NonNullableFormBuilder,
   ReactiveFormsModule,
@@ -7,6 +13,7 @@ import {
 } from '@angular/forms';
 import { Prisma } from '@generated/prisma';
 import { Apollo, gql } from 'apollo-angular';
+import { format } from 'date-fns';
 import Store from '../../core/store';
 @Component({
   selector: 'app-periods-form',
@@ -78,10 +85,23 @@ export default class PeriodsForm {
   public form = this.#fb.group({
     name: ['', [Validators.required]],
     shortName: ['', [Validators.required]],
-    year: ['', [Validators.required]],
-    startDate: [new Date(), [Validators.required]],
-    endDate: [new Date(), [Validators.required]],
+    year: [new Date().getFullYear(), [Validators.required]],
+    startDate: [format(new Date(), 'yyyy-MM-dd'), [Validators.required]],
+    endDate: [format(new Date(), 'yyyy-MM-dd'), [Validators.required]],
   });
+
+  constructor() {
+    afterRenderEffect(() => {
+      const period = this.data()?.period;
+      if (period) {
+        this.form.patchValue({
+          ...period,
+          startDate: format(period.startDate, 'yyyy-MM-dd'),
+          endDate: format(period.endDate, 'yyyy-MM-dd'),
+        });
+      }
+    });
+  }
 
   onSubmit() {
     if (this.form.invalid) {

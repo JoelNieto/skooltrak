@@ -71,11 +71,11 @@ type StudentType = Prisma.StudentGetPayload<{
       <div
         ngTabList
         selectionMode="follow"
-        selectedTab="info"
+        selectedTab="courses"
         class="tabs tabs-box mt-4"
       >
-        <div ngTab value="info" class="tab">Informacion Personal</div>
         <div ngTab value="courses" class="tab">Cursos</div>
+        <div ngTab value="info" class="tab">Informacion Personal</div>
       </div>
       <div class="p-1">
         <div ngTabPanel value="info">
@@ -87,8 +87,8 @@ type StudentType = Prisma.StudentGetPayload<{
                   Detalles personales y de contacto
                 </p>
               </div>
-              <div class="mt-6 border-t border-gray-100">
-                <dl class="divide-y divide-gray-100">
+              <div class="mt-6 border-t border-base-300">
+                <dl class="divide-y divide-base-300">
                   <div
                     class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0"
                   >
@@ -169,6 +169,18 @@ type StudentType = Prisma.StudentGetPayload<{
                     </dd>
                   </div>
                 </dl>
+              </div>
+            </div>
+          </ng-template>
+        </div>
+        <div ngTabPanel value="courses">
+          <ng-template ngTabContent>
+            <div class="bg-base-100 border-base-300 p-4 rounded-lg">
+              <div class="px-4 sm:px-0">
+                <h3 class="text-base/7 font-semibold">Cursos</h3>
+                <p class="mt-1 max-w-2xl text-sm/6 text-base-content/60">
+                  Cursos asignados al alumno
+                </p>
               </div>
             </div>
           </ng-template>

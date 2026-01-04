@@ -20,7 +20,7 @@ export class PeriodsService {
 
   findManyBySchoolId(schoolId: string) {
     return this.prisma.period.findMany({
-      where: { schoolId, year: new Date().getFullYear() },
+      where: { schoolId },
       include: { school: true },
     });
   }

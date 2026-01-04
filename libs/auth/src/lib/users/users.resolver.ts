@@ -1,11 +1,13 @@
 import {
   Args,
+  Int,
   Mutation,
   Parent,
   Query,
   ResolveField,
   Resolver,
 } from '@nestjs/graphql';
+import { FetchDataInput } from '../fetch-data-input';
 import { CreateUserInput } from './dto/create-user.input';
 import { UpdateUserInput } from './dto/update-user.input';
 import { User } from './entities/user.entity';
@@ -21,8 +23,13 @@ export class UsersResolver {
   }
 
   @Query(() => [User], { name: 'users' })
-  findAll() {
-    return this.usersService.findAll();
+  findAll(@Args() fetchDataInput: FetchDataInput) {
+    return this.usersService.findAll(fetchDataInput);
+  }
+
+  @Query(() => Int, { name: 'usersCount' })
+  count(@Args() fetchDataInput: FetchDataInput) {
+    return this.usersService.count(fetchDataInput);
   }
 
   @Query(() => User, { name: 'user' })

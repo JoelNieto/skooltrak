@@ -1,11 +1,15 @@
 import { Confirmation, Modal, Toast } from '@/ui';
+import { Menu, MenuContent, MenuItem, MenuTrigger } from '@angular/aria/menu';
+import { OverlayModule } from '@angular/cdk/overlay';
 import { DatePipe } from '@angular/common';
-import { Component, inject } from '@angular/core';
+import { Component, inject, viewChild } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import { Prisma } from '@generated/prisma';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
+  phosphorDotsThreeOutlineDuotone,
+  phosphorEyeDuotone,
   phosphorPencilDuotone,
   phosphorPlusCircleDuotone,
   phosphorTrashDuotone,
@@ -16,12 +20,23 @@ import Store from '../../core/store';
 import ClassGroupsForm from '../forms/class-groups-form';
 @Component({
   selector: 'app-groups',
-  imports: [NgIcon, DatePipe, RouterLink],
+  imports: [
+    NgIcon,
+    DatePipe,
+    RouterLink,
+    Menu,
+    MenuContent,
+    MenuItem,
+    MenuTrigger,
+    OverlayModule,
+  ],
   viewProviders: [
     provideIcons({
       phosphorPlusCircleDuotone,
       phosphorTrashDuotone,
       phosphorPencilDuotone,
+      phosphorDotsThreeOutlineDuotone,
+      phosphorEyeDuotone,
     }),
   ],
   template: `
@@ -42,7 +57,7 @@ import ClassGroupsForm from '../forms/class-groups-form';
             <th>Plan de estudio</th>
             <th>Fecha de creación</th>
             <th>Fecha de actualización</th>
-            <th>Acciones</th>
+            <th></th>
           </tr>
         </thead>
         <tbody>
@@ -61,22 +76,68 @@ import ClassGroupsForm from '../forms/class-groups-form';
             <td>{{ group.createdAt | date : 'short' }}</td>
             <td>{{ group.updatedAt | date : 'short' }}</td>
             <td>
-              <div class="flex gap-2">
-                <button
-                  class="btn btn-primary btn-xs btn-soft"
-                  (click)="editClassGroup(group)"
+              <button
+                class="cursor-pointer hover:bg-base-200 p-1 rounded-lg flex items-center justify-center"
+                ngMenuTrigger
+                #origin
+                #trigger="ngMenuTrigger"
+                [menu]="actionsMenu()"
+              >
+                <ng-icon
+                  name="phosphorDotsThreeOutlineDuotone"
+                  class="text-xl"
+                />
+              </button>
+              <ng-template
+                [cdkConnectedOverlayOpen]="trigger.expanded()"
+                [cdkConnectedOverlay]="{origin, usePopover: 'inline'}"
+                [cdkConnectedOverlayPositions]="[
+                  {
+                    originX: 'end',
+                    originY: 'bottom',
+                    overlayX: 'end',
+                    overlayY: 'top',
+                    offsetY: 4
+                  }
+                ]"
+                cdkAttachPopoverAsChild
+              >
+                <div
+                  ngMenu
+                  class="bg-base-100 shadow-sm rounded-lg p-1 w-48"
+                  #actionsMenu="ngMenu"
                 >
-                  <ng-icon name="phosphorPencilDuotone" />
-                  Editar
-                </button>
-                <button
-                  class="btn btn-error btn-xs btn-soft"
-                  (click)="deleteClassGroup(group.id)"
-                >
-                  <ng-icon name="phosphorTrashDuotone" />
-                  Eliminar
-                </button>
-              </div>
+                  <ng-template ngMenuContent>
+                    <a
+                      ngMenuItem
+                      value="view"
+                      [routerLink]="['/groups', group.id]"
+                      class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-base-200 w-full"
+                    >
+                      <ng-icon name="phosphorEyeDuotone" class="text-lg" />
+                      <span>Ver</span>
+                    </a>
+                    <button
+                      ngMenuItem
+                      value="edit"
+                      class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-base-200 w-full"
+                      (click)="editClassGroup(group)"
+                    >
+                      <ng-icon name="phosphorPencilDuotone" class="text-lg" />
+                      <span>Editar</span>
+                    </button>
+                    <button
+                      ngMenuItem
+                      value="delete"
+                      class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-base-200 w-full"
+                      (click)="deleteClassGroup(group.id)"
+                    >
+                      <ng-icon name="phosphorTrashDuotone" class="text-lg" />
+                      <span>Eliminar</span>
+                    </button>
+                  </ng-template>
+                </div>
+              </ng-template>
             </td>
           </tr>
 
@@ -92,6 +153,7 @@ export default class ClassGroups {
   private store = inject(Store);
   private confirmation = inject(Confirmation);
   private toasts = inject(Toast);
+  actionsMenu = viewChild<Menu<string>>('actionsMenu');
   public classGroups = rxResource({
     params: () => ({
       schoolId: this.store.currentSchoolId(),

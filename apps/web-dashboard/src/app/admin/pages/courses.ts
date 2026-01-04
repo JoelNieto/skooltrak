@@ -1,11 +1,15 @@
 import { Confirmation, Modal, Paginator, Toast } from '@/ui';
-import { Component, computed, inject, signal } from '@angular/core';
+import { Menu, MenuContent, MenuItem, MenuTrigger } from '@angular/aria/menu';
+import { OverlayModule } from '@angular/cdk/overlay';
+import { Component, computed, inject, signal, viewChild } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { Prisma } from '@generated/prisma';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
+  phosphorDotsThreeOutlineDuotone,
+  phosphorEyeDuotone,
   phosphorMagnifyingGlassDuotone,
   phosphorPencilDuotone,
   phosphorPlusCircleDuotone,
@@ -15,6 +19,7 @@ import { Apollo, gql } from 'apollo-angular';
 import { filter, map, of, switchMap, tap } from 'rxjs';
 import Store from '../../core/store';
 import CoursesForm from '../forms/courses-form';
+
 type Teacher = Prisma.TeacherGetPayload<{ include: { user: true } }> & {
   name: string;
   initials: string;
@@ -28,13 +33,25 @@ type CourseType = Prisma.CourseGetPayload<{
 
 @Component({
   selector: 'app-courses',
-  imports: [NgIcon, Paginator, RouterLink, FormsModule],
+  imports: [
+    NgIcon,
+    Paginator,
+    RouterLink,
+    FormsModule,
+    Menu,
+    MenuContent,
+    MenuItem,
+    MenuTrigger,
+    OverlayModule,
+  ],
   viewProviders: [
     provideIcons({
       phosphorPlusCircleDuotone,
       phosphorTrashDuotone,
       phosphorPencilDuotone,
       phosphorMagnifyingGlassDuotone,
+      phosphorDotsThreeOutlineDuotone,
+      phosphorEyeDuotone,
     }),
   ],
   template: `<div class="flex justify-between">
@@ -82,11 +99,7 @@ type CourseType = Prisma.CourseGetPayload<{
           @for (course of courses.value(); track course.id) {
           <tr>
             <td>
-              <a
-                class="link link-primary"
-                [routerLink]="['/courses', course.id]"
-                >{{ course.name }}</a
-              >
+              {{ course.name }}
             </td>
             <td>{{ course.shortName }}</td>
             <td>{{ course.code }}</td>
@@ -104,22 +117,68 @@ type CourseType = Prisma.CourseGetPayload<{
             </td>
             <td>{{ course.currentPeriod?.name }}</td>
             <td>
-              <div class="flex gap-2">
-                <button
-                  class="btn btn-primary btn-xs btn-soft"
-                  (click)="editCourse(course)"
+              <button
+                class="cursor-pointer hover:bg-base-200 p-1 rounded-lg flex items-center justify-center"
+                ngMenuTrigger
+                #origin
+                #trigger="ngMenuTrigger"
+                [menu]="actionsMenu()"
+              >
+                <ng-icon
+                  name="phosphorDotsThreeOutlineDuotone"
+                  class="text-xl"
+                />
+              </button>
+              <ng-template
+                [cdkConnectedOverlayOpen]="trigger.expanded()"
+                [cdkConnectedOverlay]="{origin, usePopover: 'inline'}"
+                [cdkConnectedOverlayPositions]="[
+                  {
+                    originX: 'end',
+                    originY: 'bottom',
+                    overlayX: 'end',
+                    overlayY: 'top',
+                    offsetY: 4
+                  }
+                ]"
+                cdkAttachPopoverAsChild
+              >
+                <div
+                  ngMenu
+                  class="bg-base-100 shadow-sm rounded-lg p-1 w-48"
+                  #actionsMenu="ngMenu"
                 >
-                  <ng-icon name="phosphorPencilDuotone" />
-                  Editar
-                </button>
-                <button
-                  class="btn btn-error btn-xs btn-soft"
-                  (click)="deleteCourse(course)"
-                >
-                  <ng-icon name="phosphorTrashDuotone" />
-                  Eliminar
-                </button>
-              </div>
+                  <ng-template ngMenuContent>
+                    <a
+                      ngMenuItem
+                      value="view"
+                      [routerLink]="['/courses', course.id]"
+                      class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-base-200 w-full"
+                    >
+                      <ng-icon name="phosphorEyeDuotone" class="text-lg" />
+                      <span>Ver</span>
+                    </a>
+                    <button
+                      ngMenuItem
+                      value="edit"
+                      class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-base-200 w-full"
+                      (click)="editCourse(course)"
+                    >
+                      <ng-icon name="phosphorPencilDuotone" class="text-lg" />
+                      <span>Editar</span>
+                    </button>
+                    <button
+                      ngMenuItem
+                      value="delete"
+                      class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-base-200 w-full"
+                      (click)="deleteCourse(course)"
+                    >
+                      <ng-icon name="phosphorTrashDuotone" class="text-lg" />
+                      <span>Eliminar</span>
+                    </button>
+                  </ng-template>
+                </div>
+              </ng-template>
             </td>
           </tr>
           }
@@ -142,6 +201,7 @@ export default class Courses {
   #confirmation = inject(Confirmation);
   #store = inject(Store);
   #toast = inject(Toast);
+  actionsMenu = viewChild<Menu<string>>('actionsMenu');
   public searchText = signal('');
   public studyPlanId = signal<string | null>(null);
 

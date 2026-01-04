@@ -1,18 +1,46 @@
 import { Confirmation, Modal, Toast } from '@/ui';
+import { Menu, MenuContent, MenuItem, MenuTrigger } from '@angular/aria/menu';
+import { OverlayModule } from '@angular/cdk/overlay';
 import { DatePipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  inject,
+  viewChild,
+} from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import { Prisma } from '@generated/prisma';
 import { NgIcon, provideIcons } from '@ng-icons/core';
-import { phosphorPlusCircleDuotone } from '@ng-icons/phosphor-icons/duotone';
+import {
+  phosphorDotsThreeOutlineDuotone,
+  phosphorPencilDuotone,
+  phosphorPlusCircleDuotone,
+  phosphorTrashDuotone,
+} from '@ng-icons/phosphor-icons/duotone';
 import { Apollo, gql } from 'apollo-angular';
 import { map } from 'rxjs';
 import { OrganizationsForm } from './organizations-form';
 @Component({
   selector: 'app-organizations',
-  imports: [NgIcon, DatePipe, RouterLink],
-  viewProviders: [provideIcons({ phosphorPlusCircleDuotone })],
+  imports: [
+    NgIcon,
+    DatePipe,
+    RouterLink,
+    Menu,
+    MenuContent,
+    MenuItem,
+    MenuTrigger,
+    OverlayModule,
+  ],
+  viewProviders: [
+    provideIcons({
+      phosphorPlusCircleDuotone,
+      phosphorPencilDuotone,
+      phosphorTrashDuotone,
+      phosphorDotsThreeOutlineDuotone,
+    }),
+  ],
   template: `<div class="breadcrumbs text-sm">
       <ul>
         <li><a routerLink="/">Inicio</a></li>
@@ -27,7 +55,7 @@ import { OrganizationsForm } from './organizations-form';
         </p>
       </div>
 
-      <button class="btn btn-primary" (click)="editOrganization()">
+      <button class="btn btn-neutral" (click)="editOrganization()">
         <ng-icon name="phosphorPlusCircleDuotone" /> Nueva Organizacións
       </button>
     </div>
@@ -50,20 +78,63 @@ import { OrganizationsForm } from './organizations-form';
             <td>{{ organization.createdAt | date : 'medium' }}</td>
             <td>{{ organization.updatedAt | date : 'medium' }}</td>
             <td>
-              <div class="flex gap-2 items-center">
-                <button
-                  class="btn btn-primary btn-xs"
-                  (click)="editOrganization(organization)"
+              <button
+                class="cursor-pointer hover:bg-base-200 p-1 rounded-lg flex items-center justify-center"
+                ngMenuTrigger
+                #origin
+                #trigger="ngMenuTrigger"
+                [menu]="actionsMenu()"
+              >
+                <ng-icon
+                  name="phosphorDotsThreeOutlineDuotone"
+                  class="text-xl"
+                />
+              </button>
+              <ng-template
+                [cdkConnectedOverlayOpen]="trigger.expanded()"
+                [cdkConnectedOverlay]="{origin, usePopover: 'inline'}"
+                [cdkConnectedOverlayPositions]="[
+                  {
+                    originX: 'end',
+                    originY: 'bottom',
+                    overlayX: 'end',
+                    overlayY: 'top',
+                    offsetY: 4
+                  }
+                ]"
+                cdkAttachPopoverAsChild
+              >
+                <div
+                  ngMenu
+                  class="bg-base-100 shadow-sm rounded-lg p-1 w-48"
+                  #actionsMenu="ngMenu"
                 >
-                  Editar
-                </button>
-                <button
-                  class="btn btn-error btn-xs"
-                  (click)="deleteOrganization(organization)"
-                >
-                  Eliminar
-                </button>
-              </div>
+                  <ng-template ngMenuContent>
+                    <button
+                      ngMenuItem
+                      value="Edit"
+                      class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-base-200 w-full"
+                      (keydown.enter)="editOrganization(organization)"
+                      (click)="editOrganization(organization)"
+                      type="button"
+                    >
+                      <ng-icon name="phosphorPencilDuotone" class="text-lg" />
+                      <span>Editar</span>
+                    </button>
+                    <button
+                      ngMenuItem
+                      value="Delete"
+                      class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-base-200 w-full"
+                      (click)="deleteOrganization(organization)"
+                      (keydown.enter)="deleteOrganization(organization)"
+                      type="button"
+                    >
+                      <ng-icon name="phosphorTrashDuotone" class="text-lg" />
+                      <span>Eliminar</span>
+                    </button>
+                  </ng-template>
+                </div>
+              </ng-template>
             </td>
           </tr>
           }
@@ -78,6 +149,7 @@ export class Organizations {
   private modal = inject(Modal);
   private confirmation = inject(Confirmation);
   private toasts = inject(Toast);
+  actionsMenu = viewChild<Menu<string>>('actionsMenu');
 
   public organizations = rxResource({
     stream: () =>

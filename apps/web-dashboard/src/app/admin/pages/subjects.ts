@@ -1,4 +1,6 @@
 import { Confirmation, Modal, Pagination, Paginator, Toast } from '@/ui';
+import { Menu, MenuContent, MenuItem, MenuTrigger } from '@angular/aria/menu';
+import { OverlayModule } from '@angular/cdk/overlay';
 import { DatePipe } from '@angular/common';
 import {
   afterRenderEffect,
@@ -6,12 +8,14 @@ import {
   Component,
   inject,
   signal,
+  viewChild,
 } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { Prisma } from '@generated/prisma';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
+  phosphorDotsThreeOutlineDuotone,
   phosphorMagnifyingGlassDuotone,
   phosphorPencilDuotone,
   phosphorPlusCircleDuotone,
@@ -24,7 +28,17 @@ import { filter, map, switchMap, tap } from 'rxjs';
 import SubjectsForm from '../forms/subjects-form';
 @Component({
   selector: 'app-subjects',
-  imports: [DatePipe, NgIcon, Paginator, FormsModule],
+  imports: [
+    DatePipe,
+    NgIcon,
+    Paginator,
+    FormsModule,
+    Menu,
+    MenuContent,
+    MenuItem,
+    MenuTrigger,
+    OverlayModule,
+  ],
   providers: [Pagination],
   viewProviders: [
     provideIcons({
@@ -34,6 +48,7 @@ import SubjectsForm from '../forms/subjects-form';
       phosphorMagnifyingGlassDuotone,
       phosphorSortAscendingDuotone,
       phosphorSortDescendingDuotone,
+      phosphorDotsThreeOutlineDuotone,
     }),
   ],
   template: `
@@ -176,19 +191,60 @@ import SubjectsForm from '../forms/subjects-form';
             <td>{{ subject.code }}</td>
             <td>{{ subject.createdAt | date : 'short' }}</td>
             <td>{{ subject.updatedAt | date : 'short' }}</td>
-            <td class="flex gap-2">
+            <td>
               <button
-                class="btn btn-primary btn-xs btn-soft"
-                (click)="editSubject(subject)"
+                class="cursor-pointer hover:bg-base-200 p-1 rounded-lg flex items-center justify-center"
+                ngMenuTrigger
+                #origin
+                #trigger="ngMenuTrigger"
+                [menu]="actionsMenu()"
               >
-                <ng-icon name="phosphorPencilDuotone" /> Editar
+                <ng-icon
+                  name="phosphorDotsThreeOutlineDuotone"
+                  class="text-xl"
+                />
               </button>
-              <button
-                class="btn btn-error btn-xs btn-soft"
-                (click)="deleteSubject(subject)"
+              <ng-template
+                [cdkConnectedOverlayOpen]="trigger.expanded()"
+                [cdkConnectedOverlay]="{origin, usePopover: 'inline'}"
+                [cdkConnectedOverlayPositions]="[
+                  {
+                    originX: 'end',
+                    originY: 'bottom',
+                    overlayX: 'end',
+                    overlayY: 'top',
+                    offsetY: 4
+                  }
+                ]"
+                cdkAttachPopoverAsChild
               >
-                <ng-icon name="phosphorTrashDuotone" /> Eliminar
-              </button>
+                <div
+                  ngMenu
+                  class="bg-base-100 shadow-sm rounded-lg p-1 w-48"
+                  #actionsMenu="ngMenu"
+                >
+                  <ng-template ngMenuContent>
+                    <button
+                      ngMenuItem
+                      value="Edit"
+                      class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-base-200 w-full"
+                      (click)="editSubject(subject)"
+                    >
+                      <ng-icon name="phosphorPencilDuotone" class="text-lg" />
+                      <span>Editar</span>
+                    </button>
+                    <button
+                      ngMenuItem
+                      value="Delete"
+                      class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-base-200 w-full"
+                      (click)="deleteSubject(subject)"
+                    >
+                      <ng-icon name="phosphorTrashDuotone" class="text-lg" />
+                      <span>Eliminar</span>
+                    </button>
+                  </ng-template>
+                </div>
+              </ng-template>
             </td>
           </tr>
           }@empty { @if (subjects.isLoading()) {
@@ -261,7 +317,7 @@ export default class Subjects {
   #toast = inject(Toast);
   pagination = inject(Pagination);
   searchText = signal('');
-
+  actionsMenu = viewChild<Menu<string>>('actionsMenu');
   public subjects = rxResource({
     params: () => ({
       take: this.pagination.take(),

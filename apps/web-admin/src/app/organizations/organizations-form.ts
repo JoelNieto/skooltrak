@@ -68,7 +68,7 @@ const UPDATE_ORGANIZATION = gql`
         </div>
       </div>
       <div class="flex justify-end mt-4">
-        <button type="submit" class="btn btn-primary">Guardar</button>
+        <button type="submit" class="btn btn-neutral">Guardar</button>
       </div>
     </form>
   `,

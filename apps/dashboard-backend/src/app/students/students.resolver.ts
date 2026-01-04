@@ -49,6 +49,11 @@ export class StudentsResolver {
     return this.studentsService.findOne(id);
   }
 
+  @Query(() => Student, { name: 'studentGrades' })
+  async getStudentsGrades(@Args('id', { type: () => String }) id: string) {
+    return this.studentsService.getStudentsGrades(id);
+  }
+
   @Query(() => [Student], { name: 'studentsByCourseId' })
   findManyByCourseId(
     @Args('courseId', { type: () => String }) courseId: string

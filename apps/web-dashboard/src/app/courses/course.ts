@@ -139,7 +139,10 @@ type CourseType = Prisma.CourseGetPayload<{
           >
         </label>
         <div class="tab-content bg-base-100 border-base-300 p-6">
-          <app-course-assignments [courseId]="id()" />
+          <app-course-assignments
+            [courseId]="id()"
+            (reload)="courseResource.reload()"
+          />
         </div>
         <label class="tab">
           <input type="radio" name="my_tabs_6" aria-label="Participantes" />

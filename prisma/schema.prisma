@@ -272,7 +272,7 @@ model Student {
   createdAt       DateTime         @default(now())
   updatedAt       DateTime         @updatedAt
   quizSubmissions QuizSubmission[]
-  gradeStudents   GradeStudent[]
+  studentGrades   StudentGrade[]
 }
 
 model Teacher {
@@ -464,30 +464,30 @@ model Grade {
   published     Boolean        @default(false)
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
-  gradeStudents GradeStudent[]
+  studentGrades StudentGrade[]
 }
 
-model GradeStudent {
-  id        String                 @id @default(cuid())
+model StudentGrade {
+  id        String                @id @default(cuid())
   comments  String?
   gradeId   String
-  grade     Grade                  @relation(fields: [gradeId], references: [id], onDelete: Cascade)
+  grade     Grade                 @relation(fields: [gradeId], references: [id], onDelete: Cascade)
   studentId String
-  student   Student                @relation(fields: [studentId], references: [id])
+  student   Student               @relation(fields: [studentId], references: [id])
   score     Decimal?
-  createdAt DateTime               @default(now())
-  updatedAt DateTime               @updatedAt
-  revisions GradeStudentRevision[]
+  createdAt DateTime              @default(now())
+  updatedAt DateTime              @updatedAt
+  revisions StudentGradeRevision[]
 }
 
-model GradeStudentRevision {
-  id             String       @id @default(cuid())
-  reason         String
-  gradeStudentId String
-  gradeStudent   GradeStudent @relation(fields: [gradeStudentId], references: [id])
-  score          Decimal
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
+model StudentGradeRevision {
+  id            String        @id @default(cuid())
+  reason        String
+  studentGradeId String
+  studentGrade  StudentGrade  @relation(fields: [studentGradeId], references: [id])
+  score         Decimal
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
 }
 
 enum Gender {

@@ -118,6 +118,75 @@ export class StudentsService {
     });
   }
 
+  async getStudentsGrades(id: string) {
+    const courses = await this.prisma.course.findMany({
+      where: {
+        students: { some: { id } },
+      },
+      orderBy: {
+        createdAt: 'asc',
+      },
+    });
+
+    // Get all course IDs and their current period IDs
+    const coursePeriodMap = new Map<string, string>();
+    courses.forEach((course) => {
+      if (course.currentPeriodId) {
+        coursePeriodMap.set(course.id, course.currentPeriodId);
+      }
+    });
+
+    if (coursePeriodMap.size === 0) {
+      return courses.map((course) => ({
+        ...course,
+        grades: [],
+      }));
+    }
+
+    // Fetch grades for all courses, filtered by published and current period
+    const grades = await this.prisma.grade.findMany({
+      where: {
+        courseId: { in: Array.from(coursePeriodMap.keys()) },
+        published: true,
+        OR: Array.from(coursePeriodMap.entries()).map(
+          ([courseId, periodId]) => ({
+            courseId,
+            periodId,
+          })
+        ),
+      },
+      include: {
+        studentGrades: {
+          where: {
+            studentId: id,
+          },
+        },
+        bucket: true,
+        period: true,
+      },
+      orderBy: {
+        createdAt: 'asc',
+      },
+    });
+
+    // Group grades by courseId
+    const gradesByCourse = new Map<string, typeof grades>();
+    grades.forEach((grade) => {
+      const existing = gradesByCourse.get(grade.courseId);
+      if (existing) {
+        existing.push(grade);
+      } else {
+        gradesByCourse.set(grade.courseId, [grade]);
+      }
+    });
+
+    // Attach grades to courses
+    return courses.map((course) => ({
+      ...course,
+      grades: gradesByCourse.get(course.id) || [],
+    }));
+  }
+
   findOne(id: string) {
     return this.prisma.student.findUniqueOrThrow({
       where: { id },

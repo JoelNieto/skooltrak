@@ -237,7 +237,7 @@ export default class CourseGrades {
             Prisma.GradeGetPayload<{
               include: {
                 bucket: true;
-                gradeStudents: {
+                studentGrades: {
                   include: {
                     student: { include: { classGroup: true } };
                   };
@@ -256,7 +256,7 @@ export default class CourseGrades {
                   id
                   name
                 }
-                gradeStudents {
+                studentGrades {
                   id
                   student {
                     id
@@ -299,8 +299,8 @@ export default class CourseGrades {
         grades: grades.map((grade) => {
           return {
             ...grade,
-            item: grade.gradeStudents.find((gradeStudent) => {
-              return gradeStudent.student.id === student.id;
+            item: grade.studentGrades.find((studentGrade) => {
+              return studentGrade.student.id === student.id;
             }),
           };
         }),
@@ -315,13 +315,19 @@ export default class CourseGrades {
   }
 
   editGrade() {
-    this.#modal.open(GradesForm, {
-      title: 'Nueva calificacion',
-      size: 'large',
-      data: {
-        courseId: this.courseId(),
-        currentPeriod: this.currentPeriod(),
-      },
-    });
+    this.#modal
+      .open(GradesForm, {
+        title: 'Nueva calificacion',
+        size: 'large',
+        data: {
+          courseId: this.courseId(),
+          currentPeriod: this.currentPeriod(),
+        },
+      })
+      .closed.subscribe((result) => {
+        if (result) {
+          this.gradesResource.reload();
+        }
+      });
   }
 }

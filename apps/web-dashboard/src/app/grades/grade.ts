@@ -14,14 +14,16 @@ import { Router, RouterLink } from '@angular/router';
 import { Prisma } from '@generated/prisma';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
+  phosphorArrowFatLinesUpDuotone,
   phosphorCalendarDotsDuotone,
+  phosphorCheckCircleDuotone,
   phosphorDotsThreeDuotone,
   phosphorPencilDuotone,
   phosphorTrashDuotone,
 } from '@ng-icons/phosphor-icons/duotone';
 import { Apollo, gql } from 'apollo-angular';
-import { filter, map, switchMap } from 'rxjs';
-import GradeStudentForm from './grade-student-form';
+import { filter, map, switchMap, tap } from 'rxjs';
+import StudentGradeForm from './student-grade-form';
 
 @Component({
   selector: 'app-grade',
@@ -41,6 +43,8 @@ import GradeStudentForm from './grade-student-form';
       phosphorPencilDuotone,
       phosphorTrashDuotone,
       phosphorDotsThreeDuotone,
+      phosphorArrowFatLinesUpDuotone,
+      phosphorCheckCircleDuotone,
     }),
   ],
   template: `
@@ -55,25 +59,41 @@ import GradeStudentForm from './grade-student-form';
     <div class="card card-border border-base-300 mt-4 bg-base-100">
       <div class="card-body">
         <div class="flex justify-between items-center">
-          <h1 class="text-2xl font-medium">{{ grade.title }}</h1>
+          <h1 class="text-xl font-semibold">{{ grade.title }}</h1>
           <div class="flex items-center gap-2">
-            <button class="btn btn-neutral btn-sm btn-soft">
-              <ng-icon name="phosphorPencilDuotone" /> Editar
+            @if(grade.published) {
+            <span class="badge badge-success">
+              <ng-icon name="phosphorCheckCircleDuotone" /> Publicada</span
+            >
+            } @else {
+            <button
+              class="btn btn-neutral btn-sm btn-soft"
+              (click)="publishGrade()"
+            >
+              <ng-icon
+                name="phosphorArrowFatLinesUpDuotone"
+                class="text-success"
+              />
+              Publicar
             </button>
+            }
             <button
               class="btn btn-error btn-sm btn-soft"
-              (click)="deleteGrade(grade)"
+              (click)="deleteGrade()"
             >
               <ng-icon name="phosphorTrashDuotone" /> Eliminar
             </button>
           </div>
         </div>
-        <a
-          class="text-sm text-link"
-          [routerLink]="['/courses', grade.course.id]"
-        >
-          {{ grade.course.name }}
-        </a>
+        <div class="flex items-center gap-2">
+          <a
+            class="link link-primary"
+            [routerLink]="['/courses', grade.course.id]"
+          >
+            {{ grade.course.name }} </a
+          >/ {{ grade.bucket.name }}
+        </div>
+
         <lib-editor-viewer [innerHTML]="grade.comments" />
       </div>
     </div>
@@ -90,30 +110,30 @@ import GradeStudentForm from './grade-student-form';
             </tr>
           </thead>
           <tbody>
-            @for (gradeStudent of grade.gradeStudents; track gradeStudent.id) {
+            @for (studentGrade of grade.studentGrades; track studentGrade.id) {
             <tr>
               <td>
-                {{ gradeStudent.student.firstName }}
-                {{ gradeStudent.student.fatherName }}
+                {{ studentGrade.student.firstName }}
+                {{ studentGrade.student.fatherName }}
               </td>
               <td
                 class="font-semibold text-center !px-0 cursor-pointer hover:bg-base-200"
-                (click)="editGradeItem(gradeStudent)"
+                (click)="editGradeItem(studentGrade)"
                 [ngClass]="{
                   '!text-success bg-success/10':
-                    gradeStudent.score &&
-                    gradeStudent.score! >= metric()!.minimumApproval,
+                    studentGrade.score &&
+                    studentGrade.score! >= metric()!.minimumApproval,
                   '!text-warning bg-warning/10':
-                    gradeStudent.score &&
-                    (gradeStudent.score! >= metric()!.minimumApproval &&
-                      gradeStudent.score! < metric()!.minimumExcellence),
+                    studentGrade.score &&
+                    (studentGrade.score! >= metric()!.minimumApproval &&
+                      studentGrade.score! < metric()!.minimumExcellence),
                   '!text-error bg-error/10':
-                    gradeStudent.score &&
-                    gradeStudent.score! < metric()!.minimumApproval,
+                    studentGrade.score &&
+                    studentGrade.score! < metric()!.minimumApproval,
                 }"
               >
-                @if(gradeStudent.score) {
-                {{ gradeStudent.score | number : '1.1-1' }}
+                @if(studentGrade.score) {
+                {{ studentGrade.score | number : '1.1-1' }}
                 } @else {
                 <ng-icon name="phosphorDotsThreeDuotone" class="text-2xl" />
                 }
@@ -121,9 +141,9 @@ import GradeStudentForm from './grade-student-form';
               <td
                 class="overflow-hidden text-ellipsis whitespace-nowrap max-w-[200px] !pl-2"
               >
-                {{ gradeStudent.comments }}
+                {{ studentGrade.comments }}
               </td>
-              <td>{{ gradeStudent.updatedAt | date : 'medium' }}</td>
+              <td>{{ studentGrade.updatedAt | date : 'medium' }}</td>
             </tr>
             }
           </tbody>
@@ -165,7 +185,7 @@ export default class Grade {
                 };
                 bucket: true;
                 period: true;
-                gradeStudents: { include: { student: true } };
+                studentGrades: { include: { student: true } };
               };
             }>
           >;
@@ -178,6 +198,7 @@ export default class Grade {
                 comments
                 date
                 courseId
+                published
                 course {
                   id
                   name
@@ -203,7 +224,7 @@ export default class Grade {
                   id
                   name
                 }
-                gradeStudents {
+                studentGrades {
                   id
                   student {
                     id
@@ -223,7 +244,10 @@ export default class Grade {
             id,
           },
         })
-        .valueChanges.pipe(map((res) => res.data.grade));
+        .valueChanges.pipe(
+          tap((res) => console.log(res)),
+          map((res) => res.data.grade)
+        );
     },
   });
 
@@ -231,21 +255,61 @@ export default class Grade {
     () => this.gradeResource.value()?.course.studyPlan?.gradeMetric
   );
 
+  publishGrade() {
+    this.#confirmation
+      .confirm({
+        title: 'Publicar calificacion',
+        message:
+          '¿Estás seguro de publicar esta calificacion? Esta calificacion se vera en el informe de calificaciones.',
+      })
+      .pipe(
+        filter((result) => result),
+        switchMap(() =>
+          this.#apollo.mutate({
+            mutation: gql`
+              mutation UpdateGrade($updateGradeInput: UpdateGradeInput!) {
+                updateGrade(updateGradeInput: $updateGradeInput) {
+                  id
+                  published
+                }
+              }
+            `,
+            variables: {
+              updateGradeInput: {
+                id: this.gradeResource.value()!.id,
+                published: true,
+              },
+            },
+          })
+        )
+      )
+      .subscribe({
+        next: () => {
+          this.gradeResource.reload();
+          this.#toast.showSuccess('Calificacion publicada correctamente');
+        },
+        error: (error) => {
+          console.error(error);
+          this.#toast.showError('Error al publicar la calificacion');
+        },
+      });
+  }
+
   editGradeItem(
-    gradeStudent: DecimalToNumber<
-      Prisma.GradeStudentGetPayload<{ include: { student: true } }>
+    studentGrade: DecimalToNumber<
+      Prisma.StudentGradeGetPayload<{ include: { student: true } }>
     >
   ) {
-    this.#modal.open(GradeStudentForm, {
+    this.#modal.open(StudentGradeForm, {
       data: {
-        gradeStudent,
+        studentGrade,
         metric: this.metric(),
       },
       title: 'Editar calificacion',
     });
   }
 
-  deleteGrade(grade: Prisma.GradeGetPayload<{ include: undefined }>) {
+  deleteGrade() {
     this.#confirmation
       .confirm({
         title: 'Eliminar calificacion',
@@ -262,13 +326,16 @@ export default class Grade {
                 }
               }
             `,
-            variables: { id: grade.id },
+            variables: { id: this.gradeResource.value()?.id },
           })
         )
       )
       .subscribe({
         next: () => {
-          this.#router.navigate(['/courses', grade.courseId]);
+          this.#router.navigate([
+            '/courses',
+            this.gradeResource.value()?.courseId,
+          ]);
           this.#toast.showSuccess('Calificacion eliminada correctamente');
         },
 

@@ -23,7 +23,7 @@ import { GradeMetricsModule } from './grade-metrics/grade-metrics.module';
 import { PeriodsModule } from './periods/periods.module';
 import { GradesModule } from './grades/grades.module';
 import { GradeBucketsModule } from './grade-buckets/grade-buckets.module';
-import { GradeStudentsModule } from './grade-students/grade-students.module';
+import { StudentGradesModule } from './student-grades/student-grades.module';
 import { MessagesModule } from './messages/messages.module';
 import { GroupsSchedulesModule } from './groups-schedules/groups-schedules.module';
 
@@ -57,7 +57,7 @@ import { GroupsSchedulesModule } from './groups-schedules/groups-schedules.modul
     PeriodsModule,
     GradesModule,
     GradeBucketsModule,
-    GradeStudentsModule,
+    StudentGradesModule,
     MessagesModule,
     GroupsSchedulesModule,
   ],

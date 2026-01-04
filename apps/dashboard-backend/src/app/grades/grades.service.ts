@@ -16,7 +16,7 @@ export class GradesService {
     return this.prisma.grade.create({
       data: {
         ...createGradeInput,
-        gradeStudents: {
+        studentGrades: {
           create: students.students.map((s) => ({
             student: { connect: { id: s.id } },
           })),
@@ -36,7 +36,7 @@ export class GradesService {
         period: true,
         bucket: true,
         course: { include: { studyPlan: { include: { gradeMetric: true } } } },
-        gradeStudents: {
+        studentGrades: {
           include: {
             student: true,
           },
@@ -57,7 +57,7 @@ export class GradesService {
         period: true,
         bucket: true,
         course: true,
-        gradeStudents: {
+        studentGrades: {
           include: {
             student: { include: { classGroup: true } },
           },
@@ -77,7 +77,7 @@ export class GradesService {
     periodId: string,
     studentId: string
   ) {
-    const grades = await this.prisma.gradeStudent.findMany({
+    const grades = await this.prisma.studentGrade.findMany({
       where: { grade: { courseId, periodId }, studentId },
       include: {
         grade: {

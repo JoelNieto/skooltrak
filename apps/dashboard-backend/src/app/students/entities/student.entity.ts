@@ -3,12 +3,18 @@ import { $Enums, Prisma } from '@generated/prisma';
 import { Field, ObjectType } from '@nestjs/graphql';
 import { ClassGroup } from '../../class-groups/entities/class-group.entity';
 import { Course } from '../../courses/entities/course.entity';
+import { StudentGrade } from '../../student-grades/entities/student-grade.entity';
 
 @ObjectType()
 export class Student
   implements
     Prisma.StudentGetPayload<{
-      include: { classGroup: true; user: true; courses: true };
+      include: {
+        classGroup: true;
+        user: true;
+        courses: true;
+        studentGrades: true;
+      };
     }>
 {
   @Field(() => String, { description: 'ID of the student' })
@@ -39,6 +45,9 @@ export class Student
   address: string;
   @Field(() => String, { description: 'Phone of the student' })
   phone: string;
+
+  @Field(() => [StudentGrade], { description: 'Student grades of the student' })
+  studentGrades: StudentGrade[];
 
   @Field(() => User, { description: 'User of the student' })
   user: User;

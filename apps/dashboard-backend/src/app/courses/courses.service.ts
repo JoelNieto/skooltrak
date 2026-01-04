@@ -1,6 +1,6 @@
 import { Prisma } from '@generated/prisma';
 
-import { Inject, Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { CONTEXT } from '@nestjs/graphql';
 import { Request } from 'express';
 import { FetchDataInput } from '../fetch-data.input';
@@ -94,8 +94,6 @@ export class CoursesService {
     const { req } = this.context;
     const { role, userId } = req.user as any;
     const { skip, take, schoolId, search, studyPlanId } = fetchDataInput;
-    Logger.log('role', role);
-    Logger.log('userId', userId);
     let where: Prisma.CourseWhereInput = {
       schoolId,
       OR: [
@@ -105,7 +103,7 @@ export class CoursesService {
       ],
     };
 
-    if (role.name === 'STUDENT') {
+    if (role === 'STUDENT') {
       where = {
         ...where,
         groups: { some: { students: { some: { userId } } } },
@@ -147,10 +145,10 @@ export class CoursesService {
       ],
     };
 
-    if (role.name === 'STUDENT') {
+    if (role === 'STUDENT') {
       where = {
         ...where,
-        groups: { some: { students: { some: { userId: userId } } } },
+        groups: { some: { students: { some: { userId } } } },
       };
     }
 
@@ -210,7 +208,7 @@ export class CoursesService {
         subject: true,
         teacher: { include: { user: true } },
         studyPlan: { include: { gradeMetric: true } },
-        grades: { include: { gradeStudents: { include: { student: true } } } },
+        grades: { include: { studentGrades: { include: { student: true } } } },
       },
     });
   }
@@ -224,7 +222,7 @@ export class CoursesService {
         subject: true,
         teacher: { include: { user: true } },
         studyPlan: { include: { gradeMetric: true } },
-        grades: { include: { gradeStudents: { include: { student: true } } } },
+        grades: { include: { studentGrades: { include: { student: true } } } },
       },
     });
   }

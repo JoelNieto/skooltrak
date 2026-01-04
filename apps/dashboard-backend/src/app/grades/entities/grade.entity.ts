@@ -2,7 +2,7 @@ import { Prisma } from '@generated/prisma';
 import { Field, ObjectType } from '@nestjs/graphql';
 import { Course } from '../../courses/entities/course.entity';
 import { GradeBucket } from '../../grade-buckets/entities/grade-bucket.entity';
-import { GradeStudent } from '../../grade-students/entities/grade-student.entity';
+import { StudentGrade } from '../../student-grades/entities/student-grade.entity';
 import { Period } from '../../periods/entities/period.entity';
 @ObjectType()
 export class Grade
@@ -12,7 +12,7 @@ export class Grade
         period: true;
         bucket: true;
         course: true;
-        gradeStudents: true;
+        studentGrades: true;
       };
     }>
 {
@@ -46,8 +46,8 @@ export class Grade
   @Field(() => Course, { description: 'Curso de la calificacion' })
   course: Course;
 
-  @Field(() => [GradeStudent], {
+  @Field(() => [StudentGrade], {
     description: 'Estudiantes de la calificacion',
   })
-  gradeStudents: GradeStudent[];
+  studentGrades: StudentGrade[];
 }

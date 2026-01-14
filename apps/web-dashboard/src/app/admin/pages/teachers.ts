@@ -14,15 +14,7 @@ import { rxResource } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { Prisma } from '@generated/prisma';
-import { NgIcon, provideIcons } from '@ng-icons/core';
-import {
-  phosphorDotsThreeOutlineDuotone,
-  phosphorEyeDuotone,
-  phosphorMagnifyingGlassDuotone,
-  phosphorPencilDuotone,
-  phosphorPlusCircleDuotone,
-  phosphorTrashDuotone,
-} from '@ng-icons/phosphor-icons/duotone';
+
 import { Apollo, gql } from 'apollo-angular';
 import { filter, map, switchMap, tap } from 'rxjs';
 import Store from '../../core/store';
@@ -35,7 +27,6 @@ type Teacher = Prisma.TeacherGetPayload<{ include: { user: true } }> & {
 @Component({
   selector: 'app-teachers',
   imports: [
-    NgIcon,
     DatePipe,
     Paginator,
     FormsModule,
@@ -47,21 +38,12 @@ type Teacher = Prisma.TeacherGetPayload<{ include: { user: true } }> & {
     MenuItem,
   ],
   providers: [Pagination],
-  viewProviders: [
-    provideIcons({
-      phosphorPlusCircleDuotone,
-      phosphorMagnifyingGlassDuotone,
-      phosphorEyeDuotone,
-      phosphorPencilDuotone,
-      phosphorTrashDuotone,
-      phosphorDotsThreeOutlineDuotone,
-    }),
-  ],
+
   template: `
     <div class="flex flex-col gap-4 md:flex-row md:justify-between">
       <div class="md:w-96 w-full">
         <label class="input input-primary ">
-          <ng-icon name="phosphorMagnifyingGlassDuotone" />
+          <span class="material-symbols-outlined">search</span>
           <input
             class="pl-0"
             type="search"
@@ -71,7 +53,8 @@ type Teacher = Prisma.TeacherGetPayload<{ include: { user: true } }> & {
         </label>
       </div>
       <button class="btn btn-primary" (click)="editTeacher()">
-        <ng-icon name="phosphorPlusCircleDuotone" /> Agregar Profesor
+        <span class="material-symbols-outlined">add_circle</span> Agregar
+        Profesor
       </button>
     </div>
     <div
@@ -126,10 +109,9 @@ type Teacher = Prisma.TeacherGetPayload<{ include: { user: true } }> & {
                 #trigger="ngMenuTrigger"
                 [menu]="actionsMenu()"
               >
-                <ng-icon
-                  name="phosphorDotsThreeOutlineDuotone"
-                  class="text-xl"
-                />
+                <span class="material-symbols-outlined text-xl"
+                  >more_horiz</span
+                >
               </button>
               <ng-template
                 [cdkConnectedOverlayOpen]="trigger.expanded()"
@@ -157,7 +139,9 @@ type Teacher = Prisma.TeacherGetPayload<{ include: { user: true } }> & {
                       [routerLink]="['/teachers', teacher.id]"
                       class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-base-200 w-full"
                     >
-                      <ng-icon name="phosphorEyeDuotone" class="text-lg" />
+                      <span class="material-symbols-outlined text-lg"
+                        >visibility</span
+                      >
                       <span>Ver</span>
                     </a>
                     <button
@@ -166,7 +150,9 @@ type Teacher = Prisma.TeacherGetPayload<{ include: { user: true } }> & {
                       class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-base-200 w-full"
                       (click)="editTeacher(teacher)"
                     >
-                      <ng-icon name="phosphorPencilDuotone" class="text-lg" />
+                      <span class="material-symbols-outlined text-lg"
+                        >edit</span
+                      >
                       <span>Editar</span>
                     </button>
                     <button
@@ -175,7 +161,9 @@ type Teacher = Prisma.TeacherGetPayload<{ include: { user: true } }> & {
                       class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-base-200 w-full"
                       (click)="deleteTeacher(teacher)"
                     >
-                      <ng-icon name="phosphorTrashDuotone" class="text-lg" />
+                      <span class="material-symbols-outlined text-lg"
+                        >delete</span
+                      >
                       <span>Eliminar</span>
                     </button>
                   </ng-template>

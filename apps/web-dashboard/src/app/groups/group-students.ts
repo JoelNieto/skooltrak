@@ -1,8 +1,7 @@
 import { Component, computed, input, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { Prisma } from '@generated/prisma';
-import { NgIcon, provideIcons } from '@ng-icons/core';
-import { phosphorMagnifyingGlassDuotone } from '@ng-icons/phosphor-icons/duotone';
+
 type Student = Prisma.StudentGetPayload<{
   include: { user: true };
 }> & {
@@ -11,15 +10,11 @@ type Student = Prisma.StudentGetPayload<{
 };
 @Component({
   selector: 'app-group-students',
-  imports: [NgIcon, RouterLink],
-  providers: [
-    provideIcons({
-      phosphorMagnifyingGlassDuotone,
-    }),
-  ],
+  imports: [RouterLink],
+
   template: `<h4 class="text-xl font-medium mb-2">Estudiantes</h4>
     <label class="input input-primary w-full md:w-96">
-      <ng-icon name="phosphorMagnifyingGlassDuotone" />
+      <span class="material-symbols-outlined">search</span>
       <input
         class="pl-0"
         type="search"

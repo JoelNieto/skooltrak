@@ -14,13 +14,6 @@ import { rxResource } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { Prisma } from '@generated/prisma';
-import { NgIcon, provideIcons } from '@ng-icons/core';
-import {
-  phosphorDotsThreeOutlineDuotone,
-  phosphorPencilDuotone,
-  phosphorPlusCircleDuotone,
-  phosphorTrashDuotone,
-} from '@ng-icons/phosphor-icons/duotone';
 import { Apollo, gql } from 'apollo-angular';
 import { map, tap } from 'rxjs';
 import { UsersForm } from './users-form';
@@ -28,7 +21,6 @@ import { UsersForm } from './users-form';
   selector: 'app-users',
   imports: [
     RouterLink,
-    NgIcon,
     DatePipe,
     Menu,
     MenuContent,
@@ -39,14 +31,6 @@ import { UsersForm } from './users-form';
     FormsModule,
   ],
   providers: [Pagination],
-  viewProviders: [
-    provideIcons({
-      phosphorPlusCircleDuotone,
-      phosphorPencilDuotone,
-      phosphorTrashDuotone,
-      phosphorDotsThreeOutlineDuotone,
-    }),
-  ],
   template: `<div class="breadcrumbs text-sm">
       <ul>
         <li><a routerLink="/">Inicio</a></li>
@@ -62,7 +46,7 @@ import { UsersForm } from './users-form';
       </div>
 
       <button class="btn btn-neutral" (click)="editUser()">
-        <ng-icon name="phosphorPlusCircleDuotone" /> Nuevo Usuario
+        <span class="material-symbols-outlined">add_circle</span> Nuevo Usuario
       </button>
     </div>
     <div class="flex justify-between items-center mb-4">
@@ -105,10 +89,9 @@ import { UsersForm } from './users-form';
                 #trigger="ngMenuTrigger"
                 [menu]="formatMenu()"
               >
-                <ng-icon
-                  name="phosphorDotsThreeOutlineDuotone"
-                  class="text-xl"
-                />
+                <span class="material-symbols-outlined text-xl"
+                  >more_horiz</span
+                >
               </button>
               <ng-template
                 [cdkConnectedOverlayOpen]="trigger.expanded()"
@@ -136,7 +119,9 @@ import { UsersForm } from './users-form';
                       class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-base-200 w-full"
                       (click)="editUser(user)"
                     >
-                      <ng-icon name="phosphorPencilDuotone" class="text-lg" />
+                      <span class="material-symbols-outlined text-lg"
+                        >edit</span
+                      >
                       <span>Editar</span>
                     </button>
                     <button
@@ -145,7 +130,9 @@ import { UsersForm } from './users-form';
                       class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-base-200 w-full"
                       (click)="deleteUser(user)"
                     >
-                      <ng-icon name="phosphorTrashDuotone" class="text-lg" />
+                      <span class="material-symbols-outlined text-lg"
+                        >delete</span
+                      >
                       <span>Eliminar</span>
                     </button>
                   </ng-template>

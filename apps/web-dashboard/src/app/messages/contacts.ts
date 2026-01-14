@@ -13,11 +13,7 @@ import {
 } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
-import { NgIcon, provideIcons } from '@ng-icons/core';
-import {
-  phosphorUserDuotone,
-  phosphorXDuotone,
-} from '@ng-icons/phosphor-icons/duotone';
+
 import { Apollo, gql } from 'apollo-angular';
 import { map, of } from 'rxjs';
 export type Contact = {
@@ -37,13 +33,8 @@ export interface SelectedContact extends Contact {
 }
 @Component({
   selector: 'app-contacts',
-  imports: [FormsModule, NgIcon],
-  viewProviders: [
-    provideIcons({
-      phosphorUserDuotone,
-      phosphorXDuotone,
-    }),
-  ],
+  imports: [FormsModule],
+
   template: ` <div class="relative w-full min-h-12 bg-white px-3 py-2">
       <div class="flex flex-wrap gap-2 items-center">
         @for (contact of selectedContacts(); track contact.id) {
@@ -51,7 +42,7 @@ export interface SelectedContact extends Contact {
           [class]="contact.isValid ? 'badge-neutral' : 'badge-error'"
           class="badge badge-soft inline-flex items-center px-2 py-1 font-medium transition-all duration-200 hover:shadow-sm"
         >
-          <ng-icon name="phosphorUserDuotone" />
+          <span class="material-symbols-outlined">person</span>
           <span class="mr-1">{{ contact.name }}</span>
           <button
             type="button"
@@ -137,7 +128,7 @@ export interface SelectedContact extends Contact {
         class="btn btn-ghost btn-xs"
         (click)="addLatestContact()"
       >
-        <ng-icon name="phosphorXDuotone" />
+        <span class="material-symbols-outlined">close</span>
       </button>
     </div>
 

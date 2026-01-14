@@ -12,14 +12,13 @@ import {
 } from '@angular/forms';
 
 import { Loader, markGroupDirty } from '@/ui';
-import { NgIcon, provideIcons } from '@ng-icons/core';
-import { phosphorEnvelopeDuotone } from '@ng-icons/phosphor-icons/duotone';
+
 import Auth from './auth';
 
 @Component({
   selector: 'app-login',
-  imports: [ReactiveFormsModule, Loader, NgIcon],
-  viewProviders: [provideIcons({ phosphorEnvelopeDuotone })],
+  imports: [ReactiveFormsModule, Loader],
+
   template: ` <div
     class="gradient-bg min-h-screen flex items-center justify-center p-4"
   >
@@ -49,7 +48,7 @@ import Auth from './auth';
                 <div
                   class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"
                 >
-                  <ng-icon name="phosphorEnvelopeDuotone" />
+                  <span class="material-symbols-outlined">mail</span>
                 </div>
                 <input
                   type="email"

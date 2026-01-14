@@ -3,16 +3,7 @@ import { Component, inject, input } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import { Prisma } from '@generated/prisma';
-import { NgIcon, provideIcons } from '@ng-icons/core';
-import {
-  phosphorCalendarDotsDuotone,
-  phosphorCalendarPlusDuotone,
-  phosphorExamDuotone,
-  phosphorFolderStarDuotone,
-  phosphorListChecksDuotone,
-  phosphorPencilDuotone,
-  phosphorUsersThreeDuotone,
-} from '@ng-icons/phosphor-icons/duotone';
+
 import { Apollo, gql } from 'apollo-angular';
 import { map, of } from 'rxjs';
 import AssignmentForm from '../assignments/assignment-form';
@@ -41,23 +32,13 @@ type CourseType = Prisma.CourseGetPayload<{
   imports: [
     Loader,
     RouterLink,
-    NgIcon,
+
     CourseAssignments,
     CourseGradeBuckets,
     CourseGrades,
     CourseStudentGrades,
   ],
-  viewProviders: [
-    provideIcons({
-      phosphorCalendarDotsDuotone,
-      phosphorUsersThreeDuotone,
-      phosphorListChecksDuotone,
-      phosphorFolderStarDuotone,
-      phosphorCalendarPlusDuotone,
-      phosphorPencilDuotone,
-      phosphorExamDuotone,
-    }),
-  ],
+
   template: ` @if(courseResource.isLoading()) {
     <lib-loader />
     } @if(courseResource.error()) {
@@ -96,10 +77,11 @@ type CourseType = Prisma.CourseGetPayload<{
             </div>
             <div class="flex gap-2">
               <button class="btn btn-neutral" (click)="addAssignment()">
-                <ng-icon name="phosphorCalendarPlusDuotone" /> Nueva asignacion
+                <span class="material-symbols-outlined">assignment_add</span>
+                Nueva asignacion
               </button>
               <button class="btn btn-primary btn-soft">
-                <ng-icon name="phosphorPencilDuotone" /> Editar
+                <span class="material-symbols-outlined">edit</span> Editar
               </button>
             </div>
           </div>
@@ -115,7 +97,7 @@ type CourseType = Prisma.CourseGetPayload<{
             checked="checked"
           />
           <span class="flex items-center gap-2">
-            <ng-icon name="phosphorExamDuotone" class="text-xl" />
+            <span class="material-symbols-outlined text-xl">grade</span>
             Calificaciones
           </span>
         </label>
@@ -138,10 +120,8 @@ type CourseType = Prisma.CourseGetPayload<{
             aria-label="Calendario"
           />
           <span class="flex items-center gap-2">
-            <ng-icon
-              name="phosphorCalendarDotsDuotone"
-              class="text-xl"
-            />Calendario</span
+            <span class="material-symbols-outlined text-xl">calendar_month</span
+            >Calendario</span
           >
         </label>
         <div class="tab-content bg-base-100 border-base-300 p-6">
@@ -153,10 +133,8 @@ type CourseType = Prisma.CourseGetPayload<{
         <label class="tab">
           <input type="radio" name="my_tabs_6" aria-label="Participantes" />
           <span class="flex items-center gap-2">
-            <ng-icon
-              name="phosphorUsersThreeDuotone"
-              class="text-xl"
-            />Participantes</span
+            <span class="material-symbols-outlined text-xl">groups</span
+            >Participantes</span
           >
         </label>
         <div class="tab-content bg-base-100 border-base-300 p-6">
@@ -166,7 +144,8 @@ type CourseType = Prisma.CourseGetPayload<{
         <label class="tab">
           <input type="radio" name="my_tabs_6" aria-label="Archivos" />
           <span class="flex items-center gap-2">
-            <ng-icon name="phosphorFolderStarDuotone" />Archivos</span
+            <span class="material-symbols-outlined">folder_special</span
+            >Archivos</span
           >
         </label>
 
@@ -176,7 +155,8 @@ type CourseType = Prisma.CourseGetPayload<{
         <label class="tab">
           <input type="radio" name="my_tabs_6" aria-label="Ponderacion" />
           <span class="flex items-center gap-2">
-            <ng-icon name="phosphorFolderStarDuotone" />Ponderacion</span
+            <span class="material-symbols-outlined">folder_special</span
+            >Ponderacion</span
           >
         </label>
 

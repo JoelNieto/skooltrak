@@ -10,8 +10,7 @@ import { rxResource } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { Prisma } from '@generated/prisma';
-import { NgIcon, provideIcons } from '@ng-icons/core';
-import { phosphorMagnifyingGlassDuotone } from '@ng-icons/phosphor-icons/duotone';
+
 import { Apollo, gql } from 'apollo-angular';
 import { map, of, tap } from 'rxjs';
 import Store from '../core/store';
@@ -28,9 +27,9 @@ type CourseType = Prisma.CourseGetPayload<{
 
 @Component({
   selector: 'app-courses',
-  imports: [RouterLink, NgIcon, Loader, Paginator, FormsModule],
+  imports: [RouterLink, Loader, Paginator, FormsModule],
   providers: [Pagination],
-  viewProviders: [provideIcons({ phosphorMagnifyingGlassDuotone })],
+
   template: `
     <div class="breadcrumbs text-sm">
       <ul>
@@ -40,7 +39,7 @@ type CourseType = Prisma.CourseGetPayload<{
     </div>
     <h1 class="text-2xl font-semibold mb-2">Cursos</h1>
     <label class="input input-primary input-lg">
-      <ng-icon name="phosphorMagnifyingGlassDuotone" />
+      <span class="material-symbols-outlined">search</span>
       <input
         class="pl-0"
         type="search"

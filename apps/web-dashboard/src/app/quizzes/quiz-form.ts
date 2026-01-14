@@ -12,11 +12,7 @@ import {
 } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { $Enums, Prisma } from '@generated/prisma';
-import { NgIcon, provideIcons } from '@ng-icons/core';
-import {
-  phosphorPlusCircleDuotone,
-  phosphorTrashDuotone,
-} from '@ng-icons/phosphor-icons/duotone';
+
 import { Apollo, gql } from 'apollo-angular';
 import { of } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -31,11 +27,8 @@ import { QuizQuestionControl } from './quiz-question-control';
     FormsModule,
     TextEditor,
     QuizQuestionControl,
-    NgIcon,
   ],
-  viewProviders: [
-    provideIcons({ phosphorTrashDuotone, phosphorPlusCircleDuotone }),
-  ],
+
   template: `<div class="breadcrumbs text-sm">
       <ul>
         <li><a routerLink="/">Inicio</a></li>
@@ -111,7 +104,7 @@ import { QuizQuestionControl } from './quiz-question-control';
                     class="btn btn-soft btn-error"
                     (click)="removeQuestion($index)"
                   >
-                    <ng-icon name="phosphorTrashDuotone" />
+                    <span class="material-symbols-outlined">delete</span>
                   </button>
                 </div>
                 <app-quiz-question-control
@@ -122,7 +115,7 @@ import { QuizQuestionControl } from './quiz-question-control';
             </div>
             }
             <button class="btn btn-primary btn-soft" (click)="addQuestion()">
-              <ng-icon name="phosphorPlusCircleDuotone" />
+              <span class="material-symbols-outlined">add_circle</span>
               Agregar pregunta
             </button>
           </div>

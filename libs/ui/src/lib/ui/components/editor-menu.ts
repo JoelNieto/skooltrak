@@ -1,45 +1,8 @@
 import { Component, input } from '@angular/core';
-import { NgIcon, provideIcons } from '@ng-icons/core';
-import {
-  phosphorCodeBold,
-  phosphorHighlighterBold,
-  phosphorListBulletsBold,
-  phosphorListNumbersBold,
-  phosphorQuotesBold,
-  phosphorTextAUnderlineBold,
-  phosphorTextBBold,
-  phosphorTextHFiveBold,
-  phosphorTextHFourBold,
-  phosphorTextHOneBold,
-  phosphorTextHSixBold,
-  phosphorTextHThreeBold,
-  phosphorTextHTwoBold,
-  phosphorTextItalicBold,
-  phosphorTextStrikethroughBold,
-} from '@ng-icons/phosphor-icons/bold';
 
 @Component({
   selector: 'lib-editor-menu',
-  imports: [NgIcon],
-  viewProviders: [
-    provideIcons({
-      phosphorTextBBold,
-      phosphorTextItalicBold,
-      phosphorTextStrikethroughBold,
-      phosphorTextAUnderlineBold,
-      phosphorCodeBold,
-      phosphorListBulletsBold,
-      phosphorListNumbersBold,
-      phosphorTextHOneBold,
-      phosphorTextHTwoBold,
-      phosphorTextHThreeBold,
-      phosphorTextHFourBold,
-      phosphorTextHFiveBold,
-      phosphorTextHSixBold,
-      phosphorQuotesBold,
-      phosphorHighlighterBold,
-    }),
-  ],
+  imports: [],
   template: `<div class="flex gap-2 flex-wrap">
     <div class="tooltip" data-tip="Negrita">
       <button
@@ -48,7 +11,7 @@ import {
         [class.btn-soft]="editor().isActive('bold')"
         (click)="editor().chain().focus().toggleBold().run()"
       >
-        <ng-icon name="phosphorTextBBold" />
+        <span class="material-symbols-outlined">format_bold</span>
       </button>
     </div>
     <div class="tooltip" data-tip="Cursiva">
@@ -58,7 +21,7 @@ import {
         [class.btn-soft]="editor().isActive('italic')"
         (click)="editor().chain().focus().toggleItalic().run()"
       >
-        <ng-icon name="phosphorTextItalicBold" />
+        <span class="material-symbols-outlined">format_italic</span>
       </button>
     </div>
     <div class="tooltip" data-tip="Tachado">
@@ -68,7 +31,7 @@ import {
         [class.btn-soft]="editor().isActive('strike')"
         (click)="editor().chain().focus().toggleStrike().run()"
       >
-        <ng-icon name="phosphorTextStrikethroughBold" />
+        <span class="material-symbols-outlined">format_strikethrough</span>
       </button>
     </div>
     <div class="tooltip" data-tip="Subrayado">
@@ -78,7 +41,7 @@ import {
         [class.btn-soft]="editor().isActive('underline')"
         (click)="editor().chain().focus().toggleUnderline().run()"
       >
-        <ng-icon name="phosphorTextAUnderlineBold" />
+        <span class="material-symbols-outlined">format_underlined</span>
       </button>
     </div>
     <div class="tooltip" data-tip="Destacado">
@@ -88,7 +51,7 @@ import {
         [class.btn-soft]="editor().isActive('highlight')"
         (click)="editor().chain().focus().toggleHighlight().run()"
       >
-        <ng-icon name="phosphorHighlighterBold" />
+        <span class="material-symbols-outlined">highlight</span>
       </button>
     </div>
     <div class="tooltip" data-tip="Código">
@@ -98,7 +61,7 @@ import {
         [class.btn-soft]="editor().isActive('code')"
         (click)="editor().chain().focus().toggleCode().run()"
       >
-        <ng-icon name="phosphorCodeBold" />
+        <span class="material-symbols-outlined">code</span>
       </button>
     </div>
     <div class="tooltip" data-tip="Lista desordenada">
@@ -108,7 +71,7 @@ import {
         [class.btn-soft]="editor().isActive('bulletList')"
         (click)="editor().chain().focus().toggleBulletList().run()"
       >
-        <ng-icon name="phosphorListBulletsBold" />
+        <span class="material-symbols-outlined">format_list_bulleted</span>
       </button>
     </div>
     <div class="tooltip" data-tip="Lista ordenada">
@@ -118,7 +81,7 @@ import {
         [class.btn-soft]="editor().isActive('orderedList')"
         (click)="editor().chain().focus().toggleOrderedList().run()"
       >
-        <ng-icon name="phosphorListNumbersBold" />
+        <span class="material-symbols-outlined">format_list_numbered</span>
       </button>
     </div>
     <div class="tooltip" data-tip="Encabezado 1">
@@ -128,7 +91,7 @@ import {
         [class.btn-soft]="editor().isActive('heading', { level: 1 })"
         (click)="editor().chain().focus().toggleHeading({ level: 1 }).run()"
       >
-        <ng-icon name="phosphorTextHOneBold" />
+        <span class="material-symbols-outlined">format_h1</span>
       </button>
     </div>
     <div class="tooltip" data-tip="Encabezado 2">
@@ -138,7 +101,7 @@ import {
         [class.btn-soft]="editor().isActive('heading', { level: 2 })"
         (click)="editor().chain().focus().toggleHeading({ level: 2 }).run()"
       >
-        <ng-icon name="phosphorTextHTwoBold" />
+        <span class="material-symbols-outlined">format_h2</span>
       </button>
     </div>
     <div class="tooltip" data-tip="Encabezado 3">
@@ -148,7 +111,7 @@ import {
         [class.btn-soft]="editor().isActive('heading', { level: 3 })"
         (click)="editor().chain().focus().toggleHeading({ level: 3 }).run()"
       >
-        <ng-icon name="phosphorTextHThreeBold" />
+        <span class="material-symbols-outlined">format_h3</span>
       </button>
     </div>
     <div class="tooltip" data-tip="Encabezado 4">
@@ -158,7 +121,7 @@ import {
         [class.btn-soft]="editor().isActive('heading', { level: 4 })"
         (click)="editor().chain().focus().toggleHeading({ level: 4 }).run()"
       >
-        <ng-icon name="phosphorTextHFourBold" />
+        <span class="material-symbols-outlined">format_h4</span>
       </button>
     </div>
     <div class="tooltip" data-tip="Encabezado 5">
@@ -168,7 +131,7 @@ import {
         [class.btn-soft]="editor().isActive('heading', { level: 5 })"
         (click)="editor().chain().focus().toggleHeading({ level: 5 }).run()"
       >
-        <ng-icon name="phosphorTextHFiveBold" />
+        <span class="material-symbols-outlined">format_h5</span>
       </button>
     </div>
     <div class="tooltip" data-tip="Cita">
@@ -178,7 +141,7 @@ import {
         [class.btn-soft]="editor().isActive('blockquote')"
         (click)="editor().chain().focus().toggleBlockquote().run()"
       >
-        <ng-icon name="phosphorQuotesBold" />
+        <span class="material-symbols-outlined">format_quote</span>
       </button>
     </div>
   </div>`,

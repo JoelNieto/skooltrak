@@ -1,23 +1,14 @@
 import { Component, computed, input, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { Prisma } from '@generated/prisma';
-import { NgIcon, provideIcons } from '@ng-icons/core';
-import {
-  phosphorBookBookmarkDuotone,
-  phosphorMagnifyingGlassDuotone,
-} from '@ng-icons/phosphor-icons/duotone';
+
 @Component({
   selector: 'app-group-courses',
-  imports: [NgIcon, RouterLink],
-  viewProviders: [
-    provideIcons({
-      phosphorBookBookmarkDuotone,
-      phosphorMagnifyingGlassDuotone,
-    }),
-  ],
+  imports: [RouterLink],
+
   template: ` <h4 class="text-xl font-medium mb-2">Cursos</h4>
     <label class="input">
-      <ng-icon name="phosphorMagnifyingGlassDuotone" />
+      <span class="material-symbols-outlined">search</span>
       <input
         class="input input-bordered pl-0"
         type="search"
@@ -35,7 +26,7 @@ import {
         >
           <div class="avatar avatar-placeholder">
             <div class="bg-secondary text-secondary-content w-10 rounded-full">
-              <ng-icon class="text-lg" name="phosphorBookBookmarkDuotone" />
+              <span class="material-symbols-outlined text-lg">menu_book</span>
             </div>
           </div>
           <div>

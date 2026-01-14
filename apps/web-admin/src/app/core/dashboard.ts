@@ -5,13 +5,12 @@ import {
   viewChild,
 } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import { NgIcon, provideIcons } from '@ng-icons/core';
-import { phosphorListDuotone } from '@ng-icons/phosphor-icons/duotone';
+
 import { Sidebar } from './sidebar';
 @Component({
   selector: 'app-dashboard',
-  imports: [RouterOutlet, Sidebar, NgIcon],
-  viewProviders: [provideIcons({ phosphorListDuotone })],
+  imports: [RouterOutlet, Sidebar],
+
   template: ` <div class="flex h-screen overflow-hidden">
     <!-- Mobile sidebar overlay -->
     <div
@@ -35,7 +34,7 @@ import { Sidebar } from './sidebar';
         (keydown)="openSidebar()"
         tabindex="0"
       >
-        <ng-icon name="phosphorListDuotone" />
+        <span class="material-symbols-outlined">menu</span>
       </button>
     </div>
 

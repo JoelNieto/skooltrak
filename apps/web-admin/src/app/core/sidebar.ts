@@ -1,31 +1,10 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
-import { NgIcon, provideIcons } from '@ng-icons/core';
-import {
-  phosphorBuildingOfficeDuotone,
-  phosphorFolderSimpleLockDuotone,
-  phosphorHouseLineDuotone,
-  phosphorTableDuotone,
-  phosphorTreeViewDuotone,
-  phosphorUserGearDuotone,
-  phosphorUsersThreeDuotone,
-} from '@ng-icons/phosphor-icons/duotone';
 
 @Component({
   // eslint-disable-next-line @angular-eslint/component-selector
   selector: '[appSidebar]',
-  imports: [RouterLink, RouterLinkActive, NgIcon],
-  viewProviders: [
-    provideIcons({
-      phosphorHouseLineDuotone,
-      phosphorBuildingOfficeDuotone,
-      phosphorUserGearDuotone,
-      phosphorFolderSimpleLockDuotone,
-      phosphorUsersThreeDuotone,
-      phosphorTreeViewDuotone,
-      phosphorTableDuotone,
-    }),
-  ],
+  imports: [RouterLink, RouterLinkActive],
   template: `<div class="flex items-center justify-between px-4 pt-4 pb-2">
       <h1 class="text-xl font-semibold text-primary flex items-center gap-2">
         SkoolTrak
@@ -43,7 +22,7 @@ import {
             ]"
             class="flex items-center p-2 text-base-content rounded-lg hover:bg-primary-50 hover:text-primary-600 group"
           >
-            <ng-icon name="phosphorHouseLineDuotone" class="text-xl" />
+            <span class="material-symbols-outlined text-xl">home</span>
             <span class="ml-3">Inicio</span>
           </a>
         </li>
@@ -57,7 +36,7 @@ import {
             ]"
             class="flex items-center p-2 text-base-content rounded-lg hover:bg-primary-50 hover:text-primary-600 group"
           >
-            <ng-icon name="phosphorTreeViewDuotone" class="text-xl" />
+            <span class="material-symbols-outlined text-xl">account_tree</span>
             <span class="ml-3">Organizaciones</span>
           </a>
         </li>
@@ -71,7 +50,7 @@ import {
             ]"
             class="flex items-center p-2 text-base-content rounded-lg hover:bg-primary-50 hover:text-primary-600 group"
           >
-            <ng-icon name="phosphorBuildingOfficeDuotone" class="text-xl" />
+            <span class="material-symbols-outlined text-xl">domain</span>
             <span class="ml-3">Escuelas</span>
           </a>
         </li>
@@ -85,7 +64,9 @@ import {
             ]"
             class="flex items-center p-2 text-base-content rounded-lg hover:bg-primary-50 hover:text-primary-600 group"
           >
-            <ng-icon name="phosphorUserGearDuotone" class="text-xl" />
+            <span class="material-symbols-outlined text-xl"
+              >manage_accounts</span
+            >
             <span class="ml-3">Roles</span>
           </a>
         </li>
@@ -99,7 +80,7 @@ import {
             ]"
             class="flex items-center p-2 text-base-content rounded-lg hover:bg-primary-50 hover:text-primary-600 group"
           >
-            <ng-icon name="phosphorTableDuotone" class="text-xl" />
+            <span class="material-symbols-outlined text-xl">table_chart</span>
             <span class="ml-3">Metricas</span>
           </a>
         </li>
@@ -113,7 +94,9 @@ import {
             ]"
             class="flex items-center p-2 text-base-content rounded-lg hover:bg-primary-50 hover:text-primary-600 group"
           >
-            <ng-icon name="phosphorFolderSimpleLockDuotone" class="text-xl" />
+            <span class="material-symbols-outlined text-xl"
+              >folder_managed</span
+            >
             <span class="ml-3">Permisos</span>
           </a>
         </li>
@@ -127,7 +110,7 @@ import {
             ]"
             class="flex items-center p-2 text-base-content rounded-lg hover:bg-primary-50 hover:text-primary-600 group"
           >
-            <ng-icon name="phosphorUsersThreeDuotone" class="text-xl" />
+            <span class="material-symbols-outlined text-xl">group</span>
             <span class="ml-3">Usuarios</span>
           </a>
         </li>

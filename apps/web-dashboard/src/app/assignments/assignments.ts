@@ -11,12 +11,7 @@ import {
 import { rxResource } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import { Prisma } from '@generated/prisma';
-import { NgIcon, provideIcons } from '@ng-icons/core';
-import {
-  phosphorArrowLeftDuotone,
-  phosphorArrowRightDuotone,
-  phosphorCalendarCheckDuotone,
-} from '@ng-icons/phosphor-icons/duotone';
+
 import { Apollo, gql } from 'apollo-angular';
 import { addDays, endOfWeek, startOfWeek, subDays } from 'date-fns';
 import { map, of } from 'rxjs';
@@ -34,14 +29,8 @@ export class StripHtmlPipe implements PipeTransform {
 
 @Component({
   selector: 'app-assignments',
-  imports: [RouterLink, DatePipe, NgIcon, StripHtmlPipe],
-  viewProviders: [
-    provideIcons({
-      phosphorArrowLeftDuotone,
-      phosphorArrowRightDuotone,
-      phosphorCalendarCheckDuotone,
-    }),
-  ],
+  imports: [RouterLink, DatePipe, StripHtmlPipe],
+
   template: `<div class="breadcrumbs text-sm">
       <ul>
         <li><a routerLink="/">Inicio</a></li>
@@ -55,14 +44,14 @@ export class StripHtmlPipe implements PipeTransform {
           class="btn btn-primary btn-soft btn-circle"
           (click)="previousWeek()"
         >
-          <ng-icon name="phosphorArrowLeftDuotone" />
+          <span class="material-symbols-outlined">chevron_left</span>
         </button>
 
         <button
           class="btn btn-primary btn-soft btn-circle"
           (click)="nextWeek()"
         >
-          <ng-icon name="phosphorArrowRightDuotone" />
+          <span class="material-symbols-outlined">chevron_right</span>
         </button>
       </div>
       <div class="flex-1 text-center text-neutral-800 dark:text-neutral-200">
@@ -70,7 +59,7 @@ export class StripHtmlPipe implements PipeTransform {
       </div>
       <div class="flex-1 flex justify-end">
         <button class="btn btn-neutral btn-soft" (click)="today()">
-          <ng-icon name="phosphorCalendarCheckDuotone" /> Hoy
+          <span class="material-symbols-outlined">today</span> Hoy
         </button>
       </div>
     </div>

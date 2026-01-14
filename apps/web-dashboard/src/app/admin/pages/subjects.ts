@@ -13,16 +13,7 @@ import {
 import { rxResource } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { Prisma } from '@generated/prisma';
-import { NgIcon, provideIcons } from '@ng-icons/core';
-import {
-  phosphorDotsThreeOutlineDuotone,
-  phosphorMagnifyingGlassDuotone,
-  phosphorPencilDuotone,
-  phosphorPlusCircleDuotone,
-  phosphorSortAscendingDuotone,
-  phosphorSortDescendingDuotone,
-  phosphorTrashDuotone,
-} from '@ng-icons/phosphor-icons/duotone';
+
 import { Apollo, gql } from 'apollo-angular';
 import { filter, map, switchMap, tap } from 'rxjs';
 import SubjectsForm from '../forms/subjects-form';
@@ -30,7 +21,7 @@ import SubjectsForm from '../forms/subjects-form';
   selector: 'app-subjects',
   imports: [
     DatePipe,
-    NgIcon,
+    DatePipe,
     Paginator,
     FormsModule,
     Menu,
@@ -40,22 +31,12 @@ import SubjectsForm from '../forms/subjects-form';
     OverlayModule,
   ],
   providers: [Pagination],
-  viewProviders: [
-    provideIcons({
-      phosphorPencilDuotone,
-      phosphorTrashDuotone,
-      phosphorPlusCircleDuotone,
-      phosphorMagnifyingGlassDuotone,
-      phosphorSortAscendingDuotone,
-      phosphorSortDescendingDuotone,
-      phosphorDotsThreeOutlineDuotone,
-    }),
-  ],
+
   template: `
     <div class="flex flex-col gap-4 md:flex-row md:justify-between">
       <div class="md:w-96 w-full">
         <label class="input input-primary ">
-          <ng-icon name="phosphorMagnifyingGlassDuotone" />
+          <span class="material-symbols-outlined">search</span>
           <input
             class="pl-0"
             type="search"
@@ -66,7 +47,8 @@ import SubjectsForm from '../forms/subjects-form';
       </div>
 
       <button class="btn btn-primary" (click)="editSubject()">
-        <ng-icon name="phosphorPlusCircleDuotone" /> Nueva asignatura
+        <span class="material-symbols-outlined">add_circle</span> Nueva
+        asignatura
       </button>
     </div>
     <div
@@ -86,14 +68,13 @@ import SubjectsForm from '../forms/subjects-form';
             >
               <div class="flex items-center gap-2">
                 Nombre @if(pagination.sortBy() === 'name') {
-                <ng-icon
-                  [name]="
+                <span class="material-symbols-outlined text-xl">
+                  {{
                     pagination.sortOrder() === 'asc'
-                      ? 'phosphorSortAscendingDuotone'
-                      : 'phosphorSortDescendingDuotone'
-                  "
-                  class="text-xl"
-                />}
+                      ? 'arrow_upward'
+                      : 'arrow_downward'
+                  }} </span
+                >}
               </div>
             </th>
             <th
@@ -107,14 +88,13 @@ import SubjectsForm from '../forms/subjects-form';
             >
               <div class="flex items-center gap-2">
                 Nombre corto @if(pagination.sortBy() === 'shortName') {
-                <ng-icon
-                  [name]="
+                <span class="material-symbols-outlined text-xl">
+                  {{
                     pagination.sortOrder() === 'asc'
-                      ? 'phosphorSortAscendingDuotone'
-                      : 'phosphorSortDescendingDuotone'
-                  "
-                  class="text-xl"
-                />}
+                      ? 'arrow_upward'
+                      : 'arrow_downward'
+                  }} </span
+                >}
               </div>
             </th>
             <th
@@ -128,14 +108,13 @@ import SubjectsForm from '../forms/subjects-form';
             >
               <div class="flex items-center gap-2">
                 Código @if(pagination.sortBy() === 'code') {
-                <ng-icon
-                  [name]="
+                <span class="material-symbols-outlined text-xl">
+                  {{
                     pagination.sortOrder() === 'asc'
-                      ? 'phosphorSortAscendingDuotone'
-                      : 'phosphorSortDescendingDuotone'
-                  "
-                  class="text-xl"
-                />}
+                      ? 'arrow_upward'
+                      : 'arrow_downward'
+                  }} </span
+                >}
               </div>
             </th>
             <th
@@ -149,14 +128,13 @@ import SubjectsForm from '../forms/subjects-form';
             >
               <div class="flex items-center gap-2">
                 Creado @if(pagination.sortBy() === 'createdAt') {
-                <ng-icon
-                  [name]="
+                <span class="material-symbols-outlined text-xl">
+                  {{
                     pagination.sortOrder() === 'asc'
-                      ? 'phosphorSortAscendingDuotone'
-                      : 'phosphorSortDescendingDuotone'
-                  "
-                  class="text-xl"
-                />}
+                      ? 'arrow_upward'
+                      : 'arrow_downward'
+                  }} </span
+                >}
               </div>
             </th>
             <th
@@ -170,14 +148,13 @@ import SubjectsForm from '../forms/subjects-form';
             >
               <div class="flex items-center gap-2">
                 Actualizado @if(pagination.sortBy() === 'updatedAt') {
-                <ng-icon
-                  [name]="
+                <span class="material-symbols-outlined text-xl">
+                  {{
                     pagination.sortOrder() === 'asc'
-                      ? 'phosphorSortAscendingDuotone'
-                      : 'phosphorSortDescendingDuotone'
-                  "
-                  class="text-xl"
-                />}
+                      ? 'arrow_upward'
+                      : 'arrow_downward'
+                  }} </span
+                >}
               </div>
             </th>
             <th></th>
@@ -199,10 +176,9 @@ import SubjectsForm from '../forms/subjects-form';
                 #trigger="ngMenuTrigger"
                 [menu]="actionsMenu()"
               >
-                <ng-icon
-                  name="phosphorDotsThreeOutlineDuotone"
-                  class="text-xl"
-                />
+                <span class="material-symbols-outlined text-xl"
+                  >more_horiz</span
+                >
               </button>
               <ng-template
                 [cdkConnectedOverlayOpen]="trigger.expanded()"
@@ -230,7 +206,9 @@ import SubjectsForm from '../forms/subjects-form';
                       class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-base-200 w-full"
                       (click)="editSubject(subject)"
                     >
-                      <ng-icon name="phosphorPencilDuotone" class="text-lg" />
+                      <span class="material-symbols-outlined text-lg"
+                        >edit</span
+                      >
                       <span>Editar</span>
                     </button>
                     <button
@@ -239,7 +217,9 @@ import SubjectsForm from '../forms/subjects-form';
                       class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-base-200 w-full"
                       (click)="deleteSubject(subject)"
                     >
-                      <ng-icon name="phosphorTrashDuotone" class="text-lg" />
+                      <span class="material-symbols-outlined text-lg"
+                        >delete</span
+                      >
                       <span>Eliminar</span>
                     </button>
                   </ng-template>

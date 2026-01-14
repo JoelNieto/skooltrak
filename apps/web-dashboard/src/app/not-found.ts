@@ -1,18 +1,11 @@
 import { Location } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import { Router } from '@angular/router';
-import { NgIcon, provideIcons } from '@ng-icons/core';
-import {
-  phosphorArrowLeftBold,
-  phosphorHouseSimpleBold,
-} from '@ng-icons/phosphor-icons/bold';
 
 @Component({
   selector: 'app-not-found',
-  imports: [NgIcon],
-  viewProviders: [
-    provideIcons({ phosphorHouseSimpleBold, phosphorArrowLeftBold }),
-  ],
+  imports: [],
+
   template: `<div
     class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen flex items-center justify-center p-4"
   >
@@ -54,11 +47,11 @@ import {
         <!-- Action Buttons -->
         <div class="flex flex-col sm:flex-row gap-4 justify-center">
           <button class="btn btn-primary btn-lg" (click)="goHome()">
-            <ng-icon name="phosphorHouseSimpleBold" />
+            <span class="material-symbols-outlined">home</span>
             Inicio
           </button>
           <button class="btn btn-outline btn-neutral btn-lg" (click)="goBack()">
-            <ng-icon name="phosphorArrowLeftBold" />
+            <span class="material-symbols-outlined">arrow_back</span>
             Regresar
           </button>
         </div>

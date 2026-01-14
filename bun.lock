@@ -27,8 +27,6 @@
         "@nestjs/jwt": "^11.0.0",
         "@nestjs/passport": "^11.0.5",
         "@nestjs/platform-express": "^11.0.0",
-        "@ng-icons/core": "^32.1.0",
-        "@ng-icons/phosphor-icons": "^32.1.0",
         "@prisma/client": "7.2.0",
         "@prisma/client-runtime-utils": "7.2.0",
         "@tiptap/core": "^3.10.4",
@@ -847,10 +845,6 @@
     "@nestjs/schematics": ["@nestjs/schematics@11.0.8", "", { "dependencies": { "@angular-devkit/core": "19.2.17", "@angular-devkit/schematics": "19.2.17", "comment-json": "4.4.1", "jsonc-parser": "3.3.1", "pluralize": "8.0.0" }, "peerDependencies": { "typescript": ">=4.8.2" } }, "sha512-HKunkzfBYLpNyL/qP5wu0OBKVPrISJLnrB4r6S53fT99pEvopDcJAeIuznSAD1Dx1njUqpbTR/uGyD0xL1y0nw=="],
 
     "@nestjs/testing": ["@nestjs/testing@11.1.6", "", { "dependencies": { "tslib": "2.8.1" }, "peerDependencies": { "@nestjs/common": "^11.0.0", "@nestjs/core": "^11.0.0", "@nestjs/microservices": "^11.0.0", "@nestjs/platform-express": "^11.0.0" }, "optionalPeers": ["@nestjs/microservices", "@nestjs/platform-express"] }, "sha512-srYzzDNxGvVCe1j0SpTS9/ix75PKt6Sn6iMaH1rpJ6nj2g8vwNrhK0CoJJXvpCYgrnI+2WES2pprYnq8rAMYHA=="],
-
-    "@ng-icons/core": ["@ng-icons/core@32.1.0", "", { "dependencies": { "tslib": "^2.3.0" }, "peerDependencies": { "@angular/common": ">=20.0.0", "@angular/core": ">=20.0.0", "rxjs": "^6.5.3 || ^7.4.0" } }, "sha512-QMZSJIZYFg6THQKL9cQDEf7IbBcALcM09wCBmlIf0slmozRWcNJR25T9huiXy9/15OH1APegaRW+606e9bsOIg=="],
-
-    "@ng-icons/phosphor-icons": ["@ng-icons/phosphor-icons@32.1.0", "", { "dependencies": { "tslib": "^2.3.0" } }, "sha512-2/XKS6zOSCcurCt/EGe+U1Y6i4Npyawsx4iul+5S75Tj4yYo7OYafVxWnxovqY9vMZ/BMb2UbQ3O25n6WlJkuA=="],
 
     "@ngtools/webpack": ["@ngtools/webpack@21.0.4", "", { "peerDependencies": { "@angular/compiler-cli": "^21.0.0", "typescript": ">=5.9 <6.0", "webpack": "^5.54.0" } }, "sha512-0+XWJqZaRB5GGtJEaWgHV0iYzgB5pDhVjMEb/1Z6+CZazF8Aq2HuU8BErWYzPIwaiTLxR+lc3Z35RsAaeSmGFQ=="],
 

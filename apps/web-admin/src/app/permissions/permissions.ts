@@ -14,22 +14,13 @@ import { rxResource } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { Prisma } from '@generated/prisma';
-import { NgIcon, provideIcons } from '@ng-icons/core';
-import {
-  phosphorDotsThreeOutlineDuotone,
-  phosphorPencilDuotone,
-  phosphorPlusCircleDuotone,
-  phosphorTrashDuotone,
-} from '@ng-icons/phosphor-icons/duotone';
 import { Apollo, gql } from 'apollo-angular';
 import { map, tap } from 'rxjs';
 import { PermissionsForm } from './permissions-form';
-
 @Component({
   selector: 'app-permissions',
   imports: [
     RouterLink,
-    NgIcon,
     DatePipe,
     Menu,
     MenuContent,
@@ -40,14 +31,6 @@ import { PermissionsForm } from './permissions-form';
     FormsModule,
   ],
   providers: [Pagination],
-  viewProviders: [
-    provideIcons({
-      phosphorPlusCircleDuotone,
-      phosphorDotsThreeOutlineDuotone,
-      phosphorPencilDuotone,
-      phosphorTrashDuotone,
-    }),
-  ],
   template: ` <div class="breadcrumbs text-sm">
       <ul>
         <li><a routerLink="/">Inicio</a></li>
@@ -63,7 +46,7 @@ import { PermissionsForm } from './permissions-form';
       </div>
 
       <button class="btn btn-neutral" (click)="editPermission()">
-        <ng-icon name="phosphorPlusCircleDuotone" /> Nuevo Permiso
+        <span class="material-symbols-outlined">add_circle</span> Nuevo Permiso
       </button>
     </div>
     <div class="flex justify-between items-center mb-4">
@@ -102,10 +85,9 @@ import { PermissionsForm } from './permissions-form';
                 #trigger="ngMenuTrigger"
                 [menu]="formatMenu()"
               >
-                <ng-icon
-                  name="phosphorDotsThreeOutlineDuotone"
-                  class="text-xl"
-                />
+                <span class="material-symbols-outlined text-xl"
+                  >more_horiz</span
+                >
               </button>
               <ng-template
                 [cdkConnectedOverlayOpen]="trigger.expanded()"
@@ -133,7 +115,9 @@ import { PermissionsForm } from './permissions-form';
                       class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-base-200 w-full"
                       (click)="editPermission(permission)"
                     >
-                      <ng-icon name="phosphorPencilDuotone" class="text-lg" />
+                      <span class="material-symbols-outlined text-lg"
+                        >edit</span
+                      >
                       <span>Editar</span>
                     </button>
                     <button
@@ -142,7 +126,9 @@ import { PermissionsForm } from './permissions-form';
                       class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-base-200 w-full"
                       (click)="deletePermission(permission)"
                     >
-                      <ng-icon name="phosphorTrashDuotone" class="text-lg" />
+                      <span class="material-symbols-outlined text-lg"
+                        >delete</span
+                      >
                       <span>Eliminar</span>
                     </button>
                   </ng-template>

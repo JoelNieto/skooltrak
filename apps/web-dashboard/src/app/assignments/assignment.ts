@@ -4,21 +4,12 @@ import { Component, inject, input } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import { Prisma } from '@generated/prisma';
-import { NgIcon, provideIcons } from '@ng-icons/core';
-import {
-  phosphorCalendarDotsDuotone,
-  phosphorUsersThreeDuotone,
-} from '@ng-icons/phosphor-icons/duotone';
+
 import { Apollo, gql } from 'apollo-angular';
 import { map } from 'rxjs';
 @Component({
-  imports: [RouterLink, DatePipe, Loader, NgIcon, EditorViewer],
-  viewProviders: [
-    provideIcons({
-      phosphorCalendarDotsDuotone,
-      phosphorUsersThreeDuotone,
-    }),
-  ],
+  imports: [RouterLink, DatePipe, Loader, EditorViewer],
+
   template: `
     @defer { @if(assignmentResource.hasValue()) { @let assignment =
     assignmentResource.value();
@@ -39,7 +30,7 @@ import { map } from 'rxjs';
           {{ assignment.course.name }}
         </a>
         <p class="flex items-center gap-2">
-          <ng-icon name="phosphorCalendarDotsDuotone" />
+          <span class="material-symbols-outlined">calendar_month</span>
           {{ assignment.date | date : 'medium' }}
         </p>
       </div>

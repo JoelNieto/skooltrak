@@ -10,14 +10,7 @@ import {
 import { rxResource } from '@angular/core/rxjs-interop';
 import { RouterLink, RouterOutlet } from '@angular/router';
 import { Prisma } from '@generated/prisma';
-import { NgIcon, provideIcons } from '@ng-icons/core';
-import {
-  phosphorBuildingApartmentDuotone,
-  phosphorEnvelopeSimpleDuotone,
-  phosphorGearFineDuotone,
-  phosphorListDuotone,
-  phosphorSignOutDuotone,
-} from '@ng-icons/phosphor-icons/duotone';
+
 import { Apollo, gql } from 'apollo-angular';
 import { map } from 'rxjs';
 import Auth from '../auth/auth';
@@ -25,16 +18,8 @@ import { Sidebar } from './sidebar';
 import Store from './store';
 @Component({
   selector: 'app-dashboard',
-  imports: [RouterOutlet, Sidebar, NgIcon, RouterLink],
-  viewProviders: [
-    provideIcons({
-      phosphorListDuotone,
-      phosphorBuildingApartmentDuotone,
-      phosphorSignOutDuotone,
-      phosphorGearFineDuotone,
-      phosphorEnvelopeSimpleDuotone,
-    }),
-  ],
+  imports: [RouterOutlet, Sidebar, RouterLink],
+  viewProviders: [],
   template: `<div class="flex h-screen overflow-hidden">
     <!-- Mobile sidebar overlay -->
     <div
@@ -66,7 +51,7 @@ import Store from './store';
             (keydown)="openSidebar()"
             tabindex="0"
           >
-            <ng-icon name="phosphorListDuotone" />
+            <span class="material-symbols-outlined">menu</span>
           </button>
           <div class="dropdown w-full">
             <div
@@ -74,10 +59,7 @@ import Store from './store';
               tabindex="0"
               class="flex items-center p-2 text-base-content rounded-lg hover:bg-primary-50 hover:text-primary-600 group cursor-pointer"
             >
-              <ng-icon
-                name="phosphorBuildingApartmentDuotone"
-                class="text-xl"
-              />
+              <span class="material-symbols-outlined text-xl">apartment</span>
               <span class="ml-2">{{ store.currentSchool()?.name }}</span>
             </div>
             <ul
@@ -100,8 +82,11 @@ import Store from './store';
         </div>
         <div class="flex items-center gap-4">
           <a routerLink="messages" class="btn btn-ghost"
-            ><ng-icon name="phosphorEnvelopeSimpleDuotone" class="text-2xl"
-          /></a>
+            ><span class="material-symbols-outlined text-2xl"
+              >mail_outline</span
+            >
+            </a
+          >
           <div class="dropdown dropdown-end">
             <div
               class="avatar avatar-placeholder cursor-pointer"
@@ -126,14 +111,16 @@ import Store from './store';
               @if(auth.isAdmin()) {
               <li>
                 <a routerLink="admin"
-                  ><ng-icon name="phosphorGearFineDuotone" class="text-xl" />
+                  ><span class="material-symbols-outlined text-xl"
+                    >settings</span
+                  >
                   <span class="ml-1">Admin</span></a
                 >
               </li>
               }
               <li>
                 <button (click)="logout()">
-                  <ng-icon name="phosphorSignOutDuotone" class="text-xl" />
+                  <span class="material-symbols-outlined text-xl">logout</span>
                   <span class="ml-1">Cerrar sesión</span>
                 </button>
               </li>

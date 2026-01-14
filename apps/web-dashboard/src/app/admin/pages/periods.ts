@@ -5,40 +5,20 @@ import { DatePipe } from '@angular/common';
 import { Component, inject, viewChild } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { Prisma } from '@generated/prisma';
-import { NgIcon, provideIcons } from '@ng-icons/core';
-import {
-  phosphorDotsThreeOutlineDuotone,
-  phosphorPencilDuotone,
-  phosphorPlusCircleDuotone,
-  phosphorTrashDuotone,
-} from '@ng-icons/phosphor-icons/duotone';
+
 import { Apollo, gql } from 'apollo-angular';
 import { filter, map, of, switchMap } from 'rxjs';
 import Store from '../../core/store';
 import PeriodsForm from '../forms/periods-form';
 @Component({
   selector: 'app-periods',
-  imports: [
-    NgIcon,
-    DatePipe,
-    Menu,
-    MenuContent,
-    MenuItem,
-    MenuTrigger,
-    OverlayModule,
-  ],
-  viewProviders: [
-    provideIcons({
-      phosphorPlusCircleDuotone,
-      phosphorPencilDuotone,
-      phosphorTrashDuotone,
-      phosphorDotsThreeOutlineDuotone,
-    }),
-  ],
+  imports: [DatePipe, Menu, MenuContent, MenuItem, MenuTrigger, OverlayModule],
+
   template: `
     <div class="flex justify-end">
       <button class="btn btn-primary" (click)="editPeriod()">
-        <ng-icon name="phosphorPlusCircleDuotone" /> Agregar periodo
+        <span class="material-symbols-outlined">add_circle</span> Agregar
+        periodo
       </button>
     </div>
     <div
@@ -71,10 +51,9 @@ import PeriodsForm from '../forms/periods-form';
                 #trigger="ngMenuTrigger"
                 [menu]="actionsMenu()"
               >
-                <ng-icon
-                  name="phosphorDotsThreeOutlineDuotone"
-                  class="text-xl"
-                />
+                <span class="material-symbols-outlined text-xl"
+                  >more_horiz</span
+                >
               </button>
               <ng-template
                 [cdkConnectedOverlayOpen]="trigger.expanded()"
@@ -102,7 +81,9 @@ import PeriodsForm from '../forms/periods-form';
                       class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-base-200 w-full"
                       (click)="editPeriod(period)"
                     >
-                      <ng-icon name="phosphorPencilDuotone" class="text-lg" />
+                      <span class="material-symbols-outlined text-lg"
+                        >edit</span
+                      >
                       <span>Editar</span>
                     </button>
                     <button
@@ -111,7 +92,9 @@ import PeriodsForm from '../forms/periods-form';
                       class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-base-200 w-full"
                       (click)="deletePeriod(period)"
                     >
-                      <ng-icon name="phosphorTrashDuotone" class="text-lg" />
+                      <span class="material-symbols-outlined text-lg"
+                        >delete</span
+                      >
                       <span>Eliminar</span>
                     </button>
                   </ng-template>

@@ -11,20 +11,13 @@ import {
 import { rxResource } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import { Prisma } from '@generated/prisma';
-import { NgIcon, provideIcons } from '@ng-icons/core';
-import {
-  phosphorDotsThreeOutlineDuotone,
-  phosphorPencilDuotone,
-  phosphorPlusCircleDuotone,
-  phosphorTrashDuotone,
-} from '@ng-icons/phosphor-icons/duotone';
+
 import { Apollo, gql } from 'apollo-angular';
 import { map } from 'rxjs';
 import { OrganizationsForm } from './organizations-form';
 @Component({
   selector: 'app-organizations',
   imports: [
-    NgIcon,
     DatePipe,
     RouterLink,
     Menu,
@@ -33,14 +26,7 @@ import { OrganizationsForm } from './organizations-form';
     MenuTrigger,
     OverlayModule,
   ],
-  viewProviders: [
-    provideIcons({
-      phosphorPlusCircleDuotone,
-      phosphorPencilDuotone,
-      phosphorTrashDuotone,
-      phosphorDotsThreeOutlineDuotone,
-    }),
-  ],
+
   template: `<div class="breadcrumbs text-sm">
       <ul>
         <li><a routerLink="/">Inicio</a></li>
@@ -56,7 +42,8 @@ import { OrganizationsForm } from './organizations-form';
       </div>
 
       <button class="btn btn-neutral" (click)="editOrganization()">
-        <ng-icon name="phosphorPlusCircleDuotone" /> Nueva Organizacións
+        <span class="material-symbols-outlined">add_circle</span> Nueva
+        Organizacións
       </button>
     </div>
     <div class="overflow-x-auto">
@@ -85,10 +72,9 @@ import { OrganizationsForm } from './organizations-form';
                 #trigger="ngMenuTrigger"
                 [menu]="actionsMenu()"
               >
-                <ng-icon
-                  name="phosphorDotsThreeOutlineDuotone"
-                  class="text-xl"
-                />
+                <span class="material-symbols-outlined text-xl"
+                  >more_horiz</span
+                >
               </button>
               <ng-template
                 [cdkConnectedOverlayOpen]="trigger.expanded()"
@@ -118,7 +104,9 @@ import { OrganizationsForm } from './organizations-form';
                       (click)="editOrganization(organization)"
                       type="button"
                     >
-                      <ng-icon name="phosphorPencilDuotone" class="text-lg" />
+                      <span class="material-symbols-outlined text-lg"
+                        >edit</span
+                      >
                       <span>Editar</span>
                     </button>
                     <button
@@ -129,7 +117,9 @@ import { OrganizationsForm } from './organizations-form';
                       (keydown.enter)="deleteOrganization(organization)"
                       type="button"
                     >
-                      <ng-icon name="phosphorTrashDuotone" class="text-lg" />
+                      <span class="material-symbols-outlined text-lg"
+                        >delete</span
+                      >
                       <span>Eliminar</span>
                     </button>
                   </ng-template>

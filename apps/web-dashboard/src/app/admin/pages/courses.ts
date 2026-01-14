@@ -6,15 +6,7 @@ import { rxResource } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { Prisma } from '@generated/prisma';
-import { NgIcon, provideIcons } from '@ng-icons/core';
-import {
-  phosphorDotsThreeOutlineDuotone,
-  phosphorEyeDuotone,
-  phosphorMagnifyingGlassDuotone,
-  phosphorPencilDuotone,
-  phosphorPlusCircleDuotone,
-  phosphorTrashDuotone,
-} from '@ng-icons/phosphor-icons/duotone';
+
 import { Apollo, gql } from 'apollo-angular';
 import { filter, map, of, switchMap, tap } from 'rxjs';
 import Store from '../../core/store';
@@ -34,7 +26,6 @@ type CourseType = Prisma.CourseGetPayload<{
 @Component({
   selector: 'app-courses',
   imports: [
-    NgIcon,
     Paginator,
     RouterLink,
     FormsModule,
@@ -44,21 +35,12 @@ type CourseType = Prisma.CourseGetPayload<{
     MenuTrigger,
     OverlayModule,
   ],
-  viewProviders: [
-    provideIcons({
-      phosphorPlusCircleDuotone,
-      phosphorTrashDuotone,
-      phosphorPencilDuotone,
-      phosphorMagnifyingGlassDuotone,
-      phosphorDotsThreeOutlineDuotone,
-      phosphorEyeDuotone,
-    }),
-  ],
+
   template: `<div class="flex justify-between">
       <div class="flex gap-2">
         <div class="md:w-96 w-full">
           <label class="input input-primary ">
-            <ng-icon name="phosphorMagnifyingGlassDuotone" />
+            <span class="material-symbols-outlined">search</span>
             <input
               class="pl-0"
               type="search"
@@ -76,7 +58,7 @@ type CourseType = Prisma.CourseGetPayload<{
       </div>
 
       <button class="btn btn-primary" (click)="editCourse()">
-        <ng-icon name="phosphorPlusCircleDuotone" /> Nuevo curso
+        <span class="material-symbols-outlined">add_circle</span> Nuevo curso
       </button>
     </div>
     <div
@@ -124,10 +106,9 @@ type CourseType = Prisma.CourseGetPayload<{
                 #trigger="ngMenuTrigger"
                 [menu]="actionsMenu()"
               >
-                <ng-icon
-                  name="phosphorDotsThreeOutlineDuotone"
-                  class="text-xl"
-                />
+                <span class="material-symbols-outlined text-xl"
+                  >more_horiz</span
+                >
               </button>
               <ng-template
                 [cdkConnectedOverlayOpen]="trigger.expanded()"
@@ -155,7 +136,9 @@ type CourseType = Prisma.CourseGetPayload<{
                       [routerLink]="['/courses', course.id]"
                       class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-base-200 w-full"
                     >
-                      <ng-icon name="phosphorEyeDuotone" class="text-lg" />
+                      <span class="material-symbols-outlined text-lg"
+                        >visibility</span
+                      >
                       <span>Ver</span>
                     </a>
                     <button
@@ -164,7 +147,9 @@ type CourseType = Prisma.CourseGetPayload<{
                       class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-base-200 w-full"
                       (click)="editCourse(course)"
                     >
-                      <ng-icon name="phosphorPencilDuotone" class="text-lg" />
+                      <span class="material-symbols-outlined text-lg"
+                        >edit</span
+                      >
                       <span>Editar</span>
                     </button>
                     <button
@@ -173,7 +158,9 @@ type CourseType = Prisma.CourseGetPayload<{
                       class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-base-200 w-full"
                       (click)="deleteCourse(course)"
                     >
-                      <ng-icon name="phosphorTrashDuotone" class="text-lg" />
+                      <span class="material-symbols-outlined text-lg"
+                        >delete</span
+                      >
                       <span>Eliminar</span>
                     </button>
                   </ng-template>

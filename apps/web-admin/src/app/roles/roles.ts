@@ -11,36 +11,12 @@ import {
 import { rxResource } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import { Prisma } from '@generated/prisma';
-import { NgIcon, provideIcons } from '@ng-icons/core';
-import {
-  phosphorDotsThreeOutlineDuotone,
-  phosphorPencilDuotone,
-  phosphorPlusCircleDuotone,
-  phosphorTrashDuotone,
-} from '@ng-icons/phosphor-icons/duotone';
 import { Apollo, gql } from 'apollo-angular';
 import { map } from 'rxjs';
 import { RolesForm } from './roles-form';
 @Component({
   selector: 'app-roles',
-  imports: [
-    RouterLink,
-    NgIcon,
-    DatePipe,
-    Menu,
-    MenuContent,
-    MenuItem,
-    MenuTrigger,
-    OverlayModule,
-  ],
-  viewProviders: [
-    provideIcons({
-      phosphorPlusCircleDuotone,
-      phosphorDotsThreeOutlineDuotone,
-      phosphorPencilDuotone,
-      phosphorTrashDuotone,
-    }),
-  ],
+  imports: [RouterLink, DatePipe, Menu, MenuContent, MenuItem, MenuTrigger],
   template: `<div class="breadcrumbs text-sm">
       <ul>
         <li><a routerLink="/">Inicio</a></li>
@@ -54,7 +30,7 @@ import { RolesForm } from './roles-form';
       </div>
 
       <button class="btn btn-primary" (click)="editRole()">
-        <ng-icon name="phosphorPlusCircleDuotone" /> Nuevo Rol
+        <span class="material-symbols-outlined">add_circle</span> Nuevo Rol
       </button>
     </div>
     <div class="overflow-x-auto">
@@ -85,10 +61,9 @@ import { RolesForm } from './roles-form';
                 #trigger="ngMenuTrigger"
                 [menu]="formatMenu()"
               >
-                <ng-icon
-                  name="phosphorDotsThreeOutlineDuotone"
-                  class="text-xl"
-                />
+                <span class="material-symbols-outlined text-xl"
+                  >more_horiz</span
+                >
               </button>
               <ng-template
                 [cdkConnectedOverlayOpen]="trigger.expanded()"
@@ -116,7 +91,9 @@ import { RolesForm } from './roles-form';
                       class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-base-200 w-full"
                       (click)="editRole(role)"
                     >
-                      <ng-icon name="phosphorPencilDuotone" class="text-lg" />
+                      <span class="material-symbols-outlined text-lg"
+                        >edit</span
+                      >
                       <span>Editar</span>
                     </button>
                     <button
@@ -125,7 +102,9 @@ import { RolesForm } from './roles-form';
                       class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-base-200 w-full"
                       (click)="deleteRole(role)"
                     >
-                      <ng-icon name="phosphorTrashDuotone" class="text-lg" />
+                      <span class="material-symbols-outlined text-lg"
+                        >delete</span
+                      >
                       <span>Eliminar</span>
                     </button>
                   </ng-template>

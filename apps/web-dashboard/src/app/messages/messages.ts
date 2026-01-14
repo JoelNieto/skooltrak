@@ -10,11 +10,7 @@ import { rxResource } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { Prisma } from '@generated/prisma';
-import { NgIcon, provideIcons } from '@ng-icons/core';
-import {
-  phosphorEyeDuotone,
-  phosphorTrashDuotone,
-} from '@ng-icons/phosphor-icons/duotone';
+
 import { Apollo, gql } from 'apollo-angular';
 import { filter, map, switchMap, tap } from 'rxjs';
 type User = Prisma.UserGetPayload<undefined> & {
@@ -33,13 +29,8 @@ type MessageRecipientType = Prisma.MessageRecipientGetPayload<undefined> & {
 };
 
 @Component({
-  imports: [RouterLink, TimeAgoPipe, Paginator, NgIcon, FormsModule],
-  viewProviders: [
-    provideIcons({
-      phosphorTrashDuotone,
-      phosphorEyeDuotone,
-    }),
-  ],
+  imports: [RouterLink, TimeAgoPipe, Paginator, FormsModule],
+
   template: `<div class="breadcrumbs text-sm">
       <ul>
         <li><a routerLink="/">Inicio</a></li>
@@ -119,7 +110,9 @@ type MessageRecipientType = Prisma.MessageRecipientGetPayload<undefined> & {
                     class="hover:text-error cursor-pointer"
                     (click)="deleteMessage(item)"
                   >
-                    <ng-icon name="phosphorTrashDuotone" class="text-lg" />
+                    <span class="material-symbols-outlined text-lg"
+                      >delete</span
+                    >
                   </button>
                 </td>
               </tr>

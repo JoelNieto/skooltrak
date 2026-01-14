@@ -6,14 +6,7 @@ import { Component, inject, viewChild } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import { Prisma } from '@generated/prisma';
-import { NgIcon, provideIcons } from '@ng-icons/core';
-import {
-  phosphorDotsThreeOutlineDuotone,
-  phosphorEyeDuotone,
-  phosphorPencilDuotone,
-  phosphorPlusCircleDuotone,
-  phosphorTrashDuotone,
-} from '@ng-icons/phosphor-icons/duotone';
+
 import { Apollo, gql } from 'apollo-angular';
 import { filter, map, of, switchMap } from 'rxjs';
 import Store from '../../core/store';
@@ -21,7 +14,6 @@ import ClassGroupsForm from '../forms/class-groups-form';
 @Component({
   selector: 'app-groups',
   imports: [
-    NgIcon,
     DatePipe,
     RouterLink,
     Menu,
@@ -30,19 +22,11 @@ import ClassGroupsForm from '../forms/class-groups-form';
     MenuTrigger,
     OverlayModule,
   ],
-  viewProviders: [
-    provideIcons({
-      phosphorPlusCircleDuotone,
-      phosphorTrashDuotone,
-      phosphorPencilDuotone,
-      phosphorDotsThreeOutlineDuotone,
-      phosphorEyeDuotone,
-    }),
-  ],
+  viewProviders: [],
   template: `
     <div class="flex justify-end">
       <button class="btn btn-primary" (click)="editClassGroup()">
-        <ng-icon name="phosphorPlusCircleDuotone" /> Nuevo Grupo
+        <span class="material-symbols-outlined">add_circle</span> Nuevo Grupo
       </button>
     </div>
     <div
@@ -83,10 +67,9 @@ import ClassGroupsForm from '../forms/class-groups-form';
                 #trigger="ngMenuTrigger"
                 [menu]="actionsMenu()"
               >
-                <ng-icon
-                  name="phosphorDotsThreeOutlineDuotone"
-                  class="text-xl"
-                />
+                <span class="material-symbols-outlined text-xl"
+                  >more_horiz</span
+                >
               </button>
               <ng-template
                 [cdkConnectedOverlayOpen]="trigger.expanded()"
@@ -114,7 +97,9 @@ import ClassGroupsForm from '../forms/class-groups-form';
                       [routerLink]="['/groups', group.id]"
                       class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-base-200 w-full"
                     >
-                      <ng-icon name="phosphorEyeDuotone" class="text-lg" />
+                      <span class="material-symbols-outlined text-lg"
+                        >visibility</span
+                      >
                       <span>Ver</span>
                     </a>
                     <button
@@ -123,7 +108,9 @@ import ClassGroupsForm from '../forms/class-groups-form';
                       class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-base-200 w-full"
                       (click)="editClassGroup(group)"
                     >
-                      <ng-icon name="phosphorPencilDuotone" class="text-lg" />
+                      <span class="material-symbols-outlined text-lg"
+                        >edit</span
+                      >
                       <span>Editar</span>
                     </button>
                     <button
@@ -132,7 +119,9 @@ import ClassGroupsForm from '../forms/class-groups-form';
                       class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-base-200 w-full"
                       (click)="deleteClassGroup(group.id)"
                     >
-                      <ng-icon name="phosphorTrashDuotone" class="text-lg" />
+                      <span class="material-symbols-outlined text-lg"
+                        >delete</span
+                      >
                       <span>Eliminar</span>
                     </button>
                   </ng-template>

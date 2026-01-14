@@ -11,13 +11,6 @@ import {
 import { rxResource } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import { Prisma } from '@generated/prisma';
-import { NgIcon, provideIcons } from '@ng-icons/core';
-import {
-  phosphorDotsThreeOutlineDuotone,
-  phosphorPencilDuotone,
-  phosphorPlusCircleDuotone,
-  phosphorTrashDuotone,
-} from '@ng-icons/phosphor-icons/duotone';
 import { Apollo, gql } from 'apollo-angular';
 import { map, tap } from 'rxjs';
 import { SchoolsForm } from './schools-form';
@@ -25,7 +18,6 @@ import { SchoolsForm } from './schools-form';
   selector: 'app-schools',
   imports: [
     RouterLink,
-    NgIcon,
     DatePipe,
     Menu,
     MenuContent,
@@ -35,14 +27,6 @@ import { SchoolsForm } from './schools-form';
     Paginator,
   ],
   providers: [Pagination],
-  viewProviders: [
-    provideIcons({
-      phosphorPlusCircleDuotone,
-      phosphorPencilDuotone,
-      phosphorTrashDuotone,
-      phosphorDotsThreeOutlineDuotone,
-    }),
-  ],
   template: `<div class="breadcrumbs text-sm">
       <ul>
         <li><a routerLink="/">Inicio</a></li>
@@ -58,7 +42,7 @@ import { SchoolsForm } from './schools-form';
       </div>
 
       <button class="btn btn-neutral" (click)="editSchool()">
-        <ng-icon name="phosphorPlusCircleDuotone" /> Nueva Escuela
+        <span class="material-symbols-outlined">add_circle</span> Nueva Escuela
       </button>
     </div>
     <div class="overflow-x-auto">
@@ -89,10 +73,9 @@ import { SchoolsForm } from './schools-form';
                 #trigger="ngMenuTrigger"
                 [menu]="formatMenu()"
               >
-                <ng-icon
-                  name="phosphorDotsThreeOutlineDuotone"
-                  class="text-xl"
-                />
+                <span class="material-symbols-outlined text-xl"
+                  >more_horiz</span
+                >
               </button>
               <ng-template
                 [cdkConnectedOverlayOpen]="trigger.expanded()"
@@ -122,7 +105,9 @@ import { SchoolsForm } from './schools-form';
                       (click)="editSchool(school)"
                       type="button"
                     >
-                      <ng-icon name="phosphorPencilDuotone" class="text-lg" />
+                      <span class="material-symbols-outlined text-lg"
+                        >edit</span
+                      >
                       <span>Editar</span>
                     </button>
                     <button
@@ -133,7 +118,9 @@ import { SchoolsForm } from './schools-form';
                       (keydown.enter)="deleteSchool(school)"
                       type="button"
                     >
-                      <ng-icon name="phosphorTrashDuotone" class="text-lg" />
+                      <span class="material-symbols-outlined text-lg"
+                        >delete</span
+                      >
                       <span>Eliminar</span>
                     </button>
                   </ng-template>

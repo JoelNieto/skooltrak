@@ -1,22 +1,10 @@
 import { Component, inject, input, output } from '@angular/core';
 import { Router } from '@angular/router';
-import { NgIcon, provideIcons } from '@ng-icons/core';
-import {
-  phosphorHouseSimpleDuotone,
-  phosphorRepeatDuotone,
-  phosphorWarningCircleDuotone,
-} from '@ng-icons/phosphor-icons/duotone';
 
 @Component({
   selector: 'lib-error',
-  imports: [NgIcon],
-  viewProviders: [
-    provideIcons({
-      phosphorWarningCircleDuotone,
-      phosphorHouseSimpleDuotone,
-      phosphorRepeatDuotone,
-    }),
-  ],
+  imports: [],
+
   template: `
     <div
       class="bg-gradient-to-br from-blue-50 to-red-100 min-h-screen flex items-center justify-center p-4"
@@ -39,21 +27,20 @@ import {
             <div
               class="w-48 h-48 bg-error/30 rounded-full flex items-center justify-center"
             >
-              <ng-icon
-                name="phosphorWarningCircleDuotone"
-                class="text-[5rem] text-error!"
-              />
+              <span class="material-symbols-outlined text-[5rem] text-error!"
+                >error</span
+              >
             </div>
           </div>
 
           <!-- Action Buttons -->
           <div class="flex flex-col sm:flex-row gap-4 justify-center">
             <button class="btn btn-error btn-soft btn-lg" (click)="goHome()">
-              <ng-icon name="phosphorHouseSimpleDuotone" />
+              <span class="material-symbols-outlined">home</span>
               Inicio
             </button>
             <button class="btn btn-error btn-lg" (click)="retry.emit()">
-              <ng-icon name="phosphorRepeatDuotone" />
+              <span class="material-symbols-outlined">refresh</span>
               Reintentar
             </button>
           </div>

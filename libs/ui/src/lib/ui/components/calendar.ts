@@ -9,11 +9,7 @@ import {
   signal,
   TemplateRef,
 } from '@angular/core';
-import { NgIcon, provideIcons } from '@ng-icons/core';
-import {
-  phosphorSkipBackDuotone,
-  phosphorSkipForwardDuotone,
-} from '@ng-icons/phosphor-icons/duotone';
+
 import {
   addMonths,
   eachDayOfInterval,
@@ -33,10 +29,7 @@ export interface CalendarMarkerData<Data = unknown> {
 }
 @Component({
   selector: 'lib-calendar',
-  imports: [NgClass, DatePipe, NgTemplateOutlet, NgIcon],
-  viewProviders: [
-    provideIcons({ phosphorSkipForwardDuotone, phosphorSkipBackDuotone }),
-  ],
+  imports: [NgClass, DatePipe, NgTemplateOutlet],
   template: `<div class="calendar-container">
     <header class="calendar-header my-4 flex items-center justify-between">
       <h2 class="text-xl font-semibold">
@@ -52,10 +45,10 @@ export interface CalendarMarkerData<Data = unknown> {
           Hoy
         </button>
         <button (click)="prevMonth()" class="btn btn-primary btn-soft btn-sm">
-          <ng-icon name="phosphorSkipBackDuotone" />
+          <span class="material-symbols-outlined">chevron_left</span>
         </button>
         <button (click)="nextMonth()" class="btn btn-primary btn-sm btn-soft">
-          <ng-icon name="phosphorSkipForwardDuotone" />
+          <span class="material-symbols-outlined">chevron_right</span>
         </button>
       </div>
     </header>

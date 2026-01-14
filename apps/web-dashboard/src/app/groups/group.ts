@@ -3,13 +3,7 @@ import { Component, inject, input } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import { Prisma } from '@generated/prisma';
-import { NgIcon, provideIcons } from '@ng-icons/core';
-import {
-  phosphorBookBookmarkDuotone,
-  phosphorCalendarDotsDuotone,
-  phosphorChalkboardTeacherDuotone,
-  phosphorUsersFourDuotone,
-} from '@ng-icons/phosphor-icons/duotone';
+
 import { Apollo, gql } from 'apollo-angular';
 import { catchError, map, of, throwError } from 'rxjs';
 import GroupCourses from './group-courses';
@@ -34,22 +28,8 @@ type GroupType = Prisma.ClassGroupGetPayload<{
 }> & { teacher?: Teacher; students: Student[] };
 
 @Component({
-  imports: [
-    RouterLink,
-    Loader,
-    NgIcon,
-    GroupStudents,
-    GroupCourses,
-    GroupSchedule,
-  ],
-  viewProviders: [
-    provideIcons({
-      phosphorChalkboardTeacherDuotone,
-      phosphorUsersFourDuotone,
-      phosphorBookBookmarkDuotone,
-      phosphorCalendarDotsDuotone,
-    }),
-  ],
+  imports: [RouterLink, Loader, GroupStudents, GroupCourses, GroupSchedule],
+  viewProviders: [],
   template: `
     @let group = groupResource.value(); @if(groupResource.isLoading()) {
     <lib-loader />
@@ -88,7 +68,7 @@ type GroupType = Prisma.ClassGroupGetPayload<{
       <label class="tab">
         <input type="radio" name="my_tabs_1" class="tab" checked />
         <span class="flex items-center gap-2">
-          <ng-icon name="phosphorUsersFourDuotone" class="text-xl" />
+          <span class="material-symbols-outlined text-xl">group</span>
           Estudiantes</span
         >
       </label>
@@ -99,7 +79,7 @@ type GroupType = Prisma.ClassGroupGetPayload<{
       <label class="tab">
         <input type="radio" name="my_tabs_1" class="tab" />
         <span class="flex items-center gap-2">
-          <ng-icon name="phosphorBookBookmarkDuotone" class="text-xl" />
+          <span class="material-symbols-outlined text-xl">menu_book</span>
           Cursos
         </span>
       </label>
@@ -110,7 +90,7 @@ type GroupType = Prisma.ClassGroupGetPayload<{
       <label class="tab">
         <input type="radio" name="my_tabs_1" class="tab" />
         <span class="flex items-center gap-2">
-          <ng-icon name="phosphorCalendarDotsDuotone" class="text-xl" />
+          <span class="material-symbols-outlined text-xl">calendar_month</span>
           Horario
         </span>
       </label>

@@ -12,15 +12,7 @@ import { Component, computed, inject, input } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { Router, RouterLink } from '@angular/router';
 import { Prisma } from '@generated/prisma';
-import { NgIcon, provideIcons } from '@ng-icons/core';
-import {
-  phosphorArrowFatLinesUpDuotone,
-  phosphorCalendarDotsDuotone,
-  phosphorCheckCircleDuotone,
-  phosphorDotsThreeDuotone,
-  phosphorPencilDuotone,
-  phosphorTrashDuotone,
-} from '@ng-icons/phosphor-icons/duotone';
+
 import { Apollo, gql } from 'apollo-angular';
 import { filter, map, switchMap } from 'rxjs';
 import StudentGradeForm from './student-grade-form';
@@ -31,22 +23,12 @@ import StudentGradeForm from './student-grade-form';
     Loader,
     RouterLink,
     EditorViewer,
-    NgIcon,
     DatePipe,
     Error,
     DecimalPipe,
     NgClass,
   ],
-  viewProviders: [
-    provideIcons({
-      phosphorCalendarDotsDuotone,
-      phosphorPencilDuotone,
-      phosphorTrashDuotone,
-      phosphorDotsThreeDuotone,
-      phosphorArrowFatLinesUpDuotone,
-      phosphorCheckCircleDuotone,
-    }),
-  ],
+
   template: `
     @defer{ @if(gradeResource.hasValue()) { @let grade = gradeResource.value()!;
     <div class="breadcrumbs text-sm">
@@ -63,17 +45,17 @@ import StudentGradeForm from './student-grade-form';
           <div class="flex items-center gap-2">
             @if(grade.published) {
             <span class="badge badge-success">
-              <ng-icon name="phosphorCheckCircleDuotone" /> Publicada</span
+              <span class="material-symbols-outlined">check_circle</span>
+              Publicada</span
             >
             } @else {
             <button
               class="btn btn-neutral btn-sm btn-soft"
               (click)="publishGrade()"
             >
-              <ng-icon
-                name="phosphorArrowFatLinesUpDuotone"
-                class="text-success"
-              />
+              <span class="material-symbols-outlined text-success"
+                >publish</span
+              >
               Publicar
             </button>
             }
@@ -81,7 +63,7 @@ import StudentGradeForm from './student-grade-form';
               class="btn btn-error btn-sm btn-soft"
               (click)="deleteGrade()"
             >
-              <ng-icon name="phosphorTrashDuotone" /> Eliminar
+              <span class="material-symbols-outlined">delete</span> Eliminar
             </button>
           </div>
         </div>
@@ -135,7 +117,9 @@ import StudentGradeForm from './student-grade-form';
                 @if(studentGrade.score) {
                 {{ studentGrade.score | number : '1.1-1' }}
                 } @else {
-                <ng-icon name="phosphorDotsThreeDuotone" class="text-2xl" />
+                <span class="material-symbols-outlined text-2xl"
+                  >more_horiz</span
+                >
                 }
               </td>
               <td

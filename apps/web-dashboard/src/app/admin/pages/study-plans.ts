@@ -10,39 +10,18 @@ import {
 } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { Prisma } from '@generated/prisma';
-import { NgIcon, provideIcons } from '@ng-icons/core';
-import {
-  phosphorDotsThreeOutlineDuotone,
-  phosphorPencilDuotone,
-  phosphorPlusCircleDuotone,
-  phosphorTrashDuotone,
-} from '@ng-icons/phosphor-icons/duotone';
+
 import { Apollo, gql } from 'apollo-angular';
 import { filter, map, of, switchMap } from 'rxjs';
 import Store from '../../core/store';
 import StudyPlanForm from '../forms/study-plans-forms';
 @Component({
   selector: 'app-study-plans',
-  imports: [
-    NgIcon,
-    DatePipe,
-    Menu,
-    MenuContent,
-    MenuItem,
-    MenuTrigger,
-    OverlayModule,
-  ],
-  viewProviders: [
-    provideIcons({
-      phosphorPencilDuotone,
-      phosphorTrashDuotone,
-      phosphorPlusCircleDuotone,
-      phosphorDotsThreeOutlineDuotone,
-    }),
-  ],
+  imports: [DatePipe, Menu, MenuContent, MenuItem, MenuTrigger, OverlayModule],
+
   template: `<div class="flex justify-end">
       <button class="btn btn-primary" (click)="editStudyPlan()">
-        <ng-icon name="phosphorPlusCircleDuotone" /> Nuevo plan
+        <span class="material-symbols-outlined">add_circle</span> Nuevo plan
       </button>
     </div>
     <div class="bg-base-100 rounded-lg border border-base-300 mt-4">
@@ -77,10 +56,9 @@ import StudyPlanForm from '../forms/study-plans-forms';
                 #trigger="ngMenuTrigger"
                 [menu]="actionsMenu()"
               >
-                <ng-icon
-                  name="phosphorDotsThreeOutlineDuotone"
-                  class="text-xl"
-                />
+                <span class="material-symbols-outlined text-xl"
+                  >more_horiz</span
+                >
               </button>
               <ng-template
                 [cdkConnectedOverlayOpen]="trigger.expanded()"
@@ -108,7 +86,9 @@ import StudyPlanForm from '../forms/study-plans-forms';
                       class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-base-200 w-full"
                       (click)="editStudyPlan(studyPlan)"
                     >
-                      <ng-icon name="phosphorPencilDuotone" class="text-lg" />
+                      <span class="material-symbols-outlined text-lg"
+                        >edit</span
+                      >
                       <span>Editar</span>
                     </button>
                     <button
@@ -117,7 +97,9 @@ import StudyPlanForm from '../forms/study-plans-forms';
                       class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-base-200 w-full"
                       (click)="deleteStudyPlan(studyPlan)"
                     >
-                      <ng-icon name="phosphorTrashDuotone" class="text-lg" />
+                      <span class="material-symbols-outlined text-lg"
+                        >delete</span
+                      >
                       <span>Eliminar</span>
                     </button>
                   </ng-template>

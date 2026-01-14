@@ -8,12 +8,9 @@ import {
   viewChild,
   ViewContainerRef,
 } from '@angular/core';
-import { NgIcon, provideIcons } from '@ng-icons/core';
-import { phosphorX } from '@ng-icons/phosphor-icons/regular';
 @Component({
   selector: 'lib-modal',
-  imports: [NgClass, NgIcon],
-  viewProviders: [provideIcons({ phosphorX })],
+  imports: [NgClass],
   template: `<dialog #dialog class="modal">
     <div
       class="modal-content modal-box"
@@ -27,7 +24,7 @@ import { phosphorX } from '@ng-icons/phosphor-icons/regular';
       <form method="dialog">
         @if(showCloseButton()) {
         <button class="btn btn-sm btn-circle btn-ghost absolute right-4 top-6">
-          <ng-icon name="phosphorX" class="text-xl" />
+          <span class="material-symbols-outlined text-xl">close</span>
         </button>
         }
       </form>

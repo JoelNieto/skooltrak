@@ -284,20 +284,6 @@ input CreateGradeInput {
   title: String!
 }
 
-input CreateGradeStudentInput {
-  """Comments for the grade student"""
-  comments: String!
-
-  """Grade ID for the grade student"""
-  gradeId: String!
-
-  """Score for the grade student"""
-  score: Float!
-
-  """Student ID for the grade student"""
-  studentId: String!
-}
-
 input CreateGroupsScheduleInput {
   """Class group ID"""
   classGroupId: String!
@@ -463,6 +449,20 @@ input CreateSchoolInput {
   zip: String! = ""
 }
 
+input CreateStudentGradeInput {
+  """Comments for the student grade"""
+  comments: String!
+
+  """Grade ID for the student grade"""
+  gradeId: String!
+
+  """Score for the student grade"""
+  score: Float!
+
+  """Student ID for the student grade"""
+  studentId: String!
+}
+
 input CreateStudentInput {
   """Address of the student"""
   address: String!
@@ -546,7 +546,7 @@ input CreateTeacherInput {
   address: String = ""
 
   """Birth date of the teacher"""
-  birthDate: DateTime = "2026-01-02T20:36:23.452Z"
+  birthDate: DateTime = "2026-01-14T17:01:32.692Z"
 
   """Document ID of the teacher"""
   documentId: String!
@@ -648,9 +648,6 @@ type Grade {
   """Fecha de la calificacion"""
   date: DateTime!
 
-  """Estudiantes de la calificacion"""
-  gradeStudents: [GradeStudent!]!
-
   """ID de la calificacion"""
   id: String!
 
@@ -662,6 +659,9 @@ type Grade {
 
   """¿Publicada?"""
   published: Boolean!
+
+  """Estudiantes de la calificacion"""
+  studentGrades: [StudentGrade!]!
 
   """Titulo de la calificacion"""
   title: String!
@@ -716,35 +716,6 @@ type GradeMetric {
   updatedAt: DateTime!
 }
 
-type GradeStudent {
-  """Comments for the grade student"""
-  comments: String
-
-  """Created at of the grade student"""
-  createdAt: DateTime!
-
-  """Grade of the grade student"""
-  grade: Grade!
-
-  """Grade ID of the grade student"""
-  gradeId: String!
-
-  """ID of the grade student"""
-  id: String!
-
-  """Score of the grade student"""
-  score: Float
-
-  """Student of the grade student"""
-  student: Student!
-
-  """Student ID of the grade student"""
-  studentId: String!
-
-  """Updated at of the grade student"""
-  updatedAt: DateTime!
-}
-
 type GroupsSchedule {
   """Class group of the groups schedule"""
   classGroup: ClassGroup!
@@ -769,6 +740,9 @@ type GroupsSchedule {
 
   """Location of the groups schedule"""
   location: String!
+
+  """Recess of the groups schedule"""
+  recess: Boolean!
 
   """Remote of the groups schedule"""
   remote: Boolean!
@@ -854,7 +828,6 @@ type Mutation {
   createDegree(createDegreeInput: CreateDegreeInput!): Degree!
   createGrade(createGradeInput: CreateGradeInput!): Grade!
   createGradeBucket(createGradeBucketInput: CreateGradeBucketInput!): GradeBucket!
-  createGradeStudent(createGradeStudentInput: CreateGradeStudentInput!): GradeStudent!
   createGroupsSchedule(createGroupsScheduleInput: CreateGroupsScheduleInput!): GroupsSchedule!
   createMessage(createMessageInput: CreateMessageInput!): Message!
   createOrganization(createOrganizationInput: CreateOrganizationInput!): Organization!
@@ -864,6 +837,7 @@ type Mutation {
   createRole(createRoleInput: CreateRoleInput!): Role!
   createSchool(createSchoolInput: CreateSchoolInput!): School!
   createStudent(createStudentInput: CreateStudentInput!): Student!
+  createStudentGrade(createStudentGradeInput: CreateStudentGradeInput!): StudentGrade!
   createStudyPlan(createStudyPlanInput: CreateStudyPlanInput!): StudyPlan!
   createSubject(createSubjectInput: CreateSubjectInput!): Subject!
   createTeacher(createTeacherInput: CreateTeacherInput!): Teacher!
@@ -875,7 +849,6 @@ type Mutation {
   removeDegree(id: String!): Degree!
   removeGrade(id: String!): Grade!
   removeGradeBucket(id: String!): GradeBucket!
-  removeGradeStudent(id: String!): GradeStudent!
   removeGroupsSchedule(id: String!): GroupsSchedule!
   removeMessage(id: String!): Message!
   removeMessageRecipient(id: String!): MessageRecipient!
@@ -886,6 +859,7 @@ type Mutation {
   removeRole(id: String!): Role!
   removeSchool(id: String!): School!
   removeStudent(id: String!): Student!
+  removeStudentGrade(id: String!): StudentGrade!
   removeStudyPlan(id: String!): StudyPlan!
   removeSubject(id: String!): Subject!
   removeTeacher(id: String!): Teacher!
@@ -896,7 +870,6 @@ type Mutation {
   updateDegree(updateDegreeInput: UpdateDegreeInput!): Degree!
   updateGrade(updateGradeInput: UpdateGradeInput!): Grade!
   updateGradeBucket(updateGradeBucketInput: UpdateGradeBucketInput!): GradeBucket!
-  updateGradeStudent(updateGradeStudentInput: UpdateGradeStudentInput!): GradeStudent!
   updateGroupsSchedule(updateGroupsScheduleInput: UpdateGroupsScheduleInput!): GroupsSchedule!
   updateOrganization(updateOrganizationInput: UpdateOrganizationInput!): Organization!
   updatePeriod(updatePeriodInput: UpdatePeriodInput!): Period!
@@ -905,6 +878,7 @@ type Mutation {
   updateRole(updateRoleInput: UpdateRoleInput!): Role!
   updateSchool(updateSchoolInput: UpdateSchoolInput!): School!
   updateStudent(updateStudentInput: UpdateStudentInput!): Student!
+  updateStudentGrade(updateStudentGradeInput: UpdateStudentGradeInput!): StudentGrade!
   updateStudyPlan(updateStudyPlanInput: UpdateStudyPlanInput!): StudyPlan!
   updateSubject(updateSubjectInput: UpdateSubjectInput!): Subject!
   updateTeacher(updateTeacherInput: UpdateTeacherInput!): Teacher!
@@ -1133,8 +1107,6 @@ type Query {
   gradeBucketsByCourseId(courseId: String!): [GradeBucket!]!
   gradeMetric(id: String!): GradeMetric!
   gradeMetrics: [GradeMetric!]!
-  gradeStudent(id: String!): GradeStudent!
-  gradeStudents: [GradeStudent!]!
   grades: [Grade!]!
   gradesByCourseId(courseId: String!, periodId: String!): [Grade!]!
   groupsSchedule(id: String!): GroupsSchedule!
@@ -1195,7 +1167,9 @@ type Query {
   school(id: String!): School!
   schools: [School!]!
   student(id: String!): Student!
-  studentGrades(id: String!): Student!
+  studentGrade(id: String!): StudentGrade!
+  studentGrades: [StudentGrade!]!
+  studentGradesByCourseId(courseId: String!, periodId: String!, studentId: String!): [StudentGrade!]!
   students(
     """Order by"""
     orderBy: String = "name"
@@ -1498,6 +1472,9 @@ type Student {
   """School ID of the student"""
   schoolId: String!
 
+  """Student grades of the student"""
+  studentGrades: [StudentGrade!]!
+
   """Updated at of the student"""
   updatedAt: DateTime!
 
@@ -1506,6 +1483,35 @@ type Student {
 
   """User ID of the student"""
   userId: String!
+}
+
+type StudentGrade {
+  """Comments for the student grade"""
+  comments: String
+
+  """Created at of the student grade"""
+  createdAt: DateTime!
+
+  """Grade of the student grade"""
+  grade: Grade!
+
+  """Grade ID of the student grade"""
+  gradeId: String!
+
+  """ID of the student grade"""
+  id: String!
+
+  """Score of the student grade"""
+  score: Float
+
+  """Student of the student grade"""
+  student: Student!
+
+  """Student ID of the student grade"""
+  studentId: String!
+
+  """Updated at of the student grade"""
+  updatedAt: DateTime!
 }
 
 type StudyPlan {
@@ -1781,21 +1787,6 @@ input UpdateGradeInput {
   title: String
 }
 
-input UpdateGradeStudentInput {
-  """Comments for the grade student"""
-  comments: String
-
-  """Grade ID for the grade student"""
-  gradeId: String
-  id: String!
-
-  """Score for the grade student"""
-  score: Float
-
-  """Student ID for the grade student"""
-  studentId: String
-}
-
 input UpdateGroupsScheduleInput {
   """Class group ID"""
   classGroupId: String
@@ -1934,6 +1925,21 @@ input UpdateSchoolInput {
   zip: String = ""
 }
 
+input UpdateStudentGradeInput {
+  """Comments for the student grade"""
+  comments: String
+
+  """Grade ID for the student grade"""
+  gradeId: String
+  id: String!
+
+  """Score for the student grade"""
+  score: Float
+
+  """Student ID for the student grade"""
+  studentId: String
+}
+
 input UpdateStudentInput {
   """Address of the student"""
   address: String
@@ -2020,7 +2026,7 @@ input UpdateTeacherInput {
   address: String = ""
 
   """Birth date of the teacher"""
-  birthDate: DateTime = "2026-01-02T20:36:23.452Z"
+  birthDate: DateTime = "2026-01-14T17:01:32.692Z"
 
   """Document ID of the teacher"""
   documentId: String

@@ -1,22 +1,54 @@
-import { Loader } from '@/ui';
+import { DecimalToNumber, Loader, PrismaDecimalPipe } from '@/ui';
 import { Tab, TabContent, TabList, TabPanel, Tabs } from '@angular/aria/tabs';
-import { DatePipe } from '@angular/common';
+import { DatePipe, DecimalPipe, NgClass } from '@angular/common';
 import { Component, inject, input } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import { Prisma } from '@generated/prisma';
 import { Apollo, gql } from 'apollo-angular';
-import { map } from 'rxjs';
+import { map, of } from 'rxjs';
 
-type StudentType = Prisma.StudentGetPayload<{
-  include: { classGroup: true; courses: true };
-}> & {
+type TeacherType = Prisma.TeacherGetPayload<{ include: { user: true } }> & {
   name: string;
-  email: string;
-  color: string;
   initials: string;
-  fullName: string;
+  color: string;
 };
+type StudentType = DecimalToNumber<
+  Prisma.StudentGetPayload<{
+    include: {
+      classGroup: {
+        include: { studyPlan: { include: { gradeMetric: true } } };
+      };
+      courses: {
+        include: { subject: true; teacher: { include: { user: true } } };
+      };
+      studentGrades: {
+        include: {
+          grade: {
+            include: {
+              course: { include: { subject: true } };
+              bucket: true;
+              period: true;
+            };
+          };
+        };
+      };
+    };
+  }> & {
+    name: string;
+    email: string;
+    color: string;
+    initials: string;
+    fullName: string;
+    courses: Array<
+      Prisma.CourseGetPayload<{
+        include: { subject: true; teacher: { include: { user: true } } };
+      }> & {
+        teacher: TeacherType;
+      }
+    >;
+  }
+>;
 
 @Component({
   selector: 'app-student',
@@ -29,12 +61,16 @@ type StudentType = Prisma.StudentGetPayload<{
     Tabs,
     TabPanel,
     TabContent,
+    PrismaDecimalPipe,
+    DecimalPipe,
+    NgClass,
   ],
   template: `
     @if (studentResource.isLoading()) {
     <lib-loader />
     } @else { @if(studentResource.hasValue()) { @let student =
-    studentResource.value();
+    studentResource.value(); @let metric =
+    student.classGroup.studyPlan.gradeMetric;
     <div class="breadcrumbs text-sm">
       <ul>
         <li><a routerLink="/">Inicio</a></li>
@@ -68,14 +104,23 @@ type StudentType = Prisma.StudentGetPayload<{
     </div>
 
     <div ngTabs>
-      <div
-        ngTabList
-        selectionMode="follow"
-        selectedTab="courses"
-        class="tabs tabs-box mt-4"
-      >
-        <div ngTab value="courses" class="tab">Cursos</div>
-        <div ngTab value="info" class="tab">Informacion Personal</div>
+      <div class="flex justify-between items-center mt-4">
+        <div
+          ngTabList
+          selectionMode="follow"
+          selectedTab="courses"
+          class="tabs tabs-box "
+        >
+          <div ngTab value="courses" class="tab">Cursos</div>
+          <div ngTab value="info" class="tab">Informacion Personal</div>
+        </div>
+        <div class="w-64">
+          <select class="select select-primary">
+            @for(period of periodsResource.value(); track period.id) {
+            <option [value]="period.id">{{ period.name }}</option>
+            }
+          </select>
+        </div>
       </div>
       <div class="p-1">
         <div ngTabPanel value="info">
@@ -175,13 +220,54 @@ type StudentType = Prisma.StudentGetPayload<{
         </div>
         <div ngTabPanel value="courses">
           <ng-template ngTabContent>
-            <div class="bg-base-100 border-base-300 p-4 rounded-lg">
-              <div class="px-4 sm:px-0">
-                <h3 class="text-base/7 font-semibold">Cursos</h3>
-                <p class="mt-1 max-w-2xl text-sm/6 text-base-content/60">
-                  Cursos asignados al alumno
-                </p>
+            <div class="flex flex-col gap-4">
+              @for(course of student.courses; track course.id) {
+              <div class="card bg-base-100 card-border border-base-300">
+                <div class="flex flex-col p-4 border-b border-base-300">
+                  <h2 class="font-semibold">
+                    {{ course.subject.name }}
+                  </h2>
+                  <p class="text-sm text-base-content/60">
+                    {{ course.teacher?.name }}
+                  </p>
+                </div>
+                <div class="overflow-x-auto">
+                  <table class="table table-sm table-zebra ">
+                    <thead>
+                      <tr>
+                        <th>Nombre</th>
+                        <th>Tipo</th>
+                        <th>Fecha</th>
+                        <th>Comentarios</th>
+                        <th>Calificacion</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      @for(grade of student.studentGrades; track grade.id) {
+                      @if(grade.grade.course.id === course.id) {
+                      <tr>
+                        <td>{{ grade.grade.title }}</td>
+                        <td>{{ grade.grade.bucket.name }}</td>
+                        <td>{{ grade.grade.date | date : 'dd/MM/yyyy' }}</td>
+                        <td>{{ grade.comments }}</td>
+                        <td>
+                          <span
+                            class="badge badge-sm"
+                            [ngClass]="{
+                            'badge-success': grade.score && grade.score! >= metric!.minimumExcellence,
+                            'badge-warning': grade.score && grade.score! >= metric!.minimumApproval && grade.score! < metric!.minimumExcellence,
+                            'badge-error': grade.score && grade.score! < metric!.minimumApproval,
+                          }"
+                            >{{ grade.score | number : '1.1-1' }}</span
+                          >
+                        </td>
+                      </tr>
+                      } }
+                    </tbody>
+                  </table>
+                </div>
               </div>
+              }
             </div>
           </ng-template>
         </div>
@@ -194,6 +280,36 @@ type StudentType = Prisma.StudentGetPayload<{
 export default class Student {
   public id = input.required<string>();
   private apollo = inject(Apollo);
+  public periodsResource = rxResource({
+    params: () => ({
+      schoolId: this.studentResource.value()?.schoolId,
+    }),
+    stream: ({ params }) => {
+      const { schoolId } = params;
+      if (!schoolId) {
+        return of([]);
+      }
+      return this.apollo
+        .watchQuery<{
+          periodsBySchoolId: Prisma.PeriodGetPayload<{ include: undefined }>[];
+        }>({
+          query: gql`
+            query PeriodsBySchoolId($schoolId: String!) {
+              periodsBySchoolId(schoolId: $schoolId) {
+                id
+                name
+                shortName
+              }
+            }
+          `,
+          variables: {
+            schoolId,
+          },
+        })
+        .valueChanges.pipe(map((result) => result.data.periodsBySchoolId));
+    },
+  });
+
   public studentResource = rxResource({
     params: () => ({
       id: this.id(),
@@ -211,12 +327,59 @@ export default class Student {
                 fatherName
                 fullName
                 name
+                schoolId
                 classGroup {
                   id
                   name
+                  studyPlan {
+                    id
+                    name
+                    gradeMetric {
+                      minimumApproval
+                      minimumExcellence
+                    }
+                  }
                 }
                 courses {
-                  name
+                  id
+                  subject {
+                    name
+                  }
+                  teacher {
+                    id
+                    name
+                  }
+                }
+                studentGrades {
+                  id
+                  score
+                  comments
+                  updatedAt
+                  grade {
+                    id
+                    title
+                    date
+                    comments
+                    published
+                    course {
+                      id
+                      subject {
+                        name
+                      }
+                    }
+                    bucket {
+                      id
+                      name
+                      weight
+                    }
+                    period {
+                      id
+                      name
+                      shortName
+                    }
+                    createdAt
+                    updatedAt
+                  }
                 }
                 color
                 email

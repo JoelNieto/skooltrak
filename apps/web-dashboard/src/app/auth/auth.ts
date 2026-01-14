@@ -46,11 +46,11 @@ export default class Auth {
 
   public userResource = rxResource({
     params: () => ({
-      token: this.token(),
+      isAuthenticated: this.isAuthenticated(),
     }),
     stream: ({ params }) => {
-      const { token } = params;
-      if (!token) {
+      const { isAuthenticated } = params;
+      if (!isAuthenticated) {
         return of(null);
       }
       return this.#apollo
@@ -96,7 +96,6 @@ export default class Auth {
         })
         .valueChanges.pipe(
           map((res) => res.data.me),
-
           catchError((err) => {
             this.#toasts.showError(err.message);
             this.isSigning.set(false);

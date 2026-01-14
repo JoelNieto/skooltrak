@@ -37,6 +37,8 @@ export class GroupsSchedule
   startTime: string;
   @Field(() => String, { description: 'End time of the groups schedule' })
   endTime: string;
+  @Field(() => Boolean, { description: 'Recess of the groups schedule' })
+  recess: boolean;
   @Field(() => Date, { description: 'Created at of the groups schedule' })
   createdAt: Date;
   @Field(() => Date, { description: 'Updated at of the groups schedule' })

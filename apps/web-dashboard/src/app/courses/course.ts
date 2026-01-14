@@ -16,9 +16,11 @@ import {
 import { Apollo, gql } from 'apollo-angular';
 import { map, of } from 'rxjs';
 import AssignmentForm from '../assignments/assignment-form';
+import Auth from '../auth/auth';
 import CourseGrades from '../grades/course-grades';
 import CourseAssignments from './course-assignments';
 import CourseGradeBuckets from './course-grade-buckets';
+import CourseStudentGrades from './course-student-grades';
 type Teacher = Prisma.TeacherGetPayload<{ include: { user: true } }> & {
   name: string;
   initials: string;
@@ -43,6 +45,7 @@ type CourseType = Prisma.CourseGetPayload<{
     CourseAssignments,
     CourseGradeBuckets,
     CourseGrades,
+    CourseStudentGrades,
   ],
   viewProviders: [
     provideIcons({
@@ -118,11 +121,14 @@ type CourseType = Prisma.CourseGetPayload<{
         </label>
 
         <div class="tab-content bg-base-100 border-base-300 p-6">
+          @if(auth.isTeacher() || auth.isAdmin()) {
           <app-course-grades
             [courseId]="id()"
             [currentPeriod]="course.currentPeriodId"
             [metric]="course.studyPlan.gradeMetric!"
-          />
+          />} @if(auth.isStudent()) {
+          <app-course-student-grades [courseId]="id()" />
+          }
         </div>
         <label class="tab">
           <input
@@ -183,6 +189,7 @@ type CourseType = Prisma.CourseGetPayload<{
 })
 export default class Course {
   public id = input.required<string>();
+  public auth = inject(Auth);
   private apollo = inject(Apollo);
   private modal = inject(Modal);
   public courseResource = rxResource({

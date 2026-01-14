@@ -36,6 +36,13 @@ export const appRoutes: Route[] = [
           import('./permissions/permissions').then((m) => m.Permissions),
       },
       {
+        path: 'permissions/:id',
+        loadComponent: () =>
+          import('./permissions/permissions-form').then(
+            (m) => m.PermissionsForm
+          ),
+      },
+      {
         path: 'grade-metrics',
         loadComponent: () => import('./grade-metrics/grade-metrics'),
       },

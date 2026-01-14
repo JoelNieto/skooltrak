@@ -190,7 +190,27 @@ export class StudentsService {
   findOne(id: string) {
     return this.prisma.student.findUniqueOrThrow({
       where: { id },
-      include: { classGroup: true, courses: true, user: true },
+      include: {
+        classGroup: {
+          include: { studyPlan: { include: { gradeMetric: true } } },
+        },
+        courses: {
+          include: { subject: true, teacher: { include: { user: true } } },
+          orderBy: { subject: { name: 'asc' } },
+        },
+        user: true,
+        studentGrades: {
+          include: {
+            grade: {
+              include: {
+                period: true,
+                bucket: true,
+                course: { include: { subject: true } },
+              },
+            },
+          },
+        },
+      },
     });
   }
 

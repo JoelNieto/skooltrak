@@ -26,6 +26,19 @@ export class StudentGradesResolver {
     return this.studentGradesService.findOne(id);
   }
 
+  @Query(() => [StudentGrade], { name: 'studentGradesByCourseId' })
+  findByCourseId(
+    @Args('courseId', { type: () => String }) courseId: string,
+    @Args('periodId', { type: () => String }) periodId?: string,
+    @Args('studentId', { type: () => String }) studentId?: string
+  ) {
+    return this.studentGradesService.findByCourseId(
+      courseId,
+      periodId,
+      studentId
+    );
+  }
+
   @Mutation(() => StudentGrade)
   updateStudentGrade(
     @Args('updateStudentGradeInput')

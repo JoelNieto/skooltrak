@@ -22,7 +22,7 @@ import {
   phosphorTrashDuotone,
 } from '@ng-icons/phosphor-icons/duotone';
 import { Apollo, gql } from 'apollo-angular';
-import { filter, map, switchMap, tap } from 'rxjs';
+import { filter, map, switchMap } from 'rxjs';
 import StudentGradeForm from './student-grade-form';
 
 @Component({
@@ -244,10 +244,7 @@ export default class Grade {
             id,
           },
         })
-        .valueChanges.pipe(
-          tap((res) => console.log(res)),
-          map((res) => res.data.grade)
-        );
+        .valueChanges.pipe(map((res) => res.data.grade));
     },
   });
 

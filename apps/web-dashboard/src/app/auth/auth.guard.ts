@@ -3,7 +3,6 @@ import { CanActivateChildFn, CanMatchFn, Router } from '@angular/router';
 import Auth from './auth';
 
 export const authGuard: CanActivateChildFn = () => {
-  console.log('authGuard', inject(Auth).isAuthenticated());
   if (inject(Auth).isAuthenticated()) {
     return true;
   }

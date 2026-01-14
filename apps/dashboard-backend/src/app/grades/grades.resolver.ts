@@ -1,4 +1,7 @@
-import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
+import { Parent, ResolveField, Resolver } from '@nestjs/graphql';
+import { Args, Mutation, Query } from '@nestjs/graphql';
+import { Course } from '../courses/entities/course.entity';
+import { CoursesService } from '../courses/courses.service';
 import { CreateGradeInput } from './dto/create-grade.input';
 import { UpdateGradeInput } from './dto/update-grade.input';
 import { Grade } from './entities/grade.entity';
@@ -6,7 +9,10 @@ import { GradesService } from './grades.service';
 
 @Resolver(() => Grade)
 export class GradesResolver {
-  constructor(private readonly gradesService: GradesService) {}
+  constructor(
+    private readonly gradesService: GradesService,
+    private readonly coursesService: CoursesService
+  ) {}
 
   @Mutation(() => Grade)
   createGrade(@Args('createGradeInput') createGradeInput: CreateGradeInput) {
@@ -39,5 +45,18 @@ export class GradesResolver {
   @Mutation(() => Grade)
   removeGrade(@Args('id', { type: () => String }) id: string) {
     return this.gradesService.remove(id);
+  }
+
+  @ResolveField(() => Course)
+  async course(@Parent() grade: Grade) {
+    // If course is already loaded, return it
+    if (grade.course && typeof grade.course === 'object' && 'id' in grade.course) {
+      return grade.course;
+    }
+    // Otherwise, fetch it using the courseId
+    if (!grade.courseId) {
+      throw new Error(`Grade ${grade.id} does not have a courseId`);
+    }
+    return this.coursesService.findOne(grade.courseId);
   }
 }

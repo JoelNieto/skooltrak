@@ -16,6 +16,21 @@ export class StudentGradesService {
     return this.prisma.studentGrade.findMany();
   }
 
+  findByCourseId(courseId: string, periodId?: string, studentId?: string) {
+    return this.prisma.studentGrade.findMany({
+      where: { grade: { courseId, periodId, published: true }, studentId },
+      include: {
+        grade: {
+          include: {
+            period: true,
+            bucket: true,
+            course: true,
+          },
+        },
+      },
+    });
+  }
+
   findOne(id: string) {
     return this.prisma.studentGrade.findUnique({ where: { id } });
   }

@@ -80,6 +80,54 @@ export const appRoutes: Route[] = [
         loadComponent: () => import('./messages/message'),
       },
       {
+        path: 'student/schedule',
+        loadComponent: () => import('./student/student-schedule'),
+      },
+      {
+        path: 'student/assignments',
+        loadComponent: () => import('./student/student-assignment-submission'),
+      },
+      {
+        path: 'student/notifications',
+        loadComponent: () => import('./student/student-notifications'),
+      },
+      {
+        path: 'student/attendance',
+        loadComponent: () => import('./student/student-attendance'),
+      },
+      {
+        path: 'teacher/attendance',
+        loadComponent: () => import('./teacher/teacher-attendance'),
+      },
+      {
+        path: 'teacher/gradebook',
+        loadComponent: () => import('./teacher/teacher-gradebook'),
+      },
+      {
+        path: 'teacher/communication',
+        loadComponent: () => import('./teacher/teacher-parent-communication'),
+      },
+      {
+        path: 'teacher/reports',
+        loadComponent: () => import('./teacher/teacher-reports'),
+      },
+      {
+        path: 'parent/portal',
+        loadComponent: () => import('./parent/parent-portal'),
+      },
+      {
+        path: 'parent/progress',
+        loadComponent: () => import('./parent/parent-child-progress'),
+      },
+      {
+        path: 'parent/communication',
+        loadComponent: () => import('./parent/parent-teacher-communication'),
+      },
+      {
+        path: 'parent/notifications',
+        loadComponent: () => import('./parent/parent-notifications'),
+      },
+      {
         path: '',
         redirectTo: 'home',
         pathMatch: 'full',
@@ -139,6 +187,22 @@ export const appRoutes: Route[] = [
           {
             path: 'periods',
             loadComponent: () => import('./admin/pages/periods'),
+          },
+          {
+            path: 'parents',
+            loadComponent: () => import('./admin/pages/parent-management'),
+          },
+          {
+            path: 'attendance-reporting',
+            loadComponent: () => import('./admin/pages/attendance-reporting'),
+          },
+          {
+            path: 'financial-module',
+            loadComponent: () => import('./admin/pages/financial-module'),
+          },
+          {
+            path: 'events-calendar',
+            loadComponent: () => import('./admin/pages/events-calendar'),
           },
 
           { path: '', redirectTo: 'subjects', pathMatch: 'full' },

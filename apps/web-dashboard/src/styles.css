@@ -181,3 +181,7 @@ textarea.ng-invalid.ng-dirty {
 .layout-padding {
   @apply mx-auto mt-4 max-w-7xl px-4 sm:px-6 lg:px-8;
 }
+
+.message-quote {
+  @apply mt-3 rounded-md border-l-4 border-primary/60 bg-base-200 px-3 py-2;
+}

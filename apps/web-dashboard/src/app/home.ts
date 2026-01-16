@@ -1,298 +1,351 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { DatePipe } from '@angular/common';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { rxResource } from '@angular/core/rxjs-interop';
+import { RouterLink } from '@angular/router';
+import { Apollo, gql } from 'apollo-angular';
+import { map, of } from 'rxjs';
+import { EmptyState, PageHeader, StatCard } from '@/ui';
+import Store from './core/store';
+
+type DashboardStats = {
+  coursesCount: number;
+  findManyStudentsCount: number;
+  findManyTeachersCount: number;
+  findManySubjectsCount: number;
+};
+
+type RecentMessage = {
+  id: string;
+  createdAt: string;
+  message: {
+    id: string;
+    subject: string;
+    createdAt: string;
+    sender: { id: string; name: string };
+  };
+};
+
+type RecentStudent = {
+  id: string;
+  fullName: string;
+  createdAt: string;
+  classGroup?: { name: string } | null;
+};
+
+type RecentTeacher = {
+  id: string;
+  fullName: string;
+  createdAt: string;
+  user: { email: string };
+};
 
 @Component({
   selector: 'app-home',
-  imports: [],
-  template: ` <div id="admin-dashboard" class="role-section layout-padding">
-    <!-- Stats Overview -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-      <div
-        class="dashboard-card bg-white rounded-xl shadow-sm p-6 border border-gray-100"
-      >
-        <div class="flex justify-between items-start">
-          <div>
-            <p class="text-sm text-gray-500">Total Students</p>
-            <p class="text-3xl font-bold text-gray-800 mt-1">1,842</p>
-            <p class="text-xs text-green-600 mt-1 flex items-center">
-              <i class="fas fa-arrow-up mr-1"></i> 5.2% from last year
-            </p>
-          </div>
-          <div class="bg-blue-100 p-3 rounded-lg">
-            <i class="fas fa-user-graduate text-blue-600 text-xl"></i>
-          </div>
-        </div>
-      </div>
+  imports: [RouterLink, DatePipe, PageHeader, StatCard, EmptyState],
+  template: `
+    <lib-page-header
+      title="Panel administrativo"
+      subtitle="Resumen general de la institución."
+    />
 
-      <div
-        class="dashboard-card bg-white rounded-xl shadow-sm p-6 border border-gray-100"
-      >
-        <div class="flex justify-between items-start">
-          <div>
-            <p class="text-sm text-gray-500">Faculty Members</p>
-            <p class="text-3xl font-bold text-gray-800 mt-1">127</p>
-            <p class="text-xs text-gray-600 mt-1">Across all departments</p>
-          </div>
-          <div class="bg-green-100 p-3 rounded-lg">
-            <i class="fas fa-chalkboard-teacher text-green-600 text-xl"></i>
-          </div>
-        </div>
-      </div>
-
-      <div
-        class="dashboard-card bg-white rounded-xl shadow-sm p-6 border border-gray-100"
-      >
-        <div class="flex justify-between items-start">
-          <div>
-            <p class="text-sm text-gray-500">Active Courses</p>
-            <p class="text-3xl font-bold text-gray-800 mt-1">286</p>
-            <p class="text-xs text-gray-600 mt-1">This semester</p>
-          </div>
-          <div class="bg-amber-100 p-3 rounded-lg">
-            <i class="fas fa-book-open text-amber-600 text-xl"></i>
-          </div>
-        </div>
-      </div>
-
-      <div
-        class="dashboard-card bg-white rounded-xl shadow-sm p-6 border border-gray-100"
-      >
-        <div class="flex justify-between items-start">
-          <div>
-            <p class="text-sm text-gray-500">System Status</p>
-            <p class="text-3xl font-bold text-green-600 mt-1">Online</p>
-            <p class="text-xs text-gray-600 mt-1">All systems operational</p>
-          </div>
-          <div class="bg-green-100 p-3 rounded-lg">
-            <i class="fas fa-server text-green-600 text-xl"></i>
-          </div>
-        </div>
-      </div>
+    <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+      <lib-stat-card
+        label="Estudiantes"
+        [value]="(statsResource.value()?.findManyStudentsCount ?? 0).toString()"
+        helper="Matriculados"
+      />
+      <lib-stat-card
+        label="Docentes"
+        [value]="(statsResource.value()?.findManyTeachersCount ?? 0).toString()"
+        helper="Activos"
+      />
+      <lib-stat-card
+        label="Cursos"
+        [value]="(statsResource.value()?.coursesCount ?? 0).toString()"
+        helper="En la institución"
+      />
+      <lib-stat-card
+        label="Asignaturas"
+        [value]="(statsResource.value()?.findManySubjectsCount ?? 0).toString()"
+        helper="Plan académico"
+      />
     </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-      <!-- Recent Activity -->
-      <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
-        <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center">
-          <i class="fas fa-list-alt text-blue-500 mr-2"></i> Recent System
-          Activity
-        </h3>
-
-        <div class="space-y-4">
-          <div class="flex items-start p-3 border border-gray-200 rounded-lg">
-            <div class="bg-green-100 text-green-800 p-2 rounded-lg mr-4">
-              <i class="fas fa-user-plus"></i>
-            </div>
-            <div class="flex-1">
-              <p class="font-medium">New student registration</p>
-              <p class="text-sm text-gray-600">
-                Jamie Smith registered for CS-101
-              </p>
-              <p class="text-xs text-gray-500 mt-1">10 minutes ago</p>
-            </div>
+    <div class="mt-6 grid gap-6 lg:grid-cols-3">
+      <div class="card border border-base-200 bg-base-100 lg:col-span-2">
+        <div class="card-body">
+          <div class="flex items-center justify-between">
+            <h2 class="text-lg font-semibold text-base-content">
+              Mensajes recientes
+            </h2>
+            <a routerLink="/messages" class="link link-primary text-sm">
+              Ver todos
+            </a>
           </div>
-
-          <div class="flex items-start p-3 border border-gray-200 rounded-lg">
-            <div class="bg-blue-100 text-blue-800 p-2 rounded-lg mr-4">
-              <i class="fas fa-book"></i>
+          @if ((recentMessages.value() ?? []).length === 0) {
+            <lib-empty-state
+              title="Sin mensajes recientes"
+              description="Las notificaciones nuevas aparecerán aquí."
+              icon="mail"
+            />
+          } @else {
+            <div class="space-y-3">
+              @for (message of recentMessages.value() ?? []; track message.id) {
+                <div class="rounded-lg border border-base-200 p-3">
+                  <p class="font-medium text-base-content">
+                    {{ message.message.subject }}
+                  </p>
+                  <div class="text-sm text-base-content/70">
+                    {{ message.message.sender.name }} ·
+                    {{ message.message.createdAt | date : 'short' }}
+                  </div>
+                </div>
+              }
             </div>
-            <div class="flex-1">
-              <p class="font-medium">Course created</p>
-              <p class="text-sm text-gray-600">
-                New course "Machine Learning" added
-              </p>
-              <p class="text-xs text-gray-500 mt-1">2 hours ago</p>
-            </div>
-          </div>
-
-          <div class="flex items-start p-3 border border-gray-200 rounded-lg">
-            <div class="bg-amber-100 text-amber-800 p-2 rounded-lg mr-4">
-              <i class="fas fa-exclamation-triangle"></i>
-            </div>
-            <div class="flex-1">
-              <p class="font-medium">System warning</p>
-              <p class="text-sm text-gray-600">High load on database server</p>
-              <p class="text-xs text-gray-500 mt-1">5 hours ago</p>
-            </div>
-          </div>
-
-          <div class="flex items-start p-3 border border-gray-200 rounded-lg">
-            <div class="bg-purple-100 text-purple-800 p-2 rounded-lg mr-4">
-              <i class="fas fa-file-export"></i>
-            </div>
-            <div class="flex-1">
-              <p class="font-medium">Report generated</p>
-              <p class="text-sm text-gray-600">
-                Semester enrollment report exported
-              </p>
-              <p class="text-xs text-gray-500 mt-1">Yesterday, 3:45 PM</p>
-            </div>
-          </div>
+          }
         </div>
       </div>
 
-      <!-- Quick Actions -->
-      <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
-        <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center">
-          <i class="fas fa-bolt text-amber-500 mr-2"></i> Quick Actions
-        </h3>
-
-        <div class="grid grid-cols-2 gap-4">
-          <a
-            href="#"
-            class="p-4 border border-gray-200 rounded-lg text-center hover:bg-gray-50 transition-colors"
-          >
-            <div class="bg-blue-100 p-3 rounded-lg inline-flex">
-              <i class="fas fa-user-plus text-blue-600 text-xl"></i>
-            </div>
-            <p class="font-medium mt-2">Add User</p>
-            <p class="text-xs text-gray-600">Create new account</p>
-          </a>
-
-          <a
-            href="#"
-            class="p-4 border border-gray-200 rounded-lg text-center hover:bg-gray-50 transition-colors"
-          >
-            <div class="bg-green-100 p-3 rounded-lg inline-flex">
-              <i class="fas fa-book text-green-600 text-xl"></i>
-            </div>
-            <p class="font-medium mt-2">Manage Courses</p>
-            <p class="text-xs text-gray-600">Add/edit courses</p>
-          </a>
-
-          <a
-            href="#"
-            class="p-4 border border-gray-200 rounded-lg text-center hover:bg-gray-50 transition-colors"
-          >
-            <div class="bg-purple-100 p-3 rounded-lg inline-flex">
-              <i class="fas fa-chart-bar text-purple-600 text-xl"></i>
-            </div>
-            <p class="font-medium mt-2">View Reports</p>
-            <p class="text-xs text-gray-600">Analytics & insights</p>
-          </a>
-
-          <a
-            href="#"
-            class="p-4 border border-gray-200 rounded-lg text-center hover:bg-gray-50 transition-colors"
-          >
-            <div class="bg-red-100 p-3 rounded-lg inline-flex">
-              <i class="fas fa-cog text-red-600 text-xl"></i>
-            </div>
-            <p class="font-medium mt-2">System Settings</p>
-            <p class="text-xs text-gray-600">Configure system</p>
-          </a>
-        </div>
-      </div>
-    </div>
-
-    <!-- System Alerts -->
-    <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100 mb-8">
-      <div class="flex justify-between items-center mb-6">
-        <h3 class="text-lg font-bold text-gray-800 flex items-center">
-          <i class="fas fa-bell text-red-500 mr-2"></i> System Alerts
-        </h3>
-        <button
-          class="text-sm text-indigo-600 hover:text-indigo-800 font-medium flex items-center"
-        >
-          View All <i class="fas fa-chevron-right ml-1"></i>
-        </button>
-      </div>
-
-      <div class="overflow-x-auto">
-        <table class="w-full">
-          <thead>
-            <tr
-              class="text-left text-sm text-gray-500 border-b border-gray-200"
+      <div class="card border border-base-200 bg-base-100">
+        <div class="card-body">
+          <h2 class="text-lg font-semibold text-base-content">Acciones rápidas</h2>
+          <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
+            <a
+              routerLink="/admin/students"
+              class="rounded-lg border border-base-200 p-3 hover:bg-base-200"
             >
-              <th class="pb-3 font-medium">Alert</th>
-              <th class="pb-3 font-medium">Severity</th>
-              <th class="pb-3 font-medium">Department</th>
-              <th class="pb-3 font-medium">Date</th>
-              <th class="pb-3 font-medium">Status</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-gray-200">
-            <tr>
-              <td class="py-3">
-                <p class="font-medium">Database performance degradation</p>
-                <p class="text-sm text-gray-600">
-                  Response times above threshold
-                </p>
-              </td>
-              <td class="py-3">
-                <span
-                  class="bg-red-100 text-red-800 text-xs font-medium px-2 py-1 rounded"
-                  >High</span
-                >
-              </td>
-              <td class="py-3">
-                <p class="text-gray-600">IT</p>
-              </td>
-              <td class="py-3">
-                <p class="text-gray-600">Today, 10:30 AM</p>
-              </td>
-              <td class="py-3">
-                <span
-                  class="bg-amber-100 text-amber-800 text-xs font-medium px-2 py-1 rounded"
-                  >Investigating</span
-                >
-              </td>
-            </tr>
-            <tr>
-              <td class="py-3">
-                <p class="font-medium">Course enrollment capacity reached</p>
-                <p class="text-sm text-gray-600">CS-301 at maximum capacity</p>
-              </td>
-              <td class="py-3">
-                <span
-                  class="bg-amber-100 text-amber-800 text-xs font-medium px-2 py-1 rounded"
-                  >Medium</span
-                >
-              </td>
-              <td class="py-3">
-                <p class="text-gray-600">Registrar</p>
-              </td>
-              <td class="py-3">
-                <p class="text-gray-600">Yesterday, 2:15 PM</p>
-              </td>
-              <td class="py-3">
-                <span
-                  class="bg-blue-100 text-blue-800 text-xs font-medium px-2 py-1 rounded"
-                  >Pending</span
-                >
-              </td>
-            </tr>
-            <tr>
-              <td class="py-3">
-                <p class="font-medium">Backup completed with warnings</p>
-                <p class="text-sm text-gray-600">
-                  3 files skipped during backup
-                </p>
-              </td>
-              <td class="py-3">
-                <span
-                  class="bg-blue-100 text-blue-800 text-xs font-medium px-2 py-1 rounded"
-                  >Low</span
-                >
-              </td>
-              <td class="py-3">
-                <p class="text-gray-600">IT</p>
-              </td>
-              <td class="py-3">
-                <p class="text-gray-600">Oct 10, 11:30 PM</p>
-              </td>
-              <td class="py-3">
-                <span
-                  class="bg-green-100 text-green-800 text-xs font-medium px-2 py-1 rounded"
-                  >Resolved</span
-                >
-              </td>
-            </tr>
-          </tbody>
-        </table>
+              <p class="font-medium text-base-content">Gestionar alumnos</p>
+              <p class="text-sm text-base-content/70">Altas y seguimiento</p>
+            </a>
+            <a
+              routerLink="/admin/teachers"
+              class="rounded-lg border border-base-200 p-3 hover:bg-base-200"
+            >
+              <p class="font-medium text-base-content">Gestionar docentes</p>
+              <p class="text-sm text-base-content/70">Equipo académico</p>
+            </a>
+            <a
+              routerLink="/admin/subjects"
+              class="rounded-lg border border-base-200 p-3 hover:bg-base-200"
+            >
+              <p class="font-medium text-base-content">Asignaturas</p>
+              <p class="text-sm text-base-content/70">Plan curricular</p>
+            </a>
+            <a
+              routerLink="/messages"
+              class="rounded-lg border border-base-200 p-3 hover:bg-base-200"
+            >
+              <p class="font-medium text-base-content">Mensajería</p>
+              <p class="text-sm text-base-content/70">Comunicación interna</p>
+            </a>
+          </div>
+        </div>
       </div>
     </div>
-  </div>`,
+
+    <div class="mt-6 grid gap-6 lg:grid-cols-2">
+      <div class="card border border-base-200 bg-base-100">
+        <div class="card-body">
+          <h2 class="text-lg font-semibold text-base-content">
+            Últimos estudiantes
+          </h2>
+          @if ((recentStudents.value() ?? []).length === 0) {
+            <lib-empty-state
+              title="Sin estudiantes recientes"
+              description="Las nuevas matrículas aparecerán aquí."
+              icon="school"
+            />
+          } @else {
+            <div class="space-y-3">
+              @for (student of recentStudents.value() ?? []; track student.id) {
+                <div class="rounded-lg border border-base-200 p-3">
+                  <p class="font-medium text-base-content">
+                    {{ student.fullName }}
+                  </p>
+                  <div class="text-sm text-base-content/70">
+                    {{ student.classGroup?.name ?? 'Sin grupo' }} ·
+                    {{ student.createdAt | date : 'short' }}
+                  </div>
+                </div>
+              }
+            </div>
+          }
+        </div>
+      </div>
+
+      <div class="card border border-base-200 bg-base-100">
+        <div class="card-body">
+          <h2 class="text-lg font-semibold text-base-content">
+            Docentes recientes
+          </h2>
+          @if ((recentTeachers.value() ?? []).length === 0) {
+            <lib-empty-state
+              title="Sin docentes recientes"
+              description="Nuevas contrataciones aparecerán aquí."
+              icon="groups"
+            />
+          } @else {
+            <div class="space-y-3">
+              @for (teacher of recentTeachers.value() ?? []; track teacher.id) {
+                <div class="rounded-lg border border-base-200 p-3">
+                  <p class="font-medium text-base-content">
+                    {{ teacher.fullName }}
+                  </p>
+                  <div class="text-sm text-base-content/70">
+                    {{ teacher.user.email }} ·
+                    {{ teacher.createdAt | date : 'short' }}
+                  </div>
+                </div>
+              }
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  `,
   styles: ``,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export default class Home {}
+export default class Home {
+  private apollo = inject(Apollo);
+  private store = inject(Store);
+
+  public statsResource = rxResource({
+    params: () => ({ schoolId: this.store.currentSchoolId() }),
+    stream: ({ params }) => {
+      if (!params.schoolId) {
+        return of<DashboardStats>({
+          coursesCount: 0,
+          findManyStudentsCount: 0,
+          findManyTeachersCount: 0,
+          findManySubjectsCount: 0,
+        });
+      }
+      return this.apollo
+        .watchQuery<DashboardStats>({
+          query: gql`
+            query AdminDashboardStats($schoolId: String) {
+              coursesCount(schoolId: $schoolId)
+              findManyStudentsCount(schoolId: $schoolId)
+              findManyTeachersCount(schoolId: $schoolId)
+              findManySubjectsCount(schoolId: $schoolId)
+            }
+          `,
+          variables: {
+            schoolId: params.schoolId,
+          },
+        })
+        .valueChanges.pipe(map((result) => result.data));
+    },
+  });
+
+  public recentMessages = rxResource({
+    params: () => ({ take: 5, skip: 0 }),
+    stream: ({ params }) => {
+      return this.apollo
+        .watchQuery<{ findManyMessages: RecentMessage[] }>({
+          query: gql`
+            query RecentMessages($take: Int!, $skip: Int!) {
+              findManyMessages(take: $take, skip: $skip) {
+                id
+                createdAt
+                message {
+                  id
+                  subject
+                  createdAt
+                  sender {
+                    id
+                    name
+                  }
+                }
+              }
+            }
+          `,
+          variables: params,
+        })
+        .valueChanges.pipe(map((result) => result.data.findManyMessages));
+    },
+  });
+
+  public recentStudents = rxResource({
+    params: () => ({ take: 4, schoolId: this.store.currentSchoolId() }),
+    stream: ({ params }) => {
+      if (!params.schoolId) {
+        return of<RecentStudent[]>([]);
+      }
+      return this.apollo
+        .watchQuery<{ students: RecentStudent[] }>({
+          query: gql`
+            query RecentStudents(
+              $take: Int!
+              $orderBy: String
+              $orderDirection: String
+              $schoolId: String
+            ) {
+              students(
+                take: $take
+                orderBy: $orderBy
+                orderDirection: $orderDirection
+                schoolId: $schoolId
+              ) {
+                id
+                fullName
+                createdAt
+                classGroup {
+                  name
+                }
+              }
+            }
+          `,
+          variables: {
+            take: params.take,
+            orderBy: 'createdAt',
+            orderDirection: 'desc',
+            schoolId: params.schoolId,
+          },
+        })
+        .valueChanges.pipe(map((result) => result.data.students));
+    },
+  });
+
+  public recentTeachers = rxResource({
+    params: () => ({ take: 4, schoolId: this.store.currentSchoolId() }),
+    stream: ({ params }) => {
+      if (!params.schoolId) {
+        return of<RecentTeacher[]>([]);
+      }
+      return this.apollo
+        .watchQuery<{ teachers: RecentTeacher[] }>({
+          query: gql`
+            query RecentTeachers(
+              $take: Int!
+              $orderBy: String
+              $orderDirection: String
+              $schoolId: String
+            ) {
+              teachers(
+                take: $take
+                orderBy: $orderBy
+                orderDirection: $orderDirection
+                schoolId: $schoolId
+              ) {
+                id
+                fullName
+                createdAt
+                user {
+                  email
+                }
+              }
+            }
+          `,
+          variables: {
+            take: params.take,
+            orderBy: 'createdAt',
+            orderDirection: 'desc',
+            schoolId: params.schoolId,
+          },
+        })
+        .valueChanges.pipe(map((result) => result.data.teachers));
+    },
+  });
+}

@@ -27,12 +27,47 @@ export class StudentGradesService {
             course: true,
           },
         },
+        student: true,
       },
     });
   }
 
   findOne(id: string) {
     return this.prisma.studentGrade.findUnique({ where: { id } });
+  }
+
+  async getAverageScoreForStudent(
+    courseId: string,
+    periodId: string,
+    studentId: string
+  ) {
+    const grades = await this.prisma.studentGrade.findMany({
+      where: { grade: { courseId, periodId }, studentId },
+      include: {
+        grade: {
+          include: {
+            bucket: true,
+          },
+        },
+      },
+    });
+    return (
+      grades
+        .filter((grade) => grade.score !== null)
+        .reduce(
+          (acc, grade) =>
+            acc +
+            (grade.score?.toNumber() ?? 0) *
+              grade.grade.bucket.weight.toNumber(),
+          0
+        ) /
+        grades
+          .filter((grade) => grade.score !== null)
+          .reduce(
+            (acc, grade) => acc + grade.grade.bucket.weight.toNumber(),
+            0
+          ) || 0
+    );
   }
 
   update(id: string, updateStudentGradeInput: UpdateStudentGradeInput) {

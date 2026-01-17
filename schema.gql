@@ -546,7 +546,7 @@ input CreateTeacherInput {
   address: String = ""
 
   """Birth date of the teacher"""
-  birthDate: DateTime = "2026-01-16T00:35:55.483Z"
+  birthDate: DateTime = "2026-01-17T09:54:45.244Z"
 
   """Document ID of the teacher"""
   documentId: String!
@@ -947,6 +947,7 @@ type Query {
   assignments: [Assignment!]!
   assignmentsByCourseId(courseId: String!, endDate: String!, startDate: String!): [Assignment!]!
   assignmentsBySchoolId(endDate: String!, schoolId: String!, startDate: String!): [Assignment!]!
+  averageCourseScoreForStudent(courseId: String!, periodId: String!, studentId: String!): Float!
   classGroup(id: String!): ClassGroup!
   classGroups: [ClassGroup!]!
   classGroupsByOrganizationId(organizationId: String!): [ClassGroup!]!
@@ -1486,6 +1487,9 @@ type Student {
 }
 
 type StudentGrade {
+  """Average score for the student"""
+  averageScoreForStudent: Float!
+
   """Comments for the student grade"""
   comments: String
 
@@ -2026,7 +2030,7 @@ input UpdateTeacherInput {
   address: String = ""
 
   """Birth date of the teacher"""
-  birthDate: DateTime = "2026-01-16T00:35:55.483Z"
+  birthDate: DateTime = "2026-01-17T09:54:45.244Z"
 
   """Document ID of the teacher"""
   documentId: String

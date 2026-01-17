@@ -1,5 +1,5 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { PageHeader, StatCard } from '@/ui';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 
 @Component({
   selector: 'app-parent-child-progress',
@@ -34,11 +34,11 @@ import { PageHeader, StatCard } from '@/ui';
             </thead>
             <tbody>
               @for (item of progress; track item.id) {
-                <tr>
-                  <td>{{ item.subject }}</td>
-                  <td>{{ item.score }}</td>
-                  <td class="text-sm text-base-content/70">{{ item.note }}</td>
-                </tr>
+              <tr>
+                <td>{{ item.subject }}</td>
+                <td>{{ item.score }}</td>
+                <td class="text-sm text-base-content/70">{{ item.note }}</td>
+              </tr>
               }
             </tbody>
           </table>

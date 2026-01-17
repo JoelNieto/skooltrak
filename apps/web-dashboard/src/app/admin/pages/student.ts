@@ -1,4 +1,4 @@
-import { DecimalToNumber, Loader, PrismaDecimalPipe } from '@/ui';
+import { DecimalToNumber, Loader } from '@/ui';
 import { Tab, TabContent, TabList, TabPanel, Tabs } from '@angular/aria/tabs';
 import { DatePipe, DecimalPipe, NgClass } from '@angular/common';
 import { Component, inject, input } from '@angular/core';
@@ -61,7 +61,6 @@ type StudentType = DecimalToNumber<
     Tabs,
     TabPanel,
     TabContent,
-    PrismaDecimalPipe,
     DecimalPipe,
     NgClass,
   ],
@@ -75,7 +74,6 @@ type StudentType = DecimalToNumber<
       <ul>
         <li><a routerLink="/">Inicio</a></li>
         <li><a routerLink="/students">Alumnos</a></li>
-
         <li>{{ student.name }}</li>
       </ul>
     </div>
@@ -235,11 +233,11 @@ type StudentType = DecimalToNumber<
                   <table class="table table-sm table-zebra ">
                     <thead>
                       <tr>
-                        <th>Nombre</th>
-                        <th>Tipo</th>
-                        <th>Fecha</th>
-                        <th>Comentarios</th>
-                        <th>Calificacion</th>
+                        <th class="w-1/5">Nombre</th>
+                        <th class="w-1/5">Tipo</th>
+                        <th class="w-1/5">Fecha</th>
+                        <th class="w-1/5">Comentarios</th>
+                        <th class="w-1/5">Calificacion</th>
                       </tr>
                     </thead>
                     <tbody>

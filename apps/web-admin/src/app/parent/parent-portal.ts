@@ -1,5 +1,5 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { EmptyState, PageHeader, StatCard } from '@/ui';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 
 @Component({
   selector: 'app-parent-portal',
@@ -12,7 +12,11 @@ import { EmptyState, PageHeader, StatCard } from '@/ui';
 
     <div class="grid gap-4 md:grid-cols-3">
       <lib-stat-card label="Promedio general" value="8.7" helper="Último mes" />
-      <lib-stat-card label="Asistencias" value="95%" helper="Últimas 4 semanas" />
+      <lib-stat-card
+        label="Asistencias"
+        value="95%"
+        helper="Últimas 4 semanas"
+      />
       <lib-stat-card label="Alertas" value="2" helper="Pendientes de revisar" />
     </div>
 
@@ -23,15 +27,15 @@ import { EmptyState, PageHeader, StatCard } from '@/ui';
         </h2>
         <div class="grid gap-4 md:grid-cols-2">
           @for (child of children; track child.id) {
-            <div class="border border-base-200 rounded-lg p-4">
-              <p class="font-semibold text-base-content">{{ child.name }}</p>
-              <p class="text-sm text-base-content/70">
-                {{ child.grade }} · {{ child.group }}
-              </p>
-              <p class="text-sm text-base-content/70">
-                Última nota: {{ child.lastGrade }}
-              </p>
-            </div>
+          <div class="border border-base-200 rounded-lg p-4">
+            <p class="font-semibold text-base-content">{{ child.name }}</p>
+            <p class="text-sm text-base-content/70">
+              {{ child.grade }} · {{ child.group }}
+            </p>
+            <p class="text-sm text-base-content/70">
+              Última nota: {{ child.lastGrade }}
+            </p>
+          </div>
           }
         </div>
       </div>
@@ -42,26 +46,26 @@ import { EmptyState, PageHeader, StatCard } from '@/ui';
         Comunicados recientes
       </h2>
       @if (announcements.length === 0) {
-        <lib-empty-state
-          title="Sin comunicados nuevos"
-          description="Los avisos importantes aparecerán aquí."
-          icon="campaign"
-        />
+      <lib-empty-state
+        title="Sin comunicados nuevos"
+        description="Los avisos importantes aparecerán aquí."
+        icon="campaign"
+      />
       } @else {
-        <div class="space-y-3">
-          @for (announcement of announcements; track announcement.id) {
-            <div class="card border border-base-200 bg-base-100">
-              <div class="card-body">
-                <p class="font-semibold text-base-content">
-                  {{ announcement.title }}
-                </p>
-                <p class="text-sm text-base-content/70">
-                  {{ announcement.summary }}
-                </p>
-              </div>
-            </div>
-          }
+      <div class="space-y-3">
+        @for (announcement of announcements; track announcement.id) {
+        <div class="card border border-base-200 bg-base-100">
+          <div class="card-body">
+            <p class="font-semibold text-base-content">
+              {{ announcement.title }}
+            </p>
+            <p class="text-sm text-base-content/70">
+              {{ announcement.summary }}
+            </p>
+          </div>
         </div>
+        }
+      </div>
       }
     </div>
   `,

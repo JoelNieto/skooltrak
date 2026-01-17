@@ -111,7 +111,7 @@ export class CoursesService {
     }
 
     if (role === 'TEACHER') {
-      where = { ...where, teacherId: userId };
+      where = { ...where, teacher: { user: { id: userId } } };
     }
 
     if (studyPlanId) {
@@ -153,7 +153,7 @@ export class CoursesService {
     }
 
     if (role === 'TEACHER') {
-      where = { ...where, teacherId: userId };
+      where = { ...where, teacher: { user: { id: userId } } };
     }
 
     if (studyPlanId) {

@@ -32,7 +32,6 @@ type CourseType = Prisma.CourseGetPayload<{
   imports: [
     Loader,
     RouterLink,
-
     CourseAssignments,
     CourseGradeBuckets,
     CourseGrades,
@@ -109,7 +108,11 @@ type CourseType = Prisma.CourseGetPayload<{
             [currentPeriod]="course.currentPeriodId"
             [metric]="course.studyPlan.gradeMetric!"
           />} @if(auth.isStudent()) {
-          <app-course-student-grades [courseId]="id()" />
+          <app-course-student-grades
+            [courseId]="id()"
+            [currentPeriod]="course.currentPeriodId"
+            [metric]="course.studyPlan.gradeMetric!"
+          />
           }
         </div>
         <label class="tab">

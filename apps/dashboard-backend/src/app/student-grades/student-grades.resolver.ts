@@ -1,4 +1,10 @@
-import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
+import {
+  Args,
+  Float,
+  Mutation,
+  Query,
+  Resolver
+} from '@nestjs/graphql';
 import { CreateStudentGradeInput } from './dto/create-student-grade.input';
 import { UpdateStudentGradeInput } from './dto/update-student-grade.input';
 import { StudentGrade } from './entities/student-grade.entity';
@@ -6,7 +12,9 @@ import { StudentGradesService } from './student-grades.service';
 
 @Resolver(() => StudentGrade)
 export class StudentGradesResolver {
-  constructor(private readonly studentGradesService: StudentGradesService) {}
+  constructor(
+    private readonly studentGradesService: StudentGradesService,
+  ) {}
 
   @Mutation(() => StudentGrade)
   createStudentGrade(
@@ -33,6 +41,19 @@ export class StudentGradesResolver {
     @Args('studentId', { type: () => String }) studentId?: string
   ) {
     return this.studentGradesService.findByCourseId(
+      courseId,
+      periodId,
+      studentId
+    );
+  }
+
+  @Query(() => Float, { name: 'averageCourseScoreForStudent' })
+  averageCourseScoreForStudent(
+    @Args('studentId', { type: () => String }) studentId: string,
+    @Args('courseId', { type: () => String }) courseId: string,
+    @Args('periodId', { type: () => String }) periodId: string
+  ) {
+    return this.studentGradesService.getAverageScoreForStudent(
       courseId,
       periodId,
       studentId

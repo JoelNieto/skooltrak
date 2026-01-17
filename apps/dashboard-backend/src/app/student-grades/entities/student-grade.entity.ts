@@ -1,5 +1,5 @@
 import { Prisma } from '@generated/prisma';
-import { Field, ObjectType } from '@nestjs/graphql';
+import { Field, Float, ObjectType } from '@nestjs/graphql';
 import { Grade } from '../../grades/entities/grade.entity';
 import { Student } from '../../students/entities/student.entity';
 @ObjectType()
@@ -31,4 +31,7 @@ export class StudentGrade
   createdAt: Date;
   @Field(() => Date, { description: 'Updated at of the student grade' })
   updatedAt: Date;
+
+  @Field(() => Float, { description: 'Average score for the student' })
+  averageScoreForStudent: number;
 }

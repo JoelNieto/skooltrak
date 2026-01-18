@@ -107,6 +107,7 @@ export default class GroupScheduleForm {
   public data = input.required<{
     schedule?: Prisma.ClassGroupWeeklyScheduleGetPayload<undefined>;
     groupId: string;
+    weekday?: string;
   }>();
   #apollo = inject(Apollo);
   #toast = inject(Toast);
@@ -165,6 +166,7 @@ export default class GroupScheduleForm {
     });
     afterRenderEffect(() => {
       const schedule = this.data()?.schedule;
+      const defaultWeekday = this.data()?.weekday;
       if (schedule) {
         this.#schedule.set({
           classGroupId: schedule.classGroupId,
@@ -176,6 +178,11 @@ export default class GroupScheduleForm {
           remote: schedule.remote,
           remoteLink: schedule.remoteLink,
         });
+      } else if (defaultWeekday) {
+        this.#schedule.update((currentSchedule) => ({
+          ...currentSchedule,
+          weekday: defaultWeekday,
+        }));
       }
     });
   }
@@ -191,6 +198,33 @@ export default class GroupScheduleForm {
     this.form.remote().markAsDirty();
     this.form.remoteLink().markAsDirty();
     submit(this.form, async () => {
+      const schedule = this.form().value();
+      if (this.data()?.schedule) {
+        this.#apollo
+          .mutate({
+            mutation: gql`
+              mutation UpdateGroupsSchedule(
+                $updateGroupsScheduleInput: UpdateGroupsScheduleInput!
+              ) {
+                updateGroupsSchedule(updateGroupsScheduleInput: $updateGroupsScheduleInput) {
+                  id
+                }
+              }
+            `,
+            variables: {
+              updateGroupsScheduleInput: schedule,
+            },
+          })
+          .subscribe({
+            next: () => {
+              this.#toast.showSuccess('Horario actualizado exitosamente');
+              this.closeModal.emit();
+            },
+            error: (error) => {
+              this.#toast.showError(error.message);
+            },
+          });
+      } else {
       this.#apollo
         .mutate({
           mutation: gql`
@@ -217,6 +251,7 @@ export default class GroupScheduleForm {
             this.#toast.showError(error.message);
           },
         });
+      }
     });
   }
 }

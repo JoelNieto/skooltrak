@@ -1,27 +1,20 @@
 import { Toast } from '@/ui';
-import {
-  afterRenderEffect,
-  Component,
-  inject,
-  input,
-  output,
-  signal,
-} from '@angular/core';
+import { afterRenderEffect, Component, inject, input, output, signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
-import { Field, form, required, submit } from '@angular/forms/signals';
+import { form, FormField, required, submit } from '@angular/forms/signals';
 import { Prisma } from '@generated/prisma';
 import { Apollo, gql } from 'apollo-angular';
 import { map } from 'rxjs';
 
 @Component({
   selector: 'app-group-schedule-form',
-  imports: [Field],
+  imports: [FormField],
   template: ` <form (submit)="save($event)" novalidate="novalidate">
     <div class="flex flex-col md:grid md:grid-cols-2 gap-2">
       <div class="fieldset">
         <label for="courseId">Curso</label>
         <select
-          [field]="form.courseId"
+          [formField]="form.courseId"
           class="select select-primary"
           [class.ng-dirty]="form.courseId().dirty()"
           [class.ng-invalid]="form.courseId().invalid()"
@@ -35,7 +28,7 @@ import { map } from 'rxjs';
       <div class="fieldset">
         <label for="weekday">Día de la semana</label>
         <select
-          [field]="form.weekday"
+          [formField]="form.weekday"
           class="select select-primary"
           [class.ng-dirty]="form.weekday().dirty()"
           [class.ng-invalid]="form.weekday().invalid()"
@@ -52,7 +45,7 @@ import { map } from 'rxjs';
       <div class="fieldset">
         <label for="startTime">Hora de inicio</label>
         <input
-          [field]="form.startTime"
+          [formField]="form.startTime"
           type="time"
           class="input input-primary"
           [class.ng-dirty]="form.startTime().dirty()"
@@ -62,7 +55,7 @@ import { map } from 'rxjs';
       <div class="fieldset">
         <label for="endTime">Hora de fin</label>
         <input
-          [field]="form.endTime"
+          [formField]="form.endTime"
           type="time"
           class="input input-primary"
           [class.ng-dirty]="form.endTime().dirty()"
@@ -71,33 +64,19 @@ import { map } from 'rxjs';
       </div>
       <div class="fieldset md:col-span-2">
         <label for="location">Ubicación</label>
-        <input
-          [field]="form.location!"
-          type="text"
-          class="input input-primary"
-        />
+        <input [formField]="form.location!" type="text" class="input input-primary" />
       </div>
       <div class="fieldset">
         <label for="remote">Remoto</label>
-        <input
-          [field]="form.remote!"
-          type="checkbox"
-          class="checkbox checkbox-primary"
-        />
+        <input [formField]="form.remote!" type="checkbox" class="checkbox checkbox-primary" />
       </div>
       <div class="fieldset">
         <label for="remoteLink">Enlace remoto</label>
-        <input
-          [field]="form.remoteLink!"
-          type="text"
-          class="input input-primary"
-        />
+        <input [formField]="form.remoteLink!" type="text" class="input input-primary" />
       </div>
     </div>
     <div class="flex justify-end gap-2 mt-4">
-      <button type="button" class="btn btn-ghost" (click)="closeModal.emit()">
-        Cancelar
-      </button>
+      <button type="button" class="btn btn-ghost" (click)="closeModal.emit()">Cancelar</button>
       <button type="submit" class="btn btn-primary">Guardar</button>
     </div>
   </form>`,
@@ -117,22 +96,20 @@ export default class GroupScheduleForm {
     }),
     stream: ({ params }) => {
       return this.#apollo
-        .watchQuery<{ coursesByGroupId: Prisma.CourseGetPayload<undefined>[] }>(
-          {
-            query: gql`
-              query CoursesByGroupId($groupId: String!) {
-                coursesByGroupId(groupId: $groupId) {
-                  id
-                  name
-                }
+        .watchQuery<{ coursesByGroupId: Prisma.CourseGetPayload<undefined>[] }>({
+          query: gql`
+            query CoursesByGroupId($groupId: String!) {
+              coursesByGroupId(groupId: $groupId) {
+                id
+                name
               }
-            `,
-            variables: {
-              groupId: params.groupId,
-            },
-            fetchPolicy: 'cache-first',
-          }
-        )
+            }
+          `,
+          variables: {
+            groupId: params.groupId,
+          },
+          fetchPolicy: 'cache-first',
+        })
         .valueChanges.pipe(map((result) => result.data.coursesByGroupId));
     },
   });
@@ -189,7 +166,6 @@ export default class GroupScheduleForm {
 
   save(event: Event) {
     event.preventDefault();
-    this.form.classGroupId().markAsDirty();
     this.form.courseId().markAsDirty();
     this.form.weekday().markAsDirty();
     this.form.startTime().markAsDirty();
@@ -198,21 +174,22 @@ export default class GroupScheduleForm {
     this.form.remote().markAsDirty();
     this.form.remoteLink().markAsDirty();
     submit(this.form, async () => {
-      const schedule = this.form().value();
+      const schedule = { ...this.form().value(), classGroupId: this.data()?.groupId };
       if (this.data()?.schedule) {
         this.#apollo
           .mutate({
             mutation: gql`
-              mutation UpdateGroupsSchedule(
-                $updateGroupsScheduleInput: UpdateGroupsScheduleInput!
-              ) {
+              mutation UpdateGroupsSchedule($updateGroupsScheduleInput: UpdateGroupsScheduleInput!) {
                 updateGroupsSchedule(updateGroupsScheduleInput: $updateGroupsScheduleInput) {
                   id
                 }
               }
             `,
             variables: {
-              updateGroupsScheduleInput: schedule,
+              updateGroupsScheduleInput: {
+                ...schedule,
+                id: this.data()?.schedule?.id,
+              },
             },
           })
           .subscribe({
@@ -225,32 +202,28 @@ export default class GroupScheduleForm {
             },
           });
       } else {
-      this.#apollo
-        .mutate({
-          mutation: gql`
-            mutation CreateGroupsSchedule(
-              $createGroupsScheduleInput: CreateGroupsScheduleInput!
-            ) {
-              createGroupsSchedule(
-                createGroupsScheduleInput: $createGroupsScheduleInput
-              ) {
-                id
+        this.#apollo
+          .mutate({
+            mutation: gql`
+              mutation CreateGroupsSchedule($createGroupsScheduleInput: CreateGroupsScheduleInput!) {
+                createGroupsSchedule(createGroupsScheduleInput: $createGroupsScheduleInput) {
+                  id
+                }
               }
-            }
-          `,
-          variables: {
-            createGroupsScheduleInput: this.form().value(),
-          },
-        })
-        .subscribe({
-          next: () => {
-            this.#toast.showSuccess('Horario creado exitosamente');
-            this.closeModal.emit();
-          },
-          error: (error) => {
-            this.#toast.showError(error.message);
-          },
-        });
+            `,
+            variables: {
+              createGroupsScheduleInput: this.form().value(),
+            },
+          })
+          .subscribe({
+            next: () => {
+              this.#toast.showSuccess('Horario creado exitosamente');
+              this.closeModal.emit();
+            },
+            error: (error) => {
+              this.#toast.showError(error.message);
+            },
+          });
       }
     });
   }

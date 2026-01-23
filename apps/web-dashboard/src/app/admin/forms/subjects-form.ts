@@ -7,13 +7,13 @@ import {
   output,
   signal,
 } from '@angular/core';
-import { Field, form, required, submit } from '@angular/forms/signals';
+import { FormField, form, required, submit } from '@angular/forms/signals';
 import { Prisma } from '@generated/prisma';
 import { Apollo, gql } from 'apollo-angular';
 
 @Component({
   selector: 'app-subjects-form',
-  imports: [Field],
+  imports: [FormField],
   template: `<form (submit)="onSubmit($event)" novalidate="novalidate">
     <div class="flex flex-col gap-2">
       <div class="fieldset">
@@ -21,7 +21,7 @@ import { Apollo, gql } from 'apollo-angular';
         <input
           type="text"
           id="name"
-          [field]="form.name"
+          [formField]="form.name"
           class="input input-primary"
           [class.ng-dirty]="form.name().dirty()"
           [class.ng-invalid]="form.name().invalid()"
@@ -40,7 +40,7 @@ import { Apollo, gql } from 'apollo-angular';
         <input
           type="text"
           id="shortName"
-          [field]="form.shortName"
+          [formField]="form.shortName"
           [class.ng-dirty]="form.shortName().dirty()"
           [class.ng-invalid]="form.shortName().invalid()"
           class="input input-primary"
@@ -58,7 +58,7 @@ import { Apollo, gql } from 'apollo-angular';
         <input
           type="text"
           id="code"
-          [field]="form.code"
+          [formField]="form.code"
           class="input input-primary"
           [class.ng-dirty]="form.code().dirty()"
           [class.ng-invalid]="form.code().invalid()"

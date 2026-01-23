@@ -1,5 +1,5 @@
-import { Modal } from '@/ui';
-import { Component, computed, effect, inject, input, signal } from '@angular/core';
+import { Modal, Toast } from '@/ui';
+import { Component, computed, inject, input, linkedSignal, signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { Prisma } from '@generated/prisma';
 import { Apollo, gql } from 'apollo-angular';
@@ -28,116 +28,92 @@ type ScheduleLayout = {
     <div class="flex flex-col gap-6">
       <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h4 class="text-lg font-semibold text-base-content">
-            Horario semanal del grupo
-          </h4>
-          <p class="text-sm text-base-200">
-            Visualiza las clases en un calendario semanal por horas.
-          </p>
+          <h4 class="text-lg font-semibold text-base-content">Horario semanal del grupo</h4>
+          <p class="text-sm text-base-200">Visualiza las clases en un calendario semanal por horas.</p>
         </div>
-        <button class="btn btn-primary btn-sm" (click)="editSchedule()">
-          Agregar clase
-        </button>
+        <button class="btn btn-primary btn-sm" (click)="editSchedule()">Agregar clase</button>
       </div>
       @if (schedulesResource.isLoading()) {
-        <div class="flex items-center gap-2 text-sm text-base-200">
-          <span class="loading loading-spinner loading-sm"></span>
-          Cargando horario...
-        </div>
-      } @else {
-        @let schedules = localSchedules();
-        @if (schedules?.length) {
-          <div class="w-full overflow-x-auto">
-            <div class="min-w-[1100px]">
-              <div
-                class="grid border border-base-300 rounded-lg bg-base-100"
-                [style.gridTemplateColumns]="gridTemplateColumns"
-              >
-                <div class="border-b border-base-200 bg-base-200 px-3 py-2 text-xs font-semibold">
-                  Hora
-                </div>
-                @for (day of weekdays; track day.key) {
-                  <div class="border-b border-base-200 bg-base-200 px-3 py-2 text-xs font-semibold">
-                    <div class="flex items-center justify-between">
-                      <span>{{ day.label }}</span>
-                      <button
-                        class="btn btn-ghost btn-xs"
-                        (click)="editSchedule(undefined, day.key)"
-                      >
-                        +
-                      </button>
-                    </div>
-                  </div>
-                }
-
-                <div class="relative border-r border-base-300 mt-4" [style.height.px]="gridHeight">
-                  @for (hour of hourMarks; track hour.label) {
-                    <div
-                      class="absolute left-0 right-0 -translate-y-1/2 px-2 text-[11px] text-base-200 pt-4 border-t border-base-300"
-                      [style.top.px]="hour.top"
-                    >
-                      {{ hour.label }}
-                    </div>
-                  }
-                </div>
-
-                @for (day of weekdays; track day.key) {
-                  <div
-                    class="relative border-r border-base-300 schedule-day-column"
-                    [attr.data-day]="day.key"
-                    [style.height.px]="gridHeight"
-                    [style.backgroundImage]="gridBackground"
-                  >
-                    @for (entry of layoutByDay()[day.key]; track entry.id) {
-                      <div
-                        class="absolute rounded-md border bg-primary-content text-primary p-2 text-xs  cursor-move group"
-                        [class.opacity-70]="draggingId() === entry.id"
-                        [style.top.px]="entry.top"
-                        [style.height.px]="entry.height"
-                        [style.left.%]="entry.left"
-                        [style.width.%]="entry.width"
-                        style="touch-action: none;"
-                        (pointerdown)="onEntryPointerDown(entry, $event)"
-                      >
-                        <div class="flex items-start justify-between gap-2">
-                          <p class="font-semibold text-primary">
-                            {{ entry.schedule.course.subject.name }}
-                          </p>
-                          <button
-                            class="btn btn-ghost btn-xs"
-                            type="button"
-                            (click)="editSchedule(entry.schedule); $event.stopPropagation()"
-                          >
-                            Editar
-                          </button>
-                        </div>
-                        <p class="text-[11px] text-base-200">
-                          {{ entry.schedule.startTime }} - {{ entry.schedule.endTime }}
-                        </p>
-                        <p class="text-[11px] text-base-200">
-                          {{ entry.schedule.location }}
-                        </p>
-                      </div>
-                    }
-                  </div>
-                }
+      <div class="flex items-center gap-2 text-sm text-base-200">
+        <span class="loading loading-spinner loading-sm"></span>
+        Cargando horario...
+      </div>
+      } @else { @let schedules = localSchedules(); @if (schedules?.length) {
+      <div class="w-full overflow-x-auto">
+        <div class="min-w-[1100px]">
+          <div
+            class="grid border border-base-300 rounded-lg bg-base-100"
+            [style.gridTemplateColumns]="gridTemplateColumns"
+          >
+            <div class="border-b border-base-200 bg-base-200 px-3 py-2 text-xs font-semibold">Hora</div>
+            @for (day of weekdays; track day.key) {
+            <div class="border-b border-base-200 bg-base-200 px-3 py-2 text-xs font-semibold">
+              <div class="flex items-center justify-between">
+                <span>{{ day.label }}</span>
+                <button class="btn btn-ghost btn-xs" (click)="editSchedule(undefined, day.key)">+</button>
               </div>
             </div>
+            }
+
+            <div class="relative border-r border-base-300 mt-4" [style.height.px]="gridHeight">
+              @for (hour of hourMarks; track hour.label) {
+              <div
+                class="absolute left-0 right-0 -translate-y-1/2 px-2 text-[11px] text-base-200 pt-4 border-t border-base-300"
+                [style.top.px]="hour.top"
+              >
+                {{ hour.label }}
+              </div>
+              }
+            </div>
+
+            @for (day of weekdays; track day.key) {
+            <div
+              class="relative border-r border-base-300 schedule-day-column"
+              [attr.data-day]="day.key"
+              [style.height.px]="gridHeight"
+              [style.backgroundImage]="gridBackground"
+            >
+              @for (entry of layoutByDay()[day.key]; track entry.id) {
+              <div
+                class="absolute rounded-md border bg-primary-content text-primary p-2 text-xs  cursor-move group"
+                [class.opacity-70]="draggingId() === entry.id"
+                [style.top.px]="entry.top"
+                [style.height.px]="entry.height"
+                [style.left.%]="entry.left"
+                [style.width.%]="entry.width"
+                style="touch-action: none;"
+                (pointerdown)="onEntryPointerDown(entry, $event)"
+              >
+                <div class="flex items-start justify-between gap-2">
+                  <p class="font-semibold text-primary">
+                    {{ entry.schedule.course.subject.name }}
+                  </p>
+                  <button
+                    class="btn btn-ghost btn-xs"
+                    type="button"
+                    (click)="editSchedule(entry.schedule); $event.stopPropagation()"
+                  >
+                    Editar
+                  </button>
+                </div>
+                <p class="text-[11px] text-base-200">{{ entry.schedule.startTime }} - {{ entry.schedule.endTime }}</p>
+                <p class="text-[11px] text-base-200">
+                  {{ entry.schedule.location }}
+                </p>
+              </div>
+              }
+            </div>
+            }
           </div>
-        } @else {
-          <div class="rounded-xl border border-dashed border-base-300 bg-base-100 p-6">
-            <h5 class="text-base font-semibold text-base-content">
-              Aún no hay horario semanal
-            </h5>
-            <p class="text-sm text-base-200 mt-1">
-              Empieza agregando las clases para cada día de la semana.
-            </p>
-            <button class="btn btn-primary btn-sm mt-4" (click)="editSchedule()">
-              Crear horario
-            </button>
-          </div>
-        }
-      }
+        </div>
+      </div>
+      } @else {
+      <div class="rounded-xl border border-dashed border-base-300 bg-base-100 p-6">
+        <h5 class="text-base font-semibold text-base-content">Aún no hay horario semanal</h5>
+        <p class="text-sm text-base-200 mt-1">Empieza agregando las clases para cada día de la semana.</p>
+        <button class="btn btn-primary btn-sm mt-4" (click)="editSchedule()">Crear horario</button>
+      </div>
+      } }
     </div>
   `,
 })
@@ -145,7 +121,7 @@ export default class GroupSchedule {
   public id = input<string>();
   #modal = inject(Modal);
   #apollo = inject(Apollo);
-  public localSchedules = signal<Schedule[]>([]);
+  #toast = inject(Toast);
   public draggingId = signal<string | null>(null);
 
   public weekdays: Array<{ key: WeekdayKey; label: string }> = [
@@ -205,33 +181,25 @@ export default class GroupSchedule {
           variables: {
             classGroupId: params.classGroupId,
           },
-          fetchPolicy: 'cache-first',
+          fetchPolicy: 'cache-and-network',
         })
-        .valueChanges.pipe(
-          map((result) => result.data.groupsSchedulesByClassGroupId)
-        );
+        .valueChanges.pipe(map((result) => result.data.groupsSchedulesByClassGroupId));
     },
+  });
+
+  public localSchedules = linkedSignal<Schedule[] | undefined, Schedule[]>({
+    source: this.schedulesResource.value,
+    computation: (source) => source ?? [],
   });
 
   public layoutByDay = computed(() => {
     const schedules = this.localSchedules();
     return this.weekdays.reduce((acc, day) => {
-      const daySchedules = schedules.filter(
-        (schedule) => schedule.weekday === day.key
-      );
+      const daySchedules = schedules.filter((schedule) => schedule.weekday === day.key);
       acc[day.key] = this.buildDayLayout(daySchedules);
       return acc;
     }, {} as Record<WeekdayKey, ScheduleLayout[]>);
   });
-
-  constructor() {
-    effect(() => {
-      const schedules = this.schedulesResource.value();
-      if (schedules) {
-        this.localSchedules.set([...schedules]);
-      }
-    });
-  }
 
   public get gridTemplateColumns() {
     return `72px repeat(${this.weekdays.length}, minmax(160px, 1fr))`;
@@ -291,9 +259,7 @@ export default class GroupSchedule {
     if (!column) return;
     const columnRect = column.getBoundingClientRect();
     const entryRect = target.getBoundingClientRect();
-    const duration =
-      this.timeToMinutes(entry.schedule.endTime) -
-      this.timeToMinutes(entry.schedule.startTime);
+    const duration = this.timeToMinutes(entry.schedule.endTime) - this.timeToMinutes(entry.schedule.startTime);
     const dragOffset = event.clientY - entryRect.top;
 
     this.draggingId.set(entry.id);
@@ -303,6 +269,9 @@ export default class GroupSchedule {
       offsetY: dragOffset,
       dayKey: entry.schedule.weekday,
       columnRect,
+      originalWeekday: entry.schedule.weekday,
+      originalStartTime: entry.schedule.startTime,
+      originalEndTime: entry.schedule.endTime,
     };
 
     window.addEventListener('pointermove', this.onPointerMove);
@@ -315,29 +284,25 @@ export default class GroupSchedule {
     offsetY: number;
     dayKey: WeekdayKey;
     columnRect: DOMRect;
+    originalWeekday: WeekdayKey;
+    originalStartTime: string;
+    originalEndTime: string;
   } | null = null;
 
   private onPointerMove = (event: PointerEvent) => {
     if (!this.activeDrag) return;
-    const element = document.elementFromPoint(
-      event.clientX,
-      event.clientY
-    ) as HTMLElement | null;
+    const element = document.elementFromPoint(event.clientX, event.clientY) as HTMLElement | null;
     const dayColumn = element?.closest?.('.schedule-day-column') as HTMLElement | null;
-    const dayKey =
-      (dayColumn?.dataset?.['day'] as WeekdayKey | undefined) ??
-      this.activeDrag.dayKey;
+    const dayKey = (dayColumn?.dataset?.['day'] as WeekdayKey | undefined) ?? this.activeDrag.dayKey;
     const columnRect = dayColumn?.getBoundingClientRect() ?? this.activeDrag.columnRect;
 
     const rawMinutes =
-      ((event.clientY - columnRect.top - this.activeDrag.offsetY) /
-        this.slotHeight) *
-      this.slotMinutes;
+      ((event.clientY - columnRect.top - this.activeDrag.offsetY) / this.slotHeight) * this.slotMinutes;
     const snappedMinutes = this.snapMinutes(rawMinutes);
     const startMinutes = this.clampMinutes(
       this.startHour * 60 + snappedMinutes,
       this.startHour * 60,
-      this.endHour * 60 - this.activeDrag.duration
+      this.endHour * 60 - this.activeDrag.duration,
     );
     const endMinutes = startMinutes + this.activeDrag.duration;
     this.updateSchedule(this.activeDrag.id, dayKey, startMinutes, endMinutes);
@@ -346,16 +311,58 @@ export default class GroupSchedule {
   private onPointerUp = () => {
     window.removeEventListener('pointermove', this.onPointerMove);
     window.removeEventListener('pointerup', this.onPointerUp);
+
+    if (this.activeDrag) {
+      const draggedId = this.activeDrag.id;
+      const updatedSchedule = this.localSchedules().find((s) => s.id === draggedId);
+
+      if (updatedSchedule) {
+        const hasChanged =
+          updatedSchedule.weekday !== this.activeDrag.originalWeekday ||
+          updatedSchedule.startTime !== this.activeDrag.originalStartTime ||
+          updatedSchedule.endTime !== this.activeDrag.originalEndTime;
+
+        if (hasChanged) {
+          this.persistScheduleChange(updatedSchedule);
+        }
+      }
+    }
+
     this.activeDrag = null;
     this.draggingId.set(null);
   };
 
-  private updateSchedule(
-    id: string,
-    weekday: WeekdayKey,
-    startMinutes: number,
-    endMinutes: number
-  ) {
+  private persistScheduleChange(schedule: Schedule) {
+    this.#apollo
+      .mutate({
+        mutation: gql`
+          mutation UpdateGroupsSchedule($updateGroupsScheduleInput: UpdateGroupsScheduleInput!) {
+            updateGroupsSchedule(updateGroupsScheduleInput: $updateGroupsScheduleInput) {
+              id
+            }
+          }
+        `,
+        variables: {
+          updateGroupsScheduleInput: {
+            id: schedule.id,
+            weekday: schedule.weekday,
+            startTime: schedule.startTime,
+            endTime: schedule.endTime,
+          },
+        },
+      })
+      .subscribe({
+        next: () => {
+          this.#toast.showSuccess('Horario actualizado');
+        },
+        error: (error) => {
+          this.#toast.showError(error.message);
+          this.schedulesResource.reload();
+        },
+      });
+  }
+
+  private updateSchedule(id: string, weekday: WeekdayKey, startMinutes: number, endMinutes: number) {
     this.localSchedules.update((schedules) =>
       schedules.map((schedule) =>
         schedule.id === id
@@ -365,8 +372,8 @@ export default class GroupSchedule {
               startTime: this.minutesToTime(startMinutes),
               endTime: this.minutesToTime(endMinutes),
             }
-          : schedule
-      )
+          : schedule,
+      ),
     );
   }
 
@@ -386,8 +393,8 @@ export default class GroupSchedule {
       .filter((item) => item.end > item.start)
       .sort((a, b) => a.start - b.start);
 
-    const groups: Array<Array<typeof prepared[number]>> = [];
-    let currentGroup: Array<typeof prepared[number]> = [];
+    const groups: Array<Array<(typeof prepared)[number]>> = [];
+    let currentGroup: Array<(typeof prepared)[number]> = [];
     let currentEnd = -Infinity;
 
     for (const item of prepared) {
@@ -420,10 +427,8 @@ export default class GroupSchedule {
       const laneWidth = 100 / laneCount;
 
       for (const { item, laneIndex } of itemsWithLane) {
-        const top =
-          ((item.start - dayStart) / this.slotMinutes) * this.slotHeight;
-        const height =
-          ((item.end - item.start) / this.slotMinutes) * this.slotHeight;
+        const top = ((item.start - dayStart) / this.slotMinutes) * this.slotHeight;
+        const height = ((item.end - item.start) / this.slotMinutes) * this.slotHeight;
         layouts.push({
           id: item.schedule.id,
           top,
@@ -456,10 +461,7 @@ export default class GroupSchedule {
     return Math.min(Math.max(value, min), max);
   }
 
-  public editSchedule(
-    schedule?: Prisma.ClassGroupWeeklyScheduleGetPayload<undefined>,
-    weekday?: string
-  ) {
+  public editSchedule(schedule?: Prisma.ClassGroupWeeklyScheduleGetPayload<undefined>, weekday?: string) {
     const modalRef = this.#modal.open(GroupScheduleForm, {
       title: schedule ? 'Editar clase' : 'Agregar clase',
       data: {

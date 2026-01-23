@@ -576,7 +576,7 @@ input CreateTeacherInput {
   address: String = ""
 
   """Birth date of the teacher"""
-  birthDate: DateTime = "2026-01-23T15:10:51.303Z"
+  birthDate: DateTime = "2026-01-23T16:49:05.819Z"
 
   """Document ID of the teacher"""
   documentId: String!
@@ -1054,6 +1054,7 @@ type Mutation {
   removeTeacher(id: String!): Teacher!
   removeUser(id: String!): User!
   shareFile(shareFileInput: ShareFileInput!): File!
+  signUp(input: SignUpInput!): AuthPayload!
   updateAssignment(updateAssignmentInput: UpdateAssignmentInput!): Assignment!
   updateClassGroup(updateClassGroupInput: UpdateClassGroupInput!): ClassGroup!
   updateCourse(updateCourseInput: UpdateCourseInput!): Course!
@@ -1718,6 +1719,26 @@ input ShareFileInput {
   targetType: String!
 }
 
+input SignUpInput {
+  """Email of the user"""
+  email: String!
+
+  """First name of the user"""
+  firstName: String!
+
+  """Last name of the user"""
+  lastName: String!
+
+  """Password of the user"""
+  password: String!
+
+  """Name of the school"""
+  schoolName: String!
+
+  """Short name of the school"""
+  schoolShortName: String!
+}
+
 type Student {
   """Address of the student"""
   address: String!
@@ -2344,7 +2365,7 @@ input UpdateTeacherInput {
   address: String = ""
 
   """Birth date of the teacher"""
-  birthDate: DateTime = "2026-01-23T15:10:51.303Z"
+  birthDate: DateTime = "2026-01-23T16:49:05.819Z"
 
   """Document ID of the teacher"""
   documentId: String

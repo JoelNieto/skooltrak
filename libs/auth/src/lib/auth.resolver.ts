@@ -4,6 +4,7 @@ import { AuthService } from './auth.service';
 
 import { UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from './auth.guard';
+import { SignUpInput } from './dto/sign-up.input';
 import { User } from './users/entities/user.entity';
 
 @Resolver()
@@ -16,6 +17,11 @@ export class AuthResolver {
     @Args('password') password: string
   ) {
     return this.authService.login(email, password);
+  }
+
+  @Mutation(() => AuthPayload)
+  async signUp(@Args('input') input: SignUpInput) {
+    return this.authService.signUp(input);
   }
 
   @UseGuards(JwtAuthGuard)

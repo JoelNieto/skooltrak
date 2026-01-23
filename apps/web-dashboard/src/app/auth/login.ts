@@ -10,6 +10,7 @@ import {
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 
 import { Loader, markGroupDirty } from '@/ui';
 
@@ -17,7 +18,7 @@ import Auth from './auth';
 
 @Component({
   selector: 'app-login',
-  imports: [ReactiveFormsModule, Loader],
+  imports: [ReactiveFormsModule, Loader, RouterLink],
 
   template: ` <div
     class="gradient-bg min-h-screen flex items-center justify-center p-4"
@@ -109,6 +110,13 @@ import Auth from './auth';
               Iniciar Sesión
             </button>
           </form>
+
+          <div class="divider">o</div>
+
+          <p class="text-center text-sm">
+            ¿No tienes cuenta?
+            <a routerLink="/register" class="link link-primary">Regístrate aquí</a>
+          </p>
         </div>
       </div>
       <p class="text-base-200 text-center">

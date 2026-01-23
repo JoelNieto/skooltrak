@@ -1,14 +1,6 @@
 import { Toast } from '@/ui';
 import { isPlatformBrowser } from '@angular/common';
-import {
-  Injectable,
-  PLATFORM_ID,
-  computed,
-  effect,
-  inject,
-  linkedSignal,
-  signal,
-} from '@angular/core';
+import { Injectable, PLATFORM_ID, computed, effect, inject, linkedSignal, signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
 import { JwtHelperService } from '@auth0/angular-jwt';
@@ -100,31 +92,22 @@ export default class Auth {
             this.#toasts.showError(err.message);
             this.isSigning.set(false);
             return of(null);
-          })
+          }),
         );
     },
   });
 
   public user = computed(() => this.userResource.value());
-  public decodedToken = computed<DecodedToken | null>(() =>
-    this.jwtHelper.decodeToken(this.token() || '')
-  );
+  public decodedToken = computed<DecodedToken | null>(() => this.jwtHelper.decodeToken(this.token() || ''));
   public isUserLoading = computed(() => this.userResource.isLoading());
 
   public userColor = computed(() => this.user()?.color);
   public role = computed(() => this.decodedToken()?.role);
-  public permissions = computed<string[]>(
-    () => this.decodedToken()?.permissions || []
-  );
+  public permissions = computed<string[]>(() => this.decodedToken()?.permissions || []);
 
-  public userName = computed(
-    () => `${this.user()?.firstName} ${this.user()?.lastName}`
-  );
+  public userName = computed(() => `${this.user()?.firstName} ${this.user()?.lastName}`);
   public userInitials = computed(
-    () =>
-      `${this.user()?.firstName.charAt(0).toUpperCase()}${this.user()
-        ?.lastName.charAt(0)
-        .toUpperCase()}`
+    () => `${this.user()?.firstName.charAt(0).toUpperCase()}${this.user()?.lastName.charAt(0).toUpperCase()}`,
   );
 
   public getAccessToken() {
@@ -134,12 +117,10 @@ export default class Auth {
     return null;
   }
 
-  public isAdmin = computed(() => this.decodedToken()?.role === 'ADMIN');
+  public isAdmin = computed(() => this.decodedToken()?.role === 'ADMIN' || this.decodedToken()?.role === 'ORG_ADMIN');
   public isTeacher = computed(() => this.decodedToken()?.role === 'TEACHER');
   public isStudent = computed(() => this.decodedToken()?.role === 'STUDENT');
-  public isAuthenticated = computed(
-    () => !this.jwtHelper.isTokenExpired(this.token() || '')
-  );
+  public isAuthenticated = computed(() => !this.jwtHelper.isTokenExpired(this.token() || ''));
 
   constructor() {
     // Mark as initialized immediately in browser

@@ -13,6 +13,11 @@ export const appRoutes: Route[] = [
     title: 'Inicio de sesión | Skooltrak',
   },
   {
+    path: 'register',
+    loadComponent: () => import('./auth/register'),
+    title: 'Registro | Skooltrak',
+  },
+  {
     path: '',
     canActivate: [authGuard],
     canActivateChild: [authGuard],

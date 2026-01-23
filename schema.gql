@@ -250,6 +250,36 @@ input CreateDegreeInput {
   shortName: String!
 }
 
+input CreateFileDownloadInput {
+  """File ID to download"""
+  fileId: String!
+}
+
+input CreateFileInput {
+  """MIME type of the file"""
+  mimeType: String!
+
+  """Name of the file"""
+  name: String!
+
+  """Size of the file in bytes"""
+  size: Int!
+
+  """Storage key for the file"""
+  storageKey: String!
+}
+
+input CreateFileUploadInput {
+  """Course ID for the upload"""
+  courseId: String!
+
+  """Original file name"""
+  fileName: String!
+
+  """MIME type of the file"""
+  mimeType: String!
+}
+
 input CreateGradeBucketInput {
   """Id del curso"""
   courseId: String!
@@ -546,7 +576,7 @@ input CreateTeacherInput {
   address: String = ""
 
   """Birth date of the teacher"""
-  birthDate: DateTime = "2026-01-17T09:54:45.244Z"
+  birthDate: DateTime = "2026-01-20T23:23:59.614Z"
 
   """Document ID of the teacher"""
   documentId: String!
@@ -624,6 +654,161 @@ type Degree {
 
   """Updated at of the degree"""
   updatedAt: DateTime!
+}
+
+type File {
+  """Effective access for the current user"""
+  access: String
+
+  """Created at"""
+  createdAt: DateTime!
+
+  """Deleted at"""
+  deletedAt: DateTime
+
+  """ID of the file"""
+  id: String!
+
+  """MIME type of the file"""
+  mimeType: String!
+
+  """Name of the file"""
+  name: String!
+
+  """Organization ID of the file"""
+  organizationId: String!
+
+  """Owner of the file"""
+  owner: User!
+
+  """Owner ID of the file"""
+  ownerId: String!
+
+  """Class group shares for the file"""
+  sharesClassGroups: [FileShareClassGroup!]!
+
+  """Course shares for the file"""
+  sharesCourses: [FileShareCourse!]!
+
+  """School shares for the file"""
+  sharesSchools: [FileShareSchool!]!
+
+  """User shares for the file"""
+  sharesUsers: [FileShareUser!]!
+
+  """Size of the file in bytes"""
+  size: Int!
+
+  """Storage key for the file"""
+  storageKey: String!
+
+  """Updated at"""
+  updatedAt: DateTime!
+}
+
+type FileDownloadUrl {
+  """Presigned download URL"""
+  downloadUrl: String!
+}
+
+type FileShareClassGroup {
+  """Class group for the share"""
+  classGroup: ClassGroup!
+
+  """Class group ID of the share"""
+  classGroupId: String!
+
+  """Created at"""
+  createdAt: DateTime!
+
+  """File ID of the share"""
+  fileId: String!
+
+  """ID of the file share"""
+  id: String!
+
+  """Permission for the share"""
+  permission: String!
+
+  """Updated at"""
+  updatedAt: DateTime!
+}
+
+type FileShareCourse {
+  """Course for the share"""
+  course: Course!
+
+  """Course ID of the share"""
+  courseId: String!
+
+  """Created at"""
+  createdAt: DateTime!
+
+  """File ID of the share"""
+  fileId: String!
+
+  """ID of the file share"""
+  id: String!
+
+  """Permission for the share"""
+  permission: String!
+
+  """Updated at"""
+  updatedAt: DateTime!
+}
+
+type FileShareSchool {
+  """Created at"""
+  createdAt: DateTime!
+
+  """File ID of the share"""
+  fileId: String!
+
+  """ID of the file share"""
+  id: String!
+
+  """Permission for the share"""
+  permission: String!
+
+  """School for the share"""
+  school: School!
+
+  """School ID of the share"""
+  schoolId: String!
+
+  """Updated at"""
+  updatedAt: DateTime!
+}
+
+type FileShareUser {
+  """Created at"""
+  createdAt: DateTime!
+
+  """File ID of the share"""
+  fileId: String!
+
+  """ID of the file share"""
+  id: String!
+
+  """Permission for the share"""
+  permission: String!
+
+  """Updated at"""
+  updatedAt: DateTime!
+
+  """User for the share"""
+  user: User!
+
+  """User ID of the share"""
+  userId: String!
+}
+
+type FileUploadUrl {
+  """Storage key for the file"""
+  storageKey: String!
+
+  """Presigned upload URL"""
+  uploadUrl: String!
 }
 
 type Grade {
@@ -826,6 +1011,9 @@ type Mutation {
   createClassGroup(createClassGroupInput: CreateClassGroupInput!): ClassGroup!
   createCourse(createCourseInput: CreateCourseInput!): Course!
   createDegree(createDegreeInput: CreateDegreeInput!): Degree!
+  createFile(createFileInput: CreateFileInput!): File!
+  createFileDownloadUrl(createFileDownloadInput: CreateFileDownloadInput!): FileDownloadUrl!
+  createFileUploadUrl(createFileUploadInput: CreateFileUploadInput!): FileUploadUrl!
   createGrade(createGradeInput: CreateGradeInput!): Grade!
   createGradeBucket(createGradeBucketInput: CreateGradeBucketInput!): GradeBucket!
   createGroupsSchedule(createGroupsScheduleInput: CreateGroupsScheduleInput!): GroupsSchedule!
@@ -858,12 +1046,14 @@ type Mutation {
   removeQuiz(id: String!): Quiz!
   removeRole(id: String!): Role!
   removeSchool(id: String!): School!
+  removeShare(removeShareInput: RemoveShareInput!): File!
   removeStudent(id: String!): Student!
   removeStudentGrade(id: String!): StudentGrade!
   removeStudyPlan(id: String!): StudyPlan!
   removeSubject(id: String!): Subject!
   removeTeacher(id: String!): Teacher!
   removeUser(id: String!): User!
+  shareFile(shareFileInput: ShareFileInput!): File!
   updateAssignment(updateAssignmentInput: UpdateAssignmentInput!): Assignment!
   updateClassGroup(updateClassGroupInput: UpdateClassGroupInput!): ClassGroup!
   updateCourse(updateCourseInput: UpdateCourseInput!): Course!
@@ -877,6 +1067,7 @@ type Mutation {
   updateQuiz(updateQuizInput: UpdateQuizInput!): Quiz!
   updateRole(updateRoleInput: UpdateRoleInput!): Role!
   updateSchool(updateSchoolInput: UpdateSchoolInput!): School!
+  updateShare(updateShareInput: UpdateShareInput!): File!
   updateStudent(updateStudentInput: UpdateStudentInput!): Student!
   updateStudentGrade(updateStudentGradeInput: UpdateStudentGradeInput!): StudentGrade!
   updateStudyPlan(updateStudyPlanInput: UpdateStudyPlanInput!): StudyPlan!
@@ -1000,6 +1191,90 @@ type Query {
   degree(id: String!): Degree!
   degrees: [Degree!]!
   degreesBySchoolId(schoolId: String!): [Degree!]!
+  fileById(id: String!): File!
+  filesAccessible(
+    """Order by"""
+    orderBy: String = "name"
+
+    """Order direction"""
+    orderDirection: String = "asc"
+
+    """School ID"""
+    schoolId: String
+
+    """Search query"""
+    search: String = ""
+
+    """Skip"""
+    skip: Int
+    studyPlanId: String
+
+    """Take"""
+    take: Int
+  ): [File!]!
+  filesForCourse(
+    """Course ID"""
+    courseId: String!
+
+    """Order by"""
+    orderBy: String = "name"
+
+    """Order direction"""
+    orderDirection: String = "asc"
+
+    """School ID"""
+    schoolId: String
+
+    """Search query"""
+    search: String = ""
+
+    """Skip"""
+    skip: Int
+    studyPlanId: String
+
+    """Take"""
+    take: Int
+  ): [File!]!
+  filesOwned(
+    """Order by"""
+    orderBy: String = "name"
+
+    """Order direction"""
+    orderDirection: String = "asc"
+
+    """School ID"""
+    schoolId: String
+
+    """Search query"""
+    search: String = ""
+
+    """Skip"""
+    skip: Int
+    studyPlanId: String
+
+    """Take"""
+    take: Int
+  ): [File!]!
+  filesSharedWithMe(
+    """Order by"""
+    orderBy: String = "name"
+
+    """Order direction"""
+    orderDirection: String = "asc"
+
+    """School ID"""
+    schoolId: String
+
+    """Search query"""
+    search: String = ""
+
+    """Skip"""
+    skip: Int
+    studyPlanId: String
+
+    """Take"""
+    take: Int
+  ): [File!]!
   findContacts(queryText: String = ""): [User!]!
   findManyMessages(
     """Order by"""
@@ -1354,6 +1629,17 @@ type QuizQuestionOption {
   questionId: String!
 }
 
+input RemoveShareInput {
+  """File ID for the share"""
+  fileId: String!
+
+  """Target ID for the share"""
+  targetId: String!
+
+  """Target type for the share"""
+  targetType: String!
+}
+
 type Role {
   createdAt: DateTime!
   description: String!
@@ -1416,6 +1702,20 @@ type School {
 
   """Zip code of the school"""
   zip: String!
+}
+
+input ShareFileInput {
+  """File ID to share"""
+  fileId: String!
+
+  """Permission for the share"""
+  permission: String!
+
+  """Target ID for the share"""
+  targetId: String!
+
+  """Target type for the share"""
+  targetType: String!
 }
 
 type Student {
@@ -1929,6 +2229,20 @@ input UpdateSchoolInput {
   zip: String = ""
 }
 
+input UpdateShareInput {
+  """File ID for the share"""
+  fileId: String!
+
+  """Updated permission for the share"""
+  permission: String!
+
+  """Target ID for the share"""
+  targetId: String!
+
+  """Target type for the share"""
+  targetType: String!
+}
+
 input UpdateStudentGradeInput {
   """Comments for the student grade"""
   comments: String
@@ -2030,7 +2344,7 @@ input UpdateTeacherInput {
   address: String = ""
 
   """Birth date of the teacher"""
-  birthDate: DateTime = "2026-01-17T09:54:45.244Z"
+  birthDate: DateTime = "2026-01-20T23:23:59.614Z"
 
   """Document ID of the teacher"""
   documentId: String

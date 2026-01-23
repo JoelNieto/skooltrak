@@ -10,6 +10,7 @@ import AssignmentForm from '../assignments/assignment-form';
 import Auth from '../auth/auth';
 import CourseGrades from '../grades/course-grades';
 import CourseAssignments from './course-assignments';
+import CourseFiles from './course-files';
 import CourseGradeBuckets from './course-grade-buckets';
 import CourseStudentGrades from './course-student-grades';
 type Teacher = Prisma.TeacherGetPayload<{ include: { user: true } }> & {
@@ -33,6 +34,7 @@ type CourseType = Prisma.CourseGetPayload<{
     Loader,
     RouterLink,
     CourseAssignments,
+    CourseFiles,
     CourseGradeBuckets,
     CourseGrades,
     CourseStudentGrades,
@@ -153,7 +155,7 @@ type CourseType = Prisma.CourseGetPayload<{
         </label>
 
         <div class="tab-content bg-base-100 border-base-300 p-6">
-          Tab content 4
+          <app-course-files [courseId]="id()" />
         </div>
         <label class="tab">
           <input type="radio" name="my_tabs_6" aria-label="Ponderacion" />

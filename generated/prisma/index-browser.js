@@ -165,6 +165,55 @@ exports.Prisma.MessageRecipientScalarFieldEnum = {
   deletedAt: 'deletedAt'
 };
 
+exports.Prisma.FileScalarFieldEnum = {
+  id: 'id',
+  organizationId: 'organizationId',
+  ownerId: 'ownerId',
+  name: 'name',
+  mimeType: 'mimeType',
+  size: 'size',
+  storageKey: 'storageKey',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  deletedAt: 'deletedAt'
+};
+
+exports.Prisma.FileShareUserScalarFieldEnum = {
+  id: 'id',
+  fileId: 'fileId',
+  userId: 'userId',
+  permission: 'permission',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.FileShareSchoolScalarFieldEnum = {
+  id: 'id',
+  fileId: 'fileId',
+  schoolId: 'schoolId',
+  permission: 'permission',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.FileShareClassGroupScalarFieldEnum = {
+  id: 'id',
+  fileId: 'fileId',
+  classGroupId: 'classGroupId',
+  permission: 'permission',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.FileShareCourseScalarFieldEnum = {
+  id: 'id',
+  fileId: 'fileId',
+  courseId: 'courseId',
+  permission: 'permission',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
 exports.Prisma.RoleScalarFieldEnum = {
   id: 'id',
   name: 'name',
@@ -474,6 +523,11 @@ exports.Prisma.NullsOrder = {
   first: 'first',
   last: 'last'
 };
+exports.FilePermission = exports.$Enums.FilePermission = {
+  VIEW: 'VIEW',
+  EDIT: 'EDIT'
+};
+
 exports.Gender = exports.$Enums.Gender = {
   FEMALE: 'FEMALE',
   MALE: 'MALE'
@@ -511,6 +565,11 @@ exports.Prisma.ModelName = {
   User: 'User',
   Message: 'Message',
   MessageRecipient: 'MessageRecipient',
+  File: 'File',
+  FileShareUser: 'FileShareUser',
+  FileShareSchool: 'FileShareSchool',
+  FileShareClassGroup: 'FileShareClassGroup',
+  FileShareCourse: 'FileShareCourse',
   Role: 'Role',
   Permission: 'Permission',
   School: 'School',

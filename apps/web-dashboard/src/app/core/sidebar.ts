@@ -43,6 +43,20 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
         </li>
         <li>
           <a
+            routerLink="files"
+            [routerLinkActive]="[
+              'bg-primary/5',
+              'text-primary',
+              'dark:text-white'
+            ]"
+            class="flex items-center p-2 text-base-content rounded-lg hover:bg-primary-50 hover:text-primary-600 group"
+          >
+            <span class="material-symbols-outlined text-xl">folder_special</span>
+            <span class="ml-3">Archivos</span>
+          </a>
+        </li>
+        <li>
+          <a
             routerLink="assignments"
             [routerLinkActive]="[
               'bg-primary/5',

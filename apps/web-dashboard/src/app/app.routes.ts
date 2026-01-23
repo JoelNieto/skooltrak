@@ -80,6 +80,10 @@ export const appRoutes: Route[] = [
         loadComponent: () => import('./messages/message'),
       },
       {
+        path: 'files',
+        loadComponent: () => import('./files/files'),
+      },
+      {
         path: 'student/schedule',
         loadComponent: () => import('./student/student-schedule'),
       },

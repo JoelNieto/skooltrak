@@ -34,6 +34,31 @@ export type Message = $Result.DefaultSelection<Prisma.$MessagePayload>
  */
 export type MessageRecipient = $Result.DefaultSelection<Prisma.$MessageRecipientPayload>
 /**
+ * Model File
+ * 
+ */
+export type File = $Result.DefaultSelection<Prisma.$FilePayload>
+/**
+ * Model FileShareUser
+ * 
+ */
+export type FileShareUser = $Result.DefaultSelection<Prisma.$FileShareUserPayload>
+/**
+ * Model FileShareSchool
+ * 
+ */
+export type FileShareSchool = $Result.DefaultSelection<Prisma.$FileShareSchoolPayload>
+/**
+ * Model FileShareClassGroup
+ * 
+ */
+export type FileShareClassGroup = $Result.DefaultSelection<Prisma.$FileShareClassGroupPayload>
+/**
+ * Model FileShareCourse
+ * 
+ */
+export type FileShareCourse = $Result.DefaultSelection<Prisma.$FileShareCoursePayload>
+/**
  * Model Role
  * 
  */
@@ -206,6 +231,14 @@ export const WeekDay: {
 
 export type WeekDay = (typeof WeekDay)[keyof typeof WeekDay]
 
+
+export const FilePermission: {
+  VIEW: 'VIEW',
+  EDIT: 'EDIT'
+};
+
+export type FilePermission = (typeof FilePermission)[keyof typeof FilePermission]
+
 }
 
 export type Gender = $Enums.Gender
@@ -223,6 +256,10 @@ export const QuizQuestionType: typeof $Enums.QuizQuestionType
 export type WeekDay = $Enums.WeekDay
 
 export const WeekDay: typeof $Enums.WeekDay
+
+export type FilePermission = $Enums.FilePermission
+
+export const FilePermission: typeof $Enums.FilePermission
 
 /**
  * ##  Prisma Client ʲˢ
@@ -380,6 +417,56 @@ export class PrismaClient<
     * ```
     */
   get messageRecipient(): Prisma.MessageRecipientDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.file`: Exposes CRUD operations for the **File** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more Files
+    * const files = await prisma.file.findMany()
+    * ```
+    */
+  get file(): Prisma.FileDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.fileShareUser`: Exposes CRUD operations for the **FileShareUser** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more FileShareUsers
+    * const fileShareUsers = await prisma.fileShareUser.findMany()
+    * ```
+    */
+  get fileShareUser(): Prisma.FileShareUserDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.fileShareSchool`: Exposes CRUD operations for the **FileShareSchool** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more FileShareSchools
+    * const fileShareSchools = await prisma.fileShareSchool.findMany()
+    * ```
+    */
+  get fileShareSchool(): Prisma.FileShareSchoolDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.fileShareClassGroup`: Exposes CRUD operations for the **FileShareClassGroup** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more FileShareClassGroups
+    * const fileShareClassGroups = await prisma.fileShareClassGroup.findMany()
+    * ```
+    */
+  get fileShareClassGroup(): Prisma.FileShareClassGroupDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.fileShareCourse`: Exposes CRUD operations for the **FileShareCourse** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more FileShareCourses
+    * const fileShareCourses = await prisma.fileShareCourse.findMany()
+    * ```
+    */
+  get fileShareCourse(): Prisma.FileShareCourseDelegate<ExtArgs, ClientOptions>;
 
   /**
    * `prisma.role`: Exposes CRUD operations for the **Role** model.
@@ -1068,6 +1155,11 @@ export namespace Prisma {
     User: 'User',
     Message: 'Message',
     MessageRecipient: 'MessageRecipient',
+    File: 'File',
+    FileShareUser: 'FileShareUser',
+    FileShareSchool: 'FileShareSchool',
+    FileShareClassGroup: 'FileShareClassGroup',
+    FileShareCourse: 'FileShareCourse',
     Role: 'Role',
     Permission: 'Permission',
     School: 'School',
@@ -1108,7 +1200,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "organization" | "user" | "message" | "messageRecipient" | "role" | "permission" | "school" | "period" | "subject" | "degree" | "studyPlan" | "course" | "classGroup" | "student" | "teacher" | "assignment" | "assignmentDate" | "quiz" | "quizQuestion" | "quizQuestionOption" | "quizSchedule" | "classGroupWeeklySchedule" | "quizSubmission" | "quizSubmissionQuestion" | "gradeMetric" | "gradeBucket" | "grade" | "studentGrade" | "studentGradeRevision"
+      modelProps: "organization" | "user" | "message" | "messageRecipient" | "file" | "fileShareUser" | "fileShareSchool" | "fileShareClassGroup" | "fileShareCourse" | "role" | "permission" | "school" | "period" | "subject" | "degree" | "studyPlan" | "course" | "classGroup" | "student" | "teacher" | "assignment" | "assignmentDate" | "quiz" | "quizQuestion" | "quizQuestionOption" | "quizSchedule" | "classGroupWeeklySchedule" | "quizSubmission" | "quizSubmissionQuestion" | "gradeMetric" | "gradeBucket" | "grade" | "studentGrade" | "studentGradeRevision"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -1405,6 +1497,376 @@ export namespace Prisma {
           count: {
             args: Prisma.MessageRecipientCountArgs<ExtArgs>
             result: $Utils.Optional<MessageRecipientCountAggregateOutputType> | number
+          }
+        }
+      }
+      File: {
+        payload: Prisma.$FilePayload<ExtArgs>
+        fields: Prisma.FileFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.FileFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FilePayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.FileFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FilePayload>
+          }
+          findFirst: {
+            args: Prisma.FileFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FilePayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.FileFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FilePayload>
+          }
+          findMany: {
+            args: Prisma.FileFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FilePayload>[]
+          }
+          create: {
+            args: Prisma.FileCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FilePayload>
+          }
+          createMany: {
+            args: Prisma.FileCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.FileCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FilePayload>[]
+          }
+          delete: {
+            args: Prisma.FileDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FilePayload>
+          }
+          update: {
+            args: Prisma.FileUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FilePayload>
+          }
+          deleteMany: {
+            args: Prisma.FileDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.FileUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.FileUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FilePayload>[]
+          }
+          upsert: {
+            args: Prisma.FileUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FilePayload>
+          }
+          aggregate: {
+            args: Prisma.FileAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateFile>
+          }
+          groupBy: {
+            args: Prisma.FileGroupByArgs<ExtArgs>
+            result: $Utils.Optional<FileGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.FileCountArgs<ExtArgs>
+            result: $Utils.Optional<FileCountAggregateOutputType> | number
+          }
+        }
+      }
+      FileShareUser: {
+        payload: Prisma.$FileShareUserPayload<ExtArgs>
+        fields: Prisma.FileShareUserFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.FileShareUserFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FileShareUserPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.FileShareUserFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FileShareUserPayload>
+          }
+          findFirst: {
+            args: Prisma.FileShareUserFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FileShareUserPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.FileShareUserFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FileShareUserPayload>
+          }
+          findMany: {
+            args: Prisma.FileShareUserFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FileShareUserPayload>[]
+          }
+          create: {
+            args: Prisma.FileShareUserCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FileShareUserPayload>
+          }
+          createMany: {
+            args: Prisma.FileShareUserCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.FileShareUserCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FileShareUserPayload>[]
+          }
+          delete: {
+            args: Prisma.FileShareUserDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FileShareUserPayload>
+          }
+          update: {
+            args: Prisma.FileShareUserUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FileShareUserPayload>
+          }
+          deleteMany: {
+            args: Prisma.FileShareUserDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.FileShareUserUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.FileShareUserUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FileShareUserPayload>[]
+          }
+          upsert: {
+            args: Prisma.FileShareUserUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FileShareUserPayload>
+          }
+          aggregate: {
+            args: Prisma.FileShareUserAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateFileShareUser>
+          }
+          groupBy: {
+            args: Prisma.FileShareUserGroupByArgs<ExtArgs>
+            result: $Utils.Optional<FileShareUserGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.FileShareUserCountArgs<ExtArgs>
+            result: $Utils.Optional<FileShareUserCountAggregateOutputType> | number
+          }
+        }
+      }
+      FileShareSchool: {
+        payload: Prisma.$FileShareSchoolPayload<ExtArgs>
+        fields: Prisma.FileShareSchoolFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.FileShareSchoolFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FileShareSchoolPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.FileShareSchoolFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FileShareSchoolPayload>
+          }
+          findFirst: {
+            args: Prisma.FileShareSchoolFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FileShareSchoolPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.FileShareSchoolFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FileShareSchoolPayload>
+          }
+          findMany: {
+            args: Prisma.FileShareSchoolFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FileShareSchoolPayload>[]
+          }
+          create: {
+            args: Prisma.FileShareSchoolCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FileShareSchoolPayload>
+          }
+          createMany: {
+            args: Prisma.FileShareSchoolCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.FileShareSchoolCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FileShareSchoolPayload>[]
+          }
+          delete: {
+            args: Prisma.FileShareSchoolDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FileShareSchoolPayload>
+          }
+          update: {
+            args: Prisma.FileShareSchoolUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FileShareSchoolPayload>
+          }
+          deleteMany: {
+            args: Prisma.FileShareSchoolDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.FileShareSchoolUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.FileShareSchoolUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FileShareSchoolPayload>[]
+          }
+          upsert: {
+            args: Prisma.FileShareSchoolUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FileShareSchoolPayload>
+          }
+          aggregate: {
+            args: Prisma.FileShareSchoolAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateFileShareSchool>
+          }
+          groupBy: {
+            args: Prisma.FileShareSchoolGroupByArgs<ExtArgs>
+            result: $Utils.Optional<FileShareSchoolGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.FileShareSchoolCountArgs<ExtArgs>
+            result: $Utils.Optional<FileShareSchoolCountAggregateOutputType> | number
+          }
+        }
+      }
+      FileShareClassGroup: {
+        payload: Prisma.$FileShareClassGroupPayload<ExtArgs>
+        fields: Prisma.FileShareClassGroupFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.FileShareClassGroupFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FileShareClassGroupPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.FileShareClassGroupFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FileShareClassGroupPayload>
+          }
+          findFirst: {
+            args: Prisma.FileShareClassGroupFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FileShareClassGroupPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.FileShareClassGroupFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FileShareClassGroupPayload>
+          }
+          findMany: {
+            args: Prisma.FileShareClassGroupFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FileShareClassGroupPayload>[]
+          }
+          create: {
+            args: Prisma.FileShareClassGroupCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FileShareClassGroupPayload>
+          }
+          createMany: {
+            args: Prisma.FileShareClassGroupCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.FileShareClassGroupCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FileShareClassGroupPayload>[]
+          }
+          delete: {
+            args: Prisma.FileShareClassGroupDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FileShareClassGroupPayload>
+          }
+          update: {
+            args: Prisma.FileShareClassGroupUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FileShareClassGroupPayload>
+          }
+          deleteMany: {
+            args: Prisma.FileShareClassGroupDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.FileShareClassGroupUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.FileShareClassGroupUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FileShareClassGroupPayload>[]
+          }
+          upsert: {
+            args: Prisma.FileShareClassGroupUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FileShareClassGroupPayload>
+          }
+          aggregate: {
+            args: Prisma.FileShareClassGroupAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateFileShareClassGroup>
+          }
+          groupBy: {
+            args: Prisma.FileShareClassGroupGroupByArgs<ExtArgs>
+            result: $Utils.Optional<FileShareClassGroupGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.FileShareClassGroupCountArgs<ExtArgs>
+            result: $Utils.Optional<FileShareClassGroupCountAggregateOutputType> | number
+          }
+        }
+      }
+      FileShareCourse: {
+        payload: Prisma.$FileShareCoursePayload<ExtArgs>
+        fields: Prisma.FileShareCourseFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.FileShareCourseFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FileShareCoursePayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.FileShareCourseFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FileShareCoursePayload>
+          }
+          findFirst: {
+            args: Prisma.FileShareCourseFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FileShareCoursePayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.FileShareCourseFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FileShareCoursePayload>
+          }
+          findMany: {
+            args: Prisma.FileShareCourseFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FileShareCoursePayload>[]
+          }
+          create: {
+            args: Prisma.FileShareCourseCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FileShareCoursePayload>
+          }
+          createMany: {
+            args: Prisma.FileShareCourseCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.FileShareCourseCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FileShareCoursePayload>[]
+          }
+          delete: {
+            args: Prisma.FileShareCourseDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FileShareCoursePayload>
+          }
+          update: {
+            args: Prisma.FileShareCourseUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FileShareCoursePayload>
+          }
+          deleteMany: {
+            args: Prisma.FileShareCourseDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.FileShareCourseUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.FileShareCourseUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FileShareCoursePayload>[]
+          }
+          upsert: {
+            args: Prisma.FileShareCourseUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FileShareCoursePayload>
+          }
+          aggregate: {
+            args: Prisma.FileShareCourseAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateFileShareCourse>
+          }
+          groupBy: {
+            args: Prisma.FileShareCourseGroupByArgs<ExtArgs>
+            result: $Utils.Optional<FileShareCourseGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.FileShareCourseCountArgs<ExtArgs>
+            result: $Utils.Optional<FileShareCourseCountAggregateOutputType> | number
           }
         }
       }
@@ -3370,6 +3832,11 @@ export namespace Prisma {
     user?: UserOmit
     message?: MessageOmit
     messageRecipient?: MessageRecipientOmit
+    file?: FileOmit
+    fileShareUser?: FileShareUserOmit
+    fileShareSchool?: FileShareSchoolOmit
+    fileShareClassGroup?: FileShareClassGroupOmit
+    fileShareCourse?: FileShareCourseOmit
     role?: RoleOmit
     permission?: PermissionOmit
     school?: SchoolOmit
@@ -3485,6 +3952,7 @@ export namespace Prisma {
     Student: number
     quizzes: number
     messages: number
+    files: number
   }
 
   export type OrganizationCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -3498,6 +3966,7 @@ export namespace Prisma {
     Student?: boolean | OrganizationCountOutputTypeCountStudentArgs
     quizzes?: boolean | OrganizationCountOutputTypeCountQuizzesArgs
     messages?: boolean | OrganizationCountOutputTypeCountMessagesArgs
+    files?: boolean | OrganizationCountOutputTypeCountFilesArgs
   }
 
   // Custom InputTypes
@@ -3581,6 +4050,13 @@ export namespace Prisma {
     where?: MessageWhereInput
   }
 
+  /**
+   * OrganizationCountOutputType without action
+   */
+  export type OrganizationCountOutputTypeCountFilesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: FileWhereInput
+  }
+
 
   /**
    * Count Type UserCountOutputType
@@ -3589,11 +4065,15 @@ export namespace Prisma {
   export type UserCountOutputType = {
     sentMessages: number
     messageRecipients: number
+    filesOwned: number
+    fileShares: number
   }
 
   export type UserCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     sentMessages?: boolean | UserCountOutputTypeCountSentMessagesArgs
     messageRecipients?: boolean | UserCountOutputTypeCountMessageRecipientsArgs
+    filesOwned?: boolean | UserCountOutputTypeCountFilesOwnedArgs
+    fileShares?: boolean | UserCountOutputTypeCountFileSharesArgs
   }
 
   // Custom InputTypes
@@ -3619,6 +4099,20 @@ export namespace Prisma {
    */
   export type UserCountOutputTypeCountMessageRecipientsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: MessageRecipientWhereInput
+  }
+
+  /**
+   * UserCountOutputType without action
+   */
+  export type UserCountOutputTypeCountFilesOwnedArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: FileWhereInput
+  }
+
+  /**
+   * UserCountOutputType without action
+   */
+  export type UserCountOutputTypeCountFileSharesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: FileShareUserWhereInput
   }
 
 
@@ -3650,6 +4144,64 @@ export namespace Prisma {
    */
   export type MessageCountOutputTypeCountRecipientsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: MessageRecipientWhereInput
+  }
+
+
+  /**
+   * Count Type FileCountOutputType
+   */
+
+  export type FileCountOutputType = {
+    sharesUsers: number
+    sharesSchools: number
+    sharesClassGroups: number
+    sharesCourses: number
+  }
+
+  export type FileCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    sharesUsers?: boolean | FileCountOutputTypeCountSharesUsersArgs
+    sharesSchools?: boolean | FileCountOutputTypeCountSharesSchoolsArgs
+    sharesClassGroups?: boolean | FileCountOutputTypeCountSharesClassGroupsArgs
+    sharesCourses?: boolean | FileCountOutputTypeCountSharesCoursesArgs
+  }
+
+  // Custom InputTypes
+  /**
+   * FileCountOutputType without action
+   */
+  export type FileCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FileCountOutputType
+     */
+    select?: FileCountOutputTypeSelect<ExtArgs> | null
+  }
+
+  /**
+   * FileCountOutputType without action
+   */
+  export type FileCountOutputTypeCountSharesUsersArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: FileShareUserWhereInput
+  }
+
+  /**
+   * FileCountOutputType without action
+   */
+  export type FileCountOutputTypeCountSharesSchoolsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: FileShareSchoolWhereInput
+  }
+
+  /**
+   * FileCountOutputType without action
+   */
+  export type FileCountOutputTypeCountSharesClassGroupsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: FileShareClassGroupWhereInput
+  }
+
+  /**
+   * FileCountOutputType without action
+   */
+  export type FileCountOutputTypeCountSharesCoursesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: FileShareCourseWhereInput
   }
 
 
@@ -3736,6 +4288,7 @@ export namespace Prisma {
     students: number
     assignments: number
     periods: number
+    fileShares: number
   }
 
   export type SchoolCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -3746,6 +4299,7 @@ export namespace Prisma {
     students?: boolean | SchoolCountOutputTypeCountStudentsArgs
     assignments?: boolean | SchoolCountOutputTypeCountAssignmentsArgs
     periods?: boolean | SchoolCountOutputTypeCountPeriodsArgs
+    fileShares?: boolean | SchoolCountOutputTypeCountFileSharesArgs
   }
 
   // Custom InputTypes
@@ -3806,6 +4360,13 @@ export namespace Prisma {
    */
   export type SchoolCountOutputTypeCountPeriodsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: PeriodWhereInput
+  }
+
+  /**
+   * SchoolCountOutputType without action
+   */
+  export type SchoolCountOutputTypeCountFileSharesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: FileShareSchoolWhereInput
   }
 
 
@@ -3972,6 +4533,7 @@ export namespace Prisma {
     gradeBuckets: number
     grades: number
     weeklySchedules: number
+    fileShares: number
   }
 
   export type CourseCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -3982,6 +4544,7 @@ export namespace Prisma {
     gradeBuckets?: boolean | CourseCountOutputTypeCountGradeBucketsArgs
     grades?: boolean | CourseCountOutputTypeCountGradesArgs
     weeklySchedules?: boolean | CourseCountOutputTypeCountWeeklySchedulesArgs
+    fileShares?: boolean | CourseCountOutputTypeCountFileSharesArgs
   }
 
   // Custom InputTypes
@@ -4044,6 +4607,13 @@ export namespace Prisma {
     where?: ClassGroupWeeklyScheduleWhereInput
   }
 
+  /**
+   * CourseCountOutputType without action
+   */
+  export type CourseCountOutputTypeCountFileSharesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: FileShareCourseWhereInput
+  }
+
 
   /**
    * Count Type ClassGroupCountOutputType
@@ -4056,6 +4626,7 @@ export namespace Prisma {
     quizSchedules: number
     quizSubmissions: number
     weeklySchedules: number
+    fileShares: number
   }
 
   export type ClassGroupCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -4065,6 +4636,7 @@ export namespace Prisma {
     quizSchedules?: boolean | ClassGroupCountOutputTypeCountQuizSchedulesArgs
     quizSubmissions?: boolean | ClassGroupCountOutputTypeCountQuizSubmissionsArgs
     weeklySchedules?: boolean | ClassGroupCountOutputTypeCountWeeklySchedulesArgs
+    fileShares?: boolean | ClassGroupCountOutputTypeCountFileSharesArgs
   }
 
   // Custom InputTypes
@@ -4118,6 +4690,13 @@ export namespace Prisma {
    */
   export type ClassGroupCountOutputTypeCountWeeklySchedulesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: ClassGroupWeeklyScheduleWhereInput
+  }
+
+  /**
+   * ClassGroupCountOutputType without action
+   */
+  export type ClassGroupCountOutputTypeCountFileSharesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: FileShareClassGroupWhereInput
   }
 
 
@@ -4760,6 +5339,7 @@ export namespace Prisma {
     Student?: boolean | Organization$StudentArgs<ExtArgs>
     quizzes?: boolean | Organization$quizzesArgs<ExtArgs>
     messages?: boolean | Organization$messagesArgs<ExtArgs>
+    files?: boolean | Organization$filesArgs<ExtArgs>
     _count?: boolean | OrganizationCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["organization"]>
 
@@ -4802,6 +5382,7 @@ export namespace Prisma {
     Student?: boolean | Organization$StudentArgs<ExtArgs>
     quizzes?: boolean | Organization$quizzesArgs<ExtArgs>
     messages?: boolean | Organization$messagesArgs<ExtArgs>
+    files?: boolean | Organization$filesArgs<ExtArgs>
     _count?: boolean | OrganizationCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type OrganizationIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
@@ -4820,6 +5401,7 @@ export namespace Prisma {
       Student: Prisma.$StudentPayload<ExtArgs>[]
       quizzes: Prisma.$QuizPayload<ExtArgs>[]
       messages: Prisma.$MessagePayload<ExtArgs>[]
+      files: Prisma.$FilePayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -5232,6 +5814,7 @@ export namespace Prisma {
     Student<T extends Organization$StudentArgs<ExtArgs> = {}>(args?: Subset<T, Organization$StudentArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$StudentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     quizzes<T extends Organization$quizzesArgs<ExtArgs> = {}>(args?: Subset<T, Organization$quizzesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$QuizPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     messages<T extends Organization$messagesArgs<ExtArgs> = {}>(args?: Subset<T, Organization$messagesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$MessagePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    files<T extends Organization$filesArgs<ExtArgs> = {}>(args?: Subset<T, Organization$filesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FilePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -5895,6 +6478,30 @@ export namespace Prisma {
   }
 
   /**
+   * Organization.files
+   */
+  export type Organization$filesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the File
+     */
+    select?: FileSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the File
+     */
+    omit?: FileOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FileInclude<ExtArgs> | null
+    where?: FileWhereInput
+    orderBy?: FileOrderByWithRelationInput | FileOrderByWithRelationInput[]
+    cursor?: FileWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: FileScalarFieldEnum | FileScalarFieldEnum[]
+  }
+
+  /**
    * Organization without action
    */
   export type OrganizationDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -6139,6 +6746,8 @@ export namespace Prisma {
     teacher?: boolean | User$teacherArgs<ExtArgs>
     sentMessages?: boolean | User$sentMessagesArgs<ExtArgs>
     messageRecipients?: boolean | User$messageRecipientsArgs<ExtArgs>
+    filesOwned?: boolean | User$filesOwnedArgs<ExtArgs>
+    fileShares?: boolean | User$fileSharesArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["user"]>
 
@@ -6199,6 +6808,8 @@ export namespace Prisma {
     teacher?: boolean | User$teacherArgs<ExtArgs>
     sentMessages?: boolean | User$sentMessagesArgs<ExtArgs>
     messageRecipients?: boolean | User$messageRecipientsArgs<ExtArgs>
+    filesOwned?: boolean | User$filesOwnedArgs<ExtArgs>
+    fileShares?: boolean | User$fileSharesArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type UserIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -6219,6 +6830,8 @@ export namespace Prisma {
       teacher: Prisma.$TeacherPayload<ExtArgs> | null
       sentMessages: Prisma.$MessagePayload<ExtArgs>[]
       messageRecipients: Prisma.$MessageRecipientPayload<ExtArgs>[]
+      filesOwned: Prisma.$FilePayload<ExtArgs>[]
+      fileShares: Prisma.$FileShareUserPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -6633,6 +7246,8 @@ export namespace Prisma {
     teacher<T extends User$teacherArgs<ExtArgs> = {}>(args?: Subset<T, User$teacherArgs<ExtArgs>>): Prisma__TeacherClient<$Result.GetResult<Prisma.$TeacherPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     sentMessages<T extends User$sentMessagesArgs<ExtArgs> = {}>(args?: Subset<T, User$sentMessagesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$MessagePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     messageRecipients<T extends User$messageRecipientsArgs<ExtArgs> = {}>(args?: Subset<T, User$messageRecipientsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$MessageRecipientPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    filesOwned<T extends User$filesOwnedArgs<ExtArgs> = {}>(args?: Subset<T, User$filesOwnedArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FilePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    fileShares<T extends User$fileSharesArgs<ExtArgs> = {}>(args?: Subset<T, User$fileSharesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FileShareUserPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -7172,6 +7787,54 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: MessageRecipientScalarFieldEnum | MessageRecipientScalarFieldEnum[]
+  }
+
+  /**
+   * User.filesOwned
+   */
+  export type User$filesOwnedArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the File
+     */
+    select?: FileSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the File
+     */
+    omit?: FileOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FileInclude<ExtArgs> | null
+    where?: FileWhereInput
+    orderBy?: FileOrderByWithRelationInput | FileOrderByWithRelationInput[]
+    cursor?: FileWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: FileScalarFieldEnum | FileScalarFieldEnum[]
+  }
+
+  /**
+   * User.fileShares
+   */
+  export type User$fileSharesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FileShareUser
+     */
+    select?: FileShareUserSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FileShareUser
+     */
+    omit?: FileShareUserOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FileShareUserInclude<ExtArgs> | null
+    where?: FileShareUserWhereInput
+    orderBy?: FileShareUserOrderByWithRelationInput | FileShareUserOrderByWithRelationInput[]
+    cursor?: FileShareUserWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: FileShareUserScalarFieldEnum | FileShareUserScalarFieldEnum[]
   }
 
   /**
@@ -9436,6 +10099,5601 @@ export namespace Prisma {
      * Choose, which related nodes to fetch as well
      */
     include?: MessageRecipientInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model File
+   */
+
+  export type AggregateFile = {
+    _count: FileCountAggregateOutputType | null
+    _avg: FileAvgAggregateOutputType | null
+    _sum: FileSumAggregateOutputType | null
+    _min: FileMinAggregateOutputType | null
+    _max: FileMaxAggregateOutputType | null
+  }
+
+  export type FileAvgAggregateOutputType = {
+    size: number | null
+  }
+
+  export type FileSumAggregateOutputType = {
+    size: number | null
+  }
+
+  export type FileMinAggregateOutputType = {
+    id: string | null
+    organizationId: string | null
+    ownerId: string | null
+    name: string | null
+    mimeType: string | null
+    size: number | null
+    storageKey: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+    deletedAt: Date | null
+  }
+
+  export type FileMaxAggregateOutputType = {
+    id: string | null
+    organizationId: string | null
+    ownerId: string | null
+    name: string | null
+    mimeType: string | null
+    size: number | null
+    storageKey: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+    deletedAt: Date | null
+  }
+
+  export type FileCountAggregateOutputType = {
+    id: number
+    organizationId: number
+    ownerId: number
+    name: number
+    mimeType: number
+    size: number
+    storageKey: number
+    createdAt: number
+    updatedAt: number
+    deletedAt: number
+    _all: number
+  }
+
+
+  export type FileAvgAggregateInputType = {
+    size?: true
+  }
+
+  export type FileSumAggregateInputType = {
+    size?: true
+  }
+
+  export type FileMinAggregateInputType = {
+    id?: true
+    organizationId?: true
+    ownerId?: true
+    name?: true
+    mimeType?: true
+    size?: true
+    storageKey?: true
+    createdAt?: true
+    updatedAt?: true
+    deletedAt?: true
+  }
+
+  export type FileMaxAggregateInputType = {
+    id?: true
+    organizationId?: true
+    ownerId?: true
+    name?: true
+    mimeType?: true
+    size?: true
+    storageKey?: true
+    createdAt?: true
+    updatedAt?: true
+    deletedAt?: true
+  }
+
+  export type FileCountAggregateInputType = {
+    id?: true
+    organizationId?: true
+    ownerId?: true
+    name?: true
+    mimeType?: true
+    size?: true
+    storageKey?: true
+    createdAt?: true
+    updatedAt?: true
+    deletedAt?: true
+    _all?: true
+  }
+
+  export type FileAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which File to aggregate.
+     */
+    where?: FileWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Files to fetch.
+     */
+    orderBy?: FileOrderByWithRelationInput | FileOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: FileWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Files from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Files.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned Files
+    **/
+    _count?: true | FileCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: FileAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: FileSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: FileMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: FileMaxAggregateInputType
+  }
+
+  export type GetFileAggregateType<T extends FileAggregateArgs> = {
+        [P in keyof T & keyof AggregateFile]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateFile[P]>
+      : GetScalarType<T[P], AggregateFile[P]>
+  }
+
+
+
+
+  export type FileGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: FileWhereInput
+    orderBy?: FileOrderByWithAggregationInput | FileOrderByWithAggregationInput[]
+    by: FileScalarFieldEnum[] | FileScalarFieldEnum
+    having?: FileScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: FileCountAggregateInputType | true
+    _avg?: FileAvgAggregateInputType
+    _sum?: FileSumAggregateInputType
+    _min?: FileMinAggregateInputType
+    _max?: FileMaxAggregateInputType
+  }
+
+  export type FileGroupByOutputType = {
+    id: string
+    organizationId: string
+    ownerId: string
+    name: string
+    mimeType: string
+    size: number
+    storageKey: string
+    createdAt: Date
+    updatedAt: Date
+    deletedAt: Date | null
+    _count: FileCountAggregateOutputType | null
+    _avg: FileAvgAggregateOutputType | null
+    _sum: FileSumAggregateOutputType | null
+    _min: FileMinAggregateOutputType | null
+    _max: FileMaxAggregateOutputType | null
+  }
+
+  type GetFileGroupByPayload<T extends FileGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<FileGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof FileGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], FileGroupByOutputType[P]>
+            : GetScalarType<T[P], FileGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type FileSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    organizationId?: boolean
+    ownerId?: boolean
+    name?: boolean
+    mimeType?: boolean
+    size?: boolean
+    storageKey?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    deletedAt?: boolean
+    organization?: boolean | OrganizationDefaultArgs<ExtArgs>
+    owner?: boolean | UserDefaultArgs<ExtArgs>
+    sharesUsers?: boolean | File$sharesUsersArgs<ExtArgs>
+    sharesSchools?: boolean | File$sharesSchoolsArgs<ExtArgs>
+    sharesClassGroups?: boolean | File$sharesClassGroupsArgs<ExtArgs>
+    sharesCourses?: boolean | File$sharesCoursesArgs<ExtArgs>
+    _count?: boolean | FileCountOutputTypeDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["file"]>
+
+  export type FileSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    organizationId?: boolean
+    ownerId?: boolean
+    name?: boolean
+    mimeType?: boolean
+    size?: boolean
+    storageKey?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    deletedAt?: boolean
+    organization?: boolean | OrganizationDefaultArgs<ExtArgs>
+    owner?: boolean | UserDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["file"]>
+
+  export type FileSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    organizationId?: boolean
+    ownerId?: boolean
+    name?: boolean
+    mimeType?: boolean
+    size?: boolean
+    storageKey?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    deletedAt?: boolean
+    organization?: boolean | OrganizationDefaultArgs<ExtArgs>
+    owner?: boolean | UserDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["file"]>
+
+  export type FileSelectScalar = {
+    id?: boolean
+    organizationId?: boolean
+    ownerId?: boolean
+    name?: boolean
+    mimeType?: boolean
+    size?: boolean
+    storageKey?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    deletedAt?: boolean
+  }
+
+  export type FileOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "organizationId" | "ownerId" | "name" | "mimeType" | "size" | "storageKey" | "createdAt" | "updatedAt" | "deletedAt", ExtArgs["result"]["file"]>
+  export type FileInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    organization?: boolean | OrganizationDefaultArgs<ExtArgs>
+    owner?: boolean | UserDefaultArgs<ExtArgs>
+    sharesUsers?: boolean | File$sharesUsersArgs<ExtArgs>
+    sharesSchools?: boolean | File$sharesSchoolsArgs<ExtArgs>
+    sharesClassGroups?: boolean | File$sharesClassGroupsArgs<ExtArgs>
+    sharesCourses?: boolean | File$sharesCoursesArgs<ExtArgs>
+    _count?: boolean | FileCountOutputTypeDefaultArgs<ExtArgs>
+  }
+  export type FileIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    organization?: boolean | OrganizationDefaultArgs<ExtArgs>
+    owner?: boolean | UserDefaultArgs<ExtArgs>
+  }
+  export type FileIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    organization?: boolean | OrganizationDefaultArgs<ExtArgs>
+    owner?: boolean | UserDefaultArgs<ExtArgs>
+  }
+
+  export type $FilePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "File"
+    objects: {
+      organization: Prisma.$OrganizationPayload<ExtArgs>
+      owner: Prisma.$UserPayload<ExtArgs>
+      sharesUsers: Prisma.$FileShareUserPayload<ExtArgs>[]
+      sharesSchools: Prisma.$FileShareSchoolPayload<ExtArgs>[]
+      sharesClassGroups: Prisma.$FileShareClassGroupPayload<ExtArgs>[]
+      sharesCourses: Prisma.$FileShareCoursePayload<ExtArgs>[]
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      organizationId: string
+      ownerId: string
+      name: string
+      mimeType: string
+      size: number
+      storageKey: string
+      createdAt: Date
+      updatedAt: Date
+      deletedAt: Date | null
+    }, ExtArgs["result"]["file"]>
+    composites: {}
+  }
+
+  type FileGetPayload<S extends boolean | null | undefined | FileDefaultArgs> = $Result.GetResult<Prisma.$FilePayload, S>
+
+  type FileCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<FileFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: FileCountAggregateInputType | true
+    }
+
+  export interface FileDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['File'], meta: { name: 'File' } }
+    /**
+     * Find zero or one File that matches the filter.
+     * @param {FileFindUniqueArgs} args - Arguments to find a File
+     * @example
+     * // Get one File
+     * const file = await prisma.file.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends FileFindUniqueArgs>(args: SelectSubset<T, FileFindUniqueArgs<ExtArgs>>): Prisma__FileClient<$Result.GetResult<Prisma.$FilePayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one File that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {FileFindUniqueOrThrowArgs} args - Arguments to find a File
+     * @example
+     * // Get one File
+     * const file = await prisma.file.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends FileFindUniqueOrThrowArgs>(args: SelectSubset<T, FileFindUniqueOrThrowArgs<ExtArgs>>): Prisma__FileClient<$Result.GetResult<Prisma.$FilePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first File that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FileFindFirstArgs} args - Arguments to find a File
+     * @example
+     * // Get one File
+     * const file = await prisma.file.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends FileFindFirstArgs>(args?: SelectSubset<T, FileFindFirstArgs<ExtArgs>>): Prisma__FileClient<$Result.GetResult<Prisma.$FilePayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first File that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FileFindFirstOrThrowArgs} args - Arguments to find a File
+     * @example
+     * // Get one File
+     * const file = await prisma.file.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends FileFindFirstOrThrowArgs>(args?: SelectSubset<T, FileFindFirstOrThrowArgs<ExtArgs>>): Prisma__FileClient<$Result.GetResult<Prisma.$FilePayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more Files that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FileFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all Files
+     * const files = await prisma.file.findMany()
+     * 
+     * // Get first 10 Files
+     * const files = await prisma.file.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const fileWithIdOnly = await prisma.file.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends FileFindManyArgs>(args?: SelectSubset<T, FileFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FilePayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a File.
+     * @param {FileCreateArgs} args - Arguments to create a File.
+     * @example
+     * // Create one File
+     * const File = await prisma.file.create({
+     *   data: {
+     *     // ... data to create a File
+     *   }
+     * })
+     * 
+     */
+    create<T extends FileCreateArgs>(args: SelectSubset<T, FileCreateArgs<ExtArgs>>): Prisma__FileClient<$Result.GetResult<Prisma.$FilePayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many Files.
+     * @param {FileCreateManyArgs} args - Arguments to create many Files.
+     * @example
+     * // Create many Files
+     * const file = await prisma.file.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends FileCreateManyArgs>(args?: SelectSubset<T, FileCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many Files and returns the data saved in the database.
+     * @param {FileCreateManyAndReturnArgs} args - Arguments to create many Files.
+     * @example
+     * // Create many Files
+     * const file = await prisma.file.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many Files and only return the `id`
+     * const fileWithIdOnly = await prisma.file.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends FileCreateManyAndReturnArgs>(args?: SelectSubset<T, FileCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FilePayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a File.
+     * @param {FileDeleteArgs} args - Arguments to delete one File.
+     * @example
+     * // Delete one File
+     * const File = await prisma.file.delete({
+     *   where: {
+     *     // ... filter to delete one File
+     *   }
+     * })
+     * 
+     */
+    delete<T extends FileDeleteArgs>(args: SelectSubset<T, FileDeleteArgs<ExtArgs>>): Prisma__FileClient<$Result.GetResult<Prisma.$FilePayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one File.
+     * @param {FileUpdateArgs} args - Arguments to update one File.
+     * @example
+     * // Update one File
+     * const file = await prisma.file.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends FileUpdateArgs>(args: SelectSubset<T, FileUpdateArgs<ExtArgs>>): Prisma__FileClient<$Result.GetResult<Prisma.$FilePayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more Files.
+     * @param {FileDeleteManyArgs} args - Arguments to filter Files to delete.
+     * @example
+     * // Delete a few Files
+     * const { count } = await prisma.file.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends FileDeleteManyArgs>(args?: SelectSubset<T, FileDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Files.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FileUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many Files
+     * const file = await prisma.file.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends FileUpdateManyArgs>(args: SelectSubset<T, FileUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Files and returns the data updated in the database.
+     * @param {FileUpdateManyAndReturnArgs} args - Arguments to update many Files.
+     * @example
+     * // Update many Files
+     * const file = await prisma.file.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more Files and only return the `id`
+     * const fileWithIdOnly = await prisma.file.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends FileUpdateManyAndReturnArgs>(args: SelectSubset<T, FileUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FilePayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one File.
+     * @param {FileUpsertArgs} args - Arguments to update or create a File.
+     * @example
+     * // Update or create a File
+     * const file = await prisma.file.upsert({
+     *   create: {
+     *     // ... data to create a File
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the File we want to update
+     *   }
+     * })
+     */
+    upsert<T extends FileUpsertArgs>(args: SelectSubset<T, FileUpsertArgs<ExtArgs>>): Prisma__FileClient<$Result.GetResult<Prisma.$FilePayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of Files.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FileCountArgs} args - Arguments to filter Files to count.
+     * @example
+     * // Count the number of Files
+     * const count = await prisma.file.count({
+     *   where: {
+     *     // ... the filter for the Files we want to count
+     *   }
+     * })
+    **/
+    count<T extends FileCountArgs>(
+      args?: Subset<T, FileCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], FileCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a File.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FileAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends FileAggregateArgs>(args: Subset<T, FileAggregateArgs>): Prisma.PrismaPromise<GetFileAggregateType<T>>
+
+    /**
+     * Group by File.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FileGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends FileGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: FileGroupByArgs['orderBy'] }
+        : { orderBy?: FileGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, FileGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetFileGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the File model
+   */
+  readonly fields: FileFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for File.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__FileClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    organization<T extends OrganizationDefaultArgs<ExtArgs> = {}>(args?: Subset<T, OrganizationDefaultArgs<ExtArgs>>): Prisma__OrganizationClient<$Result.GetResult<Prisma.$OrganizationPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    owner<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    sharesUsers<T extends File$sharesUsersArgs<ExtArgs> = {}>(args?: Subset<T, File$sharesUsersArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FileShareUserPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    sharesSchools<T extends File$sharesSchoolsArgs<ExtArgs> = {}>(args?: Subset<T, File$sharesSchoolsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FileShareSchoolPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    sharesClassGroups<T extends File$sharesClassGroupsArgs<ExtArgs> = {}>(args?: Subset<T, File$sharesClassGroupsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FileShareClassGroupPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    sharesCourses<T extends File$sharesCoursesArgs<ExtArgs> = {}>(args?: Subset<T, File$sharesCoursesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FileShareCoursePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the File model
+   */
+  interface FileFieldRefs {
+    readonly id: FieldRef<"File", 'String'>
+    readonly organizationId: FieldRef<"File", 'String'>
+    readonly ownerId: FieldRef<"File", 'String'>
+    readonly name: FieldRef<"File", 'String'>
+    readonly mimeType: FieldRef<"File", 'String'>
+    readonly size: FieldRef<"File", 'Int'>
+    readonly storageKey: FieldRef<"File", 'String'>
+    readonly createdAt: FieldRef<"File", 'DateTime'>
+    readonly updatedAt: FieldRef<"File", 'DateTime'>
+    readonly deletedAt: FieldRef<"File", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * File findUnique
+   */
+  export type FileFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the File
+     */
+    select?: FileSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the File
+     */
+    omit?: FileOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FileInclude<ExtArgs> | null
+    /**
+     * Filter, which File to fetch.
+     */
+    where: FileWhereUniqueInput
+  }
+
+  /**
+   * File findUniqueOrThrow
+   */
+  export type FileFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the File
+     */
+    select?: FileSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the File
+     */
+    omit?: FileOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FileInclude<ExtArgs> | null
+    /**
+     * Filter, which File to fetch.
+     */
+    where: FileWhereUniqueInput
+  }
+
+  /**
+   * File findFirst
+   */
+  export type FileFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the File
+     */
+    select?: FileSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the File
+     */
+    omit?: FileOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FileInclude<ExtArgs> | null
+    /**
+     * Filter, which File to fetch.
+     */
+    where?: FileWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Files to fetch.
+     */
+    orderBy?: FileOrderByWithRelationInput | FileOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for Files.
+     */
+    cursor?: FileWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Files from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Files.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Files.
+     */
+    distinct?: FileScalarFieldEnum | FileScalarFieldEnum[]
+  }
+
+  /**
+   * File findFirstOrThrow
+   */
+  export type FileFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the File
+     */
+    select?: FileSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the File
+     */
+    omit?: FileOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FileInclude<ExtArgs> | null
+    /**
+     * Filter, which File to fetch.
+     */
+    where?: FileWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Files to fetch.
+     */
+    orderBy?: FileOrderByWithRelationInput | FileOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for Files.
+     */
+    cursor?: FileWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Files from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Files.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Files.
+     */
+    distinct?: FileScalarFieldEnum | FileScalarFieldEnum[]
+  }
+
+  /**
+   * File findMany
+   */
+  export type FileFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the File
+     */
+    select?: FileSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the File
+     */
+    omit?: FileOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FileInclude<ExtArgs> | null
+    /**
+     * Filter, which Files to fetch.
+     */
+    where?: FileWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Files to fetch.
+     */
+    orderBy?: FileOrderByWithRelationInput | FileOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing Files.
+     */
+    cursor?: FileWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Files from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Files.
+     */
+    skip?: number
+    distinct?: FileScalarFieldEnum | FileScalarFieldEnum[]
+  }
+
+  /**
+   * File create
+   */
+  export type FileCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the File
+     */
+    select?: FileSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the File
+     */
+    omit?: FileOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FileInclude<ExtArgs> | null
+    /**
+     * The data needed to create a File.
+     */
+    data: XOR<FileCreateInput, FileUncheckedCreateInput>
+  }
+
+  /**
+   * File createMany
+   */
+  export type FileCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many Files.
+     */
+    data: FileCreateManyInput | FileCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * File createManyAndReturn
+   */
+  export type FileCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the File
+     */
+    select?: FileSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the File
+     */
+    omit?: FileOmit<ExtArgs> | null
+    /**
+     * The data used to create many Files.
+     */
+    data: FileCreateManyInput | FileCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FileIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * File update
+   */
+  export type FileUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the File
+     */
+    select?: FileSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the File
+     */
+    omit?: FileOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FileInclude<ExtArgs> | null
+    /**
+     * The data needed to update a File.
+     */
+    data: XOR<FileUpdateInput, FileUncheckedUpdateInput>
+    /**
+     * Choose, which File to update.
+     */
+    where: FileWhereUniqueInput
+  }
+
+  /**
+   * File updateMany
+   */
+  export type FileUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update Files.
+     */
+    data: XOR<FileUpdateManyMutationInput, FileUncheckedUpdateManyInput>
+    /**
+     * Filter which Files to update
+     */
+    where?: FileWhereInput
+    /**
+     * Limit how many Files to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * File updateManyAndReturn
+   */
+  export type FileUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the File
+     */
+    select?: FileSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the File
+     */
+    omit?: FileOmit<ExtArgs> | null
+    /**
+     * The data used to update Files.
+     */
+    data: XOR<FileUpdateManyMutationInput, FileUncheckedUpdateManyInput>
+    /**
+     * Filter which Files to update
+     */
+    where?: FileWhereInput
+    /**
+     * Limit how many Files to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FileIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * File upsert
+   */
+  export type FileUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the File
+     */
+    select?: FileSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the File
+     */
+    omit?: FileOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FileInclude<ExtArgs> | null
+    /**
+     * The filter to search for the File to update in case it exists.
+     */
+    where: FileWhereUniqueInput
+    /**
+     * In case the File found by the `where` argument doesn't exist, create a new File with this data.
+     */
+    create: XOR<FileCreateInput, FileUncheckedCreateInput>
+    /**
+     * In case the File was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<FileUpdateInput, FileUncheckedUpdateInput>
+  }
+
+  /**
+   * File delete
+   */
+  export type FileDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the File
+     */
+    select?: FileSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the File
+     */
+    omit?: FileOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FileInclude<ExtArgs> | null
+    /**
+     * Filter which File to delete.
+     */
+    where: FileWhereUniqueInput
+  }
+
+  /**
+   * File deleteMany
+   */
+  export type FileDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which Files to delete
+     */
+    where?: FileWhereInput
+    /**
+     * Limit how many Files to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * File.sharesUsers
+   */
+  export type File$sharesUsersArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FileShareUser
+     */
+    select?: FileShareUserSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FileShareUser
+     */
+    omit?: FileShareUserOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FileShareUserInclude<ExtArgs> | null
+    where?: FileShareUserWhereInput
+    orderBy?: FileShareUserOrderByWithRelationInput | FileShareUserOrderByWithRelationInput[]
+    cursor?: FileShareUserWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: FileShareUserScalarFieldEnum | FileShareUserScalarFieldEnum[]
+  }
+
+  /**
+   * File.sharesSchools
+   */
+  export type File$sharesSchoolsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FileShareSchool
+     */
+    select?: FileShareSchoolSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FileShareSchool
+     */
+    omit?: FileShareSchoolOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FileShareSchoolInclude<ExtArgs> | null
+    where?: FileShareSchoolWhereInput
+    orderBy?: FileShareSchoolOrderByWithRelationInput | FileShareSchoolOrderByWithRelationInput[]
+    cursor?: FileShareSchoolWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: FileShareSchoolScalarFieldEnum | FileShareSchoolScalarFieldEnum[]
+  }
+
+  /**
+   * File.sharesClassGroups
+   */
+  export type File$sharesClassGroupsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FileShareClassGroup
+     */
+    select?: FileShareClassGroupSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FileShareClassGroup
+     */
+    omit?: FileShareClassGroupOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FileShareClassGroupInclude<ExtArgs> | null
+    where?: FileShareClassGroupWhereInput
+    orderBy?: FileShareClassGroupOrderByWithRelationInput | FileShareClassGroupOrderByWithRelationInput[]
+    cursor?: FileShareClassGroupWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: FileShareClassGroupScalarFieldEnum | FileShareClassGroupScalarFieldEnum[]
+  }
+
+  /**
+   * File.sharesCourses
+   */
+  export type File$sharesCoursesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FileShareCourse
+     */
+    select?: FileShareCourseSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FileShareCourse
+     */
+    omit?: FileShareCourseOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FileShareCourseInclude<ExtArgs> | null
+    where?: FileShareCourseWhereInput
+    orderBy?: FileShareCourseOrderByWithRelationInput | FileShareCourseOrderByWithRelationInput[]
+    cursor?: FileShareCourseWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: FileShareCourseScalarFieldEnum | FileShareCourseScalarFieldEnum[]
+  }
+
+  /**
+   * File without action
+   */
+  export type FileDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the File
+     */
+    select?: FileSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the File
+     */
+    omit?: FileOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FileInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model FileShareUser
+   */
+
+  export type AggregateFileShareUser = {
+    _count: FileShareUserCountAggregateOutputType | null
+    _min: FileShareUserMinAggregateOutputType | null
+    _max: FileShareUserMaxAggregateOutputType | null
+  }
+
+  export type FileShareUserMinAggregateOutputType = {
+    id: string | null
+    fileId: string | null
+    userId: string | null
+    permission: $Enums.FilePermission | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type FileShareUserMaxAggregateOutputType = {
+    id: string | null
+    fileId: string | null
+    userId: string | null
+    permission: $Enums.FilePermission | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type FileShareUserCountAggregateOutputType = {
+    id: number
+    fileId: number
+    userId: number
+    permission: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type FileShareUserMinAggregateInputType = {
+    id?: true
+    fileId?: true
+    userId?: true
+    permission?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type FileShareUserMaxAggregateInputType = {
+    id?: true
+    fileId?: true
+    userId?: true
+    permission?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type FileShareUserCountAggregateInputType = {
+    id?: true
+    fileId?: true
+    userId?: true
+    permission?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type FileShareUserAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which FileShareUser to aggregate.
+     */
+    where?: FileShareUserWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of FileShareUsers to fetch.
+     */
+    orderBy?: FileShareUserOrderByWithRelationInput | FileShareUserOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: FileShareUserWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` FileShareUsers from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` FileShareUsers.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned FileShareUsers
+    **/
+    _count?: true | FileShareUserCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: FileShareUserMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: FileShareUserMaxAggregateInputType
+  }
+
+  export type GetFileShareUserAggregateType<T extends FileShareUserAggregateArgs> = {
+        [P in keyof T & keyof AggregateFileShareUser]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateFileShareUser[P]>
+      : GetScalarType<T[P], AggregateFileShareUser[P]>
+  }
+
+
+
+
+  export type FileShareUserGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: FileShareUserWhereInput
+    orderBy?: FileShareUserOrderByWithAggregationInput | FileShareUserOrderByWithAggregationInput[]
+    by: FileShareUserScalarFieldEnum[] | FileShareUserScalarFieldEnum
+    having?: FileShareUserScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: FileShareUserCountAggregateInputType | true
+    _min?: FileShareUserMinAggregateInputType
+    _max?: FileShareUserMaxAggregateInputType
+  }
+
+  export type FileShareUserGroupByOutputType = {
+    id: string
+    fileId: string
+    userId: string
+    permission: $Enums.FilePermission
+    createdAt: Date
+    updatedAt: Date
+    _count: FileShareUserCountAggregateOutputType | null
+    _min: FileShareUserMinAggregateOutputType | null
+    _max: FileShareUserMaxAggregateOutputType | null
+  }
+
+  type GetFileShareUserGroupByPayload<T extends FileShareUserGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<FileShareUserGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof FileShareUserGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], FileShareUserGroupByOutputType[P]>
+            : GetScalarType<T[P], FileShareUserGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type FileShareUserSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    fileId?: boolean
+    userId?: boolean
+    permission?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    file?: boolean | FileDefaultArgs<ExtArgs>
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["fileShareUser"]>
+
+  export type FileShareUserSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    fileId?: boolean
+    userId?: boolean
+    permission?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    file?: boolean | FileDefaultArgs<ExtArgs>
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["fileShareUser"]>
+
+  export type FileShareUserSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    fileId?: boolean
+    userId?: boolean
+    permission?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    file?: boolean | FileDefaultArgs<ExtArgs>
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["fileShareUser"]>
+
+  export type FileShareUserSelectScalar = {
+    id?: boolean
+    fileId?: boolean
+    userId?: boolean
+    permission?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type FileShareUserOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "fileId" | "userId" | "permission" | "createdAt" | "updatedAt", ExtArgs["result"]["fileShareUser"]>
+  export type FileShareUserInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    file?: boolean | FileDefaultArgs<ExtArgs>
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }
+  export type FileShareUserIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    file?: boolean | FileDefaultArgs<ExtArgs>
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }
+  export type FileShareUserIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    file?: boolean | FileDefaultArgs<ExtArgs>
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }
+
+  export type $FileShareUserPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "FileShareUser"
+    objects: {
+      file: Prisma.$FilePayload<ExtArgs>
+      user: Prisma.$UserPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      fileId: string
+      userId: string
+      permission: $Enums.FilePermission
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["fileShareUser"]>
+    composites: {}
+  }
+
+  type FileShareUserGetPayload<S extends boolean | null | undefined | FileShareUserDefaultArgs> = $Result.GetResult<Prisma.$FileShareUserPayload, S>
+
+  type FileShareUserCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<FileShareUserFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: FileShareUserCountAggregateInputType | true
+    }
+
+  export interface FileShareUserDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['FileShareUser'], meta: { name: 'FileShareUser' } }
+    /**
+     * Find zero or one FileShareUser that matches the filter.
+     * @param {FileShareUserFindUniqueArgs} args - Arguments to find a FileShareUser
+     * @example
+     * // Get one FileShareUser
+     * const fileShareUser = await prisma.fileShareUser.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends FileShareUserFindUniqueArgs>(args: SelectSubset<T, FileShareUserFindUniqueArgs<ExtArgs>>): Prisma__FileShareUserClient<$Result.GetResult<Prisma.$FileShareUserPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one FileShareUser that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {FileShareUserFindUniqueOrThrowArgs} args - Arguments to find a FileShareUser
+     * @example
+     * // Get one FileShareUser
+     * const fileShareUser = await prisma.fileShareUser.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends FileShareUserFindUniqueOrThrowArgs>(args: SelectSubset<T, FileShareUserFindUniqueOrThrowArgs<ExtArgs>>): Prisma__FileShareUserClient<$Result.GetResult<Prisma.$FileShareUserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first FileShareUser that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FileShareUserFindFirstArgs} args - Arguments to find a FileShareUser
+     * @example
+     * // Get one FileShareUser
+     * const fileShareUser = await prisma.fileShareUser.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends FileShareUserFindFirstArgs>(args?: SelectSubset<T, FileShareUserFindFirstArgs<ExtArgs>>): Prisma__FileShareUserClient<$Result.GetResult<Prisma.$FileShareUserPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first FileShareUser that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FileShareUserFindFirstOrThrowArgs} args - Arguments to find a FileShareUser
+     * @example
+     * // Get one FileShareUser
+     * const fileShareUser = await prisma.fileShareUser.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends FileShareUserFindFirstOrThrowArgs>(args?: SelectSubset<T, FileShareUserFindFirstOrThrowArgs<ExtArgs>>): Prisma__FileShareUserClient<$Result.GetResult<Prisma.$FileShareUserPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more FileShareUsers that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FileShareUserFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all FileShareUsers
+     * const fileShareUsers = await prisma.fileShareUser.findMany()
+     * 
+     * // Get first 10 FileShareUsers
+     * const fileShareUsers = await prisma.fileShareUser.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const fileShareUserWithIdOnly = await prisma.fileShareUser.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends FileShareUserFindManyArgs>(args?: SelectSubset<T, FileShareUserFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FileShareUserPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a FileShareUser.
+     * @param {FileShareUserCreateArgs} args - Arguments to create a FileShareUser.
+     * @example
+     * // Create one FileShareUser
+     * const FileShareUser = await prisma.fileShareUser.create({
+     *   data: {
+     *     // ... data to create a FileShareUser
+     *   }
+     * })
+     * 
+     */
+    create<T extends FileShareUserCreateArgs>(args: SelectSubset<T, FileShareUserCreateArgs<ExtArgs>>): Prisma__FileShareUserClient<$Result.GetResult<Prisma.$FileShareUserPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many FileShareUsers.
+     * @param {FileShareUserCreateManyArgs} args - Arguments to create many FileShareUsers.
+     * @example
+     * // Create many FileShareUsers
+     * const fileShareUser = await prisma.fileShareUser.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends FileShareUserCreateManyArgs>(args?: SelectSubset<T, FileShareUserCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many FileShareUsers and returns the data saved in the database.
+     * @param {FileShareUserCreateManyAndReturnArgs} args - Arguments to create many FileShareUsers.
+     * @example
+     * // Create many FileShareUsers
+     * const fileShareUser = await prisma.fileShareUser.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many FileShareUsers and only return the `id`
+     * const fileShareUserWithIdOnly = await prisma.fileShareUser.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends FileShareUserCreateManyAndReturnArgs>(args?: SelectSubset<T, FileShareUserCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FileShareUserPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a FileShareUser.
+     * @param {FileShareUserDeleteArgs} args - Arguments to delete one FileShareUser.
+     * @example
+     * // Delete one FileShareUser
+     * const FileShareUser = await prisma.fileShareUser.delete({
+     *   where: {
+     *     // ... filter to delete one FileShareUser
+     *   }
+     * })
+     * 
+     */
+    delete<T extends FileShareUserDeleteArgs>(args: SelectSubset<T, FileShareUserDeleteArgs<ExtArgs>>): Prisma__FileShareUserClient<$Result.GetResult<Prisma.$FileShareUserPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one FileShareUser.
+     * @param {FileShareUserUpdateArgs} args - Arguments to update one FileShareUser.
+     * @example
+     * // Update one FileShareUser
+     * const fileShareUser = await prisma.fileShareUser.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends FileShareUserUpdateArgs>(args: SelectSubset<T, FileShareUserUpdateArgs<ExtArgs>>): Prisma__FileShareUserClient<$Result.GetResult<Prisma.$FileShareUserPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more FileShareUsers.
+     * @param {FileShareUserDeleteManyArgs} args - Arguments to filter FileShareUsers to delete.
+     * @example
+     * // Delete a few FileShareUsers
+     * const { count } = await prisma.fileShareUser.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends FileShareUserDeleteManyArgs>(args?: SelectSubset<T, FileShareUserDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more FileShareUsers.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FileShareUserUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many FileShareUsers
+     * const fileShareUser = await prisma.fileShareUser.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends FileShareUserUpdateManyArgs>(args: SelectSubset<T, FileShareUserUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more FileShareUsers and returns the data updated in the database.
+     * @param {FileShareUserUpdateManyAndReturnArgs} args - Arguments to update many FileShareUsers.
+     * @example
+     * // Update many FileShareUsers
+     * const fileShareUser = await prisma.fileShareUser.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more FileShareUsers and only return the `id`
+     * const fileShareUserWithIdOnly = await prisma.fileShareUser.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends FileShareUserUpdateManyAndReturnArgs>(args: SelectSubset<T, FileShareUserUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FileShareUserPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one FileShareUser.
+     * @param {FileShareUserUpsertArgs} args - Arguments to update or create a FileShareUser.
+     * @example
+     * // Update or create a FileShareUser
+     * const fileShareUser = await prisma.fileShareUser.upsert({
+     *   create: {
+     *     // ... data to create a FileShareUser
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the FileShareUser we want to update
+     *   }
+     * })
+     */
+    upsert<T extends FileShareUserUpsertArgs>(args: SelectSubset<T, FileShareUserUpsertArgs<ExtArgs>>): Prisma__FileShareUserClient<$Result.GetResult<Prisma.$FileShareUserPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of FileShareUsers.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FileShareUserCountArgs} args - Arguments to filter FileShareUsers to count.
+     * @example
+     * // Count the number of FileShareUsers
+     * const count = await prisma.fileShareUser.count({
+     *   where: {
+     *     // ... the filter for the FileShareUsers we want to count
+     *   }
+     * })
+    **/
+    count<T extends FileShareUserCountArgs>(
+      args?: Subset<T, FileShareUserCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], FileShareUserCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a FileShareUser.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FileShareUserAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends FileShareUserAggregateArgs>(args: Subset<T, FileShareUserAggregateArgs>): Prisma.PrismaPromise<GetFileShareUserAggregateType<T>>
+
+    /**
+     * Group by FileShareUser.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FileShareUserGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends FileShareUserGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: FileShareUserGroupByArgs['orderBy'] }
+        : { orderBy?: FileShareUserGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, FileShareUserGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetFileShareUserGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the FileShareUser model
+   */
+  readonly fields: FileShareUserFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for FileShareUser.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__FileShareUserClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    file<T extends FileDefaultArgs<ExtArgs> = {}>(args?: Subset<T, FileDefaultArgs<ExtArgs>>): Prisma__FileClient<$Result.GetResult<Prisma.$FilePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    user<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the FileShareUser model
+   */
+  interface FileShareUserFieldRefs {
+    readonly id: FieldRef<"FileShareUser", 'String'>
+    readonly fileId: FieldRef<"FileShareUser", 'String'>
+    readonly userId: FieldRef<"FileShareUser", 'String'>
+    readonly permission: FieldRef<"FileShareUser", 'FilePermission'>
+    readonly createdAt: FieldRef<"FileShareUser", 'DateTime'>
+    readonly updatedAt: FieldRef<"FileShareUser", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * FileShareUser findUnique
+   */
+  export type FileShareUserFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FileShareUser
+     */
+    select?: FileShareUserSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FileShareUser
+     */
+    omit?: FileShareUserOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FileShareUserInclude<ExtArgs> | null
+    /**
+     * Filter, which FileShareUser to fetch.
+     */
+    where: FileShareUserWhereUniqueInput
+  }
+
+  /**
+   * FileShareUser findUniqueOrThrow
+   */
+  export type FileShareUserFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FileShareUser
+     */
+    select?: FileShareUserSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FileShareUser
+     */
+    omit?: FileShareUserOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FileShareUserInclude<ExtArgs> | null
+    /**
+     * Filter, which FileShareUser to fetch.
+     */
+    where: FileShareUserWhereUniqueInput
+  }
+
+  /**
+   * FileShareUser findFirst
+   */
+  export type FileShareUserFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FileShareUser
+     */
+    select?: FileShareUserSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FileShareUser
+     */
+    omit?: FileShareUserOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FileShareUserInclude<ExtArgs> | null
+    /**
+     * Filter, which FileShareUser to fetch.
+     */
+    where?: FileShareUserWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of FileShareUsers to fetch.
+     */
+    orderBy?: FileShareUserOrderByWithRelationInput | FileShareUserOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for FileShareUsers.
+     */
+    cursor?: FileShareUserWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` FileShareUsers from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` FileShareUsers.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of FileShareUsers.
+     */
+    distinct?: FileShareUserScalarFieldEnum | FileShareUserScalarFieldEnum[]
+  }
+
+  /**
+   * FileShareUser findFirstOrThrow
+   */
+  export type FileShareUserFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FileShareUser
+     */
+    select?: FileShareUserSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FileShareUser
+     */
+    omit?: FileShareUserOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FileShareUserInclude<ExtArgs> | null
+    /**
+     * Filter, which FileShareUser to fetch.
+     */
+    where?: FileShareUserWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of FileShareUsers to fetch.
+     */
+    orderBy?: FileShareUserOrderByWithRelationInput | FileShareUserOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for FileShareUsers.
+     */
+    cursor?: FileShareUserWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` FileShareUsers from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` FileShareUsers.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of FileShareUsers.
+     */
+    distinct?: FileShareUserScalarFieldEnum | FileShareUserScalarFieldEnum[]
+  }
+
+  /**
+   * FileShareUser findMany
+   */
+  export type FileShareUserFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FileShareUser
+     */
+    select?: FileShareUserSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FileShareUser
+     */
+    omit?: FileShareUserOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FileShareUserInclude<ExtArgs> | null
+    /**
+     * Filter, which FileShareUsers to fetch.
+     */
+    where?: FileShareUserWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of FileShareUsers to fetch.
+     */
+    orderBy?: FileShareUserOrderByWithRelationInput | FileShareUserOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing FileShareUsers.
+     */
+    cursor?: FileShareUserWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` FileShareUsers from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` FileShareUsers.
+     */
+    skip?: number
+    distinct?: FileShareUserScalarFieldEnum | FileShareUserScalarFieldEnum[]
+  }
+
+  /**
+   * FileShareUser create
+   */
+  export type FileShareUserCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FileShareUser
+     */
+    select?: FileShareUserSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FileShareUser
+     */
+    omit?: FileShareUserOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FileShareUserInclude<ExtArgs> | null
+    /**
+     * The data needed to create a FileShareUser.
+     */
+    data: XOR<FileShareUserCreateInput, FileShareUserUncheckedCreateInput>
+  }
+
+  /**
+   * FileShareUser createMany
+   */
+  export type FileShareUserCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many FileShareUsers.
+     */
+    data: FileShareUserCreateManyInput | FileShareUserCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * FileShareUser createManyAndReturn
+   */
+  export type FileShareUserCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FileShareUser
+     */
+    select?: FileShareUserSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the FileShareUser
+     */
+    omit?: FileShareUserOmit<ExtArgs> | null
+    /**
+     * The data used to create many FileShareUsers.
+     */
+    data: FileShareUserCreateManyInput | FileShareUserCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FileShareUserIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * FileShareUser update
+   */
+  export type FileShareUserUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FileShareUser
+     */
+    select?: FileShareUserSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FileShareUser
+     */
+    omit?: FileShareUserOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FileShareUserInclude<ExtArgs> | null
+    /**
+     * The data needed to update a FileShareUser.
+     */
+    data: XOR<FileShareUserUpdateInput, FileShareUserUncheckedUpdateInput>
+    /**
+     * Choose, which FileShareUser to update.
+     */
+    where: FileShareUserWhereUniqueInput
+  }
+
+  /**
+   * FileShareUser updateMany
+   */
+  export type FileShareUserUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update FileShareUsers.
+     */
+    data: XOR<FileShareUserUpdateManyMutationInput, FileShareUserUncheckedUpdateManyInput>
+    /**
+     * Filter which FileShareUsers to update
+     */
+    where?: FileShareUserWhereInput
+    /**
+     * Limit how many FileShareUsers to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * FileShareUser updateManyAndReturn
+   */
+  export type FileShareUserUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FileShareUser
+     */
+    select?: FileShareUserSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the FileShareUser
+     */
+    omit?: FileShareUserOmit<ExtArgs> | null
+    /**
+     * The data used to update FileShareUsers.
+     */
+    data: XOR<FileShareUserUpdateManyMutationInput, FileShareUserUncheckedUpdateManyInput>
+    /**
+     * Filter which FileShareUsers to update
+     */
+    where?: FileShareUserWhereInput
+    /**
+     * Limit how many FileShareUsers to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FileShareUserIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * FileShareUser upsert
+   */
+  export type FileShareUserUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FileShareUser
+     */
+    select?: FileShareUserSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FileShareUser
+     */
+    omit?: FileShareUserOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FileShareUserInclude<ExtArgs> | null
+    /**
+     * The filter to search for the FileShareUser to update in case it exists.
+     */
+    where: FileShareUserWhereUniqueInput
+    /**
+     * In case the FileShareUser found by the `where` argument doesn't exist, create a new FileShareUser with this data.
+     */
+    create: XOR<FileShareUserCreateInput, FileShareUserUncheckedCreateInput>
+    /**
+     * In case the FileShareUser was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<FileShareUserUpdateInput, FileShareUserUncheckedUpdateInput>
+  }
+
+  /**
+   * FileShareUser delete
+   */
+  export type FileShareUserDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FileShareUser
+     */
+    select?: FileShareUserSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FileShareUser
+     */
+    omit?: FileShareUserOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FileShareUserInclude<ExtArgs> | null
+    /**
+     * Filter which FileShareUser to delete.
+     */
+    where: FileShareUserWhereUniqueInput
+  }
+
+  /**
+   * FileShareUser deleteMany
+   */
+  export type FileShareUserDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which FileShareUsers to delete
+     */
+    where?: FileShareUserWhereInput
+    /**
+     * Limit how many FileShareUsers to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * FileShareUser without action
+   */
+  export type FileShareUserDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FileShareUser
+     */
+    select?: FileShareUserSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FileShareUser
+     */
+    omit?: FileShareUserOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FileShareUserInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model FileShareSchool
+   */
+
+  export type AggregateFileShareSchool = {
+    _count: FileShareSchoolCountAggregateOutputType | null
+    _min: FileShareSchoolMinAggregateOutputType | null
+    _max: FileShareSchoolMaxAggregateOutputType | null
+  }
+
+  export type FileShareSchoolMinAggregateOutputType = {
+    id: string | null
+    fileId: string | null
+    schoolId: string | null
+    permission: $Enums.FilePermission | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type FileShareSchoolMaxAggregateOutputType = {
+    id: string | null
+    fileId: string | null
+    schoolId: string | null
+    permission: $Enums.FilePermission | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type FileShareSchoolCountAggregateOutputType = {
+    id: number
+    fileId: number
+    schoolId: number
+    permission: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type FileShareSchoolMinAggregateInputType = {
+    id?: true
+    fileId?: true
+    schoolId?: true
+    permission?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type FileShareSchoolMaxAggregateInputType = {
+    id?: true
+    fileId?: true
+    schoolId?: true
+    permission?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type FileShareSchoolCountAggregateInputType = {
+    id?: true
+    fileId?: true
+    schoolId?: true
+    permission?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type FileShareSchoolAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which FileShareSchool to aggregate.
+     */
+    where?: FileShareSchoolWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of FileShareSchools to fetch.
+     */
+    orderBy?: FileShareSchoolOrderByWithRelationInput | FileShareSchoolOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: FileShareSchoolWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` FileShareSchools from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` FileShareSchools.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned FileShareSchools
+    **/
+    _count?: true | FileShareSchoolCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: FileShareSchoolMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: FileShareSchoolMaxAggregateInputType
+  }
+
+  export type GetFileShareSchoolAggregateType<T extends FileShareSchoolAggregateArgs> = {
+        [P in keyof T & keyof AggregateFileShareSchool]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateFileShareSchool[P]>
+      : GetScalarType<T[P], AggregateFileShareSchool[P]>
+  }
+
+
+
+
+  export type FileShareSchoolGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: FileShareSchoolWhereInput
+    orderBy?: FileShareSchoolOrderByWithAggregationInput | FileShareSchoolOrderByWithAggregationInput[]
+    by: FileShareSchoolScalarFieldEnum[] | FileShareSchoolScalarFieldEnum
+    having?: FileShareSchoolScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: FileShareSchoolCountAggregateInputType | true
+    _min?: FileShareSchoolMinAggregateInputType
+    _max?: FileShareSchoolMaxAggregateInputType
+  }
+
+  export type FileShareSchoolGroupByOutputType = {
+    id: string
+    fileId: string
+    schoolId: string
+    permission: $Enums.FilePermission
+    createdAt: Date
+    updatedAt: Date
+    _count: FileShareSchoolCountAggregateOutputType | null
+    _min: FileShareSchoolMinAggregateOutputType | null
+    _max: FileShareSchoolMaxAggregateOutputType | null
+  }
+
+  type GetFileShareSchoolGroupByPayload<T extends FileShareSchoolGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<FileShareSchoolGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof FileShareSchoolGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], FileShareSchoolGroupByOutputType[P]>
+            : GetScalarType<T[P], FileShareSchoolGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type FileShareSchoolSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    fileId?: boolean
+    schoolId?: boolean
+    permission?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    file?: boolean | FileDefaultArgs<ExtArgs>
+    school?: boolean | SchoolDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["fileShareSchool"]>
+
+  export type FileShareSchoolSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    fileId?: boolean
+    schoolId?: boolean
+    permission?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    file?: boolean | FileDefaultArgs<ExtArgs>
+    school?: boolean | SchoolDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["fileShareSchool"]>
+
+  export type FileShareSchoolSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    fileId?: boolean
+    schoolId?: boolean
+    permission?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    file?: boolean | FileDefaultArgs<ExtArgs>
+    school?: boolean | SchoolDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["fileShareSchool"]>
+
+  export type FileShareSchoolSelectScalar = {
+    id?: boolean
+    fileId?: boolean
+    schoolId?: boolean
+    permission?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type FileShareSchoolOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "fileId" | "schoolId" | "permission" | "createdAt" | "updatedAt", ExtArgs["result"]["fileShareSchool"]>
+  export type FileShareSchoolInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    file?: boolean | FileDefaultArgs<ExtArgs>
+    school?: boolean | SchoolDefaultArgs<ExtArgs>
+  }
+  export type FileShareSchoolIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    file?: boolean | FileDefaultArgs<ExtArgs>
+    school?: boolean | SchoolDefaultArgs<ExtArgs>
+  }
+  export type FileShareSchoolIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    file?: boolean | FileDefaultArgs<ExtArgs>
+    school?: boolean | SchoolDefaultArgs<ExtArgs>
+  }
+
+  export type $FileShareSchoolPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "FileShareSchool"
+    objects: {
+      file: Prisma.$FilePayload<ExtArgs>
+      school: Prisma.$SchoolPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      fileId: string
+      schoolId: string
+      permission: $Enums.FilePermission
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["fileShareSchool"]>
+    composites: {}
+  }
+
+  type FileShareSchoolGetPayload<S extends boolean | null | undefined | FileShareSchoolDefaultArgs> = $Result.GetResult<Prisma.$FileShareSchoolPayload, S>
+
+  type FileShareSchoolCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<FileShareSchoolFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: FileShareSchoolCountAggregateInputType | true
+    }
+
+  export interface FileShareSchoolDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['FileShareSchool'], meta: { name: 'FileShareSchool' } }
+    /**
+     * Find zero or one FileShareSchool that matches the filter.
+     * @param {FileShareSchoolFindUniqueArgs} args - Arguments to find a FileShareSchool
+     * @example
+     * // Get one FileShareSchool
+     * const fileShareSchool = await prisma.fileShareSchool.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends FileShareSchoolFindUniqueArgs>(args: SelectSubset<T, FileShareSchoolFindUniqueArgs<ExtArgs>>): Prisma__FileShareSchoolClient<$Result.GetResult<Prisma.$FileShareSchoolPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one FileShareSchool that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {FileShareSchoolFindUniqueOrThrowArgs} args - Arguments to find a FileShareSchool
+     * @example
+     * // Get one FileShareSchool
+     * const fileShareSchool = await prisma.fileShareSchool.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends FileShareSchoolFindUniqueOrThrowArgs>(args: SelectSubset<T, FileShareSchoolFindUniqueOrThrowArgs<ExtArgs>>): Prisma__FileShareSchoolClient<$Result.GetResult<Prisma.$FileShareSchoolPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first FileShareSchool that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FileShareSchoolFindFirstArgs} args - Arguments to find a FileShareSchool
+     * @example
+     * // Get one FileShareSchool
+     * const fileShareSchool = await prisma.fileShareSchool.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends FileShareSchoolFindFirstArgs>(args?: SelectSubset<T, FileShareSchoolFindFirstArgs<ExtArgs>>): Prisma__FileShareSchoolClient<$Result.GetResult<Prisma.$FileShareSchoolPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first FileShareSchool that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FileShareSchoolFindFirstOrThrowArgs} args - Arguments to find a FileShareSchool
+     * @example
+     * // Get one FileShareSchool
+     * const fileShareSchool = await prisma.fileShareSchool.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends FileShareSchoolFindFirstOrThrowArgs>(args?: SelectSubset<T, FileShareSchoolFindFirstOrThrowArgs<ExtArgs>>): Prisma__FileShareSchoolClient<$Result.GetResult<Prisma.$FileShareSchoolPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more FileShareSchools that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FileShareSchoolFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all FileShareSchools
+     * const fileShareSchools = await prisma.fileShareSchool.findMany()
+     * 
+     * // Get first 10 FileShareSchools
+     * const fileShareSchools = await prisma.fileShareSchool.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const fileShareSchoolWithIdOnly = await prisma.fileShareSchool.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends FileShareSchoolFindManyArgs>(args?: SelectSubset<T, FileShareSchoolFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FileShareSchoolPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a FileShareSchool.
+     * @param {FileShareSchoolCreateArgs} args - Arguments to create a FileShareSchool.
+     * @example
+     * // Create one FileShareSchool
+     * const FileShareSchool = await prisma.fileShareSchool.create({
+     *   data: {
+     *     // ... data to create a FileShareSchool
+     *   }
+     * })
+     * 
+     */
+    create<T extends FileShareSchoolCreateArgs>(args: SelectSubset<T, FileShareSchoolCreateArgs<ExtArgs>>): Prisma__FileShareSchoolClient<$Result.GetResult<Prisma.$FileShareSchoolPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many FileShareSchools.
+     * @param {FileShareSchoolCreateManyArgs} args - Arguments to create many FileShareSchools.
+     * @example
+     * // Create many FileShareSchools
+     * const fileShareSchool = await prisma.fileShareSchool.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends FileShareSchoolCreateManyArgs>(args?: SelectSubset<T, FileShareSchoolCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many FileShareSchools and returns the data saved in the database.
+     * @param {FileShareSchoolCreateManyAndReturnArgs} args - Arguments to create many FileShareSchools.
+     * @example
+     * // Create many FileShareSchools
+     * const fileShareSchool = await prisma.fileShareSchool.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many FileShareSchools and only return the `id`
+     * const fileShareSchoolWithIdOnly = await prisma.fileShareSchool.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends FileShareSchoolCreateManyAndReturnArgs>(args?: SelectSubset<T, FileShareSchoolCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FileShareSchoolPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a FileShareSchool.
+     * @param {FileShareSchoolDeleteArgs} args - Arguments to delete one FileShareSchool.
+     * @example
+     * // Delete one FileShareSchool
+     * const FileShareSchool = await prisma.fileShareSchool.delete({
+     *   where: {
+     *     // ... filter to delete one FileShareSchool
+     *   }
+     * })
+     * 
+     */
+    delete<T extends FileShareSchoolDeleteArgs>(args: SelectSubset<T, FileShareSchoolDeleteArgs<ExtArgs>>): Prisma__FileShareSchoolClient<$Result.GetResult<Prisma.$FileShareSchoolPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one FileShareSchool.
+     * @param {FileShareSchoolUpdateArgs} args - Arguments to update one FileShareSchool.
+     * @example
+     * // Update one FileShareSchool
+     * const fileShareSchool = await prisma.fileShareSchool.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends FileShareSchoolUpdateArgs>(args: SelectSubset<T, FileShareSchoolUpdateArgs<ExtArgs>>): Prisma__FileShareSchoolClient<$Result.GetResult<Prisma.$FileShareSchoolPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more FileShareSchools.
+     * @param {FileShareSchoolDeleteManyArgs} args - Arguments to filter FileShareSchools to delete.
+     * @example
+     * // Delete a few FileShareSchools
+     * const { count } = await prisma.fileShareSchool.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends FileShareSchoolDeleteManyArgs>(args?: SelectSubset<T, FileShareSchoolDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more FileShareSchools.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FileShareSchoolUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many FileShareSchools
+     * const fileShareSchool = await prisma.fileShareSchool.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends FileShareSchoolUpdateManyArgs>(args: SelectSubset<T, FileShareSchoolUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more FileShareSchools and returns the data updated in the database.
+     * @param {FileShareSchoolUpdateManyAndReturnArgs} args - Arguments to update many FileShareSchools.
+     * @example
+     * // Update many FileShareSchools
+     * const fileShareSchool = await prisma.fileShareSchool.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more FileShareSchools and only return the `id`
+     * const fileShareSchoolWithIdOnly = await prisma.fileShareSchool.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends FileShareSchoolUpdateManyAndReturnArgs>(args: SelectSubset<T, FileShareSchoolUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FileShareSchoolPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one FileShareSchool.
+     * @param {FileShareSchoolUpsertArgs} args - Arguments to update or create a FileShareSchool.
+     * @example
+     * // Update or create a FileShareSchool
+     * const fileShareSchool = await prisma.fileShareSchool.upsert({
+     *   create: {
+     *     // ... data to create a FileShareSchool
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the FileShareSchool we want to update
+     *   }
+     * })
+     */
+    upsert<T extends FileShareSchoolUpsertArgs>(args: SelectSubset<T, FileShareSchoolUpsertArgs<ExtArgs>>): Prisma__FileShareSchoolClient<$Result.GetResult<Prisma.$FileShareSchoolPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of FileShareSchools.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FileShareSchoolCountArgs} args - Arguments to filter FileShareSchools to count.
+     * @example
+     * // Count the number of FileShareSchools
+     * const count = await prisma.fileShareSchool.count({
+     *   where: {
+     *     // ... the filter for the FileShareSchools we want to count
+     *   }
+     * })
+    **/
+    count<T extends FileShareSchoolCountArgs>(
+      args?: Subset<T, FileShareSchoolCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], FileShareSchoolCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a FileShareSchool.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FileShareSchoolAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends FileShareSchoolAggregateArgs>(args: Subset<T, FileShareSchoolAggregateArgs>): Prisma.PrismaPromise<GetFileShareSchoolAggregateType<T>>
+
+    /**
+     * Group by FileShareSchool.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FileShareSchoolGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends FileShareSchoolGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: FileShareSchoolGroupByArgs['orderBy'] }
+        : { orderBy?: FileShareSchoolGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, FileShareSchoolGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetFileShareSchoolGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the FileShareSchool model
+   */
+  readonly fields: FileShareSchoolFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for FileShareSchool.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__FileShareSchoolClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    file<T extends FileDefaultArgs<ExtArgs> = {}>(args?: Subset<T, FileDefaultArgs<ExtArgs>>): Prisma__FileClient<$Result.GetResult<Prisma.$FilePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    school<T extends SchoolDefaultArgs<ExtArgs> = {}>(args?: Subset<T, SchoolDefaultArgs<ExtArgs>>): Prisma__SchoolClient<$Result.GetResult<Prisma.$SchoolPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the FileShareSchool model
+   */
+  interface FileShareSchoolFieldRefs {
+    readonly id: FieldRef<"FileShareSchool", 'String'>
+    readonly fileId: FieldRef<"FileShareSchool", 'String'>
+    readonly schoolId: FieldRef<"FileShareSchool", 'String'>
+    readonly permission: FieldRef<"FileShareSchool", 'FilePermission'>
+    readonly createdAt: FieldRef<"FileShareSchool", 'DateTime'>
+    readonly updatedAt: FieldRef<"FileShareSchool", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * FileShareSchool findUnique
+   */
+  export type FileShareSchoolFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FileShareSchool
+     */
+    select?: FileShareSchoolSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FileShareSchool
+     */
+    omit?: FileShareSchoolOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FileShareSchoolInclude<ExtArgs> | null
+    /**
+     * Filter, which FileShareSchool to fetch.
+     */
+    where: FileShareSchoolWhereUniqueInput
+  }
+
+  /**
+   * FileShareSchool findUniqueOrThrow
+   */
+  export type FileShareSchoolFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FileShareSchool
+     */
+    select?: FileShareSchoolSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FileShareSchool
+     */
+    omit?: FileShareSchoolOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FileShareSchoolInclude<ExtArgs> | null
+    /**
+     * Filter, which FileShareSchool to fetch.
+     */
+    where: FileShareSchoolWhereUniqueInput
+  }
+
+  /**
+   * FileShareSchool findFirst
+   */
+  export type FileShareSchoolFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FileShareSchool
+     */
+    select?: FileShareSchoolSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FileShareSchool
+     */
+    omit?: FileShareSchoolOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FileShareSchoolInclude<ExtArgs> | null
+    /**
+     * Filter, which FileShareSchool to fetch.
+     */
+    where?: FileShareSchoolWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of FileShareSchools to fetch.
+     */
+    orderBy?: FileShareSchoolOrderByWithRelationInput | FileShareSchoolOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for FileShareSchools.
+     */
+    cursor?: FileShareSchoolWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` FileShareSchools from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` FileShareSchools.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of FileShareSchools.
+     */
+    distinct?: FileShareSchoolScalarFieldEnum | FileShareSchoolScalarFieldEnum[]
+  }
+
+  /**
+   * FileShareSchool findFirstOrThrow
+   */
+  export type FileShareSchoolFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FileShareSchool
+     */
+    select?: FileShareSchoolSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FileShareSchool
+     */
+    omit?: FileShareSchoolOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FileShareSchoolInclude<ExtArgs> | null
+    /**
+     * Filter, which FileShareSchool to fetch.
+     */
+    where?: FileShareSchoolWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of FileShareSchools to fetch.
+     */
+    orderBy?: FileShareSchoolOrderByWithRelationInput | FileShareSchoolOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for FileShareSchools.
+     */
+    cursor?: FileShareSchoolWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` FileShareSchools from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` FileShareSchools.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of FileShareSchools.
+     */
+    distinct?: FileShareSchoolScalarFieldEnum | FileShareSchoolScalarFieldEnum[]
+  }
+
+  /**
+   * FileShareSchool findMany
+   */
+  export type FileShareSchoolFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FileShareSchool
+     */
+    select?: FileShareSchoolSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FileShareSchool
+     */
+    omit?: FileShareSchoolOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FileShareSchoolInclude<ExtArgs> | null
+    /**
+     * Filter, which FileShareSchools to fetch.
+     */
+    where?: FileShareSchoolWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of FileShareSchools to fetch.
+     */
+    orderBy?: FileShareSchoolOrderByWithRelationInput | FileShareSchoolOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing FileShareSchools.
+     */
+    cursor?: FileShareSchoolWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` FileShareSchools from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` FileShareSchools.
+     */
+    skip?: number
+    distinct?: FileShareSchoolScalarFieldEnum | FileShareSchoolScalarFieldEnum[]
+  }
+
+  /**
+   * FileShareSchool create
+   */
+  export type FileShareSchoolCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FileShareSchool
+     */
+    select?: FileShareSchoolSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FileShareSchool
+     */
+    omit?: FileShareSchoolOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FileShareSchoolInclude<ExtArgs> | null
+    /**
+     * The data needed to create a FileShareSchool.
+     */
+    data: XOR<FileShareSchoolCreateInput, FileShareSchoolUncheckedCreateInput>
+  }
+
+  /**
+   * FileShareSchool createMany
+   */
+  export type FileShareSchoolCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many FileShareSchools.
+     */
+    data: FileShareSchoolCreateManyInput | FileShareSchoolCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * FileShareSchool createManyAndReturn
+   */
+  export type FileShareSchoolCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FileShareSchool
+     */
+    select?: FileShareSchoolSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the FileShareSchool
+     */
+    omit?: FileShareSchoolOmit<ExtArgs> | null
+    /**
+     * The data used to create many FileShareSchools.
+     */
+    data: FileShareSchoolCreateManyInput | FileShareSchoolCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FileShareSchoolIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * FileShareSchool update
+   */
+  export type FileShareSchoolUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FileShareSchool
+     */
+    select?: FileShareSchoolSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FileShareSchool
+     */
+    omit?: FileShareSchoolOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FileShareSchoolInclude<ExtArgs> | null
+    /**
+     * The data needed to update a FileShareSchool.
+     */
+    data: XOR<FileShareSchoolUpdateInput, FileShareSchoolUncheckedUpdateInput>
+    /**
+     * Choose, which FileShareSchool to update.
+     */
+    where: FileShareSchoolWhereUniqueInput
+  }
+
+  /**
+   * FileShareSchool updateMany
+   */
+  export type FileShareSchoolUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update FileShareSchools.
+     */
+    data: XOR<FileShareSchoolUpdateManyMutationInput, FileShareSchoolUncheckedUpdateManyInput>
+    /**
+     * Filter which FileShareSchools to update
+     */
+    where?: FileShareSchoolWhereInput
+    /**
+     * Limit how many FileShareSchools to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * FileShareSchool updateManyAndReturn
+   */
+  export type FileShareSchoolUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FileShareSchool
+     */
+    select?: FileShareSchoolSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the FileShareSchool
+     */
+    omit?: FileShareSchoolOmit<ExtArgs> | null
+    /**
+     * The data used to update FileShareSchools.
+     */
+    data: XOR<FileShareSchoolUpdateManyMutationInput, FileShareSchoolUncheckedUpdateManyInput>
+    /**
+     * Filter which FileShareSchools to update
+     */
+    where?: FileShareSchoolWhereInput
+    /**
+     * Limit how many FileShareSchools to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FileShareSchoolIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * FileShareSchool upsert
+   */
+  export type FileShareSchoolUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FileShareSchool
+     */
+    select?: FileShareSchoolSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FileShareSchool
+     */
+    omit?: FileShareSchoolOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FileShareSchoolInclude<ExtArgs> | null
+    /**
+     * The filter to search for the FileShareSchool to update in case it exists.
+     */
+    where: FileShareSchoolWhereUniqueInput
+    /**
+     * In case the FileShareSchool found by the `where` argument doesn't exist, create a new FileShareSchool with this data.
+     */
+    create: XOR<FileShareSchoolCreateInput, FileShareSchoolUncheckedCreateInput>
+    /**
+     * In case the FileShareSchool was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<FileShareSchoolUpdateInput, FileShareSchoolUncheckedUpdateInput>
+  }
+
+  /**
+   * FileShareSchool delete
+   */
+  export type FileShareSchoolDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FileShareSchool
+     */
+    select?: FileShareSchoolSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FileShareSchool
+     */
+    omit?: FileShareSchoolOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FileShareSchoolInclude<ExtArgs> | null
+    /**
+     * Filter which FileShareSchool to delete.
+     */
+    where: FileShareSchoolWhereUniqueInput
+  }
+
+  /**
+   * FileShareSchool deleteMany
+   */
+  export type FileShareSchoolDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which FileShareSchools to delete
+     */
+    where?: FileShareSchoolWhereInput
+    /**
+     * Limit how many FileShareSchools to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * FileShareSchool without action
+   */
+  export type FileShareSchoolDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FileShareSchool
+     */
+    select?: FileShareSchoolSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FileShareSchool
+     */
+    omit?: FileShareSchoolOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FileShareSchoolInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model FileShareClassGroup
+   */
+
+  export type AggregateFileShareClassGroup = {
+    _count: FileShareClassGroupCountAggregateOutputType | null
+    _min: FileShareClassGroupMinAggregateOutputType | null
+    _max: FileShareClassGroupMaxAggregateOutputType | null
+  }
+
+  export type FileShareClassGroupMinAggregateOutputType = {
+    id: string | null
+    fileId: string | null
+    classGroupId: string | null
+    permission: $Enums.FilePermission | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type FileShareClassGroupMaxAggregateOutputType = {
+    id: string | null
+    fileId: string | null
+    classGroupId: string | null
+    permission: $Enums.FilePermission | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type FileShareClassGroupCountAggregateOutputType = {
+    id: number
+    fileId: number
+    classGroupId: number
+    permission: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type FileShareClassGroupMinAggregateInputType = {
+    id?: true
+    fileId?: true
+    classGroupId?: true
+    permission?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type FileShareClassGroupMaxAggregateInputType = {
+    id?: true
+    fileId?: true
+    classGroupId?: true
+    permission?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type FileShareClassGroupCountAggregateInputType = {
+    id?: true
+    fileId?: true
+    classGroupId?: true
+    permission?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type FileShareClassGroupAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which FileShareClassGroup to aggregate.
+     */
+    where?: FileShareClassGroupWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of FileShareClassGroups to fetch.
+     */
+    orderBy?: FileShareClassGroupOrderByWithRelationInput | FileShareClassGroupOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: FileShareClassGroupWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` FileShareClassGroups from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` FileShareClassGroups.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned FileShareClassGroups
+    **/
+    _count?: true | FileShareClassGroupCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: FileShareClassGroupMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: FileShareClassGroupMaxAggregateInputType
+  }
+
+  export type GetFileShareClassGroupAggregateType<T extends FileShareClassGroupAggregateArgs> = {
+        [P in keyof T & keyof AggregateFileShareClassGroup]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateFileShareClassGroup[P]>
+      : GetScalarType<T[P], AggregateFileShareClassGroup[P]>
+  }
+
+
+
+
+  export type FileShareClassGroupGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: FileShareClassGroupWhereInput
+    orderBy?: FileShareClassGroupOrderByWithAggregationInput | FileShareClassGroupOrderByWithAggregationInput[]
+    by: FileShareClassGroupScalarFieldEnum[] | FileShareClassGroupScalarFieldEnum
+    having?: FileShareClassGroupScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: FileShareClassGroupCountAggregateInputType | true
+    _min?: FileShareClassGroupMinAggregateInputType
+    _max?: FileShareClassGroupMaxAggregateInputType
+  }
+
+  export type FileShareClassGroupGroupByOutputType = {
+    id: string
+    fileId: string
+    classGroupId: string
+    permission: $Enums.FilePermission
+    createdAt: Date
+    updatedAt: Date
+    _count: FileShareClassGroupCountAggregateOutputType | null
+    _min: FileShareClassGroupMinAggregateOutputType | null
+    _max: FileShareClassGroupMaxAggregateOutputType | null
+  }
+
+  type GetFileShareClassGroupGroupByPayload<T extends FileShareClassGroupGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<FileShareClassGroupGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof FileShareClassGroupGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], FileShareClassGroupGroupByOutputType[P]>
+            : GetScalarType<T[P], FileShareClassGroupGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type FileShareClassGroupSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    fileId?: boolean
+    classGroupId?: boolean
+    permission?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    file?: boolean | FileDefaultArgs<ExtArgs>
+    classGroup?: boolean | ClassGroupDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["fileShareClassGroup"]>
+
+  export type FileShareClassGroupSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    fileId?: boolean
+    classGroupId?: boolean
+    permission?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    file?: boolean | FileDefaultArgs<ExtArgs>
+    classGroup?: boolean | ClassGroupDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["fileShareClassGroup"]>
+
+  export type FileShareClassGroupSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    fileId?: boolean
+    classGroupId?: boolean
+    permission?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    file?: boolean | FileDefaultArgs<ExtArgs>
+    classGroup?: boolean | ClassGroupDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["fileShareClassGroup"]>
+
+  export type FileShareClassGroupSelectScalar = {
+    id?: boolean
+    fileId?: boolean
+    classGroupId?: boolean
+    permission?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type FileShareClassGroupOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "fileId" | "classGroupId" | "permission" | "createdAt" | "updatedAt", ExtArgs["result"]["fileShareClassGroup"]>
+  export type FileShareClassGroupInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    file?: boolean | FileDefaultArgs<ExtArgs>
+    classGroup?: boolean | ClassGroupDefaultArgs<ExtArgs>
+  }
+  export type FileShareClassGroupIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    file?: boolean | FileDefaultArgs<ExtArgs>
+    classGroup?: boolean | ClassGroupDefaultArgs<ExtArgs>
+  }
+  export type FileShareClassGroupIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    file?: boolean | FileDefaultArgs<ExtArgs>
+    classGroup?: boolean | ClassGroupDefaultArgs<ExtArgs>
+  }
+
+  export type $FileShareClassGroupPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "FileShareClassGroup"
+    objects: {
+      file: Prisma.$FilePayload<ExtArgs>
+      classGroup: Prisma.$ClassGroupPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      fileId: string
+      classGroupId: string
+      permission: $Enums.FilePermission
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["fileShareClassGroup"]>
+    composites: {}
+  }
+
+  type FileShareClassGroupGetPayload<S extends boolean | null | undefined | FileShareClassGroupDefaultArgs> = $Result.GetResult<Prisma.$FileShareClassGroupPayload, S>
+
+  type FileShareClassGroupCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<FileShareClassGroupFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: FileShareClassGroupCountAggregateInputType | true
+    }
+
+  export interface FileShareClassGroupDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['FileShareClassGroup'], meta: { name: 'FileShareClassGroup' } }
+    /**
+     * Find zero or one FileShareClassGroup that matches the filter.
+     * @param {FileShareClassGroupFindUniqueArgs} args - Arguments to find a FileShareClassGroup
+     * @example
+     * // Get one FileShareClassGroup
+     * const fileShareClassGroup = await prisma.fileShareClassGroup.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends FileShareClassGroupFindUniqueArgs>(args: SelectSubset<T, FileShareClassGroupFindUniqueArgs<ExtArgs>>): Prisma__FileShareClassGroupClient<$Result.GetResult<Prisma.$FileShareClassGroupPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one FileShareClassGroup that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {FileShareClassGroupFindUniqueOrThrowArgs} args - Arguments to find a FileShareClassGroup
+     * @example
+     * // Get one FileShareClassGroup
+     * const fileShareClassGroup = await prisma.fileShareClassGroup.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends FileShareClassGroupFindUniqueOrThrowArgs>(args: SelectSubset<T, FileShareClassGroupFindUniqueOrThrowArgs<ExtArgs>>): Prisma__FileShareClassGroupClient<$Result.GetResult<Prisma.$FileShareClassGroupPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first FileShareClassGroup that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FileShareClassGroupFindFirstArgs} args - Arguments to find a FileShareClassGroup
+     * @example
+     * // Get one FileShareClassGroup
+     * const fileShareClassGroup = await prisma.fileShareClassGroup.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends FileShareClassGroupFindFirstArgs>(args?: SelectSubset<T, FileShareClassGroupFindFirstArgs<ExtArgs>>): Prisma__FileShareClassGroupClient<$Result.GetResult<Prisma.$FileShareClassGroupPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first FileShareClassGroup that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FileShareClassGroupFindFirstOrThrowArgs} args - Arguments to find a FileShareClassGroup
+     * @example
+     * // Get one FileShareClassGroup
+     * const fileShareClassGroup = await prisma.fileShareClassGroup.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends FileShareClassGroupFindFirstOrThrowArgs>(args?: SelectSubset<T, FileShareClassGroupFindFirstOrThrowArgs<ExtArgs>>): Prisma__FileShareClassGroupClient<$Result.GetResult<Prisma.$FileShareClassGroupPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more FileShareClassGroups that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FileShareClassGroupFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all FileShareClassGroups
+     * const fileShareClassGroups = await prisma.fileShareClassGroup.findMany()
+     * 
+     * // Get first 10 FileShareClassGroups
+     * const fileShareClassGroups = await prisma.fileShareClassGroup.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const fileShareClassGroupWithIdOnly = await prisma.fileShareClassGroup.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends FileShareClassGroupFindManyArgs>(args?: SelectSubset<T, FileShareClassGroupFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FileShareClassGroupPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a FileShareClassGroup.
+     * @param {FileShareClassGroupCreateArgs} args - Arguments to create a FileShareClassGroup.
+     * @example
+     * // Create one FileShareClassGroup
+     * const FileShareClassGroup = await prisma.fileShareClassGroup.create({
+     *   data: {
+     *     // ... data to create a FileShareClassGroup
+     *   }
+     * })
+     * 
+     */
+    create<T extends FileShareClassGroupCreateArgs>(args: SelectSubset<T, FileShareClassGroupCreateArgs<ExtArgs>>): Prisma__FileShareClassGroupClient<$Result.GetResult<Prisma.$FileShareClassGroupPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many FileShareClassGroups.
+     * @param {FileShareClassGroupCreateManyArgs} args - Arguments to create many FileShareClassGroups.
+     * @example
+     * // Create many FileShareClassGroups
+     * const fileShareClassGroup = await prisma.fileShareClassGroup.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends FileShareClassGroupCreateManyArgs>(args?: SelectSubset<T, FileShareClassGroupCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many FileShareClassGroups and returns the data saved in the database.
+     * @param {FileShareClassGroupCreateManyAndReturnArgs} args - Arguments to create many FileShareClassGroups.
+     * @example
+     * // Create many FileShareClassGroups
+     * const fileShareClassGroup = await prisma.fileShareClassGroup.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many FileShareClassGroups and only return the `id`
+     * const fileShareClassGroupWithIdOnly = await prisma.fileShareClassGroup.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends FileShareClassGroupCreateManyAndReturnArgs>(args?: SelectSubset<T, FileShareClassGroupCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FileShareClassGroupPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a FileShareClassGroup.
+     * @param {FileShareClassGroupDeleteArgs} args - Arguments to delete one FileShareClassGroup.
+     * @example
+     * // Delete one FileShareClassGroup
+     * const FileShareClassGroup = await prisma.fileShareClassGroup.delete({
+     *   where: {
+     *     // ... filter to delete one FileShareClassGroup
+     *   }
+     * })
+     * 
+     */
+    delete<T extends FileShareClassGroupDeleteArgs>(args: SelectSubset<T, FileShareClassGroupDeleteArgs<ExtArgs>>): Prisma__FileShareClassGroupClient<$Result.GetResult<Prisma.$FileShareClassGroupPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one FileShareClassGroup.
+     * @param {FileShareClassGroupUpdateArgs} args - Arguments to update one FileShareClassGroup.
+     * @example
+     * // Update one FileShareClassGroup
+     * const fileShareClassGroup = await prisma.fileShareClassGroup.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends FileShareClassGroupUpdateArgs>(args: SelectSubset<T, FileShareClassGroupUpdateArgs<ExtArgs>>): Prisma__FileShareClassGroupClient<$Result.GetResult<Prisma.$FileShareClassGroupPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more FileShareClassGroups.
+     * @param {FileShareClassGroupDeleteManyArgs} args - Arguments to filter FileShareClassGroups to delete.
+     * @example
+     * // Delete a few FileShareClassGroups
+     * const { count } = await prisma.fileShareClassGroup.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends FileShareClassGroupDeleteManyArgs>(args?: SelectSubset<T, FileShareClassGroupDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more FileShareClassGroups.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FileShareClassGroupUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many FileShareClassGroups
+     * const fileShareClassGroup = await prisma.fileShareClassGroup.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends FileShareClassGroupUpdateManyArgs>(args: SelectSubset<T, FileShareClassGroupUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more FileShareClassGroups and returns the data updated in the database.
+     * @param {FileShareClassGroupUpdateManyAndReturnArgs} args - Arguments to update many FileShareClassGroups.
+     * @example
+     * // Update many FileShareClassGroups
+     * const fileShareClassGroup = await prisma.fileShareClassGroup.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more FileShareClassGroups and only return the `id`
+     * const fileShareClassGroupWithIdOnly = await prisma.fileShareClassGroup.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends FileShareClassGroupUpdateManyAndReturnArgs>(args: SelectSubset<T, FileShareClassGroupUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FileShareClassGroupPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one FileShareClassGroup.
+     * @param {FileShareClassGroupUpsertArgs} args - Arguments to update or create a FileShareClassGroup.
+     * @example
+     * // Update or create a FileShareClassGroup
+     * const fileShareClassGroup = await prisma.fileShareClassGroup.upsert({
+     *   create: {
+     *     // ... data to create a FileShareClassGroup
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the FileShareClassGroup we want to update
+     *   }
+     * })
+     */
+    upsert<T extends FileShareClassGroupUpsertArgs>(args: SelectSubset<T, FileShareClassGroupUpsertArgs<ExtArgs>>): Prisma__FileShareClassGroupClient<$Result.GetResult<Prisma.$FileShareClassGroupPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of FileShareClassGroups.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FileShareClassGroupCountArgs} args - Arguments to filter FileShareClassGroups to count.
+     * @example
+     * // Count the number of FileShareClassGroups
+     * const count = await prisma.fileShareClassGroup.count({
+     *   where: {
+     *     // ... the filter for the FileShareClassGroups we want to count
+     *   }
+     * })
+    **/
+    count<T extends FileShareClassGroupCountArgs>(
+      args?: Subset<T, FileShareClassGroupCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], FileShareClassGroupCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a FileShareClassGroup.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FileShareClassGroupAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends FileShareClassGroupAggregateArgs>(args: Subset<T, FileShareClassGroupAggregateArgs>): Prisma.PrismaPromise<GetFileShareClassGroupAggregateType<T>>
+
+    /**
+     * Group by FileShareClassGroup.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FileShareClassGroupGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends FileShareClassGroupGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: FileShareClassGroupGroupByArgs['orderBy'] }
+        : { orderBy?: FileShareClassGroupGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, FileShareClassGroupGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetFileShareClassGroupGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the FileShareClassGroup model
+   */
+  readonly fields: FileShareClassGroupFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for FileShareClassGroup.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__FileShareClassGroupClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    file<T extends FileDefaultArgs<ExtArgs> = {}>(args?: Subset<T, FileDefaultArgs<ExtArgs>>): Prisma__FileClient<$Result.GetResult<Prisma.$FilePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    classGroup<T extends ClassGroupDefaultArgs<ExtArgs> = {}>(args?: Subset<T, ClassGroupDefaultArgs<ExtArgs>>): Prisma__ClassGroupClient<$Result.GetResult<Prisma.$ClassGroupPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the FileShareClassGroup model
+   */
+  interface FileShareClassGroupFieldRefs {
+    readonly id: FieldRef<"FileShareClassGroup", 'String'>
+    readonly fileId: FieldRef<"FileShareClassGroup", 'String'>
+    readonly classGroupId: FieldRef<"FileShareClassGroup", 'String'>
+    readonly permission: FieldRef<"FileShareClassGroup", 'FilePermission'>
+    readonly createdAt: FieldRef<"FileShareClassGroup", 'DateTime'>
+    readonly updatedAt: FieldRef<"FileShareClassGroup", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * FileShareClassGroup findUnique
+   */
+  export type FileShareClassGroupFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FileShareClassGroup
+     */
+    select?: FileShareClassGroupSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FileShareClassGroup
+     */
+    omit?: FileShareClassGroupOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FileShareClassGroupInclude<ExtArgs> | null
+    /**
+     * Filter, which FileShareClassGroup to fetch.
+     */
+    where: FileShareClassGroupWhereUniqueInput
+  }
+
+  /**
+   * FileShareClassGroup findUniqueOrThrow
+   */
+  export type FileShareClassGroupFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FileShareClassGroup
+     */
+    select?: FileShareClassGroupSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FileShareClassGroup
+     */
+    omit?: FileShareClassGroupOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FileShareClassGroupInclude<ExtArgs> | null
+    /**
+     * Filter, which FileShareClassGroup to fetch.
+     */
+    where: FileShareClassGroupWhereUniqueInput
+  }
+
+  /**
+   * FileShareClassGroup findFirst
+   */
+  export type FileShareClassGroupFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FileShareClassGroup
+     */
+    select?: FileShareClassGroupSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FileShareClassGroup
+     */
+    omit?: FileShareClassGroupOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FileShareClassGroupInclude<ExtArgs> | null
+    /**
+     * Filter, which FileShareClassGroup to fetch.
+     */
+    where?: FileShareClassGroupWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of FileShareClassGroups to fetch.
+     */
+    orderBy?: FileShareClassGroupOrderByWithRelationInput | FileShareClassGroupOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for FileShareClassGroups.
+     */
+    cursor?: FileShareClassGroupWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` FileShareClassGroups from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` FileShareClassGroups.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of FileShareClassGroups.
+     */
+    distinct?: FileShareClassGroupScalarFieldEnum | FileShareClassGroupScalarFieldEnum[]
+  }
+
+  /**
+   * FileShareClassGroup findFirstOrThrow
+   */
+  export type FileShareClassGroupFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FileShareClassGroup
+     */
+    select?: FileShareClassGroupSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FileShareClassGroup
+     */
+    omit?: FileShareClassGroupOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FileShareClassGroupInclude<ExtArgs> | null
+    /**
+     * Filter, which FileShareClassGroup to fetch.
+     */
+    where?: FileShareClassGroupWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of FileShareClassGroups to fetch.
+     */
+    orderBy?: FileShareClassGroupOrderByWithRelationInput | FileShareClassGroupOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for FileShareClassGroups.
+     */
+    cursor?: FileShareClassGroupWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` FileShareClassGroups from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` FileShareClassGroups.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of FileShareClassGroups.
+     */
+    distinct?: FileShareClassGroupScalarFieldEnum | FileShareClassGroupScalarFieldEnum[]
+  }
+
+  /**
+   * FileShareClassGroup findMany
+   */
+  export type FileShareClassGroupFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FileShareClassGroup
+     */
+    select?: FileShareClassGroupSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FileShareClassGroup
+     */
+    omit?: FileShareClassGroupOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FileShareClassGroupInclude<ExtArgs> | null
+    /**
+     * Filter, which FileShareClassGroups to fetch.
+     */
+    where?: FileShareClassGroupWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of FileShareClassGroups to fetch.
+     */
+    orderBy?: FileShareClassGroupOrderByWithRelationInput | FileShareClassGroupOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing FileShareClassGroups.
+     */
+    cursor?: FileShareClassGroupWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` FileShareClassGroups from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` FileShareClassGroups.
+     */
+    skip?: number
+    distinct?: FileShareClassGroupScalarFieldEnum | FileShareClassGroupScalarFieldEnum[]
+  }
+
+  /**
+   * FileShareClassGroup create
+   */
+  export type FileShareClassGroupCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FileShareClassGroup
+     */
+    select?: FileShareClassGroupSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FileShareClassGroup
+     */
+    omit?: FileShareClassGroupOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FileShareClassGroupInclude<ExtArgs> | null
+    /**
+     * The data needed to create a FileShareClassGroup.
+     */
+    data: XOR<FileShareClassGroupCreateInput, FileShareClassGroupUncheckedCreateInput>
+  }
+
+  /**
+   * FileShareClassGroup createMany
+   */
+  export type FileShareClassGroupCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many FileShareClassGroups.
+     */
+    data: FileShareClassGroupCreateManyInput | FileShareClassGroupCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * FileShareClassGroup createManyAndReturn
+   */
+  export type FileShareClassGroupCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FileShareClassGroup
+     */
+    select?: FileShareClassGroupSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the FileShareClassGroup
+     */
+    omit?: FileShareClassGroupOmit<ExtArgs> | null
+    /**
+     * The data used to create many FileShareClassGroups.
+     */
+    data: FileShareClassGroupCreateManyInput | FileShareClassGroupCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FileShareClassGroupIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * FileShareClassGroup update
+   */
+  export type FileShareClassGroupUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FileShareClassGroup
+     */
+    select?: FileShareClassGroupSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FileShareClassGroup
+     */
+    omit?: FileShareClassGroupOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FileShareClassGroupInclude<ExtArgs> | null
+    /**
+     * The data needed to update a FileShareClassGroup.
+     */
+    data: XOR<FileShareClassGroupUpdateInput, FileShareClassGroupUncheckedUpdateInput>
+    /**
+     * Choose, which FileShareClassGroup to update.
+     */
+    where: FileShareClassGroupWhereUniqueInput
+  }
+
+  /**
+   * FileShareClassGroup updateMany
+   */
+  export type FileShareClassGroupUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update FileShareClassGroups.
+     */
+    data: XOR<FileShareClassGroupUpdateManyMutationInput, FileShareClassGroupUncheckedUpdateManyInput>
+    /**
+     * Filter which FileShareClassGroups to update
+     */
+    where?: FileShareClassGroupWhereInput
+    /**
+     * Limit how many FileShareClassGroups to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * FileShareClassGroup updateManyAndReturn
+   */
+  export type FileShareClassGroupUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FileShareClassGroup
+     */
+    select?: FileShareClassGroupSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the FileShareClassGroup
+     */
+    omit?: FileShareClassGroupOmit<ExtArgs> | null
+    /**
+     * The data used to update FileShareClassGroups.
+     */
+    data: XOR<FileShareClassGroupUpdateManyMutationInput, FileShareClassGroupUncheckedUpdateManyInput>
+    /**
+     * Filter which FileShareClassGroups to update
+     */
+    where?: FileShareClassGroupWhereInput
+    /**
+     * Limit how many FileShareClassGroups to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FileShareClassGroupIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * FileShareClassGroup upsert
+   */
+  export type FileShareClassGroupUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FileShareClassGroup
+     */
+    select?: FileShareClassGroupSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FileShareClassGroup
+     */
+    omit?: FileShareClassGroupOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FileShareClassGroupInclude<ExtArgs> | null
+    /**
+     * The filter to search for the FileShareClassGroup to update in case it exists.
+     */
+    where: FileShareClassGroupWhereUniqueInput
+    /**
+     * In case the FileShareClassGroup found by the `where` argument doesn't exist, create a new FileShareClassGroup with this data.
+     */
+    create: XOR<FileShareClassGroupCreateInput, FileShareClassGroupUncheckedCreateInput>
+    /**
+     * In case the FileShareClassGroup was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<FileShareClassGroupUpdateInput, FileShareClassGroupUncheckedUpdateInput>
+  }
+
+  /**
+   * FileShareClassGroup delete
+   */
+  export type FileShareClassGroupDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FileShareClassGroup
+     */
+    select?: FileShareClassGroupSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FileShareClassGroup
+     */
+    omit?: FileShareClassGroupOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FileShareClassGroupInclude<ExtArgs> | null
+    /**
+     * Filter which FileShareClassGroup to delete.
+     */
+    where: FileShareClassGroupWhereUniqueInput
+  }
+
+  /**
+   * FileShareClassGroup deleteMany
+   */
+  export type FileShareClassGroupDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which FileShareClassGroups to delete
+     */
+    where?: FileShareClassGroupWhereInput
+    /**
+     * Limit how many FileShareClassGroups to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * FileShareClassGroup without action
+   */
+  export type FileShareClassGroupDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FileShareClassGroup
+     */
+    select?: FileShareClassGroupSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FileShareClassGroup
+     */
+    omit?: FileShareClassGroupOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FileShareClassGroupInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model FileShareCourse
+   */
+
+  export type AggregateFileShareCourse = {
+    _count: FileShareCourseCountAggregateOutputType | null
+    _min: FileShareCourseMinAggregateOutputType | null
+    _max: FileShareCourseMaxAggregateOutputType | null
+  }
+
+  export type FileShareCourseMinAggregateOutputType = {
+    id: string | null
+    fileId: string | null
+    courseId: string | null
+    permission: $Enums.FilePermission | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type FileShareCourseMaxAggregateOutputType = {
+    id: string | null
+    fileId: string | null
+    courseId: string | null
+    permission: $Enums.FilePermission | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type FileShareCourseCountAggregateOutputType = {
+    id: number
+    fileId: number
+    courseId: number
+    permission: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type FileShareCourseMinAggregateInputType = {
+    id?: true
+    fileId?: true
+    courseId?: true
+    permission?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type FileShareCourseMaxAggregateInputType = {
+    id?: true
+    fileId?: true
+    courseId?: true
+    permission?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type FileShareCourseCountAggregateInputType = {
+    id?: true
+    fileId?: true
+    courseId?: true
+    permission?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type FileShareCourseAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which FileShareCourse to aggregate.
+     */
+    where?: FileShareCourseWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of FileShareCourses to fetch.
+     */
+    orderBy?: FileShareCourseOrderByWithRelationInput | FileShareCourseOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: FileShareCourseWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` FileShareCourses from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` FileShareCourses.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned FileShareCourses
+    **/
+    _count?: true | FileShareCourseCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: FileShareCourseMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: FileShareCourseMaxAggregateInputType
+  }
+
+  export type GetFileShareCourseAggregateType<T extends FileShareCourseAggregateArgs> = {
+        [P in keyof T & keyof AggregateFileShareCourse]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateFileShareCourse[P]>
+      : GetScalarType<T[P], AggregateFileShareCourse[P]>
+  }
+
+
+
+
+  export type FileShareCourseGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: FileShareCourseWhereInput
+    orderBy?: FileShareCourseOrderByWithAggregationInput | FileShareCourseOrderByWithAggregationInput[]
+    by: FileShareCourseScalarFieldEnum[] | FileShareCourseScalarFieldEnum
+    having?: FileShareCourseScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: FileShareCourseCountAggregateInputType | true
+    _min?: FileShareCourseMinAggregateInputType
+    _max?: FileShareCourseMaxAggregateInputType
+  }
+
+  export type FileShareCourseGroupByOutputType = {
+    id: string
+    fileId: string
+    courseId: string
+    permission: $Enums.FilePermission
+    createdAt: Date
+    updatedAt: Date
+    _count: FileShareCourseCountAggregateOutputType | null
+    _min: FileShareCourseMinAggregateOutputType | null
+    _max: FileShareCourseMaxAggregateOutputType | null
+  }
+
+  type GetFileShareCourseGroupByPayload<T extends FileShareCourseGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<FileShareCourseGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof FileShareCourseGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], FileShareCourseGroupByOutputType[P]>
+            : GetScalarType<T[P], FileShareCourseGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type FileShareCourseSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    fileId?: boolean
+    courseId?: boolean
+    permission?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    file?: boolean | FileDefaultArgs<ExtArgs>
+    course?: boolean | CourseDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["fileShareCourse"]>
+
+  export type FileShareCourseSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    fileId?: boolean
+    courseId?: boolean
+    permission?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    file?: boolean | FileDefaultArgs<ExtArgs>
+    course?: boolean | CourseDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["fileShareCourse"]>
+
+  export type FileShareCourseSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    fileId?: boolean
+    courseId?: boolean
+    permission?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    file?: boolean | FileDefaultArgs<ExtArgs>
+    course?: boolean | CourseDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["fileShareCourse"]>
+
+  export type FileShareCourseSelectScalar = {
+    id?: boolean
+    fileId?: boolean
+    courseId?: boolean
+    permission?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type FileShareCourseOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "fileId" | "courseId" | "permission" | "createdAt" | "updatedAt", ExtArgs["result"]["fileShareCourse"]>
+  export type FileShareCourseInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    file?: boolean | FileDefaultArgs<ExtArgs>
+    course?: boolean | CourseDefaultArgs<ExtArgs>
+  }
+  export type FileShareCourseIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    file?: boolean | FileDefaultArgs<ExtArgs>
+    course?: boolean | CourseDefaultArgs<ExtArgs>
+  }
+  export type FileShareCourseIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    file?: boolean | FileDefaultArgs<ExtArgs>
+    course?: boolean | CourseDefaultArgs<ExtArgs>
+  }
+
+  export type $FileShareCoursePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "FileShareCourse"
+    objects: {
+      file: Prisma.$FilePayload<ExtArgs>
+      course: Prisma.$CoursePayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      fileId: string
+      courseId: string
+      permission: $Enums.FilePermission
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["fileShareCourse"]>
+    composites: {}
+  }
+
+  type FileShareCourseGetPayload<S extends boolean | null | undefined | FileShareCourseDefaultArgs> = $Result.GetResult<Prisma.$FileShareCoursePayload, S>
+
+  type FileShareCourseCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<FileShareCourseFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: FileShareCourseCountAggregateInputType | true
+    }
+
+  export interface FileShareCourseDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['FileShareCourse'], meta: { name: 'FileShareCourse' } }
+    /**
+     * Find zero or one FileShareCourse that matches the filter.
+     * @param {FileShareCourseFindUniqueArgs} args - Arguments to find a FileShareCourse
+     * @example
+     * // Get one FileShareCourse
+     * const fileShareCourse = await prisma.fileShareCourse.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends FileShareCourseFindUniqueArgs>(args: SelectSubset<T, FileShareCourseFindUniqueArgs<ExtArgs>>): Prisma__FileShareCourseClient<$Result.GetResult<Prisma.$FileShareCoursePayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one FileShareCourse that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {FileShareCourseFindUniqueOrThrowArgs} args - Arguments to find a FileShareCourse
+     * @example
+     * // Get one FileShareCourse
+     * const fileShareCourse = await prisma.fileShareCourse.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends FileShareCourseFindUniqueOrThrowArgs>(args: SelectSubset<T, FileShareCourseFindUniqueOrThrowArgs<ExtArgs>>): Prisma__FileShareCourseClient<$Result.GetResult<Prisma.$FileShareCoursePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first FileShareCourse that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FileShareCourseFindFirstArgs} args - Arguments to find a FileShareCourse
+     * @example
+     * // Get one FileShareCourse
+     * const fileShareCourse = await prisma.fileShareCourse.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends FileShareCourseFindFirstArgs>(args?: SelectSubset<T, FileShareCourseFindFirstArgs<ExtArgs>>): Prisma__FileShareCourseClient<$Result.GetResult<Prisma.$FileShareCoursePayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first FileShareCourse that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FileShareCourseFindFirstOrThrowArgs} args - Arguments to find a FileShareCourse
+     * @example
+     * // Get one FileShareCourse
+     * const fileShareCourse = await prisma.fileShareCourse.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends FileShareCourseFindFirstOrThrowArgs>(args?: SelectSubset<T, FileShareCourseFindFirstOrThrowArgs<ExtArgs>>): Prisma__FileShareCourseClient<$Result.GetResult<Prisma.$FileShareCoursePayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more FileShareCourses that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FileShareCourseFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all FileShareCourses
+     * const fileShareCourses = await prisma.fileShareCourse.findMany()
+     * 
+     * // Get first 10 FileShareCourses
+     * const fileShareCourses = await prisma.fileShareCourse.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const fileShareCourseWithIdOnly = await prisma.fileShareCourse.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends FileShareCourseFindManyArgs>(args?: SelectSubset<T, FileShareCourseFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FileShareCoursePayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a FileShareCourse.
+     * @param {FileShareCourseCreateArgs} args - Arguments to create a FileShareCourse.
+     * @example
+     * // Create one FileShareCourse
+     * const FileShareCourse = await prisma.fileShareCourse.create({
+     *   data: {
+     *     // ... data to create a FileShareCourse
+     *   }
+     * })
+     * 
+     */
+    create<T extends FileShareCourseCreateArgs>(args: SelectSubset<T, FileShareCourseCreateArgs<ExtArgs>>): Prisma__FileShareCourseClient<$Result.GetResult<Prisma.$FileShareCoursePayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many FileShareCourses.
+     * @param {FileShareCourseCreateManyArgs} args - Arguments to create many FileShareCourses.
+     * @example
+     * // Create many FileShareCourses
+     * const fileShareCourse = await prisma.fileShareCourse.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends FileShareCourseCreateManyArgs>(args?: SelectSubset<T, FileShareCourseCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many FileShareCourses and returns the data saved in the database.
+     * @param {FileShareCourseCreateManyAndReturnArgs} args - Arguments to create many FileShareCourses.
+     * @example
+     * // Create many FileShareCourses
+     * const fileShareCourse = await prisma.fileShareCourse.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many FileShareCourses and only return the `id`
+     * const fileShareCourseWithIdOnly = await prisma.fileShareCourse.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends FileShareCourseCreateManyAndReturnArgs>(args?: SelectSubset<T, FileShareCourseCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FileShareCoursePayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a FileShareCourse.
+     * @param {FileShareCourseDeleteArgs} args - Arguments to delete one FileShareCourse.
+     * @example
+     * // Delete one FileShareCourse
+     * const FileShareCourse = await prisma.fileShareCourse.delete({
+     *   where: {
+     *     // ... filter to delete one FileShareCourse
+     *   }
+     * })
+     * 
+     */
+    delete<T extends FileShareCourseDeleteArgs>(args: SelectSubset<T, FileShareCourseDeleteArgs<ExtArgs>>): Prisma__FileShareCourseClient<$Result.GetResult<Prisma.$FileShareCoursePayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one FileShareCourse.
+     * @param {FileShareCourseUpdateArgs} args - Arguments to update one FileShareCourse.
+     * @example
+     * // Update one FileShareCourse
+     * const fileShareCourse = await prisma.fileShareCourse.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends FileShareCourseUpdateArgs>(args: SelectSubset<T, FileShareCourseUpdateArgs<ExtArgs>>): Prisma__FileShareCourseClient<$Result.GetResult<Prisma.$FileShareCoursePayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more FileShareCourses.
+     * @param {FileShareCourseDeleteManyArgs} args - Arguments to filter FileShareCourses to delete.
+     * @example
+     * // Delete a few FileShareCourses
+     * const { count } = await prisma.fileShareCourse.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends FileShareCourseDeleteManyArgs>(args?: SelectSubset<T, FileShareCourseDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more FileShareCourses.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FileShareCourseUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many FileShareCourses
+     * const fileShareCourse = await prisma.fileShareCourse.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends FileShareCourseUpdateManyArgs>(args: SelectSubset<T, FileShareCourseUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more FileShareCourses and returns the data updated in the database.
+     * @param {FileShareCourseUpdateManyAndReturnArgs} args - Arguments to update many FileShareCourses.
+     * @example
+     * // Update many FileShareCourses
+     * const fileShareCourse = await prisma.fileShareCourse.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more FileShareCourses and only return the `id`
+     * const fileShareCourseWithIdOnly = await prisma.fileShareCourse.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends FileShareCourseUpdateManyAndReturnArgs>(args: SelectSubset<T, FileShareCourseUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FileShareCoursePayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one FileShareCourse.
+     * @param {FileShareCourseUpsertArgs} args - Arguments to update or create a FileShareCourse.
+     * @example
+     * // Update or create a FileShareCourse
+     * const fileShareCourse = await prisma.fileShareCourse.upsert({
+     *   create: {
+     *     // ... data to create a FileShareCourse
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the FileShareCourse we want to update
+     *   }
+     * })
+     */
+    upsert<T extends FileShareCourseUpsertArgs>(args: SelectSubset<T, FileShareCourseUpsertArgs<ExtArgs>>): Prisma__FileShareCourseClient<$Result.GetResult<Prisma.$FileShareCoursePayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of FileShareCourses.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FileShareCourseCountArgs} args - Arguments to filter FileShareCourses to count.
+     * @example
+     * // Count the number of FileShareCourses
+     * const count = await prisma.fileShareCourse.count({
+     *   where: {
+     *     // ... the filter for the FileShareCourses we want to count
+     *   }
+     * })
+    **/
+    count<T extends FileShareCourseCountArgs>(
+      args?: Subset<T, FileShareCourseCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], FileShareCourseCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a FileShareCourse.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FileShareCourseAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends FileShareCourseAggregateArgs>(args: Subset<T, FileShareCourseAggregateArgs>): Prisma.PrismaPromise<GetFileShareCourseAggregateType<T>>
+
+    /**
+     * Group by FileShareCourse.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FileShareCourseGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends FileShareCourseGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: FileShareCourseGroupByArgs['orderBy'] }
+        : { orderBy?: FileShareCourseGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, FileShareCourseGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetFileShareCourseGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the FileShareCourse model
+   */
+  readonly fields: FileShareCourseFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for FileShareCourse.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__FileShareCourseClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    file<T extends FileDefaultArgs<ExtArgs> = {}>(args?: Subset<T, FileDefaultArgs<ExtArgs>>): Prisma__FileClient<$Result.GetResult<Prisma.$FilePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    course<T extends CourseDefaultArgs<ExtArgs> = {}>(args?: Subset<T, CourseDefaultArgs<ExtArgs>>): Prisma__CourseClient<$Result.GetResult<Prisma.$CoursePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the FileShareCourse model
+   */
+  interface FileShareCourseFieldRefs {
+    readonly id: FieldRef<"FileShareCourse", 'String'>
+    readonly fileId: FieldRef<"FileShareCourse", 'String'>
+    readonly courseId: FieldRef<"FileShareCourse", 'String'>
+    readonly permission: FieldRef<"FileShareCourse", 'FilePermission'>
+    readonly createdAt: FieldRef<"FileShareCourse", 'DateTime'>
+    readonly updatedAt: FieldRef<"FileShareCourse", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * FileShareCourse findUnique
+   */
+  export type FileShareCourseFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FileShareCourse
+     */
+    select?: FileShareCourseSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FileShareCourse
+     */
+    omit?: FileShareCourseOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FileShareCourseInclude<ExtArgs> | null
+    /**
+     * Filter, which FileShareCourse to fetch.
+     */
+    where: FileShareCourseWhereUniqueInput
+  }
+
+  /**
+   * FileShareCourse findUniqueOrThrow
+   */
+  export type FileShareCourseFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FileShareCourse
+     */
+    select?: FileShareCourseSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FileShareCourse
+     */
+    omit?: FileShareCourseOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FileShareCourseInclude<ExtArgs> | null
+    /**
+     * Filter, which FileShareCourse to fetch.
+     */
+    where: FileShareCourseWhereUniqueInput
+  }
+
+  /**
+   * FileShareCourse findFirst
+   */
+  export type FileShareCourseFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FileShareCourse
+     */
+    select?: FileShareCourseSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FileShareCourse
+     */
+    omit?: FileShareCourseOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FileShareCourseInclude<ExtArgs> | null
+    /**
+     * Filter, which FileShareCourse to fetch.
+     */
+    where?: FileShareCourseWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of FileShareCourses to fetch.
+     */
+    orderBy?: FileShareCourseOrderByWithRelationInput | FileShareCourseOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for FileShareCourses.
+     */
+    cursor?: FileShareCourseWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` FileShareCourses from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` FileShareCourses.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of FileShareCourses.
+     */
+    distinct?: FileShareCourseScalarFieldEnum | FileShareCourseScalarFieldEnum[]
+  }
+
+  /**
+   * FileShareCourse findFirstOrThrow
+   */
+  export type FileShareCourseFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FileShareCourse
+     */
+    select?: FileShareCourseSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FileShareCourse
+     */
+    omit?: FileShareCourseOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FileShareCourseInclude<ExtArgs> | null
+    /**
+     * Filter, which FileShareCourse to fetch.
+     */
+    where?: FileShareCourseWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of FileShareCourses to fetch.
+     */
+    orderBy?: FileShareCourseOrderByWithRelationInput | FileShareCourseOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for FileShareCourses.
+     */
+    cursor?: FileShareCourseWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` FileShareCourses from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` FileShareCourses.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of FileShareCourses.
+     */
+    distinct?: FileShareCourseScalarFieldEnum | FileShareCourseScalarFieldEnum[]
+  }
+
+  /**
+   * FileShareCourse findMany
+   */
+  export type FileShareCourseFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FileShareCourse
+     */
+    select?: FileShareCourseSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FileShareCourse
+     */
+    omit?: FileShareCourseOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FileShareCourseInclude<ExtArgs> | null
+    /**
+     * Filter, which FileShareCourses to fetch.
+     */
+    where?: FileShareCourseWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of FileShareCourses to fetch.
+     */
+    orderBy?: FileShareCourseOrderByWithRelationInput | FileShareCourseOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing FileShareCourses.
+     */
+    cursor?: FileShareCourseWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` FileShareCourses from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` FileShareCourses.
+     */
+    skip?: number
+    distinct?: FileShareCourseScalarFieldEnum | FileShareCourseScalarFieldEnum[]
+  }
+
+  /**
+   * FileShareCourse create
+   */
+  export type FileShareCourseCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FileShareCourse
+     */
+    select?: FileShareCourseSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FileShareCourse
+     */
+    omit?: FileShareCourseOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FileShareCourseInclude<ExtArgs> | null
+    /**
+     * The data needed to create a FileShareCourse.
+     */
+    data: XOR<FileShareCourseCreateInput, FileShareCourseUncheckedCreateInput>
+  }
+
+  /**
+   * FileShareCourse createMany
+   */
+  export type FileShareCourseCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many FileShareCourses.
+     */
+    data: FileShareCourseCreateManyInput | FileShareCourseCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * FileShareCourse createManyAndReturn
+   */
+  export type FileShareCourseCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FileShareCourse
+     */
+    select?: FileShareCourseSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the FileShareCourse
+     */
+    omit?: FileShareCourseOmit<ExtArgs> | null
+    /**
+     * The data used to create many FileShareCourses.
+     */
+    data: FileShareCourseCreateManyInput | FileShareCourseCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FileShareCourseIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * FileShareCourse update
+   */
+  export type FileShareCourseUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FileShareCourse
+     */
+    select?: FileShareCourseSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FileShareCourse
+     */
+    omit?: FileShareCourseOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FileShareCourseInclude<ExtArgs> | null
+    /**
+     * The data needed to update a FileShareCourse.
+     */
+    data: XOR<FileShareCourseUpdateInput, FileShareCourseUncheckedUpdateInput>
+    /**
+     * Choose, which FileShareCourse to update.
+     */
+    where: FileShareCourseWhereUniqueInput
+  }
+
+  /**
+   * FileShareCourse updateMany
+   */
+  export type FileShareCourseUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update FileShareCourses.
+     */
+    data: XOR<FileShareCourseUpdateManyMutationInput, FileShareCourseUncheckedUpdateManyInput>
+    /**
+     * Filter which FileShareCourses to update
+     */
+    where?: FileShareCourseWhereInput
+    /**
+     * Limit how many FileShareCourses to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * FileShareCourse updateManyAndReturn
+   */
+  export type FileShareCourseUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FileShareCourse
+     */
+    select?: FileShareCourseSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the FileShareCourse
+     */
+    omit?: FileShareCourseOmit<ExtArgs> | null
+    /**
+     * The data used to update FileShareCourses.
+     */
+    data: XOR<FileShareCourseUpdateManyMutationInput, FileShareCourseUncheckedUpdateManyInput>
+    /**
+     * Filter which FileShareCourses to update
+     */
+    where?: FileShareCourseWhereInput
+    /**
+     * Limit how many FileShareCourses to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FileShareCourseIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * FileShareCourse upsert
+   */
+  export type FileShareCourseUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FileShareCourse
+     */
+    select?: FileShareCourseSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FileShareCourse
+     */
+    omit?: FileShareCourseOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FileShareCourseInclude<ExtArgs> | null
+    /**
+     * The filter to search for the FileShareCourse to update in case it exists.
+     */
+    where: FileShareCourseWhereUniqueInput
+    /**
+     * In case the FileShareCourse found by the `where` argument doesn't exist, create a new FileShareCourse with this data.
+     */
+    create: XOR<FileShareCourseCreateInput, FileShareCourseUncheckedCreateInput>
+    /**
+     * In case the FileShareCourse was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<FileShareCourseUpdateInput, FileShareCourseUncheckedUpdateInput>
+  }
+
+  /**
+   * FileShareCourse delete
+   */
+  export type FileShareCourseDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FileShareCourse
+     */
+    select?: FileShareCourseSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FileShareCourse
+     */
+    omit?: FileShareCourseOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FileShareCourseInclude<ExtArgs> | null
+    /**
+     * Filter which FileShareCourse to delete.
+     */
+    where: FileShareCourseWhereUniqueInput
+  }
+
+  /**
+   * FileShareCourse deleteMany
+   */
+  export type FileShareCourseDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which FileShareCourses to delete
+     */
+    where?: FileShareCourseWhereInput
+    /**
+     * Limit how many FileShareCourses to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * FileShareCourse without action
+   */
+  export type FileShareCourseDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FileShareCourse
+     */
+    select?: FileShareCourseSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FileShareCourse
+     */
+    omit?: FileShareCourseOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FileShareCourseInclude<ExtArgs> | null
   }
 
 
@@ -11951,6 +18209,7 @@ export namespace Prisma {
     students?: boolean | School$studentsArgs<ExtArgs>
     assignments?: boolean | School$assignmentsArgs<ExtArgs>
     periods?: boolean | School$periodsArgs<ExtArgs>
+    fileShares?: boolean | School$fileSharesArgs<ExtArgs>
     _count?: boolean | SchoolCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["school"]>
 
@@ -12023,6 +18282,7 @@ export namespace Prisma {
     students?: boolean | School$studentsArgs<ExtArgs>
     assignments?: boolean | School$assignmentsArgs<ExtArgs>
     periods?: boolean | School$periodsArgs<ExtArgs>
+    fileShares?: boolean | School$fileSharesArgs<ExtArgs>
     _count?: boolean | SchoolCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type SchoolIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -12043,6 +18303,7 @@ export namespace Prisma {
       students: Prisma.$StudentPayload<ExtArgs>[]
       assignments: Prisma.$AssignmentPayload<ExtArgs>[]
       periods: Prisma.$PeriodPayload<ExtArgs>[]
+      fileShares: Prisma.$FileShareSchoolPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -12463,6 +18724,7 @@ export namespace Prisma {
     students<T extends School$studentsArgs<ExtArgs> = {}>(args?: Subset<T, School$studentsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$StudentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     assignments<T extends School$assignmentsArgs<ExtArgs> = {}>(args?: Subset<T, School$assignmentsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AssignmentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     periods<T extends School$periodsArgs<ExtArgs> = {}>(args?: Subset<T, School$periodsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PeriodPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    fileShares<T extends School$fileSharesArgs<ExtArgs> = {}>(args?: Subset<T, School$fileSharesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FileShareSchoolPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -13069,6 +19331,30 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: PeriodScalarFieldEnum | PeriodScalarFieldEnum[]
+  }
+
+  /**
+   * School.fileShares
+   */
+  export type School$fileSharesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FileShareSchool
+     */
+    select?: FileShareSchoolSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FileShareSchool
+     */
+    omit?: FileShareSchoolOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FileShareSchoolInclude<ExtArgs> | null
+    where?: FileShareSchoolWhereInput
+    orderBy?: FileShareSchoolOrderByWithRelationInput | FileShareSchoolOrderByWithRelationInput[]
+    cursor?: FileShareSchoolWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: FileShareSchoolScalarFieldEnum | FileShareSchoolScalarFieldEnum[]
   }
 
   /**
@@ -18031,6 +24317,7 @@ export namespace Prisma {
     gradeBuckets?: boolean | Course$gradeBucketsArgs<ExtArgs>
     grades?: boolean | Course$gradesArgs<ExtArgs>
     weeklySchedules?: boolean | Course$weeklySchedulesArgs<ExtArgs>
+    fileShares?: boolean | Course$fileSharesArgs<ExtArgs>
     _count?: boolean | CourseCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["course"]>
 
@@ -18106,6 +24393,7 @@ export namespace Prisma {
     gradeBuckets?: boolean | Course$gradeBucketsArgs<ExtArgs>
     grades?: boolean | Course$gradesArgs<ExtArgs>
     weeklySchedules?: boolean | Course$weeklySchedulesArgs<ExtArgs>
+    fileShares?: boolean | Course$fileSharesArgs<ExtArgs>
     _count?: boolean | CourseCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type CourseIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -18141,6 +24429,7 @@ export namespace Prisma {
       gradeBuckets: Prisma.$GradeBucketPayload<ExtArgs>[]
       grades: Prisma.$GradePayload<ExtArgs>[]
       weeklySchedules: Prisma.$ClassGroupWeeklySchedulePayload<ExtArgs>[]
+      fileShares: Prisma.$FileShareCoursePayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -18562,6 +24851,7 @@ export namespace Prisma {
     gradeBuckets<T extends Course$gradeBucketsArgs<ExtArgs> = {}>(args?: Subset<T, Course$gradeBucketsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$GradeBucketPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     grades<T extends Course$gradesArgs<ExtArgs> = {}>(args?: Subset<T, Course$gradesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$GradePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     weeklySchedules<T extends Course$weeklySchedulesArgs<ExtArgs> = {}>(args?: Subset<T, Course$weeklySchedulesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ClassGroupWeeklySchedulePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    fileShares<T extends Course$fileSharesArgs<ExtArgs> = {}>(args?: Subset<T, Course$fileSharesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FileShareCoursePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -19205,6 +25495,30 @@ export namespace Prisma {
   }
 
   /**
+   * Course.fileShares
+   */
+  export type Course$fileSharesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FileShareCourse
+     */
+    select?: FileShareCourseSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FileShareCourse
+     */
+    omit?: FileShareCourseOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FileShareCourseInclude<ExtArgs> | null
+    where?: FileShareCourseWhereInput
+    orderBy?: FileShareCourseOrderByWithRelationInput | FileShareCourseOrderByWithRelationInput[]
+    cursor?: FileShareCourseWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: FileShareCourseScalarFieldEnum | FileShareCourseScalarFieldEnum[]
+  }
+
+  /**
    * Course without action
    */
   export type CourseDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -19437,6 +25751,7 @@ export namespace Prisma {
     quizSchedules?: boolean | ClassGroup$quizSchedulesArgs<ExtArgs>
     quizSubmissions?: boolean | ClassGroup$quizSubmissionsArgs<ExtArgs>
     weeklySchedules?: boolean | ClassGroup$weeklySchedulesArgs<ExtArgs>
+    fileShares?: boolean | ClassGroup$fileSharesArgs<ExtArgs>
     _count?: boolean | ClassGroupCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["classGroup"]>
 
@@ -19499,6 +25814,7 @@ export namespace Prisma {
     quizSchedules?: boolean | ClassGroup$quizSchedulesArgs<ExtArgs>
     quizSubmissions?: boolean | ClassGroup$quizSubmissionsArgs<ExtArgs>
     weeklySchedules?: boolean | ClassGroup$weeklySchedulesArgs<ExtArgs>
+    fileShares?: boolean | ClassGroup$fileSharesArgs<ExtArgs>
     _count?: boolean | ClassGroupCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type ClassGroupIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -19527,6 +25843,7 @@ export namespace Prisma {
       quizSchedules: Prisma.$QuizSchedulePayload<ExtArgs>[]
       quizSubmissions: Prisma.$QuizSubmissionPayload<ExtArgs>[]
       weeklySchedules: Prisma.$ClassGroupWeeklySchedulePayload<ExtArgs>[]
+      fileShares: Prisma.$FileShareClassGroupPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -19943,6 +26260,7 @@ export namespace Prisma {
     quizSchedules<T extends ClassGroup$quizSchedulesArgs<ExtArgs> = {}>(args?: Subset<T, ClassGroup$quizSchedulesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$QuizSchedulePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     quizSubmissions<T extends ClassGroup$quizSubmissionsArgs<ExtArgs> = {}>(args?: Subset<T, ClassGroup$quizSubmissionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$QuizSubmissionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     weeklySchedules<T extends ClassGroup$weeklySchedulesArgs<ExtArgs> = {}>(args?: Subset<T, ClassGroup$weeklySchedulesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ClassGroupWeeklySchedulePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    fileShares<T extends ClassGroup$fileSharesArgs<ExtArgs> = {}>(args?: Subset<T, ClassGroup$fileSharesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FileShareClassGroupPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -20538,6 +26856,30 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: ClassGroupWeeklyScheduleScalarFieldEnum | ClassGroupWeeklyScheduleScalarFieldEnum[]
+  }
+
+  /**
+   * ClassGroup.fileShares
+   */
+  export type ClassGroup$fileSharesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FileShareClassGroup
+     */
+    select?: FileShareClassGroupSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FileShareClassGroup
+     */
+    omit?: FileShareClassGroupOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FileShareClassGroupInclude<ExtArgs> | null
+    where?: FileShareClassGroupWhereInput
+    orderBy?: FileShareClassGroupOrderByWithRelationInput | FileShareClassGroupOrderByWithRelationInput[]
+    cursor?: FileShareClassGroupWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: FileShareClassGroupScalarFieldEnum | FileShareClassGroupScalarFieldEnum[]
   }
 
   /**
@@ -39330,6 +45672,70 @@ export namespace Prisma {
   export type MessageRecipientScalarFieldEnum = (typeof MessageRecipientScalarFieldEnum)[keyof typeof MessageRecipientScalarFieldEnum]
 
 
+  export const FileScalarFieldEnum: {
+    id: 'id',
+    organizationId: 'organizationId',
+    ownerId: 'ownerId',
+    name: 'name',
+    mimeType: 'mimeType',
+    size: 'size',
+    storageKey: 'storageKey',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt',
+    deletedAt: 'deletedAt'
+  };
+
+  export type FileScalarFieldEnum = (typeof FileScalarFieldEnum)[keyof typeof FileScalarFieldEnum]
+
+
+  export const FileShareUserScalarFieldEnum: {
+    id: 'id',
+    fileId: 'fileId',
+    userId: 'userId',
+    permission: 'permission',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type FileShareUserScalarFieldEnum = (typeof FileShareUserScalarFieldEnum)[keyof typeof FileShareUserScalarFieldEnum]
+
+
+  export const FileShareSchoolScalarFieldEnum: {
+    id: 'id',
+    fileId: 'fileId',
+    schoolId: 'schoolId',
+    permission: 'permission',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type FileShareSchoolScalarFieldEnum = (typeof FileShareSchoolScalarFieldEnum)[keyof typeof FileShareSchoolScalarFieldEnum]
+
+
+  export const FileShareClassGroupScalarFieldEnum: {
+    id: 'id',
+    fileId: 'fileId',
+    classGroupId: 'classGroupId',
+    permission: 'permission',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type FileShareClassGroupScalarFieldEnum = (typeof FileShareClassGroupScalarFieldEnum)[keyof typeof FileShareClassGroupScalarFieldEnum]
+
+
+  export const FileShareCourseScalarFieldEnum: {
+    id: 'id',
+    fileId: 'fileId',
+    courseId: 'courseId',
+    permission: 'permission',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type FileShareCourseScalarFieldEnum = (typeof FileShareCourseScalarFieldEnum)[keyof typeof FileShareCourseScalarFieldEnum]
+
+
   export const RoleScalarFieldEnum: {
     id: 'id',
     name: 'name',
@@ -39779,6 +46185,20 @@ export namespace Prisma {
 
 
   /**
+   * Reference to a field of type 'FilePermission'
+   */
+  export type EnumFilePermissionFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'FilePermission'>
+    
+
+
+  /**
+   * Reference to a field of type 'FilePermission[]'
+   */
+  export type ListEnumFilePermissionFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'FilePermission[]'>
+    
+
+
+  /**
    * Reference to a field of type 'Gender'
    */
   export type EnumGenderFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Gender'>
@@ -39885,6 +46305,7 @@ export namespace Prisma {
     Student?: StudentListRelationFilter
     quizzes?: QuizListRelationFilter
     messages?: MessageListRelationFilter
+    files?: FileListRelationFilter
   }
 
   export type OrganizationOrderByWithRelationInput = {
@@ -39904,6 +46325,7 @@ export namespace Prisma {
     Student?: StudentOrderByRelationAggregateInput
     quizzes?: QuizOrderByRelationAggregateInput
     messages?: MessageOrderByRelationAggregateInput
+    files?: FileOrderByRelationAggregateInput
   }
 
   export type OrganizationWhereUniqueInput = Prisma.AtLeast<{
@@ -39926,6 +46348,7 @@ export namespace Prisma {
     Student?: StudentListRelationFilter
     quizzes?: QuizListRelationFilter
     messages?: MessageListRelationFilter
+    files?: FileListRelationFilter
   }, "id">
 
   export type OrganizationOrderByWithAggregationInput = {
@@ -39974,6 +46397,8 @@ export namespace Prisma {
     teacher?: XOR<TeacherNullableScalarRelationFilter, TeacherWhereInput> | null
     sentMessages?: MessageListRelationFilter
     messageRecipients?: MessageRecipientListRelationFilter
+    filesOwned?: FileListRelationFilter
+    fileShares?: FileShareUserListRelationFilter
   }
 
   export type UserOrderByWithRelationInput = {
@@ -39995,6 +46420,8 @@ export namespace Prisma {
     teacher?: TeacherOrderByWithRelationInput
     sentMessages?: MessageOrderByRelationAggregateInput
     messageRecipients?: MessageRecipientOrderByRelationAggregateInput
+    filesOwned?: FileOrderByRelationAggregateInput
+    fileShares?: FileShareUserOrderByRelationAggregateInput
   }
 
   export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -40019,6 +46446,8 @@ export namespace Prisma {
     teacher?: XOR<TeacherNullableScalarRelationFilter, TeacherWhereInput> | null
     sentMessages?: MessageListRelationFilter
     messageRecipients?: MessageRecipientListRelationFilter
+    filesOwned?: FileListRelationFilter
+    fileShares?: FileShareUserListRelationFilter
   }, "id" | "email">
 
   export type UserOrderByWithAggregationInput = {
@@ -40202,6 +46631,359 @@ export namespace Prisma {
     deletedAt?: DateTimeNullableWithAggregatesFilter<"MessageRecipient"> | Date | string | null
   }
 
+  export type FileWhereInput = {
+    AND?: FileWhereInput | FileWhereInput[]
+    OR?: FileWhereInput[]
+    NOT?: FileWhereInput | FileWhereInput[]
+    id?: StringFilter<"File"> | string
+    organizationId?: StringFilter<"File"> | string
+    ownerId?: StringFilter<"File"> | string
+    name?: StringFilter<"File"> | string
+    mimeType?: StringFilter<"File"> | string
+    size?: IntFilter<"File"> | number
+    storageKey?: StringFilter<"File"> | string
+    createdAt?: DateTimeFilter<"File"> | Date | string
+    updatedAt?: DateTimeFilter<"File"> | Date | string
+    deletedAt?: DateTimeNullableFilter<"File"> | Date | string | null
+    organization?: XOR<OrganizationScalarRelationFilter, OrganizationWhereInput>
+    owner?: XOR<UserScalarRelationFilter, UserWhereInput>
+    sharesUsers?: FileShareUserListRelationFilter
+    sharesSchools?: FileShareSchoolListRelationFilter
+    sharesClassGroups?: FileShareClassGroupListRelationFilter
+    sharesCourses?: FileShareCourseListRelationFilter
+  }
+
+  export type FileOrderByWithRelationInput = {
+    id?: SortOrder
+    organizationId?: SortOrder
+    ownerId?: SortOrder
+    name?: SortOrder
+    mimeType?: SortOrder
+    size?: SortOrder
+    storageKey?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    deletedAt?: SortOrderInput | SortOrder
+    organization?: OrganizationOrderByWithRelationInput
+    owner?: UserOrderByWithRelationInput
+    sharesUsers?: FileShareUserOrderByRelationAggregateInput
+    sharesSchools?: FileShareSchoolOrderByRelationAggregateInput
+    sharesClassGroups?: FileShareClassGroupOrderByRelationAggregateInput
+    sharesCourses?: FileShareCourseOrderByRelationAggregateInput
+  }
+
+  export type FileWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: FileWhereInput | FileWhereInput[]
+    OR?: FileWhereInput[]
+    NOT?: FileWhereInput | FileWhereInput[]
+    organizationId?: StringFilter<"File"> | string
+    ownerId?: StringFilter<"File"> | string
+    name?: StringFilter<"File"> | string
+    mimeType?: StringFilter<"File"> | string
+    size?: IntFilter<"File"> | number
+    storageKey?: StringFilter<"File"> | string
+    createdAt?: DateTimeFilter<"File"> | Date | string
+    updatedAt?: DateTimeFilter<"File"> | Date | string
+    deletedAt?: DateTimeNullableFilter<"File"> | Date | string | null
+    organization?: XOR<OrganizationScalarRelationFilter, OrganizationWhereInput>
+    owner?: XOR<UserScalarRelationFilter, UserWhereInput>
+    sharesUsers?: FileShareUserListRelationFilter
+    sharesSchools?: FileShareSchoolListRelationFilter
+    sharesClassGroups?: FileShareClassGroupListRelationFilter
+    sharesCourses?: FileShareCourseListRelationFilter
+  }, "id">
+
+  export type FileOrderByWithAggregationInput = {
+    id?: SortOrder
+    organizationId?: SortOrder
+    ownerId?: SortOrder
+    name?: SortOrder
+    mimeType?: SortOrder
+    size?: SortOrder
+    storageKey?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    deletedAt?: SortOrderInput | SortOrder
+    _count?: FileCountOrderByAggregateInput
+    _avg?: FileAvgOrderByAggregateInput
+    _max?: FileMaxOrderByAggregateInput
+    _min?: FileMinOrderByAggregateInput
+    _sum?: FileSumOrderByAggregateInput
+  }
+
+  export type FileScalarWhereWithAggregatesInput = {
+    AND?: FileScalarWhereWithAggregatesInput | FileScalarWhereWithAggregatesInput[]
+    OR?: FileScalarWhereWithAggregatesInput[]
+    NOT?: FileScalarWhereWithAggregatesInput | FileScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"File"> | string
+    organizationId?: StringWithAggregatesFilter<"File"> | string
+    ownerId?: StringWithAggregatesFilter<"File"> | string
+    name?: StringWithAggregatesFilter<"File"> | string
+    mimeType?: StringWithAggregatesFilter<"File"> | string
+    size?: IntWithAggregatesFilter<"File"> | number
+    storageKey?: StringWithAggregatesFilter<"File"> | string
+    createdAt?: DateTimeWithAggregatesFilter<"File"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"File"> | Date | string
+    deletedAt?: DateTimeNullableWithAggregatesFilter<"File"> | Date | string | null
+  }
+
+  export type FileShareUserWhereInput = {
+    AND?: FileShareUserWhereInput | FileShareUserWhereInput[]
+    OR?: FileShareUserWhereInput[]
+    NOT?: FileShareUserWhereInput | FileShareUserWhereInput[]
+    id?: StringFilter<"FileShareUser"> | string
+    fileId?: StringFilter<"FileShareUser"> | string
+    userId?: StringFilter<"FileShareUser"> | string
+    permission?: EnumFilePermissionFilter<"FileShareUser"> | $Enums.FilePermission
+    createdAt?: DateTimeFilter<"FileShareUser"> | Date | string
+    updatedAt?: DateTimeFilter<"FileShareUser"> | Date | string
+    file?: XOR<FileScalarRelationFilter, FileWhereInput>
+    user?: XOR<UserScalarRelationFilter, UserWhereInput>
+  }
+
+  export type FileShareUserOrderByWithRelationInput = {
+    id?: SortOrder
+    fileId?: SortOrder
+    userId?: SortOrder
+    permission?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    file?: FileOrderByWithRelationInput
+    user?: UserOrderByWithRelationInput
+  }
+
+  export type FileShareUserWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    fileId_userId?: FileShareUserFileIdUserIdCompoundUniqueInput
+    AND?: FileShareUserWhereInput | FileShareUserWhereInput[]
+    OR?: FileShareUserWhereInput[]
+    NOT?: FileShareUserWhereInput | FileShareUserWhereInput[]
+    fileId?: StringFilter<"FileShareUser"> | string
+    userId?: StringFilter<"FileShareUser"> | string
+    permission?: EnumFilePermissionFilter<"FileShareUser"> | $Enums.FilePermission
+    createdAt?: DateTimeFilter<"FileShareUser"> | Date | string
+    updatedAt?: DateTimeFilter<"FileShareUser"> | Date | string
+    file?: XOR<FileScalarRelationFilter, FileWhereInput>
+    user?: XOR<UserScalarRelationFilter, UserWhereInput>
+  }, "id" | "fileId_userId">
+
+  export type FileShareUserOrderByWithAggregationInput = {
+    id?: SortOrder
+    fileId?: SortOrder
+    userId?: SortOrder
+    permission?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: FileShareUserCountOrderByAggregateInput
+    _max?: FileShareUserMaxOrderByAggregateInput
+    _min?: FileShareUserMinOrderByAggregateInput
+  }
+
+  export type FileShareUserScalarWhereWithAggregatesInput = {
+    AND?: FileShareUserScalarWhereWithAggregatesInput | FileShareUserScalarWhereWithAggregatesInput[]
+    OR?: FileShareUserScalarWhereWithAggregatesInput[]
+    NOT?: FileShareUserScalarWhereWithAggregatesInput | FileShareUserScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"FileShareUser"> | string
+    fileId?: StringWithAggregatesFilter<"FileShareUser"> | string
+    userId?: StringWithAggregatesFilter<"FileShareUser"> | string
+    permission?: EnumFilePermissionWithAggregatesFilter<"FileShareUser"> | $Enums.FilePermission
+    createdAt?: DateTimeWithAggregatesFilter<"FileShareUser"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"FileShareUser"> | Date | string
+  }
+
+  export type FileShareSchoolWhereInput = {
+    AND?: FileShareSchoolWhereInput | FileShareSchoolWhereInput[]
+    OR?: FileShareSchoolWhereInput[]
+    NOT?: FileShareSchoolWhereInput | FileShareSchoolWhereInput[]
+    id?: StringFilter<"FileShareSchool"> | string
+    fileId?: StringFilter<"FileShareSchool"> | string
+    schoolId?: StringFilter<"FileShareSchool"> | string
+    permission?: EnumFilePermissionFilter<"FileShareSchool"> | $Enums.FilePermission
+    createdAt?: DateTimeFilter<"FileShareSchool"> | Date | string
+    updatedAt?: DateTimeFilter<"FileShareSchool"> | Date | string
+    file?: XOR<FileScalarRelationFilter, FileWhereInput>
+    school?: XOR<SchoolScalarRelationFilter, SchoolWhereInput>
+  }
+
+  export type FileShareSchoolOrderByWithRelationInput = {
+    id?: SortOrder
+    fileId?: SortOrder
+    schoolId?: SortOrder
+    permission?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    file?: FileOrderByWithRelationInput
+    school?: SchoolOrderByWithRelationInput
+  }
+
+  export type FileShareSchoolWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    fileId_schoolId?: FileShareSchoolFileIdSchoolIdCompoundUniqueInput
+    AND?: FileShareSchoolWhereInput | FileShareSchoolWhereInput[]
+    OR?: FileShareSchoolWhereInput[]
+    NOT?: FileShareSchoolWhereInput | FileShareSchoolWhereInput[]
+    fileId?: StringFilter<"FileShareSchool"> | string
+    schoolId?: StringFilter<"FileShareSchool"> | string
+    permission?: EnumFilePermissionFilter<"FileShareSchool"> | $Enums.FilePermission
+    createdAt?: DateTimeFilter<"FileShareSchool"> | Date | string
+    updatedAt?: DateTimeFilter<"FileShareSchool"> | Date | string
+    file?: XOR<FileScalarRelationFilter, FileWhereInput>
+    school?: XOR<SchoolScalarRelationFilter, SchoolWhereInput>
+  }, "id" | "fileId_schoolId">
+
+  export type FileShareSchoolOrderByWithAggregationInput = {
+    id?: SortOrder
+    fileId?: SortOrder
+    schoolId?: SortOrder
+    permission?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: FileShareSchoolCountOrderByAggregateInput
+    _max?: FileShareSchoolMaxOrderByAggregateInput
+    _min?: FileShareSchoolMinOrderByAggregateInput
+  }
+
+  export type FileShareSchoolScalarWhereWithAggregatesInput = {
+    AND?: FileShareSchoolScalarWhereWithAggregatesInput | FileShareSchoolScalarWhereWithAggregatesInput[]
+    OR?: FileShareSchoolScalarWhereWithAggregatesInput[]
+    NOT?: FileShareSchoolScalarWhereWithAggregatesInput | FileShareSchoolScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"FileShareSchool"> | string
+    fileId?: StringWithAggregatesFilter<"FileShareSchool"> | string
+    schoolId?: StringWithAggregatesFilter<"FileShareSchool"> | string
+    permission?: EnumFilePermissionWithAggregatesFilter<"FileShareSchool"> | $Enums.FilePermission
+    createdAt?: DateTimeWithAggregatesFilter<"FileShareSchool"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"FileShareSchool"> | Date | string
+  }
+
+  export type FileShareClassGroupWhereInput = {
+    AND?: FileShareClassGroupWhereInput | FileShareClassGroupWhereInput[]
+    OR?: FileShareClassGroupWhereInput[]
+    NOT?: FileShareClassGroupWhereInput | FileShareClassGroupWhereInput[]
+    id?: StringFilter<"FileShareClassGroup"> | string
+    fileId?: StringFilter<"FileShareClassGroup"> | string
+    classGroupId?: StringFilter<"FileShareClassGroup"> | string
+    permission?: EnumFilePermissionFilter<"FileShareClassGroup"> | $Enums.FilePermission
+    createdAt?: DateTimeFilter<"FileShareClassGroup"> | Date | string
+    updatedAt?: DateTimeFilter<"FileShareClassGroup"> | Date | string
+    file?: XOR<FileScalarRelationFilter, FileWhereInput>
+    classGroup?: XOR<ClassGroupScalarRelationFilter, ClassGroupWhereInput>
+  }
+
+  export type FileShareClassGroupOrderByWithRelationInput = {
+    id?: SortOrder
+    fileId?: SortOrder
+    classGroupId?: SortOrder
+    permission?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    file?: FileOrderByWithRelationInput
+    classGroup?: ClassGroupOrderByWithRelationInput
+  }
+
+  export type FileShareClassGroupWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    fileId_classGroupId?: FileShareClassGroupFileIdClassGroupIdCompoundUniqueInput
+    AND?: FileShareClassGroupWhereInput | FileShareClassGroupWhereInput[]
+    OR?: FileShareClassGroupWhereInput[]
+    NOT?: FileShareClassGroupWhereInput | FileShareClassGroupWhereInput[]
+    fileId?: StringFilter<"FileShareClassGroup"> | string
+    classGroupId?: StringFilter<"FileShareClassGroup"> | string
+    permission?: EnumFilePermissionFilter<"FileShareClassGroup"> | $Enums.FilePermission
+    createdAt?: DateTimeFilter<"FileShareClassGroup"> | Date | string
+    updatedAt?: DateTimeFilter<"FileShareClassGroup"> | Date | string
+    file?: XOR<FileScalarRelationFilter, FileWhereInput>
+    classGroup?: XOR<ClassGroupScalarRelationFilter, ClassGroupWhereInput>
+  }, "id" | "fileId_classGroupId">
+
+  export type FileShareClassGroupOrderByWithAggregationInput = {
+    id?: SortOrder
+    fileId?: SortOrder
+    classGroupId?: SortOrder
+    permission?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: FileShareClassGroupCountOrderByAggregateInput
+    _max?: FileShareClassGroupMaxOrderByAggregateInput
+    _min?: FileShareClassGroupMinOrderByAggregateInput
+  }
+
+  export type FileShareClassGroupScalarWhereWithAggregatesInput = {
+    AND?: FileShareClassGroupScalarWhereWithAggregatesInput | FileShareClassGroupScalarWhereWithAggregatesInput[]
+    OR?: FileShareClassGroupScalarWhereWithAggregatesInput[]
+    NOT?: FileShareClassGroupScalarWhereWithAggregatesInput | FileShareClassGroupScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"FileShareClassGroup"> | string
+    fileId?: StringWithAggregatesFilter<"FileShareClassGroup"> | string
+    classGroupId?: StringWithAggregatesFilter<"FileShareClassGroup"> | string
+    permission?: EnumFilePermissionWithAggregatesFilter<"FileShareClassGroup"> | $Enums.FilePermission
+    createdAt?: DateTimeWithAggregatesFilter<"FileShareClassGroup"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"FileShareClassGroup"> | Date | string
+  }
+
+  export type FileShareCourseWhereInput = {
+    AND?: FileShareCourseWhereInput | FileShareCourseWhereInput[]
+    OR?: FileShareCourseWhereInput[]
+    NOT?: FileShareCourseWhereInput | FileShareCourseWhereInput[]
+    id?: StringFilter<"FileShareCourse"> | string
+    fileId?: StringFilter<"FileShareCourse"> | string
+    courseId?: StringFilter<"FileShareCourse"> | string
+    permission?: EnumFilePermissionFilter<"FileShareCourse"> | $Enums.FilePermission
+    createdAt?: DateTimeFilter<"FileShareCourse"> | Date | string
+    updatedAt?: DateTimeFilter<"FileShareCourse"> | Date | string
+    file?: XOR<FileScalarRelationFilter, FileWhereInput>
+    course?: XOR<CourseScalarRelationFilter, CourseWhereInput>
+  }
+
+  export type FileShareCourseOrderByWithRelationInput = {
+    id?: SortOrder
+    fileId?: SortOrder
+    courseId?: SortOrder
+    permission?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    file?: FileOrderByWithRelationInput
+    course?: CourseOrderByWithRelationInput
+  }
+
+  export type FileShareCourseWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    fileId_courseId?: FileShareCourseFileIdCourseIdCompoundUniqueInput
+    AND?: FileShareCourseWhereInput | FileShareCourseWhereInput[]
+    OR?: FileShareCourseWhereInput[]
+    NOT?: FileShareCourseWhereInput | FileShareCourseWhereInput[]
+    fileId?: StringFilter<"FileShareCourse"> | string
+    courseId?: StringFilter<"FileShareCourse"> | string
+    permission?: EnumFilePermissionFilter<"FileShareCourse"> | $Enums.FilePermission
+    createdAt?: DateTimeFilter<"FileShareCourse"> | Date | string
+    updatedAt?: DateTimeFilter<"FileShareCourse"> | Date | string
+    file?: XOR<FileScalarRelationFilter, FileWhereInput>
+    course?: XOR<CourseScalarRelationFilter, CourseWhereInput>
+  }, "id" | "fileId_courseId">
+
+  export type FileShareCourseOrderByWithAggregationInput = {
+    id?: SortOrder
+    fileId?: SortOrder
+    courseId?: SortOrder
+    permission?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: FileShareCourseCountOrderByAggregateInput
+    _max?: FileShareCourseMaxOrderByAggregateInput
+    _min?: FileShareCourseMinOrderByAggregateInput
+  }
+
+  export type FileShareCourseScalarWhereWithAggregatesInput = {
+    AND?: FileShareCourseScalarWhereWithAggregatesInput | FileShareCourseScalarWhereWithAggregatesInput[]
+    OR?: FileShareCourseScalarWhereWithAggregatesInput[]
+    NOT?: FileShareCourseScalarWhereWithAggregatesInput | FileShareCourseScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"FileShareCourse"> | string
+    fileId?: StringWithAggregatesFilter<"FileShareCourse"> | string
+    courseId?: StringWithAggregatesFilter<"FileShareCourse"> | string
+    permission?: EnumFilePermissionWithAggregatesFilter<"FileShareCourse"> | $Enums.FilePermission
+    createdAt?: DateTimeWithAggregatesFilter<"FileShareCourse"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"FileShareCourse"> | Date | string
+  }
+
   export type RoleWhereInput = {
     AND?: RoleWhereInput | RoleWhereInput[]
     OR?: RoleWhereInput[]
@@ -40352,6 +47134,7 @@ export namespace Prisma {
     students?: StudentListRelationFilter
     assignments?: AssignmentListRelationFilter
     periods?: PeriodListRelationFilter
+    fileShares?: FileShareSchoolListRelationFilter
   }
 
   export type SchoolOrderByWithRelationInput = {
@@ -40379,6 +47162,7 @@ export namespace Prisma {
     students?: StudentOrderByRelationAggregateInput
     assignments?: AssignmentOrderByRelationAggregateInput
     periods?: PeriodOrderByRelationAggregateInput
+    fileShares?: FileShareSchoolOrderByRelationAggregateInput
   }
 
   export type SchoolWhereUniqueInput = Prisma.AtLeast<{
@@ -40409,6 +47193,7 @@ export namespace Prisma {
     students?: StudentListRelationFilter
     assignments?: AssignmentListRelationFilter
     periods?: PeriodListRelationFilter
+    fileShares?: FileShareSchoolListRelationFilter
   }, "id">
 
   export type SchoolOrderByWithAggregationInput = {
@@ -40805,6 +47590,7 @@ export namespace Prisma {
     gradeBuckets?: GradeBucketListRelationFilter
     grades?: GradeListRelationFilter
     weeklySchedules?: ClassGroupWeeklyScheduleListRelationFilter
+    fileShares?: FileShareCourseListRelationFilter
   }
 
   export type CourseOrderByWithRelationInput = {
@@ -40833,6 +47619,7 @@ export namespace Prisma {
     gradeBuckets?: GradeBucketOrderByRelationAggregateInput
     grades?: GradeOrderByRelationAggregateInput
     weeklySchedules?: ClassGroupWeeklyScheduleOrderByRelationAggregateInput
+    fileShares?: FileShareCourseOrderByRelationAggregateInput
   }
 
   export type CourseWhereUniqueInput = Prisma.AtLeast<{
@@ -40867,6 +47654,7 @@ export namespace Prisma {
     gradeBuckets?: GradeBucketListRelationFilter
     grades?: GradeListRelationFilter
     weeklySchedules?: ClassGroupWeeklyScheduleListRelationFilter
+    fileShares?: FileShareCourseListRelationFilter
   }, "id" | "schoolId_name" | "schoolId_code" | "schoolId_subjectId_studyPlanId">
 
   export type CourseOrderByWithAggregationInput = {
@@ -40929,6 +47717,7 @@ export namespace Prisma {
     quizSchedules?: QuizScheduleListRelationFilter
     quizSubmissions?: QuizSubmissionListRelationFilter
     weeklySchedules?: ClassGroupWeeklyScheduleListRelationFilter
+    fileShares?: FileShareClassGroupListRelationFilter
   }
 
   export type ClassGroupOrderByWithRelationInput = {
@@ -40952,6 +47741,7 @@ export namespace Prisma {
     quizSchedules?: QuizScheduleOrderByRelationAggregateInput
     quizSubmissions?: QuizSubmissionOrderByRelationAggregateInput
     weeklySchedules?: ClassGroupWeeklyScheduleOrderByRelationAggregateInput
+    fileShares?: FileShareClassGroupOrderByRelationAggregateInput
   }
 
   export type ClassGroupWhereUniqueInput = Prisma.AtLeast<{
@@ -40978,6 +47768,7 @@ export namespace Prisma {
     quizSchedules?: QuizScheduleListRelationFilter
     quizSubmissions?: QuizSubmissionListRelationFilter
     weeklySchedules?: ClassGroupWeeklyScheduleListRelationFilter
+    fileShares?: FileShareClassGroupListRelationFilter
   }, "id">
 
   export type ClassGroupOrderByWithAggregationInput = {
@@ -42327,6 +49118,7 @@ export namespace Prisma {
     Student?: StudentCreateNestedManyWithoutOrganizationInput
     quizzes?: QuizCreateNestedManyWithoutOrganizationInput
     messages?: MessageCreateNestedManyWithoutOrganizationInput
+    files?: FileCreateNestedManyWithoutOrganizationInput
   }
 
   export type OrganizationUncheckedCreateInput = {
@@ -42346,6 +49138,7 @@ export namespace Prisma {
     Student?: StudentUncheckedCreateNestedManyWithoutOrganizationInput
     quizzes?: QuizUncheckedCreateNestedManyWithoutOrganizationInput
     messages?: MessageUncheckedCreateNestedManyWithoutOrganizationInput
+    files?: FileUncheckedCreateNestedManyWithoutOrganizationInput
   }
 
   export type OrganizationUpdateInput = {
@@ -42365,6 +49158,7 @@ export namespace Prisma {
     Student?: StudentUpdateManyWithoutOrganizationNestedInput
     quizzes?: QuizUpdateManyWithoutOrganizationNestedInput
     messages?: MessageUpdateManyWithoutOrganizationNestedInput
+    files?: FileUpdateManyWithoutOrganizationNestedInput
   }
 
   export type OrganizationUncheckedUpdateInput = {
@@ -42384,6 +49178,7 @@ export namespace Prisma {
     Student?: StudentUncheckedUpdateManyWithoutOrganizationNestedInput
     quizzes?: QuizUncheckedUpdateManyWithoutOrganizationNestedInput
     messages?: MessageUncheckedUpdateManyWithoutOrganizationNestedInput
+    files?: FileUncheckedUpdateManyWithoutOrganizationNestedInput
   }
 
   export type OrganizationCreateManyInput = {
@@ -42430,6 +49225,8 @@ export namespace Prisma {
     teacher?: TeacherCreateNestedOneWithoutUserInput
     sentMessages?: MessageCreateNestedManyWithoutSenderInput
     messageRecipients?: MessageRecipientCreateNestedManyWithoutUserInput
+    filesOwned?: FileCreateNestedManyWithoutOwnerInput
+    fileShares?: FileShareUserCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateInput = {
@@ -42449,6 +49246,8 @@ export namespace Prisma {
     teacher?: TeacherUncheckedCreateNestedOneWithoutUserInput
     sentMessages?: MessageUncheckedCreateNestedManyWithoutSenderInput
     messageRecipients?: MessageRecipientUncheckedCreateNestedManyWithoutUserInput
+    filesOwned?: FileUncheckedCreateNestedManyWithoutOwnerInput
+    fileShares?: FileShareUserUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserUpdateInput = {
@@ -42468,6 +49267,8 @@ export namespace Prisma {
     teacher?: TeacherUpdateOneWithoutUserNestedInput
     sentMessages?: MessageUpdateManyWithoutSenderNestedInput
     messageRecipients?: MessageRecipientUpdateManyWithoutUserNestedInput
+    filesOwned?: FileUpdateManyWithoutOwnerNestedInput
+    fileShares?: FileShareUserUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateInput = {
@@ -42487,6 +49288,8 @@ export namespace Prisma {
     teacher?: TeacherUncheckedUpdateOneWithoutUserNestedInput
     sentMessages?: MessageUncheckedUpdateManyWithoutSenderNestedInput
     messageRecipients?: MessageRecipientUncheckedUpdateManyWithoutUserNestedInput
+    filesOwned?: FileUncheckedUpdateManyWithoutOwnerNestedInput
+    fileShares?: FileShareUserUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type UserCreateManyInput = {
@@ -42679,6 +49482,355 @@ export namespace Prisma {
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
+  export type FileCreateInput = {
+    id?: string
+    name: string
+    mimeType: string
+    size: number
+    storageKey: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    deletedAt?: Date | string | null
+    organization: OrganizationCreateNestedOneWithoutFilesInput
+    owner: UserCreateNestedOneWithoutFilesOwnedInput
+    sharesUsers?: FileShareUserCreateNestedManyWithoutFileInput
+    sharesSchools?: FileShareSchoolCreateNestedManyWithoutFileInput
+    sharesClassGroups?: FileShareClassGroupCreateNestedManyWithoutFileInput
+    sharesCourses?: FileShareCourseCreateNestedManyWithoutFileInput
+  }
+
+  export type FileUncheckedCreateInput = {
+    id?: string
+    organizationId: string
+    ownerId: string
+    name: string
+    mimeType: string
+    size: number
+    storageKey: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    deletedAt?: Date | string | null
+    sharesUsers?: FileShareUserUncheckedCreateNestedManyWithoutFileInput
+    sharesSchools?: FileShareSchoolUncheckedCreateNestedManyWithoutFileInput
+    sharesClassGroups?: FileShareClassGroupUncheckedCreateNestedManyWithoutFileInput
+    sharesCourses?: FileShareCourseUncheckedCreateNestedManyWithoutFileInput
+  }
+
+  export type FileUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    mimeType?: StringFieldUpdateOperationsInput | string
+    size?: IntFieldUpdateOperationsInput | number
+    storageKey?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    organization?: OrganizationUpdateOneRequiredWithoutFilesNestedInput
+    owner?: UserUpdateOneRequiredWithoutFilesOwnedNestedInput
+    sharesUsers?: FileShareUserUpdateManyWithoutFileNestedInput
+    sharesSchools?: FileShareSchoolUpdateManyWithoutFileNestedInput
+    sharesClassGroups?: FileShareClassGroupUpdateManyWithoutFileNestedInput
+    sharesCourses?: FileShareCourseUpdateManyWithoutFileNestedInput
+  }
+
+  export type FileUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    organizationId?: StringFieldUpdateOperationsInput | string
+    ownerId?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    mimeType?: StringFieldUpdateOperationsInput | string
+    size?: IntFieldUpdateOperationsInput | number
+    storageKey?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    sharesUsers?: FileShareUserUncheckedUpdateManyWithoutFileNestedInput
+    sharesSchools?: FileShareSchoolUncheckedUpdateManyWithoutFileNestedInput
+    sharesClassGroups?: FileShareClassGroupUncheckedUpdateManyWithoutFileNestedInput
+    sharesCourses?: FileShareCourseUncheckedUpdateManyWithoutFileNestedInput
+  }
+
+  export type FileCreateManyInput = {
+    id?: string
+    organizationId: string
+    ownerId: string
+    name: string
+    mimeType: string
+    size: number
+    storageKey: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    deletedAt?: Date | string | null
+  }
+
+  export type FileUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    mimeType?: StringFieldUpdateOperationsInput | string
+    size?: IntFieldUpdateOperationsInput | number
+    storageKey?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type FileUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    organizationId?: StringFieldUpdateOperationsInput | string
+    ownerId?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    mimeType?: StringFieldUpdateOperationsInput | string
+    size?: IntFieldUpdateOperationsInput | number
+    storageKey?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type FileShareUserCreateInput = {
+    id?: string
+    permission: $Enums.FilePermission
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    file: FileCreateNestedOneWithoutSharesUsersInput
+    user: UserCreateNestedOneWithoutFileSharesInput
+  }
+
+  export type FileShareUserUncheckedCreateInput = {
+    id?: string
+    fileId: string
+    userId: string
+    permission: $Enums.FilePermission
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type FileShareUserUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    permission?: EnumFilePermissionFieldUpdateOperationsInput | $Enums.FilePermission
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    file?: FileUpdateOneRequiredWithoutSharesUsersNestedInput
+    user?: UserUpdateOneRequiredWithoutFileSharesNestedInput
+  }
+
+  export type FileShareUserUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    fileId?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    permission?: EnumFilePermissionFieldUpdateOperationsInput | $Enums.FilePermission
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type FileShareUserCreateManyInput = {
+    id?: string
+    fileId: string
+    userId: string
+    permission: $Enums.FilePermission
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type FileShareUserUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    permission?: EnumFilePermissionFieldUpdateOperationsInput | $Enums.FilePermission
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type FileShareUserUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    fileId?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    permission?: EnumFilePermissionFieldUpdateOperationsInput | $Enums.FilePermission
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type FileShareSchoolCreateInput = {
+    id?: string
+    permission: $Enums.FilePermission
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    file: FileCreateNestedOneWithoutSharesSchoolsInput
+    school: SchoolCreateNestedOneWithoutFileSharesInput
+  }
+
+  export type FileShareSchoolUncheckedCreateInput = {
+    id?: string
+    fileId: string
+    schoolId: string
+    permission: $Enums.FilePermission
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type FileShareSchoolUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    permission?: EnumFilePermissionFieldUpdateOperationsInput | $Enums.FilePermission
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    file?: FileUpdateOneRequiredWithoutSharesSchoolsNestedInput
+    school?: SchoolUpdateOneRequiredWithoutFileSharesNestedInput
+  }
+
+  export type FileShareSchoolUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    fileId?: StringFieldUpdateOperationsInput | string
+    schoolId?: StringFieldUpdateOperationsInput | string
+    permission?: EnumFilePermissionFieldUpdateOperationsInput | $Enums.FilePermission
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type FileShareSchoolCreateManyInput = {
+    id?: string
+    fileId: string
+    schoolId: string
+    permission: $Enums.FilePermission
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type FileShareSchoolUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    permission?: EnumFilePermissionFieldUpdateOperationsInput | $Enums.FilePermission
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type FileShareSchoolUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    fileId?: StringFieldUpdateOperationsInput | string
+    schoolId?: StringFieldUpdateOperationsInput | string
+    permission?: EnumFilePermissionFieldUpdateOperationsInput | $Enums.FilePermission
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type FileShareClassGroupCreateInput = {
+    id?: string
+    permission: $Enums.FilePermission
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    file: FileCreateNestedOneWithoutSharesClassGroupsInput
+    classGroup: ClassGroupCreateNestedOneWithoutFileSharesInput
+  }
+
+  export type FileShareClassGroupUncheckedCreateInput = {
+    id?: string
+    fileId: string
+    classGroupId: string
+    permission: $Enums.FilePermission
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type FileShareClassGroupUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    permission?: EnumFilePermissionFieldUpdateOperationsInput | $Enums.FilePermission
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    file?: FileUpdateOneRequiredWithoutSharesClassGroupsNestedInput
+    classGroup?: ClassGroupUpdateOneRequiredWithoutFileSharesNestedInput
+  }
+
+  export type FileShareClassGroupUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    fileId?: StringFieldUpdateOperationsInput | string
+    classGroupId?: StringFieldUpdateOperationsInput | string
+    permission?: EnumFilePermissionFieldUpdateOperationsInput | $Enums.FilePermission
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type FileShareClassGroupCreateManyInput = {
+    id?: string
+    fileId: string
+    classGroupId: string
+    permission: $Enums.FilePermission
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type FileShareClassGroupUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    permission?: EnumFilePermissionFieldUpdateOperationsInput | $Enums.FilePermission
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type FileShareClassGroupUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    fileId?: StringFieldUpdateOperationsInput | string
+    classGroupId?: StringFieldUpdateOperationsInput | string
+    permission?: EnumFilePermissionFieldUpdateOperationsInput | $Enums.FilePermission
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type FileShareCourseCreateInput = {
+    id?: string
+    permission: $Enums.FilePermission
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    file: FileCreateNestedOneWithoutSharesCoursesInput
+    course: CourseCreateNestedOneWithoutFileSharesInput
+  }
+
+  export type FileShareCourseUncheckedCreateInput = {
+    id?: string
+    fileId: string
+    courseId: string
+    permission: $Enums.FilePermission
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type FileShareCourseUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    permission?: EnumFilePermissionFieldUpdateOperationsInput | $Enums.FilePermission
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    file?: FileUpdateOneRequiredWithoutSharesCoursesNestedInput
+    course?: CourseUpdateOneRequiredWithoutFileSharesNestedInput
+  }
+
+  export type FileShareCourseUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    fileId?: StringFieldUpdateOperationsInput | string
+    courseId?: StringFieldUpdateOperationsInput | string
+    permission?: EnumFilePermissionFieldUpdateOperationsInput | $Enums.FilePermission
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type FileShareCourseCreateManyInput = {
+    id?: string
+    fileId: string
+    courseId: string
+    permission: $Enums.FilePermission
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type FileShareCourseUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    permission?: EnumFilePermissionFieldUpdateOperationsInput | $Enums.FilePermission
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type FileShareCourseUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    fileId?: StringFieldUpdateOperationsInput | string
+    courseId?: StringFieldUpdateOperationsInput | string
+    permission?: EnumFilePermissionFieldUpdateOperationsInput | $Enums.FilePermission
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type RoleCreateInput = {
     id?: string
     name: string
@@ -42833,6 +49985,7 @@ export namespace Prisma {
     students?: StudentCreateNestedManyWithoutSchoolInput
     assignments?: AssignmentCreateNestedManyWithoutSchoolInput
     periods?: PeriodCreateNestedManyWithoutSchoolInput
+    fileShares?: FileShareSchoolCreateNestedManyWithoutSchoolInput
   }
 
   export type SchoolUncheckedCreateInput = {
@@ -42859,6 +50012,7 @@ export namespace Prisma {
     students?: StudentUncheckedCreateNestedManyWithoutSchoolInput
     assignments?: AssignmentUncheckedCreateNestedManyWithoutSchoolInput
     periods?: PeriodUncheckedCreateNestedManyWithoutSchoolInput
+    fileShares?: FileShareSchoolUncheckedCreateNestedManyWithoutSchoolInput
   }
 
   export type SchoolUpdateInput = {
@@ -42885,6 +50039,7 @@ export namespace Prisma {
     students?: StudentUpdateManyWithoutSchoolNestedInput
     assignments?: AssignmentUpdateManyWithoutSchoolNestedInput
     periods?: PeriodUpdateManyWithoutSchoolNestedInput
+    fileShares?: FileShareSchoolUpdateManyWithoutSchoolNestedInput
   }
 
   export type SchoolUncheckedUpdateInput = {
@@ -42911,6 +50066,7 @@ export namespace Prisma {
     students?: StudentUncheckedUpdateManyWithoutSchoolNestedInput
     assignments?: AssignmentUncheckedUpdateManyWithoutSchoolNestedInput
     periods?: PeriodUncheckedUpdateManyWithoutSchoolNestedInput
+    fileShares?: FileShareSchoolUncheckedUpdateManyWithoutSchoolNestedInput
   }
 
   export type SchoolCreateManyInput = {
@@ -43326,6 +50482,7 @@ export namespace Prisma {
     gradeBuckets?: GradeBucketCreateNestedManyWithoutCourseInput
     grades?: GradeCreateNestedManyWithoutCourseInput
     weeklySchedules?: ClassGroupWeeklyScheduleCreateNestedManyWithoutCourseInput
+    fileShares?: FileShareCourseCreateNestedManyWithoutCourseInput
   }
 
   export type CourseUncheckedCreateInput = {
@@ -43348,6 +50505,7 @@ export namespace Prisma {
     gradeBuckets?: GradeBucketUncheckedCreateNestedManyWithoutCourseInput
     grades?: GradeUncheckedCreateNestedManyWithoutCourseInput
     weeklySchedules?: ClassGroupWeeklyScheduleUncheckedCreateNestedManyWithoutCourseInput
+    fileShares?: FileShareCourseUncheckedCreateNestedManyWithoutCourseInput
   }
 
   export type CourseUpdateInput = {
@@ -43370,6 +50528,7 @@ export namespace Prisma {
     gradeBuckets?: GradeBucketUpdateManyWithoutCourseNestedInput
     grades?: GradeUpdateManyWithoutCourseNestedInput
     weeklySchedules?: ClassGroupWeeklyScheduleUpdateManyWithoutCourseNestedInput
+    fileShares?: FileShareCourseUpdateManyWithoutCourseNestedInput
   }
 
   export type CourseUncheckedUpdateInput = {
@@ -43392,6 +50551,7 @@ export namespace Prisma {
     gradeBuckets?: GradeBucketUncheckedUpdateManyWithoutCourseNestedInput
     grades?: GradeUncheckedUpdateManyWithoutCourseNestedInput
     weeklySchedules?: ClassGroupWeeklyScheduleUncheckedUpdateManyWithoutCourseNestedInput
+    fileShares?: FileShareCourseUncheckedUpdateManyWithoutCourseNestedInput
   }
 
   export type CourseCreateManyInput = {
@@ -43450,6 +50610,7 @@ export namespace Prisma {
     quizSchedules?: QuizScheduleCreateNestedManyWithoutClassGroupInput
     quizSubmissions?: QuizSubmissionCreateNestedManyWithoutClassGroupInput
     weeklySchedules?: ClassGroupWeeklyScheduleCreateNestedManyWithoutClassGroupInput
+    fileShares?: FileShareClassGroupCreateNestedManyWithoutClassGroupInput
   }
 
   export type ClassGroupUncheckedCreateInput = {
@@ -43469,6 +50630,7 @@ export namespace Prisma {
     quizSchedules?: QuizScheduleUncheckedCreateNestedManyWithoutClassGroupInput
     quizSubmissions?: QuizSubmissionUncheckedCreateNestedManyWithoutClassGroupInput
     weeklySchedules?: ClassGroupWeeklyScheduleUncheckedCreateNestedManyWithoutClassGroupInput
+    fileShares?: FileShareClassGroupUncheckedCreateNestedManyWithoutClassGroupInput
   }
 
   export type ClassGroupUpdateInput = {
@@ -43488,6 +50650,7 @@ export namespace Prisma {
     quizSchedules?: QuizScheduleUpdateManyWithoutClassGroupNestedInput
     quizSubmissions?: QuizSubmissionUpdateManyWithoutClassGroupNestedInput
     weeklySchedules?: ClassGroupWeeklyScheduleUpdateManyWithoutClassGroupNestedInput
+    fileShares?: FileShareClassGroupUpdateManyWithoutClassGroupNestedInput
   }
 
   export type ClassGroupUncheckedUpdateInput = {
@@ -43507,6 +50670,7 @@ export namespace Prisma {
     quizSchedules?: QuizScheduleUncheckedUpdateManyWithoutClassGroupNestedInput
     quizSubmissions?: QuizSubmissionUncheckedUpdateManyWithoutClassGroupNestedInput
     weeklySchedules?: ClassGroupWeeklyScheduleUncheckedUpdateManyWithoutClassGroupNestedInput
+    fileShares?: FileShareClassGroupUncheckedUpdateManyWithoutClassGroupNestedInput
   }
 
   export type ClassGroupCreateManyInput = {
@@ -44989,6 +52153,12 @@ export namespace Prisma {
     none?: MessageWhereInput
   }
 
+  export type FileListRelationFilter = {
+    every?: FileWhereInput
+    some?: FileWhereInput
+    none?: FileWhereInput
+  }
+
   export type UserOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
@@ -45026,6 +52196,10 @@ export namespace Prisma {
   }
 
   export type MessageOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type FileOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -45148,12 +52322,22 @@ export namespace Prisma {
     none?: MessageRecipientWhereInput
   }
 
+  export type FileShareUserListRelationFilter = {
+    every?: FileShareUserWhereInput
+    some?: FileShareUserWhereInput
+    none?: FileShareUserWhereInput
+  }
+
   export type SortOrderInput = {
     sort: SortOrder
     nulls?: NullsOrder
   }
 
   export type MessageRecipientOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type FileShareUserOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -45322,6 +52506,275 @@ export namespace Prisma {
     deletedAt?: SortOrder
   }
 
+  export type IntFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel>
+    in?: number[] | ListIntFieldRefInput<$PrismaModel>
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel>
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntFilter<$PrismaModel> | number
+  }
+
+  export type FileShareSchoolListRelationFilter = {
+    every?: FileShareSchoolWhereInput
+    some?: FileShareSchoolWhereInput
+    none?: FileShareSchoolWhereInput
+  }
+
+  export type FileShareClassGroupListRelationFilter = {
+    every?: FileShareClassGroupWhereInput
+    some?: FileShareClassGroupWhereInput
+    none?: FileShareClassGroupWhereInput
+  }
+
+  export type FileShareCourseListRelationFilter = {
+    every?: FileShareCourseWhereInput
+    some?: FileShareCourseWhereInput
+    none?: FileShareCourseWhereInput
+  }
+
+  export type FileShareSchoolOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type FileShareClassGroupOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type FileShareCourseOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type FileCountOrderByAggregateInput = {
+    id?: SortOrder
+    organizationId?: SortOrder
+    ownerId?: SortOrder
+    name?: SortOrder
+    mimeType?: SortOrder
+    size?: SortOrder
+    storageKey?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    deletedAt?: SortOrder
+  }
+
+  export type FileAvgOrderByAggregateInput = {
+    size?: SortOrder
+  }
+
+  export type FileMaxOrderByAggregateInput = {
+    id?: SortOrder
+    organizationId?: SortOrder
+    ownerId?: SortOrder
+    name?: SortOrder
+    mimeType?: SortOrder
+    size?: SortOrder
+    storageKey?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    deletedAt?: SortOrder
+  }
+
+  export type FileMinOrderByAggregateInput = {
+    id?: SortOrder
+    organizationId?: SortOrder
+    ownerId?: SortOrder
+    name?: SortOrder
+    mimeType?: SortOrder
+    size?: SortOrder
+    storageKey?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    deletedAt?: SortOrder
+  }
+
+  export type FileSumOrderByAggregateInput = {
+    size?: SortOrder
+  }
+
+  export type IntWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel>
+    in?: number[] | ListIntFieldRefInput<$PrismaModel>
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel>
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntWithAggregatesFilter<$PrismaModel> | number
+    _count?: NestedIntFilter<$PrismaModel>
+    _avg?: NestedFloatFilter<$PrismaModel>
+    _sum?: NestedIntFilter<$PrismaModel>
+    _min?: NestedIntFilter<$PrismaModel>
+    _max?: NestedIntFilter<$PrismaModel>
+  }
+
+  export type EnumFilePermissionFilter<$PrismaModel = never> = {
+    equals?: $Enums.FilePermission | EnumFilePermissionFieldRefInput<$PrismaModel>
+    in?: $Enums.FilePermission[] | ListEnumFilePermissionFieldRefInput<$PrismaModel>
+    notIn?: $Enums.FilePermission[] | ListEnumFilePermissionFieldRefInput<$PrismaModel>
+    not?: NestedEnumFilePermissionFilter<$PrismaModel> | $Enums.FilePermission
+  }
+
+  export type FileScalarRelationFilter = {
+    is?: FileWhereInput
+    isNot?: FileWhereInput
+  }
+
+  export type FileShareUserFileIdUserIdCompoundUniqueInput = {
+    fileId: string
+    userId: string
+  }
+
+  export type FileShareUserCountOrderByAggregateInput = {
+    id?: SortOrder
+    fileId?: SortOrder
+    userId?: SortOrder
+    permission?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type FileShareUserMaxOrderByAggregateInput = {
+    id?: SortOrder
+    fileId?: SortOrder
+    userId?: SortOrder
+    permission?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type FileShareUserMinOrderByAggregateInput = {
+    id?: SortOrder
+    fileId?: SortOrder
+    userId?: SortOrder
+    permission?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type EnumFilePermissionWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.FilePermission | EnumFilePermissionFieldRefInput<$PrismaModel>
+    in?: $Enums.FilePermission[] | ListEnumFilePermissionFieldRefInput<$PrismaModel>
+    notIn?: $Enums.FilePermission[] | ListEnumFilePermissionFieldRefInput<$PrismaModel>
+    not?: NestedEnumFilePermissionWithAggregatesFilter<$PrismaModel> | $Enums.FilePermission
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumFilePermissionFilter<$PrismaModel>
+    _max?: NestedEnumFilePermissionFilter<$PrismaModel>
+  }
+
+  export type SchoolScalarRelationFilter = {
+    is?: SchoolWhereInput
+    isNot?: SchoolWhereInput
+  }
+
+  export type FileShareSchoolFileIdSchoolIdCompoundUniqueInput = {
+    fileId: string
+    schoolId: string
+  }
+
+  export type FileShareSchoolCountOrderByAggregateInput = {
+    id?: SortOrder
+    fileId?: SortOrder
+    schoolId?: SortOrder
+    permission?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type FileShareSchoolMaxOrderByAggregateInput = {
+    id?: SortOrder
+    fileId?: SortOrder
+    schoolId?: SortOrder
+    permission?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type FileShareSchoolMinOrderByAggregateInput = {
+    id?: SortOrder
+    fileId?: SortOrder
+    schoolId?: SortOrder
+    permission?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type ClassGroupScalarRelationFilter = {
+    is?: ClassGroupWhereInput
+    isNot?: ClassGroupWhereInput
+  }
+
+  export type FileShareClassGroupFileIdClassGroupIdCompoundUniqueInput = {
+    fileId: string
+    classGroupId: string
+  }
+
+  export type FileShareClassGroupCountOrderByAggregateInput = {
+    id?: SortOrder
+    fileId?: SortOrder
+    classGroupId?: SortOrder
+    permission?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type FileShareClassGroupMaxOrderByAggregateInput = {
+    id?: SortOrder
+    fileId?: SortOrder
+    classGroupId?: SortOrder
+    permission?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type FileShareClassGroupMinOrderByAggregateInput = {
+    id?: SortOrder
+    fileId?: SortOrder
+    classGroupId?: SortOrder
+    permission?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type CourseScalarRelationFilter = {
+    is?: CourseWhereInput
+    isNot?: CourseWhereInput
+  }
+
+  export type FileShareCourseFileIdCourseIdCompoundUniqueInput = {
+    fileId: string
+    courseId: string
+  }
+
+  export type FileShareCourseCountOrderByAggregateInput = {
+    id?: SortOrder
+    fileId?: SortOrder
+    courseId?: SortOrder
+    permission?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type FileShareCourseMaxOrderByAggregateInput = {
+    id?: SortOrder
+    fileId?: SortOrder
+    courseId?: SortOrder
+    permission?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type FileShareCourseMinOrderByAggregateInput = {
+    id?: SortOrder
+    fileId?: SortOrder
+    courseId?: SortOrder
+    permission?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
   export type PermissionListRelationFilter = {
     every?: PermissionWhereInput
     some?: PermissionWhereInput
@@ -45386,17 +52839,6 @@ export namespace Prisma {
     description?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
-  }
-
-  export type IntFilter<$PrismaModel = never> = {
-    equals?: number | IntFieldRefInput<$PrismaModel>
-    in?: number[] | ListIntFieldRefInput<$PrismaModel>
-    notIn?: number[] | ListIntFieldRefInput<$PrismaModel>
-    lt?: number | IntFieldRefInput<$PrismaModel>
-    lte?: number | IntFieldRefInput<$PrismaModel>
-    gt?: number | IntFieldRefInput<$PrismaModel>
-    gte?: number | IntFieldRefInput<$PrismaModel>
-    not?: NestedIntFilter<$PrismaModel> | number
   }
 
   export type StudyPlanListRelationFilter = {
@@ -45502,27 +52944,6 @@ export namespace Prisma {
 
   export type SchoolSumOrderByAggregateInput = {
     currentYear?: SortOrder
-  }
-
-  export type IntWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: number | IntFieldRefInput<$PrismaModel>
-    in?: number[] | ListIntFieldRefInput<$PrismaModel>
-    notIn?: number[] | ListIntFieldRefInput<$PrismaModel>
-    lt?: number | IntFieldRefInput<$PrismaModel>
-    lte?: number | IntFieldRefInput<$PrismaModel>
-    gt?: number | IntFieldRefInput<$PrismaModel>
-    gte?: number | IntFieldRefInput<$PrismaModel>
-    not?: NestedIntWithAggregatesFilter<$PrismaModel> | number
-    _count?: NestedIntFilter<$PrismaModel>
-    _avg?: NestedFloatFilter<$PrismaModel>
-    _sum?: NestedIntFilter<$PrismaModel>
-    _min?: NestedIntFilter<$PrismaModel>
-    _max?: NestedIntFilter<$PrismaModel>
-  }
-
-  export type SchoolScalarRelationFilter = {
-    is?: SchoolWhereInput
-    isNot?: SchoolWhereInput
   }
 
   export type GradeListRelationFilter = {
@@ -45884,11 +53305,6 @@ export namespace Prisma {
     not?: NestedEnumGenderFilter<$PrismaModel> | $Enums.Gender
   }
 
-  export type ClassGroupScalarRelationFilter = {
-    is?: ClassGroupWhereInput
-    isNot?: ClassGroupWhereInput
-  }
-
   export type StudentGradeListRelationFilter = {
     every?: StudentGradeWhereInput
     some?: StudentGradeWhereInput
@@ -46069,11 +53485,6 @@ export namespace Prisma {
     in?: $Enums.AssignmentType[] | ListEnumAssignmentTypeFieldRefInput<$PrismaModel>
     notIn?: $Enums.AssignmentType[] | ListEnumAssignmentTypeFieldRefInput<$PrismaModel>
     not?: NestedEnumAssignmentTypeFilter<$PrismaModel> | $Enums.AssignmentType
-  }
-
-  export type CourseScalarRelationFilter = {
-    is?: CourseWhereInput
-    isNot?: CourseWhereInput
   }
 
   export type TeacherScalarRelationFilter = {
@@ -46843,6 +54254,13 @@ export namespace Prisma {
     connect?: MessageWhereUniqueInput | MessageWhereUniqueInput[]
   }
 
+  export type FileCreateNestedManyWithoutOrganizationInput = {
+    create?: XOR<FileCreateWithoutOrganizationInput, FileUncheckedCreateWithoutOrganizationInput> | FileCreateWithoutOrganizationInput[] | FileUncheckedCreateWithoutOrganizationInput[]
+    connectOrCreate?: FileCreateOrConnectWithoutOrganizationInput | FileCreateOrConnectWithoutOrganizationInput[]
+    createMany?: FileCreateManyOrganizationInputEnvelope
+    connect?: FileWhereUniqueInput | FileWhereUniqueInput[]
+  }
+
   export type UserUncheckedCreateNestedManyWithoutOrganizationInput = {
     create?: XOR<UserCreateWithoutOrganizationInput, UserUncheckedCreateWithoutOrganizationInput> | UserCreateWithoutOrganizationInput[] | UserUncheckedCreateWithoutOrganizationInput[]
     connectOrCreate?: UserCreateOrConnectWithoutOrganizationInput | UserCreateOrConnectWithoutOrganizationInput[]
@@ -46911,6 +54329,13 @@ export namespace Prisma {
     connectOrCreate?: MessageCreateOrConnectWithoutOrganizationInput | MessageCreateOrConnectWithoutOrganizationInput[]
     createMany?: MessageCreateManyOrganizationInputEnvelope
     connect?: MessageWhereUniqueInput | MessageWhereUniqueInput[]
+  }
+
+  export type FileUncheckedCreateNestedManyWithoutOrganizationInput = {
+    create?: XOR<FileCreateWithoutOrganizationInput, FileUncheckedCreateWithoutOrganizationInput> | FileCreateWithoutOrganizationInput[] | FileUncheckedCreateWithoutOrganizationInput[]
+    connectOrCreate?: FileCreateOrConnectWithoutOrganizationInput | FileCreateOrConnectWithoutOrganizationInput[]
+    createMany?: FileCreateManyOrganizationInputEnvelope
+    connect?: FileWhereUniqueInput | FileWhereUniqueInput[]
   }
 
   export type StringFieldUpdateOperationsInput = {
@@ -47065,6 +54490,20 @@ export namespace Prisma {
     deleteMany?: MessageScalarWhereInput | MessageScalarWhereInput[]
   }
 
+  export type FileUpdateManyWithoutOrganizationNestedInput = {
+    create?: XOR<FileCreateWithoutOrganizationInput, FileUncheckedCreateWithoutOrganizationInput> | FileCreateWithoutOrganizationInput[] | FileUncheckedCreateWithoutOrganizationInput[]
+    connectOrCreate?: FileCreateOrConnectWithoutOrganizationInput | FileCreateOrConnectWithoutOrganizationInput[]
+    upsert?: FileUpsertWithWhereUniqueWithoutOrganizationInput | FileUpsertWithWhereUniqueWithoutOrganizationInput[]
+    createMany?: FileCreateManyOrganizationInputEnvelope
+    set?: FileWhereUniqueInput | FileWhereUniqueInput[]
+    disconnect?: FileWhereUniqueInput | FileWhereUniqueInput[]
+    delete?: FileWhereUniqueInput | FileWhereUniqueInput[]
+    connect?: FileWhereUniqueInput | FileWhereUniqueInput[]
+    update?: FileUpdateWithWhereUniqueWithoutOrganizationInput | FileUpdateWithWhereUniqueWithoutOrganizationInput[]
+    updateMany?: FileUpdateManyWithWhereWithoutOrganizationInput | FileUpdateManyWithWhereWithoutOrganizationInput[]
+    deleteMany?: FileScalarWhereInput | FileScalarWhereInput[]
+  }
+
   export type UserUncheckedUpdateManyWithoutOrganizationNestedInput = {
     create?: XOR<UserCreateWithoutOrganizationInput, UserUncheckedCreateWithoutOrganizationInput> | UserCreateWithoutOrganizationInput[] | UserUncheckedCreateWithoutOrganizationInput[]
     connectOrCreate?: UserCreateOrConnectWithoutOrganizationInput | UserCreateOrConnectWithoutOrganizationInput[]
@@ -47205,6 +54644,20 @@ export namespace Prisma {
     deleteMany?: MessageScalarWhereInput | MessageScalarWhereInput[]
   }
 
+  export type FileUncheckedUpdateManyWithoutOrganizationNestedInput = {
+    create?: XOR<FileCreateWithoutOrganizationInput, FileUncheckedCreateWithoutOrganizationInput> | FileCreateWithoutOrganizationInput[] | FileUncheckedCreateWithoutOrganizationInput[]
+    connectOrCreate?: FileCreateOrConnectWithoutOrganizationInput | FileCreateOrConnectWithoutOrganizationInput[]
+    upsert?: FileUpsertWithWhereUniqueWithoutOrganizationInput | FileUpsertWithWhereUniqueWithoutOrganizationInput[]
+    createMany?: FileCreateManyOrganizationInputEnvelope
+    set?: FileWhereUniqueInput | FileWhereUniqueInput[]
+    disconnect?: FileWhereUniqueInput | FileWhereUniqueInput[]
+    delete?: FileWhereUniqueInput | FileWhereUniqueInput[]
+    connect?: FileWhereUniqueInput | FileWhereUniqueInput[]
+    update?: FileUpdateWithWhereUniqueWithoutOrganizationInput | FileUpdateWithWhereUniqueWithoutOrganizationInput[]
+    updateMany?: FileUpdateManyWithWhereWithoutOrganizationInput | FileUpdateManyWithWhereWithoutOrganizationInput[]
+    deleteMany?: FileScalarWhereInput | FileScalarWhereInput[]
+  }
+
   export type RoleCreateNestedOneWithoutUsersInput = {
     create?: XOR<RoleCreateWithoutUsersInput, RoleUncheckedCreateWithoutUsersInput>
     connectOrCreate?: RoleCreateOrConnectWithoutUsersInput
@@ -47243,6 +54696,20 @@ export namespace Prisma {
     connect?: MessageRecipientWhereUniqueInput | MessageRecipientWhereUniqueInput[]
   }
 
+  export type FileCreateNestedManyWithoutOwnerInput = {
+    create?: XOR<FileCreateWithoutOwnerInput, FileUncheckedCreateWithoutOwnerInput> | FileCreateWithoutOwnerInput[] | FileUncheckedCreateWithoutOwnerInput[]
+    connectOrCreate?: FileCreateOrConnectWithoutOwnerInput | FileCreateOrConnectWithoutOwnerInput[]
+    createMany?: FileCreateManyOwnerInputEnvelope
+    connect?: FileWhereUniqueInput | FileWhereUniqueInput[]
+  }
+
+  export type FileShareUserCreateNestedManyWithoutUserInput = {
+    create?: XOR<FileShareUserCreateWithoutUserInput, FileShareUserUncheckedCreateWithoutUserInput> | FileShareUserCreateWithoutUserInput[] | FileShareUserUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: FileShareUserCreateOrConnectWithoutUserInput | FileShareUserCreateOrConnectWithoutUserInput[]
+    createMany?: FileShareUserCreateManyUserInputEnvelope
+    connect?: FileShareUserWhereUniqueInput | FileShareUserWhereUniqueInput[]
+  }
+
   export type StudentUncheckedCreateNestedOneWithoutUserInput = {
     create?: XOR<StudentCreateWithoutUserInput, StudentUncheckedCreateWithoutUserInput>
     connectOrCreate?: StudentCreateOrConnectWithoutUserInput
@@ -47267,6 +54734,20 @@ export namespace Prisma {
     connectOrCreate?: MessageRecipientCreateOrConnectWithoutUserInput | MessageRecipientCreateOrConnectWithoutUserInput[]
     createMany?: MessageRecipientCreateManyUserInputEnvelope
     connect?: MessageRecipientWhereUniqueInput | MessageRecipientWhereUniqueInput[]
+  }
+
+  export type FileUncheckedCreateNestedManyWithoutOwnerInput = {
+    create?: XOR<FileCreateWithoutOwnerInput, FileUncheckedCreateWithoutOwnerInput> | FileCreateWithoutOwnerInput[] | FileUncheckedCreateWithoutOwnerInput[]
+    connectOrCreate?: FileCreateOrConnectWithoutOwnerInput | FileCreateOrConnectWithoutOwnerInput[]
+    createMany?: FileCreateManyOwnerInputEnvelope
+    connect?: FileWhereUniqueInput | FileWhereUniqueInput[]
+  }
+
+  export type FileShareUserUncheckedCreateNestedManyWithoutUserInput = {
+    create?: XOR<FileShareUserCreateWithoutUserInput, FileShareUserUncheckedCreateWithoutUserInput> | FileShareUserCreateWithoutUserInput[] | FileShareUserUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: FileShareUserCreateOrConnectWithoutUserInput | FileShareUserCreateOrConnectWithoutUserInput[]
+    createMany?: FileShareUserCreateManyUserInputEnvelope
+    connect?: FileShareUserWhereUniqueInput | FileShareUserWhereUniqueInput[]
   }
 
   export type NullableStringFieldUpdateOperationsInput = {
@@ -47343,6 +54824,34 @@ export namespace Prisma {
     deleteMany?: MessageRecipientScalarWhereInput | MessageRecipientScalarWhereInput[]
   }
 
+  export type FileUpdateManyWithoutOwnerNestedInput = {
+    create?: XOR<FileCreateWithoutOwnerInput, FileUncheckedCreateWithoutOwnerInput> | FileCreateWithoutOwnerInput[] | FileUncheckedCreateWithoutOwnerInput[]
+    connectOrCreate?: FileCreateOrConnectWithoutOwnerInput | FileCreateOrConnectWithoutOwnerInput[]
+    upsert?: FileUpsertWithWhereUniqueWithoutOwnerInput | FileUpsertWithWhereUniqueWithoutOwnerInput[]
+    createMany?: FileCreateManyOwnerInputEnvelope
+    set?: FileWhereUniqueInput | FileWhereUniqueInput[]
+    disconnect?: FileWhereUniqueInput | FileWhereUniqueInput[]
+    delete?: FileWhereUniqueInput | FileWhereUniqueInput[]
+    connect?: FileWhereUniqueInput | FileWhereUniqueInput[]
+    update?: FileUpdateWithWhereUniqueWithoutOwnerInput | FileUpdateWithWhereUniqueWithoutOwnerInput[]
+    updateMany?: FileUpdateManyWithWhereWithoutOwnerInput | FileUpdateManyWithWhereWithoutOwnerInput[]
+    deleteMany?: FileScalarWhereInput | FileScalarWhereInput[]
+  }
+
+  export type FileShareUserUpdateManyWithoutUserNestedInput = {
+    create?: XOR<FileShareUserCreateWithoutUserInput, FileShareUserUncheckedCreateWithoutUserInput> | FileShareUserCreateWithoutUserInput[] | FileShareUserUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: FileShareUserCreateOrConnectWithoutUserInput | FileShareUserCreateOrConnectWithoutUserInput[]
+    upsert?: FileShareUserUpsertWithWhereUniqueWithoutUserInput | FileShareUserUpsertWithWhereUniqueWithoutUserInput[]
+    createMany?: FileShareUserCreateManyUserInputEnvelope
+    set?: FileShareUserWhereUniqueInput | FileShareUserWhereUniqueInput[]
+    disconnect?: FileShareUserWhereUniqueInput | FileShareUserWhereUniqueInput[]
+    delete?: FileShareUserWhereUniqueInput | FileShareUserWhereUniqueInput[]
+    connect?: FileShareUserWhereUniqueInput | FileShareUserWhereUniqueInput[]
+    update?: FileShareUserUpdateWithWhereUniqueWithoutUserInput | FileShareUserUpdateWithWhereUniqueWithoutUserInput[]
+    updateMany?: FileShareUserUpdateManyWithWhereWithoutUserInput | FileShareUserUpdateManyWithWhereWithoutUserInput[]
+    deleteMany?: FileShareUserScalarWhereInput | FileShareUserScalarWhereInput[]
+  }
+
   export type StudentUncheckedUpdateOneWithoutUserNestedInput = {
     create?: XOR<StudentCreateWithoutUserInput, StudentUncheckedCreateWithoutUserInput>
     connectOrCreate?: StudentCreateOrConnectWithoutUserInput
@@ -47389,6 +54898,34 @@ export namespace Prisma {
     update?: MessageRecipientUpdateWithWhereUniqueWithoutUserInput | MessageRecipientUpdateWithWhereUniqueWithoutUserInput[]
     updateMany?: MessageRecipientUpdateManyWithWhereWithoutUserInput | MessageRecipientUpdateManyWithWhereWithoutUserInput[]
     deleteMany?: MessageRecipientScalarWhereInput | MessageRecipientScalarWhereInput[]
+  }
+
+  export type FileUncheckedUpdateManyWithoutOwnerNestedInput = {
+    create?: XOR<FileCreateWithoutOwnerInput, FileUncheckedCreateWithoutOwnerInput> | FileCreateWithoutOwnerInput[] | FileUncheckedCreateWithoutOwnerInput[]
+    connectOrCreate?: FileCreateOrConnectWithoutOwnerInput | FileCreateOrConnectWithoutOwnerInput[]
+    upsert?: FileUpsertWithWhereUniqueWithoutOwnerInput | FileUpsertWithWhereUniqueWithoutOwnerInput[]
+    createMany?: FileCreateManyOwnerInputEnvelope
+    set?: FileWhereUniqueInput | FileWhereUniqueInput[]
+    disconnect?: FileWhereUniqueInput | FileWhereUniqueInput[]
+    delete?: FileWhereUniqueInput | FileWhereUniqueInput[]
+    connect?: FileWhereUniqueInput | FileWhereUniqueInput[]
+    update?: FileUpdateWithWhereUniqueWithoutOwnerInput | FileUpdateWithWhereUniqueWithoutOwnerInput[]
+    updateMany?: FileUpdateManyWithWhereWithoutOwnerInput | FileUpdateManyWithWhereWithoutOwnerInput[]
+    deleteMany?: FileScalarWhereInput | FileScalarWhereInput[]
+  }
+
+  export type FileShareUserUncheckedUpdateManyWithoutUserNestedInput = {
+    create?: XOR<FileShareUserCreateWithoutUserInput, FileShareUserUncheckedCreateWithoutUserInput> | FileShareUserCreateWithoutUserInput[] | FileShareUserUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: FileShareUserCreateOrConnectWithoutUserInput | FileShareUserCreateOrConnectWithoutUserInput[]
+    upsert?: FileShareUserUpsertWithWhereUniqueWithoutUserInput | FileShareUserUpsertWithWhereUniqueWithoutUserInput[]
+    createMany?: FileShareUserCreateManyUserInputEnvelope
+    set?: FileShareUserWhereUniqueInput | FileShareUserWhereUniqueInput[]
+    disconnect?: FileShareUserWhereUniqueInput | FileShareUserWhereUniqueInput[]
+    delete?: FileShareUserWhereUniqueInput | FileShareUserWhereUniqueInput[]
+    connect?: FileShareUserWhereUniqueInput | FileShareUserWhereUniqueInput[]
+    update?: FileShareUserUpdateWithWhereUniqueWithoutUserInput | FileShareUserUpdateWithWhereUniqueWithoutUserInput[]
+    updateMany?: FileShareUserUpdateManyWithWhereWithoutUserInput | FileShareUserUpdateManyWithWhereWithoutUserInput[]
+    deleteMany?: FileShareUserScalarWhereInput | FileShareUserScalarWhereInput[]
   }
 
   export type OrganizationCreateNestedOneWithoutMessagesInput = {
@@ -47489,6 +55026,326 @@ export namespace Prisma {
     upsert?: UserUpsertWithoutMessageRecipientsInput
     connect?: UserWhereUniqueInput
     update?: XOR<XOR<UserUpdateToOneWithWhereWithoutMessageRecipientsInput, UserUpdateWithoutMessageRecipientsInput>, UserUncheckedUpdateWithoutMessageRecipientsInput>
+  }
+
+  export type OrganizationCreateNestedOneWithoutFilesInput = {
+    create?: XOR<OrganizationCreateWithoutFilesInput, OrganizationUncheckedCreateWithoutFilesInput>
+    connectOrCreate?: OrganizationCreateOrConnectWithoutFilesInput
+    connect?: OrganizationWhereUniqueInput
+  }
+
+  export type UserCreateNestedOneWithoutFilesOwnedInput = {
+    create?: XOR<UserCreateWithoutFilesOwnedInput, UserUncheckedCreateWithoutFilesOwnedInput>
+    connectOrCreate?: UserCreateOrConnectWithoutFilesOwnedInput
+    connect?: UserWhereUniqueInput
+  }
+
+  export type FileShareUserCreateNestedManyWithoutFileInput = {
+    create?: XOR<FileShareUserCreateWithoutFileInput, FileShareUserUncheckedCreateWithoutFileInput> | FileShareUserCreateWithoutFileInput[] | FileShareUserUncheckedCreateWithoutFileInput[]
+    connectOrCreate?: FileShareUserCreateOrConnectWithoutFileInput | FileShareUserCreateOrConnectWithoutFileInput[]
+    createMany?: FileShareUserCreateManyFileInputEnvelope
+    connect?: FileShareUserWhereUniqueInput | FileShareUserWhereUniqueInput[]
+  }
+
+  export type FileShareSchoolCreateNestedManyWithoutFileInput = {
+    create?: XOR<FileShareSchoolCreateWithoutFileInput, FileShareSchoolUncheckedCreateWithoutFileInput> | FileShareSchoolCreateWithoutFileInput[] | FileShareSchoolUncheckedCreateWithoutFileInput[]
+    connectOrCreate?: FileShareSchoolCreateOrConnectWithoutFileInput | FileShareSchoolCreateOrConnectWithoutFileInput[]
+    createMany?: FileShareSchoolCreateManyFileInputEnvelope
+    connect?: FileShareSchoolWhereUniqueInput | FileShareSchoolWhereUniqueInput[]
+  }
+
+  export type FileShareClassGroupCreateNestedManyWithoutFileInput = {
+    create?: XOR<FileShareClassGroupCreateWithoutFileInput, FileShareClassGroupUncheckedCreateWithoutFileInput> | FileShareClassGroupCreateWithoutFileInput[] | FileShareClassGroupUncheckedCreateWithoutFileInput[]
+    connectOrCreate?: FileShareClassGroupCreateOrConnectWithoutFileInput | FileShareClassGroupCreateOrConnectWithoutFileInput[]
+    createMany?: FileShareClassGroupCreateManyFileInputEnvelope
+    connect?: FileShareClassGroupWhereUniqueInput | FileShareClassGroupWhereUniqueInput[]
+  }
+
+  export type FileShareCourseCreateNestedManyWithoutFileInput = {
+    create?: XOR<FileShareCourseCreateWithoutFileInput, FileShareCourseUncheckedCreateWithoutFileInput> | FileShareCourseCreateWithoutFileInput[] | FileShareCourseUncheckedCreateWithoutFileInput[]
+    connectOrCreate?: FileShareCourseCreateOrConnectWithoutFileInput | FileShareCourseCreateOrConnectWithoutFileInput[]
+    createMany?: FileShareCourseCreateManyFileInputEnvelope
+    connect?: FileShareCourseWhereUniqueInput | FileShareCourseWhereUniqueInput[]
+  }
+
+  export type FileShareUserUncheckedCreateNestedManyWithoutFileInput = {
+    create?: XOR<FileShareUserCreateWithoutFileInput, FileShareUserUncheckedCreateWithoutFileInput> | FileShareUserCreateWithoutFileInput[] | FileShareUserUncheckedCreateWithoutFileInput[]
+    connectOrCreate?: FileShareUserCreateOrConnectWithoutFileInput | FileShareUserCreateOrConnectWithoutFileInput[]
+    createMany?: FileShareUserCreateManyFileInputEnvelope
+    connect?: FileShareUserWhereUniqueInput | FileShareUserWhereUniqueInput[]
+  }
+
+  export type FileShareSchoolUncheckedCreateNestedManyWithoutFileInput = {
+    create?: XOR<FileShareSchoolCreateWithoutFileInput, FileShareSchoolUncheckedCreateWithoutFileInput> | FileShareSchoolCreateWithoutFileInput[] | FileShareSchoolUncheckedCreateWithoutFileInput[]
+    connectOrCreate?: FileShareSchoolCreateOrConnectWithoutFileInput | FileShareSchoolCreateOrConnectWithoutFileInput[]
+    createMany?: FileShareSchoolCreateManyFileInputEnvelope
+    connect?: FileShareSchoolWhereUniqueInput | FileShareSchoolWhereUniqueInput[]
+  }
+
+  export type FileShareClassGroupUncheckedCreateNestedManyWithoutFileInput = {
+    create?: XOR<FileShareClassGroupCreateWithoutFileInput, FileShareClassGroupUncheckedCreateWithoutFileInput> | FileShareClassGroupCreateWithoutFileInput[] | FileShareClassGroupUncheckedCreateWithoutFileInput[]
+    connectOrCreate?: FileShareClassGroupCreateOrConnectWithoutFileInput | FileShareClassGroupCreateOrConnectWithoutFileInput[]
+    createMany?: FileShareClassGroupCreateManyFileInputEnvelope
+    connect?: FileShareClassGroupWhereUniqueInput | FileShareClassGroupWhereUniqueInput[]
+  }
+
+  export type FileShareCourseUncheckedCreateNestedManyWithoutFileInput = {
+    create?: XOR<FileShareCourseCreateWithoutFileInput, FileShareCourseUncheckedCreateWithoutFileInput> | FileShareCourseCreateWithoutFileInput[] | FileShareCourseUncheckedCreateWithoutFileInput[]
+    connectOrCreate?: FileShareCourseCreateOrConnectWithoutFileInput | FileShareCourseCreateOrConnectWithoutFileInput[]
+    createMany?: FileShareCourseCreateManyFileInputEnvelope
+    connect?: FileShareCourseWhereUniqueInput | FileShareCourseWhereUniqueInput[]
+  }
+
+  export type IntFieldUpdateOperationsInput = {
+    set?: number
+    increment?: number
+    decrement?: number
+    multiply?: number
+    divide?: number
+  }
+
+  export type OrganizationUpdateOneRequiredWithoutFilesNestedInput = {
+    create?: XOR<OrganizationCreateWithoutFilesInput, OrganizationUncheckedCreateWithoutFilesInput>
+    connectOrCreate?: OrganizationCreateOrConnectWithoutFilesInput
+    upsert?: OrganizationUpsertWithoutFilesInput
+    connect?: OrganizationWhereUniqueInput
+    update?: XOR<XOR<OrganizationUpdateToOneWithWhereWithoutFilesInput, OrganizationUpdateWithoutFilesInput>, OrganizationUncheckedUpdateWithoutFilesInput>
+  }
+
+  export type UserUpdateOneRequiredWithoutFilesOwnedNestedInput = {
+    create?: XOR<UserCreateWithoutFilesOwnedInput, UserUncheckedCreateWithoutFilesOwnedInput>
+    connectOrCreate?: UserCreateOrConnectWithoutFilesOwnedInput
+    upsert?: UserUpsertWithoutFilesOwnedInput
+    connect?: UserWhereUniqueInput
+    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutFilesOwnedInput, UserUpdateWithoutFilesOwnedInput>, UserUncheckedUpdateWithoutFilesOwnedInput>
+  }
+
+  export type FileShareUserUpdateManyWithoutFileNestedInput = {
+    create?: XOR<FileShareUserCreateWithoutFileInput, FileShareUserUncheckedCreateWithoutFileInput> | FileShareUserCreateWithoutFileInput[] | FileShareUserUncheckedCreateWithoutFileInput[]
+    connectOrCreate?: FileShareUserCreateOrConnectWithoutFileInput | FileShareUserCreateOrConnectWithoutFileInput[]
+    upsert?: FileShareUserUpsertWithWhereUniqueWithoutFileInput | FileShareUserUpsertWithWhereUniqueWithoutFileInput[]
+    createMany?: FileShareUserCreateManyFileInputEnvelope
+    set?: FileShareUserWhereUniqueInput | FileShareUserWhereUniqueInput[]
+    disconnect?: FileShareUserWhereUniqueInput | FileShareUserWhereUniqueInput[]
+    delete?: FileShareUserWhereUniqueInput | FileShareUserWhereUniqueInput[]
+    connect?: FileShareUserWhereUniqueInput | FileShareUserWhereUniqueInput[]
+    update?: FileShareUserUpdateWithWhereUniqueWithoutFileInput | FileShareUserUpdateWithWhereUniqueWithoutFileInput[]
+    updateMany?: FileShareUserUpdateManyWithWhereWithoutFileInput | FileShareUserUpdateManyWithWhereWithoutFileInput[]
+    deleteMany?: FileShareUserScalarWhereInput | FileShareUserScalarWhereInput[]
+  }
+
+  export type FileShareSchoolUpdateManyWithoutFileNestedInput = {
+    create?: XOR<FileShareSchoolCreateWithoutFileInput, FileShareSchoolUncheckedCreateWithoutFileInput> | FileShareSchoolCreateWithoutFileInput[] | FileShareSchoolUncheckedCreateWithoutFileInput[]
+    connectOrCreate?: FileShareSchoolCreateOrConnectWithoutFileInput | FileShareSchoolCreateOrConnectWithoutFileInput[]
+    upsert?: FileShareSchoolUpsertWithWhereUniqueWithoutFileInput | FileShareSchoolUpsertWithWhereUniqueWithoutFileInput[]
+    createMany?: FileShareSchoolCreateManyFileInputEnvelope
+    set?: FileShareSchoolWhereUniqueInput | FileShareSchoolWhereUniqueInput[]
+    disconnect?: FileShareSchoolWhereUniqueInput | FileShareSchoolWhereUniqueInput[]
+    delete?: FileShareSchoolWhereUniqueInput | FileShareSchoolWhereUniqueInput[]
+    connect?: FileShareSchoolWhereUniqueInput | FileShareSchoolWhereUniqueInput[]
+    update?: FileShareSchoolUpdateWithWhereUniqueWithoutFileInput | FileShareSchoolUpdateWithWhereUniqueWithoutFileInput[]
+    updateMany?: FileShareSchoolUpdateManyWithWhereWithoutFileInput | FileShareSchoolUpdateManyWithWhereWithoutFileInput[]
+    deleteMany?: FileShareSchoolScalarWhereInput | FileShareSchoolScalarWhereInput[]
+  }
+
+  export type FileShareClassGroupUpdateManyWithoutFileNestedInput = {
+    create?: XOR<FileShareClassGroupCreateWithoutFileInput, FileShareClassGroupUncheckedCreateWithoutFileInput> | FileShareClassGroupCreateWithoutFileInput[] | FileShareClassGroupUncheckedCreateWithoutFileInput[]
+    connectOrCreate?: FileShareClassGroupCreateOrConnectWithoutFileInput | FileShareClassGroupCreateOrConnectWithoutFileInput[]
+    upsert?: FileShareClassGroupUpsertWithWhereUniqueWithoutFileInput | FileShareClassGroupUpsertWithWhereUniqueWithoutFileInput[]
+    createMany?: FileShareClassGroupCreateManyFileInputEnvelope
+    set?: FileShareClassGroupWhereUniqueInput | FileShareClassGroupWhereUniqueInput[]
+    disconnect?: FileShareClassGroupWhereUniqueInput | FileShareClassGroupWhereUniqueInput[]
+    delete?: FileShareClassGroupWhereUniqueInput | FileShareClassGroupWhereUniqueInput[]
+    connect?: FileShareClassGroupWhereUniqueInput | FileShareClassGroupWhereUniqueInput[]
+    update?: FileShareClassGroupUpdateWithWhereUniqueWithoutFileInput | FileShareClassGroupUpdateWithWhereUniqueWithoutFileInput[]
+    updateMany?: FileShareClassGroupUpdateManyWithWhereWithoutFileInput | FileShareClassGroupUpdateManyWithWhereWithoutFileInput[]
+    deleteMany?: FileShareClassGroupScalarWhereInput | FileShareClassGroupScalarWhereInput[]
+  }
+
+  export type FileShareCourseUpdateManyWithoutFileNestedInput = {
+    create?: XOR<FileShareCourseCreateWithoutFileInput, FileShareCourseUncheckedCreateWithoutFileInput> | FileShareCourseCreateWithoutFileInput[] | FileShareCourseUncheckedCreateWithoutFileInput[]
+    connectOrCreate?: FileShareCourseCreateOrConnectWithoutFileInput | FileShareCourseCreateOrConnectWithoutFileInput[]
+    upsert?: FileShareCourseUpsertWithWhereUniqueWithoutFileInput | FileShareCourseUpsertWithWhereUniqueWithoutFileInput[]
+    createMany?: FileShareCourseCreateManyFileInputEnvelope
+    set?: FileShareCourseWhereUniqueInput | FileShareCourseWhereUniqueInput[]
+    disconnect?: FileShareCourseWhereUniqueInput | FileShareCourseWhereUniqueInput[]
+    delete?: FileShareCourseWhereUniqueInput | FileShareCourseWhereUniqueInput[]
+    connect?: FileShareCourseWhereUniqueInput | FileShareCourseWhereUniqueInput[]
+    update?: FileShareCourseUpdateWithWhereUniqueWithoutFileInput | FileShareCourseUpdateWithWhereUniqueWithoutFileInput[]
+    updateMany?: FileShareCourseUpdateManyWithWhereWithoutFileInput | FileShareCourseUpdateManyWithWhereWithoutFileInput[]
+    deleteMany?: FileShareCourseScalarWhereInput | FileShareCourseScalarWhereInput[]
+  }
+
+  export type FileShareUserUncheckedUpdateManyWithoutFileNestedInput = {
+    create?: XOR<FileShareUserCreateWithoutFileInput, FileShareUserUncheckedCreateWithoutFileInput> | FileShareUserCreateWithoutFileInput[] | FileShareUserUncheckedCreateWithoutFileInput[]
+    connectOrCreate?: FileShareUserCreateOrConnectWithoutFileInput | FileShareUserCreateOrConnectWithoutFileInput[]
+    upsert?: FileShareUserUpsertWithWhereUniqueWithoutFileInput | FileShareUserUpsertWithWhereUniqueWithoutFileInput[]
+    createMany?: FileShareUserCreateManyFileInputEnvelope
+    set?: FileShareUserWhereUniqueInput | FileShareUserWhereUniqueInput[]
+    disconnect?: FileShareUserWhereUniqueInput | FileShareUserWhereUniqueInput[]
+    delete?: FileShareUserWhereUniqueInput | FileShareUserWhereUniqueInput[]
+    connect?: FileShareUserWhereUniqueInput | FileShareUserWhereUniqueInput[]
+    update?: FileShareUserUpdateWithWhereUniqueWithoutFileInput | FileShareUserUpdateWithWhereUniqueWithoutFileInput[]
+    updateMany?: FileShareUserUpdateManyWithWhereWithoutFileInput | FileShareUserUpdateManyWithWhereWithoutFileInput[]
+    deleteMany?: FileShareUserScalarWhereInput | FileShareUserScalarWhereInput[]
+  }
+
+  export type FileShareSchoolUncheckedUpdateManyWithoutFileNestedInput = {
+    create?: XOR<FileShareSchoolCreateWithoutFileInput, FileShareSchoolUncheckedCreateWithoutFileInput> | FileShareSchoolCreateWithoutFileInput[] | FileShareSchoolUncheckedCreateWithoutFileInput[]
+    connectOrCreate?: FileShareSchoolCreateOrConnectWithoutFileInput | FileShareSchoolCreateOrConnectWithoutFileInput[]
+    upsert?: FileShareSchoolUpsertWithWhereUniqueWithoutFileInput | FileShareSchoolUpsertWithWhereUniqueWithoutFileInput[]
+    createMany?: FileShareSchoolCreateManyFileInputEnvelope
+    set?: FileShareSchoolWhereUniqueInput | FileShareSchoolWhereUniqueInput[]
+    disconnect?: FileShareSchoolWhereUniqueInput | FileShareSchoolWhereUniqueInput[]
+    delete?: FileShareSchoolWhereUniqueInput | FileShareSchoolWhereUniqueInput[]
+    connect?: FileShareSchoolWhereUniqueInput | FileShareSchoolWhereUniqueInput[]
+    update?: FileShareSchoolUpdateWithWhereUniqueWithoutFileInput | FileShareSchoolUpdateWithWhereUniqueWithoutFileInput[]
+    updateMany?: FileShareSchoolUpdateManyWithWhereWithoutFileInput | FileShareSchoolUpdateManyWithWhereWithoutFileInput[]
+    deleteMany?: FileShareSchoolScalarWhereInput | FileShareSchoolScalarWhereInput[]
+  }
+
+  export type FileShareClassGroupUncheckedUpdateManyWithoutFileNestedInput = {
+    create?: XOR<FileShareClassGroupCreateWithoutFileInput, FileShareClassGroupUncheckedCreateWithoutFileInput> | FileShareClassGroupCreateWithoutFileInput[] | FileShareClassGroupUncheckedCreateWithoutFileInput[]
+    connectOrCreate?: FileShareClassGroupCreateOrConnectWithoutFileInput | FileShareClassGroupCreateOrConnectWithoutFileInput[]
+    upsert?: FileShareClassGroupUpsertWithWhereUniqueWithoutFileInput | FileShareClassGroupUpsertWithWhereUniqueWithoutFileInput[]
+    createMany?: FileShareClassGroupCreateManyFileInputEnvelope
+    set?: FileShareClassGroupWhereUniqueInput | FileShareClassGroupWhereUniqueInput[]
+    disconnect?: FileShareClassGroupWhereUniqueInput | FileShareClassGroupWhereUniqueInput[]
+    delete?: FileShareClassGroupWhereUniqueInput | FileShareClassGroupWhereUniqueInput[]
+    connect?: FileShareClassGroupWhereUniqueInput | FileShareClassGroupWhereUniqueInput[]
+    update?: FileShareClassGroupUpdateWithWhereUniqueWithoutFileInput | FileShareClassGroupUpdateWithWhereUniqueWithoutFileInput[]
+    updateMany?: FileShareClassGroupUpdateManyWithWhereWithoutFileInput | FileShareClassGroupUpdateManyWithWhereWithoutFileInput[]
+    deleteMany?: FileShareClassGroupScalarWhereInput | FileShareClassGroupScalarWhereInput[]
+  }
+
+  export type FileShareCourseUncheckedUpdateManyWithoutFileNestedInput = {
+    create?: XOR<FileShareCourseCreateWithoutFileInput, FileShareCourseUncheckedCreateWithoutFileInput> | FileShareCourseCreateWithoutFileInput[] | FileShareCourseUncheckedCreateWithoutFileInput[]
+    connectOrCreate?: FileShareCourseCreateOrConnectWithoutFileInput | FileShareCourseCreateOrConnectWithoutFileInput[]
+    upsert?: FileShareCourseUpsertWithWhereUniqueWithoutFileInput | FileShareCourseUpsertWithWhereUniqueWithoutFileInput[]
+    createMany?: FileShareCourseCreateManyFileInputEnvelope
+    set?: FileShareCourseWhereUniqueInput | FileShareCourseWhereUniqueInput[]
+    disconnect?: FileShareCourseWhereUniqueInput | FileShareCourseWhereUniqueInput[]
+    delete?: FileShareCourseWhereUniqueInput | FileShareCourseWhereUniqueInput[]
+    connect?: FileShareCourseWhereUniqueInput | FileShareCourseWhereUniqueInput[]
+    update?: FileShareCourseUpdateWithWhereUniqueWithoutFileInput | FileShareCourseUpdateWithWhereUniqueWithoutFileInput[]
+    updateMany?: FileShareCourseUpdateManyWithWhereWithoutFileInput | FileShareCourseUpdateManyWithWhereWithoutFileInput[]
+    deleteMany?: FileShareCourseScalarWhereInput | FileShareCourseScalarWhereInput[]
+  }
+
+  export type FileCreateNestedOneWithoutSharesUsersInput = {
+    create?: XOR<FileCreateWithoutSharesUsersInput, FileUncheckedCreateWithoutSharesUsersInput>
+    connectOrCreate?: FileCreateOrConnectWithoutSharesUsersInput
+    connect?: FileWhereUniqueInput
+  }
+
+  export type UserCreateNestedOneWithoutFileSharesInput = {
+    create?: XOR<UserCreateWithoutFileSharesInput, UserUncheckedCreateWithoutFileSharesInput>
+    connectOrCreate?: UserCreateOrConnectWithoutFileSharesInput
+    connect?: UserWhereUniqueInput
+  }
+
+  export type EnumFilePermissionFieldUpdateOperationsInput = {
+    set?: $Enums.FilePermission
+  }
+
+  export type FileUpdateOneRequiredWithoutSharesUsersNestedInput = {
+    create?: XOR<FileCreateWithoutSharesUsersInput, FileUncheckedCreateWithoutSharesUsersInput>
+    connectOrCreate?: FileCreateOrConnectWithoutSharesUsersInput
+    upsert?: FileUpsertWithoutSharesUsersInput
+    connect?: FileWhereUniqueInput
+    update?: XOR<XOR<FileUpdateToOneWithWhereWithoutSharesUsersInput, FileUpdateWithoutSharesUsersInput>, FileUncheckedUpdateWithoutSharesUsersInput>
+  }
+
+  export type UserUpdateOneRequiredWithoutFileSharesNestedInput = {
+    create?: XOR<UserCreateWithoutFileSharesInput, UserUncheckedCreateWithoutFileSharesInput>
+    connectOrCreate?: UserCreateOrConnectWithoutFileSharesInput
+    upsert?: UserUpsertWithoutFileSharesInput
+    connect?: UserWhereUniqueInput
+    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutFileSharesInput, UserUpdateWithoutFileSharesInput>, UserUncheckedUpdateWithoutFileSharesInput>
+  }
+
+  export type FileCreateNestedOneWithoutSharesSchoolsInput = {
+    create?: XOR<FileCreateWithoutSharesSchoolsInput, FileUncheckedCreateWithoutSharesSchoolsInput>
+    connectOrCreate?: FileCreateOrConnectWithoutSharesSchoolsInput
+    connect?: FileWhereUniqueInput
+  }
+
+  export type SchoolCreateNestedOneWithoutFileSharesInput = {
+    create?: XOR<SchoolCreateWithoutFileSharesInput, SchoolUncheckedCreateWithoutFileSharesInput>
+    connectOrCreate?: SchoolCreateOrConnectWithoutFileSharesInput
+    connect?: SchoolWhereUniqueInput
+  }
+
+  export type FileUpdateOneRequiredWithoutSharesSchoolsNestedInput = {
+    create?: XOR<FileCreateWithoutSharesSchoolsInput, FileUncheckedCreateWithoutSharesSchoolsInput>
+    connectOrCreate?: FileCreateOrConnectWithoutSharesSchoolsInput
+    upsert?: FileUpsertWithoutSharesSchoolsInput
+    connect?: FileWhereUniqueInput
+    update?: XOR<XOR<FileUpdateToOneWithWhereWithoutSharesSchoolsInput, FileUpdateWithoutSharesSchoolsInput>, FileUncheckedUpdateWithoutSharesSchoolsInput>
+  }
+
+  export type SchoolUpdateOneRequiredWithoutFileSharesNestedInput = {
+    create?: XOR<SchoolCreateWithoutFileSharesInput, SchoolUncheckedCreateWithoutFileSharesInput>
+    connectOrCreate?: SchoolCreateOrConnectWithoutFileSharesInput
+    upsert?: SchoolUpsertWithoutFileSharesInput
+    connect?: SchoolWhereUniqueInput
+    update?: XOR<XOR<SchoolUpdateToOneWithWhereWithoutFileSharesInput, SchoolUpdateWithoutFileSharesInput>, SchoolUncheckedUpdateWithoutFileSharesInput>
+  }
+
+  export type FileCreateNestedOneWithoutSharesClassGroupsInput = {
+    create?: XOR<FileCreateWithoutSharesClassGroupsInput, FileUncheckedCreateWithoutSharesClassGroupsInput>
+    connectOrCreate?: FileCreateOrConnectWithoutSharesClassGroupsInput
+    connect?: FileWhereUniqueInput
+  }
+
+  export type ClassGroupCreateNestedOneWithoutFileSharesInput = {
+    create?: XOR<ClassGroupCreateWithoutFileSharesInput, ClassGroupUncheckedCreateWithoutFileSharesInput>
+    connectOrCreate?: ClassGroupCreateOrConnectWithoutFileSharesInput
+    connect?: ClassGroupWhereUniqueInput
+  }
+
+  export type FileUpdateOneRequiredWithoutSharesClassGroupsNestedInput = {
+    create?: XOR<FileCreateWithoutSharesClassGroupsInput, FileUncheckedCreateWithoutSharesClassGroupsInput>
+    connectOrCreate?: FileCreateOrConnectWithoutSharesClassGroupsInput
+    upsert?: FileUpsertWithoutSharesClassGroupsInput
+    connect?: FileWhereUniqueInput
+    update?: XOR<XOR<FileUpdateToOneWithWhereWithoutSharesClassGroupsInput, FileUpdateWithoutSharesClassGroupsInput>, FileUncheckedUpdateWithoutSharesClassGroupsInput>
+  }
+
+  export type ClassGroupUpdateOneRequiredWithoutFileSharesNestedInput = {
+    create?: XOR<ClassGroupCreateWithoutFileSharesInput, ClassGroupUncheckedCreateWithoutFileSharesInput>
+    connectOrCreate?: ClassGroupCreateOrConnectWithoutFileSharesInput
+    upsert?: ClassGroupUpsertWithoutFileSharesInput
+    connect?: ClassGroupWhereUniqueInput
+    update?: XOR<XOR<ClassGroupUpdateToOneWithWhereWithoutFileSharesInput, ClassGroupUpdateWithoutFileSharesInput>, ClassGroupUncheckedUpdateWithoutFileSharesInput>
+  }
+
+  export type FileCreateNestedOneWithoutSharesCoursesInput = {
+    create?: XOR<FileCreateWithoutSharesCoursesInput, FileUncheckedCreateWithoutSharesCoursesInput>
+    connectOrCreate?: FileCreateOrConnectWithoutSharesCoursesInput
+    connect?: FileWhereUniqueInput
+  }
+
+  export type CourseCreateNestedOneWithoutFileSharesInput = {
+    create?: XOR<CourseCreateWithoutFileSharesInput, CourseUncheckedCreateWithoutFileSharesInput>
+    connectOrCreate?: CourseCreateOrConnectWithoutFileSharesInput
+    connect?: CourseWhereUniqueInput
+  }
+
+  export type FileUpdateOneRequiredWithoutSharesCoursesNestedInput = {
+    create?: XOR<FileCreateWithoutSharesCoursesInput, FileUncheckedCreateWithoutSharesCoursesInput>
+    connectOrCreate?: FileCreateOrConnectWithoutSharesCoursesInput
+    upsert?: FileUpsertWithoutSharesCoursesInput
+    connect?: FileWhereUniqueInput
+    update?: XOR<XOR<FileUpdateToOneWithWhereWithoutSharesCoursesInput, FileUpdateWithoutSharesCoursesInput>, FileUncheckedUpdateWithoutSharesCoursesInput>
+  }
+
+  export type CourseUpdateOneRequiredWithoutFileSharesNestedInput = {
+    create?: XOR<CourseCreateWithoutFileSharesInput, CourseUncheckedCreateWithoutFileSharesInput>
+    connectOrCreate?: CourseCreateOrConnectWithoutFileSharesInput
+    upsert?: CourseUpsertWithoutFileSharesInput
+    connect?: CourseWhereUniqueInput
+    update?: XOR<XOR<CourseUpdateToOneWithWhereWithoutFileSharesInput, CourseUpdateWithoutFileSharesInput>, CourseUncheckedUpdateWithoutFileSharesInput>
   }
 
   export type UserCreateNestedManyWithoutRoleInput = {
@@ -47680,6 +55537,13 @@ export namespace Prisma {
     connect?: PeriodWhereUniqueInput | PeriodWhereUniqueInput[]
   }
 
+  export type FileShareSchoolCreateNestedManyWithoutSchoolInput = {
+    create?: XOR<FileShareSchoolCreateWithoutSchoolInput, FileShareSchoolUncheckedCreateWithoutSchoolInput> | FileShareSchoolCreateWithoutSchoolInput[] | FileShareSchoolUncheckedCreateWithoutSchoolInput[]
+    connectOrCreate?: FileShareSchoolCreateOrConnectWithoutSchoolInput | FileShareSchoolCreateOrConnectWithoutSchoolInput[]
+    createMany?: FileShareSchoolCreateManySchoolInputEnvelope
+    connect?: FileShareSchoolWhereUniqueInput | FileShareSchoolWhereUniqueInput[]
+  }
+
   export type StudyPlanUncheckedCreateNestedManyWithoutSchoolInput = {
     create?: XOR<StudyPlanCreateWithoutSchoolInput, StudyPlanUncheckedCreateWithoutSchoolInput> | StudyPlanCreateWithoutSchoolInput[] | StudyPlanUncheckedCreateWithoutSchoolInput[]
     connectOrCreate?: StudyPlanCreateOrConnectWithoutSchoolInput | StudyPlanCreateOrConnectWithoutSchoolInput[]
@@ -47729,12 +55593,11 @@ export namespace Prisma {
     connect?: PeriodWhereUniqueInput | PeriodWhereUniqueInput[]
   }
 
-  export type IntFieldUpdateOperationsInput = {
-    set?: number
-    increment?: number
-    decrement?: number
-    multiply?: number
-    divide?: number
+  export type FileShareSchoolUncheckedCreateNestedManyWithoutSchoolInput = {
+    create?: XOR<FileShareSchoolCreateWithoutSchoolInput, FileShareSchoolUncheckedCreateWithoutSchoolInput> | FileShareSchoolCreateWithoutSchoolInput[] | FileShareSchoolUncheckedCreateWithoutSchoolInput[]
+    connectOrCreate?: FileShareSchoolCreateOrConnectWithoutSchoolInput | FileShareSchoolCreateOrConnectWithoutSchoolInput[]
+    createMany?: FileShareSchoolCreateManySchoolInputEnvelope
+    connect?: FileShareSchoolWhereUniqueInput | FileShareSchoolWhereUniqueInput[]
   }
 
   export type OrganizationUpdateOneRequiredWithoutSchoolsNestedInput = {
@@ -47843,6 +55706,20 @@ export namespace Prisma {
     deleteMany?: PeriodScalarWhereInput | PeriodScalarWhereInput[]
   }
 
+  export type FileShareSchoolUpdateManyWithoutSchoolNestedInput = {
+    create?: XOR<FileShareSchoolCreateWithoutSchoolInput, FileShareSchoolUncheckedCreateWithoutSchoolInput> | FileShareSchoolCreateWithoutSchoolInput[] | FileShareSchoolUncheckedCreateWithoutSchoolInput[]
+    connectOrCreate?: FileShareSchoolCreateOrConnectWithoutSchoolInput | FileShareSchoolCreateOrConnectWithoutSchoolInput[]
+    upsert?: FileShareSchoolUpsertWithWhereUniqueWithoutSchoolInput | FileShareSchoolUpsertWithWhereUniqueWithoutSchoolInput[]
+    createMany?: FileShareSchoolCreateManySchoolInputEnvelope
+    set?: FileShareSchoolWhereUniqueInput | FileShareSchoolWhereUniqueInput[]
+    disconnect?: FileShareSchoolWhereUniqueInput | FileShareSchoolWhereUniqueInput[]
+    delete?: FileShareSchoolWhereUniqueInput | FileShareSchoolWhereUniqueInput[]
+    connect?: FileShareSchoolWhereUniqueInput | FileShareSchoolWhereUniqueInput[]
+    update?: FileShareSchoolUpdateWithWhereUniqueWithoutSchoolInput | FileShareSchoolUpdateWithWhereUniqueWithoutSchoolInput[]
+    updateMany?: FileShareSchoolUpdateManyWithWhereWithoutSchoolInput | FileShareSchoolUpdateManyWithWhereWithoutSchoolInput[]
+    deleteMany?: FileShareSchoolScalarWhereInput | FileShareSchoolScalarWhereInput[]
+  }
+
   export type StudyPlanUncheckedUpdateManyWithoutSchoolNestedInput = {
     create?: XOR<StudyPlanCreateWithoutSchoolInput, StudyPlanUncheckedCreateWithoutSchoolInput> | StudyPlanCreateWithoutSchoolInput[] | StudyPlanUncheckedCreateWithoutSchoolInput[]
     connectOrCreate?: StudyPlanCreateOrConnectWithoutSchoolInput | StudyPlanCreateOrConnectWithoutSchoolInput[]
@@ -47939,6 +55816,20 @@ export namespace Prisma {
     update?: PeriodUpdateWithWhereUniqueWithoutSchoolInput | PeriodUpdateWithWhereUniqueWithoutSchoolInput[]
     updateMany?: PeriodUpdateManyWithWhereWithoutSchoolInput | PeriodUpdateManyWithWhereWithoutSchoolInput[]
     deleteMany?: PeriodScalarWhereInput | PeriodScalarWhereInput[]
+  }
+
+  export type FileShareSchoolUncheckedUpdateManyWithoutSchoolNestedInput = {
+    create?: XOR<FileShareSchoolCreateWithoutSchoolInput, FileShareSchoolUncheckedCreateWithoutSchoolInput> | FileShareSchoolCreateWithoutSchoolInput[] | FileShareSchoolUncheckedCreateWithoutSchoolInput[]
+    connectOrCreate?: FileShareSchoolCreateOrConnectWithoutSchoolInput | FileShareSchoolCreateOrConnectWithoutSchoolInput[]
+    upsert?: FileShareSchoolUpsertWithWhereUniqueWithoutSchoolInput | FileShareSchoolUpsertWithWhereUniqueWithoutSchoolInput[]
+    createMany?: FileShareSchoolCreateManySchoolInputEnvelope
+    set?: FileShareSchoolWhereUniqueInput | FileShareSchoolWhereUniqueInput[]
+    disconnect?: FileShareSchoolWhereUniqueInput | FileShareSchoolWhereUniqueInput[]
+    delete?: FileShareSchoolWhereUniqueInput | FileShareSchoolWhereUniqueInput[]
+    connect?: FileShareSchoolWhereUniqueInput | FileShareSchoolWhereUniqueInput[]
+    update?: FileShareSchoolUpdateWithWhereUniqueWithoutSchoolInput | FileShareSchoolUpdateWithWhereUniqueWithoutSchoolInput[]
+    updateMany?: FileShareSchoolUpdateManyWithWhereWithoutSchoolInput | FileShareSchoolUpdateManyWithWhereWithoutSchoolInput[]
+    deleteMany?: FileShareSchoolScalarWhereInput | FileShareSchoolScalarWhereInput[]
   }
 
   export type SchoolCreateNestedOneWithoutPeriodsInput = {
@@ -48400,6 +56291,13 @@ export namespace Prisma {
     connect?: ClassGroupWeeklyScheduleWhereUniqueInput | ClassGroupWeeklyScheduleWhereUniqueInput[]
   }
 
+  export type FileShareCourseCreateNestedManyWithoutCourseInput = {
+    create?: XOR<FileShareCourseCreateWithoutCourseInput, FileShareCourseUncheckedCreateWithoutCourseInput> | FileShareCourseCreateWithoutCourseInput[] | FileShareCourseUncheckedCreateWithoutCourseInput[]
+    connectOrCreate?: FileShareCourseCreateOrConnectWithoutCourseInput | FileShareCourseCreateOrConnectWithoutCourseInput[]
+    createMany?: FileShareCourseCreateManyCourseInputEnvelope
+    connect?: FileShareCourseWhereUniqueInput | FileShareCourseWhereUniqueInput[]
+  }
+
   export type ClassGroupUncheckedCreateNestedManyWithoutCoursesInput = {
     create?: XOR<ClassGroupCreateWithoutCoursesInput, ClassGroupUncheckedCreateWithoutCoursesInput> | ClassGroupCreateWithoutCoursesInput[] | ClassGroupUncheckedCreateWithoutCoursesInput[]
     connectOrCreate?: ClassGroupCreateOrConnectWithoutCoursesInput | ClassGroupCreateOrConnectWithoutCoursesInput[]
@@ -48445,6 +56343,13 @@ export namespace Prisma {
     connectOrCreate?: ClassGroupWeeklyScheduleCreateOrConnectWithoutCourseInput | ClassGroupWeeklyScheduleCreateOrConnectWithoutCourseInput[]
     createMany?: ClassGroupWeeklyScheduleCreateManyCourseInputEnvelope
     connect?: ClassGroupWeeklyScheduleWhereUniqueInput | ClassGroupWeeklyScheduleWhereUniqueInput[]
+  }
+
+  export type FileShareCourseUncheckedCreateNestedManyWithoutCourseInput = {
+    create?: XOR<FileShareCourseCreateWithoutCourseInput, FileShareCourseUncheckedCreateWithoutCourseInput> | FileShareCourseCreateWithoutCourseInput[] | FileShareCourseUncheckedCreateWithoutCourseInput[]
+    connectOrCreate?: FileShareCourseCreateOrConnectWithoutCourseInput | FileShareCourseCreateOrConnectWithoutCourseInput[]
+    createMany?: FileShareCourseCreateManyCourseInputEnvelope
+    connect?: FileShareCourseWhereUniqueInput | FileShareCourseWhereUniqueInput[]
   }
 
   export type OrganizationUpdateOneRequiredWithoutCoursesNestedInput = {
@@ -48595,6 +56500,20 @@ export namespace Prisma {
     deleteMany?: ClassGroupWeeklyScheduleScalarWhereInput | ClassGroupWeeklyScheduleScalarWhereInput[]
   }
 
+  export type FileShareCourseUpdateManyWithoutCourseNestedInput = {
+    create?: XOR<FileShareCourseCreateWithoutCourseInput, FileShareCourseUncheckedCreateWithoutCourseInput> | FileShareCourseCreateWithoutCourseInput[] | FileShareCourseUncheckedCreateWithoutCourseInput[]
+    connectOrCreate?: FileShareCourseCreateOrConnectWithoutCourseInput | FileShareCourseCreateOrConnectWithoutCourseInput[]
+    upsert?: FileShareCourseUpsertWithWhereUniqueWithoutCourseInput | FileShareCourseUpsertWithWhereUniqueWithoutCourseInput[]
+    createMany?: FileShareCourseCreateManyCourseInputEnvelope
+    set?: FileShareCourseWhereUniqueInput | FileShareCourseWhereUniqueInput[]
+    disconnect?: FileShareCourseWhereUniqueInput | FileShareCourseWhereUniqueInput[]
+    delete?: FileShareCourseWhereUniqueInput | FileShareCourseWhereUniqueInput[]
+    connect?: FileShareCourseWhereUniqueInput | FileShareCourseWhereUniqueInput[]
+    update?: FileShareCourseUpdateWithWhereUniqueWithoutCourseInput | FileShareCourseUpdateWithWhereUniqueWithoutCourseInput[]
+    updateMany?: FileShareCourseUpdateManyWithWhereWithoutCourseInput | FileShareCourseUpdateManyWithWhereWithoutCourseInput[]
+    deleteMany?: FileShareCourseScalarWhereInput | FileShareCourseScalarWhereInput[]
+  }
+
   export type ClassGroupUncheckedUpdateManyWithoutCoursesNestedInput = {
     create?: XOR<ClassGroupCreateWithoutCoursesInput, ClassGroupUncheckedCreateWithoutCoursesInput> | ClassGroupCreateWithoutCoursesInput[] | ClassGroupUncheckedCreateWithoutCoursesInput[]
     connectOrCreate?: ClassGroupCreateOrConnectWithoutCoursesInput | ClassGroupCreateOrConnectWithoutCoursesInput[]
@@ -48691,6 +56610,20 @@ export namespace Prisma {
     deleteMany?: ClassGroupWeeklyScheduleScalarWhereInput | ClassGroupWeeklyScheduleScalarWhereInput[]
   }
 
+  export type FileShareCourseUncheckedUpdateManyWithoutCourseNestedInput = {
+    create?: XOR<FileShareCourseCreateWithoutCourseInput, FileShareCourseUncheckedCreateWithoutCourseInput> | FileShareCourseCreateWithoutCourseInput[] | FileShareCourseUncheckedCreateWithoutCourseInput[]
+    connectOrCreate?: FileShareCourseCreateOrConnectWithoutCourseInput | FileShareCourseCreateOrConnectWithoutCourseInput[]
+    upsert?: FileShareCourseUpsertWithWhereUniqueWithoutCourseInput | FileShareCourseUpsertWithWhereUniqueWithoutCourseInput[]
+    createMany?: FileShareCourseCreateManyCourseInputEnvelope
+    set?: FileShareCourseWhereUniqueInput | FileShareCourseWhereUniqueInput[]
+    disconnect?: FileShareCourseWhereUniqueInput | FileShareCourseWhereUniqueInput[]
+    delete?: FileShareCourseWhereUniqueInput | FileShareCourseWhereUniqueInput[]
+    connect?: FileShareCourseWhereUniqueInput | FileShareCourseWhereUniqueInput[]
+    update?: FileShareCourseUpdateWithWhereUniqueWithoutCourseInput | FileShareCourseUpdateWithWhereUniqueWithoutCourseInput[]
+    updateMany?: FileShareCourseUpdateManyWithWhereWithoutCourseInput | FileShareCourseUpdateManyWithWhereWithoutCourseInput[]
+    deleteMany?: FileShareCourseScalarWhereInput | FileShareCourseScalarWhereInput[]
+  }
+
   export type OrganizationCreateNestedOneWithoutGroupsInput = {
     create?: XOR<OrganizationCreateWithoutGroupsInput, OrganizationUncheckedCreateWithoutGroupsInput>
     connectOrCreate?: OrganizationCreateOrConnectWithoutGroupsInput
@@ -48756,6 +56689,13 @@ export namespace Prisma {
     connect?: ClassGroupWeeklyScheduleWhereUniqueInput | ClassGroupWeeklyScheduleWhereUniqueInput[]
   }
 
+  export type FileShareClassGroupCreateNestedManyWithoutClassGroupInput = {
+    create?: XOR<FileShareClassGroupCreateWithoutClassGroupInput, FileShareClassGroupUncheckedCreateWithoutClassGroupInput> | FileShareClassGroupCreateWithoutClassGroupInput[] | FileShareClassGroupUncheckedCreateWithoutClassGroupInput[]
+    connectOrCreate?: FileShareClassGroupCreateOrConnectWithoutClassGroupInput | FileShareClassGroupCreateOrConnectWithoutClassGroupInput[]
+    createMany?: FileShareClassGroupCreateManyClassGroupInputEnvelope
+    connect?: FileShareClassGroupWhereUniqueInput | FileShareClassGroupWhereUniqueInput[]
+  }
+
   export type CourseUncheckedCreateNestedManyWithoutGroupsInput = {
     create?: XOR<CourseCreateWithoutGroupsInput, CourseUncheckedCreateWithoutGroupsInput> | CourseCreateWithoutGroupsInput[] | CourseUncheckedCreateWithoutGroupsInput[]
     connectOrCreate?: CourseCreateOrConnectWithoutGroupsInput | CourseCreateOrConnectWithoutGroupsInput[]
@@ -48795,6 +56735,13 @@ export namespace Prisma {
     connectOrCreate?: ClassGroupWeeklyScheduleCreateOrConnectWithoutClassGroupInput | ClassGroupWeeklyScheduleCreateOrConnectWithoutClassGroupInput[]
     createMany?: ClassGroupWeeklyScheduleCreateManyClassGroupInputEnvelope
     connect?: ClassGroupWeeklyScheduleWhereUniqueInput | ClassGroupWeeklyScheduleWhereUniqueInput[]
+  }
+
+  export type FileShareClassGroupUncheckedCreateNestedManyWithoutClassGroupInput = {
+    create?: XOR<FileShareClassGroupCreateWithoutClassGroupInput, FileShareClassGroupUncheckedCreateWithoutClassGroupInput> | FileShareClassGroupCreateWithoutClassGroupInput[] | FileShareClassGroupUncheckedCreateWithoutClassGroupInput[]
+    connectOrCreate?: FileShareClassGroupCreateOrConnectWithoutClassGroupInput | FileShareClassGroupCreateOrConnectWithoutClassGroupInput[]
+    createMany?: FileShareClassGroupCreateManyClassGroupInputEnvelope
+    connect?: FileShareClassGroupWhereUniqueInput | FileShareClassGroupWhereUniqueInput[]
   }
 
   export type OrganizationUpdateOneRequiredWithoutGroupsNestedInput = {
@@ -48914,6 +56861,20 @@ export namespace Prisma {
     deleteMany?: ClassGroupWeeklyScheduleScalarWhereInput | ClassGroupWeeklyScheduleScalarWhereInput[]
   }
 
+  export type FileShareClassGroupUpdateManyWithoutClassGroupNestedInput = {
+    create?: XOR<FileShareClassGroupCreateWithoutClassGroupInput, FileShareClassGroupUncheckedCreateWithoutClassGroupInput> | FileShareClassGroupCreateWithoutClassGroupInput[] | FileShareClassGroupUncheckedCreateWithoutClassGroupInput[]
+    connectOrCreate?: FileShareClassGroupCreateOrConnectWithoutClassGroupInput | FileShareClassGroupCreateOrConnectWithoutClassGroupInput[]
+    upsert?: FileShareClassGroupUpsertWithWhereUniqueWithoutClassGroupInput | FileShareClassGroupUpsertWithWhereUniqueWithoutClassGroupInput[]
+    createMany?: FileShareClassGroupCreateManyClassGroupInputEnvelope
+    set?: FileShareClassGroupWhereUniqueInput | FileShareClassGroupWhereUniqueInput[]
+    disconnect?: FileShareClassGroupWhereUniqueInput | FileShareClassGroupWhereUniqueInput[]
+    delete?: FileShareClassGroupWhereUniqueInput | FileShareClassGroupWhereUniqueInput[]
+    connect?: FileShareClassGroupWhereUniqueInput | FileShareClassGroupWhereUniqueInput[]
+    update?: FileShareClassGroupUpdateWithWhereUniqueWithoutClassGroupInput | FileShareClassGroupUpdateWithWhereUniqueWithoutClassGroupInput[]
+    updateMany?: FileShareClassGroupUpdateManyWithWhereWithoutClassGroupInput | FileShareClassGroupUpdateManyWithWhereWithoutClassGroupInput[]
+    deleteMany?: FileShareClassGroupScalarWhereInput | FileShareClassGroupScalarWhereInput[]
+  }
+
   export type CourseUncheckedUpdateManyWithoutGroupsNestedInput = {
     create?: XOR<CourseCreateWithoutGroupsInput, CourseUncheckedCreateWithoutGroupsInput> | CourseCreateWithoutGroupsInput[] | CourseUncheckedCreateWithoutGroupsInput[]
     connectOrCreate?: CourseCreateOrConnectWithoutGroupsInput | CourseCreateOrConnectWithoutGroupsInput[]
@@ -48995,6 +56956,20 @@ export namespace Prisma {
     update?: ClassGroupWeeklyScheduleUpdateWithWhereUniqueWithoutClassGroupInput | ClassGroupWeeklyScheduleUpdateWithWhereUniqueWithoutClassGroupInput[]
     updateMany?: ClassGroupWeeklyScheduleUpdateManyWithWhereWithoutClassGroupInput | ClassGroupWeeklyScheduleUpdateManyWithWhereWithoutClassGroupInput[]
     deleteMany?: ClassGroupWeeklyScheduleScalarWhereInput | ClassGroupWeeklyScheduleScalarWhereInput[]
+  }
+
+  export type FileShareClassGroupUncheckedUpdateManyWithoutClassGroupNestedInput = {
+    create?: XOR<FileShareClassGroupCreateWithoutClassGroupInput, FileShareClassGroupUncheckedCreateWithoutClassGroupInput> | FileShareClassGroupCreateWithoutClassGroupInput[] | FileShareClassGroupUncheckedCreateWithoutClassGroupInput[]
+    connectOrCreate?: FileShareClassGroupCreateOrConnectWithoutClassGroupInput | FileShareClassGroupCreateOrConnectWithoutClassGroupInput[]
+    upsert?: FileShareClassGroupUpsertWithWhereUniqueWithoutClassGroupInput | FileShareClassGroupUpsertWithWhereUniqueWithoutClassGroupInput[]
+    createMany?: FileShareClassGroupCreateManyClassGroupInputEnvelope
+    set?: FileShareClassGroupWhereUniqueInput | FileShareClassGroupWhereUniqueInput[]
+    disconnect?: FileShareClassGroupWhereUniqueInput | FileShareClassGroupWhereUniqueInput[]
+    delete?: FileShareClassGroupWhereUniqueInput | FileShareClassGroupWhereUniqueInput[]
+    connect?: FileShareClassGroupWhereUniqueInput | FileShareClassGroupWhereUniqueInput[]
+    update?: FileShareClassGroupUpdateWithWhereUniqueWithoutClassGroupInput | FileShareClassGroupUpdateWithWhereUniqueWithoutClassGroupInput[]
+    updateMany?: FileShareClassGroupUpdateManyWithWhereWithoutClassGroupInput | FileShareClassGroupUpdateManyWithWhereWithoutClassGroupInput[]
+    deleteMany?: FileShareClassGroupScalarWhereInput | FileShareClassGroupScalarWhereInput[]
   }
 
   export type OrganizationCreateNestedOneWithoutStudentInput = {
@@ -50525,6 +58500,23 @@ export namespace Prisma {
     not?: NestedFloatFilter<$PrismaModel> | number
   }
 
+  export type NestedEnumFilePermissionFilter<$PrismaModel = never> = {
+    equals?: $Enums.FilePermission | EnumFilePermissionFieldRefInput<$PrismaModel>
+    in?: $Enums.FilePermission[] | ListEnumFilePermissionFieldRefInput<$PrismaModel>
+    notIn?: $Enums.FilePermission[] | ListEnumFilePermissionFieldRefInput<$PrismaModel>
+    not?: NestedEnumFilePermissionFilter<$PrismaModel> | $Enums.FilePermission
+  }
+
+  export type NestedEnumFilePermissionWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.FilePermission | EnumFilePermissionFieldRefInput<$PrismaModel>
+    in?: $Enums.FilePermission[] | ListEnumFilePermissionFieldRefInput<$PrismaModel>
+    notIn?: $Enums.FilePermission[] | ListEnumFilePermissionFieldRefInput<$PrismaModel>
+    not?: NestedEnumFilePermissionWithAggregatesFilter<$PrismaModel> | $Enums.FilePermission
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumFilePermissionFilter<$PrismaModel>
+    _max?: NestedEnumFilePermissionFilter<$PrismaModel>
+  }
+
   export type NestedEnumGenderFilter<$PrismaModel = never> = {
     equals?: $Enums.Gender | EnumGenderFieldRefInput<$PrismaModel>
     in?: $Enums.Gender[] | ListEnumGenderFieldRefInput<$PrismaModel>
@@ -50690,6 +58682,8 @@ export namespace Prisma {
     teacher?: TeacherCreateNestedOneWithoutUserInput
     sentMessages?: MessageCreateNestedManyWithoutSenderInput
     messageRecipients?: MessageRecipientCreateNestedManyWithoutUserInput
+    filesOwned?: FileCreateNestedManyWithoutOwnerInput
+    fileShares?: FileShareUserCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutOrganizationInput = {
@@ -50708,6 +58702,8 @@ export namespace Prisma {
     teacher?: TeacherUncheckedCreateNestedOneWithoutUserInput
     sentMessages?: MessageUncheckedCreateNestedManyWithoutSenderInput
     messageRecipients?: MessageRecipientUncheckedCreateNestedManyWithoutUserInput
+    filesOwned?: FileUncheckedCreateNestedManyWithoutOwnerInput
+    fileShares?: FileShareUserUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutOrganizationInput = {
@@ -50773,6 +58769,7 @@ export namespace Prisma {
     students?: StudentCreateNestedManyWithoutSchoolInput
     assignments?: AssignmentCreateNestedManyWithoutSchoolInput
     periods?: PeriodCreateNestedManyWithoutSchoolInput
+    fileShares?: FileShareSchoolCreateNestedManyWithoutSchoolInput
   }
 
   export type SchoolUncheckedCreateWithoutOrganizationInput = {
@@ -50798,6 +58795,7 @@ export namespace Prisma {
     students?: StudentUncheckedCreateNestedManyWithoutSchoolInput
     assignments?: AssignmentUncheckedCreateNestedManyWithoutSchoolInput
     periods?: PeriodUncheckedCreateNestedManyWithoutSchoolInput
+    fileShares?: FileShareSchoolUncheckedCreateNestedManyWithoutSchoolInput
   }
 
   export type SchoolCreateOrConnectWithoutOrganizationInput = {
@@ -50858,6 +58856,7 @@ export namespace Prisma {
     quizSchedules?: QuizScheduleCreateNestedManyWithoutClassGroupInput
     quizSubmissions?: QuizSubmissionCreateNestedManyWithoutClassGroupInput
     weeklySchedules?: ClassGroupWeeklyScheduleCreateNestedManyWithoutClassGroupInput
+    fileShares?: FileShareClassGroupCreateNestedManyWithoutClassGroupInput
   }
 
   export type ClassGroupUncheckedCreateWithoutOrganizationInput = {
@@ -50876,6 +58875,7 @@ export namespace Prisma {
     quizSchedules?: QuizScheduleUncheckedCreateNestedManyWithoutClassGroupInput
     quizSubmissions?: QuizSubmissionUncheckedCreateNestedManyWithoutClassGroupInput
     weeklySchedules?: ClassGroupWeeklyScheduleUncheckedCreateNestedManyWithoutClassGroupInput
+    fileShares?: FileShareClassGroupUncheckedCreateNestedManyWithoutClassGroupInput
   }
 
   export type ClassGroupCreateOrConnectWithoutOrganizationInput = {
@@ -50907,6 +58907,7 @@ export namespace Prisma {
     gradeBuckets?: GradeBucketCreateNestedManyWithoutCourseInput
     grades?: GradeCreateNestedManyWithoutCourseInput
     weeklySchedules?: ClassGroupWeeklyScheduleCreateNestedManyWithoutCourseInput
+    fileShares?: FileShareCourseCreateNestedManyWithoutCourseInput
   }
 
   export type CourseUncheckedCreateWithoutOrganizationInput = {
@@ -50928,6 +58929,7 @@ export namespace Prisma {
     gradeBuckets?: GradeBucketUncheckedCreateNestedManyWithoutCourseInput
     grades?: GradeUncheckedCreateNestedManyWithoutCourseInput
     weeklySchedules?: ClassGroupWeeklyScheduleUncheckedCreateNestedManyWithoutCourseInput
+    fileShares?: FileShareCourseUncheckedCreateNestedManyWithoutCourseInput
   }
 
   export type CourseCreateOrConnectWithoutOrganizationInput = {
@@ -51117,6 +59119,48 @@ export namespace Prisma {
 
   export type MessageCreateManyOrganizationInputEnvelope = {
     data: MessageCreateManyOrganizationInput | MessageCreateManyOrganizationInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type FileCreateWithoutOrganizationInput = {
+    id?: string
+    name: string
+    mimeType: string
+    size: number
+    storageKey: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    deletedAt?: Date | string | null
+    owner: UserCreateNestedOneWithoutFilesOwnedInput
+    sharesUsers?: FileShareUserCreateNestedManyWithoutFileInput
+    sharesSchools?: FileShareSchoolCreateNestedManyWithoutFileInput
+    sharesClassGroups?: FileShareClassGroupCreateNestedManyWithoutFileInput
+    sharesCourses?: FileShareCourseCreateNestedManyWithoutFileInput
+  }
+
+  export type FileUncheckedCreateWithoutOrganizationInput = {
+    id?: string
+    ownerId: string
+    name: string
+    mimeType: string
+    size: number
+    storageKey: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    deletedAt?: Date | string | null
+    sharesUsers?: FileShareUserUncheckedCreateNestedManyWithoutFileInput
+    sharesSchools?: FileShareSchoolUncheckedCreateNestedManyWithoutFileInput
+    sharesClassGroups?: FileShareClassGroupUncheckedCreateNestedManyWithoutFileInput
+    sharesCourses?: FileShareCourseUncheckedCreateNestedManyWithoutFileInput
+  }
+
+  export type FileCreateOrConnectWithoutOrganizationInput = {
+    where: FileWhereUniqueInput
+    create: XOR<FileCreateWithoutOrganizationInput, FileUncheckedCreateWithoutOrganizationInput>
+  }
+
+  export type FileCreateManyOrganizationInputEnvelope = {
+    data: FileCreateManyOrganizationInput | FileCreateManyOrganizationInput[]
     skipDuplicates?: boolean
   }
 
@@ -51453,6 +59497,38 @@ export namespace Prisma {
     deletedAt?: DateTimeNullableFilter<"Message"> | Date | string | null
   }
 
+  export type FileUpsertWithWhereUniqueWithoutOrganizationInput = {
+    where: FileWhereUniqueInput
+    update: XOR<FileUpdateWithoutOrganizationInput, FileUncheckedUpdateWithoutOrganizationInput>
+    create: XOR<FileCreateWithoutOrganizationInput, FileUncheckedCreateWithoutOrganizationInput>
+  }
+
+  export type FileUpdateWithWhereUniqueWithoutOrganizationInput = {
+    where: FileWhereUniqueInput
+    data: XOR<FileUpdateWithoutOrganizationInput, FileUncheckedUpdateWithoutOrganizationInput>
+  }
+
+  export type FileUpdateManyWithWhereWithoutOrganizationInput = {
+    where: FileScalarWhereInput
+    data: XOR<FileUpdateManyMutationInput, FileUncheckedUpdateManyWithoutOrganizationInput>
+  }
+
+  export type FileScalarWhereInput = {
+    AND?: FileScalarWhereInput | FileScalarWhereInput[]
+    OR?: FileScalarWhereInput[]
+    NOT?: FileScalarWhereInput | FileScalarWhereInput[]
+    id?: StringFilter<"File"> | string
+    organizationId?: StringFilter<"File"> | string
+    ownerId?: StringFilter<"File"> | string
+    name?: StringFilter<"File"> | string
+    mimeType?: StringFilter<"File"> | string
+    size?: IntFilter<"File"> | number
+    storageKey?: StringFilter<"File"> | string
+    createdAt?: DateTimeFilter<"File"> | Date | string
+    updatedAt?: DateTimeFilter<"File"> | Date | string
+    deletedAt?: DateTimeNullableFilter<"File"> | Date | string | null
+  }
+
   export type RoleCreateWithoutUsersInput = {
     id?: string
     name: string
@@ -51494,6 +59570,7 @@ export namespace Prisma {
     Student?: StudentCreateNestedManyWithoutOrganizationInput
     quizzes?: QuizCreateNestedManyWithoutOrganizationInput
     messages?: MessageCreateNestedManyWithoutOrganizationInput
+    files?: FileCreateNestedManyWithoutOrganizationInput
   }
 
   export type OrganizationUncheckedCreateWithoutUsersInput = {
@@ -51512,6 +59589,7 @@ export namespace Prisma {
     Student?: StudentUncheckedCreateNestedManyWithoutOrganizationInput
     quizzes?: QuizUncheckedCreateNestedManyWithoutOrganizationInput
     messages?: MessageUncheckedCreateNestedManyWithoutOrganizationInput
+    files?: FileUncheckedCreateNestedManyWithoutOrganizationInput
   }
 
   export type OrganizationCreateOrConnectWithoutUsersInput = {
@@ -51681,6 +59759,74 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type FileCreateWithoutOwnerInput = {
+    id?: string
+    name: string
+    mimeType: string
+    size: number
+    storageKey: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    deletedAt?: Date | string | null
+    organization: OrganizationCreateNestedOneWithoutFilesInput
+    sharesUsers?: FileShareUserCreateNestedManyWithoutFileInput
+    sharesSchools?: FileShareSchoolCreateNestedManyWithoutFileInput
+    sharesClassGroups?: FileShareClassGroupCreateNestedManyWithoutFileInput
+    sharesCourses?: FileShareCourseCreateNestedManyWithoutFileInput
+  }
+
+  export type FileUncheckedCreateWithoutOwnerInput = {
+    id?: string
+    organizationId: string
+    name: string
+    mimeType: string
+    size: number
+    storageKey: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    deletedAt?: Date | string | null
+    sharesUsers?: FileShareUserUncheckedCreateNestedManyWithoutFileInput
+    sharesSchools?: FileShareSchoolUncheckedCreateNestedManyWithoutFileInput
+    sharesClassGroups?: FileShareClassGroupUncheckedCreateNestedManyWithoutFileInput
+    sharesCourses?: FileShareCourseUncheckedCreateNestedManyWithoutFileInput
+  }
+
+  export type FileCreateOrConnectWithoutOwnerInput = {
+    where: FileWhereUniqueInput
+    create: XOR<FileCreateWithoutOwnerInput, FileUncheckedCreateWithoutOwnerInput>
+  }
+
+  export type FileCreateManyOwnerInputEnvelope = {
+    data: FileCreateManyOwnerInput | FileCreateManyOwnerInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type FileShareUserCreateWithoutUserInput = {
+    id?: string
+    permission: $Enums.FilePermission
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    file: FileCreateNestedOneWithoutSharesUsersInput
+  }
+
+  export type FileShareUserUncheckedCreateWithoutUserInput = {
+    id?: string
+    fileId: string
+    permission: $Enums.FilePermission
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type FileShareUserCreateOrConnectWithoutUserInput = {
+    where: FileShareUserWhereUniqueInput
+    create: XOR<FileShareUserCreateWithoutUserInput, FileShareUserUncheckedCreateWithoutUserInput>
+  }
+
+  export type FileShareUserCreateManyUserInputEnvelope = {
+    data: FileShareUserCreateManyUserInput | FileShareUserCreateManyUserInput[]
+    skipDuplicates?: boolean
+  }
+
   export type RoleUpsertWithoutUsersInput = {
     update: XOR<RoleUpdateWithoutUsersInput, RoleUncheckedUpdateWithoutUsersInput>
     create: XOR<RoleCreateWithoutUsersInput, RoleUncheckedCreateWithoutUsersInput>
@@ -51739,6 +59885,7 @@ export namespace Prisma {
     Student?: StudentUpdateManyWithoutOrganizationNestedInput
     quizzes?: QuizUpdateManyWithoutOrganizationNestedInput
     messages?: MessageUpdateManyWithoutOrganizationNestedInput
+    files?: FileUpdateManyWithoutOrganizationNestedInput
   }
 
   export type OrganizationUncheckedUpdateWithoutUsersInput = {
@@ -51757,6 +59904,7 @@ export namespace Prisma {
     Student?: StudentUncheckedUpdateManyWithoutOrganizationNestedInput
     quizzes?: QuizUncheckedUpdateManyWithoutOrganizationNestedInput
     messages?: MessageUncheckedUpdateManyWithoutOrganizationNestedInput
+    files?: FileUncheckedUpdateManyWithoutOrganizationNestedInput
   }
 
   export type StudentUpsertWithoutUserInput = {
@@ -51918,6 +60066,50 @@ export namespace Prisma {
     deletedAt?: DateTimeNullableFilter<"MessageRecipient"> | Date | string | null
   }
 
+  export type FileUpsertWithWhereUniqueWithoutOwnerInput = {
+    where: FileWhereUniqueInput
+    update: XOR<FileUpdateWithoutOwnerInput, FileUncheckedUpdateWithoutOwnerInput>
+    create: XOR<FileCreateWithoutOwnerInput, FileUncheckedCreateWithoutOwnerInput>
+  }
+
+  export type FileUpdateWithWhereUniqueWithoutOwnerInput = {
+    where: FileWhereUniqueInput
+    data: XOR<FileUpdateWithoutOwnerInput, FileUncheckedUpdateWithoutOwnerInput>
+  }
+
+  export type FileUpdateManyWithWhereWithoutOwnerInput = {
+    where: FileScalarWhereInput
+    data: XOR<FileUpdateManyMutationInput, FileUncheckedUpdateManyWithoutOwnerInput>
+  }
+
+  export type FileShareUserUpsertWithWhereUniqueWithoutUserInput = {
+    where: FileShareUserWhereUniqueInput
+    update: XOR<FileShareUserUpdateWithoutUserInput, FileShareUserUncheckedUpdateWithoutUserInput>
+    create: XOR<FileShareUserCreateWithoutUserInput, FileShareUserUncheckedCreateWithoutUserInput>
+  }
+
+  export type FileShareUserUpdateWithWhereUniqueWithoutUserInput = {
+    where: FileShareUserWhereUniqueInput
+    data: XOR<FileShareUserUpdateWithoutUserInput, FileShareUserUncheckedUpdateWithoutUserInput>
+  }
+
+  export type FileShareUserUpdateManyWithWhereWithoutUserInput = {
+    where: FileShareUserScalarWhereInput
+    data: XOR<FileShareUserUpdateManyMutationInput, FileShareUserUncheckedUpdateManyWithoutUserInput>
+  }
+
+  export type FileShareUserScalarWhereInput = {
+    AND?: FileShareUserScalarWhereInput | FileShareUserScalarWhereInput[]
+    OR?: FileShareUserScalarWhereInput[]
+    NOT?: FileShareUserScalarWhereInput | FileShareUserScalarWhereInput[]
+    id?: StringFilter<"FileShareUser"> | string
+    fileId?: StringFilter<"FileShareUser"> | string
+    userId?: StringFilter<"FileShareUser"> | string
+    permission?: EnumFilePermissionFilter<"FileShareUser"> | $Enums.FilePermission
+    createdAt?: DateTimeFilter<"FileShareUser"> | Date | string
+    updatedAt?: DateTimeFilter<"FileShareUser"> | Date | string
+  }
+
   export type OrganizationCreateWithoutMessagesInput = {
     id?: string
     name: string
@@ -51934,6 +60126,7 @@ export namespace Prisma {
     Teacher?: TeacherCreateNestedManyWithoutOrganizationInput
     Student?: StudentCreateNestedManyWithoutOrganizationInput
     quizzes?: QuizCreateNestedManyWithoutOrganizationInput
+    files?: FileCreateNestedManyWithoutOrganizationInput
   }
 
   export type OrganizationUncheckedCreateWithoutMessagesInput = {
@@ -51952,6 +60145,7 @@ export namespace Prisma {
     Teacher?: TeacherUncheckedCreateNestedManyWithoutOrganizationInput
     Student?: StudentUncheckedCreateNestedManyWithoutOrganizationInput
     quizzes?: QuizUncheckedCreateNestedManyWithoutOrganizationInput
+    files?: FileUncheckedCreateNestedManyWithoutOrganizationInput
   }
 
   export type OrganizationCreateOrConnectWithoutMessagesInput = {
@@ -51975,6 +60169,8 @@ export namespace Prisma {
     student?: StudentCreateNestedOneWithoutUserInput
     teacher?: TeacherCreateNestedOneWithoutUserInput
     messageRecipients?: MessageRecipientCreateNestedManyWithoutUserInput
+    filesOwned?: FileCreateNestedManyWithoutOwnerInput
+    fileShares?: FileShareUserCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutSentMessagesInput = {
@@ -51993,6 +60189,8 @@ export namespace Prisma {
     student?: StudentUncheckedCreateNestedOneWithoutUserInput
     teacher?: TeacherUncheckedCreateNestedOneWithoutUserInput
     messageRecipients?: MessageRecipientUncheckedCreateNestedManyWithoutUserInput
+    filesOwned?: FileUncheckedCreateNestedManyWithoutOwnerInput
+    fileShares?: FileShareUserUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutSentMessagesInput = {
@@ -52055,6 +60253,7 @@ export namespace Prisma {
     Teacher?: TeacherUpdateManyWithoutOrganizationNestedInput
     Student?: StudentUpdateManyWithoutOrganizationNestedInput
     quizzes?: QuizUpdateManyWithoutOrganizationNestedInput
+    files?: FileUpdateManyWithoutOrganizationNestedInput
   }
 
   export type OrganizationUncheckedUpdateWithoutMessagesInput = {
@@ -52073,6 +60272,7 @@ export namespace Prisma {
     Teacher?: TeacherUncheckedUpdateManyWithoutOrganizationNestedInput
     Student?: StudentUncheckedUpdateManyWithoutOrganizationNestedInput
     quizzes?: QuizUncheckedUpdateManyWithoutOrganizationNestedInput
+    files?: FileUncheckedUpdateManyWithoutOrganizationNestedInput
   }
 
   export type UserUpsertWithoutSentMessagesInput = {
@@ -52102,6 +60302,8 @@ export namespace Prisma {
     student?: StudentUpdateOneWithoutUserNestedInput
     teacher?: TeacherUpdateOneWithoutUserNestedInput
     messageRecipients?: MessageRecipientUpdateManyWithoutUserNestedInput
+    filesOwned?: FileUpdateManyWithoutOwnerNestedInput
+    fileShares?: FileShareUserUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutSentMessagesInput = {
@@ -52120,6 +60322,8 @@ export namespace Prisma {
     student?: StudentUncheckedUpdateOneWithoutUserNestedInput
     teacher?: TeacherUncheckedUpdateOneWithoutUserNestedInput
     messageRecipients?: MessageRecipientUncheckedUpdateManyWithoutUserNestedInput
+    filesOwned?: FileUncheckedUpdateManyWithoutOwnerNestedInput
+    fileShares?: FileShareUserUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type MessageRecipientUpsertWithWhereUniqueWithoutMessageInput = {
@@ -52181,6 +60385,8 @@ export namespace Prisma {
     student?: StudentCreateNestedOneWithoutUserInput
     teacher?: TeacherCreateNestedOneWithoutUserInput
     sentMessages?: MessageCreateNestedManyWithoutSenderInput
+    filesOwned?: FileCreateNestedManyWithoutOwnerInput
+    fileShares?: FileShareUserCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutMessageRecipientsInput = {
@@ -52199,6 +60405,8 @@ export namespace Prisma {
     student?: StudentUncheckedCreateNestedOneWithoutUserInput
     teacher?: TeacherUncheckedCreateNestedOneWithoutUserInput
     sentMessages?: MessageUncheckedCreateNestedManyWithoutSenderInput
+    filesOwned?: FileUncheckedCreateNestedManyWithoutOwnerInput
+    fileShares?: FileShareUserUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutMessageRecipientsInput = {
@@ -52266,6 +60474,8 @@ export namespace Prisma {
     student?: StudentUpdateOneWithoutUserNestedInput
     teacher?: TeacherUpdateOneWithoutUserNestedInput
     sentMessages?: MessageUpdateManyWithoutSenderNestedInput
+    filesOwned?: FileUpdateManyWithoutOwnerNestedInput
+    fileShares?: FileShareUserUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutMessageRecipientsInput = {
@@ -52284,6 +60494,1132 @@ export namespace Prisma {
     student?: StudentUncheckedUpdateOneWithoutUserNestedInput
     teacher?: TeacherUncheckedUpdateOneWithoutUserNestedInput
     sentMessages?: MessageUncheckedUpdateManyWithoutSenderNestedInput
+    filesOwned?: FileUncheckedUpdateManyWithoutOwnerNestedInput
+    fileShares?: FileShareUserUncheckedUpdateManyWithoutUserNestedInput
+  }
+
+  export type OrganizationCreateWithoutFilesInput = {
+    id?: string
+    name: string
+    description: string
+    active?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    users?: UserCreateNestedManyWithoutOrganizationInput
+    roles?: RoleCreateNestedManyWithoutOrganizationInput
+    schools?: SchoolCreateNestedManyWithoutOrganizationInput
+    subjects?: SubjectCreateNestedManyWithoutOrganizationInput
+    groups?: ClassGroupCreateNestedManyWithoutOrganizationInput
+    courses?: CourseCreateNestedManyWithoutOrganizationInput
+    Teacher?: TeacherCreateNestedManyWithoutOrganizationInput
+    Student?: StudentCreateNestedManyWithoutOrganizationInput
+    quizzes?: QuizCreateNestedManyWithoutOrganizationInput
+    messages?: MessageCreateNestedManyWithoutOrganizationInput
+  }
+
+  export type OrganizationUncheckedCreateWithoutFilesInput = {
+    id?: string
+    name: string
+    description: string
+    active?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    users?: UserUncheckedCreateNestedManyWithoutOrganizationInput
+    roles?: RoleUncheckedCreateNestedManyWithoutOrganizationInput
+    schools?: SchoolUncheckedCreateNestedManyWithoutOrganizationInput
+    subjects?: SubjectUncheckedCreateNestedManyWithoutOrganizationInput
+    groups?: ClassGroupUncheckedCreateNestedManyWithoutOrganizationInput
+    courses?: CourseUncheckedCreateNestedManyWithoutOrganizationInput
+    Teacher?: TeacherUncheckedCreateNestedManyWithoutOrganizationInput
+    Student?: StudentUncheckedCreateNestedManyWithoutOrganizationInput
+    quizzes?: QuizUncheckedCreateNestedManyWithoutOrganizationInput
+    messages?: MessageUncheckedCreateNestedManyWithoutOrganizationInput
+  }
+
+  export type OrganizationCreateOrConnectWithoutFilesInput = {
+    where: OrganizationWhereUniqueInput
+    create: XOR<OrganizationCreateWithoutFilesInput, OrganizationUncheckedCreateWithoutFilesInput>
+  }
+
+  export type UserCreateWithoutFilesOwnedInput = {
+    id?: string
+    email: string
+    firstName: string
+    lastName: string
+    password: string
+    color?: string | null
+    lastLogin?: Date | string | null
+    isBlocked?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    role: RoleCreateNestedOneWithoutUsersInput
+    organization?: OrganizationCreateNestedOneWithoutUsersInput
+    student?: StudentCreateNestedOneWithoutUserInput
+    teacher?: TeacherCreateNestedOneWithoutUserInput
+    sentMessages?: MessageCreateNestedManyWithoutSenderInput
+    messageRecipients?: MessageRecipientCreateNestedManyWithoutUserInput
+    fileShares?: FileShareUserCreateNestedManyWithoutUserInput
+  }
+
+  export type UserUncheckedCreateWithoutFilesOwnedInput = {
+    id?: string
+    email: string
+    firstName: string
+    lastName: string
+    password: string
+    color?: string | null
+    roleId: string
+    organizationId?: string | null
+    lastLogin?: Date | string | null
+    isBlocked?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    student?: StudentUncheckedCreateNestedOneWithoutUserInput
+    teacher?: TeacherUncheckedCreateNestedOneWithoutUserInput
+    sentMessages?: MessageUncheckedCreateNestedManyWithoutSenderInput
+    messageRecipients?: MessageRecipientUncheckedCreateNestedManyWithoutUserInput
+    fileShares?: FileShareUserUncheckedCreateNestedManyWithoutUserInput
+  }
+
+  export type UserCreateOrConnectWithoutFilesOwnedInput = {
+    where: UserWhereUniqueInput
+    create: XOR<UserCreateWithoutFilesOwnedInput, UserUncheckedCreateWithoutFilesOwnedInput>
+  }
+
+  export type FileShareUserCreateWithoutFileInput = {
+    id?: string
+    permission: $Enums.FilePermission
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    user: UserCreateNestedOneWithoutFileSharesInput
+  }
+
+  export type FileShareUserUncheckedCreateWithoutFileInput = {
+    id?: string
+    userId: string
+    permission: $Enums.FilePermission
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type FileShareUserCreateOrConnectWithoutFileInput = {
+    where: FileShareUserWhereUniqueInput
+    create: XOR<FileShareUserCreateWithoutFileInput, FileShareUserUncheckedCreateWithoutFileInput>
+  }
+
+  export type FileShareUserCreateManyFileInputEnvelope = {
+    data: FileShareUserCreateManyFileInput | FileShareUserCreateManyFileInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type FileShareSchoolCreateWithoutFileInput = {
+    id?: string
+    permission: $Enums.FilePermission
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    school: SchoolCreateNestedOneWithoutFileSharesInput
+  }
+
+  export type FileShareSchoolUncheckedCreateWithoutFileInput = {
+    id?: string
+    schoolId: string
+    permission: $Enums.FilePermission
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type FileShareSchoolCreateOrConnectWithoutFileInput = {
+    where: FileShareSchoolWhereUniqueInput
+    create: XOR<FileShareSchoolCreateWithoutFileInput, FileShareSchoolUncheckedCreateWithoutFileInput>
+  }
+
+  export type FileShareSchoolCreateManyFileInputEnvelope = {
+    data: FileShareSchoolCreateManyFileInput | FileShareSchoolCreateManyFileInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type FileShareClassGroupCreateWithoutFileInput = {
+    id?: string
+    permission: $Enums.FilePermission
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    classGroup: ClassGroupCreateNestedOneWithoutFileSharesInput
+  }
+
+  export type FileShareClassGroupUncheckedCreateWithoutFileInput = {
+    id?: string
+    classGroupId: string
+    permission: $Enums.FilePermission
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type FileShareClassGroupCreateOrConnectWithoutFileInput = {
+    where: FileShareClassGroupWhereUniqueInput
+    create: XOR<FileShareClassGroupCreateWithoutFileInput, FileShareClassGroupUncheckedCreateWithoutFileInput>
+  }
+
+  export type FileShareClassGroupCreateManyFileInputEnvelope = {
+    data: FileShareClassGroupCreateManyFileInput | FileShareClassGroupCreateManyFileInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type FileShareCourseCreateWithoutFileInput = {
+    id?: string
+    permission: $Enums.FilePermission
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    course: CourseCreateNestedOneWithoutFileSharesInput
+  }
+
+  export type FileShareCourseUncheckedCreateWithoutFileInput = {
+    id?: string
+    courseId: string
+    permission: $Enums.FilePermission
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type FileShareCourseCreateOrConnectWithoutFileInput = {
+    where: FileShareCourseWhereUniqueInput
+    create: XOR<FileShareCourseCreateWithoutFileInput, FileShareCourseUncheckedCreateWithoutFileInput>
+  }
+
+  export type FileShareCourseCreateManyFileInputEnvelope = {
+    data: FileShareCourseCreateManyFileInput | FileShareCourseCreateManyFileInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type OrganizationUpsertWithoutFilesInput = {
+    update: XOR<OrganizationUpdateWithoutFilesInput, OrganizationUncheckedUpdateWithoutFilesInput>
+    create: XOR<OrganizationCreateWithoutFilesInput, OrganizationUncheckedCreateWithoutFilesInput>
+    where?: OrganizationWhereInput
+  }
+
+  export type OrganizationUpdateToOneWithWhereWithoutFilesInput = {
+    where?: OrganizationWhereInput
+    data: XOR<OrganizationUpdateWithoutFilesInput, OrganizationUncheckedUpdateWithoutFilesInput>
+  }
+
+  export type OrganizationUpdateWithoutFilesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    description?: StringFieldUpdateOperationsInput | string
+    active?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    users?: UserUpdateManyWithoutOrganizationNestedInput
+    roles?: RoleUpdateManyWithoutOrganizationNestedInput
+    schools?: SchoolUpdateManyWithoutOrganizationNestedInput
+    subjects?: SubjectUpdateManyWithoutOrganizationNestedInput
+    groups?: ClassGroupUpdateManyWithoutOrganizationNestedInput
+    courses?: CourseUpdateManyWithoutOrganizationNestedInput
+    Teacher?: TeacherUpdateManyWithoutOrganizationNestedInput
+    Student?: StudentUpdateManyWithoutOrganizationNestedInput
+    quizzes?: QuizUpdateManyWithoutOrganizationNestedInput
+    messages?: MessageUpdateManyWithoutOrganizationNestedInput
+  }
+
+  export type OrganizationUncheckedUpdateWithoutFilesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    description?: StringFieldUpdateOperationsInput | string
+    active?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    users?: UserUncheckedUpdateManyWithoutOrganizationNestedInput
+    roles?: RoleUncheckedUpdateManyWithoutOrganizationNestedInput
+    schools?: SchoolUncheckedUpdateManyWithoutOrganizationNestedInput
+    subjects?: SubjectUncheckedUpdateManyWithoutOrganizationNestedInput
+    groups?: ClassGroupUncheckedUpdateManyWithoutOrganizationNestedInput
+    courses?: CourseUncheckedUpdateManyWithoutOrganizationNestedInput
+    Teacher?: TeacherUncheckedUpdateManyWithoutOrganizationNestedInput
+    Student?: StudentUncheckedUpdateManyWithoutOrganizationNestedInput
+    quizzes?: QuizUncheckedUpdateManyWithoutOrganizationNestedInput
+    messages?: MessageUncheckedUpdateManyWithoutOrganizationNestedInput
+  }
+
+  export type UserUpsertWithoutFilesOwnedInput = {
+    update: XOR<UserUpdateWithoutFilesOwnedInput, UserUncheckedUpdateWithoutFilesOwnedInput>
+    create: XOR<UserCreateWithoutFilesOwnedInput, UserUncheckedCreateWithoutFilesOwnedInput>
+    where?: UserWhereInput
+  }
+
+  export type UserUpdateToOneWithWhereWithoutFilesOwnedInput = {
+    where?: UserWhereInput
+    data: XOR<UserUpdateWithoutFilesOwnedInput, UserUncheckedUpdateWithoutFilesOwnedInput>
+  }
+
+  export type UserUpdateWithoutFilesOwnedInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    firstName?: StringFieldUpdateOperationsInput | string
+    lastName?: StringFieldUpdateOperationsInput | string
+    password?: StringFieldUpdateOperationsInput | string
+    color?: NullableStringFieldUpdateOperationsInput | string | null
+    lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    isBlocked?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    role?: RoleUpdateOneRequiredWithoutUsersNestedInput
+    organization?: OrganizationUpdateOneWithoutUsersNestedInput
+    student?: StudentUpdateOneWithoutUserNestedInput
+    teacher?: TeacherUpdateOneWithoutUserNestedInput
+    sentMessages?: MessageUpdateManyWithoutSenderNestedInput
+    messageRecipients?: MessageRecipientUpdateManyWithoutUserNestedInput
+    fileShares?: FileShareUserUpdateManyWithoutUserNestedInput
+  }
+
+  export type UserUncheckedUpdateWithoutFilesOwnedInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    firstName?: StringFieldUpdateOperationsInput | string
+    lastName?: StringFieldUpdateOperationsInput | string
+    password?: StringFieldUpdateOperationsInput | string
+    color?: NullableStringFieldUpdateOperationsInput | string | null
+    roleId?: StringFieldUpdateOperationsInput | string
+    organizationId?: NullableStringFieldUpdateOperationsInput | string | null
+    lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    isBlocked?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    student?: StudentUncheckedUpdateOneWithoutUserNestedInput
+    teacher?: TeacherUncheckedUpdateOneWithoutUserNestedInput
+    sentMessages?: MessageUncheckedUpdateManyWithoutSenderNestedInput
+    messageRecipients?: MessageRecipientUncheckedUpdateManyWithoutUserNestedInput
+    fileShares?: FileShareUserUncheckedUpdateManyWithoutUserNestedInput
+  }
+
+  export type FileShareUserUpsertWithWhereUniqueWithoutFileInput = {
+    where: FileShareUserWhereUniqueInput
+    update: XOR<FileShareUserUpdateWithoutFileInput, FileShareUserUncheckedUpdateWithoutFileInput>
+    create: XOR<FileShareUserCreateWithoutFileInput, FileShareUserUncheckedCreateWithoutFileInput>
+  }
+
+  export type FileShareUserUpdateWithWhereUniqueWithoutFileInput = {
+    where: FileShareUserWhereUniqueInput
+    data: XOR<FileShareUserUpdateWithoutFileInput, FileShareUserUncheckedUpdateWithoutFileInput>
+  }
+
+  export type FileShareUserUpdateManyWithWhereWithoutFileInput = {
+    where: FileShareUserScalarWhereInput
+    data: XOR<FileShareUserUpdateManyMutationInput, FileShareUserUncheckedUpdateManyWithoutFileInput>
+  }
+
+  export type FileShareSchoolUpsertWithWhereUniqueWithoutFileInput = {
+    where: FileShareSchoolWhereUniqueInput
+    update: XOR<FileShareSchoolUpdateWithoutFileInput, FileShareSchoolUncheckedUpdateWithoutFileInput>
+    create: XOR<FileShareSchoolCreateWithoutFileInput, FileShareSchoolUncheckedCreateWithoutFileInput>
+  }
+
+  export type FileShareSchoolUpdateWithWhereUniqueWithoutFileInput = {
+    where: FileShareSchoolWhereUniqueInput
+    data: XOR<FileShareSchoolUpdateWithoutFileInput, FileShareSchoolUncheckedUpdateWithoutFileInput>
+  }
+
+  export type FileShareSchoolUpdateManyWithWhereWithoutFileInput = {
+    where: FileShareSchoolScalarWhereInput
+    data: XOR<FileShareSchoolUpdateManyMutationInput, FileShareSchoolUncheckedUpdateManyWithoutFileInput>
+  }
+
+  export type FileShareSchoolScalarWhereInput = {
+    AND?: FileShareSchoolScalarWhereInput | FileShareSchoolScalarWhereInput[]
+    OR?: FileShareSchoolScalarWhereInput[]
+    NOT?: FileShareSchoolScalarWhereInput | FileShareSchoolScalarWhereInput[]
+    id?: StringFilter<"FileShareSchool"> | string
+    fileId?: StringFilter<"FileShareSchool"> | string
+    schoolId?: StringFilter<"FileShareSchool"> | string
+    permission?: EnumFilePermissionFilter<"FileShareSchool"> | $Enums.FilePermission
+    createdAt?: DateTimeFilter<"FileShareSchool"> | Date | string
+    updatedAt?: DateTimeFilter<"FileShareSchool"> | Date | string
+  }
+
+  export type FileShareClassGroupUpsertWithWhereUniqueWithoutFileInput = {
+    where: FileShareClassGroupWhereUniqueInput
+    update: XOR<FileShareClassGroupUpdateWithoutFileInput, FileShareClassGroupUncheckedUpdateWithoutFileInput>
+    create: XOR<FileShareClassGroupCreateWithoutFileInput, FileShareClassGroupUncheckedCreateWithoutFileInput>
+  }
+
+  export type FileShareClassGroupUpdateWithWhereUniqueWithoutFileInput = {
+    where: FileShareClassGroupWhereUniqueInput
+    data: XOR<FileShareClassGroupUpdateWithoutFileInput, FileShareClassGroupUncheckedUpdateWithoutFileInput>
+  }
+
+  export type FileShareClassGroupUpdateManyWithWhereWithoutFileInput = {
+    where: FileShareClassGroupScalarWhereInput
+    data: XOR<FileShareClassGroupUpdateManyMutationInput, FileShareClassGroupUncheckedUpdateManyWithoutFileInput>
+  }
+
+  export type FileShareClassGroupScalarWhereInput = {
+    AND?: FileShareClassGroupScalarWhereInput | FileShareClassGroupScalarWhereInput[]
+    OR?: FileShareClassGroupScalarWhereInput[]
+    NOT?: FileShareClassGroupScalarWhereInput | FileShareClassGroupScalarWhereInput[]
+    id?: StringFilter<"FileShareClassGroup"> | string
+    fileId?: StringFilter<"FileShareClassGroup"> | string
+    classGroupId?: StringFilter<"FileShareClassGroup"> | string
+    permission?: EnumFilePermissionFilter<"FileShareClassGroup"> | $Enums.FilePermission
+    createdAt?: DateTimeFilter<"FileShareClassGroup"> | Date | string
+    updatedAt?: DateTimeFilter<"FileShareClassGroup"> | Date | string
+  }
+
+  export type FileShareCourseUpsertWithWhereUniqueWithoutFileInput = {
+    where: FileShareCourseWhereUniqueInput
+    update: XOR<FileShareCourseUpdateWithoutFileInput, FileShareCourseUncheckedUpdateWithoutFileInput>
+    create: XOR<FileShareCourseCreateWithoutFileInput, FileShareCourseUncheckedCreateWithoutFileInput>
+  }
+
+  export type FileShareCourseUpdateWithWhereUniqueWithoutFileInput = {
+    where: FileShareCourseWhereUniqueInput
+    data: XOR<FileShareCourseUpdateWithoutFileInput, FileShareCourseUncheckedUpdateWithoutFileInput>
+  }
+
+  export type FileShareCourseUpdateManyWithWhereWithoutFileInput = {
+    where: FileShareCourseScalarWhereInput
+    data: XOR<FileShareCourseUpdateManyMutationInput, FileShareCourseUncheckedUpdateManyWithoutFileInput>
+  }
+
+  export type FileShareCourseScalarWhereInput = {
+    AND?: FileShareCourseScalarWhereInput | FileShareCourseScalarWhereInput[]
+    OR?: FileShareCourseScalarWhereInput[]
+    NOT?: FileShareCourseScalarWhereInput | FileShareCourseScalarWhereInput[]
+    id?: StringFilter<"FileShareCourse"> | string
+    fileId?: StringFilter<"FileShareCourse"> | string
+    courseId?: StringFilter<"FileShareCourse"> | string
+    permission?: EnumFilePermissionFilter<"FileShareCourse"> | $Enums.FilePermission
+    createdAt?: DateTimeFilter<"FileShareCourse"> | Date | string
+    updatedAt?: DateTimeFilter<"FileShareCourse"> | Date | string
+  }
+
+  export type FileCreateWithoutSharesUsersInput = {
+    id?: string
+    name: string
+    mimeType: string
+    size: number
+    storageKey: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    deletedAt?: Date | string | null
+    organization: OrganizationCreateNestedOneWithoutFilesInput
+    owner: UserCreateNestedOneWithoutFilesOwnedInput
+    sharesSchools?: FileShareSchoolCreateNestedManyWithoutFileInput
+    sharesClassGroups?: FileShareClassGroupCreateNestedManyWithoutFileInput
+    sharesCourses?: FileShareCourseCreateNestedManyWithoutFileInput
+  }
+
+  export type FileUncheckedCreateWithoutSharesUsersInput = {
+    id?: string
+    organizationId: string
+    ownerId: string
+    name: string
+    mimeType: string
+    size: number
+    storageKey: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    deletedAt?: Date | string | null
+    sharesSchools?: FileShareSchoolUncheckedCreateNestedManyWithoutFileInput
+    sharesClassGroups?: FileShareClassGroupUncheckedCreateNestedManyWithoutFileInput
+    sharesCourses?: FileShareCourseUncheckedCreateNestedManyWithoutFileInput
+  }
+
+  export type FileCreateOrConnectWithoutSharesUsersInput = {
+    where: FileWhereUniqueInput
+    create: XOR<FileCreateWithoutSharesUsersInput, FileUncheckedCreateWithoutSharesUsersInput>
+  }
+
+  export type UserCreateWithoutFileSharesInput = {
+    id?: string
+    email: string
+    firstName: string
+    lastName: string
+    password: string
+    color?: string | null
+    lastLogin?: Date | string | null
+    isBlocked?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    role: RoleCreateNestedOneWithoutUsersInput
+    organization?: OrganizationCreateNestedOneWithoutUsersInput
+    student?: StudentCreateNestedOneWithoutUserInput
+    teacher?: TeacherCreateNestedOneWithoutUserInput
+    sentMessages?: MessageCreateNestedManyWithoutSenderInput
+    messageRecipients?: MessageRecipientCreateNestedManyWithoutUserInput
+    filesOwned?: FileCreateNestedManyWithoutOwnerInput
+  }
+
+  export type UserUncheckedCreateWithoutFileSharesInput = {
+    id?: string
+    email: string
+    firstName: string
+    lastName: string
+    password: string
+    color?: string | null
+    roleId: string
+    organizationId?: string | null
+    lastLogin?: Date | string | null
+    isBlocked?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    student?: StudentUncheckedCreateNestedOneWithoutUserInput
+    teacher?: TeacherUncheckedCreateNestedOneWithoutUserInput
+    sentMessages?: MessageUncheckedCreateNestedManyWithoutSenderInput
+    messageRecipients?: MessageRecipientUncheckedCreateNestedManyWithoutUserInput
+    filesOwned?: FileUncheckedCreateNestedManyWithoutOwnerInput
+  }
+
+  export type UserCreateOrConnectWithoutFileSharesInput = {
+    where: UserWhereUniqueInput
+    create: XOR<UserCreateWithoutFileSharesInput, UserUncheckedCreateWithoutFileSharesInput>
+  }
+
+  export type FileUpsertWithoutSharesUsersInput = {
+    update: XOR<FileUpdateWithoutSharesUsersInput, FileUncheckedUpdateWithoutSharesUsersInput>
+    create: XOR<FileCreateWithoutSharesUsersInput, FileUncheckedCreateWithoutSharesUsersInput>
+    where?: FileWhereInput
+  }
+
+  export type FileUpdateToOneWithWhereWithoutSharesUsersInput = {
+    where?: FileWhereInput
+    data: XOR<FileUpdateWithoutSharesUsersInput, FileUncheckedUpdateWithoutSharesUsersInput>
+  }
+
+  export type FileUpdateWithoutSharesUsersInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    mimeType?: StringFieldUpdateOperationsInput | string
+    size?: IntFieldUpdateOperationsInput | number
+    storageKey?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    organization?: OrganizationUpdateOneRequiredWithoutFilesNestedInput
+    owner?: UserUpdateOneRequiredWithoutFilesOwnedNestedInput
+    sharesSchools?: FileShareSchoolUpdateManyWithoutFileNestedInput
+    sharesClassGroups?: FileShareClassGroupUpdateManyWithoutFileNestedInput
+    sharesCourses?: FileShareCourseUpdateManyWithoutFileNestedInput
+  }
+
+  export type FileUncheckedUpdateWithoutSharesUsersInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    organizationId?: StringFieldUpdateOperationsInput | string
+    ownerId?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    mimeType?: StringFieldUpdateOperationsInput | string
+    size?: IntFieldUpdateOperationsInput | number
+    storageKey?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    sharesSchools?: FileShareSchoolUncheckedUpdateManyWithoutFileNestedInput
+    sharesClassGroups?: FileShareClassGroupUncheckedUpdateManyWithoutFileNestedInput
+    sharesCourses?: FileShareCourseUncheckedUpdateManyWithoutFileNestedInput
+  }
+
+  export type UserUpsertWithoutFileSharesInput = {
+    update: XOR<UserUpdateWithoutFileSharesInput, UserUncheckedUpdateWithoutFileSharesInput>
+    create: XOR<UserCreateWithoutFileSharesInput, UserUncheckedCreateWithoutFileSharesInput>
+    where?: UserWhereInput
+  }
+
+  export type UserUpdateToOneWithWhereWithoutFileSharesInput = {
+    where?: UserWhereInput
+    data: XOR<UserUpdateWithoutFileSharesInput, UserUncheckedUpdateWithoutFileSharesInput>
+  }
+
+  export type UserUpdateWithoutFileSharesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    firstName?: StringFieldUpdateOperationsInput | string
+    lastName?: StringFieldUpdateOperationsInput | string
+    password?: StringFieldUpdateOperationsInput | string
+    color?: NullableStringFieldUpdateOperationsInput | string | null
+    lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    isBlocked?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    role?: RoleUpdateOneRequiredWithoutUsersNestedInput
+    organization?: OrganizationUpdateOneWithoutUsersNestedInput
+    student?: StudentUpdateOneWithoutUserNestedInput
+    teacher?: TeacherUpdateOneWithoutUserNestedInput
+    sentMessages?: MessageUpdateManyWithoutSenderNestedInput
+    messageRecipients?: MessageRecipientUpdateManyWithoutUserNestedInput
+    filesOwned?: FileUpdateManyWithoutOwnerNestedInput
+  }
+
+  export type UserUncheckedUpdateWithoutFileSharesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    firstName?: StringFieldUpdateOperationsInput | string
+    lastName?: StringFieldUpdateOperationsInput | string
+    password?: StringFieldUpdateOperationsInput | string
+    color?: NullableStringFieldUpdateOperationsInput | string | null
+    roleId?: StringFieldUpdateOperationsInput | string
+    organizationId?: NullableStringFieldUpdateOperationsInput | string | null
+    lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    isBlocked?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    student?: StudentUncheckedUpdateOneWithoutUserNestedInput
+    teacher?: TeacherUncheckedUpdateOneWithoutUserNestedInput
+    sentMessages?: MessageUncheckedUpdateManyWithoutSenderNestedInput
+    messageRecipients?: MessageRecipientUncheckedUpdateManyWithoutUserNestedInput
+    filesOwned?: FileUncheckedUpdateManyWithoutOwnerNestedInput
+  }
+
+  export type FileCreateWithoutSharesSchoolsInput = {
+    id?: string
+    name: string
+    mimeType: string
+    size: number
+    storageKey: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    deletedAt?: Date | string | null
+    organization: OrganizationCreateNestedOneWithoutFilesInput
+    owner: UserCreateNestedOneWithoutFilesOwnedInput
+    sharesUsers?: FileShareUserCreateNestedManyWithoutFileInput
+    sharesClassGroups?: FileShareClassGroupCreateNestedManyWithoutFileInput
+    sharesCourses?: FileShareCourseCreateNestedManyWithoutFileInput
+  }
+
+  export type FileUncheckedCreateWithoutSharesSchoolsInput = {
+    id?: string
+    organizationId: string
+    ownerId: string
+    name: string
+    mimeType: string
+    size: number
+    storageKey: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    deletedAt?: Date | string | null
+    sharesUsers?: FileShareUserUncheckedCreateNestedManyWithoutFileInput
+    sharesClassGroups?: FileShareClassGroupUncheckedCreateNestedManyWithoutFileInput
+    sharesCourses?: FileShareCourseUncheckedCreateNestedManyWithoutFileInput
+  }
+
+  export type FileCreateOrConnectWithoutSharesSchoolsInput = {
+    where: FileWhereUniqueInput
+    create: XOR<FileCreateWithoutSharesSchoolsInput, FileUncheckedCreateWithoutSharesSchoolsInput>
+  }
+
+  export type SchoolCreateWithoutFileSharesInput = {
+    id?: string
+    name: string
+    shortName: string
+    logo: string
+    address: string
+    city: string
+    state: string
+    zip: string
+    country: string
+    email: string
+    phone: string
+    website: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    currentYear?: number
+    organization: OrganizationCreateNestedOneWithoutSchoolsInput
+    studyPlans?: StudyPlanCreateNestedManyWithoutSchoolInput
+    degrees?: DegreeCreateNestedManyWithoutSchoolInput
+    courses?: CourseCreateNestedManyWithoutSchoolInput
+    classGroups?: ClassGroupCreateNestedManyWithoutSchoolInput
+    students?: StudentCreateNestedManyWithoutSchoolInput
+    assignments?: AssignmentCreateNestedManyWithoutSchoolInput
+    periods?: PeriodCreateNestedManyWithoutSchoolInput
+  }
+
+  export type SchoolUncheckedCreateWithoutFileSharesInput = {
+    id?: string
+    organizationId: string
+    name: string
+    shortName: string
+    logo: string
+    address: string
+    city: string
+    state: string
+    zip: string
+    country: string
+    email: string
+    phone: string
+    website: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    currentYear?: number
+    studyPlans?: StudyPlanUncheckedCreateNestedManyWithoutSchoolInput
+    degrees?: DegreeUncheckedCreateNestedManyWithoutSchoolInput
+    courses?: CourseUncheckedCreateNestedManyWithoutSchoolInput
+    classGroups?: ClassGroupUncheckedCreateNestedManyWithoutSchoolInput
+    students?: StudentUncheckedCreateNestedManyWithoutSchoolInput
+    assignments?: AssignmentUncheckedCreateNestedManyWithoutSchoolInput
+    periods?: PeriodUncheckedCreateNestedManyWithoutSchoolInput
+  }
+
+  export type SchoolCreateOrConnectWithoutFileSharesInput = {
+    where: SchoolWhereUniqueInput
+    create: XOR<SchoolCreateWithoutFileSharesInput, SchoolUncheckedCreateWithoutFileSharesInput>
+  }
+
+  export type FileUpsertWithoutSharesSchoolsInput = {
+    update: XOR<FileUpdateWithoutSharesSchoolsInput, FileUncheckedUpdateWithoutSharesSchoolsInput>
+    create: XOR<FileCreateWithoutSharesSchoolsInput, FileUncheckedCreateWithoutSharesSchoolsInput>
+    where?: FileWhereInput
+  }
+
+  export type FileUpdateToOneWithWhereWithoutSharesSchoolsInput = {
+    where?: FileWhereInput
+    data: XOR<FileUpdateWithoutSharesSchoolsInput, FileUncheckedUpdateWithoutSharesSchoolsInput>
+  }
+
+  export type FileUpdateWithoutSharesSchoolsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    mimeType?: StringFieldUpdateOperationsInput | string
+    size?: IntFieldUpdateOperationsInput | number
+    storageKey?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    organization?: OrganizationUpdateOneRequiredWithoutFilesNestedInput
+    owner?: UserUpdateOneRequiredWithoutFilesOwnedNestedInput
+    sharesUsers?: FileShareUserUpdateManyWithoutFileNestedInput
+    sharesClassGroups?: FileShareClassGroupUpdateManyWithoutFileNestedInput
+    sharesCourses?: FileShareCourseUpdateManyWithoutFileNestedInput
+  }
+
+  export type FileUncheckedUpdateWithoutSharesSchoolsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    organizationId?: StringFieldUpdateOperationsInput | string
+    ownerId?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    mimeType?: StringFieldUpdateOperationsInput | string
+    size?: IntFieldUpdateOperationsInput | number
+    storageKey?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    sharesUsers?: FileShareUserUncheckedUpdateManyWithoutFileNestedInput
+    sharesClassGroups?: FileShareClassGroupUncheckedUpdateManyWithoutFileNestedInput
+    sharesCourses?: FileShareCourseUncheckedUpdateManyWithoutFileNestedInput
+  }
+
+  export type SchoolUpsertWithoutFileSharesInput = {
+    update: XOR<SchoolUpdateWithoutFileSharesInput, SchoolUncheckedUpdateWithoutFileSharesInput>
+    create: XOR<SchoolCreateWithoutFileSharesInput, SchoolUncheckedCreateWithoutFileSharesInput>
+    where?: SchoolWhereInput
+  }
+
+  export type SchoolUpdateToOneWithWhereWithoutFileSharesInput = {
+    where?: SchoolWhereInput
+    data: XOR<SchoolUpdateWithoutFileSharesInput, SchoolUncheckedUpdateWithoutFileSharesInput>
+  }
+
+  export type SchoolUpdateWithoutFileSharesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    shortName?: StringFieldUpdateOperationsInput | string
+    logo?: StringFieldUpdateOperationsInput | string
+    address?: StringFieldUpdateOperationsInput | string
+    city?: StringFieldUpdateOperationsInput | string
+    state?: StringFieldUpdateOperationsInput | string
+    zip?: StringFieldUpdateOperationsInput | string
+    country?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    phone?: StringFieldUpdateOperationsInput | string
+    website?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    currentYear?: IntFieldUpdateOperationsInput | number
+    organization?: OrganizationUpdateOneRequiredWithoutSchoolsNestedInput
+    studyPlans?: StudyPlanUpdateManyWithoutSchoolNestedInput
+    degrees?: DegreeUpdateManyWithoutSchoolNestedInput
+    courses?: CourseUpdateManyWithoutSchoolNestedInput
+    classGroups?: ClassGroupUpdateManyWithoutSchoolNestedInput
+    students?: StudentUpdateManyWithoutSchoolNestedInput
+    assignments?: AssignmentUpdateManyWithoutSchoolNestedInput
+    periods?: PeriodUpdateManyWithoutSchoolNestedInput
+  }
+
+  export type SchoolUncheckedUpdateWithoutFileSharesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    organizationId?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    shortName?: StringFieldUpdateOperationsInput | string
+    logo?: StringFieldUpdateOperationsInput | string
+    address?: StringFieldUpdateOperationsInput | string
+    city?: StringFieldUpdateOperationsInput | string
+    state?: StringFieldUpdateOperationsInput | string
+    zip?: StringFieldUpdateOperationsInput | string
+    country?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    phone?: StringFieldUpdateOperationsInput | string
+    website?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    currentYear?: IntFieldUpdateOperationsInput | number
+    studyPlans?: StudyPlanUncheckedUpdateManyWithoutSchoolNestedInput
+    degrees?: DegreeUncheckedUpdateManyWithoutSchoolNestedInput
+    courses?: CourseUncheckedUpdateManyWithoutSchoolNestedInput
+    classGroups?: ClassGroupUncheckedUpdateManyWithoutSchoolNestedInput
+    students?: StudentUncheckedUpdateManyWithoutSchoolNestedInput
+    assignments?: AssignmentUncheckedUpdateManyWithoutSchoolNestedInput
+    periods?: PeriodUncheckedUpdateManyWithoutSchoolNestedInput
+  }
+
+  export type FileCreateWithoutSharesClassGroupsInput = {
+    id?: string
+    name: string
+    mimeType: string
+    size: number
+    storageKey: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    deletedAt?: Date | string | null
+    organization: OrganizationCreateNestedOneWithoutFilesInput
+    owner: UserCreateNestedOneWithoutFilesOwnedInput
+    sharesUsers?: FileShareUserCreateNestedManyWithoutFileInput
+    sharesSchools?: FileShareSchoolCreateNestedManyWithoutFileInput
+    sharesCourses?: FileShareCourseCreateNestedManyWithoutFileInput
+  }
+
+  export type FileUncheckedCreateWithoutSharesClassGroupsInput = {
+    id?: string
+    organizationId: string
+    ownerId: string
+    name: string
+    mimeType: string
+    size: number
+    storageKey: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    deletedAt?: Date | string | null
+    sharesUsers?: FileShareUserUncheckedCreateNestedManyWithoutFileInput
+    sharesSchools?: FileShareSchoolUncheckedCreateNestedManyWithoutFileInput
+    sharesCourses?: FileShareCourseUncheckedCreateNestedManyWithoutFileInput
+  }
+
+  export type FileCreateOrConnectWithoutSharesClassGroupsInput = {
+    where: FileWhereUniqueInput
+    create: XOR<FileCreateWithoutSharesClassGroupsInput, FileUncheckedCreateWithoutSharesClassGroupsInput>
+  }
+
+  export type ClassGroupCreateWithoutFileSharesInput = {
+    id?: string
+    name: string
+    shortName: string
+    active: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    organization: OrganizationCreateNestedOneWithoutGroupsInput
+    school: SchoolCreateNestedOneWithoutClassGroupsInput
+    courses?: CourseCreateNestedManyWithoutGroupsInput
+    studyPlan: StudyPlanCreateNestedOneWithoutClassGroupsInput
+    students?: StudentCreateNestedManyWithoutClassGroupInput
+    teacher?: TeacherCreateNestedOneWithoutClassGroupsInput
+    assignmentDates?: AssignmentDateCreateNestedManyWithoutClassGroupInput
+    quizSchedules?: QuizScheduleCreateNestedManyWithoutClassGroupInput
+    quizSubmissions?: QuizSubmissionCreateNestedManyWithoutClassGroupInput
+    weeklySchedules?: ClassGroupWeeklyScheduleCreateNestedManyWithoutClassGroupInput
+  }
+
+  export type ClassGroupUncheckedCreateWithoutFileSharesInput = {
+    id?: string
+    name: string
+    shortName: string
+    organizationId: string
+    schoolId: string
+    active: boolean
+    teacherId?: string | null
+    studyPlanId: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    courses?: CourseUncheckedCreateNestedManyWithoutGroupsInput
+    students?: StudentUncheckedCreateNestedManyWithoutClassGroupInput
+    assignmentDates?: AssignmentDateUncheckedCreateNestedManyWithoutClassGroupInput
+    quizSchedules?: QuizScheduleUncheckedCreateNestedManyWithoutClassGroupInput
+    quizSubmissions?: QuizSubmissionUncheckedCreateNestedManyWithoutClassGroupInput
+    weeklySchedules?: ClassGroupWeeklyScheduleUncheckedCreateNestedManyWithoutClassGroupInput
+  }
+
+  export type ClassGroupCreateOrConnectWithoutFileSharesInput = {
+    where: ClassGroupWhereUniqueInput
+    create: XOR<ClassGroupCreateWithoutFileSharesInput, ClassGroupUncheckedCreateWithoutFileSharesInput>
+  }
+
+  export type FileUpsertWithoutSharesClassGroupsInput = {
+    update: XOR<FileUpdateWithoutSharesClassGroupsInput, FileUncheckedUpdateWithoutSharesClassGroupsInput>
+    create: XOR<FileCreateWithoutSharesClassGroupsInput, FileUncheckedCreateWithoutSharesClassGroupsInput>
+    where?: FileWhereInput
+  }
+
+  export type FileUpdateToOneWithWhereWithoutSharesClassGroupsInput = {
+    where?: FileWhereInput
+    data: XOR<FileUpdateWithoutSharesClassGroupsInput, FileUncheckedUpdateWithoutSharesClassGroupsInput>
+  }
+
+  export type FileUpdateWithoutSharesClassGroupsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    mimeType?: StringFieldUpdateOperationsInput | string
+    size?: IntFieldUpdateOperationsInput | number
+    storageKey?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    organization?: OrganizationUpdateOneRequiredWithoutFilesNestedInput
+    owner?: UserUpdateOneRequiredWithoutFilesOwnedNestedInput
+    sharesUsers?: FileShareUserUpdateManyWithoutFileNestedInput
+    sharesSchools?: FileShareSchoolUpdateManyWithoutFileNestedInput
+    sharesCourses?: FileShareCourseUpdateManyWithoutFileNestedInput
+  }
+
+  export type FileUncheckedUpdateWithoutSharesClassGroupsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    organizationId?: StringFieldUpdateOperationsInput | string
+    ownerId?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    mimeType?: StringFieldUpdateOperationsInput | string
+    size?: IntFieldUpdateOperationsInput | number
+    storageKey?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    sharesUsers?: FileShareUserUncheckedUpdateManyWithoutFileNestedInput
+    sharesSchools?: FileShareSchoolUncheckedUpdateManyWithoutFileNestedInput
+    sharesCourses?: FileShareCourseUncheckedUpdateManyWithoutFileNestedInput
+  }
+
+  export type ClassGroupUpsertWithoutFileSharesInput = {
+    update: XOR<ClassGroupUpdateWithoutFileSharesInput, ClassGroupUncheckedUpdateWithoutFileSharesInput>
+    create: XOR<ClassGroupCreateWithoutFileSharesInput, ClassGroupUncheckedCreateWithoutFileSharesInput>
+    where?: ClassGroupWhereInput
+  }
+
+  export type ClassGroupUpdateToOneWithWhereWithoutFileSharesInput = {
+    where?: ClassGroupWhereInput
+    data: XOR<ClassGroupUpdateWithoutFileSharesInput, ClassGroupUncheckedUpdateWithoutFileSharesInput>
+  }
+
+  export type ClassGroupUpdateWithoutFileSharesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    shortName?: StringFieldUpdateOperationsInput | string
+    active?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    organization?: OrganizationUpdateOneRequiredWithoutGroupsNestedInput
+    school?: SchoolUpdateOneRequiredWithoutClassGroupsNestedInput
+    courses?: CourseUpdateManyWithoutGroupsNestedInput
+    studyPlan?: StudyPlanUpdateOneRequiredWithoutClassGroupsNestedInput
+    students?: StudentUpdateManyWithoutClassGroupNestedInput
+    teacher?: TeacherUpdateOneWithoutClassGroupsNestedInput
+    assignmentDates?: AssignmentDateUpdateManyWithoutClassGroupNestedInput
+    quizSchedules?: QuizScheduleUpdateManyWithoutClassGroupNestedInput
+    quizSubmissions?: QuizSubmissionUpdateManyWithoutClassGroupNestedInput
+    weeklySchedules?: ClassGroupWeeklyScheduleUpdateManyWithoutClassGroupNestedInput
+  }
+
+  export type ClassGroupUncheckedUpdateWithoutFileSharesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    shortName?: StringFieldUpdateOperationsInput | string
+    organizationId?: StringFieldUpdateOperationsInput | string
+    schoolId?: StringFieldUpdateOperationsInput | string
+    active?: BoolFieldUpdateOperationsInput | boolean
+    teacherId?: NullableStringFieldUpdateOperationsInput | string | null
+    studyPlanId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    courses?: CourseUncheckedUpdateManyWithoutGroupsNestedInput
+    students?: StudentUncheckedUpdateManyWithoutClassGroupNestedInput
+    assignmentDates?: AssignmentDateUncheckedUpdateManyWithoutClassGroupNestedInput
+    quizSchedules?: QuizScheduleUncheckedUpdateManyWithoutClassGroupNestedInput
+    quizSubmissions?: QuizSubmissionUncheckedUpdateManyWithoutClassGroupNestedInput
+    weeklySchedules?: ClassGroupWeeklyScheduleUncheckedUpdateManyWithoutClassGroupNestedInput
+  }
+
+  export type FileCreateWithoutSharesCoursesInput = {
+    id?: string
+    name: string
+    mimeType: string
+    size: number
+    storageKey: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    deletedAt?: Date | string | null
+    organization: OrganizationCreateNestedOneWithoutFilesInput
+    owner: UserCreateNestedOneWithoutFilesOwnedInput
+    sharesUsers?: FileShareUserCreateNestedManyWithoutFileInput
+    sharesSchools?: FileShareSchoolCreateNestedManyWithoutFileInput
+    sharesClassGroups?: FileShareClassGroupCreateNestedManyWithoutFileInput
+  }
+
+  export type FileUncheckedCreateWithoutSharesCoursesInput = {
+    id?: string
+    organizationId: string
+    ownerId: string
+    name: string
+    mimeType: string
+    size: number
+    storageKey: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    deletedAt?: Date | string | null
+    sharesUsers?: FileShareUserUncheckedCreateNestedManyWithoutFileInput
+    sharesSchools?: FileShareSchoolUncheckedCreateNestedManyWithoutFileInput
+    sharesClassGroups?: FileShareClassGroupUncheckedCreateNestedManyWithoutFileInput
+  }
+
+  export type FileCreateOrConnectWithoutSharesCoursesInput = {
+    where: FileWhereUniqueInput
+    create: XOR<FileCreateWithoutSharesCoursesInput, FileUncheckedCreateWithoutSharesCoursesInput>
+  }
+
+  export type CourseCreateWithoutFileSharesInput = {
+    id?: string
+    name: string
+    code: string
+    shortName: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    organization: OrganizationCreateNestedOneWithoutCoursesInput
+    school: SchoolCreateNestedOneWithoutCoursesInput
+    subject: SubjectCreateNestedOneWithoutCoursesInput
+    studyPlan: StudyPlanCreateNestedOneWithoutCoursesInput
+    groups?: ClassGroupCreateNestedManyWithoutCoursesInput
+    students?: StudentCreateNestedManyWithoutCoursesInput
+    teacher?: TeacherCreateNestedOneWithoutCoursesInput
+    assignments?: AssignmentCreateNestedManyWithoutCourseInput
+    quizzes?: QuizCreateNestedManyWithoutCourseInput
+    currentPeriod?: PeriodCreateNestedOneWithoutCoursesInput
+    gradeBuckets?: GradeBucketCreateNestedManyWithoutCourseInput
+    grades?: GradeCreateNestedManyWithoutCourseInput
+    weeklySchedules?: ClassGroupWeeklyScheduleCreateNestedManyWithoutCourseInput
+  }
+
+  export type CourseUncheckedCreateWithoutFileSharesInput = {
+    id?: string
+    name: string
+    code: string
+    shortName: string
+    organizationId: string
+    schoolId: string
+    subjectId: string
+    studyPlanId: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    teacherId?: string | null
+    currentPeriodId?: string | null
+    groups?: ClassGroupUncheckedCreateNestedManyWithoutCoursesInput
+    students?: StudentUncheckedCreateNestedManyWithoutCoursesInput
+    assignments?: AssignmentUncheckedCreateNestedManyWithoutCourseInput
+    quizzes?: QuizUncheckedCreateNestedManyWithoutCourseInput
+    gradeBuckets?: GradeBucketUncheckedCreateNestedManyWithoutCourseInput
+    grades?: GradeUncheckedCreateNestedManyWithoutCourseInput
+    weeklySchedules?: ClassGroupWeeklyScheduleUncheckedCreateNestedManyWithoutCourseInput
+  }
+
+  export type CourseCreateOrConnectWithoutFileSharesInput = {
+    where: CourseWhereUniqueInput
+    create: XOR<CourseCreateWithoutFileSharesInput, CourseUncheckedCreateWithoutFileSharesInput>
+  }
+
+  export type FileUpsertWithoutSharesCoursesInput = {
+    update: XOR<FileUpdateWithoutSharesCoursesInput, FileUncheckedUpdateWithoutSharesCoursesInput>
+    create: XOR<FileCreateWithoutSharesCoursesInput, FileUncheckedCreateWithoutSharesCoursesInput>
+    where?: FileWhereInput
+  }
+
+  export type FileUpdateToOneWithWhereWithoutSharesCoursesInput = {
+    where?: FileWhereInput
+    data: XOR<FileUpdateWithoutSharesCoursesInput, FileUncheckedUpdateWithoutSharesCoursesInput>
+  }
+
+  export type FileUpdateWithoutSharesCoursesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    mimeType?: StringFieldUpdateOperationsInput | string
+    size?: IntFieldUpdateOperationsInput | number
+    storageKey?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    organization?: OrganizationUpdateOneRequiredWithoutFilesNestedInput
+    owner?: UserUpdateOneRequiredWithoutFilesOwnedNestedInput
+    sharesUsers?: FileShareUserUpdateManyWithoutFileNestedInput
+    sharesSchools?: FileShareSchoolUpdateManyWithoutFileNestedInput
+    sharesClassGroups?: FileShareClassGroupUpdateManyWithoutFileNestedInput
+  }
+
+  export type FileUncheckedUpdateWithoutSharesCoursesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    organizationId?: StringFieldUpdateOperationsInput | string
+    ownerId?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    mimeType?: StringFieldUpdateOperationsInput | string
+    size?: IntFieldUpdateOperationsInput | number
+    storageKey?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    sharesUsers?: FileShareUserUncheckedUpdateManyWithoutFileNestedInput
+    sharesSchools?: FileShareSchoolUncheckedUpdateManyWithoutFileNestedInput
+    sharesClassGroups?: FileShareClassGroupUncheckedUpdateManyWithoutFileNestedInput
+  }
+
+  export type CourseUpsertWithoutFileSharesInput = {
+    update: XOR<CourseUpdateWithoutFileSharesInput, CourseUncheckedUpdateWithoutFileSharesInput>
+    create: XOR<CourseCreateWithoutFileSharesInput, CourseUncheckedCreateWithoutFileSharesInput>
+    where?: CourseWhereInput
+  }
+
+  export type CourseUpdateToOneWithWhereWithoutFileSharesInput = {
+    where?: CourseWhereInput
+    data: XOR<CourseUpdateWithoutFileSharesInput, CourseUncheckedUpdateWithoutFileSharesInput>
+  }
+
+  export type CourseUpdateWithoutFileSharesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    code?: StringFieldUpdateOperationsInput | string
+    shortName?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    organization?: OrganizationUpdateOneRequiredWithoutCoursesNestedInput
+    school?: SchoolUpdateOneRequiredWithoutCoursesNestedInput
+    subject?: SubjectUpdateOneRequiredWithoutCoursesNestedInput
+    studyPlan?: StudyPlanUpdateOneRequiredWithoutCoursesNestedInput
+    groups?: ClassGroupUpdateManyWithoutCoursesNestedInput
+    students?: StudentUpdateManyWithoutCoursesNestedInput
+    teacher?: TeacherUpdateOneWithoutCoursesNestedInput
+    assignments?: AssignmentUpdateManyWithoutCourseNestedInput
+    quizzes?: QuizUpdateManyWithoutCourseNestedInput
+    currentPeriod?: PeriodUpdateOneWithoutCoursesNestedInput
+    gradeBuckets?: GradeBucketUpdateManyWithoutCourseNestedInput
+    grades?: GradeUpdateManyWithoutCourseNestedInput
+    weeklySchedules?: ClassGroupWeeklyScheduleUpdateManyWithoutCourseNestedInput
+  }
+
+  export type CourseUncheckedUpdateWithoutFileSharesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    code?: StringFieldUpdateOperationsInput | string
+    shortName?: StringFieldUpdateOperationsInput | string
+    organizationId?: StringFieldUpdateOperationsInput | string
+    schoolId?: StringFieldUpdateOperationsInput | string
+    subjectId?: StringFieldUpdateOperationsInput | string
+    studyPlanId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    teacherId?: NullableStringFieldUpdateOperationsInput | string | null
+    currentPeriodId?: NullableStringFieldUpdateOperationsInput | string | null
+    groups?: ClassGroupUncheckedUpdateManyWithoutCoursesNestedInput
+    students?: StudentUncheckedUpdateManyWithoutCoursesNestedInput
+    assignments?: AssignmentUncheckedUpdateManyWithoutCourseNestedInput
+    quizzes?: QuizUncheckedUpdateManyWithoutCourseNestedInput
+    gradeBuckets?: GradeBucketUncheckedUpdateManyWithoutCourseNestedInput
+    grades?: GradeUncheckedUpdateManyWithoutCourseNestedInput
+    weeklySchedules?: ClassGroupWeeklyScheduleUncheckedUpdateManyWithoutCourseNestedInput
   }
 
   export type UserCreateWithoutRoleInput = {
@@ -52302,6 +61638,8 @@ export namespace Prisma {
     teacher?: TeacherCreateNestedOneWithoutUserInput
     sentMessages?: MessageCreateNestedManyWithoutSenderInput
     messageRecipients?: MessageRecipientCreateNestedManyWithoutUserInput
+    filesOwned?: FileCreateNestedManyWithoutOwnerInput
+    fileShares?: FileShareUserCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutRoleInput = {
@@ -52320,6 +61658,8 @@ export namespace Prisma {
     teacher?: TeacherUncheckedCreateNestedOneWithoutUserInput
     sentMessages?: MessageUncheckedCreateNestedManyWithoutSenderInput
     messageRecipients?: MessageRecipientUncheckedCreateNestedManyWithoutUserInput
+    filesOwned?: FileUncheckedCreateNestedManyWithoutOwnerInput
+    fileShares?: FileShareUserUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutRoleInput = {
@@ -52369,6 +61709,7 @@ export namespace Prisma {
     Student?: StudentCreateNestedManyWithoutOrganizationInput
     quizzes?: QuizCreateNestedManyWithoutOrganizationInput
     messages?: MessageCreateNestedManyWithoutOrganizationInput
+    files?: FileCreateNestedManyWithoutOrganizationInput
   }
 
   export type OrganizationUncheckedCreateWithoutRolesInput = {
@@ -52387,6 +61728,7 @@ export namespace Prisma {
     Student?: StudentUncheckedCreateNestedManyWithoutOrganizationInput
     quizzes?: QuizUncheckedCreateNestedManyWithoutOrganizationInput
     messages?: MessageUncheckedCreateNestedManyWithoutOrganizationInput
+    files?: FileUncheckedCreateNestedManyWithoutOrganizationInput
   }
 
   export type OrganizationCreateOrConnectWithoutRolesInput = {
@@ -52464,6 +61806,7 @@ export namespace Prisma {
     Student?: StudentUpdateManyWithoutOrganizationNestedInput
     quizzes?: QuizUpdateManyWithoutOrganizationNestedInput
     messages?: MessageUpdateManyWithoutOrganizationNestedInput
+    files?: FileUpdateManyWithoutOrganizationNestedInput
   }
 
   export type OrganizationUncheckedUpdateWithoutRolesInput = {
@@ -52482,6 +61825,7 @@ export namespace Prisma {
     Student?: StudentUncheckedUpdateManyWithoutOrganizationNestedInput
     quizzes?: QuizUncheckedUpdateManyWithoutOrganizationNestedInput
     messages?: MessageUncheckedUpdateManyWithoutOrganizationNestedInput
+    files?: FileUncheckedUpdateManyWithoutOrganizationNestedInput
   }
 
   export type RoleCreateWithoutPermissionsInput = {
@@ -52541,6 +61885,7 @@ export namespace Prisma {
     Student?: StudentCreateNestedManyWithoutOrganizationInput
     quizzes?: QuizCreateNestedManyWithoutOrganizationInput
     messages?: MessageCreateNestedManyWithoutOrganizationInput
+    files?: FileCreateNestedManyWithoutOrganizationInput
   }
 
   export type OrganizationUncheckedCreateWithoutSchoolsInput = {
@@ -52559,6 +61904,7 @@ export namespace Prisma {
     Student?: StudentUncheckedCreateNestedManyWithoutOrganizationInput
     quizzes?: QuizUncheckedCreateNestedManyWithoutOrganizationInput
     messages?: MessageUncheckedCreateNestedManyWithoutOrganizationInput
+    files?: FileUncheckedCreateNestedManyWithoutOrganizationInput
   }
 
   export type OrganizationCreateOrConnectWithoutSchoolsInput = {
@@ -52653,6 +61999,7 @@ export namespace Prisma {
     gradeBuckets?: GradeBucketCreateNestedManyWithoutCourseInput
     grades?: GradeCreateNestedManyWithoutCourseInput
     weeklySchedules?: ClassGroupWeeklyScheduleCreateNestedManyWithoutCourseInput
+    fileShares?: FileShareCourseCreateNestedManyWithoutCourseInput
   }
 
   export type CourseUncheckedCreateWithoutSchoolInput = {
@@ -52674,6 +62021,7 @@ export namespace Prisma {
     gradeBuckets?: GradeBucketUncheckedCreateNestedManyWithoutCourseInput
     grades?: GradeUncheckedCreateNestedManyWithoutCourseInput
     weeklySchedules?: ClassGroupWeeklyScheduleUncheckedCreateNestedManyWithoutCourseInput
+    fileShares?: FileShareCourseUncheckedCreateNestedManyWithoutCourseInput
   }
 
   export type CourseCreateOrConnectWithoutSchoolInput = {
@@ -52702,6 +62050,7 @@ export namespace Prisma {
     quizSchedules?: QuizScheduleCreateNestedManyWithoutClassGroupInput
     quizSubmissions?: QuizSubmissionCreateNestedManyWithoutClassGroupInput
     weeklySchedules?: ClassGroupWeeklyScheduleCreateNestedManyWithoutClassGroupInput
+    fileShares?: FileShareClassGroupCreateNestedManyWithoutClassGroupInput
   }
 
   export type ClassGroupUncheckedCreateWithoutSchoolInput = {
@@ -52720,6 +62069,7 @@ export namespace Prisma {
     quizSchedules?: QuizScheduleUncheckedCreateNestedManyWithoutClassGroupInput
     quizSubmissions?: QuizSubmissionUncheckedCreateNestedManyWithoutClassGroupInput
     weeklySchedules?: ClassGroupWeeklyScheduleUncheckedCreateNestedManyWithoutClassGroupInput
+    fileShares?: FileShareClassGroupUncheckedCreateNestedManyWithoutClassGroupInput
   }
 
   export type ClassGroupCreateOrConnectWithoutSchoolInput = {
@@ -52858,6 +62208,32 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type FileShareSchoolCreateWithoutSchoolInput = {
+    id?: string
+    permission: $Enums.FilePermission
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    file: FileCreateNestedOneWithoutSharesSchoolsInput
+  }
+
+  export type FileShareSchoolUncheckedCreateWithoutSchoolInput = {
+    id?: string
+    fileId: string
+    permission: $Enums.FilePermission
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type FileShareSchoolCreateOrConnectWithoutSchoolInput = {
+    where: FileShareSchoolWhereUniqueInput
+    create: XOR<FileShareSchoolCreateWithoutSchoolInput, FileShareSchoolUncheckedCreateWithoutSchoolInput>
+  }
+
+  export type FileShareSchoolCreateManySchoolInputEnvelope = {
+    data: FileShareSchoolCreateManySchoolInput | FileShareSchoolCreateManySchoolInput[]
+    skipDuplicates?: boolean
+  }
+
   export type OrganizationUpsertWithoutSchoolsInput = {
     update: XOR<OrganizationUpdateWithoutSchoolsInput, OrganizationUncheckedUpdateWithoutSchoolsInput>
     create: XOR<OrganizationCreateWithoutSchoolsInput, OrganizationUncheckedCreateWithoutSchoolsInput>
@@ -52885,6 +62261,7 @@ export namespace Prisma {
     Student?: StudentUpdateManyWithoutOrganizationNestedInput
     quizzes?: QuizUpdateManyWithoutOrganizationNestedInput
     messages?: MessageUpdateManyWithoutOrganizationNestedInput
+    files?: FileUpdateManyWithoutOrganizationNestedInput
   }
 
   export type OrganizationUncheckedUpdateWithoutSchoolsInput = {
@@ -52903,6 +62280,7 @@ export namespace Prisma {
     Student?: StudentUncheckedUpdateManyWithoutOrganizationNestedInput
     quizzes?: QuizUncheckedUpdateManyWithoutOrganizationNestedInput
     messages?: MessageUncheckedUpdateManyWithoutOrganizationNestedInput
+    files?: FileUncheckedUpdateManyWithoutOrganizationNestedInput
   }
 
   export type StudyPlanUpsertWithWhereUniqueWithoutSchoolInput = {
@@ -53078,6 +62456,22 @@ export namespace Prisma {
     updatedAt?: DateTimeFilter<"Period"> | Date | string
   }
 
+  export type FileShareSchoolUpsertWithWhereUniqueWithoutSchoolInput = {
+    where: FileShareSchoolWhereUniqueInput
+    update: XOR<FileShareSchoolUpdateWithoutSchoolInput, FileShareSchoolUncheckedUpdateWithoutSchoolInput>
+    create: XOR<FileShareSchoolCreateWithoutSchoolInput, FileShareSchoolUncheckedCreateWithoutSchoolInput>
+  }
+
+  export type FileShareSchoolUpdateWithWhereUniqueWithoutSchoolInput = {
+    where: FileShareSchoolWhereUniqueInput
+    data: XOR<FileShareSchoolUpdateWithoutSchoolInput, FileShareSchoolUncheckedUpdateWithoutSchoolInput>
+  }
+
+  export type FileShareSchoolUpdateManyWithWhereWithoutSchoolInput = {
+    where: FileShareSchoolScalarWhereInput
+    data: XOR<FileShareSchoolUpdateManyMutationInput, FileShareSchoolUncheckedUpdateManyWithoutSchoolInput>
+  }
+
   export type SchoolCreateWithoutPeriodsInput = {
     id?: string
     name: string
@@ -53101,6 +62495,7 @@ export namespace Prisma {
     classGroups?: ClassGroupCreateNestedManyWithoutSchoolInput
     students?: StudentCreateNestedManyWithoutSchoolInput
     assignments?: AssignmentCreateNestedManyWithoutSchoolInput
+    fileShares?: FileShareSchoolCreateNestedManyWithoutSchoolInput
   }
 
   export type SchoolUncheckedCreateWithoutPeriodsInput = {
@@ -53126,6 +62521,7 @@ export namespace Prisma {
     classGroups?: ClassGroupUncheckedCreateNestedManyWithoutSchoolInput
     students?: StudentUncheckedCreateNestedManyWithoutSchoolInput
     assignments?: AssignmentUncheckedCreateNestedManyWithoutSchoolInput
+    fileShares?: FileShareSchoolUncheckedCreateNestedManyWithoutSchoolInput
   }
 
   export type SchoolCreateOrConnectWithoutPeriodsInput = {
@@ -53152,6 +62548,7 @@ export namespace Prisma {
     gradeBuckets?: GradeBucketCreateNestedManyWithoutCourseInput
     grades?: GradeCreateNestedManyWithoutCourseInput
     weeklySchedules?: ClassGroupWeeklyScheduleCreateNestedManyWithoutCourseInput
+    fileShares?: FileShareCourseCreateNestedManyWithoutCourseInput
   }
 
   export type CourseUncheckedCreateWithoutCurrentPeriodInput = {
@@ -53173,6 +62570,7 @@ export namespace Prisma {
     gradeBuckets?: GradeBucketUncheckedCreateNestedManyWithoutCourseInput
     grades?: GradeUncheckedCreateNestedManyWithoutCourseInput
     weeklySchedules?: ClassGroupWeeklyScheduleUncheckedCreateNestedManyWithoutCourseInput
+    fileShares?: FileShareCourseUncheckedCreateNestedManyWithoutCourseInput
   }
 
   export type CourseCreateOrConnectWithoutCurrentPeriodInput = {
@@ -53255,6 +62653,7 @@ export namespace Prisma {
     classGroups?: ClassGroupUpdateManyWithoutSchoolNestedInput
     students?: StudentUpdateManyWithoutSchoolNestedInput
     assignments?: AssignmentUpdateManyWithoutSchoolNestedInput
+    fileShares?: FileShareSchoolUpdateManyWithoutSchoolNestedInput
   }
 
   export type SchoolUncheckedUpdateWithoutPeriodsInput = {
@@ -53280,6 +62679,7 @@ export namespace Prisma {
     classGroups?: ClassGroupUncheckedUpdateManyWithoutSchoolNestedInput
     students?: StudentUncheckedUpdateManyWithoutSchoolNestedInput
     assignments?: AssignmentUncheckedUpdateManyWithoutSchoolNestedInput
+    fileShares?: FileShareSchoolUncheckedUpdateManyWithoutSchoolNestedInput
   }
 
   export type CourseUpsertWithWhereUniqueWithoutCurrentPeriodInput = {
@@ -53346,6 +62746,7 @@ export namespace Prisma {
     Student?: StudentCreateNestedManyWithoutOrganizationInput
     quizzes?: QuizCreateNestedManyWithoutOrganizationInput
     messages?: MessageCreateNestedManyWithoutOrganizationInput
+    files?: FileCreateNestedManyWithoutOrganizationInput
   }
 
   export type OrganizationUncheckedCreateWithoutSubjectsInput = {
@@ -53364,6 +62765,7 @@ export namespace Prisma {
     Student?: StudentUncheckedCreateNestedManyWithoutOrganizationInput
     quizzes?: QuizUncheckedCreateNestedManyWithoutOrganizationInput
     messages?: MessageUncheckedCreateNestedManyWithoutOrganizationInput
+    files?: FileUncheckedCreateNestedManyWithoutOrganizationInput
   }
 
   export type OrganizationCreateOrConnectWithoutSubjectsInput = {
@@ -53390,6 +62792,7 @@ export namespace Prisma {
     gradeBuckets?: GradeBucketCreateNestedManyWithoutCourseInput
     grades?: GradeCreateNestedManyWithoutCourseInput
     weeklySchedules?: ClassGroupWeeklyScheduleCreateNestedManyWithoutCourseInput
+    fileShares?: FileShareCourseCreateNestedManyWithoutCourseInput
   }
 
   export type CourseUncheckedCreateWithoutSubjectInput = {
@@ -53411,6 +62814,7 @@ export namespace Prisma {
     gradeBuckets?: GradeBucketUncheckedCreateNestedManyWithoutCourseInput
     grades?: GradeUncheckedCreateNestedManyWithoutCourseInput
     weeklySchedules?: ClassGroupWeeklyScheduleUncheckedCreateNestedManyWithoutCourseInput
+    fileShares?: FileShareCourseUncheckedCreateNestedManyWithoutCourseInput
   }
 
   export type CourseCreateOrConnectWithoutSubjectInput = {
@@ -53505,6 +62909,7 @@ export namespace Prisma {
     Student?: StudentUpdateManyWithoutOrganizationNestedInput
     quizzes?: QuizUpdateManyWithoutOrganizationNestedInput
     messages?: MessageUpdateManyWithoutOrganizationNestedInput
+    files?: FileUpdateManyWithoutOrganizationNestedInput
   }
 
   export type OrganizationUncheckedUpdateWithoutSubjectsInput = {
@@ -53523,6 +62928,7 @@ export namespace Prisma {
     Student?: StudentUncheckedUpdateManyWithoutOrganizationNestedInput
     quizzes?: QuizUncheckedUpdateManyWithoutOrganizationNestedInput
     messages?: MessageUncheckedUpdateManyWithoutOrganizationNestedInput
+    files?: FileUncheckedUpdateManyWithoutOrganizationNestedInput
   }
 
   export type CourseUpsertWithWhereUniqueWithoutSubjectInput = {
@@ -53580,6 +62986,7 @@ export namespace Prisma {
     students?: StudentCreateNestedManyWithoutSchoolInput
     assignments?: AssignmentCreateNestedManyWithoutSchoolInput
     periods?: PeriodCreateNestedManyWithoutSchoolInput
+    fileShares?: FileShareSchoolCreateNestedManyWithoutSchoolInput
   }
 
   export type SchoolUncheckedCreateWithoutDegreesInput = {
@@ -53605,6 +63012,7 @@ export namespace Prisma {
     students?: StudentUncheckedCreateNestedManyWithoutSchoolInput
     assignments?: AssignmentUncheckedCreateNestedManyWithoutSchoolInput
     periods?: PeriodUncheckedCreateNestedManyWithoutSchoolInput
+    fileShares?: FileShareSchoolUncheckedCreateNestedManyWithoutSchoolInput
   }
 
   export type SchoolCreateOrConnectWithoutDegreesInput = {
@@ -53686,6 +63094,7 @@ export namespace Prisma {
     students?: StudentUpdateManyWithoutSchoolNestedInput
     assignments?: AssignmentUpdateManyWithoutSchoolNestedInput
     periods?: PeriodUpdateManyWithoutSchoolNestedInput
+    fileShares?: FileShareSchoolUpdateManyWithoutSchoolNestedInput
   }
 
   export type SchoolUncheckedUpdateWithoutDegreesInput = {
@@ -53711,6 +63120,7 @@ export namespace Prisma {
     students?: StudentUncheckedUpdateManyWithoutSchoolNestedInput
     assignments?: AssignmentUncheckedUpdateManyWithoutSchoolNestedInput
     periods?: PeriodUncheckedUpdateManyWithoutSchoolNestedInput
+    fileShares?: FileShareSchoolUncheckedUpdateManyWithoutSchoolNestedInput
   }
 
   export type StudyPlanUpsertWithWhereUniqueWithoutDegreeInput = {
@@ -53775,6 +63185,7 @@ export namespace Prisma {
     students?: StudentCreateNestedManyWithoutSchoolInput
     assignments?: AssignmentCreateNestedManyWithoutSchoolInput
     periods?: PeriodCreateNestedManyWithoutSchoolInput
+    fileShares?: FileShareSchoolCreateNestedManyWithoutSchoolInput
   }
 
   export type SchoolUncheckedCreateWithoutStudyPlansInput = {
@@ -53800,6 +63211,7 @@ export namespace Prisma {
     students?: StudentUncheckedCreateNestedManyWithoutSchoolInput
     assignments?: AssignmentUncheckedCreateNestedManyWithoutSchoolInput
     periods?: PeriodUncheckedCreateNestedManyWithoutSchoolInput
+    fileShares?: FileShareSchoolUncheckedCreateNestedManyWithoutSchoolInput
   }
 
   export type SchoolCreateOrConnectWithoutStudyPlansInput = {
@@ -53826,6 +63238,7 @@ export namespace Prisma {
     gradeBuckets?: GradeBucketCreateNestedManyWithoutCourseInput
     grades?: GradeCreateNestedManyWithoutCourseInput
     weeklySchedules?: ClassGroupWeeklyScheduleCreateNestedManyWithoutCourseInput
+    fileShares?: FileShareCourseCreateNestedManyWithoutCourseInput
   }
 
   export type CourseUncheckedCreateWithoutStudyPlanInput = {
@@ -53847,6 +63260,7 @@ export namespace Prisma {
     gradeBuckets?: GradeBucketUncheckedCreateNestedManyWithoutCourseInput
     grades?: GradeUncheckedCreateNestedManyWithoutCourseInput
     weeklySchedules?: ClassGroupWeeklyScheduleUncheckedCreateNestedManyWithoutCourseInput
+    fileShares?: FileShareCourseUncheckedCreateNestedManyWithoutCourseInput
   }
 
   export type CourseCreateOrConnectWithoutStudyPlanInput = {
@@ -53875,6 +63289,7 @@ export namespace Prisma {
     quizSchedules?: QuizScheduleCreateNestedManyWithoutClassGroupInput
     quizSubmissions?: QuizSubmissionCreateNestedManyWithoutClassGroupInput
     weeklySchedules?: ClassGroupWeeklyScheduleCreateNestedManyWithoutClassGroupInput
+    fileShares?: FileShareClassGroupCreateNestedManyWithoutClassGroupInput
   }
 
   export type ClassGroupUncheckedCreateWithoutStudyPlanInput = {
@@ -53893,6 +63308,7 @@ export namespace Prisma {
     quizSchedules?: QuizScheduleUncheckedCreateNestedManyWithoutClassGroupInput
     quizSubmissions?: QuizSubmissionUncheckedCreateNestedManyWithoutClassGroupInput
     weeklySchedules?: ClassGroupWeeklyScheduleUncheckedCreateNestedManyWithoutClassGroupInput
+    fileShares?: FileShareClassGroupUncheckedCreateNestedManyWithoutClassGroupInput
   }
 
   export type ClassGroupCreateOrConnectWithoutStudyPlanInput = {
@@ -53995,6 +63411,7 @@ export namespace Prisma {
     students?: StudentUpdateManyWithoutSchoolNestedInput
     assignments?: AssignmentUpdateManyWithoutSchoolNestedInput
     periods?: PeriodUpdateManyWithoutSchoolNestedInput
+    fileShares?: FileShareSchoolUpdateManyWithoutSchoolNestedInput
   }
 
   export type SchoolUncheckedUpdateWithoutStudyPlansInput = {
@@ -54020,6 +63437,7 @@ export namespace Prisma {
     students?: StudentUncheckedUpdateManyWithoutSchoolNestedInput
     assignments?: AssignmentUncheckedUpdateManyWithoutSchoolNestedInput
     periods?: PeriodUncheckedUpdateManyWithoutSchoolNestedInput
+    fileShares?: FileShareSchoolUncheckedUpdateManyWithoutSchoolNestedInput
   }
 
   export type CourseUpsertWithWhereUniqueWithoutStudyPlanInput = {
@@ -54103,6 +63521,7 @@ export namespace Prisma {
     Student?: StudentCreateNestedManyWithoutOrganizationInput
     quizzes?: QuizCreateNestedManyWithoutOrganizationInput
     messages?: MessageCreateNestedManyWithoutOrganizationInput
+    files?: FileCreateNestedManyWithoutOrganizationInput
   }
 
   export type OrganizationUncheckedCreateWithoutCoursesInput = {
@@ -54121,6 +63540,7 @@ export namespace Prisma {
     Student?: StudentUncheckedCreateNestedManyWithoutOrganizationInput
     quizzes?: QuizUncheckedCreateNestedManyWithoutOrganizationInput
     messages?: MessageUncheckedCreateNestedManyWithoutOrganizationInput
+    files?: FileUncheckedCreateNestedManyWithoutOrganizationInput
   }
 
   export type OrganizationCreateOrConnectWithoutCoursesInput = {
@@ -54151,6 +63571,7 @@ export namespace Prisma {
     students?: StudentCreateNestedManyWithoutSchoolInput
     assignments?: AssignmentCreateNestedManyWithoutSchoolInput
     periods?: PeriodCreateNestedManyWithoutSchoolInput
+    fileShares?: FileShareSchoolCreateNestedManyWithoutSchoolInput
   }
 
   export type SchoolUncheckedCreateWithoutCoursesInput = {
@@ -54176,6 +63597,7 @@ export namespace Prisma {
     students?: StudentUncheckedCreateNestedManyWithoutSchoolInput
     assignments?: AssignmentUncheckedCreateNestedManyWithoutSchoolInput
     periods?: PeriodUncheckedCreateNestedManyWithoutSchoolInput
+    fileShares?: FileShareSchoolUncheckedCreateNestedManyWithoutSchoolInput
   }
 
   export type SchoolCreateOrConnectWithoutCoursesInput = {
@@ -54261,6 +63683,7 @@ export namespace Prisma {
     quizSchedules?: QuizScheduleCreateNestedManyWithoutClassGroupInput
     quizSubmissions?: QuizSubmissionCreateNestedManyWithoutClassGroupInput
     weeklySchedules?: ClassGroupWeeklyScheduleCreateNestedManyWithoutClassGroupInput
+    fileShares?: FileShareClassGroupCreateNestedManyWithoutClassGroupInput
   }
 
   export type ClassGroupUncheckedCreateWithoutCoursesInput = {
@@ -54279,6 +63702,7 @@ export namespace Prisma {
     quizSchedules?: QuizScheduleUncheckedCreateNestedManyWithoutClassGroupInput
     quizSubmissions?: QuizSubmissionUncheckedCreateNestedManyWithoutClassGroupInput
     weeklySchedules?: ClassGroupWeeklyScheduleUncheckedCreateNestedManyWithoutClassGroupInput
+    fileShares?: FileShareClassGroupUncheckedCreateNestedManyWithoutClassGroupInput
   }
 
   export type ClassGroupCreateOrConnectWithoutCoursesInput = {
@@ -54595,6 +64019,32 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type FileShareCourseCreateWithoutCourseInput = {
+    id?: string
+    permission: $Enums.FilePermission
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    file: FileCreateNestedOneWithoutSharesCoursesInput
+  }
+
+  export type FileShareCourseUncheckedCreateWithoutCourseInput = {
+    id?: string
+    fileId: string
+    permission: $Enums.FilePermission
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type FileShareCourseCreateOrConnectWithoutCourseInput = {
+    where: FileShareCourseWhereUniqueInput
+    create: XOR<FileShareCourseCreateWithoutCourseInput, FileShareCourseUncheckedCreateWithoutCourseInput>
+  }
+
+  export type FileShareCourseCreateManyCourseInputEnvelope = {
+    data: FileShareCourseCreateManyCourseInput | FileShareCourseCreateManyCourseInput[]
+    skipDuplicates?: boolean
+  }
+
   export type OrganizationUpsertWithoutCoursesInput = {
     update: XOR<OrganizationUpdateWithoutCoursesInput, OrganizationUncheckedUpdateWithoutCoursesInput>
     create: XOR<OrganizationCreateWithoutCoursesInput, OrganizationUncheckedCreateWithoutCoursesInput>
@@ -54622,6 +64072,7 @@ export namespace Prisma {
     Student?: StudentUpdateManyWithoutOrganizationNestedInput
     quizzes?: QuizUpdateManyWithoutOrganizationNestedInput
     messages?: MessageUpdateManyWithoutOrganizationNestedInput
+    files?: FileUpdateManyWithoutOrganizationNestedInput
   }
 
   export type OrganizationUncheckedUpdateWithoutCoursesInput = {
@@ -54640,6 +64091,7 @@ export namespace Prisma {
     Student?: StudentUncheckedUpdateManyWithoutOrganizationNestedInput
     quizzes?: QuizUncheckedUpdateManyWithoutOrganizationNestedInput
     messages?: MessageUncheckedUpdateManyWithoutOrganizationNestedInput
+    files?: FileUncheckedUpdateManyWithoutOrganizationNestedInput
   }
 
   export type SchoolUpsertWithoutCoursesInput = {
@@ -54676,6 +64128,7 @@ export namespace Prisma {
     students?: StudentUpdateManyWithoutSchoolNestedInput
     assignments?: AssignmentUpdateManyWithoutSchoolNestedInput
     periods?: PeriodUpdateManyWithoutSchoolNestedInput
+    fileShares?: FileShareSchoolUpdateManyWithoutSchoolNestedInput
   }
 
   export type SchoolUncheckedUpdateWithoutCoursesInput = {
@@ -54701,6 +64154,7 @@ export namespace Prisma {
     students?: StudentUncheckedUpdateManyWithoutSchoolNestedInput
     assignments?: AssignmentUncheckedUpdateManyWithoutSchoolNestedInput
     periods?: PeriodUncheckedUpdateManyWithoutSchoolNestedInput
+    fileShares?: FileShareSchoolUncheckedUpdateManyWithoutSchoolNestedInput
   }
 
   export type SubjectUpsertWithoutCoursesInput = {
@@ -55017,6 +64471,22 @@ export namespace Prisma {
     updatedAt?: DateTimeFilter<"ClassGroupWeeklySchedule"> | Date | string
   }
 
+  export type FileShareCourseUpsertWithWhereUniqueWithoutCourseInput = {
+    where: FileShareCourseWhereUniqueInput
+    update: XOR<FileShareCourseUpdateWithoutCourseInput, FileShareCourseUncheckedUpdateWithoutCourseInput>
+    create: XOR<FileShareCourseCreateWithoutCourseInput, FileShareCourseUncheckedCreateWithoutCourseInput>
+  }
+
+  export type FileShareCourseUpdateWithWhereUniqueWithoutCourseInput = {
+    where: FileShareCourseWhereUniqueInput
+    data: XOR<FileShareCourseUpdateWithoutCourseInput, FileShareCourseUncheckedUpdateWithoutCourseInput>
+  }
+
+  export type FileShareCourseUpdateManyWithWhereWithoutCourseInput = {
+    where: FileShareCourseScalarWhereInput
+    data: XOR<FileShareCourseUpdateManyMutationInput, FileShareCourseUncheckedUpdateManyWithoutCourseInput>
+  }
+
   export type OrganizationCreateWithoutGroupsInput = {
     id?: string
     name: string
@@ -55033,6 +64503,7 @@ export namespace Prisma {
     Student?: StudentCreateNestedManyWithoutOrganizationInput
     quizzes?: QuizCreateNestedManyWithoutOrganizationInput
     messages?: MessageCreateNestedManyWithoutOrganizationInput
+    files?: FileCreateNestedManyWithoutOrganizationInput
   }
 
   export type OrganizationUncheckedCreateWithoutGroupsInput = {
@@ -55051,6 +64522,7 @@ export namespace Prisma {
     Student?: StudentUncheckedCreateNestedManyWithoutOrganizationInput
     quizzes?: QuizUncheckedCreateNestedManyWithoutOrganizationInput
     messages?: MessageUncheckedCreateNestedManyWithoutOrganizationInput
+    files?: FileUncheckedCreateNestedManyWithoutOrganizationInput
   }
 
   export type OrganizationCreateOrConnectWithoutGroupsInput = {
@@ -55081,6 +64553,7 @@ export namespace Prisma {
     students?: StudentCreateNestedManyWithoutSchoolInput
     assignments?: AssignmentCreateNestedManyWithoutSchoolInput
     periods?: PeriodCreateNestedManyWithoutSchoolInput
+    fileShares?: FileShareSchoolCreateNestedManyWithoutSchoolInput
   }
 
   export type SchoolUncheckedCreateWithoutClassGroupsInput = {
@@ -55106,6 +64579,7 @@ export namespace Prisma {
     students?: StudentUncheckedCreateNestedManyWithoutSchoolInput
     assignments?: AssignmentUncheckedCreateNestedManyWithoutSchoolInput
     periods?: PeriodUncheckedCreateNestedManyWithoutSchoolInput
+    fileShares?: FileShareSchoolUncheckedCreateNestedManyWithoutSchoolInput
   }
 
   export type SchoolCreateOrConnectWithoutClassGroupsInput = {
@@ -55132,6 +64606,7 @@ export namespace Prisma {
     gradeBuckets?: GradeBucketCreateNestedManyWithoutCourseInput
     grades?: GradeCreateNestedManyWithoutCourseInput
     weeklySchedules?: ClassGroupWeeklyScheduleCreateNestedManyWithoutCourseInput
+    fileShares?: FileShareCourseCreateNestedManyWithoutCourseInput
   }
 
   export type CourseUncheckedCreateWithoutGroupsInput = {
@@ -55153,6 +64628,7 @@ export namespace Prisma {
     gradeBuckets?: GradeBucketUncheckedCreateNestedManyWithoutCourseInput
     grades?: GradeUncheckedCreateNestedManyWithoutCourseInput
     weeklySchedules?: ClassGroupWeeklyScheduleUncheckedCreateNestedManyWithoutCourseInput
+    fileShares?: FileShareCourseUncheckedCreateNestedManyWithoutCourseInput
   }
 
   export type CourseCreateOrConnectWithoutGroupsInput = {
@@ -55422,6 +64898,32 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type FileShareClassGroupCreateWithoutClassGroupInput = {
+    id?: string
+    permission: $Enums.FilePermission
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    file: FileCreateNestedOneWithoutSharesClassGroupsInput
+  }
+
+  export type FileShareClassGroupUncheckedCreateWithoutClassGroupInput = {
+    id?: string
+    fileId: string
+    permission: $Enums.FilePermission
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type FileShareClassGroupCreateOrConnectWithoutClassGroupInput = {
+    where: FileShareClassGroupWhereUniqueInput
+    create: XOR<FileShareClassGroupCreateWithoutClassGroupInput, FileShareClassGroupUncheckedCreateWithoutClassGroupInput>
+  }
+
+  export type FileShareClassGroupCreateManyClassGroupInputEnvelope = {
+    data: FileShareClassGroupCreateManyClassGroupInput | FileShareClassGroupCreateManyClassGroupInput[]
+    skipDuplicates?: boolean
+  }
+
   export type OrganizationUpsertWithoutGroupsInput = {
     update: XOR<OrganizationUpdateWithoutGroupsInput, OrganizationUncheckedUpdateWithoutGroupsInput>
     create: XOR<OrganizationCreateWithoutGroupsInput, OrganizationUncheckedCreateWithoutGroupsInput>
@@ -55449,6 +64951,7 @@ export namespace Prisma {
     Student?: StudentUpdateManyWithoutOrganizationNestedInput
     quizzes?: QuizUpdateManyWithoutOrganizationNestedInput
     messages?: MessageUpdateManyWithoutOrganizationNestedInput
+    files?: FileUpdateManyWithoutOrganizationNestedInput
   }
 
   export type OrganizationUncheckedUpdateWithoutGroupsInput = {
@@ -55467,6 +64970,7 @@ export namespace Prisma {
     Student?: StudentUncheckedUpdateManyWithoutOrganizationNestedInput
     quizzes?: QuizUncheckedUpdateManyWithoutOrganizationNestedInput
     messages?: MessageUncheckedUpdateManyWithoutOrganizationNestedInput
+    files?: FileUncheckedUpdateManyWithoutOrganizationNestedInput
   }
 
   export type SchoolUpsertWithoutClassGroupsInput = {
@@ -55503,6 +65007,7 @@ export namespace Prisma {
     students?: StudentUpdateManyWithoutSchoolNestedInput
     assignments?: AssignmentUpdateManyWithoutSchoolNestedInput
     periods?: PeriodUpdateManyWithoutSchoolNestedInput
+    fileShares?: FileShareSchoolUpdateManyWithoutSchoolNestedInput
   }
 
   export type SchoolUncheckedUpdateWithoutClassGroupsInput = {
@@ -55528,6 +65033,7 @@ export namespace Prisma {
     students?: StudentUncheckedUpdateManyWithoutSchoolNestedInput
     assignments?: AssignmentUncheckedUpdateManyWithoutSchoolNestedInput
     periods?: PeriodUncheckedUpdateManyWithoutSchoolNestedInput
+    fileShares?: FileShareSchoolUncheckedUpdateManyWithoutSchoolNestedInput
   }
 
   export type CourseUpsertWithWhereUniqueWithoutGroupsInput = {
@@ -55765,6 +65271,22 @@ export namespace Prisma {
     data: XOR<ClassGroupWeeklyScheduleUpdateManyMutationInput, ClassGroupWeeklyScheduleUncheckedUpdateManyWithoutClassGroupInput>
   }
 
+  export type FileShareClassGroupUpsertWithWhereUniqueWithoutClassGroupInput = {
+    where: FileShareClassGroupWhereUniqueInput
+    update: XOR<FileShareClassGroupUpdateWithoutClassGroupInput, FileShareClassGroupUncheckedUpdateWithoutClassGroupInput>
+    create: XOR<FileShareClassGroupCreateWithoutClassGroupInput, FileShareClassGroupUncheckedCreateWithoutClassGroupInput>
+  }
+
+  export type FileShareClassGroupUpdateWithWhereUniqueWithoutClassGroupInput = {
+    where: FileShareClassGroupWhereUniqueInput
+    data: XOR<FileShareClassGroupUpdateWithoutClassGroupInput, FileShareClassGroupUncheckedUpdateWithoutClassGroupInput>
+  }
+
+  export type FileShareClassGroupUpdateManyWithWhereWithoutClassGroupInput = {
+    where: FileShareClassGroupScalarWhereInput
+    data: XOR<FileShareClassGroupUpdateManyMutationInput, FileShareClassGroupUncheckedUpdateManyWithoutClassGroupInput>
+  }
+
   export type OrganizationCreateWithoutStudentInput = {
     id?: string
     name: string
@@ -55781,6 +65303,7 @@ export namespace Prisma {
     Teacher?: TeacherCreateNestedManyWithoutOrganizationInput
     quizzes?: QuizCreateNestedManyWithoutOrganizationInput
     messages?: MessageCreateNestedManyWithoutOrganizationInput
+    files?: FileCreateNestedManyWithoutOrganizationInput
   }
 
   export type OrganizationUncheckedCreateWithoutStudentInput = {
@@ -55799,6 +65322,7 @@ export namespace Prisma {
     Teacher?: TeacherUncheckedCreateNestedManyWithoutOrganizationInput
     quizzes?: QuizUncheckedCreateNestedManyWithoutOrganizationInput
     messages?: MessageUncheckedCreateNestedManyWithoutOrganizationInput
+    files?: FileUncheckedCreateNestedManyWithoutOrganizationInput
   }
 
   export type OrganizationCreateOrConnectWithoutStudentInput = {
@@ -55829,6 +65353,7 @@ export namespace Prisma {
     classGroups?: ClassGroupCreateNestedManyWithoutSchoolInput
     assignments?: AssignmentCreateNestedManyWithoutSchoolInput
     periods?: PeriodCreateNestedManyWithoutSchoolInput
+    fileShares?: FileShareSchoolCreateNestedManyWithoutSchoolInput
   }
 
   export type SchoolUncheckedCreateWithoutStudentsInput = {
@@ -55854,6 +65379,7 @@ export namespace Prisma {
     classGroups?: ClassGroupUncheckedCreateNestedManyWithoutSchoolInput
     assignments?: AssignmentUncheckedCreateNestedManyWithoutSchoolInput
     periods?: PeriodUncheckedCreateNestedManyWithoutSchoolInput
+    fileShares?: FileShareSchoolUncheckedCreateNestedManyWithoutSchoolInput
   }
 
   export type SchoolCreateOrConnectWithoutStudentsInput = {
@@ -55877,6 +65403,7 @@ export namespace Prisma {
     quizSchedules?: QuizScheduleCreateNestedManyWithoutClassGroupInput
     quizSubmissions?: QuizSubmissionCreateNestedManyWithoutClassGroupInput
     weeklySchedules?: ClassGroupWeeklyScheduleCreateNestedManyWithoutClassGroupInput
+    fileShares?: FileShareClassGroupCreateNestedManyWithoutClassGroupInput
   }
 
   export type ClassGroupUncheckedCreateWithoutStudentsInput = {
@@ -55895,6 +65422,7 @@ export namespace Prisma {
     quizSchedules?: QuizScheduleUncheckedCreateNestedManyWithoutClassGroupInput
     quizSubmissions?: QuizSubmissionUncheckedCreateNestedManyWithoutClassGroupInput
     weeklySchedules?: ClassGroupWeeklyScheduleUncheckedCreateNestedManyWithoutClassGroupInput
+    fileShares?: FileShareClassGroupUncheckedCreateNestedManyWithoutClassGroupInput
   }
 
   export type ClassGroupCreateOrConnectWithoutStudentsInput = {
@@ -55921,6 +65449,7 @@ export namespace Prisma {
     gradeBuckets?: GradeBucketCreateNestedManyWithoutCourseInput
     grades?: GradeCreateNestedManyWithoutCourseInput
     weeklySchedules?: ClassGroupWeeklyScheduleCreateNestedManyWithoutCourseInput
+    fileShares?: FileShareCourseCreateNestedManyWithoutCourseInput
   }
 
   export type CourseUncheckedCreateWithoutStudentsInput = {
@@ -55942,6 +65471,7 @@ export namespace Prisma {
     gradeBuckets?: GradeBucketUncheckedCreateNestedManyWithoutCourseInput
     grades?: GradeUncheckedCreateNestedManyWithoutCourseInput
     weeklySchedules?: ClassGroupWeeklyScheduleUncheckedCreateNestedManyWithoutCourseInput
+    fileShares?: FileShareCourseUncheckedCreateNestedManyWithoutCourseInput
   }
 
   export type CourseCreateOrConnectWithoutStudentsInput = {
@@ -55965,6 +65495,8 @@ export namespace Prisma {
     teacher?: TeacherCreateNestedOneWithoutUserInput
     sentMessages?: MessageCreateNestedManyWithoutSenderInput
     messageRecipients?: MessageRecipientCreateNestedManyWithoutUserInput
+    filesOwned?: FileCreateNestedManyWithoutOwnerInput
+    fileShares?: FileShareUserCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutStudentInput = {
@@ -55983,6 +65515,8 @@ export namespace Prisma {
     teacher?: TeacherUncheckedCreateNestedOneWithoutUserInput
     sentMessages?: MessageUncheckedCreateNestedManyWithoutSenderInput
     messageRecipients?: MessageRecipientUncheckedCreateNestedManyWithoutUserInput
+    filesOwned?: FileUncheckedCreateNestedManyWithoutOwnerInput
+    fileShares?: FileShareUserUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutStudentInput = {
@@ -56077,6 +65611,7 @@ export namespace Prisma {
     Teacher?: TeacherUpdateManyWithoutOrganizationNestedInput
     quizzes?: QuizUpdateManyWithoutOrganizationNestedInput
     messages?: MessageUpdateManyWithoutOrganizationNestedInput
+    files?: FileUpdateManyWithoutOrganizationNestedInput
   }
 
   export type OrganizationUncheckedUpdateWithoutStudentInput = {
@@ -56095,6 +65630,7 @@ export namespace Prisma {
     Teacher?: TeacherUncheckedUpdateManyWithoutOrganizationNestedInput
     quizzes?: QuizUncheckedUpdateManyWithoutOrganizationNestedInput
     messages?: MessageUncheckedUpdateManyWithoutOrganizationNestedInput
+    files?: FileUncheckedUpdateManyWithoutOrganizationNestedInput
   }
 
   export type SchoolUpsertWithoutStudentsInput = {
@@ -56131,6 +65667,7 @@ export namespace Prisma {
     classGroups?: ClassGroupUpdateManyWithoutSchoolNestedInput
     assignments?: AssignmentUpdateManyWithoutSchoolNestedInput
     periods?: PeriodUpdateManyWithoutSchoolNestedInput
+    fileShares?: FileShareSchoolUpdateManyWithoutSchoolNestedInput
   }
 
   export type SchoolUncheckedUpdateWithoutStudentsInput = {
@@ -56156,6 +65693,7 @@ export namespace Prisma {
     classGroups?: ClassGroupUncheckedUpdateManyWithoutSchoolNestedInput
     assignments?: AssignmentUncheckedUpdateManyWithoutSchoolNestedInput
     periods?: PeriodUncheckedUpdateManyWithoutSchoolNestedInput
+    fileShares?: FileShareSchoolUncheckedUpdateManyWithoutSchoolNestedInput
   }
 
   export type ClassGroupUpsertWithoutStudentsInput = {
@@ -56185,6 +65723,7 @@ export namespace Prisma {
     quizSchedules?: QuizScheduleUpdateManyWithoutClassGroupNestedInput
     quizSubmissions?: QuizSubmissionUpdateManyWithoutClassGroupNestedInput
     weeklySchedules?: ClassGroupWeeklyScheduleUpdateManyWithoutClassGroupNestedInput
+    fileShares?: FileShareClassGroupUpdateManyWithoutClassGroupNestedInput
   }
 
   export type ClassGroupUncheckedUpdateWithoutStudentsInput = {
@@ -56203,6 +65742,7 @@ export namespace Prisma {
     quizSchedules?: QuizScheduleUncheckedUpdateManyWithoutClassGroupNestedInput
     quizSubmissions?: QuizSubmissionUncheckedUpdateManyWithoutClassGroupNestedInput
     weeklySchedules?: ClassGroupWeeklyScheduleUncheckedUpdateManyWithoutClassGroupNestedInput
+    fileShares?: FileShareClassGroupUncheckedUpdateManyWithoutClassGroupNestedInput
   }
 
   export type CourseUpsertWithWhereUniqueWithoutStudentsInput = {
@@ -56248,6 +65788,8 @@ export namespace Prisma {
     teacher?: TeacherUpdateOneWithoutUserNestedInput
     sentMessages?: MessageUpdateManyWithoutSenderNestedInput
     messageRecipients?: MessageRecipientUpdateManyWithoutUserNestedInput
+    filesOwned?: FileUpdateManyWithoutOwnerNestedInput
+    fileShares?: FileShareUserUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutStudentInput = {
@@ -56266,6 +65808,8 @@ export namespace Prisma {
     teacher?: TeacherUncheckedUpdateOneWithoutUserNestedInput
     sentMessages?: MessageUncheckedUpdateManyWithoutSenderNestedInput
     messageRecipients?: MessageRecipientUncheckedUpdateManyWithoutUserNestedInput
+    filesOwned?: FileUncheckedUpdateManyWithoutOwnerNestedInput
+    fileShares?: FileShareUserUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type QuizSubmissionUpsertWithWhereUniqueWithoutStudentInput = {
@@ -56329,6 +65873,7 @@ export namespace Prisma {
     Student?: StudentCreateNestedManyWithoutOrganizationInput
     quizzes?: QuizCreateNestedManyWithoutOrganizationInput
     messages?: MessageCreateNestedManyWithoutOrganizationInput
+    files?: FileCreateNestedManyWithoutOrganizationInput
   }
 
   export type OrganizationUncheckedCreateWithoutTeacherInput = {
@@ -56347,6 +65892,7 @@ export namespace Prisma {
     Student?: StudentUncheckedCreateNestedManyWithoutOrganizationInput
     quizzes?: QuizUncheckedCreateNestedManyWithoutOrganizationInput
     messages?: MessageUncheckedCreateNestedManyWithoutOrganizationInput
+    files?: FileUncheckedCreateNestedManyWithoutOrganizationInput
   }
 
   export type OrganizationCreateOrConnectWithoutTeacherInput = {
@@ -56397,6 +65943,7 @@ export namespace Prisma {
     quizSchedules?: QuizScheduleCreateNestedManyWithoutClassGroupInput
     quizSubmissions?: QuizSubmissionCreateNestedManyWithoutClassGroupInput
     weeklySchedules?: ClassGroupWeeklyScheduleCreateNestedManyWithoutClassGroupInput
+    fileShares?: FileShareClassGroupCreateNestedManyWithoutClassGroupInput
   }
 
   export type ClassGroupUncheckedCreateWithoutTeacherInput = {
@@ -56415,6 +65962,7 @@ export namespace Prisma {
     quizSchedules?: QuizScheduleUncheckedCreateNestedManyWithoutClassGroupInput
     quizSubmissions?: QuizSubmissionUncheckedCreateNestedManyWithoutClassGroupInput
     weeklySchedules?: ClassGroupWeeklyScheduleUncheckedCreateNestedManyWithoutClassGroupInput
+    fileShares?: FileShareClassGroupUncheckedCreateNestedManyWithoutClassGroupInput
   }
 
   export type ClassGroupCreateOrConnectWithoutTeacherInput = {
@@ -56446,6 +65994,7 @@ export namespace Prisma {
     gradeBuckets?: GradeBucketCreateNestedManyWithoutCourseInput
     grades?: GradeCreateNestedManyWithoutCourseInput
     weeklySchedules?: ClassGroupWeeklyScheduleCreateNestedManyWithoutCourseInput
+    fileShares?: FileShareCourseCreateNestedManyWithoutCourseInput
   }
 
   export type CourseUncheckedCreateWithoutTeacherInput = {
@@ -56467,6 +66016,7 @@ export namespace Prisma {
     gradeBuckets?: GradeBucketUncheckedCreateNestedManyWithoutCourseInput
     grades?: GradeUncheckedCreateNestedManyWithoutCourseInput
     weeklySchedules?: ClassGroupWeeklyScheduleUncheckedCreateNestedManyWithoutCourseInput
+    fileShares?: FileShareCourseUncheckedCreateNestedManyWithoutCourseInput
   }
 
   export type CourseCreateOrConnectWithoutTeacherInput = {
@@ -56495,6 +66045,8 @@ export namespace Prisma {
     student?: StudentCreateNestedOneWithoutUserInput
     sentMessages?: MessageCreateNestedManyWithoutSenderInput
     messageRecipients?: MessageRecipientCreateNestedManyWithoutUserInput
+    filesOwned?: FileCreateNestedManyWithoutOwnerInput
+    fileShares?: FileShareUserCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutTeacherInput = {
@@ -56513,6 +66065,8 @@ export namespace Prisma {
     student?: StudentUncheckedCreateNestedOneWithoutUserInput
     sentMessages?: MessageUncheckedCreateNestedManyWithoutSenderInput
     messageRecipients?: MessageRecipientUncheckedCreateNestedManyWithoutUserInput
+    filesOwned?: FileUncheckedCreateNestedManyWithoutOwnerInput
+    fileShares?: FileShareUserUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutTeacherInput = {
@@ -56621,6 +66175,7 @@ export namespace Prisma {
     Student?: StudentUpdateManyWithoutOrganizationNestedInput
     quizzes?: QuizUpdateManyWithoutOrganizationNestedInput
     messages?: MessageUpdateManyWithoutOrganizationNestedInput
+    files?: FileUpdateManyWithoutOrganizationNestedInput
   }
 
   export type OrganizationUncheckedUpdateWithoutTeacherInput = {
@@ -56639,6 +66194,7 @@ export namespace Prisma {
     Student?: StudentUncheckedUpdateManyWithoutOrganizationNestedInput
     quizzes?: QuizUncheckedUpdateManyWithoutOrganizationNestedInput
     messages?: MessageUncheckedUpdateManyWithoutOrganizationNestedInput
+    files?: FileUncheckedUpdateManyWithoutOrganizationNestedInput
   }
 
   export type SubjectUpsertWithWhereUniqueWithoutTeachersInput = {
@@ -56716,6 +66272,8 @@ export namespace Prisma {
     student?: StudentUpdateOneWithoutUserNestedInput
     sentMessages?: MessageUpdateManyWithoutSenderNestedInput
     messageRecipients?: MessageRecipientUpdateManyWithoutUserNestedInput
+    filesOwned?: FileUpdateManyWithoutOwnerNestedInput
+    fileShares?: FileShareUserUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutTeacherInput = {
@@ -56734,6 +66292,8 @@ export namespace Prisma {
     student?: StudentUncheckedUpdateOneWithoutUserNestedInput
     sentMessages?: MessageUncheckedUpdateManyWithoutSenderNestedInput
     messageRecipients?: MessageRecipientUncheckedUpdateManyWithoutUserNestedInput
+    filesOwned?: FileUncheckedUpdateManyWithoutOwnerNestedInput
+    fileShares?: FileShareUserUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type AssignmentUpsertWithWhereUniqueWithoutTeacherInput = {
@@ -56791,6 +66351,7 @@ export namespace Prisma {
     classGroups?: ClassGroupCreateNestedManyWithoutSchoolInput
     students?: StudentCreateNestedManyWithoutSchoolInput
     periods?: PeriodCreateNestedManyWithoutSchoolInput
+    fileShares?: FileShareSchoolCreateNestedManyWithoutSchoolInput
   }
 
   export type SchoolUncheckedCreateWithoutAssignmentsInput = {
@@ -56816,6 +66377,7 @@ export namespace Prisma {
     classGroups?: ClassGroupUncheckedCreateNestedManyWithoutSchoolInput
     students?: StudentUncheckedCreateNestedManyWithoutSchoolInput
     periods?: PeriodUncheckedCreateNestedManyWithoutSchoolInput
+    fileShares?: FileShareSchoolUncheckedCreateNestedManyWithoutSchoolInput
   }
 
   export type SchoolCreateOrConnectWithoutAssignmentsInput = {
@@ -56842,6 +66404,7 @@ export namespace Prisma {
     gradeBuckets?: GradeBucketCreateNestedManyWithoutCourseInput
     grades?: GradeCreateNestedManyWithoutCourseInput
     weeklySchedules?: ClassGroupWeeklyScheduleCreateNestedManyWithoutCourseInput
+    fileShares?: FileShareCourseCreateNestedManyWithoutCourseInput
   }
 
   export type CourseUncheckedCreateWithoutAssignmentsInput = {
@@ -56863,6 +66426,7 @@ export namespace Prisma {
     gradeBuckets?: GradeBucketUncheckedCreateNestedManyWithoutCourseInput
     grades?: GradeUncheckedCreateNestedManyWithoutCourseInput
     weeklySchedules?: ClassGroupWeeklyScheduleUncheckedCreateNestedManyWithoutCourseInput
+    fileShares?: FileShareCourseUncheckedCreateNestedManyWithoutCourseInput
   }
 
   export type CourseCreateOrConnectWithoutAssignmentsInput = {
@@ -56981,6 +66545,7 @@ export namespace Prisma {
     classGroups?: ClassGroupUpdateManyWithoutSchoolNestedInput
     students?: StudentUpdateManyWithoutSchoolNestedInput
     periods?: PeriodUpdateManyWithoutSchoolNestedInput
+    fileShares?: FileShareSchoolUpdateManyWithoutSchoolNestedInput
   }
 
   export type SchoolUncheckedUpdateWithoutAssignmentsInput = {
@@ -57006,6 +66571,7 @@ export namespace Prisma {
     classGroups?: ClassGroupUncheckedUpdateManyWithoutSchoolNestedInput
     students?: StudentUncheckedUpdateManyWithoutSchoolNestedInput
     periods?: PeriodUncheckedUpdateManyWithoutSchoolNestedInput
+    fileShares?: FileShareSchoolUncheckedUpdateManyWithoutSchoolNestedInput
   }
 
   export type CourseUpsertWithoutAssignmentsInput = {
@@ -57038,6 +66604,7 @@ export namespace Prisma {
     gradeBuckets?: GradeBucketUpdateManyWithoutCourseNestedInput
     grades?: GradeUpdateManyWithoutCourseNestedInput
     weeklySchedules?: ClassGroupWeeklyScheduleUpdateManyWithoutCourseNestedInput
+    fileShares?: FileShareCourseUpdateManyWithoutCourseNestedInput
   }
 
   export type CourseUncheckedUpdateWithoutAssignmentsInput = {
@@ -57059,6 +66626,7 @@ export namespace Prisma {
     gradeBuckets?: GradeBucketUncheckedUpdateManyWithoutCourseNestedInput
     grades?: GradeUncheckedUpdateManyWithoutCourseNestedInput
     weeklySchedules?: ClassGroupWeeklyScheduleUncheckedUpdateManyWithoutCourseNestedInput
+    fileShares?: FileShareCourseUncheckedUpdateManyWithoutCourseNestedInput
   }
 
   export type AssignmentDateUpsertWithWhereUniqueWithoutAssignmentInput = {
@@ -57187,6 +66755,7 @@ export namespace Prisma {
     quizSchedules?: QuizScheduleCreateNestedManyWithoutClassGroupInput
     quizSubmissions?: QuizSubmissionCreateNestedManyWithoutClassGroupInput
     weeklySchedules?: ClassGroupWeeklyScheduleCreateNestedManyWithoutClassGroupInput
+    fileShares?: FileShareClassGroupCreateNestedManyWithoutClassGroupInput
   }
 
   export type ClassGroupUncheckedCreateWithoutAssignmentDatesInput = {
@@ -57205,6 +66774,7 @@ export namespace Prisma {
     quizSchedules?: QuizScheduleUncheckedCreateNestedManyWithoutClassGroupInput
     quizSubmissions?: QuizSubmissionUncheckedCreateNestedManyWithoutClassGroupInput
     weeklySchedules?: ClassGroupWeeklyScheduleUncheckedCreateNestedManyWithoutClassGroupInput
+    fileShares?: FileShareClassGroupUncheckedCreateNestedManyWithoutClassGroupInput
   }
 
   export type ClassGroupCreateOrConnectWithoutAssignmentDatesInput = {
@@ -57278,6 +66848,7 @@ export namespace Prisma {
     quizSchedules?: QuizScheduleUpdateManyWithoutClassGroupNestedInput
     quizSubmissions?: QuizSubmissionUpdateManyWithoutClassGroupNestedInput
     weeklySchedules?: ClassGroupWeeklyScheduleUpdateManyWithoutClassGroupNestedInput
+    fileShares?: FileShareClassGroupUpdateManyWithoutClassGroupNestedInput
   }
 
   export type ClassGroupUncheckedUpdateWithoutAssignmentDatesInput = {
@@ -57296,6 +66867,7 @@ export namespace Prisma {
     quizSchedules?: QuizScheduleUncheckedUpdateManyWithoutClassGroupNestedInput
     quizSubmissions?: QuizSubmissionUncheckedUpdateManyWithoutClassGroupNestedInput
     weeklySchedules?: ClassGroupWeeklyScheduleUncheckedUpdateManyWithoutClassGroupNestedInput
+    fileShares?: FileShareClassGroupUncheckedUpdateManyWithoutClassGroupNestedInput
   }
 
   export type OrganizationCreateWithoutQuizzesInput = {
@@ -57314,6 +66886,7 @@ export namespace Prisma {
     Teacher?: TeacherCreateNestedManyWithoutOrganizationInput
     Student?: StudentCreateNestedManyWithoutOrganizationInput
     messages?: MessageCreateNestedManyWithoutOrganizationInput
+    files?: FileCreateNestedManyWithoutOrganizationInput
   }
 
   export type OrganizationUncheckedCreateWithoutQuizzesInput = {
@@ -57332,6 +66905,7 @@ export namespace Prisma {
     Teacher?: TeacherUncheckedCreateNestedManyWithoutOrganizationInput
     Student?: StudentUncheckedCreateNestedManyWithoutOrganizationInput
     messages?: MessageUncheckedCreateNestedManyWithoutOrganizationInput
+    files?: FileUncheckedCreateNestedManyWithoutOrganizationInput
   }
 
   export type OrganizationCreateOrConnectWithoutQuizzesInput = {
@@ -57358,6 +66932,7 @@ export namespace Prisma {
     gradeBuckets?: GradeBucketCreateNestedManyWithoutCourseInput
     grades?: GradeCreateNestedManyWithoutCourseInput
     weeklySchedules?: ClassGroupWeeklyScheduleCreateNestedManyWithoutCourseInput
+    fileShares?: FileShareCourseCreateNestedManyWithoutCourseInput
   }
 
   export type CourseUncheckedCreateWithoutQuizzesInput = {
@@ -57379,6 +66954,7 @@ export namespace Prisma {
     gradeBuckets?: GradeBucketUncheckedCreateNestedManyWithoutCourseInput
     grades?: GradeUncheckedCreateNestedManyWithoutCourseInput
     weeklySchedules?: ClassGroupWeeklyScheduleUncheckedCreateNestedManyWithoutCourseInput
+    fileShares?: FileShareCourseUncheckedCreateNestedManyWithoutCourseInput
   }
 
   export type CourseCreateOrConnectWithoutQuizzesInput = {
@@ -57558,6 +67134,7 @@ export namespace Prisma {
     Teacher?: TeacherUpdateManyWithoutOrganizationNestedInput
     Student?: StudentUpdateManyWithoutOrganizationNestedInput
     messages?: MessageUpdateManyWithoutOrganizationNestedInput
+    files?: FileUpdateManyWithoutOrganizationNestedInput
   }
 
   export type OrganizationUncheckedUpdateWithoutQuizzesInput = {
@@ -57576,6 +67153,7 @@ export namespace Prisma {
     Teacher?: TeacherUncheckedUpdateManyWithoutOrganizationNestedInput
     Student?: StudentUncheckedUpdateManyWithoutOrganizationNestedInput
     messages?: MessageUncheckedUpdateManyWithoutOrganizationNestedInput
+    files?: FileUncheckedUpdateManyWithoutOrganizationNestedInput
   }
 
   export type CourseUpsertWithoutQuizzesInput = {
@@ -57608,6 +67186,7 @@ export namespace Prisma {
     gradeBuckets?: GradeBucketUpdateManyWithoutCourseNestedInput
     grades?: GradeUpdateManyWithoutCourseNestedInput
     weeklySchedules?: ClassGroupWeeklyScheduleUpdateManyWithoutCourseNestedInput
+    fileShares?: FileShareCourseUpdateManyWithoutCourseNestedInput
   }
 
   export type CourseUncheckedUpdateWithoutQuizzesInput = {
@@ -57629,6 +67208,7 @@ export namespace Prisma {
     gradeBuckets?: GradeBucketUncheckedUpdateManyWithoutCourseNestedInput
     grades?: GradeUncheckedUpdateManyWithoutCourseNestedInput
     weeklySchedules?: ClassGroupWeeklyScheduleUncheckedUpdateManyWithoutCourseNestedInput
+    fileShares?: FileShareCourseUncheckedUpdateManyWithoutCourseNestedInput
   }
 
   export type TeacherUpsertWithoutQuizzesInput = {
@@ -58073,6 +67653,7 @@ export namespace Prisma {
     assignmentDates?: AssignmentDateCreateNestedManyWithoutClassGroupInput
     quizSubmissions?: QuizSubmissionCreateNestedManyWithoutClassGroupInput
     weeklySchedules?: ClassGroupWeeklyScheduleCreateNestedManyWithoutClassGroupInput
+    fileShares?: FileShareClassGroupCreateNestedManyWithoutClassGroupInput
   }
 
   export type ClassGroupUncheckedCreateWithoutQuizSchedulesInput = {
@@ -58091,6 +67672,7 @@ export namespace Prisma {
     assignmentDates?: AssignmentDateUncheckedCreateNestedManyWithoutClassGroupInput
     quizSubmissions?: QuizSubmissionUncheckedCreateNestedManyWithoutClassGroupInput
     weeklySchedules?: ClassGroupWeeklyScheduleUncheckedCreateNestedManyWithoutClassGroupInput
+    fileShares?: FileShareClassGroupUncheckedCreateNestedManyWithoutClassGroupInput
   }
 
   export type ClassGroupCreateOrConnectWithoutQuizSchedulesInput = {
@@ -58162,6 +67744,7 @@ export namespace Prisma {
     assignmentDates?: AssignmentDateUpdateManyWithoutClassGroupNestedInput
     quizSubmissions?: QuizSubmissionUpdateManyWithoutClassGroupNestedInput
     weeklySchedules?: ClassGroupWeeklyScheduleUpdateManyWithoutClassGroupNestedInput
+    fileShares?: FileShareClassGroupUpdateManyWithoutClassGroupNestedInput
   }
 
   export type ClassGroupUncheckedUpdateWithoutQuizSchedulesInput = {
@@ -58180,6 +67763,7 @@ export namespace Prisma {
     assignmentDates?: AssignmentDateUncheckedUpdateManyWithoutClassGroupNestedInput
     quizSubmissions?: QuizSubmissionUncheckedUpdateManyWithoutClassGroupNestedInput
     weeklySchedules?: ClassGroupWeeklyScheduleUncheckedUpdateManyWithoutClassGroupNestedInput
+    fileShares?: FileShareClassGroupUncheckedUpdateManyWithoutClassGroupNestedInput
   }
 
   export type ClassGroupCreateWithoutWeeklySchedulesInput = {
@@ -58198,6 +67782,7 @@ export namespace Prisma {
     assignmentDates?: AssignmentDateCreateNestedManyWithoutClassGroupInput
     quizSchedules?: QuizScheduleCreateNestedManyWithoutClassGroupInput
     quizSubmissions?: QuizSubmissionCreateNestedManyWithoutClassGroupInput
+    fileShares?: FileShareClassGroupCreateNestedManyWithoutClassGroupInput
   }
 
   export type ClassGroupUncheckedCreateWithoutWeeklySchedulesInput = {
@@ -58216,6 +67801,7 @@ export namespace Prisma {
     assignmentDates?: AssignmentDateUncheckedCreateNestedManyWithoutClassGroupInput
     quizSchedules?: QuizScheduleUncheckedCreateNestedManyWithoutClassGroupInput
     quizSubmissions?: QuizSubmissionUncheckedCreateNestedManyWithoutClassGroupInput
+    fileShares?: FileShareClassGroupUncheckedCreateNestedManyWithoutClassGroupInput
   }
 
   export type ClassGroupCreateOrConnectWithoutWeeklySchedulesInput = {
@@ -58242,6 +67828,7 @@ export namespace Prisma {
     currentPeriod?: PeriodCreateNestedOneWithoutCoursesInput
     gradeBuckets?: GradeBucketCreateNestedManyWithoutCourseInput
     grades?: GradeCreateNestedManyWithoutCourseInput
+    fileShares?: FileShareCourseCreateNestedManyWithoutCourseInput
   }
 
   export type CourseUncheckedCreateWithoutWeeklySchedulesInput = {
@@ -58263,6 +67850,7 @@ export namespace Prisma {
     quizzes?: QuizUncheckedCreateNestedManyWithoutCourseInput
     gradeBuckets?: GradeBucketUncheckedCreateNestedManyWithoutCourseInput
     grades?: GradeUncheckedCreateNestedManyWithoutCourseInput
+    fileShares?: FileShareCourseUncheckedCreateNestedManyWithoutCourseInput
   }
 
   export type CourseCreateOrConnectWithoutWeeklySchedulesInput = {
@@ -58297,6 +67885,7 @@ export namespace Prisma {
     assignmentDates?: AssignmentDateUpdateManyWithoutClassGroupNestedInput
     quizSchedules?: QuizScheduleUpdateManyWithoutClassGroupNestedInput
     quizSubmissions?: QuizSubmissionUpdateManyWithoutClassGroupNestedInput
+    fileShares?: FileShareClassGroupUpdateManyWithoutClassGroupNestedInput
   }
 
   export type ClassGroupUncheckedUpdateWithoutWeeklySchedulesInput = {
@@ -58315,6 +67904,7 @@ export namespace Prisma {
     assignmentDates?: AssignmentDateUncheckedUpdateManyWithoutClassGroupNestedInput
     quizSchedules?: QuizScheduleUncheckedUpdateManyWithoutClassGroupNestedInput
     quizSubmissions?: QuizSubmissionUncheckedUpdateManyWithoutClassGroupNestedInput
+    fileShares?: FileShareClassGroupUncheckedUpdateManyWithoutClassGroupNestedInput
   }
 
   export type CourseUpsertWithoutWeeklySchedulesInput = {
@@ -58347,6 +67937,7 @@ export namespace Prisma {
     currentPeriod?: PeriodUpdateOneWithoutCoursesNestedInput
     gradeBuckets?: GradeBucketUpdateManyWithoutCourseNestedInput
     grades?: GradeUpdateManyWithoutCourseNestedInput
+    fileShares?: FileShareCourseUpdateManyWithoutCourseNestedInput
   }
 
   export type CourseUncheckedUpdateWithoutWeeklySchedulesInput = {
@@ -58368,6 +67959,7 @@ export namespace Prisma {
     quizzes?: QuizUncheckedUpdateManyWithoutCourseNestedInput
     gradeBuckets?: GradeBucketUncheckedUpdateManyWithoutCourseNestedInput
     grades?: GradeUncheckedUpdateManyWithoutCourseNestedInput
+    fileShares?: FileShareCourseUncheckedUpdateManyWithoutCourseNestedInput
   }
 
   export type QuizCreateWithoutQuizSubmissionsInput = {
@@ -58464,6 +68056,7 @@ export namespace Prisma {
     assignmentDates?: AssignmentDateCreateNestedManyWithoutClassGroupInput
     quizSchedules?: QuizScheduleCreateNestedManyWithoutClassGroupInput
     weeklySchedules?: ClassGroupWeeklyScheduleCreateNestedManyWithoutClassGroupInput
+    fileShares?: FileShareClassGroupCreateNestedManyWithoutClassGroupInput
   }
 
   export type ClassGroupUncheckedCreateWithoutQuizSubmissionsInput = {
@@ -58482,6 +68075,7 @@ export namespace Prisma {
     assignmentDates?: AssignmentDateUncheckedCreateNestedManyWithoutClassGroupInput
     quizSchedules?: QuizScheduleUncheckedCreateNestedManyWithoutClassGroupInput
     weeklySchedules?: ClassGroupWeeklyScheduleUncheckedCreateNestedManyWithoutClassGroupInput
+    fileShares?: FileShareClassGroupUncheckedCreateNestedManyWithoutClassGroupInput
   }
 
   export type ClassGroupCreateOrConnectWithoutQuizSubmissionsInput = {
@@ -58636,6 +68230,7 @@ export namespace Prisma {
     assignmentDates?: AssignmentDateUpdateManyWithoutClassGroupNestedInput
     quizSchedules?: QuizScheduleUpdateManyWithoutClassGroupNestedInput
     weeklySchedules?: ClassGroupWeeklyScheduleUpdateManyWithoutClassGroupNestedInput
+    fileShares?: FileShareClassGroupUpdateManyWithoutClassGroupNestedInput
   }
 
   export type ClassGroupUncheckedUpdateWithoutQuizSubmissionsInput = {
@@ -58654,6 +68249,7 @@ export namespace Prisma {
     assignmentDates?: AssignmentDateUncheckedUpdateManyWithoutClassGroupNestedInput
     quizSchedules?: QuizScheduleUncheckedUpdateManyWithoutClassGroupNestedInput
     weeklySchedules?: ClassGroupWeeklyScheduleUncheckedUpdateManyWithoutClassGroupNestedInput
+    fileShares?: FileShareClassGroupUncheckedUpdateManyWithoutClassGroupNestedInput
   }
 
   export type QuizSubmissionQuestionUpsertWithWhereUniqueWithoutQuizSubmissionInput = {
@@ -58894,6 +68490,7 @@ export namespace Prisma {
     currentPeriod?: PeriodCreateNestedOneWithoutCoursesInput
     grades?: GradeCreateNestedManyWithoutCourseInput
     weeklySchedules?: ClassGroupWeeklyScheduleCreateNestedManyWithoutCourseInput
+    fileShares?: FileShareCourseCreateNestedManyWithoutCourseInput
   }
 
   export type CourseUncheckedCreateWithoutGradeBucketsInput = {
@@ -58915,6 +68512,7 @@ export namespace Prisma {
     quizzes?: QuizUncheckedCreateNestedManyWithoutCourseInput
     grades?: GradeUncheckedCreateNestedManyWithoutCourseInput
     weeklySchedules?: ClassGroupWeeklyScheduleUncheckedCreateNestedManyWithoutCourseInput
+    fileShares?: FileShareCourseUncheckedCreateNestedManyWithoutCourseInput
   }
 
   export type CourseCreateOrConnectWithoutGradeBucketsInput = {
@@ -58988,6 +68586,7 @@ export namespace Prisma {
     currentPeriod?: PeriodUpdateOneWithoutCoursesNestedInput
     grades?: GradeUpdateManyWithoutCourseNestedInput
     weeklySchedules?: ClassGroupWeeklyScheduleUpdateManyWithoutCourseNestedInput
+    fileShares?: FileShareCourseUpdateManyWithoutCourseNestedInput
   }
 
   export type CourseUncheckedUpdateWithoutGradeBucketsInput = {
@@ -59009,6 +68608,7 @@ export namespace Prisma {
     quizzes?: QuizUncheckedUpdateManyWithoutCourseNestedInput
     grades?: GradeUncheckedUpdateManyWithoutCourseNestedInput
     weeklySchedules?: ClassGroupWeeklyScheduleUncheckedUpdateManyWithoutCourseNestedInput
+    fileShares?: FileShareCourseUncheckedUpdateManyWithoutCourseNestedInput
   }
 
   export type GradeUpsertWithWhereUniqueWithoutBucketInput = {
@@ -59046,6 +68646,7 @@ export namespace Prisma {
     currentPeriod?: PeriodCreateNestedOneWithoutCoursesInput
     gradeBuckets?: GradeBucketCreateNestedManyWithoutCourseInput
     weeklySchedules?: ClassGroupWeeklyScheduleCreateNestedManyWithoutCourseInput
+    fileShares?: FileShareCourseCreateNestedManyWithoutCourseInput
   }
 
   export type CourseUncheckedCreateWithoutGradesInput = {
@@ -59067,6 +68668,7 @@ export namespace Prisma {
     quizzes?: QuizUncheckedCreateNestedManyWithoutCourseInput
     gradeBuckets?: GradeBucketUncheckedCreateNestedManyWithoutCourseInput
     weeklySchedules?: ClassGroupWeeklyScheduleUncheckedCreateNestedManyWithoutCourseInput
+    fileShares?: FileShareCourseUncheckedCreateNestedManyWithoutCourseInput
   }
 
   export type CourseCreateOrConnectWithoutGradesInput = {
@@ -59188,6 +68790,7 @@ export namespace Prisma {
     currentPeriod?: PeriodUpdateOneWithoutCoursesNestedInput
     gradeBuckets?: GradeBucketUpdateManyWithoutCourseNestedInput
     weeklySchedules?: ClassGroupWeeklyScheduleUpdateManyWithoutCourseNestedInput
+    fileShares?: FileShareCourseUpdateManyWithoutCourseNestedInput
   }
 
   export type CourseUncheckedUpdateWithoutGradesInput = {
@@ -59209,6 +68812,7 @@ export namespace Prisma {
     quizzes?: QuizUncheckedUpdateManyWithoutCourseNestedInput
     gradeBuckets?: GradeBucketUncheckedUpdateManyWithoutCourseNestedInput
     weeklySchedules?: ClassGroupWeeklyScheduleUncheckedUpdateManyWithoutCourseNestedInput
+    fileShares?: FileShareCourseUncheckedUpdateManyWithoutCourseNestedInput
   }
 
   export type GradeBucketUpsertWithoutGradesInput = {
@@ -59704,6 +69308,18 @@ export namespace Prisma {
     deletedAt?: Date | string | null
   }
 
+  export type FileCreateManyOrganizationInput = {
+    id?: string
+    ownerId: string
+    name: string
+    mimeType: string
+    size: number
+    storageKey: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    deletedAt?: Date | string | null
+  }
+
   export type UserUpdateWithoutOrganizationInput = {
     id?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
@@ -59720,6 +69336,8 @@ export namespace Prisma {
     teacher?: TeacherUpdateOneWithoutUserNestedInput
     sentMessages?: MessageUpdateManyWithoutSenderNestedInput
     messageRecipients?: MessageRecipientUpdateManyWithoutUserNestedInput
+    filesOwned?: FileUpdateManyWithoutOwnerNestedInput
+    fileShares?: FileShareUserUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutOrganizationInput = {
@@ -59738,6 +69356,8 @@ export namespace Prisma {
     teacher?: TeacherUncheckedUpdateOneWithoutUserNestedInput
     sentMessages?: MessageUncheckedUpdateManyWithoutSenderNestedInput
     messageRecipients?: MessageRecipientUncheckedUpdateManyWithoutUserNestedInput
+    filesOwned?: FileUncheckedUpdateManyWithoutOwnerNestedInput
+    fileShares?: FileShareUserUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateManyWithoutOrganizationInput = {
@@ -59805,6 +69425,7 @@ export namespace Prisma {
     students?: StudentUpdateManyWithoutSchoolNestedInput
     assignments?: AssignmentUpdateManyWithoutSchoolNestedInput
     periods?: PeriodUpdateManyWithoutSchoolNestedInput
+    fileShares?: FileShareSchoolUpdateManyWithoutSchoolNestedInput
   }
 
   export type SchoolUncheckedUpdateWithoutOrganizationInput = {
@@ -59830,6 +69451,7 @@ export namespace Prisma {
     students?: StudentUncheckedUpdateManyWithoutSchoolNestedInput
     assignments?: AssignmentUncheckedUpdateManyWithoutSchoolNestedInput
     periods?: PeriodUncheckedUpdateManyWithoutSchoolNestedInput
+    fileShares?: FileShareSchoolUncheckedUpdateManyWithoutSchoolNestedInput
   }
 
   export type SchoolUncheckedUpdateManyWithoutOrganizationInput = {
@@ -59897,6 +69519,7 @@ export namespace Prisma {
     quizSchedules?: QuizScheduleUpdateManyWithoutClassGroupNestedInput
     quizSubmissions?: QuizSubmissionUpdateManyWithoutClassGroupNestedInput
     weeklySchedules?: ClassGroupWeeklyScheduleUpdateManyWithoutClassGroupNestedInput
+    fileShares?: FileShareClassGroupUpdateManyWithoutClassGroupNestedInput
   }
 
   export type ClassGroupUncheckedUpdateWithoutOrganizationInput = {
@@ -59915,6 +69538,7 @@ export namespace Prisma {
     quizSchedules?: QuizScheduleUncheckedUpdateManyWithoutClassGroupNestedInput
     quizSubmissions?: QuizSubmissionUncheckedUpdateManyWithoutClassGroupNestedInput
     weeklySchedules?: ClassGroupWeeklyScheduleUncheckedUpdateManyWithoutClassGroupNestedInput
+    fileShares?: FileShareClassGroupUncheckedUpdateManyWithoutClassGroupNestedInput
   }
 
   export type ClassGroupUncheckedUpdateManyWithoutOrganizationInput = {
@@ -59948,6 +69572,7 @@ export namespace Prisma {
     gradeBuckets?: GradeBucketUpdateManyWithoutCourseNestedInput
     grades?: GradeUpdateManyWithoutCourseNestedInput
     weeklySchedules?: ClassGroupWeeklyScheduleUpdateManyWithoutCourseNestedInput
+    fileShares?: FileShareCourseUpdateManyWithoutCourseNestedInput
   }
 
   export type CourseUncheckedUpdateWithoutOrganizationInput = {
@@ -59969,6 +69594,7 @@ export namespace Prisma {
     gradeBuckets?: GradeBucketUncheckedUpdateManyWithoutCourseNestedInput
     grades?: GradeUncheckedUpdateManyWithoutCourseNestedInput
     weeklySchedules?: ClassGroupWeeklyScheduleUncheckedUpdateManyWithoutCourseNestedInput
+    fileShares?: FileShareCourseUncheckedUpdateManyWithoutCourseNestedInput
   }
 
   export type CourseUncheckedUpdateManyWithoutOrganizationInput = {
@@ -60183,6 +69809,50 @@ export namespace Prisma {
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
+  export type FileUpdateWithoutOrganizationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    mimeType?: StringFieldUpdateOperationsInput | string
+    size?: IntFieldUpdateOperationsInput | number
+    storageKey?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    owner?: UserUpdateOneRequiredWithoutFilesOwnedNestedInput
+    sharesUsers?: FileShareUserUpdateManyWithoutFileNestedInput
+    sharesSchools?: FileShareSchoolUpdateManyWithoutFileNestedInput
+    sharesClassGroups?: FileShareClassGroupUpdateManyWithoutFileNestedInput
+    sharesCourses?: FileShareCourseUpdateManyWithoutFileNestedInput
+  }
+
+  export type FileUncheckedUpdateWithoutOrganizationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    ownerId?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    mimeType?: StringFieldUpdateOperationsInput | string
+    size?: IntFieldUpdateOperationsInput | number
+    storageKey?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    sharesUsers?: FileShareUserUncheckedUpdateManyWithoutFileNestedInput
+    sharesSchools?: FileShareSchoolUncheckedUpdateManyWithoutFileNestedInput
+    sharesClassGroups?: FileShareClassGroupUncheckedUpdateManyWithoutFileNestedInput
+    sharesCourses?: FileShareCourseUncheckedUpdateManyWithoutFileNestedInput
+  }
+
+  export type FileUncheckedUpdateManyWithoutOrganizationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    ownerId?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    mimeType?: StringFieldUpdateOperationsInput | string
+    size?: IntFieldUpdateOperationsInput | number
+    storageKey?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
   export type MessageCreateManySenderInput = {
     id?: string
     subject: string
@@ -60200,6 +69870,26 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     deletedAt?: Date | string | null
+  }
+
+  export type FileCreateManyOwnerInput = {
+    id?: string
+    organizationId: string
+    name: string
+    mimeType: string
+    size: number
+    storageKey: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    deletedAt?: Date | string | null
+  }
+
+  export type FileShareUserCreateManyUserInput = {
+    id?: string
+    fileId: string
+    permission: $Enums.FilePermission
+    createdAt?: Date | string
+    updatedAt?: Date | string
   }
 
   export type MessageUpdateWithoutSenderInput = {
@@ -60261,6 +69951,74 @@ export namespace Prisma {
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
+  export type FileUpdateWithoutOwnerInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    mimeType?: StringFieldUpdateOperationsInput | string
+    size?: IntFieldUpdateOperationsInput | number
+    storageKey?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    organization?: OrganizationUpdateOneRequiredWithoutFilesNestedInput
+    sharesUsers?: FileShareUserUpdateManyWithoutFileNestedInput
+    sharesSchools?: FileShareSchoolUpdateManyWithoutFileNestedInput
+    sharesClassGroups?: FileShareClassGroupUpdateManyWithoutFileNestedInput
+    sharesCourses?: FileShareCourseUpdateManyWithoutFileNestedInput
+  }
+
+  export type FileUncheckedUpdateWithoutOwnerInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    organizationId?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    mimeType?: StringFieldUpdateOperationsInput | string
+    size?: IntFieldUpdateOperationsInput | number
+    storageKey?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    sharesUsers?: FileShareUserUncheckedUpdateManyWithoutFileNestedInput
+    sharesSchools?: FileShareSchoolUncheckedUpdateManyWithoutFileNestedInput
+    sharesClassGroups?: FileShareClassGroupUncheckedUpdateManyWithoutFileNestedInput
+    sharesCourses?: FileShareCourseUncheckedUpdateManyWithoutFileNestedInput
+  }
+
+  export type FileUncheckedUpdateManyWithoutOwnerInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    organizationId?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    mimeType?: StringFieldUpdateOperationsInput | string
+    size?: IntFieldUpdateOperationsInput | number
+    storageKey?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type FileShareUserUpdateWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    permission?: EnumFilePermissionFieldUpdateOperationsInput | $Enums.FilePermission
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    file?: FileUpdateOneRequiredWithoutSharesUsersNestedInput
+  }
+
+  export type FileShareUserUncheckedUpdateWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    fileId?: StringFieldUpdateOperationsInput | string
+    permission?: EnumFilePermissionFieldUpdateOperationsInput | $Enums.FilePermission
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type FileShareUserUncheckedUpdateManyWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    fileId?: StringFieldUpdateOperationsInput | string
+    permission?: EnumFilePermissionFieldUpdateOperationsInput | $Enums.FilePermission
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type MessageRecipientCreateManyMessageInput = {
     id?: string
     userId: string
@@ -60297,6 +70055,134 @@ export namespace Prisma {
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
+  export type FileShareUserCreateManyFileInput = {
+    id?: string
+    userId: string
+    permission: $Enums.FilePermission
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type FileShareSchoolCreateManyFileInput = {
+    id?: string
+    schoolId: string
+    permission: $Enums.FilePermission
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type FileShareClassGroupCreateManyFileInput = {
+    id?: string
+    classGroupId: string
+    permission: $Enums.FilePermission
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type FileShareCourseCreateManyFileInput = {
+    id?: string
+    courseId: string
+    permission: $Enums.FilePermission
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type FileShareUserUpdateWithoutFileInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    permission?: EnumFilePermissionFieldUpdateOperationsInput | $Enums.FilePermission
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    user?: UserUpdateOneRequiredWithoutFileSharesNestedInput
+  }
+
+  export type FileShareUserUncheckedUpdateWithoutFileInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    permission?: EnumFilePermissionFieldUpdateOperationsInput | $Enums.FilePermission
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type FileShareUserUncheckedUpdateManyWithoutFileInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    permission?: EnumFilePermissionFieldUpdateOperationsInput | $Enums.FilePermission
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type FileShareSchoolUpdateWithoutFileInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    permission?: EnumFilePermissionFieldUpdateOperationsInput | $Enums.FilePermission
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    school?: SchoolUpdateOneRequiredWithoutFileSharesNestedInput
+  }
+
+  export type FileShareSchoolUncheckedUpdateWithoutFileInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    schoolId?: StringFieldUpdateOperationsInput | string
+    permission?: EnumFilePermissionFieldUpdateOperationsInput | $Enums.FilePermission
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type FileShareSchoolUncheckedUpdateManyWithoutFileInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    schoolId?: StringFieldUpdateOperationsInput | string
+    permission?: EnumFilePermissionFieldUpdateOperationsInput | $Enums.FilePermission
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type FileShareClassGroupUpdateWithoutFileInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    permission?: EnumFilePermissionFieldUpdateOperationsInput | $Enums.FilePermission
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    classGroup?: ClassGroupUpdateOneRequiredWithoutFileSharesNestedInput
+  }
+
+  export type FileShareClassGroupUncheckedUpdateWithoutFileInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    classGroupId?: StringFieldUpdateOperationsInput | string
+    permission?: EnumFilePermissionFieldUpdateOperationsInput | $Enums.FilePermission
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type FileShareClassGroupUncheckedUpdateManyWithoutFileInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    classGroupId?: StringFieldUpdateOperationsInput | string
+    permission?: EnumFilePermissionFieldUpdateOperationsInput | $Enums.FilePermission
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type FileShareCourseUpdateWithoutFileInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    permission?: EnumFilePermissionFieldUpdateOperationsInput | $Enums.FilePermission
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    course?: CourseUpdateOneRequiredWithoutFileSharesNestedInput
+  }
+
+  export type FileShareCourseUncheckedUpdateWithoutFileInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    courseId?: StringFieldUpdateOperationsInput | string
+    permission?: EnumFilePermissionFieldUpdateOperationsInput | $Enums.FilePermission
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type FileShareCourseUncheckedUpdateManyWithoutFileInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    courseId?: StringFieldUpdateOperationsInput | string
+    permission?: EnumFilePermissionFieldUpdateOperationsInput | $Enums.FilePermission
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type UserCreateManyRoleInput = {
     id?: string
     email: string
@@ -60327,6 +70213,8 @@ export namespace Prisma {
     teacher?: TeacherUpdateOneWithoutUserNestedInput
     sentMessages?: MessageUpdateManyWithoutSenderNestedInput
     messageRecipients?: MessageRecipientUpdateManyWithoutUserNestedInput
+    filesOwned?: FileUpdateManyWithoutOwnerNestedInput
+    fileShares?: FileShareUserUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutRoleInput = {
@@ -60345,6 +70233,8 @@ export namespace Prisma {
     teacher?: TeacherUncheckedUpdateOneWithoutUserNestedInput
     sentMessages?: MessageUncheckedUpdateManyWithoutSenderNestedInput
     messageRecipients?: MessageRecipientUncheckedUpdateManyWithoutUserNestedInput
+    filesOwned?: FileUncheckedUpdateManyWithoutOwnerNestedInput
+    fileShares?: FileShareUserUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateManyWithoutRoleInput = {
@@ -60503,6 +70393,14 @@ export namespace Prisma {
     updatedAt?: Date | string
   }
 
+  export type FileShareSchoolCreateManySchoolInput = {
+    id?: string
+    fileId: string
+    permission: $Enums.FilePermission
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
   export type StudyPlanUpdateWithoutSchoolInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
@@ -60591,6 +70489,7 @@ export namespace Prisma {
     gradeBuckets?: GradeBucketUpdateManyWithoutCourseNestedInput
     grades?: GradeUpdateManyWithoutCourseNestedInput
     weeklySchedules?: ClassGroupWeeklyScheduleUpdateManyWithoutCourseNestedInput
+    fileShares?: FileShareCourseUpdateManyWithoutCourseNestedInput
   }
 
   export type CourseUncheckedUpdateWithoutSchoolInput = {
@@ -60612,6 +70511,7 @@ export namespace Prisma {
     gradeBuckets?: GradeBucketUncheckedUpdateManyWithoutCourseNestedInput
     grades?: GradeUncheckedUpdateManyWithoutCourseNestedInput
     weeklySchedules?: ClassGroupWeeklyScheduleUncheckedUpdateManyWithoutCourseNestedInput
+    fileShares?: FileShareCourseUncheckedUpdateManyWithoutCourseNestedInput
   }
 
   export type CourseUncheckedUpdateManyWithoutSchoolInput = {
@@ -60644,6 +70544,7 @@ export namespace Prisma {
     quizSchedules?: QuizScheduleUpdateManyWithoutClassGroupNestedInput
     quizSubmissions?: QuizSubmissionUpdateManyWithoutClassGroupNestedInput
     weeklySchedules?: ClassGroupWeeklyScheduleUpdateManyWithoutClassGroupNestedInput
+    fileShares?: FileShareClassGroupUpdateManyWithoutClassGroupNestedInput
   }
 
   export type ClassGroupUncheckedUpdateWithoutSchoolInput = {
@@ -60662,6 +70563,7 @@ export namespace Prisma {
     quizSchedules?: QuizScheduleUncheckedUpdateManyWithoutClassGroupNestedInput
     quizSubmissions?: QuizSubmissionUncheckedUpdateManyWithoutClassGroupNestedInput
     weeklySchedules?: ClassGroupWeeklyScheduleUncheckedUpdateManyWithoutClassGroupNestedInput
+    fileShares?: FileShareClassGroupUncheckedUpdateManyWithoutClassGroupNestedInput
   }
 
   export type ClassGroupUncheckedUpdateManyWithoutSchoolInput = {
@@ -60814,6 +70716,30 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type FileShareSchoolUpdateWithoutSchoolInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    permission?: EnumFilePermissionFieldUpdateOperationsInput | $Enums.FilePermission
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    file?: FileUpdateOneRequiredWithoutSharesSchoolsNestedInput
+  }
+
+  export type FileShareSchoolUncheckedUpdateWithoutSchoolInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    fileId?: StringFieldUpdateOperationsInput | string
+    permission?: EnumFilePermissionFieldUpdateOperationsInput | $Enums.FilePermission
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type FileShareSchoolUncheckedUpdateManyWithoutSchoolInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    fileId?: StringFieldUpdateOperationsInput | string
+    permission?: EnumFilePermissionFieldUpdateOperationsInput | $Enums.FilePermission
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type CourseCreateManyCurrentPeriodInput = {
     id?: string
     name: string
@@ -60859,6 +70785,7 @@ export namespace Prisma {
     gradeBuckets?: GradeBucketUpdateManyWithoutCourseNestedInput
     grades?: GradeUpdateManyWithoutCourseNestedInput
     weeklySchedules?: ClassGroupWeeklyScheduleUpdateManyWithoutCourseNestedInput
+    fileShares?: FileShareCourseUpdateManyWithoutCourseNestedInput
   }
 
   export type CourseUncheckedUpdateWithoutCurrentPeriodInput = {
@@ -60880,6 +70807,7 @@ export namespace Prisma {
     gradeBuckets?: GradeBucketUncheckedUpdateManyWithoutCourseNestedInput
     grades?: GradeUncheckedUpdateManyWithoutCourseNestedInput
     weeklySchedules?: ClassGroupWeeklyScheduleUncheckedUpdateManyWithoutCourseNestedInput
+    fileShares?: FileShareCourseUncheckedUpdateManyWithoutCourseNestedInput
   }
 
   export type CourseUncheckedUpdateManyWithoutCurrentPeriodInput = {
@@ -60967,6 +70895,7 @@ export namespace Prisma {
     gradeBuckets?: GradeBucketUpdateManyWithoutCourseNestedInput
     grades?: GradeUpdateManyWithoutCourseNestedInput
     weeklySchedules?: ClassGroupWeeklyScheduleUpdateManyWithoutCourseNestedInput
+    fileShares?: FileShareCourseUpdateManyWithoutCourseNestedInput
   }
 
   export type CourseUncheckedUpdateWithoutSubjectInput = {
@@ -60988,6 +70917,7 @@ export namespace Prisma {
     gradeBuckets?: GradeBucketUncheckedUpdateManyWithoutCourseNestedInput
     grades?: GradeUncheckedUpdateManyWithoutCourseNestedInput
     weeklySchedules?: ClassGroupWeeklyScheduleUncheckedUpdateManyWithoutCourseNestedInput
+    fileShares?: FileShareCourseUncheckedUpdateManyWithoutCourseNestedInput
   }
 
   export type CourseUncheckedUpdateManyWithoutSubjectInput = {
@@ -61176,6 +71106,7 @@ export namespace Prisma {
     gradeBuckets?: GradeBucketUpdateManyWithoutCourseNestedInput
     grades?: GradeUpdateManyWithoutCourseNestedInput
     weeklySchedules?: ClassGroupWeeklyScheduleUpdateManyWithoutCourseNestedInput
+    fileShares?: FileShareCourseUpdateManyWithoutCourseNestedInput
   }
 
   export type CourseUncheckedUpdateWithoutStudyPlanInput = {
@@ -61197,6 +71128,7 @@ export namespace Prisma {
     gradeBuckets?: GradeBucketUncheckedUpdateManyWithoutCourseNestedInput
     grades?: GradeUncheckedUpdateManyWithoutCourseNestedInput
     weeklySchedules?: ClassGroupWeeklyScheduleUncheckedUpdateManyWithoutCourseNestedInput
+    fileShares?: FileShareCourseUncheckedUpdateManyWithoutCourseNestedInput
   }
 
   export type CourseUncheckedUpdateManyWithoutStudyPlanInput = {
@@ -61229,6 +71161,7 @@ export namespace Prisma {
     quizSchedules?: QuizScheduleUpdateManyWithoutClassGroupNestedInput
     quizSubmissions?: QuizSubmissionUpdateManyWithoutClassGroupNestedInput
     weeklySchedules?: ClassGroupWeeklyScheduleUpdateManyWithoutClassGroupNestedInput
+    fileShares?: FileShareClassGroupUpdateManyWithoutClassGroupNestedInput
   }
 
   export type ClassGroupUncheckedUpdateWithoutStudyPlanInput = {
@@ -61247,6 +71180,7 @@ export namespace Prisma {
     quizSchedules?: QuizScheduleUncheckedUpdateManyWithoutClassGroupNestedInput
     quizSubmissions?: QuizSubmissionUncheckedUpdateManyWithoutClassGroupNestedInput
     weeklySchedules?: ClassGroupWeeklyScheduleUncheckedUpdateManyWithoutClassGroupNestedInput
+    fileShares?: FileShareClassGroupUncheckedUpdateManyWithoutClassGroupNestedInput
   }
 
   export type ClassGroupUncheckedUpdateManyWithoutStudyPlanInput = {
@@ -61318,6 +71252,14 @@ export namespace Prisma {
     updatedAt?: Date | string
   }
 
+  export type FileShareCourseCreateManyCourseInput = {
+    id?: string
+    fileId: string
+    permission: $Enums.FilePermission
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
   export type ClassGroupUpdateWithoutCoursesInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
@@ -61334,6 +71276,7 @@ export namespace Prisma {
     quizSchedules?: QuizScheduleUpdateManyWithoutClassGroupNestedInput
     quizSubmissions?: QuizSubmissionUpdateManyWithoutClassGroupNestedInput
     weeklySchedules?: ClassGroupWeeklyScheduleUpdateManyWithoutClassGroupNestedInput
+    fileShares?: FileShareClassGroupUpdateManyWithoutClassGroupNestedInput
   }
 
   export type ClassGroupUncheckedUpdateWithoutCoursesInput = {
@@ -61352,6 +71295,7 @@ export namespace Prisma {
     quizSchedules?: QuizScheduleUncheckedUpdateManyWithoutClassGroupNestedInput
     quizSubmissions?: QuizSubmissionUncheckedUpdateManyWithoutClassGroupNestedInput
     weeklySchedules?: ClassGroupWeeklyScheduleUncheckedUpdateManyWithoutClassGroupNestedInput
+    fileShares?: FileShareClassGroupUncheckedUpdateManyWithoutClassGroupNestedInput
   }
 
   export type ClassGroupUncheckedUpdateManyWithoutCoursesInput = {
@@ -61611,6 +71555,30 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type FileShareCourseUpdateWithoutCourseInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    permission?: EnumFilePermissionFieldUpdateOperationsInput | $Enums.FilePermission
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    file?: FileUpdateOneRequiredWithoutSharesCoursesNestedInput
+  }
+
+  export type FileShareCourseUncheckedUpdateWithoutCourseInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    fileId?: StringFieldUpdateOperationsInput | string
+    permission?: EnumFilePermissionFieldUpdateOperationsInput | $Enums.FilePermission
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type FileShareCourseUncheckedUpdateManyWithoutCourseInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    fileId?: StringFieldUpdateOperationsInput | string
+    permission?: EnumFilePermissionFieldUpdateOperationsInput | $Enums.FilePermission
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type StudentCreateManyClassGroupInput = {
     id?: string
     firstName: string
@@ -61668,6 +71636,14 @@ export namespace Prisma {
     updatedAt?: Date | string
   }
 
+  export type FileShareClassGroupCreateManyClassGroupInput = {
+    id?: string
+    fileId: string
+    permission: $Enums.FilePermission
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
   export type CourseUpdateWithoutGroupsInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
@@ -61687,6 +71663,7 @@ export namespace Prisma {
     gradeBuckets?: GradeBucketUpdateManyWithoutCourseNestedInput
     grades?: GradeUpdateManyWithoutCourseNestedInput
     weeklySchedules?: ClassGroupWeeklyScheduleUpdateManyWithoutCourseNestedInput
+    fileShares?: FileShareCourseUpdateManyWithoutCourseNestedInput
   }
 
   export type CourseUncheckedUpdateWithoutGroupsInput = {
@@ -61708,6 +71685,7 @@ export namespace Prisma {
     gradeBuckets?: GradeBucketUncheckedUpdateManyWithoutCourseNestedInput
     grades?: GradeUncheckedUpdateManyWithoutCourseNestedInput
     weeklySchedules?: ClassGroupWeeklyScheduleUncheckedUpdateManyWithoutCourseNestedInput
+    fileShares?: FileShareCourseUncheckedUpdateManyWithoutCourseNestedInput
   }
 
   export type CourseUncheckedUpdateManyWithoutGroupsInput = {
@@ -61904,6 +71882,30 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type FileShareClassGroupUpdateWithoutClassGroupInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    permission?: EnumFilePermissionFieldUpdateOperationsInput | $Enums.FilePermission
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    file?: FileUpdateOneRequiredWithoutSharesClassGroupsNestedInput
+  }
+
+  export type FileShareClassGroupUncheckedUpdateWithoutClassGroupInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    fileId?: StringFieldUpdateOperationsInput | string
+    permission?: EnumFilePermissionFieldUpdateOperationsInput | $Enums.FilePermission
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type FileShareClassGroupUncheckedUpdateManyWithoutClassGroupInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    fileId?: StringFieldUpdateOperationsInput | string
+    permission?: EnumFilePermissionFieldUpdateOperationsInput | $Enums.FilePermission
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type QuizSubmissionCreateManyStudentInput = {
     id?: string
     quizId: string
@@ -61941,6 +71943,7 @@ export namespace Prisma {
     gradeBuckets?: GradeBucketUpdateManyWithoutCourseNestedInput
     grades?: GradeUpdateManyWithoutCourseNestedInput
     weeklySchedules?: ClassGroupWeeklyScheduleUpdateManyWithoutCourseNestedInput
+    fileShares?: FileShareCourseUpdateManyWithoutCourseNestedInput
   }
 
   export type CourseUncheckedUpdateWithoutStudentsInput = {
@@ -61962,6 +71965,7 @@ export namespace Prisma {
     gradeBuckets?: GradeBucketUncheckedUpdateManyWithoutCourseNestedInput
     grades?: GradeUncheckedUpdateManyWithoutCourseNestedInput
     weeklySchedules?: ClassGroupWeeklyScheduleUncheckedUpdateManyWithoutCourseNestedInput
+    fileShares?: FileShareCourseUncheckedUpdateManyWithoutCourseNestedInput
   }
 
   export type CourseUncheckedUpdateManyWithoutStudentsInput = {
@@ -62134,6 +72138,7 @@ export namespace Prisma {
     quizSchedules?: QuizScheduleUpdateManyWithoutClassGroupNestedInput
     quizSubmissions?: QuizSubmissionUpdateManyWithoutClassGroupNestedInput
     weeklySchedules?: ClassGroupWeeklyScheduleUpdateManyWithoutClassGroupNestedInput
+    fileShares?: FileShareClassGroupUpdateManyWithoutClassGroupNestedInput
   }
 
   export type ClassGroupUncheckedUpdateWithoutTeacherInput = {
@@ -62152,6 +72157,7 @@ export namespace Prisma {
     quizSchedules?: QuizScheduleUncheckedUpdateManyWithoutClassGroupNestedInput
     quizSubmissions?: QuizSubmissionUncheckedUpdateManyWithoutClassGroupNestedInput
     weeklySchedules?: ClassGroupWeeklyScheduleUncheckedUpdateManyWithoutClassGroupNestedInput
+    fileShares?: FileShareClassGroupUncheckedUpdateManyWithoutClassGroupNestedInput
   }
 
   export type ClassGroupUncheckedUpdateManyWithoutTeacherInput = {
@@ -62185,6 +72191,7 @@ export namespace Prisma {
     gradeBuckets?: GradeBucketUpdateManyWithoutCourseNestedInput
     grades?: GradeUpdateManyWithoutCourseNestedInput
     weeklySchedules?: ClassGroupWeeklyScheduleUpdateManyWithoutCourseNestedInput
+    fileShares?: FileShareCourseUpdateManyWithoutCourseNestedInput
   }
 
   export type CourseUncheckedUpdateWithoutTeacherInput = {
@@ -62206,6 +72213,7 @@ export namespace Prisma {
     gradeBuckets?: GradeBucketUncheckedUpdateManyWithoutCourseNestedInput
     grades?: GradeUncheckedUpdateManyWithoutCourseNestedInput
     weeklySchedules?: ClassGroupWeeklyScheduleUncheckedUpdateManyWithoutCourseNestedInput
+    fileShares?: FileShareCourseUncheckedUpdateManyWithoutCourseNestedInput
   }
 
   export type CourseUncheckedUpdateManyWithoutTeacherInput = {

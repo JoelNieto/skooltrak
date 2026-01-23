@@ -30,6 +30,7 @@ model Organization {
   Student     Student[]
   quizzes     Quiz[]
   messages    Message[]
+  files       File[]
 }
 
 model User {
@@ -51,6 +52,8 @@ model User {
   teacher           Teacher?
   sentMessages      Message[]
   messageRecipients MessageRecipient[]
+  filesOwned        File[]
+  fileShares        FileShareUser[]
 }
 
 model Message {
@@ -81,6 +84,84 @@ model MessageRecipient {
   @@unique([messageId, userId])
 }
 
+model File {
+  id                String                @id @default(cuid())
+  organizationId    String
+  organization      Organization          @relation(fields: [organizationId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  ownerId           String
+  owner             User                  @relation(fields: [ownerId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  name              String
+  mimeType          String
+  size              Int
+  storageKey        String
+  sharesUsers       FileShareUser[]
+  sharesSchools     FileShareSchool[]
+  sharesClassGroups FileShareClassGroup[]
+  sharesCourses     FileShareCourse[]
+  createdAt         DateTime              @default(now())
+  updatedAt         DateTime              @updatedAt
+  deletedAt         DateTime?
+
+  @@index([organizationId])
+  @@index([ownerId])
+}
+
+model FileShareUser {
+  id         String         @id @default(cuid())
+  fileId     String
+  file       File           @relation(fields: [fileId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  userId     String
+  user       User           @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  permission FilePermission
+  createdAt  DateTime       @default(now())
+  updatedAt  DateTime       @updatedAt
+
+  @@unique([fileId, userId])
+  @@index([userId])
+}
+
+model FileShareSchool {
+  id         String         @id @default(cuid())
+  fileId     String
+  file       File           @relation(fields: [fileId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  schoolId   String
+  school     School         @relation(fields: [schoolId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  permission FilePermission
+  createdAt  DateTime       @default(now())
+  updatedAt  DateTime       @updatedAt
+
+  @@unique([fileId, schoolId])
+  @@index([schoolId])
+}
+
+model FileShareClassGroup {
+  id           String         @id @default(cuid())
+  fileId       String
+  file         File           @relation(fields: [fileId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  classGroupId String
+  classGroup   ClassGroup     @relation(fields: [classGroupId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  permission   FilePermission
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  @@unique([fileId, classGroupId])
+  @@index([classGroupId])
+}
+
+model FileShareCourse {
+  id         String         @id @default(cuid())
+  fileId     String
+  file       File           @relation(fields: [fileId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  courseId   String
+  course     Course         @relation(fields: [courseId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  permission FilePermission
+  createdAt  DateTime       @default(now())
+  updatedAt  DateTime       @updatedAt
+
+  @@unique([fileId, courseId])
+  @@index([courseId])
+}
+
 model Role {
   id             String        @id @default(cuid())
   name           String
@@ -105,8 +186,8 @@ model Permission {
 }
 
 model School {
-  id             String       @id @default(cuid())
-  organization   Organization @relation(fields: [organizationId], references: [id])
+  id             String            @id @default(cuid())
+  organization   Organization      @relation(fields: [organizationId], references: [id])
   organizationId String
   name           String
   shortName      String
@@ -119,16 +200,17 @@ model School {
   email          String
   phone          String
   website        String
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
   studyPlans     StudyPlan[]
   degrees        Degree[]
   courses        Course[]
   classGroups    ClassGroup[]
   students       Student[]
   assignments    Assignment[]
-  currentYear    Int          @default(2025)
+  currentYear    Int               @default(2025)
   periods        Period[]
+  fileShares     FileShareSchool[]
 }
 
 model Period {
@@ -220,6 +302,7 @@ model Course {
   gradeBuckets    GradeBucket[]
   grades          Grade[]
   weeklySchedules ClassGroupWeeklySchedule[]
+  fileShares      FileShareCourse[]
 
   @@unique([schoolId, name])
   @@unique([schoolId, code])
@@ -245,6 +328,7 @@ model ClassGroup {
   quizSchedules   QuizSchedule[]
   quizSubmissions QuizSubmission[]
   weeklySchedules ClassGroupWeeklySchedule[]
+  fileShares      FileShareClassGroup[]
   createdAt       DateTime                   @default(now())
   updatedAt       DateTime                   @updatedAt
 }
@@ -520,4 +604,9 @@ enum WeekDay {
   FRIDAY
   SATURDAY
   SUNDAY
+}
+
+enum FilePermission {
+  VIEW
+  EDIT
 }

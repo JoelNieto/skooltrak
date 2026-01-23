@@ -1,3 +1,7 @@
+---
+alwaysApply: true
+---
+
 ## Modern Angular Guidelines
 
 Use current Angular patterns (v16+).
@@ -14,3 +18,4 @@ Use current Angular patterns (v16+).
 - Prefer `OnPush` change detection; use `signal`/`computed` to minimize manual `markForCheck`.
 - Use `DestroyRef` or `takeUntilDestroyed` for cleanup in RxJS streams.
 - Avoid `NgModule` unless required for legacy or third-party integrations.
+- Prefer `afterRenderEffect` over `ngOnInit` for component initialization

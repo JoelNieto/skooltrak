@@ -1,3 +1,4 @@
+import { TransformDateToNoon } from '@/shared';
 import { Prisma } from '@generated/prisma';
 import { Field, InputType } from '@nestjs/graphql';
 @InputType()
@@ -12,8 +13,9 @@ export class CreateGradeInput implements Prisma.GradeUncheckedCreateInput {
   bucketId: string;
   @Field(() => String, { description: 'Id del periodo' })
   periodId: string;
+  @TransformDateToNoon()
   @Field(() => Date, { description: 'Fecha de la calificacion' })
-  date: string | Date;
+  date: Date;
   @Field(() => Boolean, { description: '¿Publicada?', defaultValue: false })
   published?: boolean;
 }

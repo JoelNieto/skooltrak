@@ -1,3 +1,4 @@
+import { TransformDateToNoon } from '@/shared';
 import { Field, InputType } from '@nestjs/graphql';
 
 import { $Enums, Prisma } from '@generated/prisma';
@@ -30,6 +31,7 @@ export class CreateTeacherInput implements CreateTeacherInputType {
   documentId: string;
   @Field(() => String, { description: 'Organization ID of the teacher' })
   organizationId: string;
+  @TransformDateToNoon()
   @Field(() => Date, {
     description: 'Birth date of the teacher',
     nullable: true,

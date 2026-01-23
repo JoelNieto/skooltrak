@@ -1,3 +1,4 @@
+import { TransformDateToNoon } from '@/shared';
 import { $Enums, Prisma } from '@generated/prisma';
 import { Field, InputType } from '@nestjs/graphql';
 type CreateStudentInputType = Omit<
@@ -24,8 +25,9 @@ export class CreateStudentInput implements CreateStudentInputType {
   schoolId: string;
   @Field(() => String, { description: 'Class group ID of the student' })
   classGroupId: string;
+  @TransformDateToNoon()
   @Field(() => Date, { description: 'Birth date of the student' })
-  birthDate: string | Date;
+  birthDate: Date;
   @Field(() => String, { description: 'Gender of the student' })
   gender: $Enums.Gender;
   @Field(() => String, { description: 'Address of the student' })

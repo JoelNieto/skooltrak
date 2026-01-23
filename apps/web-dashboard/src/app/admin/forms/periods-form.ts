@@ -151,14 +151,16 @@ export default class PeriodsForm {
       .mutate({
         mutation: gql`
           mutation UpdatePeriod($updatePeriodInput: UpdatePeriodInput!) {
-            updatePeriod(input: $updatePeriodInput) {
+            updatePeriod(updatePeriodInput: $updatePeriodInput) {
               id
             }
           }
         `,
         variables: {
-          id: this.data()?.period?.id,
-          updatePeriodInput: this.form.getRawValue(),
+          updatePeriodInput: {
+            ...this.form.getRawValue(),
+            id: this.data()?.period?.id,
+          },
         },
       })
       .subscribe({

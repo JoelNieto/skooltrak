@@ -1,11 +1,5 @@
 import { debounceSignal, Loader, Pagination, Paginator } from '@/ui';
-import {
-  ChangeDetectionStrategy,
-  Component,
-  inject,
-  Signal,
-  signal,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, Signal, signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
@@ -40,12 +34,7 @@ type CourseType = Prisma.CourseGetPayload<{
     <h1 class="text-2xl font-semibold mb-2">Cursos</h1>
     <label class="input input-primary input-lg">
       <span class="material-symbols-outlined">search</span>
-      <input
-        class="pl-0"
-        type="search"
-        placeholder="Buscar..."
-        [(ngModel)]="searchText"
-      />
+      <input class="pl-0" type="search" placeholder="Buscar..." [(ngModel)]="searchText" />
     </label>
     @if(coursesResource.isLoading()) {
     <lib-loader />
@@ -56,28 +45,20 @@ type CourseType = Prisma.CourseGetPayload<{
       @for(course of coursesResource.value(); track course.id) {
       <div class="card bg-base-100 card-border border-base-300">
         <figure>
-          <img
-            src="course-default.jpg"
-            alt="Course"
-            class="h-36 object-cover w-full"
-          />
+          <img src="course-default.jpg" alt="Course" class="h-36 object-cover w-full" />
         </figure>
         <div class="card-body">
-          <h2
-            class="card-title block whitespace-nowrap text-ellipsis overflow-hidden "
-          >
+          <h2 class="card-title block whitespace-nowrap text-ellipsis overflow-hidden ">
             {{ course.subject.name }}
           </h2>
           <p class="text-base-200">{{ course.studyPlan.name }}</p>
           <div class="card-actions justify-end">
-            <a class="btn btn-neutral" [routerLink]="['/courses', course.id]">
-              Ver curso
-            </a>
+            <a class="btn btn-neutral" [routerLink]="['/courses', course.id]"> Ver curso </a>
           </div>
         </div>
       </div>
       } @empty {
-      <p class="text-center text-base-200">
+      <p class="text-center text-base-200 col-span-full">
         No se encontraron cursos para la busqueda
         <strong class="text-primary">"{{ searchText() }}"</strong>
       </p>
@@ -122,19 +103,9 @@ export default class Courses {
           courses: CourseType[];
         }>({
           query: gql`
-            query getCourses(
-              $schoolId: String!
-              $take: Int!
-              $skip: Int!
-              $search: String
-            ) {
+            query getCourses($schoolId: String!, $take: Int!, $skip: Int!, $search: String) {
               count: coursesCount(schoolId: $schoolId, search: $search)
-              courses(
-                schoolId: $schoolId
-                take: $take
-                skip: $skip
-                search: $search
-              ) {
+              courses(schoolId: $schoolId, take: $take, skip: $skip, search: $search) {
                 id
                 name
                 shortName
@@ -173,7 +144,7 @@ export default class Courses {
           tap((result) => {
             this.pagination.updateCount(result.data.count);
           }),
-          map((result) => result.data.courses)
+          map((result) => result.data.courses),
         );
     },
   });

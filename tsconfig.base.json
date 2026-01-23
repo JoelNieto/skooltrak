@@ -27,6 +27,9 @@
       ],
       "@generated/prisma": [
         "generated/prisma"
+      ],
+      "@/shared": [
+        "libs/shared/src/index.ts"
       ]
     }
   },

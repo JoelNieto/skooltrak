@@ -16,7 +16,7 @@ type Teacher = Prisma.TeacherGetPayload<{ include: { user: true } }> & {
 type CourseType = Prisma.CourseGetPayload<{
   include: { subject: true; studyPlan: true; currentPeriod: true };
 }> & {
-  teacher: Teacher;
+  teacher: Teacher | null;
 };
 
 @Component({
@@ -45,22 +45,36 @@ type CourseType = Prisma.CourseGetPayload<{
     @if (coursesResource.hasValue()) {
       <div class="flex flex-col md:grid md:grid-cols-2 lg:grid-cols-4 gap-5 mt-4">
         @for (course of coursesResource.value(); track course.id) {
-          <div
-            class="card bg-base-100 border border-base-300 shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden"
+          <a
+            [routerLink]="['/courses', course.id]"
+            class="group card bg-base-100 border border-base-300 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 overflow-hidden cursor-pointer"
           >
-            <figure>
-              <img src="course-default.jpg" alt="Course" class="h-32 object-cover w-full" />
+            <figure class="relative overflow-hidden">
+              <img
+                src="course-default.jpg"
+                alt="Course"
+                class="h-28 w-full object-cover transition-transform duration-300 group-hover:scale-110"
+              />
+              <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+              <span class="absolute bottom-2 left-2 badge badge-sm badge-primary">
+                {{ course.studyPlan.name }}
+              </span>
             </figure>
-            <div class="card-body p-4">
-              <h2 class="card-title text-sm block whitespace-nowrap text-ellipsis overflow-hidden">
-                {{ course.subject.name }}
-              </h2>
-              <p class="text-xs text-base-content/60">{{ course.studyPlan.name }}</p>
-              <div class="card-actions justify-end mt-2">
-                <a class="btn btn-sm btn-primary" [routerLink]="['/courses', course.id]"> Ver curso </a>
-              </div>
+            <div class="card-body p-3">
+              <h2 class="card-title text-sm line-clamp-2">{{ course.subject.name }}</h2>
+              @if (course.teacher?.name) {
+                <p class="text-xs text-base-content/60 flex items-center gap-1">
+                  <span class="material-symbols-outlined text-sm">person</span>
+                  {{ course.teacher?.name }}
+                </p>
+              } @else {
+                <p class="text-xs text-base-content/60 flex items-center gap-1">
+                  <span class="material-symbols-outlined text-sm">person</span>
+                  Sin docente asignado
+                </p>
+              }
             </div>
-          </div>
+          </a>
         } @empty {
           <p class="text-center text-base-content/60 col-span-full py-8">
             No se encontraron cursos para la búsqueda
@@ -154,7 +168,7 @@ export default class Courses {
   });
 
   constructor() {
-    this.pagination.updateTake(8);
+    this.pagination.updateTake(12);
 
     this.#debouncedSearch = debounceSignal(this.searchText, 400);
   }

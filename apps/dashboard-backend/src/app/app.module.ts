@@ -9,6 +9,7 @@ import { AppService } from './app.service';
 
 import { AuthModule } from '@/auth';
 import { AssignmentsModule } from './assignments/assignments.module';
+import { AttendanceModule } from './attendance/attendance.module';
 import { ClassGroupsModule } from './class-groups/class-groups.module';
 import { CoursesModule } from './courses/courses.module';
 import { DegreesModule } from './degrees/degrees.module';
@@ -51,6 +52,7 @@ import { FilesModule } from './files/files.module';
     TeachersModule,
     StudentsModule,
     AssignmentsModule,
+    AttendanceModule,
     ClassGroupsModule,
     AuthModule,
     QuizzesModule,

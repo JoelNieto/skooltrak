@@ -1,10 +1,9 @@
-import { Loader, PageHeader, StatCard } from '@/ui';
+import { Loader, StatCard } from '@/ui';
 import { DatePipe, NgClass } from '@angular/common';
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, input } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { Apollo, gql } from 'apollo-angular';
 import { map, of } from 'rxjs';
-import Store from '../core/store';
 
 type AttendanceRecordType = {
   id: string;
@@ -50,14 +49,9 @@ const STATUS_COLORS: Record<string, string> = {
 };
 
 @Component({
-  selector: 'app-student-attendance',
-  imports: [Loader, PageHeader, StatCard, DatePipe, NgClass],
+  selector: 'app-student-attendance-report',
+  imports: [Loader, StatCard, DatePipe, NgClass],
   template: `
-    <lib-page-header
-      title="Mi Asistencia"
-      subtitle="Resumen de asistencia por curso y sesiones recientes."
-    />
-
     @if (statsResource.isLoading()) {
       <div class="flex justify-center py-8">
         <lib-loader />
@@ -66,7 +60,7 @@ const STATUS_COLORS: Record<string, string> = {
 
     @if (statsResource.hasValue()) {
       @let stats = statsResource.value()!;
-      <div class="grid gap-4 md:grid-cols-4">
+      <div class="grid gap-4 md:grid-cols-4 mb-6">
         <lib-stat-card
           label="Asistencias"
           [value]="stats.present.toString()"
@@ -75,7 +69,7 @@ const STATUS_COLORS: Record<string, string> = {
         <lib-stat-card
           label="Tardanzas"
           [value]="stats.late.toString()"
-          helper="Procura llegar a tiempo"
+          helper="Total acumulado"
         />
         <lib-stat-card
           label="Faltas"
@@ -90,10 +84,10 @@ const STATUS_COLORS: Record<string, string> = {
       </div>
     }
 
-    <div class="mt-6 card border border-base-200 bg-base-100">
+    <div class="card border border-base-200 bg-base-100">
       <div class="card-body">
         <h2 class="text-lg font-semibold text-base-content">
-          Registro reciente
+          Historial de asistencia
         </h2>
 
         @if (recordsResource.isLoading()) {
@@ -102,7 +96,7 @@ const STATUS_COLORS: Record<string, string> = {
 
         @if (recordsResource.hasValue()) {
           <div class="overflow-x-auto">
-            <table class="table">
+            <table class="table table-zebra">
               <thead>
                 <tr>
                   <th>Fecha</th>
@@ -128,7 +122,7 @@ const STATUS_COLORS: Record<string, string> = {
                 } @empty {
                   <tr>
                     <td colspan="4" class="text-center py-8 text-base-content/60">
-                      No hay registros de asistencia
+                      No hay registros de asistencia para este estudiante
                     </td>
                   </tr>
                 }
@@ -141,13 +135,14 @@ const STATUS_COLORS: Record<string, string> = {
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export default class StudentAttendance {
+export default class StudentAttendanceReport {
+  public studentId = input.required<string>();
+
   #apollo = inject(Apollo);
-  #store = inject(Store);
 
   public statsResource = rxResource({
     params: () => ({
-      studentId: this.#store.currentStudentId(),
+      studentId: this.studentId(),
     }),
     stream: ({ params }) => {
       if (!params.studentId) return of(null);
@@ -175,7 +170,7 @@ export default class StudentAttendance {
 
   public recordsResource = rxResource({
     params: () => ({
-      studentId: this.#store.currentStudentId(),
+      studentId: this.studentId(),
     }),
     stream: ({ params }) => {
       if (!params.studentId) return of([]);
@@ -183,7 +178,7 @@ export default class StudentAttendance {
         .query<{ attendanceRecordsByStudentId: AttendanceRecordType[] }>({
           query: gql`
             query AttendanceRecordsByStudentId($studentId: String!) {
-              attendanceRecordsByStudentId(studentId: $studentId, take: 50) {
+              attendanceRecordsByStudentId(studentId: $studentId, take: 100) {
                 id
                 status
                 comment

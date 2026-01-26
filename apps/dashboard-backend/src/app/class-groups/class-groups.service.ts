@@ -54,6 +54,21 @@ export class ClassGroupsService {
     });
   }
 
+  findAllByCourseId(courseId: string) {
+    return this.prisma.classGroup.findMany({
+      where: { courses: { some: { id: courseId } } },
+      include: {
+        teacher: true,
+        studyPlan: {
+          include: {
+            degree: true,
+          },
+        },
+      },
+      orderBy: { name: 'asc' },
+    });
+  }
+
   async findOne(id: string) {
     return this.prisma.classGroup.findUnique({
       where: { id },

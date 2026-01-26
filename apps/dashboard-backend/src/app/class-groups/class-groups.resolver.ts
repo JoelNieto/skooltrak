@@ -34,6 +34,13 @@ export class ClassGroupsResolver {
     return this.classGroupsService.findAllBySchoolId(schoolId);
   }
 
+  @Query(() => [ClassGroup], { name: 'classGroupsByCourseId' })
+  findAllByCourseId(
+    @Args('courseId', { type: () => String }) courseId: string
+  ) {
+    return this.classGroupsService.findAllByCourseId(courseId);
+  }
+
   @Query(() => ClassGroup, { name: 'classGroup' })
   findOne(@Args('id', { type: () => String }) id: string) {
     return this.classGroupsService.findOne(id);

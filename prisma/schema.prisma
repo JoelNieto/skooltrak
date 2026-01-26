@@ -14,23 +14,24 @@ datasource db {
 }
 
 model Organization {
-  id          String       @id @default(cuid())
-  name        String
-  description String
-  active      Boolean      @default(true)
-  users       User[]
-  roles       Role[]
-  schools     School[]
-  subjects    Subject[]
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
-  groups      ClassGroup[]
-  courses     Course[]
-  Teacher     Teacher[]
-  Student     Student[]
-  quizzes     Quiz[]
-  messages    Message[]
-  files       File[]
+  id                 String              @id @default(cuid())
+  name               String
+  description        String
+  active             Boolean             @default(true)
+  users              User[]
+  roles              Role[]
+  schools            School[]
+  subjects           Subject[]
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+  groups             ClassGroup[]
+  courses            Course[]
+  Teacher            Teacher[]
+  Student            Student[]
+  quizzes            Quiz[]
+  messages           Message[]
+  files              File[]
+  attendanceSessions AttendanceSession[]
 }
 
 model User {
@@ -277,32 +278,33 @@ model StudyPlan {
 }
 
 model Course {
-  id              String                     @id @default(cuid())
-  name            String
-  code            String
-  shortName       String
-  organizationId  String
-  organization    Organization               @relation(fields: [organizationId], references: [id])
-  schoolId        String
-  school          School                     @relation(fields: [schoolId], references: [id])
-  subjectId       String
-  subject         Subject                    @relation(fields: [subjectId], references: [id])
-  studyPlanId     String
-  studyPlan       StudyPlan                  @relation(fields: [studyPlanId], references: [id])
-  createdAt       DateTime                   @default(now())
-  updatedAt       DateTime                   @updatedAt
-  groups          ClassGroup[]
-  students        Student[]
-  teacher         Teacher?                   @relation(fields: [teacherId], references: [id], onDelete: SetNull, onUpdate: Cascade)
-  teacherId       String?
-  assignments     Assignment[]
-  quizzes         Quiz[]
-  currentPeriod   Period?                    @relation(fields: [currentPeriodId], references: [id], onDelete: SetNull, onUpdate: Cascade)
-  currentPeriodId String?
-  gradeBuckets    GradeBucket[]
-  grades          Grade[]
-  weeklySchedules ClassGroupWeeklySchedule[]
-  fileShares      FileShareCourse[]
+  id                 String                     @id @default(cuid())
+  name               String
+  code               String
+  shortName          String
+  organizationId     String
+  organization       Organization               @relation(fields: [organizationId], references: [id])
+  schoolId           String
+  school             School                     @relation(fields: [schoolId], references: [id])
+  subjectId          String
+  subject            Subject                    @relation(fields: [subjectId], references: [id])
+  studyPlanId        String
+  studyPlan          StudyPlan                  @relation(fields: [studyPlanId], references: [id])
+  createdAt          DateTime                   @default(now())
+  updatedAt          DateTime                   @updatedAt
+  groups             ClassGroup[]
+  students           Student[]
+  teacher            Teacher?                   @relation(fields: [teacherId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  teacherId          String?
+  assignments        Assignment[]
+  quizzes            Quiz[]
+  currentPeriod      Period?                    @relation(fields: [currentPeriodId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  currentPeriodId    String?
+  gradeBuckets       GradeBucket[]
+  grades             Grade[]
+  weeklySchedules    ClassGroupWeeklySchedule[]
+  fileShares         FileShareCourse[]
+  attendanceSessions AttendanceSession[]
 
   @@unique([schoolId, name])
   @@unique([schoolId, code])
@@ -310,81 +312,84 @@ model Course {
 }
 
 model ClassGroup {
-  id              String                     @id @default(cuid())
-  name            String
-  shortName       String
-  organizationId  String
-  organization    Organization               @relation(fields: [organizationId], references: [id])
-  schoolId        String
-  school          School                     @relation(fields: [schoolId], references: [id])
-  courses         Course[]
-  studyPlan       StudyPlan                  @relation(fields: [studyPlanId], references: [id])
-  active          Boolean
-  students        Student[]
-  teacher         Teacher?                   @relation(fields: [teacherId], references: [id])
-  teacherId       String?
-  studyPlanId     String
-  assignmentDates AssignmentDate[]
-  quizSchedules   QuizSchedule[]
-  quizSubmissions QuizSubmission[]
-  weeklySchedules ClassGroupWeeklySchedule[]
-  fileShares      FileShareClassGroup[]
-  createdAt       DateTime                   @default(now())
-  updatedAt       DateTime                   @updatedAt
+  id                 String                     @id @default(cuid())
+  name               String
+  shortName          String
+  organizationId     String
+  organization       Organization               @relation(fields: [organizationId], references: [id])
+  schoolId           String
+  school             School                     @relation(fields: [schoolId], references: [id])
+  courses            Course[]
+  studyPlan          StudyPlan                  @relation(fields: [studyPlanId], references: [id])
+  active             Boolean
+  students           Student[]
+  teacher            Teacher?                   @relation(fields: [teacherId], references: [id])
+  teacherId          String?
+  studyPlanId        String
+  assignmentDates    AssignmentDate[]
+  quizSchedules      QuizSchedule[]
+  quizSubmissions    QuizSubmission[]
+  weeklySchedules    ClassGroupWeeklySchedule[]
+  fileShares         FileShareClassGroup[]
+  attendanceSessions AttendanceSession[]
+  createdAt          DateTime                   @default(now())
+  updatedAt          DateTime                   @updatedAt
 }
 
 model Student {
-  id              String           @id @default(cuid())
-  firstName       String
-  middleName      String
-  fatherName      String
-  motherName      String
-  documentId      String
-  organizationId  String
-  organization    Organization     @relation(fields: [organizationId], references: [id])
-  school          School           @relation(fields: [schoolId], references: [id])
-  schoolId        String
-  classGroup      ClassGroup       @relation(fields: [classGroupId], references: [id])
-  classGroupId    String
-  birthDate       DateTime
-  gender          Gender
-  address         String
-  phone           String
-  courses         Course[]
-  userId          String           @unique
-  user            User             @relation(fields: [userId], references: [id])
-  createdAt       DateTime         @default(now())
-  updatedAt       DateTime         @updatedAt
-  quizSubmissions QuizSubmission[]
-  studentGrades   StudentGrade[]
+  id                String             @id @default(cuid())
+  firstName         String
+  middleName        String
+  fatherName        String
+  motherName        String
+  documentId        String
+  organizationId    String
+  organization      Organization       @relation(fields: [organizationId], references: [id])
+  school            School             @relation(fields: [schoolId], references: [id])
+  schoolId          String
+  classGroup        ClassGroup         @relation(fields: [classGroupId], references: [id])
+  classGroupId      String
+  birthDate         DateTime
+  gender            Gender
+  address           String
+  phone             String
+  courses           Course[]
+  userId            String             @unique
+  user              User               @relation(fields: [userId], references: [id])
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  quizSubmissions   QuizSubmission[]
+  studentGrades     StudentGrade[]
+  attendanceRecords AttendanceRecord[]
 }
 
 model Teacher {
-  id             String       @id @default(cuid())
-  firstName      String
-  middleName     String
-  fatherName     String
-  motherName     String
-  documentId     String
-  organizationId String
-  organization   Organization @relation(fields: [organizationId], references: [id])
-  birthDate      DateTime
-  address        String       @default("")
-  phoneNumber    String       @default("")
-  personalEmail  String       @default("")
-  about          String       @default("")
-  teacherSince   Int?
-  memberSince    DateTime?
-  subjects       Subject[]
-  gender         Gender
-  classGroups    ClassGroup[]
-  courses        Course[]
-  user           User         @relation(fields: [userId], references: [id])
-  userId         String       @unique
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
-  assignments    Assignment[]
-  quizzes        Quiz[]
+  id                 String              @id @default(cuid())
+  firstName          String
+  middleName         String
+  fatherName         String
+  motherName         String
+  documentId         String
+  organizationId     String
+  organization       Organization        @relation(fields: [organizationId], references: [id])
+  birthDate          DateTime
+  address            String              @default("")
+  phoneNumber        String              @default("")
+  personalEmail      String              @default("")
+  about              String              @default("")
+  teacherSince       Int?
+  memberSince        DateTime?
+  subjects           Subject[]
+  gender             Gender
+  classGroups        ClassGroup[]
+  courses            Course[]
+  user               User                @relation(fields: [userId], references: [id])
+  userId             String              @unique
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+  assignments        Assignment[]
+  quizzes            Quiz[]
+  attendanceSessions AttendanceSession[]
 }
 
 model Assignment {
@@ -609,4 +614,48 @@ enum WeekDay {
 enum FilePermission {
   VIEW
   EDIT
+}
+
+enum AttendanceStatus {
+  PRESENT
+  ABSENT
+  LATE
+  SICK_LEAVE
+  EXCUSED
+}
+
+model AttendanceSession {
+  id             String             @id @default(cuid())
+  date           DateTime           @db.Date
+  courseId       String
+  course         Course             @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  classGroupId   String
+  classGroup     ClassGroup         @relation(fields: [classGroupId], references: [id], onDelete: Cascade)
+  teacherId      String
+  teacher        Teacher            @relation(fields: [teacherId], references: [id])
+  organizationId String
+  organization   Organization       @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  records        AttendanceRecord[]
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
+
+  @@unique([courseId, classGroupId, date])
+  @@index([courseId])
+  @@index([classGroupId])
+  @@index([date])
+}
+
+model AttendanceRecord {
+  id                  String            @id @default(cuid())
+  attendanceSessionId String
+  attendanceSession   AttendanceSession @relation(fields: [attendanceSessionId], references: [id], onDelete: Cascade)
+  studentId           String
+  student             Student           @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  status              AttendanceStatus
+  comment             String?
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
+
+  @@unique([attendanceSessionId, studentId])
+  @@index([studentId])
 }

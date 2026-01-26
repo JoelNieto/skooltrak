@@ -509,6 +509,27 @@ exports.Prisma.StudentGradeRevisionScalarFieldEnum = {
   updatedAt: 'updatedAt'
 };
 
+exports.Prisma.AttendanceSessionScalarFieldEnum = {
+  id: 'id',
+  date: 'date',
+  courseId: 'courseId',
+  classGroupId: 'classGroupId',
+  teacherId: 'teacherId',
+  organizationId: 'organizationId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.AttendanceRecordScalarFieldEnum = {
+  id: 'id',
+  attendanceSessionId: 'attendanceSessionId',
+  studentId: 'studentId',
+  status: 'status',
+  comment: 'comment',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -560,6 +581,14 @@ exports.WeekDay = exports.$Enums.WeekDay = {
   SUNDAY: 'SUNDAY'
 };
 
+exports.AttendanceStatus = exports.$Enums.AttendanceStatus = {
+  PRESENT: 'PRESENT',
+  ABSENT: 'ABSENT',
+  LATE: 'LATE',
+  SICK_LEAVE: 'SICK_LEAVE',
+  EXCUSED: 'EXCUSED'
+};
+
 exports.Prisma.ModelName = {
   Organization: 'Organization',
   User: 'User',
@@ -594,7 +623,9 @@ exports.Prisma.ModelName = {
   GradeBucket: 'GradeBucket',
   Grade: 'Grade',
   StudentGrade: 'StudentGrade',
-  StudentGradeRevision: 'StudentGradeRevision'
+  StudentGradeRevision: 'StudentGradeRevision',
+  AttendanceSession: 'AttendanceSession',
+  AttendanceRecord: 'AttendanceRecord'
 };
 
 /**

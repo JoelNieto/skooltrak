@@ -54,6 +54,108 @@ input AssignmentDateInput {
   date: DateTime!
 }
 
+type AttendanceRecord {
+  """Attendance session"""
+  attendanceSession: AttendanceSession
+
+  """Attendance session ID"""
+  attendanceSessionId: String!
+
+  """Optional comment"""
+  comment: String
+
+  """Created at"""
+  createdAt: DateTime!
+
+  """ID of the attendance record"""
+  id: String!
+
+  """Attendance status"""
+  status: AttendanceStatus!
+
+  """Student of this record"""
+  student: Student!
+
+  """Student ID"""
+  studentId: String!
+
+  """Updated at"""
+  updatedAt: DateTime!
+}
+
+type AttendanceSession {
+  """Class group of this session"""
+  classGroup: ClassGroup!
+
+  """Class group ID"""
+  classGroupId: String!
+
+  """Course of this session"""
+  course: Course!
+
+  """Course ID"""
+  courseId: String!
+
+  """Created at"""
+  createdAt: DateTime!
+
+  """Date of the attendance session"""
+  date: DateTime!
+
+  """ID of the attendance session"""
+  id: String!
+
+  """Organization ID"""
+  organizationId: String!
+
+  """Attendance records for this session"""
+  records: [AttendanceRecord!]!
+
+  """Teacher who created this session"""
+  teacher: Teacher!
+
+  """Teacher ID"""
+  teacherId: String!
+
+  """Updated at"""
+  updatedAt: DateTime!
+}
+
+type AttendanceStats {
+  """Absent count"""
+  absent: Int!
+
+  """Absent percentage"""
+  absentPercentage: Int!
+
+  """Excused count"""
+  excused: Int!
+
+  """Late count"""
+  late: Int!
+
+  """Present count"""
+  present: Int!
+
+  """Present percentage"""
+  presentPercentage: Int!
+
+  """Sick leave count"""
+  sickLeave: Int!
+
+  """Total attendance records"""
+  total: Int!
+}
+
+"""Status of attendance for a student"""
+enum AttendanceStatus {
+  ABSENT
+  EXCUSED
+  LATE
+  PRESENT
+  SICK_LEAVE
+}
+
 type AuthPayload {
   accessToken: String!
 }
@@ -185,6 +287,31 @@ input CreateAssignmentInput {
 
   """Tipo de la asignacion"""
   type: String!
+}
+
+input CreateAttendanceRecordInput {
+  """Optional comment"""
+  comment: String
+
+  """Attendance status"""
+  status: AttendanceStatus!
+
+  """Student ID"""
+  studentId: String!
+}
+
+input CreateAttendanceSessionInput {
+  """Class group ID"""
+  classGroupId: String!
+
+  """Course ID"""
+  courseId: String!
+
+  """Date of the attendance session"""
+  date: DateTime!
+
+  """Attendance records for each student"""
+  records: [CreateAttendanceRecordInput!]!
 }
 
 input CreateClassGroupInput {
@@ -576,7 +703,7 @@ input CreateTeacherInput {
   address: String = ""
 
   """Birth date of the teacher"""
-  birthDate: DateTime = "2026-01-25T16:24:54.461Z"
+  birthDate: DateTime = "2026-01-26T12:17:04.948Z"
 
   """Document ID of the teacher"""
   documentId: String!
@@ -1008,6 +1135,7 @@ type MessageRecipient {
 
 type Mutation {
   createAssignment(createAssignmentInput: CreateAssignmentInput!): Assignment!
+  createAttendanceSession(input: CreateAttendanceSessionInput!): AttendanceSession!
   createClassGroup(createClassGroupInput: CreateClassGroupInput!): ClassGroup!
   createCourse(createCourseInput: CreateCourseInput!): Course!
   createDegree(createDegreeInput: CreateDegreeInput!): Degree!
@@ -1030,6 +1158,7 @@ type Mutation {
   createSubject(createSubjectInput: CreateSubjectInput!): Subject!
   createTeacher(createTeacherInput: CreateTeacherInput!): Teacher!
   createUser(createUserInput: CreateUserInput!): User!
+  deleteAttendanceSession(id: String!): AttendanceSession!
   login(email: String!, password: String!): AuthPayload!
   removeAssignment(id: String!): Assignment!
   removeClassGroup(id: String!): ClassGroup!
@@ -1056,6 +1185,8 @@ type Mutation {
   shareFile(shareFileInput: ShareFileInput!): File!
   signUp(input: SignUpInput!): AuthPayload!
   updateAssignment(updateAssignmentInput: UpdateAssignmentInput!): Assignment!
+  updateAttendanceRecord(input: UpdateAttendanceRecordInput!): AttendanceRecord!
+  updateAttendanceRecords(inputs: [UpdateAttendanceRecordInput!]!): [AttendanceRecord!]!
   updateClassGroup(updateClassGroupInput: UpdateClassGroupInput!): ClassGroup!
   updateCourse(updateCourseInput: UpdateCourseInput!): Course!
   updateDegree(updateDegreeInput: UpdateDegreeInput!): Degree!
@@ -1139,9 +1270,50 @@ type Query {
   assignments: [Assignment!]!
   assignmentsByCourseId(courseId: String!, endDate: String!, startDate: String!): [Assignment!]!
   assignmentsBySchoolId(endDate: String!, schoolId: String!, startDate: String!): [Assignment!]!
+  attendanceRecordsByStudentId(studentId: String!, take: Int): [AttendanceRecord!]!
+  attendanceSession(id: String!): AttendanceSession
+  attendanceSessions(
+    """Class group ID"""
+    classGroupId: String
+
+    """Course ID"""
+    courseId: String!
+
+    """End date filter"""
+    endDate: DateTime
+
+    """Skip"""
+    skip: Int = 0
+
+    """Start date filter"""
+    startDate: DateTime
+
+    """Take"""
+    take: Int = 20
+  ): [AttendanceSession!]!
+  attendanceSessionsCount(
+    """Class group ID"""
+    classGroupId: String
+
+    """Course ID"""
+    courseId: String!
+
+    """End date filter"""
+    endDate: DateTime
+
+    """Skip"""
+    skip: Int = 0
+
+    """Start date filter"""
+    startDate: DateTime
+
+    """Take"""
+    take: Int = 20
+  ): Int!
   averageCourseScoreForStudent(courseId: String!, periodId: String!, studentId: String!): Float!
   classGroup(id: String!): ClassGroup!
   classGroups: [ClassGroup!]!
+  classGroupsByCourseId(courseId: String!): [ClassGroup!]!
   classGroupsByOrganizationId(organizationId: String!): [ClassGroup!]!
   classGroupsBySchoolId(schoolId: String!): [ClassGroup!]!
   course(id: String!): Course!
@@ -1444,6 +1616,7 @@ type Query {
   school(id: String!): School!
   schools: [School!]!
   student(id: String!): Student!
+  studentAttendanceStats(studentId: String!): AttendanceStats!
   studentGrade(id: String!): StudentGrade!
   studentGrades: [StudentGrade!]!
   studentGradesByCourseId(courseId: String!, periodId: String!, studentId: String!): [StudentGrade!]!
@@ -1469,6 +1642,7 @@ type Query {
   ): [Student!]!
   studentsByCourseId(courseId: String!): [Student!]!
   studentsBySchoolId(schoolId: String!): [Student!]!
+  studentsForAttendance(classGroupId: String!, courseId: String!): [Student!]!
   studyPlan(id: String!): StudyPlan!
   studyPlans: [StudyPlan!]!
   studyPlansBySchoolId(degreeId: String, schoolId: String!): [StudyPlan!]!
@@ -2009,6 +2183,20 @@ input UpdateAssignmentInput {
   type: String
 }
 
+input UpdateAttendanceRecordInput {
+  """Optional comment"""
+  comment: String
+
+  """ID of the attendance record"""
+  id: String!
+
+  """Attendance status"""
+  status: AttendanceStatus
+
+  """Student ID"""
+  studentId: String
+}
+
 input UpdateClassGroupInput {
   """Active status of the class group"""
   active: Boolean = true
@@ -2365,7 +2553,7 @@ input UpdateTeacherInput {
   address: String = ""
 
   """Birth date of the teacher"""
-  birthDate: DateTime = "2026-01-25T16:24:54.461Z"
+  birthDate: DateTime = "2026-01-26T12:17:04.948Z"
 
   """Document ID of the teacher"""
   documentId: String

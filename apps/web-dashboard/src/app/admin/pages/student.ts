@@ -7,6 +7,7 @@ import { RouterLink } from '@angular/router';
 import { Prisma } from '@generated/prisma';
 import { Apollo, gql } from 'apollo-angular';
 import { map, of } from 'rxjs';
+import StudentAttendanceReport from './student-attendance-report';
 
 type TeacherType = Prisma.TeacherGetPayload<{ include: { user: true } }> & {
   name: string;
@@ -63,6 +64,7 @@ type StudentType = DecimalToNumber<
     TabContent,
     DecimalPipe,
     NgClass,
+    StudentAttendanceReport,
   ],
   template: `
     @if (studentResource.isLoading()) {
@@ -110,6 +112,7 @@ type StudentType = DecimalToNumber<
           class="tabs tabs-box "
         >
           <div ngTab value="courses" class="tab">Cursos</div>
+          <div ngTab value="attendance" class="tab">Asistencia</div>
           <div ngTab value="info" class="tab">Informacion Personal</div>
         </div>
         <div class="w-64">
@@ -214,6 +217,11 @@ type StudentType = DecimalToNumber<
                 </dl>
               </div>
             </div>
+          </ng-template>
+        </div>
+        <div ngTabPanel value="attendance">
+          <ng-template ngTabContent>
+            <app-student-attendance-report [studentId]="id()" />
           </ng-template>
         </div>
         <div ngTabPanel value="courses">

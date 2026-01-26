@@ -7,6 +7,7 @@ import { Prisma } from '@generated/prisma';
 import { Apollo, gql } from 'apollo-angular';
 import { map, of } from 'rxjs';
 import AssignmentForm from '../assignments/assignment-form';
+import CourseAttendance from '../attendance/course-attendance';
 import Auth from '../auth/auth';
 import CourseGrades from '../grades/course-grades';
 import CourseAssignments from './course-assignments';
@@ -34,6 +35,7 @@ type CourseType = Prisma.CourseGetPayload<{
     Loader,
     RouterLink,
     CourseAssignments,
+    CourseAttendance,
     CourseFiles,
     CourseGradeBuckets,
     CourseGrades,
@@ -135,6 +137,23 @@ type CourseType = Prisma.CourseGetPayload<{
             (reload)="courseResource.reload()"
           />
         </div>
+        @if (auth.isTeacher() || auth.isAdmin()) {
+        <label class="tab">
+          <input
+            type="radio"
+            name="my_tabs_6"
+            class="tab"
+            aria-label="Asistencia"
+          />
+          <span class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-xl">how_to_reg</span
+            >Asistencia</span
+          >
+        </label>
+        <div class="tab-content bg-base-100 border-base-300 p-6">
+          <app-course-attendance [courseId]="id()" />
+        </div>
+        }
         <label class="tab">
           <input type="radio" name="my_tabs_6" aria-label="Participantes" />
           <span class="flex items-center gap-2">

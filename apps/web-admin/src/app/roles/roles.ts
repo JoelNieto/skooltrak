@@ -2,12 +2,7 @@ import { Confirmation, Modal, Toast } from '@/ui';
 import { Menu, MenuContent, MenuItem, MenuTrigger } from '@angular/aria/menu';
 import { OverlayModule } from '@angular/cdk/overlay';
 import { DatePipe } from '@angular/common';
-import {
-  ChangeDetectionStrategy,
-  Component,
-  inject,
-  viewChild,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, viewChild } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import { Prisma } from '@generated/prisma';
@@ -16,7 +11,7 @@ import { map } from 'rxjs';
 import { RolesForm } from './roles-form';
 @Component({
   selector: 'app-roles',
-  imports: [RouterLink, DatePipe, Menu, MenuContent, MenuItem, MenuTrigger],
+  imports: [RouterLink, DatePipe, Menu, MenuContent, MenuItem, MenuTrigger, OverlayModule],
   template: `<div class="breadcrumbs text-sm">
       <ul>
         <li><a routerLink="/">Inicio</a></li>
@@ -40,6 +35,7 @@ import { RolesForm } from './roles-form';
             <th>Nombre</th>
             <th>Descripción</th>
             <th>Nombre</th>
+            <th>Organización</th>
             <th>Fecha de creación</th>
             <th>Fecha de actualización</th>
             <th></th>
@@ -47,71 +43,62 @@ import { RolesForm } from './roles-form';
         </thead>
         <tbody>
           @for (role of roles.value(); track role.id) {
-          <tr>
-            <td>{{ role.name }}</td>
-            <td>{{ role.description }}</td>
-            <td>{{ role.name }}</td>
-            <td>{{ role.createdAt | date : 'medium' }}</td>
-            <td>{{ role.updatedAt | date : 'medium' }}</td>
-            <td>
-              <button
-                class="cursor-pointer hover:bg-base-200 p-1 rounded-lg flex items-center justify-center"
-                ngMenuTrigger
-                #origin
-                #trigger="ngMenuTrigger"
-                [menu]="formatMenu()"
-              >
-                <span class="material-symbols-outlined text-xl"
-                  >more_horiz</span
+            <tr>
+              <td>{{ role.name }}</td>
+              <td>{{ role.description }}</td>
+              <td>{{ role.name }}</td>
+              <td>{{ role.organization?.name }}</td>
+              <td>{{ role.createdAt | date: 'medium' }}</td>
+              <td>{{ role.updatedAt | date: 'medium' }}</td>
+              <td>
+                <button
+                  class="cursor-pointer hover:bg-base-200 p-1 rounded-lg flex items-center justify-center"
+                  ngMenuTrigger
+                  #origin
+                  #trigger="ngMenuTrigger"
+                  [menu]="formatMenu()"
                 >
-              </button>
-              <ng-template
-                [cdkConnectedOverlayOpen]="trigger.expanded()"
-                [cdkConnectedOverlay]="{origin, usePopover: 'inline'}"
-                [cdkConnectedOverlayPositions]="[
-                  {
-                    originX: 'end',
-                    originY: 'bottom',
-                    overlayX: 'end',
-                    overlayY: 'top',
-                    offsetY: 4
-                  }
-                ]"
-                cdkAttachPopoverAsChild
-              >
-                <div
-                  ngMenu
-                  class="bg-base-100 shadow-sm rounded-lg p-1 w-48"
-                  #formatMenu="ngMenu"
+                  <span class="material-symbols-outlined text-xl">more_horiz</span>
+                </button>
+                <ng-template
+                  [cdkConnectedOverlayOpen]="trigger.expanded()"
+                  [cdkConnectedOverlay]="{ origin, usePopover: 'inline' }"
+                  [cdkConnectedOverlayPositions]="[
+                    {
+                      originX: 'end',
+                      originY: 'bottom',
+                      overlayX: 'end',
+                      overlayY: 'top',
+                      offsetY: 4,
+                    },
+                  ]"
+                  cdkAttachPopoverAsChild
                 >
-                  <ng-template ngMenuContent>
-                    <button
-                      ngMenuItem
-                      value="Edit"
-                      class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-base-200 w-full"
-                      (click)="editRole(role)"
-                    >
-                      <span class="material-symbols-outlined text-lg"
-                        >edit</span
+                  <div ngMenu class="bg-base-100 shadow-sm rounded-lg p-1 w-48" #formatMenu="ngMenu">
+                    <ng-template ngMenuContent>
+                      <button
+                        ngMenuItem
+                        value="Edit"
+                        class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-base-200 w-full"
+                        (click)="editRole(role)"
                       >
-                      <span>Editar</span>
-                    </button>
-                    <button
-                      ngMenuItem
-                      value="Delete"
-                      class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-base-200 w-full"
-                      (click)="deleteRole(role)"
-                    >
-                      <span class="material-symbols-outlined text-lg"
-                        >delete</span
+                        <span class="material-symbols-outlined text-lg">edit</span>
+                        <span>Editar</span>
+                      </button>
+                      <button
+                        ngMenuItem
+                        value="Delete"
+                        class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-base-200 w-full"
+                        (click)="deleteRole(role)"
                       >
-                      <span>Eliminar</span>
-                    </button>
-                  </ng-template>
-                </div>
-              </ng-template>
-            </td>
-          </tr>
+                        <span class="material-symbols-outlined text-lg">delete</span>
+                        <span>Eliminar</span>
+                      </button>
+                    </ng-template>
+                  </div>
+                </ng-template>
+              </td>
+            </tr>
           }
         </tbody>
       </table>

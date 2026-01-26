@@ -6,7 +6,10 @@ import { PrismaService } from './prisma.service';
 
 @Injectable()
 export class AuthService {
-  constructor(private prisma: PrismaService, private jwtService: JwtService) {}
+  constructor(
+    private prisma: PrismaService,
+    private jwtService: JwtService,
+  ) {}
 
   private getRandomPastelColor() {
     const hue = Math.floor(Math.random() * 360);
@@ -42,7 +45,7 @@ export class AuthService {
           organizationId: organizationId,
           permissions: role.permissions.map((p) => p.descriptiveId),
         },
-        { secret: process.env['JWT_SECRET'] }
+        { secret: process.env['JWT_SECRET'] },
       ),
     };
   }
@@ -59,8 +62,7 @@ export class AuthService {
   }
 
   async signUp(input: SignUpInput) {
-    const { schoolName, schoolShortName, email, firstName, lastName, password } =
-      input;
+    const { schoolName, schoolShortName, email, firstName, lastName, password } = input;
 
     // Check if email already exists
     const existingUser = await this.prisma.user.findUnique({
@@ -141,7 +143,7 @@ export class AuthService {
           organizationId: organization.id,
           permissions: role.permissions.map((p) => p.descriptiveId),
         },
-        { secret: process.env['JWT_SECRET'] }
+        { secret: process.env['JWT_SECRET'] },
       ),
     };
   }

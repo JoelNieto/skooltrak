@@ -10,12 +10,13 @@ import {
 } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
-import { Prisma } from '@generated/prisma';
 
 import { Apollo, gql } from 'apollo-angular';
 import { addDays, endOfWeek, startOfWeek, subDays } from 'date-fns';
 import { map, of } from 'rxjs';
+import Auth from '../auth/auth';
 import Store from '../core/store';
+
 @Pipe({ name: 'stripHtml', standalone: true })
 export class StripHtmlPipe implements PipeTransform {
   transform(value: string | null | undefined): string {
@@ -26,6 +27,33 @@ export class StripHtmlPipe implements PipeTransform {
       .trim();
   }
 }
+
+type AssignmentDateResult = {
+  id: string;
+  date: string;
+  classGroupId: string;
+  classGroup: {
+    id: string;
+    name: string;
+    shortName: string;
+  };
+  assignment: {
+    id: string;
+    title: string;
+    details: string;
+    type: string;
+    requireSubmission: boolean;
+    course: {
+      id: string;
+      name: string;
+    };
+    teacher: {
+      id: string;
+      firstName: string;
+      fatherName: string;
+    };
+  };
+};
 
 @Component({
   selector: 'app-assignments',
@@ -69,42 +97,45 @@ export class StripHtmlPipe implements PipeTransform {
           <tr>
             <th>Título</th>
             <th>Detalles</th>
-            <th>Fecha</th>
+            <th>Fecha de entrega</th>
+            @if (!isStudent()) {
+              <th>Grupo</th>
+            }
             <th>Curso</th>
             <th>Profesor</th>
-            <th>Fecha de creación</th>
-            <th>Fecha de actualización</th>
             <th></th>
           </tr>
         </thead>
         <tbody>
-          @for( assignment of assignmentsResource.value(); track assignment.id)
-          {
-          <tr>
-            <td>
-              <a [routerLink]="assignment.id" class="link link-primary">{{
-                assignment.title
-              }}</a>
-            </td>
-            <td class="max-w-[24rem] truncate">
-              {{ assignment.details | stripHtml }}
-            </td>
-            <td>{{ assignment.date | date : 'medium' }}</td>
-            <td>{{ assignment.course.name }}</td>
-            <td>
-              {{ assignment.teacher.firstName }}
-              {{ assignment.teacher.fatherName }}
-            </td>
-            <td>{{ assignment.createdAt | date : 'short' }}</td>
-            <td>{{ assignment.updatedAt | date : 'short' }}</td>
-            <td></td>
-          </tr>
+          @for (item of assignmentDatesResource.value(); track item.id) {
+            <tr>
+              <td>
+                <a [routerLink]="item.assignment.id" class="link link-primary">{{
+                  item.assignment.title
+                }}</a>
+              </td>
+              <td class="max-w-[24rem] truncate">
+                {{ item.assignment.details | stripHtml }}
+              </td>
+              <td>{{ item.date | date : 'medium' }}</td>
+              @if (!isStudent()) {
+                <td>
+                  <span class="badge badge-outline">{{ item.classGroup.shortName || item.classGroup.name }}</span>
+                </td>
+              }
+              <td>{{ item.assignment.course.name }}</td>
+              <td>
+                {{ item.assignment.teacher.firstName }}
+                {{ item.assignment.teacher.fatherName }}
+              </td>
+              <td></td>
+            </tr>
           } @empty {
-          <tr>
-            <td colspan="8" class="text-center">
-              No hay asignaciones para esta semana
-            </td>
-          </tr>
+            <tr>
+              <td [attr.colspan]="isStudent() ? 6 : 7" class="text-center">
+                No hay asignaciones para esta semana
+              </td>
+            </tr>
           }
         </tbody>
       </table>
@@ -114,6 +145,9 @@ export class StripHtmlPipe implements PipeTransform {
 export default class Assignments {
   private store = inject(Store);
   private apollo = inject(Apollo);
+  private auth = inject(Auth);
+
+  public isStudent = this.auth.isStudent;
   public currentDate = signal(new Date());
   public startDate = computed(() =>
     startOfWeek(this.currentDate(), { weekStartsOn: 1 })
@@ -134,52 +168,59 @@ export default class Assignments {
     this.currentDate.set(new Date());
   }
 
-  public assignmentsResource = rxResource({
+  public assignmentDatesResource = rxResource({
     params: () => ({
       startDate: this.startDate(),
       endDate: this.endDate(),
       schoolId: this.store.currentSchoolId(),
+      classGroupId: this.store.currentStudentGroupId(),
     }),
     stream: ({ params }) => {
-      const { startDate, endDate, schoolId } = params;
+      const { startDate, endDate, schoolId, classGroupId } = params;
       if (!schoolId) {
         return of([]);
       }
       return this.apollo
         .watchQuery<{
-          assignmentsBySchoolId: Prisma.AssignmentGetPayload<{
-            include: {
-              course: true;
-              teacher: true;
-            };
-          }>[];
+          assignmentDatesBySchoolId: AssignmentDateResult[];
         }>({
           query: gql`
-            query AssignmentsBySchoolId(
+            query AssignmentDatesBySchoolId(
               $schoolId: String!
               $startDate: String!
               $endDate: String!
+              $classGroupId: String
             ) {
-              assignmentsBySchoolId(
+              assignmentDatesBySchoolId(
                 schoolId: $schoolId
                 startDate: $startDate
                 endDate: $endDate
+                classGroupId: $classGroupId
               ) {
                 id
-                title
-                details
-                course {
+                date
+                classGroupId
+                classGroup {
                   id
                   name
+                  shortName
                 }
-                teacher {
+                assignment {
                   id
-                  firstName
-                  fatherName
+                  title
+                  details
+                  type
+                  requireSubmission
+                  course {
+                    id
+                    name
+                  }
+                  teacher {
+                    id
+                    firstName
+                    fatherName
+                  }
                 }
-                date
-                createdAt
-                updatedAt
               }
             }
           `,
@@ -187,9 +228,17 @@ export default class Assignments {
             schoolId,
             startDate: startDate.toISOString(),
             endDate: endDate.toISOString(),
+            classGroupId: classGroupId || null,
           },
         })
-        .valueChanges.pipe(map((res) => res.data.assignmentsBySchoolId));
+        .valueChanges.pipe(
+          map((res) =>
+            res.data.assignmentDatesBySchoolId.map((item) => ({
+              ...item,
+              date: new Date(item.date),
+            }))
+          )
+        );
     },
   });
 }

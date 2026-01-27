@@ -8,19 +8,23 @@ export class AssignmentsService {
   constructor(private readonly prisma: PrismaService) {}
 
   create(createAssignmentInput: CreateAssignmentInput) {
+    const { groupDates, ...assignmentData } = createAssignmentInput;
     return this.prisma.assignment.create({
       data: {
-        ...createAssignmentInput,
-        dates: {
-          create: createAssignmentInput.groupDates,
-        },
+        ...assignmentData,
+        dates: groupDates?.length
+          ? {
+              create: groupDates,
+            }
+          : undefined,
       },
+      include: { course: true, teacher: true, dates: { include: { classGroup: true } } },
     });
   }
 
   findAll() {
     return this.prisma.assignment.findMany({
-      include: { course: true, teacher: true },
+      include: { course: true, teacher: true, dates: { include: { classGroup: true } } },
     });
   }
 
@@ -30,6 +34,7 @@ export class AssignmentsService {
       include: {
         course: { include: { subject: true, studyPlan: true } },
         teacher: true,
+        dates: { include: { classGroup: true } },
       },
       orderBy: { date: 'asc' },
     });
@@ -38,7 +43,61 @@ export class AssignmentsService {
   findAssignmentByCourseId(courseId: string, startDate: Date, endDate: Date) {
     return this.prisma.assignment.findMany({
       where: { courseId, date: { gte: startDate, lte: endDate } },
-      include: { course: true, teacher: true },
+      include: { course: true, teacher: true, dates: { include: { classGroup: true } } },
+      orderBy: { date: 'asc' },
+    });
+  }
+
+  /**
+   * Find assignment dates by school ID for calendar display.
+   * If classGroupId is provided, filters to only that group's dates (for students).
+   * Otherwise returns all assignment dates (for teachers/admins).
+   */
+  findAssignmentDatesBySchoolId(
+    schoolId: string,
+    startDate: Date,
+    endDate: Date,
+    classGroupId?: string,
+  ) {
+    return this.prisma.assignmentDate.findMany({
+      where: {
+        date: { gte: startDate, lte: endDate },
+        assignment: { schoolId },
+        ...(classGroupId ? { classGroupId } : {}),
+      },
+      include: {
+        classGroup: true,
+        assignment: {
+          include: { course: true, teacher: true },
+        },
+      },
+      orderBy: { date: 'asc' },
+    });
+  }
+
+  /**
+   * Find assignment dates by course ID for calendar display.
+   * If classGroupId is provided, filters to only that group's dates (for students).
+   * Otherwise returns all assignment dates (for teachers/admins).
+   */
+  findAssignmentDatesByCourseId(
+    courseId: string,
+    startDate: Date,
+    endDate: Date,
+    classGroupId?: string,
+  ) {
+    return this.prisma.assignmentDate.findMany({
+      where: {
+        date: { gte: startDate, lte: endDate },
+        assignment: { courseId },
+        ...(classGroupId ? { classGroupId } : {}),
+      },
+      include: {
+        classGroup: true,
+        assignment: {
+          include: { course: true, teacher: true },
+        },
+      },
       orderBy: { date: 'asc' },
     });
   }
@@ -46,7 +105,7 @@ export class AssignmentsService {
   findOne(id: string) {
     return this.prisma.assignment.findUnique({
       where: { id },
-      include: { course: true, teacher: true },
+      include: { course: true, teacher: true, dates: { include: { classGroup: true } } },
     });
   }
 

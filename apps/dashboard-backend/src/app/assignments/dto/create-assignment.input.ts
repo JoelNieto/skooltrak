@@ -2,9 +2,7 @@ import { $Enums, Prisma } from '@generated/prisma';
 import { Field, InputType } from '@nestjs/graphql';
 
 @InputType()
-export class CreateAssignmentInput
-  implements Prisma.AssignmentUncheckedCreateInput
-{
+export class CreateAssignmentInput implements Prisma.AssignmentUncheckedCreateInput {
   @Field(() => String, { description: 'Titulo de la asignacion' })
   title: string;
   @Field(() => String, { description: 'Detalles de la asignacion' })
@@ -30,13 +28,9 @@ export class CreateAssignmentInput
 }
 
 @InputType()
-export class AssignmentDateInput
-  implements Prisma.AssignmentDateUncheckedCreateInput
-{
-  @Field(() => Date, { description: 'Fecha de la asignacion' })
+export class AssignmentDateInput {
+  @Field(() => Date, { description: 'Due date for this group' })
   date: Date;
-  @Field(() => String, { description: 'Id de la asignacion' })
-  assignmentId: string;
-  @Field(() => String, { description: 'Id del grupo' })
+  @Field(() => String, { description: 'Class group ID' })
   classGroupId: string;
 }

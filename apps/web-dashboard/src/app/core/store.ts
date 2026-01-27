@@ -19,4 +19,7 @@ export default class Store {
   public currentTeacher = computed(() => this.auth.user()?.teacher);
   public currentStudent = computed(() => this.auth.user()?.student);
   public currentStudentId = computed(() => this.currentStudent()?.id);
+  public currentStudentGroupId = computed(
+    () => this.currentStudent()?.classGroupId
+  );
 }

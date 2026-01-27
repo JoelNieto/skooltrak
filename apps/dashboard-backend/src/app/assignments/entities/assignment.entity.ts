@@ -1,12 +1,11 @@
-import { $Enums, Prisma } from '@generated/prisma';
+import { $Enums } from '@generated/prisma';
 import { Field, ObjectType } from '@nestjs/graphql';
 import { Course } from '../../courses/entities/course.entity';
 import { Teacher } from '../../teachers/entities/teacher.entity';
+import { AssignmentDate } from './assignment-date.entity';
 
 @ObjectType()
 export class Assignment
-  implements
-    Prisma.AssignmentGetPayload<{ include: { teacher: true; course: true } }>
 {
   @Field(() => String, { description: 'ID of the assignment (auto-generated)' })
   id: string;
@@ -16,7 +15,7 @@ export class Assignment
   details: string;
   @Field(() => String, { description: 'Type of the assignment' })
   type: $Enums.AssignmentType;
-  @Field(() => Date, { description: 'Date of the assignment' })
+  @Field(() => Date, { description: 'Default date of the assignment' })
   date: Date;
   @Field(() => String, { description: 'School ID of the assignment' })
   schoolId: string;
@@ -30,6 +29,11 @@ export class Assignment
   teacherId: string;
   @Field(() => Teacher, { description: 'Teacher of the assignment' })
   teacher: Teacher;
+  @Field(() => [AssignmentDate], {
+    description: 'Group-specific due dates',
+    nullable: true,
+  })
+  dates: AssignmentDate[];
   @Field(() => Date, { description: 'Created at' })
   createdAt: Date;
   @Field(() => Date, { description: 'Updated at' })

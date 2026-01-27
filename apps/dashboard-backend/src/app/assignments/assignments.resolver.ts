@@ -2,6 +2,7 @@ import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { AssignmentsService } from './assignments.service';
 import { CreateAssignmentInput } from './dto/create-assignment.input';
 import { UpdateAssignmentInput } from './dto/update-assignment.input';
+import { AssignmentDateWithDetails } from './entities/assignment-date-with-details.entity';
 import { Assignment } from './entities/assignment.entity';
 
 @Resolver(() => Assignment)
@@ -48,6 +49,38 @@ export class AssignmentsResolver {
       courseId,
       new Date(startDate),
       new Date(endDate)
+    );
+  }
+
+  @Query(() => [AssignmentDateWithDetails], { name: 'assignmentDatesBySchoolId' })
+  findAssignmentDatesBySchoolId(
+    @Args('schoolId', { type: () => String }) schoolId: string,
+    @Args('startDate', { type: () => String }) startDate: string,
+    @Args('endDate', { type: () => String }) endDate: string,
+    @Args('classGroupId', { type: () => String, nullable: true })
+    classGroupId?: string
+  ) {
+    return this.assignmentsService.findAssignmentDatesBySchoolId(
+      schoolId,
+      new Date(startDate),
+      new Date(endDate),
+      classGroupId
+    );
+  }
+
+  @Query(() => [AssignmentDateWithDetails], { name: 'assignmentDatesByCourseId' })
+  findAssignmentDatesByCourseId(
+    @Args('courseId', { type: () => String }) courseId: string,
+    @Args('startDate', { type: () => String }) startDate: string,
+    @Args('endDate', { type: () => String }) endDate: string,
+    @Args('classGroupId', { type: () => String, nullable: true })
+    classGroupId?: string
+  ) {
+    return this.assignmentsService.findAssignmentDatesByCourseId(
+      courseId,
+      new Date(startDate),
+      new Date(endDate),
+      classGroupId
     );
   }
 

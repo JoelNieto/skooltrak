@@ -72,6 +72,7 @@ export default class Auth {
                   id
                   firstName
                   fatherName
+                  classGroupId
                 }
                 role {
                   name

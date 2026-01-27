@@ -12,8 +12,11 @@ type Assignment {
   """Created at"""
   createdAt: DateTime!
 
-  """Date of the assignment"""
+  """Default date of the assignment"""
   date: DateTime!
+
+  """Group-specific due dates"""
+  dates: [AssignmentDate!]
 
   """Details of the assignment"""
   details: String!
@@ -43,15 +46,72 @@ type Assignment {
   updatedAt: DateTime!
 }
 
-input AssignmentDateInput {
-  """Id de la asignacion"""
+type AssignmentDate {
+  """Assignment ID"""
   assignmentId: String!
 
-  """Id del grupo"""
+  """Class group"""
+  classGroup: ClassGroup
+
+  """Class group ID"""
   classGroupId: String!
 
-  """Fecha de la asignacion"""
+  """Due date for this group"""
   date: DateTime!
+
+  """ID of the assignment date"""
+  id: String!
+}
+
+input AssignmentDateInput {
+  """Class group ID"""
+  classGroupId: String!
+
+  """Due date for this group"""
+  date: DateTime!
+}
+
+type AssignmentDateWithDetails {
+  """Assignment details"""
+  assignment: AssignmentDetails!
+
+  """Assignment ID"""
+  assignmentId: String!
+
+  """Class group"""
+  classGroup: ClassGroup!
+
+  """Class group ID"""
+  classGroupId: String!
+
+  """Due date for this group"""
+  date: DateTime!
+
+  """ID of the assignment date"""
+  id: String!
+}
+
+type AssignmentDetails {
+  """Course of the assignment"""
+  course: Course!
+
+  """Details of the assignment"""
+  details: String!
+
+  """ID of the assignment"""
+  id: String!
+
+  """Require submission"""
+  requireSubmission: Boolean!
+
+  """Teacher of the assignment"""
+  teacher: Teacher!
+
+  """Title of the assignment"""
+  title: String!
+
+  """Type of the assignment"""
+  type: String!
 }
 
 type AssignmentSubmission {
@@ -760,7 +820,7 @@ input CreateTeacherInput {
   address: String = ""
 
   """Birth date of the teacher"""
-  birthDate: DateTime = "2026-01-26T23:17:51.971Z"
+  birthDate: DateTime = "2026-01-27T05:59:24.584Z"
 
   """Document ID of the teacher"""
   documentId: String!
@@ -1336,6 +1396,8 @@ type Permission {
 
 type Query {
   assignment(id: String!): Assignment!
+  assignmentDatesByCourseId(classGroupId: String, courseId: String!, endDate: String!, startDate: String!): [AssignmentDateWithDetails!]!
+  assignmentDatesBySchoolId(classGroupId: String, endDate: String!, schoolId: String!, startDate: String!): [AssignmentDateWithDetails!]!
 
   """Get all submissions for an assignment (teachers/admins only)"""
   assignmentSubmissions(assignmentId: String!): [AssignmentSubmission!]!
@@ -2662,7 +2724,7 @@ input UpdateTeacherInput {
   address: String = ""
 
   """Birth date of the teacher"""
-  birthDate: DateTime = "2026-01-26T23:17:51.971Z"
+  birthDate: DateTime = "2026-01-27T05:59:24.584Z"
 
   """Document ID of the teacher"""
   documentId: String

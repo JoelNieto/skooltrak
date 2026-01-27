@@ -54,6 +54,35 @@ input AssignmentDateInput {
   date: DateTime!
 }
 
+type AssignmentSubmission {
+  """Assignment of the submission"""
+  assignment: Assignment!
+
+  """Assignment ID"""
+  assignmentId: String!
+
+  """Submitted file"""
+  file: File!
+
+  """File ID"""
+  fileId: String!
+
+  """ID of the submission"""
+  id: String!
+
+  """Student who submitted"""
+  student: Student!
+
+  """Student ID"""
+  studentId: String!
+
+  """Submission date"""
+  submittedAt: DateTime!
+
+  """Updated at"""
+  updatedAt: DateTime!
+}
+
 type AttendanceRecord {
   """Attendance session"""
   attendanceSession: AttendanceSession
@@ -287,6 +316,23 @@ input CreateAssignmentInput {
 
   """Tipo de la asignacion"""
   type: String!
+}
+
+input CreateAssignmentSubmissionInput {
+  """Assignment ID"""
+  assignmentId: String!
+
+  """File name"""
+  fileName: String!
+
+  """Size of the file in bytes"""
+  fileSize: Int!
+
+  """MIME type of the file"""
+  mimeType: String!
+
+  """Storage key from the upload"""
+  storageKey: String!
 }
 
 input CreateAttendanceRecordInput {
@@ -698,12 +744,23 @@ input CreateSubjectInput {
   shortName: String!
 }
 
+input CreateSubmissionUploadInput {
+  """Assignment ID"""
+  assignmentId: String!
+
+  """File name"""
+  fileName: String!
+
+  """MIME type of the file"""
+  mimeType: String!
+}
+
 input CreateTeacherInput {
   about: String = ""
   address: String = ""
 
   """Birth date of the teacher"""
-  birthDate: DateTime = "2026-01-26T12:17:04.948Z"
+  birthDate: DateTime = "2026-01-26T23:17:51.971Z"
 
   """Document ID of the teacher"""
   documentId: String!
@@ -1135,6 +1192,9 @@ type MessageRecipient {
 
 type Mutation {
   createAssignment(createAssignmentInput: CreateAssignmentInput!): Assignment!
+
+  """Create an assignment submission after file upload"""
+  createAssignmentSubmission(input: CreateAssignmentSubmissionInput!): AssignmentSubmission!
   createAttendanceSession(input: CreateAttendanceSessionInput!): AttendanceSession!
   createClassGroup(createClassGroupInput: CreateClassGroupInput!): ClassGroup!
   createCourse(createCourseInput: CreateCourseInput!): Course!
@@ -1156,8 +1216,17 @@ type Mutation {
   createStudentGrade(createStudentGradeInput: CreateStudentGradeInput!): StudentGrade!
   createStudyPlan(createStudyPlanInput: CreateStudyPlanInput!): StudyPlan!
   createSubject(createSubjectInput: CreateSubjectInput!): Subject!
+
+  """Create a presigned URL for downloading a submission file"""
+  createSubmissionDownloadUrl(fileId: String!): SubmissionDownloadUrl!
+
+  """Create a presigned URL for uploading a submission file"""
+  createSubmissionUploadUrl(input: CreateSubmissionUploadInput!): SubmissionUploadUrl!
   createTeacher(createTeacherInput: CreateTeacherInput!): Teacher!
   createUser(createUserInput: CreateUserInput!): User!
+
+  """Delete an assignment submission"""
+  deleteAssignmentSubmission(submissionId: String!): Boolean!
   deleteAttendanceSession(id: String!): AttendanceSession!
   login(email: String!, password: String!): AuthPayload!
   removeAssignment(id: String!): Assignment!
@@ -1267,6 +1336,9 @@ type Permission {
 
 type Query {
   assignment(id: String!): Assignment!
+
+  """Get all submissions for an assignment (teachers/admins only)"""
+  assignmentSubmissions(assignmentId: String!): [AssignmentSubmission!]!
   assignments: [Assignment!]!
   assignmentsByCourseId(courseId: String!, endDate: String!, startDate: String!): [Assignment!]!
   assignmentsBySchoolId(endDate: String!, schoolId: String!, startDate: String!): [Assignment!]!
@@ -1563,6 +1635,9 @@ type Query {
   groupsSchedulesByClassGroupId(classGroupId: String!): [GroupsSchedule!]!
   groupsSchedulesByClassGroupIdGrouped(classGroupId: String!): [GroupsSchedule!]!
   me: User!
+
+  """Get the current student submission for an assignment"""
+  myAssignmentSubmission(assignmentId: String!): AssignmentSubmission
   organization(id: String!): Organization!
   organizations: [Organization!]!
   period(id: String!): Period!
@@ -1642,6 +1717,9 @@ type Query {
   ): [Student!]!
   studentsByCourseId(courseId: String!): [Student!]!
   studentsBySchoolId(schoolId: String!): [Student!]!
+
+  """Get all students for an assignment with their submissions"""
+  studentsForAssignment(assignmentId: String!): [Student!]!
   studentsForAttendance(classGroupId: String!, courseId: String!): [Student!]!
   studyPlan(id: String!): StudyPlan!
   studyPlans: [StudyPlan!]!
@@ -1916,6 +1994,9 @@ input SignUpInput {
 type Student {
   """Address of the student"""
   address: String!
+
+  """Assignment submissions by the student"""
+  assignmentSubmissions: [StudentAssignmentSubmission!]!
   averageScoreForStudent(courseId: String!, periodId: String!): Float!
 
   """Birth date of the student"""
@@ -1981,6 +2062,13 @@ type Student {
   userId: String!
 }
 
+"""Student assignment submission info"""
+type StudentAssignmentSubmission {
+  file: StudentSubmissionFile!
+  id: String!
+  submittedAt: DateTime!
+}
+
 type StudentGrade {
   """Average score for the student"""
   averageScoreForStudent: Float!
@@ -2011,6 +2099,14 @@ type StudentGrade {
 
   """Updated at of the student grade"""
   updatedAt: DateTime!
+}
+
+"""File info for student assignment submission"""
+type StudentSubmissionFile {
+  id: String!
+  mimeType: String!
+  name: String!
+  size: Int!
 }
 
 type StudyPlan {
@@ -2079,6 +2175,19 @@ type Subject {
   """Short name of the subject"""
   shortName: String!
   updatedAt: DateTime!
+}
+
+type SubmissionDownloadUrl {
+  """Presigned URL for downloading the file"""
+  downloadUrl: String!
+}
+
+type SubmissionUploadUrl {
+  """Storage key for the file"""
+  storageKey: String!
+
+  """Presigned URL for uploading the file"""
+  uploadUrl: String!
 }
 
 type Teacher {
@@ -2553,7 +2662,7 @@ input UpdateTeacherInput {
   address: String = ""
 
   """Birth date of the teacher"""
-  birthDate: DateTime = "2026-01-26T12:17:04.948Z"
+  birthDate: DateTime = "2026-01-26T23:17:51.971Z"
 
   """Document ID of the teacher"""
   documentId: String

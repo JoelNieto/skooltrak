@@ -1,9 +1,36 @@
 import { User } from '@/auth';
 import { $Enums, Prisma } from '@generated/prisma';
-import { Field, ObjectType } from '@nestjs/graphql';
+import { Field, Int, ObjectType } from '@nestjs/graphql';
 import { ClassGroup } from '../../class-groups/entities/class-group.entity';
 import { Course } from '../../courses/entities/course.entity';
 import { StudentGrade } from '../../student-grades/entities/student-grade.entity';
+
+@ObjectType({ description: 'File info for student assignment submission' })
+export class StudentSubmissionFile {
+  @Field(() => String)
+  id: string;
+
+  @Field(() => String)
+  name: string;
+
+  @Field(() => String)
+  mimeType: string;
+
+  @Field(() => Int)
+  size: number;
+}
+
+@ObjectType({ description: 'Student assignment submission info' })
+export class StudentAssignmentSubmission {
+  @Field(() => String)
+  id: string;
+
+  @Field(() => Date)
+  submittedAt: Date;
+
+  @Field(() => StudentSubmissionFile)
+  file: StudentSubmissionFile;
+}
 
 @ObjectType()
 export class Student
@@ -48,6 +75,11 @@ export class Student
 
   @Field(() => [StudentGrade], { description: 'Student grades of the student' })
   studentGrades: StudentGrade[];
+
+  @Field(() => [StudentAssignmentSubmission], {
+    description: 'Assignment submissions by the student',
+  })
+  assignmentSubmissions: StudentAssignmentSubmission[];
 
   @Field(() => User, { description: 'User of the student' })
   user: User;

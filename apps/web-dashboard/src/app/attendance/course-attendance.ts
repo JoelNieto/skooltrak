@@ -114,19 +114,19 @@ const STATUS_COLORS: Record<string, string> = {
                 </td>
                 <td>
                   <span class="badge badge-success gap-1">
-                    <span class="material-symbols-outlined text-sm">check</span>
+                    <span class="material-symbols-outlined text-sm!">check</span>
                     {{ stats.present }}
                   </span>
                 </td>
                 <td>
                   <span class="badge badge-error gap-1">
-                    <span class="material-symbols-outlined text-sm">close</span>
+                    <span class="material-symbols-outlined text-sm!">close</span>
                     {{ stats.absent }}
                   </span>
                 </td>
                 <td>
                   <span class="badge badge-warning gap-1">
-                    <span class="material-symbols-outlined text-sm">schedule</span>
+                    <span class="material-symbols-outlined text-sm!">schedule</span>
                     {{ stats.late }}
                   </span>
                 </td>
@@ -135,7 +135,7 @@ const STATUS_COLORS: Record<string, string> = {
                     {{ stats.other }}
                   </span>
                 </td>
-                <td>
+                <td class="text-right">
                   <button
                     class="btn btn-sm btn-ghost"
                     ngMenuTrigger
@@ -143,7 +143,7 @@ const STATUS_COLORS: Record<string, string> = {
                     #trigger="ngMenuTrigger"
                     [menu]="actionsMenu()"
                   >
-                    <span class="material-symbols-outlined text-xl">more_horiz</span>
+                    <span class="material-symbols-outlined text-xl!">more_horiz</span>
                   </button>
                   <ng-template
                     [cdkConnectedOverlayOpen]="trigger.expanded()"

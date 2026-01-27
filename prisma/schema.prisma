@@ -86,22 +86,23 @@ model MessageRecipient {
 }
 
 model File {
-  id                String               @id @default(cuid())
-  organizationId    String
-  organization      Organization         @relation(fields: [organizationId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  ownerId           String
-  owner             User                 @relation(fields: [ownerId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  name              String
-  mimeType          String
-  size              Int
-  storageKey        String
-  sharesUsers       FileShareUser[]
-  sharesSchools     FileShareSchool[]
-  sharesClassGroups FileShareClassGroup[]
-  sharesCourses     FileShareCourse[]
-  createdAt         DateTime             @default(now())
-  updatedAt         DateTime             @updatedAt
-  deletedAt         DateTime?
+  id                    String                 @id @default(cuid())
+  organizationId        String
+  organization          Organization           @relation(fields: [organizationId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  ownerId               String
+  owner                 User                   @relation(fields: [ownerId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  name                  String
+  mimeType              String
+  size                  Int
+  storageKey            String
+  sharesUsers           FileShareUser[]
+  sharesSchools         FileShareSchool[]
+  sharesClassGroups     FileShareClassGroup[]
+  sharesCourses         FileShareCourse[]
+  assignmentSubmissions AssignmentSubmission[]
+  createdAt             DateTime               @default(now())
+  updatedAt             DateTime               @updatedAt
+  deletedAt             DateTime?
 
   @@index([organizationId])
   @@index([ownerId])
@@ -337,30 +338,31 @@ model ClassGroup {
 }
 
 model Student {
-  id                String             @id @default(cuid())
-  firstName         String
-  middleName        String
-  fatherName        String
-  motherName        String
-  documentId        String
-  organizationId    String
-  organization      Organization       @relation(fields: [organizationId], references: [id])
-  school            School             @relation(fields: [schoolId], references: [id])
-  schoolId          String
-  classGroup        ClassGroup         @relation(fields: [classGroupId], references: [id])
-  classGroupId      String
-  birthDate         DateTime
-  gender            Gender
-  address           String
-  phone             String
-  courses           Course[]
-  userId            String             @unique
-  user              User               @relation(fields: [userId], references: [id])
-  createdAt         DateTime           @default(now())
-  updatedAt         DateTime           @updatedAt
-  quizSubmissions   QuizSubmission[]
-  studentGrades     StudentGrade[]
-  attendanceRecords AttendanceRecord[]
+  id                    String                 @id @default(cuid())
+  firstName             String
+  middleName            String
+  fatherName            String
+  motherName            String
+  documentId            String
+  organizationId        String
+  organization          Organization           @relation(fields: [organizationId], references: [id])
+  school                School                 @relation(fields: [schoolId], references: [id])
+  schoolId              String
+  classGroup            ClassGroup             @relation(fields: [classGroupId], references: [id])
+  classGroupId          String
+  birthDate             DateTime
+  gender                Gender
+  address               String
+  phone                 String
+  courses               Course[]
+  userId                String                 @unique
+  user                  User                   @relation(fields: [userId], references: [id])
+  createdAt             DateTime               @default(now())
+  updatedAt             DateTime               @updatedAt
+  quizSubmissions       QuizSubmission[]
+  studentGrades         StudentGrade[]
+  attendanceRecords     AttendanceRecord[]
+  assignmentSubmissions AssignmentSubmission[]
 }
 
 model Teacher {
@@ -393,21 +395,38 @@ model Teacher {
 }
 
 model Assignment {
-  id                String           @id @default(cuid())
+  id                String                 @id @default(cuid())
   title             String
   details           String
   type              AssignmentType
-  school            School           @relation(fields: [schoolId], references: [id])
-  course            Course           @relation(fields: [courseId], references: [id])
+  school            School                 @relation(fields: [schoolId], references: [id])
+  course            Course                 @relation(fields: [courseId], references: [id])
   date              DateTime
   schoolId          String
   courseId          String
   dates             AssignmentDate[]
   requireSubmission Boolean
-  teacher           Teacher          @relation(fields: [teacherId], references: [id])
+  teacher           Teacher                @relation(fields: [teacherId], references: [id])
   teacherId         String
-  createdAt         DateTime         @default(now())
-  updatedAt         DateTime         @updatedAt
+  submissions       AssignmentSubmission[]
+  createdAt         DateTime               @default(now())
+  updatedAt         DateTime               @updatedAt
+}
+
+model AssignmentSubmission {
+  id           String     @id @default(cuid())
+  assignmentId String
+  assignment   Assignment @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+  studentId    String
+  student      Student    @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  fileId       String
+  file         File       @relation(fields: [fileId], references: [id], onDelete: Cascade)
+  submittedAt  DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  @@unique([assignmentId, studentId])
+  @@index([assignmentId])
+  @@index([studentId])
 }
 
 model AssignmentDate {

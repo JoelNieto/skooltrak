@@ -1,3 +1,4 @@
+import { EmptyState, PageHeader, StatCard } from '@/ui';
 import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
@@ -6,16 +7,12 @@ import { Prisma } from '@generated/prisma';
 import { Apollo, gql } from 'apollo-angular';
 import { endOfWeek, startOfWeek } from 'date-fns';
 import { map, of } from 'rxjs';
-import { EmptyState, PageHeader, StatCard } from '@/ui';
 import Store from './core/store';
 @Component({
   selector: 'app-teacher-home',
   imports: [DatePipe, RouterLink, PageHeader, StatCard, EmptyState],
   template: `
-    <lib-page-header
-      title="Dashboard docente"
-      subtitle="Resumen de tus clases y seguimiento semanal."
-    />
+    <lib-page-header title="Dashboard docente" subtitle="Resumen de tus clases y seguimiento semanal." />
 
     <div class="grid gap-4 md:grid-cols-3">
       <lib-stat-card
@@ -39,12 +36,8 @@ import Store from './core/store';
       <div class="card border border-base-200 bg-base-100">
         <div class="card-body">
           <div class="flex items-center justify-between">
-            <h2 class="text-lg font-semibold text-base-content">
-              Asignaciones de la semana
-            </h2>
-            <a routerLink="/assignments" class="link link-primary text-sm">
-              Ver todas
-            </a>
+            <h2 class="text-lg font-semibold text-base-content">Asignaciones de la semana</h2>
+            <a routerLink="/assignments" class="link link-primary text-sm"> Ver todas </a>
           </div>
           @if (upcomingAssignments().length === 0) {
             <lib-empty-state
@@ -55,13 +48,16 @@ import Store from './core/store';
           } @else {
             <div class="space-y-3">
               @for (assignment of upcomingAssignments(); track assignment.id) {
-                <div class="rounded-lg border border-base-200 p-3">
+                <div
+                  class="rounded-lg border border-base-200 cursor-pointer hover:bg-base-100 transition-colors p-3"
+                  [routerLink]="['/assignments', assignment.id]"
+                >
                   <p class="font-medium text-base-content">
                     {{ assignment.title }}
                   </p>
                   <div class="text-sm text-base-content/70">
                     {{ assignment.course.name }} ·
-                    {{ assignment.date | date : 'mediumDate' }}
+                    {{ assignment.date | date: 'mediumDate' }}
                   </div>
                 </div>
               }
@@ -73,12 +69,8 @@ import Store from './core/store';
       <div class="card border border-base-200 bg-base-100">
         <div class="card-body">
           <div class="flex items-center justify-between">
-            <h2 class="text-lg font-semibold text-base-content">
-              Mensajes recientes
-            </h2>
-            <a routerLink="/messages" class="link link-primary text-sm">
-              Ir a mensajes
-            </a>
+            <h2 class="text-lg font-semibold text-base-content">Mensajes recientes</h2>
+            <a routerLink="/messages" class="link link-primary text-sm"> Ir a mensajes </a>
           </div>
           @if ((recentMessages.value() ?? []).length === 0) {
             <lib-empty-state
@@ -95,7 +87,7 @@ import Store from './core/store';
                   </p>
                   <div class="text-sm text-base-content/70">
                     {{ message.message.sender.name }} ·
-                    {{ message.message.createdAt | date : 'short' }}
+                    {{ message.message.createdAt | date: 'short' }}
                   </div>
                 </div>
               }
@@ -112,12 +104,8 @@ export default class TeacherHome {
   private store = inject(Store);
 
   private currentDate = signal(new Date());
-  private startDate = computed(() =>
-    startOfWeek(this.currentDate(), { weekStartsOn: 1 })
-  );
-  private endDate = computed(() =>
-    endOfWeek(this.currentDate(), { weekStartsOn: 1 })
-  );
+  private startDate = computed(() => startOfWeek(this.currentDate(), { weekStartsOn: 1 }));
+  private endDate = computed(() => endOfWeek(this.currentDate(), { weekStartsOn: 1 }));
 
   public statsResource = rxResource({
     params: () => ({ schoolId: this.store.currentSchoolId() }),
@@ -160,16 +148,8 @@ export default class TeacherHome {
       return this.apollo
         .watchQuery<{ assignmentsBySchoolId: AssignmentPreview[] }>({
           query: gql`
-            query TeacherAssignments(
-              $schoolId: String!
-              $startDate: String!
-              $endDate: String!
-            ) {
-              assignmentsBySchoolId(
-                schoolId: $schoolId
-                startDate: $startDate
-                endDate: $endDate
-              ) {
+            query TeacherAssignments($schoolId: String!, $startDate: String!, $endDate: String!) {
+              assignmentsBySchoolId(schoolId: $schoolId, startDate: $startDate, endDate: $endDate) {
                 id
                 title
                 date
@@ -220,16 +200,10 @@ export default class TeacherHome {
 
   public upcomingAssignments = computed(() => {
     const assignments = this.assignmentsResource.value() ?? [];
-    return [...assignments]
-      .sort(
-        (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
-      )
-      .slice(0, 4);
+    return [...assignments].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()).slice(0, 4);
   });
 
-  public weeklyAssignmentsCount = computed(
-    () => this.assignmentsResource.value()?.length ?? 0
-  );
+  public weeklyAssignmentsCount = computed(() => this.assignmentsResource.value()?.length ?? 0);
 }
 
 type AssignmentPreview = Prisma.AssignmentGetPayload<{

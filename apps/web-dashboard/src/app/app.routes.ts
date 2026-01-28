@@ -55,6 +55,11 @@ export const appRoutes: Route[] = [
         canMatch: [studentGuard],
         loadComponent: () => import('./student-home'),
       },
+      // Fallback home for when role guards don't match
+      {
+        path: 'home',
+        loadComponent: () => import('./home'),
+      },
       {
         path: 'courses',
         loadComponent: () => import('./courses/courses'),
@@ -175,6 +180,11 @@ export const appRoutes: Route[] = [
       {
         path: 'profile',
         loadComponent: () => import('./profile'),
+      },
+      {
+        path: 'change-password',
+        loadComponent: () => import('./auth/change-password'),
+        title: 'Cambiar contraseña | Skooltrak',
       },
       {
         path: 'admin',

@@ -4,9 +4,10 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
-import { Reflector } from '@nestjs/core';
+import { ModuleRef, Reflector } from '@nestjs/core';
 import { GqlExecutionContext } from '@nestjs/graphql';
 import { SetMetadata } from '@nestjs/common';
+import * as jwt from 'jsonwebtoken';
 import { PrismaService } from './prisma.service';
 
 // Decorator to mark routes as public (no auth required)
@@ -28,6 +29,13 @@ export interface AuthUserContext {
   permissions?: string[];
 }
 
+interface JwtPayload {
+  userId: string;
+  role: string;
+  organizationId: string | null;
+  permissions: string[];
+}
+
 /**
  * Auth guard that works with better-auth sessions via GraphQL context
  * This guard checks for the session in the GraphQL context set by better-auth
@@ -35,7 +43,10 @@ export interface AuthUserContext {
  */
 @Injectable()
 export class BetterAuthGuard implements CanActivate {
-  constructor(private reflector: Reflector) {}
+  constructor(
+    private reflector: Reflector,
+    private moduleRef: ModuleRef
+  ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     // Check if route is marked as public
@@ -51,25 +62,68 @@ export class BetterAuthGuard implements CanActivate {
     const ctx = GqlExecutionContext.create(context);
     const request = ctx.getContext().req;
 
-    // Check for session from better-auth or legacy JWT user
+    // Check for session from better-auth
     const session = request.session;
-    const legacyUser = request.user;
 
-    // If we have a better-auth session, populate req.user for backward compatibility
+    // If we have a better-auth session, populate req.user
     if (session?.user) {
-      const user = session.user;
+      const sessionUser = session.user;
+      const prisma = this.moduleRef.get(PrismaService, { strict: false });
+      const dbUser = await prisma.user.findUnique({
+        where: { id: sessionUser.id },
+        include: {
+          role: { include: { permissions: true } },
+        },
+      });
+
+      if (!dbUser) {
+        throw new UnauthorizedException('User not found');
+      }
+
       request.user = {
-        userId: user.id,
-        organizationId: session.activeOrganizationId || user.organizationId || null,
-        role: user.role?.name || 'member',
-        permissions: user.role?.permissions?.map((p: any) => p.descriptiveId) || [],
+        userId: dbUser.id,
+        organizationId: session.activeOrganizationId || dbUser.organizationId,
+        role: dbUser.role?.name || 'member',
+        permissions: dbUser.role?.permissions?.map((p) => p.descriptiveId) || [],
       } as AuthUserContext;
+
       return true;
     }
 
-    // If we have a legacy JWT user object, it's already in the expected format
-    if (legacyUser?.userId) {
-      return true;
+    // Check for JWT token in Authorization header (backward compatibility)
+    const authHeader = request.headers.authorization;
+    if (authHeader?.startsWith('Bearer ')) {
+      const token = authHeader.substring(7);
+      try {
+        const decoded = jwt.verify(
+          token,
+          process.env['JWT_SECRET'] || ''
+        ) as JwtPayload;
+
+        // Fetch fresh user data from database
+        const prisma = this.moduleRef.get(PrismaService, { strict: false });
+        const dbUser = await prisma.user.findUnique({
+          where: { id: decoded.userId },
+          include: {
+            role: { include: { permissions: true } },
+          },
+        });
+
+        if (!dbUser) {
+          throw new UnauthorizedException('User not found');
+        }
+
+        request.user = {
+          userId: dbUser.id,
+          organizationId: dbUser.organizationId,
+          role: dbUser.role?.name || 'member',
+          permissions: dbUser.role?.permissions?.map((p) => p.descriptiveId) || [],
+        } as AuthUserContext;
+
+        return true;
+      } catch (err) {
+        throw new UnauthorizedException('Invalid token');
+      }
     }
 
     throw new UnauthorizedException('Not authenticated');

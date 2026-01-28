@@ -157,49 +157,33 @@ export default class Auth {
   public async signIn(email: string, password: string) {
     this.isSigning.set(true);
 
-    try {
-      // Use better-auth client for sign in
-      const { data, error } = await authClient.signIn.email({
-        email,
-        password,
-        callbackURL: '/home',
-      });
-
-      if (error) {
-        this.#toasts.showError(error.message || 'Sign in failed');
-        this.isSigning.set(false);
-        return;
-      }
-
-      // Update session state
-      this.sessionState.set(data);
-
-      // Also use GraphQL for legacy support
-      this.#apollo
-        .mutate<{ login: { accessToken: string } }>({
-          mutation: gql`
-            mutation Login($email: String!, $password: String!) {
-              login(email: $email, password: $password) {
-                accessToken
-              }
+    // Use GraphQL login which returns JWT token
+    this.#apollo
+      .mutate<{ login: { accessToken: string } }>({
+        mutation: gql`
+          mutation Login($email: String!, $password: String!) {
+            login(email: $email, password: $password) {
+              accessToken
             }
-          `,
-          variables: { email, password },
-        })
-        .subscribe({
-          next: (res) => {
-            const { accessToken } = res.data!.login;
+          }
+        `,
+        variables: { email, password },
+      })
+      .subscribe({
+        next: (res) => {
+          const accessToken = res.data?.login?.accessToken;
+          if (accessToken) {
             this.token.set(accessToken);
-          },
-          error: (err) => {
-            console.error('GraphQL login error:', err);
-          },
-        });
-    } catch (err: any) {
-      console.error('Sign in error:', err);
-      this.#toasts.showError(err.message || 'Sign in failed');
-      this.isSigning.set(false);
-    }
+            this.isSigning.set(false);
+            this.#router.navigate(['/home']);
+          }
+        },
+        error: (err) => {
+          console.error('Login error:', err);
+          this.#toasts.showError(err.message || 'Credenciales inválidas');
+          this.isSigning.set(false);
+        },
+      });
   }
 
   public async logout() {

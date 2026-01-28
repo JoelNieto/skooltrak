@@ -119,7 +119,9 @@ export default class Auth {
 
   // Computed from user or session
   public userColor = computed(() => this.user()?.color);
-  public role = computed(() => this.user()?.role?.name || this.sessionState()?.user?.role);
+  public role = computed(
+    () => this.user()?.role?.name || this.sessionState()?.user?.role
+  );
   public permissions = computed<string[]>(
     () => this.user()?.role?.permissions?.map((p: any) => p.descriptiveId) || []
   );
@@ -185,52 +187,33 @@ export default class Auth {
   public async signIn(email: string, password: string) {
     this.isSigning.set(true);
 
-    try {
-      // Use better-auth client for sign in
-      const { data, error } = await authClient.signIn.email({
-        email,
-        password,
-        callbackURL: '/home',
-      });
-
-      if (error) {
-        this.#toasts.showError(error.message || 'Sign in failed');
-        this.isSigning.set(false);
-        return;
-      }
-
-      // Update session state
-      this.sessionState.set(data);
-
-      // Also use GraphQL for legacy support and to get the JWT token
-      this.#apollo
-        .mutate<{ login: { accessToken: string } }>({
-          mutation: gql`
-            mutation Login($email: String!, $password: String!) {
-              login(email: $email, password: $password) {
-                accessToken
-              }
+    // Use GraphQL login which returns JWT token
+    this.#apollo
+      .mutate<{ login: { accessToken: string } }>({
+        mutation: gql`
+          mutation Login($email: String!, $password: String!) {
+            login(email: $email, password: $password) {
+              accessToken
             }
-          `,
-          variables: { email, password },
-        })
-        .subscribe({
-          next: (res) => {
-            const { accessToken } = res.data!.login;
+          }
+        `,
+        variables: { email, password },
+      })
+      .subscribe({
+        next: (res) => {
+          const accessToken = res.data?.login?.accessToken;
+          if (accessToken) {
             this.token.set(accessToken);
+            this.isSigning.set(false);
             this.router.navigate(['/home']);
-          },
-          error: (err) => {
-            console.error('GraphQL login error:', err);
-            // Still navigate since better-auth login succeeded
-            this.router.navigate(['/home']);
-          },
-        });
-    } catch (err: any) {
-      console.error('Sign in error:', err);
-      this.#toasts.showError(err.message || 'Sign in failed');
-      this.isSigning.set(false);
-    }
+          }
+        },
+        error: (err) => {
+          console.error('Login error:', err);
+          this.#toasts.showError(err.message || 'Credenciales inválidas');
+          this.isSigning.set(false);
+        },
+      });
   }
 
   public hasPermission(permission: string) {
@@ -277,7 +260,10 @@ export default class Auth {
     }
   }
 
-  public async resetPassword(token: string, newPassword: string): Promise<boolean> {
+  public async resetPassword(
+    token: string,
+    newPassword: string
+  ): Promise<boolean> {
     try {
       const response = await fetch('/api/auth/reset-password', {
         method: 'POST',

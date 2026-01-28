@@ -1,12 +1,20 @@
 import { Toast } from '@/ui';
 import { isPlatformBrowser } from '@angular/common';
-import { Injectable, PLATFORM_ID, computed, effect, inject, linkedSignal, signal } from '@angular/core';
+import {
+  Injectable,
+  PLATFORM_ID,
+  computed,
+  effect,
+  inject,
+  linkedSignal,
+  signal,
+} from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
-import { JwtHelperService } from '@auth0/angular-jwt';
 import { Prisma } from '@generated/prisma';
 import { Apollo, gql } from 'apollo-angular';
 import { catchError, map, of } from 'rxjs';
+import { authClient } from './auth-client';
 
 export type DecodedToken = {
   userId: string;
@@ -22,13 +30,21 @@ export type DecodedToken = {
 })
 export default class Auth {
   private platformId = inject(PLATFORM_ID);
-  private jwtHelper = new JwtHelperService();
   private router = inject(Router);
   #apollo = inject(Apollo);
   #toasts = inject(Toast);
   public readonly isInitialized = signal(false);
   public isSigning = signal(false);
 
+  // Session state from better-auth
+  private sessionState = signal<{
+    user?: any;
+    session?: any;
+    token?: string;
+    redirect?: boolean;
+  } | null>(null);
+
+  // For backward compatibility with existing code that uses token
   public token = linkedSignal(() => {
     if (isPlatformBrowser(this.platformId)) {
       return localStorage.getItem('access_token');
@@ -93,22 +109,27 @@ export default class Auth {
             this.#toasts.showError(err.message);
             this.isSigning.set(false);
             return of(null);
-          }),
+          })
         );
     },
   });
 
   public user = computed(() => this.userResource.value());
-  public decodedToken = computed<DecodedToken | null>(() => this.jwtHelper.decodeToken(this.token() || ''));
   public isUserLoading = computed(() => this.userResource.isLoading());
 
+  // Computed from user or session
   public userColor = computed(() => this.user()?.color);
-  public role = computed(() => this.decodedToken()?.role);
-  public permissions = computed<string[]>(() => this.decodedToken()?.permissions || []);
+  public role = computed(() => this.user()?.role?.name || this.sessionState()?.user?.role);
+  public permissions = computed<string[]>(
+    () => this.user()?.role?.permissions?.map((p: any) => p.descriptiveId) || []
+  );
 
-  public userName = computed(() => `${this.user()?.firstName} ${this.user()?.lastName}`);
+  public userName = computed(
+    () => `${this.user()?.firstName} ${this.user()?.lastName}`
+  );
   public userInitials = computed(
-    () => `${this.user()?.firstName.charAt(0).toUpperCase()}${this.user()?.lastName.charAt(0).toUpperCase()}`,
+    () =>
+      `${this.user()?.firstName?.charAt(0).toUpperCase() || ''}${this.user()?.lastName?.charAt(0).toUpperCase() || ''}`
   );
 
   public getAccessToken() {
@@ -118,16 +139,24 @@ export default class Auth {
     return null;
   }
 
-  public isAdmin = computed(() => this.decodedToken()?.role === 'ADMIN' || this.decodedToken()?.role === 'ORG_ADMIN');
-  public isTeacher = computed(() => this.decodedToken()?.role === 'TEACHER');
-  public isStudent = computed(() => this.decodedToken()?.role === 'STUDENT');
-  public isAuthenticated = computed(() => !this.jwtHelper.isTokenExpired(this.token() || ''));
+  public isAdmin = computed(
+    () => this.role() === 'ADMIN' || this.role() === 'ORG_ADMIN'
+  );
+  public isTeacher = computed(() => this.role() === 'TEACHER');
+  public isStudent = computed(() => this.role() === 'STUDENT');
+
+  public isAuthenticated = computed(() => {
+    // Check both session state and token for backward compatibility
+    const session = this.sessionState();
+    const token = this.token();
+    return !!session?.user || !!token;
+  });
 
   constructor() {
-    // Mark as initialized immediately in browser
-    // For SSR with RenderMode.Client, this won't run on server anyway
     if (isPlatformBrowser(this.platformId)) {
       this.isInitialized.set(true);
+      // Initialize session from better-auth
+      this.initializeSession();
     }
 
     effect(() => {
@@ -142,33 +171,66 @@ export default class Auth {
     });
   }
 
-  public signIn(email: string, password: string) {
-    this.#apollo
-      .mutate<{ login: { accessToken: string } }>({
-        mutation: gql`
-          mutation Login($email: String!, $password: String!) {
-            login(email: $email, password: $password) {
-              accessToken
-            }
-          }
-        `,
-        variables: {
-          email,
-          password,
-        },
-      })
-      .subscribe({
-        next: (res) => {
-          const { accessToken } = res.data!.login;
-          this.token.set(accessToken);
-          this.isSigning.set(true);
-          this.router.navigate(['/home']);
-        },
-        error: (err) => {
-          console.error(err);
-          this.#toasts.showError(err.message);
-        },
+  private async initializeSession() {
+    try {
+      const session = await authClient.getSession();
+      if (session.data) {
+        this.sessionState.set(session.data);
+      }
+    } catch (error) {
+      console.error('Failed to initialize session:', error);
+    }
+  }
+
+  public async signIn(email: string, password: string) {
+    this.isSigning.set(true);
+
+    try {
+      // Use better-auth client for sign in
+      const { data, error } = await authClient.signIn.email({
+        email,
+        password,
+        callbackURL: '/home',
       });
+
+      if (error) {
+        this.#toasts.showError(error.message || 'Sign in failed');
+        this.isSigning.set(false);
+        return;
+      }
+
+      // Update session state
+      this.sessionState.set(data);
+
+      // Also use GraphQL for legacy support and to get the JWT token
+      this.#apollo
+        .mutate<{ login: { accessToken: string } }>({
+          mutation: gql`
+            mutation Login($email: String!, $password: String!) {
+              login(email: $email, password: $password) {
+                accessToken
+              }
+            }
+          `,
+          variables: { email, password },
+        })
+        .subscribe({
+          next: (res) => {
+            const { accessToken } = res.data!.login;
+            this.token.set(accessToken);
+            this.router.navigate(['/home']);
+          },
+          error: (err) => {
+            console.error('GraphQL login error:', err);
+            // Still navigate since better-auth login succeeded
+            this.router.navigate(['/home']);
+          },
+        });
+    } catch (err: any) {
+      console.error('Sign in error:', err);
+      this.#toasts.showError(err.message || 'Sign in failed');
+      this.isSigning.set(false);
+    }
   }
 
   public hasPermission(permission: string) {
@@ -176,12 +238,98 @@ export default class Auth {
   }
 
   public isAuthenticatedSync() {
+    const session = this.sessionState();
     const token = this.getAccessToken();
-    return token && !this.jwtHelper.isTokenExpired(token);
+    return !!session?.user || !!token;
   }
 
-  public logout() {
+  public async logout() {
+    try {
+      await authClient.signOut();
+    } catch (error) {
+      console.error('Sign out error:', error);
+    }
+
+    this.sessionState.set(null);
     this.token.set(null);
     this.router.navigate(['/login']);
+  }
+
+  // Password reset methods
+  public async requestPasswordReset(email: string): Promise<boolean> {
+    try {
+      // Use fetch to call the better-auth REST endpoint
+      const response = await fetch('/api/auth/forget-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          email,
+          redirectTo: '/reset-password',
+        }),
+      });
+
+      // Always return true to prevent email enumeration
+      return true;
+    } catch (err: any) {
+      console.error('Password reset request error:', err);
+      return true; // Return true to prevent email enumeration
+    }
+  }
+
+  public async resetPassword(token: string, newPassword: string): Promise<boolean> {
+    try {
+      const response = await fetch('/api/auth/reset-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          token,
+          newPassword,
+        }),
+      });
+
+      if (!response.ok) {
+        this.#toasts.showError('Failed to reset password');
+        return false;
+      }
+
+      this.#toasts.showSuccess('Password reset successfully');
+      return true;
+    } catch (err: any) {
+      console.error('Password reset error:', err);
+      this.#toasts.showError('Failed to reset password');
+      return false;
+    }
+  }
+
+  public async changePassword(
+    currentPassword: string,
+    newPassword: string
+  ): Promise<boolean> {
+    try {
+      const response = await fetch('/api/auth/change-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          currentPassword,
+          newPassword,
+          revokeOtherSessions: true,
+        }),
+      });
+
+      if (!response.ok) {
+        this.#toasts.showError('Failed to change password');
+        return false;
+      }
+
+      this.#toasts.showSuccess('Password changed successfully');
+      return true;
+    } catch (err: any) {
+      console.error('Password change error:', err);
+      this.#toasts.showError('Failed to change password');
+      return false;
+    }
   }
 }

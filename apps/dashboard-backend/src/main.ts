@@ -8,7 +8,9 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app/app.module';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, {
+    bodyParser: false, // Required for better-auth to handle raw request body
+  });
   app.useGlobalPipes(new ValidationPipe({ transform: true }));
   const globalPrefix = 'api';
   app.setGlobalPrefix(globalPrefix);

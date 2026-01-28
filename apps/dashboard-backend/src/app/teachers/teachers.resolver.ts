@@ -1,4 +1,4 @@
-import { JwtAuthGuard } from '@/auth';
+import { BetterAuthGuard } from '@/auth';
 import { UseGuards } from '@nestjs/common';
 import {
   Args,
@@ -26,7 +26,7 @@ export class TeachersResolver {
     return this.teachersService.create(createTeacherInput);
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(BetterAuthGuard)
   @Query(() => [Teacher], { name: 'teachers' })
   findAll(
     @Args()
@@ -47,7 +47,7 @@ export class TeachersResolver {
     return this.teachersService.findManyByOrganizationId(organizationId);
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(BetterAuthGuard)
   @Query(() => Int, { name: 'findManyTeachersCount' })
   findManyTeachersCount(
     @Args()

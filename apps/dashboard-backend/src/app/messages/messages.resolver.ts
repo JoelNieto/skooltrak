@@ -1,4 +1,4 @@
-import { JwtAuthGuard, User } from '@/auth';
+import { BetterAuthGuard, User } from '@/auth';
 import { UseGuards } from '@nestjs/common';
 import { Args, Int, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { FetchDataInput } from '../fetch-data.input';
@@ -10,7 +10,7 @@ import { MessagesService } from './messages.service';
 export class MessagesResolver {
   constructor(private readonly messagesService: MessagesService) {}
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(BetterAuthGuard)
   @Mutation(() => Message)
   createMessage(
     @Args('createMessageInput') createMessageInput: CreateMessageInput
@@ -18,25 +18,25 @@ export class MessagesResolver {
     return this.messagesService.create(createMessageInput);
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(BetterAuthGuard)
   @Query(() => [Message], { name: 'findMyMessages' })
   findMyMessages(@Args() args: FetchDataInput) {
     return this.messagesService.findManyBySender(args);
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(BetterAuthGuard)
   @Query(() => [MessageRecipient], { name: 'findManyMessages' })
   findManyMessages(@Args() query: FetchDataInput) {
     return this.messagesService.findMany(query);
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(BetterAuthGuard)
   @Query(() => Int, { name: 'findManyMessagesCount' })
   findManyMessagesCount() {
     return this.messagesService.findCount();
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(BetterAuthGuard)
   @Query(() => [User], { name: 'findContacts' })
   findContacts(
     @Args('queryText', { type: () => String, nullable: true, defaultValue: '' })
@@ -45,19 +45,19 @@ export class MessagesResolver {
     return this.messagesService.findContacts(queryText);
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(BetterAuthGuard)
   @Query(() => Message, { name: 'findMessageById' })
   findMessageById(@Args('id', { type: () => String }) id: string) {
     return this.messagesService.findOne(id);
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(BetterAuthGuard)
   @Mutation(() => Message)
   removeMessage(@Args('id', { type: () => String }) id: string) {
     return this.messagesService.remove(id);
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(BetterAuthGuard)
   @Mutation(() => MessageRecipient)
   removeMessageRecipient(@Args('id', { type: () => String }) id: string) {
     return this.messagesService.removeRecipient(id);

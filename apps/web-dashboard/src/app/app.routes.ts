@@ -18,6 +18,21 @@ export const appRoutes: Route[] = [
     title: 'Registro | Skooltrak',
   },
   {
+    path: 'forgot-password',
+    loadComponent: () => import('./auth/forgot-password'),
+    title: 'Recuperar contraseña | Skooltrak',
+  },
+  {
+    path: 'reset-password',
+    loadComponent: () => import('./auth/reset-password'),
+    title: 'Restablecer contraseña | Skooltrak',
+  },
+  {
+    path: 'accept-invitation/:id',
+    loadComponent: () => import('./auth/accept-invitation'),
+    title: 'Aceptar invitación | Skooltrak',
+  },
+  {
     path: '',
     canActivate: [authGuard],
     canActivateChild: [authGuard],

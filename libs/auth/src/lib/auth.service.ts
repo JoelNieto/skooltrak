@@ -1,52 +1,43 @@
 import { Injectable } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
+import { randomUUID } from 'crypto';
 import { SignUpInput } from './dto/sign-up.input';
 import { PrismaService } from './prisma.service';
+import { auth } from './better-auth';
 
 @Injectable()
 export class AuthService {
-  constructor(
-    private prisma: PrismaService,
-    private jwtService: JwtService,
-  ) {}
+  constructor(private prisma: PrismaService) {}
 
   private getRandomPastelColor() {
     const hue = Math.floor(Math.random() * 360);
     return `hsl(${hue}, 70%, 80%)`;
   }
 
+  private generateSlug(name: string): string {
+    return name
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-|-$/g, '');
+  }
+
+  /**
+   * Legacy login method - kept for backward compatibility
+   * Better-auth handles login via its own API endpoints
+   */
   async login(email: string, password: string) {
-    const user = await this.prisma.user.findUnique({
-      where: { email },
-      include: { role: { include: { permissions: true } } },
+    const response = await auth.api.signInEmail({
+      body: { email, password },
+      asResponse: true,
     });
 
-    if (!user) {
-      throw new Error('User not found');
+    if (!response.ok) {
+      throw new Error('Invalid credentials');
     }
 
-    const { id, role, organizationId } = user;
-
-    if (!(await bcrypt.compare(password, user.password))) {
-      throw new Error('Invalid password');
-    }
-
-    await this.prisma.user.update({
-      where: { id: user.id },
-      data: { lastLogin: new Date() },
-    });
-
+    const data = await response.json();
     return {
-      accessToken: this.jwtService.sign(
-        {
-          userId: id,
-          role: role.name,
-          organizationId: organizationId,
-          permissions: role.permissions.map((p) => p.descriptiveId),
-        },
-        { secret: process.env['JWT_SECRET'] },
-      ),
+      accessToken: data.token || data.session?.token || '',
     };
   }
 
@@ -54,15 +45,17 @@ export class AuthService {
     return this.prisma.user.findUnique({
       where: { id: userId },
       include: {
-        role: { include: { permissions: true } },
+        role: { include: { permissions: true, organization: true } },
         teacher: true,
         student: true,
+        organization: true,
       },
     });
   }
 
   async signUp(input: SignUpInput) {
-    const { schoolName, schoolShortName, email, firstName, lastName, password } = input;
+    const { schoolName, schoolShortName, email, firstName, lastName, password } =
+      input;
 
     // Check if email already exists
     const existingUser = await this.prisma.user.findUnique({
@@ -76,12 +69,22 @@ export class AuthService {
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
+    // Generate unique slug for organization
+    let baseSlug = this.generateSlug(schoolName);
+    let slug = baseSlug;
+    let counter = 1;
+    while (await this.prisma.organization.findFirst({ where: { slug } })) {
+      slug = `${baseSlug}-${counter}`;
+      counter++;
+    }
+
     // Create all entities in a transaction
     const result = await this.prisma.$transaction(async (tx) => {
       // 1. Create Organization (using school name)
       const organization = await tx.organization.create({
         data: {
           name: schoolName,
+          slug,
           description: '',
           active: true,
         },
@@ -101,17 +104,40 @@ export class AuthService {
       const user = await tx.user.create({
         data: {
           email,
+          name: `${firstName} ${lastName}`.trim(),
           firstName,
           lastName,
           password: hashedPassword,
           color: this.getRandomPastelColor(),
           roleId: role.id,
           organizationId: organization.id,
+          emailVerified: true, // Auto-verify for new signups
         },
         include: { role: { include: { permissions: true } } },
       });
 
-      // 4. Create first School
+      // 4. Create Account for better-auth
+      await tx.account.create({
+        data: {
+          id: randomUUID(),
+          accountId: user.id,
+          providerId: 'credential',
+          userId: user.id,
+          password: hashedPassword,
+        },
+      });
+
+      // 5. Create Member linking user to organization
+      await tx.member.create({
+        data: {
+          id: randomUUID(),
+          organizationId: organization.id,
+          userId: user.id,
+          role: 'owner',
+        },
+      });
+
+      // 6. Create first School
       await tx.school.create({
         data: {
           name: schoolName,
@@ -132,19 +158,22 @@ export class AuthService {
       return { user, role, organization };
     });
 
-    const { user, role, organization } = result;
+    const { user, organization } = result;
 
-    // Return JWT token
+    // Create session using better-auth
+    const response = await auth.api.signInEmail({
+      body: { email, password },
+      asResponse: true,
+    });
+
+    if (!response.ok) {
+      // Fallback: return empty token, user will need to login manually
+      return { accessToken: '' };
+    }
+
+    const data = await response.json();
     return {
-      accessToken: this.jwtService.sign(
-        {
-          userId: user.id,
-          role: role.name,
-          organizationId: organization.id,
-          permissions: role.permissions.map((p) => p.descriptiveId),
-        },
-        { secret: process.env['JWT_SECRET'] },
-      ),
+      accessToken: data.token || data.session?.token || '',
     };
   }
 }

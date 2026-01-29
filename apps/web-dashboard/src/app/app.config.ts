@@ -35,10 +35,12 @@ export const appConfig: ApplicationConfig = {
         },
       }));
 
+      // Auth link - supports both JWT tokens and cookie-based sessions
       const auth = setContext(() => {
         if (!isPlatformBrowser(platformId)) {
           return {};
         }
+        // Still include JWT token for backward compatibility
         const token = localStorage.getItem('access_token');
         if (token) {
           return {
@@ -49,11 +51,16 @@ export const appConfig: ApplicationConfig = {
         }
         return {};
       });
+
       return {
         link: ApolloLink.from([
           basic,
           auth,
-          httpLink.create({ uri: '/api/graphql' }),
+          httpLink.create({
+            uri: '/api/graphql',
+            // Include credentials to send cookies for session-based auth
+            withCredentials: true,
+          }),
         ]),
         cache: new InMemoryCache(),
         defaultOptions: {

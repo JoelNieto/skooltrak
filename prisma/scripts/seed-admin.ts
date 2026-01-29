@@ -1,0 +1,143 @@
+/**
+ * Seed script to create an admin user
+ *
+ * Run with: bun run prisma/scripts/seed-admin.ts
+ */
+
+import { PrismaPg } from '@prisma/adapter-pg';
+import * as bcrypt from 'bcrypt';
+import { randomUUID } from 'crypto';
+import { PrismaClient } from '../../generated/prisma/index.js';
+
+const adapter = new PrismaPg({
+  connectionString: process.env['DATABASE_URL'],
+});
+
+const prisma = new PrismaClient({ adapter });
+
+async function main() {
+  const email = 'joelnieto1215@gmail.com';
+  const password = 'Skooltrak123!'; // Change this!
+  const firstName = 'Admin';
+  const lastName = 'User';
+  const organizationName = 'Skooltrak';
+  const schoolShortName = 'SKOOL';
+
+  // Check if user already exists
+  const existingUser = await prisma.user.findUnique({
+    where: { email },
+  });
+
+  if (existingUser) {
+    console.log(`User ${email} already exists!`);
+    return;
+  }
+
+  // Hash password
+  const hashedPassword = await bcrypt.hash(password, 10);
+
+  // Generate slug
+  const slug = organizationName.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+
+  console.log('Creating organization, user, and school...\n');
+
+  const result = await prisma.$transaction(async (tx) => {
+    // 1. Create Organization
+    const organization = await tx.organization.create({
+      data: {
+        name: organizationName,
+        slug,
+        description: 'Demo organization',
+        active: true,
+      },
+    });
+    console.log(`✓ Created organization: ${organization.name}`);
+
+    // 2. Create ORG_ADMIN Role
+    const role = await tx.role.create({
+      data: {
+        name: 'ORG_ADMIN',
+        description: 'Organization Administrator',
+        organizationId: organization.id,
+      },
+    });
+    console.log(`✓ Created role: ${role.name}`);
+
+    // 3. Create User
+    const user = await tx.user.create({
+      data: {
+        email,
+        name: `${firstName} ${lastName}`,
+        firstName,
+        lastName,
+        password: hashedPassword,
+        color: `hsl(${Math.floor(Math.random() * 360)}, 70%, 80%)`,
+        roleId: role.id,
+        organizationId: organization.id,
+        emailVerified: true,
+      },
+    });
+    console.log(`✓ Created user: ${user.email}`);
+
+    // 4. Create Account for better-auth
+    await tx.account.create({
+      data: {
+        id: randomUUID(),
+        accountId: user.id,
+        providerId: 'credential',
+        userId: user.id,
+        password: hashedPassword,
+      },
+    });
+    console.log(`✓ Created credential account`);
+
+    // 5. Create Member
+    await tx.member.create({
+      data: {
+        id: randomUUID(),
+        organizationId: organization.id,
+        userId: user.id,
+        role: 'owner',
+      },
+    });
+    console.log(`✓ Created member record`);
+
+    // 6. Create School
+    const school = await tx.school.create({
+      data: {
+        name: organizationName,
+        shortName: schoolShortName,
+        organizationId: organization.id,
+        logo: '',
+        address: '',
+        city: '',
+        state: '',
+        zip: '',
+        country: '',
+        email: '',
+        phone: '',
+        website: '',
+      },
+    });
+    console.log(`✓ Created school: ${school.name}`);
+
+    return { user, organization, school };
+  });
+
+  console.log('\n========================================');
+  console.log('Admin user created successfully!');
+  console.log('========================================');
+  console.log(`Email: ${email}`);
+  console.log(`Password: ${password}`);
+  console.log(`Organization: ${result.organization.name}`);
+  console.log('\nYou can now login at http://localhost:4200/login');
+}
+
+main()
+  .catch((e) => {
+    console.error('Seed failed:', e);
+    process.exit(1);
+  })
+  .finally(async () => {
+    await prisma.$disconnect();
+  });

@@ -1,4 +1,4 @@
-import { JwtAuthGuard } from '@/auth';
+import { BetterAuthGuard } from '@/auth';
 import { UseGuards } from '@nestjs/common';
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { FetchDataInput } from '../fetch-data.input';
@@ -18,13 +18,13 @@ import { FilesService } from './files.service';
 export class FilesResolver {
   constructor(private readonly filesService: FilesService) {}
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(BetterAuthGuard)
   @Mutation(() => File)
   createFile(@Args('createFileInput') createFileInput: CreateFileInput) {
     return this.filesService.create(createFileInput);
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(BetterAuthGuard)
   @Mutation(() => FileUploadUrl)
   createFileUploadUrl(
     @Args('createFileUploadInput') createFileUploadInput: CreateFileUploadInput
@@ -32,7 +32,7 @@ export class FilesResolver {
     return this.filesService.createUploadUrl(createFileUploadInput);
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(BetterAuthGuard)
   @Mutation(() => FileDownloadUrl)
   createFileDownloadUrl(
     @Args('createFileDownloadInput')
@@ -41,49 +41,49 @@ export class FilesResolver {
     return this.filesService.createDownloadUrl(createFileDownloadInput);
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(BetterAuthGuard)
   @Query(() => [File], { name: 'filesAccessible' })
   filesAccessible(@Args() query: FetchDataInput) {
     return this.filesService.findAccessible(query);
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(BetterAuthGuard)
   @Query(() => [File], { name: 'filesOwned' })
   filesOwned(@Args() query: FetchDataInput) {
     return this.filesService.findOwned(query);
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(BetterAuthGuard)
   @Query(() => [File], { name: 'filesSharedWithMe' })
   filesSharedWithMe(@Args() query: FetchDataInput) {
     return this.filesService.findSharedWithMe(query);
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(BetterAuthGuard)
   @Query(() => [File], { name: 'filesForCourse' })
   filesForCourse(@Args() query: FetchCourseFilesInput) {
     return this.filesService.findByCourse(query);
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(BetterAuthGuard)
   @Query(() => File, { name: 'fileById' })
   fileById(@Args('id', { type: () => String }) id: string) {
     return this.filesService.findOne(id);
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(BetterAuthGuard)
   @Mutation(() => File)
   shareFile(@Args('shareFileInput') shareFileInput: ShareFileInput) {
     return this.filesService.share(shareFileInput);
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(BetterAuthGuard)
   @Mutation(() => File)
   updateShare(@Args('updateShareInput') updateShareInput: UpdateShareInput) {
     return this.filesService.updateShare(updateShareInput);
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(BetterAuthGuard)
   @Mutation(() => File)
   removeShare(@Args('removeShareInput') removeShareInput: RemoveShareInput) {
     return this.filesService.removeShare(removeShareInput);

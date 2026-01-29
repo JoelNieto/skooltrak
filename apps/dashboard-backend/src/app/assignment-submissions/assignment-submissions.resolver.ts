@@ -1,6 +1,6 @@
 import { UseGuards } from '@nestjs/common';
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
-import { JwtAuthGuard } from '@/auth';
+import { BetterAuthGuard } from '@/auth';
 import { AssignmentSubmissionsService } from './assignment-submissions.service';
 import {
   CreateAssignmentSubmissionInput,
@@ -13,7 +13,7 @@ import {
 import { Student } from '../students/entities/student.entity';
 
 @Resolver(() => AssignmentSubmission)
-@UseGuards(JwtAuthGuard)
+@UseGuards(BetterAuthGuard)
 export class AssignmentSubmissionsResolver {
   constructor(
     private readonly assignmentSubmissionsService: AssignmentSubmissionsService

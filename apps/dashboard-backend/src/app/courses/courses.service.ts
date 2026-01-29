@@ -1,13 +1,13 @@
 import { Prisma } from '@generated/prisma';
 
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, Scope } from '@nestjs/common';
 import { CONTEXT } from '@nestjs/graphql';
 import { Request } from 'express';
 import { FetchDataInput } from '../fetch-data.input';
 import { PrismaService } from '../prisma.service';
 import { CreateCourseInput } from './dto/create-course.input';
 import { UpdateCourseInput } from './dto/update-course.input';
-@Injectable()
+@Injectable({ scope: Scope.REQUEST })
 export class CoursesService {
   constructor(
     private readonly prisma: PrismaService,

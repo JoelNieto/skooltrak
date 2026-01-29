@@ -16,6 +16,9 @@ datasource db {
 model Organization {
   id                 String              @id @default(cuid())
   name               String
+  slug               String?             @unique
+  logo               String?
+  metadata           String?
   description        String
   active             Boolean             @default(true)
   users              User[]
@@ -32,15 +35,24 @@ model Organization {
   messages           Message[]
   files              File[]
   attendanceSessions AttendanceSession[]
+  // Better-auth organization plugin
+  members            Member[]
+  invitations        Invitation[]
 }
 
 model User {
   id                String             @id @default(cuid())
   email             String             @unique
+  name              String?
   firstName         String
   lastName          String
   password          String
   color             String?
+  image             String?
+  emailVerified     Boolean            @default(false)
+  banned            Boolean            @default(false)
+  banReason         String?
+  banExpires        DateTime?
   role              Role               @relation(fields: [roleId], references: [id])
   roleId            String
   organization      Organization?      @relation(fields: [organizationId], references: [id])
@@ -55,6 +67,10 @@ model User {
   messageRecipients MessageRecipient[]
   filesOwned        File[]
   fileShares        FileShareUser[]
+  // Better-auth relations
+  sessions          Session[]
+  accounts          Account[]
+  members           Member[]
 }
 
 model Message {
@@ -597,6 +613,87 @@ model StudentGradeRevision {
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
 }
+
+// ==========================================
+// Better-Auth Tables
+// ==========================================
+
+model Session {
+  id                   String    @id
+  expiresAt            DateTime
+  token                String    @unique
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+  ipAddress            String?
+  userAgent            String?
+  userId               String
+  user                 User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  activeOrganizationId String?
+
+  @@index([userId])
+}
+
+model Account {
+  id                    String    @id
+  accountId             String
+  providerId            String
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@index([userId])
+}
+
+model Verification {
+  id         String   @id
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([identifier])
+}
+
+model Member {
+  id             String       @id
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  userId         String
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role           String       @default("member")
+  createdAt      DateTime     @default(now())
+
+  @@unique([organizationId, userId])
+  @@index([userId])
+}
+
+model Invitation {
+  id             String       @id
+  email          String
+  inviterId      String
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  role           String
+  status         String       @default("pending")
+  expiresAt      DateTime
+  createdAt      DateTime     @default(now())
+
+  @@index([organizationId])
+  @@index([email])
+}
+
+// ==========================================
+// Enums
+// ==========================================
 
 enum Gender {
   FEMALE

@@ -4,7 +4,7 @@ import { UpdateSubjectInput } from './dto/update-subject.input';
 import { Subject } from './entities/subject.entity';
 import { SubjectsService } from './subjects.service';
 
-import { JwtAuthGuard } from '@/auth';
+import { BetterAuthGuard } from '@/auth';
 import { UseGuards } from '@nestjs/common';
 import { FetchDataInput } from '../fetch-data.input';
 
@@ -12,7 +12,7 @@ import { FetchDataInput } from '../fetch-data.input';
 export class SubjectsResolver {
   constructor(private readonly subjectsService: SubjectsService) {}
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(BetterAuthGuard)
   @Mutation(() => Subject)
   createSubject(
     @Args('createSubjectInput') createSubjectInput: CreateSubjectInput
@@ -20,7 +20,7 @@ export class SubjectsResolver {
     return this.subjectsService.create(createSubjectInput);
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(BetterAuthGuard)
   @Query(() => [Subject], { name: 'subjects' })
   findAll(
     @Args()
@@ -29,13 +29,13 @@ export class SubjectsResolver {
     return this.subjectsService.findAll(fetchDataInput);
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(BetterAuthGuard)
   @Query(() => Subject, { name: 'subject' })
   findOne(@Args('id', { type: () => String }) id: string) {
     return this.subjectsService.findOne(id);
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(BetterAuthGuard)
   @Query(() => Int, { name: 'findManySubjectsCount' })
   findManySubjectsCount(
     @Args()
@@ -44,7 +44,7 @@ export class SubjectsResolver {
     return this.subjectsService.findCount(fetchDataInput);
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(BetterAuthGuard)
   @Mutation(() => Subject)
   updateSubject(
     @Args('updateSubjectInput') updateSubjectInput: UpdateSubjectInput

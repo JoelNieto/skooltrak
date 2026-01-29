@@ -6,6 +6,7 @@ import {
   Inject,
   Injectable,
   NotFoundException,
+  Scope,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { CONTEXT } from '@nestjs/graphql';
@@ -21,7 +22,7 @@ type AuthUserContext = {
   organizationId?: string | null;
 };
 
-@Injectable()
+@Injectable({ scope: Scope.REQUEST })
 export class AssignmentSubmissionsService {
   private readonly submissionInclude: Prisma.AssignmentSubmissionInclude = {
     assignment: { include: { course: true, teacher: true } },

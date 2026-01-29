@@ -1,4 +1,4 @@
-import { JwtAuthGuard } from '@/auth';
+import { BetterAuthGuard } from '@/auth';
 import { UseGuards } from '@nestjs/common';
 import { Args, Int, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { FetchDataInput } from '../fetch-data.input';
@@ -18,13 +18,13 @@ export class CoursesResolver {
     return this.coursesService.create(createCourseInput);
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(BetterAuthGuard)
   @Query(() => [Course], { name: 'courses' })
   findAll(@Args() fetchDataInput: FetchDataInput) {
     return this.coursesService.findAll(fetchDataInput);
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(BetterAuthGuard)
   @Query(() => Int, { name: 'coursesCount' })
   count(@Args() fetchDataInput: FetchDataInput) {
     return this.coursesService.count(fetchDataInput);

@@ -820,7 +820,7 @@ input CreateTeacherInput {
   address: String = ""
 
   """Birth date of the teacher"""
-  birthDate: DateTime = "2026-01-27T05:59:24.584Z"
+  birthDate: DateTime = "2026-01-29T17:29:30.964Z"
 
   """Document ID of the teacher"""
   documentId: String!
@@ -1189,6 +1189,25 @@ type GroupsSchedule {
   weekday: String!
 }
 
+type Invitation {
+  createdAt: DateTime!
+  email: String!
+  expiresAt: DateTime!
+  id: String!
+  inviterId: String!
+  organizationId: String!
+  role: String!
+  status: String!
+}
+
+type Member {
+  createdAt: DateTime!
+  id: String!
+  organizationId: String!
+  role: String!
+  userId: String!
+}
+
 type Message {
   """The content of the message."""
   content: String!
@@ -1251,6 +1270,9 @@ type MessageRecipient {
 }
 
 type Mutation {
+  acceptInvitation(invitationId: String!): Boolean!
+  cancelInvitation(invitationId: String!): Boolean!
+  changePassword(currentPassword: String!, newPassword: String!): Boolean!
   createAssignment(createAssignmentInput: CreateAssignmentInput!): Assignment!
 
   """Create an assignment submission after file upload"""
@@ -1288,7 +1310,9 @@ type Mutation {
   """Delete an assignment submission"""
   deleteAssignmentSubmission(submissionId: String!): Boolean!
   deleteAttendanceSession(id: String!): AttendanceSession!
+  inviteMember(email: String!, organizationId: String, role: String!): Invitation!
   login(email: String!, password: String!): AuthPayload!
+  rejectInvitation(invitationId: String!): Boolean!
   removeAssignment(id: String!): Assignment!
   removeClassGroup(id: String!): ClassGroup!
   removeCourse(id: String!): Course!
@@ -1296,6 +1320,7 @@ type Mutation {
   removeGrade(id: String!): Grade!
   removeGradeBucket(id: String!): GradeBucket!
   removeGroupsSchedule(id: String!): GroupsSchedule!
+  removeMember(memberIdOrEmail: String!, organizationId: String): Boolean!
   removeMessage(id: String!): Message!
   removeMessageRecipient(id: String!): MessageRecipient!
   removeOrganization(id: String!): Organization!
@@ -1311,7 +1336,12 @@ type Mutation {
   removeSubject(id: String!): Subject!
   removeTeacher(id: String!): Teacher!
   removeUser(id: String!): User!
+  requestPasswordReset(email: String!): Boolean!
+  resetPassword(newPassword: String!, token: String!): Boolean!
+  sendVerificationEmail(email: String!): Boolean!
+  setActiveOrganization(organizationId: String): Boolean!
   shareFile(shareFileInput: ShareFileInput!): File!
+  signOut: Boolean!
   signUp(input: SignUpInput!): AuthPayload!
   updateAssignment(updateAssignmentInput: UpdateAssignmentInput!): Assignment!
   updateAttendanceRecord(input: UpdateAttendanceRecordInput!): AttendanceRecord!
@@ -1322,6 +1352,7 @@ type Mutation {
   updateGrade(updateGradeInput: UpdateGradeInput!): Grade!
   updateGradeBucket(updateGradeBucketInput: UpdateGradeBucketInput!): GradeBucket!
   updateGroupsSchedule(updateGroupsScheduleInput: UpdateGroupsScheduleInput!): GroupsSchedule!
+  updateMemberRole(memberId: String!, organizationId: String, role: String!): Boolean!
   updateOrganization(updateOrganizationInput: UpdateOrganizationInput!): Organization!
   updatePeriod(updatePeriodInput: UpdatePeriodInput!): Period!
   updatePermission(updatePermissionInput: UpdatePermissionInput!): Permission!
@@ -1335,6 +1366,7 @@ type Mutation {
   updateSubject(updateSubjectInput: UpdateSubjectInput!): Subject!
   updateTeacher(updateTeacherInput: UpdateTeacherInput!): Teacher!
   updateUser(updateUserInput: UpdateUserInput!): User!
+  verifyEmail(token: String!): Boolean!
 }
 
 type Organization {
@@ -1350,8 +1382,17 @@ type Organization {
   """Organization id"""
   id: String!
 
+  """Organization logo"""
+  logo: String
+
+  """Organization metadata"""
+  metadata: String
+
   """Organization name"""
   name: String!
+
+  """Organization slug"""
+  slug: String
 
   """Organization updated at"""
   updatedAt: DateTime!
@@ -1696,6 +1737,8 @@ type Query {
   groupsSchedules: [GroupsSchedule!]!
   groupsSchedulesByClassGroupId(classGroupId: String!): [GroupsSchedule!]!
   groupsSchedulesByClassGroupIdGrouped(classGroupId: String!): [GroupsSchedule!]!
+  listInvitations(organizationId: String): [Invitation!]!
+  listMembers(organizationId: String): [Member!]!
   me: User!
 
   """Get the current student submission for an assignment"""
@@ -2724,7 +2767,7 @@ input UpdateTeacherInput {
   address: String = ""
 
   """Birth date of the teacher"""
-  birthDate: DateTime = "2026-01-27T05:59:24.584Z"
+  birthDate: DateTime = "2026-01-29T17:29:30.964Z"
 
   """Document ID of the teacher"""
   documentId: String
@@ -2776,18 +2819,23 @@ input UpdateUserInput {
 }
 
 type User {
-  color: String!
+  banExpires: DateTime
+  banReason: String
+  banned: Boolean!
+  color: String
   createdAt: DateTime!
   email: String!
+  emailVerified: Boolean!
   firstName: String!
   id: String!
+  image: String
   initials: String!
   isBlocked: Boolean!
-  lastLogin: DateTime!
+  lastLogin: DateTime
   lastName: String!
-  name: String!
+  name: String
   organization: Organization
-  organizationId: String!
+  organizationId: String
   role: Role!
   roleId: String!
   student: UserStudent

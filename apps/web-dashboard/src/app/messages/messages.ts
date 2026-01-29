@@ -1,11 +1,5 @@
-import { Confirmation, Paginator, TimeAgoPipe, Toast } from '@/ui';
-import {
-  ChangeDetectionStrategy,
-  Component,
-  computed,
-  inject,
-  signal,
-} from '@angular/core';
+import { Confirmation, EmptyState, Paginator, TimeAgoPipe, Toast } from '@/ui';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
@@ -29,7 +23,7 @@ type MessageRecipientType = Prisma.MessageRecipientGetPayload<undefined> & {
 };
 
 @Component({
-  imports: [RouterLink, TimeAgoPipe, Paginator, FormsModule],
+  imports: [RouterLink, TimeAgoPipe, Paginator, FormsModule, EmptyState],
 
   template: `<div class="breadcrumbs text-sm">
       <ul>
@@ -40,19 +34,11 @@ type MessageRecipientType = Prisma.MessageRecipientGetPayload<undefined> & {
     <div class="flex flex:col md:flex-row md:justify-between md:items-center">
       <h1 class="text-2xl font-semibold">Mensajes</h1>
       <div class="flex gap-2">
-        <a [routerLink]="['/messages/compose']" class="btn btn-primary"
-          >Nuevo mensaje</a
-        >
+        <a [routerLink]="['/messages/compose']" class="btn btn-primary">Nuevo mensaje</a>
       </div>
     </div>
     <div class="tabs tabs-box mt-4">
-      <input
-        class="tab"
-        type="radio"
-        name="messages_tabs"
-        aria-label="Inbox"
-        checked="checked"
-      />
+      <input class="tab" type="radio" name="messages_tabs" aria-label="Inbox" checked="checked" />
       <div class="tab-content bg-base-100 border-base-300 p-4">
         <div class="overflow-x-auto bg-base-100 rounded-lg">
           <table class="table">
@@ -74,48 +60,42 @@ type MessageRecipientType = Prisma.MessageRecipientGetPayload<undefined> & {
               </tr>
             </thead>
             <tbody>
-              @for(item of messagesResource.value(); track item.id) {
-              <tr class="hover:bg-base-300">
-                <td>
-                  <input
-                    type="checkbox"
-                    class="checkbox"
-                    [checked]="selectedStates()[item.id] || false"
-                    (change)="onCheckboxChange(item.id, $event.target.checked)"
-                  />
-                </td>
-                <td
-                  class="text-neutral-900! font-semibold flex items-center gap-2"
-                >
-                  <div class="avatar avatar-placeholder">
-                    <div
-                      class="text-neutral-content w-7 rounded-full"
-                      [style.background]="item.message.sender.color"
-                    >
-                      <span>{{ item.message.sender.initials }}</span>
+              @for (item of messagesResource.value(); track item.id) {
+                <tr class="hover:bg-base-300">
+                  <td>
+                    <input
+                      type="checkbox"
+                      class="checkbox"
+                      [checked]="selectedStates()[item.id] || false"
+                      (change)="onCheckboxChange(item.id, $event.target.checked)"
+                    />
+                  </td>
+                  <td class="text-neutral-900! font-semibold flex items-center gap-2">
+                    <div class="avatar avatar-placeholder">
+                      <div class="text-neutral-content w-7 rounded-full" [style.background]="item.message.sender.color">
+                        <span>{{ item.message.sender.initials }}</span>
+                      </div>
                     </div>
-                  </div>
-                  {{ item.message.sender.name }}
-                </td>
-                <td class="text-neutral-500!">
-                  <a [routerLink]="['/messages', item.message.id]">{{
-                    item.message.subject
-                  }}</a>
-                </td>
-                <td class="text-neutral-500!">
-                  {{ item.message.createdAt | timeAgo }}
-                </td>
-                <td>
-                  <button
-                    class="hover:text-error cursor-pointer"
-                    (click)="deleteMessage(item)"
-                  >
-                    <span class="material-symbols-outlined text-lg"
-                      >delete</span
-                    >
-                  </button>
-                </td>
-              </tr>
+                    {{ item.message.sender.name }}
+                  </td>
+                  <td class="text-neutral-500!">
+                    <a [routerLink]="['/messages', item.message.id]">{{ item.message.subject }}</a>
+                  </td>
+                  <td class="text-neutral-500!">
+                    {{ item.message.createdAt | timeAgo }}
+                  </td>
+                  <td>
+                    <button class="hover:text-error cursor-pointer" (click)="deleteMessage(item)">
+                      <span class="material-symbols-outlined text-lg">delete</span>
+                    </button>
+                  </td>
+                </tr>
+              } @empty {
+                <tr>
+                  <td colspan="5" class="text-center">
+                    <lib-empty-state title="Sin mensajes" description="No hay mensajes" icon="mail" color="primary" />
+                  </td>
+                </tr>
               }
             </tbody>
             <tfoot></tfoot>
@@ -132,12 +112,7 @@ type MessageRecipientType = Prisma.MessageRecipientGetPayload<undefined> & {
         </div>
       </div>
 
-      <input
-        class="tab"
-        type="radio"
-        name="messages_tabs"
-        aria-label="Outbox"
-      />
+      <input class="tab" type="radio" name="messages_tabs" aria-label="Outbox" />
     </div> `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -162,9 +137,7 @@ export default class Messages {
   readonly allSelected = computed(() => {
     const states = this.selectedStates();
     const messages = this.messagesResource.value();
-    return (
-      (messages?.length ?? 0) > 0 && messages?.every(({ id }) => states[id])
-    );
+    return (messages?.length ?? 0) > 0 && messages?.every(({ id }) => states[id]);
   });
 
   public someSelected = computed(() => {
@@ -256,7 +229,7 @@ export default class Messages {
               count: result.data.count,
             }));
           }),
-          map((result) => result.data.findManyMessages)
+          map((result) => result.data.findManyMessages),
         );
     },
   });
@@ -281,8 +254,8 @@ export default class Messages {
             variables: {
               id: message.id,
             },
-          })
-        )
+          }),
+        ),
       )
       .subscribe({
         next: () => {

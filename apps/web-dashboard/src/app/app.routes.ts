@@ -18,6 +18,21 @@ export const appRoutes: Route[] = [
     title: 'Registro | Skooltrak',
   },
   {
+    path: 'forgot-password',
+    loadComponent: () => import('./auth/forgot-password'),
+    title: 'Recuperar contraseña | Skooltrak',
+  },
+  {
+    path: 'reset-password',
+    loadComponent: () => import('./auth/reset-password'),
+    title: 'Restablecer contraseña | Skooltrak',
+  },
+  {
+    path: 'accept-invitation/:id',
+    loadComponent: () => import('./auth/accept-invitation'),
+    title: 'Aceptar invitación | Skooltrak',
+  },
+  {
     path: '',
     canActivate: [authGuard],
     canActivateChild: [authGuard],
@@ -39,6 +54,11 @@ export const appRoutes: Route[] = [
         path: 'home',
         canMatch: [studentGuard],
         loadComponent: () => import('./student-home'),
+      },
+      // Fallback home for when role guards don't match
+      {
+        path: 'home',
+        loadComponent: () => import('./home'),
       },
       {
         path: 'courses',
@@ -160,6 +180,11 @@ export const appRoutes: Route[] = [
       {
         path: 'profile',
         loadComponent: () => import('./profile'),
+      },
+      {
+        path: 'change-password',
+        loadComponent: () => import('./auth/change-password'),
+        title: 'Cambiar contraseña | Skooltrak',
       },
       {
         path: 'admin',

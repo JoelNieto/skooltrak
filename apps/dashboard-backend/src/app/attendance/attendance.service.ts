@@ -5,6 +5,7 @@ import {
   Inject,
   Injectable,
   NotFoundException,
+  Scope,
 } from '@nestjs/common';
 import { CONTEXT } from '@nestjs/graphql';
 import { Request } from 'express';
@@ -13,7 +14,7 @@ import { AttendanceFilterInput } from './dto/attendance-filter.input';
 import { CreateAttendanceSessionInput } from './dto/create-attendance-session.input';
 import { UpdateAttendanceRecordInput } from './dto/update-attendance-record.input';
 
-@Injectable()
+@Injectable({ scope: Scope.REQUEST })
 export class AttendanceService {
   constructor(
     private readonly prisma: PrismaService,

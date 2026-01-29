@@ -1,4 +1,4 @@
-import { JwtAuthGuard } from '@/auth';
+import { BetterAuthGuard } from '@/auth';
 import { UseGuards } from '@nestjs/common';
 import {
   Args,
@@ -22,7 +22,7 @@ import { AttendanceSession } from './entities/attendance-session.entity';
 import { AttendanceStats } from './entities/attendance-stats.entity';
 
 @Resolver(() => AttendanceSession)
-@UseGuards(JwtAuthGuard)
+@UseGuards(BetterAuthGuard)
 export class AttendanceResolver {
   constructor(private readonly attendanceService: AttendanceService) {}
 

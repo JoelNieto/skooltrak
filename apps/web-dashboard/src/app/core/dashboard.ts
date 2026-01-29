@@ -1,12 +1,5 @@
 import { Confirmation } from '@/ui';
-import {
-  afterRenderEffect,
-  ChangeDetectionStrategy,
-  Component,
-  ElementRef,
-  inject,
-  viewChild,
-} from '@angular/core';
+import { afterRenderEffect, ChangeDetectionStrategy, Component, ElementRef, inject, viewChild } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { RouterLink, RouterOutlet } from '@angular/router';
 import { Prisma } from '@generated/prisma';
@@ -66,57 +59,48 @@ import Store from './store';
               tabindex="0"
               class="dropdown-content menu bg-base-100 rounded-box z-1 w-52 p-2 shadow-sm cursor-pointer"
             >
-              @for(school of schools.value(); track school.id) {
-              <li>
-                <div
-                  (click)="store.currentSchool.set(school)"
-                  (keydown)="store.currentSchool.set(school)"
-                  tabindex="0"
-                >
-                  {{ school.name }}
-                </div>
-              </li>
+              @for (school of schools.value(); track school.id) {
+                <li>
+                  <div
+                    (click)="store.currentSchool.set(school)"
+                    (keydown)="store.currentSchool.set(school)"
+                    tabindex="0"
+                  >
+                    {{ school.name }}
+                  </div>
+                </li>
               }
             </ul>
           </div>
         </div>
         <div class="flex items-center gap-4">
           <a routerLink="messages" class="btn btn-ghost"
-            ><span class="material-symbols-outlined text-2xl"
-              >mail_outline</span
-            >
-            </a
-          >
+            ><span class="material-symbols-outlined text-2xl">mail_outline</span>
+          </a>
           <div class="dropdown dropdown-end">
-            <div
-              class="avatar avatar-placeholder cursor-pointer"
-              role="button"
-              tabindex="0"
-            >
-              <div
-                class="text-neutral-content w-8 rounded-full"
-                [style.background]="auth.userColor()"
-              >
+            <div class="avatar avatar-placeholder cursor-pointer" role="button" tabindex="0">
+              <div class="text-neutral-content w-8 rounded-full" [style.background]="auth.userColor()">
                 <span>{{ auth.userInitials() }}</span>
               </div>
             </div>
             <ul
               tabindex="0"
-              class="dropdown-content menu bg-base-100 rounded-box z-1 w-52 p-2 shadow-sm cursor-pointer "
+              class="dropdown-content menu bg-base-100 rounded-box z-1 w-64 p-2 shadow-sm cursor-pointer "
             >
-              <span class="text-neutral-400 text-medium px-2 mb-3">{{
-                auth.userName()
-              }}</span>
+              <span class="text-neutral-400 text-medium px-2 mb-3">{{ auth.userName() }}</span>
               <li><a routerLink="profile">Perfil</a></li>
-              @if(auth.isAdmin()) {
               <li>
-                <a routerLink="admin"
-                  ><span class="material-symbols-outlined text-xl"
-                    >settings</span
-                  >
-                  <span class="ml-1">Admin</span></a
-                >
+                <a routerLink="change-password">
+                  <span class="material-symbols-outlined text-xl">key</span>
+                  <span class="ml-1">Cambiar contraseña</span>
+                </a>
               </li>
+              @if (auth.isAdmin()) {
+                <li>
+                  <a routerLink="admin"
+                    ><span class="material-symbols-outlined text-xl">settings</span> <span class="ml-1">Admin</span></a
+                  >
+                </li>
               }
               <li>
                 <button (click)="logout()">
@@ -140,15 +124,13 @@ import Store from './store';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class Dashboard {
-  public sidebarOverlay =
-    viewChild.required<ElementRef<HTMLDivElement>>('sidebarOverlay');
+  public sidebarOverlay = viewChild.required<ElementRef<HTMLDivElement>>('sidebarOverlay');
 
   public sidebar = viewChild.required<Sidebar, ElementRef>('sidebar', {
     read: ElementRef,
   });
 
-  public sidebarToggle =
-    viewChild.required<ElementRef<HTMLElement>>('sidebarToggle');
+  public sidebarToggle = viewChild.required<ElementRef<HTMLElement>>('sidebarToggle');
 
   public store = inject(Store);
   private apollo = inject(Apollo);

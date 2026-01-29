@@ -13,7 +13,7 @@ import { rxResource } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
 import { Prisma } from '@generated/prisma';
 import { Apollo, gql } from 'apollo-angular';
-import { catchError, map, of, tap } from 'rxjs';
+import { catchError, firstValueFrom, map, of, tap } from 'rxjs';
 import { authClient } from './auth-client';
 
 @Injectable({
@@ -154,36 +154,40 @@ export default class Auth {
     }
   }
 
-  public async signIn(email: string, password: string) {
+  public async signIn(email: string, password: string): Promise<boolean> {
     this.isSigning.set(true);
 
-    // Use GraphQL login which returns JWT token
-    this.#apollo
-      .mutate<{ login: { accessToken: string } }>({
-        mutation: gql`
-          mutation Login($email: String!, $password: String!) {
-            login(email: $email, password: $password) {
-              accessToken
+    try {
+      // Use GraphQL login which returns JWT token
+      const res = await firstValueFrom(
+        this.#apollo.mutate<{ login: { accessToken: string } }>({
+          mutation: gql`
+            mutation Login($email: String!, $password: String!) {
+              login(email: $email, password: $password) {
+                accessToken
+              }
             }
-          }
-        `,
-        variables: { email, password },
-      })
-      .subscribe({
-        next: (res) => {
-          const accessToken = res.data?.login?.accessToken;
-          if (accessToken) {
-            this.token.set(accessToken);
-            this.isSigning.set(false);
-            this.#router.navigate(['/home']);
-          }
-        },
-        error: (err) => {
-          console.error('Login error:', err);
-          this.#toasts.showError(err.message || 'Credenciales inválidas');
-          this.isSigning.set(false);
-        },
-      });
+          `,
+          variables: { email, password },
+        })
+      );
+
+      const accessToken = res.data?.login?.accessToken;
+      if (accessToken) {
+        this.token.set(accessToken);
+        this.isSigning.set(false);
+        this.#router.navigate(['/home']);
+        return true;
+      }
+
+      this.isSigning.set(false);
+      return false;
+    } catch (err: any) {
+      console.error('Login error:', err);
+      this.#toasts.showError(err.message || 'Credenciales inválidas');
+      this.isSigning.set(false);
+      return false;
+    }
   }
 
   public async logout() {

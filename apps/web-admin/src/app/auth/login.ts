@@ -87,7 +87,7 @@ export default class Login {
   private toasts = inject(Toast);
   public loading = signal(false);
 
-  public onSubmit() {
+  public async onSubmit() {
     if (this.form.invalid) {
       this.toasts.showError('Llenar todos los campos');
       markGroupDirty(this.form);
@@ -96,6 +96,7 @@ export default class Login {
 
     this.loading.set(true);
     const { email, password } = this.form.getRawValue();
-    this.#auth.signIn(email, password);
+    await this.#auth.signIn(email, password);
+    this.loading.set(false);
   }
 }

@@ -160,7 +160,7 @@ export default class Login {
     });
   }
 
-  public onSubmit() {
+  public async onSubmit() {
     if (this.form.invalid) {
       this.toasts.showError('Llenar todos los campos');
       markGroupDirty(this.form);
@@ -168,6 +168,7 @@ export default class Login {
     }
     const { email, password } = this.form.getRawValue();
     this.loading.set(true);
-    this.auth.signIn(email, password);
+    await this.auth.signIn(email, password);
+    this.loading.set(false);
   }
 }

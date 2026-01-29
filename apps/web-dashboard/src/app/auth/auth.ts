@@ -183,13 +183,14 @@ export default class Auth {
             }
           `,
           variables: { email, password },
-        })
+        }),
       );
 
       const accessToken = res.data?.login?.accessToken;
       if (accessToken) {
         this.token.set(accessToken);
         this.isSigning.set(false);
+        this.#toasts.showSuccess('Bienvenido de nuevo');
         this.router.navigate(['/home']);
         return true;
       }
@@ -244,7 +245,7 @@ export default class Auth {
   public async requestPasswordReset(email: string): Promise<boolean> {
     try {
       const baseUrl = this.getApiBaseUrl();
-      const response = await fetch(`${baseUrl}/api/auth/request-password-reset`, {
+      await fetch(`${baseUrl}/api/auth/request-password-reset`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',

@@ -76,6 +76,7 @@ export class StudentsResolver {
     return `${student.firstName} ${student.middleName} ${student.fatherName} ${student.motherName}`;
   }
 
+  @UseGuards(BetterAuthGuard)
   @Query(() => Int, { name: 'findManyStudentsCount' })
   findManyStudentsCount(@Args() fetchDataInput: FetchDataInput) {
     return this.studentsService.getCount(fetchDataInput);

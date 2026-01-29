@@ -1,11 +1,11 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, Scope } from '@nestjs/common';
 import { CONTEXT } from '@nestjs/graphql';
 import { Request } from 'express';
 import { PrismaService } from '../prisma.service';
 import { CreateSchoolInput } from './dto/create-school.input';
 import { UpdateSchoolInput } from './dto/update-school.input';
 
-@Injectable()
+@Injectable({ scope: Scope.REQUEST })
 export class SchoolsService {
   constructor(
     private readonly prisma: PrismaService,

@@ -1,7 +1,7 @@
 import { GetObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { $Enums, Prisma } from '@generated/prisma';
-import { ForbiddenException, Inject, Injectable } from '@nestjs/common';
+import { ForbiddenException, Inject, Injectable, Scope } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { CONTEXT } from '@nestjs/graphql';
 import { Request } from 'express';
@@ -26,7 +26,7 @@ type AuthUserContext = {
   organizationId?: string | null;
 };
 
-@Injectable()
+@Injectable({ scope: Scope.REQUEST })
 export class FilesService {
   private readonly fileInclude: Prisma.FileInclude = {
     owner: true,

@@ -820,7 +820,7 @@ input CreateTeacherInput {
   address: String = ""
 
   """Birth date of the teacher"""
-  birthDate: DateTime = "2026-01-28T20:34:50.932Z"
+  birthDate: DateTime = "2026-01-29T11:43:07.908Z"
 
   """Document ID of the teacher"""
   documentId: String!
@@ -2767,7 +2767,7 @@ input UpdateTeacherInput {
   address: String = ""
 
   """Birth date of the teacher"""
-  birthDate: DateTime = "2026-01-28T20:34:50.932Z"
+  birthDate: DateTime = "2026-01-29T11:43:07.908Z"
 
   """Document ID of the teacher"""
   documentId: String

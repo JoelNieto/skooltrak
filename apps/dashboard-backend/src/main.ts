@@ -11,6 +11,15 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
     bodyParser: false, // Required for better-auth to handle raw request body
   });
+
+  // Enable CORS for frontend dev servers
+  app.enableCors({
+    origin: ['http://localhost:4200', 'http://localhost:4201'],
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
+  });
+
   app.useGlobalPipes(new ValidationPipe({ transform: true }));
   const globalPrefix = 'api';
   app.setGlobalPrefix(globalPrefix);

@@ -42,6 +42,7 @@ import { FilesModule } from './files/files.module';
         playground: false,
         plugins: [ApolloServerPluginLandingPageLocalDefault()],
         path: '/api/graphql',
+        context: ({ req, res }) => ({ req, res }),
       }),
       driver: ApolloDriver,
     }),

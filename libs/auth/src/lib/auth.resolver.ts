@@ -1,15 +1,20 @@
 import { Args, Context, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
+import * as jwt from 'jsonwebtoken';
 import { AuthPayload } from './auth.payload';
 import { AuthService } from './auth.service';
 import { AllowAnonymous, BetterAuthGuard } from './auth.guard';
 import { SignUpInput } from './dto/sign-up.input';
 import { User } from './users/entities/user.entity';
 import { auth } from './better-auth';
+import { PrismaService } from './prisma.service';
 
 @Resolver()
 export class AuthResolver {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly prisma: PrismaService
+  ) {}
 
   @Mutation(() => AuthPayload)
   @AllowAnonymous()
@@ -39,9 +44,34 @@ export class AuthResolver {
       context.res.setHeader('set-cookie', setCookieHeader);
     }
 
-    return {
-      accessToken: data.token || data.session?.token || '',
+    // Get full user data to generate JWT with required fields
+    const user = await this.prisma.user.findUnique({
+      where: { id: data.user.id },
+      include: {
+        role: { include: { permissions: true } },
+      },
+    });
+
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    // Generate JWT for backward compatibility with frontend
+    const jwtPayload = {
+      userId: user.id,
+      email: user.email,
+      role: user.role?.name || 'member',
+      organizationId: user.organizationId,
+      permissions: user.role?.permissions?.map((p) => p.descriptiveId) || [],
     };
+
+    const accessToken = jwt.sign(
+      jwtPayload,
+      process.env['JWT_SECRET'] || 'fallback-secret',
+      { expiresIn: '7d' }
+    );
+
+    return { accessToken };
   }
 
   @Mutation(() => AuthPayload)
@@ -77,7 +107,7 @@ export class AuthResolver {
   ): Promise<boolean> {
     try {
       // Call better-auth REST endpoint directly
-      const response = await fetch(`${process.env['APP_URL'] || 'http://localhost:3000'}/api/auth/forget-password`, {
+      const response = await fetch(`${process.env['APP_URL'] || 'http://localhost:3000'}/api/auth/request-password-reset`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

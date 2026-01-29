@@ -10,7 +10,7 @@ import {
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 
 import { Loader, markGroupDirty } from '@/ui';
 
@@ -36,6 +36,12 @@ import Auth from './auth';
 
         <!-- Form Section -->
         <div class="p-8 bg-base-100">
+          @if (passwordResetSuccess()) {
+            <div class="alert alert-success mb-4">
+              <span class="material-symbols-outlined">check_circle</span>
+              <span>Tu contraseña ha sido actualizada. Ya puedes iniciar sesión.</span>
+            </div>
+          }
           <form
             id="loginForm"
             class="space-y-6"
@@ -71,7 +77,7 @@ import Auth from './auth';
             <div class="fieldset">
               <div class="flex justify-between items-center mb-1">
                 <label for="password">Contraseña</label>
-                <a href="#" class="text-sm link link-primary"
+                <a routerLink="/forgot-password" class="text-sm link link-primary"
                   >¿Olvidaste tu contraseña?</a
                 >
               </div>
@@ -135,12 +141,24 @@ import Auth from './auth';
 export default class Login {
   private fb = inject(NonNullableFormBuilder);
   private auth = inject(Auth);
+  private route = inject(ActivatedRoute);
+  private toasts = inject(Toast);
+
   public form = this.fb.group({
     email: ['', [Validators.required, Validators.email]],
     password: ['', [Validators.required]],
   });
-  private toasts = inject(Toast);
   public loading = signal(false);
+  public passwordResetSuccess = signal(false);
+
+  constructor() {
+    // Check for password reset success query param
+    this.route.queryParams.subscribe((params) => {
+      if (params['reset'] === 'success') {
+        this.passwordResetSuccess.set(true);
+      }
+    });
+  }
 
   public onSubmit() {
     if (this.form.invalid) {

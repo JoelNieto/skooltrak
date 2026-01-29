@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
+import * as jwt from 'jsonwebtoken';
 import { randomUUID } from 'crypto';
 import { SignUpInput } from './dto/sign-up.input';
 import { PrismaService } from './prisma.service';
-import { auth } from './better-auth';
 
 @Injectable()
 export class AuthService {
@@ -22,23 +22,27 @@ export class AuthService {
   }
 
   /**
-   * Legacy login method - kept for backward compatibility
-   * Better-auth handles login via its own API endpoints
+   * Generate JWT token for a user
    */
-  async login(email: string, password: string) {
-    const response = await auth.api.signInEmail({
-      body: { email, password },
-      asResponse: true,
-    });
-
-    if (!response.ok) {
-      throw new Error('Invalid credentials');
-    }
-
-    const data = await response.json();
-    return {
-      accessToken: data.token || data.session?.token || '',
+  private generateJwt(user: {
+    id: string;
+    email: string;
+    organizationId: string | null;
+    role?: { name: string; permissions?: { descriptiveId: string }[] } | null;
+  }): string {
+    const jwtPayload = {
+      userId: user.id,
+      email: user.email,
+      role: user.role?.name || 'member',
+      organizationId: user.organizationId,
+      permissions: user.role?.permissions?.map((p) => p.descriptiveId) || [],
     };
+
+    return jwt.sign(
+      jwtPayload,
+      process.env['JWT_SECRET'] || 'fallback-secret',
+      { expiresIn: '7d' }
+    );
   }
 
   getUser(userId: string) {
@@ -158,22 +162,10 @@ export class AuthService {
       return { user, role, organization };
     });
 
-    const { user, organization } = result;
+    const { user } = result;
 
-    // Create session using better-auth
-    const response = await auth.api.signInEmail({
-      body: { email, password },
-      asResponse: true,
-    });
-
-    if (!response.ok) {
-      // Fallback: return empty token, user will need to login manually
-      return { accessToken: '' };
-    }
-
-    const data = await response.json();
-    return {
-      accessToken: data.token || data.session?.token || '',
-    };
+    // Generate JWT for the new user
+    const accessToken = this.generateJwt(user);
+    return { accessToken };
   }
 }

@@ -24,6 +24,7 @@ import { GradeMetricsModule } from './grade-metrics/grade-metrics.module';
         playground: false,
         plugins: [ApolloServerPluginLandingPageLocalDefault()],
         path: '/api/graphql',
+        context: ({ req, res }) => ({ req, res }),
       }),
       driver: ApolloDriver,
     }),

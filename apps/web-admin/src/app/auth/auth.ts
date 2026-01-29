@@ -198,16 +198,28 @@ export default class Auth {
     this.#router.navigate(['/login']);
   }
 
+  // Helper to get API base URL (handles dev vs production)
+  private getApiBaseUrl(): string {
+    if (isPlatformBrowser(this.platformId)) {
+      const isDev = window.location.hostname === 'localhost';
+      if (isDev) {
+        return 'http://localhost:3000';
+      }
+    }
+    return '';
+  }
+
   // Password reset methods
   public async requestPasswordReset(email: string): Promise<boolean> {
     try {
-      await fetch('/api/auth/forget-password', {
+      const baseUrl = this.getApiBaseUrl();
+      await fetch(`${baseUrl}/api/auth/request-password-reset`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
         body: JSON.stringify({
           email,
-          redirectTo: '/reset-password',
+          redirectTo: `${window.location.origin}/reset-password`,
         }),
       });
 
@@ -222,7 +234,8 @@ export default class Auth {
     newPassword: string
   ): Promise<boolean> {
     try {
-      const response = await fetch('/api/auth/reset-password', {
+      const baseUrl = this.getApiBaseUrl();
+      const response = await fetch(`${baseUrl}/api/auth/reset-password`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',

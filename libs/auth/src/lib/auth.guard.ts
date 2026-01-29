@@ -92,6 +92,7 @@ export class BetterAuthGuard implements CanActivate {
 
     // Check for JWT token in Authorization header (backward compatibility)
     const authHeader = request.headers.authorization;
+
     if (authHeader?.startsWith('Bearer ')) {
       const token = authHeader.substring(7);
       try {

@@ -23,7 +23,7 @@ import { UsersModule } from './users/users.module';
     RolesModule,
     PermissionsModule,
     PrismaModule,
-    BetterAuthModule.forRoot({ auth }),
+    BetterAuthModule.forRoot({ auth, disableGlobalAuthGuard: true }),
     OrganizationsModule,
   ],
 })

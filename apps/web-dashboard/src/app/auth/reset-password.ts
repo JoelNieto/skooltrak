@@ -1,93 +1,141 @@
+import { Loader } from '@/ui';
 import { Component, inject, signal } from '@angular/core';
-import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import {
+  FormControl,
+  FormGroup,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import Auth from './auth';
 
 @Component({
   selector: 'app-reset-password',
-  imports: [ReactiveFormsModule, RouterLink],
+  imports: [ReactiveFormsModule, RouterLink, Loader],
   template: `
-    <div class="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div class="max-w-md w-full space-y-8">
-        <div>
-          <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            Set new password
-          </h2>
-          <p class="mt-2 text-center text-sm text-gray-600">
-            Enter your new password below.
-          </p>
-        </div>
+    <div class="gradient-bg min-h-screen flex items-center justify-center p-4">
+      @defer {
+        <div class="max-w-md w-full flex flex-col gap-8 items-center">
+          <div><img src="skooltrak.png" alt="" class="h-12" /></div>
 
-        @if (error()) {
-          <div class="rounded-md bg-red-50 p-4">
-            <div class="flex">
-              <div class="flex-shrink-0">
-                <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
-                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
-                </svg>
-              </div>
-              <div class="ml-3">
-                <p class="text-sm font-medium text-red-800">
-                  Invalid or expired reset link. Please request a new one.
+          <div
+            class="w-full rounded-2xl shadow-xl overflow-hidden flex flex-col"
+          >
+            <!-- Header Section -->
+            <div class="bg-primary p-6 text-white text-center">
+              <h1 class="text-2xl font-bold">Nueva contraseña</h1>
+              <p class="text-primary-content mt-2">
+                Ingresa tu nueva contraseña
+              </p>
+            </div>
+
+            <!-- Form Section -->
+            <div class="p-8 bg-base-100">
+              @if (error()) {
+                <div class="alert alert-error mb-4">
+                  <span class="material-symbols-outlined">error</span>
+                  <span
+                    >El enlace es inválido o ha expirado. Solicita uno
+                    nuevo.</span
+                  >
+                </div>
+                <div class="text-center">
+                  <a routerLink="/forgot-password" class="btn btn-primary">
+                    Solicitar nuevo enlace
+                  </a>
+                </div>
+              } @else {
+                <form
+                  [formGroup]="form"
+                  (ngSubmit)="onSubmit()"
+                  class="space-y-6"
+                >
+                  <div class="fieldset">
+                    <label for="password">Nueva contraseña</label>
+                    <input
+                      id="password"
+                      formControlName="password"
+                      type="password"
+                      autocomplete="new-password"
+                      class="input input-primary w-full"
+                      placeholder="Mínimo 8 caracteres"
+                    />
+                    @if (
+                      form.get('password')?.touched &&
+                      form.get('password')?.hasError('required')
+                    ) {
+                      <p class="text-error text-xs mt-1">
+                        La contraseña es requerida
+                      </p>
+                    }
+                    @if (
+                      form.get('password')?.touched &&
+                      form.get('password')?.hasError('minlength')
+                    ) {
+                      <p class="text-error text-xs mt-1">
+                        La contraseña debe tener al menos 8 caracteres
+                      </p>
+                    }
+                  </div>
+
+                  <div class="fieldset">
+                    <label for="confirmPassword">Confirmar contraseña</label>
+                    <input
+                      id="confirmPassword"
+                      formControlName="confirmPassword"
+                      type="password"
+                      autocomplete="new-password"
+                      class="input input-primary w-full"
+                      placeholder="Repite la nueva contraseña"
+                    />
+                    @if (
+                      form.get('confirmPassword')?.touched &&
+                      form.get('confirmPassword')?.hasError('required')
+                    ) {
+                      <p class="text-error text-xs mt-1">
+                        Confirma tu contraseña
+                      </p>
+                    }
+                  </div>
+
+                  @if (passwordMismatch()) {
+                    <p class="text-error text-sm">
+                      Las contraseñas no coinciden.
+                    </p>
+                  }
+
+                  <button
+                    type="submit"
+                    [disabled]="loading() || form.invalid || passwordMismatch()"
+                    class="btn btn-primary w-full"
+                  >
+                    @if (loading()) {
+                      <span class="loading loading-spinner loading-sm"></span>
+                      Guardando...
+                    } @else {
+                      Guardar nueva contraseña
+                    }
+                  </button>
+                </form>
+
+                <div class="divider">o</div>
+
+                <p class="text-center text-sm">
+                  <a routerLink="/login" class="link link-primary"
+                    >Volver al inicio de sesión</a
+                  >
                 </p>
-              </div>
+              }
             </div>
           </div>
-        } @else {
-          <form [formGroup]="form" (ngSubmit)="onSubmit()" class="mt-8 space-y-6">
-            <div class="rounded-md shadow-sm space-y-4">
-              <div>
-                <label for="password" class="sr-only">New password</label>
-                <input
-                  id="password"
-                  formControlName="password"
-                  type="password"
-                  autocomplete="new-password"
-                  required
-                  class="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                  placeholder="New password"
-                />
-              </div>
-              <div>
-                <label for="confirmPassword" class="sr-only">Confirm password</label>
-                <input
-                  id="confirmPassword"
-                  formControlName="confirmPassword"
-                  type="password"
-                  autocomplete="new-password"
-                  required
-                  class="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                  placeholder="Confirm new password"
-                />
-              </div>
-            </div>
 
-            @if (passwordMismatch()) {
-              <p class="text-sm text-red-600">Passwords do not match.</p>
-            }
-
-            <div>
-              <button
-                type="submit"
-                [disabled]="loading() || form.invalid || passwordMismatch()"
-                class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                @if (loading()) {
-                  <span>Resetting...</span>
-                } @else {
-                  <span>Reset password</span>
-                }
-              </button>
-            </div>
-          </form>
-        }
-
-        <div class="text-center">
-          <a routerLink="/login" class="font-medium text-indigo-600 hover:text-indigo-500">
-            Back to sign in
-          </a>
+          <p class="text-base-200 text-center">
+            2025 © Skooltrak. Todos los derechos reservados.
+          </p>
         </div>
-      </div>
+      } @placeholder {
+        <lib-loader />
+      }
     </div>
   `,
 })
@@ -98,24 +146,28 @@ export default class ResetPasswordComponent {
   token = signal<string | null>(null);
   error = signal(false);
   loading = signal(false);
+  passwordMismatch = signal(false);
 
   form = new FormGroup({
-    password: new FormControl('', [Validators.required, Validators.minLength(8)]),
+    password: new FormControl('', [
+      Validators.required,
+      Validators.minLength(8),
+    ]),
     confirmPassword: new FormControl('', [Validators.required]),
   });
 
-  passwordMismatch = signal(false);
-
   constructor() {
     // Get token from URL query params
-    const params = new URLSearchParams(window.location.search);
-    const token = params.get('token');
-    const errorParam = params.get('error');
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const token = params.get('token');
+      const errorParam = params.get('error');
 
-    if (errorParam || !token) {
-      this.error.set(true);
-    } else {
-      this.token.set(token);
+      if (errorParam || !token) {
+        this.error.set(true);
+      } else {
+        this.token.set(token);
+      }
     }
 
     // Watch for password mismatch
@@ -128,13 +180,15 @@ export default class ResetPasswordComponent {
   }
 
   async onSubmit() {
-    if (this.form.invalid || !this.token() || this.passwordMismatch()) return;
+    const token = this.token();
+    const password = this.form.value.password;
+
+    if (this.form.invalid || !token || this.passwordMismatch() || !password) {
+      return;
+    }
 
     this.loading.set(true);
-    const success = await this.auth.resetPassword(
-      this.token()!,
-      this.form.value.password!
-    );
+    const success = await this.auth.resetPassword(token, password);
     this.loading.set(false);
 
     if (success) {

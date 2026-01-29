@@ -1,77 +1,124 @@
+import { Loader } from '@/ui';
 import { Component, inject, signal } from '@angular/core';
-import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import {
+  FormControl,
+  FormGroup,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import Auth from './auth';
 
 @Component({
   selector: 'app-forgot-password',
-  imports: [ReactiveFormsModule, RouterLink],
+  imports: [ReactiveFormsModule, RouterLink, Loader],
   template: `
-    <div class="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div class="max-w-md w-full space-y-8">
-        <div>
-          <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            Reset your password
-          </h2>
-          <p class="mt-2 text-center text-sm text-gray-600">
-            Enter your email address and we'll send you a link to reset your password.
-          </p>
-        </div>
+    <div class="gradient-bg min-h-screen flex items-center justify-center p-4">
+      @defer {
+        <div class="max-w-md w-full flex flex-col gap-8 items-center">
+          <div><img src="skooltrak.png" alt="" class="h-12" /></div>
 
-        @if (sent()) {
-          <div class="rounded-md bg-green-50 p-4">
-            <div class="flex">
-              <div class="flex-shrink-0">
-                <svg class="h-5 w-5 text-green-400" viewBox="0 0 20 20" fill="currentColor">
-                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-                </svg>
-              </div>
-              <div class="ml-3">
-                <p class="text-sm font-medium text-green-800">
-                  Check your email for a password reset link.
+          <div
+            class="w-full rounded-2xl shadow-xl overflow-hidden flex flex-col"
+          >
+            <!-- Header Section -->
+            <div class="bg-primary p-6 text-white text-center">
+              <h1 class="text-2xl font-bold">Recuperar contraseña</h1>
+              <p class="text-primary-content mt-2">
+                Ingresa tu correo y te enviaremos un enlace para restablecer tu
+                contraseña
+              </p>
+            </div>
+
+            <!-- Form Section -->
+            <div class="p-8 bg-base-100">
+              @if (sent()) {
+                <div class="alert alert-success mb-4">
+                  <span class="material-symbols-outlined">check_circle</span>
+                  <span
+                    >Revisa tu correo electrónico. Te hemos enviado un enlace
+                    para restablecer tu contraseña.</span
+                  >
+                </div>
+                <div class="text-center">
+                  <a routerLink="/login" class="btn btn-primary">
+                    Volver al inicio de sesión
+                  </a>
+                </div>
+              } @else {
+                <form
+                  [formGroup]="form"
+                  (ngSubmit)="onSubmit()"
+                  class="space-y-6"
+                >
+                  <div class="fieldset">
+                    <label for="email">Correo Electrónico</label>
+                    <div class="relative">
+                      <div
+                        class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"
+                      >
+                        <span class="material-symbols-outlined">mail</span>
+                      </div>
+                      <input
+                        id="email"
+                        formControlName="email"
+                        type="email"
+                        autocomplete="email"
+                        class="input input-primary"
+                        placeholder="tu@email.com"
+                      />
+                    </div>
+                    @if (
+                      form.get('email')?.touched &&
+                      form.get('email')?.hasError('required')
+                    ) {
+                      <p class="text-error text-xs mt-1">
+                        El correo electrónico es requerido
+                      </p>
+                    }
+                    @if (
+                      form.get('email')?.touched &&
+                      form.get('email')?.hasError('email')
+                    ) {
+                      <p class="text-error text-xs mt-1">
+                        Ingresa un correo electrónico válido
+                      </p>
+                    }
+                  </div>
+
+                  <button
+                    type="submit"
+                    [disabled]="loading() || form.invalid"
+                    class="btn btn-primary w-full"
+                  >
+                    @if (loading()) {
+                      <span class="loading loading-spinner loading-sm"></span>
+                      Enviando...
+                    } @else {
+                      Enviar enlace de recuperación
+                    }
+                  </button>
+                </form>
+
+                <div class="divider">o</div>
+
+                <p class="text-center text-sm">
+                  ¿Ya recuerdas tu contraseña?
+                  <a routerLink="/login" class="link link-primary"
+                    >Inicia sesión</a
+                  >
                 </p>
-              </div>
+              }
             </div>
           </div>
-        } @else {
-          <form [formGroup]="form" (ngSubmit)="onSubmit()" class="mt-8 space-y-6">
-            <div class="rounded-md shadow-sm -space-y-px">
-              <div>
-                <label for="email" class="sr-only">Email address</label>
-                <input
-                  id="email"
-                  formControlName="email"
-                  type="email"
-                  autocomplete="email"
-                  required
-                  class="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                  placeholder="Email address"
-                />
-              </div>
-            </div>
 
-            <div>
-              <button
-                type="submit"
-                [disabled]="loading() || form.invalid"
-                class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                @if (loading()) {
-                  <span>Sending...</span>
-                } @else {
-                  <span>Send reset link</span>
-                }
-              </button>
-            </div>
-          </form>
-        }
-
-        <div class="text-center">
-          <a routerLink="/login" class="font-medium text-indigo-600 hover:text-indigo-500">
-            Back to sign in
-          </a>
+          <p class="text-base-200 text-center">
+            2025 © Skooltrak. Todos los derechos reservados.
+          </p>
         </div>
-      </div>
+      } @placeholder {
+        <lib-loader />
+      }
     </div>
   `,
 })
@@ -89,11 +136,11 @@ export default class ForgotPasswordComponent {
     if (this.form.invalid) return;
 
     this.loading.set(true);
-    const success = await this.auth.requestPasswordReset(this.form.value.email!);
-    this.loading.set(false);
-
-    if (success) {
-      this.sent.set(true);
+    const email = this.form.value.email;
+    if (email) {
+      await this.auth.requestPasswordReset(email);
     }
+    this.loading.set(false);
+    this.sent.set(true);
   }
 }

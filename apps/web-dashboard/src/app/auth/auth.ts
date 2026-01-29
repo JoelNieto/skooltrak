@@ -1,14 +1,6 @@
 import { Toast } from '@/ui';
 import { isPlatformBrowser } from '@angular/common';
-import {
-  Injectable,
-  PLATFORM_ID,
-  computed,
-  effect,
-  inject,
-  linkedSignal,
-  signal,
-} from '@angular/core';
+import { Injectable, PLATFORM_ID, computed, effect, inject, linkedSignal, signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
 import { Prisma } from '@generated/prisma';
@@ -109,7 +101,7 @@ export default class Auth {
             this.#toasts.showError(err.message);
             this.isSigning.set(false);
             return of(null);
-          })
+          }),
         );
     },
   });
@@ -119,19 +111,13 @@ export default class Auth {
 
   // Computed from user or session
   public userColor = computed(() => this.user()?.color);
-  public role = computed(
-    () => this.user()?.role?.name || this.sessionState()?.user?.role
-  );
-  public permissions = computed<string[]>(
-    () => this.user()?.role?.permissions?.map((p: any) => p.descriptiveId) || []
-  );
+  public role = computed(() => this.user()?.role?.name || this.sessionState()?.user?.role);
+  public permissions = computed<string[]>(() => this.user()?.role?.permissions?.map((p: any) => p.descriptiveId) || []);
 
-  public userName = computed(
-    () => `${this.user()?.firstName} ${this.user()?.lastName}`
-  );
+  public userName = computed(() => `${this.user()?.firstName} ${this.user()?.lastName}`);
   public userInitials = computed(
     () =>
-      `${this.user()?.firstName?.charAt(0).toUpperCase() || ''}${this.user()?.lastName?.charAt(0).toUpperCase() || ''}`
+      `${this.user()?.firstName?.charAt(0).toUpperCase() || ''}${this.user()?.lastName?.charAt(0).toUpperCase() || ''}`,
   );
 
   public getAccessToken() {
@@ -141,9 +127,7 @@ export default class Auth {
     return null;
   }
 
-  public isAdmin = computed(
-    () => this.role() === 'ADMIN' || this.role() === 'ORG_ADMIN'
-  );
+  public isAdmin = computed(() => this.role() === 'ADMIN' || this.role() === 'ORG_ADMIN');
   public isTeacher = computed(() => this.role() === 'TEACHER');
   public isStudent = computed(() => this.role() === 'STUDENT');
 
@@ -238,17 +222,31 @@ export default class Auth {
     this.router.navigate(['/login']);
   }
 
+  // Helper to get API base URL (handles dev vs production)
+  private getApiBaseUrl(): string {
+    // In browser, use relative URL (proxy handles it)
+    // In SSR or if proxy fails, use absolute URL
+    if (isPlatformBrowser(this.platformId)) {
+      // Try to detect if we're in development
+      const isDev = window.location.hostname === 'localhost';
+      if (isDev) {
+        return 'http://localhost:3000';
+      }
+    }
+    return '';
+  }
+
   // Password reset methods
   public async requestPasswordReset(email: string): Promise<boolean> {
     try {
-      // Use fetch to call the better-auth REST endpoint
-      const response = await fetch('/api/auth/forget-password', {
+      const baseUrl = this.getApiBaseUrl();
+      const response = await fetch(`${baseUrl}/api/auth/request-password-reset`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
         body: JSON.stringify({
           email,
-          redirectTo: '/reset-password',
+          redirectTo: `${window.location.origin}/reset-password`,
         }),
       });
 
@@ -260,12 +258,10 @@ export default class Auth {
     }
   }
 
-  public async resetPassword(
-    token: string,
-    newPassword: string
-  ): Promise<boolean> {
+  public async resetPassword(token: string, newPassword: string): Promise<boolean> {
     try {
-      const response = await fetch('/api/auth/reset-password', {
+      const baseUrl = this.getApiBaseUrl();
+      const response = await fetch(`${baseUrl}/api/auth/reset-password`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -289,12 +285,10 @@ export default class Auth {
     }
   }
 
-  public async changePassword(
-    currentPassword: string,
-    newPassword: string
-  ): Promise<boolean> {
+  public async changePassword(currentPassword: string, newPassword: string): Promise<boolean> {
     try {
-      const response = await fetch('/api/auth/change-password', {
+      const baseUrl = this.getApiBaseUrl();
+      const response = await fetch(`${baseUrl}/api/auth/change-password`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',

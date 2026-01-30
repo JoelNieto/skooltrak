@@ -4,16 +4,11 @@
  * Run with: bun run prisma/scripts/seed-admin.ts
  */
 
-import { PrismaPg } from '@prisma/adapter-pg';
 import * as bcrypt from 'bcrypt';
 import { randomUUID } from 'crypto';
 import { PrismaClient } from '../../generated/prisma/index.js';
 
-const adapter = new PrismaPg({
-  connectionString: process.env['DATABASE_URL'],
-});
-
-const prisma = new PrismaClient({ adapter });
+const prisma = new PrismaClient();
 
 async function main() {
   const email = 'joelnieto1215@gmail.com';

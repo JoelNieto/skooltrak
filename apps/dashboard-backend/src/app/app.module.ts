@@ -29,6 +29,7 @@ import { StudentGradesModule } from './student-grades/student-grades.module';
 import { MessagesModule } from './messages/messages.module';
 import { GroupsSchedulesModule } from './groups-schedules/groups-schedules.module';
 import { FilesModule } from './files/files.module';
+import { ParentsModule } from './parents/parents.module';
 
 @Module({
   imports: [
@@ -67,6 +68,7 @@ import { FilesModule } from './files/files.module';
     MessagesModule,
     GroupsSchedulesModule,
     FilesModule,
+    ParentsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

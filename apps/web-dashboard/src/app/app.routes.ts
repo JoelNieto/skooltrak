@@ -1,10 +1,5 @@
 import { Route } from '@angular/router';
-import {
-  adminGuard,
-  authGuard,
-  studentGuard,
-  teacherGuard,
-} from './auth/auth.guard';
+import { adminGuard, authGuard, studentGuard, teacherGuard } from './auth/auth.guard';
 
 export const appRoutes: Route[] = [
   {
@@ -110,19 +105,19 @@ export const appRoutes: Route[] = [
       },
       {
         path: 'student/schedule',
-        loadComponent: () => import('./student/student-schedule'),
+        loadComponent: () => import('./students/student-schedule'),
       },
       {
         path: 'student/assignments',
-        loadComponent: () => import('./student/student-assignment-submission'),
+        loadComponent: () => import('./students/student-assignment-submission'),
       },
       {
         path: 'student/notifications',
-        loadComponent: () => import('./student/student-notifications'),
+        loadComponent: () => import('./students/student-notifications'),
       },
       {
         path: 'student/attendance',
-        loadComponent: () => import('./student/student-attendance'),
+        loadComponent: () => import('./students/student-attendance'),
       },
       {
         path: 'teacher/attendance',
@@ -163,11 +158,19 @@ export const appRoutes: Route[] = [
       },
       {
         path: 'students',
-        loadComponent: () => import('./admin/pages/students'),
+        loadComponent: () => import('./students/students'),
+      },
+      {
+        path: 'students/new',
+        loadComponent: () => import('./students/student-form'),
       },
       {
         path: 'students/:id',
-        loadComponent: () => import('./admin/pages/student'),
+        loadComponent: () => import('./students/student'),
+      },
+      {
+        path: 'students/:id/edit',
+        loadComponent: () => import('./students/student-form'),
       },
       {
         path: 'groups',
@@ -213,10 +216,6 @@ export const appRoutes: Route[] = [
           {
             path: 'degrees',
             loadComponent: () => import('./admin/pages/degrees'),
-          },
-          {
-            path: 'students',
-            loadComponent: () => import('./admin/pages/students'),
           },
           {
             path: 'periods',

@@ -14,8 +14,29 @@ export class StudentsService {
     @Inject(CONTEXT) private readonly context: { req: Request }
   ) {}
   async create(createStudentInput: CreateStudentInput) {
-    const { email, organizationId, schoolId, classGroupId, ...rest } =
-      createStudentInput;
+    const {
+      email,
+      organizationId,
+      schoolId,
+      classGroupId,
+      parentIds,
+      firstName,
+      middleName,
+      fatherName,
+      motherName,
+      documentId,
+      birthDate,
+      gender,
+      address,
+      phone,
+      enrollmentStatus,
+      bloodType,
+      allergies,
+      medicalNotes,
+      emergencyContactName,
+      emergencyContactPhone,
+    } = createStudentInput;
+
     const role = await this.prisma.role.findFirstOrThrow({
       where: {
         organizationId: null,
@@ -24,40 +45,68 @@ export class StudentsService {
     });
     const user = await this.prisma.user.create({
       data: {
-        firstName: rest.firstName,
-        lastName: rest.fatherName,
+        firstName,
+        lastName: fatherName,
         email: email,
         color: this.getRandomPastelColor(),
-        password: bcrypt.hashSync(rest.documentId, 10),
+        password: bcrypt.hashSync(documentId, 10),
         organizationId,
         roleId: role.id,
       },
     });
 
-    const group = await this.prisma.classGroup.findUniqueOrThrow({
-      where: {
-        id: classGroupId,
-      },
-    });
+    // Only connect courses if classGroupId is provided
+    let coursesToConnect: { id: string }[] = [];
+    if (classGroupId) {
+      const group = await this.prisma.classGroup.findUnique({
+        where: { id: classGroupId },
+      });
+      if (group) {
+        const courses = await this.prisma.course.findMany({
+          where: { studyPlanId: group.studyPlanId },
+        });
+        coursesToConnect = courses.map((course) => ({ id: course.id }));
+      }
+    }
 
-    const courses = await this.prisma.course.findMany({
-      where: {
-        studyPlanId: group.studyPlanId,
-      },
-    });
+    // Convert birthDate properly - handle both Date and string
+    const parsedBirthDate = birthDate instanceof Date ? birthDate : new Date(birthDate);
+    
+    const studentData = {
+      firstName,
+      middleName,
+      fatherName,
+      motherName,
+      documentId,
+      birthDate: parsedBirthDate,
+      gender,
+      address,
+      phone,
+      enrollmentStatus: enrollmentStatus || 'ACTIVE',
+      bloodType: bloodType || '',
+      allergies: allergies || '',
+      medicalNotes: medicalNotes || '',
+      emergencyContactName: emergencyContactName || '',
+      emergencyContactPhone: emergencyContactPhone || '',
+      userId: user.id,
+      organizationId,
+      schoolId,
+      classGroupId: classGroupId || null,
+      courses: coursesToConnect.length > 0 ? { connect: coursesToConnect } : undefined,
+      parents: parentIds?.length ? { connect: parentIds.map((id) => ({ id })) } : undefined,
+    };
 
-    return this.prisma.student.create({
-      data: {
-        ...rest,
-        userId: user.id,
-        organizationId,
-        schoolId,
-        classGroupId,
-        courses: {
-          connect: courses.map((course) => ({ id: course.id })),
-        },
-      },
-    });
+    console.log('Creating student with data:', JSON.stringify(studentData, null, 2));
+
+    try {
+      return await this.prisma.student.create({
+        data: studentData,
+        include: { classGroup: true, user: true, parents: true },
+      });
+    } catch (error) {
+      console.error('Prisma error creating student:', error);
+      throw error;
+    }
   }
 
   getRandomPastelColor() {
@@ -199,6 +248,7 @@ export class StudentsService {
           orderBy: { subject: { name: 'asc' } },
         },
         user: true,
+        parents: true,
         studentGrades: {
           include: {
             grade: {
@@ -215,11 +265,40 @@ export class StudentsService {
   }
 
   async update(id: string, updateStudentInput: UpdateStudentInput) {
-    const { email, ...rest } = updateStudentInput;
+    const { email, parentIds, birthDate, ...rest } = updateStudentInput;
 
-    return await this.prisma.student.update({
+    // Build update data, only including defined fields
+    const updateData: Record<string, unknown> = {};
+
+    // Only add fields that are explicitly provided
+    if (rest.firstName !== undefined) updateData.firstName = rest.firstName;
+    if (rest.middleName !== undefined) updateData.middleName = rest.middleName;
+    if (rest.fatherName !== undefined) updateData.fatherName = rest.fatherName;
+    if (rest.motherName !== undefined) updateData.motherName = rest.motherName;
+    if (rest.documentId !== undefined) updateData.documentId = rest.documentId;
+    if (birthDate !== undefined) updateData.birthDate = new Date(birthDate);
+    if (rest.gender !== undefined) updateData.gender = rest.gender;
+    if (rest.address !== undefined) updateData.address = rest.address;
+    if (rest.phone !== undefined) updateData.phone = rest.phone;
+    if (rest.classGroupId !== undefined) updateData.classGroupId = rest.classGroupId || null;
+    if (rest.enrollmentStatus !== undefined) updateData.enrollmentStatus = rest.enrollmentStatus;
+    if (rest.bloodType !== undefined) updateData.bloodType = rest.bloodType;
+    if (rest.allergies !== undefined) updateData.allergies = rest.allergies;
+    if (rest.medicalNotes !== undefined) updateData.medicalNotes = rest.medicalNotes;
+    if (rest.emergencyContactName !== undefined) updateData.emergencyContactName = rest.emergencyContactName;
+    if (rest.emergencyContactPhone !== undefined) updateData.emergencyContactPhone = rest.emergencyContactPhone;
+
+    // If parentIds is provided, update the relationship
+    if (parentIds !== undefined) {
+      updateData.parents = {
+        set: parentIds.map((parentId) => ({ id: parentId })),
+      };
+    }
+
+    return this.prisma.student.update({
       where: { id },
-      data: rest,
+      data: updateData,
+      include: { classGroup: true, user: true, parents: true },
     });
   }
 

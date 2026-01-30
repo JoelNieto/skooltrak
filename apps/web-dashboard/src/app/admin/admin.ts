@@ -15,89 +15,37 @@ import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
     <div class="border-b border-base-300">
       <ul class="menu menu-horizontal gap-2 ">
         <li>
-          <a
-            routerLink="subjects"
-            routerLinkActive="bg-primary text-primary-content"
-          >
-            Asignaturas</a
-          >
+          <a routerLink="subjects" routerLinkActive="bg-primary text-primary-content"> Asignaturas</a>
         </li>
         <li>
-          <a
-            routerLink="courses"
-            routerLinkActive="bg-primary text-primary-content"
-            >Cursos</a
-          >
+          <a routerLink="courses" routerLinkActive="bg-primary text-primary-content">Cursos</a>
         </li>
         <li>
-          <a
-            routerLink="degrees"
-            routerLinkActive="bg-primary text-primary-content"
-            >Niveles</a
-          >
+          <a routerLink="degrees" routerLinkActive="bg-primary text-primary-content">Niveles</a>
         </li>
         <li>
-          <a
-            routerLink="students"
-            routerLinkActive="bg-primary text-primary-content"
-            >Alumnos</a
-          >
+          <a routerLink="study-plans" routerLinkActive="bg-primary text-primary-content">Planes</a>
         </li>
         <li>
-          <a
-            routerLink="study-plans"
-            routerLinkActive="bg-primary text-primary-content"
-            >Planes</a
-          >
+          <a routerLink="class-groups" routerLinkActive="bg-primary text-primary-content">Grupos</a>
         </li>
         <li>
-          <a
-            routerLink="class-groups"
-            routerLinkActive="bg-primary text-primary-content"
-            >Grupos</a
-          >
+          <a routerLink="teachers" routerLinkActive="bg-primary text-primary-content">Profesores</a>
         </li>
         <li>
-          <a
-            routerLink="teachers"
-            routerLinkActive="bg-primary text-primary-content"
-            >Profesores</a
-          >
+          <a routerLink="periods" routerLinkActive="bg-primary text-primary-content">Periodos</a>
         </li>
         <li>
-          <a
-            routerLink="periods"
-            routerLinkActive="bg-primary text-primary-content"
-            >Periodos</a
-          >
+          <a routerLink="parents" routerLinkActive="bg-primary text-primary-content">Padres</a>
         </li>
         <li>
-          <a
-            routerLink="parents"
-            routerLinkActive="bg-primary text-primary-content"
-            >Padres</a
-          >
+          <a routerLink="attendance-reporting" routerLinkActive="bg-primary text-primary-content">Asistencia</a>
         </li>
         <li>
-          <a
-            routerLink="attendance-reporting"
-            routerLinkActive="bg-primary text-primary-content"
-            >Asistencia</a
-          >
+          <a routerLink="financial-module" routerLinkActive="bg-primary text-primary-content">Finanzas</a>
         </li>
         <li>
-          <a
-            routerLink="financial-module"
-            routerLinkActive="bg-primary text-primary-content"
-            >Finanzas</a
-          >
-        </li>
-        <li>
-          <a
-            routerLink="events-calendar"
-            routerLinkActive="bg-primary text-primary-content"
-            >Eventos</a
-          >
+          <a routerLink="events-calendar" routerLinkActive="bg-primary text-primary-content">Eventos</a>
         </li>
       </ul>
     </div>

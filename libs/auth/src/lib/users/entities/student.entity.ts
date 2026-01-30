@@ -21,8 +21,8 @@ export class UserStudent
   organizationId: string;
   @Field(() => String)
   schoolId: string;
-  @Field(() => String)
-  classGroupId: string;
+  @Field(() => String, { nullable: true })
+  classGroupId: string | null;
   @Field(() => Date)
   birthDate: Date;
   @Field(() => String)
@@ -31,6 +31,18 @@ export class UserStudent
   address: string;
   @Field(() => String)
   phone: string;
+  @Field(() => String)
+  enrollmentStatus: $Enums.EnrollmentStatus;
+  @Field(() => String)
+  bloodType: string;
+  @Field(() => String)
+  allergies: string;
+  @Field(() => String)
+  medicalNotes: string;
+  @Field(() => String)
+  emergencyContactName: string;
+  @Field(() => String)
+  emergencyContactPhone: string;
   @Field(() => String)
   userId: string;
   @Field(() => Date)

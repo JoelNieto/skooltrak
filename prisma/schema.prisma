@@ -11,6 +11,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 model Organization {
@@ -31,6 +32,7 @@ model Organization {
   courses            Course[]
   Teacher            Teacher[]
   Student            Student[]
+  Parent             Parent[]
   quizzes            Quiz[]
   messages           Message[]
   files              File[]
@@ -361,21 +363,48 @@ model Student {
   organization          Organization           @relation(fields: [organizationId], references: [id])
   school                School                 @relation(fields: [schoolId], references: [id])
   schoolId              String
-  classGroup            ClassGroup             @relation(fields: [classGroupId], references: [id])
-  classGroupId          String
+  classGroup            ClassGroup?            @relation(fields: [classGroupId], references: [id])
+  classGroupId          String?
   birthDate             DateTime
   gender                Gender
   address               String
   phone                 String
+  enrollmentStatus      EnrollmentStatus       @default(ACTIVE)
+  bloodType             String                 @default("")
+  allergies             String                 @default("")
+  medicalNotes          String                 @default("")
+  emergencyContactName  String                 @default("")
+  emergencyContactPhone String                 @default("")
   courses               Course[]
   userId                String                 @unique
   user                  User                   @relation(fields: [userId], references: [id])
+  parents               Parent[]
   createdAt             DateTime               @default(now())
   updatedAt             DateTime               @updatedAt
   quizSubmissions       QuizSubmission[]
   studentGrades         StudentGrade[]
   attendanceRecords     AttendanceRecord[]
   assignmentSubmissions AssignmentSubmission[]
+}
+
+model Parent {
+  id             String       @id @default(cuid())
+  firstName      String
+  middleName     String       @default("")
+  fatherName     String
+  motherName     String       @default("")
+  documentId     String
+  phone          String
+  email          String
+  relationship   String
+  occupation     String       @default("")
+  workPhone      String       @default("")
+  address        String       @default("")
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  students       Student[]
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
 }
 
 model Teacher {
@@ -735,6 +764,12 @@ enum AttendanceStatus {
   LATE
   SICK_LEAVE
   EXCUSED
+}
+
+enum EnrollmentStatus {
+  ACTIVE
+  CANDIDATE
+  RETIRED
 }
 
 model AttendanceSession {

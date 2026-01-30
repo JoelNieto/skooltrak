@@ -46,23 +46,12 @@ export class CoursesService {
       select: { id: true },
     });
 
-    const groupsToConnect = await this.prisma.classGroup.findMany({
-      where: {
-        studyPlanId: createCourseInput.studyPlanId,
-        schoolId: createCourseInput.schoolId,
-      },
-      select: { id: true },
-    });
-
     if (studentsToConnect.length > 0) {
       await this.prisma.course.update({
         where: { id: course.id },
         data: {
           students: {
             connect: studentsToConnect.map((s) => ({ id: s.id })),
-          },
-          groups: {
-            connect: groupsToConnect.map((g) => ({ id: g.id })),
           },
         },
       });
@@ -106,7 +95,7 @@ export class CoursesService {
     if (role === 'STUDENT') {
       where = {
         ...where,
-        groups: { some: { students: { some: { userId } } } },
+        studyPlan: { classGroups: { some: { students: { some: { userId } } } } },
       };
     }
 
@@ -148,7 +137,7 @@ export class CoursesService {
     if (role === 'STUDENT') {
       where = {
         ...where,
-        groups: { some: { students: { some: { userId } } } },
+        studyPlan: { classGroups: { some: { students: { some: { userId } } } } },
       };
     }
 
@@ -213,9 +202,14 @@ export class CoursesService {
     });
   }
 
-  findManyByGroupId(groupId: string) {
+  async findManyByGroupId(groupId: string) {
+    const group = await this.prisma.classGroup.findUnique({
+      where: { id: groupId },
+      select: { studyPlanId: true },
+    });
+    if (!group) return [];
     return this.prisma.course.findMany({
-      where: { groups: { some: { id: groupId } } },
+      where: { studyPlanId: group.studyPlanId },
       orderBy: { name: 'asc' },
       include: {
         school: true,

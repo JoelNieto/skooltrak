@@ -7,18 +7,8 @@ import { UpdateClassGroupInput } from './dto/update-class-group.input';
 export class ClassGroupsService {
   constructor(private readonly prisma: PrismaService) {}
   async create(createClassGroupInput: CreateClassGroupInput) {
-    const coursesToConnect = await this.prisma.course.findMany({
-      where: {
-        studyPlanId: createClassGroupInput.studyPlanId,
-        schoolId: createClassGroupInput.schoolId,
-      },
-      select: { id: true },
-    });
     return this.prisma.classGroup.create({
-      data: {
-        ...createClassGroupInput,
-        courses: { connect: coursesToConnect.map((c) => ({ id: c.id })) },
-      },
+      data: createClassGroupInput,
     });
   }
 
@@ -54,9 +44,14 @@ export class ClassGroupsService {
     });
   }
 
-  findAllByCourseId(courseId: string) {
+  async findAllByCourseId(courseId: string) {
+    const course = await this.prisma.course.findUnique({
+      where: { id: courseId },
+      select: { studyPlanId: true },
+    });
+    if (!course) return [];
     return this.prisma.classGroup.findMany({
-      where: { courses: { some: { id: courseId } } },
+      where: { studyPlanId: course.studyPlanId },
       include: {
         teacher: true,
         studyPlan: {
@@ -70,7 +65,7 @@ export class ClassGroupsService {
   }
 
   async findOne(id: string) {
-    return this.prisma.classGroup.findUnique({
+    const classGroup = await this.prisma.classGroup.findUnique({
       where: { id },
       include: {
         teacher: {
@@ -82,10 +77,6 @@ export class ClassGroupsService {
           include: { user: true },
           orderBy: { user: { firstName: 'asc' } },
         },
-        courses: {
-          include: { teacher: true, subject: true },
-          orderBy: { subject: { name: 'asc' } },
-        },
         studyPlan: {
           include: {
             degree: true,
@@ -93,6 +84,16 @@ export class ClassGroupsService {
         },
       },
     });
+    if (!classGroup) return null;
+
+    // Fetch courses via studyPlan
+    const courses = await this.prisma.course.findMany({
+      where: { studyPlanId: classGroup.studyPlanId },
+      include: { teacher: true, subject: true },
+      orderBy: { subject: { name: 'asc' } },
+    });
+
+    return { ...classGroup, courses };
   }
 
   update(id: string, updateClassGroupInput: UpdateClassGroupInput) {

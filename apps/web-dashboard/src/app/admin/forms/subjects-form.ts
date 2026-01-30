@@ -1,13 +1,6 @@
 import { Toast } from '@/ui';
-import {
-  afterRenderEffect,
-  Component,
-  inject,
-  input,
-  output,
-  signal,
-} from '@angular/core';
-import { FormField, form, required, submit } from '@angular/forms/signals';
+import { afterRenderEffect, Component, inject, input, output, signal } from '@angular/core';
+import { form, FormField, required, submit } from '@angular/forms/signals';
 import { Prisma } from '@generated/prisma';
 import { Apollo, gql } from 'apollo-angular';
 
@@ -27,30 +20,11 @@ import { Apollo, gql } from 'apollo-angular';
           [class.ng-invalid]="form.name().invalid()"
         />
         @if (form.name().invalid() && form.name().dirty()) {
-
-        <ul>
-          @for (error of form.name().errors(); track error) {
-          <li class="text-error">{{ error.message }}</li>
-          }
-        </ul>
-        }
-      </div>
-      <div class="fieldset">
-        <label for="shortName">Nombre corto</label>
-        <input
-          type="text"
-          id="shortName"
-          [formField]="form.shortName"
-          [class.ng-dirty]="form.shortName().dirty()"
-          [class.ng-invalid]="form.shortName().invalid()"
-          class="input input-primary"
-        />
-        @if (form.shortName().invalid() && form.shortName().dirty()) {
-        <ul>
-          @for (error of form.shortName().errors(); track error) {
-          <li class="text-error">{{ error.message }}</li>
-          }
-        </ul>
+          <ul>
+            @for (error of form.name().errors(); track error) {
+              <li class="text-error">{{ error.message }}</li>
+            }
+          </ul>
         }
       </div>
       <div class="fieldset">
@@ -64,18 +38,16 @@ import { Apollo, gql } from 'apollo-angular';
           [class.ng-invalid]="form.code().invalid()"
         />
         @if (form.code().invalid() && form.code().dirty()) {
-        <ul>
-          @for (error of form.code().errors(); track error) {
-          <li class="text-error">{{ error.message }}</li>
-          }
-        </ul>
+          <ul>
+            @for (error of form.code().errors(); track error) {
+              <li class="text-error">{{ error.message }}</li>
+            }
+          </ul>
         }
       </div>
     </div>
     <div class="flex justify-end gap-2 mt-4">
-      <button class="btn btn-ghost" (click)="closeModal.emit()" type="button">
-        Cancelar
-      </button>
+      <button class="btn btn-ghost" (click)="closeModal.emit()" type="button">Cancelar</button>
       <button class="btn btn-primary" type="submit">Guardar</button>
     </div>
   </form>`,
@@ -85,16 +57,12 @@ export default class SubjectsForm {
   public data = input<{ subject?: Prisma.SubjectGetPayload<false> }>();
   private toast = inject(Toast);
   private apollo = inject(Apollo);
-  #subject = signal<Omit<Prisma.SubjectUncheckedCreateInput, 'organizationId'>>(
-    {
-      name: '',
-      shortName: '',
-      code: '',
-    }
-  );
+  #subject = signal<Omit<Prisma.SubjectUncheckedCreateInput, 'organizationId'>>({
+    name: '',
+    code: '',
+  });
   public form = form(this.#subject, (schemaPath) => {
     required(schemaPath.name, { message: 'Nombre es requerido' });
-    required(schemaPath.shortName, { message: 'Nombre corto es requerido' });
   });
 
   constructor() {
@@ -103,7 +71,6 @@ export default class SubjectsForm {
       if (subject) {
         this.#subject.set({
           name: subject.name,
-          shortName: subject.shortName,
           code: subject.code,
         });
       }
@@ -116,7 +83,6 @@ export default class SubjectsForm {
       this.toast.showError('Datos inválidos');
     }
     this.form.name().markAsDirty();
-    this.form.shortName().markAsDirty();
     this.form.code().markAsDirty();
     submit(this.form, async () => {
       const subject = this.form().value();

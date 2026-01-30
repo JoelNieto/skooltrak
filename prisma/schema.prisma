@@ -252,7 +252,6 @@ model Subject {
   organizationId String
   name           String
   code           String
-  shortName      String
   courses        Course[]
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt

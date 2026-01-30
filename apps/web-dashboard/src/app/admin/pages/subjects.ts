@@ -2,14 +2,7 @@ import { Confirmation, Modal, Pagination, Paginator, Toast } from '@/ui';
 import { Menu, MenuContent, MenuItem, MenuTrigger } from '@angular/aria/menu';
 import { OverlayModule } from '@angular/cdk/overlay';
 import { DatePipe } from '@angular/common';
-import {
-  afterRenderEffect,
-  ChangeDetectionStrategy,
-  Component,
-  inject,
-  signal,
-  viewChild,
-} from '@angular/core';
+import { afterRenderEffect, ChangeDetectionStrategy, Component, inject, signal, viewChild } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { Prisma } from '@generated/prisma';
@@ -19,17 +12,7 @@ import { filter, map, switchMap, tap } from 'rxjs';
 import SubjectsForm from '../forms/subjects-form';
 @Component({
   selector: 'app-subjects',
-  imports: [
-    DatePipe,
-    DatePipe,
-    Paginator,
-    FormsModule,
-    Menu,
-    MenuContent,
-    MenuItem,
-    MenuTrigger,
-    OverlayModule,
-  ],
+  imports: [DatePipe, DatePipe, Paginator, FormsModule, Menu, MenuContent, MenuItem, MenuTrigger, OverlayModule],
   providers: [Pagination],
 
   template: `
@@ -37,124 +20,72 @@ import SubjectsForm from '../forms/subjects-form';
       <div class="md:w-96 w-full">
         <label class="input input-primary ">
           <span class="material-symbols-outlined">search</span>
-          <input
-            class="pl-0"
-            type="search"
-            placeholder="Buscar..."
-            [(ngModel)]="searchText"
-          />
+          <input class="pl-0" type="search" placeholder="Buscar..." [(ngModel)]="searchText" />
         </label>
       </div>
 
       <button class="btn btn-primary" (click)="editSubject()">
-        <span class="material-symbols-outlined">add_circle</span> Nueva
-        asignatura
+        <span class="material-symbols-outlined">add_circle</span> Nueva asignatura
       </button>
     </div>
-    <div
-      class="overflow-x-auto bg-base-100 rounded-lg mt-4 border border-base-300"
-    >
+    <div class="overflow-x-auto bg-base-100 rounded-lg mt-4 border border-base-300">
       <table class="table">
         <thead>
           <tr>
             <th
               class="cursor-pointer hover:bg-base-200"
-              [class]="
-                pagination.sortBy() === 'name'
-                  ? 'bg-primary/10 !text-primary hover:bg-primary/20'
-                  : ''
-              "
+              [class]="pagination.sortBy() === 'name' ? 'bg-primary/10 !text-primary hover:bg-primary/20' : ''"
               (click)="pagination.setOrder('name')"
             >
               <div class="flex items-center gap-2">
-                Nombre @if(pagination.sortBy() === 'name') {
-                <span class="material-symbols-outlined text-xl">
-                  {{
-                    pagination.sortOrder() === 'asc'
-                      ? 'arrow_upward'
-                      : 'arrow_downward'
-                  }} </span
-                >}
+                Nombre
+                @if (pagination.sortBy() === 'name') {
+                  <span class="material-symbols-outlined text-xl">
+                    {{ pagination.sortOrder() === 'asc' ? 'arrow_upward' : 'arrow_downward' }}
+                  </span>
+                }
               </div>
             </th>
             <th
               class="hover:bg-base-200 cursor-pointer"
-              [class]="
-                pagination.sortBy() === 'shortName'
-                  ? 'bg-primary/10 !text-primary hover:bg-primary/20'
-                  : ''
-              "
-              (click)="pagination.setOrder('shortName')"
-            >
-              <div class="flex items-center gap-2">
-                Nombre corto @if(pagination.sortBy() === 'shortName') {
-                <span class="material-symbols-outlined text-xl">
-                  {{
-                    pagination.sortOrder() === 'asc'
-                      ? 'arrow_upward'
-                      : 'arrow_downward'
-                  }} </span
-                >}
-              </div>
-            </th>
-            <th
-              class="hover:bg-base-200 cursor-pointer"
-              [class]="
-                pagination.sortBy() === 'code'
-                  ? 'bg-primary/10 !text-primary hover:bg-primary/20'
-                  : ''
-              "
+              [class]="pagination.sortBy() === 'code' ? 'bg-primary/10 !text-primary hover:bg-primary/20' : ''"
               (click)="pagination.setOrder('code')"
             >
               <div class="flex items-center gap-2">
-                Código @if(pagination.sortBy() === 'code') {
-                <span class="material-symbols-outlined text-xl">
-                  {{
-                    pagination.sortOrder() === 'asc'
-                      ? 'arrow_upward'
-                      : 'arrow_downward'
-                  }} </span
-                >}
+                Código
+                @if (pagination.sortBy() === 'code') {
+                  <span class="material-symbols-outlined text-xl">
+                    {{ pagination.sortOrder() === 'asc' ? 'arrow_upward' : 'arrow_downward' }}
+                  </span>
+                }
               </div>
             </th>
             <th
               class="hover:bg-base-200 cursor-pointer"
-              [class]="
-                pagination.sortBy() === 'createdAt'
-                  ? 'bg-primary/10 !text-primary hover:bg-primary/20'
-                  : ''
-              "
+              [class]="pagination.sortBy() === 'createdAt' ? 'bg-primary/10 !text-primary hover:bg-primary/20' : ''"
               (click)="pagination.setOrder('createdAt')"
             >
               <div class="flex items-center gap-2">
-                Creado @if(pagination.sortBy() === 'createdAt') {
-                <span class="material-symbols-outlined text-xl">
-                  {{
-                    pagination.sortOrder() === 'asc'
-                      ? 'arrow_upward'
-                      : 'arrow_downward'
-                  }} </span
-                >}
+                Creado
+                @if (pagination.sortBy() === 'createdAt') {
+                  <span class="material-symbols-outlined text-xl">
+                    {{ pagination.sortOrder() === 'asc' ? 'arrow_upward' : 'arrow_downward' }}
+                  </span>
+                }
               </div>
             </th>
             <th
               class="hover:bg-base-200 cursor-pointer"
-              [class]="
-                pagination.sortBy() === 'updatedAt'
-                  ? 'bg-primary/10 !text-primary hover:bg-primary/20'
-                  : ''
-              "
+              [class]="pagination.sortBy() === 'updatedAt' ? 'bg-primary/10 !text-primary hover:bg-primary/20' : ''"
               (click)="pagination.setOrder('updatedAt')"
             >
               <div class="flex items-center gap-2">
-                Actualizado @if(pagination.sortBy() === 'updatedAt') {
-                <span class="material-symbols-outlined text-xl">
-                  {{
-                    pagination.sortOrder() === 'asc'
-                      ? 'arrow_upward'
-                      : 'arrow_downward'
-                  }} </span
-                >}
+                Actualizado
+                @if (pagination.sortBy() === 'updatedAt') {
+                  <span class="material-symbols-outlined text-xl">
+                    {{ pagination.sortOrder() === 'asc' ? 'arrow_upward' : 'arrow_downward' }}
+                  </span>
+                }
               </div>
             </th>
             <th></th>
@@ -162,119 +93,108 @@ import SubjectsForm from '../forms/subjects-form';
         </thead>
         <tbody>
           @for (subject of subjects.value() ?? []; track subject.id) {
-          <tr>
-            <td>{{ subject.name }}</td>
-            <td>{{ subject.shortName }}</td>
-            <td>{{ subject.code }}</td>
-            <td>{{ subject.createdAt | date : 'short' }}</td>
-            <td>{{ subject.updatedAt | date : 'short' }}</td>
-            <td>
-              <button
-                class="cursor-pointer hover:bg-base-200 p-1 rounded-lg flex items-center justify-center"
-                ngMenuTrigger
-                #origin
-                #trigger="ngMenuTrigger"
-                [menu]="actionsMenu()"
-              >
-                <span class="material-symbols-outlined text-xl"
-                  >more_horiz</span
+            <tr>
+              <td>{{ subject.name }}</td>
+              <td>{{ subject.code }}</td>
+              <td>{{ subject.createdAt | date: 'short' }}</td>
+              <td>{{ subject.updatedAt | date: 'short' }}</td>
+              <td>
+                <button
+                  class="cursor-pointer hover:bg-base-200 p-1 rounded-lg flex items-center justify-center"
+                  ngMenuTrigger
+                  #origin
+                  #trigger="ngMenuTrigger"
+                  [menu]="actionsMenu()"
                 >
-              </button>
-              <ng-template
-                [cdkConnectedOverlayOpen]="trigger.expanded()"
-                [cdkConnectedOverlay]="{origin, usePopover: 'inline'}"
-                [cdkConnectedOverlayPositions]="[
-                  {
-                    originX: 'end',
-                    originY: 'bottom',
-                    overlayX: 'end',
-                    overlayY: 'top',
-                    offsetY: 4
-                  }
-                ]"
-                cdkAttachPopoverAsChild
-              >
-                <div
-                  ngMenu
-                  class="bg-base-100 shadow-sm rounded-lg p-1 w-48"
-                  #actionsMenu="ngMenu"
+                  <span class="material-symbols-outlined text-xl">more_horiz</span>
+                </button>
+                <ng-template
+                  [cdkConnectedOverlayOpen]="trigger.expanded()"
+                  [cdkConnectedOverlay]="{ origin, usePopover: 'inline' }"
+                  [cdkConnectedOverlayPositions]="[
+                    {
+                      originX: 'end',
+                      originY: 'bottom',
+                      overlayX: 'end',
+                      overlayY: 'top',
+                      offsetY: 4,
+                    },
+                  ]"
+                  cdkAttachPopoverAsChild
                 >
-                  <ng-template ngMenuContent>
-                    <button
-                      ngMenuItem
-                      value="Edit"
-                      class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-base-200 w-full"
-                      (click)="editSubject(subject)"
-                    >
-                      <span class="material-symbols-outlined text-lg"
-                        >edit</span
+                  <div ngMenu class="bg-base-100 shadow-sm rounded-lg p-1 w-48" #actionsMenu="ngMenu">
+                    <ng-template ngMenuContent>
+                      <button
+                        ngMenuItem
+                        value="Edit"
+                        class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-base-200 w-full"
+                        (click)="editSubject(subject)"
                       >
-                      <span>Editar</span>
-                    </button>
-                    <button
-                      ngMenuItem
-                      value="Delete"
-                      class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-base-200 w-full"
-                      (click)="deleteSubject(subject)"
-                    >
-                      <span class="material-symbols-outlined text-lg"
-                        >delete</span
+                        <span class="material-symbols-outlined text-lg">edit</span>
+                        <span>Editar</span>
+                      </button>
+                      <button
+                        ngMenuItem
+                        value="Delete"
+                        class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-base-200 w-full"
+                        (click)="deleteSubject(subject)"
                       >
-                      <span>Eliminar</span>
-                    </button>
-                  </ng-template>
-                </div>
-              </ng-template>
-            </td>
-          </tr>
-          }@empty { @if (subjects.isLoading()) {
-          <tr>
-            <td><div class="skeleton h-4 w-full"></div></td>
-            <td><div class="skeleton h-4 w-full"></div></td>
-            <td><div class="skeleton h-4 w-full"></div></td>
-            <td><div class="skeleton h-4 w-full"></div></td>
-            <td><div class="skeleton h-4 w-full"></div></td>
-            <td><div class="skeleton h-4 w-full"></div></td>
-          </tr>
-          <tr>
-            <td><div class="skeleton h-4 w-full"></div></td>
-            <td><div class="skeleton h-4 w-full"></div></td>
-            <td><div class="skeleton h-4 w-full"></div></td>
-            <td><div class="skeleton h-4 w-full"></div></td>
-            <td><div class="skeleton h-4 w-full"></div></td>
-            <td><div class="skeleton h-4 w-full"></div></td>
-          </tr>
-          <tr>
-            <td><div class="skeleton h-4 w-full"></div></td>
-            <td><div class="skeleton h-4 w-full"></div></td>
-            <td><div class="skeleton h-4 w-full"></div></td>
-            <td><div class="skeleton h-4 w-full"></div></td>
-            <td><div class="skeleton h-4 w-full"></div></td>
-            <td><div class="skeleton h-4 w-full"></div></td>
-          </tr>
-          <tr>
-            <td><div class="skeleton h-4 w-full"></div></td>
-            <td><div class="skeleton h-4 w-full"></div></td>
-            <td><div class="skeleton h-4 w-full"></div></td>
-            <td><div class="skeleton h-4 w-full"></div></td>
-            <td><div class="skeleton h-4 w-full"></div></td>
-            <td><div class="skeleton h-4 w-full"></div></td>
-          </tr>
-          <tr>
-            <td><div class="skeleton h-4 w-full"></div></td>
-            <td><div class="skeleton h-4 w-full"></div></td>
-            <td><div class="skeleton h-4 w-full"></div></td>
-            <td><div class="skeleton h-4 w-full"></div></td>
-            <td><div class="skeleton h-4 w-full"></div></td>
-            <td><div class="skeleton h-4 w-full"></div></td>
-          </tr>
-          }@else {
-          <tr>
-            <td colspan="6" class="text-center">
-              Sin valores para este filtro
-            </td>
-          </tr>
-          } }
+                        <span class="material-symbols-outlined text-lg">delete</span>
+                        <span>Eliminar</span>
+                      </button>
+                    </ng-template>
+                  </div>
+                </ng-template>
+              </td>
+            </tr>
+          } @empty {
+            @if (subjects.isLoading()) {
+              <tr>
+                <td><div class="skeleton h-4 w-full"></div></td>
+                <td><div class="skeleton h-4 w-full"></div></td>
+                <td><div class="skeleton h-4 w-full"></div></td>
+                <td><div class="skeleton h-4 w-full"></div></td>
+                <td><div class="skeleton h-4 w-full"></div></td>
+                <td><div class="skeleton h-4 w-full"></div></td>
+              </tr>
+              <tr>
+                <td><div class="skeleton h-4 w-full"></div></td>
+                <td><div class="skeleton h-4 w-full"></div></td>
+                <td><div class="skeleton h-4 w-full"></div></td>
+                <td><div class="skeleton h-4 w-full"></div></td>
+                <td><div class="skeleton h-4 w-full"></div></td>
+                <td><div class="skeleton h-4 w-full"></div></td>
+              </tr>
+              <tr>
+                <td><div class="skeleton h-4 w-full"></div></td>
+                <td><div class="skeleton h-4 w-full"></div></td>
+                <td><div class="skeleton h-4 w-full"></div></td>
+                <td><div class="skeleton h-4 w-full"></div></td>
+                <td><div class="skeleton h-4 w-full"></div></td>
+                <td><div class="skeleton h-4 w-full"></div></td>
+              </tr>
+              <tr>
+                <td><div class="skeleton h-4 w-full"></div></td>
+                <td><div class="skeleton h-4 w-full"></div></td>
+                <td><div class="skeleton h-4 w-full"></div></td>
+                <td><div class="skeleton h-4 w-full"></div></td>
+                <td><div class="skeleton h-4 w-full"></div></td>
+                <td><div class="skeleton h-4 w-full"></div></td>
+              </tr>
+              <tr>
+                <td><div class="skeleton h-4 w-full"></div></td>
+                <td><div class="skeleton h-4 w-full"></div></td>
+                <td><div class="skeleton h-4 w-full"></div></td>
+                <td><div class="skeleton h-4 w-full"></div></td>
+                <td><div class="skeleton h-4 w-full"></div></td>
+                <td><div class="skeleton h-4 w-full"></div></td>
+              </tr>
+            } @else {
+              <tr>
+                <td colspan="6" class="text-center">Sin valores para este filtro</td>
+              </tr>
+            }
+          }
         </tbody>
       </table>
       <div class="p-4 rounded-b-lg ">
@@ -314,24 +234,11 @@ export default class Subjects {
           subjects: Prisma.SubjectGetPayload<false>[];
         }>({
           query: gql`
-            query GetSubjects(
-              $take: Int!
-              $skip: Int!
-              $search: String
-              $orderBy: String
-              $orderDirection: String
-            ) {
+            query GetSubjects($take: Int!, $skip: Int!, $search: String, $orderBy: String, $orderDirection: String) {
               count: findManySubjectsCount(search: $search)
-              subjects(
-                take: $take
-                skip: $skip
-                search: $search
-                orderBy: $orderBy
-                orderDirection: $orderDirection
-              ) {
+              subjects(take: $take, skip: $skip, search: $search, orderBy: $orderBy, orderDirection: $orderDirection) {
                 id
                 name
-                shortName
                 code
                 createdAt
                 updatedAt
@@ -350,7 +257,7 @@ export default class Subjects {
           tap(({ data }) => {
             this.pagination.updateCount(data.count);
           }),
-          map((result) => result.data.subjects)
+          map((result) => result.data.subjects),
         );
     },
   });
@@ -394,8 +301,8 @@ export default class Subjects {
             variables: {
               removeSubjectId: subject.id,
             },
-          })
-        )
+          }),
+        ),
       )
       .subscribe({
         next: () => {

@@ -26,7 +26,7 @@ export class CoursesService {
         ...createCourseInput,
         shortName: createCourseInput.shortName
           ? `${createCourseInput.shortName}`
-          : `${subject?.shortName} - ${studyPlan?.shortName}`,
+          : `${subject?.code} - ${studyPlan?.shortName}`,
         name: createCourseInput.name
           ? `${createCourseInput.name}`
           : `${subject?.name} - ${studyPlan?.name}`,

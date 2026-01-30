@@ -33,7 +33,6 @@ export class SubjectsService {
         organizationId,
         OR: [
           { name: { contains: search, mode: 'insensitive' } },
-          { shortName: { contains: search, mode: 'insensitive' } },
           { code: { contains: search, mode: 'insensitive' } },
         ],
       },
@@ -54,7 +53,6 @@ export class SubjectsService {
         organizationId,
         OR: [
           { name: { contains: search, mode: 'insensitive' } },
-          { shortName: { contains: search, mode: 'insensitive' } },
           { code: { contains: search, mode: 'insensitive' } },
         ],
       },

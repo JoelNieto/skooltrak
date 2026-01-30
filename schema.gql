@@ -799,9 +799,6 @@ input CreateSubjectInput {
 
   """Name of the subject"""
   name: String!
-
-  """Short name of the subject"""
-  shortName: String!
 }
 
 input CreateSubmissionUploadInput {
@@ -820,7 +817,7 @@ input CreateTeacherInput {
   address: String = ""
 
   """Birth date of the teacher"""
-  birthDate: DateTime = "2026-01-29T17:37:53.233Z"
+  birthDate: DateTime = "2026-01-29T19:33:40.544Z"
 
   """Document ID of the teacher"""
   documentId: String!
@@ -2276,9 +2273,6 @@ type Subject {
 
   """Organization ID of the subject"""
   organizationId: String!
-
-  """Short name of the subject"""
-  shortName: String!
   updatedAt: DateTime!
 }
 
@@ -2757,9 +2751,6 @@ input UpdateSubjectInput {
 
   """Name of the subject"""
   name: String
-
-  """Short name of the subject"""
-  shortName: String
 }
 
 input UpdateTeacherInput {
@@ -2767,7 +2758,7 @@ input UpdateTeacherInput {
   address: String = ""
 
   """Birth date of the teacher"""
-  birthDate: DateTime = "2026-01-29T17:37:53.233Z"
+  birthDate: DateTime = "2026-01-29T19:33:40.544Z"
 
   """Document ID of the teacher"""
   documentId: String

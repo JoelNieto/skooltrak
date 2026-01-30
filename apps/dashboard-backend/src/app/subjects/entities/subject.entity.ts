@@ -7,8 +7,6 @@ export class Subject
 {
   @Field(() => String, { description: 'ID of the subject (auto-generated)' })
   id: string;
-  @Field(() => String, { description: 'Short name of the subject' })
-  shortName: string;
   @Field(() => String, { description: 'Code of the subject' })
   code: string;
   @Field(() => String, { description: 'Name of the subject' })

@@ -1,6 +1,7 @@
 import { Inject, Injectable, Scope } from '@nestjs/common';
 import { CONTEXT } from '@nestjs/graphql';
 import * as bcrypt from 'bcrypt';
+import { randomUUID } from 'crypto';
 import { Request } from 'express';
 import { FetchDataInput } from '../fetch-data.input';
 import { PrismaService } from '../prisma.service';
@@ -43,15 +44,29 @@ export class StudentsService {
         name: 'STUDENT',
       },
     });
+
+    const hashedPassword = bcrypt.hashSync(documentId, 10);
+
     const user = await this.prisma.user.create({
       data: {
         firstName,
         lastName: fatherName,
         email: email,
         color: this.getRandomPastelColor(),
-        password: bcrypt.hashSync(documentId, 10),
+        password: hashedPassword,
         organizationId,
         roleId: role.id,
+      },
+    });
+
+    // Create Account for Better Auth credential login
+    await this.prisma.account.create({
+      data: {
+        id: randomUUID(),
+        accountId: user.id,
+        providerId: 'credential',
+        userId: user.id,
+        password: hashedPassword,
       },
     });
 

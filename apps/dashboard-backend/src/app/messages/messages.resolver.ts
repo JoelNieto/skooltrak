@@ -1,6 +1,14 @@
 import { BetterAuthGuard, User } from '@/auth';
 import { UseGuards } from '@nestjs/common';
-import { Args, Int, Mutation, Query, Resolver } from '@nestjs/graphql';
+import {
+  Args,
+  Int,
+  Mutation,
+  Parent,
+  Query,
+  ResolveField,
+  Resolver,
+} from '@nestjs/graphql';
 import { FetchDataInput } from '../fetch-data.input';
 import { CreateMessageInput } from './dto/create-message.input';
 import { Message, MessageRecipient } from './entities/message.entity';
@@ -9,6 +17,11 @@ import { MessagesService } from './messages.service';
 @Resolver(() => Message)
 export class MessagesResolver {
   constructor(private readonly messagesService: MessagesService) {}
+
+  @ResolveField(() => [Message], { name: 'replies' })
+  getReplies(@Parent() message: Message) {
+    return this.messagesService.findReplies(message.id);
+  }
 
   @UseGuards(BetterAuthGuard)
   @Mutation(() => Message)
@@ -37,6 +50,12 @@ export class MessagesResolver {
   }
 
   @UseGuards(BetterAuthGuard)
+  @Query(() => Int, { name: 'findSentMessagesCount' })
+  findSentMessagesCount() {
+    return this.messagesService.findSentCount();
+  }
+
+  @UseGuards(BetterAuthGuard)
   @Query(() => [User], { name: 'findContacts' })
   findContacts(
     @Args('queryText', { type: () => String, nullable: true, defaultValue: '' })
@@ -61,5 +80,17 @@ export class MessagesResolver {
   @Mutation(() => MessageRecipient)
   removeMessageRecipient(@Args('id', { type: () => String }) id: string) {
     return this.messagesService.removeRecipient(id);
+  }
+
+  @UseGuards(BetterAuthGuard)
+  @Mutation(() => MessageRecipient, { nullable: true })
+  markMessageAsRead(@Args('messageId', { type: () => String }) messageId: string) {
+    return this.messagesService.markAsRead(messageId);
+  }
+
+  @UseGuards(BetterAuthGuard)
+  @Query(() => Int, { name: 'unreadMessagesCount' })
+  unreadMessagesCount() {
+    return this.messagesService.findUnreadCount();
   }
 }

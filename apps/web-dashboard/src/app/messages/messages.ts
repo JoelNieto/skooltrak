@@ -6,10 +6,11 @@ import { RouterLink } from '@angular/router';
 import { Prisma } from '@generated/prisma';
 
 import { Apollo, gql } from 'apollo-angular';
-import { filter, map, switchMap, tap } from 'rxjs';
+import { catchError, filter, map, of, switchMap, tap } from 'rxjs';
 type User = Prisma.UserGetPayload<undefined> & {
   name: string;
   initials: string;
+  color?: string;
 };
 type RecipientType = Prisma.MessageRecipientGetPayload<undefined> & {
   user: User;
@@ -38,7 +39,14 @@ type MessageRecipientType = Prisma.MessageRecipientGetPayload<undefined> & {
       </div>
     </div>
     <div class="tabs tabs-box mt-4">
-      <input class="tab" type="radio" name="messages_tabs" aria-label="Inbox" checked="checked" />
+      <input
+        class="tab"
+        type="radio"
+        name="messages_tabs"
+        aria-label="Inbox"
+        [checked]="activeTab() === 'inbox'"
+        (change)="setActiveTab('inbox')"
+      />
       <div class="tab-content bg-base-100 border-base-300 p-4">
         <div class="overflow-x-auto bg-base-100 rounded-lg">
           <table class="table">
@@ -61,7 +69,7 @@ type MessageRecipientType = Prisma.MessageRecipientGetPayload<undefined> & {
             </thead>
             <tbody>
               @for (item of messagesResource.value(); track item.id) {
-                <tr class="hover:bg-base-300">
+                <tr class="hover:bg-base-300" [class.bg-base-200]="!item.readAt">
                   <td>
                     <input
                       type="checkbox"
@@ -70,7 +78,10 @@ type MessageRecipientType = Prisma.MessageRecipientGetPayload<undefined> & {
                       (change)="onCheckboxChange(item.id, $event.target.checked)"
                     />
                   </td>
-                  <td class="text-neutral-900! font-semibold flex items-center gap-2">
+                  <td class="flex items-center gap-2" [class.font-bold]="!item.readAt">
+                    @if (!item.readAt) {
+                      <span class="w-2 h-2 bg-primary rounded-full"></span>
+                    }
                     <div class="avatar avatar-placeholder">
                       <div class="text-neutral-content w-7 rounded-full" [style.background]="item.message.sender.color">
                         <span>{{ item.message.sender.initials }}</span>
@@ -78,10 +89,10 @@ type MessageRecipientType = Prisma.MessageRecipientGetPayload<undefined> & {
                     </div>
                     {{ item.message.sender.name }}
                   </td>
-                  <td class="text-neutral-500!">
+                  <td [class.font-semibold]="!item.readAt" [class.text-neutral-500]="item.readAt">
                     <a [routerLink]="['/messages', item.message.id]">{{ item.message.subject }}</a>
                   </td>
-                  <td class="text-neutral-500!">
+                  <td class="text-neutral-500">
                     {{ item.message.createdAt | timeAgo }}
                   </td>
                   <td>
@@ -93,7 +104,12 @@ type MessageRecipientType = Prisma.MessageRecipientGetPayload<undefined> & {
               } @empty {
                 <tr>
                   <td colspan="5" class="text-center">
-                    <lib-empty-state title="Sin mensajes" description="No hay mensajes" icon="mail" color="primary" />
+                    <lib-empty-state
+                      title="Sin mensajes"
+                      description="No hay mensajes en tu bandeja de entrada"
+                      icon="mail"
+                      color="primary"
+                    />
                   </td>
                 </tr>
               }
@@ -102,29 +118,141 @@ type MessageRecipientType = Prisma.MessageRecipientGetPayload<undefined> & {
           </table>
           <div class="p-4 rounded-b-lg ">
             <lib-paginator
-              [count]="pagination().count"
-              [take]="pagination().take"
-              [skip]="pagination().skip"
-              (skipChange)="updateSkip($event)"
-              (takeChange)="updateTake($event)"
+              [count]="inboxPagination().count"
+              [take]="inboxPagination().take"
+              [skip]="inboxPagination().skip"
+              (skipChange)="updateInboxSkip($event)"
+              (takeChange)="updateInboxTake($event)"
             />
           </div>
         </div>
       </div>
 
-      <input class="tab" type="radio" name="messages_tabs" aria-label="Outbox" />
+      <input
+        class="tab"
+        type="radio"
+        name="messages_tabs"
+        aria-label="Enviados"
+        [checked]="activeTab() === 'outbox'"
+        (change)="setActiveTab('outbox')"
+      />
+      <div class="tab-content bg-base-100 border-base-300 p-4">
+        <div class="overflow-x-auto bg-base-100 rounded-lg">
+          <table class="table">
+            <thead>
+              <tr>
+                <th class="w-12">
+                  <input
+                    type="checkbox"
+                    [checked]="allSentSelected()"
+                    [indeterminate]="someSentSelected()"
+                    (change)="onSelectAllSentChange($event.target.checked)"
+                    class="checkbox"
+                  />
+                </th>
+                <th class="w-[15rem]">Para</th>
+                <th>Asunto</th>
+                <th>Fecha</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (item of sentMessagesResource.value(); track item.id) {
+                <tr [routerLink]="['/messages', item.id]" class="hover:bg-base-300">
+                  <td>
+                    <input
+                      type="checkbox"
+                      class="checkbox"
+                      [checked]="sentSelectedStates()[item.id] || false"
+                      (change)="onSentCheckboxChange(item.id, $event.target.checked)"
+                    />
+                  </td>
+                  <td class="text-neutral-900! font-semibold">
+                    <div class="flex items-center gap-2">
+                      @for (recipient of item.recipients.slice(0, 2); track recipient.id) {
+                        <div class="avatar avatar-placeholder">
+                          <div
+                            class="text-neutral-content w-7 rounded-full text-xs"
+                            [style.background]="recipient.user.color"
+                          >
+                            <span>{{ recipient.user.initials }}</span>
+                          </div>
+                        </div>
+                      }
+                      <span>{{ getRecipientsText(item) }}</span>
+                    </div>
+                  </td>
+                  <td class="text-neutral-500!">
+                    <a>{{ item.subject }}</a>
+                  </td>
+                  <td class="text-neutral-500!">
+                    {{ item.createdAt | timeAgo }}
+                  </td>
+                  <td>
+                    <button class="hover:text-error cursor-pointer" (click)="deleteSentMessage(item)">
+                      <span class="material-symbols-outlined text-lg">delete</span>
+                    </button>
+                  </td>
+                </tr>
+              } @empty {
+                <tr>
+                  <td colspan="5" class="text-center">
+                    <lib-empty-state
+                      title="Sin mensajes enviados"
+                      description="No has enviado ningún mensaje"
+                      icon="send"
+                      color="primary"
+                    />
+                  </td>
+                </tr>
+              }
+            </tbody>
+            <tfoot></tfoot>
+          </table>
+          <div class="p-4 rounded-b-lg">
+            <lib-paginator
+              [count]="outboxPagination().count"
+              [take]="outboxPagination().take"
+              [skip]="outboxPagination().skip"
+              (skipChange)="updateOutboxSkip($event)"
+              (takeChange)="updateOutboxTake($event)"
+            />
+          </div>
+        </div>
+      </div>
     </div> `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class Messages {
   #apollo = inject(Apollo);
-  pagination = signal({
+  #confirmation = inject(Confirmation);
+  #toast = inject(Toast);
+
+  // Tab state
+  activeTab = signal<'inbox' | 'outbox'>('inbox');
+
+  setActiveTab(tab: 'inbox' | 'outbox') {
+    this.activeTab.set(tab);
+  }
+
+  // Inbox pagination
+  inboxPagination = signal({
     take: 10,
     skip: 0,
     count: 0,
   });
-  #confirmation = inject(Confirmation);
-  #toast = inject(Toast);
+
+  // Outbox pagination
+  outboxPagination = signal({
+    take: 10,
+    skip: 0,
+    count: 0,
+  });
+
+  // For backward compatibility
+  pagination = this.inboxPagination;
+
+  // Inbox selection state
   readonly selectedStates = signal<Record<string, boolean>>({});
   public selectedIds = computed(() => {
     const states = this.selectedStates();
@@ -153,31 +281,83 @@ export default class Messages {
     }));
   }
 
-  onSelectAllChange(isChecked: boolean): void {
+  onSelectAllChange(isChecked: unknown): void {
     this.selectedStates.update(() => {
       const newStates: Record<string, boolean> = {};
       this.messagesResource.value()?.forEach(({ id }) => {
-        newStates[id] = isChecked;
+        newStates[id] = isChecked as boolean;
       });
       return newStates;
     });
   }
 
-  public take = computed(() => this.pagination().take);
-  public skip = computed(() => this.pagination().skip);
+  // Outbox selection state
+  readonly sentSelectedStates = signal<Record<string, boolean>>({});
 
-  public updateSkip(skip: number) {
-    this.pagination.update((prev) => ({ ...prev, skip }));
+  readonly allSentSelected = computed(() => {
+    const states = this.sentSelectedStates();
+    const messages = this.sentMessagesResource.value();
+    return (messages?.length ?? 0) > 0 && messages?.every(({ id }) => states[id]);
+  });
+
+  public someSentSelected = computed(() => {
+    const states = this.sentSelectedStates();
+    const messages = this.sentMessagesResource.value();
+    return messages?.some(({ id }) => states[id]) && !this.allSentSelected();
+  });
+
+  onSentCheckboxChange(itemId: string, isChecked: boolean): void {
+    this.sentSelectedStates.update((states) => ({
+      ...states,
+      [itemId]: isChecked,
+    }));
   }
 
-  public updateTake(take: number) {
-    this.pagination.update((prev) => ({ ...prev, take }));
+  onSelectAllSentChange(isChecked: unknown): void {
+    this.sentSelectedStates.update(() => {
+      const newStates: Record<string, boolean> = {};
+      this.sentMessagesResource.value()?.forEach(({ id }) => {
+        newStates[id] = isChecked as boolean;
+      });
+      return newStates;
+    });
   }
 
+  // Inbox pagination methods
+  public inboxTake = computed(() => this.inboxPagination().take);
+  public inboxSkip = computed(() => this.inboxPagination().skip);
+
+  public updateInboxSkip(skip: number) {
+    this.inboxPagination.update((prev) => ({ ...prev, skip }));
+  }
+
+  public updateInboxTake(take: number) {
+    this.inboxPagination.update((prev) => ({ ...prev, take }));
+  }
+
+  // For backward compatibility
+  public take = this.inboxTake;
+  public skip = this.inboxSkip;
+  public updateSkip = this.updateInboxSkip.bind(this);
+  public updateTake = this.updateInboxTake.bind(this);
+
+  // Outbox pagination methods
+  public outboxTake = computed(() => this.outboxPagination().take);
+  public outboxSkip = computed(() => this.outboxPagination().skip);
+
+  public updateOutboxSkip(skip: number) {
+    this.outboxPagination.update((prev) => ({ ...prev, skip }));
+  }
+
+  public updateOutboxTake(take: number) {
+    this.outboxPagination.update((prev) => ({ ...prev, take }));
+  }
+
+  // Inbox resource
   public messagesResource = rxResource({
     params: () => ({
-      take: this.take(),
-      skip: this.skip(),
+      take: this.inboxTake(),
+      skip: this.inboxSkip(),
     }),
     stream: ({ params }) => {
       return this.#apollo
@@ -217,6 +397,7 @@ export default class Messages {
               }
             }
           `,
+          fetchPolicy: 'network-only',
           variables: {
             take: params.take,
             skip: params.skip,
@@ -224,15 +405,89 @@ export default class Messages {
         })
         .valueChanges.pipe(
           tap((result) => {
-            this.pagination.update((prev) => ({
+            this.inboxPagination.update((prev) => ({
               ...prev,
               count: result.data.count,
             }));
           }),
-          map((result) => result.data.findManyMessages),
+          map((result) => result.data.findManyMessages ?? []),
+          catchError((err) => {
+            console.error('Error fetching inbox messages:', err);
+            return of([]);
+          }),
         );
     },
   });
+
+  // Outbox resource
+  public sentMessagesResource = rxResource({
+    params: () => ({
+      take: this.outboxTake(),
+      skip: this.outboxSkip(),
+      tab: this.activeTab(), // Trigger refetch when tab changes
+    }),
+    stream: ({ params }) => {
+      return this.#apollo
+        .watchQuery<{
+          count: number;
+          findMyMessages: MessageType[];
+        }>({
+          query: gql`
+            query findMyMessages($take: Int!, $skip: Int!) {
+              count: findSentMessagesCount
+              findMyMessages(take: $take, skip: $skip) {
+                id
+                subject
+                createdAt
+                sender {
+                  id
+                  name
+                  initials
+                  email
+                  color
+                }
+                recipients {
+                  id
+                  user {
+                    id
+                    initials
+                    name
+                    email
+                    color
+                  }
+                }
+              }
+            }
+          `,
+          fetchPolicy: 'network-only',
+          variables: {
+            take: params.take,
+            skip: params.skip,
+          },
+        })
+        .valueChanges.pipe(
+          tap((result) => {
+            this.outboxPagination.update((prev) => ({
+              ...prev,
+              count: result.data.count,
+            }));
+          }),
+          map((result) => result.data.findMyMessages ?? []),
+          catchError((err) => {
+            console.error('Error fetching sent messages:', err);
+            return of([]);
+          }),
+        );
+    },
+  });
+
+  getRecipientsText(message: MessageType): string {
+    const names = message.recipients.map((r) => r.user.name);
+    if (names.length <= 2) {
+      return names.join(', ');
+    }
+    return `${names[0]}, ${names[1]} +${names.length - 2}`;
+  }
 
   public deleteMessage(message: MessageRecipientType) {
     this.#confirmation
@@ -261,6 +516,41 @@ export default class Messages {
         next: () => {
           this.#toast.showSuccess('Mensaje eliminado correctamente');
           this.messagesResource.reload();
+        },
+        error: (error) => {
+          console.error(error);
+          this.#toast.showError('Error al eliminar el mensaje');
+        },
+      });
+  }
+
+  public deleteSentMessage(message: MessageType) {
+    this.#confirmation
+      .confirm({
+        title: 'Eliminar mensaje enviado',
+        message: '¿Estás seguro de eliminar este mensaje enviado?',
+      })
+      .pipe(
+        filter((result) => result),
+        switchMap(() =>
+          this.#apollo.mutate({
+            mutation: gql`
+              mutation removeMessage($id: String!) {
+                removeMessage(id: $id) {
+                  id
+                }
+              }
+            `,
+            variables: {
+              id: message.id,
+            },
+          }),
+        ),
+      )
+      .subscribe({
+        next: () => {
+          this.#toast.showSuccess('Mensaje eliminado correctamente');
+          this.sentMessagesResource.reload();
         },
         error: (error) => {
           console.error(error);

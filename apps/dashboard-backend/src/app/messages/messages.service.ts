@@ -43,11 +43,16 @@ export class MessagesService {
     const { skip, take } = query;
 
     return this.prisma.message.findMany({
-      where: { senderId: userId, deletedAt: null },
+      where: {
+        senderId: userId,
+        deletedAt: null,
+        parentMessageId: null,
+      },
       skip,
       take,
       orderBy: { createdAt: 'desc' },
       include: {
+        sender: true,
         recipients: {
           include: {
             user: true,
@@ -104,14 +109,52 @@ export class MessagesService {
     });
   }
 
+  findSentCount() {
+    const { req } = this.context;
+    const { userId } = req.user as any;
+    return this.prisma.message.count({
+      where: { senderId: userId, deletedAt: null, parentMessageId: null },
+    });
+  }
+
   findOne(id: string) {
     const { req } = this.context;
     const { userId } = req.user as any;
     return this.prisma.message.findUnique({
       where: {
         id,
-        OR: [{ recipients: { some: { userId } } }, { senderId: id }],
+        OR: [{ recipients: { some: { userId } } }, { senderId: userId }],
       },
+      include: {
+        sender: { include: { role: true, student: true, teacher: true } },
+        recipients: {
+          include: {
+            user: { include: { role: true, student: true, teacher: true } },
+          },
+        },
+        replies: {
+          where: { deletedAt: null },
+          orderBy: { createdAt: 'asc' },
+          include: {
+            sender: { include: { role: true, student: true, teacher: true } },
+            recipients: {
+              include: {
+                user: { include: { role: true, student: true, teacher: true } },
+              },
+            },
+          },
+        },
+      },
+    });
+  }
+
+  findReplies(messageId: string) {
+    return this.prisma.message.findMany({
+      where: {
+        parentMessageId: messageId,
+        deletedAt: null,
+      },
+      orderBy: { createdAt: 'asc' },
       include: {
         sender: { include: { role: true, student: true, teacher: true } },
         recipients: {
@@ -140,6 +183,37 @@ export class MessagesService {
     return this.prisma.messageRecipient.update({
       where: { id, userId },
       data: { deletedAt: new Date() },
+    });
+  }
+
+  async markAsRead(messageId: string) {
+    const { req } = this.context;
+    const { userId } = req.user as any;
+
+    // Find the recipient record for this user and message
+    const recipient = await this.prisma.messageRecipient.findFirst({
+      where: {
+        messageId,
+        userId,
+        readAt: null,
+      },
+    });
+
+    if (!recipient) {
+      return null; // Already read or not a recipient
+    }
+
+    return this.prisma.messageRecipient.update({
+      where: { id: recipient.id },
+      data: { readAt: new Date() },
+    });
+  }
+
+  findUnreadCount() {
+    const { req } = this.context;
+    const { userId } = req.user as any;
+    return this.prisma.messageRecipient.count({
+      where: { userId, deletedAt: null, readAt: null },
     });
   }
 }

@@ -3,7 +3,11 @@ import { Prisma } from '@generated/prisma';
 import { Field, ObjectType } from '@nestjs/graphql';
 @ObjectType()
 export class Message
-  implements Prisma.MessageGetPayload<{ include: { recipients: true } }>
+  implements
+    Omit<
+      Prisma.MessageGetPayload<{ include: { recipients: true; replies: true } }>,
+      'replies' | 'parentMessage'
+    >
 {
   @Field(() => String, {
     description: 'The unique identifier for the message.',
@@ -23,8 +27,9 @@ export class Message
 
   @Field(() => String, {
     description: 'The ID of the sender associated with the message.',
+    nullable: true,
   })
-  senderId: string;
+  senderId: string | null;
 
   @Field(() => User, {
     description: 'The sender associated with the message.',
@@ -35,6 +40,15 @@ export class Message
     description: 'The recipients of the message.',
   })
   recipients: MessageRecipient[];
+
+  @Field(() => String, {
+    description: 'The ID of the parent message (for replies).',
+    nullable: true,
+  })
+  parentMessageId: string | null;
+
+  // replies field is resolved via @ResolveField in the resolver
+  // to avoid circular dependency issues
 
   @Field(() => Date, {
     description: 'The date and time the message was created.',

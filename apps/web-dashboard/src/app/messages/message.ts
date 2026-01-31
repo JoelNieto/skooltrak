@@ -1,4 +1,4 @@
-import { EditorViewer, Loader } from '@/ui';
+import { EditorViewer, Loader, Toast } from '@/ui';
 import { DatePipe } from '@angular/common';
 import { Component, computed, inject, input, signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
@@ -6,7 +6,9 @@ import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { Prisma } from '@generated/prisma';
 import { Apollo, gql } from 'apollo-angular';
-import { map } from 'rxjs';
+import { map, tap } from 'rxjs';
+import Auth from '../auth/auth';
+
 type User = Prisma.UserGetPayload<undefined> & {
   name: string;
   initials: string;
@@ -14,28 +16,28 @@ type User = Prisma.UserGetPayload<undefined> & {
 type RecipientType = Prisma.MessageRecipientGetPayload<undefined> & {
   user: User;
 };
+type ReplyType = Prisma.MessageGetPayload<undefined> & {
+  sender: User;
+  parentMessageId: string | null;
+};
 type MessageType = Prisma.MessageGetPayload<undefined> & {
   sender: User;
   recipients: RecipientType[];
-};
-type ThreadMessage = {
-  id: string;
-  replyToId?: string;
-  quotedText?: string;
-  quotedAuthor?: string;
-  content: string;
-  createdAt: Date;
-  sender: User;
-};
-type ThreadDisplayMessage = ThreadMessage & {
-  depth: number;
-  isRoot: boolean;
+  replies: ReplyType[];
 };
 
 @Component({
   selector: 'app-message',
   imports: [Loader, RouterLink, DatePipe, EditorViewer, FormsModule],
-
+  styles: `
+    :host ::ng-deep blockquote {
+      border-left: 3px solid oklch(var(--bc) / 0.3);
+      padding-left: 1rem;
+      margin: 0.5rem 0;
+      color: oklch(var(--bc) / 0.7);
+      font-style: italic;
+    }
+  `,
   template: `@defer{ @if(messageResource.hasValue()){ @let message =
     messageResource.value();
     <div class="breadcrumbs text-sm">
@@ -60,7 +62,7 @@ type ThreadDisplayMessage = ThreadMessage & {
               </div>
             </div>
             <div class="flex flex-col text-sm">
-              <div class="font-sembibold">{{ message.sender.name }}</div>
+              <div class="font-semibold">{{ message.sender.name }}</div>
               <div class="text-base-content/60">Para: {{ receivers() }}</div>
             </div>
           </div>
@@ -85,39 +87,41 @@ type ThreadDisplayMessage = ThreadMessage & {
       </div>
     </div>
 
+    @if(hasReplies()) {
     <div class="mt-6">
       <h2 class="text-xl font-semibold">Conversacion</h2>
       <div class="mt-4 space-y-3">
-        @for(item of threadMessages(); track item.id) {
-        <div
-          class="card card-bordered bg-base-100"
-          [style.marginLeft.px]="item.depth * 24"
-        >
+        @for(item of repliesOnly(); track item.id) {
+        <div class="card card-bordered bg-base-100">
           <div class="card-body p-4">
             <div class="flex items-center justify-between text-sm">
-              <div class="font-semibold">{{ item.sender.name }}</div>
+              <div class="flex items-center gap-2">
+                <div class="avatar avatar-placeholder">
+                  <div
+                    class="bg-neutral text-neutral-content w-8 rounded-full text-xs"
+                  >
+                    <span>{{ item.sender.initials }}</span>
+                  </div>
+                </div>
+                <div class="font-semibold">{{ item.sender.name }}</div>
+              </div>
               <span class="text-base-content/60">{{
                 item.createdAt | date : 'short'
               }}</span>
             </div>
-            @if(item.quotedText){
-            <div class="message-quote">
-              <div class="text-xs text-base-content/60">
-                Cita de {{ item.quotedAuthor }}
-              </div>
-              <div class="text-sm">{{ item.quotedText }}</div>
-            </div>
-            }
-            <div class="mt-2 whitespace-pre-wrap text-sm">
-              {{ item.content }}
+            <div class="mt-2 text-sm">
+              <lib-editor-viewer [innerHTML]="item.content" />
             </div>
             <div class="mt-3 flex gap-2">
-              <button class="btn btn-ghost btn-xs" (click)="prepareReply(item)">
+              <button
+                class="btn btn-ghost btn-xs"
+                (click)="prepareReplyFromReply(item)"
+              >
                 Responder
               </button>
               <button
                 class="btn btn-ghost btn-xs"
-                (click)="prepareReply(item, true)"
+                (click)="prepareReplyFromReply(item, true)"
               >
                 Responder con cita
               </button>
@@ -127,6 +131,7 @@ type ThreadDisplayMessage = ThreadMessage & {
         }
       </div>
     </div>
+    }
 
     <div class="card card-bordered bg-base-100 mt-6">
       <div class="card-body">
@@ -150,10 +155,17 @@ type ThreadDisplayMessage = ThreadMessage & {
           placeholder="Escribe tu respuesta"
           [ngModel]="replyDraft().content"
           (ngModelChange)="updateReplyContent($event)"
+          [disabled]="isSending()"
         ></textarea>
         <div class="flex justify-end gap-2 mt-3">
-          <button class="btn btn-primary btn-sm" (click)="sendReply()">
-            Enviar respuesta
+          <button
+            class="btn btn-primary btn-sm"
+            (click)="sendReply()"
+            [disabled]="isSending() || !replyDraft().content.trim()"
+          >
+            @if(isSending()) {
+            <span class="loading loading-spinner loading-sm"></span>
+            } Enviar respuesta
           </button>
         </div>
       </div>
@@ -166,13 +178,10 @@ type ThreadDisplayMessage = ThreadMessage & {
 export default class Message {
   public id = input.required<string>();
   #apollo = inject(Apollo);
+  #auth = inject(Auth);
+  #toast = inject(Toast);
 
-  private readonly currentUser = {
-    id: 'me',
-    name: 'Tu',
-    initials: 'TU',
-  } as User;
-  private readonly threadReplies = signal<ThreadMessage[]>([]);
+  public readonly isSending = signal(false);
   public readonly replyDraft = signal<{
     content: string;
     replyToId?: string;
@@ -180,6 +189,22 @@ export default class Message {
     quotedAuthor?: string;
   }>({
     content: '',
+  });
+
+  private readonly currentUser = computed(() => {
+    const user = this.#auth.user();
+    if (!user) {
+      return {
+        id: '',
+        name: 'Tu',
+        initials: 'TU',
+      } as User;
+    }
+    return {
+      id: user.id,
+      name: `${user.firstName} ${user.lastName}`,
+      initials: `${user.firstName?.charAt(0) || ''}${user.lastName?.charAt(0) || ''}`.toUpperCase(),
+    } as User;
   });
 
   messageResource = rxResource({
@@ -231,16 +256,54 @@ export default class Message {
                     }
                   }
                 }
+                replies {
+                  id
+                  content
+                  createdAt
+                  parentMessageId
+                  sender {
+                    id
+                    initials
+                    name
+                    email
+                  }
+                }
               }
             }
           `,
           variables: {
             id: params.id,
           },
+          fetchPolicy: 'network-only',
         })
-        .valueChanges.pipe(map((result) => result.data.findMessageById));
+        .valueChanges.pipe(
+          map((result) => result.data.findMessageById),
+          tap((message) => {
+            if (message) {
+              this.markAsRead(message.id);
+            }
+          }),
+        );
     },
   });
+
+  private markAsRead(messageId: string): void {
+    this.#apollo
+      .mutate({
+        mutation: gql`
+          mutation markMessageAsRead($messageId: String!) {
+            markMessageAsRead(messageId: $messageId) {
+              id
+              readAt
+            }
+          }
+        `,
+        variables: { messageId },
+      })
+      .subscribe({
+        error: (err) => console.error('Error marking message as read:', err),
+      });
+  }
 
   public receivers = computed(() =>
     this.messageResource
@@ -249,39 +312,40 @@ export default class Message {
       .join(', ')
   );
 
-  public readonly threadMessages = computed<ThreadDisplayMessage[]>(() => {
+  public hasReplies = computed(() => {
     const message = this.messageResource.value();
-    if (!message) {
-      return [];
-    }
-    const rootMessage: ThreadMessage = {
-      id: message.id,
-      content: this.toPlainText(message.content),
-      createdAt: new Date(message.createdAt),
-      sender: message.sender,
-    };
-    const items = [rootMessage, ...this.threadReplies()];
-    const byId = new Map(items.map((item) => [item.id, item]));
-    return items.map((item) => ({
-      ...item,
-      depth: this.getDepth(item, byId),
-      isRoot: item.id === rootMessage.id,
-    }));
+    return message?.replies && message.replies.length > 0;
   });
 
-  prepareReply(
-    target: MessageType | ThreadMessage,
-    includeQuote = false
-  ): void {
-    const threadTarget = this.toThreadMessage(target);
+  public repliesOnly = computed(() => {
+    const message = this.messageResource.value();
+    if (!message?.replies) {
+      return [];
+    }
+    return message.replies;
+  });
+
+  prepareReply(message: MessageType, includeQuote = false): void {
     const quotedText = includeQuote
-      ? this.toPlainText(threadTarget.content).slice(0, 200)
+      ? this.toPlainText(message.content).slice(0, 200)
       : undefined;
     this.replyDraft.set({
       content: '',
-      replyToId: threadTarget.id,
+      replyToId: message.id,
       quotedText,
-      quotedAuthor: includeQuote ? threadTarget.sender.name : undefined,
+      quotedAuthor: includeQuote ? message.sender.name : undefined,
+    });
+  }
+
+  prepareReplyFromReply(reply: ReplyType, includeQuote = false): void {
+    const quotedText = includeQuote
+      ? this.toPlainText(reply.content).slice(0, 200)
+      : undefined;
+    this.replyDraft.set({
+      content: '',
+      replyToId: reply.id,
+      quotedText,
+      quotedAuthor: includeQuote ? reply.sender.name : undefined,
     });
   }
 
@@ -307,57 +371,56 @@ export default class Message {
     if (!message || !draft.content.trim()) {
       return;
     }
-    const reply: ThreadMessage = {
-      id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
-      replyToId: draft.replyToId ?? message.id,
-      quotedText: draft.quotedText,
-      quotedAuthor: draft.quotedAuthor,
-      content: draft.content.trim(),
-      createdAt: new Date(),
-      sender: this.currentUser,
-    };
-    this.threadReplies.update((prev) => [...prev, reply]);
-    this.replyDraft.set({
-      content: '',
-    });
-  }
 
-  private getDepth(
-    message: ThreadMessage,
-    byId: Map<string, ThreadMessage>
-  ): number {
-    let depth = 0;
-    let current = message;
-    while (current.replyToId) {
-      const parent = byId.get(current.replyToId);
-      if (!parent) {
-        break;
-      }
-      depth += 1;
-      current = parent;
-      if (depth > 6) {
-        break;
-      }
+    this.isSending.set(true);
+
+    // Build the reply content - include quote if present
+    let replyContent = draft.content.trim();
+    if (draft.quotedText) {
+      replyContent = `<blockquote><strong>${draft.quotedAuthor}:</strong> ${draft.quotedText}</blockquote>\n\n${replyContent}`;
     }
-    return depth;
+
+    // Reply goes back to the original sender
+    const recipientIds = [message.sender.id];
+
+    this.#apollo
+      .mutate({
+        mutation: gql`
+          mutation createMessage($createMessageInput: CreateMessageInput!) {
+            createMessage(createMessageInput: $createMessageInput) {
+              id
+            }
+          }
+        `,
+        variables: {
+          createMessageInput: {
+            subject: `Re: ${message.subject}`,
+            content: replyContent,
+            recipientIds,
+            parentMessageId: message.id,
+          },
+        },
+      })
+      .subscribe({
+        next: () => {
+          this.#toast.showSuccess('Respuesta enviada exitosamente');
+          this.replyDraft.set({ content: '' });
+          this.isSending.set(false);
+          // Refetch the message to update the thread
+          this.messageResource.reload();
+        },
+        error: (err) => {
+          console.error('Error sending reply:', err);
+          this.#toast.showError('Error al enviar la respuesta');
+          this.isSending.set(false);
+        },
+      });
   }
 
-  private toPlainText(content: string): string {
+  toPlainText(content: string): string {
     return content
       .replace(/<[^>]+>/g, ' ')
       .replace(/\s+/g, ' ')
       .trim();
-  }
-
-  private toThreadMessage(target: MessageType | ThreadMessage): ThreadMessage {
-    if ('recipients' in target) {
-      return {
-        id: target.id,
-        content: this.toPlainText(target.content),
-        createdAt: new Date(target.createdAt),
-        sender: target.sender,
-      };
-    }
-    return target;
   }
 }

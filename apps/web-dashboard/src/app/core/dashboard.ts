@@ -74,8 +74,13 @@ import Store from './store';
           </div>
         </div>
         <div class="flex items-center gap-4">
-          <a routerLink="messages" class="btn btn-ghost"
-            ><span class="material-symbols-outlined text-2xl">mail_outline</span>
+          <a routerLink="messages" class="btn btn-ghost relative">
+            <span class="material-symbols-outlined text-2xl">mail_outline</span>
+            @if (unreadCount.value(); as count) {
+              @if (count > 0) {
+                <span class="badge badge-primary badge-sm absolute -top-1 -right-1">{{ count > 99 ? '99+' : count }}</span>
+              }
+            }
           </a>
           <div class="dropdown dropdown-end">
             <div class="avatar avatar-placeholder cursor-pointer" role="button" tabindex="0">
@@ -168,6 +173,21 @@ export default class Dashboard {
           `,
         })
         .valueChanges.pipe(map((result) => result.data.schools)),
+  });
+
+  public unreadCount = rxResource({
+    stream: () =>
+      this.apollo
+        .watchQuery<{ unreadMessagesCount: number }>({
+          fetchPolicy: 'network-only',
+          pollInterval: 60000, // Poll every minute
+          query: gql`
+            query UnreadMessagesCount {
+              unreadMessagesCount
+            }
+          `,
+        })
+        .valueChanges.pipe(map((result) => result.data.unreadMessagesCount)),
   });
 
   constructor() {

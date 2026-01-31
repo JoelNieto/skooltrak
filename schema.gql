@@ -577,6 +577,9 @@ input CreateMessageInput {
   """The content of the message."""
   content: String!
 
+  """The ID of the parent message (for replies)."""
+  parentMessageId: String
+
   """The IDs of the recipients associated with the message."""
   recipientIds: [String!]!
 
@@ -879,7 +882,7 @@ input CreateTeacherInput {
   address: String = ""
 
   """Birth date of the teacher"""
-  birthDate: DateTime = "2026-01-30T17:23:29.453Z"
+  birthDate: DateTime = "2026-01-30T22:23:16.769Z"
 
   """Document ID of the teacher"""
   documentId: String!
@@ -1290,14 +1293,18 @@ type Message {
   """The ID of the organization associated with the message."""
   organizationId: String!
 
+  """The ID of the parent message (for replies)."""
+  parentMessageId: String
+
   """The recipients of the message."""
   recipients: [MessageRecipient!]!
+  replies: [Message!]!
 
   """The sender associated with the message."""
   sender: User!
 
   """The ID of the sender associated with the message."""
-  senderId: String!
+  senderId: String
 
   """The subject of the message."""
   subject: String!
@@ -1379,6 +1386,7 @@ type Mutation {
   deleteAttendanceSession(id: String!): AttendanceSession!
   inviteMember(email: String!, organizationId: String, role: String!): Invitation!
   login(email: String!, password: String!): AuthPayload!
+  markMessageAsRead(messageId: String!): MessageRecipient
   rejectInvitation(invitationId: String!): Boolean!
   removeAssignment(id: String!): Assignment!
   removeClassGroup(id: String!): ClassGroup!
@@ -1844,6 +1852,7 @@ type Query {
     """Take"""
     take: Int
   ): [Message!]!
+  findSentMessagesCount: Int!
   grade(id: String!): Grade!
   gradeBucket(id: String!): GradeBucket!
   gradeBucketsByCourseId(courseId: String!): [GradeBucket!]!
@@ -2032,6 +2041,7 @@ type Query {
     take: Int
   ): [Teacher!]!
   teachersByOrganizationId(organizationId: String!): [Teacher!]!
+  unreadMessagesCount: Int!
   user(id: String!): User!
   users(
     """Order by"""
@@ -3005,7 +3015,7 @@ input UpdateTeacherInput {
   address: String = ""
 
   """Birth date of the teacher"""
-  birthDate: DateTime = "2026-01-30T17:23:29.453Z"
+  birthDate: DateTime = "2026-01-30T22:23:16.769Z"
 
   """Document ID of the teacher"""
   documentId: String

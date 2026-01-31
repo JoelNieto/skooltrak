@@ -9,7 +9,7 @@ import { CreateMessageInput } from './dto/create-message.input';
 export class MessagesService {
   constructor(
     private readonly prisma: PrismaService,
-    @Inject(CONTEXT) private readonly context: { req: Request }
+    @Inject(CONTEXT) private readonly context: { req: Request },
   ) {}
   create(createMessageInput: CreateMessageInput) {
     const { req } = this.context;

@@ -1,14 +1,6 @@
 import { BetterAuthGuard, User } from '@/auth';
 import { UseGuards } from '@nestjs/common';
-import {
-  Args,
-  Int,
-  Mutation,
-  Parent,
-  Query,
-  ResolveField,
-  Resolver,
-} from '@nestjs/graphql';
+import { Args, Int, Mutation, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql';
 import { FetchDataInput } from '../fetch-data.input';
 import { CreateMessageInput } from './dto/create-message.input';
 import { Message, MessageRecipient } from './entities/message.entity';
@@ -25,9 +17,7 @@ export class MessagesResolver {
 
   @UseGuards(BetterAuthGuard)
   @Mutation(() => Message)
-  createMessage(
-    @Args('createMessageInput') createMessageInput: CreateMessageInput
-  ) {
+  createMessage(@Args('createMessageInput') createMessageInput: CreateMessageInput) {
     return this.messagesService.create(createMessageInput);
   }
 
@@ -59,7 +49,7 @@ export class MessagesResolver {
   @Query(() => [User], { name: 'findContacts' })
   findContacts(
     @Args('queryText', { type: () => String, nullable: true, defaultValue: '' })
-    queryText?: string
+    queryText?: string,
   ) {
     return this.messagesService.findContacts(queryText);
   }

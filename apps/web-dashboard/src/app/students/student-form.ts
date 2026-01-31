@@ -1,7 +1,7 @@
-import { Loader, markGroupDirty, Toast } from '@/ui';
-import { ChangeDetectionStrategy, Component, computed, inject, input, signal } from '@angular/core';
+import { Loader, Toast } from '@/ui';
+import { afterRenderEffect, ChangeDetectionStrategy, Component, computed, inject, input, signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
-import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { email, form, FormField, required, submit } from '@angular/forms/signals';
 import { Router, RouterLink } from '@angular/router';
 import { Prisma } from '@generated/prisma';
 import { Apollo, gql } from 'apollo-angular';
@@ -15,9 +15,29 @@ type StudentType = Prisma.StudentGetPayload<{
   email: string;
 };
 
+interface StudentFormData {
+  firstName: string;
+  middleName: string;
+  fatherName: string;
+  motherName: string;
+  documentId: string;
+  email: string;
+  classGroupId: string;
+  birthDate: string;
+  gender: string;
+  address: string;
+  phone: string;
+  enrollmentStatus: string;
+  bloodType: string;
+  allergies: string;
+  medicalNotes: string;
+  emergencyContactName: string;
+  emergencyContactPhone: string;
+}
+
 @Component({
   selector: 'app-student-form',
-  imports: [ReactiveFormsModule, RouterLink, Loader],
+  imports: [FormField, RouterLink, Loader],
   template: `
     <div class="breadcrumbs text-sm">
       <ul>
@@ -40,7 +60,7 @@ type StudentType = Prisma.StudentGetPayload<{
     @if (isEditMode() && studentResource.isLoading()) {
       <lib-loader />
     } @else {
-      <form [formGroup]="form" (ngSubmit)="onSubmit()">
+      <form (submit)="onSubmit($event)" novalidate="novalidate">
         <div class="flex flex-col gap-6 divide-y divide-base-300">
           <!-- Personal Information Section -->
           <div class="sm:grid sm:grid-cols-4 sm:gap-4 pb-8">
@@ -57,9 +77,18 @@ type StudentType = Prisma.StudentGetPayload<{
                       <input
                         id="firstName"
                         type="text"
-                        formControlName="firstName"
+                        [formField]="studentForm.firstName"
                         class="input input-primary w-full"
+                        [class.ng-dirty]="studentForm.firstName().dirty()"
+                        [class.ng-invalid]="studentForm.firstName().invalid()"
                       />
+                      @if (studentForm.firstName().dirty() && studentForm.firstName().invalid()) {
+                        <ul>
+                          @for (error of studentForm.firstName().errors(); track error) {
+                            <li class="text-error text-sm">{{ error.message }}</li>
+                          }
+                        </ul>
+                      }
                     </div>
                     <div class="fieldset col-span-3">
                       <label for="middleName">
@@ -69,7 +98,7 @@ type StudentType = Prisma.StudentGetPayload<{
                       <input
                         id="middleName"
                         type="text"
-                        formControlName="middleName"
+                        [formField]="studentForm.middleName"
                         class="input input-primary w-full"
                       />
                     </div>
@@ -78,9 +107,18 @@ type StudentType = Prisma.StudentGetPayload<{
                       <input
                         id="fatherName"
                         type="text"
-                        formControlName="fatherName"
+                        [formField]="studentForm.fatherName"
                         class="input input-primary w-full"
+                        [class.ng-dirty]="studentForm.fatherName().dirty()"
+                        [class.ng-invalid]="studentForm.fatherName().invalid()"
                       />
+                      @if (studentForm.fatherName().dirty() && studentForm.fatherName().invalid()) {
+                        <ul>
+                          @for (error of studentForm.fatherName().errors(); track error) {
+                            <li class="text-error text-sm">{{ error.message }}</li>
+                          }
+                        </ul>
+                      }
                     </div>
                     <div class="fieldset col-span-3">
                       <label for="motherName">
@@ -90,7 +128,7 @@ type StudentType = Prisma.StudentGetPayload<{
                       <input
                         id="motherName"
                         type="text"
-                        formControlName="motherName"
+                        [formField]="studentForm.motherName"
                         class="input input-primary w-full"
                       />
                     </div>
@@ -99,26 +137,57 @@ type StudentType = Prisma.StudentGetPayload<{
                       <input
                         id="documentId"
                         type="text"
-                        formControlName="documentId"
+                        [formField]="studentForm.documentId"
                         class="input input-primary w-full"
+                        [class.ng-dirty]="studentForm.documentId().dirty()"
+                        [class.ng-invalid]="studentForm.documentId().invalid()"
                       />
+                      @if (studentForm.documentId().dirty() && studentForm.documentId().invalid()) {
+                        <ul>
+                          @for (error of studentForm.documentId().errors(); track error) {
+                            <li class="text-error text-sm">{{ error.message }}</li>
+                          }
+                        </ul>
+                      }
                     </div>
                     <div class="fieldset col-span-2">
                       <label for="birthDate">Fecha de nacimiento</label>
                       <input
                         id="birthDate"
                         type="date"
-                        formControlName="birthDate"
+                        [formField]="studentForm.birthDate"
                         class="input input-primary w-full"
+                        [class.ng-dirty]="studentForm.birthDate().dirty()"
+                        [class.ng-invalid]="studentForm.birthDate().invalid()"
                       />
+                      @if (studentForm.birthDate().dirty() && studentForm.birthDate().invalid()) {
+                        <ul>
+                          @for (error of studentForm.birthDate().errors(); track error) {
+                            <li class="text-error text-sm">{{ error.message }}</li>
+                          }
+                        </ul>
+                      }
                     </div>
                     <div class="fieldset col-span-2">
                       <label for="gender">Género</label>
-                      <select id="gender" formControlName="gender" class="select select-primary w-full">
+                      <select
+                        id="gender"
+                        [formField]="studentForm.gender"
+                        class="select select-primary w-full"
+                        [class.ng-dirty]="studentForm.gender().dirty()"
+                        [class.ng-invalid]="studentForm.gender().invalid()"
+                      >
                         <option value="" disabled>---Seleccionar---</option>
                         <option value="MALE">Masculino</option>
                         <option value="FEMALE">Femenino</option>
                       </select>
+                      @if (studentForm.gender().dirty() && studentForm.gender().invalid()) {
+                        <ul>
+                          @for (error of studentForm.gender().errors(); track error) {
+                            <li class="text-error text-sm">{{ error.message }}</li>
+                          }
+                        </ul>
+                      }
                     </div>
                   </div>
                 </div>
@@ -141,7 +210,11 @@ type StudentType = Prisma.StudentGetPayload<{
                         Grupo
                         <span class="text-base-content/50 text-xs">(opcional)</span>
                       </label>
-                      <select id="classGroupId" formControlName="classGroupId" class="select select-primary w-full">
+                      <select
+                        id="classGroupId"
+                        [formField]="studentForm.classGroupId"
+                        class="select select-primary w-full"
+                      >
                         <option value="">---Sin grupo---</option>
                         @for (group of groups.value(); track group.id) {
                           <option [value]="group.id">{{ group.name }}</option>
@@ -152,7 +225,7 @@ type StudentType = Prisma.StudentGetPayload<{
                       <label for="enrollmentStatus">Estado de matrícula</label>
                       <select
                         id="enrollmentStatus"
-                        formControlName="enrollmentStatus"
+                        [formField]="studentForm.enrollmentStatus"
                         class="select select-primary w-full"
                       >
                         <option value="ACTIVE">Activo</option>
@@ -178,15 +251,57 @@ type StudentType = Prisma.StudentGetPayload<{
                   <div class="sm:grid sm:grid-cols-6 sm:gap-4">
                     <div class="fieldset col-span-3">
                       <label for="email">Correo electrónico</label>
-                      <input id="email" type="email" formControlName="email" class="input input-primary w-full" />
+                      <input
+                        id="email"
+                        type="email"
+                        [formField]="studentForm.email"
+                        class="input input-primary w-full"
+                        [class.ng-dirty]="studentForm.email().dirty()"
+                        [class.ng-invalid]="studentForm.email().invalid()"
+                      />
+                      @if (studentForm.email().dirty() && studentForm.email().invalid()) {
+                        <ul>
+                          @for (error of studentForm.email().errors(); track error) {
+                            <li class="text-error text-sm">{{ error.message }}</li>
+                          }
+                        </ul>
+                      }
                     </div>
                     <div class="fieldset col-span-3">
                       <label for="phone">Teléfono</label>
-                      <input id="phone" type="text" formControlName="phone" class="input input-primary w-full" />
+                      <input
+                        id="phone"
+                        type="text"
+                        [formField]="studentForm.phone"
+                        class="input input-primary w-full"
+                        [class.ng-dirty]="studentForm.phone().dirty()"
+                        [class.ng-invalid]="studentForm.phone().invalid()"
+                      />
+                      @if (studentForm.phone().dirty() && studentForm.phone().invalid()) {
+                        <ul>
+                          @for (error of studentForm.phone().errors(); track error) {
+                            <li class="text-error text-sm">{{ error.message }}</li>
+                          }
+                        </ul>
+                      }
                     </div>
                     <div class="fieldset col-span-6">
                       <label for="address">Dirección</label>
-                      <input id="address" type="text" formControlName="address" class="input input-primary w-full" />
+                      <input
+                        id="address"
+                        type="text"
+                        [formField]="studentForm.address"
+                        class="input input-primary w-full"
+                        [class.ng-dirty]="studentForm.address().dirty()"
+                        [class.ng-invalid]="studentForm.address().invalid()"
+                      />
+                      @if (studentForm.address().dirty() && studentForm.address().invalid()) {
+                        <ul>
+                          @for (error of studentForm.address().errors(); track error) {
+                            <li class="text-error text-sm">{{ error.message }}</li>
+                          }
+                        </ul>
+                      }
                     </div>
                   </div>
                 </div>
@@ -209,7 +324,11 @@ type StudentType = Prisma.StudentGetPayload<{
                         Tipo de sangre
                         <span class="text-base-content/50 text-xs">(opcional)</span>
                       </label>
-                      <select id="bloodType" formControlName="bloodType" class="select select-primary w-full">
+                      <select
+                        id="bloodType"
+                        [formField]="studentForm.bloodType"
+                        class="select select-primary w-full"
+                      >
                         <option value="">---Seleccionar---</option>
                         <option value="A+">A+</option>
                         <option value="A-">A-</option>
@@ -229,7 +348,7 @@ type StudentType = Prisma.StudentGetPayload<{
                       <input
                         id="allergies"
                         type="text"
-                        formControlName="allergies"
+                        [formField]="studentForm.allergies"
                         class="input input-primary w-full"
                         placeholder="Ej: Penicilina, maní, etc."
                       />
@@ -241,7 +360,7 @@ type StudentType = Prisma.StudentGetPayload<{
                       </label>
                       <textarea
                         id="medicalNotes"
-                        formControlName="medicalNotes"
+                        [formField]="studentForm.medicalNotes"
                         class="textarea textarea-primary w-full"
                         rows="3"
                         placeholder="Condiciones médicas, medicamentos, etc."
@@ -271,7 +390,7 @@ type StudentType = Prisma.StudentGetPayload<{
                       <input
                         id="emergencyContactName"
                         type="text"
-                        formControlName="emergencyContactName"
+                        [formField]="studentForm.emergencyContactName"
                         class="input input-primary w-full"
                       />
                     </div>
@@ -283,7 +402,7 @@ type StudentType = Prisma.StudentGetPayload<{
                       <input
                         id="emergencyContactPhone"
                         type="text"
-                        formControlName="emergencyContactPhone"
+                        [formField]="studentForm.emergencyContactPhone"
                         class="input input-primary w-full"
                       />
                     </div>
@@ -316,29 +435,40 @@ export default class StudentForm {
   private store = inject(Store);
   private router = inject(Router);
   private toasts = inject(Toast);
-  private fb = inject(NonNullableFormBuilder);
 
   public isEditMode = computed(() => !!this.id());
   public isSaving = signal(false);
 
-  public form = this.fb.group({
-    firstName: ['', [Validators.required]],
-    middleName: [''],
-    fatherName: ['', [Validators.required]],
-    motherName: [''],
-    documentId: ['', [Validators.required]],
-    email: ['', [Validators.required, Validators.email]],
-    classGroupId: [''],
-    birthDate: ['', [Validators.required]],
-    gender: ['', [Validators.required]],
-    address: ['', [Validators.required]],
-    phone: ['', [Validators.required]],
-    enrollmentStatus: ['ACTIVE'],
-    bloodType: [''],
-    allergies: [''],
-    medicalNotes: [''],
-    emergencyContactName: [''],
-    emergencyContactPhone: [''],
+  #studentModel = signal<StudentFormData>({
+    firstName: '',
+    middleName: '',
+    fatherName: '',
+    motherName: '',
+    documentId: '',
+    email: '',
+    classGroupId: '',
+    birthDate: '',
+    gender: '',
+    address: '',
+    phone: '',
+    enrollmentStatus: 'ACTIVE',
+    bloodType: '',
+    allergies: '',
+    medicalNotes: '',
+    emergencyContactName: '',
+    emergencyContactPhone: '',
+  });
+
+  public studentForm = form(this.#studentModel, (schemaPath) => {
+    required(schemaPath.firstName, { message: 'Primer nombre es requerido' });
+    required(schemaPath.fatherName, { message: 'Apellido paterno es requerido' });
+    required(schemaPath.documentId, { message: 'Nro. documento es requerido' });
+    required(schemaPath.email, { message: 'Correo electrónico es requerido' });
+    email(schemaPath.email, { message: 'Ingrese un correo válido' });
+    required(schemaPath.birthDate, { message: 'Fecha de nacimiento es requerida' });
+    required(schemaPath.gender, { message: 'Género es requerido' });
+    required(schemaPath.address, { message: 'Dirección es requerida' });
+    required(schemaPath.phone, { message: 'Teléfono es requerido' });
   });
 
   public groups = rxResource({
@@ -402,113 +532,133 @@ export default class StudentForm {
           `,
           variables: { id: params.id },
         })
-        .valueChanges.pipe(
-          map((result) => {
-            const student = result.data.student;
-            // Patch form with student data
-            this.form.patchValue({
-              firstName: student.firstName,
-              middleName: student.middleName,
-              fatherName: student.fatherName,
-              motherName: student.motherName,
-              documentId: student.documentId,
-              email: student.email,
-              classGroupId: student.classGroupId || '',
-              birthDate: student.birthDate ? new Date(student.birthDate).toISOString().split('T')[0] : '',
-              gender: student.gender,
-              address: student.address,
-              phone: student.phone,
-              enrollmentStatus: student.enrollmentStatus,
-              bloodType: student.bloodType,
-              allergies: student.allergies,
-              medicalNotes: student.medicalNotes,
-              emergencyContactName: student.emergencyContactName,
-              emergencyContactPhone: student.emergencyContactPhone,
-            });
-            return student;
-          }),
-        );
+        .valueChanges.pipe(map((result) => result.data.student));
     },
   });
 
-  onSubmit() {
-    if (this.form.invalid) {
-      this.toasts.showError('Por favor, completa todos los campos requeridos');
-      markGroupDirty(this.form);
-      return;
-    }
-
-    this.isSaving.set(true);
-    const formValue = this.form.getRawValue();
-
-    // Clean up empty classGroupId and convert birthDate to proper format
-    const request = {
-      ...formValue,
-      classGroupId: formValue.classGroupId || null,
-      birthDate: formValue.birthDate ? new Date(formValue.birthDate) : null,
-    };
-
-    if (this.isEditMode()) {
-      this.apollo
-        .mutate({
-          mutation: gql`
-            mutation UpdateStudent($updateStudentInput: UpdateStudentInput!) {
-              updateStudent(updateStudentInput: $updateStudentInput) {
-                id
-              }
-            }
-          `,
-          variables: {
-            updateStudentInput: {
-              ...request,
-              id: this.id(),
-            },
-          },
-        })
-        .subscribe({
-          next: () => {
-            this.isSaving.set(false);
-            this.toasts.showSuccess('Alumno actualizado exitosamente');
-            this.router.navigate(['/students', this.id()]);
-          },
-          error: (error) => {
-            this.isSaving.set(false);
-            console.error('Update student error:', error);
-            const message = error?.graphQLErrors?.[0]?.message || error?.message || 'Error al actualizar el alumno';
-            this.toasts.showError(message);
-          },
+  constructor() {
+    afterRenderEffect(() => {
+      const student = this.studentResource.value();
+      if (student) {
+        this.#studentModel.set({
+          firstName: student.firstName ?? '',
+          middleName: student.middleName ?? '',
+          fatherName: student.fatherName ?? '',
+          motherName: student.motherName ?? '',
+          documentId: student.documentId ?? '',
+          email: student.email ?? '',
+          classGroupId: student.classGroupId ?? '',
+          birthDate: student.birthDate ? new Date(student.birthDate).toISOString().split('T')[0] : '',
+          gender: student.gender ?? '',
+          address: student.address ?? '',
+          phone: student.phone ?? '',
+          enrollmentStatus: student.enrollmentStatus ?? 'ACTIVE',
+          bloodType: student.bloodType ?? '',
+          allergies: student.allergies ?? '',
+          medicalNotes: student.medicalNotes ?? '',
+          emergencyContactName: student.emergencyContactName ?? '',
+          emergencyContactPhone: student.emergencyContactPhone ?? '',
         });
-    } else {
-      this.apollo
-        .mutate({
-          mutation: gql`
-            mutation CreateStudent($createStudentInput: CreateStudentInput!) {
-              createStudent(createStudentInput: $createStudentInput) {
-                id
-              }
-            }
-          `,
-          variables: {
-            createStudentInput: {
-              ...request,
-              organizationId: this.store.currentOrganizationId(),
-              schoolId: this.store.currentSchoolId(),
-            },
-          },
-        })
-        .subscribe({
-          next: (result: any) => {
-            this.isSaving.set(false);
-            this.toasts.showSuccess('Alumno creado exitosamente');
-            this.router.navigate(['/students', result.data.createStudent.id]);
-          },
-          error: (error) => {
-            this.isSaving.set(false);
-            console.error('Create student error:', error);
-            const message = error?.graphQLErrors?.[0]?.message || error?.message || 'Error al crear el alumno';
-            this.toasts.showError(message);
-          },
+      }
+    });
+  }
+
+  onSubmit(event: Event) {
+    event.preventDefault();
+
+    // Mark all required fields as dirty for validation display
+    this.studentForm.firstName().markAsDirty();
+    this.studentForm.fatherName().markAsDirty();
+    this.studentForm.documentId().markAsDirty();
+    this.studentForm.email().markAsDirty();
+    this.studentForm.birthDate().markAsDirty();
+    this.studentForm.gender().markAsDirty();
+    this.studentForm.address().markAsDirty();
+    this.studentForm.phone().markAsDirty();
+
+    submit(this.studentForm, async () => {
+      this.isSaving.set(true);
+      const formValue = this.studentForm().value();
+
+      // Clean up empty classGroupId and convert birthDate to proper format
+      const request = {
+        ...formValue,
+        classGroupId: formValue.classGroupId || null,
+        birthDate: formValue.birthDate ? new Date(formValue.birthDate) : null,
+      };
+
+      if (this.isEditMode()) {
+        await new Promise<void>((resolve, reject) => {
+          this.apollo
+            .mutate({
+              mutation: gql`
+                mutation UpdateStudent($updateStudentInput: UpdateStudentInput!) {
+                  updateStudent(updateStudentInput: $updateStudentInput) {
+                    id
+                  }
+                }
+              `,
+              variables: {
+                updateStudentInput: {
+                  ...request,
+                  id: this.id(),
+                },
+              },
+            })
+            .subscribe({
+              next: () => {
+                this.isSaving.set(false);
+                this.toasts.showSuccess('Alumno actualizado exitosamente');
+                this.router.navigate(['/students', this.id()]);
+                resolve();
+              },
+              error: (error) => {
+                this.isSaving.set(false);
+                console.error('Update student error:', error);
+                const message =
+                  error?.graphQLErrors?.[0]?.message || error?.message || 'Error al actualizar el alumno';
+                this.toasts.showError(message);
+                reject(error);
+              },
+            });
         });
-    }
+      } else {
+        await new Promise<void>((resolve, reject) => {
+          this.apollo
+            .mutate({
+              mutation: gql`
+                mutation CreateStudent($createStudentInput: CreateStudentInput!) {
+                  createStudent(createStudentInput: $createStudentInput) {
+                    id
+                  }
+                }
+              `,
+              variables: {
+                createStudentInput: {
+                  ...request,
+                  organizationId: this.store.currentOrganizationId(),
+                  schoolId: this.store.currentSchoolId(),
+                },
+              },
+            })
+            .subscribe({
+              next: (result) => {
+                this.isSaving.set(false);
+                this.toasts.showSuccess('Alumno creado exitosamente');
+                const data = result.data as { createStudent: { id: string } };
+                this.router.navigate(['/students', data.createStudent.id]);
+                resolve();
+              },
+              error: (error) => {
+                this.isSaving.set(false);
+                console.error('Create student error:', error);
+                const message = error?.graphQLErrors?.[0]?.message || error?.message || 'Error al crear el alumno';
+                this.toasts.showError(message);
+                reject(error);
+              },
+            });
+        });
+      }
+    });
   }
 }

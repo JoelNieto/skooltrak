@@ -77,10 +77,6 @@ export const appRoutes: Route[] = [
         path: 'teachers/:id/edit',
         loadComponent: () => import('./teachers/teacher-form'),
       },
-      {
-        path: 'grades',
-        loadComponent: () => import('./grades/grades'),
-      },
       { path: 'grades/:id', loadComponent: () => import('./grades/grade') },
       { path: 'quizzes', loadComponent: () => import('./quizzes/quizzes') },
       {

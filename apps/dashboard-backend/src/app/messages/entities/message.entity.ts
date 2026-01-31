@@ -4,10 +4,7 @@ import { Field, ObjectType } from '@nestjs/graphql';
 @ObjectType()
 export class Message
   implements
-    Omit<
-      Prisma.MessageGetPayload<{ include: { recipients: true; replies: true } }>,
-      'replies' | 'parentMessage'
-    >
+    Omit<Prisma.MessageGetPayload<{ include: { recipients: true; replies: true } }>, 'replies' | 'parentMessage'>
 {
   @Field(() => String, {
     description: 'The unique identifier for the message.',
@@ -68,9 +65,7 @@ export class Message
 }
 
 @ObjectType()
-export class MessageRecipient
-  implements Prisma.MessageRecipientGetPayload<{ include: { user: true } }>
-{
+export class MessageRecipient implements Prisma.MessageRecipientGetPayload<{ include: { user: true } }> {
   @Field(() => String, {
     description: 'The unique identifier for the message recipient.',
   })

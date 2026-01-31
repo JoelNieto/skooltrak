@@ -38,141 +38,116 @@ type MessageType = Prisma.MessageGetPayload<undefined> & {
       font-style: italic;
     }
   `,
-  template: `@defer{ @if(messageResource.hasValue()){ @let message =
-    messageResource.value();
-    <div class="breadcrumbs text-sm">
-      <ul>
-        <li><a routerLink="/">Inicio</a></li>
-        <li><a routerLink="/messages">Mensajes</a></li>
-        <li>{{ message.sender.name }}: {{ message.subject }}</li>
-      </ul>
-    </div>
-    <div class="card card-border bg-base-100 border-base-300 mt-4">
-      <div class="card-body">
-        <div class="border-b border-base-300">
-          <h1 class="text-2xl font-bold mb-4">{{ message.subject }}</h1>
+  template: `@defer {
+      @if (messageResource.hasValue()) {
+        @let message = messageResource.value();
+        <div class="breadcrumbs text-sm">
+          <ul>
+            <li><a routerLink="/">Inicio</a></li>
+            <li><a routerLink="/messages">Mensajes</a></li>
+            <li>{{ message.sender.name }}: {{ message.subject }}</li>
+          </ul>
         </div>
-        <div
-          class="flex items-center justify-between border-b border-base-300 w-full py-4"
-        >
-          <div class="flex items-center gap-2">
-            <div class="avatar avatar-placeholder">
-              <div class="bg-neutral text-neutral-content w-10 rounded-full">
-                <span>{{ message.sender.initials }}</span>
-              </div>
+        <div class="card card-border bg-base-100 border-base-300 mt-4">
+          <div class="card-body">
+            <div class="border-b border-base-300">
+              <h1 class="text-2xl font-bold mb-4">{{ message.subject }}</h1>
             </div>
-            <div class="flex flex-col text-sm">
-              <div class="font-semibold">{{ message.sender.name }}</div>
-              <div class="text-base-content/60">Para: {{ receivers() }}</div>
-            </div>
-          </div>
-          <span class="text-sm text-base-content/60">{{
-            message.createdAt | date : 'short'
-          }}</span>
-        </div>
-        <div class="py-3">
-          <lib-editor-viewer [innerHTML]="message.content" />
-        </div>
-        <div class="flex justify-end gap-2 border-t border-base-300 pt-3">
-          <button class="btn btn-ghost btn-sm" (click)="prepareReply(message)">
-            Responder
-          </button>
-          <button
-            class="btn btn-ghost btn-sm"
-            (click)="prepareReply(message, true)"
-          >
-            Responder con cita
-          </button>
-        </div>
-      </div>
-    </div>
-
-    @if(hasReplies()) {
-    <div class="mt-6">
-      <h2 class="text-xl font-semibold">Conversacion</h2>
-      <div class="mt-4 space-y-3">
-        @for(item of repliesOnly(); track item.id) {
-        <div class="card card-bordered bg-base-100">
-          <div class="card-body p-4">
-            <div class="flex items-center justify-between text-sm">
+            <div class="flex items-center justify-between border-b border-base-300 w-full py-4">
               <div class="flex items-center gap-2">
                 <div class="avatar avatar-placeholder">
-                  <div
-                    class="bg-neutral text-neutral-content w-8 rounded-full text-xs"
-                  >
-                    <span>{{ item.sender.initials }}</span>
+                  <div class="bg-neutral text-neutral-content w-10 rounded-full">
+                    <span>{{ message.sender.initials }}</span>
                   </div>
                 </div>
-                <div class="font-semibold">{{ item.sender.name }}</div>
+                <div class="flex flex-col text-sm">
+                  <div class="font-semibold">{{ message.sender.name }}</div>
+                  <div class="text-base-content/60">Para: {{ receivers() }}</div>
+                </div>
               </div>
-              <span class="text-base-content/60">{{
-                item.createdAt | date : 'short'
-              }}</span>
+              <span class="text-sm text-base-content/60">{{ message.createdAt | date: 'short' }}</span>
             </div>
-            <div class="mt-2 text-sm">
-              <lib-editor-viewer [innerHTML]="item.content" />
+            <div class="py-3">
+              <lib-editor-viewer [innerHTML]="message.content" />
             </div>
-            <div class="mt-3 flex gap-2">
-              <button
-                class="btn btn-ghost btn-xs"
-                (click)="prepareReplyFromReply(item)"
-              >
-                Responder
-              </button>
-              <button
-                class="btn btn-ghost btn-xs"
-                (click)="prepareReplyFromReply(item, true)"
-              >
-                Responder con cita
-              </button>
+            <div class="flex justify-end gap-2 border-t border-base-300 pt-3">
+              <button class="btn btn-ghost btn-sm" (click)="prepareReply(message)">Responder</button>
+              <button class="btn btn-ghost btn-sm" (click)="prepareReply(message, true)">Responder con cita</button>
             </div>
           </div>
         </div>
-        }
-      </div>
-    </div>
-    }
 
-    <div class="card card-bordered bg-base-100 mt-6">
-      <div class="card-body">
-        <h3 class="text-lg font-semibold">Responder</h3>
-        @if(replyDraft().quotedText){
-        <div class="message-quote">
-          <div class="text-xs text-base-content/60">
-            Cita de {{ replyDraft().quotedAuthor }}
+        @if (hasReplies()) {
+          <div class="mt-6">
+            <h2 class="text-xl font-semibold">Conversacion</h2>
+            <div class="mt-4 space-y-3">
+              @for (item of repliesOnly(); track item.id) {
+                <div class="card card-bordered bg-base-100">
+                  <div class="card-body p-4">
+                    <div class="flex items-center justify-between text-sm">
+                      <div class="flex items-center gap-2">
+                        <div class="avatar avatar-placeholder">
+                          <div class="bg-neutral text-neutral-content w-8 rounded-full text-xs">
+                            <span>{{ item.sender.initials }}</span>
+                          </div>
+                        </div>
+                        <div class="font-semibold">{{ item.sender.name }}</div>
+                      </div>
+                      <span class="text-base-content/60">{{ item.createdAt | date: 'short' }}</span>
+                    </div>
+                    <div class="mt-2 text-sm">
+                      <lib-editor-viewer [innerHTML]="item.content" />
+                    </div>
+                    <div class="mt-3 flex gap-2">
+                      <button class="btn btn-ghost btn-xs" (click)="prepareReplyFromReply(item)">Responder</button>
+                      <button class="btn btn-ghost btn-xs" (click)="prepareReplyFromReply(item, true)">
+                        Responder con cita
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              }
+            </div>
           </div>
-          <div class="text-sm">{{ replyDraft().quotedText }}</div>
-          <div class="mt-2">
-            <button class="btn btn-ghost btn-xs" (click)="clearQuote()">
-              Quitar cita
-            </button>
-          </div>
-        </div>
         }
-        <textarea
-          class="textarea textarea-bordered w-full mt-3"
-          rows="4"
-          placeholder="Escribe tu respuesta"
-          [ngModel]="replyDraft().content"
-          (ngModelChange)="updateReplyContent($event)"
-          [disabled]="isSending()"
-        ></textarea>
-        <div class="flex justify-end gap-2 mt-3">
-          <button
-            class="btn btn-primary btn-sm"
-            (click)="sendReply()"
-            [disabled]="isSending() || !replyDraft().content.trim()"
-          >
-            @if(isSending()) {
-            <span class="loading loading-spinner loading-sm"></span>
-            } Enviar respuesta
-          </button>
-        </div>
-      </div>
-    </div>
 
-    } } @placeholder(minimum 1s){
-    <lib-loader />
+        <div class="card card-bordered bg-base-100 mt-6">
+          <div class="card-body">
+            <h3 class="text-lg font-semibold">Responder</h3>
+            @if (replyDraft().quotedText) {
+              <div class="message-quote">
+                <div class="text-xs text-base-content/60">Cita de {{ replyDraft().quotedAuthor }}</div>
+                <div class="text-sm">{{ replyDraft().quotedText }}</div>
+                <div class="mt-2">
+                  <button class="btn btn-ghost btn-xs" (click)="clearQuote()">Quitar cita</button>
+                </div>
+              </div>
+            }
+            <textarea
+              class="textarea textarea-bordered w-full mt-3"
+              rows="4"
+              placeholder="Escribe tu respuesta"
+              [ngModel]="replyDraft().content"
+              (ngModelChange)="updateReplyContent($event)"
+              [disabled]="isSending()"
+            ></textarea>
+            <div class="flex justify-end gap-2 mt-3">
+              <button
+                class="btn btn-primary btn-sm"
+                (click)="sendReply()"
+                [disabled]="isSending() || !replyDraft().content.trim()"
+              >
+                @if (isSending()) {
+                  <span class="loading loading-spinner loading-sm"></span>
+                }
+                Enviar respuesta
+              </button>
+            </div>
+          </div>
+        </div>
+      }
+    } @placeholder (minimum 1s) {
+      <lib-loader />
     }`,
 })
 export default class Message {
@@ -309,7 +284,7 @@ export default class Message {
     this.messageResource
       .value()
       ?.recipients.map((recipient) => recipient.user.name)
-      .join(', ')
+      .join(', '),
   );
 
   public hasReplies = computed(() => {
@@ -326,9 +301,7 @@ export default class Message {
   });
 
   prepareReply(message: MessageType, includeQuote = false): void {
-    const quotedText = includeQuote
-      ? this.toPlainText(message.content).slice(0, 200)
-      : undefined;
+    const quotedText = includeQuote ? this.toPlainText(message.content).slice(0, 200) : undefined;
     this.replyDraft.set({
       content: '',
       replyToId: message.id,
@@ -338,9 +311,7 @@ export default class Message {
   }
 
   prepareReplyFromReply(reply: ReplyType, includeQuote = false): void {
-    const quotedText = includeQuote
-      ? this.toPlainText(reply.content).slice(0, 200)
-      : undefined;
+    const quotedText = includeQuote ? this.toPlainText(reply.content).slice(0, 200) : undefined;
     this.replyDraft.set({
       content: '',
       replyToId: reply.id,

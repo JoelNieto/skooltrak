@@ -164,17 +164,24 @@ const ENROLLMENT_STATUS_COLORS: Record<$Enums.EnrollmentStatus, string> = {
                     <dl class="divide-y divide-base-300">
                       <div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
                         <dt class="text-sm/6 font-medium text-base-content">Nombre completo</dt>
-                        <dd class="mt-1 text-sm/6 text-base-content/90 sm:col-span-2 sm:mt-0">{{ student.fullName }}</dd>
+                        <dd class="mt-1 text-sm/6 text-base-content/90 sm:col-span-2 sm:mt-0">
+                          {{ student.fullName }}
+                        </dd>
                       </div>
                       <div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
                         <dt class="text-sm/6 font-medium text-base-content">Documento de identidad</dt>
-                        <dd class="mt-1 text-sm/6 text-base-content/90 sm:col-span-2 sm:mt-0">{{ student.documentId }}</dd>
+                        <dd class="mt-1 text-sm/6 text-base-content/90 sm:col-span-2 sm:mt-0">
+                          {{ student.documentId }}
+                        </dd>
                       </div>
                       <div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
                         <dt class="text-sm/6 font-medium text-base-content">Grupo</dt>
                         <dd class="mt-1 text-sm/6 text-base-content/90 sm:col-span-2 sm:mt-0">
                           @if (student.classGroup) {
-                            <a [routerLink]="['/groups', student.classGroup.id]" class="badge badge-soft badge-primary cursor-pointer">
+                            <a
+                              [routerLink]="['/groups', student.classGroup.id]"
+                              class="badge badge-soft badge-primary cursor-pointer"
+                            >
                               <span class="text-sm">{{ student.classGroup.name }}</span>
                             </a>
                           } @else {
@@ -184,7 +191,9 @@ const ENROLLMENT_STATUS_COLORS: Record<$Enums.EnrollmentStatus, string> = {
                       </div>
                       <div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
                         <dt class="text-sm/6 font-medium text-base-content">Fecha de nacimiento</dt>
-                        <dd class="mt-1 text-sm/6 text-base-content/90 sm:col-span-2 sm:mt-0">{{ student.birthDate | date: 'dd/MM/yyyy' }}</dd>
+                        <dd class="mt-1 text-sm/6 text-base-content/90 sm:col-span-2 sm:mt-0">
+                          {{ student.birthDate | date: 'dd/MM/yyyy' }}
+                        </dd>
                       </div>
                       <div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
                         <dt class="text-sm/6 font-medium text-base-content">Correo electrónico</dt>
@@ -192,11 +201,15 @@ const ENROLLMENT_STATUS_COLORS: Record<$Enums.EnrollmentStatus, string> = {
                       </div>
                       <div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
                         <dt class="text-sm/6 font-medium text-base-content">Teléfono</dt>
-                        <dd class="mt-1 text-sm/6 text-base-content/90 sm:col-span-2 sm:mt-0">{{ student.phone || '-' }}</dd>
+                        <dd class="mt-1 text-sm/6 text-base-content/90 sm:col-span-2 sm:mt-0">
+                          {{ student.phone || '-' }}
+                        </dd>
                       </div>
                       <div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
                         <dt class="text-sm/6 font-medium text-base-content">Dirección</dt>
-                        <dd class="mt-1 text-sm/6 text-base-content/90 sm:col-span-2 sm:mt-0">{{ student.address || '-' }}</dd>
+                        <dd class="mt-1 text-sm/6 text-base-content/90 sm:col-span-2 sm:mt-0">
+                          {{ student.address || '-' }}
+                        </dd>
                       </div>
                     </dl>
                   </div>
@@ -209,11 +222,15 @@ const ENROLLMENT_STATUS_COLORS: Record<$Enums.EnrollmentStatus, string> = {
                     <dl class="divide-y divide-base-300">
                       <div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
                         <dt class="text-sm/6 font-medium text-base-content">Nombre</dt>
-                        <dd class="mt-1 text-sm/6 text-base-content/90 sm:col-span-2 sm:mt-0">{{ student.emergencyContactName || '-' }}</dd>
+                        <dd class="mt-1 text-sm/6 text-base-content/90 sm:col-span-2 sm:mt-0">
+                          {{ student.emergencyContactName || '-' }}
+                        </dd>
                       </div>
                       <div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
                         <dt class="text-sm/6 font-medium text-base-content">Teléfono</dt>
-                        <dd class="mt-1 text-sm/6 text-base-content/90 sm:col-span-2 sm:mt-0">{{ student.emergencyContactPhone || '-' }}</dd>
+                        <dd class="mt-1 text-sm/6 text-base-content/90 sm:col-span-2 sm:mt-0">
+                          {{ student.emergencyContactPhone || '-' }}
+                        </dd>
                       </div>
                     </dl>
                   </div>
@@ -252,15 +269,21 @@ const ENROLLMENT_STATUS_COLORS: Record<$Enums.EnrollmentStatus, string> = {
                     <dl class="divide-y divide-base-300">
                       <div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
                         <dt class="text-sm/6 font-medium text-base-content">Tipo de sangre</dt>
-                        <dd class="mt-1 text-sm/6 text-base-content/90 sm:col-span-2 sm:mt-0">{{ student.bloodType || '-' }}</dd>
+                        <dd class="mt-1 text-sm/6 text-base-content/90 sm:col-span-2 sm:mt-0">
+                          {{ student.bloodType || '-' }}
+                        </dd>
                       </div>
                       <div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
                         <dt class="text-sm/6 font-medium text-base-content">Alergias</dt>
-                        <dd class="mt-1 text-sm/6 text-base-content/90 sm:col-span-2 sm:mt-0">{{ student.allergies || 'Ninguna registrada' }}</dd>
+                        <dd class="mt-1 text-sm/6 text-base-content/90 sm:col-span-2 sm:mt-0">
+                          {{ student.allergies || 'Ninguna registrada' }}
+                        </dd>
                       </div>
                       <div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
                         <dt class="text-sm/6 font-medium text-base-content">Notas médicas</dt>
-                        <dd class="mt-1 text-sm/6 text-base-content/90 sm:col-span-2 sm:mt-0">{{ student.medicalNotes || 'Ninguna' }}</dd>
+                        <dd class="mt-1 text-sm/6 text-base-content/90 sm:col-span-2 sm:mt-0">
+                          {{ student.medicalNotes || 'Ninguna' }}
+                        </dd>
                       </div>
                     </dl>
                   </div>
@@ -280,7 +303,7 @@ const ENROLLMENT_STATUS_COLORS: Record<$Enums.EnrollmentStatus, string> = {
                     <div class="card bg-base-100 card-border border-base-300">
                       <div class="flex flex-col p-4 border-b border-base-300">
                         <h2 class="font-semibold">{{ course.subject.name }}</h2>
-                        <p class="text-sm text-base-content/60">{{ course.teacher?.name }}</p>
+                        <p class="text-sm text-base-content/60">{{ course.teacher.name }}</p>
                       </div>
                       <div class="overflow-x-auto">
                         <table class="table table-sm table-zebra">
@@ -305,8 +328,13 @@ const ENROLLMENT_STATUS_COLORS: Record<$Enums.EnrollmentStatus, string> = {
                                     <span
                                       class="badge badge-sm"
                                       [ngClass]="{
-                                        'badge-success': metric && grade.score && grade.score! >= metric.minimumExcellence,
-                                        'badge-warning': metric && grade.score && grade.score! >= metric.minimumApproval && grade.score! < metric.minimumExcellence,
+                                        'badge-success':
+                                          metric && grade.score && grade.score! >= metric.minimumExcellence,
+                                        'badge-warning':
+                                          metric &&
+                                          grade.score &&
+                                          grade.score! >= metric.minimumApproval &&
+                                          grade.score! < metric.minimumExcellence,
                                         'badge-error': metric && grade.score && grade.score! < metric.minimumApproval,
                                       }"
                                     >

@@ -10,6 +10,10 @@ import { Prisma } from '@generated/prisma';
 import { Apollo, gql } from 'apollo-angular';
 import { filter, map, switchMap } from 'rxjs';
 
+type School = Prisma.SchoolGetPayload<false> & {
+  logoUrl?: string | null;
+};
+
 @Component({
   selector: 'app-schools',
   imports: [DatePipe, Paginator, FormsModule, RouterLink, Menu, MenuContent, MenuItem, MenuTrigger, OverlayModule],
@@ -36,7 +40,7 @@ import { filter, map, switchMap } from 'rxjs';
       <table class="table">
         <thead>
           <tr>
-            <th>Nombre</th>
+            <th>Colegio</th>
             <th>Abreviatura</th>
             <th>Ciudad</th>
             <th>Email</th>
@@ -49,8 +53,17 @@ import { filter, map, switchMap } from 'rxjs';
           @for (school of schools.value() ?? []; track school.id) {
             <tr>
               <td>
-                <a [routerLink]="['/admin/schools', school.id, 'edit']" class="link link-hover">
-                  {{ school.name }}
+                <a [routerLink]="['/schools', school.id]" class="flex items-center gap-3 hover:opacity-80">
+                  <div
+                    class="min-w-10 max-w-16 min-h-8 max-h-12 rounded-lg border border-base-300 flex items-center justify-center overflow-hidden bg-base-200 shrink-0"
+                  >
+                    @if (school.logoUrl) {
+                      <img [src]="school.logoUrl" [alt]="school.name" class="w-full h-auto object-contain" />
+                    } @else {
+                      <span class="material-symbols-outlined text-xl text-base-content/40">school</span>
+                    }
+                  </div>
+                  <span class="link link-hover font-medium">{{ school.name }}</span>
                 </a>
               </td>
               <td>{{ school.shortName }}</td>
@@ -86,6 +99,15 @@ import { filter, map, switchMap } from 'rxjs';
                     <ng-template ngMenuContent>
                       <a
                         ngMenuItem
+                        value="view"
+                        [routerLink]="['/schools', school.id]"
+                        class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-base-200 w-full"
+                      >
+                        <span class="material-symbols-outlined text-lg">visibility</span>
+                        <span>Ver</span>
+                      </a>
+                      <a
+                        ngMenuItem
                         value="edit"
                         [routerLink]="['/schools', school.id, 'edit']"
                         class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-base-200 w-full"
@@ -111,7 +133,12 @@ import { filter, map, switchMap } from 'rxjs';
             @if (schools.isLoading()) {
               @for (_ of [1, 2, 3, 4, 5]; track _) {
                 <tr>
-                  <td><div class="skeleton h-4 w-full"></div></td>
+                  <td>
+                    <div class="flex items-center gap-3">
+                      <div class="skeleton w-10 h-10 rounded-lg"></div>
+                      <div class="skeleton h-4 w-32"></div>
+                    </div>
+                  </td>
                   <td><div class="skeleton h-4 w-full"></div></td>
                   <td><div class="skeleton h-4 w-full"></div></td>
                   <td><div class="skeleton h-4 w-full"></div></td>
@@ -149,14 +176,14 @@ export default class Schools {
   searchText = signal('');
   actionsMenu = viewChild<Menu<string>>('actionsMenu');
 
-  public schools = rxResource({
+  public schools = rxResource<School[], { search: string }>({
     params: () => ({
       search: this.pagination.search(),
     }),
     stream: () => {
       return this.#apollo
         .watchQuery<{
-          schools: Prisma.SchoolGetPayload<false>[];
+          schools: School[];
         }>({
           query: gql`
             query GetSchools {
@@ -173,6 +200,7 @@ export default class Schools {
                 country
                 website
                 logo
+                logoUrl
                 createdAt
                 updatedAt
               }
@@ -189,7 +217,7 @@ export default class Schools {
     });
   }
 
-  public deleteSchool(school: Prisma.SchoolGetPayload<false>) {
+  public deleteSchool(school: School) {
     this.#confirmation
       .confirm({
         title: 'Eliminar Colegio',

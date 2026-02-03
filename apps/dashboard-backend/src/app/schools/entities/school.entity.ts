@@ -20,8 +20,13 @@ export class School
   organizationId: string;
   @Field(() => String, { description: 'Short name of the school' })
   shortName: string;
-  @Field(() => String, { description: 'Logo of the school' })
+  @Field(() => String, { description: 'Logo storage key of the school' })
   logo: string;
+  @Field(() => String, {
+    description: 'Presigned URL for the school logo',
+    nullable: true,
+  })
+  logoUrl?: string;
   @Field(() => String, { description: 'Address of the school' })
   address: string;
   @Field(() => String, { description: 'City of the school' })

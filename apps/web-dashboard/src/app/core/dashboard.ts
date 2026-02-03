@@ -52,7 +52,15 @@ import Store from './store';
               tabindex="0"
               class="flex items-center p-2 text-base-content rounded-lg hover:bg-primary-50 hover:text-primary-600 group cursor-pointer"
             >
-              <span class="material-symbols-outlined text-xl">apartment</span>
+              @if (store.currentSchool()?.logoUrl) {
+                <img
+                  [src]="store.currentSchool()?.logoUrl"
+                  [alt]="store.currentSchool()?.name"
+                  class="min-w-6 max-w-12 h-6 rounded object-contain"
+                />
+              } @else {
+                <span class="material-symbols-outlined text-xl">apartment</span>
+              }
               <span class="ml-2">{{ store.currentSchool()?.name }}</span>
             </div>
             <ul
@@ -65,8 +73,14 @@ import Store from './store';
                     (click)="store.currentSchool.set(school)"
                     (keydown)="store.currentSchool.set(school)"
                     tabindex="0"
+                    class="flex items-center gap-2"
                   >
-                    {{ school.name }}
+                    @if (school.logoUrl) {
+                      <img [src]="school.logoUrl" [alt]="school.name" class="w-5 h-5 rounded object-contain" />
+                    } @else {
+                      <span class="material-symbols-outlined text-lg">apartment</span>
+                    }
+                    <span>{{ school.name }}</span>
                   </div>
                 </li>
               }
@@ -78,7 +92,9 @@ import Store from './store';
             <span class="material-symbols-outlined text-2xl">mail_outline</span>
             @if (unreadCount.value(); as count) {
               @if (count > 0) {
-                <span class="badge badge-primary badge-sm absolute -top-1 -right-1">{{ count > 99 ? '99+' : count }}</span>
+                <span class="badge badge-primary badge-sm absolute -top-1 -right-1">{{
+                  count > 99 ? '99+' : count
+                }}</span>
               }
             }
           </a>
@@ -145,9 +161,9 @@ export default class Dashboard {
     stream: () =>
       this.apollo
         .watchQuery<{
-          schools: Prisma.SchoolGetPayload<{
+          schools: (Prisma.SchoolGetPayload<{
             include: undefined;
-          }>[];
+          }> & { logoUrl?: string | null })[];
         }>({
           fetchPolicy: 'cache-first',
           query: gql`
@@ -158,6 +174,7 @@ export default class Dashboard {
                 organizationId
                 shortName
                 logo
+                logoUrl
                 address
                 city
                 state

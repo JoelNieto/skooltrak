@@ -1370,6 +1370,9 @@ type Mutation {
   createQuiz(createQuizInput: CreateQuizInput!): Quiz!
   createRole(createRoleInput: CreateRoleInput!): Role!
   createSchool(createSchoolInput: CreateSchoolInput!): School!
+
+  """Create a presigned URL for uploading a school logo"""
+  createSchoolLogoUploadUrl(input: SchoolLogoUploadInput!): SchoolLogoUploadUrl!
   createStudent(createStudentInput: CreateStudentInput!): Student!
   createStudentGrade(createStudentGradeInput: CreateStudentGradeInput!): StudentGrade!
   createStudyPlan(createStudyPlanInput: CreateStudyPlanInput!): StudyPlan!
@@ -1438,6 +1441,9 @@ type Mutation {
   updateQuiz(updateQuizInput: UpdateQuizInput!): Quiz!
   updateRole(updateRoleInput: UpdateRoleInput!): Role!
   updateSchool(updateSchoolInput: UpdateSchoolInput!): School!
+
+  """Update only the logo of a school"""
+  updateSchoolLogo(id: String!, logo: String!): School!
   updateShare(updateShareInput: UpdateShareInput!): File!
   updateStudent(updateStudentInput: UpdateStudentInput!): Student!
   updateStudentGrade(updateStudentGradeInput: UpdateStudentGradeInput!): StudentGrade!
@@ -1965,6 +1971,9 @@ type Query {
   role(id: String!): Role!
   roles: [Role!]!
   school(id: String!): School!
+
+  """Get a presigned URL for downloading a school logo"""
+  schoolLogoDownloadUrl(schoolId: String!): SchoolLogoDownloadUrl!
   schools: [School!]!
   student(id: String!): Student!
   studentAttendanceStats(studentId: String!): AttendanceStats!
@@ -2203,8 +2212,11 @@ type School {
   """ID of the school"""
   id: String!
 
-  """Logo of the school"""
+  """Logo storage key of the school"""
   logo: String!
+
+  """Presigned URL for the school logo"""
+  logoUrl: String
 
   """Name of the school"""
   name: String!
@@ -2232,6 +2244,27 @@ type School {
 
   """Zip code of the school"""
   zip: String!
+}
+
+type SchoolLogoDownloadUrl {
+  """Presigned download URL for the logo"""
+  downloadUrl: String!
+}
+
+input SchoolLogoUploadInput {
+  """MIME type of the image"""
+  mimeType: String!
+
+  """School ID for the logo upload"""
+  schoolId: String!
+}
+
+type SchoolLogoUploadUrl {
+  """Storage key for the logo"""
+  storageKey: String!
+
+  """Presigned upload URL"""
+  uploadUrl: String!
 }
 
 input ShareFileInput {

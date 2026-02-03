@@ -190,6 +190,10 @@ export const appRoutes: Route[] = [
         loadComponent: () => import('./admin/pages/school-form'),
       },
       {
+        path: 'schools/:id',
+        loadComponent: () => import('./admin/pages/school'),
+      },
+      {
         path: 'schools/:id/edit',
         loadComponent: () => import('./admin/pages/school-form'),
       },

@@ -19,6 +19,8 @@ module.exports = {
       outputHashing: 'none',
       generatePackageJson: true,
       sourceMaps: true,
+      // Externalize all dependencies to avoid Prisma bundling issues
+      externalDependencies: 'all',
     }),
   ],
 };

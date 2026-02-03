@@ -1,6 +1,6 @@
 import { User } from '@/auth';
 import { $Enums, Prisma } from '@generated/prisma';
-import { Field, ObjectType } from '@nestjs/graphql';
+import { Field, Int, ObjectType } from '@nestjs/graphql';
 import { ClassGroup } from '../../class-groups/entities/class-group.entity';
 import { Course } from '../../courses/entities/course.entity';
 import { Subject } from '../../subjects/entities/subject.entity';
@@ -49,10 +49,10 @@ export class Teacher
   personalEmail: string;
   @Field(() => String, { description: 'About the teacher' })
   about: string;
-  @Field(() => Number, { description: 'Teacher since year' })
-  teacherSince: number;
-  @Field(() => Date, { description: 'Member since date' })
-  memberSince: Date;
+  @Field(() => Int, { description: 'Teacher since year', nullable: true })
+  teacherSince: number | null;
+  @Field(() => Date, { description: 'Member since date', nullable: true })
+  memberSince: Date | null;
   @Field(() => User, { description: 'User of the teacher' })
   user: User;
   @Field(() => Date, { description: 'Created at' })

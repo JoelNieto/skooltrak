@@ -206,7 +206,7 @@ export default class Auth {
   }
 
   public hasPermission(permission: string) {
-    return this.permissions()?.includes(permission);
+    return this.permissions()?.includes(permission) || this.isAdmin();
   }
 
   public isAuthenticatedSync() {

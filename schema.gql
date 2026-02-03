@@ -882,7 +882,7 @@ input CreateTeacherInput {
   address: String = ""
 
   """Birth date of the teacher"""
-  birthDate: DateTime = "2026-01-31T18:36:13.949Z"
+  birthDate: DateTime
 
   """Document ID of the teacher"""
   documentId: String!
@@ -898,6 +898,7 @@ input CreateTeacherInput {
 
   """Gender of the teacher"""
   gender: String!
+  memberSince: DateTime
 
   """Middle name of the teacher"""
   middleName: String = ""
@@ -909,6 +910,7 @@ input CreateTeacherInput {
   organizationId: String!
   personalEmail: String = ""
   phoneNumber: String = ""
+  teacherSince: Int
 }
 
 input CreateUserInput {
@@ -2521,7 +2523,7 @@ type Teacher {
   initials: String!
 
   """Member since date"""
-  memberSince: DateTime!
+  memberSince: DateTime
 
   """Middle name of the teacher"""
   middleName: String!
@@ -2543,7 +2545,7 @@ type Teacher {
   subjects: [Subject!]!
 
   """Teacher since year"""
-  teacherSince: Float!
+  teacherSince: Int
 
   """Updated at"""
   updatedAt: DateTime!
@@ -3015,7 +3017,7 @@ input UpdateTeacherInput {
   address: String = ""
 
   """Birth date of the teacher"""
-  birthDate: DateTime = "2026-01-31T18:36:13.949Z"
+  birthDate: DateTime
 
   """Document ID of the teacher"""
   documentId: String
@@ -3032,6 +3034,7 @@ input UpdateTeacherInput {
   """Gender of the teacher"""
   gender: String
   id: String!
+  memberSince: DateTime
 
   """Middle name of the teacher"""
   middleName: String = ""
@@ -3043,6 +3046,7 @@ input UpdateTeacherInput {
   organizationId: String
   personalEmail: String = ""
   phoneNumber: String = ""
+  teacherSince: Int
 }
 
 input UpdateUserInput {

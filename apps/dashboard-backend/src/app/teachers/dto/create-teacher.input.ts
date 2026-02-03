@@ -1,11 +1,8 @@
 import { TransformDateToNoon } from '@/shared';
-import { Field, InputType } from '@nestjs/graphql';
+import { Field, InputType, Int } from '@nestjs/graphql';
 
 import { $Enums, Prisma } from '@generated/prisma';
-type CreateTeacherInputType = Omit<
-  Prisma.TeacherUncheckedCreateInput,
-  'userId'
-> & {
+type CreateTeacherInputType = Omit<Prisma.TeacherUncheckedCreateInput, 'userId'> & {
   email: string;
 };
 
@@ -35,7 +32,6 @@ export class CreateTeacherInput implements CreateTeacherInputType {
   @Field(() => Date, {
     description: 'Birth date of the teacher',
     nullable: true,
-    defaultValue: new Date(),
   })
   birthDate: Date;
 
@@ -54,4 +50,8 @@ export class CreateTeacherInput implements CreateTeacherInputType {
   gender: $Enums.Gender;
   @Field(() => String, { description: 'Email of the teacher' })
   email: string;
+  @Field(() => Int, { nullable: true })
+  teacherSince?: number;
+  @Field(() => Date, { nullable: true })
+  memberSince?: Date;
 }

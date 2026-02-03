@@ -30,9 +30,6 @@ import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
           <a routerLink="class-groups" routerLinkActive="bg-primary text-primary-content">Grupos</a>
         </li>
         <li>
-          <a routerLink="teachers" routerLinkActive="bg-primary text-primary-content">Profesores</a>
-        </li>
-        <li>
           <a routerLink="periods" routerLinkActive="bg-primary text-primary-content">Periodos</a>
         </li>
         <li>

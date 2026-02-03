@@ -133,12 +133,26 @@ export class TeachersService {
     });
   }
 
-  update(id: string, updateTeacherInput: UpdateTeacherInput) {
-    return this.prisma.teacher.update({
+  async update(id: string, updateTeacherInput: UpdateTeacherInput) {
+    // Extract email and other non-Teacher fields
+    const { email, organizationId, ...teacherData } = updateTeacherInput as any;
+
+    // Update teacher data (excluding email which belongs to User)
+    const teacher = await this.prisma.teacher.update({
       where: { id },
-      data: updateTeacherInput,
+      data: teacherData,
       include: { user: { select: { id: true, email: true } } },
     });
+
+    // If email was provided and changed, update the user's email
+    if (email && teacher.user && email !== teacher.user.email) {
+      await this.prisma.user.update({
+        where: { id: teacher.userId },
+        data: { email },
+      });
+    }
+
+    return teacher;
   }
 
   remove(id: string) {

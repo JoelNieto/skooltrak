@@ -70,6 +70,10 @@ export const appRoutes: Route[] = [
       },
       { path: 'teachers', loadComponent: () => import('./teachers/teachers') },
       {
+        path: 'teachers/new',
+        loadComponent: () => import('./teachers/teacher-form'),
+      },
+      {
         path: 'teachers/:id',
         loadComponent: () => import('./teachers/teacher'),
       },
@@ -205,10 +209,7 @@ export const appRoutes: Route[] = [
             path: 'study-plans',
             loadComponent: () => import('./admin/pages/study-plans'),
           },
-          {
-            path: 'teachers',
-            loadComponent: () => import('./admin/pages/teachers'),
-          },
+
           {
             path: 'degrees',
             loadComponent: () => import('./admin/pages/degrees'),

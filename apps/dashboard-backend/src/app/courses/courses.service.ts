@@ -1,6 +1,6 @@
 import { Prisma } from '@generated/prisma';
 
-import { Inject, Injectable, Scope } from '@nestjs/common';
+import { ConflictException, Inject, Injectable, Scope } from '@nestjs/common';
 import { CONTEXT } from '@nestjs/graphql';
 import { Request } from 'express';
 import { FetchDataInput } from '../fetch-data.input';
@@ -11,8 +11,48 @@ import { UpdateCourseInput } from './dto/update-course.input';
 export class CoursesService {
   constructor(
     private readonly prisma: PrismaService,
-    @Inject(CONTEXT) private readonly context: { req: Request }
+    @Inject(CONTEXT) private readonly context: { req: Request },
   ) {}
+
+  /**
+   * Generates a unique course code starting with 3 letters.
+   * If the code already exists, it adds more letters until unique.
+   */
+  private async generateUniqueCode(schoolId: string, baseName: string): Promise<string> {
+    // Remove non-alphabetic characters and convert to uppercase
+    const cleanName = baseName.replace(/[^a-zA-Z]/g, '').toUpperCase();
+
+    // Start with 3 letters minimum
+    for (let length = 3; length <= cleanName.length; length++) {
+      const code = cleanName.substring(0, length);
+
+      const existing = await this.prisma.course.findUnique({
+        where: {
+          schoolId_code: { schoolId, code },
+        },
+      });
+
+      if (!existing) {
+        return code;
+      }
+    }
+
+    // If all substrings are taken, append a number
+    let counter = 1;
+    while (true) {
+      const code = `${cleanName.substring(0, 3)}${counter}`;
+      const existing = await this.prisma.course.findUnique({
+        where: {
+          schoolId_code: { schoolId, code },
+        },
+      });
+
+      if (!existing) {
+        return code;
+      }
+      counter++;
+    }
+  }
 
   async create(createCourseInput: CreateCourseInput) {
     const subject = await this.prisma.subject.findUnique({
@@ -21,18 +61,20 @@ export class CoursesService {
     const studyPlan = await this.prisma.studyPlan.findUnique({
       where: { id: createCourseInput.studyPlanId },
     });
+
+    // Use provided code or generate a unique one from subject name
+    const code = createCourseInput.code
+      ? createCourseInput.code
+      : await this.generateUniqueCode(createCourseInput.schoolId, subject?.name ?? 'CRS');
+
     const course = await this.prisma.course.create({
       data: {
         ...createCourseInput,
         shortName: createCourseInput.shortName
           ? `${createCourseInput.shortName}`
           : `${subject?.code} - ${studyPlan?.shortName}`,
-        name: createCourseInput.name
-          ? `${createCourseInput.name}`
-          : `${subject?.name} - ${studyPlan?.name}`,
-        code: createCourseInput.code
-          ? `${createCourseInput.code}`
-          : `${subject?.code} - ${studyPlan?.code}`,
+        name: createCourseInput.name ? `${createCourseInput.name}` : `${subject?.name} - ${studyPlan?.name}`,
+        code,
       },
       include: { school: true, subject: true, studyPlan: true },
     });
@@ -68,15 +110,39 @@ export class CoursesService {
   }
 
   async replicate(targetStudyPlanId: string, sourceStudyPlanId: string) {
-    const courses = await this.prisma.course.findMany({
-      where: { studyPlanId: sourceStudyPlanId },
-    });
-    return this.prisma.course.createMany({
-      data: courses.map((course) => ({
-        ...course,
-        studyPlanId: targetStudyPlanId,
-      })),
-    });
+    const [courses, targetStudyPlan] = await Promise.all([
+      this.prisma.course.findMany({
+        where: { studyPlanId: sourceStudyPlanId },
+        include: { subject: true },
+      }),
+      this.prisma.studyPlan.findUnique({
+        where: { id: targetStudyPlanId },
+      }),
+    ]);
+
+    if (!targetStudyPlan) {
+      throw new ConflictException('Target study plan not found');
+    }
+
+    const createdCourses = [];
+    for (const course of courses) {
+      const code = await this.generateUniqueCode(course.schoolId, course.subject.name);
+
+      const newCourse = await this.prisma.course.create({
+        data: {
+          name: `${course.subject.name} - ${targetStudyPlan.name}`,
+          code,
+          shortName: `${course.subject.code} - ${targetStudyPlan.shortName}`,
+          organizationId: course.organizationId,
+          schoolId: course.schoolId,
+          subjectId: course.subjectId,
+          studyPlanId: targetStudyPlanId,
+        },
+      });
+      createdCourses.push(newCourse);
+    }
+
+    return { count: createdCourses.length };
   }
 
   findAll(fetchDataInput: FetchDataInput) {

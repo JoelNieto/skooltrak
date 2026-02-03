@@ -1,11 +1,11 @@
 import { Toast } from '@/ui';
 import { isPlatformBrowser } from '@angular/common';
 import { Injectable, PLATFORM_ID, computed, effect, inject, linkedSignal, signal } from '@angular/core';
-import { rxResource } from '@angular/core/rxjs-interop';
+import { rxResource, toObservable } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
 import { Prisma } from '@generated/prisma';
 import { Apollo, gql } from 'apollo-angular';
-import { catchError, firstValueFrom, map, of } from 'rxjs';
+import { catchError, filter, firstValueFrom, map, of, take } from 'rxjs';
 import { authClient } from './auth-client';
 
 export type DecodedToken = {
@@ -108,6 +108,22 @@ export default class Auth {
 
   public user = computed(() => this.userResource.value());
   public isUserLoading = computed(() => this.userResource.isLoading());
+
+  // Signal that indicates when user data is ready (loaded or determined to be null)
+  public isUserReady = computed(() => {
+    // If not authenticated, we're ready (no user to load)
+    if (!this.isAuthenticated()) {
+      return true;
+    }
+    // If authenticated, wait for userResource to finish loading
+    return !this.userResource.isLoading();
+  });
+
+  // Observable for guards to wait on user being ready
+  public whenReady$ = toObservable(this.isUserReady).pipe(
+    filter((ready) => ready),
+    take(1),
+  );
 
   // Computed from user or session
   public userColor = computed(() => this.user()?.color);

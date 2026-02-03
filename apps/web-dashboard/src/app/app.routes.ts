@@ -50,11 +50,6 @@ export const appRoutes: Route[] = [
         canMatch: [studentGuard],
         loadComponent: () => import('./student-home'),
       },
-      // Fallback home for when role guards don't match
-      {
-        path: 'home',
-        loadComponent: () => import('./home'),
-      },
       {
         path: 'courses',
         loadComponent: () => import('./courses/courses'),

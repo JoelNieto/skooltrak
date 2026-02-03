@@ -1,11 +1,11 @@
 import { Toast } from '@/ui';
 import { isPlatformBrowser } from '@angular/common';
-import { Injectable, PLATFORM_ID, computed, effect, inject, linkedSignal, signal } from '@angular/core';
-import { rxResource, toObservable } from '@angular/core/rxjs-interop';
+import { computed, effect, inject, Injectable, linkedSignal, PLATFORM_ID, signal } from '@angular/core';
+import { rxResource } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
 import { Prisma } from '@generated/prisma';
 import { Apollo, gql } from 'apollo-angular';
-import { catchError, filter, firstValueFrom, map, of, take } from 'rxjs';
+import { catchError, firstValueFrom, map, of } from 'rxjs';
 import { authClient } from './auth-client';
 
 export type DecodedToken = {
@@ -115,15 +115,29 @@ export default class Auth {
     if (!this.isAuthenticated()) {
       return true;
     }
-    // If authenticated, wait for userResource to finish loading
-    return !this.userResource.isLoading();
+    // If authenticated, we need actual user data with a role to be loaded
+    // This ensures we wait for the NEW request after login, not just any "resolved" state
+    const user = this.user();
+    const status = this.userResource.status();
+    // We're ready if we have a user with a role, or if there was an error
+    return (user != null && user.role != null) || status === 'error';
   });
 
-  // Observable for guards to wait on user being ready
-  public whenReady$ = toObservable(this.isUserReady).pipe(
-    filter((ready) => ready),
-    take(1),
-  );
+  // Promise-based method for guards to wait until user data is ready
+  public waitUntilReady(): Promise<boolean> {
+    if (this.isUserReady()) {
+      return Promise.resolve(true);
+    }
+
+    return new Promise((resolve) => {
+      const checkInterval = setInterval(() => {
+        if (this.isUserReady()) {
+          clearInterval(checkInterval);
+          resolve(true);
+        }
+      }, 50);
+    });
+  }
 
   // Computed from user or session
   public userColor = computed(() => this.user()?.color);

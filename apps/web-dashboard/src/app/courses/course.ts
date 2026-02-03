@@ -65,12 +65,16 @@ type CourseType = Prisma.CourseGetPayload<{
               <div>
                 <h2 class="card-title text-xl">{{ course.name }}</h2>
                 <div class="flex items-center gap-1 text-sm">
-                  <div class="avatar avatar-placeholder">
-                    <div class="text-white w-7 rounded-full" [style.background]="course.teacher?.color">
-                      <span class="text-xs">{{ course?.teacher?.initials }}</span>
+                  @if (course.teacher) {
+                    <div class="avatar avatar-placeholder">
+                      <div class="text-white w-7 rounded-full" [style.background]="course.teacher?.color">
+                        <span class="text-xs">{{ course?.teacher?.initials }}</span>
+                      </div>
                     </div>
-                  </div>
-                  {{ course.teacher?.name }}
+                    {{ course.teacher?.name }}
+                  } @else {
+                    <span class="text-sm text-base-content/50">No hay docente asignado</span>
+                  }
                 </div>
                 <p class="text-base-200">{{ course.code }}</p>
               </div>

@@ -50,6 +50,7 @@
         "express": "4.21.2",
         "graphql": "^16.11.0",
         "jsonwebtoken": "^9.0.3",
+        "ngx-image-cropper": "^9.1.6",
         "ngx-tiptap": "^14.0.1",
         "passport": "^0.7.0",
         "passport-jwt": "^4.0.1",
@@ -2916,6 +2917,8 @@
     "negotiator": ["negotiator@1.0.0", "", {}, "sha512-8Ofs/AUQh8MaEcrlq5xOX0CQ9ypTF5dl78mjlMNfOK08fzpgTHQRQPBxcPlEtIw0yRpws+Zo/3r+5WRby7u3Gg=="],
 
     "neo-async": ["neo-async@2.6.2", "", {}, "sha512-Yd3UES5mWCSqR+qNT93S3UoYUkqAZ9lLg8a7g9rimsWmYGK8cVToA4/sF3RrshdyV3sAGMXVUmpMYOw+dLpOuw=="],
+
+    "ngx-image-cropper": ["ngx-image-cropper@9.1.6", "", { "dependencies": { "tslib": "^2.3.0" }, "peerDependencies": { "@angular/common": ">=17.3.0", "@angular/core": ">=17.3.0" } }, "sha512-b250YJ+jZovfqIj8vdEOrpEFay34be5f1Hpvg6Db68VMlvdyyuzboJdR0gCupbXtVcG6qQ86L7YG+SYxXJwApw=="],
 
     "ngx-tiptap": ["ngx-tiptap@14.0.1", "", { "dependencies": { "tslib": "^2.3.0" }, "peerDependencies": { "@angular/common": ">=20.0.0", "@angular/core": ">=20.0.0", "@angular/forms": ">=20.0.0", "@floating-ui/dom": "^1.0.0", "@tiptap/core": "^3.0.1", "@tiptap/extension-bubble-menu": "^3.0.1", "@tiptap/extension-floating-menu": "^3.0.1", "@tiptap/pm": "^3.0.1" } }, "sha512-LOd8y+8H09Oi6jAE/UWy2sg68Mk5ZGTnPhnq7qeiDhU/QSZWD+SJ5vWkF4sguOCsHtPfde010xBf/zhy/b1P5A=="],
 

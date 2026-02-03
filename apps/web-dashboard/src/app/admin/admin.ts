@@ -15,6 +15,9 @@ import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
     <div class="border-b border-base-300">
       <ul class="menu menu-horizontal gap-2 ">
         <li>
+          <a routerLink="schools" routerLinkActive="bg-primary text-primary-content">Colegios</a>
+        </li>
+        <li>
           <a routerLink="subjects" routerLinkActive="bg-primary text-primary-content"> Asignaturas</a>
         </li>
         <li>

@@ -184,10 +184,24 @@ export const appRoutes: Route[] = [
         loadComponent: () => import('./auth/change-password'),
         title: 'Cambiar contraseña | Skooltrak',
       },
+
+      {
+        path: 'schools/new',
+        loadComponent: () => import('./admin/pages/school-form'),
+      },
+      {
+        path: 'schools/:id/edit',
+        loadComponent: () => import('./admin/pages/school-form'),
+      },
       {
         path: 'admin',
         loadComponent: () => import('./admin/admin'),
         children: [
+          {
+            path: 'schools',
+            loadComponent: () => import('./admin/pages/schools'),
+          },
+
           {
             path: 'subjects',
             loadComponent: () => import('./admin/pages/subjects'),
@@ -230,7 +244,7 @@ export const appRoutes: Route[] = [
             loadComponent: () => import('./admin/pages/events-calendar'),
           },
 
-          { path: '', redirectTo: 'subjects', pathMatch: 'full' },
+          { path: '', redirectTo: 'schools', pathMatch: 'full' },
         ],
       },
     ],

@@ -9,15 +9,58 @@ import { UpdateSubjectInput } from './dto/update-subject.input';
 export class SubjectsService {
   constructor(
     private readonly prisma: PrismaService,
-    @Inject(CONTEXT) private readonly context: { req: Request }
+    @Inject(CONTEXT) private readonly context: { req: Request },
   ) {}
 
-  create(createSubjectInput: CreateSubjectInput) {
+  /**
+   * Generates a unique subject code starting with 3 letters.
+   * If the code already exists, it adds more letters until unique.
+   */
+  private async generateUniqueCode(organizationId: string, baseName: string): Promise<string> {
+    // Remove non-alphabetic characters and convert to uppercase
+    const cleanName = baseName.replace(/[^a-zA-Z]/g, '').toUpperCase();
+
+    // Start with 3 letters minimum
+    for (let length = 3; length <= cleanName.length; length++) {
+      const code = cleanName.substring(0, length);
+
+      const existing = await this.prisma.subject.findFirst({
+        where: { organizationId, code },
+      });
+
+      if (!existing) {
+        return code;
+      }
+    }
+
+    // If all substrings are taken, append a number
+    let counter = 1;
+    while (true) {
+      const code = `${cleanName.substring(0, 3)}${counter}`;
+      const existing = await this.prisma.subject.findFirst({
+        where: { organizationId, code },
+      });
+
+      if (!existing) {
+        return code;
+      }
+      counter++;
+    }
+  }
+
+  async create(createSubjectInput: CreateSubjectInput) {
     const { req } = this.context;
     const { organizationId } = req.user as any;
+
+    // Use provided code or generate a unique one from subject name
+    const code = createSubjectInput.code
+      ? createSubjectInput.code
+      : await this.generateUniqueCode(organizationId, createSubjectInput.name);
+
     return this.prisma.subject.create({
       data: {
         ...createSubjectInput,
+        code,
         organizationId,
       },
       include: { organization: true },
@@ -31,10 +74,7 @@ export class SubjectsService {
     return this.prisma.subject.findMany({
       where: {
         organizationId,
-        OR: [
-          { name: { contains: search, mode: 'insensitive' } },
-          { code: { contains: search, mode: 'insensitive' } },
-        ],
+        OR: [{ name: { contains: search, mode: 'insensitive' } }, { code: { contains: search, mode: 'insensitive' } }],
       },
       skip,
       take,
@@ -51,10 +91,7 @@ export class SubjectsService {
     return this.prisma.subject.count({
       where: {
         organizationId,
-        OR: [
-          { name: { contains: search, mode: 'insensitive' } },
-          { code: { contains: search, mode: 'insensitive' } },
-        ],
+        OR: [{ name: { contains: search, mode: 'insensitive' } }, { code: { contains: search, mode: 'insensitive' } }],
       },
     });
   }

@@ -347,4 +347,82 @@ export default class Auth {
       return false;
     }
   }
+
+  // Email verification check
+  public async checkEmailVerified(): Promise<boolean> {
+    try {
+      const result = await firstValueFrom(
+        this.#apollo.query<{ isEmailVerified: boolean }>({
+          query: gql`
+            query IsEmailVerified {
+              isEmailVerified
+            }
+          `,
+          fetchPolicy: 'network-only',
+        }),
+      );
+      return result.data?.isEmailVerified ?? false;
+    } catch {
+      return false;
+    }
+  }
+
+  // Onboarding status check
+  public async checkOnboardingStatus(): Promise<{
+    onboardingCompleted: boolean;
+    schoolId?: string;
+    schoolName?: string;
+    degreesCount: number;
+    studyPlansCount: number;
+    coursesCount: number;
+    groupsCount: number;
+  }> {
+    try {
+      const result = await firstValueFrom(
+        this.#apollo.query<{
+          onboardingStatus: {
+            onboardingCompleted: boolean;
+            schoolId?: string;
+            schoolName?: string;
+            degreesCount: number;
+            studyPlansCount: number;
+            coursesCount: number;
+            groupsCount: number;
+          };
+        }>({
+          query: gql`
+            query OnboardingStatus {
+              onboardingStatus {
+                onboardingCompleted
+                schoolId
+                schoolName
+                degreesCount
+                studyPlansCount
+                coursesCount
+                groupsCount
+              }
+            }
+          `,
+          fetchPolicy: 'network-only',
+        }),
+      );
+      return (
+        result.data?.onboardingStatus ?? {
+          onboardingCompleted: false,
+          degreesCount: 0,
+          studyPlansCount: 0,
+          coursesCount: 0,
+          groupsCount: 0,
+        }
+      );
+    } catch {
+      return {
+        onboardingCompleted: false,
+        degreesCount: 0,
+        studyPlansCount: 0,
+        coursesCount: 0,
+        groupsCount: 0,
+      };
+    }
+  }
 }

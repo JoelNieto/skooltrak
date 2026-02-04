@@ -15,31 +15,32 @@ datasource db {
 }
 
 model Organization {
-  id                 String              @id @default(cuid())
-  name               String
-  slug               String?             @unique
-  logo               String?
-  metadata           String?
-  description        String
-  active             Boolean             @default(true)
-  users              User[]
-  roles              Role[]
-  schools            School[]
-  subjects           Subject[]
-  createdAt          DateTime            @default(now())
-  updatedAt          DateTime            @updatedAt
-  groups             ClassGroup[]
-  courses            Course[]
-  Teacher            Teacher[]
-  Student            Student[]
-  Parent             Parent[]
-  quizzes            Quiz[]
-  messages           Message[]
-  files              File[]
-  attendanceSessions AttendanceSession[]
+  id                  String              @id @default(cuid())
+  name                String
+  slug                String?             @unique
+  logo                String?
+  metadata            String?
+  description         String
+  active              Boolean             @default(true)
+  onboardingCompleted Boolean             @default(false)
+  users               User[]
+  roles               Role[]
+  schools             School[]
+  subjects            Subject[]
+  createdAt           DateTime            @default(now())
+  updatedAt           DateTime            @updatedAt
+  groups              ClassGroup[]
+  courses             Course[]
+  Teacher             Teacher[]
+  Student             Student[]
+  Parent              Parent[]
+  quizzes             Quiz[]
+  messages            Message[]
+  files               File[]
+  attendanceSessions  AttendanceSession[]
   // Better-auth organization plugin
-  members            Member[]
-  invitations        Invitation[]
+  members             Member[]
+  invitations         Invitation[]
 }
 
 model User {

@@ -1,5 +1,5 @@
 import { Route } from '@angular/router';
-import { adminGuard, authGuard, studentGuard, teacherGuard } from './auth/auth.guard';
+import { adminGuard, authGuard, onboardingGuard, studentGuard, teacherGuard } from './auth/auth.guard';
 
 export const appRoutes: Route[] = [
   {
@@ -27,6 +27,32 @@ export const appRoutes: Route[] = [
     loadComponent: () => import('./auth/accept-invitation'),
     title: 'Aceptar invitación | Skooltrak',
   },
+  // Email verification page (requires auth but not verified email)
+  {
+    path: 'verify-email',
+    canActivate: [authGuard],
+    loadComponent: () => import('./auth/verify-email'),
+    title: 'Verificar correo | Skooltrak',
+  },
+  // Onboarding flow (requires verified email but not completed onboarding)
+  {
+    path: 'onboarding',
+    canActivate: [onboardingGuard],
+    children: [
+      {
+        path: 'acknowledge',
+        loadComponent: () => import('./onboarding/school-acknowledgment'),
+        title: 'Configuración inicial | Skooltrak',
+      },
+      {
+        path: 'setup',
+        loadComponent: () => import('./onboarding/setup-wizard'),
+        title: 'Configuración inicial | Skooltrak',
+      },
+      { path: '', redirectTo: 'acknowledge', pathMatch: 'full' },
+    ],
+  },
+  // Main dashboard (requires auth, verified email, and completed onboarding for admins)
   {
     path: '',
     canActivate: [authGuard],

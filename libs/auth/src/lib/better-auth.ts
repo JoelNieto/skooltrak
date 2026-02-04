@@ -15,14 +15,10 @@ console.log('[Better Auth] Creating betterAuth instance with basePath: /api/auth
 export const auth = betterAuth({
   database: prismaAdapter(prisma, { provider: 'postgresql' }),
   basePath: '/api/auth',
-  trustedOrigins: [
-    'http://localhost:4200',
-    'http://localhost:4201',
-    process.env['APP_URL'] || 'http://localhost:3000',
-  ],
+  trustedOrigins: ['http://localhost:4200', 'http://localhost:4201', process.env['APP_URL'] || 'http://localhost:3000'],
   emailAndPassword: {
     enabled: true,
-    requireEmailVerification: false, // Can enable later
+    requireEmailVerification: true,
     password: {
       // Use bcrypt to verify existing passwords (migration compatibility)
       verify: async ({ password, hash }) => bcrypt.compare(password, hash),

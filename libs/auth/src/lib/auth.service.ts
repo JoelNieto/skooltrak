@@ -1,7 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
-import * as jwt from 'jsonwebtoken';
 import { randomUUID } from 'crypto';
+import * as jwt from 'jsonwebtoken';
+import { auth } from './better-auth';
 import { SignUpInput } from './dto/sign-up.input';
 import { PrismaService } from './prisma.service';
 
@@ -38,11 +39,7 @@ export class AuthService {
       permissions: user.role?.permissions?.map((p) => p.descriptiveId) || [],
     };
 
-    return jwt.sign(
-      jwtPayload,
-      process.env['JWT_SECRET'] || 'fallback-secret',
-      { expiresIn: '7d' }
-    );
+    return jwt.sign(jwtPayload, process.env['JWT_SECRET'] || 'fallback-secret', { expiresIn: '7d' });
   }
 
   getUser(userId: string) {
@@ -58,8 +55,7 @@ export class AuthService {
   }
 
   async signUp(input: SignUpInput) {
-    const { schoolName, schoolShortName, email, firstName, lastName, password } =
-      input;
+    const { schoolName, schoolShortName, email, firstName, lastName, password } = input;
 
     // Check if email already exists
     const existingUser = await this.prisma.user.findUnique({
@@ -73,8 +69,11 @@ export class AuthService {
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
+    // Use user name for organization if no school name provided
+    const orgName = schoolName || `${firstName} ${lastName}`;
+
     // Generate unique slug for organization
-    let baseSlug = this.generateSlug(schoolName);
+    let baseSlug = this.generateSlug(orgName);
     let slug = baseSlug;
     let counter = 1;
     while (await this.prisma.organization.findFirst({ where: { slug } })) {
@@ -84,13 +83,14 @@ export class AuthService {
 
     // Create all entities in a transaction
     const result = await this.prisma.$transaction(async (tx) => {
-      // 1. Create Organization (using school name)
+      // 1. Create Organization
       const organization = await tx.organization.create({
         data: {
-          name: schoolName,
+          name: orgName,
           slug,
           description: '',
           active: true,
+          onboardingCompleted: false,
         },
       });
 
@@ -115,7 +115,7 @@ export class AuthService {
           color: this.getRandomPastelColor(),
           roleId: role.id,
           organizationId: organization.id,
-          emailVerified: true, // Auto-verify for new signups
+          emailVerified: false, // Email verification required
         },
         include: { role: { include: { permissions: true } } },
       });
@@ -141,31 +141,110 @@ export class AuthService {
         },
       });
 
-      // 6. Create first School
-      await tx.school.create({
-        data: {
-          name: schoolName,
-          shortName: schoolShortName,
-          organizationId: organization.id,
-          logo: '',
-          address: '',
-          city: '',
-          state: '',
-          zip: '',
-          country: '',
-          email: '',
-          phone: '',
-          website: '',
-        },
-      });
+      // 6. Create first School only if school name is provided
+      if (schoolName && schoolShortName) {
+        await tx.school.create({
+          data: {
+            name: schoolName,
+            shortName: schoolShortName,
+            organizationId: organization.id,
+            logo: '',
+            address: '',
+            city: '',
+            state: '',
+            zip: '',
+            country: '',
+            email: '',
+            phone: '',
+            website: '',
+          },
+        });
+      }
 
       return { user, role, organization };
     });
 
     const { user } = result;
 
+    // Send verification email
+    try {
+      await auth.api.sendVerificationEmail({
+        body: {
+          email: user.email,
+          callbackURL: `${process.env['APP_URL'] || 'http://localhost:4200'}/verify-email`,
+        },
+      });
+    } catch (error) {
+      console.error('[AuthService] Failed to send verification email:', error);
+      // Don't fail signup if email sending fails
+    }
+
     // Generate JWT for the new user
     const accessToken = this.generateJwt(user);
     return { accessToken };
+  }
+
+  /**
+   * Check if a user's email is verified
+   */
+  async isEmailVerified(userId: string): Promise<boolean> {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { emailVerified: true },
+    });
+    return user?.emailVerified ?? false;
+  }
+
+  /**
+   * Get onboarding status for an organization
+   */
+  async getOnboardingStatus(organizationId: string) {
+    const org = await this.prisma.organization.findUnique({
+      where: { id: organizationId },
+      select: {
+        onboardingCompleted: true,
+        _count: {
+          select: {
+            schools: true,
+          },
+        },
+      },
+    });
+
+    const school = await this.prisma.school.findFirst({
+      where: { organizationId },
+      select: {
+        id: true,
+        name: true,
+        _count: {
+          select: {
+            degrees: true,
+            studyPlans: true,
+            courses: true,
+            classGroups: true,
+          },
+        },
+      },
+    });
+
+    return {
+      onboardingCompleted: org?.onboardingCompleted ?? false,
+      schoolId: school?.id,
+      schoolName: school?.name,
+      degreesCount: school?._count?.degrees ?? 0,
+      studyPlansCount: school?._count?.studyPlans ?? 0,
+      coursesCount: school?._count?.courses ?? 0,
+      groupsCount: school?._count?.classGroups ?? 0,
+    };
+  }
+
+  /**
+   * Mark onboarding as completed for an organization
+   */
+  async completeOnboarding(organizationId: string) {
+    return this.prisma.organization.update({
+      where: { id: organizationId },
+      data: { onboardingCompleted: true },
+    });
   }
 }

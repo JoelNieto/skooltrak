@@ -728,6 +728,9 @@ input CreateSchoolInput {
   """Country of the school"""
   country: String! = ""
 
+  """Current year of the school"""
+  currentYear: Int! = 2025
+
   """Email of the school"""
   email: String! = ""
 
@@ -738,7 +741,7 @@ input CreateSchoolInput {
   name: String!
 
   """Organization ID of the school"""
-  organizationId: String!
+  organizationId: String
 
   """Phone number of the school"""
   phone: String! = ""
@@ -1348,6 +1351,7 @@ type Mutation {
   acceptInvitation(invitationId: String!): Boolean!
   cancelInvitation(invitationId: String!): Boolean!
   changePassword(currentPassword: String!, newPassword: String!): Boolean!
+  completeOnboarding: Boolean!
   createAssignment(createAssignmentInput: CreateAssignmentInput!): Assignment!
 
   """Create an assignment submission after file upload"""
@@ -1418,6 +1422,7 @@ type Mutation {
   removeTeacher(id: String!): Teacher!
   removeUser(id: String!): User!
   requestPasswordReset(email: String!): Boolean!
+  resendVerificationEmail: Boolean!
   resetPassword(newPassword: String!, token: String!): Boolean!
   sendVerificationEmail(email: String!): Boolean!
   setActiveOrganization(organizationId: String): Boolean!
@@ -1451,7 +1456,17 @@ type Mutation {
   updateSubject(updateSubjectInput: UpdateSubjectInput!): Subject!
   updateTeacher(updateTeacherInput: UpdateTeacherInput!): Teacher!
   updateUser(updateUserInput: UpdateUserInput!): User!
-  verifyEmail(token: String!): Boolean!
+  verifyEmail(token: String!): AuthPayload!
+}
+
+type OnboardingStatus {
+  coursesCount: Int!
+  degreesCount: Int!
+  groupsCount: Int!
+  onboardingCompleted: Boolean!
+  schoolId: String
+  schoolName: String
+  studyPlansCount: Int!
 }
 
 type Organization {
@@ -1475,6 +1490,9 @@ type Organization {
 
   """Organization name"""
   name: String!
+
+  """Whether onboarding has been completed"""
+  onboardingCompleted: Boolean!
 
   """Organization slug"""
   slug: String
@@ -1872,12 +1890,14 @@ type Query {
   groupsSchedules: [GroupsSchedule!]!
   groupsSchedulesByClassGroupId(classGroupId: String!): [GroupsSchedule!]!
   groupsSchedulesByClassGroupIdGrouped(classGroupId: String!): [GroupsSchedule!]!
+  isEmailVerified: Boolean!
   listInvitations(organizationId: String): [Invitation!]!
   listMembers(organizationId: String): [Member!]!
   me: User!
 
   """Get the current student submission for an assignment"""
   myAssignmentSubmission(assignmentId: String!): AssignmentSubmission
+  onboardingStatus: OnboardingStatus!
   organization(id: String!): Organization!
   organizations: [Organization!]!
   parent(id: String!): Parent!
@@ -2294,11 +2314,11 @@ input SignUpInput {
   """Password of the user"""
   password: String!
 
-  """Name of the school"""
-  schoolName: String!
+  """Name of the school (optional)"""
+  schoolName: String
 
-  """Short name of the school"""
-  schoolShortName: String!
+  """Short name of the school (optional)"""
+  schoolShortName: String
 }
 
 type Student {
@@ -2887,6 +2907,9 @@ input UpdateSchoolInput {
 
   """Country of the school"""
   country: String = ""
+
+  """Current year of the school"""
+  currentYear: Int = 2025
 
   """Email of the school"""
   email: String = ""

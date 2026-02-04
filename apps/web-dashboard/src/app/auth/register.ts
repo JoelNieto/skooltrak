@@ -15,192 +15,172 @@ import { Apollo, gql } from 'apollo-angular';
   selector: 'app-register',
   imports: [ReactiveFormsModule, Loader, RouterLink],
   template: `
-    <div class="gradient-bg min-h-screen flex items-center justify-center p-4">
-      @defer {
-      <div class="max-w-lg w-full flex flex-col gap-8 items-center">
-        <div><img src="skooltrak.png" alt="" class="h-12" /></div>
+    @defer {
+      <div class="min-h-screen flex flex-col gradient-bg">
+        <!-- Fixed Header -->
+        <header class="p-4 md:p-6 flex items-center justify-between">
+          <img src="skooltrak.png" alt="Skooltrak" class="h-8 md:h-10" />
+        </header>
 
-        <div class="w-full rounded-2xl shadow-xl overflow-hidden flex flex-col">
-          <!-- Header Section -->
-          <div class="bg-primary p-6 text-white text-center">
-            <h1 class="text-2xl font-bold">Registra tu Escuela</h1>
-            <p class="text-primary-content mt-2">Crea tu escuela y comienza a gestionar tu institución</p>
-          </div>
-
-          <!-- Steps indicator -->
-          <div class="bg-base-200 px-6 py-4">
-            <ul class="steps steps-horizontal w-full">
-              <li class="step" [class.step-primary]="currentStep() >= 1">Escuela</li>
-              <li class="step" [class.step-primary]="currentStep() >= 2">Administrador</li>
-            </ul>
-          </div>
-
-          <!-- Form Section -->
-          <div class="p-8 bg-base-100">
-            <form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-6">
-              <!-- Step 1: School -->
-              @if (currentStep() === 1) {
-              <div class="space-y-4" formGroupName="school">
-                <p class="text-sm text-base-content/70 mb-4">
-                  Ingresa los datos de tu institución educativa. Podrás agregar más detalles después.
-                </p>
-
-                <div class="fieldset">
-                  <label for="schoolName">Nombre de la Escuela</label>
-                  <input
-                    type="text"
-                    id="schoolName"
-                    class="input input-primary w-full"
-                    placeholder="Escuela Primaria Central"
-                    formControlName="name"
-                  />
-                  @if (form.get('school.name')?.touched && form.get('school.name')?.hasError('required')) {
-                  <p class="text-error text-xs mt-1">El nombre de la escuela es requerido</p>
-                  }
-                </div>
-
-                <div class="fieldset">
-                  <label for="schoolShortName">Nombre Corto / Siglas</label>
-                  <input
-                    type="text"
-                    id="schoolShortName"
-                    class="input input-primary w-full"
-                    placeholder="EPC"
-                    formControlName="shortName"
-                  />
-                  @if (form.get('school.shortName')?.touched && form.get('school.shortName')?.hasError('required')) {
-                  <p class="text-error text-xs mt-1">El nombre corto es requerido</p>
-                  }
-                  <p class="text-xs text-base-content/60 mt-1">Se usará para identificar rápidamente tu escuela</p>
+        <!-- Scrollable Content -->
+        <main class="flex-1 flex flex-col items-center justify-center p-6 overflow-y-auto">
+          <form [formGroup]="form" (ngSubmit)="onSubmit()" class="w-full max-w-md">
+            <div class="text-center space-y-8 animate-fade-in">
+              <!-- Icon -->
+              <div class="flex justify-center">
+                <div class="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center">
+                  <span class="material-symbols-outlined text-5xl text-primary">person_add</span>
                 </div>
               </div>
-              }
 
-              <!-- Step 2: Admin User Details -->
-              @if (currentStep() === 2) {
-              <div class="space-y-4" formGroupName="user">
-                <p class="text-sm text-base-content/70 mb-4">
-                  Crea tu cuenta de administrador para gestionar la escuela.
+              <!-- Title & Subtitle -->
+              <div class="space-y-2">
+                <h1 class="text-2xl md:text-3xl font-bold text-base-content">Crea tu Cuenta</h1>
+                <p class="text-base-content/70">
+                  Registra tu cuenta de administrador. Después podrás configurar tu escuela.
                 </p>
+              </div>
 
+              <!-- Form Fields -->
+              <div class="space-y-4 text-left">
                 <div class="fieldset">
-                  <label for="email">Correo Electrónico</label>
+                  <label for="email" class="label">
+                    <span class="label-text font-medium">Correo Electrónico</span>
+                  </label>
                   <input
                     type="email"
                     id="email"
-                    class="input input-primary w-full"
+                    class="input input-bordered w-full"
                     placeholder="tu@email.com"
                     formControlName="email"
                   />
-                  @if (form.get('user.email')?.touched && form.get('user.email')?.hasError('required')) {
-                  <p class="text-error text-xs mt-1">El correo electrónico es requerido</p>
-                  } @if (form.get('user.email')?.touched && form.get('user.email')?.hasError('email')) {
-                  <p class="text-error text-xs mt-1">Ingresa un correo electrónico válido</p>
+                  @if (form.get('email')?.touched && form.get('email')?.hasError('required')) {
+                    <p class="text-error text-xs mt-1">El correo electrónico es requerido</p>
+                  } @else if (form.get('email')?.touched && form.get('email')?.hasError('email')) {
+                    <p class="text-error text-xs mt-1">Ingresa un correo electrónico válido</p>
                   }
                 </div>
 
                 <div class="grid grid-cols-2 gap-4">
                   <div class="fieldset">
-                    <label for="firstName">Nombre</label>
+                    <label for="firstName" class="label">
+                      <span class="label-text font-medium">Nombre</span>
+                    </label>
                     <input
                       type="text"
                       id="firstName"
-                      class="input input-primary w-full"
+                      class="input input-bordered w-full"
                       placeholder="Juan"
                       formControlName="firstName"
                     />
-                    @if (form.get('user.firstName')?.touched && form.get('user.firstName')?.hasError('required')) {
-                    <p class="text-error text-xs mt-1">El nombre es requerido</p>
+                    @if (form.get('firstName')?.touched && form.get('firstName')?.hasError('required')) {
+                      <p class="text-error text-xs mt-1">Requerido</p>
                     }
                   </div>
 
                   <div class="fieldset">
-                    <label for="lastName">Apellido</label>
+                    <label for="lastName" class="label">
+                      <span class="label-text font-medium">Apellido</span>
+                    </label>
                     <input
                       type="text"
                       id="lastName"
-                      class="input input-primary w-full"
+                      class="input input-bordered w-full"
                       placeholder="Pérez"
                       formControlName="lastName"
                     />
-                    @if (form.get('user.lastName')?.touched && form.get('user.lastName')?.hasError('required')) {
-                    <p class="text-error text-xs mt-1">El apellido es requerido</p>
+                    @if (form.get('lastName')?.touched && form.get('lastName')?.hasError('required')) {
+                      <p class="text-error text-xs mt-1">Requerido</p>
                     }
                   </div>
                 </div>
 
                 <div class="fieldset">
-                  <label for="password">Contraseña</label>
+                  <label for="password" class="label">
+                    <span class="label-text font-medium">Contraseña</span>
+                  </label>
                   <input
                     type="password"
                     id="password"
-                    class="input input-primary w-full"
+                    class="input input-bordered w-full"
                     placeholder="••••••••"
                     formControlName="password"
                   />
-                  @if (form.get('user.password')?.touched && form.get('user.password')?.hasError('required')) {
-                  <p class="text-error text-xs mt-1">La contraseña es requerida</p>
-                  } @if (form.get('user.password')?.touched && form.get('user.password')?.hasError('minlength')) {
-                  <p class="text-error text-xs mt-1">La contraseña debe tener al menos 8 caracteres</p>
+                  @if (form.get('password')?.touched && form.get('password')?.hasError('required')) {
+                    <p class="text-error text-xs mt-1">La contraseña es requerida</p>
+                  } @else if (form.get('password')?.touched && form.get('password')?.hasError('minlength')) {
+                    <p class="text-error text-xs mt-1">Mínimo 8 caracteres</p>
                   }
                 </div>
 
                 <div class="fieldset">
-                  <label for="confirmPassword">Confirmar Contraseña</label>
+                  <label for="confirmPassword" class="label">
+                    <span class="label-text font-medium">Confirmar Contraseña</span>
+                  </label>
                   <input
                     type="password"
                     id="confirmPassword"
-                    class="input input-primary w-full"
+                    class="input input-bordered w-full"
                     placeholder="••••••••"
                     formControlName="confirmPassword"
                   />
-                  @if (form.get('user.confirmPassword')?.touched && form.get('user.confirmPassword')?.hasError('required')) {
-                  <p class="text-error text-xs mt-1">Confirma tu contraseña</p>
-                  } @if (form.get('user')?.hasError('passwordMismatch') && form.get('user.confirmPassword')?.touched) {
-                  <p class="text-error text-xs mt-1">Las contraseñas no coinciden</p>
+                  @if (form.get('confirmPassword')?.touched && form.get('confirmPassword')?.hasError('required')) {
+                    <p class="text-error text-xs mt-1">Confirma tu contraseña</p>
+                  } @else if (form.hasError('passwordMismatch') && form.get('confirmPassword')?.touched) {
+                    <p class="text-error text-xs mt-1">Las contraseñas no coinciden</p>
                   }
                 </div>
               </div>
-              }
 
-              <!-- Navigation Buttons -->
-              <div class="flex justify-between gap-4 pt-4">
-                @if (currentStep() > 1) {
-                <button type="button" class="btn btn-outline" (click)="previousStep()">Anterior</button>
-                } @else {
-                <div></div>
-                } @if (currentStep() < 2) {
-                <button type="button" class="btn btn-primary" (click)="nextStep()">Siguiente</button>
-                } @else {
-                <button type="submit" class="btn btn-primary" [disabled]="loading()">
+              <div class="pt-4">
+                <button type="submit" class="btn btn-primary w-full" [disabled]="loading()">
                   @if (loading()) {
-                  <span class="loading loading-spinner loading-sm"></span>
-                  Creando escuela...
+                    <span class="loading loading-spinner loading-sm"></span>
+                    Creando cuenta...
                   } @else {
-                  Crear Escuela
+                    Crear Cuenta
+                    <span class="material-symbols-outlined text-xl">arrow_forward</span>
                   }
                 </button>
-                }
               </div>
-            </form>
+            </div>
+          </form>
 
-            <div class="divider">o</div>
-
-            <p class="text-center text-sm">
+          <!-- Login Link (centered below form) -->
+          <div class="mt-8 text-center">
+            <p class="text-sm text-base-content/70">
               ¿Ya tienes cuenta?
-              <a routerLink="/login" class="link link-primary">Inicia sesión</a>
+              <a routerLink="/login" class="link link-primary font-medium">Inicia sesión</a>
             </p>
           </div>
-        </div>
+        </main>
 
-        <p class="text-base-200 text-center">2025 © Skooltrak. Todos los derechos reservados.</p>
+        <!-- Fixed Footer -->
+        <footer class="p-4 md:p-6 flex justify-center border-t border-base-200 bg-base-100/80 backdrop-blur-sm">
+          <p class="text-sm text-base-content/60">2025 © Skooltrak. Todos los derechos reservados.</p>
+        </footer>
       </div>
-      } @placeholder {
-      <lib-loader />
-      } @error {
-      <div>Error loading registration</div>
+    } @placeholder {
+      <div class="min-h-screen flex items-center justify-center gradient-bg">
+        <lib-loader />
+      </div>
+    }
+  `,
+  styles: `
+    .animate-fade-in {
+      animation: fadeIn 0.3s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
       }
-    </div>
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -210,25 +190,18 @@ export default class Register {
   private router = inject(Router);
   private toasts = inject(Toast);
 
-  public currentStep = signal(1);
   public loading = signal(false);
 
-  public form = this.fb.group({
-    school: this.fb.group({
-      name: ['', [Validators.required]],
-      shortName: ['', [Validators.required]],
-    }),
-    user: this.fb.group(
-      {
-        email: ['', [Validators.required, Validators.email]],
-        firstName: ['', [Validators.required]],
-        lastName: ['', [Validators.required]],
-        password: ['', [Validators.required, Validators.minLength(8)]],
-        confirmPassword: ['', [Validators.required]],
-      },
-      { validators: this.passwordMatchValidator },
-    ),
-  });
+  public form = this.fb.group(
+    {
+      email: ['', [Validators.required, Validators.email]],
+      firstName: ['', [Validators.required]],
+      lastName: ['', [Validators.required]],
+      password: ['', [Validators.required, Validators.minLength(8)]],
+      confirmPassword: ['', [Validators.required]],
+    },
+    { validators: this.passwordMatchValidator },
+  );
 
   private passwordMatchValidator(control: AbstractControl): ValidationErrors | null {
     const password = control.get('password');
@@ -240,41 +213,16 @@ export default class Register {
     return null;
   }
 
-  public nextStep() {
-    const currentStepGroup = this.getCurrentStepGroup();
-    if (currentStepGroup?.invalid) {
-      markGroupDirty(currentStepGroup as unknown as FormGroup<any>);
-      this.toasts.showError('Por favor, completa todos los campos requeridos');
-      return;
-    }
-    this.currentStep.update((step) => Math.min(step + 1, 2));
-  }
-
-  public previousStep() {
-    this.currentStep.update((step) => Math.max(step - 1, 1));
-  }
-
-  private getCurrentStepGroup() {
-    switch (this.currentStep()) {
-      case 1:
-        return this.form.get('school');
-      case 2:
-        return this.form.get('user');
-      default:
-        return null;
-    }
-  }
-
   public onSubmit() {
     if (this.form.invalid) {
-      markGroupDirty(this.form);
+      markGroupDirty(this.form as FormGroup);
       this.toasts.showError('Por favor, completa todos los campos requeridos');
       return;
     }
 
     this.loading.set(true);
 
-    const { school, user } = this.form.getRawValue();
+    const { email, firstName, lastName, password } = this.form.getRawValue();
 
     this.apollo
       .mutate<{ signUp: { accessToken: string } }>({
@@ -287,12 +235,10 @@ export default class Register {
         `,
         variables: {
           input: {
-            schoolName: school.name,
-            schoolShortName: school.shortName,
-            email: user.email,
-            firstName: user.firstName,
-            lastName: user.lastName,
-            password: user.password,
+            email,
+            firstName,
+            lastName,
+            password,
           },
         },
       })
@@ -300,13 +246,14 @@ export default class Register {
         next: (res) => {
           const { accessToken } = res.data!.signUp;
           localStorage.setItem('access_token', accessToken);
-          this.toasts.showSuccess('Escuela creada exitosamente');
-          this.router.navigate(['/home']);
+          this.toasts.showSuccess('Cuenta creada. Verifica tu correo electrónico.');
+          // Redirect to email verification page
+          this.router.navigate(['/verify-email']);
         },
         error: (err) => {
           console.error(err);
           this.loading.set(false);
-          this.toasts.showError(err.message || 'Error al crear la escuela. Intenta de nuevo.');
+          this.toasts.showError(err.message || 'Error al crear la cuenta. Intenta de nuevo.');
         },
       });
   }

@@ -1,11 +1,12 @@
 import { EmptyState, PageHeader, StatCard } from '@/ui';
 import { DatePipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import { Apollo, gql } from 'apollo-angular';
 import { map, of } from 'rxjs';
 import Store from './core/store';
+import WelcomeBanner from './shared/welcome-banner';
 
 type DashboardStats = {
   coursesCount: number;
@@ -39,10 +40,24 @@ type RecentTeacher = {
   user: { email: string };
 };
 
+type OnboardingStatus = {
+  onboardingCompleted: boolean;
+  schoolName?: string;
+  degreesCount: number;
+  studyPlansCount: number;
+  coursesCount: number;
+  groupsCount: number;
+};
+
 @Component({
   selector: 'app-home',
-  imports: [RouterLink, DatePipe, PageHeader, StatCard, EmptyState],
+  imports: [RouterLink, DatePipe, PageHeader, StatCard, EmptyState, WelcomeBanner],
   template: `
+    <!-- Welcome Banner for recently completed onboarding -->
+    @if (showWelcomeBanner()) {
+      <app-welcome-banner [summary]="onboardingSummary()" [firstVisit]="isFirstVisit()" />
+    }
+
     <lib-page-header title="Panel administrativo" subtitle="Resumen general de la institución." />
 
     <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
@@ -223,6 +238,59 @@ type RecentTeacher = {
 export default class Home {
   private apollo = inject(Apollo);
   private store = inject(Store);
+  private FIRST_VISIT_KEY = 'skooltrak_first_visit_shown';
+
+  // Onboarding status query
+  public onboardingStatus = rxResource({
+    stream: () =>
+      this.apollo
+        .watchQuery<{ onboardingStatus: OnboardingStatus }>({
+          query: gql`
+            query OnboardingStatus {
+              onboardingStatus {
+                onboardingCompleted
+                schoolName
+                degreesCount
+                studyPlansCount
+                coursesCount
+                groupsCount
+              }
+            }
+          `,
+          fetchPolicy: 'cache-first',
+        })
+        .valueChanges.pipe(map((result) => result.data.onboardingStatus)),
+  });
+
+  // Check if we should show the welcome banner
+  public showWelcomeBanner = computed(() => {
+    const status = this.onboardingStatus.value();
+    if (!status?.onboardingCompleted) return false;
+    // Show if onboarding was just completed or user hasn't dismissed
+    return true;
+  });
+
+  public onboardingSummary = computed(() => {
+    const status = this.onboardingStatus.value();
+    return {
+      schoolName: status?.schoolName,
+      degreesCount: status?.degreesCount ?? 0,
+      studyPlansCount: status?.studyPlansCount ?? 0,
+      coursesCount: status?.coursesCount ?? 0,
+      groupsCount: status?.groupsCount ?? 0,
+    };
+  });
+
+  public isFirstVisit = computed(() => {
+    if (typeof localStorage === 'undefined') return false;
+    const shown = localStorage.getItem(this.FIRST_VISIT_KEY);
+    if (!shown) {
+      // Mark as shown for next time
+      localStorage.setItem(this.FIRST_VISIT_KEY, 'true');
+      return true;
+    }
+    return false;
+  });
 
   public statsResource = rxResource({
     params: () => ({ schoolId: this.store.currentSchoolId() }),

@@ -24,6 +24,9 @@ export class Organization implements Prisma.OrganizationGetPayload<undefined> {
   @Field(() => Boolean, { description: 'Organization active status' })
   active: boolean;
 
+  @Field(() => Boolean, { description: 'Whether onboarding has been completed' })
+  onboardingCompleted: boolean;
+
   @Field(() => Date, { description: 'Organization created at' })
   createdAt: Date;
 

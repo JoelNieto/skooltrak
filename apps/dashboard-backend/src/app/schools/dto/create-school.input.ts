@@ -1,12 +1,16 @@
 import { Prisma } from '@generated/prisma';
-import { Field, InputType } from '@nestjs/graphql';
+import { Field, InputType, Int } from '@nestjs/graphql';
+
+type CreateSchoolInputType = Omit<Prisma.SchoolUncheckedCreateInput, 'organizationId'> & {
+  organizationId?: string;
+};
 @InputType()
-export class CreateSchoolInput implements Prisma.SchoolUncheckedCreateInput {
+export class CreateSchoolInput implements CreateSchoolInputType {
   @Field(() => String, {
     description: 'Organization ID of the school',
-    nullable: false,
+    nullable: true,
   })
-  organizationId: string;
+  organizationId?: string;
 
   @Field(() => String, { description: 'Name of the school', nullable: false })
   name: string;
@@ -48,4 +52,10 @@ export class CreateSchoolInput implements Prisma.SchoolUncheckedCreateInput {
     defaultValue: '',
   })
   website: string;
+
+  @Field(() => Int, {
+    description: 'Current year of the school',
+    defaultValue: 2025,
+  })
+  currentYear: number;
 }

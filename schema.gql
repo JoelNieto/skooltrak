@@ -2907,9 +2907,7 @@ input UpdateSchoolInput {
 
   """Country of the school"""
   country: String = ""
-
-  """Current year of the school"""
-  currentYear: Int = 2025
+  currentYear: Int
 
   """Email of the school"""
   email: String = ""

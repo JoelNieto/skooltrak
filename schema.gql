@@ -3131,7 +3131,7 @@ type User {
   color: String
   createdAt: DateTime!
   email: String!
-  emailVerified: Boolean!
+  emailVerified: Boolean
   firstName: String!
   id: String!
   image: String

@@ -17,6 +17,7 @@ type Student = Prisma.StudentGetPayload<{
   name: string;
   email: string;
   enrollmentStatus: $Enums.EnrollmentStatus;
+  user: { id: string; email: string; emailVerified: boolean | null; color: string | null };
 };
 
 const ENROLLMENT_STATUS_LABELS: Record<$Enums.EnrollmentStatus, string> = {
@@ -90,7 +91,20 @@ const ENROLLMENT_STATUS_COLORS: Record<$Enums.EnrollmentStatus, string> = {
               <td>
                 <a [routerLink]="['/students', student.id]" class="link link-hover">{{ student.name }}</a>
               </td>
-              <td>{{ student.email }}</td>
+              <td>
+                <div class="flex items-center gap-2">
+                  {{ student.email }}
+                  @if (student.user.emailVerified) {
+                    <span class="badge badge-success badge-xs" title="Verificado">
+                      <span class="material-symbols-outlined text-xs">check_circle</span>
+                    </span>
+                  } @else {
+                    <span class="badge badge-warning badge-xs" title="Pendiente de verificación">
+                      <span class="material-symbols-outlined text-xs">schedule</span>
+                    </span>
+                  }
+                </div>
+              </td>
               <td>{{ student.documentId }}</td>
               <td>
                 <span class="badge badge-sm" [ngClass]="getStatusColor(student.enrollmentStatus)">
@@ -215,6 +229,12 @@ export default class Students {
                 classGroup {
                   id
                   name
+                }
+                user {
+                  id
+                  email
+                  emailVerified
+                  color
                 }
                 createdAt
                 updatedAt

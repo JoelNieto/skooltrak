@@ -1,4 +1,5 @@
-import { Inject, Injectable, Scope } from '@nestjs/common';
+import { sendUserInvitation } from '@/auth';
+import { Inject, Injectable, Logger, Scope } from '@nestjs/common';
 import { CONTEXT } from '@nestjs/graphql';
 import * as bcrypt from 'bcrypt';
 import { randomUUID } from 'crypto';
@@ -10,9 +11,11 @@ import { UpdateTeacherInput } from './dto/update-teacher.input';
 
 @Injectable({ scope: Scope.REQUEST })
 export class TeachersService {
+  private readonly logger = new Logger(TeachersService.name);
+
   constructor(
     private readonly prisma: PrismaService,
-    @Inject(CONTEXT) private readonly context: { req: Request }
+    @Inject(CONTEXT) private readonly context: { req: Request },
   ) {
     //this.initColors();
   }
@@ -23,6 +26,12 @@ export class TeachersService {
         organizationId: null,
         name: 'TEACHER',
       },
+    });
+
+    // Get organization name for the welcome email
+    const organization = await this.prisma.organization.findUnique({
+      where: { id: createTeacherInput.organizationId },
+      select: { name: true },
     });
 
     const hashedPassword = bcrypt.hashSync(rest.documentId, 10);
@@ -36,6 +45,7 @@ export class TeachersService {
         password: hashedPassword,
         organizationId: createTeacherInput.organizationId,
         roleId: role.id,
+        emailVerified: false, // Will be verified when user clicks the email link
       },
     });
 
@@ -50,12 +60,29 @@ export class TeachersService {
       },
     });
 
-    return this.prisma.teacher.create({
+    const teacher = await this.prisma.teacher.create({
       data: {
         ...rest,
         userId: user.id,
       },
     });
+
+    // Send welcome invitation email
+    try {
+      await sendUserInvitation({
+        prisma: this.prisma,
+        email,
+        name: `${rest.firstName} ${rest.fatherName}`,
+        role: 'teacher',
+        organizationName: organization?.name || 'Skooltrak',
+      });
+      this.logger.log(`Welcome invitation sent to teacher: ${email}`);
+    } catch (error) {
+      // Log error but don't fail the creation
+      this.logger.error(`Failed to send welcome invitation to ${email}:`, error);
+    }
+
+    return teacher;
   }
 
   async initColors() {
@@ -108,7 +135,7 @@ export class TeachersService {
     return this.prisma.teacher.findUnique({
       where: { id },
       include: {
-        user: { select: { id: true, email: true, color: true } },
+        user: { select: { id: true, email: true, color: true, emailVerified: true } },
         classGroups: true,
         courses: true,
         assignments: true,

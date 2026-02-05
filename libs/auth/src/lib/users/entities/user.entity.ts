@@ -43,7 +43,7 @@ export class User
   @Field(() => String, { nullable: true })
   image: string | null;
 
-  @Field(() => Boolean)
+  @Field(() => Boolean, { nullable: true, defaultValue: false })
   emailVerified: boolean;
 
   @Field(() => Boolean)

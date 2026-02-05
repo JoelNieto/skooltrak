@@ -146,24 +146,78 @@ export class AuthResolver {
   @Mutation(() => Boolean)
   @AllowAnonymous()
   async resetPassword(@Args('token') token: string, @Args('newPassword') newPassword: string): Promise<boolean> {
-    try {
-      const response = await fetch(`${process.env['APP_URL'] || 'http://localhost:3000'}/api/auth/reset-password`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          token,
-          newPassword,
-        }),
+    // Try to find the token in our Verification table
+    // Support both formats:
+    // 1. Our custom tokens: value = token, identifier = email
+    // 2. Better Auth tokens: identifier = "reset-password:{token}", value = userId
+
+    let verification = await this.prisma.verification.findFirst({
+      where: { value: token },
+    });
+
+    let userEmail: string | null = null;
+    let userId: string | null = null;
+
+    if (verification) {
+      // Our custom token format - identifier is the email
+      userEmail = verification.identifier;
+    } else {
+      // Try Better Auth format - identifier contains the token
+      verification = await this.prisma.verification.findFirst({
+        where: { identifier: `reset-password:${token}` },
       });
 
-      if (!response.ok) {
-        throw new Error('Invalid or expired token');
+      if (verification) {
+        // Better Auth format - value is the userId
+        userId = verification.value;
       }
+    }
 
-      return true;
-    } catch {
+    if (!verification) {
       throw new Error('Invalid or expired token');
     }
+
+    // Check if token is expired
+    if (verification.expiresAt < new Date()) {
+      await this.prisma.verification.delete({ where: { id: verification.id } });
+      throw new Error('Invalid or expired token');
+    }
+
+    // Find the user
+    let user;
+    if (userEmail) {
+      user = await this.prisma.user.findUnique({ where: { email: userEmail } });
+    } else if (userId) {
+      user = await this.prisma.user.findUnique({ where: { id: userId } });
+    }
+
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    // Hash the new password
+    const bcrypt = await import('bcrypt');
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    // Update user password and mark email as verified
+    await this.prisma.user.update({
+      where: { id: user.id },
+      data: {
+        password: hashedPassword,
+        emailVerified: true,
+      },
+    });
+
+    // Update account password if exists
+    await this.prisma.account.updateMany({
+      where: { userId: user.id, providerId: 'credential' },
+      data: { password: hashedPassword },
+    });
+
+    // Delete the used verification token
+    await this.prisma.verification.delete({ where: { id: verification.id } });
+
+    return true;
   }
 
   @UseGuards(BetterAuthGuard)

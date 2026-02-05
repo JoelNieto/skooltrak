@@ -295,27 +295,27 @@ export default class Auth {
 
   public async resetPassword(token: string, newPassword: string): Promise<boolean> {
     try {
-      const baseUrl = this.getApiBaseUrl();
-      const response = await fetch(`${baseUrl}/api/auth/reset-password`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({
-          token,
-          newPassword,
+      const result = await firstValueFrom(
+        this.#apollo.mutate<{ resetPassword: boolean }>({
+          mutation: gql`
+            mutation ResetPassword($token: String!, $newPassword: String!) {
+              resetPassword(token: $token, newPassword: $newPassword)
+            }
+          `,
+          variables: { token, newPassword },
         }),
-      });
+      );
 
-      if (!response.ok) {
-        this.#toasts.showError('Failed to reset password');
-        return false;
+      if (result.data?.resetPassword) {
+        this.#toasts.showSuccess('Contraseña actualizada exitosamente');
+        return true;
       }
 
-      this.#toasts.showSuccess('Password reset successfully');
-      return true;
+      this.#toasts.showError('No se pudo restablecer la contraseña');
+      return false;
     } catch (err: any) {
       console.error('Password reset error:', err);
-      this.#toasts.showError('Failed to reset password');
+      this.#toasts.showError(err.message || 'No se pudo restablecer la contraseña');
       return false;
     }
   }

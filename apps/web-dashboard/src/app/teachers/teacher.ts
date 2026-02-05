@@ -12,6 +12,7 @@ type TeacherType = Prisma.TeacherGetPayload<{
   name: string;
   fullName: string;
   initials: string;
+  user: { id: string; email: string; color: string | null; emailVerified: boolean | null };
 };
 
 @Component({
@@ -35,7 +36,20 @@ type TeacherType = Prisma.TeacherGetPayload<{
                 </div>
               </div>
               <div class="flex flex-col">
-                {{ teacher.name }}
+                <div class="flex items-center gap-2">
+                  {{ teacher.name }}
+                  @if (teacher.user.emailVerified) {
+                    <span class="badge badge-success badge-sm gap-1">
+                      <span class="material-symbols-outlined text-sm!">check_circle</span>
+                      Verificado
+                    </span>
+                  } @else {
+                    <span class="badge badge-warning badge-sm gap-1">
+                      <span class="material-symbols-outlined text-sm!">schedule</span>
+                      Pendiente
+                    </span>
+                  }
+                </div>
                 <span class="text-sm text-base-content/50">{{ teacher.user.email }}</span>
               </div>
             </div>
@@ -197,6 +211,7 @@ export default class Teacher {
       const { id } = params;
       return this.#apollo
         .watchQuery<{ teacher: TeacherType }>({
+          fetchPolicy: 'cache-and-network',
           query: gql`
             query Teacher($teacherId: String!) {
               teacher(id: $teacherId) {
@@ -221,6 +236,7 @@ export default class Teacher {
                   id
                   email
                   color
+                  emailVerified
                 }
                 subjects {
                   id

@@ -40,6 +40,7 @@ type StudentType = DecimalToNumber<
         };
       };
       parents: true;
+      user: true;
     };
   }> & {
     name: string;
@@ -54,6 +55,7 @@ type StudentType = DecimalToNumber<
     emergencyContactName: string;
     emergencyContactPhone: string;
     parents: ParentType[];
+    user: { id: string; email: string; emailVerified: boolean | null; color: string | null };
     courses: Array<
       Prisma.CourseGetPayload<{
         include: { subject: true; teacher: { include: { user: true } } };
@@ -120,6 +122,17 @@ const ENROLLMENT_STATUS_COLORS: Record<$Enums.EnrollmentStatus, string> = {
                     <span class="badge badge-sm" [ngClass]="getStatusColor(student.enrollmentStatus)">
                       {{ getStatusLabel(student.enrollmentStatus) }}
                     </span>
+                    @if (student.user.emailVerified) {
+                      <span class="badge badge-success badge-sm gap-1">
+                        <span class="material-symbols-outlined text-xs">check_circle</span>
+                        Verificado
+                      </span>
+                    } @else {
+                      <span class="badge badge-warning badge-sm gap-1">
+                        <span class="material-symbols-outlined text-xs">schedule</span>
+                        Pendiente
+                      </span>
+                    }
                   </div>
                   @if (student.classGroup) {
                     <span class="text-sm text-base-content/60">{{ student.classGroup.name }}</span>
@@ -494,6 +507,12 @@ export default class Student {
                 gender
                 address
                 phone
+                user {
+                  id
+                  email
+                  emailVerified
+                  color
+                }
                 createdAt
                 updatedAt
               }

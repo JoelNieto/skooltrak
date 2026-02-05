@@ -14,6 +14,7 @@ import Store from '../core/store';
 type Teacher = Prisma.TeacherGetPayload<{ include: { user: true } }> & {
   name: string;
   initials: string;
+  user: { id: string; email: string; color: string | null; initials: string; emailVerified: boolean | null };
 };
 
 @Component({
@@ -64,7 +65,20 @@ type Teacher = Prisma.TeacherGetPayload<{ include: { user: true } }> & {
                     </div>
                   </div>
                   <div class="flex flex-col">
-                    {{ teacher.name }}
+                    <div class="flex items-center gap-2">
+                      {{ teacher.name }}
+                      @if (teacher.user.emailVerified) {
+                        <span class="badge badge-success badge-sm gap-1">
+                          <span class="material-symbols-outlined text-sm!">check_circle</span>
+                          Verificado
+                        </span>
+                      } @else {
+                        <span class="badge badge-warning badge-sm gap-1">
+                          <span class="material-symbols-outlined text-sm!">schedule</span>
+                          Pendiente
+                        </span>
+                      }
+                    </div>
                     <span class="text-sm text-base-content/50">{{ teacher.user.email }}</span>
                   </div>
                 </div>
@@ -190,6 +204,7 @@ export default class Teachers {
                   email
                   color
                   initials
+                  emailVerified
                 }
                 createdAt
                 updatedAt

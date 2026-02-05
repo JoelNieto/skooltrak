@@ -1,4 +1,5 @@
-import { Inject, Injectable, Scope } from '@nestjs/common';
+import { sendUserInvitation } from '@/auth';
+import { Inject, Injectable, Logger, Scope } from '@nestjs/common';
 import { CONTEXT } from '@nestjs/graphql';
 import * as bcrypt from 'bcrypt';
 import { randomUUID } from 'crypto';
@@ -10,9 +11,11 @@ import { UpdateStudentInput } from './dto/update-student.input';
 
 @Injectable({ scope: Scope.REQUEST })
 export class StudentsService {
+  private readonly logger = new Logger(StudentsService.name);
+
   constructor(
     private readonly prisma: PrismaService,
-    @Inject(CONTEXT) private readonly context: { req: Request }
+    @Inject(CONTEXT) private readonly context: { req: Request },
   ) {}
   async create(createStudentInput: CreateStudentInput) {
     const {
@@ -45,6 +48,12 @@ export class StudentsService {
       },
     });
 
+    // Get organization name for the welcome email
+    const organization = await this.prisma.organization.findUnique({
+      where: { id: organizationId },
+      select: { name: true },
+    });
+
     const hashedPassword = bcrypt.hashSync(documentId, 10);
 
     const user = await this.prisma.user.create({
@@ -56,6 +65,7 @@ export class StudentsService {
         password: hashedPassword,
         organizationId,
         roleId: role.id,
+        emailVerified: false, // Will be verified when user clicks the email link
       },
     });
 
@@ -86,7 +96,7 @@ export class StudentsService {
 
     // Convert birthDate properly - handle both Date and string
     const parsedBirthDate = birthDate instanceof Date ? birthDate : new Date(birthDate);
-    
+
     const studentData = {
       firstName,
       middleName,
@@ -111,15 +121,32 @@ export class StudentsService {
       parents: parentIds?.length ? { connect: parentIds.map((id) => ({ id })) } : undefined,
     };
 
-    console.log('Creating student with data:', JSON.stringify(studentData, null, 2));
+    this.logger.log(`Creating student with data: ${JSON.stringify(studentData, null, 2)}`);
 
     try {
-      return await this.prisma.student.create({
+      const student = await this.prisma.student.create({
         data: studentData,
         include: { classGroup: true, user: true, parents: true },
       });
+
+      // Send welcome invitation email
+      try {
+        await sendUserInvitation({
+          prisma: this.prisma,
+          email,
+          name: `${firstName} ${fatherName}`,
+          role: 'student',
+          organizationName: organization?.name || 'Skooltrak',
+        });
+        this.logger.log(`Welcome invitation sent to student: ${email}`);
+      } catch (emailError) {
+        // Log error but don't fail the creation
+        this.logger.error(`Failed to send welcome invitation to ${email}:`, emailError);
+      }
+
+      return student;
     } catch (error) {
-      console.error('Prisma error creating student:', error);
+      this.logger.error('Prisma error creating student:', error);
       throw error;
     }
   }
@@ -212,12 +239,10 @@ export class StudentsService {
       where: {
         courseId: { in: Array.from(coursePeriodMap.keys()) },
         published: true,
-        OR: Array.from(coursePeriodMap.entries()).map(
-          ([courseId, periodId]) => ({
-            courseId,
-            periodId,
-          })
-        ),
+        OR: Array.from(coursePeriodMap.entries()).map(([courseId, periodId]) => ({
+          courseId,
+          periodId,
+        })),
       },
       include: {
         studentGrades: {

@@ -1,14 +1,6 @@
-import { BetterAuthGuard } from '@/auth';
+import { BetterAuthGuard, Perm, PermissionsGuard, RequirePermissions } from '@/auth';
 import { UseGuards } from '@nestjs/common';
-import {
-  Args,
-  Int,
-  Mutation,
-  Parent,
-  Query,
-  ResolveField,
-  Resolver,
-} from '@nestjs/graphql';
+import { Args, Int, Mutation, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql';
 import { ClassGroup } from '../class-groups/entities/class-group.entity';
 import { Course } from '../courses/entities/course.entity';
 import { Student } from '../students/entities/student.entity';
@@ -21,15 +13,15 @@ import { AttendanceRecord } from './entities/attendance-record.entity';
 import { AttendanceSession } from './entities/attendance-session.entity';
 import { AttendanceStats } from './entities/attendance-stats.entity';
 
+@UseGuards(BetterAuthGuard, PermissionsGuard)
+@RequirePermissions(Perm.VIEW_ATTENDANCE)
 @Resolver(() => AttendanceSession)
-@UseGuards(BetterAuthGuard)
 export class AttendanceResolver {
   constructor(private readonly attendanceService: AttendanceService) {}
 
+  @RequirePermissions(Perm.MANAGE_ATTENDANCE)
   @Mutation(() => AttendanceSession, { name: 'createAttendanceSession' })
-  create(
-    @Args('input') input: CreateAttendanceSessionInput,
-  ) {
+  create(@Args('input') input: CreateAttendanceSessionInput) {
     return this.attendanceService.create(input);
   }
 
@@ -48,11 +40,13 @@ export class AttendanceResolver {
     return this.attendanceService.findOne(id);
   }
 
+  @RequirePermissions(Perm.MANAGE_ATTENDANCE)
   @Mutation(() => AttendanceRecord, { name: 'updateAttendanceRecord' })
   updateRecord(@Args('input') input: UpdateAttendanceRecordInput) {
     return this.attendanceService.updateRecord(input);
   }
 
+  @RequirePermissions(Perm.MANAGE_ATTENDANCE)
   @Mutation(() => [AttendanceRecord], { name: 'updateAttendanceRecords' })
   updateManyRecords(
     @Args('inputs', { type: () => [UpdateAttendanceRecordInput] })
@@ -61,6 +55,7 @@ export class AttendanceResolver {
     return this.attendanceService.updateManyRecords(inputs);
   }
 
+  @RequirePermissions(Perm.MANAGE_ATTENDANCE)
   @Mutation(() => AttendanceSession, { name: 'deleteAttendanceSession' })
   remove(@Args('id', { type: () => String }) id: string) {
     return this.attendanceService.remove(id);
@@ -71,10 +66,7 @@ export class AttendanceResolver {
     @Args('courseId', { type: () => String }) courseId: string,
     @Args('classGroupId', { type: () => String }) classGroupId: string,
   ) {
-    return this.attendanceService.getStudentsForAttendance(
-      courseId,
-      classGroupId,
-    );
+    return this.attendanceService.getStudentsForAttendance(courseId, classGroupId);
   }
 
   @Query(() => [AttendanceRecord], { name: 'attendanceRecordsByStudentId' })
@@ -86,19 +78,13 @@ export class AttendanceResolver {
   }
 
   @Query(() => AttendanceStats, { name: 'studentAttendanceStats' })
-  getStudentAttendanceStats(
-    @Args('studentId', { type: () => String }) studentId: string,
-  ) {
+  getStudentAttendanceStats(@Args('studentId', { type: () => String }) studentId: string) {
     return this.attendanceService.getStudentAttendanceStats(studentId);
   }
 
   @ResolveField(() => Course)
   async course(@Parent() session: AttendanceSession) {
-    if (
-      session.course &&
-      typeof session.course === 'object' &&
-      'id' in session.course
-    ) {
+    if (session.course && typeof session.course === 'object' && 'id' in session.course) {
       return session.course;
     }
     return null;
@@ -106,11 +92,7 @@ export class AttendanceResolver {
 
   @ResolveField(() => ClassGroup)
   async classGroup(@Parent() session: AttendanceSession) {
-    if (
-      session.classGroup &&
-      typeof session.classGroup === 'object' &&
-      'id' in session.classGroup
-    ) {
+    if (session.classGroup && typeof session.classGroup === 'object' && 'id' in session.classGroup) {
       return session.classGroup;
     }
     return null;
@@ -118,11 +100,7 @@ export class AttendanceResolver {
 
   @ResolveField(() => Teacher)
   async teacher(@Parent() session: AttendanceSession) {
-    if (
-      session.teacher &&
-      typeof session.teacher === 'object' &&
-      'id' in session.teacher
-    ) {
+    if (session.teacher && typeof session.teacher === 'object' && 'id' in session.teacher) {
       return session.teacher;
     }
     return null;

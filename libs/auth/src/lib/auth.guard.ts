@@ -1,26 +1,41 @@
 import {
   CanActivate,
   ExecutionContext,
+  ForbiddenException,
   Injectable,
+  SetMetadata,
   UnauthorizedException,
 } from '@nestjs/common';
 import { ModuleRef, Reflector } from '@nestjs/core';
 import { GqlExecutionContext } from '@nestjs/graphql';
-import { SetMetadata } from '@nestjs/common';
 import * as jwt from 'jsonwebtoken';
 import { PrismaService } from './prisma.service';
 
-// Decorator to mark routes as public (no auth required)
+// ---------------------------------------------------------------------------
+// Decorator: mark routes as public (no auth required)
+// ---------------------------------------------------------------------------
 export const IS_PUBLIC_KEY = 'isPublic';
 export const AllowAnonymous = () => SetMetadata(IS_PUBLIC_KEY, true);
 export const Public = AllowAnonymous;
+
+// ---------------------------------------------------------------------------
+// Decorator: require specific permissions (OR logic – any match passes)
+// ---------------------------------------------------------------------------
+export const PERMISSIONS_KEY = 'requiredPermissions';
+export const RequirePermissions = (...permissions: string[]) => SetMetadata(PERMISSIONS_KEY, permissions);
+
+// ---------------------------------------------------------------------------
+// Decorator: require specific roles (OR logic – any match passes)
+// ---------------------------------------------------------------------------
+export const ROLES_KEY = 'requiredRoles';
+export const RequireRoles = (...roles: string[]) => SetMetadata(ROLES_KEY, roles);
 
 // Re-export Session decorator from nestjs-better-auth
 export { Session, UserSession } from '@thallesp/nestjs-better-auth';
 
 /**
- * Interface for the user context expected by services
- * This maintains backward compatibility with the old JWT payload
+ * Interface for the user context expected by services.
+ * This maintains backward compatibility with the old JWT payload.
  */
 export interface AuthUserContext {
   userId: string;
@@ -36,16 +51,14 @@ interface JwtPayload {
   permissions: string[];
 }
 
-/**
- * Auth guard that works with better-auth sessions via GraphQL context
- * This guard checks for the session in the GraphQL context set by better-auth
- * and populates req.user with the expected fields for backward compatibility
- */
+// ---------------------------------------------------------------------------
+// BetterAuthGuard – authenticates user and populates req.user
+// ---------------------------------------------------------------------------
 @Injectable()
 export class BetterAuthGuard implements CanActivate {
   constructor(
     private reflector: Reflector,
-    private moduleRef: ModuleRef
+    private moduleRef: ModuleRef,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -96,10 +109,7 @@ export class BetterAuthGuard implements CanActivate {
     if (authHeader?.startsWith('Bearer ')) {
       const token = authHeader.substring(7);
       try {
-        const decoded = jwt.verify(
-          token,
-          process.env['JWT_SECRET'] || ''
-        ) as JwtPayload;
+        const decoded = jwt.verify(token, process.env['JWT_SECRET'] || '') as JwtPayload;
 
         // Fetch fresh user data from database
         const prisma = this.moduleRef.get(PrismaService, { strict: false });
@@ -122,7 +132,7 @@ export class BetterAuthGuard implements CanActivate {
         } as AuthUserContext;
 
         return true;
-      } catch (err) {
+      } catch {
         throw new UnauthorizedException('Invalid token');
       }
     }
@@ -137,17 +147,63 @@ export class BetterAuthGuard implements CanActivate {
  */
 export class JwtAuthGuard extends BetterAuthGuard {}
 
-/**
- * Guard to check if user has a specific role
- */
+// ---------------------------------------------------------------------------
+// PermissionsGuard – checks @RequirePermissions() metadata
+// ---------------------------------------------------------------------------
+@Injectable()
+export class PermissionsGuard implements CanActivate {
+  constructor(private reflector: Reflector) {}
+
+  canActivate(context: ExecutionContext): boolean {
+    const requiredPermissions = this.reflector.getAllAndOverride<string[]>(PERMISSIONS_KEY, [
+      context.getHandler(),
+      context.getClass(),
+    ]);
+
+    // No permissions required – allow access
+    if (!requiredPermissions || requiredPermissions.length === 0) {
+      return true;
+    }
+
+    const ctx = GqlExecutionContext.create(context);
+    const request = ctx.getContext().req;
+    const user = request.user as AuthUserContext;
+
+    if (!user?.userId) {
+      throw new UnauthorizedException('Not authenticated');
+    }
+
+    const userPermissions = user.permissions ?? [];
+
+    // OR logic: user needs at least one of the required permissions
+    const hasPermission = requiredPermissions.some((perm) => userPermissions.includes(perm));
+
+    if (!hasPermission) {
+      throw new ForbiddenException('You do not have the required permissions to perform this action');
+    }
+
+    return true;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// RoleGuard – checks @RequireRoles() metadata
+// ---------------------------------------------------------------------------
 @Injectable()
 export class RoleGuard implements CanActivate {
-  constructor(
-    private reflector: Reflector,
-    private readonly allowedRoles: string[]
-  ) {}
+  constructor(private reflector: Reflector) {}
 
   canActivate(context: ExecutionContext): boolean {
+    const requiredRoles = this.reflector.getAllAndOverride<string[]>(ROLES_KEY, [
+      context.getHandler(),
+      context.getClass(),
+    ]);
+
+    // No roles required – allow access
+    if (!requiredRoles || requiredRoles.length === 0) {
+      return true;
+    }
+
     const ctx = GqlExecutionContext.create(context);
     const request = ctx.getContext().req;
     const user = request.user as AuthUserContext;
@@ -156,45 +212,12 @@ export class RoleGuard implements CanActivate {
       throw new UnauthorizedException('Not authenticated');
     }
 
-    return this.allowedRoles.some(
-      (role) => user.role?.toUpperCase() === role.toUpperCase()
-    );
-  }
-}
+    const hasRole = requiredRoles.some((role) => user.role?.toUpperCase() === role.toUpperCase());
 
-/**
- * Guard to check if user is a teacher
- */
-@Injectable()
-export class TeacherGuard implements CanActivate {
-  canActivate(context: ExecutionContext): boolean {
-    const ctx = GqlExecutionContext.create(context);
-    const request = ctx.getContext().req;
-    const user = request.user as AuthUserContext;
-
-    if (!user?.userId) {
-      throw new UnauthorizedException('Not authenticated');
+    if (!hasRole) {
+      throw new ForbiddenException('You do not have the required role to perform this action');
     }
 
-    return user.role?.toUpperCase() === 'TEACHER';
-  }
-}
-
-/**
- * Guard to check if user is an admin
- */
-@Injectable()
-export class AdminGuard implements CanActivate {
-  canActivate(context: ExecutionContext): boolean {
-    const ctx = GqlExecutionContext.create(context);
-    const request = ctx.getContext().req;
-    const user = request.user as AuthUserContext;
-
-    if (!user?.userId) {
-      throw new UnauthorizedException('Not authenticated');
-    }
-
-    const role = user.role?.toUpperCase();
-    return role === 'ADMIN' || role === 'ORG_ADMIN' || role === 'OWNER';
+    return true;
   }
 }

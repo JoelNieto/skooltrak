@@ -1,5 +1,7 @@
 /**
- * Seed script to create an admin user
+ * Seed script to create an admin user.
+ *
+ * IMPORTANT: Run seed-roles-permissions.ts first to create global roles.
  *
  * Run with: bun run prisma/scripts/seed-admin.ts
  */
@@ -48,15 +50,15 @@ async function main() {
     });
     console.log(`✓ Created organization: ${organization.name}`);
 
-    // 2. Create ORG_ADMIN Role
-    const role = await tx.role.create({
-      data: {
-        name: 'ORG_ADMIN',
-        description: 'Organization Administrator',
-        organizationId: organization.id,
-      },
+    // 2. Look up the global ORG_ADMIN role (created by seed-roles-permissions.ts)
+    const role = await tx.role.findFirst({
+      where: { name: 'ORG_ADMIN', organizationId: null },
     });
-    console.log(`✓ Created role: ${role.name}`);
+
+    if (!role) {
+      throw new Error('Global ORG_ADMIN role not found. Run seed-roles-permissions.ts first.');
+    }
+    console.log(`✓ Found global role: ${role.name}`);
 
     // 3. Create User
     const user = await tx.user.create({

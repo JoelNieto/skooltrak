@@ -10,6 +10,7 @@ import { Prisma } from '@generated/prisma';
 
 import { Apollo, gql } from 'apollo-angular';
 import { filter, map, switchMap, tap } from 'rxjs';
+import Auth from '../auth/auth';
 import Store from '../core/store';
 type Teacher = Prisma.TeacherGetPayload<{ include: { user: true } }> & {
   name: string;
@@ -37,9 +38,11 @@ type Teacher = Prisma.TeacherGetPayload<{ include: { user: true } }> & {
           <input class="pl-0" type="search" placeholder="Buscar..." [(ngModel)]="searchText" />
         </label>
       </div>
-      <a routerLink="/teachers/new" class="btn btn-primary">
-        <span class="material-symbols-outlined">add_circle</span> Agregar Profesor
-      </a>
+      @if (auth.hasPermission('MANAGE_TEACHERS')) {
+        <a routerLink="/teachers/new" class="btn btn-primary">
+          <span class="material-symbols-outlined">add_circle</span> Agregar Profesor
+        </a>
+      }
     </div>
     <div class="overflow-x-auto bg-base-100 rounded-lg mt-4 border border-base-300">
       <table class="table">
@@ -123,24 +126,26 @@ type Teacher = Prisma.TeacherGetPayload<{ include: { user: true } }> & {
                         <span class="material-symbols-outlined text-lg">visibility</span>
                         <span>Ver</span>
                       </a>
-                      <a
-                        ngMenuItem
-                        value="edit"
-                        [routerLink]="['/teachers', teacher.id, 'edit']"
-                        class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-base-200 w-full"
-                      >
-                        <span class="material-symbols-outlined text-lg">edit</span>
-                        <span>Editar</span>
-                      </a>
-                      <button
-                        ngMenuItem
-                        value="delete"
-                        class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-base-200 w-full"
-                        (click)="deleteTeacher(teacher)"
-                      >
-                        <span class="material-symbols-outlined text-lg">delete</span>
-                        <span>Eliminar</span>
-                      </button>
+                      @if (auth.hasPermission('MANAGE_TEACHERS')) {
+                        <a
+                          ngMenuItem
+                          value="edit"
+                          [routerLink]="['/teachers', teacher.id, 'edit']"
+                          class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-base-200 w-full"
+                        >
+                          <span class="material-symbols-outlined text-lg">edit</span>
+                          <span>Editar</span>
+                        </a>
+                        <button
+                          ngMenuItem
+                          value="delete"
+                          class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-base-200 w-full"
+                          (click)="deleteTeacher(teacher)"
+                        >
+                          <span class="material-symbols-outlined text-lg">delete</span>
+                          <span>Eliminar</span>
+                        </button>
+                      }
                     </ng-template>
                   </div>
                 </ng-template>
@@ -165,6 +170,7 @@ type Teacher = Prisma.TeacherGetPayload<{ include: { user: true } }> & {
 export default class Teachers {
   public store = inject(Store);
   private apollo = inject(Apollo);
+  public auth = inject(Auth);
   public pagination = inject(Pagination);
   #confirmation = inject(Confirmation);
   #toasts = inject(Toast);

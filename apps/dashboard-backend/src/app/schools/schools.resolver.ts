@@ -1,4 +1,4 @@
-import { BetterAuthGuard } from '@/auth';
+import { BetterAuthGuard, Perm, PermissionsGuard, RequirePermissions } from '@/auth';
 import { UseGuards } from '@nestjs/common';
 import { Args, Mutation, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql';
 import { CreateSchoolInput } from './dto/create-school.input';
@@ -8,17 +8,18 @@ import { SchoolLogoDownloadUrl, SchoolLogoUploadUrl } from './entities/school-lo
 import { School } from './entities/school.entity';
 import { SchoolsService } from './schools.service';
 
+@UseGuards(BetterAuthGuard, PermissionsGuard)
+@RequirePermissions(Perm.VIEW_SCHOOLS)
 @Resolver(() => School)
 export class SchoolsResolver {
   constructor(private readonly schoolsService: SchoolsService) {}
 
-  @UseGuards(BetterAuthGuard)
+  @RequirePermissions(Perm.MANAGE_SCHOOLS)
   @Mutation(() => School)
   createSchool(@Args('createSchoolInput') createSchoolInput: CreateSchoolInput) {
     return this.schoolsService.create(createSchoolInput);
   }
 
-  @UseGuards(BetterAuthGuard)
   @Query(() => [School], { name: 'schools' })
   findAll() {
     return this.schoolsService.findAll();
@@ -29,19 +30,19 @@ export class SchoolsResolver {
     return this.schoolsService.findOne(id);
   }
 
-  @UseGuards(BetterAuthGuard)
+  @RequirePermissions(Perm.MANAGE_SCHOOLS)
   @Mutation(() => School)
   updateSchool(@Args('updateSchoolInput') updateSchoolInput: UpdateSchoolInput) {
     return this.schoolsService.update(updateSchoolInput.id, updateSchoolInput);
   }
 
-  @UseGuards(BetterAuthGuard)
+  @RequirePermissions(Perm.MANAGE_SCHOOLS)
   @Mutation(() => School)
   removeSchool(@Args('id', { type: () => String }) id: string) {
     return this.schoolsService.remove(id);
   }
 
-  @UseGuards(BetterAuthGuard)
+  @RequirePermissions(Perm.MANAGE_SCHOOLS)
   @Mutation(() => SchoolLogoUploadUrl, {
     description: 'Create a presigned URL for uploading a school logo',
   })
@@ -49,7 +50,7 @@ export class SchoolsResolver {
     return this.schoolsService.createLogoUploadUrl(input);
   }
 
-  @UseGuards(BetterAuthGuard)
+  @RequirePermissions(Perm.MANAGE_SCHOOLS)
   @Mutation(() => School, {
     description: 'Update only the logo of a school',
   })
@@ -57,7 +58,6 @@ export class SchoolsResolver {
     return this.schoolsService.updateLogo(id, logo);
   }
 
-  @UseGuards(BetterAuthGuard)
   @Query(() => SchoolLogoDownloadUrl, {
     name: 'schoolLogoDownloadUrl',
     description: 'Get a presigned URL for downloading a school logo',

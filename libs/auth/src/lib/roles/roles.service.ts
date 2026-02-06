@@ -1,11 +1,13 @@
 import { Prisma } from '@generated/prisma';
-import { Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma.service';
 import { CreateRoleInput } from './dto/create-role.input';
 import { UpdateRoleInput } from './dto/update-role.input';
+
 @Injectable()
 export class RolesService {
   constructor(private readonly prisma: PrismaService) {}
+
   async create(createRoleInput: CreateRoleInput) {
     const { organizationId, permissionIds, ...rest } = createRoleInput;
     let req = rest as Prisma.RoleCreateInput;
@@ -57,6 +59,8 @@ export class RolesService {
   }
 
   async update(id: string, updateRoleInput: UpdateRoleInput) {
+    await this.assertNotGlobalRole(id);
+
     const { organizationId, permissionIds, ...rest } = updateRoleInput;
     let req = rest as Prisma.RoleUpdateInput;
 
@@ -75,9 +79,7 @@ export class RolesService {
       req = {
         ...req,
         permissions: {
-          connect: permissionIds.map((id) => ({
-            id,
-          })),
+          set: permissionIds.map((id) => ({ id })),
         },
       };
     }
@@ -91,9 +93,25 @@ export class RolesService {
     });
   }
 
-  remove(id: string) {
+  async remove(id: string) {
+    await this.assertNotGlobalRole(id);
+
     return this.prisma.role.delete({
       where: { id },
     });
+  }
+
+  /**
+   * Prevents mutation or deletion of global default roles (organizationId = null).
+   */
+  private async assertNotGlobalRole(id: string) {
+    const role = await this.prisma.role.findUnique({
+      where: { id },
+      select: { organizationId: true },
+    });
+
+    if (role && role.organizationId === null) {
+      throw new ForbiddenException('Global default roles cannot be modified or deleted');
+    }
   }
 }

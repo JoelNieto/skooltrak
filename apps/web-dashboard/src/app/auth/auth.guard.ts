@@ -33,6 +33,48 @@ export const studentGuard: CanMatchFn = async () => {
   return auth.role() === 'STUDENT';
 };
 
+export const parentGuard: CanMatchFn = async () => {
+  const auth = inject(Auth);
+  await auth.waitUntilReady();
+  return auth.role() === 'PARENT';
+};
+
+/**
+ * Factory that creates a CanActivate guard requiring at least one of
+ * the given permission descriptiveIds (OR logic).
+ *
+ * Usage in routes:
+ *   canActivate: [permissionGuard('MANAGE_STUDENTS', 'VIEW_STUDENTS')]
+ */
+export function permissionGuard(...permissions: string[]): CanActivateFn {
+  return async () => {
+    const auth = inject(Auth);
+    const router = inject(Router);
+    await auth.waitUntilReady();
+
+    if (permissions.some((p) => auth.hasPermission(p))) {
+      return true;
+    }
+
+    return router.createUrlTree(['/home']);
+  };
+}
+
+/**
+ * Factory that creates a CanMatch guard requiring at least one of
+ * the given permission descriptiveIds (OR logic).
+ *
+ * Usage in routes:
+ *   canMatch: [permissionMatchGuard('VIEW_COURSES')]
+ */
+export function permissionMatchGuard(...permissions: string[]): CanMatchFn {
+  return async () => {
+    const auth = inject(Auth);
+    await auth.waitUntilReady();
+    return permissions.some((p) => auth.hasPermission(p));
+  };
+}
+
 /**
  * Guard that ensures the user's email is verified.
  * Redirects to /verify-email if not verified.

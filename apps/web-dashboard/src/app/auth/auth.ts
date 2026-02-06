@@ -160,6 +160,7 @@ export default class Auth {
   public isAdmin = computed(() => this.role() === 'ADMIN' || this.role() === 'ORG_ADMIN');
   public isTeacher = computed(() => this.role() === 'TEACHER');
   public isStudent = computed(() => this.role() === 'STUDENT');
+  public isParent = computed(() => this.role() === 'PARENT');
 
   public isAuthenticated = computed(() => {
     // Check both session state and token for backward compatibility

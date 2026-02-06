@@ -1,5 +1,5 @@
 import { Route } from '@angular/router';
-import { adminGuard, authGuard, onboardingGuard, studentGuard, teacherGuard } from './auth/auth.guard';
+import { adminGuard, authGuard, onboardingGuard, permissionGuard, studentGuard, teacherGuard } from './auth/auth.guard';
 
 export const appRoutes: Route[] = [
   {
@@ -52,7 +52,7 @@ export const appRoutes: Route[] = [
       { path: '', redirectTo: 'acknowledge', pathMatch: 'full' },
     ],
   },
-  // Main dashboard (requires auth, verified email, and completed onboarding for admins)
+  // Main dashboard (requires auth)
   {
     path: '',
     canActivate: [authGuard],
@@ -60,12 +60,12 @@ export const appRoutes: Route[] = [
     title: 'Software Educativo | Skooltrak',
     loadComponent: () => import('./core/dashboard'),
     children: [
+      // Role-based home pages
       {
         path: 'home',
         canMatch: [adminGuard],
         loadComponent: () => import('./home'),
       },
-
       {
         path: 'home',
         canMatch: [teacherGuard],
@@ -76,131 +76,181 @@ export const appRoutes: Route[] = [
         canMatch: [studentGuard],
         loadComponent: () => import('./student-home'),
       },
+
+      // General feature routes (permission-gated)
       {
         path: 'courses',
+        canActivate: [permissionGuard('VIEW_COURSES')],
         loadComponent: () => import('./courses/courses'),
       },
-      { path: 'courses/:id', loadComponent: () => import('./courses/course') },
+      {
+        path: 'courses/:id',
+        canActivate: [permissionGuard('VIEW_COURSES')],
+        loadComponent: () => import('./courses/course'),
+      },
       {
         path: 'assignments',
+        canActivate: [permissionGuard('VIEW_ASSIGNMENTS')],
         loadComponent: () => import('./assignments/assignments'),
       },
       {
         path: 'assignments/:id',
+        canActivate: [permissionGuard('VIEW_ASSIGNMENTS')],
         loadComponent: () => import('./assignments/assignment'),
       },
-      { path: 'teachers', loadComponent: () => import('./teachers/teachers') },
+      {
+        path: 'teachers',
+        canActivate: [permissionGuard('VIEW_TEACHERS')],
+        loadComponent: () => import('./teachers/teachers'),
+      },
       {
         path: 'teachers/new',
+        canActivate: [permissionGuard('MANAGE_TEACHERS')],
         loadComponent: () => import('./teachers/teacher-form'),
       },
       {
         path: 'teachers/:id',
+        canActivate: [permissionGuard('VIEW_TEACHERS')],
         loadComponent: () => import('./teachers/teacher'),
       },
       {
         path: 'teachers/:id/edit',
+        canActivate: [permissionGuard('MANAGE_TEACHERS')],
         loadComponent: () => import('./teachers/teacher-form'),
       },
-      { path: 'grades/:id', loadComponent: () => import('./grades/grade') },
-      { path: 'quizzes', loadComponent: () => import('./quizzes/quizzes') },
+      {
+        path: 'grades/:id',
+        canActivate: [permissionGuard('VIEW_GRADES')],
+        loadComponent: () => import('./grades/grade'),
+      },
+      {
+        path: 'quizzes',
+        canActivate: [permissionGuard('VIEW_QUIZZES')],
+        loadComponent: () => import('./quizzes/quizzes'),
+      },
       {
         path: 'quizzes/:id',
+        canActivate: [permissionGuard('MANAGE_QUIZZES')],
         loadComponent: () => import('./quizzes/quiz-form'),
       },
       {
         path: 'messages',
+        canActivate: [permissionGuard('VIEW_MESSAGES')],
         loadComponent: () => import('./messages/messages'),
       },
       {
         path: 'messages/compose',
+        canActivate: [permissionGuard('MANAGE_MESSAGES')],
         loadComponent: () => import('./messages/compose'),
       },
       {
         path: 'messages/:id',
+        canActivate: [permissionGuard('VIEW_MESSAGES')],
         loadComponent: () => import('./messages/message'),
       },
       {
         path: 'files',
+        canActivate: [permissionGuard('VIEW_FILES')],
         loadComponent: () => import('./files/files'),
       },
       {
-        path: 'student/schedule',
-        loadComponent: () => import('./students/student-schedule'),
-      },
-      {
-        path: 'student/assignments',
-        loadComponent: () => import('./students/student-assignment-submission'),
-      },
-      {
-        path: 'student/notifications',
-        loadComponent: () => import('./students/student-notifications'),
-      },
-      {
-        path: 'student/attendance',
-        loadComponent: () => import('./students/student-attendance'),
-      },
-      {
-        path: 'teacher/attendance',
-        loadComponent: () => import('./teacher/teacher-attendance'),
-      },
-      {
-        path: 'teacher/gradebook',
-        loadComponent: () => import('./teacher/teacher-gradebook'),
-      },
-      {
-        path: 'teacher/communication',
-        loadComponent: () => import('./teacher/teacher-parent-communication'),
-      },
-      {
-        path: 'teacher/reports',
-        loadComponent: () => import('./teacher/teacher-reports'),
-      },
-      {
-        path: 'parent/portal',
-        loadComponent: () => import('./parent/parent-portal'),
-      },
-      {
-        path: 'parent/progress',
-        loadComponent: () => import('./parent/parent-child-progress'),
-      },
-      {
-        path: 'parent/communication',
-        loadComponent: () => import('./parent/parent-teacher-communication'),
-      },
-      {
-        path: 'parent/notifications',
-        loadComponent: () => import('./parent/parent-notifications'),
-      },
-      {
-        path: '',
-        redirectTo: 'home',
-        pathMatch: 'full',
-      },
-      {
         path: 'students',
+        canActivate: [permissionGuard('VIEW_STUDENTS')],
         loadComponent: () => import('./students/students'),
       },
       {
         path: 'students/new',
+        canActivate: [permissionGuard('MANAGE_STUDENTS')],
         loadComponent: () => import('./students/student-form'),
       },
       {
         path: 'students/:id',
+        canActivate: [permissionGuard('VIEW_STUDENTS')],
         loadComponent: () => import('./students/student'),
       },
       {
         path: 'students/:id/edit',
+        canActivate: [permissionGuard('MANAGE_STUDENTS')],
         loadComponent: () => import('./students/student-form'),
       },
       {
         path: 'groups',
+        canActivate: [permissionGuard('VIEW_CLASS_GROUPS')],
         loadComponent: () => import('./groups/groups'),
       },
       {
         path: 'groups/:id',
+        canActivate: [permissionGuard('VIEW_CLASS_GROUPS')],
         loadComponent: () => import('./groups/group'),
       },
+
+      // Student-specific routes
+      {
+        path: 'student/schedule',
+        canActivate: [permissionGuard('VIEW_SCHEDULES')],
+        loadComponent: () => import('./students/student-schedule'),
+      },
+      {
+        path: 'student/assignments',
+        canActivate: [permissionGuard('SUBMIT_ASSIGNMENTS')],
+        loadComponent: () => import('./students/student-assignment-submission'),
+      },
+      {
+        path: 'student/notifications',
+        canActivate: [permissionGuard('VIEW_MESSAGES')],
+        loadComponent: () => import('./students/student-notifications'),
+      },
+      {
+        path: 'student/attendance',
+        canActivate: [permissionGuard('VIEW_ATTENDANCE')],
+        loadComponent: () => import('./students/student-attendance'),
+      },
+
+      // Teacher-specific routes
+      {
+        path: 'teacher/attendance',
+        canActivate: [permissionGuard('MANAGE_ATTENDANCE')],
+        loadComponent: () => import('./teacher/teacher-attendance'),
+      },
+      {
+        path: 'teacher/gradebook',
+        canActivate: [permissionGuard('MANAGE_GRADES')],
+        loadComponent: () => import('./teacher/teacher-gradebook'),
+      },
+      {
+        path: 'teacher/communication',
+        canActivate: [permissionGuard('MANAGE_MESSAGES')],
+        loadComponent: () => import('./teacher/teacher-parent-communication'),
+      },
+      {
+        path: 'teacher/reports',
+        canActivate: [permissionGuard('VIEW_GRADES')],
+        loadComponent: () => import('./teacher/teacher-reports'),
+      },
+
+      // Parent-specific routes
+      {
+        path: 'parent/portal',
+        canActivate: [permissionGuard('VIEW_GRADES')],
+        loadComponent: () => import('./parent/parent-portal'),
+      },
+      {
+        path: 'parent/progress',
+        canActivate: [permissionGuard('VIEW_GRADES')],
+        loadComponent: () => import('./parent/parent-child-progress'),
+      },
+      {
+        path: 'parent/communication',
+        canActivate: [permissionGuard('VIEW_MESSAGES')],
+        loadComponent: () => import('./parent/parent-teacher-communication'),
+      },
+      {
+        path: 'parent/notifications',
+        canActivate: [permissionGuard('VIEW_MESSAGES')],
+        loadComponent: () => import('./parent/parent-notifications'),
+      },
+
+      // Profile (always accessible when authenticated)
       {
         path: 'profile',
         loadComponent: () => import('./profile'),
@@ -211,27 +261,33 @@ export const appRoutes: Route[] = [
         title: 'Cambiar contraseña | Skooltrak',
       },
 
+      // School management (admin-only)
       {
         path: 'schools/new',
+        canActivate: [permissionGuard('MANAGE_SCHOOLS')],
         loadComponent: () => import('./admin/pages/school-form'),
       },
       {
         path: 'schools/:id',
+        canActivate: [permissionGuard('VIEW_SCHOOLS')],
         loadComponent: () => import('./admin/pages/school'),
       },
       {
         path: 'schools/:id/edit',
+        canActivate: [permissionGuard('MANAGE_SCHOOLS')],
         loadComponent: () => import('./admin/pages/school-form'),
       },
+
+      // Admin panel (ORG_ADMIN only)
       {
         path: 'admin',
+        canActivate: [permissionGuard('MANAGE_SCHOOLS')],
         loadComponent: () => import('./admin/admin'),
         children: [
           {
             path: 'schools',
             loadComponent: () => import('./admin/pages/schools'),
           },
-
           {
             path: 'subjects',
             loadComponent: () => import('./admin/pages/subjects'),
@@ -248,7 +304,6 @@ export const appRoutes: Route[] = [
             path: 'study-plans',
             loadComponent: () => import('./admin/pages/study-plans'),
           },
-
           {
             path: 'degrees',
             loadComponent: () => import('./admin/pages/degrees'),
@@ -273,9 +328,15 @@ export const appRoutes: Route[] = [
             path: 'events-calendar',
             loadComponent: () => import('./admin/pages/events-calendar'),
           },
-
           { path: '', redirectTo: 'schools', pathMatch: 'full' },
         ],
+      },
+
+      // Default redirect
+      {
+        path: '',
+        redirectTo: 'home',
+        pathMatch: 'full',
       },
     ],
   },

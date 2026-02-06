@@ -1,42 +1,40 @@
+import { BetterAuthGuard, Perm, PermissionsGuard, RequirePermissions } from '@/auth';
 import { UseGuards } from '@nestjs/common';
-import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
-import { BetterAuthGuard } from '@/auth';
-import { AssignmentSubmissionsService } from './assignment-submissions.service';
-import {
-  CreateAssignmentSubmissionInput,
-  CreateSubmissionUploadInput,
-} from './dto/create-submission.input';
-import {
-  AssignmentSubmission,
-  SubmissionUploadUrl,
-} from './entities/assignment-submission.entity';
+import { Args, Field, Mutation, ObjectType, Query, Resolver } from '@nestjs/graphql';
 import { Student } from '../students/entities/student.entity';
+import { AssignmentSubmissionsService } from './assignment-submissions.service';
+import { CreateAssignmentSubmissionInput, CreateSubmissionUploadInput } from './dto/create-submission.input';
+import { AssignmentSubmission, SubmissionUploadUrl } from './entities/assignment-submission.entity';
 
+@ObjectType()
+class SubmissionDownloadUrl {
+  @Field(() => String, { description: 'Presigned URL for downloading the file' })
+  downloadUrl: string;
+}
+
+@UseGuards(BetterAuthGuard, PermissionsGuard)
+@RequirePermissions(Perm.VIEW_ASSIGNMENTS)
 @Resolver(() => AssignmentSubmission)
-@UseGuards(BetterAuthGuard)
 export class AssignmentSubmissionsResolver {
-  constructor(
-    private readonly assignmentSubmissionsService: AssignmentSubmissionsService
-  ) {}
+  constructor(private readonly assignmentSubmissionsService: AssignmentSubmissionsService) {}
 
+  @RequirePermissions(Perm.SUBMIT_ASSIGNMENTS)
   @Mutation(() => SubmissionUploadUrl, {
     description: 'Create a presigned URL for uploading a submission file',
   })
-  createSubmissionUploadUrl(
-    @Args('input') input: CreateSubmissionUploadInput
-  ) {
+  createSubmissionUploadUrl(@Args('input') input: CreateSubmissionUploadInput) {
     return this.assignmentSubmissionsService.createUploadUrl(input);
   }
 
+  @RequirePermissions(Perm.SUBMIT_ASSIGNMENTS)
   @Mutation(() => AssignmentSubmission, {
     description: 'Create an assignment submission after file upload',
   })
-  createAssignmentSubmission(
-    @Args('input') input: CreateAssignmentSubmissionInput
-  ) {
+  createAssignmentSubmission(@Args('input') input: CreateAssignmentSubmissionInput) {
     return this.assignmentSubmissionsService.createSubmission(input);
   }
 
+  @RequirePermissions(Perm.MANAGE_ASSIGNMENTS)
   @Mutation(() => Boolean, {
     description: 'Delete an assignment submission',
   })
@@ -72,12 +70,4 @@ export class AssignmentSubmissionsResolver {
   createSubmissionDownloadUrl(@Args('fileId') fileId: string) {
     return this.assignmentSubmissionsService.createDownloadUrl(fileId);
   }
-}
-
-import { Field, ObjectType } from '@nestjs/graphql';
-
-@ObjectType()
-class SubmissionDownloadUrl {
-  @Field(() => String, { description: 'Presigned URL for downloading the file' })
-  downloadUrl: string;
 }

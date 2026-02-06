@@ -1,36 +1,29 @@
-import { BetterAuthGuard } from '@/auth';
+import { BetterAuthGuard, Perm, PermissionsGuard, RequirePermissions } from '@/auth';
 import { UseGuards } from '@nestjs/common';
-import {
-  Args,
-  Int,
-  Mutation,
-  Parent as GqlParent,
-  Query,
-  ResolveField,
-  Resolver,
-} from '@nestjs/graphql';
+import { Args, Parent as GqlParent, Int, Mutation, Query, ResolveField, Resolver } from '@nestjs/graphql';
 import { FetchDataInput } from '../fetch-data.input';
 import { CreateParentInput } from './dto/create-parent.input';
 import { UpdateParentInput } from './dto/update-parent.input';
 import { Parent } from './entities/parent.entity';
 import { ParentsService } from './parents.service';
 
+@UseGuards(BetterAuthGuard, PermissionsGuard)
+@RequirePermissions(Perm.VIEW_PARENTS)
 @Resolver(() => Parent)
 export class ParentsResolver {
   constructor(private readonly parentsService: ParentsService) {}
 
+  @RequirePermissions(Perm.MANAGE_PARENTS)
   @Mutation(() => Parent)
   createParent(@Args('createParentInput') createParentInput: CreateParentInput) {
     return this.parentsService.create(createParentInput);
   }
 
-  @UseGuards(BetterAuthGuard)
   @Query(() => [Parent], { name: 'parents' })
   findAll(@Args() fetchDataInput: FetchDataInput) {
     return this.parentsService.findAll(fetchDataInput);
   }
 
-  @UseGuards(BetterAuthGuard)
   @Query(() => Int, { name: 'parentsCount' })
   getCount(@Args() fetchDataInput: FetchDataInput) {
     return this.parentsService.getCount(fetchDataInput);
@@ -57,11 +50,13 @@ export class ParentsResolver {
     return parts.join(' ');
   }
 
+  @RequirePermissions(Perm.MANAGE_PARENTS)
   @Mutation(() => Parent)
   updateParent(@Args('updateParentInput') updateParentInput: UpdateParentInput) {
     return this.parentsService.update(updateParentInput.id, updateParentInput);
   }
 
+  @RequirePermissions(Perm.MANAGE_PARENTS)
   @Mutation(() => Parent)
   removeParent(@Args('id', { type: () => String }) id: string) {
     return this.parentsService.remove(id);

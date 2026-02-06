@@ -116,13 +116,6 @@ import Store from './store';
                   <span class="ml-1">Cambiar contraseña</span>
                 </a>
               </li>
-              @if (auth.isAdmin()) {
-                <li>
-                  <a routerLink="admin"
-                    ><span class="material-symbols-outlined text-xl">settings</span> <span class="ml-1">Admin</span></a
-                  >
-                </li>
-              }
               <li>
                 <button (click)="logout()">
                   <span class="material-symbols-outlined text-xl">logout</span>

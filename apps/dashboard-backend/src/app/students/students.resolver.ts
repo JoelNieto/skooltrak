@@ -1,15 +1,6 @@
-import { BetterAuthGuard } from '@/auth';
+import { BetterAuthGuard, Perm, PermissionsGuard, RequirePermissions } from '@/auth';
 import { UseGuards } from '@nestjs/common';
-import {
-  Args,
-  Float,
-  Int,
-  Mutation,
-  Parent,
-  Query,
-  ResolveField,
-  Resolver,
-} from '@nestjs/graphql';
+import { Args, Float, Int, Mutation, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql';
 import { FetchDataInput } from '../fetch-data.input';
 import { GradesService } from '../grades/grades.service';
 import { CreateStudentInput } from './dto/create-student.input';
@@ -17,30 +8,28 @@ import { UpdateStudentInput } from './dto/update-student.input';
 import { Student } from './entities/student.entity';
 import { StudentsService } from './students.service';
 
+@UseGuards(BetterAuthGuard, PermissionsGuard)
+@RequirePermissions(Perm.VIEW_STUDENTS)
 @Resolver(() => Student)
 export class StudentsResolver {
   constructor(
     private readonly studentsService: StudentsService,
-    private readonly gradesService: GradesService
+    private readonly gradesService: GradesService,
   ) {}
 
+  @RequirePermissions(Perm.MANAGE_STUDENTS)
   @Mutation(() => Student)
-  createStudent(
-    @Args('createStudentInput') createStudentInput: CreateStudentInput
-  ) {
+  createStudent(@Args('createStudentInput') createStudentInput: CreateStudentInput) {
     return this.studentsService.create(createStudentInput);
   }
 
-  @UseGuards(BetterAuthGuard)
   @Query(() => [Student], { name: 'students' })
   findAll(@Args() fetchDataInput: FetchDataInput) {
     return this.studentsService.findAll(fetchDataInput);
   }
 
   @Query(() => [Student], { name: 'studentsBySchoolId' })
-  findManyBySchoolId(
-    @Args('schoolId', { type: () => String }) schoolId: string
-  ) {
+  findManyBySchoolId(@Args('schoolId', { type: () => String }) schoolId: string) {
     return this.studentsService.findManyBySchoolId(schoolId);
   }
 
@@ -55,9 +44,7 @@ export class StudentsResolver {
   }
 
   @Query(() => [Student], { name: 'studentsByCourseId' })
-  findManyByCourseId(
-    @Args('courseId', { type: () => String }) courseId: string
-  ) {
+  findManyByCourseId(@Args('courseId', { type: () => String }) courseId: string) {
     return this.studentsService.findManyByCourseId(courseId);
   }
 
@@ -76,7 +63,6 @@ export class StudentsResolver {
     return `${student.firstName} ${student.middleName} ${student.fatherName} ${student.motherName}`;
   }
 
-  @UseGuards(BetterAuthGuard)
   @Query(() => Int, { name: 'findManyStudentsCount' })
   findManyStudentsCount(@Args() fetchDataInput: FetchDataInput) {
     return this.studentsService.getCount(fetchDataInput);
@@ -96,25 +82,18 @@ export class StudentsResolver {
   getAverageScoreForStudent(
     @Parent() student: Student,
     @Args('courseId', { type: () => String }) courseId: string,
-    @Args('periodId', { type: () => String }) periodId: string
+    @Args('periodId', { type: () => String }) periodId: string,
   ) {
-    return this.gradesService.getAverageScoreForStudent(
-      courseId,
-      periodId,
-      student.id
-    );
+    return this.gradesService.getAverageScoreForStudent(courseId, periodId, student.id);
   }
 
+  @RequirePermissions(Perm.MANAGE_STUDENTS)
   @Mutation(() => Student)
-  updateStudent(
-    @Args('updateStudentInput') updateStudentInput: UpdateStudentInput
-  ) {
-    return this.studentsService.update(
-      updateStudentInput.id,
-      updateStudentInput
-    );
+  updateStudent(@Args('updateStudentInput') updateStudentInput: UpdateStudentInput) {
+    return this.studentsService.update(updateStudentInput.id, updateStudentInput);
   }
 
+  @RequirePermissions(Perm.MANAGE_STUDENTS)
   @Mutation(() => Student)
   removeStudent(@Args('id', { type: () => String }) id: string) {
     return this.studentsService.remove(id);

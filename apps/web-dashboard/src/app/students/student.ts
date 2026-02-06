@@ -123,13 +123,13 @@ const ENROLLMENT_STATUS_COLORS: Record<$Enums.EnrollmentStatus, string> = {
                       {{ getStatusLabel(student.enrollmentStatus) }}
                     </span>
                     @if (student.user.emailVerified) {
-                      <span class="badge badge-success badge-sm gap-1">
-                        <span class="material-symbols-outlined text-xs">check_circle</span>
+                      <span class="badge badge-success badge-soft badge-sm gap-1">
+                        <span class="material-symbols-outlined text-sm!">check_circle</span>
                         Verificado
                       </span>
                     } @else {
                       <span class="badge badge-warning badge-sm gap-1">
-                        <span class="material-symbols-outlined text-xs">schedule</span>
+                        <span class="material-symbols-outlined text-sm!">schedule</span>
                         Pendiente
                       </span>
                     }

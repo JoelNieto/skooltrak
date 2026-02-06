@@ -201,3 +201,12 @@ textarea.ng-invalid.ng-dirty {
 .message-quote {
   @apply mt-3 rounded-md border-l-4 border-primary/60 bg-base-200 px-3 py-2;
 }
+
+/* Sidebar gradient — adapts to light/dark via DaisyUI theme variables */
+.sidebar-gradient {
+  background: linear-gradient(
+    180deg,
+    color-mix(in oklch, var(--color-primary) 50%, black) 0%,
+    color-mix(in oklch, var(--color-accent) 45%, black) 100%
+  );
+}

@@ -137,6 +137,9 @@ const DEFAULT_ROLES: RoleDef[] = [
     name: 'STUDENT',
     description: 'Student',
     permissions: [
+      Perm.VIEW_SCHOOLS,
+      Perm.VIEW_TEACHERS,
+      Perm.VIEW_STUDENTS,
       Perm.VIEW_COURSES,
       Perm.VIEW_SUBJECTS,
       Perm.VIEW_CLASS_GROUPS,

@@ -55,7 +55,7 @@ type CourseType = Prisma.CourseGetPayload<{
           <ul>
             <li><a routerLink="/">Inicio</a></li>
             <li><a routerLink="/courses">Cursos</a></li>
-            <li>{{ course.shortName }}</li>
+            <li>{{ course.name }}</li>
           </ul>
         </div>
         <div class="card card-border border-base-300 mt-4 bg-base-100">
@@ -78,14 +78,19 @@ type CourseType = Prisma.CourseGetPayload<{
                 </div>
                 <p class="text-base-200">{{ course.code }}</p>
               </div>
+
               <div class="flex gap-2">
-                <button class="btn btn-neutral" (click)="addAssignment()">
-                  <span class="material-symbols-outlined">assignment_add</span>
-                  Nueva asignacion
-                </button>
-                <button class="btn btn-primary btn-soft">
-                  <span class="material-symbols-outlined">edit</span> Editar
-                </button>
+                @if (auth.hasPermission('MANAGE_ASSIGNMENTS')) {
+                  <button class="btn btn-neutral" (click)="addAssignment()">
+                    <span class="material-symbols-outlined">assignment_add</span>
+                    Nueva asignacion
+                  </button>
+                }
+                @if (auth.hasPermission('MANAGE_COURSES')) {
+                  <button class="btn btn-primary btn-soft">
+                    <span class="material-symbols-outlined">edit</span> Editar
+                  </button>
+                }
               </div>
             </div>
           </div>

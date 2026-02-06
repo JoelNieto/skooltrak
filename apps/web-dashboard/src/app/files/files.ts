@@ -1,12 +1,6 @@
 import { debounceSignal, Loader, Modal, PageHeader, Toast } from '@/ui';
 import { DatePipe } from '@angular/common';
-import {
-  ChangeDetectionStrategy,
-  Component,
-  inject,
-  Signal,
-  signal,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, Signal, signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
@@ -42,182 +36,149 @@ type FileItem = {
     <div class="breadcrumbs text-sm">
       <ul>
         <li><a routerLink="/">Inicio</a></li>
-        <li>Archivoss</li>
+        <li>Archivos</li>
       </ul>
     </div>
-    <lib-page-header
-      title="Archivos"
-      subtitle="Archivos compartidos conmigo"
-    />
+    <lib-page-header title="Archivos" subtitle="Archivos compartidos conmigo" />
 
     <div class="flex flex-col md:flex-row md:justify-between md:items-center">
-
       <label class="input input-primary input-md mt-3 md:mt-0">
         <span class="material-symbols-outlined">search</span>
-        <input
-          class="pl-0"
-          type="search"
-          placeholder="Buscar archivos..."
-          [(ngModel)]="searchText"
-        />
+        <input class="pl-0" type="search" placeholder="Buscar archivos..." [(ngModel)]="searchText" />
       </label>
     </div>
     <div class="tabs tabs-box mt-4">
-      <input
-        class="tab"
-        type="radio"
-        name="files_tabs"
-        aria-label="Compartidos conmigo"
-        checked="checked"
-      />
+      <input class="tab" type="radio" name="files_tabs" aria-label="Compartidos conmigo" checked="checked" />
       <div class="tab-content bg-base-100 border-base-300 p-4">
-        @if(sharedFilesResource.isLoading()) {
-        <lib-loader />
-        } @if(sharedFilesResource.error()) {
-        <p>Error al cargar archivos compartidos</p>
-        } @if(sharedFilesResource.hasValue()) {
-        <div class="overflow-x-auto bg-base-100 rounded-lg">
-          <table class="table">
-            <thead>
-              <tr>
-                <th>Nombre</th>
-                <th>Propietario</th>
-                <th>Curso</th>
-                <th>Tipo</th>
-                <th>Tamaño</th>
-                <th>Acceso</th>
-                <th></th>
-                <th class="text-right">Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              @for(file of sharedFilesResource.value(); track file.id) {
-              <tr class="hover:bg-base-300">
-                <td class="font-medium">{{ file.name }}</td>
-                <td>
-                  <div class="flex items-center gap-2">
-                    <div class="avatar avatar-placeholder">
-                      <div
-                        class="text-white w-7 rounded-full"
-                        [style.background]="file.owner.color"
-                      >
-                        <span class="text-xs">{{ file.owner.initials }}</span>
+        @if (sharedFilesResource.isLoading()) {
+          <lib-loader />
+        }
+        @if (sharedFilesResource.error()) {
+          <p>Error al cargar archivos compartidos</p>
+        }
+        @if (sharedFilesResource.hasValue()) {
+          <div class="overflow-x-auto bg-base-100 rounded-lg">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Nombre</th>
+                  <th>Propietario</th>
+                  <th>Curso</th>
+                  <th>Tipo</th>
+                  <th>Tamaño</th>
+                  <th>Acceso</th>
+                  <th></th>
+                  <th class="text-right">Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (file of sharedFilesResource.value(); track file.id) {
+                  <tr class="hover:bg-base-300">
+                    <td class="font-medium">{{ file.name }}</td>
+                    <td>
+                      <div class="flex items-center gap-2">
+                        <div class="avatar avatar-placeholder">
+                          <div class="text-white w-7 rounded-full" [style.background]="file.owner.color">
+                            <span class="text-xs">{{ file.owner.initials }}</span>
+                          </div>
+                        </div>
+                        {{ file.owner.name }}
                       </div>
-                    </div>
-                    {{ file.owner.name }}
-                  </div>
-                </td>
-                <td class="text-base-200">{{ courseLabel(file) }}</td>
-                <td class="text-base-200">{{ file.mimeType }}</td>
-                <td class="text-base-200">{{ formatBytes(file.size) }}</td>
-                <td>
-                  @if(file.access) {
-                  <span
-                    class="badge"
-                    [class.badge-success]="file.access === 'EDIT'"
-                    [class.badge-info]="file.access === 'VIEW'"
-                  >
-                    {{ file.access === 'EDIT' ? 'Editar' : 'Ver' }}
-                  </span>
-                  } @else {
-                  <span class="text-base-200">-</span>
-                  }
-                </td>
-                <td class="text-base-200">
-                  {{ file.updatedAt | date : 'short' }}
-                </td>
-                <td class="text-right">
-                  <button
-                    class="btn btn-primary btn-xs"
-                    (click)="openFile(file.id)"
-                  >
-                    Abrir
-                  </button>
-                  <button
-                    class="btn btn-ghost btn-xs"
-                    (click)="downloadFile(file.id)"
-                  >
-                    Descargar
-                  </button>
-                </td>
-              </tr>
-              } @empty {
-              <tr>
-                <td colspan="7" class="text-center text-base-200">
-                  No hay archivos compartidos.
-                </td>
-              </tr>
-              }
-            </tbody>
-          </table>
-        </div>
+                    </td>
+                    <td class="text-base-200">{{ courseLabel(file) }}</td>
+                    <td class="text-base-200">{{ file.mimeType }}</td>
+                    <td class="text-base-200">{{ formatBytes(file.size) }}</td>
+                    <td>
+                      @if (file.access) {
+                        <span
+                          class="badge"
+                          [class.badge-success]="file.access === 'EDIT'"
+                          [class.badge-info]="file.access === 'VIEW'"
+                        >
+                          {{ file.access === 'EDIT' ? 'Editar' : 'Ver' }}
+                        </span>
+                      } @else {
+                        <span class="text-base-200">-</span>
+                      }
+                    </td>
+                    <td class="text-base-200">
+                      {{ file.updatedAt | date: 'short' }}
+                    </td>
+                    <td class="text-right">
+                      <button class="btn btn-primary btn-xs" (click)="openFile(file.id)">Abrir</button>
+                      <button class="btn btn-ghost btn-xs" (click)="downloadFile(file.id)">Descargar</button>
+                    </td>
+                  </tr>
+                } @empty {
+                  <tr>
+                    <td colspan="7" class="text-center text-base-200">No hay archivos compartidos.</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
         }
       </div>
-      <input
-        class="tab"
-        type="radio"
-        name="files_tabs"
-        aria-label="Mis archivos"
-      />
+      <input class="tab" type="radio" name="files_tabs" aria-label="Mis archivos" />
       <div class="tab-content bg-base-100 border-base-300 p-4">
-        @if(ownedFilesResource.isLoading()) {
-        <lib-loader />
-        } @if(ownedFilesResource.error()) {
-        <p>Error al cargar mis archivos</p>
-        } @if(ownedFilesResource.hasValue()) {
-        <div class="overflow-x-auto bg-base-100 rounded-lg">
-          <table class="table">
-            <thead>
-              <tr>
-                <th>Nombre</th>
-                <th>Curso</th>
-                <th>Tipo</th>
-                <th>Tamaño</th>
-                <th>Actualizado</th>
-                <th class="text-right"></th>
-              </tr>
-            </thead>
-            <tbody>
-              @for(file of ownedFilesResource.value(); track file.id) {
-              <tr>
-                <td class="font-medium">{{ file.name }}</td>
-                <td class="text-base-200">{{ courseLabel(file) }}</td>
-                <td class="text-base-200">{{ file.mimeType }}</td>
-                <td class="text-base-200">{{ formatBytes(file.size) }}</td>
-                <td class="text-base-200">
-                  {{ file.updatedAt | date : 'short' }}
-                </td>
-                <td class="text-right">
-                  <button
-                    class="text-base-content hover:text-success p-1 rounded-lg  cursor-pointer"
-                    (click)="openFile(file.id)"
-                  >
-                    <span class="material-symbols-outlined text-medium!">open_in_new</span>
-                  </button>
-                  <button
-                    class="text-base-content hover:text-blue-500 p-1 rounded-lg  cursor-pointer"
-                    (click)="downloadFile(file.id)"
-                  >
-                    <span class="material-symbols-outlined text-medium!">download</span>
-                  </button>
-                  <button
-                    class="text-base-content hover:text-primary p-1 rounded-lg cursor-pointer"
-                    (click)="openShareModal(file)"
-                  >
-                    <span class="material-symbols-outlined text-medium!">share</span>
-                  </button>
-                </td>
-              </tr>
-              } @empty {
-              <tr>
-                <td colspan="5" class="text-center text-base-200">
-                  No has subido archivos.
-                </td>
-              </tr>
-              }
-            </tbody>
-          </table>
-        </div>
+        @if (ownedFilesResource.isLoading()) {
+          <lib-loader />
+        }
+        @if (ownedFilesResource.error()) {
+          <p>Error al cargar mis archivos</p>
+        }
+        @if (ownedFilesResource.hasValue()) {
+          <div class="overflow-x-auto bg-base-100 rounded-lg">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Nombre</th>
+                  <th>Curso</th>
+                  <th>Tipo</th>
+                  <th>Tamaño</th>
+                  <th>Actualizado</th>
+                  <th class="text-right"></th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (file of ownedFilesResource.value(); track file.id) {
+                  <tr>
+                    <td class="font-medium">{{ file.name }}</td>
+                    <td class="text-base-200">{{ courseLabel(file) }}</td>
+                    <td class="text-base-200">{{ file.mimeType }}</td>
+                    <td class="text-base-200">{{ formatBytes(file.size) }}</td>
+                    <td class="text-base-200">
+                      {{ file.updatedAt | date: 'short' }}
+                    </td>
+                    <td class="text-right">
+                      <button
+                        class="text-base-content hover:text-success p-1 rounded-lg  cursor-pointer"
+                        (click)="openFile(file.id)"
+                      >
+                        <span class="material-symbols-outlined text-medium!">open_in_new</span>
+                      </button>
+                      <button
+                        class="text-base-content hover:text-blue-500 p-1 rounded-lg  cursor-pointer"
+                        (click)="downloadFile(file.id)"
+                      >
+                        <span class="material-symbols-outlined text-medium!">download</span>
+                      </button>
+                      <button
+                        class="text-base-content hover:text-primary p-1 rounded-lg cursor-pointer"
+                        (click)="openShareModal(file)"
+                      >
+                        <span class="material-symbols-outlined text-medium!">share</span>
+                      </button>
+                    </td>
+                  </tr>
+                } @empty {
+                  <tr>
+                    <td colspan="5" class="text-center text-base-200">No has subido archivos.</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
         }
       </div>
     </div>
@@ -337,12 +298,8 @@ export default class FilesPage {
     this.#apollo
       .mutate<{ createFileDownloadUrl: { downloadUrl: string } }>({
         mutation: gql`
-          mutation CreateFileDownloadUrl(
-            $createFileDownloadInput: CreateFileDownloadInput!
-          ) {
-            createFileDownloadUrl(
-              createFileDownloadInput: $createFileDownloadInput
-            ) {
+          mutation CreateFileDownloadUrl($createFileDownloadInput: CreateFileDownloadInput!) {
+            createFileDownloadUrl(createFileDownloadInput: $createFileDownloadInput) {
               downloadUrl
             }
           }
@@ -368,12 +325,8 @@ export default class FilesPage {
     this.#apollo
       .mutate<{ createFileDownloadUrl: { downloadUrl: string } }>({
         mutation: gql`
-          mutation CreateFileDownloadUrl(
-            $createFileDownloadInput: CreateFileDownloadInput!
-          ) {
-            createFileDownloadUrl(
-              createFileDownloadInput: $createFileDownloadInput
-            ) {
+          mutation CreateFileDownloadUrl($createFileDownloadInput: CreateFileDownloadInput!) {
+            createFileDownloadUrl(createFileDownloadInput: $createFileDownloadInput) {
               downloadUrl
             }
           }
@@ -402,39 +355,21 @@ export default class FilesPage {
     const shareTargets = {
       COURSE: {
         ids: file.sharesCourses?.map((share) => share.course.id) ?? [],
-        labels: Object.fromEntries(
-          (file.sharesCourses ?? []).map((share) => [
-            share.course.id,
-            share.course.name,
-          ])
-        ),
+        labels: Object.fromEntries((file.sharesCourses ?? []).map((share) => [share.course.id, share.course.name])),
       },
       CLASS_GROUP: {
         ids: file.sharesClassGroups?.map((share) => share.classGroup.id) ?? [],
         labels: Object.fromEntries(
-          (file.sharesClassGroups ?? []).map((share) => [
-            share.classGroup.id,
-            share.classGroup.name,
-          ])
+          (file.sharesClassGroups ?? []).map((share) => [share.classGroup.id, share.classGroup.name]),
         ),
       },
       SCHOOL: {
         ids: file.sharesSchools?.map((share) => share.school.id) ?? [],
-        labels: Object.fromEntries(
-          (file.sharesSchools ?? []).map((share) => [
-            share.school.id,
-            share.school.name,
-          ])
-        ),
+        labels: Object.fromEntries((file.sharesSchools ?? []).map((share) => [share.school.id, share.school.name])),
       },
       USER: {
         ids: file.sharesUsers?.map((share) => share.user.id) ?? [],
-        labels: Object.fromEntries(
-          (file.sharesUsers ?? []).map((share) => [
-            share.user.id,
-            share.user.name,
-          ])
-        ),
+        labels: Object.fromEntries((file.sharesUsers ?? []).map((share) => [share.user.id, share.user.name])),
       },
     };
 

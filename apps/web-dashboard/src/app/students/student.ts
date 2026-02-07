@@ -316,7 +316,7 @@ const ENROLLMENT_STATUS_COLORS: Record<$Enums.EnrollmentStatus, string> = {
                     <div class="card bg-base-100 card-border border-base-300">
                       <div class="flex flex-col p-4 border-b border-base-300">
                         <h2 class="font-semibold">{{ course.subject.name }}</h2>
-                        <p class="text-sm text-base-content/60">{{ course.teacher.name }}</p>
+                        <p class="text-sm text-base-content/60">{{ course.teacher?.name ?? 'Sin profesor' }}</p>
                       </div>
                       <div class="overflow-x-auto">
                         <table class="table table-sm table-zebra">

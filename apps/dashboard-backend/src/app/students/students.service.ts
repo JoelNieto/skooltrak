@@ -335,6 +335,26 @@ export class StudentsService {
       };
     }
 
+    // Sync courses when classGroupId changes
+    if (rest.classGroupId !== undefined) {
+      if (rest.classGroupId) {
+        const group = await this.prisma.classGroup.findUnique({
+          where: { id: rest.classGroupId },
+        });
+        if (group) {
+          const courses = await this.prisma.course.findMany({
+            where: { studyPlanId: group.studyPlanId },
+          });
+          updateData.courses = {
+            set: courses.map((course) => ({ id: course.id })),
+          };
+        }
+      } else {
+        // If classGroupId is being cleared, disconnect all courses
+        updateData.courses = { set: [] };
+      }
+    }
+
     return this.prisma.student.update({
       where: { id },
       data: updateData,

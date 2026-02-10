@@ -120,8 +120,8 @@ model File {
   id                    String                 @id @default(cuid())
   organizationId        String
   organization          Organization           @relation(fields: [organizationId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  ownerId               String
-  owner                 User                   @relation(fields: [ownerId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  ownerId               String?
+  owner                 User?                  @relation(fields: [ownerId], references: [id], onDelete: SetNull , onUpdate: Cascade)
   name                  String
   mimeType              String
   size                  Int
@@ -332,13 +332,13 @@ model Course {
   code               String
   shortName          String
   organizationId     String
-  organization       Organization               @relation(fields: [organizationId], references: [id])
+  organization       Organization               @relation(fields: [organizationId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   schoolId           String
-  school             School                     @relation(fields: [schoolId], references: [id])
+  school             School                     @relation(fields: [schoolId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   subjectId          String
-  subject            Subject                    @relation(fields: [subjectId], references: [id])
+  subject            Subject                    @relation(fields: [subjectId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   studyPlanId        String
-  studyPlan          StudyPlan                  @relation(fields: [studyPlanId], references: [id])
+  studyPlan          StudyPlan                  @relation(fields: [studyPlanId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   createdAt          DateTime                   @default(now())
   updatedAt          DateTime                   @updatedAt
   students           Student[]
@@ -394,10 +394,10 @@ model Student {
   motherName            String
   documentId            String
   organizationId        String
-  organization          Organization           @relation(fields: [organizationId], references: [id])
-  school                School                 @relation(fields: [schoolId], references: [id])
+  organization          Organization           @relation(fields: [organizationId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  school                School                 @relation(fields: [schoolId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   schoolId              String
-  classGroup            ClassGroup?            @relation(fields: [classGroupId], references: [id])
+  classGroup            ClassGroup?            @relation(fields: [classGroupId], references: [id], onDelete: SetNull, onUpdate: Cascade)
   classGroupId          String?
   birthDate             DateTime
   gender                Gender
@@ -411,7 +411,7 @@ model Student {
   emergencyContactPhone String                 @default("")
   courses               Course[]
   userId                String                 @unique
-  user                  User                   @relation(fields: [userId], references: [id])
+  user                  User                   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   parents               Parent[]
   createdAt             DateTime               @default(now())
   updatedAt             DateTime               @updatedAt
@@ -483,15 +483,15 @@ model Assignment {
   title             String
   details           String
   type              AssignmentType
-  school            School                 @relation(fields: [schoolId], references: [id])
-  course            Course                 @relation(fields: [courseId], references: [id])
+  school            School                 @relation(fields: [schoolId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  course            Course                 @relation(fields: [courseId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   date              DateTime
   schoolId          String
   courseId          String
   dates             AssignmentDate[]
   requireSubmission Boolean
-  teacher           Teacher                @relation(fields: [teacherId], references: [id])
-  teacherId         String
+  teacher           Teacher?                @relation(fields: [teacherId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  teacherId         String?
   submissions       AssignmentSubmission[]
   createdAt         DateTime               @default(now())
   updatedAt         DateTime               @updatedAt
@@ -519,9 +519,9 @@ model AssignmentSubmission {
 model AssignmentDate {
   id           String     @id @default(cuid())
   date         DateTime
-  assignment   Assignment @relation(fields: [assignmentId], references: [id])
+  assignment   Assignment @relation(fields: [assignmentId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   assignmentId String
-  classGroup   ClassGroup @relation(fields: [classGroupId], references: [id])
+  classGroup   ClassGroup @relation(fields: [classGroupId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   classGroupId String
 
   @@map("assignment_dates")
@@ -716,7 +716,7 @@ model StudentGradeRevision {
 
 model JoinRequest {
   id            String            @id @default(cuid())
-  user          User              @relation(fields: [userId], references: [id])
+  user          User              @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId        String
   school        School            @relation(fields: [schoolId], references: [id])
   schoolId      String
@@ -732,7 +732,7 @@ model JoinRequest {
 
 model Notification {
   id          String   @id @default(cuid())
-  recipient   User     @relation(fields: [recipientId], references: [id])
+  recipient   User     @relation(fields: [recipientId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   recipientId String
   type        String   // 'JOIN_REQUEST', 'REQUEST_APPROVED', 'REQUEST_REJECTED'
   title       String

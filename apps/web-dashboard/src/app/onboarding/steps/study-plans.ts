@@ -114,19 +114,6 @@ import { CreatedEntity } from '../setup-wizard';
           </div>
 
           <div class="fieldset">
-            <label for="code" class="label">
-              <span class="label-text font-medium">Código</span>
-            </label>
-            <input
-              type="text"
-              id="code"
-              formControlName="code"
-              class="input input-bordered w-full"
-              placeholder="PRIM-1"
-            />
-          </div>
-
-          <div class="fieldset">
             <label for="gradeMetricId" class="label">
               <span class="label-text font-medium">Métrica de Calificaciones</span>
             </label>
@@ -276,7 +263,6 @@ export default class StudyPlansStep {
   public form = this.fb.group({
     name: ['', [Validators.required]],
     shortName: ['', [Validators.required]],
-    code: ['', [Validators.required]],
     level: [1, [Validators.required]],
     degreeId: ['', [Validators.required]],
     gradeMetricId: ['', [Validators.required]],

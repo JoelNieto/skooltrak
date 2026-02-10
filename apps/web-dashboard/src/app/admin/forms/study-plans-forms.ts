@@ -35,14 +35,6 @@ import Store from '../../core/store';
           />
         </div>
         <div class="fieldset">
-          <label for="code">Código</label>
-          <input
-            type="text"
-            formControlName="code"
-            class="input input-primary"
-          />
-        </div>
-        <div class="fieldset">
           <label for="level">Grado</label>
           <input
             type="number"
@@ -153,7 +145,6 @@ export default class StudyPlanForm implements OnInit {
   public form = this.fb.group({
     name: ['', [Validators.required]],
     shortName: ['', [Validators.required]],
-    code: ['', [Validators.required]],
     description: ['', []],
     level: [0, [Validators.required]],
     degreeId: ['', [Validators.required]],

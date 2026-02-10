@@ -875,9 +875,6 @@ input CreateStudentInput {
 }
 
 input CreateStudyPlanInput {
-  """Code of the study plan"""
-  code: String!
-
   """Degree ID of the study plan"""
   degreeId: String!
 
@@ -2642,9 +2639,6 @@ type StudentSubmissionFile {
 }
 
 type StudyPlan {
-  """Code of the study plan"""
-  code: String!
-
   """Created at of the study plan"""
   createdAt: DateTime!
 
@@ -3227,9 +3221,6 @@ input UpdateStudentInput {
 }
 
 input UpdateStudyPlanInput {
-  """Code of the study plan"""
-  code: String
-
   """Degree ID of the study plan"""
   degreeId: String
 

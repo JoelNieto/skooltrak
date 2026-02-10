@@ -19,9 +19,6 @@ export class CreateStudyPlanInput
   @Field(() => String, { description: 'Description of the study plan' })
   description: string;
 
-  @Field(() => String, { description: 'Code of the study plan' })
-  code: string;
-
   @Field(() => String, { description: 'School ID of the study plan' })
   schoolId: string;
 

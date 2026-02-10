@@ -50,6 +50,9 @@ import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
         <li>
           <a routerLink="join-requests" routerLinkActive="bg-primary text-primary-content">Solicitudes</a>
         </li>
+        <li>
+          <a routerLink="newsletters" routerLinkActive="bg-primary text-primary-content">Boletines</a>
+        </li>
       </ul>
     </div>
     <div class="pt-4">

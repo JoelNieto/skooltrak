@@ -599,6 +599,20 @@ input CreateMessageInput {
   subject: String!
 }
 
+input CreateNewsletterInput {
+  """Content of the newsletter (HTML)"""
+  content: String!
+
+  """Whether to publish immediately"""
+  published: Boolean = false
+
+  """School ID the newsletter belongs to"""
+  schoolId: String!
+
+  """Title of the newsletter"""
+  title: String!
+}
+
 input CreateOrganizationInput {
   active: Boolean
   description: String!
@@ -1406,6 +1420,7 @@ type Mutation {
   createGradeBucket(createGradeBucketInput: CreateGradeBucketInput!): GradeBucket!
   createGroupsSchedule(createGroupsScheduleInput: CreateGroupsScheduleInput!): GroupsSchedule!
   createMessage(createMessageInput: CreateMessageInput!): Message!
+  createNewsletter(createNewsletterInput: CreateNewsletterInput!): Newsletter!
   createOrganization(createOrganizationInput: CreateOrganizationInput!): Organization!
   createParent(createParentInput: CreateParentInput!): Parent!
   createPeriod(createPeriodInput: CreatePeriodInput!): Period!
@@ -1448,6 +1463,7 @@ type Mutation {
   removeMember(memberIdOrEmail: String!, organizationId: String): Boolean!
   removeMessage(id: String!): Message!
   removeMessageRecipient(id: String!): MessageRecipient!
+  removeNewsletter(id: String!): Newsletter!
   removeOrganization(id: String!): Organization!
   removeParent(id: String!): Parent!
   removePeriod(id: String!): Period!
@@ -1480,6 +1496,7 @@ type Mutation {
   updateGradeBucket(updateGradeBucketInput: UpdateGradeBucketInput!): GradeBucket!
   updateGroupsSchedule(updateGroupsScheduleInput: UpdateGroupsScheduleInput!): GroupsSchedule!
   updateMemberRole(memberId: String!, organizationId: String, role: String!): Boolean!
+  updateNewsletter(updateNewsletterInput: UpdateNewsletterInput!): Newsletter!
   updateOrganization(updateOrganizationInput: UpdateOrganizationInput!): Organization!
   updateParent(updateParentInput: UpdateParentInput!): Parent!
   updatePeriod(updatePeriodInput: UpdatePeriodInput!): Period!
@@ -1497,6 +1514,47 @@ type Mutation {
   updateSubject(updateSubjectInput: UpdateSubjectInput!): Subject!
   updateTeacher(updateTeacherInput: UpdateTeacherInput!): Teacher!
   updateUser(updateUserInput: UpdateUserInput!): User!
+}
+
+type Newsletter {
+  """Author of the newsletter"""
+  author: User!
+
+  """Author user ID"""
+  authorId: String!
+
+  """Content of the newsletter (HTML)"""
+  content: String!
+
+  """Created at"""
+  createdAt: DateTime!
+
+  """ID of the newsletter"""
+  id: String!
+
+  """Organization of the newsletter"""
+  organization: Organization!
+
+  """Organization ID"""
+  organizationId: String!
+
+  """Whether the newsletter is published"""
+  published: Boolean!
+
+  """Date when the newsletter was published"""
+  publishedAt: DateTime
+
+  """School of the newsletter"""
+  school: School!
+
+  """School ID"""
+  schoolId: String!
+
+  """Title of the newsletter"""
+  title: String!
+
+  """Updated at"""
+  updatedAt: DateTime!
 }
 
 type NotificationItem {
@@ -1866,6 +1924,26 @@ type Query {
     take: Int
   ): [MessageRecipient!]!
   findManyMessagesCount: Int!
+  findManyNewslettersCount(
+    """Order by"""
+    orderBy: String = "name"
+
+    """Order direction"""
+    orderDirection: String = "asc"
+
+    """School ID"""
+    schoolId: String
+
+    """Search query"""
+    search: String = ""
+
+    """Skip"""
+    skip: Int
+    studyPlanId: String
+
+    """Take"""
+    take: Int
+  ): Int!
   findManyStudentsCount(
     """Order by"""
     orderBy: String = "name"
@@ -1967,6 +2045,27 @@ type Query {
   """Get the current student submission for an assignment"""
   myAssignmentSubmission(assignmentId: String!): AssignmentSubmission
   myJoinRequestStatus: JoinRequestStatus
+  newsletter(id: String!): Newsletter
+  newsletters(
+    """Order by"""
+    orderBy: String = "name"
+
+    """Order direction"""
+    orderDirection: String = "asc"
+
+    """School ID"""
+    schoolId: String
+
+    """Search query"""
+    search: String = ""
+
+    """Skip"""
+    skip: Int
+    studyPlanId: String
+
+    """Take"""
+    take: Int
+  ): [Newsletter!]!
   notifications: [NotificationItem!]!
   onboardingStatus: OnboardingStatus!
   organization(id: String!): Organization!
@@ -2058,6 +2157,7 @@ type Query {
     """Take"""
     take: Int
   ): Int!
+  publishedNewsletters(schoolId: String!, take: Int! = 3): [Newsletter!]!
   quiz(id: String!): Quiz!
   quizzes(organizationId: String!): [Quiz!]!
   role(id: String!): Role!
@@ -2863,6 +2963,21 @@ input UpdateGroupsScheduleInput {
 
   """Week day"""
   weekday: String
+}
+
+input UpdateNewsletterInput {
+  """Content of the newsletter (HTML)"""
+  content: String
+  id: String!
+
+  """Whether to publish immediately"""
+  published: Boolean = false
+
+  """School ID the newsletter belongs to"""
+  schoolId: String
+
+  """Title of the newsletter"""
+  title: String
 }
 
 input UpdateOrganizationInput {

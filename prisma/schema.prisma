@@ -37,6 +37,7 @@ model Organization {
   messages            Message[]
   files               File[]
   attendanceSessions  AttendanceSession[]
+  newsletters         Newsletter[]
   // Better-auth organization plugin
   members             Member[]
   invitations         Invitation[]
@@ -74,6 +75,7 @@ model User {
   fileShares        FileShareUser[]
   notifications     Notification[]
   joinRequests      JoinRequest[]
+  newsletters       Newsletter[]
   // Better-auth relations
   sessions          Session[]
   accounts          Account[]
@@ -251,6 +253,7 @@ model School {
   periods        Period[]
   fileShares     FileShareSchool[]
   joinRequests   JoinRequest[]
+  newsletters    Newsletter[]
 
   @@map("schools")
 }
@@ -822,6 +825,24 @@ model Invitation {
   @@index([organizationId])
   @@index([email])
   @@map("invitations")
+}
+
+model Newsletter {
+  id             String       @id @default(cuid())
+  title          String
+  content        String
+  published      Boolean      @default(false)
+  publishedAt    DateTime?
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  organizationId String
+  school         School       @relation(fields: [schoolId], references: [id])
+  schoolId       String
+  author         User         @relation(fields: [authorId], references: [id])
+  authorId       String
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  @@map("newsletters")
 }
 
 // ==========================================

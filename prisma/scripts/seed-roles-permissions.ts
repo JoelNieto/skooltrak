@@ -51,6 +51,8 @@ enum Perm {
   VIEW_STUDY_PLANS = 'VIEW_STUDY_PLANS',
   MANAGE_PERIODS = 'MANAGE_PERIODS',
   VIEW_PERIODS = 'VIEW_PERIODS',
+  MANAGE_NEWSLETTER = 'MANAGE_NEWSLETTER',
+  VIEW_NEWSLETTER = 'VIEW_NEWSLETTER',
   MANAGE_ROLES = 'MANAGE_ROLES',
   MANAGE_PERMISSIONS = 'MANAGE_PERMISSIONS',
 }
@@ -89,6 +91,8 @@ const PERMISSION_DESCRIPTIONS: Record<Perm, string> = {
   [Perm.VIEW_STUDY_PLANS]: 'View study plans',
   [Perm.MANAGE_PERIODS]: 'Create, update, and delete periods',
   [Perm.VIEW_PERIODS]: 'View periods',
+  [Perm.MANAGE_NEWSLETTER]: 'Create, update, and delete newsletters',
+  [Perm.VIEW_NEWSLETTER]: 'View newsletters',
   [Perm.MANAGE_ROLES]: 'Create, update, and delete roles',
   [Perm.MANAGE_PERMISSIONS]: 'Manage permission assignments',
 };
@@ -133,6 +137,7 @@ const DEFAULT_ROLES: RoleDef[] = [
       Perm.MANAGE_MESSAGES,
       Perm.MANAGE_FILES,
       Perm.MANAGE_QUIZZES,
+      Perm.VIEW_NEWSLETTER,
     ],
   },
   {
@@ -156,6 +161,7 @@ const DEFAULT_ROLES: RoleDef[] = [
       Perm.VIEW_SCHEDULES,
       Perm.VIEW_STUDY_PLANS,
       Perm.VIEW_PERIODS,
+      Perm.VIEW_NEWSLETTER,
     ],
   },
   {
@@ -168,6 +174,7 @@ const DEFAULT_ROLES: RoleDef[] = [
       Perm.VIEW_GRADES,
       Perm.VIEW_MESSAGES,
       Perm.VIEW_SCHEDULES,
+      Perm.VIEW_NEWSLETTER,
     ],
   },
 ];
@@ -230,6 +237,33 @@ async function main() {
       }
 
       console.log(`✓ Upserted global role: ${roleDef.name} (${roleDef.permissions.length} permissions)`);
+    }
+
+    // 3. Sync org-specific roles: ensure they have the same permissions as their global counterparts
+    for (const roleDef of DEFAULT_ROLES) {
+      const permissionConnections = roleDef.permissions.map((p) => ({
+        id: permissionMap.get(p)!,
+      }));
+
+      const orgRoles = await tx.role.findMany({
+        where: {
+          name: roleDef.name,
+          organizationId: { not: null },
+        },
+      });
+
+      for (const orgRole of orgRoles) {
+        await tx.role.update({
+          where: { id: orgRole.id },
+          data: {
+            permissions: { set: permissionConnections },
+          },
+        });
+      }
+
+      if (orgRoles.length > 0) {
+        console.log(`✓ Synced ${orgRoles.length} org-specific ${roleDef.name} role(s)`);
+      }
     }
   });
 

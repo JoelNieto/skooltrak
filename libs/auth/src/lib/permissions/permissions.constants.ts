@@ -68,6 +68,10 @@ export enum Perm {
   MANAGE_PERIODS = 'MANAGE_PERIODS',
   VIEW_PERIODS = 'VIEW_PERIODS',
 
+  // Newsletters
+  MANAGE_NEWSLETTER = 'MANAGE_NEWSLETTER',
+  VIEW_NEWSLETTER = 'VIEW_NEWSLETTER',
+
   // Roles & Permissions management
   MANAGE_ROLES = 'MANAGE_ROLES',
   MANAGE_PERMISSIONS = 'MANAGE_PERMISSIONS',
@@ -110,6 +114,8 @@ export const PERMISSION_DESCRIPTIONS: Record<Perm, string> = {
   [Perm.VIEW_STUDY_PLANS]: 'View study plans',
   [Perm.MANAGE_PERIODS]: 'Create, update, and delete periods',
   [Perm.VIEW_PERIODS]: 'View periods',
+  [Perm.MANAGE_NEWSLETTER]: 'Create, update, and delete newsletters',
+  [Perm.VIEW_NEWSLETTER]: 'View newsletters',
   [Perm.MANAGE_ROLES]: 'Create, update, and delete roles',
   [Perm.MANAGE_PERMISSIONS]: 'Manage permission assignments',
 };
@@ -159,6 +165,7 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<DefaultRole, Perm[]> = {
     Perm.MANAGE_MESSAGES,
     Perm.MANAGE_FILES,
     Perm.MANAGE_QUIZZES,
+    Perm.VIEW_NEWSLETTER,
   ],
 
   [DefaultRole.STUDENT]: [
@@ -176,6 +183,7 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<DefaultRole, Perm[]> = {
     Perm.VIEW_SCHEDULES,
     Perm.VIEW_STUDY_PLANS,
     Perm.VIEW_PERIODS,
+    Perm.VIEW_NEWSLETTER,
   ],
 
   [DefaultRole.PARENT]: [
@@ -185,6 +193,7 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<DefaultRole, Perm[]> = {
     Perm.VIEW_GRADES,
     Perm.VIEW_MESSAGES,
     Perm.VIEW_SCHEDULES,
+    Perm.VIEW_NEWSLETTER,
   ],
 };
 

@@ -96,6 +96,42 @@ import Store from './core/store';
         </div>
       </div>
     </div>
+
+    @if (!recentNewsletters.error()) {
+      <div class="mt-6">
+        <div class="card border border-base-200 bg-base-100">
+          <div class="card-body">
+            <h2 class="text-lg font-semibold text-base-content">Boletines recientes</h2>
+            @if ((recentNewsletters.value() ?? []).length === 0) {
+              <lib-empty-state
+                title="Sin boletines recientes"
+                description="Los boletines publicados aparecerán aquí."
+                icon="newspaper"
+              />
+            } @else {
+              <div class="space-y-3">
+                @for (newsletter of recentNewsletters.value() ?? []; track newsletter.id) {
+                  <div class="rounded-lg border border-base-200 p-3">
+                    <p class="font-medium text-base-content">{{ newsletter.title }}</p>
+                    <p class="text-sm text-base-content/70 mt-1 line-clamp-2">
+                      {{ stripHtml(newsletter.content) }}
+                    </p>
+                    <div class="flex items-center justify-between mt-2">
+                      <span class="text-sm text-base-content/70">
+                        {{ newsletter.author.name }} · {{ newsletter.publishedAt | date: 'mediumDate' }}
+                      </span>
+                      <a [routerLink]="['/newsletters', newsletter.id]" class="link link-primary text-sm">
+                        Ver más
+                      </a>
+                    </div>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+    }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -198,6 +234,43 @@ export default class TeacherHome {
     },
   });
 
+  public recentNewsletters = rxResource({
+    params: () => ({ schoolId: this.store.currentSchoolId() }),
+    stream: ({ params }) => {
+      if (!params.schoolId) {
+        return of<RecentNewsletter[]>([]);
+      }
+      return this.apollo
+        .watchQuery<{ publishedNewsletters: RecentNewsletter[] }>({
+          query: gql`
+            query TeacherRecentNewsletters($schoolId: String!, $take: Int!) {
+              publishedNewsletters(schoolId: $schoolId, take: $take) {
+                id
+                title
+                content
+                publishedAt
+                author {
+                  id
+                  name
+                }
+              }
+            }
+          `,
+          variables: {
+            schoolId: params.schoolId,
+            take: 3,
+          },
+        })
+        .valueChanges.pipe(map((result) => result.data.publishedNewsletters));
+    },
+  });
+
+  stripHtml(html: string): string {
+    const div = document.createElement('div');
+    div.innerHTML = html;
+    return div.textContent?.trim() ?? '';
+  }
+
   public upcomingAssignments = computed(() => {
     const assignments = this.assignmentsResource.value() ?? [];
     return [...assignments].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()).slice(0, 4);
@@ -209,6 +282,14 @@ export default class TeacherHome {
 type AssignmentPreview = Prisma.AssignmentGetPayload<{
   include: { course: true };
 }>;
+
+type RecentNewsletter = {
+  id: string;
+  title: string;
+  content: string;
+  publishedAt: string;
+  author: { id: string; name: string };
+};
 
 type RecentMessage = {
   id: string;

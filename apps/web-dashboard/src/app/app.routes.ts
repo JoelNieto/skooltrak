@@ -320,6 +320,25 @@ export const appRoutes: Route[] = [
         loadComponent: () => import('./admin/pages/school-form'),
       },
 
+      // Newsletter view (any authenticated user)
+      {
+        path: 'newsletters/:id',
+        canActivate: [permissionGuard('VIEW_NEWSLETTER')],
+        loadComponent: () => import('./newsletters/newsletter-view'),
+      },
+
+      // Newsletter management (admin-only)
+      {
+        path: 'admin/newsletters/new',
+        canActivate: [permissionGuard('MANAGE_NEWSLETTER')],
+        loadComponent: () => import('./admin/forms/newsletter-form'),
+      },
+      {
+        path: 'admin/newsletters/:id/edit',
+        canActivate: [permissionGuard('MANAGE_NEWSLETTER')],
+        loadComponent: () => import('./admin/forms/newsletter-form'),
+      },
+
       // Admin panel (ORG_ADMIN only)
       {
         path: 'admin',
@@ -374,6 +393,10 @@ export const appRoutes: Route[] = [
           {
             path: 'events-calendar',
             loadComponent: () => import('./admin/pages/events-calendar'),
+          },
+          {
+            path: 'newsletters',
+            loadComponent: () => import('./admin/pages/newsletters'),
           },
           { path: '', redirectTo: 'schools', pathMatch: 'full' },
         ],

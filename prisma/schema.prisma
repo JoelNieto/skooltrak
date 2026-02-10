@@ -228,7 +228,7 @@ model Permission {
 
 model School {
   id             String       @id @default(cuid())
-  organization   Organization @relation(fields: [organizationId], references: [id])
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   organizationId String
   name           String
   shortName      String
@@ -261,7 +261,7 @@ model School {
 model Period {
   id        String   @id @default(cuid())
   schoolId  String
-  school    School   @relation(fields: [schoolId], references: [id])
+  school    School   @relation(fields: [schoolId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   name      String
   shortName String
   year      Int
@@ -277,7 +277,7 @@ model Period {
 
 model Subject {
   id             String       @id @default(cuid())
-  organization   Organization @relation(fields: [organizationId], references: [id])
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   organizationId String
   name           String
   code           String
@@ -309,11 +309,11 @@ model StudyPlan {
   shortName     String
   level         Int
   degreeId      String
-  degree        Degree       @relation(fields: [degreeId], references: [id])
+  degree        Degree       @relation(fields: [degreeId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   description   String
   code          String
   schoolId      String
-  school        School       @relation(fields: [schoolId], references: [id])
+  school        School       @relation(fields: [schoolId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   courses       Course[]
   createdAt     DateTime     @default(now())
   updatedAt     DateTime     @updatedAt
@@ -365,13 +365,13 @@ model ClassGroup {
   name               String
   shortName          String
   organizationId     String
-  organization       Organization               @relation(fields: [organizationId], references: [id])
+  organization       Organization               @relation(fields: [organizationId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   schoolId           String
-  school             School                     @relation(fields: [schoolId], references: [id])
-  studyPlan          StudyPlan                  @relation(fields: [studyPlanId], references: [id])
+  school             School                     @relation(fields: [schoolId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  studyPlan          StudyPlan                  @relation(fields: [studyPlanId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   active             Boolean
   students           Student[]
-  teacher            Teacher?                   @relation(fields: [teacherId], references: [id])
+  teacher            Teacher?                   @relation(fields: [teacherId], references: [id], onDelete: SetNull, onUpdate: Cascade)
   teacherId          String?
   studyPlanId        String
   assignmentDates    AssignmentDate[]
@@ -437,9 +437,9 @@ model Parent {
   workPhone      String       @default("")
   address        String       @default("")
   organizationId String
-  organization   Organization @relation(fields: [organizationId], references: [id])
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   students       Student[]
-  user           User?        @relation(fields: [userId], references: [id])
+  user           User?        @relation(fields: [userId], references: [id], onDelete: SetNull, onUpdate: Cascade)
   userId         String?      @unique
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
@@ -455,7 +455,7 @@ model Teacher {
   motherName         String
   documentId         String
   organizationId     String
-  organization       Organization        @relation(fields: [organizationId], references: [id])
+  organization       Organization        @relation(fields: [organizationId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   birthDate          DateTime
   address            String              @default("")
   phoneNumber        String              @default("")
@@ -467,7 +467,7 @@ model Teacher {
   gender             Gender
   classGroups        ClassGroup[]
   courses            Course[]
-  user               User                @relation(fields: [userId], references: [id])
+  user               User                @relation(fields: [userId], references: [id], onDelete: SetNull, onUpdate: Cascade)
   userId             String              @unique
   createdAt          DateTime            @default(now())
   updatedAt          DateTime            @updatedAt
@@ -531,12 +531,12 @@ model Quiz {
   id              String           @id @default(cuid())
   title           String
   details         String
-  organization    Organization     @relation(fields: [organizationId], references: [id])
+  organization    Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   organizationId  String
-  course          Course           @relation(fields: [courseId], references: [id])
+  course          Course           @relation(fields: [courseId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   courseId        String
-  teacher         Teacher          @relation(fields: [teacherId], references: [id])
-  teacherId       String
+  teacher         Teacher?          @relation(fields: [teacherId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  teacherId       String?
   createdAt       DateTime         @default(now())
   updatedAt       DateTime         @updatedAt
   questions       QuizQuestion[]
@@ -549,7 +549,7 @@ model Quiz {
 model QuizQuestion {
   id                  String                   @id @default(cuid())
   question            String
-  quiz                Quiz                     @relation(fields: [quizId], references: [id])
+  quiz                Quiz                     @relation(fields: [quizId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   quizId              String
   value               Decimal
   type                QuizQuestionType
@@ -563,7 +563,7 @@ model QuizQuestion {
 model QuizQuestionOption {
   id                  String                   @id @default(cuid())
   option              String
-  question            QuizQuestion             @relation(fields: [questionId], references: [id])
+  question            QuizQuestion             @relation(fields: [questionId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   questionId          String
   isCorrect           Boolean
   submissionQuestions QuizSubmissionQuestion[]
@@ -573,9 +573,9 @@ model QuizQuestionOption {
 
 model QuizSchedule {
   id           String     @id @default(cuid())
-  quiz         Quiz       @relation(fields: [quizId], references: [id])
+  quiz         Quiz       @relation(fields: [quizId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   quizId       String
-  classGroup   ClassGroup @relation(fields: [classGroupId], references: [id])
+  classGroup   ClassGroup @relation(fields: [classGroupId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   classGroupId String
   startDate    DateTime
   dueDate      DateTime
@@ -669,11 +669,11 @@ model Grade {
   title         String
   comments      String?
   courseId      String
-  course        Course         @relation(fields: [courseId], references: [id])
+  course        Course         @relation(fields: [courseId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   bucketId      String
-  bucket        GradeBucket    @relation(fields: [bucketId], references: [id])
+  bucket        GradeBucket    @relation(fields: [bucketId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   periodId      String
-  period        Period         @relation(fields: [periodId], references: [id])
+  period        Period         @relation(fields: [periodId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   date          DateTime
   published     Boolean        @default(false)
   createdAt     DateTime       @default(now())
@@ -689,7 +689,7 @@ model StudentGrade {
   gradeId   String
   grade     Grade                 @relation(fields: [gradeId], references: [id], onDelete: Cascade)
   studentId String
-  student   Student               @relation(fields: [studentId], references: [id])
+  student   Student               @relation(fields: [studentId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   score     Decimal?
   createdAt DateTime              @default(now())
   updatedAt DateTime              @updatedAt
@@ -702,7 +702,7 @@ model StudentGradeRevision {
   id            String        @id @default(cuid())
   reason        String
   studentGradeId String
-  studentGrade  StudentGrade  @relation(fields: [studentGradeId], references: [id])
+  studentGrade  StudentGrade  @relation(fields: [studentGradeId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   score         Decimal
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
@@ -833,12 +833,12 @@ model Newsletter {
   content        String
   published      Boolean      @default(false)
   publishedAt    DateTime?
-  organization   Organization @relation(fields: [organizationId], references: [id])
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   organizationId String
-  school         School       @relation(fields: [schoolId], references: [id])
+  school         School       @relation(fields: [schoolId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   schoolId       String
-  author         User         @relation(fields: [authorId], references: [id])
-  authorId       String
+  author         User?         @relation(fields: [authorId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  authorId       String?
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
 

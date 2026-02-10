@@ -1,11 +1,10 @@
 import { Confirmation } from '@/ui';
 import { afterRenderEffect, ChangeDetectionStrategy, Component, ElementRef, inject, viewChild } from '@angular/core';
-import { rxResource } from '@angular/core/rxjs-interop';
-import { RouterLink, RouterOutlet } from '@angular/router';
+import { rxResource, takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { NavigationEnd, Router, RouterLink, RouterOutlet } from '@angular/router';
 import { Prisma } from '@generated/prisma';
-
 import { Apollo, gql } from 'apollo-angular';
-import { map } from 'rxjs';
+import { filter, map } from 'rxjs';
 import Auth from '../auth/auth';
 import { Sidebar } from './sidebar';
 import Store from './store';
@@ -61,7 +60,7 @@ import Store from './store';
               } @else {
                 <span class="material-symbols-outlined text-xl">apartment</span>
               }
-              <span class="ml-2">{{ store.currentSchool()?.name }}</span>
+              <span class="ml-2 sm:block hidden">{{ store.currentSchool()?.name }}</span>
             </div>
             <ul
               tabindex="0"
@@ -105,7 +104,7 @@ import Store from './store';
                   <span>{{ auth.userInitials() }}</span>
                 </div>
               </div>
-              <div class="flex flex-col">
+              <div class="flex-col sm:flex hidden">
                 <span>{{ auth.userName() }}</span>
                 <span class="text-xs text-neutral-500">{{ auth.user()?.email }}</span>
               </div>
@@ -152,6 +151,7 @@ export default class Dashboard {
   public sidebarToggle = viewChild.required<ElementRef<HTMLElement>>('sidebarToggle');
 
   public store = inject(Store);
+  #router = inject(Router);
   private apollo = inject(Apollo);
   public auth = inject(Auth);
   #confirmation = inject(Confirmation);
@@ -206,6 +206,14 @@ export default class Dashboard {
   });
 
   constructor() {
+    this.#router.events
+      .pipe(
+        filter((event) => event instanceof NavigationEnd),
+        takeUntilDestroyed(),
+      )
+      .subscribe(() => {
+        this.closeSidebar();
+      });
     afterRenderEffect(() => {
       const schools = this.schools.value();
       if (schools?.length) {

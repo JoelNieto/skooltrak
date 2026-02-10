@@ -2,14 +2,14 @@ import { Confirmation, Pagination, Paginator, Toast } from '@/ui';
 import { Menu, MenuContent, MenuItem, MenuTrigger } from '@angular/aria/menu';
 import { OverlayModule } from '@angular/cdk/overlay';
 import { DatePipe } from '@angular/common';
-import { afterRenderEffect, ChangeDetectionStrategy, Component, inject, signal, viewChild } from '@angular/core';
-import { rxResource } from '@angular/core/rxjs-interop';
+import { afterRenderEffect, ChangeDetectionStrategy, Component, DestroyRef, inject, signal, viewChild } from '@angular/core';
+import { rxResource, takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { Prisma } from '@generated/prisma';
 
 import { Apollo, gql } from 'apollo-angular';
-import { filter, map, switchMap, tap } from 'rxjs';
+import { catchError, filter, map, of, switchMap, tap } from 'rxjs';
 import Auth from '../auth/auth';
 import Store from '../core/store';
 type Teacher = Prisma.TeacherGetPayload<{ include: { user: true } }> & {
@@ -174,6 +174,7 @@ export default class Teachers {
   public pagination = inject(Pagination);
   #confirmation = inject(Confirmation);
   #toasts = inject(Toast);
+  #destroyRef = inject(DestroyRef);
   actionsMenu = viewChild<Menu<string>>('actionsMenu');
   searchText = signal('');
 
@@ -230,6 +231,7 @@ export default class Teachers {
             this.pagination.updateCount(data.count);
           }),
           map((result) => result.data.teachers),
+          takeUntilDestroyed(this.#destroyRef),
         );
     },
   });
@@ -251,8 +253,8 @@ export default class Teachers {
         switchMap(() => {
           return this.apollo.mutate({
             mutation: gql`
-              mutation DeleteTeacher($id: String!) {
-                deleteTeacher(id: $id) {
+              mutation removeTeacher($id: String!) {
+                removeTeacher(id: $id) {
                   id
                 }
               }
@@ -261,6 +263,11 @@ export default class Teachers {
               id: teacher.id,
             },
           });
+        }),
+        catchError((error) => {
+          console.error(error);
+          this.#toasts.showError('Error al eliminar el profesor');
+          return of(null);
         }),
       )
       .subscribe(() => {

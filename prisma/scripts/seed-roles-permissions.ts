@@ -107,6 +107,11 @@ interface RoleDef {
 
 const DEFAULT_ROLES: RoleDef[] = [
   {
+    name: 'SYSADMIN',
+    description: 'System Administrator',
+    permissions: ALL_PERMISSIONS as Perm[],
+  },
+  {
     name: 'ORG_ADMIN',
     description: 'Organization Administrator',
     permissions: ALL_PERMISSIONS as Perm[],

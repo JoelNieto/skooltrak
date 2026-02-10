@@ -2,14 +2,7 @@ import { Confirmation, Modal, Pagination, Paginator, Toast } from '@/ui';
 import { Menu, MenuContent, MenuItem, MenuTrigger } from '@angular/aria/menu';
 import { OverlayModule } from '@angular/cdk/overlay';
 import { DatePipe } from '@angular/common';
-import {
-  afterRenderEffect,
-  ChangeDetectionStrategy,
-  Component,
-  inject,
-  signal,
-  viewChild,
-} from '@angular/core';
+import { afterRenderEffect, ChangeDetectionStrategy, Component, inject, signal, viewChild } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
@@ -19,17 +12,7 @@ import { map, tap } from 'rxjs';
 import { UsersForm } from './users-form';
 @Component({
   selector: 'app-users',
-  imports: [
-    RouterLink,
-    DatePipe,
-    Menu,
-    MenuContent,
-    MenuItem,
-    MenuTrigger,
-    OverlayModule,
-    Paginator,
-    FormsModule,
-  ],
+  imports: [RouterLink, DatePipe, Menu, MenuContent, MenuItem, MenuTrigger, OverlayModule, Paginator, FormsModule],
   providers: [Pagination],
   template: `<div class="breadcrumbs text-sm">
       <ul>
@@ -40,9 +23,7 @@ import { UsersForm } from './users-form';
     <div class="flex justify-between items-center mb-4">
       <div>
         <h1 class="text-2xl text-base-content font-medium">Usuarios</h1>
-        <p class="text-sm text-gray-500 dark:text-gray-400">
-          Listado de usuarios
-        </p>
+        <p class="text-sm text-gray-500 dark:text-gray-400">Listado de usuarios</p>
       </div>
 
       <button class="btn btn-neutral" (click)="editUser()">
@@ -51,12 +32,7 @@ import { UsersForm } from './users-form';
     </div>
     <div class="flex justify-between items-center mb-4">
       <div class="md:w-96 w-full">
-        <input
-          type="text"
-          class="input"
-          placeholder="Buscar"
-          [(ngModel)]="searchText"
-        />
+        <input type="text" class="input" placeholder="Buscar" [(ngModel)]="searchText" />
       </div>
     </div>
     <div class="overflow-x-auto">
@@ -74,72 +50,62 @@ import { UsersForm } from './users-form';
         </thead>
         <tbody>
           @for (user of users.value(); track user.id) {
-          <tr>
-            <td>{{ user.firstName }} {{ user.lastName }}</td>
-            <td>{{ user.email }}</td>
-            <td>{{ user.role.name }}</td>
-            <td>{{ user.organization?.name }}</td>
-            <td>{{ user.createdAt | date : 'medium' }}</td>
-            <td>{{ user.updatedAt | date : 'medium' }}</td>
-            <td>
-              <button
-                class="cursor-pointer hover:bg-base-200 p-1 rounded-lg flex items-center justify-center"
-                ngMenuTrigger
-                #origin
-                #trigger="ngMenuTrigger"
-                [menu]="formatMenu()"
-              >
-                <span class="material-symbols-outlined text-xl"
-                  >more_horiz</span
+            <tr>
+              <td>{{ user.firstName }} {{ user.lastName }}</td>
+              <td>{{ user.email }}</td>
+              <td>{{ user.role?.name ?? 'Sin rol' }}</td>
+              <td>{{ user.organization?.name ?? 'Sin organización' }}</td>
+              <td>{{ user.createdAt | date: 'medium' }}</td>
+              <td>{{ user.updatedAt | date: 'medium' }}</td>
+              <td>
+                <button
+                  class="cursor-pointer hover:bg-base-200 p-1 rounded-lg flex items-center justify-center"
+                  ngMenuTrigger
+                  #origin
+                  #trigger="ngMenuTrigger"
+                  [menu]="formatMenu()"
                 >
-              </button>
-              <ng-template
-                [cdkConnectedOverlayOpen]="trigger.expanded()"
-                [cdkConnectedOverlay]="{origin, usePopover: 'inline'}"
-                [cdkConnectedOverlayPositions]="[
-                  {
-                    originX: 'end',
-                    originY: 'bottom',
-                    overlayX: 'end',
-                    overlayY: 'top',
-                    offsetY: 4
-                  }
-                ]"
-                cdkAttachPopoverAsChild
-              >
-                <div
-                  ngMenu
-                  class="bg-base-100 shadow-sm rounded-lg p-1 w-48"
-                  #formatMenu="ngMenu"
+                  <span class="material-symbols-outlined text-xl">more_horiz</span>
+                </button>
+                <ng-template
+                  [cdkConnectedOverlayOpen]="trigger.expanded()"
+                  [cdkConnectedOverlay]="{ origin, usePopover: 'inline' }"
+                  [cdkConnectedOverlayPositions]="[
+                    {
+                      originX: 'end',
+                      originY: 'bottom',
+                      overlayX: 'end',
+                      overlayY: 'top',
+                      offsetY: 4,
+                    },
+                  ]"
+                  cdkAttachPopoverAsChild
                 >
-                  <ng-template ngMenuContent>
-                    <button
-                      ngMenuItem
-                      value="Edit"
-                      class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-base-200 w-full"
-                      (click)="editUser(user)"
-                    >
-                      <span class="material-symbols-outlined text-lg"
-                        >edit</span
+                  <div ngMenu class="bg-base-100 shadow-sm rounded-lg p-1 w-48" #formatMenu="ngMenu">
+                    <ng-template ngMenuContent>
+                      <button
+                        ngMenuItem
+                        value="Edit"
+                        class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-base-200 w-full"
+                        (click)="editUser(user)"
                       >
-                      <span>Editar</span>
-                    </button>
-                    <button
-                      ngMenuItem
-                      value="Delete"
-                      class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-base-200 w-full"
-                      (click)="deleteUser(user)"
-                    >
-                      <span class="material-symbols-outlined text-lg"
-                        >delete</span
+                        <span class="material-symbols-outlined text-lg">edit</span>
+                        <span>Editar</span>
+                      </button>
+                      <button
+                        ngMenuItem
+                        value="Delete"
+                        class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-base-200 w-full"
+                        (click)="deleteUser(user)"
                       >
-                      <span>Eliminar</span>
-                    </button>
-                  </ng-template>
-                </div>
-              </ng-template>
-            </td>
-          </tr>
+                        <span class="material-symbols-outlined text-lg">delete</span>
+                        <span>Eliminar</span>
+                      </button>
+                    </ng-template>
+                  </div>
+                </ng-template>
+              </td>
+            </tr>
           }
         </tbody>
       </table>
@@ -208,7 +174,7 @@ export class Users {
           tap((res) => {
             this.pagination.updateCount(res.data.count);
           }),
-          map((res) => res.data.users)
+          map((res) => res.data.users),
         ),
   });
 
@@ -221,7 +187,7 @@ export class Users {
   public editUser(
     user?: Prisma.UserGetPayload<{
       include: { organization: true; role: true };
-    }>
+    }>,
   ) {
     this.modal.open(UsersForm, {
       title: user ? 'Editar Usuario' : 'Nuevo Usuario',
@@ -234,7 +200,7 @@ export class Users {
   public deleteUser(
     user: Prisma.UserGetPayload<{
       include: { organization: true; role: true };
-    }>
+    }>,
   ) {
     this.confirmation
       .confirm({

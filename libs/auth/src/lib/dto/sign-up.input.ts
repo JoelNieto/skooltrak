@@ -1,10 +1,13 @@
 import { Field, InputType } from '@nestjs/graphql';
-import { IsEmail, IsNotEmpty, IsOptional, MinLength } from 'class-validator';
+import { IsEmail, IsNotEmpty, MinLength } from 'class-validator';
 
 @InputType()
 export class SignUpInput {
-  // User fields (required)
-  @Field(() => String, { description: 'Email of the user' })
+  @Field(() => String, { description: 'Verification token from email link' })
+  @IsNotEmpty()
+  token: string;
+
+  @Field(() => String, { description: 'Email of the user (must match token)' })
   @IsEmail()
   @IsNotEmpty()
   email: string;
@@ -21,13 +24,4 @@ export class SignUpInput {
   @MinLength(8)
   @IsNotEmpty()
   password: string;
-
-  // School fields (optional - created during onboarding)
-  @Field(() => String, { nullable: true, description: 'Name of the school (optional)' })
-  @IsOptional()
-  schoolName?: string;
-
-  @Field(() => String, { nullable: true, description: 'Short name of the school (optional)' })
-  @IsOptional()
-  schoolShortName?: string;
 }

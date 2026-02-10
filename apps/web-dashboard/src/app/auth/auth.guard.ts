@@ -14,21 +14,18 @@ export const authGuard: CanActivateFn & CanActivateChildFn = () => {
 
 export const teacherGuard: CanMatchFn = async () => {
   const auth = inject(Auth);
-  // Wait for user data to load before checking role
   await auth.waitUntilReady();
   return auth.role() === 'TEACHER';
 };
 
 export const adminGuard: CanMatchFn = async () => {
   const auth = inject(Auth);
-  // Wait for user data to load before checking role
   await auth.waitUntilReady();
   return auth.role() === 'ADMIN' || auth.role() === 'ORG_ADMIN';
 };
 
 export const studentGuard: CanMatchFn = async () => {
   const auth = inject(Auth);
-  // Wait for user data to load before checking role
   await auth.waitUntilReady();
   return auth.role() === 'STUDENT';
 };
@@ -42,9 +39,6 @@ export const parentGuard: CanMatchFn = async () => {
 /**
  * Factory that creates a CanActivate guard requiring at least one of
  * the given permission descriptiveIds (OR logic).
- *
- * Usage in routes:
- *   canActivate: [permissionGuard('MANAGE_STUDENTS', 'VIEW_STUDENTS')]
  */
 export function permissionGuard(...permissions: string[]): CanActivateFn {
   return async () => {
@@ -63,9 +57,6 @@ export function permissionGuard(...permissions: string[]): CanActivateFn {
 /**
  * Factory that creates a CanMatch guard requiring at least one of
  * the given permission descriptiveIds (OR logic).
- *
- * Usage in routes:
- *   canMatch: [permissionMatchGuard('VIEW_COURSES')]
  */
 export function permissionMatchGuard(...permissions: string[]): CanMatchFn {
   return async () => {
@@ -76,54 +67,9 @@ export function permissionMatchGuard(...permissions: string[]): CanMatchFn {
 }
 
 /**
- * Guard that ensures the user's email is verified.
- * Redirects to /verify-email if not verified.
- */
-export const emailVerifiedGuard: CanActivateFn = async () => {
-  const auth = inject(Auth);
-  const router = inject(Router);
-
-  if (!auth.isAuthenticated()) {
-    return router.createUrlTree(['/login']);
-  }
-
-  const isVerified = await auth.checkEmailVerified();
-  if (!isVerified) {
-    return router.createUrlTree(['/verify-email']);
-  }
-  return true;
-};
-
-/**
- * Guard that ensures the user has completed onboarding.
- * Redirects to /onboarding if not completed.
- */
-export const onboardingCompletedGuard: CanActivateFn = async () => {
-  const auth = inject(Auth);
-  const router = inject(Router);
-
-  if (!auth.isAuthenticated()) {
-    return router.createUrlTree(['/login']);
-  }
-
-  // First check email verification
-  const isVerified = await auth.checkEmailVerified();
-  if (!isVerified) {
-    return router.createUrlTree(['/verify-email']);
-  }
-
-  // Then check onboarding status
-  const status = await auth.checkOnboardingStatus();
-  if (!status.onboardingCompleted) {
-    return router.createUrlTree(['/onboarding']);
-  }
-
-  return true;
-};
-
-/**
  * Guard for the onboarding flow.
- * Only allows access if email is verified but onboarding is not completed.
+ * Requires authentication. Allows access to onboarding routes
+ * for users who haven't completed onboarding yet.
  */
 export const onboardingGuard: CanActivateFn = async () => {
   const auth = inject(Auth);
@@ -133,17 +79,52 @@ export const onboardingGuard: CanActivateFn = async () => {
     return router.createUrlTree(['/login']);
   }
 
-  // First check email verification
-  const isVerified = await auth.checkEmailVerified();
-  if (!isVerified) {
-    return router.createUrlTree(['/verify-email']);
-  }
+  // Wait for user data to be available
+  await auth.waitUntilReady();
 
-  // If onboarding already completed, redirect to home
-  const status = await auth.checkOnboardingStatus();
-  if (status.onboardingCompleted) {
+  const step = auth.onboardingStep();
+
+  // If onboarding is already completed, redirect to dashboard
+  if (step === 'completed') {
     return router.createUrlTree(['/home']);
   }
 
+  // Allow access to onboarding routes
   return true;
+};
+
+/**
+ * Guard that ensures onboarding is completed before accessing the dashboard.
+ * Redirects to appropriate onboarding step if not completed.
+ */
+export const onboardingCompletedGuard: CanActivateFn = async () => {
+  const auth = inject(Auth);
+  const router = inject(Router);
+
+  if (!auth.isAuthenticated()) {
+    return router.createUrlTree(['/login']);
+  }
+
+  // Wait for user data
+  await auth.waitUntilReady();
+
+  const step = auth.onboardingStep();
+
+  // If user has completed onboarding, allow through
+  if (step === 'completed') {
+    return true;
+  }
+
+  // Route based on onboarding step
+  switch (step) {
+    case 'choose-path':
+      return router.createUrlTree(['/onboarding/choose-path']);
+    case 'school-setup':
+      return router.createUrlTree(['/onboarding/setup']);
+    case 'waiting-approval':
+      return router.createUrlTree(['/onboarding/waiting-approval']);
+    default:
+      // No step set yet, or unknown step -> go to choose-path
+      return router.createUrlTree(['/onboarding/choose-path']);
+  }
 };

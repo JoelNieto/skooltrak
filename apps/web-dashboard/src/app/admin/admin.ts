@@ -47,6 +47,9 @@ import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
         <li>
           <a routerLink="events-calendar" routerLinkActive="bg-primary text-primary-content">Eventos</a>
         </li>
+        <li>
+          <a routerLink="join-requests" routerLinkActive="bg-primary text-primary-content">Solicitudes</a>
+        </li>
       </ul>
     </div>
     <div class="pt-4">

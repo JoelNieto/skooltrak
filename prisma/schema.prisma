@@ -56,20 +56,24 @@ model User {
   banned            Boolean            @default(false)
   banReason         String?
   banExpires        DateTime?
-  role              Role               @relation(fields: [roleId], references: [id])
-  roleId            String
+  role              Role?              @relation(fields: [roleId], references: [id])
+  roleId            String?
   organization      Organization?      @relation(fields: [organizationId], references: [id])
   organizationId    String?
+  onboardingStep    String?            // 'choose-path', 'school-setup', 'waiting-approval', 'completed'
   lastLogin         DateTime?
   isBlocked         Boolean            @default(false)
   createdAt         DateTime           @default(now())
   updatedAt         DateTime           @updatedAt
   student           Student?
   teacher           Teacher?
+  parent            Parent?
   sentMessages      Message[]
   messageRecipients MessageRecipient[]
   filesOwned        File[]
   fileShares        FileShareUser[]
+  notifications     Notification[]
+  joinRequests      JoinRequest[]
   // Better-auth relations
   sessions          Session[]
   accounts          Account[]
@@ -246,6 +250,7 @@ model School {
   currentYear    Int          @default(2025)
   periods        Period[]
   fileShares     FileShareSchool[]
+  joinRequests   JoinRequest[]
 
   @@map("schools")
 }
@@ -431,6 +436,8 @@ model Parent {
   organizationId String
   organization   Organization @relation(fields: [organizationId], references: [id])
   students       Student[]
+  user           User?        @relation(fields: [userId], references: [id])
+  userId         String?      @unique
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
 
@@ -701,6 +708,41 @@ model StudentGradeRevision {
 }
 
 // ==========================================
+// Join Requests & Notifications
+// ==========================================
+
+model JoinRequest {
+  id            String            @id @default(cuid())
+  user          User              @relation(fields: [userId], references: [id])
+  userId        String
+  school        School            @relation(fields: [schoolId], references: [id])
+  schoolId      String
+  requestedRole String            // 'ORG_ADMIN', 'TEACHER', 'PARENT'
+  documentId    String?
+  status        JoinRequestStatus @default(PENDING)
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+
+  @@unique([userId, schoolId])
+  @@map("join_requests")
+}
+
+model Notification {
+  id          String   @id @default(cuid())
+  recipient   User     @relation(fields: [recipientId], references: [id])
+  recipientId String
+  type        String   // 'JOIN_REQUEST', 'REQUEST_APPROVED', 'REQUEST_REJECTED'
+  title       String
+  message     String
+  read        Boolean  @default(false)
+  relatedId   String?
+  createdAt   DateTime @default(now())
+
+  @@index([recipientId])
+  @@map("notifications")
+}
+
+// ==========================================
 // Better-Auth Tables
 // ==========================================
 
@@ -835,6 +877,12 @@ enum EnrollmentStatus {
   ACTIVE
   CANDIDATE
   RETIRED
+}
+
+enum JoinRequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
 }
 
 model AttendanceSession {

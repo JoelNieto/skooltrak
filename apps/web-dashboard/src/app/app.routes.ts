@@ -1,5 +1,13 @@
 import { Route } from '@angular/router';
-import { adminGuard, authGuard, onboardingGuard, permissionGuard, studentGuard, teacherGuard } from './auth/auth.guard';
+import {
+  adminGuard,
+  authGuard,
+  onboardingCompletedGuard,
+  onboardingGuard,
+  permissionGuard,
+  studentGuard,
+  teacherGuard,
+} from './auth/auth.guard';
 
 export const appRoutes: Route[] = [
   {
@@ -27,35 +35,69 @@ export const appRoutes: Route[] = [
     loadComponent: () => import('./auth/accept-invitation'),
     title: 'Aceptar invitación | Skooltrak',
   },
-  // Email verification page (requires auth but not verified email)
-  {
-    path: 'verify-email',
-    canActivate: [authGuard],
-    loadComponent: () => import('./auth/verify-email'),
-    title: 'Verificar correo | Skooltrak',
-  },
-  // Onboarding flow (requires verified email but not completed onboarding)
+  // Onboarding flow (requires auth, routes based on onboardingStep)
   {
     path: 'onboarding',
     canActivate: [onboardingGuard],
     children: [
       {
-        path: 'acknowledge',
-        loadComponent: () => import('./onboarding/school-acknowledgment'),
-        title: 'Configuración inicial | Skooltrak',
+        path: 'choose-path',
+        loadComponent: () => import('./onboarding/choose-path'),
+        title: 'Elige tu camino | Skooltrak',
+      },
+      {
+        path: 'create-school',
+        loadComponent: () => import('./onboarding/create-school'),
+        title: 'Crear escuela | Skooltrak',
+      },
+      {
+        path: 'join-school',
+        loadComponent: () => import('./onboarding/join-school'),
+        title: 'Unirse a escuela | Skooltrak',
+      },
+      {
+        path: 'select-role',
+        loadComponent: () => import('./onboarding/select-role'),
+        title: 'Seleccionar rol | Skooltrak',
+      },
+      {
+        path: 'confirm-request',
+        loadComponent: () => import('./onboarding/confirm-request'),
+        title: 'Confirmar solicitud | Skooltrak',
+      },
+      {
+        path: 'verify-student',
+        loadComponent: () => import('./onboarding/verify-student'),
+        title: 'Verificación de estudiante | Skooltrak',
+      },
+      {
+        path: 'verify-parent',
+        loadComponent: () => import('./onboarding/verify-parent'),
+        title: 'Verificación de padre | Skooltrak',
+      },
+      {
+        path: 'waiting-approval',
+        loadComponent: () => import('./onboarding/waiting-approval'),
+        title: 'Esperando aprobación | Skooltrak',
       },
       {
         path: 'setup',
         loadComponent: () => import('./onboarding/setup-wizard'),
         title: 'Configuración inicial | Skooltrak',
       },
-      { path: '', redirectTo: 'acknowledge', pathMatch: 'full' },
+      // Legacy redirect
+      {
+        path: 'acknowledge',
+        redirectTo: 'create-school',
+        pathMatch: 'full',
+      },
+      { path: '', redirectTo: 'choose-path', pathMatch: 'full' },
     ],
   },
-  // Main dashboard (requires auth)
+  // Main dashboard (requires auth + completed onboarding)
   {
     path: '',
-    canActivate: [authGuard],
+    canActivate: [authGuard, onboardingCompletedGuard],
     canActivateChild: [authGuard],
     title: 'Software Educativo | Skooltrak',
     loadComponent: () => import('./core/dashboard'),
@@ -315,6 +357,11 @@ export const appRoutes: Route[] = [
           {
             path: 'parents',
             loadComponent: () => import('./admin/pages/parent-management'),
+          },
+          {
+            path: 'join-requests',
+            loadComponent: () => import('./admin/pages/join-requests'),
+            title: 'Solicitudes de ingreso | Skooltrak',
           },
           {
             path: 'attendance-reporting',

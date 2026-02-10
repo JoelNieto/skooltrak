@@ -1,4 +1,3 @@
-import { Prisma } from '@generated/prisma';
 import { Field, ObjectType } from '@nestjs/graphql';
 import { Organization } from '../../organizations/entities/organization.entity';
 import { Role } from '../../roles/entities/role.entity';
@@ -6,22 +5,12 @@ import { UserStudent } from './student.entity';
 import { UserTeacher } from './teacher.entity';
 
 @ObjectType()
-export class User
-  implements
-    Prisma.UserGetPayload<{
-      include: {
-        role: { include: { permissions: true; organization: true } };
-        teacher: true;
-        student: true;
-        organization: true;
-      };
-    }>
-{
+export class User {
   @Field(() => String)
   id: string;
 
-  @Field(() => Role)
-  role: Role;
+  @Field(() => Role, { nullable: true })
+  role: Role | null;
 
   @Field(() => String, { nullable: true })
   color: string | null;
@@ -55,14 +44,17 @@ export class User
   @Field(() => Date, { nullable: true })
   banExpires: Date | null;
 
-  @Field(() => String)
-  roleId: string;
+  @Field(() => String, { nullable: true })
+  roleId: string | null;
 
   @Field(() => String, { nullable: true })
   organizationId: string | null;
 
   @Field(() => Organization, { nullable: true })
   organization: Organization | null;
+
+  @Field(() => String, { nullable: true })
+  onboardingStep: string | null;
 
   @Field(() => Date, { nullable: true })
   lastLogin: Date | null;

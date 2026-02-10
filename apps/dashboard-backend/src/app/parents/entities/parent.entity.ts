@@ -45,6 +45,9 @@ export class Parent
   @Field(() => String, { description: 'Organization ID of the parent' })
   organizationId: string;
 
+  @Field(() => String, { nullable: true, description: 'User ID linked to this parent' })
+  userId: string | null;
+
   // Students relation is omitted to avoid circular dependency
   // Access students through the parentsByStudentId query instead
   students: any[];

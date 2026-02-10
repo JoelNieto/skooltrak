@@ -2,6 +2,7 @@ import { Toast } from '@/ui';
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { Apollo, gql } from 'apollo-angular';
+import Auth from '../auth/auth';
 
 // Step components
 import CoursesStep from './steps/courses';
@@ -124,6 +125,7 @@ export default class SetupWizard {
   private router = inject(Router);
   private apollo = inject(Apollo);
   private toasts = inject(Toast);
+  private auth = inject(Auth);
 
   public currentStep = signal(1);
   public completing = signal(false);
@@ -177,7 +179,9 @@ export default class SetupWizard {
         `,
       })
       .subscribe({
-        next: () => {
+        next: async () => {
+          // Reload user data so guards see onboardingStep: 'completed'
+          await this.auth.reloadUser();
           this.completing.set(false);
           this.toasts.showSuccess('Configuración completada exitosamente');
           this.router.navigate(['/home']);

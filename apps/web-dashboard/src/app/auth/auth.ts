@@ -71,6 +71,8 @@ export default class Auth {
                 firstName
                 lastName
                 color
+                onboardingStep
+                organizationId
                 teacher {
                   id
                   firstName
@@ -115,12 +117,10 @@ export default class Auth {
     if (!this.isAuthenticated()) {
       return true;
     }
-    // If authenticated, we need actual user data with a role to be loaded
-    // This ensures we wait for the NEW request after login, not just any "resolved" state
+    // If authenticated, we need user data to be loaded (role may be null for new users)
     const user = this.user();
     const status = this.userResource.status();
-    // We're ready if we have a user with a role, or if there was an error
-    return (user != null && user.role != null) || status === 'error';
+    return user != null || status === 'error';
   });
 
   // Promise-based method for guards to wait until user data is ready
@@ -139,10 +139,27 @@ export default class Auth {
     });
   }
 
+  /**
+   * Reload user data from the server and wait until it's refreshed.
+   */
+  public reloadUser(): Promise<void> {
+    this.userResource.reload();
+    return new Promise((resolve) => {
+      const checkInterval = setInterval(() => {
+        const status = this.userResource.status();
+        if (status === 'resolved' || status === 'error') {
+          clearInterval(checkInterval);
+          resolve();
+        }
+      }, 50);
+    });
+  }
+
   // Computed from user or session
   public userColor = computed(() => this.user()?.color);
   public role = computed(() => this.user()?.role?.name || this.sessionState()?.user?.role?.name);
   public permissions = computed<string[]>(() => this.user()?.role?.permissions?.map((p: any) => p.descriptiveId) || []);
+  public onboardingStep = computed(() => (this.user() as any)?.onboardingStep as string | null);
 
   public userName = computed(() => `${this.user()?.firstName} ${this.user()?.lastName}`);
   public userInitials = computed(
@@ -222,6 +239,7 @@ export default class Auth {
         this.token.set(accessToken);
         this.isSigning.set(false);
         this.#toasts.showSuccess('Bienvenido de nuevo');
+        // The onboardingCompletedGuard will redirect if onboarding is not done
         this.router.navigate(['/home']);
         return true;
       }

@@ -8,9 +8,14 @@
 
 import * as bcrypt from 'bcrypt';
 import { randomUUID } from 'crypto';
-import { PrismaClient } from '../../generated/prisma/index.js';
+import 'dotenv/config';
+import { PrismaClient } from '../../generated/prisma/client.js';
+import { PrismaPg } from '@prisma/adapter-pg';
 
-const prisma = new PrismaClient();
+const adapter = new PrismaPg({
+  connectionString: process.env['DATABASE_URL']!,
+});
+const prisma = new PrismaClient({ adapter });
 
 async function main() {
   const email = 'joelnieto1215@gmail.com';

@@ -1,5 +1,7 @@
 import { Prisma } from '@generated/prisma';
 
+type Decimal = InstanceType<typeof Prisma.Decimal>;
+
 type BuiltinObjects =
   | Date
   | RegExp
@@ -21,7 +23,7 @@ type BuiltinObjects =
   | Float32Array
   | Float64Array;
 
-export type DecimalToNumber<T> = T extends Prisma.Decimal
+export type DecimalToNumber<T> = T extends Decimal
   ? number // Convert Prisma.Decimal to number
   : T extends BuiltinObjects
   ? T // Leave built-in objects unchanged

@@ -7,6 +7,8 @@ import {
   ReactiveFormsModule,
 } from '@angular/forms';
 import { $Enums, Prisma } from '@generated/prisma';
+
+type Decimal = InstanceType<typeof Prisma.Decimal>;
 import QuestionOptionControl from './question-option-control';
 
 @Component({
@@ -53,7 +55,7 @@ export class QuizQuestionControl {
   public question = input.required<
     FormGroup<{
       question: FormControl<string>;
-      value: FormControl<number | Prisma.Decimal>;
+      value: FormControl<number | Decimal>;
       type: FormControl<$Enums.QuizQuestionType | ''>;
       timeLimit: FormControl<number>;
       options: FormArray<

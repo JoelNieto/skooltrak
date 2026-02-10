@@ -13,6 +13,8 @@ import {
 import { RouterLink } from '@angular/router';
 import { $Enums, Prisma } from '@generated/prisma';
 
+type Decimal = InstanceType<typeof Prisma.Decimal>;
+
 import { Apollo, gql } from 'apollo-angular';
 import { of } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -144,7 +146,7 @@ export default class QuizForm {
   ) {
     return this.fb.group<{
       question: FormControl<string>;
-      value: FormControl<number | Prisma.Decimal>;
+      value: FormControl<number | Decimal>;
       type: FormControl<$Enums.QuizQuestionType | ''>;
       timeLimit: FormControl<number>;
       options: FormArray<
@@ -155,7 +157,7 @@ export default class QuizForm {
       >;
     }>({
       question: this.fb.control(question?.question ?? ''),
-      value: this.fb.control((question?.value as number | Prisma.Decimal) ?? 0),
+      value: this.fb.control((question?.value as number | Decimal) ?? 0),
       type: this.fb.control((question?.type as $Enums.QuizQuestionType) ?? ''),
       timeLimit: this.fb.control((question?.timeLimit as number) ?? 0),
       options: this.fb.array<
@@ -209,7 +211,7 @@ export default class QuizForm {
     questions: this.fb.array<
       FormGroup<{
         question: FormControl<string>;
-        value: FormControl<number | Prisma.Decimal>;
+        value: FormControl<number | Decimal>;
         type: FormControl<$Enums.QuizQuestionType | ''>;
         timeLimit: FormControl<number>;
         options: FormArray<

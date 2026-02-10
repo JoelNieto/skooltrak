@@ -5,13 +5,12 @@
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
-  provider = "prisma-client-js"
+  provider = "prisma-client"
   output   = "../generated/prisma"
 }
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
 }
 
 model Organization {
@@ -41,6 +40,7 @@ model Organization {
   // Better-auth organization plugin
   members             Member[]
   invitations         Invitation[]
+  @@map("organizations")
 }
 
 model User {
@@ -74,6 +74,7 @@ model User {
   sessions          Session[]
   accounts          Account[]
   members           Member[]
+  @@map("users")
 }
 
 model Message {
@@ -91,6 +92,7 @@ model Message {
   createdAt       DateTime           @default(now())
   updatedAt       DateTime           @updatedAt
   deletedAt       DateTime?
+  @@map("messages")
 }
 
 model MessageRecipient {
@@ -105,6 +107,7 @@ model MessageRecipient {
   deletedAt DateTime?
 
   @@unique([messageId, userId])
+  @@map("message_recipients")
 }
 
 model File {
@@ -128,6 +131,7 @@ model File {
 
   @@index([organizationId])
   @@index([ownerId])
+  @@map("files")
 }
 
 model FileShareUser {
@@ -142,6 +146,7 @@ model FileShareUser {
 
   @@unique([fileId, userId])
   @@index([userId])
+  @@map("file_share_users")
 }
 
 model FileShareSchool {
@@ -156,6 +161,8 @@ model FileShareSchool {
 
   @@unique([fileId, schoolId])
   @@index([schoolId])
+
+  @@map("file_share_schools")
 }
 
 model FileShareClassGroup {
@@ -170,6 +177,7 @@ model FileShareClassGroup {
 
   @@unique([fileId, classGroupId])
   @@index([classGroupId])
+  @@map("file_share_class_groups")
 }
 
 model FileShareCourse {
@@ -184,6 +192,7 @@ model FileShareCourse {
 
   @@unique([fileId, courseId])
   @@index([courseId])
+  @@map("file_share_courses")
 }
 
 model Role {
@@ -198,6 +207,7 @@ model Role {
   updatedAt      DateTime      @updatedAt
 
   @@unique([organizationId, name])
+  @@map("roles")
 }
 
 model Permission {
@@ -207,6 +217,7 @@ model Permission {
   roles         Role[]
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
+  @@map("permissions")
 }
 
 model School {
@@ -235,6 +246,8 @@ model School {
   currentYear    Int          @default(2025)
   periods        Period[]
   fileShares     FileShareSchool[]
+
+  @@map("schools")
 }
 
 model Period {
@@ -250,6 +263,8 @@ model Period {
   updatedAt DateTime @updatedAt
   courses   Course[]
   grades    Grade[]
+
+  @@map("periods")
 }
 
 model Subject {
@@ -264,6 +279,7 @@ model Subject {
   teachers       Teacher[]
 
   @@unique([organizationId, name, code])
+  @@map("subjects")
 }
 
 model Degree {
@@ -275,6 +291,8 @@ model Degree {
   createdAt  DateTime    @default(now())
   updatedAt  DateTime    @updatedAt
   studyPlans StudyPlan[]
+
+  @@map("degrees")
 }
 
 model StudyPlan {
@@ -297,6 +315,7 @@ model StudyPlan {
 
   @@unique([schoolId, name])
   @@unique([schoolId, code])
+  @@map("study_plans")
 }
 
 model Course {
@@ -330,6 +349,7 @@ model Course {
   @@unique([schoolId, name])
   @@unique([schoolId, code])
   @@unique([schoolId, subjectId, studyPlanId])
+  @@map("courses")
 }
 
 model ClassGroup {
@@ -354,6 +374,8 @@ model ClassGroup {
   attendanceSessions AttendanceSession[]
   createdAt          DateTime                   @default(now())
   updatedAt          DateTime                   @updatedAt
+
+  @@map("class_groups")
 }
 
 model Student {
@@ -389,6 +411,8 @@ model Student {
   studentGrades         StudentGrade[]
   attendanceRecords     AttendanceRecord[]
   assignmentSubmissions AssignmentSubmission[]
+
+  @@map("students")
 }
 
 model Parent {
@@ -409,6 +433,8 @@ model Parent {
   students       Student[]
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
+
+  @@map("parents")
 }
 
 model Teacher {
@@ -438,6 +464,8 @@ model Teacher {
   assignments        Assignment[]
   quizzes            Quiz[]
   attendanceSessions AttendanceSession[]
+
+  @@map("teachers")
 }
 
 model Assignment {
@@ -457,6 +485,8 @@ model Assignment {
   submissions       AssignmentSubmission[]
   createdAt         DateTime               @default(now())
   updatedAt         DateTime               @updatedAt
+
+  @@map("assignments")
 }
 
 model AssignmentSubmission {
@@ -473,6 +503,7 @@ model AssignmentSubmission {
   @@unique([assignmentId, studentId])
   @@index([assignmentId])
   @@index([studentId])
+  @@map("assignment_submissions")
 }
 
 model AssignmentDate {
@@ -482,6 +513,8 @@ model AssignmentDate {
   assignmentId String
   classGroup   ClassGroup @relation(fields: [classGroupId], references: [id])
   classGroupId String
+
+  @@map("assignment_dates")
 }
 
 model Quiz {
@@ -499,6 +532,8 @@ model Quiz {
   questions       QuizQuestion[]
   schedules       QuizSchedule[]
   quizSubmissions QuizSubmission[]
+
+  @@map("quizzes")
 }
 
 model QuizQuestion {
@@ -511,6 +546,8 @@ model QuizQuestion {
   options             QuizQuestionOption[]
   submissionQuestions QuizSubmissionQuestion[]
   timeLimit           Int?
+
+  @@map("quiz_questions")
 }
 
 model QuizQuestionOption {
@@ -520,6 +557,8 @@ model QuizQuestionOption {
   questionId          String
   isCorrect           Boolean
   submissionQuestions QuizSubmissionQuestion[]
+
+  @@map("quiz_question_options")
 }
 
 model QuizSchedule {
@@ -533,6 +572,8 @@ model QuizSchedule {
   published    Boolean
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @updatedAt
+
+  @@map("quiz_schedules")
 }
 
 model ClassGroupWeeklySchedule {
@@ -552,6 +593,7 @@ model ClassGroupWeeklySchedule {
   updatedAt    DateTime   @updatedAt
 
   @@unique([classGroupId, courseId, weekday, startTime])
+  @@map("class_group_weekly_schedules")
 }
 
 model QuizSubmission {
@@ -566,6 +608,8 @@ model QuizSubmission {
   score               Decimal
   createdAt           DateTime                 @default(now())
   updatedAt           DateTime                 @updatedAt
+
+  @@map("quiz_submissions")
 }
 
 model QuizSubmissionQuestion {
@@ -579,6 +623,8 @@ model QuizSubmissionQuestion {
   isCorrect        Boolean
   score            Decimal
   comment          String?
+
+  @@map("quiz_submission_questions")
 }
 
 model GradeMetric {
@@ -591,6 +637,8 @@ model GradeMetric {
   createdAt         DateTime    @default(now())
   updatedAt         DateTime    @updatedAt
   studyPlans        StudyPlan[]
+
+  @@map("grade_metrics")
 }
 
 model GradeBucket {
@@ -602,6 +650,8 @@ model GradeBucket {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   grades    Grade[]
+
+  @@map("grade_buckets")
 }
 
 model Grade {
@@ -619,6 +669,8 @@ model Grade {
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
   studentGrades StudentGrade[]
+
+  @@map("grades")
 }
 
 model StudentGrade {
@@ -632,6 +684,8 @@ model StudentGrade {
   createdAt DateTime              @default(now())
   updatedAt DateTime              @updatedAt
   revisions StudentGradeRevision[]
+
+  @@map("student_grades")
 }
 
 model StudentGradeRevision {
@@ -642,6 +696,8 @@ model StudentGradeRevision {
   score         Decimal
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
+
+  @@map("student_grade_revisions")
 }
 
 // ==========================================
@@ -661,6 +717,7 @@ model Session {
   activeOrganizationId String?
 
   @@index([userId])
+  @@map("sessions")
 }
 
 model Account {
@@ -680,6 +737,7 @@ model Account {
   updatedAt             DateTime  @updatedAt
 
   @@index([userId])
+  @@map("accounts")
 }
 
 model Verification {
@@ -691,6 +749,7 @@ model Verification {
   updatedAt  DateTime @updatedAt
 
   @@index([identifier])
+  @@map("verifications")
 }
 
 model Member {
@@ -704,6 +763,7 @@ model Member {
 
   @@unique([organizationId, userId])
   @@index([userId])
+  @@map("members")
 }
 
 model Invitation {
@@ -719,6 +779,7 @@ model Invitation {
 
   @@index([organizationId])
   @@index([email])
+  @@map("invitations")
 }
 
 // ==========================================
@@ -795,6 +856,7 @@ model AttendanceSession {
   @@index([courseId])
   @@index([classGroupId])
   @@index([date])
+  @@map("attendance_sessions")
 }
 
 model AttendanceRecord {
@@ -810,4 +872,5 @@ model AttendanceRecord {
 
   @@unique([attendanceSessionId, studentId])
   @@index([studentId])
+  @@map("attendance_records")
 }

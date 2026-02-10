@@ -1,4 +1,5 @@
 import { PrismaClient } from '@generated/prisma';
+import { PrismaPg } from '@prisma/adapter-pg';
 import * as bcrypt from 'bcrypt';
 import { betterAuth } from 'better-auth';
 import { prismaAdapter } from 'better-auth/adapters/prisma';
@@ -8,7 +9,10 @@ import { sendEmail } from './resend.service';
 console.log('[Better Auth] Initializing...');
 console.log('[Better Auth] DATABASE_URL:', process.env['DATABASE_URL'] ? 'Set' : 'NOT SET');
 
-const prisma = new PrismaClient();
+const adapter = new PrismaPg({
+  connectionString: process.env['DATABASE_URL']!,
+});
+const prisma = new PrismaClient({ adapter });
 
 console.log('[Better Auth] Creating betterAuth instance with basePath: /api/auth');
 

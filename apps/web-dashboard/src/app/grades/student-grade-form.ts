@@ -13,6 +13,8 @@ import {
   Validators,
 } from '@angular/forms';
 import { Prisma } from '@generated/prisma';
+
+type Decimal = InstanceType<typeof Prisma.Decimal>;
 import { Apollo, gql } from 'apollo-angular';
 @Component({
   selector: 'app-student-grade-form',
@@ -61,7 +63,7 @@ export default class StudentGradeForm {
   #apollo = inject(Apollo);
 
   public form = this.#fb.group({
-    score: this.#fb.control<number | Prisma.Decimal | null>(0),
+    score: this.#fb.control<number | Decimal | null>(0),
     comments: [''],
   });
 

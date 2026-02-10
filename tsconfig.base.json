@@ -26,7 +26,7 @@
         "libs/ui/src/index.ts"
       ],
       "@generated/prisma": [
-        "generated/prisma"
+        "generated/prisma/client"
       ],
       "@/shared": [
         "libs/shared/src/index.ts"

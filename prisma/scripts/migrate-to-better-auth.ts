@@ -4,10 +4,15 @@
  * Run with: bun run prisma/scripts/migrate-to-better-auth.ts
  */
 
-import { PrismaClient } from '../../generated/prisma/index.js';
+import 'dotenv/config';
+import { PrismaClient } from '../../generated/prisma/client.js';
+import { PrismaPg } from '@prisma/adapter-pg';
 import { randomUUID } from 'crypto';
 
-const prisma = new PrismaClient();
+const adapter = new PrismaPg({
+  connectionString: process.env['DATABASE_URL']!,
+});
+const prisma = new PrismaClient({ adapter });
 
 function generateSlug(name: string): string {
   return name

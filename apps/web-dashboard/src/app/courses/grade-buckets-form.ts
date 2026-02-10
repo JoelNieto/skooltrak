@@ -6,6 +6,8 @@ import {
   Validators,
 } from '@angular/forms';
 import { Prisma } from '@generated/prisma';
+
+type Decimal = InstanceType<typeof Prisma.Decimal>;
 import { Apollo, gql } from 'apollo-angular';
 @Component({
   selector: 'app-grade-bucket-form',
@@ -49,7 +51,7 @@ export default class GradeBucketForm implements OnInit {
   #apollo = inject(Apollo);
   public form = this.#fb.group({
     name: ['', [Validators.required]],
-    weight: this.#fb.control<number | Prisma.Decimal>(0, [Validators.required]),
+    weight: this.#fb.control<number | Decimal>(0, [Validators.required]),
   });
 
   ngOnInit() {

@@ -1,14 +1,6 @@
 import { DecimalToNumber, Modal } from '@/ui';
 import { DecimalPipe, NgClass } from '@angular/common';
-import {
-  afterRenderEffect,
-  ChangeDetectionStrategy,
-  Component,
-  computed,
-  inject,
-  input,
-  signal,
-} from '@angular/core';
+import { afterRenderEffect, ChangeDetectionStrategy, Component, computed, inject, input, signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
@@ -31,104 +23,78 @@ export type StudentType = {
   selector: 'app-course-grades',
   imports: [FormsModule, DecimalPipe, RouterLink, NgClass],
   template: ` <div class="flex justify-end gap-2">
-      <select
-        class="select select-primary w-64!"
-        [ngModel]="currentPeriod()"
-        (ngModelChange)="periodId.set($event)"
-      >
+      <select class="select select-primary w-64!" [ngModel]="currentPeriod()" (ngModelChange)="periodId.set($event)">
         <option disabled selected value="">Selecciona un periodo...</option>
-        @for(period of periodsResource.value()!; track period.id) {
-        <option [value]="period.id">{{ period.name }}</option>
+        @for (period of periodsResource.value()!; track period.id) {
+          <option [value]="period.id">{{ period.name }}</option>
         }
       </select>
-      <button class="btn btn-primary btn-soft" (click)="editGrade()">
-        Nueva calificacion
-      </button>
+      <button class="btn btn-primary btn-soft" (click)="editGrade()">Nueva calificacion</button>
     </div>
     <div class="overflow-x-auto">
       <table class="table table-zebra table-fixed">
         <thead>
           <tr>
             <th class="w-[10rem]">Estudiante</th>
-            @for(grade of gradesResource.value(); track grade.id) {
-            <th class="w-[2rem] min-w-[2rem] max-w-[2rem]">
-              <a
-                [routerLink]="['/grades', grade.id]"
-                class="link link-primary text-nowrap overflow-hidden text-ellipsis block"
-              >
-                {{ grade.title }}</a
-              >
-            </th>
+            @for (grade of gradesResource.value(); track grade.id) {
+              <th class="w-[2rem] min-w-[2rem] max-w-[2rem]">
+                <a
+                  [routerLink]="['/grades', grade.id]"
+                  class="link link-primary text-nowrap overflow-hidden text-ellipsis block"
+                >
+                  {{ grade.title }}</a
+                >
+              </th>
             }
             <th class="w-[2rem] min-w-[2rem] max-w-[2rem]">Promedio actual</th>
           </tr>
         </thead>
         <tbody>
-          @for(student of groupedGrades(); track student.id) {
-          <tr>
-            <td>
-              <a
-                [routerLink]="['/students', student.id]"
-                class="flex items-center gap-2 cursor-pointer"
-              >
-                <div class="avatar avatar-placeholder">
-                  <div
-                    class="text-white w-7 rounded-full"
-                    [style.background]="student.color"
-                  >
-                    <span class="text-xs">{{ student.initials }}</span>
+          @for (student of groupedGrades(); track student.id) {
+            <tr>
+              <td>
+                <a [routerLink]="['/students', student.id]" class="flex items-center gap-2 cursor-pointer">
+                  <div class="avatar avatar-placeholder">
+                    <div class="text-white w-7 rounded-full" [style.background]="student.color">
+                      <span class="text-xs">{{ student.initials }}</span>
+                    </div>
                   </div>
-                </div>
-                {{ student.name }}
-              </a>
-            </td>
-            @for(grade of student.grades; track grade.id) {
-            <td
-              class="text-center w-[2rem] min-w-[2rem] max-w-[2rem]"
-              [ngClass]="{
-              '!text-success bg-success/10':
-                grade.item?.score &&
-                grade.item?.score! >= metric().minimumApproval,
-              '!text-warning bg-warning/10':
-                grade.item?.score &&
-                (grade.item?.score! >= metric().minimumApproval &&
-                  grade.item?.score! < metric().minimumExcellence),
-              '!text-error bg-error/10':
-                grade.item?.score &&
-                grade.item?.score! < metric().minimumApproval,
-            }"
-            >
-              {{ (grade.item?.score | number : '1.1-1') ?? '-' }}
-            </td>
-            }
-            <td
-              class="text-center font-bold w-[2rem] min-w-[2rem] max-w-[2rem]"
-              [ngClass]="{
-              '!text-success bg-success/10':
-                student.averageScore &&
-                student.averageScore >= metric().minimumApproval,
-              '!text-warning bg-warning/10':
-                student.averageScore &&
-                (student.averageScore >= metric().minimumApproval &&
-                  student.averageScore < metric().minimumExcellence),
-              '!text-error bg-error/10':
-                student.averageScore &&
-                student.averageScore < metric().minimumApproval,
-            }"
-            >
-              {{
-                student.averageScore
-                  ? (student.averageScore | number : '1.1-1')
-                  : '-'
-              }}
-            </td>
-          </tr>
+                  {{ student.name }}
+                </a>
+              </td>
+              @for (grade of student.grades; track grade.id) {
+                <td
+                  class="text-center w-[2rem] min-w-[2rem] max-w-[2rem]"
+                  [ngClass]="{
+                    '!text-success bg-success/10': grade.item?.score && grade.item?.score! >= metric().minimumApproval,
+                    '!text-warning bg-warning/10':
+                      grade.item?.score &&
+                      grade.item?.score! >= metric().minimumApproval && grade.item?.score! < metric().minimumExcellence,
+                    '!text-error bg-error/10': grade.item?.score && grade.item?.score! < metric().minimumApproval,
+                  }"
+                >
+                  {{ (grade.item?.score | number: '1.1-1') ?? '-' }}
+                </td>
+              }
+              <td
+                class="text-center font-bold w-[2rem] min-w-[2rem] max-w-[2rem]"
+                [ngClass]="{
+                  '!text-success bg-success/10':
+                    student.averageScore && student.averageScore >= metric().minimumApproval,
+                  '!text-warning bg-warning/10':
+                    student.averageScore &&
+                    student.averageScore >= metric().minimumApproval &&
+                      student.averageScore < metric().minimumExcellence,
+                  '!text-error bg-error/10': student.averageScore && student.averageScore < metric().minimumApproval,
+                }"
+              >
+                {{ student.averageScore ? (student.averageScore | number: '1.1-1') : '-' }}
+              </td>
+            </tr>
           } @empty {
-          <tr>
-            <td colspan="6" class="text-center">
-              No hay calificaciones para este curso
-            </td>
-          </tr>
+            <tr>
+              <td colspan="6" class="text-center">No hay calificaciones para este curso</td>
+            </tr>
           }
         </tbody>
       </table>
@@ -137,8 +103,7 @@ export type StudentType = {
 })
 export default class CourseGrades {
   public courseId = input.required<string>();
-  public metric =
-    input.required<DecimalToNumber<Prisma.GradeMetricGetPayload<undefined>>>();
+  public metric = input.required<DecimalToNumber<Prisma.GradeMetricGetPayload<undefined>>>();
   public currentPeriod = input<string | null>();
   #store = inject(Store);
   #apollo = inject(Apollo);
@@ -166,7 +131,6 @@ export default class CourseGrades {
               periodsByYear(year: $year) {
                 id
                 name
-                shortName
               }
             }
           `,
@@ -200,10 +164,7 @@ export default class CourseGrades {
                 name
                 initials
                 color
-                averageScore: averageScoreForStudent(
-                  courseId: $courseId
-                  periodId: $periodId
-                )
+                averageScore: averageScoreForStudent(courseId: $courseId, periodId: $periodId)
                 classGroup {
                   id
                   name
@@ -262,10 +223,7 @@ export default class CourseGrades {
                     id
                     firstName
                     fatherName
-                    averageScoreForStudent(
-                      courseId: $courseId
-                      periodId: $periodId
-                    )
+                    averageScoreForStudent(courseId: $courseId, periodId: $periodId)
                   }
                   score
                   comments

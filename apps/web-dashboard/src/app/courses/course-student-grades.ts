@@ -1,12 +1,6 @@
 import { DecimalToNumber } from '@/ui';
 import { DatePipe, DecimalPipe, NgClass } from '@angular/common';
-import {
-  afterRenderEffect,
-  Component,
-  inject,
-  input,
-  signal,
-} from '@angular/core';
+import { afterRenderEffect, Component, inject, input, signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { Prisma } from '@generated/prisma';
@@ -31,44 +25,46 @@ type StudentGradeItem = DecimalToNumber<
   template: `
     <div class="flex flex-col gap-4">
       <div class="flex justify-between items-start">
-        <div class="text-sm card card-compact bg-base-100 " [ngClass]="{
-          'bg-success/10': studentsResource.value().average >= metric().minimumApproval,
-          'bg-warning/10': studentsResource.value().average >= metric().minimumApproval && studentsResource.value().average < metric().minimumExcellence,
-          'bg-error/10': studentsResource.value().average < metric().minimumApproval,
-        }">
+        <div
+          class="text-sm card card-compact bg-base-100 "
+          [ngClass]="{
+            'bg-success/10': studentsResource.value().average >= metric().minimumApproval,
+            'bg-warning/10':
+              studentsResource.value().average >= metric().minimumApproval &&
+              studentsResource.value().average < metric().minimumExcellence,
+            'bg-error/10': studentsResource.value().average < metric().minimumApproval,
+          }"
+        >
           <div class="card-body">
             <div class="text-sm text-base-content/70">Promedio del periodo:</div>
             <div class="text-lg font-bold">
-              <span [ngClass]="{
-                'text-success': studentsResource.value().average >= metric().minimumApproval,
-                'text-warning': studentsResource.value().average >= metric().minimumApproval && studentsResource.value().average < metric().minimumExcellence,
-                'text-error': studentsResource.value().average < metric().minimumApproval,
-              }">
-                {{ studentsResource.value().average | number : '1.1-1' }}
+              <span
+                [ngClass]="{
+                  'text-success': studentsResource.value().average >= metric().minimumApproval,
+                  'text-warning':
+                    studentsResource.value().average >= metric().minimumApproval &&
+                    studentsResource.value().average < metric().minimumExcellence,
+                  'text-error': studentsResource.value().average < metric().minimumApproval,
+                }"
+              >
+                {{ studentsResource.value().average | number: '1.1-1' }}
               </span>
             </div>
           </div>
         </div>
         <div class="w-64!">
-          <select
-            class="select select-primary"
-            [ngModel]="periodId()"
-            (ngModelChange)="periodId.set($event)"
-          >
-            <option disabled selected [value]="">
-              Selecciona un periodo...
-            </option>
-            @for(period of periodsResource.value(); track period.id) {
-            <option [value]="period.id">{{ period.name }}</option>
+          <select class="select select-primary" [ngModel]="periodId()" (ngModelChange)="periodId.set($event)">
+            <option disabled selected [value]="">Selecciona un periodo...</option>
+            @for (period of periodsResource.value(); track period.id) {
+              <option [value]="period.id">{{ period.name }}</option>
             }
           </select>
         </div>
       </div>
       <div class="flex items-center justify-between">
         @if (studentsResource.value().studentGradesByCourseId.length) {
-
         } @else {
-        <div class="text-sm text-base-content/70">Promedio del periodo: -</div>
+          <div class="text-sm text-base-content/70">Promedio del periodo: -</div>
         }
       </div>
       <div class="overflow-x-auto">
@@ -83,39 +79,28 @@ type StudentGradeItem = DecimalToNumber<
             </tr>
           </thead>
           <tbody>
-            @for(
-            item of studentsResource.value().studentGradesByCourseId;
-            track item.id
-            ) {
-            <tr>
-              <td>{{ item.grade.title }}</td>
+            @for (item of studentsResource.value().studentGradesByCourseId; track item.id) {
+              <tr>
+                <td>{{ item.grade.title }}</td>
 
-              <td>{{ item.comments }}</td>
-              <td>{{ item.grade.date | date : 'dd/MM/yyyy' }}</td>
-              <td>{{ item.grade.bucket.name }}</td>
-              <td
-                [ngClass]="{
-              '!text-success bg-success/10':
-                item.score &&
-                item.score! >= metric().minimumApproval,
-              '!text-warning bg-warning/10':
-                item.score &&
-                (item.score! >= metric().minimumApproval &&
-                  item.score! < metric().minimumExcellence),
-              '!text-error bg-error/10':
-                item.score &&
-                item.score! < metric().minimumApproval,
-            }"
-              >
-                {{ item.score | number : '1.1-1' }}
-              </td>
-            </tr>
+                <td>{{ item.comments }}</td>
+                <td>{{ item.grade.date | date: 'dd/MM/yyyy' }}</td>
+                <td>{{ item.grade.bucket.name }}</td>
+                <td
+                  [ngClass]="{
+                    '!text-success bg-success/10': item.score && item.score! >= metric().minimumApproval,
+                    '!text-warning bg-warning/10':
+                      item.score && item.score! >= metric().minimumApproval && item.score! < metric().minimumExcellence,
+                    '!text-error bg-error/10': item.score && item.score! < metric().minimumApproval,
+                  }"
+                >
+                  {{ item.score | number: '1.1-1' }}
+                </td>
+              </tr>
             } @empty {
-            <tr>
-              <td colspan="6" class="text-center">
-                No hay calificaciones para este periodo
-              </td>
-            </tr>
+              <tr>
+                <td colspan="6" class="text-center">No hay calificaciones para este periodo</td>
+              </tr>
             }
           </tbody>
         </table>
@@ -126,8 +111,7 @@ type StudentGradeItem = DecimalToNumber<
 export default class CourseStudentGrades {
   public courseId = input.required<string>();
   public currentPeriod = input<string | null>();
-  public metric =
-    input.required<DecimalToNumber<Prisma.GradeMetricGetPayload<undefined>>>();
+  public metric = input.required<DecimalToNumber<Prisma.GradeMetricGetPayload<undefined>>>();
   #store = inject(Store);
   #apollo = inject(Apollo);
   public periodId = signal<string>('');
@@ -150,7 +134,6 @@ export default class CourseStudentGrades {
               periodsByYear(year: $year) {
                 id
                 name
-                shortName
               }
             }
           `,
@@ -187,21 +170,9 @@ export default class CourseStudentGrades {
           studentGradesByCourseId: StudentGradeItem[];
         }>({
           query: gql`
-            query StudentGradesByCourseId(
-              $courseId: String!
-              $periodId: String!
-              $studentId: String!
-            ) {
-              average: averageCourseScoreForStudent(
-                studentId: $studentId
-                courseId: $courseId
-                periodId: $periodId
-              )
-              studentGradesByCourseId(
-                courseId: $courseId
-                periodId: $periodId
-                studentId: $studentId
-              ) {
+            query StudentGradesByCourseId($courseId: String!, $periodId: String!, $studentId: String!) {
+              average: averageCourseScoreForStudent(studentId: $studentId, courseId: $courseId, periodId: $periodId)
+              studentGradesByCourseId(courseId: $courseId, periodId: $periodId, studentId: $studentId) {
                 id
                 score
                 comments
@@ -228,7 +199,7 @@ export default class CourseStudentGrades {
           map((result) => ({
             average: result.data.average,
             studentGradesByCourseId: result.data.studentGradesByCourseId,
-          }))
+          })),
         );
     },
   });

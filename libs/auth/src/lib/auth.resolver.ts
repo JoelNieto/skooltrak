@@ -438,9 +438,13 @@ export class AuthResolver {
     return true;
   }
 
-  @Mutation(() => Boolean)
+  @Mutation(() => AuthPayload)
   @AllowAnonymous()
-  async resetPassword(@Args('token') token: string, @Args('newPassword') newPassword: string): Promise<boolean> {
+  async resetPassword(
+    @Args('token') token: string,
+    @Args('newPassword') newPassword: string,
+    @Context() context: any,
+  ): Promise<AuthPayload> {
     let verification = await this.prisma.verification.findFirst({
       where: { value: token },
     });
@@ -483,11 +487,21 @@ export class AuthResolver {
     const bcrypt = await import('bcrypt');
     const hashedPassword = await bcrypt.hash(newPassword, 10);
 
+    // Check if the user is an invited teacher (has TEACHER role + organization already assigned)
+    const userWithRole = await this.prisma.user.findUnique({
+      where: { id: user.id },
+      include: { role: true },
+    });
+    const isInvitedTeacher =
+      userWithRole?.role?.name === 'TEACHER' && !!userWithRole.organizationId;
+
     await this.prisma.user.update({
       where: { id: user.id },
       data: {
         password: hashedPassword,
         emailVerified: true,
+        // Invited teachers skip onboarding entirely
+        ...(isInvitedTeacher && { onboardingStep: 'completed' }),
       },
     });
 
@@ -498,7 +512,26 @@ export class AuthResolver {
 
     await this.prisma.verification.delete({ where: { id: verification.id } });
 
-    return true;
+    // Auto-login: sign the user in via Better Auth and return JWT
+    const response = await auth.api.signInEmail({
+      body: { email: user.email, password: newPassword },
+      asResponse: true,
+    });
+
+    // Set session cookies from Better Auth response
+    const setCookieHeader = response.headers.get('set-cookie');
+    if (setCookieHeader && context.res) {
+      context.res.setHeader('set-cookie', setCookieHeader);
+    }
+
+    // Get full user data to generate JWT
+    const fullUser = await this.prisma.user.findUnique({
+      where: { id: user.id },
+      include: { role: { include: { permissions: true } } },
+    });
+
+    const accessToken = this.authService.generateJwt(fullUser!);
+    return { accessToken };
   }
 
   @UseGuards(BetterAuthGuard)

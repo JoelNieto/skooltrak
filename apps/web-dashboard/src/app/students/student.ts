@@ -403,7 +403,6 @@ export default class Student {
               periodsByYear(year: $year) {
                 id
                 name
-                shortName
               }
             }
           `,
@@ -495,7 +494,6 @@ export default class Student {
                     period {
                       id
                       name
-                      shortName
                     }
                     createdAt
                     updatedAt

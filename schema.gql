@@ -1471,7 +1471,7 @@ type Mutation {
   removeUser(id: String!): User!
   requestJoinSchool(input: RequestJoinSchoolInput!): JoinRequestResult!
   requestPasswordReset(email: String!): Boolean!
-  resetPassword(newPassword: String!, token: String!): Boolean!
+  resetPassword(newPassword: String!, token: String!): AuthPayload!
   sendVerificationLink(email: String!): Boolean!
   setActiveOrganization(organizationId: String): Boolean!
   shareFile(shareFileInput: ShareFileInput!): File!

@@ -11,7 +11,6 @@ import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
         <li>Admin</li>
       </ul>
     </div>
-    <h1 class="text-2xl font-semibold">Admin</h1>
     <div class="border-b border-base-300">
       <ul class="menu menu-horizontal gap-2 ">
         <li>

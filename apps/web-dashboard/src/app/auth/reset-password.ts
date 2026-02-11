@@ -188,11 +188,12 @@ export default class ResetPasswordComponent {
     }
 
     this.loading.set(true);
-    const success = await this.auth.resetPassword(token, password);
+    const accessToken = await this.auth.resetPassword(token, password);
     this.loading.set(false);
 
-    if (success) {
-      this.router.navigate(['/login'], { queryParams: { reset: 'success' } });
+    if (accessToken) {
+      // User is already logged in after password reset, navigate to home
+      this.router.navigate(['/home']);
     } else {
       this.error.set(true);
     }

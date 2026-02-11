@@ -1,4 +1,4 @@
-import { Args, Int, Mutation, Query, Resolver } from '@nestjs/graphql';
+import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { CreatePeriodInput } from './dto/create-period.input';
 import { UpdatePeriodInput } from './dto/update-period.input';
 import { Period } from './entities/period.entity';
@@ -18,11 +18,6 @@ export class PeriodsResolver {
   @Query(() => [Period], { name: 'periods' })
   findAll() {
     return this.periodsService.findAll();
-  }
-
-  @Query(() => [Period], { name: 'periodsByYear' })
-  findManyByYear(@Args('year', { type: () => Int }) year: number) {
-    return this.periodsService.findManyByYear(year);
   }
 
   @Query(() => Period, { name: 'period' })

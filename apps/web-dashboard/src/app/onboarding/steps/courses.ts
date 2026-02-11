@@ -246,25 +246,25 @@ export default class CoursesStep {
   });
 
   public periods = rxResource({
-    params: () => ({ schoolId: this.schoolId() }),
+    params: () => ({ year: this.store.currentSchool()?.currentYear }),
     stream: ({ params }) => {
-      if (!params.schoolId) {
+      if (!params.year) {
         return of([]);
       }
       return this.apollo
-        .watchQuery<{ periodsBySchoolId: { id: string; name: string }[] }>({
+        .watchQuery<{ periodsByYear: { id: string; name: string }[] }>({
           query: gql`
-            query GetPeriodsBySchoolId($schoolId: String!) {
-              periodsBySchoolId(schoolId: $schoolId) {
+            query PeriodsByYear($year: Int!) {
+              periodsByYear(year: $year) {
                 id
                 name
               }
             }
           `,
-          variables: { schoolId: params.schoolId },
+          variables: { year: params.year },
           fetchPolicy: 'cache-first',
         })
-        .valueChanges.pipe(map((result) => result.data.periodsBySchoolId));
+        .valueChanges.pipe(map((result) => result.data.periodsByYear));
     },
   });
 

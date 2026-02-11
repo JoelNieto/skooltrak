@@ -667,12 +667,6 @@ input CreatePeriodInput {
   """Name of the period"""
   name: String!
 
-  """School ID of the period"""
-  schoolId: String!
-
-  """Short name of the period"""
-  shortName: String!
-
   """Start date of the period"""
   startDate: DateTime!
 
@@ -1686,12 +1680,6 @@ type Period {
   """Name of the period"""
   name: String!
 
-  """School ID of the period"""
-  schoolId: String!
-
-  """Short name of the period"""
-  shortName: String!
-
   """Start date of the period"""
   startDate: DateTime!
 
@@ -2112,7 +2100,7 @@ type Query {
   pendingJoinRequests: [PendingJoinRequest!]!
   period(id: String!): Period!
   periods: [Period!]!
-  periodsBySchoolId(schoolId: String!): [Period!]!
+  periodsByYear(year: Int!): [Period!]!
   permission(id: String!): Permission!
   permissions(
     """Order by"""
@@ -3032,12 +3020,6 @@ input UpdatePeriodInput {
 
   """Name of the period"""
   name: String
-
-  """School ID of the period"""
-  schoolId: String
-
-  """Short name of the period"""
-  shortName: String
 
   """Start date of the period"""
   startDate: DateTime

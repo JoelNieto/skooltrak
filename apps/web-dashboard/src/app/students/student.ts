@@ -7,6 +7,7 @@ import { RouterLink } from '@angular/router';
 import { $Enums, Prisma } from '@generated/prisma';
 import { Apollo, gql } from 'apollo-angular';
 import { map, of } from 'rxjs';
+import Store from '../core/store';
 import StudentAttendanceReport from './student-attendance-report';
 
 type TeacherType = Prisma.TeacherGetPayload<{ include: { user: true } }> & {
@@ -374,6 +375,7 @@ const ENROLLMENT_STATUS_COLORS: Record<$Enums.EnrollmentStatus, string> = {
 export default class Student {
   public id = input.required<string>();
   private apollo = inject(Apollo);
+  private store = inject(Store);
 
   getStatusLabel(status: $Enums.EnrollmentStatus): string {
     return ENROLLMENT_STATUS_LABELS[status] || status;
@@ -385,20 +387,20 @@ export default class Student {
 
   public periodsResource = rxResource({
     params: () => ({
-      schoolId: this.studentResource.value()?.schoolId,
+      year: this.store.currentSchool()?.currentYear,
     }),
     stream: ({ params }) => {
-      const { schoolId } = params;
-      if (!schoolId) {
+      const { year } = params;
+      if (!year) {
         return of([]);
       }
       return this.apollo
         .watchQuery<{
-          periodsBySchoolId: Prisma.PeriodGetPayload<{ include: undefined }>[];
+          periodsByYear: Prisma.PeriodGetPayload<{ include: undefined }>[];
         }>({
           query: gql`
-            query PeriodsBySchoolId($schoolId: String!) {
-              periodsBySchoolId(schoolId: $schoolId) {
+            query PeriodsByYear($year: Int!) {
+              periodsByYear(year: $year) {
                 id
                 name
                 shortName
@@ -406,10 +408,10 @@ export default class Student {
             }
           `,
           variables: {
-            schoolId,
+            year,
           },
         })
-        .valueChanges.pipe(map((result) => result.data.periodsBySchoolId));
+        .valueChanges.pipe(map((result) => result.data.periodsByYear));
     },
   });
 

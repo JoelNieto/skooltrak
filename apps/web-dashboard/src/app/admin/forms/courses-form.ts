@@ -175,28 +175,28 @@ export default class CoursesForm {
 
   public periods = rxResource({
     params: () => ({
-      schoolId: this.store.currentSchoolId(),
+      year: this.store.currentSchool()?.currentYear,
     }),
     stream: ({ params }) => {
-      if (!params.schoolId) {
+      if (!params.year) {
         return of([]);
       }
       return this.apollo
-        .watchQuery<{ periodsBySchoolId: Prisma.PeriodGetPayload<false>[] }>({
+        .watchQuery<{ periodsByYear: Prisma.PeriodGetPayload<false>[] }>({
           query: gql`
-            query GetPeriodsBySchoolId($schoolId: String!) {
-              periodsBySchoolId(schoolId: $schoolId) {
+            query PeriodsByYear($year: Int!) {
+              periodsByYear(year: $year) {
                 id
                 name
               }
             }
           `,
           variables: {
-            schoolId: params.schoolId,
+            year: params.year,
           },
           fetchPolicy: 'cache-first',
         })
-        .valueChanges.pipe(map((result) => result.data.periodsBySchoolId));
+        .valueChanges.pipe(map((result) => result.data.periodsByYear));
     },
   });
 

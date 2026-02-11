@@ -11,6 +11,7 @@ import { PrismaModule } from './prisma.module';
 import { SchoolsModule } from './schools/schools.module';
 import { SubjectsModule } from './subjects/subjects.module';
 import { GradeMetricsModule } from './grade-metrics/grade-metrics.module';
+import { PeriodsModule } from './periods/periods.module';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { GradeMetricsModule } from './grade-metrics/grade-metrics.module';
     SubjectsModule,
     AuthModule,
     GradeMetricsModule,
+    PeriodsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -17,12 +17,6 @@ export class PeriodsService {
     return this.prisma.period.findMany();
   }
 
-  findManyByYear(year: number) {
-    return this.prisma.period.findMany({
-      where: { year },
-    });
-  }
-
   findOne(id: string) {
     return this.prisma.period.findUnique({
       where: { id },

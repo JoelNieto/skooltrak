@@ -370,10 +370,6 @@ export const appRoutes: Route[] = [
             loadComponent: () => import('./admin/pages/degrees'),
           },
           {
-            path: 'periods',
-            loadComponent: () => import('./admin/pages/periods'),
-          },
-          {
             path: 'parents',
             loadComponent: () => import('./admin/pages/parent-management'),
           },

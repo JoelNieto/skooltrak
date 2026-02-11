@@ -250,7 +250,6 @@ model School {
   students       Student[]
   assignments    Assignment[]
   currentYear    Int          @default(2025)
-  periods        Period[]
   fileShares     FileShareSchool[]
   joinRequests   JoinRequest[]
   newsletters    Newsletter[]
@@ -260,10 +259,7 @@ model School {
 
 model Period {
   id        String   @id @default(cuid())
-  schoolId  String
-  school    School   @relation(fields: [schoolId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   name      String
-  shortName String
   year      Int
   startDate DateTime
   endDate   DateTime
@@ -271,6 +267,7 @@ model Period {
   updatedAt DateTime @updatedAt
   courses   Course[]
   grades    Grade[]
+  @@index([year, name])
 
   @@map("periods")
 }

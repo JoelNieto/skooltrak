@@ -180,6 +180,7 @@ export default class Dashboard {
                 country
                 email
                 phone
+                currentYear
                 website
                 createdAt
                 updatedAt

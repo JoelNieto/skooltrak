@@ -134,20 +134,20 @@ export default class CourseStudentGrades {
 
   public periodsResource = rxResource({
     params: () => ({
-      schoolId: this.#store.currentSchoolId(),
+      year: this.#store.currentSchool()?.currentYear,
     }),
     stream: ({ params }) => {
-      const { schoolId } = params;
-      if (!schoolId) {
+      const { year } = params;
+      if (!year) {
         return of([]);
       }
       return this.#apollo
         .query<{
-          periodsBySchoolId: Prisma.PeriodGetPayload<{ include: undefined }>[];
+          periodsByYear: Prisma.PeriodGetPayload<{ include: undefined }>[];
         }>({
           query: gql`
-            query PeriodsBySchoolId($schoolId: String!) {
-              periodsBySchoolId(schoolId: $schoolId) {
+            query PeriodsByYear($year: Int!) {
+              periodsByYear(year: $year) {
                 id
                 name
                 shortName
@@ -155,11 +155,11 @@ export default class CourseStudentGrades {
             }
           `,
           variables: {
-            schoolId,
+            year,
           },
           fetchPolicy: 'cache-first',
         })
-        .pipe(map((result) => result.data.periodsBySchoolId));
+        .pipe(map((result) => result.data.periodsByYear));
     },
   });
 

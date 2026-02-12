@@ -118,20 +118,6 @@ import Store from '../../core/store';
           }
         </select>
       </div>
-      <div class="fieldset">
-        <label for="currentPeriodId">Periodo actual</label>
-        <select
-          id="currentPeriodId"
-          name="currentPeriodId"
-          formControlName="currentPeriodId"
-          class="select select-primary"
-        >
-          <option value="" disabled>Seleccionar periodo...</option>
-          @for (period of periods.value(); track period.id) {
-            <option [value]="period.id">{{ period.name }}</option>
-          }
-        </select>
-      </div>
     </div>
     <div class="flex justify-end gap-2 mt-4">
       <button type="button" class="btn btn-ghost" (click)="closeModal.emit()">Cancelar</button>
@@ -172,33 +158,6 @@ export default class CoursesForm {
   public listbox = viewChild<Listbox<string>>(Listbox);
   public options = viewChildren<Option<string>>(Option);
   public combobox = viewChild<Combobox<string>>(Combobox);
-
-  public periods = rxResource({
-    params: () => ({
-      year: this.store.currentSchool()?.currentYear,
-    }),
-    stream: ({ params }) => {
-      if (!params.year) {
-        return of([]);
-      }
-      return this.apollo
-        .watchQuery<{ periodsByYear: Prisma.PeriodGetPayload<false>[] }>({
-          query: gql`
-            query PeriodsByYear($year: Int!) {
-              periodsByYear(year: $year) {
-                id
-                name
-              }
-            }
-          `,
-          variables: {
-            year: params.year,
-          },
-          fetchPolicy: 'cache-first',
-        })
-        .valueChanges.pipe(map((result) => result.data.periodsByYear));
-    },
-  });
 
   public subjects = rxResource({
     stream: () => {
@@ -260,7 +219,6 @@ export default class CoursesForm {
     subjectId: ['', [Validators.required]],
     studyPlanId: ['', [Validators.required]],
     teacherId: this.fb.control<string | null>(null),
-    currentPeriodId: this.fb.control<string | null>('', [Validators.required]),
   });
 
   public teachers = rxResource({

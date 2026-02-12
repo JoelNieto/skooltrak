@@ -265,7 +265,6 @@ model Period {
   endDate   DateTime
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  courses   Course[]
   grades    Grade[]
   @@index([year, name])
 
@@ -341,8 +340,6 @@ model Course {
   teacherId          String?
   assignments        Assignment[]
   quizzes            Quiz[]
-  currentPeriod      Period?                    @relation(fields: [currentPeriodId], references: [id], onDelete: SetNull, onUpdate: Cascade)
-  currentPeriodId    String?
   gradeBuckets       GradeBucket[]
   grades             Grade[]
   weeklySchedules    ClassGroupWeeklySchedule[]

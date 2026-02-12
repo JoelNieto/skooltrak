@@ -18,7 +18,7 @@ type Teacher = Prisma.TeacherGetPayload<{ include: { user: true } }> & {
 };
 
 type CourseType = Prisma.CourseGetPayload<{
-  include: { subject: true; studyPlan: true; currentPeriod: true };
+  include: { subject: true; studyPlan: true };
 }> & {
   teacher: Teacher;
 };
@@ -73,7 +73,6 @@ type CourseType = Prisma.CourseGetPayload<{
             <th>Asignatura</th>
             <th>Plan de estudio</th>
             <th>Docente</th>
-            <th>Periodo actual</th>
             <th></th>
           </tr>
         </thead>
@@ -97,7 +96,6 @@ type CourseType = Prisma.CourseGetPayload<{
               </a>
               } @else { -- }
             </td>
-            <td>{{ course.currentPeriod?.name }}</td>
             <td>
               <button
                 class="cursor-pointer hover:bg-base-200 p-1 rounded-lg flex items-center justify-center"
@@ -286,14 +284,10 @@ export default class Courses {
                 studyPlan {
                   name
                 }
-                currentPeriod {
-                  name
-                }
                 teacher {
                   id
                   name
                 }
-                currentPeriodId
                 subjectId
                 studyPlanId
                 teacherId

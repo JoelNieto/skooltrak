@@ -209,7 +209,7 @@ export class StudentsService {
     });
   }
 
-  async getStudentsGrades(id: string) {
+  async getStudentsGrades(id: string, periodId?: string) {
     const courses = await this.prisma.course.findMany({
       where: {
         students: { some: { id } },
@@ -219,31 +219,25 @@ export class StudentsService {
       },
     });
 
-    // Get all course IDs and their current period IDs
-    const coursePeriodMap = new Map<string, string>();
-    courses.forEach((course) => {
-      if (course.currentPeriodId) {
-        coursePeriodMap.set(course.id, course.currentPeriodId);
-      }
-    });
+    const courseIds = courses.map((c) => c.id);
 
-    if (coursePeriodMap.size === 0) {
-      return courses.map((course) => ({
-        ...course,
-        grades: [],
-      }));
+    if (courseIds.length === 0) {
+      return [];
     }
 
-    // Fetch grades for all courses, filtered by published and current period
+    // Build grade filter: always filter by published, optionally by periodId
+    const where: any = {
+      courseId: { in: courseIds },
+      published: true,
+    };
+
+    if (periodId) {
+      where.periodId = periodId;
+    }
+
+    // Fetch grades for all courses
     const grades = await this.prisma.grade.findMany({
-      where: {
-        courseId: { in: Array.from(coursePeriodMap.keys()) },
-        published: true,
-        OR: Array.from(coursePeriodMap.entries()).map(([courseId, periodId]) => ({
-          courseId,
-          periodId,
-        })),
-      },
+      where,
       include: {
         studentGrades: {
           where: {

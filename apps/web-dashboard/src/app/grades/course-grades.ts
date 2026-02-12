@@ -23,7 +23,7 @@ export type StudentType = {
   selector: 'app-course-grades',
   imports: [FormsModule, DecimalPipe, RouterLink, NgClass],
   template: ` <div class="flex justify-end gap-2">
-      <select class="select select-primary w-64!" [ngModel]="currentPeriod()" (ngModelChange)="periodId.set($event)">
+      <select class="select select-primary w-64!" [ngModel]="periodId()" (ngModelChange)="periodId.set($event)">
         <option disabled selected value="">Selecciona un periodo...</option>
         @for (period of periodsResource.value()!; track period.id) {
           <option [value]="period.id">{{ period.name }}</option>
@@ -104,7 +104,6 @@ export type StudentType = {
 export default class CourseGrades {
   public courseId = input.required<string>();
   public metric = input.required<DecimalToNumber<Prisma.GradeMetricGetPayload<undefined>>>();
-  public currentPeriod = input<string | null>();
   #store = inject(Store);
   #apollo = inject(Apollo);
   #modal = inject(Modal);
@@ -131,6 +130,8 @@ export default class CourseGrades {
               periodsByYear(year: $year) {
                 id
                 name
+                startDate
+                endDate
               }
             }
           `,
@@ -141,6 +142,16 @@ export default class CourseGrades {
         })
         .valueChanges.pipe(map((result) => result.data.periodsByYear));
     },
+  });
+
+  private currentPeriodId = computed(() => {
+    const periods = this.periodsResource.value();
+    if (!periods?.length) return '';
+    const today = new Date();
+    const current = periods.find(
+      (p) => new Date(p.startDate) <= today && today <= new Date(p.endDate),
+    );
+    return current?.id ?? '';
   });
 
   public students = rxResource({
@@ -268,7 +279,8 @@ export default class CourseGrades {
 
   constructor() {
     afterRenderEffect(() => {
-      this.periodId.set(this.currentPeriod() || '');
+      const id = this.currentPeriodId();
+      if (id) this.periodId.set(id);
     });
   }
 
@@ -279,7 +291,7 @@ export default class CourseGrades {
         size: 'large',
         data: {
           courseId: this.courseId(),
-          currentPeriod: this.currentPeriod(),
+          periodId: this.periodId(),
         },
       })
       .closed.subscribe((result) => {

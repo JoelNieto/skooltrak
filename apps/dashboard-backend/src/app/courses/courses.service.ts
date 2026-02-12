@@ -181,7 +181,6 @@ export class CoursesService {
         school: true,
         subject: true,
         studyPlan: true,
-        currentPeriod: true,
         teacher: true,
       },
     });
@@ -226,7 +225,6 @@ export class CoursesService {
         school: true,
         subject: true,
         studyPlan: { include: { degree: true } },
-        currentPeriod: true,
       },
     });
   }
@@ -238,7 +236,6 @@ export class CoursesService {
         school: true,
         subject: true,
         studyPlan: { include: { degree: true } },
-        currentPeriod: true,
       },
     });
   }
@@ -250,7 +247,6 @@ export class CoursesService {
         school: true,
         subject: true,
         studyPlan: { include: { degree: true } },
-        currentPeriod: true,
       },
     });
   }

@@ -24,7 +24,6 @@ type CourseType = Prisma.CourseGetPayload<{
   include: {
     studyPlan: { include: { gradeMetric: true } };
     subject: true;
-    currentPeriod: true;
   };
 }> & {
   teacher?: Teacher;
@@ -108,14 +107,12 @@ type CourseType = Prisma.CourseGetPayload<{
             @if (auth.isTeacher() || auth.isAdmin()) {
               <app-course-grades
                 [courseId]="id()"
-                [currentPeriod]="course.currentPeriodId"
                 [metric]="course.studyPlan.gradeMetric!"
               />
             }
             @if (auth.isStudent()) {
               <app-course-student-grades
                 [courseId]="id()"
-                [currentPeriod]="course.currentPeriodId"
                 [metric]="course.studyPlan.gradeMetric!"
               />
             }
@@ -199,7 +196,6 @@ export default class Course {
                 code
                 createdAt
                 updatedAt
-                currentPeriodId
                 subject {
                   id
                   name

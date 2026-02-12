@@ -1,8 +1,9 @@
 import { DecimalToNumber, Loader } from '@/ui';
 import { Tab, TabContent, TabList, TabPanel, Tabs } from '@angular/aria/tabs';
 import { DatePipe, DecimalPipe, NgClass } from '@angular/common';
-import { Component, inject, input } from '@angular/core';
+import { afterRenderEffect, Component, computed, inject, input, signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
+import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { $Enums, Prisma } from '@generated/prisma';
 import { Apollo, gql } from 'apollo-angular';
@@ -85,6 +86,7 @@ const ENROLLMENT_STATUS_COLORS: Record<$Enums.EnrollmentStatus, string> = {
     RouterLink,
     Loader,
     DatePipe,
+    FormsModule,
     TabList,
     Tab,
     Tabs,
@@ -159,7 +161,8 @@ const ENROLLMENT_STATUS_COLORS: Record<$Enums.EnrollmentStatus, string> = {
               <div ngTab value="attendance" class="tab">Asistencia</div>
             </div>
             <div class="w-64">
-              <select class="select select-primary">
+              <select class="select select-primary" [ngModel]="periodId()" (ngModelChange)="periodId.set($event)">
+                <option disabled selected value="">Selecciona un periodo...</option>
                 @for (period of periodsResource.value(); track period.id) {
                   <option [value]="period.id">{{ period.name }}</option>
                 }
@@ -377,6 +380,8 @@ export default class Student {
   private apollo = inject(Apollo);
   private store = inject(Store);
 
+  public periodId = signal<string>('');
+
   getStatusLabel(status: $Enums.EnrollmentStatus): string {
     return ENROLLMENT_STATUS_LABELS[status] || status;
   }
@@ -403,6 +408,8 @@ export default class Student {
               periodsByYear(year: $year) {
                 id
                 name
+                startDate
+                endDate
               }
             }
           `,
@@ -413,6 +420,23 @@ export default class Student {
         .valueChanges.pipe(map((result) => result.data.periodsByYear));
     },
   });
+
+  private currentPeriodId = computed(() => {
+    const periods = this.periodsResource.value();
+    if (!periods?.length) return '';
+    const today = new Date();
+    const current = periods.find(
+      (p) => new Date(p.startDate) <= today && today <= new Date(p.endDate),
+    );
+    return current?.id ?? '';
+  });
+
+  constructor() {
+    afterRenderEffect(() => {
+      const id = this.currentPeriodId();
+      if (id) this.periodId.set(id);
+    });
+  }
 
   public studentResource = rxResource({
     params: () => ({

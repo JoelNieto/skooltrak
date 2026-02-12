@@ -14,7 +14,7 @@ type Teacher = Prisma.TeacherGetPayload<{ include: { user: true } }> & {
 };
 
 type CourseType = Prisma.CourseGetPayload<{
-  include: { subject: true; studyPlan: true; currentPeriod: true };
+  include: { subject: true; studyPlan: true };
 }> & {
   teacher: Teacher | null;
 };
@@ -137,14 +137,10 @@ export default class Courses {
                 studyPlan {
                   name
                 }
-                currentPeriod {
-                  name
-                }
                 teacher {
                   id
                   name
                 }
-                currentPeriodId
                 subjectId
                 studyPlanId
                 teacherId

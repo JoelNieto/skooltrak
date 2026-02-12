@@ -1,6 +1,6 @@
 import { DecimalToNumber } from '@/ui';
 import { DatePipe, DecimalPipe, NgClass } from '@angular/common';
-import { afterRenderEffect, Component, inject, input, signal } from '@angular/core';
+import { afterRenderEffect, Component, computed, inject, input, signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { Prisma } from '@generated/prisma';
@@ -110,7 +110,6 @@ type StudentGradeItem = DecimalToNumber<
 })
 export default class CourseStudentGrades {
   public courseId = input.required<string>();
-  public currentPeriod = input<string | null>();
   public metric = input.required<DecimalToNumber<Prisma.GradeMetricGetPayload<undefined>>>();
   #store = inject(Store);
   #apollo = inject(Apollo);
@@ -134,6 +133,8 @@ export default class CourseStudentGrades {
               periodsByYear(year: $year) {
                 id
                 name
+                startDate
+                endDate
               }
             }
           `,
@@ -144,6 +145,16 @@ export default class CourseStudentGrades {
         })
         .pipe(map((result) => result.data.periodsByYear));
     },
+  });
+
+  private currentPeriodId = computed(() => {
+    const periods = this.periodsResource.value();
+    if (!periods?.length) return '';
+    const today = new Date();
+    const current = periods.find(
+      (p) => new Date(p.startDate) <= today && today <= new Date(p.endDate),
+    );
+    return current?.id ?? '';
   });
 
   public studentsResource = rxResource({
@@ -206,7 +217,8 @@ export default class CourseStudentGrades {
 
   constructor() {
     afterRenderEffect(() => {
-      this.periodId.set(this.currentPeriod() || '');
+      const id = this.currentPeriodId();
+      if (id) this.periodId.set(id);
     });
   }
 }

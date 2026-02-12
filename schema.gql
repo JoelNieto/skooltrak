@@ -312,12 +312,6 @@ type Course {
   """Created at"""
   createdAt: DateTime!
 
-  """Current period of the course"""
-  currentPeriod: Period
-
-  """Current period ID of the course"""
-  currentPeriodId: String
-
   """Grades of the course"""
   grades: [Grade!]!
 
@@ -458,9 +452,6 @@ input CreateClassGroupInput {
 input CreateCourseInput {
   """Code of the course"""
   code: String!
-
-  """Current period ID of the course"""
-  currentPeriodId: String
 
   """Name of the course"""
   name: String
@@ -2844,9 +2835,6 @@ input UpdateClassGroupInput {
 input UpdateCourseInput {
   """Code of the course"""
   code: String
-
-  """Current period ID of the course"""
-  currentPeriodId: String
   id: String!
 
   """Name of the course"""

@@ -101,21 +101,6 @@ import { CreatedEntity } from '../setup-wizard';
             />
           </div>
 
-          <div class="fieldset">
-            <label for="currentPeriodId" class="label">
-              <span class="label-text font-medium">Periodo Actual</span>
-            </label>
-            <select id="currentPeriodId" formControlName="currentPeriodId" class="select select-bordered w-full">
-              <option value="" disabled>Selecciona un periodo...</option>
-              @for (period of periods.value(); track period.id) {
-                <option [value]="period.id">{{ period.name }}</option>
-              }
-            </select>
-            <p class="text-xs text-base-content/60 mt-1">
-              Si no hay periodos, podrás crearlos después en administración.
-            </p>
-          </div>
-
           <div class="flex gap-3 pt-4">
             <button type="submit" class="btn btn-outline flex-1" [disabled]="saving()" (click)="addAnother = true">
               @if (saving() && addAnother) {
@@ -245,29 +230,6 @@ export default class CoursesStep {
         .valueChanges.pipe(map((result) => result.data.subjects)),
   });
 
-  public periods = rxResource({
-    params: () => ({ year: this.store.currentSchool()?.currentYear }),
-    stream: ({ params }) => {
-      if (!params.year) {
-        return of([]);
-      }
-      return this.apollo
-        .watchQuery<{ periodsByYear: { id: string; name: string }[] }>({
-          query: gql`
-            query PeriodsByYear($year: Int!) {
-              periodsByYear(year: $year) {
-                id
-                name
-              }
-            }
-          `,
-          variables: { year: params.year },
-          fetchPolicy: 'cache-first',
-        })
-        .valueChanges.pipe(map((result) => result.data.periodsByYear));
-    },
-  });
-
   // Combine API study plans with newly created ones
   public allStudyPlans = computed(() => {
     const apiPlans = this.studyPlans.value() ?? [];
@@ -279,7 +241,6 @@ export default class CoursesStep {
     code: [''],
     subjectId: ['', [Validators.required]],
     studyPlanId: ['', [Validators.required]],
-    currentPeriodId: this.fb.control<string | null>(null),
   });
 
   public onSubmit() {

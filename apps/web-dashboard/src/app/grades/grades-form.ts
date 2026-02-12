@@ -62,7 +62,7 @@ import { map, of } from 'rxjs';
 })
 export default class GradesForm {
   public closeModal = output<boolean>();
-  public data = input.required<{ courseId: string; currentPeriod: string }>();
+  public data = input.required<{ courseId: string; periodId: string }>();
   #apollo = inject(Apollo);
   #toast = inject(Toast);
 
@@ -132,7 +132,7 @@ export default class GradesForm {
           createGradeInput: {
             ...this.form.getRawValue(),
             courseId: this.data().courseId,
-            periodId: this.data().currentPeriod,
+            periodId: this.data().periodId,
           },
         },
       })

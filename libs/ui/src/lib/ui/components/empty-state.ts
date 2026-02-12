@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input, output } from '@angular/core';
 
 type EmptyStateColor = 'primary' | 'secondary' | 'accent' | 'info' | 'success' | 'warning' | 'neutral';
 
@@ -30,7 +30,7 @@ export class EmptyState {
   icon = input<string>();
   color = input<EmptyStateColor>('primary');
   actionLabel = input<string>();
-  action = input<() => void>();
+  action = output<void>();
 
   containerClass = computed(() => {
     const colorMap: Record<EmptyStateColor, string> = {
@@ -85,9 +85,6 @@ export class EmptyState {
   });
 
   onAction() {
-    const actionFn = this.action();
-    if (actionFn) {
-      actionFn();
-    }
+    this.action.emit();
   }
 }

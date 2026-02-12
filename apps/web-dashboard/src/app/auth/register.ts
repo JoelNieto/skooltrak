@@ -48,7 +48,7 @@ import { Apollo, gql } from 'apollo-angular';
                       <input
                         type="email"
                         id="email"
-                        class="input input-bordered w-full"
+                        class="input input-primary w-full"
                         placeholder="tu@email.com"
                         formControlName="email"
                       />
@@ -86,8 +86,8 @@ import { Apollo, gql } from 'apollo-angular';
                 <div class="space-y-2">
                   <h1 class="text-2xl md:text-3xl font-bold text-base-content">Revisa tu Correo</h1>
                   <p class="text-base-content/70">
-                    Te hemos enviado un enlace de verificación a <strong>{{ sentEmail() }}</strong>. Haz clic en el
-                    enlace para continuar con el registro.
+                    Te hemos enviado un enlace de verificación a <strong>{{ sentEmail() }}</strong
+                    >. Haz clic en el enlace para continuar con el registro.
                   </p>
                 </div>
 
@@ -174,7 +174,9 @@ import { Apollo, gql } from 'apollo-angular';
                           placeholder="Juan"
                           formControlName="firstName"
                         />
-                        @if (registerForm.get('firstName')?.touched && registerForm.get('firstName')?.hasError('required')) {
+                        @if (
+                          registerForm.get('firstName')?.touched && registerForm.get('firstName')?.hasError('required')
+                        ) {
                           <p class="text-error text-xs mt-1">Requerido</p>
                         }
                       </div>
@@ -190,7 +192,9 @@ import { Apollo, gql } from 'apollo-angular';
                           placeholder="Pérez"
                           formControlName="lastName"
                         />
-                        @if (registerForm.get('lastName')?.touched && registerForm.get('lastName')?.hasError('required')) {
+                        @if (
+                          registerForm.get('lastName')?.touched && registerForm.get('lastName')?.hasError('required')
+                        ) {
                           <p class="text-error text-xs mt-1">Requerido</p>
                         }
                       </div>
@@ -207,9 +211,13 @@ import { Apollo, gql } from 'apollo-angular';
                         placeholder="••••••••"
                         formControlName="password"
                       />
-                      @if (registerForm.get('password')?.touched && registerForm.get('password')?.hasError('required')) {
+                      @if (
+                        registerForm.get('password')?.touched && registerForm.get('password')?.hasError('required')
+                      ) {
                         <p class="text-error text-xs mt-1">La contraseña es requerida</p>
-                      } @else if (registerForm.get('password')?.touched && registerForm.get('password')?.hasError('minlength')) {
+                      } @else if (
+                        registerForm.get('password')?.touched && registerForm.get('password')?.hasError('minlength')
+                      ) {
                         <p class="text-error text-xs mt-1">Mínimo 8 caracteres</p>
                       }
                     </div>
@@ -230,7 +238,9 @@ import { Apollo, gql } from 'apollo-angular';
                         registerForm.get('confirmPassword')?.hasError('required')
                       ) {
                         <p class="text-error text-xs mt-1">Confirma tu contraseña</p>
-                      } @else if (registerForm.hasError('passwordMismatch') && registerForm.get('confirmPassword')?.touched) {
+                      } @else if (
+                        registerForm.hasError('passwordMismatch') && registerForm.get('confirmPassword')?.touched
+                      ) {
                         <p class="text-error text-xs mt-1">Las contraseñas no coinciden</p>
                       }
                     </div>

@@ -2,7 +2,15 @@ import { Confirmation, Pagination, Paginator, Toast } from '@/ui';
 import { Menu, MenuContent, MenuItem, MenuTrigger } from '@angular/aria/menu';
 import { OverlayModule } from '@angular/cdk/overlay';
 import { DatePipe } from '@angular/common';
-import { afterRenderEffect, ChangeDetectionStrategy, Component, DestroyRef, inject, signal, viewChild } from '@angular/core';
+import {
+  afterRenderEffect,
+  ChangeDetectionStrategy,
+  Component,
+  DestroyRef,
+  inject,
+  signal,
+  viewChild,
+} from '@angular/core';
 import { rxResource, takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
@@ -49,9 +57,6 @@ type Teacher = Prisma.TeacherGetPayload<{ include: { user: true } }> & {
         <thead>
           <tr>
             <th>Nombre</th>
-            <th>Documento</th>
-            <th>Fecha de nacimiento</th>
-            <th>Genero</th>
             <th>Creado</th>
             <th>Actualizado</th>
             <th></th>
@@ -86,9 +91,6 @@ type Teacher = Prisma.TeacherGetPayload<{ include: { user: true } }> & {
                   </div>
                 </div>
               </td>
-              <td>{{ teacher.documentId }}</td>
-              <td>{{ teacher.birthDate | date: 'shortDate' }}</td>
-              <td>{{ teacher.gender }}</td>
               <td>{{ teacher.createdAt | date: 'short' }}</td>
               <td>{{ teacher.updatedAt | date: 'short' }}</td>
               <td>
@@ -203,9 +205,6 @@ export default class Teachers {
                 fatherName
                 name
                 initials
-                documentId
-                birthDate
-                gender
                 user {
                   id
                   email

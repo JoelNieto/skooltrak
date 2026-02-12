@@ -1,3 +1,4 @@
+import { EmptyState } from '@/ui';
 import { DatePipe } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
@@ -6,6 +7,7 @@ import { Prisma } from '@generated/prisma';
 import { Apollo, gql } from 'apollo-angular';
 import { map, of } from 'rxjs';
 import Store from '../core/store';
+
 type Teacher = Prisma.TeacherGetPayload<undefined> & { name: string };
 type GroupType = Prisma.ClassGroupGetPayload<{
   include: {
@@ -14,7 +16,7 @@ type GroupType = Prisma.ClassGroupGetPayload<{
   };
 }> & { teacher?: Teacher };
 @Component({
-  imports: [RouterLink, DatePipe],
+  imports: [RouterLink, DatePipe, EmptyState],
   template: `<div class="breadcrumbs text-sm">
       <ul>
         <li><a routerLink="/">Inicio</a></li>
@@ -36,19 +38,26 @@ type GroupType = Prisma.ClassGroupGetPayload<{
         </thead>
         <tbody>
           @for (group of classGroups.value(); track group.id) {
-          <tr>
-            <td>
-              <a class="link link-primary" [routerLink]="[group.id]">{{
-                group.name
-              }}</a>
-            </td>
-            <td>{{ group.shortName }}</td>
-            <td>{{ group.teacher?.name }}</td>
-            <td>{{ group.studyPlan.name }}</td>
-            <td>{{ group.createdAt | date : 'short' }}</td>
-            <td>{{ group.updatedAt | date : 'short' }}</td>
-          </tr>
-
+            <tr>
+              <td>
+                <a class="link link-primary" [routerLink]="[group.id]">{{ group.name }}</a>
+              </td>
+              <td>{{ group.shortName }}</td>
+              <td>{{ group.teacher?.name }}</td>
+              <td>{{ group.studyPlan.name }}</td>
+              <td>{{ group.createdAt | date: 'short' }}</td>
+              <td>{{ group.updatedAt | date: 'short' }}</td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="6">
+                <lib-empty-state
+                  [title]="'No hay grupos'"
+                  [description]="'No hay grupos para mostrar'"
+                  [icon]="'group'"
+                />
+              </td>
+            </tr>
           }
         </tbody>
       </table>

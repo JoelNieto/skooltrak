@@ -1,4 +1,4 @@
-import { Loader, Toast } from '@/ui';
+import { EmptyState, Loader, Toast } from '@/ui';
 import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { Apollo, gql } from 'apollo-angular';
@@ -20,12 +20,12 @@ interface PendingJoinRequest {
 
 @Component({
   selector: 'app-join-requests',
-  imports: [Loader, DatePipe],
+  imports: [Loader, DatePipe, EmptyState],
   template: `
     <div class="space-y-6">
       <div class="flex items-center justify-between">
         <div>
-          <h1 class="text-2xl font-bold text-base-content">Solicitudes de Ingreso</h1>
+          <h1 class="text-2xl font-bold text-base-content">Solicitudes de Acceso</h1>
           <p class="text-base-content/60">Administra las solicitudes de usuarios que desean unirse a tu escuela.</p>
         </div>
         <button class="btn btn-ghost btn-sm" (click)="loadRequests()">
@@ -39,15 +39,11 @@ interface PendingJoinRequest {
           <lib-loader />
         </div>
       } @else if (requests().length === 0) {
-        <div class="card bg-base-100 shadow">
-          <div class="card-body items-center text-center py-12">
-            <span class="material-symbols-outlined text-6xl text-base-content/20">inbox</span>
-            <h3 class="text-lg font-medium text-base-content/60 mt-4">No hay solicitudes pendientes</h3>
-            <p class="text-sm text-base-content/40">
-              Cuando un usuario solicite unirse a tu escuela, aparecerá aquí.
-            </p>
-          </div>
-        </div>
+        <lib-empty-state
+          [title]="'No hay solicitudes pendientes'"
+          [description]="'Cuando un usuario solicite unirse a tu escuela, aparecerá aquí.'"
+          [icon]="'inbox'"
+        />
       } @else {
         <div class="grid gap-4">
           @for (request of requests(); track request.id) {
@@ -55,7 +51,7 @@ interface PendingJoinRequest {
               <div class="card-body">
                 <div class="flex items-start gap-4">
                   <!-- Avatar -->
-                  <div class="avatar placeholder">
+                  <div class="avatar avatar-placeholder">
                     <div class="w-12 h-12 rounded-full bg-primary/10 text-primary">
                       <span class="text-lg font-medium">
                         {{ request.userFirstName.charAt(0) }}{{ request.userLastName.charAt(0) }}
@@ -77,23 +73,15 @@ interface PendingJoinRequest {
                         {{ request.schoolName }}
                       </span>
                       @if (request.documentId) {
-                        <span class="text-xs text-base-content/40">
-                          Doc: {{ request.documentId }}
-                        </span>
+                        <span class="text-xs text-base-content/40"> Doc: {{ request.documentId }} </span>
                       }
                     </div>
-                    <p class="text-xs text-base-content/40 mt-1">
-                      Solicitado {{ request.createdAt | date: 'medium' }}
-                    </p>
+                    <p class="text-xs text-base-content/40 mt-1">Solicitado {{ request.createdAt | date: 'medium' }}</p>
                   </div>
 
                   <!-- Actions -->
                   <div class="flex gap-2">
-                    <button
-                      class="btn btn-success btn-sm"
-                      (click)="approve(request.id)"
-                      [disabled]="processing()"
-                    >
+                    <button class="btn btn-success btn-sm" (click)="approve(request.id)" [disabled]="processing()">
                       <span class="material-symbols-outlined text-lg">check</span>
                       Aprobar
                     </button>

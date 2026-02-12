@@ -1,4 +1,4 @@
-import { Confirmation, Modal, Toast } from '@/ui';
+import { Confirmation, EmptyState, Modal, Toast } from '@/ui';
 import { Menu, MenuContent, MenuItem, MenuTrigger } from '@angular/aria/menu';
 import { OverlayModule } from '@angular/cdk/overlay';
 import { DatePipe } from '@angular/common';
@@ -13,15 +13,7 @@ import Store from '../../core/store';
 import ClassGroupsForm from '../forms/class-groups-form';
 @Component({
   selector: 'app-groups',
-  imports: [
-    DatePipe,
-    RouterLink,
-    Menu,
-    MenuContent,
-    MenuItem,
-    MenuTrigger,
-    OverlayModule,
-  ],
+  imports: [DatePipe, RouterLink, Menu, MenuContent, MenuItem, MenuTrigger, OverlayModule, EmptyState],
   viewProviders: [],
   template: `
     <div class="flex justify-end">
@@ -29,9 +21,7 @@ import ClassGroupsForm from '../forms/class-groups-form';
         <span class="material-symbols-outlined">add_circle</span> Nuevo Grupo
       </button>
     </div>
-    <div
-      class="overflow-x-auto bg-base-100 rounded-lg border border-base-300 mt-4"
-    >
+    <div class="overflow-x-auto bg-base-100 rounded-lg border border-base-300 mt-4">
       <table class="table">
         <thead>
           <tr>
@@ -46,90 +36,85 @@ import ClassGroupsForm from '../forms/class-groups-form';
         </thead>
         <tbody>
           @for (group of classGroups.value(); track group.id) {
-          <tr>
-            <td>
-              <a
-                class="link link-primary"
-                [routerLink]="['/groups', group.id]"
-                >{{ group.name }}</a
-              >
-            </td>
-            <td>{{ group.shortName }}</td>
-            <td>{{ group.teacher?.name }}</td>
-            <td>{{ group.studyPlan.name }}</td>
-            <td>{{ group.createdAt | date : 'short' }}</td>
-            <td>{{ group.updatedAt | date : 'short' }}</td>
-            <td>
-              <button
-                class="cursor-pointer hover:bg-base-200 p-1 rounded-lg flex items-center justify-center"
-                ngMenuTrigger
-                #origin
-                #trigger="ngMenuTrigger"
-                [menu]="actionsMenu()"
-              >
-                <span class="material-symbols-outlined text-xl"
-                  >more_horiz</span
+            <tr>
+              <td>
+                <a class="link link-primary" [routerLink]="['/groups', group.id]">{{ group.name }}</a>
+              </td>
+              <td>{{ group.shortName }}</td>
+              <td>{{ group.teacher?.name }}</td>
+              <td>{{ group.studyPlan.name }}</td>
+              <td>{{ group.createdAt | date: 'short' }}</td>
+              <td>{{ group.updatedAt | date: 'short' }}</td>
+              <td>
+                <button
+                  class="cursor-pointer hover:bg-base-200 p-1 rounded-lg flex items-center justify-center"
+                  ngMenuTrigger
+                  #origin
+                  #trigger="ngMenuTrigger"
+                  [menu]="actionsMenu()"
                 >
-              </button>
-              <ng-template
-                [cdkConnectedOverlayOpen]="trigger.expanded()"
-                [cdkConnectedOverlay]="{origin, usePopover: 'inline'}"
-                [cdkConnectedOverlayPositions]="[
-                  {
-                    originX: 'end',
-                    originY: 'bottom',
-                    overlayX: 'end',
-                    overlayY: 'top',
-                    offsetY: 4
-                  }
-                ]"
-                cdkAttachPopoverAsChild
-              >
-                <div
-                  ngMenu
-                  class="bg-base-100 shadow-sm rounded-lg p-1 w-48"
-                  #actionsMenu="ngMenu"
+                  <span class="material-symbols-outlined text-xl">more_horiz</span>
+                </button>
+                <ng-template
+                  [cdkConnectedOverlayOpen]="trigger.expanded()"
+                  [cdkConnectedOverlay]="{ origin, usePopover: 'inline' }"
+                  [cdkConnectedOverlayPositions]="[
+                    {
+                      originX: 'end',
+                      originY: 'bottom',
+                      overlayX: 'end',
+                      overlayY: 'top',
+                      offsetY: 4,
+                    },
+                  ]"
+                  cdkAttachPopoverAsChild
                 >
-                  <ng-template ngMenuContent>
-                    <a
-                      ngMenuItem
-                      value="view"
-                      [routerLink]="['/groups', group.id]"
-                      class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-base-200 w-full"
-                    >
-                      <span class="material-symbols-outlined text-lg"
-                        >visibility</span
+                  <div ngMenu class="bg-base-100 shadow-sm rounded-lg p-1 w-48" #actionsMenu="ngMenu">
+                    <ng-template ngMenuContent>
+                      <a
+                        ngMenuItem
+                        value="view"
+                        [routerLink]="['/groups', group.id]"
+                        class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-base-200 w-full"
                       >
-                      <span>Ver</span>
-                    </a>
-                    <button
-                      ngMenuItem
-                      value="edit"
-                      class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-base-200 w-full"
-                      (click)="editClassGroup(group)"
-                    >
-                      <span class="material-symbols-outlined text-lg"
-                        >edit</span
+                        <span class="material-symbols-outlined text-lg">visibility</span>
+                        <span>Ver</span>
+                      </a>
+                      <button
+                        ngMenuItem
+                        value="edit"
+                        class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-base-200 w-full"
+                        (click)="editClassGroup(group)"
                       >
-                      <span>Editar</span>
-                    </button>
-                    <button
-                      ngMenuItem
-                      value="delete"
-                      class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-base-200 w-full"
-                      (click)="deleteClassGroup(group.id)"
-                    >
-                      <span class="material-symbols-outlined text-lg"
-                        >delete</span
+                        <span class="material-symbols-outlined text-lg">edit</span>
+                        <span>Editar</span>
+                      </button>
+                      <button
+                        ngMenuItem
+                        value="delete"
+                        class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-base-200 w-full"
+                        (click)="deleteClassGroup(group.id)"
                       >
-                      <span>Eliminar</span>
-                    </button>
-                  </ng-template>
-                </div>
-              </ng-template>
-            </td>
-          </tr>
-
+                        <span class="material-symbols-outlined text-lg">delete</span>
+                        <span>Eliminar</span>
+                      </button>
+                    </ng-template>
+                  </div>
+                </ng-template>
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="7" class="text-center">
+                <lib-empty-state
+                  title="No hay grupos"
+                  description="No hay grupos para mostrar"
+                  icon="group"
+                  actionLabel="Nuevo grupo"
+                  (action)="editClassGroup()"
+                />
+              </td>
+            </tr>
           }
         </tbody>
       </table>
@@ -188,7 +173,7 @@ export default class ClassGroups {
   public editClassGroup(
     group?: Prisma.ClassGroupGetPayload<{
       include: { teacher: true; studyPlan: true };
-    }>
+    }>,
   ) {
     this.modal
       .open(ClassGroupsForm, {
@@ -222,8 +207,8 @@ export default class ClassGroups {
             variables: {
               id,
             },
-          })
-        )
+          }),
+        ),
       )
       .subscribe(() => {
         this.toasts.showSuccess('Grupo eliminado correctamente');

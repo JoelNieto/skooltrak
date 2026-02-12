@@ -1,4 +1,4 @@
-import { debounceSignal, Loader, Pagination, Paginator } from '@/ui';
+import { debounceSignal, EmptyState, Loader, Pagination, Paginator } from '@/ui';
 import { ChangeDetectionStrategy, Component, inject, Signal, signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
@@ -21,7 +21,7 @@ type CourseType = Prisma.CourseGetPayload<{
 
 @Component({
   selector: 'app-courses',
-  imports: [RouterLink, Loader, Paginator, FormsModule],
+  imports: [RouterLink, Loader, Paginator, FormsModule, EmptyState],
   providers: [Pagination],
 
   template: `
@@ -55,7 +55,7 @@ type CourseType = Prisma.CourseGetPayload<{
                 alt="Course"
                 class="h-28 w-full object-cover transition-transform duration-300 group-hover:scale-110"
               />
-              <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+              <div class="absolute inset-0 bg-linear-to-t from-black/60 to-transparent"></div>
               <span class="absolute bottom-2 left-2 badge badge-sm badge-primary">
                 {{ course.studyPlan.name }}
               </span>
@@ -76,10 +76,13 @@ type CourseType = Prisma.CourseGetPayload<{
             </div>
           </a>
         } @empty {
-          <p class="text-center text-base-content/60 col-span-full py-8">
-            No se encontraron cursos para la búsqueda
-            <strong class="text-primary">"{{ searchText() }}"</strong>
-          </p>
+          <div class="col-span-full">
+            <lib-empty-state
+              [title]="'No se encontraron cursos'"
+              [description]="'No se encontraron cursos para la búsqueda'"
+              [icon]="'search'"
+            />
+          </div>
         }
       </div>
     }

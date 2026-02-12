@@ -67,17 +67,27 @@ export class CoursesService {
       ? createCourseInput.code
       : await this.generateUniqueCode(createCourseInput.schoolId, subject?.name ?? 'CRS');
 
-    const course = await this.prisma.course.create({
-      data: {
-        ...createCourseInput,
-        shortName: createCourseInput.shortName
-          ? `${createCourseInput.shortName}`
-          : `${subject?.code} - ${studyPlan?.shortName}`,
-        name: createCourseInput.name ? `${createCourseInput.name}` : `${subject?.name} - ${studyPlan?.name}`,
-        code,
-      },
-      include: { school: true, subject: true, studyPlan: true },
-    });
+    let course;
+    try {
+      course = await this.prisma.course.create({
+        data: {
+          ...createCourseInput,
+          shortName: createCourseInput.shortName
+            ? `${createCourseInput.shortName}`
+            : `${subject?.code} - ${studyPlan?.shortName}`,
+          name: createCourseInput.name ? `${createCourseInput.name}` : `${subject?.name} - ${studyPlan?.name}`,
+          code,
+        },
+        include: { school: true, subject: true, studyPlan: true },
+      });
+    } catch (error: unknown) {
+      if (error instanceof Error && 'code' in error && (error as { code: string }).code === 'P2002') {
+        throw new ConflictException(
+          `Ya existe un curso con la asignatura "${subject?.name}" en el plan "${studyPlan?.name}"`,
+        );
+      }
+      throw error;
+    }
 
     // Find all students in the same study plan (and school) to enroll in the new course
     const studentsToConnect = await this.prisma.student.findMany({

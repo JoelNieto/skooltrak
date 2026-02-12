@@ -119,6 +119,14 @@ import Store from '../../core/store';
         </select>
       </div>
     </div>
+    @if (errorMessage()) {
+      <div role="alert" class="alert alert-error mt-3">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 shrink-0 stroke-current" fill="none" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <span>{{ errorMessage() }}</span>
+      </div>
+    }
     <div class="flex justify-end gap-2 mt-4">
       <button type="button" class="btn btn-ghost" (click)="closeModal.emit()">Cancelar</button>
       <button type="submit" class="btn btn-primary">Guardar</button>
@@ -141,6 +149,9 @@ export default class CoursesForm {
   private toast = inject(Toast);
   private apollo = inject(Apollo);
   private store = inject(Store);
+
+  // Error message signal
+  public errorMessage = signal('');
 
   // Subject autocomplete signals
   public subjectQuery = signal('');
@@ -356,7 +367,7 @@ export default class CoursesForm {
   }
 
   public onSubmit() {
-    console.log(this.form.getRawValue());
+    this.errorMessage.set('');
     if (this.form.invalid) {
       this.toast.showError('Llenar todos los campos');
       markGroupDirty(this.form);
@@ -391,7 +402,7 @@ export default class CoursesForm {
             this.toast.showSuccess('Curso actualizado exitosamente');
           },
           error: (err) => {
-            this.toast.showError(err.message);
+            this.errorMessage.set(this.extractErrorMessage(err));
           },
         });
       return;
@@ -424,8 +435,14 @@ export default class CoursesForm {
           this.toast.showSuccess('Curso creado exitosamente');
         },
         error: (err) => {
-          this.toast.showError(err.message);
+          this.errorMessage.set(this.extractErrorMessage(err));
         },
       });
+  }
+
+  private extractErrorMessage(err: any): string {
+    const message = err?.graphQLErrors?.[0]?.message ?? err?.message ?? 'Error inesperado';
+    // Strip the GraphQL prefix if present
+    return message.replace(/^(ConflictException:\s*)/i, '');
   }
 }

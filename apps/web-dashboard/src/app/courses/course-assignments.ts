@@ -21,7 +21,6 @@ type AssignmentDateResult = {
   classGroup: {
     id: string;
     name: string;
-    shortName: string;
   };
   assignment: {
     id: string;
@@ -111,7 +110,6 @@ export default class CourseAssignments {
                 classGroup {
                   id
                   name
-                  shortName
                 }
                 assignment {
                   id
@@ -141,7 +139,7 @@ export default class CourseAssignments {
                 details: item.assignment.details,
                 type: item.assignment.type,
                 groupId: item.classGroupId,
-                groupName: item.classGroup?.shortName || item.classGroup?.name,
+                groupName: item.classGroup?.name,
               },
             }))
           )

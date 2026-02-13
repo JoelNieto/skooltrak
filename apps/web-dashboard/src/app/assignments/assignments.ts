@@ -35,7 +35,6 @@ type AssignmentDateResult = {
   classGroup: {
     id: string;
     name: string;
-    shortName: string;
   };
   assignment: {
     id: string;
@@ -120,7 +119,7 @@ type AssignmentDateResult = {
               <td>{{ item.date | date : 'medium' }}</td>
               @if (!isStudent()) {
                 <td>
-                  <span class="badge badge-outline">{{ item.classGroup.shortName || item.classGroup.name }}</span>
+                  <span class="badge badge-outline">{{ item.classGroup.name }}</span>
                 </td>
               }
               <td>{{ item.assignment.course.name }}</td>
@@ -203,7 +202,6 @@ export default class Assignments {
                 classGroup {
                   id
                   name
-                  shortName
                 }
                 assignment {
                   id

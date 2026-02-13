@@ -29,7 +29,6 @@ type GroupType = Prisma.ClassGroupGetPayload<{
         <thead>
           <tr>
             <th>Nombre</th>
-            <th>Nombre corto</th>
             <th>Profesor</th>
             <th>Plan de estudio</th>
             <th>Fecha de creación</th>
@@ -42,7 +41,6 @@ type GroupType = Prisma.ClassGroupGetPayload<{
               <td>
                 <a class="link link-primary" [routerLink]="[group.id]">{{ group.name }}</a>
               </td>
-              <td>{{ group.shortName }}</td>
               <td>{{ group.teacher?.name }}</td>
               <td>{{ group.studyPlan.name }}</td>
               <td>{{ group.createdAt | date: 'short' }}</td>
@@ -85,7 +83,6 @@ export default class Groups {
               classGroupsBySchoolId(schoolId: $schoolId) {
                 id
                 name
-                shortName
                 createdAt
                 updatedAt
                 teacherId

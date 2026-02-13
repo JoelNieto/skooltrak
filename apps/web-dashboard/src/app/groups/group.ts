@@ -126,7 +126,6 @@ export default class Group {
               classGroup(id: $id) {
                 id
                 name
-                shortName
                 createdAt
                 updatedAt
                 teacherId

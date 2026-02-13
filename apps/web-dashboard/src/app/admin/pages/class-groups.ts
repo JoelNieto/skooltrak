@@ -26,7 +26,6 @@ import ClassGroupsForm from '../forms/class-groups-form';
         <thead>
           <tr>
             <th>Nombre</th>
-            <th>Nombre corto</th>
             <th>Profesor</th>
             <th>Plan de estudio</th>
             <th>Fecha de creación</th>
@@ -40,7 +39,6 @@ import ClassGroupsForm from '../forms/class-groups-form';
               <td>
                 <a class="link link-primary" [routerLink]="['/groups', group.id]">{{ group.name }}</a>
               </td>
-              <td>{{ group.shortName }}</td>
               <td>{{ group.teacher?.name }}</td>
               <td>{{ group.studyPlan.name }}</td>
               <td>{{ group.createdAt | date: 'short' }}</td>
@@ -105,7 +103,7 @@ import ClassGroupsForm from '../forms/class-groups-form';
             </tr>
           } @empty {
             <tr>
-              <td colspan="7" class="text-center">
+              <td colspan="6" class="text-center">
                 <lib-empty-state
                   title="No hay grupos"
                   description="No hay grupos para mostrar"
@@ -146,7 +144,6 @@ export default class ClassGroups {
               classGroupsBySchoolId(schoolId: $schoolId) {
                 id
                 name
-                shortName
                 createdAt
                 updatedAt
                 teacherId

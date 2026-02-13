@@ -25,7 +25,7 @@ type AttendanceSessionType = {
   courseId: string;
   classGroupId: string;
   teacherId: string;
-  classGroup: { id: string; name: string; shortName: string };
+  classGroup: { id: string; name: string };
   records: AttendanceRecordType[];
   createdAt: string;
   updatedAt: string;
@@ -109,7 +109,7 @@ const STATUS_COLORS: Record<string, string> = {
                 </td>
                 <td>
                   <span class="badge badge-ghost">
-                    {{ session.classGroup.shortName }}
+                    {{ session.classGroup.name }}
                   </span>
                 </td>
                 <td>
@@ -291,7 +291,6 @@ export default class CourseAttendance {
               classGroupsByCourseId(courseId: $courseId) {
                 id
                 name
-                shortName
                 studyPlan {
                   id
                   name
@@ -332,7 +331,6 @@ export default class CourseAttendance {
                 classGroup {
                   id
                   name
-                  shortName
                 }
                 records {
                   id

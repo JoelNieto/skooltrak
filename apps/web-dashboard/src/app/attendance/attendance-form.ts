@@ -28,7 +28,6 @@ type AttendanceSessionType = {
 type ClassGroupType = {
   id: string;
   name: string;
-  shortName: string;
 };
 
 const STATUS_OPTIONS = [

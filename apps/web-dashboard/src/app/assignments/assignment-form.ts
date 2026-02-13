@@ -25,7 +25,6 @@ type Teacher = Prisma.TeacherGetPayload<false> & {
 type ClassGroup = {
   id: string;
   name: string;
-  shortName: string;
 };
 
 @Component({
@@ -162,7 +161,6 @@ export default class AssignmentForm implements OnInit {
               classGroupsByCourseId(courseId: $courseId) {
                 id
                 name
-                shortName
               }
             }
           `,

@@ -86,22 +86,6 @@ import { CreatedEntity } from '../setup-wizard';
             }
           </div>
 
-          <div class="fieldset">
-            <label for="shortName" class="label">
-              <span class="label-text font-medium">Nombre Corto</span>
-            </label>
-            <input
-              type="text"
-              id="shortName"
-              formControlName="shortName"
-              class="input input-bordered w-full"
-              placeholder="GA-25"
-            />
-            @if (form.get('shortName')?.touched && form.get('shortName')?.hasError('required')) {
-              <p class="text-error text-xs mt-1">El nombre corto es requerido</p>
-            }
-          </div>
-
           <div class="flex gap-3 pt-4">
             <button type="submit" class="btn btn-outline flex-1" [disabled]="saving()" (click)="addAnother = true">
               @if (saving() && addAnother) {
@@ -222,7 +206,6 @@ export default class GroupsStep {
 
   public form = this.fb.group({
     name: ['', [Validators.required]],
-    shortName: ['', [Validators.required]],
     studyPlanId: ['', [Validators.required]],
     active: [true],
   });

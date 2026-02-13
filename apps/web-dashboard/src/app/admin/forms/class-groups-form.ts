@@ -32,16 +32,6 @@ import Store from '../../core/store';
         />
       </div>
       <div class="fieldset">
-        <label for="shortName">Nombre corto</label>
-        <input
-          type="text"
-          id="shortName"
-          name="shortName"
-          formControlName="shortName"
-          class="input input-primary"
-        />
-      </div>
-      <div class="fieldset">
         <label for="studyPlanId">Plan de estudio</label>
         <select
           id="studyPlanId"
@@ -167,7 +157,6 @@ export default class ClassGroupsForm {
 
   public form = this.fb.group({
     name: ['', [Validators.required]],
-    shortName: ['', [Validators.required]],
     teacherId: this.fb.control<string | null>(null),
     studyPlanId: ['', [Validators.required]],
     active: [true],
@@ -200,7 +189,6 @@ export default class ClassGroupsForm {
               updateClassGroup(updateClassGroupInput: $updateClassGroupInput) {
                 id
                 name
-                shortName
               }
             }
           `,
@@ -231,7 +219,6 @@ export default class ClassGroupsForm {
               createClassGroup(createClassGroupInput: $createClassGroupInput) {
                 id
                 name
-                shortName
               }
             }
           `,

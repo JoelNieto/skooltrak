@@ -6,8 +6,6 @@ export class CreateClassGroupInput
 {
   @Field(() => String, { description: 'Name of the class group' })
   name: string;
-  @Field(() => String, { description: 'Short name of the class group' })
-  shortName: string;
   @Field(() => String, { description: 'Organization ID of the class group' })
   organizationId: string;
   @Field(() => String, { description: 'School ID of the class group' })

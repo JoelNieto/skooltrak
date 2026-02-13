@@ -355,7 +355,6 @@ model Course {
 model ClassGroup {
   id                 String                     @id @default(cuid())
   name               String
-  shortName          String
   organizationId     String
   organization       Organization               @relation(fields: [organizationId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   schoolId           String

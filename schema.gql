@@ -283,9 +283,6 @@ type ClassGroup {
   """School ID of the class group"""
   schoolId: String!
 
-  """Short name of the class group"""
-  shortName: String!
-
   """Students of the class group"""
   students: [Student!]!
 
@@ -438,9 +435,6 @@ input CreateClassGroupInput {
 
   """School ID of the class group"""
   schoolId: String!
-
-  """Short name of the class group"""
-  shortName: String!
 
   """Study plan ID of the class group"""
   studyPlanId: String!
@@ -2821,9 +2815,6 @@ input UpdateClassGroupInput {
 
   """School ID of the class group"""
   schoolId: String
-
-  """Short name of the class group"""
-  shortName: String
 
   """Study plan ID of the class group"""
   studyPlanId: String

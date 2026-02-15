@@ -1278,6 +1278,54 @@ type GroupsSchedule {
   weekday: String!
 }
 
+type HabitEvaluation {
+  classGroupId: String!
+  createdAt: DateTime!
+  habitMetricId: String!
+  id: String!
+  organizationId: String!
+  periodId: String!
+  published: Boolean!
+  studentEvaluations: [StudentHabitEvaluation!]!
+  teacherId: String!
+  updatedAt: DateTime!
+}
+
+type HabitMetric {
+  """Estado activo del criterio"""
+  active: Boolean!
+
+  """Fecha de creación"""
+  createdAt: DateTime!
+
+  """Descripción del criterio"""
+  description: String
+
+  """ID del criterio"""
+  id: String!
+
+  """Nombre del criterio"""
+  name: String!
+
+  """Orden de visualización"""
+  order: Int!
+
+  """Fecha de actualización"""
+  updatedAt: DateTime!
+}
+
+"""Valores de evaluación de hábitos"""
+enum HabitValue {
+  """Desempeño regular"""
+  R
+
+  """Desempeño satisfactorio"""
+  S
+
+  """Desempeño deficiente"""
+  X
+}
+
 type Invitation {
   createdAt: DateTime!
   email: String!
@@ -1457,6 +1505,7 @@ type Mutation {
   requestJoinSchool(input: RequestJoinSchoolInput!): JoinRequestResult!
   requestPasswordReset(email: String!): Boolean!
   resetPassword(newPassword: String!, token: String!): AuthPayload!
+  saveHabitEvaluation(saveHabitEvaluationInput: SaveHabitEvaluationInput!): HabitEvaluation!
   sendVerificationLink(email: String!): Boolean!
   setActiveOrganization(organizationId: String): Boolean!
   shareFile(shareFileInput: ShareFileInput!): File!
@@ -2007,6 +2056,10 @@ type Query {
   groupsSchedules: [GroupsSchedule!]!
   groupsSchedulesByClassGroupId(classGroupId: String!): [GroupsSchedule!]!
   groupsSchedulesByClassGroupIdGrouped(classGroupId: String!): [GroupsSchedule!]!
+  habitEvaluation(id: String!): HabitEvaluation!
+  habitEvaluationsByGroup(classGroupId: String!, periodId: String!): [HabitEvaluation!]!
+  habitMetric(id: String!): HabitMetric!
+  habitMetrics: [HabitMetric!]!
   isEmailVerified: Boolean!
   listInvitations(organizationId: String): [Invitation!]!
   listMembers(organizationId: String): [Member!]!
@@ -2364,6 +2417,23 @@ type Role {
   updatedAt: DateTime!
 }
 
+input SaveHabitEvaluationInput {
+  """ID del grupo"""
+  classGroupId: String!
+
+  """ID de la métrica de hábito"""
+  habitMetricId: String!
+
+  """ID del período"""
+  periodId: String!
+
+  """Si la evaluación está publicada"""
+  published: Boolean
+
+  """Evaluaciones de estudiantes"""
+  studentEvaluations: [StudentHabitEvaluationInput!]!
+}
+
 type School {
   """Address of the school"""
   address: String!
@@ -2601,6 +2671,27 @@ type StudentGrade {
 
   """Updated at of the student grade"""
   updatedAt: DateTime!
+}
+
+type StudentHabitEvaluation {
+  comments: String
+  createdAt: DateTime!
+  habitEvaluationId: String!
+  id: String!
+  studentId: String!
+  updatedAt: DateTime!
+  value: HabitValue!
+}
+
+input StudentHabitEvaluationInput {
+  """Comentarios opcionales"""
+  comments: String
+
+  """ID del estudiante"""
+  studentId: String!
+
+  """Valor de la evaluación"""
+  value: HabitValue!
 }
 
 """File info for student assignment submission"""

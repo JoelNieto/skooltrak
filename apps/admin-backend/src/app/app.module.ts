@@ -12,6 +12,7 @@ import { SchoolsModule } from './schools/schools.module';
 import { SubjectsModule } from './subjects/subjects.module';
 import { GradeMetricsModule } from './grade-metrics/grade-metrics.module';
 import { PeriodsModule } from './periods/periods.module';
+import { HabitMetricsModule } from './habit-metrics/habit-metrics.module';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { PeriodsModule } from './periods/periods.module';
     SubjectsModule,
     AuthModule,
     GradeMetricsModule,
+    HabitMetricsModule,
     PeriodsModule,
   ],
   controllers: [AppController],

@@ -47,6 +47,10 @@ export const appRoutes: Route[] = [
         loadComponent: () => import('./grade-metrics/grade-metrics'),
       },
       {
+        path: 'habit-metrics',
+        loadComponent: () => import('./habit-metrics/habit-metrics'),
+      },
+      {
         path: 'periods',
         loadComponent: () => import('./periods/periods'),
       },

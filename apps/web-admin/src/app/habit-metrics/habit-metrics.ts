@@ -7,27 +7,30 @@ import { rxResource } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import { Prisma } from '@generated/prisma';
 import { Apollo, gql } from 'apollo-angular';
-import { filter, map, switchMap } from 'rxjs';
-import PeriodsForm from './periods-form';
+import { map } from 'rxjs';
+import HabitMetricsForm from './habit-metrics-form';
 
 @Component({
-  selector: 'app-periods',
+  selector: 'app-habit-metrics',
   imports: [RouterLink, DatePipe, Menu, MenuContent, MenuItem, MenuTrigger, OverlayModule],
   template: `
     <div class="breadcrumbs text-sm">
       <ul>
         <li><a routerLink="/">Inicio</a></li>
-        <li>Periodos</li>
+        <li>Hábitos y actitudes</li>
       </ul>
     </div>
     <div class="flex justify-between items-center mb-4">
       <div>
-        <h1 class="text-2xl text-base-content font-medium">Periodos</h1>
-        <p class="text-sm text-gray-500 dark:text-gray-400">Listado de periodos globales</p>
+        <h1 class="text-2xl text-base-content font-medium">Criterios de hábitos y actitudes</h1>
+        <p class="text-sm text-gray-500 dark:text-gray-400">
+          Listado de criterios para evaluación de hábitos y actitudes
+        </p>
       </div>
-      <button class="btn btn-primary" (click)="editPeriod()">
+
+      <button class="btn btn-primary" (click)="editHabitMetric()">
         <span class="material-symbols-outlined">add_circle</span>
-        Nuevo periodo
+        Nueva métrica
       </button>
     </div>
     <div class="overflow-x-auto">
@@ -35,22 +38,33 @@ import PeriodsForm from './periods-form';
         <thead>
           <tr>
             <th>Nombre</th>
-            <th>Año</th>
-            <th>Fecha de inicio</th>
-            <th>Fecha de fin</th>
+            <th class="w-96">Descripción</th>
+            <th>Estado</th>
+            <th>Orden</th>
             <th>Fecha de creación</th>
             <th>Acciones</th>
           </tr>
         </thead>
         <tbody>
-          @for (period of periods.value(); track period.id) {
+          @if (metrics.isLoading()) {
             <tr>
-              <td>{{ period.name }}</td>
-              <td>{{ period.year }}</td>
-              <td>{{ period.startDate | date: 'shortDate' }}</td>
-              <td>{{ period.endDate | date: 'shortDate' }}</td>
-              <td>{{ period.createdAt | date: 'short' }}</td>
-              <td class="flex gap-2">
+              <td colspan="6" class="text-center">
+                <span class="loading loading-spinner loading-md"></span>
+              </td>
+            </tr>
+          }
+          @for (metric of metrics.value(); track metric.id) {
+            <tr>
+              <td>{{ metric.name }}</td>
+              <td class="max-w-64 truncate">{{ metric.description || '-' }}</td>
+              <td>
+                <span class="badge" [class.badge-success]="metric.active" [class.badge-error]="!metric.active">
+                  {{ metric.active ? 'Activo' : 'Inactivo' }}
+                </span>
+              </td>
+              <td>{{ metric.order }}</td>
+              <td>{{ metric.createdAt | date: 'short' }}</td>
+              <td>
                 <button
                   class="cursor-pointer hover:bg-base-200 p-1 rounded-lg flex items-center justify-center"
                   ngMenuTrigger
@@ -80,7 +94,7 @@ import PeriodsForm from './periods-form';
                         ngMenuItem
                         value="Edit"
                         class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-base-200 w-full"
-                        (click)="editPeriod(period)"
+                        (click)="editHabitMetric(metric)"
                       >
                         <span class="material-symbols-outlined text-lg">edit</span>
                         <span>Editar</span>
@@ -89,14 +103,14 @@ import PeriodsForm from './periods-form';
                         ngMenuItem
                         value="Delete"
                         class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-base-200 w-full"
-                        (click)="deletePeriod(period)"
+                        (click)="deleteHabitMetric(metric.id)"
                       >
                         <span class="material-symbols-outlined text-lg">delete</span>
                         <span>Eliminar</span>
                       </button>
                     </ng-template>
-                  </div>
-                </ng-template>
+                  </div></ng-template
+                >
               </td>
             </tr>
           }
@@ -105,80 +119,79 @@ import PeriodsForm from './periods-form';
     </div>
   `,
 })
-export default class Periods {
+export default class HabitMetrics {
   private apollo = inject(Apollo);
-  private toast = inject(Toast);
-  private modal = inject(Modal);
+  private toasts = inject(Toast);
   private confirmation = inject(Confirmation);
+  private modal = inject(Modal);
   optionsMenu = viewChild<Menu<string>>('optionsMenu');
-  public periods = rxResource({
+
+  public metrics = rxResource({
     stream: () =>
       this.apollo
         .watchQuery<{
-          periods: Prisma.PeriodGetPayload<{ include: undefined }>[];
+          habitMetrics: Prisma.HabitMetricGetPayload<{ include: undefined }>[];
         }>({
           query: gql`
-            query GetPeriods {
-              periods {
+            query GetHabitMetrics {
+              habitMetrics {
                 id
                 name
-                year
-                startDate
-                endDate
+                description
+                active
+                order
                 createdAt
                 updatedAt
               }
             }
           `,
         })
-        .valueChanges.pipe(map((result) => result.data.periods)),
+        .valueChanges.pipe(map((result) => result.data.habitMetrics)),
   });
 
-  editPeriod(period?: Prisma.PeriodGetPayload<{ include: undefined }>) {
+  editHabitMetric(metric?: Prisma.HabitMetricGetPayload<{ include: undefined }>) {
     this.modal
-      .open(PeriodsForm, {
-        title: period ? 'Editar Periodo' : 'Nuevo Periodo',
-        data: { period },
+      .open(HabitMetricsForm, {
+        title: metric ? 'Editar criterio de hábitos' : 'Nuevo criterio de hábitos',
+        data: { metric },
       })
       .closed.subscribe((result) => {
         if (result) {
-          this.periods.reload();
+          this.metrics.reload();
         }
       });
   }
 
-  deletePeriod(period: Prisma.PeriodGetPayload<{ include: undefined }>) {
+  deleteHabitMetric(id: string) {
     this.confirmation
       .confirm({
-        title: 'Eliminar Periodo',
-        message: `¿Estás seguro de eliminar el periodo ${period.name}?`,
+        title: '¿Estás seguro?',
+        message: 'Esta acción eliminará el criterio de hábitos. Las evaluaciones existentes no se eliminarán.',
       })
-      .pipe(
-        filter((confirmed: boolean) => confirmed === true),
-        switchMap(() =>
-          this.apollo.mutate({
+      .subscribe((confirmed: boolean) => {
+        if (!confirmed) return;
+
+        this.apollo
+          .mutate({
             mutation: gql`
-              mutation RemovePeriod($removePeriodId: String!) {
-                removePeriod(id: $removePeriodId) {
+              mutation RemoveHabitMetric($id: String!) {
+                removeHabitMetric(id: $id) {
                   id
                 }
               }
             `,
-            variables: {
-              removePeriodId: period.id,
+            variables: { id },
+          })
+          .subscribe({
+            next: () => {
+              this.toasts.showSuccess('Criterio eliminado exitosamente');
+              this.metrics.reload();
             },
-          }),
-        ),
-      )
-      .subscribe({
-        next: () => {
-          this.periods.reload();
-          this.toast.showSuccess('Periodo eliminado correctamente');
-        },
-        error: (error) => {
-          console.error(error);
-          this.toast.showError('Error al eliminar el periodo');
-        },
+            error: (error) => {
+              this.toasts.showError('Error al eliminar el criterio');
+              console.error(error);
+            },
+          });
       });
   }
 }

@@ -9,6 +9,7 @@ import { Prisma } from '@generated/prisma';
 import { Apollo, gql } from 'apollo-angular';
 import { map } from 'rxjs';
 import { RolesForm } from './roles-form';
+
 @Component({
   selector: 'app-roles',
   imports: [RouterLink, DatePipe, Menu, MenuContent, MenuItem, MenuTrigger, OverlayModule],

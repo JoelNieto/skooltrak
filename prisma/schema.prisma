@@ -38,6 +38,7 @@ model Organization {
   files               File[]
   attendanceSessions  AttendanceSession[]
   newsletters         Newsletter[]
+  habitEvaluations    HabitEvaluation[]
   // Better-auth organization plugin
   members             Member[]
   invitations         Invitation[]
@@ -258,14 +259,15 @@ model School {
 }
 
 model Period {
-  id        String   @id @default(cuid())
-  name      String
-  year      Int
-  startDate DateTime
-  endDate   DateTime
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  grades    Grade[]
+  id               String            @id @default(cuid())
+  name             String
+  year             Int
+  startDate        DateTime
+  endDate          DateTime
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  grades           Grade[]
+  habitEvaluations HabitEvaluation[]
   @@index([year, name])
 
   @@map("periods")
@@ -371,6 +373,7 @@ model ClassGroup {
   weeklySchedules    ClassGroupWeeklySchedule[]
   fileShares         FileShareClassGroup[]
   attendanceSessions AttendanceSession[]
+  habitEvaluations   HabitEvaluation[]
   createdAt          DateTime                   @default(now())
   updatedAt          DateTime                   @updatedAt
 
@@ -410,6 +413,7 @@ model Student {
   studentGrades         StudentGrade[]
   attendanceRecords     AttendanceRecord[]
   assignmentSubmissions AssignmentSubmission[]
+  habitEvaluations      StudentHabitEvaluation[]
 
   @@map("students")
 }
@@ -465,6 +469,7 @@ model Teacher {
   assignments        Assignment[]
   quizzes            Quiz[]
   attendanceSessions AttendanceSession[]
+  habitEvaluations   HabitEvaluation[]
 
   @@map("teachers")
 }
@@ -897,6 +902,12 @@ enum JoinRequestStatus {
   REJECTED
 }
 
+enum HabitValue {
+  X  // Bad performance
+  R  // Regular performance
+  S  // Good performance (Satisfactorio)
+}
+
 model AttendanceSession {
   id             String             @id @default(cuid())
   date           DateTime           @db.Date
@@ -933,4 +944,56 @@ model AttendanceRecord {
   @@unique([attendanceSessionId, studentId])
   @@index([studentId])
   @@map("attendance_records")
+}
+
+model HabitMetric {
+  id          String            @id @default(cuid())
+  name        String            @unique
+  description String?
+  active      Boolean           @default(true)
+  order       Int               @default(0)
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  evaluations HabitEvaluation[]
+
+  @@index([active])
+  @@map("habit_metrics")
+}
+
+model HabitEvaluation {
+  id                 String                   @id @default(cuid())
+  habitMetricId      String
+  habitMetric        HabitMetric              @relation(fields: [habitMetricId], references: [id], onDelete: Cascade)
+  classGroupId       String
+  classGroup         ClassGroup               @relation(fields: [classGroupId], references: [id], onDelete: Cascade)
+  periodId           String
+  period             Period                   @relation(fields: [periodId], references: [id], onDelete: Cascade)
+  teacherId          String
+  teacher            Teacher                  @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+  organizationId     String
+  organization       Organization             @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  published          Boolean                  @default(false)
+  createdAt          DateTime                 @default(now())
+  updatedAt          DateTime                 @updatedAt
+  studentEvaluations StudentHabitEvaluation[]
+
+  @@unique([habitMetricId, classGroupId, periodId])
+  @@index([classGroupId, periodId])
+  @@map("habit_evaluations")
+}
+
+model StudentHabitEvaluation {
+  id                String          @id @default(cuid())
+  habitEvaluationId String
+  habitEvaluation   HabitEvaluation @relation(fields: [habitEvaluationId], references: [id], onDelete: Cascade)
+  studentId         String
+  student           Student         @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  value             HabitValue
+  comments          String?
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+
+  @@unique([habitEvaluationId, studentId])
+  @@index([studentId])
+  @@map("student_habit_evaluations")
 }

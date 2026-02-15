@@ -86,6 +86,20 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
         </li>
         <li>
           <a
+            routerLink="habit-metrics"
+            [routerLinkActive]="[
+              'bg-base-200',
+              'text-primary',
+              'dark:text-white'
+            ]"
+            class="flex items-center p-2 text-base-content rounded-lg hover:bg-primary-50 hover:text-primary-600 group"
+          >
+            <span class="material-symbols-outlined text-xl">psychology</span>
+            <span class="ml-3">Hábitos y actitudes</span>
+          </a>
+        </li>
+        <li>
+          <a
             routerLink="periods"
             [routerLinkActive]="[
               'bg-base-200',

@@ -1,4 +1,4 @@
-import { Confirmation, EmptyState, Modal, Toast } from '@/ui';
+import { Confirmation, EmptyState, Modal, Pagination, Paginator, Toast } from '@/ui';
 import { Menu, MenuContent, MenuItem, MenuTrigger } from '@angular/aria/menu';
 import { OverlayModule } from '@angular/cdk/overlay';
 import { DatePipe } from '@angular/common';
@@ -8,13 +8,13 @@ import { RouterLink } from '@angular/router';
 import { Prisma } from '@generated/prisma';
 
 import { Apollo, gql } from 'apollo-angular';
-import { filter, map, of, switchMap } from 'rxjs';
+import { filter, map, of, switchMap, tap } from 'rxjs';
 import Store from '../../core/store';
 import ClassGroupsForm from '../forms/class-groups-form';
 @Component({
   selector: 'app-groups',
-  imports: [DatePipe, RouterLink, Menu, MenuContent, MenuItem, MenuTrigger, OverlayModule, EmptyState],
-  viewProviders: [],
+  imports: [DatePipe, RouterLink, Menu, MenuContent, MenuItem, MenuTrigger, OverlayModule, EmptyState, Paginator],
+  providers: [Pagination],
   template: `
     <div class="flex justify-end">
       <button class="btn btn-primary" (click)="editClassGroup()">
@@ -116,6 +116,15 @@ import ClassGroupsForm from '../forms/class-groups-form';
           }
         </tbody>
       </table>
+      <div class="p-4 rounded-b-lg">
+        <lib-paginator
+          [count]="pagination.count()"
+          [take]="pagination.take()"
+          [skip]="pagination.skip()"
+          (skipChange)="pagination.updateSkip($event)"
+          (takeChange)="pagination.updateTake($event)"
+        />
+      </div>
     </div>
   `,
 })
@@ -125,10 +134,14 @@ export default class ClassGroups {
   private store = inject(Store);
   private confirmation = inject(Confirmation);
   private toasts = inject(Toast);
+  public pagination = inject(Pagination);
   actionsMenu = viewChild<Menu<string>>('actionsMenu');
   public classGroups = rxResource({
     params: () => ({
       schoolId: this.store.currentSchoolId(),
+      take: this.pagination.take(),
+      skip: this.pagination.skip(),
+      search: this.pagination.search(),
     }),
     stream: ({ params }) => {
       const { schoolId } = params;
@@ -137,17 +150,15 @@ export default class ClassGroups {
       }
       return this.apollo
         .watchQuery<{
-          classGroupsBySchoolId: any[];
+          classGroups: any[];
+          count: number;
         }>({
           query: gql`
-            query ClassGroupsBySchoolId($schoolId: String!) {
-              classGroupsBySchoolId(schoolId: $schoolId) {
+            query ClassGroupsBySchoolId($schoolId: String!, $take: Int!, $skip: Int!, $search: String!) {
+              count: classGroupsCount(schoolId: $schoolId, search: $search)
+              classGroups(schoolId: $schoolId, take: $take, skip: $skip, search: $search) {
                 id
                 name
-                createdAt
-                updatedAt
-                teacherId
-                studyPlanId
                 teacher {
                   id
                   name
@@ -155,18 +166,27 @@ export default class ClassGroups {
                 studyPlan {
                   id
                   name
+                  createdAt
+                  updatedAt
                 }
+                createdAt
+                updatedAt
               }
             }
           `,
           variables: {
             schoolId: params.schoolId,
+            take: params.take,
+            skip: params.skip,
+            search: params.search,
           },
         })
-        .valueChanges.pipe(map((result) => result.data.classGroupsBySchoolId));
+        .valueChanges.pipe(
+          tap((result) => this.pagination.updateCount(result.data.count)),
+          map((result) => result.data.classGroups),
+        );
     },
   });
-
   public editClassGroup(
     group?: Prisma.ClassGroupGetPayload<{
       include: { teacher: true; studyPlan: true };

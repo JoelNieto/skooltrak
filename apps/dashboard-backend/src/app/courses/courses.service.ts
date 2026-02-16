@@ -5,6 +5,7 @@ import { CONTEXT } from '@nestjs/graphql';
 import { Request } from 'express';
 import { FetchDataInput } from '../fetch-data.input';
 import { PrismaService } from '../prisma.service';
+import { DEFAULT_BUCKETS } from './default-buckets.constants';
 import { CreateCourseInput } from './dto/create-course.input';
 import { UpdateCourseInput } from './dto/update-course.input';
 @Injectable({ scope: Scope.REQUEST })
@@ -77,6 +78,14 @@ export class CoursesService {
             : `${subject?.code} - ${studyPlan?.shortName}`,
           name: createCourseInput.name ? `${createCourseInput.name}` : `${subject?.name} - ${studyPlan?.name}`,
           code,
+          gradeBuckets: {
+            createMany: {
+              data: DEFAULT_BUCKETS.map((bucket) => ({
+                name: bucket.name,
+                weight: bucket.weighting,
+              })),
+            },
+          },
         },
         include: { school: true, subject: true, studyPlan: true },
       });

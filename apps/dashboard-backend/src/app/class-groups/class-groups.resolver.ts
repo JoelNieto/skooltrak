@@ -1,4 +1,5 @@
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
+import { FetchDataInput } from '../fetch-data.input';
 import { ClassGroupsService } from './class-groups.service';
 import { CreateClassGroupInput } from './dto/create-class-group.input';
 import { UpdateClassGroupInput } from './dto/update-class-group.input';
@@ -9,35 +10,32 @@ export class ClassGroupsResolver {
   constructor(private readonly classGroupsService: ClassGroupsService) {}
 
   @Mutation(() => ClassGroup)
-  createClassGroup(
-    @Args('createClassGroupInput') createClassGroupInput: CreateClassGroupInput
-  ) {
+  createClassGroup(@Args('createClassGroupInput') createClassGroupInput: CreateClassGroupInput) {
     return this.classGroupsService.create(createClassGroupInput);
   }
 
   @Query(() => [ClassGroup], { name: 'classGroups' })
-  findAll() {
-    return this.classGroupsService.findAll();
+  findAll(@Args() fetchDataInput: FetchDataInput) {
+    return this.classGroupsService.findAll(fetchDataInput);
+  }
+
+  @Query(() => Number, { name: 'classGroupsCount' })
+  count(@Args() fetchDataInput: FetchDataInput) {
+    return this.classGroupsService.count(fetchDataInput);
   }
 
   @Query(() => [ClassGroup], { name: 'classGroupsByOrganizationId' })
-  findAllByOrganizationId(
-    @Args('organizationId', { type: () => String }) organizationId: string
-  ) {
+  findAllByOrganizationId(@Args('organizationId', { type: () => String }) organizationId: string) {
     return this.classGroupsService.findAllByOrganizationId(organizationId);
   }
 
   @Query(() => [ClassGroup], { name: 'classGroupsBySchoolId' })
-  findAllBySchoolId(
-    @Args('schoolId', { type: () => String }) schoolId: string
-  ) {
+  findAllBySchoolId(@Args('schoolId', { type: () => String }) schoolId: string) {
     return this.classGroupsService.findAllBySchoolId(schoolId);
   }
 
   @Query(() => [ClassGroup], { name: 'classGroupsByCourseId' })
-  findAllByCourseId(
-    @Args('courseId', { type: () => String }) courseId: string
-  ) {
+  findAllByCourseId(@Args('courseId', { type: () => String }) courseId: string) {
     return this.classGroupsService.findAllByCourseId(courseId);
   }
 
@@ -47,13 +45,8 @@ export class ClassGroupsResolver {
   }
 
   @Mutation(() => ClassGroup)
-  updateClassGroup(
-    @Args('updateClassGroupInput') updateClassGroupInput: UpdateClassGroupInput
-  ) {
-    return this.classGroupsService.update(
-      updateClassGroupInput.id,
-      updateClassGroupInput
-    );
+  updateClassGroup(@Args('updateClassGroupInput') updateClassGroupInput: UpdateClassGroupInput) {
+    return this.classGroupsService.update(updateClassGroupInput.id, updateClassGroupInput);
   }
 
   @Mutation(() => ClassGroup)

@@ -20,8 +20,11 @@ export class Grade
   id: string;
   @Field(() => String, { description: 'Titulo de la calificacion' })
   title: string;
-  @Field(() => String, { description: 'Comentarios de la calificacion' })
-  comments: string;
+  @Field(() => String, {
+    description: 'Comentarios de la calificacion',
+    nullable: true,
+  })
+  comments: string | null;
   @Field(() => String, { description: 'ID del curso' })
   courseId: string;
   @Field(() => String, { description: 'ID del bucket' })

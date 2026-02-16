@@ -1,17 +1,7 @@
 import { markGroupDirty, Toast } from '@/ui';
-import {
-  afterRenderEffect,
-  Component,
-  inject,
-  input,
-  output,
-} from '@angular/core';
+import { afterRenderEffect, Component, inject, input, output } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
-import {
-  NonNullableFormBuilder,
-  ReactiveFormsModule,
-  Validators,
-} from '@angular/forms';
+import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Prisma } from '@generated/prisma';
 import { Apollo, gql } from 'apollo-angular';
 import { map, of } from 'rxjs';
@@ -23,60 +13,33 @@ import Store from '../../core/store';
     <div class="flex flex-col md:grid md:grid-cols-2 gap-2">
       <div class="fieldset">
         <label for="name">Nombre</label>
-        <input
-          type="text"
-          id="name"
-          name="name"
-          formControlName="name"
-          class="input input-primary"
-        />
+        <input type="text" id="name" name="name" formControlName="name" class="input input-primary" />
       </div>
       <div class="fieldset">
         <label for="studyPlanId">Plan de estudio</label>
-        <select
-          id="studyPlanId"
-          name="studyPlanId"
-          formControlName="studyPlanId"
-          class="select select-primary"
-        >
+        <select id="studyPlanId" name="studyPlanId" formControlName="studyPlanId" class="select select-primary">
           <option value="" disabled>Seleccionar plan...</option>
-          @for(studyPlan of studyPlans.value(); track studyPlan.id) {
-          <option [value]="studyPlan.id">{{ studyPlan.name }}</option>
+          @for (studyPlan of studyPlans.value(); track studyPlan.id) {
+            <option [value]="studyPlan.id">{{ studyPlan.name }}</option>
           }
         </select>
       </div>
       <div class="fieldset">
-        <label for="teacherId"
-          >Profesor
-          <span class="text-base-content/50 text-xs">(opcional)</span></label
-        >
-        <select
-          id="teacherId"
-          name="teacherId"
-          formControlName="teacherId"
-          class="select select-primary"
-        >
+        <label for="teacherId">Profesor <span class="text-base-content/50 text-xs">(opcional)</span></label>
+        <select id="teacherId" name="teacherId" formControlName="teacherId" class="select select-primary">
           <option [value]="null" disabled>Seleccionar profesor...</option>
-          @for(teacher of teachers.value(); track teacher.id) {
-          <option [value]="teacher.id">{{ teacher.name }}</option>
+          @for (teacher of teachers.value(); track teacher.id) {
+            <option [value]="teacher.id">{{ teacher.name }}</option>
           }
         </select>
       </div>
       <div class="fieldset">
         <label for="active">Activo</label>
-        <input
-          type="checkbox"
-          id="active"
-          name="active"
-          formControlName="active"
-          class="checkbox checkbox-primary"
-        />
+        <input type="checkbox" id="active" name="active" formControlName="active" class="checkbox checkbox-primary" />
       </div>
     </div>
     <div class="flex justify-end mt-4 gap-2">
-      <button class="btn btn-ghost" (click)="closeModal.emit()">
-        Cancelar
-      </button>
+      <button class="btn btn-ghost" type="button" (click)="closeModal.emit()">Cancelar</button>
       <button class="btn btn-primary" type="submit">Guardar</button>
     </div>
   </form>`,
@@ -117,9 +80,7 @@ export default class ClassGroupsForm {
             organizationId: params.organizationId,
           },
         })
-        .valueChanges.pipe(
-          map((result) => result.data.teachersByOrganizationId)
-        );
+        .valueChanges.pipe(map((result) => result.data.teachersByOrganizationId));
     },
   });
 
@@ -183,9 +144,7 @@ export default class ClassGroupsForm {
       this.apollo
         .mutate({
           mutation: gql`
-            mutation UpdateClassGroup(
-              $updateClassGroupInput: UpdateClassGroupInput!
-            ) {
+            mutation UpdateClassGroup($updateClassGroupInput: UpdateClassGroupInput!) {
               updateClassGroup(updateClassGroupInput: $updateClassGroupInput) {
                 id
                 name
@@ -213,9 +172,7 @@ export default class ClassGroupsForm {
       this.apollo
         .mutate({
           mutation: gql`
-            mutation CreateClassGroup(
-              $createClassGroupInput: CreateClassGroupInput!
-            ) {
+            mutation CreateClassGroup($createClassGroupInput: CreateClassGroupInput!) {
               createClassGroup(createClassGroupInput: $createClassGroupInput) {
                 id
                 name

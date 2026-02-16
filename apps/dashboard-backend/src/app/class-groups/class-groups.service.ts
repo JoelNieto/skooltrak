@@ -1,4 +1,6 @@
+import { Prisma } from '@generated/prisma';
 import { Injectable } from '@nestjs/common';
+import { FetchDataInput } from '../fetch-data.input';
 import { PrismaService } from '../prisma.service';
 import { CreateClassGroupInput } from './dto/create-class-group.input';
 import { UpdateClassGroupInput } from './dto/update-class-group.input';
@@ -12,8 +14,46 @@ export class ClassGroupsService {
     });
   }
 
-  findAll() {
-    return this.prisma.classGroup.findMany();
+  findAll(fetchDataInput: FetchDataInput) {
+    const { skip, take, schoolId, search, studyPlanId } = fetchDataInput;
+    let where: Prisma.ClassGroupWhereInput = {
+      schoolId,
+      studyPlanId,
+    };
+    if (search) {
+      where = {
+        ...where,
+        OR: [{ name: { contains: search, mode: 'insensitive' } }],
+      };
+    }
+    return this.prisma.classGroup.findMany({
+      include: {
+        teacher: true,
+        studyPlan: {
+          include: {
+            degree: true,
+          },
+        },
+      },
+      where,
+      skip,
+      take,
+    });
+  }
+
+  count(fetchDataInput: FetchDataInput) {
+    const { schoolId, search, studyPlanId } = fetchDataInput;
+    let where: Prisma.ClassGroupWhereInput = {
+      schoolId,
+      studyPlanId,
+    };
+    if (search) {
+      where = {
+        ...where,
+        OR: [{ name: { contains: search, mode: 'insensitive' } }],
+      };
+    }
+    return this.prisma.classGroup.count({ where });
   }
 
   findAllByOrganizationId(organizationId: string) {

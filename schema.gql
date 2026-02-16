@@ -1152,7 +1152,7 @@ type Grade {
   bucketId: String!
 
   """Comentarios de la calificacion"""
-  comments: String!
+  comments: String
 
   """Curso de la calificacion"""
   course: Course!
@@ -1785,10 +1785,49 @@ type Query {
   availableSchools: [AvailableSchool!]!
   averageCourseScoreForStudent(courseId: String!, periodId: String!, studentId: String!): Float!
   classGroup(id: String!): ClassGroup!
-  classGroups: [ClassGroup!]!
+  classGroups(
+    """Order by"""
+    orderBy: String = "name"
+
+    """Order direction"""
+    orderDirection: String = "asc"
+
+    """School ID"""
+    schoolId: String
+
+    """Search query"""
+    search: String = ""
+
+    """Skip"""
+    skip: Int
+    studyPlanId: String
+
+    """Take"""
+    take: Int
+  ): [ClassGroup!]!
   classGroupsByCourseId(courseId: String!): [ClassGroup!]!
   classGroupsByOrganizationId(organizationId: String!): [ClassGroup!]!
   classGroupsBySchoolId(schoolId: String!): [ClassGroup!]!
+  classGroupsCount(
+    """Order by"""
+    orderBy: String = "name"
+
+    """Order direction"""
+    orderDirection: String = "asc"
+
+    """School ID"""
+    schoolId: String
+
+    """Search query"""
+    search: String = ""
+
+    """Skip"""
+    skip: Int
+    studyPlanId: String
+
+    """Take"""
+    take: Int
+  ): Float!
   course(id: String!): Course!
   courses(
     """Order by"""

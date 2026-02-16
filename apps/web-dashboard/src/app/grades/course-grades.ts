@@ -16,7 +16,7 @@ export type StudentType = {
   initials: string;
   color: string;
   averageScore: number;
-  classGroup: { id: string; name: string };
+  classGroup: { id: string; name: string } | null;
 };
 
 @Component({
@@ -31,66 +31,81 @@ export type StudentType = {
       </select>
       <button class="btn btn-primary btn-soft" (click)="editGrade()">Nueva calificacion</button>
     </div>
-    <div class="overflow-x-auto">
-      <table class="table table-zebra table-fixed">
+    <div class="overflow-x-auto w-full">
+      <table class="table table-zebra table-fixed w-full">
         <thead>
           <tr>
-            <th class="w-[10rem]">Estudiante</th>
+            <th class="min-w-48 w-48">Estudiante</th>
             @for (grade of gradesResource.value(); track grade.id) {
-              <th class="w-[2rem] min-w-[2rem] max-w-[2rem]">
+              <th class="min-w-24 w-24">
                 <a
                   [routerLink]="['/grades', grade.id]"
-                  class="link link-primary text-nowrap overflow-hidden text-ellipsis block"
+                  class="link link-primary block truncate"
+                  [title]="grade.title"
                 >
-                  {{ grade.title }}</a
-                >
+                  {{ grade.title }}
+                </a>
               </th>
             }
-            <th class="w-[2rem] min-w-[2rem] max-w-[2rem]">Promedio actual</th>
+            <th class="min-w-24 w-24">Promedio actual</th>
           </tr>
         </thead>
         <tbody>
-          @for (student of groupedGrades(); track student.id) {
-            <tr>
-              <td>
-                <a [routerLink]="['/students', student.id]" class="flex items-center gap-2 cursor-pointer">
-                  <div class="avatar avatar-placeholder">
-                    <div class="text-white w-7 rounded-full" [style.background]="student.color">
-                      <span class="text-xs">{{ student.initials }}</span>
-                    </div>
-                  </div>
-                  {{ student.name }}
-                </a>
-              </td>
-              @for (grade of student.grades; track grade.id) {
-                <td
-                  class="text-center w-[2rem] min-w-[2rem] max-w-[2rem]"
-                  [ngClass]="{
-                    '!text-success bg-success/10': grade.item?.score && grade.item?.score! >= metric().minimumApproval,
-                    '!text-warning bg-warning/10':
-                      grade.item?.score &&
-                      grade.item?.score! >= metric().minimumApproval && grade.item?.score! < metric().minimumExcellence,
-                    '!text-error bg-error/10': grade.item?.score && grade.item?.score! < metric().minimumApproval,
-                  }"
-                >
-                  {{ (grade.item?.score | number: '1.1-1') ?? '-' }}
-                </td>
-              }
-              <td
-                class="text-center font-bold w-[2rem] min-w-[2rem] max-w-[2rem]"
-                [ngClass]="{
-                  '!text-success bg-success/10':
-                    student.averageScore && student.averageScore >= metric().minimumApproval,
-                  '!text-warning bg-warning/10':
-                    student.averageScore &&
-                    student.averageScore >= metric().minimumApproval &&
-                      student.averageScore < metric().minimumExcellence,
-                  '!text-error bg-error/10': student.averageScore && student.averageScore < metric().minimumApproval,
-                }"
-              >
-                {{ student.averageScore ? (student.averageScore | number: '1.1-1') : '-' }}
+          @for (group of groupedGradesByClassGroup(); track group.classGroup?.id ?? '__none__') {
+            <tr class="bg-base-200/50">
+              <td colspan="100" class="font-semibold text-base-content/80 py-2">
+                @if (group.classGroup) {
+                  {{ group.classGroup.name }}
+                } @else {
+                  Sin grupo
+                }
               </td>
             </tr>
+            @for (student of group.students; track student.id) {
+              <tr>
+                <td class="overflow-hidden">
+                  <a
+                    [routerLink]="['/students', student.id]"
+                    class="flex items-center gap-2 cursor-pointer min-w-0"
+                  >
+                    <div class="avatar avatar-placeholder flex-shrink-0">
+                      <div class="text-white w-7 rounded-full" [style.background]="student.color">
+                        <span class="text-xs">{{ student.initials }}</span>
+                      </div>
+                    </div>
+                    <span class="truncate">{{ student.name }}</span>
+                  </a>
+                </td>
+                @for (grade of student.grades; track grade.id) {
+                  <td
+                    class="text-center min-w-24 w-24"
+                    [ngClass]="{
+                      '!text-success bg-success/10': grade.item?.score && grade.item?.score! >= metric().minimumApproval,
+                      '!text-warning bg-warning/10':
+                        grade.item?.score &&
+                        grade.item?.score! >= metric().minimumApproval && grade.item?.score! < metric().minimumExcellence,
+                      '!text-error bg-error/10': grade.item?.score && grade.item?.score! < metric().minimumApproval,
+                    }"
+                  >
+                    {{ (grade.item?.score | number: '1.1-1') ?? '-' }}
+                  </td>
+                }
+                <td
+                  class="text-center font-bold min-w-24 w-24"
+                  [ngClass]="{
+                    '!text-success bg-success/10':
+                      student.averageScore && student.averageScore >= metric().minimumApproval,
+                    '!text-warning bg-warning/10':
+                      student.averageScore &&
+                      student.averageScore >= metric().minimumApproval &&
+                        student.averageScore < metric().minimumExcellence,
+                    '!text-error bg-error/10': student.averageScore && student.averageScore < metric().minimumApproval,
+                  }"
+                >
+                  {{ student.averageScore ? (student.averageScore | number: '1.1-1') : '-' }}
+                </td>
+              </tr>
+            }
           } @empty {
             <tr>
               <td colspan="6" class="text-center">No hay calificaciones para este curso</td>
@@ -275,6 +290,28 @@ export default class CourseGrades {
         }),
       };
     });
+  });
+
+  /** Groups students by class group for display, with "Sin grupo" last. */
+  public groupedGradesByClassGroup = computed(() => {
+    const flat = this.groupedGrades();
+    if (!flat.length) return [];
+    const groups = new Map<string | null, { classGroup: { id: string; name: string } | null; students: typeof flat }>();
+    for (const student of flat) {
+      const cg = student.classGroup ?? null;
+      const key = cg?.id ?? null;
+      if (!groups.has(key)) {
+        groups.set(key, { classGroup: cg, students: [] });
+      }
+      groups.get(key)!.students.push(student);
+    }
+    const result = [...groups.values()];
+    result.sort((a, b) => {
+      if (!a.classGroup) return 1;
+      if (!b.classGroup) return -1;
+      return a.classGroup.name.localeCompare(b.classGroup.name);
+    });
+    return result;
   });
 
   constructor() {

@@ -38,7 +38,7 @@ export class GradesService {
         course: { include: { studyPlan: { include: { gradeMetric: true } } } },
         studentGrades: {
           include: {
-            student: true,
+            student: { include: { classGroup: true } },
           },
           orderBy: {
             student: {

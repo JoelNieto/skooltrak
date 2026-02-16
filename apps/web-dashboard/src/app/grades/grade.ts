@@ -56,50 +56,65 @@ import StudentGradeForm from './student-grade-form';
         <div class="card card-border border-base-300 mt-4 bg-base-100">
           <div class="card-body">
             <h3 class="card-title">Calificaciones</h3>
-            <table class="table">
-              <thead>
-                <tr>
-                  <th>Nombre</th>
-                  <th class="text-center px-0 w-25">Calificacion</th>
-                  <th class="px-2!">Comentarios</th>
-                  <th>Actualizado</th>
-                </tr>
-              </thead>
-              <tbody>
-                @for (studentGrade of grade.studentGrades; track studentGrade.id) {
+            <div class="overflow-x-auto w-full">
+              <table class="table w-full">
+                <thead>
                   <tr>
-                    <td>
-                      {{ studentGrade.student.firstName }}
-                      {{ studentGrade.student.fatherName }}
-                    </td>
-                    <td
-                      class="font-semibold text-center !px-0 cursor-pointer hover:bg-base-200"
-                      (click)="editGradeItem(studentGrade)"
-                      [ngClass]="{
-                        '!text-success bg-success/10':
-                          studentGrade.score && studentGrade.score! >= metric()!.minimumApproval,
-                        '!text-warning bg-warning/10':
-                          studentGrade.score &&
-                          studentGrade.score! >= metric()!.minimumApproval &&
-                          studentGrade.score! < metric()!.minimumExcellence,
-                        '!text-error bg-error/10':
-                          studentGrade.score && studentGrade.score! < metric()!.minimumApproval,
-                      }"
-                    >
-                      @if (studentGrade.score) {
-                        {{ studentGrade.score | number: '1.1-1' }}
-                      } @else {
-                        <span class="material-symbols-outlined text-2xl">more_horiz</span>
-                      }
-                    </td>
-                    <td class="overflow-hidden text-ellipsis whitespace-nowrap max-w-[200px] !pl-2">
-                      {{ studentGrade.comments }}
-                    </td>
-                    <td>{{ studentGrade.updatedAt | date: 'medium' }}</td>
+                    <th>Nombre</th>
+                    <th class="text-center px-0 w-25">Calificacion</th>
+                    <th class="px-2!">Comentarios</th>
+                    <th>Actualizado</th>
                   </tr>
-                }
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  @for (group of studentGradesByClassGroup(); track group.classGroup?.id ?? '__none__') {
+                    <tr class="bg-base-200/50">
+                      <td colspan="4" class="font-semibold text-base-content/80 py-2">
+                        @if (group.classGroup) {
+                          {{ group.classGroup.name }}
+                        } @else {
+                          Sin grupo
+                        }
+                      </td>
+                    </tr>
+                    @for (studentGrade of group.studentGrades; track studentGrade.id) {
+                      <tr>
+                        <td class="overflow-hidden">
+                          <span class="block truncate">
+                            {{ studentGrade.student.firstName }}
+                            {{ studentGrade.student.fatherName }}
+                          </span>
+                        </td>
+                        <td
+                          class="font-semibold text-center px-0! cursor-pointer hover:bg-base-200"
+                          (click)="editGradeItem(studentGrade)"
+                          [ngClass]="{
+                            'text-success! bg-success/10':
+                              studentGrade.score && studentGrade.score! >= metric()!.minimumApproval,
+                            'text-warning! bg-warning/10':
+                              studentGrade.score &&
+                              studentGrade.score! >= metric()!.minimumApproval &&
+                              studentGrade.score! < metric()!.minimumExcellence,
+                            'text-error! bg-error/10':
+                              studentGrade.score && studentGrade.score! < metric()!.minimumApproval,
+                          }"
+                        >
+                          @if (studentGrade.score) {
+                            {{ studentGrade.score | number: '1.1-1' }}
+                          } @else {
+                            <span class="material-symbols-outlined text-2xl">more_horiz</span>
+                          }
+                        </td>
+                        <td class="overflow-hidden text-ellipsis whitespace-nowrap max-w-[200px] !pl-2">
+                          {{ studentGrade.comments }}
+                        </td>
+                        <td>{{ studentGrade.updatedAt | date: 'medium' }}</td>
+                      </tr>
+                    }
+                  }
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       } @else if (gradeResource.error()) {
@@ -136,7 +151,7 @@ export default class Grade {
                 };
                 bucket: true;
                 period: true;
-                studentGrades: { include: { student: true } };
+                studentGrades: { include: { student: { include: { classGroup: true } } } };
               };
             }>
           >;
@@ -181,6 +196,10 @@ export default class Grade {
                     id
                     firstName
                     fatherName
+                    classGroup {
+                      id
+                      name
+                    }
                   }
                   score
                   comments
@@ -200,6 +219,31 @@ export default class Grade {
   });
 
   public metric = computed(() => this.gradeResource.value()?.course.studyPlan?.gradeMetric);
+
+  /** Groups student grades by class group, with "Sin grupo" last. */
+  public studentGradesByClassGroup = computed(() => {
+    const grade = this.gradeResource.value();
+    if (!grade?.studentGrades?.length) return [];
+    const groups = new Map<
+      string | null,
+      { classGroup: { id: string; name: string } | null; studentGrades: typeof grade.studentGrades }
+    >();
+    for (const sg of grade.studentGrades) {
+      const cg = sg.student.classGroup ?? null;
+      const key = cg?.id ?? '__none__';
+      if (!groups.has(key)) {
+        groups.set(key, { classGroup: cg, studentGrades: [] });
+      }
+      groups.get(key)!.studentGrades.push(sg);
+    }
+    const result = [...groups.values()];
+    result.sort((a, b) => {
+      if (!a.classGroup) return 1;
+      if (!b.classGroup) return -1;
+      return a.classGroup.name.localeCompare(b.classGroup.name);
+    });
+    return result;
+  });
 
   publishGrade() {
     this.#confirmation

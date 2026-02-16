@@ -60,8 +60,8 @@ import StudentGradeForm from './student-grade-form';
               <thead>
                 <tr>
                   <th>Nombre</th>
-                  <th class="text-center px-0 w-[100px]">Calificacion</th>
-                  <th class="!px-2">Comentarios</th>
+                  <th class="text-center px-0 w-25">Calificacion</th>
+                  <th class="px-2!">Comentarios</th>
                   <th>Actualizado</th>
                 </tr>
               </thead>
@@ -81,7 +81,7 @@ import StudentGradeForm from './student-grade-form';
                         '!text-warning bg-warning/10':
                           studentGrade.score &&
                           studentGrade.score! >= metric()!.minimumApproval &&
-                            studentGrade.score! < metric()!.minimumExcellence,
+                          studentGrade.score! < metric()!.minimumExcellence,
                         '!text-error bg-error/10':
                           studentGrade.score && studentGrade.score! < metric()!.minimumApproval,
                       }"

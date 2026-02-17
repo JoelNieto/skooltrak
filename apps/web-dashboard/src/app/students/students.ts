@@ -183,7 +183,13 @@ const ENROLLMENT_STATUS_COLORS: Record<$Enums.EnrollmentStatus, string> = {
         </tbody>
       </table>
       <div class="p-4 rounded-b-lg ">
-        <lib-paginator [count]="pagination.count()" [take]="pagination.take()" [skip]="pagination.skip()" />
+        <lib-paginator
+          [count]="pagination.count()"
+          [take]="pagination.take()"
+          [skip]="pagination.skip()"
+          (skipChange)="pagination.updateSkip($event)"
+          (takeChange)="pagination.updateTake($event)"
+        />
       </div>
     </div>
   `,

@@ -6,6 +6,9 @@ import {
   model,
 } from '@angular/core';
 
+/** Page number or ellipsis placeholder for compact pagination */
+export type PageItem = number | 'ellipsis';
+
 @Component({
   selector: 'lib-paginator',
   template: ` <div class="flex justify-between items-center w-full">
@@ -14,35 +17,42 @@ import {
       <strong>{{ end() }}</strong> de <strong>{{ count() }}</strong>
     </p>
     <div>
-      <div class="join">
+      <div class="join join-horizontal">
         <button
-          class="join-item btn"
+          class="join-item btn btn-sm"
           [class.btn-disabled]="!hasPreviousPage()"
           (click)="previousPage()"
         >
-          «
+          ‹
         </button>
-        @for(page of pagesRange(); track page) {
-        <button
-          class="join-item btn"
-          [class.btn-active]="page === currentPage()"
-          (click)="skip.set(page * take() - take())"
-        >
-          {{ page }}
-        </button>
+        @for(item of pageItems(); track trackPageItem($index, item)) {
+          @if(item === 'ellipsis') {
+            <span class="join-item btn btn-sm btn-disabled no-pointer-events px-2">…</span>
+          } @else {
+            <button
+              class="join-item btn btn-sm min-w-9"
+              [class.btn-active]="item === currentPage()"
+              (click)="skip.set((item - 1) * take())"
+            >
+              {{ item }}
+            </button>
+          }
         }
         <button
-          class="join-item btn"
+          class="join-item btn btn-sm"
           [class.btn-disabled]="!hasNextPage()"
           (click)="nextPage()"
         >
-          »
+          ›
         </button>
       </div>
     </div>
   </div>`,
   styles: `:host {
     width: 100%;
+  }
+  :host .no-pointer-events {
+    pointer-events: none;
   }`,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -52,13 +62,32 @@ export class Paginator {
   public count = input.required<number>();
 
   public pages = computed(() => Math.ceil(this.count() / this.take()));
-  public pagesRange = computed(() => {
-    const pages = [];
-    for (let i = 1; i <= this.pages(); i++) {
-      pages.push(i);
+
+  /** Compact page items: numbers and ellipsis for large page counts */
+  public pageItems = computed((): PageItem[] => {
+    const total = this.pages();
+    const current = this.currentPage();
+    const windowSize = 2;
+
+    if (total <= 9) {
+      return Array.from({ length: total }, (_, i) => i + 1);
     }
-    return pages;
+
+    const items: PageItem[] = [1];
+    const windowStart = Math.max(2, current - windowSize);
+    const windowEnd = Math.min(total - 1, current + windowSize);
+
+    if (windowStart > 2) items.push('ellipsis');
+    for (let i = windowStart; i <= windowEnd; i++) items.push(i);
+    if (windowEnd < total - 1) items.push('ellipsis');
+    if (total > 1) items.push(total);
+
+    return items;
   });
+
+  trackPageItem(index: number, item: PageItem): string {
+    return item === 'ellipsis' ? `ellipsis-${index}` : `page-${item}`;
+  }
   public currentPage = computed(
     () => Math.floor(this.skip() / this.take()) + 1
   );

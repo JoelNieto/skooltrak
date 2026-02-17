@@ -1,7 +1,6 @@
-import { Parent, ResolveField, Resolver } from '@nestjs/graphql';
-import { Args, Mutation, Query } from '@nestjs/graphql';
-import { Course } from '../courses/entities/course.entity';
+import { Args, Mutation, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql';
 import { CoursesService } from '../courses/courses.service';
+import { Course } from '../courses/entities/course.entity';
 import { CreateGradeInput } from './dto/create-grade.input';
 import { UpdateGradeInput } from './dto/update-grade.input';
 import { Grade } from './entities/grade.entity';
@@ -11,7 +10,7 @@ import { GradesService } from './grades.service';
 export class GradesResolver {
   constructor(
     private readonly gradesService: GradesService,
-    private readonly coursesService: CoursesService
+    private readonly coursesService: CoursesService,
   ) {}
 
   @Mutation(() => Grade)
@@ -32,7 +31,7 @@ export class GradesResolver {
   @Query(() => [Grade], { name: 'gradesByCourseId' })
   findByCourseId(
     @Args('courseId', { type: () => String }) courseId: string,
-    @Args('periodId', { type: () => String }) periodId?: string
+    @Args('periodId', { type: () => String }) periodId?: string,
   ) {
     return this.gradesService.findByCourseId(courseId, periodId);
   }

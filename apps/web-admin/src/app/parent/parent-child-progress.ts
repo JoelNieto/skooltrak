@@ -1,5 +1,5 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { PageHeader, StatCard } from '@/ui';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 
 @Component({
   selector: 'app-parent-child-progress',
@@ -20,9 +20,7 @@ import { PageHeader, StatCard } from '@/ui';
 
     <div class="mt-6 card border border-base-200 bg-base-100">
       <div class="card-body">
-        <h2 class="text-lg font-semibold text-base-content">
-          Calificaciones por materia
-        </h2>
+        <h2 class="text-lg font-semibold text-base-content">Calificaciones por materia</h2>
         <div class="overflow-x-auto">
           <table class="table">
             <thead>

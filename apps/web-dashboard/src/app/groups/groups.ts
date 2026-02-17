@@ -1,11 +1,11 @@
-import { EmptyState } from '@/ui';
+import { EmptyState, Pagination, Paginator } from '@/ui';
 import { DatePipe } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import { Prisma } from '@generated/prisma';
 import { Apollo, gql } from 'apollo-angular';
-import { map, of } from 'rxjs';
+import { map, of, tap } from 'rxjs';
 import Store from '../core/store';
 
 type Teacher = Prisma.TeacherGetPayload<undefined> & { name: string };
@@ -16,7 +16,8 @@ type GroupType = Prisma.ClassGroupGetPayload<{
   };
 }> & { teacher?: Teacher };
 @Component({
-  imports: [RouterLink, DatePipe, EmptyState],
+  imports: [RouterLink, DatePipe, EmptyState, Paginator],
+  providers: [Pagination],
   template: `<div class="breadcrumbs text-sm">
       <ul>
         <li><a routerLink="/">Inicio</a></li>
@@ -59,15 +60,27 @@ type GroupType = Prisma.ClassGroupGetPayload<{
           }
         </tbody>
       </table>
+      <div class="p-4 rounded-b-lg">
+        <lib-paginator
+          [count]="pagination.count()"
+          [take]="pagination.take()"
+          [skip]="pagination.skip()"
+          (skipChange)="pagination.updateSkip($event)"
+          (takeChange)="pagination.updateTake($event)"
+        />
+      </div>
     </div>`,
 })
 export default class Groups {
   private store = inject(Store);
   private apollo = inject(Apollo);
+  public pagination = inject(Pagination);
 
   public classGroups = rxResource({
     params: () => ({
       schoolId: this.store.currentSchoolId(),
+      take: this.pagination.take(),
+      skip: this.pagination.skip(),
     }),
     stream: ({ params }) => {
       const { schoolId } = params;
@@ -76,11 +89,13 @@ export default class Groups {
       }
       return this.apollo
         .watchQuery<{
-          classGroupsBySchoolId: GroupType[];
+          classGroups: GroupType[];
+          count: number;
         }>({
           query: gql`
-            query ClassGroupsBySchoolId($schoolId: String!) {
-              classGroupsBySchoolId(schoolId: $schoolId) {
+            query GetClassGroups($schoolId: String!, $take: Int!, $skip: Int!) {
+              count: classGroupsCount(schoolId: $schoolId)
+              classGroups(schoolId: $schoolId, take: $take, skip: $skip) {
                 id
                 name
                 createdAt
@@ -100,9 +115,14 @@ export default class Groups {
           `,
           variables: {
             schoolId: params.schoolId,
+            take: params.take,
+            skip: params.skip,
           },
         })
-        .valueChanges.pipe(map((result) => result.data.classGroupsBySchoolId));
+        .valueChanges.pipe(
+          tap((result) => this.pagination.updateCount(result.data.count)),
+          map((result) => result.data.classGroups),
+        );
     },
   });
 }

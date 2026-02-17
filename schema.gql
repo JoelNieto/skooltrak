@@ -652,6 +652,9 @@ input CreatePeriodInput {
   """Name of the period"""
   name: String!
 
+  """Short name of the period"""
+  shortName: String! = ""
+
   """Start date of the period"""
   startDate: DateTime!
 
@@ -1234,6 +1237,113 @@ type GradeMetric {
   updatedAt: DateTime!
 }
 
+type GradeReport {
+  """Attendance per course per period"""
+  attendanceRows: [GradeReportAttendanceRow!]!
+
+  """Class group name"""
+  classGroupName: String
+
+  """Student document ID"""
+  documentId: String!
+
+  """Grades per course"""
+  gradesRows: [GradeReportGradesRow!]!
+
+  """Habit metrics so far"""
+  habitRows: [GradeReportHabitRow!]!
+
+  """Study plan level"""
+  level: Int
+
+  """Overall averages row"""
+  overallGradesRow: GradeReportOverallRow
+
+  """Period name for the report"""
+  periodName: String!
+
+  """All periods in the school year"""
+  periods: [GradeReportPeriodInfo!]!
+
+  """Presigned URL for the school logo"""
+  schoolLogoUrl: String
+
+  """School name"""
+  schoolName: String!
+
+  """Student full name"""
+  studentName: String!
+
+  """Study plan name"""
+  studyPlanName: String
+
+  """Teacher name (class group homeroom teacher)"""
+  teacherName: String
+}
+
+type GradeReportAttendanceRow {
+  """Course ID"""
+  courseId: String!
+
+  """Course name (subject name)"""
+  courseName: String!
+
+  """Attendance per period"""
+  periodAttendance: [GradeReportPeriodAttendance!]!
+}
+
+type GradeReportGradesRow {
+  """Course ID"""
+  courseId: String!
+
+  """Course name (subject name)"""
+  courseName: String!
+
+  """Cumulative average (periods 1 through selected)"""
+  cumulativeAverage: Float
+
+  """Period averages - null for future periods"""
+  periodAverages: [Float]!
+}
+
+type GradeReportHabitRow {
+  """Habit metric name"""
+  metricName: String!
+
+  """Value: X (Deficiente), R (Regular), S (Satisfactorio)"""
+  value: String!
+}
+
+type GradeReportOverallRow {
+  """Overall cumulative average"""
+  cumulativeAverage: Float
+
+  """Overall average per period - null for future"""
+  periodAverages: [Float]!
+}
+
+type GradeReportPeriodAttendance {
+  """Absent count for this period"""
+  absent: Int!
+
+  """Late count for this period"""
+  late: Int!
+
+  """Period ID"""
+  periodId: String!
+}
+
+type GradeReportPeriodInfo {
+  """Period ID"""
+  id: String!
+
+  """Period name"""
+  name: String!
+
+  """Period short name"""
+  shortName: String!
+}
+
 type GroupsSchedule {
   """Class group of the groups schedule"""
   classGroup: ClassGroup!
@@ -1714,6 +1824,9 @@ type Period {
   """Name of the period"""
   name: String!
 
+  """Short name of the period"""
+  shortName: String!
+
   """Start date of the period"""
   startDate: DateTime!
 
@@ -2089,6 +2202,11 @@ type Query {
   gradeBucketsByCourseId(courseId: String!): [GradeBucket!]!
   gradeMetric(id: String!): GradeMetric!
   gradeMetrics: [GradeMetric!]!
+
+  """
+  Get the grade report (Boletin de calificaciones) for a student and period
+  """
+  gradeReport(periodId: String!, studentId: String!): GradeReport!
   grades: [Grade!]!
   gradesByCourseId(courseId: String!, periodId: String!): [Grade!]!
   groupsSchedule(id: String!): GroupsSchedule!
@@ -3129,6 +3247,9 @@ input UpdatePeriodInput {
 
   """Name of the period"""
   name: String
+
+  """Short name of the period"""
+  shortName: String = ""
 
   """Start date of the period"""
   startDate: DateTime

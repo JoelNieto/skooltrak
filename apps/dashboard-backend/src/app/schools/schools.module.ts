@@ -7,5 +7,6 @@ import { SchoolsService } from './schools.service';
 @Module({
   providers: [SchoolsResolver, SchoolsService],
   imports: [PrismaModule, ConfigModule],
+  exports: [SchoolsService],
 })
 export class SchoolsModule {}

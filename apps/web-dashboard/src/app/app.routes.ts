@@ -211,6 +211,11 @@ export const appRoutes: Route[] = [
         loadComponent: () => import('./students/student'),
       },
       {
+        path: 'students/:id/grade-report',
+        canActivate: [permissionGuard('VIEW_STUDENTS')],
+        loadComponent: () => import('./students/grade-report'),
+      },
+      {
         path: 'students/:id/edit',
         canActivate: [permissionGuard('MANAGE_STUDENTS')],
         loadComponent: () => import('./students/student-form'),

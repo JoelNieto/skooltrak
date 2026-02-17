@@ -144,10 +144,19 @@ const ENROLLMENT_STATUS_COLORS: Record<$Enums.EnrollmentStatus, string> = {
                   }
                 </div>
               </div>
-              <a [routerLink]="['/students', student.id, 'edit']" class="btn btn-primary btn-sm">
-                <span class="material-symbols-outlined text-lg">edit</span>
-                Editar
-              </a>
+              <div class="flex gap-2">
+                <a
+                  [routerLink]="['/students', student.id, 'grade-report']"
+                  class="btn btn-ghost btn-sm"
+                >
+                  <span class="material-symbols-outlined text-lg">description</span>
+                  Boletín
+                </a>
+                <a [routerLink]="['/students', student.id, 'edit']" class="btn btn-primary btn-sm">
+                  <span class="material-symbols-outlined text-lg">edit</span>
+                  Editar
+                </a>
+              </div>
             </div>
           </div>
         </div>

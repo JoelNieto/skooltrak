@@ -42,6 +42,7 @@ model Organization {
   // Better-auth organization plugin
   members             Member[]
   invitations         Invitation[]
+
   @@map("organizations")
 }
 
@@ -62,7 +63,7 @@ model User {
   roleId            String?
   organization      Organization?      @relation(fields: [organizationId], references: [id], onDelete: SetNull, onUpdate: Cascade)
   organizationId    String?
-  onboardingStep    String?            // 'choose-path', 'school-setup', 'waiting-approval', 'completed'
+  onboardingStep    String? // 'choose-path', 'school-setup', 'waiting-approval', 'completed'
   lastLogin         DateTime?
   isBlocked         Boolean            @default(false)
   createdAt         DateTime           @default(now())
@@ -81,6 +82,7 @@ model User {
   sessions          Session[]
   accounts          Account[]
   members           Member[]
+
   @@map("users")
 }
 
@@ -99,6 +101,7 @@ model Message {
   createdAt       DateTime           @default(now())
   updatedAt       DateTime           @updatedAt
   deletedAt       DateTime?
+
   @@map("messages")
 }
 
@@ -122,7 +125,7 @@ model File {
   organizationId        String
   organization          Organization           @relation(fields: [organizationId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   ownerId               String?
-  owner                 User?                  @relation(fields: [ownerId], references: [id], onDelete: SetNull , onUpdate: Cascade)
+  owner                 User?                  @relation(fields: [ownerId], references: [id], onDelete: SetNull, onUpdate: Cascade)
   name                  String
   mimeType              String
   size                  Int
@@ -168,7 +171,6 @@ model FileShareSchool {
 
   @@unique([fileId, schoolId])
   @@index([schoolId])
-
   @@map("file_share_schools")
 }
 
@@ -224,12 +226,13 @@ model Permission {
   roles         Role[]
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
+
   @@map("permissions")
 }
 
 model School {
-  id             String       @id @default(cuid())
-  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  id             String            @id @default(cuid())
+  organization   Organization      @relation(fields: [organizationId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   organizationId String
   name           String
   shortName      String
@@ -242,15 +245,15 @@ model School {
   email          String
   phone          String
   website        String
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
   studyPlans     StudyPlan[]
   degrees        Degree[]
   courses        Course[]
   classGroups    ClassGroup[]
   students       Student[]
   assignments    Assignment[]
-  currentYear    Int          @default(2025)
+  currentYear    Int               @default(2025)
   fileShares     FileShareSchool[]
   joinRequests   JoinRequest[]
   newsletters    Newsletter[]
@@ -261,6 +264,7 @@ model School {
 model Period {
   id               String            @id @default(cuid())
   name             String
+  shortName        String            @default("")
   year             Int
   startDate        DateTime
   endDate          DateTime
@@ -268,8 +272,9 @@ model Period {
   updatedAt        DateTime          @updatedAt
   grades           Grade[]
   habitEvaluations HabitEvaluation[]
-  @@index([year, name])
 
+  @@index([year, name])
+  @@index([year, shortName])
   @@map("periods")
 }
 
@@ -381,34 +386,34 @@ model ClassGroup {
 }
 
 model Student {
-  id                    String                 @id @default(cuid())
+  id                    String                   @id @default(cuid())
   firstName             String
   middleName            String
   fatherName            String
   motherName            String
   documentId            String
   organizationId        String
-  organization          Organization           @relation(fields: [organizationId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  school                School                 @relation(fields: [schoolId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  organization          Organization             @relation(fields: [organizationId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  school                School                   @relation(fields: [schoolId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   schoolId              String
-  classGroup            ClassGroup?            @relation(fields: [classGroupId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  classGroup            ClassGroup?              @relation(fields: [classGroupId], references: [id], onDelete: SetNull, onUpdate: Cascade)
   classGroupId          String?
   birthDate             DateTime
   gender                Gender
   address               String
   phone                 String
-  enrollmentStatus      EnrollmentStatus       @default(ACTIVE)
-  bloodType             String                 @default("")
-  allergies             String                 @default("")
-  medicalNotes          String                 @default("")
-  emergencyContactName  String                 @default("")
-  emergencyContactPhone String                 @default("")
+  enrollmentStatus      EnrollmentStatus         @default(ACTIVE)
+  bloodType             String                   @default("")
+  allergies             String                   @default("")
+  medicalNotes          String                   @default("")
+  emergencyContactName  String                   @default("")
+  emergencyContactPhone String                   @default("")
   courses               Course[]
-  userId                String                 @unique
-  user                  User                   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  userId                String                   @unique
+  user                  User                     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   parents               Parent[]
-  createdAt             DateTime               @default(now())
-  updatedAt             DateTime               @updatedAt
+  createdAt             DateTime                 @default(now())
+  updatedAt             DateTime                 @updatedAt
   quizSubmissions       QuizSubmission[]
   studentGrades         StudentGrade[]
   attendanceRecords     AttendanceRecord[]
@@ -462,8 +467,8 @@ model Teacher {
   gender             Gender
   classGroups        ClassGroup[]
   courses            Course[]
-  user               User?                @relation(fields: [userId], references: [id], onDelete: SetNull, onUpdate: Cascade)
-  userId             String?              @unique
+  user               User?               @relation(fields: [userId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  userId             String?             @unique
   createdAt          DateTime            @default(now())
   updatedAt          DateTime            @updatedAt
   assignments        Assignment[]
@@ -486,7 +491,7 @@ model Assignment {
   courseId          String
   dates             AssignmentDate[]
   requireSubmission Boolean
-  teacher           Teacher?                @relation(fields: [teacherId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  teacher           Teacher?               @relation(fields: [teacherId], references: [id], onDelete: SetNull, onUpdate: Cascade)
   teacherId         String?
   submissions       AssignmentSubmission[]
   createdAt         DateTime               @default(now())
@@ -531,7 +536,7 @@ model Quiz {
   organizationId  String
   course          Course           @relation(fields: [courseId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   courseId        String
-  teacher         Teacher?          @relation(fields: [teacherId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  teacher         Teacher?         @relation(fields: [teacherId], references: [id], onDelete: SetNull, onUpdate: Cascade)
   teacherId       String?
   createdAt       DateTime         @default(now())
   updatedAt       DateTime         @updatedAt
@@ -680,28 +685,28 @@ model Grade {
 }
 
 model StudentGrade {
-  id        String                @id @default(cuid())
+  id        String                 @id @default(cuid())
   comments  String?
   gradeId   String
-  grade     Grade                 @relation(fields: [gradeId], references: [id], onDelete: Cascade)
+  grade     Grade                  @relation(fields: [gradeId], references: [id], onDelete: Cascade)
   studentId String
-  student   Student               @relation(fields: [studentId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  student   Student                @relation(fields: [studentId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   score     Decimal?
-  createdAt DateTime              @default(now())
-  updatedAt DateTime              @updatedAt
+  createdAt DateTime               @default(now())
+  updatedAt DateTime               @updatedAt
   revisions StudentGradeRevision[]
 
   @@map("student_grades")
 }
 
 model StudentGradeRevision {
-  id            String        @id @default(cuid())
-  reason        String
+  id             String       @id @default(cuid())
+  reason         String
   studentGradeId String
-  studentGrade  StudentGrade  @relation(fields: [studentGradeId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  score         Decimal
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
+  studentGrade   StudentGrade @relation(fields: [studentGradeId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  score          Decimal
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
 
   @@map("student_grade_revisions")
 }
@@ -716,7 +721,7 @@ model JoinRequest {
   userId        String
   school        School            @relation(fields: [schoolId], references: [id])
   schoolId      String
-  requestedRole String            // 'ORG_ADMIN', 'TEACHER', 'PARENT'
+  requestedRole String // 'ORG_ADMIN', 'TEACHER', 'PARENT'
   documentId    String?
   status        JoinRequestStatus @default(PENDING)
   createdAt     DateTime          @default(now())
@@ -730,7 +735,7 @@ model Notification {
   id          String   @id @default(cuid())
   recipient   User     @relation(fields: [recipientId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   recipientId String
-  type        String   // 'JOIN_REQUEST', 'REQUEST_APPROVED', 'REQUEST_REJECTED'
+  type        String // 'JOIN_REQUEST', 'REQUEST_APPROVED', 'REQUEST_REJECTED'
   title       String
   message     String
   read        Boolean  @default(false)
@@ -746,15 +751,15 @@ model Notification {
 // ==========================================
 
 model Session {
-  id                   String    @id
+  id                   String   @id
   expiresAt            DateTime
-  token                String    @unique
-  createdAt            DateTime  @default(now())
-  updatedAt            DateTime  @updatedAt
+  token                String   @unique
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
   ipAddress            String?
   userAgent            String?
   userId               String
-  user                 User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user                 User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   activeOrganizationId String?
 
   @@index([userId])
@@ -833,7 +838,7 @@ model Newsletter {
   organizationId String
   school         School       @relation(fields: [schoolId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   schoolId       String
-  author         User?         @relation(fields: [authorId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  author         User?        @relation(fields: [authorId], references: [id], onDelete: SetNull, onUpdate: Cascade)
   authorId       String?
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
@@ -903,9 +908,9 @@ enum JoinRequestStatus {
 }
 
 enum HabitValue {
-  X  // Bad performance
-  R  // Regular performance
-  S  // Good performance (Satisfactorio)
+  X // Bad performance
+  R // Regular performance
+  S // Good performance (Satisfactorio)
 }
 
 model AttendanceSession {

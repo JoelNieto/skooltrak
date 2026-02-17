@@ -1,5 +1,5 @@
 /* You can add global styles to this file, and also import other style files */
-@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
 @import url('https://fonts.googleapis.com/icon?family=Material+Symbols+Outlined');
 @import 'tailwindcss';
 @import '@angular/cdk/overlay-prebuilt.css';
@@ -81,7 +81,7 @@
 }
 
 @theme {
-  --font-sans: 'Manrope', system-ui, sans-serif !important;
+  --font-sans: 'Inter', system-ui, sans-serif !important;
   --tab-border-color: var(--color-primary);
 }
 
@@ -209,4 +209,42 @@ textarea.ng-invalid.ng-dirty {
     color-mix(in oklch, var(--color-primary) 50%, black) 0%,
     color-mix(in oklch, var(--color-accent) 45%, black) 100%
   );
+}
+
+/* Print styles: hide layout chrome when printing (e.g. grade report) */
+@media print {
+  @page {
+    size: letter;
+    margin: 0.35in;
+  }
+  #sidebar,
+  #sidebar-overlay,
+  #sidebar-toggle,
+  .print\:hidden {
+    display: none !important;
+  }
+  aside#sidebar {
+    display: none !important;
+  }
+  /* Hide the header bar (school selector, user menu) when printing */
+  div.flex-1 > div.p-4.border-b {
+    display: none !important;
+  }
+  /* Full width, no padding for printed content */
+  main {
+    padding: 0 !important;
+  }
+  .grade-report-container .breadcrumbs,
+  .grade-report-container .flex.gap-2 {
+    display: none !important;
+  }
+  /* Compact grade report for single letter page */
+  .grade-report-container {
+    max-height: none;
+    overflow: visible !important;
+  }
+  /* Ensure grade report tables don't get cut off */
+  .grade-report-content {
+    overflow: visible !important;
+  }
 }

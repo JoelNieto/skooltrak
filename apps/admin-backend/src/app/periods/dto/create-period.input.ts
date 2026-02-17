@@ -5,6 +5,8 @@ import { Field, InputType, Int } from '@nestjs/graphql';
 export class CreatePeriodInput implements Prisma.PeriodUncheckedCreateInput {
   @Field(() => String, { description: 'Name of the period' })
   name: string;
+  @Field(() => String, { description: 'Short name of the period', defaultValue: '' })
+  shortName: string;
   @Field(() => Int, { description: 'Year of the period' })
   year: number;
   @TransformDateToNoon()

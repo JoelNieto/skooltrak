@@ -35,6 +35,7 @@ import PeriodsForm from './periods-form';
         <thead>
           <tr>
             <th>Nombre</th>
+            <th>Nombre corto</th>
             <th>Año</th>
             <th>Fecha de inicio</th>
             <th>Fecha de fin</th>
@@ -46,6 +47,7 @@ import PeriodsForm from './periods-form';
           @for (period of periods.value(); track period.id) {
             <tr>
               <td>{{ period.name }}</td>
+              <td>{{ period.shortName }}</td>
               <td>{{ period.year }}</td>
               <td>{{ period.startDate | date: 'shortDate' }}</td>
               <td>{{ period.endDate | date: 'shortDate' }}</td>
@@ -122,6 +124,7 @@ export default class Periods {
               periods {
                 id
                 name
+                shortName
                 year
                 startDate
                 endDate

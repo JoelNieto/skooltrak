@@ -6,6 +6,8 @@ export class Period implements Prisma.PeriodGetPayload<{ include: undefined }> {
   id: string;
   @Field(() => String, { description: 'Name of the period' })
   name: string;
+  @Field(() => String, { description: 'Short name of the period', defaultValue: '' })
+  shortName: string;
   @Field(() => Int, { description: 'Year of the period' })
   year: number;
   @Field(() => Date, { description: 'Start date of the period' })

@@ -31,6 +31,7 @@ import { GroupsSchedulesModule } from './groups-schedules/groups-schedules.modul
 import { FilesModule } from './files/files.module';
 import { NewslettersModule } from './newsletters/newsletters.module';
 import { ParentsModule } from './parents/parents.module';
+import { GradeReportModule } from './grade-report/grade-report.module';
 import { HabitEvaluationsModule } from './habit-evaluations/habit-evaluations.module';
 import { HabitMetricsModule } from './habit-metrics/habit-metrics.module';
 
@@ -75,6 +76,7 @@ import { HabitMetricsModule } from './habit-metrics/habit-metrics.module';
     NewslettersModule,
     HabitEvaluationsModule,
     HabitMetricsModule,
+    GradeReportModule,
   ],
   controllers: [AppController],
   providers: [AppService],

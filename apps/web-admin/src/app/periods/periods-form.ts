@@ -15,6 +15,10 @@ import { format } from 'date-fns';
         <input type="text" id="name" formControlName="name" class="input input-primary" />
       </div>
       <div class="fieldset">
+        <label for="shortName">Nombre corto</label>
+        <input type="text" id="shortName" formControlName="shortName" class="input input-primary" />
+      </div>
+      <div class="fieldset">
         <label for="year">Año</label>
         <input type="number" id="year" formControlName="year" class="input input-primary" />
       </div>
@@ -44,6 +48,7 @@ export default class PeriodsForm implements OnInit {
 
   public form = this.fb.group({
     name: ['', [Validators.required]],
+    shortName: ['', [Validators.required]],
     year: [new Date().getFullYear(), [Validators.required]],
     startDate: [format(new Date(), 'yyyy-MM-dd'), [Validators.required]],
     endDate: [format(new Date(), 'yyyy-MM-dd'), [Validators.required]],

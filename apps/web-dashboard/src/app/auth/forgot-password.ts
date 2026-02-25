@@ -7,6 +7,7 @@ import {
   Validators,
 } from '@angular/forms';
 import { RouterLink } from '@angular/router';
+import { Apollo, gql } from 'apollo-angular';
 import Auth from './auth';
 
 @Component({
@@ -25,14 +26,29 @@ import Auth from './auth';
             <div class="bg-primary p-6 text-white text-center">
               <h1 class="text-2xl font-bold">Recuperar contraseña</h1>
               <p class="text-primary-content mt-2">
-                Ingresa tu correo y te enviaremos un enlace para restablecer tu
-                contraseña
+                @switch (step()) {
+                  @case ('email') {
+                    Ingresa tu correo para buscar tu cuenta
+                  }
+                  @case ('confirm') {
+                    ¿Es tu cuenta?
+                  }
+                  @case ('sent') {
+                    Enlace enviado
+                  }
+                  @case ('not-found') {
+                    Cuenta no encontrada
+                  }
+                  @default {
+                    Ingresa tu correo y te enviaremos un enlace
+                  }
+                }
               </p>
             </div>
 
             <!-- Form Section -->
             <div class="p-8 bg-base-100">
-              @if (sent()) {
+              @if (step() === 'sent') {
                 <div class="alert alert-success mb-4">
                   <span class="material-symbols-outlined">check_circle</span>
                   <span
@@ -45,10 +61,68 @@ import Auth from './auth';
                     Volver al inicio de sesión
                   </a>
                 </div>
+              } @else if (step() === 'confirm') {
+                <div class="space-y-6">
+                  <div class="bg-base-200 rounded-lg p-4">
+                    <p class="text-base-content/90">
+                      Encontramos una cuenta asociada a <strong>{{ searchedEmail() }}</strong>:
+                    </p>
+                    <p class="mt-2 font-medium">
+                      {{ accountInfo().roleLabel }} <strong>{{ accountInfo().displayName }}</strong>
+                      @if (accountInfo().organizationName) {
+                        en <strong>{{ accountInfo().organizationName }}</strong>
+                      }
+                    </p>
+                  </div>
+                  <p class="text-sm text-base-content/70">
+                    ¿Es tu cuenta? Confirma para enviarte el enlace de recuperación.
+                  </p>
+                  <div class="flex flex-col gap-3">
+                    <button
+                      type="button"
+                      class="btn btn-primary w-full"
+                      [disabled]="loading()"
+                      (click)="confirmAndSendReset()"
+                    >
+                      @if (loading()) {
+                        <span class="loading loading-spinner loading-sm"></span>
+                        Enviando...
+                      } @else {
+                        <span class="material-symbols-outlined">check_circle</span>
+                        Sí, enviar enlace
+                      }
+                    </button>
+                    <button
+                      type="button"
+                      class="btn btn-ghost w-full"
+                      [disabled]="loading()"
+                      (click)="rejectAndGoBack()"
+                    >
+                      No, usar otro correo
+                    </button>
+                  </div>
+                </div>
+              } @else if (step() === 'not-found') {
+                <div class="space-y-6">
+                  <div class="alert alert-warning">
+                    <span class="material-symbols-outlined">info</span>
+                    <span>
+                      No encontramos ninguna cuenta con
+                      <strong>{{ searchedEmail() }}</strong>
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    class="btn btn-primary w-full"
+                    (click)="step.set('email'); form.reset()"
+                  >
+                    Probar con otro correo
+                  </button>
+                </div>
               } @else {
                 <form
                   [formGroup]="form"
-                  (ngSubmit)="onSubmit()"
+                  (ngSubmit)="onLookup()"
                   class="space-y-6"
                 >
                   <div class="fieldset">
@@ -93,9 +167,9 @@ import Auth from './auth';
                   >
                     @if (loading()) {
                       <span class="loading loading-spinner loading-sm"></span>
-                      Enviando...
+                      Buscando...
                     } @else {
-                      Enviar enlace de recuperación
+                      Buscar cuenta
                     }
                   </button>
                 </form>
@@ -124,23 +198,85 @@ import Auth from './auth';
 })
 export default class ForgotPasswordComponent {
   private auth = inject(Auth);
+  private apollo = inject(Apollo);
 
   form = new FormGroup({
     email: new FormControl('', [Validators.required, Validators.email]),
   });
 
+  step = signal<'email' | 'confirm' | 'sent' | 'not-found'>('email');
   loading = signal(false);
-  sent = signal(false);
+  searchedEmail = signal('');
+  accountInfo = signal<{
+    roleLabel: string;
+    displayName: string;
+    organizationName?: string;
+  }>({ roleLabel: '', displayName: '' });
 
-  async onSubmit() {
+  onLookup() {
     if (this.form.invalid) return;
 
     this.loading.set(true);
-    const email = this.form.value.email;
-    if (email) {
-      await this.auth.requestPasswordReset(email);
-    }
+    const email = this.form.getRawValue().email;
+    this.searchedEmail.set(email);
+
+    this.apollo
+      .query<{
+        lookupAccountForPasswordReset: {
+          found: boolean;
+          roleLabel?: string;
+          displayName?: string;
+          organizationName?: string;
+        };
+      }>({
+        query: gql`
+          query LookupAccountForPasswordReset($email: String!) {
+            lookupAccountForPasswordReset(email: $email) {
+              found
+              roleLabel
+              displayName
+              organizationName
+            }
+          }
+        `,
+        variables: { email },
+        fetchPolicy: 'network-only',
+      })
+      .subscribe({
+        next: (res) => {
+          this.loading.set(false);
+          const data = res.data?.lookupAccountForPasswordReset;
+          if (data?.found && data.roleLabel && data.displayName) {
+            this.accountInfo.set({
+              roleLabel: data.roleLabel,
+              displayName: data.displayName,
+              organizationName: data.organizationName,
+            });
+            this.step.set('confirm');
+          } else {
+            this.step.set('not-found');
+          }
+        },
+        error: () => {
+          this.loading.set(false);
+          this.step.set('not-found');
+        },
+      });
+  }
+
+  async confirmAndSendReset() {
+    const email = this.searchedEmail();
+    if (!email) return;
+
+    this.loading.set(true);
+    await this.auth.requestPasswordReset(email);
     this.loading.set(false);
-    this.sent.set(true);
+    this.step.set('sent');
+  }
+
+  rejectAndGoBack() {
+    this.step.set('email');
+    this.form.reset();
+    this.searchedEmail.set('');
   }
 }

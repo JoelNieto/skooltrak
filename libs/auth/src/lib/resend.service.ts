@@ -121,8 +121,8 @@ export async function sendUserInvitation({
     },
   });
 
-  // Build the password reset URL
-  const resetPasswordUrl = `${appUrl}/reset-password?token=${token}`;
+  // Build the password reset URL (include email for resend flow when link expires)
+  const resetPasswordUrl = `${appUrl}/reset-password?token=${token}&email=${encodeURIComponent(email)}`;
 
   console.log(`[Email Service] Generated invitation for ${role} ${email}`);
   console.log(`[Email Service] Reset URL: ${resetPasswordUrl}`);

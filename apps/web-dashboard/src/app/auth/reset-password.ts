@@ -1,4 +1,4 @@
-import { Loader } from '@/ui';
+import { Loader, Toast } from '@/ui';
 import { Component, inject, signal } from '@angular/core';
 import {
   FormControl,
@@ -7,6 +7,7 @@ import {
   Validators,
 } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
+import { Apollo, gql } from 'apollo-angular';
 import Auth from './auth';
 
 @Component({
@@ -31,7 +32,15 @@ import Auth from './auth';
 
             <!-- Form Section -->
             <div class="p-8 bg-base-100">
-              @if (error()) {
+              @if (resendSuccess()) {
+                <div class="alert alert-success mb-4">
+                  <span class="material-symbols-outlined">check_circle</span>
+                  <span>Invitación reenviada. Revisa tu bandeja de entrada.</span>
+                </div>
+                <a routerLink="/login" class="btn btn-primary w-full">
+                  Volver al inicio de sesión
+                </a>
+              } @else if (error()) {
                 <div class="alert alert-error mb-4">
                   <span class="material-symbols-outlined">error</span>
                   <span
@@ -39,10 +48,27 @@ import Auth from './auth';
                     nuevo.</span
                   >
                 </div>
-                <div class="text-center">
-                  <a routerLink="/forgot-password" class="btn btn-primary">
-                    Solicitar nuevo enlace
-                  </a>
+                <div class="flex flex-col gap-3 text-center">
+                  @if (emailFromUrl()) {
+                    <button
+                      type="button"
+                      class="btn btn-primary"
+                      [disabled]="resending()"
+                      (click)="resendInvitation()"
+                    >
+                      @if (resending()) {
+                        <span class="loading loading-spinner loading-sm"></span>
+                        Enviando...
+                      } @else {
+                        <span class="material-symbols-outlined">mail</span>
+                        Reenviar invitación
+                      }
+                    </button>
+                  } @else {
+                    <a routerLink="/forgot-password" class="btn btn-primary">
+                      Solicitar nuevo enlace
+                    </a>
+                  }
                 </div>
               } @else {
                 <form
@@ -142,10 +168,15 @@ import Auth from './auth';
 export default class ResetPasswordComponent {
   private auth = inject(Auth);
   private router = inject(Router);
+  private apollo = inject(Apollo);
+  private toasts = inject(Toast);
 
   token = signal<string | null>(null);
+  emailFromUrl = signal<string | null>(null);
   error = signal(false);
   loading = signal(false);
+  resending = signal(false);
+  resendSuccess = signal(false);
   passwordMismatch = signal(false);
 
   form = new FormGroup({
@@ -157,12 +188,14 @@ export default class ResetPasswordComponent {
   });
 
   constructor() {
-    // Get token from URL query params
+    // Get token and email from URL query params
     if (typeof window !== 'undefined') {
       const params = new URLSearchParams(window.location.search);
       const token = params.get('token');
+      const email = params.get('email');
       const errorParam = params.get('error');
 
+      this.emailFromUrl.set(email);
       if (errorParam || !token) {
         this.error.set(true);
       } else {
@@ -197,5 +230,33 @@ export default class ResetPasswordComponent {
     } else {
       this.error.set(true);
     }
+  }
+
+  resendInvitation() {
+    const email = this.emailFromUrl();
+    if (!email) return;
+
+    this.resending.set(true);
+    this.apollo
+      .mutate<{ resendUserInvitation: boolean }>({
+        mutation: gql`
+          mutation ResendUserInvitation($email: String!) {
+            resendUserInvitation(email: $email)
+          }
+        `,
+        variables: { email },
+      })
+      .subscribe({
+        next: () => {
+          this.resending.set(false);
+          this.toasts.showSuccess('Invitación reenviada. Revisa tu correo.');
+          this.resendSuccess.set(true);
+          this.error.set(false);
+        },
+        error: (err) => {
+          this.resending.set(false);
+          this.toasts.showError(err.message || 'Error al reenviar invitación');
+        },
+      });
   }
 }

@@ -126,6 +126,8 @@ export default class StudyPlans {
                 level
                 degreeId
                 gradeMetricId
+                monthlyTuitionAmount
+                tuitionMonths
                 gradeMetric {
                   id
                   name
@@ -137,6 +139,12 @@ export default class StudyPlans {
                 schoolId
                 createdAt
                 updatedAt
+                enrollmentCosts {
+                  id
+                  name
+                  amount
+                  order
+                }
               }
             }
           `,
@@ -183,8 +191,8 @@ export default class StudyPlans {
         switchMap(() => {
           return this.apollo.mutate({
             mutation: gql`
-              mutation DeleteStudyPlan($id: String!) {
-                deleteStudyPlan(id: $id) {
+              mutation RemoveStudyPlan($id: String!) {
+                removeStudyPlan(id: $id) {
                   id
                 }
               }

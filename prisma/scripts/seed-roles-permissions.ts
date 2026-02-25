@@ -53,6 +53,8 @@ enum Perm {
   VIEW_PERIODS = 'VIEW_PERIODS',
   MANAGE_NEWSLETTER = 'MANAGE_NEWSLETTER',
   VIEW_NEWSLETTER = 'VIEW_NEWSLETTER',
+  MANAGE_FINANCIALS = 'MANAGE_FINANCIALS',
+  VIEW_FINANCIALS = 'VIEW_FINANCIALS',
   MANAGE_ROLES = 'MANAGE_ROLES',
   MANAGE_PERMISSIONS = 'MANAGE_PERMISSIONS',
 }
@@ -93,6 +95,8 @@ const PERMISSION_DESCRIPTIONS: Record<Perm, string> = {
   [Perm.VIEW_PERIODS]: 'View periods',
   [Perm.MANAGE_NEWSLETTER]: 'Create, update, and delete newsletters',
   [Perm.VIEW_NEWSLETTER]: 'View newsletters',
+  [Perm.MANAGE_FINANCIALS]: 'Create, update, and delete charges and payments',
+  [Perm.VIEW_FINANCIALS]: 'View financial balance and payment history',
   [Perm.MANAGE_ROLES]: 'Create, update, and delete roles',
   [Perm.MANAGE_PERMISSIONS]: 'Manage permission assignments',
 };
@@ -149,6 +153,7 @@ const DEFAULT_ROLES: RoleDef[] = [
     name: 'STUDENT',
     description: 'Student',
     permissions: [
+      Perm.VIEW_FINANCIALS,
       Perm.VIEW_SCHOOLS,
       Perm.VIEW_TEACHERS,
       Perm.VIEW_STUDENTS,
@@ -173,6 +178,7 @@ const DEFAULT_ROLES: RoleDef[] = [
     name: 'PARENT',
     description: 'Parent or Guardian',
     permissions: [
+      Perm.VIEW_FINANCIALS,
       Perm.VIEW_COURSES,
       Perm.VIEW_ASSIGNMENTS,
       Perm.VIEW_ATTENDANCE,

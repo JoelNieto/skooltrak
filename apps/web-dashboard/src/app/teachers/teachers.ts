@@ -138,6 +138,17 @@ type Teacher = Prisma.TeacherGetPayload<{ include: { user: true } }> & {
                           <span class="material-symbols-outlined text-lg">edit</span>
                           <span>Editar</span>
                         </a>
+                        @if (!teacher.user.emailVerified) {
+                          <button
+                            ngMenuItem
+                            value="resend"
+                            class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-base-200 w-full"
+                            (click)="resendInvitation(teacher.user.email)"
+                          >
+                            <span class="material-symbols-outlined text-lg">mail</span>
+                            <span>Reenviar invitación</span>
+                          </button>
+                        }
                         <button
                           ngMenuItem
                           value="delete"
@@ -239,6 +250,27 @@ export default class Teachers {
     afterRenderEffect(() => {
       this.pagination.updateSearch(this.searchText());
     });
+  }
+
+  public resendInvitation(email: string) {
+    this.apollo
+      .mutate<{ resendUserInvitation: boolean }>({
+        mutation: gql`
+          mutation ResendUserInvitation($email: String!) {
+            resendUserInvitation(email: $email)
+          }
+        `,
+        variables: { email },
+      })
+      .subscribe({
+        next: () => {
+          this.#toasts.showSuccess('Invitación reenviada');
+          this.teachers.reload();
+        },
+        error: (err) => {
+          this.#toasts.showError(err.message || 'Error al reenviar invitación');
+        },
+      });
   }
 
   public deleteTeacher(teacher: Teacher) {

@@ -97,6 +97,39 @@ class JoinRequestStatus {
 }
 
 @ObjectType()
+class CheckPendingInvitationResult {
+  @Field()
+  hasPendingInvitation: boolean;
+
+  @Field({ nullable: true })
+  role?: string;
+
+  @Field({ nullable: true })
+  organizationName?: string;
+}
+
+@ObjectType()
+class CreateInvitationAccessLinkResult {
+  @Field()
+  url: string;
+}
+
+@ObjectType()
+class LookupAccountForPasswordResetResult {
+  @Field()
+  found: boolean;
+
+  @Field({ nullable: true })
+  roleLabel?: string;
+
+  @Field({ nullable: true })
+  displayName?: string;
+
+  @Field({ nullable: true })
+  organizationName?: string;
+}
+
+@ObjectType()
 class PendingJoinRequest {
   @Field()
   id: string;
@@ -238,6 +271,28 @@ export class AuthResolver {
     @Args('email') email: string,
   ): Promise<boolean> {
     return this.authService.validateEmailToken(token, email);
+  }
+
+  @Query(() => CheckPendingInvitationResult)
+  @AllowAnonymous()
+  async checkPendingInvitation(
+    @Args('email') email: string,
+  ): Promise<CheckPendingInvitationResult> {
+    return this.authService.checkPendingInvitation(email);
+  }
+
+  @Mutation(() => CreateInvitationAccessLinkResult)
+  @AllowAnonymous()
+  async createInvitationAccessLink(
+    @Args('email') email: string,
+  ): Promise<CreateInvitationAccessLinkResult> {
+    return this.authService.createInvitationAccessLink(email);
+  }
+
+  @Mutation(() => Boolean)
+  @AllowAnonymous()
+  async resendUserInvitation(@Args('email') email: string): Promise<boolean> {
+    return this.authService.resendUserInvitation(email);
   }
 
   // ==========================================
@@ -416,6 +471,14 @@ export class AuthResolver {
   // ==========================================
   // Password management
   // ==========================================
+
+  @Query(() => LookupAccountForPasswordResetResult)
+  @AllowAnonymous()
+  async lookupAccountForPasswordReset(
+    @Args('email') email: string,
+  ): Promise<LookupAccountForPasswordResetResult> {
+    return this.authService.lookupAccountForPasswordReset(email);
+  }
 
   @Mutation(() => Boolean)
   @AllowAnonymous()

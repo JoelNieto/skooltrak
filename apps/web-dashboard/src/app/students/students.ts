@@ -165,6 +165,17 @@ const ENROLLMENT_STATUS_COLORS: Record<$Enums.EnrollmentStatus, string> = {
                         <span class="material-symbols-outlined text-lg">edit</span>
                         <span>Editar</span>
                       </a>
+                      @if (!student.user.emailVerified) {
+                        <button
+                          ngMenuItem
+                          value="resend"
+                          class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-base-200 w-full"
+                          (click)="resendInvitation(student.email)"
+                        >
+                          <span class="material-symbols-outlined text-lg">mail</span>
+                          <span>Reenviar invitación</span>
+                        </button>
+                      }
                       <button
                         ngMenuItem
                         value="delete"
@@ -270,6 +281,27 @@ export default class Students {
 
   getStatusColor(status: $Enums.EnrollmentStatus): string {
     return ENROLLMENT_STATUS_COLORS[status] || 'badge-ghost';
+  }
+
+  public resendInvitation(email: string) {
+    this.apollo
+      .mutate<{ resendUserInvitation: boolean }>({
+        mutation: gql`
+          mutation ResendUserInvitation($email: String!) {
+            resendUserInvitation(email: $email)
+          }
+        `,
+        variables: { email },
+      })
+      .subscribe({
+        next: () => {
+          this.toasts.showSuccess('Invitación reenviada');
+          this.students.reload();
+        },
+        error: (err) => {
+          this.toasts.showError(err.message || 'Error al reenviar invitación');
+        },
+      });
   }
 
   public deleteStudent(student: Student) {

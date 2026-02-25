@@ -1,16 +1,10 @@
-import { Prisma } from '@generated/prisma';
 import { Field, ObjectType } from '@nestjs/graphql';
 import { Course } from '../../courses/entities/course.entity';
 import { Student } from '../../students/entities/student.entity';
 import { StudyPlan } from '../../study-plans/entities/study-plan.entity';
 import { Teacher } from '../../teachers/entities/teacher.entity';
 @ObjectType()
-export class ClassGroup
-  implements
-    Prisma.ClassGroupGetPayload<{
-      include: { teacher: true; studyPlan: true };
-    }>
-{
+export class ClassGroup {
   @Field(() => String, { description: 'ID of the class group' })
   id: string;
   @Field(() => String, { description: 'Name of the class group' })

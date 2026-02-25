@@ -237,6 +237,7 @@ model School {
   name           String
   shortName      String
   logo           String
+  currencyCode   String            @default("USD")
   address        String
   city           String
   state          String
@@ -257,6 +258,7 @@ model School {
   fileShares     FileShareSchool[]
   joinRequests   JoinRequest[]
   newsletters    Newsletter[]
+  charges        Charge[]
 
   @@map("schools")
 }
@@ -307,24 +309,41 @@ model Degree {
 }
 
 model StudyPlan {
-  id            String       @id @default(cuid())
-  name          String
-  shortName     String
-  level         Int
-  degreeId      String
-  degree        Degree       @relation(fields: [degreeId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  description   String
-  schoolId      String
-  school        School       @relation(fields: [schoolId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  courses       Course[]
-  createdAt     DateTime     @default(now())
-  updatedAt     DateTime     @updatedAt
-  classGroups   ClassGroup[]
-  gradeMetric   GradeMetric? @relation(fields: [gradeMetricId], references: [id], onDelete: SetNull)
-  gradeMetricId String?
+  id                  String                    @id @default(cuid())
+  name                String
+  shortName           String
+  level               Int
+  degreeId            String
+  degree              Degree                    @relation(fields: [degreeId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  description         String
+  schoolId            String
+  school              School                    @relation(fields: [schoolId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  courses             Course[]
+  createdAt           DateTime                  @default(now())
+  updatedAt           DateTime                  @updatedAt
+  classGroups         ClassGroup[]
+  gradeMetric         GradeMetric?              @relation(fields: [gradeMetricId], references: [id], onDelete: SetNull)
+  gradeMetricId       String?
+  monthlyTuitionAmount Decimal?
+  tuitionMonths       Int[]              @default([])
+  enrollmentCosts     StudyPlanEnrollmentCost[]
 
   @@unique([schoolId, name])
   @@map("study_plans")
+}
+
+model StudyPlanEnrollmentCost {
+  id          String     @id @default(cuid())
+  studyPlanId String
+  studyPlan   StudyPlan  @relation(fields: [studyPlanId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  name        String
+  amount      Decimal
+  order       Int        @default(0)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@index([studyPlanId])
+  @@map("study_plan_enrollment_costs")
 }
 
 model Course {
@@ -379,6 +398,7 @@ model ClassGroup {
   fileShares         FileShareClassGroup[]
   attendanceSessions AttendanceSession[]
   habitEvaluations   HabitEvaluation[]
+  charges            Charge[]
   createdAt          DateTime                   @default(now())
   updatedAt          DateTime                   @updatedAt
 
@@ -419,6 +439,8 @@ model Student {
   attendanceRecords     AttendanceRecord[]
   assignmentSubmissions AssignmentSubmission[]
   habitEvaluations      StudentHabitEvaluation[]
+  charges               Charge[]
+  payments              Payment[]
 
   @@map("students")
 }
@@ -747,6 +769,48 @@ model Notification {
 }
 
 // ==========================================
+// Financial
+// ==========================================
+
+model Charge {
+  id            String       @id @default(cuid())
+  schoolId      String
+  school        School       @relation(fields: [schoolId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  year          Int
+  studentId     String
+  student       Student      @relation(fields: [studentId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  classGroupId  String?
+  classGroup    ClassGroup?  @relation(fields: [classGroupId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  amount        Decimal
+  dueDate       DateTime     @db.Date
+  description   String       @default("")
+  chargeType    ChargeType   @default(CUSTOM)
+  status        ChargeStatus @default(PENDING)
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  @@index([schoolId])
+  @@index([schoolId, year])
+  @@index([studentId])
+  @@map("charges")
+}
+
+model Payment {
+  id        String   @id @default(cuid())
+  studentId String
+  student   Student  @relation(fields: [studentId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  amount    Decimal
+  paidAt    DateTime @db.Date
+  reference String?  @default("")
+  createdBy String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([studentId])
+  @@map("payments")
+}
+
+// ==========================================
 // Better-Auth Tables
 // ==========================================
 
@@ -911,6 +975,19 @@ enum HabitValue {
   X // Bad performance
   R // Regular performance
   S // Good performance (Satisfactorio)
+}
+
+enum ChargeType {
+  ENROLLMENT
+  TUITION
+  CUSTOM
+}
+
+enum ChargeStatus {
+  PENDING
+  PAID
+  PARTIAL
+  OVERDUE
 }
 
 model AttendanceSession {

@@ -188,13 +188,16 @@ export default class SchoolAcknowledgment {
     const { name, shortName } = this.form.getRawValue();
 
     this.apollo
-      .mutate<{ createSchool: { id: string; name: string; organizationId: string } }>({
+      .mutate<{
+        createSchool: { id: string; name: string; organizationId: string; currencyCode?: string };
+      }>({
         mutation: gql`
           mutation CreateSchool($createSchoolInput: CreateSchoolInput!) {
             createSchool(createSchoolInput: $createSchoolInput) {
               id
               name
               organizationId
+              currencyCode
             }
           }
         `,
@@ -217,6 +220,7 @@ export default class SchoolAcknowledgment {
               organizationId: school.organizationId,
               shortName,
               logo: '',
+              currencyCode: school?.currencyCode ?? 'USD',
               address: '',
               city: '',
               state: '',

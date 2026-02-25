@@ -4,7 +4,8 @@
   "license": "MIT",
   "scripts": {
     "serve:dev": "nx run-many --parallel --target=serve --projects=web-dashboard,dashboard-backend",
-    "serve:dev:admin": "nx run-many --parallel --target=serve --projects=admin-backend,web-admin"
+    "serve:dev:admin": "nx run-many --parallel --target=serve --projects=admin-backend,web-admin",
+    "db:add-financial-permissions": "bun run prisma/scripts/add-financial-permissions-to-admins.ts"
   },
   "private": true,
   "dependencies": {

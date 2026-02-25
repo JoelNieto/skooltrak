@@ -225,6 +225,7 @@ export default class CreateSchool {
               organizationId: '', // Will be populated from the token
               shortName,
               logo: '',
+              currencyCode: 'USD',
               address: '',
               city: '',
               state: '',

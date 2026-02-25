@@ -252,6 +252,11 @@ export const appRoutes: Route[] = [
         canActivate: [permissionGuard('VIEW_ATTENDANCE')],
         loadComponent: () => import('./students/student-attendance'),
       },
+      {
+        path: 'student/finances',
+        canActivate: [permissionGuard('VIEW_FINANCIALS')],
+        loadComponent: () => import('./students/student-finances'),
+      },
 
       // Teacher-specific routes
       {
@@ -295,6 +300,11 @@ export const appRoutes: Route[] = [
         path: 'parent/notifications',
         canActivate: [permissionGuard('VIEW_MESSAGES')],
         loadComponent: () => import('./parent/parent-notifications'),
+      },
+      {
+        path: 'parent/finances',
+        canActivate: [permissionGuard('VIEW_FINANCIALS')],
+        loadComponent: () => import('./parent/parent-finances'),
       },
 
       // Profile (always accessible when authenticated)

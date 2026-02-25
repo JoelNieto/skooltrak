@@ -6,7 +6,7 @@ import { CreateSchoolWithOrgInput } from './dto/create-school-with-org.input';
 import { RequestJoinSchoolInput } from './dto/request-join-school.input';
 import { SignUpInput } from './dto/sign-up.input';
 import { PrismaService } from './prisma.service';
-import { sendEmail } from './resend.service';
+import { sendEmail, sendUserInvitation } from './resend.service';
 
 @Injectable()
 export class AuthService {
@@ -70,9 +70,20 @@ export class AuthService {
     // Check if a user with this email already exists
     const existingUser = await this.prisma.user.findUnique({
       where: { email },
+      include: { role: true, organization: true },
     });
 
     if (existingUser) {
+      // If user exists but has pending invitation (student/teacher), throw specific error
+      if (
+        !existingUser.emailVerified &&
+        existingUser.role?.name &&
+        ['STUDENT', 'TEACHER'].includes(existingUser.role.name)
+      ) {
+        throw new Error(
+          'Tienes una invitación pendiente. Refresca la página e ingresa tu correo de nuevo.',
+        );
+      }
       throw new Error('Este correo electrónico ya está registrado');
     }
 
@@ -157,6 +168,190 @@ export class AuthService {
     }
 
     return true;
+  }
+
+  // ==========================================
+  // Pending invitation (student/teacher signup)
+  // ==========================================
+
+  /**
+   * Check if an email has a pending invitation (user created but not yet verified).
+   */
+  async checkPendingInvitation(email: string): Promise<{
+    hasPendingInvitation: boolean;
+    role?: 'student' | 'teacher';
+    organizationName?: string;
+  }> {
+    const user = await this.prisma.user.findUnique({
+      where: { email: email.toLowerCase().trim() },
+      include: { role: true, organization: true },
+    });
+
+    if (!user || user.emailVerified) {
+      return { hasPendingInvitation: false };
+    }
+
+    const roleName = user.role?.name;
+    if (roleName === 'STUDENT' || roleName === 'TEACHER') {
+      return {
+        hasPendingInvitation: true,
+        role: roleName.toLowerCase() as 'student' | 'teacher',
+        organizationName: user.organization?.name ?? undefined,
+      };
+    }
+
+    return { hasPendingInvitation: false };
+  }
+
+  /**
+   * Create a one-time access link for a user with pending invitation.
+   * Allows them to land directly on reset-password without waiting for email.
+   */
+  async createInvitationAccessLink(email: string): Promise<{ url: string }> {
+    const pending = await this.checkPendingInvitation(email);
+    if (!pending.hasPendingInvitation) {
+      throw new Error('No hay invitación pendiente para este correo');
+    }
+
+    const user = await this.prisma.user.findUnique({
+      where: { email: email.toLowerCase().trim() },
+      include: { role: true, organization: true, student: true, teacher: true },
+    });
+
+    if (!user) {
+      throw new Error('Usuario no encontrado');
+    }
+
+    const role = user.role?.name === 'TEACHER' ? 'teacher' : 'student';
+    const name =
+      role === 'teacher' && user.teacher
+        ? `${user.teacher.firstName} ${user.teacher.fatherName}`
+        : role === 'student' && user.student
+          ? `${user.student.firstName} ${user.student.fatherName}`
+          : `${user.firstName} ${user.lastName}`;
+
+    // Invalidate existing tokens so only the new link works
+    await this.prisma.verification.deleteMany({
+      where: { identifier: user.email },
+    });
+
+    await sendUserInvitation({
+      prisma: this.prisma,
+      email: user.email,
+      name,
+      role,
+      organizationName: user.organization?.name || 'Skooltrak',
+    });
+
+    const appUrl = process.env['APP_URL'] || 'http://localhost:4200';
+    const verification = await this.prisma.verification.findFirst({
+      where: { identifier: user.email },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    if (!verification) {
+      throw new Error('Error al crear el enlace');
+    }
+
+    return {
+      url: `${appUrl}/reset-password?token=${verification.value}&email=${encodeURIComponent(user.email)}`,
+    };
+  }
+
+  /**
+   * Resend invitation email for a user with pending setup (student/teacher).
+   */
+  async resendUserInvitation(email: string): Promise<boolean> {
+    const user = await this.prisma.user.findUnique({
+      where: { email: email.toLowerCase().trim() },
+      include: { role: true, organization: true, student: true, teacher: true },
+    });
+
+    if (!user) {
+      throw new Error('Usuario no encontrado');
+    }
+
+    if (user.emailVerified) {
+      throw new Error('Este usuario ya completó su registro');
+    }
+
+    const roleName = user.role?.name;
+    if (roleName !== 'STUDENT' && roleName !== 'TEACHER') {
+      throw new Error('Solo se pueden reenviar invitaciones para estudiantes y docentes');
+    }
+
+    const role = roleName.toLowerCase() as 'teacher' | 'student';
+    const name =
+      role === 'teacher' && user.teacher
+        ? `${user.teacher.firstName} ${user.teacher.fatherName}`
+        : role === 'student' && user.student
+          ? `${user.student.firstName} ${user.student.fatherName}`
+          : `${user.firstName} ${user.lastName}`;
+
+    // Invalidate any existing verification tokens for this email
+    await this.prisma.verification.deleteMany({
+      where: { identifier: user.email },
+    });
+
+    await sendUserInvitation({
+      prisma: this.prisma,
+      email: user.email,
+      name,
+      role,
+      organizationName: user.organization?.name || 'Skooltrak',
+    });
+
+    return true;
+  }
+
+  /**
+   * Look up account by email for password reset confirmation.
+   * Returns display info when found so user can approve/reject before sending reset link.
+   */
+  async lookupAccountForPasswordReset(email: string): Promise<{
+    found: boolean;
+    roleLabel?: string;
+    displayName?: string;
+    organizationName?: string;
+  }> {
+    const user = await this.prisma.user.findUnique({
+      where: { email: email.toLowerCase().trim() },
+      include: {
+        role: true,
+        organization: true,
+        student: true,
+        teacher: true,
+        parent: true,
+      },
+    });
+
+    if (!user) {
+      return { found: false };
+    }
+
+    const roleName = user.role?.name;
+    let roleLabel = 'Usuario';
+    let displayName = `${user.firstName} ${user.lastName}`;
+
+    if (roleName === 'STUDENT' && user.student) {
+      roleLabel = 'Estudiante';
+      displayName = `${user.student.firstName} ${user.student.fatherName}`;
+    } else if (roleName === 'TEACHER' && user.teacher) {
+      roleLabel = 'Docente';
+      displayName = `${user.teacher.firstName} ${user.teacher.fatherName}`;
+    } else if (roleName === 'PARENT' && user.parent) {
+      roleLabel = 'Padre/Representante';
+      displayName = `${user.parent.firstName} ${user.parent.fatherName}`;
+    } else if (roleName === 'ORG_ADMIN' || roleName === 'SYSADMIN') {
+      roleLabel = 'Administrador';
+    }
+
+    return {
+      found: true,
+      roleLabel,
+      displayName,
+      organizationName: user.organization?.name ?? undefined,
+    };
   }
 
   // ==========================================

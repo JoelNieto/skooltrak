@@ -1,4 +1,3 @@
-import { Prisma } from '@generated/prisma';
 import { Field, ObjectType } from '@nestjs/graphql';
 import { Grade } from '../../grades/entities/grade.entity';
 import { School } from '../../schools/entities/school.entity';
@@ -6,12 +5,7 @@ import { StudyPlan } from '../../study-plans/entities/study-plan.entity';
 import { Subject } from '../../subjects/entities/subject.entity';
 import { Teacher } from '../../teachers/entities/teacher.entity';
 @ObjectType()
-export class Course
-  implements
-    Prisma.CourseGetPayload<{
-      include: { school: true; subject: true; studyPlan: true; teacher: true };
-    }>
-{
+export class Course {
   @Field(() => String, { description: 'ID of the course (auto-generated)' })
   id: string;
 

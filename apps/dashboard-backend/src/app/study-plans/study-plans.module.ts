@@ -6,5 +6,6 @@ import { StudyPlansService } from './study-plans.service';
 @Module({
   providers: [StudyPlansResolver, StudyPlansService],
   imports: [PrismaModule],
+  exports: [StudyPlansService],
 })
 export class StudyPlansModule {}

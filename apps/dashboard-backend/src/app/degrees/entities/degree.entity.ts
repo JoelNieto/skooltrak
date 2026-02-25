@@ -1,12 +1,8 @@
-import { Prisma } from '@generated/prisma';
 import { Field, ObjectType } from '@nestjs/graphql';
 import { School } from '../../schools/entities/school.entity';
 import { StudyPlan } from '../../study-plans/entities/study-plan.entity';
 @ObjectType()
-export class Degree
-  implements
-    Prisma.DegreeGetPayload<{ include: { studyPlans: true; school: true } }>
-{
+export class Degree {
   @Field(() => String, { description: 'ID of the degree' })
   id: string;
 

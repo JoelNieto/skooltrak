@@ -25,6 +25,44 @@ import { Apollo, gql } from 'apollo-angular';
         <!-- Scrollable Content -->
         <main class="flex-1 flex flex-col items-center justify-center p-6 overflow-y-auto">
           @switch (step()) {
+            @case ('pending-invitation') {
+              <!-- Pending invitation - complete account setup directly -->
+              <div class="w-full max-w-md text-center space-y-8 animate-fade-in">
+                <div class="flex justify-center">
+                  <div class="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center">
+                    <span class="material-symbols-outlined text-5xl text-primary">mail</span>
+                  </div>
+                </div>
+                <div class="space-y-2">
+                  <h1 class="text-2xl md:text-3xl font-bold text-base-content">Invitación Pendiente</h1>
+                  <p class="text-base-content/70">
+                    Tienes una invitación pendiente como
+                    <strong>{{ pendingInvitationRole() === 'student' ? 'estudiante' : 'docente' }}</strong> en
+                    <strong>{{ pendingInvitationOrg() }}</strong>. Completa la configuración de tu cuenta.
+                  </p>
+                </div>
+                <div class="pt-4">
+                  <button
+                    type="button"
+                    class="btn btn-primary w-full"
+                    [disabled]="loading()"
+                    (click)="completePendingInvitation()"
+                  >
+                    @if (loading()) {
+                      <span class="loading loading-spinner loading-sm"></span>
+                      Redirigiendo...
+                    } @else {
+                      Configurar mi cuenta
+                      <span class="material-symbols-outlined text-xl">arrow_forward</span>
+                    }
+                  </button>
+                </div>
+                <button class="btn btn-ghost btn-sm" (click)="step.set('email')">
+                  <span class="material-symbols-outlined text-lg">arrow_back</span>
+                  Usar otro correo
+                </button>
+              </div>
+            }
             @case ('email') {
               <!-- Step 1: Enter email -->
               <form [formGroup]="emailForm" (ngSubmit)="sendVerificationLink()" class="w-full max-w-md">
@@ -283,7 +321,7 @@ import { Apollo, gql } from 'apollo-angular';
           }
 
           <!-- Login Link (centered below form) -->
-          @if (step() === 'email' || step() === 'register') {
+          @if (step() === 'email' || step() === 'register' || step() === 'pending-invitation') {
             <div class="mt-8 text-center">
               <p class="text-sm text-base-content/70">
                 ¿Ya tienes cuenta?
@@ -329,12 +367,16 @@ export default class Register implements OnInit {
   private route = inject(ActivatedRoute);
   private toasts = inject(Toast);
 
-  public step = signal<'email' | 'check-inbox' | 'validating' | 'register' | 'error'>('email');
+  public step = signal<
+    'email' | 'check-inbox' | 'validating' | 'register' | 'error' | 'pending-invitation'
+  >('email');
   public loading = signal(false);
   public sentEmail = signal('');
   public verifiedEmail = signal('');
   public verifiedToken = signal('');
   public errorMessage = signal('');
+  public pendingInvitationRole = signal<string | null>(null);
+  public pendingInvitationOrg = signal<string | null>(null);
   public cooldown = signal(0);
   private cooldownInterval: ReturnType<typeof setInterval> | null = null;
 
@@ -410,6 +452,49 @@ export default class Register implements OnInit {
     this.loading.set(true);
     const email = this.emailForm.getRawValue().email;
 
+    // First check for pending invitation (student/teacher created but not yet verified)
+    this.apollo
+      .query<{
+        checkPendingInvitation: {
+          hasPendingInvitation: boolean;
+          role?: string;
+          organizationName?: string;
+        };
+      }>({
+        query: gql`
+          query CheckPendingInvitation($email: String!) {
+            checkPendingInvitation(email: $email) {
+              hasPendingInvitation
+              role
+              organizationName
+            }
+          }
+        `,
+        variables: { email },
+        fetchPolicy: 'network-only',
+      })
+      .subscribe({
+        next: (res) => {
+          const pending = res.data?.checkPendingInvitation;
+          if (pending?.hasPendingInvitation) {
+            this.sentEmail.set(email);
+            this.pendingInvitationRole.set(pending.role ?? null);
+            this.pendingInvitationOrg.set(pending.organizationName ?? null);
+            this.step.set('pending-invitation');
+            this.loading.set(false);
+          } else {
+            this.sendVerificationLinkMutation(email);
+          }
+        },
+        error: () => {
+          this.loading.set(false);
+          this.sendVerificationLinkMutation(email);
+        },
+      });
+  }
+
+  private sendVerificationLinkMutation(email: string) {
+    this.loading.set(true);
     this.apollo
       .mutate<{ sendVerificationLink: boolean }>({
         mutation: gql`
@@ -429,6 +514,39 @@ export default class Register implements OnInit {
         error: (err) => {
           this.loading.set(false);
           this.toasts.showError(err.message || 'Error al enviar el enlace de verificación');
+        },
+      });
+  }
+
+  public completePendingInvitation() {
+    const email = this.sentEmail();
+    if (!email) return;
+
+    this.loading.set(true);
+    this.apollo
+      .mutate<{ createInvitationAccessLink: { url: string } }>({
+        mutation: gql`
+          mutation CreateInvitationAccessLink($email: String!) {
+            createInvitationAccessLink(email: $email) {
+              url
+            }
+          }
+        `,
+        variables: { email },
+      })
+      .subscribe({
+        next: (res) => {
+          const url = res.data?.createInvitationAccessLink?.url;
+          if (url) {
+            window.location.href = url;
+          } else {
+            this.loading.set(false);
+            this.toasts.showError('Error al generar el enlace');
+          }
+        },
+        error: (err) => {
+          this.loading.set(false);
+          this.toasts.showError(err.message || 'Error al completar la invitación');
         },
       });
   }

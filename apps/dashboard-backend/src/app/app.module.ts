@@ -34,6 +34,7 @@ import { ParentsModule } from './parents/parents.module';
 import { GradeReportModule } from './grade-report/grade-report.module';
 import { HabitEvaluationsModule } from './habit-evaluations/habit-evaluations.module';
 import { HabitMetricsModule } from './habit-metrics/habit-metrics.module';
+import { FinancialModule } from './financial/financial.module';
 
 @Module({
   imports: [
@@ -77,6 +78,7 @@ import { HabitMetricsModule } from './habit-metrics/habit-metrics.module';
     HabitEvaluationsModule,
     HabitMetricsModule,
     GradeReportModule,
+    FinancialModule,
   ],
   controllers: [AppController],
   providers: [AppService],

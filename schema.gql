@@ -261,6 +261,43 @@ type AvailableSchool {
   studentCount: Int!
 }
 
+type Charge {
+  amount: Float!
+  chargeType: ChargeType!
+  classGroup: ClassGroup
+  classGroupId: String
+  createdAt: DateTime!
+  description: String!
+  dueDate: DateTime!
+  id: String!
+  school: School!
+  schoolId: String!
+  status: ChargeStatus!
+  student: Student!
+  studentId: String!
+  updatedAt: DateTime!
+  year: Int!
+}
+
+enum ChargeStatus {
+  OVERDUE
+  PAID
+  PARTIAL
+  PENDING
+}
+
+enum ChargeType {
+  CUSTOM
+  ENROLLMENT
+  TUITION
+}
+
+type CheckPendingInvitationResult {
+  hasPendingInvitation: Boolean!
+  organizationName: String
+  role: String
+}
+
 type ClassGroup {
   """Active status of the class group"""
   active: Boolean!
@@ -423,6 +460,19 @@ input CreateAttendanceSessionInput {
   records: [CreateAttendanceRecordInput!]!
 }
 
+input CreateChargeInput {
+  amount: Float!
+  chargeType: String
+
+  """If provided, creates charges for all students in the group"""
+  classGroupId: String
+  description: String
+  dueDate: DateTime!
+  schoolId: String!
+  studentId: String
+  year: Int!
+}
+
 input CreateClassGroupInput {
   """Active status of the class group"""
   active: Boolean! = true
@@ -570,6 +620,10 @@ input CreateGroupsScheduleInput {
   weekday: String!
 }
 
+type CreateInvitationAccessLinkResult {
+  url: String!
+}
+
 input CreateMessageInput {
   """The content of the message."""
   content: String!
@@ -643,6 +697,14 @@ input CreateParentInput {
 
   """Work phone number of the parent"""
   workPhone: String! = ""
+}
+
+input CreatePaymentInput {
+  amount: Float!
+  createdBy: String
+  paidAt: DateTime!
+  reference: String
+  studentId: String!
 }
 
 input CreatePeriodInput {
@@ -983,6 +1045,13 @@ type Degree {
 
   """Updated at of the degree"""
   updatedAt: DateTime!
+}
+
+input EnrollmentCostInput {
+  amount: Float!
+  id: String
+  name: String!
+  order: Int! = 0
 }
 
 """The enrollment status of a student"""
@@ -1460,6 +1529,13 @@ type JoinRequestStatus {
   status: String!
 }
 
+type LookupAccountForPasswordResetResult {
+  displayName: String
+  found: Boolean!
+  organizationName: String
+  roleLabel: String
+}
+
 type Member {
   createdAt: DateTime!
   id: String!
@@ -1544,6 +1620,7 @@ type Mutation {
   """Create an assignment submission after file upload"""
   createAssignmentSubmission(input: CreateAssignmentSubmissionInput!): AssignmentSubmission!
   createAttendanceSession(input: CreateAttendanceSessionInput!): AttendanceSession!
+  createCharge(input: CreateChargeInput!): [Charge!]!
   createClassGroup(createClassGroupInput: CreateClassGroupInput!): ClassGroup!
   createCourse(createCourseInput: CreateCourseInput!): Course!
   createDegree(createDegreeInput: CreateDegreeInput!): Degree!
@@ -1553,10 +1630,12 @@ type Mutation {
   createGrade(createGradeInput: CreateGradeInput!): Grade!
   createGradeBucket(createGradeBucketInput: CreateGradeBucketInput!): GradeBucket!
   createGroupsSchedule(createGroupsScheduleInput: CreateGroupsScheduleInput!): GroupsSchedule!
+  createInvitationAccessLink(email: String!): CreateInvitationAccessLinkResult!
   createMessage(createMessageInput: CreateMessageInput!): Message!
   createNewsletter(createNewsletterInput: CreateNewsletterInput!): Newsletter!
   createOrganization(createOrganizationInput: CreateOrganizationInput!): Organization!
   createParent(createParentInput: CreateParentInput!): Parent!
+  createPayment(input: CreatePaymentInput!): Payment!
   createPeriod(createPeriodInput: CreatePeriodInput!): Period!
   createPermission(createPermissionInput: CreatePermissionInput!): Permission!
   createQuiz(createQuizInput: CreateQuizInput!): Quiz!
@@ -1588,6 +1667,7 @@ type Mutation {
   markNotificationRead(notificationId: String!): Boolean!
   rejectInvitation(invitationId: String!): Boolean!
   removeAssignment(id: String!): Assignment!
+  removeCharge(id: String!): Charge
   removeClassGroup(id: String!): ClassGroup!
   removeCourse(id: String!): Course!
   removeDegree(id: String!): Degree!
@@ -1614,6 +1694,7 @@ type Mutation {
   removeUser(id: String!): User!
   requestJoinSchool(input: RequestJoinSchoolInput!): JoinRequestResult!
   requestPasswordReset(email: String!): Boolean!
+  resendUserInvitation(email: String!): Boolean!
   resetPassword(newPassword: String!, token: String!): AuthPayload!
   saveHabitEvaluation(saveHabitEvaluationInput: SaveHabitEvaluationInput!): HabitEvaluation!
   sendVerificationLink(email: String!): Boolean!
@@ -1646,6 +1727,7 @@ type Mutation {
   updateStudent(updateStudentInput: UpdateStudentInput!): Student!
   updateStudentGrade(updateStudentGradeInput: UpdateStudentGradeInput!): StudentGrade!
   updateStudyPlan(updateStudyPlanInput: UpdateStudyPlanInput!): StudyPlan!
+  updateStudyPlanFinancialConfig(input: UpdateStudyPlanFinancialInput!): StudyPlan!
   updateSubject(updateSubjectInput: UpdateSubjectInput!): Subject!
   updateTeacher(updateTeacherInput: UpdateTeacherInput!): Teacher!
   updateUser(updateUserInput: UpdateUserInput!): User!
@@ -1796,6 +1878,18 @@ type Parent {
   workPhone: String!
 }
 
+type Payment {
+  amount: Float!
+  createdAt: DateTime!
+  createdBy: String
+  id: String!
+  paidAt: DateTime!
+  reference: String
+  student: Student!
+  studentId: String!
+  updatedAt: DateTime!
+}
+
 type PendingJoinRequest {
   createdAt: DateTime!
   documentId: String
@@ -1897,6 +1991,9 @@ type Query {
   ): Int!
   availableSchools: [AvailableSchool!]!
   averageCourseScoreForStudent(courseId: String!, periodId: String!, studentId: String!): Float!
+  chargesBySchool(schoolId: String!, year: Int): [Charge!]!
+  chargesByStudent(studentId: String!): [Charge!]!
+  checkPendingInvitation(email: String!): CheckPendingInvitationResult!
   classGroup(id: String!): ClassGroup!
   classGroups(
     """Order by"""
@@ -2218,8 +2315,10 @@ type Query {
   habitMetric(id: String!): HabitMetric!
   habitMetrics: [HabitMetric!]!
   isEmailVerified: Boolean!
+  linkedStudentsFinancialSummary: [StudentFinancialSummary!]!
   listInvitations(organizationId: String): [Invitation!]!
   listMembers(organizationId: String): [Member!]!
+  lookupAccountForPasswordReset(email: String!): LookupAccountForPasswordResetResult!
   me: User!
 
   """Get the current student submission for an assignment"""
@@ -2292,6 +2391,7 @@ type Query {
     """Take"""
     take: Int
   ): Int!
+  paymentsByStudent(studentId: String!): [Payment!]!
   pendingJoinRequests: [PendingJoinRequest!]!
   period(id: String!): Period!
   periods: [Period!]!
@@ -2349,6 +2449,7 @@ type Query {
   schools: [School!]!
   student(id: String!): Student!
   studentAttendanceStats(studentId: String!): AttendanceStats!
+  studentBalance(studentId: String!): StudentBalance!
   studentGrade(id: String!): StudentGrade!
   studentGrades: [StudentGrade!]!
   studentGradesByCourseId(courseId: String!, periodId: String!, studentId: String!): [StudentGrade!]!
@@ -2604,6 +2705,9 @@ type School {
   """Created at"""
   createdAt: DateTime!
 
+  """Currency code (e.g. USD, MXN)"""
+  currencyCode: String!
+
   """Current year of the school"""
   currentYear: Float!
 
@@ -2798,6 +2902,22 @@ type StudentAssignmentSubmission {
   submittedAt: DateTime!
 }
 
+type StudentBalance {
+  balance: Float!
+  studentId: String!
+  totalCharges: Float!
+  totalPayments: Float!
+}
+
+type StudentFinancialSummary {
+  balance: Float!
+  fatherName: String!
+  firstName: String!
+  studentId: String!
+  totalCharges: Float!
+  totalPayments: Float!
+}
+
 type StudentGrade {
   """Average score for the student"""
   averageScoreForStudent: Float!
@@ -2871,6 +2991,7 @@ type StudyPlan {
 
   """Description of the study plan"""
   description: String!
+  enrollmentCosts: [StudyPlanEnrollmentCost!]
 
   """Grade metric of the study plan"""
   gradeMetric: GradeMetric
@@ -2883,6 +3004,7 @@ type StudyPlan {
 
   """Level of the study plan"""
   level: Int!
+  monthlyTuitionAmount: Float
 
   """Name of the study plan"""
   name: String!
@@ -2895,8 +3017,19 @@ type StudyPlan {
 
   """Short name of the study plan"""
   shortName: String!
+  tuitionMonths: [Int!]!
 
   """Updated at of the study plan"""
+  updatedAt: DateTime!
+}
+
+type StudyPlanEnrollmentCost {
+  amount: Float!
+  createdAt: DateTime!
+  id: String!
+  name: String!
+  order: Int!
+  studyPlanId: String!
   updatedAt: DateTime!
 }
 
@@ -3430,6 +3563,15 @@ input UpdateStudentInput {
 
   """School ID of the student"""
   schoolId: String
+}
+
+input UpdateStudyPlanFinancialInput {
+  enrollmentCosts: [EnrollmentCostInput!]
+  monthlyTuitionAmount: Float
+  studyPlanId: String!
+
+  """Month numbers 1-12 when tuition is due"""
+  tuitionMonths: [Int!]
 }
 
 input UpdateStudyPlanInput {

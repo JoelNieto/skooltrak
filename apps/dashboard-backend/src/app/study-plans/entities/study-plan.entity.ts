@@ -1,15 +1,12 @@
 import { Prisma } from '@generated/prisma';
-import { Field, Int, ObjectType } from '@nestjs/graphql';
+import { Field, Float, Int, ObjectType } from '@nestjs/graphql';
 import { Degree } from '../../degrees/entities/degree.entity';
 import { GradeMetric } from '../../grade-metrics/entities/grade-metric.entity';
 import { School } from '../../schools/entities/school.entity';
+import { StudyPlanEnrollmentCost } from '../../financial/entities/study-plan-enrollment-cost.entity';
+
 @ObjectType()
-export class StudyPlan
-  implements
-    Prisma.StudyPlanGetPayload<{
-      include: { degree: true; school: true; gradeMetric: true };
-    }>
-{
+export class StudyPlan {
   @Field(() => String, { description: 'ID of the study plan' })
   id: string;
   @Field(() => Degree, { description: 'Degree of the study plan' })
@@ -39,6 +36,15 @@ export class StudyPlan
     nullable: true,
   })
   gradeMetricId: string;
+  @Field(() => Float, { nullable: true })
+  monthlyTuitionAmount?: Prisma.Decimal | null;
+
+  @Field(() => [Int])
+  tuitionMonths: number[];
+
+  @Field(() => [StudyPlanEnrollmentCost], { nullable: true })
+  enrollmentCosts?: StudyPlanEnrollmentCost[];
+
   @Field(() => Date, { description: 'Created at of the study plan' })
   createdAt: Date;
   @Field(() => Date, { description: 'Updated at of the study plan' })

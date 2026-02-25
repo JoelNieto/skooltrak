@@ -14,9 +14,9 @@ export class CreateChargeInput {
 
   @Field(() => String, {
     nullable: true,
-    description: 'If provided, creates charges for all students in the group',
+    description: 'If provided, creates charges for all students in class groups using this study plan',
   })
-  classGroupId?: string;
+  studyPlanId?: string;
 
   @Field(() => Float)
   amount: number;

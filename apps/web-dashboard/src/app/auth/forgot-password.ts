@@ -1,11 +1,6 @@
 import { Loader } from '@/ui';
 import { Component, inject, signal } from '@angular/core';
-import {
-  FormControl,
-  FormGroup,
-  ReactiveFormsModule,
-  Validators,
-} from '@angular/forms';
+import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { Apollo, gql } from 'apollo-angular';
 import Auth from './auth';
@@ -19,9 +14,7 @@ import Auth from './auth';
         <div class="max-w-md w-full flex flex-col gap-8 items-center">
           <div><img src="skooltrak.png" alt="" class="h-12" /></div>
 
-          <div
-            class="w-full rounded-2xl shadow-xl overflow-hidden flex flex-col"
-          >
+          <div class="w-full rounded-2xl shadow-xl overflow-hidden flex flex-col">
             <!-- Header Section -->
             <div class="bg-primary p-6 text-white text-center">
               <h1 class="text-2xl font-bold">Recuperar contraseña</h1>
@@ -51,21 +44,17 @@ import Auth from './auth';
               @if (step() === 'sent') {
                 <div class="alert alert-success mb-4">
                   <span class="material-symbols-outlined">check_circle</span>
-                  <span
-                    >Revisa tu correo electrónico. Te hemos enviado un enlace
-                    para restablecer tu contraseña.</span
-                  >
+                  <span>Revisa tu correo electrónico. Te hemos enviado un enlace para restablecer tu contraseña.</span>
                 </div>
                 <div class="text-center">
-                  <a routerLink="/login" class="btn btn-primary">
-                    Volver al inicio de sesión
-                  </a>
+                  <a routerLink="/login" class="btn btn-primary"> Volver al inicio de sesión </a>
                 </div>
               } @else if (step() === 'confirm') {
                 <div class="space-y-6">
                   <div class="bg-base-200 rounded-lg p-4">
                     <p class="text-base-content/90">
-                      Encontramos una cuenta asociada a <strong>{{ searchedEmail() }}</strong>:
+                      Encontramos una cuenta asociada a <strong>{{ searchedEmail() }}</strong
+                      >:
                     </p>
                     <p class="mt-2 font-medium">
                       {{ accountInfo().roleLabel }} <strong>{{ accountInfo().displayName }}</strong>
@@ -111,26 +100,16 @@ import Auth from './auth';
                       <strong>{{ searchedEmail() }}</strong>
                     </span>
                   </div>
-                  <button
-                    type="button"
-                    class="btn btn-primary w-full"
-                    (click)="step.set('email'); form.reset()"
-                  >
+                  <button type="button" class="btn btn-primary w-full" (click)="step.set('email'); form.reset()">
                     Probar con otro correo
                   </button>
                 </div>
               } @else {
-                <form
-                  [formGroup]="form"
-                  (ngSubmit)="onLookup()"
-                  class="space-y-6"
-                >
+                <form [formGroup]="form" (ngSubmit)="onLookup()" class="space-y-6">
                   <div class="fieldset">
                     <label for="email">Correo Electrónico</label>
                     <div class="relative">
-                      <div
-                        class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"
-                      >
+                      <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                         <span class="material-symbols-outlined">mail</span>
                       </div>
                       <input
@@ -142,29 +121,15 @@ import Auth from './auth';
                         placeholder="tu@email.com"
                       />
                     </div>
-                    @if (
-                      form.get('email')?.touched &&
-                      form.get('email')?.hasError('required')
-                    ) {
-                      <p class="text-error text-xs mt-1">
-                        El correo electrónico es requerido
-                      </p>
+                    @if (form.get('email')?.touched && form.get('email')?.hasError('required')) {
+                      <p class="text-error text-xs mt-1">El correo electrónico es requerido</p>
                     }
-                    @if (
-                      form.get('email')?.touched &&
-                      form.get('email')?.hasError('email')
-                    ) {
-                      <p class="text-error text-xs mt-1">
-                        Ingresa un correo electrónico válido
-                      </p>
+                    @if (form.get('email')?.touched && form.get('email')?.hasError('email')) {
+                      <p class="text-error text-xs mt-1">Ingresa un correo electrónico válido</p>
                     }
                   </div>
 
-                  <button
-                    type="submit"
-                    [disabled]="loading() || form.invalid"
-                    class="btn btn-primary w-full"
-                  >
+                  <button type="submit" [disabled]="loading() || form.invalid" class="btn btn-primary w-full">
                     @if (loading()) {
                       <span class="loading loading-spinner loading-sm"></span>
                       Buscando...
@@ -178,17 +143,13 @@ import Auth from './auth';
 
                 <p class="text-center text-sm">
                   ¿Ya recuerdas tu contraseña?
-                  <a routerLink="/login" class="link link-primary"
-                    >Inicia sesión</a
-                  >
+                  <a routerLink="/login" class="link link-primary">Inicia sesión</a>
                 </p>
               }
             </div>
           </div>
 
-          <p class="text-base-200 text-center">
-            2025 © Skooltrak. Todos los derechos reservados.
-          </p>
+          <p class="text-base-200 text-center">2025 © Skooltrak. Todos los derechos reservados.</p>
         </div>
       } @placeholder {
         <lib-loader />
@@ -218,6 +179,7 @@ export default class ForgotPasswordComponent {
 
     this.loading.set(true);
     const email = this.form.getRawValue().email;
+    if (!email) return;
     this.searchedEmail.set(email);
 
     this.apollo

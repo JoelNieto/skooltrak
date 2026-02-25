@@ -16,7 +16,7 @@ import Store from '../../core/store';
           <label>Objetivo</label>
           <select formControlName="targetType" class="select select-primary w-full">
             <option value="student">Estudiante</option>
-            <option value="group">Grupo</option>
+            <option value="studyPlan">Plan de estudio</option>
           </select>
         </div>
         @if (targetType === 'student') {
@@ -30,13 +30,13 @@ import Store from '../../core/store';
             </select>
           </div>
         }
-        @if (targetType === 'group') {
+        @if (targetType === 'studyPlan') {
           <div class="fieldset">
-            <label>Grupo</label>
-            <select formControlName="classGroupId" class="select select-primary w-full">
-              <option value="" disabled>Seleccionar grupo...</option>
-              @for (g of classGroups.value(); track g.id) {
-                <option [value]="g.id">{{ g.name }}</option>
+            <label>Plan de estudio</label>
+            <select formControlName="studyPlanId" class="select select-primary w-full">
+              <option value="" disabled>Seleccionar plan...</option>
+              @for (sp of studyPlans.value(); track sp.id) {
+                <option [value]="sp.id">{{ sp.name }}</option>
               }
             </select>
           </div>
@@ -73,9 +73,9 @@ export default class CreateChargeForm {
   public closeModal = output<void>();
   private fb = inject(NonNullableFormBuilder);
 
-  get targetType(): 'student' | 'group' {
+  get targetType(): 'student' | 'studyPlan' {
     const v = this.form.get('targetType')?.value as string | undefined;
-    return v === 'group' ? 'group' : 'student';
+    return v === 'studyPlan' ? 'studyPlan' : 'student';
   }
   private apollo = inject(Apollo);
   private toast = inject(Toast);
@@ -102,15 +102,15 @@ export default class CreateChargeForm {
     },
   });
 
-  public classGroups = rxResource({
+  public studyPlans = rxResource({
     params: () => ({ schoolId: this.store.currentSchoolId() }),
     stream: ({ params }) => {
       if (!params.schoolId) return of([]);
       return this.apollo
-        .watchQuery<{ classGroupsBySchoolId: { id: string; name: string }[] }>({
+        .watchQuery<{ studyPlansBySchoolId: { id: string; name: string }[] }>({
           query: gql`
-            query ClassGroupsForCharges($schoolId: String!) {
-              classGroupsBySchoolId(schoolId: $schoolId) {
+            query StudyPlansForCharges($schoolId: String!) {
+              studyPlansBySchoolId(schoolId: $schoolId) {
                 id
                 name
               }
@@ -118,14 +118,14 @@ export default class CreateChargeForm {
           `,
           variables: { schoolId: params.schoolId },
         })
-        .valueChanges.pipe(map((r) => r.data.classGroupsBySchoolId));
+        .valueChanges.pipe(map((r) => r.data.studyPlansBySchoolId));
     },
   });
 
   public form = this.fb.group({
     targetType: ['student' as const],
     studentId: [''],
-    classGroupId: [''],
+    studyPlanId: [''],
     amount: [0, [Validators.required, Validators.min(0.01)]],
     dueDate: ['', Validators.required],
     description: [''],
@@ -161,11 +161,11 @@ export default class CreateChargeForm {
       }
       input['studentId'] = v.studentId;
     } else {
-      if (!v.classGroupId) {
-        this.toast.showError('Selecciona un grupo');
+      if (!v.studyPlanId) {
+        this.toast.showError('Selecciona un plan de estudio');
         return;
       }
-      input['classGroupId'] = v.classGroupId;
+      input['studyPlanId'] = v.studyPlanId;
     }
     this.apollo
       .mutate({

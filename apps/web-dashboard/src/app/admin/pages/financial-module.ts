@@ -18,7 +18,7 @@ type ChargeType = {
   chargeType: string;
   status: string;
   student: { id: string; firstName: string; fatherName: string };
-  classGroup?: { id: string; name: string } | null;
+  studyPlan?: { id: string; name: string } | null;
 };
 
 type PaymentType = {
@@ -115,7 +115,7 @@ type PaymentType = {
                         <td colspan="7">
                           <lib-empty-state
                             title="Sin cargos"
-                            description="Crea cargos para estudiantes o grupos."
+                            description="Crea cargos para estudiantes o planes de estudio."
                             icon="receipt_long"
                             actionLabel="Nuevo cargo"
                             (action)="openCreateCharge()"
@@ -182,7 +182,7 @@ export default class FinancialModule {
                   firstName
                   fatherName
                 }
-                classGroup {
+                studyPlan {
                   id
                   name
                 }

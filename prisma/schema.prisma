@@ -322,6 +322,7 @@ model StudyPlan {
   createdAt           DateTime                  @default(now())
   updatedAt           DateTime                  @updatedAt
   classGroups         ClassGroup[]
+  charges             Charge[]
   gradeMetric         GradeMetric?              @relation(fields: [gradeMetricId], references: [id], onDelete: SetNull)
   gradeMetricId       String?
   monthlyTuitionAmount Decimal?
@@ -398,7 +399,6 @@ model ClassGroup {
   fileShares         FileShareClassGroup[]
   attendanceSessions AttendanceSession[]
   habitEvaluations   HabitEvaluation[]
-  charges            Charge[]
   createdAt          DateTime                   @default(now())
   updatedAt          DateTime                   @updatedAt
 
@@ -773,14 +773,14 @@ model Notification {
 // ==========================================
 
 model Charge {
-  id            String       @id @default(cuid())
+  id            String     @id @default(cuid())
   schoolId      String
-  school        School       @relation(fields: [schoolId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  school        School     @relation(fields: [schoolId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   year          Int
   studentId     String
-  student       Student      @relation(fields: [studentId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  classGroupId  String?
-  classGroup    ClassGroup?  @relation(fields: [classGroupId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  student       Student    @relation(fields: [studentId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  studyPlanId   String?
+  studyPlan     StudyPlan? @relation(fields: [studyPlanId], references: [id], onDelete: SetNull, onUpdate: Cascade)
   amount        Decimal
   dueDate       DateTime     @db.Date
   description   String       @default("")
@@ -792,6 +792,7 @@ model Charge {
   @@index([schoolId])
   @@index([schoolId, year])
   @@index([studentId])
+  @@index([studyPlanId])
   @@map("charges")
 }
 

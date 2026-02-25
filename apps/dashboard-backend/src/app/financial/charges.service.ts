@@ -12,18 +12,18 @@ export class ChargesService {
       schoolId,
       year,
       studentId,
-      classGroupId,
+      studyPlanId,
       amount,
       dueDate,
       description = '',
       chargeType = $Enums.ChargeType.CUSTOM,
     } = input;
 
-    if (!studentId && !classGroupId) {
-      throw new BadRequestException('Either studentId or classGroupId is required');
+    if (!studentId && !studyPlanId) {
+      throw new BadRequestException('Either studentId or studyPlanId is required');
     }
-    if (studentId && classGroupId) {
-      throw new BadRequestException('Provide only one of studentId or classGroupId');
+    if (studentId && studyPlanId) {
+      throw new BadRequestException('Provide only one of studentId or studyPlanId');
     }
 
     if (studentId) {
@@ -38,37 +38,39 @@ export class ChargesService {
           chargeType,
           status: $Enums.ChargeStatus.PENDING,
         },
-        include: { school: true, student: true, classGroup: true },
+        include: { school: true, student: true, studyPlan: true },
       });
       return [charge];
     }
 
-    const group = await this.prisma.classGroup.findUnique({
-      where: { id: classGroupId! },
-      include: { students: true },
+    const studyPlan = await this.prisma.studyPlan.findUnique({
+      where: { id: studyPlanId! },
+      include: { classGroups: { include: { students: true } } },
     });
-    if (!group) {
-      throw new BadRequestException('Class group not found');
+    if (!studyPlan) {
+      throw new BadRequestException('Study plan not found');
     }
-    if (group.students.length === 0) {
-      throw new BadRequestException('Class group has no students');
+    const students = studyPlan.classGroups.flatMap((cg) => cg.students);
+    const uniqueStudents = [...new Map(students.map((s) => [s.id, s])).values()];
+    if (uniqueStudents.length === 0) {
+      throw new BadRequestException('Study plan has no students in any class group');
     }
 
     const charges = await this.prisma.$transaction(
-      group.students.map((s) =>
+      uniqueStudents.map((s) =>
         this.prisma.charge.create({
           data: {
             schoolId,
             year,
             studentId: s.id,
-            classGroupId: group.id,
+            studyPlanId: studyPlan.id,
             amount,
             dueDate,
             description,
             chargeType,
             status: $Enums.ChargeStatus.PENDING,
           },
-          include: { school: true, student: true, classGroup: true },
+          include: { school: true, student: true, studyPlan: true },
         })
       )
     );
@@ -78,7 +80,7 @@ export class ChargesService {
   async findByStudent(studentId: string) {
     return this.prisma.charge.findMany({
       where: { studentId },
-      include: { school: true, classGroup: true },
+      include: { school: true, studyPlan: true },
       orderBy: { dueDate: 'asc' },
     });
   }
@@ -90,7 +92,7 @@ export class ChargesService {
     }
     return this.prisma.charge.findMany({
       where,
-      include: { student: true, classGroup: true },
+      include: { student: true, studyPlan: true },
       orderBy: [{ year: 'desc' }, { dueDate: 'asc' }],
     });
   }
@@ -98,7 +100,7 @@ export class ChargesService {
   async remove(id: string) {
     return this.prisma.charge.delete({
       where: { id },
-      include: { school: true, student: true, classGroup: true },
+      include: { school: true, student: true, studyPlan: true },
     });
   }
 }

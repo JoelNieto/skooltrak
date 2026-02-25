@@ -1,19 +1,14 @@
 import { $Enums, Prisma } from '@generated/prisma';
 import { Field, Float, Int, ObjectType, registerEnumType } from '@nestjs/graphql';
-import { ClassGroup } from '../../class-groups/entities/class-group.entity';
 import { School } from '../../schools/entities/school.entity';
 import { Student } from '../../students/entities/student.entity';
+import { StudyPlan } from '../../study-plans/entities/study-plan.entity';
 
 registerEnumType($Enums.ChargeStatus, { name: 'ChargeStatus' });
 registerEnumType($Enums.ChargeType, { name: 'ChargeType' });
 
 @ObjectType()
-export class Charge
-  implements
-    Prisma.ChargeGetPayload<{
-      include: { school: true; student: true; classGroup: true };
-    }>
-{
+export class Charge {
   @Field(() => String)
   id: string;
 
@@ -33,10 +28,10 @@ export class Charge
   student: Student;
 
   @Field(() => String, { nullable: true })
-  classGroupId: string | null;
+  studyPlanId: string | null;
 
-  @Field(() => ClassGroup, { nullable: true })
-  classGroup: ClassGroup | null;
+  @Field(() => StudyPlan, { nullable: true })
+  studyPlan: StudyPlan | null;
 
   @Field(() => Float)
   amount: Prisma.Decimal;

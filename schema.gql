@@ -264,8 +264,6 @@ type AvailableSchool {
 type Charge {
   amount: Float!
   chargeType: ChargeType!
-  classGroup: ClassGroup
-  classGroupId: String
   createdAt: DateTime!
   description: String!
   dueDate: DateTime!
@@ -275,6 +273,8 @@ type Charge {
   status: ChargeStatus!
   student: Student!
   studentId: String!
+  studyPlan: StudyPlan
+  studyPlanId: String
   updatedAt: DateTime!
   year: Int!
 }
@@ -463,13 +463,15 @@ input CreateAttendanceSessionInput {
 input CreateChargeInput {
   amount: Float!
   chargeType: String
-
-  """If provided, creates charges for all students in the group"""
-  classGroupId: String
   description: String
   dueDate: DateTime!
   schoolId: String!
   studentId: String
+
+  """
+  If provided, creates charges for all students in class groups using this study plan
+  """
+  studyPlanId: String
   year: Int!
 }
 

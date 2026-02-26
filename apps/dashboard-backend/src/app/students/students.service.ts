@@ -1,5 +1,5 @@
 import { sendUserInvitation } from '@/auth';
-import { Inject, Injectable, Logger, Scope } from '@nestjs/common';
+import { ConflictException, Inject, Injectable, Logger, Scope } from '@nestjs/common';
 import { CONTEXT } from '@nestjs/graphql';
 import * as bcrypt from 'bcrypt';
 import { randomUUID } from 'crypto';
@@ -56,29 +56,74 @@ export class StudentsService {
 
     const hashedPassword = bcrypt.hashSync(documentId, 10);
 
-    const user = await this.prisma.user.create({
-      data: {
-        firstName,
-        lastName: fatherName,
-        email: email,
-        color: this.getRandomPastelColor(),
-        password: hashedPassword,
-        organizationId,
-        roleId: role.id,
-        emailVerified: false, // Will be verified when user clicks the email link
-      },
+    const existingUser = await this.prisma.user.findUnique({
+      where: { email },
+      include: { student: true },
     });
 
-    // Create Account for Better Auth credential login
-    await this.prisma.account.create({
-      data: {
-        id: randomUUID(),
-        accountId: user.id,
-        providerId: 'credential',
-        userId: user.id,
-        password: hashedPassword,
-      },
-    });
+    if (existingUser?.student) {
+      throw new ConflictException('Student already exists, contact support');
+    }
+
+    let user: { id: string };
+    if (existingUser) {
+      await this.prisma.user.update({
+        where: { id: existingUser.id },
+        data: {
+          firstName,
+          lastName: fatherName,
+          organizationId,
+          roleId: role.id,
+          password: hashedPassword,
+          onboardingStep: 'completed', // Admin-created students skip onboarding
+        },
+      });
+      user = { id: existingUser.id };
+
+      const credentialAccount = await this.prisma.account.findFirst({
+        where: { userId: existingUser.id, providerId: 'credential' },
+      });
+      if (credentialAccount) {
+        await this.prisma.account.update({
+          where: { id: credentialAccount.id },
+          data: { password: hashedPassword },
+        });
+      } else {
+        await this.prisma.account.create({
+          data: {
+            id: randomUUID(),
+            accountId: user.id,
+            providerId: 'credential',
+            userId: user.id,
+            password: hashedPassword,
+          },
+        });
+      }
+    } else {
+      user = await this.prisma.user.create({
+        data: {
+          firstName,
+          lastName: fatherName,
+          email: email,
+          color: this.getRandomPastelColor(),
+          password: hashedPassword,
+          organizationId,
+          roleId: role.id,
+          emailVerified: false, // Will be verified when user clicks the email link
+          onboardingStep: 'completed', // Admin-created students skip onboarding
+        },
+      });
+
+      await this.prisma.account.create({
+        data: {
+          id: randomUUID(),
+          accountId: user.id,
+          providerId: 'credential',
+          userId: user.id,
+          password: hashedPassword,
+        },
+      });
+    }
 
     // Only connect courses if classGroupId is provided
     let coursesToConnect: { id: string }[] = [];

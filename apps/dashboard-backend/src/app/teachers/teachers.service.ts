@@ -1,5 +1,5 @@
 import { sendUserInvitation } from '@/auth';
-import { Inject, Injectable, Logger, Scope } from '@nestjs/common';
+import { ConflictException, Inject, Injectable, Logger, Scope } from '@nestjs/common';
 import { CONTEXT } from '@nestjs/graphql';
 import * as bcrypt from 'bcrypt';
 import { randomUUID } from 'crypto';
@@ -36,34 +36,80 @@ export class TeachersService {
 
     const hashedPassword = bcrypt.hashSync(rest.documentId, 10);
 
-    const user = await this.prisma.user.create({
-      data: {
-        firstName: rest.firstName,
-        lastName: rest.fatherName,
-        email: email,
-        color: this.getRandomPastelColor(),
-        password: hashedPassword,
-        organizationId: createTeacherInput.organizationId,
-        roleId: role.id,
-        emailVerified: false, // Will be verified when user clicks the email link
-      },
+    const existingUser = await this.prisma.user.findUnique({
+      where: { email },
+      include: { teacher: true },
     });
 
-    // Create Account for Better Auth credential login
-    await this.prisma.account.create({
-      data: {
-        id: randomUUID(),
-        accountId: user.id,
-        providerId: 'credential',
-        userId: user.id,
-        password: hashedPassword,
-      },
-    });
+    if (existingUser?.teacher) {
+      throw new ConflictException('Teacher already exists, contact support');
+    }
+
+    let userId: string;
+    if (existingUser) {
+      await this.prisma.user.update({
+        where: { id: existingUser.id },
+        data: {
+          firstName: rest.firstName,
+          lastName: rest.fatherName,
+          organizationId: createTeacherInput.organizationId,
+          roleId: role.id,
+          password: hashedPassword,
+          onboardingStep: 'completed', // Admin-created teachers skip onboarding
+        },
+      });
+      userId = existingUser.id;
+
+      const credentialAccount = await this.prisma.account.findFirst({
+        where: { userId: existingUser.id, providerId: 'credential' },
+      });
+      if (credentialAccount) {
+        await this.prisma.account.update({
+          where: { id: credentialAccount.id },
+          data: { password: hashedPassword },
+        });
+      } else {
+        await this.prisma.account.create({
+          data: {
+            id: randomUUID(),
+            accountId: userId,
+            providerId: 'credential',
+            userId,
+            password: hashedPassword,
+          },
+        });
+      }
+    } else {
+      const user = await this.prisma.user.create({
+        data: {
+          firstName: rest.firstName,
+          lastName: rest.fatherName,
+          email: email,
+          color: this.getRandomPastelColor(),
+          password: hashedPassword,
+          organizationId: createTeacherInput.organizationId,
+          roleId: role.id,
+          emailVerified: false, // Will be verified when user clicks the email link
+          onboardingStep: 'completed', // Admin-created teachers skip onboarding
+        },
+      });
+      userId = user.id;
+
+      await this.prisma.account.create({
+        data: {
+          id: randomUUID(),
+          accountId: user.id,
+          providerId: 'credential',
+          userId: user.id,
+          password: hashedPassword,
+        },
+      });
+    }
 
     const teacher = await this.prisma.teacher.create({
       data: {
         ...rest,
-        userId: user.id,
+        userId,
       },
     });
 

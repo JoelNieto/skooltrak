@@ -9,7 +9,7 @@ import { RouterLink } from '@angular/router';
 import { $Enums, Prisma } from '@generated/prisma';
 
 import { Apollo, gql } from 'apollo-angular';
-import { filter, map, switchMap, tap } from 'rxjs';
+import { filter, map, of, switchMap, tap } from 'rxjs';
 
 type Student = Prisma.StudentGetPayload<{
   include: { classGroup: true; user: true };
@@ -94,7 +94,7 @@ const ENROLLMENT_STATUS_COLORS: Record<$Enums.EnrollmentStatus, string> = {
               <td>
                 <div class="flex items-center gap-2">
                   {{ student.email }}
-                  @if (student.user.emailVerified) {
+                  @if (student.user?.emailVerified) {
                     <span class="badge badge-success badge-xs" title="Verificado">
                       <span class="material-symbols-outlined text-xs!">check_circle</span>
                     </span>
@@ -107,8 +107,8 @@ const ENROLLMENT_STATUS_COLORS: Record<$Enums.EnrollmentStatus, string> = {
               </td>
               <td>{{ student.documentId }}</td>
               <td>
-                <span class="badge badge-sm" [ngClass]="getStatusColor(student.enrollmentStatus)">
-                  {{ getStatusLabel(student.enrollmentStatus) }}
+                <span class="badge badge-sm" [ngClass]="getStatusColor(student.enrollmentStatus ?? 'ACTIVE')">
+                  {{ getStatusLabel(student.enrollmentStatus ?? 'ACTIVE') }}
                 </span>
               </td>
               <td>
@@ -165,12 +165,12 @@ const ENROLLMENT_STATUS_COLORS: Record<$Enums.EnrollmentStatus, string> = {
                         <span class="material-symbols-outlined text-lg">edit</span>
                         <span>Editar</span>
                       </a>
-                      @if (!student.user.emailVerified) {
+                      @if (student.user && !student.user.emailVerified) {
                         <button
                           ngMenuItem
                           value="resend"
                           class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-base-200 w-full"
-                          (click)="resendInvitation(student.email)"
+                          (click)="resendInvitationForStudent(student)"
                         >
                           <span class="material-symbols-outlined text-lg">mail</span>
                           <span>Reenviar invitación</span>
@@ -268,9 +268,9 @@ export default class Students {
         })
         .valueChanges.pipe(
           tap(({ data }) => {
-            this.pagination.updateCount(data.count);
+            this.pagination.updateCount(data?.count ?? 0);
           }),
-          map((result) => result.data.students),
+          map((result) => result.data?.students ?? []),
         );
     },
   });
@@ -281,6 +281,12 @@ export default class Students {
 
   getStatusColor(status: $Enums.EnrollmentStatus): string {
     return ENROLLMENT_STATUS_COLORS[status] || 'badge-ghost';
+  }
+
+  public resendInvitationForStudent(student: { email?: string }) {
+    if (student?.email) {
+      this.resendInvitation(student.email);
+    }
   }
 
   public resendInvitation(email: string) {
@@ -304,18 +310,20 @@ export default class Students {
       });
   }
 
-  public deleteStudent(student: Student) {
+  public deleteStudent(student: { id?: string; name?: string }) {
+    if (!student?.id) return;
     this.confirmation
       .confirm({
         title: 'Eliminar Alumno',
-        message: `¿Estás seguro de eliminar al alumno ${student.name}?`,
+        message: `¿Estás seguro de eliminar al alumno ${student.name ?? 'este alumno'}?`,
         confirmText: 'Eliminar',
         cancelText: 'Cancelar',
       })
       .pipe(
         filter((confirmed: boolean) => confirmed === true),
-        switchMap(() =>
-          this.apollo.mutate({
+        switchMap(() => {
+          if (!student.id) return of(null);
+          return this.apollo.mutate({
             mutation: gql`
               mutation RemoveStudent($id: String!) {
                 removeStudent(id: $id) {
@@ -326,8 +334,8 @@ export default class Students {
             variables: {
               id: student.id,
             },
-          }),
-        ),
+          });
+        }),
       )
       .subscribe({
         next: () => {

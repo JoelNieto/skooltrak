@@ -281,7 +281,7 @@ export default class School {
             id: params.id,
           },
         })
-        .valueChanges.pipe(map((result) => result.data.school)),
+        .valueChanges.pipe(map((result) => result.data?.school)),
   });
 
   getLocationString(school: SchoolType): string {

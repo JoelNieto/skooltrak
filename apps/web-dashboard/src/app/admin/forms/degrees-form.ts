@@ -89,7 +89,7 @@ export default class DegreesForm implements OnInit {
             }
           `,
         })
-        .valueChanges.pipe(map((result) => result.data.schools)),
+        .valueChanges.pipe(map((result) => result.data?.schools ?? [])),
   });
 
   public form = this.fb.group({

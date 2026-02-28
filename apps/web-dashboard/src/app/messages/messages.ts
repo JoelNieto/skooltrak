@@ -74,8 +74,8 @@ type MessageRecipientType = Prisma.MessageRecipientGetPayload<undefined> & {
                     <input
                       type="checkbox"
                       class="checkbox"
-                      [checked]="selectedStates()[item.id] || false"
-                      (change)="onCheckboxChange(item.id, $event.target.checked)"
+                      [checked]="(item.id && selectedStates()[item.id]) || false"
+                      (change)="item.id && onCheckboxChange(item.id, $any($event.target).checked)"
                     />
                   </td>
                   <td class="flex items-center gap-2" [class.font-bold]="!item.readAt">
@@ -83,17 +83,17 @@ type MessageRecipientType = Prisma.MessageRecipientGetPayload<undefined> & {
                       <span class="w-2 h-2 bg-primary rounded-full"></span>
                     }
                     <div class="avatar avatar-placeholder">
-                      <div class="text-neutral-content w-7 rounded-full" [style.background]="item.message.sender.color">
-                        <span>{{ item.message.sender.initials }}</span>
+                      <div class="text-neutral-content w-7 rounded-full" [style.background]="item.message?.sender?.color">
+                        <span>{{ item.message?.sender?.initials }}</span>
                       </div>
                     </div>
-                    {{ item.message.sender.name }}
+                    {{ item.message?.sender?.name }}
                   </td>
                   <td [class.font-semibold]="!item.readAt" [class.text-neutral-500]="item.readAt">
-                    <a [routerLink]="['/messages', item.message.id]">{{ item.message.subject }}</a>
+                    <a [routerLink]="['/messages', item.message?.id ?? '']">{{ item.message?.subject }}</a>
                   </td>
                   <td class="text-neutral-500">
-                    {{ item.message.createdAt | timeAgo }}
+                    {{ formatTimeAgo(item.message?.createdAt) }}
                   </td>
                   <td>
                     <button class="hover:text-error cursor-pointer" (click)="deleteMessage(item)">
@@ -163,19 +163,19 @@ type MessageRecipientType = Prisma.MessageRecipientGetPayload<undefined> & {
                     <input
                       type="checkbox"
                       class="checkbox"
-                      [checked]="sentSelectedStates()[item.id] || false"
-                      (change)="onSentCheckboxChange(item.id, $event.target.checked)"
+                      [checked]="(item.id && sentSelectedStates()[item.id]) || false"
+                      (change)="item.id && onSentCheckboxChange(item.id, $any($event.target).checked)"
                     />
                   </td>
                   <td class="text-neutral-900! font-semibold">
                     <div class="flex items-center gap-2">
-                      @for (recipient of item.recipients.slice(0, 2); track recipient.id) {
+                      @for (recipient of (item.recipients ?? []).slice(0, 2); track recipient.id ?? recipient) {
                         <div class="avatar avatar-placeholder">
                           <div
                             class="text-neutral-content w-7 rounded-full text-xs"
-                            [style.background]="recipient.user.color"
+                            [style.background]="recipient.user?.color"
                           >
-                            <span>{{ recipient.user.initials }}</span>
+                            <span>{{ recipient.user?.initials }}</span>
                           </div>
                         </div>
                       }
@@ -186,7 +186,7 @@ type MessageRecipientType = Prisma.MessageRecipientGetPayload<undefined> & {
                     <a>{{ item.subject }}</a>
                   </td>
                   <td class="text-neutral-500!">
-                    {{ item.createdAt | timeAgo }}
+                    {{ formatTimeAgo(item.createdAt) }}
                   </td>
                   <td>
                     <button class="hover:text-error cursor-pointer" (click)="deleteSentMessage(item)">
@@ -227,6 +227,7 @@ export default class Messages {
   #apollo = inject(Apollo);
   #confirmation = inject(Confirmation);
   #toast = inject(Toast);
+  #timeAgo = inject(TimeAgoPipe);
 
   // Tab state
   activeTab = signal<'inbox' | 'outbox'>('inbox');
@@ -258,20 +259,21 @@ export default class Messages {
     const states = this.selectedStates();
     return this.messagesResource
       .value()
-      ?.filter(({ id }) => states[id])
-      .map(({ id }) => id);
+      ?.filter(({ id }) => id != null && states[id])
+      .map(({ id }) => id)
+      .filter((id): id is string => id != null);
   });
 
   readonly allSelected = computed(() => {
     const states = this.selectedStates();
     const messages = this.messagesResource.value();
-    return (messages?.length ?? 0) > 0 && messages?.every(({ id }) => states[id]);
+    return (messages?.length ?? 0) > 0 && messages?.every(({ id }) => id != null && states[id]);
   });
 
   public someSelected = computed(() => {
     const states = this.selectedStates();
     const messages = this.messagesResource.value();
-    return messages?.some(({ id }) => states[id]) && !this.allSelected();
+    return messages?.some(({ id }) => id != null && states[id]) && !this.allSelected();
   });
 
   onCheckboxChange(itemId: string, isChecked: boolean): void {
@@ -285,7 +287,7 @@ export default class Messages {
     this.selectedStates.update(() => {
       const newStates: Record<string, boolean> = {};
       this.messagesResource.value()?.forEach(({ id }) => {
-        newStates[id] = isChecked as boolean;
+        if (id != null) newStates[id] = isChecked as boolean;
       });
       return newStates;
     });
@@ -297,13 +299,13 @@ export default class Messages {
   readonly allSentSelected = computed(() => {
     const states = this.sentSelectedStates();
     const messages = this.sentMessagesResource.value();
-    return (messages?.length ?? 0) > 0 && messages?.every(({ id }) => states[id]);
+    return (messages?.length ?? 0) > 0 && messages?.every(({ id }) => id != null && states[id]);
   });
 
   public someSentSelected = computed(() => {
     const states = this.sentSelectedStates();
     const messages = this.sentMessagesResource.value();
-    return messages?.some(({ id }) => states[id]) && !this.allSentSelected();
+    return messages?.some(({ id }) => id != null && states[id]) && !this.allSentSelected();
   });
 
   onSentCheckboxChange(itemId: string, isChecked: boolean): void {
@@ -317,7 +319,7 @@ export default class Messages {
     this.sentSelectedStates.update(() => {
       const newStates: Record<string, boolean> = {};
       this.sentMessagesResource.value()?.forEach(({ id }) => {
-        newStates[id] = isChecked as boolean;
+        if (id != null) newStates[id] = isChecked as boolean;
       });
       return newStates;
     });
@@ -407,10 +409,10 @@ export default class Messages {
           tap((result) => {
             this.inboxPagination.update((prev) => ({
               ...prev,
-              count: result.data.count,
+              count: result.data?.count ?? 0,
             }));
           }),
-          map((result) => result.data.findManyMessages ?? []),
+          map((result) => result.data?.findManyMessages ?? []),
           catchError((err) => {
             console.error('Error fetching inbox messages:', err);
             return of([]);
@@ -469,10 +471,10 @@ export default class Messages {
           tap((result) => {
             this.outboxPagination.update((prev) => ({
               ...prev,
-              count: result.data.count,
+              count: result.data?.count ?? 0,
             }));
           }),
-          map((result) => result.data.findMyMessages ?? []),
+          map((result) => result.data?.findMyMessages ?? []),
           catchError((err) => {
             console.error('Error fetching sent messages:', err);
             return of([]);
@@ -481,15 +483,21 @@ export default class Messages {
     },
   });
 
-  getRecipientsText(message: MessageType): string {
-    const names = message.recipients.map((r) => r.user.name);
+  formatTimeAgo(date: Date | string | null | undefined): string {
+    return date ? this.#timeAgo.transform(date) : '-';
+  }
+
+  getRecipientsText(message: { recipients?: Array<{ user?: { name?: string | null } }> }): string {
+    const recipients = message.recipients ?? [];
+    const names = recipients.map((r) => r.user?.name ?? '').filter(Boolean);
     if (names.length <= 2) {
       return names.join(', ');
     }
     return `${names[0]}, ${names[1]} +${names.length - 2}`;
   }
 
-  public deleteMessage(message: MessageRecipientType) {
+  public deleteMessage(message: { id?: string }) {
+    if (!message?.id) return;
     this.#confirmation
       .confirm({
         title: 'Eliminar mensaje',
@@ -524,7 +532,8 @@ export default class Messages {
       });
   }
 
-  public deleteSentMessage(message: MessageType) {
+  public deleteSentMessage(message: { id?: string }) {
+    if (!message?.id) return;
     this.#confirmation
       .confirm({
         title: 'Eliminar mensaje enviado',

@@ -406,7 +406,7 @@ export default class TeacherForm {
           `,
           variables: { id: params.id },
         })
-        .valueChanges.pipe(map((result) => result.data.teacher));
+        .valueChanges.pipe(map((result) => result.data?.teacher));
     },
   });
 

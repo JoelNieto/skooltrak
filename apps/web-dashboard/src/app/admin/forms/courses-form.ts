@@ -188,7 +188,7 @@ export default class CoursesForm {
           },
           fetchPolicy: 'cache-first',
         })
-        .valueChanges.pipe(map((result) => result.data.subjects));
+        .valueChanges.pipe(map((result) => result.data?.subjects ?? []));
     },
   });
 
@@ -219,7 +219,7 @@ export default class CoursesForm {
           },
           fetchPolicy: 'cache-first',
         })
-        .valueChanges.pipe(map((result) => result.data.studyPlansBySchoolId));
+        .valueChanges.pipe(map((result) => result.data?.studyPlansBySchoolId ?? []));
     },
   });
 
@@ -256,7 +256,7 @@ export default class CoursesForm {
           },
           fetchPolicy: 'cache-first',
         })
-        .valueChanges.pipe(map((result) => result.data.teachers)),
+        .valueChanges.pipe(map((result) => result.data?.teachers ?? [])),
   });
 
   constructor() {
@@ -355,7 +355,7 @@ export default class CoursesForm {
       );
 
       if (result.data?.createSubject) {
-        const newSubject = result.data.createSubject;
+        const newSubject = result.data?.createSubject;
         this.selectSubject({ id: newSubject.id, name: newSubject.name });
         this.toast.showSuccess(`Asignatura "${name}" creada exitosamente`);
         // Reload subjects

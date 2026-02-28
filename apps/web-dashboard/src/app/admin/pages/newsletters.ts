@@ -343,7 +343,7 @@ export default class Newsletters {
           tap(({ data }) => {
             this.pagination.updateCount(data.count);
           }),
-          map((result) => result.data.newsletters),
+          map((result) => result.data?.newsletters ?? []),
         );
     },
   });

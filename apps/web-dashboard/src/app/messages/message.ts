@@ -45,7 +45,7 @@ type MessageType = Prisma.MessageGetPayload<undefined> & {
           <ul>
             <li><a routerLink="/">Inicio</a></li>
             <li><a routerLink="/messages">Mensajes</a></li>
-            <li>{{ message.sender.name }}: {{ message.subject }}</li>
+            <li>{{ message.sender?.name }}: {{ message.subject }}</li>
           </ul>
         </div>
         <div class="card card-border bg-base-100 border-base-300 mt-4">
@@ -57,11 +57,11 @@ type MessageType = Prisma.MessageGetPayload<undefined> & {
               <div class="flex items-center gap-2">
                 <div class="avatar avatar-placeholder">
                   <div class="bg-neutral text-neutral-content w-10 rounded-full">
-                    <span>{{ message.sender.initials }}</span>
+                    <span>{{ message.sender?.initials }}</span>
                   </div>
                 </div>
                 <div class="flex flex-col text-sm">
-                  <div class="font-semibold">{{ message.sender.name }}</div>
+                  <div class="font-semibold">{{ message.sender?.name }}</div>
                   <div class="text-base-content/60">Para: {{ receivers() }}</div>
                 </div>
               </div>
@@ -88,10 +88,10 @@ type MessageType = Prisma.MessageGetPayload<undefined> & {
                       <div class="flex items-center gap-2">
                         <div class="avatar avatar-placeholder">
                           <div class="bg-neutral text-neutral-content w-8 rounded-full text-xs">
-                            <span>{{ item.sender.initials }}</span>
+                            <span>{{ item.sender?.initials }}</span>
                           </div>
                         </div>
-                        <div class="font-semibold">{{ item.sender.name }}</div>
+                        <div class="font-semibold">{{ item.sender?.name }}</div>
                       </div>
                       <span class="text-base-content/60">{{ item.createdAt | date: 'short' }}</span>
                     </div>
@@ -252,9 +252,9 @@ export default class Message {
           fetchPolicy: 'network-only',
         })
         .valueChanges.pipe(
-          map((result) => result.data.findMessageById),
+          map((result) => result.data?.findMessageById),
           tap((message) => {
-            if (message) {
+            if (message?.id) {
               this.markAsRead(message.id);
             }
           }),
@@ -281,9 +281,9 @@ export default class Message {
   }
 
   public receivers = computed(() =>
-    this.messageResource
-      .value()
-      ?.recipients.map((recipient) => recipient.user.name)
+    (this.messageResource.value()?.recipients ?? [])
+      .map((recipient) => recipient.user?.name ?? '')
+      .filter(Boolean)
       .join(', '),
   );
 
@@ -300,23 +300,25 @@ export default class Message {
     return message.replies;
   });
 
-  prepareReply(message: MessageType, includeQuote = false): void {
-    const quotedText = includeQuote ? this.toPlainText(message.content).slice(0, 200) : undefined;
+  prepareReply(message: { id?: string; content?: string; sender?: { name?: string } }, includeQuote = false): void {
+    if (!message?.id) return;
+    const quotedText = includeQuote && message.content ? this.toPlainText(message.content).slice(0, 200) : undefined;
     this.replyDraft.set({
       content: '',
       replyToId: message.id,
       quotedText,
-      quotedAuthor: includeQuote ? message.sender.name : undefined,
+      quotedAuthor: includeQuote ? message.sender?.name : undefined,
     });
   }
 
-  prepareReplyFromReply(reply: ReplyType, includeQuote = false): void {
-    const quotedText = includeQuote ? this.toPlainText(reply.content).slice(0, 200) : undefined;
+  prepareReplyFromReply(reply: { id?: string; content?: string; sender?: { name?: string } }, includeQuote = false): void {
+    if (!reply?.id) return;
+    const quotedText = includeQuote && reply.content ? this.toPlainText(reply.content).slice(0, 200) : undefined;
     this.replyDraft.set({
       content: '',
       replyToId: reply.id,
       quotedText,
-      quotedAuthor: includeQuote ? reply.sender.name : undefined,
+      quotedAuthor: includeQuote ? reply.sender?.name : undefined,
     });
   }
 
@@ -352,7 +354,7 @@ export default class Message {
     }
 
     // Reply goes back to the original sender
-    const recipientIds = [message.sender.id];
+    const recipientIds = message.sender ? [message.sender.id] : [];
 
     this.#apollo
       .mutate({

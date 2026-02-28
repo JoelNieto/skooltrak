@@ -225,7 +225,7 @@ export default class Course {
             id,
           },
         })
-        .pipe(map((result) => result.data.course));
+        .pipe(map((result) => result.data?.course));
     },
   });
 

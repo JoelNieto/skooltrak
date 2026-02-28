@@ -183,7 +183,7 @@ export default class GroupSchedule {
           },
           fetchPolicy: 'cache-and-network',
         })
-        .valueChanges.pipe(map((result) => result.data.groupsSchedulesByClassGroupId));
+        .valueChanges.pipe(map((result) => result.data?.groupsSchedulesByClassGroupId ?? []));
     },
   });
 

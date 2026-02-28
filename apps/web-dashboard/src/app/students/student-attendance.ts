@@ -53,10 +53,7 @@ const STATUS_COLORS: Record<string, string> = {
   selector: 'app-student-attendance',
   imports: [Loader, PageHeader, StatCard, DatePipe, NgClass],
   template: `
-    <lib-page-header
-      title="Mi Asistencia"
-      subtitle="Resumen de asistencia por curso y sesiones recientes."
-    />
+    <lib-page-header title="Mi Asistencia" subtitle="Resumen de asistencia por curso y sesiones recientes." />
 
     @if (statsResource.isLoading()) {
       <div class="flex justify-center py-8">
@@ -72,29 +69,19 @@ const STATUS_COLORS: Record<string, string> = {
           [value]="stats.present.toString()"
           [helper]="stats.presentPercentage + '% del total'"
         />
-        <lib-stat-card
-          label="Tardanzas"
-          [value]="stats.late.toString()"
-          helper="Procura llegar a tiempo"
-        />
+        <lib-stat-card label="Tardanzas" [value]="stats.late.toString()" helper="Procura llegar a tiempo" />
         <lib-stat-card
           label="Faltas"
           [value]="stats.absent.toString()"
           [helper]="stats.absentPercentage + '% del total'"
         />
-        <lib-stat-card
-          label="Permisos"
-          [value]="(stats.sickLeave + stats.excused).toString()"
-          helper="Justificadas"
-        />
+        <lib-stat-card label="Permisos" [value]="(stats.sickLeave + stats.excused).toString()" helper="Justificadas" />
       </div>
     }
 
     <div class="mt-6 card border border-base-200 bg-base-100">
       <div class="card-body">
-        <h2 class="text-lg font-semibold text-base-content">
-          Registro reciente
-        </h2>
+        <h2 class="text-lg font-semibold text-base-content">Registro reciente</h2>
 
         @if (recordsResource.isLoading()) {
           <lib-loader />
@@ -127,9 +114,7 @@ const STATUS_COLORS: Record<string, string> = {
                   </tr>
                 } @empty {
                   <tr>
-                    <td colspan="4" class="text-center py-8 text-base-content/60">
-                      No hay registros de asistencia
-                    </td>
+                    <td colspan="4" class="text-center py-8 text-base-content/60">No hay registros de asistencia</td>
                   </tr>
                 }
               </tbody>
@@ -169,7 +154,7 @@ export default class StudentAttendance {
           `,
           variables: { studentId: params.studentId },
         })
-        .pipe(map((r) => r.data.studentAttendanceStats));
+        .pipe(map((r) => r.data?.studentAttendanceStats));
     },
   });
 
@@ -207,7 +192,7 @@ export default class StudentAttendance {
           `,
           variables: { studentId: params.studentId },
         })
-        .pipe(map((r) => r.data.attendanceRecordsByStudentId));
+        .pipe(map((r) => r.data?.attendanceRecordsByStudentId));
     },
   });
 

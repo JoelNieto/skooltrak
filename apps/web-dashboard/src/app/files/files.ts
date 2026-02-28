@@ -247,7 +247,7 @@ export default class FilesPage {
             search: params.search,
           },
         })
-        .valueChanges.pipe(map((result) => result.data.filesSharedWithMe));
+        .valueChanges.pipe(map((result) => result.data?.filesSharedWithMe ?? []));
     },
   });
 
@@ -286,7 +286,7 @@ export default class FilesPage {
             search: params.search,
           },
         })
-        .valueChanges.pipe(map((result) => result.data.filesOwned));
+        .valueChanges.pipe(map((result) => result.data?.filesOwned ?? []));
     },
   });
 
@@ -310,7 +310,7 @@ export default class FilesPage {
       })
       .subscribe({
         next: (result) => {
-          const url = result.data?.createFileDownloadUrl.downloadUrl;
+          const url = result.data?.createFileDownloadUrl?.downloadUrl;
           if (url) {
             window.open(url, '_blank');
           }
@@ -337,7 +337,7 @@ export default class FilesPage {
       })
       .subscribe({
         next: (result) => {
-          const url = result.data?.createFileDownloadUrl.downloadUrl;
+          const url = result.data?.createFileDownloadUrl?.downloadUrl;
           if (url) {
             const link = document.createElement('a');
             link.href = url;

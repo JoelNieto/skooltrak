@@ -232,7 +232,7 @@ export default class Courses {
             schoolId: params.schoolId,
           },
         })
-        .valueChanges.pipe(map((result) => result.data.studyPlansBySchoolId));
+        .valueChanges.pipe(map((result) => result.data?.studyPlansBySchoolId ?? []));
     },
   });
 
@@ -309,10 +309,10 @@ export default class Courses {
           tap((result) => {
             this.pagination.update((prev) => ({
               ...prev,
-              count: result.data.count,
+              count: result.data?.count ?? 0,
             }));
           }),
-          map((result) => result.data.courses)
+          map((result) => result.data?.courses ?? [])
         );
     },
   });

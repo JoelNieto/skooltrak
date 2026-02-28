@@ -164,7 +164,7 @@ export default class GroupsStep {
           `,
           fetchPolicy: 'cache-first',
         })
-        .valueChanges.pipe(map((result) => result.data.schools)),
+        .valueChanges.pipe(map((result) => result.data?.schools ?? [])),
   });
 
   // Get the school ID from store or first school from API
@@ -193,7 +193,7 @@ export default class GroupsStep {
           variables: { schoolId: params.schoolId },
           fetchPolicy: 'cache-and-network',
         })
-        .valueChanges.pipe(map((result) => result.data.studyPlansBySchoolId));
+        .valueChanges.pipe(map((result) => result.data?.studyPlansBySchoolId ?? []));
     },
   });
 

@@ -155,7 +155,7 @@ export default class CourseGrades {
           },
           fetchPolicy: 'cache-first',
         })
-        .valueChanges.pipe(map((result) => result.data.periodsByYear));
+        .valueChanges.pipe(map((result) => result.data?.periodsByYear ?? []));
     },
   });
 
@@ -204,7 +204,7 @@ export default class CourseGrades {
           },
           fetchPolicy: 'cache-first',
         })
-        .valueChanges.pipe(map((result) => result.data.studentsByCourseId));
+        .valueChanges.pipe(map((result) => result.data?.studentsByCourseId ?? []));
     },
   });
 
@@ -267,7 +267,7 @@ export default class CourseGrades {
             periodId,
           },
         })
-        .valueChanges.pipe(map((result) => result.data.gradesByCourseId));
+        .valueChanges.pipe(map((result) => result.data?.gradesByCourseId ?? []));
     },
   });
 

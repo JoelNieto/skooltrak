@@ -414,7 +414,7 @@ export default class SchoolForm {
           `,
           variables: { id: params.id },
         })
-        .valueChanges.pipe(map((result) => result.data.school));
+        .valueChanges.pipe(map((result) => result.data?.school));
     },
   });
 
@@ -587,7 +587,7 @@ export default class SchoolForm {
           fetchPolicy: 'network-only',
         }),
       );
-      this.logoDownloadUrl.set(result.data.schoolLogoDownloadUrl.downloadUrl);
+      this.logoDownloadUrl.set(result.data?.schoolLogoDownloadUrl?.downloadUrl ?? '');
 
       this.toasts.showSuccess('Logo actualizado correctamente');
     } catch (error) {

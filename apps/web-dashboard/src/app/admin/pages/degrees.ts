@@ -152,7 +152,7 @@ export default class Degrees {
             schoolId: params.schoolId,
           },
         })
-        .valueChanges.pipe(map((result) => result.data.degreesBySchoolId));
+        .valueChanges.pipe(map((result) => result.data?.degreesBySchoolId ?? []));
     },
   });
 

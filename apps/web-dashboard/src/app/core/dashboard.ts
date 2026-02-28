@@ -188,7 +188,7 @@ export default class Dashboard {
             }
           `,
         })
-        .valueChanges.pipe(map((result) => result.data.schools)),
+        .valueChanges.pipe(map((result) => result.data?.schools ?? [])),
   });
 
   public unreadCount = rxResource({
@@ -203,7 +203,7 @@ export default class Dashboard {
             }
           `,
         })
-        .valueChanges.pipe(map((result) => result.data.unreadMessagesCount)),
+        .valueChanges.pipe(map((result) => result.data?.unreadMessagesCount ?? 0)),
   });
 
   constructor() {

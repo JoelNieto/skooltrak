@@ -172,7 +172,7 @@ export default class NewsletterForm {
           `,
           variables: { id: params.id },
         })
-        .valueChanges.pipe(map((result) => result.data.newsletter));
+        .valueChanges.pipe(map((result) => result.data?.newsletter));
     },
   });
 

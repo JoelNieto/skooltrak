@@ -164,7 +164,7 @@ export default class Contacts {
             queryText: params.queryText,
           },
         })
-        .valueChanges.pipe(map((result) => result.data.findContacts));
+        .valueChanges.pipe(map((result) => result.data?.findContacts ?? []));
     },
   });
   availableContacts = input<Contact[]>([]);
@@ -199,11 +199,12 @@ export default class Contacts {
     this.inputValue.set(value);
   }
 
-  selectContact(contact: Contact): void {
+  selectContact(contact: { id?: string; email?: string; [key: string]: unknown }): void {
+    if (!contact?.id || !contact?.email) return;
     const selectedContact: SelectedContact = {
       ...contact,
       isValid: this.validateEmail(contact.email),
-    };
+    } as SelectedContact;
 
     this.selectedContacts.update((prev) => [...prev, selectedContact]);
     this.inputValue.set('');

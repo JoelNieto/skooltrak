@@ -80,7 +80,7 @@ export default class ClassGroupsForm {
             organizationId: params.organizationId,
           },
         })
-        .valueChanges.pipe(map((result) => result.data.teachersByOrganizationId));
+        .valueChanges.pipe(map((result) => result.data?.teachersByOrganizationId ?? []));
     },
   });
 
@@ -110,7 +110,7 @@ export default class ClassGroupsForm {
             schoolId: params.schoolId,
           },
         })
-        .valueChanges.pipe(map((result) => result.data.studyPlansBySchoolId));
+        .valueChanges.pipe(map((result) => result.data?.studyPlansBySchoolId ?? []));
     },
   });
 

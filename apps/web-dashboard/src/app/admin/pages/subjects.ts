@@ -257,7 +257,7 @@ export default class Subjects {
           tap(({ data }) => {
             this.pagination.updateCount(data.count);
           }),
-          map((result) => result.data.subjects),
+          map((result) => result.data?.subjects ?? []),
         );
     },
   });

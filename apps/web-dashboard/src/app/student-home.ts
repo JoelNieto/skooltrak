@@ -60,7 +60,7 @@ import Store from './core/store';
                     {{ assignment.title }}
                   </p>
                   <div class="text-sm text-base-content/70">
-                    {{ assignment.course.name }} ·
+                    {{ assignment.course?.name }} ·
                     {{ assignment.date | date : 'mediumDate' }}
                   </div>
                 </div>
@@ -91,11 +91,11 @@ import Store from './core/store';
               @for (message of recentMessages.value() ?? []; track message.id) {
                 <div class="rounded-lg border border-base-200 p-3">
                   <p class="font-medium text-base-content">
-                    {{ message.message.subject }}
+                    {{ message.message?.subject }}
                   </p>
                   <div class="text-sm text-base-content/70">
-                    {{ message.message.sender.name }} ·
-                    {{ message.message.createdAt | date : 'short' }}
+                    {{ message.message?.sender?.name }} ·
+                    {{ message.message?.createdAt | date: 'short' }}
                   </div>
                 </div>
               }
@@ -122,11 +122,11 @@ import Store from './core/store';
                   <div class="rounded-lg border border-base-200 p-3">
                     <p class="font-medium text-base-content">{{ newsletter.title }}</p>
                     <p class="text-sm text-base-content/70 mt-1 line-clamp-2">
-                      {{ stripHtml(newsletter.content) }}
+                      {{ stripHtml(newsletter.content ?? '') }}
                     </p>
                     <div class="flex items-center justify-between mt-2">
                       <span class="text-sm text-base-content/70">
-                        {{ newsletter.author.name }} · {{ newsletter.publishedAt | date: 'mediumDate' }}
+                        {{ newsletter.author?.name }} · {{ newsletter.publishedAt | date: 'mediumDate' }}
                       </span>
                       <a [routerLink]="['/newsletters', newsletter.id]" class="link link-primary text-sm">
                         Ver más
@@ -179,7 +179,7 @@ export default class StudentHome {
             schoolId: params.schoolId,
           },
         })
-        .valueChanges.pipe(map((result) => result.data));
+        .valueChanges.pipe(map((result) => result.data ?? { coursesCount: 0, findManyMessagesCount: 0 }));
     },
   });
 
@@ -222,7 +222,7 @@ export default class StudentHome {
             endDate: params.endDate.toISOString(),
           },
         })
-        .valueChanges.pipe(map((result) => result.data.assignmentsBySchoolId));
+        .valueChanges.pipe(map((result) => result.data?.assignmentsBySchoolId ?? []));
     },
   });
 
@@ -250,7 +250,7 @@ export default class StudentHome {
           `,
           variables: params,
         })
-        .valueChanges.pipe(map((result) => result.data.findManyMessages));
+        .valueChanges.pipe(map((result) => result.data?.findManyMessages ?? []));
     },
   });
 
@@ -281,7 +281,7 @@ export default class StudentHome {
             take: 3,
           },
         })
-        .valueChanges.pipe(map((result) => result.data.publishedNewsletters));
+        .valueChanges.pipe(map((result) => result.data?.publishedNewsletters ?? []));
     },
   });
 
@@ -295,7 +295,7 @@ export default class StudentHome {
     const assignments = this.assignmentsResource.value() ?? [];
     return [...assignments]
       .sort(
-        (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+        (a, b) => new Date(a.date ?? 0).getTime() - new Date(b.date ?? 0).getTime()
       )
       .slice(0, 4);
   });

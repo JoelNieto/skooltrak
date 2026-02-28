@@ -84,7 +84,7 @@ export default class CourseGradeBuckets {
             courseId,
           },
         })
-        .pipe(map((result) => result.data.gradeBucketsByCourseId));
+        .pipe(map((result) => result.data?.gradeBucketsByCourseId ?? []));
     },
   });
 

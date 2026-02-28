@@ -358,7 +358,7 @@ export default class GradeReport {
           `,
           variables: { year: params.year },
         })
-        .valueChanges.pipe(map((r) => r.data.periodsByYear));
+        .valueChanges.pipe(map((r) => r.data?.periodsByYear ?? []));
     },
   });
 
@@ -430,7 +430,7 @@ export default class GradeReport {
           `,
           variables: { studentId, periodId },
         })
-        .pipe(map((r) => r.data.gradeReport));
+        .pipe(map((r) => r.data?.gradeReport));
     },
   });
 

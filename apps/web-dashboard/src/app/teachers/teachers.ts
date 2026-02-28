@@ -68,14 +68,14 @@ type Teacher = Prisma.TeacherGetPayload<{ include: { user: true } }> & {
               <td>
                 <div class="flex gap-2 items-center cursor-pointer" [routerLink]="['/teachers', teacher.id]">
                   <div class="avatar avatar-placeholder">
-                    <div class="text-white w-8 rounded-full" [style.background]="teacher.user.color">
+                    <div class="text-white w-8 rounded-full" [style.background]="teacher.user?.color">
                       <span class="text-sm">{{ teacher.initials }}</span>
                     </div>
                   </div>
                   <div class="flex flex-col">
                     <div class="flex items-center gap-2">
                       {{ teacher.name }}
-                      @if (teacher.user.emailVerified) {
+                      @if (teacher.user?.emailVerified) {
                         <span class="badge badge-success badge-sm gap-1">
                           <span class="material-symbols-outlined text-sm!">check_circle</span>
                           Verificado
@@ -87,7 +87,7 @@ type Teacher = Prisma.TeacherGetPayload<{ include: { user: true } }> & {
                         </span>
                       }
                     </div>
-                    <span class="text-sm text-base-content/50">{{ teacher.user.email }}</span>
+                    <span class="text-sm text-base-content/50">{{ teacher.user?.email }}</span>
                   </div>
                 </div>
               </td>
@@ -138,12 +138,12 @@ type Teacher = Prisma.TeacherGetPayload<{ include: { user: true } }> & {
                           <span class="material-symbols-outlined text-lg">edit</span>
                           <span>Editar</span>
                         </a>
-                        @if (!teacher.user.emailVerified) {
+                        @if (teacher.user && !teacher.user.emailVerified) {
                           <button
                             ngMenuItem
                             value="resend"
                             class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-base-200 w-full"
-                            (click)="resendInvitation(teacher.user.email)"
+                            (click)="resendInvitationForTeacher(teacher)"
                           >
                             <span class="material-symbols-outlined text-lg">mail</span>
                             <span>Reenviar invitación</span>
@@ -238,9 +238,9 @@ export default class Teachers {
         })
         .valueChanges.pipe(
           tap(({ data }) => {
-            this.pagination.updateCount(data.count);
+            this.pagination.updateCount(data?.count ?? 0);
           }),
-          map((result) => result.data.teachers),
+          map((result) => result.data?.teachers),
           takeUntilDestroyed(this.#destroyRef),
         );
     },
@@ -250,6 +250,12 @@ export default class Teachers {
     afterRenderEffect(() => {
       this.pagination.updateSearch(this.searchText());
     });
+  }
+
+  public resendInvitationForTeacher(teacher: { user?: { email?: string } | null }) {
+    if (teacher.user?.email) {
+      this.resendInvitation(teacher.user.email);
+    }
   }
 
   public resendInvitation(email: string) {
@@ -273,7 +279,7 @@ export default class Teachers {
       });
   }
 
-  public deleteTeacher(teacher: Teacher) {
+  public deleteTeacher(teacher: { id?: string }) {
     this.#confirmation
       .confirm({
         title: 'Eliminar Profesor',
@@ -282,6 +288,7 @@ export default class Teachers {
       .pipe(
         filter((result) => result),
         switchMap(() => {
+          if (!teacher.id) return of(null);
           return this.apollo.mutate({
             mutation: gql`
               mutation removeTeacher($id: String!) {

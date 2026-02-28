@@ -43,7 +43,7 @@ type GroupType = Prisma.ClassGroupGetPayload<{
                 <a class="link link-primary" [routerLink]="[group.id]">{{ group.name }}</a>
               </td>
               <td>{{ group.teacher?.name }}</td>
-              <td>{{ group.studyPlan.name }}</td>
+              <td>{{ group.studyPlan?.name }}</td>
               <td>{{ group.createdAt | date: 'short' }}</td>
               <td>{{ group.updatedAt | date: 'short' }}</td>
             </tr>
@@ -120,8 +120,8 @@ export default class Groups {
           },
         })
         .valueChanges.pipe(
-          tap((result) => this.pagination.updateCount(result.data.count)),
-          map((result) => result.data.classGroups),
+          tap((result) => this.pagination.updateCount(result.data?.count ?? 0)),
+          map((result) => result.data?.classGroups ?? []),
         );
     },
   });

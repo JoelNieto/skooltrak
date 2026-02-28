@@ -98,7 +98,7 @@ export default class SchoolBasicsStep {
           `,
           fetchPolicy: 'network-only',
         })
-        .valueChanges.pipe(map((result) => result.data.schools)),
+        .valueChanges.pipe(map((result) => result.data?.schools ?? [])),
   });
 
   // Get the school ID from store or first school from API

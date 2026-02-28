@@ -154,7 +154,7 @@ export default class DegreesStep {
           `,
           fetchPolicy: 'cache-first',
         })
-        .valueChanges.pipe(map((result) => result.data.schools)),
+        .valueChanges.pipe(map((result) => result.data?.schools ?? [])),
   });
 
   // Get the school ID from store or first school from API

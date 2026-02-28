@@ -167,7 +167,7 @@ export default class StudyPlanForm implements OnInit {
           `,
           fetchPolicy: 'cache-first',
         })
-        .valueChanges.pipe(map((result) => result.data.gradeMetrics)),
+        .valueChanges.pipe(map((result) => result.data?.gradeMetrics ?? [])),
   });
   public degrees = rxResource({
     params: () => ({
@@ -195,7 +195,7 @@ export default class StudyPlanForm implements OnInit {
             schoolId: params.schoolId,
           },
         })
-        .valueChanges.pipe(map((result) => result.data.degreesBySchoolId));
+        .valueChanges.pipe(map((result) => result.data?.degreesBySchoolId ?? []));
     },
   });
 

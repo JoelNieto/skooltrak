@@ -157,7 +157,7 @@ export default class CourseFiles {
             search: params.search,
           },
         })
-        .valueChanges.pipe(map((result) => result.data.filesForCourse));
+        .valueChanges.pipe(map((result) => result.data?.filesForCourse ?? []));
     },
   });
 

@@ -203,7 +203,7 @@ export default class StudyPlansStep {
           `,
           fetchPolicy: 'cache-first',
         })
-        .valueChanges.pipe(map((result) => result.data.schools)),
+        .valueChanges.pipe(map((result) => result.data?.schools ?? [])),
   });
 
   // Get the school ID from store or first school from API
@@ -232,7 +232,7 @@ export default class StudyPlansStep {
           variables: { schoolId: params.schoolId },
           fetchPolicy: 'cache-and-network',
         })
-        .valueChanges.pipe(map((result) => result.data.degreesBySchoolId));
+        .valueChanges.pipe(map((result) => result.data?.degreesBySchoolId ?? []));
     },
   });
 
@@ -250,7 +250,7 @@ export default class StudyPlansStep {
           `,
           fetchPolicy: 'cache-first',
         })
-        .valueChanges.pipe(map((result) => result.data.gradeMetrics)),
+        .valueChanges.pipe(map((result) => result.data?.gradeMetrics ?? [])),
   });
 
   // Combine API degrees with newly created ones

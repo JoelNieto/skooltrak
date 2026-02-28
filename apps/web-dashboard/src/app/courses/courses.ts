@@ -159,9 +159,9 @@ export default class Courses {
         })
         .valueChanges.pipe(
           tap((result) => {
-            this.pagination.updateCount(result.data.count);
+            this.pagination.updateCount(result.data?.count ?? 0);
           }),
-          map((result) => result.data.courses),
+          map((result) => result.data?.courses ?? []),
         );
     },
   });

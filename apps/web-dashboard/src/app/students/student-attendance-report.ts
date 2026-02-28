@@ -164,7 +164,7 @@ export default class StudentAttendanceReport {
           `,
           variables: { studentId: params.studentId },
         })
-        .pipe(map((r) => r.data.studentAttendanceStats));
+        .pipe(map((r) => r.data?.studentAttendanceStats));
     },
   });
 
@@ -202,7 +202,7 @@ export default class StudentAttendanceReport {
           `,
           variables: { studentId: params.studentId },
         })
-        .pipe(map((r) => r.data.attendanceRecordsByStudentId));
+        .pipe(map((r) => r.data?.attendanceRecordsByStudentId ?? []));
     },
   });
 

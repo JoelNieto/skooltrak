@@ -122,10 +122,10 @@ const ENROLLMENT_STATUS_COLORS: Record<$Enums.EnrollmentStatus, string> = {
                 <div class="flex flex-col">
                   <div class="flex items-center gap-2">
                     <span class="font-semibold">{{ student.name }}</span>
-                    <span class="badge badge-sm" [ngClass]="getStatusColor(student.enrollmentStatus)">
-                      {{ getStatusLabel(student.enrollmentStatus) }}
+                    <span class="badge badge-sm" [ngClass]="getStatusColor(student.enrollmentStatus ?? 'ACTIVE')">
+                      {{ getStatusLabel(student.enrollmentStatus ?? 'ACTIVE') }}
                     </span>
-                    @if (student.user.emailVerified) {
+                    @if (student.user?.emailVerified) {
                       <span class="badge badge-success badge-soft badge-sm gap-1">
                         <span class="material-symbols-outlined text-sm!">check_circle</span>
                         Verificado
@@ -328,7 +328,7 @@ const ENROLLMENT_STATUS_COLORS: Record<$Enums.EnrollmentStatus, string> = {
                   @for (course of student.courses; track course.id) {
                     <div class="card bg-base-100 card-border border-base-300">
                       <div class="flex flex-col p-4 border-b border-base-300">
-                        <h2 class="font-semibold">{{ course.subject.name }}</h2>
+                        <h2 class="font-semibold">{{ course.subject?.name }}</h2>
                         <p class="text-sm text-base-content/60">{{ course.teacher?.name ?? 'Sin profesor' }}</p>
                       </div>
                       <div class="overflow-x-auto">
@@ -344,25 +344,16 @@ const ENROLLMENT_STATUS_COLORS: Record<$Enums.EnrollmentStatus, string> = {
                           </thead>
                           <tbody>
                             @for (grade of student.studentGrades; track grade.id) {
-                              @if (grade.grade.course.id === course.id) {
+                              @if (grade.grade?.course?.id === course.id) {
                                 <tr>
-                                  <td>{{ grade.grade.title }}</td>
-                                  <td>{{ grade.grade.bucket.name }}</td>
-                                  <td>{{ grade.grade.date | date: 'dd/MM/yyyy' }}</td>
+                                  <td>{{ grade.grade?.title }}</td>
+                                  <td>{{ grade.grade?.bucket?.name }}</td>
+                                  <td>{{ grade.grade?.date | date: 'dd/MM/yyyy' }}</td>
                                   <td>{{ grade.comments }}</td>
                                   <td>
                                     <span
                                       class="badge badge-sm"
-                                      [ngClass]="{
-                                        'badge-success':
-                                          metric && grade.score && grade.score! >= metric.minimumExcellence,
-                                        'badge-warning':
-                                          metric &&
-                                          grade.score &&
-                                          grade.score! >= metric.minimumApproval &&
-                                          grade.score! < metric.minimumExcellence,
-                                        'badge-error': metric && grade.score && grade.score! < metric.minimumApproval,
-                                      }"
+                                      [ngClass]="getGradeBadgeClass(grade, metric)"
                                     >
                                       {{ grade.score | number: '1.1-1' }}
                                     </span>
@@ -399,6 +390,17 @@ export default class Student {
     return ENROLLMENT_STATUS_COLORS[status] || 'badge-ghost';
   }
 
+  getGradeBadgeClass(
+    grade: { score?: number | null },
+    metric: { minimumExcellence?: number; minimumApproval?: number } | null | undefined
+  ): string {
+    if (!metric || grade.score == null || metric.minimumExcellence == null || metric.minimumApproval == null)
+      return 'badge-ghost';
+    if (grade.score >= metric.minimumExcellence) return 'badge-success';
+    if (grade.score >= metric.minimumApproval) return 'badge-warning';
+    return 'badge-error';
+  }
+
   public periodsResource = rxResource({
     params: () => ({
       year: this.store.currentSchool()?.currentYear,
@@ -426,7 +428,7 @@ export default class Student {
             year,
           },
         })
-        .valueChanges.pipe(map((result) => result.data.periodsByYear));
+        .valueChanges.pipe(map((result) => result.data?.periodsByYear ?? []));
     },
   });
 
@@ -435,7 +437,7 @@ export default class Student {
     if (!periods?.length) return '';
     const today = new Date();
     const current = periods.find(
-      (p) => new Date(p.startDate) <= today && today <= new Date(p.endDate),
+      (p) => new Date(p.startDate ?? 0) <= today && today <= new Date(p.endDate ?? 0),
     );
     return current?.id ?? '';
   });
@@ -555,6 +557,6 @@ export default class Student {
             id: params.id,
           },
         })
-        .valueChanges.pipe(map((result) => result.data.student)),
+        .valueChanges.pipe(map((result) => result.data?.student)),
   });
 }

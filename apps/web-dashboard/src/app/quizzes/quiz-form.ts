@@ -200,7 +200,7 @@ export default class QuizForm {
             schoolId: params.schoolId,
           },
         })
-        .valueChanges.pipe(map((result) => result.data.coursesBySchoolId));
+        .valueChanges.pipe(map((result) => result.data?.coursesBySchoolId ?? []));
     },
   });
 

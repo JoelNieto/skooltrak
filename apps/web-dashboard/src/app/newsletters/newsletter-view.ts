@@ -42,13 +42,13 @@ type NewsletterDetail = {
           <h1 class="text-3xl font-bold text-base-content">{{ item.title }}</h1>
           <div class="mt-3 flex items-center gap-2 text-sm text-base-content/60">
             <span class="material-symbols-outlined text-base">person</span>
-            <span>{{ item.author.name }}</span>
+            <span>{{ item.author?.name }}</span>
             <span class="mx-1">·</span>
             <span class="material-symbols-outlined text-base">calendar_today</span>
             <span>{{ item.publishedAt | date: 'longDate' }}</span>
             <span class="mx-1">·</span>
             <span class="material-symbols-outlined text-base">apartment</span>
-            <span>{{ item.school.name }}</span>
+            <span>{{ item.school?.name }}</span>
           </div>
         </header>
 
@@ -163,7 +163,7 @@ export default class NewsletterView {
           `,
           variables: { id: params.id },
         })
-        .valueChanges.pipe(map((result) => result.data.newsletter));
+        .valueChanges.pipe(map((result) => result.data?.newsletter));
     },
   });
 }

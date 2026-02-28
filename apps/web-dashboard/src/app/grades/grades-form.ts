@@ -95,7 +95,7 @@ export default class GradesForm {
             courseId,
           },
         })
-        .pipe(map((result) => result.data.gradeBucketsByCourseId));
+        .pipe(map((result) => result.data?.gradeBucketsByCourseId ?? []));
     },
   });
 

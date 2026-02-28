@@ -492,7 +492,7 @@ export default class StudentForm {
           `,
           variables: { schoolId },
         })
-        .valueChanges.pipe(map((result) => result.data.classGroupsBySchoolId));
+        .valueChanges.pipe(map((result) => result.data?.classGroupsBySchoolId ?? []));
     },
   });
 
@@ -532,7 +532,7 @@ export default class StudentForm {
           `,
           variables: { id: params.id },
         })
-        .valueChanges.pipe(map((result) => result.data.student));
+        .valueChanges.pipe(map((result) => result.data?.student));
     },
   });
 

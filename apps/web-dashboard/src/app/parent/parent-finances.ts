@@ -97,7 +97,7 @@ export default class ParentFinances {
             }
           `,
         })
-        .pipe(map((r) => r.data.linkedStudentsFinancialSummary ?? [])),
+        .pipe(map((r) => r.data?.linkedStudentsFinancialSummary ?? [])),
   });
 
   formatCurrency(value: number): string {

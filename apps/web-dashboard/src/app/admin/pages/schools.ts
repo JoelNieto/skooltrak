@@ -207,7 +207,7 @@ export default class Schools {
             }
           `,
         })
-        .valueChanges.pipe(map((result) => result.data.schools));
+        .valueChanges.pipe(map((result) => result.data?.schools ?? []));
     },
   });
 

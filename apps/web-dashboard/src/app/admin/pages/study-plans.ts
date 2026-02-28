@@ -152,7 +152,7 @@ export default class StudyPlans {
             schoolId: params.schoolId,
           },
         })
-        .valueChanges.pipe(map((result) => result.data.studyPlansBySchoolId));
+        .valueChanges.pipe(map((result) => result.data?.studyPlansBySchoolId ?? []));
     },
   });
 

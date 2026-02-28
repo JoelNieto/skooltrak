@@ -178,7 +178,7 @@ export default class StudentFinances {
           `,
           variables: { studentId: params.studentId },
         })
-        .pipe(map((r) => r.data.studentBalance));
+        .pipe(map((r) => r.data?.studentBalance));
     },
   });
 
@@ -204,7 +204,7 @@ export default class StudentFinances {
           `,
           variables: { studentId: params.studentId },
         })
-        .pipe(map((r) => r.data.chargesByStudent));
+        .pipe(map((r) => r.data?.chargesByStudent ?? []));
     },
   });
 
@@ -228,7 +228,7 @@ export default class StudentFinances {
           `,
           variables: { studentId: params.studentId },
         })
-        .pipe(map((r) => r.data.paymentsByStudent));
+        .pipe(map((r) => r.data?.paymentsByStudent ?? []));
     },
   });
 

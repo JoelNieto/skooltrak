@@ -31,14 +31,14 @@ type TeacherType = Prisma.TeacherGetPayload<{
           <div class="card-body flex flex-row justify-between items-center">
             <div class="flex gap-2 items-center ">
               <div class="avatar avatar-placeholder">
-                <div class="text-white w-12 rounded-full" [style.background]="teacher.user.color">
+                <div class="text-white w-12 rounded-full" [style.background]="teacher.user?.color">
                   <span class="text-lg">{{ teacher.initials }}</span>
                 </div>
               </div>
               <div class="flex flex-col">
                 <div class="flex items-center gap-2">
                   {{ teacher.name }}
-                  @if (teacher.user.emailVerified) {
+                  @if (teacher.user?.emailVerified) {
                     <span class="badge badge-success badge-sm gap-1">
                       <span class="material-symbols-outlined text-sm!">check_circle</span>
                       Verificado
@@ -50,7 +50,7 @@ type TeacherType = Prisma.TeacherGetPayload<{
                     </span>
                   }
                 </div>
-                <span class="text-sm text-base-content/50">{{ teacher.user.email }}</span>
+                <span class="text-sm text-base-content/50">{{ teacher.user?.email }}</span>
               </div>
             </div>
             <div class="flex gap-2 items-center">
@@ -259,7 +259,7 @@ export default class Teacher {
             teacherId: id,
           },
         })
-        .valueChanges.pipe(map((result) => result.data.teacher));
+        .valueChanges.pipe(map((result) => result.data?.teacher));
     },
   });
 }

@@ -143,7 +143,7 @@ export default class CourseStudentGrades {
           },
           fetchPolicy: 'cache-first',
         })
-        .pipe(map((result) => result.data.periodsByYear));
+        .pipe(map((result) => result.data?.periodsByYear ?? []));
     },
   });
 
@@ -208,8 +208,8 @@ export default class CourseStudentGrades {
         })
         .valueChanges.pipe(
           map((result) => ({
-            average: result.data.average,
-            studentGradesByCourseId: result.data.studentGradesByCourseId,
+            average: result.data?.average,
+            studentGradesByCourseId: result.data?.studentGradesByCourseId ?? [],
           })),
         );
     },

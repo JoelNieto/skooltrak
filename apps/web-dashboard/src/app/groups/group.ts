@@ -76,7 +76,7 @@ type GroupType = Prisma.ClassGroupGetPayload<{
       </label>
 
       <div class="tab-content bg-base-100 border-base-300 p-6">
-        <app-group-students [students]="group.students" />
+        <app-group-students [students]="$any(group.students ?? [])" />
       </div>
       <label class="tab">
         <input type="radio" name="my_tabs_1" class="tab" />
@@ -108,7 +108,7 @@ type GroupType = Prisma.ClassGroupGetPayload<{
         </span>
       </label>
       <div class="tab-content bg-base-100 border-base-300 p-6">
-        <app-group-habits [groupId]="id()" [students]="group.students" />
+        <app-group-habits [groupId]="id()" [students]="$any(group.students ?? [])" />
       </div>
       }
     </div>
@@ -207,7 +207,7 @@ export default class Group {
           },
         })
         .valueChanges.pipe(
-          map((result) => result.data.classGroup),
+          map((result) => result.data?.classGroup),
           catchError((err) => {
             console.log(err);
             return throwError(() => err);

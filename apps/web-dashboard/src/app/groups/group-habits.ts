@@ -233,7 +233,7 @@ export default class GroupHabits {
             }
           `,
         })
-        .valueChanges.pipe(map((result) => result.data.periods)),
+        .valueChanges.pipe(map((result) => result.data?.periods ?? [])),
   });
 
   // Load habit metrics
@@ -253,7 +253,7 @@ export default class GroupHabits {
             }
           `,
         })
-        .valueChanges.pipe(map((result) => result.data.habitMetrics)),
+        .valueChanges.pipe(map((result) => result.data?.habitMetrics ?? [])),
   });
 
   // Filter active metrics only
@@ -315,7 +315,7 @@ export default class GroupHabits {
           this.evaluationsLoading.set(false);
 
           // Find the evaluation for the selected metric
-          const evaluation = result.data.habitEvaluationsByGroup.find(
+          const evaluation = result.data?.habitEvaluationsByGroup?.find(
             (e) => e.habitMetricId === metricId
           );
 

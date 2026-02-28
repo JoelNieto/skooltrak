@@ -110,7 +110,7 @@ export default class GroupScheduleForm {
           },
           fetchPolicy: 'cache-first',
         })
-        .valueChanges.pipe(map((result) => result.data.coursesByGroupId));
+        .valueChanges.pipe(map((result) => result.data?.coursesByGroupId ?? []));
     },
   });
 

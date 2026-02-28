@@ -139,7 +139,7 @@ export default class AssignmentForm implements OnInit {
             schoolId: params.schoolId,
           },
         })
-        .valueChanges.pipe(map((result) => result.data.coursesBySchoolId));
+        .valueChanges.pipe(map((result) => result.data?.coursesBySchoolId ?? []));
     },
   });
 
@@ -166,7 +166,7 @@ export default class AssignmentForm implements OnInit {
           `,
           variables: { courseId },
         })
-        .valueChanges.pipe(map((result) => result.data.classGroupsByCourseId));
+        .valueChanges.pipe(map((result) => result.data?.classGroupsByCourseId ?? []));
     },
   });
 
@@ -195,7 +195,7 @@ export default class AssignmentForm implements OnInit {
             organizationId: params.organizationId,
           },
         })
-        .valueChanges.pipe(map((result) => result.data.teachersByOrganizationId));
+        .valueChanges.pipe(map((result) => result.data?.teachersByOrganizationId ?? []));
     },
   });
 

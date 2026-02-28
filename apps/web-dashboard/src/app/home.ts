@@ -120,11 +120,11 @@ type OnboardingStatus = {
                   class="rounded-lg border border-base-200 p-3 transition-colors duration-150 hover:bg-base-200 cursor-pointer"
                 >
                   <p class="font-medium text-base-content text-sm">
-                    {{ message.message.subject }}
+                    {{ message.message?.subject }}
                   </p>
                   <div class="text-xs text-base-content/60 mt-1">
-                    {{ message.message.sender.name }} ·
-                    {{ message.message.createdAt | date: 'short' }}
+                    {{ message.message?.sender?.name }} ·
+                    {{ message.message?.createdAt | date: 'short' }}
                   </div>
                 </div>
               }
@@ -203,11 +203,11 @@ type OnboardingStatus = {
                   <div class="rounded-lg border border-base-200 p-4 transition-colors duration-150 hover:bg-base-200">
                     <p class="font-medium text-base-content text-sm">{{ newsletter.title }}</p>
                     <p class="text-xs text-base-content/60 mt-1 line-clamp-2">
-                      {{ stripHtml(newsletter.content) }}
+                      {{ stripHtml(newsletter.content ?? '') }}
                     </p>
                     <div class="flex items-center justify-between mt-2">
                       <span class="text-xs text-base-content/60">
-                        {{ newsletter.author.name }} · {{ newsletter.publishedAt | date: 'mediumDate' }}
+                        {{ newsletter.author?.name }} · {{ newsletter.publishedAt | date: 'mediumDate' }}
                       </span>
                       <a [routerLink]="['/newsletters', newsletter.id]" class="link link-primary text-xs">
                         Ver más
@@ -269,7 +269,7 @@ type OnboardingStatus = {
                     {{ teacher.fullName }}
                   </p>
                   <div class="text-xs text-base-content/60 mt-1">
-                    {{ teacher.user.email }} ·
+                    {{ teacher.user?.email }} ·
                     {{ teacher.createdAt | date: 'short' }}
                   </div>
                 </div>
@@ -307,7 +307,7 @@ export default class Home {
           `,
           fetchPolicy: 'cache-first',
         })
-        .valueChanges.pipe(map((result) => result.data.onboardingStatus)),
+        .valueChanges.pipe(map((result) => result.data?.onboardingStatus)),
   });
 
   // Check if we should show the welcome banner
@@ -365,7 +365,7 @@ export default class Home {
             schoolId: params.schoolId,
           },
         })
-        .valueChanges.pipe(map((result) => result.data));
+        .valueChanges.pipe(map((result) => result.data ?? { coursesCount: 0, findManyStudentsCount: 0, findManyTeachersCount: 0, findManySubjectsCount: 0 }));
     },
   });
 
@@ -393,7 +393,7 @@ export default class Home {
           `,
           variables: params,
         })
-        .valueChanges.pipe(map((result) => result.data.findManyMessages));
+        .valueChanges.pipe(map((result) => result.data?.findManyMessages ?? []));
     },
   });
 
@@ -424,7 +424,7 @@ export default class Home {
             schoolId: params.schoolId,
           },
         })
-        .valueChanges.pipe(map((result) => result.data.students));
+        .valueChanges.pipe(map((result) => result.data?.students ?? []));
     },
   });
 
@@ -455,7 +455,7 @@ export default class Home {
             take: 3,
           },
         })
-        .valueChanges.pipe(map((result) => result.data.publishedNewsletters));
+        .valueChanges.pipe(map((result) => result.data?.publishedNewsletters ?? []));
     },
   });
 
@@ -492,7 +492,7 @@ export default class Home {
             schoolId: params.schoolId,
           },
         })
-        .valueChanges.pipe(map((result) => result.data.teachers));
+        .valueChanges.pipe(map((result) => result.data?.teachers ?? []));
     },
   });
 }

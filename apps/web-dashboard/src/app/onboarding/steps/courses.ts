@@ -179,7 +179,7 @@ export default class CoursesStep {
           `,
           fetchPolicy: 'cache-first',
         })
-        .valueChanges.pipe(map((result) => result.data.schools)),
+        .valueChanges.pipe(map((result) => result.data?.schools ?? [])),
   });
 
   // Get the school ID from store or first school from API
@@ -208,7 +208,7 @@ export default class CoursesStep {
           variables: { schoolId: params.schoolId },
           fetchPolicy: 'cache-and-network',
         })
-        .valueChanges.pipe(map((result) => result.data.studyPlansBySchoolId));
+        .valueChanges.pipe(map((result) => result.data?.studyPlansBySchoolId ?? []));
     },
   });
 
@@ -227,7 +227,7 @@ export default class CoursesStep {
           variables: { take: 100, orderBy: 'name' },
           fetchPolicy: 'cache-first',
         })
-        .valueChanges.pipe(map((result) => result.data.subjects)),
+        .valueChanges.pipe(map((result) => result.data?.subjects ?? [])),
   });
 
   // Combine API study plans with newly created ones

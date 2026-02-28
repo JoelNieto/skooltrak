@@ -182,8 +182,8 @@ export default class ClassGroups {
           },
         })
         .valueChanges.pipe(
-          tap((result) => this.pagination.updateCount(result.data.count)),
-          map((result) => result.data.classGroups),
+          tap((result) => this.pagination.updateCount(result.data?.count ?? 0)),
+          map((result) => result.data?.classGroups ?? []),
         );
     },
   });

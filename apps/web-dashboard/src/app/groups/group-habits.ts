@@ -322,14 +322,16 @@ export default class GroupHabits {
           // Initialize evaluations map
           const evalMap = new Map<string, StudentEvaluation>();
 
-          if (evaluation) {
+          if (evaluation?.studentEvaluations) {
             // Load existing evaluations
             evaluation.studentEvaluations.forEach((se) => {
-              evalMap.set(se.studentId, {
-                studentId: se.studentId,
-                value: se.value,
-                comments: se.comments || '',
-              });
+              if (se.studentId) {
+                evalMap.set(se.studentId, {
+                  studentId: se.studentId,
+                  value: se.value ?? null,
+                  comments: se.comments || '',
+                });
+              }
             });
           } else {
             // Initialize empty evaluations for all students

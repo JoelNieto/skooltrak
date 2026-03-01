@@ -6,6 +6,7 @@ import { Prisma } from '@generated/prisma';
 
 import { Apollo, gql } from 'apollo-angular';
 import { catchError, map, of, throwError } from 'rxjs';
+import { isValidId } from '../core/validators';
 import Auth from '../auth/auth';
 import GroupCourses from './group-courses';
 import GroupHabits from './group-habits';
@@ -35,7 +36,7 @@ type GroupType = Prisma.ClassGroupGetPayload<{
   template: `
     @let group = groupResource.value(); @if(groupResource.isLoading()) {
     <lib-loader />
-    } @else { @if(group) {
+    } @else { @if(group && group.id) {
     <div class="breadcrumbs text-sm">
       <ul>
         <li><a routerLink="/">Inicio</a></li>
@@ -48,7 +49,7 @@ type GroupType = Prisma.ClassGroupGetPayload<{
         <div>
           <h1 class="text-xl  font-semibold">{{ group.name }}</h1>
           <h3 class="text-base-200">
-            {{ group.studyPlan.name }} / {{ group.studyPlan.degree.name }}
+            {{ group.studyPlan?.name }} / {{ group.studyPlan?.degree?.name }}
           </h3>
           <div class="flex items-center gap-2">
             <div class="avatar avatar-placeholder">
@@ -87,7 +88,7 @@ type GroupType = Prisma.ClassGroupGetPayload<{
       </label>
 
       <div class="tab-content bg-base-100 border-base-300 p-6">
-        <app-group-courses [courses]="group.courses" />
+        <app-group-courses [courses]="$any(group.courses ?? [])" />
       </div>
       <label class="tab">
         <input type="radio" name="my_tabs_1" class="tab" />
@@ -142,7 +143,7 @@ export default class Group {
     }),
     stream: ({ params }) => {
       const { id } = params;
-      if (!id) {
+      if (!isValidId(id)) {
         return of(null);
       }
 

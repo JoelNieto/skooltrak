@@ -2,6 +2,7 @@ import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject, input, ViewEncapsulation } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
+import { isValidId } from '../core/validators';
 import { Apollo, gql } from 'apollo-angular';
 import { map, of } from 'rxjs';
 
@@ -37,6 +38,7 @@ type NewsletterDetail = {
         <a routerLink="/home" class="btn btn-sm btn-ghost">Volver al inicio</a>
       </div>
     } @else if (newsletter.value(); as item) {
+      @if (item?.id) {
       <article class="mx-auto max-w-3xl">
         <header class="mb-8">
           <h1 class="text-3xl font-bold text-base-content">{{ item.title }}</h1>
@@ -61,6 +63,9 @@ type NewsletterDetail = {
           </a>
         </div>
       </article>
+    } @else {
+      <div>No se encontró el boletín</div>
+    }
     }
   `,
   styles: `
@@ -139,7 +144,7 @@ export default class NewsletterView {
   public newsletter = rxResource({
     params: () => ({ id: this.id() }),
     stream: ({ params }) => {
-      if (!params.id) return of(null);
+      if (!isValidId(params.id)) return of(null);
       return this.apollo
         .watchQuery<{ newsletter: NewsletterDetail }>({
           query: gql`

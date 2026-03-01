@@ -144,7 +144,7 @@ export class Roles {
             }
           `,
         })
-        .valueChanges.pipe(map((result) => result.data.roles)),
+        .valueChanges.pipe(map((result) => result.data?.roles ?? [])),
   });
 
   public editRole(role?: Prisma.RoleGetPayload<false>) {

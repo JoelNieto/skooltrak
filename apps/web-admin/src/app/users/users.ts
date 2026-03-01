@@ -172,9 +172,9 @@ export class Users {
         })
         .valueChanges.pipe(
           tap((res) => {
-            this.pagination.updateCount(res.data.count);
+            this.pagination.updateCount(res.data?.count ?? 0);
           }),
-          map((res) => res.data.users),
+          map((res) => res.data?.users ?? []),
         ),
   });
 

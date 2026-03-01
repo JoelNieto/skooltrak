@@ -146,7 +146,7 @@ export default class HabitMetrics {
             }
           `,
         })
-        .valueChanges.pipe(map((result) => result.data.habitMetrics)),
+        .valueChanges.pipe(map((result) => result.data?.habitMetrics ?? [])),
   });
 
   editHabitMetric(metric?: Prisma.HabitMetricGetPayload<{ include: undefined }>) {

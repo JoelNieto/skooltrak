@@ -5,7 +5,8 @@
   "scripts": {
     "serve:dev": "nx run-many --parallel --target=serve --projects=web-dashboard,dashboard-backend",
     "serve:dev:admin": "nx run-many --parallel --target=serve --projects=admin-backend,web-admin",
-    "db:add-financial-permissions": "bun run prisma/scripts/add-financial-permissions-to-admins.ts"
+    "db:add-financial-permissions": "bun run prisma/scripts/add-financial-permissions-to-admins.ts",
+    "graphql:generate": "graphql-codegen"
   },
   "private": true,
   "dependencies": {
@@ -82,6 +83,11 @@
     "@angular/language-service": "21.1.1",
     "@eslint/js": "^9.8.0",
     "@faker-js/faker": "^10.3.0",
+    "@graphql-codegen/cli": "^6.1.2",
+    "@graphql-codegen/client-preset": "^5.2.3",
+    "@graphql-codegen/typed-document-node": "^6.1.6",
+    "@graphql-codegen/typescript": "^5.0.8",
+    "@graphql-codegen/typescript-operations": "^5.0.8",
     "@nestjs/schematics": "^11.0.0",
     "@nestjs/testing": "^11.0.0",
     "@nx/angular": "22.5.2",

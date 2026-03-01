@@ -2,6 +2,7 @@ import { Loader, PageHeader, StatCard } from '@/ui';
 import { DatePipe, NgClass } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
+import { isValidId } from '../core/validators';
 import { Apollo, gql } from 'apollo-angular';
 import { map, of } from 'rxjs';
 import Store from '../core/store';
@@ -135,7 +136,7 @@ export default class StudentAttendance {
       studentId: this.#store.currentStudentId(),
     }),
     stream: ({ params }) => {
-      if (!params.studentId) return of(null);
+      if (!isValidId(params.studentId)) return of(null);
       return this.#apollo
         .query<{ studentAttendanceStats: AttendanceStatsType }>({
           query: gql`
@@ -163,7 +164,7 @@ export default class StudentAttendance {
       studentId: this.#store.currentStudentId(),
     }),
     stream: ({ params }) => {
-      if (!params.studentId) return of([]);
+      if (!isValidId(params.studentId)) return of([]);
       return this.#apollo
         .query<{ attendanceRecordsByStudentId: AttendanceRecordType[] }>({
           query: gql`

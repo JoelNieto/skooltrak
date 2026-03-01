@@ -12,6 +12,7 @@ import { rxResource } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { form, FormField, required, submit } from '@angular/forms/signals';
 import { Router, RouterLink } from '@angular/router';
+import { isValidId } from '../../core/validators';
 import { Apollo, gql } from 'apollo-angular';
 import { firstValueFrom, map, of } from 'rxjs';
 import Store from '../../core/store';
@@ -148,7 +149,7 @@ export default class NewsletterForm {
   public newsletterResource = rxResource({
     params: () => ({ id: this.id() }),
     stream: ({ params }) => {
-      if (!params.id) {
+      if (!isValidId(params.id)) {
         return of(null);
       }
       return this.apollo

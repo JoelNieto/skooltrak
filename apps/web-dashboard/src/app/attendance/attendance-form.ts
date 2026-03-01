@@ -250,7 +250,7 @@ export default class AttendanceForm {
         })
         .pipe(
           map((r) => {
-            const students = r.data.studentsForAttendance;
+            const students = r.data?.studentsForAttendance ?? [];
             this.initializeRecords(students);
             return students;
           }),

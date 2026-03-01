@@ -301,7 +301,7 @@ export default class CourseAttendance {
           variables: { courseId: params.courseId },
           fetchPolicy: 'cache-first',
         })
-        .valueChanges.pipe(map((r) => r.data.classGroupsByCourseId));
+        .valueChanges.pipe(map((r) => r.data?.classGroupsByCourseId ?? []));
     },
   });
 
@@ -358,8 +358,8 @@ export default class CourseAttendance {
           fetchPolicy: 'cache-and-network',
         })
         .valueChanges.pipe(
-          tap((r) => this.pagination.updateCount(r.data.attendanceSessionsCount)),
-          map((r) => r.data.attendanceSessions),
+          tap((r) => this.pagination.updateCount(r.data?.attendanceSessionsCount ?? 0)),
+          map((r) => r.data?.attendanceSessions ?? []),
         );
     },
   });

@@ -109,7 +109,7 @@ export default class Auth {
           fetchPolicy: 'network-only',
         })
         .valueChanges.pipe(
-          map((res) => res.data.me),
+          map((res) => res.data?.me),
           tap(() => {
             if (this.isSigning()) {
               this.#router.navigate(['/home']);

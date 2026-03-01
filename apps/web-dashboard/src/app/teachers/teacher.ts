@@ -4,8 +4,9 @@ import { ChangeDetectionStrategy, Component, inject, input } from '@angular/core
 import { rxResource } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import { Prisma } from '@generated/prisma';
+import { isValidId } from '../core/validators';
 import { Apollo, gql } from 'apollo-angular';
-import { map } from 'rxjs';
+import { map, of } from 'rxjs';
 type TeacherType = Prisma.TeacherGetPayload<{
   include: { user: true; courses: true; classGroups: true; subjects: true };
 }> & {
@@ -18,8 +19,8 @@ type TeacherType = Prisma.TeacherGetPayload<{
 @Component({
   imports: [Loader, RouterLink, DatePipe],
   template: `@defer {
-      @if (teacherResource.hasValue()) {
-        @let teacher = teacherResource.value();
+      @if (teacherResource.hasValue() && teacherResource.value()?.id) {
+        @let teacher = teacherResource.value()!;
         <div class="breadcrumbs text-sm">
           <ul>
             <li><a routerLink="/">Inicio</a></li>
@@ -192,6 +193,8 @@ type TeacherType = Prisma.TeacherGetPayload<{
             </div>
           </div>
         </div>
+      } @else {
+        <div>No se encontró el docente</div>
       }
     } @placeholder (minimum 1s) {
       <lib-loader />
@@ -209,6 +212,9 @@ export default class Teacher {
     }),
     stream: ({ params }) => {
       const { id } = params;
+      if (!isValidId(id)) {
+        return of(null);
+      }
       return this.#apollo
         .watchQuery<{ teacher: TeacherType }>({
           fetchPolicy: 'cache-and-network',

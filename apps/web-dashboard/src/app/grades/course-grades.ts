@@ -283,8 +283,8 @@ export default class CourseGrades {
         grades: grades.map((grade) => {
           return {
             ...grade,
-            item: grade.studentGrades.find((studentGrade) => {
-              return studentGrade.student.id === student.id;
+            item: grade.studentGrades?.find((studentGrade) => {
+              return studentGrade.student?.id === student.id;
             }),
           };
         }),
@@ -298,7 +298,9 @@ export default class CourseGrades {
     if (!flat.length) return [];
     const groups = new Map<string | null, { classGroup: { id: string; name: string } | null; students: typeof flat }>();
     for (const student of flat) {
-      const cg = student.classGroup ?? null;
+      const rawCg = student.classGroup;
+      const cg: { id: string; name: string } | null =
+        rawCg?.id && rawCg?.name ? { id: rawCg.id, name: rawCg.name } : null;
       const key = cg?.id ?? null;
       if (!groups.has(key)) {
         groups.set(key, { classGroup: cg, students: [] });

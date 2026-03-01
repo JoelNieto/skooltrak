@@ -194,7 +194,7 @@ export default class FinancialModule {
             year: params.year,
           },
         })
-        .valueChanges.pipe(map((r) => r.data.chargesBySchool ?? []));
+        .valueChanges.pipe(map((r) => r.data?.chargesBySchool ?? []));
     },
   });
 

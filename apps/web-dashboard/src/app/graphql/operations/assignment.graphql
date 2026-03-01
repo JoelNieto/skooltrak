@@ -1,0 +1,20 @@
+query Assignment($id: String!) {
+  assignment(id: $id) {
+    id
+    title
+    details
+    course {
+      id
+      name
+    }
+    teacher {
+      id
+      firstName
+      fatherName
+    }
+    date
+    createdAt
+    updatedAt
+    requireSubmission
+  }
+}

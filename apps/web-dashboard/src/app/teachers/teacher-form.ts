@@ -4,6 +4,7 @@ import { rxResource } from '@angular/core/rxjs-interop';
 import { email, form, FormField, required, submit } from '@angular/forms/signals';
 import { Router, RouterLink } from '@angular/router';
 import { Prisma } from '@generated/prisma';
+import { isValidId } from '../core/validators';
 import { Apollo, gql } from 'apollo-angular';
 import { map, of } from 'rxjs';
 import Store from '../core/store';
@@ -375,7 +376,7 @@ export default class TeacherForm {
       id: this.id(),
     }),
     stream: ({ params }) => {
-      if (!params.id) {
+      if (!isValidId(params.id)) {
         return of(null);
       }
       return this.apollo

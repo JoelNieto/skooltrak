@@ -98,7 +98,7 @@ export default class CreateChargeForm {
           `,
           variables: { schoolId: params.schoolId },
         })
-        .valueChanges.pipe(map((r) => r.data.studentsBySchoolId));
+        .valueChanges.pipe(map((r) => r.data?.studentsBySchoolId ?? []));
     },
   });
 
@@ -118,7 +118,7 @@ export default class CreateChargeForm {
           `,
           variables: { schoolId: params.schoolId },
         })
-        .valueChanges.pipe(map((r) => r.data.studyPlansBySchoolId));
+        .valueChanges.pipe(map((r) => r.data?.studyPlansBySchoolId ?? []));
     },
   });
 

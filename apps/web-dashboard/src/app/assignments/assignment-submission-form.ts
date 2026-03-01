@@ -141,7 +141,7 @@ export default class AssignmentSubmissionForm {
           variables: { assignmentId: params.assignmentId },
           fetchPolicy: 'network-only',
         })
-        .valueChanges.pipe(map((res) => res.data.myAssignmentSubmission));
+        .valueChanges.pipe(map((res) => res.data?.myAssignmentSubmission));
     },
   });
 

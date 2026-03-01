@@ -98,7 +98,7 @@ export default class Auth {
           fetchPolicy: 'network-only',
         })
         .valueChanges.pipe(
-          map((res) => res.data.me),
+          map((res) => res.data?.me),
           catchError((err) => {
             this.#toasts.showError(err.message);
             this.isSigning.set(false);

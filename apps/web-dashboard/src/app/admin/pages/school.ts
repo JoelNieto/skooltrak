@@ -5,8 +5,9 @@ import { Component, inject, input } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import { Prisma } from '@generated/prisma';
+import { isValidId } from '../../core/validators';
 import { Apollo, gql } from 'apollo-angular';
-import { map } from 'rxjs';
+import { map, of } from 'rxjs';
 
 type SchoolType = Prisma.SchoolGetPayload<false> & {
   logoUrl?: string | null;
@@ -19,8 +20,8 @@ type SchoolType = Prisma.SchoolGetPayload<false> & {
     @if (schoolResource.isLoading()) {
       <lib-loader />
     } @else {
-      @if (schoolResource.hasValue()) {
-        @let school = schoolResource.value();
+      @if (schoolResource.hasValue() && schoolResource.value()?.id) {
+        @let school = schoolResource.value()!;
         <div class="breadcrumbs text-sm">
           <ul>
             <li><a routerLink="/">Inicio</a></li>
@@ -238,6 +239,8 @@ type SchoolType = Prisma.SchoolGetPayload<false> & {
             </div>
           </div>
         </div>
+      } @else {
+        <div>No se encontró el colegio</div>
       }
     }
   `,
@@ -250,8 +253,11 @@ export default class School {
     params: () => ({
       id: this.id(),
     }),
-    stream: ({ params }) =>
-      this.apollo
+    stream: ({ params }) => {
+      if (!isValidId(params.id)) {
+        return of(null);
+      }
+      return this.apollo
         .watchQuery<{
           school: SchoolType;
         }>({
@@ -281,7 +287,8 @@ export default class School {
             id: params.id,
           },
         })
-        .valueChanges.pipe(map((result) => result.data?.school)),
+        .valueChanges.pipe(map((result) => result.data?.school));
+    },
   });
 
   getLocationString(school: SchoolType): string {

@@ -1,23 +1,31 @@
-import { EditorViewer, Loader } from '@/ui';
+import { EditorViewer, Error as ErrorComponent, Loader } from '@/ui';
 import { DatePipe } from '@angular/common';
 import { Component, inject, input } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
-import { Prisma } from '@generated/prisma';
 import Auth from '../auth/auth';
 
-import { Apollo, gql } from 'apollo-angular';
+import { Apollo } from 'apollo-angular';
 import { map } from 'rxjs';
+import { AssignmentDocument, AssignmentQuery } from '../graphql/generated/graphql';
 import AssignmentSubmissionForm from './assignment-submission-form';
 import AssignmentSubmissionsList from './assignment-submissions-list';
 
 @Component({
-  imports: [RouterLink, DatePipe, Loader, EditorViewer, AssignmentSubmissionForm, AssignmentSubmissionsList],
+  imports: [
+    RouterLink,
+    DatePipe,
+    Loader,
+    EditorViewer,
+    ErrorComponent,
+    AssignmentSubmissionForm,
+    AssignmentSubmissionsList,
+  ],
 
   template: `
     @defer {
       @if (assignmentResource.hasValue()) {
-        @let assignment = assignmentResource.value();
+        @let assignment = assignmentResource.value()!;
         <div class="breadcrumbs text-sm">
           <ul>
             <li><a routerLink="/">Inicio</a></li>
@@ -60,6 +68,10 @@ import AssignmentSubmissionsList from './assignment-submissions-list';
             </div>
           </div>
         }
+      } @else if (assignmentResource.error()) {
+        <lib-error (retry)="assignmentResource.reload()" [description]="assignmentResource.error()?.message" />
+      } @else {
+        <div>No se encontró la asignación</div>
       }
     } @placeholder (minimum 1s) {
       <lib-loader />
@@ -68,7 +80,7 @@ import AssignmentSubmissionsList from './assignment-submissions-list';
     }
   `,
 })
-export default class Assigment {
+export default class Assignment {
   public id = input.required<string>();
   private apollo = inject(Apollo);
   public auth = inject(Auth);
@@ -77,39 +89,18 @@ export default class Assigment {
     stream: ({ params }) => {
       const { id } = params;
       return this.apollo
-        .watchQuery<{
-          assignment: Prisma.AssignmentGetPayload<{
-            include: {
-              course: true;
-              teacher: true;
-            };
-          }>;
-        }>({
-          query: gql`
-            query Assignment($id: String!) {
-              assignment(id: $id) {
-                id
-                title
-                details
-                course {
-                  id
-                  name
-                }
-                teacher {
-                  id
-                  firstName
-                  fatherName
-                }
-                date
-                createdAt
-                updatedAt
-                requireSubmission
-              }
-            }
-          `,
+        .watchQuery({
+          query: AssignmentDocument,
           variables: { id },
         })
-        .valueChanges.pipe(map((res) => res.data.assignment));
+        .valueChanges.pipe(
+          map((res) => {
+            if (res.data?.assignment) {
+              return res.data.assignment as AssignmentQuery['assignment'];
+            }
+            throw new Error('Assignment not found');
+          }),
+        );
     },
   });
 }

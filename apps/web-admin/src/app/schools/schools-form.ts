@@ -216,7 +216,7 @@ export class SchoolsForm implements OnInit {
             }
           `,
         })
-        .valueChanges.pipe(map((result) => result.data.organizations)),
+        .valueChanges.pipe(map((result) => result.data?.organizations ?? [])),
   });
 
   public form = this.fb.group({

@@ -2,6 +2,7 @@ import { Modal, Toast } from '@/ui';
 import { Component, computed, inject, input, linkedSignal, signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { Prisma } from '@generated/prisma';
+import { isValidId } from '../core/validators';
 import { Apollo, gql } from 'apollo-angular';
 import { map, of } from 'rxjs';
 import GroupScheduleForm from './group-schedule-form';
@@ -143,7 +144,7 @@ export default class GroupSchedule {
       classGroupId: this.id(),
     }),
     stream: ({ params }) => {
-      if (!params.classGroupId) {
+      if (!isValidId(params.classGroupId)) {
         return of([]);
       }
 
@@ -183,17 +184,19 @@ export default class GroupSchedule {
           },
           fetchPolicy: 'cache-and-network',
         })
-        .valueChanges.pipe(map((result) => result.data?.groupsSchedulesByClassGroupId ?? []));
+        .valueChanges.pipe(
+          map((result) => (result.data?.groupsSchedulesByClassGroupId ?? []) as Schedule[]),
+        );
     },
   });
 
   public localSchedules = linkedSignal<Schedule[] | undefined, Schedule[]>({
-    source: this.schedulesResource.value,
+    source: () => this.schedulesResource.value(),
     computation: (source) => source ?? [],
   });
 
   public layoutByDay = computed(() => {
-    const schedules = this.localSchedules();
+    const schedules: Schedule[] = this.localSchedules() ?? [];
     return this.weekdays.reduce((acc, day) => {
       const daySchedules = schedules.filter((schedule) => schedule.weekday === day.key);
       acc[day.key] = this.buildDayLayout(daySchedules);
@@ -314,7 +317,7 @@ export default class GroupSchedule {
 
     if (this.activeDrag) {
       const draggedId = this.activeDrag.id;
-      const updatedSchedule = this.localSchedules().find((s) => s.id === draggedId);
+      const updatedSchedule = (this.localSchedules() ?? []).find((s) => s.id === draggedId);
 
       if (updatedSchedule) {
         const hasChanged =
@@ -364,7 +367,7 @@ export default class GroupSchedule {
 
   private updateSchedule(id: string, weekday: WeekdayKey, startMinutes: number, endMinutes: number) {
     this.localSchedules.update((schedules) =>
-      schedules.map((schedule) =>
+      (schedules ?? []).map((schedule) =>
         schedule.id === id
           ? {
               ...schedule,

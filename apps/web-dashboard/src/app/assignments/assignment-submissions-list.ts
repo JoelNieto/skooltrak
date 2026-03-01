@@ -179,7 +179,7 @@ export default class AssignmentSubmissionsList {
           variables: { assignmentId: params.assignmentId },
           fetchPolicy: 'network-only',
         })
-        .valueChanges.pipe(map((res) => res.data.studentsForAssignment));
+        .valueChanges.pipe(map((res) => res.data?.studentsForAssignment ?? []));
     },
   });
 

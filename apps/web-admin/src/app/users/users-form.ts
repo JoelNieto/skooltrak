@@ -145,7 +145,7 @@ export class UsersForm implements OnInit {
             }
           `,
         })
-        .valueChanges.pipe(map((result) => result.data.roles)),
+        .valueChanges.pipe(map((result) => result.data?.roles ?? [])),
   });
 
   public organizations = rxResource({
@@ -162,7 +162,7 @@ export class UsersForm implements OnInit {
             }
           `,
         })
-        .valueChanges.pipe(map((result) => result.data.organizations)),
+        .valueChanges.pipe(map((result) => result.data?.organizations ?? [])),
   });
 
   public form = this.fb.group({

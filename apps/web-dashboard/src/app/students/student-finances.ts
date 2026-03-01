@@ -2,6 +2,7 @@ import { Loader, PageHeader, StatCard } from '@/ui';
 import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
+import { isValidId } from '../core/validators';
 import { Apollo, gql } from 'apollo-angular';
 import { map, of } from 'rxjs';
 import Store from '../core/store';
@@ -163,7 +164,7 @@ export default class StudentFinances {
       studentId: this.#store.currentStudentId(),
     }),
     stream: ({ params }) => {
-      if (!params.studentId) return of(null);
+      if (!isValidId(params.studentId)) return of(null);
       return this.#apollo
         .query<{ studentBalance: StudentBalanceType }>({
           query: gql`
@@ -187,7 +188,7 @@ export default class StudentFinances {
       studentId: this.#store.currentStudentId(),
     }),
     stream: ({ params }) => {
-      if (!params.studentId) return of([]);
+      if (!isValidId(params.studentId)) return of([]);
       return this.#apollo
         .query<{ chargesByStudent: ChargeType[] }>({
           query: gql`
@@ -213,7 +214,7 @@ export default class StudentFinances {
       studentId: this.#store.currentStudentId(),
     }),
     stream: ({ params }) => {
-      if (!params.studentId) return of([]);
+      if (!isValidId(params.studentId)) return of([]);
       return this.#apollo
         .query<{ paymentsByStudent: PaymentType[] }>({
           query: gql`

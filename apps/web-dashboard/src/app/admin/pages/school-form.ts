@@ -13,6 +13,7 @@ import { rxResource } from '@angular/core/rxjs-interop';
 import { form, FormField, required, submit } from '@angular/forms/signals';
 import { Router, RouterLink } from '@angular/router';
 import { Prisma } from '@generated/prisma';
+import { isValidId } from '../../core/validators';
 import { Apollo, gql } from 'apollo-angular';
 import { ImageCroppedEvent, ImageCropperComponent } from 'ngx-image-cropper';
 import { firstValueFrom, map, of } from 'rxjs';
@@ -388,7 +389,7 @@ export default class SchoolForm {
       id: this.id(),
     }),
     stream: ({ params }) => {
-      if (!params.id) {
+      if (!isValidId(params.id)) {
         return of(null);
       }
       return this.apollo

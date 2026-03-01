@@ -134,7 +134,7 @@ export default class Periods {
             }
           `,
         })
-        .valueChanges.pipe(map((result) => result.data.periods)),
+        .valueChanges.pipe(map((result) => result.data?.periods ?? [])),
   });
 
   editPeriod(period?: Prisma.PeriodGetPayload<{ include: undefined }>) {

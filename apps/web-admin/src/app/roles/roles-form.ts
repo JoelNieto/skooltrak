@@ -90,7 +90,7 @@ export class RolesForm implements OnInit {
             }
           `,
         })
-        .valueChanges.pipe(map((result) => result.data.permissions)),
+        .valueChanges.pipe(map((result) => result.data?.permissions ?? [])),
   });
 
   public organizations = rxResource({
@@ -107,7 +107,7 @@ export class RolesForm implements OnInit {
             }
           `,
         })
-        .valueChanges.pipe(map((result) => result.data.organizations)),
+        .valueChanges.pipe(map((result) => result.data?.organizations ?? [])),
   });
 
   public selectedIds = model<string[]>([]);

@@ -194,9 +194,9 @@ export class Permissions {
         })
         .valueChanges.pipe(
           tap((result) => {
-            this.pagination.updateCount(result.data.count);
+            this.pagination.updateCount(result.data?.count ?? 0);
           }),
-          map((result) => result.data.permissions)
+          map((result) => result.data?.permissions ?? [])
         ),
   });
 

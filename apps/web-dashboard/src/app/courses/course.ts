@@ -8,6 +8,7 @@ import { Apollo, gql } from 'apollo-angular';
 import { map, of } from 'rxjs';
 import AssignmentForm from '../assignments/assignment-form';
 import CourseAttendance from '../attendance/course-attendance';
+import { isValidId } from '../core/validators';
 import Auth from '../auth/auth';
 import CourseGrades from '../grades/course-grades';
 import CourseAssignments from './course-assignments';
@@ -47,7 +48,7 @@ type CourseType = Prisma.CourseGetPayload<{
     @if (courseResource.error()) {
       <p>Error al cargar curso</p>
     }
-    @if (courseResource.hasValue()) {
+    @if (courseResource.hasValue() && courseResource.value()?.id) {
       @let course = courseResource.value()!;
       <div>
         <div class="breadcrumbs text-sm">
@@ -167,6 +168,8 @@ type CourseType = Prisma.CourseGetPayload<{
           </div>
         </div>
       </div>
+    } @else if (!courseResource.isLoading() && !courseResource.error()) {
+      <div>No se encontró el curso</div>
     }`,
 })
 export default class Course {
@@ -180,7 +183,7 @@ export default class Course {
     }),
     stream: ({ params }) => {
       const { id } = params;
-      if (!id) {
+      if (!isValidId(id)) {
         return of(null);
       }
       return this.apollo

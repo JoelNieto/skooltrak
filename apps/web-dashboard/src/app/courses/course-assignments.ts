@@ -130,7 +130,7 @@ export default class CourseAssignments {
         })
         .valueChanges.pipe(
           map((res) =>
-            res.data.assignmentDatesByCourseId.map((item) => ({
+            (res.data?.assignmentDatesByCourseId ?? []).map((item) => ({
               date: new Date(item.date),
               data: {
                 id: item.id,

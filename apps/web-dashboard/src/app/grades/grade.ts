@@ -46,8 +46,8 @@ import StudentGradeForm from './student-grade-form';
               </div>
             </div>
             <div class="flex items-center gap-2">
-              <a class="link link-primary" [routerLink]="['/courses', grade.course.id]"> {{ grade.course.name }} </a>/
-              {{ grade.bucket.name }}
+              <a class="link link-primary" [routerLink]="['/courses', grade.course?.id]"> {{ grade.course?.name }} </a>/
+              {{ grade.bucket?.name }}
             </div>
 
             <lib-editor-viewer [innerHTML]="grade.comments" />
@@ -81,8 +81,8 @@ import StudentGradeForm from './student-grade-form';
                       <tr>
                         <td class="overflow-hidden">
                           <span class="block truncate">
-                            {{ studentGrade.student.firstName }}
-                            {{ studentGrade.student.fatherName }}
+                            {{ studentGrade.student?.firstName }}
+                            {{ studentGrade.student?.fatherName }}
                           </span>
                         </td>
                         <td
@@ -90,13 +90,14 @@ import StudentGradeForm from './student-grade-form';
                           (click)="editGradeItem(studentGrade)"
                           [ngClass]="{
                             'text-success! bg-success/10':
-                              studentGrade.score && studentGrade.score! >= metric()!.minimumApproval,
+                              studentGrade.score != null && metric() && studentGrade.score >= (metric()?.minimumApproval ?? 0),
                             'text-warning! bg-warning/10':
-                              studentGrade.score &&
-                              studentGrade.score! >= metric()!.minimumApproval &&
-                              studentGrade.score! < metric()!.minimumExcellence,
+                              studentGrade.score != null &&
+                              metric() &&
+                              studentGrade.score >= (metric()?.minimumApproval ?? 0) &&
+                              studentGrade.score < (metric()?.minimumExcellence ?? 0),
                             'text-error! bg-error/10':
-                              studentGrade.score && studentGrade.score! < metric()!.minimumApproval,
+                              studentGrade.score != null && metric() && studentGrade.score < (metric()?.minimumApproval ?? 0),
                           }"
                         >
                           @if (studentGrade.score) {
@@ -214,27 +215,33 @@ export default class Grade {
             id,
           },
         })
-        .valueChanges.pipe(map((res) => res.data.grade));
+        .valueChanges.pipe(map((res) => res.data?.grade));
     },
   });
 
-  public metric = computed(() => this.gradeResource.value()?.course.studyPlan?.gradeMetric);
+  public metric = computed(() => this.gradeResource.value()?.course?.studyPlan?.gradeMetric);
 
   /** Groups student grades by class group, with "Sin grupo" last. */
   public studentGradesByClassGroup = computed(() => {
     const grade = this.gradeResource.value();
     if (!grade?.studentGrades?.length) return [];
+    const studentGrades = grade.studentGrades;
+    type StudentGrade = (typeof studentGrades)[number];
     const groups = new Map<
       string | null,
-      { classGroup: { id: string; name: string } | null; studentGrades: typeof grade.studentGrades }
+      { classGroup: { id: string; name: string } | null; studentGrades: StudentGrade[] }
     >();
-    for (const sg of grade.studentGrades) {
-      const cg = sg.student.classGroup ?? null;
+    for (const sg of studentGrades) {
+      const rawCg = sg.student?.classGroup;
+      const cg: { id: string; name: string } | null =
+        rawCg?.id && rawCg?.name ? { id: rawCg.id, name: rawCg.name } : null;
       const key = cg?.id ?? '__none__';
-      if (!groups.has(key)) {
-        groups.set(key, { classGroup: cg, studentGrades: [] });
+      const group = groups.get(key);
+      if (group) {
+        group.studentGrades.push(sg as StudentGrade);
+      } else {
+        groups.set(key, { classGroup: cg, studentGrades: [sg as StudentGrade] });
       }
-      groups.get(key)!.studentGrades.push(sg);
     }
     const result = [...groups.values()];
     result.sort((a, b) => {
@@ -285,10 +292,11 @@ export default class Grade {
       });
   }
 
-  editGradeItem(studentGrade: DecimalToNumber<Prisma.StudentGradeGetPayload<{ include: { student: true } }>>) {
+  editGradeItem(studentGrade?: DecimalToNumber<Prisma.StudentGradeGetPayload<{ include: { student: true } }>>) {
+    if (!studentGrade) return;
     this.#modal.open(StudentGradeForm, {
       data: {
-        studentGrade,
+        studentGrade: studentGrade as DecimalToNumber<Prisma.StudentGradeGetPayload<{ include: { student: true } }>>,
         metric: this.metric(),
       },
       title: 'Editar calificacion',

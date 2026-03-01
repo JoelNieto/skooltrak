@@ -158,7 +158,7 @@ export class Organizations {
             }
           `,
         })
-        .valueChanges.pipe(map((result) => result.data.organizations)),
+        .valueChanges.pipe(map((result) => result.data?.organizations ?? [])),
   });
 
   public editOrganization(organization?: Prisma.OrganizationCreateInput) {

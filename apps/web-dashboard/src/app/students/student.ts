@@ -6,6 +6,7 @@ import { rxResource } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { $Enums, Prisma } from '@generated/prisma';
+import { isValidId } from '../core/validators';
 import { Apollo, gql } from 'apollo-angular';
 import { map, of } from 'rxjs';
 import Store from '../core/store';
@@ -100,8 +101,8 @@ const ENROLLMENT_STATUS_COLORS: Record<$Enums.EnrollmentStatus, string> = {
     @if (studentResource.isLoading()) {
       <lib-loader />
     } @else {
-      @if (studentResource.hasValue()) {
-        @let student = studentResource.value();
+      @if (studentResource.hasValue() && studentResource.value()?.id) {
+        @let student = studentResource.value()!;
         @let metric = student.classGroup?.studyPlan?.gradeMetric;
         <div class="breadcrumbs text-sm">
           <ul>
@@ -371,6 +372,8 @@ const ENROLLMENT_STATUS_COLORS: Record<$Enums.EnrollmentStatus, string> = {
             </div>
           </div>
         </div>
+      } @else {
+        <div>No se encontró el alumno</div>
       }
     }
   `,
@@ -453,8 +456,11 @@ export default class Student {
     params: () => ({
       id: this.id(),
     }),
-    stream: ({ params }) =>
-      this.apollo
+    stream: ({ params }) => {
+      if (!isValidId(params.id)) {
+        return of(null);
+      }
+      return this.apollo
         .watchQuery<{
           student: StudentType;
         }>({
@@ -557,6 +563,7 @@ export default class Student {
             id: params.id,
           },
         })
-        .valueChanges.pipe(map((result) => result.data?.student)),
+        .valueChanges.pipe(map((result) => result.data?.student));
+    },
   });
 }

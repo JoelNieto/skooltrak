@@ -138,7 +138,7 @@ export default class GradeMetrics {
             }
           `,
         })
-        .valueChanges.pipe(map((result) => result.data.gradeMetrics)),
+        .valueChanges.pipe(map((result) => result.data?.gradeMetrics ?? [])),
   });
 
   editGradeMetric(metric?: Prisma.GradeMetricGetPayload<{ include: undefined }>) {

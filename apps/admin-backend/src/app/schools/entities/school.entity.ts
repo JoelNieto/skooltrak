@@ -29,6 +29,8 @@ export class School
   phone: string;
   @Field(() => String, { description: 'Website of the school' })
   website: string;
+  @Field(() => String, { description: 'Currency code (e.g. USD, MXN)' })
+  currencyCode: string;
   @Field(() => Date, { description: 'Created at' })
   createdAt: Date;
   @Field(() => Date, { description: 'Updated at' })

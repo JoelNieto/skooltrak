@@ -1,0 +1,12 @@
+query WebAdminGetGradeMetrics {
+  gradeMetrics {
+    id
+    name
+    minimum
+    maximum
+    minimumApproval
+    minimumExcellence
+    createdAt
+    updatedAt
+  }
+}

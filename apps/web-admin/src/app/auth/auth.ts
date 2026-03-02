@@ -12,7 +12,11 @@ import {
 import { rxResource } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
 import { Prisma } from '@generated/prisma';
-import { Apollo, gql } from 'apollo-angular';
+import { Apollo } from 'apollo-angular';
+import {
+  WebAdminAuthLoginDocument,
+  WebAdminAuthMeDocument,
+} from '../graphql/generated';
 import { catchError, firstValueFrom, map, of, tap } from 'rxjs';
 import { authClient } from './auth-client';
 
@@ -68,44 +72,8 @@ export default class Auth {
         return of(null);
       }
       return this.#apollo
-        .watchQuery<{
-          me: Prisma.UserGetPayload<{
-            include: {
-              role: { include: { permissions: true } };
-              teacher: true;
-              student: true;
-            };
-          }>;
-        }>({
-          query: gql`
-            query Me {
-              me {
-                id
-                email
-                firstName
-                lastName
-                color
-                teacher {
-                  id
-                  firstName
-                  fatherName
-                }
-                student {
-                  id
-                  firstName
-                  fatherName
-                }
-                role {
-                  name
-                  permissions {
-                    id
-                    descriptiveId
-                    description
-                  }
-                }
-              }
-            }
-          `,
+        .watchQuery({
+          query: WebAdminAuthMeDocument,
           fetchPolicy: 'network-only',
         })
         .valueChanges.pipe(
@@ -160,14 +128,8 @@ export default class Auth {
     try {
       // Use GraphQL login which returns JWT token
       const res = await firstValueFrom(
-        this.#apollo.mutate<{ login: { accessToken: string } }>({
-          mutation: gql`
-            mutation Login($email: String!, $password: String!) {
-              login(email: $email, password: $password) {
-                accessToken
-              }
-            }
-          `,
+        this.#apollo.mutate({
+          mutation: WebAdminAuthLoginDocument,
           variables: { email, password },
         })
       );

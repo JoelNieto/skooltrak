@@ -1,0 +1,30 @@
+query WebAdminGetUsers($take: Int!, $skip: Int!, $search: String!) {
+  count: usersCount(search: $search)
+  users(take: $take, skip: $skip, search: $search) {
+    id
+    firstName
+    lastName
+    email
+    createdAt
+    updatedAt
+    roleId
+    role {
+      id
+      name
+    }
+    organizationId
+    organization {
+      id
+      name
+    }
+  }
+}
+
+mutation WebAdminRemoveUser($id: String!) {
+  removeUser(id: $id) {
+    id
+    name
+    createdAt
+    updatedAt
+  }
+}

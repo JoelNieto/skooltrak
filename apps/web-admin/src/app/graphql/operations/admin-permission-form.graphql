@@ -1,0 +1,19 @@
+mutation WebAdminCreatePermission($createPermissionInput: CreatePermissionInput!) {
+  createPermission(createPermissionInput: $createPermissionInput) {
+    id
+    descriptiveId
+    description
+    createdAt
+    updatedAt
+  }
+}
+
+mutation WebAdminUpdatePermission($updatePermissionInput: UpdatePermissionInput!) {
+  updatePermission(updatePermissionInput: $updatePermissionInput) {
+    id
+    descriptiveId
+    description
+    createdAt
+    updatedAt
+  }
+}

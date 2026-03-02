@@ -1,0 +1,18 @@
+query WebAdminGetPeriods {
+  periods {
+    id
+    name
+    shortName
+    year
+    startDate
+    endDate
+    createdAt
+    updatedAt
+  }
+}
+
+mutation WebAdminRemovePeriod($removePeriodId: String!) {
+  removePeriod(id: $removePeriodId) {
+    id
+  }
+}

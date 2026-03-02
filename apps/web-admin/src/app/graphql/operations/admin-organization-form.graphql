@@ -1,0 +1,19 @@
+mutation WebAdminCreateOrganization($createOrganizationInput: CreateOrganizationInput!) {
+  createOrganization(createOrganizationInput: $createOrganizationInput) {
+    id
+    name
+    description
+    createdAt
+    updatedAt
+  }
+}
+
+mutation WebAdminUpdateOrganization($updateOrganizationInput: UpdateOrganizationInput!) {
+  updateOrganization(updateOrganizationInput: $updateOrganizationInput) {
+    id
+    name
+    description
+    createdAt
+    updatedAt
+  }
+}

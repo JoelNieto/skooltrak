@@ -14,57 +14,13 @@ import {
   Validators,
 } from '@angular/forms';
 import { Prisma } from '@generated/prisma';
-import { Apollo, gql } from 'apollo-angular';
+import { Apollo } from 'apollo-angular';
 import { map } from 'rxjs';
-const CREATE_SCHOOL = gql`
-  mutation CreateSchool($createSchoolInput: CreateSchoolInput!) {
-    createSchool(createSchoolInput: $createSchoolInput) {
-      id
-      name
-      shortName
-      organization {
-        id
-        name
-      }
-      logo
-      address
-      city
-      state
-      zip
-      country
-      email
-      phone
-      website
-      createdAt
-      updatedAt
-    }
-  }
-`;
-
-const UPDATE_SCHOOL = gql`
-  mutation UpdateSchool($updateSchoolInput: UpdateSchoolInput!) {
-    updateSchool(updateSchoolInput: $updateSchoolInput) {
-      id
-      name
-      shortName
-      organization {
-        id
-        name
-      }
-      logo
-      address
-      city
-      state
-      zip
-      country
-      email
-      phone
-      website
-      createdAt
-      updatedAt
-    }
-  }
-`;
+import {
+  WebAdminCreateSchoolDocument,
+  WebAdminGetOrganizationsForSchoolDocument,
+  WebAdminUpdateSchoolDocument,
+} from '../graphql/generated';
 
 @Component({
   selector: 'app-schools-form',
@@ -205,16 +161,9 @@ export class SchoolsForm implements OnInit {
   public organizations = rxResource({
     stream: () =>
       this.apollo
-        .watchQuery<{ organizations: Prisma.OrganizationCreateInput[] }>({
+        .watchQuery({
           fetchPolicy: 'cache-and-network',
-          query: gql`
-            query GetOrganizations {
-              organizations {
-                id
-                name
-              }
-            }
-          `,
+          query: WebAdminGetOrganizationsForSchoolDocument,
         })
         .valueChanges.pipe(map((result) => result.data?.organizations ?? [])),
   });
@@ -249,12 +198,12 @@ export class SchoolsForm implements OnInit {
 
     if (this.data()?.school) {
       this.apollo
-        .mutate<{ updateSchool: Prisma.SchoolCreateInput }>({
-          mutation: UPDATE_SCHOOL,
+        .mutate({
+          mutation: WebAdminUpdateSchoolDocument,
           variables: {
             updateSchoolInput: {
-              ...this.form.value,
-              id: this.data()!.school!.id,
+              ...this.form.getRawValue(),
+              id: this.data()!.school!.id!,
             },
           },
         })
@@ -270,12 +219,10 @@ export class SchoolsForm implements OnInit {
         });
     } else {
       this.apollo
-        .mutate<{ createSchool: Prisma.SchoolCreateInput }>({
-          mutation: CREATE_SCHOOL,
+        .mutate({
+          mutation: WebAdminCreateSchoolDocument,
           variables: {
-            createSchoolInput: {
-              ...this.form.value,
-            },
+            createSchoolInput: this.form.getRawValue(),
           },
         })
         .subscribe({

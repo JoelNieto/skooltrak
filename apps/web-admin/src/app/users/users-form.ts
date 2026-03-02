@@ -14,37 +14,14 @@ import {
   Validators,
 } from '@angular/forms';
 import { Prisma } from '@generated/prisma';
-import { Apollo, gql } from 'apollo-angular';
+import { Apollo } from 'apollo-angular';
 import { map } from 'rxjs';
-const CREATE_USER = gql`
-  mutation CreateUser($createUserInput: CreateUserInput!) {
-    createUser(createUserInput: $createUserInput) {
-      id
-      firstName
-      lastName
-      email
-      role {
-        id
-        name
-      }
-    }
-  }
-`;
-
-const UPDATE_USER = gql`
-  mutation UpdateUser($updateUserInput: UpdateUserInput!) {
-    updateUser(updateUserInput: $updateUserInput) {
-      id
-      firstName
-      lastName
-      email
-      role {
-        id
-        name
-      }
-    }
-  }
-`;
+import {
+  WebAdminCreateUserDocument,
+  WebAdminGetOrganizationsForUserDocument,
+  WebAdminGetRolesForUserDocument,
+  WebAdminUpdateUserDocument,
+} from '../graphql/generated';
 
 @Component({
   selector: 'app-users-form',
@@ -134,16 +111,9 @@ export class UsersForm implements OnInit {
   public roles = rxResource({
     stream: () =>
       this.apollo
-        .watchQuery<{ roles: Prisma.RoleGetPayload<true>[] }>({
+        .watchQuery({
           fetchPolicy: 'cache-and-network',
-          query: gql`
-            query GetRoles {
-              roles {
-                id
-                name
-              }
-            }
-          `,
+          query: WebAdminGetRolesForUserDocument,
         })
         .valueChanges.pipe(map((result) => result.data?.roles ?? [])),
   });
@@ -151,16 +121,9 @@ export class UsersForm implements OnInit {
   public organizations = rxResource({
     stream: () =>
       this.apollo
-        .watchQuery<{ organizations: Prisma.OrganizationGetPayload<true>[] }>({
+        .watchQuery({
           fetchPolicy: 'cache-and-network',
-          query: gql`
-            query GetOrganizations {
-              organizations {
-                id
-                name
-              }
-            }
-          `,
+          query: WebAdminGetOrganizationsForUserDocument,
         })
         .valueChanges.pipe(map((result) => result.data?.organizations ?? [])),
   });
@@ -188,12 +151,12 @@ export class UsersForm implements OnInit {
 
     if (this.data()?.user) {
       this.apollo
-        .mutate<{ updateUser: Prisma.UserCreateInput }>({
-          mutation: UPDATE_USER,
+        .mutate({
+          mutation: WebAdminUpdateUserDocument,
           variables: {
             updateUserInput: {
-              ...this.form.value,
-              id: this.data()!.user!.id,
+              ...this.form.getRawValue(),
+              id: this.data()!.user!.id!,
             },
           },
         })
@@ -209,12 +172,10 @@ export class UsersForm implements OnInit {
         });
     } else {
       this.apollo
-        .mutate<{ createUser: Prisma.UserCreateInput }>({
-          mutation: CREATE_USER,
+        .mutate({
+          mutation: WebAdminCreateUserDocument,
           variables: {
-            createUserInput: {
-              ...this.form.value,
-            },
+            createUserInput: this.form.getRawValue(),
           },
         })
         .subscribe({

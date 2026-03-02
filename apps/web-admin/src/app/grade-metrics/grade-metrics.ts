@@ -1,4 +1,4 @@
-import { Confirmation, Modal, PrismaDecimalPipe, Toast } from '@/ui';
+import { Confirmation, Error, Modal, Toast } from '@/ui';
 import { Menu, MenuContent, MenuItem, MenuTrigger } from '@angular/aria/menu';
 import { OverlayModule } from '@angular/cdk/overlay';
 import { DatePipe, DecimalPipe } from '@angular/common';
@@ -6,7 +6,8 @@ import { Component, inject, viewChild } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import { Prisma } from '@generated/prisma';
-import { Apollo, gql } from 'apollo-angular';
+import { Apollo } from 'apollo-angular';
+import { WebAdminGetGradeMetricsDocument } from '../graphql/generated';
 import { map } from 'rxjs';
 import GradeMetricsForm from './grade-metrics-form';
 @Component({
@@ -14,13 +15,13 @@ import GradeMetricsForm from './grade-metrics-form';
   imports: [
     RouterLink,
     DecimalPipe,
-    PrismaDecimalPipe,
     DatePipe,
     Menu,
     MenuContent,
     MenuItem,
     MenuTrigger,
     OverlayModule,
+    Error,
   ],
   template: `
     <div class="breadcrumbs text-sm">
@@ -40,6 +41,12 @@ import GradeMetricsForm from './grade-metrics-form';
         Nueva métrica
       </button>
     </div>
+    @if (metrics.error()) {
+      <lib-error
+        (retry)="metrics.reload()"
+        [description]="metrics.error()?.message"
+      />
+    } @else {
     <div class="overflow-x-auto">
       <table class="table">
         <thead>
@@ -57,10 +64,10 @@ import GradeMetricsForm from './grade-metrics-form';
           @for (metric of metrics.value()!; track metric.id) {
             <tr>
               <td>{{ metric.name }}</td>
-              <td>{{ metric.minimum | decimal | number: '1.2-2' }}</td>
-              <td>{{ metric.maximum | decimal | number: '1.2-2' }}</td>
-              <td>{{ metric.minimumApproval | decimal | number: '1.2-2' }}</td>
-              <td>{{ metric.minimumExcellence | decimal | number: '1.2-2' }}</td>
+              <td>{{ metric.minimum | number: '1.2-2' }}</td>
+              <td>{{ metric.maximum | number: '1.2-2' }}</td>
+              <td>{{ metric.minimumApproval | number: '1.2-2' }}</td>
+              <td>{{ metric.minimumExcellence | number: '1.2-2' }}</td>
               <td>{{ metric.createdAt | date: 'short' }}</td>
               <td>{{ metric.updatedAt | date: 'short' }}</td>
               <td>
@@ -93,7 +100,7 @@ import GradeMetricsForm from './grade-metrics-form';
                         ngMenuItem
                         value="Edit"
                         class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-base-200 w-full"
-                        (click)="editGradeMetric(metric)"
+                        (click)="editGradeMetric($any(metric))"
                       >
                         <span class="material-symbols-outlined text-lg">edit</span>
                         <span>Editar</span>
@@ -107,6 +114,7 @@ import GradeMetricsForm from './grade-metrics-form';
         </tbody>
       </table>
     </div>
+    }
   `,
 })
 export default class GradeMetrics {
@@ -120,23 +128,8 @@ export default class GradeMetrics {
   public metrics = rxResource({
     stream: () =>
       this.apollo
-        .watchQuery<{
-          gradeMetrics: Prisma.GradeMetricGetPayload<{ include: undefined }>[];
-        }>({
-          query: gql`
-            query GetGradeMetrics {
-              gradeMetrics {
-                id
-                name
-                minimum
-                maximum
-                minimumApproval
-                minimumExcellence
-                createdAt
-                updatedAt
-              }
-            }
-          `,
+        .watchQuery({
+          query: WebAdminGetGradeMetricsDocument,
         })
         .valueChanges.pipe(map((result) => result.data?.gradeMetrics ?? [])),
   });

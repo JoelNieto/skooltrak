@@ -1,4 +1,4 @@
-import { Confirmation, Modal, Toast } from '@/ui';
+import { Confirmation, Error, Modal, Toast } from '@/ui';
 import { Menu, MenuContent, MenuItem, MenuTrigger } from '@angular/aria/menu';
 import { OverlayModule } from '@angular/cdk/overlay';
 import { DatePipe } from '@angular/common';
@@ -6,7 +6,11 @@ import { ChangeDetectionStrategy, Component, inject, viewChild } from '@angular/
 import { rxResource } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import { Prisma } from '@generated/prisma';
-import { Apollo, gql } from 'apollo-angular';
+import { Apollo } from 'apollo-angular';
+import {
+  WebAdminGetRolesDocument,
+  WebAdminRemoveRoleDocument,
+} from '../graphql/generated';
 import { map } from 'rxjs';
 import { RolesForm } from './roles-form';
 
@@ -81,7 +85,7 @@ import { RolesForm } from './roles-form';
                         ngMenuItem
                         value="Edit"
                         class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-base-200 w-full"
-                        (click)="editRole(role)"
+                        (click)="editRole($any(role))"
                       >
                         <span class="material-symbols-outlined text-lg">edit</span>
                         <span>Editar</span>
@@ -90,7 +94,7 @@ import { RolesForm } from './roles-form';
                         ngMenuItem
                         value="Delete"
                         class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-base-200 w-full"
-                        (click)="deleteRole(role)"
+                        (click)="deleteRole($any(role))"
                       >
                         <span class="material-symbols-outlined text-lg">delete</span>
                         <span>Eliminar</span>
@@ -117,32 +121,9 @@ export class Roles {
   public roles = rxResource({
     stream: () =>
       this.apollo
-        .watchQuery<{
-          roles: Prisma.RoleGetPayload<{
-            include: { organization: true; permissions: true };
-          }>[];
-        }>({
+        .watchQuery({
           fetchPolicy: 'cache-and-network',
-          query: gql`
-            query GetRoles {
-              roles {
-                id
-                name
-                description
-                createdAt
-                updatedAt
-                organization {
-                  id
-                  name
-                }
-                permissions {
-                  id
-                  descriptiveId
-                  description
-                }
-              }
-            }
-          `,
+          query: WebAdminGetRolesDocument,
         })
         .valueChanges.pipe(map((result) => result.data?.roles ?? [])),
   });
@@ -169,15 +150,7 @@ export class Roles {
         if (result) {
           this.apollo
             .mutate({
-              mutation: gql`
-                mutation RemoveRole($id: String!) {
-                  removeRole(id: $id) {
-                    id
-                    name
-                    description
-                  }
-                }
-              `,
+              mutation: WebAdminRemoveRoleDocument,
               variables: {
                 id: role.id,
               },

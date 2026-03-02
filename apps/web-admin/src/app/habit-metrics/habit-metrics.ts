@@ -1,4 +1,4 @@
-import { Confirmation, Modal, Toast } from '@/ui';
+import { Confirmation, Error, Modal, Toast } from '@/ui';
 import { Menu, MenuContent, MenuItem, MenuTrigger } from '@angular/aria/menu';
 import { OverlayModule } from '@angular/cdk/overlay';
 import { DatePipe } from '@angular/common';
@@ -7,12 +7,13 @@ import { rxResource } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import { Prisma } from '@generated/prisma';
 import { Apollo, gql } from 'apollo-angular';
+import { WebAdminGetHabitMetricsDocument } from '../graphql/generated';
 import { map } from 'rxjs';
 import HabitMetricsForm from './habit-metrics-form';
 
 @Component({
   selector: 'app-habit-metrics',
-  imports: [RouterLink, DatePipe, Menu, MenuContent, MenuItem, MenuTrigger, OverlayModule],
+  imports: [RouterLink, DatePipe, Menu, MenuContent, MenuItem, MenuTrigger, OverlayModule, Error],
   template: `
     <div class="breadcrumbs text-sm">
       <ul>
@@ -33,6 +34,12 @@ import HabitMetricsForm from './habit-metrics-form';
         Nueva métrica
       </button>
     </div>
+    @if (metrics.error()) {
+      <lib-error
+        (retry)="metrics.reload()"
+        [description]="metrics.error()?.message"
+      />
+    } @else {
     <div class="overflow-x-auto">
       <table class="table">
         <thead>
@@ -94,7 +101,7 @@ import HabitMetricsForm from './habit-metrics-form';
                         ngMenuItem
                         value="Edit"
                         class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-base-200 w-full"
-                        (click)="editHabitMetric(metric)"
+                        (click)="editHabitMetric($any(metric))"
                       >
                         <span class="material-symbols-outlined text-lg">edit</span>
                         <span>Editar</span>
@@ -103,7 +110,7 @@ import HabitMetricsForm from './habit-metrics-form';
                         ngMenuItem
                         value="Delete"
                         class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-base-200 w-full"
-                        (click)="deleteHabitMetric(metric.id)"
+                        (click)="deleteHabitMetric(metric.id!)"
                       >
                         <span class="material-symbols-outlined text-lg">delete</span>
                         <span>Eliminar</span>
@@ -117,6 +124,7 @@ import HabitMetricsForm from './habit-metrics-form';
         </tbody>
       </table>
     </div>
+    }
   `,
 })
 export default class HabitMetrics {
@@ -129,22 +137,8 @@ export default class HabitMetrics {
   public metrics = rxResource({
     stream: () =>
       this.apollo
-        .watchQuery<{
-          habitMetrics: Prisma.HabitMetricGetPayload<{ include: undefined }>[];
-        }>({
-          query: gql`
-            query GetHabitMetrics {
-              habitMetrics {
-                id
-                name
-                description
-                active
-                order
-                createdAt
-                updatedAt
-              }
-            }
-          `,
+        .watchQuery({
+          query: WebAdminGetHabitMetricsDocument,
         })
         .valueChanges.pipe(map((result) => result.data?.habitMetrics ?? [])),
   });

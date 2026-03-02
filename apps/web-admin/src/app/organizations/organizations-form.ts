@@ -13,34 +13,11 @@ import {
   Validators,
 } from '@angular/forms';
 import { Prisma } from '@generated/prisma';
-import { Apollo, gql } from 'apollo-angular';
-const CREATE_ORGANIZATION = gql`
-  mutation CreateOrganization(
-    $createOrganizationInput: CreateOrganizationInput!
-  ) {
-    createOrganization(createOrganizationInput: $createOrganizationInput) {
-      id
-      name
-      description
-      createdAt
-      updatedAt
-    }
-  }
-`;
-
-const UPDATE_ORGANIZATION = gql`
-  mutation UpdateOrganization(
-    $updateOrganizationInput: UpdateOrganizationInput!
-  ) {
-    updateOrganization(updateOrganizationInput: $updateOrganizationInput) {
-      id
-      name
-      description
-      createdAt
-      updatedAt
-    }
-  }
-`;
+import { Apollo } from 'apollo-angular';
+import {
+  WebAdminCreateOrganizationDocument,
+  WebAdminUpdateOrganizationDocument,
+} from '../graphql/generated';
 
 @Component({
   selector: 'app-organizations-form',
@@ -101,12 +78,12 @@ export class OrganizationsForm implements OnInit {
     const req = this.form.getRawValue();
     if (this.data()?.organization) {
       this.apollo
-        .mutate<{ updateOrganization: Prisma.OrganizationCreateInput }>({
-          mutation: UPDATE_ORGANIZATION,
+        .mutate({
+          mutation: WebAdminUpdateOrganizationDocument,
           variables: {
             updateOrganizationInput: {
               ...req,
-              id: this.data()!.organization!.id,
+              id: this.data()!.organization!.id!,
             },
           },
         })
@@ -122,8 +99,8 @@ export class OrganizationsForm implements OnInit {
         });
     } else {
       this.apollo
-        .mutate<{ createOrganization: Prisma.OrganizationCreateInput }>({
-          mutation: CREATE_ORGANIZATION,
+        .mutate({
+          mutation: WebAdminCreateOrganizationDocument,
           variables: {
             createOrganizationInput: {
               ...req,

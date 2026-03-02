@@ -1,4 +1,4 @@
-import { Confirmation, Modal, Pagination, Paginator, Toast } from '@/ui';
+import { Confirmation, Error, Modal, Pagination, Paginator, Toast } from '@/ui';
 import { Menu, MenuContent, MenuItem, MenuTrigger } from '@angular/aria/menu';
 import { OverlayModule } from '@angular/cdk/overlay';
 import { DatePipe } from '@angular/common';
@@ -14,7 +14,11 @@ import { rxResource } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { Prisma } from '@generated/prisma';
-import { Apollo, gql } from 'apollo-angular';
+import { Apollo } from 'apollo-angular';
+import {
+  WebAdminGetPermissionsDocument,
+  WebAdminRemovePermissionDocument,
+} from '../graphql/generated';
 import { map, tap } from 'rxjs';
 import { PermissionsForm } from './permissions-form';
 @Component({
@@ -29,6 +33,7 @@ import { PermissionsForm } from './permissions-form';
     OverlayModule,
     Paginator,
     FormsModule,
+    Error,
   ],
   providers: [Pagination],
   template: ` <div class="breadcrumbs text-sm">
@@ -59,6 +64,12 @@ import { PermissionsForm } from './permissions-form';
         />
       </div>
     </div>
+    @if (permissions.error()) {
+      <lib-error
+        (retry)="permissions.reload()"
+        [description]="permissions.error()?.message"
+      />
+    } @else {
     <div class="overflow-x-auto">
       <table class="table">
         <thead>
@@ -113,7 +124,7 @@ import { PermissionsForm } from './permissions-form';
                       ngMenuItem
                       value="Edit"
                       class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-base-200 w-full"
-                      (click)="editPermission(permission)"
+                      (click)="editPermission($any(permission))"
                     >
                       <span class="material-symbols-outlined text-lg"
                         >edit</span
@@ -124,7 +135,7 @@ import { PermissionsForm } from './permissions-form';
                       ngMenuItem
                       value="Delete"
                       class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-base-200 w-full"
-                      (click)="deletePermission(permission)"
+                      (click)="deletePermission($any(permission))"
                     >
                       <span class="material-symbols-outlined text-lg"
                         >delete</span
@@ -148,7 +159,8 @@ import { PermissionsForm } from './permissions-form';
         (skipChange)="pagination.updateSkip($event)"
         (takeChange)="pagination.updateTake($event)"
       />
-    </div>`,
+    </div>
+    }`,
   styles: ``,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -169,23 +181,9 @@ export class Permissions {
     }),
     stream: ({ params }) =>
       this.apollo
-        .watchQuery<{
-          count: number;
-          permissions: Prisma.PermissionGetPayload<false>[];
-        }>({
+        .watchQuery({
           fetchPolicy: 'cache-and-network',
-          query: gql`
-            query GetPermissions($take: Int!, $skip: Int!, $search: String!) {
-              count: permissionsCount(search: $search)
-              permissions(take: $take, skip: $skip, search: $search) {
-                id
-                descriptiveId
-                description
-                createdAt
-                updatedAt
-              }
-            }
-          `,
+          query: WebAdminGetPermissionsDocument,
           variables: {
             take: params.take,
             skip: params.skip,
@@ -227,14 +225,8 @@ export class Permissions {
       .subscribe((result) => {
         if (result) {
           this.apollo
-            .mutate<{ removePermission: Prisma.PermissionGetPayload<false> }>({
-              mutation: gql`
-                mutation RemovePermission($id: String!) {
-                  removePermission(id: $id) {
-                    id
-                  }
-                }
-              `,
+            .mutate({
+              mutation: WebAdminRemovePermissionDocument,
               variables: {
                 id: permission.id,
               },

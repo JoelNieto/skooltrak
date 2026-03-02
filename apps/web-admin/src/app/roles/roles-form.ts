@@ -8,7 +8,13 @@ import {
   Validators,
 } from '@angular/forms';
 import { Prisma } from '@generated/prisma';
-import { Apollo, gql } from 'apollo-angular';
+import { Apollo } from 'apollo-angular';
+import {
+  WebAdminCreateRoleDocument,
+  WebAdminGetOrganizationsForRoleDocument,
+  WebAdminGetPermissionsForRoleDocument,
+  WebAdminUpdateRoleDocument,
+} from '../graphql/generated';
 import { map } from 'rxjs';
 @Component({
   selector: 'app-roles-form',
@@ -49,9 +55,9 @@ import { map } from 'rxjs';
           <input
             type="checkbox"
             class="toggle toggle-primary"
-            [checked]="selectedIds().includes(permission.id)"
+            [checked]="selectedIds().includes(permission.id!)"
             [id]="permission.id"
-            (change)="togglePermission(permission.id)"
+            (change)="togglePermission(permission.id!)"
           />
           <span class="label-text ml-2"
             >{{ permission.description }} {{ permission.descriptiveId }}</span
@@ -78,17 +84,9 @@ export class RolesForm implements OnInit {
   public permissions = rxResource({
     stream: () =>
       this.apollo
-        .watchQuery<{ permissions: Prisma.PermissionGetPayload<false>[] }>({
+        .watchQuery({
           fetchPolicy: 'cache-and-network',
-          query: gql`
-            query GetPermissions {
-              permissions {
-                id
-                descriptiveId
-                description
-              }
-            }
-          `,
+          query: WebAdminGetPermissionsForRoleDocument,
         })
         .valueChanges.pipe(map((result) => result.data?.permissions ?? [])),
   });
@@ -96,16 +94,9 @@ export class RolesForm implements OnInit {
   public organizations = rxResource({
     stream: () =>
       this.apollo
-        .watchQuery<{ organizations: Prisma.OrganizationGetPayload<false>[] }>({
+        .watchQuery({
           fetchPolicy: 'cache-and-network',
-          query: gql`
-            query GetOrganizations {
-              organizations {
-                id
-                name
-              }
-            }
-          `,
+          query: WebAdminGetOrganizationsForRoleDocument,
         })
         .valueChanges.pipe(map((result) => result.data?.organizations ?? [])),
   });
@@ -146,17 +137,7 @@ export class RolesForm implements OnInit {
     if (this.data()?.role) {
       this.apollo
         .mutate({
-          mutation: gql`
-            mutation UpdateRole($updateRoleInput: UpdateRoleInput!) {
-              updateRole(updateRoleInput: $updateRoleInput) {
-                id
-                name
-                description
-                createdAt
-                updatedAt
-              }
-            }
-          `,
+          mutation: WebAdminUpdateRoleDocument,
           variables: {
             updateRoleInput: {
               ...req,
@@ -177,17 +158,7 @@ export class RolesForm implements OnInit {
     } else {
       this.apollo
         .mutate({
-          mutation: gql`
-            mutation CreateRole($createRoleInput: CreateRoleInput!) {
-              createRole(createRoleInput: $createRoleInput) {
-                id
-                name
-                description
-                createdAt
-                updatedAt
-              }
-            }
-          `,
+          mutation: WebAdminCreateRoleDocument,
           variables: {
             createRoleInput: req,
           },

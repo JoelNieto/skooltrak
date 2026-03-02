@@ -13,30 +13,11 @@ import {
   Validators,
 } from '@angular/forms';
 import { Prisma } from '@generated/prisma';
-import { Apollo, gql } from 'apollo-angular';
-const CREATE_PERMISSION = gql`
-  mutation CreatePermission($createPermissionInput: CreatePermissionInput!) {
-    createPermission(createPermissionInput: $createPermissionInput) {
-      id
-      descriptiveId
-      description
-      createdAt
-      updatedAt
-    }
-  }
-`;
-
-const UPDATE_PERMISSION = gql`
-  mutation UpdatePermission($updatePermissionInput: UpdatePermissionInput!) {
-    updatePermission(updatePermissionInput: $updatePermissionInput) {
-      id
-      descriptiveId
-      description
-      createdAt
-      updatedAt
-    }
-  }
-`;
+import { Apollo } from 'apollo-angular';
+import {
+  WebAdminCreatePermissionDocument,
+  WebAdminUpdatePermissionDocument,
+} from '../graphql/generated';
 
 @Component({
   selector: 'app-permissions-form',
@@ -92,12 +73,12 @@ export class PermissionsForm implements OnInit {
     const req = this.form.getRawValue();
     if (this.data()?.permission) {
       this.apollo
-        .mutate<{ updatePermission: Prisma.PermissionGetPayload<false> }>({
-          mutation: UPDATE_PERMISSION,
+        .mutate({
+          mutation: WebAdminUpdatePermissionDocument,
           variables: {
             updatePermissionInput: {
               ...req,
-              id: this.data()!.permission!.id,
+              id: this.data()!.permission!.id!,
             },
           },
         })
@@ -113,8 +94,8 @@ export class PermissionsForm implements OnInit {
         });
     } else {
       this.apollo
-        .mutate<{ createPermission: Prisma.PermissionGetPayload<false> }>({
-          mutation: CREATE_PERMISSION,
+        .mutate({
+          mutation: WebAdminCreatePermissionDocument,
           variables: {
             createPermissionInput: {
               ...req,

@@ -1,0 +1,16 @@
+query WebAdminGetPermissions($take: Int!, $skip: Int!, $search: String!) {
+  count: permissionsCount(search: $search)
+  permissions(take: $take, skip: $skip, search: $search) {
+    id
+    descriptiveId
+    description
+    createdAt
+    updatedAt
+  }
+}
+
+mutation WebAdminRemovePermission($id: String!) {
+  removePermission(id: $id) {
+    id
+  }
+}

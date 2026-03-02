@@ -1,0 +1,13 @@
+query WebAdminGetHabitMetrics {
+  habitMetrics {
+    id
+    name
+    description
+    active
+    order
+    createdAt
+    updatedAt
+  }
+}
+
+# removeHabitMetric not in dashboard schema - keep inline gql in component until admin schema

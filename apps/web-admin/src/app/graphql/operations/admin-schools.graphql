@@ -1,0 +1,35 @@
+# Uses schema's schools (no pagination). Admin-backend has schoolsCount/schools(take,skip,search).
+# When admin-backend schema is used, restore paginated query.
+query WebAdminGetSchools {
+  schools {
+    id
+    organizationId
+    organization {
+      id
+      name
+    }
+    name
+    shortName
+    logo
+    address
+    city
+    state
+    zip
+    country
+    email
+    phone
+    website
+    currentYear
+    createdAt
+    updatedAt
+  }
+}
+
+mutation WebAdminRemoveSchool($id: String!) {
+  removeSchool(id: $id) {
+    id
+    name
+    createdAt
+    updatedAt
+  }
+}

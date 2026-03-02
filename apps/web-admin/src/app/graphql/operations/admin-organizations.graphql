@@ -1,0 +1,19 @@
+query WebAdminGetOrganizations {
+  organizations {
+    id
+    name
+    description
+    createdAt
+    updatedAt
+  }
+}
+
+mutation WebAdminRemoveOrganization($id: String!) {
+  removeOrganization(id: $id) {
+    id
+    name
+    description
+    createdAt
+    updatedAt
+  }
+}

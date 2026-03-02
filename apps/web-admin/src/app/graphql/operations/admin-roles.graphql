@@ -1,0 +1,26 @@
+query WebAdminGetRoles {
+  roles {
+    id
+    name
+    description
+    createdAt
+    updatedAt
+    organization {
+      id
+      name
+    }
+    permissions {
+      id
+      descriptiveId
+      description
+    }
+  }
+}
+
+mutation WebAdminRemoveRole($id: String!) {
+  removeRole(id: $id) {
+    id
+    name
+    description
+  }
+}

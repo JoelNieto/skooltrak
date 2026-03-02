@@ -1,0 +1,52 @@
+query WebAdminGetOrganizationsForSchool {
+  organizations {
+    id
+    name
+  }
+}
+
+mutation WebAdminCreateSchool($createSchoolInput: CreateSchoolInput!) {
+  createSchool(createSchoolInput: $createSchoolInput) {
+    id
+    name
+    shortName
+    organization {
+      id
+      name
+    }
+    logo
+    address
+    city
+    state
+    zip
+    country
+    email
+    phone
+    website
+    createdAt
+    updatedAt
+  }
+}
+
+mutation WebAdminUpdateSchool($updateSchoolInput: UpdateSchoolInput!) {
+  updateSchool(updateSchoolInput: $updateSchoolInput) {
+    id
+    name
+    shortName
+    organization {
+      id
+      name
+    }
+    logo
+    address
+    city
+    state
+    zip
+    country
+    email
+    phone
+    website
+    createdAt
+    updatedAt
+  }
+}

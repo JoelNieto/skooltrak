@@ -1,4 +1,4 @@
-import { Confirmation, Modal, Pagination, Paginator, Toast } from '@/ui';
+import { Confirmation, Error, Loader, Modal, Pagination, Paginator, Toast } from '@/ui';
 import { Menu, MenuContent, MenuItem, MenuTrigger } from '@angular/aria/menu';
 import { OverlayModule } from '@angular/cdk/overlay';
 import { DatePipe } from '@angular/common';
@@ -11,8 +11,12 @@ import {
 import { rxResource } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import { Prisma } from '@generated/prisma';
-import { Apollo, gql } from 'apollo-angular';
-import { map, tap } from 'rxjs';
+import { Apollo } from 'apollo-angular';
+import {
+  WebAdminGetSchoolsDocument,
+  WebAdminRemoveSchoolDocument,
+} from '../graphql/generated';
+import { map } from 'rxjs';
 import { SchoolsForm } from './schools-form';
 @Component({
   selector: 'app-schools',
@@ -25,6 +29,8 @@ import { SchoolsForm } from './schools-form';
     MenuTrigger,
     OverlayModule,
     Paginator,
+    Error,
+    Loader,
   ],
   providers: [Pagination],
   template: `<div class="breadcrumbs text-sm">
@@ -45,6 +51,14 @@ import { SchoolsForm } from './schools-form';
         <span class="material-symbols-outlined">add_circle</span> Nueva Escuela
       </button>
     </div>
+    @if (schools.error()) {
+      <lib-error
+        (retry)="schools.reload()"
+        [description]="schools.error()?.message"
+      />
+    } @else if (!schools.hasValue()) {
+      <lib-loader />
+    } @else {
     <div class="overflow-x-auto">
       <table class="table">
         <thead>
@@ -61,7 +75,7 @@ import { SchoolsForm } from './schools-form';
           @for (school of schools.value(); track school.id) {
           <tr>
             <td>{{ school.name }}</td>
-            <td>{{ school.organization.name }}</td>
+            <td>{{ school.organization?.name }}</td>
             <td>{{ school.currentYear }}</td>
             <td>{{ school.createdAt | date : 'medium' }}</td>
             <td>{{ school.updatedAt | date : 'medium' }}</td>
@@ -101,8 +115,8 @@ import { SchoolsForm } from './schools-form';
                       ngMenuItem
                       value="Edit"
                       class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-base-200 w-full"
-                      (keydown.enter)="editSchool(school)"
-                      (click)="editSchool(school)"
+                      (keydown.enter)="editSchool($any(school))"
+                      (click)="editSchool($any(school))"
                       type="button"
                     >
                       <span class="material-symbols-outlined text-lg"
@@ -114,8 +128,8 @@ import { SchoolsForm } from './schools-form';
                       ngMenuItem
                       value="Delete"
                       class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-base-200 w-full"
-                      (click)="deleteSchool(school)"
-                      (keydown.enter)="deleteSchool(school)"
+                      (click)="deleteSchool($any(school))"
+                      (keydown.enter)="deleteSchool($any(school))"
                       type="button"
                     >
                       <span class="material-symbols-outlined text-lg"
@@ -140,7 +154,8 @@ import { SchoolsForm } from './schools-form';
           (takeChange)="pagination.updateTake($event)"
         />
       </div>
-    </div>`,
+    </div>
+    }`,
   styles: ``,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -156,55 +171,19 @@ export class Schools {
     params: () => ({
       take: this.pagination.take(),
       skip: this.pagination.skip(),
-      search: this.pagination.search(),
     }),
     stream: ({ params }) =>
       this.apollo
-        .watchQuery<{
-          count: number;
-          schools: Prisma.SchoolGetPayload<{
-            include: { organization: true };
-          }>[];
-        }>({
+        .watchQuery({
           fetchPolicy: 'cache-and-network',
-          query: gql`
-            query GetSchools($take: Int!, $skip: Int!, $search: String!) {
-              count: schoolsCount(search: $search)
-              schools(take: $take, skip: $skip, search: $search) {
-                id
-                organizationId
-                organization {
-                  id
-                  name
-                }
-                name
-                shortName
-                logo
-                address
-                city
-                state
-                zip
-                country
-                email
-                phone
-                website
-                currentYear
-                createdAt
-                updatedAt
-              }
-            }
-          `,
-          variables: {
-            take: params.take,
-            skip: params.skip,
-            search: params.search,
-          },
+          query: WebAdminGetSchoolsDocument,
         })
         .valueChanges.pipe(
-          tap(({ data }) => {
-            this.pagination.updateCount(data.count);
-          }),
-          map(({ data }) => data.schools)
+          map(({ data }) => {
+            const all = data?.schools ?? [];
+            this.pagination.updateCount(all.length);
+            return all.slice(params.skip, params.skip + params.take);
+          })
         ),
   });
 
@@ -234,17 +213,8 @@ export class Schools {
       .subscribe((result) => {
         if (result) {
           this.apollo
-            .mutate<{ removeSchool: Prisma.SchoolCreateInput }>({
-              mutation: gql`
-                mutation RemoveSchool($id: String!) {
-                  removeSchool(id: $id) {
-                    id
-                    name
-                    createdAt
-                    updatedAt
-                  }
-                }
-              `,
+            .mutate({
+              mutation: WebAdminRemoveSchoolDocument,
               variables: {
                 id: school.id,
               },

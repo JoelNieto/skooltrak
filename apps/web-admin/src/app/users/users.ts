@@ -1,4 +1,4 @@
-import { Confirmation, Modal, Pagination, Paginator, Toast } from '@/ui';
+import { Confirmation, Error, Modal, Pagination, Paginator, Toast } from '@/ui';
 import { Menu, MenuContent, MenuItem, MenuTrigger } from '@angular/aria/menu';
 import { OverlayModule } from '@angular/cdk/overlay';
 import { DatePipe } from '@angular/common';
@@ -7,12 +7,16 @@ import { rxResource } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { Prisma } from '@generated/prisma';
-import { Apollo, gql } from 'apollo-angular';
+import { Apollo } from 'apollo-angular';
+import {
+  WebAdminGetUsersDocument,
+  WebAdminRemoveUserDocument,
+} from '../graphql/generated';
 import { map, tap } from 'rxjs';
 import { UsersForm } from './users-form';
 @Component({
   selector: 'app-users',
-  imports: [RouterLink, DatePipe, Menu, MenuContent, MenuItem, MenuTrigger, OverlayModule, Paginator, FormsModule],
+  imports: [RouterLink, DatePipe, Menu, MenuContent, MenuItem, MenuTrigger, OverlayModule, Paginator, FormsModule, Error],
   providers: [Pagination],
   template: `<div class="breadcrumbs text-sm">
       <ul>
@@ -35,6 +39,12 @@ import { UsersForm } from './users-form';
         <input type="text" class="input" placeholder="Buscar" [(ngModel)]="searchText" />
       </div>
     </div>
+    @if (users.error()) {
+      <lib-error
+        (retry)="users.reload()"
+        [description]="users.error()?.message"
+      />
+    } @else {
     <div class="overflow-x-auto">
       <table class="table">
         <thead>
@@ -87,7 +97,7 @@ import { UsersForm } from './users-form';
                         ngMenuItem
                         value="Edit"
                         class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-base-200 w-full"
-                        (click)="editUser(user)"
+                        (click)="editUser($any(user))"
                       >
                         <span class="material-symbols-outlined text-lg">edit</span>
                         <span>Editar</span>
@@ -96,7 +106,7 @@ import { UsersForm } from './users-form';
                         ngMenuItem
                         value="Delete"
                         class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-base-200 w-full"
-                        (click)="deleteUser(user)"
+                        (click)="deleteUser($any(user))"
                       >
                         <span class="material-symbols-outlined text-lg">delete</span>
                         <span>Eliminar</span>
@@ -116,7 +126,8 @@ import { UsersForm } from './users-form';
         (skipChange)="pagination.updateSkip($event)"
         (takeChange)="pagination.updateTake($event)"
       />
-    </div>`,
+    </div>
+    }`,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Users {
@@ -135,35 +146,8 @@ export class Users {
     }),
     stream: ({ params }) =>
       this.apollo
-        .watchQuery<{
-          count: number;
-          users: Prisma.UserGetPayload<{
-            include: { organization: true; role: true };
-          }>[];
-        }>({
-          query: gql`
-            query GetUsers($take: Int!, $skip: Int!, $search: String!) {
-              count: usersCount(search: $search)
-              users(take: $take, skip: $skip, search: $search) {
-                id
-                firstName
-                lastName
-                email
-                createdAt
-                updatedAt
-                roleId
-                role {
-                  id
-                  name
-                }
-                organizationId
-                organization {
-                  id
-                  name
-                }
-              }
-            }
-          `,
+        .watchQuery({
+          query: WebAdminGetUsersDocument,
           variables: {
             take: params.take,
             skip: params.skip,
@@ -210,17 +194,8 @@ export class Users {
       .subscribe((result) => {
         if (result) {
           this.apollo
-            .mutate<{ removeUser: Prisma.UserCreateInput }>({
-              mutation: gql`
-                mutation RemoveUser($id: String!) {
-                  removeUser(id: $id) {
-                    id
-                    name
-                    createdAt
-                    updatedAt
-                  }
-                }
-              `,
+            .mutate({
+              mutation: WebAdminRemoveUserDocument,
               variables: {
                 id: user.id,
               },

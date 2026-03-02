@@ -1,4 +1,4 @@
-import { Confirmation, Modal, Toast } from '@/ui';
+import { Confirmation, Error, Modal, Toast } from '@/ui';
 import { Menu, MenuContent, MenuItem, MenuTrigger } from '@angular/aria/menu';
 import { OverlayModule } from '@angular/cdk/overlay';
 import { DatePipe } from '@angular/common';
@@ -12,8 +12,12 @@ import { rxResource } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import { Prisma } from '@generated/prisma';
 
-import { Apollo, gql } from 'apollo-angular';
+import { Apollo } from 'apollo-angular';
 import { map } from 'rxjs';
+import {
+  WebAdminGetOrganizationsDocument,
+  WebAdminRemoveOrganizationDocument,
+} from '../graphql/generated';
 import { OrganizationsForm } from './organizations-form';
 @Component({
   selector: 'app-organizations',
@@ -25,6 +29,7 @@ import { OrganizationsForm } from './organizations-form';
     MenuItem,
     MenuTrigger,
     OverlayModule,
+    Error,
   ],
 
   template: `<div class="breadcrumbs text-sm">
@@ -46,6 +51,12 @@ import { OrganizationsForm } from './organizations-form';
         Organizacións
       </button>
     </div>
+    @if (organizations.error()) {
+      <lib-error
+        (retry)="organizations.reload()"
+        [description]="organizations.error()?.message"
+      />
+    } @else {
     <div class="overflow-x-auto">
       <table class="table">
         <thead>
@@ -100,8 +111,8 @@ import { OrganizationsForm } from './organizations-form';
                       ngMenuItem
                       value="Edit"
                       class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-base-200 w-full"
-                      (keydown.enter)="editOrganization(organization)"
-                      (click)="editOrganization(organization)"
+                      (keydown.enter)="editOrganization($any(organization))"
+                      (click)="editOrganization($any(organization))"
                       type="button"
                     >
                       <span class="material-symbols-outlined text-lg"
@@ -113,8 +124,8 @@ import { OrganizationsForm } from './organizations-form';
                       ngMenuItem
                       value="Delete"
                       class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-base-200 w-full"
-                      (click)="deleteOrganization(organization)"
-                      (keydown.enter)="deleteOrganization(organization)"
+                      (click)="deleteOrganization($any(organization))"
+                      (keydown.enter)="deleteOrganization($any(organization))"
                       type="button"
                     >
                       <span class="material-symbols-outlined text-lg"
@@ -130,7 +141,8 @@ import { OrganizationsForm } from './organizations-form';
           }
         </tbody>
       </table>
-    </div>`,
+    </div>
+    }`,
   styles: ``,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -144,19 +156,9 @@ export class Organizations {
   public organizations = rxResource({
     stream: () =>
       this.apollo
-        .watchQuery<{ organizations: Prisma.OrganizationCreateInput[] }>({
+        .watchQuery({
           fetchPolicy: 'cache-and-network',
-          query: gql`
-            query GetOrganizations {
-              organizations {
-                id
-                name
-                description
-                createdAt
-                updatedAt
-              }
-            }
-          `,
+          query: WebAdminGetOrganizationsDocument,
         })
         .valueChanges.pipe(map((result) => result.data?.organizations ?? [])),
   });
@@ -183,20 +185,10 @@ export class Organizations {
       .subscribe((result) => {
         if (result) {
           this.apollo
-            .mutate<{ removeOrganization: Prisma.OrganizationCreateInput }>({
-              mutation: gql`
-                mutation RemoveOrganization($id: String!) {
-                  removeOrganization(id: $id) {
-                    id
-                    name
-                    description
-                    createdAt
-                    updatedAt
-                  }
-                }
-              `,
+            .mutate({
+              mutation: WebAdminRemoveOrganizationDocument,
               variables: {
-                id: organization.id,
+                id: organization.id!,
               },
             })
             .subscribe({

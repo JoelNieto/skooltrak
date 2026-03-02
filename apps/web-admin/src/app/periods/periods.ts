@@ -1,4 +1,4 @@
-import { Confirmation, Modal, Toast } from '@/ui';
+import { Confirmation, Error, Modal, Toast } from '@/ui';
 import { Menu, MenuContent, MenuItem, MenuTrigger } from '@angular/aria/menu';
 import { OverlayModule } from '@angular/cdk/overlay';
 import { DatePipe } from '@angular/common';
@@ -6,7 +6,11 @@ import { Component, inject, viewChild } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import { Prisma } from '@generated/prisma';
-import { Apollo, gql } from 'apollo-angular';
+import { Apollo } from 'apollo-angular';
+import {
+  WebAdminGetPeriodsDocument,
+  WebAdminRemovePeriodDocument,
+} from '../graphql/generated';
 import { filter, map, switchMap } from 'rxjs';
 import PeriodsForm from './periods-form';
 
@@ -82,7 +86,7 @@ import PeriodsForm from './periods-form';
                         ngMenuItem
                         value="Edit"
                         class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-base-200 w-full"
-                        (click)="editPeriod(period)"
+                        (click)="editPeriod($any(period))"
                       >
                         <span class="material-symbols-outlined text-lg">edit</span>
                         <span>Editar</span>
@@ -91,7 +95,7 @@ import PeriodsForm from './periods-form';
                         ngMenuItem
                         value="Delete"
                         class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-base-200 w-full"
-                        (click)="deletePeriod(period)"
+                        (click)="deletePeriod($any(period))"
                       >
                         <span class="material-symbols-outlined text-lg">delete</span>
                         <span>Eliminar</span>
@@ -116,23 +120,8 @@ export default class Periods {
   public periods = rxResource({
     stream: () =>
       this.apollo
-        .watchQuery<{
-          periods: Prisma.PeriodGetPayload<{ include: undefined }>[];
-        }>({
-          query: gql`
-            query GetPeriods {
-              periods {
-                id
-                name
-                shortName
-                year
-                startDate
-                endDate
-                createdAt
-                updatedAt
-              }
-            }
-          `,
+        .watchQuery({
+          query: WebAdminGetPeriodsDocument,
         })
         .valueChanges.pipe(map((result) => result.data?.periods ?? [])),
   });
@@ -160,13 +149,7 @@ export default class Periods {
         filter((confirmed: boolean) => confirmed === true),
         switchMap(() =>
           this.apollo.mutate({
-            mutation: gql`
-              mutation RemovePeriod($removePeriodId: String!) {
-                removePeriod(id: $removePeriodId) {
-                  id
-                }
-              }
-            `,
+            mutation: WebAdminRemovePeriodDocument,
             variables: {
               removePeriodId: period.id,
             },

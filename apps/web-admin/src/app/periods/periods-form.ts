@@ -2,7 +2,11 @@ import { markGroupDirty, Toast } from '@/ui';
 import { Component, inject, input, OnInit, output } from '@angular/core';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Prisma } from '@generated/prisma';
-import { Apollo, gql } from 'apollo-angular';
+import { Apollo } from 'apollo-angular';
+import {
+  WebAdminCreatePeriodDocument,
+  WebAdminUpdatePeriodDocument,
+} from '../graphql/generated';
 import { format } from 'date-fns';
 
 @Component({
@@ -75,13 +79,7 @@ export default class PeriodsForm implements OnInit {
     if (this.data()?.period) {
       this.apollo
         .mutate({
-          mutation: gql`
-            mutation UpdatePeriod($updatePeriodInput: UpdatePeriodInput!) {
-              updatePeriod(updatePeriodInput: $updatePeriodInput) {
-                id
-              }
-            }
-          `,
+          mutation: WebAdminUpdatePeriodDocument,
           variables: {
             updatePeriodInput: {
               ...this.form.getRawValue(),
@@ -102,13 +100,7 @@ export default class PeriodsForm implements OnInit {
     } else {
       this.apollo
         .mutate({
-          mutation: gql`
-            mutation CreatePeriod($createPeriodInput: CreatePeriodInput!) {
-              createPeriod(createPeriodInput: $createPeriodInput) {
-                id
-              }
-            }
-          `,
+          mutation: WebAdminCreatePeriodDocument,
           variables: {
             createPeriodInput: {
               ...this.form.getRawValue(),

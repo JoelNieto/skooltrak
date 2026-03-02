@@ -1,0 +1,11 @@
+mutation WebAdminCreatePeriod($createPeriodInput: CreatePeriodInput!) {
+  createPeriod(createPeriodInput: $createPeriodInput) {
+    id
+  }
+}
+
+mutation WebAdminUpdatePeriod($updatePeriodInput: UpdatePeriodInput!) {
+  updatePeriod(updatePeriodInput: $updatePeriodInput) {
+    id
+  }
+}

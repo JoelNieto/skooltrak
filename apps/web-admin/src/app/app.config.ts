@@ -1,5 +1,5 @@
 import { isPlatformBrowser } from '@angular/common';
-import { provideHttpClient, withFetch } from '@angular/common/http';
+import { HttpHeaders, provideHttpClient, withFetch } from '@angular/common/http';
 import {
   ApplicationConfig,
   inject,
@@ -7,14 +7,10 @@ import {
   provideBrowserGlobalErrorListeners,
   provideZonelessChangeDetection,
 } from '@angular/core';
-import {
-  provideClientHydration,
-  withEventReplay,
-} from '@angular/platform-browser';
+import { provideClientHydration, withEventReplay } from '@angular/platform-browser';
 import { provideRouter, withViewTransitions } from '@angular/router';
-import { InMemoryCache } from '@apollo/client/cache';
-import { ApolloLink } from '@apollo/client/core';
-import { setContext } from '@apollo/client/link/context';
+import { ApolloLink, InMemoryCache } from '@apollo/client/core';
+import { SetContextLink } from '@apollo/client/link/context';
 import { provideApollo } from 'apollo-angular';
 import { HttpLink } from 'apollo-angular/http';
 import { appRoutes } from './app.routes';
@@ -30,14 +26,14 @@ export const appConfig: ApplicationConfig = {
       const httpLink = inject(HttpLink);
       const platformId = inject(PLATFORM_ID);
 
-      const basic = setContext((_, __) => ({
-        headers: {
+      const basic = new SetContextLink(() => ({
+        headers: new HttpHeaders({
           Accept: 'application/json, charset=utf-8',
-        },
+        }),
       }));
 
       // Auth link - supports both JWT tokens and cookie-based sessions
-      const auth = setContext((_, __) => {
+      const auth = new SetContextLink(() => {
         if (!isPlatformBrowser(platformId)) {
           return {};
         }
@@ -45,9 +41,9 @@ export const appConfig: ApplicationConfig = {
         const token = localStorage.getItem('access_token');
         if (token) {
           return {
-            headers: {
+            headers: new HttpHeaders({
               Authorization: `Bearer ${token}`,
-            },
+            }),
           };
         }
         return {};

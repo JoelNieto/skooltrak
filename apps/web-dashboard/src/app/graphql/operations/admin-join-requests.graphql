@@ -1,0 +1,20 @@
+query AdminPendingJoinRequests {
+  pendingJoinRequests {
+    id
+    requestedRole
+    documentId
+    status
+    userId
+    userFirstName
+    userLastName
+    userEmail
+    userImage
+    schoolId
+    schoolName
+    createdAt
+  }
+}
+
+mutation AdminApproveJoinRequest($requestId: String!, $approve: Boolean!) {
+  approveJoinRequest(requestId: $requestId, approve: $approve)
+}

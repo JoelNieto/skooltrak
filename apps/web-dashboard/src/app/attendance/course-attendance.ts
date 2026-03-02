@@ -6,8 +6,13 @@ import { ChangeDetectionStrategy, Component, inject, input, signal, viewChild } 
 import { rxResource } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { Prisma } from '@generated/prisma';
-import { Apollo, gql } from 'apollo-angular';
+import { Apollo } from 'apollo-angular';
 import { map, of, tap } from 'rxjs';
+import {
+  CourseAttendanceAttendanceSessionsDocument,
+  CourseAttendanceClassGroupsByCourseIdDocument,
+  CourseAttendanceDeleteAttendanceSessionDocument,
+} from '../graphql/generated/graphql';
 import AttendanceForm from './attendance-form';
 type StudentType = Prisma.StudentGetPayload<{ include: { classGroup: true } }>;
 
@@ -30,8 +35,6 @@ type AttendanceSessionType = {
   createdAt: string;
   updatedAt: string;
 };
-
-type ClassGroupType = Prisma.ClassGroupGetPayload<{ include: { studyPlan: true } }>;
 
 const STATUS_LABELS: Record<string, string> = {
   PRESENT: 'Presente',
@@ -285,19 +288,8 @@ export default class CourseAttendance {
     stream: ({ params }) => {
       if (!params.courseId) return of([]);
       return this.#apollo
-        .watchQuery<{ classGroupsByCourseId: ClassGroupType[] }>({
-          query: gql`
-            query ClassGroupsByCourseId($courseId: String!) {
-              classGroupsByCourseId(courseId: $courseId) {
-                id
-                name
-                studyPlan {
-                  id
-                  name
-                }
-              }
-            }
-          `,
+        .watchQuery({
+          query: CourseAttendanceClassGroupsByCourseIdDocument,
           variables: { courseId: params.courseId },
           fetchPolicy: 'cache-first',
         })
@@ -315,51 +307,14 @@ export default class CourseAttendance {
     stream: ({ params }) => {
       if (!params.courseId) return of([]);
       return this.#apollo
-        .watchQuery<{
-          attendanceSessions: AttendanceSessionType[];
-          attendanceSessionsCount: number;
-        }>({
-          query: gql`
-            query AttendanceSessions($courseId: String!, $classGroupId: String, $skip: Int, $take: Int) {
-              attendanceSessionsCount(courseId: $courseId, classGroupId: $classGroupId)
-              attendanceSessions(courseId: $courseId, classGroupId: $classGroupId, skip: $skip, take: $take) {
-                id
-                date
-                courseId
-                classGroupId
-                teacherId
-                classGroup {
-                  id
-                  name
-                }
-                records {
-                  id
-                  studentId
-                  status
-                  comment
-                  student {
-                    id
-                    firstName
-                    middleName
-                    fatherName
-                    motherName
-                    classGroup {
-                      id
-                      name
-                    }
-                  }
-                }
-                createdAt
-                updatedAt
-              }
-            }
-          `,
+        .watchQuery({
+          query: CourseAttendanceAttendanceSessionsDocument,
           variables: params,
           fetchPolicy: 'cache-and-network',
         })
         .valueChanges.pipe(
           tap((r) => this.pagination.updateCount(r.data?.attendanceSessionsCount ?? 0)),
-          map((r) => r.data?.attendanceSessions ?? []),
+          map((r) => (r.data?.attendanceSessions as AttendanceSessionType[]) ?? []),
         );
     },
   });
@@ -422,13 +377,7 @@ export default class CourseAttendance {
         if (confirmed) {
           this.#apollo
             .mutate({
-              mutation: gql`
-                mutation DeleteAttendanceSession($id: String!) {
-                  deleteAttendanceSession(id: $id) {
-                    id
-                  }
-                }
-              `,
+              mutation: CourseAttendanceDeleteAttendanceSessionDocument,
               variables: { id: session.id },
             })
             .subscribe({

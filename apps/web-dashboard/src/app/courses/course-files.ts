@@ -10,7 +10,11 @@ import {
 } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
-import { Apollo, gql } from 'apollo-angular';
+import { Apollo } from 'apollo-angular';
+import {
+  CreateFileDownloadUrlDocument,
+  FilesForCourseDocument,
+} from '../graphql/generated/graphql';
 import { map } from 'rxjs';
 import CourseFileUploadForm from './course-file-upload-form';
 
@@ -66,7 +70,7 @@ type CourseFile = {
             <tr >
               <td class="font-medium">{{ file.name }}</td>
               <td class="text-base-200">{{ file.mimeType }}</td>
-              <td class="text-base-200">{{ formatBytes(file.size) }}</td>
+              <td class="text-base-200">{{ formatBytes(file.size ?? 0) }}</td>
               <td>
                 @if(file.access) {
                 <span
@@ -87,7 +91,7 @@ type CourseFile = {
                 @if(file.access) {
                 <button
                   class="cursor-pointer hover:text-primary p-1 text-xs rounded-lg flex items-center justify-center"
-                  (click)="openFile(file.id)"
+                  (click)="file.id ? openFile(file.id) : null"
                 >
                   <span class="material-symbols-outlined text-medium!">open_in_new</span>
 
@@ -127,29 +131,8 @@ export default class CourseFiles {
     }),
     stream: ({ params }) => {
       return this.#apollo
-        .watchQuery<{ filesForCourse: CourseFile[] }>({
-          query: gql`
-            query FilesForCourse(
-              $courseId: String!
-              $take: Int!
-              $skip: Int!
-              $search: String
-            ) {
-              filesForCourse(
-                courseId: $courseId
-                take: $take
-                skip: $skip
-                search: $search
-              ) {
-                id
-                name
-                mimeType
-                size
-                access
-                updatedAt
-              }
-            }
-          `,
+        .watchQuery({
+          query: FilesForCourseDocument,
           variables: {
             courseId: params.courseId,
             take: params.take,
@@ -167,18 +150,8 @@ export default class CourseFiles {
 
   openFile(fileId: string) {
     this.#apollo
-      .mutate<{ createFileDownloadUrl: { downloadUrl: string } }>({
-        mutation: gql`
-          mutation CreateFileDownloadUrl(
-            $createFileDownloadInput: CreateFileDownloadInput!
-          ) {
-            createFileDownloadUrl(
-              createFileDownloadInput: $createFileDownloadInput
-            ) {
-              downloadUrl
-            }
-          }
-        `,
+      .mutate({
+        mutation: CreateFileDownloadUrlDocument,
         variables: {
           createFileDownloadInput: {
             fileId,
@@ -187,7 +160,7 @@ export default class CourseFiles {
       })
       .subscribe({
         next: (result) => {
-          const url = result.data?.createFileDownloadUrl.downloadUrl;
+          const url = result.data?.createFileDownloadUrl?.downloadUrl;
           if (url) {
             window.open(url, '_blank');
           }

@@ -3,7 +3,8 @@ import { ChangeDetectionStrategy, Component, inject, input, ViewEncapsulation } 
 import { rxResource } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import { isValidId } from '../core/validators';
-import { Apollo, gql } from 'apollo-angular';
+import { Apollo } from 'apollo-angular';
+import { GetNewsletterViewDocument } from '../graphql/generated/graphql';
 import { map, of } from 'rxjs';
 
 type NewsletterDetail = {
@@ -146,26 +147,8 @@ export default class NewsletterView {
     stream: ({ params }) => {
       if (!isValidId(params.id)) return of(null);
       return this.apollo
-        .watchQuery<{ newsletter: NewsletterDetail }>({
-          query: gql`
-            query GetNewsletterView($id: String!) {
-              newsletter(id: $id) {
-                id
-                title
-                content
-                published
-                publishedAt
-                author {
-                  id
-                  name
-                }
-                school {
-                  id
-                  name
-                }
-              }
-            }
-          `,
+        .watchQuery({
+          query: GetNewsletterViewDocument,
           variables: { id: params.id },
         })
         .valueChanges.pipe(map((result) => result.data?.newsletter));

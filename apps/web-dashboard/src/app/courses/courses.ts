@@ -5,7 +5,8 @@ import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { Prisma } from '@generated/prisma';
 
-import { Apollo, gql } from 'apollo-angular';
+import { Apollo } from 'apollo-angular';
+import { GetCoursesDocument } from '../graphql/generated/graphql';
 import { map, of, tap } from 'rxjs';
 import Store from '../core/store';
 type Teacher = Prisma.TeacherGetPayload<{ include: { user: true } }> & {
@@ -57,11 +58,11 @@ type CourseType = Prisma.CourseGetPayload<{
               />
               <div class="absolute inset-0 bg-linear-to-t from-black/60 to-transparent"></div>
               <span class="absolute bottom-2 left-2 badge badge-sm badge-primary">
-                {{ course.studyPlan.name }}
+                {{ course.studyPlan?.name }}
               </span>
             </figure>
             <div class="card-body p-3">
-              <h2 class="card-title text-sm line-clamp-2">{{ course.subject.name }}</h2>
+              <h2 class="card-title text-sm line-clamp-2">{{ course.subject?.name }}</h2>
               @if (course.teacher?.name) {
                 <p class="text-xs text-base-content/60 flex items-center gap-1">
                   <span class="material-symbols-outlined text-sm">person</span>
@@ -119,37 +120,8 @@ export default class Courses {
         return of([]);
       }
       return this.#apollo
-        .watchQuery<{
-          count: number;
-          courses: CourseType[];
-        }>({
-          query: gql`
-            query getCourses($schoolId: String!, $take: Int!, $skip: Int!, $search: String) {
-              count: coursesCount(schoolId: $schoolId, search: $search)
-              courses(schoolId: $schoolId, take: $take, skip: $skip, search: $search) {
-                id
-                name
-                shortName
-                schoolId
-                subject {
-                  name
-                }
-                studyPlan {
-                  name
-                }
-                teacher {
-                  id
-                  name
-                }
-                subjectId
-                studyPlanId
-                teacherId
-                code
-                createdAt
-                updatedAt
-              }
-            }
-          `,
+        .watchQuery({
+          query: GetCoursesDocument,
           variables: {
             schoolId,
             take,

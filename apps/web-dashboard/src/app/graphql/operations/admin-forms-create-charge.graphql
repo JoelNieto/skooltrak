@@ -1,0 +1,20 @@
+query CreateChargeFormStudentsBySchoolId($schoolId: String!) {
+  studentsBySchoolId(schoolId: $schoolId) {
+    id
+    firstName
+    fatherName
+  }
+}
+
+query CreateChargeFormStudyPlansBySchoolId($schoolId: String!) {
+  studyPlansBySchoolId(schoolId: $schoolId) {
+    id
+    name
+  }
+}
+
+mutation CreateChargeFormCreateCharge($input: CreateChargeInput!) {
+  createCharge(input: $input) {
+    id
+  }
+}

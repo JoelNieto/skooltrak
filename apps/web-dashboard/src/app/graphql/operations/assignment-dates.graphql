@@ -1,0 +1,37 @@
+query AssignmentDatesBySchoolId(
+  $schoolId: String!
+  $startDate: String!
+  $endDate: String!
+  $classGroupId: String
+) {
+  assignmentDatesBySchoolId(
+    schoolId: $schoolId
+    startDate: $startDate
+    endDate: $endDate
+    classGroupId: $classGroupId
+  ) {
+    id
+    date
+    classGroupId
+    classGroup {
+      id
+      name
+    }
+    assignment {
+      id
+      title
+      details
+      type
+      requireSubmission
+      course {
+        id
+        name
+      }
+      teacher {
+        id
+        firstName
+        fatherName
+      }
+    }
+  }
+}

@@ -5,7 +5,12 @@ import { email, form, FormField, required, submit } from '@angular/forms/signals
 import { Router, RouterLink } from '@angular/router';
 import { Prisma } from '@generated/prisma';
 import { isValidId } from '../core/validators';
-import { Apollo, gql } from 'apollo-angular';
+import { Apollo } from 'apollo-angular';
+import {
+  CreateTeacherDocument,
+  TeacherFormDocument,
+  UpdateTeacherDocument,
+} from '../graphql/generated/graphql';
 import { map, of } from 'rxjs';
 import Store from '../core/store';
 
@@ -380,31 +385,9 @@ export default class TeacherForm {
         return of(null);
       }
       return this.apollo
-        .watchQuery<{ teacher: TeacherType }>({
+        .watchQuery({
           fetchPolicy: 'network-only',
-          query: gql`
-            query Teacher($id: String!) {
-              teacher(id: $id) {
-                id
-                firstName
-                middleName
-                fatherName
-                motherName
-                documentId
-                birthDate
-                gender
-                address
-                phoneNumber
-                personalEmail
-                about
-                teacherSince
-                memberSince
-                user {
-                  email
-                }
-              }
-            }
-          `,
+          query: TeacherFormDocument,
           variables: { id: params.id },
         })
         .valueChanges.pipe(map((result) => result.data?.teacher));
@@ -462,17 +445,11 @@ export default class TeacherForm {
         await new Promise<void>((resolve, reject) => {
           this.apollo
             .mutate({
-              mutation: gql`
-                mutation UpdateTeacher($updateTeacherInput: UpdateTeacherInput!) {
-                  updateTeacher(updateTeacherInput: $updateTeacherInput) {
-                    id
-                  }
-                }
-              `,
+              mutation: UpdateTeacherDocument,
               variables: {
                 updateTeacherInput: {
                   ...request,
-                  id: this.id(),
+                  id: this.id()!,
                 },
               },
             })
@@ -497,17 +474,11 @@ export default class TeacherForm {
         await new Promise<void>((resolve, reject) => {
           this.apollo
             .mutate({
-              mutation: gql`
-                mutation CreateTeacher($createTeacherInput: CreateTeacherInput!) {
-                  createTeacher(createTeacherInput: $createTeacherInput) {
-                    id
-                  }
-                }
-              `,
+              mutation: CreateTeacherDocument,
               variables: {
                 createTeacherInput: {
                   ...request,
-                  organizationId: this.store.currentOrganizationId(),
+                  organizationId: this.store.currentOrganizationId()!,
                 },
               },
             })
@@ -515,8 +486,8 @@ export default class TeacherForm {
               next: (result) => {
                 this.isSaving.set(false);
                 this.toasts.showSuccess('Docente creado exitosamente');
-                const data = result.data as { createTeacher: { id: string } };
-                this.router.navigate(['/teachers', data.createTeacher.id]);
+                const id = result.data?.createTeacher?.id;
+                if (id) this.router.navigate(['/teachers', id]);
                 resolve();
               },
               error: (error) => {

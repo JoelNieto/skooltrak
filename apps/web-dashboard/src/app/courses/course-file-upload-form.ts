@@ -1,12 +1,9 @@
 import { markGroupDirty, Toast } from '@/ui';
 import { Component, inject, input, output } from '@angular/core';
-import {
-  NonNullableFormBuilder,
-  ReactiveFormsModule,
-  Validators,
-} from '@angular/forms';
-import { Apollo, gql } from 'apollo-angular';
+import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Apollo } from 'apollo-angular';
 import { from, switchMap } from 'rxjs';
+import { CreateFileDocument, CreateFileUploadUrlDocument, ShareFileDocument } from '../graphql/generated/graphql';
 
 type UploadResult = { created: boolean };
 
@@ -17,38 +14,21 @@ type UploadResult = { created: boolean };
     <div class="flex flex-col gap-4">
       <div class="fieldset">
         <label for="file">Archivo</label>
-        <input
-          id="file"
-          type="file"
-          class="file-input file-input-primary w-full"
-          (change)="onFileSelected($event)"
-        />
-        @if(selectedFile) {
-        <p class="text-sm text-base-200 mt-1">
-          {{ selectedFile.name }} · {{ formatBytes(selectedFile.size) }}
-        </p>
+        <input id="file" type="file" class="file-input file-input-primary w-full" (change)="onFileSelected($event)" />
+        @if (selectedFile) {
+          <p class="text-sm text-base-200 mt-1">{{ selectedFile.name }} · {{ formatBytes(selectedFile.size) }}</p>
         }
       </div>
       <div class="fieldset">
         <label for="permission">Permiso</label>
-        <select
-          id="permission"
-          formControlName="permission"
-          class="select select-primary"
-        >
+        <select id="permission" formControlName="permission" class="select select-primary">
           <option value="VIEW">Solo ver</option>
           <option value="EDIT">Puede editar</option>
         </select>
       </div>
     </div>
     <div class="mt-6 flex justify-end gap-2">
-      <button
-        class="btn btn-ghost"
-        type="button"
-        (click)="closeModal.emit(undefined)"
-      >
-        Cancelar
-      </button>
+      <button class="btn btn-ghost" type="button" (click)="closeModal.emit(undefined)">Cancelar</button>
       <button class="btn btn-primary" type="submit">Subir</button>
     </div>
   </form>`,
@@ -87,19 +67,8 @@ export default class CourseFileUploadForm {
     const mimeType = this.selectedFile.type || 'application/octet-stream';
 
     this.apollo
-      .mutate<{
-        createFileUploadUrl: { uploadUrl: string; storageKey: string };
-      }>({
-        mutation: gql`
-          mutation CreateFileUploadUrl(
-            $createFileUploadInput: CreateFileUploadInput!
-          ) {
-            createFileUploadUrl(createFileUploadInput: $createFileUploadInput) {
-              uploadUrl
-              storageKey
-            }
-          }
-        `,
+      .mutate({
+        mutation: CreateFileUploadUrlDocument,
         variables: {
           createFileUploadInput: {
             courseId: this.data().courseId,
@@ -110,7 +79,7 @@ export default class CourseFileUploadForm {
       })
       .pipe(
         switchMap((result) => {
-          const payload = result.data?.createFileUploadUrl;
+          const payload = result.data?.createFileUploadUrl ?? undefined;
           if (!payload) {
             throw new Error('No upload URL returned.');
           }
@@ -124,47 +93,35 @@ export default class CourseFileUploadForm {
                 throw new Error('Upload failed.');
               }
               return payload;
-            })
+            }),
           );
         }),
         switchMap((payload) =>
-          this.apollo.mutate<{ createFile: { id: string } }>({
-            mutation: gql`
-              mutation CreateFile($createFileInput: CreateFileInput!) {
-                createFile(createFileInput: $createFileInput) {
-                  id
-                }
-              }
-            `,
+          this.apollo.mutate({
+            mutation: CreateFileDocument,
             variables: {
               createFileInput: {
-                name: this.selectedFile?.name,
+                name: this.selectedFile?.name ?? '',
                 mimeType,
-                size: this.selectedFile?.size,
+                size: this.selectedFile?.size ?? 0,
                 storageKey: payload.storageKey,
               },
             },
-          })
+          }),
         ),
         switchMap((result) =>
           this.apollo.mutate({
-            mutation: gql`
-              mutation ShareFile($shareFileInput: ShareFileInput!) {
-                shareFile(shareFileInput: $shareFileInput) {
-                  id
-                }
-              }
-            `,
+            mutation: ShareFileDocument,
             variables: {
               shareFileInput: {
-                fileId: result.data?.createFile.id,
+                fileId: result.data?.createFile?.id ?? '',
                 targetType: 'COURSE',
                 targetId: this.data().courseId,
                 permission,
               },
             },
-          })
-        )
+          }),
+        ),
       )
       .subscribe({
         next: () => {

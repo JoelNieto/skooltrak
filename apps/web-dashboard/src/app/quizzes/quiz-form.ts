@@ -15,21 +15,16 @@ import { $Enums, Prisma } from '@generated/prisma';
 
 type Decimal = InstanceType<typeof Prisma.Decimal>;
 
-import { Apollo, gql } from 'apollo-angular';
+import { Apollo } from 'apollo-angular';
 import { of } from 'rxjs';
 import { map } from 'rxjs/operators';
 import Store from '../core/store';
+import { QuizFormCoursesBySchoolIdDocument } from '../graphql/generated/graphql';
 import { QuizQuestionControl } from './quiz-question-control';
 
 @Component({
   selector: 'app-quiz-form',
-  imports: [
-    RouterLink,
-    ReactiveFormsModule,
-    FormsModule,
-    TextEditor,
-    QuizQuestionControl,
-  ],
+  imports: [RouterLink, ReactiveFormsModule, FormsModule, TextEditor, QuizQuestionControl],
 
   template: `<div class="breadcrumbs text-sm">
       <ul>
@@ -64,31 +59,19 @@ import { QuizQuestionControl } from './quiz-question-control';
                 class="select select-primary"
                 placeholder="Selecciona un curso..."
               >
-                <option value="" disabled selected>
-                  Selecciona un curso...
-                </option>
-                @for(course of coursesResource.value(); track course.id) {
-                <option value="{{ course.id }}">{{ course.name }}</option>
+                <option value="" disabled selected>Selecciona un curso...</option>
+                @for (course of coursesResource.value(); track course.id) {
+                  <option value="{{ course.id }}">{{ course.name }}</option>
                 }
               </select>
             </div>
             <div class="fieldset">
               <label for="description">Descripción</label>
-              <lib-text-editor
-                id="description"
-                name="description"
-                formControlName="description"
-              />
+              <lib-text-editor id="description" name="description" formControlName="description" />
             </div>
           </div>
           <div class="flex justify-end mt-4">
-            <button
-              type="submit"
-              class="btn btn-primary"
-              (click)="saveChanges()"
-            >
-              Guardar
-            </button>
+            <button type="submit" class="btn btn-primary" (click)="saveChanges()">Guardar</button>
           </div>
         </div>
       </div>
@@ -97,24 +80,18 @@ import { QuizQuestionControl } from './quiz-question-control';
           <h2 class="card-title text-xl font-semibold">Preguntas</h2>
 
           <div formArrayName="questions" class="flex flex-col gap-4">
-            @for(question of questions.controls; track $index) {
-            <div class="card bg-base-100 card-border border-neutral-300">
-              <div class="card-body">
-                <div class="flex justify-between">
-                  <h2 class="card-title">Pregunta {{ $index + 1 }}</h2>
-                  <button
-                    class="btn btn-soft btn-error"
-                    (click)="removeQuestion($index)"
-                  >
-                    <span class="material-symbols-outlined">delete</span>
-                  </button>
+            @for (question of questions.controls; track $index) {
+              <div class="card bg-base-100 card-border border-neutral-300">
+                <div class="card-body">
+                  <div class="flex justify-between">
+                    <h2 class="card-title">Pregunta {{ $index + 1 }}</h2>
+                    <button class="btn btn-soft btn-error" (click)="removeQuestion($index)">
+                      <span class="material-symbols-outlined">delete</span>
+                    </button>
+                  </div>
+                  <app-quiz-question-control [question]="question" [index]="$index" />
                 </div>
-                <app-quiz-question-control
-                  [question]="question"
-                  [index]="$index"
-                />
               </div>
-            </div>
             }
             <button class="btn btn-primary btn-soft" (click)="addQuestion()">
               <span class="material-symbols-outlined">add_circle</span>
@@ -141,9 +118,7 @@ export default class QuizForm {
     });
   }
 
-  private createQuestionGroup(
-    question?: Prisma.QuizQuestionGetPayload<{ include: { options: true } }>
-  ) {
+  private createQuestionGroup(question?: Prisma.QuizQuestionGetPayload<{ include: { options: true } }>) {
     return this.fb.group<{
       question: FormControl<string>;
       value: FormControl<number | Decimal>;
@@ -165,11 +140,7 @@ export default class QuizForm {
           option: FormControl<string>;
           isCorrect: FormControl<boolean>;
         }>
-      >(
-        question?.options
-          ? question.options.map((opt) => this.createOptionGroup(opt))
-          : []
-      ),
+      >(question?.options ? question.options.map((opt) => this.createOptionGroup(opt)) : []),
     });
   }
 
@@ -183,21 +154,10 @@ export default class QuizForm {
         return of([]);
       }
       return this.apollo
-        .watchQuery<{
-          coursesBySchoolId: Prisma.CourseGetPayload<{
-            include: undefined;
-          }>[];
-        }>({
-          query: gql`
-            query CoursesBySchoolId($schoolId: String!) {
-              coursesBySchoolId(schoolId: $schoolId) {
-                id
-                name
-              }
-            }
-          `,
+        .watchQuery({
+          query: QuizFormCoursesBySchoolIdDocument,
           variables: {
-            schoolId: params.schoolId,
+            schoolId: schoolId,
           },
         })
         .valueChanges.pipe(map((result) => result.data?.coursesBySchoolId ?? []));
@@ -228,9 +188,7 @@ export default class QuizForm {
     return this.quizForm.controls.questions;
   }
 
-  initQuestion(
-    question?: Prisma.QuizQuestionGetPayload<{ include: { options: true } }>
-  ) {
+  initQuestion(question?: Prisma.QuizQuestionGetPayload<{ include: { options: true } }>) {
     return this.createQuestionGroup(question);
   }
 

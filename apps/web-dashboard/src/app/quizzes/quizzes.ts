@@ -1,8 +1,8 @@
 import { Component, inject } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
-import { Prisma } from '@generated/prisma';
-import { Apollo, gql } from 'apollo-angular';
+import { Apollo } from 'apollo-angular';
+import { QuizzesListDocument } from '../graphql/generated/graphql';
 import { map, of } from 'rxjs';
 import Store from '../core/store';
 @Component({
@@ -32,30 +32,8 @@ export default class Quizzes {
         return of([]);
       }
       return this.apollo
-        .watchQuery<{
-          quizzes: Prisma.QuizGetPayload<{
-            include: { course: true; teacher: true };
-          }>[];
-        }>({
-          query: gql`
-            query Quizzes($organizationId: String!) {
-              quizzes(organizationId: $organizationId) {
-                id
-                title
-                createdAt
-                updatedAt
-                course {
-                  id
-                  name
-                }
-                teacher {
-                  id
-                  firstName
-                  fatherName
-                }
-              }
-            }
-          `,
+        .watchQuery({
+          query: QuizzesListDocument,
           variables: {
             organizationId: params.organizationId,
           },

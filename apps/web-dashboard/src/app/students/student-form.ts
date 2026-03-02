@@ -5,7 +5,13 @@ import { email, form, FormField, required, submit } from '@angular/forms/signals
 import { Router, RouterLink } from '@angular/router';
 import { Prisma } from '@generated/prisma';
 import { isValidId } from '../core/validators';
-import { Apollo, gql } from 'apollo-angular';
+import { Apollo } from 'apollo-angular';
+import {
+  ClassGroupsBySchoolIdDocument,
+  CreateStudentDocument,
+  StudentFormDataDocument,
+  UpdateStudentDocument,
+} from '../graphql/generated/graphql';
 import { map, of } from 'rxjs';
 import Store from '../core/store';
 
@@ -482,15 +488,8 @@ export default class StudentForm {
         return of([]);
       }
       return this.apollo
-        .watchQuery<{ classGroupsBySchoolId: { id: string; name: string }[] }>({
-          query: gql`
-            query ClassGroupsBySchoolId($schoolId: String!) {
-              classGroupsBySchoolId(schoolId: $schoolId) {
-                id
-                name
-              }
-            }
-          `,
+        .watchQuery({
+          query: ClassGroupsBySchoolIdDocument,
           variables: { schoolId },
         })
         .valueChanges.pipe(map((result) => result.data?.classGroupsBySchoolId ?? []));
@@ -506,31 +505,8 @@ export default class StudentForm {
         return of(null);
       }
       return this.apollo
-        .watchQuery<{ student: StudentType }>({
-          query: gql`
-            query Student($id: String!) {
-              student(id: $id) {
-                id
-                firstName
-                middleName
-                fatherName
-                motherName
-                documentId
-                email
-                classGroupId
-                birthDate
-                gender
-                address
-                phone
-                enrollmentStatus
-                bloodType
-                allergies
-                medicalNotes
-                emergencyContactName
-                emergencyContactPhone
-              }
-            }
-          `,
+        .watchQuery({
+          query: StudentFormDataDocument,
           variables: { id: params.id },
         })
         .valueChanges.pipe(map((result) => result.data?.student));
@@ -592,17 +568,11 @@ export default class StudentForm {
         await new Promise<void>((resolve, reject) => {
           this.apollo
             .mutate({
-              mutation: gql`
-                mutation UpdateStudent($updateStudentInput: UpdateStudentInput!) {
-                  updateStudent(updateStudentInput: $updateStudentInput) {
-                    id
-                  }
-                }
-              `,
+              mutation: UpdateStudentDocument,
               variables: {
                 updateStudentInput: {
                   ...request,
-                  id: this.id(),
+                  id: this.id()!,
                 },
               },
             })
@@ -627,18 +597,12 @@ export default class StudentForm {
         await new Promise<void>((resolve, reject) => {
           this.apollo
             .mutate({
-              mutation: gql`
-                mutation CreateStudent($createStudentInput: CreateStudentInput!) {
-                  createStudent(createStudentInput: $createStudentInput) {
-                    id
-                  }
-                }
-              `,
+              mutation: CreateStudentDocument,
               variables: {
                 createStudentInput: {
                   ...request,
-                  organizationId: this.store.currentOrganizationId(),
-                  schoolId: this.store.currentSchoolId(),
+                  organizationId: this.store.currentOrganizationId()!,
+                  schoolId: this.store.currentSchoolId()!,
                 },
               },
             })
@@ -646,8 +610,8 @@ export default class StudentForm {
               next: (result) => {
                 this.isSaving.set(false);
                 this.toasts.showSuccess('Alumno creado exitosamente');
-                const data = result.data as { createStudent: { id: string } };
-                this.router.navigate(['/students', data.createStudent.id]);
+                const id = result.data?.createStudent?.id;
+                if (id) this.router.navigate(['/students', id]);
                 resolve();
               },
               error: (error) => {

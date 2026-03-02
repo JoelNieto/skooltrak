@@ -1,0 +1,10 @@
+query CourseGradeBuckets($courseId: String!) {
+  gradeBucketsByCourseId(courseId: $courseId) {
+    id
+    name
+    weight
+    courseId
+    createdAt
+    updatedAt
+  }
+}

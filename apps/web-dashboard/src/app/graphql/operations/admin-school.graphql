@@ -1,0 +1,20 @@
+query AdminSchool($id: String!) {
+  school(id: $id) {
+    id
+    name
+    shortName
+    logo
+    logoUrl
+    email
+    phone
+    website
+    address
+    city
+    state
+    zip
+    country
+    currentYear
+    createdAt
+    updatedAt
+  }
+}

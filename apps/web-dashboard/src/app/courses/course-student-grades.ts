@@ -4,21 +4,11 @@ import { afterRenderEffect, Component, computed, inject, input, signal } from '@
 import { rxResource } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { Prisma } from '@generated/prisma';
-import { Apollo, gql } from 'apollo-angular';
+import { Apollo } from 'apollo-angular';
 import { map, of } from 'rxjs';
 import Store from '../core/store';
+import { PeriodsByYearDocument, StudentGradesByCourseIdDocument } from '../graphql/generated/graphql';
 
-type StudentGradeItem = DecimalToNumber<
-  Prisma.StudentGradeGetPayload<{
-    include: {
-      grade: {
-        include: {
-          bucket: true;
-        };
-      };
-    };
-  }>
->;
 @Component({
   selector: 'app-course-student-grades',
   imports: [FormsModule, NgClass, DatePipe, DecimalPipe],
@@ -40,11 +30,11 @@ type StudentGradeItem = DecimalToNumber<
             <div class="text-lg font-bold">
               <span
                 [ngClass]="{
-                  'text-success': studentsResource.value().average >= metric().minimumApproval,
-                  'text-warning':
+                  'text-success!': studentsResource.value().average >= metric().minimumApproval,
+                  'text-warning!':
                     studentsResource.value().average >= metric().minimumApproval &&
                     studentsResource.value().average < metric().minimumExcellence,
-                  'text-error': studentsResource.value().average < metric().minimumApproval,
+                  'text-error!': studentsResource.value().average < metric().minimumApproval,
                 }"
               >
                 {{ studentsResource.value().average | number: '1.1-1' }}
@@ -81,17 +71,17 @@ type StudentGradeItem = DecimalToNumber<
           <tbody>
             @for (item of studentsResource.value().studentGradesByCourseId; track item.id) {
               <tr>
-                <td>{{ item.grade.title }}</td>
+                <td>{{ item.grade?.title }}</td>
 
                 <td>{{ item.comments }}</td>
-                <td>{{ item.grade.date | date: 'dd/MM/yyyy' }}</td>
-                <td>{{ item.grade.bucket.name }}</td>
+                <td>{{ item.grade?.date | date: 'dd/MM/yyyy' }}</td>
+                <td>{{ item.grade?.bucket?.name }}</td>
                 <td
                   [ngClass]="{
-                    '!text-success bg-success/10': item.score && item.score! >= metric().minimumApproval,
-                    '!text-warning bg-warning/10':
+                    'text-success! bg-success/10': item.score && item.score! >= metric().minimumApproval,
+                    'text-warning! bg-warning/10':
                       item.score && item.score! >= metric().minimumApproval && item.score! < metric().minimumExcellence,
-                    '!text-error bg-error/10': item.score && item.score! < metric().minimumApproval,
+                    'text-error! bg-error/10': item.score && item.score! < metric().minimumApproval,
                   }"
                 >
                   {{ item.score | number: '1.1-1' }}
@@ -125,19 +115,8 @@ export default class CourseStudentGrades {
         return of([]);
       }
       return this.#apollo
-        .query<{
-          periodsByYear: Prisma.PeriodGetPayload<{ include: undefined }>[];
-        }>({
-          query: gql`
-            query PeriodsByYear($year: Int!) {
-              periodsByYear(year: $year) {
-                id
-                name
-                startDate
-                endDate
-              }
-            }
-          `,
+        .query({
+          query: PeriodsByYearDocument,
           variables: {
             year,
           },
@@ -151,9 +130,7 @@ export default class CourseStudentGrades {
     const periods = this.periodsResource.value();
     if (!periods?.length) return '';
     const today = new Date();
-    const current = periods.find(
-      (p) => new Date(p.startDate) <= today && today <= new Date(p.endDate),
-    );
+    const current = periods.find((p) => new Date(p.startDate) <= today && today <= new Date(p.endDate));
     return current?.id ?? '';
   });
 
@@ -176,30 +153,8 @@ export default class CourseStudentGrades {
         });
       }
       return this.#apollo
-        .watchQuery<{
-          average: number;
-          studentGradesByCourseId: StudentGradeItem[];
-        }>({
-          query: gql`
-            query StudentGradesByCourseId($courseId: String!, $periodId: String!, $studentId: String!) {
-              average: averageCourseScoreForStudent(studentId: $studentId, courseId: $courseId, periodId: $periodId)
-              studentGradesByCourseId(courseId: $courseId, periodId: $periodId, studentId: $studentId) {
-                id
-                score
-                comments
-                grade {
-                  id
-                  title
-                  date
-                  comments
-                  bucket {
-                    id
-                    name
-                  }
-                }
-              }
-            }
-          `,
+        .watchQuery({
+          query: StudentGradesByCourseIdDocument,
           variables: {
             courseId,
             periodId,
@@ -208,7 +163,7 @@ export default class CourseStudentGrades {
         })
         .valueChanges.pipe(
           map((result) => ({
-            average: result.data?.average,
+            average: result.data?.average ?? 0,
             studentGradesByCourseId: result.data?.studentGradesByCourseId ?? [],
           })),
         );

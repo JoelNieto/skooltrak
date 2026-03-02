@@ -3,11 +3,18 @@ import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
-import { Prisma } from '@generated/prisma';
-import { Apollo, gql } from 'apollo-angular';
+import { Apollo } from 'apollo-angular';
 import { endOfWeek, startOfWeek } from 'date-fns';
 import { map, of } from 'rxjs';
 import Store from './core/store';
+import {
+  TeacherAssignmentsDocument,
+  TeacherAssignmentsQuery,
+  TeacherDashboardStatsDocument,
+  TeacherRecentMessagesDocument,
+  TeacherRecentNewslettersDocument,
+  TeacherRecentNewslettersQuery,
+} from './graphql/generated/graphql';
 @Component({
   selector: 'app-teacher-home',
   imports: [DatePipe, RouterLink, PageHeader, StatCard, EmptyState],
@@ -56,7 +63,7 @@ import Store from './core/store';
                     {{ assignment.title }}
                   </p>
                   <div class="text-sm text-base-content/70">
-                    {{ assignment.course?.name }} ·
+                    {{ assignment.course.name }} ·
                     {{ assignment.date | date: 'mediumDate' }}
                   </div>
                 </div>
@@ -114,15 +121,13 @@ import Store from './core/store';
                   <div class="rounded-lg border border-base-200 p-3">
                     <p class="font-medium text-base-content">{{ newsletter.title }}</p>
                     <p class="text-sm text-base-content/70 mt-1 line-clamp-2">
-                      {{ stripHtml(newsletter.content ?? '') }}
+                      {{ stripHtml(newsletter.content) }}
                     </p>
                     <div class="flex items-center justify-between mt-2">
                       <span class="text-sm text-base-content/70">
-                        {{ newsletter.author?.name }} · {{ newsletter.publishedAt | date: 'mediumDate' }}
+                        {{ newsletter.author.name }} · {{ newsletter.publishedAt | date: 'mediumDate' }}
                       </span>
-                      <a [routerLink]="['/newsletters', newsletter.id]" class="link link-primary text-sm">
-                        Ver más
-                      </a>
+                      <a [routerLink]="['/newsletters', newsletter.id]" class="link link-primary text-sm"> Ver más </a>
                     </div>
                   </div>
                 }
@@ -153,21 +158,22 @@ export default class TeacherHome {
         });
       }
       return this.apollo
-        .watchQuery<{
-          coursesCount: number;
-          findManyStudentsCount: number;
-        }>({
-          query: gql`
-            query TeacherDashboardStats($schoolId: String) {
-              coursesCount(schoolId: $schoolId)
-              findManyStudentsCount(schoolId: $schoolId)
-            }
-          `,
+        .watchQuery({
+          query: TeacherDashboardStatsDocument,
           variables: {
             schoolId: params.schoolId,
           },
         })
-        .valueChanges.pipe(map((result) => result.data ?? { coursesCount: 0, findManyStudentsCount: 0 }));
+        .valueChanges.pipe(
+          map(
+            (result) =>
+              result.data ??
+              ({
+                coursesCount: 0,
+                findManyStudentsCount: 0,
+              } as { coursesCount: number; findManyStudentsCount: number }),
+          ),
+        );
     },
   });
 
@@ -179,30 +185,22 @@ export default class TeacherHome {
     }),
     stream: ({ params }) => {
       if (!params.schoolId) {
-        return of<AssignmentPreview[]>([]);
+        return of<TeacherAssignmentsQuery['assignmentsBySchoolId']>([]);
       }
       return this.apollo
-        .watchQuery<{ assignmentsBySchoolId: AssignmentPreview[] }>({
-          query: gql`
-            query TeacherAssignments($schoolId: String!, $startDate: String!, $endDate: String!) {
-              assignmentsBySchoolId(schoolId: $schoolId, startDate: $startDate, endDate: $endDate) {
-                id
-                title
-                date
-                course {
-                  id
-                  name
-                }
-              }
-            }
-          `,
+        .watchQuery({
+          query: TeacherAssignmentsDocument,
           variables: {
             schoolId: params.schoolId,
             startDate: params.startDate.toISOString(),
             endDate: params.endDate.toISOString(),
           },
         })
-        .valueChanges.pipe(map((result) => result.data?.assignmentsBySchoolId ?? []));
+        .valueChanges.pipe(
+          map(
+            (result) => (result.data?.assignmentsBySchoolId ?? []) as TeacherAssignmentsQuery['assignmentsBySchoolId'],
+          ),
+        );
     },
   });
 
@@ -210,24 +208,8 @@ export default class TeacherHome {
     params: () => ({ take: 4, skip: 0 }),
     stream: ({ params }) => {
       return this.apollo
-        .watchQuery<{ findManyMessages: RecentMessage[] }>({
-          query: gql`
-            query TeacherRecentMessages($take: Int!, $skip: Int!) {
-              findManyMessages(take: $take, skip: $skip) {
-                id
-                createdAt
-                message {
-                  id
-                  subject
-                  createdAt
-                  sender {
-                    id
-                    name
-                  }
-                }
-              }
-            }
-          `,
+        .watchQuery({
+          query: TeacherRecentMessagesDocument,
           variables: params,
         })
         .valueChanges.pipe(map((result) => result.data?.findManyMessages ?? []));
@@ -238,30 +220,22 @@ export default class TeacherHome {
     params: () => ({ schoolId: this.store.currentSchoolId() }),
     stream: ({ params }) => {
       if (!params.schoolId) {
-        return of<RecentNewsletter[]>([]);
+        return of<TeacherRecentNewslettersQuery['publishedNewsletters']>([]);
       }
       return this.apollo
-        .watchQuery<{ publishedNewsletters: RecentNewsletter[] }>({
-          query: gql`
-            query TeacherRecentNewsletters($schoolId: String!, $take: Int!) {
-              publishedNewsletters(schoolId: $schoolId, take: $take) {
-                id
-                title
-                content
-                publishedAt
-                author {
-                  id
-                  name
-                }
-              }
-            }
-          `,
+        .watchQuery({
+          query: TeacherRecentNewslettersDocument,
           variables: {
             schoolId: params.schoolId,
             take: 3,
           },
         })
-        .valueChanges.pipe(map((result) => result.data?.publishedNewsletters ?? []));
+        .valueChanges.pipe(
+          map(
+            (result) =>
+              (result.data?.publishedNewsletters ?? []) as TeacherRecentNewslettersQuery['publishedNewsletters'],
+          ),
+        );
     },
   });
 
@@ -273,31 +247,10 @@ export default class TeacherHome {
 
   public upcomingAssignments = computed(() => {
     const assignments = this.assignmentsResource.value() ?? [];
-    return [...assignments].sort((a, b) => new Date(a.date ?? 0).getTime() - new Date(b.date ?? 0).getTime()).slice(0, 4);
+    return [...assignments]
+      .sort((a, b) => new Date(a.date ?? 0).getTime() - new Date(b.date ?? 0).getTime())
+      .slice(0, 4);
   });
 
   public weeklyAssignmentsCount = computed(() => this.assignmentsResource.value()?.length ?? 0);
 }
-
-type AssignmentPreview = Prisma.AssignmentGetPayload<{
-  include: { course: true };
-}>;
-
-type RecentNewsletter = {
-  id: string;
-  title: string;
-  content: string;
-  publishedAt: string;
-  author: { id: string; name: string };
-};
-
-type RecentMessage = {
-  id: string;
-  createdAt: string;
-  message: {
-    id: string;
-    subject: string;
-    createdAt: string;
-    sender: { id: string; name: string };
-  };
-};

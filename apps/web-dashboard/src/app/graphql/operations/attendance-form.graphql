@@ -1,0 +1,32 @@
+query AttendanceFormStudentsForAttendance($courseId: String!, $classGroupId: String!) {
+  studentsForAttendance(courseId: $courseId, classGroupId: $classGroupId) {
+    id
+    firstName
+    middleName
+    fatherName
+    motherName
+    classGroup {
+      id
+      name
+    }
+  }
+}
+
+mutation AttendanceFormCreateAttendanceSession($input: CreateAttendanceSessionInput!) {
+  createAttendanceSession(input: $input) {
+    id
+    date
+    classGroup {
+      id
+      name
+    }
+  }
+}
+
+mutation AttendanceFormUpdateAttendanceRecords($inputs: [UpdateAttendanceRecordInput!]!) {
+  updateAttendanceRecords(inputs: $inputs) {
+    id
+    status
+    comment
+  }
+}

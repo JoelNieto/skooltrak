@@ -8,7 +8,11 @@ import {
 import { Prisma } from '@generated/prisma';
 
 type Decimal = InstanceType<typeof Prisma.Decimal>;
-import { Apollo, gql } from 'apollo-angular';
+import { Apollo } from 'apollo-angular';
+import {
+  GradeBucketsFormCreateGradeBucketDocument,
+  GradeBucketsFormUpdateGradeBucketDocument,
+} from '../graphql/generated/graphql';
 @Component({
   selector: 'app-grade-bucket-form',
   imports: [ReactiveFormsModule],
@@ -66,29 +70,16 @@ export default class GradeBucketForm implements OnInit {
       return;
     }
     if (this.data().bucket) {
+      const raw = this.form.getRawValue();
       this.#apollo
         .mutate({
-          mutation: gql`
-            mutation UpdateGradeBucket(
-              $id: String!
-              $updateGradeBucketInput: GradeBucketUpdateInput!
-            ) {
-              updateGradeBucket(
-                id: $id
-                updateGradeBucketInput: $updateGradeBucketInput
-              ) {
-                id
-                name
-                weight
-                courseId
-                createdAt
-                updatedAt
-              }
-            }
-          `,
+          mutation: GradeBucketsFormUpdateGradeBucketDocument,
           variables: {
-            id: this.data().bucket!.id,
-            updateGradeBucketInput: this.form.getRawValue(),
+            updateGradeBucketInput: {
+              name: raw.name,
+              id: this.data().bucket!.id,
+              weight: Number(raw.weight),
+            },
           },
         })
         .subscribe({
@@ -103,25 +94,14 @@ export default class GradeBucketForm implements OnInit {
         });
       return;
     }
+    const raw = this.form.getRawValue();
     this.#apollo
       .mutate({
-        mutation: gql`
-          mutation CreateGradeBucket(
-            $createGradeBucketInput: CreateGradeBucketInput!
-          ) {
-            createGradeBucket(createGradeBucketInput: $createGradeBucketInput) {
-              id
-              name
-              weight
-              courseId
-              createdAt
-              updatedAt
-            }
-          }
-        `,
+        mutation: GradeBucketsFormCreateGradeBucketDocument,
         variables: {
           createGradeBucketInput: {
-            ...this.form.getRawValue(),
+            name: raw.name,
+            weight: Number(raw.weight),
             courseId: this.data().courseId,
           },
         },

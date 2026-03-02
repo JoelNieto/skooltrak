@@ -5,11 +5,15 @@ import { DatePipe } from '@angular/common';
 import { Component, inject, viewChild } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
-import { Prisma } from '@generated/prisma';
 
-import { Apollo, gql } from 'apollo-angular';
+import { Apollo } from 'apollo-angular';
 import { filter, map, of, switchMap, tap } from 'rxjs';
 import Store from '../../core/store';
+import {
+  AdminClassGroupsBySchoolIdDocument,
+  AdminClassGroupsBySchoolIdQuery,
+  AdminRemoveClassGroupDocument,
+} from '../../graphql/generated/graphql';
 import ClassGroupsForm from '../forms/class-groups-form';
 @Component({
   selector: 'app-groups',
@@ -144,54 +148,27 @@ export default class ClassGroups {
       search: this.pagination.search(),
     }),
     stream: ({ params }) => {
-      const { schoolId } = params;
+      const { schoolId, take, skip, search } = params;
       if (!schoolId) {
         return of([]);
       }
       return this.apollo
-        .watchQuery<{
-          classGroups: any[];
-          count: number;
-        }>({
-          query: gql`
-            query ClassGroupsBySchoolId($schoolId: String!, $take: Int!, $skip: Int!, $search: String!) {
-              count: classGroupsCount(schoolId: $schoolId, search: $search)
-              classGroups(schoolId: $schoolId, take: $take, skip: $skip, search: $search) {
-                id
-                name
-                teacher {
-                  id
-                  name
-                }
-                studyPlan {
-                  id
-                  name
-                  createdAt
-                  updatedAt
-                }
-                createdAt
-                updatedAt
-              }
-            }
-          `,
+        .watchQuery({
+          query: AdminClassGroupsBySchoolIdDocument,
           variables: {
-            schoolId: params.schoolId,
-            take: params.take,
-            skip: params.skip,
-            search: params.search,
+            schoolId,
+            take,
+            skip,
+            search,
           },
         })
         .valueChanges.pipe(
           tap((result) => this.pagination.updateCount(result.data?.count ?? 0)),
-          map((result) => result.data?.classGroups ?? []),
+          map((result) => (result.data?.classGroups ?? []) as AdminClassGroupsBySchoolIdQuery['classGroups']),
         );
     },
   });
-  public editClassGroup(
-    group?: Prisma.ClassGroupGetPayload<{
-      include: { teacher: true; studyPlan: true };
-    }>,
-  ) {
+  public editClassGroup(group?: AdminClassGroupsBySchoolIdQuery['classGroups'][number]) {
     this.modal
       .open(ClassGroupsForm, {
         title: group ? 'Editar grupo' : 'Nuevo grupo',
@@ -214,13 +191,7 @@ export default class ClassGroups {
         filter((result) => result),
         switchMap(() =>
           this.apollo.mutate({
-            mutation: gql`
-              mutation DeleteClassGroup($id: String!) {
-                removeClassGroup(id: $id) {
-                  id
-                }
-              }
-            `,
+            mutation: AdminRemoveClassGroupDocument,
             variables: {
               id,
             },

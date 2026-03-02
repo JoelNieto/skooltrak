@@ -1,0 +1,20 @@
+query DegreesFormGetSchools {
+  schools {
+    id
+    name
+  }
+}
+
+mutation DegreesFormUpdateDegree($updateDegreeInput: UpdateDegreeInput!) {
+  updateDegree(updateDegreeInput: $updateDegreeInput) {
+    id
+    name
+  }
+}
+
+mutation DegreesFormCreateDegree($createDegreeInput: CreateDegreeInput!) {
+  createDegree(createDegreeInput: $createDegreeInput) {
+    id
+    name
+  }
+}

@@ -1,7 +1,8 @@
 import { Toast } from '@/ui';
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
-import { Apollo, gql } from 'apollo-angular';
+import { Apollo } from 'apollo-angular';
+import { OnboardingCompleteOnboardingDocument } from '../graphql/generated/graphql';
 import Auth from '../auth/auth';
 
 // Step components
@@ -171,12 +172,8 @@ export default class SetupWizard {
     this.completing.set(true);
 
     this.apollo
-      .mutate<{ completeOnboarding: boolean }>({
-        mutation: gql`
-          mutation CompleteOnboarding {
-            completeOnboarding
-          }
-        `,
+      .mutate({
+        mutation: OnboardingCompleteOnboardingDocument,
       })
       .subscribe({
         next: async () => {

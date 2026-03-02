@@ -2,7 +2,13 @@ import { markGroupDirty, Toast } from '@/ui';
 import { ChangeDetectionStrategy, Component, computed, inject, input, output, signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Apollo, gql } from 'apollo-angular';
+import { Apollo } from 'apollo-angular';
+import {
+  OnboardingStepsCreateCourseDocument,
+  OnboardingStepsGetSchoolsDocument,
+  OnboardingStepsGetSubjectsDocument,
+  OnboardingStepsStudyPlansBySchoolIdDocument,
+} from '../../graphql/generated/graphql';
 import { map, of } from 'rxjs';
 import Store from '../../core/store';
 import { CreatedEntity } from '../setup-wizard';
@@ -169,14 +175,8 @@ export default class CoursesStep {
   public schools = rxResource({
     stream: () =>
       this.apollo
-        .watchQuery<{ schools: { id: string }[] }>({
-          query: gql`
-            query GetSchools {
-              schools {
-                id
-              }
-            }
-          `,
+        .watchQuery({
+          query: OnboardingStepsGetSchoolsDocument,
           fetchPolicy: 'cache-first',
         })
         .valueChanges.pipe(map((result) => result.data?.schools ?? [])),
@@ -196,15 +196,8 @@ export default class CoursesStep {
         return of([]);
       }
       return this.apollo
-        .watchQuery<{ studyPlansBySchoolId: { id: string; name: string }[] }>({
-          query: gql`
-            query StudyPlansBySchoolId($schoolId: String!) {
-              studyPlansBySchoolId(schoolId: $schoolId) {
-                id
-                name
-              }
-            }
-          `,
+        .watchQuery({
+          query: OnboardingStepsStudyPlansBySchoolIdDocument,
           variables: { schoolId: params.schoolId },
           fetchPolicy: 'cache-and-network',
         })
@@ -215,15 +208,8 @@ export default class CoursesStep {
   public subjects = rxResource({
     stream: () =>
       this.apollo
-        .watchQuery<{ subjects: { id: string; name: string }[] }>({
-          query: gql`
-            query GetSubjects($take: Int!, $orderBy: String) {
-              subjects(take: $take, orderBy: $orderBy) {
-                id
-                name
-              }
-            }
-          `,
+        .watchQuery({
+          query: OnboardingStepsGetSubjectsDocument,
           variables: { take: 100, orderBy: 'name' },
           fetchPolicy: 'cache-first',
         })
@@ -262,15 +248,8 @@ export default class CoursesStep {
     const formValue = this.form.getRawValue();
 
     this.apollo
-      .mutate<{ createCourse: { id: string; name: string } }>({
-        mutation: gql`
-          mutation CreateCourse($createCourseInput: CreateCourseInput!) {
-            createCourse(createCourseInput: $createCourseInput) {
-              id
-              name
-            }
-          }
-        `,
+      .mutate({
+        mutation: OnboardingStepsCreateCourseDocument,
         variables: {
           createCourseInput: {
             ...formValue,

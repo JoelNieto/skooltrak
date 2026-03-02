@@ -12,11 +12,18 @@ import {
 import { rxResource } from '@angular/core/rxjs-interop';
 import { form, FormField, required, submit } from '@angular/forms/signals';
 import { Router, RouterLink } from '@angular/router';
-import { Prisma } from '@generated/prisma';
-import { isValidId } from '../../core/validators';
-import { Apollo, gql } from 'apollo-angular';
+import { Apollo } from 'apollo-angular';
 import { ImageCroppedEvent, ImageCropperComponent } from 'ngx-image-cropper';
 import { firstValueFrom, map, of } from 'rxjs';
+import { isValidId } from '../../core/validators';
+import {
+  AdminCreateSchoolDocument,
+  AdminCreateSchoolLogoUploadUrlDocument,
+  AdminSchoolFormDocument,
+  AdminSchoolLogoDownloadUrlDocument,
+  AdminUpdateSchoolDocument,
+  AdminUpdateSchoolLogoDocument,
+} from '../../graphql/generated/graphql';
 
 interface SchoolFormData {
   name: string;
@@ -393,26 +400,8 @@ export default class SchoolForm {
         return of(null);
       }
       return this.apollo
-        .watchQuery<{ school: Prisma.SchoolGetPayload<false> }>({
-          query: gql`
-            query School($id: String!) {
-              school(id: $id) {
-                id
-                name
-                shortName
-                email
-                phone
-                address
-                city
-                state
-                zip
-                country
-                website
-                logo
-                logoUrl
-              }
-            }
-          `,
+        .watchQuery({
+          query: AdminSchoolFormDocument,
           variables: { id: params.id },
         })
         .valueChanges.pipe(map((result) => result.data?.school));
@@ -517,17 +506,8 @@ export default class SchoolForm {
     try {
       // Step 1: Get presigned upload URL
       const uploadResult = await firstValueFrom(
-        this.apollo.mutate<{
-          createSchoolLogoUploadUrl: { uploadUrl: string; storageKey: string };
-        }>({
-          mutation: gql`
-            mutation CreateSchoolLogoUploadUrl($input: SchoolLogoUploadInput!) {
-              createSchoolLogoUploadUrl(input: $input) {
-                uploadUrl
-                storageKey
-              }
-            }
-          `,
+        this.apollo.mutate({
+          mutation: AdminCreateSchoolLogoUploadUrlDocument,
           variables: {
             input: {
               schoolId,
@@ -537,7 +517,9 @@ export default class SchoolForm {
         }),
       );
 
-      const { uploadUrl, storageKey } = uploadResult.data!.createSchoolLogoUploadUrl;
+      const createSchoolLogoUploadUrl = uploadResult.data?.createSchoolLogoUploadUrl;
+      if (!createSchoolLogoUploadUrl) throw new Error('Failed to get upload URL');
+      const { uploadUrl, storageKey } = createSchoolLogoUploadUrl;
 
       // Step 2: Upload to S3
       const response = await fetch(uploadUrl, {
@@ -555,14 +537,7 @@ export default class SchoolForm {
       // Step 3: Update school with storage key
       await firstValueFrom(
         this.apollo.mutate({
-          mutation: gql`
-            mutation UpdateSchoolLogo($id: String!, $logo: String!) {
-              updateSchoolLogo(id: $id, logo: $logo) {
-                id
-                logo
-              }
-            }
-          `,
+          mutation: AdminUpdateSchoolLogoDocument,
           variables: {
             id: schoolId,
             logo: storageKey,
@@ -577,13 +552,7 @@ export default class SchoolForm {
       // Fetch the new download URL
       const result = await firstValueFrom(
         this.apollo.query<{ schoolLogoDownloadUrl: { downloadUrl: string } }>({
-          query: gql`
-            query SchoolLogoDownloadUrl($schoolId: String!) {
-              schoolLogoDownloadUrl(schoolId: $schoolId) {
-                downloadUrl
-              }
-            }
-          `,
+          query: AdminSchoolLogoDownloadUrlDocument,
           variables: { schoolId },
           fetchPolicy: 'network-only',
         }),
@@ -635,17 +604,11 @@ export default class SchoolForm {
         if (this.isEditMode()) {
           await firstValueFrom(
             this.apollo.mutate({
-              mutation: gql`
-                mutation UpdateSchool($updateSchoolInput: UpdateSchoolInput!) {
-                  updateSchool(updateSchoolInput: $updateSchoolInput) {
-                    id
-                  }
-                }
-              `,
+              mutation: AdminUpdateSchoolDocument,
               variables: {
                 updateSchoolInput: {
                   ...formValue,
-                  id: this.id(),
+                  id: this.id()!,
                 },
               },
             }),
@@ -655,14 +618,8 @@ export default class SchoolForm {
         } else {
           // Create the school first
           const createResult = await firstValueFrom(
-            this.apollo.mutate<{ createSchool: { id: string } }>({
-              mutation: gql`
-                mutation CreateSchool($createSchoolInput: CreateSchoolInput!) {
-                  createSchool(createSchoolInput: $createSchoolInput) {
-                    id
-                  }
-                }
-              `,
+            this.apollo.mutate({
+              mutation: AdminCreateSchoolDocument,
               variables: {
                 createSchoolInput: {
                   ...formValue,
@@ -672,24 +629,16 @@ export default class SchoolForm {
             }),
           );
 
-          const newSchoolId = createResult.data!.createSchool.id;
+          const newSchoolId = createResult.data?.createSchool?.id;
+          if (!newSchoolId) throw new Error('Failed to create school');
 
           // If there's a pending logo to upload, do it now
           const pendingBlob = this.tempCroppedBlob();
           if (pendingBlob) {
             // Get presigned URL and upload
             const uploadResult = await firstValueFrom(
-              this.apollo.mutate<{
-                createSchoolLogoUploadUrl: { uploadUrl: string; storageKey: string };
-              }>({
-                mutation: gql`
-                  mutation CreateSchoolLogoUploadUrl($input: SchoolLogoUploadInput!) {
-                    createSchoolLogoUploadUrl(input: $input) {
-                      uploadUrl
-                      storageKey
-                    }
-                  }
-                `,
+              this.apollo.mutate({
+                mutation: AdminCreateSchoolLogoUploadUrlDocument,
                 variables: {
                   input: {
                     schoolId: newSchoolId,
@@ -699,7 +648,9 @@ export default class SchoolForm {
               }),
             );
 
-            const { uploadUrl, storageKey } = uploadResult.data!.createSchoolLogoUploadUrl;
+            const createSchoolLogoUploadUrl = uploadResult.data?.createSchoolLogoUploadUrl;
+            if (!createSchoolLogoUploadUrl) throw new Error('Failed to get upload URL');
+            const { uploadUrl, storageKey } = createSchoolLogoUploadUrl;
 
             // Upload to S3
             const response = await fetch(uploadUrl, {
@@ -714,14 +665,7 @@ export default class SchoolForm {
               // Update school with storage key
               await firstValueFrom(
                 this.apollo.mutate({
-                  mutation: gql`
-                    mutation UpdateSchoolLogo($id: String!, $logo: String!) {
-                      updateSchoolLogo(id: $id, logo: $logo) {
-                        id
-                        logo
-                      }
-                    }
-                  `,
+                  mutation: AdminUpdateSchoolLogoDocument,
                   variables: {
                     id: newSchoolId,
                     logo: storageKey,

@@ -7,7 +7,8 @@ import {
   Validators,
 } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import { Apollo, gql } from 'apollo-angular';
+import { Apollo } from 'apollo-angular';
+import { ResetPasswordResendUserInvitationDocument } from '../graphql/generated/graphql';
 import Auth from './auth';
 
 @Component({
@@ -238,12 +239,8 @@ export default class ResetPasswordComponent {
 
     this.resending.set(true);
     this.apollo
-      .mutate<{ resendUserInvitation: boolean }>({
-        mutation: gql`
-          mutation ResendUserInvitation($email: String!) {
-            resendUserInvitation(email: $email)
-          }
-        `,
+      .mutate({
+        mutation: ResetPasswordResendUserInvitationDocument,
         variables: { email },
       })
       .subscribe({

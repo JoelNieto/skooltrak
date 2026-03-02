@@ -2,7 +2,11 @@ import { markGroupDirty, Toast } from '@/ui';
 import { ChangeDetectionStrategy, Component, computed, inject, input, output, signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Apollo, gql } from 'apollo-angular';
+import { Apollo } from 'apollo-angular';
+import {
+  OnboardingStepsCreateDegreeDocument,
+  OnboardingStepsDegreesGetSchoolsDocument,
+} from '../../graphql/generated/graphql';
 import { map } from 'rxjs';
 import Store from '../../core/store';
 import { CreatedEntity } from '../setup-wizard';
@@ -144,14 +148,8 @@ export default class DegreesStep {
   public schools = rxResource({
     stream: () =>
       this.apollo
-        .watchQuery<{ schools: { id: string }[] }>({
-          query: gql`
-            query GetSchools {
-              schools {
-                id
-              }
-            }
-          `,
+        .watchQuery({
+          query: OnboardingStepsDegreesGetSchoolsDocument,
           fetchPolicy: 'cache-first',
         })
         .valueChanges.pipe(map((result) => result.data?.schools ?? [])),
@@ -187,15 +185,8 @@ export default class DegreesStep {
     const { name, shortName } = this.form.getRawValue();
 
     this.apollo
-      .mutate<{ createDegree: { id: string; name: string } }>({
-        mutation: gql`
-          mutation CreateDegree($createDegreeInput: CreateDegreeInput!) {
-            createDegree(createDegreeInput: $createDegreeInput) {
-              id
-              name
-            }
-          }
-        `,
+      .mutate({
+        mutation: OnboardingStepsCreateDegreeDocument,
         variables: {
           createDegreeInput: {
             name,

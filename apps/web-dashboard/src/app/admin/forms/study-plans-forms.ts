@@ -3,9 +3,16 @@ import { Component, inject, input, OnInit, output } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { FormArray, NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Prisma } from '@generated/prisma';
-import { Apollo, gql } from 'apollo-angular';
+import { Apollo } from 'apollo-angular';
 import { map, of, switchMap } from 'rxjs';
 import Store from '../../core/store';
+import {
+  StudyPlanFormCreateStudyPlanDocument,
+  StudyPlanFormDegreesBySchoolIdDocument,
+  StudyPlanFormGetGradeMetricsDocument,
+  StudyPlanFormUpdateStudyPlanDocument,
+  StudyPlanFormUpdateStudyPlanFinancialConfigDocument,
+} from '../../graphql/generated/graphql';
 
 const MONTH_LABELS: Record<number, string> = {
   1: 'Enero',
@@ -154,17 +161,8 @@ export default class StudyPlanForm implements OnInit {
   public metrics = rxResource({
     stream: () =>
       this.apollo
-        .watchQuery<{
-          gradeMetrics: Prisma.GradeMetricGetPayload<{ include: undefined }>[];
-        }>({
-          query: gql`
-            query GetGradeMetrics {
-              gradeMetrics {
-                id
-                name
-              }
-            }
-          `,
+        .watchQuery({
+          query: StudyPlanFormGetGradeMetricsDocument,
           fetchPolicy: 'cache-first',
         })
         .valueChanges.pipe(map((result) => result.data?.gradeMetrics ?? [])),
@@ -178,19 +176,8 @@ export default class StudyPlanForm implements OnInit {
         return of([]);
       }
       return this.apollo
-        .watchQuery<{
-          degreesBySchoolId: Prisma.DegreeGetPayload<{
-            include: { school: true };
-          }>[];
-        }>({
-          query: gql`
-            query DegreesBySchoolId($schoolId: String!) {
-              degreesBySchoolId(schoolId: $schoolId) {
-                id
-                name
-              }
-            }
-          `,
+        .watchQuery({
+          query: StudyPlanFormDegreesBySchoolIdDocument,
           variables: {
             schoolId: params.schoolId,
           },
@@ -205,7 +192,7 @@ export default class StudyPlanForm implements OnInit {
     description: ['', []],
     level: [0, [Validators.required]],
     degreeId: ['', [Validators.required]],
-    gradeMetricId: this.fb.control<string | null>('', [Validators.required]),
+    gradeMetricId: this.fb.control<string>('', [Validators.required]),
     monthlyTuitionAmount: this.fb.control<number | null>(null),
     tuitionMonths: this.fb.control<number[]>([], []),
     enrollmentCosts: this.fb.array([]) as FormArray,
@@ -309,13 +296,7 @@ export default class StudyPlanForm implements OnInit {
       );
       return this.apollo
         .mutate({
-          mutation: gql`
-            mutation UpdateStudyPlanFinancialConfig($input: UpdateStudyPlanFinancialInput!) {
-              updateStudyPlanFinancialConfig(input: $input) {
-                id
-              }
-            }
-          `,
+          mutation: StudyPlanFormUpdateStudyPlanFinancialConfigDocument,
           variables: {
             input: {
               studyPlanId,
@@ -331,14 +312,7 @@ export default class StudyPlanForm implements OnInit {
     if (plan) {
       this.apollo
         .mutate({
-          mutation: gql`
-            mutation UpdateStudyPlan($updateStudyPlanInput: UpdateStudyPlanInput!) {
-              updateStudyPlan(updateStudyPlanInput: $updateStudyPlanInput) {
-                id
-                name
-              }
-            }
-          `,
+          mutation: StudyPlanFormUpdateStudyPlanDocument,
           variables: {
             updateStudyPlanInput: {
               name: request.name,
@@ -361,15 +335,8 @@ export default class StudyPlanForm implements OnInit {
         });
     } else if (schoolId) {
       this.apollo
-        .mutate<{ createStudyPlan: { id: string } }>({
-          mutation: gql`
-            mutation CreateStudyPlan($createStudyPlanInput: CreateStudyPlanInput!) {
-              createStudyPlan(createStudyPlanInput: $createStudyPlanInput) {
-                id
-                name
-              }
-            }
-          `,
+        .mutate({
+          mutation: StudyPlanFormCreateStudyPlanDocument,
           variables: {
             createStudyPlanInput: {
               name: request.name,

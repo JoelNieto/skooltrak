@@ -1,0 +1,25 @@
+query AdminChargesBySchool($schoolId: String!, $year: Int) {
+  chargesBySchool(schoolId: $schoolId, year: $year) {
+    id
+    amount
+    dueDate
+    description
+    chargeType
+    status
+    student {
+      id
+      firstName
+      fatherName
+    }
+    studyPlan {
+      id
+      name
+    }
+  }
+}
+
+mutation AdminRemoveCharge($id: String!) {
+  removeCharge(id: $id) {
+    id
+  }
+}

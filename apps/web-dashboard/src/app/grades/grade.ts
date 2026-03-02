@@ -1,12 +1,12 @@
-import { Confirmation, DecimalToNumber, EditorViewer, Error, Loader, Modal, Toast } from '@/ui';
+import { Confirmation, EditorViewer, Error, Loader, Modal, Toast } from '@/ui';
 import { DatePipe, DecimalPipe, NgClass } from '@angular/common';
 import { Component, computed, inject, input } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { Router, RouterLink } from '@angular/router';
-import { Prisma } from '@generated/prisma';
 
-import { Apollo, gql } from 'apollo-angular';
+import { Apollo } from 'apollo-angular';
 import { filter, map, switchMap } from 'rxjs';
+import { GradeDocument, RemoveGradeDocument, UpdateGradeDocument } from '../graphql/generated/graphql';
 import StudentGradeForm from './student-grade-form';
 
 @Component({
@@ -90,14 +90,21 @@ import StudentGradeForm from './student-grade-form';
                           (click)="editGradeItem(studentGrade)"
                           [ngClass]="{
                             'text-success! bg-success/10':
-                              studentGrade.score != null && metric() && studentGrade.score >= (metric()?.minimumApproval ?? 0),
+                              studentGrade.score !== null &&
+                              studentGrade.score !== undefined &&
+                              metric() &&
+                              studentGrade.score >= (metric()?.minimumApproval ?? 0),
                             'text-warning! bg-warning/10':
-                              studentGrade.score != null &&
+                              studentGrade.score !== null &&
+                              studentGrade.score !== undefined &&
                               metric() &&
                               studentGrade.score >= (metric()?.minimumApproval ?? 0) &&
                               studentGrade.score < (metric()?.minimumExcellence ?? 0),
                             'text-error! bg-error/10':
-                              studentGrade.score != null && metric() && studentGrade.score < (metric()?.minimumApproval ?? 0),
+                              studentGrade.score !== null &&
+                              studentGrade.score !== undefined &&
+                              metric() &&
+                              studentGrade.score < (metric()?.minimumApproval ?? 0),
                           }"
                         >
                           @if (studentGrade.score) {
@@ -106,7 +113,7 @@ import StudentGradeForm from './student-grade-form';
                             <span class="material-symbols-outlined text-2xl">more_horiz</span>
                           }
                         </td>
-                        <td class="overflow-hidden text-ellipsis whitespace-nowrap max-w-[200px] !pl-2">
+                        <td class="overflow-hidden text-ellipsis whitespace-nowrap max-w-50 pl-2!">
                           {{ studentGrade.comments }}
                         </td>
                         <td>{{ studentGrade.updatedAt | date: 'medium' }}</td>
@@ -143,77 +150,9 @@ export default class Grade {
     stream: ({ params }) => {
       const { id } = params;
       return this.#apollo
-        .watchQuery<{
-          grade: DecimalToNumber<
-            Prisma.GradeGetPayload<{
-              include: {
-                course: {
-                  include: { studyPlan: { include: { gradeMetric: true } } };
-                };
-                bucket: true;
-                period: true;
-                studentGrades: { include: { student: { include: { classGroup: true } } } };
-              };
-            }>
-          >;
-        }>({
-          query: gql`
-            query Grade($id: String!) {
-              grade(id: $id) {
-                id
-                title
-                comments
-                date
-                courseId
-                published
-                course {
-                  id
-                  name
-                  studyPlan {
-                    id
-                    name
-                    gradeMetric {
-                      id
-                      name
-                      minimum
-                      maximum
-                      minimumApproval
-                      minimumExcellence
-                    }
-                  }
-                }
-                bucket {
-                  id
-                  name
-                  weight
-                }
-                period {
-                  id
-                  name
-                }
-                studentGrades {
-                  id
-                  student {
-                    id
-                    firstName
-                    fatherName
-                    classGroup {
-                      id
-                      name
-                    }
-                  }
-                  score
-                  comments
-                  updatedAt
-                }
-                createdAt
-                updatedAt
-              }
-            }
-          `,
-          variables: {
-            id,
-          },
+        .watchQuery({
+          query: GradeDocument,
+          variables: { id },
         })
         .valueChanges.pipe(map((res) => res.data?.grade));
     },
@@ -263,17 +202,10 @@ export default class Grade {
         filter((result) => result),
         switchMap(() =>
           this.#apollo.mutate({
-            mutation: gql`
-              mutation UpdateGrade($updateGradeInput: UpdateGradeInput!) {
-                updateGrade(updateGradeInput: $updateGradeInput) {
-                  id
-                  published
-                }
-              }
-            `,
+            mutation: UpdateGradeDocument,
             variables: {
               updateGradeInput: {
-                id: this.gradeResource.value()!.id,
+                id: this.gradeResource.value()?.id ?? '',
                 published: true,
               },
             },
@@ -292,11 +224,11 @@ export default class Grade {
       });
   }
 
-  editGradeItem(studentGrade?: DecimalToNumber<Prisma.StudentGradeGetPayload<{ include: { student: true } }>>) {
+  editGradeItem(studentGrade?: { id?: string; student?: unknown; score?: number | null; comments?: string | null }) {
     if (!studentGrade) return;
     this.#modal.open(StudentGradeForm, {
       data: {
-        studentGrade: studentGrade as DecimalToNumber<Prisma.StudentGradeGetPayload<{ include: { student: true } }>>,
+        studentGrade,
         metric: this.metric(),
       },
       title: 'Editar calificacion',
@@ -313,14 +245,8 @@ export default class Grade {
         filter((result: boolean) => result === true),
         switchMap(() =>
           this.#apollo.mutate({
-            mutation: gql`
-              mutation RemoveGrade($id: String!) {
-                removeGrade(id: $id) {
-                  id
-                }
-              }
-            `,
-            variables: { id: this.gradeResource.value()?.id },
+            mutation: RemoveGradeDocument,
+            variables: { id: this.gradeResource.value()?.id ?? '' },
           }),
         ),
       )

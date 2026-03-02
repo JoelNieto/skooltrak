@@ -1,0 +1,8 @@
+mutation OnboardingCreateSchool($createSchoolInput: CreateSchoolInput!) {
+  createSchool(createSchoolInput: $createSchoolInput) {
+    id
+    name
+    organizationId
+    currencyCode
+  }
+}

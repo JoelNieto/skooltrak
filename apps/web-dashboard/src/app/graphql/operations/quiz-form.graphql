@@ -1,0 +1,6 @@
+query QuizFormCoursesBySchoolId($schoolId: String!) {
+  coursesBySchoolId(schoolId: $schoolId) {
+    id
+    name
+  }
+}

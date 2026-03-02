@@ -2,7 +2,8 @@ import { Loader } from '@/ui';
 import { Component, inject, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { Apollo, gql } from 'apollo-angular';
+import { Apollo } from 'apollo-angular';
+import { ForgotPasswordLookupAccountForPasswordResetDocument } from '../graphql/generated/graphql';
 import Auth from './auth';
 
 @Component({
@@ -183,24 +184,8 @@ export default class ForgotPasswordComponent {
     this.searchedEmail.set(email);
 
     this.apollo
-      .query<{
-        lookupAccountForPasswordReset: {
-          found: boolean;
-          roleLabel?: string;
-          displayName?: string;
-          organizationName?: string;
-        };
-      }>({
-        query: gql`
-          query LookupAccountForPasswordReset($email: String!) {
-            lookupAccountForPasswordReset(email: $email) {
-              found
-              roleLabel
-              displayName
-              organizationName
-            }
-          }
-        `,
+      .query({
+        query: ForgotPasswordLookupAccountForPasswordResetDocument,
         variables: { email },
         fetchPolicy: 'network-only',
       })
@@ -212,7 +197,7 @@ export default class ForgotPasswordComponent {
             this.accountInfo.set({
               roleLabel: data.roleLabel,
               displayName: data.displayName,
-              organizationName: data.organizationName,
+              organizationName: data.organizationName ?? undefined,
             });
             this.step.set('confirm');
           } else {

@@ -1,21 +1,15 @@
+import { Error, Loader } from '@/ui';
 import { DatePipe } from '@angular/common';
-import {
-  ChangeDetectionStrategy,
-  Component,
-  Pipe,
-  PipeTransform,
-  computed,
-  inject,
-  signal,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, Pipe, PipeTransform, computed, inject, signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 
-import { Apollo, gql } from 'apollo-angular';
+import { Apollo } from 'apollo-angular';
 import { addDays, endOfWeek, startOfWeek, subDays } from 'date-fns';
 import { map, of } from 'rxjs';
 import Auth from '../auth/auth';
 import Store from '../core/store';
+import { AssignmentDatesBySchoolIdDocument, AssignmentDatesBySchoolIdQuery } from '../graphql/generated/graphql';
 
 @Pipe({ name: 'stripHtml', standalone: true })
 export class StripHtmlPipe implements PipeTransform {
@@ -28,35 +22,9 @@ export class StripHtmlPipe implements PipeTransform {
   }
 }
 
-type AssignmentDateResult = {
-  id: string;
-  date: string;
-  classGroupId: string;
-  classGroup: {
-    id: string;
-    name: string;
-  };
-  assignment: {
-    id: string;
-    title: string;
-    details: string;
-    type: string;
-    requireSubmission: boolean;
-    course: {
-      id: string;
-      name: string;
-    };
-    teacher: {
-      id: string;
-      firstName: string;
-      fatherName: string;
-    };
-  };
-};
-
 @Component({
   selector: 'app-assignments',
-  imports: [RouterLink, DatePipe, StripHtmlPipe],
+  imports: [RouterLink, DatePipe, StripHtmlPipe, Error, Loader],
 
   template: `<div class="breadcrumbs text-sm">
       <ul>
@@ -67,17 +35,11 @@ type AssignmentDateResult = {
     <h1 class="text-2xl font-semibold mb-2">Asignaciones</h1>
     <div class="flex items-center gap-2 justify-between px-8">
       <div class="flex items-center gap-2 flex-1">
-        <button
-          class="btn btn-primary btn-soft btn-circle"
-          (click)="previousWeek()"
-        >
+        <button class="btn btn-primary btn-soft btn-circle" (click)="previousWeek()">
           <span class="material-symbols-outlined">chevron_left</span>
         </button>
 
-        <button
-          class="btn btn-primary btn-soft btn-circle"
-          (click)="nextWeek()"
-        >
+        <button class="btn btn-primary btn-soft btn-circle" (click)="nextWeek()">
           <span class="material-symbols-outlined">chevron_right</span>
         </button>
       </div>
@@ -91,53 +53,59 @@ type AssignmentDateResult = {
       </div>
     </div>
     <div class="overflow-x-auto bg-base-100 rounded-lg shadow-sm mt-4">
-      <table class="table">
-        <thead>
-          <tr>
-            <th>Título</th>
-            <th>Detalles</th>
-            <th>Fecha de entrega</th>
-            @if (!isStudent()) {
-              <th>Grupo</th>
-            }
-            <th>Curso</th>
-            <th>Profesor</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody>
-          @for (item of assignmentDatesResource.value(); track item.id) {
+      @if (assignmentDatesResource.hasValue()) {
+        @let list = assignmentDatesResource.value()!;
+        <table class="table">
+          <thead>
             <tr>
-              <td>
-                <a [routerLink]="item.assignment.id" class="link link-primary">{{
-                  item.assignment.title
-                }}</a>
-              </td>
-              <td class="max-w-[24rem] truncate">
-                {{ item.assignment.details | stripHtml }}
-              </td>
-              <td>{{ item.date | date : 'medium' }}</td>
+              <th>Título</th>
+              <th>Detalles</th>
+              <th>Fecha de entrega</th>
               @if (!isStudent()) {
-                <td>
-                  <span class="badge badge-outline">{{ item.classGroup.name }}</span>
-                </td>
+                <th>Grupo</th>
               }
-              <td>{{ item.assignment.course.name }}</td>
-              <td>
-                {{ item.assignment.teacher.firstName }}
-                {{ item.assignment.teacher.fatherName }}
-              </td>
-              <td></td>
+              <th>Curso</th>
+              <th>Profesor</th>
+              <th></th>
             </tr>
-          } @empty {
-            <tr>
-              <td [attr.colspan]="isStudent() ? 6 : 7" class="text-center">
-                No hay asignaciones para esta semana
-              </td>
-            </tr>
-          }
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            @for (item of list; track item.id) {
+              <tr>
+                <td>
+                  <a [routerLink]="item.assignment.id" class="link link-primary">{{ item.assignment.title }}</a>
+                </td>
+                <td class="max-w-[24rem] truncate">
+                  {{ item.assignment.details | stripHtml }}
+                </td>
+                <td>{{ item.date | date: 'medium' }}</td>
+                @if (!isStudent()) {
+                  <td>
+                    <span class="badge badge-outline">{{ item.classGroup.name }}</span>
+                  </td>
+                }
+                <td>{{ item.assignment.course.name }}</td>
+                <td>
+                  {{ item.assignment.teacher.firstName }}
+                  {{ item.assignment.teacher.fatherName }}
+                </td>
+                <td></td>
+              </tr>
+            } @empty {
+              <tr>
+                <td [attr.colspan]="isStudent() ? 6 : 7" class="text-center">No hay asignaciones para esta semana</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      } @else if (assignmentDatesResource.error()) {
+        <lib-error
+          (retry)="assignmentDatesResource.reload()"
+          [description]="assignmentDatesResource.error()?.message"
+        />
+      } @else {
+        <lib-loader />
+      }
     </div>`,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -148,12 +116,8 @@ export default class Assignments {
 
   public isStudent = this.auth.isStudent;
   public currentDate = signal(new Date());
-  public startDate = computed(() =>
-    startOfWeek(this.currentDate(), { weekStartsOn: 1 })
-  );
-  public endDate = computed(() =>
-    endOfWeek(this.currentDate(), { weekStartsOn: 1 })
-  );
+  public startDate = computed(() => startOfWeek(this.currentDate(), { weekStartsOn: 1 }));
+  public endDate = computed(() => endOfWeek(this.currentDate(), { weekStartsOn: 1 }));
 
   public nextWeek() {
     this.currentDate.set(addDays(this.currentDate(), 7));
@@ -180,48 +144,8 @@ export default class Assignments {
         return of([]);
       }
       return this.apollo
-        .watchQuery<{
-          assignmentDatesBySchoolId: AssignmentDateResult[];
-        }>({
-          query: gql`
-            query AssignmentDatesBySchoolId(
-              $schoolId: String!
-              $startDate: String!
-              $endDate: String!
-              $classGroupId: String
-            ) {
-              assignmentDatesBySchoolId(
-                schoolId: $schoolId
-                startDate: $startDate
-                endDate: $endDate
-                classGroupId: $classGroupId
-              ) {
-                id
-                date
-                classGroupId
-                classGroup {
-                  id
-                  name
-                }
-                assignment {
-                  id
-                  title
-                  details
-                  type
-                  requireSubmission
-                  course {
-                    id
-                    name
-                  }
-                  teacher {
-                    id
-                    firstName
-                    fatherName
-                  }
-                }
-              }
-            }
-          `,
+        .watchQuery({
+          query: AssignmentDatesBySchoolIdDocument,
           variables: {
             schoolId,
             startDate: startDate.toISOString(),
@@ -231,11 +155,13 @@ export default class Assignments {
         })
         .valueChanges.pipe(
           map((res) =>
-            (res.data?.assignmentDatesBySchoolId ?? []).map((item) => ({
+            (
+              (res.data?.assignmentDatesBySchoolId as AssignmentDatesBySchoolIdQuery['assignmentDatesBySchoolId']) ?? []
+            ).map((item) => ({
               ...item,
-              date: new Date(item.date),
-            }))
-          )
+              date: new Date(item.date ?? ''),
+            })),
+          ),
         );
     },
   });

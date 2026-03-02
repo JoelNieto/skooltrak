@@ -1,7 +1,8 @@
 import { Loader, PageHeader } from '@/ui';
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
-import { Apollo, gql } from 'apollo-angular';
+import { Apollo } from 'apollo-angular';
+import { ParentFinancesLinkedStudentsSummaryDocument } from '../graphql/generated/graphql';
 import { map } from 'rxjs';
 import Store from '../core/store';
 
@@ -83,19 +84,8 @@ export default class ParentFinances {
     params: () => ({}),
     stream: () =>
       this.#apollo
-        .query<{ linkedStudentsFinancialSummary: StudentFinancialSummaryType[] }>({
-          query: gql`
-            query LinkedStudentsFinancialSummary {
-              linkedStudentsFinancialSummary {
-                studentId
-                firstName
-                fatherName
-                totalCharges
-                totalPayments
-                balance
-              }
-            }
-          `,
+        .query({
+          query: ParentFinancesLinkedStudentsSummaryDocument,
         })
         .pipe(map((r) => r.data?.linkedStudentsFinancialSummary ?? [])),
   });

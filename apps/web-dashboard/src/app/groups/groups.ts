@@ -3,18 +3,12 @@ import { DatePipe } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
-import { Prisma } from '@generated/prisma';
-import { Apollo, gql } from 'apollo-angular';
+
+import { Apollo } from 'apollo-angular';
 import { map, of, tap } from 'rxjs';
 import Store from '../core/store';
+import { GetClassGroupsDocument } from '../graphql/generated/graphql';
 
-type Teacher = Prisma.TeacherGetPayload<undefined> & { name: string };
-type GroupType = Prisma.ClassGroupGetPayload<{
-  include: {
-    studyPlan: { include: { degree: true } };
-    courses: { include: { teacher: true; subject: true } };
-  };
-}> & { teacher?: Teacher };
 @Component({
   imports: [RouterLink, DatePipe, EmptyState, Paginator],
   providers: [Pagination],
@@ -83,40 +77,17 @@ export default class Groups {
       skip: this.pagination.skip(),
     }),
     stream: ({ params }) => {
-      const { schoolId } = params;
+      const { schoolId, take, skip } = params;
       if (!schoolId) {
         return of([]);
       }
       return this.apollo
-        .watchQuery<{
-          classGroups: GroupType[];
-          count: number;
-        }>({
-          query: gql`
-            query GetClassGroups($schoolId: String!, $take: Int!, $skip: Int!) {
-              count: classGroupsCount(schoolId: $schoolId)
-              classGroups(schoolId: $schoolId, take: $take, skip: $skip) {
-                id
-                name
-                createdAt
-                updatedAt
-                teacherId
-                studyPlanId
-                teacher {
-                  id
-                  name
-                }
-                studyPlan {
-                  id
-                  name
-                }
-              }
-            }
-          `,
+        .watchQuery({
+          query: GetClassGroupsDocument,
           variables: {
-            schoolId: params.schoolId,
-            take: params.take,
-            skip: params.skip,
+            schoolId,
+            take,
+            skip,
           },
         })
         .valueChanges.pipe(

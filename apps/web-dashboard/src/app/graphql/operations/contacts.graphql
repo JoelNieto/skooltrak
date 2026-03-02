@@ -1,0 +1,19 @@
+query ContactsFindContacts($queryText: String) {
+  findContacts(queryText: $queryText) {
+    id
+    initials
+    name
+    email
+    color
+    role {
+      id
+      name
+    }
+    student {
+      id
+    }
+    teacher {
+      id
+    }
+  }
+}

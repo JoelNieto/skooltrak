@@ -4,8 +4,13 @@ import { ChangeDetectionStrategy, Component, inject, Signal, signal } from '@ang
 import { rxResource } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { Apollo, gql } from 'apollo-angular';
+import { Apollo } from 'apollo-angular';
 import { map } from 'rxjs';
+import {
+  FilesCreateFileDownloadUrlDocument,
+  FilesOwnedDocument,
+  FilesSharedWithMeDocument,
+} from '../graphql/generated/graphql';
 import FileShareForm from './file-share-form';
 
 type UserInfo = {
@@ -105,8 +110,10 @@ type FileItem = {
                       {{ file.updatedAt | date: 'short' }}
                     </td>
                     <td class="text-right">
-                      <button class="btn btn-primary btn-xs" (click)="openFile(file.id)">Abrir</button>
-                      <button class="btn btn-ghost btn-xs" (click)="downloadFile(file.id)">Descargar</button>
+                      @if (file.id) {
+                        <button class="btn btn-primary btn-xs" (click)="openFile(file.id)">Abrir</button>
+                        <button class="btn btn-ghost btn-xs" (click)="downloadFile(file.id)">Descargar</button>
+                      }
                     </td>
                   </tr>
                 } @empty {
@@ -151,24 +158,26 @@ type FileItem = {
                       {{ file.updatedAt | date: 'short' }}
                     </td>
                     <td class="text-right">
-                      <button
-                        class="text-base-content hover:text-success p-1 rounded-lg  cursor-pointer"
-                        (click)="openFile(file.id)"
-                      >
-                        <span class="material-symbols-outlined text-medium!">open_in_new</span>
-                      </button>
-                      <button
-                        class="text-base-content hover:text-blue-500 p-1 rounded-lg  cursor-pointer"
-                        (click)="downloadFile(file.id)"
-                      >
-                        <span class="material-symbols-outlined text-medium!">download</span>
-                      </button>
-                      <button
-                        class="text-base-content hover:text-primary p-1 rounded-lg cursor-pointer"
-                        (click)="openShareModal(file)"
-                      >
-                        <span class="material-symbols-outlined text-medium!">share</span>
-                      </button>
+                      @if (file.id) {
+                        <button
+                          class="text-base-content hover:text-success p-1 rounded-lg  cursor-pointer"
+                          (click)="openFile(file.id)"
+                        >
+                          <span class="material-symbols-outlined text-medium!">open_in_new</span>
+                        </button>
+                        <button
+                          class="text-base-content hover:text-blue-500 p-1 rounded-lg  cursor-pointer"
+                          (click)="downloadFile(file.id)"
+                        >
+                          <span class="material-symbols-outlined text-medium!">download</span>
+                        </button>
+                        <button
+                          class="text-base-content hover:text-primary p-1 rounded-lg cursor-pointer"
+                          (click)="openShareModal(file)"
+                        >
+                          <span class="material-symbols-outlined text-medium!">share</span>
+                        </button>
+                      }
                     </td>
                   </tr>
                 } @empty {
@@ -199,55 +208,12 @@ export default class FilesPage {
     stream: ({ params }) => {
       return this.#apollo
         .watchQuery<{ filesSharedWithMe: FileItem[] }>({
-          query: gql`
-            query FilesSharedWithMe($search: String) {
-              filesSharedWithMe(search: $search) {
-                id
-                name
-                mimeType
-                size
-                access
-                updatedAt
-                sharesCourses {
-                  course {
-                    id
-                    name
-                  }
-                }
-                sharesUsers {
-                  user {
-                    id
-                    name
-                    initials
-                    color
-                  }
-                }
-                sharesSchools {
-                  school {
-                    id
-                    name
-                  }
-                }
-                sharesClassGroups {
-                  classGroup {
-                    id
-                    name
-                  }
-                }
-                owner {
-                  id
-                  name
-                  initials
-                  color
-                }
-              }
-            }
-          `,
+          query: FilesSharedWithMeDocument,
           variables: {
             search: params.search,
           },
         })
-        .valueChanges.pipe(map((result) => result.data?.filesSharedWithMe ?? []));
+        .valueChanges.pipe(map((result) => (result.data?.filesSharedWithMe ?? []) as FileItem[]));
     },
   });
 
@@ -258,35 +224,13 @@ export default class FilesPage {
     stream: ({ params }) => {
       return this.#apollo
         .watchQuery<{ filesOwned: FileItem[] }>({
-          query: gql`
-            query FilesOwned($search: String) {
-              filesOwned(search: $search) {
-                id
-                name
-                mimeType
-                size
-                access
-                updatedAt
-                sharesCourses {
-                  course {
-                    id
-                    name
-                  }
-                }
-                owner {
-                  id
-                  name
-                  initials
-                  color
-                }
-              }
-            }
-          `,
+          query: FilesOwnedDocument,
           variables: {
             search: params.search,
           },
+          fetchPolicy: 'network-only',
         })
-        .valueChanges.pipe(map((result) => result.data?.filesOwned ?? []));
+        .valueChanges.pipe(map((result) => (result.data?.filesOwned ?? []) as FileItem[]));
     },
   });
 
@@ -296,14 +240,8 @@ export default class FilesPage {
 
   openFile(fileId: string) {
     this.#apollo
-      .mutate<{ createFileDownloadUrl: { downloadUrl: string } }>({
-        mutation: gql`
-          mutation CreateFileDownloadUrl($createFileDownloadInput: CreateFileDownloadInput!) {
-            createFileDownloadUrl(createFileDownloadInput: $createFileDownloadInput) {
-              downloadUrl
-            }
-          }
-        `,
+      .mutate({
+        mutation: FilesCreateFileDownloadUrlDocument,
         variables: {
           createFileDownloadInput: { fileId },
         },
@@ -323,14 +261,8 @@ export default class FilesPage {
 
   downloadFile(fileId: string) {
     this.#apollo
-      .mutate<{ createFileDownloadUrl: { downloadUrl: string } }>({
-        mutation: gql`
-          mutation CreateFileDownloadUrl($createFileDownloadInput: CreateFileDownloadInput!) {
-            createFileDownloadUrl(createFileDownloadInput: $createFileDownloadInput) {
-              downloadUrl
-            }
-          }
-        `,
+      .mutate({
+        mutation: FilesCreateFileDownloadUrlDocument,
         variables: {
           createFileDownloadInput: { fileId },
         },

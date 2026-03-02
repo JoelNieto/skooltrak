@@ -1,13 +1,18 @@
 import { Confirmation, EmptyState, Modal, PageHeader, Toast } from '@/ui';
 import { Tab, TabContent, TabList, TabPanel, Tabs } from '@angular/aria/tabs';
 import { DatePipe, DecimalPipe, NgClass } from '@angular/common';
-import { FormsModule } from '@angular/forms';
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
+import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { Apollo, gql } from 'apollo-angular';
+import { Apollo } from 'apollo-angular';
 import { filter, map, of, switchMap } from 'rxjs';
 import Store from '../../core/store';
+import {
+  AdminChargesBySchoolDocument,
+  AdminChargesBySchoolQuery,
+  AdminRemoveChargeDocument,
+} from '../../graphql/generated/graphql';
 import CreateChargeForm from '../forms/create-charge-form';
 
 type ChargeType = {
@@ -54,10 +59,7 @@ type PaymentType = {
       </ul>
     </div>
 
-    <lib-page-header
-      title="Módulo financiero"
-      subtitle="Gestión de cargos, pagos y estados de cuenta."
-    />
+    <lib-page-header title="Módulo financiero" subtitle="Gestión de cargos, pagos y estados de cuenta." />
 
     <div ngTabs>
       <div class="flex justify-between items-center mt-4">
@@ -66,7 +68,11 @@ type PaymentType = {
           <div ngTab value="payments" class="tab">Pagos</div>
         </div>
         <div class="flex gap-2 items-center">
-          <select class="select select-primary select-sm" [ngModel]="yearFilter()" (ngModelChange)="yearFilter.set($event)">
+          <select
+            class="select select-primary select-sm"
+            [ngModel]="yearFilter()"
+            (ngModelChange)="yearFilter.set($event)"
+          >
             @for (y of years(); track y) {
               <option [value]="y">{{ y }}</option>
             }
@@ -100,10 +106,14 @@ type PaymentType = {
                       <tr>
                         <td>{{ c.student.firstName }} {{ c.student.fatherName }}</td>
                         <td>{{ c.description || '-' }}</td>
-                        <td><span class="badge badge-soft">{{ c.chargeType }}</span></td>
+                        <td>
+                          <span class="badge badge-soft">{{ c.chargeType }}</span>
+                        </td>
                         <td>{{ c.amount | number: '1.2-2' }}</td>
                         <td>{{ c.dueDate | date: 'dd/MM/yyyy' }}</td>
-                        <td><span class="badge" [ngClass]="statusClass(c.status)">{{ c.status }}</span></td>
+                        <td>
+                          <span class="badge" [ngClass]="statusClass(c.status)">{{ c.status }}</span>
+                        </td>
                         <td>
                           <button class="btn btn-ghost btn-sm" (click)="removeCharge(c.id)">
                             <span class="material-symbols-outlined text-error">delete</span>
@@ -167,34 +177,14 @@ export default class FinancialModule {
     stream: ({ params }) => {
       if (!params.schoolId) return of<ChargeType[]>([]);
       return this.apollo
-        .watchQuery<{ chargesBySchool: ChargeType[] }>({
-          query: gql`
-            query ChargesBySchool($schoolId: String!, $year: Int) {
-              chargesBySchool(schoolId: $schoolId, year: $year) {
-                id
-                amount
-                dueDate
-                description
-                chargeType
-                status
-                student {
-                  id
-                  firstName
-                  fatherName
-                }
-                studyPlan {
-                  id
-                  name
-                }
-              }
-            }
-          `,
+        .watchQuery({
+          query: AdminChargesBySchoolDocument,
           variables: {
             schoolId: params.schoolId,
             year: params.year,
           },
         })
-        .valueChanges.pipe(map((r) => r.data?.chargesBySchool ?? []));
+        .valueChanges.pipe(map((r) => (r.data?.chargesBySchool as AdminChargesBySchoolQuery['chargesBySchool']) ?? []));
     },
   });
 
@@ -221,16 +211,10 @@ export default class FinancialModule {
         filter(Boolean),
         switchMap(() =>
           this.apollo.mutate({
-            mutation: gql`
-              mutation RemoveCharge($id: String!) {
-                removeCharge(id: $id) {
-                  id
-                }
-              }
-            `,
+            mutation: AdminRemoveChargeDocument,
             variables: { id },
-          })
-        )
+          }),
+        ),
       )
       .subscribe({
         next: () => {

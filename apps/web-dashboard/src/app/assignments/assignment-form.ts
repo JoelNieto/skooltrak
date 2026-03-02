@@ -1,12 +1,18 @@
 import { markGroupDirty, TextEditor, Toast } from '@/ui';
-import { Component, computed, effect, inject, input, OnInit, output, signal } from '@angular/core';
+import { Component, effect, inject, input, OnInit, output, signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { FormArray, FormControl, NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Prisma } from '@generated/prisma';
-import { Apollo, gql } from 'apollo-angular';
+import { Apollo } from 'apollo-angular';
 import { addDays, format, setHours, setMinutes } from 'date-fns';
 import { map, of } from 'rxjs';
 import Store from '../core/store';
+import {
+  ClassGroupsByCourseIdDocument,
+  ClassGroupsByCourseIdQuery,
+  CoursesBySchoolIdDocument,
+  CreateAssignmentDocument,
+  TeachersByOrganizationIdDocument,
+} from '../graphql/generated/graphql';
 
 enum AssignmentType {
   HOMEWORK = 'HOMEWORK',
@@ -16,16 +22,6 @@ enum AssignmentType {
   PAPER = 'PAPER',
   NEW = 'NEW',
 }
-
-type Teacher = Prisma.TeacherGetPayload<false> & {
-  name: string;
-  fullName: string;
-};
-
-type ClassGroup = {
-  id: string;
-  name: string;
-};
 
 @Component({
   selector: 'app-assignment-form',
@@ -122,22 +118,9 @@ export default class AssignmentForm implements OnInit {
         return of([]);
       }
       return this.apollo
-        .watchQuery<{
-          coursesBySchoolId: Prisma.CourseGetPayload<{
-            include: undefined;
-          }>[];
-        }>({
-          query: gql`
-            query coursesBySchoolId($schoolId: String!) {
-              coursesBySchoolId(schoolId: $schoolId) {
-                id
-                name
-              }
-            }
-          `,
-          variables: {
-            schoolId: params.schoolId,
-          },
+        .watchQuery({
+          query: CoursesBySchoolIdDocument,
+          variables: { schoolId },
         })
         .valueChanges.pipe(map((result) => result.data?.coursesBySchoolId ?? []));
     },
@@ -153,20 +136,16 @@ export default class AssignmentForm implements OnInit {
         return of([]);
       }
       return this.apollo
-        .watchQuery<{
-          classGroupsByCourseId: ClassGroup[];
-        }>({
-          query: gql`
-            query ClassGroupsByCourseId($courseId: String!) {
-              classGroupsByCourseId(courseId: $courseId) {
-                id
-                name
-              }
-            }
-          `,
+        .watchQuery({
+          query: ClassGroupsByCourseIdDocument,
           variables: { courseId },
         })
-        .valueChanges.pipe(map((result) => result.data?.classGroupsByCourseId ?? []));
+        .valueChanges.pipe(
+          map(
+            (result) =>
+              (result.data?.classGroupsByCourseId as ClassGroupsByCourseIdQuery['classGroupsByCourseId']) ?? [],
+          ),
+        );
     },
   });
 
@@ -180,20 +159,9 @@ export default class AssignmentForm implements OnInit {
         return of([]);
       }
       return this.apollo
-        .watchQuery<{
-          teachersByOrganizationId: Teacher[];
-        }>({
-          query: gql`
-            query TeachersByOrganizationId($organizationId: String!) {
-              teachersByOrganizationId(organizationId: $organizationId) {
-                id
-                name
-              }
-            }
-          `,
-          variables: {
-            organizationId: params.organizationId,
-          },
+        .watchQuery({
+          query: TeachersByOrganizationIdDocument,
+          variables: { organizationId },
         })
         .valueChanges.pipe(map((result) => result.data?.teachersByOrganizationId ?? []));
     },
@@ -250,19 +218,19 @@ export default class AssignmentForm implements OnInit {
       this.selectedCourseId.set(this.data()!.courseId!);
     }
     if (this.store.currentTeacher()) {
-      this.form.get('teacherId')?.setValue(this.store.currentTeacher()!.id);
+      this.form.get('teacherId')?.setValue(this.store.currentTeacher()!.id ?? '');
       this.form.get('teacherId')?.disable();
     }
   }
 
-  private buildGroupDatesArray(groups: ClassGroup[]) {
+  private buildGroupDatesArray(groups: { id: string; name: string }[]) {
     this.groupDatesArray.clear();
     groups.forEach((group) => {
       this.groupDatesArray.push(
         this.fb.group({
           classGroupId: [group.id],
           date: [this.defaultDate, [Validators.required]],
-        })
+        }),
       );
     });
   }
@@ -288,23 +256,17 @@ export default class AssignmentForm implements OnInit {
 
     this.apollo
       .mutate({
-        mutation: gql`
-          mutation CreateAssignment($createAssignmentInput: CreateAssignmentInput!) {
-            createAssignment(createAssignmentInput: $createAssignmentInput) {
-              id
-            }
-          }
-        `,
+        mutation: CreateAssignmentDocument,
         variables: {
           createAssignmentInput: {
             title: req.title,
             details: req.details,
             type: req.type,
-            date: new Date(req.date),
+            date: new Date(req.date).toISOString(),
             requireSubmission: req.requireSubmission,
-            teacherId: req.teacherId,
-            courseId: req.courseId,
-            schoolId: this.store.currentSchoolId(),
+            teacherId: req.teacherId ?? '',
+            courseId: req.courseId ?? '',
+            schoolId: this.store.currentSchoolId() ?? '',
             groupDates,
           },
         },

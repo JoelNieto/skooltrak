@@ -1,0 +1,21 @@
+mutation GradeBucketsFormUpdateGradeBucket($updateGradeBucketInput: UpdateGradeBucketInput!) {
+  updateGradeBucket(updateGradeBucketInput: $updateGradeBucketInput) {
+    id
+    name
+    weight
+    courseId
+    createdAt
+    updatedAt
+  }
+}
+
+mutation GradeBucketsFormCreateGradeBucket($createGradeBucketInput: CreateGradeBucketInput!) {
+  createGradeBucket(createGradeBucketInput: $createGradeBucketInput) {
+    id
+    name
+    weight
+    courseId
+    createdAt
+    updatedAt
+  }
+}

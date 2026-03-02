@@ -15,7 +15,8 @@ import {
 import { Prisma } from '@generated/prisma';
 
 type Decimal = InstanceType<typeof Prisma.Decimal>;
-import { Apollo, gql } from 'apollo-angular';
+import { Apollo } from 'apollo-angular';
+import { UpdateStudentGradeDocument } from '../graphql/generated/graphql';
 @Component({
   selector: 'app-student-grade-form',
   imports: [ReactiveFormsModule],
@@ -92,26 +93,11 @@ export default class StudentGradeForm {
 
     this.#apollo
       .mutate({
-        mutation: gql`
-          mutation UpdateStudentGrade(
-            $updateStudentGradeInput: UpdateStudentGradeInput!
-          ) {
-            updateStudentGrade(
-              updateStudentGradeInput: $updateStudentGradeInput
-            ) {
-              id
-              score
-              comments
-              gradeId
-              studentId
-              createdAt
-              updatedAt
-            }
-          }
-        `,
+        mutation: UpdateStudentGradeDocument,
         variables: {
           updateStudentGradeInput: {
-            ...this.form.getRawValue(),
+            score: Number(this.form.getRawValue().score),
+            comments: this.form.getRawValue().comments,
             id: this.data().studentGrade.id,
           },
         },

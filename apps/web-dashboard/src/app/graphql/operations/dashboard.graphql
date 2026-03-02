@@ -1,0 +1,26 @@
+query GetSchools {
+  schools {
+    id
+    name
+    organizationId
+    shortName
+    logo
+    logoUrl
+    address
+    city
+    state
+    zip
+    country
+    email
+    phone
+    currencyCode
+    currentYear
+    website
+    createdAt
+    updatedAt
+  }
+}
+
+query UnreadMessagesCount {
+  unreadMessagesCount
+}

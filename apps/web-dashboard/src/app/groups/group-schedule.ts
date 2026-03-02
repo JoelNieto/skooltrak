@@ -3,7 +3,11 @@ import { Component, computed, inject, input, linkedSignal, signal } from '@angul
 import { rxResource } from '@angular/core/rxjs-interop';
 import { Prisma } from '@generated/prisma';
 import { isValidId } from '../core/validators';
-import { Apollo, gql } from 'apollo-angular';
+import { Apollo } from 'apollo-angular';
+import {
+  GroupScheduleGroupsSchedulesByClassGroupIdDocument,
+  GroupScheduleUpdateGroupsScheduleDocument,
+} from '../graphql/generated/graphql';
 import { map, of } from 'rxjs';
 import GroupScheduleForm from './group-schedule-form';
 
@@ -152,33 +156,7 @@ export default class GroupSchedule {
         .watchQuery<{
           groupsSchedulesByClassGroupId: Schedule[];
         }>({
-          query: gql`
-            query GroupsSchedulesByClassGroupId($classGroupId: String!) {
-              groupsSchedulesByClassGroupId(classGroupId: $classGroupId) {
-                id
-                weekday
-                startTime
-                endTime
-                location
-                remote
-                remoteLink
-                courseId
-                course {
-                  id
-                  name
-                  subject {
-                    name
-                  }
-                  teacher {
-                    user {
-                      firstName
-                      lastName
-                    }
-                  }
-                }
-              }
-            }
-          `,
+          query: GroupScheduleGroupsSchedulesByClassGroupIdDocument,
           variables: {
             classGroupId: params.classGroupId,
           },
@@ -338,13 +316,7 @@ export default class GroupSchedule {
   private persistScheduleChange(schedule: Schedule) {
     this.#apollo
       .mutate({
-        mutation: gql`
-          mutation UpdateGroupsSchedule($updateGroupsScheduleInput: UpdateGroupsScheduleInput!) {
-            updateGroupsSchedule(updateGroupsScheduleInput: $updateGroupsScheduleInput) {
-              id
-            }
-          }
-        `,
+        mutation: GroupScheduleUpdateGroupsScheduleDocument,
         variables: {
           updateGroupsScheduleInput: {
             id: schedule.id,

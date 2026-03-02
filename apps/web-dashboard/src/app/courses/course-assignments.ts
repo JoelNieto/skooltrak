@@ -1,35 +1,13 @@
 import { Calendar } from '@/ui';
 import { DatePipe } from '@angular/common';
-import {
-  ChangeDetectionStrategy,
-  Component,
-  inject,
-  input,
-  signal,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, input, signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
-import { Apollo, gql } from 'apollo-angular';
+import { Apollo } from 'apollo-angular';
 import { map } from 'rxjs';
 import Auth from '../auth/auth';
 import Store from '../core/store';
-
-type AssignmentDateResult = {
-  id: string;
-  date: string;
-  classGroupId: string;
-  classGroup: {
-    id: string;
-    name: string;
-  };
-  assignment: {
-    id: string;
-    title: string;
-    details: string;
-    type: string;
-    requireSubmission: boolean;
-  };
-};
+import { AssignmentDatesByCourseIdDocument, AssignmentDatesByCourseIdQuery } from '../graphql/generated/graphql';
 
 @Component({
   selector: 'app-course-assignments',
@@ -46,19 +24,14 @@ type AssignmentDateResult = {
             class="flex items-center gap-2 justify-between cursor-pointer"
             [routerLink]="['/assignments', marker.data.assignmentId]"
           >
-            <div
-              class="overflow-hidden text-ellipsis text-base-content whitespace-nowrap text-xs"
-            >
+            <div class="overflow-hidden text-ellipsis text-base-content whitespace-nowrap text-xs">
               {{ marker.data.title }}
               @if (!isStudent() && marker.data.groupName) {
                 <span class="text-base-300 ml-1">({{ marker.data.groupName }})</span>
               }
             </div>
-            <time
-              [attr.datetime]="marker.date | date : 'yyyy-MM-dd'"
-              class="text-base-200 text-xs flex-none"
-            >
-              {{ marker.date | date : 'h:mm a' }}
+            <time [attr.datetime]="marker.date | date: 'yyyy-MM-dd'" class="text-base-200 text-xs flex-none">
+              {{ marker.date | date: 'h:mm a' }}
             </time>
           </div>
         }
@@ -88,49 +61,20 @@ export default class CourseAssignments {
     stream: ({ params }) => {
       const { start, end, classGroupId } = params;
       return this.#apollo
-        .watchQuery<{
-          assignmentDatesByCourseId: AssignmentDateResult[];
-        }>({
-          query: gql`
-            query AssignmentDatesByCourseId(
-              $courseId: String!
-              $endDate: String!
-              $startDate: String!
-              $classGroupId: String
-            ) {
-              assignmentDatesByCourseId(
-                courseId: $courseId
-                endDate: $endDate
-                startDate: $startDate
-                classGroupId: $classGroupId
-              ) {
-                id
-                date
-                classGroupId
-                classGroup {
-                  id
-                  name
-                }
-                assignment {
-                  id
-                  title
-                  details
-                  type
-                  requireSubmission
-                }
-              }
-            }
-          `,
+        .watchQuery({
+          query: AssignmentDatesByCourseIdDocument,
           variables: {
             courseId: this.courseId(),
-            startDate: start,
-            endDate: end,
+            startDate: start instanceof Date ? start.toISOString() : String(start),
+            endDate: end instanceof Date ? end.toISOString() : String(end),
             classGroupId: classGroupId || null,
           },
         })
         .valueChanges.pipe(
           map((res) =>
-            (res.data?.assignmentDatesByCourseId ?? []).map((item) => ({
+            (
+              (res.data?.assignmentDatesByCourseId as AssignmentDatesByCourseIdQuery['assignmentDatesByCourseId']) ?? []
+            ).map((item) => ({
               date: new Date(item.date),
               data: {
                 id: item.id,
@@ -141,8 +85,8 @@ export default class CourseAssignments {
                 groupId: item.classGroupId,
                 groupName: item.classGroup?.name,
               },
-            }))
-          )
+            })),
+          ),
         );
     },
   });

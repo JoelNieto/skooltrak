@@ -1,0 +1,8 @@
+query OnboardingMyJoinRequestStatus {
+  myJoinRequestStatus {
+    id
+    requestedRole
+    status
+    schoolName
+  }
+}

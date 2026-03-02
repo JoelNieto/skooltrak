@@ -1,22 +1,18 @@
 import { Toast } from '@/ui';
 import { DatePipe } from '@angular/common';
-import {
-  ChangeDetectionStrategy,
-  Component,
-  computed,
-  inject,
-  input,
-  signal,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input, signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
-import { Prisma } from '@generated/prisma';
-import { Apollo, gql } from 'apollo-angular';
+import { Apollo } from 'apollo-angular';
 import { from, map, switchMap } from 'rxjs';
+import {
+  CreateAssignmentSubmissionDocument,
+  CreateSubmissionDownloadUrlDocument,
+  CreateSubmissionUploadUrlDocument,
+  DeleteAssignmentSubmissionDocument,
+  MyAssignmentSubmissionDocument,
+  MyAssignmentSubmissionQuery,
+} from '../graphql/generated/graphql';
 import AssignmentDropzone, { UploadedFile } from './assignment-dropzone';
-
-type AssignmentSubmission = Prisma.AssignmentSubmissionGetPayload<{
-  include: { file: true };
-}>;
 
 @Component({
   selector: 'app-assignment-submission-form',
@@ -27,15 +23,13 @@ type AssignmentSubmission = Prisma.AssignmentSubmissionGetPayload<{
         <div class="flex items-center justify-center py-8">
           <span class="loading loading-spinner loading-md"></span>
         </div>
-      } @else if (submissionResource.hasValue() && submissionResource.value()) {
+      } @else if (submissionResource.hasValue()) {
         @let submission = submissionResource.value()!;
         <div class="alert alert-success">
           <span class="material-symbols-outlined">check_circle</span>
           <div>
             <h3 class="font-bold">Entrega completada</h3>
-            <p class="text-sm">
-              Entregaste el {{ submission.submittedAt | date: 'medium' }}
-            </p>
+            <p class="text-sm">Entregaste el {{ submission.submittedAt | date: 'medium' }}</p>
           </div>
         </div>
         <div class="flex items-center justify-between p-4 bg-base-200 rounded-lg">
@@ -79,16 +73,9 @@ type AssignmentSubmission = Prisma.AssignmentSubmissionGetPayload<{
           ¿Deseas reemplazar tu entrega? Elimina el archivo actual y sube uno nuevo.
         </p>
       } @else {
-        <app-assignment-dropzone
-          [maxSize]="maxFileSize"
-          (filesChange)="onFilesChange($event)"
-        />
+        <app-assignment-dropzone [maxSize]="maxFileSize" (filesChange)="onFilesChange($event)" />
         @if (selectedFiles().length > 0) {
-          <button
-            class="btn btn-primary w-full"
-            (click)="submitAssignment()"
-            [disabled]="isUploading()"
-          >
+          <button class="btn btn-primary w-full" (click)="submitAssignment()" [disabled]="isUploading()">
             @if (isUploading()) {
               <span class="loading loading-spinner loading-sm"></span>
               Subiendo...
@@ -120,28 +107,14 @@ export default class AssignmentSubmissionForm {
     params: () => ({ assignmentId: this.assignmentId() }),
     stream: ({ params }) => {
       return this.apollo
-        .watchQuery<{ myAssignmentSubmission: AssignmentSubmission | null }>({
-          query: gql`
-            query MyAssignmentSubmission($assignmentId: String!) {
-              myAssignmentSubmission(assignmentId: $assignmentId) {
-                id
-                assignmentId
-                studentId
-                fileId
-                submittedAt
-                file {
-                  id
-                  name
-                  mimeType
-                  size
-                }
-              }
-            }
-          `,
+        .watchQuery({
+          query: MyAssignmentSubmissionDocument,
           variables: { assignmentId: params.assignmentId },
           fetchPolicy: 'network-only',
         })
-        .valueChanges.pipe(map((res) => res.data?.myAssignmentSubmission));
+        .valueChanges.pipe(
+          map((res) => res.data?.myAssignmentSubmission as MyAssignmentSubmissionQuery['myAssignmentSubmission']),
+        );
     },
   });
 
@@ -164,17 +137,8 @@ export default class AssignmentSubmissionForm {
     this.isUploading.set(true);
 
     this.apollo
-      .mutate<{
-        createSubmissionUploadUrl: { uploadUrl: string; storageKey: string };
-      }>({
-        mutation: gql`
-          mutation CreateSubmissionUploadUrl($input: CreateSubmissionUploadInput!) {
-            createSubmissionUploadUrl(input: $input) {
-              uploadUrl
-              storageKey
-            }
-          }
-        `,
+      .mutate({
+        mutation: CreateSubmissionUploadUrlDocument,
         variables: {
           input: {
             assignmentId: this.assignmentId(),
@@ -199,30 +163,12 @@ export default class AssignmentSubmissionForm {
                 throw new Error('Error al subir el archivo.');
               }
               return payload;
-            })
+            }),
           );
         }),
         switchMap((payload) =>
-          this.apollo.mutate<{ createAssignmentSubmission: AssignmentSubmission }>({
-            mutation: gql`
-              mutation CreateAssignmentSubmission(
-                $input: CreateAssignmentSubmissionInput!
-              ) {
-                createAssignmentSubmission(input: $input) {
-                  id
-                  assignmentId
-                  studentId
-                  fileId
-                  submittedAt
-                  file {
-                    id
-                    name
-                    mimeType
-                    size
-                  }
-                }
-              }
-            `,
+          this.apollo.mutate({
+            mutation: CreateAssignmentSubmissionDocument,
             variables: {
               input: {
                 assignmentId: this.assignmentId(),
@@ -232,8 +178,8 @@ export default class AssignmentSubmissionForm {
                 storageKey: payload.storageKey,
               },
             },
-          })
-        )
+          }),
+        ),
       )
       .subscribe({
         next: () => {
@@ -254,12 +200,8 @@ export default class AssignmentSubmissionForm {
     this.isDeleting.set(true);
 
     this.apollo
-      .mutate<{ deleteAssignmentSubmission: boolean }>({
-        mutation: gql`
-          mutation DeleteAssignmentSubmission($submissionId: String!) {
-            deleteAssignmentSubmission(submissionId: $submissionId)
-          }
-        `,
+      .mutate({
+        mutation: DeleteAssignmentSubmissionDocument,
         variables: { submissionId },
       })
       .subscribe({
@@ -280,19 +222,13 @@ export default class AssignmentSubmissionForm {
     this.isDownloading.set(true);
 
     this.apollo
-      .mutate<{ createSubmissionDownloadUrl: { downloadUrl: string } }>({
-        mutation: gql`
-          mutation CreateSubmissionDownloadUrl($fileId: String!) {
-            createSubmissionDownloadUrl(fileId: $fileId) {
-              downloadUrl
-            }
-          }
-        `,
+      .mutate({
+        mutation: CreateSubmissionDownloadUrlDocument,
         variables: { fileId },
       })
       .subscribe({
         next: (result) => {
-          const url = result.data?.createSubmissionDownloadUrl.downloadUrl;
+          const url = result.data?.createSubmissionDownloadUrl?.downloadUrl;
           if (url) {
             window.open(url, '_blank');
           }
@@ -309,10 +245,8 @@ export default class AssignmentSubmissionForm {
   getFileIcon(mimeType: string): string {
     if (mimeType.includes('pdf')) return 'picture_as_pdf';
     if (mimeType.includes('image')) return 'image';
-    if (mimeType.includes('word') || mimeType.includes('document'))
-      return 'description';
-    if (mimeType.includes('spreadsheet') || mimeType.includes('excel'))
-      return 'table_chart';
+    if (mimeType.includes('word') || mimeType.includes('document')) return 'description';
+    if (mimeType.includes('spreadsheet') || mimeType.includes('excel')) return 'table_chart';
     return 'insert_drive_file';
   }
 

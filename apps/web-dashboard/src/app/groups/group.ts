@@ -2,9 +2,9 @@ import { Loader } from '@/ui';
 import { Component, computed, inject, input } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
-import { Prisma } from '@generated/prisma';
 
-import { Apollo, gql } from 'apollo-angular';
+import { Apollo } from 'apollo-angular';
+import { ClassGroupDocument } from '../graphql/generated/graphql';
 import { catchError, map, of, throwError } from 'rxjs';
 import { isValidId } from '../core/validators';
 import Auth from '../auth/auth';
@@ -12,23 +12,6 @@ import GroupCourses from './group-courses';
 import GroupHabits from './group-habits';
 import GroupSchedule from './group-schedule';
 import GroupStudents from './group-students';
-type Teacher = Prisma.TeacherGetPayload<{ include: { user: true } }> & {
-  name: string;
-  color: string;
-  initials: string;
-};
-type Student = Prisma.StudentGetPayload<{
-  include: { user: true };
-}> & {
-  name: string;
-  initials: string;
-};
-type GroupType = Prisma.ClassGroupGetPayload<{
-  include: {
-    studyPlan: { include: { degree: true } };
-    courses: { include: { teacher: true; subject: true } };
-  };
-}> & { teacher?: Teacher; students: Student[] };
 
 @Component({
   imports: [RouterLink, Loader, GroupStudents, GroupCourses, GroupSchedule, GroupHabits],
@@ -148,64 +131,9 @@ export default class Group {
       }
 
       return this.apollo
-        .watchQuery<{
-          classGroup: GroupType;
-        }>({
-          query: gql`
-            query ClassGroup($id: String!) {
-              classGroup(id: $id) {
-                id
-                name
-                createdAt
-                updatedAt
-                teacherId
-                studyPlanId
-                students {
-                  id
-                  name
-                  email
-                  documentId
-                  initials
-                  user {
-                    color
-                  }
-                }
-                courses {
-                  id
-                  name
-                  code
-                  subject {
-                    id
-                    name
-                  }
-                  teacher {
-                    id
-                    name
-                  }
-                }
-                teacher {
-                  id
-                  name
-                  color
-                  initials
-                  user {
-                    id
-                  }
-                }
-                studyPlan {
-                  id
-                  name
-                  degree {
-                    id
-                    name
-                  }
-                }
-              }
-            }
-          `,
-          variables: {
-            id,
-          },
+        .watchQuery({
+          query: ClassGroupDocument,
+          variables: { id },
         })
         .valueChanges.pipe(
           map((result) => result.data?.classGroup),

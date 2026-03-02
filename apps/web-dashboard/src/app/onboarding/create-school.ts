@@ -2,7 +2,8 @@ import { markGroupDirty, Toast } from '@/ui';
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { FormsModule, NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { Apollo, gql } from 'apollo-angular';
+import { Apollo } from 'apollo-angular';
+import { OnboardingCreateSchoolWithOrganizationDocument } from '../graphql/generated/graphql';
 import Auth from '../auth/auth';
 import Store from '../core/store';
 
@@ -193,15 +194,8 @@ export default class CreateSchool {
     const { name, shortName } = this.form.getRawValue();
 
     this.apollo
-      .mutate<{ createSchoolWithOrganization: { accessToken: string; schoolId: string } }>({
-        mutation: gql`
-          mutation CreateSchoolWithOrganization($input: CreateSchoolWithOrgInput!) {
-            createSchoolWithOrganization(input: $input) {
-              accessToken
-              schoolId
-            }
-          }
-        `,
+      .mutate({
+        mutation: OnboardingCreateSchoolWithOrganizationDocument,
         variables: {
           input: {
             schoolName: name,

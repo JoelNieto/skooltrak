@@ -1,0 +1,26 @@
+query OnboardingStepsStudyPlansGetSchools {
+  schools {
+    id
+  }
+}
+
+query OnboardingStepsDegreesBySchoolId($schoolId: String!) {
+  degreesBySchoolId(schoolId: $schoolId) {
+    id
+    name
+  }
+}
+
+query OnboardingStepsGetGradeMetrics {
+  gradeMetrics {
+    id
+    name
+  }
+}
+
+mutation OnboardingStepsCreateStudyPlan($createStudyPlanInput: CreateStudyPlanInput!) {
+  createStudyPlan(createStudyPlanInput: $createStudyPlanInput) {
+    id
+    name
+  }
+}

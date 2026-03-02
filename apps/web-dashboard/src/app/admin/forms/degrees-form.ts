@@ -14,7 +14,12 @@ import {
   Validators,
 } from '@angular/forms';
 import { Prisma } from '@generated/prisma';
-import { Apollo, gql } from 'apollo-angular';
+import { Apollo } from 'apollo-angular';
+import {
+  DegreesFormCreateDegreeDocument,
+  DegreesFormGetSchoolsDocument,
+  DegreesFormUpdateDegreeDocument,
+} from '../../graphql/generated/graphql';
 import { map } from 'rxjs';
 import Store from '../../core/store';
 @Component({
@@ -74,20 +79,9 @@ export default class DegreesForm implements OnInit {
   public schools = rxResource({
     stream: () =>
       this.apollo
-        .watchQuery<{
-          schools: Prisma.SchoolGetPayload<{
-            include: undefined;
-          }>[];
-        }>({
+        .watchQuery({
+          query: DegreesFormGetSchoolsDocument,
           fetchPolicy: 'cache-and-network',
-          query: gql`
-            query GetSchools {
-              schools {
-                id
-                name
-              }
-            }
-          `,
         })
         .valueChanges.pipe(map((result) => result.data?.schools ?? [])),
   });
@@ -117,17 +111,8 @@ export default class DegreesForm implements OnInit {
 
     if (this.data()?.degree) {
       this.apollo
-        .mutate<{
-          updateDegree: Prisma.DegreeGetPayload<{ include: { school: true } }>;
-        }>({
-          mutation: gql`
-            mutation UpdateDegree($updateDegreeInput: UpdateDegreeInput!) {
-              updateDegree(updateDegreeInput: $updateDegreeInput) {
-                id
-                name
-              }
-            }
-          `,
+        .mutate({
+          mutation: DegreesFormUpdateDegreeDocument,
           variables: {
             updateDegreeInput: { ...request, id: this.data()!.degree!.id },
           },
@@ -145,17 +130,8 @@ export default class DegreesForm implements OnInit {
     }
 
     this.apollo
-      .mutate<{
-        createDegree: Prisma.DegreeGetPayload<{ include: { school: true } }>;
-      }>({
-        mutation: gql`
-          mutation CreateDegree($createDegreeInput: CreateDegreeInput!) {
-            createDegree(createDegreeInput: $createDegreeInput) {
-              id
-              name
-            }
-          }
-        `,
+      .mutate({
+        mutation: DegreesFormCreateDegreeDocument,
         variables: {
           createDegreeInput: { ...request },
         },

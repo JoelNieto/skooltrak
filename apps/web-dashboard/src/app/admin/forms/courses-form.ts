@@ -16,9 +16,18 @@ import {
 import { rxResource } from '@angular/core/rxjs-interop';
 import { FormsModule, NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Prisma } from '@generated/prisma';
-import { Apollo, gql } from 'apollo-angular';
+import { Apollo } from 'apollo-angular';
 import { firstValueFrom, map, of } from 'rxjs';
 import Store from '../../core/store';
+import {
+  CoursesFormCreateCourseDocument,
+  CoursesFormCreateSubjectDocument,
+  CoursesFormGetSubjectsDocument,
+  CoursesFormGetSubjectsQuery,
+  CoursesFormGetTeachersDocument,
+  CoursesFormStudyPlansBySchoolIdDocument,
+  CoursesFormUpdateCourseDocument,
+} from '../../graphql/generated/graphql';
 @Component({
   selector: 'app-courses-form',
   imports: [
@@ -122,7 +131,12 @@ import Store from '../../core/store';
     @if (errorMessage()) {
       <div role="alert" class="alert alert-error mt-3">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 shrink-0 stroke-current" fill="none" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
+          />
         </svg>
         <span>{{ errorMessage() }}</span>
       </div>
@@ -173,22 +187,15 @@ export default class CoursesForm {
   public subjects = rxResource({
     stream: () => {
       return this.apollo
-        .watchQuery<{ subjects: Prisma.SubjectGetPayload<false>[] }>({
-          query: gql`
-            query GetSubjects($take: Int!, $orderBy: String) {
-              subjects(take: $take, orderBy: $orderBy) {
-                id
-                name
-              }
-            }
-          `,
+        .watchQuery({
+          query: CoursesFormGetSubjectsDocument,
           variables: {
             take: 100,
             orderBy: 'name',
           },
           fetchPolicy: 'cache-first',
         })
-        .valueChanges.pipe(map((result) => result.data?.subjects ?? []));
+        .valueChanges.pipe(map((result) => (result.data?.subjects as CoursesFormGetSubjectsQuery['subjects']) ?? []));
     },
   });
 
@@ -201,19 +208,8 @@ export default class CoursesForm {
         return of([]);
       }
       return this.apollo
-        .watchQuery<{
-          studyPlansBySchoolId: Prisma.StudyPlanGetPayload<{
-            include: { degree: true; school: true };
-          }>[];
-        }>({
-          query: gql`
-            query StudyPlansBySchoolId($schoolId: String!) {
-              studyPlansBySchoolId(schoolId: $schoolId) {
-                id
-                name
-              }
-            }
-          `,
+        .watchQuery({
+          query: CoursesFormStudyPlansBySchoolIdDocument,
           variables: {
             schoolId: params.schoolId,
           },
@@ -235,18 +231,8 @@ export default class CoursesForm {
   public teachers = rxResource({
     stream: () =>
       this.apollo
-        .watchQuery<{
-          teachers: { id: string; name: string }[];
-        }>({
-          query: gql`
-            query getTeachers($take: Int!, $skip: Int!, $search: String, $orderBy: String, $orderDirection: String) {
-              teachers(take: $take, skip: $skip, search: $search, orderBy: $orderBy, orderDirection: $orderDirection) {
-                id
-                name
-                initials
-              }
-            }
-          `,
+        .watchQuery({
+          query: CoursesFormGetTeachersDocument,
           variables: {
             take: 100,
             skip: 0,
@@ -307,9 +293,7 @@ export default class CoursesForm {
       return;
     }
     // If the query exactly matches a subject name, select it
-    const exactMatch = filtered.find(
-      (s) => s.name.toLowerCase() === query
-    );
+    const exactMatch = filtered.find((s) => s.name.toLowerCase() === query);
     if (exactMatch) {
       this.selectSubject(exactMatch);
     }
@@ -332,25 +316,15 @@ export default class CoursesForm {
 
     try {
       const result = await firstValueFrom(
-        this.apollo.mutate<{
-          createSubject: { id: string; name: string; code: string };
-        }>({
-          mutation: gql`
-            mutation CreateSubject($createSubjectInput: CreateSubjectInput!) {
-              createSubject(createSubjectInput: $createSubjectInput) {
-                id
-                name
-                code
-              }
-            }
-          `,
+        this.apollo.mutate({
+          mutation: CoursesFormCreateSubjectDocument,
           variables: {
             createSubjectInput: {
               name,
               code,
             },
           },
-          refetchQueries: ['GetSubjects'],
+          refetchQueries: ['CoursesFormGetSubjects'],
         }),
       );
 
@@ -377,18 +351,7 @@ export default class CoursesForm {
     if (this.data()?.course) {
       this.apollo
         .mutate({
-          mutation: gql`
-            mutation UpdateCourse($updateCourseInput: UpdateCourseInput!) {
-              updateCourse(updateCourseInput: $updateCourseInput) {
-                id
-                name
-                shortName
-                code
-                subjectId
-                studyPlanId
-              }
-            }
-          `,
+          mutation: CoursesFormUpdateCourseDocument,
           variables: {
             updateCourseInput: {
               ...req,
@@ -409,23 +372,12 @@ export default class CoursesForm {
     }
     this.apollo
       .mutate({
-        mutation: gql`
-          mutation CreateCourse($createCourseInput: CreateCourseInput!) {
-            createCourse(createCourseInput: $createCourseInput) {
-              id
-              name
-              shortName
-              code
-              subjectId
-              studyPlanId
-            }
-          }
-        `,
+        mutation: CoursesFormCreateCourseDocument,
         variables: {
           createCourseInput: {
             ...req,
-            organizationId: this.store.currentOrganizationId(),
-            schoolId: this.store.currentSchoolId(),
+            organizationId: this.store.currentOrganizationId() ?? '',
+            schoolId: this.store.currentSchoolId() ?? '',
           },
         },
       })

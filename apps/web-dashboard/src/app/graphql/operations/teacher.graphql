@@ -1,0 +1,41 @@
+query Teacher($teacherId: String!) {
+  teacher(id: $teacherId) {
+    id
+    firstName
+    middleName
+    fatherName
+    motherName
+    name
+    fullName
+    initials
+    documentId
+    birthDate
+    gender
+    address
+    phoneNumber
+    personalEmail
+    about
+    teacherSince
+    memberSince
+    user {
+      id
+      email
+      color
+      emailVerified
+    }
+    subjects {
+      id
+      name
+    }
+    courses {
+      id
+      name
+    }
+    classGroups {
+      id
+      name
+    }
+    createdAt
+    updatedAt
+  }
+}

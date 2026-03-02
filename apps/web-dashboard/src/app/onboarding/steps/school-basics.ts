@@ -2,7 +2,11 @@ import { markGroupDirty, Toast } from '@/ui';
 import { ChangeDetectionStrategy, Component, computed, inject, output, signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Apollo, gql } from 'apollo-angular';
+import { Apollo } from 'apollo-angular';
+import {
+  OnboardingStepsSchoolBasicsGetSchoolsDocument,
+  OnboardingStepsUpdateSchoolDocument,
+} from '../../graphql/generated/graphql';
 import { map } from 'rxjs';
 import Store from '../../core/store';
 
@@ -86,16 +90,8 @@ export default class SchoolBasicsStep {
   public schools = rxResource({
     stream: () =>
       this.apollo
-        .watchQuery<{ schools: { id: string; name: string; currentYear: number }[] }>({
-          query: gql`
-            query GetSchools {
-              schools {
-                id
-                name
-                currentYear
-              }
-            }
-          `,
+        .watchQuery({
+          query: OnboardingStepsSchoolBasicsGetSchoolsDocument,
           fetchPolicy: 'network-only',
         })
         .valueChanges.pipe(map((result) => result.data?.schools ?? [])),
@@ -133,14 +129,7 @@ export default class SchoolBasicsStep {
 
     this.apollo
       .mutate({
-        mutation: gql`
-          mutation UpdateSchool($updateSchoolInput: UpdateSchoolInput!) {
-            updateSchool(updateSchoolInput: $updateSchoolInput) {
-              id
-              currentYear
-            }
-          }
-        `,
+        mutation: OnboardingStepsUpdateSchoolDocument,
         variables: {
           updateSchoolInput: {
             id: schoolId,

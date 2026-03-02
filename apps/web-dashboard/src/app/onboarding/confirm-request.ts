@@ -1,7 +1,8 @@
 import { Toast } from '@/ui';
 import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Apollo, gql } from 'apollo-angular';
+import { Apollo } from 'apollo-angular';
+import { OnboardingRequestJoinSchoolDocument } from '../graphql/generated/graphql';
 
 @Component({
   selector: 'app-confirm-request',
@@ -92,15 +93,8 @@ export default class ConfirmRequest implements OnInit {
     this.loading.set(true);
 
     this.apollo
-      .mutate<{ requestJoinSchool: { status: string; message: string } }>({
-        mutation: gql`
-          mutation RequestJoinSchool($input: RequestJoinSchoolInput!) {
-            requestJoinSchool(input: $input) {
-              status
-              message
-            }
-          }
-        `,
+      .mutate({
+        mutation: OnboardingRequestJoinSchoolDocument,
         variables: {
           input: {
             schoolId: this.schoolId(),

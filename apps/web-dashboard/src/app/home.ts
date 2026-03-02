@@ -3,9 +3,21 @@ import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
-import { Apollo, gql } from 'apollo-angular';
-import { map, of } from 'rxjs';
+import { Apollo } from 'apollo-angular';
+import { map, Observable, of } from 'rxjs';
 import Store from './core/store';
+import {
+  AdminDashboardStatsDocument,
+  OnboardingStatusDocument,
+  RecentMessagesDocument,
+  RecentMessagesQuery,
+  RecentNewslettersDocument,
+  RecentNewslettersQuery,
+  RecentStudentsDocument,
+  RecentStudentsQuery,
+  RecentTeachersDocument,
+  RecentTeachersQuery,
+} from './graphql/generated/graphql';
 import WelcomeBanner from './shared/welcome-banner';
 
 type DashboardStats = {
@@ -13,17 +25,6 @@ type DashboardStats = {
   findManyStudentsCount: number;
   findManyTeachersCount: number;
   findManySubjectsCount: number;
-};
-
-type RecentMessage = {
-  id: string;
-  createdAt: string;
-  message: {
-    id: string;
-    subject: string;
-    createdAt: string;
-    sender: { id: string; name: string };
-  };
 };
 
 type RecentStudent = {
@@ -38,23 +39,6 @@ type RecentTeacher = {
   fullName: string;
   createdAt: string;
   user: { email: string };
-};
-
-type RecentNewsletter = {
-  id: string;
-  title: string;
-  content: string;
-  publishedAt: string;
-  author: { id: string; name: string };
-};
-
-type OnboardingStatus = {
-  onboardingCompleted: boolean;
-  schoolName?: string;
-  degreesCount: number;
-  studyPlansCount: number;
-  coursesCount: number;
-  groupsCount: number;
 };
 
 @Component({
@@ -120,11 +104,11 @@ type OnboardingStatus = {
                   class="rounded-lg border border-base-200 p-3 transition-colors duration-150 hover:bg-base-200 cursor-pointer"
                 >
                   <p class="font-medium text-base-content text-sm">
-                    {{ message.message?.subject }}
+                    {{ message.message.subject }}
                   </p>
                   <div class="text-xs text-base-content/60 mt-1">
-                    {{ message.message?.sender?.name }} ·
-                    {{ message.message?.createdAt | date: 'short' }}
+                    {{ message.message.sender.name }} ·
+                    {{ message.message.createdAt | date: 'short' }}
                   </div>
                 </div>
               }
@@ -203,15 +187,13 @@ type OnboardingStatus = {
                   <div class="rounded-lg border border-base-200 p-4 transition-colors duration-150 hover:bg-base-200">
                     <p class="font-medium text-base-content text-sm">{{ newsletter.title }}</p>
                     <p class="text-xs text-base-content/60 mt-1 line-clamp-2">
-                      {{ stripHtml(newsletter.content ?? '') }}
+                      {{ stripHtml(newsletter.content) }}
                     </p>
                     <div class="flex items-center justify-between mt-2">
                       <span class="text-xs text-base-content/60">
-                        {{ newsletter.author?.name }} · {{ newsletter.publishedAt | date: 'mediumDate' }}
+                        {{ newsletter.author.name }} · {{ newsletter.publishedAt | date: 'mediumDate' }}
                       </span>
-                      <a [routerLink]="['/newsletters', newsletter.id]" class="link link-primary text-xs">
-                        Ver más
-                      </a>
+                      <a [routerLink]="['/newsletters', newsletter.id]" class="link link-primary text-xs"> Ver más </a>
                     </div>
                   </div>
                 }
@@ -269,7 +251,7 @@ type OnboardingStatus = {
                     {{ teacher.fullName }}
                   </p>
                   <div class="text-xs text-base-content/60 mt-1">
-                    {{ teacher.user?.email }} ·
+                    {{ teacher.user.email }} ·
                     {{ teacher.createdAt | date: 'short' }}
                   </div>
                 </div>
@@ -292,19 +274,8 @@ export default class Home {
   public onboardingStatus = rxResource({
     stream: () =>
       this.apollo
-        .watchQuery<{ onboardingStatus: OnboardingStatus }>({
-          query: gql`
-            query OnboardingStatus {
-              onboardingStatus {
-                onboardingCompleted
-                schoolName
-                degreesCount
-                studyPlansCount
-                coursesCount
-                groupsCount
-              }
-            }
-          `,
+        .watchQuery({
+          query: OnboardingStatusDocument,
           fetchPolicy: 'cache-first',
         })
         .valueChanges.pipe(map((result) => result.data?.onboardingStatus)),
@@ -321,7 +292,7 @@ export default class Home {
   public onboardingSummary = computed(() => {
     const status = this.onboardingStatus.value();
     return {
-      schoolName: status?.schoolName,
+      schoolName: status?.schoolName ?? undefined,
       degreesCount: status?.degreesCount ?? 0,
       studyPlansCount: status?.studyPlansCount ?? 0,
       coursesCount: status?.coursesCount ?? 0,
@@ -342,7 +313,7 @@ export default class Home {
 
   public statsResource = rxResource({
     params: () => ({ schoolId: this.store.currentSchoolId() }),
-    stream: ({ params }) => {
+    stream: ({ params }): import('rxjs').Observable<DashboardStats> => {
       if (!params.schoolId) {
         return of<DashboardStats>({
           coursesCount: 0,
@@ -352,71 +323,48 @@ export default class Home {
         });
       }
       return this.apollo
-        .watchQuery<DashboardStats>({
-          query: gql`
-            query AdminDashboardStats($schoolId: String) {
-              coursesCount(schoolId: $schoolId)
-              findManyStudentsCount(schoolId: $schoolId)
-              findManyTeachersCount(schoolId: $schoolId)
-              findManySubjectsCount(schoolId: $schoolId)
-            }
-          `,
+        .watchQuery({
+          query: AdminDashboardStatsDocument,
           variables: {
             schoolId: params.schoolId,
           },
         })
-        .valueChanges.pipe(map((result) => result.data ?? { coursesCount: 0, findManyStudentsCount: 0, findManyTeachersCount: 0, findManySubjectsCount: 0 }));
+        .valueChanges.pipe(
+          map((result): DashboardStats => {
+            const d = result.data;
+            return {
+              coursesCount: d?.coursesCount ?? 0,
+              findManyStudentsCount: d?.findManyStudentsCount ?? 0,
+              findManyTeachersCount: d?.findManyTeachersCount ?? 0,
+              findManySubjectsCount: d?.findManySubjectsCount ?? 0,
+            };
+          }),
+        );
     },
   });
 
   public recentMessages = rxResource({
     params: () => ({ take: 5, skip: 0 }),
-    stream: ({ params }) => {
-      return this.apollo
-        .watchQuery<{ findManyMessages: RecentMessage[] }>({
-          query: gql`
-            query RecentMessages($take: Int!, $skip: Int!) {
-              findManyMessages(take: $take, skip: $skip) {
-                id
-                createdAt
-                message {
-                  id
-                  subject
-                  createdAt
-                  sender {
-                    id
-                    name
-                  }
-                }
-              }
-            }
-          `,
+    stream: ({ params }) =>
+      this.apollo
+        .watchQuery({
+          query: RecentMessagesDocument,
           variables: params,
         })
-        .valueChanges.pipe(map((result) => result.data?.findManyMessages ?? []));
-    },
+        .valueChanges.pipe(
+          map((result) => (result.data?.findManyMessages ?? []) as RecentMessagesQuery['findManyMessages']),
+        ),
   });
 
   public recentStudents = rxResource({
     params: () => ({ take: 4, schoolId: this.store.currentSchoolId() }),
-    stream: ({ params }) => {
+    stream: ({ params }): Observable<RecentStudent[]> => {
       if (!params.schoolId) {
         return of<RecentStudent[]>([]);
       }
       return this.apollo
-        .watchQuery<{ students: RecentStudent[] }>({
-          query: gql`
-            query RecentStudents($take: Int!, $orderBy: String, $orderDirection: String, $schoolId: String) {
-              students(take: $take, orderBy: $orderBy, orderDirection: $orderDirection, schoolId: $schoolId) {
-                id
-                fullName
-                createdAt
-                classGroup {
-                  name
-                }
-              }
-            }
-          `,
+        .watchQuery({
+          query: RecentStudentsDocument,
           variables: {
             take: params.take,
             orderBy: 'createdAt',
@@ -424,7 +372,7 @@ export default class Home {
             schoolId: params.schoolId,
           },
         })
-        .valueChanges.pipe(map((result) => result.data?.students ?? []));
+        .valueChanges.pipe(map((result) => (result.data?.students ?? []) as RecentStudentsQuery['students']));
     },
   });
 
@@ -432,30 +380,19 @@ export default class Home {
     params: () => ({ schoolId: this.store.currentSchoolId() }),
     stream: ({ params }) => {
       if (!params.schoolId) {
-        return of<RecentNewsletter[]>([]);
+        return of<RecentNewslettersQuery['publishedNewsletters']>([]);
       }
       return this.apollo
-        .watchQuery<{ publishedNewsletters: RecentNewsletter[] }>({
-          query: gql`
-            query RecentNewsletters($schoolId: String!, $take: Int!) {
-              publishedNewsletters(schoolId: $schoolId, take: $take) {
-                id
-                title
-                content
-                publishedAt
-                author {
-                  id
-                  name
-                }
-              }
-            }
-          `,
+        .watchQuery({
+          query: RecentNewslettersDocument,
           variables: {
             schoolId: params.schoolId,
             take: 3,
           },
         })
-        .valueChanges.pipe(map((result) => result.data?.publishedNewsletters ?? []));
+        .valueChanges.pipe(
+          map((result) => (result.data?.publishedNewsletters ?? []) as RecentNewslettersQuery['publishedNewsletters']),
+        );
     },
   });
 
@@ -467,24 +404,13 @@ export default class Home {
 
   public recentTeachers = rxResource({
     params: () => ({ take: 4, schoolId: this.store.currentSchoolId() }),
-    stream: ({ params }) => {
+    stream: ({ params }): Observable<RecentTeacher[]> => {
       if (!params.schoolId) {
         return of<RecentTeacher[]>([]);
       }
       return this.apollo
-        .watchQuery<{ teachers: RecentTeacher[] }>({
-          query: gql`
-            query RecentTeachers($take: Int!, $orderBy: String, $orderDirection: String, $schoolId: String) {
-              teachers(take: $take, orderBy: $orderBy, orderDirection: $orderDirection, schoolId: $schoolId) {
-                id
-                fullName
-                createdAt
-                user {
-                  email
-                }
-              }
-            }
-          `,
+        .watchQuery({
+          query: RecentTeachersDocument,
           variables: {
             take: params.take,
             orderBy: 'createdAt',
@@ -492,7 +418,7 @@ export default class Home {
             schoolId: params.schoolId,
           },
         })
-        .valueChanges.pipe(map((result) => result.data?.teachers ?? []));
+        .valueChanges.pipe(map((result) => (result.data?.teachers ?? []) as RecentTeachersQuery['teachers']));
     },
   });
 }

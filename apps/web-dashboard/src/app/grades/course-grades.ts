@@ -5,7 +5,12 @@ import { rxResource } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { Prisma } from '@generated/prisma';
-import { Apollo, gql } from 'apollo-angular';
+import { Apollo } from 'apollo-angular';
+import {
+  GradesByCourseIdDocument,
+  PeriodsByYearDocument,
+  StudentsByCourseIdDocument,
+} from '../graphql/generated/graphql';
 import { map, of } from 'rxjs';
 import Store from '../core/store';
 import GradesForm from './grades-form';
@@ -135,23 +140,10 @@ export default class CourseGrades {
         return of([]);
       }
       return this.#apollo
-        .watchQuery<{
-          periodsByYear: Prisma.PeriodGetPayload<{
-            include: undefined;
-          }>[];
-        }>({
-          query: gql`
-            query PeriodsByYear($year: Int!) {
-              periodsByYear(year: $year) {
-                id
-                name
-                startDate
-                endDate
-              }
-            }
-          `,
+        .watchQuery({
+          query: PeriodsByYearDocument,
           variables: {
-            year: params.year,
+            year: year,
           },
           fetchPolicy: 'cache-first',
         })
@@ -180,24 +172,8 @@ export default class CourseGrades {
         return of([]);
       }
       return this.#apollo
-        .watchQuery<{
-          studentsByCourseId: StudentType[];
-        }>({
-          query: gql`
-            query StudentsByCourseId($courseId: String!, $periodId: String!) {
-              studentsByCourseId(courseId: $courseId) {
-                id
-                name
-                initials
-                color
-                averageScore: averageScoreForStudent(courseId: $courseId, periodId: $periodId)
-                classGroup {
-                  id
-                  name
-                }
-              }
-            }
-          `,
+        .watchQuery({
+          query: StudentsByCourseIdDocument,
           variables: {
             courseId,
             periodId,
@@ -219,49 +195,8 @@ export default class CourseGrades {
         return of([]);
       }
       return this.#apollo
-        .watchQuery<{
-          gradesByCourseId: DecimalToNumber<
-            Prisma.GradeGetPayload<{
-              include: {
-                bucket: true;
-                studentGrades: {
-                  include: {
-                    student: { include: { classGroup: true } };
-                  };
-                };
-              };
-            }>
-          >[];
-        }>({
-          query: gql`
-            query GradesByCourseId($courseId: String!, $periodId: String!) {
-              gradesByCourseId(courseId: $courseId, periodId: $periodId) {
-                id
-                title
-                comments
-                bucket {
-                  id
-                  name
-                }
-                studentGrades {
-                  id
-                  student {
-                    id
-                    firstName
-                    fatherName
-                    averageScoreForStudent(courseId: $courseId, periodId: $periodId)
-                  }
-                  score
-                  comments
-                  updatedAt
-                }
-                published
-                date
-                createdAt
-                updatedAt
-              }
-            }
-          `,
+        .watchQuery({
+          query: GradesByCourseIdDocument,
           variables: {
             courseId,
             periodId,

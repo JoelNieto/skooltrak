@@ -1,0 +1,35 @@
+query AdminStudyPlansBySchoolId($schoolId: String!) {
+  studyPlansBySchoolId(schoolId: $schoolId) {
+    id
+    name
+    shortName
+    level
+    degreeId
+    gradeMetricId
+    monthlyTuitionAmount
+    tuitionMonths
+    gradeMetric {
+      id
+      name
+    }
+    degree {
+      id
+      name
+    }
+    schoolId
+    createdAt
+    updatedAt
+    enrollmentCosts {
+      id
+      name
+      amount
+      order
+    }
+  }
+}
+
+mutation AdminRemoveStudyPlan($id: String!) {
+  removeStudyPlan(id: $id) {
+    id
+  }
+}

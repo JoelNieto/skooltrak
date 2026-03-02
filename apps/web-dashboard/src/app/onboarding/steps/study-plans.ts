@@ -2,7 +2,13 @@ import { markGroupDirty, Toast } from '@/ui';
 import { ChangeDetectionStrategy, Component, computed, inject, input, output, signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Apollo, gql } from 'apollo-angular';
+import { Apollo } from 'apollo-angular';
+import {
+  OnboardingStepsCreateStudyPlanDocument,
+  OnboardingStepsDegreesBySchoolIdDocument,
+  OnboardingStepsGetGradeMetricsDocument,
+  OnboardingStepsStudyPlansGetSchoolsDocument,
+} from '../../graphql/generated/graphql';
 import { map, of } from 'rxjs';
 import Store from '../../core/store';
 import { CreatedEntity } from '../setup-wizard';
@@ -193,14 +199,8 @@ export default class StudyPlansStep {
   public schools = rxResource({
     stream: () =>
       this.apollo
-        .watchQuery<{ schools: { id: string }[] }>({
-          query: gql`
-            query GetSchools {
-              schools {
-                id
-              }
-            }
-          `,
+        .watchQuery({
+          query: OnboardingStepsStudyPlansGetSchoolsDocument,
           fetchPolicy: 'cache-first',
         })
         .valueChanges.pipe(map((result) => result.data?.schools ?? [])),
@@ -220,15 +220,8 @@ export default class StudyPlansStep {
         return of([]);
       }
       return this.apollo
-        .watchQuery<{ degreesBySchoolId: { id: string; name: string }[] }>({
-          query: gql`
-            query DegreesBySchoolId($schoolId: String!) {
-              degreesBySchoolId(schoolId: $schoolId) {
-                id
-                name
-              }
-            }
-          `,
+        .watchQuery({
+          query: OnboardingStepsDegreesBySchoolIdDocument,
           variables: { schoolId: params.schoolId },
           fetchPolicy: 'cache-and-network',
         })
@@ -239,15 +232,8 @@ export default class StudyPlansStep {
   public gradeMetrics = rxResource({
     stream: () =>
       this.apollo
-        .watchQuery<{ gradeMetrics: { id: string; name: string }[] }>({
-          query: gql`
-            query GetGradeMetrics {
-              gradeMetrics {
-                id
-                name
-              }
-            }
-          `,
+        .watchQuery({
+          query: OnboardingStepsGetGradeMetricsDocument,
           fetchPolicy: 'cache-first',
         })
         .valueChanges.pipe(map((result) => result.data?.gradeMetrics ?? [])),
@@ -286,15 +272,8 @@ export default class StudyPlansStep {
     const formValue = this.form.getRawValue();
 
     this.apollo
-      .mutate<{ createStudyPlan: { id: string; name: string } }>({
-        mutation: gql`
-          mutation CreateStudyPlan($createStudyPlanInput: CreateStudyPlanInput!) {
-            createStudyPlan(createStudyPlanInput: $createStudyPlanInput) {
-              id
-              name
-            }
-          }
-        `,
+      .mutate({
+        mutation: OnboardingStepsCreateStudyPlanDocument,
         variables: {
           createStudyPlanInput: {
             ...formValue,

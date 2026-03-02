@@ -2,10 +2,10 @@ import { Confirmation } from '@/ui';
 import { afterRenderEffect, ChangeDetectionStrategy, Component, ElementRef, inject, viewChild } from '@angular/core';
 import { rxResource, takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router, RouterLink, RouterOutlet } from '@angular/router';
-import { Prisma } from '@generated/prisma';
-import { Apollo, gql } from 'apollo-angular';
+import { Apollo } from 'apollo-angular';
 import { filter, map } from 'rxjs';
 import Auth from '../auth/auth';
+import { GetSchoolsDocument, GetSchoolsQuery, UnreadMessagesCountDocument } from '../graphql/generated/graphql';
 import { Sidebar } from './sidebar';
 import Store from './store';
 @Component({
@@ -158,50 +158,20 @@ export default class Dashboard {
   public schools = rxResource({
     stream: () =>
       this.apollo
-        .watchQuery<{
-          schools: (Prisma.SchoolGetPayload<{
-            include: undefined;
-          }> & { logoUrl?: string | null })[];
-        }>({
+        .watchQuery({
           fetchPolicy: 'cache-first',
-          query: gql`
-            query GetSchools {
-              schools {
-                id
-                name
-                organizationId
-                shortName
-                logo
-                logoUrl
-                address
-                city
-                state
-                zip
-                country
-                email
-                phone
-                currentYear
-                website
-                createdAt
-                updatedAt
-              }
-            }
-          `,
+          query: GetSchoolsDocument,
         })
-        .valueChanges.pipe(map((result) => result.data?.schools ?? [])),
+        .valueChanges.pipe(map((result) => (result.data?.schools as GetSchoolsQuery['schools']) ?? [])),
   });
 
   public unreadCount = rxResource({
     stream: () =>
       this.apollo
-        .watchQuery<{ unreadMessagesCount: number }>({
+        .watchQuery({
           fetchPolicy: 'network-only',
           pollInterval: 60000, // Poll every minute
-          query: gql`
-            query UnreadMessagesCount {
-              unreadMessagesCount
-            }
-          `,
+          query: UnreadMessagesCountDocument,
         })
         .valueChanges.pipe(map((result) => result.data?.unreadMessagesCount ?? 0)),
   });
@@ -221,6 +191,10 @@ export default class Dashboard {
         this.store.currentSchool.set(schools[0]);
       }
     });
+  }
+
+  public selectSchool(school: GetSchoolsQuery['schools'][number]) {
+    this.store.currentSchool.set(school as NonNullable<ReturnType<typeof this.store.currentSchool>>);
   }
 
   public openSidebar() {

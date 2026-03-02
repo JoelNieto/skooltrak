@@ -3,7 +3,12 @@ import { afterRenderEffect, Component, inject, input, output, signal } from '@an
 import { rxResource } from '@angular/core/rxjs-interop';
 import { form, FormField, required, submit } from '@angular/forms/signals';
 import { Prisma } from '@generated/prisma';
-import { Apollo, gql } from 'apollo-angular';
+import { Apollo } from 'apollo-angular';
+import {
+  GroupScheduleFormCoursesByGroupIdDocument,
+  GroupScheduleFormUpdateGroupsScheduleDocument,
+  GroupScheduleFormCreateGroupsScheduleDocument,
+} from '../graphql/generated/graphql';
 import { map } from 'rxjs';
 
 @Component({
@@ -96,15 +101,8 @@ export default class GroupScheduleForm {
     }),
     stream: ({ params }) => {
       return this.#apollo
-        .watchQuery<{ coursesByGroupId: Prisma.CourseGetPayload<undefined>[] }>({
-          query: gql`
-            query CoursesByGroupId($groupId: String!) {
-              coursesByGroupId(groupId: $groupId) {
-                id
-                name
-              }
-            }
-          `,
+        .watchQuery({
+          query: GroupScheduleFormCoursesByGroupIdDocument,
           variables: {
             groupId: params.groupId,
           },
@@ -178,17 +176,11 @@ export default class GroupScheduleForm {
       if (this.data()?.schedule) {
         this.#apollo
           .mutate({
-            mutation: gql`
-              mutation UpdateGroupsSchedule($updateGroupsScheduleInput: UpdateGroupsScheduleInput!) {
-                updateGroupsSchedule(updateGroupsScheduleInput: $updateGroupsScheduleInput) {
-                  id
-                }
-              }
-            `,
+            mutation: GroupScheduleFormUpdateGroupsScheduleDocument,
             variables: {
               updateGroupsScheduleInput: {
                 ...schedule,
-                id: this.data()?.schedule?.id,
+                id: this.data()?.schedule?.id!,
               },
             },
           })
@@ -204,13 +196,7 @@ export default class GroupScheduleForm {
       } else {
         this.#apollo
           .mutate({
-            mutation: gql`
-              mutation CreateGroupsSchedule($createGroupsScheduleInput: CreateGroupsScheduleInput!) {
-                createGroupsSchedule(createGroupsScheduleInput: $createGroupsScheduleInput) {
-                  id
-                }
-              }
-            `,
+            mutation: GroupScheduleFormCreateGroupsScheduleDocument,
             variables: {
               createGroupsScheduleInput: this.form().value(),
             },

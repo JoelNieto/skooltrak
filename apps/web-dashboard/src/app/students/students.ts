@@ -6,19 +6,15 @@ import { Component, inject, signal, viewChild } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { $Enums, Prisma } from '@generated/prisma';
+import { $Enums } from '@generated/prisma';
 
-import { Apollo, gql } from 'apollo-angular';
+import { Apollo } from 'apollo-angular';
+import {
+  GetStudentsDocument,
+  RemoveStudentDocument,
+  ResendUserInvitationDocument,
+} from '../graphql/generated/graphql';
 import { filter, map, of, switchMap, tap } from 'rxjs';
-
-type Student = Prisma.StudentGetPayload<{
-  include: { classGroup: true; user: true };
-}> & {
-  name: string;
-  email: string;
-  enrollmentStatus: $Enums.EnrollmentStatus;
-  user: { id: string; email: string; emailVerified: boolean | null; color: string | null };
-};
 
 const ENROLLMENT_STATUS_LABELS: Record<$Enums.EnrollmentStatus, string> = {
   ACTIVE: 'Activo',
@@ -224,40 +220,8 @@ export default class Students {
     stream: ({ params }) => {
       const { take, skip, search, orderBy, orderDirection } = params;
       return this.apollo
-        .watchQuery<{ count: number; students: Student[] }>({
-          query: gql`
-            query getStudents($take: Int!, $skip: Int!, $search: String, $orderBy: String, $orderDirection: String) {
-              count: findManyStudentsCount(search: $search)
-              students(take: $take, skip: $skip, search: $search, orderBy: $orderBy, orderDirection: $orderDirection) {
-                id
-                name
-                firstName
-                middleName
-                motherName
-                birthDate
-                gender
-                fatherName
-                documentId
-                email
-                classGroupId
-                enrollmentStatus
-                phone
-                address
-                classGroup {
-                  id
-                  name
-                }
-                user {
-                  id
-                  email
-                  emailVerified
-                  color
-                }
-                createdAt
-                updatedAt
-              }
-            }
-          `,
+        .watchQuery({
+          query: GetStudentsDocument,
           variables: {
             take,
             skip,
@@ -291,12 +255,8 @@ export default class Students {
 
   public resendInvitation(email: string) {
     this.apollo
-      .mutate<{ resendUserInvitation: boolean }>({
-        mutation: gql`
-          mutation ResendUserInvitation($email: String!) {
-            resendUserInvitation(email: $email)
-          }
-        `,
+      .mutate({
+        mutation: ResendUserInvitationDocument,
         variables: { email },
       })
       .subscribe({
@@ -324,13 +284,7 @@ export default class Students {
         switchMap(() => {
           if (!student.id) return of(null);
           return this.apollo.mutate({
-            mutation: gql`
-              mutation RemoveStudent($id: String!) {
-                removeStudent(id: $id) {
-                  id
-                }
-              }
-            `,
+            mutation: RemoveStudentDocument,
             variables: {
               id: student.id,
             },

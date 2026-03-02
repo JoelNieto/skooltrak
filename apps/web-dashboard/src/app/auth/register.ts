@@ -9,7 +9,14 @@ import {
   Validators,
 } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { Apollo, gql } from 'apollo-angular';
+import { Apollo } from 'apollo-angular';
+import {
+  RegisterCheckPendingInvitationDocument,
+  RegisterCreateInvitationAccessLinkDocument,
+  RegisterSendVerificationLinkDocument,
+  RegisterSignUpDocument,
+  RegisterValidateEmailTokenDocument,
+} from '../graphql/generated/graphql';
 
 @Component({
   selector: 'app-register',
@@ -38,7 +45,8 @@ import { Apollo, gql } from 'apollo-angular';
                   <p class="text-base-content/70">
                     Tienes una invitación pendiente como
                     <strong>{{ pendingInvitationRole() === 'student' ? 'estudiante' : 'docente' }}</strong> en
-                    <strong>{{ pendingInvitationOrg() }}</strong>. Completa la configuración de tu cuenta.
+                    <strong>{{ pendingInvitationOrg() }}</strong
+                    >. Completa la configuración de tu cuenta.
                   </p>
                 </div>
                 <div class="pt-4">
@@ -367,9 +375,7 @@ export default class Register implements OnInit {
   private route = inject(ActivatedRoute);
   private toasts = inject(Toast);
 
-  public step = signal<
-    'email' | 'check-inbox' | 'validating' | 'register' | 'error' | 'pending-invitation'
-  >('email');
+  public step = signal<'email' | 'check-inbox' | 'validating' | 'register' | 'error' | 'pending-invitation'>('email');
   public loading = signal(false);
   public sentEmail = signal('');
   public verifiedEmail = signal('');
@@ -417,12 +423,8 @@ export default class Register implements OnInit {
     this.step.set('validating');
 
     this.apollo
-      .query<{ validateEmailToken: boolean }>({
-        query: gql`
-          query ValidateEmailToken($token: String!, $email: String!) {
-            validateEmailToken(token: $token, email: $email)
-          }
-        `,
+      .query({
+        query: RegisterValidateEmailTokenDocument,
         variables: { token, email },
         fetchPolicy: 'network-only',
       })
@@ -454,22 +456,8 @@ export default class Register implements OnInit {
 
     // First check for pending invitation (student/teacher created but not yet verified)
     this.apollo
-      .query<{
-        checkPendingInvitation: {
-          hasPendingInvitation: boolean;
-          role?: string;
-          organizationName?: string;
-        };
-      }>({
-        query: gql`
-          query CheckPendingInvitation($email: String!) {
-            checkPendingInvitation(email: $email) {
-              hasPendingInvitation
-              role
-              organizationName
-            }
-          }
-        `,
+      .query({
+        query: RegisterCheckPendingInvitationDocument,
         variables: { email },
         fetchPolicy: 'network-only',
       })
@@ -496,12 +484,8 @@ export default class Register implements OnInit {
   private sendVerificationLinkMutation(email: string) {
     this.loading.set(true);
     this.apollo
-      .mutate<{ sendVerificationLink: boolean }>({
-        mutation: gql`
-          mutation SendVerificationLink($email: String!) {
-            sendVerificationLink(email: $email)
-          }
-        `,
+      .mutate({
+        mutation: RegisterSendVerificationLinkDocument,
         variables: { email },
       })
       .subscribe({
@@ -524,14 +508,8 @@ export default class Register implements OnInit {
 
     this.loading.set(true);
     this.apollo
-      .mutate<{ createInvitationAccessLink: { url: string } }>({
-        mutation: gql`
-          mutation CreateInvitationAccessLink($email: String!) {
-            createInvitationAccessLink(email: $email) {
-              url
-            }
-          }
-        `,
+      .mutate({
+        mutation: RegisterCreateInvitationAccessLinkDocument,
         variables: { email },
       })
       .subscribe({
@@ -558,12 +536,8 @@ export default class Register implements OnInit {
     const email = this.sentEmail();
 
     this.apollo
-      .mutate<{ sendVerificationLink: boolean }>({
-        mutation: gql`
-          mutation SendVerificationLink($email: String!) {
-            sendVerificationLink(email: $email)
-          }
-        `,
+      .mutate({
+        mutation: RegisterSendVerificationLinkDocument,
         variables: { email },
       })
       .subscribe({
@@ -610,14 +584,8 @@ export default class Register implements OnInit {
     const { firstName, lastName, password } = this.registerForm.getRawValue();
 
     this.apollo
-      .mutate<{ signUp: { accessToken: string } }>({
-        mutation: gql`
-          mutation SignUp($input: SignUpInput!) {
-            signUp(input: $input) {
-              accessToken
-            }
-          }
-        `,
+      .mutate({
+        mutation: RegisterSignUpDocument,
         variables: {
           input: {
             token: this.verifiedToken(),
@@ -630,8 +598,10 @@ export default class Register implements OnInit {
       })
       .subscribe({
         next: (res) => {
-          const { accessToken } = res.data!.signUp;
-          localStorage.setItem('access_token', accessToken);
+          const accessToken = res.data?.signUp?.accessToken;
+          if (accessToken) {
+            localStorage.setItem('access_token', accessToken);
+          }
           this.toasts.showSuccess('Cuenta creada exitosamente');
           this.router.navigate(['/onboarding']);
         },

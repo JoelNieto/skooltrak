@@ -1,0 +1,54 @@
+query AdminStudyPlansForCourses($schoolId: String!) {
+  studyPlansBySchoolId(schoolId: $schoolId) {
+    id
+    name
+  }
+}
+
+query AdminGetCourses(
+  $schoolId: String!
+  $take: Int!
+  $skip: Int!
+  $search: String
+  $studyPlanId: String
+) {
+  count: coursesCount(
+    schoolId: $schoolId
+    studyPlanId: $studyPlanId
+    search: $search
+  )
+  courses(
+    schoolId: $schoolId
+    take: $take
+    skip: $skip
+    studyPlanId: $studyPlanId
+    search: $search
+  ) {
+    id
+    name
+    shortName
+    schoolId
+    subject {
+      name
+    }
+    studyPlan {
+      name
+    }
+    teacher {
+      id
+      name
+    }
+    subjectId
+    studyPlanId
+    teacherId
+    code
+    createdAt
+    updatedAt
+  }
+}
+
+mutation AdminRemoveCourse($removeCourseId: String!) {
+  removeCourse(id: $removeCourseId) {
+    id
+  }
+}

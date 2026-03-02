@@ -1,0 +1,18 @@
+query FileShareFormCoursesBySchoolId($schoolId: String!) {
+  coursesBySchoolId(schoolId: $schoolId) {
+    id
+    name
+  }
+}
+
+mutation FileShareFormShareFile($shareFileInput: ShareFileInput!) {
+  shareFile(shareFileInput: $shareFileInput) {
+    id
+  }
+}
+
+mutation FileShareFormRemoveShare($removeShareInput: RemoveShareInput!) {
+  removeShare(removeShareInput: $removeShareInput) {
+    id
+  }
+}

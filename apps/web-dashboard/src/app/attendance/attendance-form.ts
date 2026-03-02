@@ -4,7 +4,12 @@ import { ChangeDetectionStrategy, Component, computed, inject, input, output, si
 import { rxResource } from '@angular/core/rxjs-interop';
 import { FormArray, FormGroup, NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Prisma } from '@generated/prisma';
-import { Apollo, gql } from 'apollo-angular';
+import { Apollo } from 'apollo-angular';
+import {
+  AttendanceFormStudentsForAttendanceDocument,
+  AttendanceFormCreateAttendanceSessionDocument,
+  AttendanceFormUpdateAttendanceRecordsDocument,
+} from '../graphql/generated/graphql';
 import { map, of } from 'rxjs';
 
 type StudentType = Prisma.StudentGetPayload<{ include: { classGroup: true } }>;
@@ -229,28 +234,14 @@ export default class AttendanceForm {
       if (!courseId || !classGroupId) return of([]);
 
       return this.#apollo
-        .query<{ studentsForAttendance: StudentType[] }>({
-          query: gql`
-            query StudentsForAttendance($courseId: String!, $classGroupId: String!) {
-              studentsForAttendance(courseId: $courseId, classGroupId: $classGroupId) {
-                id
-                firstName
-                middleName
-                fatherName
-                motherName
-                classGroup {
-                  id
-                  name
-                }
-              }
-            }
-          `,
+        .query({
+          query: AttendanceFormStudentsForAttendanceDocument,
           variables: { courseId, classGroupId },
           fetchPolicy: 'network-only',
         })
         .pipe(
           map((r) => {
-            const students = r.data?.studentsForAttendance ?? [];
+            const students = (r.data?.studentsForAttendance ?? []) as StudentType[];
             this.initializeRecords(students);
             return students;
           }),
@@ -367,18 +358,7 @@ export default class AttendanceForm {
 
     this.#apollo
       .mutate({
-        mutation: gql`
-          mutation CreateAttendanceSession($input: CreateAttendanceSessionInput!) {
-            createAttendanceSession(input: $input) {
-              id
-              date
-              classGroup {
-                id
-                name
-              }
-            }
-          }
-        `,
+        mutation: AttendanceFormCreateAttendanceSessionDocument,
         variables: {
           input: {
             date: new Date(formValue.date).toISOString(),
@@ -411,15 +391,7 @@ export default class AttendanceForm {
 
     this.#apollo
       .mutate({
-        mutation: gql`
-          mutation UpdateAttendanceRecords($inputs: [UpdateAttendanceRecordInput!]!) {
-            updateAttendanceRecords(inputs: $inputs) {
-              id
-              status
-              comment
-            }
-          }
-        `,
+        mutation: AttendanceFormUpdateAttendanceRecordsDocument,
         variables: {
           inputs: formValue.records.map((r: any) => ({
             id: r.id,

@@ -1,0 +1,68 @@
+query MessagesFindManyMessages($take: Int!, $skip: Int!) {
+  count: findManyMessagesCount
+  findManyMessages(take: $take, skip: $skip) {
+    id
+    readAt
+    createdAt
+    message {
+      id
+      subject
+      createdAt
+      sender {
+        id
+        name
+        initials
+        email
+        color
+      }
+      recipients {
+        id
+        user {
+          id
+          initials
+          name
+          email
+          color
+        }
+      }
+    }
+  }
+}
+
+query MessagesFindMyMessages($take: Int!, $skip: Int!) {
+  count: findSentMessagesCount
+  findMyMessages(take: $take, skip: $skip) {
+    id
+    subject
+    createdAt
+    sender {
+      id
+      name
+      initials
+      email
+      color
+    }
+    recipients {
+      id
+      user {
+        id
+        initials
+        name
+        email
+        color
+      }
+    }
+  }
+}
+
+mutation MessagesRemoveMessageRecipient($id: String!) {
+  removeMessageRecipient(id: $id) {
+    id
+  }
+}
+
+mutation MessagesRemoveMessage($id: String!) {
+  removeMessage(id: $id) {
+    id
+  }
+}

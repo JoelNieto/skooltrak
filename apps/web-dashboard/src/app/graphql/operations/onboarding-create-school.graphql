@@ -1,0 +1,6 @@
+mutation OnboardingCreateSchoolWithOrganization($input: CreateSchoolWithOrgInput!) {
+  createSchoolWithOrganization(input: $input) {
+    accessToken
+    schoolId
+  }
+}

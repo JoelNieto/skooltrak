@@ -1,21 +1,19 @@
 import { TextEditor, Toast } from '@/ui';
-import {
-  afterRenderEffect,
-  ChangeDetectionStrategy,
-  Component,
-  computed,
-  inject,
-  input,
-  signal,
-} from '@angular/core';
+import { afterRenderEffect, ChangeDetectionStrategy, Component, computed, inject, input, signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { form, FormField, required, submit } from '@angular/forms/signals';
 import { Router, RouterLink } from '@angular/router';
-import { isValidId } from '../../core/validators';
-import { Apollo, gql } from 'apollo-angular';
+import { Apollo } from 'apollo-angular';
 import { firstValueFrom, map, of } from 'rxjs';
 import Store from '../../core/store';
+import { isValidId } from '../../core/validators';
+import {
+  NewsletterFormCreateNewsletterDocument,
+  NewsletterFormGetNewsletterDocument,
+  NewsletterFormGetNewsletterQuery,
+  NewsletterFormUpdateNewsletterDocument,
+} from '../../graphql/generated/graphql';
 
 @Component({
   selector: 'app-newsletter-form',
@@ -45,12 +43,8 @@ import Store from '../../core/store';
         <!-- Title & Status Section -->
         <div class="sm:grid sm:grid-cols-4 sm:gap-4 pb-8">
           <div class="mb-4">
-            <h2 class="text-lg/7 font-semibold text-base-content">
-              Información
-            </h2>
-            <p class="mt-1 text-sm text-base-content/70">
-              Título y estado del boletín.
-            </p>
+            <h2 class="text-lg/7 font-semibold text-base-content">Información</h2>
+            <p class="mt-1 text-sm text-base-content/70">Título y estado del boletín.</p>
           </div>
           <div class="sm:col-span-3">
             <div class="card card-border border-base-300 bg-base-100">
@@ -79,7 +73,7 @@ import Store from '../../core/store';
                       type="checkbox"
                       class="toggle toggle-primary"
                       [(ngModel)]="published"
-                      [ngModelOptions]="{standalone: true}"
+                      [ngModelOptions]="{ standalone: true }"
                     />
                     <span>Publicar inmediatamente</span>
                   </label>
@@ -92,17 +86,13 @@ import Store from '../../core/store';
         <!-- Content Section -->
         <div class="sm:grid sm:grid-cols-4 sm:gap-4 pb-8 pt-6">
           <div class="mb-4">
-            <h2 class="text-lg/7 font-semibold text-base-content">
-              Contenido
-            </h2>
-            <p class="mt-1 text-sm text-base-content/70">
-              Redacta el contenido del boletín.
-            </p>
+            <h2 class="text-lg/7 font-semibold text-base-content">Contenido</h2>
+            <p class="mt-1 text-sm text-base-content/70">Redacta el contenido del boletín.</p>
           </div>
           <div class="sm:col-span-3">
             <div class="card card-border border-base-300 bg-base-100">
               <div class="card-body">
-                <lib-text-editor [bordered]="true" [(ngModel)]="content" [ngModelOptions]="{standalone: true}" />
+                <lib-text-editor [bordered]="true" [(ngModel)]="content" [ngModelOptions]="{ standalone: true }" />
               </div>
             </div>
           </div>
@@ -112,11 +102,7 @@ import Store from '../../core/store';
       <!-- Form Actions -->
       <div class="flex justify-end gap-3 my-6 pt-6 border-t border-base-300">
         <a routerLink="/admin/newsletters" class="btn btn-ghost">Cancelar</a>
-        <button
-          type="submit"
-          class="btn btn-primary"
-          [disabled]="isSaving()"
-        >
+        <button type="submit" class="btn btn-primary" [disabled]="isSaving()">
           @if (isSaving()) {
             <span class="loading loading-spinner loading-sm"></span>
           }
@@ -153,27 +139,11 @@ export default class NewsletterForm {
         return of(null);
       }
       return this.apollo
-        .watchQuery<{
-          newsletter: {
-            id: string;
-            title: string;
-            content: string;
-            published: boolean;
-          };
-        }>({
-          query: gql`
-            query GetNewsletter($id: String!) {
-              newsletter(id: $id) {
-                id
-                title
-                content
-                published
-              }
-            }
-          `,
+        .watchQuery({
+          query: NewsletterFormGetNewsletterDocument,
           variables: { id: params.id },
         })
-        .valueChanges.pipe(map((result) => result.data?.newsletter));
+        .valueChanges.pipe(map((result) => result.data?.newsletter as NewsletterFormGetNewsletterQuery['newsletter']));
     },
   });
 
@@ -206,22 +176,16 @@ export default class NewsletterForm {
 
       try {
         if (this.isEditMode()) {
+          if (!this.id()) {
+            this.toast.showError('ID del boletín no válido');
+            return;
+          }
           await firstValueFrom(
             this.apollo.mutate({
-              mutation: gql`
-                mutation UpdateNewsletter(
-                  $updateNewsletterInput: UpdateNewsletterInput!
-                ) {
-                  updateNewsletter(
-                    updateNewsletterInput: $updateNewsletterInput
-                  ) {
-                    id
-                  }
-                }
-              `,
+              mutation: NewsletterFormUpdateNewsletterDocument,
               variables: {
                 updateNewsletterInput: {
-                  id: this.id(),
+                  id: this.id() ?? '',
                   title,
                   content,
                   published,
@@ -234,23 +198,13 @@ export default class NewsletterForm {
         } else {
           await firstValueFrom(
             this.apollo.mutate({
-              mutation: gql`
-                mutation CreateNewsletter(
-                  $createNewsletterInput: CreateNewsletterInput!
-                ) {
-                  createNewsletter(
-                    createNewsletterInput: $createNewsletterInput
-                  ) {
-                    id
-                  }
-                }
-              `,
+              mutation: NewsletterFormCreateNewsletterDocument,
               variables: {
                 createNewsletterInput: {
                   title,
                   content,
                   published,
-                  schoolId,
+                  schoolId: schoolId ?? '',
                 },
               },
             }),
@@ -259,10 +213,7 @@ export default class NewsletterForm {
           this.router.navigate(['/admin/newsletters']);
         }
       } catch (error: any) {
-        const message =
-          error?.graphQLErrors?.[0]?.message ||
-          error?.message ||
-          'Error al guardar el boletín';
+        const message = error?.graphQLErrors?.[0]?.message || error?.message || 'Error al guardar el boletín';
         this.toast.showError(message);
       } finally {
         this.isSaving.set(false);

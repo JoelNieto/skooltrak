@@ -14,7 +14,8 @@ import {
 import { rxResource } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 
-import { Apollo, gql } from 'apollo-angular';
+import { Apollo } from 'apollo-angular';
+import { ContactsFindContactsDocument } from '../graphql/generated/graphql';
 import { map, of } from 'rxjs';
 export type Contact = {
   id: string;
@@ -139,27 +140,7 @@ export default class Contacts {
       }
       return this.#apollo
         .watchQuery<{ findContacts: Contact[] }>({
-          query: gql`
-            query findContacts($queryText: String) {
-              findContacts(queryText: $queryText) {
-                id
-                initials
-                name
-                email
-                color
-                role {
-                  id
-                  name
-                }
-                student {
-                  id
-                }
-                teacher {
-                  id
-                }
-              }
-            }
-          `,
+          query: ContactsFindContactsDocument,
           variables: {
             queryText: params.queryText,
           },

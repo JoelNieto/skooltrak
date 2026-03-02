@@ -1,22 +1,12 @@
 import { EmptyState, Loader, Toast } from '@/ui';
 import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
-import { Apollo, gql } from 'apollo-angular';
-
-interface PendingJoinRequest {
-  id: string;
-  requestedRole: string;
-  documentId: string;
-  status: string;
-  userId: string;
-  userFirstName: string;
-  userLastName: string;
-  userEmail: string;
-  userImage: string;
-  schoolId: string;
-  schoolName: string;
-  createdAt: Date;
-}
+import { Apollo } from 'apollo-angular';
+import {
+  AdminApproveJoinRequestDocument,
+  AdminPendingJoinRequestsDocument,
+  AdminPendingJoinRequestsQuery,
+} from '../../graphql/generated/graphql';
 
 @Component({
   selector: 'app-join-requests',
@@ -110,7 +100,7 @@ export default class JoinRequests {
 
   public loading = signal(true);
   public processing = signal(false);
-  public requests = signal<PendingJoinRequest[]>([]);
+  public requests = signal<AdminPendingJoinRequestsQuery['pendingJoinRequests']>([]);
 
   private roleLabels: Record<string, string> = {
     ORG_ADMIN: 'Administrador',
@@ -143,30 +133,15 @@ export default class JoinRequests {
     this.loading.set(true);
 
     this.apollo
-      .query<{ pendingJoinRequests: PendingJoinRequest[] }>({
-        query: gql`
-          query PendingJoinRequests {
-            pendingJoinRequests {
-              id
-              requestedRole
-              documentId
-              status
-              userId
-              userFirstName
-              userLastName
-              userEmail
-              userImage
-              schoolId
-              schoolName
-              createdAt
-            }
-          }
-        `,
+      .query({
+        query: AdminPendingJoinRequestsDocument,
         fetchPolicy: 'network-only',
       })
       .subscribe({
         next: (res) => {
-          this.requests.set(res.data?.pendingJoinRequests || []);
+          this.requests.set(
+            (res.data?.pendingJoinRequests as AdminPendingJoinRequestsQuery['pendingJoinRequests']) ?? [],
+          );
           this.loading.set(false);
         },
         error: (err) => {
@@ -188,12 +163,8 @@ export default class JoinRequests {
     this.processing.set(true);
 
     this.apollo
-      .mutate<{ approveJoinRequest: boolean }>({
-        mutation: gql`
-          mutation ApproveJoinRequest($requestId: String!, $approve: Boolean!) {
-            approveJoinRequest(requestId: $requestId, approve: $approve)
-          }
-        `,
+      .mutate({
+        mutation: AdminApproveJoinRequestDocument,
         variables: { requestId, approve },
       })
       .subscribe({

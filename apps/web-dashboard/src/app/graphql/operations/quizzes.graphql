@@ -1,0 +1,17 @@
+query QuizzesList($organizationId: String!) {
+  quizzes(organizationId: $organizationId) {
+    id
+    title
+    createdAt
+    updatedAt
+    course {
+      id
+      name
+    }
+    teacher {
+      id
+      firstName
+      fatherName
+    }
+  }
+}

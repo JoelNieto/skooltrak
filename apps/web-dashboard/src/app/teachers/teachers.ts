@@ -16,7 +16,12 @@ import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { Prisma } from '@generated/prisma';
 
-import { Apollo, gql } from 'apollo-angular';
+import { Apollo } from 'apollo-angular';
+import {
+  GetTeachersDocument,
+  RemoveTeacherDocument,
+  ResendUserInvitationDocument,
+} from '../graphql/generated/graphql';
 import { catchError, filter, map, of, switchMap, tap } from 'rxjs';
 import Auth from '../auth/auth';
 import Store from '../core/store';
@@ -203,31 +208,8 @@ export default class Teachers {
       const { take, skip, search, orderBy, orderDirection } = params;
 
       return this.apollo
-        .watchQuery<{
-          count: number;
-          teachers: Teacher[];
-        }>({
-          query: gql`
-            query getTeachers($take: Int!, $skip: Int!, $search: String, $orderBy: String, $orderDirection: String) {
-              count: findManyTeachersCount(search: $search)
-              teachers(take: $take, skip: $skip, search: $search, orderBy: $orderBy, orderDirection: $orderDirection) {
-                id
-                firstName
-                fatherName
-                name
-                initials
-                user {
-                  id
-                  email
-                  color
-                  initials
-                  emailVerified
-                }
-                createdAt
-                updatedAt
-              }
-            }
-          `,
+        .watchQuery({
+          query: GetTeachersDocument,
           variables: {
             take,
             skip,
@@ -260,12 +242,8 @@ export default class Teachers {
 
   public resendInvitation(email: string) {
     this.apollo
-      .mutate<{ resendUserInvitation: boolean }>({
-        mutation: gql`
-          mutation ResendUserInvitation($email: String!) {
-            resendUserInvitation(email: $email)
-          }
-        `,
+      .mutate({
+        mutation: ResendUserInvitationDocument,
         variables: { email },
       })
       .subscribe({
@@ -290,13 +268,7 @@ export default class Teachers {
         switchMap(() => {
           if (!teacher.id) return of(null);
           return this.apollo.mutate({
-            mutation: gql`
-              mutation removeTeacher($id: String!) {
-                removeTeacher(id: $id) {
-                  id
-                }
-              }
-            `,
+            mutation: RemoveTeacherDocument,
             variables: {
               id: teacher.id,
             },

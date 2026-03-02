@@ -1,0 +1,18 @@
+mutation CreateFileUploadUrl($createFileUploadInput: CreateFileUploadInput!) {
+  createFileUploadUrl(createFileUploadInput: $createFileUploadInput) {
+    uploadUrl
+    storageKey
+  }
+}
+
+mutation CreateFile($createFileInput: CreateFileInput!) {
+  createFile(createFileInput: $createFileInput) {
+    id
+  }
+}
+
+mutation ShareFile($shareFileInput: ShareFileInput!) {
+  shareFile(shareFileInput: $shareFileInput) {
+    id
+  }
+}

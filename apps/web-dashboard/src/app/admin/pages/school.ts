@@ -5,9 +5,10 @@ import { Component, inject, input } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import { Prisma } from '@generated/prisma';
-import { isValidId } from '../../core/validators';
-import { Apollo, gql } from 'apollo-angular';
+import { Apollo } from 'apollo-angular';
 import { map, of } from 'rxjs';
+import { isValidId } from '../../core/validators';
+import { AdminSchoolDocument, AdminSchoolQuery } from '../../graphql/generated/graphql';
 
 type SchoolType = Prisma.SchoolGetPayload<false> & {
   logoUrl?: string | null;
@@ -258,44 +259,21 @@ export default class School {
         return of(null);
       }
       return this.apollo
-        .watchQuery<{
-          school: SchoolType;
-        }>({
-          query: gql`
-            query School($id: String!) {
-              school(id: $id) {
-                id
-                name
-                shortName
-                logo
-                logoUrl
-                email
-                phone
-                website
-                address
-                city
-                state
-                zip
-                country
-                currentYear
-                createdAt
-                updatedAt
-              }
-            }
-          `,
+        .watchQuery({
+          query: AdminSchoolDocument,
           variables: {
             id: params.id,
           },
         })
-        .valueChanges.pipe(map((result) => result.data?.school));
+        .valueChanges.pipe(map((result) => result.data?.school as AdminSchoolQuery['school']));
     },
   });
 
-  getLocationString(school: SchoolType): string {
+  getLocationString(school: AdminSchoolQuery['school']): string {
     return [school.city, school.state, school.country].filter((x) => !!x).join(', ');
   }
 
-  getGoogleMapsUrl(school: SchoolType): string {
+  getGoogleMapsUrl(school: AdminSchoolQuery['school']): string {
     const parts = [school.address, school.city, school.state, school.zip, school.country].filter((x) => !!x);
     const query = encodeURIComponent(parts.join(', '));
     return `https://www.google.com/maps/search/?api=1&query=${query}`;

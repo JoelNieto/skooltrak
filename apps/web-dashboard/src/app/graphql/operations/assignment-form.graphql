@@ -1,0 +1,26 @@
+query CoursesBySchoolId($schoolId: String!) {
+  coursesBySchoolId(schoolId: $schoolId) {
+    id
+    name
+  }
+}
+
+query ClassGroupsByCourseId($courseId: String!) {
+  classGroupsByCourseId(courseId: $courseId) {
+    id
+    name
+  }
+}
+
+query TeachersByOrganizationId($organizationId: String!) {
+  teachersByOrganizationId(organizationId: $organizationId) {
+    id
+    name
+  }
+}
+
+mutation CreateAssignment($createAssignmentInput: CreateAssignmentInput!) {
+  createAssignment(createAssignmentInput: $createAssignmentInput) {
+    id
+  }
+}

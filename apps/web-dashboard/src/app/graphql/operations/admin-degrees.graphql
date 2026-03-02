@@ -1,0 +1,20 @@
+query AdminDegreesBySchoolId($schoolId: String!) {
+  degreesBySchoolId(schoolId: $schoolId) {
+    id
+    name
+    shortName
+    schoolId
+    school {
+      id
+      name
+    }
+    createdAt
+    updatedAt
+  }
+}
+
+mutation AdminRemoveDegree($removeDegreeId: String!) {
+  removeDegree(id: $removeDegreeId) {
+    id
+  }
+}

@@ -15,7 +15,12 @@ import {
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
-import { Apollo, gql } from 'apollo-angular';
+import { Apollo } from 'apollo-angular';
+import {
+  FileShareFormCoursesBySchoolIdDocument,
+  FileShareFormShareFileDocument,
+  FileShareFormRemoveShareDocument,
+} from '../graphql/generated/graphql';
 import { forkJoin, map, of } from 'rxjs';
 import Store from '../core/store';
 
@@ -161,14 +166,7 @@ export default class FileShareForm implements OnInit {
         .watchQuery<{
           coursesBySchoolId: Array<{ id: string; name: string }>;
         }>({
-          query: gql`
-            query coursesBySchoolId($schoolId: String!) {
-              coursesBySchoolId(schoolId: $schoolId) {
-                id
-                name
-              }
-            }
-          `,
+          query: FileShareFormCoursesBySchoolIdDocument,
           variables: {
             schoolId: params.schoolId,
           },
@@ -280,13 +278,7 @@ export default class FileShareForm implements OnInit {
 
     const shareMutations = newTargets.map((targetId) =>
       this.apollo.mutate({
-        mutation: gql`
-          mutation ShareFile($shareFileInput: ShareFileInput!) {
-            shareFile(shareFileInput: $shareFileInput) {
-              id
-            }
-          }
-        `,
+        mutation: FileShareFormShareFileDocument,
         variables: {
           shareFileInput: {
             fileId,
@@ -300,13 +292,7 @@ export default class FileShareForm implements OnInit {
 
     const removeMutations = removedTargets.map((targetId) =>
       this.apollo.mutate({
-        mutation: gql`
-          mutation RemoveShare($removeShareInput: RemoveShareInput!) {
-            removeShare(removeShareInput: $removeShareInput) {
-              id
-            }
-          }
-        `,
+        mutation: FileShareFormRemoveShareDocument,
         variables: {
           removeShareInput: {
             fileId,

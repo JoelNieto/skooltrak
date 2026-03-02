@@ -1,0 +1,26 @@
+query StudentGradesByCourseId($courseId: String!, $periodId: String!, $studentId: String!) {
+  average: averageCourseScoreForStudent(
+    studentId: $studentId
+    courseId: $courseId
+    periodId: $periodId
+  )
+  studentGradesByCourseId(
+    courseId: $courseId
+    periodId: $periodId
+    studentId: $studentId
+  ) {
+    id
+    score
+    comments
+    grade {
+      id
+      title
+      date
+      comments
+      bucket {
+        id
+        name
+      }
+    }
+  }
+}

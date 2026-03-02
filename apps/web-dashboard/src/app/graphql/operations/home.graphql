@@ -1,0 +1,68 @@
+query OnboardingStatus {
+  onboardingStatus {
+    onboardingCompleted
+    schoolName
+    degreesCount
+    studyPlansCount
+    coursesCount
+    groupsCount
+  }
+}
+
+query AdminDashboardStats($schoolId: String) {
+  coursesCount(schoolId: $schoolId)
+  findManyStudentsCount(schoolId: $schoolId)
+  findManyTeachersCount(schoolId: $schoolId)
+  findManySubjectsCount(schoolId: $schoolId)
+}
+
+query RecentMessages($take: Int!, $skip: Int!) {
+  findManyMessages(take: $take, skip: $skip) {
+    id
+    createdAt
+    message {
+      id
+      subject
+      createdAt
+      sender {
+        id
+        name
+      }
+    }
+  }
+}
+
+query RecentStudents($take: Int!, $orderBy: String, $orderDirection: String, $schoolId: String) {
+  students(take: $take, orderBy: $orderBy, orderDirection: $orderDirection, schoolId: $schoolId) {
+    id
+    fullName
+    createdAt
+    classGroup {
+      name
+    }
+  }
+}
+
+query RecentNewsletters($schoolId: String!, $take: Int!) {
+  publishedNewsletters(schoolId: $schoolId, take: $take) {
+    id
+    title
+    content
+    publishedAt
+    author {
+      id
+      name
+    }
+  }
+}
+
+query RecentTeachers($take: Int!, $orderBy: String, $orderDirection: String, $schoolId: String) {
+  teachers(take: $take, orderBy: $orderBy, orderDirection: $orderDirection, schoolId: $schoolId) {
+    id
+    fullName
+    createdAt
+    user {
+      email
+    }
+  }
+}

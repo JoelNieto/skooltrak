@@ -6,8 +6,8 @@ import {
   input,
 } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
-import { Prisma } from '@generated/prisma';
-import { Apollo, gql } from 'apollo-angular';
+import { Apollo } from 'apollo-angular';
+import { CourseGradeBucketsDocument } from '../graphql/generated/graphql';
 import { map, of } from 'rxjs';
 import GradeBucketForm from './grade-buckets-form';
 @Component({
@@ -63,23 +63,8 @@ export default class CourseGradeBuckets {
         return of(null);
       }
       return this.#apollo
-        .query<{
-          gradeBucketsByCourseId: Prisma.GradeBucketGetPayload<{
-            include: { course: true };
-          }>[];
-        }>({
-          query: gql`
-            query GradeBucketsByCourseId($courseId: String!) {
-              gradeBucketsByCourseId(courseId: $courseId) {
-                id
-                name
-                weight
-                courseId
-                createdAt
-                updatedAt
-              }
-            }
-          `,
+        .query({
+          query: CourseGradeBucketsDocument,
           variables: {
             courseId,
           },
@@ -88,7 +73,7 @@ export default class CourseGradeBuckets {
     },
   });
 
-  editBucket(bucket?: Prisma.GradeBucketGetPayload<{ include: undefined }>) {
+  editBucket(bucket?: { id: string; name: string; weight: number; courseId?: string }) {
     this.#modal
       .open(GradeBucketForm, {
         data: {

@@ -4,7 +4,8 @@ import { afterRenderEffect, ChangeDetectionStrategy, Component, computed, inject
 import { rxResource } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { Apollo, gql } from 'apollo-angular';
+import { Apollo } from 'apollo-angular';
+import { GradeReportDocument, PeriodsByYearForReportDocument } from '../graphql/generated/graphql';
 import { map, of } from 'rxjs';
 import Store from '../core/store';
 
@@ -344,18 +345,8 @@ export default class GradeReport {
     stream: ({ params }) => {
       if (!params.year) return of([]);
       return this.#apollo
-        .watchQuery<{ periodsByYear: (GradeReportPeriodInfo & { startDate?: string; endDate?: string })[] }>({
-          query: gql`
-            query PeriodsByYearForReport($year: Int!) {
-              periodsByYear(year: $year) {
-                id
-                name
-                shortName
-                startDate
-                endDate
-              }
-            }
-          `,
+        .watchQuery({
+          query: PeriodsByYearForReportDocument,
           variables: { year: params.year },
         })
         .valueChanges.pipe(map((r) => r.data?.periodsByYear ?? []));
@@ -384,50 +375,8 @@ export default class GradeReport {
       const { studentId, periodId } = params;
       if (!studentId || !periodId) return of(null);
       return this.#apollo
-        .query<{ gradeReport: GradeReportData }>({
-          query: gql`
-            query GradeReport($studentId: String!, $periodId: String!) {
-              gradeReport(studentId: $studentId, periodId: $periodId) {
-                schoolName
-                schoolLogoUrl
-                periodName
-                studentName
-                documentId
-                classGroupName
-                teacherName
-                studyPlanName
-                level
-                periods {
-                  id
-                  name
-                  shortName
-                }
-                gradesRows {
-                  courseId
-                  courseName
-                  periodAverages
-                  cumulativeAverage
-                }
-                overallGradesRow {
-                  periodAverages
-                  cumulativeAverage
-                }
-                attendanceRows {
-                  courseId
-                  courseName
-                  periodAttendance {
-                    periodId
-                    absent
-                    late
-                  }
-                }
-                habitRows {
-                  metricName
-                  value
-                }
-              }
-            }
-          `,
+        .query({
+          query: GradeReportDocument,
           variables: { studentId, periodId },
         })
         .pipe(map((r) => r.data?.gradeReport));

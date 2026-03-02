@@ -1,18 +1,13 @@
 import { Loader, Toast } from '@/ui';
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
-import { Apollo, gql } from 'apollo-angular';
+import { Apollo } from 'apollo-angular';
+import {
+  OnboardingAvailableSchoolsDocument,
+  OnboardingAvailableSchoolsQuery,
+} from '../graphql/generated/graphql';
 
-interface AvailableSchool {
-  id: string;
-  name: string;
-  shortName: string;
-  organizationName: string;
-  logo: string;
-  city: string;
-  country: string;
-  studentCount: number;
-}
+type AvailableSchool = OnboardingAvailableSchoolsQuery['availableSchools'][number];
 
 @Component({
   selector: 'app-join-school',
@@ -64,7 +59,7 @@ interface AvailableSchool {
                     </div>
                     <div class="flex-1 min-w-0">
                       <h3 class="font-semibold text-base-content truncate">{{ school.name }}</h3>
-                      <p class="text-sm text-base-content/60">{{ school.organizationName }}</p>
+                      <p class="text-sm text-base-content/60">{{ school.organizationName ?? '' }}</p>
                       @if (school.city) {
                         <p class="text-xs text-base-content/40">{{ school.city }}{{ school.country ? ', ' + school.country : '' }}</p>
                       }
@@ -107,8 +102,8 @@ export default class JoinSchool {
   private toasts = inject(Toast);
 
   public loading = signal(true);
-  public schools = signal<AvailableSchool[]>([]);
-  public filteredSchools = signal<AvailableSchool[]>([]);
+  public schools = signal<OnboardingAvailableSchoolsQuery['availableSchools']>([]);
+  public filteredSchools = signal<OnboardingAvailableSchoolsQuery['availableSchools']>([]);
   private searchTerm = '';
 
   constructor() {
@@ -117,26 +112,13 @@ export default class JoinSchool {
 
   private loadSchools() {
     this.apollo
-      .query<{ availableSchools: AvailableSchool[] }>({
-        query: gql`
-          query AvailableSchools {
-            availableSchools {
-              id
-              name
-              shortName
-              organizationName
-              logo
-              city
-              country
-              studentCount
-            }
-          }
-        `,
+      .query({
+        query: OnboardingAvailableSchoolsDocument,
         fetchPolicy: 'network-only',
       })
       .subscribe({
         next: (res) => {
-          const schools = res.data?.availableSchools || [];
+          const schools = res.data?.availableSchools ?? [];
           this.schools.set(schools);
           this.filteredSchools.set(schools);
           this.loading.set(false);
@@ -158,7 +140,7 @@ export default class JoinSchool {
         this.schools().filter(
           (s) =>
             s.name.toLowerCase().includes(term) ||
-            s.organizationName.toLowerCase().includes(term) ||
+            (s.organizationName ?? '').toLowerCase().includes(term) ||
             s.city?.toLowerCase().includes(term),
         ),
       );

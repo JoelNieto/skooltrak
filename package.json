@@ -2,6 +2,7 @@
   "name": "@skooltrak-platform/source",
   "version": "0.0.0",
   "license": "MIT",
+  "packageManager": "bun@1.2.2",
   "scripts": {
     "serve:dev": "nx run-many --parallel --target=serve --projects=web-dashboard,dashboard-backend",
     "serve:dev:admin": "nx run-many --parallel --target=serve --projects=admin-backend,web-admin",

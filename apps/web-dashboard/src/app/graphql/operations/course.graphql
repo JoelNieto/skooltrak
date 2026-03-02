@@ -1,0 +1,34 @@
+query Course($id: String!) {
+  course(id: $id) {
+    id
+    name
+    shortName
+    code
+    createdAt
+    updatedAt
+    subject {
+      id
+      name
+    }
+    teacher {
+      id
+      name
+      color
+      initials
+    }
+    studyPlan {
+      id
+      name
+      gradeMetric {
+        id
+        name
+        minimumApproval
+        minimumExcellence
+        maximum
+        minimum
+        createdAt
+        updatedAt
+      }
+    }
+  }
+}

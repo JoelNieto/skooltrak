@@ -1,0 +1,12 @@
+query OnboardingAvailableSchools {
+  availableSchools {
+    id
+    name
+    shortName
+    organizationName
+    logo
+    city
+    country
+    studentCount
+  }
+}

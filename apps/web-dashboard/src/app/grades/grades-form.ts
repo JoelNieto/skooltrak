@@ -6,8 +6,8 @@ import {
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
-import { Prisma } from '@generated/prisma';
-import { Apollo, gql } from 'apollo-angular';
+import { Apollo } from 'apollo-angular';
+import { CreateGradeDocument, GradeBucketsByCourseIdDocument } from '../graphql/generated/graphql';
 import { map, of } from 'rxjs';
 @Component({
   selector: 'app-grades-form',
@@ -77,20 +77,8 @@ export default class GradesForm {
         return of(null);
       }
       return this.#apollo
-        .query<{
-          gradeBucketsByCourseId: Prisma.GradeBucketGetPayload<{
-            include: { course: true };
-          }>[];
-        }>({
-          query: gql`
-            query GradeBucketsByCourseId($courseId: String!) {
-              gradeBucketsByCourseId(courseId: $courseId) {
-                id
-                name
-                weight
-              }
-            }
-          `,
+        .query({
+          query: GradeBucketsByCourseIdDocument,
           variables: {
             courseId,
           },
@@ -116,18 +104,7 @@ export default class GradesForm {
 
     this.#apollo
       .mutate({
-        mutation: gql`
-          mutation CreateGrade($createGradeInput: CreateGradeInput!) {
-            createGrade(createGradeInput: $createGradeInput) {
-              id
-              title
-              comments
-              bucketId
-              published
-              date
-            }
-          }
-        `,
+        mutation: CreateGradeDocument,
         variables: {
           createGradeInput: {
             ...this.form.getRawValue(),

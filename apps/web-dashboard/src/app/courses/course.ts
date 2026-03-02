@@ -2,9 +2,9 @@ import { DecimalToNumber, Loader, Modal } from '@/ui';
 import { Component, inject, input } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
-import { Prisma } from '@generated/prisma';
 
-import { Apollo, gql } from 'apollo-angular';
+import { Apollo } from 'apollo-angular';
+import { CourseDocument } from '../graphql/generated/graphql';
 import { map, of } from 'rxjs';
 import AssignmentForm from '../assignments/assignment-form';
 import CourseAttendance from '../attendance/course-attendance';
@@ -15,20 +15,6 @@ import CourseAssignments from './course-assignments';
 import CourseFiles from './course-files';
 import CourseGradeBuckets from './course-grade-buckets';
 import CourseStudentGrades from './course-student-grades';
-type Teacher = Prisma.TeacherGetPayload<{ include: { user: true } }> & {
-  name: string;
-  initials: string;
-  color: string;
-};
-
-type CourseType = Prisma.CourseGetPayload<{
-  include: {
-    studyPlan: { include: { gradeMetric: true } };
-    subject: true;
-  };
-}> & {
-  teacher?: Teacher;
-};
 
 @Component({
   imports: [
@@ -187,46 +173,9 @@ export default class Course {
         return of(null);
       }
       return this.apollo
-        .query<{
-          course: DecimalToNumber<CourseType>;
-        }>({
-          query: gql`
-            query Course($id: String!) {
-              course(id: $id) {
-                id
-                name
-                shortName
-                code
-                createdAt
-                updatedAt
-                subject {
-                  id
-                  name
-                }
-                teacher {
-                  id
-                  name
-                  color
-                  initials
-                }
-                studyPlan {
-                  id
-                  name
-                  gradeMetric {
-                    id
-                    name
-                    minimumApproval
-                    minimumExcellence
-                    maximum
-                    minimum
-                  }
-                }
-              }
-            }
-          `,
-          variables: {
-            id,
-          },
+        .query({
+          query: CourseDocument,
+          variables: { id },
         })
         .pipe(map((result) => result.data?.course));
     },

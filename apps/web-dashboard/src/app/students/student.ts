@@ -1,73 +1,17 @@
-import { DecimalToNumber, Loader } from '@/ui';
+import { Loader } from '@/ui';
 import { Tab, TabContent, TabList, TabPanel, Tabs } from '@angular/aria/tabs';
 import { DatePipe, DecimalPipe, NgClass } from '@angular/common';
 import { afterRenderEffect, Component, computed, inject, input, signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { $Enums, Prisma } from '@generated/prisma';
+import { $Enums } from '@generated/prisma';
 import { isValidId } from '../core/validators';
-import { Apollo, gql } from 'apollo-angular';
+import { Apollo } from 'apollo-angular';
+import { PeriodsByYearDocument, StudentDocument } from '../graphql/generated/graphql';
 import { map, of } from 'rxjs';
 import Store from '../core/store';
 import StudentAttendanceReport from './student-attendance-report';
-
-type TeacherType = Prisma.TeacherGetPayload<{ include: { user: true } }> & {
-  name: string;
-  initials: string;
-  color: string;
-};
-
-type ParentType = Prisma.ParentGetPayload<{ include: undefined }> & {
-  name: string;
-};
-
-type StudentType = DecimalToNumber<
-  Prisma.StudentGetPayload<{
-    include: {
-      classGroup: {
-        include: { studyPlan: { include: { gradeMetric: true } } };
-      };
-      courses: {
-        include: { subject: true; teacher: { include: { user: true } } };
-      };
-      studentGrades: {
-        include: {
-          grade: {
-            include: {
-              course: { include: { subject: true } };
-              bucket: true;
-              period: true;
-            };
-          };
-        };
-      };
-      parents: true;
-      user: true;
-    };
-  }> & {
-    name: string;
-    email: string;
-    color: string;
-    initials: string;
-    fullName: string;
-    enrollmentStatus: $Enums.EnrollmentStatus;
-    bloodType: string;
-    allergies: string;
-    medicalNotes: string;
-    emergencyContactName: string;
-    emergencyContactPhone: string;
-    parents: ParentType[];
-    user: { id: string; email: string; emailVerified: boolean | null; color: string | null };
-    courses: Array<
-      Prisma.CourseGetPayload<{
-        include: { subject: true; teacher: { include: { user: true } } };
-      }> & {
-        teacher: TeacherType;
-      }
-    >;
-  }
->;
 
 const ENROLLMENT_STATUS_LABELS: Record<$Enums.EnrollmentStatus, string> = {
   ACTIVE: 'Activo',
@@ -414,22 +358,9 @@ export default class Student {
         return of([]);
       }
       return this.apollo
-        .watchQuery<{
-          periodsByYear: Prisma.PeriodGetPayload<{ include: undefined }>[];
-        }>({
-          query: gql`
-            query PeriodsByYear($year: Int!) {
-              periodsByYear(year: $year) {
-                id
-                name
-                startDate
-                endDate
-              }
-            }
-          `,
-          variables: {
-            year,
-          },
+        .watchQuery({
+          query: PeriodsByYearDocument,
+          variables: { year },
         })
         .valueChanges.pipe(map((result) => result.data?.periodsByYear ?? []));
     },
@@ -461,107 +392,9 @@ export default class Student {
         return of(null);
       }
       return this.apollo
-        .watchQuery<{
-          student: StudentType;
-        }>({
-          query: gql`
-            query Student($id: String!) {
-              student(id: $id) {
-                id
-                firstName
-                fatherName
-                fullName
-                name
-                schoolId
-                enrollmentStatus
-                bloodType
-                allergies
-                medicalNotes
-                emergencyContactName
-                emergencyContactPhone
-                classGroup {
-                  id
-                  name
-                  studyPlan {
-                    id
-                    name
-                    gradeMetric {
-                      minimumApproval
-                      minimumExcellence
-                    }
-                  }
-                }
-                courses {
-                  id
-                  subject {
-                    name
-                  }
-                  teacher {
-                    id
-                    name
-                  }
-                }
-                parents {
-                  id
-                  firstName
-                  fatherName
-                  name
-                  phone
-                  email
-                  relationship
-                }
-                studentGrades {
-                  id
-                  score
-                  comments
-                  updatedAt
-                  grade {
-                    id
-                    title
-                    date
-                    comments
-                    published
-                    course {
-                      id
-                      subject {
-                        name
-                      }
-                    }
-                    bucket {
-                      id
-                      name
-                      weight
-                    }
-                    period {
-                      id
-                      name
-                    }
-                    createdAt
-                    updatedAt
-                  }
-                }
-                color
-                email
-                documentId
-                birthDate
-                initials
-                gender
-                address
-                phone
-                user {
-                  id
-                  email
-                  emailVerified
-                  color
-                }
-                createdAt
-                updatedAt
-              }
-            }
-          `,
-          variables: {
-            id: params.id,
-          },
+        .watchQuery({
+          query: StudentDocument,
+          variables: { id: params.id },
         })
         .valueChanges.pipe(map((result) => result.data?.student));
     },

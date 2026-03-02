@@ -1,0 +1,28 @@
+query AssignmentDatesByCourseId(
+  $courseId: String!
+  $endDate: String!
+  $startDate: String!
+  $classGroupId: String
+) {
+  assignmentDatesByCourseId(
+    courseId: $courseId
+    endDate: $endDate
+    startDate: $startDate
+    classGroupId: $classGroupId
+  ) {
+    id
+    date
+    classGroupId
+    classGroup {
+      id
+      name
+    }
+    assignment {
+      id
+      title
+      details
+      type
+      requireSubmission
+    }
+  }
+}

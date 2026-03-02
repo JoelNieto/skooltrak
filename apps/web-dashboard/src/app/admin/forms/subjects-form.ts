@@ -2,7 +2,8 @@ import { Toast } from '@/ui';
 import { afterRenderEffect, Component, inject, input, output, signal } from '@angular/core';
 import { form, FormField, required, submit } from '@angular/forms/signals';
 import { Prisma } from '@generated/prisma';
-import { Apollo, gql } from 'apollo-angular';
+import { Apollo } from 'apollo-angular';
+import { SubjectsFormCreateSubjectDocument, SubjectsFormUpdateSubjectDocument } from '../../graphql/generated/graphql';
 
 @Component({
   selector: 'app-subjects-form',
@@ -86,21 +87,16 @@ export default class SubjectsForm {
     this.form.code().markAsDirty();
     submit(this.form, async () => {
       const subject = this.form().value();
+      const subjectId = this.data()?.subject?.id ?? '';
 
       if (this.data()?.subject) {
         this.apollo
           .mutate({
-            mutation: gql`
-              mutation UpdateSubject($updateSubjectInput: UpdateSubjectInput!) {
-                updateSubject(updateSubjectInput: $updateSubjectInput) {
-                  id
-                }
-              }
-            `,
+            mutation: SubjectsFormUpdateSubjectDocument,
             variables: {
               updateSubjectInput: {
                 ...subject,
-                id: this.data()?.subject?.id,
+                id: subjectId,
               },
             },
           })
@@ -116,13 +112,7 @@ export default class SubjectsForm {
       } else {
         this.apollo
           .mutate({
-            mutation: gql`
-              mutation CreateSubject($createSubjectInput: CreateSubjectInput!) {
-                createSubject(createSubjectInput: $createSubjectInput) {
-                  id
-                }
-              }
-            `,
+            mutation: SubjectsFormCreateSubjectDocument,
             variables: {
               createSubjectInput: subject,
             },

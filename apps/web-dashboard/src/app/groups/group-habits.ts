@@ -3,7 +3,14 @@ import { Component, computed, inject, input, signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { Prisma } from '@generated/prisma';
-import { Apollo, gql } from 'apollo-angular';
+import { Apollo } from 'apollo-angular';
+import {
+  GroupHabitsGetPeriodsDocument,
+  GroupHabitsGetHabitMetricsDocument,
+  GroupHabitsGetHabitEvaluationsDocument,
+  GroupHabitsSaveHabitEvaluationDocument,
+  type HabitValue,
+} from '../graphql/generated/graphql';
 import { map } from 'rxjs';
 
 type Student = Prisma.StudentGetPayload<{
@@ -220,18 +227,8 @@ export default class GroupHabits {
   public periods = rxResource({
     stream: () =>
       this.apollo
-        .watchQuery<{ periods: Period[] }>({
-          query: gql`
-            query GetPeriods {
-              periods {
-                id
-                name
-                year
-                startDate
-                endDate
-              }
-            }
-          `,
+        .watchQuery({
+          query: GroupHabitsGetPeriodsDocument,
         })
         .valueChanges.pipe(map((result) => result.data?.periods ?? [])),
   });
@@ -240,18 +237,8 @@ export default class GroupHabits {
   public habitMetrics = rxResource({
     stream: () =>
       this.apollo
-        .watchQuery<{ habitMetrics: HabitMetric[] }>({
-          query: gql`
-            query GetHabitMetrics {
-              habitMetrics {
-                id
-                name
-                description
-                active
-                order
-              }
-            }
-          `,
+        .watchQuery({
+          query: GroupHabitsGetHabitMetricsDocument,
         })
         .valueChanges.pipe(map((result) => result.data?.habitMetrics ?? [])),
   });
@@ -276,38 +263,8 @@ export default class GroupHabits {
     this.evaluationsLoading.set(true);
 
     this.apollo
-      .watchQuery<{
-        habitEvaluationsByGroup: Array<{
-          id: string;
-          habitMetricId: string;
-          studentEvaluations: Array<{
-            id: string;
-            studentId: string;
-            value: 'X' | 'R' | 'S';
-            comments: string | null;
-          }>;
-        }>;
-      }>({
-        query: gql`
-          query GetHabitEvaluations(
-            $classGroupId: String!
-            $periodId: String!
-          ) {
-            habitEvaluationsByGroup(
-              classGroupId: $classGroupId
-              periodId: $periodId
-            ) {
-              id
-              habitMetricId
-              studentEvaluations {
-                id
-                studentId
-                value
-                comments
-              }
-            }
-          }
-        `,
+      .watchQuery({
+        query: GroupHabitsGetHabitEvaluationsDocument,
         variables: { classGroupId: groupId, periodId },
       })
       .valueChanges.subscribe({
@@ -396,7 +353,7 @@ export default class GroupHabits {
       .filter((e) => e.value !== null)
       .map((e) => ({
         studentId: e.studentId,
-        value: e.value!,
+        value: e.value! as HabitValue,
         comments: e.comments || null,
       }));
 
@@ -411,18 +368,7 @@ export default class GroupHabits {
 
     this.apollo
       .mutate({
-        mutation: gql`
-          mutation SaveHabitEvaluation(
-            $saveHabitEvaluationInput: SaveHabitEvaluationInput!
-          ) {
-            saveHabitEvaluation(
-              saveHabitEvaluationInput: $saveHabitEvaluationInput
-            ) {
-              id
-              published
-            }
-          }
-        `,
+        mutation: GroupHabitsSaveHabitEvaluationDocument,
         variables: {
           saveHabitEvaluationInput: {
             classGroupId: this.groupId(),

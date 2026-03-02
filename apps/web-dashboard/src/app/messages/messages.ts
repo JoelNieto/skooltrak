@@ -5,8 +5,14 @@ import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { Prisma } from '@generated/prisma';
 
-import { Apollo, gql } from 'apollo-angular';
+import { Apollo } from 'apollo-angular';
 import { catchError, filter, map, of, switchMap, tap } from 'rxjs';
+import {
+  MessagesFindManyMessagesDocument,
+  MessagesFindMyMessagesDocument,
+  MessagesRemoveMessageDocument,
+  MessagesRemoveMessageRecipientDocument,
+} from '../graphql/generated/graphql';
 type User = Prisma.UserGetPayload<undefined> & {
   name: string;
   initials: string;
@@ -24,8 +30,8 @@ type MessageRecipientType = Prisma.MessageRecipientGetPayload<undefined> & {
 };
 
 @Component({
-  imports: [RouterLink, TimeAgoPipe, Paginator, FormsModule, EmptyState],
-
+  imports: [RouterLink, Paginator, FormsModule, EmptyState],
+  providers: [TimeAgoPipe],
   template: `<div class="breadcrumbs text-sm">
       <ul>
         <li><a routerLink="/">Inicio</a></li>
@@ -83,7 +89,10 @@ type MessageRecipientType = Prisma.MessageRecipientGetPayload<undefined> & {
                       <span class="w-2 h-2 bg-primary rounded-full"></span>
                     }
                     <div class="avatar avatar-placeholder">
-                      <div class="text-neutral-content w-7 rounded-full" [style.background]="item.message?.sender?.color">
+                      <div
+                        class="text-neutral-content w-7 rounded-full"
+                        [style.background]="item.message?.sender?.color"
+                      >
                         <span>{{ item.message?.sender?.initials }}</span>
                       </div>
                     </div>
@@ -367,38 +376,7 @@ export default class Messages {
           count: number;
           findManyMessages: MessageRecipientType[];
         }>({
-          query: gql`
-            query findManyMessages($take: Int!, $skip: Int!) {
-              count: findManyMessagesCount
-              findManyMessages(take: $take, skip: $skip) {
-                id
-                readAt
-                createdAt
-                message {
-                  id
-                  subject
-                  createdAt
-                  sender {
-                    id
-                    name
-                    initials
-                    email
-                    color
-                  }
-                  recipients {
-                    id
-                    user {
-                      id
-                      initials
-                      name
-                      email
-                      color
-                    }
-                  }
-                }
-              }
-            }
-          `,
+          query: MessagesFindManyMessagesDocument,
           fetchPolicy: 'network-only',
           variables: {
             take: params.take,
@@ -434,33 +412,7 @@ export default class Messages {
           count: number;
           findMyMessages: MessageType[];
         }>({
-          query: gql`
-            query findMyMessages($take: Int!, $skip: Int!) {
-              count: findSentMessagesCount
-              findMyMessages(take: $take, skip: $skip) {
-                id
-                subject
-                createdAt
-                sender {
-                  id
-                  name
-                  initials
-                  email
-                  color
-                }
-                recipients {
-                  id
-                  user {
-                    id
-                    initials
-                    name
-                    email
-                    color
-                  }
-                }
-              }
-            }
-          `,
+          query: MessagesFindMyMessagesDocument,
           fetchPolicy: 'network-only',
           variables: {
             take: params.take,
@@ -507,15 +459,9 @@ export default class Messages {
         filter((result) => result),
         switchMap(() =>
           this.#apollo.mutate({
-            mutation: gql`
-              mutation removeMessageRecipient($id: String!) {
-                removeMessageRecipient(id: $id) {
-                  id
-                }
-              }
-            `,
+            mutation: MessagesRemoveMessageRecipientDocument,
             variables: {
-              id: message.id,
+              id: message.id!,
             },
           }),
         ),
@@ -543,15 +489,9 @@ export default class Messages {
         filter((result) => result),
         switchMap(() =>
           this.#apollo.mutate({
-            mutation: gql`
-              mutation removeMessage($id: String!) {
-                removeMessage(id: $id) {
-                  id
-                }
-              }
-            `,
+            mutation: MessagesRemoveMessageDocument,
             variables: {
-              id: message.id,
+              id: message.id!,
             },
           }),
         ),

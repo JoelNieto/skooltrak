@@ -3,7 +3,12 @@ import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { isValidId } from '../core/validators';
-import { Apollo, gql } from 'apollo-angular';
+import { Apollo } from 'apollo-angular';
+import {
+  StudentFinancesBalanceDocument,
+  StudentFinancesChargesByStudentDocument,
+  StudentFinancesPaymentsByStudentDocument,
+} from '../graphql/generated/graphql';
 import { map, of } from 'rxjs';
 import Store from '../core/store';
 
@@ -166,17 +171,8 @@ export default class StudentFinances {
     stream: ({ params }) => {
       if (!isValidId(params.studentId)) return of(null);
       return this.#apollo
-        .query<{ studentBalance: StudentBalanceType }>({
-          query: gql`
-            query StudentBalance($studentId: String!) {
-              studentBalance(studentId: $studentId) {
-                studentId
-                totalCharges
-                totalPayments
-                balance
-              }
-            }
-          `,
+        .query({
+          query: StudentFinancesBalanceDocument,
           variables: { studentId: params.studentId },
         })
         .pipe(map((r) => r.data?.studentBalance));
@@ -190,19 +186,8 @@ export default class StudentFinances {
     stream: ({ params }) => {
       if (!isValidId(params.studentId)) return of([]);
       return this.#apollo
-        .query<{ chargesByStudent: ChargeType[] }>({
-          query: gql`
-            query ChargesByStudent($studentId: String!) {
-              chargesByStudent(studentId: $studentId) {
-                id
-                amount
-                dueDate
-                description
-                chargeType
-                status
-              }
-            }
-          `,
+        .query({
+          query: StudentFinancesChargesByStudentDocument,
           variables: { studentId: params.studentId },
         })
         .pipe(map((r) => r.data?.chargesByStudent ?? []));
@@ -216,17 +201,8 @@ export default class StudentFinances {
     stream: ({ params }) => {
       if (!isValidId(params.studentId)) return of([]);
       return this.#apollo
-        .query<{ paymentsByStudent: PaymentType[] }>({
-          query: gql`
-            query PaymentsByStudent($studentId: String!) {
-              paymentsByStudent(studentId: $studentId) {
-                id
-                amount
-                paidAt
-                reference
-              }
-            }
-          `,
+        .query({
+          query: StudentFinancesPaymentsByStudentDocument,
           variables: { studentId: params.studentId },
         })
         .pipe(map((r) => r.data?.paymentsByStudent ?? []));

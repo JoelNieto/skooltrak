@@ -1,7 +1,8 @@
 import { Toast } from '@/ui';
 import { ChangeDetectionStrategy, Component, inject, OnDestroy, OnInit, signal } from '@angular/core';
 import { Router } from '@angular/router';
-import { Apollo, gql } from 'apollo-angular';
+import { Apollo } from 'apollo-angular';
+import { OnboardingMyJoinRequestStatusDocument } from '../graphql/generated/graphql';
 import Auth from '../auth/auth';
 
 @Component({
@@ -121,24 +122,8 @@ export default class WaitingApproval implements OnInit, OnDestroy {
     this.checking.set(true);
 
     this.apollo
-      .query<{
-        myJoinRequestStatus: {
-          id: string;
-          requestedRole: string;
-          status: string;
-          schoolName: string;
-        } | null;
-      }>({
-        query: gql`
-          query MyJoinRequestStatus {
-            myJoinRequestStatus {
-              id
-              requestedRole
-              status
-              schoolName
-            }
-          }
-        `,
+      .query({
+        query: OnboardingMyJoinRequestStatusDocument,
         fetchPolicy: 'network-only',
       })
       .subscribe({
@@ -147,7 +132,7 @@ export default class WaitingApproval implements OnInit, OnDestroy {
           const request = res.data?.myJoinRequestStatus;
 
           if (request) {
-            this.schoolName.set(request.schoolName);
+            this.schoolName.set(request.schoolName ?? '');
             this.requestedRole.set(request.requestedRole);
 
             if (request.status === 'APPROVED') {

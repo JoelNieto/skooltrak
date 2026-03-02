@@ -5,7 +5,12 @@ import { rxResource } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { Prisma } from '@generated/prisma';
-import { Apollo, gql } from 'apollo-angular';
+import { Apollo } from 'apollo-angular';
+import {
+  MessageFindMessageByIdDocument,
+  MessageMarkAsReadDocument,
+  MessageCreateMessageDocument,
+} from '../graphql/generated/graphql';
 import { map, tap } from 'rxjs';
 import Auth from '../auth/auth';
 
@@ -189,63 +194,7 @@ export default class Message {
     stream: ({ params }) => {
       return this.#apollo
         .watchQuery<{ findMessageById: MessageType }>({
-          query: gql`
-            query findMessageById($id: String!) {
-              findMessageById(id: $id) {
-                id
-                subject
-                content
-                createdAt
-                sender {
-                  id
-                  initials
-                  name
-                  email
-                  role {
-                    id
-                    name
-                  }
-                  student {
-                    id
-                  }
-                  teacher {
-                    id
-                  }
-                }
-                recipients {
-                  id
-                  user {
-                    id
-                    initials
-                    name
-                    email
-                    role {
-                      id
-                      name
-                    }
-                    student {
-                      id
-                    }
-                    teacher {
-                      id
-                    }
-                  }
-                }
-                replies {
-                  id
-                  content
-                  createdAt
-                  parentMessageId
-                  sender {
-                    id
-                    initials
-                    name
-                    email
-                  }
-                }
-              }
-            }
-          `,
+          query: MessageFindMessageByIdDocument,
           variables: {
             id: params.id,
           },
@@ -265,14 +214,7 @@ export default class Message {
   private markAsRead(messageId: string): void {
     this.#apollo
       .mutate({
-        mutation: gql`
-          mutation markMessageAsRead($messageId: String!) {
-            markMessageAsRead(messageId: $messageId) {
-              id
-              readAt
-            }
-          }
-        `,
+        mutation: MessageMarkAsReadDocument,
         variables: { messageId },
       })
       .subscribe({
@@ -354,23 +296,17 @@ export default class Message {
     }
 
     // Reply goes back to the original sender
-    const recipientIds = message.sender ? [message.sender.id] : [];
+    const recipientIds = message.sender?.id ? [message.sender.id] : [];
 
     this.#apollo
       .mutate({
-        mutation: gql`
-          mutation createMessage($createMessageInput: CreateMessageInput!) {
-            createMessage(createMessageInput: $createMessageInput) {
-              id
-            }
-          }
-        `,
+        mutation: MessageCreateMessageDocument,
         variables: {
           createMessageInput: {
             subject: `Re: ${message.subject}`,
             content: replyContent,
             recipientIds,
-            parentMessageId: message.id,
+            parentMessageId: message.id!,
           },
         },
       })

@@ -1,21 +1,25 @@
+import { EmptyState, PageHeader, StatCard } from '@/ui';
 import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
-import { Prisma } from '@generated/prisma';
-import { Apollo, gql } from 'apollo-angular';
+import { Apollo } from 'apollo-angular';
 import { endOfWeek, startOfWeek } from 'date-fns';
 import { map, of } from 'rxjs';
-import { EmptyState, PageHeader, StatCard } from '@/ui';
 import Store from './core/store';
+import {
+  StudentAssignmentsDocument,
+  StudentAssignmentsQuery,
+  StudentDashboardStatsDocument,
+  StudentRecentMessagesDocument,
+  StudentRecentNewslettersDocument,
+  StudentRecentNewslettersQuery,
+} from './graphql/generated/graphql';
 @Component({
   selector: 'app-student-home',
   imports: [DatePipe, RouterLink, PageHeader, StatCard, EmptyState],
   template: `
-    <lib-page-header
-      title="Dashboard del estudiante"
-      subtitle="Lo más importante de tu semana académica."
-    />
+    <lib-page-header title="Dashboard del estudiante" subtitle="Lo más importante de tu semana académica." />
 
     <div class="grid gap-4 md:grid-cols-3">
       <lib-stat-card
@@ -39,12 +43,8 @@ import Store from './core/store';
       <div class="card border border-base-200 bg-base-100">
         <div class="card-body">
           <div class="flex items-center justify-between">
-            <h2 class="text-lg font-semibold text-base-content">
-              Asignaciones próximas
-            </h2>
-            <a routerLink="/assignments" class="link link-primary text-sm">
-              Ver todas
-            </a>
+            <h2 class="text-lg font-semibold text-base-content">Asignaciones próximas</h2>
+            <a routerLink="/assignments" class="link link-primary text-sm"> Ver todas </a>
           </div>
           @if (upcomingAssignments().length === 0) {
             <lib-empty-state
@@ -60,8 +60,8 @@ import Store from './core/store';
                     {{ assignment.title }}
                   </p>
                   <div class="text-sm text-base-content/70">
-                    {{ assignment.course?.name }} ·
-                    {{ assignment.date | date : 'mediumDate' }}
+                    {{ assignment.course.name }} ·
+                    {{ assignment.date | date: 'mediumDate' }}
                   </div>
                 </div>
               }
@@ -73,12 +73,8 @@ import Store from './core/store';
       <div class="card border border-base-200 bg-base-100">
         <div class="card-body">
           <div class="flex items-center justify-between">
-            <h2 class="text-lg font-semibold text-base-content">
-              Mensajes recientes
-            </h2>
-            <a routerLink="/messages" class="link link-primary text-sm">
-              Ir a mensajes
-            </a>
+            <h2 class="text-lg font-semibold text-base-content">Mensajes recientes</h2>
+            <a routerLink="/messages" class="link link-primary text-sm"> Ir a mensajes </a>
           </div>
           @if ((recentMessages.value() ?? []).length === 0) {
             <lib-empty-state
@@ -122,15 +118,13 @@ import Store from './core/store';
                   <div class="rounded-lg border border-base-200 p-3">
                     <p class="font-medium text-base-content">{{ newsletter.title }}</p>
                     <p class="text-sm text-base-content/70 mt-1 line-clamp-2">
-                      {{ stripHtml(newsletter.content ?? '') }}
+                      {{ stripHtml(newsletter.content) }}
                     </p>
                     <div class="flex items-center justify-between mt-2">
                       <span class="text-sm text-base-content/70">
-                        {{ newsletter.author?.name }} · {{ newsletter.publishedAt | date: 'mediumDate' }}
+                        {{ newsletter.author.name }} · {{ newsletter.publishedAt | date: 'mediumDate' }}
                       </span>
-                      <a [routerLink]="['/newsletters', newsletter.id]" class="link link-primary text-sm">
-                        Ver más
-                      </a>
+                      <a [routerLink]="['/newsletters', newsletter.id]" class="link link-primary text-sm"> Ver más </a>
                     </div>
                   </div>
                 }
@@ -148,12 +142,8 @@ export default class StudentHome {
   private store = inject(Store);
 
   private currentDate = signal(new Date());
-  private startDate = computed(() =>
-    startOfWeek(this.currentDate(), { weekStartsOn: 1 })
-  );
-  private endDate = computed(() =>
-    endOfWeek(this.currentDate(), { weekStartsOn: 1 })
-  );
+  private startDate = computed(() => startOfWeek(this.currentDate(), { weekStartsOn: 1 }));
+  private endDate = computed(() => endOfWeek(this.currentDate(), { weekStartsOn: 1 }));
 
   public statsResource = rxResource({
     params: () => ({ schoolId: this.store.currentSchoolId() }),
@@ -165,21 +155,22 @@ export default class StudentHome {
         });
       }
       return this.apollo
-        .watchQuery<{
-          coursesCount: number;
-          findManyMessagesCount: number;
-        }>({
-          query: gql`
-            query StudentDashboardStats($schoolId: String) {
-              coursesCount(schoolId: $schoolId)
-              findManyMessagesCount
-            }
-          `,
+        .watchQuery({
+          query: StudentDashboardStatsDocument,
           variables: {
             schoolId: params.schoolId,
           },
         })
-        .valueChanges.pipe(map((result) => result.data ?? { coursesCount: 0, findManyMessagesCount: 0 }));
+        .valueChanges.pipe(
+          map(
+            (result) =>
+              result.data ??
+              ({
+                coursesCount: 0,
+                findManyMessagesCount: 0,
+              } as { coursesCount: number; findManyMessagesCount: number }),
+          ),
+        );
     },
   });
 
@@ -191,38 +182,22 @@ export default class StudentHome {
     }),
     stream: ({ params }) => {
       if (!params.schoolId) {
-        return of<AssignmentPreview[]>([]);
+        return of<StudentAssignmentsQuery['assignmentsBySchoolId']>([]);
       }
       return this.apollo
-        .watchQuery<{ assignmentsBySchoolId: AssignmentPreview[] }>({
-          query: gql`
-            query StudentAssignments(
-              $schoolId: String!
-              $startDate: String!
-              $endDate: String!
-            ) {
-              assignmentsBySchoolId(
-                schoolId: $schoolId
-                startDate: $startDate
-                endDate: $endDate
-              ) {
-                id
-                title
-                date
-                course {
-                  id
-                  name
-                }
-              }
-            }
-          `,
+        .watchQuery({
+          query: StudentAssignmentsDocument,
           variables: {
             schoolId: params.schoolId,
             startDate: params.startDate.toISOString(),
             endDate: params.endDate.toISOString(),
           },
         })
-        .valueChanges.pipe(map((result) => result.data?.assignmentsBySchoolId ?? []));
+        .valueChanges.pipe(
+          map(
+            (result) => (result.data?.assignmentsBySchoolId ?? []) as StudentAssignmentsQuery['assignmentsBySchoolId'],
+          ),
+        );
     },
   });
 
@@ -230,24 +205,8 @@ export default class StudentHome {
     params: () => ({ take: 4, skip: 0 }),
     stream: ({ params }) => {
       return this.apollo
-        .watchQuery<{ findManyMessages: RecentMessage[] }>({
-          query: gql`
-            query StudentRecentMessages($take: Int!, $skip: Int!) {
-              findManyMessages(take: $take, skip: $skip) {
-                id
-                createdAt
-                message {
-                  id
-                  subject
-                  createdAt
-                  sender {
-                    id
-                    name
-                  }
-                }
-              }
-            }
-          `,
+        .watchQuery({
+          query: StudentRecentMessagesDocument,
           variables: params,
         })
         .valueChanges.pipe(map((result) => result.data?.findManyMessages ?? []));
@@ -258,30 +217,22 @@ export default class StudentHome {
     params: () => ({ schoolId: this.store.currentSchoolId() }),
     stream: ({ params }) => {
       if (!params.schoolId) {
-        return of<RecentNewsletter[]>([]);
+        return of<StudentRecentNewslettersQuery['publishedNewsletters']>([]);
       }
       return this.apollo
-        .watchQuery<{ publishedNewsletters: RecentNewsletter[] }>({
-          query: gql`
-            query StudentRecentNewsletters($schoolId: String!, $take: Int!) {
-              publishedNewsletters(schoolId: $schoolId, take: $take) {
-                id
-                title
-                content
-                publishedAt
-                author {
-                  id
-                  name
-                }
-              }
-            }
-          `,
+        .watchQuery({
+          query: StudentRecentNewslettersDocument,
           variables: {
             schoolId: params.schoolId,
             take: 3,
           },
         })
-        .valueChanges.pipe(map((result) => result.data?.publishedNewsletters ?? []));
+        .valueChanges.pipe(
+          map(
+            (result) =>
+              (result.data?.publishedNewsletters ?? []) as StudentRecentNewslettersQuery['publishedNewsletters'],
+          ),
+        );
     },
   });
 
@@ -294,36 +245,9 @@ export default class StudentHome {
   public upcomingAssignments = computed(() => {
     const assignments = this.assignmentsResource.value() ?? [];
     return [...assignments]
-      .sort(
-        (a, b) => new Date(a.date ?? 0).getTime() - new Date(b.date ?? 0).getTime()
-      )
+      .sort((a, b) => new Date(a.date ?? 0).getTime() - new Date(b.date ?? 0).getTime())
       .slice(0, 4);
   });
 
-  public weeklyAssignmentsCount = computed(
-    () => this.assignmentsResource.value()?.length ?? 0
-  );
+  public weeklyAssignmentsCount = computed(() => this.assignmentsResource.value()?.length ?? 0);
 }
-
-type AssignmentPreview = Prisma.AssignmentGetPayload<{
-  include: { course: true };
-}>;
-
-type RecentNewsletter = {
-  id: string;
-  title: string;
-  content: string;
-  publishedAt: string;
-  author: { id: string; name: string };
-};
-
-type RecentMessage = {
-  id: string;
-  createdAt: string;
-  message: {
-    id: string;
-    subject: string;
-    createdAt: string;
-    sender: { id: string; name: string };
-  };
-};

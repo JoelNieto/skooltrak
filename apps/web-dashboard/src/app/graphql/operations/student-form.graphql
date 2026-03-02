@@ -1,0 +1,41 @@
+query ClassGroupsBySchoolId($schoolId: String!) {
+  classGroupsBySchoolId(schoolId: $schoolId) {
+    id
+    name
+  }
+}
+
+query StudentFormData($id: String!) {
+  student(id: $id) {
+    id
+    firstName
+    middleName
+    fatherName
+    motherName
+    documentId
+    email
+    classGroupId
+    birthDate
+    gender
+    address
+    phone
+    enrollmentStatus
+    bloodType
+    allergies
+    medicalNotes
+    emergencyContactName
+    emergencyContactPhone
+  }
+}
+
+mutation UpdateStudent($updateStudentInput: UpdateStudentInput!) {
+  updateStudent(updateStudentInput: $updateStudentInput) {
+    id
+  }
+}
+
+mutation CreateStudent($createStudentInput: CreateStudentInput!) {
+  createStudent(createStudentInput: $createStudentInput) {
+    id
+  }
+}

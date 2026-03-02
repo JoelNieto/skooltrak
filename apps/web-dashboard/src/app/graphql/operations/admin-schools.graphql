@@ -1,0 +1,25 @@
+query AdminGetSchools {
+  schools {
+    id
+    name
+    shortName
+    city
+    email
+    phone
+    address
+    state
+    zip
+    country
+    website
+    logo
+    logoUrl
+    createdAt
+    updatedAt
+  }
+}
+
+mutation AdminRemoveSchool($removeSchoolId: String!) {
+  removeSchool(id: $removeSchoolId) {
+    id
+  }
+}

@@ -3,9 +3,16 @@ import { isPlatformBrowser } from '@angular/common';
 import { computed, effect, inject, Injectable, linkedSignal, PLATFORM_ID, signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
-import { Prisma } from '@generated/prisma';
-import { Apollo, gql } from 'apollo-angular';
+import { Apollo } from 'apollo-angular';
 import { catchError, firstValueFrom, map, of } from 'rxjs';
+import {
+  AuthIsEmailVerifiedDocument,
+  AuthLoginDocument,
+  AuthMeDocument,
+  AuthOnboardingStatusDocument,
+  AuthResetPasswordDocument,
+  Query,
+} from '../graphql/generated/graphql';
 import { authClient } from './auth-client';
 
 export type DecodedToken = {
@@ -54,51 +61,12 @@ export default class Auth {
         return of(null);
       }
       return this.#apollo
-        .watchQuery<{
-          me: Prisma.UserGetPayload<{
-            include: {
-              role: { include: { permissions: true } };
-              teacher: true;
-              student: true;
-            };
-          }>;
-        }>({
-          query: gql`
-            query Me {
-              me {
-                id
-                email
-                firstName
-                lastName
-                color
-                onboardingStep
-                organizationId
-                teacher {
-                  id
-                  firstName
-                  fatherName
-                }
-                student {
-                  id
-                  firstName
-                  fatherName
-                  classGroupId
-                }
-                role {
-                  name
-                  permissions {
-                    id
-                    descriptiveId
-                    description
-                  }
-                }
-              }
-            }
-          `,
+        .watchQuery({
+          query: AuthMeDocument,
           fetchPolicy: 'network-only',
         })
         .valueChanges.pipe(
-          map((res) => res.data?.me),
+          map((res) => res.data?.me as Query['me']),
           catchError((err) => {
             this.#toasts.showError(err.message);
             this.isSigning.set(false);
@@ -222,14 +190,8 @@ export default class Auth {
     try {
       // Use GraphQL login which returns JWT token
       const res = await firstValueFrom(
-        this.#apollo.mutate<{ login: { accessToken: string } }>({
-          mutation: gql`
-            mutation Login($email: String!, $password: String!) {
-              login(email: $email, password: $password) {
-                accessToken
-              }
-            }
-          `,
+        this.#apollo.mutate({
+          mutation: AuthLoginDocument,
           variables: { email, password },
         }),
       );
@@ -315,14 +277,8 @@ export default class Auth {
   public async resetPassword(token: string, newPassword: string): Promise<string | null> {
     try {
       const result = await firstValueFrom(
-        this.#apollo.mutate<{ resetPassword: { accessToken: string } }>({
-          mutation: gql`
-            mutation ResetPassword($token: String!, $newPassword: String!) {
-              resetPassword(token: $token, newPassword: $newPassword) {
-                accessToken
-              }
-            }
-          `,
+        this.#apollo.mutate({
+          mutation: AuthResetPasswordDocument,
           variables: { token, newPassword },
         }),
       );
@@ -375,12 +331,8 @@ export default class Auth {
   public async checkEmailVerified(): Promise<boolean> {
     try {
       const result = await firstValueFrom(
-        this.#apollo.query<{ isEmailVerified: boolean }>({
-          query: gql`
-            query IsEmailVerified {
-              isEmailVerified
-            }
-          `,
+        this.#apollo.query({
+          query: AuthIsEmailVerifiedDocument,
           fetchPolicy: 'network-only',
         }),
       );
@@ -402,42 +354,30 @@ export default class Auth {
   }> {
     try {
       const result = await firstValueFrom(
-        this.#apollo.query<{
-          onboardingStatus: {
-            onboardingCompleted: boolean;
-            schoolId?: string;
-            schoolName?: string;
-            degreesCount: number;
-            studyPlansCount: number;
-            coursesCount: number;
-            groupsCount: number;
-          };
-        }>({
-          query: gql`
-            query OnboardingStatus {
-              onboardingStatus {
-                onboardingCompleted
-                schoolId
-                schoolName
-                degreesCount
-                studyPlansCount
-                coursesCount
-                groupsCount
-              }
-            }
-          `,
+        this.#apollo.query({
+          query: AuthOnboardingStatusDocument,
           fetchPolicy: 'network-only',
         }),
       );
-      return (
-        result.data?.onboardingStatus ?? {
-          onboardingCompleted: false,
-          degreesCount: 0,
-          studyPlansCount: 0,
-          coursesCount: 0,
-          groupsCount: 0,
-        }
-      );
+      const os = result.data?.onboardingStatus;
+      const fallback = {
+        onboardingCompleted: false,
+        degreesCount: 0,
+        studyPlansCount: 0,
+        coursesCount: 0,
+        groupsCount: 0,
+      };
+      if (!os) return fallback;
+      return {
+        ...fallback,
+        onboardingCompleted: os.onboardingCompleted,
+        schoolId: os.schoolId != null ? os.schoolId : undefined,
+        schoolName: os.schoolName != null ? os.schoolName : undefined,
+        degreesCount: os.degreesCount,
+        studyPlansCount: os.studyPlansCount,
+        coursesCount: os.coursesCount,
+        groupsCount: os.groupsCount,
+      };
     } catch {
       return {
         onboardingCompleted: false,

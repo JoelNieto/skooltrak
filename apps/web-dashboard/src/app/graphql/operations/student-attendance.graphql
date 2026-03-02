@@ -1,0 +1,35 @@
+query StudentAttendanceStats($studentId: String!) {
+  studentAttendanceStats(studentId: $studentId) {
+    total
+    present
+    absent
+    late
+    sickLeave
+    excused
+    presentPercentage
+    absentPercentage
+  }
+}
+
+query AttendanceRecordsByStudentId($studentId: String!, $take: Int) {
+  attendanceRecordsByStudentId(studentId: $studentId, take: $take) {
+    id
+    status
+    comment
+    attendanceSession {
+      id
+      date
+      course {
+        id
+        name
+        subject {
+          name
+        }
+      }
+      classGroup {
+        id
+        name
+      }
+    }
+  }
+}

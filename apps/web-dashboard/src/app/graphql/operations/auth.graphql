@@ -1,0 +1,58 @@
+query AuthMe {
+  me {
+    id
+    email
+    firstName
+    lastName
+    color
+    onboardingStep
+    organizationId
+    teacher {
+      id
+      firstName
+      fatherName
+    }
+    student {
+      id
+      firstName
+      fatherName
+      classGroupId
+    }
+    role {
+      name
+      permissions {
+        id
+        descriptiveId
+        description
+      }
+    }
+  }
+}
+
+mutation AuthLogin($email: String!, $password: String!) {
+  login(email: $email, password: $password) {
+    accessToken
+  }
+}
+
+mutation AuthResetPassword($token: String!, $newPassword: String!) {
+  resetPassword(token: $token, newPassword: $newPassword) {
+    accessToken
+  }
+}
+
+query AuthIsEmailVerified {
+  isEmailVerified
+}
+
+query AuthOnboardingStatus {
+  onboardingStatus {
+    onboardingCompleted
+    schoolId
+    schoolName
+    degreesCount
+    studyPlansCount
+    coursesCount
+    groupsCount
+  }
+}

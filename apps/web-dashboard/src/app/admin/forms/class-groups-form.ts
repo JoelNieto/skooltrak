@@ -3,9 +3,15 @@ import { afterRenderEffect, Component, inject, input, output } from '@angular/co
 import { rxResource } from '@angular/core/rxjs-interop';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Prisma } from '@generated/prisma';
-import { Apollo, gql } from 'apollo-angular';
+import { Apollo } from 'apollo-angular';
 import { map, of } from 'rxjs';
 import Store from '../../core/store';
+import {
+  ClassGroupsFormCreateClassGroupDocument,
+  ClassGroupsFormStudyPlansBySchoolIdDocument,
+  ClassGroupsFormTeachersByOrganizationIdDocument,
+  ClassGroupsFormUpdateClassGroupDocument,
+} from '../../graphql/generated/graphql';
 @Component({
   selector: 'app-class-groups-form',
   imports: [ReactiveFormsModule],
@@ -65,19 +71,10 @@ export default class ClassGroupsForm {
         return of([]);
       }
       return this.apollo
-        .watchQuery<{
-          teachersByOrganizationId: { id: string; name: string }[];
-        }>({
-          query: gql`
-            query TeachersByOrganizationId($organizationId: String!) {
-              teachersByOrganizationId(organizationId: $organizationId) {
-                id
-                name
-              }
-            }
-          `,
+        .watchQuery({
+          query: ClassGroupsFormTeachersByOrganizationIdDocument,
           variables: {
-            organizationId: params.organizationId,
+            organizationId,
           },
         })
         .valueChanges.pipe(map((result) => result.data?.teachersByOrganizationId ?? []));
@@ -93,19 +90,8 @@ export default class ClassGroupsForm {
         return of([]);
       }
       return this.apollo
-        .watchQuery<{
-          studyPlansBySchoolId: Prisma.StudyPlanGetPayload<{
-            include: { degree: true; school: true };
-          }>[];
-        }>({
-          query: gql`
-            query StudyPlansBySchoolId($schoolId: String!) {
-              studyPlansBySchoolId(schoolId: $schoolId) {
-                id
-                name
-              }
-            }
-          `,
+        .watchQuery({
+          query: ClassGroupsFormStudyPlansBySchoolIdDocument,
           variables: {
             schoolId: params.schoolId,
           },
@@ -139,22 +125,16 @@ export default class ClassGroupsForm {
     }
 
     const req = this.form.getRawValue();
+    const groupId = this.data()?.group?.id ?? '';
 
     if (this.data()?.group) {
       this.apollo
         .mutate({
-          mutation: gql`
-            mutation UpdateClassGroup($updateClassGroupInput: UpdateClassGroupInput!) {
-              updateClassGroup(updateClassGroupInput: $updateClassGroupInput) {
-                id
-                name
-              }
-            }
-          `,
+          mutation: ClassGroupsFormUpdateClassGroupDocument,
           variables: {
             updateClassGroupInput: {
               ...req,
-              id: this.data()?.group?.id,
+              id: groupId,
             },
           },
         })
@@ -171,19 +151,12 @@ export default class ClassGroupsForm {
     } else {
       this.apollo
         .mutate({
-          mutation: gql`
-            mutation CreateClassGroup($createClassGroupInput: CreateClassGroupInput!) {
-              createClassGroup(createClassGroupInput: $createClassGroupInput) {
-                id
-                name
-              }
-            }
-          `,
+          mutation: ClassGroupsFormCreateClassGroupDocument,
           variables: {
             createClassGroupInput: {
               ...req,
-              schoolId: this.store.currentSchoolId(),
-              organizationId: this.store.currentOrganizationId(),
+              schoolId: this.store.currentSchoolId() ?? '',
+              organizationId: this.store.currentOrganizationId() ?? '',
             },
           },
         })

@@ -2,7 +2,12 @@ import { markGroupDirty, Toast } from '@/ui';
 import { ChangeDetectionStrategy, Component, computed, inject, input, output, signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Apollo, gql } from 'apollo-angular';
+import { Apollo } from 'apollo-angular';
+import {
+  OnboardingStepsCreateClassGroupDocument,
+  OnboardingStepsGroupsGetSchoolsDocument,
+  OnboardingStepsGroupsStudyPlansBySchoolIdDocument,
+} from '../../graphql/generated/graphql';
 import { map, of } from 'rxjs';
 import Store from '../../core/store';
 import { CreatedEntity } from '../setup-wizard';
@@ -154,14 +159,8 @@ export default class GroupsStep {
   public schools = rxResource({
     stream: () =>
       this.apollo
-        .watchQuery<{ schools: { id: string }[] }>({
-          query: gql`
-            query GetSchools {
-              schools {
-                id
-              }
-            }
-          `,
+        .watchQuery({
+          query: OnboardingStepsGroupsGetSchoolsDocument,
           fetchPolicy: 'cache-first',
         })
         .valueChanges.pipe(map((result) => result.data?.schools ?? [])),
@@ -181,15 +180,8 @@ export default class GroupsStep {
         return of([]);
       }
       return this.apollo
-        .watchQuery<{ studyPlansBySchoolId: { id: string; name: string }[] }>({
-          query: gql`
-            query StudyPlansBySchoolId($schoolId: String!) {
-              studyPlansBySchoolId(schoolId: $schoolId) {
-                id
-                name
-              }
-            }
-          `,
+        .watchQuery({
+          query: OnboardingStepsGroupsStudyPlansBySchoolIdDocument,
           variables: { schoolId: params.schoolId },
           fetchPolicy: 'cache-and-network',
         })
@@ -229,15 +221,8 @@ export default class GroupsStep {
     const formValue = this.form.getRawValue();
 
     this.apollo
-      .mutate<{ createClassGroup: { id: string; name: string } }>({
-        mutation: gql`
-          mutation CreateClassGroup($createClassGroupInput: CreateClassGroupInput!) {
-            createClassGroup(createClassGroupInput: $createClassGroupInput) {
-              id
-              name
-            }
-          }
-        `,
+      .mutate({
+        mutation: OnboardingStepsCreateClassGroupDocument,
         variables: {
           createClassGroupInput: {
             ...formValue,

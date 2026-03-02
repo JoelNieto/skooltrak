@@ -5,7 +5,8 @@ import { rxResource } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import { Prisma } from '@generated/prisma';
 import { isValidId } from '../core/validators';
-import { Apollo, gql } from 'apollo-angular';
+import { Apollo } from 'apollo-angular';
+import { TeacherDocument } from '../graphql/generated/graphql';
 import { map, of } from 'rxjs';
 type TeacherType = Prisma.TeacherGetPayload<{
   include: { user: true; courses: true; classGroups: true; subjects: true };
@@ -216,51 +217,9 @@ export default class Teacher {
         return of(null);
       }
       return this.#apollo
-        .watchQuery<{ teacher: TeacherType }>({
+        .watchQuery({
           fetchPolicy: 'cache-and-network',
-          query: gql`
-            query Teacher($teacherId: String!) {
-              teacher(id: $teacherId) {
-                id
-                firstName
-                middleName
-                fatherName
-                motherName
-                name
-                fullName
-                initials
-                documentId
-                birthDate
-                gender
-                address
-                phoneNumber
-                personalEmail
-                about
-                teacherSince
-                memberSince
-                user {
-                  id
-                  email
-                  color
-                  emailVerified
-                }
-                subjects {
-                  id
-                  name
-                }
-                courses {
-                  id
-                  name
-                }
-                classGroups {
-                  id
-                  name
-                }
-                createdAt
-                updatedAt
-              }
-            }
-          `,
+          query: TeacherDocument,
           variables: {
             teacherId: id,
           },

@@ -7,8 +7,13 @@ import { rxResource } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { Prisma } from '@generated/prisma';
-import { Apollo, gql } from 'apollo-angular';
+import { Apollo } from 'apollo-angular';
 import { filter, map, switchMap } from 'rxjs';
+import {
+  AdminGetSchoolsDocument,
+  AdminGetSchoolsQuery,
+  AdminRemoveSchoolDocument,
+} from '../../graphql/generated/graphql';
 
 type School = Prisma.SchoolGetPayload<false> & {
   logoUrl?: string | null;
@@ -176,38 +181,16 @@ export default class Schools {
   searchText = signal('');
   actionsMenu = viewChild<Menu<string>>('actionsMenu');
 
-  public schools = rxResource<School[], { search: string }>({
+  public schools = rxResource({
     params: () => ({
       search: this.pagination.search(),
     }),
     stream: () => {
       return this.#apollo
-        .watchQuery<{
-          schools: School[];
-        }>({
-          query: gql`
-            query GetSchools {
-              schools {
-                id
-                name
-                shortName
-                city
-                email
-                phone
-                address
-                state
-                zip
-                country
-                website
-                logo
-                logoUrl
-                createdAt
-                updatedAt
-              }
-            }
-          `,
+        .watchQuery({
+          query: AdminGetSchoolsDocument,
         })
-        .valueChanges.pipe(map((result) => result.data?.schools ?? []));
+        .valueChanges.pipe(map((result) => (result.data?.schools as AdminGetSchoolsQuery['schools']) ?? []));
     },
   });
 
@@ -217,7 +200,7 @@ export default class Schools {
     });
   }
 
-  public deleteSchool(school: School) {
+  public deleteSchool(school: AdminGetSchoolsQuery['schools'][number]) {
     this.#confirmation
       .confirm({
         title: 'Eliminar Colegio',
@@ -229,13 +212,7 @@ export default class Schools {
         filter((confirmed: boolean) => confirmed === true),
         switchMap(() =>
           this.#apollo.mutate({
-            mutation: gql`
-              mutation RemoveSchool($removeSchoolId: String!) {
-                removeSchool(id: $removeSchoolId) {
-                  id
-                }
-              }
-            `,
+            mutation: AdminRemoveSchoolDocument,
             variables: {
               removeSchoolId: school.id,
             },

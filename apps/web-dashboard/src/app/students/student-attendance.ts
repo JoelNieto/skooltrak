@@ -3,7 +3,11 @@ import { DatePipe, NgClass } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { isValidId } from '../core/validators';
-import { Apollo, gql } from 'apollo-angular';
+import { Apollo } from 'apollo-angular';
+import {
+  AttendanceRecordsByStudentIdDocument,
+  StudentAttendanceStatsDocument,
+} from '../graphql/generated/graphql';
 import { map, of } from 'rxjs';
 import Store from '../core/store';
 
@@ -102,8 +106,14 @@ const STATUS_COLORS: Record<string, string> = {
               <tbody>
                 @for (record of recordsResource.value(); track record.id) {
                   <tr class="hover">
-                    <td>{{ record.attendanceSession.date | date: 'fullDate' }}</td>
-                    <td>{{ record.attendanceSession.course.subject.name }}</td>
+                    <td>
+                      @if (record.attendanceSession) {
+                        {{ record.attendanceSession.date | date: 'fullDate' }}
+                      } @else {
+                        -
+                      }
+                    </td>
+                    <td>{{ record.attendanceSession?.course?.subject?.name ?? '-' }}</td>
                     <td>
                       <span class="badge" [ngClass]="getStatusColor(record.status)">
                         {{ getStatusLabel(record.status) }}
@@ -138,21 +148,8 @@ export default class StudentAttendance {
     stream: ({ params }) => {
       if (!isValidId(params.studentId)) return of(null);
       return this.#apollo
-        .query<{ studentAttendanceStats: AttendanceStatsType }>({
-          query: gql`
-            query StudentAttendanceStats($studentId: String!) {
-              studentAttendanceStats(studentId: $studentId) {
-                total
-                present
-                absent
-                late
-                sickLeave
-                excused
-                presentPercentage
-                absentPercentage
-              }
-            }
-          `,
+        .query({
+          query: StudentAttendanceStatsDocument,
           variables: { studentId: params.studentId },
         })
         .pipe(map((r) => r.data?.studentAttendanceStats));
@@ -166,34 +163,11 @@ export default class StudentAttendance {
     stream: ({ params }) => {
       if (!isValidId(params.studentId)) return of([]);
       return this.#apollo
-        .query<{ attendanceRecordsByStudentId: AttendanceRecordType[] }>({
-          query: gql`
-            query AttendanceRecordsByStudentId($studentId: String!) {
-              attendanceRecordsByStudentId(studentId: $studentId, take: 50) {
-                id
-                status
-                comment
-                attendanceSession {
-                  id
-                  date
-                  course {
-                    id
-                    name
-                    subject {
-                      name
-                    }
-                  }
-                  classGroup {
-                    id
-                    name
-                  }
-                }
-              }
-            }
-          `,
-          variables: { studentId: params.studentId },
+        .query({
+          query: AttendanceRecordsByStudentIdDocument,
+          variables: { studentId: params.studentId, take: 50 },
         })
-        .pipe(map((r) => r.data?.attendanceRecordsByStudentId));
+        .pipe(map((r) => r.data?.attendanceRecordsByStudentId ?? []));
     },
   });
 

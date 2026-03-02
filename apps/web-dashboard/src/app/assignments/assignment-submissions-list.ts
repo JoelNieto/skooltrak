@@ -1,20 +1,16 @@
 import { Toast } from '@/ui';
-import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject, input, signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
-import { Prisma } from '@generated/prisma';
-import { Apollo, gql } from 'apollo-angular';
+import { Apollo } from 'apollo-angular';
 import { map } from 'rxjs';
-
-type StudentWithSubmission = Prisma.StudentGetPayload<{
-  include: {
-    assignmentSubmissions: { include: { file: true } };
-  };
-}>;
+import {
+  CreateSubmissionDownloadUrlDocument,
+  StudentsForAssignmentDocument,
+  StudentsForAssignmentQuery,
+} from '../graphql/generated/graphql';
 
 @Component({
   selector: 'app-assignment-submissions-list',
-  imports: [DatePipe],
   template: `
     <div class="space-y-4">
       @if (studentsResource.isLoading()) {
@@ -61,7 +57,7 @@ type StudentWithSubmission = Prisma.StudentGetPayload<{
               </tr>
             </thead>
             <tbody>
-              @for (student of students; track student.id) {
+              @for (student of students; track student.id ?? '') {
                 @let submission = student.assignmentSubmissions[0];
                 <tr>
                   <td>
@@ -85,7 +81,7 @@ type StudentWithSubmission = Prisma.StudentGetPayload<{
                   </td>
                   <td class="text-base-content/70 text-sm">
                     @if (submission) {
-                      {{ submission.submittedAt | date: 'short' }}
+                      {{ formatSubmissionDate(submission.submittedAt) }}
                     } @else {
                       -
                     }
@@ -102,7 +98,7 @@ type StudentWithSubmission = Prisma.StudentGetPayload<{
                         >
                           {{ getFileIcon(submission.file.mimeType) }}
                         </span>
-                        <span class="text-sm truncate max-w-[150px]">
+                        <span class="text-sm truncate max-w-37.5">
                           {{ submission.file.name }}
                         </span>
                         <span class="text-xs text-base-content/50"> ({{ formatBytes(submission.file.size) }}) </span>
@@ -112,13 +108,14 @@ type StudentWithSubmission = Prisma.StudentGetPayload<{
                     }
                   </td>
                   <td>
-                    @if (submission) {
+                    @let fileId = submission?.file?.id;
+                    @if (fileId) {
                       <button
                         class="btn btn-ghost btn-sm"
-                        (click)="downloadFile(submission.file.id)"
-                        [disabled]="downloadingFileId() === submission.file.id"
+                        (click)="downloadFile(fileId)"
+                        [disabled]="downloadingFileId() === fileId"
                       >
-                        @if (downloadingFileId() === submission.file.id) {
+                        @if (downloadingFileId() === fileId) {
                           <span class="loading loading-spinner loading-xs"></span>
                         } @else {
                           <span class="material-symbols-outlined">download</span>
@@ -154,60 +151,36 @@ export default class AssignmentSubmissionsList {
     params: () => ({ assignmentId: this.assignmentId() }),
     stream: ({ params }) => {
       return this.apollo
-        .watchQuery<{ studentsForAssignment: StudentWithSubmission[] }>({
-          query: gql`
-            query StudentsForAssignment($assignmentId: String!) {
-              studentsForAssignment(assignmentId: $assignmentId) {
-                id
-                firstName
-                middleName
-                fatherName
-                motherName
-                assignmentSubmissions {
-                  id
-                  submittedAt
-                  file {
-                    id
-                    name
-                    mimeType
-                    size
-                  }
-                }
-              }
-            }
-          `,
+        .watchQuery({
+          query: StudentsForAssignmentDocument,
           variables: { assignmentId: params.assignmentId },
           fetchPolicy: 'network-only',
         })
-        .valueChanges.pipe(map((res) => res.data?.studentsForAssignment ?? []));
+        .valueChanges.pipe(
+          map((res) => (res.data?.studentsForAssignment as StudentsForAssignmentQuery['studentsForAssignment']) ?? []),
+        );
     },
   });
 
-  getSubmittedCount(students: StudentWithSubmission[]): number {
-    return students.filter((s) => s.assignmentSubmissions.length > 0).length;
+  getSubmittedCount(students: Array<{ assignmentSubmissions?: unknown[] }>): number {
+    return students.filter((s) => (s.assignmentSubmissions?.length ?? 0) > 0).length;
   }
 
-  getPendingCount(students: StudentWithSubmission[]): number {
-    return students.filter((s) => s.assignmentSubmissions.length === 0).length;
+  getPendingCount(students: Array<{ assignmentSubmissions?: unknown[] }>): number {
+    return students.filter((s) => (s.assignmentSubmissions?.length ?? 0) === 0).length;
   }
 
   downloadFile(fileId: string) {
     this.downloadingFileId.set(fileId);
 
     this.apollo
-      .mutate<{ createSubmissionDownloadUrl: { downloadUrl: string } }>({
-        mutation: gql`
-          mutation CreateSubmissionDownloadUrl($fileId: String!) {
-            createSubmissionDownloadUrl(fileId: $fileId) {
-              downloadUrl
-            }
-          }
-        `,
+      .mutate({
+        mutation: CreateSubmissionDownloadUrlDocument,
         variables: { fileId },
       })
       .subscribe({
         next: (result) => {
-          const url = result.data?.createSubmissionDownloadUrl.downloadUrl;
+          const url = result.data?.createSubmissionDownloadUrl?.downloadUrl;
           if (url) {
             window.open(url, '_blank');
           }
@@ -219,6 +192,12 @@ export default class AssignmentSubmissionsList {
           this.downloadingFileId.set(null);
         },
       });
+  }
+
+  formatSubmissionDate(value: unknown): string {
+    if (value == null) return '-';
+    const date = value instanceof Date ? value : new Date(String(value));
+    return isNaN(date.getTime()) ? '-' : date.toLocaleDateString(undefined, { dateStyle: 'short', timeStyle: 'short' });
   }
 
   getFileIcon(mimeType: string): string {

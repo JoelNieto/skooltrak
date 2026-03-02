@@ -1,0 +1,49 @@
+query TeacherDashboardStats($schoolId: String) {
+  coursesCount(schoolId: $schoolId)
+  findManyStudentsCount(schoolId: $schoolId)
+}
+
+query TeacherAssignments($schoolId: String!, $startDate: String!, $endDate: String!) {
+  assignmentsBySchoolId(
+    schoolId: $schoolId
+    startDate: $startDate
+    endDate: $endDate
+  ) {
+    id
+    title
+    date
+    course {
+      id
+      name
+    }
+  }
+}
+
+query TeacherRecentMessages($take: Int!, $skip: Int!) {
+  findManyMessages(take: $take, skip: $skip) {
+    id
+    createdAt
+    message {
+      id
+      subject
+      createdAt
+      sender {
+        id
+        name
+      }
+    }
+  }
+}
+
+query TeacherRecentNewsletters($schoolId: String!, $take: Int!) {
+  publishedNewsletters(schoolId: $schoolId, take: $take) {
+    id
+    title
+    content
+    publishedAt
+    author {
+      id
+      name
+    }
+  }
+}

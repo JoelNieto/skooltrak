@@ -1,0 +1,10 @@
+query ParentFinancesLinkedStudentsSummary {
+  linkedStudentsFinancialSummary {
+    studentId
+    firstName
+    fatherName
+    totalCharges
+    totalPayments
+    balance
+  }
+}

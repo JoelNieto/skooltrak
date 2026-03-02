@@ -1,0 +1,35 @@
+query AdminClassGroupsBySchoolId(
+  $schoolId: String!
+  $take: Int!
+  $skip: Int!
+  $search: String!
+) {
+  count: classGroupsCount(schoolId: $schoolId, search: $search)
+  classGroups(
+    schoolId: $schoolId
+    take: $take
+    skip: $skip
+    search: $search
+  ) {
+    id
+    name
+    teacher {
+      id
+      name
+    }
+    studyPlan {
+      id
+      name
+      createdAt
+      updatedAt
+    }
+    createdAt
+    updatedAt
+  }
+}
+
+mutation AdminRemoveClassGroup($id: String!) {
+  removeClassGroup(id: $id) {
+    id
+  }
+}

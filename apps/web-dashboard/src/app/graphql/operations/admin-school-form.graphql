@@ -1,0 +1,49 @@
+query AdminSchoolForm($id: String!) {
+  school(id: $id) {
+    id
+    name
+    shortName
+    email
+    phone
+    address
+    city
+    state
+    zip
+    country
+    website
+    logo
+    logoUrl
+  }
+}
+
+mutation AdminCreateSchoolLogoUploadUrl($input: SchoolLogoUploadInput!) {
+  createSchoolLogoUploadUrl(input: $input) {
+    uploadUrl
+    storageKey
+  }
+}
+
+mutation AdminUpdateSchoolLogo($id: String!, $logo: String!) {
+  updateSchoolLogo(id: $id, logo: $logo) {
+    id
+    logo
+  }
+}
+
+query AdminSchoolLogoDownloadUrl($schoolId: String!) {
+  schoolLogoDownloadUrl(schoolId: $schoolId) {
+    downloadUrl
+  }
+}
+
+mutation AdminUpdateSchool($updateSchoolInput: UpdateSchoolInput!) {
+  updateSchool(updateSchoolInput: $updateSchoolInput) {
+    id
+  }
+}
+
+mutation AdminCreateSchool($createSchoolInput: CreateSchoolInput!) {
+  createSchool(createSchoolInput: $createSchoolInput) {
+    id
+  }
+}

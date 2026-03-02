@@ -5,11 +5,16 @@ import { Component, computed, inject, signal, viewChild } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { Prisma } from '@generated/prisma';
+import { Prisma, StudyPlan } from '@generated/prisma';
 
-import { Apollo, gql } from 'apollo-angular';
+import { Apollo } from 'apollo-angular';
 import { filter, map, of, switchMap, tap } from 'rxjs';
 import Store from '../../core/store';
+import {
+  AdminGetCoursesDocument,
+  AdminRemoveCourseDocument,
+  AdminStudyPlansForCoursesDocument,
+} from '../../graphql/generated/graphql';
 import CoursesForm from '../forms/courses-form';
 
 type Teacher = Prisma.TeacherGetPayload<{ include: { user: true } }> & {
@@ -25,34 +30,20 @@ type CourseType = Prisma.CourseGetPayload<{
 
 @Component({
   selector: 'app-courses',
-  imports: [
-    Paginator,
-    RouterLink,
-    FormsModule,
-    Menu,
-    MenuContent,
-    MenuItem,
-    MenuTrigger,
-    OverlayModule,
-  ],
+  imports: [Paginator, RouterLink, FormsModule, Menu, MenuContent, MenuItem, MenuTrigger, OverlayModule],
 
   template: `<div class="flex justify-between">
       <div class="flex gap-2">
         <div class="md:w-96 w-full">
           <label class="input input-primary ">
             <span class="material-symbols-outlined">search</span>
-            <input
-              class="pl-0"
-              type="search"
-              placeholder="Buscar..."
-              [(ngModel)]="searchText"
-            />
+            <input class="pl-0" type="search" placeholder="Buscar..." [(ngModel)]="searchText" />
           </label>
         </div>
         <select class="select select-primary" [(ngModel)]="studyPlanId">
           <option [ngValue]="null">Elija nivel...</option>
           @for (studyPlan of studyPlans.value(); track studyPlan.id) {
-          <option [value]="studyPlan.id">{{ studyPlan.name }}</option>
+            <option [value]="studyPlan.id">{{ studyPlan.name }}</option>
           }
         </select>
       </div>
@@ -61,9 +52,7 @@ type CourseType = Prisma.CourseGetPayload<{
         <span class="material-symbols-outlined">add_circle</span> Nuevo curso
       </button>
     </div>
-    <div
-      class="overflow-x-auto bg-base-100 rounded-lg mt-4 border border-base-300"
-    >
+    <div class="overflow-x-auto bg-base-100 rounded-lg mt-4 border border-base-300">
       <table class="table">
         <thead>
           <tr>
@@ -78,94 +67,81 @@ type CourseType = Prisma.CourseGetPayload<{
         </thead>
         <tbody>
           @for (course of courses.value(); track course.id) {
-          <tr>
-            <td>
-              {{ course.name }}
-            </td>
-            <td>{{ course.shortName }}</td>
-            <td>{{ course.code }}</td>
-            <td>{{ course.subject.name }}</td>
-            <td>{{ course.studyPlan.name }}</td>
-            <td>
-              @if(course.teacher) {
-              <a
-                [routerLink]="['/teachers', course.teacher.id]"
-                class="link link-primary"
-              >
-                {{ course.teacher.name }}
-              </a>
-              } @else { -- }
-            </td>
-            <td>
-              <button
-                class="cursor-pointer hover:bg-base-200 p-1 rounded-lg flex items-center justify-center"
-                ngMenuTrigger
-                #origin
-                #trigger="ngMenuTrigger"
-                [menu]="actionsMenu()"
-              >
-                <span class="material-symbols-outlined text-xl"
-                  >more_horiz</span
+            <tr>
+              <td>
+                {{ course.name }}
+              </td>
+              <td>{{ course.shortName }}</td>
+              <td>{{ course.code }}</td>
+              <td>{{ course.subject.name }}</td>
+              <td>{{ course.studyPlan.name }}</td>
+              <td>
+                @if (course.teacher) {
+                  <a [routerLink]="['/teachers', course.teacher.id]" class="link link-primary">
+                    {{ course.teacher.name }}
+                  </a>
+                } @else {
+                  --
+                }
+              </td>
+              <td>
+                <button
+                  class="cursor-pointer hover:bg-base-200 p-1 rounded-lg flex items-center justify-center"
+                  ngMenuTrigger
+                  #origin
+                  #trigger="ngMenuTrigger"
+                  [menu]="actionsMenu()"
                 >
-              </button>
-              <ng-template
-                [cdkConnectedOverlayOpen]="trigger.expanded()"
-                [cdkConnectedOverlay]="{origin, usePopover: 'inline'}"
-                [cdkConnectedOverlayPositions]="[
-                  {
-                    originX: 'end',
-                    originY: 'bottom',
-                    overlayX: 'end',
-                    overlayY: 'top',
-                    offsetY: 4
-                  }
-                ]"
-                cdkAttachPopoverAsChild
-              >
-                <div
-                  ngMenu
-                  class="bg-base-100 shadow-sm rounded-lg p-1 w-48"
-                  #actionsMenu="ngMenu"
+                  <span class="material-symbols-outlined text-xl">more_horiz</span>
+                </button>
+                <ng-template
+                  [cdkConnectedOverlayOpen]="trigger.expanded()"
+                  [cdkConnectedOverlay]="{ origin, usePopover: 'inline' }"
+                  [cdkConnectedOverlayPositions]="[
+                    {
+                      originX: 'end',
+                      originY: 'bottom',
+                      overlayX: 'end',
+                      overlayY: 'top',
+                      offsetY: 4,
+                    },
+                  ]"
+                  cdkAttachPopoverAsChild
                 >
-                  <ng-template ngMenuContent>
-                    <a
-                      ngMenuItem
-                      value="view"
-                      [routerLink]="['/courses', course.id]"
-                      class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-base-200 w-full"
-                    >
-                      <span class="material-symbols-outlined text-lg"
-                        >visibility</span
+                  <div ngMenu class="bg-base-100 shadow-sm rounded-lg p-1 w-48" #actionsMenu="ngMenu">
+                    <ng-template ngMenuContent>
+                      <a
+                        ngMenuItem
+                        value="view"
+                        [routerLink]="['/courses', course.id]"
+                        class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-base-200 w-full"
                       >
-                      <span>Ver</span>
-                    </a>
-                    <button
-                      ngMenuItem
-                      value="edit"
-                      class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-base-200 w-full"
-                      (click)="editCourse(course)"
-                    >
-                      <span class="material-symbols-outlined text-lg"
-                        >edit</span
+                        <span class="material-symbols-outlined text-lg">visibility</span>
+                        <span>Ver</span>
+                      </a>
+                      <button
+                        ngMenuItem
+                        value="edit"
+                        class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-base-200 w-full"
+                        (click)="editCourse(course)"
                       >
-                      <span>Editar</span>
-                    </button>
-                    <button
-                      ngMenuItem
-                      value="delete"
-                      class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-base-200 w-full"
-                      (click)="deleteCourse(course)"
-                    >
-                      <span class="material-symbols-outlined text-lg"
-                        >delete</span
+                        <span class="material-symbols-outlined text-lg">edit</span>
+                        <span>Editar</span>
+                      </button>
+                      <button
+                        ngMenuItem
+                        value="delete"
+                        class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-base-200 w-full"
+                        (click)="deleteCourse(course)"
                       >
-                      <span>Eliminar</span>
-                    </button>
-                  </ng-template>
-                </div>
-              </ng-template>
-            </td>
-          </tr>
+                        <span class="material-symbols-outlined text-lg">delete</span>
+                        <span>Eliminar</span>
+                      </button>
+                    </ng-template>
+                  </div>
+                </ng-template>
+              </td>
+            </tr>
           }
         </tbody>
       </table>
@@ -215,24 +191,13 @@ export default class Courses {
         return of([]);
       }
       return this.#apollo
-        .watchQuery<{
-          studyPlansBySchoolId: Prisma.StudyPlanGetPayload<{
-            include: { degree: true; school: true; gradeMetric: true };
-          }>[];
-        }>({
-          query: gql`
-            query StudyPlansBySchoolId($schoolId: String!) {
-              studyPlansBySchoolId(schoolId: $schoolId) {
-                id
-                name
-              }
-            }
-          `,
+        .watchQuery({
+          query: AdminStudyPlansForCoursesDocument,
           variables: {
             schoolId: params.schoolId,
           },
         })
-        .valueChanges.pipe(map((result) => result.data?.studyPlansBySchoolId ?? []));
+        .valueChanges.pipe(map((result) => (result.data?.studyPlansBySchoolId as StudyPlan[]) ?? []));
     },
   });
 
@@ -250,53 +215,8 @@ export default class Courses {
         return of([]);
       }
       return this.#apollo
-        .watchQuery<{
-          count: number;
-          courses: CourseType[];
-        }>({
-          query: gql`
-            query getCourses(
-              $schoolId: String!
-              $take: Int!
-              $skip: Int!
-              $search: String
-              $studyPlanId: String
-            ) {
-              count: coursesCount(
-                schoolId: $schoolId
-                studyPlanId: $studyPlanId
-                search: $search
-              )
-              courses(
-                schoolId: $schoolId
-                take: $take
-                skip: $skip
-                studyPlanId: $studyPlanId
-                search: $search
-              ) {
-                id
-                name
-                shortName
-                schoolId
-                subject {
-                  name
-                }
-                studyPlan {
-                  name
-                }
-                teacher {
-                  id
-                  name
-                }
-                subjectId
-                studyPlanId
-                teacherId
-                code
-                createdAt
-                updatedAt
-              }
-            }
-          `,
+        .watchQuery({
+          query: AdminGetCoursesDocument,
           variables: {
             schoolId,
             take,
@@ -312,7 +232,7 @@ export default class Courses {
               count: result.data?.count ?? 0,
             }));
           }),
-          map((result) => result.data?.courses ?? [])
+          map((result) => (result.data?.courses ?? []) as CourseType[]),
         );
     },
   });
@@ -320,7 +240,7 @@ export default class Courses {
   public editCourse(
     course?: Prisma.CourseGetPayload<{
       include: { subject: true; studyPlan: true };
-    }>
+    }>,
   ) {
     this.#modal
       .open(CoursesForm, {
@@ -344,18 +264,12 @@ export default class Courses {
         filter((confirmed: boolean) => confirmed === true),
         switchMap(() =>
           this.#apollo.mutate({
-            mutation: gql`
-              mutation RemoveCourse($removeCourseId: String!) {
-                removeCourse(id: $removeCourseId) {
-                  id
-                }
-              }
-            `,
+            mutation: AdminRemoveCourseDocument,
             variables: {
               removeCourseId: course.id,
             },
-          })
-        )
+          }),
+        ),
       )
       .subscribe({
         next: () => {

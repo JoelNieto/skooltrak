@@ -2,9 +2,15 @@ import { Toast } from '@/ui';
 import { Component, inject, output } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Apollo, gql } from 'apollo-angular';
+import { Apollo } from 'apollo-angular';
 import { map, of } from 'rxjs';
 import Store from '../../core/store';
+import type { CreateChargeInput } from '../../graphql/generated/graphql';
+import {
+  CreateChargeFormCreateChargeDocument,
+  CreateChargeFormStudentsBySchoolIdDocument,
+  CreateChargeFormStudyPlansBySchoolIdDocument,
+} from '../../graphql/generated/graphql';
 
 @Component({
   selector: 'app-create-charge-form',
@@ -13,7 +19,7 @@ import Store from '../../core/store';
     <form [formGroup]="form" (ngSubmit)="onSubmit()">
       <div class="flex flex-col gap-4">
         <div class="fieldset">
-          <label>Objetivo</label>
+          <label for="targetType">Objetivo</label>
           <select formControlName="targetType" class="select select-primary w-full">
             <option value="student">Estudiante</option>
             <option value="studyPlan">Plan de estudio</option>
@@ -21,7 +27,7 @@ import Store from '../../core/store';
         </div>
         @if (targetType === 'student') {
           <div class="fieldset">
-            <label>Estudiante</label>
+            <label for="studentId">Estudiante</label>
             <select formControlName="studentId" class="select select-primary w-full">
               <option value="" disabled>Seleccionar estudiante...</option>
               @for (s of students.value(); track s.id) {
@@ -32,7 +38,7 @@ import Store from '../../core/store';
         }
         @if (targetType === 'studyPlan') {
           <div class="fieldset">
-            <label>Plan de estudio</label>
+            <label for="studyPlanId">Plan de estudio</label>
             <select formControlName="studyPlanId" class="select select-primary w-full">
               <option value="" disabled>Seleccionar plan...</option>
               @for (sp of studyPlans.value(); track sp.id) {
@@ -42,19 +48,24 @@ import Store from '../../core/store';
           </div>
         }
         <div class="fieldset">
-          <label>Monto</label>
+          <label for="amount">Monto</label>
           <input type="number" step="0.01" min="0" formControlName="amount" class="input input-primary w-full" />
         </div>
         <div class="fieldset">
-          <label>Fecha de vencimiento</label>
+          <label for="dueDate">Fecha de vencimiento</label>
           <input type="date" formControlName="dueDate" class="input input-primary w-full" />
         </div>
         <div class="fieldset">
-          <label>Descripción (opcional)</label>
-          <input type="text" formControlName="description" class="input input-primary w-full" placeholder="Ej. Colegiatura Septiembre" />
+          <label for="description">Descripción (opcional)</label>
+          <input
+            type="text"
+            formControlName="description"
+            class="input input-primary w-full"
+            placeholder="Ej. Colegiatura Septiembre"
+          />
         </div>
         <div class="fieldset">
-          <label>Tipo</label>
+          <label for="chargeType">Tipo</label>
           <select formControlName="chargeType" class="select select-primary w-full">
             <option value="CUSTOM">Personalizado</option>
             <option value="TUITION">Colegiatura</option>
@@ -86,16 +97,8 @@ export default class CreateChargeForm {
     stream: ({ params }) => {
       if (!params.schoolId) return of([]);
       return this.apollo
-        .watchQuery<{ studentsBySchoolId: { id: string; firstName: string; fatherName: string }[] }>({
-          query: gql`
-            query StudentsForCharges($schoolId: String!) {
-              studentsBySchoolId(schoolId: $schoolId) {
-                id
-                firstName
-                fatherName
-              }
-            }
-          `,
+        .watchQuery({
+          query: CreateChargeFormStudentsBySchoolIdDocument,
           variables: { schoolId: params.schoolId },
         })
         .valueChanges.pipe(map((r) => r.data?.studentsBySchoolId ?? []));
@@ -107,15 +110,8 @@ export default class CreateChargeForm {
     stream: ({ params }) => {
       if (!params.schoolId) return of([]);
       return this.apollo
-        .watchQuery<{ studyPlansBySchoolId: { id: string; name: string }[] }>({
-          query: gql`
-            query StudyPlansForCharges($schoolId: String!) {
-              studyPlansBySchoolId(schoolId: $schoolId) {
-                id
-                name
-              }
-            }
-          `,
+        .watchQuery({
+          query: CreateChargeFormStudyPlansBySchoolIdDocument,
           variables: { schoolId: params.schoolId },
         })
         .valueChanges.pipe(map((r) => r.data?.studyPlansBySchoolId ?? []));
@@ -146,36 +142,42 @@ export default class CreateChargeForm {
       return;
     }
     const year = school.currentYear ?? new Date().getFullYear();
-    const input: Record<string, unknown> = {
-      schoolId,
-      year,
-      amount: v.amount,
-      dueDate: v.dueDate,
-      description: v.description || '',
-      chargeType: v.chargeType,
-    };
-    if (v.targetType === 'student') {
-      if (!v.studentId) {
-        this.toast.showError('Selecciona un estudiante');
-        return;
-      }
-      input['studentId'] = v.studentId;
-    } else {
-      if (!v.studyPlanId) {
-        this.toast.showError('Selecciona un plan de estudio');
-        return;
-      }
-      input['studyPlanId'] = v.studyPlanId;
-    }
+    const input: CreateChargeInput | null =
+      v.targetType === 'student'
+        ? (() => {
+            if (!v.studentId) {
+              this.toast.showError('Selecciona un estudiante');
+              return null;
+            }
+            return {
+              schoolId,
+              year,
+              amount: v.amount,
+              dueDate: v.dueDate,
+              description: v.description || undefined,
+              chargeType: v.chargeType,
+              studentId: v.studentId,
+            };
+          })()
+        : (() => {
+            if (!v.studyPlanId) {
+              this.toast.showError('Selecciona un plan de estudio');
+              return null;
+            }
+            return {
+              schoolId,
+              year,
+              amount: v.amount,
+              dueDate: v.dueDate,
+              description: v.description || undefined,
+              chargeType: v.chargeType,
+              studyPlanId: v.studyPlanId,
+            };
+          })();
+    if (!input) return;
     this.apollo
       .mutate({
-        mutation: gql`
-          mutation CreateCharge($input: CreateChargeInput!) {
-            createCharge(input: $input) {
-              id
-            }
-          }
-        `,
+        mutation: CreateChargeFormCreateChargeDocument,
         variables: { input },
       })
       .subscribe({

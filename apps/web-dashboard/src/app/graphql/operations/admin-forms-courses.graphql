@@ -1,0 +1,63 @@
+query CoursesFormGetSubjects($take: Int!, $orderBy: String) {
+  subjects(take: $take, orderBy: $orderBy) {
+    id
+    name
+  }
+}
+
+query CoursesFormStudyPlansBySchoolId($schoolId: String!) {
+  studyPlansBySchoolId(schoolId: $schoolId) {
+    id
+    name
+  }
+}
+
+query CoursesFormGetTeachers(
+  $take: Int!
+  $skip: Int!
+  $search: String
+  $orderBy: String
+  $orderDirection: String
+) {
+  teachers(
+    take: $take
+    skip: $skip
+    search: $search
+    orderBy: $orderBy
+    orderDirection: $orderDirection
+  ) {
+    id
+    name
+    initials
+  }
+}
+
+mutation CoursesFormCreateSubject($createSubjectInput: CreateSubjectInput!) {
+  createSubject(createSubjectInput: $createSubjectInput) {
+    id
+    name
+    code
+  }
+}
+
+mutation CoursesFormUpdateCourse($updateCourseInput: UpdateCourseInput!) {
+  updateCourse(updateCourseInput: $updateCourseInput) {
+    id
+    name
+    shortName
+    code
+    subjectId
+    studyPlanId
+  }
+}
+
+mutation CoursesFormCreateCourse($createCourseInput: CreateCourseInput!) {
+  createCourse(createCourseInput: $createCourseInput) {
+    id
+    name
+    shortName
+    code
+    subjectId
+    studyPlanId
+  }
+}

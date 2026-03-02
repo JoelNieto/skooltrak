@@ -10,7 +10,8 @@ import {
   validate,
 } from '@angular/forms/signals';
 import { Router, RouterLink } from '@angular/router';
-import { Apollo, gql } from 'apollo-angular';
+import { Apollo } from 'apollo-angular';
+import { ComposeCreateMessageDocument } from '../graphql/generated/graphql';
 import Contacts, { SelectedContact } from './contacts';
 
 interface ComposeFormData {
@@ -146,13 +147,7 @@ export default class Compose {
       await new Promise<void>((resolve, reject) => {
         this.#apollo
           .mutate({
-            mutation: gql`
-              mutation createMessage($createMessageInput: CreateMessageInput!) {
-                createMessage(createMessageInput: $createMessageInput) {
-                  id
-                }
-              }
-            `,
+            mutation: ComposeCreateMessageDocument,
             variables: {
               createMessageInput: {
                 recipientIds: this.formModel().to.map((contact) => contact.id),

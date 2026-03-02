@@ -7,8 +7,13 @@ import { rxResource } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { Prisma } from '@generated/prisma';
 
-import { Apollo, gql } from 'apollo-angular';
+import { Apollo } from 'apollo-angular';
 import { filter, map, switchMap, tap } from 'rxjs';
+import {
+  AdminGetSubjectsDocument,
+  AdminGetSubjectsQuery,
+  AdminRemoveSubjectDocument,
+} from '../../graphql/generated/graphql';
 import SubjectsForm from '../forms/subjects-form';
 @Component({
   selector: 'app-subjects',
@@ -233,18 +238,7 @@ export default class Subjects {
           count: number;
           subjects: Prisma.SubjectGetPayload<false>[];
         }>({
-          query: gql`
-            query GetSubjects($take: Int!, $skip: Int!, $search: String, $orderBy: String, $orderDirection: String) {
-              count: findManySubjectsCount(search: $search)
-              subjects(take: $take, skip: $skip, search: $search, orderBy: $orderBy, orderDirection: $orderDirection) {
-                id
-                name
-                code
-                createdAt
-                updatedAt
-              }
-            }
-          `,
+          query: AdminGetSubjectsDocument,
           variables: {
             take,
             skip,
@@ -255,9 +249,9 @@ export default class Subjects {
         })
         .valueChanges.pipe(
           tap(({ data }) => {
-            this.pagination.updateCount(data.count);
+            this.pagination.updateCount(data?.count ?? 0);
           }),
-          map((result) => result.data?.subjects ?? []),
+          map((result) => (result.data?.subjects as AdminGetSubjectsQuery['subjects']) ?? []),
         );
     },
   });
@@ -268,7 +262,7 @@ export default class Subjects {
     });
   }
 
-  public editSubject(subject?: Prisma.SubjectGetPayload<false>) {
+  public editSubject(subject?: AdminGetSubjectsQuery['subjects'][number]) {
     this.#modal
       .open(SubjectsForm, {
         title: subject ? 'Editar Asignatura' : 'Agregar Asignatura',
@@ -281,7 +275,7 @@ export default class Subjects {
       });
   }
 
-  public deleteSubject(subject: Prisma.SubjectGetPayload<false>) {
+  public deleteSubject(subject: AdminGetSubjectsQuery['subjects'][number]) {
     this.#confirmation
       .confirm({
         title: 'Eliminar Asignatura',
@@ -291,13 +285,7 @@ export default class Subjects {
         filter((confirmed: boolean) => confirmed === true),
         switchMap(() =>
           this.#apollo.mutate({
-            mutation: gql`
-              mutation RemoveSubject($removeSubjectId: String!) {
-                removeSubject(id: $removeSubjectId) {
-                  id
-                }
-              }
-            `,
+            mutation: AdminRemoveSubjectDocument,
             variables: {
               removeSubjectId: subject.id,
             },

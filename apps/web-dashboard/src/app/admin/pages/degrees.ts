@@ -2,18 +2,17 @@ import { Confirmation, Modal, Toast } from '@/ui';
 import { Menu, MenuContent, MenuItem, MenuTrigger } from '@angular/aria/menu';
 import { OverlayModule } from '@angular/cdk/overlay';
 import { DatePipe } from '@angular/common';
-import {
-  ChangeDetectionStrategy,
-  Component,
-  inject,
-  viewChild,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, viewChild } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
-import { Prisma } from '@generated/prisma';
 
-import { Apollo, gql } from 'apollo-angular';
+import { Apollo } from 'apollo-angular';
 import { filter, map, of, switchMap } from 'rxjs';
 import Store from '../../core/store';
+import {
+  AdminDegreesBySchoolIdDocument,
+  AdminDegreesBySchoolIdQuery,
+  AdminRemoveDegreeDocument,
+} from '../../graphql/generated/graphql';
 import DegreesForm from '../forms/degrees-form';
 @Component({
   selector: 'app-degrees',
@@ -24,9 +23,7 @@ import DegreesForm from '../forms/degrees-form';
         <span class="material-symbols-outlined">add_circle</span> Agregar nivel
       </button>
     </div>
-    <div
-      class="overflow-x-auto bg-base-100 rounded-lg mt-4 border border-base-300"
-    >
+    <div class="overflow-x-auto bg-base-100 rounded-lg mt-4 border border-base-300">
       <table class="table">
         <thead>
           <tr>
@@ -40,71 +37,61 @@ import DegreesForm from '../forms/degrees-form';
         </thead>
         <tbody>
           @for (degree of degrees.value(); track degree.id) {
-          <tr>
-            <td>{{ degree.name }}</td>
-            <td>{{ degree.shortName }}</td>
-            <td>{{ degree.school.name }}</td>
-            <td>{{ degree.createdAt | date : 'short' }}</td>
-            <td>{{ degree.updatedAt | date : 'short' }}</td>
-            <td>
-              <button
-                class="cursor-pointer hover:bg-base-200 p-1 rounded-lg flex items-center justify-center"
-                ngMenuTrigger
-                #origin
-                #trigger="ngMenuTrigger"
-                [menu]="actionsMenu()"
-              >
-                <span class="material-symbols-outlined text-xl"
-                  >more_horiz</span
+            <tr>
+              <td>{{ degree.name }}</td>
+              <td>{{ degree.shortName }}</td>
+              <td>{{ degree.school.name }}</td>
+              <td>{{ degree.createdAt | date: 'short' }}</td>
+              <td>{{ degree.updatedAt | date: 'short' }}</td>
+              <td>
+                <button
+                  class="cursor-pointer hover:bg-base-200 p-1 rounded-lg flex items-center justify-center"
+                  ngMenuTrigger
+                  #origin
+                  #trigger="ngMenuTrigger"
+                  [menu]="actionsMenu()"
                 >
-              </button>
-              <ng-template
-                [cdkConnectedOverlayOpen]="trigger.expanded()"
-                [cdkConnectedOverlay]="{origin, usePopover: 'inline'}"
-                [cdkConnectedOverlayPositions]="[
-                  {
-                    originX: 'end',
-                    originY: 'bottom',
-                    overlayX: 'end',
-                    overlayY: 'top',
-                    offsetY: 4
-                  }
-                ]"
-                cdkAttachPopoverAsChild
-              >
-                <div
-                  ngMenu
-                  class="bg-base-100 shadow-sm rounded-lg p-1 w-48"
-                  #actionsMenu="ngMenu"
+                  <span class="material-symbols-outlined text-xl">more_horiz</span>
+                </button>
+                <ng-template
+                  [cdkConnectedOverlayOpen]="trigger.expanded()"
+                  [cdkConnectedOverlay]="{ origin, usePopover: 'inline' }"
+                  [cdkConnectedOverlayPositions]="[
+                    {
+                      originX: 'end',
+                      originY: 'bottom',
+                      overlayX: 'end',
+                      overlayY: 'top',
+                      offsetY: 4,
+                    },
+                  ]"
+                  cdkAttachPopoverAsChild
                 >
-                  <ng-template ngMenuContent>
-                    <button
-                      ngMenuItem
-                      value="Edit"
-                      class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-base-200 w-full"
-                      (click)="editDegree(degree)"
-                    >
-                      <span class="material-symbols-outlined text-lg"
-                        >edit</span
+                  <div ngMenu class="bg-base-100 shadow-sm rounded-lg p-1 w-48" #actionsMenu="ngMenu">
+                    <ng-template ngMenuContent>
+                      <button
+                        ngMenuItem
+                        value="Edit"
+                        class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-base-200 w-full"
+                        (click)="editDegree(degree)"
                       >
-                      <span>Editar</span>
-                    </button>
-                    <button
-                      ngMenuItem
-                      value="Delete"
-                      class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-base-200 w-full"
-                      (click)="deleteDegree(degree)"
-                    >
-                      <span class="material-symbols-outlined text-lg"
-                        >delete</span
+                        <span class="material-symbols-outlined text-lg">edit</span>
+                        <span>Editar</span>
+                      </button>
+                      <button
+                        ngMenuItem
+                        value="Delete"
+                        class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-base-200 w-full"
+                        (click)="deleteDegree(degree)"
                       >
-                      <span>Eliminar</span>
-                    </button>
-                  </ng-template>
-                </div>
-              </ng-template>
-            </td>
-          </tr>
+                        <span class="material-symbols-outlined text-lg">delete</span>
+                        <span>Eliminar</span>
+                      </button>
+                    </ng-template>
+                  </div>
+                </ng-template>
+              </td>
+            </tr>
           }
         </tbody>
       </table>
@@ -127,38 +114,19 @@ export default class Degrees {
         return of([]);
       }
       return this.apollo
-        .watchQuery<{
-          degreesBySchoolId: Prisma.DegreeGetPayload<{
-            include: { school: true };
-          }>[];
-        }>({
-          query: gql`
-            query DegreesBySchoolId($schoolId: String!) {
-              degreesBySchoolId(schoolId: $schoolId) {
-                id
-                name
-                shortName
-                schoolId
-                school {
-                  id
-                  name
-                }
-                createdAt
-                updatedAt
-              }
-            }
-          `,
+        .watchQuery({
+          query: AdminDegreesBySchoolIdDocument,
           variables: {
             schoolId: params.schoolId,
           },
         })
-        .valueChanges.pipe(map((result) => result.data?.degreesBySchoolId ?? []));
+        .valueChanges.pipe(
+          map((result) => (result.data?.degreesBySchoolId as AdminDegreesBySchoolIdQuery['degreesBySchoolId']) ?? []),
+        );
     },
   });
 
-  public editDegree(
-    degree?: Prisma.DegreeGetPayload<{ include: { school: true } }>
-  ) {
+  public editDegree(degree?: AdminDegreesBySchoolIdQuery['degreesBySchoolId'][number]) {
     this.modal
       .open(DegreesForm, {
         title: degree ? 'Editar Nivel' : 'Agregar Nivel',
@@ -171,9 +139,7 @@ export default class Degrees {
       });
   }
 
-  public deleteDegree(
-    degree: Prisma.DegreeGetPayload<{ include: { school: true } }>
-  ) {
+  public deleteDegree(degree: AdminDegreesBySchoolIdQuery['degreesBySchoolId'][number]) {
     this.confirmation
       .confirm({
         title: 'Eliminar Nivel',
@@ -183,18 +149,12 @@ export default class Degrees {
         filter((confirmed: boolean) => confirmed === true),
         switchMap(() =>
           this.apollo.mutate({
-            mutation: gql`
-              mutation RemoveDegree($removeDegreeId: String!) {
-                removeDegree(id: $removeDegreeId) {
-                  id
-                }
-              }
-            `,
+            mutation: AdminRemoveDegreeDocument,
             variables: {
               removeDegreeId: degree.id,
             },
-          })
-        )
+          }),
+        ),
       )
       .subscribe({
         next: () => {

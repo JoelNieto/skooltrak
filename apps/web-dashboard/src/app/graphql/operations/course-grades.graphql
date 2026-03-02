@@ -1,0 +1,50 @@
+query PeriodsByYear($year: Int!) {
+  periodsByYear(year: $year) {
+    id
+    name
+    startDate
+    endDate
+  }
+}
+
+query StudentsByCourseId($courseId: String!, $periodId: String!) {
+  studentsByCourseId(courseId: $courseId) {
+    id
+    name
+    initials
+    color
+    averageScore: averageScoreForStudent(courseId: $courseId, periodId: $periodId)
+    classGroup {
+      id
+      name
+    }
+  }
+}
+
+query GradesByCourseId($courseId: String!, $periodId: String!) {
+  gradesByCourseId(courseId: $courseId, periodId: $periodId) {
+    id
+    title
+    comments
+    bucket {
+      id
+      name
+    }
+    studentGrades {
+      id
+      student {
+        id
+        firstName
+        fatherName
+        averageScoreForStudent(courseId: $courseId, periodId: $periodId)
+      }
+      score
+      comments
+      updatedAt
+    }
+    published
+    date
+    createdAt
+    updatedAt
+  }
+}

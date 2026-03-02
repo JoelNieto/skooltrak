@@ -4,11 +4,15 @@ import { OverlayModule } from '@angular/cdk/overlay';
 import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject, viewChild } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
-import { Prisma } from '@generated/prisma';
 
-import { Apollo, gql } from 'apollo-angular';
+import { Apollo } from 'apollo-angular';
 import { filter, map, of, switchMap } from 'rxjs';
 import Store from '../../core/store';
+import {
+  AdminRemoveStudyPlanDocument,
+  AdminStudyPlansBySchoolIdDocument,
+  AdminStudyPlansBySchoolIdQuery,
+} from '../../graphql/generated/graphql';
 import StudyPlanForm from '../forms/study-plans-forms';
 @Component({
   selector: 'app-study-plans',
@@ -112,55 +116,22 @@ export default class StudyPlans {
         return of([]);
       }
       return this.apollo
-        .watchQuery<{
-          studyPlansBySchoolId: Prisma.StudyPlanGetPayload<{
-            include: { degree: true; school: true; gradeMetric: true };
-          }>[];
-        }>({
-          query: gql`
-            query StudyPlansBySchoolId($schoolId: String!) {
-              studyPlansBySchoolId(schoolId: $schoolId) {
-                id
-                name
-                shortName
-                level
-                degreeId
-                gradeMetricId
-                monthlyTuitionAmount
-                tuitionMonths
-                gradeMetric {
-                  id
-                  name
-                }
-                degree {
-                  id
-                  name
-                }
-                schoolId
-                createdAt
-                updatedAt
-                enrollmentCosts {
-                  id
-                  name
-                  amount
-                  order
-                }
-              }
-            }
-          `,
+        .watchQuery({
+          query: AdminStudyPlansBySchoolIdDocument,
           variables: {
             schoolId: params.schoolId,
           },
         })
-        .valueChanges.pipe(map((result) => result.data?.studyPlansBySchoolId ?? []));
+        .valueChanges.pipe(
+          map(
+            (result) =>
+              (result.data?.studyPlansBySchoolId as AdminStudyPlansBySchoolIdQuery['studyPlansBySchoolId']) ?? [],
+          ),
+        );
     },
   });
 
-  public editStudyPlan(
-    studyPlan?: Prisma.StudyPlanGetPayload<{
-      include: { degree: true; school: true };
-    }>,
-  ) {
+  public editStudyPlan(studyPlan?: AdminStudyPlansBySchoolIdQuery['studyPlansBySchoolId'][number]) {
     this.modal
       .open(StudyPlanForm, {
         title: studyPlan ? 'Editar Plan de Estudio' : 'Agregar Plan de Estudio',
@@ -174,11 +145,7 @@ export default class StudyPlans {
       });
   }
 
-  deleteStudyPlan(
-    studyPlan: Prisma.StudyPlanGetPayload<{
-      include: { degree: true; school: true };
-    }>,
-  ) {
+  deleteStudyPlan(studyPlan: AdminStudyPlansBySchoolIdQuery['studyPlansBySchoolId'][number]) {
     this.confirmation
       .confirm({
         title: 'Eliminar Plan de Estudio',
@@ -190,13 +157,7 @@ export default class StudyPlans {
         filter((result) => result === true),
         switchMap(() => {
           return this.apollo.mutate({
-            mutation: gql`
-              mutation RemoveStudyPlan($id: String!) {
-                removeStudyPlan(id: $id) {
-                  id
-                }
-              }
-            `,
+            mutation: AdminRemoveStudyPlanDocument,
             variables: {
               id: studyPlan.id,
             },

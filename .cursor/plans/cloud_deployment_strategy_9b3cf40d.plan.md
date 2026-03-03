@@ -4,19 +4,19 @@ overview: Deploy the Nx monorepo with 4 services (2 NestJS backends + 2 Angular 
 todos:
   - id: dockerfiles
     content: Create Dockerfiles for all 4 applications (dashboard-backend, admin-backend, web-dashboard, web-admin)
-    status: pending
+    status: completed
   - id: railway-config
     content: Create railway.json and nixpacks configuration for monorepo deployment
-    status: pending
+    status: completed
   - id: env-config
     content: Update production environment configurations and CORS settings
-    status: pending
+    status: completed
   - id: ci-cd
     content: Update .gitlab-ci.yml with deployment stage for Railway
-    status: pending
+    status: completed
   - id: docs
     content: Create deployment documentation with setup instructions
-    status: pending
+    status: completed
 isProject: false
 ---
 

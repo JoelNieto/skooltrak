@@ -2,8 +2,13 @@ image: node:20
 variables:
   CI: 'true'
 
-# Main job
+stages:
+  - test
+  - deploy
+
+# Main CI job - lint, test, build
 CI:
+  stage: test
   interruptible: true
   only:
     - main
@@ -28,3 +33,21 @@ CI:
 
   after_script:
     - bun nx fix-ci
+
+# Deploy to Railway (runs only on main when RAILWAY_TOKEN is set)
+# Configure RAILWAY_TOKEN in GitLab CI/CD variables for deployment
+# Each Railway service should have Root Directory = / and RAILWAY_DOCKERFILE_PATH set:
+#   - dashboard-backend: apps/dashboard-backend/Dockerfile
+#   - admin-backend: apps/admin-backend/Dockerfile
+#   - web-dashboard: apps/web-dashboard/Dockerfile
+#   - web-admin: apps/web-admin/Dockerfile
+# Alternative: Connect the repo via Railway dashboard for automatic deploys on push
+deploy:
+  stage: deploy
+  only:
+    - main
+  when: manual
+  script:
+    - curl -fsSL https://railway.app/install.sh | sh
+    - export PATH="$HOME/.local/bin:$PATH"
+    - railway up --detach

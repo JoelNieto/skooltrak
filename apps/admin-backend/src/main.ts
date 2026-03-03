@@ -12,9 +12,12 @@ async function bootstrap() {
     bodyParser: false, // Required for better-auth to handle raw request body
   });
 
-  // Enable CORS for frontend dev servers
+  // Enable CORS - use CORS_ORIGINS env in production, localhost in development
+  const corsOrigins = process.env['CORS_ORIGINS']
+    ? process.env['CORS_ORIGINS'].split(',').map((o) => o.trim())
+    : ['http://localhost:4200', 'http://localhost:4201'];
   app.enableCors({
-    origin: ['http://localhost:4200', 'http://localhost:4201'],
+    origin: corsOrigins,
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],

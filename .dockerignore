@@ -1,0 +1,32 @@
+# Dependencies - installed fresh in container
+node_modules
+
+# Build outputs - built fresh in container
+dist
+tmp
+out-tsc
+.angular
+.nx/cache
+.nx/workspace-data
+
+# Environment - injected at runtime
+.env
+.env.*
+
+# IDE and misc
+.idea
+.vscode
+*.log
+coverage
+.git
+.gitignore
+
+# E2E and test artifacts
+playwright-report
+test-results
+*.spec.ts
+*.spec.tsx
+
+# Documentation
+*.md
+!README.md

@@ -226,8 +226,7 @@ textarea.ng-invalid.ng-dirty {
   aside#sidebar {
     display: none !important;
   }
-  /* Hide the header bar (school selector, user menu) when printing */
-  div.flex-1 > div.p-4.border-b {
+  #mobile-menu-bar {
     display: none !important;
   }
   /* Full width, no padding for printed content */

@@ -1,16 +1,69 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { Confirmation } from '@/ui';
+import { afterRenderEffect, ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { rxResource } from '@angular/core/rxjs-interop';
 import { RouterLink, RouterLinkActive } from '@angular/router';
+import { Apollo } from 'apollo-angular';
+import { map } from 'rxjs';
 import Auth from '../auth/auth';
+import { GetSchoolsDocument, GetSchoolsQuery, UnreadMessagesCountDocument } from '../graphql/generated/graphql';
+import Store from './store';
 
 @Component({
   // eslint-disable-next-line @angular-eslint/component-selector
   selector: '[appSidebar]',
   imports: [RouterLink, RouterLinkActive],
-  template: `<div class="flex items-center justify-between px-4 py-5">
+  template: `<div class="flex flex-col h-full">
+    <div class="flex items-center justify-between px-4 py-5 shrink-0">
       <h1 class="text-xl font-semibold text-primary flex items-center gap-2">
         <img src="skooltrak.png" alt="Skooltrak" class="h-8" />
       </h1>
     </div>
+    <!-- School selector -->
+    @if (schoolsList.length) {
+      <div class="px-3 pb-3 shrink-0">
+        <div class="dropdown w-full">
+          <div
+            role="button"
+            tabindex="0"
+            class="flex items-center gap-2 p-2 rounded-lg hover:bg-base-200 group cursor-pointer text-base-content/80"
+          >
+            @if (store.currentSchool()?.logoUrl) {
+              <img
+                [src]="store.currentSchool()?.logoUrl"
+                [alt]="store.currentSchool()?.name"
+                class="min-w-6 max-w-10 h-6 rounded object-contain"
+              />
+            } @else {
+              <span class="material-symbols-outlined text-xl">apartment</span>
+            }
+            <span class="flex-1 truncate text-sm">{{ store.currentSchool()?.name }}</span>
+            <span class="material-symbols-outlined text-lg opacity-70">expand_more</span>
+          </div>
+          <ul
+            tabindex="0"
+            class="dropdown-content menu bg-base-100 rounded-box z-50 w-full max-w-56 p-2 shadow-lg border border-base-200"
+          >
+            @for (school of schoolsList; track school.id) {
+              <li>
+                <div
+                  (click)="store.currentSchool.set(school)"
+                  (keydown)="store.currentSchool.set(school)"
+                  tabindex="0"
+                  class="flex items-center gap-2"
+                >
+                  @if (school.logoUrl) {
+                    <img [src]="school.logoUrl" [alt]="school.name" class="w-5 h-5 rounded object-contain" />
+                  } @else {
+                    <span class="material-symbols-outlined text-lg">apartment</span>
+                  }
+                  <span>{{ school.name }}</span>
+                </div>
+              </li>
+            }
+          </ul>
+        </div>
+      </div>
+    }
     <nav class="px-3 flex flex-col gap-6 flex-1 min-h-0 overflow-y-auto">
       <!-- General Section -->
       <ul class="space-y-0.5">
@@ -313,10 +366,111 @@ import Auth from '../auth/auth';
           </ul>
         </div>
       }
-    </nav>`,
+    </nav>
+    <!-- User section at bottom -->
+    <div class="shrink-0 p-3 border-t border-neutral-200 dark:border-white/10 space-y-2">
+      <a
+        routerLink="messages"
+        class="flex items-center gap-3 px-3 py-2 text-base-content/80 rounded-lg transition-all duration-150 hover:bg-base-200 hover:text-base-content group w-full"
+      >
+        <span class="material-symbols-outlined text-xl">mail_outline</span>
+        <span>Mensajes</span>
+        @if (unreadCount.value(); as count) {
+          @if (count > 0) {
+            <span class="badge badge-primary badge-sm ml-auto">{{ count > 99 ? '99+' : count }}</span>
+          }
+        }
+      </a>
+      <div class="dropdown dropdown-top w-full">
+        <div
+          role="button"
+          tabindex="0"
+          class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-base-200 group cursor-pointer w-full"
+        >
+          <div class="w-9 h-9 rounded-full flex items-center justify-center shrink-0" [style.background]="auth.userColor()">
+            <span class="text-neutral-content text-sm font-medium">{{ auth.userInitials() }}</span>
+          </div>
+          <div class="flex-1 min-w-0 text-left">
+            <p class="text-sm font-medium truncate">{{ auth.userName() }}</p>
+            <p class="text-xs text-base-content/60 truncate">Ver perfil</p>
+          </div>
+          <span class="material-symbols-outlined text-lg opacity-70">expand_less</span>
+        </div>
+        <ul
+          tabindex="0"
+          class="dropdown-content menu bg-base-100 rounded-box z-50 w-full max-w-56 p-2 shadow-lg border border-base-200 mb-2"
+        >
+          <li><a routerLink="profile">Perfil</a></li>
+          <li>
+            <a routerLink="change-password">
+              <span class="material-symbols-outlined text-xl">key</span>
+              <span class="ml-1">Cambiar contraseña</span>
+            </a>
+          </li>
+          <li>
+            <button (click)="logout()">
+              <span class="material-symbols-outlined text-xl">logout</span>
+              <span class="ml-1">Cerrar sesión</span>
+            </button>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>`,
   styles: ``,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Sidebar {
   protected readonly auth = inject(Auth);
+  protected readonly store = inject(Store);
+  #apollo = inject(Apollo);
+  #confirmation = inject(Confirmation);
+
+  protected schools = rxResource({
+    stream: () =>
+      this.#apollo
+        .watchQuery({
+          fetchPolicy: 'cache-first',
+          query: GetSchoolsDocument,
+        })
+        .valueChanges.pipe(map((result) => (result.data?.schools as GetSchoolsQuery['schools']) ?? [])),
+  });
+
+  protected unreadCount = rxResource({
+    stream: () =>
+      this.#apollo
+        .watchQuery({
+          fetchPolicy: 'network-only',
+          pollInterval: 60000,
+          query: UnreadMessagesCountDocument,
+        })
+        .valueChanges.pipe(map((result) => result.data?.unreadMessagesCount ?? 0)),
+  });
+
+  protected get schoolsList(): GetSchoolsQuery['schools'] {
+    const s = this.schools.value();
+    return Array.isArray(s) ? s : [];
+  }
+
+  constructor() {
+    afterRenderEffect(() => {
+      const schools = this.schools.value();
+      if (schools?.length && !this.store.currentSchool()) {
+        this.store.currentSchool.set(schools[0]);
+      }
+    });
+  }
+
+  protected logout() {
+    this.#confirmation
+      .confirm({
+        title: 'Cerrar sesión',
+        message: '¿Estás seguro de que quieres cerrar sesión?',
+      })
+      .subscribe((confirmed) => {
+        if (confirmed) {
+          this.auth.logout();
+        }
+      });
+  }
 }

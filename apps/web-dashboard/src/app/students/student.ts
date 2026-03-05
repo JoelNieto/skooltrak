@@ -6,11 +6,11 @@ import { rxResource } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { $Enums } from '@generated/prisma';
-import { isValidId } from '../core/validators';
 import { Apollo } from 'apollo-angular';
-import { PeriodsByYearDocument, StudentDocument } from '../graphql/generated/graphql';
 import { map, of } from 'rxjs';
 import Store from '../core/store';
+import { isValidId } from '../core/validators';
+import { PeriodsByYearDocument, StudentDocument } from '../graphql/generated/graphql';
 import StudentAttendanceReport from './student-attendance-report';
 
 const ENROLLMENT_STATUS_LABELS: Record<$Enums.EnrollmentStatus, string> = {
@@ -71,13 +71,13 @@ const ENROLLMENT_STATUS_COLORS: Record<$Enums.EnrollmentStatus, string> = {
                       {{ getStatusLabel(student.enrollmentStatus ?? 'ACTIVE') }}
                     </span>
                     @if (student.user?.emailVerified) {
-                      <span class="badge badge-success badge-soft badge-sm gap-1">
-                        <span class="material-symbols-outlined text-sm!">check_circle</span>
+                      <span class="badge badge-success badge-sm gap-1">
+                        <span class="material-symbols-outlined text-xs">check_circle</span>
                         Verificado
                       </span>
                     } @else {
                       <span class="badge badge-warning badge-sm gap-1">
-                        <span class="material-symbols-outlined text-sm!">schedule</span>
+                        <span class="material-symbols-outlined text-xs">schedule</span>
                         Pendiente
                       </span>
                     }
@@ -90,10 +90,7 @@ const ENROLLMENT_STATUS_COLORS: Record<$Enums.EnrollmentStatus, string> = {
                 </div>
               </div>
               <div class="flex gap-2">
-                <a
-                  [routerLink]="['/students', student.id, 'grade-report']"
-                  class="btn btn-ghost btn-sm"
-                >
+                <a [routerLink]="['/students', student.id, 'grade-report']" class="btn btn-ghost btn-sm">
                   <span class="material-symbols-outlined text-lg">description</span>
                   Boletín
                 </a>
@@ -296,10 +293,7 @@ const ENROLLMENT_STATUS_COLORS: Record<$Enums.EnrollmentStatus, string> = {
                                   <td>{{ grade.grade?.date | date: 'dd/MM/yyyy' }}</td>
                                   <td>{{ grade.comments }}</td>
                                   <td>
-                                    <span
-                                      class="badge badge-sm"
-                                      [ngClass]="getGradeBadgeClass(grade, metric)"
-                                    >
+                                    <span class="badge badge-sm" [ngClass]="getGradeBadgeClass(grade, metric)">
                                       {{ grade.score | number: '1.1-1' }}
                                     </span>
                                   </td>
@@ -339,7 +333,7 @@ export default class Student {
 
   getGradeBadgeClass(
     grade: { score?: number | null },
-    metric: { minimumExcellence?: number; minimumApproval?: number } | null | undefined
+    metric: { minimumExcellence?: number; minimumApproval?: number } | null | undefined,
   ): string {
     if (!metric || grade.score == null || metric.minimumExcellence == null || metric.minimumApproval == null)
       return 'badge-ghost';
@@ -370,9 +364,7 @@ export default class Student {
     const periods = this.periodsResource.value();
     if (!periods?.length) return '';
     const today = new Date();
-    const current = periods.find(
-      (p) => new Date(p.startDate ?? 0) <= today && today <= new Date(p.endDate ?? 0),
-    );
+    const current = periods.find((p) => new Date(p.startDate ?? 0) <= today && today <= new Date(p.endDate ?? 0));
     return current?.id ?? '';
   });
 

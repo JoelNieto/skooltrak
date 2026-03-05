@@ -28,7 +28,7 @@ import Store from './store';
       #sidebar
       id="sidebar"
       appSidebar
-      class="fixed flex flex-col lg:relative z-50 w-64 h-screen sidebar-gradient shadow-xl transform -translate-x-full lg:translate-x-0 transition-transform duration-200 ease-in-out"
+      class="fixed flex flex-col lg:relative z-50 w-64 h-screen bg-base-100 border-r border-neutral-200 dark:border-white/10 transform -translate-x-full lg:translate-x-0 transition-transform duration-200 ease-in-out"
     ></aside>
     <div class="flex-1 flex flex-col overflow-hidden pt-0">
       <div
@@ -98,21 +98,16 @@ import Store from './store';
             }
           </a>
           <div class="dropdown dropdown-end">
-            <div class="flex items-center gap-2 cursor-pointer" tabindex="0" role="button">
-              <div class="avatar avatar-placeholder cursor-pointer">
-                <div class="text-neutral-content w-8 rounded-full" [style.background]="auth.userColor()">
-                  <span>{{ auth.userInitials() }}</span>
-                </div>
-              </div>
-              <div class="flex-col sm:flex hidden">
-                <span>{{ auth.userName() }}</span>
-                <span class="text-xs text-neutral-500">{{ auth.user()?.email }}</span>
+            <div class="avatar avatar-placeholder cursor-pointer" role="button" tabindex="0">
+              <div class="text-neutral-content w-8 rounded-full" [style.background]="auth.userColor()">
+                <span>{{ auth.userInitials() }}</span>
               </div>
             </div>
             <ul
               tabindex="0"
               class="dropdown-content menu bg-base-100 rounded-box z-1 w-64 p-2 shadow-sm cursor-pointer "
             >
+              <span class="text-neutral-400 text-medium px-2 mb-3">{{ auth.userName() }}</span>
               <li><a routerLink="profile">Perfil</a></li>
               <li>
                 <a routerLink="change-password">

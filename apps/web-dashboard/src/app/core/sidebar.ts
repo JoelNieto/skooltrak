@@ -7,8 +7,8 @@ import Auth from '../auth/auth';
   selector: '[appSidebar]',
   imports: [RouterLink, RouterLinkActive],
   template: `<div class="flex items-center justify-between px-4 py-5">
-      <h1 class="text-xl font-semibold text-white flex items-center gap-2">
-        <img src="skooltrak_white.png" alt="Skooltrak" class="h-8" />
+      <h1 class="text-xl font-semibold text-primary flex items-center gap-2">
+        <img src="skooltrak.png" alt="Skooltrak" class="h-8" />
       </h1>
     </div>
     <nav class="px-3 flex flex-col gap-6 flex-1 min-h-0 overflow-y-auto">
@@ -17,8 +17,8 @@ import Auth from '../auth/auth';
         <li>
           <a
             routerLink="home"
-            routerLinkActive="bg-white/15 text-white font-semibold"
-            class="flex items-center gap-3 px-3 py-2 text-white/70 rounded-lg transition-all duration-150 hover:bg-white/10 hover:text-white group"
+            routerLinkActive="bg-primary/10 text-primary font-semibold"
+            class="flex items-center gap-3 px-3 py-2 text-base-content/80 rounded-lg transition-all duration-150 hover:bg-base-200 hover:text-base-content group"
           >
             <span class="material-symbols-outlined text-xl">home</span>
             <span>Inicio</span>
@@ -28,8 +28,8 @@ import Auth from '../auth/auth';
           <li>
             <a
               routerLink="courses"
-              routerLinkActive="bg-white/15 text-white font-semibold"
-              class="flex items-center gap-3 px-3 py-2 text-white/70 rounded-lg transition-all duration-150 hover:bg-white/10 hover:text-white group"
+              routerLinkActive="bg-primary/10 text-primary font-semibold"
+              class="flex items-center gap-3 px-3 py-2 text-base-content/80 rounded-lg transition-all duration-150 hover:bg-base-200 hover:text-base-content group"
             >
               <span class="material-symbols-outlined text-xl">menu_book</span>
               <span>Cursos</span>
@@ -40,8 +40,8 @@ import Auth from '../auth/auth';
           <li>
             <a
               routerLink="files"
-              routerLinkActive="bg-white/15 text-white font-semibold"
-              class="flex items-center gap-3 px-3 py-2 text-white/70 rounded-lg transition-all duration-150 hover:bg-white/10 hover:text-white group"
+              routerLinkActive="bg-primary/10 text-primary font-semibold"
+              class="flex items-center gap-3 px-3 py-2 text-base-content/80 rounded-lg transition-all duration-150 hover:bg-base-200 hover:text-base-content group"
             >
               <span class="material-symbols-outlined text-xl">folder_special</span>
               <span>Archivos</span>
@@ -52,8 +52,8 @@ import Auth from '../auth/auth';
           <li>
             <a
               routerLink="students"
-              routerLinkActive="bg-white/15 text-white font-semibold"
-              class="flex items-center gap-3 px-3 py-2 text-white/70 rounded-lg transition-all duration-150 hover:bg-white/10 hover:text-white group"
+              routerLinkActive="bg-primary/10 text-primary font-semibold"
+              class="flex items-center gap-3 px-3 py-2 text-base-content/80 rounded-lg transition-all duration-150 hover:bg-base-200 hover:text-base-content group"
             >
               <span class="material-symbols-outlined text-xl">people</span>
               <span>Alumnos</span>
@@ -64,8 +64,8 @@ import Auth from '../auth/auth';
           <li>
             <a
               routerLink="teachers"
-              routerLinkActive="bg-white/15 text-white font-semibold"
-              class="flex items-center gap-3 px-3 py-2 text-white/70 rounded-lg transition-all duration-150 hover:bg-white/10 hover:text-white group"
+              routerLinkActive="bg-primary/10 text-primary font-semibold"
+              class="flex items-center gap-3 px-3 py-2 text-base-content/80 rounded-lg transition-all duration-150 hover:bg-base-200 hover:text-base-content group"
             >
               <span class="material-symbols-outlined text-xl">school</span>
               <span>Docentes</span>
@@ -76,8 +76,8 @@ import Auth from '../auth/auth';
           <li>
             <a
               routerLink="assignments"
-              routerLinkActive="bg-white/15 text-white font-semibold"
-              class="flex items-center gap-3 px-3 py-2 text-white/70 rounded-lg transition-all duration-150 hover:bg-white/10 hover:text-white group"
+              routerLinkActive="bg-primary/10 text-primary font-semibold"
+              class="flex items-center gap-3 px-3 py-2 text-base-content/80 rounded-lg transition-all duration-150 hover:bg-base-200 hover:text-base-content group"
             >
               <span class="material-symbols-outlined text-xl">bookmarks</span>
               <span>Asignaciones</span>
@@ -88,8 +88,8 @@ import Auth from '../auth/auth';
           <li>
             <a
               routerLink="groups"
-              routerLinkActive="bg-white/15 text-white font-semibold"
-              class="flex items-center gap-3 px-3 py-2 text-white/70 rounded-lg transition-all duration-150 hover:bg-white/10 hover:text-white group"
+              routerLinkActive="bg-primary/10 text-primary font-semibold"
+              class="flex items-center gap-3 px-3 py-2 text-base-content/80 rounded-lg transition-all duration-150 hover:bg-base-200 hover:text-base-content group"
             >
               <span class="material-symbols-outlined text-xl">groups</span>
               <span>Grupos</span>
@@ -100,8 +100,8 @@ import Auth from '../auth/auth';
           <li>
             <a
               routerLink="quizzes"
-              routerLinkActive="bg-white/15 text-white font-semibold"
-              class="flex items-center gap-3 px-3 py-2 text-white/70 rounded-lg transition-all duration-150 hover:bg-white/10 hover:text-white group"
+              routerLinkActive="bg-primary/10 text-primary font-semibold"
+              class="flex items-center gap-3 px-3 py-2 text-base-content/80 rounded-lg transition-all duration-150 hover:bg-base-200 hover:text-base-content group"
             >
               <span class="material-symbols-outlined text-xl">verified</span>
               <span>Quizzes</span>
@@ -112,8 +112,8 @@ import Auth from '../auth/auth';
           <li>
             <a
               routerLink="messages"
-              routerLinkActive="bg-white/15 text-white font-semibold"
-              class="flex items-center gap-3 px-3 py-2 text-white/70 rounded-lg transition-all duration-150 hover:bg-white/10 hover:text-white group"
+              routerLinkActive="bg-primary/10 text-primary font-semibold"
+              class="flex items-center gap-3 px-3 py-2 text-base-content/80 rounded-lg transition-all duration-150 hover:bg-base-200 hover:text-base-content group"
             >
               <span class="material-symbols-outlined text-xl">mail</span>
               <span>Mensajes</span>
@@ -125,13 +125,13 @@ import Auth from '../auth/auth';
       <!-- Student Section -->
       @if (auth.isStudent()) {
         <div>
-          <p class="px-3 py-1.5 text-[11px] uppercase font-semibold text-white/40 tracking-wider">Estudiante</p>
+          <p class="px-3 py-1.5 text-[11px] uppercase font-semibold text-base-content/50 tracking-wider">Estudiante</p>
           <ul class="space-y-0.5 mt-1">
             <li>
               <a
                 routerLink="student/schedule"
-                routerLinkActive="bg-white/15 text-white font-semibold"
-                class="flex items-center gap-3 px-3 py-2 text-white/70 rounded-lg transition-all duration-150 hover:bg-white/10 hover:text-white group"
+                routerLinkActive="bg-primary/10 text-primary font-semibold"
+                class="flex items-center gap-3 px-3 py-2 text-base-content/80 rounded-lg transition-all duration-150 hover:bg-base-200 hover:text-base-content group"
               >
                 <span class="material-symbols-outlined text-xl">event</span>
                 <span>Agenda</span>
@@ -140,8 +140,8 @@ import Auth from '../auth/auth';
             <li>
               <a
                 routerLink="student/assignments"
-                routerLinkActive="bg-white/15 text-white font-semibold"
-                class="flex items-center gap-3 px-3 py-2 text-white/70 rounded-lg transition-all duration-150 hover:bg-white/10 hover:text-white group"
+                routerLinkActive="bg-primary/10 text-primary font-semibold"
+                class="flex items-center gap-3 px-3 py-2 text-base-content/80 rounded-lg transition-all duration-150 hover:bg-base-200 hover:text-base-content group"
               >
                 <span class="material-symbols-outlined text-xl">upload_file</span>
                 <span>Entregas</span>
@@ -150,8 +150,8 @@ import Auth from '../auth/auth';
             <li>
               <a
                 routerLink="student/notifications"
-                routerLinkActive="bg-white/15 text-white font-semibold"
-                class="flex items-center gap-3 px-3 py-2 text-white/70 rounded-lg transition-all duration-150 hover:bg-white/10 hover:text-white group"
+                routerLinkActive="bg-primary/10 text-primary font-semibold"
+                class="flex items-center gap-3 px-3 py-2 text-base-content/80 rounded-lg transition-all duration-150 hover:bg-base-200 hover:text-base-content group"
               >
                 <span class="material-symbols-outlined text-xl">notifications</span>
                 <span>Notificaciones</span>
@@ -160,8 +160,8 @@ import Auth from '../auth/auth';
             <li>
               <a
                 routerLink="student/attendance"
-                routerLinkActive="bg-white/15 text-white font-semibold"
-                class="flex items-center gap-3 px-3 py-2 text-white/70 rounded-lg transition-all duration-150 hover:bg-white/10 hover:text-white group"
+                routerLinkActive="bg-primary/10 text-primary font-semibold"
+                class="flex items-center gap-3 px-3 py-2 text-base-content/80 rounded-lg transition-all duration-150 hover:bg-base-200 hover:text-base-content group"
               >
                 <span class="material-symbols-outlined text-xl">fact_check</span>
                 <span>Asistencia</span>
@@ -186,13 +186,13 @@ import Auth from '../auth/auth';
       <!-- Teacher Section -->
       @if (auth.isTeacher() || auth.isAdmin()) {
         <div>
-          <p class="px-3 py-1.5 text-[11px] uppercase font-semibold text-white/40 tracking-wider">Docente</p>
+          <p class="px-3 py-1.5 text-[11px] uppercase font-semibold text-base-content/50 tracking-wider">Docente</p>
           <ul class="space-y-0.5 mt-1">
             <li>
               <a
                 routerLink="teacher/attendance"
-                routerLinkActive="bg-white/15 text-white font-semibold"
-                class="flex items-center gap-3 px-3 py-2 text-white/70 rounded-lg transition-all duration-150 hover:bg-white/10 hover:text-white group"
+                routerLinkActive="bg-primary/10 text-primary font-semibold"
+                class="flex items-center gap-3 px-3 py-2 text-base-content/80 rounded-lg transition-all duration-150 hover:bg-base-200 hover:text-base-content group"
               >
                 <span class="material-symbols-outlined text-xl">playlist_add_check</span>
                 <span>Tomar asistencia</span>
@@ -201,8 +201,8 @@ import Auth from '../auth/auth';
             <li>
               <a
                 routerLink="teacher/gradebook"
-                routerLinkActive="bg-white/15 text-white font-semibold"
-                class="flex items-center gap-3 px-3 py-2 text-white/70 rounded-lg transition-all duration-150 hover:bg-white/10 hover:text-white group"
+                routerLinkActive="bg-primary/10 text-primary font-semibold"
+                class="flex items-center gap-3 px-3 py-2 text-base-content/80 rounded-lg transition-all duration-150 hover:bg-base-200 hover:text-base-content group"
               >
                 <span class="material-symbols-outlined text-xl">table</span>
                 <span>Libro de notas</span>
@@ -211,8 +211,8 @@ import Auth from '../auth/auth';
             <li>
               <a
                 routerLink="teacher/communication"
-                routerLinkActive="bg-white/15 text-white font-semibold"
-                class="flex items-center gap-3 px-3 py-2 text-white/70 rounded-lg transition-all duration-150 hover:bg-white/10 hover:text-white group"
+                routerLinkActive="bg-primary/10 text-primary font-semibold"
+                class="flex items-center gap-3 px-3 py-2 text-base-content/80 rounded-lg transition-all duration-150 hover:bg-base-200 hover:text-base-content group"
               >
                 <span class="material-symbols-outlined text-xl">forum</span>
                 <span>Comunicación</span>
@@ -221,8 +221,8 @@ import Auth from '../auth/auth';
             <li>
               <a
                 routerLink="teacher/reports"
-                routerLinkActive="bg-white/15 text-white font-semibold"
-                class="flex items-center gap-3 px-3 py-2 text-white/70 rounded-lg transition-all duration-150 hover:bg-white/10 hover:text-white group"
+                routerLinkActive="bg-primary/10 text-primary font-semibold"
+                class="flex items-center gap-3 px-3 py-2 text-base-content/80 rounded-lg transition-all duration-150 hover:bg-base-200 hover:text-base-content group"
               >
                 <span class="material-symbols-outlined text-xl">assessment</span>
                 <span>Reportes</span>
@@ -235,13 +235,13 @@ import Auth from '../auth/auth';
       <!-- Parent Section -->
       @if (auth.isParent()) {
         <div>
-          <p class="px-3 py-1.5 text-[11px] uppercase font-semibold text-white/40 tracking-wider">Padres</p>
+          <p class="px-3 py-1.5 text-[11px] uppercase font-semibold text-base-content/50 tracking-wider">Padres</p>
           <ul class="space-y-0.5 mt-1">
             <li>
               <a
                 routerLink="parent/portal"
-                routerLinkActive="bg-white/15 text-white font-semibold"
-                class="flex items-center gap-3 px-3 py-2 text-white/70 rounded-lg transition-all duration-150 hover:bg-white/10 hover:text-white group"
+                routerLinkActive="bg-primary/10 text-primary font-semibold"
+                class="flex items-center gap-3 px-3 py-2 text-base-content/80 rounded-lg transition-all duration-150 hover:bg-base-200 hover:text-base-content group"
               >
                 <span class="material-symbols-outlined text-xl">family_restroom</span>
                 <span>Portal</span>
@@ -250,8 +250,8 @@ import Auth from '../auth/auth';
             <li>
               <a
                 routerLink="parent/progress"
-                routerLinkActive="bg-white/15 text-white font-semibold"
-                class="flex items-center gap-3 px-3 py-2 text-white/70 rounded-lg transition-all duration-150 hover:bg-white/10 hover:text-white group"
+                routerLinkActive="bg-primary/10 text-primary font-semibold"
+                class="flex items-center gap-3 px-3 py-2 text-base-content/80 rounded-lg transition-all duration-150 hover:bg-base-200 hover:text-base-content group"
               >
                 <span class="material-symbols-outlined text-xl">bar_chart</span>
                 <span>Progreso</span>
@@ -260,8 +260,8 @@ import Auth from '../auth/auth';
             <li>
               <a
                 routerLink="parent/communication"
-                routerLinkActive="bg-white/15 text-white font-semibold"
-                class="flex items-center gap-3 px-3 py-2 text-white/70 rounded-lg transition-all duration-150 hover:bg-white/10 hover:text-white group"
+                routerLinkActive="bg-primary/10 text-primary font-semibold"
+                class="flex items-center gap-3 px-3 py-2 text-base-content/80 rounded-lg transition-all duration-150 hover:bg-base-200 hover:text-base-content group"
               >
                 <span class="material-symbols-outlined text-xl">chat</span>
                 <span>Mensajes</span>
@@ -270,8 +270,8 @@ import Auth from '../auth/auth';
             <li>
               <a
                 routerLink="parent/notifications"
-                routerLinkActive="bg-white/15 text-white font-semibold"
-                class="flex items-center gap-3 px-3 py-2 text-white/70 rounded-lg transition-all duration-150 hover:bg-white/10 hover:text-white group"
+                routerLinkActive="bg-primary/10 text-primary font-semibold"
+                class="flex items-center gap-3 px-3 py-2 text-base-content/80 rounded-lg transition-all duration-150 hover:bg-base-200 hover:text-base-content group"
               >
                 <span class="material-symbols-outlined text-xl">notifications_active</span>
                 <span>Alertas</span>
@@ -296,13 +296,15 @@ import Auth from '../auth/auth';
       <!-- Admin Section -->
       @if (auth.isAdmin()) {
         <div>
-          <p class="px-3 py-1.5 text-[11px] uppercase font-semibold text-white/40 tracking-wider">Administración</p>
+          <p class="px-3 py-1.5 text-[11px] uppercase font-semibold text-base-content/50 tracking-wider">
+            Administración
+          </p>
           <ul class="space-y-0.5 mt-1">
             <li>
               <a
                 routerLink="admin"
-                routerLinkActive="bg-white/15 text-white font-semibold"
-                class="flex items-center gap-3 px-3 py-2 text-white/70 rounded-lg transition-all duration-150 hover:bg-white/10 hover:text-white group"
+                routerLinkActive="bg-primary/10 text-primary font-semibold"
+                class="flex items-center gap-3 px-3 py-2 text-base-content/80 rounded-lg transition-all duration-150 hover:bg-base-200 hover:text-base-content group"
               >
                 <span class="material-symbols-outlined text-xl">admin_panel_settings</span>
                 <span>Panel de admin</span>

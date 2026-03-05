@@ -2,249 +2,6 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
-type Assignment {
-  """Course of the assignment"""
-  course: Course!
-
-  """Course ID of the assignment"""
-  courseId: String!
-
-  """Created at"""
-  createdAt: DateTime!
-
-  """Default date of the assignment"""
-  date: DateTime!
-
-  """Group-specific due dates"""
-  dates: [AssignmentDate!]
-
-  """Details of the assignment"""
-  details: String!
-
-  """ID of the assignment (auto-generated)"""
-  id: String!
-
-  """Require submission of the assignment"""
-  requireSubmission: Boolean!
-
-  """School ID of the assignment"""
-  schoolId: String!
-
-  """Teacher of the assignment"""
-  teacher: Teacher!
-
-  """Teacher ID of the assignment"""
-  teacherId: String!
-
-  """Title of the assignment"""
-  title: String!
-
-  """Type of the assignment"""
-  type: String!
-
-  """Updated at"""
-  updatedAt: DateTime!
-}
-
-type AssignmentDate {
-  """Assignment ID"""
-  assignmentId: String!
-
-  """Class group"""
-  classGroup: ClassGroup
-
-  """Class group ID"""
-  classGroupId: String!
-
-  """Due date for this group"""
-  date: DateTime!
-
-  """ID of the assignment date"""
-  id: String!
-}
-
-input AssignmentDateInput {
-  """Class group ID"""
-  classGroupId: String!
-
-  """Due date for this group"""
-  date: DateTime!
-}
-
-type AssignmentDateWithDetails {
-  """Assignment details"""
-  assignment: AssignmentDetails!
-
-  """Assignment ID"""
-  assignmentId: String!
-
-  """Class group"""
-  classGroup: ClassGroup!
-
-  """Class group ID"""
-  classGroupId: String!
-
-  """Due date for this group"""
-  date: DateTime!
-
-  """ID of the assignment date"""
-  id: String!
-}
-
-type AssignmentDetails {
-  """Course of the assignment"""
-  course: Course!
-
-  """Details of the assignment"""
-  details: String!
-
-  """ID of the assignment"""
-  id: String!
-
-  """Require submission"""
-  requireSubmission: Boolean!
-
-  """Teacher of the assignment"""
-  teacher: Teacher!
-
-  """Title of the assignment"""
-  title: String!
-
-  """Type of the assignment"""
-  type: String!
-}
-
-type AssignmentSubmission {
-  """Assignment of the submission"""
-  assignment: Assignment!
-
-  """Assignment ID"""
-  assignmentId: String!
-
-  """Submitted file"""
-  file: File!
-
-  """File ID"""
-  fileId: String!
-
-  """ID of the submission"""
-  id: String!
-
-  """Student who submitted"""
-  student: Student!
-
-  """Student ID"""
-  studentId: String!
-
-  """Submission date"""
-  submittedAt: DateTime!
-
-  """Updated at"""
-  updatedAt: DateTime!
-}
-
-type AttendanceRecord {
-  """Attendance session"""
-  attendanceSession: AttendanceSession
-
-  """Attendance session ID"""
-  attendanceSessionId: String!
-
-  """Optional comment"""
-  comment: String
-
-  """Created at"""
-  createdAt: DateTime!
-
-  """ID of the attendance record"""
-  id: String!
-
-  """Attendance status"""
-  status: AttendanceStatus!
-
-  """Student of this record"""
-  student: Student!
-
-  """Student ID"""
-  studentId: String!
-
-  """Updated at"""
-  updatedAt: DateTime!
-}
-
-type AttendanceSession {
-  """Class group of this session"""
-  classGroup: ClassGroup!
-
-  """Class group ID"""
-  classGroupId: String!
-
-  """Course of this session"""
-  course: Course!
-
-  """Course ID"""
-  courseId: String!
-
-  """Created at"""
-  createdAt: DateTime!
-
-  """Date of the attendance session"""
-  date: DateTime!
-
-  """ID of the attendance session"""
-  id: String!
-
-  """Organization ID"""
-  organizationId: String!
-
-  """Attendance records for this session"""
-  records: [AttendanceRecord!]!
-
-  """Teacher who created this session"""
-  teacher: Teacher!
-
-  """Teacher ID"""
-  teacherId: String!
-
-  """Updated at"""
-  updatedAt: DateTime!
-}
-
-type AttendanceStats {
-  """Absent count"""
-  absent: Int!
-
-  """Absent percentage"""
-  absentPercentage: Int!
-
-  """Excused count"""
-  excused: Int!
-
-  """Late count"""
-  late: Int!
-
-  """Present count"""
-  present: Int!
-
-  """Present percentage"""
-  presentPercentage: Int!
-
-  """Sick leave count"""
-  sickLeave: Int!
-
-  """Total attendance records"""
-  total: Int!
-}
-
-"""Status of attendance for a student"""
-enum AttendanceStatus {
-  ABSENT
-  EXCUSED
-  LATE
-  PRESENT
-  SICK_LEAVE
-}
-
 type AuthPayload {
   accessToken: String!
 }
@@ -261,452 +18,51 @@ type AvailableSchool {
   studentCount: Int!
 }
 
-type Charge {
-  amount: Float!
-  chargeType: ChargeType!
-  createdAt: DateTime!
-  description: String!
-  dueDate: DateTime!
-  id: String!
-  school: School!
-  schoolId: String!
-  status: ChargeStatus!
-  student: Student!
-  studentId: String!
-  studyPlan: StudyPlan
-  studyPlanId: String
-  updatedAt: DateTime!
-  year: Int!
-}
-
-enum ChargeStatus {
-  OVERDUE
-  PAID
-  PARTIAL
-  PENDING
-}
-
-enum ChargeType {
-  CUSTOM
-  ENROLLMENT
-  TUITION
-}
-
 type CheckPendingInvitationResult {
   hasPendingInvitation: Boolean!
   organizationName: String
   role: String
 }
 
-type ClassGroup {
-  """Active status of the class group"""
-  active: Boolean!
+input CreateGradeMetricInput {
+  """Valor máximo del grado"""
+  maximum: Float!
 
-  """Courses of the class group"""
-  courses: [Course!]!
+  """Valor mínimo del grado"""
+  minimum: Float!
 
-  """Created at of the class group"""
-  createdAt: DateTime!
+  """Valor mínimo de aprobación del grado"""
+  minimumApproval: Float!
 
-  """ID of the class group"""
-  id: String!
+  """Valor mínimo de excelencia del grado"""
+  minimumExcellence: Float!
 
-  """Name of the class group"""
+  """Nombre del grado"""
   name: String!
-
-  """Organization ID of the class group"""
-  organizationId: String!
-
-  """School ID of the class group"""
-  schoolId: String!
-
-  """Students of the class group"""
-  students: [Student!]!
-
-  """Study plan of the class group"""
-  studyPlan: StudyPlan!
-
-  """Study plan ID of the class group"""
-  studyPlanId: String!
-
-  """Teacher of the class group"""
-  teacher: Teacher
-
-  """Teacher ID of the class group"""
-  teacherId: String
-
-  """Updated at of the class group"""
-  updatedAt: DateTime!
 }
 
-type Course {
-  """Code of the course"""
-  code: String!
-
-  """Created at"""
-  createdAt: DateTime!
-
-  """Grades of the course"""
-  grades: [Grade!]!
-
-  """ID of the course (auto-generated)"""
-  id: String!
-
-  """Name of the course"""
-  name: String!
-
-  """Organization ID of the course"""
-  organizationId: String!
-
-  """School of the course"""
-  school: School!
-
-  """School ID of the course"""
-  schoolId: String!
-
-  """Short name of the course"""
-  shortName: String!
-
-  """Study plan of the course"""
-  studyPlan: StudyPlan!
-
-  """Study plan ID of the course"""
-  studyPlanId: String!
-
-  """Subject of the course"""
-  subject: Subject!
-
-  """Subject ID of the course"""
-  subjectId: String!
-
-  """Teacher of the course"""
-  teacher: Teacher
-
-  """Teacher ID of the course"""
-  teacherId: String
-
-  """Updated at"""
-  updatedAt: DateTime!
-}
-
-input CreateAssignmentInput {
-  """Id del curso"""
-  courseId: String!
-
-  """Fecha de la asignacion"""
-  date: String!
-
-  """Detalles de la asignacion"""
-  details: String!
-
-  """Fechas de la asignacion"""
-  groupDates: [AssignmentDateInput!]
-
-  """Requiere envio"""
-  requireSubmission: Boolean!
-
-  """Id de la escuela"""
-  schoolId: String!
-
-  """Id del profesor"""
-  teacherId: String!
-
-  """Titulo de la asignacion"""
-  title: String!
-
-  """Tipo de la asignacion"""
-  type: String!
-}
-
-input CreateAssignmentSubmissionInput {
-  """Assignment ID"""
-  assignmentId: String!
-
-  """File name"""
-  fileName: String!
-
-  """Size of the file in bytes"""
-  fileSize: Int!
-
-  """MIME type of the file"""
-  mimeType: String!
-
-  """Storage key from the upload"""
-  storageKey: String!
-}
-
-input CreateAttendanceRecordInput {
-  """Optional comment"""
-  comment: String
-
-  """Attendance status"""
-  status: AttendanceStatus!
-
-  """Student ID"""
-  studentId: String!
-}
-
-input CreateAttendanceSessionInput {
-  """Class group ID"""
-  classGroupId: String!
-
-  """Course ID"""
-  courseId: String!
-
-  """Date of the attendance session"""
-  date: DateTime!
-
-  """Attendance records for each student"""
-  records: [CreateAttendanceRecordInput!]!
-}
-
-input CreateChargeInput {
-  amount: Float!
-  chargeType: String
-  description: String
-  dueDate: DateTime!
-  schoolId: String!
-  studentId: String
-
-  """
-  If provided, creates charges for all students in class groups using this study plan
-  """
-  studyPlanId: String
-  year: Int!
-}
-
-input CreateClassGroupInput {
-  """Active status of the class group"""
+input CreateHabitMetricInput {
+  """Estado activo del criterio"""
   active: Boolean! = true
 
-  """Name of the class group"""
+  """Descripción del criterio"""
+  description: String
+
+  """Nombre del criterio"""
   name: String!
 
-  """Organization ID of the class group"""
-  organizationId: String!
-
-  """School ID of the class group"""
-  schoolId: String!
-
-  """Study plan ID of the class group"""
-  studyPlanId: String!
-
-  """Teacher ID of the class group"""
-  teacherId: String
-}
-
-input CreateCourseInput {
-  """Code of the course"""
-  code: String!
-
-  """Name of the course"""
-  name: String
-
-  """Organization ID of the course"""
-  organizationId: String!
-
-  """School ID of the course"""
-  schoolId: String!
-
-  """Short name of the course"""
-  shortName: String
-
-  """Study plan ID of the course"""
-  studyPlanId: String!
-
-  """Subject ID of the course"""
-  subjectId: String!
-
-  """Teacher ID of the course"""
-  teacherId: String
-}
-
-input CreateDegreeInput {
-  """Name of the degree"""
-  name: String!
-
-  """School ID"""
-  schoolId: String!
-
-  """Short name of the degree"""
-  shortName: String!
-}
-
-input CreateFileDownloadInput {
-  """File ID to download"""
-  fileId: String!
-}
-
-input CreateFileInput {
-  """MIME type of the file"""
-  mimeType: String!
-
-  """Name of the file"""
-  name: String!
-
-  """Size of the file in bytes"""
-  size: Int!
-
-  """Storage key for the file"""
-  storageKey: String!
-}
-
-input CreateFileUploadInput {
-  """Course ID for the upload"""
-  courseId: String!
-
-  """Original file name"""
-  fileName: String!
-
-  """MIME type of the file"""
-  mimeType: String!
-}
-
-input CreateGradeBucketInput {
-  """Id del curso"""
-  courseId: String!
-
-  """Nombre del bucket"""
-  name: String!
-
-  """Peso del bucket"""
-  weight: Float!
-}
-
-input CreateGradeInput {
-  """Id del bucket"""
-  bucketId: String!
-
-  """Comentarios"""
-  comments: String!
-
-  """Id del curso"""
-  courseId: String!
-
-  """Fecha de la calificacion"""
-  date: DateTime!
-
-  """Id del periodo"""
-  periodId: String!
-
-  """¿Publicada?"""
-  published: Boolean! = false
-
-  """Titulo de la calificacion  """
-  title: String!
-}
-
-input CreateGroupsScheduleInput {
-  """Class group ID"""
-  classGroupId: String!
-
-  """Course ID"""
-  courseId: String!
-
-  """End time"""
-  endTime: String!
-
-  """Location"""
-  location: String!
-
-  """Remote"""
-  remote: Boolean!
-
-  """Remote link"""
-  remoteLink: String!
-
-  """Start time"""
-  startTime: String!
-
-  """Week day"""
-  weekday: String!
+  """Orden de visualización"""
+  order: Int! = 0
 }
 
 type CreateInvitationAccessLinkResult {
   url: String!
 }
 
-input CreateMessageInput {
-  """The content of the message."""
-  content: String!
-
-  """The ID of the parent message (for replies)."""
-  parentMessageId: String
-
-  """The IDs of the recipients associated with the message."""
-  recipientIds: [String!]!
-
-  """The subject of the message."""
-  subject: String!
-}
-
-input CreateNewsletterInput {
-  """Content of the newsletter (HTML)"""
-  content: String!
-
-  """Whether to publish immediately"""
-  published: Boolean = false
-
-  """School ID the newsletter belongs to"""
-  schoolId: String!
-
-  """Title of the newsletter"""
-  title: String!
-}
-
 input CreateOrganizationInput {
   active: Boolean
   description: String!
   name: String!
-}
-
-input CreateParentInput {
-  """Address of the parent"""
-  address: String! = ""
-
-  """Document ID of the parent"""
-  documentId: String!
-
-  """Email of the parent"""
-  email: String!
-
-  """Father name (paternal last name) of the parent"""
-  fatherName: String!
-
-  """First name of the parent"""
-  firstName: String!
-
-  """Middle name of the parent"""
-  middleName: String! = ""
-
-  """Mother name (maternal last name) of the parent"""
-  motherName: String! = ""
-
-  """Occupation of the parent"""
-  occupation: String! = ""
-
-  """Organization ID of the parent"""
-  organizationId: String!
-
-  """Phone number of the parent"""
-  phone: String!
-
-  """Relationship to student (Father, Mother, Guardian, etc.)"""
-  relationship: String!
-
-  """IDs of students to associate with this parent"""
-  studentIds: [String!]
-
-  """Work phone number of the parent"""
-  workPhone: String! = ""
-}
-
-input CreatePaymentInput {
-  amount: Float!
-  createdBy: String
-  paidAt: DateTime!
-  reference: String
-  studentId: String!
 }
 
 input CreatePeriodInput {
@@ -729,51 +85,6 @@ input CreatePeriodInput {
 input CreatePermissionInput {
   description: String!
   descriptiveId: String!
-}
-
-input CreateQuizInput {
-  """Course ID"""
-  courseId: String!
-
-  """Details"""
-  details: String!
-
-  """Organization ID"""
-  organizationId: String!
-
-  """Questions"""
-  questions: [CreateQuizQuestionInput!]!
-
-  """Teacher ID"""
-  teacherId: String!
-
-  """Title"""
-  title: String!
-}
-
-input CreateQuizQuestionInput {
-  """Options"""
-  options: [CreateQuizQuestionOptionInput!]!
-
-  """Question"""
-  question: String!
-
-  """Time Limit"""
-  timeLimit: Float! = 0
-
-  """Type"""
-  type: String!
-
-  """Value"""
-  value: String!
-}
-
-input CreateQuizQuestionOptionInput {
-  """Is Correct"""
-  isCorrect: Boolean!
-
-  """Option"""
-  option: String!
 }
 
 input CreateRoleInput {
@@ -813,9 +124,9 @@ input CreateSchoolInput {
   name: String!
 
   """Organization ID of the school"""
-  organizationId: String
+  organizationId: String!
 
-  """Phone number of the school"""
+  """Phone of the school"""
   phone: String! = ""
 
   """Short name of the school"""
@@ -844,158 +155,21 @@ input CreateSchoolWithOrgInput {
   schoolShortName: String!
 }
 
-input CreateStudentGradeInput {
-  """Comments for the student grade"""
-  comments: String!
-
-  """Grade ID for the student grade"""
-  gradeId: String!
-
-  """Score for the student grade"""
-  score: Float!
-
-  """Student ID for the student grade"""
-  studentId: String!
-}
-
-input CreateStudentInput {
-  """Address of the student"""
-  address: String!
-
-  """Allergies of the student"""
-  allergies: String = ""
-
-  """Birth date of the student"""
-  birthDate: DateTime!
-
-  """Blood type of the student"""
-  bloodType: String = ""
-
-  """Class group ID of the student"""
-  classGroupId: String
-
-  """Document ID of the student"""
-  documentId: String!
-
-  """Email of the student"""
-  email: String!
-
-  """Emergency contact name"""
-  emergencyContactName: String = ""
-
-  """Emergency contact phone"""
-  emergencyContactPhone: String = ""
-
-  """Enrollment status of the student"""
-  enrollmentStatus: String = "ACTIVE"
-
-  """Father name of the student"""
-  fatherName: String!
-
-  """First name of the student"""
-  firstName: String!
-
-  """Gender of the student"""
-  gender: String!
-
-  """Medical notes of the student"""
-  medicalNotes: String = ""
-
-  """Middle name of the student"""
-  middleName: String!
-
-  """Mother name of the student"""
-  motherName: String!
-
-  """Organization ID of the student"""
-  organizationId: String!
-
-  """IDs of parents to associate with this student"""
-  parentIds: [String!]
-
-  """Phone of the student"""
-  phone: String!
-
-  """School ID of the student"""
-  schoolId: String!
-}
-
-input CreateStudyPlanInput {
-  """Degree ID of the study plan"""
-  degreeId: String!
-
-  """Description of the study plan"""
-  description: String!
-
-  """Grade metric ID of the study plan"""
-  gradeMetricId: String!
-
-  """Level of the study plan"""
-  level: Int!
-
-  """Name of the study plan"""
-  name: String!
-
-  """School ID of the study plan"""
-  schoolId: String!
-
-  """Short name of the study plan"""
-  shortName: String!
-}
-
 input CreateSubjectInput {
   """Code of the subject"""
   code: String!
 
   """Name of the subject"""
   name: String!
-}
 
-input CreateSubmissionUploadInput {
-  """Assignment ID"""
-  assignmentId: String!
-
-  """File name"""
-  fileName: String!
-
-  """MIME type of the file"""
-  mimeType: String!
-}
-
-input CreateTeacherInput {
-  about: String = ""
-  address: String = ""
-
-  """Birth date of the teacher"""
-  birthDate: DateTime
-
-  """Document ID of the teacher"""
-  documentId: String!
-
-  """Email of the teacher"""
-  email: String!
-
-  """Father name of the teacher"""
-  fatherName: String!
-
-  """First name of the teacher"""
-  firstName: String!
-
-  """Gender of the teacher"""
-  gender: String!
-  memberSince: DateTime
-
-  """Middle name of the teacher"""
-  middleName: String = ""
-
-  """Mother name of the teacher"""
-  motherName: String = ""
-
-  """Organization ID of the teacher"""
+  """Organization ID of the subject"""
   organizationId: String!
-  personalEmail: String = ""
-  phoneNumber: String = ""
-  teacherSince: Int
+
+  """School ID of the subject"""
+  schoolId: String!
+
+  """Short name of the subject"""
+  shortName: String!
 }
 
 input CreateUserInput {
@@ -1023,452 +197,29 @@ A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date
 """
 scalar DateTime
 
-type Degree {
-  """Created at of the degree"""
-  createdAt: DateTime!
-
-  """ID of the degree"""
-  id: String!
-
-  """Name of the degree"""
-  name: String!
-
-  """School of the degree"""
-  school: School!
-
-  """School ID of the degree"""
-  schoolId: String!
-
-  """Short name of the degree"""
-  shortName: String!
-
-  """Study plans of the degree"""
-  studyPlans: [StudyPlan!]!
-
-  """Updated at of the degree"""
-  updatedAt: DateTime!
-}
-
-input EnrollmentCostInput {
-  amount: Float!
-  id: String
-  name: String!
-  order: Int! = 0
-}
-
-"""The enrollment status of a student"""
-enum EnrollmentStatus {
-  ACTIVE
-  CANDIDATE
-  RETIRED
-}
-
-type File {
-  """Effective access for the current user"""
-  access: String
-
-  """Created at"""
-  createdAt: DateTime!
-
-  """Deleted at"""
-  deletedAt: DateTime
-
-  """ID of the file"""
-  id: String!
-
-  """MIME type of the file"""
-  mimeType: String!
-
-  """Name of the file"""
-  name: String!
-
-  """Organization ID of the file"""
-  organizationId: String!
-
-  """Owner of the file"""
-  owner: User!
-
-  """Owner ID of the file"""
-  ownerId: String!
-
-  """Class group shares for the file"""
-  sharesClassGroups: [FileShareClassGroup!]!
-
-  """Course shares for the file"""
-  sharesCourses: [FileShareCourse!]!
-
-  """School shares for the file"""
-  sharesSchools: [FileShareSchool!]!
-
-  """User shares for the file"""
-  sharesUsers: [FileShareUser!]!
-
-  """Size of the file in bytes"""
-  size: Int!
-
-  """Storage key for the file"""
-  storageKey: String!
-
-  """Updated at"""
-  updatedAt: DateTime!
-}
-
-type FileDownloadUrl {
-  """Presigned download URL"""
-  downloadUrl: String!
-}
-
-type FileShareClassGroup {
-  """Class group for the share"""
-  classGroup: ClassGroup!
-
-  """Class group ID of the share"""
-  classGroupId: String!
-
-  """Created at"""
-  createdAt: DateTime!
-
-  """File ID of the share"""
-  fileId: String!
-
-  """ID of the file share"""
-  id: String!
-
-  """Permission for the share"""
-  permission: String!
-
-  """Updated at"""
-  updatedAt: DateTime!
-}
-
-type FileShareCourse {
-  """Course for the share"""
-  course: Course!
-
-  """Course ID of the share"""
-  courseId: String!
-
-  """Created at"""
-  createdAt: DateTime!
-
-  """File ID of the share"""
-  fileId: String!
-
-  """ID of the file share"""
-  id: String!
-
-  """Permission for the share"""
-  permission: String!
-
-  """Updated at"""
-  updatedAt: DateTime!
-}
-
-type FileShareSchool {
-  """Created at"""
-  createdAt: DateTime!
-
-  """File ID of the share"""
-  fileId: String!
-
-  """ID of the file share"""
-  id: String!
-
-  """Permission for the share"""
-  permission: String!
-
-  """School for the share"""
-  school: School!
-
-  """School ID of the share"""
-  schoolId: String!
-
-  """Updated at"""
-  updatedAt: DateTime!
-}
-
-type FileShareUser {
-  """Created at"""
-  createdAt: DateTime!
-
-  """File ID of the share"""
-  fileId: String!
-
-  """ID of the file share"""
-  id: String!
-
-  """Permission for the share"""
-  permission: String!
-
-  """Updated at"""
-  updatedAt: DateTime!
-
-  """User for the share"""
-  user: User!
-
-  """User ID of the share"""
-  userId: String!
-}
-
-type FileUploadUrl {
-  """Storage key for the file"""
-  storageKey: String!
-
-  """Presigned upload URL"""
-  uploadUrl: String!
-}
-
-type Grade {
-  """Bucket de la calificacion"""
-  bucket: GradeBucket!
-
-  """ID del bucket"""
-  bucketId: String!
-
-  """Comentarios de la calificacion"""
-  comments: String
-
-  """Curso de la calificacion"""
-  course: Course!
-
-  """ID del curso"""
-  courseId: String!
-
-  """Fecha de creacion"""
-  createdAt: DateTime!
-
-  """Fecha de la calificacion"""
-  date: DateTime!
-
-  """ID de la calificacion"""
-  id: String!
-
-  """Periodo de la calificacion"""
-  period: Period!
-
-  """ID del periodo"""
-  periodId: String!
-
-  """¿Publicada?"""
-  published: Boolean!
-
-  """Estudiantes de la calificacion"""
-  studentGrades: [StudentGrade!]!
-
-  """Titulo de la calificacion"""
-  title: String!
-
-  """Fecha de actualizacion"""
-  updatedAt: DateTime!
-}
-
-type GradeBucket {
-  """Id del curso"""
-  courseId: String!
-
-  """Fecha de creación"""
-  createdAt: DateTime!
-
-  """Id del bucket"""
-  id: String!
-
-  """Nombre del bucket"""
-  name: String!
-
-  """Fecha de actualización"""
-  updatedAt: DateTime!
-
-  """Peso del bucket"""
-  weight: Float!
-}
-
 type GradeMetric {
-  """Fecha de creacion"""
+  """Fecha de creación del grado"""
   createdAt: DateTime!
 
-  """ID"""
+  """ID del grado"""
   id: String!
 
-  """Maximo"""
+  """Valor máximo del grado"""
   maximum: Float!
 
-  """Minimo"""
+  """Valor mínimo del grado"""
   minimum: Float!
 
-  """Minimo de aprobacion"""
+  """Valor mínimo de aprobación del grado"""
   minimumApproval: Float!
 
-  """Minimo de excelencia"""
+  """Valor mínimo de excelencia del grado"""
   minimumExcellence: Float!
 
-  """Nombre"""
+  """Nombre del grado"""
   name: String!
 
-  """Fecha de actualizacion"""
-  updatedAt: DateTime!
-}
-
-type GradeReport {
-  """Attendance per course per period"""
-  attendanceRows: [GradeReportAttendanceRow!]!
-
-  """Class group name"""
-  classGroupName: String
-
-  """Student document ID"""
-  documentId: String!
-
-  """Grades per course"""
-  gradesRows: [GradeReportGradesRow!]!
-
-  """Habit metrics so far"""
-  habitRows: [GradeReportHabitRow!]!
-
-  """Study plan level"""
-  level: Int
-
-  """Overall averages row"""
-  overallGradesRow: GradeReportOverallRow
-
-  """Period name for the report"""
-  periodName: String!
-
-  """All periods in the school year"""
-  periods: [GradeReportPeriodInfo!]!
-
-  """Presigned URL for the school logo"""
-  schoolLogoUrl: String
-
-  """School name"""
-  schoolName: String!
-
-  """Student full name"""
-  studentName: String!
-
-  """Study plan name"""
-  studyPlanName: String
-
-  """Teacher name (class group homeroom teacher)"""
-  teacherName: String
-}
-
-type GradeReportAttendanceRow {
-  """Course ID"""
-  courseId: String!
-
-  """Course name (subject name)"""
-  courseName: String!
-
-  """Attendance per period"""
-  periodAttendance: [GradeReportPeriodAttendance!]!
-}
-
-type GradeReportGradesRow {
-  """Course ID"""
-  courseId: String!
-
-  """Course name (subject name)"""
-  courseName: String!
-
-  """Cumulative average (periods 1 through selected)"""
-  cumulativeAverage: Float
-
-  """Period averages - null for future periods"""
-  periodAverages: [Float]!
-}
-
-type GradeReportHabitRow {
-  """Habit metric name"""
-  metricName: String!
-
-  """Value: X (Deficiente), R (Regular), S (Satisfactorio)"""
-  value: String!
-}
-
-type GradeReportOverallRow {
-  """Overall cumulative average"""
-  cumulativeAverage: Float
-
-  """Overall average per period - null for future"""
-  periodAverages: [Float]!
-}
-
-type GradeReportPeriodAttendance {
-  """Absent count for this period"""
-  absent: Int!
-
-  """Late count for this period"""
-  late: Int!
-
-  """Period ID"""
-  periodId: String!
-}
-
-type GradeReportPeriodInfo {
-  """Period ID"""
-  id: String!
-
-  """Period name"""
-  name: String!
-
-  """Period short name"""
-  shortName: String!
-}
-
-type GroupsSchedule {
-  """Class group of the groups schedule"""
-  classGroup: ClassGroup!
-
-  """Class group ID of the groups schedule"""
-  classGroupId: String!
-
-  """Course of the groups schedule"""
-  course: Course!
-
-  """Course ID of the groups schedule"""
-  courseId: String!
-
-  """Created at of the groups schedule"""
-  createdAt: DateTime!
-
-  """End time of the groups schedule"""
-  endTime: String!
-
-  """ID of the groups schedule"""
-  id: String!
-
-  """Location of the groups schedule"""
-  location: String!
-
-  """Recess of the groups schedule"""
-  recess: Boolean!
-
-  """Remote of the groups schedule"""
-  remote: Boolean!
-
-  """Remote link of the groups schedule"""
-  remoteLink: String!
-
-  """Start time of the groups schedule"""
-  startTime: String!
-
-  """Updated at of the groups schedule"""
-  updatedAt: DateTime!
-
-  """Week day of the groups schedule"""
-  weekday: String!
-}
-
-type HabitEvaluation {
-  classGroupId: String!
-  createdAt: DateTime!
-  habitMetricId: String!
-  id: String!
-  organizationId: String!
-  periodId: String!
-  published: Boolean!
-  studentEvaluations: [StudentHabitEvaluation!]!
-  teacherId: String!
+  """Fecha de actualización del grado"""
   updatedAt: DateTime!
 }
 
@@ -1493,18 +244,6 @@ type HabitMetric {
 
   """Fecha de actualización"""
   updatedAt: DateTime!
-}
-
-"""Valores de evaluación de hábitos"""
-enum HabitValue {
-  """Desempeño regular"""
-  R
-
-  """Desempeño satisfactorio"""
-  S
-
-  """Desempeño deficiente"""
-  X
 }
 
 type Invitation {
@@ -1546,234 +285,55 @@ type Member {
   userId: String!
 }
 
-type Message {
-  """The content of the message."""
-  content: String!
-
-  """The date and time the message was created."""
-  createdAt: DateTime!
-
-  """The date and time the message was deleted."""
-  deletedAt: DateTime
-
-  """The unique identifier for the message."""
-  id: String!
-
-  """The ID of the organization associated with the message."""
-  organizationId: String!
-
-  """The ID of the parent message (for replies)."""
-  parentMessageId: String
-
-  """The recipients of the message."""
-  recipients: [MessageRecipient!]!
-  replies: [Message!]!
-
-  """The sender associated with the message."""
-  sender: User!
-
-  """The ID of the sender associated with the message."""
-  senderId: String
-
-  """The subject of the message."""
-  subject: String!
-
-  """The date and time the message was last updated."""
-  updatedAt: DateTime!
-}
-
-type MessageRecipient {
-  """The date and time the message recipient was created."""
-  createdAt: DateTime!
-
-  """The date and time the message recipient was deleted."""
-  deletedAt: DateTime
-
-  """The unique identifier for the message recipient."""
-  id: String!
-
-  """The message associated with the message recipient."""
-  message: Message!
-
-  """The ID of the message associated with the message recipient."""
-  messageId: String!
-
-  """The date and time the message was read."""
-  readAt: DateTime
-
-  """The date and time the message recipient was last updated."""
-  updatedAt: DateTime!
-
-  """The user associated with the message recipient."""
-  user: User!
-
-  """The ID of the user associated with the message recipient."""
-  userId: String!
-}
-
 type Mutation {
   acceptInvitation(invitationId: String!): Boolean!
   approveJoinRequest(approve: Boolean!, requestId: String!): Boolean!
   cancelInvitation(invitationId: String!): Boolean!
   changePassword(currentPassword: String!, newPassword: String!): Boolean!
   completeOnboarding: Boolean!
-  createAssignment(createAssignmentInput: CreateAssignmentInput!): Assignment!
-
-  """Create an assignment submission after file upload"""
-  createAssignmentSubmission(input: CreateAssignmentSubmissionInput!): AssignmentSubmission!
-  createAttendanceSession(input: CreateAttendanceSessionInput!): AttendanceSession!
-  createCharge(input: CreateChargeInput!): [Charge!]!
-  createClassGroup(createClassGroupInput: CreateClassGroupInput!): ClassGroup!
-  createCourse(createCourseInput: CreateCourseInput!): Course!
-  createDegree(createDegreeInput: CreateDegreeInput!): Degree!
-  createFile(createFileInput: CreateFileInput!): File!
-  createFileDownloadUrl(createFileDownloadInput: CreateFileDownloadInput!): FileDownloadUrl!
-  createFileUploadUrl(createFileUploadInput: CreateFileUploadInput!): FileUploadUrl!
-  createGrade(createGradeInput: CreateGradeInput!): Grade!
-  createGradeBucket(createGradeBucketInput: CreateGradeBucketInput!): GradeBucket!
-  createGroupsSchedule(createGroupsScheduleInput: CreateGroupsScheduleInput!): GroupsSchedule!
+  createGradeMetric(createGradeMetricInput: CreateGradeMetricInput!): GradeMetric!
+  createHabitMetric(createHabitMetricInput: CreateHabitMetricInput!): HabitMetric!
   createInvitationAccessLink(email: String!): CreateInvitationAccessLinkResult!
-  createMessage(createMessageInput: CreateMessageInput!): Message!
-  createNewsletter(createNewsletterInput: CreateNewsletterInput!): Newsletter!
   createOrganization(createOrganizationInput: CreateOrganizationInput!): Organization!
-  createParent(createParentInput: CreateParentInput!): Parent!
-  createPayment(input: CreatePaymentInput!): Payment!
   createPeriod(createPeriodInput: CreatePeriodInput!): Period!
   createPermission(createPermissionInput: CreatePermissionInput!): Permission!
-  createQuiz(createQuizInput: CreateQuizInput!): Quiz!
   createRole(createRoleInput: CreateRoleInput!): Role!
   createSchool(createSchoolInput: CreateSchoolInput!): School!
-
-  """Create a presigned URL for uploading a school logo"""
-  createSchoolLogoUploadUrl(input: SchoolLogoUploadInput!): SchoolLogoUploadUrl!
   createSchoolWithOrganization(input: CreateSchoolWithOrgInput!): CreateSchoolResult!
-  createStudent(createStudentInput: CreateStudentInput!): Student!
-  createStudentGrade(createStudentGradeInput: CreateStudentGradeInput!): StudentGrade!
-  createStudyPlan(createStudyPlanInput: CreateStudyPlanInput!): StudyPlan!
   createSubject(createSubjectInput: CreateSubjectInput!): Subject!
-
-  """Create a presigned URL for downloading a submission file"""
-  createSubmissionDownloadUrl(fileId: String!): SubmissionDownloadUrl!
-
-  """Create a presigned URL for uploading a submission file"""
-  createSubmissionUploadUrl(input: CreateSubmissionUploadInput!): SubmissionUploadUrl!
-  createTeacher(createTeacherInput: CreateTeacherInput!): Teacher!
   createUser(createUserInput: CreateUserInput!): User!
-
-  """Delete an assignment submission"""
-  deleteAssignmentSubmission(submissionId: String!): Boolean!
-  deleteAttendanceSession(id: String!): AttendanceSession!
   inviteMember(email: String!, organizationId: String, role: String!): Invitation!
   login(email: String!, password: String!): AuthPayload!
-  markMessageAsRead(messageId: String!): MessageRecipient
   markNotificationRead(notificationId: String!): Boolean!
   rejectInvitation(invitationId: String!): Boolean!
-  removeAssignment(id: String!): Assignment!
-  removeCharge(id: String!): Charge
-  removeClassGroup(id: String!): ClassGroup!
-  removeCourse(id: String!): Course!
-  removeDegree(id: String!): Degree!
-  removeGrade(id: String!): Grade!
-  removeGradeBucket(id: String!): GradeBucket!
-  removeGroupsSchedule(id: String!): GroupsSchedule!
+  removeGradeMetric(id: String!): GradeMetric!
+  removeHabitMetric(id: String!): HabitMetric!
   removeMember(memberIdOrEmail: String!, organizationId: String): Boolean!
-  removeMessage(id: String!): Message!
-  removeMessageRecipient(id: String!): MessageRecipient!
-  removeNewsletter(id: String!): Newsletter!
   removeOrganization(id: String!): Organization!
-  removeParent(id: String!): Parent!
   removePeriod(id: String!): Period!
   removePermission(id: String!): Permission!
-  removeQuiz(id: String!): Quiz!
   removeRole(id: String!): Role!
   removeSchool(id: String!): School!
-  removeShare(removeShareInput: RemoveShareInput!): File!
-  removeStudent(id: String!): Student!
-  removeStudentGrade(id: String!): StudentGrade!
-  removeStudyPlan(id: String!): StudyPlan!
   removeSubject(id: String!): Subject!
-  removeTeacher(id: String!): Teacher!
   removeUser(id: String!): User!
   requestJoinSchool(input: RequestJoinSchoolInput!): JoinRequestResult!
   requestPasswordReset(email: String!): Boolean!
   resendUserInvitation(email: String!): Boolean!
   resetPassword(newPassword: String!, token: String!): AuthPayload!
-  saveHabitEvaluation(saveHabitEvaluationInput: SaveHabitEvaluationInput!): HabitEvaluation!
   sendVerificationLink(email: String!): Boolean!
   setActiveOrganization(organizationId: String): Boolean!
-  shareFile(shareFileInput: ShareFileInput!): File!
   signOut: Boolean!
   signUp(input: SignUpInput!): AuthPayload!
-  updateAssignment(updateAssignmentInput: UpdateAssignmentInput!): Assignment!
-  updateAttendanceRecord(input: UpdateAttendanceRecordInput!): AttendanceRecord!
-  updateAttendanceRecords(inputs: [UpdateAttendanceRecordInput!]!): [AttendanceRecord!]!
-  updateClassGroup(updateClassGroupInput: UpdateClassGroupInput!): ClassGroup!
-  updateCourse(updateCourseInput: UpdateCourseInput!): Course!
-  updateDegree(updateDegreeInput: UpdateDegreeInput!): Degree!
-  updateGrade(updateGradeInput: UpdateGradeInput!): Grade!
-  updateGradeBucket(updateGradeBucketInput: UpdateGradeBucketInput!): GradeBucket!
-  updateGroupsSchedule(updateGroupsScheduleInput: UpdateGroupsScheduleInput!): GroupsSchedule!
+  updateGradeMetric(updateGradeMetricInput: UpdateGradeMetricInput!): GradeMetric!
+  updateHabitMetric(updateHabitMetricInput: UpdateHabitMetricInput!): HabitMetric!
   updateMemberRole(memberId: String!, organizationId: String, role: String!): Boolean!
-  updateNewsletter(updateNewsletterInput: UpdateNewsletterInput!): Newsletter!
   updateOrganization(updateOrganizationInput: UpdateOrganizationInput!): Organization!
-  updateParent(updateParentInput: UpdateParentInput!): Parent!
   updatePeriod(updatePeriodInput: UpdatePeriodInput!): Period!
   updatePermission(updatePermissionInput: UpdatePermissionInput!): Permission!
-  updateQuiz(updateQuizInput: UpdateQuizInput!): Quiz!
   updateRole(updateRoleInput: UpdateRoleInput!): Role!
   updateSchool(updateSchoolInput: UpdateSchoolInput!): School!
-
-  """Update only the logo of a school"""
-  updateSchoolLogo(id: String!, logo: String!): School!
-  updateShare(updateShareInput: UpdateShareInput!): File!
-  updateStudent(updateStudentInput: UpdateStudentInput!): Student!
-  updateStudentGrade(updateStudentGradeInput: UpdateStudentGradeInput!): StudentGrade!
-  updateStudyPlan(updateStudyPlanInput: UpdateStudyPlanInput!): StudyPlan!
-  updateStudyPlanFinancialConfig(input: UpdateStudyPlanFinancialInput!): StudyPlan!
   updateSubject(updateSubjectInput: UpdateSubjectInput!): Subject!
-  updateTeacher(updateTeacherInput: UpdateTeacherInput!): Teacher!
   updateUser(updateUserInput: UpdateUserInput!): User!
-}
-
-type Newsletter {
-  """Author of the newsletter"""
-  author: User!
-
-  """Author user ID"""
-  authorId: String!
-
-  """Content of the newsletter (HTML)"""
-  content: String!
-
-  """Created at"""
-  createdAt: DateTime!
-
-  """ID of the newsletter"""
-  id: String!
-
-  """Organization of the newsletter"""
-  organization: Organization!
-
-  """Organization ID"""
-  organizationId: String!
-
-  """Whether the newsletter is published"""
-  published: Boolean!
-
-  """Date when the newsletter was published"""
-  publishedAt: DateTime
-
-  """School of the newsletter"""
-  school: School!
-
-  """School ID"""
-  schoolId: String!
-
-  """Title of the newsletter"""
-  title: String!
-
-  """Updated at"""
-  updatedAt: DateTime!
 }
 
 type NotificationItem {
@@ -1828,70 +388,6 @@ type Organization {
   updatedAt: DateTime!
 }
 
-type Parent {
-  """Address of the parent"""
-  address: String!
-
-  """Created at timestamp"""
-  createdAt: DateTime!
-
-  """Document ID of the parent"""
-  documentId: String!
-
-  """Email of the parent"""
-  email: String!
-
-  """Father name (paternal last name) of the parent"""
-  fatherName: String!
-
-  """First name of the parent"""
-  firstName: String!
-  fullName: String!
-
-  """ID of the parent"""
-  id: String!
-
-  """Middle name of the parent"""
-  middleName: String!
-
-  """Mother name (maternal last name) of the parent"""
-  motherName: String!
-  name: String!
-
-  """Occupation of the parent"""
-  occupation: String!
-
-  """Organization ID of the parent"""
-  organizationId: String!
-
-  """Phone number of the parent"""
-  phone: String!
-
-  """Relationship to student (Father, Mother, Guardian, etc.)"""
-  relationship: String!
-
-  """Updated at timestamp"""
-  updatedAt: DateTime!
-
-  """User ID linked to this parent"""
-  userId: String
-
-  """Work phone number of the parent"""
-  workPhone: String!
-}
-
-type Payment {
-  amount: Float!
-  createdAt: DateTime!
-  createdBy: String
-  id: String!
-  paidAt: DateTime!
-  reference: String
-  student: Student!
-  studentId: String!
-  updatedAt: DateTime!
-}
-
 type PendingJoinRequest {
   createdAt: DateTime!
   documentId: String
@@ -1942,462 +438,25 @@ type Permission {
 }
 
 type Query {
-  assignment(id: String!): Assignment!
-  assignmentDatesByCourseId(classGroupId: String, courseId: String!, endDate: String!, startDate: String!): [AssignmentDateWithDetails!]!
-  assignmentDatesBySchoolId(classGroupId: String, endDate: String!, schoolId: String!, startDate: String!): [AssignmentDateWithDetails!]!
-
-  """Get all submissions for an assignment (teachers/admins only)"""
-  assignmentSubmissions(assignmentId: String!): [AssignmentSubmission!]!
-  assignments: [Assignment!]!
-  assignmentsByCourseId(courseId: String!, endDate: String!, startDate: String!): [Assignment!]!
-  assignmentsBySchoolId(endDate: String!, schoolId: String!, startDate: String!): [Assignment!]!
-  attendanceRecordsByStudentId(studentId: String!, take: Int): [AttendanceRecord!]!
-  attendanceSession(id: String!): AttendanceSession
-  attendanceSessions(
-    """Class group ID"""
-    classGroupId: String
-
-    """Course ID"""
-    courseId: String!
-
-    """End date filter"""
-    endDate: DateTime
-
-    """Skip"""
-    skip: Int = 0
-
-    """Start date filter"""
-    startDate: DateTime
-
-    """Take"""
-    take: Int = 20
-  ): [AttendanceSession!]!
-  attendanceSessionsCount(
-    """Class group ID"""
-    classGroupId: String
-
-    """Course ID"""
-    courseId: String!
-
-    """End date filter"""
-    endDate: DateTime
-
-    """Skip"""
-    skip: Int = 0
-
-    """Start date filter"""
-    startDate: DateTime
-
-    """Take"""
-    take: Int = 20
-  ): Int!
   availableSchools: [AvailableSchool!]!
-  averageCourseScoreForStudent(courseId: String!, periodId: String!, studentId: String!): Float!
-  chargesBySchool(schoolId: String!, year: Int): [Charge!]!
-  chargesByStudent(studentId: String!): [Charge!]!
   checkPendingInvitation(email: String!): CheckPendingInvitationResult!
-  classGroup(id: String!): ClassGroup!
-  classGroups(
-    """Order by"""
-    orderBy: String = "name"
-
-    """Order direction"""
-    orderDirection: String = "asc"
-
-    """School ID"""
-    schoolId: String
-
-    """Search query"""
-    search: String = ""
-
-    """Skip"""
-    skip: Int
-    studyPlanId: String
-
-    """Take"""
-    take: Int
-  ): [ClassGroup!]!
-  classGroupsByCourseId(courseId: String!): [ClassGroup!]!
-  classGroupsByOrganizationId(organizationId: String!): [ClassGroup!]!
-  classGroupsBySchoolId(schoolId: String!): [ClassGroup!]!
-  classGroupsCount(
-    """Order by"""
-    orderBy: String = "name"
-
-    """Order direction"""
-    orderDirection: String = "asc"
-
-    """School ID"""
-    schoolId: String
-
-    """Search query"""
-    search: String = ""
-
-    """Skip"""
-    skip: Int
-    studyPlanId: String
-
-    """Take"""
-    take: Int
-  ): Float!
-  course(id: String!): Course!
-  courses(
-    """Order by"""
-    orderBy: String = "name"
-
-    """Order direction"""
-    orderDirection: String = "asc"
-
-    """School ID"""
-    schoolId: String
-
-    """Search query"""
-    search: String = ""
-
-    """Skip"""
-    skip: Int
-    studyPlanId: String
-
-    """Take"""
-    take: Int
-  ): [Course!]!
-  coursesByGroupId(groupId: String!): [Course!]!
-  coursesBySchoolId(schoolId: String!): [Course!]!
-  coursesByStudyPlanId(studyPlanId: String!): [Course!]!
-  coursesBySubjectId(subjectId: String!): [Course!]!
-  coursesCount(
-    """Order by"""
-    orderBy: String = "name"
-
-    """Order direction"""
-    orderDirection: String = "asc"
-
-    """School ID"""
-    schoolId: String
-
-    """Search query"""
-    search: String = ""
-
-    """Skip"""
-    skip: Int
-    studyPlanId: String
-
-    """Take"""
-    take: Int
-  ): Int!
-  degree(id: String!): Degree!
-  degrees: [Degree!]!
-  degreesBySchoolId(schoolId: String!): [Degree!]!
-  fileById(id: String!): File!
-  filesAccessible(
-    """Order by"""
-    orderBy: String = "name"
-
-    """Order direction"""
-    orderDirection: String = "asc"
-
-    """School ID"""
-    schoolId: String
-
-    """Search query"""
-    search: String = ""
-
-    """Skip"""
-    skip: Int
-    studyPlanId: String
-
-    """Take"""
-    take: Int
-  ): [File!]!
-  filesForCourse(
-    """Course ID"""
-    courseId: String!
-
-    """Order by"""
-    orderBy: String = "name"
-
-    """Order direction"""
-    orderDirection: String = "asc"
-
-    """School ID"""
-    schoolId: String
-
-    """Search query"""
-    search: String = ""
-
-    """Skip"""
-    skip: Int
-    studyPlanId: String
-
-    """Take"""
-    take: Int
-  ): [File!]!
-  filesOwned(
-    """Order by"""
-    orderBy: String = "name"
-
-    """Order direction"""
-    orderDirection: String = "asc"
-
-    """School ID"""
-    schoolId: String
-
-    """Search query"""
-    search: String = ""
-
-    """Skip"""
-    skip: Int
-    studyPlanId: String
-
-    """Take"""
-    take: Int
-  ): [File!]!
-  filesSharedWithMe(
-    """Order by"""
-    orderBy: String = "name"
-
-    """Order direction"""
-    orderDirection: String = "asc"
-
-    """School ID"""
-    schoolId: String
-
-    """Search query"""
-    search: String = ""
-
-    """Skip"""
-    skip: Int
-    studyPlanId: String
-
-    """Take"""
-    take: Int
-  ): [File!]!
-  findContacts(queryText: String = ""): [User!]!
-  findManyMessages(
-    """Order by"""
-    orderBy: String = "name"
-
-    """Order direction"""
-    orderDirection: String = "asc"
-
-    """School ID"""
-    schoolId: String
-
-    """Search query"""
-    search: String = ""
-
-    """Skip"""
-    skip: Int
-    studyPlanId: String
-
-    """Take"""
-    take: Int
-  ): [MessageRecipient!]!
-  findManyMessagesCount: Int!
-  findManyNewslettersCount(
-    """Order by"""
-    orderBy: String = "name"
-
-    """Order direction"""
-    orderDirection: String = "asc"
-
-    """School ID"""
-    schoolId: String
-
-    """Search query"""
-    search: String = ""
-
-    """Skip"""
-    skip: Int
-    studyPlanId: String
-
-    """Take"""
-    take: Int
-  ): Int!
-  findManyStudentsCount(
-    """Order by"""
-    orderBy: String = "name"
-
-    """Order direction"""
-    orderDirection: String = "asc"
-
-    """School ID"""
-    schoolId: String
-
-    """Search query"""
-    search: String = ""
-
-    """Skip"""
-    skip: Int
-    studyPlanId: String
-
-    """Take"""
-    take: Int
-  ): Int!
-  findManySubjectsCount(
-    """Order by"""
-    orderBy: String = "name"
-
-    """Order direction"""
-    orderDirection: String = "asc"
-
-    """School ID"""
-    schoolId: String
-
-    """Search query"""
-    search: String = ""
-
-    """Skip"""
-    skip: Int
-    studyPlanId: String
-
-    """Take"""
-    take: Int
-  ): Int!
-  findManyTeachersCount(
-    """Order by"""
-    orderBy: String = "name"
-
-    """Order direction"""
-    orderDirection: String = "asc"
-
-    """School ID"""
-    schoolId: String
-
-    """Search query"""
-    search: String = ""
-
-    """Skip"""
-    skip: Int
-    studyPlanId: String
-
-    """Take"""
-    take: Int
-  ): Int!
-  findMessageById(id: String!): Message!
-  findMyMessages(
-    """Order by"""
-    orderBy: String = "name"
-
-    """Order direction"""
-    orderDirection: String = "asc"
-
-    """School ID"""
-    schoolId: String
-
-    """Search query"""
-    search: String = ""
-
-    """Skip"""
-    skip: Int
-    studyPlanId: String
-
-    """Take"""
-    take: Int
-  ): [Message!]!
-  findSentMessagesCount: Int!
-  grade(id: String!): Grade!
-  gradeBucket(id: String!): GradeBucket!
-  gradeBucketsByCourseId(courseId: String!): [GradeBucket!]!
   gradeMetric(id: String!): GradeMetric!
   gradeMetrics: [GradeMetric!]!
-
-  """
-  Get the grade report (Boletin de calificaciones) for a student and period
-  """
-  gradeReport(periodId: String!, studentId: String!): GradeReport!
-  grades: [Grade!]!
-  gradesByCourseId(courseId: String!, periodId: String!): [Grade!]!
-  groupsSchedule(id: String!): GroupsSchedule!
-  groupsSchedules: [GroupsSchedule!]!
-  groupsSchedulesByClassGroupId(classGroupId: String!): [GroupsSchedule!]!
-  groupsSchedulesByClassGroupIdGrouped(classGroupId: String!): [GroupsSchedule!]!
-  habitEvaluation(id: String!): HabitEvaluation!
-  habitEvaluationsByGroup(classGroupId: String!, periodId: String!): [HabitEvaluation!]!
   habitMetric(id: String!): HabitMetric!
   habitMetrics: [HabitMetric!]!
   isEmailVerified: Boolean!
-  linkedStudentsFinancialSummary: [StudentFinancialSummary!]!
   listInvitations(organizationId: String): [Invitation!]!
   listMembers(organizationId: String): [Member!]!
   lookupAccountForPasswordReset(email: String!): LookupAccountForPasswordResetResult!
   me: User!
-
-  """Get the current student submission for an assignment"""
-  myAssignmentSubmission(assignmentId: String!): AssignmentSubmission
   myJoinRequestStatus: JoinRequestStatus
-  newsletter(id: String!): Newsletter
-  newsletters(
-    """Order by"""
-    orderBy: String = "name"
-
-    """Order direction"""
-    orderDirection: String = "asc"
-
-    """School ID"""
-    schoolId: String
-
-    """Search query"""
-    search: String = ""
-
-    """Skip"""
-    skip: Int
-    studyPlanId: String
-
-    """Take"""
-    take: Int
-  ): [Newsletter!]!
   notifications: [NotificationItem!]!
   onboardingStatus: OnboardingStatus!
   organization(id: String!): Organization!
   organizations: [Organization!]!
-  parent(id: String!): Parent!
-  parents(
-    """Order by"""
-    orderBy: String = "name"
-
-    """Order direction"""
-    orderDirection: String = "asc"
-
-    """School ID"""
-    schoolId: String
-
-    """Search query"""
-    search: String = ""
-
-    """Skip"""
-    skip: Int
-    studyPlanId: String
-
-    """Take"""
-    take: Int
-  ): [Parent!]!
-  parentsByStudentId(studentId: String!): [Parent!]!
-  parentsCount(
-    """Order by"""
-    orderBy: String = "name"
-
-    """Order direction"""
-    orderDirection: String = "asc"
-
-    """School ID"""
-    schoolId: String
-
-    """Search query"""
-    search: String = ""
-
-    """Skip"""
-    skip: Int
-    studyPlanId: String
-
-    """Take"""
-    take: Int
-  ): Int!
-  paymentsByStudent(studentId: String!): [Payment!]!
   pendingJoinRequests: [PendingJoinRequest!]!
   period(id: String!): Period!
   periods: [Period!]!
-  periodsByYear(year: Int!): [Period!]!
   permission(id: String!): Permission!
   permissions(
     """Order by"""
@@ -2439,28 +498,18 @@ type Query {
     """Take"""
     take: Int
   ): Int!
-  publishedNewsletters(schoolId: String!, take: Int! = 3): [Newsletter!]!
-  quiz(id: String!): Quiz!
-  quizzes(organizationId: String!): [Quiz!]!
   role(id: String!): Role!
   roles: [Role!]!
   school(id: String!): School!
-
-  """Get a presigned URL for downloading a school logo"""
-  schoolLogoDownloadUrl(schoolId: String!): SchoolLogoDownloadUrl!
-  schools: [School!]!
-  student(id: String!): Student!
-  studentAttendanceStats(studentId: String!): AttendanceStats!
-  studentBalance(studentId: String!): StudentBalance!
-  studentGrade(id: String!): StudentGrade!
-  studentGrades: [StudentGrade!]!
-  studentGradesByCourseId(courseId: String!, periodId: String!, studentId: String!): [StudentGrade!]!
-  students(
+  schools(
     """Order by"""
     orderBy: String = "name"
 
     """Order direction"""
     orderDirection: String = "asc"
+
+    """Organization ID"""
+    organizationId: String
 
     """School ID"""
     schoolId: String
@@ -2474,60 +523,32 @@ type Query {
 
     """Take"""
     take: Int
-  ): [Student!]!
-  studentsByCourseId(courseId: String!): [Student!]!
-  studentsBySchoolId(schoolId: String!): [Student!]!
+  ): [School!]!
+  schoolsCount(
+    """Order by"""
+    orderBy: String = "name"
 
-  """Get all students for an assignment with their submissions"""
-  studentsForAssignment(assignmentId: String!): [Student!]!
-  studentsForAttendance(classGroupId: String!, courseId: String!): [Student!]!
-  studyPlan(id: String!): StudyPlan!
-  studyPlans: [StudyPlan!]!
-  studyPlansBySchoolId(degreeId: String, schoolId: String!): [StudyPlan!]!
+    """Order direction"""
+    orderDirection: String = "asc"
+
+    """Organization ID"""
+    organizationId: String
+
+    """School ID"""
+    schoolId: String
+
+    """Search query"""
+    search: String = ""
+
+    """Skip"""
+    skip: Int
+    studyPlanId: String
+
+    """Take"""
+    take: Int
+  ): Int!
   subject(id: String!): Subject!
-  subjects(
-    """Order by"""
-    orderBy: String = "name"
-
-    """Order direction"""
-    orderDirection: String = "asc"
-
-    """School ID"""
-    schoolId: String
-
-    """Search query"""
-    search: String = ""
-
-    """Skip"""
-    skip: Int
-    studyPlanId: String
-
-    """Take"""
-    take: Int
-  ): [Subject!]!
-  teacher(id: String!): Teacher!
-  teachers(
-    """Order by"""
-    orderBy: String = "name"
-
-    """Order direction"""
-    orderDirection: String = "asc"
-
-    """School ID"""
-    schoolId: String
-
-    """Search query"""
-    search: String = ""
-
-    """Skip"""
-    skip: Int
-    studyPlanId: String
-
-    """Take"""
-    take: Int
-  ): [Teacher!]!
-  teachersByOrganizationId(organizationId: String!): [Teacher!]!
-  unreadMessagesCount: Int!
+  subjects: [Subject!]!
   user(id: String!): User!
   users(
     """Order by"""
@@ -2572,89 +593,6 @@ type Query {
   validateEmailToken(email: String!, token: String!): Boolean!
 }
 
-type Quiz {
-  """Course"""
-  course: Course!
-
-  """Course ID"""
-  courseId: String!
-
-  """Created At"""
-  createdAt: DateTime!
-
-  """Details"""
-  details: String!
-
-  """ID"""
-  id: String!
-
-  """Organization ID"""
-  organizationId: String!
-
-  """Questions"""
-  questions: [QuizQuestion!]!
-
-  """Teacher"""
-  teacher: Teacher!
-
-  """Teacher ID"""
-  teacherId: String!
-
-  """Title"""
-  title: String!
-
-  """Updated At"""
-  updatedAt: DateTime!
-}
-
-type QuizQuestion {
-  """ID"""
-  id: String!
-
-  """Options"""
-  options: [QuizQuestionOption!]!
-
-  """Question"""
-  question: String!
-
-  """Quiz ID"""
-  quizId: String!
-
-  """Time Limit"""
-  timeLimit: Float!
-
-  """Type"""
-  type: String!
-
-  """Value"""
-  value: Float!
-}
-
-type QuizQuestionOption {
-  """ID"""
-  id: String!
-
-  """Is Correct"""
-  isCorrect: Boolean!
-
-  """Option"""
-  option: String!
-
-  """Question ID"""
-  questionId: String!
-}
-
-input RemoveShareInput {
-  """File ID for the share"""
-  fileId: String!
-
-  """Target ID for the share"""
-  targetId: String!
-
-  """Target type for the share"""
-  targetType: String!
-}
-
 input RequestJoinSchoolInput {
   """Document ID (required for STUDENT and PARENT)"""
   documentId: String
@@ -2677,23 +615,6 @@ type Role {
   updatedAt: DateTime!
 }
 
-input SaveHabitEvaluationInput {
-  """ID del grupo"""
-  classGroupId: String!
-
-  """ID de la métrica de hábito"""
-  habitMetricId: String!
-
-  """ID del período"""
-  periodId: String!
-
-  """Si la evaluación está publicada"""
-  published: Boolean
-
-  """Evaluaciones de estudiantes"""
-  studentEvaluations: [StudentHabitEvaluationInput!]!
-}
-
 type School {
   """Address of the school"""
   address: String!
@@ -2711,19 +632,16 @@ type School {
   currencyCode: String!
 
   """Current year of the school"""
-  currentYear: Float!
+  currentYear: Int!
 
   """Email of the school"""
   email: String!
 
-  """ID of the school"""
+  """ID of the school (auto-generated)"""
   id: String!
 
-  """Logo storage key of the school"""
+  """Logo of the school"""
   logo: String!
-
-  """Presigned URL for the school logo"""
-  logoUrl: String
 
   """Name of the school"""
   name: String!
@@ -2731,10 +649,10 @@ type School {
   """Organization of the school"""
   organization: Organization!
 
-  """Organization ID of the school"""
+  """ID of the organization"""
   organizationId: String!
 
-  """Phone number of the school"""
+  """Phone of the school"""
   phone: String!
 
   """Short name of the school"""
@@ -2751,41 +669,6 @@ type School {
 
   """Zip code of the school"""
   zip: String!
-}
-
-type SchoolLogoDownloadUrl {
-  """Presigned download URL for the logo"""
-  downloadUrl: String!
-}
-
-input SchoolLogoUploadInput {
-  """MIME type of the image"""
-  mimeType: String!
-
-  """School ID for the logo upload"""
-  schoolId: String!
-}
-
-type SchoolLogoUploadUrl {
-  """Storage key for the logo"""
-  storageKey: String!
-
-  """Presigned upload URL"""
-  uploadUrl: String!
-}
-
-input ShareFileInput {
-  """File ID to share"""
-  fileId: String!
-
-  """Permission for the share"""
-  permission: String!
-
-  """Target ID for the share"""
-  targetId: String!
-
-  """Target type for the share"""
-  targetType: String!
 }
 
 input SignUpInput {
@@ -2805,236 +688,6 @@ input SignUpInput {
   token: String!
 }
 
-type Student {
-  """Address of the student"""
-  address: String!
-
-  """Allergies of the student"""
-  allergies: String!
-
-  """Assignment submissions by the student"""
-  assignmentSubmissions: [StudentAssignmentSubmission!]!
-  averageScoreForStudent(courseId: String!, periodId: String!): Float!
-
-  """Birth date of the student"""
-  birthDate: DateTime!
-
-  """Blood type of the student"""
-  bloodType: String!
-
-  """Class group of the student"""
-  classGroup: ClassGroup
-
-  """Class group ID of the student"""
-  classGroupId: String
-  color: String!
-
-  """Courses of the student"""
-  courses: [Course!]!
-
-  """Created at of the student"""
-  createdAt: DateTime!
-
-  """Document ID of the student"""
-  documentId: String!
-  email: String!
-
-  """Emergency contact name"""
-  emergencyContactName: String!
-
-  """Emergency contact phone"""
-  emergencyContactPhone: String!
-
-  """Enrollment status of the student"""
-  enrollmentStatus: EnrollmentStatus!
-
-  """Father name of the student"""
-  fatherName: String!
-
-  """First name of the student"""
-  firstName: String!
-  fullName: String!
-
-  """Gender of the student"""
-  gender: String!
-
-  """ID of the student"""
-  id: String!
-  initials: String!
-
-  """Medical notes of the student"""
-  medicalNotes: String!
-
-  """Middle name of the student"""
-  middleName: String!
-
-  """Mother name of the student"""
-  motherName: String!
-  name: String!
-
-  """Organization ID of the student"""
-  organizationId: String!
-
-  """Parents of the student"""
-  parents: [Parent!]!
-
-  """Phone of the student"""
-  phone: String!
-
-  """School ID of the student"""
-  schoolId: String!
-
-  """Student grades of the student"""
-  studentGrades: [StudentGrade!]!
-
-  """Updated at of the student"""
-  updatedAt: DateTime!
-
-  """User of the student"""
-  user: User!
-
-  """User ID of the student"""
-  userId: String!
-}
-
-"""Student assignment submission info"""
-type StudentAssignmentSubmission {
-  file: StudentSubmissionFile!
-  id: String!
-  submittedAt: DateTime!
-}
-
-type StudentBalance {
-  balance: Float!
-  studentId: String!
-  totalCharges: Float!
-  totalPayments: Float!
-}
-
-type StudentFinancialSummary {
-  balance: Float!
-  fatherName: String!
-  firstName: String!
-  studentId: String!
-  totalCharges: Float!
-  totalPayments: Float!
-}
-
-type StudentGrade {
-  """Average score for the student"""
-  averageScoreForStudent: Float!
-
-  """Comments for the student grade"""
-  comments: String
-
-  """Created at of the student grade"""
-  createdAt: DateTime!
-
-  """Grade of the student grade"""
-  grade: Grade!
-
-  """Grade ID of the student grade"""
-  gradeId: String!
-
-  """ID of the student grade"""
-  id: String!
-
-  """Score of the student grade"""
-  score: Float
-
-  """Student of the student grade"""
-  student: Student!
-
-  """Student ID of the student grade"""
-  studentId: String!
-
-  """Updated at of the student grade"""
-  updatedAt: DateTime!
-}
-
-type StudentHabitEvaluation {
-  comments: String
-  createdAt: DateTime!
-  habitEvaluationId: String!
-  id: String!
-  studentId: String!
-  updatedAt: DateTime!
-  value: HabitValue!
-}
-
-input StudentHabitEvaluationInput {
-  """Comentarios opcionales"""
-  comments: String
-
-  """ID del estudiante"""
-  studentId: String!
-
-  """Valor de la evaluación"""
-  value: HabitValue!
-}
-
-"""File info for student assignment submission"""
-type StudentSubmissionFile {
-  id: String!
-  mimeType: String!
-  name: String!
-  size: Int!
-}
-
-type StudyPlan {
-  """Created at of the study plan"""
-  createdAt: DateTime!
-
-  """Degree of the study plan"""
-  degree: Degree!
-
-  """Degree ID of the study plan"""
-  degreeId: String!
-
-  """Description of the study plan"""
-  description: String!
-  enrollmentCosts: [StudyPlanEnrollmentCost!]
-
-  """Grade metric of the study plan"""
-  gradeMetric: GradeMetric
-
-  """Grade metric ID of the study plan"""
-  gradeMetricId: String
-
-  """ID of the study plan"""
-  id: String!
-
-  """Level of the study plan"""
-  level: Int!
-  monthlyTuitionAmount: Float
-
-  """Name of the study plan"""
-  name: String!
-
-  """School of the study plan"""
-  school: School!
-
-  """School ID of the study plan"""
-  schoolId: String!
-
-  """Short name of the study plan"""
-  shortName: String!
-  tuitionMonths: [Int!]!
-
-  """Updated at of the study plan"""
-  updatedAt: DateTime!
-}
-
-type StudyPlanEnrollmentCost {
-  amount: Float!
-  createdAt: DateTime!
-  id: String!
-  name: String!
-  order: Int!
-  studyPlanId: String!
-  updatedAt: DateTime!
-}
-
 type Subject {
   """Code of the subject"""
   code: String!
@@ -3051,277 +704,48 @@ type Subject {
   """Organization of the subject"""
   organization: Organization!
 
-  """Organization ID of the subject"""
-  organizationId: String!
-  updatedAt: DateTime!
-}
-
-type SubmissionDownloadUrl {
-  """Presigned URL for downloading the file"""
-  downloadUrl: String!
-}
-
-type SubmissionUploadUrl {
-  """Storage key for the file"""
-  storageKey: String!
-
-  """Presigned URL for uploading the file"""
-  uploadUrl: String!
-}
-
-type Teacher {
-  """About the teacher"""
-  about: String!
-
-  """Address of the teacher"""
-  address: String!
-
-  """Birth date of the teacher"""
-  birthDate: DateTime!
-
-  """Groups of the teacher"""
-  classGroups: [ClassGroup!]!
-  color: String!
-
-  """Courses of the teacher"""
-  courses: [Course!]!
-
-  """Created at"""
-  createdAt: DateTime!
-
-  """Document ID of the teacher"""
-  documentId: String!
-
-  """Father name of the teacher"""
-  fatherName: String!
-
-  """First name of the teacher"""
-  firstName: String!
-  fullName: String!
-
-  """Gender of the teacher"""
-  gender: String!
-
-  """ID of the teacher (auto-generated)"""
-  id: String!
-  initials: String!
-
-  """Member since date"""
-  memberSince: DateTime
-
-  """Middle name of the teacher"""
-  middleName: String!
-
-  """Mother name of the teacher"""
-  motherName: String!
-  name: String!
-
-  """Organization ID of the teacher"""
+  """ID of the organization"""
   organizationId: String!
 
-  """Personal email of the teacher"""
-  personalEmail: String!
-
-  """Phone number of the teacher"""
-  phoneNumber: String!
-
-  """Subject of the teacher"""
-  subjects: [Subject!]!
-
-  """Teacher since year"""
-  teacherSince: Int
+  """Short name of the subject"""
+  shortName: String!
 
   """Updated at"""
   updatedAt: DateTime!
-
-  """User of the teacher"""
-  user: User!
-
-  """User ID of the teacher"""
-  userId: String!
 }
 
-input UpdateAssignmentInput {
-  """Id del curso"""
-  courseId: String
-
-  """Fecha de la asignacion"""
-  date: String
-
-  """Detalles de la asignacion"""
-  details: String
-
-  """Fechas de la asignacion"""
-  groupDates: [AssignmentDateInput!]
+input UpdateGradeMetricInput {
   id: String!
 
-  """Requiere envio"""
-  requireSubmission: Boolean
+  """Valor máximo del grado"""
+  maximum: Float
 
-  """Id de la escuela"""
-  schoolId: String
+  """Valor mínimo del grado"""
+  minimum: Float
 
-  """Id del profesor"""
-  teacherId: String
+  """Valor mínimo de aprobación del grado"""
+  minimumApproval: Float
 
-  """Titulo de la asignacion"""
-  title: String
+  """Valor mínimo de excelencia del grado"""
+  minimumExcellence: Float
 
-  """Tipo de la asignacion"""
-  type: String
+  """Nombre del grado"""
+  name: String
 }
 
-input UpdateAttendanceRecordInput {
-  """Optional comment"""
-  comment: String
-
-  """ID of the attendance record"""
-  id: String!
-
-  """Attendance status"""
-  status: AttendanceStatus
-
-  """Student ID"""
-  studentId: String
-}
-
-input UpdateClassGroupInput {
-  """Active status of the class group"""
+input UpdateHabitMetricInput {
+  """Estado activo del criterio"""
   active: Boolean = true
+
+  """Descripción del criterio"""
+  description: String
   id: String!
 
-  """Name of the class group"""
+  """Nombre del criterio"""
   name: String
 
-  """Organization ID of the class group"""
-  organizationId: String
-
-  """School ID of the class group"""
-  schoolId: String
-
-  """Study plan ID of the class group"""
-  studyPlanId: String
-
-  """Teacher ID of the class group"""
-  teacherId: String
-}
-
-input UpdateCourseInput {
-  """Code of the course"""
-  code: String
-  id: String!
-
-  """Name of the course"""
-  name: String
-
-  """Organization ID of the course"""
-  organizationId: String
-
-  """School ID of the course"""
-  schoolId: String
-
-  """Short name of the course"""
-  shortName: String
-
-  """Study plan ID of the course"""
-  studyPlanId: String
-
-  """Subject ID of the course"""
-  subjectId: String
-
-  """Teacher ID of the course"""
-  teacherId: String
-}
-
-input UpdateDegreeInput {
-  id: String!
-
-  """Name of the degree"""
-  name: String
-
-  """School ID"""
-  schoolId: String
-
-  """Short name of the degree"""
-  shortName: String
-}
-
-input UpdateGradeBucketInput {
-  """Id del curso"""
-  courseId: String
-  id: String!
-
-  """Nombre del bucket"""
-  name: String
-
-  """Peso del bucket"""
-  weight: Float
-}
-
-input UpdateGradeInput {
-  """Id del bucket"""
-  bucketId: String
-
-  """Comentarios"""
-  comments: String
-
-  """Id del curso"""
-  courseId: String
-
-  """Fecha de la calificacion"""
-  date: DateTime
-  id: String!
-
-  """Id del periodo"""
-  periodId: String
-
-  """¿Publicada?"""
-  published: Boolean = false
-
-  """Titulo de la calificacion  """
-  title: String
-}
-
-input UpdateGroupsScheduleInput {
-  """Class group ID"""
-  classGroupId: String
-
-  """Course ID"""
-  courseId: String
-
-  """End time"""
-  endTime: String
-  id: String!
-
-  """Location"""
-  location: String
-
-  """Remote"""
-  remote: Boolean
-
-  """Remote link"""
-  remoteLink: String
-
-  """Start time"""
-  startTime: String
-
-  """Week day"""
-  weekday: String
-}
-
-input UpdateNewsletterInput {
-  """Content of the newsletter (HTML)"""
-  content: String
-  id: String!
-
-  """Whether to publish immediately"""
-  published: Boolean = false
-
-  """School ID the newsletter belongs to"""
-  schoolId: String
-
-  """Title of the newsletter"""
-  title: String
+  """Orden de visualización"""
+  order: Int = 0
 }
 
 input UpdateOrganizationInput {
@@ -3329,48 +753,6 @@ input UpdateOrganizationInput {
   description: String
   id: String!
   name: String
-}
-
-input UpdateParentInput {
-  """Address of the parent"""
-  address: String = ""
-
-  """Document ID of the parent"""
-  documentId: String
-
-  """Email of the parent"""
-  email: String
-
-  """Father name (paternal last name) of the parent"""
-  fatherName: String
-
-  """First name of the parent"""
-  firstName: String
-  id: String!
-
-  """Middle name of the parent"""
-  middleName: String = ""
-
-  """Mother name (maternal last name) of the parent"""
-  motherName: String = ""
-
-  """Occupation of the parent"""
-  occupation: String = ""
-
-  """Organization ID of the parent"""
-  organizationId: String
-
-  """Phone number of the parent"""
-  phone: String
-
-  """Relationship to student (Father, Mother, Guardian, etc.)"""
-  relationship: String
-
-  """IDs of students to associate with this parent"""
-  studentIds: [String!]
-
-  """Work phone number of the parent"""
-  workPhone: String = ""
 }
 
 input UpdatePeriodInput {
@@ -3399,27 +781,6 @@ input UpdatePermissionInput {
   id: String!
 }
 
-input UpdateQuizInput {
-  """Course ID"""
-  courseId: String
-
-  """Details"""
-  details: String
-  id: String!
-
-  """Organization ID"""
-  organizationId: String
-
-  """Questions"""
-  questions: [CreateQuizQuestionInput!]
-
-  """Teacher ID"""
-  teacherId: String
-
-  """Title"""
-  title: String
-}
-
 input UpdateRoleInput {
   """Description of the role"""
   description: String
@@ -3444,7 +805,9 @@ input UpdateSchoolInput {
 
   """Country of the school"""
   country: String = ""
-  currentYear: Int
+
+  """Current year of the school"""
+  currentYear: Int = 2025
 
   """Email of the school"""
   email: String = ""
@@ -3459,7 +822,7 @@ input UpdateSchoolInput {
   """Organization ID of the school"""
   organizationId: String
 
-  """Phone number of the school"""
+  """Phone of the school"""
   phone: String = ""
 
   """Short name of the school"""
@@ -3475,131 +838,6 @@ input UpdateSchoolInput {
   zip: String = ""
 }
 
-input UpdateShareInput {
-  """File ID for the share"""
-  fileId: String!
-
-  """Updated permission for the share"""
-  permission: String!
-
-  """Target ID for the share"""
-  targetId: String!
-
-  """Target type for the share"""
-  targetType: String!
-}
-
-input UpdateStudentGradeInput {
-  """Comments for the student grade"""
-  comments: String
-
-  """Grade ID for the student grade"""
-  gradeId: String
-  id: String!
-
-  """Score for the student grade"""
-  score: Float
-
-  """Student ID for the student grade"""
-  studentId: String
-}
-
-input UpdateStudentInput {
-  """Address of the student"""
-  address: String
-
-  """Allergies of the student"""
-  allergies: String = ""
-
-  """Birth date of the student"""
-  birthDate: DateTime
-
-  """Blood type of the student"""
-  bloodType: String = ""
-
-  """Class group ID of the student"""
-  classGroupId: String
-
-  """Document ID of the student"""
-  documentId: String
-
-  """Email of the student"""
-  email: String
-
-  """Emergency contact name"""
-  emergencyContactName: String = ""
-
-  """Emergency contact phone"""
-  emergencyContactPhone: String = ""
-
-  """Enrollment status of the student"""
-  enrollmentStatus: String = "ACTIVE"
-
-  """Father name of the student"""
-  fatherName: String
-
-  """First name of the student"""
-  firstName: String
-
-  """Gender of the student"""
-  gender: String
-  id: String!
-
-  """Medical notes of the student"""
-  medicalNotes: String = ""
-
-  """Middle name of the student"""
-  middleName: String
-
-  """Mother name of the student"""
-  motherName: String
-
-  """Organization ID of the student"""
-  organizationId: String
-
-  """IDs of parents to associate with this student"""
-  parentIds: [String!]
-
-  """Phone of the student"""
-  phone: String
-
-  """School ID of the student"""
-  schoolId: String
-}
-
-input UpdateStudyPlanFinancialInput {
-  enrollmentCosts: [EnrollmentCostInput!]
-  monthlyTuitionAmount: Float
-  studyPlanId: String!
-
-  """Month numbers 1-12 when tuition is due"""
-  tuitionMonths: [Int!]
-}
-
-input UpdateStudyPlanInput {
-  """Degree ID of the study plan"""
-  degreeId: String
-
-  """Description of the study plan"""
-  description: String
-
-  """Grade metric ID of the study plan"""
-  gradeMetricId: String
-  id: String!
-
-  """Level of the study plan"""
-  level: Int
-
-  """Name of the study plan"""
-  name: String
-
-  """School ID of the study plan"""
-  schoolId: String
-
-  """Short name of the study plan"""
-  shortName: String
-}
-
 input UpdateSubjectInput {
   """Code of the subject"""
   code: String
@@ -3607,43 +845,15 @@ input UpdateSubjectInput {
 
   """Name of the subject"""
   name: String
-}
 
-input UpdateTeacherInput {
-  about: String = ""
-  address: String = ""
-
-  """Birth date of the teacher"""
-  birthDate: DateTime
-
-  """Document ID of the teacher"""
-  documentId: String
-
-  """Email of the teacher"""
-  email: String
-
-  """Father name of the teacher"""
-  fatherName: String
-
-  """First name of the teacher"""
-  firstName: String
-
-  """Gender of the teacher"""
-  gender: String
-  id: String!
-  memberSince: DateTime
-
-  """Middle name of the teacher"""
-  middleName: String = ""
-
-  """Mother name of the teacher"""
-  motherName: String = ""
-
-  """Organization ID of the teacher"""
+  """Organization ID of the subject"""
   organizationId: String
-  personalEmail: String = ""
-  phoneNumber: String = ""
-  teacherSince: Int
+
+  """School ID of the subject"""
+  schoolId: String
+
+  """Short name of the subject"""
+  shortName: String
 }
 
 input UpdateUserInput {

@@ -171,7 +171,17 @@ export const appRoutes: Route[] = [
         loadComponent: () => import('./quizzes/quizzes'),
       },
       {
+        path: 'quizzes/new',
+        canActivate: [permissionGuard('MANAGE_QUIZZES')],
+        loadComponent: () => import('./quizzes/quiz-form'),
+      },
+      {
         path: 'quizzes/:id',
+        canActivate: [permissionGuard('VIEW_QUIZZES')],
+        loadComponent: () => import('./quizzes/quiz'),
+      },
+      {
+        path: 'quizzes/:id/edit',
         canActivate: [permissionGuard('MANAGE_QUIZZES')],
         loadComponent: () => import('./quizzes/quiz-form'),
       },

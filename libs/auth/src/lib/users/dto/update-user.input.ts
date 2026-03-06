@@ -5,4 +5,7 @@ import { CreateUserInput } from './create-user.input';
 export class UpdateUserInput extends PartialType(CreateUserInput) {
   @Field(() => String)
   id: string;
+
+  @Field(() => String, { nullable: true, description: 'Theme preference: light, dark, or system' })
+  themePreference?: string;
 }

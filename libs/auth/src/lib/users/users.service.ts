@@ -129,13 +129,13 @@ export class UsersService {
   }
 
   update(id: string, updateUserInput: UpdateUserInput) {
-    if (updateUserInput.password) {
-      const password = bcrypt.hashSync(updateUserInput.password, 10);
-      updateUserInput.password = password;
+    const { id: _id, ...data } = updateUserInput;
+    if (data.password) {
+      data.password = bcrypt.hashSync(data.password, 10);
     }
     return this.prisma.user.update({
       where: { id },
-      data: { ...updateUserInput, color: this.getRandomPastelColor() },
+      data,
       include: {
         role: { include: { permissions: true } },
         organization: true,

@@ -108,7 +108,7 @@
 
 .fieldset {
   label {
-    @apply block text-sm/6 font-medium text-gray-800 dark:text-gray-100 mb-0;
+    @apply block text-sm/6 font-medium text-base-content/60 mb-0;
   }
 }
 
@@ -153,7 +153,7 @@ textarea.ng-invalid.ng-dirty {
   thead > tr {
     @apply border-b border-gray-300 dark:border-gray-700;
     th {
-      @apply text-gray-800 dark:text-gray-200 font-medium;
+      @apply text-base-content/70 font-medium;
     }
     th:first-child {
       @apply pl-4;
@@ -165,7 +165,7 @@ textarea.ng-invalid.ng-dirty {
   tbody > tr {
     @apply border-b border-gray-200 last:border-b-0 dark:border-gray-700;
     td {
-      @apply text-gray-700 dark:text-gray-200;
+      @apply text-base-content;
     }
     td:first-child {
       @apply font-medium pl-4;

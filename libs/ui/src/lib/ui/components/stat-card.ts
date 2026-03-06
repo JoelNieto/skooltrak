@@ -5,7 +5,7 @@ type StatCardColor = 'primary' | 'secondary' | 'accent' | 'info' | 'success' | '
 @Component({
   selector: 'lib-stat-card',
   template: `
-    <div class="card border border-base-300 bg-base-100 shadow-sm hover:shadow-md transition-shadow duration-200">
+    <div class="card bg-base-100 hover:shadow-md transition-shadow duration-200">
       <div class="card-body p-4">
         <div class="flex items-center justify-between">
           <p class="text-xs uppercase text-base-content/50 font-medium tracking-wider">{{ label() }}</p>

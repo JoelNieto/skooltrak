@@ -9,12 +9,8 @@ import { RouterLink } from '@angular/router';
 import { $Enums } from '@generated/prisma';
 
 import { Apollo } from 'apollo-angular';
-import {
-  GetStudentsDocument,
-  RemoveStudentDocument,
-  ResendUserInvitationDocument,
-} from '../graphql/generated/graphql';
 import { filter, map, of, switchMap, tap } from 'rxjs';
+import { GetStudentsDocument, RemoveStudentDocument, ResendUserInvitationDocument } from '../graphql/generated/graphql';
 
 const ENROLLMENT_STATUS_LABELS: Record<$Enums.EnrollmentStatus, string> = {
   ACTIVE: 'Activo',
@@ -68,7 +64,7 @@ const ENROLLMENT_STATUS_COLORS: Record<$Enums.EnrollmentStatus, string> = {
         <span class="material-symbols-outlined">add_circle</span> Agregar Alumno
       </a>
     </div>
-    <div class="overflow-x-auto bg-base-100 rounded-lg border border-base-300 mt-4">
+    <div class="overflow-x-auto bg-base-100 rounded-lg mt-4">
       <table class="table">
         <thead>
           <tr>

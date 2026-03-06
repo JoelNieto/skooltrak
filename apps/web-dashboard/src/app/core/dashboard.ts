@@ -1,8 +1,10 @@
-import { ChangeDetectionStrategy, Component, ElementRef, inject, viewChild } from '@angular/core';
+import { afterRenderEffect, ChangeDetectionStrategy, Component, ElementRef, inject, viewChild } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { filter } from 'rxjs';
+import Auth from '../auth/auth';
 import { Sidebar } from './sidebar';
+import { ThemeService } from './theme.service';
 @Component({
   selector: 'app-dashboard',
   imports: [RouterOutlet, Sidebar],
@@ -23,7 +25,7 @@ import { Sidebar } from './sidebar';
       #sidebar
       id="sidebar"
       appSidebar
-      class="fixed flex flex-col lg:relative z-50 w-64 h-screen bg-base-100 border-r border-neutral-200 dark:border-white/10 transform -translate-x-full lg:translate-x-0 transition-transform duration-200 ease-in-out"
+      class="fixed flex flex-col lg:relative z-50 w-64 h-screen bg-base-100 transform -translate-x-full lg:translate-x-0 transition-transform duration-200 ease-in-out"
     ></aside>
     <div class="flex-1 flex flex-col overflow-hidden min-w-0">
       <!-- Mobile menu toggle only -->
@@ -60,8 +62,16 @@ export default class Dashboard {
   public sidebarToggle = viewChild.required<ElementRef<HTMLElement>>('sidebarToggle');
 
   #router = inject(Router);
+  #theme = inject(ThemeService);
+  #auth = inject(Auth);
 
   constructor() {
+    afterRenderEffect(() => {
+      const pref = this.#auth.themePreference();
+      if (pref) {
+        this.#theme.applyTheme(pref);
+      }
+    });
     this.#router.events
       .pipe(
         filter((event) => event instanceof NavigationEnd),

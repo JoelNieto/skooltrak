@@ -130,6 +130,7 @@ export default class Auth {
   public onboardingStep = computed(() => (this.user() as any)?.onboardingStep as string | null);
 
   public userName = computed(() => `${this.user()?.firstName} ${this.user()?.lastName}`);
+  public themePreference = computed(() => (this.user() as { themePreference?: string })?.themePreference);
   public userInitials = computed(
     () =>
       `${this.user()?.firstName?.charAt(0).toUpperCase() || ''}${this.user()?.lastName?.charAt(0).toUpperCase() || ''}`,

@@ -64,6 +64,7 @@ model User {
   organization      Organization?      @relation(fields: [organizationId], references: [id], onDelete: SetNull, onUpdate: Cascade)
   organizationId    String?
   onboardingStep    String? // 'choose-path', 'school-setup', 'waiting-approval', 'completed'
+  themePreference   String? // 'light' | 'dark' | 'system'
   lastLogin         DateTime?
   isBlocked         Boolean            @default(false)
   createdAt         DateTime           @default(now())

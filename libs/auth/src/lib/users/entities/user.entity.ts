@@ -56,6 +56,9 @@ export class User {
   @Field(() => String, { nullable: true })
   onboardingStep: string | null;
 
+  @Field(() => String, { nullable: true })
+  themePreference: string | null;
+
   @Field(() => Date, { nullable: true })
   lastLogin: Date | null;
 

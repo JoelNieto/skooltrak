@@ -84,7 +84,7 @@ type RecentTeacher = {
     </div>
 
     <div class="mt-6 grid gap-5 lg:grid-cols-3">
-      <div class="card border border-base-300 bg-base-100 lg:col-span-2 shadow-sm">
+      <div class="card bg-base-100 lg:col-span-2 ">
         <div class="card-body">
           <div class="flex items-center justify-between">
             <h2 class="text-base font-semibold text-base-content">Mensajes recientes</h2>
@@ -117,7 +117,7 @@ type RecentTeacher = {
         </div>
       </div>
 
-      <div class="card border border-base-300 bg-base-100 shadow-sm">
+      <div class="card bg-base-100">
         <div class="card-body">
           <h2 class="text-base font-semibold text-base-content">Acciones rápidas</h2>
           <div class="grid gap-2 sm:grid-cols-2 lg:grid-cols-1 mt-2">
@@ -168,7 +168,7 @@ type RecentTeacher = {
 
     @if (!recentNewsletters.error()) {
       <div class="mt-5">
-        <div class="card border border-base-300 bg-base-100 shadow-sm">
+        <div class="card bg-base-100">
           <div class="card-body">
             <div class="flex items-center justify-between">
               <h2 class="text-base font-semibold text-base-content">Boletines recientes</h2>
@@ -205,7 +205,7 @@ type RecentTeacher = {
     }
 
     <div class="mt-5 grid gap-5 lg:grid-cols-2">
-      <div class="card border border-base-300 bg-base-100 shadow-sm">
+      <div class="card bg-base-100">
         <div class="card-body">
           <h2 class="text-base font-semibold text-base-content">Últimos estudiantes</h2>
           @if ((recentStudents.value() ?? []).length === 0) {
@@ -233,7 +233,7 @@ type RecentTeacher = {
         </div>
       </div>
 
-      <div class="card border border-base-300 bg-base-100 shadow-sm">
+      <div class="card bg-base-100">
         <div class="card-body">
           <h2 class="text-base font-semibold text-base-content">Docentes recientes</h2>
           @if ((recentTeachers.value() ?? []).length === 0) {

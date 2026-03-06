@@ -7,6 +7,7 @@ import { map } from 'rxjs';
 import Auth from '../auth/auth';
 import { GetSchoolsDocument, GetSchoolsQuery, UnreadMessagesCountDocument } from '../graphql/generated/graphql';
 import Store from './store';
+import { ThemeService } from './theme.service';
 
 @Component({
   // eslint-disable-next-line @angular-eslint/component-selector
@@ -368,7 +369,7 @@ import Store from './store';
       }
     </nav>
     <!-- User section at bottom -->
-    <div class="shrink-0 p-3 border-t border-neutral-200 dark:border-white/10 space-y-2">
+    <div class="shrink-0 p-3 border-t border-base-300 dark:border-white/10 space-y-2">
       <a
         routerLink="messages"
         class="flex items-center gap-3 px-3 py-2 text-base-content/80 rounded-lg transition-all duration-150 hover:bg-base-200 hover:text-base-content group w-full"
@@ -381,13 +382,48 @@ import Store from './store';
           }
         }
       </a>
+      <div class="flex gap-1 p-2 rounded-lg bg-base-200/50" role="group" aria-label="Tema">
+        <button
+          type="button"
+          (click)="theme.setTheme('light')"
+          [class.btn-active]="theme.theme() === 'light'"
+          class="btn btn-ghost btn-sm btn-square"
+          [attr.aria-pressed]="theme.theme() === 'light'"
+          title="Claro"
+        >
+          <span class="material-symbols-outlined text-lg">light_mode</span>
+        </button>
+        <button
+          type="button"
+          (click)="theme.setTheme('dark')"
+          [class.btn-active]="theme.theme() === 'dark'"
+          class="btn btn-ghost btn-sm btn-square"
+          [attr.aria-pressed]="theme.theme() === 'dark'"
+          title="Oscuro"
+        >
+          <span class="material-symbols-outlined text-lg">dark_mode</span>
+        </button>
+        <button
+          type="button"
+          (click)="theme.setTheme('system')"
+          [class.btn-active]="theme.theme() === 'system'"
+          class="btn btn-ghost btn-sm btn-square"
+          [attr.aria-pressed]="theme.theme() === 'system'"
+          title="Sistema"
+        >
+          <span class="material-symbols-outlined text-lg">contrast</span>
+        </button>
+      </div>
       <div class="dropdown dropdown-top w-full">
         <div
           role="button"
           tabindex="0"
           class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-base-200 group cursor-pointer w-full"
         >
-          <div class="w-9 h-9 rounded-full flex items-center justify-center shrink-0" [style.background]="auth.userColor()">
+          <div
+            class="w-9 h-9 rounded-full flex items-center justify-center shrink-0"
+            [style.background]="auth.userColor()"
+          >
             <span class="text-neutral-content text-sm font-medium">{{ auth.userInitials() }}</span>
           </div>
           <div class="flex-1 min-w-0 text-left">
@@ -423,6 +459,7 @@ import Store from './store';
 export class Sidebar {
   protected readonly auth = inject(Auth);
   protected readonly store = inject(Store);
+  protected readonly theme = inject(ThemeService);
   #apollo = inject(Apollo);
   #confirmation = inject(Confirmation);
 

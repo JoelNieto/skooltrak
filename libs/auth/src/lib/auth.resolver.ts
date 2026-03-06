@@ -326,6 +326,24 @@ export class AuthResolver {
     return user as unknown as User;
   }
 
+  @UseGuards(BetterAuthGuard)
+  @Mutation(() => User)
+  async updateThemePreference(
+    @Args('themePreference') themePreference: string,
+    @Context() context: any,
+  ): Promise<User> {
+    const userId = context.req.session?.user?.id || context.req.user?.userId;
+    if (!userId) throw new Error('No autenticado');
+
+    const valid = ['light', 'dark', 'system'].includes(themePreference);
+    if (!valid) {
+      throw new Error('themePreference must be light, dark, or system');
+    }
+
+    const user = await this.authService.updateThemePreference(userId, themePreference);
+    return user as unknown as User;
+  }
+
   // ==========================================
   // School + Organization creation
   // ==========================================

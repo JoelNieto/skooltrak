@@ -5,6 +5,7 @@ query AuthMe {
     firstName
     lastName
     color
+    themePreference
     onboardingStep
     organizationId
     teacher {
@@ -43,6 +44,13 @@ mutation AuthResetPassword($token: String!, $newPassword: String!) {
 
 query AuthIsEmailVerified {
   isEmailVerified
+}
+
+mutation UpdateThemePreference($themePreference: String!) {
+  updateThemePreference(themePreference: $themePreference) {
+    id
+    themePreference
+  }
 }
 
 query AuthOnboardingStatus {

@@ -58,6 +58,19 @@ export class AuthService {
     });
   }
 
+  async updateThemePreference(userId: string, themePreference: string) {
+    return this.prisma.user.update({
+      where: { id: userId },
+      data: { themePreference },
+      include: {
+        role: { include: { permissions: true, organization: true } },
+        teacher: true,
+        student: true,
+        organization: true,
+      },
+    });
+  }
+
   // ==========================================
   // Email Verification (before user creation)
   // ==========================================

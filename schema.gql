@@ -1732,6 +1732,7 @@ type Mutation {
   updateStudyPlanFinancialConfig(input: UpdateStudyPlanFinancialInput!): StudyPlan!
   updateSubject(updateSubjectInput: UpdateSubjectInput!): Subject!
   updateTeacher(updateTeacherInput: UpdateTeacherInput!): Teacher!
+  updateThemePreference(themePreference: String!): User!
   updateUser(updateUserInput: UpdateUserInput!): User!
 }
 
@@ -3665,6 +3666,9 @@ input UpdateUserInput {
 
   """Role ID of the user"""
   roleId: String
+
+  """Theme preference: light, dark, or system"""
+  themePreference: String
 }
 
 type User {
@@ -3690,6 +3694,7 @@ type User {
   roleId: String
   student: UserStudent
   teacher: UserTeacher
+  themePreference: String
   updatedAt: DateTime!
 }
 

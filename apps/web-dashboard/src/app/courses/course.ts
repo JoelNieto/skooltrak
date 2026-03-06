@@ -1,16 +1,16 @@
-import { DecimalToNumber, Loader, Modal } from '@/ui';
+import { Loader, Modal } from '@/ui';
 import { Component, inject, input } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 
 import { Apollo } from 'apollo-angular';
-import { CourseDocument } from '../graphql/generated/graphql';
 import { map, of } from 'rxjs';
 import AssignmentForm from '../assignments/assignment-form';
 import CourseAttendance from '../attendance/course-attendance';
-import { isValidId } from '../core/validators';
 import Auth from '../auth/auth';
+import { isValidId } from '../core/validators';
 import CourseGrades from '../grades/course-grades';
+import { CourseDocument } from '../graphql/generated/graphql';
 import CourseAssignments from './course-assignments';
 import CourseFiles from './course-files';
 import CourseGradeBuckets from './course-grade-buckets';
@@ -44,7 +44,7 @@ import CourseStudentGrades from './course-student-grades';
             <li>{{ course.name }}</li>
           </ul>
         </div>
-        <div class="card card-border border-base-300 mt-4 bg-base-100">
+        <div class="card mt-4 bg-base-100">
           <div class="card-body flex md:flex-row md:gap-4 md:items-center">
             <img src="course-default.jpg" alt="Course" class="h-18 w-18 rounded-lg" />
             <div class="flex justify-between items-center w-full">
@@ -90,18 +90,12 @@ import CourseStudentGrades from './course-student-grades';
             </span>
           </label>
 
-          <div class="tab-content bg-base-100 border-base-300 p-6">
+          <div class="tab-content bg-base-100 p-6">
             @if (auth.isTeacher() || auth.isAdmin()) {
-              <app-course-grades
-                [courseId]="id()"
-                [metric]="course.studyPlan.gradeMetric!"
-              />
+              <app-course-grades [courseId]="id()" [metric]="course.studyPlan.gradeMetric!" />
             }
             @if (auth.isStudent()) {
-              <app-course-student-grades
-                [courseId]="id()"
-                [metric]="course.studyPlan.gradeMetric!"
-              />
+              <app-course-student-grades [courseId]="id()" [metric]="course.studyPlan.gradeMetric!" />
             }
           </div>
           <label class="tab">
@@ -120,7 +114,7 @@ import CourseStudentGrades from './course-student-grades';
                 <span class="material-symbols-outlined text-xl">how_to_reg</span>Asistencia</span
               >
             </label>
-            <div class="tab-content bg-base-100 border-base-300 p-6">
+            <div class="tab-content bg-base-100 p-6">
               <app-course-attendance [courseId]="id()" />
             </div>
           }
@@ -130,7 +124,7 @@ import CourseStudentGrades from './course-student-grades';
               <span class="material-symbols-outlined text-xl">groups</span>Participantes</span
             >
           </label>
-          <div class="tab-content bg-base-100 border-base-300 p-6">Tab content 2</div>
+          <div class="tab-content bg-base-100 p-6">Tab content 2</div>
 
           <label class="tab">
             <input type="radio" name="my_tabs_6" aria-label="Archivos" />
@@ -139,7 +133,7 @@ import CourseStudentGrades from './course-student-grades';
             >
           </label>
 
-          <div class="tab-content bg-base-100 border-base-300 p-6">
+          <div class="tab-content bg-base-100 p-6">
             <app-course-files [courseId]="id()" />
           </div>
           <label class="tab">
@@ -149,7 +143,7 @@ import CourseStudentGrades from './course-student-grades';
             >
           </label>
 
-          <div class="tab-content bg-base-100 border-base-300 p-6">
+          <div class="tab-content bg-base-100 p-6">
             <app-course-grade-buckets [courseId]="id()" />
           </div>
         </div>

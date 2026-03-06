@@ -6,7 +6,6 @@ import { afterRenderEffect, ChangeDetectionStrategy, Component, inject, signal, 
 import { rxResource } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { Prisma } from '@generated/prisma';
 import { Apollo } from 'apollo-angular';
 import { filter, map, switchMap } from 'rxjs';
 import {
@@ -14,10 +13,6 @@ import {
   AdminGetSchoolsQuery,
   AdminRemoveSchoolDocument,
 } from '../../graphql/generated/graphql';
-
-type School = Prisma.SchoolGetPayload<false> & {
-  logoUrl?: string | null;
-};
 
 @Component({
   selector: 'app-schools',

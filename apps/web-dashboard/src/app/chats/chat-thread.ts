@@ -34,9 +34,9 @@ import {
       <lib-loader />
     } @else if (chatResource.hasValue() && chatResource.value()) {
       @let chat = chatResource.value()!;
-      <div class="card bg-base-100 mt-4">
-        <div class="card-body p-0 flex flex-col" style="min-height: 400px;">
-          <div class="p-4 border-b border-base-300 flex items-center gap-2">
+      <div class="card bg-base-100 mt-4 flex flex-col max-h-[calc(100vh-6rem)]">
+        <div class="card-body p-0 flex flex-col flex-1 min-h-0">
+          <div class="shrink-0 p-4 border-b border-base-300 flex items-center gap-2">
             <div class="avatar avatar-placeholder">
               <div
                 class="text-white rounded-full w-8"
@@ -51,7 +51,7 @@ import {
             </div>
           </div>
 
-          <div #messagesContainer class="flex-1 overflow-y-auto p-4 space-y-3 min-h-75">
+          <div #messagesContainer class="flex-1 min-h-0 overflow-y-auto p-4 space-y-3">
             @if (messagesResource.isLoading()) {
               <lib-loader />
             } @else {
@@ -86,7 +86,7 @@ import {
             }
           </div>
 
-          <form (submit)="sendMessage($event)" class="p-4 border-t border-base-300">
+          <form (submit)="sendMessage($event)" class="shrink-0 p-4 border-t border-base-300 bg-base-100 rounded-b-lg">
             <div class="flex gap-2">
               <input
                 type="text"

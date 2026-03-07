@@ -1,10 +1,10 @@
-import { Loader } from '@/ui';
-import { Component, computed, inject, input } from '@angular/core';
+import { Loader, Toast } from '@/ui';
+import { Component, computed, inject, input, signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 
 import { Apollo } from 'apollo-angular';
-import { ClassGroupDocument } from '../graphql/generated/graphql';
+import { ChatType, ChatsCreateContextualChatDocument, ClassGroupDocument } from '../graphql/generated/graphql';
 import { catchError, map, of, throwError } from 'rxjs';
 import { isValidId } from '../core/validators';
 import Auth from '../auth/auth';
@@ -46,7 +46,20 @@ import GroupStudents from './group-students';
             {{ group.teacher?.name }}
           </div>
         </div>
-        <div></div>
+        @if (canStartGroupChat()) {
+          <button
+            class="btn btn-ghost btn-sm"
+            (click)="startGroupChat()"
+            [disabled]="startingChat()"
+          >
+            @if (startingChat()) {
+              <span class="loading loading-spinner loading-sm"></span>
+            } @else {
+              <span class="material-symbols-outlined">chat</span>
+            }
+            Chat
+          </button>
+        }
       </div>
     </div>
 
@@ -104,7 +117,35 @@ import GroupStudents from './group-students';
 export default class Group {
   public id = input.required<string>();
   private apollo = inject(Apollo);
+  private router = inject(Router);
+  private toast = inject(Toast);
   private auth = inject(Auth);
+  startingChat = signal(false);
+
+  canStartGroupChat() {
+    if (!this.auth.hasPermission('MANAGE_MESSAGES')) return false;
+    const group = this.groupResource.value();
+    if (!group) return false;
+    return this.auth.isAdmin() || group.teacher?.user?.id === this.auth.user()?.id;
+  }
+
+  async startGroupChat() {
+    this.startingChat.set(true);
+    try {
+      const result = await this.apollo
+        .mutate({
+          mutation: ChatsCreateContextualChatDocument,
+          variables: { input: { contextType: ChatType.ClassGroup, contextId: this.id() } },
+        })
+        .toPromise();
+      const chat = result?.data?.createContextualChat;
+      if (chat?.id) this.router.navigate(['/chats', chat.id]);
+    } catch {
+      this.toast.showError('Error al crear chat');
+    } finally {
+      this.startingChat.set(false);
+    }
+  }
 
   // Check if current user can manage habits for this group
   public canManageHabits = computed(() => {

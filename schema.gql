@@ -2,6 +2,14 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+input AddChatParticipantsInput {
+  """Chat ID"""
+  chatId: String!
+
+  """User IDs to add"""
+  userIds: [String!]!
+}
+
 type Assignment {
   """Course of the assignment"""
   course: Course!
@@ -292,6 +300,69 @@ enum ChargeType {
   TUITION
 }
 
+type Chat {
+  assignmentId: String
+  classGroupId: String
+  courseId: String
+  createdAt: DateTime!
+  createdBy: User
+  createdById: String
+  deletedAt: DateTime
+  id: String!
+  name: String
+  organizationId: String!
+  participants: [ChatParticipant!]!
+  type: ChatType!
+  updatedAt: DateTime!
+}
+
+type ChatMessage {
+  chatId: String!
+  content: String!
+  createdAt: DateTime!
+  deletedAt: DateTime
+  id: String!
+  replyToId: String
+  sender: User
+  senderId: String
+}
+
+input ChatMessagesInput {
+  """Chat ID"""
+  chatId: String!
+
+  """Cursor for pagination (message ID)"""
+  cursor: String
+
+  """Number of messages to fetch"""
+  limit: Int! = 50
+}
+
+type ChatParticipant {
+  chatId: String!
+  createdAt: DateTime!
+  id: String!
+  joinedAt: DateTime!
+  lastReadAt: DateTime
+  role: ChatParticipantRole!
+  updatedAt: DateTime!
+  user: User!
+  userId: String!
+}
+
+enum ChatParticipantRole {
+  ADMIN
+  MEMBER
+}
+
+enum ChatType {
+  ASSIGNMENT
+  CLASS_GROUP
+  COURSE
+  DIRECT
+  GROUP
+}
+
 type CheckPendingInvitationResult {
   hasPendingInvitation: Boolean!
   organizationName: String
@@ -495,6 +566,14 @@ input CreateClassGroupInput {
   teacherId: String
 }
 
+input CreateContextualChatInput {
+  """ID of the course, assignment, or class group"""
+  contextId: String!
+
+  """Context type: COURSE, ASSIGNMENT, or CLASS_GROUP"""
+  contextType: ChatType!
+}
+
 input CreateCourseInput {
   """Code of the course"""
   code: String!
@@ -594,6 +673,14 @@ input CreateGradeInput {
 
   """Titulo de la calificacion  """
   title: String!
+}
+
+input CreateGroupChatInput {
+  """Name of the group chat"""
+  name: String!
+
+  """User IDs of initial participants (excluding creator)"""
+  participantIds: [String!]!
 }
 
 input CreateGroupsScheduleInput {
@@ -1622,6 +1709,7 @@ type MessageRecipient {
 
 type Mutation {
   acceptInvitation(invitationId: String!): Boolean!
+  addChatParticipants(input: AddChatParticipantsInput!): Chat!
   approveJoinRequest(approve: Boolean!, requestId: String!): Boolean!
   cancelInvitation(invitationId: String!): Boolean!
   changePassword(currentPassword: String!, newPassword: String!): Boolean!
@@ -1633,13 +1721,16 @@ type Mutation {
   createAttendanceSession(input: CreateAttendanceSessionInput!): AttendanceSession!
   createCharge(input: CreateChargeInput!): [Charge!]!
   createClassGroup(createClassGroupInput: CreateClassGroupInput!): ClassGroup!
+  createContextualChat(input: CreateContextualChatInput!): Chat!
   createCourse(createCourseInput: CreateCourseInput!): Course!
   createDegree(createDegreeInput: CreateDegreeInput!): Degree!
+  createDirectChat(recipientId: String!): Chat!
   createFile(createFileInput: CreateFileInput!): File!
   createFileDownloadUrl(createFileDownloadInput: CreateFileDownloadInput!): FileDownloadUrl!
   createFileUploadUrl(createFileUploadInput: CreateFileUploadInput!): FileUploadUrl!
   createGrade(createGradeInput: CreateGradeInput!): Grade!
   createGradeBucket(createGradeBucketInput: CreateGradeBucketInput!): GradeBucket!
+  createGroupChat(input: CreateGroupChatInput!): Chat!
   createGroupsSchedule(createGroupsScheduleInput: CreateGroupsScheduleInput!): GroupsSchedule!
   createInvitationAccessLink(email: String!): CreateInvitationAccessLinkResult!
   createMessage(createMessageInput: CreateMessageInput!): Message!
@@ -1673,7 +1764,9 @@ type Mutation {
   deleteAssignmentSubmission(submissionId: String!): Boolean!
   deleteAttendanceSession(id: String!): AttendanceSession!
   inviteMember(email: String!, organizationId: String, role: String!): Invitation!
+  leaveChat(chatId: String!): Boolean!
   login(email: String!, password: String!): AuthPayload!
+  markChatRead(chatId: String!): ChatParticipant
   markMessageAsRead(messageId: String!): MessageRecipient
   markNotificationRead(notificationId: String!): Boolean!
   rejectInvitation(invitationId: String!): Boolean!
@@ -1708,6 +1801,7 @@ type Mutation {
   resendUserInvitation(email: String!): Boolean!
   resetPassword(newPassword: String!, token: String!): AuthPayload!
   saveHabitEvaluation(saveHabitEvaluationInput: SaveHabitEvaluationInput!): HabitEvaluation!
+  sendMessage(input: SendMessageInput!): ChatMessage!
   sendVerificationLink(email: String!): Boolean!
   setActiveOrganization(organizationId: String): Boolean!
   shareFile(shareFileInput: ShareFileInput!): File!
@@ -2005,6 +2099,9 @@ type Query {
   averageCourseScoreForStudent(courseId: String!, periodId: String!, studentId: String!): Float!
   chargesBySchool(schoolId: String!, year: Int): [Charge!]!
   chargesByStudent(studentId: String!): [Charge!]!
+  chat(id: String!): Chat
+  chatMessages(input: ChatMessagesInput!): [ChatMessage!]!
+  chatUnreadCount: Int!
   checkPendingInvitation(email: String!): CheckPendingInvitationResult!
   classGroup(id: String!): ClassGroup!
   classGroups(
@@ -2335,6 +2432,7 @@ type Query {
 
   """Get the current student submission for an assignment"""
   myAssignmentSubmission(assignmentId: String!): AssignmentSubmission
+  myChats: [Chat!]!
   myJoinRequestStatus: JoinRequestStatus
   newsletter(id: String!): Newsletter
   newsletters(
@@ -2793,6 +2891,17 @@ type SchoolLogoUploadUrl {
   uploadUrl: String!
 }
 
+input SendMessageInput {
+  """Chat ID"""
+  chatId: String!
+
+  """Message content"""
+  content: String!
+
+  """Optional reply to message ID"""
+  replyToId: String
+}
+
 input ShareFileInput {
   """File ID to share"""
   fileId: String!
@@ -3086,6 +3195,10 @@ type SubmissionUploadUrl {
 
   """Presigned URL for uploading the file"""
   uploadUrl: String!
+}
+
+type Subscription {
+  messageReceived(chatId: String): ChatMessage!
 }
 
 type Teacher {

@@ -3,22 +3,11 @@ import { ChangeDetectionStrategy, Component, inject, Signal, signal } from '@ang
 import { rxResource } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { Prisma } from '@generated/prisma';
 
 import { Apollo } from 'apollo-angular';
-import { GetCoursesDocument } from '../graphql/generated/graphql';
 import { map, of, tap } from 'rxjs';
 import Store from '../core/store';
-type Teacher = Prisma.TeacherGetPayload<{ include: { user: true } }> & {
-  name: string;
-  initials: string;
-};
-
-type CourseType = Prisma.CourseGetPayload<{
-  include: { subject: true; studyPlan: true };
-}> & {
-  teacher: Teacher | null;
-};
+import { GetCoursesDocument } from '../graphql/generated/graphql';
 
 @Component({
   selector: 'app-courses',
@@ -48,7 +37,7 @@ type CourseType = Prisma.CourseGetPayload<{
         @for (course of coursesResource.value(); track course.id) {
           <a
             [routerLink]="['/courses', course.id]"
-            class="group card bg-base-100 border border-base-300 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 overflow-hidden cursor-pointer"
+            class="group card bg-base-100 hover:shadow hover:-translate-y-1 transition-all duration-300 overflow-hidden cursor-pointer"
           >
             <figure class="relative overflow-hidden">
               <img

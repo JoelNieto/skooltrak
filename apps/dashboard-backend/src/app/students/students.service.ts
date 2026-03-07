@@ -4,6 +4,7 @@ import { CONTEXT } from '@nestjs/graphql';
 import * as bcrypt from 'bcrypt';
 import { randomUUID } from 'crypto';
 import { Request } from 'express';
+import { ChatSyncService } from '../chats/chat-sync.service';
 import { FetchDataInput } from '../fetch-data.input';
 import { PrismaService } from '../prisma.service';
 import { CreateStudentInput } from './dto/create-student.input';
@@ -15,6 +16,7 @@ export class StudentsService {
 
   constructor(
     private readonly prisma: PrismaService,
+    private readonly chatSync: ChatSyncService,
     @Inject(CONTEXT) private readonly context: { req: Request },
   ) {}
   async create(createStudentInput: CreateStudentInput) {
@@ -187,6 +189,18 @@ export class StudentsService {
       } catch (emailError) {
         // Log error but don't fail the creation
         this.logger.error(`Failed to send welcome invitation to ${email}:`, emailError);
+      }
+
+      // Add student to contextual chats for class group and courses
+      try {
+        if (classGroupId) {
+          await this.chatSync.addUserToClassGroupChats(classGroupId, user.id);
+        }
+        for (const course of coursesToConnect) {
+          await this.chatSync.addUserToCourseChats(course.id, user.id);
+        }
+      } catch (chatError) {
+        this.logger.warn(`Failed to add student to contextual chats:`, chatError);
       }
 
       return student;
@@ -394,11 +408,28 @@ export class StudentsService {
       }
     }
 
-    return this.prisma.student.update({
+    const updated = await this.prisma.student.update({
       where: { id },
       data: updateData,
       include: { classGroup: true, user: true, parents: true },
     });
+
+    // Add student to contextual chats when class group or courses change
+    try {
+      if (rest.classGroupId && updated.userId) {
+        await this.chatSync.addUserToClassGroupChats(rest.classGroupId, updated.userId);
+      }
+      if (updateData.courses && 'set' in (updateData.courses as object) && updated.userId) {
+        const courseIds = (updateData.courses as { set: { id: string }[] }).set.map((c) => c.id);
+        for (const courseId of courseIds) {
+          await this.chatSync.addUserToCourseChats(courseId, updated.userId);
+        }
+      }
+    } catch (chatError) {
+      this.logger.warn(`Failed to add student to contextual chats on update:`, chatError);
+    }
+
+    return updated;
   }
 
   async remove(id: string) {

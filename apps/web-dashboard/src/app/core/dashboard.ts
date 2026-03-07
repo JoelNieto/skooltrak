@@ -43,7 +43,7 @@ import { ThemeService } from './theme.service';
         </button>
       </div>
       <!-- Page content -->
-      <main class="flex-1 overflow-y-auto px-4 bg-base-200">
+      <main class="flex-1 overflow-y-auto px-4 bg-base-300">
         <div class="mx-auto pt-2">
           <router-outlet />
         </div>

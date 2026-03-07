@@ -39,6 +39,7 @@ model Organization {
   attendanceSessions  AttendanceSession[]
   newsletters         Newsletter[]
   habitEvaluations    HabitEvaluation[]
+  chats               Chat[]
   // Better-auth organization plugin
   members             Member[]
   invitations         Invitation[]
@@ -79,6 +80,9 @@ model User {
   notifications     Notification[]
   joinRequests      JoinRequest[]
   newsletters       Newsletter[]
+  chatParticipants  ChatParticipant[]
+  sentChatMessages  ChatMessage[]
+  createdChats      Chat[]
   // Better-auth relations
   sessions          Session[]
   accounts          Account[]
@@ -119,6 +123,85 @@ model MessageRecipient {
 
   @@unique([messageId, userId])
   @@map("message_recipients")
+}
+
+// ==========================================
+// Instant Messaging (Chat)
+// ==========================================
+
+enum ChatType {
+  DIRECT
+  GROUP
+  COURSE
+  ASSIGNMENT
+  CLASS_GROUP
+}
+
+enum ChatParticipantRole {
+  MEMBER
+  ADMIN
+}
+
+model Chat {
+  id             String            @id @default(cuid())
+  organizationId String
+  organization   Organization      @relation(fields: [organizationId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  name           String?
+  type           ChatType
+  courseId       String?
+  course         Course?           @relation(fields: [courseId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  assignmentId   String?
+  assignment     Assignment?       @relation(fields: [assignmentId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  classGroupId   String?
+  classGroup     ClassGroup?       @relation(fields: [classGroupId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  createdById    String?
+  createdBy      User?             @relation(fields: [createdById], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  participants   ChatParticipant[]
+  messages       ChatMessage[]
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+  deletedAt      DateTime?
+
+  @@index([organizationId])
+  @@index([courseId])
+  @@index([assignmentId])
+  @@index([classGroupId])
+  @@map("chats")
+}
+
+model ChatParticipant {
+  id         String              @id @default(cuid())
+  chatId     String
+  chat       Chat                @relation(fields: [chatId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  userId     String
+  user       User                @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  role       ChatParticipantRole @default(MEMBER)
+  joinedAt   DateTime            @default(now())
+  lastReadAt DateTime?
+  createdAt  DateTime            @default(now())
+  updatedAt  DateTime            @updatedAt
+
+  @@unique([chatId, userId])
+  @@index([userId])
+  @@map("chat_participants")
+}
+
+model ChatMessage {
+  id        String        @id @default(cuid())
+  chatId    String
+  chat      Chat          @relation(fields: [chatId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  senderId  String?
+  sender    User?         @relation(fields: [senderId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  content   String
+  replyToId String?
+  replyTo   ChatMessage?  @relation("ChatMessageReplies", fields: [replyToId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  replies   ChatMessage[] @relation("ChatMessageReplies")
+  createdAt DateTime      @default(now())
+  deletedAt DateTime?
+
+  @@index([chatId])
+  @@index([senderId])
+  @@map("chat_messages")
 }
 
 model File {
@@ -313,39 +396,39 @@ model Degree {
 }
 
 model StudyPlan {
-  id                  String                    @id @default(cuid())
-  name                String
-  shortName           String
-  level               Int
-  degreeId            String
-  degree              Degree                    @relation(fields: [degreeId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  description         String
-  schoolId            String
-  school              School                    @relation(fields: [schoolId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  courses             Course[]
-  createdAt           DateTime                  @default(now())
-  updatedAt           DateTime                  @updatedAt
-  classGroups         ClassGroup[]
-  charges             Charge[]
-  gradeMetric         GradeMetric?              @relation(fields: [gradeMetricId], references: [id], onDelete: SetNull)
-  gradeMetricId       String?
+  id                   String                    @id @default(cuid())
+  name                 String
+  shortName            String
+  level                Int
+  degreeId             String
+  degree               Degree                    @relation(fields: [degreeId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  description          String
+  schoolId             String
+  school               School                    @relation(fields: [schoolId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  courses              Course[]
+  createdAt            DateTime                  @default(now())
+  updatedAt            DateTime                  @updatedAt
+  classGroups          ClassGroup[]
+  charges              Charge[]
+  gradeMetric          GradeMetric?              @relation(fields: [gradeMetricId], references: [id], onDelete: SetNull)
+  gradeMetricId        String?
   monthlyTuitionAmount Decimal?
-  tuitionMonths       Int[]              @default([])
-  enrollmentCosts     StudyPlanEnrollmentCost[]
+  tuitionMonths        Int[]                     @default([])
+  enrollmentCosts      StudyPlanEnrollmentCost[]
 
   @@unique([schoolId, name])
   @@map("study_plans")
 }
 
 model StudyPlanEnrollmentCost {
-  id          String     @id @default(cuid())
+  id          String    @id @default(cuid())
   studyPlanId String
-  studyPlan   StudyPlan  @relation(fields: [studyPlanId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  studyPlan   StudyPlan @relation(fields: [studyPlanId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   name        String
   amount      Decimal
-  order       Int        @default(0)
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
+  order       Int       @default(0)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 
   @@index([studyPlanId])
   @@map("study_plan_enrollment_costs")
@@ -376,6 +459,7 @@ model Course {
   weeklySchedules    ClassGroupWeeklySchedule[]
   fileShares         FileShareCourse[]
   attendanceSessions AttendanceSession[]
+  chats              Chat[]
 
   @@unique([schoolId, name])
   @@unique([schoolId, code])
@@ -403,6 +487,7 @@ model ClassGroup {
   fileShares         FileShareClassGroup[]
   attendanceSessions AttendanceSession[]
   habitEvaluations   HabitEvaluation[]
+  chats              Chat[]
   createdAt          DateTime                   @default(now())
   updatedAt          DateTime                   @updatedAt
 
@@ -520,6 +605,7 @@ model Assignment {
   teacher           Teacher?               @relation(fields: [teacherId], references: [id], onDelete: SetNull, onUpdate: Cascade)
   teacherId         String?
   submissions       AssignmentSubmission[]
+  chats             Chat[]
   createdAt         DateTime               @default(now())
   updatedAt         DateTime               @updatedAt
 
@@ -777,21 +863,21 @@ model Notification {
 // ==========================================
 
 model Charge {
-  id            String     @id @default(cuid())
-  schoolId      String
-  school        School     @relation(fields: [schoolId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  year          Int
-  studentId     String
-  student       Student    @relation(fields: [studentId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  studyPlanId   String?
-  studyPlan     StudyPlan? @relation(fields: [studyPlanId], references: [id], onDelete: SetNull, onUpdate: Cascade)
-  amount        Decimal
-  dueDate       DateTime     @db.Date
-  description   String       @default("")
-  chargeType    ChargeType   @default(CUSTOM)
-  status        ChargeStatus @default(PENDING)
-  createdAt     DateTime     @default(now())
-  updatedAt     DateTime     @updatedAt
+  id          String       @id @default(cuid())
+  schoolId    String
+  school      School       @relation(fields: [schoolId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  year        Int
+  studentId   String
+  student     Student      @relation(fields: [studentId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  studyPlanId String?
+  studyPlan   StudyPlan?   @relation(fields: [studyPlanId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  amount      Decimal
+  dueDate     DateTime     @db.Date
+  description String       @default("")
+  chargeType  ChargeType   @default(CUSTOM)
+  status      ChargeStatus @default(PENDING)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
 
   @@index([schoolId])
   @@index([schoolId, year])

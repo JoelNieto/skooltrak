@@ -2,6 +2,7 @@ import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { ScheduleModule } from '@nestjs/schedule';
 import { GraphQLModule } from '@nestjs/graphql';
 import { join } from 'path';
 import { AppController } from './app.controller';
@@ -32,6 +33,7 @@ import { FilesModule } from './files/files.module';
 import { NewslettersModule } from './newsletters/newsletters.module';
 import { ParentsModule } from './parents/parents.module';
 import { GradeReportModule } from './grade-report/grade-report.module';
+import { ChatsModule } from './chats/chats.module';
 import { HabitEvaluationsModule } from './habit-evaluations/habit-evaluations.module';
 import { HabitMetricsModule } from './habit-metrics/habit-metrics.module';
 import { FinancialModule } from './financial/financial.module';
@@ -39,6 +41,7 @@ import { FinancialModule } from './financial/financial.module';
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
+    ScheduleModule.forRoot(),
     PrismaModule,
     GraphQLModule.forRootAsync<ApolloDriverConfig>({
       imports: [ConfigModule],
@@ -49,6 +52,9 @@ import { FinancialModule } from './financial/financial.module';
         plugins: [ApolloServerPluginLandingPageLocalDefault()],
         path: '/api/graphql',
         context: ({ req, res }) => ({ req, res }),
+        subscriptions: {
+          'graphql-ws': true,
+        },
       }),
       driver: ApolloDriver,
     }),
@@ -75,6 +81,7 @@ import { FinancialModule } from './financial/financial.module';
     FilesModule,
     ParentsModule,
     NewslettersModule,
+    ChatsModule,
     HabitEvaluationsModule,
     HabitMetricsModule,
     GradeReportModule,

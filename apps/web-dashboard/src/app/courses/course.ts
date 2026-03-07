@@ -1,10 +1,11 @@
-import { Loader, Modal } from '@/ui';
-import { Component, inject, input } from '@angular/core';
+import { Loader, Modal, Toast } from '@/ui';
+import { Component, inject, input, signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 
 import { Apollo } from 'apollo-angular';
 import { map, of } from 'rxjs';
+import { ChatType, ChatsCreateContextualChatDocument } from '../graphql/generated/graphql';
 import AssignmentForm from '../assignments/assignment-form';
 import CourseAttendance from '../attendance/course-attendance';
 import Auth from '../auth/auth';
@@ -66,6 +67,20 @@ import CourseStudentGrades from './course-student-grades';
               </div>
 
               <div class="flex gap-2">
+                @if (canStartCourseChat()) {
+                  <button
+                    class="btn btn-ghost"
+                    (click)="startCourseChat()"
+                    [disabled]="startingChat()"
+                  >
+                    @if (startingChat()) {
+                      <span class="loading loading-spinner loading-sm"></span>
+                    } @else {
+                      <span class="material-symbols-outlined">chat</span>
+                    }
+                    Chat
+                  </button>
+                }
                 @if (auth.hasPermission('MANAGE_ASSIGNMENTS')) {
                   <button class="btn btn-neutral" (click)="addAssignment()">
                     <span class="material-symbols-outlined">assignment_add</span>
@@ -157,6 +172,34 @@ export default class Course {
   public auth = inject(Auth);
   private apollo = inject(Apollo);
   private modal = inject(Modal);
+  private router = inject(Router);
+  private toast = inject(Toast);
+  startingChat = signal(false);
+
+  canStartCourseChat() {
+    if (!this.auth.hasPermission('MANAGE_MESSAGES')) return false;
+    const course = this.courseResource.value();
+    if (!course) return false;
+    return this.auth.isAdmin() || course.teacher?.user?.id === this.auth.user()?.id;
+  }
+
+  async startCourseChat() {
+    this.startingChat.set(true);
+    try {
+      const result = await this.apollo
+        .mutate({
+          mutation: ChatsCreateContextualChatDocument,
+          variables: { input: { contextType: ChatType.Course, contextId: this.id() } },
+        })
+        .toPromise();
+      const chat = result?.data?.createContextualChat;
+      if (chat?.id) this.router.navigate(['/chats', chat.id]);
+    } catch {
+      this.toast.showError('Error al crear chat');
+    } finally {
+      this.startingChat.set(false);
+    }
+  }
   public courseResource = rxResource({
     params: () => ({
       id: this.id(),

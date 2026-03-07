@@ -201,6 +201,21 @@ export const appRoutes: Route[] = [
         loadComponent: () => import('./messages/message'),
       },
       {
+        path: 'chats',
+        canActivate: [permissionGuard('VIEW_MESSAGES')],
+        loadComponent: () => import('./chats/chats'),
+      },
+      {
+        path: 'chats/new',
+        canActivate: [permissionGuard('MANAGE_MESSAGES')],
+        loadComponent: () => import('./chats/chat-new'),
+      },
+      {
+        path: 'chats/:id',
+        canActivate: [permissionGuard('VIEW_MESSAGES')],
+        loadComponent: () => import('./chats/chat-thread'),
+      },
+      {
         path: 'files',
         canActivate: [permissionGuard('VIEW_FILES')],
         loadComponent: () => import('./files/files'),

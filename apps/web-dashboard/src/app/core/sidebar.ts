@@ -5,7 +5,12 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
 import { Apollo } from 'apollo-angular';
 import { map } from 'rxjs';
 import Auth from '../auth/auth';
-import { GetSchoolsDocument, GetSchoolsQuery, UnreadMessagesCountDocument } from '../graphql/generated/graphql';
+import {
+  ChatsUnreadCountDocument,
+  GetSchoolsDocument,
+  GetSchoolsQuery,
+  UnreadMessagesCountDocument,
+} from '../graphql/generated/graphql';
 import Store from './store';
 import { ThemeService } from './theme.service';
 
@@ -171,6 +176,21 @@ import { ThemeService } from './theme.service';
             >
               <span class="material-symbols-outlined text-xl">mail</span>
               <span>Mensajes</span>
+            </a>
+          </li>
+          <li>
+            <a
+              routerLink="chats"
+              routerLinkActive="bg-primary/10 text-primary font-semibold"
+              class="flex items-center gap-3 px-3 py-2 text-base-content/80 rounded-lg transition-all duration-150 hover:bg-base-200 hover:text-base-content group"
+            >
+              <span class="material-symbols-outlined text-xl">chat</span>
+              <span>Chats</span>
+              @if (chatUnreadCount.value(); as count) {
+                @if (count > 0) {
+                  <span class="badge badge-primary badge-sm ml-auto">{{ count > 99 ? '99+' : count }}</span>
+                }
+              }
             </a>
           </li>
         }
@@ -482,6 +502,17 @@ export class Sidebar {
           query: UnreadMessagesCountDocument,
         })
         .valueChanges.pipe(map((result) => result.data?.unreadMessagesCount ?? 0)),
+  });
+
+  protected chatUnreadCount = rxResource({
+    stream: () =>
+      this.#apollo
+        .watchQuery({
+          fetchPolicy: 'network-only',
+          pollInterval: 60000,
+          query: ChatsUnreadCountDocument,
+        })
+        .valueChanges.pipe(map((result) => result.data?.chatUnreadCount ?? 0)),
   });
 
   protected get schoolsList(): GetSchoolsQuery['schools'] {

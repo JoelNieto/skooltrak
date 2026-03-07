@@ -11,6 +11,9 @@ query Assignment($id: String!) {
       id
       firstName
       fatherName
+      user {
+        id
+      }
     }
     date
     createdAt

@@ -1,15 +1,19 @@
 import { Injectable } from '@nestjs/common';
+import { ChatSyncService } from '../chats/chat-sync.service';
 import { PrismaService } from '../prisma.service';
 import { CreateAssignmentInput } from './dto/create-assignment.input';
 import { UpdateAssignmentInput } from './dto/update-assignment.input';
 
 @Injectable()
 export class AssignmentsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly chatSync: ChatSyncService,
+  ) {}
 
-  create(createAssignmentInput: CreateAssignmentInput) {
+  async create(createAssignmentInput: CreateAssignmentInput) {
     const { groupDates, ...assignmentData } = createAssignmentInput;
-    return this.prisma.assignment.create({
+    const assignment = await this.prisma.assignment.create({
       data: {
         ...assignmentData,
         dates: groupDates?.length
@@ -20,6 +24,12 @@ export class AssignmentsService {
       },
       include: { course: true, teacher: true, dates: { include: { classGroup: true } } },
     });
+
+    for (const d of assignment.dates) {
+      await this.chatSync.addClassGroupStudentsToAssignmentChat(assignment.id, d.classGroupId);
+    }
+
+    return assignment;
   }
 
   findAll() {
@@ -109,11 +119,28 @@ export class AssignmentsService {
     });
   }
 
-  update(id: string, updateAssignmentInput: UpdateAssignmentInput) {
-    return this.prisma.assignment.update({
+  async update(id: string, updateAssignmentInput: UpdateAssignmentInput) {
+    const input = updateAssignmentInput as UpdateAssignmentInput & {
+      groupDates?: { date: Date; classGroupId: string }[];
+    };
+    const { id: _id, groupDates, ...rest } = input;
+    const updateData: Record<string, unknown> = { ...rest };
+    if (groupDates?.length) {
+      (updateData as { dates?: { create: unknown[] } }).dates = { create: groupDates };
+    }
+    const assignment = await this.prisma.assignment.update({
       where: { id },
-      data: updateAssignmentInput,
+      data: updateData as never,
+      include: { course: true, teacher: true, dates: { include: { classGroup: true } } },
     });
+
+    if (groupDates?.length) {
+      for (const d of groupDates) {
+        await this.chatSync.addClassGroupStudentsToAssignmentChat(id, d.classGroupId);
+      }
+    }
+
+    return assignment;
   }
 
   remove(id: string) {

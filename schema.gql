@@ -818,11 +818,20 @@ input CreateSchoolInput {
   """Phone number of the school"""
   phone: String! = ""
 
+  """Primary brand color (hex, e.g. #3b82f6)"""
+  primaryColor: String
+
+  """Secondary brand color (hex)"""
+  secondaryColor: String
+
   """Short name of the school"""
   shortName: String!
 
   """State of the school"""
   state: String! = ""
+
+  """Tertiary/accent brand color (hex)"""
+  tertiaryColor: String
 
   """Website of the school"""
   website: String! = ""
@@ -2738,11 +2747,20 @@ type School {
   """Phone number of the school"""
   phone: String!
 
+  """Primary brand color (hex, e.g. #3b82f6)"""
+  primaryColor: String
+
+  """Secondary brand color (hex)"""
+  secondaryColor: String
+
   """Short name of the school"""
   shortName: String!
 
   """State of the school"""
   state: String!
+
+  """Tertiary/accent brand color (hex)"""
+  tertiaryColor: String
 
   """Updated at"""
   updatedAt: DateTime!
@@ -3463,11 +3481,20 @@ input UpdateSchoolInput {
   """Phone number of the school"""
   phone: String = ""
 
+  """Primary brand color (hex, e.g. #3b82f6)"""
+  primaryColor: String
+
+  """Secondary brand color (hex)"""
+  secondaryColor: String
+
   """Short name of the school"""
   shortName: String
 
   """State of the school"""
   state: String = ""
+
+  """Tertiary/accent brand color (hex)"""
+  tertiaryColor: String
 
   """Website of the school"""
   website: String = ""

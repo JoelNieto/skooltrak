@@ -231,6 +231,9 @@ export default class CreateSchool {
               currentYear: new Date().getFullYear(),
               createdAt: new Date(),
               updatedAt: new Date(),
+              primaryColor: null,
+              secondaryColor: null,
+              tertiaryColor: null,
             });
             this.toasts.showSuccess('Escuela creada exitosamente');
             this.router.navigate(['/onboarding/setup']);

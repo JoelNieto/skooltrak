@@ -1,15 +1,8 @@
 import { Organization } from '@/auth';
-import { Prisma } from '@generated/prisma';
 import { Field, ObjectType } from '@nestjs/graphql';
+
 @ObjectType()
-export class School
-  implements
-    Prisma.SchoolGetPayload<{
-      include: {
-        organization: true;
-      };
-    }>
-{
+export class School {
   @Field(() => String, { description: 'ID of the school' })
   id: string;
   @Field(() => Organization, { description: 'Organization of the school' })
@@ -43,6 +36,21 @@ export class School
   phone: string;
   @Field(() => String, { description: 'Website of the school' })
   website: string;
+  @Field(() => String, {
+    description: 'Primary brand color (hex, e.g. #3b82f6)',
+    nullable: true,
+  })
+  primaryColor: string | null;
+  @Field(() => String, {
+    description: 'Secondary brand color (hex)',
+    nullable: true,
+  })
+  secondaryColor: string | null;
+  @Field(() => String, {
+    description: 'Tertiary/accent brand color (hex)',
+    nullable: true,
+  })
+  tertiaryColor: string | null;
   @Field(() => String, { description: 'Currency code (e.g. USD, MXN)' })
   currencyCode: string;
   @Field(() => Number, { description: 'Current year of the school' })

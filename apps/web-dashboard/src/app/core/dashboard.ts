@@ -3,6 +3,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { filter } from 'rxjs';
 import Auth from '../auth/auth';
+import { SchoolThemeService } from './school-theme.service';
 import { Sidebar } from './sidebar';
 import { ThemeService } from './theme.service';
 @Component({
@@ -64,7 +65,7 @@ export default class Dashboard {
   #router = inject(Router);
   #theme = inject(ThemeService);
   #auth = inject(Auth);
-
+  public schoolTheme = inject(SchoolThemeService);
   constructor() {
     afterRenderEffect(() => {
       const pref = this.#auth.themePreference();

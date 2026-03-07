@@ -16,6 +16,9 @@ query GetSchools {
     currencyCode
     currentYear
     website
+    primaryColor
+    secondaryColor
+    tertiaryColor
     createdAt
     updatedAt
   }

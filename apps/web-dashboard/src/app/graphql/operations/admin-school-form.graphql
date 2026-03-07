@@ -13,6 +13,9 @@ query AdminSchoolForm($id: String!) {
     website
     logo
     logoUrl
+    primaryColor
+    secondaryColor
+    tertiaryColor
   }
 }
 

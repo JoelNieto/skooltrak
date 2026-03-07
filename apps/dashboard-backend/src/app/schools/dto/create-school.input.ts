@@ -53,6 +53,22 @@ export class CreateSchoolInput implements CreateSchoolInputType {
   })
   website: string;
 
+  @Field(() => String, {
+    description: 'Primary brand color (hex, e.g. #3b82f6)',
+    nullable: true,
+  })
+  primaryColor?: string | null;
+  @Field(() => String, {
+    description: 'Secondary brand color (hex)',
+    nullable: true,
+  })
+  secondaryColor?: string | null;
+  @Field(() => String, {
+    description: 'Tertiary/accent brand color (hex)',
+    nullable: true,
+  })
+  tertiaryColor?: string | null;
+
   @Field(() => Int, {
     description: 'Current year of the school',
     defaultValue: 2025,

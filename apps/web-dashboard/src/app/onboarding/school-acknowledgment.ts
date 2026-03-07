@@ -222,6 +222,9 @@ export default class SchoolAcknowledgment {
               currentYear: new Date().getFullYear(),
               createdAt: new Date(),
               updatedAt: new Date(),
+              primaryColor: (school as { primaryColor?: string | null }).primaryColor ?? null,
+              secondaryColor: (school as { secondaryColor?: string | null }).secondaryColor ?? null,
+              tertiaryColor: (school as { tertiaryColor?: string | null }).tertiaryColor ?? null,
             });
             this.toasts.showSuccess('Escuela creada exitosamente');
             this.router.navigate(['/onboarding/setup']);

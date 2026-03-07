@@ -15,6 +15,7 @@ import { Router, RouterLink } from '@angular/router';
 import { Apollo } from 'apollo-angular';
 import { ImageCroppedEvent, ImageCropperComponent } from 'ngx-image-cropper';
 import { firstValueFrom, map, of } from 'rxjs';
+import Store from '../../core/store';
 import { isValidId } from '../../core/validators';
 import {
   AdminCreateSchoolDocument,
@@ -37,6 +38,9 @@ interface SchoolFormData {
   country: string;
   website: string;
   logo: string;
+  primaryColor: string;
+  secondaryColor: string;
+  tertiaryColor: string;
 }
 
 @Component({
@@ -333,6 +337,87 @@ interface SchoolFormData {
               </div>
             </div>
           </div>
+
+          <!-- Theme / Colors Section -->
+          <div class="sm:grid sm:grid-cols-4 sm:gap-4 pb-8 pt-6">
+            <div class="mb-4">
+              <h2 class="text-lg/7 font-semibold text-base-content">Tema / Colores</h2>
+              <p class="mt-1 text-sm text-base-content/70">
+                Colores de marca del colegio. Se aplican en toda la aplicación cuando este colegio está seleccionado.
+              </p>
+            </div>
+            <div class="sm:col-span-3">
+              <div class="card card-border border-base-300 bg-base-100">
+                <div class="card-body gap-y-4">
+                  <div class="sm:grid sm:grid-cols-6 sm:gap-4">
+                    <div class="fieldset col-span-2">
+                      <label for="primaryColor">
+                        Color primario
+                        <span class="text-base-content/50 text-xs">(opcional)</span>
+                      </label>
+                      <div class="flex gap-2 items-center">
+                        <input
+                          type="color"
+                          [value]="schoolForm.primaryColor().value() || '#3b82f6'"
+                          (input)="onThemeColorChange('primaryColor', $any($event.target).value)"
+                          class="w-12 h-10 rounded cursor-pointer border border-base-300 p-1 bg-base-200 shrink-0"
+                        />
+                        <input
+                          id="primaryColor"
+                          type="text"
+                          [formField]="schoolForm.primaryColor"
+                          class="input input-primary flex-1 font-mono text-sm"
+                          placeholder="#3b82f6"
+                        />
+                      </div>
+                    </div>
+                    <div class="fieldset col-span-2">
+                      <label for="secondaryColor">
+                        Color secundario
+                        <span class="text-base-content/50 text-xs">(opcional)</span>
+                      </label>
+                      <div class="flex gap-2 items-center">
+                        <input
+                          type="color"
+                          [value]="schoolForm.secondaryColor().value() || '#10b981'"
+                          (input)="onThemeColorChange('secondaryColor', $any($event.target).value)"
+                          class="w-12 h-10 rounded cursor-pointer border border-base-300 p-1 bg-base-200 shrink-0"
+                        />
+                        <input
+                          id="secondaryColor"
+                          type="text"
+                          [formField]="schoolForm.secondaryColor"
+                          class="input input-primary flex-1 font-mono text-sm"
+                          placeholder="#10b981"
+                        />
+                      </div>
+                    </div>
+                    <div class="fieldset col-span-2">
+                      <label for="tertiaryColor">
+                        Color terciario
+                        <span class="text-base-content/50 text-xs">(opcional)</span>
+                      </label>
+                      <div class="flex gap-2 items-center">
+                        <input
+                          type="color"
+                          [value]="schoolForm.tertiaryColor().value() || '#8b5cf6'"
+                          (input)="onThemeColorChange('tertiaryColor', $any($event.target).value)"
+                          class="w-12 h-10 rounded cursor-pointer border border-base-300 p-1 bg-base-200 shrink-0"
+                        />
+                        <input
+                          id="tertiaryColor"
+                          type="text"
+                          [formField]="schoolForm.tertiaryColor"
+                          class="input input-primary flex-1 font-mono text-sm"
+                          placeholder="#8b5cf6"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
         <!-- Form Actions -->
@@ -356,6 +441,7 @@ export default class SchoolForm {
   private apollo = inject(Apollo);
   private router = inject(Router);
   private toasts = inject(Toast);
+  private store = inject(Store);
 
   public isEditMode = computed(() => !!this.id());
   public isSaving = signal(false);
@@ -384,6 +470,9 @@ export default class SchoolForm {
     country: '',
     website: '',
     logo: '',
+    primaryColor: '',
+    secondaryColor: '',
+    tertiaryColor: '',
   });
 
   public schoolForm = form(this.#schoolModel, (schemaPath) => {
@@ -424,6 +513,9 @@ export default class SchoolForm {
           country: school.country ?? '',
           website: school.website ?? '',
           logo: school.logo ?? '',
+          primaryColor: (school as { primaryColor?: string | null }).primaryColor ?? '',
+          secondaryColor: (school as { secondaryColor?: string | null }).secondaryColor ?? '',
+          tertiaryColor: (school as { tertiaryColor?: string | null }).tertiaryColor ?? '',
         });
 
         // Set logo download URL if available
@@ -569,6 +661,10 @@ export default class SchoolForm {
     }
   }
 
+  onThemeColorChange(field: 'primaryColor' | 'secondaryColor' | 'tertiaryColor', value: string): void {
+    this.#schoolModel.update((m) => ({ ...m, [field]: value }));
+  }
+
   cancelCrop(): void {
     this.showCropper.set(false);
     this.imageChangedEvent.set(null);
@@ -598,7 +694,13 @@ export default class SchoolForm {
 
     submit(this.schoolForm, async () => {
       this.isSaving.set(true);
-      const formValue = this.schoolForm().value();
+      const raw = this.schoolForm().value();
+      const formValue = {
+        ...raw,
+        primaryColor: raw.primaryColor?.trim() || null,
+        secondaryColor: raw.secondaryColor?.trim() || null,
+        tertiaryColor: raw.tertiaryColor?.trim() || null,
+      };
 
       try {
         if (this.isEditMode()) {
@@ -614,6 +716,11 @@ export default class SchoolForm {
             }),
           );
           this.toasts.showSuccess('Colegio actualizado exitosamente');
+          if (this.store.currentSchool()?.id === this.id()) {
+            this.store.currentSchool.update((s) =>
+              s ? { ...s, primaryColor: formValue.primaryColor ?? null, secondaryColor: formValue.secondaryColor ?? null, tertiaryColor: formValue.tertiaryColor ?? null } : s
+            );
+          }
           this.router.navigate(['/schools', this.id()]);
         } else {
           // Create the school first

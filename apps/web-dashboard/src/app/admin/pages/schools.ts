@@ -36,7 +36,7 @@ import {
         <span class="material-symbols-outlined">add_circle</span> Agregar Colegio
       </a>
     </div>
-    <div class="overflow-x-auto bg-base-100 rounded-lg mt-4 border border-base-300">
+    <div class="overflow-x-auto bg-base-100 rounded-lg mt-4">
       <table class="table">
         <thead>
           <tr>

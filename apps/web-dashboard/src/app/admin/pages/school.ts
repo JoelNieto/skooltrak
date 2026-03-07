@@ -4,15 +4,10 @@ import { DatePipe } from '@angular/common';
 import { Component, inject, input } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
-import { Prisma } from '@generated/prisma';
 import { Apollo } from 'apollo-angular';
 import { map, of } from 'rxjs';
 import { isValidId } from '../../core/validators';
 import { AdminSchoolDocument, AdminSchoolQuery } from '../../graphql/generated/graphql';
-
-type SchoolType = Prisma.SchoolGetPayload<false> & {
-  logoUrl?: string | null;
-};
 
 @Component({
   selector: 'app-school',
@@ -68,7 +63,7 @@ type SchoolType = Prisma.SchoolGetPayload<false> & {
 
         <!-- Tabs -->
         <div ngTabs>
-          <div class="flex justify-between items-center mt-4">
+          <div class="flex justify-between items-center mt-4 px-1">
             <div ngTabList selectionMode="follow" selectedTab="info" class="tabs tabs-box">
               <div ngTab value="info" class="tab">Información General</div>
               <div ngTab value="contact" class="tab">Contacto</div>

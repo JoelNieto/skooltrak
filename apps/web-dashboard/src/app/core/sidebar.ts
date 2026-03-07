@@ -155,18 +155,6 @@ import { ThemeService } from './theme.service';
             </a>
           </li>
         }
-        @if (auth.hasPermission('VIEW_QUIZZES')) {
-          <li>
-            <a
-              routerLink="quizzes"
-              routerLinkActive="bg-primary/10 text-primary font-semibold"
-              class="flex items-center gap-3 px-3 py-2 text-base-content/80 rounded-lg transition-all duration-150 hover:bg-base-200 hover:text-base-content group"
-            >
-              <span class="material-symbols-outlined text-xl">verified</span>
-              <span>Quizzes</span>
-            </a>
-          </li>
-        }
         @if (auth.hasPermission('VIEW_MESSAGES')) {
           <li>
             <a

@@ -8,10 +8,14 @@ import {
 } from '@angular/core';
 import { provideClientHydration, withEventReplay } from '@angular/platform-browser';
 import { provideRouter, withComponentInputBinding } from '@angular/router';
-import { ApolloLink, InMemoryCache } from '@apollo/client/core';
+import { ApolloLink, InMemoryCache, split } from '@apollo/client/core';
 import { SetContextLink } from '@apollo/client/link/context';
+import { getMainDefinition } from '@apollo/client/utilities';
+import { Kind, OperationTypeNode } from 'graphql';
+import { createClient } from 'graphql-ws';
 import { provideApollo } from 'apollo-angular';
 import { HttpLink } from 'apollo-angular/http';
+import { GraphQLWsLink } from '@apollo/client/link/subscriptions';
 import { appRoutes } from './app.routes';
 
 export const appConfig: ApplicationConfig = {
@@ -47,16 +51,44 @@ export const appConfig: ApplicationConfig = {
         return {};
       });
 
+      const http = httpLink.create({
+        uri: '/api/graphql',
+        withCredentials: true,
+      });
+
+      // WebSocket link for subscriptions (browser only)
+      const ws =
+        isPlatformBrowser(platformId) &&
+        (() => {
+          const protocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+          const wsUrl = `${protocol}//${location.host}/api/graphql`;
+          return new GraphQLWsLink(
+            createClient({
+              url: wsUrl,
+              connectionParams: () => {
+                const token = localStorage.getItem('access_token');
+                return token ? { authorization: `Bearer ${token}` } : {};
+              },
+            })
+          );
+        })();
+
+      const link = ws
+        ? split(
+            ({ query }) => {
+              const def = getMainDefinition(query);
+              return (
+                def.kind === Kind.OPERATION_DEFINITION &&
+                def.operation === OperationTypeNode.SUBSCRIPTION
+              );
+            },
+            ws,
+            ApolloLink.from([basic, auth, http])
+          )
+        : ApolloLink.from([basic, auth, http]);
+
       return {
-        link: ApolloLink.from([
-          basic,
-          auth,
-          httpLink.create({
-            uri: '/api/graphql',
-            // Include credentials to send cookies for session-based auth
-            withCredentials: true,
-          }),
-        ]),
+        link,
         cache: new InMemoryCache(),
         defaultOptions: {
           watchQuery: {

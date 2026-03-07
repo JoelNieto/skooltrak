@@ -12,6 +12,8 @@ import {
   ChatsChatMessagesDocument,
   ChatsChatQuery,
   ChatsMarkChatReadDocument,
+  ChatsMessageReceivedDocument,
+  ChatsMessageReceivedSubscription,
   ChatsSendMessageDocument,
   ChatsUnreadCountDocument,
 } from '../graphql/generated/graphql';
@@ -32,7 +34,7 @@ import {
       <lib-loader />
     } @else if (chatResource.hasValue() && chatResource.value()) {
       @let chat = chatResource.value()!;
-      <div class="card card-border border-base-300 bg-base-100 mt-4">
+      <div class="card bg-base-100 mt-4">
         <div class="card-body p-0 flex flex-col" style="min-height: 400px;">
           <div class="p-4 border-b border-base-300 flex items-center gap-2">
             <div class="avatar avatar-placeholder">
@@ -155,6 +157,37 @@ export default class ChatThread {
           .subscribe();
       }
     });
+
+    // Subscribe to new messages for real-time updates
+    effect((onCleanup) => {
+      const chatId = this.id();
+      if (!chatId) return;
+
+      const sub = this.#apollo
+        .subscribe<ChatsMessageReceivedSubscription>({
+          query: ChatsMessageReceivedDocument,
+          variables: { chatId },
+        })
+        .subscribe((result) => {
+          const message = result.data?.messageReceived;
+          if (!message || message.chatId !== chatId) return;
+
+          const cached = this.#apollo.client.readQuery({
+            query: ChatsChatMessagesDocument,
+            variables: { input: { chatId, limit: 50 } },
+          });
+          const messages = cached?.chatMessages ?? [];
+          if (messages.some((m) => m.id === message.id)) return;
+
+          this.#apollo.client.writeQuery({
+            query: ChatsChatMessagesDocument,
+            variables: { input: { chatId, limit: 50 } },
+            data: { chatMessages: [...messages, message] },
+          });
+        });
+
+      onCleanup(() => sub.unsubscribe());
+    });
   }
 
   chatDisplayName() {
@@ -196,7 +229,7 @@ export default class ChatThread {
         })
         .toPromise();
       this.messageContent.set('');
-    } catch (err) {
+    } catch {
       this.#toast.showError('Error al enviar mensaje');
     } finally {
       this.sending.set(false);

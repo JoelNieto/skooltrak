@@ -45,9 +45,19 @@ import {
                 <span class="text-xs">{{ otherParticipant($any(chat))?.initials || '?' }}</span>
               </div>
             </div>
-            <div>
+            <div class="flex-1 min-w-0">
               <h2 class="font-semibold">{{ chatDisplayName() }}</h2>
-              <p class="text-sm text-base-content/60">{{ participantsCount($any(chat)) }} participantes</p>
+              <div class="flex flex-wrap items-center gap-1.5 mt-0.5">
+                <span class="text-sm text-base-content/60">{{ participantsCount($any(chat)) }} participantes</span>
+                @if (otherParticipant($any(chat)); as user) {
+                  @if (roleLabel(user?.role?.name); as label) {
+                    <span class="badge badge-secondary badge-soft badge-sm">{{ label }}</span>
+                  }
+                  @if (user?.student?.classGroup?.name; as groupName) {
+                    <span class="badge badge-outline badge-primary badge-sm">{{ groupName }}</span>
+                  }
+                }
+              </div>
             </div>
           </div>
 
@@ -76,7 +86,15 @@ import {
                     [class.bg-base-200]="!isOwnMessage(msg)"
                   >
                     @if (!isOwnMessage(msg)) {
-                      <p class="text-xs font-medium mb-0.5">{{ msg.sender?.firstName }} {{ msg.sender?.lastName }}</p>
+                      <div class="flex flex-wrap items-center gap-1.5 mb-0.5">
+                        <p class="text-xs font-medium">{{ msg.sender?.firstName }} {{ msg.sender?.lastName }}</p>
+                        @if (roleLabel(msg.sender?.role?.name); as label) {
+                          <span class="badge badge-secondary badge-soft badge-xs">{{ label }}</span>
+                        }
+                        @if (msg.sender?.student?.classGroup?.name; as groupName) {
+                          <span class="badge badge-outline badge-primary badge-xs">{{ groupName }}</span>
+                        }
+                      </div>
                     }
                     <p class="text-sm whitespace-pre-wrap">{{ msg.content }}</p>
                     <p class="text-xs opacity-70 mt-1">{{ msg.createdAt | date: 'short' }}</p>
@@ -210,6 +228,19 @@ export default class ChatThread {
 
   isOwnMessage(msg: { senderId?: string | null }) {
     return msg.senderId === this.#auth.user()?.id;
+  }
+
+  roleLabel(roleName?: string | null): string | null {
+    if (!roleName) return null;
+    const labels: Record<string, string> = {
+      STUDENT: 'Estudiante',
+      TEACHER: 'Docente',
+      ORG_ADMIN: 'Administrador',
+      SYSADMIN: 'Administrador',
+      ADMIN: 'Administrador',
+      PARENT: 'Padre/Representante',
+    };
+    return labels[roleName] ?? roleName;
   }
 
   async sendMessage(e: Event) {

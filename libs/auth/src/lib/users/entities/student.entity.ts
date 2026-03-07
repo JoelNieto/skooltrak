@@ -1,5 +1,6 @@
 import { $Enums, Prisma } from '@generated/prisma';
 import { Field, ObjectType } from '@nestjs/graphql';
+import { ClassGroupRef } from './class-group-ref.entity';
 
 @ObjectType()
 export class UserStudent
@@ -23,6 +24,10 @@ export class UserStudent
   schoolId: string;
   @Field(() => String, { nullable: true })
   classGroupId: string | null;
+
+  @Field(() => ClassGroupRef, { nullable: true })
+  classGroup: ClassGroupRef | null;
+
   @Field(() => Date)
   birthDate: Date;
   @Field(() => String)

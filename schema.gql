@@ -410,6 +410,11 @@ type ClassGroup {
   updatedAt: DateTime!
 }
 
+type ClassGroupRef {
+  id: String!
+  name: String!
+}
+
 type Course {
   """Code of the course"""
   code: String!
@@ -3843,6 +3848,7 @@ type UserStudent {
   allergies: String!
   birthDate: DateTime!
   bloodType: String!
+  classGroup: ClassGroupRef
   classGroupId: String
   createdAt: DateTime!
   documentId: String!

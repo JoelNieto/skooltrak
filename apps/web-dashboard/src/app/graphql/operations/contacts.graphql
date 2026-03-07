@@ -11,6 +11,10 @@ query ContactsFindContacts($queryText: String) {
     }
     student {
       id
+      classGroup {
+        id
+        name
+      }
     }
     teacher {
       id

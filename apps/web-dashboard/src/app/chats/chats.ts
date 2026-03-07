@@ -46,7 +46,17 @@ import { ChatsMyChatsDocument, ChatsMyChatsQuery, ChatType } from '../graphql/ge
                 <p class="font-medium truncate">
                   {{ chatDisplayName(chat) }}
                 </p>
-                <p class="text-sm text-base-content/60">{{ chatTypeLabel(chat.type) }}</p>
+                <div class="flex flex-wrap items-center gap-1.5 mt-0.5">
+                  <span class="text-sm text-base-content/60">{{ chatTypeLabel(chat.type) }}</span>
+                  @if (otherParticipant(chat); as user) {
+                    @if (roleLabel(user?.role?.name); as label) {
+                      <span class="badge badge-secondary badge-soft badge-sm">{{ label }}</span>
+                    }
+                    @if (user?.student?.classGroup?.name; as groupName) {
+                      <span class="badge badge-outline badge-primary badge-sm">{{ groupName }}</span>
+                    }
+                  }
+                </div>
               </div>
               <span class="material-symbols-outlined text-base-content/50">chevron_right</span>
             </a>
@@ -96,5 +106,18 @@ export default class Chats {
       CLASS_GROUP: 'Grupo de clase',
     };
     return labels[type] ?? type;
+  }
+
+  roleLabel(roleName?: string | null): string | null {
+    if (!roleName) return null;
+    const labels: Record<string, string> = {
+      STUDENT: 'Estudiante',
+      TEACHER: 'Docente',
+      ORG_ADMIN: 'Administrador',
+      SYSADMIN: 'Administrador',
+      ADMIN: 'Administrador',
+      PARENT: 'Padre/Representante',
+    };
+    return labels[roleName] ?? roleName;
   }
 }

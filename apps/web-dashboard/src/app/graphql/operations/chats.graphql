@@ -18,6 +18,16 @@ query ChatsMyChats {
         lastName
         initials
         color
+        role {
+          name
+        }
+        student {
+          id
+          classGroup {
+            id
+            name
+          }
+        }
       }
     }
     createdBy {
@@ -49,6 +59,16 @@ query ChatsChat($id: String!) {
         lastName
         initials
         color
+        role {
+          name
+        }
+        student {
+          id
+          classGroup {
+            id
+            name
+          }
+        }
       }
     }
     createdBy {
@@ -73,6 +93,16 @@ query ChatsChatMessages($input: ChatMessagesInput!) {
       lastName
       initials
       color
+      role {
+        name
+      }
+      student {
+        id
+        classGroup {
+          id
+          name
+        }
+      }
     }
   }
 }
@@ -172,6 +202,16 @@ subscription ChatsMessageReceived($chatId: String) {
       lastName
       initials
       color
+      role {
+        name
+      }
+      student {
+        id
+        classGroup {
+          id
+          name
+        }
+      }
     }
   }
 }

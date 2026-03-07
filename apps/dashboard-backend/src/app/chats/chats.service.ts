@@ -23,7 +23,7 @@ const CHAT_INCLUDE = {
       user: {
         include: {
           role: true,
-          student: true,
+          student: { include: { classGroup: true } },
           teacher: true,
         },
       },
@@ -32,7 +32,7 @@ const CHAT_INCLUDE = {
   createdBy: {
     include: {
       role: true,
-      student: true,
+      student: { include: { classGroup: true } },
       teacher: true,
     },
   },
@@ -372,7 +372,11 @@ export class ChatsService {
       orderBy: { createdAt: 'desc' },
       include: {
         sender: {
-          include: { role: true, student: true, teacher: true },
+          include: {
+            role: true,
+            student: { include: { classGroup: true } },
+            teacher: true,
+          },
         },
       },
     });
@@ -402,7 +406,11 @@ export class ChatsService {
       },
       include: {
         sender: {
-          include: { role: true, student: true, teacher: true },
+          include: {
+            role: true,
+            student: { include: { classGroup: true } },
+            teacher: true,
+          },
         },
       },
     });

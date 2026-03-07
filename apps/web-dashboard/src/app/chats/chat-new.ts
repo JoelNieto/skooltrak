@@ -51,9 +51,17 @@ import {
                 <span>{{ contact.initials }}</span>
               </div>
             </div>
-            <div class="flex-1">
+            <div class="flex-1 min-w-0">
               <p class="font-medium">{{ contact.name }}</p>
-              <p class="text-sm text-base-content/60">{{ contact.email }}</p>
+              <div class="flex flex-wrap items-center gap-1.5 mt-0.5">
+                <span class="text-sm text-base-content/60">{{ contact.email }}</span>
+                @if (roleLabel(contact?.role?.name); as label) {
+                  <span class="badge badge-secondary badge-soft badge-sm">{{ label }}</span>
+                }
+                @if (contact?.student?.classGroup?.name; as groupName) {
+                  <span class="badge badge-outline badge-primary badge-sm">{{ groupName }}</span>
+                }
+              </div>
             </div>
             @if (creating() === contact.id) {
               <span class="loading loading-spinner loading-sm"></span>
@@ -93,6 +101,19 @@ export default class ChatNew {
     const contacts = this.contactsResource.value() ?? [];
     const me = this.#auth.user()?.id;
     return contacts.filter((c) => c.id !== me);
+  }
+
+  roleLabel(roleName?: string | null): string | null {
+    if (!roleName) return null;
+    const labels: Record<string, string> = {
+      STUDENT: 'Estudiante',
+      TEACHER: 'Docente',
+      ORG_ADMIN: 'Administrador',
+      SYSADMIN: 'Administrador',
+      ADMIN: 'Administrador',
+      PARENT: 'Padre/Representante',
+    };
+    return labels[roleName] ?? roleName;
   }
 
   #auth = inject(Auth);

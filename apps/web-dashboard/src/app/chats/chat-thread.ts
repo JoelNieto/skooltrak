@@ -65,11 +65,14 @@ import {
             @if (messagesResource.isLoading()) {
               <lib-loader />
             } @else {
-              @for (msg of messagesResource.value(); track msg.id) {
-                <div class="flex  gap-2" [class.flex-row-reverse]="isOwnMessage(msg)">
-                  @if (!isOwnMessage(msg)) {
-                    <div>
-                      <div class="avatar avatar-placeholder shrink-0">
+              <div class="w-full space-y-3">
+                @for (msg of messagesResource.value(); track msg.id) {
+                  <div
+                    class="chat space-y-2"
+                    [class]="{ 'chat-start': !isOwnMessage(msg), 'chat-end': isOwnMessage(msg) }"
+                  >
+                    <div class="chat-image avatar">
+                      <div class="avatar avatar-placeholder">
                         <div
                           class="text-white rounded-full w-8"
                           [style.background]="msg.sender?.color || 'oklch(var(--p))'"
@@ -78,29 +81,23 @@ import {
                         </div>
                       </div>
                     </div>
-                  }
-                  <div
-                    class="max-w-[80%] rounded-lg px-3 py-2"
-                    [class.bg-primary]="isOwnMessage(msg)"
-                    [class.text-primary-content]="isOwnMessage(msg)"
-                    [class.bg-base-200]="!isOwnMessage(msg)"
-                  >
-                    @if (!isOwnMessage(msg)) {
-                      <div class="flex flex-wrap items-center gap-1.5 mb-0.5">
-                        <p class="text-xs font-medium">{{ msg.sender?.firstName }} {{ msg.sender?.lastName }}</p>
-                        @if (roleLabel(msg.sender?.role?.name); as label) {
-                          <span class="badge badge-secondary badge-soft badge-xs">{{ label }}</span>
-                        }
-                        @if (msg.sender?.student?.classGroup?.name; as groupName) {
-                          <span class="badge badge-outline badge-primary badge-xs">{{ groupName }}</span>
-                        }
-                      </div>
-                    }
-                    <p class="text-sm whitespace-pre-wrap">{{ msg.content }}</p>
-                    <p class="text-xs opacity-70 mt-1">{{ msg.createdAt | date: 'short' }}</p>
+                    <div class="chat-header">
+                      <p class="text-xs font-medium">{{ msg.sender?.firstName }} {{ msg.sender?.lastName }}</p>
+                    </div>
+                    <div
+                      class="chat-bubble"
+                      [class.bg-primary]="!isOwnMessage(msg)"
+                      [class.text-primary-content]="!isOwnMessage(msg)"
+                      [class.bg-base-200]="isOwnMessage(msg)"
+                    >
+                      <p class="text-sm whitespace-pre-wrap">{{ msg.content }}</p>
+                    </div>
+                    <div class="chat-footer">
+                      <p class="text-xs opacity-70">{{ msg.createdAt | date: 'short' }}</p>
+                    </div>
                   </div>
-                </div>
-              }
+                }
+              </div>
             }
           </div>
 

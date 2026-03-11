@@ -8,6 +8,7 @@ import { Apollo } from 'apollo-angular';
 import { map } from 'rxjs';
 import Auth from '../auth/auth';
 import {
+  ChatType,
   ChatsChatDocument,
   ChatsChatMessagesDocument,
   ChatsChatQuery,
@@ -38,12 +39,21 @@ import {
         <div class="card-body p-0 flex flex-col flex-1 min-h-0">
           <div class="shrink-0 p-4 border-b border-base-300 flex items-center gap-2">
             <div class="avatar avatar-placeholder">
-              <div
-                class="text-white rounded-full w-8"
-                [style.background]="otherParticipant($any(chat))?.color || 'oklch(var(--p))'"
-              >
-                <span class="text-xs">{{ otherParticipant($any(chat))?.initials || '?' }}</span>
-              </div>
+              @if (isContextualChat($any(chat).type)) {
+                <div
+                  class="flex items-center justify-center w-8 h-8 rounded-full text-white"
+                  [style.background]="contextualChatColor($any(chat).type)"
+                >
+                  <span class="material-symbols-outlined text-base">{{ contextualChatIcon($any(chat).type) }}</span>
+                </div>
+              } @else {
+                <div
+                  class="text-white rounded-full w-8"
+                  [style.background]="otherParticipant($any(chat))?.color || 'oklch(var(--p))'"
+                >
+                  <span class="text-xs">{{ otherParticipant($any(chat))?.initials || '?' }}</span>
+                </div>
+              }
             </div>
             <div class="flex-1 min-w-0">
               <h2 class="font-semibold">{{ chatDisplayName() }}</h2>
@@ -238,6 +248,28 @@ export default class ChatThread {
       PARENT: 'Padre/Representante',
     };
     return labels[roleName] ?? roleName;
+  }
+
+  isContextualChat(type: ChatType) {
+    return type === ChatType.Course || type === ChatType.Assignment || type === ChatType.ClassGroup;
+  }
+
+  contextualChatIcon(type: ChatType) {
+    const icons: Record<string, string> = {
+      [ChatType.Course]: 'school',
+      [ChatType.Assignment]: 'assignment',
+      [ChatType.ClassGroup]: 'groups',
+    };
+    return icons[type] ?? 'chat';
+  }
+
+  contextualChatColor(type: ChatType) {
+    const colors: Record<string, string> = {
+      [ChatType.Course]: 'oklch(var(--p))',
+      [ChatType.Assignment]: 'oklch(var(--s))',
+      [ChatType.ClassGroup]: 'oklch(var(--a))',
+    };
+    return colors[type] ?? 'oklch(var(--p))';
   }
 
   async sendMessage(e: Event) {

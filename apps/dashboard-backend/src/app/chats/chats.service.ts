@@ -73,10 +73,6 @@ export class ChatsService {
       throw new ForbiddenException('Organization context required');
     }
 
-    if (this.isAdmin(role)) {
-      return { organizationId, name: contextId };
-    }
-
     if (
       contextType !== ChatType.COURSE &&
       contextType !== ChatType.ASSIGNMENT &&
@@ -94,7 +90,7 @@ export class ChatsService {
       if (course.organizationId !== organizationId) {
         throw new ForbiddenException('Course not in your organization');
       }
-      if (course.teacher?.userId !== userId) {
+      if (!this.isAdmin(role) && course.teacher?.userId !== userId) {
         throw new ForbiddenException('Only the course teacher or admin can create this chat');
       }
       return { organizationId, name: course.name };
@@ -109,7 +105,7 @@ export class ChatsService {
       if (assignment.course.organizationId !== organizationId) {
         throw new ForbiddenException('Assignment not in your organization');
       }
-      if (assignment.teacher?.userId !== userId) {
+      if (!this.isAdmin(role) && assignment.teacher?.userId !== userId) {
         throw new ForbiddenException('Only the assignment teacher or admin can create this chat');
       }
       return { organizationId, name: assignment.title };
@@ -124,7 +120,7 @@ export class ChatsService {
       if (classGroup.organizationId !== organizationId) {
         throw new ForbiddenException('Class group not in your organization');
       }
-      if (classGroup.teacher?.userId !== userId) {
+      if (!this.isAdmin(role) && classGroup.teacher?.userId !== userId) {
         throw new ForbiddenException('Only the class group teacher or admin can create this chat');
       }
       return { organizationId, name: classGroup.name };
@@ -284,6 +280,12 @@ export class ChatsService {
     const { organizationId, name } = await this.validateCanCreateContextualChat(contextType, contextId);
     const participants = await this.resolveContextualParticipants(contextType, contextId);
 
+    // Ensure creator is always a participant (e.g. ORG_ADMIN creating course chat)
+    const participantIds = new Set(participants.map((p) => p.userId));
+    if (!participantIds.has(userId)) {
+      participants.push({ userId, role: ChatParticipantRole.ADMIN });
+    }
+
     const data: Record<string, unknown> = {
       organizationId,
       name,
@@ -313,7 +315,20 @@ export class ChatsService {
       include: CHAT_INCLUDE,
     });
 
-    if (existing) return existing;
+    if (existing) {
+      const isParticipant = existing.participants.some((p) => p.userId === userId);
+      if (!isParticipant) {
+        await this.prisma.chatParticipant.create({
+          data: { chatId: existing.id, userId, role: ChatParticipantRole.ADMIN },
+        });
+        const refreshed = await this.prisma.chat.findUniqueOrThrow({
+          where: { id: existing.id },
+          include: CHAT_INCLUDE,
+        });
+        return this.resolveContextualChatName(refreshed);
+      }
+      return this.resolveContextualChatName(existing);
+    }
 
     return this.prisma.chat.create({
       data: data as never,
@@ -321,11 +336,26 @@ export class ChatsService {
     });
   }
 
+  private resolveContextualChatName<T extends { type: ChatType; name: string | null; course?: { name: string } | null; assignment?: { title: string } | null; classGroup?: { name: string } | null }>(
+    chat: T,
+  ): T {
+    if (chat.type === ChatType.COURSE && chat.course) {
+      return { ...chat, name: chat.course.name };
+    }
+    if (chat.type === ChatType.ASSIGNMENT && chat.assignment) {
+      return { ...chat, name: chat.assignment.title };
+    }
+    if (chat.type === ChatType.CLASS_GROUP && chat.classGroup) {
+      return { ...chat, name: chat.classGroup.name };
+    }
+    return chat;
+  }
+
   async myChats() {
     const { userId, organizationId } = this.getAuth();
     if (!organizationId) return [];
 
-    return this.prisma.chat.findMany({
+    const chats = await this.prisma.chat.findMany({
       where: {
         organizationId,
         deletedAt: null,
@@ -334,6 +364,7 @@ export class ChatsService {
       include: CHAT_INCLUDE,
       orderBy: { updatedAt: 'desc' },
     });
+    return chats.map((c) => this.resolveContextualChatName(c));
   }
 
   async chat(id: string) {
@@ -349,7 +380,7 @@ export class ChatsService {
     });
 
     if (!chat) throw new NotFoundException('Chat not found');
-    return chat;
+    return this.resolveContextualChatName(chat);
   }
 
   async chatMessages(input: ChatMessagesInput) {

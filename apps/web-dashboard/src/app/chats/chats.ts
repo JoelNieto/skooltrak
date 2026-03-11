@@ -35,12 +35,18 @@ import { ChatsMyChatsDocument, ChatsMyChatsQuery, ChatType } from '../graphql/ge
               class="flex items-center gap-3 p-4 rounded-lg bg-base-200 hover:bg-base-100 transition-colors"
             >
               <div class="avatar avatar-placeholder">
-                <div
-                  class="text-white w-10 rounded-full"
-                  [style.background]="otherParticipant(chat).color || 'oklch(var(--p))'"
-                >
-                  <span class="tex-lg">{{ otherParticipant(chat).initials || chat.name?.slice(0, 2) || '?' }}</span>
-                </div>
+                @if (isContextualChat(chat.type)) {
+                  <div class="flex items-center justify-center w-10 h-10 rounded-full text-white bg-primary">
+                    <span class="material-symbols-outlined text-xl">{{ contextualChatIcon(chat.type) }}</span>
+                  </div>
+                } @else {
+                  <div
+                    class="text-white w-10 rounded-full"
+                    [style.background]="otherParticipant(chat).color || 'oklch(var(--p))'"
+                  >
+                    <span class="tex-lg">{{ otherParticipant(chat).initials || chat.name?.slice(0, 2) || '?' }}</span>
+                  </div>
+                }
               </div>
               <div class="flex-1 min-w-0">
                 <p class="font-medium truncate">
@@ -106,6 +112,28 @@ export default class Chats {
       CLASS_GROUP: 'Grupo de clase',
     };
     return labels[type] ?? type;
+  }
+
+  isContextualChat(type: ChatType) {
+    return type === ChatType.Course || type === ChatType.Assignment || type === ChatType.ClassGroup;
+  }
+
+  contextualChatIcon(type: ChatType) {
+    const icons: Record<string, string> = {
+      [ChatType.Course]: 'school',
+      [ChatType.Assignment]: 'assignment',
+      [ChatType.ClassGroup]: 'groups',
+    };
+    return icons[type] ?? 'chat';
+  }
+
+  contextualChatColor(type: ChatType) {
+    const colors: Record<string, string> = {
+      [ChatType.Course]: 'oklch(var(--p))',
+      [ChatType.Assignment]: 'oklch(var(--s))',
+      [ChatType.ClassGroup]: 'oklch(var(--a))',
+    };
+    return colors[type] ?? 'oklch(var(--p))';
   }
 
   roleLabel(roleName?: string | null): string | null {

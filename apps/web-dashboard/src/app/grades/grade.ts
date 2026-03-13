@@ -35,8 +35,8 @@ import StudentGradeForm from './student-grade-form';
                     Publicada</span
                   >
                 } @else {
-                  <button class="btn btn-neutral btn-sm btn-soft" (click)="publishGrade()">
-                    <span class="material-symbols-outlined text-success">publish</span>
+                  <button class="btn btn-primary btn-sm" (click)="publishGrade()">
+                    <span class="material-symbols-outlined">publish</span>
                     Publicar
                   </button>
                 }

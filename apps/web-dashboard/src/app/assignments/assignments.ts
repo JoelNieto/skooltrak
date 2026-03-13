@@ -48,7 +48,7 @@ export class StripHtmlPipe implements PipeTransform {
         <button class="btn btn-soft" (click)="today()"><span class="material-symbols-outlined">today</span> Hoy</button>
       </div>
     </div>
-    <div class="overflow-x-auto bg-base-100 rounded-lg shadow-sm mt-4">
+    <div class="overflow-x-auto bg-base-100 rounded-lg mt-4">
       @if (assignmentDatesResource.hasValue()) {
         @let list = assignmentDatesResource.value()!;
         <table class="table">

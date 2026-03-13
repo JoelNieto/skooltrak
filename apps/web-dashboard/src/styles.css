@@ -33,7 +33,7 @@
   --color-error-content: oklch(96% 0.015 12.422);
   --radius-selector: 1rem;
   --radius-field: 0.5rem;
-  --radius-box: 1rem;
+  --radius-box: 0.5rem;
   --size-selector: 0.25rem;
   --size-field: 0.25rem;
   --border: 1px;
@@ -72,7 +72,7 @@
   /* Modern rounded corners */
   --radius-selector: 0.625rem;
   --radius-field: 0.5rem;
-  --radius-box: 0.75rem;
+  --radius-box: 0.5rem;
   --size-selector: 0.25rem;
   --size-field: 0.25rem;
   --border: 1px;

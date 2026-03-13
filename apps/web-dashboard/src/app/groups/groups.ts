@@ -19,7 +19,7 @@ import { GetClassGroupsDocument } from '../graphql/generated/graphql';
       </ul>
     </div>
     <h1 class="text-2xl font-semibold">Grupos</h1>
-    <div class="overflow-x-auto bg-base-100 rounded-lg shadow-sm mt-4">
+    <div class="overflow-x-auto bg-base-100 rounded-lg mt-4">
       <table class="table">
         <thead>
           <tr>

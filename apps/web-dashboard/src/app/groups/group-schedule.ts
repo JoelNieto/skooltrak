@@ -2,13 +2,13 @@ import { Modal, Toast } from '@/ui';
 import { Component, computed, inject, input, linkedSignal, signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { Prisma } from '@generated/prisma';
-import { isValidId } from '../core/validators';
 import { Apollo } from 'apollo-angular';
+import { map, of } from 'rxjs';
+import { isValidId } from '../core/validators';
 import {
   GroupScheduleGroupsSchedulesByClassGroupIdDocument,
   GroupScheduleUpdateGroupsScheduleDocument,
 } from '../graphql/generated/graphql';
-import { map, of } from 'rxjs';
 import GroupScheduleForm from './group-schedule-form';
 
 type Schedule = Prisma.ClassGroupWeeklyScheduleGetPayload<{
@@ -39,86 +39,91 @@ type ScheduleLayout = {
         <button class="btn btn-primary btn-sm" (click)="editSchedule()">Agregar clase</button>
       </div>
       @if (schedulesResource.isLoading()) {
-      <div class="flex items-center gap-2 text-sm text-base-200">
-        <span class="loading loading-spinner loading-sm"></span>
-        Cargando horario...
-      </div>
-      } @else { @let schedules = localSchedules(); @if (schedules?.length) {
-      <div class="w-full overflow-x-auto">
-        <div class="min-w-[1100px]">
-          <div
-            class="grid border border-base-300 rounded-lg bg-base-100"
-            [style.gridTemplateColumns]="gridTemplateColumns"
-          >
-            <div class="border-b border-base-200 bg-base-200 px-3 py-2 text-xs font-semibold">Hora</div>
-            @for (day of weekdays; track day.key) {
-            <div class="border-b border-base-200 bg-base-200 px-3 py-2 text-xs font-semibold">
-              <div class="flex items-center justify-between">
-                <span>{{ day.label }}</span>
-                <button class="btn btn-ghost btn-xs" (click)="editSchedule(undefined, day.key)">+</button>
-              </div>
-            </div>
-            }
-
-            <div class="relative border-r border-base-300 mt-4" [style.height.px]="gridHeight">
-              @for (hour of hourMarks; track hour.label) {
-              <div
-                class="absolute left-0 right-0 -translate-y-1/2 px-2 text-[11px] text-base-200 pt-4 border-t border-base-300"
-                [style.top.px]="hour.top"
-              >
-                {{ hour.label }}
-              </div>
-              }
-            </div>
-
-            @for (day of weekdays; track day.key) {
-            <div
-              class="relative border-r border-base-300 schedule-day-column"
-              [attr.data-day]="day.key"
-              [style.height.px]="gridHeight"
-              [style.backgroundImage]="gridBackground"
-            >
-              @for (entry of layoutByDay()[day.key]; track entry.id) {
-              <div
-                class="absolute rounded-md border bg-primary-content text-primary p-2 text-xs  cursor-move group"
-                [class.opacity-70]="draggingId() === entry.id"
-                [style.top.px]="entry.top"
-                [style.height.px]="entry.height"
-                [style.left.%]="entry.left"
-                [style.width.%]="entry.width"
-                style="touch-action: none;"
-                (pointerdown)="onEntryPointerDown(entry, $event)"
-              >
-                <div class="flex items-start justify-between gap-2">
-                  <p class="font-semibold text-primary">
-                    {{ entry.schedule.course.subject.name }}
-                  </p>
-                  <button
-                    class="btn btn-ghost btn-xs"
-                    type="button"
-                    (click)="editSchedule(entry.schedule); $event.stopPropagation()"
-                  >
-                    Editar
-                  </button>
-                </div>
-                <p class="text-[11px] text-base-200">{{ entry.schedule.startTime }} - {{ entry.schedule.endTime }}</p>
-                <p class="text-[11px] text-base-200">
-                  {{ entry.schedule.location }}
-                </p>
-              </div>
-              }
-            </div>
-            }
-          </div>
+        <div class="flex items-center gap-2 text-sm text-base-200">
+          <span class="loading loading-spinner loading-sm"></span>
+          Cargando horario...
         </div>
-      </div>
       } @else {
-      <div class="rounded-xl border border-dashed border-base-300 bg-base-100 p-6">
-        <h5 class="text-base font-semibold text-base-content">Aún no hay horario semanal</h5>
-        <p class="text-sm text-base-200 mt-1">Empieza agregando las clases para cada día de la semana.</p>
-        <button class="btn btn-primary btn-sm mt-4" (click)="editSchedule()">Crear horario</button>
-      </div>
-      } }
+        @let schedules = localSchedules();
+        @if (schedules?.length) {
+          <div class="w-full overflow-x-auto">
+            <div class="min-w-[1100px]">
+              <div
+                class="grid border border-base-300 rounded-lg bg-base-100"
+                [style.gridTemplateColumns]="gridTemplateColumns"
+              >
+                <div class="border-b border-base-200 bg-base-200 px-3 py-2 text-xs font-semibold">Hora</div>
+                @for (day of weekdays; track day.key) {
+                  <div class="border-b border-base-200 bg-base-200 px-3 py-2 text-xs font-semibold">
+                    <div class="flex items-center justify-between">
+                      <span>{{ day.label }}</span>
+                      <button class="btn btn-ghost btn-xs" (click)="editSchedule(undefined, day.key)">+</button>
+                    </div>
+                  </div>
+                }
+
+                <div class="relative border-r border-base-300 mt-4" [style.height.px]="gridHeight">
+                  @for (hour of hourMarks; track hour.label) {
+                    <div
+                      class="absolute left-0 right-0 -translate-y-1/2 px-2 text-[11px] text-base-200 pt-4 border-t border-base-300"
+                      [style.top.px]="hour.top"
+                    >
+                      {{ hour.label }}
+                    </div>
+                  }
+                </div>
+
+                @for (day of weekdays; track day.key) {
+                  <div
+                    class="relative border-r border-base-300 schedule-day-column"
+                    [attr.data-day]="day.key"
+                    [style.height.px]="gridHeight"
+                    [style.backgroundImage]="gridBackground"
+                  >
+                    @for (entry of layoutByDay()[day.key]; track entry.id) {
+                      <div
+                        class="absolute rounded-md bg-primary/70 text-primary-content p-2 text-xs cursor-move group"
+                        [class.opacity-70]="draggingId() === entry.id"
+                        [style.top.px]="entry.top"
+                        [style.height.px]="entry.height"
+                        [style.left.%]="entry.left"
+                        [style.width.%]="entry.width"
+                        style="touch-action: none;"
+                        (pointerdown)="onEntryPointerDown(entry, $event)"
+                      >
+                        <div class="flex items-start justify-between gap-2">
+                          <p class="font-semibold text-white">
+                            {{ entry.schedule.course.subject.name }}
+                          </p>
+                          <button
+                            class="btn btn-ghost btn-xs"
+                            type="button"
+                            (click)="editSchedule(entry.schedule); $event.stopPropagation()"
+                          >
+                            Editar
+                          </button>
+                        </div>
+                        <p class="text-[11px] text-base-content">
+                          {{ entry.schedule.startTime }} - {{ entry.schedule.endTime }}
+                        </p>
+                        <p class="text-[11px] text-base-200">
+                          {{ entry.schedule.location }}
+                        </p>
+                      </div>
+                    }
+                  </div>
+                }
+              </div>
+            </div>
+          </div>
+        } @else {
+          <div class="rounded-xl border border-dashed border-base-300 bg-base-100 p-6">
+            <h5 class="text-base font-semibold text-base-content">Aún no hay horario semanal</h5>
+            <p class="text-sm text-base-200 mt-1">Empieza agregando las clases para cada día de la semana.</p>
+            <button class="btn btn-primary btn-sm mt-4" (click)="editSchedule()">Crear horario</button>
+          </div>
+        }
+      }
     </div>
   `,
 })
@@ -162,9 +167,7 @@ export default class GroupSchedule {
           },
           fetchPolicy: 'cache-and-network',
         })
-        .valueChanges.pipe(
-          map((result) => (result.data?.groupsSchedulesByClassGroupId ?? []) as Schedule[]),
-        );
+        .valueChanges.pipe(map((result) => (result.data?.groupsSchedulesByClassGroupId ?? []) as Schedule[]));
     },
   });
 
@@ -175,11 +178,14 @@ export default class GroupSchedule {
 
   public layoutByDay = computed(() => {
     const schedules: Schedule[] = this.localSchedules() ?? [];
-    return this.weekdays.reduce((acc, day) => {
-      const daySchedules = schedules.filter((schedule) => schedule.weekday === day.key);
-      acc[day.key] = this.buildDayLayout(daySchedules);
-      return acc;
-    }, {} as Record<WeekdayKey, ScheduleLayout[]>);
+    return this.weekdays.reduce(
+      (acc, day) => {
+        const daySchedules = schedules.filter((schedule) => schedule.weekday === day.key);
+        acc[day.key] = this.buildDayLayout(daySchedules);
+        return acc;
+      },
+      {} as Record<WeekdayKey, ScheduleLayout[]>,
+    );
   });
 
   public get gridTemplateColumns() {

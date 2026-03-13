@@ -42,7 +42,7 @@ export class StudentGradesService {
     studentId: string
   ) {
     const grades = await this.prisma.studentGrade.findMany({
-      where: { grade: { courseId, periodId }, studentId },
+      where: { grade: { courseId, periodId, published: true }, studentId },
       include: {
         grade: {
           include: {

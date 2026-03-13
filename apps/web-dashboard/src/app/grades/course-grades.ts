@@ -45,10 +45,16 @@ export type StudentType = {
               <th class="min-w-24 w-24">
                 <a
                   [routerLink]="['/grades', grade.id]"
-                  class="link link-primary block truncate"
+                  class="link link-primary flex flex-col items-center gap-0.5"
                   [title]="grade.title"
                 >
-                  {{ grade.title }}
+                  <span class="block truncate w-full text-center">{{ grade.title }}</span>
+                  @if (!grade.published) {
+                    <span class="badge badge-ghost badge-sm gap-0.5">
+                      <span class="material-symbols-outlined text-sm">visibility_off</span>
+                      Borrador
+                    </span>
+                  }
                 </a>
               </th>
             }

@@ -1,6 +1,6 @@
 import { EmptyState, PageHeader, StatCard } from '@/ui';
-import { DatePipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { DecimalPipe, DatePipe } from '@angular/common';
+import { afterRenderEffect, ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import { Apollo } from 'apollo-angular';
@@ -8,6 +8,8 @@ import { endOfWeek, startOfWeek } from 'date-fns';
 import { map, of } from 'rxjs';
 import Store from './core/store';
 import {
+  GradeReportDocument,
+  PeriodsByYearForReportDocument,
   StudentAssignmentsDocument,
   StudentAssignmentsQuery,
   StudentDashboardStatsDocument,
@@ -17,7 +19,7 @@ import {
 } from './graphql/generated/graphql';
 @Component({
   selector: 'app-student-home',
-  imports: [DatePipe, RouterLink, PageHeader, StatCard, EmptyState],
+  imports: [DatePipe, DecimalPipe, RouterLink, PageHeader, StatCard, EmptyState],
   template: `
     <lib-page-header title="Dashboard del estudiante" subtitle="Lo más importante de tu semana académica." />
 
@@ -101,6 +103,58 @@ import {
       </div>
     </div>
 
+    @if (gradeReportStudentId()) {
+      <div class="mt-6">
+        <div class="card border border-base-200 bg-base-100">
+          <div class="card-body">
+            <div class="flex items-center justify-between">
+              <h2 class="text-lg font-semibold text-base-content">Informe de calificaciones</h2>
+              @if (gradeReportResource.hasValue() && gradeReportResource.value()) {
+                <a
+                  [routerLink]="['/students', gradeReportStudentId(), 'grade-report']"
+                  class="link link-primary text-sm"
+                >
+                  Ver informe completo
+                </a>
+              }
+            </div>
+            @if (gradeReportResource.isLoading()) {
+              <div class="flex justify-center py-8">
+                <span class="loading loading-spinner loading-md"></span>
+              </div>
+            } @else if (gradeReportResource.hasValue() && gradeReportResource.value(); as report) {
+              <div class="flex flex-col gap-2">
+                <p class="text-sm text-base-content/70">
+                  Periodo: {{ report.periodName || 'Selecciona un periodo' }}
+                </p>
+                @if (report.overallGradesRow?.cumulativeAverage != null) {
+                  <p class="text-lg font-bold text-base-content">
+                    Promedio general: {{ report.overallGradesRow!.cumulativeAverage! | number: '1.1-1' }}
+                  </p>
+                } @else {
+                  <p class="text-sm text-base-content/70">
+                    No hay calificaciones publicadas para este periodo.
+                  </p>
+                }
+              </div>
+            } @else if (gradeReportResource.error()) {
+              <lib-empty-state
+                title="No se pudo cargar el informe"
+                description="Intenta de nuevo más tarde."
+                icon="grade"
+              />
+            } @else {
+              <lib-empty-state
+                title="Sin informe disponible"
+                description="Selecciona un periodo para ver tus calificaciones."
+                icon="grade"
+              />
+            }
+          </div>
+        </div>
+      </div>
+    }
+
     @if (!recentNewsletters.error()) {
       <div class="mt-6">
         <div class="card border border-base-200 bg-base-100">
@@ -144,6 +198,54 @@ export default class StudentHome {
   private currentDate = signal(new Date());
   private startDate = computed(() => startOfWeek(this.currentDate(), { weekStartsOn: 1 }));
   private endDate = computed(() => endOfWeek(this.currentDate(), { weekStartsOn: 1 }));
+
+  public gradeReportStudentId = computed(() => this.store.currentStudentId() ?? null);
+  public gradeReportPeriodId = signal<string>('');
+
+  public gradeReportPeriodsResource = rxResource({
+    params: () => ({ year: this.store.currentSchool()?.currentYear }),
+    stream: ({ params }) => {
+      if (!params.year) return of([]);
+      return this.apollo
+        .watchQuery({
+          query: PeriodsByYearForReportDocument,
+          variables: { year: params.year },
+          fetchPolicy: 'cache-first',
+        })
+        .valueChanges.pipe(map((result) => result.data?.periodsByYear ?? []));
+    },
+  });
+
+  private gradeReportCurrentPeriodId = computed(() => {
+    const periods = this.gradeReportPeriodsResource.value();
+    if (!periods?.length) return '';
+    const today = new Date();
+    const current = periods.find(
+      (p) => new Date(p.startDate) <= today && today <= new Date(p.endDate),
+    );
+    return current?.id ?? '';
+  });
+
+  public gradeReportResource = rxResource({
+    params: () => ({
+      studentId: this.gradeReportStudentId(),
+      periodId: this.gradeReportPeriodId() || this.gradeReportCurrentPeriodId(),
+    }),
+    stream: ({ params }) => {
+      if (!params.studentId || !params.periodId) {
+        return of(null);
+      }
+      return this.apollo
+        .watchQuery({
+          query: GradeReportDocument,
+          variables: {
+            studentId: params.studentId,
+            periodId: params.periodId,
+          },
+        })
+        .valueChanges.pipe(map((result) => result.data?.gradeReport ?? null));
+    },
+  });
 
   public statsResource = rxResource({
     params: () => ({ schoolId: this.store.currentSchoolId() }),
@@ -250,4 +352,11 @@ export default class StudentHome {
   });
 
   public weeklyAssignmentsCount = computed(() => this.assignmentsResource.value()?.length ?? 0);
+
+  constructor() {
+    afterRenderEffect(() => {
+      const id = this.gradeReportCurrentPeriodId();
+      if (id) this.gradeReportPeriodId.set(id);
+    });
+  }
 }

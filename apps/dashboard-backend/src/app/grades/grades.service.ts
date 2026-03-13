@@ -1,3 +1,4 @@
+import { sendGradePublishedEmail } from '@/auth';
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma.service';
 import { CreateGradeInput } from './dto/create-grade.input';
@@ -78,7 +79,7 @@ export class GradesService {
     studentId: string
   ) {
     const grades = await this.prisma.studentGrade.findMany({
-      where: { grade: { courseId, periodId }, studentId },
+      where: { grade: { courseId, periodId, published: true }, studentId },
       include: {
         grade: {
           include: {
@@ -106,11 +107,100 @@ export class GradesService {
     );
   }
 
-  update(id: string, updateGradeInput: UpdateGradeInput) {
-    return this.prisma.grade.update({
+  async update(id: string, updateGradeInput: UpdateGradeInput) {
+    const existing = await this.prisma.grade.findUnique({
+      where: { id },
+      select: { published: true },
+    });
+
+    const updated = await this.prisma.grade.update({
       where: { id },
       data: updateGradeInput,
     });
+
+    if (
+      updateGradeInput.published === true &&
+      existing?.published === false
+    ) {
+      await this.sendGradePublishedNotifications(updated.id);
+    }
+
+    return updated;
+  }
+
+  private async sendGradePublishedNotifications(gradeId: string) {
+    const grade = await this.prisma.grade.findUnique({
+      where: { id: gradeId },
+      include: {
+        course: true,
+        studentGrades: {
+          include: {
+            student: {
+              include: {
+                user: true,
+                parents: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!grade) return;
+
+    const courseName = grade.course.name;
+    const gradeTitle = grade.title;
+
+    const emailsSent = new Set<string>();
+
+    for (const sg of grade.studentGrades) {
+      const student = sg.student;
+      const studentName = [
+        student.firstName,
+        student.middleName,
+        student.fatherName,
+        student.motherName,
+      ]
+        .filter(Boolean)
+        .join(' ')
+        .trim();
+
+      if (student.user?.email && !emailsSent.has(student.user.email)) {
+        try {
+          await sendGradePublishedEmail({
+            to: student.user.email,
+            studentName,
+            gradeTitle,
+            courseName,
+          });
+          emailsSent.add(student.user.email);
+        } catch (error) {
+          console.error(
+            `[GradesService] Failed to send grade published email to student ${student.user.email}:`,
+            error,
+          );
+        }
+      }
+
+      for (const parent of student.parents) {
+        if (parent.email && !emailsSent.has(parent.email)) {
+          try {
+            await sendGradePublishedEmail({
+              to: parent.email,
+              studentName,
+              gradeTitle,
+              courseName,
+            });
+            emailsSent.add(parent.email);
+          } catch (error) {
+            console.error(
+              `[GradesService] Failed to send grade published email to parent ${parent.email}:`,
+              error,
+            );
+          }
+        }
+      }
+    }
   }
 
   remove(id: string) {

@@ -51,14 +51,20 @@ export class GradeReportService {
 
     const isAdmin = role === 'ADMIN' || role === 'ORG_ADMIN' || role === 'SYSADMIN';
     if (!isAdmin) {
-      const teacher = await this.prisma.teacher.findUnique({
-        where: { userId },
-      });
-      const hasAccess =
-        teacher &&
-        (student.classGroup?.teacherId === teacher.id || student.courses.some((c) => c.teacherId === teacher.id));
-      if (!hasAccess) {
-        throw new ForbiddenException('You do not have permission to view this grade report');
+      if (role === 'STUDENT') {
+        if (student.userId !== userId) {
+          throw new ForbiddenException('You can only view your own grade report');
+        }
+      } else {
+        const teacher = await this.prisma.teacher.findUnique({
+          where: { userId },
+        });
+        const hasAccess =
+          teacher &&
+          (student.classGroup?.teacherId === teacher.id || student.courses.some((c) => c.teacherId === teacher.id));
+        if (!hasAccess) {
+          throw new ForbiddenException('You do not have permission to view this grade report');
+        }
       }
     }
 

@@ -136,3 +136,53 @@ export async function sendUserInvitation({
     resetPasswordUrl,
   });
 }
+
+/**
+ * Sends an email notification when a grade has been published to students/parents.
+ */
+export async function sendGradePublishedEmail({
+  to,
+  studentName,
+  gradeTitle,
+  courseName,
+}: {
+  to: string;
+  studentName: string;
+  gradeTitle: string;
+  courseName: string;
+}) {
+  const subject = `Nueva calificación publicada - ${gradeTitle}`;
+
+  const html = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+    <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; margin: 0; padding: 0; background-color: #f4f4f5;">
+      <div style="max-width: 600px; margin: 0 auto; padding: 40px 20px;">
+        <div style="background-color: white; border-radius: 8px; padding: 40px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+          <h1 style="color: #18181b; font-size: 24px; font-weight: 600; margin: 0 0 24px 0;">Nueva calificación publicada</h1>
+          <p style="color: #52525b; font-size: 16px; line-height: 24px; margin: 0 0 16px 0;">
+            Se ha publicado una nueva calificación para <strong>${studentName}</strong>.
+          </p>
+          <p style="color: #52525b; font-size: 16px; line-height: 24px; margin: 0 0 16px 0;">
+            <strong>Curso:</strong> ${courseName}<br>
+            <strong>Calificación:</strong> ${gradeTitle}
+          </p>
+          <p style="color: #71717a; font-size: 14px; line-height: 20px; margin: 24px 0 0 0;">
+            Inicia sesión en la plataforma para ver los detalles completos del informe de calificaciones.
+          </p>
+          <hr style="border: none; border-top: 1px solid #e4e4e7; margin: 24px 0;">
+          <p style="color: #a1a1aa; font-size: 12px; line-height: 18px; margin: 0;">
+            Este correo fue enviado por Skooltrak.
+          </p>
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+
+  return sendEmail({ to, subject, html });
+}

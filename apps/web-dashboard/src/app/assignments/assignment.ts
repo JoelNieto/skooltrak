@@ -4,9 +4,10 @@ import { Component, inject, input, signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { Router, RouterLink } from '@angular/router';
 import Auth from '../auth/auth';
+import { isValidId } from '../core/validators';
 
 import { Apollo } from 'apollo-angular';
-import { map } from 'rxjs';
+import { filter, map, of } from 'rxjs';
 import {
   AssignmentDocument,
   AssignmentQuery,
@@ -29,7 +30,7 @@ import AssignmentSubmissionsList from './assignment-submissions-list';
 
   template: `
     @defer {
-      @if (assignmentResource.hasValue()) {
+      @if (assignmentResource.hasValue() && assignmentResource.value()) {
         @let assignment = assignmentResource.value()!;
         <div class="breadcrumbs text-sm">
           <ul>
@@ -51,11 +52,7 @@ import AssignmentSubmissionsList from './assignment-submissions-list';
               </p>
             </div>
             @if (canStartAssignmentChat()) {
-              <button
-                class="btn btn-ghost btn-sm"
-                (click)="startAssignmentChat()"
-                [disabled]="startingChat()"
-              >
+              <button class="btn btn-ghost btn-sm" (click)="startAssignmentChat()" [disabled]="startingChat()">
                 @if (startingChat()) {
                   <span class="loading loading-spinner loading-sm"></span>
                 } @else {
@@ -138,12 +135,16 @@ export default class Assignment {
     params: () => ({ id: this.id() }),
     stream: ({ params }) => {
       const { id } = params;
+      if (!isValidId(id)) {
+        return of(null);
+      }
       return this.apollo
         .watchQuery({
           query: AssignmentDocument,
           variables: { id },
         })
         .valueChanges.pipe(
+          filter((res) => !res.loading),
           map((res) => {
             if (res.data?.assignment) {
               return res.data.assignment as AssignmentQuery['assignment'];

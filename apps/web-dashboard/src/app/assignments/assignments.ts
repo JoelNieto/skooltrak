@@ -69,7 +69,7 @@ export class StripHtmlPipe implements PipeTransform {
             @for (item of list; track item.id) {
               <tr>
                 <td>
-                  <a [routerLink]="item.assignment.id" class="link link-primary">{{ item.assignment.title }}</a>
+                  <a [routerLink]="['/assignments', item.assignment.id]" class="link link-primary">{{ item.assignment.title }}</a>
                 </td>
                 <td class="max-w-[24rem] truncate">
                   {{ item.assignment.details | stripHtml }}

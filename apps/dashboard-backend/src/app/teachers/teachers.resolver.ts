@@ -55,9 +55,9 @@ export class TeachersResolver {
     return `${teacher.firstName} ${teacher.middleName} ${teacher.fatherName} ${teacher.motherName}`;
   }
 
-  @ResolveField(() => String)
+  @ResolveField(() => String, { nullable: true })
   color(@Parent() teacher: Teacher) {
-    return teacher.user.color;
+    return teacher.user?.color ?? null;
   }
 
   @ResolveField(() => String)

@@ -30,8 +30,8 @@ export class Teacher
   birthDate: Date;
   @Field(() => String, { description: 'Gender of the teacher' })
   gender: $Enums.Gender;
-  @Field(() => String, { description: 'User ID of the teacher' })
-  userId: string;
+  @Field(() => String, { description: 'User ID of the teacher', nullable: true })
+  userId: string | null;
   @Field(() => [Course], { description: 'Courses of the teacher' })
   courses: Course[];
 
@@ -53,8 +53,8 @@ export class Teacher
   teacherSince: number | null;
   @Field(() => Date, { description: 'Member since date', nullable: true })
   memberSince: Date | null;
-  @Field(() => User, { description: 'User of the teacher' })
-  user: User;
+  @Field(() => User, { description: 'User of the teacher', nullable: true })
+  user: User | null;
   @Field(() => Date, { description: 'Created at' })
   createdAt: Date;
   @Field(() => Date, { description: 'Updated at' })

@@ -1,10 +1,7 @@
 {
   "$schema": "./node_modules/nx/schemas/nx-schema.json",
   "namedInputs": {
-    "default": [
-      "{projectRoot}/**/*",
-      "sharedGlobals"
-    ],
+    "default": ["{projectRoot}/**/*", "sharedGlobals"],
     "production": [
       "default",
       "!{projectRoot}/.eslintrc.json",
@@ -15,21 +12,14 @@
       "!{projectRoot}/jest.config.[jt]s",
       "!{projectRoot}/test-setup.[jt]s"
     ],
-    "sharedGlobals": [
-      "{workspaceRoot}/.gitlab-ci.yml"
-    ]
+    "sharedGlobals": ["{workspaceRoot}/.gitlab-ci.yml"]
   },
   "nxCloudId": "68e145c2c3749010daf16002",
   "targetDefaults": {
     "@angular/build:application": {
       "cache": true,
-      "dependsOn": [
-        "^build"
-      ],
-      "inputs": [
-        "production",
-        "^production"
-      ]
+      "dependsOn": ["^build"],
+      "inputs": ["production", "^production"]
     },
     "@nx/eslint:lint": {
       "cache": true,
@@ -42,20 +32,12 @@
     },
     "@nx/vitest:test": {
       "cache": true,
-      "inputs": [
-        "default",
-        "^production"
-      ]
+      "inputs": ["default", "^production"]
     },
     "@nx/js:tsc": {
       "cache": true,
-      "dependsOn": [
-        "^build"
-      ],
-      "inputs": [
-        "production",
-        "^production"
-      ]
+      "dependsOn": ["^build"],
+      "inputs": ["production", "^production"]
     }
   },
   "plugins": [
@@ -87,10 +69,7 @@
       "options": {
         "targetName": "test"
       },
-      "exclude": [
-        "apps/dashboard-backend-e2e/**/*",
-        "apps/admin-backend-e2e/**/*"
-      ]
+      "exclude": ["apps/dashboard-backend-e2e/**/*", "apps/admin-backend-e2e/**/*"]
     }
   ],
   "generators": {
@@ -110,5 +89,6 @@
       "linter": "eslint",
       "unitTestRunner": "vitest-analog"
     }
-  }
+  },
+  "analytics": false
 }

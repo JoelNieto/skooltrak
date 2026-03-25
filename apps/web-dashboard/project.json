@@ -8,7 +8,9 @@
   "targets": {
     "build": {
       "executor": "@angular/build:application",
-      "outputs": ["{options.outputPath}"],
+      "outputs": [
+        "{options.outputPath}"
+      ],
       "options": {
         "outputPath": "dist/apps/web-dashboard",
         "browser": "apps/web-dashboard/src/main.ts",
@@ -20,7 +22,9 @@
             "input": "apps/web-dashboard/public"
           }
         ],
-        "styles": ["apps/web-dashboard/src/styles.css"],
+        "styles": [
+          "apps/web-dashboard/src/styles.css"
+        ],
         "server": "apps/web-dashboard/src/main.server.ts",
         "ssr": {
           "entry": "apps/web-dashboard/src/server.ts"
@@ -63,7 +67,9 @@
         }
       },
       "defaultConfiguration": "development",
-      "dependsOn": ["dashboard-backend:serve"],
+      "dependsOn": [
+        "dashboard-backend:serve"
+      ],
       "options": {
         "proxyConfig": "apps/web-dashboard/proxy.conf.json"
       }
@@ -79,9 +85,11 @@
     },
     "test": {
       "executor": "@nx/vitest:test",
-      "outputs": ["{options.reportsDirectory}"],
+      "outputs": [
+        "{options.reportsDirectory}"
+      ],
       "options": {
-        "reportsDirectory": "../../coverage/apps/web-dashboard"
+        "reportsDirectory": "{projectRoot}/../../coverage/apps/web-dashboard"
       }
     },
     "serve-static": {

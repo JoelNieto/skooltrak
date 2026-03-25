@@ -4,7 +4,7 @@ import { computed, effect, inject, Injectable, linkedSignal, PLATFORM_ID, signal
 import { rxResource } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
 import { Apollo } from 'apollo-angular';
-import { catchError, firstValueFrom, map, of } from 'rxjs';
+import { catchError, filter, firstValueFrom, map, of, throwError } from 'rxjs';
 import {
   AuthIsEmailVerifiedDocument,
   AuthLoginDocument,
@@ -66,11 +66,30 @@ export default class Auth {
           fetchPolicy: 'network-only',
         })
         .valueChanges.pipe(
-          map((res) => res.data?.me as Query['me']),
-          catchError((err) => {
+          // Skip in-flight emissions so rxResource does not "resolve" with null before `me` arrives.
+          filter((res) => !res.loading),
+          map((res) => {
+            if (res.error) {
+              const err = res.error as { message: string; errors?: readonly { message: string }[] };
+              const fromGql = err.errors?.map((ge: { message: string }) => ge.message) ?? [];
+              const msg = [...fromGql, err.message].filter(Boolean).join('; ');
+              throw new Error(msg || 'Me query failed');
+            }
+            const me = res.data?.me as Query['me'];
+            if (me == null) {
+              throw new Error('No autenticado');
+            }
+            return me;
+          }),
+          catchError((err: Error) => {
+            if (this.#shouldClearCredentialsForMeError(err)) {
+              this.#clearStoredCredentialsAfterAuthFailure();
+              this.#maybeNavigateToLoginAfterAuthFailure();
+              return of(null);
+            }
             this.#toasts.showError(err.message);
             this.isSigning.set(false);
-            return of(null);
+            return throwError(() => err);
           }),
         );
     },
@@ -79,16 +98,17 @@ export default class Auth {
   public user = computed(() => this.userResource.value());
   public isUserLoading = computed(() => this.userResource.isLoading());
 
-  // Signal that indicates when user data is ready (loaded or determined to be null)
+  // Wait for a real `me` payload or a terminal error — not "resolved" with null because
+  // catchError previously turned GraphQL failures into of(null), which mis-routed to onboarding.
   public isUserReady = computed(() => {
-    // If not authenticated, we're ready (no user to load)
     if (!this.isAuthenticated()) {
       return true;
     }
-    // If authenticated, we need user data to be loaded (role may be null for new users)
-    const user = this.user();
     const status = this.userResource.status();
-    return user != null || status === 'error';
+    if (status === 'error') {
+      return true;
+    }
+    return status === 'resolved' && this.user() != null;
   });
 
   // Promise-based method for guards to wait until user data is ready
@@ -183,6 +203,37 @@ export default class Auth {
     } catch (error) {
       console.error('Failed to initialize session:', error);
     }
+  }
+
+  /** JWT / session rejected by API — drop local credentials so rxResource can idle cleanly. */
+  #shouldClearCredentialsForMeError(err: Error): boolean {
+    const m = (err?.message ?? '').toLowerCase();
+    return (
+      m.includes('invalid token') ||
+      m.includes('no autenticado') ||
+      m.includes('not authenticated') ||
+      m.includes('unauthorized')
+    );
+  }
+
+  #clearStoredCredentialsAfterAuthFailure(): void {
+    void authClient.signOut().catch(() => {});
+    this.sessionState.set(null);
+    this.token.set(null);
+    if (isPlatformBrowser(this.platformId)) {
+      localStorage.removeItem('access_token');
+    }
+  }
+
+  #maybeNavigateToLoginAfterAuthFailure(): void {
+    if (!isPlatformBrowser(this.platformId)) {
+      return;
+    }
+    const path = this.router.url.split('?')[0] ?? '';
+    if (/^\/(login|register|forgot-password|reset-password)(\/|$)/.test(path)) {
+      return;
+    }
+    void this.router.navigateByUrl('/login');
   }
 
   public async signIn(email: string, password: string): Promise<boolean> {

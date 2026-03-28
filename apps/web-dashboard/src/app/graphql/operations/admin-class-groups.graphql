@@ -13,6 +13,9 @@ query AdminClassGroupsBySchoolId($schoolId: String!, $take: Int!, $skip: Int!, $
       createdAt
       updatedAt
     }
+    teacherId
+    studyPlanId
+    active
     createdAt
     updatedAt
   }

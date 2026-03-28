@@ -8,6 +8,7 @@ import { RouterLink } from '@angular/router';
 import { $Enums } from '@generated/prisma';
 import { Apollo } from 'apollo-angular';
 import { map, of } from 'rxjs';
+import Auth from '../auth/auth';
 import Store from '../core/store';
 import { isValidId } from '../core/validators';
 import { PeriodsByYearDocument, StudentDocument } from '../graphql/generated/graphql';
@@ -94,10 +95,12 @@ const ENROLLMENT_STATUS_COLORS: Record<$Enums.EnrollmentStatus, string> = {
                   <span class="material-symbols-outlined text-lg">description</span>
                   Boletín
                 </a>
-                <a [routerLink]="['/students', student.id, 'edit']" class="btn btn-primary btn-sm">
-                  <span class="material-symbols-outlined text-lg">edit</span>
-                  Editar
-                </a>
+                @if (auth.hasPermission('MANAGE_STUDENTS')) {
+                  <a [routerLink]="['/students', student.id, 'edit']" class="btn btn-primary btn-sm">
+                    <span class="material-symbols-outlined text-lg">edit</span>
+                    Editar
+                  </a>
+                }
               </div>
             </div>
           </div>
@@ -320,7 +323,7 @@ export default class Student {
   public id = input.required<string>();
   private apollo = inject(Apollo);
   private store = inject(Store);
-
+  public auth = inject(Auth);
   public periodId = signal<string>('');
 
   getStatusLabel(status: $Enums.EnrollmentStatus): string {

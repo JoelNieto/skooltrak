@@ -34,12 +34,7 @@ type RecentStudent = {
   classGroup?: { name: string } | null;
 };
 
-type RecentTeacher = {
-  id: string;
-  fullName: string;
-  createdAt: string;
-  user: { email: string };
-};
+type RecentTeacher = RecentTeachersQuery['teachers'][number];
 
 @Component({
   selector: 'app-home',
@@ -251,7 +246,7 @@ type RecentTeacher = {
                     {{ teacher.fullName }}
                   </p>
                   <div class="text-xs text-base-content/60 mt-1">
-                    {{ teacher.user.email }} ·
+                    {{ teacher.user ? teacher.user.email : 'Sin correo' }} ·
                     {{ teacher.createdAt | date: 'short' }}
                   </div>
                 </div>

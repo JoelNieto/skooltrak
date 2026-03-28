@@ -10,6 +10,7 @@ import { $Enums } from '@generated/prisma';
 
 import { Apollo } from 'apollo-angular';
 import { filter, map, of, switchMap, tap } from 'rxjs';
+import Auth from '../auth/auth';
 import { GetStudentsDocument, RemoveStudentDocument, ResendUserInvitationDocument } from '../graphql/generated/graphql';
 
 const ENROLLMENT_STATUS_LABELS: Record<$Enums.EnrollmentStatus, string> = {
@@ -105,7 +106,7 @@ const ENROLLMENT_STATUS_COLORS: Record<$Enums.EnrollmentStatus, string> = {
               </td>
               <td>
                 @if (student.classGroup) {
-                  <a class="badge badge-primary badge-sm badge-soft" [routerLink]="['/groups', student.classGroupId]">
+                  <a class="badge badge-primary badge-sm" [routerLink]="['/groups', student.classGroupId]">
                     {{ student.classGroup.name }}
                   </a>
                 } @else {
@@ -148,15 +149,17 @@ const ENROLLMENT_STATUS_COLORS: Record<$Enums.EnrollmentStatus, string> = {
                         <span class="material-symbols-outlined text-lg">visibility</span>
                         <span>Ver</span>
                       </a>
-                      <a
-                        ngMenuItem
-                        value="edit"
-                        [routerLink]="['/students', student.id, 'edit']"
-                        class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-base-200 w-full"
-                      >
-                        <span class="material-symbols-outlined text-lg">edit</span>
-                        <span>Editar</span>
-                      </a>
+                      @if (auth.hasPermission('MANAGE_STUDENTS')) {
+                        <a
+                          ngMenuItem
+                          value="edit"
+                          [routerLink]="['/students', student.id, 'edit']"
+                          class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-base-200 w-full"
+                        >
+                          <span class="material-symbols-outlined text-lg">edit</span>
+                          <span>Editar</span>
+                        </a>
+                      }
                       @if (student.user && !student.user.emailVerified) {
                         <button
                           ngMenuItem
@@ -168,15 +171,17 @@ const ENROLLMENT_STATUS_COLORS: Record<$Enums.EnrollmentStatus, string> = {
                           <span>Reenviar invitación</span>
                         </button>
                       }
-                      <button
-                        ngMenuItem
-                        value="delete"
-                        class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-base-200 w-full"
-                        (click)="deleteStudent(student)"
-                      >
-                        <span class="material-symbols-outlined text-lg">delete</span>
-                        <span>Eliminar</span>
-                      </button>
+                      @if (auth.hasPermission('MANAGE_STUDENTS')) {
+                        <button
+                          ngMenuItem
+                          value="delete"
+                          class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-base-200 w-full"
+                          (click)="deleteStudent(student)"
+                        >
+                          <span class="material-symbols-outlined text-lg">delete</span>
+                          <span>Eliminar</span>
+                        </button>
+                      }
                     </ng-template>
                   </div>
                 </ng-template>
@@ -204,7 +209,7 @@ export default class Students {
   public searchText = signal('');
   public pagination = inject(Pagination);
   actionsMenu = viewChild<Menu<string>>('actionsMenu');
-
+  public auth = inject(Auth);
   public students = rxResource({
     params: () => ({
       take: this.pagination.take(),

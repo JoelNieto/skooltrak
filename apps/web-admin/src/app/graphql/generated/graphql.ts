@@ -3534,7 +3534,7 @@ export type Teacher = {
   birthDate: Scalars['DateTime']['output'];
   /** Groups of the teacher */
   classGroups: Array<ClassGroup>;
-  color: Scalars['String']['output'];
+  color?: Maybe<Scalars['String']['output']>;
   /** Courses of the teacher */
   courses: Array<Course>;
   /** Created at */
@@ -3571,9 +3571,9 @@ export type Teacher = {
   /** Updated at */
   updatedAt: Scalars['DateTime']['output'];
   /** User of the teacher */
-  user: User;
+  user?: Maybe<User>;
   /** User ID of the teacher */
-  userId: Scalars['String']['output'];
+  userId?: Maybe<Scalars['String']['output']>;
 };
 
 export type UpdateAssignmentInput = {
@@ -4738,7 +4738,7 @@ export type AssignmentQueryVariables = Exact<{
 }>;
 
 
-export type AssignmentQuery = { __typename?: 'Query', assignment: { __typename?: 'Assignment', id: string, title: string, details: string, date: any, createdAt: any, updatedAt: any, requireSubmission: boolean, course: { __typename?: 'Course', id: string, name: string }, teacher: { __typename?: 'Teacher', id: string, firstName: string, fatherName: string, user: { __typename?: 'User', id: string } } } };
+export type AssignmentQuery = { __typename?: 'Query', assignment: { __typename?: 'Assignment', id: string, title: string, details: string, date: any, createdAt: any, updatedAt: any, requireSubmission: boolean, course: { __typename?: 'Course', id: string, name: string }, teacher: { __typename?: 'Teacher', id: string, firstName: string, fatherName: string, user?: { __typename?: 'User', id: string } | null } } };
 
 export type AttendanceFormStudentsForAttendanceQueryVariables = Exact<{
   courseId: Scalars['String']['input'];
@@ -5046,7 +5046,7 @@ export type CourseQueryVariables = Exact<{
 }>;
 
 
-export type CourseQuery = { __typename?: 'Query', course: { __typename?: 'Course', id: string, name: string, shortName: string, code: string, createdAt: any, updatedAt: any, subject: { __typename?: 'Subject', id: string, name: string }, teacher?: { __typename?: 'Teacher', id: string, name: string, color: string, initials: string, user: { __typename?: 'User', id: string } } | null, studyPlan: { __typename?: 'StudyPlan', id: string, name: string, gradeMetric?: { __typename?: 'GradeMetric', id: string, name: string, minimumApproval: number, minimumExcellence: number, maximum: number, minimum: number, createdAt: any, updatedAt: any } | null } } };
+export type CourseQuery = { __typename?: 'Query', course: { __typename?: 'Course', id: string, name: string, shortName: string, code: string, createdAt: any, updatedAt: any, subject: { __typename?: 'Subject', id: string, name: string }, teacher?: { __typename?: 'Teacher', id: string, name: string, color?: string | null, initials: string, user?: { __typename?: 'User', id: string } | null } | null, studyPlan: { __typename?: 'StudyPlan', id: string, name: string, gradeMetric?: { __typename?: 'GradeMetric', id: string, name: string, minimumApproval: number, minimumExcellence: number, maximum: number, minimum: number, createdAt: any, updatedAt: any } | null } } };
 
 export type GetCoursesQueryVariables = Exact<{
   schoolId: Scalars['String']['input'];
@@ -5225,7 +5225,7 @@ export type GroupScheduleGroupsSchedulesByClassGroupIdQueryVariables = Exact<{
 }>;
 
 
-export type GroupScheduleGroupsSchedulesByClassGroupIdQuery = { __typename?: 'Query', groupsSchedulesByClassGroupId: Array<{ __typename?: 'GroupsSchedule', id: string, weekday: string, startTime: string, endTime: string, location: string, remote: boolean, remoteLink: string, courseId: string, course: { __typename?: 'Course', id: string, name: string, subject: { __typename?: 'Subject', name: string }, teacher?: { __typename?: 'Teacher', user: { __typename?: 'User', firstName: string, lastName: string } } | null } }> };
+export type GroupScheduleGroupsSchedulesByClassGroupIdQuery = { __typename?: 'Query', groupsSchedulesByClassGroupId: Array<{ __typename?: 'GroupsSchedule', id: string, weekday: string, startTime: string, endTime: string, location: string, remote: boolean, remoteLink: string, courseId: string, course: { __typename?: 'Course', id: string, name: string, subject: { __typename?: 'Subject', name: string }, teacher?: { __typename?: 'Teacher', user?: { __typename?: 'User', firstName: string, lastName: string } | null } | null } }> };
 
 export type GroupScheduleUpdateGroupsScheduleMutationVariables = Exact<{
   updateGroupsScheduleInput: UpdateGroupsScheduleInput;
@@ -5239,7 +5239,7 @@ export type ClassGroupQueryVariables = Exact<{
 }>;
 
 
-export type ClassGroupQuery = { __typename?: 'Query', classGroup: { __typename?: 'ClassGroup', id: string, name: string, createdAt: any, updatedAt: any, teacherId?: string | null, studyPlanId: string, students: Array<{ __typename?: 'Student', id: string, name: string, email: string, documentId: string, initials: string, user: { __typename?: 'User', color?: string | null } }>, courses: Array<{ __typename?: 'Course', id: string, name: string, code: string, subject: { __typename?: 'Subject', id: string, name: string }, teacher?: { __typename?: 'Teacher', id: string, name: string } | null }>, teacher?: { __typename?: 'Teacher', id: string, name: string, color: string, initials: string, user: { __typename?: 'User', id: string } } | null, studyPlan: { __typename?: 'StudyPlan', id: string, name: string, degree: { __typename?: 'Degree', id: string, name: string } } } };
+export type ClassGroupQuery = { __typename?: 'Query', classGroup: { __typename?: 'ClassGroup', id: string, name: string, createdAt: any, updatedAt: any, teacherId?: string | null, studyPlanId: string, students: Array<{ __typename?: 'Student', id: string, name: string, email: string, documentId: string, initials: string, user: { __typename?: 'User', color?: string | null } }>, courses: Array<{ __typename?: 'Course', id: string, name: string, code: string, subject: { __typename?: 'Subject', id: string, name: string }, teacher?: { __typename?: 'Teacher', id: string, name: string } | null }>, teacher?: { __typename?: 'Teacher', id: string, name: string, color?: string | null, initials: string, user?: { __typename?: 'User', id: string } | null } | null, studyPlan: { __typename?: 'StudyPlan', id: string, name: string, degree: { __typename?: 'Degree', id: string, name: string } } } };
 
 export type GetClassGroupsQueryVariables = Exact<{
   schoolId: Scalars['String']['input'];
@@ -5296,7 +5296,7 @@ export type RecentTeachersQueryVariables = Exact<{
 }>;
 
 
-export type RecentTeachersQuery = { __typename?: 'Query', teachers: Array<{ __typename?: 'Teacher', id: string, fullName: string, createdAt: any, user: { __typename?: 'User', email: string } }> };
+export type RecentTeachersQuery = { __typename?: 'Query', teachers: Array<{ __typename?: 'Teacher', id: string, fullName: string, createdAt: any, user?: { __typename?: 'User', email: string } | null }> };
 
 export type MessageFindMessageByIdQueryVariables = Exact<{
   id: Scalars['String']['input'];
@@ -5673,7 +5673,7 @@ export type TeacherFormQueryVariables = Exact<{
 }>;
 
 
-export type TeacherFormQuery = { __typename?: 'Query', teacher: { __typename?: 'Teacher', id: string, firstName: string, middleName: string, fatherName: string, motherName: string, documentId: string, birthDate: any, gender: string, address: string, phoneNumber: string, personalEmail: string, about: string, teacherSince?: number | null, memberSince?: any | null, user: { __typename?: 'User', email: string } } };
+export type TeacherFormQuery = { __typename?: 'Query', teacher: { __typename?: 'Teacher', id: string, firstName: string, middleName: string, fatherName: string, motherName: string, documentId: string, birthDate: any, gender: string, address: string, phoneNumber: string, personalEmail: string, about: string, teacherSince?: number | null, memberSince?: any | null, user?: { __typename?: 'User', email: string } | null } };
 
 export type UpdateTeacherMutationVariables = Exact<{
   updateTeacherInput: UpdateTeacherInput;
@@ -5726,7 +5726,7 @@ export type TeacherQueryVariables = Exact<{
 }>;
 
 
-export type TeacherQuery = { __typename?: 'Query', teacher: { __typename?: 'Teacher', id: string, firstName: string, middleName: string, fatherName: string, motherName: string, name: string, fullName: string, initials: string, documentId: string, birthDate: any, gender: string, address: string, phoneNumber: string, personalEmail: string, about: string, teacherSince?: number | null, memberSince?: any | null, createdAt: any, updatedAt: any, user: { __typename?: 'User', id: string, email: string, color?: string | null, emailVerified?: boolean | null }, subjects: Array<{ __typename?: 'Subject', id: string, name: string }>, courses: Array<{ __typename?: 'Course', id: string, name: string }>, classGroups: Array<{ __typename?: 'ClassGroup', id: string, name: string }> } };
+export type TeacherQuery = { __typename?: 'Query', teacher: { __typename?: 'Teacher', id: string, firstName: string, middleName: string, fatherName: string, motherName: string, name: string, fullName: string, initials: string, documentId: string, birthDate: any, gender: string, address: string, phoneNumber: string, personalEmail: string, about: string, teacherSince?: number | null, memberSince?: any | null, createdAt: any, updatedAt: any, user?: { __typename?: 'User', id: string, email: string, color?: string | null, emailVerified?: boolean | null } | null, subjects: Array<{ __typename?: 'Subject', id: string, name: string }>, courses: Array<{ __typename?: 'Course', id: string, name: string }>, classGroups: Array<{ __typename?: 'ClassGroup', id: string, name: string }> } };
 
 export type GetTeachersQueryVariables = Exact<{
   take: Scalars['Int']['input'];
@@ -5737,7 +5737,7 @@ export type GetTeachersQueryVariables = Exact<{
 }>;
 
 
-export type GetTeachersQuery = { __typename?: 'Query', count: number, teachers: Array<{ __typename?: 'Teacher', id: string, firstName: string, fatherName: string, name: string, initials: string, createdAt: any, updatedAt: any, user: { __typename?: 'User', id: string, email: string, color?: string | null, initials: string, emailVerified?: boolean | null } }> };
+export type GetTeachersQuery = { __typename?: 'Query', count: number, teachers: Array<{ __typename?: 'Teacher', id: string, firstName: string, fatherName: string, name: string, initials: string, createdAt: any, updatedAt: any, user?: { __typename?: 'User', id: string, email: string, color?: string | null, initials: string, emailVerified?: boolean | null } | null }> };
 
 export type RemoveTeacherMutationVariables = Exact<{
   id: Scalars['String']['input'];

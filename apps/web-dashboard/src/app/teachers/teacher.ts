@@ -3,19 +3,11 @@ import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject, input } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
-import { Prisma } from '@generated/prisma';
-import { isValidId } from '../core/validators';
 import { Apollo } from 'apollo-angular';
-import { TeacherDocument } from '../graphql/generated/graphql';
 import { map, of } from 'rxjs';
-type TeacherType = Prisma.TeacherGetPayload<{
-  include: { user: true; courses: true; classGroups: true; subjects: true };
-}> & {
-  name: string;
-  fullName: string;
-  initials: string;
-  user: { id: string; email: string; color: string | null; emailVerified: boolean | null };
-};
+import Auth from '../auth/auth';
+import { isValidId } from '../core/validators';
+import { TeacherDocument } from '../graphql/generated/graphql';
 
 @Component({
   imports: [Loader, RouterLink, DatePipe],
@@ -56,8 +48,12 @@ type TeacherType = Prisma.TeacherGetPayload<{
               </div>
             </div>
             <div class="flex gap-2 items-center">
-              <a class="btn btn-neutral" routerLink="edit">Editar</a>
-              <button class="btn btn-neutral btn-soft">Mensaje</button>
+              @if (auth.hasPermission('MANAGE_TEACHERS')) {
+                <a class="btn btn-secondary btn-sm" routerLink="edit">
+                  <span class="material-symbols-outlined">edit</span></a
+                >
+              }
+              <button class="btn btn-primary btn-sm"><span class="material-symbols-outlined">chat</span></button>
             </div>
           </div>
         </div>
@@ -69,8 +65,8 @@ type TeacherType = Prisma.TeacherGetPayload<{
                 <h3 class="text-base/7 font-semibold">Información Personal</h3>
                 <p class="mt-1 max-w-2xl text-sm/6 text-base-content/60">Detalles personales y de contacto</p>
               </div>
-              <div class="mt-6 border-t border-gray-100">
-                <dl class="divide-y divide-gray-100">
+              <div class="mt-6 border-t border-base-300">
+                <dl class="divide-y divide-base-300">
                   <div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
                     <dt class="text-sm/6 font-medium text-base-content">Nombre completo</dt>
                     <dd class="mt-1 text-sm/6 text-base-content/90 sm:col-span-2 sm:mt-0">
@@ -133,8 +129,8 @@ type TeacherType = Prisma.TeacherGetPayload<{
                 <h3 class="text-base/7 font-semibold">Información Académica</h3>
                 <p class="mt-1 max-w-2xl text-sm/6 text-base-content/60">Materias, cursos y grupos asignados</p>
               </div>
-              <div class="mt-6 border-t border-gray-100">
-                <dl class="divide-y divide-gray-100">
+              <div class="mt-6 border-t border-base-300">
+                <dl class="divide-y divide-base-300">
                   <div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
                     <dt class="text-sm/6 font-medium text-base-content">Docente desde</dt>
                     <dd class="mt-1 text-sm/6 text-base-content/90 sm:col-span-2 sm:mt-0">
@@ -152,7 +148,7 @@ type TeacherType = Prisma.TeacherGetPayload<{
                     <dd class="mt-1 text-sm/6 text-base-content/90 sm:col-span-2 sm:mt-0">
                       <div class="flex flex-wrap gap-2">
                         @for (subject of teacher.subjects; track subject.id) {
-                          <span class="badge badge-secondary badge-soft">
+                          <span class="badge badge-secondary">
                             {{ subject.name }}
                           </span>
                         } @empty {
@@ -166,7 +162,7 @@ type TeacherType = Prisma.TeacherGetPayload<{
                     <dd class="mt-1 text-sm/6 text-base-content/90 sm:col-span-2 sm:mt-0">
                       <div class="flex flex-wrap gap-2">
                         @for (course of teacher.courses; track course.id) {
-                          <a [routerLink]="['/courses', course.id]" class="badge badge-primary badge-soft">
+                          <a [routerLink]="['/courses', course.id]" class="badge badge-primary">
                             {{ course.name }}
                           </a>
                         } @empty {
@@ -180,7 +176,7 @@ type TeacherType = Prisma.TeacherGetPayload<{
                     <dd class="mt-2 text-sm text-base-content/90 sm:col-span-2 sm:mt-0">
                       <div class="flex flex-wrap gap-2">
                         @for (group of teacher.classGroups; track group.id) {
-                          <a [routerLink]="['/groups', group.id]" class="badge badge-neutral badge-soft">
+                          <a [routerLink]="['/groups', group.id]" class="badge badge-secondary">
                             {{ group.name }}
                           </a>
                         } @empty {
@@ -207,6 +203,7 @@ type TeacherType = Prisma.TeacherGetPayload<{
 export default class Teacher {
   public id = input.required<string>();
   #apollo = inject(Apollo);
+  public auth = inject(Auth);
   public teacherResource = rxResource({
     params: () => ({
       id: this.id(),

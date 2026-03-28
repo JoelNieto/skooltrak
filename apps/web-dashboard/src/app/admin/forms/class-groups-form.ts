@@ -111,6 +111,7 @@ export default class ClassGroupsForm {
 
   constructor() {
     afterRenderEffect(() => {
+      console.log(this.data()?.group);
       if (this.data()?.group) {
         this.form.patchValue(this.data()!.group!);
       }

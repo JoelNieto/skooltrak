@@ -1,16 +1,6 @@
-query AdminClassGroupsBySchoolId(
-  $schoolId: String!
-  $take: Int!
-  $skip: Int!
-  $search: String!
-) {
+query AdminClassGroupsBySchoolId($schoolId: String!, $take: Int!, $skip: Int!, $search: String!) {
   count: classGroupsCount(schoolId: $schoolId, search: $search)
-  classGroups(
-    schoolId: $schoolId
-    take: $take
-    skip: $skip
-    search: $search
-  ) {
+  classGroups(schoolId: $schoolId, take: $take, skip: $skip, search: $search) {
     id
     name
     teacher {

@@ -1,4 +1,4 @@
-import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
+import { Args, Int, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { DegreesService } from './degrees.service';
 import { CreateDegreeInput } from './dto/create-degree.input';
 import { UpdateDegreeInput } from './dto/update-degree.input';
@@ -27,9 +27,16 @@ export class DegreesResolver {
 
   @Query(() => [Degree], { name: 'degreesBySchoolId' })
   findManyBySchoolId(
-    @Args('schoolId', { type: () => String }) schoolId: string
+    @Args('schoolId', { type: () => String }) schoolId: string,
+    @Args('take', { type: () => Int, nullable: true }) take?: number,
+    @Args('skip', { type: () => Int, nullable: true }) skip?: number
   ) {
-    return this.degreesService.findManyBySchoolId(schoolId);
+    return this.degreesService.findManyBySchoolId(schoolId, { take, skip });
+  }
+
+  @Query(() => Int, { name: 'degreesBySchoolIdCount' })
+  degreesBySchoolIdCount(@Args('schoolId', { type: () => String }) schoolId: string) {
+    return this.degreesService.countBySchoolId(schoolId);
   }
 
   @Mutation(() => Degree)

@@ -1,5 +1,6 @@
-query AdminDegreesBySchoolId($schoolId: String!) {
-  degreesBySchoolId(schoolId: $schoolId) {
+query AdminDegreesBySchoolId($schoolId: String!, $take: Int!, $skip: Int!) {
+  count: degreesBySchoolIdCount(schoolId: $schoolId)
+  degreesBySchoolId(schoolId: $schoolId, take: $take, skip: $skip) {
     id
     name
     shortName

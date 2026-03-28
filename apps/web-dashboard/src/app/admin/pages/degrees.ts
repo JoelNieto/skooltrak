@@ -1,12 +1,12 @@
-import { Confirmation, Modal, Toast } from '@/ui';
+import { Confirmation, Modal, Paginator, Toast } from '@/ui';
 import { Menu, MenuContent, MenuItem, MenuTrigger } from '@angular/aria/menu';
 import { OverlayModule } from '@angular/cdk/overlay';
 import { DatePipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, inject, viewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal, viewChild } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 
 import { Apollo } from 'apollo-angular';
-import { filter, map, of, switchMap } from 'rxjs';
+import { filter, map, of, switchMap, tap } from 'rxjs';
 import Store from '../../core/store';
 import {
   AdminDegreesBySchoolIdDocument,
@@ -16,7 +16,7 @@ import {
 import DegreesForm from '../forms/degrees-form';
 @Component({
   selector: 'app-degrees',
-  imports: [DatePipe, Menu, MenuContent, MenuItem, MenuTrigger, OverlayModule],
+  imports: [DatePipe, Paginator, Menu, MenuContent, MenuItem, MenuTrigger, OverlayModule],
 
   template: ` <div class="flex justify-end">
       <button class="btn btn-primary" (click)="editDegree()">
@@ -95,6 +95,15 @@ import DegreesForm from '../forms/degrees-form';
           }
         </tbody>
       </table>
+      <div class="p-4 rounded-b-lg">
+        <lib-paginator
+          [count]="pagination().count"
+          [take]="pagination().take"
+          [skip]="pagination().skip"
+          (skipChange)="updateSkip($event)"
+          (takeChange)="updateTake($event)"
+        />
+      </div>
     </div>`,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -105,9 +114,29 @@ export default class Degrees {
   private modal = inject(Modal);
   private confirmation = inject(Confirmation);
   actionsMenu = viewChild<Menu<string>>('actionsMenu');
+
+  public pagination = signal({
+    take: 10,
+    skip: 0,
+    count: 0,
+  });
+
+  public take = computed(() => this.pagination().take);
+  public skip = computed(() => this.pagination().skip);
+
+  public updateSkip(skip: number) {
+    this.pagination.update((prev) => ({ ...prev, skip }));
+  }
+
+  public updateTake(take: number) {
+    this.pagination.update((prev) => ({ ...prev, take }));
+  }
+
   public degrees = rxResource({
     params: () => ({
       schoolId: this.store.currentSchoolId(),
+      take: this.take(),
+      skip: this.skip(),
     }),
     stream: ({ params }) => {
       if (!params.schoolId) {
@@ -118,9 +147,17 @@ export default class Degrees {
           query: AdminDegreesBySchoolIdDocument,
           variables: {
             schoolId: params.schoolId,
+            take: params.take,
+            skip: params.skip,
           },
         })
         .valueChanges.pipe(
+          tap((result) => {
+            this.pagination.update((prev) => ({
+              ...prev,
+              count: result.data?.count ?? 0,
+            }));
+          }),
           map((result) => (result.data?.degreesBySchoolId as AdminDegreesBySchoolIdQuery['degreesBySchoolId']) ?? []),
         );
     },

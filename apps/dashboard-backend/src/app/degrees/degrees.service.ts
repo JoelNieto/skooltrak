@@ -20,11 +20,18 @@ export class DegreesService {
     });
   }
 
-  findManyBySchoolId(schoolId: string) {
+  findManyBySchoolId(schoolId: string, options?: { take?: number; skip?: number }) {
     return this.prisma.degree.findMany({
       where: { schoolId },
+      take: options?.take,
+      skip: options?.skip,
+      orderBy: { name: 'asc' },
       include: { school: true, studyPlans: true },
     });
+  }
+
+  countBySchoolId(schoolId: string) {
+    return this.prisma.degree.count({ where: { schoolId } });
   }
 
   findOne(id: string) {

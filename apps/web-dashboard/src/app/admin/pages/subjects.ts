@@ -38,7 +38,7 @@ import SubjectsForm from '../forms/subjects-form';
         <thead>
           <tr>
             <th
-              class="cursor-pointer hover:bg-base-200"
+              class="cursor-pointer hover:bg-base-200 w-1/4"
               [class]="pagination.sortBy() === 'name' ? 'bg-primary/10 !text-primary hover:bg-primary/20' : ''"
               (click)="pagination.setOrder('name')"
             >
@@ -52,8 +52,8 @@ import SubjectsForm from '../forms/subjects-form';
               </div>
             </th>
             <th
-              class="hover:bg-base-200 cursor-pointer"
-              [class]="pagination.sortBy() === 'code' ? 'bg-primary/10 !text-primary hover:bg-primary/20' : ''"
+              class="hover:bg-base-200 cursor-pointer w-1/5"
+              [class]="pagination.sortBy() === 'code' ? 'bg-primary/10 text-primary! hover:bg-primary/20' : ''"
               (click)="pagination.setOrder('code')"
             >
               <div class="flex items-center gap-2">

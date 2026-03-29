@@ -1,0 +1,200 @@
+query StoreMe {
+  me {
+    id
+    role {
+      permissions {
+        descriptiveId
+      }
+    }
+  }
+}
+
+fragment StoreCategoryFields on StoreCategory {
+  id
+  schoolId
+  name
+  description
+  sortOrder
+  active
+  createdAt
+  updatedAt
+}
+
+fragment StoreProductFields on StoreProduct {
+  id
+  schoolId
+  categoryId
+  category {
+    ...StoreCategoryFields
+  }
+  name
+  description
+  price
+  imageUrl
+  stock
+  active
+  createdAt
+  updatedAt
+}
+
+fragment StoreCartItemFields on StoreCartItem {
+  id
+  userId
+  productId
+  product {
+    ...StoreProductFields
+  }
+  quantity
+  createdAt
+  updatedAt
+}
+
+fragment StoreOrderItemFields on StoreOrderItem {
+  id
+  orderId
+  productId
+  product {
+    ...StoreProductFields
+  }
+  quantity
+  unitPrice
+}
+
+fragment StoreOrderFields on StoreOrder {
+  id
+  schoolId
+  userId
+  total
+  status
+  paymentStatus
+  notes
+  createdAt
+  updatedAt
+  items {
+    ...StoreOrderItemFields
+  }
+}
+
+query StoreCategories($schoolId: String!) {
+  storeCategories(schoolId: $schoolId) {
+    ...StoreCategoryFields
+  }
+}
+
+query StoreCategoriesAdmin($schoolId: String!) {
+  storeCategoriesAdmin(schoolId: $schoolId) {
+    ...StoreCategoryFields
+  }
+}
+
+query StoreProducts($schoolId: String!, $search: String, $categoryId: String) {
+  storeProducts(schoolId: $schoolId, search: $search, categoryId: $categoryId) {
+    ...StoreProductFields
+  }
+}
+
+query StoreProduct($id: String!) {
+  storeProduct(id: $id) {
+    ...StoreProductFields
+  }
+}
+
+query StoreProductsAdmin($schoolId: String!) {
+  storeProductsAdmin(schoolId: $schoolId) {
+    ...StoreProductFields
+  }
+}
+
+query MyStoreCart($schoolId: String!) {
+  myStoreCart(schoolId: $schoolId) {
+    ...StoreCartItemFields
+  }
+}
+
+query MyStoreOrders($schoolId: String!) {
+  myStoreOrders(schoolId: $schoolId) {
+    ...StoreOrderFields
+  }
+}
+
+query StoreOrder($id: String!) {
+  storeOrder(id: $id) {
+    ...StoreOrderFields
+  }
+}
+
+query StoreOrdersAdmin($schoolId: String!) {
+  storeOrdersAdmin(schoolId: $schoolId) {
+    ...StoreOrderFields
+  }
+}
+
+mutation AddToStoreCart($input: AddToCartInput!) {
+  addToStoreCart(input: $input) {
+    ...StoreCartItemFields
+  }
+}
+
+mutation UpdateStoreCartItem($input: UpdateCartItemInput!) {
+  updateStoreCartItem(input: $input) {
+    ...StoreCartItemFields
+  }
+}
+
+mutation RemoveStoreCartItem($cartItemId: String!) {
+  removeStoreCartItem(cartItemId: $cartItemId)
+}
+
+mutation ClearStoreCart($schoolId: String!) {
+  clearStoreCart(schoolId: $schoolId)
+}
+
+mutation CheckoutStore($input: CheckoutStoreInput!) {
+  checkoutStore(input: $input) {
+    ...StoreOrderFields
+  }
+}
+
+mutation ProcessStorePayment($input: ProcessStorePaymentInput!) {
+  processStorePayment(input: $input) {
+    ...StoreOrderFields
+  }
+}
+
+mutation CreateStoreCategory($input: CreateStoreCategoryInput!) {
+  createStoreCategory(input: $input) {
+    ...StoreCategoryFields
+  }
+}
+
+mutation UpdateStoreCategory($input: UpdateStoreCategoryInput!) {
+  updateStoreCategory(input: $input) {
+    ...StoreCategoryFields
+  }
+}
+
+mutation DeleteStoreCategory($id: String!) {
+  deleteStoreCategory(id: $id)
+}
+
+mutation CreateStoreProduct($input: CreateStoreProductInput!) {
+  createStoreProduct(input: $input) {
+    ...StoreProductFields
+  }
+}
+
+mutation UpdateStoreProduct($input: UpdateStoreProductInput!) {
+  updateStoreProduct(input: $input) {
+    ...StoreProductFields
+  }
+}
+
+mutation DeleteStoreProduct($id: String!) {
+  deleteStoreProduct(id: $id)
+}
+
+mutation UpdateStoreOrderStatus($input: UpdateStoreOrderStatusInput!) {
+  updateStoreOrderStatus(input: $input) {
+    ...StoreOrderFields
+  }
+}

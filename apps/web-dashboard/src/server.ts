@@ -1,66 +1,72 @@
-import {
-  AngularNodeAppEngine,
-  createNodeRequestHandler,
-  isMainModule,
-  writeResponseToNodeResponse,
-} from '@angular/ssr/node';
-import express from 'express';
-import { dirname, resolve } from 'node:path';
+import './ssr/node-polyfills';
+
+import { initNodeFederation } from '@softarc/native-federation-node';
+import { existsSync, readFileSync } from 'node:fs';
+import { dirname, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-const serverDistFolder = dirname(fileURLToPath(import.meta.url));
-const browserDistFolder = resolve(serverDistFolder, '../browser');
+console.log('Starting SSR for Shell');
 
-const app = express();
-const angularApp = new AngularNodeAppEngine();
+const serverDir = dirname(fileURLToPath(import.meta.url));
 
 /**
- * Example Express Rest API endpoints can be defined here.
- * Uncomment and define endpoints as necessary.
- *
- * Example:
- * ```ts
- * app.get('/api/**', (req, res) => {
- *   // Handle API request
- * });
- * ```
+ * Native Federation's initNodeFederation passes manifest/remote paths to fs.readFile.
+ * Relative paths are resolved from process.cwd() (repo root under `nx serve`), not from
+ * this file — so we pass a path relative to process.cwd() for relBundlePath.
+ * Do not use process.chdir: Angular route extraction runs in a worker where chdir is forbidden.
  */
-
-/**
- * Serve static files from /browser
- */
-app.use(
-  express.static(browserDistFolder, {
-    maxAge: '1y',
-    index: false,
-    redirect: false,
-  })
-);
-
-/**
- * Handle all other requests by rendering the Angular application.
- */
-app.use('/**', (req, res, next) => {
-  angularApp
-    .handle(req)
-    .then((response) =>
-      response ? writeResponseToNodeResponse(response, res) : next()
-    )
-    .catch(next);
-});
-
-/**
- * Start the server if this module is the main entry point.
- * The server listens on the port defined by the `PORT` environment variable, or defaults to 4000.
- */
-if (isMainModule(import.meta.url)) {
-  const port = process.env['PORT'] || 4000;
-  app.listen(port, () => {
-    console.log(`Node Express server listening on http://localhost:${port}`);
-  });
+function resolveBrowserDir(): string {
+  const nextToServer = resolve(serverDir, '../browser');
+  if (existsSync(join(nextToServer, 'remoteEntry.json'))) {
+    return nextToServer;
+  }
+  const fromWorkspaceDist = resolve(process.cwd(), 'dist/apps/web-dashboard/browser');
+  if (existsSync(join(fromWorkspaceDist, 'remoteEntry.json'))) {
+    return fromWorkspaceDist;
+  }
+  return nextToServer;
 }
 
-/**
- * Request handler used by the Angular CLI (for dev-server and during build) or Firebase Cloud Functions.
- */
-export const reqHandler = createNodeRequestHandler(app);
+function loadRemotes(): Record<string, string> {
+  const browserDir = resolveBrowserDir();
+  const candidates = [
+    join(browserDir, 'federation.manifest.json'),
+    join(serverDir, '../public/federation.manifest.json'),
+    resolve(process.cwd(), 'apps/web-dashboard/public/federation.manifest.json'),
+  ];
+  for (const p of candidates) {
+    if (existsSync(p)) {
+      return JSON.parse(readFileSync(p, 'utf-8')) as Record<string, string>;
+    }
+  }
+  throw new Error(
+    `federation.manifest.json not found. Tried:\n${candidates.join('\n')}`,
+  );
+}
+
+(async () => {
+  const browserDir = resolveBrowserDir();
+  if (!existsSync(join(browserDir, 'remoteEntry.json'))) {
+    throw new Error(
+      `Native Federation host remoteEntry.json missing under:\n${browserDir}\n` +
+        'Build the dashboard at least once (e.g. nx run web-dashboard:esbuild:development) so dist/apps/web-dashboard/browser exists.',
+    );
+  }
+
+  const remotes = loadRemotes();
+
+  let relBundlePath = relative(process.cwd(), browserDir).replace(/\\/g, '/');
+  if (!relBundlePath || relBundlePath === '.') {
+    relBundlePath = './';
+  } else if (!relBundlePath.endsWith('/')) {
+    relBundlePath += '/';
+  }
+
+  await initNodeFederation({
+    remotesOrManifestUrl: remotes,
+    relBundlePath,
+    throwIfRemoteNotFound: false,
+  });
+
+  await import('./bootstrap-server');
+})();

@@ -76,6 +76,10 @@ export enum Perm {
   MANAGE_FINANCIALS = 'MANAGE_FINANCIALS',
   VIEW_FINANCIALS = 'VIEW_FINANCIALS',
 
+  // School store
+  MANAGE_STORE = 'MANAGE_STORE',
+  VIEW_STORE = 'VIEW_STORE',
+
   // Roles & Permissions management
   MANAGE_ROLES = 'MANAGE_ROLES',
   MANAGE_PERMISSIONS = 'MANAGE_PERMISSIONS',
@@ -122,6 +126,8 @@ export const PERMISSION_DESCRIPTIONS: Record<Perm, string> = {
   [Perm.VIEW_NEWSLETTER]: 'View newsletters',
   [Perm.MANAGE_FINANCIALS]: 'Create, update, and delete charges and payments',
   [Perm.VIEW_FINANCIALS]: 'View financial balance and payment history',
+  [Perm.MANAGE_STORE]: 'Manage school store products, categories, and orders',
+  [Perm.VIEW_STORE]: 'Browse the school store and place orders',
   [Perm.MANAGE_ROLES]: 'Create, update, and delete roles',
   [Perm.MANAGE_PERMISSIONS]: 'Manage permission assignments',
 };
@@ -173,6 +179,7 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<DefaultRole, Perm[]> = {
     Perm.MANAGE_FILES,
     Perm.MANAGE_QUIZZES,
     Perm.VIEW_NEWSLETTER,
+    Perm.VIEW_STORE,
   ],
 
   [DefaultRole.STUDENT]: [
@@ -192,6 +199,7 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<DefaultRole, Perm[]> = {
     Perm.VIEW_STUDY_PLANS,
     Perm.VIEW_PERIODS,
     Perm.VIEW_NEWSLETTER,
+    Perm.VIEW_STORE,
   ],
 
   [DefaultRole.PARENT]: [
@@ -203,6 +211,7 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<DefaultRole, Perm[]> = {
     Perm.VIEW_MESSAGES,
     Perm.VIEW_SCHEDULES,
     Perm.VIEW_NEWSLETTER,
+    Perm.VIEW_STORE,
   ],
 };
 

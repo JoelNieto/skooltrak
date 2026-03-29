@@ -1,0 +1,6 @@
+query MyStoreCartCount($schoolId: String!) {
+  myStoreCart(schoolId: $schoolId) {
+    id
+    quantity
+  }
+}

@@ -11,6 +11,7 @@
     "isolatedModules": true,
     "emitDecoratorMetadata": false,
     "module": "preserve",
+    "baseUrl": "../..",
     "paths": {
       "@/auth": ["libs/auth/src/index.ts"],
       "@/ui": ["libs/ui/src/index.ts"],

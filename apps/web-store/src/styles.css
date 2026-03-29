@@ -1,0 +1,249 @@
+/* You can add global styles to this file, and also import other style files */
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+@import url('https://fonts.googleapis.com/icon?family=Material+Symbols+Outlined');
+@import 'tailwindcss';
+@import '@angular/cdk/overlay-prebuilt.css';
+
+@plugin 'daisyui';
+
+@plugin "daisyui/theme" {
+  name: 'light';
+  default: true;
+  prefersdark: false;
+  color-scheme: 'light';
+  --color-base-100: oklch(100% 0 0);
+  --color-base-200: oklch(98% 0.003 247.858);
+  --color-base-300: oklch(96% 0.007 247.896);
+  --color-base-content: oklch(30% 0.056 229.695);
+  --color-primary: oklch(60% 0.25 292.717);
+  --color-primary-content: oklch(97% 0.014 308.299);
+  --color-secondary: oklch(77% 0.152 181.912);
+  --color-secondary-content: oklch(43% 0.078 188.216);
+  --color-accent: oklch(39% 0.195 277.366);
+  --color-accent-content: oklch(96% 0.018 272.314);
+  --color-neutral: oklch(37% 0.044 257.287);
+  --color-neutral-content: oklch(98% 0.019 200.873);
+  --color-info: oklch(58% 0.158 241.966);
+  --color-info-content: oklch(97% 0.013 236.62);
+  --color-success: oklch(76% 0.177 163.223);
+  --color-success-content: oklch(37% 0.077 168.94);
+  --color-warning: oklch(68% 0.162 75.834);
+  --color-warning-content: oklch(98% 0.026 102.212);
+  --color-error: oklch(58% 0.253 17.585);
+  --color-error-content: oklch(96% 0.015 12.422);
+  --radius-selector: 1rem;
+  --radius-field: 0.5rem;
+  --radius-box: 0.5rem;
+  --size-selector: 0.25rem;
+  --size-field: 0.25rem;
+  --border: 1px;
+  --depth: 0;
+  --noise: 0;
+}
+
+@plugin "daisyui/theme" {
+  name: 'dark';
+  default: false;
+  prefersdark: true;
+  color-scheme: 'dark';
+  --color-base-100: oklch(22% 0.015 265);
+  --color-base-200: oklch(19% 0.012 265);
+  --color-base-300: oklch(16% 0.01 265);
+  --color-base-content: oklch(95% 0.01 265);
+  /* Luminous indigo primary for dark mode */
+  --color-primary: oklch(65% 0.2 265);
+  --color-primary-content: oklch(15% 0.02 265);
+  /* Light slate secondary */
+  --color-secondary: oklch(70% 0.06 265);
+  --color-secondary-content: oklch(15% 0.02 265);
+  /* Bright teal accent */
+  --color-accent: oklch(68% 0.14 195);
+  --color-accent-content: oklch(15% 0.02 195);
+  --color-neutral: oklch(15% 0.01 265);
+  --color-neutral-content: oklch(90% 0.01 265);
+  --color-info: oklch(68% 0.16 245);
+  --color-info-content: oklch(15% 0.02 245);
+  --color-success: oklch(68% 0.16 155);
+  --color-success-content: oklch(15% 0.02 155);
+  --color-warning: oklch(78% 0.16 70);
+  --color-warning-content: oklch(20% 0.06 70);
+  --color-error: oklch(65% 0.2 25);
+  --color-error-content: oklch(98% 0.02 25);
+  /* Modern rounded corners */
+  --radius-selector: 0.625rem;
+  --radius-field: 0.5rem;
+  --radius-box: 0.5rem;
+  --size-selector: 0.25rem;
+  --size-field: 0.25rem;
+  --border: 1px;
+  --depth: 0;
+  --noise: 0;
+}
+
+@theme {
+  --font-sans: 'Inter', system-ui, sans-serif !important;
+  --tab-border-color: var(--color-primary);
+}
+
+/* Kid-friendly interactive effects */
+.card-interactive {
+  @apply transition-all duration-200 hover:shadow-lg hover:-translate-y-1;
+}
+
+.btn-playful {
+  @apply transition-all duration-200 hover:scale-105 active:scale-95;
+}
+
+.nav-item-playful {
+  @apply transition-all duration-200 hover:translate-x-1;
+}
+
+.fieldset {
+  @apply gap-1;
+}
+
+.text-base-200 {
+  color: color-mix(in oklab, var(--color-base-content) 60%, transparent);
+}
+
+.fieldset {
+  label {
+    @apply block text-sm/6 font-medium text-base-content/60 mb-0;
+  }
+}
+
+.input {
+  @apply placeholder:text-gray-400 dark:placeholder:text-gray-600 text-sm/6;
+}
+
+.input-primary,
+.select-primary,
+.textarea-primary,
+.checkbox-primary {
+  --input-color: color-mix(in oklab, var(--color-base-content) 20%, #0000);
+  &:focus,
+  &:focus-within {
+    --input-color: var(--color-primary);
+  }
+}
+
+.input:focus,
+.input:focus-within,
+.select:focus,
+.select:focus-within,
+.textarea:focus,
+.textarea:focus-within {
+  outline: none;
+}
+
+input.ng-invalid.ng-dirty,
+select.ng-invalid.ng-dirty,
+textarea.ng-invalid.ng-dirty {
+  --input-color: var(--color-error);
+}
+
+.input,
+.select,
+.textarea {
+  @apply w-full;
+}
+
+.table {
+  @apply overflow-x-auto;
+  thead > tr {
+    @apply border-b border-gray-300 dark:border-gray-700;
+    th {
+      @apply text-base-content/70 font-medium;
+    }
+    th:first-child {
+      @apply pl-4;
+    }
+    th:last-child {
+      @apply pr-4;
+    }
+  }
+  tbody > tr {
+    @apply border-b border-gray-200 last:border-b-0 dark:border-gray-700;
+    td {
+      @apply text-base-content;
+    }
+    td:first-child {
+      @apply font-medium pl-4;
+    }
+    td:last-child {
+      @apply pr-4;
+    }
+  }
+  td {
+    @apply whitespace-nowrap;
+  }
+}
+
+.table-transition {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.layout-padding {
+  @apply mx-auto mt-4 max-w-7xl px-4 sm:px-6 lg:px-8;
+}
+
+.message-quote {
+  @apply mt-3 rounded-md border-l-4 border-primary/60 bg-base-200 px-3 py-2;
+}
+
+/* Sidebar gradient — adapts to light/dark via DaisyUI theme variables */
+.sidebar-gradient {
+  background: linear-gradient(
+    180deg,
+    color-mix(in oklch, var(--color-primary) 50%, black) 0%,
+    color-mix(in oklch, var(--color-accent) 45%, black) 100%
+  );
+}
+
+/* Print styles: hide layout chrome when printing (e.g. grade report) */
+@media print {
+  @page {
+    size: letter;
+    margin: 0.35in;
+  }
+  #sidebar,
+  #sidebar-overlay,
+  #sidebar-toggle,
+  .print\:hidden {
+    display: none !important;
+  }
+  aside#sidebar {
+    display: none !important;
+  }
+  #mobile-menu-bar {
+    display: none !important;
+  }
+  /* Full width, no padding for printed content */
+  main {
+    padding: 0 !important;
+  }
+  .grade-report-container .breadcrumbs,
+  .grade-report-container .flex.gap-2 {
+    display: none !important;
+  }
+  /* Compact grade report for single letter page */
+  .grade-report-container {
+    max-height: none;
+    overflow: visible !important;
+  }
+  /* Ensure grade report tables don't get cut off */
+  .grade-report-content {
+    overflow: visible !important;
+  }
+}

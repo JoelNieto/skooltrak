@@ -1,3 +1,4 @@
+import { loadRemoteModule } from '@angular-architects/native-federation';
 import { Route } from '@angular/router';
 import {
   adminGuard,
@@ -254,6 +255,13 @@ export const appRoutes: Route[] = [
         path: 'groups/:id',
         canActivate: [permissionGuard('VIEW_CLASS_GROUPS')],
         loadComponent: () => import('./groups/group'),
+      },
+
+      {
+        path: 'store',
+        canActivate: [permissionGuard('VIEW_STORE')],
+        loadChildren: () =>
+          loadRemoteModule('webStore', './routes').then((m) => m.STORE_ROUTES),
       },
 
       // Student-specific routes

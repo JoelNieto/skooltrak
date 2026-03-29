@@ -10,6 +10,11 @@ input AddChatParticipantsInput {
   userIds: [String!]!
 }
 
+input AddToCartInput {
+  productId: String!
+  quantity: Int! = 1
+}
+
 type Assignment {
   """Course of the assignment"""
   course: Course!
@@ -367,6 +372,11 @@ type CheckPendingInvitationResult {
   hasPendingInvitation: Boolean!
   organizationName: String
   role: String
+}
+
+input CheckoutStoreInput {
+  notes: String
+  schoolId: String!
 }
 
 type ClassGroup {
@@ -943,6 +953,24 @@ input CreateSchoolWithOrgInput {
 
   """Short name of the school"""
   schoolShortName: String!
+}
+
+input CreateStoreCategoryInput {
+  description: String
+  name: String!
+  schoolId: String!
+  sortOrder: Int
+}
+
+input CreateStoreProductInput {
+  active: Boolean
+  categoryId: String
+  description: String
+  imageUrl: String
+  name: String!
+  price: Float!
+  schoolId: String!
+  stock: Int!
 }
 
 input CreateStudentGradeInput {
@@ -1715,9 +1743,12 @@ type MessageRecipient {
 type Mutation {
   acceptInvitation(invitationId: String!): Boolean!
   addChatParticipants(input: AddChatParticipantsInput!): Chat!
+  addToStoreCart(input: AddToCartInput!): StoreCartItem!
   approveJoinRequest(approve: Boolean!, requestId: String!): Boolean!
   cancelInvitation(invitationId: String!): Boolean!
   changePassword(currentPassword: String!, newPassword: String!): Boolean!
+  checkoutStore(input: CheckoutStoreInput!): StoreOrder!
+  clearStoreCart(schoolId: String!): Boolean!
   completeOnboarding: Boolean!
   createAssignment(createAssignmentInput: CreateAssignmentInput!): Assignment!
 
@@ -1752,6 +1783,8 @@ type Mutation {
   """Create a presigned URL for uploading a school logo"""
   createSchoolLogoUploadUrl(input: SchoolLogoUploadInput!): SchoolLogoUploadUrl!
   createSchoolWithOrganization(input: CreateSchoolWithOrgInput!): CreateSchoolResult!
+  createStoreCategory(input: CreateStoreCategoryInput!): StoreCategory!
+  createStoreProduct(input: CreateStoreProductInput!): StoreProduct!
   createStudent(createStudentInput: CreateStudentInput!): Student!
   createStudentGrade(createStudentGradeInput: CreateStudentGradeInput!): StudentGrade!
   createStudyPlan(createStudyPlanInput: CreateStudyPlanInput!): StudyPlan!
@@ -1768,12 +1801,15 @@ type Mutation {
   """Delete an assignment submission"""
   deleteAssignmentSubmission(submissionId: String!): Boolean!
   deleteAttendanceSession(id: String!): AttendanceSession!
+  deleteStoreCategory(id: String!): Boolean!
+  deleteStoreProduct(id: String!): Boolean!
   inviteMember(email: String!, organizationId: String, role: String!): Invitation!
   leaveChat(chatId: String!): Boolean!
   login(email: String!, password: String!): AuthPayload!
   markChatRead(chatId: String!): ChatParticipant
   markMessageAsRead(messageId: String!): MessageRecipient
   markNotificationRead(notificationId: String!): Boolean!
+  processStorePayment(input: ProcessStorePaymentInput!): StoreOrder!
   rejectInvitation(invitationId: String!): Boolean!
   removeAssignment(id: String!): Assignment!
   removeCharge(id: String!): Charge
@@ -1795,6 +1831,7 @@ type Mutation {
   removeRole(id: String!): Role!
   removeSchool(id: String!): School!
   removeShare(removeShareInput: RemoveShareInput!): File!
+  removeStoreCartItem(cartItemId: String!): Boolean!
   removeStudent(id: String!): Student!
   removeStudentGrade(id: String!): StudentGrade!
   removeStudyPlan(id: String!): StudyPlan!
@@ -1834,6 +1871,10 @@ type Mutation {
   """Update only the logo of a school"""
   updateSchoolLogo(id: String!, logo: String!): School!
   updateShare(updateShareInput: UpdateShareInput!): File!
+  updateStoreCartItem(input: UpdateCartItemInput!): StoreCartItem!
+  updateStoreCategory(input: UpdateStoreCategoryInput!): StoreCategory!
+  updateStoreOrderStatus(input: UpdateStoreOrderStatusInput!): StoreOrder!
+  updateStoreProduct(input: UpdateStoreProductInput!): StoreProduct!
   updateStudent(updateStudentInput: UpdateStudentInput!): Student!
   updateStudentGrade(updateStudentGradeInput: UpdateStudentGradeInput!): StudentGrade!
   updateStudyPlan(updateStudyPlanInput: UpdateStudyPlanInput!): StudyPlan!
@@ -2048,6 +2089,11 @@ type Permission {
   descriptiveId: String!
   id: String!
   updatedAt: DateTime!
+}
+
+input ProcessStorePaymentInput {
+  orderId: String!
+  simulateSuccess: Boolean
 }
 
 type Query {
@@ -2440,6 +2486,8 @@ type Query {
   myAssignmentSubmission(assignmentId: String!): AssignmentSubmission
   myChats: [Chat!]!
   myJoinRequestStatus: JoinRequestStatus
+  myStoreCart(schoolId: String!): [StoreCartItem!]!
+  myStoreOrders(schoolId: String!): [StoreOrder!]!
   newsletter(id: String!): Newsletter
   newsletters(
     """Order by"""
@@ -2563,6 +2611,13 @@ type Query {
   """Get a presigned URL for downloading a school logo"""
   schoolLogoDownloadUrl(schoolId: String!): SchoolLogoDownloadUrl!
   schools: [School!]!
+  storeCategories(schoolId: String!): [StoreCategory!]!
+  storeCategoriesAdmin(schoolId: String!): [StoreCategory!]!
+  storeOrder(id: String!): StoreOrder!
+  storeOrdersAdmin(schoolId: String!): [StoreOrder!]!
+  storeProduct(id: String!): StoreProduct
+  storeProducts(categoryId: String, schoolId: String!, search: String): [StoreProduct!]!
+  storeProductsAdmin(schoolId: String!): [StoreProduct!]!
   student(id: String!): Student!
   studentAttendanceStats(studentId: String!): AttendanceStats!
   studentBalance(studentId: String!): StudentBalance!
@@ -2937,6 +2992,80 @@ input SignUpInput {
 
   """Verification token from email link"""
   token: String!
+}
+
+type StoreCartItem {
+  createdAt: DateTime!
+  id: String!
+  product: StoreProduct!
+  productId: String!
+  quantity: Int!
+  updatedAt: DateTime!
+  userId: String!
+}
+
+type StoreCategory {
+  active: Boolean!
+  createdAt: DateTime!
+  description: String
+  id: String!
+  name: String!
+  schoolId: String!
+  sortOrder: Int!
+  updatedAt: DateTime!
+}
+
+type StoreOrder {
+  createdAt: DateTime!
+  id: String!
+  items: [StoreOrderItem!]!
+  notes: String
+  paymentStatus: StorePaymentStatus!
+  schoolId: String!
+  status: StoreOrderStatus!
+  total: Float!
+  updatedAt: DateTime!
+  userId: String!
+}
+
+type StoreOrderItem {
+  id: String!
+  orderId: String!
+  product: StoreProduct!
+  productId: String!
+  quantity: Int!
+  unitPrice: Float!
+}
+
+enum StoreOrderStatus {
+  CANCELLED
+  CONFIRMED
+  DELIVERED
+  PENDING
+  PROCESSING
+  READY
+}
+
+enum StorePaymentStatus {
+  FAILED
+  PAID
+  PENDING
+  REFUNDED
+}
+
+type StoreProduct {
+  active: Boolean!
+  category: StoreCategory
+  categoryId: String
+  createdAt: DateTime!
+  description: String
+  id: String!
+  imageUrl: String
+  name: String!
+  price: Float!
+  schoolId: String!
+  stock: Int!
+  updatedAt: DateTime!
 }
 
 type Student {
@@ -3323,6 +3452,11 @@ input UpdateAttendanceRecordInput {
   studentId: String
 }
 
+input UpdateCartItemInput {
+  cartItemId: String!
+  quantity: Int!
+}
+
 input UpdateClassGroupInput {
   """Active status of the class group"""
   active: Boolean = true
@@ -3634,6 +3768,30 @@ input UpdateShareInput {
 
   """Target type for the share"""
   targetType: String!
+}
+
+input UpdateStoreCategoryInput {
+  active: Boolean
+  description: String
+  id: String!
+  name: String
+  sortOrder: Int
+}
+
+input UpdateStoreOrderStatusInput {
+  orderId: String!
+  status: String!
+}
+
+input UpdateStoreProductInput {
+  active: Boolean
+  categoryId: String
+  description: String
+  id: String!
+  imageUrl: String
+  name: String
+  price: Float
+  stock: Int
 }
 
 input UpdateStudentGradeInput {

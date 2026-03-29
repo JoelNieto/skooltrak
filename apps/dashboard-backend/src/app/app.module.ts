@@ -37,6 +37,7 @@ import { ChatsModule } from './chats/chats.module';
 import { HabitEvaluationsModule } from './habit-evaluations/habit-evaluations.module';
 import { HabitMetricsModule } from './habit-metrics/habit-metrics.module';
 import { FinancialModule } from './financial/financial.module';
+import { StoreModule } from './store/store.module';
 
 @Module({
   imports: [
@@ -86,6 +87,7 @@ import { FinancialModule } from './financial/financial.module';
     HabitMetricsModule,
     GradeReportModule,
     FinancialModule,
+    StoreModule,
   ],
   controllers: [AppController],
   providers: [AppService],

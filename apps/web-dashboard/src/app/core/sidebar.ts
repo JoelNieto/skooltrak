@@ -3,12 +3,13 @@ import { afterRenderEffect, ChangeDetectionStrategy, Component, inject } from '@
 import { rxResource } from '@angular/core/rxjs-interop';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { Apollo } from 'apollo-angular';
-import { map } from 'rxjs';
+import { map, of } from 'rxjs';
 import Auth from '../auth/auth';
 import {
   ChatsUnreadCountDocument,
   GetSchoolsDocument,
   GetSchoolsQuery,
+  MyStoreCartCountDocument,
   UnreadMessagesCountDocument,
 } from '../graphql/generated/graphql';
 import Store from './store';
@@ -152,6 +153,23 @@ import { ThemeService } from './theme.service';
             >
               <span class="material-symbols-outlined text-xl">groups</span>
               <span>Grupos</span>
+            </a>
+          </li>
+        }
+        @if (auth.hasPermission('VIEW_STORE')) {
+          <li>
+            <a
+              routerLink="store"
+              routerLinkActive="bg-primary/10 text-primary font-semibold"
+              class="flex items-center gap-3 px-3 py-2 text-base-content/80 rounded-lg transition-all duration-150 hover:bg-base-200 hover:text-base-content group"
+            >
+              <span class="material-symbols-outlined text-xl">storefront</span>
+              <span>Tienda</span>
+              @if (storeCartCount.value(); as cnt) {
+                @if (cnt > 0) {
+                  <span class="badge badge-primary badge-sm ml-auto">{{ cnt > 99 ? '99+' : cnt }}</span>
+                }
+              }
             </a>
           </li>
         }
@@ -501,6 +519,27 @@ export class Sidebar {
           query: ChatsUnreadCountDocument,
         })
         .valueChanges.pipe(map((result) => result.data?.chatUnreadCount ?? 0)),
+  });
+
+  protected storeCartCount = rxResource({
+    params: () => ({ schoolId: this.store.currentSchool()?.id }),
+    stream: ({ params }) => {
+      if (!params.schoolId) {
+        return of(0);
+      }
+      return this.#apollo
+        .watchQuery({
+          query: MyStoreCartCountDocument,
+          variables: { schoolId: params.schoolId },
+          fetchPolicy: 'network-only',
+          pollInterval: 120000,
+        })
+        .valueChanges.pipe(
+          map((r) =>
+            (r.data?.myStoreCart ?? []).reduce((sum, item) => sum + (item.quantity ?? 0), 0),
+          ),
+        );
+    },
   });
 
   protected get schoolsList(): GetSchoolsQuery['schools'] {

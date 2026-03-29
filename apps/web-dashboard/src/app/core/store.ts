@@ -1,4 +1,5 @@
-import { Injectable, computed, inject, signal } from '@angular/core';
+import { SchoolContext } from '@/shared';
+import { effect, Injectable, computed, inject, signal } from '@angular/core';
 import { Prisma } from '@generated/prisma';
 import Auth from '../auth/auth';
 
@@ -16,6 +17,7 @@ export type CurrentSchool = Omit<BaseSchool, 'primaryColor' | 'secondaryColor' |
 })
 export default class Store {
   private auth = inject(Auth);
+  private schoolContext = inject(SchoolContext);
   public currentSchool = signal<CurrentSchool | null>(null);
 
   public currentSchoolId = computed(() => this.currentSchool()?.id);
@@ -25,4 +27,14 @@ export default class Store {
   public currentStudent = computed(() => this.auth.user()?.student);
   public currentStudentId = computed(() => this.currentStudent()?.id);
   public currentStudentGroupId = computed(() => this.currentStudent()?.classGroupId);
+
+  constructor() {
+    effect(() => {
+      const school = this.currentSchool();
+      this.schoolContext.currentSchoolId.set(school?.id ?? null);
+      if (school?.currencyCode) {
+        this.schoolContext.currencyCode.set(school.currencyCode);
+      }
+    });
+  }
 }

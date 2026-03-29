@@ -1,0 +1,51 @@
+import { SchoolContext } from '@/shared';
+import { ChangeDetectionStrategy, Component, inject, input } from '@angular/core';
+import { RouterLink } from '@angular/router';
+import { rxResource } from '@angular/core/rxjs-interop';
+import { Apollo } from 'apollo-angular';
+import { map } from 'rxjs';
+import { StoreOrderDocument } from '../graphql/generated/graphql';
+
+@Component({
+  selector: 'app-order-confirmation',
+  imports: [RouterLink],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  template: `
+    <div class="max-w-lg mx-auto text-center space-y-4 py-8">
+      <span class="material-symbols-outlined text-6xl text-success">check_circle</span>
+      <h1 class="text-2xl font-bold">¡Pedido confirmado!</h1>
+      @if (order.value(); as o) {
+        <p class="text-base-content/80">Número de pedido: <strong>{{ o.id }}</strong></p>
+        <p class="text-lg font-semibold">Total: {{ formatPrice(o.total) }}</p>
+        <a routerLink="/store/orders" class="btn btn-primary">Ver mis pedidos</a>
+        <a routerLink="/store" class="btn btn-ghost btn-sm">Volver a la tienda</a>
+      } @else if (order.isLoading()) {
+        <p>Cargando…</p>
+      }
+    </div>
+  `,
+})
+export default class OrderConfirmation {
+  readonly id = input.required<string>({ alias: 'id' });
+  private readonly apollo = inject(Apollo);
+  private readonly school = inject(SchoolContext);
+
+  protected order = rxResource({
+    params: () => ({ id: this.id() }),
+    stream: ({ params }) =>
+      this.apollo
+        .watchQuery({
+          query: StoreOrderDocument,
+          variables: { id: params.id },
+          fetchPolicy: 'network-only',
+        })
+        .valueChanges.pipe(map((r) => r.data?.storeOrder)),
+  });
+
+  protected formatPrice(price: unknown): string {
+    return new Intl.NumberFormat('es-MX', {
+      style: 'currency',
+      currency: this.school.currencyCode(),
+    }).format(Number(price));
+  }
+}

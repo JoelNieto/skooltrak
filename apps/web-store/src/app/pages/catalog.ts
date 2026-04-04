@@ -5,7 +5,7 @@ import { RouterLink } from '@angular/router';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { Apollo } from 'apollo-angular';
 import { map, of } from 'rxjs';
-import { StoreCategoriesDocument, StoreProductsDocument } from '../graphql/generated/graphql';
+import { PublicStoreCategoriesDocument, PublicStoreProductsDocument } from '../graphql/generated/graphql';
 
 @Component({
   selector: 'app-store-catalog',
@@ -13,7 +13,10 @@ import { StoreCategoriesDocument, StoreProductsDocument } from '../graphql/gener
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     @if (!schoolId()) {
-      <div class="alert alert-warning">Selecciona una escuela en la barra lateral para ver la tienda.</div>
+      <div class="alert alert-warning">
+        Elige una escuela en <a routerLink="/store" class="link link-primary">la lista de tiendas</a> para ver
+        productos.
+      </div>
     } @else {
       <div class="flex flex-col gap-4 mb-6">
         <input
@@ -92,11 +95,11 @@ export default class Catalog {
       if (!params.schoolId) return of([]);
       return this.apollo
         .watchQuery({
-          query: StoreCategoriesDocument,
+          query: PublicStoreCategoriesDocument,
           variables: { schoolId: params.schoolId },
           fetchPolicy: 'cache-first',
         })
-        .valueChanges.pipe(map((r) => r.data?.storeCategories ?? []));
+        .valueChanges.pipe(map((r) => r.data?.publicStoreCategories ?? []));
     },
   });
 
@@ -113,7 +116,7 @@ export default class Catalog {
       const search = params.search?.trim() || null;
       return this.apollo
         .watchQuery({
-          query: StoreProductsDocument,
+          query: PublicStoreProductsDocument,
           variables: {
             schoolId: params.schoolId,
             search,
@@ -121,7 +124,7 @@ export default class Catalog {
           },
           fetchPolicy: 'network-only',
         })
-        .valueChanges.pipe(map((r) => r.data?.storeProducts ?? []));
+        .valueChanges.pipe(map((r) => r.data?.publicStoreProducts ?? []));
     },
   });
 

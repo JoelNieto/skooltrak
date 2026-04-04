@@ -8,6 +8,7 @@ import {
 } from '@angular/core';
 import { provideClientHydration, withEventReplay } from '@angular/platform-browser';
 import { provideRouter, withComponentInputBinding } from '@angular/router';
+import { createDefaultApolloBearerAuthLink, readAccessTokenFromStorage } from '@/client-auth';
 import { ApolloLink, InMemoryCache, split } from '@apollo/client/core';
 import { SetContextLink } from '@apollo/client/link/context';
 import { getMainDefinition } from '@apollo/client/utilities';
@@ -34,22 +35,7 @@ export const appConfig: ApplicationConfig = {
         }),
       }));
 
-      // Auth link - supports both JWT tokens and cookie-based sessions
-      const auth = new SetContextLink(() => {
-        if (!isPlatformBrowser(platformId)) {
-          return {};
-        }
-        // Still include JWT token for backward compatibility
-        const token = localStorage.getItem('access_token');
-        if (token) {
-          return {
-            headers: new HttpHeaders({
-              Authorization: `Bearer ${token}`,
-            }),
-          };
-        }
-        return {};
-      });
+      const auth = createDefaultApolloBearerAuthLink(platformId);
 
       const http = httpLink.create({
         uri: '/api/graphql',
@@ -66,7 +52,7 @@ export const appConfig: ApplicationConfig = {
             createClient({
               url: wsUrl,
               connectionParams: () => {
-                const token = localStorage.getItem('access_token');
+                const token = readAccessTokenFromStorage();
                 return token ? { authorization: `Bearer ${token}` } : {};
               },
             })

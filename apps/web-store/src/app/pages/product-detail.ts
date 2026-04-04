@@ -6,14 +6,14 @@ import { rxResource } from '@angular/core/rxjs-interop';
 import { Apollo } from 'apollo-angular';
 import { map } from 'rxjs';
 import { CartService } from '../cart.service';
-import { AddToStoreCartDocument, StoreProductDocument } from '../graphql/generated/graphql';
+import { AddToStoreCartDocument, PublicStoreProductDocument } from '../graphql/generated/graphql';
 
 @Component({
   selector: 'app-product-detail',
   imports: [RouterLink],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <a routerLink="/store" class="btn btn-ghost btn-sm gap-1 mb-4">
+    <a routerLink=".." class="btn btn-ghost btn-sm gap-1 mb-4">
       <span class="material-symbols-outlined">arrow_back</span>
       Volver
     </a>
@@ -63,11 +63,11 @@ export default class ProductDetail {
     stream: ({ params }) =>
       this.apollo
         .watchQuery({
-          query: StoreProductDocument,
+          query: PublicStoreProductDocument,
           variables: { id: params.id },
           fetchPolicy: 'network-only',
         })
-        .valueChanges.pipe(map((r) => r.data?.storeProduct)),
+        .valueChanges.pipe(map((r) => r.data?.publicStoreProduct)),
   });
 
   protected formatPrice(price: unknown): string {

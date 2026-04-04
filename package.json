@@ -5,7 +5,7 @@
   "packageManager": "bun@1.2.2",
   "scripts": {
     "postinstall": "node tools/apply-package-exports-patches.mjs",
-    "serve:dev": "nx run-many --parallel --target=serve --projects=web-dashboard,dashboard-backend,web-store",
+    "serve:dev": "nx run web-shell:serve",
     "serve:dev:admin": "nx run-many --parallel --target=serve --projects=admin-backend,web-admin",
     "db:add-financial-permissions": "bun run prisma/scripts/add-financial-permissions-to-admins.ts",
     "graphql:generate": "graphql-codegen"

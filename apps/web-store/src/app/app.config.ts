@@ -1,3 +1,4 @@
+import { createDefaultApolloBearerAuthLink, readAccessTokenFromStorage } from '@/client-auth';
 import { isPlatformBrowser } from '@angular/common';
 import { HttpHeaders, provideHttpClient, withFetch } from '@angular/common/http';
 import { ApplicationConfig, inject, PLATFORM_ID, provideBrowserGlobalErrorListeners } from '@angular/core';
@@ -27,20 +28,7 @@ export const appConfig: ApplicationConfig = {
         }),
       }));
 
-      const auth = new SetContextLink(() => {
-        if (!isPlatformBrowser(platformId)) {
-          return {};
-        }
-        const token = localStorage.getItem('access_token');
-        if (token) {
-          return {
-            headers: new HttpHeaders({
-              Authorization: `Bearer ${token}`,
-            }),
-          };
-        }
-        return {};
-      });
+      const auth = createDefaultApolloBearerAuthLink(platformId);
 
       const http = httpLink.create({
         uri: '/api/graphql',
@@ -56,7 +44,7 @@ export const appConfig: ApplicationConfig = {
             createClient({
               url: wsUrl,
               connectionParams: () => {
-                const token = localStorage.getItem('access_token');
+                const token = readAccessTokenFromStorage();
                 return token ? { authorization: `Bearer ${token}` } : {};
               },
             })

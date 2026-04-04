@@ -1,4 +1,4 @@
-# Build stage
+# Build stage — federation host (CSR) + API consumers resolve remotes via public federation manifest.
 FROM oven/bun:1 AS builder
 WORKDIR /app
 
@@ -15,19 +15,12 @@ RUN bunx prisma generate
 # Copy source code
 COPY . .
 
-# Build the Angular SSR application
-RUN bun nx build web-dashboard --configuration=production
+# Build the shell (static); remotes are loaded at runtime from federation.manifest.json
+RUN bun nx build web-shell --configuration=production
 
-# Runtime stage - Node.js for Angular SSR (uses ES modules)
-FROM node:20-slim
-WORKDIR /app
+FROM nginx:alpine
+COPY apps/web-shell/nginx.conf /etc/nginx/conf.d/default.conf
+COPY --from=builder /app/dist/apps/web-shell/browser /usr/share/nginx/html
 
-# Copy built application (server + browser)
-COPY --from=builder /app/dist/apps/web-dashboard/server ./server
-COPY --from=builder /app/dist/apps/web-dashboard/browser ./browser
-
-EXPOSE 4200
-ENV PORT=4200
-
-# Run the Angular SSR server
-CMD ["node", "server/server.mjs"]
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]

@@ -56,7 +56,7 @@
       "executor": "@nx/web:file-server",
       "options": {
         "buildTarget": "web-dashboard:build",
-        "port": 4200,
+        "port": 4202,
         "staticFilePath": "dist/apps/web-dashboard/browser",
         "spa": true
       }
@@ -124,10 +124,10 @@
         }
       },
       "defaultConfiguration": "development",
-      "dependsOn": ["dashboard-backend:serve", "web-store:serve"],
+      "dependsOn": ["dashboard-backend:serve"],
       "options": {
         "proxyConfig": "apps/web-dashboard/proxy.conf.json",
-        "port": 4200
+        "port": 4202
       }
     }
   }

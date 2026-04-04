@@ -1,0 +1,8 @@
+/**
+ * Shell host must load the same global design tokens and Tailwind layers as the dashboard remote.
+ * Content scanning for remotes/shell/libs is configured in web-dashboard/src/styles.css (@source)
+ * so Tailwind runs in the same pass as @import "tailwindcss".
+ *
+ * Requires apps/web-shell/.postcssrc.json with @tailwindcss/postcss (same as web-dashboard).
+ */
+@import '../../web-dashboard/src/styles.css';

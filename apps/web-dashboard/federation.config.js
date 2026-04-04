@@ -3,12 +3,15 @@ const { withNativeFederation, shareAll } = require('@angular-architects/native-f
 module.exports = withNativeFederation({
   name: 'web-dashboard',
 
+  exposes: {
+    './routes': './apps/web-dashboard/src/app/dashboard.routes.ts',
+  },
 
   shared: {
     ...shareAll({ singleton: true, strictVersion: true, requiredVersion: 'auto' }),
   },
 
-  sharedMappings: ['@/shared', '@/ui', '@/auth'],
+  sharedMappings: ['@/shared', '@/ui', '@/auth', '@/client-auth'],
 
   skip: [
     'rxjs/ajax',

@@ -6,6 +6,7 @@ const config: CodegenConfig = {
     'apps/web-dashboard/src/app/graphql/operations/**/*.graphql',
     'apps/web-admin/src/app/graphql/operations/**/*.graphql',
     'apps/web-store/src/app/graphql/operations/**/*.graphql',
+    'apps/web-shell/src/app/graphql/operations/**/*.graphql',
   ],
   generates: {
     'apps/web-dashboard/src/app/graphql/generated/': {
@@ -29,6 +30,16 @@ const config: CodegenConfig = {
       },
     },
     'apps/web-store/src/app/graphql/generated/': {
+      preset: 'client',
+      presetConfig: {
+        gqlTagName: 'gql',
+        fragmentMasking: false,
+      },
+      config: {
+        useTypeImports: true,
+      },
+    },
+    'apps/web-shell/src/app/graphql/generated/': {
       preset: 'client',
       presetConfig: {
         gqlTagName: 'gql',

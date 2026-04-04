@@ -30,6 +30,9 @@
       ],
       "@/shared": [
         "libs/shared/src/index.ts"
+      ],
+      "@/client-auth": [
+        "libs/client-auth/src/index.ts"
       ]
     }
   },

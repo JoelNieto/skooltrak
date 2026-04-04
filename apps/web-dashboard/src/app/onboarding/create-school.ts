@@ -216,6 +216,7 @@ export default class CreateSchool {
             this.store.currentSchool.set({
               id: result.schoolId,
               name,
+              slug: null,
               organizationId: '', // Will be populated from the token
               shortName,
               logo: '',

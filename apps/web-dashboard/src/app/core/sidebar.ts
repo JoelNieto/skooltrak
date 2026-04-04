@@ -1,5 +1,11 @@
 import { Confirmation } from '@/ui';
-import { afterRenderEffect, ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import {
+  afterRenderEffect,
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  inject,
+} from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { Apollo } from 'apollo-angular';
@@ -53,8 +59,8 @@ import { ThemeService } from './theme.service';
             @for (school of schoolsList; track school.id) {
               <li>
                 <div
-                  (click)="store.currentSchool.set(school)"
-                  (keydown)="store.currentSchool.set(school)"
+                  (click)="pickSchool(school)"
+                  (keydown)="pickSchool(school)"
                   tabindex="0"
                   class="flex items-center gap-2"
                 >
@@ -159,7 +165,7 @@ import { ThemeService } from './theme.service';
         @if (auth.hasPermission('VIEW_STORE')) {
           <li>
             <a
-              routerLink="store"
+              [routerLink]="storeLink()"
               routerLinkActive="bg-primary/10 text-primary font-semibold"
               class="flex items-center gap-3 px-3 py-2 text-base-content/80 rounded-lg transition-all duration-150 hover:bg-base-200 hover:text-base-content group"
             >
@@ -170,6 +176,19 @@ import { ThemeService } from './theme.service';
                   <span class="badge badge-primary badge-sm ml-auto">{{ cnt > 99 ? '99+' : cnt }}</span>
                 }
               }
+            </a>
+          </li>
+        }
+        @if (auth.hasPermission('MANAGE_STORE') && store.currentSchool()?.slug) {
+          <li>
+            <a
+              [routerLink]="storeAdminLink()"
+              routerLinkActive="bg-primary/10 text-primary font-semibold"
+              [routerLinkActiveOptions]="{ exact: false }"
+              class="flex items-center gap-3 px-3 py-2 text-base-content/80 rounded-lg transition-all duration-150 hover:bg-base-200 hover:text-base-content group"
+            >
+              <span class="material-symbols-outlined text-xl">inventory_2</span>
+              <span>Administrar tienda</span>
             </a>
           </li>
         }
@@ -486,6 +505,18 @@ export class Sidebar {
   protected readonly auth = inject(Auth);
   protected readonly store = inject(Store);
   protected readonly theme = inject(ThemeService);
+
+  /** Shell hosts the store at `/store` (directory) and `/store/:slug` (catalog). */
+  protected readonly storeLink = computed((): string[] => {
+    const slug = this.store.currentSchool()?.slug;
+    return slug ? ['/store', slug] : ['/store'];
+  });
+
+  /** Store back-office (products, categories, orders) — same remote as catalog, `/store/:slug/admin`. */
+  protected readonly storeAdminLink = computed((): string[] => {
+    const slug = this.store.currentSchool()?.slug;
+    return slug ? ['/store', slug, 'admin'] : ['/store'];
+  });
   #apollo = inject(Apollo);
   #confirmation = inject(Confirmation);
 
@@ -551,9 +582,13 @@ export class Sidebar {
     afterRenderEffect(() => {
       const schools = this.schools.value();
       if (schools?.length && !this.store.currentSchool()) {
-        this.store.currentSchool.set(schools[0]);
+        this.pickSchool(schools[0]);
       }
     });
+  }
+
+  protected pickSchool(school: GetSchoolsQuery['schools'][number]) {
+    this.store.currentSchool.set({ ...school, slug: school.slug ?? null });
   }
 
   protected logout() {

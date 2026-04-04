@@ -320,6 +320,8 @@ model School {
   id             String            @id @default(cuid())
   organization   Organization      @relation(fields: [organizationId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   organizationId String
+  /// Public URL segment for the school store (e.g. /store/my-school)
+  slug           String?           @unique
   name           String
   shortName      String
   logo           String

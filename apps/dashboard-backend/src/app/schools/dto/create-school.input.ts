@@ -12,6 +12,12 @@ export class CreateSchoolInput implements CreateSchoolInputType {
   })
   organizationId?: string;
 
+  @Field(() => String, {
+    description: 'URL slug for the school store (optional; auto-generated if omitted)',
+    nullable: true,
+  })
+  slug?: string | null;
+
   @Field(() => String, { description: 'Name of the school', nullable: false })
   name: string;
   @Field(() => String, {

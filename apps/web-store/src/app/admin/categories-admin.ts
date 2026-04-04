@@ -1,8 +1,8 @@
-import { Toast } from '@/ui';
 import { SchoolContext } from '@/shared';
+import { Toast } from '@/ui';
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
-import { FormsModule } from '@angular/forms';
 import { rxResource } from '@angular/core/rxjs-interop';
+import { FormsModule } from '@angular/forms';
 import { Apollo } from 'apollo-angular';
 import { map, of } from 'rxjs';
 import {
@@ -54,14 +54,20 @@ import {
                 </td>
                 <td class="flex gap-2">
                   <button type="button" class="btn btn-ghost btn-xs" (click)="save(c.id!)">Guardar</button>
-                  <button type="button" class="btn btn-ghost btn-xs text-error" (click)="remove(c.id!)">Eliminar</button>
+                  <button type="button" class="btn btn-ghost btn-xs text-error" (click)="remove(c.id!)">
+                    Eliminar
+                  </button>
                 </td>
               </tr>
             } @empty {
               @if (categories.isLoading()) {
-                <tr><td colspan="4">Cargando…</td></tr>
+                <tr>
+                  <td colspan="4">Cargando…</td>
+                </tr>
               } @else {
-                <tr><td colspan="4">Sin categorías.</td></tr>
+                <tr>
+                  <td colspan="4">Sin categorías.</td>
+                </tr>
               }
             }
           </tbody>
@@ -107,7 +113,9 @@ export default class CategoriesAdmin {
   });
 
   protected create() {
+    console.log('create', this.newName);
     const schoolId = this.school.currentSchoolId();
+    console.log('schoolId', schoolId);
     if (!schoolId || !this.newName.trim()) return;
     this.apollo
       .mutate({
@@ -119,8 +127,12 @@ export default class CategoriesAdmin {
           this.newName = '';
           this.toast.showSuccess('Categoría creada');
           this.tick.update((n) => n + 1);
+          console.log('created');
         },
-        error: (e: Error) => this.toast.showError(e.message),
+        error: (e: Error) => {
+          this.toast.showError(e.message);
+          console.error(e);
+        },
       });
   }
 
@@ -144,14 +156,12 @@ export default class CategoriesAdmin {
   }
 
   protected remove(id: string) {
-    this.apollo
-      .mutate({ mutation: DeleteStoreCategoryDocument, variables: { id } })
-      .subscribe({
-        next: () => {
-          this.toast.showSuccess('Eliminada');
-          this.tick.update((n) => n + 1);
-        },
-        error: (e: Error) => this.toast.showError(e.message),
-      });
+    this.apollo.mutate({ mutation: DeleteStoreCategoryDocument, variables: { id } }).subscribe({
+      next: () => {
+        this.toast.showSuccess('Eliminada');
+        this.tick.update((n) => n + 1);
+      },
+      error: (e: Error) => this.toast.showError(e.message),
+    });
   }
 }

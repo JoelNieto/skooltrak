@@ -7,6 +7,11 @@ export class School {
   id: string;
   @Field(() => Organization, { description: 'Organization of the school' })
   organization: Organization;
+  @Field(() => String, {
+    description: 'URL slug for public store routes',
+    nullable: true,
+  })
+  slug: string | null;
   @Field(() => String, { description: 'Name of the school' })
   name: string;
   @Field(() => String, { description: 'Organization ID of the school' })

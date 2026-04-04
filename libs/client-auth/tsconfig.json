@@ -1,0 +1,20 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "strict": true,
+    "noImplicitOverride": true,
+    "moduleResolution": "bundler",
+    "module": "preserve",
+    "target": "es2022",
+    "isolatedModules": true,
+    "emitDecoratorMetadata": false,
+    "experimentalDecorators": true,
+    "baseUrl": "../..",
+    "paths": {
+      "@/client-auth": ["libs/client-auth/src/index.ts"]
+    }
+  },
+  "files": [],
+  "include": [],
+  "references": [{ "path": "./tsconfig.lib.json" }]
+}

@@ -6,6 +6,8 @@ import Auth from '../auth/auth';
 type BaseSchool = Prisma.SchoolGetPayload<{ include: undefined }>;
 
 export type CurrentSchool = Omit<BaseSchool, 'primaryColor' | 'secondaryColor' | 'tertiaryColor'> & {
+  /** May be missing from some client-constructed objects until synced from API */
+  slug?: string | null;
   logoUrl?: string | null;
   primaryColor?: string | null;
   secondaryColor?: string | null;
@@ -32,6 +34,9 @@ export default class Store {
     effect(() => {
       const school = this.currentSchool();
       this.schoolContext.currentSchoolId.set(school?.id ?? null);
+      this.schoolContext.currentSchoolSlug.set(school?.slug ?? null);
+      this.schoolContext.currentSchoolName.set(school?.name ?? null);
+      this.schoolContext.currentSchoolLogoUrl.set(school?.logoUrl ?? school?.logo ?? null);
       if (school?.currencyCode) {
         this.schoolContext.currencyCode.set(school.currencyCode);
       }

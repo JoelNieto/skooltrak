@@ -207,6 +207,7 @@ export default class SchoolAcknowledgment {
             this.store.currentSchool.set({
               id: school.id,
               name: school.name,
+              slug: (school as { slug?: string | null }).slug ?? null,
               organizationId: school.organizationId,
               shortName,
               logo: '',

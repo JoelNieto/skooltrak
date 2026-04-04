@@ -2,6 +2,7 @@ query StoreMe {
   me {
     id
     role {
+      name
       permissions {
         descriptiveId
       }
@@ -196,5 +197,45 @@ mutation DeleteStoreProduct($id: String!) {
 mutation UpdateStoreOrderStatus($input: UpdateStoreOrderStatusInput!) {
   updateStoreOrderStatus(input: $input) {
     ...StoreOrderFields
+  }
+}
+
+# --- Public catalog (anonymous-friendly) ---
+
+query PublicSchoolsForStore {
+  publicSchoolsForStore {
+    id
+    name
+    slug
+    currencyCode
+    logoUrl
+  }
+}
+
+query PublicSchoolBySlug($slug: String!) {
+  publicSchoolBySlug(slug: $slug) {
+    id
+    name
+    slug
+    currencyCode
+    logoUrl
+  }
+}
+
+query PublicStoreCategories($schoolId: String!) {
+  publicStoreCategories(schoolId: $schoolId) {
+    ...StoreCategoryFields
+  }
+}
+
+query PublicStoreProducts($schoolId: String!, $search: String, $categoryId: String) {
+  publicStoreProducts(schoolId: $schoolId, search: $search, categoryId: $categoryId) {
+    ...StoreProductFields
+  }
+}
+
+query PublicStoreProduct($id: String!) {
+  publicStoreProduct(id: $id) {
+    ...StoreProductFields
   }
 }

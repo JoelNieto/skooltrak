@@ -1,11 +1,11 @@
 import { SchoolContext } from '@/shared';
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { RouterLink, RouterOutlet } from '@angular/router';
-import { rxResource } from '@angular/core/rxjs-interop';
+import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal } from '@angular/core';
+import { rxResource, takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { ActivatedRoute, RouterLink, RouterOutlet } from '@angular/router';
 import { Apollo } from 'apollo-angular';
-import { map } from 'rxjs';
+import { filter, map, switchMap, distinctUntilChanged } from 'rxjs';
 import { CartService } from '../cart.service';
-import { StoreMeDocument } from '../graphql/generated/graphql';
+import { PublicSchoolBySlugDocument, StoreMeDocument } from '../graphql/generated/graphql';
 
 @Component({
   selector: 'app-store-layout',
@@ -15,12 +15,35 @@ import { StoreMeDocument } from '../graphql/generated/graphql';
     <div class="layout-padding pb-10">
       <div class="breadcrumbs text-sm mb-4">
         <ul>
-          <li><a routerLink="/home">Inicio</a></li>
-          <li><a routerLink="/store">Tienda</a></li>
+          <li><a routerLink="/">Inicio</a></li>
+          <li><a routerLink="/store">Tiendas</a></li>
+          @if (schoolName()) {
+            <li class="text-base-content/80">{{ schoolName() }}</li>
+          }
         </ul>
       </div>
       <div class="flex flex-wrap items-center justify-between gap-3 mb-6">
-        <h1 class="text-2xl font-semibold text-base-content">Tienda escolar</h1>
+        <div class="flex min-w-0 flex-1 items-center gap-3">
+          @if (schoolLogoUrl()) {
+            <img
+              [src]="schoolLogoUrl()!"
+              [alt]="schoolName() ?? 'Escuela'"
+              class="h-12 w-12 shrink-0 rounded-lg border border-base-300 bg-base-200 object-contain"
+            />
+          } @else {
+            <div
+              class="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary"
+            >
+              <span class="material-symbols-outlined text-2xl">apartment</span>
+            </div>
+          }
+          <div class="min-w-0">
+            <h1 class="truncate text-2xl font-semibold text-base-content">
+              {{ schoolName() ?? 'Tienda escolar' }}
+            </h1>
+            <p class="text-sm text-base-content/60">Tienda escolar</p>
+          </div>
+        </div>
         <div class="flex flex-wrap gap-2">
           @if (canManage()) {
             <a routerLink="admin" class="btn btn-outline btn-sm">Administrar tienda</a>
@@ -40,7 +63,49 @@ import { StoreMeDocument } from '../graphql/generated/graphql';
 })
 export default class StoreLayout {
   private readonly apollo = inject(Apollo);
+  private readonly route = inject(ActivatedRoute);
+  private readonly schoolContext = inject(SchoolContext);
+  private readonly destroyRef = inject(DestroyRef);
   protected readonly cartService = inject(CartService);
+
+  constructor() {
+    const paramRoute = this.route.parent ?? this.route;
+    paramRoute.paramMap
+      .pipe(
+        map((pm) => pm.get('schoolSlug')),
+        filter((s): s is string => !!s),
+        distinctUntilChanged(),
+        switchMap((slug) =>
+          this.apollo
+            .watchQuery({
+              query: PublicSchoolBySlugDocument,
+              variables: { slug },
+              fetchPolicy: 'network-only',
+            })
+            .valueChanges.pipe(map((r) => r.data?.publicSchoolBySlug)),
+        ),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe((school) => {
+        if (school?.id && school.slug && school.currencyCode) {
+          this.schoolContext.currentSchoolId.set(school.id);
+          this.schoolContext.currentSchoolSlug.set(school.slug);
+          this.schoolContext.currencyCode.set(school.currencyCode);
+          this.schoolContext.currentSchoolName.set(school.name);
+          this.schoolContext.currentSchoolLogoUrl.set(school.logoUrl ?? null);
+          this.schoolName.set(school.name);
+          this.schoolLogoUrl.set(school.logoUrl ?? null);
+        } else {
+          this.schoolContext.currentSchoolName.set(null);
+          this.schoolContext.currentSchoolLogoUrl.set(null);
+          this.schoolName.set(null);
+          this.schoolLogoUrl.set(null);
+        }
+      });
+  }
+
+  protected readonly schoolName = signal<string | null>(null);
+  protected readonly schoolLogoUrl = signal<string | null>(null);
 
   protected readonly me = rxResource({
     stream: () =>
@@ -50,8 +115,14 @@ export default class StoreLayout {
   });
 
   protected canManage = () => {
-    const perms = this.me.value()?.role?.permissions?.map((p) => p.descriptiveId) ?? [];
-    return perms.includes('MANAGE_STORE');
+    const me = this.me.value();
+    const roleName = me?.role?.name;
+    const perms = me?.role?.permissions?.map((p) => p.descriptiveId) ?? [];
+    return (
+      perms.includes('MANAGE_STORE') ||
+      roleName === 'ADMIN' ||
+      roleName === 'ORG_ADMIN'
+    );
   };
 
   protected cartCount = () => this.cartService.itemCount();

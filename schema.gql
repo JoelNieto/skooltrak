@@ -929,6 +929,9 @@ input CreateSchoolInput {
   """Short name of the school"""
   shortName: String!
 
+  """URL slug for the school store (optional; auto-generated if omitted)"""
+  slug: String
+
   """State of the school"""
   state: String! = ""
 
@@ -2096,6 +2099,16 @@ input ProcessStorePaymentInput {
   simulateSuccess: Boolean
 }
 
+type PublicSchoolDirectoryEntry {
+  currencyCode: String!
+  id: String!
+
+  """School logo URL when set"""
+  logoUrl: String
+  name: String!
+  slug: String!
+}
+
 type Query {
   assignment(id: String!): Assignment!
   assignmentDatesByCourseId(classGroupId: String, courseId: String!, endDate: String!, startDate: String!): [AssignmentDateWithDetails!]!
@@ -2601,6 +2614,11 @@ type Query {
     """Take"""
     take: Int
   ): Int!
+  publicSchoolBySlug(slug: String!): PublicSchoolDirectoryEntry!
+  publicSchoolsForStore: [PublicSchoolDirectoryEntry!]!
+  publicStoreCategories(schoolId: String!): [StoreCategory!]!
+  publicStoreProduct(id: String!): StoreProduct
+  publicStoreProducts(categoryId: String, schoolId: String!, search: String): [StoreProduct!]!
   publishedNewsletters(schoolId: String!, take: Int! = 3): [Newsletter!]!
   quiz(id: String!): Quiz!
   quizzes(organizationId: String!): [Quiz!]!
@@ -2914,6 +2932,9 @@ type School {
 
   """Short name of the school"""
   shortName: String!
+
+  """URL slug for public store routes"""
+  slug: String
 
   """State of the school"""
   state: String!
@@ -3742,6 +3763,9 @@ input UpdateSchoolInput {
 
   """Short name of the school"""
   shortName: String
+
+  """URL slug for the school store (optional; auto-generated if omitted)"""
+  slug: String
 
   """State of the school"""
   state: String = ""

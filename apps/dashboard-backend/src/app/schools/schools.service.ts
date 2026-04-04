@@ -34,14 +34,43 @@ export class SchoolsService {
     }
   }
 
-  create(createSchoolInput: CreateSchoolInput) {
+  private async ensureUniqueSlug(base: string, excludeSchoolId?: string): Promise<string> {
+    const normalized =
+      base
+        .toLowerCase()
+        .trim()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '') || 'school';
+    let candidate = normalized;
+    let n = 0;
+    while (true) {
+      const existing = await this.prisma.school.findFirst({
+        where: {
+          slug: candidate,
+          ...(excludeSchoolId ? { NOT: { id: excludeSchoolId } } : {}),
+        },
+        select: { id: true },
+      });
+      if (!existing) {
+        return candidate;
+      }
+      n += 1;
+      candidate = `${normalized}-${n}`;
+    }
+  }
+
+  async create(createSchoolInput: CreateSchoolInput) {
     const { req } = this.context;
     const { organizationId } = req.user as { organizationId: string };
+    const { slug: inputSlug, ...rest } = createSchoolInput;
+    const slug =
+      inputSlug?.trim() || (await this.ensureUniqueSlug(createSchoolInput.shortName || createSchoolInput.name));
 
     return this.prisma.school.create({
       data: {
-        ...createSchoolInput,
+        ...rest,
         organizationId,
+        slug,
       },
     });
   }
@@ -56,12 +85,17 @@ export class SchoolsService {
     return this.prisma.school.findUnique({ where: { id } });
   }
 
-  update(id: string, updateSchoolInput: UpdateSchoolInput) {
+  async update(id: string, updateSchoolInput: UpdateSchoolInput) {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { id: _id, ...data } = updateSchoolInput;
+    const { id: _id, slug, ...data } = updateSchoolInput;
+    const nextData = { ...data } as Record<string, unknown>;
+    if (slug !== undefined && slug !== null) {
+      const trimmed = slug.trim();
+      nextData.slug = trimmed ? await this.ensureUniqueSlug(trimmed, id) : null;
+    }
     return this.prisma.school.update({
       where: { id },
-      data,
+      data: nextData,
     });
   }
 

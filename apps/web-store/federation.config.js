@@ -13,7 +13,7 @@ module.exports = withNativeFederation({
     ...shareAll({ singleton: true, strictVersion: true, requiredVersion: 'auto' }),
   },
 
-  sharedMappings: ['@/shared', '@/ui', '@/auth'],
+  sharedMappings: ['@/shared', '@/ui', '@/auth', '@/client-auth'],
 
   skip: [
     'rxjs/ajax',

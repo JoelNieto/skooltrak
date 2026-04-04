@@ -2,6 +2,7 @@ query GetSchools {
   schools {
     id
     name
+    slug
     organizationId
     shortName
     logo

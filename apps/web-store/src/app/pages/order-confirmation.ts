@@ -1,7 +1,7 @@
 import { SchoolContext } from '@/shared';
 import { ChangeDetectionStrategy, Component, inject, input } from '@angular/core';
-import { RouterLink } from '@angular/router';
 import { rxResource } from '@angular/core/rxjs-interop';
+import { RouterLink } from '@angular/router';
 import { Apollo } from 'apollo-angular';
 import { map } from 'rxjs';
 import { StoreOrderDocument } from '../graphql/generated/graphql';
@@ -15,10 +15,12 @@ import { StoreOrderDocument } from '../graphql/generated/graphql';
       <span class="material-symbols-outlined text-6xl text-success">check_circle</span>
       <h1 class="text-2xl font-bold">¡Pedido confirmado!</h1>
       @if (order.value(); as o) {
-        <p class="text-base-content/80">Número de pedido: <strong>{{ o.id }}</strong></p>
+        <p class="text-base-content/80">
+          Número de pedido: <strong>{{ o.id }}</strong>
+        </p>
         <p class="text-lg font-semibold">Total: {{ formatPrice(o.total) }}</p>
-        <a routerLink="/store/orders" class="btn btn-primary">Ver mis pedidos</a>
-        <a routerLink="/store" class="btn btn-ghost btn-sm">Volver a la tienda</a>
+        <a [routerLink]="['..', 'orders']" class="btn btn-primary">Ver mis pedidos</a>
+        <a [routerLink]="['..']" class="btn btn-ghost btn-sm">Volver a la tienda</a>
       } @else if (order.isLoading()) {
         <p>Cargando…</p>
       }
@@ -26,7 +28,7 @@ import { StoreOrderDocument } from '../graphql/generated/graphql';
   `,
 })
 export default class OrderConfirmation {
-  readonly id = input.required<string>({ alias: 'id' });
+  readonly id = input.required<string>();
   private readonly apollo = inject(Apollo);
   private readonly school = inject(SchoolContext);
 

@@ -1,10 +1,11 @@
 import { Field, InputType } from '@nestjs/graphql';
-import { IsOptional, IsString, IsUUID, MaxLength } from 'class-validator';
+import { IsNotEmpty, IsOptional, IsString, MaxLength } from 'class-validator';
 
 @InputType()
 export class CheckoutStoreInput {
   @Field(() => String)
-  @IsUUID()
+  @IsString()
+  @IsNotEmpty()
   schoolId: string;
 
   @Field(() => String, { nullable: true })

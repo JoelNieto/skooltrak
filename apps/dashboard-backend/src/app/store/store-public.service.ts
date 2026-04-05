@@ -1,5 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma.service';
+import { SchoolsService } from '../schools/schools.service';
 
 const productInclude = {
   category: true,
@@ -7,7 +8,10 @@ const productInclude = {
 
 @Injectable()
 export class StorePublicService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly schoolsService: SchoolsService,
+  ) {}
 
   async publicSchoolsDirectory() {
     const rows = await this.prisma.school.findMany({
@@ -15,15 +19,18 @@ export class StorePublicService {
       select: { id: true, name: true, slug: true, currencyCode: true, logo: true },
       orderBy: { name: 'asc' },
     });
-    return rows
-      .filter((r): r is typeof r & { slug: string } => r.slug != null && r.slug.length > 0)
-      .map((r) => ({
+    const filtered = rows.filter(
+      (r): r is typeof r & { slug: string } => r.slug != null && r.slug.length > 0,
+    );
+    return Promise.all(
+      filtered.map(async (r) => ({
         id: r.id,
         name: r.name,
         slug: r.slug,
         currencyCode: r.currencyCode,
-        logoUrl: r.logo?.trim() ? r.logo : null,
-      }));
+        logoUrl: r.logo?.trim() ? await this.schoolsService.getLogoUrl(r.logo) : null,
+      })),
+    );
   }
 
   async schoolBySlug(slug: string) {
@@ -40,12 +47,13 @@ export class StorePublicService {
     if (!school?.slug) {
       throw new NotFoundException('Escuela no encontrada.');
     }
+    const logoUrl = school.logo?.trim() ? await this.schoolsService.getLogoUrl(school.logo) : null;
     return {
       id: school.id,
       name: school.name,
       slug: school.slug,
       currencyCode: school.currencyCode,
-      logoUrl: school.logo?.trim() ? school.logo : null,
+      logoUrl,
     };
   }
 

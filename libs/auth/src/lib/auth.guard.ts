@@ -173,6 +173,13 @@ export class PermissionsGuard implements CanActivate {
       throw new UnauthorizedException('Not authenticated');
     }
 
+    // Match dashboard `Auth.hasPermission`: ORG_ADMIN / ADMIN / SYSADMIN pass any permission check
+    // when the role’s permission rows are missing newer entries (e.g. MANAGE_STORE).
+    const role = user.role?.toUpperCase();
+    if (role === 'ORG_ADMIN' || role === 'ADMIN' || role === 'SYSADMIN') {
+      return true;
+    }
+
     const userPermissions = user.permissions ?? [];
 
     // OR logic: user needs at least one of the required permissions

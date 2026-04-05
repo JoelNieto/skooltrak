@@ -20,7 +20,7 @@ import {
       <div class="alert alert-warning">Selecciona una escuela.</div>
     } @else if (!lines().length) {
       <p class="text-base-content/70 mb-4">Tu carrito está vacío.</p>
-      <a routerLink="/store" class="btn btn-primary">Seguir comprando</a>
+      <a [routerLink]="['..']" class="btn btn-primary">Seguir comprando</a>
     } @else {
       <div class="overflow-x-auto rounded-box border border-base-200">
         <table class="table">
@@ -58,7 +58,7 @@ import {
         <button type="button" class="btn btn-outline btn-sm" (click)="clear()">Vaciar carrito</button>
         <div class="text-right">
           <p class="text-lg font-semibold">Total: {{ formatPrice(total()) }}</p>
-          <a routerLink="/store/checkout" class="btn btn-primary mt-2">Proceder al pago</a>
+          <a [routerLink]="['..', 'checkout']" class="btn btn-primary mt-2">Proceder al pago</a>
         </div>
       </div>
     }

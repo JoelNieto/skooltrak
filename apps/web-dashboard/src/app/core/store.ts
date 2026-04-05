@@ -36,7 +36,8 @@ export default class Store {
       this.schoolContext.currentSchoolId.set(school?.id ?? null);
       this.schoolContext.currentSchoolSlug.set(school?.slug ?? null);
       this.schoolContext.currentSchoolName.set(school?.name ?? null);
-      this.schoolContext.currentSchoolLogoUrl.set(school?.logoUrl ?? school?.logo ?? null);
+      /** Same as sidebar: `logo` is storage key; only `logoUrl` is a presigned URL from GraphQL. */
+      this.schoolContext.currentSchoolLogoUrl.set(school?.logoUrl ?? null);
       if (school?.currencyCode) {
         this.schoolContext.currencyCode.set(school.currencyCode);
       }

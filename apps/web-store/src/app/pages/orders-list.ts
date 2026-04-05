@@ -35,7 +35,7 @@ import { MyStoreOrdersDocument } from '../graphql/generated/graphql';
                 <td>{{ o.paymentStatus }}</td>
                 <td>{{ formatPrice(o.total) }}</td>
                 <td>
-                  <a [routerLink]="['/store/orders', o.id]" class="link link-primary">Detalle</a>
+                  <a [routerLink]="[o.id]" class="link link-primary">Detalle</a>
                 </td>
               </tr>
             } @empty {

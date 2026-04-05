@@ -4,19 +4,25 @@ import { rxResource } from '@angular/core/rxjs-interop';
 import { Apollo } from 'apollo-angular';
 import { map } from 'rxjs';
 import { PublicSchoolsForStoreDocument } from '../graphql/generated/graphql';
+import StoreThemeToggle from '../store-theme-toggle';
 
 @Component({
   selector: 'app-school-picker-standalone',
-  imports: [RouterLink],
+  imports: [RouterLink, StoreThemeToggle],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="layout-padding max-w-3xl mx-auto py-10">
-      <h1 class="text-2xl font-semibold mb-2">Tiendas escolares</h1>
-      <p class="text-base-content/70 mb-6">Elige una escuela para ver sus productos.</p>
+      <div class="flex flex-wrap items-start justify-between gap-4 mb-6">
+        <div class="min-w-0">
+          <h1 class="text-2xl font-semibold mb-2">Tiendas escolares</h1>
+          <p class="text-base-content/70">Elige una escuela para ver sus productos.</p>
+        </div>
+        <app-store-theme-toggle class="shrink-0" />
+      </div>
       @if (schools.isLoading()) {
         <p>Cargando…</p>
       } @else {
-        <ul class="menu bg-base-100 rounded-box border border-base-200">
+        <ul class="menu bg-base-100 rounded-box border border-base-200 mt-0">
           @for (s of schools.value(); track s.id) {
             <li>
               <a [routerLink]="['/store', s.slug]" class="justify-between gap-3">

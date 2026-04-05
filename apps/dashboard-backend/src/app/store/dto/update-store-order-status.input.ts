@@ -1,11 +1,12 @@
 import { $Enums } from '@generated/prisma';
 import { Field, InputType } from '@nestjs/graphql';
-import { IsEnum, IsUUID } from 'class-validator';
+import { IsEnum, IsNotEmpty, IsString } from 'class-validator';
 
 @InputType()
 export class UpdateStoreOrderStatusInput {
   @Field(() => String)
-  @IsUUID()
+  @IsString()
+  @IsNotEmpty()
   orderId: string;
 
   @Field(() => String)

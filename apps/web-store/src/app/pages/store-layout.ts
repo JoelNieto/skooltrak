@@ -1,15 +1,24 @@
 import { SchoolContext } from '@/shared';
-import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  DestroyRef,
+  effect,
+  inject,
+  signal,
+} from '@angular/core';
 import { rxResource, takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, RouterLink, RouterOutlet } from '@angular/router';
 import { Apollo } from 'apollo-angular';
 import { filter, map, switchMap, distinctUntilChanged } from 'rxjs';
 import { CartService } from '../cart.service';
 import { PublicSchoolBySlugDocument, StoreMeDocument } from '../graphql/generated/graphql';
+import StoreThemeToggle from '../store-theme-toggle';
+import { StoreThemeService } from '../store-theme.service';
 
 @Component({
   selector: 'app-store-layout',
-  imports: [RouterOutlet, RouterLink],
+  imports: [RouterOutlet, RouterLink, StoreThemeToggle],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="layout-padding pb-10">
@@ -44,7 +53,8 @@ import { PublicSchoolBySlugDocument, StoreMeDocument } from '../graphql/generate
             <p class="text-sm text-base-content/60">Tienda escolar</p>
           </div>
         </div>
-        <div class="flex flex-wrap gap-2">
+        <div class="flex flex-wrap items-center gap-2">
+          <app-store-theme-toggle />
           @if (canManage()) {
             <a routerLink="admin" class="btn btn-outline btn-sm">Administrar tienda</a>
           }
@@ -67,8 +77,15 @@ export default class StoreLayout {
   private readonly schoolContext = inject(SchoolContext);
   private readonly destroyRef = inject(DestroyRef);
   protected readonly cartService = inject(CartService);
+  private readonly storeTheme = inject(StoreThemeService);
 
   constructor() {
+    effect(() => {
+      const pref = this.me.value()?.themePreference;
+      if (pref) {
+        this.storeTheme.applyTheme(pref);
+      }
+    });
     const paramRoute = this.route.parent ?? this.route;
     paramRoute.paramMap
       .pipe(
@@ -91,9 +108,9 @@ export default class StoreLayout {
           this.schoolContext.currentSchoolId.set(school.id);
           this.schoolContext.currentSchoolSlug.set(school.slug);
           this.schoolContext.currencyCode.set(school.currencyCode);
-          this.schoolContext.currentSchoolName.set(school.name);
+          this.schoolContext.currentSchoolName.set(school.name ?? null);
           this.schoolContext.currentSchoolLogoUrl.set(school.logoUrl ?? null);
-          this.schoolName.set(school.name);
+          this.schoolName.set(school.name ?? null);
           this.schoolLogoUrl.set(school.logoUrl ?? null);
         } else {
           this.schoolContext.currentSchoolName.set(null);

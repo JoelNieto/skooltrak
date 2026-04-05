@@ -12,6 +12,7 @@ import {
   StoreProductDocument,
   UpdateStoreProductDocument,
 } from '../graphql/generated/graphql';
+import { storeBaseSegments } from '../store-nav';
 
 @Component({
   selector: 'app-product-form',
@@ -58,7 +59,7 @@ import {
         </label>
         <div class="flex gap-2">
           <button type="submit" class="btn btn-primary" [disabled]="saving()">Guardar</button>
-          <button type="button" class="btn btn-ghost" (click)="router.navigate(['/store/admin/products'])">Cancelar</button>
+          <button type="button" class="btn btn-ghost" (click)="goToProductsAdmin()">Cancelar</button>
         </div>
       </form>
     }
@@ -111,6 +112,10 @@ export default class ProductForm {
     },
   });
 
+  protected goToProductsAdmin() {
+    this.router.navigate([...storeBaseSegments(this.school), 'admin', 'products']);
+  }
+
   constructor() {
     effect(() => {
       const p = this.product.value();
@@ -151,7 +156,7 @@ export default class ProductForm {
           next: () => {
             this.saving.set(false);
             this.toast.showSuccess('Producto actualizado');
-            this.router.navigate(['/store/admin/products']);
+            this.goToProductsAdmin();
           },
           error: (e: Error) => {
             this.saving.set(false);
@@ -179,7 +184,7 @@ export default class ProductForm {
           next: () => {
             this.saving.set(false);
             this.toast.showSuccess('Producto creado');
-            this.router.navigate(['/store/admin/products']);
+            this.goToProductsAdmin();
           },
           error: (e: Error) => {
             this.saving.set(false);

@@ -1,10 +1,11 @@
 import { Field, InputType, Int } from '@nestjs/graphql';
-import { IsInt, IsOptional, IsString, IsUUID, MaxLength, Min } from 'class-validator';
+import { IsInt, IsNotEmpty, IsOptional, IsString, MaxLength, Min } from 'class-validator';
 
 @InputType()
 export class CreateStoreCategoryInput {
   @Field(() => String)
-  @IsUUID()
+  @IsString()
+  @IsNotEmpty()
   schoolId: string;
 
   @Field(() => String)

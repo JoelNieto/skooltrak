@@ -1,8 +1,8 @@
 import { SchoolContext } from '@/shared';
 import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject, input } from '@angular/core';
-import { RouterLink } from '@angular/router';
 import { rxResource } from '@angular/core/rxjs-interop';
+import { RouterLink } from '@angular/router';
 import { Apollo } from 'apollo-angular';
 import { map } from 'rxjs';
 import { StoreOrderDocument } from '../graphql/generated/graphql';
@@ -12,7 +12,7 @@ import { StoreOrderDocument } from '../graphql/generated/graphql';
   imports: [RouterLink, DatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <a routerLink="/store/orders" class="btn btn-ghost btn-sm mb-4">← Mis pedidos</a>
+    <a [routerLink]="['..']" class="btn btn-ghost btn-sm mb-4">← Mis pedidos</a>
     @if (order.isLoading()) {
       <p>Cargando…</p>
     } @else if (!order.value()) {
@@ -52,7 +52,7 @@ import { StoreOrderDocument } from '../graphql/generated/graphql';
   `,
 })
 export default class OrderDetail {
-  readonly id = input.required<string>({ alias: 'id' });
+  readonly id = input.required<string>();
   private readonly apollo = inject(Apollo);
   private readonly school = inject(SchoolContext);
 

@@ -1,15 +1,17 @@
 import { Field, Float, InputType, Int } from '@nestjs/graphql';
-import { IsBoolean, IsNumber, IsOptional, IsString, IsUUID, MaxLength, Min } from 'class-validator';
+import { IsBoolean, IsNotEmpty, IsNumber, IsOptional, IsString, MaxLength, Min } from 'class-validator';
 
 @InputType()
 export class CreateStoreProductInput {
   @Field(() => String)
-  @IsUUID()
+  @IsString()
+  @IsNotEmpty()
   schoolId: string;
 
   @Field(() => String, { nullable: true })
   @IsOptional()
-  @IsUUID()
+  @IsString()
+  @IsNotEmpty()
   categoryId?: string;
 
   @Field(() => String)

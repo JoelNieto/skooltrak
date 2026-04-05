@@ -1,12 +1,15 @@
 import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
+import { SchoolContext } from '@/shared';
 import { Apollo } from 'apollo-angular';
 import { catchError, map, of } from 'rxjs';
 import { StoreMeDocument } from '../graphql/generated/graphql';
+import { storeBaseSegments } from '../store-nav';
 
 export const manageStoreGuard: CanActivateFn = () => {
   const apollo = inject(Apollo);
   const router = inject(Router);
+  const school = inject(SchoolContext);
   return apollo
     .query({
       query: StoreMeDocument,
@@ -25,8 +28,8 @@ export const manageStoreGuard: CanActivateFn = () => {
         if (canManage) {
           return true;
         }
-        return router.createUrlTree(['/store']);
+        return router.createUrlTree(storeBaseSegments(school));
       }),
-      catchError(() => of(router.createUrlTree(['/store']))),
+      catchError(() => of(router.createUrlTree(storeBaseSegments(school)))),
     );
 };

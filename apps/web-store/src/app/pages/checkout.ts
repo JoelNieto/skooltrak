@@ -2,7 +2,7 @@ import { Toast } from '@/ui';
 import { SchoolContext } from '@/shared';
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Apollo } from 'apollo-angular';
 import { CartService } from '../cart.service';
 import { CheckoutStoreDocument, ProcessStorePaymentDocument } from '../graphql/generated/graphql';
@@ -71,6 +71,7 @@ export default class Checkout {
   private readonly apollo = inject(Apollo);
   private readonly toast = inject(Toast);
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
 
   protected cardName = 'Demo Usuario';
   protected cardLast4 = '4242';
@@ -118,10 +119,12 @@ export default class Checkout {
                 const st = r2.data?.processStorePayment?.paymentStatus;
                 if (st === 'FAILED') {
                   this.toast.showError('El pago fue rechazado (simulación).');
-                  this.router.navigate(['/store/orders', orderId]);
+                  this.router.navigate(['../orders', orderId], { relativeTo: this.route });
                 } else {
                   this.toast.showSuccess('¡Pago exitoso!');
-                  this.router.navigate(['/store/order-confirmation', orderId]);
+                  this.router.navigate(['../order-confirmation', orderId], {
+                    relativeTo: this.route,
+                  });
                 }
               },
               error: (e: Error) => {

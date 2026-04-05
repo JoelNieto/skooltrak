@@ -36,7 +36,12 @@ import {
           <tbody>
             @for (line of lines(); track line.id) {
               <tr>
-                <td>{{ line.product?.name }}</td>
+                <td>
+                  <div class="font-medium">{{ line.product?.name }}</div>
+                  @if (line.variant?.label) {
+                    <div class="text-sm text-base-content/60">Talla: {{ line.variant?.label }}</div>
+                  }
+                </td>
                 <td>{{ formatPrice(line.product?.price) }}</td>
                 <td>
                   <div class="join">
@@ -88,11 +93,15 @@ export default class CartPage {
   }
 
   protected setQty(
-    line: { id?: string; quantity?: number | null; product?: { stock?: number | null } | null },
+    line: {
+      id?: string;
+      quantity?: number | null;
+      variant?: { stock?: number | null } | null;
+    },
     q: number,
   ) {
     if (q < 1) return;
-    if (q > (line.product?.stock ?? 0)) {
+    if (q > (line.variant?.stock ?? 0)) {
       this.toast.showWarning('Stock insuficiente');
       return;
     }

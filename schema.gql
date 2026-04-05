@@ -11,8 +11,8 @@ input AddChatParticipantsInput {
 }
 
 input AddToCartInput {
-  productId: String!
   quantity: Int! = 1
+  variantId: String!
 }
 
 type Assignment {
@@ -973,6 +973,12 @@ input CreateStoreProductInput {
   name: String!
   price: Float!
   schoolId: String!
+  variants: [CreateStoreProductVariantInput!]!
+}
+
+input CreateStoreProductVariantInput {
+  label: String!
+  sortOrder: Int
   stock: Int!
 }
 
@@ -3019,10 +3025,11 @@ type StoreCartItem {
   createdAt: DateTime!
   id: String!
   product: StoreProduct!
-  productId: String!
   quantity: Int!
   updatedAt: DateTime!
   userId: String!
+  variant: StoreProductVariant!
+  variantId: String!
 }
 
 type StoreCategory {
@@ -3056,6 +3063,9 @@ type StoreOrderItem {
   productId: String!
   quantity: Int!
   unitPrice: Float!
+  variant: StoreProductVariant
+  variantId: String
+  variantLabel: String
 }
 
 enum StoreOrderStatus {
@@ -3080,11 +3090,23 @@ type StoreProduct {
   categoryId: String
   createdAt: DateTime!
   description: String
+  hasOutOfStockVariant: Boolean!
   id: String!
   imageUrl: String
   name: String!
   price: Float!
   schoolId: String!
+  totalStock: Int!
+  updatedAt: DateTime!
+  variants: [StoreProductVariant!]!
+}
+
+type StoreProductVariant {
+  createdAt: DateTime!
+  id: String!
+  label: String!
+  productId: String!
+  sortOrder: Int!
   stock: Int!
   updatedAt: DateTime!
 }
@@ -3815,7 +3837,14 @@ input UpdateStoreProductInput {
   imageUrl: String
   name: String
   price: Float
-  stock: Int
+  variants: [UpdateStoreProductVariantInput!]
+}
+
+input UpdateStoreProductVariantInput {
+  id: String
+  label: String!
+  sortOrder: Int
+  stock: Int!
 }
 
 input UpdateStudentGradeInput {

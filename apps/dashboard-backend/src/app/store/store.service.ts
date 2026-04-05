@@ -14,16 +14,28 @@ import { UpdateStoreCategoryInput } from './dto/update-store-category.input';
 import { UpdateStoreOrderStatusInput } from './dto/update-store-order-status.input';
 import { UpdateStoreProductInput } from './dto/update-store-product.input';
 
+const variantOrder = { sortOrder: 'asc' as const };
+
 const productInclude = {
   category: true,
+  variants: { orderBy: variantOrder },
 } as const;
 
 const cartInclude = {
-  product: { include: productInclude },
+  variant: {
+    include: {
+      product: { include: productInclude },
+    },
+  },
 } as const;
 
 const orderInclude = {
-  items: { include: { product: { include: productInclude } } },
+  items: {
+    include: {
+      product: { include: productInclude },
+      variant: true,
+    },
+  },
 } as const;
 
 @Injectable({ scope: Scope.REQUEST })
@@ -149,6 +161,7 @@ export class StoreService {
               OR: [
                 { name: { contains: search, mode: 'insensitive' } },
                 { description: { contains: search, mode: 'insensitive' } },
+                { variants: { some: { label: { contains: search, mode: 'insensitive' } } } },
               ],
             }
           : {}),
@@ -197,8 +210,14 @@ export class StoreService {
         description: input.description ?? null,
         price: new Prisma.Decimal(input.price),
         imageUrl: input.imageUrl ?? null,
-        stock: input.stock,
         active: input.active ?? true,
+        variants: {
+          create: input.variants.map((v, i) => ({
+            label: v.label.trim(),
+            stock: v.stock,
+            sortOrder: v.sortOrder ?? i,
+          })),
+        },
       },
       include: productInclude,
     });
@@ -207,6 +226,7 @@ export class StoreService {
   async updateProduct(input: UpdateStoreProductInput) {
     const existing = await this.prisma.storeProduct.findFirst({
       where: { id: input.id, school: { organizationId: this.orgId } },
+      include: { variants: true },
     });
     if (!existing) throw new NotFoundException('Producto no encontrado.');
     if (input.categoryId !== undefined && input.categoryId !== null) {
@@ -215,6 +235,40 @@ export class StoreService {
       });
       if (!cat) throw new ForbiddenException('Categoría inválida.');
     }
+    if (input.variants !== undefined) {
+      if (input.variants.length < 1) {
+        throw new ForbiddenException('Debe haber al menos una talla o variante con stock.');
+      }
+      await this.prisma.$transaction(async (tx) => {
+        const incomingIds = new Set(input.variants!.filter((v) => v.id).map((v) => v.id!));
+        const toDelete = existing.variants.filter((v) => !incomingIds.has(v.id)).map((v) => v.id);
+        if (toDelete.length) {
+          await tx.storeProductVariant.deleteMany({
+            where: { id: { in: toDelete }, productId: input.id },
+          });
+        }
+        let i = 0;
+        for (const v of input.variants!) {
+          const label = v.label.trim();
+          const sortOrder = v.sortOrder ?? i;
+          i += 1;
+          if (v.id) {
+            const row = await tx.storeProductVariant.findFirst({
+              where: { id: v.id, productId: input.id },
+            });
+            if (!row) throw new ForbiddenException('Variante inválida.');
+            await tx.storeProductVariant.update({
+              where: { id: v.id },
+              data: { label, stock: v.stock, sortOrder },
+            });
+          } else {
+            await tx.storeProductVariant.create({
+              data: { productId: input.id, label, stock: v.stock, sortOrder },
+            });
+          }
+        }
+      });
+    }
     return this.prisma.storeProduct.update({
       where: { id: input.id },
       data: {
@@ -222,7 +276,6 @@ export class StoreService {
         ...(input.description !== undefined ? { description: input.description } : {}),
         ...(input.price !== undefined ? { price: new Prisma.Decimal(input.price) } : {}),
         ...(input.imageUrl !== undefined ? { imageUrl: input.imageUrl } : {}),
-        ...(input.stock !== undefined ? { stock: input.stock } : {}),
         ...(input.active !== undefined ? { active: input.active } : {}),
         ...(input.categoryId !== undefined ? { categoryId: input.categoryId } : {}),
       },
@@ -246,7 +299,7 @@ export class StoreService {
     return this.prisma.storeCartItem.findMany({
       where: {
         userId,
-        product: { schoolId },
+        variant: { product: { schoolId } },
       },
       include: cartInclude,
       orderBy: { createdAt: 'asc' },
@@ -254,22 +307,35 @@ export class StoreService {
   }
 
   async addToCart(input: AddToCartInput) {
-    const product = await this.ensureProductInOrg(input.productId);
-    if (!product.active) throw new ForbiddenException('Producto no disponible.');
-    const available = product.stock;
+    const variant = await this.prisma.storeProductVariant.findFirst({
+      where: {
+        id: input.variantId,
+        product: {
+          school: { organizationId: this.orgId },
+        },
+      },
+      include: { product: { include: productInclude } },
+    });
+    if (!variant) {
+      throw new NotFoundException('Variante no encontrada.');
+    }
+    if (!variant.product.active) {
+      throw new ForbiddenException('Producto no disponible.');
+    }
+    const available = variant.stock;
     const userId = this.ctx.userId;
     const existing = await this.prisma.storeCartItem.findUnique({
-      where: { userId_productId: { userId, productId: product.id } },
+      where: { userId_variantId: { userId, variantId: variant.id } },
     });
     const nextQty = (existing?.quantity ?? 0) + input.quantity;
     if (nextQty > available) {
       throw new ForbiddenException('Stock insuficiente.');
     }
     return this.prisma.storeCartItem.upsert({
-      where: { userId_productId: { userId, productId: product.id } },
+      where: { userId_variantId: { userId, variantId: variant.id } },
       create: {
         userId,
-        productId: product.id,
+        variantId: variant.id,
         quantity: input.quantity,
       },
       update: { quantity: nextQty },
@@ -281,11 +347,11 @@ export class StoreService {
     const userId = this.ctx.userId;
     const row = await this.prisma.storeCartItem.findFirst({
       where: { id: input.cartItemId, userId },
-      include: { product: true },
+      include: { variant: { include: { product: true } } },
     });
     if (!row) throw new NotFoundException('Ítem no encontrado.');
-    await this.ensureProductInOrg(row.productId);
-    if (input.quantity > row.product.stock) {
+    await this.ensureProductInOrg(row.variant.productId);
+    if (input.quantity > row.variant.stock) {
       throw new ForbiddenException('Stock insuficiente.');
     }
     return this.prisma.storeCartItem.update({
@@ -309,7 +375,7 @@ export class StoreService {
     await this.ensureSchoolInOrg(schoolId);
     const userId = this.ctx.userId;
     await this.prisma.storeCartItem.deleteMany({
-      where: { userId, product: { schoolId } },
+      where: { userId, variant: { product: { schoolId } } },
     });
     return true;
   }
@@ -319,18 +385,18 @@ export class StoreService {
     await this.ensureSchoolInOrg(input.schoolId);
     const userId = this.ctx.userId;
     const items = await this.prisma.storeCartItem.findMany({
-      where: { userId, product: { schoolId: input.schoolId } },
-      include: { product: true },
+      where: { userId, variant: { product: { schoolId: input.schoolId } } },
+      include: { variant: { include: { product: true } } },
     });
     if (!items.length) {
       throw new ForbiddenException('El carrito está vacío.');
     }
     let total = new Prisma.Decimal(0);
     for (const line of items) {
-      if (!line.product.active || line.quantity > line.product.stock) {
-        throw new ForbiddenException(`Stock insuficiente para: ${line.product.name}`);
+      if (!line.variant.product.active || line.quantity > line.variant.stock) {
+        throw new ForbiddenException(`Stock insuficiente para: ${line.variant.product.name} (${line.variant.label})`);
       }
-      total = total.add(new Prisma.Decimal(line.product.price).mul(line.quantity));
+      total = total.add(new Prisma.Decimal(line.variant.product.price).mul(line.quantity));
     }
     const order = await this.prisma.$transaction(async (tx) => {
       const created = await tx.storeOrder.create({
@@ -343,22 +409,24 @@ export class StoreService {
           notes: input.notes ?? null,
           items: {
             create: items.map((line) => ({
-              productId: line.productId,
+              productId: line.variant.productId,
+              variantId: line.variantId,
+              variantLabel: line.variant.label,
               quantity: line.quantity,
-              unitPrice: line.product.price,
+              unitPrice: line.variant.product.price,
             })),
           },
         },
         include: orderInclude,
       });
       for (const line of items) {
-        await tx.storeProduct.update({
-          where: { id: line.productId },
+        await tx.storeProductVariant.update({
+          where: { id: line.variantId },
           data: { stock: { decrement: line.quantity } },
         });
       }
       await tx.storeCartItem.deleteMany({
-        where: { userId, product: { schoolId: input.schoolId } },
+        where: { userId, variant: { product: { schoolId: input.schoolId } } },
       });
       return created;
     });

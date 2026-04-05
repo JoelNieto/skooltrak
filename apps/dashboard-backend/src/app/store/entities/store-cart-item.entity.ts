@@ -1,5 +1,6 @@
 import { Field, Int, ObjectType } from '@nestjs/graphql';
 import { StoreProduct } from './store-product.entity';
+import { StoreProductVariant } from './store-product-variant.entity';
 
 @ObjectType()
 export class StoreCartItem {
@@ -10,8 +11,12 @@ export class StoreCartItem {
   userId: string;
 
   @Field(() => String)
-  productId: string;
+  variantId: string;
 
+  @Field(() => StoreProductVariant)
+  variant: StoreProductVariant;
+
+  /** Resolved from variant.product */
   @Field(() => StoreProduct)
   product: StoreProduct;
 

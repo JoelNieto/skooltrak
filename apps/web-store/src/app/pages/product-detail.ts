@@ -1,16 +1,17 @@
 import { Toast } from '@/ui';
 import { SchoolContext } from '@/shared';
-import { ChangeDetectionStrategy, Component, inject, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, effect, inject, input, signal } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { Apollo } from 'apollo-angular';
 import { map } from 'rxjs';
-import { CartService } from '../cart.service';
 import { AddToStoreCartDocument, PublicStoreProductDocument } from '../graphql/generated/graphql';
+import { CartService } from '../cart.service';
 
 @Component({
   selector: 'app-product-detail',
-  imports: [RouterLink],
+  imports: [RouterLink, FormsModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <a routerLink=".." class="btn btn-ghost btn-sm gap-1 mb-4">
@@ -35,12 +36,31 @@ import { AddToStoreCartDocument, PublicStoreProductDocument } from '../graphql/g
         </figure>
         <div class="space-y-4">
           <h1 class="text-3xl font-bold">{{ p.name }}</h1>
+          @if (p.hasOutOfStockVariant) {
+            <div class="alert alert-warning py-2 text-sm">Alguna talla está agotada</div>
+          }
           <p class="text-2xl font-semibold text-primary">{{ formatPrice(p.price) }}</p>
           @if (p.description) {
             <p class="text-base-content/80 whitespace-pre-wrap">{{ p.description }}</p>
           }
-          @if ((p.stock ?? 0) <= 0) {
-            <div class="badge badge-error">Agotado</div>
+          @if (p.variants?.length) {
+            <label class="form-control w-full max-w-xs">
+              <span class="label-text">Talla / variante</span>
+              <select
+                class="select select-bordered"
+                [ngModel]="selectedVariantId()"
+                (ngModelChange)="selectedVariantId.set($event)"
+              >
+                @for (v of p.variants; track v.id) {
+                  <option [value]="v.id" [disabled]="(v.stock ?? 0) <= 0">
+                    {{ v.label }} — {{ (v.stock ?? 0) <= 0 ? 'Agotado' : v.stock + ' disponibles' }}
+                  </option>
+                }
+              </select>
+            </label>
+          }
+          @if (!selectedVariant() || (selectedVariant()?.stock ?? 0) <= 0) {
+            <div class="badge badge-error">Sin stock en la talla seleccionada</div>
           } @else {
             <div class="flex flex-wrap gap-2">
               <button type="button" class="btn btn-primary" (click)="add(1)">Agregar al carrito</button>
@@ -58,6 +78,8 @@ export default class ProductDetail {
   private readonly cart = inject(CartService);
   private readonly toast = inject(Toast);
 
+  protected selectedVariantId = signal<string | null>(null);
+
   protected product = rxResource({
     params: () => ({ id: this.id() }),
     stream: ({ params }) =>
@@ -70,6 +92,30 @@ export default class ProductDetail {
         .valueChanges.pipe(map((r) => r.data?.publicStoreProduct)),
   });
 
+  constructor() {
+    effect(() => {
+      const p = this.product.value();
+      const variants = p?.variants ?? [];
+      const current = this.selectedVariantId();
+      if (!variants.length) {
+        this.selectedVariantId.set(null);
+        return;
+      }
+      const stillValid = current && variants.some((v) => v.id === current);
+      if (!stillValid) {
+        const firstInStock = variants.find((v) => (v.stock ?? 0) > 0);
+        this.selectedVariantId.set((firstInStock ?? variants[0]).id ?? null);
+      }
+    });
+  }
+
+  protected selectedVariant() {
+    const p = this.product.value();
+    const vid = this.selectedVariantId();
+    if (!p?.variants?.length || !vid) return null;
+    return p.variants.find((v) => v.id === vid) ?? null;
+  }
+
   protected formatPrice(price: unknown): string {
     return new Intl.NumberFormat('es-MX', {
       style: 'currency',
@@ -78,11 +124,17 @@ export default class ProductDetail {
   }
 
   protected add(qty: number) {
-    const pid = this.id();
+    const vid = this.selectedVariantId();
+    if (!vid) return;
+    const v = this.selectedVariant();
+    if (!v || (v.stock ?? 0) < qty) {
+      this.toast.showError('Stock insuficiente');
+      return;
+    }
     this.apollo
       .mutate({
         mutation: AddToStoreCartDocument,
-        variables: { input: { productId: pid, quantity: qty } },
+        variables: { input: { variantId: vid, quantity: qty } },
       })
       .subscribe({
         next: () => {

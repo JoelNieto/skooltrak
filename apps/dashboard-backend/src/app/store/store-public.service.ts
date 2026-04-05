@@ -4,6 +4,7 @@ import { SchoolsService } from '../schools/schools.service';
 
 const productInclude = {
   category: true,
+  variants: { orderBy: { sortOrder: 'asc' as const } },
 } as const;
 
 @Injectable()
@@ -78,6 +79,7 @@ export class StorePublicService {
               OR: [
                 { name: { contains: search, mode: 'insensitive' } },
                 { description: { contains: search, mode: 'insensitive' } },
+                { variants: { some: { label: { contains: search, mode: 'insensitive' } } } },
               ],
             }
           : {}),

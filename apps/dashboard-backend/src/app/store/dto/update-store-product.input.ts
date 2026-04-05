@@ -1,5 +1,17 @@
-import { Field, Float, InputType, Int } from '@nestjs/graphql';
-import { IsBoolean, IsNotEmpty, IsNumber, IsOptional, IsString, MaxLength, Min } from 'class-validator';
+import { Field, Float, InputType } from '@nestjs/graphql';
+import { Type } from 'class-transformer';
+import {
+  IsArray,
+  IsBoolean,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+  MaxLength,
+  Min,
+  ValidateNested,
+} from 'class-validator';
+import { UpdateStoreProductVariantInput } from './update-store-product-variant.input';
 
 @InputType()
 export class UpdateStoreProductInput {
@@ -37,14 +49,15 @@ export class UpdateStoreProductInput {
   @MaxLength(2000)
   imageUrl?: string | null;
 
-  @Field(() => Int, { nullable: true })
-  @IsOptional()
-  @IsNumber()
-  @Min(0)
-  stock?: number;
-
   @Field(() => Boolean, { nullable: true })
   @IsOptional()
   @IsBoolean()
   active?: boolean;
+
+  @Field(() => [UpdateStoreProductVariantInput], { nullable: true })
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => UpdateStoreProductVariantInput)
+  variants?: UpdateStoreProductVariantInput[];
 }

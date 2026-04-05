@@ -22,6 +22,16 @@ fragment StoreCategoryFields on StoreCategory {
   updatedAt
 }
 
+fragment StoreProductVariantFields on StoreProductVariant {
+  id
+  productId
+  label
+  stock
+  sortOrder
+  createdAt
+  updatedAt
+}
+
 fragment StoreProductFields on StoreProduct {
   id
   schoolId
@@ -33,8 +43,12 @@ fragment StoreProductFields on StoreProduct {
   description
   price
   imageUrl
-  stock
   active
+  totalStock
+  hasOutOfStockVariant
+  variants {
+    ...StoreProductVariantFields
+  }
   createdAt
   updatedAt
 }
@@ -42,7 +56,10 @@ fragment StoreProductFields on StoreProduct {
 fragment StoreCartItemFields on StoreCartItem {
   id
   userId
-  productId
+  variantId
+  variant {
+    ...StoreProductVariantFields
+  }
   product {
     ...StoreProductFields
   }
@@ -55,6 +72,11 @@ fragment StoreOrderItemFields on StoreOrderItem {
   id
   orderId
   productId
+  variantId
+  variantLabel
+  variant {
+    ...StoreProductVariantFields
+  }
   product {
     ...StoreProductFields
   }

@@ -1,14 +1,23 @@
 import { Module } from '@nestjs/common';
 import { PrismaModule } from '../prisma.module';
 import { SchoolsModule } from '../schools/schools.module';
+import { StoreCartItemResolver } from './store-cart-item.resolver';
 import { StorePublicResolver } from './store-public.resolver';
 import { StorePublicService } from './store-public.service';
+import { StoreProductFieldsResolver } from './store-product-fields.resolver';
 import { StoreResolver } from './store.resolver';
 import { StoreService } from './store.service';
 
 @Module({
   imports: [PrismaModule, SchoolsModule],
-  providers: [StoreService, StoreResolver, StorePublicService, StorePublicResolver],
+  providers: [
+    StoreService,
+    StoreResolver,
+    StorePublicService,
+    StorePublicResolver,
+    StoreProductFieldsResolver,
+    StoreCartItemResolver,
+  ],
   exports: [StoreService, StorePublicService],
 })
 export class StoreModule {}

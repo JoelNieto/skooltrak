@@ -6,7 +6,7 @@ export class AddToCartInput {
   @Field(() => String)
   @IsString()
   @IsNotEmpty()
-  productId: string;
+  variantId: string;
 
   @Field(() => Int, { defaultValue: 1 })
   @IsInt()

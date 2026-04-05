@@ -64,8 +64,11 @@ import { PublicStoreCategoriesDocument, PublicStoreProductsDocument } from '../g
             </figure>
             <div class="card-body p-4 gap-1">
               <h2 class="card-title text-base line-clamp-2">{{ p.name }}</h2>
+              @if (p.hasOutOfStockVariant) {
+                <span class="badge badge-warning badge-sm">Alguna talla agotada</span>
+              }
               <p class="text-lg font-semibold text-primary">{{ formatPrice(p.price) }}</p>
-              @if ((p.stock ?? 0) <= 0) {
+              @if ((p.totalStock ?? 0) <= 0) {
                 <span class="badge badge-error badge-sm">Agotado</span>
               }
             </div>

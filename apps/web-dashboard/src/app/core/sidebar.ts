@@ -1,11 +1,5 @@
 import { Confirmation } from '@/ui';
-import {
-  afterRenderEffect,
-  ChangeDetectionStrategy,
-  Component,
-  computed,
-  inject,
-} from '@angular/core';
+import { afterRenderEffect, ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { Apollo } from 'apollo-angular';
@@ -162,23 +156,23 @@ import { ThemeService } from './theme.service';
             </a>
           </li>
         }
-        @if (auth.hasPermission('VIEW_STORE')) {
-          <li>
-            <a
-              [routerLink]="storeLink()"
-              routerLinkActive="bg-primary/10 text-primary font-semibold"
-              class="flex items-center gap-3 px-3 py-2 text-base-content/80 rounded-lg transition-all duration-150 hover:bg-base-200 hover:text-base-content group"
-            >
-              <span class="material-symbols-outlined text-xl">storefront</span>
-              <span>Tienda</span>
-              @if (storeCartCount.value(); as cnt) {
-                @if (cnt > 0) {
-                  <span class="badge badge-primary badge-sm ml-auto">{{ cnt > 99 ? '99+' : cnt }}</span>
-                }
+
+        <li>
+          <a
+            [routerLink]="storeLink()"
+            routerLinkActive="bg-primary/10 text-primary font-semibold"
+            class="flex items-center gap-3 px-3 py-2 text-base-content/80 rounded-lg transition-all duration-150 hover:bg-base-200 hover:text-base-content group"
+          >
+            <span class="material-symbols-outlined text-xl">storefront</span>
+            <span>Tienda</span>
+            @if (storeCartCount.value(); as cnt) {
+              @if (cnt > 0) {
+                <span class="badge badge-primary badge-sm ml-auto">{{ cnt > 99 ? '99+' : cnt }}</span>
               }
-            </a>
-          </li>
-        }
+            }
+          </a>
+        </li>
+
         @if (auth.hasPermission('MANAGE_STORE') && store.currentSchool()?.slug) {
           <li>
             <a
@@ -566,9 +560,7 @@ export class Sidebar {
           pollInterval: 120000,
         })
         .valueChanges.pipe(
-          map((r) =>
-            (r.data?.myStoreCart ?? []).reduce((sum, item) => sum + (item.quantity ?? 0), 0),
-          ),
+          map((r) => (r.data?.myStoreCart ?? []).reduce((sum, item) => sum + (item.quantity ?? 0), 0)),
         );
     },
   });

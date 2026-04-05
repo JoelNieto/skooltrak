@@ -24,7 +24,13 @@ import { CheckoutStoreDocument, ProcessStorePaymentDocument } from '../graphql/g
           <ul class="space-y-1 text-sm">
             @for (line of cart.lines(); track line.id) {
               <li class="flex justify-between gap-2">
-                <span>{{ line.product?.name }} × {{ line.quantity }}</span>
+                <span>
+                  {{ line.product?.name }}
+                  @if (line.variant?.label) {
+                    <span class="text-base-content/60"> ({{ line.variant?.label }})</span>
+                  }
+                  × {{ line.quantity }}
+                </span>
                 <span>{{ formatPrice(lineSubtotal(line)) }}</span>
               </li>
             }

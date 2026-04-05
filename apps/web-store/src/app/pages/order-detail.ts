@@ -30,6 +30,7 @@ import { StoreOrderDocument } from '../graphql/generated/graphql';
           <thead>
             <tr>
               <th>Producto</th>
+              <th>Talla</th>
               <th>Cant.</th>
               <th>P. unit.</th>
               <th>Subtotal</th>
@@ -39,6 +40,7 @@ import { StoreOrderDocument } from '../graphql/generated/graphql';
             @for (it of o.items; track it.id) {
               <tr>
                 <td>{{ it.product?.name }}</td>
+                <td>{{ it.variantLabel || '—' }}</td>
                 <td>{{ it.quantity }}</td>
                 <td>{{ formatPrice(it.unitPrice) }}</td>
                 <td>{{ formatPrice(itemLineTotal(it)) }}</td>

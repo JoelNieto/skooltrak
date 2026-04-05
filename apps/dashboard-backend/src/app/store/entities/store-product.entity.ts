@@ -1,6 +1,7 @@
 import { Prisma } from '@generated/prisma';
-import { Field, Float, Int, ObjectType } from '@nestjs/graphql';
+import { Field, Float, ObjectType } from '@nestjs/graphql';
 import { StoreCategory } from './store-category.entity';
+import { StoreProductVariant } from './store-product-variant.entity';
 
 @ObjectType()
 export class StoreProduct {
@@ -28,11 +29,11 @@ export class StoreProduct {
   @Field(() => String, { nullable: true })
   imageUrl: string | null;
 
-  @Field(() => Int)
-  stock: number;
-
   @Field(() => Boolean)
   active: boolean;
+
+  @Field(() => [StoreProductVariant])
+  variants: StoreProductVariant[];
 
   @Field(() => Date)
   createdAt: Date;

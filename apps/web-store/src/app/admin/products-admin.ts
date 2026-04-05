@@ -24,8 +24,9 @@ import { DeleteStoreProductDocument, StoreProductsAdminDocument } from '../graph
           <thead>
             <tr>
               <th>Nombre</th>
+              <th>Stock total</th>
+              <th>Alerta</th>
               <th>Precio</th>
-              <th>Stock</th>
               <th>Activo</th>
               <th></th>
             </tr>
@@ -34,8 +35,15 @@ import { DeleteStoreProductDocument, StoreProductsAdminDocument } from '../graph
             @for (p of products.value(); track p.id) {
               <tr>
                 <td>{{ p.name }}</td>
+                <td>{{ p.totalStock }}</td>
+                <td>
+                  @if (p.hasOutOfStockVariant) {
+                    <span class="badge badge-warning badge-sm">Alguna talla agotada</span>
+                  } @else {
+                    —
+                  }
+                </td>
                 <td>{{ formatPrice(p.price) }}</td>
-                <td>{{ p.stock }}</td>
                 <td>{{ p.active ? 'Sí' : 'No' }}</td>
                 <td class="flex gap-2">
                   <a [routerLink]="[p.id, 'edit']" class="link link-primary">Editar</a>
@@ -44,9 +52,9 @@ import { DeleteStoreProductDocument, StoreProductsAdminDocument } from '../graph
               </tr>
             } @empty {
               @if (products.isLoading()) {
-                <tr><td colspan="5">Cargando…</td></tr>
+                <tr><td colspan="6">Cargando…</td></tr>
               } @else {
-                <tr><td colspan="5">Sin productos.</td></tr>
+                <tr><td colspan="6">Sin productos.</td></tr>
               }
             }
           </tbody>

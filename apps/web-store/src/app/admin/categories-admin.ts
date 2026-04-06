@@ -53,10 +53,8 @@ import {
                   <input type="checkbox" class="toggle toggle-sm" [(ngModel)]="editActive[c.id!]" [name]="'a' + c.id" />
                 </td>
                 <td class="flex gap-2">
-                  <button type="button" class="btn btn-ghost btn-xs" (click)="save(c.id!)">Guardar</button>
-                  <button type="button" class="btn btn-ghost btn-xs text-error" (click)="remove(c.id!)">
-                    Eliminar
-                  </button>
+                  <button type="button" class="btn btn-primary btn-soft btn-sm" (click)="save(c.id!)">Guardar</button>
+                  <button type="button" class="btn btn-error btn-soft btn-sm" (click)="remove(c.id!)">Eliminar</button>
                 </td>
               </tr>
             } @empty {

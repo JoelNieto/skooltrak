@@ -1,11 +1,26 @@
-import { Toast } from '@/ui';
 import { SchoolContext } from '@/shared';
-import { ChangeDetectionStrategy, Component, effect, inject, signal } from '@angular/core';
-import { FormsModule } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
+import { Toast } from '@/ui';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  effect,
+  inject,
+  input,
+  signal,
+} from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
+import {
+  applyEach,
+  form,
+  FormField,
+  maxLength,
+  min,
+  required,
+  submit,
+} from '@angular/forms/signals';
+import { Router } from '@angular/router';
 import { Apollo } from 'apollo-angular';
-import { map, of } from 'rxjs';
+import { firstValueFrom, map, of } from 'rxjs';
 import {
   CreateStoreProductDocument,
   StoreCategoriesAdminDocument,
@@ -14,42 +29,69 @@ import {
 } from '../graphql/generated/graphql';
 import { storeBaseSegments } from '../store-nav';
 
-type VariantRow = { id?: string; label: string; stock: number; sortOrder: number };
+type VariantModel = { id?: string; label: string; stock: number; sortOrder: number };
+
+interface StoreProductFormModel {
+  name: string;
+  description: string;
+  /** Empty string = no category (maps to null in API). */
+  categoryId: string;
+  price: number;
+  imageUrl: string;
+  active: boolean;
+  variants: VariantModel[];
+}
+
+function emptyStoreProductForm(): StoreProductFormModel {
+  return {
+    name: '',
+    description: '',
+    categoryId: '',
+    price: 0,
+    imageUrl: '',
+    active: true,
+    variants: [{ label: '', stock: 0, sortOrder: 0 }],
+  };
+}
 
 @Component({
   selector: 'app-product-form',
-  imports: [FormsModule],
+  imports: [FormField],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <h3 class="text-lg font-medium mb-4">{{ productId() ? 'Editar producto' : 'Nuevo producto' }}</h3>
+    <h3 class="text-lg font-medium mb-4">{{ id() ? 'Editar producto' : 'Nuevo producto' }}</h3>
     @if (!school.currentSchoolId()) {
       <div class="alert alert-warning">Selecciona una escuela.</div>
     } @else {
-      <form class="grid gap-4 max-w-2xl" (ngSubmit)="save()">
+      <form class="grid gap-4 max-w-2xl" (submit)="onSubmit($event)" novalidate>
         <label class="form-control">
           <span class="label-text">Nombre</span>
-          <input class="input input-bordered" [(ngModel)]="name" name="name" required />
+          <input class="input input-bordered" [formField]="productForm.name" />
         </label>
         <label class="form-control">
           <span class="label-text">Descripción</span>
-          <textarea class="textarea textarea-bordered" [(ngModel)]="description" name="desc" rows="3"></textarea>
+          <textarea
+            class="textarea textarea-bordered"
+            [formField]="productForm.description"
+            rows="3"
+          ></textarea>
         </label>
         <label class="form-control">
           <span class="label-text">Categoría</span>
-          <select class="select select-bordered" [(ngModel)]="categoryId" name="cat">
-            <option [ngValue]="null">—</option>
+          <select class="select select-bordered" [formField]="productForm.categoryId">
+            <option value="">—</option>
             @for (c of categories.value(); track c.id) {
-              <option [ngValue]="c.id">{{ c.name }}</option>
+              <option [value]="c.id">{{ c.name }}</option>
             }
           </select>
         </label>
         <label class="form-control">
           <span class="label-text">Precio</span>
-          <input class="input input-bordered" type="number" min="0" step="0.01" [(ngModel)]="price" name="price" />
+          <input class="input input-bordered" type="number" step="0.01" [formField]="productForm.price" />
         </label>
         <label class="form-control">
           <span class="label-text">URL de imagen (opcional)</span>
-          <input class="input input-bordered" [(ngModel)]="imageUrl" name="img" />
+          <input class="input input-bordered" [formField]="productForm.imageUrl" />
         </label>
 
         <div class="space-y-2">
@@ -71,38 +113,28 @@ type VariantRow = { id?: string; label: string; stock: number; sortOrder: number
                 </tr>
               </thead>
               <tbody>
-                @for (row of variantRows; track $index) {
+                @for (row of productForm.variants; track $index) {
                   <tr>
                     <td>
                       <input
-                        class="input input-bordered input-sm w-full max-w-[10rem]"
-                        [(ngModel)]="row.label"
-                        [name]="'vl' + $index"
-                        maxlength="120"
+                        class="input input-bordered input-sm w-full max-w-40"
+                        [formField]="row.label"
                         placeholder="S, M, 32…"
                       />
                     </td>
                     <td>
-                      <input
-                        class="input input-bordered input-sm w-24"
-                        type="number"
-                        min="0"
-                        [(ngModel)]="row.stock"
-                        [name]="'vs' + $index"
-                      />
+                      <input class="input input-bordered input-sm w-24" type="number" [formField]="row.stock" />
                     </td>
                     <td>
-                      <input
-                        class="input input-bordered input-sm w-16"
-                        type="number"
-                        min="0"
-                        [(ngModel)]="row.sortOrder"
-                        [name]="'vo' + $index"
-                      />
+                      <input class="input input-bordered input-sm w-16" type="number" [formField]="row.sortOrder" />
                     </td>
                     <td>
-                      @if (variantRows.length > 1) {
-                        <button type="button" class="btn btn-ghost btn-xs text-error" (click)="removeVariantRow($index)">
+                      @if (productModel().variants.length > 1) {
+                        <button
+                          type="button"
+                          class="btn btn-ghost btn-xs text-error"
+                          (click)="removeVariantRow($index)"
+                        >
                           Quitar
                         </button>
                       }
@@ -115,11 +147,13 @@ type VariantRow = { id?: string; label: string; stock: number; sortOrder: number
         </div>
 
         <label class="label cursor-pointer justify-start gap-2">
-          <input type="checkbox" class="toggle" [(ngModel)]="active" name="active" />
+          <input type="checkbox" class="toggle" [formField]="productForm.active" />
           <span class="label-text">Activo</span>
         </label>
         <div class="flex gap-2">
-          <button type="submit" class="btn btn-primary" [disabled]="saving()">Guardar</button>
+          <button type="submit" class="btn btn-primary" [disabled]="saving() || productForm().invalid()">
+            Guardar
+          </button>
           <button type="button" class="btn btn-ghost" (click)="goToProductsAdmin()">Cancelar</button>
         </div>
       </form>
@@ -129,22 +163,25 @@ type VariantRow = { id?: string; label: string; stock: number; sortOrder: number
 export default class ProductForm {
   protected readonly school = inject(SchoolContext);
   protected readonly router = inject(Router);
-  private readonly route = inject(ActivatedRoute);
   private readonly apollo = inject(Apollo);
   private readonly toast = inject(Toast);
 
   /** Route param from `products/:id/edit`; undefined for `products/new`. */
-  protected productId = signal<string | undefined>(this.route.snapshot.paramMap.get('id') ?? undefined);
+  protected id = input<string>();
 
-  protected name = '';
-  protected description = '';
-  protected categoryId: string | null = null;
-  protected price = 0;
-  protected imageUrl = '';
-  protected active = true;
+  protected readonly productModel = signal<StoreProductFormModel>(emptyStoreProductForm());
+
+  protected readonly productForm = form(this.productModel, (schemaPath) => {
+    required(schemaPath.name, { message: 'El nombre es obligatorio' });
+    min(schemaPath.price, 0, { message: 'El precio no puede ser negativo' });
+    applyEach(schemaPath.variants, (item) => {
+      maxLength(item.label, 120, { message: 'Máximo 120 caracteres' });
+      min(item.stock, 0, { message: 'Stock mínimo 0' });
+      min(item.sortOrder, 0, { message: 'Orden mínimo 0' });
+    });
+  });
+
   protected saving = signal(false);
-
-  protected variantRows: VariantRow[] = [{ label: '', stock: 0, sortOrder: 0 }];
 
   protected categories = rxResource({
     params: () => ({ schoolId: this.school.currentSchoolId() }),
@@ -161,7 +198,7 @@ export default class ProductForm {
   });
 
   private product = rxResource({
-    params: () => ({ id: this.productId() }),
+    params: () => ({ id: this.id() }),
     stream: ({ params }) => {
       if (!params.id) return of(null);
       return this.apollo
@@ -174,45 +211,132 @@ export default class ProductForm {
     },
   });
 
+  constructor() {
+    effect(() => {
+      const routeId = this.id();
+      if (!routeId) {
+        this.productModel.set(emptyStoreProductForm());
+        return;
+      }
+      const p = this.product.value();
+      if (!p) return;
+      if (p.id !== routeId) return;
+      const vs = p.variants ?? [];
+      this.productModel.set({
+        name: p.name ?? '',
+        description: p.description ?? '',
+        categoryId: p.categoryId ?? '',
+        price: Number(p.price ?? 0),
+        imageUrl: p.imageUrl ?? '',
+        active: p.active ?? true,
+        variants:
+          vs.length > 0
+            ? vs.map((v) => ({
+                id: v.id,
+                label: v.label ?? '',
+                stock: v.stock ?? 0,
+                sortOrder: v.sortOrder ?? 0,
+              }))
+            : [{ label: '', stock: 0, sortOrder: 0 }],
+      });
+    });
+  }
+
   protected goToProductsAdmin() {
     this.router.navigate([...storeBaseSegments(this.school), 'admin', 'products']);
   }
 
   protected addVariantRow() {
-    this.variantRows = [...this.variantRows, { label: '', stock: 0, sortOrder: this.variantRows.length }];
+    this.productModel.update((m) => ({
+      ...m,
+      variants: [...m.variants, { label: '', stock: 0, sortOrder: m.variants.length }],
+    }));
   }
 
   protected removeVariantRow(index: number) {
-    if (this.variantRows.length <= 1) return;
-    this.variantRows = this.variantRows.filter((_, i) => i !== index);
+    this.productModel.update((m) => {
+      if (m.variants.length <= 1) return m;
+      return { ...m, variants: m.variants.filter((_, i) => i !== index) };
+    });
   }
 
-  constructor() {
-    effect(() => {
-      const p = this.product.value();
-      if (!p) return;
-      this.name = p.name ?? '';
-      this.description = p.description ?? '';
-      this.categoryId = p.categoryId ?? null;
-      this.price = Number(p.price ?? 0);
-      this.imageUrl = p.imageUrl ?? '';
-      this.active = p.active ?? true;
-      const vs = p.variants ?? [];
-      this.variantRows =
-        vs.length > 0
-          ? vs.map((v) => ({
-              id: v.id,
-              label: v.label ?? '',
-              stock: v.stock ?? 0,
-              sortOrder: v.sortOrder ?? 0,
-            }))
-          : [{ label: '', stock: 0, sortOrder: 0 }];
+  protected onSubmit(event: Event) {
+    event.preventDefault();
+    const variants = this.buildVariantsPayload();
+    if (!variants) return;
+
+    this.productForm.name().markAsDirty();
+
+    submit(this.productForm, async () => {
+      const m = this.productModel();
+      const pid = this.id();
+      const schoolId = this.school.currentSchoolId();
+      if (!schoolId) return;
+
+      this.saving.set(true);
+      const categoryId = m.categoryId.trim() ? m.categoryId : null;
+
+      try {
+        if (pid) {
+          await firstValueFrom(
+            this.apollo.mutate({
+              mutation: UpdateStoreProductDocument,
+              variables: {
+                input: {
+                  id: pid,
+                  name: m.name,
+                  description: m.description,
+                  categoryId,
+                  price: m.price,
+                  imageUrl: m.imageUrl || null,
+                  active: m.active,
+                  variants: variants.map((v) => ({
+                    id: v.id,
+                    label: v.label,
+                    stock: v.stock,
+                    sortOrder: v.sortOrder,
+                  })),
+                },
+              },
+            }),
+          );
+          this.toast.showSuccess('Producto actualizado');
+        } else {
+          await firstValueFrom(
+            this.apollo.mutate({
+              mutation: CreateStoreProductDocument,
+              variables: {
+                input: {
+                  schoolId,
+                  name: m.name,
+                  description: m.description,
+                  categoryId: categoryId ?? undefined,
+                  price: m.price,
+                  imageUrl: m.imageUrl || undefined,
+                  active: m.active,
+                  variants: variants.map((v) => ({
+                    label: v.label,
+                    stock: v.stock,
+                    sortOrder: v.sortOrder,
+                  })),
+                },
+              },
+            }),
+          );
+          this.toast.showSuccess('Producto creado');
+        }
+        this.goToProductsAdmin();
+      } catch (e) {
+        this.toast.showError(e instanceof Error ? e.message : String(e));
+      } finally {
+        this.saving.set(false);
+      }
     });
   }
 
   private buildVariantsPayload() {
-    const rows = this.variantRows
-      .map((r, i) => ({
+    const rows = this.productModel()
+      .variants.map((r, i) => ({
         id: r.id,
         label: r.label.trim(),
         stock: Math.max(0, Number(r.stock) || 0),
@@ -224,80 +348,5 @@ export default class ProductForm {
       return null;
     }
     return rows;
-  }
-
-  protected save() {
-    const schoolId = this.school.currentSchoolId();
-    if (!schoolId) return;
-    const variants = this.buildVariantsPayload();
-    if (!variants) return;
-    const pid = this.productId();
-    this.saving.set(true);
-    if (pid) {
-      this.apollo
-        .mutate({
-          mutation: UpdateStoreProductDocument,
-          variables: {
-            input: {
-              id: pid,
-              name: this.name,
-              description: this.description,
-              categoryId: this.categoryId,
-              price: this.price,
-              imageUrl: this.imageUrl || null,
-              active: this.active,
-              variants: variants.map((v) => ({
-                id: v.id,
-                label: v.label,
-                stock: v.stock,
-                sortOrder: v.sortOrder,
-              })),
-            },
-          },
-        })
-        .subscribe({
-          next: () => {
-            this.saving.set(false);
-            this.toast.showSuccess('Producto actualizado');
-            this.goToProductsAdmin();
-          },
-          error: (e: Error) => {
-            this.saving.set(false);
-            this.toast.showError(e.message);
-          },
-        });
-    } else {
-      this.apollo
-        .mutate({
-          mutation: CreateStoreProductDocument,
-          variables: {
-            input: {
-              schoolId,
-              name: this.name,
-              description: this.description,
-              categoryId: this.categoryId ?? undefined,
-              price: this.price,
-              imageUrl: this.imageUrl || undefined,
-              active: this.active,
-              variants: variants.map((v) => ({
-                label: v.label,
-                stock: v.stock,
-                sortOrder: v.sortOrder,
-              })),
-            },
-          },
-        })
-        .subscribe({
-          next: () => {
-            this.saving.set(false);
-            this.toast.showSuccess('Producto creado');
-            this.goToProductsAdmin();
-          },
-          error: (e: Error) => {
-            this.saving.set(false);
-            this.toast.showError(e.message);
-          },
-        });
-    }
   }
 }

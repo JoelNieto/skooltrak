@@ -1,8 +1,8 @@
-import { Toast } from '@/ui';
 import { SchoolContext } from '@/shared';
+import { Toast } from '@/ui';
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
-import { RouterLink } from '@angular/router';
 import { rxResource } from '@angular/core/rxjs-interop';
+import { RouterLink } from '@angular/router';
 import { Apollo } from 'apollo-angular';
 import { map, of } from 'rxjs';
 import { DeleteStoreProductDocument, StoreProductsAdminDocument } from '../graphql/generated/graphql';
@@ -46,15 +46,19 @@ import { DeleteStoreProductDocument, StoreProductsAdminDocument } from '../graph
                 <td>{{ formatPrice(p.price) }}</td>
                 <td>{{ p.active ? 'Sí' : 'No' }}</td>
                 <td class="flex gap-2">
-                  <a [routerLink]="[p.id, 'edit']" class="link link-primary">Editar</a>
-                  <button type="button" class="link link-error" (click)="remove(p.id!)">Eliminar</button>
+                  <a [routerLink]="[p.id, 'edit']" class="btn btn-primary btn-soft btn-sm">Editar</a>
+                  <button type="button" class="btn btn-error btn-soft btn-sm" (click)="remove(p.id!)">Eliminar</button>
                 </td>
               </tr>
             } @empty {
               @if (products.isLoading()) {
-                <tr><td colspan="6">Cargando…</td></tr>
+                <tr>
+                  <td colspan="6">Cargando…</td>
+                </tr>
               } @else {
-                <tr><td colspan="6">Sin productos.</td></tr>
+                <tr>
+                  <td colspan="6">Sin productos.</td>
+                </tr>
               }
             }
           </tbody>
@@ -91,14 +95,12 @@ export default class ProductsAdmin {
   }
 
   protected remove(id: string) {
-    this.apollo
-      .mutate({ mutation: DeleteStoreProductDocument, variables: { id } })
-      .subscribe({
-        next: () => {
-          this.toast.showSuccess('Producto eliminado');
-          this.listTick.update((n) => n + 1);
-        },
-        error: (e: Error) => this.toast.showError(e.message),
-      });
+    this.apollo.mutate({ mutation: DeleteStoreProductDocument, variables: { id } }).subscribe({
+      next: () => {
+        this.toast.showSuccess('Producto eliminado');
+        this.listTick.update((n) => n + 1);
+      },
+      error: (e: Error) => this.toast.showError(e.message),
+    });
   }
 }

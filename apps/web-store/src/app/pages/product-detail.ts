@@ -1,20 +1,20 @@
-import { Toast } from '@/ui';
 import { SchoolContext } from '@/shared';
+import { Toast } from '@/ui';
 import { ChangeDetectionStrategy, Component, effect, inject, input, signal } from '@angular/core';
+import { rxResource } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { rxResource } from '@angular/core/rxjs-interop';
 import { Apollo } from 'apollo-angular';
 import { map } from 'rxjs';
-import { AddToStoreCartDocument, PublicStoreProductDocument } from '../graphql/generated/graphql';
 import { CartService } from '../cart.service';
+import { AddToStoreCartDocument, PublicStoreProductDocument } from '../graphql/generated/graphql';
 
 @Component({
   selector: 'app-product-detail',
   imports: [RouterLink, FormsModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <a routerLink=".." class="btn btn-ghost btn-sm gap-1 mb-4">
+    <a routerLink="../.." class="btn btn-ghost btn-sm gap-1 mb-4">
       <span class="material-symbols-outlined">arrow_back</span>
       Volver
     </a>
@@ -62,7 +62,7 @@ import { CartService } from '../cart.service';
           @if (!selectedVariant() || (selectedVariant()?.stock ?? 0) <= 0) {
             <div class="badge badge-error">Sin stock en la talla seleccionada</div>
           } @else {
-            <div class="flex flex-wrap gap-2">
+            <div class="flex flex-wrap gap-2 mt-4">
               <button type="button" class="btn btn-primary" (click)="add(1)">Agregar al carrito</button>
             </div>
           }
@@ -72,7 +72,7 @@ import { CartService } from '../cart.service';
   `,
 })
 export default class ProductDetail {
-  readonly id = input.required<string>({ alias: 'id' });
+  readonly id = input.required<string>();
   private readonly apollo = inject(Apollo);
   private readonly school = inject(SchoolContext);
   private readonly cart = inject(CartService);

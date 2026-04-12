@@ -276,55 +276,6 @@ import { ThemeService } from './theme.service';
         </div>
       }
 
-      <!-- Teacher Section -->
-      @if (auth.isTeacher() || auth.isAdmin()) {
-        <div>
-          <p class="px-3 py-1.5 text-[11px] uppercase font-semibold text-base-content/50 tracking-wider">Docente</p>
-          <ul class="space-y-0.5 mt-1">
-            <li>
-              <a
-                routerLink="teacher/attendance"
-                routerLinkActive="bg-primary/10 text-primary font-semibold"
-                class="flex items-center gap-3 px-3 py-2 text-base-content/80 rounded-lg transition-all duration-150 hover:bg-base-200 hover:text-base-content group"
-              >
-                <span class="material-symbols-outlined text-xl">playlist_add_check</span>
-                <span>Tomar asistencia</span>
-              </a>
-            </li>
-            <li>
-              <a
-                routerLink="teacher/gradebook"
-                routerLinkActive="bg-primary/10 text-primary font-semibold"
-                class="flex items-center gap-3 px-3 py-2 text-base-content/80 rounded-lg transition-all duration-150 hover:bg-base-200 hover:text-base-content group"
-              >
-                <span class="material-symbols-outlined text-xl">table</span>
-                <span>Libro de notas</span>
-              </a>
-            </li>
-            <li>
-              <a
-                routerLink="teacher/communication"
-                routerLinkActive="bg-primary/10 text-primary font-semibold"
-                class="flex items-center gap-3 px-3 py-2 text-base-content/80 rounded-lg transition-all duration-150 hover:bg-base-200 hover:text-base-content group"
-              >
-                <span class="material-symbols-outlined text-xl">forum</span>
-                <span>Comunicación</span>
-              </a>
-            </li>
-            <li>
-              <a
-                routerLink="teacher/reports"
-                routerLinkActive="bg-primary/10 text-primary font-semibold"
-                class="flex items-center gap-3 px-3 py-2 text-base-content/80 rounded-lg transition-all duration-150 hover:bg-base-200 hover:text-base-content group"
-              >
-                <span class="material-symbols-outlined text-xl">assessment</span>
-                <span>Reportes</span>
-              </a>
-            </li>
-          </ul>
-        </div>
-      }
-
       <!-- Parent Section -->
       @if (auth.isParent()) {
         <div>

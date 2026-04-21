@@ -1,26 +1,28 @@
-# Build stage — federation host (CSR) + API consumers resolve remotes via public federation manifest.
+# Build stage — federation SSR remote (web-dashboard).
+# Serves the remote bundle + SSR; the web-shell host loads this app via federation.manifest.json at runtime.
 FROM oven/bun:1 AS builder
 WORKDIR /app
 
-# Copy dependency files
 COPY package.json bun.lock ./
 COPY prisma ./prisma/
 
-# Install dependencies
 RUN bun install --frozen-lockfile
 
-# Generate Prisma client (needed for Angular build - some components import from @generated/prisma)
+# Needed for Angular build paths that import @generated/prisma
 RUN bunx prisma generate
 
-# Copy source code
 COPY . .
 
-# Build the shell (static); remotes are loaded at runtime from federation.manifest.json
-RUN bun nx build web-shell --configuration=production
+RUN bun nx build web-dashboard --configuration=production
 
-FROM nginx:alpine
-COPY apps/web-shell/nginx.conf /etc/nginx/conf.d/default.conf
-COPY --from=builder /app/dist/apps/web-shell/browser /usr/share/nginx/html
+# Runtime — Node for Angular SSR + native-federation-node (see apps/web-dashboard/src/server.ts)
+FROM node:20-slim
+WORKDIR /app
 
-EXPOSE 80
-CMD ["nginx", "-g", "daemon off;"]
+COPY --from=builder /app/dist/apps/web-dashboard/server ./server
+COPY --from=builder /app/dist/apps/web-dashboard/browser ./browser
+
+EXPOSE 4202
+ENV PORT=4202
+
+CMD ["node", "server/server.mjs"]

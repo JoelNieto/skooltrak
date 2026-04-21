@@ -39,7 +39,9 @@ CI:
 # Each Railway service should have Root Directory = / and RAILWAY_DOCKERFILE_PATH set:
 #   - dashboard-backend: apps/dashboard-backend/Dockerfile
 #   - admin-backend: apps/admin-backend/Dockerfile
+#   - web-shell: apps/web-shell/Dockerfile
 #   - web-dashboard: apps/web-dashboard/Dockerfile
+#   - web-store: apps/web-store/Dockerfile
 #   - web-admin: apps/web-admin/Dockerfile
 # Alternative: Connect the repo via Railway dashboard for automatic deploys on push
 deploy:

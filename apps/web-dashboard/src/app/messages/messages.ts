@@ -1,32 +1,32 @@
 import { Confirmation, EmptyState, Paginator, TimeAgoPipe, Toast } from '@/ui';
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
-import { rxResource } from '@angular/core/rxjs-interop';
+import { httpResource, HttpClient } from '@angular/common/http';
+import { ChangeDetectionStrategy, Component, computed, effect, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { Prisma } from '@generated/prisma';
+import { filter, switchMap } from 'rxjs';
+import { toFetchQueryRecord } from '../core/fetch-query-params';
 
-import { Apollo } from 'apollo-angular';
-import { catchError, filter, map, of, switchMap, tap } from 'rxjs';
-import {
-  MessagesFindManyMessagesDocument,
-  MessagesFindMyMessagesDocument,
-  MessagesRemoveMessageDocument,
-  MessagesRemoveMessageRecipientDocument,
-} from '../graphql/generated/graphql';
-type User = Prisma.UserGetPayload<undefined> & {
+type User = {
+  id: string;
   name: string;
   initials: string;
   color?: string;
 };
-type RecipientType = Prisma.MessageRecipientGetPayload<undefined> & {
+type RecipientType = {
+  id: string;
   user: User;
 };
-type MessageType = Prisma.MessageGetPayload<undefined> & {
+type MessageType = {
+  id: string;
+  subject: string;
+  createdAt: string;
   sender: User;
   recipients: RecipientType[];
 };
-type MessageRecipientType = Prisma.MessageRecipientGetPayload<undefined> & {
-  message: MessageType;
+type MessageRecipientType = {
+  id: string;
+  readAt?: string | null;
+  message?: MessageType;
 };
 
 @Component({
@@ -233,36 +233,21 @@ type MessageRecipientType = Prisma.MessageRecipientGetPayload<undefined> & {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class Messages {
-  #apollo = inject(Apollo);
+  #http = inject(HttpClient);
   #confirmation = inject(Confirmation);
   #toast = inject(Toast);
   #timeAgo = inject(TimeAgoPipe);
 
-  // Tab state
   activeTab = signal<'inbox' | 'outbox'>('inbox');
 
   setActiveTab(tab: 'inbox' | 'outbox') {
     this.activeTab.set(tab);
   }
 
-  // Inbox pagination
-  inboxPagination = signal({
-    take: 10,
-    skip: 0,
-    count: 0,
-  });
-
-  // Outbox pagination
-  outboxPagination = signal({
-    take: 10,
-    skip: 0,
-    count: 0,
-  });
-
-  // For backward compatibility
+  inboxPagination = signal({ take: 10, skip: 0, count: 0 });
+  outboxPagination = signal({ take: 10, skip: 0, count: 0 });
   pagination = this.inboxPagination;
 
-  // Inbox selection state
   readonly selectedStates = signal<Record<string, boolean>>({});
   public selectedIds = computed(() => {
     const states = this.selectedStates();
@@ -286,10 +271,7 @@ export default class Messages {
   });
 
   onCheckboxChange(itemId: string, isChecked: boolean): void {
-    this.selectedStates.update((states) => ({
-      ...states,
-      [itemId]: isChecked,
-    }));
+    this.selectedStates.update((states) => ({ ...states, [itemId]: isChecked }));
   }
 
   onSelectAllChange(isChecked: unknown): void {
@@ -302,7 +284,6 @@ export default class Messages {
     });
   }
 
-  // Outbox selection state
   readonly sentSelectedStates = signal<Record<string, boolean>>({});
 
   readonly allSentSelected = computed(() => {
@@ -318,10 +299,7 @@ export default class Messages {
   });
 
   onSentCheckboxChange(itemId: string, isChecked: boolean): void {
-    this.sentSelectedStates.update((states) => ({
-      ...states,
-      [itemId]: isChecked,
-    }));
+    this.sentSelectedStates.update((states) => ({ ...states, [itemId]: isChecked }));
   }
 
   onSelectAllSentChange(isChecked: unknown): void {
@@ -334,7 +312,6 @@ export default class Messages {
     });
   }
 
-  // Inbox pagination methods
   public inboxTake = computed(() => this.inboxPagination().take);
   public inboxSkip = computed(() => this.inboxPagination().skip);
 
@@ -346,13 +323,11 @@ export default class Messages {
     this.inboxPagination.update((prev) => ({ ...prev, take }));
   }
 
-  // For backward compatibility
   public take = this.inboxTake;
   public skip = this.inboxSkip;
   public updateSkip = this.updateInboxSkip.bind(this);
   public updateTake = this.updateInboxTake.bind(this);
 
-  // Outbox pagination methods
   public outboxTake = computed(() => this.outboxPagination().take);
   public outboxSkip = computed(() => this.outboxPagination().skip);
 
@@ -364,76 +339,50 @@ export default class Messages {
     this.outboxPagination.update((prev) => ({ ...prev, take }));
   }
 
-  // Inbox resource
-  public messagesResource = rxResource({
-    params: () => ({
-      take: this.inboxTake(),
-      skip: this.inboxSkip(),
+  public messagesResource = httpResource<MessageRecipientType[]>(
+    () => ({
+      url: '/api/v1/messages',
+      params: toFetchQueryRecord({
+        take: this.inboxTake(),
+        skip: this.inboxSkip(),
+      }),
     }),
-    stream: ({ params }) => {
-      return this.#apollo
-        .watchQuery<{
-          count: number;
-          findManyMessages: MessageRecipientType[];
-        }>({
-          query: MessagesFindManyMessagesDocument,
-          fetchPolicy: 'network-only',
-          variables: {
-            take: params.take,
-            skip: params.skip,
-          },
-        })
-        .valueChanges.pipe(
-          tap((result) => {
-            this.inboxPagination.update((prev) => ({
-              ...prev,
-              count: result.data?.count ?? 0,
-            }));
-          }),
-          map((result) => result.data?.findManyMessages ?? []),
-          catchError((err) => {
-            console.error('Error fetching inbox messages:', err);
-            return of([]);
-          }),
-        );
-    },
-  });
+    { defaultValue: [] },
+  );
 
-  // Outbox resource
-  public sentMessagesResource = rxResource({
-    params: () => ({
-      take: this.outboxTake(),
-      skip: this.outboxSkip(),
-      tab: this.activeTab(), // Trigger refetch when tab changes
+  #inboxCount = httpResource<number>(() => ({
+    url: '/api/v1/messages/count',
+  }));
+
+  public sentMessagesResource = httpResource<MessageType[]>(
+    () => ({
+      url: '/api/v1/messages/mine',
+      params: toFetchQueryRecord({
+        take: this.outboxTake(),
+        skip: this.outboxSkip(),
+      }),
     }),
-    stream: ({ params }) => {
-      return this.#apollo
-        .watchQuery<{
-          count: number;
-          findMyMessages: MessageType[];
-        }>({
-          query: MessagesFindMyMessagesDocument,
-          fetchPolicy: 'network-only',
-          variables: {
-            take: params.take,
-            skip: params.skip,
-          },
-        })
-        .valueChanges.pipe(
-          tap((result) => {
-            this.outboxPagination.update((prev) => ({
-              ...prev,
-              count: result.data?.count ?? 0,
-            }));
-          }),
-          map((result) => result.data?.findMyMessages ?? []),
-          catchError((err) => {
-            console.error('Error fetching sent messages:', err);
-            return of([]);
-          }),
-        );
-    },
-  });
+    { defaultValue: [] },
+  );
+
+  #sentCount = httpResource<number>(() => ({
+    url: '/api/v1/messages/sent-count',
+  }));
+
+  constructor() {
+    effect(() => {
+      const count = this.#inboxCount.value();
+      if (count != null) {
+        this.inboxPagination.update((prev) => ({ ...prev, count }));
+      }
+    });
+    effect(() => {
+      const count = this.#sentCount.value();
+      if (count != null) {
+        this.outboxPagination.update((prev) => ({ ...prev, count }));
+      }
+    });
+  }
 
   formatTimeAgo(date: Date | string | null | undefined): string {
     return date ? this.#timeAgo.transform(date) : '-';
@@ -457,14 +406,7 @@ export default class Messages {
       })
       .pipe(
         filter((result) => result),
-        switchMap(() =>
-          this.#apollo.mutate({
-            mutation: MessagesRemoveMessageRecipientDocument,
-            variables: {
-              id: message.id!,
-            },
-          }),
-        ),
+        switchMap(() => this.#http.delete(`/api/v1/messages/recipients/${message.id!}`)),
       )
       .subscribe({
         next: () => {
@@ -487,14 +429,7 @@ export default class Messages {
       })
       .pipe(
         filter((result) => result),
-        switchMap(() =>
-          this.#apollo.mutate({
-            mutation: MessagesRemoveMessageDocument,
-            variables: {
-              id: message.id!,
-            },
-          }),
-        ),
+        switchMap(() => this.#http.delete(`/api/v1/messages/${message.id!}`)),
       )
       .subscribe({
         next: () => {

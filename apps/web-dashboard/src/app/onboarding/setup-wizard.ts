@@ -1,8 +1,7 @@
 import { Toast } from '@/ui';
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
-import { Apollo } from 'apollo-angular';
-import { OnboardingCompleteOnboardingDocument } from '../graphql/generated/graphql';
+import { HttpClient } from '@angular/common/http';
 import Auth from '../auth/auth';
 
 // Step components
@@ -124,7 +123,7 @@ export type CreatedEntity = {
 })
 export default class SetupWizard {
   private router = inject(Router);
-  private apollo = inject(Apollo);
+  private http = inject(HttpClient);
   private toasts = inject(Toast);
   private auth = inject(Auth);
 
@@ -171,22 +170,17 @@ export default class SetupWizard {
   public completeOnboarding() {
     this.completing.set(true);
 
-    this.apollo
-      .mutate({
-        mutation: OnboardingCompleteOnboardingDocument,
-      })
-      .subscribe({
-        next: async () => {
-          // Reload user data so guards see onboardingStep: 'completed'
-          await this.auth.reloadUser();
-          this.completing.set(false);
-          this.toasts.showSuccess('Configuración completada exitosamente');
-          this.router.navigate(['/home']);
-        },
-        error: (err) => {
-          this.completing.set(false);
-          this.toasts.showError(err.message || 'Error al completar la configuración');
-        },
-      });
+    this.http.post('/api/v1/auth/complete-onboarding', {}).subscribe({
+      next: async () => {
+        await this.auth.reloadUser();
+        this.completing.set(false);
+        this.toasts.showSuccess('Configuración completada exitosamente');
+        this.router.navigate(['/home']);
+      },
+      error: (err) => {
+        this.completing.set(false);
+        this.toasts.showError(err.message || 'Error al completar la configuración');
+      },
+    });
   }
 }

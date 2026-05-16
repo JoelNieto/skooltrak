@@ -1,8 +1,7 @@
 import { Toast } from '@/ui';
+import { HttpClient } from '@angular/common/http';
 import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Apollo } from 'apollo-angular';
-import { OnboardingRequestJoinSchoolDocument } from '../graphql/generated/graphql';
 
 @Component({
   selector: 'app-confirm-request',
@@ -64,7 +63,7 @@ import { OnboardingRequestJoinSchoolDocument } from '../graphql/generated/graphq
 export default class ConfirmRequest implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
-  private apollo = inject(Apollo);
+  private http = inject(HttpClient);
   private toasts = inject(Toast);
 
   public schoolId = signal('');
@@ -92,20 +91,15 @@ export default class ConfirmRequest implements OnInit {
   sendRequest() {
     this.loading.set(true);
 
-    this.apollo
-      .mutate({
-        mutation: OnboardingRequestJoinSchoolDocument,
-        variables: {
-          input: {
-            schoolId: this.schoolId(),
-            requestedRole: this.role(),
-          },
-        },
+    this.http
+      .post<{ message?: string }>('/api/v1/auth/request-join-school', {
+        schoolId: this.schoolId(),
+        requestedRole: this.role(),
       })
       .subscribe({
         next: (res) => {
           this.loading.set(false);
-          this.toasts.showSuccess(res.data?.requestJoinSchool.message || 'Solicitud enviada');
+          this.toasts.showSuccess(res.message || 'Solicitud enviada');
           this.router.navigate(['/onboarding/waiting-approval']);
         },
         error: (err) => {

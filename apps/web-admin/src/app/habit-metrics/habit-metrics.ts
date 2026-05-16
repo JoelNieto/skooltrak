@@ -3,12 +3,10 @@ import { Menu, MenuContent, MenuItem, MenuTrigger } from '@angular/aria/menu';
 import { OverlayModule } from '@angular/cdk/overlay';
 import { DatePipe } from '@angular/common';
 import { Component, inject, viewChild } from '@angular/core';
-import { rxResource } from '@angular/core/rxjs-interop';
+import { httpResource } from '@angular/common/http';
 import { RouterLink } from '@angular/router';
 import { Prisma } from '@generated/prisma';
-import { Apollo, gql } from 'apollo-angular';
-import { WebAdminGetHabitMetricsDocument } from '../graphql/generated';
-import { map } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
 import HabitMetricsForm from './habit-metrics-form';
 
 @Component({
@@ -128,20 +126,16 @@ import HabitMetricsForm from './habit-metrics-form';
   `,
 })
 export default class HabitMetrics {
-  private apollo = inject(Apollo);
+  private http = inject(HttpClient);
   private toasts = inject(Toast);
   private confirmation = inject(Confirmation);
   private modal = inject(Modal);
   optionsMenu = viewChild<Menu<string>>('optionsMenu');
 
-  public metrics = rxResource({
-    stream: () =>
-      this.apollo
-        .watchQuery({
-          query: WebAdminGetHabitMetricsDocument,
-        })
-        .valueChanges.pipe(map((result) => result.data?.habitMetrics ?? [])),
-  });
+  public metrics = httpResource<Prisma.HabitMetricGetPayload<{ include: undefined }>[]>(
+    () => '/api/v1/habit-metrics',
+    { defaultValue: [] },
+  );
 
   editHabitMetric(metric?: Prisma.HabitMetricGetPayload<{ include: undefined }>) {
     this.modal
@@ -165,27 +159,16 @@ export default class HabitMetrics {
       .subscribe((confirmed: boolean) => {
         if (!confirmed) return;
 
-        this.apollo
-          .mutate({
-            mutation: gql`
-              mutation RemoveHabitMetric($id: String!) {
-                removeHabitMetric(id: $id) {
-                  id
-                }
-              }
-            `,
-            variables: { id },
-          })
-          .subscribe({
-            next: () => {
-              this.toasts.showSuccess('Criterio eliminado exitosamente');
-              this.metrics.reload();
-            },
-            error: (error) => {
-              this.toasts.showError('Error al eliminar el criterio');
-              console.error(error);
-            },
-          });
+        this.http.delete(`/api/v1/habit-metrics/${id}`).subscribe({
+          next: () => {
+            this.toasts.showSuccess('Criterio eliminado exitosamente');
+            this.metrics.reload();
+          },
+          error: (error) => {
+            this.toasts.showError('Error al eliminar el criterio');
+            console.error(error);
+          },
+        });
       });
   }
 }

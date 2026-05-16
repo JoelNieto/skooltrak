@@ -1,23 +1,57 @@
 import { Loader, Toast } from '@/ui';
 import { DatePipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, effect, inject, input, signal, viewChild } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  effect,
+  inject,
+  input,
+  signal,
+  viewChild,
+} from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { Apollo } from 'apollo-angular';
+import { readAccessTokenFromStorage } from '@/client-auth';
 import { map } from 'rxjs';
+import { io, Socket } from 'socket.io-client';
 import Auth from '../auth/auth';
-import {
-  ChatType,
-  ChatsChatDocument,
-  ChatsChatMessagesDocument,
-  ChatsChatQuery,
-  ChatsMarkChatReadDocument,
-  ChatsMessageReceivedDocument,
-  ChatsMessageReceivedSubscription,
-  ChatsSendMessageDocument,
-  ChatsUnreadCountDocument,
-} from '../graphql/generated/graphql';
+
+/** Aligns with dashboard REST + Socket.IO chat API. */
+type ChatParticipantUser = {
+  id?: string | null;
+  firstName?: string | null;
+  lastName?: string | null;
+  initials?: string | null;
+  color?: string | null;
+  role?: { name?: string | null } | null;
+  student?: { classGroup?: { name?: string | null } | null } | null;
+};
+
+type ChatDto = {
+  id: string;
+  name?: string | null;
+  type: string;
+  participants?: { user?: ChatParticipantUser | null }[];
+};
+
+type ChatMessageDto = {
+  id: string;
+  chatId: string;
+  senderId?: string | null;
+  content: string;
+  createdAt: string;
+  sender?: {
+    id?: string;
+    firstName?: string | null;
+    lastName?: string | null;
+    initials?: string | null;
+    color?: string | null;
+    role?: { name?: string | null };
+    student?: { classGroup?: { name?: string | null } };
+  } | null;
+};
 
 @Component({
   selector: 'app-chat-thread',
@@ -76,7 +110,7 @@ import {
               <lib-loader />
             } @else {
               <div class="w-full space-y-3">
-                @for (msg of messagesResource.value(); track msg.id) {
+                @for (msg of messages(); track msg.id) {
                   <div
                     class="chat space-y-2"
                     [class]="{ 'chat-start': !isOwnMessage(msg), 'chat-end': isOwnMessage(msg) }"
@@ -139,79 +173,74 @@ import {
 })
 export default class ChatThread {
   id = input.required<string>();
-  #apollo = inject(Apollo);
+  private http = inject(HttpClient);
   #auth = inject(Auth);
   #toast = inject(Toast);
 
   messageContent = signal('');
   sending = signal(false);
+  /** Live message list (REST load + socket appends). */
+  messages = signal<ChatMessageDto[]>([]);
   messagesContainer = viewChild<HTMLElement>('messagesContainer');
 
   chatResource = rxResource({
     params: () => ({ id: this.id() }),
     stream: ({ params }) =>
-      this.#apollo
-        .watchQuery({
-          query: ChatsChatDocument,
-          variables: { id: params.id },
-        })
-        .valueChanges.pipe(map((r) => r.data?.chat ?? null)),
+      this.http.get<ChatDto | null>(`/api/v1/chats/${params.id}`).pipe(map((c) => c ?? null)),
   });
 
   messagesResource = rxResource({
     params: () => ({ chatId: this.id() }),
     stream: ({ params }) =>
-      this.#apollo
-        .watchQuery({
-          query: ChatsChatMessagesDocument,
-          variables: { input: { chatId: params.chatId, limit: 50 } },
+      this.http
+        .get<ChatMessageDto[]>(`/api/v1/chats/messages`, {
+          params: { chatId: params.chatId, limit: '50' },
         })
-        .valueChanges.pipe(map((r) => r.data?.chatMessages ?? [])),
+        .pipe(
+          map((list) => {
+            this.messages.set(list ?? []);
+            return list ?? [];
+          }),
+        ),
   });
 
   constructor() {
     effect(() => {
       const chat = this.chatResource.value();
       if (chat?.id) {
-        this.#apollo
-          .mutate({
-            mutation: ChatsMarkChatReadDocument,
-            variables: { chatId: chat.id },
-            refetchQueries: [{ query: ChatsUnreadCountDocument }],
-          })
-          .subscribe();
+        this.http.patch(`/api/v1/chats/${chat.id}/read`, {}).subscribe({
+          next: () => this.http.get<number>('/api/v1/chats/unread-count').subscribe(),
+          error: () => {},
+        });
       }
     });
 
-    // Subscribe to new messages for real-time updates
     effect((onCleanup) => {
       const chatId = this.id();
       if (!chatId) return;
 
-      const sub = this.#apollo
-        .subscribe<ChatsMessageReceivedSubscription>({
-          query: ChatsMessageReceivedDocument,
-          variables: { chatId },
-        })
-        .subscribe((result) => {
-          const message = result.data?.messageReceived;
-          if (!message || message.chatId !== chatId) return;
+      const socket: Socket = io(typeof location !== 'undefined' ? `${location.protocol}//${location.host}` : '', {
+        path: '/socket.io',
+        transports: ['websocket', 'polling'],
+        extraHeaders: readAccessTokenFromStorage()
+          ? { Authorization: `Bearer ${readAccessTokenFromStorage()}` }
+          : {},
+      });
 
-          const cached = this.#apollo.client.readQuery({
-            query: ChatsChatMessagesDocument,
-            variables: { input: { chatId, limit: 50 } },
-          });
-          const messages = cached?.chatMessages ?? [];
-          if (messages.some((m) => m.id === message.id)) return;
-
-          this.#apollo.client.writeQuery({
-            query: ChatsChatMessagesDocument,
-            variables: { input: { chatId, limit: 50 } },
-            data: { chatMessages: [...messages, message] },
-          });
+      const handler = (payload: { chatId: string; message: ChatMessageDto }) => {
+        if (payload.chatId !== chatId || !payload.message) return;
+        this.messages.update((prev) => {
+          if (prev.some((m) => m.id === payload.message.id)) return prev;
+          return [...prev, payload.message];
         });
+      };
 
-      onCleanup(() => sub.unsubscribe());
+      socket.on('messageReceived', handler);
+
+      onCleanup(() => {
+        socket.off('messageReceived', handler);
+        socket.disconnect();
+      });
     });
   }
 
@@ -219,17 +248,17 @@ export default class ChatThread {
     const chat = this.chatResource.value();
     if (!chat) return 'Chat';
     if (chat.name) return chat.name;
-    const other = this.otherParticipant(chat as ChatsChatQuery['chat']);
+    const other = this.otherParticipant(chat);
     return other ? `${other.firstName} ${other.lastName}` : 'Chat';
   }
 
-  otherParticipant(chat: ChatsChatQuery['chat']) {
+  otherParticipant(chat: ChatDto | null) {
     if (!chat) return null;
     const me = this.#auth.user()?.id;
     return chat.participants?.find((p) => p.user?.id !== me)?.user ?? chat.participants?.[0]?.user;
   }
 
-  participantsCount(chat: ChatsChatQuery['chat']) {
+  participantsCount(chat: ChatDto | null) {
     return chat?.participants?.length ?? 0;
   }
 
@@ -250,24 +279,24 @@ export default class ChatThread {
     return labels[roleName] ?? roleName;
   }
 
-  isContextualChat(type: ChatType) {
-    return type === ChatType.Course || type === ChatType.Assignment || type === ChatType.ClassGroup;
+  isContextualChat(type: string) {
+    return type === 'COURSE' || type === 'ASSIGNMENT' || type === 'CLASS_GROUP';
   }
 
-  contextualChatIcon(type: ChatType) {
+  contextualChatIcon(type: string) {
     const icons: Record<string, string> = {
-      [ChatType.Course]: 'school',
-      [ChatType.Assignment]: 'assignment',
-      [ChatType.ClassGroup]: 'groups',
+      COURSE: 'school',
+      ASSIGNMENT: 'assignment',
+      CLASS_GROUP: 'groups',
     };
     return icons[type] ?? 'chat';
   }
 
-  contextualChatColor(type: ChatType) {
+  contextualChatColor(type: string) {
     const colors: Record<string, string> = {
-      [ChatType.Course]: 'oklch(var(--p))',
-      [ChatType.Assignment]: 'oklch(var(--s))',
-      [ChatType.ClassGroup]: 'oklch(var(--a))',
+      COURSE: 'oklch(var(--p))',
+      ASSIGNMENT: 'oklch(var(--s))',
+      CLASS_GROUP: 'oklch(var(--a))',
     };
     return colors[type] ?? 'oklch(var(--p))';
   }
@@ -279,13 +308,10 @@ export default class ChatThread {
 
     this.sending.set(true);
     try {
-      await this.#apollo
-        .mutate({
-          mutation: ChatsSendMessageDocument,
-          variables: { input: { chatId: this.id(), content } },
-          refetchQueries: [
-            { query: ChatsChatMessagesDocument, variables: { input: { chatId: this.id(), limit: 50 } } },
-          ],
+      await this.http
+        .post<ChatMessageDto>('/api/v1/chats/messages', {
+          chatId: this.id(),
+          content,
         })
         .toPromise();
       this.messageContent.set('');

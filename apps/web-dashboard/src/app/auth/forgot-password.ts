@@ -1,10 +1,16 @@
 import { Loader } from '@/ui';
+import { HttpClient } from '@angular/common/http';
 import { Component, inject, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { Apollo } from 'apollo-angular';
-import { ForgotPasswordLookupAccountForPasswordResetDocument } from '../graphql/generated/graphql';
 import Auth from './auth';
+
+type LookupResult = {
+  found: boolean;
+  roleLabel?: string | null;
+  displayName?: string | null;
+  organizationName?: string | null;
+};
 
 @Component({
   selector: 'app-forgot-password',
@@ -160,7 +166,7 @@ import Auth from './auth';
 })
 export default class ForgotPasswordComponent {
   private auth = inject(Auth);
-  private apollo = inject(Apollo);
+  private http = inject(HttpClient);
 
   form = new FormGroup({
     email: new FormControl('', [Validators.required, Validators.email]),
@@ -183,32 +189,25 @@ export default class ForgotPasswordComponent {
     if (!email) return;
     this.searchedEmail.set(email);
 
-    this.apollo
-      .query({
-        query: ForgotPasswordLookupAccountForPasswordResetDocument,
-        variables: { email },
-        fetchPolicy: 'network-only',
-      })
-      .subscribe({
-        next: (res) => {
-          this.loading.set(false);
-          const data = res.data?.lookupAccountForPasswordReset;
-          if (data?.found && data.roleLabel && data.displayName) {
-            this.accountInfo.set({
-              roleLabel: data.roleLabel,
-              displayName: data.displayName,
-              organizationName: data.organizationName ?? undefined,
-            });
-            this.step.set('confirm');
-          } else {
-            this.step.set('not-found');
-          }
-        },
-        error: () => {
-          this.loading.set(false);
+    this.http.post<LookupResult>('/api/v1/auth/lookup-account-for-password-reset', { email }).subscribe({
+      next: (data) => {
+        this.loading.set(false);
+        if (data?.found && data.roleLabel && data.displayName) {
+          this.accountInfo.set({
+            roleLabel: data.roleLabel,
+            displayName: data.displayName,
+            organizationName: data.organizationName ?? undefined,
+          });
+          this.step.set('confirm');
+        } else {
           this.step.set('not-found');
-        },
-      });
+        }
+      },
+      error: () => {
+        this.loading.set(false);
+        this.step.set('not-found');
+      },
+    });
   }
 
   async confirmAndSendReset() {

@@ -4,13 +4,8 @@ import { afterRenderEffect, ChangeDetectionStrategy, Component, computed, inject
 import { rxResource } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
 import { Prisma } from '@generated/prisma';
-import { Apollo } from 'apollo-angular';
-import {
-  GradesByCourseIdDocument,
-  PeriodsByYearDocument,
-  StudentsByCourseIdDocument,
-} from '../graphql/generated/graphql';
 import { map, of } from 'rxjs';
 import Store from '../core/store';
 import GradesForm from './grades-form';
@@ -131,7 +126,7 @@ export default class CourseGrades {
   public courseId = input.required<string>();
   public metric = input.required<DecimalToNumber<Prisma.GradeMetricGetPayload<undefined>>>();
   #store = inject(Store);
-  #apollo = inject(Apollo);
+  #http = inject(HttpClient);
   #modal = inject(Modal);
 
   public periodId = signal<string>('');
@@ -145,15 +140,11 @@ export default class CourseGrades {
       if (!year) {
         return of([]);
       }
-      return this.#apollo
-        .watchQuery({
-          query: PeriodsByYearDocument,
-          variables: {
-            year: year,
-          },
-          fetchPolicy: 'cache-first',
+      return this.#http
+        .get<Array<{ id: string; name: string; startDate: string; endDate: string }>>(`/api/v1/periods/by-year`, {
+          params: { year: String(year) },
         })
-        .valueChanges.pipe(map((result) => result.data?.periodsByYear ?? []));
+        .pipe(map((rows) => rows ?? []));
     },
   });
 
@@ -170,23 +161,13 @@ export default class CourseGrades {
   public students = rxResource({
     params: () => ({
       courseId: this.courseId(),
-      periodId: this.periodId(),
     }),
     stream: ({ params }) => {
-      const { courseId, periodId } = params;
+      const { courseId } = params;
       if (!courseId) {
         return of([]);
       }
-      return this.#apollo
-        .watchQuery({
-          query: StudentsByCourseIdDocument,
-          variables: {
-            courseId,
-            periodId,
-          },
-          fetchPolicy: 'cache-first',
-        })
-        .valueChanges.pipe(map((result) => result.data?.studentsByCourseId ?? []));
+      return this.#http.get<StudentType[]>(`/api/v1/students/by-course/${courseId}`);
     },
   });
 
@@ -200,15 +181,18 @@ export default class CourseGrades {
       if (!courseId || !periodId) {
         return of([]);
       }
-      return this.#apollo
-        .watchQuery({
-          query: GradesByCourseIdDocument,
-          variables: {
-            courseId,
-            periodId,
-          },
-        })
-        .valueChanges.pipe(map((result) => result.data?.gradesByCourseId ?? []));
+      return this.#http.get<
+        Array<{
+          id: string;
+          title: string;
+          published: boolean;
+          studentGrades?: Array<{
+            id: string;
+            score?: number | null;
+            student?: { id: string; classGroup?: { id: string; name: string } | null };
+          }>;
+        }>
+      >(`/api/v1/grades/by-course/${courseId}`, { params: { periodId } });
     },
   });
 
@@ -219,16 +203,16 @@ export default class CourseGrades {
       return [];
     }
     return students.map((student) => {
+      const gradeCells = grades.map((grade) => ({
+        ...grade,
+        item: grade.studentGrades?.find((studentGrade) => studentGrade.student?.id === student.id),
+      }));
+      const scores = gradeCells.map((g) => g.item?.score).filter((s): s is number => s != null);
+      const averageScore = scores.length ? scores.reduce((a, b) => a + b, 0) / scores.length : 0;
       return {
         ...student,
-        grades: grades.map((grade) => {
-          return {
-            ...grade,
-            item: grade.studentGrades?.find((studentGrade) => {
-              return studentGrade.student?.id === student.id;
-            }),
-          };
-        }),
+        averageScore,
+        grades: gradeCells,
       };
     });
   });

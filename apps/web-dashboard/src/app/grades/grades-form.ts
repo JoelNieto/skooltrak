@@ -1,14 +1,11 @@
 import { markGroupDirty, TextEditor, Toast } from '@/ui';
 import { Component, inject, input, output } from '@angular/core';
-import { rxResource } from '@angular/core/rxjs-interop';
+import { httpResource, HttpClient } from '@angular/common/http';
 import {
   NonNullableFormBuilder,
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
-import { Apollo } from 'apollo-angular';
-import { CreateGradeDocument, GradeBucketsByCourseIdDocument } from '../graphql/generated/graphql';
-import { map, of } from 'rxjs';
 @Component({
   selector: 'app-grades-form',
   imports: [ReactiveFormsModule, TextEditor],
@@ -63,29 +60,17 @@ import { map, of } from 'rxjs';
 export default class GradesForm {
   public closeModal = output<boolean>();
   public data = input.required<{ courseId: string; periodId: string }>();
-  #apollo = inject(Apollo);
+  #http = inject(HttpClient);
   #toast = inject(Toast);
 
   #fb = inject(NonNullableFormBuilder);
-  public bucketsResource = rxResource({
-    params: () => ({
-      courseId: this.data().courseId,
-    }),
-    stream: ({ params }) => {
-      const { courseId } = params;
-      if (!courseId) {
-        return of(null);
-      }
-      return this.#apollo
-        .query({
-          query: GradeBucketsByCourseIdDocument,
-          variables: {
-            courseId,
-          },
-        })
-        .pipe(map((result) => result.data?.gradeBucketsByCourseId ?? []));
+  public bucketsResource = httpResource<Array<{ id: string; name: string }>>(
+    () => {
+      const courseId = this.data().courseId;
+      return courseId ? `/api/v1/grade-buckets/by-course/${courseId}` : undefined;
     },
-  });
+    { defaultValue: [] },
+  );
 
   public form = this.#fb.group({
     title: ['', [Validators.required]],
@@ -102,16 +87,11 @@ export default class GradesForm {
       return;
     }
 
-    this.#apollo
-      .mutate({
-        mutation: CreateGradeDocument,
-        variables: {
-          createGradeInput: {
-            ...this.form.getRawValue(),
-            courseId: this.data().courseId,
-            periodId: this.data().periodId,
-          },
-        },
+    this.#http
+      .post('/api/v1/grades', {
+        ...this.form.getRawValue(),
+        courseId: this.data().courseId,
+        periodId: this.data().periodId,
       })
       .subscribe({
         next: () => {

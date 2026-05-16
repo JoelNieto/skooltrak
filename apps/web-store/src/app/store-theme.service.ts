@@ -1,9 +1,8 @@
 import { isPlatformBrowser } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
 import { inject, Injectable, PLATFORM_ID, signal } from '@angular/core';
-import { Apollo } from 'apollo-angular';
 import { firstValueFrom } from 'rxjs';
 import { readAccessTokenFromStorage } from '@/client-auth';
-import { UpdateThemePreferenceDocument } from './graphql/generated/graphql';
 
 export type StoreThemePreference = 'light' | 'dark' | 'system';
 
@@ -14,7 +13,7 @@ const STORAGE_KEY = 'skooltrak-theme-preference';
 })
 export class StoreThemeService {
   private readonly platformId = inject(PLATFORM_ID);
-  private readonly apollo = inject(Apollo);
+  private readonly http = inject(HttpClient);
 
   readonly theme = signal<StoreThemePreference>('system');
 
@@ -81,10 +80,7 @@ export class StoreThemeService {
     if (readAccessTokenFromStorage()) {
       try {
         await firstValueFrom(
-          this.apollo.mutate({
-            mutation: UpdateThemePreferenceDocument,
-            variables: { themePreference: value },
-          }),
+          this.http.patch('/api/v1/auth/me/theme', { themePreference: value }),
         );
       } catch {
         // Theme still applied locally

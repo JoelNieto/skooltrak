@@ -14,22 +14,28 @@ import { GradeMetricsModule } from './grade-metrics/grade-metrics.module';
 import { PeriodsModule } from './periods/periods.module';
 import { HabitMetricsModule } from './habit-metrics/habit-metrics.module';
 
+const openApiExport = process.env['OPENAPI_EXPORT'] === 'true';
+
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     PrismaModule,
-    GraphQLModule.forRootAsync<ApolloDriverConfig>({
-      imports: [ConfigModule],
-      useFactory: async () => ({
-        autoSchemaFile: join(process.cwd(), 'schema.gql'),
-        sortSchema: true,
-        playground: false,
-        plugins: [ApolloServerPluginLandingPageLocalDefault()],
-        path: '/api/graphql',
-        context: ({ req, res }) => ({ req, res }),
-      }),
-      driver: ApolloDriver,
-    }),
+    ...(openApiExport
+      ? []
+      : [
+          GraphQLModule.forRootAsync<ApolloDriverConfig>({
+            imports: [ConfigModule],
+            useFactory: async () => ({
+              autoSchemaFile: join(process.cwd(), 'schema.gql'),
+              sortSchema: true,
+              playground: false,
+              plugins: [ApolloServerPluginLandingPageLocalDefault()],
+              path: '/api/graphql',
+              context: ({ req, res }) => ({ req, res }),
+            }),
+            driver: ApolloDriver,
+          }),
+        ]),
     SchoolsModule,
     SubjectsModule,
     AuthModule,

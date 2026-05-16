@@ -2,11 +2,8 @@ import { markGroupDirty, Toast } from '@/ui';
 import { Component, inject, input, OnInit, output } from '@angular/core';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Prisma } from '@generated/prisma';
-import { Apollo } from 'apollo-angular';
-import {
-  WebAdminCreatePeriodDocument,
-  WebAdminUpdatePeriodDocument,
-} from '../graphql/generated';
+import { HttpClient } from '@angular/common/http';
+import { firstValueFrom } from 'rxjs';
 import { format } from 'date-fns';
 
 @Component({
@@ -48,7 +45,7 @@ export default class PeriodsForm implements OnInit {
   }>();
   private fb = inject(NonNullableFormBuilder);
   private toast = inject(Toast);
-  private apollo = inject(Apollo);
+  private http = inject(HttpClient);
 
   public form = this.fb.group({
     name: ['', [Validators.required]],
@@ -76,46 +73,28 @@ export default class PeriodsForm implements OnInit {
       return;
     }
 
+    const body = this.form.getRawValue();
     if (this.data()?.period) {
-      this.apollo
-        .mutate({
-          mutation: WebAdminUpdatePeriodDocument,
-          variables: {
-            updatePeriodInput: {
-              ...this.form.getRawValue(),
-              id: this.data()!.period!.id,
-            },
-          },
+      void firstValueFrom(
+        this.http.patch('/api/v1/periods', { ...body, id: this.data()!.period!.id }),
+      )
+        .then(() => {
+          this.toast.showSuccess('Periodo actualizado correctamente');
+          this.closeModal.emit(true);
         })
-        .subscribe({
-          next: () => {
-            this.toast.showSuccess('Periodo actualizado correctamente');
-            this.closeModal.emit(true);
-          },
-          error: (error) => {
-            this.toast.showError('Error al actualizar el periodo');
-            console.error(error);
-          },
+        .catch((error) => {
+          this.toast.showError('Error al actualizar el periodo');
+          console.error(error);
         });
     } else {
-      this.apollo
-        .mutate({
-          mutation: WebAdminCreatePeriodDocument,
-          variables: {
-            createPeriodInput: {
-              ...this.form.getRawValue(),
-            },
-          },
+      void firstValueFrom(this.http.post('/api/v1/periods', body))
+        .then(() => {
+          this.toast.showSuccess('Periodo creado correctamente');
+          this.closeModal.emit(true);
         })
-        .subscribe({
-          next: () => {
-            this.toast.showSuccess('Periodo creado correctamente');
-            this.closeModal.emit(true);
-          },
-          error: (error) => {
-            this.toast.showError('Error al crear el periodo');
-            console.error(error);
-          },
+        .catch((error) => {
+          this.toast.showError('Error al crear el periodo');
+          console.error(error);
         });
     }
   }

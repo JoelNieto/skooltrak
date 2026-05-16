@@ -3,11 +3,10 @@ import { DatePipe, DecimalPipe, NgClass } from '@angular/common';
 import { afterRenderEffect, Component, computed, inject, input, signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
+import { HttpClient } from '@angular/common/http';
 import { Prisma } from '@generated/prisma';
-import { Apollo } from 'apollo-angular';
 import { map, of } from 'rxjs';
 import Store from '../core/store';
-import { PeriodsByYearDocument, StudentGradesByCourseIdDocument } from '../graphql/generated/graphql';
 
 @Component({
   selector: 'app-course-student-grades',
@@ -102,7 +101,7 @@ export default class CourseStudentGrades {
   public courseId = input.required<string>();
   public metric = input.required<DecimalToNumber<Prisma.GradeMetricGetPayload<undefined>>>();
   #store = inject(Store);
-  #apollo = inject(Apollo);
+  #http = inject(HttpClient);
   public periodId = signal<string>('');
 
   public periodsResource = rxResource({
@@ -114,15 +113,11 @@ export default class CourseStudentGrades {
       if (!year) {
         return of([]);
       }
-      return this.#apollo
-        .query({
-          query: PeriodsByYearDocument,
-          variables: {
-            year,
-          },
-          fetchPolicy: 'cache-first',
+      return this.#http
+        .get<Array<{ id: string; name: string; startDate: string; endDate: string }>>(`/api/v1/periods/by-year`, {
+          params: { year: String(year) },
         })
-        .pipe(map((result) => result.data?.periodsByYear ?? []));
+        .pipe(map((result) => result ?? []));
     },
   });
 
@@ -152,20 +147,25 @@ export default class CourseStudentGrades {
           studentGradesByCourseId: [],
         });
       }
-      return this.#apollo
-        .watchQuery({
-          query: StudentGradesByCourseIdDocument,
-          variables: {
-            courseId,
-            periodId,
-            studentId,
-          },
+      return this.#http
+        .get<unknown[]>(`/api/v1/student-grades/by-course/${courseId}`, {
+          params: { periodId, studentId },
         })
-        .valueChanges.pipe(
-          map((result) => ({
-            average: result.data?.average ?? 0,
-            studentGradesByCourseId: result.data?.studentGradesByCourseId ?? [],
-          })),
+        .pipe(
+          map((rows) => {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const studentGradesByCourseId = (rows ?? []) as any[];
+            return {
+              average:
+                studentGradesByCourseId.length > 0
+                  ? studentGradesByCourseId.reduce(
+                      (acc: number, item: { score?: unknown }) => acc + (Number(item?.score) || 0),
+                      0,
+                    ) / studentGradesByCourseId.length
+                  : 0,
+              studentGradesByCourseId,
+            };
+          }),
         );
     },
   });

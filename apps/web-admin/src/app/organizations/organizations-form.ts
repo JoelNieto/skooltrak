@@ -13,11 +13,8 @@ import {
   Validators,
 } from '@angular/forms';
 import { Prisma } from '@generated/prisma';
-import { Apollo } from 'apollo-angular';
-import {
-  WebAdminCreateOrganizationDocument,
-  WebAdminUpdateOrganizationDocument,
-} from '../graphql/generated';
+import { HttpClient } from '@angular/common/http';
+import { firstValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-organizations-form',
@@ -55,7 +52,7 @@ import {
 export class OrganizationsForm implements OnInit {
   private readonly fb = inject(NonNullableFormBuilder);
   public data = input<{ organization?: Prisma.OrganizationCreateInput }>();
-  private apollo = inject(Apollo);
+  private http = inject(HttpClient);
   public closeModal = output<void>();
   private toasts = inject(Toast);
   public form = this.fb.group({
@@ -77,45 +74,29 @@ export class OrganizationsForm implements OnInit {
 
     const req = this.form.getRawValue();
     if (this.data()?.organization) {
-      this.apollo
-        .mutate({
-          mutation: WebAdminUpdateOrganizationDocument,
-          variables: {
-            updateOrganizationInput: {
-              ...req,
-              id: this.data()!.organization!.id!,
-            },
-          },
+      void firstValueFrom(
+        this.http.patch('/api/v1/organizations', {
+          ...req,
+          id: this.data()!.organization!.id!,
+        }),
+      )
+        .then(() => {
+          this.toasts.showSuccess('Organización actualizada exitosamente');
+          this.closeModal.emit();
         })
-        .subscribe({
-          next: () => {
-            this.toasts.showSuccess('Organización actualizada exitosamente');
-            this.closeModal.emit();
-          },
-          error: (error) => {
-            this.toasts.showError('Error al actualizar la organización');
-            console.error(error);
-          },
+        .catch((error) => {
+          this.toasts.showError('Error al actualizar la organización');
+          console.error(error);
         });
     } else {
-      this.apollo
-        .mutate({
-          mutation: WebAdminCreateOrganizationDocument,
-          variables: {
-            createOrganizationInput: {
-              ...req,
-            },
-          },
+      void firstValueFrom(this.http.post('/api/v1/organizations', req))
+        .then(() => {
+          this.toasts.showSuccess('Organización creada exitosamente');
+          this.closeModal.emit();
         })
-        .subscribe({
-          next: () => {
-            this.toasts.showSuccess('Organización creada exitosamente');
-            this.closeModal.emit();
-          },
-          error: (error) => {
-            this.toasts.showError('Error al crear la organización');
-            console.error(error);
-          },
+        .catch((error) => {
+          this.toasts.showError('Error al crear la organización');
+          console.error(error);
         });
     }
   }

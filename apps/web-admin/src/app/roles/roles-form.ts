@@ -1,6 +1,6 @@
 import { Toast } from '@/ui';
 import { Component, inject, input, model, OnInit, output } from '@angular/core';
-import { rxResource } from '@angular/core/rxjs-interop';
+import { httpResource } from '@angular/common/http';
 import {
   FormsModule,
   NonNullableFormBuilder,
@@ -8,14 +8,8 @@ import {
   Validators,
 } from '@angular/forms';
 import { Prisma } from '@generated/prisma';
-import { Apollo } from 'apollo-angular';
-import {
-  WebAdminCreateRoleDocument,
-  WebAdminGetOrganizationsForRoleDocument,
-  WebAdminGetPermissionsForRoleDocument,
-  WebAdminUpdateRoleDocument,
-} from '../graphql/generated';
-import { map } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
+import { firstValueFrom } from 'rxjs';
 @Component({
   selector: 'app-roles-form',
   imports: [ReactiveFormsModule, FormsModule],
@@ -72,7 +66,7 @@ import { map } from 'rxjs';
   `,
 })
 export class RolesForm implements OnInit {
-  private apollo = inject(Apollo);
+  private http = inject(HttpClient);
   private fb = inject(NonNullableFormBuilder);
   private toast = inject(Toast);
   public closeModal = output<void>();
@@ -81,25 +75,18 @@ export class RolesForm implements OnInit {
       include: { organization: true; permissions: true };
     }>;
   }>();
-  public permissions = rxResource({
-    stream: () =>
-      this.apollo
-        .watchQuery({
-          fetchPolicy: 'cache-and-network',
-          query: WebAdminGetPermissionsForRoleDocument,
-        })
-        .valueChanges.pipe(map((result) => result.data?.permissions ?? [])),
-  });
+  public permissions = httpResource<Array<{ id: string; descriptiveId: string; description: string }>>(
+    () => ({
+      url: '/api/v1/permissions',
+      params: { take: '500' },
+    }),
+    { defaultValue: [] },
+  );
 
-  public organizations = rxResource({
-    stream: () =>
-      this.apollo
-        .watchQuery({
-          fetchPolicy: 'cache-and-network',
-          query: WebAdminGetOrganizationsForRoleDocument,
-        })
-        .valueChanges.pipe(map((result) => result.data?.organizations ?? [])),
-  });
+  public organizations = httpResource<Array<{ id: string; name: string }>>(
+    () => '/api/v1/organizations',
+    { defaultValue: [] },
+  );
 
   public selectedIds = model<string[]>([]);
 
@@ -135,43 +122,26 @@ export class RolesForm implements OnInit {
     const req = this.form.getRawValue();
 
     if (this.data()?.role) {
-      this.apollo
-        .mutate({
-          mutation: WebAdminUpdateRoleDocument,
-          variables: {
-            updateRoleInput: {
-              ...req,
-              id: this.data()!.role!.id,
-            },
-          },
+      void firstValueFrom(
+        this.http.patch('/api/v1/roles', { ...req, id: this.data()!.role!.id }),
+      )
+        .then(() => {
+          this.toast.showSuccess('Rol actualizado exitosamente');
+          this.closeModal.emit();
         })
-        .subscribe({
-          next: () => {
-            this.toast.showSuccess('Rol actualizado exitosamente');
-            this.closeModal.emit();
-          },
-          error: (error) => {
-            this.toast.showError('Error al actualizar el rol');
-            console.error(error);
-          },
+        .catch((error) => {
+          this.toast.showError('Error al actualizar el rol');
+          console.error(error);
         });
     } else {
-      this.apollo
-        .mutate({
-          mutation: WebAdminCreateRoleDocument,
-          variables: {
-            createRoleInput: req,
-          },
+      void firstValueFrom(this.http.post('/api/v1/roles', req))
+        .then(() => {
+          this.toast.showSuccess('Rol creado exitosamente');
+          this.closeModal.emit();
         })
-        .subscribe({
-          next: () => {
-            this.toast.showSuccess('Rol creado exitosamente');
-            this.closeModal.emit();
-          },
-          error: (error) => {
-            this.toast.showError('Error al crear el rol');
-            console.error(error);
-          },
+        .catch((error) => {
+          this.toast.showError('Error al crear el rol');
+          console.error(error);
         });
     }
   }

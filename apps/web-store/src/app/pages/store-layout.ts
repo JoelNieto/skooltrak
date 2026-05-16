@@ -9,10 +9,9 @@ import {
 } from '@angular/core';
 import { rxResource, takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, RouterLink, RouterOutlet } from '@angular/router';
-import { Apollo } from 'apollo-angular';
-import { filter, map, switchMap, distinctUntilChanged } from 'rxjs';
+import { catchError, filter, map, of, switchMap, distinctUntilChanged } from 'rxjs';
 import { CartService } from '../cart.service';
-import { PublicSchoolBySlugDocument, StoreMeDocument } from '../graphql/generated/graphql';
+import { StoreApiService } from '../store-api.service';
 import StoreThemeToggle from '../store-theme-toggle';
 import { StoreThemeService } from '../store-theme.service';
 
@@ -72,7 +71,7 @@ import { StoreThemeService } from '../store-theme.service';
   `,
 })
 export default class StoreLayout {
-  private readonly apollo = inject(Apollo);
+  private readonly api = inject(StoreApiService);
   private readonly route = inject(ActivatedRoute);
   private readonly schoolContext = inject(SchoolContext);
   private readonly destroyRef = inject(DestroyRef);
@@ -92,15 +91,7 @@ export default class StoreLayout {
         map((pm) => pm.get('schoolSlug')),
         filter((s): s is string => !!s),
         distinctUntilChanged(),
-        switchMap((slug) =>
-          this.apollo
-            .watchQuery({
-              query: PublicSchoolBySlugDocument,
-              variables: { slug },
-              fetchPolicy: 'network-only',
-            })
-            .valueChanges.pipe(map((r) => r.data?.publicSchoolBySlug)),
-        ),
+        switchMap((slug) => this.api.publicSchoolBySlug(slug)),
         takeUntilDestroyed(this.destroyRef),
       )
       .subscribe((school) => {
@@ -125,16 +116,14 @@ export default class StoreLayout {
   protected readonly schoolLogoUrl = signal<string | null>(null);
 
   protected readonly me = rxResource({
-    stream: () =>
-      this.apollo
-        .watchQuery({ query: StoreMeDocument, fetchPolicy: 'cache-first' })
-        .valueChanges.pipe(map((r) => r.data?.me)),
+    stream: () => this.api.getMe().pipe(catchError(() => of(null))),
   });
 
   protected canManage = () => {
     const me = this.me.value();
     const roleName = me?.role?.name;
-    const perms = me?.role?.permissions?.map((p) => p.descriptiveId) ?? [];
+    const perms =
+      me?.role?.permissions?.map((p: { descriptiveId: string }) => p.descriptiveId) ?? [];
     return (
       perms.includes('MANAGE_STORE') ||
       roleName === 'ADMIN' ||

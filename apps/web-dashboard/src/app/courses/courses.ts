@@ -1,13 +1,17 @@
 import { debounceSignal, EmptyState, Loader, Pagination, Paginator } from '@/ui';
-import { ChangeDetectionStrategy, Component, inject, Signal, signal } from '@angular/core';
-import { rxResource } from '@angular/core/rxjs-interop';
+import { httpResource } from '@angular/common/http';
+import { ChangeDetectionStrategy, Component, computed, effect, inject, Signal, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-
-import { Apollo } from 'apollo-angular';
-import { map, of, tap } from 'rxjs';
 import Store from '../core/store';
-import { GetCoursesDocument } from '../graphql/generated/graphql';
+import { toFetchQueryRecord } from '../core/fetch-query-params';
+
+type CourseRow = {
+  id: string;
+  subject?: { name?: string };
+  studyPlan?: { name?: string };
+  teacher?: { firstName?: string; fatherName?: string; name?: string };
+};
 
 @Component({
   selector: 'app-courses',
@@ -26,15 +30,15 @@ import { GetCoursesDocument } from '../graphql/generated/graphql';
       <span class="material-symbols-outlined">search</span>
       <input class="pl-0" type="search" placeholder="Buscar..." [(ngModel)]="searchText" />
     </label>
-    @if (coursesResource.isLoading()) {
+    @if (coursesListResource.isLoading()) {
       <lib-loader />
     }
-    @if (coursesResource.error()) {
+    @if (coursesListResource.error()) {
       <p>Error al cargar cursos</p>
     }
-    @if (coursesResource.hasValue()) {
+    @if (coursesListResource.hasValue()) {
       <div class="flex flex-col md:grid md:grid-cols-2 lg:grid-cols-4 gap-5 mt-4">
-        @for (course of coursesResource.value(); track course.id) {
+        @for (course of courses(); track course.id) {
           <a
             [routerLink]="['/courses', course.id]"
             class="group card bg-base-100 hover:shadow hover:-translate-y-1 transition-all duration-300 overflow-hidden cursor-pointer"
@@ -90,46 +94,66 @@ import { GetCoursesDocument } from '../graphql/generated/graphql';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class Courses {
-  #apollo = inject(Apollo);
   #store = inject(Store);
   public pagination = inject(Pagination);
   public searchText = signal<string>('');
   #debouncedSearch: Signal<string>;
 
-  public coursesResource = rxResource({
-    params: () => ({
-      schoolId: this.#store.currentSchoolId(),
-      search: this.#debouncedSearch(),
-      take: this.pagination.take(),
-      skip: this.pagination.skip(),
-    }),
-    stream: ({ params }) => {
-      const { schoolId, take, skip, search } = params;
+  protected coursesListResource = httpResource<CourseRow[]>(
+    () => {
+      const schoolId = this.#store.currentSchoolId();
       if (!schoolId) {
-        return of([]);
+        return undefined;
       }
-      return this.#apollo
-        .watchQuery({
-          query: GetCoursesDocument,
-          variables: {
-            schoolId,
-            take,
-            skip,
-            search,
-          },
-        })
-        .valueChanges.pipe(
-          tap((result) => {
-            this.pagination.updateCount(result.data?.count ?? 0);
-          }),
-          map((result) => result.data?.courses ?? []),
-        );
+      return {
+        url: '/api/v1/courses',
+        params: toFetchQueryRecord({
+          schoolId,
+          take: this.pagination.take(),
+          skip: this.pagination.skip(),
+          search: this.#debouncedSearch(),
+        }),
+      };
     },
+    { defaultValue: [] },
+  );
+
+  protected courses = computed(() =>
+    (this.coursesListResource.value() ?? []).map((c) => ({
+      ...c,
+      teacher: c.teacher
+        ? {
+            ...c.teacher,
+            name: c.teacher.name ?? `${c.teacher.firstName ?? ''} ${c.teacher.fatherName ?? ''}`.trim(),
+          }
+        : c.teacher,
+    })),
+  );
+
+  private readonly coursesCount = httpResource<number>(() => {
+    const schoolId = this.#store.currentSchoolId();
+    if (!schoolId) {
+      return undefined;
+    }
+    return {
+      url: '/api/v1/courses/count',
+      params: toFetchQueryRecord({
+        schoolId,
+        take: this.pagination.take(),
+        skip: this.pagination.skip(),
+        search: this.#debouncedSearch(),
+      }),
+    };
   });
 
   constructor() {
     this.pagination.updateTake(12);
-
     this.#debouncedSearch = debounceSignal(this.searchText, 400);
+    effect(() => {
+      const count = this.coursesCount.value();
+      if (count != null) {
+        this.pagination.updateCount(count);
+      }
+    });
   }
 }

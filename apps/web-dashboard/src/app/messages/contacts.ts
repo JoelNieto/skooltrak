@@ -11,12 +11,8 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
-import { rxResource } from '@angular/core/rxjs-interop';
+import { httpResource } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
-
-import { Apollo } from 'apollo-angular';
-import { ContactsFindContactsDocument } from '../graphql/generated/graphql';
-import { map, of } from 'rxjs';
 export type Contact = {
   id: string;
   initials: string;
@@ -129,25 +125,17 @@ export interface SelectedContact extends Contact {
 })
 export default class Contacts {
   inputElement = viewChild.required<ElementRef<HTMLInputElement>>('inputElement');
-  #apollo = inject(Apollo);
-  contactsResource = rxResource({
-    params: () => ({
-      queryText: this.inputValue(),
-    }),
-    stream: ({ params }) => {
-      if (!params.queryText) {
-        return of([]);
-      }
-      return this.#apollo
-        .watchQuery<{ findContacts: Contact[] }>({
-          query: ContactsFindContactsDocument,
-          variables: {
-            queryText: params.queryText,
-          },
-        })
-        .valueChanges.pipe(map((result) => result.data?.findContacts ?? []));
+  contactsResource = httpResource<Contact[]>(
+    () => {
+      const queryText = this.inputValue();
+      if (!queryText) return undefined;
+      return {
+        url: '/api/v1/messages/contacts',
+        params: { queryText },
+      };
     },
-  });
+    { defaultValue: [] },
+  );
   availableContacts = input<Contact[]>([]);
   selectedContacts = model<SelectedContact[]>([]);
   contactsChange = output<SelectedContact[]>();

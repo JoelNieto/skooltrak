@@ -3,11 +3,10 @@ import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject, input, signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
-import { Apollo } from 'apollo-angular';
+import { HttpClient } from '@angular/common/http';
 import { map } from 'rxjs';
 import Auth from '../auth/auth';
 import Store from '../core/store';
-import { AssignmentDatesByCourseIdDocument, AssignmentDatesByCourseIdQuery } from '../graphql/generated/graphql';
 
 @Component({
   selector: 'app-course-assignments',
@@ -40,7 +39,7 @@ import { AssignmentDatesByCourseIdDocument, AssignmentDatesByCourseIdQuery } fro
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class CourseAssignments {
-  #apollo = inject(Apollo);
+  #http = inject(HttpClient);
   #auth = inject(Auth);
   #store = inject(Store);
 
@@ -60,21 +59,18 @@ export default class CourseAssignments {
     }),
     stream: ({ params }) => {
       const { start, end, classGroupId } = params;
-      return this.#apollo
-        .watchQuery({
-          query: AssignmentDatesByCourseIdDocument,
-          variables: {
+      return this.#http
+        .get<any[]>(`/api/v1/assignments/dates/by-course`, {
+          params: {
             courseId: this.courseId(),
             startDate: start instanceof Date ? start.toISOString() : String(start),
             endDate: end instanceof Date ? end.toISOString() : String(end),
-            classGroupId: classGroupId || null,
+            classGroupId: classGroupId || '',
           },
         })
-        .valueChanges.pipe(
+        .pipe(
           map((res) =>
-            (
-              (res.data?.assignmentDatesByCourseId as AssignmentDatesByCourseIdQuery['assignmentDatesByCourseId']) ?? []
-            ).map((item) => ({
+            (res ?? []).map((item) => ({
               date: new Date(item.date),
               data: {
                 id: item.id,

@@ -3,16 +3,21 @@ import { Menu, MenuContent, MenuItem, MenuTrigger } from '@angular/aria/menu';
 import { OverlayModule } from '@angular/cdk/overlay';
 import { DatePipe } from '@angular/common';
 import { afterRenderEffect, ChangeDetectionStrategy, Component, inject, signal, viewChild } from '@angular/core';
-import { rxResource } from '@angular/core/rxjs-interop';
+import { httpResource, HttpClient } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { Apollo } from 'apollo-angular';
-import { filter, map, switchMap } from 'rxjs';
-import {
-  AdminGetSchoolsDocument,
-  AdminGetSchoolsQuery,
-  AdminRemoveSchoolDocument,
-} from '../../graphql/generated/graphql';
+import { filter, switchMap } from 'rxjs';
+
+type SchoolRow = {
+  id: string;
+  name: string;
+  shortName?: string;
+  city?: string | null;
+  email?: string | null;
+  phone?: string | null;
+  logoUrl?: string | null;
+  createdAt?: string;
+};
 
 @Component({
   selector: 'app-schools',
@@ -169,25 +174,14 @@ import {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class Schools {
-  #apollo = inject(Apollo);
+  #http = inject(HttpClient);
   #confirmation = inject(Confirmation);
   #toast = inject(Toast);
   pagination = inject(Pagination);
   searchText = signal('');
   actionsMenu = viewChild<Menu<string>>('actionsMenu');
 
-  public schools = rxResource({
-    params: () => ({
-      search: this.pagination.search(),
-    }),
-    stream: () => {
-      return this.#apollo
-        .watchQuery({
-          query: AdminGetSchoolsDocument,
-        })
-        .valueChanges.pipe(map((result) => (result.data?.schools as AdminGetSchoolsQuery['schools']) ?? []));
-    },
-  });
+  public schools = httpResource<SchoolRow[]>(() => '/api/v1/schools', { defaultValue: [] });
 
   constructor() {
     afterRenderEffect(() => {
@@ -195,7 +189,7 @@ export default class Schools {
     });
   }
 
-  public deleteSchool(school: AdminGetSchoolsQuery['schools'][number]) {
+  public deleteSchool(school: SchoolRow) {
     this.#confirmation
       .confirm({
         title: 'Eliminar Colegio',
@@ -205,14 +199,7 @@ export default class Schools {
       })
       .pipe(
         filter((confirmed: boolean) => confirmed === true),
-        switchMap(() =>
-          this.#apollo.mutate({
-            mutation: AdminRemoveSchoolDocument,
-            variables: {
-              removeSchoolId: school.id,
-            },
-          }),
-        ),
+        switchMap(() => this.#http.delete(`/api/v1/schools/${school.id}`)),
       )
       .subscribe({
         next: () => {

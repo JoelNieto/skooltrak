@@ -1,13 +1,12 @@
 import { SchoolContext } from '@/shared';
 import { computed, inject, Injectable, signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
-import { Apollo } from 'apollo-angular';
 import { map, of } from 'rxjs';
-import { MyStoreCartDocument } from './graphql/generated/graphql';
+import { StoreApiService } from './store-api.service';
 
 @Injectable({ providedIn: 'root' })
 export class CartService {
-  private readonly apollo = inject(Apollo);
+  private readonly api = inject(StoreApiService);
   private readonly school = inject(SchoolContext);
 
   /** Bump to refetch cart after mutations */
@@ -22,13 +21,9 @@ export class CartService {
       if (!params.schoolId) {
         return of([]);
       }
-      return this.apollo
-        .watchQuery({
-          query: MyStoreCartDocument,
-          variables: { schoolId: params.schoolId },
-          fetchPolicy: 'network-only',
-        })
-        .valueChanges.pipe(map((r) => r.data?.myStoreCart ?? []));
+      return this.api.myStoreCart(params.schoolId).pipe(
+        map((rows) => (Array.isArray(rows) ? rows : [])),
+      );
     },
   });
 

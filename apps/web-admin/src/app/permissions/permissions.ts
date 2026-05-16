@@ -6,20 +6,16 @@ import {
   afterRenderEffect,
   ChangeDetectionStrategy,
   Component,
+  effect,
   inject,
   signal,
   viewChild,
 } from '@angular/core';
-import { rxResource } from '@angular/core/rxjs-interop';
+import { httpResource, HttpClient } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { Prisma } from '@generated/prisma';
-import { Apollo } from 'apollo-angular';
-import {
-  WebAdminGetPermissionsDocument,
-  WebAdminRemovePermissionDocument,
-} from '../graphql/generated';
-import { map, tap } from 'rxjs';
+import { toFetchQueryRecord } from '../core/fetch-query-params';
 import { PermissionsForm } from './permissions-form';
 @Component({
   selector: 'app-permissions',
@@ -169,38 +165,40 @@ export class Permissions {
   public pagination = inject(Pagination);
   formatMenu = viewChild<Menu<string>>('formatMenu');
   searchText = signal('');
-  private apollo = inject(Apollo);
+  private http = inject(HttpClient);
   private confirmation = inject(Confirmation);
   private toast = inject(Toast);
 
-  public permissions = rxResource({
-    params: () => ({
+  public permissions = httpResource<Prisma.PermissionGetPayload<false>[]>(
+    () => ({
+      url: '/api/v1/permissions',
+      params: toFetchQueryRecord({
+        take: this.pagination.take(),
+        skip: this.pagination.skip(),
+        search: this.pagination.search(),
+      }),
+    }),
+    { defaultValue: [] },
+  );
+
+  private readonly permissionsCount = httpResource<number>(() => ({
+    url: '/api/v1/permissions/count',
+    params: toFetchQueryRecord({
       take: this.pagination.take(),
       skip: this.pagination.skip(),
       search: this.pagination.search(),
     }),
-    stream: ({ params }) =>
-      this.apollo
-        .watchQuery({
-          fetchPolicy: 'cache-and-network',
-          query: WebAdminGetPermissionsDocument,
-          variables: {
-            take: params.take,
-            skip: params.skip,
-            search: params.search,
-          },
-        })
-        .valueChanges.pipe(
-          tap((result) => {
-            this.pagination.updateCount(result.data?.count ?? 0);
-          }),
-          map((result) => result.data?.permissions ?? [])
-        ),
-  });
+  }));
 
   constructor() {
     afterRenderEffect(() => {
       this.pagination.updateSearch(this.searchText());
+    });
+    effect(() => {
+      const count = this.permissionsCount.value();
+      if (count != null) {
+        this.pagination.updateCount(count);
+      }
     });
   }
 
@@ -224,23 +222,16 @@ export class Permissions {
       })
       .subscribe((result) => {
         if (result) {
-          this.apollo
-            .mutate({
-              mutation: WebAdminRemovePermissionDocument,
-              variables: {
-                id: permission.id,
-              },
-            })
-            .subscribe({
-              next: () => {
-                this.toast.showInfo('Permiso eliminado exitosamente');
-                this.permissions.reload();
-              },
-              error: (error) => {
-                console.error(error);
-                this.toast.showError('Error al eliminar el permiso');
-              },
-            });
+          this.http.delete(`/api/v1/permissions/${permission.id}`).subscribe({
+            next: () => {
+              this.toast.showInfo('Permiso eliminado exitosamente');
+              this.permissions.reload();
+            },
+            error: (error) => {
+              console.error(error);
+              this.toast.showError('Error al eliminar el permiso');
+            },
+          });
         }
       });
   }

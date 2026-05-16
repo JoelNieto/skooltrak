@@ -1,16 +1,10 @@
 import { debounceSignal, Loader, Modal, PageHeader, Toast } from '@/ui';
 import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject, Signal, signal } from '@angular/core';
-import { rxResource } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { Apollo } from 'apollo-angular';
-import { map } from 'rxjs';
-import {
-  FilesCreateFileDownloadUrlDocument,
-  FilesOwnedDocument,
-  FilesSharedWithMeDocument,
-} from '../graphql/generated/graphql';
+import { httpResource, HttpClient } from '@angular/common/http';
+import { toFetchQueryRecord } from '../core/fetch-query-params';
 import FileShareForm from './file-share-form';
 
 type UserInfo = {
@@ -195,60 +189,38 @@ type FileItem = {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class FilesPage {
-  #apollo = inject(Apollo);
+  #http = inject(HttpClient);
   #toast = inject(Toast);
   #modal = inject(Modal);
   public searchText = signal<string>('');
   #debouncedSearch: Signal<string>;
 
-  public sharedFilesResource = rxResource({
-    params: () => ({
-      search: this.#debouncedSearch(),
+  public sharedFilesResource = httpResource<FileItem[]>(
+    () => ({
+      url: '/api/v1/files/shared-with-me',
+      params: toFetchQueryRecord({ search: this.#debouncedSearch() }),
     }),
-    stream: ({ params }) => {
-      return this.#apollo
-        .watchQuery<{ filesSharedWithMe: FileItem[] }>({
-          query: FilesSharedWithMeDocument,
-          variables: {
-            search: params.search,
-          },
-        })
-        .valueChanges.pipe(map((result) => (result.data?.filesSharedWithMe ?? []) as FileItem[]));
-    },
-  });
+    { defaultValue: [] },
+  );
 
-  public ownedFilesResource = rxResource({
-    params: () => ({
-      search: this.#debouncedSearch(),
+  public ownedFilesResource = httpResource<FileItem[]>(
+    () => ({
+      url: '/api/v1/files/owned',
+      params: toFetchQueryRecord({ search: this.#debouncedSearch() }),
     }),
-    stream: ({ params }) => {
-      return this.#apollo
-        .watchQuery<{ filesOwned: FileItem[] }>({
-          query: FilesOwnedDocument,
-          variables: {
-            search: params.search,
-          },
-          fetchPolicy: 'network-only',
-        })
-        .valueChanges.pipe(map((result) => (result.data?.filesOwned ?? []) as FileItem[]));
-    },
-  });
+    { defaultValue: [] },
+  );
 
   constructor() {
     this.#debouncedSearch = debounceSignal(this.searchText, 400);
   }
 
   openFile(fileId: string) {
-    this.#apollo
-      .mutate({
-        mutation: FilesCreateFileDownloadUrlDocument,
-        variables: {
-          createFileDownloadInput: { fileId },
-        },
-      })
+    this.#http
+      .post<{ downloadUrl: string }>('/api/v1/files/download-url', { fileId })
       .subscribe({
         next: (result) => {
-          const url = result.data?.createFileDownloadUrl?.downloadUrl;
+          const url = result?.downloadUrl;
           if (url) {
             window.open(url, '_blank');
           }
@@ -260,16 +232,11 @@ export default class FilesPage {
   }
 
   downloadFile(fileId: string) {
-    this.#apollo
-      .mutate({
-        mutation: FilesCreateFileDownloadUrlDocument,
-        variables: {
-          createFileDownloadInput: { fileId },
-        },
-      })
+    this.#http
+      .post<{ downloadUrl: string }>('/api/v1/files/download-url', { fileId })
       .subscribe({
         next: (result) => {
-          const url = result.data?.createFileDownloadUrl?.downloadUrl;
+          const url = result?.downloadUrl;
           if (url) {
             const link = document.createElement('a');
             link.href = url;

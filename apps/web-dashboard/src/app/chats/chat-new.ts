@@ -1,16 +1,12 @@
 import { Loader, Toast } from '@/ui';
+import { HttpClient } from '@angular/common/http';
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import { Apollo } from 'apollo-angular';
+import { firstValueFrom } from 'rxjs';
 import { map } from 'rxjs';
 import Auth from '../auth/auth';
-import {
-  ChatsCreateDirectChatDocument,
-  ChatsMyChatsDocument,
-  ContactsFindContactsDocument,
-} from '../graphql/generated/graphql';
 
 @Component({
   selector: 'app-chat-new',
@@ -79,7 +75,7 @@ import {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class ChatNew {
-  #apollo = inject(Apollo);
+  #http = inject(HttpClient);
   #router = inject(Router);
   #toast = inject(Toast);
 
@@ -89,12 +85,21 @@ export default class ChatNew {
   contactsResource = rxResource({
     params: () => ({ query: this.searchQuery() }),
     stream: ({ params }) =>
-      this.#apollo
-        .watchQuery({
-          query: ContactsFindContactsDocument,
-          variables: { queryText: params.query || undefined },
+      this.#http
+        .get<
+          Array<{
+            id: string;
+            name?: string;
+            email?: string;
+            color?: string | null;
+            initials?: string;
+            role?: { name?: string | null };
+            student?: { classGroup?: { name?: string | null } | null };
+          }>
+        >('/api/v1/messages/contacts', {
+          params: params.query ? { queryText: params.query } : {},
         })
-        .valueChanges.pipe(map((r) => r.data?.findContacts ?? [])),
+        .pipe(map((r) => r ?? [])),
   });
 
   filteredContacts() {
@@ -121,14 +126,9 @@ export default class ChatNew {
   async startChat(recipientId: string) {
     this.creating.set(recipientId);
     try {
-      const result = await this.#apollo
-        .mutate({
-          mutation: ChatsCreateDirectChatDocument,
-          variables: { recipientId },
-          refetchQueries: [{ query: ChatsMyChatsDocument }],
-        })
-        .toPromise();
-      const chat = result?.data?.createDirectChat;
+      const chat = await firstValueFrom(
+        this.#http.post<{ id: string }>(`/api/v1/chats/direct`, { recipientId }),
+      );
       if (chat?.id) {
         this.#router.navigate(['/chats', chat.id]);
       }

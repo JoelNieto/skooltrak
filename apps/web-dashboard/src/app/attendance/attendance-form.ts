@@ -4,13 +4,8 @@ import { ChangeDetectionStrategy, Component, computed, inject, input, output, si
 import { rxResource } from '@angular/core/rxjs-interop';
 import { FormArray, FormGroup, NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Prisma } from '@generated/prisma';
-import { Apollo } from 'apollo-angular';
-import {
-  AttendanceFormStudentsForAttendanceDocument,
-  AttendanceFormCreateAttendanceSessionDocument,
-  AttendanceFormUpdateAttendanceRecordsDocument,
-} from '../graphql/generated/graphql';
-import { map, of } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
+import { map, of, tap } from 'rxjs';
 
 type StudentType = Prisma.StudentGetPayload<{ include: { classGroup: true } }>;
 
@@ -197,7 +192,7 @@ export default class AttendanceForm {
   }>();
   public closeModal = output<void>();
 
-  #apollo = inject(Apollo);
+  #http = inject(HttpClient);
   #fb = inject(NonNullableFormBuilder);
   #toast = inject(Toast);
 
@@ -233,18 +228,13 @@ export default class AttendanceForm {
 
       if (!courseId || !classGroupId) return of([]);
 
-      return this.#apollo
-        .query({
-          query: AttendanceFormStudentsForAttendanceDocument,
-          variables: { courseId, classGroupId },
-          fetchPolicy: 'network-only',
+      return this.#http
+        .get<StudentType[]>('/api/v1/attendance/students', {
+          params: { courseId, classGroupId },
         })
         .pipe(
-          map((r) => {
-            const students = (r.data?.studentsForAttendance ?? []) as StudentType[];
-            this.initializeRecords(students);
-            return students;
-          }),
+          tap((students) => this.initializeRecords(students ?? [])),
+          map((students) => students ?? []),
         );
     },
   });
@@ -356,21 +346,16 @@ export default class AttendanceForm {
   private createAttendance() {
     const formValue = this.form.getRawValue();
 
-    this.#apollo
-      .mutate({
-        mutation: AttendanceFormCreateAttendanceSessionDocument,
-        variables: {
-          input: {
-            date: new Date(formValue.date).toISOString(),
-            courseId: this.data()!.courseId,
-            classGroupId: formValue.classGroupId,
-            records: formValue.records.map((r: any) => ({
-              studentId: r.studentId,
-              status: r.status,
-              comment: r.comment || null,
-            })),
-          },
-        },
+    this.#http
+      .post('/api/v1/attendance/sessions', {
+        date: new Date(formValue.date).toISOString(),
+        courseId: this.data()!.courseId,
+        classGroupId: formValue.classGroupId,
+        records: (formValue.records as Array<{ studentId: string; status: string; comment?: string }>).map((r) => ({
+          studentId: r.studentId,
+          status: r.status,
+          comment: r.comment || null,
+        })),
       })
       .subscribe({
         next: () => {
@@ -389,16 +374,13 @@ export default class AttendanceForm {
   private updateAttendance() {
     const formValue = this.form.getRawValue();
 
-    this.#apollo
-      .mutate({
-        mutation: AttendanceFormUpdateAttendanceRecordsDocument,
-        variables: {
-          inputs: formValue.records.map((r: any) => ({
-            id: r.id,
-            status: r.status,
-            comment: r.comment || null,
-          })),
-        },
+    this.#http
+      .patch('/api/v1/attendance/records/batch', {
+        inputs: (formValue.records as Array<{ id: string; status: string; comment?: string }>).map((r) => ({
+          id: r.id,
+          status: r.status,
+          comment: r.comment || null,
+        })),
       })
       .subscribe({
         next: () => {

@@ -3,9 +3,8 @@ import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/cor
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { rxResource } from '@angular/core/rxjs-interop';
-import { Apollo } from 'apollo-angular';
 import { map, of } from 'rxjs';
-import { PublicStoreCategoriesDocument, PublicStoreProductsDocument } from '../graphql/generated/graphql';
+import { StoreApiService } from '../store-api.service';
 
 @Component({
   selector: 'app-store-catalog',
@@ -85,7 +84,7 @@ import { PublicStoreCategoriesDocument, PublicStoreProductsDocument } from '../g
   `,
 })
 export default class Catalog {
-  private readonly apollo = inject(Apollo);
+  private readonly api = inject(StoreApiService);
   private readonly schoolContext = inject(SchoolContext);
 
   protected readonly search = signal('');
@@ -96,13 +95,9 @@ export default class Catalog {
     params: () => ({ schoolId: this.schoolContext.currentSchoolId() }),
     stream: ({ params }) => {
       if (!params.schoolId) return of([]);
-      return this.apollo
-        .watchQuery({
-          query: PublicStoreCategoriesDocument,
-          variables: { schoolId: params.schoolId },
-          fetchPolicy: 'cache-first',
-        })
-        .valueChanges.pipe(map((r) => r.data?.publicStoreCategories ?? []));
+      return this.api.publicStoreCategories(params.schoolId).pipe(
+        map((rows) => (Array.isArray(rows) ? rows : [])),
+      );
     },
   });
 
@@ -117,17 +112,9 @@ export default class Catalog {
         return of([]);
       }
       const search = params.search?.trim() || null;
-      return this.apollo
-        .watchQuery({
-          query: PublicStoreProductsDocument,
-          variables: {
-            schoolId: params.schoolId,
-            search,
-            categoryId: params.categoryId,
-          },
-          fetchPolicy: 'network-only',
-        })
-        .valueChanges.pipe(map((r) => r.data?.publicStoreProducts ?? []));
+      return this.api
+        .publicStoreProducts(params.schoolId, search, params.categoryId)
+        .pipe(map((rows) => (Array.isArray(rows) ? rows : [])));
     },
   });
 

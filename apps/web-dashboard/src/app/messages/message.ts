@@ -1,17 +1,10 @@
 import { EditorViewer, Loader, Toast } from '@/ui';
 import { DatePipe } from '@angular/common';
-import { Component, computed, inject, input, signal } from '@angular/core';
-import { rxResource } from '@angular/core/rxjs-interop';
+import { Component, computed, effect, inject, input, signal } from '@angular/core';
+import { httpResource, HttpClient } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { Prisma } from '@generated/prisma';
-import { Apollo } from 'apollo-angular';
-import {
-  MessageFindMessageByIdDocument,
-  MessageMarkAsReadDocument,
-  MessageCreateMessageDocument,
-} from '../graphql/generated/graphql';
-import { map, tap } from 'rxjs';
 import Auth from '../auth/auth';
 
 type User = Prisma.UserGetPayload<undefined> & {
@@ -157,7 +150,7 @@ type MessageType = Prisma.MessageGetPayload<undefined> & {
 })
 export default class Message {
   public id = input.required<string>();
-  #apollo = inject(Apollo);
+  #http = inject(HttpClient);
   #auth = inject(Auth);
   #toast = inject(Toast);
 
@@ -187,39 +180,25 @@ export default class Message {
     } as User;
   });
 
-  messageResource = rxResource({
-    params: () => ({
-      id: this.id(),
-    }),
-    stream: ({ params }) => {
-      return this.#apollo
-        .watchQuery<{ findMessageById: MessageType }>({
-          query: MessageFindMessageByIdDocument,
-          variables: {
-            id: params.id,
-          },
-          fetchPolicy: 'network-only',
-        })
-        .valueChanges.pipe(
-          map((result) => result.data?.findMessageById),
-          tap((message) => {
-            if (message?.id) {
-              this.markAsRead(message.id);
-            }
-          }),
-        );
-    },
+  messageResource = httpResource<MessageType | undefined>(() => {
+    const id = this.id();
+    if (!id) return undefined;
+    return `/api/v1/messages/${id}`;
   });
 
+  constructor() {
+    effect(() => {
+      const message = this.messageResource.value();
+      if (message?.id) {
+        this.markAsRead(message.id);
+      }
+    });
+  }
+
   private markAsRead(messageId: string): void {
-    this.#apollo
-      .mutate({
-        mutation: MessageMarkAsReadDocument,
-        variables: { messageId },
-      })
-      .subscribe({
-        error: (err) => console.error('Error marking message as read:', err),
-      });
+    this.#http.patch(`/api/v1/messages/${messageId}/read`, {}).subscribe({
+      error: (err) => console.error('Error marking message as read:', err),
+    });
   }
 
   public receivers = computed(() =>
@@ -298,17 +277,12 @@ export default class Message {
     // Reply goes back to the original sender
     const recipientIds = message.sender?.id ? [message.sender.id] : [];
 
-    this.#apollo
-      .mutate({
-        mutation: MessageCreateMessageDocument,
-        variables: {
-          createMessageInput: {
-            subject: `Re: ${message.subject}`,
-            content: replyContent,
-            recipientIds,
-            parentMessageId: message.id!,
-          },
-        },
+    this.#http
+      .post('/api/v1/messages', {
+        subject: `Re: ${message.subject}`,
+        content: replyContent,
+        recipientIds,
+        parentMessageId: message.id!,
       })
       .subscribe({
         next: () => {

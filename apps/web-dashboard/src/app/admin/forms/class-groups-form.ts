@@ -1,17 +1,11 @@
 import { markGroupDirty, Toast } from '@/ui';
+import { HttpClient } from '@angular/common/http';
 import { afterRenderEffect, Component, inject, input, output } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Prisma } from '@generated/prisma';
-import { Apollo } from 'apollo-angular';
 import { map, of } from 'rxjs';
 import Store from '../../core/store';
-import {
-  ClassGroupsFormCreateClassGroupDocument,
-  ClassGroupsFormStudyPlansBySchoolIdDocument,
-  ClassGroupsFormTeachersByOrganizationIdDocument,
-  ClassGroupsFormUpdateClassGroupDocument,
-} from '../../graphql/generated/graphql';
 @Component({
   selector: 'app-class-groups-form',
   imports: [ReactiveFormsModule],
@@ -57,7 +51,7 @@ export default class ClassGroupsForm {
     }>;
   }>();
   private store = inject(Store);
-  private apollo = inject(Apollo);
+  private http = inject(HttpClient);
   private toast = inject(Toast);
   public closeModal = output<void>();
 
@@ -70,14 +64,9 @@ export default class ClassGroupsForm {
       if (!organizationId) {
         return of([]);
       }
-      return this.apollo
-        .watchQuery({
-          query: ClassGroupsFormTeachersByOrganizationIdDocument,
-          variables: {
-            organizationId,
-          },
-        })
-        .valueChanges.pipe(map((result) => result.data?.teachersByOrganizationId ?? []));
+      return this.http
+        .get<Array<{ id: string; name: string }>>(`/api/v1/teachers/by-organization/${organizationId}`)
+        .pipe(map((list) => list ?? []));
     },
   });
 
@@ -89,14 +78,11 @@ export default class ClassGroupsForm {
       if (!params.schoolId) {
         return of([]);
       }
-      return this.apollo
-        .watchQuery({
-          query: ClassGroupsFormStudyPlansBySchoolIdDocument,
-          variables: {
-            schoolId: params.schoolId,
-          },
+      return this.http
+        .get<Array<{ id: string; name: string }>>(`/api/v1/study-plans/by-school`, {
+          params: { schoolId: params.schoolId },
         })
-        .valueChanges.pipe(map((result) => result.data?.studyPlansBySchoolId ?? []));
+        .pipe(map((list) => list ?? []));
     },
   });
 
@@ -129,15 +115,11 @@ export default class ClassGroupsForm {
     const groupId = this.data()?.group?.id ?? '';
 
     if (this.data()?.group) {
-      this.apollo
-        .mutate({
-          mutation: ClassGroupsFormUpdateClassGroupDocument,
-          variables: {
-            updateClassGroupInput: {
-              ...req,
-              id: groupId,
-            },
-          },
+      this.http
+        .patch('/api/v1/class-groups', {
+          ...req,
+          teacherId: req.teacherId || undefined,
+          id: groupId,
         })
         .subscribe({
           next: () => {
@@ -150,16 +132,12 @@ export default class ClassGroupsForm {
           },
         });
     } else {
-      this.apollo
-        .mutate({
-          mutation: ClassGroupsFormCreateClassGroupDocument,
-          variables: {
-            createClassGroupInput: {
-              ...req,
-              schoolId: this.store.currentSchoolId() ?? '',
-              organizationId: this.store.currentOrganizationId() ?? '',
-            },
-          },
+      this.http
+        .post('/api/v1/class-groups', {
+          ...req,
+          teacherId: req.teacherId || undefined,
+          schoolId: this.store.currentSchoolId() ?? '',
+          organizationId: this.store.currentOrganizationId() ?? '',
         })
         .subscribe({
           next: () => {

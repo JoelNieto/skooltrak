@@ -5,18 +5,14 @@ import { DatePipe } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
+  effect,
   inject,
   viewChild,
 } from '@angular/core';
-import { rxResource } from '@angular/core/rxjs-interop';
+import { httpResource, HttpClient } from '@angular/common/http';
 import { RouterLink } from '@angular/router';
 import { Prisma } from '@generated/prisma';
-import { Apollo } from 'apollo-angular';
-import {
-  WebAdminGetSchoolsDocument,
-  WebAdminRemoveSchoolDocument,
-} from '../graphql/generated';
-import { map } from 'rxjs';
+import { toFetchQueryRecord } from '../core/fetch-query-params';
 import { SchoolsForm } from './schools-form';
 @Component({
   selector: 'app-schools',
@@ -162,30 +158,32 @@ import { SchoolsForm } from './schools-form';
 export class Schools {
   private readonly modal = inject(Modal);
   public pagination = inject(Pagination);
-  private readonly apollo = inject(Apollo);
+  private readonly http = inject(HttpClient);
   private readonly toasts = inject(Toast);
   private readonly confirmation = inject(Confirmation);
   formatMenu = viewChild<Menu<string>>('formatMenu');
 
-  public schools = rxResource({
-    params: () => ({
-      take: this.pagination.take(),
-      skip: this.pagination.skip(),
+  public schools = httpResource<Prisma.SchoolGetPayload<{ include: { organization: true } }>[]>(
+    () => ({
+      url: '/api/v1/schools',
+      params: toFetchQueryRecord({
+        skip: this.pagination.skip(),
+        take: this.pagination.take(),
+      }),
     }),
-    stream: ({ params }) =>
-      this.apollo
-        .watchQuery({
-          fetchPolicy: 'cache-and-network',
-          query: WebAdminGetSchoolsDocument,
-        })
-        .valueChanges.pipe(
-          map(({ data }) => {
-            const all = data?.schools ?? [];
-            this.pagination.updateCount(all.length);
-            return all.slice(params.skip, params.skip + params.take);
-          })
-        ),
-  });
+    { defaultValue: [] },
+  );
+
+  private readonly schoolsCount = httpResource<number>(() => '/api/v1/schools/count');
+
+  constructor() {
+    effect(() => {
+      const count = this.schoolsCount.value();
+      if (count != null) {
+        this.pagination.updateCount(count);
+      }
+    });
+  }
 
   public editSchool(
     school?: Prisma.SchoolGetPayload<{ include: { organization: true } }>
@@ -212,23 +210,16 @@ export class Schools {
       })
       .subscribe((result) => {
         if (result) {
-          this.apollo
-            .mutate({
-              mutation: WebAdminRemoveSchoolDocument,
-              variables: {
-                id: school.id,
-              },
-            })
-            .subscribe({
-              next: () => {
-                this.toasts.showInfo('Escuela eliminada exitosamente');
-                this.schools.reload();
-              },
-              error: (error) => {
-                console.error(error);
-                this.toasts.showError('Error al eliminar la escuela');
-              },
-            });
+          this.http.delete(`/api/v1/schools/${school.id}`).subscribe({
+            next: () => {
+              this.toasts.showInfo('Escuela eliminada exitosamente');
+              this.schools.reload();
+            },
+            error: (error) => {
+              console.error(error);
+              this.toasts.showError('Error al eliminar la escuela');
+            },
+          });
         }
       });
   }

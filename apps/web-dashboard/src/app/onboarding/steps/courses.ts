@@ -1,15 +1,8 @@
 import { markGroupDirty, Toast } from '@/ui';
 import { ChangeDetectionStrategy, Component, computed, inject, input, output, signal } from '@angular/core';
-import { rxResource } from '@angular/core/rxjs-interop';
+import { httpResource, HttpClient } from '@angular/common/http';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Apollo } from 'apollo-angular';
-import {
-  OnboardingStepsCreateCourseDocument,
-  OnboardingStepsGetSchoolsDocument,
-  OnboardingStepsGetSubjectsDocument,
-  OnboardingStepsStudyPlansBySchoolIdDocument,
-} from '../../graphql/generated/graphql';
-import { map, of } from 'rxjs';
+import { toFetchQueryRecord } from '../../core/fetch-query-params';
 import Store from '../../core/store';
 import { CreatedEntity } from '../setup-wizard';
 
@@ -158,7 +151,7 @@ import { CreatedEntity } from '../setup-wizard';
 })
 export default class CoursesStep {
   private fb = inject(NonNullableFormBuilder);
-  private apollo = inject(Apollo);
+  #http = inject(HttpClient);
   private toasts = inject(Toast);
   private store = inject(Store);
 
@@ -172,14 +165,8 @@ export default class CoursesStep {
   public addAnother = false;
 
   // Fetch schools to get the first one if not in store
-  public schools = rxResource({
-    stream: () =>
-      this.apollo
-        .watchQuery({
-          query: OnboardingStepsGetSchoolsDocument,
-          fetchPolicy: 'cache-first',
-        })
-        .valueChanges.pipe(map((result) => result.data?.schools ?? [])),
+  public schools = httpResource<Array<{ id: string; name: string }>>(() => '/api/v1/schools', {
+    defaultValue: [],
   });
 
   // Get the school ID from store or first school from API
@@ -189,32 +176,24 @@ export default class CoursesStep {
     return this.schools.value()?.[0]?.id;
   });
 
-  public studyPlans = rxResource({
-    params: () => ({ schoolId: this.schoolId() }),
-    stream: ({ params }) => {
-      if (!params.schoolId) {
-        return of([]);
+  public studyPlans = httpResource<Array<{ id: string; name: string }>>(
+    () => {
+      const schoolId = this.schoolId();
+      if (!schoolId) {
+        return undefined;
       }
-      return this.apollo
-        .watchQuery({
-          query: OnboardingStepsStudyPlansBySchoolIdDocument,
-          variables: { schoolId: params.schoolId },
-          fetchPolicy: 'cache-and-network',
-        })
-        .valueChanges.pipe(map((result) => result.data?.studyPlansBySchoolId ?? []));
+      return { url: '/api/v1/study-plans/by-school', params: { schoolId } };
     },
-  });
+    { defaultValue: [] },
+  );
 
-  public subjects = rxResource({
-    stream: () =>
-      this.apollo
-        .watchQuery({
-          query: OnboardingStepsGetSubjectsDocument,
-          variables: { take: 100, orderBy: 'name' },
-          fetchPolicy: 'cache-first',
-        })
-        .valueChanges.pipe(map((result) => result.data?.subjects ?? [])),
-  });
+  public subjects = httpResource<Array<{ id: string; name: string }>>(
+    () => ({
+      url: '/api/v1/subjects',
+      params: toFetchQueryRecord({ take: 100, orderBy: 'name' }),
+    }),
+    { defaultValue: [] },
+  );
 
   // Combine API study plans with newly created ones
   public allStudyPlans = computed(() => {
@@ -247,21 +226,15 @@ export default class CoursesStep {
 
     const formValue = this.form.getRawValue();
 
-    this.apollo
-      .mutate({
-        mutation: OnboardingStepsCreateCourseDocument,
-        variables: {
-          createCourseInput: {
-            ...formValue,
-            schoolId,
-            organizationId,
-          },
-        },
+    this.#http
+      .post<{ id: string; name: string }>('/api/v1/courses', {
+        ...formValue,
+        schoolId,
+        organizationId,
       })
       .subscribe({
-        next: (result) => {
+        next: (course) => {
           this.saving.set(false);
-          const course = result.data?.createCourse;
           if (course) {
             this.entityCreated.emit({ id: course.id, name: course.name, type: 'course' });
             this.toasts.showSuccess(`Curso "${course.name}" creado`);

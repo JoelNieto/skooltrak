@@ -1,22 +1,38 @@
 import { EmptyState, PageHeader, StatCard } from '@/ui';
 import { DecimalPipe, DatePipe } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
 import { afterRenderEffect, ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
-import { Apollo } from 'apollo-angular';
 import { endOfWeek, startOfWeek } from 'date-fns';
-import { map, of } from 'rxjs';
+import { forkJoin, map, of } from 'rxjs';
 import Store from './core/store';
-import {
-  GradeReportDocument,
-  PeriodsByYearForReportDocument,
-  StudentAssignmentsDocument,
-  StudentAssignmentsQuery,
-  StudentDashboardStatsDocument,
-  StudentRecentMessagesDocument,
-  StudentRecentNewslettersDocument,
-  StudentRecentNewslettersQuery,
-} from './graphql/generated/graphql';
+import { toFetchQueryParams } from './core/fetch-query-params';
+
+type InboxRow = {
+  id: string;
+  message: {
+    subject: string;
+    createdAt: string;
+    sender: { name?: string | null; firstName?: string | null; lastName?: string | null };
+  };
+};
+
+type PublishedNewsletter = {
+  id: string;
+  title: string;
+  content: string;
+  publishedAt: string | null;
+  author: { name?: string | null; firstName?: string | null; lastName?: string | null };
+};
+
+type StudentAssignmentRow = {
+  id: string;
+  title: string;
+  date: string;
+  course: { id: string; name: string };
+};
+
 @Component({
   selector: 'app-student-home',
   imports: [DatePipe, DecimalPipe, RouterLink, PageHeader, StatCard, EmptyState],
@@ -92,7 +108,7 @@ import {
                     {{ message.message?.subject }}
                   </p>
                   <div class="text-sm text-base-content/70">
-                    {{ message.message?.sender?.name }} ·
+                    {{ senderDisplayName(message.message?.sender) }} ·
                     {{ message.message?.createdAt | date: 'short' }}
                   </div>
                 </div>
@@ -176,7 +192,7 @@ import {
                     </p>
                     <div class="flex items-center justify-between mt-2">
                       <span class="text-sm text-base-content/70">
-                        {{ newsletter.author.name }} · {{ newsletter.publishedAt | date: 'mediumDate' }}
+                        {{ authorDisplayName(newsletter.author) }} · {{ newsletter.publishedAt | date: 'mediumDate' }}
                       </span>
                       <a [routerLink]="['/newsletters', newsletter.id]" class="link link-primary text-sm"> Ver más </a>
                     </div>
@@ -192,7 +208,7 @@ import {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class StudentHome {
-  private apollo = inject(Apollo);
+  private http = inject(HttpClient);
   private store = inject(Store);
 
   private currentDate = signal(new Date());
@@ -202,17 +218,26 @@ export default class StudentHome {
   public gradeReportStudentId = computed(() => this.store.currentStudentId() ?? null);
   public gradeReportPeriodId = signal<string>('');
 
+  senderDisplayName(sender: InboxRow['message']['sender'] | undefined): string {
+    if (!sender) return '—';
+    if (sender.name?.trim()) return sender.name;
+    return [sender.firstName, sender.lastName].filter(Boolean).join(' ').trim() || '—';
+  }
+
+  authorDisplayName(author: PublishedNewsletter['author']): string {
+    if (author.name?.trim()) return author.name;
+    return [author.firstName, author.lastName].filter(Boolean).join(' ').trim() || '—';
+  }
+
   public gradeReportPeriodsResource = rxResource({
     params: () => ({ year: this.store.currentSchool()?.currentYear }),
     stream: ({ params }) => {
       if (!params.year) return of([]);
-      return this.apollo
-        .watchQuery({
-          query: PeriodsByYearForReportDocument,
-          variables: { year: params.year },
-          fetchPolicy: 'cache-first',
+      return this.http
+        .get<Array<{ id: string; name: string; startDate: string; endDate: string }>>(`/api/v1/periods/by-year`, {
+          params: { year: String(params.year) },
         })
-        .valueChanges.pipe(map((result) => result.data?.periodsByYear ?? []));
+        .pipe(map((rows) => rows ?? []));
     },
   });
 
@@ -235,15 +260,12 @@ export default class StudentHome {
       if (!params.studentId || !params.periodId) {
         return of(null);
       }
-      return this.apollo
-        .watchQuery({
-          query: GradeReportDocument,
-          variables: {
-            studentId: params.studentId,
-            periodId: params.periodId,
-          },
-        })
-        .valueChanges.pipe(map((result) => result.data?.gradeReport ?? null));
+      return this.http.get<{
+        periodName?: string | null;
+        overallGradesRow?: { cumulativeAverage?: number | null } | null;
+      }>(`/api/v1/grade-report`, {
+        params: { studentId: params.studentId, periodId: params.periodId },
+      });
     },
   });
 
@@ -256,23 +278,11 @@ export default class StudentHome {
           findManyMessagesCount: 0,
         });
       }
-      return this.apollo
-        .watchQuery({
-          query: StudentDashboardStatsDocument,
-          variables: {
-            schoolId: params.schoolId,
-          },
-        })
-        .valueChanges.pipe(
-          map(
-            (result) =>
-              result.data ??
-              ({
-                coursesCount: 0,
-                findManyMessagesCount: 0,
-              } as { coursesCount: number; findManyMessagesCount: number }),
-          ),
-        );
+      const q = toFetchQueryParams({ schoolId: params.schoolId });
+      return forkJoin({
+        coursesCount: this.http.get<number>('/api/v1/courses/count', { params: q }),
+        findManyMessagesCount: this.http.get<number>('/api/v1/messages/count'),
+      });
     },
   });
 
@@ -284,57 +294,39 @@ export default class StudentHome {
     }),
     stream: ({ params }) => {
       if (!params.schoolId) {
-        return of<StudentAssignmentsQuery['assignmentsBySchoolId']>([]);
+        return of<StudentAssignmentRow[]>([]);
       }
-      return this.apollo
-        .watchQuery({
-          query: StudentAssignmentsDocument,
-          variables: {
+      return this.http
+        .get<StudentAssignmentRow[]>(`/api/v1/assignments/by-school`, {
+          params: {
             schoolId: params.schoolId,
             startDate: params.startDate.toISOString(),
             endDate: params.endDate.toISOString(),
           },
         })
-        .valueChanges.pipe(
-          map(
-            (result) => (result.data?.assignmentsBySchoolId ?? []) as StudentAssignmentsQuery['assignmentsBySchoolId'],
-          ),
-        );
+        .pipe(map((rows) => rows ?? []));
     },
   });
 
   public recentMessages = rxResource({
     params: () => ({ take: 4, skip: 0 }),
-    stream: ({ params }) => {
-      return this.apollo
-        .watchQuery({
-          query: StudentRecentMessagesDocument,
-          variables: params,
+    stream: ({ params }) =>
+      this.http
+        .get<InboxRow[]>('/api/v1/messages', {
+          params: toFetchQueryParams({ take: params.take, skip: params.skip }),
         })
-        .valueChanges.pipe(map((result) => result.data?.findManyMessages ?? []));
-    },
+        .pipe(map((rows) => rows ?? [])),
   });
 
   public recentNewsletters = rxResource({
     params: () => ({ schoolId: this.store.currentSchoolId() }),
     stream: ({ params }) => {
       if (!params.schoolId) {
-        return of<StudentRecentNewslettersQuery['publishedNewsletters']>([]);
+        return of<PublishedNewsletter[]>([]);
       }
-      return this.apollo
-        .watchQuery({
-          query: StudentRecentNewslettersDocument,
-          variables: {
-            schoolId: params.schoolId,
-            take: 3,
-          },
-        })
-        .valueChanges.pipe(
-          map(
-            (result) =>
-              (result.data?.publishedNewsletters ?? []) as StudentRecentNewslettersQuery['publishedNewsletters'],
-          ),
-        );
+      return this.http.get<PublishedNewsletter[]>(`/api/v1/newsletters/published`, {
+        params: { schoolId: params.schoolId, take: '3' },
+      });
     },
   });
 

@@ -1,7 +1,8 @@
 import { Loader, Toast } from '@/ui';
+import { HttpClient } from '@angular/common/http';
 import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Apollo, gql } from 'apollo-angular';
+import { firstValueFrom } from 'rxjs';
 import Auth from './auth';
 
 @Component({
@@ -137,7 +138,7 @@ import Auth from './auth';
 export default class VerifyEmail implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
-  private apollo = inject(Apollo);
+  private http = inject(HttpClient);
   private auth = inject(Auth);
   private toasts = inject(Toast);
 
@@ -150,99 +151,78 @@ export default class VerifyEmail implements OnInit {
   private cooldownInterval: ReturnType<typeof setInterval> | null = null;
 
   ngOnInit() {
-    // Check if there's a token in the URL (from email link)
     const token = this.route.snapshot.queryParamMap.get('token');
-    if (token) {
-      this.verifyToken(token);
+    const email = this.route.snapshot.queryParamMap.get('email') ?? this.auth.user()?.email;
+    if (token && email) {
+      void this.verifyToken(token, email);
     }
   }
 
-  private async verifyToken(token: string) {
+  private async verifyToken(token: string, email: string) {
     this.verifying.set(true);
     this.error.set(null);
 
-    this.apollo
-      .mutate<{ verifyEmail: { accessToken: string } }>({
-        mutation: gql`
-          mutation VerifyEmail($token: String!) {
-            verifyEmail(token: $token) {
-              accessToken
-            }
-          }
-        `,
-        variables: { token },
-      })
-      .subscribe({
-        next: (res) => {
-          this.verifying.set(false);
-          const accessToken = res.data?.verifyEmail?.accessToken;
-          if (accessToken) {
-            this.auth.token.set(accessToken);
-            this.verified.set(true);
-            this.toasts.showSuccess('Correo verificado exitosamente');
-          } else {
-            this.error.set('No se pudo verificar el correo. El enlace puede haber expirado.');
-          }
-        },
-        error: (err) => {
-          this.verifying.set(false);
-          this.error.set(err.message || 'Error al verificar el correo. El enlace puede haber expirado.');
-        },
-      });
+    try {
+      const valid = await firstValueFrom(
+        this.http.post<boolean>('/api/v1/auth/validate-email-token', { token, email }),
+      );
+      this.verifying.set(false);
+      if (valid) {
+        const isVerified = await this.auth.checkEmailVerified();
+        if (isVerified) {
+          this.verified.set(true);
+          this.toasts.showSuccess('Correo verificado exitosamente');
+        } else {
+          this.verified.set(true);
+          this.toasts.showSuccess('Enlace válido. Continúa con la configuración.');
+        }
+      } else {
+        this.error.set('No se pudo verificar el correo. El enlace puede haber expirado.');
+      }
+    } catch (err: unknown) {
+      this.verifying.set(false);
+      const message = err instanceof Error ? err.message : 'Error al verificar el correo. El enlace puede haber expirado.';
+      this.error.set(message);
+    }
   }
 
-  public checkVerification() {
-    this.apollo
-      .query<{ isEmailVerified: boolean }>({
-        query: gql`
-          query IsEmailVerified {
-            isEmailVerified
-          }
-        `,
-        fetchPolicy: 'network-only',
-      })
-      .subscribe({
-        next: (res) => {
-          if (res.data?.isEmailVerified) {
-            this.verified.set(true);
-            this.toasts.showSuccess('Correo verificado exitosamente');
-          } else {
-            this.toasts.showError('Tu correo aún no ha sido verificado');
-          }
-        },
-        error: () => {
-          this.toasts.showError('Error al verificar el estado');
-        },
-      });
+  public async checkVerification() {
+    try {
+      const isVerified = await this.auth.checkEmailVerified();
+      if (isVerified) {
+        this.verified.set(true);
+        this.toasts.showSuccess('Correo verificado exitosamente');
+      } else {
+        this.toasts.showError('Tu correo aún no ha sido verificado');
+      }
+    } catch {
+      this.toasts.showError('Error al verificar el estado');
+    }
   }
 
   public resendEmail() {
     if (this.cooldown() > 0) return;
 
+    const email = this.auth.user()?.email ?? this.route.snapshot.queryParamMap.get('email');
+    if (!email) {
+      this.toasts.showError('No se encontró un correo para reenviar la verificación');
+      return;
+    }
+
     this.resending.set(true);
 
-    this.apollo
-      .mutate<{ resendVerificationEmail: boolean }>({
-        mutation: gql`
-          mutation ResendVerificationEmail {
-            resendVerificationEmail
-          }
-        `,
-      })
-      .subscribe({
-        next: (res) => {
-          this.resending.set(false);
-          if (res.data?.resendVerificationEmail) {
-            this.toasts.showSuccess('Correo de verificación enviado');
-            this.error.set(null);
-            this.startCooldown();
-          }
-        },
-        error: (err) => {
-          this.resending.set(false);
-          this.toasts.showError(err.message || 'Error al enviar el correo');
-        },
-      });
+    this.http.post('/api/v1/auth/send-verification-link', { email }).subscribe({
+      next: () => {
+        this.resending.set(false);
+        this.toasts.showSuccess('Correo de verificación enviado');
+        this.error.set(null);
+        this.startCooldown();
+      },
+      error: (err: { message?: string }) => {
+        this.resending.set(false);
+        this.toasts.showError(err.message || 'Error al enviar el correo');
+      },
+    });
   }
 
   private startCooldown() {

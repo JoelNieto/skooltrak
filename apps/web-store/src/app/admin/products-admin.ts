@@ -3,9 +3,8 @@ import { Toast } from '@/ui';
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
-import { Apollo } from 'apollo-angular';
 import { map, of } from 'rxjs';
-import { DeleteStoreProductDocument, StoreProductsAdminDocument } from '../graphql/generated/graphql';
+import { StoreApiService } from '../store-api.service';
 
 @Component({
   selector: 'app-products-admin',
@@ -69,7 +68,7 @@ import { DeleteStoreProductDocument, StoreProductsAdminDocument } from '../graph
 })
 export default class ProductsAdmin {
   protected readonly school = inject(SchoolContext);
-  private readonly apollo = inject(Apollo);
+  private readonly api = inject(StoreApiService);
   private readonly toast = inject(Toast);
   private readonly listTick = signal(0);
 
@@ -77,13 +76,9 @@ export default class ProductsAdmin {
     params: () => ({ schoolId: this.school.currentSchoolId(), tick: this.listTick() }),
     stream: ({ params }) => {
       if (!params.schoolId) return of([]);
-      return this.apollo
-        .watchQuery({
-          query: StoreProductsAdminDocument,
-          variables: { schoolId: params.schoolId },
-          fetchPolicy: 'network-only',
-        })
-        .valueChanges.pipe(map((r) => r.data?.storeProductsAdmin ?? []));
+      return this.api
+        .storeProductsAdmin(params.schoolId)
+        .pipe(map((rows) => (Array.isArray(rows) ? rows : [])));
     },
   });
 
@@ -95,7 +90,7 @@ export default class ProductsAdmin {
   }
 
   protected remove(id: string) {
-    this.apollo.mutate({ mutation: DeleteStoreProductDocument, variables: { id } }).subscribe({
+    this.api.deleteStoreProduct(id).subscribe({
       next: () => {
         this.toast.showSuccess('Producto eliminado');
         this.listTick.update((n) => n + 1);

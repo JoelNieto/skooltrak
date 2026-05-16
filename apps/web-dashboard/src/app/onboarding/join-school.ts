@@ -1,13 +1,16 @@
 import { Loader, Toast } from '@/ui';
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
-import { Apollo } from 'apollo-angular';
-import {
-  OnboardingAvailableSchoolsDocument,
-  OnboardingAvailableSchoolsQuery,
-} from '../graphql/generated/graphql';
+import { HttpClient } from '@angular/common/http';
 
-type AvailableSchool = OnboardingAvailableSchoolsQuery['availableSchools'][number];
+type AvailableSchool = {
+  id: string;
+  name: string;
+  organizationName?: string;
+  city?: string | null;
+  country?: string | null;
+  studentCount: number;
+};
 
 @Component({
   selector: 'app-join-school',
@@ -97,13 +100,13 @@ type AvailableSchool = OnboardingAvailableSchoolsQuery['availableSchools'][numbe
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class JoinSchool {
-  private apollo = inject(Apollo);
+  private http = inject(HttpClient);
   private router = inject(Router);
   private toasts = inject(Toast);
 
   public loading = signal(true);
-  public schools = signal<OnboardingAvailableSchoolsQuery['availableSchools']>([]);
-  public filteredSchools = signal<OnboardingAvailableSchoolsQuery['availableSchools']>([]);
+  public schools = signal<AvailableSchool[]>([]);
+  public filteredSchools = signal<AvailableSchool[]>([]);
   private searchTerm = '';
 
   constructor() {
@@ -111,23 +114,17 @@ export default class JoinSchool {
   }
 
   private loadSchools() {
-    this.apollo
-      .query({
-        query: OnboardingAvailableSchoolsDocument,
-        fetchPolicy: 'network-only',
-      })
-      .subscribe({
-        next: (res) => {
-          const schools = res.data?.availableSchools ?? [];
-          this.schools.set(schools);
-          this.filteredSchools.set(schools);
-          this.loading.set(false);
-        },
-        error: (err) => {
-          this.loading.set(false);
-          this.toasts.showError(err.message || 'Error al cargar escuelas');
-        },
-      });
+    this.http.get<AvailableSchool[]>('/api/v1/auth/available-schools').subscribe({
+      next: (schools) => {
+        this.schools.set(schools ?? []);
+        this.filteredSchools.set(schools ?? []);
+        this.loading.set(false);
+      },
+      error: (err) => {
+        this.loading.set(false);
+        this.toasts.showError(err.message || 'Error al cargar escuelas');
+      },
+    });
   }
 
   public onSearch(event: Event) {

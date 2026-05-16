@@ -2,12 +2,27 @@ import { Loader } from '@/ui';
 import { Tab, TabContent, TabList, TabPanel, Tabs } from '@angular/aria/tabs';
 import { DatePipe } from '@angular/common';
 import { Component, inject, input } from '@angular/core';
-import { rxResource } from '@angular/core/rxjs-interop';
+import { httpResource } from '@angular/common/http';
 import { RouterLink } from '@angular/router';
-import { Apollo } from 'apollo-angular';
-import { map, of } from 'rxjs';
 import { isValidId } from '../../core/validators';
-import { AdminSchoolDocument, AdminSchoolQuery } from '../../graphql/generated/graphql';
+
+type SchoolDetail = {
+  id: string;
+  name: string;
+  shortName?: string;
+  logoUrl?: string | null;
+  currentYear?: number | null;
+  city?: string | null;
+  state?: string | null;
+  country?: string | null;
+  address?: string | null;
+  zip?: string | null;
+  email?: string | null;
+  phone?: string | null;
+  website?: string | null;
+  createdAt?: string;
+  updatedAt?: string;
+};
 
 @Component({
   selector: 'app-school',
@@ -243,32 +258,15 @@ import { AdminSchoolDocument, AdminSchoolQuery } from '../../graphql/generated/g
 })
 export default class School {
   public id = input.required<string>();
-  private apollo = inject(Apollo);
+  public schoolResource = httpResource<SchoolDetail | null>(() =>
+    isValidId(this.id()) ? `/api/v1/schools/${this.id()}` : undefined,
+  );
 
-  public schoolResource = rxResource({
-    params: () => ({
-      id: this.id(),
-    }),
-    stream: ({ params }) => {
-      if (!isValidId(params.id)) {
-        return of(null);
-      }
-      return this.apollo
-        .watchQuery({
-          query: AdminSchoolDocument,
-          variables: {
-            id: params.id,
-          },
-        })
-        .valueChanges.pipe(map((result) => result.data?.school as AdminSchoolQuery['school']));
-    },
-  });
-
-  getLocationString(school: AdminSchoolQuery['school']): string {
+  getLocationString(school: SchoolDetail): string {
     return [school.city, school.state, school.country].filter((x) => !!x).join(', ');
   }
 
-  getGoogleMapsUrl(school: AdminSchoolQuery['school']): string {
+  getGoogleMapsUrl(school: SchoolDetail): string {
     const parts = [school.address, school.city, school.state, school.zip, school.country].filter((x) => !!x);
     const query = encodeURIComponent(parts.join(', '));
     return `https://www.google.com/maps/search/?api=1&query=${query}`;

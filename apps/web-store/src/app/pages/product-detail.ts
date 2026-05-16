@@ -4,10 +4,9 @@ import { ChangeDetectionStrategy, Component, effect, inject, input, signal } fro
 import { rxResource } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { Apollo } from 'apollo-angular';
 import { map } from 'rxjs';
 import { CartService } from '../cart.service';
-import { AddToStoreCartDocument, PublicStoreProductDocument } from '../graphql/generated/graphql';
+import { StoreApiService } from '../store-api.service';
 
 @Component({
   selector: 'app-product-detail',
@@ -73,7 +72,7 @@ import { AddToStoreCartDocument, PublicStoreProductDocument } from '../graphql/g
 })
 export default class ProductDetail {
   readonly id = input.required<string>();
-  private readonly apollo = inject(Apollo);
+  private readonly api = inject(StoreApiService);
   private readonly school = inject(SchoolContext);
   private readonly cart = inject(CartService);
   private readonly toast = inject(Toast);
@@ -83,13 +82,7 @@ export default class ProductDetail {
   protected product = rxResource({
     params: () => ({ id: this.id() }),
     stream: ({ params }) =>
-      this.apollo
-        .watchQuery({
-          query: PublicStoreProductDocument,
-          variables: { id: params.id },
-          fetchPolicy: 'network-only',
-        })
-        .valueChanges.pipe(map((r) => r.data?.publicStoreProduct)),
+      this.api.publicStoreProduct(params.id).pipe(map((p) => p ?? null)),
   });
 
   constructor() {
@@ -101,9 +94,9 @@ export default class ProductDetail {
         this.selectedVariantId.set(null);
         return;
       }
-      const stillValid = current && variants.some((v) => v.id === current);
+      const stillValid = current && variants.some((v: { id?: string }) => v.id === current);
       if (!stillValid) {
-        const firstInStock = variants.find((v) => (v.stock ?? 0) > 0);
+        const firstInStock = variants.find((v: { stock?: number | null }) => (v.stock ?? 0) > 0);
         this.selectedVariantId.set((firstInStock ?? variants[0]).id ?? null);
       }
     });
@@ -113,7 +106,7 @@ export default class ProductDetail {
     const p = this.product.value();
     const vid = this.selectedVariantId();
     if (!p?.variants?.length || !vid) return null;
-    return p.variants.find((v) => v.id === vid) ?? null;
+    return p.variants.find((v: { id?: string }) => v.id === vid) ?? null;
   }
 
   protected formatPrice(price: unknown): string {
@@ -131,11 +124,8 @@ export default class ProductDetail {
       this.toast.showError('Stock insuficiente');
       return;
     }
-    this.apollo
-      .mutate({
-        mutation: AddToStoreCartDocument,
-        variables: { input: { variantId: vid, quantity: qty } },
-      })
+    this.api
+      .addToStoreCart({ variantId: vid, quantity: qty })
       .subscribe({
         next: () => {
           this.toast.showSuccess('Añadido al carrito');

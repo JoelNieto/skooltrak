@@ -3,9 +3,8 @@ import { SchoolContext } from '@/shared';
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Apollo } from 'apollo-angular';
 import { CartService } from '../cart.service';
-import { CheckoutStoreDocument, ProcessStorePaymentDocument } from '../graphql/generated/graphql';
+import { StoreApiService } from '../store-api.service';
 
 @Component({
   selector: 'app-checkout',
@@ -74,7 +73,7 @@ import { CheckoutStoreDocument, ProcessStorePaymentDocument } from '../graphql/g
 export default class Checkout {
   protected readonly school = inject(SchoolContext);
   protected readonly cart = inject(CartService);
-  private readonly apollo = inject(Apollo);
+  private readonly api = inject(StoreApiService);
   private readonly toast = inject(Toast);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
@@ -99,30 +98,28 @@ export default class Checkout {
     const schoolId = this.school.currentSchoolId();
     if (!schoolId) return;
     this.paying.set(true);
-    this.apollo
-      .mutate({
-        mutation: CheckoutStoreDocument,
-        variables: { input: { schoolId, notes: `Tarjeta ****${this.cardLast4} · ${this.cardName}` } },
+    this.api
+      .checkoutStore({
+        schoolId,
+        notes: `Tarjeta ****${this.cardLast4} · ${this.cardName}`,
       })
       .subscribe({
-        next: (res) => {
-          const orderId = res.data?.checkoutStore?.id;
+        next: (order) => {
+          const orderId = (order as { id?: string })?.id;
           if (!orderId) {
             this.paying.set(false);
             return;
           }
-          this.apollo
-            .mutate({
-              mutation: ProcessStorePaymentDocument,
-              variables: {
-                input: { orderId, simulateSuccess: !this.simulateFail },
-              },
+          this.api
+            .processStorePayment({
+              orderId,
+              simulateSuccess: !this.simulateFail,
             })
             .subscribe({
               next: (r2) => {
                 this.paying.set(false);
                 this.cart.invalidate();
-                const st = r2.data?.processStorePayment?.paymentStatus;
+                const st = (r2 as { paymentStatus?: string })?.paymentStatus;
                 if (st === 'FAILED') {
                   this.toast.showError('El pago fue rechazado (simulación).');
                   this.router.navigate(['../orders', orderId], { relativeTo: this.route });

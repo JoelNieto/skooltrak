@@ -2,17 +2,18 @@ import { Loader } from '@/ui';
 import { Tab, TabContent, TabList, TabPanel, Tabs } from '@angular/aria/tabs';
 import { DatePipe, DecimalPipe, NgClass } from '@angular/common';
 import { afterRenderEffect, Component, computed, inject, input, signal } from '@angular/core';
-import { rxResource } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
+import { httpResource, HttpClient } from '@angular/common/http';
 import { $Enums } from '@generated/prisma';
-import { Apollo } from 'apollo-angular';
-import { map, of } from 'rxjs';
 import Auth from '../auth/auth';
 import Store from '../core/store';
 import { isValidId } from '../core/validators';
-import { PeriodsByYearDocument, StudentDocument } from '../graphql/generated/graphql';
 import StudentAttendanceReport from './student-attendance-report';
+
+/** REST `GET /api/v1/students/:id` payload (includes nested relations used by this page). */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type StudentView = any;
 
 const ENROLLMENT_STATUS_LABELS: Record<$Enums.EnrollmentStatus, string> = {
   ACTIVE: 'Activo',
@@ -321,7 +322,7 @@ const ENROLLMENT_STATUS_COLORS: Record<$Enums.EnrollmentStatus, string> = {
 })
 export default class Student {
   public id = input.required<string>();
-  private apollo = inject(Apollo);
+  private http = inject(HttpClient);
   private store = inject(Store);
   public auth = inject(Auth);
   public periodId = signal<string>('');
@@ -345,23 +346,19 @@ export default class Student {
     return 'badge-error';
   }
 
-  public periodsResource = rxResource({
-    params: () => ({
-      year: this.store.currentSchool()?.currentYear,
-    }),
-    stream: ({ params }) => {
-      const { year } = params;
+  public periodsResource = httpResource<Array<{ id: string; name: string; startDate: string; endDate: string }>>(
+    () => {
+      const year = this.store.currentSchool()?.currentYear;
       if (!year) {
-        return of([]);
+        return undefined;
       }
-      return this.apollo
-        .watchQuery({
-          query: PeriodsByYearDocument,
-          variables: { year },
-        })
-        .valueChanges.pipe(map((result) => result.data?.periodsByYear ?? []));
+      return {
+        url: '/api/v1/periods/by-year',
+        params: { year: String(year) },
+      };
     },
-  });
+    { defaultValue: [] },
+  );
 
   private currentPeriodId = computed(() => {
     const periods = this.periodsResource.value();
@@ -378,20 +375,7 @@ export default class Student {
     });
   }
 
-  public studentResource = rxResource({
-    params: () => ({
-      id: this.id(),
-    }),
-    stream: ({ params }) => {
-      if (!isValidId(params.id)) {
-        return of(null);
-      }
-      return this.apollo
-        .watchQuery({
-          query: StudentDocument,
-          variables: { id: params.id },
-        })
-        .valueChanges.pipe(map((result) => result.data?.student));
-    },
-  });
+  public studentResource = httpResource<StudentView | null>(() =>
+    isValidId(this.id()) ? `/api/v1/students/${this.id()}` : undefined,
+  );
 }

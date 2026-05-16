@@ -4,9 +4,8 @@ import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { rxResource } from '@angular/core/rxjs-interop';
-import { Apollo } from 'apollo-angular';
 import { map, of } from 'rxjs';
-import { StoreOrdersAdminDocument, UpdateStoreOrderStatusDocument } from '../graphql/generated/graphql';
+import { StoreApiService } from '../store-api.service';
 
 @Component({
   selector: 'app-orders-admin',
@@ -69,7 +68,7 @@ import { StoreOrdersAdminDocument, UpdateStoreOrderStatusDocument } from '../gra
 })
 export default class OrdersAdmin {
   protected readonly school = inject(SchoolContext);
-  private readonly apollo = inject(Apollo);
+  private readonly api = inject(StoreApiService);
   private readonly toast = inject(Toast);
   private readonly tick = signal(0);
 
@@ -77,13 +76,9 @@ export default class OrdersAdmin {
     params: () => ({ schoolId: this.school.currentSchoolId(), t: this.tick() }),
     stream: ({ params }) => {
       if (!params.schoolId) return of([]);
-      return this.apollo
-        .watchQuery({
-          query: StoreOrdersAdminDocument,
-          variables: { schoolId: params.schoolId },
-          fetchPolicy: 'network-only',
-        })
-        .valueChanges.pipe(map((r) => r.data?.storeOrdersAdmin ?? []));
+      return this.api
+        .storeOrdersAdmin(params.schoolId)
+        .pipe(map((rows) => (Array.isArray(rows) ? rows : [])));
     },
   });
 
@@ -95,11 +90,8 @@ export default class OrdersAdmin {
   }
 
   protected updateStatus(orderId: string, status: string) {
-    this.apollo
-      .mutate({
-        mutation: UpdateStoreOrderStatusDocument,
-        variables: { input: { orderId, status: status as never } },
-      })
+    this.api
+      .updateStoreOrderStatus({ orderId, status })
       .subscribe({
         next: () => {
           this.toast.showSuccess('Estado actualizado');

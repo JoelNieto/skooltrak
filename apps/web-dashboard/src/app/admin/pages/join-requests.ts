@@ -1,12 +1,22 @@
 import { EmptyState, Loader, Toast } from '@/ui';
+import { HttpClient } from '@angular/common/http';
 import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
-import { Apollo } from 'apollo-angular';
-import {
-  AdminApproveJoinRequestDocument,
-  AdminPendingJoinRequestsDocument,
-  AdminPendingJoinRequestsQuery,
-} from '../../graphql/generated/graphql';
+
+type JoinRequestRow = {
+  id: string;
+  requestedRole: string;
+  documentId: string;
+  status: string;
+  userId: string;
+  userFirstName: string;
+  userLastName: string;
+  userEmail: string;
+  userImage: string;
+  schoolId: string;
+  schoolName: string;
+  createdAt: string;
+};
 
 @Component({
   selector: 'app-join-requests',
@@ -40,7 +50,6 @@ import {
             <div class="card bg-base-100 shadow">
               <div class="card-body">
                 <div class="flex items-start gap-4">
-                  <!-- Avatar -->
                   <div class="avatar avatar-placeholder">
                     <div class="w-12 h-12 rounded-full bg-primary/10 text-primary">
                       <span class="text-lg font-medium">
@@ -49,7 +58,6 @@ import {
                     </div>
                   </div>
 
-                  <!-- Info -->
                   <div class="flex-1 min-w-0">
                     <h3 class="font-semibold text-base-content">
                       {{ request.userFirstName }} {{ request.userLastName }}
@@ -69,7 +77,6 @@ import {
                     <p class="text-xs text-base-content/40 mt-1">Solicitado {{ request.createdAt | date: 'medium' }}</p>
                   </div>
 
-                  <!-- Actions -->
                   <div class="flex gap-2">
                     <button class="btn btn-success btn-sm" (click)="approve(request.id)" [disabled]="processing()">
                       <span class="material-symbols-outlined text-lg">check</span>
@@ -95,12 +102,12 @@ import {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class JoinRequests {
-  private apollo = inject(Apollo);
+  private http = inject(HttpClient);
   private toasts = inject(Toast);
 
   public loading = signal(true);
   public processing = signal(false);
-  public requests = signal<AdminPendingJoinRequestsQuery['pendingJoinRequests']>([]);
+  public requests = signal<JoinRequestRow[]>([]);
 
   private roleLabels: Record<string, string> = {
     ORG_ADMIN: 'Administrador',
@@ -132,23 +139,16 @@ export default class JoinRequests {
   loadRequests() {
     this.loading.set(true);
 
-    this.apollo
-      .query({
-        query: AdminPendingJoinRequestsDocument,
-        fetchPolicy: 'network-only',
-      })
-      .subscribe({
-        next: (res) => {
-          this.requests.set(
-            (res.data?.pendingJoinRequests as AdminPendingJoinRequestsQuery['pendingJoinRequests']) ?? [],
-          );
-          this.loading.set(false);
-        },
-        error: (err) => {
-          this.loading.set(false);
-          this.toasts.showError(err.message || 'Error al cargar solicitudes');
-        },
-      });
+    this.http.get<JoinRequestRow[]>('/api/v1/auth/pending-join-requests').subscribe({
+      next: (rows) => {
+        this.requests.set(rows ?? []);
+        this.loading.set(false);
+      },
+      error: (err) => {
+        this.loading.set(false);
+        this.toasts.showError(err.message || 'Error al cargar solicitudes');
+      },
+    });
   }
 
   approve(requestId: string) {
@@ -162,22 +162,16 @@ export default class JoinRequests {
   private processRequest(requestId: string, approve: boolean) {
     this.processing.set(true);
 
-    this.apollo
-      .mutate({
-        mutation: AdminApproveJoinRequestDocument,
-        variables: { requestId, approve },
-      })
-      .subscribe({
-        next: () => {
-          this.processing.set(false);
-          this.toasts.showSuccess(approve ? 'Solicitud aprobada' : 'Solicitud rechazada');
-          // Remove from list
-          this.requests.update((reqs) => reqs.filter((r) => r.id !== requestId));
-        },
-        error: (err) => {
-          this.processing.set(false);
-          this.toasts.showError(err.message || 'Error al procesar la solicitud');
-        },
-      });
+    this.http.post('/api/v1/auth/approve-join-request', { requestId, approve }).subscribe({
+      next: () => {
+        this.processing.set(false);
+        this.toasts.showSuccess(approve ? 'Solicitud aprobada' : 'Solicitud rechazada');
+        this.requests.update((reqs) => reqs.filter((r) => r.id !== requestId));
+      },
+      error: (err) => {
+        this.processing.set(false);
+        this.toasts.showError(err.message || 'Error al procesar la solicitud');
+      },
+    });
   }
 }

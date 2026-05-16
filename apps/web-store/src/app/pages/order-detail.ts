@@ -3,9 +3,8 @@ import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject, input } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
-import { Apollo } from 'apollo-angular';
 import { map } from 'rxjs';
-import { StoreOrderDocument } from '../graphql/generated/graphql';
+import { StoreApiService } from '../store-api.service';
 
 @Component({
   selector: 'app-order-detail',
@@ -55,19 +54,13 @@ import { StoreOrderDocument } from '../graphql/generated/graphql';
 })
 export default class OrderDetail {
   readonly id = input.required<string>();
-  private readonly apollo = inject(Apollo);
+  private readonly api = inject(StoreApiService);
   private readonly school = inject(SchoolContext);
 
   protected order = rxResource({
     params: () => ({ id: this.id() }),
     stream: ({ params }) =>
-      this.apollo
-        .watchQuery({
-          query: StoreOrderDocument,
-          variables: { id: params.id },
-          fetchPolicy: 'network-only',
-        })
-        .valueChanges.pipe(map((r) => r.data?.storeOrder)),
+      this.api.storeOrder(params.id).pipe(map((o) => o ?? null)),
   });
 
   protected formatPrice(price: unknown): string {

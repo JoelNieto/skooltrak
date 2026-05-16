@@ -2,18 +2,21 @@ import { Confirmation, Modal, Paginator, Toast } from '@/ui';
 import { Menu, MenuContent, MenuItem, MenuTrigger } from '@angular/aria/menu';
 import { OverlayModule } from '@angular/cdk/overlay';
 import { DatePipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, computed, inject, signal, viewChild } from '@angular/core';
-import { rxResource } from '@angular/core/rxjs-interop';
-
-import { Apollo } from 'apollo-angular';
-import { filter, map, of, switchMap, tap } from 'rxjs';
+import { httpResource, HttpClient } from '@angular/common/http';
+import { ChangeDetectionStrategy, Component, computed, effect, inject, signal, viewChild } from '@angular/core';
+import { filter, switchMap } from 'rxjs';
 import Store from '../../core/store';
-import {
-  AdminDegreesBySchoolIdDocument,
-  AdminDegreesBySchoolIdQuery,
-  AdminRemoveDegreeDocument,
-} from '../../graphql/generated/graphql';
+import { toFetchQueryRecord } from '../../core/fetch-query-params';
 import DegreesForm from '../forms/degrees-form';
+
+type DegreeRow = {
+  id: string;
+  name: string;
+  shortName: string;
+  createdAt: string;
+  updatedAt: string;
+  school: { name: string };
+};
 @Component({
   selector: 'app-degrees',
   imports: [DatePipe, Paginator, Menu, MenuContent, MenuItem, MenuTrigger, OverlayModule],
@@ -108,7 +111,7 @@ import DegreesForm from '../forms/degrees-form';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class Degrees {
-  private apollo = inject(Apollo);
+  #http = inject(HttpClient);
   private store = inject(Store);
   private toast = inject(Toast);
   private modal = inject(Modal);
@@ -132,38 +135,41 @@ export default class Degrees {
     this.pagination.update((prev) => ({ ...prev, take }));
   }
 
-  public degrees = rxResource({
-    params: () => ({
-      schoolId: this.store.currentSchoolId(),
-      take: this.take(),
-      skip: this.skip(),
-    }),
-    stream: ({ params }) => {
-      if (!params.schoolId) {
-        return of([]);
-      }
-      return this.apollo
-        .watchQuery({
-          query: AdminDegreesBySchoolIdDocument,
-          variables: {
-            schoolId: params.schoolId,
-            take: params.take,
-            skip: params.skip,
-          },
-        })
-        .valueChanges.pipe(
-          tap((result) => {
-            this.pagination.update((prev) => ({
-              ...prev,
-              count: result.data?.count ?? 0,
-            }));
-          }),
-          map((result) => (result.data?.degreesBySchoolId as AdminDegreesBySchoolIdQuery['degreesBySchoolId']) ?? []),
-        );
+  public degrees = httpResource<DegreeRow[]>(
+    () => {
+      const schoolId = this.store.currentSchoolId();
+      if (!schoolId) return undefined;
+      return {
+        url: `/api/v1/degrees/by-school`,
+        params: toFetchQueryRecord({
+          schoolId,
+          take: this.take(),
+          skip: this.skip(),
+        }),
+      };
     },
+    { defaultValue: [] },
+  );
+
+  #degreesCount = httpResource<number>(() => {
+    const schoolId = this.store.currentSchoolId();
+    if (!schoolId) return undefined;
+    return {
+      url: `/api/v1/degrees/count`,
+      params: toFetchQueryRecord({ schoolId }),
+    };
   });
 
-  public editDegree(degree?: AdminDegreesBySchoolIdQuery['degreesBySchoolId'][number]) {
+  constructor() {
+    effect(() => {
+      const count = this.#degreesCount.value();
+      if (count != null) {
+        this.pagination.update((prev) => ({ ...prev, count }));
+      }
+    });
+  }
+
+  public editDegree(degree?: DegreeRow) {
     this.modal
       .open(DegreesForm, {
         title: degree ? 'Editar Nivel' : 'Agregar Nivel',
@@ -176,7 +182,7 @@ export default class Degrees {
       });
   }
 
-  public deleteDegree(degree: AdminDegreesBySchoolIdQuery['degreesBySchoolId'][number]) {
+  public deleteDegree(degree: DegreeRow) {
     this.confirmation
       .confirm({
         title: 'Eliminar Nivel',
@@ -184,14 +190,7 @@ export default class Degrees {
       })
       .pipe(
         filter((confirmed: boolean) => confirmed === true),
-        switchMap(() =>
-          this.apollo.mutate({
-            mutation: AdminRemoveDegreeDocument,
-            variables: {
-              removeDegreeId: degree.id,
-            },
-          }),
-        ),
+        switchMap(() => this.#http.delete(`/api/v1/degrees/${degree.id}`)),
       )
       .subscribe({
         next: () => {

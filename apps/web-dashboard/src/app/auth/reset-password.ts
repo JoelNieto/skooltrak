@@ -7,8 +7,7 @@ import {
   Validators,
 } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import { Apollo } from 'apollo-angular';
-import { ResetPasswordResendUserInvitationDocument } from '../graphql/generated/graphql';
+import { HttpClient } from '@angular/common/http';
 import Auth from './auth';
 
 @Component({
@@ -169,7 +168,7 @@ import Auth from './auth';
 export default class ResetPasswordComponent {
   private auth = inject(Auth);
   private router = inject(Router);
-  private apollo = inject(Apollo);
+  private http = inject(HttpClient);
   private toasts = inject(Toast);
 
   token = signal<string | null>(null);
@@ -238,22 +237,17 @@ export default class ResetPasswordComponent {
     if (!email) return;
 
     this.resending.set(true);
-    this.apollo
-      .mutate({
-        mutation: ResetPasswordResendUserInvitationDocument,
-        variables: { email },
-      })
-      .subscribe({
-        next: () => {
-          this.resending.set(false);
-          this.toasts.showSuccess('Invitación reenviada. Revisa tu correo.');
-          this.resendSuccess.set(true);
-          this.error.set(false);
-        },
-        error: (err) => {
-          this.resending.set(false);
-          this.toasts.showError(err.message || 'Error al reenviar invitación');
-        },
-      });
+    this.http.post('/api/v1/auth/resend-invitation', { email }).subscribe({
+      next: () => {
+        this.resending.set(false);
+        this.toasts.showSuccess('Invitación reenviada. Revisa tu correo.');
+        this.resendSuccess.set(true);
+        this.error.set(false);
+      },
+      error: (err) => {
+        this.resending.set(false);
+        this.toasts.showError(err.message || 'Error al reenviar invitación');
+      },
+    });
   }
 }

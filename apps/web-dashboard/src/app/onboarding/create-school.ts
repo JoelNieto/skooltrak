@@ -1,9 +1,9 @@
 import { markGroupDirty, Toast } from '@/ui';
+import { HttpClient } from '@angular/common/http';
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { FormsModule, NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { Apollo } from 'apollo-angular';
-import { OnboardingCreateSchoolWithOrganizationDocument } from '../graphql/generated/graphql';
+import { firstValueFrom } from 'rxjs';
 import Auth from '../auth/auth';
 import Store from '../core/store';
 
@@ -164,7 +164,7 @@ import Store from '../core/store';
 export default class CreateSchool {
   private router = inject(Router);
   private fb = inject(NonNullableFormBuilder);
-  private apollo = inject(Apollo);
+  private http = inject(HttpClient);
   private toasts = inject(Toast);
   private store = inject(Store);
   private auth = inject(Auth);
@@ -193,58 +193,49 @@ export default class CreateSchool {
 
     const { name, shortName } = this.form.getRawValue();
 
-    this.apollo
-      .mutate({
-        mutation: OnboardingCreateSchoolWithOrganizationDocument,
-        variables: {
-          input: {
+    (async () => {
+      try {
+        const result = await firstValueFrom(
+          this.http.post<{ accessToken: string; schoolId: string }>('/api/v1/auth/create-school-with-organization', {
             schoolName: name,
             schoolShortName: shortName,
-          },
-        },
-      })
-      .subscribe({
-        next: (res) => {
-          this.saving.set(false);
-          const result = res.data?.createSchoolWithOrganization;
-          if (result) {
-            // Update the JWT token with the new one that includes org/role info
-            this.auth.token.set(result.accessToken);
-            localStorage.setItem('access_token', result.accessToken);
+          }),
+        );
+        this.auth.token.set(result.accessToken);
+        localStorage.setItem('access_token', result.accessToken);
 
-            // Set the current school in the store
-            this.store.currentSchool.set({
-              id: result.schoolId,
-              name,
-              slug: null,
-              organizationId: '', // Will be populated from the token
-              shortName,
-              logo: '',
-              currencyCode: 'USD',
-              address: '',
-              city: '',
-              state: '',
-              zip: '',
-              country: '',
-              email: '',
-              phone: '',
-              website: '',
-              currentYear: new Date().getFullYear(),
-              createdAt: new Date(),
-              updatedAt: new Date(),
-              primaryColor: null,
-              secondaryColor: null,
-              tertiaryColor: null,
-            });
-            this.toasts.showSuccess('Escuela creada exitosamente');
-            this.router.navigate(['/onboarding/setup']);
-          }
-        },
-        error: (err) => {
-          this.saving.set(false);
-          this.toasts.showError(err.message || 'Error al crear la escuela');
-        },
-      });
+        this.store.currentSchool.set({
+          id: result.schoolId,
+          name,
+          slug: null,
+          organizationId: '',
+          shortName,
+          logo: '',
+          currencyCode: 'USD',
+          address: '',
+          city: '',
+          state: '',
+          zip: '',
+          country: '',
+          email: '',
+          phone: '',
+          website: '',
+          currentYear: new Date().getFullYear(),
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          primaryColor: null,
+          secondaryColor: null,
+          tertiaryColor: null,
+        });
+        this.toasts.showSuccess('Escuela creada exitosamente');
+        this.router.navigate(['/onboarding/setup']);
+      } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : 'Error al crear la escuela';
+        this.toasts.showError(msg);
+      } finally {
+        this.saving.set(false);
+      }
+    })();
   }
 
   public goBack() {

@@ -9,19 +9,14 @@ import {
   output,
   signal,
 } from '@angular/core';
-import { rxResource, takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { httpResource, HttpClient } from '@angular/common/http';
 import {
   NonNullableFormBuilder,
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
-import { Apollo } from 'apollo-angular';
-import {
-  FileShareFormCoursesBySchoolIdDocument,
-  FileShareFormShareFileDocument,
-  FileShareFormRemoveShareDocument,
-} from '../graphql/generated/graphql';
-import { forkJoin, map, of } from 'rxjs';
+import { forkJoin } from 'rxjs';
 import Store from '../core/store';
 
 type ShareTargets = {
@@ -136,7 +131,7 @@ export default class FileShareForm implements OnInit {
   public data = input.required<{ fileId: string; shareTargets?: ShareTargets }>();
   public closeModal = output<{ shared: boolean } | undefined>();
   private fb = inject(NonNullableFormBuilder);
-  private apollo = inject(Apollo);
+  private http = inject(HttpClient);
   private toast = inject(Toast);
   private store = inject(Store);
   private destroyRef = inject(DestroyRef);
@@ -154,26 +149,16 @@ export default class FileShareForm implements OnInit {
   public removedTargetIds = signal<string[]>([]);
   public hasTargets = computed(() => this.targetIds().length > 0);
 
-  public coursesResource = rxResource({
-    params: () => ({
-      schoolId: this.store.currentSchoolId(),
-    }),
-    stream: ({ params }) => {
-      if (!params.schoolId) {
-        return of([]);
+  public coursesResource = httpResource<Array<{ id: string; name: string }>>(
+    () => {
+      const schoolId = this.store.currentSchoolId();
+      if (!schoolId) {
+        return undefined;
       }
-      return this.apollo
-        .watchQuery<{
-          coursesBySchoolId: Array<{ id: string; name: string }>;
-        }>({
-          query: FileShareFormCoursesBySchoolIdDocument,
-          variables: {
-            schoolId: params.schoolId,
-          },
-        })
-        .valueChanges.pipe(map((result) => result.data?.coursesBySchoolId ?? []));
+      return `/api/v1/courses/by-school/${schoolId}`;
     },
-  });
+    { defaultValue: [] },
+  );
 
   constructor() {
     this.form
@@ -277,30 +262,20 @@ export default class FileShareForm implements OnInit {
     );
 
     const shareMutations = newTargets.map((targetId) =>
-      this.apollo.mutate({
-        mutation: FileShareFormShareFileDocument,
-        variables: {
-          shareFileInput: {
-            fileId,
-            targetType,
-            targetId,
-            permission,
-          },
-        },
-      })
+      this.http.post('/api/v1/files/share', {
+        fileId,
+        targetType,
+        targetId,
+        permission,
+      }),
     );
 
     const removeMutations = removedTargets.map((targetId) =>
-      this.apollo.mutate({
-        mutation: FileShareFormRemoveShareDocument,
-        variables: {
-          removeShareInput: {
-            fileId,
-            targetType,
-            targetId,
-          },
-        },
-      })
+      this.http.post('/api/v1/files/share/remove', {
+        fileId,
+        targetType,
+        targetId,
+      }),
     );
 
     const mutations = [...shareMutations, ...removeMutations];

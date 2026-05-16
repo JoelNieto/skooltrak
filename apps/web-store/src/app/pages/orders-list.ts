@@ -3,9 +3,8 @@ import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { rxResource } from '@angular/core/rxjs-interop';
-import { Apollo } from 'apollo-angular';
 import { map, of } from 'rxjs';
-import { MyStoreOrdersDocument } from '../graphql/generated/graphql';
+import { StoreApiService } from '../store-api.service';
 
 @Component({
   selector: 'app-orders-list',
@@ -53,7 +52,7 @@ import { MyStoreOrdersDocument } from '../graphql/generated/graphql';
 })
 export default class OrdersList {
   protected readonly school = inject(SchoolContext);
-  private readonly apollo = inject(Apollo);
+  private readonly api = inject(StoreApiService);
 
   protected orders = rxResource({
     params: () => ({ schoolId: this.school.currentSchoolId() }),
@@ -61,13 +60,9 @@ export default class OrdersList {
       if (!params.schoolId) {
         return of([]);
       }
-      return this.apollo
-        .watchQuery({
-          query: MyStoreOrdersDocument,
-          variables: { schoolId: params.schoolId },
-          fetchPolicy: 'network-only',
-        })
-        .valueChanges.pipe(map((r) => r.data?.myStoreOrders ?? []));
+      return this.api
+        .myStoreOrders(params.schoolId)
+        .pipe(map((rows) => (Array.isArray(rows) ? rows : [])));
     },
   });
 

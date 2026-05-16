@@ -7,21 +7,15 @@ import {
   OnInit,
   output,
 } from '@angular/core';
-import { rxResource } from '@angular/core/rxjs-interop';
+import { httpResource } from '@angular/common/http';
 import {
   NonNullableFormBuilder,
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
 import { Prisma } from '@generated/prisma';
-import { Apollo } from 'apollo-angular';
-import { map } from 'rxjs';
-import {
-  WebAdminCreateUserDocument,
-  WebAdminGetOrganizationsForUserDocument,
-  WebAdminGetRolesForUserDocument,
-  WebAdminUpdateUserDocument,
-} from '../graphql/generated';
+import { HttpClient } from '@angular/common/http';
+import { firstValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-users-form',
@@ -105,28 +99,17 @@ export class UsersForm implements OnInit {
   public data = input<{ user?: Prisma.UserCreateInput }>();
   public closeModal = output<void>();
   private fb = inject(NonNullableFormBuilder);
-  private apollo = inject(Apollo);
+  private http = inject(HttpClient);
   private toasts = inject(Toast);
 
-  public roles = rxResource({
-    stream: () =>
-      this.apollo
-        .watchQuery({
-          fetchPolicy: 'cache-and-network',
-          query: WebAdminGetRolesForUserDocument,
-        })
-        .valueChanges.pipe(map((result) => result.data?.roles ?? [])),
+  public roles = httpResource<Array<{ id: string; name: string }>>(() => '/api/v1/roles', {
+    defaultValue: [],
   });
 
-  public organizations = rxResource({
-    stream: () =>
-      this.apollo
-        .watchQuery({
-          fetchPolicy: 'cache-and-network',
-          query: WebAdminGetOrganizationsForUserDocument,
-        })
-        .valueChanges.pipe(map((result) => result.data?.organizations ?? [])),
-  });
+  public organizations = httpResource<Array<{ id: string; name: string }>>(
+    () => '/api/v1/organizations',
+    { defaultValue: [] },
+  );
 
   public form = this.fb.group({
     firstName: ['', [Validators.required]],
@@ -149,44 +132,28 @@ export class UsersForm implements OnInit {
       return;
     }
 
+    const body = this.form.getRawValue();
     if (this.data()?.user) {
-      this.apollo
-        .mutate({
-          mutation: WebAdminUpdateUserDocument,
-          variables: {
-            updateUserInput: {
-              ...this.form.getRawValue(),
-              id: this.data()!.user!.id!,
-            },
-          },
+      void firstValueFrom(
+        this.http.patch('/api/v1/users', { ...body, id: this.data()!.user!.id! }),
+      )
+        .then(() => {
+          this.toasts.showSuccess('Usuario actualizado exitosamente');
+          this.closeModal.emit();
         })
-        .subscribe({
-          next: () => {
-            this.toasts.showSuccess('Usuario actualizado exitosamente');
-            this.closeModal.emit();
-          },
-          error: (error) => {
-            this.toasts.showError('Error al actualizar el usuario');
-            console.error(error);
-          },
+        .catch((error) => {
+          this.toasts.showError('Error al actualizar el usuario');
+          console.error(error);
         });
     } else {
-      this.apollo
-        .mutate({
-          mutation: WebAdminCreateUserDocument,
-          variables: {
-            createUserInput: this.form.getRawValue(),
-          },
+      void firstValueFrom(this.http.post('/api/v1/users', body))
+        .then(() => {
+          this.toasts.showSuccess('Usuario creado exitosamente');
+          this.closeModal.emit();
         })
-        .subscribe({
-          next: () => {
-            this.toasts.showSuccess('Usuario creado exitosamente');
-            this.closeModal.emit();
-          },
-          error: (error) => {
-            this.toasts.showError('Error al crear el usuario');
-            console.error(error);
-          },
+        .catch((error) => {
+          this.toasts.showError('Error al crear el usuario');
+          console.error(error);
         });
     }
   }

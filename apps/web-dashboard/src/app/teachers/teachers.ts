@@ -6,25 +6,19 @@ import {
   afterRenderEffect,
   ChangeDetectionStrategy,
   Component,
-  DestroyRef,
   inject,
   signal,
   viewChild,
 } from '@angular/core';
-import { rxResource, takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { effect } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
+import { httpResource, HttpClient } from '@angular/common/http';
 import { Prisma } from '@generated/prisma';
-
-import { Apollo } from 'apollo-angular';
-import {
-  GetTeachersDocument,
-  RemoveTeacherDocument,
-  ResendUserInvitationDocument,
-} from '../graphql/generated/graphql';
-import { catchError, filter, map, of, switchMap, tap } from 'rxjs';
+import { catchError, filter, of, switchMap } from 'rxjs';
 import Auth from '../auth/auth';
 import Store from '../core/store';
+import { toFetchQueryRecord } from '../core/fetch-query-params';
 type Teacher = Prisma.TeacherGetPayload<{ include: { user: true } }> & {
   name: string;
   initials: string;
@@ -187,50 +181,48 @@ type Teacher = Prisma.TeacherGetPayload<{ include: { user: true } }> & {
 })
 export default class Teachers {
   public store = inject(Store);
-  private apollo = inject(Apollo);
+  private http = inject(HttpClient);
   public auth = inject(Auth);
   public pagination = inject(Pagination);
   #confirmation = inject(Confirmation);
   #toasts = inject(Toast);
-  #destroyRef = inject(DestroyRef);
   actionsMenu = viewChild<Menu<string>>('actionsMenu');
   searchText = signal('');
 
-  public teachers = rxResource({
-    params: () => ({
+  public teachers = httpResource<Teacher[]>(
+    () => ({
+      url: '/api/v1/teachers',
+      params: toFetchQueryRecord({
+        take: this.pagination.take(),
+        skip: this.pagination.skip(),
+        search: this.pagination.search(),
+        orderBy: this.pagination.sortBy(),
+        orderDirection: this.pagination.sortOrder(),
+      }),
+    }),
+    { defaultValue: [] },
+  );
+
+  private readonly teachersCount = httpResource<number>(() => ({
+    url: '/api/v1/teachers/count',
+    params: toFetchQueryRecord({
       take: this.pagination.take(),
       skip: this.pagination.skip(),
       search: this.pagination.search(),
       orderBy: this.pagination.sortBy(),
       orderDirection: this.pagination.sortOrder(),
     }),
-    stream: ({ params }) => {
-      const { take, skip, search, orderBy, orderDirection } = params;
-
-      return this.apollo
-        .watchQuery({
-          query: GetTeachersDocument,
-          variables: {
-            take,
-            skip,
-            search,
-            orderBy,
-            orderDirection,
-          },
-        })
-        .valueChanges.pipe(
-          tap(({ data }) => {
-            this.pagination.updateCount(data?.count ?? 0);
-          }),
-          map((result) => result.data?.teachers),
-          takeUntilDestroyed(this.#destroyRef),
-        );
-    },
-  });
+  }));
 
   constructor() {
     afterRenderEffect(() => {
       this.pagination.updateSearch(this.searchText());
+    });
+    effect(() => {
+      const count = this.teachersCount.value();
+      if (count != null) {
+        this.pagination.updateCount(count);
+      }
     });
   }
 
@@ -241,20 +233,16 @@ export default class Teachers {
   }
 
   public resendInvitation(email: string) {
-    this.apollo
-      .mutate({
-        mutation: ResendUserInvitationDocument,
-        variables: { email },
-      })
-      .subscribe({
-        next: () => {
-          this.#toasts.showSuccess('Invitación reenviada');
-          this.teachers.reload();
-        },
-        error: (err) => {
-          this.#toasts.showError(err.message || 'Error al reenviar invitación');
-        },
-      });
+    this.http.post('/api/v1/auth/resend-invitation', { email }).subscribe({
+      next: () => {
+        this.#toasts.showSuccess('Invitación reenviada');
+        this.teachers.reload();
+      },
+      error: (err: unknown) => {
+        const msg = err instanceof Error ? err.message : 'Error al reenviar invitación';
+        this.#toasts.showError(msg);
+      },
+    });
   }
 
   public deleteTeacher(teacher: { id?: string }) {
@@ -267,12 +255,7 @@ export default class Teachers {
         filter((result) => result),
         switchMap(() => {
           if (!teacher.id) return of(null);
-          return this.apollo.mutate({
-            mutation: RemoveTeacherDocument,
-            variables: {
-              id: teacher.id,
-            },
-          });
+          return this.http.delete(`/api/v1/teachers/${teacher.id}`);
         }),
         catchError((error) => {
           console.error(error);

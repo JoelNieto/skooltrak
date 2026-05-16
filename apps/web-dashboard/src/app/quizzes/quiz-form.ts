@@ -13,18 +13,11 @@ import {
 import { Router, RouterLink } from '@angular/router';
 import { $Enums } from '@generated/prisma';
 
-import { Apollo } from 'apollo-angular';
+import { HttpClient } from '@angular/common/http';
 import { of } from 'rxjs';
 import { map } from 'rxjs/operators';
 import Store from '../core/store';
 import { isValidId } from '../core/validators';
-import {
-  CreateQuizDocument,
-  QuizDocument,
-  QuizFormCoursesBySchoolIdDocument,
-  QuizQuery,
-  UpdateQuizDocument,
-} from '../graphql/generated/graphql';
 import { QuizQuestionControl } from './quiz-question-control';
 
 @Component({
@@ -124,7 +117,7 @@ export default class QuizForm {
 
   private fb = inject(NonNullableFormBuilder);
   private store = inject(Store);
-  private apollo = inject(Apollo);
+  private http = inject(HttpClient);
   private router = inject(Router);
   private toast = inject(Toast);
 
@@ -180,19 +173,21 @@ export default class QuizForm {
       if (!params.id || !isValidId(params.id)) {
         return of(null);
       }
-      return this.apollo
-        .watchQuery({
-          query: QuizDocument,
-          variables: { id: params.id },
-        })
-        .valueChanges.pipe(
-          map((res) => {
-            if (res.data?.quiz) {
-              return res.data.quiz as QuizQuery['quiz'];
-            }
-            return null;
-          }),
-        );
+      return this.http.get<{
+        id: string;
+        title: string;
+        details: string;
+        courseId: string;
+        course?: { id: string };
+        questions: Array<{
+          id: string;
+          question: string;
+          value: unknown;
+          type: string;
+          timeLimit?: number | null;
+          options?: Array<{ id: string; option: string; isCorrect: boolean }>;
+        }>;
+      } | null>(`/api/v1/quizzes/${params.id}`);
     },
   });
 
@@ -205,14 +200,9 @@ export default class QuizForm {
       if (!schoolId) {
         return of([]);
       }
-      return this.apollo
-        .watchQuery({
-          query: QuizFormCoursesBySchoolIdDocument,
-          variables: {
-            schoolId: schoolId,
-          },
-        })
-        .valueChanges.pipe(map((result) => result.data?.coursesBySchoolId ?? []));
+      return this.http
+        .get<Array<{ id: string; name: string }>>(`/api/v1/courses/by-school/${schoolId}`)
+        .pipe(map((rows) => rows ?? []));
     },
   });
 
@@ -247,14 +237,14 @@ export default class QuizForm {
         this.quizForm.patchValue({
           title: quiz.title,
           details: quiz.details,
-          courseId: quiz.course.id,
+          courseId: quiz.course?.id ?? quiz.courseId,
         });
         this.questions.clear();
         for (const q of quiz.questions) {
           this.questions.push(
             this.createQuestionGroup({
               question: q.question,
-              value: q.value,
+              value: Number(q.value),
               type: q.type,
               timeLimit: q.timeLimit ?? 0,
               options: q.options?.map((o) => ({ option: o.option, isCorrect: o.isCorrect })),
@@ -306,20 +296,15 @@ export default class QuizForm {
     this.isSaving.set(true);
 
     if (this.isEditMode()) {
-      this.apollo
-        .mutate({
-          mutation: UpdateQuizDocument,
-          variables: {
-            updateQuizInput: {
-              id: this.id()!,
-              title: raw.title,
-              details: raw.details,
-              courseId: raw.courseId,
-              teacherId,
-              organizationId,
-              questions,
-            },
-          },
+      this.http
+        .patch<{ id: string }>(`/api/v1/quizzes`, {
+          id: this.id()!,
+          title: raw.title,
+          details: raw.details,
+          courseId: raw.courseId,
+          teacherId,
+          organizationId,
+          questions,
         })
         .subscribe({
           next: () => {
@@ -333,25 +318,20 @@ export default class QuizForm {
           },
         });
     } else {
-      this.apollo
-        .mutate({
-          mutation: CreateQuizDocument,
-          variables: {
-            createQuizInput: {
-              title: raw.title,
-              details: raw.details,
-              courseId: raw.courseId,
-              teacherId,
-              organizationId,
-              questions,
-            },
-          },
+      this.http
+        .post<{ id: string }>(`/api/v1/quizzes`, {
+          title: raw.title,
+          details: raw.details,
+          courseId: raw.courseId,
+          teacherId,
+          organizationId,
+          questions,
         })
         .subscribe({
           next: (res) => {
             this.isSaving.set(false);
             this.toast.showSuccess('Quiz creado correctamente');
-            const id = res.data?.createQuiz?.id;
+            const id = res.id;
             if (id) {
               this.router.navigate(['/quizzes', id]);
             }

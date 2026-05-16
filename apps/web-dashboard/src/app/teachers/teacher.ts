@@ -3,11 +3,13 @@ import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject, input } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
-import { Apollo } from 'apollo-angular';
-import { map, of } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
+import { of } from 'rxjs';
 import Auth from '../auth/auth';
 import { isValidId } from '../core/validators';
-import { TeacherDocument } from '../graphql/generated/graphql';
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type TeacherView = any;
 
 @Component({
   imports: [Loader, RouterLink, DatePipe],
@@ -202,7 +204,7 @@ import { TeacherDocument } from '../graphql/generated/graphql';
 })
 export default class Teacher {
   public id = input.required<string>();
-  #apollo = inject(Apollo);
+  #http = inject(HttpClient);
   public auth = inject(Auth);
   public teacherResource = rxResource({
     params: () => ({
@@ -213,15 +215,7 @@ export default class Teacher {
       if (!isValidId(id)) {
         return of(null);
       }
-      return this.#apollo
-        .watchQuery({
-          fetchPolicy: 'cache-and-network',
-          query: TeacherDocument,
-          variables: {
-            teacherId: id,
-          },
-        })
-        .valueChanges.pipe(map((result) => result.data?.teacher));
+      return this.#http.get<TeacherView>(`/api/v1/teachers/${id}`);
     },
   });
 }

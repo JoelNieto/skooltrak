@@ -2,19 +2,14 @@ import { Confirmation, Modal, Paginator, Toast } from '@/ui';
 import { Menu, MenuContent, MenuItem, MenuTrigger } from '@angular/aria/menu';
 import { OverlayModule } from '@angular/cdk/overlay';
 import { Component, computed, inject, signal, viewChild } from '@angular/core';
-import { rxResource } from '@angular/core/rxjs-interop';
+import { effect } from '@angular/core';
+import { httpResource, HttpClient } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { Prisma, StudyPlan } from '@generated/prisma';
-
-import { Apollo } from 'apollo-angular';
-import { filter, map, of, switchMap, tap } from 'rxjs';
+import { filter, switchMap } from 'rxjs';
 import Store from '../../core/store';
-import {
-  AdminGetCoursesDocument,
-  AdminRemoveCourseDocument,
-  AdminStudyPlansForCoursesDocument,
-} from '../../graphql/generated/graphql';
+import { toFetchQueryRecord } from '../../core/fetch-query-params';
 import CoursesForm from '../forms/courses-form';
 
 type Teacher = Prisma.TeacherGetPayload<{ include: { user: true } }> & {
@@ -158,7 +153,7 @@ type CourseType = Prisma.CourseGetPayload<{
 })
 export default class Courses {
   #modal = inject(Modal);
-  #apollo = inject(Apollo);
+  #http = inject(HttpClient);
   #confirmation = inject(Confirmation);
   #store = inject(Store);
   #toast = inject(Toast);
@@ -182,60 +177,65 @@ export default class Courses {
     count: 0,
   });
 
-  public studyPlans = rxResource({
-    params: () => ({
-      schoolId: this.#store.currentSchoolId(),
-    }),
-    stream: ({ params }) => {
-      if (!params.schoolId) {
-        return of([]);
+  public studyPlans = httpResource<StudyPlan[]>(
+    () => {
+      const schoolId = this.#store.currentSchoolId();
+      if (!schoolId) {
+        return undefined;
       }
-      return this.#apollo
-        .watchQuery({
-          query: AdminStudyPlansForCoursesDocument,
-          variables: {
-            schoolId: params.schoolId,
-          },
-        })
-        .valueChanges.pipe(map((result) => (result.data?.studyPlansBySchoolId as StudyPlan[]) ?? []));
+      return {
+        url: '/api/v1/study-plans/by-school',
+        params: { schoolId },
+      };
     },
+    { defaultValue: [] },
+  );
+
+  public courses = httpResource<CourseType[]>(
+    () => {
+      const schoolId = this.#store.currentSchoolId();
+      if (!schoolId) {
+        return undefined;
+      }
+      return {
+        url: '/api/v1/courses',
+        params: toFetchQueryRecord({
+          schoolId,
+          take: this.take(),
+          skip: this.skip(),
+          search: this.searchText(),
+          studyPlanId: this.studyPlanId() ?? undefined,
+        }),
+      };
+    },
+    { defaultValue: [] },
+  );
+
+  private readonly coursesCount = httpResource<number>(() => {
+    const schoolId = this.#store.currentSchoolId();
+    if (!schoolId) {
+      return undefined;
+    }
+    return {
+      url: '/api/v1/courses/count',
+      params: toFetchQueryRecord({
+        schoolId,
+        take: this.take(),
+        skip: this.skip(),
+        search: this.searchText(),
+        studyPlanId: this.studyPlanId() ?? undefined,
+      }),
+    };
   });
 
-  public courses = rxResource({
-    params: () => ({
-      schoolId: this.#store.currentSchoolId(),
-      search: this.searchText(),
-      studyPlanId: this.studyPlanId(),
-      take: this.take(),
-      skip: this.skip(),
-    }),
-    stream: ({ params }) => {
-      const { schoolId, take, skip, search, studyPlanId } = params;
-      if (!schoolId) {
-        return of([]);
+  constructor() {
+    effect(() => {
+      const count = this.coursesCount.value();
+      if (count != null) {
+        this.pagination.update((prev) => ({ ...prev, count }));
       }
-      return this.#apollo
-        .watchQuery({
-          query: AdminGetCoursesDocument,
-          variables: {
-            schoolId,
-            take,
-            skip,
-            search,
-            studyPlanId,
-          },
-        })
-        .valueChanges.pipe(
-          tap((result) => {
-            this.pagination.update((prev) => ({
-              ...prev,
-              count: result.data?.count ?? 0,
-            }));
-          }),
-          map((result) => (result.data?.courses ?? []) as CourseType[]),
-        );
-    },
-  });
+    });
+  }
 
   public editCourse(
     course?: Prisma.CourseGetPayload<{
@@ -262,14 +262,7 @@ export default class Courses {
       })
       .pipe(
         filter((confirmed: boolean) => confirmed === true),
-        switchMap(() =>
-          this.#apollo.mutate({
-            mutation: AdminRemoveCourseDocument,
-            variables: {
-              removeCourseId: course.id,
-            },
-          }),
-        ),
+        switchMap(() => this.#http.delete(`/api/v1/courses/${course.id}`)),
       )
       .subscribe({
         next: () => {

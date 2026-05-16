@@ -3,17 +3,21 @@ import { Menu, MenuContent, MenuItem, MenuTrigger } from '@angular/aria/menu';
 import { OverlayModule } from '@angular/cdk/overlay';
 import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject, viewChild } from '@angular/core';
-import { rxResource } from '@angular/core/rxjs-interop';
-
-import { Apollo } from 'apollo-angular';
-import { filter, map, of, switchMap } from 'rxjs';
+import { httpResource, HttpClient } from '@angular/common/http';
+import { filter, switchMap } from 'rxjs';
 import Store from '../../core/store';
-import {
-  AdminRemoveStudyPlanDocument,
-  AdminStudyPlansBySchoolIdDocument,
-  AdminStudyPlansBySchoolIdQuery,
-} from '../../graphql/generated/graphql';
 import StudyPlanForm from '../forms/study-plans-forms';
+
+type StudyPlanRow = {
+  id: string;
+  name: string;
+  shortName?: string;
+  level?: number;
+  degree: { name: string };
+  createdAt?: string;
+  updatedAt?: string;
+};
+
 @Component({
   selector: 'app-study-plans',
   imports: [DatePipe, Menu, MenuContent, MenuItem, MenuTrigger, OverlayModule],
@@ -101,37 +105,28 @@ import StudyPlanForm from '../forms/study-plans-forms';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class StudyPlans {
-  private apollo = inject(Apollo);
+  private http = inject(HttpClient);
   private store = inject(Store);
   private toast = inject(Toast);
   private modal = inject(Modal);
   private confirmation = inject(Confirmation);
   actionsMenu = viewChild<Menu<string>>('actionsMenu');
-  public studyPlans = rxResource({
-    params: () => ({
-      schoolId: this.store.currentSchoolId(),
-    }),
-    stream: ({ params }) => {
-      if (!params.schoolId) {
-        return of([]);
-      }
-      return this.apollo
-        .watchQuery({
-          query: AdminStudyPlansBySchoolIdDocument,
-          variables: {
-            schoolId: params.schoolId,
-          },
-        })
-        .valueChanges.pipe(
-          map(
-            (result) =>
-              (result.data?.studyPlansBySchoolId as AdminStudyPlansBySchoolIdQuery['studyPlansBySchoolId']) ?? [],
-          ),
-        );
-    },
-  });
 
-  public editStudyPlan(studyPlan?: AdminStudyPlansBySchoolIdQuery['studyPlansBySchoolId'][number]) {
+  public studyPlans = httpResource<StudyPlanRow[]>(
+    () => {
+      const schoolId = this.store.currentSchoolId();
+      if (!schoolId) {
+        return undefined;
+      }
+      return {
+        url: '/api/v1/study-plans/by-school',
+        params: { schoolId },
+      };
+    },
+    { defaultValue: [] },
+  );
+
+  public editStudyPlan(studyPlan?: StudyPlanRow) {
     this.modal
       .open(StudyPlanForm, {
         title: studyPlan ? 'Editar Plan de Estudio' : 'Agregar Plan de Estudio',
@@ -145,7 +140,7 @@ export default class StudyPlans {
       });
   }
 
-  deleteStudyPlan(studyPlan: AdminStudyPlansBySchoolIdQuery['studyPlansBySchoolId'][number]) {
+  deleteStudyPlan(studyPlan: StudyPlanRow) {
     this.confirmation
       .confirm({
         title: 'Eliminar Plan de Estudio',
@@ -155,14 +150,7 @@ export default class StudyPlans {
       })
       .pipe(
         filter((result) => result === true),
-        switchMap(() => {
-          return this.apollo.mutate({
-            mutation: AdminRemoveStudyPlanDocument,
-            variables: {
-              id: studyPlan.id,
-            },
-          });
-        }),
+        switchMap(() => this.http.delete(`/api/v1/study-plans/${studyPlan.id}`)),
       )
       .subscribe({
         next: () => {

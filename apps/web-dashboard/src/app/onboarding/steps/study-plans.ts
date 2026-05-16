@@ -1,15 +1,7 @@
 import { markGroupDirty, Toast } from '@/ui';
 import { ChangeDetectionStrategy, Component, computed, inject, input, output, signal } from '@angular/core';
-import { rxResource } from '@angular/core/rxjs-interop';
+import { httpResource, HttpClient } from '@angular/common/http';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Apollo } from 'apollo-angular';
-import {
-  OnboardingStepsCreateStudyPlanDocument,
-  OnboardingStepsDegreesBySchoolIdDocument,
-  OnboardingStepsGetGradeMetricsDocument,
-  OnboardingStepsStudyPlansGetSchoolsDocument,
-} from '../../graphql/generated/graphql';
-import { map, of } from 'rxjs';
 import Store from '../../core/store';
 import { CreatedEntity } from '../setup-wizard';
 
@@ -182,7 +174,7 @@ import { CreatedEntity } from '../setup-wizard';
 })
 export default class StudyPlansStep {
   private fb = inject(NonNullableFormBuilder);
-  private apollo = inject(Apollo);
+  #http = inject(HttpClient);
   private toasts = inject(Toast);
   private store = inject(Store);
 
@@ -196,14 +188,8 @@ export default class StudyPlansStep {
   public addAnother = false;
 
   // Fetch schools to get the first one if not in store
-  public schools = rxResource({
-    stream: () =>
-      this.apollo
-        .watchQuery({
-          query: OnboardingStepsStudyPlansGetSchoolsDocument,
-          fetchPolicy: 'cache-first',
-        })
-        .valueChanges.pipe(map((result) => result.data?.schools ?? [])),
+  public schools = httpResource<Array<{ id: string; name: string }>>(() => '/api/v1/schools', {
+    defaultValue: [],
   });
 
   // Get the school ID from store or first school from API
@@ -213,30 +199,19 @@ export default class StudyPlansStep {
     return this.schools.value()?.[0]?.id;
   });
 
-  public degrees = rxResource({
-    params: () => ({ schoolId: this.schoolId() }),
-    stream: ({ params }) => {
-      if (!params.schoolId) {
-        return of([]);
+  public degrees = httpResource<Array<{ id: string; name: string }>>(
+    () => {
+      const schoolId = this.schoolId();
+      if (!schoolId) {
+        return undefined;
       }
-      return this.apollo
-        .watchQuery({
-          query: OnboardingStepsDegreesBySchoolIdDocument,
-          variables: { schoolId: params.schoolId },
-          fetchPolicy: 'cache-and-network',
-        })
-        .valueChanges.pipe(map((result) => result.data?.degreesBySchoolId ?? []));
+      return { url: '/api/v1/degrees/by-school', params: { schoolId } };
     },
-  });
+    { defaultValue: [] },
+  );
 
-  public gradeMetrics = rxResource({
-    stream: () =>
-      this.apollo
-        .watchQuery({
-          query: OnboardingStepsGetGradeMetricsDocument,
-          fetchPolicy: 'cache-first',
-        })
-        .valueChanges.pipe(map((result) => result.data?.gradeMetrics ?? [])),
+  public gradeMetrics = httpResource<Array<{ id: string; name: string }>>(() => '/api/v1/grade-metrics', {
+    defaultValue: [],
   });
 
   // Combine API degrees with newly created ones
@@ -271,21 +246,15 @@ export default class StudyPlansStep {
 
     const formValue = this.form.getRawValue();
 
-    this.apollo
-      .mutate({
-        mutation: OnboardingStepsCreateStudyPlanDocument,
-        variables: {
-          createStudyPlanInput: {
-            ...formValue,
-            description: '',
-            schoolId,
-          },
-        },
+    this.#http
+      .post<{ id: string; name: string }>('/api/v1/study-plans', {
+        ...formValue,
+        description: '',
+        schoolId,
       })
       .subscribe({
-        next: (result) => {
+        next: (studyPlan) => {
           this.saving.set(false);
-          const studyPlan = result.data?.createStudyPlan;
           if (studyPlan) {
             this.entityCreated.emit({ id: studyPlan.id, name: studyPlan.name, type: 'studyPlan' });
             this.toasts.showSuccess(`Plan "${studyPlan.name}" creado`);

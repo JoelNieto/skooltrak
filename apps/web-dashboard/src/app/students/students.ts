@@ -2,16 +2,16 @@ import { Confirmation, Pagination, Paginator, Toast } from '@/ui';
 import { Menu, MenuContent, MenuItem, MenuTrigger } from '@angular/aria/menu';
 import { OverlayModule } from '@angular/cdk/overlay';
 import { DatePipe, NgClass } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
 import { Component, inject, signal, viewChild } from '@angular/core';
-import { rxResource } from '@angular/core/rxjs-interop';
+import { effect } from '@angular/core';
+import { httpResource } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { $Enums } from '@generated/prisma';
-
-import { Apollo } from 'apollo-angular';
-import { filter, map, of, switchMap, tap } from 'rxjs';
+import { filter, of, switchMap } from 'rxjs';
 import Auth from '../auth/auth';
-import { GetStudentsDocument, RemoveStudentDocument, ResendUserInvitationDocument } from '../graphql/generated/graphql';
+import { toFetchQueryRecord } from '../core/fetch-query-params';
 
 const ENROLLMENT_STATUS_LABELS: Record<$Enums.EnrollmentStatus, string> = {
   ACTIVE: 'Activo',
@@ -203,42 +203,58 @@ const ENROLLMENT_STATUS_COLORS: Record<$Enums.EnrollmentStatus, string> = {
   `,
 })
 export default class Students {
-  private apollo = inject(Apollo);
+  private http = inject(HttpClient);
   private toasts = inject(Toast);
   private confirmation = inject(Confirmation);
   public searchText = signal('');
   public pagination = inject(Pagination);
   actionsMenu = viewChild<Menu<string>>('actionsMenu');
   public auth = inject(Auth);
-  public students = rxResource({
-    params: () => ({
+  public students = httpResource<
+    Array<{
+      id: string;
+      name: string;
+      email?: string;
+      documentId?: string;
+      enrollmentStatus?: $Enums.EnrollmentStatus;
+      classGroupId?: string;
+      classGroup?: { name: string };
+      user?: { emailVerified?: boolean };
+      createdAt?: string;
+    }>
+  >(
+    () => ({
+      url: '/api/v1/students',
+      params: toFetchQueryRecord({
+        take: this.pagination.take(),
+        skip: this.pagination.skip(),
+        search: this.pagination.search(),
+        orderBy: this.pagination.sortBy(),
+        orderDirection: this.pagination.sortOrder(),
+      }),
+    }),
+    { defaultValue: [] },
+  );
+
+  private readonly studentsCount = httpResource<number>(() => ({
+    url: '/api/v1/students/count',
+    params: toFetchQueryRecord({
       take: this.pagination.take(),
       skip: this.pagination.skip(),
       search: this.pagination.search(),
       orderBy: this.pagination.sortBy(),
       orderDirection: this.pagination.sortOrder(),
     }),
-    stream: ({ params }) => {
-      const { take, skip, search, orderBy, orderDirection } = params;
-      return this.apollo
-        .watchQuery({
-          query: GetStudentsDocument,
-          variables: {
-            take,
-            skip,
-            search,
-            orderBy,
-            orderDirection,
-          },
-        })
-        .valueChanges.pipe(
-          tap(({ data }) => {
-            this.pagination.updateCount(data?.count ?? 0);
-          }),
-          map((result) => result.data?.students ?? []),
-        );
-    },
-  });
+  }));
+
+  constructor() {
+    effect(() => {
+      const count = this.studentsCount.value();
+      if (count != null) {
+        this.pagination.updateCount(count);
+      }
+    });
+  }
 
   getStatusLabel(status: $Enums.EnrollmentStatus): string {
     return ENROLLMENT_STATUS_LABELS[status] || status;
@@ -255,20 +271,16 @@ export default class Students {
   }
 
   public resendInvitation(email: string) {
-    this.apollo
-      .mutate({
-        mutation: ResendUserInvitationDocument,
-        variables: { email },
-      })
-      .subscribe({
-        next: () => {
-          this.toasts.showSuccess('Invitación reenviada');
-          this.students.reload();
-        },
-        error: (err) => {
-          this.toasts.showError(err.message || 'Error al reenviar invitación');
-        },
-      });
+    this.http.post('/api/v1/auth/resend-invitation', { email }).subscribe({
+      next: () => {
+        this.toasts.showSuccess('Invitación reenviada');
+        this.students.reload();
+      },
+      error: (err: unknown) => {
+        const msg = err instanceof Error ? err.message : 'Error al reenviar invitación';
+        this.toasts.showError(msg);
+      },
+    });
   }
 
   public deleteStudent(student: { id?: string; name?: string }) {
@@ -284,12 +296,7 @@ export default class Students {
         filter((confirmed: boolean) => confirmed === true),
         switchMap(() => {
           if (!student.id) return of(null);
-          return this.apollo.mutate({
-            mutation: RemoveStudentDocument,
-            variables: {
-              id: student.id,
-            },
-          });
+          return this.http.delete(`/api/v1/students/${student.id}`);
         }),
       )
       .subscribe({

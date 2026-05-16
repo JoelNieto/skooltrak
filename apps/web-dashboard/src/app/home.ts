@@ -1,23 +1,12 @@
 import { EmptyState, PageHeader, StatCard } from '@/ui';
 import { DatePipe } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
-import { Apollo } from 'apollo-angular';
-import { map, Observable, of } from 'rxjs';
+import { forkJoin, map, Observable, of } from 'rxjs';
 import Store from './core/store';
-import {
-  AdminDashboardStatsDocument,
-  OnboardingStatusDocument,
-  RecentMessagesDocument,
-  RecentMessagesQuery,
-  RecentNewslettersDocument,
-  RecentNewslettersQuery,
-  RecentStudentsDocument,
-  RecentStudentsQuery,
-  RecentTeachersDocument,
-  RecentTeachersQuery,
-} from './graphql/generated/graphql';
+import { toFetchQueryParams } from './core/fetch-query-params';
 import WelcomeBanner from './shared/welcome-banner';
 
 type DashboardStats = {
@@ -34,7 +23,29 @@ type RecentStudent = {
   classGroup?: { name: string } | null;
 };
 
-type RecentTeacher = RecentTeachersQuery['teachers'][number];
+type RecentTeacher = {
+  id: string;
+  fullName: string;
+  createdAt: string;
+  user?: { email?: string | null } | null;
+};
+
+type InboxRow = {
+  id: string;
+  message: {
+    subject: string;
+    createdAt: string;
+    sender: { name?: string | null; firstName?: string; lastName?: string };
+  };
+};
+
+type PublishedNewsletter = {
+  id: string;
+  title: string;
+  content: string;
+  publishedAt: string | null;
+  author: { name?: string | null; firstName?: string; lastName?: string };
+};
 
 @Component({
   selector: 'app-home',
@@ -102,7 +113,7 @@ type RecentTeacher = RecentTeachersQuery['teachers'][number];
                     {{ message.message.subject }}
                   </p>
                   <div class="text-xs text-base-content/60 mt-1">
-                    {{ message.message.sender.name }} ·
+                    {{ senderDisplayName(message.message.sender) }} ·
                     {{ message.message.createdAt | date: 'short' }}
                   </div>
                 </div>
@@ -186,7 +197,7 @@ type RecentTeacher = RecentTeachersQuery['teachers'][number];
                     </p>
                     <div class="flex items-center justify-between mt-2">
                       <span class="text-xs text-base-content/60">
-                        {{ newsletter.author.name }} · {{ newsletter.publishedAt | date: 'mediumDate' }}
+                        {{ authorDisplayName(newsletter.author) }} · {{ newsletter.publishedAt | date: 'mediumDate' }}
                       </span>
                       <a [routerLink]="['/newsletters', newsletter.id]" class="link link-primary text-xs"> Ver más </a>
                     </div>
@@ -261,19 +272,31 @@ type RecentTeacher = RecentTeachersQuery['teachers'][number];
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class Home {
-  private apollo = inject(Apollo);
+  private http = inject(HttpClient);
   private store = inject(Store);
   private FIRST_VISIT_KEY = 'skooltrak_first_visit_shown';
+
+  senderDisplayName(sender: InboxRow['message']['sender']): string {
+    if (sender.name?.trim()) return sender.name;
+    return [sender.firstName, sender.lastName].filter(Boolean).join(' ').trim() || '—';
+  }
+
+  authorDisplayName(author: PublishedNewsletter['author']): string {
+    if (author.name?.trim()) return author.name;
+    return [author.firstName, author.lastName].filter(Boolean).join(' ').trim() || '—';
+  }
 
   // Onboarding status query
   public onboardingStatus = rxResource({
     stream: () =>
-      this.apollo
-        .watchQuery({
-          query: OnboardingStatusDocument,
-          fetchPolicy: 'cache-first',
-        })
-        .valueChanges.pipe(map((result) => result.data?.onboardingStatus)),
+      this.http.get<{
+        onboardingCompleted: boolean;
+        schoolName?: string | null;
+        degreesCount: number;
+        studyPlansCount: number;
+        coursesCount: number;
+        groupsCount: number;
+      }>('/api/v1/auth/onboarding-status'),
   });
 
   // Check if we should show the welcome banner
@@ -317,38 +340,24 @@ export default class Home {
           findManySubjectsCount: 0,
         });
       }
-      return this.apollo
-        .watchQuery({
-          query: AdminDashboardStatsDocument,
-          variables: {
-            schoolId: params.schoolId,
-          },
-        })
-        .valueChanges.pipe(
-          map((result): DashboardStats => {
-            const d = result.data;
-            return {
-              coursesCount: d?.coursesCount ?? 0,
-              findManyStudentsCount: d?.findManyStudentsCount ?? 0,
-              findManyTeachersCount: d?.findManyTeachersCount ?? 0,
-              findManySubjectsCount: d?.findManySubjectsCount ?? 0,
-            };
-          }),
-        );
+      const q = toFetchQueryParams({ schoolId: params.schoolId });
+      return forkJoin({
+        coursesCount: this.http.get<number>('/api/v1/courses/count', { params: q }),
+        findManyStudentsCount: this.http.get<number>('/api/v1/students/count', { params: q }),
+        findManyTeachersCount: this.http.get<number>('/api/v1/teachers/count', { params: q }),
+        findManySubjectsCount: this.http.get<number>('/api/v1/subjects/count', { params: q }),
+      });
     },
   });
 
   public recentMessages = rxResource({
     params: () => ({ take: 5, skip: 0 }),
     stream: ({ params }) =>
-      this.apollo
-        .watchQuery({
-          query: RecentMessagesDocument,
-          variables: params,
+      this.http
+        .get<InboxRow[]>('/api/v1/messages', {
+          params: toFetchQueryParams({ take: params.take, skip: params.skip }),
         })
-        .valueChanges.pipe(
-          map((result) => (result.data?.findManyMessages ?? []) as RecentMessagesQuery['findManyMessages']),
-        ),
+        .pipe(map((rows) => rows ?? [])),
   });
 
   public recentStudents = rxResource({
@@ -357,17 +366,14 @@ export default class Home {
       if (!params.schoolId) {
         return of<RecentStudent[]>([]);
       }
-      return this.apollo
-        .watchQuery({
-          query: RecentStudentsDocument,
-          variables: {
-            take: params.take,
-            orderBy: 'createdAt',
-            orderDirection: 'desc',
-            schoolId: params.schoolId,
-          },
-        })
-        .valueChanges.pipe(map((result) => (result.data?.students ?? []) as RecentStudentsQuery['students']));
+      return this.http.get<RecentStudent[]>(`/api/v1/students`, {
+        params: toFetchQueryParams({
+          take: params.take,
+          orderBy: 'createdAt',
+          orderDirection: 'desc',
+          schoolId: params.schoolId,
+        }),
+      });
     },
   });
 
@@ -375,19 +381,11 @@ export default class Home {
     params: () => ({ schoolId: this.store.currentSchoolId() }),
     stream: ({ params }) => {
       if (!params.schoolId) {
-        return of<RecentNewslettersQuery['publishedNewsletters']>([]);
+        return of<PublishedNewsletter[]>([]);
       }
-      return this.apollo
-        .watchQuery({
-          query: RecentNewslettersDocument,
-          variables: {
-            schoolId: params.schoolId,
-            take: 3,
-          },
-        })
-        .valueChanges.pipe(
-          map((result) => (result.data?.publishedNewsletters ?? []) as RecentNewslettersQuery['publishedNewsletters']),
-        );
+      return this.http.get<PublishedNewsletter[]>(`/api/v1/newsletters/published`, {
+        params: { schoolId: params.schoolId, take: '3' },
+      });
     },
   });
 
@@ -403,17 +401,14 @@ export default class Home {
       if (!params.schoolId) {
         return of<RecentTeacher[]>([]);
       }
-      return this.apollo
-        .watchQuery({
-          query: RecentTeachersDocument,
-          variables: {
-            take: params.take,
-            orderBy: 'createdAt',
-            orderDirection: 'desc',
-            schoolId: params.schoolId,
-          },
-        })
-        .valueChanges.pipe(map((result) => (result.data?.teachers ?? []) as RecentTeachersQuery['teachers']));
+      return this.http.get<RecentTeacher[]>(`/api/v1/teachers`, {
+        params: toFetchQueryParams({
+          take: params.take,
+          orderBy: 'createdAt',
+          orderDirection: 'desc',
+          schoolId: params.schoolId,
+        }),
+      });
     },
   });
 }

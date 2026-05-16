@@ -1,10 +1,7 @@
 import { Organization } from '@/auth';
-import { Prisma } from '@generated/prisma';
 import { Field, Int, ObjectType } from '@nestjs/graphql';
 @ObjectType()
-export class School
-  implements Prisma.SchoolGetPayload<{ include: { organization: true } }>
-{
+export class School {
   @Field(() => String, { description: 'ID of the school (auto-generated)' })
   id: string;
   @Field(() => String, { description: 'Name of the school' })

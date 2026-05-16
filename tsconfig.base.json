@@ -11,33 +11,18 @@
     "target": "es2023",
     "esModuleInterop": true,
     "module": "commonjs",
-    "lib": [
-      "es2020",
-      "dom"
-    ],
+    "lib": ["es2020", "dom"],
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "@/auth": [
-        "libs/auth/src/index.ts"
-      ],
-      "@/ui": [
-        "libs/ui/src/index.ts"
-      ],
-      "@generated/prisma": [
-        "generated/prisma/client"
-      ],
-      "@/shared": [
-        "libs/shared/src/index.ts"
-      ],
-      "@/client-auth": [
-        "libs/client-auth/src/index.ts"
-      ]
+      "@/auth": ["libs/auth/src/index.ts"],
+      "@/ui": ["libs/ui/src/index.ts"],
+      "@generated/prisma": ["generated/prisma/client"],
+      "@/shared": ["libs/shared/src/index.ts"],
+      "@/client-auth": ["libs/client-auth/src/index.ts"],
+      "@/api-contracts": ["libs/api-contracts/src/index.ts"]
     }
   },
-  "exclude": [
-    "node_modules",
-    "tmp"
-  ]
+  "exclude": ["node_modules", "tmp"]
 }

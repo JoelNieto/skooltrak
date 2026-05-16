@@ -1,19 +1,20 @@
 import { Confirmation } from '@/ui';
+import { HttpClient } from '@angular/common/http';
 import { afterRenderEffect, ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { RouterLink, RouterLinkActive } from '@angular/router';
-import { Apollo } from 'apollo-angular';
-import { map, of } from 'rxjs';
+import { forkJoin, map, of, switchMap, timer } from 'rxjs';
 import Auth from '../auth/auth';
-import {
-  ChatsUnreadCountDocument,
-  GetSchoolsDocument,
-  GetSchoolsQuery,
-  MyStoreCartCountDocument,
-  UnreadMessagesCountDocument,
-} from '../graphql/generated/graphql';
-import Store from './store';
+import Store, { CurrentSchool } from './store';
 import { ThemeService } from './theme.service';
+
+type SidebarSchool = {
+  id: string;
+  name: string;
+  slug?: string | null;
+  logo?: string | null;
+  logoUrl?: string | null;
+};
 
 @Component({
   // eslint-disable-next-line @angular-eslint/component-selector
@@ -462,61 +463,58 @@ export class Sidebar {
     const slug = this.store.currentSchool()?.slug;
     return slug ? ['/store', slug, 'admin'] : ['/store'];
   });
-  #apollo = inject(Apollo);
+  #http = inject(HttpClient);
   #confirmation = inject(Confirmation);
 
   protected schools = rxResource({
     stream: () =>
-      this.#apollo
-        .watchQuery({
-          fetchPolicy: 'cache-first',
-          query: GetSchoolsDocument,
-        })
-        .valueChanges.pipe(map((result) => (result.data?.schools as GetSchoolsQuery['schools']) ?? [])),
+      this.#http.get<SidebarSchool[]>('/api/v1/schools').pipe(
+        switchMap((schools) => {
+          if (!schools?.length) return of<SidebarSchool[]>([]);
+          return forkJoin(
+            schools.map((s) =>
+              s.logo
+                ? this.#http
+                    .get<{ url: string | null }>(`/api/v1/schools/${s.id}/presigned-logo-url`)
+                    .pipe(map((r) => ({ ...s, logoUrl: r.url })))
+                : of({ ...s, logoUrl: null as string | null }),
+            ),
+          );
+        }),
+      ),
   });
 
   protected unreadCount = rxResource({
     stream: () =>
-      this.#apollo
-        .watchQuery({
-          fetchPolicy: 'network-only',
-          pollInterval: 60000,
-          query: UnreadMessagesCountDocument,
-        })
-        .valueChanges.pipe(map((result) => result.data?.unreadMessagesCount ?? 0)),
+      timer(0, 60000).pipe(
+        switchMap(() => this.#http.get<number>('/api/v1/messages/unread-count')),
+      ),
   });
 
   protected chatUnreadCount = rxResource({
     stream: () =>
-      this.#apollo
-        .watchQuery({
-          fetchPolicy: 'network-only',
-          pollInterval: 60000,
-          query: ChatsUnreadCountDocument,
-        })
-        .valueChanges.pipe(map((result) => result.data?.chatUnreadCount ?? 0)),
+      timer(0, 60000).pipe(switchMap(() => this.#http.get<number>('/api/v1/chats/unread-count'))),
   });
 
   protected storeCartCount = rxResource({
-    params: () => ({ schoolId: this.store.currentSchool()?.id }),
+    params: () => ({ schoolId: this.store.currentSchool()?.id ?? '' }),
     stream: ({ params }) => {
       if (!params.schoolId) {
         return of(0);
       }
-      return this.#apollo
-        .watchQuery({
-          query: MyStoreCartCountDocument,
-          variables: { schoolId: params.schoolId },
-          fetchPolicy: 'network-only',
-          pollInterval: 120000,
-        })
-        .valueChanges.pipe(
-          map((r) => (r.data?.myStoreCart ?? []).reduce((sum, item) => sum + (item.quantity ?? 0), 0)),
-        );
+      const schoolId = params.schoolId;
+      return timer(0, 120000).pipe(
+        switchMap(() =>
+          this.#http.get<Array<{ quantity?: number }>>(`/api/v1/store/cart`, {
+            params: { schoolId },
+          }),
+        ),
+        map((items) => (items ?? []).reduce((sum, item) => sum + (item.quantity ?? 0), 0)),
+      );
     },
   });
 
-  protected get schoolsList(): GetSchoolsQuery['schools'] {
+  protected get schoolsList(): SidebarSchool[] {
     const s = this.schools.value();
     return Array.isArray(s) ? s : [];
   }
@@ -530,8 +528,8 @@ export class Sidebar {
     });
   }
 
-  protected pickSchool(school: GetSchoolsQuery['schools'][number]) {
-    this.store.currentSchool.set({ ...school, slug: school.slug ?? null });
+  protected pickSchool(school: SidebarSchool) {
+    this.store.currentSchool.set({ ...school, slug: school.slug ?? null } as CurrentSchool);
   }
 
   protected logout() {

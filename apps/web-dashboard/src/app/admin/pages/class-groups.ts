@@ -2,19 +2,23 @@ import { Confirmation, EmptyState, Modal, Pagination, Paginator, Toast } from '@
 import { Menu, MenuContent, MenuItem, MenuTrigger } from '@angular/aria/menu';
 import { OverlayModule } from '@angular/cdk/overlay';
 import { DatePipe } from '@angular/common';
-import { Component, inject, viewChild } from '@angular/core';
-import { rxResource } from '@angular/core/rxjs-interop';
+import { Component, effect, inject, viewChild } from '@angular/core';
+import { httpResource, HttpClient } from '@angular/common/http';
 import { RouterLink } from '@angular/router';
-
-import { Apollo } from 'apollo-angular';
-import { filter, map, of, switchMap, tap } from 'rxjs';
+import { filter, switchMap } from 'rxjs';
 import Store from '../../core/store';
-import {
-  AdminClassGroupsBySchoolIdDocument,
-  AdminClassGroupsBySchoolIdQuery,
-  AdminRemoveClassGroupDocument,
-} from '../../graphql/generated/graphql';
+import { toFetchQueryRecord } from '../../core/fetch-query-params';
 import ClassGroupsForm from '../forms/class-groups-form';
+
+type ClassGroupRow = {
+  id: string;
+  name: string;
+  createdAt?: string;
+  updatedAt?: string;
+  teacher?: { name?: string };
+  studyPlan: { name: string };
+};
+
 @Component({
   selector: 'app-groups',
   imports: [DatePipe, RouterLink, Menu, MenuContent, MenuItem, MenuTrigger, OverlayModule, EmptyState, Paginator],
@@ -134,41 +138,58 @@ import ClassGroupsForm from '../forms/class-groups-form';
 })
 export default class ClassGroups {
   private modal = inject(Modal);
-  private apollo = inject(Apollo);
+  private http = inject(HttpClient);
   private store = inject(Store);
   private confirmation = inject(Confirmation);
   private toasts = inject(Toast);
   public pagination = inject(Pagination);
   actionsMenu = viewChild<Menu<string>>('actionsMenu');
-  public classGroups = rxResource({
-    params: () => ({
-      schoolId: this.store.currentSchoolId(),
-      take: this.pagination.take(),
-      skip: this.pagination.skip(),
-      search: this.pagination.search(),
-    }),
-    stream: ({ params }) => {
-      const { schoolId, take, skip, search } = params;
+
+  public classGroups = httpResource<ClassGroupRow[]>(
+    () => {
+      const schoolId = this.store.currentSchoolId();
       if (!schoolId) {
-        return of([]);
+        return undefined;
       }
-      return this.apollo
-        .watchQuery({
-          query: AdminClassGroupsBySchoolIdDocument,
-          variables: {
-            schoolId,
-            take,
-            skip,
-            search,
-          },
-        })
-        .valueChanges.pipe(
-          tap((result) => this.pagination.updateCount(result.data?.count ?? 0)),
-          map((result) => (result.data?.classGroups ?? []) as AdminClassGroupsBySchoolIdQuery['classGroups']),
-        );
+      return {
+        url: '/api/v1/class-groups',
+        params: toFetchQueryRecord({
+          schoolId,
+          take: this.pagination.take(),
+          skip: this.pagination.skip(),
+          search: this.pagination.search(),
+        }),
+      };
     },
+    { defaultValue: [] },
+  );
+
+  private readonly classGroupsCount = httpResource<number>(() => {
+    const schoolId = this.store.currentSchoolId();
+    if (!schoolId) {
+      return undefined;
+    }
+    return {
+      url: '/api/v1/class-groups/count',
+      params: toFetchQueryRecord({
+        schoolId,
+        take: this.pagination.take(),
+        skip: this.pagination.skip(),
+        search: this.pagination.search(),
+      }),
+    };
   });
-  public editClassGroup(group?: AdminClassGroupsBySchoolIdQuery['classGroups'][number]) {
+
+  constructor() {
+    effect(() => {
+      const count = this.classGroupsCount.value();
+      if (count != null) {
+        this.pagination.updateCount(count);
+      }
+    });
+  }
+
+  public editClassGroup(group?: ClassGroupRow) {
     this.modal
       .open(ClassGroupsForm, {
         title: group ? 'Editar grupo' : 'Nuevo grupo',
@@ -189,14 +210,7 @@ export default class ClassGroups {
       })
       .pipe(
         filter((result) => result),
-        switchMap(() =>
-          this.apollo.mutate({
-            mutation: AdminRemoveClassGroupDocument,
-            variables: {
-              id,
-            },
-          }),
-        ),
+        switchMap(() => this.http.delete(`/api/v1/class-groups/${id}`)),
       )
       .subscribe(() => {
         this.toasts.showSuccess('Grupo eliminado correctamente');

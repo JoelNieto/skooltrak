@@ -19,14 +19,8 @@ import {
   submit,
 } from '@angular/forms/signals';
 import { Router } from '@angular/router';
-import { Apollo } from 'apollo-angular';
 import { firstValueFrom, map, of } from 'rxjs';
-import {
-  CreateStoreProductDocument,
-  StoreCategoriesAdminDocument,
-  StoreProductDocument,
-  UpdateStoreProductDocument,
-} from '../graphql/generated/graphql';
+import { StoreApiService } from '../store-api.service';
 import { storeBaseSegments } from '../store-nav';
 
 type VariantModel = { id?: string; label: string; stock: number; sortOrder: number };
@@ -163,7 +157,7 @@ function emptyStoreProductForm(): StoreProductFormModel {
 export default class ProductForm {
   protected readonly school = inject(SchoolContext);
   protected readonly router = inject(Router);
-  private readonly apollo = inject(Apollo);
+  private readonly api = inject(StoreApiService);
   private readonly toast = inject(Toast);
 
   /** Route param from `products/:id/edit`; undefined for `products/new`. */
@@ -187,13 +181,9 @@ export default class ProductForm {
     params: () => ({ schoolId: this.school.currentSchoolId() }),
     stream: ({ params }) => {
       if (!params.schoolId) return of([]);
-      return this.apollo
-        .watchQuery({
-          query: StoreCategoriesAdminDocument,
-          variables: { schoolId: params.schoolId },
-          fetchPolicy: 'cache-first',
-        })
-        .valueChanges.pipe(map((r) => r.data?.storeCategoriesAdmin ?? []));
+      return this.api
+        .storeCategoriesAdmin(params.schoolId)
+        .pipe(map((rows) => (Array.isArray(rows) ? rows : [])));
     },
   });
 
@@ -201,13 +191,7 @@ export default class ProductForm {
     params: () => ({ id: this.id() }),
     stream: ({ params }) => {
       if (!params.id) return of(null);
-      return this.apollo
-        .watchQuery({
-          query: StoreProductDocument,
-          variables: { id: params.id },
-          fetchPolicy: 'network-only',
-        })
-        .valueChanges.pipe(map((r) => r.data?.storeProduct ?? null));
+      return this.api.storeProduct(params.id).pipe(map((p) => p ?? null));
     },
   });
 
@@ -231,7 +215,7 @@ export default class ProductForm {
         active: p.active ?? true,
         variants:
           vs.length > 0
-            ? vs.map((v) => ({
+            ? vs.map((v: { id?: string; label?: string | null; stock?: number | null; sortOrder?: number | null }) => ({
                 id: v.id,
                 label: v.label ?? '',
                 stock: v.stock ?? 0,
@@ -279,48 +263,38 @@ export default class ProductForm {
       try {
         if (pid) {
           await firstValueFrom(
-            this.apollo.mutate({
-              mutation: UpdateStoreProductDocument,
-              variables: {
-                input: {
-                  id: pid,
-                  name: m.name,
-                  description: m.description,
-                  categoryId,
-                  price: m.price,
-                  imageUrl: m.imageUrl || null,
-                  active: m.active,
-                  variants: variants.map((v) => ({
-                    id: v.id,
-                    label: v.label,
-                    stock: v.stock,
-                    sortOrder: v.sortOrder,
-                  })),
-                },
-              },
+            this.api.updateStoreProduct({
+              id: pid,
+              name: m.name,
+              description: m.description,
+              categoryId,
+              price: m.price,
+              imageUrl: m.imageUrl || null,
+              active: m.active,
+              variants: variants.map((v) => ({
+                id: v.id,
+                label: v.label,
+                stock: v.stock,
+                sortOrder: v.sortOrder,
+              })),
             }),
           );
           this.toast.showSuccess('Producto actualizado');
         } else {
           await firstValueFrom(
-            this.apollo.mutate({
-              mutation: CreateStoreProductDocument,
-              variables: {
-                input: {
-                  schoolId,
-                  name: m.name,
-                  description: m.description,
-                  categoryId: categoryId ?? undefined,
-                  price: m.price,
-                  imageUrl: m.imageUrl || undefined,
-                  active: m.active,
-                  variants: variants.map((v) => ({
-                    label: v.label,
-                    stock: v.stock,
-                    sortOrder: v.sortOrder,
-                  })),
-                },
-              },
+            this.api.createStoreProduct({
+              schoolId,
+              name: m.name,
+              description: m.description,
+              categoryId: categoryId ?? undefined,
+              price: m.price,
+              imageUrl: m.imageUrl || undefined,
+              active: m.active,
+              variants: variants.map((v) => ({
+                label: v.label,
+                stock: v.stock,
+                sortOrder: v.sortOrder,
+              })),
             }),
           );
           this.toast.showSuccess('Producto creado');

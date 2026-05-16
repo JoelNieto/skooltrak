@@ -1,25 +1,21 @@
 import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
 import { SchoolContext } from '@/shared';
-import { Apollo } from 'apollo-angular';
 import { catchError, map, of } from 'rxjs';
-import { StoreMeDocument } from '../graphql/generated/graphql';
+import { StoreApiService } from '../store-api.service';
 import { storeBaseSegments } from '../store-nav';
 
 export const manageStoreGuard: CanActivateFn = () => {
-  const apollo = inject(Apollo);
+  const api = inject(StoreApiService);
   const router = inject(Router);
   const school = inject(SchoolContext);
-  return apollo
-    .query({
-      query: StoreMeDocument,
-      fetchPolicy: 'network-only',
-    })
-    .pipe(
-      map((res) => {
-        const roleName = res.data?.me?.role?.name;
-        const perms =
-          res.data?.me?.role?.permissions?.map((p: { descriptiveId: string }) => p.descriptiveId) ?? [];
+  return api.getMe().pipe(
+      map((me) => {
+        const u = me as {
+          role?: { name?: string; permissions?: { descriptiveId: string }[] };
+        };
+        const roleName = u?.role?.name;
+        const perms = u?.role?.permissions?.map((p) => p.descriptiveId) ?? [];
         // Match dashboard Auth.hasPermission('MANAGE_STORE'): explicit perm or org/school admin role.
         const canManage =
           perms.includes('MANAGE_STORE') ||

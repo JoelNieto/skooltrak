@@ -6,44 +6,58 @@ import { prismaAdapter } from 'better-auth/adapters/prisma';
 import { organization } from 'better-auth/plugins';
 import { sendEmail } from './resend.service';
 
-console.log('[Better Auth] Initializing...');
-console.log('[Better Auth] DATABASE_URL:', process.env['DATABASE_URL'] ? 'Set' : 'NOT SET');
-
-const adapter = new PrismaPg({
-  connectionString: process.env['DATABASE_URL']!,
-});
-const prisma = new PrismaClient({ adapter });
-
-console.log('[Better Auth] Creating betterAuth instance with basePath: /api/auth');
-
-export const auth = betterAuth({
-  database: prismaAdapter(prisma, { provider: 'postgresql' }),
-  basePath: '/api/auth',
-  trustedOrigins: [
-    'http://localhost:4200',
-    'http://localhost:4201',
-    process.env['APP_URL'] || 'http://localhost:3000',
-    ...(process.env['TRUSTED_ORIGINS']
-      ? process.env['TRUSTED_ORIGINS'].split(',').map((o) => o.trim())
-      : []),
-  ],
-  emailAndPassword: {
-    enabled: true,
-    requireEmailVerification: true,
-    password: {
-      // Use bcrypt to verify existing passwords (migration compatibility)
-      verify: async ({ password, hash }) => bcrypt.compare(password, hash),
-      // New passwords use bcrypt
-      hash: async (password) => bcrypt.hash(password, 10),
+function createOpenApiAuthStub(): ReturnType<typeof betterAuth> {
+  return {
+    options: {
+      trustedOrigins: ['http://localhost:4200', 'http://localhost:4201'],
+      hooks: {},
     },
-    sendResetPassword: async ({ user, url }) => {
-      console.log('[Better Auth] sendResetPassword called for:', user.email);
-      console.log('[Better Auth] Reset URL:', url);
-      try {
-        await sendEmail({
-          to: user.email,
-          subject: 'Restablecer contraseña - Skooltrak',
-          html: `
+    handler: ((_req: unknown, _res: unknown) => undefined) as unknown as ReturnType<
+      typeof betterAuth
+    >['handler'],
+  } as ReturnType<typeof betterAuth>;
+}
+
+function createProductionAuth(): ReturnType<typeof betterAuth> {
+  console.log('[Better Auth] Initializing...');
+  console.log(
+    '[Better Auth] DATABASE_URL:',
+    process.env['DATABASE_URL'] ? 'Set' : 'NOT SET',
+  );
+
+  const adapter = new PrismaPg({
+    connectionString: process.env['DATABASE_URL']!,
+  });
+  const prisma = new PrismaClient({ adapter });
+
+  console.log('[Better Auth] Creating betterAuth instance with basePath: /api/auth');
+
+  return betterAuth({
+    database: prismaAdapter(prisma, { provider: 'postgresql' }),
+    basePath: '/api/auth',
+    trustedOrigins: [
+      'http://localhost:4200',
+      'http://localhost:4201',
+      process.env['APP_URL'] || 'http://localhost:3000',
+      ...(process.env['TRUSTED_ORIGINS']
+        ? process.env['TRUSTED_ORIGINS'].split(',').map((o) => o.trim())
+        : []),
+    ],
+    emailAndPassword: {
+      enabled: true,
+      requireEmailVerification: true,
+      password: {
+        verify: async ({ password, hash }) => bcrypt.compare(password, hash),
+        hash: async (password) => bcrypt.hash(password, 10),
+      },
+      sendResetPassword: async ({ user, url }) => {
+        console.log('[Better Auth] sendResetPassword called for:', user.email);
+        console.log('[Better Auth] Reset URL:', url);
+        try {
+          await sendEmail({
+            to: user.email,
+            subject: 'Restablecer contraseña - Skooltrak',
+            html: `
             <!DOCTYPE html>
             <html>
             <head>
@@ -65,21 +79,21 @@ export const auth = betterAuth({
             </body>
             </html>
           `,
-        });
-        console.log('[Better Auth] Password reset email sent successfully');
-      } catch (error) {
-        console.error('[Better Auth] Failed to send password reset email:', error);
-      }
+          });
+          console.log('[Better Auth] Password reset email sent successfully');
+        } catch (error) {
+          console.error('[Better Auth] Failed to send password reset email:', error);
+        }
+      },
     },
-  },
-  emailVerification: {
-    sendVerificationEmail: async ({ user, url }) => {
-      console.log('[Better Auth] sendVerificationEmail called for:', user.email);
-      try {
-        await sendEmail({
-          to: user.email,
-          subject: 'Verifica tu correo - Skooltrak',
-          html: `
+    emailVerification: {
+      sendVerificationEmail: async ({ user, url }) => {
+        console.log('[Better Auth] sendVerificationEmail called for:', user.email);
+        try {
+          await sendEmail({
+            to: user.email,
+            subject: 'Verifica tu correo - Skooltrak',
+            html: `
             <!DOCTYPE html>
             <html>
             <head>
@@ -101,23 +115,23 @@ export const auth = betterAuth({
             </body>
             </html>
           `,
-        });
-        console.log('[Better Auth] Verification email sent successfully');
-      } catch (error) {
-        console.error('[Better Auth] Failed to send verification email:', error);
-      }
+          });
+          console.log('[Better Auth] Verification email sent successfully');
+        } catch (error) {
+          console.error('[Better Auth] Failed to send verification email:', error);
+        }
+      },
     },
-  },
-  plugins: [
-    organization({
-      sendInvitationEmail: async (data) => {
-        console.log('[Better Auth] sendInvitationEmail called for:', data.email);
-        const inviteLink = `${process.env['APP_URL']}/accept-invitation/${data.id}`;
-        try {
-          await sendEmail({
-            to: data.email,
-            subject: `Has sido invitado a ${data.organization.name} - Skooltrak`,
-            html: `
+    plugins: [
+      organization({
+        sendInvitationEmail: async (data) => {
+          console.log('[Better Auth] sendInvitationEmail called for:', data.email);
+          const inviteLink = `${process.env['APP_URL']}/accept-invitation/${data.id}`;
+          try {
+            await sendEmail({
+              to: data.email,
+              subject: `Has sido invitado a ${data.organization.name} - Skooltrak`,
+              html: `
               <!DOCTYPE html>
               <html>
               <head>
@@ -141,14 +155,22 @@ export const auth = betterAuth({
               </body>
               </html>
             `,
-          });
-          console.log('[Better Auth] Invitation email sent successfully');
-        } catch (error) {
-          console.error('[Better Auth] Failed to send invitation email:', error);
-        }
-      },
-    }),
-  ],
-});
+            });
+            console.log('[Better Auth] Invitation email sent successfully');
+          } catch (error) {
+            console.error('[Better Auth] Failed to send invitation email:', error);
+          }
+        },
+      }),
+    ],
+  });
+}
+
+/** Cast avoids a union type when OPENAPI_EXPORT is only used by tooling. */
+export const auth = (
+  process.env['OPENAPI_EXPORT'] === 'true'
+    ? createOpenApiAuthStub()
+    : createProductionAuth()
+) as ReturnType<typeof betterAuth>;
 
 export type Session = typeof auth.$Infer.Session;

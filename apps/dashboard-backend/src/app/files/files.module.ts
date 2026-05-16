@@ -1,10 +1,16 @@
+import { includeNestGraphQlResolvers } from '@/auth';
 import { Module } from '@nestjs/common';
 import { PrismaModule } from '../prisma.module';
+import { FilesController } from './files.controller';
 import { FilesResolver } from './files.resolver';
 import { FilesService } from './files.service';
 
 @Module({
-  providers: [FilesResolver, FilesService],
+  controllers: [FilesController],
+  providers: [
+    ...(includeNestGraphQlResolvers ? [FilesResolver] : []),
+    FilesService,
+  ],
   imports: [PrismaModule],
 })
 export class FilesModule {}

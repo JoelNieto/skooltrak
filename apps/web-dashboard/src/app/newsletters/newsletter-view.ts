@@ -1,11 +1,8 @@
 import { DatePipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, inject, input, ViewEncapsulation } from '@angular/core';
-import { rxResource } from '@angular/core/rxjs-interop';
+import { httpResource } from '@angular/common/http';
+import { ChangeDetectionStrategy, Component, input, ViewEncapsulation } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { isValidId } from '../core/validators';
-import { Apollo } from 'apollo-angular';
-import { GetNewsletterViewDocument } from '../graphql/generated/graphql';
-import { map, of } from 'rxjs';
 
 type NewsletterDetail = {
   id: string;
@@ -140,18 +137,10 @@ type NewsletterDetail = {
 })
 export default class NewsletterView {
   public id = input.required<string>();
-  private apollo = inject(Apollo);
 
-  public newsletter = rxResource({
-    params: () => ({ id: this.id() }),
-    stream: ({ params }) => {
-      if (!isValidId(params.id)) return of(null);
-      return this.apollo
-        .watchQuery({
-          query: GetNewsletterViewDocument,
-          variables: { id: params.id },
-        })
-        .valueChanges.pipe(map((result) => result.data?.newsletter));
-    },
+  public newsletter = httpResource<NewsletterDetail | null>(() => {
+    const id = this.id();
+    if (!isValidId(id)) return undefined;
+    return `/api/v1/newsletters/${id}`;
   });
 }

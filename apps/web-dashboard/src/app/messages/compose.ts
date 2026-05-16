@@ -10,8 +10,7 @@ import {
   validate,
 } from '@angular/forms/signals';
 import { Router, RouterLink } from '@angular/router';
-import { Apollo } from 'apollo-angular';
-import { ComposeCreateMessageDocument } from '../graphql/generated/graphql';
+import { HttpClient } from '@angular/common/http';
 import Contacts, { SelectedContact } from './contacts';
 
 interface ComposeFormData {
@@ -93,7 +92,7 @@ interface ComposeFormData {
     </form>`,
 })
 export default class Compose {
-  #apollo = inject(Apollo);
+  #http = inject(HttpClient);
   #toast = inject(Toast);
   #router = inject(Router);
 
@@ -145,16 +144,11 @@ export default class Compose {
     event.preventDefault();
     submit(this.composeForm, async () => {
       await new Promise<void>((resolve, reject) => {
-        this.#apollo
-          .mutate({
-            mutation: ComposeCreateMessageDocument,
-            variables: {
-              createMessageInput: {
-                recipientIds: this.formModel().to.map((contact) => contact.id),
-                subject: this.formModel().subject,
-                content: this.formModel().content,
-              },
-            },
+        this.#http
+          .post('/api/v1/messages', {
+            recipientIds: this.formModel().to.map((contact) => contact.id),
+            subject: this.formModel().subject,
+            content: this.formModel().content,
           })
           .subscribe({
             next: () => {

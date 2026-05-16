@@ -8,7 +8,8 @@
     "serve:dev": "nx run web-shell:serve",
     "serve:dev:admin": "nx run-many --parallel --target=serve --projects=admin-backend,web-admin",
     "db:add-financial-permissions": "bun run prisma/scripts/add-financial-permissions-to-admins.ts",
-    "graphql:generate": "graphql-codegen"
+    "graphql:generate": "graphql-codegen",
+    "openapi:orval": "orval --config orval.config.ts"
   },
   "private": true,
   "dependencies": {
@@ -39,7 +40,10 @@
     "@nestjs/jwt": "^11.0.0",
     "@nestjs/passport": "^11.0.5",
     "@nestjs/platform-express": "^11.0.0",
+    "@nestjs/platform-socket.io": "^11.1.19",
     "@nestjs/schedule": "^6.1.1",
+    "@nestjs/swagger": "^11.3.2",
+    "@nestjs/websockets": "^11.1.19",
     "@prisma/adapter-pg": "7",
     "@prisma/client": "7",
     "@softarc/native-federation-node": "^3.3.4",
@@ -80,6 +84,7 @@
     "reflect-metadata": "^0.1.13",
     "resend": "^6.9.1",
     "rxjs": "~7.8.0",
+    "socket.io": "^4.8.3",
     "uuid": "^13.0.0"
   },
   "devDependencies": {
@@ -127,6 +132,7 @@
     "@types/jest": "^30.0.0",
     "@types/node": "20.19.9",
     "@types/passport-jwt": "^4.0.1",
+    "@types/socket.io-client": "^3.0.0",
     "@typescript-eslint/utils": "^8.40.0",
     "@vitest/coverage-v8": "4.0.9",
     "@vitest/ui": "4.0.9",
@@ -143,8 +149,10 @@
     "jsdom": "~22.1.0",
     "jsonc-eslint-parser": "^2.1.0",
     "nx": "22.6.5",
+    "orval": "^8.8.1",
     "prettier": "~3.6.2",
     "prisma": "^7.5.0",
+    "socket.io-client": "^4.8.3",
     "tailwindcss": "^4.1.14",
     "ts-jest": "^29.4.0",
     "ts-node": "10.9.1",

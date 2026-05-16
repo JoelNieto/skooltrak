@@ -8,14 +8,9 @@ import {
   Signal,
   signal,
 } from '@angular/core';
-import { rxResource } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
-import { Apollo } from 'apollo-angular';
-import {
-  CreateFileDownloadUrlDocument,
-  FilesForCourseDocument,
-} from '../graphql/generated/graphql';
-import { map } from 'rxjs';
+import { httpResource, HttpClient } from '@angular/common/http';
+import { toFetchQueryRecord } from '../core/fetch-query-params';
 import CourseFileUploadForm from './course-file-upload-form';
 
 type CourseFile = {
@@ -115,60 +110,42 @@ type CourseFile = {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class CourseFiles {
-  #apollo = inject(Apollo);
+  #http = inject(HttpClient);
   #modal = inject(Modal);
   #toast = inject(Toast);
   public courseId = input.required<string>();
   public searchText = signal<string>('');
   #debouncedSearch: Signal<string>;
 
-  public filesResource = rxResource({
-    params: () => ({
-      courseId: this.courseId(),
-      take: 50,
-      skip: 0,
-      search: this.#debouncedSearch(),
+  public filesResource = httpResource<CourseFile[]>(
+    () => ({
+      url: '/api/v1/files/for-course',
+      params: toFetchQueryRecord({
+        courseId: this.courseId(),
+        take: 50,
+        skip: 0,
+        search: this.#debouncedSearch(),
+      }),
     }),
-    stream: ({ params }) => {
-      return this.#apollo
-        .watchQuery({
-          query: FilesForCourseDocument,
-          variables: {
-            courseId: params.courseId,
-            take: params.take,
-            skip: params.skip,
-            search: params.search,
-          },
-        })
-        .valueChanges.pipe(map((result) => result.data?.filesForCourse ?? []));
-    },
-  });
+    { defaultValue: [] },
+  );
 
   constructor() {
     this.#debouncedSearch = debounceSignal(this.searchText, 400);
   }
 
   openFile(fileId: string) {
-    this.#apollo
-      .mutate({
-        mutation: CreateFileDownloadUrlDocument,
-        variables: {
-          createFileDownloadInput: {
-            fileId,
-          },
-        },
-      })
-      .subscribe({
-        next: (result) => {
-          const url = result.data?.createFileDownloadUrl?.downloadUrl;
-          if (url) {
-            window.open(url, '_blank');
-          }
-        },
-        error: () => {
-          this.#toast.showError('Error al abrir el archivo');
-        },
-      });
+    this.#http.post<{ downloadUrl: string }>('/api/v1/files/download-url', { fileId }).subscribe({
+      next: (result) => {
+        const url = result?.downloadUrl;
+        if (url) {
+          window.open(url, '_blank');
+        }
+      },
+      error: () => {
+        this.#toast.showError('Error al abrir el archivo');
+      },
+    });
   }
 
   openUploadModal() {

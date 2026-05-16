@@ -4,10 +4,32 @@ import { Component, computed, inject, input } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { Router, RouterLink } from '@angular/router';
 
-import { Apollo } from 'apollo-angular';
-import { filter, map, switchMap } from 'rxjs';
-import { GradeDocument, RemoveGradeDocument, UpdateGradeDocument } from '../graphql/generated/graphql';
+import { HttpClient } from '@angular/common/http';
+import { filter, switchMap } from 'rxjs';
 import StudentGradeForm from './student-grade-form';
+
+type GradeDetail = {
+  id: string;
+  title: string;
+  published?: boolean;
+  comments?: string;
+  courseId?: string;
+  bucket?: { name?: string | null } | null;
+  course?: {
+    id?: string;
+    name?: string;
+    studyPlan?: {
+      gradeMetric?: { minimumApproval?: number; minimumExcellence?: number } | null;
+    } | null;
+  } | null;
+  studentGrades?: Array<{
+    id: string;
+    score?: number | null;
+    comments?: string | null;
+    updatedAt?: string;
+    student?: { firstName?: string; fatherName?: string; classGroup?: { id?: string; name?: string } | null };
+  }>;
+};
 
 @Component({
   selector: 'app-grade',
@@ -140,7 +162,7 @@ import StudentGradeForm from './student-grade-form';
 })
 export default class Grade {
   public id = input.required<string>();
-  #apollo = inject(Apollo);
+  #http = inject(HttpClient);
   #router = inject(Router);
   #modal = inject(Modal);
   #confirmation = inject(Confirmation);
@@ -149,12 +171,7 @@ export default class Grade {
     params: () => ({ id: this.id() }),
     stream: ({ params }) => {
       const { id } = params;
-      return this.#apollo
-        .watchQuery({
-          query: GradeDocument,
-          variables: { id },
-        })
-        .valueChanges.pipe(map((res) => res.data?.grade));
+      return this.#http.get<GradeDetail>(`/api/v1/grades/${id}/with-course`);
     },
   });
 
@@ -201,14 +218,9 @@ export default class Grade {
       .pipe(
         filter((result) => result),
         switchMap(() =>
-          this.#apollo.mutate({
-            mutation: UpdateGradeDocument,
-            variables: {
-              updateGradeInput: {
-                id: this.gradeResource.value()?.id ?? '',
-                published: true,
-              },
-            },
+          this.#http.patch('/api/v1/grades', {
+            id: this.gradeResource.value()?.id ?? '',
+            published: true,
           }),
         ),
       )
@@ -243,12 +255,7 @@ export default class Grade {
       })
       .pipe(
         filter((result: boolean) => result === true),
-        switchMap(() =>
-          this.#apollo.mutate({
-            mutation: RemoveGradeDocument,
-            variables: { id: this.gradeResource.value()?.id ?? '' },
-          }),
-        ),
+        switchMap(() => this.#http.delete(`/api/v1/grades/${this.gradeResource.value()?.id ?? ''}`)),
       )
       .subscribe({
         next: () => {

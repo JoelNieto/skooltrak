@@ -1,13 +1,9 @@
 import { Toast } from '@/ui';
+import { HttpClient } from '@angular/common/http';
 import { ChangeDetectionStrategy, Component, inject, input, signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
-import { Apollo } from 'apollo-angular';
+import { firstValueFrom } from 'rxjs';
 import { map } from 'rxjs';
-import {
-  CreateSubmissionDownloadUrlDocument,
-  StudentsForAssignmentDocument,
-  StudentsForAssignmentQuery,
-} from '../graphql/generated/graphql';
 
 @Component({
   selector: 'app-assignment-submissions-list',
@@ -142,24 +138,28 @@ import {
 export default class AssignmentSubmissionsList {
   assignmentId = input.required<string>();
 
-  private apollo = inject(Apollo);
+  private http = inject(HttpClient);
   private toast = inject(Toast);
 
   downloadingFileId = signal<string | null>(null);
 
   studentsResource = rxResource({
     params: () => ({ assignmentId: this.assignmentId() }),
-    stream: ({ params }) => {
-      return this.apollo
-        .watchQuery({
-          query: StudentsForAssignmentDocument,
-          variables: { assignmentId: params.assignmentId },
-          fetchPolicy: 'network-only',
-        })
-        .valueChanges.pipe(
-          map((res) => (res.data?.studentsForAssignment as StudentsForAssignmentQuery['studentsForAssignment']) ?? []),
-        );
-    },
+    stream: ({ params }) =>
+      this.http
+        .get<
+          Array<{
+            id: string;
+            firstName: string;
+            fatherName: string;
+            motherName: string;
+            assignmentSubmissions: Array<{
+              submittedAt?: string | Date | null;
+              file: { id: string; name: string; mimeType: string; size: number };
+            }>;
+          }>
+        >(`/api/v1/assignment-submissions/students-for-assignment/${params.assignmentId}`)
+        .pipe(map((res) => res ?? [])),
   });
 
   getSubmittedCount(students: Array<{ assignmentSubmissions?: unknown[] }>): number {
@@ -170,28 +170,22 @@ export default class AssignmentSubmissionsList {
     return students.filter((s) => (s.assignmentSubmissions?.length ?? 0) === 0).length;
   }
 
-  downloadFile(fileId: string) {
+  async downloadFile(fileId: string) {
     this.downloadingFileId.set(fileId);
-
-    this.apollo
-      .mutate({
-        mutation: CreateSubmissionDownloadUrlDocument,
-        variables: { fileId },
-      })
-      .subscribe({
-        next: (result) => {
-          const url = result.data?.createSubmissionDownloadUrl?.downloadUrl;
-          if (url) {
-            window.open(url, '_blank');
-          }
-          this.downloadingFileId.set(null);
-        },
-        error: (error) => {
-          console.error(error);
-          this.toast.showError('Error al descargar el archivo.');
-          this.downloadingFileId.set(null);
-        },
-      });
+    try {
+      const res = await firstValueFrom(
+        this.http.get<{ downloadUrl?: string }>(`/api/v1/assignment-submissions/download-url/${fileId}`),
+      );
+      const url = res?.downloadUrl;
+      if (url) {
+        window.open(url, '_blank');
+      }
+    } catch (error) {
+      console.error(error);
+      this.toast.showError('Error al descargar el archivo.');
+    } finally {
+      this.downloadingFileId.set(null);
+    }
   }
 
   formatSubmissionDate(value: unknown): string {

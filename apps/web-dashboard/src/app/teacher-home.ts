@@ -1,20 +1,32 @@
 import { EmptyState, PageHeader, StatCard } from '@/ui';
+import { httpResource } from '@angular/common/http';
 import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
-import { rxResource } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
-import { Apollo } from 'apollo-angular';
 import { endOfWeek, startOfWeek } from 'date-fns';
-import { map, of } from 'rxjs';
 import Store from './core/store';
-import {
-  TeacherAssignmentsDocument,
-  TeacherAssignmentsQuery,
-  TeacherDashboardStatsDocument,
-  TeacherRecentMessagesDocument,
-  TeacherRecentNewslettersDocument,
-  TeacherRecentNewslettersQuery,
-} from './graphql/generated/graphql';
+import { toFetchQueryRecord } from './core/fetch-query-params';
+
+type AssignmentRow = {
+  id: string;
+  title: string;
+  date?: string;
+  course: { name: string };
+};
+
+type InboxRow = {
+  id: string;
+  message?: { subject?: string; createdAt?: string; sender?: { name?: string } };
+};
+
+type PublishedNewsletter = {
+  id: string;
+  title: string;
+  content: string;
+  publishedAt: string;
+  author: { name: string };
+};
+
 @Component({
   selector: 'app-teacher-home',
   imports: [DatePipe, RouterLink, PageHeader, StatCard, EmptyState],
@@ -24,12 +36,12 @@ import {
     <div class="grid gap-4 md:grid-cols-3">
       <lib-stat-card
         label="Cursos activos"
-        [value]="(statsResource.value()?.coursesCount ?? 0).toString()"
+        [value]="statsResource().coursesCount.toString()"
         helper="En la institución"
       />
       <lib-stat-card
         label="Estudiantes"
-        [value]="(statsResource.value()?.findManyStudentsCount ?? 0).toString()"
+        [value]="statsResource().findManyStudentsCount.toString()"
         helper="Matriculados"
       />
       <lib-stat-card
@@ -141,103 +153,70 @@ import {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class TeacherHome {
-  private apollo = inject(Apollo);
-  private store = inject(Store);
+  #store = inject(Store);
 
   private currentDate = signal(new Date());
   private startDate = computed(() => startOfWeek(this.currentDate(), { weekStartsOn: 1 }));
   private endDate = computed(() => endOfWeek(this.currentDate(), { weekStartsOn: 1 }));
 
-  public statsResource = rxResource({
-    params: () => ({ schoolId: this.store.currentSchoolId() }),
-    stream: ({ params }) => {
-      if (!params.schoolId) {
-        return of({
-          coursesCount: 0,
-          findManyStudentsCount: 0,
-        });
-      }
-      return this.apollo
-        .watchQuery({
-          query: TeacherDashboardStatsDocument,
-          variables: {
-            schoolId: params.schoolId,
-          },
-        })
-        .valueChanges.pipe(
-          map(
-            (result) =>
-              result.data ??
-              ({
-                coursesCount: 0,
-                findManyStudentsCount: 0,
-              } as { coursesCount: number; findManyStudentsCount: number }),
-          ),
-        );
-    },
+  #coursesCount = httpResource<number>(() => {
+    const schoolId = this.#store.currentSchoolId();
+    if (!schoolId) return undefined;
+    return {
+      url: '/api/v1/courses/count',
+      params: toFetchQueryRecord({ schoolId }),
+    };
   });
 
-  public assignmentsResource = rxResource({
-    params: () => ({
-      startDate: this.startDate(),
-      endDate: this.endDate(),
-      schoolId: this.store.currentSchoolId(),
+  #studentsCount = httpResource<number>(() => {
+    const schoolId = this.#store.currentSchoolId();
+    if (!schoolId) return undefined;
+    return {
+      url: '/api/v1/students/count',
+      params: toFetchQueryRecord({ schoolId }),
+    };
+  });
+
+  public statsResource = computed(() => ({
+    coursesCount: this.#coursesCount.value() ?? 0,
+    findManyStudentsCount: this.#studentsCount.value() ?? 0,
+  }));
+
+  public assignmentsResource = httpResource<AssignmentRow[]>(
+    () => {
+      const schoolId = this.#store.currentSchoolId();
+      if (!schoolId) return undefined;
+      return {
+        url: '/api/v1/assignments/by-school',
+        params: {
+          schoolId,
+          startDate: this.startDate().toISOString(),
+          endDate: this.endDate().toISOString(),
+        },
+      };
+    },
+    { defaultValue: [] },
+  );
+
+  public recentMessages = httpResource<InboxRow[]>(
+    () => ({
+      url: '/api/v1/messages',
+      params: toFetchQueryRecord({ take: 4, skip: 0 }),
     }),
-    stream: ({ params }) => {
-      if (!params.schoolId) {
-        return of<TeacherAssignmentsQuery['assignmentsBySchoolId']>([]);
-      }
-      return this.apollo
-        .watchQuery({
-          query: TeacherAssignmentsDocument,
-          variables: {
-            schoolId: params.schoolId,
-            startDate: params.startDate.toISOString(),
-            endDate: params.endDate.toISOString(),
-          },
-        })
-        .valueChanges.pipe(
-          map(
-            (result) => (result.data?.assignmentsBySchoolId ?? []) as TeacherAssignmentsQuery['assignmentsBySchoolId'],
-          ),
-        );
-    },
-  });
+    { defaultValue: [] },
+  );
 
-  public recentMessages = rxResource({
-    params: () => ({ take: 4, skip: 0 }),
-    stream: ({ params }) => {
-      return this.apollo
-        .watchQuery({
-          query: TeacherRecentMessagesDocument,
-          variables: params,
-        })
-        .valueChanges.pipe(map((result) => result.data?.findManyMessages ?? []));
+  public recentNewsletters = httpResource<PublishedNewsletter[]>(
+    () => {
+      const schoolId = this.#store.currentSchoolId();
+      if (!schoolId) return undefined;
+      return {
+        url: '/api/v1/newsletters/published',
+        params: { schoolId, take: '3' },
+      };
     },
-  });
-
-  public recentNewsletters = rxResource({
-    params: () => ({ schoolId: this.store.currentSchoolId() }),
-    stream: ({ params }) => {
-      if (!params.schoolId) {
-        return of<TeacherRecentNewslettersQuery['publishedNewsletters']>([]);
-      }
-      return this.apollo
-        .watchQuery({
-          query: TeacherRecentNewslettersDocument,
-          variables: {
-            schoolId: params.schoolId,
-            take: 3,
-          },
-        })
-        .valueChanges.pipe(
-          map(
-            (result) =>
-              (result.data?.publishedNewsletters ?? []) as TeacherRecentNewslettersQuery['publishedNewsletters'],
-          ),
-        );
-    },
-  });
+    { defaultValue: [] },
+  );
 
   stripHtml(html: string): string {
     const div = document.createElement('div');

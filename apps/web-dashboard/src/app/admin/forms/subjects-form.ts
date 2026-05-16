@@ -1,9 +1,8 @@
 import { Toast } from '@/ui';
+import { HttpClient } from '@angular/common/http';
 import { afterRenderEffect, Component, inject, input, output, signal } from '@angular/core';
 import { form, FormField, required, submit } from '@angular/forms/signals';
 import { Prisma } from '@generated/prisma';
-import { Apollo } from 'apollo-angular';
-import { SubjectsFormCreateSubjectDocument, SubjectsFormUpdateSubjectDocument } from '../../graphql/generated/graphql';
 
 @Component({
   selector: 'app-subjects-form',
@@ -57,7 +56,7 @@ export default class SubjectsForm {
   public closeModal = output<void>();
   public data = input<{ subject?: Prisma.SubjectGetPayload<false> }>();
   private toast = inject(Toast);
-  private apollo = inject(Apollo);
+  #http = inject(HttpClient);
   #subject = signal<Omit<Prisma.SubjectUncheckedCreateInput, 'organizationId'>>({
     name: '',
     code: '',
@@ -90,15 +89,10 @@ export default class SubjectsForm {
       const subjectId = this.data()?.subject?.id ?? '';
 
       if (this.data()?.subject) {
-        this.apollo
-          .mutate({
-            mutation: SubjectsFormUpdateSubjectDocument,
-            variables: {
-              updateSubjectInput: {
-                ...subject,
-                id: subjectId,
-              },
-            },
+        this.#http
+          .patch('/api/v1/subjects', {
+            ...subject,
+            id: subjectId,
           })
           .subscribe({
             next: () => {
@@ -110,22 +104,15 @@ export default class SubjectsForm {
             },
           });
       } else {
-        this.apollo
-          .mutate({
-            mutation: SubjectsFormCreateSubjectDocument,
-            variables: {
-              createSubjectInput: subject,
-            },
-          })
-          .subscribe({
-            next: () => {
-              this.toast.showSuccess('Asignatura creada');
-              this.closeModal.emit();
-            },
-            error: (error) => {
-              this.toast.showError(error.message);
-            },
-          });
+        this.#http.post('/api/v1/subjects', subject).subscribe({
+          next: () => {
+            this.toast.showSuccess('Asignatura creada');
+            this.closeModal.emit();
+          },
+          error: (error) => {
+            this.toast.showError(error.message);
+          },
+        });
       }
     });
   }

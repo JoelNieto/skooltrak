@@ -1,8 +1,7 @@
 import { isPlatformBrowser } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
 import { effect, inject, Injectable, PLATFORM_ID, signal } from '@angular/core';
-import { Apollo } from 'apollo-angular';
 import { firstValueFrom } from 'rxjs';
-import { UpdateThemePreferenceDocument } from '../graphql/generated/graphql';
 import Auth from '../auth/auth';
 
 export type ThemePreference = 'light' | 'dark' | 'system';
@@ -14,7 +13,7 @@ const STORAGE_KEY = 'skooltrak-theme-preference';
 })
 export class ThemeService {
   private platformId = inject(PLATFORM_ID);
-  private apollo = inject(Apollo);
+  private http = inject(HttpClient);
   private auth = inject(Auth);
 
   readonly theme = signal<ThemePreference>('system');
@@ -84,10 +83,7 @@ export class ThemeService {
     if (this.auth.isAuthenticated()) {
       try {
         await firstValueFrom(
-          this.apollo.mutate({
-            mutation: UpdateThemePreferenceDocument,
-            variables: { themePreference: value },
-          }),
+          this.http.patch('/api/v1/auth/me/theme', { themePreference: value }),
         );
         this.auth.reloadUser();
       } catch {

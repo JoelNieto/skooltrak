@@ -8,8 +8,39 @@ import {
 } from '@nestjs/common';
 import { ModuleRef, Reflector } from '@nestjs/core';
 import { GqlExecutionContext } from '@nestjs/graphql';
+import { Request } from 'express';
 import * as jwt from 'jsonwebtoken';
 import { PrismaService } from './prisma.service';
+
+/**
+ * Interface for the user context expected by services.
+ * This maintains backward compatibility with the old JWT payload.
+ */
+export interface AuthUserContext {
+  userId: string;
+  organizationId: string | null;
+  role: string;
+  permissions?: string[];
+}
+
+/** Express request augmented by better-auth and JWT guard. */
+export type AuthenticatedRequest = Request & {
+  user?: AuthUserContext;
+  session?: unknown;
+};
+
+/** Resolves Express `req` for HTTP controllers and GraphQL resolvers during migration. */
+export function getRequestFromExecutionContext(context: ExecutionContext): AuthenticatedRequest {
+  const type = context.getType<string>();
+  if (type === 'http' || type === 'ws') {
+    return context.switchToHttp().getRequest<AuthenticatedRequest>();
+  }
+  if (type === 'graphql') {
+    const gqlCtx = GqlExecutionContext.create(context);
+    return gqlCtx.getContext().req as AuthenticatedRequest;
+  }
+  return context.switchToHttp().getRequest<AuthenticatedRequest>();
+}
 
 // ---------------------------------------------------------------------------
 // Decorator: mark routes as public (no auth required)
@@ -31,18 +62,8 @@ export const ROLES_KEY = 'requiredRoles';
 export const RequireRoles = (...roles: string[]) => SetMetadata(ROLES_KEY, roles);
 
 // Re-export Session decorator from nestjs-better-auth
-export { Session, UserSession } from '@thallesp/nestjs-better-auth';
-
-/**
- * Interface for the user context expected by services.
- * This maintains backward compatibility with the old JWT payload.
- */
-export interface AuthUserContext {
-  userId: string;
-  organizationId: string | null;
-  role: string;
-  permissions?: string[];
-}
+export { Session } from '@thallesp/nestjs-better-auth';
+export type { UserSession } from '@thallesp/nestjs-better-auth';
 
 interface JwtPayload {
   userId: string;
@@ -72,11 +93,12 @@ export class BetterAuthGuard implements CanActivate {
       return true;
     }
 
-    const ctx = GqlExecutionContext.create(context);
-    const request = ctx.getContext().req;
+    const request = getRequestFromExecutionContext(context);
 
     // Check for session from better-auth
-    const session = request.session;
+    const session = request.session as
+      | { user?: { id: string }; activeOrganizationId?: string | null }
+      | undefined;
 
     // If we have a better-auth session, populate req.user
     if (session?.user) {
@@ -165,8 +187,7 @@ export class PermissionsGuard implements CanActivate {
       return true;
     }
 
-    const ctx = GqlExecutionContext.create(context);
-    const request = ctx.getContext().req;
+    const request = getRequestFromExecutionContext(context);
     const user = request.user as AuthUserContext;
 
     if (!user?.userId) {
@@ -211,8 +232,7 @@ export class RoleGuard implements CanActivate {
       return true;
     }
 
-    const ctx = GqlExecutionContext.create(context);
-    const request = ctx.getContext().req;
+    const request = getRequestFromExecutionContext(context);
     const user = request.user as AuthUserContext;
 
     if (!user?.userId) {

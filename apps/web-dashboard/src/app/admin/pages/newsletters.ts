@@ -1,15 +1,15 @@
 import { Confirmation, Pagination, Paginator, Toast } from '@/ui';
 import { Menu, MenuContent, MenuItem, MenuTrigger } from '@angular/aria/menu';
 import { OverlayModule } from '@angular/cdk/overlay';
+import { HttpClient } from '@angular/common/http';
 import { DatePipe } from '@angular/common';
 import { afterRenderEffect, ChangeDetectionStrategy, Component, inject, signal, viewChild } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { Apollo, gql } from 'apollo-angular';
-import { filter, map, switchMap, tap } from 'rxjs';
+import { filter, forkJoin, map, switchMap, tap } from 'rxjs';
 import Store from '../../core/store';
-import { AdminRemoveNewsletterDocument, AdminUpdateNewsletterDocument } from '../../graphql/generated/graphql';
+import { toFetchQueryParams } from '../../core/fetch-query-params';
 
 type NewsletterItem = {
   id: string;
@@ -208,13 +208,33 @@ type NewsletterItem = {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class Newsletters {
-  #apollo = inject(Apollo);
+  #http = inject(HttpClient);
   #confirmation = inject(Confirmation);
   #toast = inject(Toast);
   #store = inject(Store);
   pagination = inject(Pagination);
   searchText = signal('');
   actionsMenu = viewChild<Menu<string>>('actionsMenu');
+
+  private enrichAuthorName(n: {
+    author?: {
+      name?: string | null;
+      firstName?: string | null;
+      lastName?: string | null;
+      id: string;
+    };
+    school: { id: string; name: string };
+  } & Omit<NewsletterItem, 'author'>): NewsletterItem {
+    const a = n.author;
+    const name =
+      a?.name?.trim() ||
+      [a?.firstName, a?.lastName].filter(Boolean).join(' ').trim() ||
+      '—';
+    return {
+      ...n,
+      author: { id: a?.id ?? '', name },
+    };
+  }
 
   public newsletters = rxResource({
     params: () => ({
@@ -227,54 +247,32 @@ export default class Newsletters {
     }),
     stream: ({ params }) => {
       const { take, skip, search, orderBy, orderDirection, schoolId } = params;
-      return this.#apollo
-        .watchQuery<{
-          count: number;
-          newsletters: NewsletterItem[];
-        }>({
-          query: gql`
-            query GetNewsletters(
-              $take: Int!
-              $skip: Int!
-              $search: String
-              $orderBy: String
-              $orderDirection: String
-              $schoolId: String
-            ) {
-              count: findManyNewslettersCount(search: $search, schoolId: $schoolId)
-              newsletters(
-                take: $take
-                skip: $skip
-                search: $search
-                orderBy: $orderBy
-                orderDirection: $orderDirection
-                schoolId: $schoolId
-              ) {
-                id
-                title
-                published
-                publishedAt
-                school {
-                  id
-                  name
-                }
-                author {
-                  id
-                  name
-                }
-                createdAt
-                updatedAt
-              }
-            }
-          `,
-          variables: { take, skip, search, orderBy, orderDirection, schoolId },
-        })
-        .valueChanges.pipe(
-          tap(({ data }) => {
-            this.pagination.updateCount(data?.count ?? 0);
-          }),
-          map((result) => (result.data?.newsletters ?? []) as NewsletterItem[]),
-        );
+      const q = toFetchQueryParams({
+        take,
+        skip,
+        search: search ?? undefined,
+        orderBy: orderBy == null ? undefined : orderBy,
+        orderDirection: orderDirection == null ? undefined : orderDirection,
+        schoolId: schoolId == null ? undefined : schoolId,
+      });
+      return forkJoin({
+        count: this.#http.get<number>('/api/v1/newsletters/count', { params: q }),
+        list: this.#http.get<
+          Array<{
+            id: string;
+            title: string;
+            published: boolean;
+            publishedAt: string | null;
+            school: { id: string; name: string };
+            author: { id: string; name?: string | null; firstName?: string | null; lastName?: string | null };
+            createdAt: string;
+            updatedAt: string;
+          }>
+        >('/api/v1/newsletters', { params: q }),
+      }).pipe(
+        tap(({ count }) => this.pagination.updateCount(count ?? 0)),
+        map(({ list }) => (list ?? []).map((row) => this.enrichAuthorName(row))),
+      );
     },
   });
 
@@ -285,15 +283,10 @@ export default class Newsletters {
   }
 
   public togglePublish(newsletter: NewsletterItem) {
-    this.#apollo
-      .mutate({
-        mutation: AdminUpdateNewsletterDocument,
-        variables: {
-          updateNewsletterInput: {
-            id: newsletter.id,
-            published: !newsletter.published,
-          },
-        },
+    this.#http
+      .patch('/api/v1/newsletters', {
+        id: newsletter.id,
+        published: !newsletter.published,
       })
       .subscribe({
         next: () => {
@@ -315,12 +308,7 @@ export default class Newsletters {
       })
       .pipe(
         filter((confirmed: boolean) => confirmed === true),
-        switchMap(() =>
-          this.#apollo.mutate({
-            mutation: AdminRemoveNewsletterDocument,
-            variables: { removeNewsletterId: newsletter.id },
-          }),
-        ),
+        switchMap(() => this.#http.delete(`/api/v1/newsletters/${newsletter.id}`)),
       )
       .subscribe({
         next: () => {

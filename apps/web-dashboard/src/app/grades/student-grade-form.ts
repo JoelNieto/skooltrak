@@ -12,11 +12,11 @@ import {
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
+import { HttpClient } from '@angular/common/http';
 import { Prisma } from '@generated/prisma';
 
 type Decimal = InstanceType<typeof Prisma.Decimal>;
-import { Apollo } from 'apollo-angular';
-import { UpdateStudentGradeDocument } from '../graphql/generated/graphql';
+
 @Component({
   selector: 'app-student-grade-form',
   imports: [ReactiveFormsModule],
@@ -61,7 +61,7 @@ export default class StudentGradeForm {
   #fb = inject(NonNullableFormBuilder);
   #toast = inject(Toast);
   public closeModal = output<boolean>();
-  #apollo = inject(Apollo);
+  #http = inject(HttpClient);
 
   public form = this.#fb.group({
     score: this.#fb.control<number | Decimal | null>(0),
@@ -91,16 +91,11 @@ export default class StudentGradeForm {
       return;
     }
 
-    this.#apollo
-      .mutate({
-        mutation: UpdateStudentGradeDocument,
-        variables: {
-          updateStudentGradeInput: {
-            score: Number(this.form.getRawValue().score),
-            comments: this.form.getRawValue().comments,
-            id: this.data().studentGrade.id,
-          },
-        },
+    this.#http
+      .patch('/api/v1/student-grades', {
+        score: Number(this.form.getRawValue().score),
+        comments: this.form.getRawValue().comments,
+        id: this.data().studentGrade.id,
       })
       .subscribe({
         next: () => {

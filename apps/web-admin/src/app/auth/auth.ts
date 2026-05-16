@@ -1,4 +1,5 @@
 import { Toast } from '@/ui';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { isPlatformBrowser } from '@angular/common';
 import {
   Injectable,
@@ -11,13 +12,7 @@ import {
 } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
-import { Prisma } from '@generated/prisma';
-import { Apollo } from 'apollo-angular';
-import {
-  WebAdminAuthLoginDocument,
-  WebAdminAuthMeDocument,
-} from '../graphql/generated';
-import { catchError, firstValueFrom, map, of, tap } from 'rxjs';
+import { catchError, firstValueFrom, of, tap, throwError } from 'rxjs';
 import { authClient } from './auth-client';
 
 @Injectable({
@@ -25,15 +20,14 @@ import { authClient } from './auth-client';
 })
 export default class Auth {
   private platformId = inject(PLATFORM_ID);
-  #apollo = inject(Apollo);
+  private http = inject(HttpClient);
   #router = inject(Router);
   #toasts = inject(Toast);
   public readonly isInitialized = signal(false);
   public isSigning = signal(false);
-  public user = computed(() => this.userResource.value());
+  public user = computed(() => this.userResource.value() as any);
   public isUserLoading = computed(() => this.userResource.isLoading());
 
-  // Session state from better-auth
   private sessionState = signal<{
     user?: any;
     session?: any;
@@ -71,25 +65,23 @@ export default class Auth {
       if (!token && !session) {
         return of(null);
       }
-      return this.#apollo
-        .watchQuery({
-          query: WebAdminAuthMeDocument,
-          fetchPolicy: 'network-only',
-        })
-        .valueChanges.pipe(
-          map((res) => res.data?.me),
-          tap(() => {
-            if (this.isSigning()) {
-              this.#router.navigate(['/home']);
-              this.isSigning.set(false);
-            }
-          }),
-          catchError((err) => {
-            this.#toasts.showError(err.message);
+      return this.http.get<any>('/api/v1/auth/me').pipe(
+        tap(() => {
+          if (this.isSigning()) {
+            this.#router.navigate(['/home']);
             this.isSigning.set(false);
-            return of(null);
-          })
-        );
+          }
+        }),
+        catchError((err: HttpErrorResponse) => {
+          const msg =
+            typeof err.error === 'object' && err.error && 'message' in err.error
+              ? String((err.error as { message?: string }).message)
+              : err.message;
+          this.#toasts.showError(msg);
+          this.isSigning.set(false);
+          return of(null);
+        }),
+      );
     },
   });
 
@@ -126,15 +118,15 @@ export default class Auth {
     this.isSigning.set(true);
 
     try {
-      // Use GraphQL login which returns JWT token
       const res = await firstValueFrom(
-        this.#apollo.mutate({
-          mutation: WebAdminAuthLoginDocument,
-          variables: { email, password },
-        })
+        this.http.post<{ accessToken: string }>(
+          '/api/v1/auth/login',
+          { email, password },
+          { withCredentials: true },
+        ),
       );
 
-      const accessToken = res.data?.login?.accessToken;
+      const accessToken = res?.accessToken;
       if (accessToken) {
         this.token.set(accessToken);
         this.isSigning.set(false);
@@ -146,7 +138,8 @@ export default class Auth {
       return false;
     } catch (err: any) {
       console.error('Login error:', err);
-      this.#toasts.showError(err.message || 'Credenciales inválidas');
+      const msg = err?.error?.message ?? err?.message ?? 'Credenciales inválidas';
+      this.#toasts.showError(msg);
       this.isSigning.set(false);
       return false;
     }
@@ -164,7 +157,6 @@ export default class Auth {
     this.#router.navigate(['/login']);
   }
 
-  // Helper to get API base URL (handles dev vs production)
   private getApiBaseUrl(): string {
     if (isPlatformBrowser(this.platformId)) {
       const isDev = window.location.hostname === 'localhost';
@@ -175,7 +167,6 @@ export default class Auth {
     return '';
   }
 
-  // Password reset methods
   public async requestPasswordReset(email: string): Promise<boolean> {
     try {
       const baseUrl = this.getApiBaseUrl();
@@ -189,37 +180,32 @@ export default class Auth {
         }),
       });
 
-      return true; // Always return true to prevent email enumeration
-    } catch (err: any) {
-      return true; // Return true to prevent email enumeration
+      return true;
+    } catch {
+      return true;
     }
   }
 
-  public async resetPassword(
-    token: string,
-    newPassword: string
-  ): Promise<boolean> {
+  public async resetPassword(token: string, newPassword: string): Promise<boolean> {
     try {
-      const baseUrl = this.getApiBaseUrl();
-      const response = await fetch(`${baseUrl}/api/auth/reset-password`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({
-          token,
-          newPassword,
-        }),
-      });
+      const result = await firstValueFrom(
+        this.http.post<{ accessToken: string }>(
+          '/api/v1/auth/reset-password',
+          { token, newPassword },
+          { withCredentials: true },
+        ),
+      );
 
-      if (!response.ok) {
-        this.#toasts.showError('Failed to reset password');
-        return false;
+      if (result?.accessToken) {
+        this.token.set(result.accessToken);
+        this.#toasts.showSuccess('Password reset successfully');
+        return true;
       }
 
-      this.#toasts.showSuccess('Password reset successfully');
-      return true;
-    } catch (err: any) {
       this.#toasts.showError('Failed to reset password');
+      return false;
+    } catch (err: any) {
+      this.#toasts.showError(err?.error?.message ?? err?.message ?? 'Failed to reset password');
       return false;
     }
   }

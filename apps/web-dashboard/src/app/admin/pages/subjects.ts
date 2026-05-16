@@ -3,17 +3,12 @@ import { Menu, MenuContent, MenuItem, MenuTrigger } from '@angular/aria/menu';
 import { OverlayModule } from '@angular/cdk/overlay';
 import { DatePipe } from '@angular/common';
 import { afterRenderEffect, ChangeDetectionStrategy, Component, inject, signal, viewChild } from '@angular/core';
-import { rxResource } from '@angular/core/rxjs-interop';
+import { effect } from '@angular/core';
+import { httpResource, HttpClient } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { Prisma } from '@generated/prisma';
-
-import { Apollo } from 'apollo-angular';
-import { filter, map, switchMap, tap } from 'rxjs';
-import {
-  AdminGetSubjectsDocument,
-  AdminGetSubjectsQuery,
-  AdminRemoveSubjectDocument,
-} from '../../graphql/generated/graphql';
+import { filter, switchMap } from 'rxjs';
+import { toFetchQueryRecord } from '../../core/fetch-query-params';
 import SubjectsForm from '../forms/subjects-form';
 @Component({
   selector: 'app-subjects',
@@ -216,53 +211,51 @@ import SubjectsForm from '../forms/subjects-form';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class Subjects {
-  #apollo = inject(Apollo);
+  #http = inject(HttpClient);
   #confirmation = inject(Confirmation);
   #modal = inject(Modal);
   #toast = inject(Toast);
   pagination = inject(Pagination);
   searchText = signal('');
   actionsMenu = viewChild<Menu<string>>('actionsMenu');
-  public subjects = rxResource({
-    params: () => ({
+  public subjects = httpResource<Prisma.SubjectGetPayload<false>[]>(
+    () => ({
+      url: '/api/v1/subjects',
+      params: toFetchQueryRecord({
+        take: this.pagination.take(),
+        skip: this.pagination.skip(),
+        search: this.pagination.search(),
+        orderBy: this.pagination.sortBy(),
+        orderDirection: this.pagination.sortOrder(),
+      }),
+    }),
+    { defaultValue: [] },
+  );
+
+  private readonly subjectsCount = httpResource<number>(() => ({
+    url: '/api/v1/subjects/count',
+    params: toFetchQueryRecord({
       take: this.pagination.take(),
       skip: this.pagination.skip(),
       search: this.pagination.search(),
       orderBy: this.pagination.sortBy(),
       orderDirection: this.pagination.sortOrder(),
     }),
-    stream: ({ params }) => {
-      const { take, skip, search, orderBy, orderDirection } = params;
-      return this.#apollo
-        .watchQuery<{
-          count: number;
-          subjects: Prisma.SubjectGetPayload<false>[];
-        }>({
-          query: AdminGetSubjectsDocument,
-          variables: {
-            take,
-            skip,
-            search,
-            orderBy,
-            orderDirection,
-          },
-        })
-        .valueChanges.pipe(
-          tap(({ data }) => {
-            this.pagination.updateCount(data?.count ?? 0);
-          }),
-          map((result) => (result.data?.subjects as AdminGetSubjectsQuery['subjects']) ?? []),
-        );
-    },
-  });
+  }));
 
   constructor() {
     afterRenderEffect(() => {
       this.pagination.updateSearch(this.searchText());
     });
+    effect(() => {
+      const count = this.subjectsCount.value();
+      if (count != null) {
+        this.pagination.updateCount(count);
+      }
+    });
   }
 
-  public editSubject(subject?: AdminGetSubjectsQuery['subjects'][number]) {
+  public editSubject(subject?: Prisma.SubjectGetPayload<false>) {
     this.#modal
       .open(SubjectsForm, {
         title: subject ? 'Editar Asignatura' : 'Agregar Asignatura',
@@ -275,7 +268,7 @@ export default class Subjects {
       });
   }
 
-  public deleteSubject(subject: AdminGetSubjectsQuery['subjects'][number]) {
+  public deleteSubject(subject: Prisma.SubjectGetPayload<false>) {
     this.#confirmation
       .confirm({
         title: 'Eliminar Asignatura',
@@ -283,14 +276,7 @@ export default class Subjects {
       })
       .pipe(
         filter((confirmed: boolean) => confirmed === true),
-        switchMap(() =>
-          this.#apollo.mutate({
-            mutation: AdminRemoveSubjectDocument,
-            variables: {
-              removeSubjectId: subject.id,
-            },
-          }),
-        ),
+        switchMap(() => this.#http.delete(`/api/v1/subjects/${subject.id}`)),
       )
       .subscribe({
         next: () => {

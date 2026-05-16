@@ -6,7 +6,8 @@ import {
   Validators,
 } from '@angular/forms';
 import { Prisma } from '@generated/prisma';
-import { Apollo, gql } from 'apollo-angular';
+import { HttpClient } from '@angular/common/http';
+import { firstValueFrom } from 'rxjs';
 @Component({
   selector: 'app-grade-metrics-form',
   imports: [ReactiveFormsModule],
@@ -66,7 +67,7 @@ export default class GradeMetricsForm implements OnInit {
   }>();
   private fb = inject(NonNullableFormBuilder);
   private toast = inject(Toast);
-  private apollo = inject(Apollo);
+  private http = inject(HttpClient);
 
   public form = this.fb.group({
     name: ['', [Validators.required]],
@@ -97,86 +98,28 @@ export default class GradeMetricsForm implements OnInit {
       return;
     }
 
+    const body = this.form.getRawValue();
     if (this.data()?.metric) {
-      this.apollo
-        .mutate({
-          mutation: gql`
-            mutation UpdateGradeMetric(
-              $updateGradeMetricInput: UpdateGradeMetricInput!
-            ) {
-              updateGradeMetric(
-                updateGradeMetricInput: $updateGradeMetricInput
-              ) {
-                id
-                name
-                minimum
-                maximum
-                minimumApproval
-                minimumExcellence
-                createdAt
-                updatedAt
-              }
-            }
-          `,
-          variables: {
-            updateGradeMetricInput: {
-              ...this.form.value,
-              id: this.data()!.metric!.id,
-            },
-          },
+      void firstValueFrom(
+        this.http.patch('/api/v1/grade-metrics', { ...body, id: this.data()!.metric!.id }),
+      )
+        .then(() => {
+          this.toast.showSuccess('Metrica de calificaciones actualizada exitosamente');
+          this.closeModal.emit(true);
         })
-        .subscribe({
-          next: () => {
-            this.toast.showSuccess(
-              'Metrica de calificaciones actualizada exitosamente'
-            );
-            this.closeModal.emit(true);
-          },
-          error: (error) => {
-            this.toast.showError(
-              'Error al actualizar la metrica de calificaciones'
-            );
-            console.error(error);
-          },
+        .catch((error) => {
+          this.toast.showError('Error al actualizar la metrica de calificaciones');
+          console.error(error);
         });
     } else {
-      this.apollo
-        .mutate({
-          mutation: gql`
-            mutation CreateGradeMetric(
-              $createGradeMetricInput: CreateGradeMetricInput!
-            ) {
-              createGradeMetric(
-                createGradeMetricInput: $createGradeMetricInput
-              ) {
-                id
-                name
-                minimum
-                maximum
-                minimumApproval
-                minimumExcellence
-                createdAt
-                updatedAt
-              }
-            }
-          `,
-          variables: {
-            createGradeMetricInput: {
-              ...this.form.value,
-            },
-          },
+      void firstValueFrom(this.http.post('/api/v1/grade-metrics', body))
+        .then(() => {
+          this.toast.showSuccess('Metrica de calificaciones creada exitosamente');
+          this.closeModal.emit(true);
         })
-        .subscribe({
-          next: () => {
-            this.toast.showSuccess(
-              'Metrica de calificaciones creada exitosamente'
-            );
-            this.closeModal.emit(true);
-          },
-          error: (error) => {
-            this.toast.showError('Error al crear la metrica de calificaciones');
-            console.error(error);
-          },
+        .catch((error) => {
+          this.toast.showError('Error al crear la metrica de calificaciones');
+          console.error(error);
         });
     }
   }

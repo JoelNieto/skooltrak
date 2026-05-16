@@ -1,21 +1,36 @@
 import { Loader, Modal, Toast } from '@/ui';
+import { HttpClient } from '@angular/common/http';
 import { Component, inject, input, signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { Router, RouterLink } from '@angular/router';
-
-import { Apollo } from 'apollo-angular';
+import { ChatType } from '@generated/prisma';
+import { firstValueFrom } from 'rxjs';
 import { map, of } from 'rxjs';
-import { ChatType, ChatsCreateContextualChatDocument } from '../graphql/generated/graphql';
 import AssignmentForm from '../assignments/assignment-form';
 import CourseAttendance from '../attendance/course-attendance';
 import Auth from '../auth/auth';
 import { isValidId } from '../core/validators';
 import CourseGrades from '../grades/course-grades';
-import { CourseDocument } from '../graphql/generated/graphql';
 import CourseAssignments from './course-assignments';
 import CourseFiles from './course-files';
 import CourseGradeBuckets from './course-grade-buckets';
 import CourseStudentGrades from './course-student-grades';
+
+type CourseVm = {
+  id: string;
+  name: string;
+  code: string;
+  teacher?: {
+    firstName?: string;
+    fatherName?: string;
+    name?: string;
+    initials?: string;
+    color?: string;
+    user?: { id?: string; firstName?: string; lastName?: string; color?: string | null };
+    userId?: string | null;
+  } | null;
+  studyPlan: { gradeMetric: unknown };
+};
 
 @Component({
   imports: [
@@ -107,10 +122,10 @@ import CourseStudentGrades from './course-student-grades';
 
           <div class="tab-content bg-base-100 p-6">
             @if (auth.isTeacher() || auth.isAdmin()) {
-              <app-course-grades [courseId]="id()" [metric]="course.studyPlan.gradeMetric!" />
+              <app-course-grades [courseId]="id()" [metric]="$any(course.studyPlan.gradeMetric)" />
             }
             @if (auth.isStudent()) {
-              <app-course-student-grades [courseId]="id()" [metric]="course.studyPlan.gradeMetric!" />
+              <app-course-student-grades [courseId]="id()" [metric]="$any(course.studyPlan.gradeMetric)" />
             }
           </div>
           <label class="tab">
@@ -170,7 +185,7 @@ import CourseStudentGrades from './course-student-grades';
 export default class Course {
   public id = input.required<string>();
   public auth = inject(Auth);
-  private apollo = inject(Apollo);
+  private http = inject(HttpClient);
   private modal = inject(Modal);
   private router = inject(Router);
   private toast = inject(Toast);
@@ -178,7 +193,9 @@ export default class Course {
 
   canStartCourseChat() {
     if (!this.auth.hasPermission('MANAGE_MESSAGES')) return false;
-    const course = this.courseResource.value();
+    const course = this.courseResource.value() as {
+      teacher?: { user?: { id?: string }; userId?: string | null };
+    } | null;
     if (!course) return false;
     return this.auth.isAdmin() || course.teacher?.user?.id === this.auth.user()?.id;
   }
@@ -186,13 +203,12 @@ export default class Course {
   async startCourseChat() {
     this.startingChat.set(true);
     try {
-      const result = await this.apollo
-        .mutate({
-          mutation: ChatsCreateContextualChatDocument,
-          variables: { input: { contextType: ChatType.Course, contextId: this.id() } },
-        })
-        .toPromise();
-      const chat = result?.data?.createContextualChat;
+      const chat = await firstValueFrom(
+        this.http.post<{ id: string }>(`/api/v1/chats/contextual`, {
+          contextType: ChatType.COURSE,
+          contextId: this.id(),
+        }),
+      );
       if (chat?.id) this.router.navigate(['/chats', chat.id]);
     } catch {
       this.toast.showError('Error al crear chat');
@@ -209,12 +225,23 @@ export default class Course {
       if (!isValidId(id)) {
         return of(null);
       }
-      return this.apollo
-        .query({
-          query: CourseDocument,
-          variables: { id },
-        })
-        .pipe(map((result) => result.data?.course));
+      return this.http.get<CourseVm>(`/api/v1/courses/${id}`).pipe(
+        map((c) => {
+          if (!c?.id) {
+            throw new Error('Course not found');
+          }
+          const t = c.teacher;
+          if (t) {
+            const color = t.user?.color ?? '#888';
+            const fn = t.user?.firstName ?? t.firstName ?? '';
+            const ln = t.user?.lastName ?? t.fatherName ?? '';
+            const name = `${fn} ${ln}`.trim();
+            const initials = `${(fn || '?').charAt(0)}${(ln || '?').charAt(0)}`.toUpperCase();
+            return { ...c, teacher: { ...t, name, initials, color } };
+          }
+          return c;
+        }),
+      );
     },
   });
 

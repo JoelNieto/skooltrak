@@ -1,18 +1,13 @@
 import { Confirmation, Loader, Modal, Pagination, Paginator } from '@/ui';
 import { Menu, MenuContent, MenuItem, MenuTrigger } from '@angular/aria/menu';
 import { OverlayModule } from '@angular/cdk/overlay';
+import { HttpClient } from '@angular/common/http';
 import { DatePipe, NgClass } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject, input, signal, viewChild } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { Prisma } from '@generated/prisma';
-import { Apollo } from 'apollo-angular';
-import { map, of, tap } from 'rxjs';
-import {
-  CourseAttendanceAttendanceSessionsDocument,
-  CourseAttendanceClassGroupsByCourseIdDocument,
-  CourseAttendanceDeleteAttendanceSessionDocument,
-} from '../graphql/generated/graphql';
+import { forkJoin, map, of, tap } from 'rxjs';
 import AttendanceForm from './attendance-form';
 type StudentType = Prisma.StudentGetPayload<{ include: { classGroup: true } }>;
 
@@ -273,7 +268,7 @@ const STATUS_COLORS: Record<string, string> = {
 export default class CourseAttendance {
   public courseId = input.required<string>();
 
-  #apollo = inject(Apollo);
+  #http = inject(HttpClient);
   #modal = inject(Modal);
   #confirmation = inject(Confirmation);
   public pagination = inject(Pagination);
@@ -287,13 +282,9 @@ export default class CourseAttendance {
     }),
     stream: ({ params }) => {
       if (!params.courseId) return of([]);
-      return this.#apollo
-        .watchQuery({
-          query: CourseAttendanceClassGroupsByCourseIdDocument,
-          variables: { courseId: params.courseId },
-          fetchPolicy: 'cache-first',
-        })
-        .valueChanges.pipe(map((r) => r.data?.classGroupsByCourseId ?? []));
+      return this.#http
+        .get<Array<{ id: string; name: string }>>(`/api/v1/class-groups/by-course/${params.courseId}`)
+        .pipe(map((r) => r ?? []));
     },
   });
 
@@ -306,16 +297,21 @@ export default class CourseAttendance {
     }),
     stream: ({ params }) => {
       if (!params.courseId) return of([]);
-      return this.#apollo
-        .watchQuery({
-          query: CourseAttendanceAttendanceSessionsDocument,
-          variables: params,
-          fetchPolicy: 'cache-and-network',
-        })
-        .valueChanges.pipe(
-          tap((r) => this.pagination.updateCount(r.data?.attendanceSessionsCount ?? 0)),
-          map((r) => (r.data?.attendanceSessions as AttendanceSessionType[]) ?? []),
-        );
+      const q: Record<string, string> = {
+        courseId: params.courseId,
+        skip: String(params.skip),
+        take: String(params.take),
+      };
+      if (params.classGroupId) {
+        q['classGroupId'] = params.classGroupId;
+      }
+      return forkJoin({
+        count: this.#http.get<number>('/api/v1/attendance/sessions/count', { params: q }),
+        sessions: this.#http.get<AttendanceSessionType[]>('/api/v1/attendance/sessions', { params: q }),
+      }).pipe(
+        tap(({ count }) => this.pagination.updateCount(count ?? 0)),
+        map(({ sessions }) => sessions ?? []),
+      );
     },
   });
 
@@ -375,16 +371,11 @@ export default class CourseAttendance {
       })
       .subscribe((confirmed) => {
         if (confirmed) {
-          this.#apollo
-            .mutate({
-              mutation: CourseAttendanceDeleteAttendanceSessionDocument,
-              variables: { id: session.id },
-            })
-            .subscribe({
-              next: () => {
-                this.sessionsResource.reload();
-              },
-            });
+          this.#http.delete(`/api/v1/attendance/sessions/${session.id}`).subscribe({
+            next: () => {
+              this.sessionsResource.reload();
+            },
+          });
         }
       });
   }

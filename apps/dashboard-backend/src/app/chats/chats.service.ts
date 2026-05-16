@@ -11,6 +11,7 @@ import { CONTEXT } from '@nestjs/graphql';
 import { Request } from 'express';
 import { PrismaService } from '../prisma.service';
 import { ChatPubSub } from './chat-pubsub';
+import { ChatSocketGateway } from './chat-socket.gateway';
 import { AddChatParticipantsInput } from './dto/add-chat-participants.input';
 import { ChatMessagesInput } from './dto/chat-messages.input';
 import { CreateContextualChatInput } from './dto/create-contextual-chat.input';
@@ -46,6 +47,7 @@ export class ChatsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly chatPubSub: ChatPubSub,
+    private readonly chatSocketGateway: ChatSocketGateway,
     @Inject(CONTEXT) private readonly context: { req: Request },
   ) {}
 
@@ -447,6 +449,7 @@ export class ChatsService {
     });
 
     this.chatPubSub.publishMessageReceived(input.chatId, message);
+    this.chatSocketGateway.emitMessageReceived(input.chatId, message);
 
     return message;
   }

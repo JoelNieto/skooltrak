@@ -2,13 +2,8 @@ import { Toast } from '@/ui';
 import { SchoolContext } from '@/shared';
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { Apollo } from 'apollo-angular';
 import { CartService } from '../cart.service';
-import {
-  ClearStoreCartDocument,
-  RemoveStoreCartItemDocument,
-  UpdateStoreCartItemDocument,
-} from '../graphql/generated/graphql';
+import { StoreApiService } from '../store-api.service';
 
 @Component({
   selector: 'app-cart-page',
@@ -72,7 +67,7 @@ import {
 export default class CartPage {
   protected readonly school = inject(SchoolContext);
   private readonly cart = inject(CartService);
-  private readonly apollo = inject(Apollo);
+  private readonly api = inject(StoreApiService);
   private readonly toast = inject(Toast);
 
   protected lines = () => this.cart.lines();
@@ -107,11 +102,8 @@ export default class CartPage {
     }
     const cartItemId = line.id;
     if (!cartItemId) return;
-    this.apollo
-      .mutate({
-        mutation: UpdateStoreCartItemDocument,
-        variables: { input: { cartItemId, quantity: q } },
-      })
+    this.api
+      .updateStoreCartItem({ cartItemId, quantity: q })
       .subscribe({
         next: () => this.cart.invalidate(),
         error: (e: Error) => this.toast.showError(e.message),
@@ -119,12 +111,7 @@ export default class CartPage {
   }
 
   protected remove(id: string) {
-    this.apollo
-      .mutate({
-        mutation: RemoveStoreCartItemDocument,
-        variables: { cartItemId: id },
-      })
-      .subscribe({
+    this.api.removeStoreCartItem(id).subscribe({
         next: () => this.cart.invalidate(),
         error: (e: Error) => this.toast.showError(e.message),
       });
@@ -133,12 +120,7 @@ export default class CartPage {
   protected clear() {
     const sid = this.school.currentSchoolId();
     if (!sid) return;
-    this.apollo
-      .mutate({
-        mutation: ClearStoreCartDocument,
-        variables: { schoolId: sid },
-      })
-      .subscribe({
+    this.api.clearStoreCart(sid).subscribe({
         next: () => this.cart.invalidate(),
         error: (e: Error) => this.toast.showError(e.message),
       });

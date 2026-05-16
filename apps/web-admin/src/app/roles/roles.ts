@@ -3,15 +3,10 @@ import { Menu, MenuContent, MenuItem, MenuTrigger } from '@angular/aria/menu';
 import { OverlayModule } from '@angular/cdk/overlay';
 import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject, viewChild } from '@angular/core';
-import { rxResource } from '@angular/core/rxjs-interop';
+import { httpResource } from '@angular/common/http';
 import { RouterLink } from '@angular/router';
 import { Prisma } from '@generated/prisma';
-import { Apollo } from 'apollo-angular';
-import {
-  WebAdminGetRolesDocument,
-  WebAdminRemoveRoleDocument,
-} from '../graphql/generated';
-import { map } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
 import { RolesForm } from './roles-form';
 
 @Component({
@@ -113,20 +108,14 @@ import { RolesForm } from './roles-form';
 })
 export class Roles {
   private modal = inject(Modal);
-  private apollo = inject(Apollo);
+  private http = inject(HttpClient);
   formatMenu = viewChild<Menu<string>>('formatMenu');
   private confirmation = inject(Confirmation);
   private toast = inject(Toast);
 
-  public roles = rxResource({
-    stream: () =>
-      this.apollo
-        .watchQuery({
-          fetchPolicy: 'cache-and-network',
-          query: WebAdminGetRolesDocument,
-        })
-        .valueChanges.pipe(map((result) => result.data?.roles ?? [])),
-  });
+  public roles = httpResource<
+    Prisma.RoleGetPayload<{ include: { organization: true; permissions: true } }>[]
+  >(() => '/api/v1/roles', { defaultValue: [] });
 
   public editRole(role?: Prisma.RoleGetPayload<false>) {
     this.modal
@@ -148,23 +137,16 @@ export class Roles {
       })
       .subscribe((result) => {
         if (result) {
-          this.apollo
-            .mutate({
-              mutation: WebAdminRemoveRoleDocument,
-              variables: {
-                id: role.id,
-              },
-            })
-            .subscribe({
-              next: () => {
-                this.toast.showInfo('Rol eliminado exitosamente');
-                this.roles.reload();
-              },
-              error: (error) => {
-                console.error(error);
-                this.toast.showError('Error al eliminar el rol');
-              },
-            });
+          this.http.delete(`/api/v1/roles/${role.id}`).subscribe({
+            next: () => {
+              this.toast.showInfo('Rol eliminado exitosamente');
+              this.roles.reload();
+            },
+            error: (error) => {
+              console.error(error);
+              this.toast.showError('Error al eliminar el rol');
+            },
+          });
         }
       });
   }

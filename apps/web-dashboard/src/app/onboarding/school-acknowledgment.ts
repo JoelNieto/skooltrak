@@ -1,9 +1,9 @@
 import { markGroupDirty, Toast } from '@/ui';
+import { HttpClient } from '@angular/common/http';
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { FormsModule, NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { Apollo } from 'apollo-angular';
-import { OnboardingCreateSchoolDocument } from '../graphql/generated/graphql';
+import { firstValueFrom } from 'rxjs';
 import Store from '../core/store';
 
 @Component({
@@ -160,7 +160,7 @@ import Store from '../core/store';
 export default class SchoolAcknowledgment {
   private router = inject(Router);
   private fb = inject(NonNullableFormBuilder);
-  private apollo = inject(Apollo);
+  private http = inject(HttpClient);
   private toasts = inject(Toast);
   private store = inject(Store);
 
@@ -187,54 +187,66 @@ export default class SchoolAcknowledgment {
     this.saving.set(true);
 
     const { name, shortName } = this.form.getRawValue();
+    const year = new Date().getFullYear();
 
-    this.apollo
-      .mutate({
-        mutation: OnboardingCreateSchoolDocument,
-        variables: {
-          createSchoolInput: {
+    (async () => {
+      try {
+        const school = await firstValueFrom(
+          this.http.post<{
+            id: string;
+            name: string;
+            organizationId: string;
+            slug?: string | null;
+            currencyCode?: string;
+            primaryColor?: string | null;
+            secondaryColor?: string | null;
+            tertiaryColor?: string | null;
+          }>('/api/v1/schools', {
             name,
             shortName,
-          },
-        },
-      })
-      .subscribe({
-        next: (res) => {
-          this.saving.set(false);
-          const school = res.data?.createSchool;
-          if (school) {
-            // Set the current school in the store
-            this.store.currentSchool.set({
-              id: school.id,
-              name: school.name,
-              slug: (school as { slug?: string | null }).slug ?? null,
-              organizationId: school.organizationId,
-              shortName,
-              logo: '',
-              currencyCode: school?.currencyCode ?? 'USD',
-              address: '',
-              city: '',
-              state: '',
-              zip: '',
-              country: '',
-              email: '',
-              phone: '',
-              website: '',
-              currentYear: new Date().getFullYear(),
-              createdAt: new Date(),
-              updatedAt: new Date(),
-              primaryColor: (school as { primaryColor?: string | null }).primaryColor ?? null,
-              secondaryColor: (school as { secondaryColor?: string | null }).secondaryColor ?? null,
-              tertiaryColor: (school as { tertiaryColor?: string | null }).tertiaryColor ?? null,
-            });
-            this.toasts.showSuccess('Escuela creada exitosamente');
-            this.router.navigate(['/onboarding/setup']);
-          }
-        },
-        error: (err) => {
-          this.saving.set(false);
-          this.toasts.showError(err.message || 'Error al crear la escuela');
-        },
-      });
+            logo: '',
+            address: '',
+            city: '',
+            state: '',
+            zip: '',
+            country: '',
+            email: '',
+            phone: '',
+            website: '',
+            currentYear: year,
+          }),
+        );
+        this.store.currentSchool.set({
+          id: school.id,
+          name: school.name,
+          slug: school.slug ?? null,
+          organizationId: school.organizationId,
+          shortName,
+          logo: '',
+          currencyCode: school.currencyCode ?? 'USD',
+          address: '',
+          city: '',
+          state: '',
+          zip: '',
+          country: '',
+          email: '',
+          phone: '',
+          website: '',
+          currentYear: year,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          primaryColor: school.primaryColor ?? null,
+          secondaryColor: school.secondaryColor ?? null,
+          tertiaryColor: school.tertiaryColor ?? null,
+        });
+        this.toasts.showSuccess('Escuela creada exitosamente');
+        this.router.navigate(['/onboarding/setup']);
+      } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : 'Error al crear la escuela';
+        this.toasts.showError(msg);
+      } finally {
+        this.saving.set(false);
+      }
+    })();
   }
 }

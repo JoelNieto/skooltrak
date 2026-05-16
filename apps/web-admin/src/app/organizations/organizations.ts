@@ -8,16 +8,9 @@ import {
   inject,
   viewChild,
 } from '@angular/core';
-import { rxResource } from '@angular/core/rxjs-interop';
+import { httpResource, HttpClient } from '@angular/common/http';
 import { RouterLink } from '@angular/router';
 import { Prisma } from '@generated/prisma';
-
-import { Apollo } from 'apollo-angular';
-import { map } from 'rxjs';
-import {
-  WebAdminGetOrganizationsDocument,
-  WebAdminRemoveOrganizationDocument,
-} from '../graphql/generated';
 import { OrganizationsForm } from './organizations-form';
 @Component({
   selector: 'app-organizations',
@@ -147,21 +140,16 @@ import { OrganizationsForm } from './organizations-form';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Organizations {
-  private readonly apollo = inject(Apollo);
+  private readonly http = inject(HttpClient);
   private modal = inject(Modal);
   private confirmation = inject(Confirmation);
   private toasts = inject(Toast);
   actionsMenu = viewChild<Menu<string>>('actionsMenu');
 
-  public organizations = rxResource({
-    stream: () =>
-      this.apollo
-        .watchQuery({
-          fetchPolicy: 'cache-and-network',
-          query: WebAdminGetOrganizationsDocument,
-        })
-        .valueChanges.pipe(map((result) => result.data?.organizations ?? [])),
-  });
+  public organizations = httpResource<Prisma.OrganizationCreateInput[]>(
+    () => '/api/v1/organizations',
+    { defaultValue: [] },
+  );
 
   public editOrganization(organization?: Prisma.OrganizationCreateInput) {
     this.modal
@@ -184,23 +172,16 @@ export class Organizations {
       })
       .subscribe((result) => {
         if (result) {
-          this.apollo
-            .mutate({
-              mutation: WebAdminRemoveOrganizationDocument,
-              variables: {
-                id: organization.id!,
-              },
-            })
-            .subscribe({
-              next: () => {
-                this.toasts.showInfo('Organización eliminada exitosamente');
-                this.organizations.reload();
-              },
-              error: (error) => {
-                console.error(error);
-                this.toasts.showError('Error al eliminar la organización');
-              },
-            });
+          this.http.delete(`/api/v1/organizations/${organization.id!}`).subscribe({
+            next: () => {
+              this.toasts.showInfo('Organización eliminada exitosamente');
+              this.organizations.reload();
+            },
+            error: (error) => {
+              console.error(error);
+              this.toasts.showError('Error al eliminar la organización');
+            },
+          });
         }
       });
   }

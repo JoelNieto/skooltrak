@@ -1,17 +1,8 @@
 import { Loader, Toast } from '@/ui';
 import { Component, computed, inject, input, signal } from '@angular/core';
-import { rxResource } from '@angular/core/rxjs-interop';
+import { httpResource, HttpClient } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { Prisma } from '@generated/prisma';
-import { Apollo } from 'apollo-angular';
-import {
-  GroupHabitsGetPeriodsDocument,
-  GroupHabitsGetHabitMetricsDocument,
-  GroupHabitsGetHabitEvaluationsDocument,
-  GroupHabitsSaveHabitEvaluationDocument,
-  type HabitValue,
-} from '../graphql/generated/graphql';
-import { map } from 'rxjs';
 
 type Student = Prisma.StudentGetPayload<{
   include: { user: true };
@@ -213,7 +204,7 @@ export default class GroupHabits {
   public groupId = input.required<string>();
   public students = input.required<Student[]>();
 
-  private apollo = inject(Apollo);
+  private http = inject(HttpClient);
   private toast = inject(Toast);
 
   // State
@@ -223,25 +214,9 @@ export default class GroupHabits {
   public evaluationsLoading = signal(false);
   public saving = signal(false);
 
-  // Load periods
-  public periods = rxResource({
-    stream: () =>
-      this.apollo
-        .watchQuery({
-          query: GroupHabitsGetPeriodsDocument,
-        })
-        .valueChanges.pipe(map((result) => result.data?.periods ?? [])),
-  });
+  public periods = httpResource<Period[]>(() => '/api/v1/periods', { defaultValue: [] });
 
-  // Load habit metrics
-  public habitMetrics = rxResource({
-    stream: () =>
-      this.apollo
-        .watchQuery({
-          query: GroupHabitsGetHabitMetricsDocument,
-        })
-        .valueChanges.pipe(map((result) => result.data?.habitMetrics ?? [])),
-  });
+  public habitMetrics = httpResource<HabitMetric[]>(() => '/api/v1/habit-metrics', { defaultValue: [] });
 
   // Filter active metrics only
   public activeMetrics = computed(() => {
@@ -262,19 +237,24 @@ export default class GroupHabits {
   loadEvaluations(groupId: string, periodId: string, metricId: string) {
     this.evaluationsLoading.set(true);
 
-    this.apollo
-      .watchQuery({
-        query: GroupHabitsGetHabitEvaluationsDocument,
-        variables: { classGroupId: groupId, periodId },
+    this.http
+      .get<
+        Array<{
+          habitMetricId: string;
+          studentEvaluations?: Array<{
+            studentId?: string;
+            value?: 'X' | 'R' | 'S' | null;
+            comments?: string | null;
+          }>;
+        }>
+      >('/api/v1/habit-evaluations/by-group', {
+        params: { classGroupId: groupId, periodId },
       })
-      .valueChanges.subscribe({
-        next: (result) => {
+      .subscribe({
+        next: (habitEvaluationsByGroup) => {
           this.evaluationsLoading.set(false);
 
-          // Find the evaluation for the selected metric
-          const evaluation = result.data?.habitEvaluationsByGroup?.find(
-            (e) => e.habitMetricId === metricId
-          );
+          const evaluation = habitEvaluationsByGroup?.find((e) => e.habitMetricId === metricId);
 
           // Initialize evaluations map
           const evalMap = new Map<string, StudentEvaluation>();
@@ -353,7 +333,7 @@ export default class GroupHabits {
       .filter((e) => e.value !== null)
       .map((e) => ({
         studentId: e.studentId,
-        value: e.value! as HabitValue,
+        value: e.value!,
         comments: e.comments || null,
       }));
 
@@ -366,18 +346,13 @@ export default class GroupHabits {
 
     this.saving.set(true);
 
-    this.apollo
-      .mutate({
-        mutation: GroupHabitsSaveHabitEvaluationDocument,
-        variables: {
-          saveHabitEvaluationInput: {
-            classGroupId: this.groupId(),
-            periodId,
-            habitMetricId: metricId,
-            studentEvaluations,
-            published: false,
-          },
-        },
+    this.http
+      .post('/api/v1/habit-evaluations', {
+        classGroupId: this.groupId(),
+        periodId,
+        habitMetricId: metricId,
+        studentEvaluations,
+        published: false,
       })
       .subscribe({
         next: () => {

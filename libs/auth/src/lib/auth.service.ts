@@ -1,10 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { randomUUID } from 'crypto';
 import * as jwt from 'jsonwebtoken';
 import { CreateSchoolWithOrgInput } from './dto/create-school-with-org.input';
 import { RequestJoinSchoolInput } from './dto/request-join-school.input';
 import { SignUpInput } from './dto/sign-up.input';
+import { auth } from './better-auth';
 import { PrismaService } from './prisma.service';
 import { sendEmail, sendUserInvitation } from './resend.service';
 
@@ -1053,5 +1054,133 @@ export class AuthService {
       where: { id: notificationId, recipientId: userId },
       data: { read: true },
     });
+  }
+
+  /**
+   * Email/password login — same behavior as GraphQL `login` mutation.
+   */
+  async loginWithEmail(
+    email: string,
+    password: string,
+    onSetCookie: (setCookieHeader: string) => void,
+  ): Promise<{ accessToken: string }> {
+    const response = await auth.api.signInEmail({
+      body: { email, password },
+      asResponse: true,
+    });
+
+    if (!response.ok) {
+      throw new UnauthorizedException('Credenciales inválidas');
+    }
+
+    const data = (await response.json()) as { user: { id: string } };
+
+    const setCookieHeader = response.headers.get('set-cookie');
+    if (setCookieHeader) {
+      onSetCookie(setCookieHeader);
+    }
+
+    const user = await this.prisma.user.findUnique({
+      where: { id: data.user.id },
+      include: { role: { include: { permissions: true } } },
+    });
+
+    if (!user) {
+      throw new NotFoundException('Usuario no encontrado');
+    }
+
+    const accessToken = this.generateJwt(user);
+    return { accessToken };
+  }
+
+  /**
+   * Password reset with token — same behavior as GraphQL `resetPassword` mutation.
+   */
+  async resetPasswordWithToken(
+    token: string,
+    newPassword: string,
+    onSetCookie: (setCookieHeader: string) => void,
+  ): Promise<{ accessToken: string }> {
+    let verification = await this.prisma.verification.findFirst({
+      where: { value: token },
+    });
+
+    let userEmail: string | null = null;
+    let userId: string | null = null;
+
+    if (verification) {
+      userEmail = verification.identifier;
+    } else {
+      verification = await this.prisma.verification.findFirst({
+        where: { identifier: `reset-password:${token}` },
+      });
+
+      if (verification) {
+        userId = verification.value;
+      }
+    }
+
+    if (!verification) {
+      throw new UnauthorizedException('Token inválido o expirado');
+    }
+
+    if (verification.expiresAt < new Date()) {
+      await this.prisma.verification.delete({ where: { id: verification.id } });
+      throw new UnauthorizedException('Token inválido o expirado');
+    }
+
+    let user;
+    if (userEmail) {
+      user = await this.prisma.user.findUnique({ where: { email: userEmail } });
+    } else if (userId) {
+      user = await this.prisma.user.findUnique({ where: { id: userId } });
+    }
+
+    if (!user) {
+      throw new NotFoundException('Usuario no encontrado');
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    const userWithRole = await this.prisma.user.findUnique({
+      where: { id: user.id },
+      include: { role: true },
+    });
+    const isInvitedTeacher =
+      userWithRole?.role?.name === 'TEACHER' && !!userWithRole.organizationId;
+
+    await this.prisma.user.update({
+      where: { id: user.id },
+      data: {
+        password: hashedPassword,
+        emailVerified: true,
+        ...(isInvitedTeacher && { onboardingStep: 'completed' }),
+      },
+    });
+
+    await this.prisma.account.updateMany({
+      where: { userId: user.id, providerId: 'credential' },
+      data: { password: hashedPassword },
+    });
+
+    await this.prisma.verification.delete({ where: { id: verification.id } });
+
+    const response = await auth.api.signInEmail({
+      body: { email: user.email, password: newPassword },
+      asResponse: true,
+    });
+
+    const setCookieHeader = response.headers.get('set-cookie');
+    if (setCookieHeader) {
+      onSetCookie(setCookieHeader);
+    }
+
+    const fullUser = await this.prisma.user.findUnique({
+      where: { id: user.id },
+      include: { role: { include: { permissions: true } } },
+    });
+
+    const accessToken = this.generateJwt(fullUser!);
+    return { accessToken };
   }
 }

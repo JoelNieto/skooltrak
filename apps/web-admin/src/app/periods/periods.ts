@@ -3,15 +3,11 @@ import { Menu, MenuContent, MenuItem, MenuTrigger } from '@angular/aria/menu';
 import { OverlayModule } from '@angular/cdk/overlay';
 import { DatePipe } from '@angular/common';
 import { Component, inject, viewChild } from '@angular/core';
-import { rxResource } from '@angular/core/rxjs-interop';
+import { httpResource } from '@angular/common/http';
 import { RouterLink } from '@angular/router';
 import { Prisma } from '@generated/prisma';
-import { Apollo } from 'apollo-angular';
-import {
-  WebAdminGetPeriodsDocument,
-  WebAdminRemovePeriodDocument,
-} from '../graphql/generated';
-import { filter, map, switchMap } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
+import { filter, switchMap } from 'rxjs';
 import PeriodsForm from './periods-form';
 
 @Component({
@@ -112,19 +108,15 @@ import PeriodsForm from './periods-form';
   `,
 })
 export default class Periods {
-  private apollo = inject(Apollo);
+  private http = inject(HttpClient);
   private toast = inject(Toast);
   private modal = inject(Modal);
   private confirmation = inject(Confirmation);
   optionsMenu = viewChild<Menu<string>>('optionsMenu');
-  public periods = rxResource({
-    stream: () =>
-      this.apollo
-        .watchQuery({
-          query: WebAdminGetPeriodsDocument,
-        })
-        .valueChanges.pipe(map((result) => result.data?.periods ?? [])),
-  });
+  public periods = httpResource<Prisma.PeriodGetPayload<{ include: undefined }>[]>(
+    () => '/api/v1/periods',
+    { defaultValue: [] },
+  );
 
   editPeriod(period?: Prisma.PeriodGetPayload<{ include: undefined }>) {
     this.modal
@@ -147,14 +139,7 @@ export default class Periods {
       })
       .pipe(
         filter((confirmed: boolean) => confirmed === true),
-        switchMap(() =>
-          this.apollo.mutate({
-            mutation: WebAdminRemovePeriodDocument,
-            variables: {
-              removePeriodId: period.id,
-            },
-          }),
-        ),
+        switchMap(() => this.http.delete(`/api/v1/periods/${period.id}`)),
       )
       .subscribe({
         next: () => {

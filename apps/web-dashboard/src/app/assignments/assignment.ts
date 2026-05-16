@@ -1,21 +1,26 @@
 import { EditorViewer, Error as ErrorComponent, Loader, Toast } from '@/ui';
 import { DatePipe } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
 import { Component, inject, input, signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { Router, RouterLink } from '@angular/router';
+import { ChatType } from '@generated/prisma';
+import { firstValueFrom } from 'rxjs';
+import { map, of } from 'rxjs';
 import Auth from '../auth/auth';
 import { isValidId } from '../core/validators';
-
-import { Apollo } from 'apollo-angular';
-import { filter, map, of } from 'rxjs';
-import {
-  AssignmentDocument,
-  AssignmentQuery,
-  ChatType,
-  ChatsCreateContextualChatDocument,
-} from '../graphql/generated/graphql';
 import AssignmentSubmissionForm from './assignment-submission-form';
 import AssignmentSubmissionsList from './assignment-submissions-list';
+
+type AssignmentDetail = {
+  id: string;
+  title: string;
+  details: string;
+  date: string;
+  requireSubmission: boolean;
+  course: { id: string; name: string };
+  teacher?: { user?: { id?: string }; userId?: string | null };
+};
 
 @Component({
   imports: [
@@ -100,7 +105,7 @@ import AssignmentSubmissionsList from './assignment-submissions-list';
 })
 export default class Assignment {
   public id = input.required<string>();
-  private apollo = inject(Apollo);
+  private http = inject(HttpClient);
   private router = inject(Router);
   private toast = inject(Toast);
   public auth = inject(Auth);
@@ -108,21 +113,27 @@ export default class Assignment {
 
   canStartAssignmentChat() {
     if (!this.auth.hasPermission('MANAGE_MESSAGES')) return false;
-    const assignment = this.assignmentResource.value();
+    const assignment = this.assignmentResource.value() as {
+      teacher?: { user?: { id?: string }; userId?: string | null };
+    } | null;
     if (!assignment) return false;
-    return this.auth.isAdmin() || assignment.teacher?.user?.id === this.auth.user()?.id;
+    const uid = this.auth.user()?.id;
+    return (
+      this.auth.isAdmin() ||
+      assignment.teacher?.user?.id === uid ||
+      assignment.teacher?.userId === uid
+    );
   }
 
   async startAssignmentChat() {
     this.startingChat.set(true);
     try {
-      const result = await this.apollo
-        .mutate({
-          mutation: ChatsCreateContextualChatDocument,
-          variables: { input: { contextType: ChatType.Assignment, contextId: this.id() } },
-        })
-        .toPromise();
-      const chat = result?.data?.createContextualChat;
+      const chat = await firstValueFrom(
+        this.http.post<{ id: string }>(`/api/v1/chats/contextual`, {
+          contextType: ChatType.ASSIGNMENT,
+          contextId: this.id(),
+        }),
+      );
       if (chat?.id) this.router.navigate(['/chats', chat.id]);
     } catch {
       this.toast.showError('Error al crear chat');
@@ -138,20 +149,12 @@ export default class Assignment {
       if (!isValidId(id)) {
         return of(null);
       }
-      return this.apollo
-        .watchQuery({
-          query: AssignmentDocument,
-          variables: { id },
-        })
-        .valueChanges.pipe(
-          filter((res) => !res.loading),
-          map((res) => {
-            if (res.data?.assignment) {
-              return res.data.assignment as AssignmentQuery['assignment'];
-            }
-            throw new Error('Assignment not found');
-          }),
-        );
+      return this.http.get<AssignmentDetail>(`/api/v1/assignments/${id}`).pipe(
+        map((a) => {
+          if (a) return a;
+          throw new Error('Assignment not found');
+        }),
+      );
     },
   });
 }

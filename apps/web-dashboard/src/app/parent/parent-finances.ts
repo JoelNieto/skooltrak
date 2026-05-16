@@ -1,9 +1,6 @@
 import { Loader, PageHeader } from '@/ui';
+import { httpResource } from '@angular/common/http';
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { rxResource } from '@angular/core/rxjs-interop';
-import { Apollo } from 'apollo-angular';
-import { ParentFinancesLinkedStudentsSummaryDocument } from '../graphql/generated/graphql';
-import { map } from 'rxjs';
 import Store from '../core/store';
 
 type StudentFinancialSummaryType = {
@@ -31,7 +28,7 @@ type StudentFinancialSummaryType = {
     }
 
     @if (summaryResource.hasValue()) {
-      @let items = summaryResource.value()!;
+      @let items = summaryResource.value() ?? [];
       @if (items.length === 0) {
         <div class="rounded-lg border border-base-200 bg-base-100 p-8 text-center text-base-content/70">
           No tienes estudiantes vinculados o no hay información financiera disponible.
@@ -77,18 +74,12 @@ type StudentFinancialSummaryType = {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class ParentFinances {
-  #apollo = inject(Apollo);
   #store = inject(Store);
 
-  public summaryResource = rxResource({
-    params: () => ({}),
-    stream: () =>
-      this.#apollo
-        .query({
-          query: ParentFinancesLinkedStudentsSummaryDocument,
-        })
-        .pipe(map((r) => r.data?.linkedStudentsFinancialSummary ?? [])),
-  });
+  public summaryResource = httpResource<StudentFinancialSummaryType[]>(
+    () => '/api/v1/financial/linked-students-summary',
+    { defaultValue: [] },
+  );
 
   formatCurrency(value: number): string {
     const code = this.#store.currentSchool()?.currencyCode ?? 'USD';

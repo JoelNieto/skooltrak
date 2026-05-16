@@ -2,8 +2,7 @@ import { Toast } from '@/ui';
 import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Apollo } from 'apollo-angular';
-import { OnboardingRequestJoinSchoolDocument } from '../graphql/generated/graphql';
+import { HttpClient } from '@angular/common/http';
 
 @Component({
   selector: 'app-verify-parent',
@@ -89,7 +88,7 @@ export default class VerifyParent implements OnInit {
   private fb = inject(NonNullableFormBuilder);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
-  private apollo = inject(Apollo);
+  private http = inject(HttpClient);
   private toasts = inject(Toast);
 
   public schoolId = signal('');
@@ -118,21 +117,16 @@ export default class VerifyParent implements OnInit {
 
     const { documentId } = this.form.getRawValue();
 
-    this.apollo
-      .mutate({
-        mutation: OnboardingRequestJoinSchoolDocument,
-        variables: {
-          input: {
-            schoolId: this.schoolId(),
-            requestedRole: 'PARENT',
-            documentId,
-          },
-        },
+    this.http
+      .post<{ message?: string }>('/api/v1/auth/request-join-school', {
+        schoolId: this.schoolId(),
+        requestedRole: 'PARENT',
+        documentId,
       })
       .subscribe({
-        next: (res) => {
+        next: (result) => {
           this.loading.set(false);
-          this.toasts.showSuccess(res.data?.requestJoinSchool.message || 'Solicitud enviada');
+          this.toasts.showSuccess(result?.message || 'Solicitud enviada');
           this.router.navigate(['/onboarding/waiting-approval']);
         },
         error: (err) => {

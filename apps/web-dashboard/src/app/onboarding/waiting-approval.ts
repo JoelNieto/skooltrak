@@ -1,8 +1,7 @@
 import { Toast } from '@/ui';
 import { ChangeDetectionStrategy, Component, inject, OnDestroy, OnInit, signal } from '@angular/core';
 import { Router } from '@angular/router';
-import { Apollo } from 'apollo-angular';
-import { OnboardingMyJoinRequestStatusDocument } from '../graphql/generated/graphql';
+import { HttpClient } from '@angular/common/http';
 import Auth from '../auth/auth';
 
 @Component({
@@ -88,7 +87,7 @@ import Auth from '../auth/auth';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class WaitingApproval implements OnInit, OnDestroy {
-  private apollo = inject(Apollo);
+  private http = inject(HttpClient);
   private router = inject(Router);
   private auth = inject(Auth);
   private toasts = inject(Toast);
@@ -121,15 +120,15 @@ export default class WaitingApproval implements OnInit, OnDestroy {
   private checkStatus() {
     this.checking.set(true);
 
-    this.apollo
-      .query({
-        query: OnboardingMyJoinRequestStatusDocument,
-        fetchPolicy: 'network-only',
-      })
+    this.http
+      .get<{
+        schoolName?: string;
+        requestedRole: string;
+        status: string;
+      } | null>('/api/v1/auth/my-join-request-status')
       .subscribe({
-        next: (res) => {
+        next: (request) => {
           this.checking.set(false);
-          const request = res.data?.myJoinRequestStatus;
 
           if (request) {
             this.schoolName.set(request.schoolName ?? '');
@@ -137,7 +136,6 @@ export default class WaitingApproval implements OnInit, OnDestroy {
 
             if (request.status === 'APPROVED') {
               this.toasts.showSuccess('Tu solicitud ha sido aprobada. ¡Bienvenido!');
-              // Force refresh user data and navigate
               window.location.href = '/home';
             } else if (request.status === 'REJECTED') {
               this.toasts.showError('Tu solicitud ha sido rechazada.');

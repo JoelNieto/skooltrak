@@ -1,14 +1,7 @@
 import { markGroupDirty, Toast } from '@/ui';
 import { ChangeDetectionStrategy, Component, computed, inject, input, output, signal } from '@angular/core';
-import { rxResource } from '@angular/core/rxjs-interop';
+import { httpResource, HttpClient } from '@angular/common/http';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Apollo } from 'apollo-angular';
-import {
-  OnboardingStepsCreateClassGroupDocument,
-  OnboardingStepsGroupsGetSchoolsDocument,
-  OnboardingStepsGroupsStudyPlansBySchoolIdDocument,
-} from '../../graphql/generated/graphql';
-import { map, of } from 'rxjs';
 import Store from '../../core/store';
 import { CreatedEntity } from '../setup-wizard';
 
@@ -142,7 +135,7 @@ import { CreatedEntity } from '../setup-wizard';
 })
 export default class GroupsStep {
   private fb = inject(NonNullableFormBuilder);
-  private apollo = inject(Apollo);
+  #http = inject(HttpClient);
   private toasts = inject(Toast);
   private store = inject(Store);
 
@@ -156,14 +149,8 @@ export default class GroupsStep {
   public addAnother = false;
 
   // Fetch schools to get the first one if not in store
-  public schools = rxResource({
-    stream: () =>
-      this.apollo
-        .watchQuery({
-          query: OnboardingStepsGroupsGetSchoolsDocument,
-          fetchPolicy: 'cache-first',
-        })
-        .valueChanges.pipe(map((result) => result.data?.schools ?? [])),
+  public schools = httpResource<Array<{ id: string; name: string }>>(() => '/api/v1/schools', {
+    defaultValue: [],
   });
 
   // Get the school ID from store or first school from API
@@ -173,21 +160,16 @@ export default class GroupsStep {
     return this.schools.value()?.[0]?.id;
   });
 
-  public studyPlans = rxResource({
-    params: () => ({ schoolId: this.schoolId() }),
-    stream: ({ params }) => {
-      if (!params.schoolId) {
-        return of([]);
+  public studyPlans = httpResource<Array<{ id: string; name: string }>>(
+    () => {
+      const schoolId = this.schoolId();
+      if (!schoolId) {
+        return undefined;
       }
-      return this.apollo
-        .watchQuery({
-          query: OnboardingStepsGroupsStudyPlansBySchoolIdDocument,
-          variables: { schoolId: params.schoolId },
-          fetchPolicy: 'cache-and-network',
-        })
-        .valueChanges.pipe(map((result) => result.data?.studyPlansBySchoolId ?? []));
+      return { url: '/api/v1/study-plans/by-school', params: { schoolId } };
     },
-  });
+    { defaultValue: [] },
+  );
 
   // Combine API study plans with newly created ones
   public allStudyPlans = computed(() => {
@@ -220,21 +202,15 @@ export default class GroupsStep {
 
     const formValue = this.form.getRawValue();
 
-    this.apollo
-      .mutate({
-        mutation: OnboardingStepsCreateClassGroupDocument,
-        variables: {
-          createClassGroupInput: {
-            ...formValue,
-            schoolId,
-            organizationId,
-          },
-        },
+    this.#http
+      .post<{ id: string; name: string }>('/api/v1/class-groups', {
+        ...formValue,
+        schoolId,
+        organizationId,
       })
       .subscribe({
-        next: (result) => {
+        next: (group) => {
           this.saving.set(false);
-          const group = result.data?.createClassGroup;
           if (group) {
             this.entityCreated.emit({ id: group.id, name: group.name, type: 'group' });
             this.toasts.showSuccess(`Grupo "${group.name}" creado`);

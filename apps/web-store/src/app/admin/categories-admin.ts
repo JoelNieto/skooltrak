@@ -3,14 +3,8 @@ import { Toast } from '@/ui';
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
-import { Apollo } from 'apollo-angular';
 import { map, of } from 'rxjs';
-import {
-  CreateStoreCategoryDocument,
-  DeleteStoreCategoryDocument,
-  StoreCategoriesAdminDocument,
-  UpdateStoreCategoryDocument,
-} from '../graphql/generated/graphql';
+import { StoreApiService } from '../store-api.service';
 
 @Component({
   selector: 'app-categories-admin',
@@ -76,7 +70,7 @@ import {
 })
 export default class CategoriesAdmin {
   protected readonly school = inject(SchoolContext);
-  private readonly apollo = inject(Apollo);
+  private readonly api = inject(StoreApiService);
   private readonly toast = inject(Toast);
   private readonly tick = signal(0);
 
@@ -89,15 +83,9 @@ export default class CategoriesAdmin {
     params: () => ({ schoolId: this.school.currentSchoolId(), t: this.tick() }),
     stream: ({ params }) => {
       if (!params.schoolId) return of([]);
-      return this.apollo
-        .watchQuery({
-          query: StoreCategoriesAdminDocument,
-          variables: { schoolId: params.schoolId },
-          fetchPolicy: 'network-only',
-        })
-        .valueChanges.pipe(
-          map((r) => {
-            const list = r.data?.storeCategoriesAdmin ?? [];
+      return this.api.storeCategoriesAdmin(params.schoolId).pipe(
+          map((rows) => {
+            const list = Array.isArray(rows) ? rows : [];
             for (const c of list) {
               const id = c.id!;
               if (this.editNames[id] === undefined) this.editNames[id] = c.name ?? '';
@@ -115,11 +103,8 @@ export default class CategoriesAdmin {
     const schoolId = this.school.currentSchoolId();
     console.log('schoolId', schoolId);
     if (!schoolId || !this.newName.trim()) return;
-    this.apollo
-      .mutate({
-        mutation: CreateStoreCategoryDocument,
-        variables: { input: { schoolId, name: this.newName.trim() } },
-      })
+    this.api
+      .createStoreCategory({ schoolId, name: this.newName.trim() })
       .subscribe({
         next: () => {
           this.newName = '';
@@ -135,17 +120,12 @@ export default class CategoriesAdmin {
   }
 
   protected save(id: string) {
-    this.apollo
-      .mutate({
-        mutation: UpdateStoreCategoryDocument,
-        variables: {
-          input: {
-            id,
-            name: this.editNames[id],
-            sortOrder: this.editOrder[id],
-            active: this.editActive[id],
-          },
-        },
+    this.api
+      .updateStoreCategory({
+        id,
+        name: this.editNames[id],
+        sortOrder: this.editOrder[id],
+        active: this.editActive[id],
       })
       .subscribe({
         next: () => this.toast.showSuccess('Guardado'),
@@ -154,7 +134,7 @@ export default class CategoriesAdmin {
   }
 
   protected remove(id: string) {
-    this.apollo.mutate({ mutation: DeleteStoreCategoryDocument, variables: { id } }).subscribe({
+    this.api.deleteStoreCategory(id).subscribe({
       next: () => {
         this.toast.showSuccess('Eliminada');
         this.tick.update((n) => n + 1);

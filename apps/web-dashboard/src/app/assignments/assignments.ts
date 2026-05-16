@@ -4,12 +4,11 @@ import { ChangeDetectionStrategy, Component, Pipe, PipeTransform, computed, inje
 import { rxResource } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 
-import { Apollo } from 'apollo-angular';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { addDays, endOfWeek, startOfWeek, subDays } from 'date-fns';
 import { map, of } from 'rxjs';
 import Auth from '../auth/auth';
 import Store from '../core/store';
-import { AssignmentDatesBySchoolIdDocument, AssignmentDatesBySchoolIdQuery } from '../graphql/generated/graphql';
 
 @Pipe({ name: 'stripHtml', standalone: true })
 export class StripHtmlPipe implements PipeTransform {
@@ -107,7 +106,7 @@ export class StripHtmlPipe implements PipeTransform {
 })
 export default class Assignments {
   private store = inject(Store);
-  private apollo = inject(Apollo);
+  private http = inject(HttpClient);
   private auth = inject(Auth);
 
   public isStudent = this.auth.isStudent;
@@ -139,21 +138,31 @@ export default class Assignments {
       if (!schoolId) {
         return of([]);
       }
-      return this.apollo
-        .watchQuery({
-          query: AssignmentDatesBySchoolIdDocument,
-          variables: {
-            schoolId,
-            startDate: startDate.toISOString(),
-            endDate: endDate.toISOString(),
-            classGroupId: classGroupId || null,
-          },
-        })
-        .valueChanges.pipe(
-          map((res) =>
-            (
-              (res.data?.assignmentDatesBySchoolId as AssignmentDatesBySchoolIdQuery['assignmentDatesBySchoolId']) ?? []
-            ).map((item) => ({
+      let p = new HttpParams()
+        .set('schoolId', schoolId)
+        .set('startDate', startDate.toISOString())
+        .set('endDate', endDate.toISOString());
+      if (classGroupId) {
+        p = p.set('classGroupId', classGroupId);
+      }
+      return this.http
+        .get<
+          Array<{
+            id: string;
+            date: string;
+            classGroup: { name: string };
+            assignment: {
+              id: string;
+              title: string;
+              details: string;
+              course: { name: string };
+              teacher: { firstName: string; fatherName: string };
+            };
+          }>
+        >(`/api/v1/assignments/dates/by-school`, { params: p })
+        .pipe(
+          map((rows) =>
+            (rows ?? []).map((item) => ({
               ...item,
               date: new Date(item.date ?? ''),
             })),

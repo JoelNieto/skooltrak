@@ -1,17 +1,11 @@
 import { Loader, Toast } from '@/ui';
 import { afterRenderEffect, ChangeDetectionStrategy, Component, computed, inject, input, signal } from '@angular/core';
-import { rxResource } from '@angular/core/rxjs-interop';
+import { httpResource, HttpClient } from '@angular/common/http';
 import { email, form, FormField, required, submit } from '@angular/forms/signals';
 import { Router, RouterLink } from '@angular/router';
 import { Prisma } from '@generated/prisma';
 import { isValidId } from '../core/validators';
-import { Apollo } from 'apollo-angular';
-import {
-  CreateTeacherDocument,
-  TeacherFormDocument,
-  UpdateTeacherDocument,
-} from '../graphql/generated/graphql';
-import { map, of } from 'rxjs';
+import { firstValueFrom } from 'rxjs';
 import Store from '../core/store';
 
 type TeacherType = Prisma.TeacherGetPayload<{
@@ -19,6 +13,23 @@ type TeacherType = Prisma.TeacherGetPayload<{
 }> & {
   name: string;
   email: string;
+};
+
+type TeacherDetail = {
+  firstName?: string;
+  middleName?: string;
+  fatherName?: string;
+  motherName?: string;
+  documentId?: string;
+  birthDate?: string;
+  gender?: string;
+  address?: string;
+  phoneNumber?: string;
+  personalEmail?: string;
+  about?: string;
+  teacherSince?: number | null;
+  memberSince?: string;
+  user?: { email?: string };
 };
 
 interface TeacherFormData {
@@ -341,7 +352,7 @@ interface TeacherFormData {
 export default class TeacherForm {
   public id = input<string>();
 
-  private apollo = inject(Apollo);
+  private http = inject(HttpClient);
   private store = inject(Store);
   private router = inject(Router);
   private toasts = inject(Toast);
@@ -376,23 +387,9 @@ export default class TeacherForm {
     required(schemaPath.gender, { message: 'Género es requerido' });
   });
 
-  public teacherResource = rxResource({
-    params: () => ({
-      id: this.id(),
-    }),
-    stream: ({ params }) => {
-      if (!isValidId(params.id)) {
-        return of(null);
-      }
-      return this.apollo
-        .watchQuery({
-          fetchPolicy: 'network-only',
-          query: TeacherFormDocument,
-          variables: { id: params.id },
-        })
-        .valueChanges.pipe(map((result) => result.data?.teacher));
-    },
-  });
+  public teacherResource = httpResource<TeacherDetail | null>(() =>
+    isValidId(this.id() ?? '') ? `/api/v1/teachers/${this.id()}` : undefined,
+  );
 
   constructor() {
     afterRenderEffect(() => {
@@ -442,63 +439,28 @@ export default class TeacherForm {
       };
 
       if (this.isEditMode()) {
-        await new Promise<void>((resolve, reject) => {
-          this.apollo
-            .mutate({
-              mutation: UpdateTeacherDocument,
-              variables: {
-                updateTeacherInput: {
-                  ...request,
-                  id: this.id()!,
-                },
-              },
-            })
-            .subscribe({
-              next: () => {
-                this.isSaving.set(false);
-                this.toasts.showSuccess('Docente actualizado exitosamente');
-                this.router.navigate(['/teachers', this.id()]);
-                resolve();
-              },
-              error: (error) => {
-                this.isSaving.set(false);
-                console.error('Update teacher error:', error);
-                const message =
-                  error?.graphQLErrors?.[0]?.message || error?.message || 'Error al actualizar el docente';
-                this.toasts.showError(message);
-                reject(error);
-              },
-            });
-        });
+        await firstValueFrom(
+          this.http.patch('/api/v1/teachers', {
+            ...request,
+            id: this.id()!,
+          }),
+        );
+        this.isSaving.set(false);
+        this.toasts.showSuccess('Docente actualizado exitosamente');
+        this.router.navigate(['/teachers', this.id()!]);
       } else {
-        await new Promise<void>((resolve, reject) => {
-          this.apollo
-            .mutate({
-              mutation: CreateTeacherDocument,
-              variables: {
-                createTeacherInput: {
-                  ...request,
-                  organizationId: this.store.currentOrganizationId()!,
-                },
-              },
-            })
-            .subscribe({
-              next: (result) => {
-                this.isSaving.set(false);
-                this.toasts.showSuccess('Docente creado exitosamente');
-                const id = result.data?.createTeacher?.id;
-                if (id) this.router.navigate(['/teachers', id]);
-                resolve();
-              },
-              error: (error) => {
-                this.isSaving.set(false);
-                console.error('Create teacher error:', error);
-                const message = error?.graphQLErrors?.[0]?.message || error?.message || 'Error al crear el docente';
-                this.toasts.showError(message);
-                reject(error);
-              },
-            });
-        });
+        const created = await firstValueFrom(
+          this.http.post<{ id: string }>('/api/v1/teachers', {
+            ...request,
+            organizationId: this.store.currentOrganizationId()!,
+          }),
+        );
+        this.isSaving.set(false);
+        this.toasts.showSuccess('Docente creado exitosamente');
+        const id = created?.id;
+        if (id) {
+          this.router.navigate(['/teachers', id]);
+        }
       }
     });
   }

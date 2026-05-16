@@ -1,18 +1,10 @@
 import { Toast } from '@/ui';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { isPlatformBrowser } from '@angular/common';
 import { computed, effect, inject, Injectable, linkedSignal, PLATFORM_ID, signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
-import { Apollo } from 'apollo-angular';
-import { catchError, filter, firstValueFrom, map, of, throwError } from 'rxjs';
-import {
-  AuthIsEmailVerifiedDocument,
-  AuthLoginDocument,
-  AuthMeDocument,
-  AuthOnboardingStatusDocument,
-  AuthResetPasswordDocument,
-  Query,
-} from '../graphql/generated/graphql';
+import { catchError, firstValueFrom, of, throwError } from 'rxjs';
 import { authClient } from './auth-client';
 
 export type DecodedToken = {
@@ -30,7 +22,7 @@ export type DecodedToken = {
 export default class Auth {
   private platformId = inject(PLATFORM_ID);
   private router = inject(Router);
-  #apollo = inject(Apollo);
+  private http = inject(HttpClient);
   #toasts = inject(Toast);
   public readonly isInitialized = signal(false);
   public isSigning = signal(false);
@@ -60,46 +52,32 @@ export default class Auth {
       if (!isAuthenticated) {
         return of(null);
       }
-      return this.#apollo
-        .watchQuery({
-          query: AuthMeDocument,
-          fetchPolicy: 'network-only',
-        })
-        .valueChanges.pipe(
-          // Skip in-flight emissions so rxResource does not "resolve" with null before `me` arrives.
-          filter((res) => !res.loading),
-          map((res) => {
-            if (res.error) {
-              const err = res.error as { message: string; errors?: readonly { message: string }[] };
-              const fromGql = err.errors?.map((ge: { message: string }) => ge.message) ?? [];
-              const msg = [...fromGql, err.message].filter(Boolean).join('; ');
-              throw new Error(msg || 'Me query failed');
-            }
-            const me = res.data?.me as Query['me'];
-            if (me == null) {
-              throw new Error('No autenticado');
-            }
-            return me;
-          }),
-          catchError((err: Error) => {
-            if (this.#shouldClearCredentialsForMeError(err)) {
-              this.#clearStoredCredentialsAfterAuthFailure();
-              this.#maybeNavigateToLoginAfterAuthFailure();
-              return of(null);
-            }
-            this.#toasts.showError(err.message);
-            this.isSigning.set(false);
-            return throwError(() => err);
-          }),
-        );
+      return this.http.get<any>('/api/v1/auth/me').pipe(
+        catchError((err: HttpErrorResponse) => {
+          const msg =
+            typeof err.error === 'object' && err.error && 'message' in err.error
+              ? String((err.error as { message?: string }).message)
+              : err.message;
+          const synthetic = new Error(msg || 'Me request failed');
+          if (
+            err.status === 401 ||
+            this.#shouldClearCredentialsForMeError(synthetic)
+          ) {
+            this.#clearStoredCredentialsAfterAuthFailure();
+            this.#maybeNavigateToLoginAfterAuthFailure();
+            return of(null);
+          }
+          this.#toasts.showError(msg || 'Me request failed');
+          this.isSigning.set(false);
+          return throwError(() => synthetic);
+        }),
+      );
     },
   });
 
-  public user = computed(() => this.userResource.value());
+  public user = computed(() => this.userResource.value() as any);
   public isUserLoading = computed(() => this.userResource.isLoading());
 
-  // Wait for a real `me` payload or a terminal error — not "resolved" with null because
-  // catchError previously turned GraphQL failures into of(null), which mis-routed to onboarding.
   public isUserReady = computed(() => {
     if (!this.isAuthenticated()) {
       return true;
@@ -111,7 +89,6 @@ export default class Auth {
     return status === 'resolved' && this.user() != null;
   });
 
-  // Promise-based method for guards to wait until user data is ready
   public waitUntilReady(): Promise<boolean> {
     if (this.isUserReady()) {
       return Promise.resolve(true);
@@ -127,9 +104,6 @@ export default class Auth {
     });
   }
 
-  /**
-   * Reload user data from the server and wait until it's refreshed.
-   */
   public reloadUser(): Promise<void> {
     this.userResource.reload();
     return new Promise((resolve) => {
@@ -143,7 +117,6 @@ export default class Auth {
     });
   }
 
-  // Computed from user or session
   public userColor = computed(() => this.user()?.color);
   public role = computed(() => this.user()?.role?.name || this.sessionState()?.user?.role?.name);
   public permissions = computed<string[]>(() => this.user()?.role?.permissions?.map((p: any) => p.descriptiveId) || []);
@@ -169,7 +142,6 @@ export default class Auth {
   public isParent = computed(() => this.role() === 'PARENT');
 
   public isAuthenticated = computed(() => {
-    // Check both session state and token for backward compatibility
     const session = this.sessionState();
     const token = this.token();
     return !!session?.user || !!token;
@@ -178,7 +150,6 @@ export default class Auth {
   constructor() {
     if (isPlatformBrowser(this.platformId)) {
       this.isInitialized.set(true);
-      // Initialize session from better-auth
       this.initializeSession();
     }
 
@@ -205,7 +176,6 @@ export default class Auth {
     }
   }
 
-  /** JWT / session rejected by API — drop local credentials so rxResource can idle cleanly. */
   #shouldClearCredentialsForMeError(err: Error): boolean {
     const m = (err?.message ?? '').toLowerCase();
     return (
@@ -240,20 +210,19 @@ export default class Auth {
     this.isSigning.set(true);
 
     try {
-      // Use GraphQL login which returns JWT token
       const res = await firstValueFrom(
-        this.#apollo.mutate({
-          mutation: AuthLoginDocument,
-          variables: { email, password },
-        }),
+        this.http.post<{ accessToken: string }>(
+          '/api/v1/auth/login',
+          { email, password },
+          { withCredentials: true },
+        ),
       );
 
-      const accessToken = res.data?.login?.accessToken;
+      const accessToken = res?.accessToken;
       if (accessToken) {
         this.token.set(accessToken);
         this.isSigning.set(false);
         this.#toasts.showSuccess('Bienvenido de nuevo');
-        // The onboardingCompletedGuard will redirect if onboarding is not done
         this.router.navigate(['/home']);
         return true;
       }
@@ -262,7 +231,11 @@ export default class Auth {
       return false;
     } catch (err: any) {
       console.error('Login error:', err);
-      this.#toasts.showError(err.message || 'Credenciales inválidas');
+      const msg =
+        err?.error?.message ??
+        (typeof err?.error === 'string' ? err.error : err?.message) ??
+        'Credenciales inválidas';
+      this.#toasts.showError(msg);
       this.isSigning.set(false);
       return false;
     }
@@ -290,12 +263,8 @@ export default class Auth {
     this.router.navigate(['/login']);
   }
 
-  // Helper to get API base URL (handles dev vs production)
   private getApiBaseUrl(): string {
-    // In browser, use relative URL (proxy handles it)
-    // In SSR or if proxy fails, use absolute URL
     if (isPlatformBrowser(this.platformId)) {
-      // Try to detect if we're in development
       const isDev = window.location.hostname === 'localhost';
       if (isDev) {
         return 'http://localhost:3000';
@@ -304,7 +273,6 @@ export default class Auth {
     return '';
   }
 
-  // Password reset methods
   public async requestPasswordReset(email: string): Promise<boolean> {
     try {
       const baseUrl = this.getApiBaseUrl();
@@ -318,24 +286,24 @@ export default class Auth {
         }),
       });
 
-      // Always return true to prevent email enumeration
       return true;
     } catch (err: any) {
       console.error('Password reset request error:', err);
-      return true; // Return true to prevent email enumeration
+      return true;
     }
   }
 
   public async resetPassword(token: string, newPassword: string): Promise<string | null> {
     try {
       const result = await firstValueFrom(
-        this.#apollo.mutate({
-          mutation: AuthResetPasswordDocument,
-          variables: { token, newPassword },
-        }),
+        this.http.post<{ accessToken: string }>(
+          '/api/v1/auth/reset-password',
+          { token, newPassword },
+          { withCredentials: true },
+        ),
       );
 
-      const accessToken = result.data?.resetPassword?.accessToken;
+      const accessToken = result?.accessToken;
       if (accessToken) {
         this.token.set(accessToken);
         this.#toasts.showSuccess('Contraseña actualizada exitosamente');
@@ -346,7 +314,8 @@ export default class Auth {
       return null;
     } catch (err: any) {
       console.error('Password reset error:', err);
-      this.#toasts.showError(err.message || 'No se pudo restablecer la contraseña');
+      const msg = err?.error?.message ?? err?.message ?? 'No se pudo restablecer la contraseña';
+      this.#toasts.showError(msg);
       return null;
     }
   }
@@ -379,22 +348,15 @@ export default class Auth {
     }
   }
 
-  // Email verification check
   public async checkEmailVerified(): Promise<boolean> {
     try {
-      const result = await firstValueFrom(
-        this.#apollo.query({
-          query: AuthIsEmailVerifiedDocument,
-          fetchPolicy: 'network-only',
-        }),
-      );
-      return result.data?.isEmailVerified ?? false;
+      const result = await firstValueFrom(this.http.get<boolean>('/api/v1/auth/is-email-verified'));
+      return result ?? false;
     } catch {
       return false;
     }
   }
 
-  // Onboarding status check
   public async checkOnboardingStatus(): Promise<{
     onboardingCompleted: boolean;
     schoolId?: string;
@@ -405,13 +367,7 @@ export default class Auth {
     groupsCount: number;
   }> {
     try {
-      const result = await firstValueFrom(
-        this.#apollo.query({
-          query: AuthOnboardingStatusDocument,
-          fetchPolicy: 'network-only',
-        }),
-      );
-      const os = result.data?.onboardingStatus;
+      const os = await firstValueFrom(this.http.get<OnboardingStatusResponse>('/api/v1/auth/onboarding-status'));
       const fallback = {
         onboardingCompleted: false,
         degreesCount: 0,
@@ -440,4 +396,14 @@ export default class Auth {
       };
     }
   }
+}
+
+interface OnboardingStatusResponse {
+  onboardingCompleted: boolean;
+  schoolId?: string | null;
+  schoolName?: string | null;
+  degreesCount: number;
+  studyPlansCount: number;
+  coursesCount: number;
+  groupsCount: number;
 }

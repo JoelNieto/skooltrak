@@ -6,12 +6,12 @@ import {
   input,
 } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
-import { Apollo } from 'apollo-angular';
-import { CourseGradeBucketsDocument } from '../graphql/generated/graphql';
+import { HttpClient } from '@angular/common/http';
 import { map, of } from 'rxjs';
 import GradeBucketForm from './grade-buckets-form';
 @Component({
   selector: 'app-course-grade-buckets',
+  imports: [],
   template: `
     <div class="flex justify-end">
       <button class="btn btn-primary" (click)="editBucket()">
@@ -50,7 +50,7 @@ import GradeBucketForm from './grade-buckets-form';
 })
 export default class CourseGradeBuckets {
   public courseId = input.required<string>();
-  #apollo = inject(Apollo);
+  #http = inject(HttpClient);
   #modal = inject(Modal);
 
   public bucketsResource = rxResource({
@@ -62,14 +62,9 @@ export default class CourseGradeBuckets {
       if (!courseId) {
         return of(null);
       }
-      return this.#apollo
-        .query({
-          query: CourseGradeBucketsDocument,
-          variables: {
-            courseId,
-          },
-        })
-        .pipe(map((result) => result.data?.gradeBucketsByCourseId ?? []));
+      return this.#http
+        .get<any[]>(`/api/v1/grade-buckets/by-course/${courseId}`)
+        .pipe(map((result) => result ?? []));
     },
   });
 

@@ -1,9 +1,8 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { rxResource } from '@angular/core/rxjs-interop';
-import { Apollo } from 'apollo-angular';
 import { map } from 'rxjs';
-import { PublicSchoolsForStoreDocument } from '../graphql/generated/graphql';
+import { StoreApiService } from '../store-api.service';
 import StoreThemeToggle from '../store-theme-toggle';
 
 @Component({
@@ -54,15 +53,12 @@ import StoreThemeToggle from '../store-theme-toggle';
   `,
 })
 export default class SchoolPickerStandalone {
-  private readonly apollo = inject(Apollo);
+  private readonly api = inject(StoreApiService);
 
   protected schools = rxResource({
     stream: () =>
-      this.apollo
-        .watchQuery({
-          query: PublicSchoolsForStoreDocument,
-          fetchPolicy: 'network-only',
-        })
-        .valueChanges.pipe(map((r) => r.data?.publicSchoolsForStore ?? [])),
+      this.api.publicSchoolsForStore().pipe(
+        map((rows) => (Array.isArray(rows) ? rows : [])),
+      ),
   });
 }

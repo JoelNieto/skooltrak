@@ -1,11 +1,9 @@
 import { Loader, Toast } from '@/ui';
 import { Component, computed, inject, input, signal } from '@angular/core';
-import { rxResource } from '@angular/core/rxjs-interop';
+import { httpResource, HttpClient } from '@angular/common/http';
 import { Router, RouterLink } from '@angular/router';
-
-import { Apollo } from 'apollo-angular';
-import { ChatType, ChatsCreateContextualChatDocument, ClassGroupDocument } from '../graphql/generated/graphql';
-import { catchError, map, of, throwError } from 'rxjs';
+import { ChatType } from '@generated/prisma';
+import { firstValueFrom } from 'rxjs';
 import { isValidId } from '../core/validators';
 import Auth from '../auth/auth';
 import GroupCourses from './group-courses';
@@ -116,7 +114,7 @@ import GroupStudents from './group-students';
 })
 export default class Group {
   public id = input.required<string>();
-  private apollo = inject(Apollo);
+  private http = inject(HttpClient);
   private router = inject(Router);
   private toast = inject(Toast);
   private auth = inject(Auth);
@@ -132,13 +130,12 @@ export default class Group {
   async startGroupChat() {
     this.startingChat.set(true);
     try {
-      const result = await this.apollo
-        .mutate({
-          mutation: ChatsCreateContextualChatDocument,
-          variables: { input: { contextType: ChatType.ClassGroup, contextId: this.id() } },
-        })
-        .toPromise();
-      const chat = result?.data?.createContextualChat;
+      const chat = await firstValueFrom(
+        this.http.post<{ id: string }>('/api/v1/chats/contextual', {
+          contextType: ChatType.CLASS_GROUP,
+          contextId: this.id(),
+        }),
+      );
       if (chat?.id) this.router.navigate(['/chats', chat.id]);
     } catch {
       this.toast.showError('Error al crear chat');
@@ -161,28 +158,16 @@ export default class Group {
     return group.teacher?.user?.id === user.id;
   });
 
-  public groupResource = rxResource({
-    params: () => ({
-      id: this.id(),
-    }),
-    stream: ({ params }) => {
-      const { id } = params;
-      if (!isValidId(id)) {
-        return of(null);
-      }
-
-      return this.apollo
-        .watchQuery({
-          query: ClassGroupDocument,
-          variables: { id },
-        })
-        .valueChanges.pipe(
-          map((result) => result.data?.classGroup),
-          catchError((err) => {
-            console.log(err);
-            return throwError(() => err);
-          })
-        );
-    },
-  });
+  public groupResource = httpResource<ClassGroupDetail | null>(() =>
+    isValidId(this.id()) ? `/api/v1/class-groups/${this.id()}` : undefined,
+  );
 }
+
+type ClassGroupDetail = {
+  id: string;
+  name: string;
+  studyPlan?: { name?: string; degree?: { name?: string } };
+  teacher?: { name?: string; initials?: string; color?: string; user?: { id?: string } };
+  students?: unknown[];
+  courses?: unknown[];
+};

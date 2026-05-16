@@ -7,20 +7,15 @@ import {
   OnInit,
   output,
 } from '@angular/core';
-import { rxResource } from '@angular/core/rxjs-interop';
+import { httpResource } from '@angular/common/http';
 import {
   NonNullableFormBuilder,
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
 import { Prisma } from '@generated/prisma';
-import { Apollo } from 'apollo-angular';
-import { map } from 'rxjs';
-import {
-  WebAdminCreateSchoolDocument,
-  WebAdminGetOrganizationsForSchoolDocument,
-  WebAdminUpdateSchoolDocument,
-} from '../graphql/generated';
+import { HttpClient } from '@angular/common/http';
+import { firstValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-schools-form',
@@ -154,19 +149,14 @@ import {
 export class SchoolsForm implements OnInit {
   private fb = inject(NonNullableFormBuilder);
   public data = input<{ school?: Prisma.SchoolCreateInput }>();
-  private apollo = inject(Apollo);
+  private http = inject(HttpClient);
   public closeModal = output<void>();
 
   private toasts = inject(Toast);
-  public organizations = rxResource({
-    stream: () =>
-      this.apollo
-        .watchQuery({
-          fetchPolicy: 'cache-and-network',
-          query: WebAdminGetOrganizationsForSchoolDocument,
-        })
-        .valueChanges.pipe(map((result) => result.data?.organizations ?? [])),
-  });
+  public organizations = httpResource<Array<{ id: string; name: string }>>(
+    () => '/api/v1/organizations',
+    { defaultValue: [] },
+  );
 
   public form = this.fb.group({
     name: ['', [Validators.required]],
@@ -196,46 +186,32 @@ export class SchoolsForm implements OnInit {
       return;
     }
 
+    const body = this.form.getRawValue();
     if (this.data()?.school) {
-      this.apollo
-        .mutate({
-          mutation: WebAdminUpdateSchoolDocument,
-          variables: {
-            updateSchoolInput: {
-              ...this.form.getRawValue(),
-              id: this.data()!.school!.id!,
-            },
-          },
+      void firstValueFrom(
+        this.http.patch('/api/v1/schools', {
+          ...body,
+          id: this.data()!.school!.id!,
+        }),
+      )
+        .then(() => {
+          this.toasts.showSuccess('Escuela actualizada exitosamente');
+          this.closeModal.emit();
         })
-        .subscribe({
-          next: () => {
-            this.toasts.showSuccess('Escuela actualizada exitosamente');
-            this.closeModal.emit();
-          },
-          error: (error) => {
-            this.toasts.showError('Error al actualizar la escuela');
-            console.error(error);
-          },
+        .catch((error) => {
+          this.toasts.showError('Error al actualizar la escuela');
+          console.error(error);
         });
     } else {
-      this.apollo
-        .mutate({
-          mutation: WebAdminCreateSchoolDocument,
-          variables: {
-            createSchoolInput: this.form.getRawValue(),
-          },
+      void firstValueFrom(this.http.post('/api/v1/schools', body))
+        .then(() => {
+          this.toasts.showSuccess('Escuela creada exitosamente');
+          this.closeModal.emit();
         })
-        .subscribe({
-          next: () => {
-            this.toasts.showSuccess('Escuela creada exitosamente');
-            this.closeModal.emit();
-          },
-          error: (error) => {
-            this.toasts.showError('Error al crear la escuela');
-            console.error(error);
-          },
+        .catch((error) => {
+          this.toasts.showError('Error al crear la escuela');
+          console.error(error);
         });
     }
-    this.closeModal.emit();
   }
 }

@@ -2,17 +2,20 @@ import { Confirmation, Error, Modal, Pagination, Paginator, Toast } from '@/ui';
 import { Menu, MenuContent, MenuItem, MenuTrigger } from '@angular/aria/menu';
 import { OverlayModule } from '@angular/cdk/overlay';
 import { DatePipe } from '@angular/common';
-import { afterRenderEffect, ChangeDetectionStrategy, Component, inject, signal, viewChild } from '@angular/core';
-import { rxResource } from '@angular/core/rxjs-interop';
+import {
+  afterRenderEffect,
+  ChangeDetectionStrategy,
+  Component,
+  effect,
+  inject,
+  signal,
+  viewChild,
+} from '@angular/core';
+import { httpResource, HttpClient } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { Prisma } from '@generated/prisma';
-import { Apollo } from 'apollo-angular';
-import {
-  WebAdminGetUsersDocument,
-  WebAdminRemoveUserDocument,
-} from '../graphql/generated';
-import { map, tap } from 'rxjs';
+import { toFetchQueryRecord } from '../core/fetch-query-params';
 import { UsersForm } from './users-form';
 @Component({
   selector: 'app-users',
@@ -133,38 +136,41 @@ import { UsersForm } from './users-form';
 export class Users {
   public pagination = inject(Pagination);
   private modal = inject(Modal);
-  private apollo = inject(Apollo);
+  private http = inject(HttpClient);
   private toasts = inject(Toast);
   formatMenu = viewChild<Menu<string>>('formatMenu');
   private confirmation = inject(Confirmation);
   public searchText = signal('');
-  public users = rxResource({
-    params: () => ({
+  public users = httpResource<Prisma.UserGetPayload<{ include: { organization: true; role: true } }>[]>(
+    () => ({
+      url: '/api/v1/users',
+      params: toFetchQueryRecord({
+        take: this.pagination.take(),
+        skip: this.pagination.skip(),
+        search: this.pagination.search(),
+      }),
+    }),
+    { defaultValue: [] },
+  );
+
+  private readonly usersCount = httpResource<number>(() => ({
+    url: '/api/v1/users/count',
+    params: toFetchQueryRecord({
       take: this.pagination.take(),
       skip: this.pagination.skip(),
       search: this.pagination.search(),
     }),
-    stream: ({ params }) =>
-      this.apollo
-        .watchQuery({
-          query: WebAdminGetUsersDocument,
-          variables: {
-            take: params.take,
-            skip: params.skip,
-            search: params.search,
-          },
-        })
-        .valueChanges.pipe(
-          tap((res) => {
-            this.pagination.updateCount(res.data?.count ?? 0);
-          }),
-          map((res) => res.data?.users ?? []),
-        ),
-  });
+  }));
 
   constructor() {
     afterRenderEffect(() => {
       this.pagination.updateSearch(this.searchText());
+    });
+    effect(() => {
+      const count = this.usersCount.value();
+      if (count != null) {
+        this.pagination.updateCount(count);
+      }
     });
   }
 
@@ -193,23 +199,16 @@ export class Users {
       })
       .subscribe((result) => {
         if (result) {
-          this.apollo
-            .mutate({
-              mutation: WebAdminRemoveUserDocument,
-              variables: {
-                id: user.id,
-              },
-            })
-            .subscribe({
-              next: () => {
-                this.toasts.showInfo('Usuario eliminado exitosamente');
-                this.users.reload();
-              },
-              error: (error) => {
-                console.error(error);
-                this.toasts.showError('Error al eliminar el usuario');
-              },
-            });
+          this.http.delete(`/api/v1/users/${user.id}`).subscribe({
+            next: () => {
+              this.toasts.showInfo('Usuario eliminado exitosamente');
+              this.users.reload();
+            },
+            error: (error) => {
+              console.error(error);
+              this.toasts.showError('Error al eliminar el usuario');
+            },
+          });
         }
       });
   }

@@ -7,20 +7,13 @@ import {
   OnInit,
   output,
 } from '@angular/core';
-import { rxResource } from '@angular/core/rxjs-interop';
+import { httpResource, HttpClient } from '@angular/common/http';
 import {
   NonNullableFormBuilder,
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
 import { Prisma } from '@generated/prisma';
-import { Apollo } from 'apollo-angular';
-import {
-  DegreesFormCreateDegreeDocument,
-  DegreesFormGetSchoolsDocument,
-  DegreesFormUpdateDegreeDocument,
-} from '../../graphql/generated/graphql';
-import { map } from 'rxjs';
 import Store from '../../core/store';
 @Component({
   selector: 'app-degrees-form',
@@ -74,17 +67,12 @@ export default class DegreesForm implements OnInit {
     degree?: Prisma.DegreeGetPayload<{ include: { school: true } }>;
   }>();
   public closeModal = output<void>();
-  private apollo = inject(Apollo);
+  #http = inject(HttpClient);
   private toasts = inject(Toast);
-  public schools = rxResource({
-    stream: () =>
-      this.apollo
-        .watchQuery({
-          query: DegreesFormGetSchoolsDocument,
-          fetchPolicy: 'cache-and-network',
-        })
-        .valueChanges.pipe(map((result) => result.data?.schools ?? [])),
-  });
+  public schools = httpResource<Array<{ id: string; name: string }>>(
+    () => '/api/v1/schools',
+    { defaultValue: [] },
+  );
 
   public form = this.fb.group({
     name: ['', [Validators.required]],
@@ -110,13 +98,8 @@ export default class DegreesForm implements OnInit {
     const request = this.form.getRawValue();
 
     if (this.data()?.degree) {
-      this.apollo
-        .mutate({
-          mutation: DegreesFormUpdateDegreeDocument,
-          variables: {
-            updateDegreeInput: { ...request, id: this.data()!.degree!.id },
-          },
-        })
+      this.#http
+        .patch('/api/v1/degrees', { ...request, id: this.data()!.degree!.id })
         .subscribe({
           next: () => {
             this.toasts.showSuccess('Nivel actualizado exitosamente');
@@ -129,21 +112,14 @@ export default class DegreesForm implements OnInit {
       return;
     }
 
-    this.apollo
-      .mutate({
-        mutation: DegreesFormCreateDegreeDocument,
-        variables: {
-          createDegreeInput: { ...request },
-        },
-      })
-      .subscribe({
-        next: () => {
-          this.toasts.showSuccess('Nivel guardado exitosamente');
-          this.closeModal.emit();
-        },
-        error: (err) => {
-          this.toasts.showError(err.message);
-        },
-      });
+    this.#http.post('/api/v1/degrees', request).subscribe({
+      next: () => {
+        this.toasts.showSuccess('Nivel guardado exitosamente');
+        this.closeModal.emit();
+      },
+      error: (err) => {
+        this.toasts.showError(err.message);
+      },
+    });
   }
 }

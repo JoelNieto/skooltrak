@@ -1,17 +1,22 @@
 import { Confirmation, Error, Loader, Toast } from '@/ui';
+import { HttpClient } from '@angular/common/http';
 import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
-import { Apollo } from 'apollo-angular';
 import { filter, map, of, switchMap } from 'rxjs';
 import Auth from '../auth/auth';
 import Store from '../core/store';
-import {
-  QuizzesListDocument,
-  RemoveQuizDocument,
-} from '../graphql/generated/graphql';
 import { StripHtmlPipe } from '../assignments/assignments';
+
+type QuizListItem = {
+  id: string;
+  title: string;
+  details: string;
+  createdAt: string;
+  course?: { name?: string | null } | null;
+  teacher?: { firstName?: string; fatherName?: string } | null;
+};
 
 @Component({
   selector: 'app-quizzes',
@@ -95,7 +100,7 @@ import { StripHtmlPipe } from '../assignments/assignments';
 })
 export default class Quizzes {
   public store = inject(Store);
-  private apollo = inject(Apollo);
+  private http = inject(HttpClient);
   public auth = inject(Auth);
   private confirmation = inject(Confirmation);
   private toast = inject(Toast);
@@ -108,14 +113,11 @@ export default class Quizzes {
       if (!params.organizationId) {
         return of([]);
       }
-      return this.apollo
-        .watchQuery({
-          query: QuizzesListDocument,
-          variables: {
-            organizationId: params.organizationId,
-          },
+      return this.http
+        .get<QuizListItem[]>(`/api/v1/quizzes`, {
+          params: { organizationId: params.organizationId },
         })
-        .valueChanges.pipe(map((result) => result.data?.quizzes ?? []));
+        .pipe(map((rows) => rows ?? []));
     },
   });
 
@@ -128,19 +130,14 @@ export default class Quizzes {
       })
       .pipe(
         filter((result) => result),
-        switchMap(() =>
-          this.apollo.mutate({
-            mutation: RemoveQuizDocument,
-            variables: { id: quiz.id! },
-          }),
-        ),
+        switchMap(() => this.http.delete(`/api/v1/quizzes/${quiz.id}`)),
       )
       .subscribe({
         next: () => {
           this.toast.showSuccess('Quiz eliminado correctamente');
           this.quizzesResource.reload();
         },
-        error: (err) => {
+        error: (err: { message?: string }) => {
           this.toast.showError(err.message || 'Error al eliminar el quiz');
         },
       });

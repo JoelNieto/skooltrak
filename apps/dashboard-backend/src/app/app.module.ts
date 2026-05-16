@@ -39,26 +39,32 @@ import { HabitMetricsModule } from './habit-metrics/habit-metrics.module';
 import { FinancialModule } from './financial/financial.module';
 import { StoreModule } from './store/store.module';
 
+const openApiExport = process.env['OPENAPI_EXPORT'] === 'true';
+
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
-    ScheduleModule.forRoot(),
+    ...(openApiExport ? [] : [ScheduleModule.forRoot()]),
     PrismaModule,
-    GraphQLModule.forRootAsync<ApolloDriverConfig>({
-      imports: [ConfigModule],
-      useFactory: async () => ({
-        autoSchemaFile: join(process.cwd(), 'schema.gql'),
-        sortSchema: true,
-        playground: false,
-        plugins: [ApolloServerPluginLandingPageLocalDefault()],
-        path: '/api/graphql',
-        context: ({ req, res }) => ({ req, res }),
-        subscriptions: {
-          'graphql-ws': true,
-        },
-      }),
-      driver: ApolloDriver,
-    }),
+    ...(openApiExport
+      ? []
+      : [
+          GraphQLModule.forRootAsync<ApolloDriverConfig>({
+            imports: [ConfigModule],
+            useFactory: async () => ({
+              autoSchemaFile: join(process.cwd(), 'schema.gql'),
+              sortSchema: true,
+              playground: false,
+              plugins: [ApolloServerPluginLandingPageLocalDefault()],
+              path: '/api/graphql',
+              context: ({ req, res }) => ({ req, res }),
+              subscriptions: {
+                'graphql-ws': true,
+              },
+            }),
+            driver: ApolloDriver,
+          }),
+        ]),
     SchoolsModule,
     SubjectsModule,
     DegreesModule,

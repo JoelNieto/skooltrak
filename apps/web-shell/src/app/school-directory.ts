@@ -1,9 +1,14 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { httpResource } from '@angular/common/http';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { rxResource } from '@angular/core/rxjs-interop';
-import { Apollo } from 'apollo-angular';
-import { map } from 'rxjs';
-import { PublicSchoolsForStoreDocument } from './graphql/generated/graphql';
+
+type PublicSchoolRow = {
+  id: string;
+  slug: string;
+  name: string;
+  logoUrl?: string | null;
+  currencyCode: string;
+};
 
 @Component({
   selector: 'app-school-directory',
@@ -48,15 +53,8 @@ import { PublicSchoolsForStoreDocument } from './graphql/generated/graphql';
   `,
 })
 export default class SchoolDirectory {
-  private readonly apollo = inject(Apollo);
-
-  protected schools = rxResource({
-    stream: () =>
-      this.apollo
-        .watchQuery({
-          query: PublicSchoolsForStoreDocument,
-          fetchPolicy: 'network-only',
-        })
-        .valueChanges.pipe(map((r) => r.data?.publicSchoolsForStore ?? [])),
-  });
+  protected schools = httpResource<PublicSchoolRow[]>(
+    () => '/api/v1/store/public/schools',
+    { defaultValue: [] },
+  );
 }

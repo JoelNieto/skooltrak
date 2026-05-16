@@ -1,12 +1,11 @@
 import { Confirmation, EditorViewer, Error as ErrorComponent, Loader, Toast } from '@/ui';
+import { HttpClient } from '@angular/common/http';
 import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject, input } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { Router, RouterLink } from '@angular/router';
-import { Apollo } from 'apollo-angular';
 import { filter, map, of, switchMap } from 'rxjs';
 import Auth from '../auth/auth';
-import { QuizDocument, QuizQuery, RemoveQuizDocument } from '../graphql/generated/graphql';
 
 const QUESTION_TYPE_LABELS: Record<string, string> = {
   TEXT: 'Texto',
@@ -14,6 +13,21 @@ const QUESTION_TYPE_LABELS: Record<string, string> = {
   MULTIPLE_CHOICE: 'Elección múltiple',
   TRUE_FALSE: 'Verdadero o falso',
   MATCH: 'Emparejar',
+};
+
+type QuizDetail = {
+  id: string;
+  title: string;
+  details: string;
+  course: { id: string; name: string };
+  teacher?: { firstName?: string; fatherName?: string } | null;
+  questions: Array<{
+    id: string;
+    type: string;
+    question: string;
+    timeLimit?: number | null;
+    options?: Array<{ id: string; option: string; isCorrect: boolean }>;
+  }>;
 };
 
 @Component({
@@ -126,7 +140,7 @@ const QUESTION_TYPE_LABELS: Record<string, string> = {
 export default class Quiz {
   readonly QUESTION_TYPE_LABELS = QUESTION_TYPE_LABELS;
   public id = input.required<string>();
-  private apollo = inject(Apollo);
+  private http = inject(HttpClient);
   private router = inject(Router);
   public auth = inject(Auth);
   private confirmation = inject(Confirmation);
@@ -137,19 +151,12 @@ export default class Quiz {
     stream: ({ params }) => {
       const { id } = params;
       if (!id) return of(null);
-      return this.apollo
-        .watchQuery({
-          query: QuizDocument,
-          variables: { id },
-        })
-        .valueChanges.pipe(
-          map((res) => {
-            if (res.data?.quiz) {
-              return res.data.quiz as QuizQuery['quiz'];
-            }
-            throw new Error('Quiz not found');
-          }),
-        );
+      return this.http.get<QuizDetail>(`/api/v1/quizzes/${id}`).pipe(
+        map((res) => {
+          if (res) return res;
+          throw new Error('Quiz not found');
+        }),
+      );
     },
   });
 
@@ -161,19 +168,14 @@ export default class Quiz {
       })
       .pipe(
         filter((result) => result),
-        switchMap(() =>
-          this.apollo.mutate({
-            mutation: RemoveQuizDocument,
-            variables: { id: quiz.id },
-          }),
-        ),
+        switchMap(() => this.http.delete(`/api/v1/quizzes/${quiz.id}`)),
       )
       .subscribe({
         next: () => {
           this.toast.showSuccess('Quiz eliminado correctamente');
           this.router.navigate(['/quizzes']);
         },
-        error: (err) => {
+        error: (err: { message?: string }) => {
           this.toast.showError(err.message || 'Error al eliminar el quiz');
         },
       });

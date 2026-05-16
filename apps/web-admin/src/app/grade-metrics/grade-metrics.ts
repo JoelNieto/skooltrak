@@ -3,12 +3,10 @@ import { Menu, MenuContent, MenuItem, MenuTrigger } from '@angular/aria/menu';
 import { OverlayModule } from '@angular/cdk/overlay';
 import { DatePipe, DecimalPipe } from '@angular/common';
 import { Component, inject, viewChild } from '@angular/core';
-import { rxResource } from '@angular/core/rxjs-interop';
+import { httpResource } from '@angular/common/http';
 import { RouterLink } from '@angular/router';
 import { Prisma } from '@generated/prisma';
-import { Apollo } from 'apollo-angular';
-import { WebAdminGetGradeMetricsDocument } from '../graphql/generated';
-import { map } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
 import GradeMetricsForm from './grade-metrics-form';
 @Component({
   selector: 'app-grade-metrics',
@@ -64,10 +62,10 @@ import GradeMetricsForm from './grade-metrics-form';
           @for (metric of metrics.value()!; track metric.id) {
             <tr>
               <td>{{ metric.name }}</td>
-              <td>{{ metric.minimum | number: '1.2-2' }}</td>
-              <td>{{ metric.maximum | number: '1.2-2' }}</td>
-              <td>{{ metric.minimumApproval | number: '1.2-2' }}</td>
-              <td>{{ metric.minimumExcellence | number: '1.2-2' }}</td>
+              <td>{{ $any(metric).minimum | number: '1.2-2' }}</td>
+              <td>{{ $any(metric).maximum | number: '1.2-2' }}</td>
+              <td>{{ $any(metric).minimumApproval | number: '1.2-2' }}</td>
+              <td>{{ $any(metric).minimumExcellence | number: '1.2-2' }}</td>
               <td>{{ metric.createdAt | date: 'short' }}</td>
               <td>{{ metric.updatedAt | date: 'short' }}</td>
               <td>
@@ -118,21 +116,17 @@ import GradeMetricsForm from './grade-metrics-form';
   `,
 })
 export default class GradeMetrics {
-  private apollo = inject(Apollo);
+  private http = inject(HttpClient);
   private toasts = inject(Toast);
   private confirmation = inject(Confirmation);
   optionsMenu = viewChild<Menu<string>>('optionsMenu');
 
   private modal = inject(Modal);
 
-  public metrics = rxResource({
-    stream: () =>
-      this.apollo
-        .watchQuery({
-          query: WebAdminGetGradeMetricsDocument,
-        })
-        .valueChanges.pipe(map((result) => result.data?.gradeMetrics ?? [])),
-  });
+  public metrics = httpResource<Prisma.GradeMetricGetPayload<{ include: undefined }>[]>(
+    () => '/api/v1/grade-metrics',
+    { defaultValue: [] },
+  );
 
   editGradeMetric(metric?: Prisma.GradeMetricGetPayload<{ include: undefined }>) {
     this.modal

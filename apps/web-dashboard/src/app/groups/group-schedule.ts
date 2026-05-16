@@ -1,14 +1,10 @@
 import { Modal, Toast } from '@/ui';
 import { Component, computed, inject, input, linkedSignal, signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
+import { HttpClient } from '@angular/common/http';
 import { Prisma } from '@generated/prisma';
-import { Apollo } from 'apollo-angular';
 import { map, of } from 'rxjs';
 import { isValidId } from '../core/validators';
-import {
-  GroupScheduleGroupsSchedulesByClassGroupIdDocument,
-  GroupScheduleUpdateGroupsScheduleDocument,
-} from '../graphql/generated/graphql';
 import GroupScheduleForm from './group-schedule-form';
 
 type Schedule = Prisma.ClassGroupWeeklyScheduleGetPayload<{
@@ -130,7 +126,7 @@ type ScheduleLayout = {
 export default class GroupSchedule {
   public id = input<string>();
   #modal = inject(Modal);
-  #apollo = inject(Apollo);
+  #http = inject(HttpClient);
   #toast = inject(Toast);
   public draggingId = signal<string | null>(null);
 
@@ -157,17 +153,9 @@ export default class GroupSchedule {
         return of([]);
       }
 
-      return this.#apollo
-        .watchQuery<{
-          groupsSchedulesByClassGroupId: Schedule[];
-        }>({
-          query: GroupScheduleGroupsSchedulesByClassGroupIdDocument,
-          variables: {
-            classGroupId: params.classGroupId,
-          },
-          fetchPolicy: 'cache-and-network',
-        })
-        .valueChanges.pipe(map((result) => (result.data?.groupsSchedulesByClassGroupId ?? []) as Schedule[]));
+      return this.#http
+        .get<Schedule[]>(`/api/v1/groups-schedules/by-class-group/${params.classGroupId}`)
+        .pipe(map((rows) => rows ?? []));
     },
   });
 
@@ -320,17 +308,12 @@ export default class GroupSchedule {
   };
 
   private persistScheduleChange(schedule: Schedule) {
-    this.#apollo
-      .mutate({
-        mutation: GroupScheduleUpdateGroupsScheduleDocument,
-        variables: {
-          updateGroupsScheduleInput: {
-            id: schedule.id,
-            weekday: schedule.weekday,
-            startTime: schedule.startTime,
-            endTime: schedule.endTime,
-          },
-        },
+    this.#http
+      .patch('/api/v1/groups-schedules', {
+        id: schedule.id,
+        weekday: schedule.weekday,
+        startTime: schedule.startTime,
+        endTime: schedule.endTime,
       })
       .subscribe({
         next: () => {

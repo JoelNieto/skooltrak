@@ -1,13 +1,7 @@
 import { markGroupDirty, Toast } from '@/ui';
 import { ChangeDetectionStrategy, Component, computed, inject, input, output, signal } from '@angular/core';
-import { rxResource } from '@angular/core/rxjs-interop';
+import { httpResource, HttpClient } from '@angular/common/http';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Apollo } from 'apollo-angular';
-import {
-  OnboardingStepsCreateDegreeDocument,
-  OnboardingStepsDegreesGetSchoolsDocument,
-} from '../../graphql/generated/graphql';
-import { map } from 'rxjs';
 import Store from '../../core/store';
 import { CreatedEntity } from '../setup-wizard';
 
@@ -132,7 +126,7 @@ import { CreatedEntity } from '../setup-wizard';
 })
 export default class DegreesStep {
   private fb = inject(NonNullableFormBuilder);
-  private apollo = inject(Apollo);
+  #http = inject(HttpClient);
   private toasts = inject(Toast);
   private store = inject(Store);
 
@@ -145,15 +139,10 @@ export default class DegreesStep {
   public addAnother = false;
 
   // Fetch schools to get the first one if not in store
-  public schools = rxResource({
-    stream: () =>
-      this.apollo
-        .watchQuery({
-          query: OnboardingStepsDegreesGetSchoolsDocument,
-          fetchPolicy: 'cache-first',
-        })
-        .valueChanges.pipe(map((result) => result.data?.schools ?? [])),
-  });
+  public schools = httpResource<Array<{ id: string; name: string }>>(
+    () => '/api/v1/schools',
+    { defaultValue: [] },
+  );
 
   // Get the school ID from store or first school from API
   public schoolId = computed(() => {
@@ -184,21 +173,15 @@ export default class DegreesStep {
 
     const { name, shortName } = this.form.getRawValue();
 
-    this.apollo
-      .mutate({
-        mutation: OnboardingStepsCreateDegreeDocument,
-        variables: {
-          createDegreeInput: {
-            name,
-            shortName,
-            schoolId,
-          },
-        },
+    this.#http
+      .post<{ id: string; name: string }>('/api/v1/degrees', {
+        name,
+        shortName,
+        schoolId,
       })
       .subscribe({
-        next: (result) => {
+        next: (degree) => {
           this.saving.set(false);
-          const degree = result.data?.createDegree;
           if (degree) {
             this.entityCreated.emit({ id: degree.id, name: degree.name, type: 'degree' });
             this.toasts.showSuccess(`Nivel "${degree.name}" creado`);

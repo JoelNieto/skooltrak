@@ -1,11 +1,30 @@
 import { EmptyState, Loader } from '@/ui';
+import { HttpClient } from '@angular/common/http';
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
-import { Apollo } from 'apollo-angular';
+import { ChatType } from '@generated/prisma';
 import { map } from 'rxjs';
 import Auth from '../auth/auth';
-import { ChatsMyChatsDocument, ChatsMyChatsQuery, ChatType } from '../graphql/generated/graphql';
+
+type ChatParticipantUser = {
+  id?: string;
+  firstName?: string | null;
+  lastName?: string | null;
+  color?: string | null;
+  initials?: string | null;
+  role?: { name?: string | null };
+  student?: { classGroup?: { name?: string | null } | null };
+};
+
+type ChatRow = {
+  id: string;
+  name?: string | null;
+  type: ChatType;
+  participants?: Array<{
+    user?: ChatParticipantUser | null;
+  }>;
+};
 
 @Component({
   selector: 'app-chats',
@@ -42,9 +61,9 @@ import { ChatsMyChatsDocument, ChatsMyChatsQuery, ChatType } from '../graphql/ge
                 } @else {
                   <div
                     class="text-white w-10 rounded-full"
-                    [style.background]="otherParticipant(chat).color || 'oklch(var(--p))'"
+                    [style.background]="participantStyle(chat).color"
                   >
-                    <span class="tex-lg">{{ otherParticipant(chat).initials || chat.name?.slice(0, 2) || '?' }}</span>
+                    <span class="tex-lg">{{ participantStyle(chat).initials }}</span>
                   </div>
                 }
               </div>
@@ -54,11 +73,12 @@ import { ChatsMyChatsDocument, ChatsMyChatsQuery, ChatType } from '../graphql/ge
                 </p>
                 <div class="flex flex-wrap items-center gap-1.5 mt-0.5">
                   <span class="text-sm text-base-content/60">{{ chatTypeLabel(chat.type) }}</span>
-                  @if (otherParticipant(chat); as user) {
-                    @if (roleLabel(user?.role?.name); as label) {
+                  @let chatUser = otherParticipant(chat);
+                  @if (chatUser) {
+                    @if (roleLabel(chatUser.role?.name); as label) {
                       <span class="badge badge-secondary badge-soft badge-sm">{{ label }}</span>
                     }
-                    @if (user?.student?.classGroup?.name; as groupName) {
+                    @if (chatUser.student?.classGroup?.name; as groupName) {
                       <span class="badge badge-outline badge-primary badge-sm">{{ groupName }}</span>
                     }
                   }
@@ -81,26 +101,37 @@ import { ChatsMyChatsDocument, ChatsMyChatsQuery, ChatType } from '../graphql/ge
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class Chats {
-  #apollo = inject(Apollo);
+  #http = inject(HttpClient);
   #auth = inject(Auth);
 
   chatsResource = rxResource({
     stream: () =>
-      this.#apollo
-        .watchQuery({ query: ChatsMyChatsDocument })
-        .valueChanges.pipe(map((result) => (result.data?.myChats as ChatsMyChatsQuery['myChats']) ?? [])),
+      this.#http.get<ChatRow[]>(`/api/v1/chats`).pipe(map((result) => result ?? [])),
   });
 
-  chatDisplayName(chat: ChatsMyChatsQuery['myChats'][0]) {
+  chatDisplayName(chat: ChatRow) {
     if (chat.name) return chat.name;
     const other = this.otherParticipant(chat);
     return other ? `${other.firstName} ${other.lastName}` : 'Chat';
   }
 
-  otherParticipant(chat: ChatsMyChatsQuery['myChats'][0]) {
+  otherParticipant(chat: ChatRow): ChatParticipantUser | null {
     const me = this.#auth.user()?.id;
     const other = chat.participants?.find((p) => p.user?.id !== me)?.user;
-    return other ?? chat.participants?.[0]?.user;
+    return other ?? chat.participants?.[0]?.user ?? null;
+  }
+
+  participantStyle(chat: ChatRow): { color: string; initials: string } {
+    const u = this.otherParticipant(chat);
+    const color = u?.color || 'oklch(var(--p))';
+    if (u?.initials?.trim()) {
+      return { color, initials: u.initials };
+    }
+    const ini = `${(u?.firstName ?? '').charAt(0)}${(u?.lastName ?? '').charAt(0)}`.trim();
+    return {
+      color,
+      initials: ini || chat.name?.slice(0, 2) || '?',
+    };
   }
 
   chatTypeLabel(type: ChatType) {
@@ -115,23 +146,23 @@ export default class Chats {
   }
 
   isContextualChat(type: ChatType) {
-    return type === ChatType.Course || type === ChatType.Assignment || type === ChatType.ClassGroup;
+    return type === ChatType.COURSE || type === ChatType.ASSIGNMENT || type === ChatType.CLASS_GROUP;
   }
 
   contextualChatIcon(type: ChatType) {
     const icons: Record<string, string> = {
-      [ChatType.Course]: 'school',
-      [ChatType.Assignment]: 'assignment',
-      [ChatType.ClassGroup]: 'groups',
+      [ChatType.COURSE]: 'school',
+      [ChatType.ASSIGNMENT]: 'assignment',
+      [ChatType.CLASS_GROUP]: 'groups',
     };
     return icons[type] ?? 'chat';
   }
 
   contextualChatColor(type: ChatType) {
     const colors: Record<string, string> = {
-      [ChatType.Course]: 'oklch(var(--p))',
-      [ChatType.Assignment]: 'oklch(var(--s))',
-      [ChatType.ClassGroup]: 'oklch(var(--a))',
+      [ChatType.COURSE]: 'oklch(var(--p))',
+      [ChatType.ASSIGNMENT]: 'oklch(var(--s))',
+      [ChatType.CLASS_GROUP]: 'oklch(var(--a))',
     };
     return colors[type] ?? 'oklch(var(--p))';
   }

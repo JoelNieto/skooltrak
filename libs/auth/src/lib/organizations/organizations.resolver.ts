@@ -1,12 +1,15 @@
 import { UseGuards } from '@nestjs/common';
 import { Args, Context, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { AllowAnonymous, BetterAuthGuard } from '../auth.guard';
-import { auth } from '../better-auth';
+import { auth as betterAuthInstance } from '../better-auth';
 import { CreateOrganizationInput } from './dto/create-organization.input';
 import { UpdateOrganizationInput } from './dto/update-organization.input';
 import { Invitation, Member } from './entities/invitation.entity';
 import { Organization } from './entities/organization.entity';
 import { OrganizationsService } from './organizations.service';
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const authApi = (betterAuthInstance as any).api;
 
 @Resolver(() => Organization)
 @UseGuards(BetterAuthGuard)
@@ -71,7 +74,7 @@ export class OrganizationsResolver {
       ? (role as 'member' | 'admin' | 'owner')
       : 'member';
 
-    const response = await auth.api.createInvitation({
+    const response = await authApi.createInvitation({
       body: {
         email,
         role: validRole,
@@ -94,7 +97,7 @@ export class OrganizationsResolver {
       headers.set('cookie', cookies);
     }
 
-    const response = await auth.api.listInvitations({
+    const response = await authApi.listInvitations({
       query: { organizationId: organizationId || undefined },
       headers,
     });
@@ -113,7 +116,7 @@ export class OrganizationsResolver {
       headers.set('cookie', cookies);
     }
 
-    await auth.api.cancelInvitation({
+    await authApi.cancelInvitation({
       body: { invitationId },
       headers,
     });
@@ -133,7 +136,7 @@ export class OrganizationsResolver {
       headers.set('cookie', cookies);
     }
 
-    await auth.api.acceptInvitation({
+    await authApi.acceptInvitation({
       body: { invitationId },
       headers,
     });
@@ -153,7 +156,7 @@ export class OrganizationsResolver {
       headers.set('cookie', cookies);
     }
 
-    await auth.api.rejectInvitation({
+    await authApi.rejectInvitation({
       body: { invitationId },
       headers,
     });
@@ -176,7 +179,7 @@ export class OrganizationsResolver {
       headers.set('cookie', cookies);
     }
 
-    const response = await auth.api.listMembers({
+    const response = await authApi.listMembers({
       query: { organizationId: organizationId || undefined },
       headers,
     });
@@ -204,7 +207,7 @@ export class OrganizationsResolver {
       headers.set('cookie', cookies);
     }
 
-    await auth.api.removeMember({
+    await authApi.removeMember({
       body: {
         memberIdOrEmail,
         organizationId: organizationId || undefined,
@@ -228,7 +231,7 @@ export class OrganizationsResolver {
       headers.set('cookie', cookies);
     }
 
-    await auth.api.updateMemberRole({
+    await authApi.updateMemberRole({
       body: {
         memberId,
         role,
@@ -255,7 +258,7 @@ export class OrganizationsResolver {
       headers.set('cookie', cookies);
     }
 
-    await auth.api.setActiveOrganization({
+    await authApi.setActiveOrganization({
       body: { organizationId },
       headers,
     });

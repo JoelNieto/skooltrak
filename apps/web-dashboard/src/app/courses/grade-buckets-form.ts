@@ -1,4 +1,5 @@
 import { Toast } from '@/ui';
+import { HttpClient } from '@angular/common/http';
 import { Component, inject, input, OnInit, output } from '@angular/core';
 import {
   NonNullableFormBuilder,
@@ -8,11 +9,7 @@ import {
 import { Prisma } from '@generated/prisma';
 
 type Decimal = InstanceType<typeof Prisma.Decimal>;
-import { Apollo } from 'apollo-angular';
-import {
-  GradeBucketsFormCreateGradeBucketDocument,
-  GradeBucketsFormUpdateGradeBucketDocument,
-} from '../graphql/generated/graphql';
+
 @Component({
   selector: 'app-grade-bucket-form',
   imports: [ReactiveFormsModule],
@@ -52,7 +49,7 @@ export default class GradeBucketForm implements OnInit {
   }>();
   #fb = inject(NonNullableFormBuilder);
   #toast = inject(Toast);
-  #apollo = inject(Apollo);
+  #http = inject(HttpClient);
   public form = this.#fb.group({
     name: ['', [Validators.required]],
     weight: this.#fb.control<number | Decimal>(0, [Validators.required]),
@@ -71,16 +68,11 @@ export default class GradeBucketForm implements OnInit {
     }
     if (this.data().bucket) {
       const raw = this.form.getRawValue();
-      this.#apollo
-        .mutate({
-          mutation: GradeBucketsFormUpdateGradeBucketDocument,
-          variables: {
-            updateGradeBucketInput: {
-              name: raw.name,
-              id: this.data().bucket!.id,
-              weight: Number(raw.weight),
-            },
-          },
+      this.#http
+        .patch('/api/v1/grade-buckets', {
+          name: raw.name,
+          id: this.data().bucket!.id,
+          weight: Number(raw.weight),
         })
         .subscribe({
           next: () => {
@@ -95,16 +87,11 @@ export default class GradeBucketForm implements OnInit {
       return;
     }
     const raw = this.form.getRawValue();
-    this.#apollo
-      .mutate({
-        mutation: GradeBucketsFormCreateGradeBucketDocument,
-        variables: {
-          createGradeBucketInput: {
-            name: raw.name,
-            weight: Number(raw.weight),
-            courseId: this.data().courseId,
-          },
-        },
+    this.#http
+      .post('/api/v1/grade-buckets', {
+        name: raw.name,
+        weight: Number(raw.weight),
+        courseId: this.data().courseId,
       })
       .subscribe({
         next: () => {

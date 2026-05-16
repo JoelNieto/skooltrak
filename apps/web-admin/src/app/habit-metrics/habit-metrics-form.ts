@@ -6,7 +6,8 @@ import {
   Validators,
 } from '@angular/forms';
 import { Prisma } from '@generated/prisma';
-import { Apollo, gql } from 'apollo-angular';
+import { HttpClient } from '@angular/common/http';
+import { firstValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-habit-metrics-form',
@@ -64,7 +65,7 @@ export default class HabitMetricsForm implements OnInit {
   }>();
   private fb = inject(NonNullableFormBuilder);
   private toast = inject(Toast);
-  private apollo = inject(Apollo);
+  private http = inject(HttpClient);
 
   public form = this.fb.group({
     name: ['', [Validators.required]],
@@ -92,76 +93,28 @@ export default class HabitMetricsForm implements OnInit {
       return;
     }
 
+    const body = this.form.getRawValue();
     if (this.data()?.metric) {
-      this.apollo
-        .mutate({
-          mutation: gql`
-            mutation UpdateHabitMetric(
-              $updateHabitMetricInput: UpdateHabitMetricInput!
-            ) {
-              updateHabitMetric(
-                updateHabitMetricInput: $updateHabitMetricInput
-              ) {
-                id
-                name
-                description
-                active
-                order
-                createdAt
-                updatedAt
-              }
-            }
-          `,
-          variables: {
-            updateHabitMetricInput: {
-              ...this.form.value,
-              id: this.data()!.metric!.id,
-            },
-          },
+      void firstValueFrom(
+        this.http.patch('/api/v1/habit-metrics', { ...body, id: this.data()!.metric!.id }),
+      )
+        .then(() => {
+          this.toast.showSuccess('Criterio actualizado exitosamente');
+          this.closeModal.emit(true);
         })
-        .subscribe({
-          next: () => {
-            this.toast.showSuccess('Criterio actualizado exitosamente');
-            this.closeModal.emit(true);
-          },
-          error: (error) => {
-            this.toast.showError('Error al actualizar el criterio');
-            console.error(error);
-          },
+        .catch((error) => {
+          this.toast.showError('Error al actualizar el criterio');
+          console.error(error);
         });
     } else {
-      this.apollo
-        .mutate({
-          mutation: gql`
-            mutation CreateHabitMetric(
-              $createHabitMetricInput: CreateHabitMetricInput!
-            ) {
-              createHabitMetric(
-                createHabitMetricInput: $createHabitMetricInput
-              ) {
-                id
-                name
-                description
-                active
-                order
-                createdAt
-                updatedAt
-              }
-            }
-          `,
-          variables: {
-            createHabitMetricInput: this.form.value,
-          },
+      void firstValueFrom(this.http.post('/api/v1/habit-metrics', body))
+        .then(() => {
+          this.toast.showSuccess('Criterio creado exitosamente');
+          this.closeModal.emit(true);
         })
-        .subscribe({
-          next: () => {
-            this.toast.showSuccess('Criterio creado exitosamente');
-            this.closeModal.emit(true);
-          },
-          error: (error) => {
-            this.toast.showError('Error al crear el criterio');
-            console.error(error);
-          },
+        .catch((error) => {
+          this.toast.showError('Error al crear el criterio');
+          console.error(error);
         });
     }
   }

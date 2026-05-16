@@ -4,10 +4,10 @@ import { Component, inject } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 
-import { Apollo } from 'apollo-angular';
-import { map, of, tap } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
+import { forkJoin, map, of, tap } from 'rxjs';
 import Store from '../core/store';
-import { GetClassGroupsDocument } from '../graphql/generated/graphql';
+import { toFetchQueryParams } from '../core/fetch-query-params';
 
 @Component({
   imports: [RouterLink, DatePipe, EmptyState, Paginator],
@@ -67,7 +67,7 @@ import { GetClassGroupsDocument } from '../graphql/generated/graphql';
 })
 export default class Groups {
   private store = inject(Store);
-  private apollo = inject(Apollo);
+  private http = inject(HttpClient);
   public pagination = inject(Pagination);
 
   public classGroups = rxResource({
@@ -81,19 +81,33 @@ export default class Groups {
       if (!schoolId) {
         return of([]);
       }
-      return this.apollo
-        .watchQuery({
-          query: GetClassGroupsDocument,
-          variables: {
-            schoolId,
-            take,
-            skip,
-          },
-        })
-        .valueChanges.pipe(
-          tap((result) => this.pagination.updateCount(result.data?.count ?? 0)),
-          map((result) => result.data?.classGroups ?? []),
-        );
+      const q = toFetchQueryParams({ schoolId, take, skip });
+      return forkJoin({
+        count: this.http.get<number>('/api/v1/class-groups/count', { params: q }),
+        list: this.http.get<
+          Array<{
+            id: string;
+            name: string;
+            createdAt: string;
+            updatedAt: string;
+            teacher?: { firstName?: string; fatherName?: string; name?: string };
+            studyPlan?: { name?: string };
+          }>
+        >('/api/v1/class-groups', { params: q }),
+      }).pipe(
+        tap(({ count }) => this.pagination.updateCount(count ?? 0)),
+        map(({ list }) =>
+          (list ?? []).map((g) => ({
+            ...g,
+            teacher: g.teacher
+              ? {
+                  ...g.teacher,
+                  name: g.teacher.name ?? `${g.teacher.firstName ?? ''} ${g.teacher.fatherName ?? ''}`.trim(),
+                }
+              : g.teacher,
+          })),
+        ),
+      );
     },
   });
 }

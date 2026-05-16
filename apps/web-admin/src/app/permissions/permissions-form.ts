@@ -13,11 +13,8 @@ import {
   Validators,
 } from '@angular/forms';
 import { Prisma } from '@generated/prisma';
-import { Apollo } from 'apollo-angular';
-import {
-  WebAdminCreatePermissionDocument,
-  WebAdminUpdatePermissionDocument,
-} from '../graphql/generated';
+import { HttpClient } from '@angular/common/http';
+import { firstValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-permissions-form',
@@ -51,7 +48,7 @@ export class PermissionsForm implements OnInit {
   public closeModal = output<void>();
   public data = input<{ permission?: Prisma.PermissionGetPayload<false> }>();
   private toast = inject(Toast);
-  private apollo = inject(Apollo);
+  private http = inject(HttpClient);
 
   public form = this.fb.group({
     descriptiveId: ['', [Validators.required]],
@@ -72,45 +69,26 @@ export class PermissionsForm implements OnInit {
 
     const req = this.form.getRawValue();
     if (this.data()?.permission) {
-      this.apollo
-        .mutate({
-          mutation: WebAdminUpdatePermissionDocument,
-          variables: {
-            updatePermissionInput: {
-              ...req,
-              id: this.data()!.permission!.id!,
-            },
-          },
+      void firstValueFrom(
+        this.http.patch('/api/v1/permissions', { ...req, id: this.data()!.permission!.id! }),
+      )
+        .then(() => {
+          this.toast.showSuccess('Permiso actualizado exitosamente');
+          this.closeModal.emit();
         })
-        .subscribe({
-          next: () => {
-            this.toast.showSuccess('Permiso actualizado exitosamente');
-            this.closeModal.emit();
-          },
-          error: (error) => {
-            this.toast.showError('Error al actualizar el permiso');
-            console.error(error);
-          },
+        .catch((error) => {
+          this.toast.showError('Error al actualizar el permiso');
+          console.error(error);
         });
     } else {
-      this.apollo
-        .mutate({
-          mutation: WebAdminCreatePermissionDocument,
-          variables: {
-            createPermissionInput: {
-              ...req,
-            },
-          },
+      void firstValueFrom(this.http.post('/api/v1/permissions', req))
+        .then(() => {
+          this.toast.showSuccess('Permiso creado exitosamente');
+          this.closeModal.emit();
         })
-        .subscribe({
-          next: () => {
-            this.toast.showSuccess('Permiso creado exitosamente');
-            this.closeModal.emit();
-          },
-          error: (error) => {
-            this.toast.showError('Error al crear el permiso');
-            console.error(error);
-          },
+        .catch((error) => {
+          this.toast.showError('Error al crear el permiso');
+          console.error(error);
         });
     }
   }

@@ -9,14 +9,7 @@ import {
   Validators,
 } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { Apollo } from 'apollo-angular';
-import {
-  RegisterCheckPendingInvitationDocument,
-  RegisterCreateInvitationAccessLinkDocument,
-  RegisterSendVerificationLinkDocument,
-  RegisterSignUpDocument,
-  RegisterValidateEmailTokenDocument,
-} from '../graphql/generated/graphql';
+import { HttpClient } from '@angular/common/http';
 
 @Component({
   selector: 'app-register',
@@ -370,7 +363,7 @@ import {
 })
 export default class Register implements OnInit {
   private fb = inject(NonNullableFormBuilder);
-  private apollo = inject(Apollo);
+  private http = inject(HttpClient);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
   private toasts = inject(Toast);
@@ -422,27 +415,21 @@ export default class Register implements OnInit {
   private validateToken(token: string, email: string) {
     this.step.set('validating');
 
-    this.apollo
-      .query({
-        query: RegisterValidateEmailTokenDocument,
-        variables: { token, email },
-        fetchPolicy: 'network-only',
-      })
-      .subscribe({
-        next: (res) => {
-          if (res.data?.validateEmailToken) {
-            this.verifiedEmail.set(email);
-            this.verifiedToken.set(token);
-            this.step.set('register');
-          } else {
-            this.step.set('error');
-          }
-        },
-        error: (err) => {
-          this.errorMessage.set(err.message || 'El enlace de verificación es inválido o ha expirado.');
+    this.http.post<boolean>('/api/v1/auth/validate-email-token', { token, email }).subscribe({
+      next: (valid) => {
+        if (valid) {
+          this.verifiedEmail.set(email);
+          this.verifiedToken.set(token);
+          this.step.set('register');
+        } else {
           this.step.set('error');
-        },
-      });
+        }
+      },
+      error: (err) => {
+        this.errorMessage.set(err.message || 'El enlace de verificación es inválido o ha expirado.');
+        this.step.set('error');
+      },
+    });
   }
 
   public sendVerificationLink() {
@@ -455,51 +442,42 @@ export default class Register implements OnInit {
     const email = this.emailForm.getRawValue().email;
 
     // First check for pending invitation (student/teacher created but not yet verified)
-    this.apollo
-      .query({
-        query: RegisterCheckPendingInvitationDocument,
-        variables: { email },
-        fetchPolicy: 'network-only',
-      })
-      .subscribe({
-        next: (res) => {
-          const pending = res.data?.checkPendingInvitation;
-          if (pending?.hasPendingInvitation) {
-            this.sentEmail.set(email);
-            this.pendingInvitationRole.set(pending.role ?? null);
-            this.pendingInvitationOrg.set(pending.organizationName ?? null);
-            this.step.set('pending-invitation');
-            this.loading.set(false);
-          } else {
-            this.sendVerificationLinkMutation(email);
-          }
-        },
-        error: () => {
+    this.http.post<{ hasPendingInvitation: boolean; role?: string; organizationName?: string }>(
+      '/api/v1/auth/check-pending-invitation',
+      { email },
+    ).subscribe({
+      next: (pending) => {
+        if (pending?.hasPendingInvitation) {
+          this.sentEmail.set(email);
+          this.pendingInvitationRole.set(pending.role ?? null);
+          this.pendingInvitationOrg.set(pending.organizationName ?? null);
+          this.step.set('pending-invitation');
           this.loading.set(false);
+        } else {
           this.sendVerificationLinkMutation(email);
-        },
-      });
+        }
+      },
+      error: () => {
+        this.loading.set(false);
+        this.sendVerificationLinkMutation(email);
+      },
+    });
   }
 
   private sendVerificationLinkMutation(email: string) {
     this.loading.set(true);
-    this.apollo
-      .mutate({
-        mutation: RegisterSendVerificationLinkDocument,
-        variables: { email },
-      })
-      .subscribe({
-        next: () => {
-          this.loading.set(false);
-          this.sentEmail.set(email);
-          this.step.set('check-inbox');
-          this.startCooldown();
-        },
-        error: (err) => {
-          this.loading.set(false);
-          this.toasts.showError(err.message || 'Error al enviar el enlace de verificación');
-        },
-      });
+    this.http.post('/api/v1/auth/send-verification-link', { email }).subscribe({
+      next: () => {
+        this.loading.set(false);
+        this.sentEmail.set(email);
+        this.step.set('check-inbox');
+        this.startCooldown();
+      },
+      error: (err) => {
+        this.loading.set(false);
+        this.toasts.showError(err.message || 'Error al enviar el enlace de verificación');
+      },
+    });
   }
 
   public completePendingInvitation() {
@@ -507,26 +485,21 @@ export default class Register implements OnInit {
     if (!email) return;
 
     this.loading.set(true);
-    this.apollo
-      .mutate({
-        mutation: RegisterCreateInvitationAccessLinkDocument,
-        variables: { email },
-      })
-      .subscribe({
-        next: (res) => {
-          const url = res.data?.createInvitationAccessLink?.url;
-          if (url) {
-            window.location.href = url;
-          } else {
-            this.loading.set(false);
-            this.toasts.showError('Error al generar el enlace');
-          }
-        },
-        error: (err) => {
+    this.http.post<{ url: string }>('/api/v1/auth/create-invitation-access-link', { email }).subscribe({
+      next: (res) => {
+        const url = res?.url;
+        if (url) {
+          window.location.href = url;
+        } else {
           this.loading.set(false);
-          this.toasts.showError(err.message || 'Error al completar la invitación');
-        },
-      });
+          this.toasts.showError('Error al generar el enlace');
+        }
+      },
+      error: (err) => {
+        this.loading.set(false);
+        this.toasts.showError(err.message || 'Error al completar la invitación');
+      },
+    });
   }
 
   public resendLink() {
@@ -535,22 +508,17 @@ export default class Register implements OnInit {
     this.loading.set(true);
     const email = this.sentEmail();
 
-    this.apollo
-      .mutate({
-        mutation: RegisterSendVerificationLinkDocument,
-        variables: { email },
-      })
-      .subscribe({
-        next: () => {
-          this.loading.set(false);
-          this.toasts.showSuccess('Enlace reenviado');
-          this.startCooldown();
-        },
-        error: (err) => {
-          this.loading.set(false);
-          this.toasts.showError(err.message || 'Error al reenviar');
-        },
-      });
+    this.http.post('/api/v1/auth/send-verification-link', { email }).subscribe({
+      next: () => {
+        this.loading.set(false);
+        this.toasts.showSuccess('Enlace reenviado');
+        this.startCooldown();
+      },
+      error: (err) => {
+        this.loading.set(false);
+        this.toasts.showError(err.message || 'Error al reenviar');
+      },
+    });
   }
 
   private startCooldown() {
@@ -583,22 +551,17 @@ export default class Register implements OnInit {
 
     const { firstName, lastName, password } = this.registerForm.getRawValue();
 
-    this.apollo
-      .mutate({
-        mutation: RegisterSignUpDocument,
-        variables: {
-          input: {
-            token: this.verifiedToken(),
-            email: this.verifiedEmail(),
-            firstName,
-            lastName,
-            password,
-          },
-        },
+    this.http
+      .post<{ accessToken: string }>('/api/v1/auth/sign-up', {
+        token: this.verifiedToken(),
+        email: this.verifiedEmail(),
+        firstName,
+        lastName,
+        password,
       })
       .subscribe({
         next: (res) => {
-          const accessToken = res.data?.signUp?.accessToken;
+          const accessToken = res?.accessToken;
           if (accessToken) {
             localStorage.setItem('access_token', accessToken);
           }

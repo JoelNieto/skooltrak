@@ -1,8 +1,6 @@
-import { Field, InputType, PartialType } from '@nestjs/graphql';
+import { PartialType } from '@nestjs/swagger';
 import { CreateClassGroupInput } from './create-class-group.input';
 
-@InputType()
 export class UpdateClassGroupInput extends PartialType(CreateClassGroupInput) {
-  @Field(() => String)
-  id: string;
+    id: string;
 }

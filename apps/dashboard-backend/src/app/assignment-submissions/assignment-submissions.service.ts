@@ -8,8 +8,8 @@ import {
   NotFoundException,
   Scope,
 } from '@nestjs/common';
+import { REQUEST } from '@nestjs/core';
 import { ConfigService } from '@nestjs/config';
-import { CONTEXT } from '@nestjs/graphql';
 import { Request } from 'express';
 import { PrismaService } from '../prisma.service';
 import {
@@ -36,7 +36,7 @@ export class AssignmentSubmissionsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly config: ConfigService,
-    @Inject(CONTEXT) private readonly context: { req: Request }
+    @Inject(REQUEST) private readonly request: Request
   ) {
     const endpoint = this.getRequiredConfig('CLOUDFLARE_R2_ENDPOINT');
     const accessKeyId = this.getRequiredConfig('CLOUDFLARE_R2_ACCESS_KEY_ID');
@@ -386,7 +386,7 @@ export class AssignmentSubmissionsService {
   }
 
   private getUserContext() {
-    const { req } = this.context;
+    const req = this.request;
     const { userId, organizationId } = req.user as AuthUserContext;
     return { userId, organizationId };
   }

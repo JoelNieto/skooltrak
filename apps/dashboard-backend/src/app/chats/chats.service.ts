@@ -7,10 +7,9 @@ import {
   NotFoundException,
   Scope,
 } from '@nestjs/common';
-import { CONTEXT } from '@nestjs/graphql';
+import { REQUEST } from '@nestjs/core';
 import { Request } from 'express';
 import { PrismaService } from '../prisma.service';
-import { ChatPubSub } from './chat-pubsub';
 import { ChatSocketGateway } from './chat-socket.gateway';
 import { AddChatParticipantsInput } from './dto/add-chat-participants.input';
 import { ChatMessagesInput } from './dto/chat-messages.input';
@@ -46,13 +45,12 @@ const CHAT_INCLUDE = {
 export class ChatsService {
   constructor(
     private readonly prisma: PrismaService,
-    private readonly chatPubSub: ChatPubSub,
     private readonly chatSocketGateway: ChatSocketGateway,
-    @Inject(CONTEXT) private readonly context: { req: Request },
+    @Inject(REQUEST) private readonly request: Request,
   ) {}
 
   private getAuth() {
-    const { req } = this.context;
+    const req = this.request;
     const { userId, organizationId, role } = req.user as {
       userId: string;
       organizationId: string | null;
@@ -448,7 +446,6 @@ export class ChatsService {
       },
     });
 
-    this.chatPubSub.publishMessageReceived(input.chatId, message);
     this.chatSocketGateway.emitMessageReceived(input.chatId, message);
 
     return message;

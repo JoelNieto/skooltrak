@@ -1,10 +1,8 @@
-import { Field, InputType, PartialType } from '@nestjs/graphql';
+import { PartialType } from '@nestjs/swagger';
 import { CreateStudentGradeInput } from './create-student-grade.input';
 
-@InputType()
 export class UpdateStudentGradeInput extends PartialType(
   CreateStudentGradeInput
 ) {
-  @Field(() => String)
-  id: string;
+    id: string;
 }

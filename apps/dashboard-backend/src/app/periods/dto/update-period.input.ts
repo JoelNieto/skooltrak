@@ -1,8 +1,6 @@
-import { Field, InputType, PartialType } from '@nestjs/graphql';
+import { PartialType } from '@nestjs/swagger';
 import { CreatePeriodInput } from './create-period.input';
 
-@InputType()
 export class UpdatePeriodInput extends PartialType(CreatePeriodInput) {
-  @Field(() => String, { description: 'ID of the period' })
-  id: string;
+    id: string;
 }

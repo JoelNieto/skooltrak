@@ -9,7 +9,7 @@ export default defineConfig({
       target: './libs/api-client-dashboard/src/lib/generated/api.ts',
       schemas: './libs/api-client-dashboard/src/lib/generated/models',
       client: 'angular',
-      httpClient: true,
+      httpClient: 'angular',
     },
   },
   'api-client-admin': {
@@ -19,7 +19,7 @@ export default defineConfig({
       target: './libs/api-client-admin/src/lib/generated/api.ts',
       schemas: './libs/api-client-admin/src/lib/generated/models',
       client: 'angular',
-      httpClient: true,
+      httpClient: 'angular',
     },
   },
 });

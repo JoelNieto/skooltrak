@@ -1,10 +1,6 @@
-import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin/landingPage/default';
-import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { ScheduleModule } from '@nestjs/schedule';
-import { GraphQLModule } from '@nestjs/graphql';
-import { join } from 'path';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 
@@ -46,25 +42,6 @@ const openApiExport = process.env['OPENAPI_EXPORT'] === 'true';
     ConfigModule.forRoot({ isGlobal: true }),
     ...(openApiExport ? [] : [ScheduleModule.forRoot()]),
     PrismaModule,
-    ...(openApiExport
-      ? []
-      : [
-          GraphQLModule.forRootAsync<ApolloDriverConfig>({
-            imports: [ConfigModule],
-            useFactory: async () => ({
-              autoSchemaFile: join(process.cwd(), 'schema.gql'),
-              sortSchema: true,
-              playground: false,
-              plugins: [ApolloServerPluginLandingPageLocalDefault()],
-              path: '/api/graphql',
-              context: ({ req, res }) => ({ req, res }),
-              subscriptions: {
-                'graphql-ws': true,
-              },
-            }),
-            driver: ApolloDriver,
-          }),
-        ]),
     SchoolsModule,
     SubjectsModule,
     DegreesModule,

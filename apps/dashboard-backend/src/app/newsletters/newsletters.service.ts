@@ -1,5 +1,5 @@
 import { Inject, Injectable, Scope } from '@nestjs/common';
-import { CONTEXT } from '@nestjs/graphql';
+import { REQUEST } from '@nestjs/core';
 import { Request } from 'express';
 import { FetchDataInput } from '../fetch-data.input';
 import { PrismaService } from '../prisma.service';
@@ -10,7 +10,7 @@ import { UpdateNewsletterInput } from './dto/update-newsletter.input';
 export class NewslettersService {
   constructor(
     private readonly prisma: PrismaService,
-    @Inject(CONTEXT) private readonly context: { req: Request },
+    @Inject(REQUEST) private readonly request: Request,
   ) {}
 
   private get includeRelations() {
@@ -18,7 +18,7 @@ export class NewslettersService {
   }
 
   async create(createNewsletterInput: CreateNewsletterInput) {
-    const { req } = this.context;
+    const req = this.request;
     const { organizationId, userId } = req.user as any;
 
     return this.prisma.newsletter.create({
@@ -38,7 +38,7 @@ export class NewslettersService {
   findAll(fetchDataInput: FetchDataInput) {
     const { skip, take, orderBy, orderDirection, search, schoolId } =
       fetchDataInput;
-    const { req } = this.context;
+    const req = this.request;
     const { organizationId } = req.user as any;
 
     return this.prisma.newsletter.findMany({
@@ -60,7 +60,7 @@ export class NewslettersService {
 
   findCount(fetchDataInput: FetchDataInput) {
     const { search, schoolId } = fetchDataInput;
-    const { req } = this.context;
+    const req = this.request;
     const { organizationId } = req.user as any;
 
     return this.prisma.newsletter.count({
@@ -75,7 +75,7 @@ export class NewslettersService {
   }
 
   findPublished(schoolId: string, take: number) {
-    const { req } = this.context;
+    const req = this.request;
     const { organizationId } = req.user as any;
 
     return this.prisma.newsletter.findMany({

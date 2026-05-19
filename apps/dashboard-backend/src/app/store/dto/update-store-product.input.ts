@@ -1,4 +1,3 @@
-import { Field, Float, InputType } from '@nestjs/graphql';
 import { Type } from 'class-transformer';
 import {
   IsArray,
@@ -13,49 +12,40 @@ import {
 } from 'class-validator';
 import { UpdateStoreProductVariantInput } from './update-store-product-variant.input';
 
-@InputType()
 export class UpdateStoreProductInput {
-  @Field(() => String)
-  @IsString()
+    @IsString()
   @IsNotEmpty()
   id: string;
 
-  @Field(() => String, { nullable: true })
-  @IsOptional()
+    @IsOptional()
   @IsString()
   categoryId?: string | null;
 
-  @Field(() => String, { nullable: true })
-  @IsOptional()
+    @IsOptional()
   @IsString()
   @MaxLength(300)
   name?: string;
 
-  @Field(() => String, { nullable: true })
-  @IsOptional()
+    @IsOptional()
   @IsString()
   @MaxLength(8000)
   description?: string;
 
-  @Field(() => Float, { nullable: true })
-  @IsOptional()
+    @IsOptional()
   @IsNumber()
   @Min(0)
   price?: number;
 
-  @Field(() => String, { nullable: true })
-  @IsOptional()
+    @IsOptional()
   @IsString()
   @MaxLength(2000)
   imageUrl?: string | null;
 
-  @Field(() => Boolean, { nullable: true })
-  @IsOptional()
+    @IsOptional()
   @IsBoolean()
   active?: boolean;
 
-  @Field(() => [UpdateStoreProductVariantInput], { nullable: true })
-  @IsOptional()
+    @IsOptional()
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => UpdateStoreProductVariantInput)

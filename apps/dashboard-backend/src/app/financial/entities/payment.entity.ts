@@ -1,35 +1,24 @@
 import { Prisma } from '@generated/prisma';
-import { Field, Float, ObjectType } from '@nestjs/graphql';
 import { Student } from '../../students/entities/student.entity';
 
-@ObjectType()
 export class Payment
   implements Prisma.PaymentGetPayload<{ include: { student: true } }>
 {
-  @Field(() => String)
-  id: string;
+    id: string;
 
-  @Field(() => String)
-  studentId: string;
+    studentId: string;
 
-  @Field(() => Student)
-  student: Student;
+    student: Student;
 
-  @Field(() => Float)
-  amount: Prisma.Decimal;
+    amount: Prisma.Decimal;
 
-  @Field(() => Date)
-  paidAt: Date;
+    paidAt: Date;
 
-  @Field(() => String, { nullable: true })
-  reference: string | null;
+    reference: string | null;
 
-  @Field(() => String, { nullable: true })
-  createdBy: string | null;
+    createdBy: string | null;
 
-  @Field(() => Date)
-  createdAt: Date;
+    createdAt: Date;
 
-  @Field(() => Date)
-  updatedAt: Date;
+    updatedAt: Date;
 }

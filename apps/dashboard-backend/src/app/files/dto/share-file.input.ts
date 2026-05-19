@@ -1,6 +1,4 @@
 import { $Enums } from '@generated/prisma';
-import { Field, InputType } from '@nestjs/graphql';
-
 export enum FileShareTargetType {
   USER = 'USER',
   SCHOOL = 'SCHOOL',
@@ -8,17 +6,12 @@ export enum FileShareTargetType {
   COURSE = 'COURSE',
 }
 
-@InputType()
 export class ShareFileInput {
-  @Field(() => String, { description: 'File ID to share' })
-  fileId: string;
+    fileId: string;
 
-  @Field(() => String, { description: 'Target type for the share' })
-  targetType: FileShareTargetType;
+    targetType: FileShareTargetType;
 
-  @Field(() => String, { description: 'Target ID for the share' })
-  targetId: string;
+    targetId: string;
 
-  @Field(() => String, { description: 'Permission for the share' })
-  permission: $Enums.FilePermission;
+    permission: $Enums.FilePermission;
 }

@@ -7,7 +7,6 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { ModuleRef, Reflector } from '@nestjs/core';
-import { GqlExecutionContext } from '@nestjs/graphql';
 import { Request } from 'express';
 import * as jwt from 'jsonwebtoken';
 import { PrismaService } from './prisma.service';
@@ -29,16 +28,8 @@ export type AuthenticatedRequest = Request & {
   session?: unknown;
 };
 
-/** Resolves Express `req` for HTTP controllers and GraphQL resolvers during migration. */
+/** Resolves Express `req` for HTTP controllers and WebSocket handlers. */
 export function getRequestFromExecutionContext(context: ExecutionContext): AuthenticatedRequest {
-  const type = context.getType<string>();
-  if (type === 'http' || type === 'ws') {
-    return context.switchToHttp().getRequest<AuthenticatedRequest>();
-  }
-  if (type === 'graphql') {
-    const gqlCtx = GqlExecutionContext.create(context);
-    return gqlCtx.getContext().req as AuthenticatedRequest;
-  }
   return context.switchToHttp().getRequest<AuthenticatedRequest>();
 }
 

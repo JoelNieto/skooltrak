@@ -1,50 +1,34 @@
 import { $Enums } from '@generated/prisma';
-import { Field, ObjectType } from '@nestjs/graphql';
 import { ClassGroup } from '../../class-groups/entities/class-group.entity';
 import { Course } from '../../courses/entities/course.entity';
 import { Teacher } from '../../teachers/entities/teacher.entity';
 
-@ObjectType()
 export class AssignmentDetails {
-  @Field(() => String, { description: 'ID of the assignment' })
-  id: string;
+    id: string;
 
-  @Field(() => String, { description: 'Title of the assignment' })
-  title: string;
+    title: string;
 
-  @Field(() => String, { description: 'Details of the assignment' })
-  details: string;
+    details: string;
 
-  @Field(() => String, { description: 'Type of the assignment' })
-  type: $Enums.AssignmentType;
+    type: $Enums.AssignmentType;
 
-  @Field(() => Boolean, { description: 'Require submission' })
-  requireSubmission: boolean;
+    requireSubmission: boolean;
 
-  @Field(() => Course, { description: 'Course of the assignment' })
-  course: Course;
+    course: Course;
 
-  @Field(() => Teacher, { description: 'Teacher of the assignment' })
-  teacher: Teacher;
+    teacher: Teacher;
 }
 
-@ObjectType()
 export class AssignmentDateWithDetails {
-  @Field(() => String, { description: 'ID of the assignment date' })
-  id: string;
+    id: string;
 
-  @Field(() => Date, { description: 'Due date for this group' })
-  date: Date;
+    date: Date;
 
-  @Field(() => String, { description: 'Assignment ID' })
-  assignmentId: string;
+    assignmentId: string;
 
-  @Field(() => String, { description: 'Class group ID' })
-  classGroupId: string;
+    classGroupId: string;
 
-  @Field(() => ClassGroup, { description: 'Class group' })
-  classGroup: ClassGroup;
+    classGroup: ClassGroup;
 
-  @Field(() => AssignmentDetails, { description: 'Assignment details' })
-  assignment: AssignmentDetails;
+    assignment: AssignmentDetails;
 }

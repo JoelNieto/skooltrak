@@ -1,18 +1,9 @@
 import { Prisma } from '@generated/prisma';
-import { Field, InputType } from '@nestjs/graphql';
-@InputType()
 export class CreateRoleInput implements Prisma.RoleUncheckedCreateInput {
-  @Field(() => String, { description: 'Name of the role' })
-  name: string;
+    name: string;
 
-  @Field(() => String, { description: 'Description of the role' })
-  description: string;
+    description: string;
 
-  @Field(() => String, {
-    description: 'Organization ID of the role',
-    nullable: true,
-  })
-  organizationId?: string;
-  @Field(() => [String], { description: 'Permissions of the role' })
-  permissionIds: string[];
+    organizationId?: string;
+    permissionIds: string[];
 }

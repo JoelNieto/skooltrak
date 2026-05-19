@@ -1,56 +1,36 @@
 import { $Enums, Prisma } from '@generated/prisma';
-import { Field, Float, Int, ObjectType, registerEnumType } from '@nestjs/graphql';
 import { School } from '../../schools/entities/school.entity';
 import { Student } from '../../students/entities/student.entity';
 import { StudyPlan } from '../../study-plans/entities/study-plan.entity';
 
-registerEnumType($Enums.ChargeStatus, { name: 'ChargeStatus' });
-registerEnumType($Enums.ChargeType, { name: 'ChargeType' });
-
-@ObjectType()
 export class Charge {
-  @Field(() => String)
-  id: string;
+    id: string;
 
-  @Field(() => String)
-  schoolId: string;
+    schoolId: string;
 
-  @Field(() => School)
-  school: School;
+    school: School;
 
-  @Field(() => Int)
-  year: number;
+    year: number;
 
-  @Field(() => String)
-  studentId: string;
+    studentId: string;
 
-  @Field(() => Student)
-  student: Student;
+    student: Student;
 
-  @Field(() => String, { nullable: true })
-  studyPlanId: string | null;
+    studyPlanId: string | null;
 
-  @Field(() => StudyPlan, { nullable: true })
-  studyPlan: StudyPlan | null;
+    studyPlan: StudyPlan | null;
 
-  @Field(() => Float)
-  amount: Prisma.Decimal;
+    amount: Prisma.Decimal;
 
-  @Field(() => Date)
-  dueDate: Date;
+    dueDate: Date;
 
-  @Field(() => String)
-  description: string;
+    description: string;
 
-  @Field(() => $Enums.ChargeType)
-  chargeType: $Enums.ChargeType;
+    chargeType: $Enums.ChargeType;
 
-  @Field(() => $Enums.ChargeStatus)
-  status: $Enums.ChargeStatus;
+    status: $Enums.ChargeStatus;
 
-  @Field(() => Date)
-  createdAt: Date;
+    createdAt: Date;
 
-  @Field(() => Date)
-  updatedAt: Date;
+    updatedAt: Date;
 }

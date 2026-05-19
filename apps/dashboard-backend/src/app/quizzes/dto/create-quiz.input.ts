@@ -1,52 +1,34 @@
 import { $Enums, Prisma } from '@generated/prisma';
-import { Field, InputType } from '@nestjs/graphql';
-
-@InputType()
 export class CreateQuizInput {
-  @Field(() => String, { description: 'Title' })
-  title: string;
+    title: string;
 
-  @Field(() => String, { description: 'Details' })
-  details: string;
+    details: string;
 
-  @Field(() => String, { description: 'Organization ID' })
-  organizationId: string;
+    organizationId: string;
 
-  @Field(() => String, { description: 'Course ID' })
-  courseId: string;
+    courseId: string;
 
-  @Field(() => String, { description: 'Teacher ID' })
-  teacherId: string;
+    teacherId: string;
 
-  @Field(() => [CreateQuizQuestionInput], { description: 'Questions' })
-  questions?: CreateQuizQuestionInput[];
+    questions?: CreateQuizQuestionInput[];
 }
 
-@InputType()
 export class CreateQuizQuestionInput {
-  @Field(() => String, { description: 'Question' })
-  question: string;
+    question: string;
 
-  @Field(() => String, { description: 'Value' })
-  value: string | number | Prisma.Decimal;
+    value: string | number | Prisma.Decimal;
 
-  @Field(() => String, { description: 'Type' })
-  type: $Enums.QuizQuestionType;
+    type: $Enums.QuizQuestionType;
 
-  @Field(() => Number, { description: 'Time Limit', defaultValue: 0 })
-  timeLimit?: number;
+    timeLimit?: number;
 
-  @Field(() => [CreateQuizQuestionOptionInput], { description: 'Options' })
-  options?: CreateQuizQuestionOptionInput[];
+    options?: CreateQuizQuestionOptionInput[];
 }
 
-@InputType()
 export class CreateQuizQuestionOptionInput
   implements Prisma.QuizQuestionOptionUncheckedCreateWithoutQuestionInput
 {
-  @Field(() => String, { description: 'Option' })
-  option: string;
+    option: string;
 
-  @Field(() => Boolean, { description: 'Is Correct' })
-  isCorrect: boolean;
+    isCorrect: boolean;
 }

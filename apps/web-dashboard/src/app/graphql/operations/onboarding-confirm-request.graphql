@@ -1,6 +1,0 @@
-mutation OnboardingRequestJoinSchool($input: RequestJoinSchoolInput!) {
-  requestJoinSchool(input: $input) {
-    status
-    message
-  }
-}

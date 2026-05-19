@@ -1,57 +1,28 @@
 import { TransformDateToNoon } from '@/shared';
-import { Field, InputType, Int } from '@nestjs/graphql';
-
 import { $Enums, Prisma } from '@generated/prisma';
 type CreateTeacherInputType = Omit<Prisma.TeacherUncheckedCreateInput, 'userId'> & {
   email: string;
 };
 
-@InputType()
 export class CreateTeacherInput implements CreateTeacherInputType {
-  @Field(() => String, { description: 'First name of the teacher' })
-  firstName: string;
-  @Field(() => String, {
-    description: 'Middle name of the teacher',
-    nullable: true,
-    defaultValue: '',
-  })
-  middleName: string;
-  @Field(() => String, { description: 'Father name of the teacher' })
-  fatherName: string;
-  @Field(() => String, {
-    description: 'Mother name of the teacher',
-    nullable: true,
-    defaultValue: '',
-  })
-  motherName: string;
-  @Field(() => String, { description: 'Document ID of the teacher' })
-  documentId: string;
-  @Field(() => String, { description: 'Organization ID of the teacher' })
-  organizationId: string;
+    firstName: string;
+    middleName: string;
+    fatherName: string;
+    motherName: string;
+    documentId: string;
+    organizationId: string;
   @TransformDateToNoon()
-  @Field(() => Date, {
-    description: 'Birth date of the teacher',
-    nullable: true,
-  })
-  birthDate: Date;
+    birthDate: Date;
 
-  @Field(() => String, { nullable: true, defaultValue: '' })
-  address?: string;
+    address?: string;
 
-  @Field(() => String, { nullable: true, defaultValue: '' })
-  about?: string;
+    about?: string;
 
-  @Field(() => String, { nullable: true, defaultValue: '' })
-  phoneNumber?: string;
+    phoneNumber?: string;
 
-  @Field(() => String, { nullable: true, defaultValue: '' })
-  personalEmail?: string;
-  @Field(() => String, { description: 'Gender of the teacher' })
-  gender: $Enums.Gender;
-  @Field(() => String, { description: 'Email of the teacher' })
-  email: string;
-  @Field(() => Int, { nullable: true })
-  teacherSince?: number;
-  @Field(() => Date, { nullable: true })
-  memberSince?: Date;
+    personalEmail?: string;
+    gender: $Enums.Gender;
+    email: string;
+    teacherSince?: number;
+    memberSince?: Date;
 }

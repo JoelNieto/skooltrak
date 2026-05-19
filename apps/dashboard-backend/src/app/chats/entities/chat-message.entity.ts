@@ -1,29 +1,18 @@
 import { User } from '@/auth';
-import { Field, ObjectType } from '@nestjs/graphql';
-
-@ObjectType()
 export class ChatMessage {
-  @Field(() => String)
-  id: string;
+    id: string;
 
-  @Field(() => String)
-  chatId: string;
+    chatId: string;
 
-  @Field(() => String, { nullable: true })
-  senderId: string | null;
+    senderId: string | null;
 
-  @Field(() => User, { nullable: true })
-  sender: User | null;
+    sender: User | null;
 
-  @Field(() => String)
-  content: string;
+    content: string;
 
-  @Field(() => String, { nullable: true })
-  replyToId: string | null;
+    replyToId: string | null;
 
-  @Field(() => Date)
-  createdAt: Date;
+    createdAt: Date;
 
-  @Field(() => Date, { nullable: true })
-  deletedAt: Date | null;
+    deletedAt: Date | null;
 }

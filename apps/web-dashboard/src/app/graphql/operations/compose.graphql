@@ -1,5 +1,0 @@
-mutation ComposeCreateMessage($createMessageInput: CreateMessageInput!) {
-  createMessage(createMessageInput: $createMessageInput) {
-    id
-  }
-}

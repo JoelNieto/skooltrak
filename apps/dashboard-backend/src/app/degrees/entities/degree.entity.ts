@@ -1,29 +1,19 @@
-import { Field, ObjectType } from '@nestjs/graphql';
 import { School } from '../../schools/entities/school.entity';
 import { StudyPlan } from '../../study-plans/entities/study-plan.entity';
-@ObjectType()
 export class Degree {
-  @Field(() => String, { description: 'ID of the degree' })
-  id: string;
+    id: string;
 
-  @Field(() => [StudyPlan], { description: 'Study plans of the degree' })
-  studyPlans: StudyPlan[];
+    studyPlans: StudyPlan[];
 
-  @Field(() => String, { description: 'Name of the degree' })
-  name: string;
+    name: string;
 
-  @Field(() => String, { description: 'Short name of the degree' })
-  shortName: string;
+    shortName: string;
 
-  @Field(() => String, { description: 'School ID of the degree' })
-  schoolId: string;
+    schoolId: string;
 
-  @Field(() => School, { description: 'School of the degree' })
-  school: School;
+    school: School;
 
-  @Field(() => Date, { description: 'Created at of the degree' })
-  createdAt: Date;
+    createdAt: Date;
 
-  @Field(() => Date, { description: 'Updated at of the degree' })
-  updatedAt: Date;
+    updatedAt: Date;
 }

@@ -1,34 +1,19 @@
-import { Field, Float, InputType, Int } from '@nestjs/graphql';
-
-@InputType()
 export class EnrollmentCostInput {
-  @Field(() => String, { nullable: true })
-  id?: string;
+    id?: string;
 
-  @Field(() => String)
-  name: string;
+    name: string;
 
-  @Field(() => Float)
-  amount: number;
+    amount: number;
 
-  @Field(() => Int, { defaultValue: 0 })
-  order: number;
+    order: number;
 }
 
-@InputType()
 export class UpdateStudyPlanFinancialInput {
-  @Field(() => String)
-  studyPlanId: string;
+    studyPlanId: string;
 
-  @Field(() => Float, { nullable: true })
-  monthlyTuitionAmount?: number;
+    monthlyTuitionAmount?: number;
 
-  @Field(() => [Int], {
-    nullable: true,
-    description: 'Month numbers 1-12 when tuition is due',
-  })
-  tuitionMonths?: number[];
+    tuitionMonths?: number[];
 
-  @Field(() => [EnrollmentCostInput], { nullable: true })
-  enrollmentCosts?: EnrollmentCostInput[];
+    enrollmentCosts?: EnrollmentCostInput[];
 }

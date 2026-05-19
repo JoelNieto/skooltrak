@@ -1,19 +1,11 @@
-import { Field, ObjectType } from '@nestjs/graphql';
-
-@ObjectType()
 export class PublicSchoolDirectoryEntry {
-  @Field(() => String)
-  id: string;
+    id: string;
 
-  @Field(() => String)
-  name: string;
+    name: string;
 
-  @Field(() => String)
-  slug: string;
+    slug: string;
 
-  @Field(() => String)
-  currencyCode: string;
+    currencyCode: string;
 
-  @Field(() => String, { nullable: true, description: 'School logo URL when set' })
-  logoUrl?: string | null;
+    logoUrl?: string | null;
 }

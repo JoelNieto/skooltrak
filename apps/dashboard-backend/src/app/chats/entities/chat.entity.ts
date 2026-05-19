@@ -1,48 +1,31 @@
 import { User } from '@/auth';
 import { ChatType } from '@generated/prisma';
-import { Field, ObjectType, registerEnumType } from '@nestjs/graphql';
 import { ChatParticipant } from './chat-participant.entity';
 
-registerEnumType(ChatType, { name: 'ChatType' });
-
-@ObjectType()
 export class Chat {
-  @Field(() => String)
-  id: string;
+    id: string;
 
-  @Field(() => String)
-  organizationId: string;
+    organizationId: string;
 
-  @Field(() => String, { nullable: true })
-  name: string | null;
+    name: string | null;
 
-  @Field(() => ChatType)
-  type: ChatType;
+    type: ChatType;
 
-  @Field(() => String, { nullable: true })
-  courseId: string | null;
+    courseId: string | null;
 
-  @Field(() => String, { nullable: true })
-  assignmentId: string | null;
+    assignmentId: string | null;
 
-  @Field(() => String, { nullable: true })
-  classGroupId: string | null;
+    classGroupId: string | null;
 
-  @Field(() => String, { nullable: true })
-  createdById: string | null;
+    createdById: string | null;
 
-  @Field(() => User, { nullable: true })
-  createdBy: User | null;
+    createdBy: User | null;
 
-  @Field(() => [ChatParticipant])
-  participants: ChatParticipant[];
+    participants: ChatParticipant[];
 
-  @Field(() => Date)
-  createdAt: Date;
+    createdAt: Date;
 
-  @Field(() => Date)
-  updatedAt: Date;
+    updatedAt: Date;
 
-  @Field(() => Date, { nullable: true })
-  deletedAt: Date | null;
+    deletedAt: Date | null;
 }

@@ -1,8 +1,8 @@
 import { GetObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { ForbiddenException, Inject, Injectable, Scope } from '@nestjs/common';
+import { REQUEST } from '@nestjs/core';
 import { ConfigService } from '@nestjs/config';
-import { CONTEXT } from '@nestjs/graphql';
 import { Request } from 'express';
 import { PrismaService } from '../prisma.service';
 import { CreateSchoolInput } from './dto/create-school.input';
@@ -17,7 +17,7 @@ export class SchoolsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly config: ConfigService,
-    @Inject(CONTEXT) private readonly context: { req: Request },
+    @Inject(REQUEST) private readonly request: Request,
   ) {
     const endpoint = this.config.get<string>('CLOUDFLARE_R2_ENDPOINT');
     const accessKeyId = this.config.get<string>('CLOUDFLARE_R2_ACCESS_KEY_ID');
@@ -60,7 +60,7 @@ export class SchoolsService {
   }
 
   async create(createSchoolInput: CreateSchoolInput) {
-    const { req } = this.context;
+    const req = this.request;
     const { organizationId } = req.user as { organizationId: string };
     const { slug: inputSlug, ...rest } = createSchoolInput;
     const slug =
@@ -76,7 +76,7 @@ export class SchoolsService {
   }
 
   findAll() {
-    const { req } = this.context;
+    const req = this.request;
     const { organizationId } = req.user as { organizationId: string };
     return this.prisma.school.findMany({ where: { organizationId } });
   }
@@ -104,7 +104,7 @@ export class SchoolsService {
   }
 
   async createLogoUploadUrl(input: SchoolLogoUploadInput) {
-    const { req } = this.context;
+    const req = this.request;
     const { organizationId } = req.user as { organizationId: string };
 
     if (!organizationId) {

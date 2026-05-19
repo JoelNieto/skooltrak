@@ -1,62 +1,38 @@
 import { User } from '@/auth';
 import { $Enums, Prisma } from '@generated/prisma';
-import { Field, Int, ObjectType } from '@nestjs/graphql';
 import { ClassGroup } from '../../class-groups/entities/class-group.entity';
 import { Course } from '../../courses/entities/course.entity';
 import { Subject } from '../../subjects/entities/subject.entity';
 
-@ObjectType()
 export class Teacher
   implements
     Prisma.TeacherGetPayload<{
       include: { user: true; courses: true; classGroups: true; subjects: true };
     }>
 {
-  @Field(() => String, { description: 'ID of the teacher (auto-generated)' })
-  id: string;
-  @Field(() => String, { description: 'First name of the teacher' })
-  firstName: string;
-  @Field(() => String, { description: 'Middle name of the teacher' })
-  middleName: string;
-  @Field(() => String, { description: 'Father name of the teacher' })
-  fatherName: string;
-  @Field(() => String, { description: 'Mother name of the teacher' })
-  motherName: string;
-  @Field(() => String, { description: 'Document ID of the teacher' })
-  documentId: string;
-  @Field(() => String, { description: 'Organization ID of the teacher' })
-  organizationId: string;
-  @Field(() => Date, { description: 'Birth date of the teacher' })
-  birthDate: Date;
-  @Field(() => String, { description: 'Gender of the teacher' })
-  gender: $Enums.Gender;
-  @Field(() => String, { description: 'User ID of the teacher', nullable: true })
-  userId: string | null;
-  @Field(() => [Course], { description: 'Courses of the teacher' })
-  courses: Course[];
+    id: string;
+    firstName: string;
+    middleName: string;
+    fatherName: string;
+    motherName: string;
+    documentId: string;
+    organizationId: string;
+    birthDate: Date;
+    gender: $Enums.Gender;
+    userId: string | null;
+    courses: Course[];
 
-  @Field(() => [ClassGroup], { description: 'Groups of the teacher' })
-  classGroups: ClassGroup[];
+    classGroups: ClassGroup[];
 
-  @Field(() => [Subject], { description: 'Subject of the teacher' })
-  subjects: Subject[];
+    subjects: Subject[];
 
-  @Field(() => String, { description: 'Address of the teacher' })
-  address: string;
-  @Field(() => String, { description: 'Phone number of the teacher' })
-  phoneNumber: string;
-  @Field(() => String, { description: 'Personal email of the teacher' })
-  personalEmail: string;
-  @Field(() => String, { description: 'About the teacher' })
-  about: string;
-  @Field(() => Int, { description: 'Teacher since year', nullable: true })
-  teacherSince: number | null;
-  @Field(() => Date, { description: 'Member since date', nullable: true })
-  memberSince: Date | null;
-  @Field(() => User, { description: 'User of the teacher', nullable: true })
-  user: User | null;
-  @Field(() => Date, { description: 'Created at' })
-  createdAt: Date;
-  @Field(() => Date, { description: 'Updated at' })
-  updatedAt: Date;
+    address: string;
+    phoneNumber: string;
+    personalEmail: string;
+    about: string;
+    teacherSince: number | null;
+    memberSince: Date | null;
+    user: User | null;
+    createdAt: Date;
+    updatedAt: Date;
 }

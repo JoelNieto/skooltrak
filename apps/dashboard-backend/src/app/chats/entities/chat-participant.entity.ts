@@ -1,35 +1,21 @@
 import { User } from '@/auth';
 import { ChatParticipantRole } from '@generated/prisma';
-import { Field, ObjectType, registerEnumType } from '@nestjs/graphql';
-
-registerEnumType(ChatParticipantRole, { name: 'ChatParticipantRole' });
-
-@ObjectType()
 export class ChatParticipant {
-  @Field(() => String)
-  id: string;
+    id: string;
 
-  @Field(() => String)
-  chatId: string;
+    chatId: string;
 
-  @Field(() => String)
-  userId: string;
+    userId: string;
 
-  @Field(() => User)
-  user: User;
+    user: User;
 
-  @Field(() => ChatParticipantRole)
-  role: ChatParticipantRole;
+    role: ChatParticipantRole;
 
-  @Field(() => Date)
-  joinedAt: Date;
+    joinedAt: Date;
 
-  @Field(() => Date, { nullable: true })
-  lastReadAt: Date | null;
+    lastReadAt: Date | null;
 
-  @Field(() => Date)
-  createdAt: Date;
+    createdAt: Date;
 
-  @Field(() => Date)
-  updatedAt: Date;
+    updatedAt: Date;
 }

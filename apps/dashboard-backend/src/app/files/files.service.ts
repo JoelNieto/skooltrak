@@ -2,8 +2,8 @@ import { GetObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { $Enums, Prisma } from '@generated/prisma';
 import { ForbiddenException, Inject, Injectable, Scope } from '@nestjs/common';
+import { REQUEST } from '@nestjs/core';
 import { ConfigService } from '@nestjs/config';
-import { CONTEXT } from '@nestjs/graphql';
 import { Request } from 'express';
 import { FetchDataInput } from '../fetch-data.input';
 import { PrismaService } from '../prisma.service';
@@ -41,7 +41,7 @@ export class FilesService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly config: ConfigService,
-    @Inject(CONTEXT) private readonly context: { req: Request }
+    @Inject(REQUEST) private readonly request: Request
   ) {
     const endpoint = this.getRequiredConfig('CLOUDFLARE_R2_ENDPOINT');
     const accessKeyId = this.getRequiredConfig('CLOUDFLARE_R2_ACCESS_KEY_ID');
@@ -402,7 +402,7 @@ export class FilesService {
   }
 
   private getUserContext() {
-    const { req } = this.context;
+    const req = this.request;
     const { userId, organizationId } = req.user as AuthUserContext;
     return { userId, organizationId };
   }

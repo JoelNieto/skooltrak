@@ -1,21 +1,11 @@
 import { Prisma } from '@generated/prisma';
-import { Field, Int, ObjectType } from '@nestjs/graphql';
-@ObjectType()
 export class Period implements Prisma.PeriodGetPayload<{ include: undefined }> {
-  @Field(() => String, { description: 'ID of the period' })
-  id: string;
-  @Field(() => String, { description: 'Name of the period' })
-  name: string;
-  @Field(() => String, { description: 'Short name of the period', defaultValue: '' })
-  shortName: string;
-  @Field(() => Int, { description: 'Year of the period' })
-  year: number;
-  @Field(() => Date, { description: 'Start date of the period' })
-  startDate: Date;
-  @Field(() => Date, { description: 'End date of the period' })
-  endDate: Date;
-  @Field(() => Date, { description: 'Created at' })
-  createdAt: Date;
-  @Field(() => Date, { description: 'Updated at' })
-  updatedAt: Date;
+    id: string;
+    name: string;
+    shortName: string;
+    year: number;
+    startDate: Date;
+    endDate: Date;
+    createdAt: Date;
+    updatedAt: Date;
 }

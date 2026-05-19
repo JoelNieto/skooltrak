@@ -1,6 +1,6 @@
 # Skooltrak Platform - Deployment Guide
 
-This guide covers deploying the Skooltrak platform to Railway with Neon PostgreSQL, Cloudflare R2, and Resend. The stack is an **Nx** monorepo: **Angular 21** frontends (including **native federation** with a shell host and remotes), **NestJS 11** backends with **GraphQL** (Apollo), **Prisma 7** + PostgreSQL, and **Bun** as the package manager / runtime for backends and CI builds.
+This guide covers deploying the Skooltrak platform to Railway with Neon PostgreSQL, Cloudflare R2, and Resend. The stack is an **Nx** monorepo: **Angular 21** frontends (including **native federation** with a shell host and remotes), **NestJS 11** backends with **typed REST** (OpenAPI/Swagger) and **Socket.IO** for live chat, **Prisma 7** + PostgreSQL, and **Bun** as the package manager / runtime for backends and CI builds.
 
 ## Current Status
 
@@ -11,7 +11,7 @@ This guide covers deploying the Skooltrak platform to Railway with Neon PostgreS
 | Angular | `21.1.1` |
 | NestJS | `11` |
 | Prisma | `7` |
-| API | GraphQL via `@nestjs/graphql` + Apollo (HTTP path `/api/graphql`; WebSocket subscriptions enabled on dashboard-backend) |
+| API | REST at `/api/v1/*` (Swagger at `/api/docs`); live chat via Socket.IO at `/socket.io` on dashboard-backend |
 
 ### Deployable apps
 
@@ -21,14 +21,14 @@ This guide covers deploying the Skooltrak platform to Railway with Neon PostgreS
 | `web-dashboard` | Federation **remote** (SSR), exposes `./routes` | [apps/web-dashboard/Dockerfile](../apps/web-dashboard/Dockerfile) — Node **20** SSR, default `PORT` **4202** |
 | `web-store` | Federation **remote** (CSR), exposes `./routes` | [apps/web-store/Dockerfile](../apps/web-store/Dockerfile) — nginx static, port **80** |
 | `web-admin` | Standalone Angular SSR app | [apps/web-admin/Dockerfile](../apps/web-admin/Dockerfile) |
-| `dashboard-backend` | NestJS + GraphQL, port `3000` | [apps/dashboard-backend/Dockerfile](../apps/dashboard-backend/Dockerfile) |
-| `admin-backend` | NestJS + GraphQL, port `5050` | [apps/admin-backend/Dockerfile](../apps/admin-backend/Dockerfile) |
+| `dashboard-backend` | NestJS REST + Socket.IO, port `3000` | [apps/dashboard-backend/Dockerfile](../apps/dashboard-backend/Dockerfile) |
+| `admin-backend` | NestJS REST, port `5050` | [apps/admin-backend/Dockerfile](../apps/admin-backend/Dockerfile) |
 
 **CI:** The repo is hosted on **GitHub**. The CI definition at `.gitlab-ci.yml` (legacy filename) installs Bun, runs `bun nx run-many -t lint test build e2e`, then `bun nx fix-ci` (Nx Cloud self-healing), and can run a manual deploy with `railway up --detach` on `main`. When using **GitHub Actions** exclusively, port these steps into `.github/workflows/` and remove or replace the legacy file.
 
 ## Architecture Overview
 
-The public “school” experience is a **federation shell** (`web-shell`) that loads **remotes** at runtime (`web-dashboard`, `web-store`). GraphQL traffic goes to `dashboard-backend` at `/api/graphql`. Admin uses a separate Angular SSR app and `admin-backend`.
+The public “school” experience is a **federation shell** (`web-shell`) that loads **remotes** at runtime (`web-dashboard`, `web-store`). REST traffic goes to `dashboard-backend` at `/api/v1/*`. Admin uses a separate Angular SSR app and `admin-backend`.
 
 ```mermaid
 flowchart TB
@@ -38,8 +38,8 @@ flowchart TB
       dash["web-dashboard<br/>Angular SSR remote<br/>app.skooltrak.com"]
       store["web-store<br/>Angular CSR remote<br/>store.skooltrak.com"]
       admin["web-admin<br/>Angular SSR<br/>admin.skooltrak.com"]
-      api["dashboard-backend<br/>NestJS + GraphQL<br/>api.skooltrak.com"]
-      apiAdmin["admin-backend<br/>NestJS + GraphQL<br/>api-admin.skooltrak.com"]
+      api["dashboard-backend<br/>NestJS REST + Socket.IO<br/>api.skooltrak.com"]
+      apiAdmin["admin-backend<br/>NestJS REST<br/>api-admin.skooltrak.com"]
     end
     neon[("Neon Postgres")]
     r2[("Cloudflare R2")]
@@ -52,10 +52,11 @@ flowchart TB
     cf --> apiAdmin
     shell -.->|"federation.manifest.json"| dash
     shell -.->|"federation.manifest.json"| store
-    shell -->|"/api/graphql"| api
-    admin -->|"/api/graphql"| apiAdmin
-    dash -->|"/api/graphql"| api
-    store -->|"/api/graphql"| api
+    shell -->|"/api/v1/*"| api
+    admin -->|"/api/v1/*"| apiAdmin
+    dash -->|"/api/v1/*"| api
+    store -->|"/api/v1/*"| api
+    dash -.->|"/socket.io"| api
     api --> neon
     apiAdmin --> neon
     api --> r2
@@ -159,7 +160,7 @@ Set `CORS_ORIGINS` to include **`https://admin.skooltrak.com`** (web-admin origi
 
 ### dashboard-backend CORS
 
-Include every origin that calls **`/api/graphql`** in the browser:
+Include every origin that calls **`/api/v1/*`** or **`/socket.io`** in the browser:
 
 - `https://skooltrak.com` (shell)
 - `https://app.skooltrak.com` (dashboard remote, if used on its own origin)
@@ -171,9 +172,12 @@ Example:
 
 Adjust if you use different hostnames.
 
-### GraphQL path
+### REST API and Socket.IO
 
-Both backends mount Apollo at **`/api/graphql`** (not `/graphql`). Frontends should use the same path when pointing at `https://api.skooltrak.com` or a reverse-proxied same-origin URL.
+- REST: **`/api/v1/*`** (OpenAPI docs at **`/api/docs`**, JSON at **`/api/openapi.json`**)
+- Live chat: **Socket.IO** at **`/socket.io`** on dashboard-backend (proxied same-origin in dev)
+
+When using a reverse proxy on the shell domain, route **`/api/*`** and **`/socket.io`** to **dashboard-backend**.
 
 ### Federation manifests
 
@@ -181,7 +185,7 @@ The shell loads **`federation.manifest.json`** and remote entry URLs. Those URLs
 
 ### Frontend / proxy
 
-If you keep **same-origin** API calls from the shell (e.g. `skooltrak.com/api/...` → backend), configure Cloudflare or a Worker to route **`/api/*`** to `dashboard-backend`. If clients call **`https://api.skooltrak.com/api/graphql`** directly, ensure CORS and cookies (if any) match your auth setup.
+If you keep **same-origin** API calls from the shell (e.g. `skooltrak.com/api/...` → backend), configure Cloudflare or a Worker to route **`/api/*`** and **`/socket.io`** to `dashboard-backend`. If clients call **`https://api.skooltrak.com`** directly, ensure CORS and cookies (if any) match your auth setup.
 
 ## Phase 4: Domain Configuration
 
@@ -248,7 +252,7 @@ If you standardize on **GitHub Actions**, recreate the same jobs in `.github/wor
 Test images locally before deploying (from repository root):
 
 ```bash
-# dashboard-backend (GraphQL at http://localhost:3000/api/graphql)
+# dashboard-backend (REST at http://localhost:3000/api/v1, Swagger at /api/docs)
 docker build -f apps/dashboard-backend/Dockerfile -t skooltrak-dashboard-backend .
 docker run -p 3000:3000 -e DATABASE_URL="postgresql://..." skooltrak-dashboard-backend
 
@@ -295,10 +299,10 @@ Ensure Prisma client is generated during the Docker build. Dockerfiles run `bunx
 - Confirm **`federation.manifest.json`** and remote **entry URLs** match deployed hostnames (HTTPS).
 - Check **CORS** if remotes are on different origins than the shell.
 
-### GraphQL 400 or CORS on `/api/graphql`
+### REST 401/403 or CORS on `/api/v1/*`
 
-- Backends expose GraphQL at **`/api/graphql`**.
 - Verify `CORS_ORIGINS` includes every browser origin that calls the API (shell + remotes + admin as applicable).
+- Ensure the reverse proxy forwards **`Authorization`** headers and WebSocket upgrades for **`/socket.io`**.
 
 ### CORS errors in production
 
@@ -311,8 +315,8 @@ Verify `CORS_ORIGINS` includes your frontend URLs (with `https://`). No trailing
 
 ### Frontend can't reach API
 
-- **Same domain:** ensure the reverse proxy routes `/api` (or `/api/graphql`) to **dashboard-backend**
-- **Subdomain API:** ensure Apollo client base URL includes `/api/graphql` and CORS is set on the backend
+- **Same domain:** ensure the reverse proxy routes `/api` and `/socket.io` to **dashboard-backend**
+- **Subdomain API:** point frontends at `https://api.skooltrak.com/api/v1/*` and ensure CORS is set on the backend
 
 ### `@generated/prisma` missing at runtime (backend)
 

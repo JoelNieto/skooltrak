@@ -1,30 +1,20 @@
 import { Prisma } from '@generated/prisma';
-import { Field, ObjectType } from '@nestjs/graphql';
-@ObjectType()
 export class GradeMetric
   implements Prisma.GradeMetricGetPayload<{ include: undefined }>
 {
-  @Field(() => String, { description: 'ID' })
-  id: string;
+    id: string;
 
-  @Field(() => String, { description: 'Nombre' })
-  name: string;
+    name: string;
 
-  @Field(() => Number, { description: 'Minimo' })
-  minimum: Prisma.Decimal;
+    minimum: Prisma.Decimal;
 
-  @Field(() => Number, { description: 'Maximo' })
-  maximum: Prisma.Decimal;
+    maximum: Prisma.Decimal;
 
-  @Field(() => Number, { description: 'Minimo de aprobacion' })
-  minimumApproval: Prisma.Decimal;
+    minimumApproval: Prisma.Decimal;
 
-  @Field(() => Number, { description: 'Minimo de excelencia' })
-  minimumExcellence: Prisma.Decimal;
+    minimumExcellence: Prisma.Decimal;
 
-  @Field(() => Date, { description: 'Fecha de creacion' })
-  createdAt: Date;
+    createdAt: Date;
 
-  @Field(() => Date, { description: 'Fecha de actualizacion' })
-  updatedAt: Date;
+    updatedAt: Date;
 }

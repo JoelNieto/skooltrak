@@ -7,7 +7,7 @@ import {
   NotFoundException,
   Scope,
 } from '@nestjs/common';
-import { CONTEXT } from '@nestjs/graphql';
+import { REQUEST } from '@nestjs/core';
 import { Request } from 'express';
 import { PrismaService } from '../prisma.service';
 import { AttendanceFilterInput } from './dto/attendance-filter.input';
@@ -18,11 +18,11 @@ import { UpdateAttendanceRecordInput } from './dto/update-attendance-record.inpu
 export class AttendanceService {
   constructor(
     private readonly prisma: PrismaService,
-    @Inject(CONTEXT) private readonly context: { req: Request },
+    @Inject(REQUEST) private readonly request: Request,
   ) {}
 
   private async validateTeacherAccess(courseId: string) {
-    const { req } = this.context;
+    const req = this.request;
     const { userId, role } = req.user as { userId: string; role: string };
 
     if (role === 'ADMIN') return;
@@ -44,7 +44,7 @@ export class AttendanceService {
   }
 
   async create(input: CreateAttendanceSessionInput) {
-    const { req } = this.context;
+    const req = this.request;
     const { userId } = req.user as { userId: string };
 
     await this.validateTeacherAccess(input.courseId);

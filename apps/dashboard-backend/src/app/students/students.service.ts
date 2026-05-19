@@ -1,6 +1,6 @@
 import { sendUserInvitation } from '@/auth';
 import { ConflictException, Inject, Injectable, Logger, Scope } from '@nestjs/common';
-import { CONTEXT } from '@nestjs/graphql';
+import { REQUEST } from '@nestjs/core';
 import * as bcrypt from 'bcrypt';
 import { randomUUID } from 'crypto';
 import { Request } from 'express';
@@ -17,7 +17,7 @@ export class StudentsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly chatSync: ChatSyncService,
-    @Inject(CONTEXT) private readonly context: { req: Request },
+    @Inject(REQUEST) private readonly request: Request,
   ) {}
   async create(createStudentInput: CreateStudentInput) {
     const {
@@ -217,7 +217,7 @@ export class StudentsService {
 
   findAll(fetchDataInput: FetchDataInput) {
     const { skip, take, search, orderBy, orderDirection } = fetchDataInput;
-    const { req } = this.context;
+    const req = this.request;
     const { organizationId } = req.user as any;
     return this.prisma.student.findMany({
       where: {
@@ -239,7 +239,7 @@ export class StudentsService {
 
   getCount(fetchDataInput: FetchDataInput) {
     const { search } = fetchDataInput;
-    const { req } = this.context;
+    const req = this.request;
     const { organizationId } = req.user as any;
     return this.prisma.student.count({
       where: {

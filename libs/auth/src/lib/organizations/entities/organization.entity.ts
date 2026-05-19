@@ -1,35 +1,22 @@
 import { Prisma } from '@generated/prisma';
-import { Field, ObjectType } from '@nestjs/graphql';
-
-@ObjectType()
 export class Organization implements Prisma.OrganizationGetPayload<undefined> {
-  @Field(() => String, { description: 'Organization id' })
-  id: string;
+    id: string;
 
-  @Field(() => String, { description: 'Organization name' })
-  name: string;
+    name: string;
 
-  @Field(() => String, { nullable: true, description: 'Organization slug' })
-  slug: string | null;
+    slug: string | null;
 
-  @Field(() => String, { nullable: true, description: 'Organization logo' })
-  logo: string | null;
+    logo: string | null;
 
-  @Field(() => String, { nullable: true, description: 'Organization metadata' })
-  metadata: string | null;
+    metadata: string | null;
 
-  @Field(() => String, { description: 'Organization description' })
-  description: string;
+    description: string;
 
-  @Field(() => Boolean, { description: 'Organization active status' })
-  active: boolean;
+    active: boolean;
 
-  @Field(() => Boolean, { description: 'Whether onboarding has been completed' })
-  onboardingCompleted: boolean;
+    onboardingCompleted: boolean;
 
-  @Field(() => Date, { description: 'Organization created at' })
-  createdAt: Date;
+    createdAt: Date;
 
-  @Field(() => Date, { description: 'Organization updated at' })
-  updatedAt: Date;
+    updatedAt: Date;
 }

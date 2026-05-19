@@ -1,5 +1,5 @@
 import { Inject, Injectable, Scope } from '@nestjs/common';
-import { CONTEXT } from '@nestjs/graphql';
+import { REQUEST } from '@nestjs/core';
 import { Request } from 'express';
 import { FetchDataInput } from '../fetch-data.input';
 import { PrismaService } from '../prisma.service';
@@ -9,7 +9,7 @@ import { UpdateSubjectInput } from './dto/update-subject.input';
 export class SubjectsService {
   constructor(
     private readonly prisma: PrismaService,
-    @Inject(CONTEXT) private readonly context: { req: Request },
+    @Inject(REQUEST) private readonly request: Request,
   ) {}
 
   /**
@@ -49,7 +49,7 @@ export class SubjectsService {
   }
 
   async create(createSubjectInput: CreateSubjectInput) {
-    const { req } = this.context;
+    const req = this.request;
     const { organizationId } = req.user as any;
 
     // Use provided code or generate a unique one from subject name
@@ -69,7 +69,7 @@ export class SubjectsService {
 
   findAll(fetchDataInput: FetchDataInput) {
     const { skip, take, orderBy, orderDirection, search } = fetchDataInput;
-    const { req } = this.context;
+    const req = this.request;
     const { organizationId } = req.user as any;
     return this.prisma.subject.findMany({
       where: {
@@ -86,7 +86,7 @@ export class SubjectsService {
 
   findCount(fetchDataInput: FetchDataInput) {
     const { search } = fetchDataInput;
-    const { req } = this.context;
+    const req = this.request;
     const { organizationId } = req.user as any;
     return this.prisma.subject.count({
       where: {

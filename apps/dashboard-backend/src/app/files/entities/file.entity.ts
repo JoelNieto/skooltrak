@@ -1,11 +1,9 @@
 import { $Enums, Prisma } from '@generated/prisma';
-import { Field, Int, ObjectType } from '@nestjs/graphql';
 import { User } from '@/auth';
 import { ClassGroup } from '../../class-groups/entities/class-group.entity';
 import { Course } from '../../courses/entities/course.entity';
 import { School } from '../../schools/entities/school.entity';
 
-@ObjectType()
 export class File
   implements
     Prisma.FileGetPayload<{
@@ -18,163 +16,108 @@ export class File
       };
     }>
 {
-  @Field(() => String, { description: 'ID of the file' })
-  id: string;
+    id: string;
 
-  @Field(() => String, { description: 'Organization ID of the file' })
-  organizationId: string;
+    organizationId: string;
 
-  @Field(() => String, { description: 'Owner ID of the file' })
-  ownerId: string;
+    ownerId: string;
 
-  @Field(() => User, { description: 'Owner of the file' })
-  owner: User;
+    owner: User;
 
-  @Field(() => String, { description: 'Name of the file' })
-  name: string;
+    name: string;
 
-  @Field(() => String, { description: 'MIME type of the file' })
-  mimeType: string;
+    mimeType: string;
 
-  @Field(() => Int, { description: 'Size of the file in bytes' })
-  size: number;
+    size: number;
 
-  @Field(() => String, { description: 'Storage key for the file' })
-  storageKey: string;
+    storageKey: string;
 
-  @Field(() => [FileShareUser], { description: 'User shares for the file' })
-  sharesUsers: FileShareUser[];
+    sharesUsers: FileShareUser[];
 
-  @Field(() => [FileShareSchool], {
-    description: 'School shares for the file',
-  })
-  sharesSchools: FileShareSchool[];
+    sharesSchools: FileShareSchool[];
 
-  @Field(() => [FileShareClassGroup], {
-    description: 'Class group shares for the file',
-  })
-  sharesClassGroups: FileShareClassGroup[];
+    sharesClassGroups: FileShareClassGroup[];
 
-  @Field(() => [FileShareCourse], { description: 'Course shares for the file' })
-  sharesCourses: FileShareCourse[];
+    sharesCourses: FileShareCourse[];
 
-  @Field(() => Date, { description: 'Created at' })
-  createdAt: Date;
+    createdAt: Date;
 
-  @Field(() => Date, { description: 'Updated at' })
-  updatedAt: Date;
+    updatedAt: Date;
 
-  @Field(() => Date, { description: 'Deleted at', nullable: true })
-  deletedAt: Date | null;
+    deletedAt: Date | null;
 
-  @Field(() => String, {
-    description: 'Effective access for the current user',
-    nullable: true,
-  })
-  access?: $Enums.FilePermission | null;
+    access?: $Enums.FilePermission | null;
 }
 
-@ObjectType()
 export class FileShareUser
   implements Prisma.FileShareUserGetPayload<{ include: { user: true } }>
 {
-  @Field(() => String, { description: 'ID of the file share' })
-  id: string;
+    id: string;
 
-  @Field(() => String, { description: 'File ID of the share' })
-  fileId: string;
+    fileId: string;
 
-  @Field(() => String, { description: 'User ID of the share' })
-  userId: string;
+    userId: string;
 
-  @Field(() => User, { description: 'User for the share' })
-  user: User;
+    user: User;
 
-  @Field(() => String, { description: 'Permission for the share' })
-  permission: $Enums.FilePermission;
+    permission: $Enums.FilePermission;
 
-  @Field(() => Date, { description: 'Created at' })
-  createdAt: Date;
+    createdAt: Date;
 
-  @Field(() => Date, { description: 'Updated at' })
-  updatedAt: Date;
+    updatedAt: Date;
 }
 
-@ObjectType()
 export class FileShareSchool
   implements Prisma.FileShareSchoolGetPayload<{ include: { school: true } }>
 {
-  @Field(() => String, { description: 'ID of the file share' })
-  id: string;
+    id: string;
 
-  @Field(() => String, { description: 'File ID of the share' })
-  fileId: string;
+    fileId: string;
 
-  @Field(() => String, { description: 'School ID of the share' })
-  schoolId: string;
+    schoolId: string;
 
-  @Field(() => School, { description: 'School for the share' })
-  school: School;
+    school: School;
 
-  @Field(() => String, { description: 'Permission for the share' })
-  permission: $Enums.FilePermission;
+    permission: $Enums.FilePermission;
 
-  @Field(() => Date, { description: 'Created at' })
-  createdAt: Date;
+    createdAt: Date;
 
-  @Field(() => Date, { description: 'Updated at' })
-  updatedAt: Date;
+    updatedAt: Date;
 }
 
-@ObjectType()
 export class FileShareClassGroup
   implements
     Prisma.FileShareClassGroupGetPayload<{ include: { classGroup: true } }>
 {
-  @Field(() => String, { description: 'ID of the file share' })
-  id: string;
+    id: string;
 
-  @Field(() => String, { description: 'File ID of the share' })
-  fileId: string;
+    fileId: string;
 
-  @Field(() => String, { description: 'Class group ID of the share' })
-  classGroupId: string;
+    classGroupId: string;
 
-  @Field(() => ClassGroup, { description: 'Class group for the share' })
-  classGroup: ClassGroup;
+    classGroup: ClassGroup;
 
-  @Field(() => String, { description: 'Permission for the share' })
-  permission: $Enums.FilePermission;
+    permission: $Enums.FilePermission;
 
-  @Field(() => Date, { description: 'Created at' })
-  createdAt: Date;
+    createdAt: Date;
 
-  @Field(() => Date, { description: 'Updated at' })
-  updatedAt: Date;
+    updatedAt: Date;
 }
 
-@ObjectType()
 export class FileShareCourse
   implements Prisma.FileShareCourseGetPayload<{ include: { course: true } }>
 {
-  @Field(() => String, { description: 'ID of the file share' })
-  id: string;
+    id: string;
 
-  @Field(() => String, { description: 'File ID of the share' })
-  fileId: string;
+    fileId: string;
 
-  @Field(() => String, { description: 'Course ID of the share' })
-  courseId: string;
+    courseId: string;
 
-  @Field(() => Course, { description: 'Course for the share' })
-  course: Course;
+    course: Course;
 
-  @Field(() => String, { description: 'Permission for the share' })
-  permission: $Enums.FilePermission;
+    permission: $Enums.FilePermission;
 
-  @Field(() => Date, { description: 'Created at' })
-  createdAt: Date;
+    createdAt: Date;
 
-  @Field(() => Date, { description: 'Updated at' })
-  updatedAt: Date;
+    updatedAt: Date;
 }

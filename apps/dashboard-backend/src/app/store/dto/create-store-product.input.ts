@@ -1,4 +1,3 @@
-import { Field, Float, InputType } from '@nestjs/graphql';
 import { Type } from 'class-transformer';
 import {
   ArrayMinSize,
@@ -14,48 +13,39 @@ import {
 } from 'class-validator';
 import { CreateStoreProductVariantInput } from './create-store-product-variant.input';
 
-@InputType()
 export class CreateStoreProductInput {
-  @Field(() => String)
-  @IsString()
+    @IsString()
   @IsNotEmpty()
   schoolId: string;
 
-  @Field(() => String, { nullable: true })
-  @IsOptional()
+    @IsOptional()
   @IsString()
   @IsNotEmpty()
   categoryId?: string;
 
-  @Field(() => String)
-  @IsString()
+    @IsString()
   @MaxLength(300)
   name: string;
 
-  @Field(() => String, { nullable: true })
-  @IsOptional()
+    @IsOptional()
   @IsString()
   @MaxLength(8000)
   description?: string;
 
-  @Field(() => Float)
-  @IsNumber()
+    @IsNumber()
   @Min(0)
   price: number;
 
-  @Field(() => String, { nullable: true })
-  @IsOptional()
+    @IsOptional()
   @IsString()
   @MaxLength(2000)
   imageUrl?: string;
 
-  @Field(() => Boolean, { nullable: true })
-  @IsOptional()
+    @IsOptional()
   @IsBoolean()
   active?: boolean;
 
-  @Field(() => [CreateStoreProductVariantInput])
-  @IsArray()
+    @IsArray()
   @ArrayMinSize(1)
   @ValidateNested({ each: true })
   @Type(() => CreateStoreProductVariantInput)

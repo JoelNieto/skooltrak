@@ -1,34 +1,23 @@
 import { Prisma } from '@generated/prisma';
-import { Field, Float, Int, ObjectType } from '@nestjs/graphql';
 import { StoreProduct } from './store-product.entity';
 import { StoreProductVariant } from './store-product-variant.entity';
 
-@ObjectType()
 export class StoreOrderItem {
-  @Field(() => String)
-  id: string;
+    id: string;
 
-  @Field(() => String)
-  orderId: string;
+    orderId: string;
 
-  @Field(() => String)
-  productId: string;
+    productId: string;
 
-  @Field(() => StoreProduct)
-  product: StoreProduct;
+    product: StoreProduct;
 
-  @Field(() => String, { nullable: true })
-  variantId: string | null;
+    variantId: string | null;
 
-  @Field(() => String, { nullable: true })
-  variantLabel: string | null;
+    variantLabel: string | null;
 
-  @Field(() => StoreProductVariant, { nullable: true })
-  variant: StoreProductVariant | null;
+    variant: StoreProductVariant | null;
 
-  @Field(() => Int)
-  quantity: number;
+    quantity: number;
 
-  @Field(() => Float)
-  unitPrice: Prisma.Decimal;
+    unitPrice: Prisma.Decimal;
 }

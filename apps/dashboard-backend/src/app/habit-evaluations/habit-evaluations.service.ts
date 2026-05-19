@@ -5,7 +5,7 @@ import {
   NotFoundException,
   Scope,
 } from '@nestjs/common';
-import { CONTEXT } from '@nestjs/graphql';
+import { REQUEST } from '@nestjs/core';
 import { Request } from 'express';
 import { PrismaService } from '../prisma.service';
 import { SaveHabitEvaluationInput } from './dto/save-habit-evaluation.input';
@@ -14,11 +14,11 @@ import { SaveHabitEvaluationInput } from './dto/save-habit-evaluation.input';
 export class HabitEvaluationsService {
   constructor(
     private readonly prisma: PrismaService,
-    @Inject(CONTEXT) private readonly context: { req: Request }
+    @Inject(REQUEST) private readonly request: Request
   ) {}
 
   private async validateTeacherAccess(classGroupId: string) {
-    const { req } = this.context;
+    const req = this.request;
     const { userId, role } = req.user as { userId: string; role: string };
 
     // Allow admins
@@ -42,7 +42,7 @@ export class HabitEvaluationsService {
   }
 
   async save(input: SaveHabitEvaluationInput) {
-    const { req } = this.context;
+    const req = this.request;
     const { userId } = req.user as { userId: string };
 
     await this.validateTeacherAccess(input.classGroupId);
@@ -129,7 +129,7 @@ export class HabitEvaluationsService {
   }
 
   async findByGroup(classGroupId: string, periodId: string) {
-    const { req } = this.context;
+    const req = this.request;
     const { userId, role } = req.user as { userId: string; role: string };
 
     await this.validateTeacherAccess(classGroupId);

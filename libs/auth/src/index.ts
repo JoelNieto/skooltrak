@@ -1,4 +1,3 @@
-export * from './lib/nest-graphql-flags';
 export * from './lib/auth.guard';
 export * from './lib/auth.module';
 export { auth } from './lib/better-auth';

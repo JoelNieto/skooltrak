@@ -1,28 +1,17 @@
-import { Field, Int, ObjectType } from '@nestjs/graphql';
-
-@ObjectType()
 export class StoreCategory {
-  @Field(() => String)
-  id: string;
+    id: string;
 
-  @Field(() => String)
-  schoolId: string;
+    schoolId: string;
 
-  @Field(() => String)
-  name: string;
+    name: string;
 
-  @Field(() => String, { nullable: true })
-  description: string | null;
+    description: string | null;
 
-  @Field(() => Int)
-  sortOrder: number;
+    sortOrder: number;
 
-  @Field(() => Boolean)
-  active: boolean;
+    active: boolean;
 
-  @Field(() => Date)
-  createdAt: Date;
+    createdAt: Date;
 
-  @Field(() => Date)
-  updatedAt: Date;
+    updatedAt: Date;
 }

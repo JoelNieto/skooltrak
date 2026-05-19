@@ -1,42 +1,17 @@
-import { ArgsType, Field, Int } from '@nestjs/graphql';
-
-@ArgsType()
 export class FetchDataInput {
-  @Field(() => Int, { nullable: true, description: 'Skip' })
-  skip?: number;
+    skip?: number;
 
-  @Field(() => Int, { nullable: true, description: 'Take' })
-  take?: number;
+    take?: number;
 
-  @Field(() => String, {
-    nullable: true,
-    description: 'Order by',
-    defaultValue: 'name',
-  })
-  orderBy?: string;
+    orderBy?: string;
 
-  @Field(() => String, { nullable: true, description: 'Organization ID' })
-  organizationId?: string;
+    organizationId?: string;
 
-  @Field(() => String, {
-    nullable: true,
-    description: 'Order direction',
-    defaultValue: 'asc',
-  })
-  orderDirection: 'asc' | 'desc';
+    orderDirection: 'asc' | 'desc';
 
-  @Field(() => String, { nullable: true, description: 'School ID' })
-  schoolId?: string;
+    schoolId?: string;
 
-  @Field(() => String, {
-    nullable: true,
-    defaultValue: '',
-    description: 'Search query',
-  })
-  search?: string;
+    search?: string;
 
-  @Field(() => String, {
-    nullable: true,
-  })
-  studyPlanId?: string;
+    studyPlanId?: string;
 }

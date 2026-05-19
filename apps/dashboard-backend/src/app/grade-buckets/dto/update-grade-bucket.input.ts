@@ -1,10 +1,8 @@
-import { Field, InputType, PartialType } from '@nestjs/graphql';
+import { PartialType } from '@nestjs/swagger';
 import { CreateGradeBucketInput } from './create-grade-bucket.input';
 
-@InputType()
 export class UpdateGradeBucketInput extends PartialType(
   CreateGradeBucketInput
 ) {
-  @Field(() => String)
-  id: string;
+    id: string;
 }

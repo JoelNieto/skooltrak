@@ -1,19 +1,11 @@
-import { Field, Float, InputType } from '@nestjs/graphql';
-
-@InputType()
 export class CreatePaymentInput {
-  @Field(() => String)
-  studentId: string;
+    studentId: string;
 
-  @Field(() => Float)
-  amount: number;
+    amount: number;
 
-  @Field(() => Date)
-  paidAt: Date;
+    paidAt: Date;
 
-  @Field(() => String, { nullable: true })
-  reference?: string;
+    reference?: string;
 
-  @Field(() => String, { nullable: true })
-  createdBy?: string;
+    createdBy?: string;
 }

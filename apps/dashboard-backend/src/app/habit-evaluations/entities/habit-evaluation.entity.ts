@@ -1,41 +1,29 @@
 import { Prisma } from '@generated/prisma';
-import { Field, ObjectType } from '@nestjs/graphql';
 import { StudentHabitEvaluation } from './student-habit-evaluation.entity';
 
-@ObjectType()
 export class HabitEvaluation
   implements
     Prisma.HabitEvaluationGetPayload<{
       include: { studentEvaluations: true };
     }>
 {
-  @Field(() => String)
-  id: string;
+    id: string;
 
-  @Field(() => String)
-  habitMetricId: string;
+    habitMetricId: string;
 
-  @Field(() => String)
-  classGroupId: string;
+    classGroupId: string;
 
-  @Field(() => String)
-  periodId: string;
+    periodId: string;
 
-  @Field(() => String)
-  teacherId: string;
+    teacherId: string;
 
-  @Field(() => String)
-  organizationId: string;
+    organizationId: string;
 
-  @Field(() => Boolean)
-  published: boolean;
+    published: boolean;
 
-  @Field(() => [StudentHabitEvaluation])
-  studentEvaluations: StudentHabitEvaluation[];
+    studentEvaluations: StudentHabitEvaluation[];
 
-  @Field(() => Date)
-  createdAt: Date;
+    createdAt: Date;
 
-  @Field(() => Date)
-  updatedAt: Date;
+    updatedAt: Date;
 }

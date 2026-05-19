@@ -1,5 +1,5 @@
 import { Inject, Injectable, Scope } from '@nestjs/common';
-import { CONTEXT } from '@nestjs/graphql';
+import { REQUEST } from '@nestjs/core';
 import { Request } from 'express';
 import { FetchDataInput } from '../fetch-data.input';
 import { PrismaService } from '../prisma.service';
@@ -10,7 +10,7 @@ import { UpdateParentInput } from './dto/update-parent.input';
 export class ParentsService {
   constructor(
     private readonly prisma: PrismaService,
-    @Inject(CONTEXT) private readonly context: { req: Request }
+    @Inject(REQUEST) private readonly request: Request
   ) {}
 
   async create(createParentInput: CreateParentInput) {
@@ -29,7 +29,7 @@ export class ParentsService {
 
   findAll(fetchDataInput: FetchDataInput) {
     const { skip, take, search, orderBy, orderDirection } = fetchDataInput;
-    const { req } = this.context;
+    const req = this.request;
     const { organizationId } = req.user as any;
 
     return this.prisma.parent.findMany({
@@ -55,7 +55,7 @@ export class ParentsService {
 
   getCount(fetchDataInput: FetchDataInput) {
     const { search } = fetchDataInput;
-    const { req } = this.context;
+    const req = this.request;
     const { organizationId } = req.user as any;
 
     return this.prisma.parent.count({

@@ -1,17 +1,10 @@
 import { Prisma } from '@generated/prisma';
-import { Field, Float, ObjectType } from '@nestjs/graphql';
-
-@ObjectType()
 export class StudentBalance {
-  @Field(() => String)
-  studentId: string;
+    studentId: string;
 
-  @Field(() => Float)
-  totalCharges: Prisma.Decimal;
+    totalCharges: Prisma.Decimal;
 
-  @Field(() => Float)
-  totalPayments: Prisma.Decimal;
+    totalPayments: Prisma.Decimal;
 
-  @Field(() => Float)
-  balance: Prisma.Decimal;
+    balance: Prisma.Decimal;
 }

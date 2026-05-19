@@ -1,25 +1,15 @@
-import { Field, Int, ObjectType } from '@nestjs/graphql';
-
-@ObjectType()
 export class StoreProductVariant {
-  @Field(() => String)
-  id: string;
+    id: string;
 
-  @Field(() => String)
-  productId: string;
+    productId: string;
 
-  @Field(() => String)
-  label: string;
+    label: string;
 
-  @Field(() => Int)
-  stock: number;
+    stock: number;
 
-  @Field(() => Int)
-  sortOrder: number;
+    sortOrder: number;
 
-  @Field(() => Date)
-  createdAt: Date;
+    createdAt: Date;
 
-  @Field(() => Date)
-  updatedAt: Date;
+    updatedAt: Date;
 }

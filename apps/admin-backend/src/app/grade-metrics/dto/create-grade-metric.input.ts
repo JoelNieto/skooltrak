@@ -1,21 +1,14 @@
 import { Prisma } from '@generated/prisma';
-import { Field, InputType } from '@nestjs/graphql';
-@InputType()
 export class CreateGradeMetricInput
   implements Prisma.GradeMetricUncheckedCreateInput
 {
-  @Field(() => String, { description: 'Nombre del grado' })
-  name: string;
+    name: string;
 
-  @Field(() => Number, { description: 'Valor mínimo del grado' })
-  minimum: number;
+    minimum: number;
 
-  @Field(() => Number, { description: 'Valor máximo del grado' })
-  maximum: number;
+    maximum: number;
 
-  @Field(() => Number, { description: 'Valor mínimo de aprobación del grado' })
-  minimumApproval: number;
+    minimumApproval: number;
 
-  @Field(() => Number, { description: 'Valor mínimo de excelencia del grado' })
-  minimumExcellence: number;
+    minimumExcellence: number;
 }

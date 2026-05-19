@@ -1,7 +1,7 @@
 import { Prisma } from '@generated/prisma';
 
 import { ConflictException, Inject, Injectable, Scope } from '@nestjs/common';
-import { CONTEXT } from '@nestjs/graphql';
+import { REQUEST } from '@nestjs/core';
 import { Request } from 'express';
 import { FetchDataInput } from '../fetch-data.input';
 import { PrismaService } from '../prisma.service';
@@ -12,7 +12,7 @@ import { UpdateCourseInput } from './dto/update-course.input';
 export class CoursesService {
   constructor(
     private readonly prisma: PrismaService,
-    @Inject(CONTEXT) private readonly context: { req: Request },
+    @Inject(REQUEST) private readonly request: Request,
   ) {}
 
   /**
@@ -165,7 +165,7 @@ export class CoursesService {
   }
 
   findAll(fetchDataInput: FetchDataInput) {
-    const { req } = this.context;
+    const req = this.request;
     const { role, userId } = req.user as any;
     const { skip, take, schoolId, search, studyPlanId } = fetchDataInput;
     let where: Prisma.CourseWhereInput = {
@@ -206,7 +206,7 @@ export class CoursesService {
   }
 
   count(fetchDataInput: FetchDataInput) {
-    const { req } = this.context;
+    const req = this.request;
     const { role, userId } = req.user as any;
     const { schoolId, search, studyPlanId } = fetchDataInput;
     let where: Prisma.CourseWhereInput = {

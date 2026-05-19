@@ -1,52 +1,28 @@
 import { Prisma } from '@generated/prisma';
-import { Field, Float, Int, ObjectType } from '@nestjs/graphql';
 import { Degree } from '../../degrees/entities/degree.entity';
 import { GradeMetric } from '../../grade-metrics/entities/grade-metric.entity';
 import { School } from '../../schools/entities/school.entity';
 import { StudyPlanEnrollmentCost } from '../../financial/entities/study-plan-enrollment-cost.entity';
 
-@ObjectType()
 export class StudyPlan {
-  @Field(() => String, { description: 'ID of the study plan' })
-  id: string;
-  @Field(() => Degree, { description: 'Degree of the study plan' })
-  degree: Degree;
-  @Field(() => String, { description: 'Degree ID of the study plan' })
-  degreeId: string;
-  @Field(() => School, { description: 'School of the study plan' })
-  school: School;
-  @Field(() => String, { description: 'Name of the study plan' })
-  name: string;
-  @Field(() => String, { description: 'Short name of the study plan' })
-  shortName: string;
-  @Field(() => Int, { description: 'Level of the study plan' })
-  level: number;
-  @Field(() => String, { description: 'Description of the study plan' })
-  description: string;
-  @Field(() => String, { description: 'School ID of the study plan' })
-  schoolId: string;
+    id: string;
+    degree: Degree;
+    degreeId: string;
+    school: School;
+    name: string;
+    shortName: string;
+    level: number;
+    description: string;
+    schoolId: string;
 
-  @Field(() => GradeMetric, {
-    description: 'Grade metric of the study plan',
-    nullable: true,
-  })
-  gradeMetric: GradeMetric;
-  @Field(() => String, {
-    description: 'Grade metric ID of the study plan',
-    nullable: true,
-  })
-  gradeMetricId: string;
-  @Field(() => Float, { nullable: true })
-  monthlyTuitionAmount?: Prisma.Decimal | null;
+    gradeMetric: GradeMetric;
+    gradeMetricId: string;
+    monthlyTuitionAmount?: Prisma.Decimal | null;
 
-  @Field(() => [Int])
-  tuitionMonths: number[];
+    tuitionMonths: number[];
 
-  @Field(() => [StudyPlanEnrollmentCost], { nullable: true })
-  enrollmentCosts?: StudyPlanEnrollmentCost[];
+    enrollmentCosts?: StudyPlanEnrollmentCost[];
 
-  @Field(() => Date, { description: 'Created at of the study plan' })
-  createdAt: Date;
-  @Field(() => Date, { description: 'Updated at of the study plan' })
-  updatedAt: Date;
+    createdAt: Date;
+    updatedAt: Date;
 }

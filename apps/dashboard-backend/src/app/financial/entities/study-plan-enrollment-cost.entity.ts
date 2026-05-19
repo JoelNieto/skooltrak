@@ -1,28 +1,18 @@
 import { Prisma } from '@generated/prisma';
-import { Field, Float, Int, ObjectType } from '@nestjs/graphql';
-
-@ObjectType()
 export class StudyPlanEnrollmentCost
   implements Prisma.StudyPlanEnrollmentCostGetPayload<{ include: undefined }>
 {
-  @Field(() => String)
-  id: string;
+    id: string;
 
-  @Field(() => String)
-  studyPlanId: string;
+    studyPlanId: string;
 
-  @Field(() => String)
-  name: string;
+    name: string;
 
-  @Field(() => Float)
-  amount: Prisma.Decimal;
+    amount: Prisma.Decimal;
 
-  @Field(() => Int)
-  order: number;
+    order: number;
 
-  @Field(() => Date)
-  createdAt: Date;
+    createdAt: Date;
 
-  @Field(() => Date)
-  updatedAt: Date;
+    updatedAt: Date;
 }

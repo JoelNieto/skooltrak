@@ -1,32 +1,23 @@
 import { $Enums, Prisma } from '@generated/prisma';
-import { Field, ObjectType } from '@nestjs/graphql';
 import { QuizQuestionOption } from './quiz-question-option.entity';
 
-@ObjectType()
 export class QuizQuestion
   implements
     Prisma.QuizQuestionGetPayload<{
       include: { options: true };
     }>
 {
-  @Field(() => String, { description: 'ID' })
-  id: string;
+    id: string;
 
-  @Field(() => String, { description: 'Question' })
-  question: string;
+    question: string;
 
-  @Field(() => String, { description: 'Quiz ID' })
-  quizId: string;
+    quizId: string;
 
-  @Field(() => Number, { description: 'Value' })
-  value: Prisma.Decimal;
+    value: Prisma.Decimal;
 
-  @Field(() => String, { description: 'Type' })
-  type: $Enums.QuizQuestionType;
+    type: $Enums.QuizQuestionType;
 
-  @Field(() => Number, { description: 'Time Limit', defaultValue: 0 })
-  timeLimit: number;
+    timeLimit: number;
 
-  @Field(() => [QuizQuestionOption], { description: 'Options' })
-  options: QuizQuestionOption[];
+    options: QuizQuestionOption[];
 }

@@ -1,40 +1,25 @@
 import { Prisma } from '@generated/prisma';
 import { $Enums } from '@generated/prisma';
-import { Field, Float, ObjectType, registerEnumType } from '@nestjs/graphql';
 import { StoreOrderItem } from './store-order-item.entity';
 
-registerEnumType($Enums.StoreOrderStatus, { name: 'StoreOrderStatus' });
-registerEnumType($Enums.StorePaymentStatus, { name: 'StorePaymentStatus' });
-
-@ObjectType()
 export class StoreOrder {
-  @Field(() => String)
-  id: string;
+    id: string;
 
-  @Field(() => String)
-  schoolId: string;
+    schoolId: string;
 
-  @Field(() => String)
-  userId: string;
+    userId: string;
 
-  @Field(() => Float)
-  total: Prisma.Decimal;
+    total: Prisma.Decimal;
 
-  @Field(() => $Enums.StoreOrderStatus)
-  status: $Enums.StoreOrderStatus;
+    status: $Enums.StoreOrderStatus;
 
-  @Field(() => $Enums.StorePaymentStatus)
-  paymentStatus: $Enums.StorePaymentStatus;
+    paymentStatus: $Enums.StorePaymentStatus;
 
-  @Field(() => String, { nullable: true })
-  notes: string | null;
+    notes: string | null;
 
-  @Field(() => Date)
-  createdAt: Date;
+    createdAt: Date;
 
-  @Field(() => Date)
-  updatedAt: Date;
+    updatedAt: Date;
 
-  @Field(() => [StoreOrderItem])
-  items: StoreOrderItem[];
+    items: StoreOrderItem[];
 }

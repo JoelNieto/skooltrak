@@ -1,8 +1,6 @@
-import { Field, InputType, PartialType } from '@nestjs/graphql';
+import { PartialType } from '@nestjs/swagger';
 import { CreateRoleInput } from './create-role.input';
 
-@InputType()
 export class UpdateRoleInput extends PartialType(CreateRoleInput) {
-  @Field(() => String)
-  id: string;
+    id: string;
 }

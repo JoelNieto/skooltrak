@@ -1,62 +1,38 @@
-import { Field, ObjectType } from '@nestjs/graphql';
 import { Grade } from '../../grades/entities/grade.entity';
 import { School } from '../../schools/entities/school.entity';
 import { StudyPlan } from '../../study-plans/entities/study-plan.entity';
 import { Subject } from '../../subjects/entities/subject.entity';
 import { Teacher } from '../../teachers/entities/teacher.entity';
-@ObjectType()
 export class Course {
-  @Field(() => String, { description: 'ID of the course (auto-generated)' })
-  id: string;
+    id: string;
 
-  @Field(() => School, { description: 'School of the course' })
-  school: School;
+    school: School;
 
-  @Field(() => Subject, { description: 'Subject of the course' })
-  subject: Subject;
+    subject: Subject;
 
-  @Field(() => StudyPlan, { description: 'Study plan of the course' })
-  studyPlan: StudyPlan;
+    studyPlan: StudyPlan;
 
-  @Field(() => String, { description: 'Name of the course' })
-  name: string;
+    name: string;
 
-  @Field(() => String, { description: 'Code of the course' })
-  code: string;
+    code: string;
 
-  @Field(() => String, { description: 'Short name of the course' })
-  shortName: string;
+    shortName: string;
 
-  @Field(() => String, { description: 'Organization ID of the course' })
-  organizationId: string;
+    organizationId: string;
 
-  @Field(() => String, { description: 'School ID of the course' })
-  schoolId: string;
+    schoolId: string;
 
-  @Field(() => String, { description: 'Subject ID of the course' })
-  subjectId: string;
+    subjectId: string;
 
-  @Field(() => String, { description: 'Study plan ID of the course' })
-  studyPlanId: string;
+    studyPlanId: string;
 
-  @Field(() => [Grade], { description: 'Grades of the course' })
-  grades: Grade[];
+    grades: Grade[];
 
-  @Field(() => String, {
-    description: 'Teacher ID of the course',
-    nullable: true,
-  })
-  teacherId: string;
+    teacherId: string;
 
-  @Field(() => Teacher, {
-    description: 'Teacher of the course',
-    nullable: true,
-  })
-  teacher: Teacher;
+    teacher: Teacher;
 
-  @Field(() => Date, { description: 'Created at' })
-  createdAt: Date;
+    createdAt: Date;
 
-  @Field(() => Date, { description: 'Updated at' })
-  updatedAt: Date;
+    updatedAt: Date;
 }

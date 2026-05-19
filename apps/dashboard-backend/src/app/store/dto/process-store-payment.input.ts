@@ -1,16 +1,12 @@
-import { Field, InputType } from '@nestjs/graphql';
 import { IsBoolean, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
-@InputType()
 export class ProcessStorePaymentInput {
-  @Field(() => String)
-  @IsString()
+    @IsString()
   @IsNotEmpty()
   orderId: string;
 
   /** Simulate failed payment when false (default: success). */
-  @Field(() => Boolean, { nullable: true })
-  @IsOptional()
+    @IsOptional()
   @IsBoolean()
   simulateSuccess?: boolean;
 }

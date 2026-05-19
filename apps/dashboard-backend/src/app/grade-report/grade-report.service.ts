@@ -1,5 +1,5 @@
 import { ForbiddenException, Inject, Injectable, NotFoundException, Scope } from '@nestjs/common';
-import { CONTEXT } from '@nestjs/graphql';
+import { REQUEST } from '@nestjs/core';
 import type { Request } from 'express';
 import { GradesService } from '../grades/grades.service';
 import { PrismaService } from '../prisma.service';
@@ -20,11 +20,11 @@ export class GradeReportService {
     private readonly prisma: PrismaService,
     private readonly gradesService: GradesService,
     private readonly schoolsService: SchoolsService,
-    @Inject(CONTEXT) private readonly context: { req: Request },
+    @Inject(REQUEST) private readonly request: Request,
   ) {}
 
   async getGradeReport(studentId: string, periodId: string): Promise<GradeReport> {
-    const { req } = this.context;
+    const req = this.request;
     const { userId, role } = req.user as { userId: string; role: string };
 
     const student = await this.prisma.student.findUnique({

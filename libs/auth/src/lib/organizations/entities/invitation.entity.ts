@@ -1,46 +1,29 @@
-import { Field, ObjectType } from '@nestjs/graphql';
-
-@ObjectType()
 export class Invitation {
-  @Field(() => String)
-  id: string;
+    id: string;
 
-  @Field(() => String)
-  email: string;
+    email: string;
 
-  @Field(() => String)
-  inviterId: string;
+    inviterId: string;
 
-  @Field(() => String)
-  organizationId: string;
+    organizationId: string;
 
-  @Field(() => String)
-  role: string;
+    role: string;
 
-  @Field(() => String)
-  status: string;
+    status: string;
 
-  @Field(() => Date)
-  expiresAt: Date;
+    expiresAt: Date;
 
-  @Field(() => Date)
-  createdAt: Date;
+    createdAt: Date;
 }
 
-@ObjectType()
 export class Member {
-  @Field(() => String)
-  id: string;
+    id: string;
 
-  @Field(() => String)
-  organizationId: string;
+    organizationId: string;
 
-  @Field(() => String)
-  userId: string;
+    userId: string;
 
-  @Field(() => String)
-  role: string;
+    role: string;
 
-  @Field(() => Date)
-  createdAt: Date;
+    createdAt: Date;
 }

@@ -1,8 +1,6 @@
-import { Field, InputType, PartialType } from '@nestjs/graphql';
+import { PartialType } from '@nestjs/swagger';
 import { CreateSubjectInput } from './create-subject.input';
 
-@InputType()
 export class UpdateSubjectInput extends PartialType(CreateSubjectInput) {
-  @Field(() => String)
-  id: string;
+    id: string;
 }

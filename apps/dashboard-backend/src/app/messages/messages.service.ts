@@ -1,5 +1,5 @@
 import { Inject, Injectable, Scope } from '@nestjs/common';
-import { CONTEXT } from '@nestjs/graphql';
+import { REQUEST } from '@nestjs/core';
 import { Request } from 'express';
 import { FetchDataInput } from '../fetch-data.input';
 import { PrismaService } from '../prisma.service';
@@ -9,10 +9,10 @@ import { CreateMessageInput } from './dto/create-message.input';
 export class MessagesService {
   constructor(
     private readonly prisma: PrismaService,
-    @Inject(CONTEXT) private readonly context: { req: Request },
+    @Inject(REQUEST) private readonly request: Request,
   ) {}
   create(createMessageInput: CreateMessageInput) {
-    const { req } = this.context;
+    const req = this.request;
     const { userId, organizationId } = req.user as any;
     const { recipientIds, ...rest } = createMessageInput;
 
@@ -38,7 +38,7 @@ export class MessagesService {
   }
 
   findManyBySender(query: FetchDataInput) {
-    const { req } = this.context;
+    const req = this.request;
     const { userId } = req.user as any;
     const { skip, take } = query;
 
@@ -63,7 +63,7 @@ export class MessagesService {
   }
 
   findMany(query: FetchDataInput) {
-    const { req } = this.context;
+    const req = this.request;
     const { userId } = req.user as any;
     const { skip, take } = query;
 
@@ -81,7 +81,7 @@ export class MessagesService {
   }
 
   findContacts(queryText?: string) {
-    const { req } = this.context;
+    const req = this.request;
     const { organizationId } = req.user as any;
 
     return this.prisma.user.findMany({
@@ -102,7 +102,7 @@ export class MessagesService {
   }
 
   findCount() {
-    const { req } = this.context;
+    const req = this.request;
     const { userId } = req.user as any;
     return this.prisma.messageRecipient.count({
       where: { userId, deletedAt: null },
@@ -110,7 +110,7 @@ export class MessagesService {
   }
 
   findSentCount() {
-    const { req } = this.context;
+    const req = this.request;
     const { userId } = req.user as any;
     return this.prisma.message.count({
       where: { senderId: userId, deletedAt: null, parentMessageId: null },
@@ -118,7 +118,7 @@ export class MessagesService {
   }
 
   findOne(id: string) {
-    const { req } = this.context;
+    const req = this.request;
     const { userId } = req.user as any;
     return this.prisma.message.findUnique({
       where: {
@@ -167,7 +167,7 @@ export class MessagesService {
   }
 
   remove(id: string) {
-    const { req } = this.context;
+    const req = this.request;
     const { userId } = req.user as any;
 
     return this.prisma.message.update({
@@ -177,7 +177,7 @@ export class MessagesService {
   }
 
   removeRecipient(id: string) {
-    const { req } = this.context;
+    const req = this.request;
     const { userId } = req.user as any;
 
     return this.prisma.messageRecipient.update({
@@ -187,7 +187,7 @@ export class MessagesService {
   }
 
   async markAsRead(messageId: string) {
-    const { req } = this.context;
+    const req = this.request;
     const { userId } = req.user as any;
 
     // Find the recipient record for this user and message
@@ -210,7 +210,7 @@ export class MessagesService {
   }
 
   findUnreadCount() {
-    const { req } = this.context;
+    const req = this.request;
     const { userId } = req.user as any;
     return this.prisma.messageRecipient.count({
       where: { userId, deletedAt: null, readAt: null },

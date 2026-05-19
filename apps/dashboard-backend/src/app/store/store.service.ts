@@ -1,7 +1,7 @@
 import { $Enums, Prisma } from '@generated/prisma';
 import { ForbiddenException, Injectable, NotFoundException, Scope } from '@nestjs/common';
+import { REQUEST } from '@nestjs/core';
 import { Inject } from '@nestjs/common';
-import { CONTEXT } from '@nestjs/graphql';
 import { Request } from 'express';
 import { PrismaService } from '../prisma.service';
 import { AddToCartInput } from './dto/add-to-cart.input';
@@ -42,11 +42,11 @@ const orderInclude = {
 export class StoreService {
   constructor(
     private readonly prisma: PrismaService,
-    @Inject(CONTEXT) private readonly context: { req: Request },
+    @Inject(REQUEST) private readonly request: Request,
   ) {}
 
   private get ctx() {
-    return this.context.req.user as {
+    return this.request.user as {
       organizationId: string | null;
       userId: string;
       permissions?: string[];

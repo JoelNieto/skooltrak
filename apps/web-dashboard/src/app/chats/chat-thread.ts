@@ -13,10 +13,9 @@ import {
 import { rxResource } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { readAccessTokenFromStorage } from '#/client-auth';
 import { map } from 'rxjs';
-import { io, Socket } from 'socket.io-client';
 import Auth from '../auth/auth';
+import ChatSocketService, { ChatMessageReceivedPayload } from './chat-socket.service';
 
 /** Aligns with dashboard REST + Socket.IO chat API. */
 type ChatParticipantUser = {
@@ -176,6 +175,7 @@ export default class ChatThread {
   private http = inject(HttpClient);
   #auth = inject(Auth);
   #toast = inject(Toast);
+  #chatSocket = inject(ChatSocketService);
 
   messageContent = signal('');
   sending = signal(false);
@@ -219,27 +219,21 @@ export default class ChatThread {
       const chatId = this.id();
       if (!chatId) return;
 
-      const socket: Socket = io(typeof location !== 'undefined' ? `${location.protocol}//${location.host}` : '', {
-        path: '/socket.io',
-        transports: ['websocket', 'polling'],
-        extraHeaders: readAccessTokenFromStorage()
-          ? { Authorization: `Bearer ${readAccessTokenFromStorage()}` }
-          : {},
-      });
+      this.#chatSocket.joinChat(chatId);
 
-      const handler = (payload: { chatId: string; message: ChatMessageDto }) => {
+      const handler = (payload: ChatMessageReceivedPayload) => {
         if (payload.chatId !== chatId || !payload.message) return;
         this.messages.update((prev) => {
           if (prev.some((m) => m.id === payload.message.id)) return prev;
-          return [...prev, payload.message];
+          return [...prev, payload.message as ChatMessageDto];
         });
       };
 
-      socket.on('messageReceived', handler);
+      const unsubscribe = this.#chatSocket.onMessageReceived(handler);
 
       onCleanup(() => {
-        socket.off('messageReceived', handler);
-        socket.disconnect();
+        unsubscribe();
+        this.#chatSocket.leaveChat(chatId);
       });
     });
   }

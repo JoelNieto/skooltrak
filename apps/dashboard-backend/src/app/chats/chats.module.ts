@@ -9,6 +9,7 @@ import { ChatsService } from './chats.service';
 import { ChatsSubscriptionResolver } from './chats-subscription.resolver';
 import { ChatPubSub } from './chat-pubsub';
 import { ChatSocketGateway } from './chat-socket.gateway';
+import { ChatWsAuthService } from './chat-ws-auth.service';
 
 @Module({
   controllers: [ChatsController],
@@ -20,6 +21,7 @@ import { ChatSocketGateway } from './chat-socket.gateway';
       ? [ChatsResolver, ChatsSubscriptionResolver]
       : []),
     ChatSocketGateway,
+    ChatWsAuthService,
     ChatPubSub,
     ChatRetentionService,
   ],

@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { EmptyState, PageHeader, StatCard } from '@/ui';
+import { EmptyState, PageHeader, StatCard } from '#/ui';
 
 @Component({
   selector: 'app-student-attendance',

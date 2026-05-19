@@ -1,4 +1,4 @@
-import { Loader, Toast } from '@/ui';
+import { Loader, Toast } from '#/ui';
 import { Component, inject, signal } from '@angular/core';
 import {
   FormControl,

@@ -1,5 +1,5 @@
-import { Toast } from '@/ui';
-import { SchoolContext } from '@/shared';
+import { Toast } from '#/ui';
+import { SchoolContext } from '#/shared';
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { CartService } from '../cart.service';

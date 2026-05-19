@@ -1,4 +1,4 @@
-import { Error, Loader } from '@/ui';
+import { Error, Loader } from '#/ui';
 import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, Pipe, PipeTransform, computed, inject, signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';

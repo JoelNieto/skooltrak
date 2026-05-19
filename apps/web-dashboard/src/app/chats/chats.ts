@@ -1,4 +1,4 @@
-import { EmptyState, Loader } from '@/ui';
+import { EmptyState, Loader } from '#/ui';
 import { HttpClient } from '@angular/common/http';
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';

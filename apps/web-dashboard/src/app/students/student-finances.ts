@@ -1,15 +1,8 @@
-import { Loader, PageHeader, StatCard } from '@/ui';
+import { Loader, PageHeader, StatCard } from '#/ui';
 import { DatePipe } from '@angular/common';
+import { httpResource } from '@angular/common/http';
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { rxResource } from '@angular/core/rxjs-interop';
 import { isValidId } from '../core/validators';
-import { Apollo } from 'apollo-angular';
-import {
-  StudentFinancesBalanceDocument,
-  StudentFinancesChargesByStudentDocument,
-  StudentFinancesPaymentsByStudentDocument,
-} from '../graphql/generated/graphql';
-import { map, of } from 'rxjs';
 import Store from '../core/store';
 
 type StudentBalanceType = {
@@ -161,53 +154,31 @@ type PaymentType = {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class StudentFinances {
-  #apollo = inject(Apollo);
   #store = inject(Store);
 
-  public balanceResource = rxResource({
-    params: () => ({
-      studentId: this.#store.currentStudentId(),
-    }),
-    stream: ({ params }) => {
-      if (!isValidId(params.studentId)) return of(null);
-      return this.#apollo
-        .query({
-          query: StudentFinancesBalanceDocument,
-          variables: { studentId: params.studentId },
-        })
-        .pipe(map((r) => r.data?.studentBalance));
-    },
+  public balanceResource = httpResource<StudentBalanceType | null>(() => {
+    const studentId = this.#store.currentStudentId();
+    if (!isValidId(studentId)) return undefined;
+    return { url: '/api/v1/financial/student-balance', params: { studentId } };
   });
 
-  public chargesResource = rxResource({
-    params: () => ({
-      studentId: this.#store.currentStudentId(),
-    }),
-    stream: ({ params }) => {
-      if (!isValidId(params.studentId)) return of([]);
-      return this.#apollo
-        .query({
-          query: StudentFinancesChargesByStudentDocument,
-          variables: { studentId: params.studentId },
-        })
-        .pipe(map((r) => r.data?.chargesByStudent ?? []));
+  public chargesResource = httpResource<ChargeType[]>(
+    () => {
+      const studentId = this.#store.currentStudentId();
+      if (!isValidId(studentId)) return undefined;
+      return { url: '/api/v1/financial/charges/by-student', params: { studentId } };
     },
-  });
+    { defaultValue: [] },
+  );
 
-  public paymentsResource = rxResource({
-    params: () => ({
-      studentId: this.#store.currentStudentId(),
-    }),
-    stream: ({ params }) => {
-      if (!isValidId(params.studentId)) return of([]);
-      return this.#apollo
-        .query({
-          query: StudentFinancesPaymentsByStudentDocument,
-          variables: { studentId: params.studentId },
-        })
-        .pipe(map((r) => r.data?.paymentsByStudent ?? []));
+  public paymentsResource = httpResource<PaymentType[]>(
+    () => {
+      const studentId = this.#store.currentStudentId();
+      if (!isValidId(studentId)) return undefined;
+      return { url: '/api/v1/financial/payments/by-student', params: { studentId } };
     },
-  });
+    { defaultValue: [] },
+  );
 
   formatCurrency(value: number): string {
     const code = this.#store.currentSchool()?.currencyCode ?? 'USD';

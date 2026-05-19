@@ -1,4 +1,4 @@
-import { Confirmation, Loader, Modal, Pagination, Paginator } from '@/ui';
+import { Confirmation, Loader, Modal, Pagination, Paginator } from '#/ui';
 import { Menu, MenuContent, MenuItem, MenuTrigger } from '@angular/aria/menu';
 import { OverlayModule } from '@angular/cdk/overlay';
 import { HttpClient } from '@angular/common/http';

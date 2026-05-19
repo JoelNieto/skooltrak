@@ -1,4 +1,5 @@
-import { Loader, Toast } from '@/ui';
+import { Loader, Toast } from '#/ui';
+import { HttpClient } from '@angular/common/http';
 import {
   afterRenderEffect,
   ChangeDetectionStrategy,
@@ -12,19 +13,27 @@ import {
 import { rxResource } from '@angular/core/rxjs-interop';
 import { form, FormField, required, submit } from '@angular/forms/signals';
 import { Router, RouterLink } from '@angular/router';
-import { Apollo } from 'apollo-angular';
 import { ImageCroppedEvent, ImageCropperComponent } from 'ngx-image-cropper';
-import { firstValueFrom, map, of } from 'rxjs';
+import { firstValueFrom, map, of, switchMap } from 'rxjs';
 import Store from '../../core/store';
 import { isValidId } from '../../core/validators';
-import {
-  AdminCreateSchoolDocument,
-  AdminCreateSchoolLogoUploadUrlDocument,
-  AdminSchoolFormDocument,
-  AdminSchoolLogoDownloadUrlDocument,
-  AdminUpdateSchoolDocument,
-  AdminUpdateSchoolLogoDocument,
-} from '../../graphql/generated/graphql';
+
+interface SchoolFromApi {
+  name: string | null;
+  shortName: string | null;
+  email: string | null;
+  phone: string | null;
+  address: string | null;
+  city: string | null;
+  state: string | null;
+  zip: string | null;
+  country: string | null;
+  website: string | null;
+  logo: string | null;
+  primaryColor?: string | null;
+  secondaryColor?: string | null;
+  tertiaryColor?: string | null;
+}
 
 interface SchoolFormData {
   name: string;
@@ -438,7 +447,7 @@ interface SchoolFormData {
 export default class SchoolForm {
   public id = input<string>();
 
-  private apollo = inject(Apollo);
+  private http = inject(HttpClient);
   private router = inject(Router);
   private toasts = inject(Toast);
   private store = inject(Store);
@@ -488,12 +497,16 @@ export default class SchoolForm {
       if (!isValidId(params.id)) {
         return of(null);
       }
-      return this.apollo
-        .watchQuery({
-          query: AdminSchoolFormDocument,
-          variables: { id: params.id },
-        })
-        .valueChanges.pipe(map((result) => result.data?.school));
+      return this.http.get<SchoolFromApi>(`/api/v1/schools/${params.id}`).pipe(
+        switchMap((school) => {
+          if (!school.logo) {
+            return of(school);
+          }
+          return this.http
+            .get<{ downloadUrl: string }>('/api/v1/schools/logo-download-url', { params: { schoolId: params.id! } })
+            .pipe(map((r) => ({ ...school, logoUrl: r.downloadUrl || undefined })));
+        }),
+      );
     },
   });
 
@@ -597,21 +610,12 @@ export default class SchoolForm {
 
     try {
       // Step 1: Get presigned upload URL
-      const uploadResult = await firstValueFrom(
-        this.apollo.mutate({
-          mutation: AdminCreateSchoolLogoUploadUrlDocument,
-          variables: {
-            input: {
-              schoolId,
-              mimeType: 'image/png',
-            },
-          },
+      const { uploadUrl, storageKey } = await firstValueFrom(
+        this.http.post<{ uploadUrl: string; storageKey: string }>('/api/v1/schools/logo-upload-url', {
+          schoolId,
+          mimeType: 'image/png',
         }),
       );
-
-      const createSchoolLogoUploadUrl = uploadResult.data?.createSchoolLogoUploadUrl;
-      if (!createSchoolLogoUploadUrl) throw new Error('Failed to get upload URL');
-      const { uploadUrl, storageKey } = createSchoolLogoUploadUrl;
 
       // Step 2: Upload to S3
       const response = await fetch(uploadUrl, {
@@ -627,15 +631,7 @@ export default class SchoolForm {
       }
 
       // Step 3: Update school with storage key
-      await firstValueFrom(
-        this.apollo.mutate({
-          mutation: AdminUpdateSchoolLogoDocument,
-          variables: {
-            id: schoolId,
-            logo: storageKey,
-          },
-        }),
-      );
+      await firstValueFrom(this.http.patch(`/api/v1/schools/${schoolId}/logo`, { logo: storageKey }));
 
       // Update form model
       this.#schoolModel.update((model) => ({ ...model, logo: storageKey }));
@@ -643,13 +639,11 @@ export default class SchoolForm {
 
       // Fetch the new download URL
       const result = await firstValueFrom(
-        this.apollo.query<{ schoolLogoDownloadUrl: { downloadUrl: string } }>({
-          query: AdminSchoolLogoDownloadUrlDocument,
-          variables: { schoolId },
-          fetchPolicy: 'network-only',
+        this.http.get<{ downloadUrl: string }>('/api/v1/schools/logo-download-url', {
+          params: { schoolId },
         }),
       );
-      this.logoDownloadUrl.set(result.data?.schoolLogoDownloadUrl?.downloadUrl ?? '');
+      this.logoDownloadUrl.set(result.downloadUrl ?? '');
 
       this.toasts.showSuccess('Logo actualizado correctamente');
     } catch (error) {
@@ -704,17 +698,7 @@ export default class SchoolForm {
 
       try {
         if (this.isEditMode()) {
-          await firstValueFrom(
-            this.apollo.mutate({
-              mutation: AdminUpdateSchoolDocument,
-              variables: {
-                updateSchoolInput: {
-                  ...formValue,
-                  id: this.id()!,
-                },
-              },
-            }),
-          );
+          await firstValueFrom(this.http.patch('/api/v1/schools', { ...formValue, id: this.id()! }));
           this.toasts.showSuccess('Colegio actualizado exitosamente');
           if (this.store.currentSchool()?.id === this.id()) {
             this.store.currentSchool.update((s) =>
@@ -724,42 +708,28 @@ export default class SchoolForm {
           this.router.navigate(['/schools', this.id()]);
         } else {
           // Create the school first
-          const createResult = await firstValueFrom(
-            this.apollo.mutate({
-              mutation: AdminCreateSchoolDocument,
-              variables: {
-                createSchoolInput: {
-                  ...formValue,
-                  logo: '', // Start with empty logo
-                },
-              },
+          const created = await firstValueFrom(
+            this.http.post<{ id: string }>('/api/v1/schools', {
+              ...formValue,
+              logo: '',
+              currentYear: new Date().getFullYear(),
+              organizationId: this.store.currentOrganizationId(),
             }),
           );
 
-          const newSchoolId = createResult.data?.createSchool?.id;
+          const newSchoolId = created.id;
           if (!newSchoolId) throw new Error('Failed to create school');
 
           // If there's a pending logo to upload, do it now
           const pendingBlob = this.tempCroppedBlob();
           if (pendingBlob) {
-            // Get presigned URL and upload
-            const uploadResult = await firstValueFrom(
-              this.apollo.mutate({
-                mutation: AdminCreateSchoolLogoUploadUrlDocument,
-                variables: {
-                  input: {
-                    schoolId: newSchoolId,
-                    mimeType: 'image/png',
-                  },
-                },
+            const { uploadUrl, storageKey } = await firstValueFrom(
+              this.http.post<{ uploadUrl: string; storageKey: string }>('/api/v1/schools/logo-upload-url', {
+                schoolId: newSchoolId,
+                mimeType: 'image/png',
               }),
             );
 
-            const createSchoolLogoUploadUrl = uploadResult.data?.createSchoolLogoUploadUrl;
-            if (!createSchoolLogoUploadUrl) throw new Error('Failed to get upload URL');
-            const { uploadUrl, storageKey } = createSchoolLogoUploadUrl;
-
-            // Upload to S3
             const response = await fetch(uploadUrl, {
               method: 'PUT',
               headers: {
@@ -769,16 +739,7 @@ export default class SchoolForm {
             });
 
             if (response.ok) {
-              // Update school with storage key
-              await firstValueFrom(
-                this.apollo.mutate({
-                  mutation: AdminUpdateSchoolLogoDocument,
-                  variables: {
-                    id: newSchoolId,
-                    logo: storageKey,
-                  },
-                }),
-              );
+              await firstValueFrom(this.http.patch(`/api/v1/schools/${newSchoolId}/logo`, { logo: storageKey }));
             }
           }
 

@@ -1,19 +1,12 @@
-import { Loader, Toast } from '@/ui';
+import { Loader, Toast } from '#/ui';
+import { httpResource, HttpClient } from '@angular/common/http';
 import { afterRenderEffect, ChangeDetectionStrategy, Component, computed, inject, input, signal } from '@angular/core';
-import { rxResource } from '@angular/core/rxjs-interop';
 import { email, form, FormField, required, submit } from '@angular/forms/signals';
 import { Router, RouterLink } from '@angular/router';
 import { Prisma } from '@generated/prisma';
-import { isValidId } from '../core/validators';
-import { Apollo } from 'apollo-angular';
-import {
-  ClassGroupsBySchoolIdDocument,
-  CreateStudentDocument,
-  StudentFormDataDocument,
-  UpdateStudentDocument,
-} from '../graphql/generated/graphql';
-import { map, of } from 'rxjs';
+import { firstValueFrom } from 'rxjs';
 import Store from '../core/store';
+import { isValidId } from '../core/validators';
 
 type StudentType = Prisma.StudentGetPayload<{
   include: { classGroup: true; user: true; parents: true };
@@ -438,7 +431,7 @@ interface StudentFormData {
 export default class StudentForm {
   public id = input<string>();
 
-  private apollo = inject(Apollo);
+  private http = inject(HttpClient);
   private store = inject(Store);
   private router = inject(Router);
   private toasts = inject(Toast);
@@ -478,40 +471,17 @@ export default class StudentForm {
     required(schemaPath.phone, { message: 'Teléfono es requerido' });
   });
 
-  public groups = rxResource({
-    params: () => ({
-      schoolId: this.store.currentSchoolId(),
-    }),
-    stream: ({ params }) => {
-      const { schoolId } = params;
-      if (!schoolId) {
-        return of([]);
-      }
-      return this.apollo
-        .watchQuery({
-          query: ClassGroupsBySchoolIdDocument,
-          variables: { schoolId },
-        })
-        .valueChanges.pipe(map((result) => result.data?.classGroupsBySchoolId ?? []));
+  public groups = httpResource<Array<{ id: string; name: string }>>(
+    () => {
+      const schoolId = this.store.currentSchoolId();
+      return schoolId ? `/api/v1/class-groups/by-school/${schoolId}` : undefined;
     },
-  });
+    { defaultValue: [] },
+  );
 
-  public studentResource = rxResource({
-    params: () => ({
-      id: this.id(),
-    }),
-    stream: ({ params }) => {
-      if (!isValidId(params.id)) {
-        return of(null);
-      }
-      return this.apollo
-        .watchQuery({
-          query: StudentFormDataDocument,
-          variables: { id: params.id },
-        })
-        .valueChanges.pipe(map((result) => result.data?.student));
-    },
-  });
+  public studentResource = httpResource<StudentType | null>(() =>
+    isValidId(this.id() ?? '') ? `/api/v1/students/${this.id()}` : undefined,
+  );
 
   constructor() {
     afterRenderEffect(() => {
@@ -555,74 +525,48 @@ export default class StudentForm {
 
     submit(this.studentForm, async () => {
       this.isSaving.set(true);
-      const formValue = this.studentForm().value();
+      try {
+        const formValue = this.studentForm().value();
 
-      // Clean up empty classGroupId and convert birthDate to proper format
-      const request = {
-        ...formValue,
-        classGroupId: formValue.classGroupId || null,
-        birthDate: formValue.birthDate ? new Date(formValue.birthDate) : null,
-      };
+        // Clean up empty classGroupId and convert birthDate to proper format
+        const request = {
+          ...formValue,
+          classGroupId: formValue.classGroupId || null,
+          birthDate: formValue.birthDate ? new Date(formValue.birthDate) : null,
+        };
 
-      if (this.isEditMode()) {
-        await new Promise<void>((resolve, reject) => {
-          this.apollo
-            .mutate({
-              mutation: UpdateStudentDocument,
-              variables: {
-                updateStudentInput: {
-                  ...request,
-                  id: this.id()!,
-                },
-              },
-            })
-            .subscribe({
-              next: () => {
-                this.isSaving.set(false);
-                this.toasts.showSuccess('Alumno actualizado exitosamente');
-                this.router.navigate(['/students', this.id()]);
-                resolve();
-              },
-              error: (error) => {
-                this.isSaving.set(false);
-                console.error('Update student error:', error);
-                const message =
-                  error?.graphQLErrors?.[0]?.message || error?.message || 'Error al actualizar el alumno';
-                this.toasts.showError(message);
-                reject(error);
-              },
-            });
-        });
-      } else {
-        await new Promise<void>((resolve, reject) => {
-          this.apollo
-            .mutate({
-              mutation: CreateStudentDocument,
-              variables: {
-                createStudentInput: {
-                  ...request,
-                  organizationId: this.store.currentOrganizationId()!,
-                  schoolId: this.store.currentSchoolId()!,
-                },
-              },
-            })
-            .subscribe({
-              next: (result) => {
-                this.isSaving.set(false);
-                this.toasts.showSuccess('Alumno creado exitosamente');
-                const id = result.data?.createStudent?.id;
-                if (id) this.router.navigate(['/students', id]);
-                resolve();
-              },
-              error: (error) => {
-                this.isSaving.set(false);
-                console.error('Create student error:', error);
-                const message = error?.graphQLErrors?.[0]?.message || error?.message || 'Error al crear el alumno';
-                this.toasts.showError(message);
-                reject(error);
-              },
-            });
-        });
+        if (this.isEditMode()) {
+          await firstValueFrom(
+            this.http.patch('/api/v1/students', {
+              ...request,
+              id: this.id()!,
+            }),
+          );
+          this.toasts.showSuccess('Alumno actualizado exitosamente');
+          this.router.navigate(['/students', this.id()]);
+        } else {
+          const created = await firstValueFrom(
+            this.http.post<{ id: string }>('/api/v1/students', {
+              ...request,
+              organizationId: this.store.currentOrganizationId()!,
+              schoolId: this.store.currentSchoolId()!,
+            }),
+          );
+          this.toasts.showSuccess('Alumno creado exitosamente');
+          const newId = created?.id;
+          if (newId) this.router.navigate(['/students', newId]);
+        }
+      } catch (error: unknown) {
+        console.error('Student save error:', error);
+        const message =
+          error && typeof error === 'object' && 'error' in error
+            ? String((error as { error?: { message?: string } }).error?.message)
+            : error instanceof Error
+              ? error.message
+              : 'Error al guardar el alumno';
+        this.toasts.showError(message || 'Error al guardar el alumno');
+      } finally {
+        this.isSaving.set(false);
       }
     });
   }

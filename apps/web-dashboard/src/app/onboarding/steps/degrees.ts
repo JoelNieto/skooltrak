@@ -1,4 +1,4 @@
-import { markGroupDirty, Toast } from '@/ui';
+import { markGroupDirty, Toast } from '#/ui';
 import { ChangeDetectionStrategy, Component, computed, inject, input, output, signal } from '@angular/core';
 import { httpResource, HttpClient } from '@angular/common/http';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';

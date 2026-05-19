@@ -1,4 +1,4 @@
-import { PageHeader, StatCard } from '@/ui';
+import { PageHeader, StatCard } from '#/ui';
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 
 @Component({

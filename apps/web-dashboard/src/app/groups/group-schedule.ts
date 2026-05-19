@@ -1,4 +1,4 @@
-import { Modal, Toast } from '@/ui';
+import { Modal, Toast } from '#/ui';
 import { Component, computed, inject, input, linkedSignal, signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { HttpClient } from '@angular/common/http';

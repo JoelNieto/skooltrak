@@ -1,4 +1,4 @@
-import { SchoolContext } from '@/shared';
+import { SchoolContext } from '#/shared';
 import { computed, inject, Injectable, signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { map, of } from 'rxjs';

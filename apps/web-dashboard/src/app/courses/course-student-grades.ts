@@ -1,4 +1,4 @@
-import { DecimalToNumber } from '@/ui';
+import { DecimalToNumber } from '#/ui';
 import { DatePipe, DecimalPipe, NgClass } from '@angular/common';
 import { afterRenderEffect, Component, computed, inject, input, signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';

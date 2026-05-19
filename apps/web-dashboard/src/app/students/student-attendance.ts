@@ -1,14 +1,8 @@
-import { Loader, PageHeader, StatCard } from '@/ui';
+import { Loader, PageHeader, StatCard } from '#/ui';
 import { DatePipe, NgClass } from '@angular/common';
+import { httpResource, HttpClient } from '@angular/common/http';
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { rxResource } from '@angular/core/rxjs-interop';
 import { isValidId } from '../core/validators';
-import { Apollo } from 'apollo-angular';
-import {
-  AttendanceRecordsByStudentIdDocument,
-  StudentAttendanceStatsDocument,
-} from '../graphql/generated/graphql';
-import { map, of } from 'rxjs';
 import Store from '../core/store';
 
 type AttendanceRecordType = {
@@ -138,38 +132,22 @@ const STATUS_COLORS: Record<string, string> = {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class StudentAttendance {
-  #apollo = inject(Apollo);
+  #http = inject(HttpClient);
   #store = inject(Store);
 
-  public statsResource = rxResource({
-    params: () => ({
-      studentId: this.#store.currentStudentId(),
-    }),
-    stream: ({ params }) => {
-      if (!isValidId(params.studentId)) return of(null);
-      return this.#apollo
-        .query({
-          query: StudentAttendanceStatsDocument,
-          variables: { studentId: params.studentId },
-        })
-        .pipe(map((r) => r.data?.studentAttendanceStats));
-    },
+  public statsResource = httpResource<AttendanceStatsType | null>(() => {
+    const studentId = this.#store.currentStudentId();
+    return isValidId(studentId) ? `/api/v1/attendance/stats/by-student/${studentId}` : undefined;
   });
 
-  public recordsResource = rxResource({
-    params: () => ({
-      studentId: this.#store.currentStudentId(),
-    }),
-    stream: ({ params }) => {
-      if (!isValidId(params.studentId)) return of([]);
-      return this.#apollo
-        .query({
-          query: AttendanceRecordsByStudentIdDocument,
-          variables: { studentId: params.studentId, take: 50 },
-        })
-        .pipe(map((r) => r.data?.attendanceRecordsByStudentId ?? []));
+  public recordsResource = httpResource<AttendanceRecordType[]>(
+    () => {
+      const studentId = this.#store.currentStudentId();
+      if (!isValidId(studentId)) return undefined;
+      return { url: `/api/v1/attendance/records/by-student/${studentId}`, params: { take: '50' } };
     },
-  });
+    { defaultValue: [] },
+  );
 
   getStatusLabel(status: string): string {
     return STATUS_LABELS[status] || status;

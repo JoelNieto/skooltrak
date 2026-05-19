@@ -1,4 +1,4 @@
-import { Confirmation } from '@/ui';
+import { Confirmation } from '#/ui';
 import { HttpClient } from '@angular/common/http';
 import { afterRenderEffect, ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';

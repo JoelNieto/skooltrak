@@ -1,4 +1,4 @@
-import { EmptyState, PageHeader, StatCard } from '@/ui';
+import { EmptyState, PageHeader, StatCard } from '#/ui';
 import { httpResource } from '@angular/common/http';
 import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';

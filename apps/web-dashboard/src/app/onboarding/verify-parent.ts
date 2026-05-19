@@ -1,4 +1,4 @@
-import { Toast } from '@/ui';
+import { Toast } from '#/ui';
 import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';

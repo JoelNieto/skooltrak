@@ -1,4 +1,4 @@
-import { Toast } from '@/ui';
+import { Toast } from '#/ui';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { isPlatformBrowser } from '@angular/common';
 import { computed, effect, inject, Injectable, linkedSignal, PLATFORM_ID, signal } from '@angular/core';

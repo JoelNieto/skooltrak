@@ -1,18 +1,16 @@
-import { Toast } from '@/ui';
+import { Toast } from '#/ui';
+import { HttpClient } from '@angular/common/http';
 import { DatePipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, computed, inject, input, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, input, signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
-import { Apollo } from 'apollo-angular';
-import { from, map, switchMap } from 'rxjs';
-import {
-  CreateAssignmentSubmissionDocument,
-  CreateSubmissionDownloadUrlDocument,
-  CreateSubmissionUploadUrlDocument,
-  DeleteAssignmentSubmissionDocument,
-  MyAssignmentSubmissionDocument,
-  MyAssignmentSubmissionQuery,
-} from '../graphql/generated/graphql';
+import { firstValueFrom } from 'rxjs';
 import AssignmentDropzone, { UploadedFile } from './assignment-dropzone';
+
+interface MySubmission {
+  id: string;
+  submittedAt: string;
+  file: { id: string; name: string; mimeType: string; size: number };
+}
 
 @Component({
   selector: 'app-assignment-submission-form',
@@ -23,8 +21,7 @@ import AssignmentDropzone, { UploadedFile } from './assignment-dropzone';
         <div class="flex items-center justify-center py-8">
           <span class="loading loading-spinner loading-md"></span>
         </div>
-      } @else if (submissionResource.hasValue()) {
-        @let submission = submissionResource.value()!;
+      } @else if (submissionResource.value(); as submission) {
         <div class="alert alert-success">
           <span class="material-symbols-outlined">check_circle</span>
           <div>
@@ -93,7 +90,7 @@ import AssignmentDropzone, { UploadedFile } from './assignment-dropzone';
 export default class AssignmentSubmissionForm {
   assignmentId = input.required<string>();
 
-  private apollo = inject(Apollo);
+  private http = inject(HttpClient);
   private toast = inject(Toast);
 
   selectedFiles = signal<UploadedFile[]>([]);
@@ -105,20 +102,11 @@ export default class AssignmentSubmissionForm {
 
   submissionResource = rxResource({
     params: () => ({ assignmentId: this.assignmentId() }),
-    stream: ({ params }) => {
-      return this.apollo
-        .watchQuery({
-          query: MyAssignmentSubmissionDocument,
-          variables: { assignmentId: params.assignmentId },
-          fetchPolicy: 'network-only',
-        })
-        .valueChanges.pipe(
-          map((res) => res.data?.myAssignmentSubmission as MyAssignmentSubmissionQuery['myAssignmentSubmission']),
-        );
-    },
+    stream: ({ params }) =>
+      this.http.get<MySubmission | null>('/api/v1/assignment-submissions/mine', {
+        params: { assignmentId: params.assignmentId },
+      }),
   });
-
-  hasSubmission = computed(() => !!this.submissionResource.value());
 
   onFilesChange(files: UploadedFile[]) {
     this.selectedFiles.set(files);
@@ -136,110 +124,74 @@ export default class AssignmentSubmissionForm {
 
     this.isUploading.set(true);
 
-    this.apollo
-      .mutate({
-        mutation: CreateSubmissionUploadUrlDocument,
-        variables: {
-          input: {
-            assignmentId: this.assignmentId(),
-            fileName: file.name,
-            mimeType,
-          },
-        },
-      })
-      .pipe(
-        switchMap((result) => {
-          const payload = result.data?.createSubmissionUploadUrl;
-          if (!payload) {
-            throw new Error('No se pudo obtener la URL de carga.');
-          }
-          return from(
-            fetch(payload.uploadUrl, {
-              method: 'PUT',
-              headers: { 'Content-Type': mimeType },
-              body: file,
-            }).then((response) => {
-              if (!response.ok) {
-                throw new Error('Error al subir el archivo.');
-              }
-              return payload;
-            }),
-          );
+    try {
+      const payload = await firstValueFrom(
+        this.http.post<{ uploadUrl: string; storageKey: string }>('/api/v1/assignment-submissions/upload-url', {
+          assignmentId: this.assignmentId(),
+          fileName: file.name,
+          mimeType,
         }),
-        switchMap((payload) =>
-          this.apollo.mutate({
-            mutation: CreateAssignmentSubmissionDocument,
-            variables: {
-              input: {
-                assignmentId: this.assignmentId(),
-                fileName: file.name,
-                mimeType,
-                fileSize: file.size,
-                storageKey: payload.storageKey,
-              },
-            },
-          }),
-        ),
-      )
-      .subscribe({
-        next: () => {
-          this.toast.showSuccess('Tarea entregada correctamente.');
-          this.selectedFiles.set([]);
-          this.submissionResource.reload();
-          this.isUploading.set(false);
-        },
-        error: (error) => {
-          console.error(error);
-          this.toast.showError(error.message || 'Error al entregar la tarea.');
-          this.isUploading.set(false);
-        },
+      );
+
+      const response = await fetch(payload.uploadUrl, {
+        method: 'PUT',
+        headers: { 'Content-Type': mimeType },
+        body: file,
       });
+      if (!response.ok) {
+        throw new Error('Error al subir el archivo.');
+      }
+
+      await firstValueFrom(
+        this.http.post('/api/v1/assignment-submissions', {
+          assignmentId: this.assignmentId(),
+          fileName: file.name,
+          mimeType,
+          fileSize: file.size,
+          storageKey: payload.storageKey,
+        }),
+      );
+
+      this.toast.showSuccess('Tarea entregada correctamente.');
+      this.selectedFiles.set([]);
+      this.submissionResource.reload();
+    } catch (error: unknown) {
+      console.error(error);
+      this.toast.showError(error instanceof Error ? error.message : 'Error al entregar la tarea.');
+    } finally {
+      this.isUploading.set(false);
+    }
   }
 
   deleteSubmission(submissionId: string) {
     this.isDeleting.set(true);
 
-    this.apollo
-      .mutate({
-        mutation: DeleteAssignmentSubmissionDocument,
-        variables: { submissionId },
+    firstValueFrom(this.http.delete(`/api/v1/assignment-submissions/${submissionId}`))
+      .then(() => {
+        this.toast.showSuccess('Entrega eliminada.');
+        this.submissionResource.reload();
       })
-      .subscribe({
-        next: () => {
-          this.toast.showSuccess('Entrega eliminada.');
-          this.submissionResource.reload();
-          this.isDeleting.set(false);
-        },
-        error: (error) => {
-          console.error(error);
-          this.toast.showError('Error al eliminar la entrega.');
-          this.isDeleting.set(false);
-        },
-      });
+      .catch((error) => {
+        console.error(error);
+        this.toast.showError('Error al eliminar la entrega.');
+      })
+      .finally(() => this.isDeleting.set(false));
   }
 
   downloadFile(fileId: string) {
     this.isDownloading.set(true);
 
-    this.apollo
-      .mutate({
-        mutation: CreateSubmissionDownloadUrlDocument,
-        variables: { fileId },
+    firstValueFrom(this.http.get<{ downloadUrl: string }>(`/api/v1/assignment-submissions/download-url/${fileId}`))
+      .then((result) => {
+        if (result.downloadUrl) {
+          window.open(result.downloadUrl, '_blank');
+        }
       })
-      .subscribe({
-        next: (result) => {
-          const url = result.data?.createSubmissionDownloadUrl?.downloadUrl;
-          if (url) {
-            window.open(url, '_blank');
-          }
-          this.isDownloading.set(false);
-        },
-        error: (error) => {
-          console.error(error);
-          this.toast.showError('Error al descargar el archivo.');
-          this.isDownloading.set(false);
-        },
-      });
+      .catch((error) => {
+        console.error(error);
+        this.toast.showError('Error al descargar el archivo.');
+      })
+      .finally(() => this.isDownloading.set(false));
   }
 
   getFileIcon(mimeType: string): string {

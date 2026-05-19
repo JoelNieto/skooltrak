@@ -1,4 +1,4 @@
-import { SchoolContext } from '@/shared';
+import { SchoolContext } from '#/shared';
 import { effect, Injectable, computed, inject, signal } from '@angular/core';
 import { Prisma } from '@generated/prisma';
 import Auth from '../auth/auth';

@@ -1,4 +1,4 @@
-import { TextEditor } from '@/ui';
+import { TextEditor } from '#/ui';
 import { Component, inject, input } from '@angular/core';
 import {
   FormArray,

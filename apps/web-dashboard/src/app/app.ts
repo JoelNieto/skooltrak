@@ -1,4 +1,4 @@
-import { Toast, ToastsContainer } from '@/ui';
+import { Toast, ToastsContainer } from '#/ui';
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { ThemeService } from './core/theme.service';

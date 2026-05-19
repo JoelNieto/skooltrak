@@ -1,4 +1,4 @@
-import { Loader, Toast } from '@/ui';
+import { Loader, Toast } from '#/ui';
 import { DatePipe } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import {
@@ -13,7 +13,7 @@ import {
 import { rxResource } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { readAccessTokenFromStorage } from '@/client-auth';
+import { readAccessTokenFromStorage } from '#/client-auth';
 import { map } from 'rxjs';
 import { io, Socket } from 'socket.io-client';
 import Auth from '../auth/auth';

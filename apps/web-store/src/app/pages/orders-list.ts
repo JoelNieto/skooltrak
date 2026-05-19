@@ -1,4 +1,4 @@
-import { SchoolContext } from '@/shared';
+import { SchoolContext } from '#/shared';
 import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';

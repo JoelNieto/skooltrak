@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { EmptyState, PageHeader } from '@/ui';
+import { EmptyState, PageHeader } from '#/ui';
 
 @Component({
   selector: 'app-student-assignment-submission',

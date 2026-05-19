@@ -1,4 +1,4 @@
-import { markGroupDirty, Toast } from '@/ui';
+import { markGroupDirty, Toast } from '#/ui';
 import { HttpClient } from '@angular/common/http';
 import { afterRenderEffect, Component, inject, input, output } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';

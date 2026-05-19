@@ -1,4 +1,4 @@
-import { SchoolContext } from '@/shared';
+import { SchoolContext } from '#/shared';
 import {
   ChangeDetectionStrategy,
   Component,

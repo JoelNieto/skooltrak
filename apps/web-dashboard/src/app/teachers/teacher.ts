@@ -1,4 +1,4 @@
-import { Loader } from '@/ui';
+import { Loader } from '#/ui';
 import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject, input } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';

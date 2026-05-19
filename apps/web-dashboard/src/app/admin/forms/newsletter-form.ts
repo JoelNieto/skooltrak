@@ -1,19 +1,19 @@
-import { TextEditor, Toast } from '@/ui';
+import { TextEditor, Toast } from '#/ui';
+import { HttpClient } from '@angular/common/http';
 import { afterRenderEffect, ChangeDetectionStrategy, Component, computed, inject, input, signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { form, FormField, required, submit } from '@angular/forms/signals';
 import { Router, RouterLink } from '@angular/router';
-import { Apollo } from 'apollo-angular';
-import { firstValueFrom, map, of } from 'rxjs';
+import { firstValueFrom, of } from 'rxjs';
 import Store from '../../core/store';
 import { isValidId } from '../../core/validators';
-import {
-  NewsletterFormCreateNewsletterDocument,
-  NewsletterFormGetNewsletterDocument,
-  NewsletterFormGetNewsletterQuery,
-  NewsletterFormUpdateNewsletterDocument,
-} from '../../graphql/generated/graphql';
+
+interface NewsletterDto {
+  title: string;
+  content?: string | null;
+  published: boolean;
+}
 
 @Component({
   selector: 'app-newsletter-form',
@@ -117,7 +117,7 @@ export default class NewsletterForm {
   public id = input<string>();
 
   private toast = inject(Toast);
-  private apollo = inject(Apollo);
+  private http = inject(HttpClient);
   private router = inject(Router);
   private store = inject(Store);
 
@@ -138,12 +138,7 @@ export default class NewsletterForm {
       if (!isValidId(params.id)) {
         return of(null);
       }
-      return this.apollo
-        .watchQuery({
-          query: NewsletterFormGetNewsletterDocument,
-          variables: { id: params.id },
-        })
-        .valueChanges.pipe(map((result) => result.data?.newsletter as NewsletterFormGetNewsletterQuery['newsletter']));
+      return this.http.get<NewsletterDto>(`/api/v1/newsletters/${params.id}`);
     },
   });
 
@@ -181,32 +176,22 @@ export default class NewsletterForm {
             return;
           }
           await firstValueFrom(
-            this.apollo.mutate({
-              mutation: NewsletterFormUpdateNewsletterDocument,
-              variables: {
-                updateNewsletterInput: {
-                  id: this.id() ?? '',
-                  title,
-                  content,
-                  published,
-                },
-              },
+            this.http.patch('/api/v1/newsletters', {
+              id: this.id() ?? '',
+              title,
+              content,
+              published,
             }),
           );
           this.toast.showSuccess('Boletín actualizado');
           this.router.navigate(['/admin/newsletters']);
         } else {
           await firstValueFrom(
-            this.apollo.mutate({
-              mutation: NewsletterFormCreateNewsletterDocument,
-              variables: {
-                createNewsletterInput: {
-                  title,
-                  content,
-                  published,
-                  schoolId: schoolId ?? '',
-                },
-              },
+            this.http.post('/api/v1/newsletters', {
+              title,
+              content,
+              published,
+              schoolId: schoolId ?? '',
             }),
           );
           this.toast.showSuccess('Boletín creado');

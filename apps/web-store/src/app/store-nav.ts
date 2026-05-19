@@ -1,4 +1,4 @@
-import { SchoolContext } from '@/shared';
+import { SchoolContext } from '#/shared';
 
 /** Base URL segments for the current school store: `['/store', slug]` or `['/store']` if no slug. */
 export function storeBaseSegments(school: SchoolContext): string[] {

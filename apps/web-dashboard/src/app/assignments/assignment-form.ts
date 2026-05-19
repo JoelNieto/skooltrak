@@ -1,18 +1,11 @@
-import { markGroupDirty, TextEditor, Toast } from '@/ui';
+import { markGroupDirty, TextEditor, Toast } from '#/ui';
+import { HttpClient } from '@angular/common/http';
 import { Component, effect, inject, input, OnInit, output, signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { FormArray, FormControl, NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Apollo } from 'apollo-angular';
 import { addDays, format, setHours, setMinutes } from 'date-fns';
-import { map, of } from 'rxjs';
+import { firstValueFrom, of } from 'rxjs';
 import Store from '../core/store';
-import {
-  ClassGroupsByCourseIdDocument,
-  ClassGroupsByCourseIdQuery,
-  CoursesBySchoolIdDocument,
-  CreateAssignmentDocument,
-  TeachersByOrganizationIdDocument,
-} from '../graphql/generated/graphql';
 
 enum AssignmentType {
   HOMEWORK = 'HOMEWORK',
@@ -102,7 +95,7 @@ export default class AssignmentForm implements OnInit {
   public data = input<{ courseId?: string }>();
   private fb = inject(NonNullableFormBuilder);
   public closeModal = output<void>();
-  private apollo = inject(Apollo);
+  private http = inject(HttpClient);
   private store = inject(Store);
   private toast = inject(Toast);
 
@@ -117,12 +110,7 @@ export default class AssignmentForm implements OnInit {
       if (!schoolId) {
         return of([]);
       }
-      return this.apollo
-        .watchQuery({
-          query: CoursesBySchoolIdDocument,
-          variables: { schoolId },
-        })
-        .valueChanges.pipe(map((result) => result.data?.coursesBySchoolId ?? []));
+      return this.http.get<{ id: string; name: string }[]>(`/api/v1/courses/by-school/${schoolId}`);
     },
   });
 
@@ -135,17 +123,7 @@ export default class AssignmentForm implements OnInit {
       if (!courseId) {
         return of([]);
       }
-      return this.apollo
-        .watchQuery({
-          query: ClassGroupsByCourseIdDocument,
-          variables: { courseId },
-        })
-        .valueChanges.pipe(
-          map(
-            (result) =>
-              (result.data?.classGroupsByCourseId as ClassGroupsByCourseIdQuery['classGroupsByCourseId']) ?? [],
-          ),
-        );
+      return this.http.get<{ id: string; name: string }[]>(`/api/v1/class-groups/by-course/${courseId}`);
     },
   });
 
@@ -158,12 +136,9 @@ export default class AssignmentForm implements OnInit {
       if (!organizationId) {
         return of([]);
       }
-      return this.apollo
-        .watchQuery({
-          query: TeachersByOrganizationIdDocument,
-          variables: { organizationId },
-        })
-        .valueChanges.pipe(map((result) => result.data?.teachersByOrganizationId ?? []));
+      return this.http.get<{ id: string; name: string }[]>(
+        `/api/v1/teachers/by-organization/${organizationId}`,
+      );
     },
   });
 
@@ -254,31 +229,25 @@ export default class AssignmentForm implements OnInit {
           }))
         : undefined;
 
-    this.apollo
-      .mutate({
-        mutation: CreateAssignmentDocument,
-        variables: {
-          createAssignmentInput: {
-            title: req.title,
-            details: req.details,
-            type: req.type,
-            date: new Date(req.date).toISOString(),
-            requireSubmission: req.requireSubmission,
-            teacherId: req.teacherId ?? '',
-            courseId: req.courseId ?? '',
-            schoolId: this.store.currentSchoolId() ?? '',
-            groupDates,
-          },
-        },
+    firstValueFrom(
+      this.http.post('/api/v1/assignments', {
+        title: req.title,
+        details: req.details,
+        type: req.type,
+        date: new Date(req.date).toISOString(),
+        requireSubmission: req.requireSubmission,
+        teacherId: req.teacherId ?? '',
+        courseId: req.courseId ?? '',
+        schoolId: this.store.currentSchoolId() ?? '',
+        groupDates,
+      }),
+    )
+      .then(() => {
+        this.toast.showSuccess('Tarea creada exitosamente');
+        this.closeModal.emit();
       })
-      .subscribe({
-        next: () => {
-          this.toast.showSuccess('Tarea creada exitosamente');
-          this.closeModal.emit();
-        },
-        error: () => {
-          this.toast.showError('Error al crear la tarea');
-        },
+      .catch(() => {
+        this.toast.showError('Error al crear la tarea');
       });
   }
 }

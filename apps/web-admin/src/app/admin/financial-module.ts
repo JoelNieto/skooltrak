@@ -1,4 +1,4 @@
-import { EmptyState, PageHeader } from '@/ui';
+import { EmptyState, PageHeader } from '#/ui';
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
 

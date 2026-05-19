@@ -1,4 +1,4 @@
-import { Confirmation, EditorViewer, Error as ErrorComponent, Loader, Toast } from '@/ui';
+import { Confirmation, EditorViewer, Error as ErrorComponent, Loader, Toast } from '#/ui';
 import { HttpClient } from '@angular/common/http';
 import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject, input } from '@angular/core';

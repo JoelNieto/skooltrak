@@ -1,4 +1,4 @@
-import { Loader } from '@/ui';
+import { Loader } from '#/ui';
 import { Tab, TabContent, TabList, TabPanel, Tabs } from '@angular/aria/tabs';
 import { DatePipe } from '@angular/common';
 import { Component, inject, input } from '@angular/core';

@@ -1,4 +1,4 @@
-import { Loader, Toast } from '@/ui';
+import { Loader, Toast } from '#/ui';
 import { HttpClient } from '@angular/common/http';
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';

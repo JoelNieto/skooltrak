@@ -1,16 +1,10 @@
-import { Toast } from '@/ui';
+import { Toast } from '#/ui';
+import { HttpClient } from '@angular/common/http';
 import { Component, inject, output } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Apollo } from 'apollo-angular';
-import { map, of } from 'rxjs';
+import { of } from 'rxjs';
 import Store from '../../core/store';
-import type { CreateChargeInput } from '../../graphql/generated/graphql';
-import {
-  CreateChargeFormCreateChargeDocument,
-  CreateChargeFormStudentsBySchoolIdDocument,
-  CreateChargeFormStudyPlansBySchoolIdDocument,
-} from '../../graphql/generated/graphql';
 
 @Component({
   selector: 'app-create-charge-form',
@@ -83,25 +77,22 @@ import {
 export default class CreateChargeForm {
   public closeModal = output<void>();
   private fb = inject(NonNullableFormBuilder);
+  private http = inject(HttpClient);
+  private toast = inject(Toast);
+  private store = inject(Store);
 
   get targetType(): 'student' | 'studyPlan' {
     const v = this.form.get('targetType')?.value as string | undefined;
     return v === 'studyPlan' ? 'studyPlan' : 'student';
   }
-  private apollo = inject(Apollo);
-  private toast = inject(Toast);
-  private store = inject(Store);
 
   public students = rxResource({
     params: () => ({ schoolId: this.store.currentSchoolId() }),
     stream: ({ params }) => {
       if (!params.schoolId) return of([]);
-      return this.apollo
-        .watchQuery({
-          query: CreateChargeFormStudentsBySchoolIdDocument,
-          variables: { schoolId: params.schoolId },
-        })
-        .valueChanges.pipe(map((r) => r.data?.studentsBySchoolId ?? []));
+      return this.http.get<{ id: string; firstName: string; fatherName: string }[]>(
+        `/api/v1/students/by-school/${params.schoolId}`,
+      );
     },
   });
 
@@ -109,12 +100,9 @@ export default class CreateChargeForm {
     params: () => ({ schoolId: this.store.currentSchoolId() }),
     stream: ({ params }) => {
       if (!params.schoolId) return of([]);
-      return this.apollo
-        .watchQuery({
-          query: CreateChargeFormStudyPlansBySchoolIdDocument,
-          variables: { schoolId: params.schoolId },
-        })
-        .valueChanges.pipe(map((r) => r.data?.studyPlansBySchoolId ?? []));
+      return this.http.get<{ id: string; name: string }[]>(`/api/v1/study-plans/by-school`, {
+        params: { schoolId: params.schoolId },
+      });
     },
   });
 
@@ -142,7 +130,7 @@ export default class CreateChargeForm {
       return;
     }
     const year = school.currentYear ?? new Date().getFullYear();
-    const input: CreateChargeInput | null =
+    const input =
       v.targetType === 'student'
         ? (() => {
             if (!v.studentId) {
@@ -175,17 +163,12 @@ export default class CreateChargeForm {
             };
           })();
     if (!input) return;
-    this.apollo
-      .mutate({
-        mutation: CreateChargeFormCreateChargeDocument,
-        variables: { input },
-      })
-      .subscribe({
-        next: () => {
-          this.toast.showSuccess('Cargo creado correctamente');
-          this.closeModal.emit();
-        },
-        error: (err) => this.toast.showError(err?.message ?? 'Error al crear'),
-      });
+    this.http.post('/api/v1/financial/charges', input).subscribe({
+      next: () => {
+        this.toast.showSuccess('Cargo creado correctamente');
+        this.closeModal.emit();
+      },
+      error: (err) => this.toast.showError(err?.message ?? 'Error al crear'),
+    });
   }
 }

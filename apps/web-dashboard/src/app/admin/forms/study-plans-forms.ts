@@ -1,18 +1,11 @@
-import { Toast } from '@/ui';
+import { Toast } from '#/ui';
+import { HttpClient } from '@angular/common/http';
 import { Component, inject, input, OnInit, output } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { FormArray, NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Prisma } from '@generated/prisma';
-import { Apollo } from 'apollo-angular';
-import { map, of, switchMap } from 'rxjs';
+import { firstValueFrom, of } from 'rxjs';
 import Store from '../../core/store';
-import {
-  StudyPlanFormCreateStudyPlanDocument,
-  StudyPlanFormDegreesBySchoolIdDocument,
-  StudyPlanFormGetGradeMetricsDocument,
-  StudyPlanFormUpdateStudyPlanDocument,
-  StudyPlanFormUpdateStudyPlanFinancialConfigDocument,
-} from '../../graphql/generated/graphql';
 
 const MONTH_LABELS: Record<number, string> = {
   1: 'Enero',
@@ -155,17 +148,11 @@ export default class StudyPlanForm implements OnInit {
 
   public closeModal = output<void>();
   private fb = inject(NonNullableFormBuilder);
-  private apollo = inject(Apollo);
+  private http = inject(HttpClient);
   private toast = inject(Toast);
   private store = inject(Store);
   public metrics = rxResource({
-    stream: () =>
-      this.apollo
-        .watchQuery({
-          query: StudyPlanFormGetGradeMetricsDocument,
-          fetchPolicy: 'cache-first',
-        })
-        .valueChanges.pipe(map((result) => result.data?.gradeMetrics ?? [])),
+    stream: () => this.http.get<{ id: string; name: string }[]>('/api/v1/grade-metrics'),
   });
   public degrees = rxResource({
     params: () => ({
@@ -175,14 +162,9 @@ export default class StudyPlanForm implements OnInit {
       if (!params.schoolId) {
         return of([]);
       }
-      return this.apollo
-        .watchQuery({
-          query: StudyPlanFormDegreesBySchoolIdDocument,
-          variables: {
-            schoolId: params.schoolId,
-          },
-        })
-        .valueChanges.pipe(map((result) => result.data?.degreesBySchoolId ?? []));
+      return this.http.get<{ id: string; name: string }[]>(`/api/v1/degrees/by-school`, {
+        params: { schoolId: params.schoolId },
+      });
     },
   });
 
@@ -269,7 +251,7 @@ export default class StudyPlanForm implements OnInit {
     }
   }
 
-  onSubmit() {
+  async onSubmit() {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       this.toast.showError('Por favor, completa todos los campos');
@@ -279,14 +261,14 @@ export default class StudyPlanForm implements OnInit {
     const plan = this.data()?.studyPlan;
     const schoolId = this.store.currentSchoolId();
 
-    const saveFinancial = (studyPlanId: string) => {
+    const saveFinancial = async (studyPlanId: string) => {
       if (
         !plan &&
         !request.monthlyTuitionAmount &&
         !request.tuitionMonths?.length &&
         (!request.enrollmentCosts?.length || request.enrollmentCosts.length === 0)
       )
-        return Promise.resolve();
+        return;
       const costs = (request.enrollmentCosts ?? []).map(
         (c: { name: string; amount: number; order: number }, i: number) => ({
           name: c.name,
@@ -294,74 +276,50 @@ export default class StudyPlanForm implements OnInit {
           order: i,
         }),
       );
-      return this.apollo
-        .mutate({
-          mutation: StudyPlanFormUpdateStudyPlanFinancialConfigDocument,
-          variables: {
-            input: {
-              studyPlanId,
-              monthlyTuitionAmount: request.monthlyTuitionAmount ?? undefined,
-              tuitionMonths: request.tuitionMonths?.length ? request.tuitionMonths : undefined,
-              enrollmentCosts: costs.length ? costs : undefined,
-            },
-          },
-        })
-        .toPromise();
+      await firstValueFrom(
+        this.http.post('/api/v1/financial/study-plan-config', {
+          studyPlanId,
+          monthlyTuitionAmount: request.monthlyTuitionAmount ?? undefined,
+          tuitionMonths: request.tuitionMonths?.length ? request.tuitionMonths : undefined,
+          enrollmentCosts: costs.length ? costs : undefined,
+        }),
+      );
     };
 
-    if (plan) {
-      this.apollo
-        .mutate({
-          mutation: StudyPlanFormUpdateStudyPlanDocument,
-          variables: {
-            updateStudyPlanInput: {
-              name: request.name,
-              shortName: request.shortName,
-              description: request.description,
-              level: request.level,
-              degreeId: request.degreeId,
-              gradeMetricId: request.gradeMetricId,
-              id: plan.id,
-            },
-          },
-        })
-        .pipe(switchMap(() => saveFinancial(plan.id)))
-        .subscribe({
-          next: () => {
-            this.toast.showSuccess('Plan de estudio actualizado exitosamente');
-            this.closeModal.emit();
-          },
-          error: (err) => this.toast.showError(err?.message ?? 'Error al actualizar'),
-        });
-    } else if (schoolId) {
-      this.apollo
-        .mutate({
-          mutation: StudyPlanFormCreateStudyPlanDocument,
-          variables: {
-            createStudyPlanInput: {
-              name: request.name,
-              shortName: request.shortName,
-              description: request.description,
-              level: request.level,
-              degreeId: request.degreeId,
-              gradeMetricId: request.gradeMetricId,
-              schoolId,
-            },
-          },
-        })
-        .pipe(
-          switchMap((res) => {
-            const id = res.data?.createStudyPlan?.id;
-            return id ? saveFinancial(id).then(() => res) : Promise.resolve(res);
+    try {
+      if (plan) {
+        await firstValueFrom(
+          this.http.patch('/api/v1/study-plans', {
+            id: plan.id,
+            name: request.name,
+            shortName: request.shortName,
+            description: request.description,
+            level: request.level,
+            degreeId: request.degreeId,
+            gradeMetricId: request.gradeMetricId,
           }),
-        )
-        .subscribe({
-          next: () => {
-            this.toast.showSuccess('Plan de estudio creado exitosamente');
-            this.closeModal.emit();
-          },
-          error: (err) => this.toast.showError(err?.message ?? 'Error al crear'),
-        });
+        );
+        await saveFinancial(plan.id);
+        this.toast.showSuccess('Plan de estudio actualizado exitosamente');
+        this.closeModal.emit();
+      } else if (schoolId) {
+        const created = await firstValueFrom(
+          this.http.post<{ id: string }>('/api/v1/study-plans', {
+            name: request.name,
+            shortName: request.shortName,
+            description: request.description,
+            level: request.level,
+            degreeId: request.degreeId,
+            gradeMetricId: request.gradeMetricId,
+            schoolId,
+          }),
+        );
+        await saveFinancial(created.id);
+        this.toast.showSuccess('Plan de estudio creado exitosamente');
+        this.closeModal.emit();
+      }
+    } catch (err: unknown) {
+      this.toast.showError(err instanceof Error ? err.message : 'Error al guardar');
     }
   }
 }

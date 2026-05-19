@@ -1,4 +1,4 @@
-import { Toast } from '@/ui';
+import { Toast } from '#/ui';
 import {
   ChangeDetectionStrategy,
   Component,

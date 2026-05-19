@@ -1,4 +1,4 @@
-import { Toast } from '@/ui';
+import { Toast } from '#/ui';
 import { ChangeDetectionStrategy, Component, inject, OnDestroy, OnInit, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';

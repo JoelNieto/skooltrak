@@ -1,4 +1,4 @@
-import { TextEditor } from '@/ui';
+import { TextEditor } from '#/ui';
 import { Component, input } from '@angular/core';
 import { FormGroup, ReactiveFormsModule } from '@angular/forms';
 

@@ -1,5 +1,5 @@
-import { Toast } from '@/ui';
-import { SchoolContext } from '@/shared';
+import { Toast } from '#/ui';
+import { SchoolContext } from '#/shared';
 import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';

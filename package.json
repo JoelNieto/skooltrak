@@ -12,6 +12,11 @@
     "openapi:orval": "orval --config orval.config.ts"
   },
   "private": true,
+  "imports": {
+    "#/ui": "./libs/ui/src/index.ts",
+    "#/client-auth": "./libs/client-auth/src/index.ts",
+    "#/shared": "./libs/shared/src/index.ts"
+  },
   "dependencies": {
     "@angular-architects/native-federation": "^21.2.3",
     "@angular-devkit/build-angular": "21.1.1",

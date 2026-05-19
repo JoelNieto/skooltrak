@@ -1,15 +1,8 @@
-import { Toast } from '@/ui';
+import { Toast } from '#/ui';
+import { httpResource, HttpClient } from '@angular/common/http';
 import { afterRenderEffect, Component, inject, input, output, signal } from '@angular/core';
-import { rxResource } from '@angular/core/rxjs-interop';
 import { form, FormField, required, submit } from '@angular/forms/signals';
 import { Prisma } from '@generated/prisma';
-import { Apollo } from 'apollo-angular';
-import {
-  GroupScheduleFormCoursesByGroupIdDocument,
-  GroupScheduleFormUpdateGroupsScheduleDocument,
-  GroupScheduleFormCreateGroupsScheduleDocument,
-} from '../graphql/generated/graphql';
-import { map } from 'rxjs';
 
 @Component({
   selector: 'app-group-schedule-form',
@@ -93,24 +86,12 @@ export default class GroupScheduleForm {
     groupId: string;
     weekday?: string;
   }>();
-  #apollo = inject(Apollo);
+  #http = inject(HttpClient);
   #toast = inject(Toast);
-  public courses = rxResource({
-    params: () => ({
-      groupId: this.data().groupId,
-    }),
-    stream: ({ params }) => {
-      return this.#apollo
-        .watchQuery({
-          query: GroupScheduleFormCoursesByGroupIdDocument,
-          variables: {
-            groupId: params.groupId,
-          },
-          fetchPolicy: 'cache-first',
-        })
-        .valueChanges.pipe(map((result) => result.data?.coursesByGroupId ?? []));
-    },
-  });
+  public courses = httpResource<Array<{ id: string; name: string }>>(
+    () => `/api/v1/courses/by-group/${this.data().groupId}`,
+    { defaultValue: [] },
+  );
 
   #schedule = signal({
     classGroupId: '',
@@ -174,42 +155,30 @@ export default class GroupScheduleForm {
     submit(this.form, async () => {
       const schedule = { ...this.form().value(), classGroupId: this.data()?.groupId };
       if (this.data()?.schedule) {
-        this.#apollo
-          .mutate({
-            mutation: GroupScheduleFormUpdateGroupsScheduleDocument,
-            variables: {
-              updateGroupsScheduleInput: {
-                ...schedule,
-                id: this.data()?.schedule?.id!,
-              },
-            },
+        this.#http
+          .patch('/api/v1/groups-schedules', {
+            ...schedule,
+            id: this.data()?.schedule?.id!,
           })
           .subscribe({
             next: () => {
               this.#toast.showSuccess('Horario actualizado exitosamente');
               this.closeModal.emit();
             },
-            error: (error) => {
-              this.#toast.showError(error.message);
+            error: (error: unknown) => {
+              this.#toast.showError(error instanceof Error ? error.message : 'Error');
             },
           });
       } else {
-        this.#apollo
-          .mutate({
-            mutation: GroupScheduleFormCreateGroupsScheduleDocument,
-            variables: {
-              createGroupsScheduleInput: this.form().value(),
-            },
-          })
-          .subscribe({
-            next: () => {
-              this.#toast.showSuccess('Horario creado exitosamente');
-              this.closeModal.emit();
-            },
-            error: (error) => {
-              this.#toast.showError(error.message);
-            },
-          });
+        this.#http.post('/api/v1/groups-schedules', schedule).subscribe({
+          next: () => {
+            this.#toast.showSuccess('Horario creado exitosamente');
+            this.closeModal.emit();
+          },
+          error: (error: unknown) => {
+            this.#toast.showError(error instanceof Error ? error.message : 'Error');
+          },
+        });
       }
     });
   }

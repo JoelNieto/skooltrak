@@ -1,5 +1,5 @@
-import { SchoolContext } from '@/shared';
-import { Toast } from '@/ui';
+import { SchoolContext } from '#/shared';
+import { Toast } from '#/ui';
 import {
   ChangeDetectionStrategy,
   Component,

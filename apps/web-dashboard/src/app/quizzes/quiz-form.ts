@@ -1,4 +1,4 @@
-import { Loader, TextEditor, Toast } from '@/ui';
+import { Loader, TextEditor, Toast } from '#/ui';
 import { Component, computed, effect, inject, input, signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import {

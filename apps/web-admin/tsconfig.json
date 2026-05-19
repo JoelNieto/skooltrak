@@ -14,9 +14,12 @@
     "paths": {
       "@/auth": ["libs/auth/src/index.ts"],
       "@/ui": ["libs/ui/src/index.ts"],
+      "#/ui": ["libs/ui/src/index.ts"],
       "@generated/prisma": ["generated/prisma/browser"],
       "@/shared": ["libs/shared/src/index.ts"],
-      "@/client-auth": ["libs/client-auth/src/index.ts"]
+      "#/shared": ["libs/shared/src/index.ts"],
+      "@/client-auth": ["libs/client-auth/src/index.ts"],
+      "#/client-auth": ["libs/client-auth/src/index.ts"]
     }
   },
   "angularCompilerOptions": {

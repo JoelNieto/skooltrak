@@ -1,4 +1,4 @@
-import { Toast } from '@/ui';
+import { Toast } from '#/ui';
 import { HttpClient } from '@angular/common/http';
 import { afterRenderEffect, Component, inject, input, output, signal } from '@angular/core';
 import { form, FormField, required, submit } from '@angular/forms/signals';

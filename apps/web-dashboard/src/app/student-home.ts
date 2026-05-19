@@ -1,4 +1,4 @@
-import { EmptyState, PageHeader, StatCard } from '@/ui';
+import { EmptyState, PageHeader, StatCard } from '#/ui';
 import { DecimalPipe, DatePipe } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { afterRenderEffect, ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';

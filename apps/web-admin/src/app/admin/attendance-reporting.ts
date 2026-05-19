@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { PageHeader, StatCard } from '@/ui';
+import { PageHeader, StatCard } from '#/ui';
 import { RouterLink } from '@angular/router';
 
 @Component({

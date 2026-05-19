@@ -1,4 +1,4 @@
-import { Loader, PageHeader } from '@/ui';
+import { Loader, PageHeader } from '#/ui';
 import { httpResource } from '@angular/common/http';
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import Store from '../core/store';

@@ -1,4 +1,4 @@
-import { Calendar } from '@/ui';
+import { Calendar } from '#/ui';
 import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject, input, signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';

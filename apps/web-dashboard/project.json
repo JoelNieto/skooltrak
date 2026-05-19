@@ -86,10 +86,16 @@
         "ssr": {
           "entry": "apps/web-dashboard/src/server.ts"
         },
+        "prerender": {
+          "discoverRoutes": false
+        },
         "outputMode": "server"
       },
       "configurations": {
         "production": {
+          "prerender": {
+            "discoverRoutes": false
+          },
           "budgets": [
             {
               "type": "initial",

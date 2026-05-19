@@ -1,4 +1,4 @@
-import { debounceSignal, Loader, Modal, Toast } from '@/ui';
+import { debounceSignal, Loader, Modal, Toast } from '#/ui';
 import { DatePipe } from '@angular/common';
 import {
   ChangeDetectionStrategy,

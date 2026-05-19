@@ -1,4 +1,4 @@
-import { Toast, ToastsContainer } from '@/ui';
+import { Toast, ToastsContainer } from '#/ui';
 import { Component, inject } from '@angular/core';
 import { RouterModule } from '@angular/router';
 

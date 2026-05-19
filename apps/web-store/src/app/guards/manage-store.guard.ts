@@ -1,6 +1,6 @@
 import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
-import { SchoolContext } from '@/shared';
+import { SchoolContext } from '#/shared';
 import { catchError, map, of } from 'rxjs';
 import { StoreApiService } from '../store-api.service';
 import { storeBaseSegments } from '../store-nav';

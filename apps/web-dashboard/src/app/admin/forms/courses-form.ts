@@ -1,7 +1,8 @@
-import { markGroupDirty, Toast } from '@/ui';
+import { markGroupDirty, Toast } from '#/ui';
 import { Combobox, ComboboxInput, ComboboxPopupContainer } from '@angular/aria/combobox';
 import { Listbox, Option } from '@angular/aria/listbox';
 import { OverlayModule } from '@angular/cdk/overlay';
+import { HttpClient } from '@angular/common/http';
 import {
   afterRenderEffect,
   Component,
@@ -16,18 +17,9 @@ import {
 import { rxResource } from '@angular/core/rxjs-interop';
 import { FormsModule, NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Prisma } from '@generated/prisma';
-import { Apollo } from 'apollo-angular';
-import { firstValueFrom, map, of } from 'rxjs';
+import { firstValueFrom, of } from 'rxjs';
+import { toFetchQueryParams } from '../../core/fetch-query-params';
 import Store from '../../core/store';
-import {
-  CoursesFormCreateCourseDocument,
-  CoursesFormCreateSubjectDocument,
-  CoursesFormGetSubjectsDocument,
-  CoursesFormGetSubjectsQuery,
-  CoursesFormGetTeachersDocument,
-  CoursesFormStudyPlansBySchoolIdDocument,
-  CoursesFormUpdateCourseDocument,
-} from '../../graphql/generated/graphql';
 @Component({
   selector: 'app-courses-form',
   imports: [
@@ -161,7 +153,7 @@ export default class CoursesForm {
   }>();
   public closeModal = output<void>();
   private toast = inject(Toast);
-  private apollo = inject(Apollo);
+  private http = inject(HttpClient);
   private store = inject(Store);
 
   // Error message signal
@@ -185,18 +177,10 @@ export default class CoursesForm {
   public combobox = viewChild<Combobox<string>>(Combobox);
 
   public subjects = rxResource({
-    stream: () => {
-      return this.apollo
-        .watchQuery({
-          query: CoursesFormGetSubjectsDocument,
-          variables: {
-            take: 100,
-            orderBy: 'name',
-          },
-          fetchPolicy: 'cache-first',
-        })
-        .valueChanges.pipe(map((result) => (result.data?.subjects as CoursesFormGetSubjectsQuery['subjects']) ?? []));
-    },
+    stream: () =>
+      this.http.get<{ id: string; name: string }[]>('/api/v1/subjects', {
+        params: toFetchQueryParams({ take: 100, orderBy: 'name' }),
+      }),
   });
 
   public studyPlans = rxResource({
@@ -207,15 +191,9 @@ export default class CoursesForm {
       if (!params.schoolId) {
         return of([]);
       }
-      return this.apollo
-        .watchQuery({
-          query: CoursesFormStudyPlansBySchoolIdDocument,
-          variables: {
-            schoolId: params.schoolId,
-          },
-          fetchPolicy: 'cache-first',
-        })
-        .valueChanges.pipe(map((result) => result.data?.studyPlansBySchoolId ?? []));
+      return this.http.get<{ id: string; name: string }[]>(`/api/v1/study-plans/by-school`, {
+        params: { schoolId: params.schoolId },
+      });
     },
   });
 
@@ -230,19 +208,14 @@ export default class CoursesForm {
 
   public teachers = rxResource({
     stream: () =>
-      this.apollo
-        .watchQuery({
-          query: CoursesFormGetTeachersDocument,
-          variables: {
-            take: 100,
-            skip: 0,
-            search: '',
-            orderBy: 'firstName',
-            orderDirection: 'asc',
-          },
-          fetchPolicy: 'cache-first',
-        })
-        .valueChanges.pipe(map((result) => result.data?.teachers ?? [])),
+      this.http.get<{ id: string; name: string }[]>('/api/v1/teachers', {
+        params: toFetchQueryParams({
+          take: 100,
+          skip: 0,
+          orderBy: 'firstName',
+          orderDirection: 'asc',
+        }),
+      }),
   });
 
   constructor() {
@@ -315,26 +288,17 @@ export default class CoursesForm {
         .substring(0, 4) || name.substring(0, 4).toUpperCase();
 
     try {
-      const result = await firstValueFrom(
-        this.apollo.mutate({
-          mutation: CoursesFormCreateSubjectDocument,
-          variables: {
-            createSubjectInput: {
-              name,
-              code,
-            },
-          },
-          refetchQueries: ['CoursesFormGetSubjects'],
+      const newSubject = await firstValueFrom(
+        this.http.post<{ id: string; name: string }>('/api/v1/subjects', {
+          name,
+          code,
         }),
       );
 
-      if (result.data?.createSubject) {
-        const newSubject = result.data?.createSubject;
-        this.selectSubject({ id: newSubject.id, name: newSubject.name });
-        this.toast.showSuccess(`Asignatura "${name}" creada exitosamente`);
-        // Reload subjects
-        this.subjects.reload();
-      }
+      this.selectSubject({ id: newSubject.id, name: newSubject.name });
+      this.toast.showSuccess(`Asignatura "${name}" creada exitosamente`);
+      // Reload subjects
+      this.subjects.reload();
     } catch (err: any) {
       this.toast.showError(err.message || 'Error al crear la asignatura');
     }
@@ -349,15 +313,10 @@ export default class CoursesForm {
     }
     const req = this.form.getRawValue();
     if (this.data()?.course) {
-      this.apollo
-        .mutate({
-          mutation: CoursesFormUpdateCourseDocument,
-          variables: {
-            updateCourseInput: {
-              ...req,
-              id: this.data()!.course!.id,
-            },
-          },
+      this.http
+        .patch('/api/v1/courses', {
+          ...req,
+          id: this.data()!.course!.id,
         })
         .subscribe({
           next: () => {
@@ -370,16 +329,11 @@ export default class CoursesForm {
         });
       return;
     }
-    this.apollo
-      .mutate({
-        mutation: CoursesFormCreateCourseDocument,
-        variables: {
-          createCourseInput: {
-            ...req,
-            organizationId: this.store.currentOrganizationId() ?? '',
-            schoolId: this.store.currentSchoolId() ?? '',
-          },
-        },
+    this.http
+      .post('/api/v1/courses', {
+        ...req,
+        organizationId: this.store.currentOrganizationId() ?? '',
+        schoolId: this.store.currentSchoolId() ?? '',
       })
       .subscribe({
         next: () => {
@@ -392,9 +346,10 @@ export default class CoursesForm {
       });
   }
 
-  private extractErrorMessage(err: any): string {
-    const message = err?.graphQLErrors?.[0]?.message ?? err?.message ?? 'Error inesperado';
-    // Strip the GraphQL prefix if present
+  private extractErrorMessage(err: unknown): string {
+    const anyErr = err as { error?: { message?: string }; graphQLErrors?: { message?: string }[]; message?: string };
+    const message =
+      anyErr?.error?.message ?? anyErr?.graphQLErrors?.[0]?.message ?? anyErr?.message ?? 'Error inesperado';
     return message.replace(/^(ConflictException:\s*)/i, '');
   }
 }

@@ -1,4 +1,4 @@
-import { Confirmation, EditorViewer, Error, Loader, Modal, Toast } from '@/ui';
+import { Confirmation, EditorViewer, Error, Loader, Modal, Toast } from '#/ui';
 import { DatePipe, DecimalPipe, NgClass } from '@angular/common';
 import { Component, computed, inject, input } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';

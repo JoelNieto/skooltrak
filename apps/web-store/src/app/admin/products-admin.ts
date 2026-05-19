@@ -1,5 +1,5 @@
-import { SchoolContext } from '@/shared';
-import { Toast } from '@/ui';
+import { SchoolContext } from '#/shared';
+import { Toast } from '#/ui';
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';

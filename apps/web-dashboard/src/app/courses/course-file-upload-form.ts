@@ -1,9 +1,8 @@
-import { markGroupDirty, Toast } from '@/ui';
+import { markGroupDirty, Toast } from '#/ui';
+import { HttpClient } from '@angular/common/http';
 import { Component, inject, input, output } from '@angular/core';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Apollo } from 'apollo-angular';
 import { from, switchMap } from 'rxjs';
-import { CreateFileDocument, CreateFileUploadUrlDocument, ShareFileDocument } from '../graphql/generated/graphql';
 
 type UploadResult = { created: boolean };
 
@@ -37,7 +36,7 @@ export default class CourseFileUploadForm {
   public data = input.required<{ courseId: string }>();
   public closeModal = output<UploadResult | undefined>();
   private fb = inject(NonNullableFormBuilder);
-  private apollo = inject(Apollo);
+  private http = inject(HttpClient);
   private toast = inject(Toast);
 
   public selectedFile: File | null = null;
@@ -66,21 +65,15 @@ export default class CourseFileUploadForm {
     const permission = this.form.getRawValue().permission;
     const mimeType = this.selectedFile.type || 'application/octet-stream';
 
-    this.apollo
-      .mutate({
-        mutation: CreateFileUploadUrlDocument,
-        variables: {
-          createFileUploadInput: {
-            courseId: this.data().courseId,
-            fileName: this.selectedFile.name,
-            mimeType,
-          },
-        },
+    this.http
+      .post<{ uploadUrl: string; storageKey: string }>('/api/v1/files/upload-url', {
+        courseId: this.data().courseId,
+        fileName: this.selectedFile.name,
+        mimeType,
       })
       .pipe(
-        switchMap((result) => {
-          const payload = result.data?.createFileUploadUrl ?? undefined;
-          if (!payload) {
+        switchMap((payload) => {
+          if (!payload?.uploadUrl || !payload?.storageKey) {
             throw new Error('No upload URL returned.');
           }
           return from(
@@ -97,29 +90,19 @@ export default class CourseFileUploadForm {
           );
         }),
         switchMap((payload) =>
-          this.apollo.mutate({
-            mutation: CreateFileDocument,
-            variables: {
-              createFileInput: {
-                name: this.selectedFile?.name ?? '',
-                mimeType,
-                size: this.selectedFile?.size ?? 0,
-                storageKey: payload.storageKey,
-              },
-            },
+          this.http.post<{ id: string }>('/api/v1/files', {
+            name: this.selectedFile?.name ?? '',
+            mimeType,
+            size: this.selectedFile?.size ?? 0,
+            storageKey: payload.storageKey,
           }),
         ),
-        switchMap((result) =>
-          this.apollo.mutate({
-            mutation: ShareFileDocument,
-            variables: {
-              shareFileInput: {
-                fileId: result.data?.createFile?.id ?? '',
-                targetType: 'COURSE',
-                targetId: this.data().courseId,
-                permission,
-              },
-            },
+        switchMap((created) =>
+          this.http.post('/api/v1/files/share', {
+            fileId: created.id,
+            targetType: 'COURSE',
+            targetId: this.data().courseId,
+            permission,
           }),
         ),
       )

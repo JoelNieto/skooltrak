@@ -1,4 +1,4 @@
-import { debounceSignal, Loader, Modal, PageHeader, Toast } from '@/ui';
+import { debounceSignal, Loader, Modal, PageHeader, Toast } from '#/ui';
 import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject, Signal, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';

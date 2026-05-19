@@ -1,4 +1,4 @@
-import { EmptyState, PageHeader, StatCard } from '@/ui';
+import { EmptyState, PageHeader, StatCard } from '#/ui';
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 
 @Component({

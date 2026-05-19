@@ -1,12 +1,9 @@
-import { Loader } from '@/ui';
+import { Loader } from '#/ui';
 import { DecimalPipe } from '@angular/common';
+import { httpResource } from '@angular/common/http';
 import { afterRenderEffect, ChangeDetectionStrategy, Component, computed, inject, input, signal } from '@angular/core';
-import { rxResource } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { Apollo } from 'apollo-angular';
-import { GradeReportDocument, PeriodsByYearForReportDocument } from '../graphql/generated/graphql';
-import { map, of } from 'rxjs';
 import Store from '../core/store';
 
 interface GradeReportPeriodInfo {
@@ -335,52 +332,37 @@ interface GradeReportData {
 })
 export default class GradeReport {
   id = input.required<string>();
-  #apollo = inject(Apollo);
   #store = inject(Store);
 
   periodId = signal<string>('');
 
-  periodsResource = rxResource({
-    params: () => ({ year: this.#store.currentSchool()?.currentYear }),
-    stream: ({ params }) => {
-      if (!params.year) return of([]);
-      return this.#apollo
-        .watchQuery({
-          query: PeriodsByYearForReportDocument,
-          variables: { year: params.year },
-        })
-        .valueChanges.pipe(map((r) => r.data?.periodsByYear ?? []));
+  periodsResource = httpResource<Array<{ id: string; name?: string; shortName?: string; startDate?: string; endDate?: string }>>(
+    () => {
+      const year = this.#store.currentSchool()?.currentYear;
+      if (!year) return undefined;
+      return { url: '/api/v1/periods/by-year', params: { year: String(year) } };
     },
-  });
+    { defaultValue: [] },
+  );
 
   private currentPeriodId = computed(() => {
     const periods = this.periodsResource.value();
     if (!periods?.length) return '';
     const today = new Date();
     const current = periods.find((p) => {
-      const start = (p as { startDate?: string }).startDate;
-      const end = (p as { endDate?: string }).endDate;
+      const start = p.startDate;
+      const end = p.endDate;
       if (!start || !end) return false;
       return new Date(start) <= today && today <= new Date(end);
     });
     return current?.id ?? periods[0]?.id ?? '';
   });
 
-  reportResource = rxResource({
-    params: () => ({
-      studentId: this.id(),
-      periodId: this.periodId(),
-    }),
-    stream: ({ params }) => {
-      const { studentId, periodId } = params;
-      if (!studentId || !periodId) return of(null);
-      return this.#apollo
-        .query({
-          query: GradeReportDocument,
-          variables: { studentId, periodId },
-        })
-        .pipe(map((r) => r.data?.gradeReport));
-    },
+  reportResource = httpResource<GradeReportData | null>(() => {
+    const studentId = this.id();
+    const periodId = this.periodId();
+    if (!studentId || !periodId) return undefined;
+    return { url: '/api/v1/grade-report', params: { studentId, periodId } };
   });
 
   constructor() {

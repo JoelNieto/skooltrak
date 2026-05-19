@@ -1,4 +1,4 @@
-import { Loader, Toast, markGroupDirty } from '@/ui';
+import { Loader, Toast, markGroupDirty } from '#/ui';
 import { NgClass } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject, input, output, signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';

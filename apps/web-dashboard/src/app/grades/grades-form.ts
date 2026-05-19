@@ -1,4 +1,4 @@
-import { markGroupDirty, TextEditor, Toast } from '@/ui';
+import { markGroupDirty, TextEditor, Toast } from '#/ui';
 import { Component, inject, input, output } from '@angular/core';
 import { httpResource, HttpClient } from '@angular/common/http';
 import {

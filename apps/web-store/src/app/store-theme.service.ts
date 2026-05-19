@@ -2,7 +2,7 @@ import { isPlatformBrowser } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable, PLATFORM_ID, signal } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
-import { readAccessTokenFromStorage } from '@/client-auth';
+import { readAccessTokenFromStorage } from '#/client-auth';
 
 export type StoreThemePreference = 'light' | 'dark' | 'system';
 

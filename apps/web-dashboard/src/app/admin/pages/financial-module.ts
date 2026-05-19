@@ -1,18 +1,13 @@
-import { Confirmation, EmptyState, Modal, PageHeader, Toast } from '@/ui';
+import { Confirmation, EmptyState, Modal, PageHeader, Toast } from '#/ui';
 import { Tab, TabContent, TabList, TabPanel, Tabs } from '@angular/aria/tabs';
 import { DatePipe, DecimalPipe, NgClass } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { Apollo } from 'apollo-angular';
-import { filter, map, of, switchMap } from 'rxjs';
+import { filter, of, switchMap } from 'rxjs';
 import Store from '../../core/store';
-import {
-  AdminChargesBySchoolDocument,
-  AdminChargesBySchoolQuery,
-  AdminRemoveChargeDocument,
-} from '../../graphql/generated/graphql';
 import CreateChargeForm from '../forms/create-charge-form';
 
 type ChargeType = {
@@ -156,7 +151,7 @@ type PaymentType = {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class FinancialModule {
-  private apollo = inject(Apollo);
+  private http = inject(HttpClient);
   private store = inject(Store);
   private modal = inject(Modal);
   private confirmation = inject(Confirmation);
@@ -176,15 +171,9 @@ export default class FinancialModule {
     }),
     stream: ({ params }) => {
       if (!params.schoolId) return of<ChargeType[]>([]);
-      return this.apollo
-        .watchQuery({
-          query: AdminChargesBySchoolDocument,
-          variables: {
-            schoolId: params.schoolId,
-            year: params.year,
-          },
-        })
-        .valueChanges.pipe(map((r) => (r.data?.chargesBySchool as AdminChargesBySchoolQuery['chargesBySchool']) ?? []));
+      return this.http.get<ChargeType[]>(`/api/v1/financial/charges/by-school`, {
+        params: { schoolId: params.schoolId, year: String(params.year) },
+      });
     },
   });
 
@@ -209,12 +198,7 @@ export default class FinancialModule {
       .confirm({ title: 'Eliminar cargo', message: '¿Estás seguro de eliminar este cargo?' })
       .pipe(
         filter(Boolean),
-        switchMap(() =>
-          this.apollo.mutate({
-            mutation: AdminRemoveChargeDocument,
-            variables: { id },
-          }),
-        ),
+        switchMap(() => this.http.delete(`/api/v1/financial/charges/${id}`)),
       )
       .subscribe({
         next: () => {

@@ -1,13 +1,7 @@
-import { markGroupDirty, Toast } from '@/ui';
+import { markGroupDirty, Toast } from '#/ui';
+import { httpResource, HttpClient } from '@angular/common/http';
 import { ChangeDetectionStrategy, Component, computed, inject, output, signal } from '@angular/core';
-import { rxResource } from '@angular/core/rxjs-interop';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Apollo } from 'apollo-angular';
-import {
-  OnboardingStepsSchoolBasicsGetSchoolsDocument,
-  OnboardingStepsUpdateSchoolDocument,
-} from '../../graphql/generated/graphql';
-import { map } from 'rxjs';
 import Store from '../../core/store';
 
 @Component({
@@ -76,7 +70,7 @@ import Store from '../../core/store';
 })
 export default class SchoolBasicsStep {
   private fb = inject(NonNullableFormBuilder);
-  private apollo = inject(Apollo);
+  private http = inject(HttpClient);
   private toasts = inject(Toast);
   private store = inject(Store);
 
@@ -87,15 +81,7 @@ export default class SchoolBasicsStep {
   public years = Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - 2 + i);
 
   // Fetch schools to get the first one if not in store
-  public schools = rxResource({
-    stream: () =>
-      this.apollo
-        .watchQuery({
-          query: OnboardingStepsSchoolBasicsGetSchoolsDocument,
-          fetchPolicy: 'network-only',
-        })
-        .valueChanges.pipe(map((result) => result.data?.schools ?? [])),
-  });
+  public schools = httpResource<Array<{ id: string }>>(() => '/api/v1/schools', { defaultValue: [] });
 
   // Get the school ID from store or first school from API
   public schoolId = computed(() => {
@@ -127,15 +113,10 @@ export default class SchoolBasicsStep {
 
     const { currentYear } = this.form.getRawValue();
 
-    this.apollo
-      .mutate({
-        mutation: OnboardingStepsUpdateSchoolDocument,
-        variables: {
-          updateSchoolInput: {
-            id: schoolId,
-            currentYear,
-          },
-        },
+    this.http
+      .patch('/api/v1/schools', {
+        id: schoolId,
+        currentYear,
       })
       .subscribe({
         next: () => {

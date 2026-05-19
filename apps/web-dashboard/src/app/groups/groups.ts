@@ -1,4 +1,4 @@
-import { EmptyState, Pagination, Paginator } from '@/ui';
+import { EmptyState, Pagination, Paginator } from '#/ui';
 import { DatePipe } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';

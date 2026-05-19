@@ -1,4 +1,4 @@
-import { debounceSignal, EmptyState, Loader, Pagination, Paginator } from '@/ui';
+import { debounceSignal, EmptyState, Loader, Pagination, Paginator } from '#/ui';
 import { httpResource } from '@angular/common/http';
 import { ChangeDetectionStrategy, Component, computed, effect, inject, Signal, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';

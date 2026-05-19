@@ -1,4 +1,4 @@
-import { Toast } from '@/ui';
+import { Toast } from '#/ui';
 import { Component, inject, input, model, OnInit, output } from '@angular/core';
 import { httpResource } from '@angular/common/http';
 import {

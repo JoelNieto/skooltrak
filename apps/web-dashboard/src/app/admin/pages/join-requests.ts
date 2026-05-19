@@ -1,4 +1,4 @@
-import { EmptyState, Loader, Toast } from '@/ui';
+import { EmptyState, Loader, Toast } from '#/ui';
 import { HttpClient } from '@angular/common/http';
 import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';

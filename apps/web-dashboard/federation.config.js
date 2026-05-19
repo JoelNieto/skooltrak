@@ -11,7 +11,7 @@ module.exports = withNativeFederation({
     ...shareAll({ singleton: true, strictVersion: true, requiredVersion: 'auto' }),
   },
 
-  sharedMappings: ['@/shared', '@/ui', '@/auth', '@/client-auth'],
+  sharedMappings: [],
 
   skip: [
     'rxjs/ajax',

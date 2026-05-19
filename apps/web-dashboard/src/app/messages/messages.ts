@@ -1,4 +1,4 @@
-import { Confirmation, EmptyState, Paginator, TimeAgoPipe, Toast } from '@/ui';
+import { Confirmation, EmptyState, Paginator, TimeAgoPipe, Toast } from '#/ui';
 import { httpResource, HttpClient } from '@angular/common/http';
 import { ChangeDetectionStrategy, Component, computed, effect, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';

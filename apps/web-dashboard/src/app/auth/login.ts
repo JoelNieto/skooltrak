@@ -1,4 +1,4 @@
-import { Toast } from '@/ui';
+import { Toast } from '#/ui';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -12,7 +12,7 @@ import {
 } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 
-import { Loader, markGroupDirty } from '@/ui';
+import { Loader, markGroupDirty } from '#/ui';
 
 import Auth from './auth';
 

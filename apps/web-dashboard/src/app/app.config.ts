@@ -1,4 +1,4 @@
-import { httpBearerInterceptor } from '@/client-auth';
+import { httpBearerInterceptor } from '#/client-auth';
 import { provideHttpClient, withFetch, withInterceptors } from '@angular/common/http';
 import { ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/core';
 import { provideClientHydration, withEventReplay } from '@angular/platform-browser';

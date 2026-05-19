@@ -1,4 +1,4 @@
-import { TextEditor, Toast } from '@/ui';
+import { TextEditor, Toast } from '#/ui';
 import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import {

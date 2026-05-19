@@ -1,4 +1,4 @@
-import { Confirmation, Error, Modal, Toast } from '@/ui';
+import { Confirmation, Error, Modal, Toast } from '#/ui';
 import { Menu, MenuContent, MenuItem, MenuTrigger } from '@angular/aria/menu';
 import { OverlayModule } from '@angular/cdk/overlay';
 import { DatePipe } from '@angular/common';

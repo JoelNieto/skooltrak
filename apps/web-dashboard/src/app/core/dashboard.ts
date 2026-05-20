@@ -1,4 +1,4 @@
-import { afterRenderEffect, ChangeDetectionStrategy, Component, ElementRef, inject, viewChild } from '@angular/core';
+import { afterRenderEffect, ChangeDetectionStrategy, Component, DestroyRef, ElementRef, inject, viewChild } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { filter } from 'rxjs';
@@ -65,6 +65,7 @@ export default class Dashboard {
   #router = inject(Router);
   #theme = inject(ThemeService);
   #auth = inject(Auth);
+  #destroyRef = inject(DestroyRef);
   public schoolTheme = inject(SchoolThemeService);
   constructor() {
     afterRenderEffect(() => {
@@ -76,7 +77,7 @@ export default class Dashboard {
     this.#router.events
       .pipe(
         filter((event) => event instanceof NavigationEnd),
-        takeUntilDestroyed(),
+        takeUntilDestroyed(this.#destroyRef),
       )
       .subscribe(() => {
         this.closeSidebar();

@@ -1,6 +1,6 @@
 import { Confirmation } from '#/ui';
 import { HttpClient } from '@angular/common/http';
-import { afterRenderEffect, ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
+import { afterRenderEffect, ChangeDetectionStrategy, Component, EnvironmentInjector, computed, inject } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { forkJoin, map, of, switchMap, timer } from 'rxjs';
@@ -465,8 +465,10 @@ export class Sidebar {
   });
   #http = inject(HttpClient);
   #confirmation = inject(Confirmation);
+  #injector = inject(EnvironmentInjector);
 
   protected schools = rxResource({
+    injector: this.#injector,
     stream: () =>
       this.#http.get<SidebarSchool[]>('/api/v1/schools').pipe(
         switchMap((schools) => {
@@ -485,6 +487,7 @@ export class Sidebar {
   });
 
   protected unreadCount = rxResource({
+    injector: this.#injector,
     stream: () =>
       timer(0, 60000).pipe(
         switchMap(() => this.#http.get<number>('/api/v1/messages/unread-count')),
@@ -492,11 +495,13 @@ export class Sidebar {
   });
 
   protected chatUnreadCount = rxResource({
+    injector: this.#injector,
     stream: () =>
       timer(0, 60000).pipe(switchMap(() => this.#http.get<number>('/api/v1/chats/unread-count'))),
   });
 
   protected storeCartCount = rxResource({
+    injector: this.#injector,
     params: () => ({ schoolId: this.store.currentSchool()?.id ?? '' }),
     stream: ({ params }) => {
       if (!params.schoolId) {

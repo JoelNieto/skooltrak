@@ -1,6 +1,5 @@
-import { injectResourceInjector } from '#/client-auth';
 import { SchoolContext } from '#/shared';
-import { computed, inject, Injectable, ResourceRef, signal } from '@angular/core';
+import { computed, EnvironmentInjector, inject, Injectable, ResourceRef, signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { map, of } from 'rxjs';
 import { StoreApiService } from './store-api.service';
@@ -14,7 +13,7 @@ export type CartLine = {
 
 @Injectable({ providedIn: 'root' })
 export class CartService {
-  readonly #resourceInjector = injectResourceInjector();
+  readonly #resourceInjector = inject(EnvironmentInjector);
   private readonly api = inject(StoreApiService);
   private readonly school = inject(SchoolContext);
 

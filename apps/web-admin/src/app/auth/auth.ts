@@ -10,9 +10,8 @@ import {
   linkedSignal,
   signal,
 } from '@angular/core';
-import { rxResource } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
-import { catchError, firstValueFrom, of, tap, throwError } from 'rxjs';
+import { firstValueFrom } from 'rxjs';
 import { authClient } from './auth-client';
 
 @Injectable({
@@ -25,8 +24,10 @@ export default class Auth {
   #toasts = inject(Toast);
   public readonly isInitialized = signal(false);
   public isSigning = signal(false);
-  public user = computed(() => this.userResource.value() as any);
-  public isUserLoading = computed(() => this.userResource.isLoading());
+  private userState = signal<any | null>(null);
+  private userLoadStatus = signal<'idle' | 'loading' | 'resolved' | 'error'>('idle');
+  public user = computed(() => this.userState());
+  public isUserLoading = computed(() => this.userLoadStatus() === 'loading');
 
   private sessionState = signal<{
     user?: any;
@@ -55,36 +56,6 @@ export default class Auth {
     return !!session?.user || !!token;
   }
 
-  public userResource = rxResource({
-    params: () => ({
-      token: this.token(),
-      session: this.sessionState(),
-    }),
-    stream: ({ params }) => {
-      const { token, session } = params;
-      if (!token && !session) {
-        return of(null);
-      }
-      return this.http.get<any>('/api/v1/auth/me').pipe(
-        tap(() => {
-          if (this.isSigning()) {
-            this.#router.navigate(['/home']);
-            this.isSigning.set(false);
-          }
-        }),
-        catchError((err: HttpErrorResponse) => {
-          const msg =
-            typeof err.error === 'object' && err.error && 'message' in err.error
-              ? String((err.error as { message?: string }).message)
-              : err.message;
-          this.#toasts.showError(msg);
-          this.isSigning.set(false);
-          return of(null);
-        }),
-      );
-    },
-  });
-
   constructor() {
     if (isPlatformBrowser(this.platformId)) {
       this.isInitialized.set(true);
@@ -100,6 +71,13 @@ export default class Auth {
           localStorage.removeItem('access_token');
         }
       }
+    });
+
+    effect(() => {
+      const session = this.sessionState();
+      const token = this.token();
+      const authed = !!session?.user || !!token;
+      void this.#loadCurrentUser(authed);
     });
   }
 
@@ -142,6 +120,37 @@ export default class Auth {
       this.#toasts.showError(msg);
       this.isSigning.set(false);
       return false;
+    }
+  }
+
+  async #loadCurrentUser(isAuthenticated = this.isAuthenticated()): Promise<void> {
+    if (!isAuthenticated) {
+      this.userState.set(null);
+      this.userLoadStatus.set('resolved');
+      return;
+    }
+
+    this.userLoadStatus.set('loading');
+
+    try {
+      const me = await firstValueFrom(this.http.get<any>('/api/v1/auth/me'));
+      this.userState.set(me ?? null);
+      this.userLoadStatus.set('resolved');
+
+      if (this.isSigning()) {
+        this.#router.navigate(['/home']);
+        this.isSigning.set(false);
+      }
+    } catch (err) {
+      const httpErr = err as HttpErrorResponse;
+      const msg =
+        typeof httpErr.error === 'object' && httpErr.error && 'message' in httpErr.error
+          ? String((httpErr.error as { message?: string }).message)
+          : httpErr.message;
+      this.#toasts.showError(msg || 'Me request failed');
+      this.isSigning.set(false);
+      this.userState.set(null);
+      this.userLoadStatus.set('error');
     }
   }
 

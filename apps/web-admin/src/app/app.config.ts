@@ -1,4 +1,4 @@
-import { httpBearerInterceptor } from '#/client-auth';
+import { httpBearerInterceptor, provideRootEnvironmentInjector } from '#/client-auth';
 import { provideHttpClient, withFetch, withInterceptors } from '@angular/common/http';
 import {
   ApplicationConfig,
@@ -16,5 +16,6 @@ export const appConfig: ApplicationConfig = {
     provideZonelessChangeDetection(),
     provideRouter(appRoutes, withViewTransitions()),
     provideHttpClient(withFetch(), withInterceptors([httpBearerInterceptor])),
+    provideRootEnvironmentInjector(),
   ],
 };

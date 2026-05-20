@@ -2,9 +2,8 @@ import { Toast } from '#/ui';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { isPlatformBrowser } from '@angular/common';
 import { computed, effect, inject, Injectable, linkedSignal, PLATFORM_ID, signal } from '@angular/core';
-import { rxResource } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
-import { catchError, firstValueFrom, of, throwError } from 'rxjs';
+import { firstValueFrom } from 'rxjs';
 import { authClient } from './auth-client';
 
 export type DecodedToken = {
@@ -43,46 +42,17 @@ export default class Auth {
     return null;
   });
 
-  public userResource = rxResource({
-    params: () => ({
-      isAuthenticated: this.isAuthenticated(),
-    }),
-    stream: ({ params }) => {
-      const { isAuthenticated } = params;
-      if (!isAuthenticated) {
-        return of(null);
-      }
-      return this.http.get<any>('/api/v1/auth/me').pipe(
-        catchError((err: HttpErrorResponse) => {
-          const msg =
-            typeof err.error === 'object' && err.error && 'message' in err.error
-              ? String((err.error as { message?: string }).message)
-              : err.message;
-          const synthetic = new Error(msg || 'Me request failed');
-          if (
-            err.status === 401 ||
-            this.#shouldClearCredentialsForMeError(synthetic)
-          ) {
-            this.#clearStoredCredentialsAfterAuthFailure();
-            this.#maybeNavigateToLoginAfterAuthFailure();
-            return of(null);
-          }
-          this.#toasts.showError(msg || 'Me request failed');
-          this.isSigning.set(false);
-          return throwError(() => synthetic);
-        }),
-      );
-    },
-  });
+  private userState = signal<any | null>(null);
+  private userLoadStatus = signal<'idle' | 'loading' | 'resolved' | 'error'>('idle');
 
-  public user = computed(() => this.userResource.value() as any);
-  public isUserLoading = computed(() => this.userResource.isLoading());
+  public user = computed(() => this.userState());
+  public isUserLoading = computed(() => this.userLoadStatus() === 'loading');
 
   public isUserReady = computed(() => {
     if (!this.isAuthenticated()) {
       return true;
     }
-    const status = this.userResource.status();
+    const status = this.userLoadStatus();
     if (status === 'error') {
       return true;
     }
@@ -104,17 +74,8 @@ export default class Auth {
     });
   }
 
-  public reloadUser(): Promise<void> {
-    this.userResource.reload();
-    return new Promise((resolve) => {
-      const checkInterval = setInterval(() => {
-        const status = this.userResource.status();
-        if (status === 'resolved' || status === 'error') {
-          clearInterval(checkInterval);
-          resolve();
-        }
-      }, 50);
-    });
+  public async reloadUser(): Promise<void> {
+    await this.#loadCurrentUser();
   }
 
   public userColor = computed(() => this.user()?.color);
@@ -163,6 +124,11 @@ export default class Auth {
         }
       }
     });
+
+    effect(() => {
+      const authed = this.isAuthenticated();
+      void this.#loadCurrentUser(authed);
+    });
   }
 
   private async initializeSession() {
@@ -204,6 +170,42 @@ export default class Auth {
       return;
     }
     void this.router.navigateByUrl('/login');
+  }
+
+  async #loadCurrentUser(isAuthenticated = this.isAuthenticated()): Promise<void> {
+    if (!isAuthenticated) {
+      this.userState.set(null);
+      this.userLoadStatus.set('resolved');
+      return;
+    }
+
+    this.userLoadStatus.set('loading');
+
+    try {
+      const me = await firstValueFrom(this.http.get<any>('/api/v1/auth/me'));
+      this.userState.set(me ?? null);
+      this.userLoadStatus.set('resolved');
+    } catch (err) {
+      const httpErr = err as HttpErrorResponse;
+      const msg =
+        typeof httpErr.error === 'object' && httpErr.error && 'message' in httpErr.error
+          ? String((httpErr.error as { message?: string }).message)
+          : httpErr.message;
+      const synthetic = new Error(msg || 'Me request failed');
+
+      if (httpErr.status === 401 || this.#shouldClearCredentialsForMeError(synthetic)) {
+        this.#clearStoredCredentialsAfterAuthFailure();
+        this.#maybeNavigateToLoginAfterAuthFailure();
+        this.userState.set(null);
+        this.userLoadStatus.set('resolved');
+        return;
+      }
+
+      this.#toasts.showError(msg || 'Me request failed');
+      this.isSigning.set(false);
+      this.userState.set(null);
+      this.userLoadStatus.set('error');
+    }
   }
 
   public async signIn(email: string, password: string): Promise<boolean> {

@@ -2,7 +2,7 @@ import { Toast } from '#/ui';
 import { SchoolContext } from '#/shared';
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { CartService } from '../cart.service';
+import { CartLine, CartService } from '../cart.service';
 import { StoreApiService } from '../store-api.service';
 
 @Component({
@@ -87,14 +87,7 @@ export default class CartPage {
     return Number(line.product?.price ?? 0) * (line.quantity ?? 0);
   }
 
-  protected setQty(
-    line: {
-      id?: string;
-      quantity?: number | null;
-      variant?: { stock?: number | null } | null;
-    },
-    q: number,
-  ) {
+  protected setQty(line: CartLine, q: number) {
     if (q < 1) return;
     if (q > (line.variant?.stock ?? 0)) {
       this.toast.showWarning('Stock insuficiente');

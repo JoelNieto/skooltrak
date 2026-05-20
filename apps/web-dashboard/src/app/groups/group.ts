@@ -146,7 +146,7 @@ export default class Group {
 
   // Check if current user can manage habits for this group
   public canManageHabits = computed(() => {
-    const user = this.auth.userResource.value();
+    const user = this.auth.user();
     const group = this.groupResource.value();
 
     if (!user || !group) return false;

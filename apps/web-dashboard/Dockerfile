@@ -1,5 +1,4 @@
-# Build stage — federation SSR remote (web-dashboard).
-# Serves the remote bundle + SSR; the web-shell host loads this app via federation.manifest.json at runtime.
+# Build stage — Angular dashboard with SSR.
 FROM oven/bun:1 AS builder
 WORKDIR /app
 
@@ -15,14 +14,14 @@ COPY . .
 
 RUN bun nx build web-dashboard --configuration=production
 
-# Runtime — Node for Angular SSR + native-federation-node (see apps/web-dashboard/src/server.ts)
+# Runtime — Node for Angular SSR
 FROM node:20-slim
 WORKDIR /app
 
 COPY --from=builder /app/dist/apps/web-dashboard/server ./server
 COPY --from=builder /app/dist/apps/web-dashboard/browser ./browser
 
-EXPOSE 4202
-ENV PORT=4202
+EXPOSE 4200
+ENV PORT=4200
 
 CMD ["node", "server/server.mjs"]

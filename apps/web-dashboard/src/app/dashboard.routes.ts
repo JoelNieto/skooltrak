@@ -8,8 +8,8 @@ import {
   studentGuard,
   teacherGuard,
 } from './auth/auth.guard';
+import { STORE_ROUTES } from './store/store.routes';
 
-/** Federated route surface for the dashboard (host shell loads this remote). */
 export const DASHBOARD_ROUTES: Route[] = [
   {
     path: 'login',
@@ -91,6 +91,20 @@ export const DASHBOARD_ROUTES: Route[] = [
         pathMatch: 'full',
       },
       { path: '', redirectTo: 'choose-path', pathMatch: 'full' },
+    ],
+  },
+  {
+    path: 'store',
+    children: [
+      {
+        path: '',
+        pathMatch: 'full',
+        loadComponent: () => import('./store/pages/school-picker-standalone'),
+      },
+      {
+        path: ':schoolSlug',
+        children: STORE_ROUTES,
+      },
     ],
   },
   {

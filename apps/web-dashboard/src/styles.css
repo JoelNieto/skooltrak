@@ -4,11 +4,7 @@
 @import 'tailwindcss';
 @import '@angular/cdk/overlay-prebuilt.css';
 
-/* Federation host + remotes + shared libs: must live here so @tailwindcss/postcss sees one graph (shell @import alone can miss this pass). */
-@source '../../web-shell/src/**/*.html';
-@source '../../web-shell/src/**/*.ts';
-@source '../../web-store/src/**/*.html';
-@source '../../web-store/src/**/*.ts';
+/* Shared libs need to be scanned so Tailwind generates utility classes used in their templates. */
 @source '../../../libs/ui/src/**/*.ts';
 @source '../../../libs/shared/src/**/*.ts';
 @source '../../../libs/client-auth/src/**/*.ts';

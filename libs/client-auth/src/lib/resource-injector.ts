@@ -16,10 +16,8 @@ type GlobalWithInjector = typeof globalThis & {
  * Captures the root `EnvironmentInjector` on `globalThis` during app bootstrap.
  *
  * Required for `rxResource` / `effect` in `providedIn: 'root'` services that may
- * be first injected from narrow injectors (e.g. route guards in native-federation
- * remotes), where the local `EnvironmentInjector` lacks providers like
- * `ChangeDetectionScheduler`. Using `globalThis` keeps a single reference even
- * when the `client-auth` library is bundled into multiple federation chunks.
+ * be first injected from narrow injectors (e.g. route guards), where the local
+ * `EnvironmentInjector` lacks providers like `ChangeDetectionScheduler`.
  */
 export function provideRootEnvironmentInjector(): EnvironmentProviders {
   return makeEnvironmentProviders([

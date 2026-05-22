@@ -7,71 +7,12 @@
   "tags": [],
   "targets": {
     "build": {
-      "executor": "@angular-architects/native-federation:build",
-      "options": {
-        "ssr": true
-      },
-      "configurations": {
-        "production": {
-          "target": "web-dashboard:esbuild:production"
-        },
-        "development": {
-          "target": "web-dashboard:esbuild:development",
-          "dev": true
-        }
-      },
-      "defaultConfiguration": "production"
-    },
-    "serve": {
-      "executor": "@angular-architects/native-federation:build",
-      "options": {
-        "target": "web-dashboard:serve-original:development",
-        "rebuildDelay": 500,
-        "dev": true,
-        "cacheExternalArtifacts": false,
-        "port": 0
-      },
-      "continuous": true
-    },
-    "extract-i18n": {
-      "executor": "@angular/build:extract-i18n",
-      "options": {
-        "buildTarget": "web-dashboard:build"
-      }
-    },
-    "lint": {
-      "executor": "@nx/eslint:lint"
-    },
-    "test": {
-      "executor": "@nx/vitest:test",
-      "outputs": [
-        "{options.reportsDirectory}"
-      ],
-      "options": {
-        "reportsDirectory": "{projectRoot}/../../coverage/apps/web-dashboard"
-      }
-    },
-    "serve-static": {
-      "continuous": true,
-      "executor": "@nx/web:file-server",
-      "options": {
-        "buildTarget": "web-dashboard:build",
-        "port": 4202,
-        "staticFilePath": "dist/apps/web-dashboard/browser",
-        "spa": true
-      }
-    },
-    "esbuild": {
       "executor": "@angular/build:application",
-      "outputs": [
-        "{options.outputPath}"
-      ],
+      "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "dist/apps/web-dashboard",
         "browser": "apps/web-dashboard/src/main.ts",
-        "polyfills": [
-          "es-module-shims"
-        ],
+        "polyfills": [],
         "tsConfig": "apps/web-dashboard/tsconfig.app.json",
         "assets": [
           {
@@ -79,23 +20,15 @@
             "input": "apps/web-dashboard/public"
           }
         ],
-        "styles": [
-          "apps/web-dashboard/src/styles.css"
-        ],
+        "styles": ["apps/web-dashboard/src/styles.css"],
         "server": "apps/web-dashboard/src/main.server.ts",
         "ssr": {
           "entry": "apps/web-dashboard/src/server.ts"
-        },
-        "prerender": {
-          "discoverRoutes": false
         },
         "outputMode": "server"
       },
       "configurations": {
         "production": {
-          "prerender": {
-            "discoverRoutes": false
-          },
           "budgets": [
             {
               "type": "initial",
@@ -118,22 +51,48 @@
       },
       "defaultConfiguration": "production"
     },
-    "serve-original": {
+    "serve": {
       "continuous": true,
       "executor": "@angular/build:dev-server",
+      "options": {
+        "port": 4200,
+        "proxyConfig": "apps/web-dashboard/proxy.conf.json"
+      },
       "configurations": {
         "production": {
-          "buildTarget": "web-dashboard:esbuild:production"
+          "buildTarget": "web-dashboard:build:production"
         },
         "development": {
-          "buildTarget": "web-dashboard:esbuild:development"
+          "buildTarget": "web-dashboard:build:development"
         }
       },
       "defaultConfiguration": "development",
-      "dependsOn": ["dashboard-backend:serve"],
+      "dependsOn": ["dashboard-backend:serve"]
+    },
+    "extract-i18n": {
+      "executor": "@angular/build:extract-i18n",
       "options": {
-        "proxyConfig": "apps/web-dashboard/proxy.conf.json",
-        "port": 4202
+        "buildTarget": "web-dashboard:build"
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint"
+    },
+    "test": {
+      "executor": "@nx/vitest:test",
+      "outputs": ["{options.reportsDirectory}"],
+      "options": {
+        "reportsDirectory": "{projectRoot}/../../coverage/apps/web-dashboard"
+      }
+    },
+    "serve-static": {
+      "continuous": true,
+      "executor": "@nx/web:file-server",
+      "options": {
+        "buildTarget": "web-dashboard:build",
+        "port": 4200,
+        "staticFilePath": "dist/apps/web-dashboard/browser",
+        "spa": true
       }
     }
   }

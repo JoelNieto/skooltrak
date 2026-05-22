@@ -1,5 +1,3 @@
-import './ssr/node-polyfills';
-
 import {
   BootstrapContext,
   bootstrapApplication,

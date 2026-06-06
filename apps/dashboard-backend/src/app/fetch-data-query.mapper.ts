@@ -5,7 +5,7 @@ export function toFetchDataInput(q: FetchDataQueryDto): FetchDataInput {
   return {
     skip: q.skip,
     take: q.take,
-    orderBy: q.orderBy ?? 'name',
+    orderBy: q.orderBy ?? 'createdAt',
     orderDirection: q.orderDirection ?? 'asc',
     schoolId: q.schoolId,
     studyPlanId: q.studyPlanId,

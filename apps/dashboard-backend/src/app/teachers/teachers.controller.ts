@@ -1,5 +1,5 @@
-import { BetterAuthGuard, Perm, PermissionsGuard, RequirePermissions } from '@/auth';
 import { FetchDataQueryDto } from '@/api-contracts';
+import { BetterAuthGuard, Perm, PermissionsGuard, RequirePermissions } from '@/auth';
 import { Body, Controller, Delete, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { toFetchDataInput } from '../fetch-data-query.mapper';
@@ -16,7 +16,7 @@ function enrichTeacher(t: {
 }) {
   const color =
     t.user && typeof t.user === 'object' && 'color' in t.user
-      ? (t.user as { color?: string | null }).color ?? null
+      ? ((t.user as { color?: string | null }).color ?? null)
       : null;
   return {
     ...t,
@@ -73,9 +73,7 @@ export class TeachersController {
   @RequirePermissions(Perm.MANAGE_TEACHERS)
   @ApiOperation({ summary: 'Update teacher' })
   update(@Body() updateTeacherInput: UpdateTeacherInput) {
-    return this.teachersService
-      .update(updateTeacherInput.id, updateTeacherInput)
-      .then((x) => enrichTeacher(x));
+    return this.teachersService.update(updateTeacherInput.id, updateTeacherInput).then((x) => enrichTeacher(x));
   }
 
   @Delete(':id')

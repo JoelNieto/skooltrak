@@ -1,15 +1,15 @@
 export class FetchDataInput {
-    skip?: number;
+  skip?: number;
 
-    take?: number;
+  take?: number;
 
-    orderBy?: string;
+  orderBy?: string;
 
-    orderDirection: 'asc' | 'desc';
+  orderDirection?: 'asc' | 'desc';
 
-    schoolId?: string;
+  schoolId?: string;
 
-    search?: string;
+  search?: string;
 
-    studyPlanId?: string;
+  studyPlanId?: string;
 }

@@ -10,10 +10,10 @@ import {
   UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
 import type { Response } from 'express';
-import { AllowAnonymous, BetterAuthGuard } from './auth.guard';
 import type { AuthenticatedRequest } from './auth.guard';
+import { AllowAnonymous, BetterAuthGuard } from './auth.guard';
 import { AuthService } from './auth.service';
 import { CreateSchoolWithOrgInput } from './dto/create-school-with-org.input';
 import { RequestJoinSchoolInput } from './dto/request-join-school.input';
@@ -28,10 +28,16 @@ export class AuthSessionController {
   @Post('login')
   @AllowAnonymous()
   @ApiOperation({ summary: 'Login (JWT + optional session cookie)' })
-  async login(
-    @Body() body: { email: string; password: string },
-    @Res({ passthrough: true }) res: Response,
-  ) {
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        email: { type: 'string', example: ' ' },
+        password: { type: 'string', example: ' ' },
+      },
+    },
+  })
+  async login(@Body() body: { email: string; password: string }, @Res({ passthrough: true }) res: Response) {
     const { accessToken } = await this.authService.loginWithEmail(body.email, body.password, (cookieHeader) => {
       res.setHeader('set-cookie', cookieHeader);
     });
@@ -41,10 +47,7 @@ export class AuthSessionController {
   @Post('reset-password')
   @AllowAnonymous()
   @ApiOperation({ summary: 'Reset password with token' })
-  async resetPassword(
-    @Body() body: { token: string; newPassword: string },
-    @Res({ passthrough: true }) res: Response,
-  ) {
+  async resetPassword(@Body() body: { token: string; newPassword: string }, @Res({ passthrough: true }) res: Response) {
     const { accessToken } = await this.authService.resetPasswordWithToken(
       body.token,
       body.newPassword,
@@ -182,10 +185,7 @@ export class AuthSessionController {
   @Patch('me/theme')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Update theme preference' })
-  async updateTheme(
-    @Req() req: AuthenticatedRequest,
-    @Body() body: { themePreference: string },
-  ) {
+  async updateTheme(@Req() req: AuthenticatedRequest, @Body() body: { themePreference: string }) {
     const sessionUserId = (req.session as { user?: { id?: string } } | undefined)?.user?.id;
     const userId = req.user?.userId ?? sessionUserId;
     if (!userId) {
@@ -201,10 +201,7 @@ export class AuthSessionController {
   @Post('create-school-with-organization')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Create organization + school for onboarding (returns new JWT)' })
-  async createSchoolWithOrganization(
-    @Req() req: AuthenticatedRequest,
-    @Body() input: CreateSchoolWithOrgInput,
-  ) {
+  async createSchoolWithOrganization(@Req() req: AuthenticatedRequest, @Body() input: CreateSchoolWithOrgInput) {
     const sessionUserId = (req.session as { user?: { id?: string } } | undefined)?.user?.id;
     const userId = req.user?.userId ?? sessionUserId;
     if (!userId) {

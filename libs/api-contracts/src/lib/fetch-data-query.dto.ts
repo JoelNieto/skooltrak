@@ -18,7 +18,7 @@ export class FetchDataQueryDto {
   @Min(1)
   take?: number;
 
-  @ApiPropertyOptional({ description: 'Order by field', default: 'name' })
+  @ApiPropertyOptional({ description: 'Order by field' })
   @IsOptional()
   @IsString()
   orderBy?: string;

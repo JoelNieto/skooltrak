@@ -219,10 +219,14 @@ export class TeachersService {
 
     // If email was provided and changed, update the user's email
     if (email && teacher.user && email !== teacher.user.email) {
-      await this.prisma.user.update({
-        where: { id: teacher.userId },
-        data: { email },
-      });
+      // teacher.user.id is guaranteed by the include above; guard to satisfy TS when it may be null
+      const userId = teacher.user.id;
+      if (userId) {
+        await this.prisma.user.update({
+          where: { id: userId },
+          data: { email },
+        });
+      }
     }
 
     return teacher;

@@ -38,8 +38,9 @@ export class TeachersController {
   @Post()
   @RequirePermissions(Perm.MANAGE_TEACHERS)
   @ApiOperation({ summary: 'Create teacher' })
-  create(@Body() createTeacherInput: CreateTeacherInput) {
-    return this.teachersService.create(createTeacherInput).then((x) => enrichTeacher(x));
+  async create(@Body() createTeacherInput: CreateTeacherInput) {
+    const x = await this.teachersService.create(createTeacherInput);
+    return enrichTeacher(x);
   }
 
   @Get()
@@ -66,14 +67,18 @@ export class TeachersController {
   @ApiOperation({ summary: 'Get teacher by id' })
   async findOne(@Param('id') id: string) {
     const t = await this.teachersService.findOne(id);
+    if (!t) {
+      return null;
+    }
     return enrichTeacher(t);
   }
 
   @Patch()
   @RequirePermissions(Perm.MANAGE_TEACHERS)
   @ApiOperation({ summary: 'Update teacher' })
-  update(@Body() updateTeacherInput: UpdateTeacherInput) {
-    return this.teachersService.update(updateTeacherInput.id, updateTeacherInput).then((x) => enrichTeacher(x));
+  async update(@Body() updateTeacherInput: UpdateTeacherInput) {
+    const x = await this.teachersService.update(updateTeacherInput.id, updateTeacherInput);
+    return enrichTeacher(x);
   }
 
   @Delete(':id')

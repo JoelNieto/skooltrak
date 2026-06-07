@@ -2,8 +2,8 @@ import { GetObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { $Enums, Prisma } from '@generated/prisma';
 import { ForbiddenException, Inject, Injectable, Scope } from '@nestjs/common';
-import { REQUEST } from '@nestjs/core';
 import { ConfigService } from '@nestjs/config';
+import { REQUEST } from '@nestjs/core';
 import { Request } from 'express';
 import { FetchDataInput } from '../fetch-data.input';
 import { PrismaService } from '../prisma.service';
@@ -41,13 +41,11 @@ export class FilesService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly config: ConfigService,
-    @Inject(REQUEST) private readonly request: Request
+    @Inject(REQUEST) private readonly request: Request,
   ) {
     const endpoint = this.getRequiredConfig('CLOUDFLARE_R2_ENDPOINT');
     const accessKeyId = this.getRequiredConfig('CLOUDFLARE_R2_ACCESS_KEY_ID');
-    const secretAccessKey = this.getRequiredConfig(
-      'CLOUDFLARE_R2_SECRET_ACCESS_KEY'
-    );
+    const secretAccessKey = this.getRequiredConfig('CLOUDFLARE_R2_SECRET_ACCESS_KEY');
     this.r2Bucket = this.getRequiredConfig('CLOUDFLARE_R2_BUCKET');
     this.s3Client = new S3Client({
       region: 'auto',
@@ -80,10 +78,7 @@ export class FilesService {
     }
 
     const accessContext = await this.getAccessContext(userId);
-    const orConditions: Prisma.FileWhereInput[] = [
-      { ownerId: userId },
-      { sharesUsers: { some: { userId } } },
-    ];
+    const orConditions: Prisma.FileWhereInput[] = [{ ownerId: userId }, { sharesUsers: { some: { userId } } }];
 
     if (accessContext.schoolIds.length > 0) {
       orConditions.push({
@@ -113,9 +108,7 @@ export class FilesService {
         organizationId,
         deletedAt: null,
         OR: orConditions,
-        name: query.search
-          ? { contains: query.search, mode: 'insensitive' }
-          : undefined,
+        name: query.search ? { contains: query.search, mode: 'insensitive' } : undefined,
       },
       skip: query.skip,
       take: query.take,
@@ -143,9 +136,7 @@ export class FilesService {
         organizationId,
         deletedAt: null,
         ownerId: userId,
-        name: query.search
-          ? { contains: query.search, mode: 'insensitive' }
-          : undefined,
+        name: query.search ? { contains: query.search, mode: 'insensitive' } : undefined,
       },
       skip: query.skip,
       take: query.take,
@@ -166,9 +157,7 @@ export class FilesService {
     }
 
     const accessContext = await this.getAccessContext(userId);
-    const orConditions: Prisma.FileWhereInput[] = [
-      { sharesUsers: { some: { userId } } },
-    ];
+    const orConditions: Prisma.FileWhereInput[] = [{ sharesUsers: { some: { userId } } }];
 
     if (accessContext.schoolIds.length > 0) {
       orConditions.push({
@@ -199,9 +188,7 @@ export class FilesService {
         deletedAt: null,
         ownerId: { not: userId },
         OR: orConditions,
-        name: query.search
-          ? { contains: query.search, mode: 'insensitive' }
-          : undefined,
+        name: query.search ? { contains: query.search, mode: 'insensitive' } : undefined,
       },
       skip: query.skip,
       take: query.take,
@@ -222,10 +209,7 @@ export class FilesService {
     }
 
     const accessContext = await this.getAccessContext(userId);
-    const orConditions: Prisma.FileWhereInput[] = [
-      { ownerId: userId },
-      { sharesUsers: { some: { userId } } },
-    ];
+    const orConditions: Prisma.FileWhereInput[] = [{ ownerId: userId }, { sharesUsers: { some: { userId } } }];
 
     if (accessContext.schoolIds.length > 0) {
       orConditions.push({
@@ -256,12 +240,10 @@ export class FilesService {
         deletedAt: null,
         sharesCourses: { some: { courseId: query.courseId } },
         OR: orConditions,
-        name: query.search
-          ? { contains: query.search, mode: 'insensitive' }
-          : undefined,
+        name: query.search ? { contains: query.search, mode: 'insensitive' } : undefined,
       },
-      skip: query.skip,
-      take: query.take,
+      skip: Number(query.skip), // Ensure skip is a number
+      take: Number(query.take), // Ensure take is a number
       orderBy: { [orderByField]: orderDirection },
       include: this.fileInclude,
     });
@@ -354,11 +336,7 @@ export class FilesService {
     const file = await this.getFileOrThrow(shareFileInput.fileId, organizationId);
     this.ensureCanEdit(file, userId, accessContext);
 
-    await this.ensureShareTargetInOrganization(
-      shareFileInput.targetType,
-      shareFileInput.targetId,
-      organizationId
-    );
+    await this.ensureShareTargetInOrganization(shareFileInput.targetType, shareFileInput.targetId, organizationId);
 
     await this.upsertShare(shareFileInput);
 
@@ -375,11 +353,7 @@ export class FilesService {
     const file = await this.getFileOrThrow(updateShareInput.fileId, organizationId);
     this.ensureCanEdit(file, userId, accessContext);
 
-    await this.ensureShareTargetInOrganization(
-      updateShareInput.targetType,
-      updateShareInput.targetId,
-      organizationId
-    );
+    await this.ensureShareTargetInOrganization(updateShareInput.targetType, updateShareInput.targetId, organizationId);
 
     await this.updateShareRecord(updateShareInput);
 
@@ -416,9 +390,7 @@ export class FilesService {
   }
 
   private buildStorageKey(courseId: string, fileName: string) {
-    const safeName = fileName
-      .replace(/\s+/g, '_')
-      .replace(/[^a-zA-Z0-9._-]/g, '');
+    const safeName = fileName.replace(/\s+/g, '_').replace(/[^a-zA-Z0-9._-]/g, '');
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
     return `courses/${courseId}/${timestamp}-${safeName}`;
   }
@@ -469,7 +441,9 @@ export class FilesService {
 
     if (user?.student) {
       schoolIds.add(user.student.schoolId);
-      classGroupIds.add(user.student.classGroupId);
+      if (user.student.classGroupId) {
+        classGroupIds.add(user.student.classGroupId);
+      }
       user.student.courses.forEach((course) => courseIds.add(course.id));
     }
 
@@ -501,7 +475,7 @@ export class FilesService {
       };
     }>,
     userId: string,
-    accessContext: AccessContext
+    accessContext: AccessContext,
   ) {
     if (file.ownerId === userId) {
       return $Enums.FilePermission.EDIT;
@@ -512,25 +486,15 @@ export class FilesService {
     const courseIds = new Set(accessContext.courseIds);
 
     const hasEdit =
-      file.sharesUsers.some(
-        (share) =>
-          share.userId === userId &&
-          share.permission === $Enums.FilePermission.EDIT
-      ) ||
+      file.sharesUsers.some((share) => share.userId === userId && share.permission === $Enums.FilePermission.EDIT) ||
       file.sharesSchools.some(
-        (share) =>
-          schoolIds.has(share.schoolId) &&
-          share.permission === $Enums.FilePermission.EDIT
+        (share) => schoolIds.has(share.schoolId) && share.permission === $Enums.FilePermission.EDIT,
       ) ||
       file.sharesClassGroups.some(
-        (share) =>
-          classGroupIds.has(share.classGroupId) &&
-          share.permission === $Enums.FilePermission.EDIT
+        (share) => classGroupIds.has(share.classGroupId) && share.permission === $Enums.FilePermission.EDIT,
       ) ||
       file.sharesCourses.some(
-        (share) =>
-          courseIds.has(share.courseId) &&
-          share.permission === $Enums.FilePermission.EDIT
+        (share) => courseIds.has(share.courseId) && share.permission === $Enums.FilePermission.EDIT,
       );
 
     if (hasEdit) {
@@ -538,25 +502,15 @@ export class FilesService {
     }
 
     const hasView =
-      file.sharesUsers.some(
-        (share) =>
-          share.userId === userId &&
-          share.permission === $Enums.FilePermission.VIEW
-      ) ||
+      file.sharesUsers.some((share) => share.userId === userId && share.permission === $Enums.FilePermission.VIEW) ||
       file.sharesSchools.some(
-        (share) =>
-          schoolIds.has(share.schoolId) &&
-          share.permission === $Enums.FilePermission.VIEW
+        (share) => schoolIds.has(share.schoolId) && share.permission === $Enums.FilePermission.VIEW,
       ) ||
       file.sharesClassGroups.some(
-        (share) =>
-          classGroupIds.has(share.classGroupId) &&
-          share.permission === $Enums.FilePermission.VIEW
+        (share) => classGroupIds.has(share.classGroupId) && share.permission === $Enums.FilePermission.VIEW,
       ) ||
       file.sharesCourses.some(
-        (share) =>
-          courseIds.has(share.courseId) &&
-          share.permission === $Enums.FilePermission.VIEW
+        (share) => courseIds.has(share.courseId) && share.permission === $Enums.FilePermission.VIEW,
       );
 
     return hasView ? $Enums.FilePermission.VIEW : null;
@@ -572,7 +526,7 @@ export class FilesService {
       };
     }>,
     userId: string,
-    accessContext: AccessContext
+    accessContext: AccessContext,
   ) {
     const access = this.resolvePermission(file, userId, accessContext);
     if (access !== $Enums.FilePermission.EDIT) {
@@ -583,7 +537,7 @@ export class FilesService {
   private async ensureShareTargetInOrganization(
     targetType: FileShareTargetType,
     targetId: string,
-    organizationId: string
+    organizationId: string,
   ) {
     switch (targetType) {
       case FileShareTargetType.USER: {
@@ -612,9 +566,7 @@ export class FilesService {
           select: { id: true },
         });
         if (!classGroup) {
-          throw new ForbiddenException(
-            'Class group target not found in organization.'
-          );
+          throw new ForbiddenException('Class group target not found in organization.');
         }
         return;
       }

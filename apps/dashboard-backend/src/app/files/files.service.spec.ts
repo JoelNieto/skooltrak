@@ -9,7 +9,7 @@ describe('FilesService access resolution', () => {
     },
   } as any;
 
-  const service = new FilesService(prismaMock, contextMock);
+  const service = new FilesService(prismaMock, contextMock, {} as any);
 
   const accessContext = {
     schoolIds: ['school-1'],

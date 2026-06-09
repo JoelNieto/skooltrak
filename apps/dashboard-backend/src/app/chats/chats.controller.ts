@@ -1,12 +1,11 @@
 import { BetterAuthGuard, Perm, PermissionsGuard, RequirePermissions } from '@/auth';
-import { Body, Controller, Delete, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ChatsService } from './chats.service';
 import { AddChatParticipantsInput } from './dto/add-chat-participants.input';
-import { ChatMessagesInput } from './dto/chat-messages.input';
 import { CreateContextualChatInput } from './dto/create-contextual-chat.input';
 import { CreateGroupChatInput } from './dto/create-group-chat.input';
 import { SendMessageInput } from './dto/send-message.input';
-import { ChatsService } from './chats.service';
 
 @ApiTags('chats')
 @ApiBearerAuth()
@@ -79,16 +78,23 @@ export class ChatsController {
 
   @Get('messages')
   @ApiOperation({ summary: 'Chat messages' })
-  chatMessages(
+  async chatMessages(
     @Query('chatId') chatId: string,
     @Query('cursor') cursor?: string,
     @Query('limit') limit?: string,
   ) {
-    return this.chatsService.chatMessages({
+    const list = await this.chatsService.chatMessages({
       chatId,
       cursor,
       limit: limit != null ? Number(limit) : 50,
     });
+    return list.map((m) => ({
+      ...m,
+      sender: {
+        ...m.sender,
+        initials: `${m.sender?.firstName?.charAt(0) ?? ''}${m.sender?.lastName?.charAt(0) ?? ''}`.toUpperCase(),
+      },
+    }));
   }
 
   @Get(':id')

@@ -1,19 +1,19 @@
 import { Loader, Toast } from '#/ui';
 import { DatePipe } from '@angular/common';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, httpResource } from '@angular/common/http';
 import {
   ChangeDetectionStrategy,
   Component,
+  DestroyRef,
   effect,
   inject,
   input,
   signal,
   viewChild,
 } from '@angular/core';
-import { rxResource } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { map } from 'rxjs';
 import Auth from '../auth/auth';
 import ChatSocketService, { ChatMessageReceivedPayload } from './chat-socket.service';
 
@@ -173,6 +173,7 @@ type ChatMessageDto = {
 export default class ChatThread {
   id = input.required<string>();
   private http = inject(HttpClient);
+  private destroyRef = inject(DestroyRef);
   #auth = inject(Auth);
   #toast = inject(Toast);
   #chatSocket = inject(ChatSocketService);
@@ -182,27 +183,14 @@ export default class ChatThread {
   /** Live message list (REST load + socket appends). */
   messages = signal<ChatMessageDto[]>([]);
   messagesContainer = viewChild<HTMLElement>('messagesContainer');
+  chatResource = httpResource<ChatDto | null>(() => ({ url: `/api/v1/chats/${this.id()}` }), { defaultValue: null });
 
-  chatResource = rxResource({
-    params: () => ({ id: this.id() }),
-    stream: ({ params }) =>
-      this.http.get<ChatDto | null>(`/api/v1/chats/${params.id}`).pipe(map((c) => c ?? null)),
-  });
-
-  messagesResource = rxResource({
-    params: () => ({ chatId: this.id() }),
-    stream: ({ params }) =>
-      this.http
-        .get<ChatMessageDto[]>(`/api/v1/chats/messages`, {
-          params: { chatId: params.chatId, limit: '50' },
-        })
-        .pipe(
-          map((list) => {
-            this.messages.set(list ?? []);
-            return list ?? [];
-          }),
-        ),
-  });
+  messagesResource = httpResource<ChatMessageDto[]>(
+    () => ({ url: `/api/v1/chats/messages`, params: { chatId: this.id(), limit: '50' } }),
+    {
+      defaultValue: [],
+    },
+  );
 
   constructor() {
     effect(() => {
@@ -215,6 +203,12 @@ export default class ChatThread {
       }
     });
 
+    effect(() => {
+      if (this.messagesResource.hasValue()) {
+        this.messages.set(this.messagesResource.value() ?? []);
+      }
+    });
+
     effect((onCleanup) => {
       const chatId = this.id();
       if (!chatId) return;
@@ -223,9 +217,19 @@ export default class ChatThread {
 
       const handler = (payload: ChatMessageReceivedPayload) => {
         if (payload.chatId !== chatId || !payload.message) return;
+
         this.messages.update((prev) => {
           if (prev.some((m) => m.id === payload.message.id)) return prev;
-          return [...prev, payload.message as ChatMessageDto];
+          let message = payload.message as ChatMessageDto;
+          message = {
+            ...message,
+            sender: {
+              ...(message.sender ?? {}),
+              initials:
+                `${message.sender?.firstName?.charAt(0) ?? ''}${message.sender?.lastName?.charAt(0) ?? ''}`.toUpperCase(),
+            },
+          };
+          return [...prev, message];
         });
       };
 
@@ -295,24 +299,27 @@ export default class ChatThread {
     return colors[type] ?? 'oklch(var(--p))';
   }
 
-  async sendMessage(e: Event) {
+  sendMessage(e: Event) {
     e.preventDefault();
     const content = this.messageContent().trim();
     if (!content) return;
 
     this.sending.set(true);
-    try {
-      await this.http
-        .post<ChatMessageDto>('/api/v1/chats/messages', {
-          chatId: this.id(),
-          content,
-        })
-        .toPromise();
-      this.messageContent.set('');
-    } catch {
-      this.#toast.showError('Error al enviar mensaje');
-    } finally {
-      this.sending.set(false);
-    }
+
+    this.http
+      .post<ChatMessageDto>('/api/v1/chats/messages', {
+        chatId: this.id(),
+        content,
+      })
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (msg) => {
+          this.messageContent.set('');
+        },
+        error: (x) => this.#toast.showError('Error al enviar mensaje'),
+        complete: () => {
+          this.sending.set(false);
+        },
+      });
   }
 }

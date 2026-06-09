@@ -73,6 +73,7 @@ export class ChatSocketGateway implements OnGatewayConnection, OnGatewayDisconne
       this.logger.warn('Socket server not ready');
       return;
     }
+    Logger.debug(`Emitting messageReceived to chat ${chatId}`);
     this.server.to(this.chatRoom(chatId)).emit('messageReceived', { chatId, message });
   }
 

@@ -1,5 +1,5 @@
-import { BetterAuthGuard, Perm, PermissionsGuard, RequirePermissions } from '@/auth';
 import { FetchDataQueryDto } from '@/api-contracts';
+import { BetterAuthGuard, Perm, PermissionsGuard, RequirePermissions } from '@/auth';
 import { Body, Controller, Delete, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { toFetchDataInput } from '../fetch-data-query.mapper';
@@ -47,8 +47,13 @@ export class MessagesController {
 
   @Get('contacts')
   @ApiOperation({ summary: 'Contacts for messaging' })
-  findContacts(@Query('queryText') queryText?: string) {
-    return this.messagesService.findContacts(queryText ?? '');
+  async findContacts(@Query('queryText') queryText?: string) {
+    const list = await this.messagesService.findContacts(queryText ?? '');
+    return list.map((c) => ({
+      ...c,
+      fullName: `${c.firstName} ${c.lastName}`,
+      initials: `${c.firstName.charAt(0)}${c.lastName.charAt(0)}`,
+    }));
   }
 
   @Get('unread-count')

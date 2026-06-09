@@ -1,11 +1,9 @@
 import { Loader, Toast } from '#/ui';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, httpResource } from '@angular/common/http';
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
-import { rxResource } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
-import { map } from 'rxjs';
 import Auth from '../auth/auth';
 
 @Component({
@@ -82,25 +80,21 @@ export default class ChatNew {
   searchQuery = signal('');
   creating = signal<string | false>(false);
 
-  contactsResource = rxResource({
-    params: () => ({ query: this.searchQuery() }),
-    stream: ({ params }) =>
-      this.#http
-        .get<
-          Array<{
-            id: string;
-            name?: string;
-            email?: string;
-            color?: string | null;
-            initials?: string;
-            role?: { name?: string | null };
-            student?: { classGroup?: { name?: string | null } | null };
-          }>
-        >('/api/v1/messages/contacts', {
-          params: params.query ? { queryText: params.query } : {},
-        })
-        .pipe(map((r) => r ?? [])),
-  });
+  contactsResource = httpResource<
+    Array<{
+      id: string;
+      name?: string;
+      email?: string;
+      color?: string | null;
+      initials?: string;
+      role?: { name?: string | null };
+      student?: { classGroup?: { name?: string | null } | null };
+    }>
+  >(() => ({
+    url: '/api/v1/messages/contacts',
+    params: { query: this.searchQuery() },
+    defaultValue: [],
+  }));
 
   filteredContacts() {
     const contacts = this.contactsResource.value() ?? [];
@@ -126,9 +120,7 @@ export default class ChatNew {
   async startChat(recipientId: string) {
     this.creating.set(recipientId);
     try {
-      const chat = await firstValueFrom(
-        this.#http.post<{ id: string }>(`/api/v1/chats/direct`, { recipientId }),
-      );
+      const chat = await firstValueFrom(this.#http.post<{ id: string }>(`/api/v1/chats/direct`, { recipientId }));
       if (chat?.id) {
         this.#router.navigate(['/chats', chat.id]);
       }

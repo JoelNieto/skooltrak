@@ -1,17 +1,16 @@
+import { httpResource } from '@angular/common/http';
 import {
   ChangeDetectionStrategy,
   Component,
   computed,
   effect,
   ElementRef,
-  inject,
   input,
   model,
   output,
   signal,
   viewChild,
 } from '@angular/core';
-import { httpResource } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 export type Contact = {
   id: string;

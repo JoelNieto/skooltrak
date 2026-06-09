@@ -4,8 +4,7 @@ import { Component, inject, input, signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { Router, RouterLink } from '@angular/router';
 import { ChatType } from '@generated/prisma';
-import { firstValueFrom } from 'rxjs';
-import { map, of } from 'rxjs';
+import { firstValueFrom, map, of } from 'rxjs';
 import AssignmentForm from '../assignments/assignment-form';
 import CourseAttendance from '../attendance/course-attendance';
 import Auth from '../auth/auth';
@@ -83,11 +82,7 @@ type CourseVm = {
 
               <div class="flex gap-2">
                 @if (canStartCourseChat()) {
-                  <button
-                    class="btn btn-ghost"
-                    (click)="startCourseChat()"
-                    [disabled]="startingChat()"
-                  >
+                  <button class="btn btn-ghost" (click)="startCourseChat()" [disabled]="startingChat()">
                     @if (startingChat()) {
                       <span class="loading loading-spinner loading-sm"></span>
                     } @else {
@@ -166,16 +161,18 @@ type CourseVm = {
           <div class="tab-content bg-base-100 p-6">
             <app-course-files [courseId]="id()" />
           </div>
-          <label class="tab">
-            <input type="radio" name="my_tabs_6" aria-label="Ponderacion" />
-            <span class="flex items-center gap-2">
-              <span class="material-symbols-outlined">folder_special</span>Ponderacion</span
-            >
-          </label>
+          @if (auth.isTeacher() || auth.isAdmin()) {
+            <label class="tab">
+              <input type="radio" name="my_tabs_6" aria-label="Ponderacion" />
+              <span class="flex items-center gap-2">
+                <span class="material-symbols-outlined">folder_special</span>Ponderacion</span
+              >
+            </label>
 
-          <div class="tab-content bg-base-100 p-6">
-            <app-course-grade-buckets [courseId]="id()" />
-          </div>
+            <div class="tab-content bg-base-100 p-6">
+              <app-course-grade-buckets [courseId]="id()" />
+            </div>
+          }
         </div>
       </div>
     } @else if (!courseResource.isLoading() && !courseResource.error()) {

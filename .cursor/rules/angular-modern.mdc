@@ -13,7 +13,8 @@ Use current Angular patterns (v16+).
 - Use the new control flow syntax (`@if`, `@for`, `@switch`) instead of structural directives.
 - Favor `inject()` over constructor injection when it keeps code cleaner.
 - Use `provideHttpClient()` and `provideRouter()` in bootstrap instead of module-based providers.
-- Enforce `rxResource` for data fetching in services and components.
+- Enforce `rxResource` for data fetching from services and components.
+- Enforce `httpResource` for http data fetching.
 - Keep components lean: push data access and business logic into services.
 - Prefer `OnPush` change detection; use `signal`/`computed` to minimize manual `markForCheck`.
 - Use `DestroyRef` or `takeUntilDestroyed` for cleanup in RxJS streams.

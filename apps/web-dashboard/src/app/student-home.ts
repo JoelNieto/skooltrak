@@ -1,13 +1,13 @@
 import { EmptyState, PageHeader, StatCard } from '#/ui';
-import { DecimalPipe, DatePipe } from '@angular/common';
-import { HttpClient } from '@angular/common/http';
+import { DatePipe, DecimalPipe } from '@angular/common';
+import { HttpClient, httpResource } from '@angular/common/http';
 import { afterRenderEffect, ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import { endOfWeek, startOfWeek } from 'date-fns';
-import { forkJoin, map, of } from 'rxjs';
-import Store from './core/store';
+import { forkJoin, of } from 'rxjs';
 import { toFetchQueryParams } from './core/fetch-query-params';
+import Store from './core/store';
 
 type InboxRow = {
   id: string;
@@ -140,17 +140,13 @@ type StudentAssignmentRow = {
               </div>
             } @else if (gradeReportResource.hasValue() && gradeReportResource.value(); as report) {
               <div class="flex flex-col gap-2">
-                <p class="text-sm text-base-content/70">
-                  Periodo: {{ report.periodName || 'Selecciona un periodo' }}
-                </p>
+                <p class="text-sm text-base-content/70">Periodo: {{ report.periodName || 'Selecciona un periodo' }}</p>
                 @if (report.overallGradesRow?.cumulativeAverage != null) {
                   <p class="text-lg font-bold text-base-content">
                     Promedio general: {{ report.overallGradesRow!.cumulativeAverage! | number: '1.1-1' }}
                   </p>
                 } @else {
-                  <p class="text-sm text-base-content/70">
-                    No hay calificaciones publicadas para este periodo.
-                  </p>
+                  <p class="text-sm text-base-content/70">No hay calificaciones publicadas para este periodo.</p>
                 }
               </div>
             } @else if (gradeReportResource.error()) {
@@ -229,44 +225,38 @@ export default class StudentHome {
     return [author.firstName, author.lastName].filter(Boolean).join(' ').trim() || '—';
   }
 
-  public gradeReportPeriodsResource = rxResource({
-    params: () => ({ year: this.store.currentSchool()?.currentYear }),
-    stream: ({ params }) => {
-      if (!params.year) return of([]);
-      return this.http
-        .get<Array<{ id: string; name: string; startDate: string; endDate: string }>>(`/api/v1/periods/by-year`, {
-          params: { year: String(params.year) },
-        })
-        .pipe(map((rows) => rows ?? []));
+  public gradeReportPeriodsResource = httpResource<{ id: string; name: string; startDate: string; endDate: string }[]>(
+    () => {
+      const year = this.store.currentSchool()?.currentYear;
+      if (!year) return undefined;
+      return {
+        url: `/api/v1/periods/by-year`,
+        params: { year: String(year) },
+      };
     },
-  });
+  );
 
   private gradeReportCurrentPeriodId = computed(() => {
     const periods = this.gradeReportPeriodsResource.value();
     if (!periods?.length) return '';
     const today = new Date();
-    const current = periods.find(
-      (p) => new Date(p.startDate) <= today && today <= new Date(p.endDate),
-    );
+    const current = periods.find((p) => new Date(p.startDate) <= today && today <= new Date(p.endDate));
     return current?.id ?? '';
   });
 
-  public gradeReportResource = rxResource({
-    params: () => ({
-      studentId: this.gradeReportStudentId(),
-      periodId: this.gradeReportPeriodId() || this.gradeReportCurrentPeriodId(),
-    }),
-    stream: ({ params }) => {
-      if (!params.studentId || !params.periodId) {
-        return of(null);
-      }
-      return this.http.get<{
-        periodName?: string | null;
-        overallGradesRow?: { cumulativeAverage?: number | null } | null;
-      }>(`/api/v1/grade-report`, {
-        params: { studentId: params.studentId, periodId: params.periodId },
-      });
-    },
+  public gradeReportResource = httpResource<{
+    periodName?: string | null;
+    overallGradesRow?: { cumulativeAverage?: number | null } | null;
+  }>(() => {
+    const studentId = this.gradeReportStudentId();
+    const periodId = this.gradeReportPeriodId() || this.gradeReportCurrentPeriodId();
+    if (!studentId || !periodId) {
+      return undefined;
+    }
+    return {
+      url: `/api/v1/grade-report`,
+      params: { studentId, periodId },
+    };
   });
 
   public statsResource = rxResource({
@@ -286,48 +276,34 @@ export default class StudentHome {
     },
   });
 
-  public assignmentsResource = rxResource({
-    params: () => ({
-      startDate: this.startDate(),
-      endDate: this.endDate(),
-      schoolId: this.store.currentSchoolId(),
-    }),
-    stream: ({ params }) => {
-      if (!params.schoolId) {
-        return of<StudentAssignmentRow[]>([]);
-      }
-      return this.http
-        .get<StudentAssignmentRow[]>(`/api/v1/assignments/by-school`, {
-          params: {
-            schoolId: params.schoolId,
-            startDate: params.startDate.toISOString(),
-            endDate: params.endDate.toISOString(),
-          },
-        })
-        .pipe(map((rows) => rows ?? []));
-    },
+  public assignmentsResource = httpResource<StudentAssignmentRow[]>(() => {
+    const schoolId = this.store.currentSchoolId();
+    if (!schoolId) return undefined;
+    return {
+      url: `/api/v1/assignments/by-school`,
+      params: {
+        schoolId,
+        startDate: this.startDate().toISOString(),
+        endDate: this.endDate().toISOString(),
+      },
+    };
   });
 
-  public recentMessages = rxResource({
-    params: () => ({ take: 4, skip: 0 }),
-    stream: ({ params }) =>
-      this.http
-        .get<InboxRow[]>('/api/v1/messages', {
-          params: toFetchQueryParams({ take: params.take, skip: params.skip }),
-        })
-        .pipe(map((rows) => rows ?? [])),
+  public recentMessages = httpResource<InboxRow[]>(() => {
+    return {
+      url: '/api/v1/messages',
+      params: toFetchQueryParams({ take: 4, skip: 0 }),
+      defaultValue: [],
+    };
   });
 
-  public recentNewsletters = rxResource({
-    params: () => ({ schoolId: this.store.currentSchoolId() }),
-    stream: ({ params }) => {
-      if (!params.schoolId) {
-        return of<PublishedNewsletter[]>([]);
-      }
-      return this.http.get<PublishedNewsletter[]>(`/api/v1/newsletters/published`, {
-        params: { schoolId: params.schoolId, take: '3' },
-      });
-    },
+  public recentNewsletters = httpResource<PublishedNewsletter[]>(() => {
+    const schoolId = this.store.currentSchoolId();
+    if (!schoolId) return undefined;
+    return {
+      url: `/api/v1/newsletters/published`,
+      params: { schoolId, take: '3' },
+    };
   });
 
   stripHtml(html: string): string {

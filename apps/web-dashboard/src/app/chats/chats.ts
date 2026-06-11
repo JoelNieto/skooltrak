@@ -1,10 +1,8 @@
 import { EmptyState, Loader } from '#/ui';
-import { HttpClient } from '@angular/common/http';
+import { httpResource } from '@angular/common/http';
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { rxResource } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import { ChatType } from '@generated/prisma';
-import { map } from 'rxjs';
 import Auth from '../auth/auth';
 
 type ChatParticipantUser = {
@@ -59,10 +57,7 @@ type ChatRow = {
                     <span class="material-symbols-outlined text-xl">{{ contextualChatIcon(chat.type) }}</span>
                   </div>
                 } @else {
-                  <div
-                    class="text-white w-10 rounded-full"
-                    [style.background]="participantStyle(chat).color"
-                  >
+                  <div class="text-white w-10 rounded-full" [style.background]="participantStyle(chat).color">
                     <span class="tex-lg">{{ participantStyle(chat).initials }}</span>
                   </div>
                 }
@@ -101,13 +96,12 @@ type ChatRow = {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class Chats {
-  #http = inject(HttpClient);
   #auth = inject(Auth);
 
-  chatsResource = rxResource({
-    stream: () =>
-      this.#http.get<ChatRow[]>(`/api/v1/chats`).pipe(map((result) => result ?? [])),
-  });
+  chatsResource = httpResource<ChatRow[]>(() => ({
+    url: `/api/v1/chats`,
+    defaultValue: [],
+  }));
 
   chatDisplayName(chat: ChatRow) {
     if (chat.name) return chat.name;

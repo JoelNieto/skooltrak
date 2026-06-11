@@ -1,6 +1,5 @@
 import { Loader, TextEditor, Toast } from '#/ui';
 import { Component, computed, effect, inject, input, signal } from '@angular/core';
-import { rxResource } from '@angular/core/rxjs-interop';
 import {
   FormArray,
   FormControl,
@@ -13,9 +12,7 @@ import {
 import { Router, RouterLink } from '@angular/router';
 import { $Enums } from '@generated/prisma';
 
-import { HttpClient } from '@angular/common/http';
-import { of } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { HttpClient, httpResource } from '@angular/common/http';
 import Store from '../core/store';
 import { isValidId } from '../core/validators';
 import { QuizQuestionControl } from './quiz-question-control';
@@ -167,43 +164,31 @@ export default class QuizForm {
     });
   }
 
-  public quizResource = rxResource({
-    params: () => ({ id: this.id()! }),
-    stream: ({ params }) => {
-      if (!params.id || !isValidId(params.id)) {
-        return of(null);
-      }
-      return this.http.get<{
-        id: string;
-        title: string;
-        details: string;
-        courseId: string;
-        course?: { id: string };
-        questions: Array<{
-          id: string;
-          question: string;
-          value: unknown;
-          type: string;
-          timeLimit?: number | null;
-          options?: Array<{ id: string; option: string; isCorrect: boolean }>;
-        }>;
-      } | null>(`/api/v1/quizzes/${params.id}`);
-    },
+  public quizResource = httpResource<{
+    id: string;
+    title: string;
+    details: string;
+    courseId: string;
+    course?: { id: string };
+    questions: Array<{
+      id: string;
+      question: string;
+      value: unknown;
+      type: string;
+      timeLimit?: number | null;
+      options?: Array<{ id: string; option: string; isCorrect: boolean }>;
+    }>;
+  } | null>(() => {
+    if (!this.id() || !isValidId(this.id())) return undefined;
+    return `/api/v1/quizzes/${this.id()}`;
   });
 
-  public coursesResource = rxResource({
-    params: () => ({
-      schoolId: this.store.currentSchoolId(),
-    }),
-    stream: ({ params }) => {
-      const { schoolId } = params;
-      if (!schoolId) {
-        return of([]);
-      }
-      return this.http
-        .get<Array<{ id: string; name: string }>>(`/api/v1/courses/by-school/${schoolId}`)
-        .pipe(map((rows) => rows ?? []));
-    },
+  public coursesResource = httpResource<{ id: string; name: string }[]>(() => {
+    const schoolId = this.store.currentSchoolId();
+    if (!schoolId) return undefined;
+    return {
+      url: `/api/v1/courses/by-school/${schoolId}`,
+    };
   });
 
   public quizForm = this.fb.group({

@@ -1,9 +1,7 @@
 import { Modal, Toast } from '#/ui';
+import { HttpClient, httpResource } from '@angular/common/http';
 import { Component, computed, inject, input, linkedSignal, signal } from '@angular/core';
-import { rxResource } from '@angular/core/rxjs-interop';
-import { HttpClient } from '@angular/common/http';
 import { Prisma } from '@generated/prisma';
-import { map, of } from 'rxjs';
 import { isValidId } from '../core/validators';
 import GroupScheduleForm from './group-schedule-form';
 
@@ -144,19 +142,9 @@ export default class GroupSchedule {
   public slotMinutes = 5;
   public slotHeight = 12;
 
-  public schedulesResource = rxResource({
-    params: () => ({
-      classGroupId: this.id(),
-    }),
-    stream: ({ params }) => {
-      if (!isValidId(params.classGroupId)) {
-        return of([]);
-      }
-
-      return this.#http
-        .get<Schedule[]>(`/api/v1/groups-schedules/by-class-group/${params.classGroupId}`)
-        .pipe(map((rows) => rows ?? []));
-    },
+  public schedulesResource = httpResource<Schedule[]>(() => {
+    if (!isValidId(this.id())) return undefined;
+    return `/api/v1/groups-schedules/by-class-group/${this.id()}`;
   });
 
   public localSchedules = linkedSignal<Schedule[] | undefined, Schedule[]>({

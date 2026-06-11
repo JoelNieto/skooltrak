@@ -1,9 +1,7 @@
 import { Toast } from '#/ui';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, httpResource } from '@angular/common/http';
 import { Component, inject, output } from '@angular/core';
-import { rxResource } from '@angular/core/rxjs-interop';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { of } from 'rxjs';
 import Store from '../../core/store';
 
 @Component({
@@ -86,24 +84,21 @@ export default class CreateChargeForm {
     return v === 'studyPlan' ? 'studyPlan' : 'student';
   }
 
-  public students = rxResource({
-    params: () => ({ schoolId: this.store.currentSchoolId() }),
-    stream: ({ params }) => {
-      if (!params.schoolId) return of([]);
-      return this.http.get<{ id: string; firstName: string; fatherName: string }[]>(
-        `/api/v1/students/by-school/${params.schoolId}`,
-      );
-    },
+  public students = httpResource<{ id: string; firstName: string; fatherName: string }[]>(() => {
+    const schoolId = this.store.currentSchoolId();
+    if (!schoolId) return undefined;
+    return {
+      url: `/api/v1/students/by-school/${schoolId}`,
+    };
   });
 
-  public studyPlans = rxResource({
-    params: () => ({ schoolId: this.store.currentSchoolId() }),
-    stream: ({ params }) => {
-      if (!params.schoolId) return of([]);
-      return this.http.get<{ id: string; name: string }[]>(`/api/v1/study-plans/by-school`, {
-        params: { schoolId: params.schoolId },
-      });
-    },
+  public studyPlans = httpResource<{ id: string; name: string }[]>(() => {
+    const schoolId = this.store.currentSchoolId();
+    if (!schoolId) return undefined;
+    return {
+      url: `/api/v1/study-plans/by-school/`,
+      params: { schoolId },
+    };
   });
 
   public form = this.fb.group({

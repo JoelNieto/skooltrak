@@ -1,10 +1,9 @@
 import { Toast } from '#/ui';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, httpResource } from '@angular/common/http';
 import { Component, inject, input, OnInit, output } from '@angular/core';
-import { rxResource } from '@angular/core/rxjs-interop';
 import { FormArray, NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Prisma } from '@generated/prisma';
-import { firstValueFrom, of } from 'rxjs';
+import { firstValueFrom } from 'rxjs';
 import Store from '../../core/store';
 
 const MONTH_LABELS: Record<number, string> = {
@@ -151,21 +150,15 @@ export default class StudyPlanForm implements OnInit {
   private http = inject(HttpClient);
   private toast = inject(Toast);
   private store = inject(Store);
-  public metrics = rxResource({
-    stream: () => this.http.get<{ id: string; name: string }[]>('/api/v1/grade-metrics'),
-  });
-  public degrees = rxResource({
-    params: () => ({
-      schoolId: this.store.currentSchoolId(),
-    }),
-    stream: ({ params }) => {
-      if (!params.schoolId) {
-        return of([]);
-      }
-      return this.http.get<{ id: string; name: string }[]>(`/api/v1/degrees/by-school`, {
-        params: { schoolId: params.schoolId },
-      });
-    },
+  public metrics = httpResource<{ id: string; name: string }[]>(() => '/api/v1/grade-metrics');
+
+  public degrees = httpResource<{ id: string; name: string }[]>(() => {
+    const schoolId = this.store.currentSchoolId();
+    if (!schoolId) return undefined;
+    return {
+      url: `/api/v1/degrees/by-school`,
+      params: { schoolId },
+    };
   });
 
   public form = this.fb.group({

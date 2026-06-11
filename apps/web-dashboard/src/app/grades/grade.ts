@@ -1,10 +1,9 @@
 import { Confirmation, EditorViewer, Error, Loader, Modal, Toast } from '#/ui';
 import { DatePipe, DecimalPipe, NgClass } from '@angular/common';
 import { Component, computed, inject, input } from '@angular/core';
-import { rxResource } from '@angular/core/rxjs-interop';
 import { Router, RouterLink } from '@angular/router';
 
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, httpResource } from '@angular/common/http';
 import { filter, switchMap } from 'rxjs';
 import StudentGradeForm from './student-grade-form';
 
@@ -167,13 +166,7 @@ export default class Grade {
   #modal = inject(Modal);
   #confirmation = inject(Confirmation);
   #toast = inject(Toast);
-  public gradeResource = rxResource({
-    params: () => ({ id: this.id() }),
-    stream: ({ params }) => {
-      const { id } = params;
-      return this.#http.get<GradeDetail>(`/api/v1/grades/${id}/with-course`);
-    },
-  });
+  public gradeResource = httpResource<GradeDetail>(() => `/api/v1/grades/${this.id()}/with-course`);
 
   public metric = computed(() => this.gradeResource.value()?.course?.studyPlan?.gradeMetric);
 

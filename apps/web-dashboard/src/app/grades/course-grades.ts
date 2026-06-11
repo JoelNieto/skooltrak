@@ -1,12 +1,10 @@
 import { DecimalToNumber, Modal } from '#/ui';
 import { DecimalPipe, NgClass } from '@angular/common';
+import { httpResource } from '@angular/common/http';
 import { afterRenderEffect, ChangeDetectionStrategy, Component, computed, inject, input, signal } from '@angular/core';
-import { rxResource } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { HttpClient } from '@angular/common/http';
 import { Prisma } from '@generated/prisma';
-import { map, of } from 'rxjs';
 import Store from '../core/store';
 import GradesForm from './grades-form';
 
@@ -70,10 +68,7 @@ export type StudentType = {
             @for (student of group.students; track student.id) {
               <tr>
                 <td class="overflow-hidden">
-                  <a
-                    [routerLink]="['/students', student.id]"
-                    class="flex items-center gap-2 cursor-pointer min-w-0"
-                  >
+                  <a [routerLink]="['/students', student.id]" class="flex items-center gap-2 cursor-pointer min-w-0">
                     <div class="avatar avatar-placeholder flex-shrink-0">
                       <div class="text-white w-7 rounded-full" [style.background]="student.color">
                         <span class="text-xs">{{ student.initials }}</span>
@@ -86,11 +81,13 @@ export type StudentType = {
                   <td
                     class="text-center min-w-24 w-24"
                     [ngClass]="{
-                      '!text-success bg-success/10': grade.item?.score && grade.item?.score! >= metric().minimumApproval,
-                      '!text-warning bg-warning/10':
+                      'text-success! bg-success/10':
+                        grade.item?.score && grade.item?.score! >= metric().minimumApproval,
+                      'text-warning! bg-warning/10':
                         grade.item?.score &&
-                        grade.item?.score! >= metric().minimumApproval && grade.item?.score! < metric().minimumExcellence,
-                      '!text-error bg-error/10': grade.item?.score && grade.item?.score! < metric().minimumApproval,
+                        grade.item?.score! >= metric().minimumApproval &&
+                        grade.item?.score! < metric().minimumExcellence,
+                      'text-error! bg-error/10': grade.item?.score && grade.item?.score! < metric().minimumApproval,
                     }"
                   >
                     {{ (grade.item?.score | number: '1.1-1') ?? '-' }}
@@ -99,13 +96,13 @@ export type StudentType = {
                 <td
                   class="text-center font-bold min-w-24 w-24"
                   [ngClass]="{
-                    '!text-success bg-success/10':
+                    'text-success! bg-success/10':
                       student.averageScore && student.averageScore >= metric().minimumApproval,
-                    '!text-warning bg-warning/10':
+                    'text-warning! bg-warning/10':
                       student.averageScore &&
                       student.averageScore >= metric().minimumApproval &&
-                        student.averageScore < metric().minimumExcellence,
-                    '!text-error bg-error/10': student.averageScore && student.averageScore < metric().minimumApproval,
+                      student.averageScore < metric().minimumExcellence,
+                    'text-error! bg-error/10': student.averageScore && student.averageScore < metric().minimumApproval,
                   }"
                 >
                   {{ student.averageScore ? (student.averageScore | number: '1.1-1') : '-' }}
@@ -126,74 +123,52 @@ export default class CourseGrades {
   public courseId = input.required<string>();
   public metric = input.required<DecimalToNumber<Prisma.GradeMetricGetPayload<undefined>>>();
   #store = inject(Store);
-  #http = inject(HttpClient);
   #modal = inject(Modal);
 
   public periodId = signal<string>('');
 
-  public periodsResource = rxResource({
-    params: () => ({
-      year: this.#store.currentSchool()?.currentYear,
-    }),
-    stream: ({ params }) => {
-      const { year } = params;
-      if (!year) {
-        return of([]);
-      }
-      return this.#http
-        .get<Array<{ id: string; name: string; startDate: string; endDate: string }>>(`/api/v1/periods/by-year`, {
-          params: { year: String(year) },
-        })
-        .pipe(map((rows) => rows ?? []));
-    },
+  public periodsResource = httpResource<{ id: string; name: string; startDate: string; endDate: string }[]>(() => {
+    const year = this.#store.currentSchool()?.currentYear;
+    if (!year) {
+      return undefined;
+    }
+    return { url: `/api/v1/periods/by-year`, params: { year: String(year) }, defaultValue: [] };
   });
 
   private currentPeriodId = computed(() => {
     const periods = this.periodsResource.value();
     if (!periods?.length) return '';
     const today = new Date();
-    const current = periods.find(
-      (p) => new Date(p.startDate) <= today && today <= new Date(p.endDate),
-    );
+    const current = periods.find((p) => new Date(p.startDate) <= today && today <= new Date(p.endDate));
     return current?.id ?? '';
   });
 
-  public students = rxResource({
-    params: () => ({
-      courseId: this.courseId(),
-    }),
-    stream: ({ params }) => {
-      const { courseId } = params;
-      if (!courseId) {
-        return of([]);
-      }
-      return this.#http.get<StudentType[]>(`/api/v1/students/by-course/${courseId}`);
-    },
+  public students = httpResource<StudentType[]>(() => {
+    const courseId = this.courseId();
+    if (!courseId) {
+      return undefined;
+    }
+    return `/api/v1/students/by-course/${courseId}`;
   });
 
-  public gradesResource = rxResource({
-    params: () => ({
-      courseId: this.courseId(),
-      periodId: this.periodId(),
-    }),
-    stream: ({ params }) => {
-      const { courseId, periodId } = params;
-      if (!courseId || !periodId) {
-        return of([]);
-      }
-      return this.#http.get<
-        Array<{
-          id: string;
-          title: string;
-          published: boolean;
-          studentGrades?: Array<{
-            id: string;
-            score?: number | null;
-            student?: { id: string; classGroup?: { id: string; name: string } | null };
-          }>;
-        }>
-      >(`/api/v1/grades/by-course/${courseId}`, { params: { periodId } });
-    },
+  public gradesResource = httpResource<
+    {
+      id: string;
+      title: string;
+      published: boolean;
+      studentGrades?: Array<{
+        id: string;
+        score?: number | null;
+        student?: { id: string; classGroup?: { id: string; name: string } | null };
+      }>;
+    }[]
+  >(() => {
+    const courseId = this.courseId(),
+      periodId = this.periodId();
+    if (!courseId || !periodId) {
+      return undefined;
+    }
+    return { url: `/api/v1/grades/by-course/${courseId}`, params: { periodId }, defaultValue: [] };
   });
 
   public groupedGrades = computed(() => {

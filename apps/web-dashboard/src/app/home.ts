@@ -1,12 +1,12 @@
 import { EmptyState, PageHeader, StatCard } from '#/ui';
 import { DatePipe } from '@angular/common';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, httpResource } from '@angular/common/http';
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
-import { forkJoin, map, Observable, of } from 'rxjs';
-import Store from './core/store';
+import { forkJoin, of } from 'rxjs';
 import { toFetchQueryParams } from './core/fetch-query-params';
+import Store from './core/store';
 import WelcomeBanner from './shared/welcome-banner';
 
 type DashboardStats = {
@@ -287,17 +287,14 @@ export default class Home {
   }
 
   // Onboarding status query
-  public onboardingStatus = rxResource({
-    stream: () =>
-      this.http.get<{
-        onboardingCompleted: boolean;
-        schoolName?: string | null;
-        degreesCount: number;
-        studyPlansCount: number;
-        coursesCount: number;
-        groupsCount: number;
-      }>('/api/v1/auth/onboarding-status'),
-  });
+  public onboardingStatus = httpResource<{
+    onboardingCompleted: boolean;
+    schoolName?: string | null;
+    degreesCount: number;
+    studyPlansCount: number;
+    coursesCount: number;
+    groupsCount: number;
+  }>(() => '/api/v1/auth/onboarding-status');
 
   // Check if we should show the welcome banner
   public showWelcomeBanner = computed(() => {
@@ -350,43 +347,33 @@ export default class Home {
     },
   });
 
-  public recentMessages = rxResource({
-    params: () => ({ take: 5, skip: 0 }),
-    stream: ({ params }) =>
-      this.http
-        .get<InboxRow[]>('/api/v1/messages', {
-          params: toFetchQueryParams({ take: params.take, skip: params.skip }),
-        })
-        .pipe(map((rows) => rows ?? [])),
+  public recentMessages = httpResource<InboxRow[]>(() => ({
+    url: '/api/v1/messages',
+    params: toFetchQueryParams({ take: 5, skip: 0 }),
+    defaultValue: [],
+  }));
+
+  public recentStudents = httpResource<RecentStudent[]>(() => {
+    const schoolId = this.store.currentSchoolId();
+    if (!schoolId) return undefined;
+    return {
+      url: `/api/v1/students`,
+      params: toFetchQueryParams({
+        take: 4,
+        orderBy: 'createdAt',
+        orderDirection: 'desc',
+        schoolId,
+      }),
+    };
   });
 
-  public recentStudents = rxResource({
-    params: () => ({ take: 4, schoolId: this.store.currentSchoolId() }),
-    stream: ({ params }): Observable<RecentStudent[]> => {
-      if (!params.schoolId) {
-        return of<RecentStudent[]>([]);
-      }
-      return this.http.get<RecentStudent[]>(`/api/v1/students`, {
-        params: toFetchQueryParams({
-          take: params.take,
-          orderBy: 'createdAt',
-          orderDirection: 'desc',
-          schoolId: params.schoolId,
-        }),
-      });
-    },
-  });
-
-  public recentNewsletters = rxResource({
-    params: () => ({ schoolId: this.store.currentSchoolId() }),
-    stream: ({ params }) => {
-      if (!params.schoolId) {
-        return of<PublishedNewsletter[]>([]);
-      }
-      return this.http.get<PublishedNewsletter[]>(`/api/v1/newsletters/published`, {
-        params: { schoolId: params.schoolId, take: '3' },
-      });
-    },
+  public recentNewsletters = httpResource<PublishedNewsletter[]>(() => {
+    const schoolId = this.store.currentSchoolId();
+    if (!schoolId) return undefined;
+    return {
+      url: `/api/v1/newsletters/published`,
+      params: { schoolId, take: '3' },
+    };
   });
 
   stripHtml(html: string): string {
@@ -395,20 +382,17 @@ export default class Home {
     return div.textContent?.trim() ?? '';
   }
 
-  public recentTeachers = rxResource({
-    params: () => ({ take: 4, schoolId: this.store.currentSchoolId() }),
-    stream: ({ params }): Observable<RecentTeacher[]> => {
-      if (!params.schoolId) {
-        return of<RecentTeacher[]>([]);
-      }
-      return this.http.get<RecentTeacher[]>(`/api/v1/teachers`, {
-        params: toFetchQueryParams({
-          take: params.take,
-          orderBy: 'createdAt',
-          orderDirection: 'desc',
-          schoolId: params.schoolId,
-        }),
-      });
-    },
+  public recentTeachers = httpResource<RecentTeacher[]>(() => {
+    const schoolId = this.store.currentSchoolId();
+    if (!schoolId) return undefined;
+    return {
+      url: `/api/v1/teachers`,
+      params: toFetchQueryParams({
+        take: 4,
+        orderBy: 'createdAt',
+        orderDirection: 'desc',
+        schoolId,
+      }),
+    };
   });
 }

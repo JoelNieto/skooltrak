@@ -1,12 +1,12 @@
 import { Confirmation, EmptyState, Modal, PageHeader, Toast } from '#/ui';
 import { Tab, TabContent, TabList, TabPanel, Tabs } from '@angular/aria/tabs';
 import { DatePipe, DecimalPipe, NgClass } from '@angular/common';
-import { HttpClient } from '@angular/common/http';
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
-import { rxResource } from '@angular/core/rxjs-interop';
+import { HttpClient, httpResource } from '@angular/common/http';
+import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { filter, of, switchMap } from 'rxjs';
+import { filter, switchMap } from 'rxjs';
 import Store from '../../core/store';
 import CreateChargeForm from '../forms/create-charge-form';
 
@@ -156,6 +156,7 @@ export default class FinancialModule {
   private modal = inject(Modal);
   private confirmation = inject(Confirmation);
   private toast = inject(Toast);
+  private destroyRef = inject(DestroyRef);
 
   yearFilter = signal<number>(new Date().getFullYear());
 
@@ -164,17 +165,13 @@ export default class FinancialModule {
     return [y, y - 1, y - 2];
   });
 
-  public chargesResource = rxResource({
-    params: () => ({
-      schoolId: this.store.currentSchoolId(),
-      year: this.yearFilter(),
-    }),
-    stream: ({ params }) => {
-      if (!params.schoolId) return of<ChargeType[]>([]);
-      return this.http.get<ChargeType[]>(`/api/v1/financial/charges/by-school`, {
-        params: { schoolId: params.schoolId, year: String(params.year) },
-      });
-    },
+  public chargesResource = httpResource<ChargeType[]>(() => {
+    const schoolId = this.store.currentSchoolId();
+    if (!schoolId) return undefined;
+    return {
+      url: `/api/v1/financial/charges/by-school`,
+      params: { schoolId, year: String(this.yearFilter()) },
+    };
   });
 
   statusClass(status: string): string {
@@ -199,6 +196,7 @@ export default class FinancialModule {
       .pipe(
         filter(Boolean),
         switchMap(() => this.http.delete(`/api/v1/financial/charges/${id}`)),
+        takeUntilDestroyed(this.destroyRef),
       )
       .subscribe({
         next: () => {

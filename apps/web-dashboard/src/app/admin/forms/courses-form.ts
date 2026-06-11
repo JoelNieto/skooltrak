@@ -2,7 +2,7 @@ import { markGroupDirty, Toast } from '#/ui';
 import { Combobox, ComboboxInput, ComboboxPopupContainer } from '@angular/aria/combobox';
 import { Listbox, Option } from '@angular/aria/listbox';
 import { OverlayModule } from '@angular/cdk/overlay';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, httpResource } from '@angular/common/http';
 import {
   afterRenderEffect,
   Component,
@@ -14,10 +14,9 @@ import {
   viewChild,
   viewChildren,
 } from '@angular/core';
-import { rxResource } from '@angular/core/rxjs-interop';
 import { FormsModule, NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Prisma } from '@generated/prisma';
-import { firstValueFrom, of } from 'rxjs';
+import { firstValueFrom } from 'rxjs';
 import { toFetchQueryParams } from '../../core/fetch-query-params';
 import Store from '../../core/store';
 @Component({
@@ -176,25 +175,20 @@ export default class CoursesForm {
   public options = viewChildren<Option<string>>(Option);
   public combobox = viewChild<Combobox<string>>(Combobox);
 
-  public subjects = rxResource({
-    stream: () =>
-      this.http.get<{ id: string; name: string }[]>('/api/v1/subjects', {
-        params: toFetchQueryParams({ take: 100, orderBy: 'name' }),
-      }),
-  });
+  public subjects = httpResource<{ id: string; name: string }[]>(() => ({
+    url: '/api/v1/subjects',
+    params: toFetchQueryParams({ take: 100, orderBy: 'name' }),
+    defaultValue: [],
+  }));
 
-  public studyPlans = rxResource({
-    params: () => ({
-      schoolId: this.store.currentSchoolId(),
-    }),
-    stream: ({ params }) => {
-      if (!params.schoolId) {
-        return of([]);
-      }
-      return this.http.get<{ id: string; name: string }[]>(`/api/v1/study-plans/by-school`, {
-        params: { schoolId: params.schoolId },
-      });
-    },
+  public studyPlans = httpResource<{ id: string; name: string }[]>(() => {
+    const currentSchoolId = this.store.currentSchoolId();
+    if (!currentSchoolId) return undefined;
+
+    return {
+      url: `/api/v1/study-plans/by-school`,
+      params: { schoolId: currentSchoolId },
+    };
   });
 
   public form = this.fb.group({
@@ -206,17 +200,14 @@ export default class CoursesForm {
     teacherId: this.fb.control<string | null>(null),
   });
 
-  public teachers = rxResource({
-    stream: () =>
-      this.http.get<{ id: string; name: string }[]>('/api/v1/teachers', {
-        params: toFetchQueryParams({
-          take: 100,
-          skip: 0,
-          orderBy: 'firstName',
-          orderDirection: 'asc',
-        }),
-      }),
-  });
+  public teachers = httpResource<{ id: string; name: string }[]>(() => ({
+    url: '/api/v1/teachers',
+    params: toFetchQueryParams({
+      take: 100,
+      orderBy: 'firstName',
+      orderDirection: 'asc',
+    }),
+  }));
 
   constructor() {
     afterRenderEffect(() => {

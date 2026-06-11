@@ -1,10 +1,9 @@
 import { Loader, Modal, Toast } from '#/ui';
-import { HttpClient } from '@angular/common/http';
-import { Component, inject, input, signal } from '@angular/core';
-import { rxResource } from '@angular/core/rxjs-interop';
+import { HttpClient, httpResource } from '@angular/common/http';
+import { Component, computed, inject, input, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { ChatType } from '@generated/prisma';
-import { firstValueFrom, map, of } from 'rxjs';
+import { firstValueFrom } from 'rxjs';
 import AssignmentForm from '../assignments/assignment-form';
 import CourseAttendance from '../attendance/course-attendance';
 import Auth from '../auth/auth';
@@ -50,7 +49,7 @@ type CourseVm = {
       <p>Error al cargar curso</p>
     }
     @if (courseResource.hasValue() && courseResource.value()?.id) {
-      @let course = courseResource.value()!;
+      @let course = transformedCourse()!;
       <div>
         <div class="breadcrumbs text-sm">
           <ul>
@@ -213,33 +212,29 @@ export default class Course {
       this.startingChat.set(false);
     }
   }
-  public courseResource = rxResource({
-    params: () => ({
-      id: this.id(),
-    }),
-    stream: ({ params }) => {
-      const { id } = params;
-      if (!isValidId(id)) {
-        return of(null);
-      }
-      return this.http.get<CourseVm>(`/api/v1/courses/${id}`).pipe(
-        map((c) => {
-          if (!c?.id) {
-            throw new Error('Course not found');
-          }
-          const t = c.teacher;
-          if (t) {
-            const color = t.user?.color ?? '#888';
-            const fn = t.user?.firstName ?? t.firstName ?? '';
-            const ln = t.user?.lastName ?? t.fatherName ?? '';
-            const name = `${fn} ${ln}`.trim();
-            const initials = `${(fn || '?').charAt(0)}${(ln || '?').charAt(0)}`.toUpperCase();
-            return { ...c, teacher: { ...t, name, initials, color } };
-          }
-          return c;
-        }),
-      );
-    },
+  public courseResource = httpResource<CourseVm>(() => {
+    const id = this.id();
+    if (!isValidId(id)) {
+      return undefined;
+    }
+    return `/api/v1/courses/${id}`;
+  });
+
+  public transformedCourse = computed(() => {
+    const c = this.courseResource.value();
+    if (!c?.id) return c;
+
+    console.log('Transforming course data', c);
+    const t = c.teacher;
+    if (t) {
+      const color = t.user?.color ?? '#888';
+      const fn = t.user?.firstName ?? t.firstName ?? '';
+      const ln = t.user?.lastName ?? t.fatherName ?? '';
+      const name = `${fn} ${ln}`.trim();
+      const initials = `${(fn || '?').charAt(0)}${(ln || '?').charAt(0)}`.toUpperCase();
+      return { ...c, teacher: { ...t, name, initials, color } };
+    }
+    return c;
   });
 
   public addAssignment() {

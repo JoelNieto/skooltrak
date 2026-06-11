@@ -1,10 +1,8 @@
 import { Confirmation, EditorViewer, Error as ErrorComponent, Loader, Toast } from '#/ui';
-import { HttpClient } from '@angular/common/http';
-import { DatePipe } from '@angular/common';
+import { HttpClient, httpResource } from '@angular/common/http';
 import { ChangeDetectionStrategy, Component, inject, input } from '@angular/core';
-import { rxResource } from '@angular/core/rxjs-interop';
 import { Router, RouterLink } from '@angular/router';
-import { filter, map, of, switchMap } from 'rxjs';
+import { filter, switchMap } from 'rxjs';
 import Auth from '../auth/auth';
 
 const QUESTION_TYPE_LABELS: Record<string, string> = {
@@ -146,18 +144,9 @@ export default class Quiz {
   private confirmation = inject(Confirmation);
   private toast = inject(Toast);
 
-  public quizResource = rxResource({
-    params: () => ({ id: this.id() }),
-    stream: ({ params }) => {
-      const { id } = params;
-      if (!id) return of(null);
-      return this.http.get<QuizDetail>(`/api/v1/quizzes/${id}`).pipe(
-        map((res) => {
-          if (res) return res;
-          throw new Error('Quiz not found');
-        }),
-      );
-    },
+  public quizResource = httpResource<QuizDetail>(() => {
+    if (!this.id()) return undefined;
+    return `/api/v1/quizzes/${this.id()}`;
   });
 
   deleteQuiz(quiz: { id: string; title: string }) {

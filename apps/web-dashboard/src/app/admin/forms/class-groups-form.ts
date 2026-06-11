@@ -1,10 +1,8 @@
 import { markGroupDirty, Toast } from '#/ui';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, httpResource } from '@angular/common/http';
 import { afterRenderEffect, Component, inject, input, output } from '@angular/core';
-import { rxResource } from '@angular/core/rxjs-interop';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Prisma } from '@generated/prisma';
-import { map, of } from 'rxjs';
 import Store from '../../core/store';
 @Component({
   selector: 'app-class-groups-form',
@@ -55,35 +53,20 @@ export default class ClassGroupsForm {
   private toast = inject(Toast);
   public closeModal = output<void>();
 
-  public teachers = rxResource({
-    params: () => ({
-      organizationId: this.store.currentOrganizationId(),
-    }),
-    stream: ({ params }) => {
-      const { organizationId } = params;
-      if (!organizationId) {
-        return of([]);
-      }
-      return this.http
-        .get<Array<{ id: string; name: string }>>(`/api/v1/teachers/by-organization/${organizationId}`)
-        .pipe(map((list) => list ?? []));
-    },
+  public teachers = httpResource<{ id: string; name: string }[]>(() => {
+    const currentOrganizationId = this.store.currentOrganizationId();
+    if (!currentOrganizationId) {
+      return undefined;
+    }
+    return `/api/v1/teachers/by-organization/${currentOrganizationId}`;
   });
 
-  public studyPlans = rxResource({
-    params: () => ({
-      schoolId: this.store.currentSchoolId(),
-    }),
-    stream: ({ params }) => {
-      if (!params.schoolId) {
-        return of([]);
-      }
-      return this.http
-        .get<Array<{ id: string; name: string }>>(`/api/v1/study-plans/by-school`, {
-          params: { schoolId: params.schoolId },
-        })
-        .pipe(map((list) => list ?? []));
-    },
+  public studyPlans = httpResource<{ id: string; name: string }[]>(() => {
+    const currentSchoolId = this.store.currentSchoolId();
+    if (!currentSchoolId) {
+      return undefined;
+    }
+    return `/api/v1/study-plans/by-school/${currentSchoolId}`;
   });
 
   private fb = inject(NonNullableFormBuilder);

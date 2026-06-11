@@ -1,8 +1,8 @@
 import { Confirmation, Loader, Modal, Pagination, Paginator } from '#/ui';
 import { Menu, MenuContent, MenuItem, MenuTrigger } from '@angular/aria/menu';
 import { OverlayModule } from '@angular/cdk/overlay';
-import { HttpClient } from '@angular/common/http';
 import { DatePipe, NgClass } from '@angular/common';
+import { HttpClient, httpResource } from '@angular/common/http';
 import { ChangeDetectionStrategy, Component, inject, input, signal, viewChild } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
@@ -276,16 +276,9 @@ export default class CourseAttendance {
   public selectedGroupId = signal<string>('');
   public selectedSession = signal<AttendanceSessionType | null>(null);
 
-  public groupsResource = rxResource({
-    params: () => ({
-      courseId: this.courseId(),
-    }),
-    stream: ({ params }) => {
-      if (!params.courseId) return of([]);
-      return this.#http
-        .get<Array<{ id: string; name: string }>>(`/api/v1/class-groups/by-course/${params.courseId}`)
-        .pipe(map((r) => r ?? []));
-    },
+  public groupsResource = httpResource<{ id: string; name: string }[]>(() => {
+    if (!this.courseId()) return undefined;
+    return `/api/v1/class-groups/by-course/${this.courseId()}`;
   });
 
   public sessionsResource = rxResource({

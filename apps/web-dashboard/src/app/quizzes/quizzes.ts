@@ -1,13 +1,12 @@
 import { Confirmation, Error, Loader, Toast } from '#/ui';
-import { HttpClient } from '@angular/common/http';
 import { DatePipe } from '@angular/common';
+import { HttpClient, httpResource } from '@angular/common/http';
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { rxResource } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
-import { filter, map, of, switchMap } from 'rxjs';
+import { filter, switchMap } from 'rxjs';
+import { StripHtmlPipe } from '../assignments/assignments';
 import Auth from '../auth/auth';
 import Store from '../core/store';
-import { StripHtmlPipe } from '../assignments/assignments';
 
 type QuizListItem = {
   id: string;
@@ -76,21 +75,15 @@ type QuizListItem = {
                   }
                 </td>
               </tr>
-            }
-            @empty {
+            } @empty {
               <tr>
-                <td colspan="6" class="text-center py-8 text-base-content/60">
-                  No hay quizzes
-                </td>
+                <td colspan="6" class="text-center py-8 text-base-content/60">No hay quizzes</td>
               </tr>
             }
           </tbody>
         </table>
       } @else if (quizzesResource.error()) {
-        <lib-error
-          (retry)="quizzesResource.reload()"
-          [description]="quizzesResource.error()?.message"
-        />
+        <lib-error (retry)="quizzesResource.reload()" [description]="quizzesResource.error()?.message" />
       } @else {
         <lib-loader />
       }
@@ -105,20 +98,13 @@ export default class Quizzes {
   private confirmation = inject(Confirmation);
   private toast = inject(Toast);
 
-  public quizzesResource = rxResource({
-    params: () => ({
-      organizationId: this.store.currentOrganizationId(),
-    }),
-    stream: ({ params }) => {
-      if (!params.organizationId) {
-        return of([]);
-      }
-      return this.http
-        .get<QuizListItem[]>(`/api/v1/quizzes`, {
-          params: { organizationId: params.organizationId },
-        })
-        .pipe(map((rows) => rows ?? []));
-    },
+  public quizzesResource = httpResource<QuizListItem[]>(() => {
+    const organizationId = this.store.currentOrganizationId();
+    if (!organizationId) return undefined;
+    return {
+      url: '/api/v1/quizzes',
+      params: { organizationId },
+    };
   });
 
   deleteQuiz(quiz: { id?: string; title?: string }) {

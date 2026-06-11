@@ -1,12 +1,10 @@
 import { EditorViewer, Error as ErrorComponent, Loader, Toast } from '#/ui';
 import { DatePipe } from '@angular/common';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, httpResource } from '@angular/common/http';
 import { Component, inject, input, signal } from '@angular/core';
-import { rxResource } from '@angular/core/rxjs-interop';
 import { Router, RouterLink } from '@angular/router';
 import { ChatType } from '@generated/prisma';
 import { firstValueFrom } from 'rxjs';
-import { map, of } from 'rxjs';
 import Auth from '../auth/auth';
 import { isValidId } from '../core/validators';
 import AssignmentSubmissionForm from './assignment-submission-form';
@@ -118,11 +116,7 @@ export default class Assignment {
     } | null;
     if (!assignment) return false;
     const uid = this.auth.user()?.id;
-    return (
-      this.auth.isAdmin() ||
-      assignment.teacher?.user?.id === uid ||
-      assignment.teacher?.userId === uid
-    );
+    return this.auth.isAdmin() || assignment.teacher?.user?.id === uid || assignment.teacher?.userId === uid;
   }
 
   async startAssignmentChat() {
@@ -142,19 +136,14 @@ export default class Assignment {
     }
   }
 
-  public assignmentResource = rxResource({
-    params: () => ({ id: this.id() }),
-    stream: ({ params }) => {
-      const { id } = params;
-      if (!isValidId(id)) {
-        return of(null);
-      }
-      return this.http.get<AssignmentDetail>(`/api/v1/assignments/${id}`).pipe(
-        map((a) => {
-          if (a) return a;
-          throw new Error('Assignment not found');
-        }),
-      );
-    },
+  public assignmentResource = httpResource<AssignmentDetail>(() => {
+    if (!isValidId(this.id())) return undefined;
+    return {
+      url: `/api/v1/assignments/${this.id()}`,
+      error: (err: Error) => {
+        console.error(err);
+        return new Error('Error al cargar la asignación');
+      },
+    };
   });
 }

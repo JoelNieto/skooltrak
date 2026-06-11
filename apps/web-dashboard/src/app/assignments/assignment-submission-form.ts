@@ -1,8 +1,7 @@
 import { Toast } from '#/ui';
-import { HttpClient } from '@angular/common/http';
 import { DatePipe } from '@angular/common';
+import { HttpClient, httpResource } from '@angular/common/http';
 import { ChangeDetectionStrategy, Component, inject, input, signal } from '@angular/core';
-import { rxResource } from '@angular/core/rxjs-interop';
 import { firstValueFrom } from 'rxjs';
 import AssignmentDropzone, { UploadedFile } from './assignment-dropzone';
 
@@ -100,12 +99,13 @@ export default class AssignmentSubmissionForm {
 
   maxFileSize = 50 * 1024 * 1024; // 50MB
 
-  submissionResource = rxResource({
-    params: () => ({ assignmentId: this.assignmentId() }),
-    stream: ({ params }) =>
-      this.http.get<MySubmission | null>('/api/v1/assignment-submissions/mine', {
-        params: { assignmentId: params.assignmentId },
-      }),
+  submissionResource = httpResource<MySubmission | null>(() => {
+    const assignmentId = this.assignmentId();
+    if (!assignmentId) return undefined;
+    return {
+      url: '/api/v1/assignment-submissions/mine',
+      params: { assignmentId },
+    };
   });
 
   onFilesChange(files: UploadedFile[]) {

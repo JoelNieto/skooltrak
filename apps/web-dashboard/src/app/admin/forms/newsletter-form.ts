@@ -1,11 +1,10 @@
 import { TextEditor, Toast } from '#/ui';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, httpResource } from '@angular/common/http';
 import { afterRenderEffect, ChangeDetectionStrategy, Component, computed, inject, input, signal } from '@angular/core';
-import { rxResource } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { form, FormField, required, submit } from '@angular/forms/signals';
 import { Router, RouterLink } from '@angular/router';
-import { firstValueFrom, of } from 'rxjs';
+import { firstValueFrom } from 'rxjs';
 import Store from '../../core/store';
 import { isValidId } from '../../core/validators';
 
@@ -132,14 +131,11 @@ export default class NewsletterForm {
     required(schemaPath.title, { message: 'Título es requerido' });
   });
 
-  public newsletterResource = rxResource({
-    params: () => ({ id: this.id() }),
-    stream: ({ params }) => {
-      if (!isValidId(params.id)) {
-        return of(null);
-      }
-      return this.http.get<NewsletterDto>(`/api/v1/newsletters/${params.id}`);
-    },
+  public newsletterResource = httpResource<NewsletterDto>(() => {
+    if (!isValidId(this.id())) return undefined;
+    return {
+      url: `/api/v1/newsletters/${this.id()}`,
+    };
   });
 
   constructor() {

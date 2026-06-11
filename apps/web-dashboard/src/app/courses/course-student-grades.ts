@@ -1,9 +1,9 @@
 import { DecimalToNumber } from '#/ui';
 import { DatePipe, DecimalPipe, NgClass } from '@angular/common';
+import { HttpClient, httpResource } from '@angular/common/http';
 import { afterRenderEffect, Component, computed, inject, input, signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
-import { HttpClient } from '@angular/common/http';
 import { Prisma } from '@generated/prisma';
 import { map, of } from 'rxjs';
 import Store from '../core/store';
@@ -104,21 +104,13 @@ export default class CourseStudentGrades {
   #http = inject(HttpClient);
   public periodId = signal<string>('');
 
-  public periodsResource = rxResource({
-    params: () => ({
-      year: this.#store.currentSchool()?.currentYear,
-    }),
-    stream: ({ params }) => {
-      const { year } = params;
-      if (!year) {
-        return of([]);
-      }
-      return this.#http
-        .get<Array<{ id: string; name: string; startDate: string; endDate: string }>>(`/api/v1/periods/by-year`, {
-          params: { year: String(year) },
-        })
-        .pipe(map((result) => result ?? []));
-    },
+  public periodsResource = httpResource<{ id: string; name: string; startDate: string; endDate: string }[]>(() => {
+    const year = this.#store.currentSchool()?.currentYear;
+    if (!year) return undefined;
+    return {
+      url: `/api/v1/periods/by-year`,
+      params: { year: String(year) },
+    };
   });
 
   private currentPeriodId = computed(() => {

@@ -1,9 +1,7 @@
 import { Toast } from '#/ui';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, httpResource } from '@angular/common/http';
 import { ChangeDetectionStrategy, Component, inject, input, signal } from '@angular/core';
-import { rxResource } from '@angular/core/rxjs-interop';
 import { firstValueFrom } from 'rxjs';
-import { map } from 'rxjs';
 
 @Component({
   selector: 'app-assignment-submissions-list',
@@ -143,24 +141,18 @@ export default class AssignmentSubmissionsList {
 
   downloadingFileId = signal<string | null>(null);
 
-  studentsResource = rxResource({
-    params: () => ({ assignmentId: this.assignmentId() }),
-    stream: ({ params }) =>
-      this.http
-        .get<
-          Array<{
-            id: string;
-            firstName: string;
-            fatherName: string;
-            motherName: string;
-            assignmentSubmissions: Array<{
-              submittedAt?: string | Date | null;
-              file: { id: string; name: string; mimeType: string; size: number };
-            }>;
-          }>
-        >(`/api/v1/assignment-submissions/students-for-assignment/${params.assignmentId}`)
-        .pipe(map((res) => res ?? [])),
-  });
+  studentsResource = httpResource<
+    {
+      id: string;
+      firstName: string;
+      fatherName: string;
+      motherName: string;
+      assignmentSubmissions: Array<{
+        submittedAt?: string | Date | null;
+        file: { id: string; name: string; mimeType: string; size: number };
+      }>;
+    }[]
+  >(() => `/api/v1/assignment-submissions/students-for-assignment/${this.assignmentId()}`);
 
   getSubmittedCount(students: Array<{ assignmentSubmissions?: unknown[] }>): number {
     return students.filter((s) => (s.assignmentSubmissions?.length ?? 0) > 0).length;

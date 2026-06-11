@@ -1,10 +1,8 @@
 import { Loader } from '#/ui';
 import { DatePipe } from '@angular/common';
+import { httpResource } from '@angular/common/http';
 import { ChangeDetectionStrategy, Component, inject, input } from '@angular/core';
-import { rxResource } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
-import { HttpClient } from '@angular/common/http';
-import { of } from 'rxjs';
 import Auth from '../auth/auth';
 import { isValidId } from '../core/validators';
 
@@ -204,18 +202,11 @@ type TeacherView = any;
 })
 export default class Teacher {
   public id = input.required<string>();
-  #http = inject(HttpClient);
   public auth = inject(Auth);
-  public teacherResource = rxResource({
-    params: () => ({
-      id: this.id(),
-    }),
-    stream: ({ params }) => {
-      const { id } = params;
-      if (!isValidId(id)) {
-        return of(null);
-      }
-      return this.#http.get<TeacherView>(`/api/v1/teachers/${id}`);
-    },
+  public teacherResource = httpResource<TeacherView>(() => {
+    if (!isValidId(this.id())) {
+      return undefined;
+    }
+    return { url: `/api/v1/teachers/${this.id()}` };
   });
 }

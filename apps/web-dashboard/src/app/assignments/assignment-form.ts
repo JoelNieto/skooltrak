@@ -1,10 +1,9 @@
 import { markGroupDirty, TextEditor, Toast } from '#/ui';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, httpResource } from '@angular/common/http';
 import { Component, effect, inject, input, OnInit, output, signal } from '@angular/core';
-import { rxResource } from '@angular/core/rxjs-interop';
 import { FormArray, FormControl, NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { addDays, format, setHours, setMinutes } from 'date-fns';
-import { firstValueFrom, of } from 'rxjs';
+import { firstValueFrom } from 'rxjs';
 import Store from '../core/store';
 
 enum AssignmentType {
@@ -101,45 +100,22 @@ export default class AssignmentForm implements OnInit {
 
   public selectedCourseId = signal<string | null>(null);
 
-  public courses = rxResource({
-    params: () => ({
-      schoolId: this.store.currentSchoolId(),
-    }),
-    stream: ({ params }) => {
-      const { schoolId } = params;
-      if (!schoolId) {
-        return of([]);
-      }
-      return this.http.get<{ id: string; name: string }[]>(`/api/v1/courses/by-school/${schoolId}`);
-    },
+  public courses = httpResource<{ id: string; name: string }[]>(() => {
+    const schoolId = this.store.currentSchoolId();
+    if (!schoolId) return undefined;
+    return `/api/v1/courses/by-school/${schoolId}`;
   });
 
-  public courseGroups = rxResource({
-    params: () => ({
-      courseId: this.selectedCourseId(),
-    }),
-    stream: ({ params }) => {
-      const { courseId } = params;
-      if (!courseId) {
-        return of([]);
-      }
-      return this.http.get<{ id: string; name: string }[]>(`/api/v1/class-groups/by-course/${courseId}`);
-    },
+  public courseGroups = httpResource<{ id: string; name: string }[]>(() => {
+    const courseId = this.selectedCourseId();
+    if (!courseId) return undefined;
+    return `/api/v1/class-groups/by-course/${courseId}`;
   });
 
-  public teachers = rxResource({
-    params: () => ({
-      organizationId: this.store.currentOrganizationId(),
-    }),
-    stream: ({ params }) => {
-      const { organizationId } = params;
-      if (!organizationId) {
-        return of([]);
-      }
-      return this.http.get<{ id: string; name: string }[]>(
-        `/api/v1/teachers/by-organization/${organizationId}`,
-      );
-    },
+  public teachers = httpResource<{ id: string; name: string }[]>(() => {
+    const organizationId = this.store.currentOrganizationId();
+    if (!organizationId) return undefined;
+    return `/api/v1/teachers/by-organization/${organizationId}`;
   });
 
   public types = [

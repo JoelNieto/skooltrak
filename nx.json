@@ -92,5 +92,8 @@
       "unitTestRunner": "vitest-analog"
     }
   },
-  "analytics": false
+  "analytics": false,
+  "migrate": {
+    "agentic": true
+  }
 }

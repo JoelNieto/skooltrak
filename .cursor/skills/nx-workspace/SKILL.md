@@ -7,7 +7,7 @@ description: "Explore and understand Nx workspaces. USE WHEN answering questions
 
 This skill provides read-only exploration of Nx workspaces. Use it to understand workspace structure, project configuration, available targets, and dependencies.
 
-Keep in mind that you might have to prefix commands with `npx`/`pnpx`/`yarn` if nx isn't installed globally. Check the lockfile to determine the package manager in use.
+Keep in mind that you might have to prefix commands with `bunx` if nx isn't installed globally. This project uses Bun (`bun.lock`).
 
 ## Listing Projects
 
@@ -59,7 +59,6 @@ nx show project my-app --json
 nx show project my-app --json | jq '.targets'
 nx show project my-app --json | jq '.targets.build'
 nx show project my-app --json | jq '.targets | keys'
-
 
 # Check project metadata
 nx show project my-app --json | jq '{name, root, sourceRoot, projectType, tags}'

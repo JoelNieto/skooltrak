@@ -75,18 +75,9 @@ E2E projects are colocated under `apps/*-e2e`.
 ## Getting started
 
 - **Install dependencies**
-  - Using Bun (preferred, bun.lock present):
-    ```sh
-    bun install
-    ```
-  - Or npm:
-    ```sh
-    npm install
-    ```
-  - Or pnpm:
-    ```sh
-    pnpm install
-    ```
+  ```sh
+  bun install
+  ```
 
 - **Environment**
   - Copy `.env` and set required variables for web and backend apps.
@@ -239,18 +230,9 @@ Los proyectos E2E están en `apps/*-e2e`.
 ## Comenzando
 
 - **Instalar dependencias**
-  - Con Bun (preferido, hay bun.lock):
-    ```sh
-    bun install
-    ```
-  - O npm:
-    ```sh
-    npm install
-    ```
-  - O pnpm:
-    ```sh
-    pnpm install
-    ```
+  ```sh
+  bun install
+  ```
 
 - **Entorno**
   - Copia `.env` y define las variables requeridas para web y backend.

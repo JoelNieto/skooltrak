@@ -3,13 +3,6 @@ name: nx-import
 description: Import, merge, or combine repositories into an Nx workspace using nx import. USE WHEN the user asks to adopt Nx across repos, move projects into a monorepo, or bring code/history from another repository.
 ---
 
----
-
-name: nx-import
-description: Import, merge, or combine repositories into an Nx workspace using nx import. USE WHEN the user asks to adopt Nx across repos, move projects into a monorepo, or bring code/history from another repository.
-
----
-
 ## Quick Start
 
 - `nx import` brings code from a source repository or folder into the current workspace, preserving commit history.
@@ -44,13 +37,32 @@ Read the nx docs if you have the tools for it.
 - **Always prefer the destination's existing conventions.** Source uses `libs/`but dest uses `packages/`? Import into `packages/` (`nx import <source> packages/foo --source=libs/foo`).
 - If dest has no convention (empty workspace), ask the user.
 
+### Application vs Library Detection
+
+Before importing, identify whether the source is an **application** or a **library**:
+
+- **Applications**: Deployable end products. Common indicators:
+  - _Frontend_: `next.config.*`, `vite.config.*` with a build entry point, framework-specific app scaffolding (CRA, Angular CLI app, etc.)
+  - _Backend (Node.js)_: Express/Fastify/NestJS server entrypoint, no `"exports"` field in `package.json`
+  - _JVM_: Maven `pom.xml` with `<packaging>jar</packaging>` or `<packaging>war</packaging>` and a `main` class; Gradle `application` plugin or `mainClass` setting
+  - _.NET_: `.csproj`/`.fsproj` with `<OutputType>Exe</OutputType>` or `<OutputType>WinExe</OutputType>`
+  - _General_: Dockerfile, a runnable entrypoint, no public API surface intended for import by other projects
+- **Libraries**: Reusable packages consumed by other projects. Common indicators: `"main"`/`"exports"` in `package.json`, Maven/Gradle packaging as a library jar, .NET `<OutputType>Library</OutputType>`, named exports intended for import by other packages.
+
+**Destination directory rules**:
+
+- Applications → `apps/<name>`. Check workspace globs (e.g. `package.json workspaces field`, `workspaces` in root `package.json`) for an existing `apps/*` entry.
+  - If `apps/*` is **not** present, add it before importing: update the workspace glob config and commit (or stage) the change.
+  - Example: `nx import <source> apps/my-app --source=packages/my-app`
+- Libraries → follow the dest's existing convention (`packages/`, `libs/`, etc.).
+
 ## Common Issues
 
-### pnpm Workspace Globs (Critical)
+### Workspace Globs (Critical)
 
-`nx import` adds the imported directory itself (e.g. `apps`) to `pnpm-workspace.yaml`, **NOT** glob patterns for packages within it. Cross-package imports will fail with `Cannot find module`.
+`nx import` adds the imported directory itself (e.g. `apps`) to `package.json workspaces field`, **NOT** glob patterns for packages within it. Cross-package imports will fail with `Cannot find module`.
 
-**Fix**: Replace with proper globs from the source config (e.g. `apps/*`, `libs/shared/*`), then `pnpm install`.
+**Fix**: Replace with proper globs from the source config (e.g. `apps/*`, `libs/shared/*`), then `bun install`.
 
 ### Root Dependencies and Config Not Imported (Critical)
 
@@ -74,15 +86,15 @@ Inferred targets (via Nx plugins) resolve config relative to project root — no
 ### Plugin Detection
 
 - **Whole-repo import**: `nx import` detects and offers to install plugins. Accept them.
-- **Subdirectory import**: Plugins NOT auto-detected. Manually add with `npx nx add @nx/PLUGIN`. Check `include`/`exclude` patterns — defaults won't match alternate directories (e.g. `apps-beta/`).
-- Run `npx nx reset` after any plugin config changes.
+- **Subdirectory import**: Plugins NOT auto-detected. Manually add with `bunx nx add @nx/PLUGIN`. Check `include`/`exclude` patterns — defaults won't match alternate directories (e.g. `apps-beta/`).
+- Run `bunx nx reset` after any plugin config changes.
 
 ### Redundant Root Files (Whole-Repo Only)
 
 Whole-repo import brings ALL source root files into the dest subdirectory. Clean up:
 
-- `pnpm-lock.yaml` — stale; dest has its own lockfile
-- `pnpm-workspace.yaml` — source workspace config; conflicts with dest
+- `bun.lock from source` — stale; dest has its own lockfile
+- `package.json workspaces field` — source workspace config; conflicts with dest
 - `node_modules/` — stale symlinks pointing to source filesystem
 - `.gitignore` — redundant with dest root `.gitignore`
 - `nx.json` — source Nx config; dest has its own
@@ -96,25 +108,25 @@ Subdirectory import doesn't bring the source's root `eslint.config.mjs`, but pro
 
 **Fix order**:
 
-1. Install ESLint deps first: `pnpm add -wD eslint@^9 @nx/eslint-plugin typescript-eslint` (plus framework-specific plugins)
+1. Install ESLint deps first: `bun add -d eslint@^9 @nx/eslint-plugin typescript-eslint` (plus framework-specific plugins)
 2. Create root `eslint.config.mjs` (copy from source or create with `@nx/eslint-plugin` base rules)
-3. Then `npx nx add @nx/eslint` to register the plugin in `nx.json`
+3. Then `bunx nx add @nx/eslint` to register the plugin in `nx.json`
 
-Install `typescript-eslint` explicitly — pnpm's strict hoisting won't auto-resolve this transitive dep of `@nx/eslint-plugin`.
+Install `typescript-eslint` explicitly — Bun's workspace resolution won't auto-resolve this transitive dep of `@nx/eslint-plugin`.
 
 ### ESLint Version Pinning (Critical)
 
 **Pin ESLint to v9** (`eslint@^9.0.0`). ESLint 10 breaks `@nx/eslint` and many plugins with cryptic errors like `Cannot read properties of undefined (reading 'version')`.
 
-`@nx/eslint` may peer-depend on ESLint 8, causing the wrong version to resolve. If lint fails with `Cannot read properties of undefined (reading 'allow')`, add `pnpm.overrides`:
+`@nx/eslint` may peer-depend on ESLint 8, causing the wrong version to resolve. If lint fails with `Cannot read properties of undefined (reading 'allow')`, add `overrides`:
 
 ```json
-{ "pnpm": { "overrides": { "eslint": "^9.0.0" } } }
+{ "overrides": { "eslint": "^9.0.0" } } }
 ```
 
 ### Dependency Version Conflicts
 
-After import, compare key deps (`typescript`, `eslint`, framework-specific). If dest uses newer versions, upgrade imported packages to match (usually safe). If source is newer, may need to upgrade dest first. Use `pnpm.overrides` to enforce single-version policy if desired.
+After import, compare key deps (`typescript`, `eslint`, framework-specific). If dest uses newer versions, upgrade imported packages to match (usually safe). If source is newer, may need to upgrade dest first. Use `overrides` to enforce single-version policy if desired.
 
 ### Module Boundaries
 
@@ -122,11 +134,11 @@ Imported projects may lack `tags`. Add tags or update `@nx/enforce-module-bounda
 
 ### Project Name Collisions (Multi-Import)
 
-Same `name` in `package.json` across source and dest causes `MultipleProjectsWithSameNameError`. **Fix**: Rename conflicting names (e.g. `@org/api` → `@org/teama-api`), update all dep references and import statements, `pnpm install`. The root `package.json` of each imported repo also becomes a project — rename those too.
+Same `name` in `package.json` across source and dest causes `MultipleProjectsWithSameNameError`. **Fix**: Rename conflicting names (e.g. `@org/api` → `@org/teama-api`), update all dep references and import statements, `bun install`. The root `package.json` of each imported repo also becomes a project — rename those too.
 
 ### Workspace Dep Import Ordering
 
-`pnpm install` fails during `nx import` if a `"workspace:*"` dependency hasn't been imported yet. File operations still succeed. **Fix**: Import all projects first, then `pnpm install --no-frozen-lockfile`.
+`bun install` fails during `nx import` if a `"workspace:*"` dependency hasn't been imported yet. File operations still succeed. **Fix**: Import all projects first, then `bun install`.
 
 ### `.gitkeep` Blocking Subdirectory Import
 
@@ -151,7 +163,7 @@ If the dest also has backend projects needing `nodenext`, use per-project overri
 
 React libraries generated with `@nx/react:library` reference `@nx/react/typings/cssmodule.d.ts` and `@nx/react/typings/image.d.ts` in their tsconfig `types`. These fail with `Cannot find type definition file` unless `@nx/react` is installed in the dest workspace.
 
-**Fix**: `pnpm add -wD @nx/react`
+**Fix**: `bun add -d @nx/react`
 
 ### Jest Preset Missing (Subdirectory Import)
 
@@ -159,27 +171,27 @@ Nx presets create `jest.preset.js` at the workspace root, and project jest confi
 
 **Fix**:
 
-1. Run `npx nx add @nx/jest` — registers `@nx/jest/plugin` in `nx.json` and updates `namedInputs`
+1. Run `bunx nx add @nx/jest` — registers `@nx/jest/plugin` in `nx.json` and updates `namedInputs`
 2. Create `jest.preset.js` at workspace root (see `references/JEST.md` for content) — `nx add` only creates this when a generator runs, not on bare `nx add`
-3. Install test runner deps: `pnpm add -wD jest jest-environment-jsdom ts-jest @types/jest`
+3. Install test runner deps: `bun add -d jest jest-environment-jsdom ts-jest @types/jest`
 4. Install framework-specific test deps as needed (see `references/JEST.md`)
 
 For deeper Jest issues (tsconfig.spec.json, Babel transforms, CI atomization, Jest vs Vitest coexistence), see `references/JEST.md`.
 
 ### Target Name Prefixing (Whole-Repo Import)
 
-When importing a project with existing npm scripts (`build`, `dev`, `start`, `lint`), Nx plugins auto-prefix inferred target names to avoid conflicts: e.g. `next:build`, `vite:build`, `eslint:lint`.
+When importing a project with existing package.json scripts (`build`, `dev`, `start`, `lint`), Nx plugins auto-prefix inferred target names to avoid conflicts: e.g. `next:build`, `vite:build`, `eslint:lint`.
 
-**Fix**: Remove the Nx-rewritten npm scripts from the imported `package.json`, then either:
+**Fix**: Remove the Nx-rewritten package.json scripts from the imported `package.json`, then either:
 
 - Accept the prefixed names (e.g. `nx run app:next:build`)
 - Rename plugin target names in `nx.json` to use unprefixed names
 
 ## Non-Nx Source Issues
 
-When the source is a plain pnpm/npm workspace without `nx.json`.
+When the source is a plain workspace without `nx.json`.
 
-### npm Script Rewriting (Critical)
+### package.json Script Rewriting (Critical)
 
 Nx rewrites `package.json` scripts during init, creating broken commands (e.g. `vitest run` → `nx test run`). **Fix**: Remove all rewritten scripts — Nx plugins infer targets from config files.
 
@@ -198,9 +210,9 @@ Plain TS projects use `"noEmit": true`, incompatible with Nx project references.
 
 ### Stale node_modules and Lockfiles
 
-`nx import` may bring `node_modules/` (pnpm symlinks pointing to the source filesystem) and `pnpm-lock.yaml` from the source. Both are stale.
+`nx import` may bring `node_modules/` (stale symlinks pointing to the source filesystem) and a foreign lockfile from the source. Both are stale.
 
-**Fix**: `rm -rf imported/node_modules imported/pnpm-lock.yaml imported/pnpm-workspace.yaml imported/.gitignore`, then `pnpm install`.
+**Fix**: `rm -rf imported/node_modules imported/bun.lock imported/.gitignore`, then `bun install`.
 
 ### ESLint Config Handling
 
@@ -210,7 +222,7 @@ Plain TS projects use `"noEmit": true`, incompatible with Nx project references.
 
 ### TypeScript `paths` Aliases
 
-Nx uses `package.json` `"exports"` + pnpm workspace linking instead of tsconfig `"paths"`. If packages have proper `"exports"`, paths are redundant. Otherwise, update paths for the new directory structure.
+Nx uses `package.json` `"exports"` + Bun workspace linking instead of tsconfig `"paths"`. If packages have proper `"exports"`, paths are redundant. Otherwise, update paths for the new directory structure.
 
 ## Technology-specific Guidance
 
@@ -218,6 +230,7 @@ Identify technologies in the source repo, then read and apply the matching refer
 
 Available references:
 
+- `references/ESLINT.md` — ESLint projects: duplicate `lint`/`eslint:lint` targets, legacy `.eslintrc.*` linting generated files, flat config `.cjs` self-linting, `typescript-eslint` v7/v9 peer dep conflict, mixed ESLint v8+v9 in one workspace.
 - `references/GRADLE.md`
 - `references/JEST.md` — Jest testing: `@nx/jest/plugin` setup, jest.preset.js, testing deps by framework, tsconfig.spec.json, Jest vs Vitest coexistence, Babel transforms, CI atomization.
 - `references/NEXT.md` — Next.js projects: `@nx/next/plugin` targets, `withNx`, Next.js TS config (`noEmit`, `jsx: "preserve"`), auto-installing deps via wrong PM, non-Nx `create-next-app` imports, mixed Next.js+Vite coexistence.

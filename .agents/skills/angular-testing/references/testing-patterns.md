@@ -153,10 +153,10 @@ export default defineConfig({
 
 ```bash
 # Run with UI
-npx vitest --ui
+bunx vitest --ui
 
 # Open UI at specific port
-npx vitest --ui --port 51204
+bunx vitest --ui --port 51204
 ```
 
 ### Concurrent Tests
@@ -625,7 +625,7 @@ export default defineConfig({
     trace: 'on-first-retry',
   },
   webServer: {
-    command: 'npm run start',
+    command: 'bun run start',
     url: 'http://localhost:4200',
     reuseExistingServer: !process.env.CI,
   },

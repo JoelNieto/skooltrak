@@ -40,7 +40,7 @@ In your handoff `summary` (1–3 sentences per the system prompt), name the brea
 
 Vitest 4 has hard runtime requirements:
 
-- **Vite ≥ 6.0.0** (Vite 5 is unsupported). Check with `npx vite --version`. If on Vite 5, apply the Vite 6 / 7 / 8 migration guides first.
+- **Vite ≥ 6.0.0** (Vite 5 is unsupported). Check with `bunx vite --version`. If on Vite 5, apply the Vite 6 / 7 / 8 migration guides first.
 - **Node.js ≥ 20.0.0** (Node 18 support dropped). Check with `node --version`. Update CI `actions/setup-node` versions, `.nvmrc`, `engines` in `package.json`, and Docker base images.
 
 If either prerequisite is unmet, write status: failed with the unmet requirement in `summary` — config-level migration on an unsupported runtime will produce confusing errors.

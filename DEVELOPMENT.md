@@ -23,17 +23,13 @@ bun run serve:dev:admin   # Admin (web + api)
 
 ## Package Manager
 
-**This project uses Bun**, not npm or pnpm.
+**This project uses Bun** exclusively. Do not use other package managers.
 
 ```bash
 # ✅ Correct
 bun nx build web-dashboard
 bun nx test dashboard-backend
 bun nx run-many -t lint test build
-
-# ❌ Wrong
-npm run nx build web-dashboard
-pnpm nx test dashboard-backend
 ```
 
 ## Project Structure
@@ -317,8 +313,8 @@ Cloud ID: `68e145c2c3749010daf16002`
 
 ## Troubleshooting
 
-### "Command not found: pnpm"
-Use `bun` instead of `pnpm` or `npm`.
+### "Command not found: bun"
+Install Bun from https://bun.sh and run `bun install` in the project root.
 
 ### "Cannot find module '@prisma/client'"
 ```bash

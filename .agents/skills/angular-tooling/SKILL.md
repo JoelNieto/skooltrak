@@ -298,7 +298,7 @@ ng add @angular/localize
 
 ```bash
 # Install and configure
-npm install @ngrx/signals
+bun install @ngrx/signals
 
 # Some libraries have schematics
 ng add @ngrx/store
@@ -327,7 +327,7 @@ ng update @angular/core @angular/cli --force
 ng build -c production --stats-json
 
 # Analyze bundle (install webpack-bundle-analyzer)
-npx webpack-bundle-analyzer dist/my-app/browser/stats.json
+bunx webpack-bundle-analyzer dist/my-app/browser/stats.json
 ```
 
 ## Caching

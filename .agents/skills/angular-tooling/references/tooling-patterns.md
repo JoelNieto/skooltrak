@@ -14,7 +14,7 @@
 
 ```bash
 # Install schematics CLI
-npm install -g @angular-devkit/schematics-cli
+bun add -g @angular-devkit/schematics-cli
 
 # Create schematic collection
 schematics blank --name=my-schematics
@@ -46,7 +46,7 @@ export function myComponent(options: { name: string; path: string }): Rule {
 
 ```bash
 # Link locally
-npm link ./my-schematics
+bun link ./my-schematics
 
 # Use
 ng generate my-schematics:my-component --name=test --path=src/app
@@ -226,19 +226,19 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
+          cache: 'bun'
       
       - name: Install dependencies
-        run: npm ci
+        run: bun install --frozen-lockfile
       
       - name: Lint
-        run: npm run lint
+        run: bun run lint
       
       - name: Test
-        run: npm run test -- --watch=false --browsers=ChromeHeadless --code-coverage
+        run: bun run test -- --watch=false --browsers=ChromeHeadless --code-coverage
       
       - name: Build
-        run: npm run build -- -c production
+        run: bun run build -- -c production
       
       - name: Upload coverage
         uses: codecov/codecov-action@v3
@@ -265,18 +265,18 @@ stages:
 install:
   stage: install
   script:
-    - npm ci
+    - bun install --frozen-lockfile
 
 test:
   stage: test
   script:
-    - npm run lint
-    - npm run test -- --watch=false --browsers=ChromeHeadless
+    - bun run lint
+    - bun run test -- --watch=false --browsers=ChromeHeadless
 
 build:
   stage: build
   script:
-    - npm run build -- -c production
+    - bun run build -- -c production
   artifacts:
     paths:
       - dist/
@@ -441,7 +441,7 @@ ng test --browsers=Chrome
     "test:ci": "ng test --watch=false --browsers=ChromeHeadless --code-coverage",
     "lint": "ng lint",
     "lint:fix": "ng lint --fix",
-    "analyze": "ng build -c production --stats-json && npx webpack-bundle-analyzer dist/my-app/browser/stats.json",
+    "analyze": "ng build -c production --stats-json && bunx webpack-bundle-analyzer dist/my-app/browser/stats.json",
     "update": "ng update"
   }
 }

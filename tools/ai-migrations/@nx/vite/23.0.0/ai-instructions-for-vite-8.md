@@ -86,7 +86,7 @@ export default defineConfig({
 - [ ] Remove `babel` options from `react()` plugin invocations
 - [ ] If you depended on a Babel plugin (e.g., styled-components, emotion, relay), find an Oxc-compatible replacement or switch to `@vitejs/plugin-react-swc` (still Babel-free). There is no drop-in for arbitrary Babel plugins.
 - [ ] If you cannot drop your Babel plugin, stay on Vite 7 + plugin-react v4 for now (see "Project-Level Vite 7 Pinning")
-- [ ] Run `pnpm install` (or your package manager equivalent) so the new plugin-react version resolves
+- [ ] Run `bun install` (or your package manager equivalent) so the new plugin-react version resolves
 
 ### 3. Angular + Vitest (vitest-analog path): Add `@oxc-project/runtime`
 
@@ -106,7 +106,7 @@ rg '@analogjs/vite-plugin-angular' --type ts --type js
 **Action Items**:
 
 - [ ] For each affected workspace, add `@oxc-project/runtime` to root `devDependencies` (the Nx Angular generators do this automatically on the vitest-analog path; check legacy workspaces that pre-date that)
-- [ ] Run `pnpm install` (or equivalent)
+- [ ] Run `bun install` (or equivalent)
 - [ ] Run the project's tests to confirm the helper resolves
 
 ### 4. Type Resolution Under `moduleResolution: "node"`
@@ -145,8 +145,8 @@ If a project depends on a Babel plugin that has no Oxc equivalent, pin that proj
 
 If only some projects need to stay on 7 while the rest move to 8, use your package manager's overrides feature:
 
-- pnpm: `pnpm.overrides` in root `package.json`
-- npm/yarn: `overrides`/`resolutions`
+- Bun: `overrides` in root `package.json`
+- Bun: `overrides` in root package.json
 
 **Action Items**:
 

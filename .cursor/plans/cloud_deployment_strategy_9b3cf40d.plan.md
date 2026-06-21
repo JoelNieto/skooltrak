@@ -189,7 +189,7 @@ deploy:
 ### Phase 1: Database Setup
 
 1. Create Neon project in AWS São Paulo region
-2. Run `npx prisma migrate deploy` to apply migrations
+2. Run `bunx prisma migrate deploy` to apply migrations
 3. Run `bun prisma/scripts/seed-admin.ts` to seed initial data
 
 ### Phase 2: Backend Deployment

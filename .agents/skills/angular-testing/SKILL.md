@@ -20,7 +20,7 @@ ng add @analogjs/vitest-angular
 Or manually:
 
 ```bash
-npm install -D vitest @analogjs/vitest-angular jsdom
+bun install -D vitest @analogjs/vitest-angular jsdom
 ```
 
 ### Configuration
@@ -71,16 +71,16 @@ getTestBed().initTestEnvironment(
 
 ```bash
 # Run tests
-npx vitest
+bunx vitest
 
 # Watch mode
-npx vitest --watch
+bunx vitest --watch
 
 # Coverage
-npx vitest --coverage
+bunx vitest --coverage
 
 # UI mode
-npx vitest --ui
+bunx vitest --ui
 ```
 
 ### Vitest Test Example

@@ -1,6 +1,6 @@
 ## ESLint
 
-ESLint-specific guidance for `nx import`. For generic import issues (root deps, pnpm globs, project references), see `SKILL.md`.
+ESLint-specific guidance for `nx import`. For generic import issues (root deps, workspace globs, project references), see `SKILL.md`.
 
 ---
 
@@ -25,10 +25,10 @@ ESLint-specific guidance for `nx import`. For generic import issues (root deps, 
 
 ### Duplicate `lint` and `eslint:lint` Targets
 
-After import, projects will have **two** lint-related targets if the source `package.json` has a `"lint"` npm script:
+After import, projects will have **two** lint-related targets if the source `package.json` has a `"lint"` package.json script:
 
 - `eslint:lint` — inferred by `@nx/eslint/plugin`; has proper caching and input/output tracking
-- `lint` — created by Nx from the npm script via `nx:run-script`; no caching intelligence, just wraps `npm run lint`
+- `lint` — created by Nx from the package.json script via `nx:run-script`; no caching intelligence, just wraps `bun run lint`
 
 **Fix**: Remove the `"lint"` script from each project's `package.json`. Keep `"lint:fix"` if present — there is no plugin-inferred equivalent for auto-fixing.
 
@@ -83,9 +83,9 @@ The same applies to `eslint.config.js` in a CJS project (no `"type": "module"`) 
 
 ### `typescript-eslint` Version Conflict With ESLint 9
 
-`typescript-eslint@7.x` declares `peerDependencies: { "eslint": "^8.56.0" }`, but it is commonly used alongside `"eslint": "^9.0.0"`. npm treats this as a hard peer dep conflict and refuses to install.
+`typescript-eslint@7.x` declares `peerDependencies: { "eslint": "^8.56.0" }`, but it is commonly used alongside `"eslint": "^9.0.0"`. Bun treats this as a hard peer dep conflict and refuses to install.
 
-**Root cause**: `@nx/eslint` init adds `eslint@~8.57.0` at the workspace root (for its own peer deps). Workspace packages that request `eslint@^9.0.0` + `typescript-eslint@^7.0.0` trigger the conflict when npm resolves their deps.
+**Root cause**: `@nx/eslint` init adds `eslint@~8.57.0` at the workspace root (for its own peer deps). Workspace packages that request `eslint@^9.0.0` + `typescript-eslint@^7.0.0` trigger the conflict when Bun resolves their deps.
 
 **Fix**: Upgrade `typescript-eslint` from `^7.0.0` to `^8.0.0` directly in the affected workspace package's `package.json`. The `tseslint.config()` API and `tseslint.configs.recommended` are identical between v7 and v8 — no config changes needed.
 
@@ -98,7 +98,7 @@ The same applies to `eslint.config.js` in a CJS project (no `"type": "module"`) 
 }
 ```
 
-**Note**: npm's root-level `"overrides"` field does not force versions for workspace packages' direct dependencies — update each package.json individually.
+**Note**: root-level `"overrides"` field does not force versions for workspace packages' direct dependencies — update each package.json individually.
 
 ---
 

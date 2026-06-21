@@ -388,7 +388,7 @@ dist/
 
 ```bash
 # Development
-npm run serve:ssr:my-app
+bun run serve:ssr:my-app
 
 # Production
 node dist/my-app/server/server.mjs

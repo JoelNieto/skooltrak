@@ -40,7 +40,7 @@ In your handoff `summary` (1–3 sentences per the system prompt), name the brea
 1. **Identify the current Vitest version**:
 
    ```bash
-   npx vitest --version
+   bunx vitest --version
    ```
 
 2. **Identify all Vitest projects**:
@@ -573,7 +573,7 @@ export default defineConfig({
 
 ## Post-Migration Verification
 
-1. Reinstall: `pnpm install` (or `npm install` / `yarn install`)
+1. Reinstall: `bun install` (or `bun install` / `yarn install`)
 2. Run affected tests: `nx affected -t test`
 3. Re-baseline coverage on key projects: `nx run <project>:test --coverage`
 4. Typecheck custom reporters / sequencers / snapshot tooling: `nx affected -t typecheck`

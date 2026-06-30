@@ -1,6 +1,6 @@
 ## Vite
 
-Vite-specific guidance for `nx import`. For generic import issues (workspace globs, root deps, project references, name collisions, ESLint, frontend tsconfig base settings, `@nx/react` typings, Jest preset, non-Nx source handling), see `SKILL.md`.
+Vite-specific guidance for `nx import`. For generic import issues (pnpm globs, root deps, project references, name collisions, ESLint, frontend tsconfig base settings, `@nx/react` typings, Jest preset, non-Nx source handling), see `SKILL.md`.
 
 ---
 
@@ -12,7 +12,7 @@ Keep both plugins only if the workspace has non-Vite pure TS libraries — `@nx/
 
 ### @nx/vite Plugin Install Failure
 
-Plugin init loads `vite.config.ts` before deps are available. **Fix**: `bun add -d vite @vitejs/plugin-react` (or `@vitejs/plugin-vue`) first, then `bunx nx add @nx/vite`.
+Plugin init loads `vite.config.ts` before deps are available. **Fix**: `pnpm add -wD vite @vitejs/plugin-react` (or `@vitejs/plugin-vue`) first, then `pnpm exec nx add @nx/vite`.
 
 ### Vite `resolve.alias` and `__dirname` (Non-Nx Sources)
 
@@ -132,7 +132,7 @@ export default [...baseConfig, ...nx.configs['flat/react'], { files: ['**/*.ts',
 
 ### React Version Conflicts
 
-React 18 (source) + React 19 (dest): Bun may resolve mismatched `react-dom`, causing `TypeError: Cannot read properties of undefined (reading 'S')`. **Fix**: Align versions with `overrides`.
+React 18 (source) + React 19 (dest): pnpm may hoist mismatched `react-dom`, causing `TypeError: Cannot read properties of undefined (reading 'S')`. **Fix**: Align versions with `pnpm.overrides`.
 
 ### `@testing-library/jest-dom` with Vitest
 
@@ -179,9 +179,9 @@ Both `@nx/js/typescript` and `@nx/vite/plugin` auto-detect `vue-tsc` when instal
 
 **Correct order:**
 
-1. `bun add -d eslint@^9 eslint-plugin-vue vue-eslint-parser @vue/eslint-config-typescript @typescript-eslint/parser @nx/eslint-plugin typescript-eslint`
+1. `pnpm add -wD eslint@^9 eslint-plugin-vue vue-eslint-parser @vue/eslint-config-typescript @typescript-eslint/parser @nx/eslint-plugin typescript-eslint`
 2. Create root `eslint.config.mjs`
-3. Then `bunx nx add @nx/eslint`
+3. Then `npx nx add @nx/eslint`
 
 ### Vue ESLint Config Pattern
 
@@ -206,7 +206,7 @@ export default [
 
 **Important**: `vue-eslint-parser` override must come **AFTER** base config — `flat/typescript` sets the TS parser globally without a `files` filter, breaking `.vue` parsing.
 
-`vue-eslint-parser` must be an explicit dependency (strict resolution prevents transitive import).
+`vue-eslint-parser` must be an explicit pnpm dependency (strict resolution prevents transitive import).
 
 **Known issue**: Some generated Vue ESLint configs omit `vue-eslint-parser`. Use the pattern above instead.
 
@@ -256,9 +256,9 @@ Remove `@nx/js/typescript` if all projects use Vite. Keep it (renamed to `"tsc-t
 
 ---
 
-## Redundant package.json Scripts After Import
+## Redundant npm Scripts After Import
 
-`nx import` copies `package.json` verbatim, so package.json scripts come along. For Vite-based projects `@nx/vite/plugin` already infers the same targets from `vite.config.ts` — the package.json scripts just shadow the plugin with weaker `nx:run-script` wrappers (no first-class caching inputs/outputs). Remove them after import.
+`nx import` copies `package.json` verbatim, so npm scripts come along. For Vite-based projects `@nx/vite/plugin` already infers the same targets from `vite.config.ts` — the npm scripts just shadow the plugin with weaker `nx:run-script` wrappers (no first-class caching inputs/outputs). Remove them after import.
 
 ### Standalone Vite App (`create-vite`)
 
@@ -296,7 +296,7 @@ Do **not** remove React Router 7 scripts. They use the framework CLI (`react-rou
 
 ### Nx Source
 
-1. Generic fixes from SKILL.md (workspace globs, root deps, executor paths, frontend tsconfig base settings, `@nx/react` typings)
+1. Generic fixes from SKILL.md (pnpm globs, root deps, executor paths, frontend tsconfig base settings, `@nx/react` typings)
 2. Configure `@nx/vite/plugin` typecheck target
 3. **React**: `jsx: "react-jsx"` (root or per-project)
 4. **Vue**: `jsx: "preserve"` + `jsxImportSource: "vue"`; verify `vue-shims.d.ts`; install ESLint deps before `@nx/eslint`
@@ -306,13 +306,13 @@ Do **not** remove React Router 7 scripts. They use the framework CLI (`react-rou
 ### Non-Nx Source (additional steps)
 
 0. Import into `apps/<name>` (see SKILL.md: "Application vs Library Detection")
-1. Generic fixes from SKILL.md (stale files cleanup, workspace globs, rewritten scripts, target name prefixing, noEmit→composite, ESLint handling)
+1. Generic fixes from SKILL.md (stale files cleanup, pnpm globs, rewritten scripts, target name prefixing, noEmit→composite, ESLint handling)
 2. Fix `noEmit` in **all** tsconfigs (app, node, etc. — non-Nx projects often have multiple)
 3. Add `extends` to solution-style tsconfigs so root settings apply
 4. Fix `resolve.alias` / `__dirname` / `baseUrl`
 5. Ensure `types` include `vite/client` and `node`
 6. Install `@nx/vite` manually if it failed during import
-7. Remove redundant package.json scripts so `@nx/vite/plugin` infers them natively (see "Redundant package.json Scripts" section)
+7. Remove redundant npm scripts so `@nx/vite/plugin` infers them natively (see "Redundant npm Scripts" section)
 8. **Vue**: Add `outDir` + `**/*.vue.d.ts` to ESLint ignores
 9. Full verification
 
@@ -324,23 +324,23 @@ See SKILL.md for generic multi-import (name collisions, dep refs). Vite-specific
 
 1. Ensure source has at least one commit (see SKILL.md: "Source Repo Has No Commits")
 2. `nx import` whole-repo into `apps/<name>` (see SKILL.md: "Application vs Library Detection") → auto-installs `@nx/vite`, `@nx/react`
-3. Stale file cleanup: `node_modules/`, `bun.lock from source`, `.gitignore`
+3. Stale file cleanup: `node_modules/`, `package-lock.json`, `.gitignore`
 4. Fix `tsconfig.json`: `noEmit` → `composite + emitDeclarationOnly + outDir + tsBuildInfoFile`
 5. Add `build` and `.react-router` to dest root `.gitignore`
-6. **Keep all package.json scripts** — React Router 7 uses framework CLI (`react-router build/dev`), not plain vite (see "Redundant package.json Scripts" above)
-7. `bun install && nx reset && nx sync --yes`
+6. **Keep all npm scripts** — React Router 7 uses framework CLI (`react-router build/dev`), not plain vite (see "Redundant npm Scripts" above)
+7. `npm install && nx reset && nx sync --yes`
 
 ### Non-Nx Source: TanStack Start
 
 1. Ensure source has at least one commit — `create-tan-stack` does NOT auto-commit (see SKILL.md)
 2. `nx import` whole-repo into `apps/<name>` (see SKILL.md: "Application vs Library Detection") → auto-installs `@nx/vite`, `@nx/vitest`
-3. Stale file cleanup: `node_modules/`, `bun.lock from source`, `.gitignore`
+3. Stale file cleanup: `node_modules/`, `package-lock.json`, `.gitignore`
 4. Fix `tsconfig.json`: `noEmit` → `composite + emitDeclarationOnly + outDir + tsBuildInfoFile`
 5. Keep `allowImportingTsExtensions` — compatible with `emitDeclarationOnly: true`
 6. Add `.vinxi`, `.tanstack`, `.nitro`, `.output` to dest root `.gitignore`
 7. Move hardcoded `--port` from `dev` script into `vite.config.ts` (`server: { port: N }`)
-8. Remove redundant package.json scripts — `@nx/vite/plugin` infers `build`, `dev`, `preview`, `test` (see "Redundant package.json Scripts" above)
-9. `bun install && nx reset && nx sync --yes`
+8. Remove redundant npm scripts — `@nx/vite/plugin` infers `build`, `dev`, `preview`, `test` (see "Redundant npm Scripts" above)
+9. `npm install && nx reset && nx sync --yes`
 
 ### Quick Reference: React vs Vue
 
@@ -372,18 +372,18 @@ See SKILL.md for generic multi-import (name collisions, dep refs). Vite-specific
 ### Scenario 6: Multiple non-Nx React apps (CRA, Next.js, React Router 7, TanStack Start, Vite) → TS preset (PASS)
 
 - Sources: 5 standalone non-Nx repos with different build tools
-- Dest: CNW ts preset (Nx 22.5.1), Bun workspaces, `packages/*`
+- Dest: CNW ts preset (Nx 22.5.1), npm workspaces, `packages/*`
 - Import: whole-repo for each, sequential into `packages/<name>`
 - Pre-import fixes:
   1. Removed `packages/.gitkeep` and committed
   2. `git init && git add . && git commit` in Vite app (no git at all)
   3. `git add . && git commit` in TanStack app (git init'd but no commits)
-- Import: `bunx nx -- import <source> packages/<name> --source=. --ref=main --no-interactive`
+- Import: `npm exec nx -- import <source> packages/<name> --source=. --ref=main --no-interactive`
   - Next.js import auto-installed `@nx/eslint`, `@nx/next`
   - React Router 7 import auto-installed `@nx/vite`, `@nx/react`, `@nx/docker` (Dockerfile present)
   - TanStack import auto-installed `@nx/vitest`
 - Post-import fixes:
-  1. Removed stale `node_modules/`, `bun.lock from source`, `.gitignore` from each package
+  1. Removed stale `node_modules/`, `package-lock.json`, `.gitignore` from each package
   2. Removed Nx-rewritten scripts from `board-games-nextjs/package.json` (had `"build": "nx next:build"`, etc.)
   3. Updated root `tsconfig.base.json`: `nodenext` → `bundler`, added `dom`/`dom.iterable` to lib, added `jsx: react-jsx`
   4. Added `build` to dest root `.gitignore` (CRA and React Router 7 output there)

@@ -48,7 +48,7 @@ import { EditorMenu } from './editor-menu';
       list-style-type: decimal !important;
     }
     .tiptap {
-      font-family: 'Momo Trust Sans', sans-serif;
+      font-family: 'Google Sans Text', sans-serif;
       font-size: 0.85rem;
     }
     .tiptap > p > code {

@@ -86,7 +86,7 @@ import { NG_VALUE_ACCESSOR, ReactiveFormsModule } from '@angular/forms';
     :host {
       display: flex;
       justify-content: center;
-      font-family: var(--inter-font);
+      font-family: var(--font-sans);
     }
     .select {
       display: flex;

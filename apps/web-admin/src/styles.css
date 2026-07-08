@@ -1,6 +1,5 @@
 /* You can add global styles to this file, and also import other style files */
-@import url('https://fonts.googleapis.com/css2?family=Inclusive+Sans:ital,wght@0,300..700;1,300..700&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Momo+Trust+Sans:wght@200..800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Google+Sans+Text:ital,wght@0,400;0,500;0,700;1,400;1,500&display=swap');
 @import url('https://fonts.googleapis.com/icon?family=Material+Symbols+Outlined');
 @import 'tailwindcss';
 @import '@angular/cdk/overlay-prebuilt.css';
@@ -78,7 +77,7 @@
 }
 
 @theme {
-  --font-sans: 'Momo Trust Sans', sans-serif !important;
+  --font-sans: 'Google Sans Text', sans-serif !important;
   --tab-border-color: var(--color-primary);
 }
 

@@ -20,6 +20,7 @@ export class PeriodsService {
   findManyByYear(year: number) {
     return this.prisma.period.findMany({
       where: { year },
+      orderBy: { startDate: 'asc' },
     });
   }
 

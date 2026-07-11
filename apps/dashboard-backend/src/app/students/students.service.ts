@@ -2,7 +2,7 @@ import { sendUserInvitation } from '@/auth';
 import { ConflictException, Inject, Injectable, Logger, Scope } from '@nestjs/common';
 import { REQUEST } from '@nestjs/core';
 import * as bcrypt from 'bcrypt';
-import { randomUUID } from 'crypto';
+import { randomBytes, randomUUID } from 'crypto';
 import { Request } from 'express';
 import { ChatSyncService } from '../chats/chat-sync.service';
 import { FetchDataInput } from '../fetch-data.input';
@@ -150,6 +150,7 @@ export class StudentsService {
       fatherName,
       motherName,
       documentId,
+      enrollmentCode: await this.generateEnrollmentCode(),
       birthDate: parsedBirthDate,
       gender,
       address,
@@ -213,6 +214,46 @@ export class StudentsService {
   getRandomPastelColor() {
     const hue = Math.floor(Math.random() * 360);
     return `hsl(${hue}, 70%, 70%)`;
+  }
+
+  /**
+   * Generates a unique, human-friendly enrollment code for parent self-linking.
+   * Reusable (one code per student) and regenerable/revocable by the school.
+   */
+  private async generateEnrollmentCode(): Promise<string> {
+    for (let attempt = 0; attempt < 5; attempt++) {
+      const code = randomBytes(5)
+        .toString('base64')
+        .toUpperCase()
+        .replace(/[^A-Z0-9]/g, '')
+        .slice(0, 8);
+      const existing = await this.prisma.student.findUnique({ where: { enrollmentCode: code } });
+      if (!existing) return code;
+    }
+    throw new Error('No se pudo generar un código de matrícula único');
+  }
+
+  /**
+   * Returns the student's current enrollment code (for school staff to share with the parent).
+   */
+  async getEnrollmentCode(id: string) {
+    const student = await this.prisma.student.findUniqueOrThrow({
+      where: { id },
+      select: { id: true, enrollmentCode: true, enrollmentCodeGeneratedAt: true },
+    });
+    return student;
+  }
+
+  /**
+   * Regenerates (revokes) a student's enrollment code. The previous code becomes invalid.
+   */
+  async regenerateEnrollmentCode(id: string) {
+    const code = await this.generateEnrollmentCode();
+    return this.prisma.student.update({
+      where: { id },
+      data: { enrollmentCode: code, enrollmentCodeGeneratedAt: new Date() },
+      select: { id: true, enrollmentCode: true, enrollmentCodeGeneratedAt: true },
+    });
   }
 
   findAll(fetchDataInput: FetchDataInput) {

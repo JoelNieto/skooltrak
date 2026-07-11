@@ -4,6 +4,7 @@ import { randomUUID } from 'crypto';
 import * as jwt from 'jsonwebtoken';
 import { CreateSchoolWithOrgInput } from './dto/create-school-with-org.input';
 import { RequestJoinSchoolInput } from './dto/request-join-school.input';
+import { LinkChildInput } from './dto/link-child.input';
 import { SignUpInput } from './dto/sign-up.input';
 import { auth } from './better-auth';
 import { PrismaService } from './prisma.service';
@@ -335,7 +336,7 @@ export class AuthService {
         organization: true,
         student: true,
         teacher: true,
-        parent: true,
+        parents: true,
       },
     });
 
@@ -353,9 +354,9 @@ export class AuthService {
     } else if (roleName === 'TEACHER' && user.teacher) {
       roleLabel = 'Docente';
       displayName = `${user.teacher.firstName} ${user.teacher.fatherName}`;
-    } else if (roleName === 'PARENT' && user.parent) {
+    } else if (roleName === 'PARENT' && user.parents?.length) {
       roleLabel = 'Padre/Representante';
-      displayName = `${user.parent.firstName} ${user.parent.fatherName}`;
+      displayName = `${user.parents[0].firstName} ${user.parents[0].fatherName}`;
     } else if (roleName === 'ORG_ADMIN' || roleName === 'SYSADMIN') {
       roleLabel = 'Administrador';
     }
@@ -571,6 +572,9 @@ export class AuthService {
         return this.handleStudentJoin(userId, school, orgId, documentId);
 
       case 'PARENT':
+        if (input.enrollmentCode) {
+          return this.linkChildByCode(userId, { enrollmentCode: input.enrollmentCode });
+        }
         return this.handleParentJoin(userId, school, orgId, documentId);
 
       case 'TEACHER':
@@ -717,6 +721,148 @@ export class AuthService {
     });
 
     return { status: 'PENDING', message: 'Solicitud enviada. Esperando aprobación del administrador.' };
+  }
+
+  /**
+   * Self-onboard/link a parent to a student using a per-student enrollment code.
+   * Resolves Student -> School -> Organization, enforces max 2 parents per student,
+   * and federates the global User into that Organization via a per-org Parent profile.
+   * No admin approval required.
+   */
+  async linkChildByCode(userId: string, input: LinkChildInput) {
+    const enrollmentCode = input.enrollmentCode?.trim().toUpperCase();
+    if (!enrollmentCode) {
+      throw new Error('El código de matrícula es requerido');
+    }
+
+    const student = await this.prisma.student.findUnique({
+      where: { enrollmentCode },
+      include: {
+        school: { include: { organization: true } },
+        parents: { select: { id: true, userId: true } },
+      },
+    });
+
+    if (!student || !student.enrollmentCode) {
+      throw new Error('Código de matrícula inválido');
+    }
+
+    const orgId = student.school.organizationId;
+
+    // Rule: maximum 2 linked parents per student
+    if (student.parents.length >= 2) {
+      throw new Error('Este estudiante ya tiene el máximo de 2 padres/tutores vinculados');
+    }
+
+    const user = await this.prisma.user.findUniqueOrThrow({
+      where: { id: userId },
+      select: { firstName: true, lastName: true, email: true, organizationId: true, roleId: true },
+    });
+
+    // Reuse existing per-org Parent profile for this User, if any
+    const existingParent = await this.prisma.parent.findFirst({
+      where: { userId, organizationId: orgId },
+    });
+
+    const alreadyLinked =
+      !!existingParent && student.parents.some((p) => p.id === existingParent.id);
+
+    if (alreadyLinked) {
+      return {
+        status: 'LINKED',
+        message: 'Este estudiante ya está vinculado a tu cuenta',
+        studentId: student.id,
+        organizationId: orgId,
+        schoolId: student.schoolId,
+      };
+    }
+
+    const parentRole = await this.prisma.role.findFirst({
+      where: { name: 'PARENT', organizationId: null },
+      include: { permissions: true },
+    });
+    if (!parentRole) {
+      throw new Error('Rol de padre/tutor no encontrado en el sistema');
+    }
+
+    await this.prisma.$transaction(async (tx) => {
+      let parentId: string;
+
+      if (existingParent) {
+        parentId = existingParent.id;
+        const updateData: Record<string, unknown> = {};
+        if (input.firstName) updateData.firstName = input.firstName;
+        if (input.middleName !== undefined) updateData.middleName = input.middleName;
+        if (input.fatherName) updateData.fatherName = input.fatherName;
+        if (input.motherName !== undefined) updateData.motherName = input.motherName;
+        if (input.documentId) updateData.documentId = input.documentId;
+        if (input.phone) updateData.phone = input.phone;
+        if (input.email) updateData.email = input.email;
+        if (input.relationship) updateData.relationship = input.relationship;
+        if (input.occupation !== undefined) updateData.occupation = input.occupation;
+        if (input.workPhone !== undefined) updateData.workPhone = input.workPhone;
+        if (input.address !== undefined) updateData.address = input.address;
+        if (Object.keys(updateData).length > 0) {
+          await tx.parent.update({ where: { id: parentId }, data: updateData });
+        }
+      } else {
+        const created = await tx.parent.create({
+          data: {
+            firstName: input.firstName || user.firstName,
+            middleName: input.middleName || '',
+            fatherName: input.fatherName || user.lastName,
+            motherName: input.motherName || '',
+            documentId: input.documentId || '',
+            phone: input.phone || '',
+            email: input.email || user.email,
+            relationship: input.relationship || 'PARENT',
+            occupation: input.occupation || '',
+            workPhone: input.workPhone || '',
+            address: input.address || '',
+            organizationId: orgId,
+            userId,
+            students: { connect: { id: student.id } },
+          },
+        });
+        parentId = created.id;
+      }
+
+      // Connect the student to this parent profile (idempotent)
+      await tx.parent.update({
+        where: { id: parentId },
+        data: { students: { connect: { id: student.id } } },
+      });
+
+      // Federation: User becomes a Member of the Organization
+      await tx.member.upsert({
+        where: { organizationId_userId: { organizationId: orgId, userId } },
+        create: {
+          id: randomUUID(),
+          organizationId: orgId,
+          userId,
+          role: 'member',
+        },
+        update: {},
+      });
+
+      // Assign PARENT role + complete onboarding (set default org context if missing)
+      await tx.user.update({
+        where: { id: userId },
+        data: {
+          roleId: parentRole.id,
+          onboardingStep: 'completed',
+          ...(user.organizationId ? {} : { organizationId: orgId }),
+        },
+      });
+    });
+
+    return {
+      status: 'LINKED',
+      message: 'Estudiante vinculado exitosamente',
+      studentId: student.id,
+      organizationId: orgId,
+      schoolId: student.schoolId,
+    };
   }
 
   private async notifyOrgAdmins(

@@ -10,6 +10,8 @@ export class UserStudent
     fatherName: string;
     motherName: string;
     documentId: string;
+    enrollmentCode: string | null;
+    enrollmentCodeGeneratedAt: Date | null;
     organizationId: string;
     schoolId: string;
     classGroupId: string | null;

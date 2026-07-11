@@ -72,7 +72,7 @@ model User {
   updatedAt         DateTime           @updatedAt
   student           Student?
   teacher           Teacher?
-  parent            Parent?
+  parents           Parent[]
   sentMessages      Message[]
   messageRecipients MessageRecipient[]
   filesOwned        File[]
@@ -508,6 +508,9 @@ model Student {
   fatherName            String
   motherName            String
   documentId            String
+  /// Per-student enrollment/invite code used by parents to self-link (reusable, regenerable)
+  enrollmentCode        String?                  @unique
+  enrollmentCodeGeneratedAt DateTime?             @default(now())
   organizationId        String
   organization          Organization             @relation(fields: [organizationId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   school                School                   @relation(fields: [schoolId], references: [id], onDelete: Cascade, onUpdate: Cascade)
@@ -558,10 +561,12 @@ model Parent {
   organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   students       Student[]
   user           User?        @relation(fields: [userId], references: [id], onDelete: SetNull, onUpdate: Cascade)
-  userId         String?      @unique
+  userId         String?
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
 
+  /// A parent (User) may hold one profile per Organization (federated cross-org identity)
+  @@unique([userId, organizationId])
   @@map("parents")
 }
 

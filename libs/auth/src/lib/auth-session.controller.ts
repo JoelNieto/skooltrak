@@ -17,6 +17,7 @@ import { AllowAnonymous, BetterAuthGuard } from './auth.guard';
 import { AuthService } from './auth.service';
 import { CreateSchoolWithOrgInput } from './dto/create-school-with-org.input';
 import { RequestJoinSchoolInput } from './dto/request-join-school.input';
+import { LinkChildInput } from './dto/link-child.input';
 import { SignUpInput } from './dto/sign-up.input';
 
 @ApiTags('auth')
@@ -247,6 +248,18 @@ export class AuthSessionController {
       throw new UnauthorizedException('No autenticado');
     }
     return this.authService.requestJoinSchool(userId, input);
+  }
+
+  @Post('link-child')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Link a parent account to a student via enrollment code (auto-link, no approval)' })
+  async linkChild(@Req() req: AuthenticatedRequest, @Body() input: LinkChildInput) {
+    const sessionUserId = (req.session as { user?: { id?: string } } | undefined)?.user?.id;
+    const userId = req.user?.userId ?? sessionUserId;
+    if (!userId) {
+      throw new UnauthorizedException('No autenticado');
+    }
+    return this.authService.linkChildByCode(userId, input);
   }
 
   @Get('my-join-request-status')

@@ -74,6 +74,19 @@ export class StudentsController {
     return this.gradesService.getAverageScoreForStudent(courseId, periodId, id);
   }
 
+  @Get(':id/enrollment-code')
+  @ApiOperation({ summary: 'Get student enrollment code for parent self-linking' })
+  getEnrollmentCode(@Param('id') id: string) {
+    return this.studentsService.getEnrollmentCode(id);
+  }
+
+  @Post(':id/enrollment-code/regenerate')
+  @RequirePermissions(Perm.MANAGE_STUDENTS)
+  @ApiOperation({ summary: 'Regenerate (revoke) student enrollment code' })
+  regenerateEnrollmentCode(@Param('id') id: string) {
+    return this.studentsService.regenerateEnrollmentCode(id);
+  }
+
   @Post()
   @RequirePermissions(Perm.MANAGE_STUDENTS)
   @ApiOperation({ summary: 'Create student' })

@@ -9,4 +9,7 @@ export class RequestJoinSchoolInput {
 
     @IsOptional()
   documentId?: string;
+
+    @IsOptional()
+  enrollmentCode?: string;
 }

@@ -120,4 +120,42 @@ export class ParentsService {
   remove(id: string) {
     return this.prisma.parent.delete({ where: { id } });
   }
+
+  /**
+   * Returns all children of the authenticated parent across every Organization
+   * they belong to (unified "My Children" view for federated parents).
+   */
+  getMyChildren(userId: string) {
+    return this.prisma.parent.findMany({
+      where: { userId },
+      include: {
+        students: {
+          include: {
+            user: true,
+            classGroup: true,
+            school: { select: { id: true, name: true, shortName: true, logo: true } },
+          },
+        },
+      },
+      orderBy: { createdAt: 'asc' },
+    });
+  }
+
+  /**
+   * Updates the authenticated parent's own profile for a specific (per-org) Parent record.
+   * Verifies ownership before applying changes.
+   */
+  async updateMyProfile(userId: string, parentId: string, data: Partial<UpdateParentInput>) {
+    const parent = await this.prisma.parent.findFirstOrThrow({
+      where: { id: parentId, userId },
+    });
+
+    const { studentIds, organizationId, userId: _u, id: _id, ...rest } = data as any;
+
+    return this.prisma.parent.update({
+      where: { id: parent.id },
+      data: rest,
+      include: { students: true },
+    });
+  }
 }

@@ -51,19 +51,20 @@ export class PaymentsService {
     };
   }
 
-  /** Returns financial summaries for all students linked to the parent of the given userId. */
+  /** Returns financial summaries for all students linked to the parent(s) of the given userId. */
   async getLinkedStudentsFinancialSummary(userId: string) {
-    const parent = await this.prisma.parent.findUnique({
+    const parents = await this.prisma.parent.findMany({
       where: { userId },
       include: { students: true },
     });
 
-    if (!parent || parent.students.length === 0) {
+    const students = parents.flatMap((p) => p.students);
+    if (students.length === 0) {
       return [];
     }
 
     const summaries = await Promise.all(
-      parent.students.map(async (student) => {
+      students.map(async (student) => {
         const balance = await this.getStudentBalance(student.id);
         return {
           studentId: student.id,

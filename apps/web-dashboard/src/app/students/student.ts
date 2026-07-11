@@ -1,10 +1,10 @@
-import { Loader } from '#/ui';
+import { Loader, Toast } from '#/ui';
 import { Tab, TabContent, TabList, TabPanel, Tabs } from '@angular/aria/tabs';
 import { DatePipe, DecimalPipe, NgClass } from '@angular/common';
+import { HttpClient, httpResource } from '@angular/common/http';
 import { afterRenderEffect, Component, computed, inject, input, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { httpResource, HttpClient } from '@angular/common/http';
 import { $Enums } from '@generated/prisma';
 import Auth from '../auth/auth';
 import Store from '../core/store';
@@ -91,17 +91,57 @@ const ENROLLMENT_STATUS_COLORS: Record<$Enums.EnrollmentStatus, string> = {
                   }
                 </div>
               </div>
-              <div class="flex gap-2">
-                <a [routerLink]="['/students', student.id, 'grade-report']" class="btn btn-ghost btn-sm">
-                  <span class="material-symbols-outlined text-lg">description</span>
-                  Boletín
-                </a>
-                @if (auth.hasPermission('MANAGE_STUDENTS')) {
-                  <a [routerLink]="['/students', student.id, 'edit']" class="btn btn-primary btn-sm">
-                    <span class="material-symbols-outlined text-lg">edit</span>
-                    Editar
+              <div class="flex flex-col items-end gap-3">
+                <div class="flex flex-col items-end gap-1">
+                  <span class="text-xs font-medium text-base-content/60">Código de matrícula</span>
+                  <div class="flex items-center gap-2">
+                    @if (student.enrollmentCode) {
+                      <span class="badge badge-soft badge-primary font-mono text-sm">{{ student.enrollmentCode }}</span>
+                      <button
+                        type="button"
+                        class="btn btn-ghost btn-sm btn-square"
+                        title="Copiar código"
+                        (click)="copyCode()"
+                      >
+                        <span class="material-symbols-outlined text-lg">content_copy</span>
+                      </button>
+                    } @else {
+                      <span class="text-sm text-base-content/50">Sin código</span>
+                    }
+                    @if (auth.hasPermission('MANAGE_STUDENTS')) {
+                      <button
+                        type="button"
+                        class="btn btn-ghost btn-sm btn-square"
+                        title="Regenerar código"
+                        [disabled]="regenerating()"
+                        (click)="regenerate()"
+                      >
+                        @if (regenerating()) {
+                          <span class="loading loading-spinner loading-sm"></span>
+                        } @else {
+                          <span class="material-symbols-outlined text-lg">refresh</span>
+                        }
+                      </button>
+                    }
+                  </div>
+                  @if (student.enrollmentCode && student.enrollmentCodeGeneratedAt) {
+                    <span class="text-xs text-base-content/50">
+                      Generado {{ student.enrollmentCodeGeneratedAt | date: 'dd/MM/yyyy HH:mm' }}
+                    </span>
+                  }
+                </div>
+                <div class="flex gap-2">
+                  <a [routerLink]="['/students', student.id, 'grade-report']" class="btn btn-ghost btn-sm">
+                    <span class="material-symbols-outlined text-lg">description</span>
+                    Boletín
                   </a>
-                }
+                  @if (auth.hasPermission('MANAGE_STUDENTS')) {
+                    <a [routerLink]="['/students', student.id, 'edit']" class="btn btn-primary btn-sm">
+                      <span class="material-symbols-outlined text-lg">edit</span>
+                      Editar
+                    </a>
+                  }
+                </div>
               </div>
             </div>
           </div>
@@ -378,4 +418,41 @@ export default class Student {
   public studentResource = httpResource<StudentView | null>(() =>
     isValidId(this.id()) ? `/api/v1/students/${this.id()}` : undefined,
   );
+
+  public regenerating = signal(false);
+  private toasts = inject(Toast);
+
+  public regenerate() {
+    if (!isValidId(this.id())) return;
+    if (!window.confirm('Regenerar el código revocará el actual. ¿Continuar?')) return;
+    this.regenerating.set(true);
+    this.http
+      .post<{
+        id: string;
+        enrollmentCode: string;
+        enrollmentCodeGeneratedAt: string;
+      }>(`/api/v1/students/${this.id()}/enrollment-code/regenerate`, {})
+      .subscribe({
+        next: () => {
+          this.regenerating.set(false);
+          this.toasts.showSuccess('Código regenerado');
+          this.studentResource.reload();
+        },
+        error: () => {
+          this.regenerating.set(false);
+          this.toasts.showError('No se pudo regenerar el código');
+        },
+      });
+  }
+
+  public async copyCode() {
+    const code = this.studentResource.value()?.enrollmentCode;
+    if (!code) return;
+    try {
+      await navigator.clipboard.writeText(code);
+      this.toasts.showSuccess('Código copiado');
+    } catch {
+      this.toasts.showError('No se pudo copiar el código');
+    }
+  }
 }

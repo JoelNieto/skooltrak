@@ -1,12 +1,12 @@
-import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { randomUUID } from 'crypto';
 import * as jwt from 'jsonwebtoken';
-import { CreateSchoolWithOrgInput } from './dto/create-school-with-org.input';
-import { RequestJoinSchoolInput } from './dto/request-join-school.input';
-import { LinkChildInput } from './dto/link-child.input';
-import { SignUpInput } from './dto/sign-up.input';
 import { auth } from './better-auth';
+import { CreateSchoolWithOrgInput } from './dto/create-school-with-org.input';
+import { LinkChildInput } from './dto/link-child.input';
+import { RequestJoinSchoolInput } from './dto/request-join-school.input';
+import { SignUpInput } from './dto/sign-up.input';
 import { PrismaService } from './prisma.service';
 import { sendEmail, sendUserInvitation } from './resend.service';
 
@@ -95,11 +95,12 @@ export class AuthService {
         existingUser.role?.name &&
         ['STUDENT', 'TEACHER'].includes(existingUser.role.name)
       ) {
-        throw new Error(
+        throw new HttpException(
           'Tienes una invitación pendiente. Refresca la página e ingresa tu correo de nuevo.',
+          HttpStatus.CONFLICT,
         );
       }
-      throw new Error('Este correo electrónico ya está registrado');
+      throw new HttpException('Este correo electrónico ya está registrado', HttpStatus.CONFLICT);
     }
 
     // Generate a random token
@@ -464,7 +465,7 @@ export class AuthService {
     if (user.organizationId) throw new Error('El usuario ya pertenece a una organización');
 
     // Generate unique slug
-    let baseSlug = this.generateSlug(schoolName);
+    const baseSlug = this.generateSlug(schoolName);
     let slug = baseSlug;
     let counter = 1;
     while (await this.prisma.organization.findFirst({ where: { slug } })) {
@@ -764,8 +765,7 @@ export class AuthService {
       where: { userId, organizationId: orgId },
     });
 
-    const alreadyLinked =
-      !!existingParent && student.parents.some((p) => p.id === existingParent.id);
+    const alreadyLinked = !!existingParent && student.parents.some((p) => p.id === existingParent.id);
 
     if (alreadyLinked) {
       return {
@@ -1292,8 +1292,7 @@ export class AuthService {
       where: { id: user.id },
       include: { role: true },
     });
-    const isInvitedTeacher =
-      userWithRole?.role?.name === 'TEACHER' && !!userWithRole.organizationId;
+    const isInvitedTeacher = userWithRole?.role?.name === 'TEACHER' && !!userWithRole.organizationId;
 
     await this.prisma.user.update({
       where: { id: user.id },

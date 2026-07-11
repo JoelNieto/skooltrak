@@ -1,4 +1,5 @@
 import { Loader, markGroupDirty, Toast } from '#/ui';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
 import {
   AbstractControl,
@@ -9,7 +10,6 @@ import {
   Validators,
 } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { HttpClient } from '@angular/common/http';
 
 @Component({
   selector: 'app-register',
@@ -442,26 +442,29 @@ export default class Register implements OnInit {
     const email = this.emailForm.getRawValue().email;
 
     // First check for pending invitation (student/teacher created but not yet verified)
-    this.http.post<{ hasPendingInvitation: boolean; role?: string; organizationName?: string }>(
-      '/api/v1/auth/check-pending-invitation',
-      { email },
-    ).subscribe({
-      next: (pending) => {
-        if (pending?.hasPendingInvitation) {
-          this.sentEmail.set(email);
-          this.pendingInvitationRole.set(pending.role ?? null);
-          this.pendingInvitationOrg.set(pending.organizationName ?? null);
-          this.step.set('pending-invitation');
+    this.http
+      .post<{
+        hasPendingInvitation: boolean;
+        role?: string;
+        organizationName?: string;
+      }>('/api/v1/auth/check-pending-invitation', { email })
+      .subscribe({
+        next: (pending) => {
+          if (pending?.hasPendingInvitation) {
+            this.sentEmail.set(email);
+            this.pendingInvitationRole.set(pending.role ?? null);
+            this.pendingInvitationOrg.set(pending.organizationName ?? null);
+            this.step.set('pending-invitation');
+            this.loading.set(false);
+          } else {
+            this.sendVerificationLinkMutation(email);
+          }
+        },
+        error: () => {
           this.loading.set(false);
-        } else {
           this.sendVerificationLinkMutation(email);
-        }
-      },
-      error: () => {
-        this.loading.set(false);
-        this.sendVerificationLinkMutation(email);
-      },
-    });
+        },
+      });
   }
 
   private sendVerificationLinkMutation(email: string) {
@@ -473,9 +476,10 @@ export default class Register implements OnInit {
         this.step.set('check-inbox');
         this.startCooldown();
       },
-      error: (err) => {
+      error: (err: HttpErrorResponse) => {
+        console.error({ err });
         this.loading.set(false);
-        this.toasts.showError(err.message || 'Error al enviar el enlace de verificación');
+        this.toasts.showError(err.error.message || 'Error al enviar el enlace de verificación. Intenta de nuevo.');
       },
     });
   }

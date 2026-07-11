@@ -59,12 +59,20 @@ export class RolesService {
   }
 
   async update(id: string, updateRoleInput: UpdateRoleInput) {
-    await this.assertNotGlobalRole(id);
+    const existing = await this.prisma.role.findUnique({
+      where: { id },
+      select: { organizationId: true },
+    });
+    const isGlobalRole = existing?.organizationId === null;
 
     const { organizationId, permissionIds, ...rest } = updateRoleInput;
     let req = rest as Prisma.RoleUpdateInput;
 
-    if (organizationId) {
+    if (isGlobalRole && organizationId) {
+      throw new ForbiddenException('Global default roles cannot be reassigned to an organization');
+    }
+
+    if (!isGlobalRole && organizationId) {
       req = {
         ...req,
         organization: {
@@ -94,7 +102,7 @@ export class RolesService {
   }
 
   async remove(id: string) {
-    await this.assertNotGlobalRole(id);
+    await this.assertNotGlobalRoleForDelete(id);
 
     return this.prisma.role.delete({
       where: { id },
@@ -102,16 +110,17 @@ export class RolesService {
   }
 
   /**
-   * Prevents mutation or deletion of global default roles (organizationId = null).
+   * Prevents deletion of global default roles (organizationId = null).
+   * Global roles may be edited, but never deleted.
    */
-  private async assertNotGlobalRole(id: string) {
+  private async assertNotGlobalRoleForDelete(id: string) {
     const role = await this.prisma.role.findUnique({
       where: { id },
       select: { organizationId: true },
     });
 
     if (role && role.organizationId === null) {
-      throw new ForbiddenException('Global default roles cannot be modified or deleted');
+      throw new ForbiddenException('Global default roles cannot be deleted');
     }
   }
 }

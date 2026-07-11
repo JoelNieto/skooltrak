@@ -92,44 +92,6 @@ const ENROLLMENT_STATUS_COLORS: Record<$Enums.EnrollmentStatus, string> = {
                 </div>
               </div>
               <div class="flex flex-col items-end gap-3">
-                <div class="flex flex-col items-end gap-1">
-                  <span class="text-xs font-medium text-base-content/60">Código de matrícula</span>
-                  <div class="flex items-center gap-2">
-                    @if (student.enrollmentCode) {
-                      <span class="badge badge-soft badge-primary font-mono text-sm">{{ student.enrollmentCode }}</span>
-                      <button
-                        type="button"
-                        class="btn btn-ghost btn-sm btn-square"
-                        title="Copiar código"
-                        (click)="copyCode()"
-                      >
-                        <span class="material-symbols-outlined text-lg">content_copy</span>
-                      </button>
-                    } @else {
-                      <span class="text-sm text-base-content/50">Sin código</span>
-                    }
-                    @if (auth.hasPermission('MANAGE_STUDENTS')) {
-                      <button
-                        type="button"
-                        class="btn btn-ghost btn-sm btn-square"
-                        title="Regenerar código"
-                        [disabled]="regenerating()"
-                        (click)="regenerate()"
-                      >
-                        @if (regenerating()) {
-                          <span class="loading loading-spinner loading-sm"></span>
-                        } @else {
-                          <span class="material-symbols-outlined text-lg">refresh</span>
-                        }
-                      </button>
-                    }
-                  </div>
-                  @if (student.enrollmentCode && student.enrollmentCodeGeneratedAt) {
-                    <span class="text-xs text-base-content/50">
-                      Generado {{ student.enrollmentCodeGeneratedAt | date: 'dd/MM/yyyy HH:mm' }}
-                    </span>
-                  }
-                </div>
                 <div class="flex gap-2">
                   <a [routerLink]="['/students', student.id, 'grade-report']" class="btn btn-ghost btn-sm">
                     <span class="material-symbols-outlined text-lg">description</span>
@@ -221,6 +183,48 @@ const ENROLLMENT_STATUS_COLORS: Record<$Enums.EnrollmentStatus, string> = {
                         <dt class="text-sm/6 font-medium text-base-content">Dirección</dt>
                         <dd class="mt-1 text-sm/6 text-base-content/90 sm:col-span-2 sm:mt-0">
                           {{ student.address || '-' }}
+                        </dd>
+                      </div>
+                      <div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
+                        <dt class="text-sm/6 font-medium text-base-content">Código de matrícula</dt>
+                        <dd class="mt-1 text-sm/6 text-base-content/90 sm:col-span-2 sm:mt-0">
+                          <div class="flex items-center gap-2">
+                            @if (student.enrollmentCode) {
+                              <span class="badge badge-soft badge-primary font-mono text-sm">{{
+                                student.enrollmentCode
+                              }}</span>
+                              <button
+                                type="button"
+                                class="btn btn-ghost btn-sm btn-square"
+                                title="Copiar código"
+                                (click)="copyCode()"
+                              >
+                                <span class="material-symbols-outlined text-lg">content_copy</span>
+                              </button>
+                            } @else {
+                              <span class="text-sm text-base-content/50">Sin código</span>
+                            }
+                            @if (auth.hasPermission('MANAGE_STUDENTS')) {
+                              <button
+                                type="button"
+                                class="btn btn-ghost btn-sm btn-square"
+                                title="Regenerar código"
+                                [disabled]="regenerating()"
+                                (click)="regenerate()"
+                              >
+                                @if (regenerating()) {
+                                  <span class="loading loading-spinner loading-sm"></span>
+                                } @else {
+                                  <span class="material-symbols-outlined text-lg">refresh</span>
+                                }
+                              </button>
+                            }
+                            @if (student.enrollmentCode && student.enrollmentCodeGeneratedAt) {
+                              <span class="text-xs text-base-content/50">
+                                Generado {{ student.enrollmentCodeGeneratedAt | date: 'dd/MM/yyyy HH:mm' }}
+                              </span>
+                            }
+                          </div>
                         </dd>
                       </div>
                     </dl>

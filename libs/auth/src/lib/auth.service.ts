@@ -791,17 +791,17 @@ export class AuthService {
       if (existingParent) {
         parentId = existingParent.id;
         const updateData: Record<string, unknown> = {};
-        if (input.firstName) updateData.firstName = input.firstName;
-        if (input.middleName !== undefined) updateData.middleName = input.middleName;
-        if (input.fatherName) updateData.fatherName = input.fatherName;
-        if (input.motherName !== undefined) updateData.motherName = input.motherName;
-        if (input.documentId) updateData.documentId = input.documentId;
-        if (input.phone) updateData.phone = input.phone;
-        if (input.email) updateData.email = input.email;
-        if (input.relationship) updateData.relationship = input.relationship;
-        if (input.occupation !== undefined) updateData.occupation = input.occupation;
-        if (input.workPhone !== undefined) updateData.workPhone = input.workPhone;
-        if (input.address !== undefined) updateData.address = input.address;
+        if (input.firstName) updateData['firstName'] = input.firstName;
+        if (input.middleName !== undefined) updateData['middleName'] = input.middleName;
+        if (input.fatherName) updateData['fatherName'] = input.fatherName;
+        if (input.motherName !== undefined) updateData['motherName'] = input.motherName;
+        if (input.documentId) updateData['documentId'] = input.documentId;
+        if (input.phone) updateData['phone'] = input.phone;
+        if (input.email) updateData['email'] = input.email;
+        if (input.relationship) updateData['relationship'] = input.relationship;
+        if (input.occupation !== undefined) updateData['occupation'] = input.occupation;
+        if (input.workPhone !== undefined) updateData['workPhone'] = input.workPhone;
+        if (input.address !== undefined) updateData['address'] = input.address;
         if (Object.keys(updateData).length > 0) {
           await tx.parent.update({ where: { id: parentId }, data: updateData });
         }

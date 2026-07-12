@@ -4,6 +4,7 @@ import {
   authGuard,
   onboardingCompletedGuard,
   onboardingGuard,
+  parentGuard,
   permissionGuard,
   studentGuard,
   teacherGuard,
@@ -128,6 +129,11 @@ export const DASHBOARD_ROUTES: Route[] = [
         path: 'home',
         canMatch: [studentGuard],
         loadComponent: () => import('./student-home'),
+      },
+      {
+        path: 'home',
+        canMatch: [parentGuard],
+        loadComponent: () => import('./parent-home'),
       },
       {
         path: 'courses',

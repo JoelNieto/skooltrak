@@ -10,7 +10,7 @@ import { UpdateParentInput } from './dto/update-parent.input';
 export class ParentsService {
   constructor(
     private readonly prisma: PrismaService,
-    @Inject(REQUEST) private readonly request: Request
+    @Inject(REQUEST) private readonly request: Request,
   ) {}
 
   async create(createParentInput: CreateParentInput) {
@@ -19,9 +19,7 @@ export class ParentsService {
     return this.prisma.parent.create({
       data: {
         ...rest,
-        students: studentIds?.length
-          ? { connect: studentIds.map((id) => ({ id })) }
-          : undefined,
+        students: studentIds?.length ? { connect: studentIds.map((id) => ({ id })) } : undefined,
       },
       include: { students: true },
     });

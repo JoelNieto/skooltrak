@@ -1,14 +1,12 @@
 import { Module } from '@nestjs/common';
 import { PrismaModule } from '../prisma.module';
-import { ParentsController } from './parents.controller';
 import { ParentsSelfController } from './parents-self.controller';
+import { ParentsController } from './parents.controller';
 import { ParentsService } from './parents.service';
 
 @Module({
-  controllers: [ParentsController, ParentsSelfController],
-  providers: [
-    ParentsService,
-  ],
+  controllers: [ParentsSelfController, ParentsController],
+  providers: [ParentsService],
   imports: [PrismaModule],
   exports: [ParentsService],
 })

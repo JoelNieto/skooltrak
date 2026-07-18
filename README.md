@@ -149,6 +149,10 @@ E2E projects are colocated under `apps/*-e2e`.
 
 Use `bunx nx g` to generate code (apps, libs, components, etc.).
 
+## Documentation
+
+- [Onboarding process analysis](docs/onboarding.md) — role onboarding flows (ORG_ADMIN, TEACHER, STUDENT, PARENT), state machine, pain points, and improvement opportunities.
+
 ---
 
 ## Español

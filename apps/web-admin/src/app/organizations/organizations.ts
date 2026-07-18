@@ -47,7 +47,7 @@ import { OrganizationsForm } from './organizations-form';
     @if (organizations.error()) {
       <lib-error
         (retry)="organizations.reload()"
-        [description]="organizations.error()?.message"
+        [description]="$safeNavigationMigration(organizations.error()?.message)"
       />
     } @else {
     <div class="overflow-x-auto">

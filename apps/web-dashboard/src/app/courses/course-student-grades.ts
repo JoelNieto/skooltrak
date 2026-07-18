@@ -74,7 +74,7 @@ import Store from '../core/store';
                 <td>{{ item.grade?.title }}</td>
 
                 <td>{{ item.comments }}</td>
-                <td>{{ item.grade?.date | date: 'dd/MM/yyyy' }}</td>
+                <td>{{ $safeNavigationMigration(item.grade?.date) | date: 'dd/MM/yyyy' }}</td>
                 <td>{{ item.grade?.bucket?.name }}</td>
                 <td
                   [ngClass]="{

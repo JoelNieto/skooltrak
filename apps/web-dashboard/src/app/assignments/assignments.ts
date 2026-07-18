@@ -96,7 +96,7 @@ export class StripHtmlPipe implements PipeTransform {
       } @else if (assignmentDatesResource.error()) {
         <lib-error
           (retry)="assignmentDatesResource.reload()"
-          [description]="assignmentDatesResource.error()?.message"
+          [description]="$safeNavigationMigration(assignmentDatesResource.error()?.message)"
         />
       } @else {
         <lib-loader />

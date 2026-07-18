@@ -106,7 +106,7 @@ type PublishedNewsletter = {
                   </p>
                   <div class="text-sm text-base-content/70">
                     {{ message.message?.sender?.name }} ·
-                    {{ message.message?.createdAt | date: 'short' }}
+                    {{ $safeNavigationMigration(message.message?.createdAt) | date: 'short' }}
                   </div>
                 </div>
               }

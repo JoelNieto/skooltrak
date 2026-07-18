@@ -83,7 +83,7 @@ type QuizListItem = {
           </tbody>
         </table>
       } @else if (quizzesResource.error()) {
-        <lib-error (retry)="quizzesResource.reload()" [description]="quizzesResource.error()?.message" />
+        <lib-error (retry)="quizzesResource.reload()" [description]="$safeNavigationMigration(quizzesResource.error()?.message)" />
       } @else {
         <lib-loader />
       }

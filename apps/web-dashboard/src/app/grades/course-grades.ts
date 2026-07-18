@@ -90,7 +90,7 @@ export type StudentType = {
                       'text-error! bg-error/10': grade.item?.score && grade.item?.score! < metric().minimumApproval,
                     }"
                   >
-                    {{ (grade.item?.score | number: '1.1-1') ?? '-' }}
+                    {{ ($safeNavigationMigration(grade.item?.score) | number: '1.1-1') ?? '-' }}
                   </td>
                 }
                 <td

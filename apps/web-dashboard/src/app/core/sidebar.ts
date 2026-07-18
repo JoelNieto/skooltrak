@@ -37,8 +37,8 @@ type SidebarSchool = {
           >
             @if (store.currentSchool()?.logoUrl) {
               <img
-                [src]="store.currentSchool()?.logoUrl"
-                [alt]="store.currentSchool()?.name"
+                [src]="$safeNavigationMigration(store.currentSchool()?.logoUrl)"
+                [alt]="$safeNavigationMigration(store.currentSchool()?.name)"
                 class="min-w-6 max-w-10 h-6 rounded object-contain"
               />
             } @else {

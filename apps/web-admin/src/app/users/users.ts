@@ -45,7 +45,7 @@ import { UsersForm } from './users-form';
     @if (users.error()) {
       <lib-error
         (retry)="users.reload()"
-        [description]="users.error()?.message"
+        [description]="$safeNavigationMigration(users.error()?.message)"
       />
     } @else {
     <div class="overflow-x-auto">

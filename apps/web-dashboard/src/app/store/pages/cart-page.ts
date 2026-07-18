@@ -37,7 +37,7 @@ import { StoreApiService } from '../store-api.service';
                     <div class="text-sm text-base-content/60">Talla: {{ line.variant?.label }}</div>
                   }
                 </td>
-                <td>{{ formatPrice(line.product?.price) }}</td>
+                <td>{{ formatPrice($safeNavigationMigration(line.product?.price)) }}</td>
                 <td>
                   <div class="join">
                     <button type="button" class="btn btn-sm join-item" (click)="setQty(line, (line.quantity ?? 0) - 1)">−</button>

@@ -70,7 +70,7 @@ type ChatRow = {
                   <span class="text-sm text-base-content/60">{{ chatTypeLabel(chat.type) }}</span>
                   @let chatUser = otherParticipant(chat);
                   @if (chatUser) {
-                    @if (roleLabel(chatUser.role?.name); as label) {
+                    @if (roleLabel($safeNavigationMigration(chatUser.role?.name)); as label) {
                       <span class="badge badge-secondary badge-soft badge-sm">{{ label }}</span>
                     }
                     @if (chatUser.student?.classGroup?.name; as groupName) {

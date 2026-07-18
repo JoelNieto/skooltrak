@@ -123,7 +123,7 @@ type QuizDetail = {
           </div>
         </div>
       } @else if (quizResource.error()) {
-        <lib-error (retry)="quizResource.reload()" [description]="quizResource.error()?.message" />
+        <lib-error (retry)="quizResource.reload()" [description]="$safeNavigationMigration(quizResource.error()?.message)" />
       } @else {
         <div>No se encontró el quiz</div>
       }

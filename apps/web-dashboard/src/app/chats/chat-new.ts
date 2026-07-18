@@ -49,7 +49,7 @@ import Auth from '../auth/auth';
               <p class="font-medium">{{ contact.name }}</p>
               <div class="flex flex-wrap items-center gap-1.5 mt-0.5">
                 <span class="text-sm text-base-content/60">{{ contact.email }}</span>
-                @if (roleLabel(contact?.role?.name); as label) {
+                @if (roleLabel($safeNavigationMigration(contact?.role?.name)); as label) {
                   <span class="badge badge-secondary badge-soft badge-sm">{{ label }}</span>
                 }
                 @if (contact?.student?.classGroup?.name; as groupName) {

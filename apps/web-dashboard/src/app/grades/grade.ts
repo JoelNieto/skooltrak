@@ -68,7 +68,7 @@ type GradeDetail = {
               </div>
             </div>
             <div class="flex items-center gap-2">
-              <a class="link link-primary" [routerLink]="['/courses', grade.course?.id]"> {{ grade.course?.name }} </a>/
+              <a class="link link-primary" [routerLink]="['/courses', $safeNavigationMigration(grade.course?.id)]"> {{ grade.course?.name }} </a>/
               {{ grade.bucket?.name }}
             </div>
 
@@ -148,7 +148,7 @@ type GradeDetail = {
           </div>
         </div>
       } @else if (gradeResource.error()) {
-        <lib-error (retry)="gradeResource.reload()" [description]="gradeResource.error()?.message" />
+        <lib-error (retry)="gradeResource.reload()" [description]="$safeNavigationMigration(gradeResource.error()?.message)" />
       }
       @if (gradeResource.isLoading()) {
         <lib-loader />

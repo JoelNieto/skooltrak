@@ -93,7 +93,7 @@ type ChatMessageDto = {
               <div class="flex flex-wrap items-center gap-1.5 mt-0.5">
                 <span class="text-sm text-base-content/60">{{ participantsCount($any(chat)) }} participantes</span>
                 @if (otherParticipant($any(chat)); as user) {
-                  @if (roleLabel(user?.role?.name); as label) {
+                  @if (roleLabel($safeNavigationMigration(user?.role?.name)); as label) {
                     <span class="badge badge-secondary badge-soft badge-sm">{{ label }}</span>
                   }
                   @if (user?.student?.classGroup?.name; as groupName) {

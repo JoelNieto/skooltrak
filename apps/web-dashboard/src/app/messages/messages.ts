@@ -102,7 +102,7 @@ type MessageRecipientType = {
                     <a [routerLink]="['/messages', item.message?.id ?? '']">{{ item.message?.subject }}</a>
                   </td>
                   <td class="text-neutral-500">
-                    {{ formatTimeAgo(item.message?.createdAt) }}
+                    {{ formatTimeAgo($safeNavigationMigration(item.message?.createdAt)) }}
                   </td>
                   <td>
                     <button class="hover:text-error cursor-pointer" (click)="deleteMessage(item)">

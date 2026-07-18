@@ -63,7 +63,7 @@ import { PermissionsForm } from './permissions-form';
     @if (permissions.error()) {
       <lib-error
         (retry)="permissions.reload()"
-        [description]="permissions.error()?.message"
+        [description]="$safeNavigationMigration(permissions.error()?.message)"
       />
     } @else {
     <div class="overflow-x-auto">

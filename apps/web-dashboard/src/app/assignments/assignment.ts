@@ -91,7 +91,7 @@ type AssignmentDetail = {
           </div>
         }
       } @else if (assignmentResource.error()) {
-        <lib-error (retry)="assignmentResource.reload()" [description]="assignmentResource.error()?.message" />
+        <lib-error (retry)="assignmentResource.reload()" [description]="$safeNavigationMigration(assignmentResource.error()?.message)" />
       } @else {
         <div>No se encontró la asignación</div>
       }

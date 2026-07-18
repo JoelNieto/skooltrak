@@ -50,7 +50,7 @@ import { SchoolsForm } from './schools-form';
     @if (schools.error()) {
       <lib-error
         (retry)="schools.reload()"
-        [description]="schools.error()?.message"
+        [description]="$safeNavigationMigration(schools.error()?.message)"
       />
     } @else if (!schools.hasValue()) {
       <lib-loader />

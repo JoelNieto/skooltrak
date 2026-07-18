@@ -108,8 +108,8 @@ type StudentAssignmentRow = {
                     {{ message.message?.subject }}
                   </p>
                   <div class="text-sm text-base-content/70">
-                    {{ senderDisplayName(message.message?.sender) }} ·
-                    {{ message.message?.createdAt | date: 'short' }}
+                    {{ senderDisplayName($safeNavigationMigration(message.message?.sender)) }} ·
+                    {{ $safeNavigationMigration(message.message?.createdAt) | date: 'short' }}
                   </div>
                 </div>
               }

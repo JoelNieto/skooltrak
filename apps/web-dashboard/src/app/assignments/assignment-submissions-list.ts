@@ -102,7 +102,7 @@ import { firstValueFrom } from 'rxjs';
                     }
                   </td>
                   <td>
-                    @let fileId = submission?.file?.id;
+                    @let fileId = $safeNavigationMigration(submission?.file?.id);
                     @if (fileId) {
                       <button
                         class="btn btn-ghost btn-sm"

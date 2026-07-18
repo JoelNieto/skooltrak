@@ -36,7 +36,7 @@ import HabitMetricsForm from './habit-metrics-form';
     @if (metrics.error()) {
       <lib-error
         (retry)="metrics.reload()"
-        [description]="metrics.error()?.message"
+        [description]="$safeNavigationMigration(metrics.error()?.message)"
       />
     } @else {
     <div class="overflow-x-auto">

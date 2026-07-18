@@ -50,7 +50,7 @@ const ENROLLMENT_STATUS_COLORS: Record<$Enums.EnrollmentStatus, string> = {
     } @else {
       @if (studentResource.hasValue() && studentResource.value()?.id) {
         @let student = studentResource.value()!;
-        @let metric = student.classGroup?.studyPlan?.gradeMetric;
+        @let metric = $safeNavigationMigration(student.classGroup?.studyPlan?.gradeMetric);
         <div class="breadcrumbs text-sm">
           <ul>
             <li><a routerLink="/">Inicio</a></li>
@@ -339,7 +339,7 @@ const ENROLLMENT_STATUS_COLORS: Record<$Enums.EnrollmentStatus, string> = {
                                 <tr>
                                   <td>{{ grade.grade?.title }}</td>
                                   <td>{{ grade.grade?.bucket?.name }}</td>
-                                  <td>{{ grade.grade?.date | date: 'dd/MM/yyyy' }}</td>
+                                  <td>{{ $safeNavigationMigration(grade.grade?.date) | date: 'dd/MM/yyyy' }}</td>
                                   <td>{{ grade.comments }}</td>
                                   <td>
                                     <span class="badge badge-sm" [ngClass]="getGradeBadgeClass(grade, metric)">

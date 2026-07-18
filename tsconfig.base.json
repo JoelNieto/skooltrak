@@ -25,7 +25,11 @@
       "@/client-auth": ["libs/client-auth/src/index.ts"],
       "#/client-auth": ["libs/client-auth/src/index.ts"],
       "@/api-contracts": ["libs/api-contracts/src/index.ts"]
-    }
+    },
+    "strict": false,
+    "noUncheckedSideEffectImports": false,
+    "types": ["*"],
+    "ignoreDeprecations": "6.0"
   },
   "exclude": ["node_modules", "tmp"]
 }

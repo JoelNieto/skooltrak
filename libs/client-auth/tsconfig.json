@@ -12,7 +12,8 @@
     "baseUrl": "../..",
     "paths": {
       "@/client-auth": ["libs/client-auth/src/index.ts"]
-    }
+    },
+    "ignoreDeprecations": "6.0"
   },
   "files": [],
   "include": [],

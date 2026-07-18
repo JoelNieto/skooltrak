@@ -1,6 +1,6 @@
 import { markGroupDirty, TextEditor, Toast } from '#/ui';
 import { HttpClient, httpResource } from '@angular/common/http';
-import { Component, effect, inject, input, OnInit, output, signal, ChangeDetectionStrategy } from '@angular/core';
+import { Component, effect, inject, input, OnInit, output, signal } from '@angular/core';
 import { FormArray, FormControl, NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { addDays, format, setHours, setMinutes } from 'date-fns';
 import { firstValueFrom } from 'rxjs';
@@ -18,7 +18,6 @@ enum AssignmentType {
 @Component({
   selector: 'app-assignment-form',
   imports: [ReactiveFormsModule, TextEditor],
-  changeDetection: ChangeDetectionStrategy.Eager,
   template: `<form [formGroup]="form" (ngSubmit)="onSubmit()">
     <div class="flex flex-col md:grid md:grid-cols-2 gap-4">
       <div class="fieldset col-span-2">

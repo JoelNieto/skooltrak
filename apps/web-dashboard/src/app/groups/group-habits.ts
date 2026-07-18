@@ -1,6 +1,6 @@
 import { Loader, Toast } from '#/ui';
-import { Component, computed, inject, input, signal, ChangeDetectionStrategy } from '@angular/core';
-import { httpResource, HttpClient } from '@angular/common/http';
+import { HttpClient, httpResource } from '@angular/common/http';
+import { Component, computed, inject, input, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Prisma } from '@generated/prisma';
 
@@ -23,181 +23,165 @@ type StudentEvaluation = {
 @Component({
   selector: 'app-group-habits',
   imports: [FormsModule, Loader],
-  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <div class="space-y-4">
       <!-- Empty state: No metrics configured -->
       @if (habitMetrics.isLoading()) {
-      <lib-loader />
-      } @else if (!habitMetrics.value() || habitMetrics.value()!.length === 0)
-      {
-      <div class="alert alert-info">
-        <span class="material-symbols-outlined">info</span>
-        <span
-          >No hay criterios de hábitos configurados. Solicite al administrador
-          que configure los criterios desde el panel de administración.</span
-        >
-      </div>
-      } @else {
-      <!-- Selectors -->
-      <div class="grid grid-cols-2 gap-4">
-        <div class="form-control">
-          <label class="label">
-            <span class="label-text">Período</span>
-          </label>
-          <select
-            class="select select-bordered"
-            [(ngModel)]="selectedPeriodId"
-            (ngModelChange)="onSelectionChange()"
+        <lib-loader />
+      } @else if (!habitMetrics.value() || habitMetrics.value()!.length === 0) {
+        <div class="alert alert-info">
+          <span class="material-symbols-outlined">info</span>
+          <span
+            >No hay criterios de hábitos configurados. Solicite al administrador que configure los criterios desde el
+            panel de administración.</span
           >
-            <option [value]="null" disabled selected>Seleccione un período</option>
-            @for (period of periods.value(); track period.id) {
-            <option [value]="period.id">
-              {{ period.name }} - {{ period.year }}
-            </option>
-            }
-          </select>
         </div>
-
-        <div class="form-control">
-          <label class="label">
-            <span class="label-text">Criterio de evaluación</span>
-          </label>
-          <select
-            class="select select-bordered"
-            [(ngModel)]="selectedMetricId"
-            (ngModelChange)="onSelectionChange()"
-          >
-            <option [value]="null" disabled selected>
-              Seleccione un criterio
-            </option>
-            @for (metric of activeMetrics(); track metric.id) {
-            <option [value]="metric.id">{{ metric.name }}</option>
-            }
-          </select>
-        </div>
-      </div>
-
-      <!-- Prompt to select period and metric -->
-      @if (!selectedPeriodId() || !selectedMetricId()) {
-      <div class="alert alert-warning">
-        <span class="material-symbols-outlined">warning</span>
-        <span
-          >Por favor, seleccione un período y un criterio para comenzar la
-          evaluación.</span
-        >
-      </div>
-      } @else if (evaluationsLoading()) {
-      <lib-loader />
       } @else {
-      <!-- Legend -->
-      <div class="flex gap-4 items-center p-4 bg-base-200 rounded-lg">
-        <span class="font-semibold">Leyenda:</span>
-        <div class="flex gap-2 items-center">
-          <input type="radio" class="radio radio-error radio-sm" disabled />
-          <span><strong>X</strong> = Deficiente</span>
-        </div>
-        <div class="flex gap-2 items-center">
-          <input type="radio" class="radio radio-warning radio-sm" disabled />
-          <span><strong>R</strong> = Regular</span>
-        </div>
-        <div class="flex gap-2 items-center">
-          <input type="radio" class="radio radio-success radio-sm" disabled />
-          <span><strong>S</strong> = Satisfactorio</span>
-        </div>
-      </div>
+        <!-- Selectors -->
+        <div class="grid grid-cols-2 gap-4">
+          <div class="form-control">
+            <label class="label">
+              <span class="label-text">Período</span>
+            </label>
+            <select class="select select-bordered" [(ngModel)]="selectedPeriodId" (ngModelChange)="onSelectionChange()">
+              <option [value]="null" disabled selected>Seleccione un período</option>
+              @for (period of periods.value(); track period.id) {
+                <option [value]="period.id">{{ period.name }} - {{ period.year }}</option>
+              }
+            </select>
+          </div>
 
-      <!-- Students Evaluation Table -->
-      <div class="overflow-x-auto">
-        <table class="table table-zebra">
-          <thead>
-            <tr>
-              <th>Estudiante</th>
-              <th>Evaluación</th>
-              <th>Comentarios</th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (student of students(); track student.id) {
-            <tr>
-              <td>
-                <div class="flex items-center gap-3">
-                  <div class="avatar avatar-placeholder">
-                    <div
-                      class="bg-neutral text-neutral-content w-8 rounded-full"
-                      [style.background]="student.user.color"
-                    >
-                      <span class="text-xs">{{ student.initials }}</span>
-                    </div>
-                  </div>
-                  <div>{{ student.name }}</div>
-                </div>
-              </td>
-              <td>
-                <div class="flex gap-4">
-                  <label class="flex items-center gap-1 cursor-pointer">
-                    <input
-                      type="radio"
-                      [name]="'eval-' + student.id"
-                      value="X"
-                      class="radio radio-error radio-sm"
-                      [checked]="getValue(student.id) === 'X'"
-                      (change)="updateValue(student.id, 'X')"
-                    />
-                    <span class="text-sm text-error font-semibold">X</span>
-                  </label>
-                  <label class="flex items-center gap-1 cursor-pointer">
-                    <input
-                      type="radio"
-                      [name]="'eval-' + student.id"
-                      value="R"
-                      class="radio radio-warning radio-sm"
-                      [checked]="getValue(student.id) === 'R'"
-                      (change)="updateValue(student.id, 'R')"
-                    />
-                    <span class="text-sm text-warning font-semibold">R</span>
-                  </label>
-                  <label class="flex items-center gap-1 cursor-pointer">
-                    <input
-                      type="radio"
-                      [name]="'eval-' + student.id"
-                      value="S"
-                      class="radio radio-success radio-sm"
-                      [checked]="getValue(student.id) === 'S'"
-                      (change)="updateValue(student.id, 'S')"
-                    />
-                    <span class="text-sm text-success font-semibold">S</span>
-                  </label>
-                </div>
-              </td>
-              <td>
-                <input
-                  type="text"
-                  class="input input-bordered input-sm w-full"
-                  [value]="getComments(student.id)"
-                  (input)="updateComments(student.id, $any($event.target).value)"
-                  placeholder="Comentarios opcionales"
-                />
-              </td>
-            </tr>
-            }
-          </tbody>
-        </table>
-      </div>
+          <div class="form-control">
+            <label class="label">
+              <span class="label-text">Criterio de evaluación</span>
+            </label>
+            <select class="select select-bordered" [(ngModel)]="selectedMetricId" (ngModelChange)="onSelectionChange()">
+              <option [value]="null" disabled selected>Seleccione un criterio</option>
+              @for (metric of activeMetrics(); track metric.id) {
+                <option [value]="metric.id">{{ metric.name }}</option>
+              }
+            </select>
+          </div>
+        </div>
 
-      <!-- Save Button -->
-      <div class="flex justify-end gap-2">
-        <button class="btn btn-primary" (click)="saveAll()" [class.loading]="saving()">
-          @if (saving()) {
-          <span class="loading loading-spinner"></span>
-          Guardando...
-          } @else {
-          <span class="material-symbols-outlined">save</span>
-          Guardar cambios
-          }
-        </button>
-      </div>
-      } }
+        <!-- Prompt to select period and metric -->
+        @if (!selectedPeriodId() || !selectedMetricId()) {
+          <div class="alert alert-warning">
+            <span class="material-symbols-outlined">warning</span>
+            <span>Por favor, seleccione un período y un criterio para comenzar la evaluación.</span>
+          </div>
+        } @else if (evaluationsLoading()) {
+          <lib-loader />
+        } @else {
+          <!-- Legend -->
+          <div class="flex gap-4 items-center p-4 bg-base-200 rounded-lg">
+            <span class="font-semibold">Leyenda:</span>
+            <div class="flex gap-2 items-center">
+              <input type="radio" class="radio radio-error radio-sm" disabled />
+              <span><strong>X</strong> = Deficiente</span>
+            </div>
+            <div class="flex gap-2 items-center">
+              <input type="radio" class="radio radio-warning radio-sm" disabled />
+              <span><strong>R</strong> = Regular</span>
+            </div>
+            <div class="flex gap-2 items-center">
+              <input type="radio" class="radio radio-success radio-sm" disabled />
+              <span><strong>S</strong> = Satisfactorio</span>
+            </div>
+          </div>
+
+          <!-- Students Evaluation Table -->
+          <div class="overflow-x-auto">
+            <table class="table table-zebra">
+              <thead>
+                <tr>
+                  <th>Estudiante</th>
+                  <th>Evaluación</th>
+                  <th>Comentarios</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (student of students(); track student.id) {
+                  <tr>
+                    <td>
+                      <div class="flex items-center gap-3">
+                        <div class="avatar avatar-placeholder">
+                          <div
+                            class="bg-neutral text-neutral-content w-8 rounded-full"
+                            [style.background]="student.user.color"
+                          >
+                            <span class="text-xs">{{ student.initials }}</span>
+                          </div>
+                        </div>
+                        <div>{{ student.name }}</div>
+                      </div>
+                    </td>
+                    <td>
+                      <div class="flex gap-4">
+                        <label class="flex items-center gap-1 cursor-pointer">
+                          <input
+                            type="radio"
+                            [name]="'eval-' + student.id"
+                            value="X"
+                            class="radio radio-error radio-sm"
+                            [checked]="getValue(student.id) === 'X'"
+                            (change)="updateValue(student.id, 'X')"
+                          />
+                          <span class="text-sm text-error font-semibold">X</span>
+                        </label>
+                        <label class="flex items-center gap-1 cursor-pointer">
+                          <input
+                            type="radio"
+                            [name]="'eval-' + student.id"
+                            value="R"
+                            class="radio radio-warning radio-sm"
+                            [checked]="getValue(student.id) === 'R'"
+                            (change)="updateValue(student.id, 'R')"
+                          />
+                          <span class="text-sm text-warning font-semibold">R</span>
+                        </label>
+                        <label class="flex items-center gap-1 cursor-pointer">
+                          <input
+                            type="radio"
+                            [name]="'eval-' + student.id"
+                            value="S"
+                            class="radio radio-success radio-sm"
+                            [checked]="getValue(student.id) === 'S'"
+                            (change)="updateValue(student.id, 'S')"
+                          />
+                          <span class="text-sm text-success font-semibold">S</span>
+                        </label>
+                      </div>
+                    </td>
+                    <td>
+                      <input
+                        type="text"
+                        class="input input-bordered input-sm w-full"
+                        [value]="getComments(student.id)"
+                        (input)="updateComments(student.id, $any($event.target).value)"
+                        placeholder="Comentarios opcionales"
+                      />
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Save Button -->
+          <div class="flex justify-end gap-2">
+            <button class="btn btn-primary" (click)="saveAll()" [class.loading]="saving()">
+              @if (saving()) {
+                <span class="loading loading-spinner"></span>
+                Guardando...
+              } @else {
+                <span class="material-symbols-outlined">save</span>
+                Guardar cambios
+              }
+            </button>
+          </div>
+        }
+      }
     </div>
   `,
 })
@@ -323,9 +307,7 @@ export default class GroupHabits {
     const metricId = this.selectedMetricId();
 
     if (!periodId || !metricId) {
-      this.toast.showError(
-        'Por favor, seleccione un período y un criterio'
-      );
+      this.toast.showError('Por favor, seleccione un período y un criterio');
       return;
     }
 
@@ -339,9 +321,7 @@ export default class GroupHabits {
       }));
 
     if (studentEvaluations.length === 0) {
-      this.toast.showError(
-        'Por favor, evalúe al menos un estudiante antes de guardar'
-      );
+      this.toast.showError('Por favor, evalúe al menos un estudiante antes de guardar');
       return;
     }
 

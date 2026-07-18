@@ -1,18 +1,13 @@
 import { markGroupDirty, Toast } from '#/ui';
-import { Component, inject, input, OnInit, output, ChangeDetectionStrategy } from '@angular/core';
-import {
-  NonNullableFormBuilder,
-  ReactiveFormsModule,
-  Validators,
-} from '@angular/forms';
-import { Prisma } from '@generated/prisma';
 import { HttpClient } from '@angular/common/http';
+import { Component, inject, input, OnInit, output } from '@angular/core';
+import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Prisma } from '@generated/prisma';
 import { firstValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-habit-metrics-form',
   imports: [ReactiveFormsModule],
-  changeDetection: ChangeDetectionStrategy.Eager,
   template: `<form [formGroup]="form" (ngSubmit)="onSubmit()">
     <div class="fieldset">
       <label for="name">Nombre</label>
@@ -34,12 +29,7 @@ import { firstValueFrom } from 'rxjs';
     </div>
     <div class="fieldset">
       <label for="order">Orden de visualización</label>
-      <input
-        type="number"
-        formControlName="order"
-        class="input input-primary"
-        min="0"
-      />
+      <input type="number" formControlName="order" class="input input-primary" min="0" />
     </div>
     <div class="form-control">
       <label class="label cursor-pointer justify-start gap-4">
@@ -48,13 +38,7 @@ import { firstValueFrom } from 'rxjs';
       </label>
     </div>
     <div class="flex justify-end gap-2 mt-4">
-      <button
-        class="btn btn-ghost"
-        type="button"
-        (click)="closeModal.emit(false)"
-      >
-        Cancelar
-      </button>
+      <button class="btn btn-ghost" type="button" (click)="closeModal.emit(false)">Cancelar</button>
       <button class="btn btn-primary" type="submit">Guardar</button>
     </div>
   </form>`,
@@ -96,9 +80,7 @@ export default class HabitMetricsForm implements OnInit {
 
     const body = this.form.getRawValue();
     if (this.data()?.metric) {
-      void firstValueFrom(
-        this.http.patch('/api/v1/habit-metrics', { ...body, id: this.data()!.metric!.id }),
-      )
+      void firstValueFrom(this.http.patch('/api/v1/habit-metrics', { ...body, id: this.data()!.metric!.id }))
         .then(() => {
           this.toast.showSuccess('Criterio actualizado exitosamente');
           this.closeModal.emit(true);

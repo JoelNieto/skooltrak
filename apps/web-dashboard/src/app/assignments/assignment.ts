@@ -1,7 +1,7 @@
 import { EditorViewer, Error as ErrorComponent, Loader, Toast } from '#/ui';
 import { DatePipe } from '@angular/common';
 import { HttpClient, httpResource } from '@angular/common/http';
-import { Component, inject, input, signal, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, input, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { ChatType } from '@generated/prisma';
 import { firstValueFrom } from 'rxjs';
@@ -30,8 +30,6 @@ type AssignmentDetail = {
     AssignmentSubmissionForm,
     AssignmentSubmissionsList,
   ],
-
-  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     @defer {
       @if (assignmentResource.hasValue() && assignmentResource.value()) {
@@ -91,7 +89,10 @@ type AssignmentDetail = {
           </div>
         }
       } @else if (assignmentResource.error()) {
-        <lib-error (retry)="assignmentResource.reload()" [description]="$safeNavigationMigration(assignmentResource.error()?.message)" />
+        <lib-error
+          (retry)="assignmentResource.reload()"
+          [description]="$safeNavigationMigration(assignmentResource.error()?.message)"
+        />
       } @else {
         <div>No se encontró la asignación</div>
       }

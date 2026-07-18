@@ -1,34 +1,12 @@
-import {
-  Combobox,
-  ComboboxInput,
-  ComboboxPopup,
-  ComboboxPopupContainer,
-} from '@angular/aria/combobox';
+import { Combobox, ComboboxPopup } from '@angular/aria/combobox';
 import { Listbox, Option } from '@angular/aria/listbox';
 import { OverlayModule } from '@angular/cdk/overlay';
-import {
-  afterRenderEffect,
-  Component,
-  computed,
-  forwardRef,
-  viewChild,
-  viewChildren,
-  ChangeDetectionStrategy
-} from '@angular/core';
+import { afterRenderEffect, Component, computed, forwardRef, viewChild, viewChildren } from '@angular/core';
 import { NG_VALUE_ACCESSOR, ReactiveFormsModule } from '@angular/forms';
 
 @Component({
   selector: 'lib-multiselect',
-  imports: [
-    ReactiveFormsModule,
-    Combobox,
-    ComboboxInput,
-    ComboboxPopup,
-    ComboboxPopupContainer,
-    Listbox,
-    Option,
-    OverlayModule,
-  ],
+  imports: [ReactiveFormsModule, Combobox, ComboboxPopup, Listbox, Option, OverlayModule],
   providers: [
     {
       provide: NG_VALUE_ACCESSOR,
@@ -39,52 +17,34 @@ import { NG_VALUE_ACCESSOR, ReactiveFormsModule } from '@angular/forms';
   template: `<div ngCombobox readonly>
     <div #origin class="select">
       <span class="combobox-label">
-        <span
-          class="selected-label-icon material-symbols-outlined"
-          translate="no"
-          >{{ displayIcon() }}</span
-        >
+        <span class="selected-label-icon material-symbols-outlined" translate="no">{{ displayIcon() }}</span>
         <span class="selected-label-text">{{ displayValue() }}</span>
       </span>
-      <input
-        aria-label="Label dropdown"
-        placeholder="Select a label"
-        ngComboboxInput
-      />
-      <span class="example-arrow material-symbols-outlined" translate="no"
-        >arrow_drop_down</span
-      >
+      <input aria-label="Label dropdown" placeholder="Select a label" ngComboboxInput />
+      <span class="example-arrow material-symbols-outlined" translate="no">arrow_drop_down</span>
     </div>
     <ng-template ngComboboxPopupContainer>
       <ng-template
-        [cdkConnectedOverlay]="{origin, usePopover: 'inline', matchWidth: true}"
+        [cdkConnectedOverlay]="{ origin, usePopover: 'inline', matchWidth: true }"
         [cdkConnectedOverlayOpen]="true"
       >
         <div class="example-popup-container">
           <div ngListbox multi>
             @for (label of labels; track label.value) {
-            <div ngOption [value]="label.value" [label]="label.value">
-              <span
-                class="example-option-icon material-symbols-outlined"
-                translate="no"
-                >{{ label.icon }}</span
-              >
-              <span class="example-option-text">{{ label.value }}</span>
-              <span
-                class="example-option-check material-symbols-outlined"
-                translate="no"
-                >check</span
-              >
-            </div>
+              <div ngOption [value]="label.value" [label]="label.value">
+                <span class="example-option-icon material-symbols-outlined" translate="no">{{ label.icon }}</span>
+                <span class="example-option-text">{{ label.value }}</span>
+                <span class="example-option-check material-symbols-outlined" translate="no">check</span>
+              </div>
             }
           </div>
         </div>
       </ng-template>
     </ng-template>
   </div>`,
-  changeDetection: ChangeDetectionStrategy.Eager,
+
   styles: `
-  @reference "tailwindcss";
+    @reference "tailwindcss";
     :host {
       display: flex;
       justify-content: center;
@@ -142,7 +102,7 @@ import { NG_VALUE_ACCESSOR, ReactiveFormsModule } from '@angular/forms';
       padding: 0.5rem;
       margin-top: 8px;
       border-radius: 0.5rem;
-      
+
       font-size: 0.9rem;
       max-height: 11rem;
       opacity: 1;
@@ -212,16 +172,16 @@ export class MultiSelect {
   /** The options available in the listbox. */
   options = viewChildren<Option<string>>(Option);
   /** A reference to the ng aria combobox. */
-  combobox = viewChild<Combobox<string>>(Combobox);
+  combobox = viewChild(Combobox);
   /** The icon that is displayed in the combobox. */
   displayIcon = computed(() => {
-    const values = this.listbox()?.values() || [];
+    const values = this.listbox()?.value() || [];
     const label = this.labels.find((label) => label.value === values[0]);
     return label ? label.icon : '';
   });
   /** The string that is displayed in the combobox. */
   displayValue = computed(() => {
-    const values = this.listbox()?.values() || [];
+    const values = this.listbox()?.value() || [];
     if (values.length === 0) {
       return 'Select a label';
     }
@@ -246,10 +206,7 @@ export class MultiSelect {
     // The slight delay here is to ensure animations are done before scrolling.
     afterRenderEffect(() => {
       const option = this.options().find((opt) => opt.active());
-      setTimeout(
-        () => option?.element.scrollIntoView({ block: 'nearest' }),
-        50
-      );
+      setTimeout(() => option?.element.scrollIntoView({ block: 'nearest' }), 50);
     });
     // Resets the listbox scroll position when the combobox is closed.
     afterRenderEffect(() => {

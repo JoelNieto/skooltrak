@@ -1,11 +1,7 @@
 import { Toast } from '#/ui';
 import { HttpClient } from '@angular/common/http';
-import { Component, inject, input, OnInit, output, ChangeDetectionStrategy } from '@angular/core';
-import {
-  NonNullableFormBuilder,
-  ReactiveFormsModule,
-  Validators,
-} from '@angular/forms';
+import { Component, inject, input, OnInit, output } from '@angular/core';
+import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Prisma } from '@generated/prisma';
 
 type Decimal = InstanceType<typeof Prisma.Decimal>;
@@ -13,7 +9,6 @@ type Decimal = InstanceType<typeof Prisma.Decimal>;
 @Component({
   selector: 'app-grade-bucket-form',
   imports: [ReactiveFormsModule],
-  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <form [formGroup]="form" (ngSubmit)="onSubmit()">
       <div class="fieldset">
@@ -22,21 +17,10 @@ type Decimal = InstanceType<typeof Prisma.Decimal>;
       </div>
       <div class="fieldset">
         <label for="weight">Ponderacion</label>
-        <input
-          id="weight"
-          formControlName="weight"
-          type="number"
-          class="input input-primary"
-        />
+        <input id="weight" formControlName="weight" type="number" class="input input-primary" />
       </div>
       <div class="flex justify-end gap-2 mt-2">
-        <button
-          type="button"
-          class="btn btn-ghost"
-          (click)="closeModal.emit(false)"
-        >
-          Cancelar
-        </button>
+        <button type="button" class="btn btn-ghost" (click)="closeModal.emit(false)">Cancelar</button>
         <button type="submit" class="btn btn-primary">Guardar</button>
       </div>
     </form>

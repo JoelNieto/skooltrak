@@ -2,17 +2,15 @@ import { Confirmation, Error, Modal, Toast } from '#/ui';
 import { Menu, MenuContent, MenuItem, MenuTrigger } from '@angular/aria/menu';
 import { OverlayModule } from '@angular/cdk/overlay';
 import { DatePipe } from '@angular/common';
-import { Component, inject, viewChild, ChangeDetectionStrategy } from '@angular/core';
-import { httpResource } from '@angular/common/http';
+import { HttpClient, httpResource } from '@angular/common/http';
+import { Component, inject, viewChild } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { Prisma } from '@generated/prisma';
-import { HttpClient } from '@angular/common/http';
 import HabitMetricsForm from './habit-metrics-form';
 
 @Component({
   selector: 'app-habit-metrics',
   imports: [RouterLink, DatePipe, Menu, MenuContent, MenuItem, MenuTrigger, OverlayModule, Error],
-  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <div class="breadcrumbs text-sm">
       <ul>
@@ -34,95 +32,92 @@ import HabitMetricsForm from './habit-metrics-form';
       </button>
     </div>
     @if (metrics.error()) {
-      <lib-error
-        (retry)="metrics.reload()"
-        [description]="$safeNavigationMigration(metrics.error()?.message)"
-      />
+      <lib-error (retry)="metrics.reload()" [description]="$safeNavigationMigration(metrics.error()?.message)" />
     } @else {
-    <div class="overflow-x-auto">
-      <table class="table">
-        <thead>
-          <tr>
-            <th>Nombre</th>
-            <th class="w-96">Descripción</th>
-            <th>Estado</th>
-            <th>Orden</th>
-            <th>Fecha de creación</th>
-            <th>Acciones</th>
-          </tr>
-        </thead>
-        <tbody>
-          @if (metrics.isLoading()) {
+      <div class="overflow-x-auto">
+        <table class="table">
+          <thead>
             <tr>
-              <td colspan="6" class="text-center">
-                <span class="loading loading-spinner loading-md"></span>
-              </td>
+              <th>Nombre</th>
+              <th class="w-96">Descripción</th>
+              <th>Estado</th>
+              <th>Orden</th>
+              <th>Fecha de creación</th>
+              <th>Acciones</th>
             </tr>
-          }
-          @for (metric of metrics.value(); track metric.id) {
-            <tr>
-              <td>{{ metric.name }}</td>
-              <td class="max-w-64 truncate">{{ metric.description || '-' }}</td>
-              <td>
-                <span class="badge" [class.badge-success]="metric.active" [class.badge-error]="!metric.active">
-                  {{ metric.active ? 'Activo' : 'Inactivo' }}
-                </span>
-              </td>
-              <td>{{ metric.order }}</td>
-              <td>{{ metric.createdAt | date: 'short' }}</td>
-              <td>
-                <button
-                  class="cursor-pointer hover:bg-base-200 p-1 rounded-lg flex items-center justify-center"
-                  ngMenuTrigger
-                  #origin
-                  #trigger="ngMenuTrigger"
-                  [menu]="optionsMenu()"
-                >
-                  <span class="material-symbols-outlined text-xl">more_horiz</span>
-                </button>
-                <ng-template
-                  [cdkConnectedOverlayOpen]="trigger.expanded()"
-                  [cdkConnectedOverlay]="{ origin, usePopover: 'inline' }"
-                  [cdkConnectedOverlayPositions]="[
-                    {
-                      originX: 'end',
-                      originY: 'bottom',
-                      overlayX: 'end',
-                      overlayY: 'top',
-                      offsetY: 4,
-                    },
-                  ]"
-                  cdkAttachPopoverAsChild
-                >
-                  <div ngMenu class="bg-base-100 shadow-sm rounded-lg p-1 w-48" #optionsMenu="ngMenu">
-                    <ng-template ngMenuContent>
-                      <button
-                        ngMenuItem
-                        value="Edit"
-                        class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-base-200 w-full"
-                        (click)="editHabitMetric($any(metric))"
-                      >
-                        <span class="material-symbols-outlined text-lg">edit</span>
-                        <span>Editar</span>
-                      </button>
-                      <button
-                        ngMenuItem
-                        value="Delete"
-                        class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-base-200 w-full"
-                        (click)="deleteHabitMetric(metric.id!)"
-                      >
-                        <span class="material-symbols-outlined text-lg">delete</span>
-                        <span>Eliminar</span>
-                      </button>
-                    </ng-template>
-                  </div></ng-template
-                >
-              </td>
-            </tr>
-          }
-        </tbody>
-      </table>
-    </div>
+          </thead>
+          <tbody>
+            @if (metrics.isLoading()) {
+              <tr>
+                <td colspan="6" class="text-center">
+                  <span class="loading loading-spinner loading-md"></span>
+                </td>
+              </tr>
+            }
+            @for (metric of metrics.value(); track metric.id) {
+              <tr>
+                <td>{{ metric.name }}</td>
+                <td class="max-w-64 truncate">{{ metric.description || '-' }}</td>
+                <td>
+                  <span class="badge" [class.badge-success]="metric.active" [class.badge-error]="!metric.active">
+                    {{ metric.active ? 'Activo' : 'Inactivo' }}
+                  </span>
+                </td>
+                <td>{{ metric.order }}</td>
+                <td>{{ metric.createdAt | date: 'short' }}</td>
+                <td>
+                  <button
+                    class="cursor-pointer hover:bg-base-200 p-1 rounded-lg flex items-center justify-center"
+                    ngMenuTrigger
+                    #origin
+                    #trigger="ngMenuTrigger"
+                    [menu]="optionsMenu()"
+                  >
+                    <span class="material-symbols-outlined text-xl">more_horiz</span>
+                  </button>
+                  <ng-template
+                    [cdkConnectedOverlayOpen]="trigger.expanded()"
+                    [cdkConnectedOverlay]="{ origin, usePopover: 'inline' }"
+                    [cdkConnectedOverlayPositions]="[
+                      {
+                        originX: 'end',
+                        originY: 'bottom',
+                        overlayX: 'end',
+                        overlayY: 'top',
+                        offsetY: 4,
+                      },
+                    ]"
+                    cdkAttachPopoverAsChild
+                  >
+                    <div ngMenu class="bg-base-100 shadow-sm rounded-lg p-1 w-48" #optionsMenu="ngMenu">
+                      <ng-template ngMenuContent>
+                        <button
+                          ngMenuItem
+                          value="Edit"
+                          class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-base-200 w-full"
+                          (click)="editHabitMetric($any(metric))"
+                        >
+                          <span class="material-symbols-outlined text-lg">edit</span>
+                          <span>Editar</span>
+                        </button>
+                        <button
+                          ngMenuItem
+                          value="Delete"
+                          class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-base-200 w-full"
+                          (click)="deleteHabitMetric(metric.id!)"
+                        >
+                          <span class="material-symbols-outlined text-lg">delete</span>
+                          <span>Eliminar</span>
+                        </button>
+                      </ng-template>
+                    </div></ng-template
+                  >
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
     }
   `,
 })
@@ -133,10 +128,9 @@ export default class HabitMetrics {
   private modal = inject(Modal);
   optionsMenu = viewChild<Menu<string>>('optionsMenu');
 
-  public metrics = httpResource<Prisma.HabitMetricGetPayload<{ include: undefined }>[]>(
-    () => '/api/v1/habit-metrics',
-    { defaultValue: [] },
-  );
+  public metrics = httpResource<Prisma.HabitMetricGetPayload<{ include: undefined }>[]>(() => '/api/v1/habit-metrics', {
+    defaultValue: [],
+  });
 
   editHabitMetric(metric?: Prisma.HabitMetricGetPayload<{ include: undefined }>) {
     this.modal

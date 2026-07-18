@@ -1,6 +1,6 @@
 import { Confirmation, EditorViewer, Error, Loader, Modal, Toast } from '#/ui';
 import { DatePipe, DecimalPipe, NgClass } from '@angular/common';
-import { Component, computed, inject, input, ChangeDetectionStrategy } from '@angular/core';
+import { Component, computed, inject, input } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 
 import { HttpClient, httpResource } from '@angular/common/http';
@@ -33,8 +33,6 @@ type GradeDetail = {
 @Component({
   selector: 'app-grade',
   imports: [Loader, RouterLink, EditorViewer, DatePipe, Error, DecimalPipe, NgClass],
-
-  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     @defer {
       @if (gradeResource.hasValue()) {
@@ -68,7 +66,9 @@ type GradeDetail = {
               </div>
             </div>
             <div class="flex items-center gap-2">
-              <a class="link link-primary" [routerLink]="['/courses', $safeNavigationMigration(grade.course?.id)]"> {{ grade.course?.name }} </a>/
+              <a class="link link-primary" [routerLink]="['/courses', $safeNavigationMigration(grade.course?.id)]">
+                {{ grade.course?.name }} </a
+              >/
               {{ grade.bucket?.name }}
             </div>
 
@@ -148,7 +148,10 @@ type GradeDetail = {
           </div>
         </div>
       } @else if (gradeResource.error()) {
-        <lib-error (retry)="gradeResource.reload()" [description]="$safeNavigationMigration(gradeResource.error()?.message)" />
+        <lib-error
+          (retry)="gradeResource.reload()"
+          [description]="$safeNavigationMigration(gradeResource.error()?.message)"
+        />
       }
       @if (gradeResource.isLoading()) {
         <lib-loader />

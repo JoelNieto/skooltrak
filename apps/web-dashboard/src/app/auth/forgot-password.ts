@@ -1,6 +1,6 @@
 import { Loader } from '#/ui';
 import { HttpClient } from '@angular/common/http';
-import { Component, inject, signal, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import Auth from './auth';
@@ -15,7 +15,6 @@ type LookupResult = {
 @Component({
   selector: 'app-forgot-password',
   imports: [ReactiveFormsModule, RouterLink, Loader],
-  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <div class="gradient-bg min-h-screen flex items-center justify-center p-4">
       @defer {

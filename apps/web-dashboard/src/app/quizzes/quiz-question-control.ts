@@ -1,50 +1,43 @@
 import { TextEditor } from '#/ui';
-import { Component, inject, input, ChangeDetectionStrategy } from '@angular/core';
-import {
-  FormArray,
-  FormControl,
-  FormGroup,
-  NonNullableFormBuilder,
-  ReactiveFormsModule,
-} from '@angular/forms';
+import { Component, inject, input } from '@angular/core';
+import { FormArray, FormControl, FormGroup, NonNullableFormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { $Enums } from '@generated/prisma';
 import QuestionOptionControl from './question-option-control';
 
 @Component({
   selector: 'app-quiz-question-control',
   imports: [TextEditor, ReactiveFormsModule, QuestionOptionControl],
-  changeDetection: ChangeDetectionStrategy.Eager,
   template: `<form [formGroup]="question()" class="flex flex-col gap-6">
     <div class="fieldset">
       <label for="question">Pregunta</label>
-      <lib-text-editor
-        id="question"
-        name="question"
-        formControlName="question"
-      />
+      <lib-text-editor id="question" name="question" formControlName="question" />
     </div>
     <div class="fieldset">
       <label for="description">Tipo de Pregunta</label>
-      <select
-        id="type"
-        name="type"
-        formControlName="type"
-        class="select select-primary"
-      >
+      <select id="type" name="type" formControlName="type" class="select select-primary">
         <option value="" disabled selected>Selecciona un tipo...</option>
         @for (type of questionTypes; track $index) {
-        <option [value]="type.value">
-          {{ type.label }}
-        </option>
+          <option [value]="type.value">
+            {{ type.label }}
+          </option>
         }
       </select>
     </div>
-    @if (question().value.type === TYPE_ENUM.QuizQuestionType.SINGLE_CHOICE || question().value.type === TYPE_ENUM.QuizQuestionType.MULTIPLE_CHOICE || question().value.type === TYPE_ENUM.QuizQuestionType.TRUE_FALSE) {
+    @if (
+      question().value.type === TYPE_ENUM.QuizQuestionType.SINGLE_CHOICE ||
+      question().value.type === TYPE_ENUM.QuizQuestionType.MULTIPLE_CHOICE ||
+      question().value.type === TYPE_ENUM.QuizQuestionType.TRUE_FALSE
+    ) {
       <div class="flex flex-col gap-4 mt-2" formArrayName="options">
         @for (option of options.controls; track $index) {
           <div class="flex items-start gap-2 w-full">
             <app-question-option-control [option]="option" [index]="$index" class="flex-1 min-w-0" />
-            <button type="button" class="btn btn-ghost btn-sm btn-square shrink-0 mt-8" (click)="removeOption($index)" title="Eliminar opción">
+            <button
+              type="button"
+              class="btn btn-ghost btn-sm btn-square shrink-0 mt-8"
+              (click)="removeOption($index)"
+              title="Eliminar opción"
+            >
               <span class="material-symbols-outlined text-error">delete</span>
             </button>
           </div>

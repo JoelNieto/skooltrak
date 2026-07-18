@@ -1,17 +1,11 @@
-import { Component, inject, signal, ChangeDetectionStrategy } from '@angular/core';
-import {
-  FormControl,
-  FormGroup,
-  ReactiveFormsModule,
-  Validators,
-} from '@angular/forms';
+import { Component, inject, signal } from '@angular/core';
+import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import Auth from './auth';
 
 @Component({
   selector: 'app-change-password',
   imports: [ReactiveFormsModule, RouterLink],
-  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <div class="flex flex-col gap-6">
       <div class="breadcrumbs text-sm">
@@ -24,9 +18,7 @@ import Auth from './auth';
       <div class="bg-base-100 rounded-lg border border-base-300 p-6 max-w-xl w-full">
         <div class="mb-6">
           <h2 class="text-2xl font-bold text-base-content">Cambiar contraseña</h2>
-          <p class="text-sm text-base-content/70">
-            Ingresa tu contraseña actual y define una nueva contraseña.
-          </p>
+          <p class="text-sm text-base-content/70">Ingresa tu contraseña actual y define una nueva contraseña.</p>
         </div>
 
         @if (success()) {
@@ -83,9 +75,7 @@ import Auth from './auth';
           }
 
           <div class="flex flex-col sm:flex-row gap-3 pt-2">
-            <a routerLink="/home" class="btn btn-outline w-full sm:w-auto">
-              Cancelar
-            </a>
+            <a routerLink="/home" class="btn btn-outline w-full sm:w-auto"> Cancelar </a>
             <button
               type="submit"
               [disabled]="loading() || form.invalid || passwordMismatch()"
@@ -116,10 +106,7 @@ export default class ChangePasswordComponent {
 
   form = new FormGroup({
     currentPassword: new FormControl('', [Validators.required]),
-    newPassword: new FormControl('', [
-      Validators.required,
-      Validators.minLength(8),
-    ]),
+    newPassword: new FormControl('', [Validators.required, Validators.minLength(8)]),
     confirmPassword: new FormControl('', [Validators.required]),
   });
 
@@ -127,9 +114,7 @@ export default class ChangePasswordComponent {
     // Watch for password mismatch
     this.form.valueChanges.subscribe(() => {
       const { newPassword, confirmPassword } = this.form.value;
-      this.passwordMismatch.set(
-        !!newPassword && !!confirmPassword && newPassword !== confirmPassword
-      );
+      this.passwordMismatch.set(!!newPassword && !!confirmPassword && newPassword !== confirmPassword);
       // Clear success/error when form changes
       if (this.success() || this.error()) {
         this.success.set(false);

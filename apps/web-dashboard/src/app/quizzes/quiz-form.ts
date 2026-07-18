@@ -1,5 +1,5 @@
 import { Loader, TextEditor, Toast } from '#/ui';
-import { Component, computed, effect, inject, input, signal, ChangeDetectionStrategy } from '@angular/core';
+import { Component, computed, effect, inject, input, signal } from '@angular/core';
 import {
   FormArray,
   FormControl,
@@ -20,8 +20,6 @@ import { QuizQuestionControl } from './quiz-question-control';
 @Component({
   selector: 'app-quiz-form',
   imports: [RouterLink, ReactiveFormsModule, FormsModule, TextEditor, QuizQuestionControl, Loader],
-
-  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <div class="breadcrumbs text-sm">
       <ul>

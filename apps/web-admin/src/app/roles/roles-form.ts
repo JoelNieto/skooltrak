@@ -1,19 +1,12 @@
 import { Toast } from '#/ui';
-import { Component, inject, input, model, OnInit, output, ChangeDetectionStrategy } from '@angular/core';
-import { httpResource } from '@angular/common/http';
-import {
-  FormsModule,
-  NonNullableFormBuilder,
-  ReactiveFormsModule,
-  Validators,
-} from '@angular/forms';
+import { HttpClient, httpResource } from '@angular/common/http';
+import { Component, inject, input, model, OnInit, output } from '@angular/core';
+import { FormsModule, NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Prisma } from '@generated/prisma';
-import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 @Component({
   selector: 'app-roles-form',
   imports: [ReactiveFormsModule, FormsModule],
-  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <form [formGroup]="form" (ngSubmit)="createRole()">
       <div class="fieldset">
@@ -22,42 +15,32 @@ import { firstValueFrom } from 'rxjs';
       </div>
       <div class="fieldset">
         <label for="description">Descripción</label>
-        <input
-          id="description"
-          formControlName="description"
-          class="input input-primary"
-        />
+        <input id="description" formControlName="description" class="input input-primary" />
       </div>
       <div class="fieldset">
         <label for="organizationId">Organización</label>
-        <select
-          id="organizationId"
-          formControlName="organizationId"
-          class="select select-primary"
-        >
+        <select id="organizationId" formControlName="organizationId" class="select select-primary">
           <option [value]="null">Seleccionar Organización</option>
           @for (organization of organizations.value(); track organization.id) {
-          <option [value]="organization.id">
-            {{ organization.name }}
-          </option>
+            <option [value]="organization.id">
+              {{ organization.name }}
+            </option>
           }
         </select>
       </div>
       <div class="fieldset">
         <label for="permissionIds">Permisos</label>
         @for (permission of permissions.value(); track permission.id) {
-        <label class="label flex gap-2 items-center">
-          <input
-            type="checkbox"
-            class="toggle toggle-primary"
-            [checked]="selectedIds().includes(permission.id!)"
-            [id]="permission.id"
-            (change)="togglePermission(permission.id!)"
-          />
-          <span class="label-text ml-2"
-            >{{ permission.description }} {{ permission.descriptiveId }}</span
-          >
-        </label>
+          <label class="label flex gap-2 items-center">
+            <input
+              type="checkbox"
+              class="toggle toggle-primary"
+              [checked]="selectedIds().includes(permission.id!)"
+              [id]="permission.id"
+              (change)="togglePermission(permission.id!)"
+            />
+            <span class="label-text ml-2">{{ permission.description }} {{ permission.descriptiveId }}</span>
+          </label>
         }
       </div>
       <div class="flex justify-end mt-4">
@@ -84,10 +67,9 @@ export class RolesForm implements OnInit {
     { defaultValue: [] },
   );
 
-  public organizations = httpResource<Array<{ id: string; name: string }>>(
-    () => '/api/v1/organizations',
-    { defaultValue: [] },
-  );
+  public organizations = httpResource<Array<{ id: string; name: string }>>(() => '/api/v1/organizations', {
+    defaultValue: [],
+  });
 
   public selectedIds = model<string[]>([]);
 
@@ -106,9 +88,7 @@ export class RolesForm implements OnInit {
   }
 
   togglePermission(id: string) {
-    this.selectedIds.update((ids) =>
-      ids.includes(id) ? ids.filter((id) => id !== id) : [...ids, id]
-    );
+    this.selectedIds.update((ids) => (ids.includes(id) ? ids.filter((id) => id !== id) : [...ids, id]));
   }
 
   public createRole() {
@@ -123,9 +103,7 @@ export class RolesForm implements OnInit {
     const req = this.form.getRawValue();
 
     if (this.data()?.role) {
-      void firstValueFrom(
-        this.http.patch('/api/v1/roles', { ...req, id: this.data()!.role!.id }),
-      )
+      void firstValueFrom(this.http.patch('/api/v1/roles', { ...req, id: this.data()!.role!.id }))
         .then(() => {
           this.toast.showSuccess('Rol actualizado exitosamente');
           this.closeModal.emit();

@@ -2,12 +2,12 @@ import { Confirmation, EmptyState, Modal, Pagination, Paginator, Toast } from '#
 import { Menu, MenuContent, MenuItem, MenuTrigger } from '@angular/aria/menu';
 import { OverlayModule } from '@angular/cdk/overlay';
 import { DatePipe } from '@angular/common';
-import { Component, effect, inject, viewChild, ChangeDetectionStrategy } from '@angular/core';
-import { httpResource, HttpClient } from '@angular/common/http';
+import { HttpClient, httpResource } from '@angular/common/http';
+import { Component, effect, inject, viewChild } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { filter, switchMap } from 'rxjs';
-import Store from '../../core/store';
 import { toFetchQueryRecord } from '../../core/fetch-query-params';
+import Store from '../../core/store';
 import ClassGroupsForm from '../forms/class-groups-form';
 
 type ClassGroupRow = {
@@ -23,7 +23,6 @@ type ClassGroupRow = {
   selector: 'app-groups',
   imports: [DatePipe, RouterLink, Menu, MenuContent, MenuItem, MenuTrigger, OverlayModule, EmptyState, Paginator],
   providers: [Pagination],
-  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <div class="flex justify-end">
       <button class="btn btn-primary" (click)="editClassGroup()">

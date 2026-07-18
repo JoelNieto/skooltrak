@@ -1,6 +1,6 @@
 import { Modal, Toast } from '#/ui';
 import { HttpClient, httpResource } from '@angular/common/http';
-import { Component, computed, inject, input, linkedSignal, signal, ChangeDetectionStrategy } from '@angular/core';
+import { Component, computed, inject, input, linkedSignal, signal } from '@angular/core';
 import { Prisma } from '@generated/prisma';
 import { isValidId } from '../core/validators';
 import GroupScheduleForm from './group-schedule-form';
@@ -22,8 +22,6 @@ type ScheduleLayout = {
 
 @Component({
   selector: 'app-group-schedule',
-  imports: [],
-  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <div class="flex flex-col gap-6">
       <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
@@ -42,7 +40,7 @@ type ScheduleLayout = {
         @let schedules = localSchedules();
         @if (schedules?.length) {
           <div class="w-full overflow-x-auto">
-            <div class="min-w-[1100px]">
+            <div class="min-w-275">
               <div
                 class="grid border border-base-300 rounded-lg bg-base-100"
                 [style.gridTemplateColumns]="gridTemplateColumns"

@@ -1,15 +1,14 @@
 import { markGroupDirty, Toast } from '#/ui';
-import { Component, inject, input, OnInit, output, ChangeDetectionStrategy } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Component, inject, input, OnInit, output } from '@angular/core';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Prisma } from '@generated/prisma';
-import { HttpClient } from '@angular/common/http';
-import { firstValueFrom } from 'rxjs';
 import { format } from 'date-fns';
+import { firstValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-periods-form',
   imports: [ReactiveFormsModule],
-  changeDetection: ChangeDetectionStrategy.Eager,
   template: `<form [formGroup]="form" (ngSubmit)="onSubmit()">
     <div class="flex flex-col gap-2">
       <div class="fieldset">
@@ -76,9 +75,7 @@ export default class PeriodsForm implements OnInit {
 
     const body = this.form.getRawValue();
     if (this.data()?.period) {
-      void firstValueFrom(
-        this.http.patch('/api/v1/periods', { ...body, id: this.data()!.period!.id }),
-      )
+      void firstValueFrom(this.http.patch('/api/v1/periods', { ...body, id: this.data()!.period!.id }))
         .then(() => {
           this.toast.showSuccess('Periodo actualizado correctamente');
           this.closeModal.emit(true);

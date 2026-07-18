@@ -1,22 +1,8 @@
 import { markGroupDirty, Toast } from '#/ui';
-import {
-  Component,
-  DestroyRef,
-  OnInit,
-  computed,
-  inject,
-  input,
-  output,
-  signal,
-  ChangeDetectionStrategy
-} from '@angular/core';
+import { HttpClient, httpResource } from '@angular/common/http';
+import { Component, computed, DestroyRef, inject, input, OnInit, output, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { httpResource, HttpClient } from '@angular/common/http';
-import {
-  NonNullableFormBuilder,
-  ReactiveFormsModule,
-  Validators,
-} from '@angular/forms';
+import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { forkJoin } from 'rxjs';
 import Store from '../core/store';
 
@@ -30,16 +16,11 @@ type ShareTargets = {
 @Component({
   selector: 'app-file-share-form',
   imports: [ReactiveFormsModule],
-  changeDetection: ChangeDetectionStrategy.Eager,
   template: `<form [formGroup]="form" (ngSubmit)="onSubmit()">
     <div class="flex flex-col gap-4">
       <div class="fieldset">
         <label for="targetType">Compartir con</label>
-        <select
-          id="targetType"
-          formControlName="targetType"
-          class="select select-primary w-full"
-        >
+        <select id="targetType" formControlName="targetType" class="select select-primary w-full">
           <option value="COURSE">Curso</option>
           <option value="CLASS_GROUP">Grupo</option>
           <option value="SCHOOL">Escuela</option>
@@ -48,84 +29,52 @@ type ShareTargets = {
       </div>
       <div class="fieldset">
         <label for="targetId">IDs de destino</label>
-        @if(targetType() === 'COURSE') {
-        <div class="flex flex-col sm:flex-row gap-2">
-          <select
-            id="courseId"
-            formControlName="courseId"
-            class="select select-primary w-full sm:flex-1"
-          >
-            <option value="" disabled selected>Seleccionar curso</option>
-            @for(course of coursesResource.value(); track course.id) {
-            <option [value]="course.id">{{ course.name }}</option>
-            }
-          </select>
-          <button
-            class="btn btn-secondary w-full sm:w-auto"
-            type="button"
-            (click)="addTarget()"
-          >
-            Agregar
-          </button>
-        </div>
+        @if (targetType() === 'COURSE') {
+          <div class="flex flex-col sm:flex-row gap-2">
+            <select id="courseId" formControlName="courseId" class="select select-primary w-full sm:flex-1">
+              <option value="" disabled selected>Seleccionar curso</option>
+              @for (course of coursesResource.value(); track course.id) {
+                <option [value]="course.id">{{ course.name }}</option>
+              }
+            </select>
+            <button class="btn btn-secondary w-full sm:w-auto" type="button" (click)="addTarget()">Agregar</button>
+          </div>
         } @else {
-        <div class="flex flex-col sm:flex-row gap-2">
-          <input
-            id="targetId"
-            type="text"
-            class="input input-primary w-full sm:flex-1"
-            formControlName="targetId"
-            placeholder="Pega un ID y agrega"
-          />
-          <button
-            class="btn btn-secondary w-full sm:w-auto"
-            type="button"
-            (click)="addTarget()"
-          >
-            Agregar
-          </button>
-        </div>
+          <div class="flex flex-col sm:flex-row gap-2">
+            <input
+              id="targetId"
+              type="text"
+              class="input input-primary w-full sm:flex-1"
+              formControlName="targetId"
+              placeholder="Pega un ID y agrega"
+            />
+            <button class="btn btn-secondary w-full sm:w-auto" type="button" (click)="addTarget()">Agregar</button>
+          </div>
         }
-        @if(targetIds().length > 0) {
-        <div class="mt-2 flex flex-wrap gap-2">
-          @for(id of targetIds(); track id) {
-          <span class="badge badge-outline gap-2">
-            {{ targetLabel(id) }}
-            <button
-              type="button"
-              class="text-xs"
-              (click)="removeTarget(id)"
-            >
-              ✕
-            </button>
-          </span>
-          }
-        </div>
+        @if (targetIds().length > 0) {
+          <div class="mt-2 flex flex-wrap gap-2">
+            @for (id of targetIds(); track id) {
+              <span class="badge badge-outline gap-2">
+                {{ targetLabel(id) }}
+                <button type="button" class="text-xs" (click)="removeTarget(id)">✕</button>
+              </span>
+            }
+          </div>
         }
       </div>
       <div class="fieldset">
         <label for="permission">Permiso</label>
-        <select
-          id="permission"
-          formControlName="permission"
-          class="select select-primary w-full"
-        >
+        <select id="permission" formControlName="permission" class="select select-primary w-full">
           <option value="VIEW">Solo ver</option>
           <option value="EDIT">Puede editar</option>
         </select>
       </div>
     </div>
     <div class="mt-6 flex flex-col-reverse sm:flex-row sm:justify-end gap-2">
-      <button
-        class="btn btn-ghost w-full sm:w-auto"
-        type="button"
-        (click)="closeModal.emit(undefined)"
-      >
+      <button class="btn btn-ghost w-full sm:w-auto" type="button" (click)="closeModal.emit(undefined)">
         Cancelar
       </button>
-      <button class="btn btn-primary w-full sm:w-auto" type="submit">
-        Compartir
-      </button>
+      <button class="btn btn-primary w-full sm:w-auto" type="submit">Compartir</button>
     </div>
   </form>`,
 })
@@ -139,10 +88,7 @@ export default class FileShareForm implements OnInit {
   private destroyRef = inject(DestroyRef);
 
   public form = this.fb.group({
-    targetType: this.fb.control<'COURSE' | 'CLASS_GROUP' | 'SCHOOL' | 'USER'>(
-      'COURSE',
-      [Validators.required]
-    ),
+    targetType: this.fb.control<'COURSE' | 'CLASS_GROUP' | 'SCHOOL' | 'USER'>('COURSE', [Validators.required]),
     targetId: this.fb.control(''),
     courseId: this.fb.control<string | null>(null),
     permission: this.fb.control<'VIEW' | 'EDIT'>('VIEW', [Validators.required]),
@@ -178,8 +124,7 @@ export default class FileShareForm implements OnInit {
 
   ngOnInit() {
     const initialTargetType = this.targetType();
-    const initialTargets =
-      this.data().shareTargets?.[initialTargetType]?.ids ?? [];
+    const initialTargets = this.data().shareTargets?.[initialTargetType]?.ids ?? [];
     this.targetIds.set(initialTargets);
     this.removedTargetIds.set([]);
   }
@@ -190,10 +135,7 @@ export default class FileShareForm implements OnInit {
 
   addTarget() {
     const formValue = this.form.getRawValue();
-    const targetId =
-      formValue.targetType === 'COURSE'
-        ? formValue.courseId?.trim() ?? ''
-        : formValue.targetId.trim();
+    const targetId = formValue.targetType === 'COURSE' ? (formValue.courseId?.trim() ?? '') : formValue.targetId.trim();
 
     if (!targetId) {
       this.toast.showError('Ingresa un ID válido.');
@@ -205,19 +147,14 @@ export default class FileShareForm implements OnInit {
       }
       return [...current, targetId];
     });
-    this.removedTargetIds.update((current) =>
-      current.filter((id) => id !== targetId)
-    );
+    this.removedTargetIds.update((current) => current.filter((id) => id !== targetId));
     this.form.get('targetId')?.setValue('');
     this.form.get('courseId')?.setValue(null);
   }
 
   removeTarget(targetId: string) {
-    this.targetIds.update((current) =>
-      current.filter((id) => id !== targetId)
-    );
-    const initialTargets =
-      this.data().shareTargets?.[this.targetType()]?.ids ?? [];
+    this.targetIds.update((current) => current.filter((id) => id !== targetId));
+    const initialTargets = this.data().shareTargets?.[this.targetType()]?.ids ?? [];
     if (initialTargets.includes(targetId)) {
       this.removedTargetIds.update((current) => {
         if (current.includes(targetId)) {
@@ -255,13 +192,10 @@ export default class FileShareForm implements OnInit {
 
     const { targetType, permission } = this.form.getRawValue();
     const fileId = this.data().fileId;
-    const initialTargets =
-      this.data().shareTargets?.[targetType]?.ids ?? [];
+    const initialTargets = this.data().shareTargets?.[targetType]?.ids ?? [];
     const currentTargets = this.targetIds();
     const removedTargets = this.removedTargetIds();
-    const newTargets = currentTargets.filter(
-      (targetId) => !initialTargets.includes(targetId)
-    );
+    const newTargets = currentTargets.filter((targetId) => !initialTargets.includes(targetId));
 
     const shareMutations = newTargets.map((targetId) =>
       this.http.post('/api/v1/files/share', {

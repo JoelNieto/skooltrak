@@ -1,7 +1,7 @@
 import { EditorViewer, Loader, Toast } from '#/ui';
 import { DatePipe } from '@angular/common';
-import { Component, computed, effect, inject, input, signal, ChangeDetectionStrategy } from '@angular/core';
-import { httpResource, HttpClient } from '@angular/common/http';
+import { HttpClient, httpResource } from '@angular/common/http';
+import { Component, computed, effect, inject, input, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { Prisma } from '@generated/prisma';
@@ -36,7 +36,6 @@ type MessageType = Prisma.MessageGetPayload<undefined> & {
       font-style: italic;
     }
   `,
-  changeDetection: ChangeDetectionStrategy.Eager,
   template: `@defer {
       @if (messageResource.hasValue()) {
         @let message = messageResource.value();
@@ -233,7 +232,10 @@ export default class Message {
     });
   }
 
-  prepareReplyFromReply(reply: { id?: string; content?: string; sender?: { name?: string } }, includeQuote = false): void {
+  prepareReplyFromReply(
+    reply: { id?: string; content?: string; sender?: { name?: string } },
+    includeQuote = false,
+  ): void {
     if (!reply?.id) return;
     const quotedText = includeQuote && reply.content ? this.toPlainText(reply.content).slice(0, 200) : undefined;
     this.replyDraft.set({

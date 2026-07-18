@@ -1,15 +1,14 @@
 import { Confirmation, Modal, Paginator, Toast } from '#/ui';
 import { Menu, MenuContent, MenuItem, MenuTrigger } from '@angular/aria/menu';
 import { OverlayModule } from '@angular/cdk/overlay';
-import { Component, computed, inject, signal, viewChild, ChangeDetectionStrategy } from '@angular/core';
-import { effect } from '@angular/core';
-import { httpResource, HttpClient } from '@angular/common/http';
+import { HttpClient, httpResource } from '@angular/common/http';
+import { Component, computed, effect, inject, signal, viewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { Prisma, StudyPlan } from '@generated/prisma';
 import { filter, switchMap } from 'rxjs';
-import Store from '../../core/store';
 import { toFetchQueryRecord } from '../../core/fetch-query-params';
+import Store from '../../core/store';
 import CoursesForm from '../forms/courses-form';
 
 type Teacher = Prisma.TeacherGetPayload<{ include: { user: true } }> & {
@@ -26,8 +25,6 @@ type CourseType = Prisma.CourseGetPayload<{
 @Component({
   selector: 'app-courses',
   imports: [Paginator, RouterLink, FormsModule, Menu, MenuContent, MenuItem, MenuTrigger, OverlayModule],
-
-  changeDetection: ChangeDetectionStrategy.Eager,
   template: `<div class="flex justify-between">
       <div class="flex gap-2">
         <div class="md:w-96 w-full">

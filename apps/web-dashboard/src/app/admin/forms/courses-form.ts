@@ -1,5 +1,5 @@
 import { markGroupDirty, Toast } from '#/ui';
-import { Combobox, ComboboxInput, ComboboxPopupContainer } from '@angular/aria/combobox';
+import { Combobox } from '@angular/aria/combobox';
 import { Listbox, Option } from '@angular/aria/listbox';
 import { OverlayModule } from '@angular/cdk/overlay';
 import { HttpClient, httpResource } from '@angular/common/http';
@@ -13,7 +13,6 @@ import {
   signal,
   viewChild,
   viewChildren,
-  ChangeDetectionStrategy
 } from '@angular/core';
 import { FormsModule, NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Prisma } from '@generated/prisma';
@@ -22,16 +21,7 @@ import { toFetchQueryParams } from '../../core/fetch-query-params';
 import Store from '../../core/store';
 @Component({
   selector: 'app-courses-form',
-  imports: [
-    ReactiveFormsModule,
-    FormsModule,
-    Combobox,
-    ComboboxInput,
-    ComboboxPopupContainer,
-    Listbox,
-    Option,
-    OverlayModule,
-  ],
+  imports: [ReactiveFormsModule, FormsModule, Combobox, Listbox, Option, OverlayModule],
   template: `<form [formGroup]="form" (ngSubmit)="onSubmit()">
     <div class="flex flex-col gap-2">
       <div class="fieldset">
@@ -138,7 +128,7 @@ import Store from '../../core/store';
       <button type="submit" class="btn btn-primary">Guardar</button>
     </div>
   </form>`,
-  changeDetection: ChangeDetectionStrategy.Eager,
+
   styles: `
     [ngCombobox]:has([aria-expanded='false']) .popup {
       display: none;
@@ -175,7 +165,7 @@ export default class CoursesForm {
 
   public listbox = viewChild<Listbox<string>>(Listbox);
   public options = viewChildren<Option<string>>(Option);
-  public combobox = viewChild<Combobox<string>>(Combobox);
+  public combobox = viewChild(Combobox);
 
   public subjects = httpResource<{ id: string; name: string }[]>(() => ({
     url: '/api/v1/subjects',

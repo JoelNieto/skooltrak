@@ -1,18 +1,17 @@
 import { EmptyState, Pagination, Paginator } from '#/ui';
 import { DatePipe } from '@angular/common';
-import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 
 import { HttpClient } from '@angular/common/http';
 import { forkJoin, map, of, tap } from 'rxjs';
-import Store from '../core/store';
 import { toFetchQueryParams } from '../core/fetch-query-params';
+import Store from '../core/store';
 
 @Component({
   imports: [RouterLink, DatePipe, EmptyState, Paginator],
   providers: [Pagination],
-  changeDetection: ChangeDetectionStrategy.Eager,
   template: `<div class="breadcrumbs text-sm">
       <ul>
         <li><a routerLink="/">Inicio</a></li>

@@ -1,19 +1,17 @@
-import { Confirmation, Error, Modal, Toast } from '#/ui';
+import { Confirmation, Modal, Toast } from '#/ui';
 import { Menu, MenuContent, MenuItem, MenuTrigger } from '@angular/aria/menu';
 import { OverlayModule } from '@angular/cdk/overlay';
 import { DatePipe } from '@angular/common';
-import { Component, inject, viewChild, ChangeDetectionStrategy } from '@angular/core';
-import { httpResource } from '@angular/common/http';
+import { HttpClient, httpResource } from '@angular/common/http';
+import { Component, inject, viewChild } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { Prisma } from '@generated/prisma';
-import { HttpClient } from '@angular/common/http';
 import { filter, switchMap } from 'rxjs';
 import PeriodsForm from './periods-form';
 
 @Component({
   selector: 'app-periods',
   imports: [RouterLink, DatePipe, Menu, MenuContent, MenuItem, MenuTrigger, OverlayModule],
-  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <div class="breadcrumbs text-sm">
       <ul>
@@ -114,10 +112,9 @@ export default class Periods {
   private modal = inject(Modal);
   private confirmation = inject(Confirmation);
   optionsMenu = viewChild<Menu<string>>('optionsMenu');
-  public periods = httpResource<Prisma.PeriodGetPayload<{ include: undefined }>[]>(
-    () => '/api/v1/periods',
-    { defaultValue: [] },
-  );
+  public periods = httpResource<Prisma.PeriodGetPayload<{ include: undefined }>[]>(() => '/api/v1/periods', {
+    defaultValue: [],
+  });
 
   editPeriod(period?: Prisma.PeriodGetPayload<{ include: undefined }>) {
     this.modal

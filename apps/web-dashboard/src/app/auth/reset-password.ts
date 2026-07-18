@@ -1,34 +1,24 @@
 import { Loader, Toast } from '#/ui';
-import { Component, inject, signal, ChangeDetectionStrategy } from '@angular/core';
-import {
-  FormControl,
-  FormGroup,
-  ReactiveFormsModule,
-  Validators,
-} from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
+import { Component, inject, signal } from '@angular/core';
+import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Router, RouterLink } from '@angular/router';
 import Auth from './auth';
 
 @Component({
   selector: 'app-reset-password',
   imports: [ReactiveFormsModule, RouterLink, Loader],
-  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <div class="gradient-bg min-h-screen flex items-center justify-center p-4">
       @defer {
         <div class="max-w-md w-full flex flex-col gap-8 items-center">
           <div><img src="skooltrak.png" alt="" class="h-12" /></div>
 
-          <div
-            class="w-full rounded-2xl shadow-xl overflow-hidden flex flex-col"
-          >
+          <div class="w-full rounded-2xl shadow-xl overflow-hidden flex flex-col">
             <!-- Header Section -->
             <div class="bg-primary p-6 text-white text-center">
               <h1 class="text-2xl font-bold">Nueva contraseña</h1>
-              <p class="text-primary-content mt-2">
-                Ingresa tu nueva contraseña
-              </p>
+              <p class="text-primary-content mt-2">Ingresa tu nueva contraseña</p>
             </div>
 
             <!-- Form Section -->
@@ -38,25 +28,15 @@ import Auth from './auth';
                   <span class="material-symbols-outlined">check_circle</span>
                   <span>Invitación reenviada. Revisa tu bandeja de entrada.</span>
                 </div>
-                <a routerLink="/login" class="btn btn-primary w-full">
-                  Volver al inicio de sesión
-                </a>
+                <a routerLink="/login" class="btn btn-primary w-full"> Volver al inicio de sesión </a>
               } @else if (error()) {
                 <div class="alert alert-error mb-4">
                   <span class="material-symbols-outlined">error</span>
-                  <span
-                    >El enlace es inválido o ha expirado. Solicita uno
-                    nuevo.</span
-                  >
+                  <span>El enlace es inválido o ha expirado. Solicita uno nuevo.</span>
                 </div>
                 <div class="flex flex-col gap-3 text-center">
                   @if (emailFromUrl()) {
-                    <button
-                      type="button"
-                      class="btn btn-primary"
-                      [disabled]="resending()"
-                      (click)="resendInvitation()"
-                    >
+                    <button type="button" class="btn btn-primary" [disabled]="resending()" (click)="resendInvitation()">
                       @if (resending()) {
                         <span class="loading loading-spinner loading-sm"></span>
                         Enviando...
@@ -66,17 +46,11 @@ import Auth from './auth';
                       }
                     </button>
                   } @else {
-                    <a routerLink="/forgot-password" class="btn btn-primary">
-                      Solicitar nuevo enlace
-                    </a>
+                    <a routerLink="/forgot-password" class="btn btn-primary"> Solicitar nuevo enlace </a>
                   }
                 </div>
               } @else {
-                <form
-                  [formGroup]="form"
-                  (ngSubmit)="onSubmit()"
-                  class="space-y-6"
-                >
+                <form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-6">
                   <div class="fieldset">
                     <label for="password">Nueva contraseña</label>
                     <input
@@ -87,21 +61,11 @@ import Auth from './auth';
                       class="input input-primary w-full"
                       placeholder="Mínimo 8 caracteres"
                     />
-                    @if (
-                      form.get('password')?.touched &&
-                      form.get('password')?.hasError('required')
-                    ) {
-                      <p class="text-error text-xs mt-1">
-                        La contraseña es requerida
-                      </p>
+                    @if (form.get('password')?.touched && form.get('password')?.hasError('required')) {
+                      <p class="text-error text-xs mt-1">La contraseña es requerida</p>
                     }
-                    @if (
-                      form.get('password')?.touched &&
-                      form.get('password')?.hasError('minlength')
-                    ) {
-                      <p class="text-error text-xs mt-1">
-                        La contraseña debe tener al menos 8 caracteres
-                      </p>
+                    @if (form.get('password')?.touched && form.get('password')?.hasError('minlength')) {
+                      <p class="text-error text-xs mt-1">La contraseña debe tener al menos 8 caracteres</p>
                     }
                   </div>
 
@@ -115,20 +79,13 @@ import Auth from './auth';
                       class="input input-primary w-full"
                       placeholder="Repite la nueva contraseña"
                     />
-                    @if (
-                      form.get('confirmPassword')?.touched &&
-                      form.get('confirmPassword')?.hasError('required')
-                    ) {
-                      <p class="text-error text-xs mt-1">
-                        Confirma tu contraseña
-                      </p>
+                    @if (form.get('confirmPassword')?.touched && form.get('confirmPassword')?.hasError('required')) {
+                      <p class="text-error text-xs mt-1">Confirma tu contraseña</p>
                     }
                   </div>
 
                   @if (passwordMismatch()) {
-                    <p class="text-error text-sm">
-                      Las contraseñas no coinciden.
-                    </p>
+                    <p class="text-error text-sm">Las contraseñas no coinciden.</p>
                   }
 
                   <button
@@ -148,17 +105,13 @@ import Auth from './auth';
                 <div class="divider">o</div>
 
                 <p class="text-center text-sm">
-                  <a routerLink="/login" class="link link-primary"
-                    >Volver al inicio de sesión</a
-                  >
+                  <a routerLink="/login" class="link link-primary">Volver al inicio de sesión</a>
                 </p>
               }
             </div>
           </div>
 
-          <p class="text-base-200 text-center">
-            2025 © Skooltrak. Todos los derechos reservados.
-          </p>
+          <p class="text-base-200 text-center">2025 © Skooltrak. Todos los derechos reservados.</p>
         </div>
       } @placeholder {
         <lib-loader />
@@ -181,10 +134,7 @@ export default class ResetPasswordComponent {
   passwordMismatch = signal(false);
 
   form = new FormGroup({
-    password: new FormControl('', [
-      Validators.required,
-      Validators.minLength(8),
-    ]),
+    password: new FormControl('', [Validators.required, Validators.minLength(8)]),
     confirmPassword: new FormControl('', [Validators.required]),
   });
 
@@ -207,9 +157,7 @@ export default class ResetPasswordComponent {
     // Watch for password mismatch
     this.form.valueChanges.subscribe(() => {
       const { password, confirmPassword } = this.form.value;
-      this.passwordMismatch.set(
-        !!password && !!confirmPassword && password !== confirmPassword
-      );
+      this.passwordMismatch.set(!!password && !!confirmPassword && password !== confirmPassword);
     });
   }
 

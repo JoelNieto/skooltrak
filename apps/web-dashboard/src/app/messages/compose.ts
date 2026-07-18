@@ -1,16 +1,9 @@
 import { TextEditor, Toast } from '#/ui';
-import { Component, inject, signal, ChangeDetectionStrategy } from '@angular/core';
-import { FormsModule } from '@angular/forms';
-import {
-  form,
-  FormField,
-  minLength,
-  required,
-  submit,
-  validate,
-} from '@angular/forms/signals';
-import { Router, RouterLink } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
+import { Component, inject, signal } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { form, FormField, minLength, required, submit, validate } from '@angular/forms/signals';
+import { Router, RouterLink } from '@angular/router';
 import Contacts, { SelectedContact } from './contacts';
 
 interface ComposeFormData {
@@ -22,7 +15,6 @@ interface ComposeFormData {
 @Component({
   selector: 'app-compose',
   imports: [RouterLink, Contacts, TextEditor, FormsModule, FormField],
-  changeDetection: ChangeDetectionStrategy.Eager,
   template: `<div class="breadcrumbs text-sm">
       <ul>
         <li><a routerLink="/">Inicio</a></li>
@@ -36,10 +28,7 @@ interface ComposeFormData {
         <div class="flex flex-col gap-1 border-b border-base-300 pb-2">
           <div class="flex gap-2 items-center">
             <label for="to">Para:</label>
-            <app-contacts
-              [selectedContacts]="formModel().to"
-              (selectedContactsChange)="updateRecipients($event)"
-            />
+            <app-contacts [selectedContacts]="formModel().to" (selectedContactsChange)="updateRecipients($event)" />
           </div>
           @if (composeForm.to().touched() && composeForm.to().invalid()) {
             <ul class="text-error text-sm">
@@ -56,9 +45,7 @@ interface ComposeFormData {
             placeholder="Asunto"
             [formField]="composeForm.subject"
           />
-          @if (
-            composeForm.subject().touched() && composeForm.subject().invalid()
-          ) {
+          @if (composeForm.subject().touched() && composeForm.subject().invalid()) {
             <ul class="text-error text-sm">
               @for (error of composeForm.subject().errors(); track error.kind) {
                 <li>{{ error.message }}</li>
@@ -73,9 +60,7 @@ interface ComposeFormData {
             (ngModelChange)="updateContent($event)"
             name="content"
           />
-          @if (
-            composeForm.content().touched() && composeForm.content().invalid()
-          ) {
+          @if (composeForm.content().touched() && composeForm.content().invalid()) {
             <ul class="text-error text-sm">
               @for (error of composeForm.content().errors(); track error.kind) {
                 <li>{{ error.message }}</li>
@@ -84,9 +69,7 @@ interface ComposeFormData {
           }
         </div>
         <div class="flex justify-end gap-2 mt-4">
-          <button type="button" class="btn btn-ghost" routerLink="/messages">
-            Cancelar
-          </button>
+          <button type="button" class="btn btn-ghost" routerLink="/messages">Cancelar</button>
           <button type="submit" class="btn btn-primary">Enviar</button>
         </div>
       </div>

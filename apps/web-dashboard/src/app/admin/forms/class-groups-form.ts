@@ -1,13 +1,12 @@
 import { markGroupDirty, Toast } from '#/ui';
 import { HttpClient, httpResource } from '@angular/common/http';
-import { afterRenderEffect, Component, inject, input, output, ChangeDetectionStrategy } from '@angular/core';
+import { afterRenderEffect, Component, inject, input, output } from '@angular/core';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Prisma } from '@generated/prisma';
 import Store from '../../core/store';
 @Component({
   selector: 'app-class-groups-form',
   imports: [ReactiveFormsModule],
-  changeDetection: ChangeDetectionStrategy.Eager,
   template: `<form [formGroup]="form" (ngSubmit)="onSubmit()">
     <div class="flex flex-col md:grid md:grid-cols-2 gap-2">
       <div class="fieldset">
@@ -81,7 +80,6 @@ export default class ClassGroupsForm {
 
   constructor() {
     afterRenderEffect(() => {
-      console.log(this.data()?.group);
       if (this.data()?.group) {
         this.form.patchValue(this.data()!.group!);
       }

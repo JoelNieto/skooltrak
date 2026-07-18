@@ -1,6 +1,6 @@
 import { Toast } from '#/ui';
 import { HttpClient, httpResource } from '@angular/common/http';
-import { Component, inject, input, OnInit, output, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, input, OnInit, output } from '@angular/core';
 import { FormArray, NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Prisma } from '@generated/prisma';
 import { firstValueFrom } from 'rxjs';
@@ -24,7 +24,7 @@ const MONTH_LABELS: Record<number, string> = {
 @Component({
   selector: 'app-study-plan-form',
   imports: [ReactiveFormsModule],
-  changeDetection: ChangeDetectionStrategy.Eager,
+
   template: `
     <form [formGroup]="form" (ngSubmit)="onSubmit()">
       <div class="flex flex-col md:grid md:grid-cols-4 md:gap-4 gap-2">

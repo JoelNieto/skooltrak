@@ -1,30 +1,21 @@
 import { markGroupDirty, TextEditor, Toast } from '#/ui';
-import { Component, inject, input, output, ChangeDetectionStrategy } from '@angular/core';
-import { httpResource, HttpClient } from '@angular/common/http';
-import {
-  NonNullableFormBuilder,
-  ReactiveFormsModule,
-  Validators,
-} from '@angular/forms';
+import { HttpClient, httpResource } from '@angular/common/http';
+import { Component, inject, input, output } from '@angular/core';
+import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 @Component({
   selector: 'app-grades-form',
   imports: [ReactiveFormsModule, TextEditor],
-  changeDetection: ChangeDetectionStrategy.Eager,
   template: `<form [formGroup]="form" (ngSubmit)="onSubmit()">
     <div class="flex flex-col md:grid md:grid-cols-4 gap-4">
       <div class="fieldset md:col-span-2">
         <label for="title">Titulo</label>
-        <input
-          type="text"
-          formControlName="title"
-          class="input input-primary"
-        />
+        <input type="text" formControlName="title" class="input input-primary" />
       </div>
       <div class="fieldset">
         <label for="bucketId">Tipo</label>
         <select formControlName="bucketId" class="select select-primary">
-          @for(bucket of bucketsResource.value()!; track bucket.id) {
-          <option [value]="bucket.id">{{ bucket.name }}</option>
+          @for (bucket of bucketsResource.value()!; track bucket.id) {
+            <option [value]="bucket.id">{{ bucket.name }}</option>
           }
         </select>
       </div>
@@ -39,21 +30,11 @@ import {
 
       <div class="fieldset">
         <label for="published">Publicada</label>
-        <input
-          type="checkbox"
-          formControlName="published"
-          class="checkbox checkbox-primary"
-        />
+        <input type="checkbox" formControlName="published" class="checkbox checkbox-primary" />
       </div>
     </div>
     <div class="flex justify-end gap-2">
-      <button
-        class="btn btn-soft"
-        type="button"
-        (click)="closeModal.emit(false)"
-      >
-        Cancelar
-      </button>
+      <button class="btn btn-soft" type="button" (click)="closeModal.emit(false)">Cancelar</button>
       <button class="btn btn-primary" type="submit">Guardar</button>
     </div>
   </form>`,

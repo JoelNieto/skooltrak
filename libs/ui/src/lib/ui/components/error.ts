@@ -1,18 +1,11 @@
-import { Component, inject, input, output, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, input, output } from '@angular/core';
 import { Router } from '@angular/router';
 
 @Component({
   selector: 'lib-error',
-  imports: [],
-
-  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
-    <div
-      class="bg-gradient-to-br from-blue-50 to-red-100 min-h-screen flex items-center justify-center p-4"
-    >
-      <div
-        class="max-w-lg w-full bg-white rounded-2xl shadow-xl overflow-hidden"
-      >
+    <div class="bg-linear-to-br from-blue-50 to-red-100 min-h-screen flex items-center justify-center p-4">
+      <div class="max-w-lg w-full bg-white rounded-2xl shadow-xl overflow-hidden">
         <div class="p-8">
           <!-- Error Code -->
           <div class="text-center mb-8">
@@ -25,12 +18,8 @@ import { Router } from '@angular/router';
           </div>
 
           <div class="flex justify-center mb-8">
-            <div
-              class="w-48 h-48 bg-error/30 rounded-full flex items-center justify-center"
-            >
-              <span class="material-symbols-outlined text-[5rem] text-error!"
-                >error</span
-              >
+            <div class="w-48 h-48 bg-error/30 rounded-full flex items-center justify-center">
+              <span class="material-symbols-outlined text-[5rem] text-error!">error</span>
             </div>
           </div>
 
@@ -53,9 +42,7 @@ import { Router } from '@angular/router';
 export class Error {
   #router = inject(Router);
   public title = input<string>('Algo salio mal');
-  public description = input<string | undefined | null>(
-    'Hubo un error inesperado'
-  );
+  public description = input<string | undefined | null>('Hubo un error inesperado');
   public retry = output<void>();
   public goHome() {
     this.#router.navigate(['/']);

@@ -1,17 +1,12 @@
 import { markGroupDirty, Toast } from '#/ui';
-import { Component, inject, input, OnInit, output, ChangeDetectionStrategy } from '@angular/core';
-import {
-  NonNullableFormBuilder,
-  ReactiveFormsModule,
-  Validators,
-} from '@angular/forms';
-import { Prisma } from '@generated/prisma';
 import { HttpClient } from '@angular/common/http';
+import { Component, inject, input, OnInit, output } from '@angular/core';
+import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Prisma } from '@generated/prisma';
 import { firstValueFrom } from 'rxjs';
 @Component({
   selector: 'app-grade-metrics-form',
   imports: [ReactiveFormsModule],
-  changeDetection: ChangeDetectionStrategy.Eager,
   template: `<form [formGroup]="form" (ngSubmit)="onSubmit()">
     <div class="fieldset">
       <label for="name">Nombre</label>
@@ -19,44 +14,22 @@ import { firstValueFrom } from 'rxjs';
     </div>
     <div class="fieldset">
       <label for="minimum">Minimo</label>
-      <input
-        type="number"
-        formControlName="minimum"
-        class="input input-primary"
-      />
+      <input type="number" formControlName="minimum" class="input input-primary" />
     </div>
     <div class="fieldset">
       <label for="maximum">Maximo</label>
-      <input
-        type="number"
-        formControlName="maximum"
-        class="input input-primary"
-      />
+      <input type="number" formControlName="maximum" class="input input-primary" />
     </div>
     <div class="fieldset">
       <label for="minimumApproval">Minimo de aprobacion</label>
-      <input
-        type="number"
-        formControlName="minimumApproval"
-        class="input input-primary"
-      />
+      <input type="number" formControlName="minimumApproval" class="input input-primary" />
     </div>
     <div class="fieldset">
       <label for="minimumExcellence">Minimo de excelencia</label>
-      <input
-        type="number"
-        formControlName="minimumExcellence"
-        class="input input-primary"
-      />
+      <input type="number" formControlName="minimumExcellence" class="input input-primary" />
     </div>
     <div class="flex justify-end gap-2 mt-4">
-      <button
-        class="btn btn-ghost"
-        type="button"
-        (click)="closeModal.emit(false)"
-      >
-        Cancelar
-      </button>
+      <button class="btn btn-ghost" type="button" (click)="closeModal.emit(false)">Cancelar</button>
       <button class="btn btn-primary" type="submit">Guardar</button>
     </div>
   </form>`,
@@ -101,9 +74,7 @@ export default class GradeMetricsForm implements OnInit {
 
     const body = this.form.getRawValue();
     if (this.data()?.metric) {
-      void firstValueFrom(
-        this.http.patch('/api/v1/grade-metrics', { ...body, id: this.data()!.metric!.id }),
-      )
+      void firstValueFrom(this.http.patch('/api/v1/grade-metrics', { ...body, id: this.data()!.metric!.id }))
         .then(() => {
           this.toast.showSuccess('Metrica de calificaciones actualizada exitosamente');
           this.closeModal.emit(true);

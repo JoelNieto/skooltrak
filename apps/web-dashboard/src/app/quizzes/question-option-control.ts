@@ -1,10 +1,11 @@
 import { TextEditor } from '#/ui';
-import { Component, input } from '@angular/core';
+import { Component, input, ChangeDetectionStrategy } from '@angular/core';
 import { FormGroup, ReactiveFormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-question-option-control',
   imports: [TextEditor, ReactiveFormsModule],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <div class="flex flex-col gap-2 w-full">
       <div class="fieldset">

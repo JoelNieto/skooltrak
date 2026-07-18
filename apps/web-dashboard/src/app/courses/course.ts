@@ -1,6 +1,6 @@
 import { Loader, Modal, Toast } from '#/ui';
 import { HttpClient, httpResource } from '@angular/common/http';
-import { Component, computed, inject, input, signal } from '@angular/core';
+import { Component, computed, inject, input, signal, ChangeDetectionStrategy } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { ChatType } from '@generated/prisma';
 import { firstValueFrom } from 'rxjs';
@@ -42,6 +42,7 @@ type CourseVm = {
     CourseStudentGrades,
   ],
 
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: ` @if (courseResource.isLoading()) {
       <lib-loader />
     }

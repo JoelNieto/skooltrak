@@ -1,8 +1,9 @@
-import { Component, input } from '@angular/core';
+import { Component, input, ChangeDetectionStrategy } from '@angular/core';
 
 @Component({
   selector: 'lib-editor-menu',
   imports: [],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `<div class="flex gap-2 flex-wrap">
     <div class="tooltip" data-tip="Negrita">
       <button

@@ -1,8 +1,9 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 
 @Component({
   selector: 'lib-editor-viewer',
   template: `<div><ng-content></ng-content></div>`,
+  changeDetection: ChangeDetectionStrategy.Eager,
   styles: `
     @reference "tailwindcss";
       :host ::ng-deep ul,

@@ -1,4 +1,4 @@
-import { Component, computed, input, signal } from '@angular/core';
+import { Component, computed, input, signal, ChangeDetectionStrategy } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { Prisma } from '@generated/prisma';
 
@@ -12,6 +12,7 @@ type Student = Prisma.StudentGetPayload<{
   selector: 'app-group-students',
   imports: [RouterLink],
 
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `<h4 class="text-xl font-medium mb-2">Estudiantes</h4>
     <label class="input input-primary w-full md:w-96">
       <span class="material-symbols-outlined">search</span>

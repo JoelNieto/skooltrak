@@ -1,5 +1,5 @@
 import { Loader, Toast } from '#/ui';
-import { Component, computed, inject, input, signal } from '@angular/core';
+import { Component, computed, inject, input, signal, ChangeDetectionStrategy } from '@angular/core';
 import { httpResource, HttpClient } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { Prisma } from '@generated/prisma';
@@ -23,6 +23,7 @@ type StudentEvaluation = {
 @Component({
   selector: 'app-group-habits',
   imports: [FormsModule, Loader],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <div class="space-y-4">
       <!-- Empty state: No metrics configured -->

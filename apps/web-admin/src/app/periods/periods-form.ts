@@ -1,5 +1,5 @@
 import { markGroupDirty, Toast } from '#/ui';
-import { Component, inject, input, OnInit, output } from '@angular/core';
+import { Component, inject, input, OnInit, output, ChangeDetectionStrategy } from '@angular/core';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Prisma } from '@generated/prisma';
 import { HttpClient } from '@angular/common/http';
@@ -9,6 +9,7 @@ import { format } from 'date-fns';
 @Component({
   selector: 'app-periods-form',
   imports: [ReactiveFormsModule],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `<form [formGroup]="form" (ngSubmit)="onSubmit()">
     <div class="flex flex-col gap-2">
       <div class="fieldset">

@@ -1,5 +1,5 @@
 import { Loader, Toast } from '#/ui';
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import {
   FormControl,
   FormGroup,
@@ -13,6 +13,7 @@ import Auth from './auth';
 @Component({
   selector: 'app-reset-password',
   imports: [ReactiveFormsModule, RouterLink, Loader],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <div class="gradient-bg min-h-screen flex items-center justify-center p-4">
       @defer {

@@ -1,10 +1,11 @@
-import { Component, inject, input, output } from '@angular/core';
+import { Component, inject, input, output, ChangeDetectionStrategy } from '@angular/core';
 import { Router } from '@angular/router';
 
 @Component({
   selector: 'lib-error',
   imports: [],
 
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <div
       class="bg-gradient-to-br from-blue-50 to-red-100 min-h-screen flex items-center justify-center p-4"

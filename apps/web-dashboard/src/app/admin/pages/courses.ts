@@ -1,7 +1,7 @@
 import { Confirmation, Modal, Paginator, Toast } from '#/ui';
 import { Menu, MenuContent, MenuItem, MenuTrigger } from '@angular/aria/menu';
 import { OverlayModule } from '@angular/cdk/overlay';
-import { Component, computed, inject, signal, viewChild } from '@angular/core';
+import { Component, computed, inject, signal, viewChild, ChangeDetectionStrategy } from '@angular/core';
 import { effect } from '@angular/core';
 import { httpResource, HttpClient } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
@@ -27,6 +27,7 @@ type CourseType = Prisma.CourseGetPayload<{
   selector: 'app-courses',
   imports: [Paginator, RouterLink, FormsModule, Menu, MenuContent, MenuItem, MenuTrigger, OverlayModule],
 
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `<div class="flex justify-between">
       <div class="flex gap-2">
         <div class="md:w-96 w-full">

@@ -1,5 +1,5 @@
 import { markGroupDirty, Toast } from '#/ui';
-import { Component, inject, input, OnInit, output } from '@angular/core';
+import { Component, inject, input, OnInit, output, ChangeDetectionStrategy } from '@angular/core';
 import {
   NonNullableFormBuilder,
   ReactiveFormsModule,
@@ -11,6 +11,7 @@ import { firstValueFrom } from 'rxjs';
 @Component({
   selector: 'app-grade-metrics-form',
   imports: [ReactiveFormsModule],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `<form [formGroup]="form" (ngSubmit)="onSubmit()">
     <div class="fieldset">
       <label for="name">Nombre</label>

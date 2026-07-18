@@ -1,12 +1,13 @@
 import { Toast } from '#/ui';
 import { HttpClient } from '@angular/common/http';
-import { afterRenderEffect, Component, inject, input, output, signal } from '@angular/core';
+import { afterRenderEffect, Component, inject, input, output, signal, ChangeDetectionStrategy } from '@angular/core';
 import { form, FormField, required, submit } from '@angular/forms/signals';
 import { Prisma } from '@generated/prisma';
 
 @Component({
   selector: 'app-subjects-form',
   imports: [FormField],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `<form (submit)="onSubmit($event)" novalidate="novalidate">
     <div class="flex flex-col gap-2">
       <div class="fieldset">

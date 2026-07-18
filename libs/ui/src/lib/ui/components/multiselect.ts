@@ -13,6 +13,7 @@ import {
   forwardRef,
   viewChild,
   viewChildren,
+  ChangeDetectionStrategy
 } from '@angular/core';
 import { NG_VALUE_ACCESSOR, ReactiveFormsModule } from '@angular/forms';
 
@@ -81,6 +82,7 @@ import { NG_VALUE_ACCESSOR, ReactiveFormsModule } from '@angular/forms';
       </ng-template>
     </ng-template>
   </div>`,
+  changeDetection: ChangeDetectionStrategy.Eager,
   styles: `
   @reference "tailwindcss";
     :host {

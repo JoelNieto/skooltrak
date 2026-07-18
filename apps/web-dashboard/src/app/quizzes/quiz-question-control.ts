@@ -1,5 +1,5 @@
 import { TextEditor } from '#/ui';
-import { Component, inject, input } from '@angular/core';
+import { Component, inject, input, ChangeDetectionStrategy } from '@angular/core';
 import {
   FormArray,
   FormControl,
@@ -13,6 +13,7 @@ import QuestionOptionControl from './question-option-control';
 @Component({
   selector: 'app-quiz-question-control',
   imports: [TextEditor, ReactiveFormsModule, QuestionOptionControl],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `<form [formGroup]="question()" class="flex flex-col gap-6">
     <div class="fieldset">
       <label for="question">Pregunta</label>

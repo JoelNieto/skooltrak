@@ -1,5 +1,5 @@
 import { Toast } from '#/ui';
-import { Component, inject, input, model, OnInit, output } from '@angular/core';
+import { Component, inject, input, model, OnInit, output, ChangeDetectionStrategy } from '@angular/core';
 import { httpResource } from '@angular/common/http';
 import {
   FormsModule,
@@ -13,6 +13,7 @@ import { firstValueFrom } from 'rxjs';
 @Component({
   selector: 'app-roles-form',
   imports: [ReactiveFormsModule, FormsModule],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <form [formGroup]="form" (ngSubmit)="createRole()">
       <div class="fieldset">

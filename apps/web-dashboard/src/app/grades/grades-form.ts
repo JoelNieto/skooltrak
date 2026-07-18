@@ -1,5 +1,5 @@
 import { markGroupDirty, TextEditor, Toast } from '#/ui';
-import { Component, inject, input, output } from '@angular/core';
+import { Component, inject, input, output, ChangeDetectionStrategy } from '@angular/core';
 import { httpResource, HttpClient } from '@angular/common/http';
 import {
   NonNullableFormBuilder,
@@ -9,6 +9,7 @@ import {
 @Component({
   selector: 'app-grades-form',
   imports: [ReactiveFormsModule, TextEditor],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `<form [formGroup]="form" (ngSubmit)="onSubmit()">
     <div class="flex flex-col md:grid md:grid-cols-4 gap-4">
       <div class="fieldset md:col-span-2">

@@ -8,6 +8,7 @@ import {
   input,
   output,
   signal,
+  ChangeDetectionStrategy
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { httpResource, HttpClient } from '@angular/common/http';
@@ -29,6 +30,7 @@ type ShareTargets = {
 @Component({
   selector: 'app-file-share-form',
   imports: [ReactiveFormsModule],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `<form [formGroup]="form" (ngSubmit)="onSubmit()">
     <div class="flex flex-col gap-4">
       <div class="fieldset">

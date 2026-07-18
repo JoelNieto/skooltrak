@@ -1,6 +1,6 @@
 import { markGroupDirty, Toast } from '#/ui';
 import { HttpClient } from '@angular/common/http';
-import { Component, inject, input, output } from '@angular/core';
+import { Component, inject, input, output, ChangeDetectionStrategy } from '@angular/core';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { from, switchMap } from 'rxjs';
 
@@ -9,6 +9,7 @@ type UploadResult = { created: boolean };
 @Component({
   selector: 'app-course-file-upload-form',
   imports: [ReactiveFormsModule],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `<form [formGroup]="form" (ngSubmit)="onSubmit()">
     <div class="flex flex-col gap-4">
       <div class="fieldset">

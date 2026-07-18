@@ -1,11 +1,12 @@
 import { Location } from '@angular/common';
-import { Component, inject } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-not-found',
   imports: [],
 
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `<div class="bg-linear-to-br from-blue-50 to-indigo-100 min-h-screen flex items-center justify-center p-4">
     <div class="max-w-lg w-full bg-white rounded-2xl shadow-xl overflow-hidden">
       <div class="p-8">

@@ -1,6 +1,6 @@
 import { Confirmation, EditorViewer, Error, Loader, Modal, Toast } from '#/ui';
 import { DatePipe, DecimalPipe, NgClass } from '@angular/common';
-import { Component, computed, inject, input } from '@angular/core';
+import { Component, computed, inject, input, ChangeDetectionStrategy } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 
 import { HttpClient, httpResource } from '@angular/common/http';
@@ -34,6 +34,7 @@ type GradeDetail = {
   selector: 'app-grade',
   imports: [Loader, RouterLink, EditorViewer, DatePipe, Error, DecimalPipe, NgClass],
 
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     @defer {
       @if (gradeResource.hasValue()) {

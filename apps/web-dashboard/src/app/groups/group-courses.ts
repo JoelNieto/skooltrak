@@ -1,4 +1,4 @@
-import { Component, computed, input, signal } from '@angular/core';
+import { Component, computed, input, signal, ChangeDetectionStrategy } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { Prisma } from '@generated/prisma';
 
@@ -6,6 +6,7 @@ import { Prisma } from '@generated/prisma';
   selector: 'app-group-courses',
   imports: [RouterLink],
 
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: ` <h4 class="text-xl font-medium mb-2">Cursos</h4>
     <label class="input">
       <span class="material-symbols-outlined">search</span>

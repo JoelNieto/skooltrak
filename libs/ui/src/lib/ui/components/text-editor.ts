@@ -1,4 +1,4 @@
-import { Component, forwardRef, input, OnDestroy, ViewEncapsulation } from '@angular/core';
+import { Component, forwardRef, input, OnDestroy, ViewEncapsulation, ChangeDetectionStrategy } from '@angular/core';
 import { ControlValueAccessor, FormsModule, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { Editor } from '@tiptap/core';
 import Highlight from '@tiptap/extension-highlight';
@@ -122,6 +122,7 @@ import { EditorMenu } from './editor-menu';
       margin: 1rem 0;
     }
   `,
+  changeDetection: ChangeDetectionStrategy.Eager,
   encapsulation: ViewEncapsulation.None,
 })
 export class TextEditor implements ControlValueAccessor, OnDestroy {

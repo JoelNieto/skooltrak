@@ -1,7 +1,7 @@
 import { Loader } from '#/ui';
 import { Tab, TabContent, TabList, TabPanel, Tabs } from '@angular/aria/tabs';
 import { DatePipe } from '@angular/common';
-import { Component, inject, input } from '@angular/core';
+import { Component, inject, input, ChangeDetectionStrategy } from '@angular/core';
 import { httpResource } from '@angular/common/http';
 import { RouterLink } from '@angular/router';
 import { isValidId } from '../../core/validators';
@@ -27,6 +27,7 @@ type SchoolDetail = {
 @Component({
   selector: 'app-school',
   imports: [RouterLink, Loader, DatePipe, TabList, Tab, Tabs, TabPanel, TabContent],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     @if (schoolResource.isLoading()) {
       <lib-loader />

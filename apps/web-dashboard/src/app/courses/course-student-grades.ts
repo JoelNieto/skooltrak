@@ -1,7 +1,7 @@
 import { DecimalToNumber } from '#/ui';
 import { DatePipe, DecimalPipe, NgClass } from '@angular/common';
 import { HttpClient, httpResource } from '@angular/common/http';
-import { afterRenderEffect, Component, computed, inject, input, signal } from '@angular/core';
+import { afterRenderEffect, Component, computed, inject, input, signal, ChangeDetectionStrategy } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { Prisma } from '@generated/prisma';
@@ -11,6 +11,7 @@ import Store from '../core/store';
 @Component({
   selector: 'app-course-student-grades',
   imports: [FormsModule, NgClass, DatePipe, DecimalPipe],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <div class="flex flex-col gap-4">
       <div class="flex justify-between items-start">

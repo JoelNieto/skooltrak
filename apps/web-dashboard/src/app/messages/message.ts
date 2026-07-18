@@ -1,6 +1,6 @@
 import { EditorViewer, Loader, Toast } from '#/ui';
 import { DatePipe } from '@angular/common';
-import { Component, computed, effect, inject, input, signal } from '@angular/core';
+import { Component, computed, effect, inject, input, signal, ChangeDetectionStrategy } from '@angular/core';
 import { httpResource, HttpClient } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
@@ -36,6 +36,7 @@ type MessageType = Prisma.MessageGetPayload<undefined> & {
       font-style: italic;
     }
   `,
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `@defer {
       @if (messageResource.hasValue()) {
         @let message = messageResource.value();

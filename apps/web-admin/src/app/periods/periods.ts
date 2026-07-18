@@ -2,7 +2,7 @@ import { Confirmation, Error, Modal, Toast } from '#/ui';
 import { Menu, MenuContent, MenuItem, MenuTrigger } from '@angular/aria/menu';
 import { OverlayModule } from '@angular/cdk/overlay';
 import { DatePipe } from '@angular/common';
-import { Component, inject, viewChild } from '@angular/core';
+import { Component, inject, viewChild, ChangeDetectionStrategy } from '@angular/core';
 import { httpResource } from '@angular/common/http';
 import { RouterLink } from '@angular/router';
 import { Prisma } from '@generated/prisma';
@@ -13,6 +13,7 @@ import PeriodsForm from './periods-form';
 @Component({
   selector: 'app-periods',
   imports: [RouterLink, DatePipe, Menu, MenuContent, MenuItem, MenuTrigger, OverlayModule],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <div class="breadcrumbs text-sm">
       <ul>

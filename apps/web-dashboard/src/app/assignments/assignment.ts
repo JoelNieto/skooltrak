@@ -1,7 +1,7 @@
 import { EditorViewer, Error as ErrorComponent, Loader, Toast } from '#/ui';
 import { DatePipe } from '@angular/common';
 import { HttpClient, httpResource } from '@angular/common/http';
-import { Component, inject, input, signal } from '@angular/core';
+import { Component, inject, input, signal, ChangeDetectionStrategy } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { ChatType } from '@generated/prisma';
 import { firstValueFrom } from 'rxjs';
@@ -31,6 +31,7 @@ type AssignmentDetail = {
     AssignmentSubmissionsList,
   ],
 
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     @defer {
       @if (assignmentResource.hasValue() && assignmentResource.value()) {

@@ -1,5 +1,5 @@
 import { Loader, Toast } from '#/ui';
-import { Component, computed, inject, input, signal } from '@angular/core';
+import { Component, computed, inject, input, signal, ChangeDetectionStrategy } from '@angular/core';
 import { httpResource, HttpClient } from '@angular/common/http';
 import { Router, RouterLink } from '@angular/router';
 import { ChatType } from '@generated/prisma';
@@ -14,6 +14,7 @@ import GroupStudents from './group-students';
 @Component({
   imports: [RouterLink, Loader, GroupStudents, GroupCourses, GroupSchedule, GroupHabits],
   viewProviders: [],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     @let group = groupResource.value(); @if(groupResource.isLoading()) {
     <lib-loader />

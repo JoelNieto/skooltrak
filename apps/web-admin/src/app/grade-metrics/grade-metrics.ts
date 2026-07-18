@@ -2,7 +2,7 @@ import { Confirmation, Error, Modal, Toast } from '#/ui';
 import { Menu, MenuContent, MenuItem, MenuTrigger } from '@angular/aria/menu';
 import { OverlayModule } from '@angular/cdk/overlay';
 import { DatePipe, DecimalPipe } from '@angular/common';
-import { Component, inject, viewChild } from '@angular/core';
+import { Component, inject, viewChild, ChangeDetectionStrategy } from '@angular/core';
 import { httpResource } from '@angular/common/http';
 import { RouterLink } from '@angular/router';
 import { Prisma } from '@generated/prisma';
@@ -21,6 +21,7 @@ import GradeMetricsForm from './grade-metrics-form';
     OverlayModule,
     Error,
   ],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <div class="breadcrumbs text-sm">
       <ul>

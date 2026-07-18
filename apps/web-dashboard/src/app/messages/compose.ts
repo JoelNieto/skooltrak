@@ -1,5 +1,5 @@
 import { TextEditor, Toast } from '#/ui';
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import {
   form,
@@ -22,6 +22,7 @@ interface ComposeFormData {
 @Component({
   selector: 'app-compose',
   imports: [RouterLink, Contacts, TextEditor, FormsModule, FormField],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `<div class="breadcrumbs text-sm">
       <ul>
         <li><a routerLink="/">Inicio</a></li>

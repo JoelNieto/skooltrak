@@ -13,6 +13,7 @@ import {
   signal,
   viewChild,
   viewChildren,
+  ChangeDetectionStrategy
 } from '@angular/core';
 import { FormsModule, NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Prisma } from '@generated/prisma';
@@ -137,6 +138,7 @@ import Store from '../../core/store';
       <button type="submit" class="btn btn-primary">Guardar</button>
     </div>
   </form>`,
+  changeDetection: ChangeDetectionStrategy.Eager,
   styles: `
     [ngCombobox]:has([aria-expanded='false']) .popup {
       display: none;

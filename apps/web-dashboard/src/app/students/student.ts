@@ -2,7 +2,7 @@ import { Loader, Toast } from '#/ui';
 import { Tab, TabContent, TabList, TabPanel, Tabs } from '@angular/aria/tabs';
 import { DatePipe, DecimalPipe, NgClass } from '@angular/common';
 import { HttpClient, httpResource } from '@angular/common/http';
-import { afterRenderEffect, Component, computed, inject, input, signal } from '@angular/core';
+import { afterRenderEffect, Component, computed, inject, input, signal, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { $Enums } from '@generated/prisma';
@@ -43,6 +43,7 @@ const ENROLLMENT_STATUS_COLORS: Record<$Enums.EnrollmentStatus, string> = {
     NgClass,
     StudentAttendanceReport,
   ],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     @if (studentResource.isLoading()) {
       <lib-loader />

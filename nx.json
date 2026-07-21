@@ -12,7 +12,11 @@
       "!{projectRoot}/jest.config.[jt]s",
       "!{projectRoot}/test-setup.[jt]s"
     ],
-    "sharedGlobals": ["{workspaceRoot}/.gitlab-ci.yml"]
+    "sharedGlobals": [
+      "{workspaceRoot}/.gitlab-ci.yml",
+      "{workspaceRoot}/generated/prisma/**/*",
+      "{workspaceRoot}/prisma/schema.prisma"
+    ]
   },
   "nxCloudId": "68e145c2c3749010daf16002",
   "targetDefaults": {

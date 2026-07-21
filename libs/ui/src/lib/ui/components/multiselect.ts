@@ -1,4 +1,4 @@
-import { Combobox, ComboboxPopup } from '@angular/aria/combobox';
+import { Combobox } from '@angular/aria/combobox';
 import { Listbox, Option } from '@angular/aria/listbox';
 import { OverlayModule } from '@angular/cdk/overlay';
 import { afterRenderEffect, Component, computed, forwardRef, viewChild, viewChildren } from '@angular/core';
@@ -6,7 +6,7 @@ import { NG_VALUE_ACCESSOR, ReactiveFormsModule } from '@angular/forms';
 
 @Component({
   selector: 'lib-multiselect',
-  imports: [ReactiveFormsModule, Combobox, ComboboxPopup, Listbox, Option, OverlayModule],
+  imports: [ReactiveFormsModule, Combobox, Listbox, Option, OverlayModule],
   providers: [
     {
       provide: NG_VALUE_ACCESSOR,

@@ -52,7 +52,7 @@ export class GradeReportService {
     const isAdmin = role === 'ADMIN' || role === 'ORG_ADMIN' || role === 'SYSADMIN';
     if (!isAdmin) {
       if (role === 'STUDENT') {
-        if (student.userId !== userId) {
+        if (student.userId && student.userId !== userId) {
           throw new ForbiddenException('You can only view your own grade report');
         }
       } else {

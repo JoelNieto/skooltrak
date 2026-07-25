@@ -282,6 +282,43 @@ export class AuthSessionController {
     return this.authService.linkChildByCode(userId, input, { ip: this.clientIp(req) });
   }
 
+  @Post('magic-link/request')
+  @AllowAnonymous()
+  @ApiOperation({ summary: 'Request a passwordless magic-link login email' })
+  async requestMagicLink(@Body() body: { email: string }, @Req() req: AuthenticatedRequest) {
+    return this.authService.requestMagicLink(body.email, { ip: this.clientIp(req) });
+  }
+
+  @Post('magic-link/verify')
+  @AllowAnonymous()
+  @ApiOperation({ summary: 'Redeem a magic-link token and receive a JWT' })
+  async verifyMagicLink(@Body() body: { token: string }, @Req() req: AuthenticatedRequest) {
+    return this.authService.verifyMagicLink(body.token, { ip: this.clientIp(req) });
+  }
+
+  @Post('child-connect/issue')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Issue a single-use QR child-connect token for a student (rotates prior tokens)' })
+  async issueChildConnect(@Req() req: AuthenticatedRequest, @Body() body: { studentId: string }) {
+    const userId = req.user?.userId;
+    const organizationId = req.user?.organizationId;
+    if (!userId || !organizationId) {
+      throw new UnauthorizedException('No autenticado');
+    }
+    return this.authService.issueChildConnectToken(body.studentId, organizationId, userId);
+  }
+
+  @Post('child-connect/redeem')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Redeem a QR child-connect token and link the parent to the student' })
+  async redeemChildConnect(@Req() req: AuthenticatedRequest, @Body() body: { token: string }) {
+    const userId = req.user?.userId;
+    if (!userId) {
+      throw new UnauthorizedException('No autenticado');
+    }
+    return this.authService.redeemChildConnectToken(body.token, userId, { ip: this.clientIp(req) });
+  }
+
   @Get('my-join-request-status')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Current user join request status' })

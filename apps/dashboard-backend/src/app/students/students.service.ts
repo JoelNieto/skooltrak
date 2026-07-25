@@ -61,39 +61,67 @@ export class StudentsService {
     // the user sets their own password via the invitation reset link.
     const hashedPassword = bcrypt.hashSync(randomBytes(32).toString('hex'), 10);
 
-    const existingUser = await this.prisma.user.findUnique({
-      where: { email },
-      include: { student: true },
-    });
+    const existingUser = email
+      ? await this.prisma.user.findUnique({
+          where: { email },
+          include: { student: true },
+        })
+      : null;
 
     if (existingUser?.student) {
       throw new ConflictException('Student already exists, contact support');
     }
 
-    let user: { id: string };
-    if (existingUser) {
-      await this.prisma.user.update({
-        where: { id: existingUser.id },
-        data: {
-          firstName,
-          lastName: fatherName,
-          organizationId,
-          roleId: role.id,
-          password: hashedPassword,
-          onboardingStep: OnboardingStep.COMPLETED, // Admin-created students skip onboarding
-        },
-      });
-      user = { id: existingUser.id };
-
-      const credentialAccount = await this.prisma.account.findFirst({
-        where: { userId: existingUser.id, providerId: 'credential' },
-      });
-      if (credentialAccount) {
-        await this.prisma.account.update({
-          where: { id: credentialAccount.id },
-          data: { password: hashedPassword },
+    let user: { id: string } | undefined;
+    if (email) {
+      if (existingUser) {
+        await this.prisma.user.update({
+          where: { id: existingUser.id },
+          data: {
+            firstName,
+            lastName: fatherName,
+            organizationId,
+            roleId: role.id,
+            password: hashedPassword,
+            onboardingStep: OnboardingStep.COMPLETED, // Admin-created students skip onboarding
+          },
         });
+        user = { id: existingUser.id };
+
+        const credentialAccount = await this.prisma.account.findFirst({
+          where: { userId: existingUser.id, providerId: 'credential' },
+        });
+        if (credentialAccount) {
+          await this.prisma.account.update({
+            where: { id: credentialAccount.id },
+            data: { password: hashedPassword },
+          });
+        } else {
+          await this.prisma.account.create({
+            data: {
+              id: randomUUID(),
+              accountId: existingUser.id,
+              providerId: 'credential',
+              userId: existingUser.id,
+              password: hashedPassword,
+            },
+          });
+        }
       } else {
+        user = await this.prisma.user.create({
+          data: {
+            firstName,
+            lastName: fatherName,
+            email: email,
+            color: this.getRandomPastelColor(),
+            password: hashedPassword,
+            organizationId,
+            roleId: role.id,
+            emailVerified: false, // Will be verified when user clicks the email link
+            onboardingStep: OnboardingStep.COMPLETED, // Admin-created students skip onboarding
+          },
+        });
+
         await this.prisma.account.create({
           data: {
             id: randomUUID(),
@@ -104,30 +132,6 @@ export class StudentsService {
           },
         });
       }
-    } else {
-      user = await this.prisma.user.create({
-        data: {
-          firstName,
-          lastName: fatherName,
-          email: email,
-          color: this.getRandomPastelColor(),
-          password: hashedPassword,
-          organizationId,
-          roleId: role.id,
-          emailVerified: false, // Will be verified when user clicks the email link
-          onboardingStep: OnboardingStep.COMPLETED, // Admin-created students skip onboarding
-        },
-      });
-
-      await this.prisma.account.create({
-        data: {
-          id: randomUUID(),
-          accountId: user.id,
-          providerId: 'credential',
-          userId: user.id,
-          password: hashedPassword,
-        },
-      });
     }
 
     // Only connect courses if classGroupId is provided
@@ -164,7 +168,7 @@ export class StudentsService {
       medicalNotes: medicalNotes || '',
       emergencyContactName: emergencyContactName || '',
       emergencyContactPhone: emergencyContactPhone || '',
-      userId: user.id,
+      userId: user?.id ?? null,
       organizationId,
       schoolId,
       classGroupId: classGroupId || null,
@@ -180,45 +184,51 @@ export class StudentsService {
         include: { classGroup: true, user: true, parents: true },
       });
 
-      // Send welcome invitation email
-      try {
-        await sendUserInvitation({
-          prisma: this.prisma,
-          email,
-          name: `${firstName} ${fatherName}`,
-          role: 'student',
-          organizationName: organization?.name || 'Skooltrak',
-        });
-        await this.prisma.invitationStatus.upsert({
-          where: { userId: user.id },
-          create: { userId: user.id, status: 'SENT' },
-          update: { status: 'SENT' },
-        });
-        await this.prisma.onboardingAuditLog.create({
-          data: {
-            action: 'INVITATION_CREATED',
-            userId: user.id,
-            organizationId,
-            detail: `email=${email}`,
-          },
-        });
-        this.logger.log(`Welcome invitation sent to student: ${email}`);
-      } catch (emailError) {
-        // Record the failure so admins can see + retry; don't fail the creation.
-        await this.prisma.invitationStatus.upsert({
-          where: { userId: user.id },
-          create: { userId: user.id, status: 'FAILED', detail: (emailError as Error).message },
-          update: { status: 'FAILED', detail: (emailError as Error).message },
-        });
-        await this.prisma.onboardingAuditLog.create({
-          data: {
-            action: 'INVITATION_EMAIL_FAILED',
-            userId: user.id,
-            organizationId,
-            detail: `create: ${(emailError as Error).message}`,
-          },
-        });
-        this.logger.error(`Failed to send welcome invitation to ${email}:`, emailError);
+      if (classGroupId) {
+        await this.recordClassGroupChange(student.id, classGroupId, 'create');
+      }
+
+      // Send welcome invitation email (only when the student has an auth user).
+      if (email) {
+        try {
+          await sendUserInvitation({
+            prisma: this.prisma,
+            email,
+            name: `${firstName} ${fatherName}`,
+            role: 'student',
+            organizationName: organization?.name || 'Skooltrak',
+          });
+          await this.prisma.invitationStatus.upsert({
+            where: { userId: user.id },
+            create: { userId: user.id, status: 'SENT' },
+            update: { status: 'SENT' },
+          });
+          await this.prisma.onboardingAuditLog.create({
+            data: {
+              action: 'INVITATION_CREATED',
+              userId: user.id,
+              organizationId,
+              detail: `email=${email}`,
+            },
+          });
+          this.logger.log(`Welcome invitation sent to student: ${email}`);
+        } catch (emailError) {
+          // Record the failure so admins can see + retry; don't fail the creation.
+          await this.prisma.invitationStatus.upsert({
+            where: { userId: user.id },
+            create: { userId: user.id, status: 'FAILED', detail: (emailError as Error).message },
+            update: { status: 'FAILED', detail: (emailError as Error).message },
+          });
+          await this.prisma.onboardingAuditLog.create({
+            data: {
+              action: 'INVITATION_EMAIL_FAILED',
+              userId: user.id,
+              organizationId,
+              detail: `create: ${(emailError as Error).message}`,
+            },
+          });
+          this.logger.error(`Failed to send welcome invitation to ${email}:`, emailError);
+        }
       }
 
       // Add student to contextual chats for class group and courses
@@ -508,7 +518,51 @@ export class StudentsService {
       this.logger.warn(`Failed to add student to contextual chats on update:`, chatError);
     }
 
+    if (rest.classGroupId !== undefined) {
+      const actorId = (this.request as { user?: { id?: string } } | undefined)?.user?.id;
+      await this.recordClassGroupChange(id, rest.classGroupId || null, 'update', actorId);
+    }
+
     return updated;
+  }
+
+  /**
+   * Record a class-group progression change: close any open history row for
+   * the student and open a new one for `newClassGroupId` (or just close when
+   * cleared). The current `Student.classGroupId` remains the live pointer.
+   */
+  private async recordClassGroupChange(
+    studentId: string,
+    newClassGroupId: string | null,
+    reason: string,
+    createdById?: string,
+  ) {
+    if (newClassGroupId) {
+      const group = await this.prisma.classGroup.findUnique({
+        where: { id: newClassGroupId },
+        select: { schoolId: true, organizationId: true },
+      });
+      if (!group) return;
+      await this.prisma.studentClassGroupHistory.updateMany({
+        where: { studentId, endedAt: null },
+        data: { endedAt: new Date() },
+      });
+      await this.prisma.studentClassGroupHistory.create({
+        data: {
+          studentId,
+          classGroupId: newClassGroupId,
+          schoolId: group.schoolId,
+          organizationId: group.organizationId,
+          reason,
+          createdById: createdById ?? null,
+        },
+      });
+    } else {
+      await this.prisma.studentClassGroupHistory.updateMany({
+        where: { studentId, endedAt: null },
+        data: { endedAt: new Date() },
+      });
+    }
   }
 
   async remove(id: string) {

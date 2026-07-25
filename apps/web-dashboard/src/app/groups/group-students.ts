@@ -27,7 +27,7 @@ type Student = Prisma.StudentGetPayload<{
         <li class="card bg-base-200 p-4 hover:bg-base-200 cursor-pointer" [routerLink]="['/students', student.id]">
           <div class="flex items-center gap-4">
             <div class="avatar avatar-placeholder">
-              <div class="text-primary-content w-10 rounded-full" [style.background]="student.user.color">
+              <div class="text-primary-content w-10 rounded-full" [style.background]="student.user?.color || '#a1a1aa'">
                 <span class="text-sm">{{ student.initials }}</span>
               </div>
             </div>

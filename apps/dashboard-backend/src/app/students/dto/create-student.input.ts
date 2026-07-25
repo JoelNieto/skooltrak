@@ -4,7 +4,7 @@ type CreateStudentInputType = Omit<
   Prisma.StudentUncheckedCreateInput,
   'userId' | 'parents'
 > & {
-  email: string;
+  email?: string;
   parentIds?: string[];
 };
 
@@ -34,7 +34,7 @@ export class CreateStudentInput implements CreateStudentInputType {
 
     phone: string;
 
-    email: string;
+    email?: string;
 
     enrollmentStatus?: $Enums.EnrollmentStatus;
 

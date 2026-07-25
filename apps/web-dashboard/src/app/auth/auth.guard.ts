@@ -1,6 +1,7 @@
 import { inject } from '@angular/core';
 import { CanActivateChildFn, CanActivateFn, CanMatchFn, Router, UrlTree } from '@angular/router';
 import Auth from './auth';
+import { OnboardingStep } from './onboarding-step';
 
 /** Session/token present but `me` failed or is absent — avoid mis-routing to onboarding. */
 function urlTreeIfMeMissing(auth: Auth, router: Router): UrlTree | null {
@@ -111,7 +112,7 @@ export const onboardingGuard: CanActivateFn = async () => {
   // Only send fully-onboarded users (org + role) to the dashboard. A user with
   // an org but no role must stay in onboarding, otherwise /home matches no
   // role-gated child route and falls through to the 404 page.
-  if (hasOrg && hasRole && (step === 'completed' || step == null || step === '')) {
+  if (hasOrg && hasRole && (step === OnboardingStep.COMPLETED || step == null || step === '')) {
     return router.createUrlTree(['/home']);
   }
 
@@ -151,7 +152,7 @@ export const onboardingCompletedGuard: CanActivateFn = async () => {
   // Fully onboarded members (org + role) may enter the dashboard.
   if (hasOrg && hasRole) {
     // Org admins mid school-setup still need the setup wizard.
-    if (step === 'school-setup') {
+    if (step === OnboardingStep.SCHOOL_SETUP) {
       return router.createUrlTree(['/onboarding/setup']);
     }
     return true;
@@ -159,11 +160,11 @@ export const onboardingCompletedGuard: CanActivateFn = async () => {
 
   // Not fully onboarded yet -> route to the correct onboarding step.
   switch (step) {
-    case 'school-setup':
+    case OnboardingStep.SCHOOL_SETUP:
       return router.createUrlTree(['/onboarding/setup']);
-    case 'waiting-approval':
+    case OnboardingStep.WAITING_APPROVAL:
       return router.createUrlTree(['/onboarding/waiting-approval']);
-    case 'choose-path':
+    case OnboardingStep.CHOOSE_PATH:
     default:
       return router.createUrlTree(['/onboarding/choose-path']);
   }

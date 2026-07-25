@@ -44,6 +44,9 @@ model Organization {
   // Better-auth organization plugin
   members             Member[]
   invitations         Invitation[]
+  importJobs          ImportJob[]
+  authTokens          AuthToken[]
+  studentClassGroupHistory StudentClassGroupHistory[]
 
   @@map("organizations")
 }
@@ -90,6 +93,7 @@ model User {
   sessions          Session[]
   accounts          Account[]
   members           Member[]
+  authTokens        AuthToken[]
 
   @@map("users")
 }
@@ -345,6 +349,7 @@ model School {
   courses        Course[]
   classGroups    ClassGroup[]
   students       Student[]
+  studentClassGroupHistory StudentClassGroupHistory[]
   assignments    Assignment[]
   currentYear    Int               @default(2025)
   fileShares     FileShareSchool[]
@@ -354,6 +359,7 @@ model School {
   storeCategories StoreCategory[]
   storeProducts   StoreProduct[]
   storeOrders     StoreOrder[]
+  importJobs      ImportJob[]
 
   @@map("schools")
 }
@@ -496,6 +502,7 @@ model ClassGroup {
   attendanceSessions AttendanceSession[]
   habitEvaluations   HabitEvaluation[]
   chats              Chat[]
+  studentHistory     StudentClassGroupHistory[]
   createdAt          DateTime                   @default(now())
   updatedAt          DateTime                   @updatedAt
 
@@ -529,8 +536,8 @@ model Student {
   emergencyContactName  String                   @default("")
   emergencyContactPhone String                   @default("")
   courses               Course[]
-  userId                String                   @unique
-  user                  User                     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  userId                String?                  @unique
+  user                  User?                    @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   parents               Parent[]
   createdAt             DateTime                 @default(now())
   updatedAt             DateTime                 @updatedAt
@@ -541,6 +548,8 @@ model Student {
   habitEvaluations      StudentHabitEvaluation[]
   charges               Charge[]
   payments              Payment[]
+  classGroupHistory     StudentClassGroupHistory[]
+  authTokens            AuthToken[]
 
   @@map("students")
 }
@@ -866,7 +875,99 @@ enum OnboardingAuditAction {
   INVITATION_CREATED
   INVITATION_EMAIL_FAILED
   ENROLLMENT_CODE_REGENERATED
+  MAGIC_LINK_ISSUED
+  MAGIC_LINK_CONSUMED
+  MAGIC_LINK_REJECTED
+  CHILD_CONNECT_ISSUED
+  CHILD_CONNECT_CONSUMED
+  CHILD_CONNECT_REJECTED
+  BULK_IMPORT_COMMITTED
+  CLASS_GROUP_CHANGED
 }
+
+enum AuthTokenType {
+  MAGIC_LINK
+  CHILD_CONNECT
+}
+
+enum ImportEntityType {
+  STUDENT
+  TEACHER
+}
+
+enum ImportJobStatus {
+  DRY_RUN
+  COMMITTED
+  FAILED
+}
+
+model AuthToken {
+  id             String       @id @default(cuid())
+  type           AuthTokenType
+  tokenHash      String       @unique
+  userId         String?
+  user           User?        @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  studentId      String?
+  student        Student?     @relation(fields: [studentId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  organizationId String?
+  organization   Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  metadata       Json?
+  expiresAt      DateTime
+  consumedAt     DateTime?
+  consumedByUserId String?
+  createdById    String?
+  attempts       Int          @default(0)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  @@index([type, expiresAt])
+  @@index([userId])
+  @@index([studentId])
+  @@map("auth_tokens")
+}
+
+model StudentClassGroupHistory {
+  id             String       @id @default(cuid())
+  studentId      String
+  student        Student      @relation(fields: [studentId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  classGroupId   String
+  classGroup     ClassGroup   @relation(fields: [classGroupId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  schoolId       String
+  school         School       @relation(fields: [schoolId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  startedAt      DateTime     @default(now())
+  endedAt        DateTime?
+  reason         String?
+  createdById    String?
+  createdAt      DateTime     @default(now())
+
+  @@index([studentId, startedAt])
+  @@index([classGroupId])
+  @@map("student_class_group_history")
+}
+
+model ImportJob {
+  id             String           @id @default(cuid())
+  organizationId String
+  organization   Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  schoolId       String
+  school         School           @relation(fields: [schoolId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  entityType     ImportEntityType
+  status         ImportJobStatus  @default(DRY_RUN)
+  createdById    String?
+  totalRows      Int              @default(0)
+  createdCount   Int              @default(0)
+  updatedCount   Int              @default(0)
+  errorCount     Int              @default(0)
+  errors         Json?
+  completedAt    DateTime?
+  createdAt      DateTime         @default(now())
+
+  @@index([organizationId])
+  @@map("import_jobs")
+}
+
 
 model OnboardingAuditLog {
   id             String               @id @default(cuid())

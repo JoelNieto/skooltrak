@@ -148,6 +148,7 @@ export class ChatsService {
         participants.push({ userId: course.teacher.userId, role: ChatParticipantRole.ADMIN });
       }
       for (const student of course.students) {
+        if (!student.userId) continue;
         participants.push({ userId: student.userId, role: ChatParticipantRole.MEMBER });
       }
     } else if (contextType === ChatType.ASSIGNMENT) {
@@ -171,6 +172,7 @@ export class ChatsService {
       }
       for (const ad of assignment.dates) {
         for (const student of ad.classGroup.students) {
+          if (!student.userId) continue;
           if (!userIds.has(student.userId)) {
             userIds.set(student.userId, ChatParticipantRole.MEMBER);
           }
@@ -192,6 +194,7 @@ export class ChatsService {
         participants.push({ userId: classGroup.teacher.userId, role: ChatParticipantRole.ADMIN });
       }
       for (const student of classGroup.students) {
+        if (!student.userId) continue;
         participants.push({ userId: student.userId, role: ChatParticipantRole.MEMBER });
       }
     }

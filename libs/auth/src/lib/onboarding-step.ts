@@ -17,7 +17,9 @@ export type OnboardingStep = (typeof OnboardingStep)[keyof typeof OnboardingStep
 
 /** Allowed transitions per current step. `null` = not yet set. */
 const ALLOWED_TRANSITIONS: Record<OnboardingStep | 'null', OnboardingStep[]> = {
-  null: [OnboardingStep.CHOOSE_PATH],
+  // Admin-provisioned accounts (students/teachers created by staff) start with
+  // no step and are landed directly at COMPLETED/SCHOOL_SETUP.
+  null: [OnboardingStep.CHOOSE_PATH, OnboardingStep.SCHOOL_SETUP, OnboardingStep.COMPLETED],
   [OnboardingStep.CHOOSE_PATH]: [
     OnboardingStep.SCHOOL_SETUP,
     OnboardingStep.COMPLETED,

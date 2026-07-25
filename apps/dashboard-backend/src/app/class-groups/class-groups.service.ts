@@ -115,7 +115,7 @@ export class ClassGroupsService {
         },
         students: {
           include: { user: true },
-          orderBy: { user: { firstName: 'asc' } },
+          orderBy: { firstName: 'asc' },
         },
         studyPlan: {
           include: {

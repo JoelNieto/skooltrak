@@ -108,7 +108,7 @@ type StudentEvaluation = {
                         <div class="avatar avatar-placeholder">
                           <div
                             class="bg-neutral text-neutral-content w-8 rounded-full"
-                            [style.background]="student.user.color"
+                            [style.background]="student.user?.color || '#a1a1aa'"
                           >
                             <span class="text-xs">{{ student.initials }}</span>
                           </div>

@@ -100,6 +100,7 @@ export class ChatSyncService {
 
     for (const chat of chats) {
       for (const student of students) {
+        if (!student.userId) continue;
         await this.prisma.chatParticipant.upsert({
           where: {
             chatId_userId: { chatId: chat.id, userId: student.userId },

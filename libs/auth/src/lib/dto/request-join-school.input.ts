@@ -1,15 +1,24 @@
-import { IsNotEmpty, IsOptional } from 'class-validator';
+import { IsNotEmpty, IsOptional, ValidateIf } from 'class-validator';
 
+/**
+ * Join-request payload. The required fields depend on `requestedRole`:
+ *  - STUDENT / TEACHER / ORG_ADMIN -> `schoolId` + `documentId`
+ *  - PARENT -> `enrollmentCode` (the school is derived from the code)
+ * The service enforces this per-role contract; `schoolId` is optional at the
+ * DTO level because it is not needed for PARENT joins.
+ */
 export class RequestJoinSchoolInput {
-    @IsNotEmpty()
-  schoolId: string;
+  @IsOptional()
+  @ValidateIf((o) => o.requestedRole !== 'PARENT')
+  @IsNotEmpty()
+  schoolId?: string;
 
-    @IsNotEmpty()
+  @IsNotEmpty()
   requestedRole: string;
 
-    @IsOptional()
+  @IsOptional()
   documentId?: string;
 
-    @IsOptional()
+  @IsOptional()
   enrollmentCode?: string;
 }

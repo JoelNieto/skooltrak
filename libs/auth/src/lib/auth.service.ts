@@ -1559,7 +1559,7 @@ export class AuthService {
     });
 
     const appUrl = process.env['APP_URL'] || 'http://localhost:4200';
-    const url = `${appUrl}/auth/magic-link?token=${raw}`;
+    const url = `${appUrl}/auth/magic-link-callback?token=${raw}`;
 
     try {
       await sendMagicLinkEmail({

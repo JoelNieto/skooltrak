@@ -38,7 +38,7 @@ export class StoreController {
   }
 
   @Get('cart')
-  @RequirePermissions(Perm.VIEW_STORE)
+  // @RequirePermissions(Perm.VIEW_STORE)
   @ApiOperation({ summary: 'My cart' })
   myStoreCart(@Query('schoolId') schoolId: string) {
     return this.storeService.myCart(schoolId);

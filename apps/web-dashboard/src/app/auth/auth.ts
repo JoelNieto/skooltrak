@@ -1,6 +1,6 @@
 import { Toast } from '#/ui';
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { isPlatformBrowser } from '@angular/common';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { computed, effect, inject, Injectable, linkedSignal, PLATFORM_ID, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
@@ -127,6 +127,7 @@ export default class Auth {
 
     effect(() => {
       const authed = this.isAuthenticated();
+      console.log('Auth state changed, isAuthenticated:', authed);
       void this.#loadCurrentUser(authed);
     });
   }
@@ -182,7 +183,9 @@ export default class Auth {
     this.userLoadStatus.set('loading');
 
     try {
+      console.log('Loading current user...');
       const me = await firstValueFrom(this.http.get<any>('/api/v1/auth/me'));
+      console.log({ me });
       this.userState.set(me ?? null);
       this.userLoadStatus.set('resolved');
     } catch (err) {
@@ -213,11 +216,7 @@ export default class Auth {
 
     try {
       const res = await firstValueFrom(
-        this.http.post<{ accessToken: string }>(
-          '/api/v1/auth/login',
-          { email, password },
-          { withCredentials: true },
-        ),
+        this.http.post<{ accessToken: string }>('/api/v1/auth/login', { email, password }, { withCredentials: true }),
       );
 
       const accessToken = res?.accessToken;
@@ -225,6 +224,7 @@ export default class Auth {
         this.token.set(accessToken);
         this.isSigning.set(false);
         this.#toasts.showSuccess('Bienvenido de nuevo');
+        void this.redeemPendingChildConnect();
         this.router.navigate(['/home']);
         return true;
       }
@@ -234,9 +234,7 @@ export default class Auth {
     } catch (err: any) {
       console.error('Login error:', err);
       const msg =
-        err?.error?.message ??
-        (typeof err?.error === 'string' ? err.error : err?.message) ??
-        'Credenciales inválidas';
+        err?.error?.message ?? (typeof err?.error === 'string' ? err.error : err?.message) ?? 'Credenciales inválidas';
       this.#toasts.showError(msg);
       this.isSigning.set(false);
       return false;
@@ -396,6 +394,30 @@ export default class Auth {
         coursesCount: 0,
         groupsCount: 0,
       };
+    }
+  }
+
+  public async redeemPendingChildConnect(): Promise<void> {
+    if (!isPlatformBrowser(this.platformId)) return;
+
+    const token = localStorage.getItem('pending_child_connect_token');
+    if (!token) return;
+
+    if (!this.isAuthenticated()) return;
+
+    try {
+      const res = await firstValueFrom(
+        this.http.post<{ status: string; studentId: string }>('/api/v1/auth/child-connect/redeem', { token }),
+      );
+      if (res?.status === 'LINKED') {
+        this.#toasts.showSuccess('Estudiante vinculado exitosamente');
+        this.router.navigate(['/students', res.studentId]);
+        return;
+      }
+    } catch (err: any) {
+      console.error('Child connect redeem error:', err);
+    } finally {
+      localStorage.removeItem('pending_child_connect_token');
     }
   }
 }

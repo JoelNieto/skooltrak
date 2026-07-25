@@ -38,6 +38,21 @@ export const DASHBOARD_ROUTES: Route[] = [
     title: 'Aceptar invitación | Skooltrak',
   },
   {
+    path: 'auth/magic-link',
+    loadComponent: () => import('./auth/magic-link-request'),
+    title: 'Acceso sin contraseña | Skooltrak',
+  },
+  {
+    path: 'auth/magic-link-callback',
+    loadComponent: () => import('./auth/magic-link-callback'),
+    title: 'Verificando acceso | Skooltrak',
+  },
+  {
+    path: 'onboarding/connect-child',
+    loadComponent: () => import('./auth/connect-child'),
+    title: 'Vincular estudiante | Skooltrak',
+  },
+  {
     path: 'onboarding',
     canActivate: [onboardingGuard],
     children: [

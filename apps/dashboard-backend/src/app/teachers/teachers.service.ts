@@ -1,8 +1,8 @@
-import { sendUserInvitation } from '@/auth';
+import { OnboardingStep, sendUserInvitation } from '@/auth';
 import { ConflictException, Inject, Injectable, Logger, Scope } from '@nestjs/common';
 import { REQUEST } from '@nestjs/core';
 import * as bcrypt from 'bcrypt';
-import { randomUUID } from 'crypto';
+import { randomBytes, randomUUID } from 'crypto';
 import { Request } from 'express';
 import { FetchDataInput } from '../fetch-data.input';
 import { PrismaService } from '../prisma.service';
@@ -34,7 +34,10 @@ export class TeachersService {
       select: { name: true },
     });
 
-    const hashedPassword = bcrypt.hashSync(rest.documentId, 10);
+    // Random, high-entropy placeholder secret. Never derived from the document
+    // ID (low-entropy, often known). Usable only after the user sets their own
+    // password via the invitation reset link.
+    const hashedPassword = bcrypt.hashSync(randomBytes(32).toString('hex'), 10);
 
     const existingUser = await this.prisma.user.findUnique({
       where: { email },
@@ -55,7 +58,7 @@ export class TeachersService {
           organizationId: createTeacherInput.organizationId,
           roleId: role.id,
           password: hashedPassword,
-          onboardingStep: 'completed', // Admin-created teachers skip onboarding
+          onboardingStep: OnboardingStep.COMPLETED, // Admin-created teachers skip onboarding
         },
       });
       userId = existingUser.id;
@@ -90,7 +93,7 @@ export class TeachersService {
           organizationId: createTeacherInput.organizationId,
           roleId: role.id,
           emailVerified: false, // Will be verified when user clicks the email link
-          onboardingStep: 'completed', // Admin-created teachers skip onboarding
+          onboardingStep: OnboardingStep.COMPLETED, // Admin-created teachers skip onboarding
         },
       });
       userId = user.id;
@@ -122,9 +125,35 @@ export class TeachersService {
         role: 'teacher',
         organizationName: organization?.name || 'Skooltrak',
       });
+      await this.prisma.invitationStatus.upsert({
+        where: { userId },
+        create: { userId, status: 'SENT' },
+        update: { status: 'SENT' },
+      });
+      await this.prisma.onboardingAuditLog.create({
+        data: {
+          action: 'INVITATION_CREATED',
+          userId,
+          organizationId: createTeacherInput.organizationId,
+          detail: `email=${email}`,
+        },
+      });
       this.logger.log(`Welcome invitation sent to teacher: ${email}`);
     } catch (error) {
-      // Log error but don't fail the creation
+      // Record the failure so admins can see + retry; don't fail the creation.
+      await this.prisma.invitationStatus.upsert({
+        where: { userId },
+        create: { userId, status: 'FAILED', detail: (error as Error).message },
+        update: { status: 'FAILED', detail: (error as Error).message },
+      });
+      await this.prisma.onboardingAuditLog.create({
+        data: {
+          action: 'INVITATION_EMAIL_FAILED',
+          userId,
+          organizationId: createTeacherInput.organizationId,
+          detail: `create: ${(error as Error).message}`,
+        },
+      });
       this.logger.error(`Failed to send welcome invitation to ${email}:`, error);
     }
 

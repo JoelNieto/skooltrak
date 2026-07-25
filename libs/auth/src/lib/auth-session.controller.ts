@@ -5,6 +5,7 @@ import {
   NotFoundException,
   Patch,
   Post,
+  Query,
   Req,
   Res,
   UnauthorizedException,
@@ -25,6 +26,18 @@ import { SignUpInput } from './dto/sign-up.input';
 @UseGuards(BetterAuthGuard)
 export class AuthSessionController {
   constructor(private readonly authService: AuthService) {}
+
+  /** Best-effort client IP for rate-limiting identity-proving endpoints. */
+  private clientIp(req: AuthenticatedRequest): string {
+    const fwd = req.headers['x-forwarded-for'];
+    if (typeof fwd === 'string' && fwd.length > 0) {
+      return fwd.split(',')[0].trim();
+    }
+    if (Array.isArray(fwd) && fwd.length > 0) {
+      return fwd[0].trim();
+    }
+    return req.ip ?? 'unknown';
+  }
 
   @Post('login')
   @AllowAnonymous()
@@ -222,9 +235,17 @@ export class AuthSessionController {
 
   @Get('available-schools')
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Schools available to join' })
-  async availableSchools() {
-    const schools = await this.authService.getAvailableSchools();
+  @ApiOperation({
+    summary: 'Schools available to join (search-only; requires a query of at least 3 chars)',
+  })
+  async availableSchools(@Query('query') query?: string) {
+    const q = (query ?? '').trim();
+    if (q.length < 3) {
+      // Do not enumerate tenants; require a meaningful search term.
+      return [];
+    }
+    const schools = await this.authService.getAvailableSchools(q);
+    // Intentionally omit counts/PII to reduce cross-tenant disclosure.
     return schools.map((s) => ({
       id: s.id,
       name: s.name,
@@ -234,7 +255,6 @@ export class AuthSessionController {
       city: s.city,
       country: s.country,
       organizationName: s.organization?.name || '',
-      studentCount: s._count?.students || 0,
     }));
   }
 
@@ -247,7 +267,7 @@ export class AuthSessionController {
     if (!userId) {
       throw new UnauthorizedException('No autenticado');
     }
-    return this.authService.requestJoinSchool(userId, input);
+    return this.authService.requestJoinSchool(userId, input, { ip: this.clientIp(req) });
   }
 
   @Post('link-child')
@@ -259,7 +279,7 @@ export class AuthSessionController {
     if (!userId) {
       throw new UnauthorizedException('No autenticado');
     }
-    return this.authService.linkChildByCode(userId, input);
+    return this.authService.linkChildByCode(userId, input, { ip: this.clientIp(req) });
   }
 
   @Get('my-join-request-status')

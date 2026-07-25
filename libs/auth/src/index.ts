@@ -6,5 +6,7 @@ export * from './lib/organizations/entities/organization.entity';
 export * from './lib/permissions/entities/permission.entity';
 export * from './lib/permissions/permissions.constants';
 export { sendGradePublishedEmail, sendUserInvitation } from './lib/resend.service';
+export { OnboardingStep, assertTransition, canTransition } from './lib/onboarding-step';
+export { RateLimiter } from './lib/rate-limiter';
 export * from './lib/roles/entities/role.entity';
 export * from './lib/users/entities/user.entity';

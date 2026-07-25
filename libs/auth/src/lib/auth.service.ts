@@ -3,6 +3,8 @@ import * as bcrypt from 'bcrypt';
 import { randomUUID } from 'crypto';
 import * as jwt from 'jsonwebtoken';
 import { auth } from './better-auth';
+import { OnboardingStep } from './onboarding-step';
+import { RateLimiter } from './rate-limiter';
 import { CreateSchoolWithOrgInput } from './dto/create-school-with-org.input';
 import { LinkChildInput } from './dto/link-child.input';
 import { RequestJoinSchoolInput } from './dto/request-join-school.input';
@@ -10,9 +12,54 @@ import { SignUpInput } from './dto/sign-up.input';
 import { PrismaService } from './prisma.service';
 import { sendEmail, sendUserInvitation } from './resend.service';
 
+/** Enrollment codes older than this are considered expired and must be regenerated. */
+export const ENROLLMENT_CODE_MAX_AGE_MS = 90 * 24 * 60 * 60 * 1000;
+
+/** Rate-limit windows for identity-proving endpoints. */
+const JOIN_REQUEST_LIMIT = 10;
+const JOIN_REQUEST_WINDOW_MS = 15 * 60 * 1000;
+const LINK_CHILD_LIMIT = 10;
+const LINK_CHILD_WINDOW_MS = 15 * 60 * 1000;
+
 @Injectable()
 export class AuthService {
+  private readonly rateLimiter = new RateLimiter();
+
   constructor(private prisma: PrismaService) {}
+
+  /** Append a row to the onboarding audit log (who/what/when). */
+  private async audit(params: {
+    action: string;
+    actorId?: string | null;
+    userId?: string | null;
+    organizationId?: string | null;
+    detail?: string;
+    ip?: string;
+  }) {
+    await this.prisma.onboardingAuditLog.create({
+      data: {
+        actorId: params.actorId ?? null,
+        userId: params.userId ?? null,
+        organizationId: params.organizationId ?? null,
+        action: params.action as never,
+        detail: params.detail ?? null,
+        ip: params.ip ?? null,
+      },
+    });
+  }
+
+  /** Persist the result of the last invitation email send for a user. */
+  private async setInvitationStatus(
+    userId: string,
+    status: 'PENDING' | 'SENT' | 'FAILED',
+    detail?: string,
+  ) {
+    await this.prisma.invitationStatus.upsert({
+      where: { userId },
+      create: { userId, status, detail: detail ?? null },
+      update: { status, detail: detail ?? null },
+    });
+  }
 
   private getRandomPastelColor() {
     const hue = Math.floor(Math.random() * 360);
@@ -251,13 +298,25 @@ export class AuthService {
       where: { identifier: user.email },
     });
 
-    await sendUserInvitation({
-      prisma: this.prisma,
-      email: user.email,
-      name,
-      role,
-      organizationName: user.organization?.name || 'Skooltrak',
-    });
+    try {
+      await sendUserInvitation({
+        prisma: this.prisma,
+        email: user.email,
+        name,
+        role,
+        organizationName: user.organization?.name || 'Skooltrak',
+      });
+      await this.setInvitationStatus(user.id, 'SENT');
+    } catch (error) {
+      await this.setInvitationStatus(user.id, 'FAILED', (error as Error).message);
+      await this.audit({
+        action: 'INVITATION_EMAIL_FAILED',
+        userId: user.id,
+        organizationId: user.organizationId,
+        detail: `create-invitation-access-link: ${(error as Error).message}`,
+      });
+      throw error;
+    }
 
     const appUrl = process.env['APP_URL'] || 'http://localhost:4200';
     const verification = await this.prisma.verification.findFirst({
@@ -309,13 +368,34 @@ export class AuthService {
       where: { identifier: user.email },
     });
 
-    await sendUserInvitation({
-      prisma: this.prisma,
-      email: user.email,
-      name,
-      role,
-      organizationName: user.organization?.name || 'Skooltrak',
-    });
+    await this.setInvitationStatus(user.id, 'PENDING');
+
+    try {
+      await sendUserInvitation({
+        prisma: this.prisma,
+        email: user.email,
+        name,
+        role,
+        organizationName: user.organization?.name || 'Skooltrak',
+      });
+      await this.setInvitationStatus(user.id, 'SENT');
+      await this.audit({
+        action: 'RESEND_INVITATION',
+        actorId: user.id,
+        userId: user.id,
+        organizationId: user.organizationId,
+        detail: `email=${user.email}`,
+      });
+    } catch (error) {
+      await this.setInvitationStatus(user.id, 'FAILED', (error as Error).message);
+      await this.audit({
+        action: 'INVITATION_EMAIL_FAILED',
+        userId: user.id,
+        organizationId: user.organizationId,
+        detail: `resend: ${(error as Error).message}`,
+      });
+      throw error;
+    }
 
     return true;
   }
@@ -421,7 +501,7 @@ export class AuthService {
           password: hashedPassword,
           color: this.getRandomPastelColor(),
           emailVerified: true, // Already verified via link
-          onboardingStep: 'choose-path',
+          onboardingStep: OnboardingStep.CHOOSE_PATH,
           // roleId: null (no role yet)
           // organizationId: null (no org yet)
         },
@@ -508,7 +588,7 @@ export class AuthService {
         data: {
           roleId: role.id,
           organizationId: organization.id,
-          onboardingStep: 'school-setup',
+          onboardingStep: OnboardingStep.SCHOOL_SETUP,
         },
         include: { role: { include: { permissions: true } } },
       });
@@ -554,8 +634,13 @@ export class AuthService {
   /**
    * Request to join an existing school with a specific role.
    */
-  async requestJoinSchool(userId: string, input: RequestJoinSchoolInput) {
+  async requestJoinSchool(
+    userId: string,
+    input: RequestJoinSchoolInput,
+    opts?: { ip?: string },
+  ) {
     const { schoolId, requestedRole, documentId } = input;
+    const ip = opts?.ip ?? 'unknown';
 
     const user = await this.prisma.user.findUnique({ where: { id: userId } });
     if (!user) throw new Error('Usuario no encontrado');
@@ -568,15 +653,41 @@ export class AuthService {
 
     const orgId = school.organizationId;
 
+    // Rate-limit identity-proving join attempts per IP
+    const limit = this.rateLimiter.hit(`join:${ip}`, JOIN_REQUEST_LIMIT, JOIN_REQUEST_WINDOW_MS);
+    if (!limit.allowed) {
+      await this.audit({
+        action: 'REQUEST_JOIN_SCHOOL',
+        actorId: userId,
+        userId,
+        organizationId: orgId,
+        detail: `Rate limited (retry after ${Math.ceil(limit.retryAfterMs / 1000)}s)`,
+        ip,
+      });
+      throw new HttpException(
+        'Demasiados intentos. Inténtalo de nuevo más tarde.',
+        HttpStatus.TOO_MANY_REQUESTS,
+      );
+    }
+
     switch (requestedRole) {
       case 'STUDENT':
+        await this.audit({
+          action: 'VERIFY_STUDENT',
+          userId,
+          organizationId: orgId,
+          detail: `schoolId=${schoolId}`,
+          ip,
+        });
         return this.handleStudentJoin(userId, school, orgId, documentId);
 
       case 'PARENT':
         if (input.enrollmentCode) {
-          return this.linkChildByCode(userId, { enrollmentCode: input.enrollmentCode });
+          return this.linkChildByCode(userId, { enrollmentCode: input.enrollmentCode }, { ip });
         }
-        return this.handleParentJoin(userId, school, orgId, documentId);
+        throw new Error(
+          'Para vincular a un estudiante proporciona el código de matrícula. Contacta a la escuela si no lo tienes.',
+        );
 
       case 'TEACHER':
       case 'ORG_ADMIN':
@@ -631,7 +742,7 @@ export class AuthService {
         data: {
           roleId: studentRole.id,
           organizationId: orgId,
-          onboardingStep: 'completed',
+          onboardingStep: OnboardingStep.COMPLETED,
         },
       });
 
@@ -649,52 +760,11 @@ export class AuthService {
     return { status: 'LINKED', message: 'Cuenta vinculada exitosamente' };
   }
 
-  private async handleParentJoin(
-    userId: string,
-    school: { id: string; name: string },
-    orgId: string,
-    documentId?: string,
-  ) {
-    if (!documentId) {
-      throw new Error('El documento de identidad es requerido para padres');
-    }
-
-    // Find parent record by documentId and organization
-    const parent = await this.prisma.parent.findFirst({
-      where: { documentId, organizationId: orgId },
-    });
-
-    if (!parent) {
-      throw new Error('No se encontró un padre/tutor pre-registrado con este documento. Contacta a tu escuela.');
-    }
-
-    if (parent.userId && parent.userId !== userId) {
-      throw new Error('Este padre/tutor ya está vinculado a otra cuenta');
-    }
-
-    // Create a join request for admin approval
-    await this.prisma.$transaction(async (tx) => {
-      await tx.joinRequest.create({
-        data: {
-          userId,
-          schoolId: school.id,
-          requestedRole: 'PARENT',
-          documentId,
-          status: 'PENDING',
-        },
-      });
-
-      await tx.user.update({
-        where: { id: userId },
-        data: { onboardingStep: 'waiting-approval' },
-      });
-
-      // Notify all ORG_ADMINs
-      await this.notifyOrgAdmins(tx, orgId, userId, school.name, 'PARENT');
-    });
-
-    return { status: 'PENDING', message: 'Solicitud enviada. Esperando aprobación del administrador.' };
-  }
+  // NOTE: The document-based, approval-required parent join path
+  // (`handleParentJoin`) was removed. Parents now self-link exclusively via a
+  // per-student enrollment code (linkChildByCode), which is the only path the
+  // UI exposes. This removes a dead, unreachable branch and unifies the parent
+  // contract.
 
   private async handleAdminTeacherJoin(
     userId: string,
@@ -714,7 +784,7 @@ export class AuthService {
 
       await tx.user.update({
         where: { id: userId },
-        data: { onboardingStep: 'waiting-approval' },
+        data: { onboardingStep: OnboardingStep.WAITING_APPROVAL },
       });
 
       // Notify all ORG_ADMINs
@@ -730,10 +800,27 @@ export class AuthService {
    * and federates the global User into that Organization via a per-org Parent profile.
    * No admin approval required.
    */
-  async linkChildByCode(userId: string, input: LinkChildInput) {
+  async linkChildByCode(userId: string, input: LinkChildInput, opts?: { ip?: string }) {
     const enrollmentCode = input.enrollmentCode?.trim().toUpperCase();
     if (!enrollmentCode) {
       throw new Error('El código de matrícula es requerido');
+    }
+
+    const ip = opts?.ip ?? 'unknown';
+
+    // Rate-limit link attempts per IP to blunt brute-force of enrollment codes
+    const limit = this.rateLimiter.hit(`link:${ip}`, LINK_CHILD_LIMIT, LINK_CHILD_WINDOW_MS);
+    if (!limit.allowed) {
+      await this.audit({
+        action: 'LINK_CHILD',
+        userId,
+        detail: `Rate limited (retry after ${Math.ceil(limit.retryAfterMs / 1000)}s)`,
+        ip,
+      });
+      throw new HttpException(
+        'Demasiados intentos. Inténtalo de nuevo más tarde.',
+        HttpStatus.TOO_MANY_REQUESTS,
+      );
     }
 
     const student = await this.prisma.student.findUnique({
@@ -745,7 +832,26 @@ export class AuthService {
     });
 
     if (!student || !student.enrollmentCode) {
+      // Do not reveal whether a code exists; log the attempt for auditing.
+      await this.audit({ action: 'LINK_CHILD', userId, detail: 'invalid code', ip });
       throw new Error('Código de matrícula inválido');
+    }
+
+    // Enrollment codes expire; schools must regenerate them for stale students.
+    if (
+      student.enrollmentCodeGeneratedAt &&
+      Date.now() - new Date(student.enrollmentCodeGeneratedAt).getTime() > ENROLLMENT_CODE_MAX_AGE_MS
+    ) {
+      await this.audit({
+        action: 'LINK_CHILD',
+        userId,
+        organizationId: student.school.organizationId,
+        detail: 'expired code',
+        ip,
+      });
+      throw new Error(
+        'El código de matrícula ha expirado. Solicita uno nuevo a la escuela.',
+      );
     }
 
     const orgId = student.school.organizationId;
@@ -850,10 +956,18 @@ export class AuthService {
         where: { id: userId },
         data: {
           roleId: parentRole.id,
-          onboardingStep: 'completed',
+          onboardingStep: OnboardingStep.COMPLETED,
           ...(user.organizationId ? {} : { organizationId: orgId }),
         },
       });
+    });
+
+    await this.audit({
+      action: 'LINK_CHILD',
+      userId,
+      organizationId: orgId,
+      detail: `studentId=${student.id}`,
+      ip,
     });
 
     return {
@@ -947,7 +1061,7 @@ export class AuthService {
 
         await tx.user.update({
           where: { id: joinRequest.userId },
-          data: { onboardingStep: 'choose-path' }, // Allow them to try again
+          data: { onboardingStep: OnboardingStep.CHOOSE_PATH }, // Allow them to try again
         });
 
         await tx.notification.create({
@@ -958,6 +1072,14 @@ export class AuthService {
             message: `Tu solicitud para unirte a ${joinRequest.school.name} ha sido rechazada.`,
           },
         });
+      });
+
+      await this.audit({
+        action: 'REJECT_JOIN_REQUEST',
+        actorId: adminUserId,
+        userId: joinRequest.userId,
+        organizationId: orgId,
+        detail: `requestId=${requestId}`,
       });
 
       return true;
@@ -1007,7 +1129,7 @@ export class AuthService {
         data: {
           roleId: role.id,
           organizationId: orgId,
-          onboardingStep: 'completed',
+          onboardingStep: OnboardingStep.COMPLETED,
         },
       });
 
@@ -1052,6 +1174,14 @@ export class AuthService {
       });
     });
 
+    await this.audit({
+      action: 'APPROVE_JOIN_REQUEST',
+      actorId: adminUserId,
+      userId: joinRequest.userId,
+      organizationId: orgId,
+      detail: `requestId=${requestId}`,
+    });
+
     return true;
   }
 
@@ -1060,19 +1190,25 @@ export class AuthService {
   // ==========================================
 
   /**
-   * Get all available schools that users can join
+   * Get schools that users can join, filtered by a search term.
+   * Search-only (no enumeration) to reduce cross-tenant disclosure.
    */
-  async getAvailableSchools() {
+  async getAvailableSchools(query: string) {
+    const term = query.trim();
     return this.prisma.school.findMany({
+      where: {
+        OR: [
+          { name: { contains: term, mode: 'insensitive' } },
+          { organization: { name: { contains: term, mode: 'insensitive' } } },
+        ],
+      },
       include: {
         organization: {
           select: { id: true, name: true },
         },
-        _count: {
-          select: { students: true },
-        },
       },
       orderBy: { name: 'asc' },
+      take: 50,
     });
   }
 
@@ -1175,7 +1311,7 @@ export class AuthService {
 
     await this.prisma.user.update({
       where: { id: userId },
-      data: { onboardingStep: 'completed' },
+      data: { onboardingStep: OnboardingStep.COMPLETED },
     });
 
     return true;
@@ -1299,7 +1435,7 @@ export class AuthService {
       data: {
         password: hashedPassword,
         emailVerified: true,
-        ...(isInvitedTeacher && { onboardingStep: 'completed' }),
+        ...(isInvitedTeacher && { onboardingStep: OnboardingStep.COMPLETED }),
       },
     });
 

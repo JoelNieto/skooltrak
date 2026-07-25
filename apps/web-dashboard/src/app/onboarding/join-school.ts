@@ -9,7 +9,6 @@ type AvailableSchool = {
   organizationName?: string;
   city?: string | null;
   country?: string | null;
-  studentCount: number;
 };
 
 @Component({
@@ -25,7 +24,7 @@ type AvailableSchool = {
         <div class="w-full max-w-3xl space-y-6 animate-fade-in">
           <div class="text-center space-y-2">
             <h1 class="text-2xl md:text-3xl font-bold text-base-content">Selecciona tu Escuela</h1>
-            <p class="text-base-content/70">Elige la escuela a la que deseas unirte</p>
+            <p class="text-base-content/70">Escribe al menos 3 caracteres para buscar tu escuela</p>
           </div>
 
           <!-- Search -->
@@ -42,12 +41,12 @@ type AvailableSchool = {
             <div class="flex justify-center py-8">
               <lib-loader />
             </div>
-          } @else if (filteredSchools().length === 0) {
+          } @else if (searched() && filteredSchools().length === 0) {
             <div class="text-center py-12">
               <span class="material-symbols-outlined text-6xl text-base-content/30">school</span>
               <p class="mt-4 text-base-content/60">No se encontraron escuelas</p>
             </div>
-          } @else {
+          } @else if (searched()) {
             <div class="grid gap-4">
               @for (school of filteredSchools(); track school.id) {
                 <button
@@ -67,14 +66,15 @@ type AvailableSchool = {
                         <p class="text-xs text-base-content/40">{{ school.city }}{{ school.country ? ', ' + school.country : '' }}</p>
                       }
                     </div>
-                    <div class="flex items-center gap-2 text-base-content/50">
-                      <span class="material-symbols-outlined text-lg">group</span>
-                      <span class="text-sm">{{ school.studentCount }}</span>
-                    </div>
                     <span class="material-symbols-outlined text-base-content/30">chevron_right</span>
                   </div>
                 </button>
               }
+            </div>
+          } @else {
+            <div class="text-center py-12">
+              <span class="material-symbols-outlined text-6xl text-base-content/30">search</span>
+              <p class="mt-4 text-base-content/50">Comienza a escribir para buscar escuelas</p>
             </div>
           }
 
@@ -107,41 +107,38 @@ export default class JoinSchool {
   public loading = signal(true);
   public schools = signal<AvailableSchool[]>([]);
   public filteredSchools = signal<AvailableSchool[]>([]);
+  public searched = signal(false);
   private searchTerm = '';
 
   constructor() {
-    this.loadSchools();
-  }
-
-  private loadSchools() {
-    this.http.get<AvailableSchool[]>('/api/v1/auth/available-schools').subscribe({
-      next: (schools) => {
-        this.schools.set(schools ?? []);
-        this.filteredSchools.set(schools ?? []);
-        this.loading.set(false);
-      },
-      error: (err) => {
-        this.loading.set(false);
-        this.toasts.showError(err.message || 'Error al cargar escuelas');
-      },
-    });
+    this.loading.set(false);
   }
 
   public onSearch(event: Event) {
-    const term = (event.target as HTMLInputElement).value.toLowerCase();
+    const term = (event.target as HTMLInputElement).value.toLowerCase().trim();
     this.searchTerm = term;
-    if (!term) {
-      this.filteredSchools.set(this.schools());
-    } else {
-      this.filteredSchools.set(
-        this.schools().filter(
-          (s) =>
-            s.name.toLowerCase().includes(term) ||
-            (s.organizationName ?? '').toLowerCase().includes(term) ||
-            s.city?.toLowerCase().includes(term),
-        ),
-      );
+    this.searched.set(true);
+
+    if (term.length < 3) {
+      this.schools.set([]);
+      this.filteredSchools.set([]);
+      return;
     }
+
+    this.loading.set(true);
+    this.http
+      .get<AvailableSchool[]>('/api/v1/auth/available-schools', { params: { query: term } })
+      .subscribe({
+        next: (schools) => {
+          this.schools.set(schools ?? []);
+          this.filteredSchools.set(schools ?? []);
+          this.loading.set(false);
+        },
+        error: (err) => {
+          this.loading.set(false);
+          this.toasts.showError(err.message || 'Error al buscar escuelas');
+        },
+      });
   }
 
   public selectSchool(school: AvailableSchool) {

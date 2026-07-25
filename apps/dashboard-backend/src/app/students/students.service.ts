@@ -1,4 +1,4 @@
-import { sendUserInvitation } from '@/auth';
+import { OnboardingStep, sendUserInvitation } from '@/auth';
 import { ConflictException, Inject, Injectable, Logger, Scope } from '@nestjs/common';
 import { REQUEST } from '@nestjs/core';
 import * as bcrypt from 'bcrypt';
@@ -56,7 +56,10 @@ export class StudentsService {
       select: { name: true },
     });
 
-    const hashedPassword = bcrypt.hashSync(documentId, 10);
+    // Random, high-entropy placeholder secret. Never derived from the document
+    // ID (which is low-entropy and often known). The account is only usable once
+    // the user sets their own password via the invitation reset link.
+    const hashedPassword = bcrypt.hashSync(randomBytes(32).toString('hex'), 10);
 
     const existingUser = await this.prisma.user.findUnique({
       where: { email },
@@ -77,7 +80,7 @@ export class StudentsService {
           organizationId,
           roleId: role.id,
           password: hashedPassword,
-          onboardingStep: 'completed', // Admin-created students skip onboarding
+          onboardingStep: OnboardingStep.COMPLETED, // Admin-created students skip onboarding
         },
       });
       user = { id: existingUser.id };
@@ -112,7 +115,7 @@ export class StudentsService {
           organizationId,
           roleId: role.id,
           emailVerified: false, // Will be verified when user clicks the email link
-          onboardingStep: 'completed', // Admin-created students skip onboarding
+          onboardingStep: OnboardingStep.COMPLETED, // Admin-created students skip onboarding
         },
       });
 
@@ -169,7 +172,7 @@ export class StudentsService {
       parents: parentIds?.length ? { connect: parentIds.map((id) => ({ id })) } : undefined,
     };
 
-    this.logger.log(`Creating student with data: ${JSON.stringify(studentData, null, 2)}`);
+      this.logger.log(`Creating student with data: ${JSON.stringify(studentData, null, 2)}`);
 
     try {
       const student = await this.prisma.student.create({
@@ -186,9 +189,35 @@ export class StudentsService {
           role: 'student',
           organizationName: organization?.name || 'Skooltrak',
         });
+        await this.prisma.invitationStatus.upsert({
+          where: { userId: user.id },
+          create: { userId: user.id, status: 'SENT' },
+          update: { status: 'SENT' },
+        });
+        await this.prisma.onboardingAuditLog.create({
+          data: {
+            action: 'INVITATION_CREATED',
+            userId: user.id,
+            organizationId,
+            detail: `email=${email}`,
+          },
+        });
         this.logger.log(`Welcome invitation sent to student: ${email}`);
       } catch (emailError) {
-        // Log error but don't fail the creation
+        // Record the failure so admins can see + retry; don't fail the creation.
+        await this.prisma.invitationStatus.upsert({
+          where: { userId: user.id },
+          create: { userId: user.id, status: 'FAILED', detail: (emailError as Error).message },
+          update: { status: 'FAILED', detail: (emailError as Error).message },
+        });
+        await this.prisma.onboardingAuditLog.create({
+          data: {
+            action: 'INVITATION_EMAIL_FAILED',
+            userId: user.id,
+            organizationId,
+            detail: `create: ${(emailError as Error).message}`,
+          },
+        });
         this.logger.error(`Failed to send welcome invitation to ${email}:`, emailError);
       }
 
@@ -249,11 +278,20 @@ export class StudentsService {
    */
   async regenerateEnrollmentCode(id: string) {
     const code = await this.generateEnrollmentCode();
-    return this.prisma.student.update({
+    const updated = await this.prisma.student.update({
       where: { id },
       data: { enrollmentCode: code, enrollmentCodeGeneratedAt: new Date() },
-      select: { id: true, enrollmentCode: true, enrollmentCodeGeneratedAt: true },
+      select: { id: true, enrollmentCode: true, enrollmentCodeGeneratedAt: true, organizationId: true },
     });
+    await this.prisma.onboardingAuditLog.create({
+      data: {
+        action: 'ENROLLMENT_CODE_REGENERATED',
+        userId: null,
+        organizationId: updated.organizationId,
+        detail: `studentId=${id}`,
+      },
+    });
+    return updated;
   }
 
   findAll(fetchDataInput: FetchDataInput) {

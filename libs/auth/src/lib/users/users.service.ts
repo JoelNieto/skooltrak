@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { randomUUID } from 'crypto';
 import { FetchDataInput } from '../fetch-data-input';
+import { OnboardingStep } from '../onboarding-step';
 import { PrismaService } from '../prisma.service';
 import { sendUserInvitation } from '../resend.service';
 import { CreateUserInput } from './dto/create-user.input';
@@ -36,7 +37,7 @@ export class UsersService {
         color: this.getRandomPastelColor(),
         password,
         emailVerified: isTeacher ? false : undefined,
-        onboardingStep: isTeacher ? 'completed' : undefined,
+        onboardingStep: isTeacher ? OnboardingStep.COMPLETED : undefined,
       },
       include: {
         role: { include: { permissions: true } },

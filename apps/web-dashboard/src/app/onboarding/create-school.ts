@@ -201,8 +201,12 @@ export default class CreateSchool {
             schoolShortName: shortName,
           }),
         );
+        // Update the token signal (also persists to localStorage via effect)
+        // and reload the user so role/org/onboardingStep signals are fresh for
+        // the guards on the next navigation. Just calling token.set() is not
+        // enough: isAuthenticated stays true, so the reload effect won't re-fire.
         this.auth.token.set(result.accessToken);
-        localStorage.setItem('access_token', result.accessToken);
+        await this.auth.reloadUser();
 
         this.store.currentSchool.set({
           id: result.schoolId,

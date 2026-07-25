@@ -106,12 +106,12 @@ export const onboardingGuard: CanActivateFn = async () => {
   const u = auth.user()!;
   const step = auth.onboardingStep();
   const hasOrg = !!(u as { organizationId?: string | null }).organizationId;
+  const hasRole = !!auth.role() && auth.role() !== 'member';
 
-  // If onboarding is already completed, redirect to dashboard
-  if (step === 'completed') {
-    return router.createUrlTree(['/home']);
-  }
-  if (hasOrg && (step == null || step === '')) {
+  // Only send fully-onboarded users (org + role) to the dashboard. A user with
+  // an org but no role must stay in onboarding, otherwise /home matches no
+  // role-gated child route and falls through to the 404 page.
+  if (hasOrg && hasRole && (step === 'completed' || step == null || step === '')) {
     return router.createUrlTree(['/home']);
   }
 
@@ -121,7 +121,12 @@ export const onboardingGuard: CanActivateFn = async () => {
 
 /**
  * Guard that ensures onboarding is completed before accessing the dashboard.
- * Redirects to appropriate onboarding step if not completed.
+ * Redirects to the appropriate onboarding step if not completed.
+ *
+ * Key rule: a user with no `organizationId` has NOT finished onboarding,
+ * regardless of `onboardingStep`. Such users must never reach `/home`, whose
+ * children are all role-gated (`canMatch`) — with no role they would match
+ * nothing and fall through to the `**` (404) route.
  */
 export const onboardingCompletedGuard: CanActivateFn = async () => {
   const auth = inject(Auth);
@@ -141,27 +146,25 @@ export const onboardingCompletedGuard: CanActivateFn = async () => {
   const u = auth.user()!;
   const step = auth.onboardingStep();
   const hasOrg = !!(u as { organizationId?: string | null }).organizationId;
+  const hasRole = !!auth.role() && auth.role() !== 'member';
 
-  // If user has completed onboarding, allow through
-  if (step === 'completed') {
+  // Fully onboarded members (org + role) may enter the dashboard.
+  if (hasOrg && hasRole) {
+    // Org admins mid school-setup still need the setup wizard.
+    if (step === 'school-setup') {
+      return router.createUrlTree(['/onboarding/setup']);
+    }
     return true;
   }
 
-  // Org-linked accounts missing onboardingStep in DB still need dashboard access
-  if (hasOrg && (step == null || step === '')) {
-    return true;
-  }
-
-  // Route based on onboarding step
+  // Not fully onboarded yet -> route to the correct onboarding step.
   switch (step) {
-    case 'choose-path':
-      return router.createUrlTree(['/onboarding/choose-path']);
     case 'school-setup':
       return router.createUrlTree(['/onboarding/setup']);
     case 'waiting-approval':
       return router.createUrlTree(['/onboarding/waiting-approval']);
+    case 'choose-path':
     default:
-      // No step set yet, or unknown step -> go to choose-path
       return router.createUrlTree(['/onboarding/choose-path']);
   }
 };

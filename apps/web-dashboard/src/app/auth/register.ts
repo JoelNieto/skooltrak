@@ -10,6 +10,8 @@ import {
   Validators,
 } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { writeAccessTokenToStorage } from '#/client-auth';
+import Auth from './auth';
 
 @Component({
   selector: 'app-register',
@@ -367,6 +369,7 @@ export default class Register implements OnInit {
   private router = inject(Router);
   private route = inject(ActivatedRoute);
   private toasts = inject(Toast);
+  private auth = inject(Auth);
 
   public step = signal<'email' | 'check-inbox' | 'validating' | 'register' | 'error' | 'pending-invitation'>('email');
   public loading = signal(false);
@@ -564,10 +567,19 @@ export default class Register implements OnInit {
         password,
       })
       .subscribe({
-        next: (res) => {
+        next: async (res) => {
           const accessToken = res?.accessToken;
           if (accessToken) {
-            localStorage.setItem('access_token', accessToken);
+            // Update the Auth signal AND persist to localStorage synchronously
+            // before reloading the user. The token->localStorage write normally
+            // happens in an async effect, but reloadUser() issues the /me
+            // request synchronously and the bearer interceptor reads the token
+            // straight from localStorage. For a brand-new user (empty storage),
+            // skipping the synchronous write would send /me unauthenticated,
+            // trigger a 401 that clears credentials, and bounce back to /login.
+            this.auth.token.set(accessToken);
+            writeAccessTokenToStorage(accessToken);
+            await this.auth.reloadUser();
           }
           this.toasts.showSuccess('Cuenta creada exitosamente');
           this.router.navigate(['/onboarding']);

@@ -3,6 +3,7 @@ import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@ang
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
+import Auth from '../auth/auth';
 
 @Component({
   selector: 'app-verify-student',
@@ -90,6 +91,7 @@ export default class VerifyStudent implements OnInit {
   private router = inject(Router);
   private http = inject(HttpClient);
   private toasts = inject(Toast);
+  private auth = inject(Auth);
 
   public schoolId = signal('');
   public schoolName = signal('');
@@ -124,10 +126,14 @@ export default class VerifyStudent implements OnInit {
         documentId,
       })
       .subscribe({
-        next: (result) => {
+        next: async (result) => {
           this.loading.set(false);
           if (result?.status === 'LINKED') {
             this.toasts.showSuccess(result.message || 'Cuenta vinculada exitosamente');
+            // Reload user so role/org/onboardingStep are fresh before the
+            // dashboard guards run; otherwise the stale state bounces the
+            // student back into onboarding.
+            await this.auth.reloadUser();
             this.router.navigate(['/home']);
           }
         },

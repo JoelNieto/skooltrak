@@ -7,7 +7,6 @@ import Auth from './auth';
 
 @Component({
   selector: 'app-magic-link-callback',
-  standalone: true,
   imports: [RouterLink],
   template: `
     <div class="min-h-screen flex items-center justify-center bg-base-200 p-4">

@@ -1,6 +1,6 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { Component, inject } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
+import { RouterLink } from '@angular/router';
 import { map } from 'rxjs';
 import { StoreApiService } from '../store-api.service';
 import StoreThemeToggle from '../store-theme-toggle';
@@ -8,7 +8,6 @@ import StoreThemeToggle from '../store-theme-toggle';
 @Component({
   selector: 'app-school-picker-standalone',
   imports: [RouterLink, StoreThemeToggle],
-  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="layout-padding max-w-3xl mx-auto py-10">
       <div class="flex flex-wrap items-start justify-between gap-4 mb-6">
@@ -56,9 +55,6 @@ export default class SchoolPickerStandalone {
   private readonly api = inject(StoreApiService);
 
   protected schools = rxResource({
-    stream: () =>
-      this.api.publicSchoolsForStore().pipe(
-        map((rows) => (Array.isArray(rows) ? rows : [])),
-      ),
+    stream: () => this.api.publicSchoolsForStore().pipe(map((rows) => (Array.isArray(rows) ? rows : []))),
   });
 }

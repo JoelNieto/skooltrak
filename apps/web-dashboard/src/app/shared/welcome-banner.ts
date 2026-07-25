@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, input, signal } from '@angular/core';
+import { Component, computed, input, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
 export type OnboardingSummary = {
@@ -96,7 +96,6 @@ export type OnboardingSummary = {
       </div>
     }
   `,
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class WelcomeBanner {
   public summary = input.required<OnboardingSummary>();

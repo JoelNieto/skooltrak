@@ -1,8 +1,8 @@
 import { Toast } from '#/ui';
-import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Component, inject, OnInit, signal } from '@angular/core';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { HttpClient } from '@angular/common/http';
 import Auth from '../auth/auth';
 
 @Component({
@@ -26,7 +26,8 @@ import Auth from '../auth/auth';
             <h1 class="text-2xl md:text-3xl font-bold text-base-content">Verificación de Estudiante</h1>
             <p class="text-base-content/70">
               Ingresa tu documento de identidad para vincular tu cuenta con tu registro en
-              <strong>{{ schoolName() }}</strong>.
+              <strong>{{ schoolName() }}</strong
+              >.
             </p>
           </div>
 
@@ -79,11 +80,16 @@ import Auth from '../auth/auth';
       animation: fadeIn 0.3s ease-out;
     }
     @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
   `,
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class VerifyStudent implements OnInit {
   private fb = inject(NonNullableFormBuilder);

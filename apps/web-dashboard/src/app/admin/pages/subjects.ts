@@ -2,9 +2,8 @@ import { Confirmation, Modal, Pagination, Paginator, Toast } from '#/ui';
 import { Menu, MenuContent, MenuItem, MenuTrigger } from '@angular/aria/menu';
 import { OverlayModule } from '@angular/cdk/overlay';
 import { DatePipe } from '@angular/common';
-import { afterRenderEffect, ChangeDetectionStrategy, Component, inject, signal, viewChild } from '@angular/core';
-import { effect } from '@angular/core';
-import { httpResource, HttpClient } from '@angular/common/http';
+import { HttpClient, httpResource } from '@angular/common/http';
+import { afterRenderEffect, Component, effect, inject, signal, viewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Prisma } from '@generated/prisma';
 import { filter, switchMap } from 'rxjs';
@@ -208,7 +207,6 @@ import SubjectsForm from '../forms/subjects-form';
       </div>
     </div>
   `,
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class Subjects {
   #http = inject(HttpClient);

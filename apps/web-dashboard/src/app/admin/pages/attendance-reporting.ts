@@ -1,5 +1,5 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { PageHeader, StatCard } from '#/ui';
+import { Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
 @Component({
@@ -29,9 +29,7 @@ import { RouterLink } from '@angular/router';
 
     <div class="mt-6 card border border-base-200 bg-base-100">
       <div class="card-body">
-        <h2 class="text-lg font-semibold text-base-content">
-          Resumen por curso
-        </h2>
+        <h2 class="text-lg font-semibold text-base-content">Resumen por curso</h2>
         <div class="overflow-x-auto">
           <table class="table">
             <thead>
@@ -57,7 +55,6 @@ import { RouterLink } from '@angular/router';
       </div>
     </div>
   `,
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class AttendanceReporting {
   courseAttendance = [

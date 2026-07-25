@@ -2,8 +2,8 @@ import { Confirmation, Modal, Toast } from '#/ui';
 import { Menu, MenuContent, MenuItem, MenuTrigger } from '@angular/aria/menu';
 import { OverlayModule } from '@angular/cdk/overlay';
 import { DatePipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, inject, viewChild } from '@angular/core';
-import { httpResource, HttpClient } from '@angular/common/http';
+import { HttpClient, httpResource } from '@angular/common/http';
+import { Component, inject, viewChild } from '@angular/core';
 import { filter, switchMap } from 'rxjs';
 import Store from '../../core/store';
 import StudyPlanForm from '../forms/study-plans-forms';
@@ -102,7 +102,6 @@ type StudyPlanRow = {
         </tbody>
       </table>
     </div>`,
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class StudyPlans {
   private http = inject(HttpClient);

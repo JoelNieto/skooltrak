@@ -1,7 +1,7 @@
 import { EmptyState, Loader, Toast } from '#/ui';
-import { HttpClient } from '@angular/common/http';
 import { DatePipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Component, inject, signal } from '@angular/core';
 
 type JoinRequestRow = {
   id: string;
@@ -99,7 +99,6 @@ type JoinRequestRow = {
       }
     </div>
   `,
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class JoinRequests {
   private http = inject(HttpClient);

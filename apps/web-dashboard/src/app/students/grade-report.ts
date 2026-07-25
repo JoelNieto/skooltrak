@@ -1,7 +1,7 @@
 import { Loader } from '#/ui';
 import { DecimalPipe } from '@angular/common';
 import { httpResource } from '@angular/common/http';
-import { afterRenderEffect, ChangeDetectionStrategy, Component, computed, inject, input, signal } from '@angular/core';
+import { afterRenderEffect, Component, computed, inject, input, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import Store from '../core/store';
@@ -328,7 +328,6 @@ interface GradeReportData {
       }
     `,
   ],
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class GradeReport {
   id = input.required<string>();
@@ -336,7 +335,9 @@ export default class GradeReport {
 
   periodId = signal<string>('');
 
-  periodsResource = httpResource<Array<{ id: string; name?: string; shortName?: string; startDate?: string; endDate?: string }>>(
+  periodsResource = httpResource<
+    Array<{ id: string; name?: string; shortName?: string; startDate?: string; endDate?: string }>
+  >(
     () => {
       const year = this.#store.currentSchool()?.currentYear;
       if (!year) return undefined;

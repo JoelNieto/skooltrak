@@ -1,6 +1,6 @@
 import { markGroupDirty, Toast } from '#/ui';
-import { ChangeDetectionStrategy, Component, computed, inject, input, output, signal } from '@angular/core';
-import { httpResource, HttpClient } from '@angular/common/http';
+import { HttpClient, httpResource } from '@angular/common/http';
+import { Component, computed, inject, input, output, signal } from '@angular/core';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import Store from '../../core/store';
 import { CreatedEntity } from '../setup-wizard';
@@ -131,7 +131,6 @@ import { CreatedEntity } from '../setup-wizard';
       }
     }
   `,
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class GroupsStep {
   private fb = inject(NonNullableFormBuilder);

@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, OnInit, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 
 interface RoleOption {
@@ -39,7 +39,10 @@ interface RoleOption {
                 (click)="selectRole(role.id)"
               >
                 <div class="card-body items-center text-center space-y-3">
-                  <div class="w-14 h-14 rounded-full flex items-center justify-center" [style.background]="role.color + '15'">
+                  <div
+                    class="w-14 h-14 rounded-full flex items-center justify-center"
+                    [style.background]="role.color + '15'"
+                  >
                     <span class="material-symbols-outlined text-3xl" [style.color]="role.color">{{ role.icon }}</span>
                   </div>
                   <h3 class="font-semibold text-base-content">{{ role.label }}</h3>
@@ -62,11 +65,16 @@ interface RoleOption {
       animation: fadeIn 0.3s ease-out;
     }
     @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
   `,
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class SelectRole implements OnInit {
   private route = inject(ActivatedRoute);
@@ -119,7 +127,9 @@ export default class SelectRole implements OnInit {
     const schoolId = this.schoolId();
 
     if (roleId === 'STUDENT') {
-      this.router.navigate(['/onboarding/verify-student'], { queryParams: { schoolId, schoolName: this.schoolName() } });
+      this.router.navigate(['/onboarding/verify-student'], {
+        queryParams: { schoolId, schoolName: this.schoolName() },
+      });
     } else if (roleId === 'PARENT') {
       this.router.navigate(['/onboarding/verify-parent'], { queryParams: { schoolId, schoolName: this.schoolName() } });
     } else {

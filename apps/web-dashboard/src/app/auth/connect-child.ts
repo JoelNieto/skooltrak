@@ -1,28 +1,29 @@
-import { Component, signal, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { HttpClient } from '@angular/common/http';
-import { Router, RouterLink } from '@angular/router';
 import { Toast } from '#/ui';
+import { HttpClient } from '@angular/common/http';
+import { Component, OnInit, signal } from '@angular/core';
+import { Router, RouterLink } from '@angular/router';
+import { firstValueFrom } from 'rxjs';
 import Auth from './auth';
 
 @Component({
   selector: 'app-connect-child',
-  standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [RouterLink],
   template: `
     <div class="min-h-screen flex items-center justify-center bg-base-200 p-4">
       <div class="card w-full max-w-md bg-base-100 shadow-xl">
         <div class="card-body items-center text-center">
           <span class="material-symbols-outlined text-4xl" [class.text-primary]="!error()" [class.text-error]="error()">
-            {{ error() ? 'error' : (loading() ? 'hourglass_top' : 'child_care') }}
+            {{ error() ? 'error' : loading() ? 'hourglass_top' : 'child_care' }}
           </span>
           <h2 class="card-title justify-center mt-2">{{ error() ? 'Error' : 'Vinculando estudiante...' }}</h2>
           <p class="text-base-content/70">
             {{ error() || 'Por favor espera mientras vinculamos al estudiante a tu cuenta.' }}
           </p>
-          <div class="card-actions justify-center mt-4" *ngIf="error() || !loading()">
-            <a routerLink="/login" class="btn btn-primary">Ir al inicio de sesión</a>
-          </div>
+          @if (error() || !loading()) {
+            <div class="card-actions justify-center mt-4">
+              <a routerLink="/login" class="btn btn-primary">Ir al inicio de sesión</a>
+            </div>
+          }
         </div>
       </div>
     </div>
@@ -68,7 +69,9 @@ export default class ConnectChild implements OnInit {
 
   async redeemAuthenticated(token: string) {
     try {
-      const res = await this.http.post<{ status: string; studentId: string }>('/api/v1/auth/child-connect/redeem', { token }).toPromise();
+      const res = await firstValueFrom(
+        this.http.post<{ status: string; studentId: string }>('/api/v1/auth/child-connect/redeem', { token }),
+      );
       if (res?.status === 'LINKED') {
         this.toast.showSuccess('Estudiante vinculado exitosamente');
         this.router.navigate(['/students', res.studentId]);

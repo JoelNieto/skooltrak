@@ -1,16 +1,5 @@
 import { httpResource } from '@angular/common/http';
-import {
-  ChangeDetectionStrategy,
-  Component,
-  computed,
-  effect,
-  ElementRef,
-  input,
-  model,
-  output,
-  signal,
-  viewChild,
-} from '@angular/core';
+import { Component, computed, effect, ElementRef, input, model, output, signal, viewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 export type Contact = {
   id: string;
@@ -120,7 +109,6 @@ export interface SelectedContact extends Contact {
       min-width: 20rem;
     }
   `,
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class Contacts {
   inputElement = viewChild.required<ElementRef<HTMLInputElement>>('inputElement');

@@ -1,9 +1,9 @@
 import { Calendar } from '#/ui';
 import { DatePipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, inject, input, signal } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Component, inject, input, signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
-import { HttpClient } from '@angular/common/http';
 import { map } from 'rxjs';
 import Auth from '../auth/auth';
 import Store from '../core/store';
@@ -36,7 +36,6 @@ import Store from '../core/store';
         }
       </div>
     </ng-template>`,
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class CourseAssignments {
   #http = inject(HttpClient);

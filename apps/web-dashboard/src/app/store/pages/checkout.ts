@@ -1,6 +1,6 @@
-import { Toast } from '#/ui';
 import { SchoolContext } from '#/shared';
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { Toast } from '#/ui';
+import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CartService } from '../cart.service';
@@ -9,7 +9,6 @@ import { StoreApiService } from '../store-api.service';
 @Component({
   selector: 'app-checkout',
   imports: [FormsModule],
-  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <h2 class="text-xl font-semibold mb-4">Pago (simulado)</h2>
     @if (!school.currentSchoolId()) {
@@ -34,9 +33,7 @@ import { StoreApiService } from '../store-api.service';
               </li>
             }
           </ul>
-          <p class="text-lg font-semibold pt-2 border-t border-base-300">
-            Total: {{ formatPrice(cart.subtotal()) }}
-          </p>
+          <p class="text-lg font-semibold pt-2 border-t border-base-300">Total: {{ formatPrice(cart.subtotal()) }}</p>
         </div>
         <div class="card bg-base-100 border border-base-200 shadow-sm">
           <div class="card-body gap-3">
@@ -52,12 +49,7 @@ import { StoreApiService } from '../store-api.service';
               <input type="checkbox" class="checkbox checkbox-primary" [(ngModel)]="simulateFail" />
               <span class="label-text">Simular pago fallido</span>
             </label>
-            <button
-              type="button"
-              class="btn btn-primary"
-              [disabled]="paying()"
-              (click)="pay()"
-            >
+            <button type="button" class="btn btn-primary" [disabled]="paying()" (click)="pay()">
               @if (paying()) {
                 Procesando…
               } @else {

@@ -1,6 +1,6 @@
 import { SchoolContext } from '#/shared';
 import { DatePipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, inject, input } from '@angular/core';
+import { Component, inject, input } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import { map } from 'rxjs';
@@ -9,7 +9,6 @@ import { StoreApiService } from '../store-api.service';
 @Component({
   selector: 'app-order-detail',
   imports: [RouterLink, DatePipe],
-  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <a [routerLink]="['..']" class="btn btn-ghost btn-sm mb-4">← Mis pedidos</a>
     @if (order.isLoading()) {
@@ -59,8 +58,7 @@ export default class OrderDetail {
 
   protected order = rxResource({
     params: () => ({ id: this.id() }),
-    stream: ({ params }) =>
-      this.api.storeOrder(params.id).pipe(map((o) => o ?? null)),
+    stream: ({ params }) => this.api.storeOrder(params.id).pipe(map((o) => o ?? null)),
   });
 
   protected formatPrice(price: unknown): string {

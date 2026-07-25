@@ -1,27 +1,16 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { EmptyState, PageHeader, StatCard } from '#/ui';
+import { Component } from '@angular/core';
 
 @Component({
   selector: 'app-student-schedule',
   imports: [EmptyState, PageHeader, StatCard],
   template: `
-    <lib-page-header
-      title="Agenda del estudiante"
-      subtitle="Calendario semanal y próximos hitos académicos."
-    />
+    <lib-page-header title="Agenda del estudiante" subtitle="Calendario semanal y próximos hitos académicos." />
 
     <div class="grid gap-4 md:grid-cols-3">
       <lib-stat-card label="Clases hoy" value="4" helper="Hasta las 14:30" />
-      <lib-stat-card
-        label="Tareas pendientes"
-        value="3"
-        helper="2 vencen esta semana"
-      />
-      <lib-stat-card
-        label="Próximos exámenes"
-        value="1"
-        helper="Matemáticas - viernes"
-      />
+      <lib-stat-card label="Tareas pendientes" value="3" helper="2 vencen esta semana" />
+      <lib-stat-card label="Próximos exámenes" value="1" helper="Matemáticas - viernes" />
     </div>
 
     <div class="mt-6 card border border-base-200 bg-base-100">
@@ -53,9 +42,7 @@ import { EmptyState, PageHeader, StatCard } from '#/ui';
     </div>
 
     <div class="mt-6">
-      <h2 class="text-lg font-semibold text-base-content mb-3">
-        Exámenes próximos
-      </h2>
+      <h2 class="text-lg font-semibold text-base-content mb-3">Exámenes próximos</h2>
       @if (upcomingExams.length === 0) {
         <lib-empty-state
           title="Sin evaluaciones próximas"
@@ -68,9 +55,7 @@ import { EmptyState, PageHeader, StatCard } from '#/ui';
             <div class="card border border-base-200 bg-base-100">
               <div class="card-body">
                 <p class="font-semibold text-base-content">{{ exam.title }}</p>
-                <p class="text-sm text-base-content/70">
-                  {{ exam.date }} · {{ exam.course }}
-                </p>
+                <p class="text-sm text-base-content/70">{{ exam.date }} · {{ exam.course }}</p>
               </div>
             </div>
           }
@@ -78,7 +63,6 @@ import { EmptyState, PageHeader, StatCard } from '#/ui';
       }
     </div>
   `,
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class StudentSchedule {
   schedule = [
@@ -112,6 +96,5 @@ export default class StudentSchedule {
     },
   ];
 
-  upcomingExams: Array<{ id: string; title: string; date: string; course: string }> =
-    [];
+  upcomingExams: Array<{ id: string; title: string; date: string; course: string }> = [];
 }

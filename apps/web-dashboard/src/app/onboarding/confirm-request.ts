@@ -1,6 +1,6 @@
 import { Toast } from '#/ui';
 import { HttpClient } from '@angular/common/http';
-import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, OnInit, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 
 @Component({
@@ -22,8 +22,8 @@ import { ActivatedRoute, Router } from '@angular/router';
           <div class="space-y-2">
             <h1 class="text-2xl md:text-3xl font-bold text-base-content">Confirmar Solicitud</h1>
             <p class="text-base-content/70">
-              Estás solicitando unirte a <strong>{{ schoolName() }}</strong> como
-              <strong>{{ roleLabel() }}</strong>.
+              Estás solicitando unirte a <strong>{{ schoolName() }}</strong> como <strong>{{ roleLabel() }}</strong
+              >.
             </p>
             <p class="text-base-content/50 text-sm">
               El administrador de la escuela recibirá tu solicitud y deberá aprobarla.
@@ -54,11 +54,16 @@ import { ActivatedRoute, Router } from '@angular/router';
       animation: fadeIn 0.3s ease-out;
     }
     @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
   `,
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class ConfirmRequest implements OnInit {
   private route = inject(ActivatedRoute);

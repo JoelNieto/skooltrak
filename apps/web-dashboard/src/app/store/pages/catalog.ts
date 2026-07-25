@@ -1,15 +1,14 @@
 import { SchoolContext } from '#/shared';
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
+import { rxResource } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { rxResource } from '@angular/core/rxjs-interop';
 import { map, of } from 'rxjs';
 import { StoreApiService } from '../store-api.service';
 
 @Component({
   selector: 'app-store-catalog',
   imports: [RouterLink, FormsModule],
-  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     @if (!schoolId()) {
       <div class="alert alert-warning">
@@ -26,12 +25,7 @@ import { StoreApiService } from '../store-api.service';
           (ngModelChange)="search.set($event)"
         />
         <div class="flex flex-wrap gap-2">
-          <button
-            type="button"
-            class="btn btn-sm"
-            [class.btn-primary]="!categoryId()"
-            (click)="categoryId.set(null)"
-          >
+          <button type="button" class="btn btn-sm" [class.btn-primary]="!categoryId()" (click)="categoryId.set(null)">
             Todos
           </button>
           @for (c of categories.value(); track c.id) {
@@ -95,9 +89,7 @@ export default class Catalog {
     params: () => ({ schoolId: this.schoolContext.currentSchoolId() }),
     stream: ({ params }) => {
       if (!params.schoolId) return of([]);
-      return this.api.publicStoreCategories(params.schoolId).pipe(
-        map((rows) => (Array.isArray(rows) ? rows : [])),
-      );
+      return this.api.publicStoreCategories(params.schoolId).pipe(map((rows) => (Array.isArray(rows) ? rows : [])));
     },
   });
 

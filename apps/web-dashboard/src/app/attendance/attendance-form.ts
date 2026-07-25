@@ -1,10 +1,10 @@
 import { Loader, Toast, markGroupDirty } from '#/ui';
 import { NgClass } from '@angular/common';
-import { ChangeDetectionStrategy, Component, computed, inject, input, output, signal } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Component, computed, inject, input, output, signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { FormArray, FormGroup, NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Prisma } from '@generated/prisma';
-import { HttpClient } from '@angular/common/http';
 import { map, of, tap } from 'rxjs';
 
 type StudentType = Prisma.StudentGetPayload<{ include: { classGroup: true } }>;
@@ -182,7 +182,6 @@ const STATUS_OPTIONS = [
       </div>
     </form>
   `,
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class AttendanceForm {
   public data = input<{

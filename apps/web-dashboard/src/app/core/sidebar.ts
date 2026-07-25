@@ -1,6 +1,6 @@
 import { Confirmation } from '#/ui';
 import { HttpClient } from '@angular/common/http';
-import { afterRenderEffect, ChangeDetectionStrategy, Component, EnvironmentInjector, computed, inject } from '@angular/core';
+import { afterRenderEffect, Component, computed, EnvironmentInjector, inject } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { forkJoin, map, of, switchMap, timer } from 'rxjs';
@@ -444,8 +444,6 @@ type SidebarSchool = {
       </div>
     </div>
   </div>`,
-  styles: ``,
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Sidebar {
   protected readonly auth = inject(Auth);
@@ -488,16 +486,12 @@ export class Sidebar {
 
   protected unreadCount = rxResource({
     injector: this.#injector,
-    stream: () =>
-      timer(0, 60000).pipe(
-        switchMap(() => this.#http.get<number>('/api/v1/messages/unread-count')),
-      ),
+    stream: () => timer(0, 60000).pipe(switchMap(() => this.#http.get<number>('/api/v1/messages/unread-count'))),
   });
 
   protected chatUnreadCount = rxResource({
     injector: this.#injector,
-    stream: () =>
-      timer(0, 60000).pipe(switchMap(() => this.#http.get<number>('/api/v1/chats/unread-count'))),
+    stream: () => timer(0, 60000).pipe(switchMap(() => this.#http.get<number>('/api/v1/chats/unread-count'))),
   });
 
   protected storeCartCount = rxResource({

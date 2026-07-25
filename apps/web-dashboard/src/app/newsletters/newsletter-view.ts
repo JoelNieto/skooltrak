@@ -1,6 +1,6 @@
 import { DatePipe } from '@angular/common';
 import { httpResource } from '@angular/common/http';
-import { ChangeDetectionStrategy, Component, input, ViewEncapsulation } from '@angular/core';
+import { Component, input, ViewEncapsulation } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { isValidId } from '../core/validators';
 
@@ -37,33 +37,33 @@ type NewsletterDetail = {
       </div>
     } @else if (newsletter.value(); as item) {
       @if (item?.id) {
-      <article class="mx-auto max-w-3xl">
-        <header class="mb-8">
-          <h1 class="text-3xl font-bold text-base-content">{{ item.title }}</h1>
-          <div class="mt-3 flex items-center gap-2 text-sm text-base-content/60">
-            <span class="material-symbols-outlined text-base">person</span>
-            <span>{{ item.author?.name }}</span>
-            <span class="mx-1">·</span>
-            <span class="material-symbols-outlined text-base">calendar_today</span>
-            <span>{{ item.publishedAt | date: 'longDate' }}</span>
-            <span class="mx-1">·</span>
-            <span class="material-symbols-outlined text-base">apartment</span>
-            <span>{{ item.school?.name }}</span>
+        <article class="mx-auto max-w-3xl">
+          <header class="mb-8">
+            <h1 class="text-3xl font-bold text-base-content">{{ item.title }}</h1>
+            <div class="mt-3 flex items-center gap-2 text-sm text-base-content/60">
+              <span class="material-symbols-outlined text-base">person</span>
+              <span>{{ item.author?.name }}</span>
+              <span class="mx-1">·</span>
+              <span class="material-symbols-outlined text-base">calendar_today</span>
+              <span>{{ item.publishedAt | date: 'longDate' }}</span>
+              <span class="mx-1">·</span>
+              <span class="material-symbols-outlined text-base">apartment</span>
+              <span>{{ item.school?.name }}</span>
+            </div>
+          </header>
+
+          <div class="prose prose-sm max-w-none newsletter-content" [innerHTML]="item.content"></div>
+
+          <div class="mt-10 pt-6 border-t border-base-300">
+            <a routerLink="/home" class="btn btn-ghost btn-sm">
+              <span class="material-symbols-outlined text-base">arrow_back</span>
+              Volver al inicio
+            </a>
           </div>
-        </header>
-
-        <div class="prose prose-sm max-w-none newsletter-content" [innerHTML]="item.content"></div>
-
-        <div class="mt-10 pt-6 border-t border-base-300">
-          <a routerLink="/home" class="btn btn-ghost btn-sm">
-            <span class="material-symbols-outlined text-base">arrow_back</span>
-            Volver al inicio
-          </a>
-        </div>
-      </article>
-    } @else {
-      <div>No se encontró el boletín</div>
-    }
+        </article>
+      } @else {
+        <div>No se encontró el boletín</div>
+      }
     }
   `,
   styles: `
@@ -133,7 +133,6 @@ type NewsletterDetail = {
     }
   `,
   encapsulation: ViewEncapsulation.None,
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class NewsletterView {
   public id = input.required<string>();

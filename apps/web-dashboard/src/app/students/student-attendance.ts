@@ -1,9 +1,9 @@
 import { Loader, PageHeader, StatCard } from '#/ui';
 import { DatePipe, NgClass } from '@angular/common';
-import { httpResource, HttpClient } from '@angular/common/http';
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { isValidId } from '../core/validators';
+import { HttpClient, httpResource } from '@angular/common/http';
+import { Component, inject } from '@angular/core';
 import Store from '../core/store';
+import { isValidId } from '../core/validators';
 
 type AttendanceRecordType = {
   id: string;
@@ -129,7 +129,6 @@ const STATUS_COLORS: Record<string, string> = {
       </div>
     </div>
   `,
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class StudentAttendance {
   #http = inject(HttpClient);

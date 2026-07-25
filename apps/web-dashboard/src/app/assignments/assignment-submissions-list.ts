@@ -1,6 +1,6 @@
 import { Toast } from '#/ui';
 import { HttpClient, httpResource } from '@angular/common/http';
-import { ChangeDetectionStrategy, Component, inject, input, signal } from '@angular/core';
+import { Component, inject, input, signal } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 
 @Component({
@@ -131,7 +131,6 @@ import { firstValueFrom } from 'rxjs';
       }
     </div>
   `,
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class AssignmentSubmissionsList {
   assignmentId = input.required<string>();

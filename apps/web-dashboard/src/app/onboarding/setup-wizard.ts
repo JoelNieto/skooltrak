@@ -1,7 +1,7 @@
 import { Toast } from '#/ui';
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
-import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
+import { Component, computed, inject, signal } from '@angular/core';
+import { Router } from '@angular/router';
 import Auth from '../auth/auth';
 
 // Step components
@@ -119,7 +119,6 @@ export type CreatedEntity = {
       </footer>
     </div>
   `,
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class SetupWizard {
   private router = inject(Router);

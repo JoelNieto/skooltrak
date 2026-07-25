@@ -1,6 +1,6 @@
 import { Confirmation, EmptyState, Paginator, TimeAgoPipe, Toast } from '#/ui';
-import { httpResource, HttpClient } from '@angular/common/http';
-import { ChangeDetectionStrategy, Component, computed, effect, inject, signal } from '@angular/core';
+import { HttpClient, httpResource } from '@angular/common/http';
+import { Component, computed, effect, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { filter, switchMap } from 'rxjs';
@@ -230,7 +230,6 @@ type MessageRecipientType = {
         </div>
       </div>
     </div> `,
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class Messages {
   #http = inject(HttpClient);

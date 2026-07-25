@@ -1,6 +1,6 @@
 import { SchoolContext } from '#/shared';
 import { Toast } from '#/ui';
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import { map, of } from 'rxjs';
@@ -9,7 +9,6 @@ import { StoreApiService } from '../store-api.service';
 @Component({
   selector: 'app-products-admin',
   imports: [RouterLink],
-  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="flex justify-between items-center mb-4">
       <h3 class="text-lg font-medium">Productos</h3>
@@ -76,9 +75,7 @@ export default class ProductsAdmin {
     params: () => ({ schoolId: this.school.currentSchoolId(), tick: this.listTick() }),
     stream: ({ params }) => {
       if (!params.schoolId) return of([]);
-      return this.api
-        .storeProductsAdmin(params.schoolId)
-        .pipe(map((rows) => (Array.isArray(rows) ? rows : [])));
+      return this.api.storeProductsAdmin(params.schoolId).pipe(map((rows) => (Array.isArray(rows) ? rows : [])));
     },
   });
 

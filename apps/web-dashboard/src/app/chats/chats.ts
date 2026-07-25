@@ -1,6 +1,6 @@
 import { EmptyState, Loader } from '#/ui';
 import { httpResource } from '@angular/common/http';
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { ChatType } from '@generated/prisma';
 import Auth from '../auth/auth';
@@ -93,7 +93,6 @@ type ChatRow = {
       }
     }
   `,
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class Chats {
   #auth = inject(Auth);

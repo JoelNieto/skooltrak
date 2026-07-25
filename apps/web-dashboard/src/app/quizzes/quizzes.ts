@@ -1,7 +1,7 @@
 import { Confirmation, Error, Loader, Toast } from '#/ui';
 import { DatePipe } from '@angular/common';
 import { HttpClient, httpResource } from '@angular/common/http';
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { filter, switchMap } from 'rxjs';
 import { StripHtmlPipe } from '../assignments/assignments';
@@ -83,13 +83,15 @@ type QuizListItem = {
           </tbody>
         </table>
       } @else if (quizzesResource.error()) {
-        <lib-error (retry)="quizzesResource.reload()" [description]="$safeNavigationMigration(quizzesResource.error()?.message)" />
+        <lib-error
+          (retry)="quizzesResource.reload()"
+          [description]="$safeNavigationMigration(quizzesResource.error()?.message)"
+        />
       } @else {
         <lib-loader />
       }
     </div>
   `,
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class Quizzes {
   public store = inject(Store);

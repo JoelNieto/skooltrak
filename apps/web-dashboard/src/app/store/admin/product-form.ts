@@ -1,23 +1,8 @@
 import { SchoolContext } from '#/shared';
 import { Toast } from '#/ui';
-import {
-  ChangeDetectionStrategy,
-  Component,
-  effect,
-  inject,
-  input,
-  signal,
-} from '@angular/core';
+import { Component, effect, inject, input, signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
-import {
-  applyEach,
-  form,
-  FormField,
-  maxLength,
-  min,
-  required,
-  submit,
-} from '@angular/forms/signals';
+import { applyEach, form, FormField, maxLength, min, required, submit } from '@angular/forms/signals';
 import { Router } from '@angular/router';
 import { firstValueFrom, map, of } from 'rxjs';
 import { StoreApiService } from '../store-api.service';
@@ -51,7 +36,6 @@ function emptyStoreProductForm(): StoreProductFormModel {
 @Component({
   selector: 'app-product-form',
   imports: [FormField],
-  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <h3 class="text-lg font-medium mb-4">{{ id() ? 'Editar producto' : 'Nuevo producto' }}</h3>
     @if (!school.currentSchoolId()) {
@@ -64,11 +48,7 @@ function emptyStoreProductForm(): StoreProductFormModel {
         </label>
         <label class="form-control">
           <span class="label-text">Descripción</span>
-          <textarea
-            class="textarea textarea-bordered"
-            [formField]="productForm.description"
-            rows="3"
-          ></textarea>
+          <textarea class="textarea textarea-bordered" [formField]="productForm.description" rows="3"></textarea>
         </label>
         <label class="form-control">
           <span class="label-text">Categoría</span>
@@ -181,9 +161,7 @@ export default class ProductForm {
     params: () => ({ schoolId: this.school.currentSchoolId() }),
     stream: ({ params }) => {
       if (!params.schoolId) return of([]);
-      return this.api
-        .storeCategoriesAdmin(params.schoolId)
-        .pipe(map((rows) => (Array.isArray(rows) ? rows : [])));
+      return this.api.storeCategoriesAdmin(params.schoolId).pipe(map((rows) => (Array.isArray(rows) ? rows : [])));
     },
   });
 

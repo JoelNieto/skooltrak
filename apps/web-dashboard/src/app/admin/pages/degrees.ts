@@ -2,11 +2,11 @@ import { Confirmation, Modal, Paginator, Toast } from '#/ui';
 import { Menu, MenuContent, MenuItem, MenuTrigger } from '@angular/aria/menu';
 import { OverlayModule } from '@angular/cdk/overlay';
 import { DatePipe } from '@angular/common';
-import { httpResource, HttpClient } from '@angular/common/http';
-import { ChangeDetectionStrategy, Component, computed, effect, inject, signal, viewChild } from '@angular/core';
+import { HttpClient, httpResource } from '@angular/common/http';
+import { Component, computed, effect, inject, signal, viewChild } from '@angular/core';
 import { filter, switchMap } from 'rxjs';
-import Store from '../../core/store';
 import { toFetchQueryRecord } from '../../core/fetch-query-params';
+import Store from '../../core/store';
 import DegreesForm from '../forms/degrees-form';
 
 type DegreeRow = {
@@ -108,7 +108,6 @@ type DegreeRow = {
         />
       </div>
     </div>`,
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class Degrees {
   #http = inject(HttpClient);

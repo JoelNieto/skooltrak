@@ -1,4 +1,4 @@
-import { afterRenderEffect, ChangeDetectionStrategy, Component, DestroyRef, ElementRef, inject, viewChild } from '@angular/core';
+import { afterRenderEffect, Component, DestroyRef, ElementRef, inject, viewChild } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { filter } from 'rxjs';
@@ -50,8 +50,6 @@ import { ThemeService } from './theme.service';
       </main>
     </div>
   </div> `,
-  styles: ``,
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class Dashboard {
   public sidebarOverlay = viewChild.required<ElementRef<HTMLDivElement>>('sidebarOverlay');

@@ -1,15 +1,6 @@
 import { Loader, Toast } from '#/ui';
 import { HttpClient } from '@angular/common/http';
-import {
-  afterRenderEffect,
-  ChangeDetectionStrategy,
-  Component,
-  computed,
-  inject,
-  input,
-  signal,
-  viewChild,
-} from '@angular/core';
+import { afterRenderEffect, Component, computed, inject, input, signal, viewChild } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { form, FormField, required, submit } from '@angular/forms/signals';
 import { Router, RouterLink } from '@angular/router';
@@ -442,7 +433,6 @@ interface SchoolFormData {
       </form>
     }
   `,
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class SchoolForm {
   public id = input<string>();
@@ -702,7 +692,14 @@ export default class SchoolForm {
           this.toasts.showSuccess('Colegio actualizado exitosamente');
           if (this.store.currentSchool()?.id === this.id()) {
             this.store.currentSchool.update((s) =>
-              s ? { ...s, primaryColor: formValue.primaryColor ?? null, secondaryColor: formValue.secondaryColor ?? null, tertiaryColor: formValue.tertiaryColor ?? null } : s
+              s
+                ? {
+                    ...s,
+                    primaryColor: formValue.primaryColor ?? null,
+                    secondaryColor: formValue.secondaryColor ?? null,
+                    tertiaryColor: formValue.tertiaryColor ?? null,
+                  }
+                : s,
             );
           }
           this.router.navigate(['/schools', this.id()]);

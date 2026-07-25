@@ -1,7 +1,7 @@
 import { DecimalToNumber, Modal } from '#/ui';
 import { DecimalPipe, NgClass } from '@angular/common';
 import { httpResource } from '@angular/common/http';
-import { afterRenderEffect, ChangeDetectionStrategy, Component, computed, inject, input, signal } from '@angular/core';
+import { afterRenderEffect, Component, computed, inject, input, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { Prisma } from '@generated/prisma';
@@ -117,7 +117,6 @@ export type StudentType = {
         </tbody>
       </table>
     </div>`,
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class CourseGrades {
   public courseId = input.required<string>();

@@ -1,6 +1,6 @@
 import { markGroupDirty, Toast } from '#/ui';
-import { httpResource, HttpClient } from '@angular/common/http';
-import { ChangeDetectionStrategy, Component, computed, inject, output, signal } from '@angular/core';
+import { HttpClient, httpResource } from '@angular/common/http';
+import { Component, computed, inject, output, signal } from '@angular/core';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import Store from '../../core/store';
 
@@ -66,7 +66,6 @@ import Store from '../../core/store';
       }
     }
   `,
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class SchoolBasicsStep {
   private fb = inject(NonNullableFormBuilder);

@@ -1,6 +1,6 @@
-import { Toast } from '#/ui';
 import { SchoolContext } from '#/shared';
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { Toast } from '#/ui';
+import { Component, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { CartLine, CartService } from '../cart.service';
 import { StoreApiService } from '../store-api.service';
@@ -8,7 +8,6 @@ import { StoreApiService } from '../store-api.service';
 @Component({
   selector: 'app-cart-page',
   imports: [RouterLink],
-  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <h2 class="text-xl font-semibold mb-4">Carrito</h2>
     @if (!school.currentSchoolId()) {
@@ -40,14 +39,20 @@ import { StoreApiService } from '../store-api.service';
                 <td>{{ formatPrice($safeNavigationMigration(line.product?.price)) }}</td>
                 <td>
                   <div class="join">
-                    <button type="button" class="btn btn-sm join-item" (click)="setQty(line, (line.quantity ?? 0) - 1)">−</button>
+                    <button type="button" class="btn btn-sm join-item" (click)="setQty(line, (line.quantity ?? 0) - 1)">
+                      −
+                    </button>
                     <span class="btn btn-sm join-item no-animation">{{ line.quantity }}</span>
-                    <button type="button" class="btn btn-sm join-item" (click)="setQty(line, (line.quantity ?? 0) + 1)">+</button>
+                    <button type="button" class="btn btn-sm join-item" (click)="setQty(line, (line.quantity ?? 0) + 1)">
+                      +
+                    </button>
                   </div>
                 </td>
                 <td>{{ formatPrice(lineSubtotal(line)) }}</td>
                 <td>
-                  <button type="button" class="btn btn-ghost btn-sm text-error" (click)="remove(line.id!)">Quitar</button>
+                  <button type="button" class="btn btn-ghost btn-sm text-error" (click)="remove(line.id!)">
+                    Quitar
+                  </button>
                 </td>
               </tr>
             }
@@ -80,10 +85,7 @@ export default class CartPage {
     }).format(Number(price));
   }
 
-  protected lineSubtotal(line: {
-    quantity?: number | null;
-    product?: { price?: unknown } | null;
-  }): number {
+  protected lineSubtotal(line: { quantity?: number | null; product?: { price?: unknown } | null }): number {
     return Number(line.product?.price ?? 0) * (line.quantity ?? 0);
   }
 
@@ -95,27 +97,25 @@ export default class CartPage {
     }
     const cartItemId = line.id;
     if (!cartItemId) return;
-    this.api
-      .updateStoreCartItem({ cartItemId, quantity: q })
-      .subscribe({
-        next: () => this.cart.invalidate(),
-        error: (e: Error) => this.toast.showError(e.message),
-      });
+    this.api.updateStoreCartItem({ cartItemId, quantity: q }).subscribe({
+      next: () => this.cart.invalidate(),
+      error: (e: Error) => this.toast.showError(e.message),
+    });
   }
 
   protected remove(id: string) {
     this.api.removeStoreCartItem(id).subscribe({
-        next: () => this.cart.invalidate(),
-        error: (e: Error) => this.toast.showError(e.message),
-      });
+      next: () => this.cart.invalidate(),
+      error: (e: Error) => this.toast.showError(e.message),
+    });
   }
 
   protected clear() {
     const sid = this.school.currentSchoolId();
     if (!sid) return;
     this.api.clearStoreCart(sid).subscribe({
-        next: () => this.cart.invalidate(),
-        error: (e: Error) => this.toast.showError(e.message),
-      });
+      next: () => this.cart.invalidate(),
+      error: (e: Error) => this.toast.showError(e.message),
+    });
   }
 }

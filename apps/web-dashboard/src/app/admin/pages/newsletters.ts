@@ -1,15 +1,15 @@
 import { Confirmation, Pagination, Paginator, Toast } from '#/ui';
 import { Menu, MenuContent, MenuItem, MenuTrigger } from '@angular/aria/menu';
 import { OverlayModule } from '@angular/cdk/overlay';
-import { HttpClient } from '@angular/common/http';
 import { DatePipe } from '@angular/common';
-import { afterRenderEffect, ChangeDetectionStrategy, Component, inject, signal, viewChild } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { afterRenderEffect, Component, inject, signal, viewChild } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { filter, forkJoin, map, switchMap, tap } from 'rxjs';
-import Store from '../../core/store';
 import { toFetchQueryParams } from '../../core/fetch-query-params';
+import Store from '../../core/store';
 
 type NewsletterItem = {
   id: string;
@@ -205,7 +205,6 @@ type NewsletterItem = {
       </div>
     }
   `,
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class Newsletters {
   #http = inject(HttpClient);
@@ -216,20 +215,19 @@ export default class Newsletters {
   searchText = signal('');
   actionsMenu = viewChild<Menu<string>>('actionsMenu');
 
-  private enrichAuthorName(n: {
-    author?: {
-      name?: string | null;
-      firstName?: string | null;
-      lastName?: string | null;
-      id: string;
-    };
-    school: { id: string; name: string };
-  } & Omit<NewsletterItem, 'author'>): NewsletterItem {
+  private enrichAuthorName(
+    n: {
+      author?: {
+        name?: string | null;
+        firstName?: string | null;
+        lastName?: string | null;
+        id: string;
+      };
+      school: { id: string; name: string };
+    } & Omit<NewsletterItem, 'author'>,
+  ): NewsletterItem {
     const a = n.author;
-    const name =
-      a?.name?.trim() ||
-      [a?.firstName, a?.lastName].filter(Boolean).join(' ').trim() ||
-      '—';
+    const name = a?.name?.trim() || [a?.firstName, a?.lastName].filter(Boolean).join(' ').trim() || '—';
     return {
       ...n,
       author: { id: a?.id ?? '', name },

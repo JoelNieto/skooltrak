@@ -1,6 +1,6 @@
 import { markGroupDirty, Toast } from '#/ui';
-import { ChangeDetectionStrategy, Component, computed, inject, input, output, signal } from '@angular/core';
-import { httpResource, HttpClient } from '@angular/common/http';
+import { HttpClient, httpResource } from '@angular/common/http';
+import { Component, computed, inject, input, output, signal } from '@angular/core';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import Store from '../../core/store';
 import { CreatedEntity } from '../setup-wizard';
@@ -122,7 +122,6 @@ import { CreatedEntity } from '../setup-wizard';
       }
     }
   `,
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class DegreesStep {
   private fb = inject(NonNullableFormBuilder);
@@ -139,10 +138,7 @@ export default class DegreesStep {
   public addAnother = false;
 
   // Fetch schools to get the first one if not in store
-  public schools = httpResource<Array<{ id: string; name: string }>>(
-    () => '/api/v1/schools',
-    { defaultValue: [] },
-  );
+  public schools = httpResource<Array<{ id: string; name: string }>>(() => '/api/v1/schools', { defaultValue: [] });
 
   // Get the school ID from store or first school from API
   public schoolId = computed(() => {

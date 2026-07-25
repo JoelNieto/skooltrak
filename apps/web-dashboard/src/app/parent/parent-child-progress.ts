@@ -1,6 +1,6 @@
 import { PageHeader, StatCard } from '#/ui';
-import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { Component, inject, OnInit, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { ParentContext } from './parent-context.service';
 
@@ -25,9 +25,7 @@ interface GradeRow {
 
     @if (!child()) {
       <div class="mt-6 card border border-base-200 bg-base-100">
-        <div class="card-body text-base-content/70">
-          Selecciona un hijo desde el portal para ver su progreso.
-        </div>
+        <div class="card-body text-base-content/70">Selecciona un hijo desde el portal para ver su progreso.</div>
       </div>
     } @else {
       <div class="grid gap-4 md:grid-cols-3">
@@ -73,7 +71,6 @@ interface GradeRow {
       </div>
     }
   `,
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class ParentChildProgress implements OnInit {
   private http = inject(HttpClient);
@@ -91,44 +88,40 @@ export default class ParentChildProgress implements OnInit {
       this.loading.set(false);
       return;
     }
-    this.http
-      .get<any[]>(`/api/v1/students/${selected.studentId}/grades`)
-      .subscribe({
-        next: (courses) => {
-          const rows: GradeRow[] = [];
-          let total = 0;
-          let count = 0;
-          for (const course of courses ?? []) {
-            const subject = course?.subject?.name ?? course?.name ?? 'Materia';
-            const studentGrades = (course?.grades ?? [])
-              .flatMap((g: any) => g?.studentGrades ?? [])
-              .filter((sg: any) => sg?.studentId === selected.studentId);
-            const scores = studentGrades
-              .map((sg: any) => parseFloat(sg?.score))
-              .filter((n: number) => !isNaN(n));
-            if (scores.length > 0) {
-              const avg = scores.reduce((a: number, b: number) => a + b, 0) / scores.length;
-              total += avg;
-              count += 1;
-              const note = studentGrades.find((sg: any) => sg?.comment)?.comment ?? '';
-              rows.push({
-                id: course.id,
-                subject,
-                score: avg.toFixed(1),
-                note,
-              });
-            } else {
-              rows.push({ id: course.id, subject, score: '—', note: '' });
-            }
+    this.http.get<any[]>(`/api/v1/students/${selected.studentId}/grades`).subscribe({
+      next: (courses) => {
+        const rows: GradeRow[] = [];
+        let total = 0;
+        let count = 0;
+        for (const course of courses ?? []) {
+          const subject = course?.subject?.name ?? course?.name ?? 'Materia';
+          const studentGrades = (course?.grades ?? [])
+            .flatMap((g: any) => g?.studentGrades ?? [])
+            .filter((sg: any) => sg?.studentId === selected.studentId);
+          const scores = studentGrades.map((sg: any) => parseFloat(sg?.score)).filter((n: number) => !isNaN(n));
+          if (scores.length > 0) {
+            const avg = scores.reduce((a: number, b: number) => a + b, 0) / scores.length;
+            total += avg;
+            count += 1;
+            const note = studentGrades.find((sg: any) => sg?.comment)?.comment ?? '';
+            rows.push({
+              id: course.id,
+              subject,
+              score: avg.toFixed(1),
+              note,
+            });
+          } else {
+            rows.push({ id: course.id, subject, score: '—', note: '' });
           }
-          this.rows.set(rows);
-          this.average.set(count > 0 ? (total / count).toFixed(1) : '—');
-          this.loading.set(false);
-        },
-        error: () => {
-          this.loading.set(false);
-        },
-      });
+        }
+        this.rows.set(rows);
+        this.average.set(count > 0 ? (total / count).toFixed(1) : '—');
+        this.loading.set(false);
+      },
+      error: () => {
+        this.loading.set(false);
+      },
+    });
   }
 
   back() {

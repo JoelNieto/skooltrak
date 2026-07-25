@@ -1,10 +1,10 @@
 import { debounceSignal, EmptyState, Loader, Pagination, Paginator } from '#/ui';
 import { httpResource } from '@angular/common/http';
-import { ChangeDetectionStrategy, Component, computed, effect, inject, Signal, signal } from '@angular/core';
+import { Component, computed, effect, inject, Signal, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import Store from '../core/store';
 import { toFetchQueryRecord } from '../core/fetch-query-params';
+import Store from '../core/store';
 
 type CourseRow = {
   id: string;
@@ -90,8 +90,6 @@ type CourseRow = {
       />
     </div>
   `,
-  styles: ``,
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class Courses {
   #store = inject(Store);

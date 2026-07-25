@@ -1,11 +1,11 @@
 import { EmptyState, PageHeader, StatCard, Toast } from '#/ui';
-import { httpResource } from '@angular/common/http';
 import { DatePipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, computed, effect, inject, signal } from '@angular/core';
+import { httpResource } from '@angular/common/http';
+import { Component, computed, effect, inject, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
+import { toFetchQueryRecord } from './core/fetch-query-params';
 import Store from './core/store';
 import { LinkedChild, ParentContext } from './parent/parent-context.service';
-import { toFetchQueryRecord } from './core/fetch-query-params';
 
 type InboxRow = {
   id: string;
@@ -36,17 +36,10 @@ type ParentMeResponse = {
   selector: 'app-parent-home',
   imports: [DatePipe, RouterLink, PageHeader, StatCard, EmptyState],
   template: `
-    <lib-page-header
-      title="Dashboard de padres"
-      subtitle="Resumen del progreso de tus hijos."
-    />
+    <lib-page-header title="Dashboard de padres" subtitle="Resumen del progreso de tus hijos." />
 
     <div class="grid gap-4 md:grid-cols-3">
-      <lib-stat-card
-        label="Hijos vinculados"
-        [value]="children().length.toString()"
-        helper="En tus escuelas"
-      />
+      <lib-stat-card label="Hijos vinculados" [value]="children().length.toString()" helper="En tus escuelas" />
       <lib-stat-card
         label="Mensajes nuevos"
         [value]="(recentMessages.value()?.length ?? 0).toString()"
@@ -158,7 +151,6 @@ type ParentMeResponse = {
       }
     </div>
   `,
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class ParentHome {
   #store = inject(Store);

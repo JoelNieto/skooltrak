@@ -1,7 +1,7 @@
 import { Toast } from '#/ui';
-import { ChangeDetectionStrategy, Component, inject, OnDestroy, OnInit, signal } from '@angular/core';
-import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
+import { Component, inject, OnDestroy, OnInit, signal } from '@angular/core';
+import { Router } from '@angular/router';
 import Auth from '../auth/auth';
 
 @Component({
@@ -80,11 +80,16 @@ import Auth from '../auth/auth';
       animation: fadeIn 0.3s ease-out;
     }
     @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
   `,
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class WaitingApproval implements OnInit, OnDestroy {
   private http = inject(HttpClient);

@@ -1,7 +1,7 @@
 import { Loader } from '#/ui';
 import { DatePipe } from '@angular/common';
 import { httpResource } from '@angular/common/http';
-import { ChangeDetectionStrategy, Component, inject, input } from '@angular/core';
+import { Component, inject, input } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import Auth from '../auth/auth';
 import { isValidId } from '../core/validators';
@@ -198,7 +198,6 @@ type TeacherView = any;
     } @loading (after 100ms; minimum 1s) {
       <lib-loader />
     }`,
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class Teacher {
   public id = input.required<string>();

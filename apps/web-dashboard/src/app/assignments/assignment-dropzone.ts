@@ -1,11 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  computed,
-  input,
-  output,
-  signal,
-} from '@angular/core';
+import { Component, computed, input, output, signal } from '@angular/core';
 
 export type UploadedFile = {
   file: File;
@@ -112,7 +105,6 @@ export type UploadedFile = {
       <p class="text-error text-sm mt-2">{{ error() }}</p>
     }
   `,
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class AssignmentDropzone {
   accept = input<string>('');
@@ -209,9 +201,7 @@ export default class AssignmentDropzone {
   }
 
   removeFile(uploadedFile: UploadedFile) {
-    this.files.update((current) =>
-      current.filter((f) => f !== uploadedFile)
-    );
+    this.files.update((current) => current.filter((f) => f !== uploadedFile));
     this.filesChange.emit(this.files());
   }
 
@@ -224,14 +214,10 @@ export default class AssignmentDropzone {
   getFileIcon(mimeType: string): string {
     if (mimeType.includes('pdf')) return 'picture_as_pdf';
     if (mimeType.includes('image')) return 'image';
-    if (mimeType.includes('word') || mimeType.includes('document'))
-      return 'description';
-    if (mimeType.includes('spreadsheet') || mimeType.includes('excel'))
-      return 'table_chart';
-    if (mimeType.includes('presentation') || mimeType.includes('powerpoint'))
-      return 'slideshow';
-    if (mimeType.includes('zip') || mimeType.includes('rar'))
-      return 'folder_zip';
+    if (mimeType.includes('word') || mimeType.includes('document')) return 'description';
+    if (mimeType.includes('spreadsheet') || mimeType.includes('excel')) return 'table_chart';
+    if (mimeType.includes('presentation') || mimeType.includes('powerpoint')) return 'slideshow';
+    if (mimeType.includes('zip') || mimeType.includes('rar')) return 'folder_zip';
     if (mimeType.includes('video')) return 'movie';
     if (mimeType.includes('audio')) return 'audio_file';
     return 'insert_drive_file';

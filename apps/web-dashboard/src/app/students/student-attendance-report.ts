@@ -1,7 +1,7 @@
 import { Loader, StatCard } from '#/ui';
 import { DatePipe, NgClass } from '@angular/common';
 import { httpResource } from '@angular/common/http';
-import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { Component, input } from '@angular/core';
 import { isValidId } from '../core/validators';
 
 type AttendanceRecordType = {
@@ -65,29 +65,19 @@ const STATUS_COLORS: Record<string, string> = {
           [value]="stats.present.toString()"
           [helper]="stats.presentPercentage + '% del total'"
         />
-        <lib-stat-card
-          label="Tardanzas"
-          [value]="stats.late.toString()"
-          helper="Total acumulado"
-        />
+        <lib-stat-card label="Tardanzas" [value]="stats.late.toString()" helper="Total acumulado" />
         <lib-stat-card
           label="Faltas"
           [value]="stats.absent.toString()"
           [helper]="stats.absentPercentage + '% del total'"
         />
-        <lib-stat-card
-          label="Permisos"
-          [value]="(stats.sickLeave + stats.excused).toString()"
-          helper="Justificadas"
-        />
+        <lib-stat-card label="Permisos" [value]="(stats.sickLeave + stats.excused).toString()" helper="Justificadas" />
       </div>
     }
 
     <div class="card border border-base-200 bg-base-100">
       <div class="card-body">
-        <h2 class="text-lg font-semibold text-base-content">
-          Historial de asistencia
-        </h2>
+        <h2 class="text-lg font-semibold text-base-content">Historial de asistencia</h2>
 
         @if (recordsResource.isLoading()) {
           <lib-loader />
@@ -138,7 +128,6 @@ const STATUS_COLORS: Record<string, string> = {
       </div>
     </div>
   `,
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class StudentAttendanceReport {
   public studentId = input.required<string>();

@@ -1,5 +1,5 @@
 import { SchoolContext } from '#/shared';
-import { ChangeDetectionStrategy, Component, inject, input } from '@angular/core';
+import { Component, inject, input } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import { map } from 'rxjs';
@@ -8,7 +8,6 @@ import { StoreApiService } from '../store-api.service';
 @Component({
   selector: 'app-order-confirmation',
   imports: [RouterLink],
-  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="max-w-lg mx-auto text-center space-y-4 py-8">
       <span class="material-symbols-outlined text-6xl text-success">check_circle</span>
@@ -33,8 +32,7 @@ export default class OrderConfirmation {
 
   protected order = rxResource({
     params: () => ({ id: this.id() }),
-    stream: ({ params }) =>
-      this.api.storeOrder(params.id).pipe(map((o) => o ?? null)),
+    stream: ({ params }) => this.api.storeOrder(params.id).pipe(map((o) => o ?? null)),
   });
 
   protected formatPrice(price: unknown): string {

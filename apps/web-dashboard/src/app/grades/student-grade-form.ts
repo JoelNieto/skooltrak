@@ -1,18 +1,7 @@
 import { markGroupDirty, Toast } from '#/ui';
-import {
-  afterRenderEffect,
-  ChangeDetectionStrategy,
-  Component,
-  inject,
-  input,
-  output,
-} from '@angular/core';
-import {
-  NonNullableFormBuilder,
-  ReactiveFormsModule,
-  Validators,
-} from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
+import { afterRenderEffect, Component, inject, input, output } from '@angular/core';
+import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Prisma } from '@generated/prisma';
 
 type Decimal = InstanceType<typeof Prisma.Decimal>;
@@ -24,34 +13,18 @@ type Decimal = InstanceType<typeof Prisma.Decimal>;
     <div class="flex flex-col gap-3">
       <div class="fieldset">
         <label for="score">Calificacion</label>
-        <input
-          type="number"
-          formControlName="score"
-          id="score"
-          class="input input-primary"
-        />
+        <input type="number" formControlName="score" id="score" class="input input-primary" />
       </div>
       <div class="fieldset">
         <label for="comments">Comentarios</label>
-        <textarea
-          formControlName="comments"
-          id="comments"
-          class="textarea textarea-primary"
-        ></textarea>
+        <textarea formControlName="comments" id="comments" class="textarea textarea-primary"></textarea>
       </div>
     </div>
     <div class="flex justify-end gap-2 mt-2">
-      <button
-        type="button"
-        class="btn btn-ghost"
-        (click)="closeModal.emit(false)"
-      >
-        Cancelar
-      </button>
+      <button type="button" class="btn btn-ghost" (click)="closeModal.emit(false)">Cancelar</button>
       <button type="submit" class="btn btn-primary">Guardar</button>
     </div>
   </form>`,
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class StudentGradeForm {
   public data = input.required<{

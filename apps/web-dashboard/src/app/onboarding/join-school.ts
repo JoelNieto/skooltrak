@@ -1,7 +1,7 @@
 import { Loader, Toast } from '#/ui';
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
-import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
+import { Component, inject, signal } from '@angular/core';
+import { Router } from '@angular/router';
 
 type AvailableSchool = {
   id: string;
@@ -54,16 +54,16 @@ type AvailableSchool = {
                   (click)="selectSchool(school)"
                 >
                   <div class="card-body flex-row items-center gap-4">
-                    <div
-                      class="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center shrink-0"
-                    >
+                    <div class="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
                       <span class="material-symbols-outlined text-2xl text-primary">school</span>
                     </div>
                     <div class="flex-1 min-w-0">
                       <h3 class="font-semibold text-base-content truncate">{{ school.name }}</h3>
                       <p class="text-sm text-base-content/60">{{ school.organizationName ?? '' }}</p>
                       @if (school.city) {
-                        <p class="text-xs text-base-content/40">{{ school.city }}{{ school.country ? ', ' + school.country : '' }}</p>
+                        <p class="text-xs text-base-content/40">
+                          {{ school.city }}{{ school.country ? ', ' + school.country : '' }}
+                        </p>
                       }
                     </div>
                     <span class="material-symbols-outlined text-base-content/30">chevron_right</span>
@@ -93,11 +93,16 @@ type AvailableSchool = {
       animation: fadeIn 0.3s ease-out;
     }
     @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
   `,
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class JoinSchool {
   private http = inject(HttpClient);
@@ -126,23 +131,23 @@ export default class JoinSchool {
     }
 
     this.loading.set(true);
-    this.http
-      .get<AvailableSchool[]>('/api/v1/auth/available-schools', { params: { query: term } })
-      .subscribe({
-        next: (schools) => {
-          this.schools.set(schools ?? []);
-          this.filteredSchools.set(schools ?? []);
-          this.loading.set(false);
-        },
-        error: (err) => {
-          this.loading.set(false);
-          this.toasts.showError(err.message || 'Error al buscar escuelas');
-        },
-      });
+    this.http.get<AvailableSchool[]>('/api/v1/auth/available-schools', { params: { query: term } }).subscribe({
+      next: (schools) => {
+        this.schools.set(schools ?? []);
+        this.filteredSchools.set(schools ?? []);
+        this.loading.set(false);
+      },
+      error: (err) => {
+        this.loading.set(false);
+        this.toasts.showError(err.message || 'Error al buscar escuelas');
+      },
+    });
   }
 
   public selectSchool(school: AvailableSchool) {
-    this.router.navigate(['/onboarding/select-role'], { queryParams: { schoolId: school.id, schoolName: school.name } });
+    this.router.navigate(['/onboarding/select-role'], {
+      queryParams: { schoolId: school.id, schoolName: school.name },
+    });
   }
 
   public goBack() {

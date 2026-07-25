@@ -1,9 +1,9 @@
 import { Loader, PageHeader, StatCard } from '#/ui';
 import { DatePipe } from '@angular/common';
 import { httpResource } from '@angular/common/http';
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { isValidId } from '../core/validators';
+import { Component, inject } from '@angular/core';
 import Store from '../core/store';
+import { isValidId } from '../core/validators';
 
 type StudentBalanceType = {
   studentId: string;
@@ -32,10 +32,7 @@ type PaymentType = {
   selector: 'app-student-finances',
   imports: [Loader, PageHeader, StatCard, DatePipe],
   template: `
-    <lib-page-header
-      title="Estado de cuenta"
-      subtitle="Resumen de cargos, pagos y saldo."
-    />
+    <lib-page-header title="Estado de cuenta" subtitle="Resumen de cargos, pagos y saldo." />
 
     @if (balanceResource.isLoading()) {
       <div class="flex justify-center py-8">
@@ -46,16 +43,8 @@ type PaymentType = {
     @if (balanceResource.hasValue()) {
       @let bal = balanceResource.value()!;
       <div class="grid gap-4 md:grid-cols-3">
-        <lib-stat-card
-          label="Total cargos"
-          [value]="formatCurrency(bal.totalCharges)"
-          helper="Cargos registrados"
-        />
-        <lib-stat-card
-          label="Total pagos"
-          [value]="formatCurrency(bal.totalPayments)"
-          helper="Pagos realizados"
-        />
+        <lib-stat-card label="Total cargos" [value]="formatCurrency(bal.totalCharges)" helper="Cargos registrados" />
+        <lib-stat-card label="Total pagos" [value]="formatCurrency(bal.totalPayments)" helper="Pagos realizados" />
         <lib-stat-card
           label="Saldo"
           [value]="formatCurrency(bal.balance)"
@@ -92,16 +81,27 @@ type PaymentType = {
                       <td>{{ c.dueDate | date: 'shortDate' }}</td>
                       <td>{{ formatCurrency(c.amount) }}</td>
                       <td>
-                        <span class="badge badge-sm" [class.badge-success]="c.status === 'PAID'" [class.badge-warning]="c.status === 'PENDING'" [class.badge-error]="c.status === 'OVERDUE'">
-                          {{ c.status === 'PAID' ? 'Pagado' : c.status === 'PENDING' ? 'Pendiente' : c.status === 'OVERDUE' ? 'Vencido' : c.status }}
+                        <span
+                          class="badge badge-sm"
+                          [class.badge-success]="c.status === 'PAID'"
+                          [class.badge-warning]="c.status === 'PENDING'"
+                          [class.badge-error]="c.status === 'OVERDUE'"
+                        >
+                          {{
+                            c.status === 'PAID'
+                              ? 'Pagado'
+                              : c.status === 'PENDING'
+                                ? 'Pendiente'
+                                : c.status === 'OVERDUE'
+                                  ? 'Vencido'
+                                  : c.status
+                          }}
                         </span>
                       </td>
                     </tr>
                   } @empty {
                     <tr>
-                      <td colspan="4" class="text-center py-6 text-base-content/60">
-                        No hay cargos
-                      </td>
+                      <td colspan="4" class="text-center py-6 text-base-content/60">No hay cargos</td>
                     </tr>
                   }
                 </tbody>
@@ -138,9 +138,7 @@ type PaymentType = {
                     </tr>
                   } @empty {
                     <tr>
-                      <td colspan="3" class="text-center py-6 text-base-content/60">
-                        No hay pagos registrados
-                      </td>
+                      <td colspan="3" class="text-center py-6 text-base-content/60">No hay pagos registrados</td>
                     </tr>
                   }
                 </tbody>
@@ -151,7 +149,6 @@ type PaymentType = {
       </div>
     </div>
   `,
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class StudentFinances {
   #store = inject(Store);

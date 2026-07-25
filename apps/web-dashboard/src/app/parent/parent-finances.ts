@@ -1,6 +1,6 @@
 import { Loader, PageHeader } from '#/ui';
 import { httpResource } from '@angular/common/http';
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import Store from '../core/store';
 
 type StudentFinancialSummaryType = {
@@ -16,10 +16,7 @@ type StudentFinancialSummaryType = {
   selector: 'app-parent-finances',
   imports: [Loader, PageHeader],
   template: `
-    <lib-page-header
-      title="Estado de cuenta"
-      subtitle="Resumen financiero de tus hijos."
-    />
+    <lib-page-header title="Estado de cuenta" subtitle="Resumen financiero de tus hijos." />
 
     @if (summaryResource.isLoading()) {
       <div class="flex justify-center py-8">
@@ -38,9 +35,7 @@ type StudentFinancialSummaryType = {
           @for (child of items; track child.studentId) {
             <div class="card border border-base-200 bg-base-100">
               <div class="card-body">
-                <h3 class="card-title text-base">
-                  {{ child.firstName }} {{ child.fatherName }}
-                </h3>
+                <h3 class="card-title text-base">{{ child.firstName }} {{ child.fatherName }}</h3>
                 <div class="mt-2 grid grid-cols-2 gap-2 text-sm">
                   <div>
                     <span class="text-base-content/60">Cargos:</span>
@@ -71,7 +66,6 @@ type StudentFinancialSummaryType = {
       }
     }
   `,
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class ParentFinances {
   #store = inject(Store);

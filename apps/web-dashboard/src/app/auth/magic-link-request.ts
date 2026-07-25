@@ -6,7 +6,6 @@ import { Router, RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-magic-link-request',
-  standalone: true,
   imports: [RouterLink, FormField],
   template: `
     <div class="min-h-screen flex items-center justify-center bg-base-200 p-4">

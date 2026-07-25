@@ -1,7 +1,7 @@
 import { Toast } from '#/ui';
 import { DatePipe } from '@angular/common';
 import { HttpClient, httpResource } from '@angular/common/http';
-import { ChangeDetectionStrategy, Component, inject, input, signal } from '@angular/core';
+import { Component, inject, input, signal } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import AssignmentDropzone, { UploadedFile } from './assignment-dropzone';
 
@@ -84,7 +84,6 @@ interface MySubmission {
       }
     </div>
   `,
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class AssignmentSubmissionForm {
   assignmentId = input.required<string>();

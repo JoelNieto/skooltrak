@@ -1,9 +1,9 @@
 import { PageHeader, Toast } from '#/ui';
-import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
-import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
+import { Component, inject, OnInit, signal } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { ParentContext, LinkedChild } from './parent-context.service';
+import { LinkedChild, ParentContext } from './parent-context.service';
 
 interface ParentMeResponse {
   id: string;
@@ -21,10 +21,7 @@ interface ParentMeResponse {
   selector: 'app-parent-portal',
   imports: [FormsModule, PageHeader],
   template: `
-    <lib-page-header
-      title="Portal de padres"
-      subtitle="Resumen rápido del progreso de tus hijos."
-    />
+    <lib-page-header title="Portal de padres" subtitle="Resumen rápido del progreso de tus hijos." />
 
     <div class="mt-6 card border border-base-200 bg-base-100">
       <div class="card-body">
@@ -68,9 +65,7 @@ interface ParentMeResponse {
         <div class="card w-full max-w-md bg-base-100">
           <div class="card-body">
             <h3 class="text-lg font-semibold text-base-content">Agregar hijo</h3>
-            <p class="text-sm text-base-content/70">
-              Ingresa el código de matrícula del estudiante.
-            </p>
+            <p class="text-sm text-base-content/70">Ingresa el código de matrícula del estudiante.</p>
 
             <input
               class="input input-bordered w-full mt-2 uppercase"
@@ -97,7 +92,6 @@ interface ParentMeResponse {
       </div>
     }
   `,
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class ParentPortal implements OnInit {
   private http = inject(HttpClient);

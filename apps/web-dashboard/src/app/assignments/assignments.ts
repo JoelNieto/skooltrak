@@ -1,6 +1,6 @@
 import { Error, Loader } from '#/ui';
 import { DatePipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, Pipe, PipeTransform, computed, inject, signal } from '@angular/core';
+import { Component, Pipe, PipeTransform, computed, inject, signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 
@@ -68,7 +68,9 @@ export class StripHtmlPipe implements PipeTransform {
             @for (item of list; track item.id) {
               <tr>
                 <td>
-                  <a [routerLink]="['/assignments', item.assignment.id]" class="link link-primary">{{ item.assignment.title }}</a>
+                  <a [routerLink]="['/assignments', item.assignment.id]" class="link link-primary">{{
+                    item.assignment.title
+                  }}</a>
                 </td>
                 <td class="max-w-[24rem] truncate">
                   {{ item.assignment.details | stripHtml }}
@@ -102,7 +104,6 @@ export class StripHtmlPipe implements PipeTransform {
         <lib-loader />
       }
     </div>`,
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class Assignments {
   private store = inject(Store);

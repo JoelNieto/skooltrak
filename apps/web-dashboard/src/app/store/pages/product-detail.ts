@@ -1,6 +1,6 @@
 import { SchoolContext } from '#/shared';
 import { Toast } from '#/ui';
-import { ChangeDetectionStrategy, Component, effect, inject, input, signal } from '@angular/core';
+import { Component, effect, inject, input, signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
@@ -11,7 +11,6 @@ import { StoreApiService } from '../store-api.service';
 @Component({
   selector: 'app-product-detail',
   imports: [RouterLink, FormsModule],
-  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <a routerLink="../.." class="btn btn-ghost btn-sm gap-1 mb-4">
       <span class="material-symbols-outlined">arrow_back</span>
@@ -81,8 +80,7 @@ export default class ProductDetail {
 
   protected product = rxResource({
     params: () => ({ id: this.id() }),
-    stream: ({ params }) =>
-      this.api.publicStoreProduct(params.id).pipe(map((p) => p ?? null)),
+    stream: ({ params }) => this.api.publicStoreProduct(params.id).pipe(map((p) => p ?? null)),
   });
 
   constructor() {
@@ -124,14 +122,12 @@ export default class ProductDetail {
       this.toast.showError('Stock insuficiente');
       return;
     }
-    this.api
-      .addToStoreCart({ variantId: vid, quantity: qty })
-      .subscribe({
-        next: () => {
-          this.toast.showSuccess('Añadido al carrito');
-          this.cart.invalidate();
-        },
-        error: (e: Error) => this.toast.showError(e.message),
-      });
+    this.api.addToStoreCart({ variantId: vid, quantity: qty }).subscribe({
+      next: () => {
+        this.toast.showSuccess('Añadido al carrito');
+        this.cart.invalidate();
+      },
+      error: (e: Error) => this.toast.showError(e.message),
+    });
   }
 }

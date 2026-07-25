@@ -1,12 +1,12 @@
 import { Loader, Toast } from '#/ui';
-import { afterRenderEffect, ChangeDetectionStrategy, Component, computed, inject, input, signal } from '@angular/core';
-import { httpResource, HttpClient } from '@angular/common/http';
+import { HttpClient, httpResource } from '@angular/common/http';
+import { afterRenderEffect, Component, computed, inject, input, signal } from '@angular/core';
 import { email, form, FormField, required, submit } from '@angular/forms/signals';
 import { Router, RouterLink } from '@angular/router';
 import { Prisma } from '@generated/prisma';
-import { isValidId } from '../core/validators';
 import { firstValueFrom } from 'rxjs';
 import Store from '../core/store';
+import { isValidId } from '../core/validators';
 
 type TeacherType = Prisma.TeacherGetPayload<{
   include: { user: true };
@@ -347,7 +347,6 @@ interface TeacherFormData {
       </form>
     }
   `,
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class TeacherForm {
   public id = input<string>();

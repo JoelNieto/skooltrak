@@ -1,5 +1,5 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { EmptyState, PageHeader } from '#/ui';
+import { Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
 @Component({
@@ -35,9 +35,7 @@ import { RouterLink } from '@angular/router';
             @for (event of events; track event.id) {
               <div class="border border-base-200 rounded-lg p-4">
                 <p class="font-semibold text-base-content">{{ event.title }}</p>
-                <p class="text-sm text-base-content/70">
-                  {{ event.date }} · {{ event.location }}
-                </p>
+                <p class="text-sm text-base-content/70">{{ event.date }} · {{ event.location }}</p>
               </div>
             }
           </div>
@@ -45,9 +43,7 @@ import { RouterLink } from '@angular/router';
       </div>
     </div>
   `,
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class EventsCalendar {
-  events: Array<{ id: string; title: string; date: string; location: string }> =
-    [];
+  events: Array<{ id: string; title: string; date: string; location: string }> = [];
 }

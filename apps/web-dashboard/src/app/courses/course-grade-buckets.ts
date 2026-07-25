@@ -1,6 +1,6 @@
 import { Modal } from '#/ui';
 import { httpResource } from '@angular/common/http';
-import { ChangeDetectionStrategy, Component, inject, input } from '@angular/core';
+import { Component, inject, input } from '@angular/core';
 import GradeBucketForm from './grade-buckets-form';
 @Component({
   selector: 'app-course-grade-buckets',
@@ -32,7 +32,6 @@ import GradeBucketForm from './grade-buckets-form';
       </table>
     </div>
   `,
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class CourseGradeBuckets {
   public courseId = input.required<string>();

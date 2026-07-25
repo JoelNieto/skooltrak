@@ -1,9 +1,9 @@
 import { debounceSignal, Loader, Modal, PageHeader, Toast } from '#/ui';
 import { DatePipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, inject, Signal, signal } from '@angular/core';
+import { HttpClient, httpResource } from '@angular/common/http';
+import { Component, inject, Signal, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { httpResource, HttpClient } from '@angular/common/http';
 import { toFetchQueryRecord } from '../core/fetch-query-params';
 import FileShareForm from './file-share-form';
 
@@ -186,7 +186,6 @@ type FileItem = {
       </div>
     </div>
   `,
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class FilesPage {
   #http = inject(HttpClient);
@@ -216,38 +215,34 @@ export default class FilesPage {
   }
 
   openFile(fileId: string) {
-    this.#http
-      .post<{ downloadUrl: string }>('/api/v1/files/download-url', { fileId })
-      .subscribe({
-        next: (result) => {
-          const url = result?.downloadUrl;
-          if (url) {
-            window.open(url, '_blank');
-          }
-        },
-        error: () => {
-          this.#toast.showError('Error al abrir el archivo');
-        },
-      });
+    this.#http.post<{ downloadUrl: string }>('/api/v1/files/download-url', { fileId }).subscribe({
+      next: (result) => {
+        const url = result?.downloadUrl;
+        if (url) {
+          window.open(url, '_blank');
+        }
+      },
+      error: () => {
+        this.#toast.showError('Error al abrir el archivo');
+      },
+    });
   }
 
   downloadFile(fileId: string) {
-    this.#http
-      .post<{ downloadUrl: string }>('/api/v1/files/download-url', { fileId })
-      .subscribe({
-        next: (result) => {
-          const url = result?.downloadUrl;
-          if (url) {
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = '';
-            link.click();
-          }
-        },
-        error: () => {
-          this.#toast.showError('Error al descargar el archivo');
-        },
-      });
+    this.#http.post<{ downloadUrl: string }>('/api/v1/files/download-url', { fileId }).subscribe({
+      next: (result) => {
+        const url = result?.downloadUrl;
+        if (url) {
+          const link = document.createElement('a');
+          link.href = url;
+          link.download = '';
+          link.click();
+        }
+      },
+      error: () => {
+        this.#toast.showError('Error al descargar el archivo');
+      },
+    });
   }
 
   openShareModal(file: FileItem) {

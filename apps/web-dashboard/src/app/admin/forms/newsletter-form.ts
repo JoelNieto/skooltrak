@@ -1,6 +1,6 @@
 import { TextEditor, Toast } from '#/ui';
 import { HttpClient, httpResource } from '@angular/common/http';
-import { afterRenderEffect, ChangeDetectionStrategy, Component, computed, inject, input, signal } from '@angular/core';
+import { afterRenderEffect, Component, computed, inject, input, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { form, FormField, required, submit } from '@angular/forms/signals';
 import { Router, RouterLink } from '@angular/router';
@@ -110,7 +110,6 @@ interface NewsletterDto {
       </div>
     </form>
   `,
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class NewsletterForm {
   public id = input<string>();

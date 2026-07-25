@@ -1,6 +1,6 @@
 import { Loader, Toast } from '#/ui';
-import { httpResource, HttpClient } from '@angular/common/http';
-import { afterRenderEffect, ChangeDetectionStrategy, Component, computed, inject, input, signal } from '@angular/core';
+import { HttpClient, httpResource } from '@angular/common/http';
+import { afterRenderEffect, Component, computed, inject, input, signal } from '@angular/core';
 import { email, form, FormField, required, submit } from '@angular/forms/signals';
 import { Router, RouterLink } from '@angular/router';
 import { Prisma } from '@generated/prisma';
@@ -324,11 +324,7 @@ interface StudentFormData {
                         Tipo de sangre
                         <span class="text-base-content/50 text-xs">(opcional)</span>
                       </label>
-                      <select
-                        id="bloodType"
-                        [formField]="studentForm.bloodType"
-                        class="select select-primary w-full"
-                      >
+                      <select id="bloodType" [formField]="studentForm.bloodType" class="select select-primary w-full">
                         <option value="">---Seleccionar---</option>
                         <option value="A+">A+</option>
                         <option value="A-">A-</option>
@@ -426,7 +422,6 @@ interface StudentFormData {
       </form>
     }
   `,
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class StudentForm {
   public id = input<string>();

@@ -1,6 +1,6 @@
 import { SchoolContext } from '#/shared';
 import { Toast } from '#/ui';
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { map, of } from 'rxjs';
@@ -9,7 +9,6 @@ import { StoreApiService } from '../store-api.service';
 @Component({
   selector: 'app-categories-admin',
   imports: [FormsModule],
-  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <h3 class="text-lg font-medium mb-4">Categorías</h3>
     @if (!school.currentSchoolId()) {
@@ -84,17 +83,17 @@ export default class CategoriesAdmin {
     stream: ({ params }) => {
       if (!params.schoolId) return of([]);
       return this.api.storeCategoriesAdmin(params.schoolId).pipe(
-          map((rows) => {
-            const list = Array.isArray(rows) ? rows : [];
-            for (const c of list) {
-              const id = c.id!;
-              if (this.editNames[id] === undefined) this.editNames[id] = c.name ?? '';
-              if (this.editOrder[id] === undefined) this.editOrder[id] = c.sortOrder ?? 0;
-              if (this.editActive[id] === undefined) this.editActive[id] = c.active ?? true;
-            }
-            return list;
-          }),
-        );
+        map((rows) => {
+          const list = Array.isArray(rows) ? rows : [];
+          for (const c of list) {
+            const id = c.id!;
+            if (this.editNames[id] === undefined) this.editNames[id] = c.name ?? '';
+            if (this.editOrder[id] === undefined) this.editOrder[id] = c.sortOrder ?? 0;
+            if (this.editActive[id] === undefined) this.editActive[id] = c.active ?? true;
+          }
+          return list;
+        }),
+      );
     },
   });
 
@@ -103,20 +102,18 @@ export default class CategoriesAdmin {
     const schoolId = this.school.currentSchoolId();
     console.log('schoolId', schoolId);
     if (!schoolId || !this.newName.trim()) return;
-    this.api
-      .createStoreCategory({ schoolId, name: this.newName.trim() })
-      .subscribe({
-        next: () => {
-          this.newName = '';
-          this.toast.showSuccess('Categoría creada');
-          this.tick.update((n) => n + 1);
-          console.log('created');
-        },
-        error: (e: Error) => {
-          this.toast.showError(e.message);
-          console.error(e);
-        },
-      });
+    this.api.createStoreCategory({ schoolId, name: this.newName.trim() }).subscribe({
+      next: () => {
+        this.newName = '';
+        this.toast.showSuccess('Categoría creada');
+        this.tick.update((n) => n + 1);
+        console.log('created');
+      },
+      error: (e: Error) => {
+        this.toast.showError(e.message);
+        console.error(e);
+      },
+    });
   }
 
   protected save(id: string) {

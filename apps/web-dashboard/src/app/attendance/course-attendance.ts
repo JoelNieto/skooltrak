@@ -3,7 +3,7 @@ import { Menu, MenuContent, MenuItem, MenuTrigger } from '@angular/aria/menu';
 import { OverlayModule } from '@angular/cdk/overlay';
 import { DatePipe, NgClass } from '@angular/common';
 import { HttpClient, httpResource } from '@angular/common/http';
-import { ChangeDetectionStrategy, Component, inject, input, signal, viewChild } from '@angular/core';
+import { Component, inject, input, signal, viewChild } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { Prisma } from '@generated/prisma';
@@ -263,7 +263,6 @@ const STATUS_COLORS: Record<string, string> = {
       </dialog>
     }
   `,
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class CourseAttendance {
   public courseId = input.required<string>();

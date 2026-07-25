@@ -88,8 +88,7 @@
     "@nx/angular:component": {
       "style": "css",
       "inlineStyle": true,
-      "inlineTemplate": true,
-      "changeDetection": "OnPush"
+      "inlineTemplate": true
     },
     "@nx/angular:library": {
       "linter": "eslint",

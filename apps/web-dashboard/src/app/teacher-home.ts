@@ -1,11 +1,11 @@
 import { EmptyState, PageHeader, StatCard } from '#/ui';
-import { httpResource } from '@angular/common/http';
 import { DatePipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { httpResource } from '@angular/common/http';
+import { Component, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { endOfWeek, startOfWeek } from 'date-fns';
-import Store from './core/store';
 import { toFetchQueryRecord } from './core/fetch-query-params';
+import Store from './core/store';
 
 type AssignmentRow = {
   id: string;
@@ -150,7 +150,6 @@ type PublishedNewsletter = {
       </div>
     }
   `,
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class TeacherHome {
   #store = inject(Store);

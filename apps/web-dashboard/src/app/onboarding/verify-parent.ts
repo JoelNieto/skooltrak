@@ -1,8 +1,8 @@
 import { Toast } from '#/ui';
-import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Component, inject, OnInit, signal } from '@angular/core';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { HttpClient } from '@angular/common/http';
 import Auth from '../auth/auth';
 
 @Component({
@@ -25,8 +25,8 @@ import Auth from '../auth/auth';
           <div class="space-y-2">
             <h1 class="text-2xl md:text-3xl font-bold text-base-content">Vincula a tu hijo/a</h1>
             <p class="text-base-content/70">
-              Ingresa el código de matrícula que te proporcionó la escuela. Tu cuenta quedará
-              vinculada de inmediato, sin esperar aprobación.
+              Ingresa el código de matrícula que te proporcionó la escuela. Tu cuenta quedará vinculada de inmediato,
+              sin esperar aprobación.
             </p>
           </div>
 
@@ -127,11 +127,16 @@ import Auth from '../auth/auth';
       animation: fadeIn 0.3s ease-out;
     }
     @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
   `,
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class VerifyParent implements OnInit {
   private fb = inject(NonNullableFormBuilder);
@@ -181,21 +186,19 @@ export default class VerifyParent implements OnInit {
       relationship: raw.relationship,
     };
 
-    this.http
-      .post<{ status?: string; message?: string }>('/api/v1/auth/link-child', payload)
-      .subscribe({
-        next: async (result) => {
-          this.loading.set(false);
-          this.toasts.showSuccess(result?.message || 'Cuenta vinculada exitosamente');
-          // Refresh user state so the guard sees onboardingStep = 'completed'
-          await this.auth.reloadUser();
-          this.router.navigate(['/home']);
-        },
-        error: (err) => {
-          this.loading.set(false);
-          this.errorMessage.set(err?.error?.message || err.message || 'Error al vincular la cuenta');
-        },
-      });
+    this.http.post<{ status?: string; message?: string }>('/api/v1/auth/link-child', payload).subscribe({
+      next: async (result) => {
+        this.loading.set(false);
+        this.toasts.showSuccess(result?.message || 'Cuenta vinculada exitosamente');
+        // Refresh user state so the guard sees onboardingStep = 'completed'
+        await this.auth.reloadUser();
+        this.router.navigate(['/home']);
+      },
+      error: (err) => {
+        this.loading.set(false);
+        this.errorMessage.set(err?.error?.message || err.message || 'Error al vincular la cuenta');
+      },
+    });
   }
 
   goBack() {

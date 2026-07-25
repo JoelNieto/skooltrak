@@ -1,6 +1,6 @@
 import { Loader, Toast } from '#/ui';
 import { HttpClient } from '@angular/common/http';
-import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, OnInit, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import Auth from './auth';
@@ -133,7 +133,6 @@ import Auth from './auth';
       </footer>
     </div>
   `,
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class VerifyEmail implements OnInit {
   private route = inject(ActivatedRoute);
@@ -181,7 +180,8 @@ export default class VerifyEmail implements OnInit {
       }
     } catch (err: unknown) {
       this.verifying.set(false);
-      const message = err instanceof Error ? err.message : 'Error al verificar el correo. El enlace puede haber expirado.';
+      const message =
+        err instanceof Error ? err.message : 'Error al verificar el correo. El enlace puede haber expirado.';
       this.error.set(message);
     }
   }

@@ -1,5 +1,5 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { EmptyState, PageHeader } from '#/ui';
+import { Component } from '@angular/core';
 
 @Component({
   selector: 'app-student-notifications',
@@ -31,9 +31,7 @@ import { EmptyState, PageHeader } from '#/ui';
     </div>
 
     <div class="mt-6">
-      <h2 class="text-lg font-semibold text-base-content mb-3">
-        Notificaciones archivadas
-      </h2>
+      <h2 class="text-lg font-semibold text-base-content mb-3">Notificaciones archivadas</h2>
       @if (archived.length === 0) {
         <lib-empty-state
           title="Sin notificaciones archivadas"
@@ -49,7 +47,6 @@ import { EmptyState, PageHeader } from '#/ui';
       }
     </div>
   `,
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class StudentNotifications {
   notifications = [

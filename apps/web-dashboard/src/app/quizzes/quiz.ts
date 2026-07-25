@@ -1,6 +1,6 @@
 import { Confirmation, EditorViewer, Error as ErrorComponent, Loader, Toast } from '#/ui';
 import { HttpClient, httpResource } from '@angular/common/http';
-import { ChangeDetectionStrategy, Component, inject, input } from '@angular/core';
+import { Component, inject, input } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { filter, switchMap } from 'rxjs';
 import Auth from '../auth/auth';
@@ -123,7 +123,10 @@ type QuizDetail = {
           </div>
         </div>
       } @else if (quizResource.error()) {
-        <lib-error (retry)="quizResource.reload()" [description]="$safeNavigationMigration(quizResource.error()?.message)" />
+        <lib-error
+          (retry)="quizResource.reload()"
+          [description]="$safeNavigationMigration(quizResource.error()?.message)"
+        />
       } @else {
         <div>No se encontró el quiz</div>
       }
@@ -133,7 +136,6 @@ type QuizDetail = {
       <lib-loader />
     }
   `,
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class Quiz {
   readonly QUESTION_TYPE_LABELS = QUESTION_TYPE_LABELS;

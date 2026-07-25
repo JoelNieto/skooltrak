@@ -1,9 +1,8 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { StoreThemeService } from './store-theme.service';
 
 @Component({
   selector: 'app-store-theme-toggle',
-  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="flex gap-1 p-2 rounded-lg bg-base-200/50" role="group" aria-label="Tema">
       <button

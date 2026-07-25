@@ -1,15 +1,8 @@
 import { SchoolContext } from '#/shared';
-import {
-  ChangeDetectionStrategy,
-  Component,
-  DestroyRef,
-  effect,
-  inject,
-  signal,
-} from '@angular/core';
+import { Component, DestroyRef, effect, inject, signal } from '@angular/core';
 import { rxResource, takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, RouterLink, RouterOutlet } from '@angular/router';
-import { catchError, filter, map, of, switchMap, distinctUntilChanged } from 'rxjs';
+import { catchError, distinctUntilChanged, filter, map, of, switchMap } from 'rxjs';
 import { CartService } from '../cart.service';
 import { StoreApiService } from '../store-api.service';
 import StoreThemeToggle from '../store-theme-toggle';
@@ -18,7 +11,6 @@ import { StoreThemeService } from '../store-theme.service';
 @Component({
   selector: 'app-store-layout',
   imports: [RouterOutlet, RouterLink, StoreThemeToggle],
-  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="layout-padding pb-10">
       <div class="breadcrumbs text-sm mb-4">
@@ -39,9 +31,7 @@ import { StoreThemeService } from '../store-theme.service';
               class="h-12 w-12 shrink-0 rounded-lg border border-base-300 bg-base-200 object-contain"
             />
           } @else {
-            <div
-              class="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary"
-            >
+            <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
               <span class="material-symbols-outlined text-2xl">apartment</span>
             </div>
           }
@@ -122,13 +112,8 @@ export default class StoreLayout {
   protected canManage = () => {
     const me = this.me.value();
     const roleName = me?.role?.name;
-    const perms =
-      me?.role?.permissions?.map((p: { descriptiveId: string }) => p.descriptiveId) ?? [];
-    return (
-      perms.includes('MANAGE_STORE') ||
-      roleName === 'ADMIN' ||
-      roleName === 'ORG_ADMIN'
-    );
+    const perms = me?.role?.permissions?.map((p: { descriptiveId: string }) => p.descriptiveId) ?? [];
+    return perms.includes('MANAGE_STORE') || roleName === 'ADMIN' || roleName === 'ORG_ADMIN';
   };
 
   protected cartCount = () => this.cartService.itemCount();

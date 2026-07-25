@@ -1,6 +1,7 @@
+import { writeAccessTokenToStorage } from '#/client-auth';
 import { Loader, markGroupDirty, Toast } from '#/ui';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, OnInit, signal } from '@angular/core';
 import {
   AbstractControl,
   FormGroup,
@@ -10,7 +11,6 @@ import {
   Validators,
 } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { writeAccessTokenToStorage } from '#/client-auth';
 import Auth from './auth';
 
 @Component({
@@ -361,7 +361,6 @@ import Auth from './auth';
       }
     }
   `,
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class Register implements OnInit {
   private fb = inject(NonNullableFormBuilder);

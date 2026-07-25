@@ -2,23 +2,15 @@ import { Confirmation, Pagination, Paginator, Toast } from '#/ui';
 import { Menu, MenuContent, MenuItem, MenuTrigger } from '@angular/aria/menu';
 import { OverlayModule } from '@angular/cdk/overlay';
 import { DatePipe } from '@angular/common';
-import {
-  afterRenderEffect,
-  ChangeDetectionStrategy,
-  Component,
-  inject,
-  signal,
-  viewChild,
-} from '@angular/core';
-import { effect } from '@angular/core';
+import { HttpClient, httpResource } from '@angular/common/http';
+import { afterRenderEffect, Component, effect, inject, signal, viewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { httpResource, HttpClient } from '@angular/common/http';
 import { Prisma } from '@generated/prisma';
 import { catchError, filter, of, switchMap } from 'rxjs';
 import Auth from '../auth/auth';
-import Store from '../core/store';
 import { toFetchQueryRecord } from '../core/fetch-query-params';
+import Store from '../core/store';
 type Teacher = Prisma.TeacherGetPayload<{ include: { user: true } }> & {
   name: string;
   initials: string;
@@ -177,7 +169,6 @@ type Teacher = Prisma.TeacherGetPayload<{ include: { user: true } }> & {
       </div>
     </div>
   `,
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class Teachers {
   public store = inject(Store);

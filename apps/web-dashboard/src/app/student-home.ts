@@ -1,7 +1,7 @@
 import { EmptyState, PageHeader, StatCard } from '#/ui';
 import { DatePipe, DecimalPipe } from '@angular/common';
 import { HttpClient, httpResource } from '@angular/common/http';
-import { afterRenderEffect, ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { afterRenderEffect, Component, computed, inject, signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import { endOfWeek, startOfWeek } from 'date-fns';
@@ -201,7 +201,6 @@ type StudentAssignmentRow = {
       </div>
     }
   `,
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class StudentHome {
   private http = inject(HttpClient);

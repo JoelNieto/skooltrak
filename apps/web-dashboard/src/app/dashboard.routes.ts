@@ -434,6 +434,12 @@ export const DASHBOARD_ROUTES: Route[] = [
             title: 'Solicitudes de ingreso | Skooltrak',
           },
           {
+            path: 'imports',
+            canActivate: [permissionGuard('MANAGE_STUDENTS')],
+            loadComponent: () => import('./admin/pages/imports'),
+            title: 'Importación masiva | Skooltrak',
+          },
+          {
             path: 'attendance-reporting',
             loadComponent: () => import('./admin/pages/attendance-reporting'),
           },

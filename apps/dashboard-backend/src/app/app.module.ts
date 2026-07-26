@@ -34,6 +34,7 @@ import { HabitEvaluationsModule } from './habit-evaluations/habit-evaluations.mo
 import { HabitMetricsModule } from './habit-metrics/habit-metrics.module';
 import { FinancialModule } from './financial/financial.module';
 import { StoreModule } from './store/store.module';
+import { ImportsModule } from './imports/imports.module';
 
 const openApiExport = process.env['OPENAPI_EXPORT'] === 'true';
 
@@ -71,6 +72,7 @@ const openApiExport = process.env['OPENAPI_EXPORT'] === 'true';
     GradeReportModule,
     FinancialModule,
     StoreModule,
+    ImportsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -81,8 +81,8 @@
     "uuid": "^13.0.0"
   },
   "devDependencies": {
-    "@analogjs/vite-plugin-angular": "2.6.3",
-    "@analogjs/vitest-angular": "2.6.3",
+    "@analogjs/vite-plugin-angular": "2.6.4",
+    "@analogjs/vitest-angular": "2.6.4",
     "@angular-devkit/core": "22.0.7",
     "@angular-devkit/schematics": "22.0.7",
     "@angular/build": "22.0.7",
@@ -109,7 +109,7 @@
     "@nx/workspace": "23.1.0",
     "@playwright/test": "^1.36.0",
     "@schematics/angular": "22.0.7",
-    "@swc-node/register": "1.12.0",
+    "@swc-node/register": "1.12.1",
     "@swc/core": "1.15.8",
     "@swc/helpers": "0.5.23",
     "@tailwindcss/postcss": "^4.1.14",
@@ -150,8 +150,8 @@
     "typescript-eslint": "8.64.0",
     "vite": "8.0.9",
     "vitest": "4.1.9",
-    "webpack": "5.108.4",
-    "webpack-cli": "7.2.1",
+    "webpack": "5.109.2",
+    "webpack-cli": "7.2.2",
     "webpack-dev-server": "5.2.6",
     "webpack-node-externals": "^3.0.0"
   },

@@ -2,7 +2,7 @@
 
 # environment variables
 .env
-.env.*
+.env.cloud
 
 # compiled output
 dist

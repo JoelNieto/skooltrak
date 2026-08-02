@@ -1,5 +1,5 @@
 import { SchoolContext } from '#/shared';
-import { computed, EnvironmentInjector, inject, Injectable, ResourceRef, signal } from '@angular/core';
+import { computed, EnvironmentInjector, inject, ResourceRef, Service, signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { map, of } from 'rxjs';
 import { StoreApiService } from './store-api.service';
@@ -11,7 +11,7 @@ export type CartLine = {
   variant?: { label?: string | null; stock?: number | null } | null;
 };
 
-@Injectable({ providedIn: 'root' })
+@Service()
 export class CartService {
   readonly #resourceInjector = inject(EnvironmentInjector);
   private readonly api = inject(StoreApiService);
@@ -33,9 +33,9 @@ export class CartService {
         if (!params.schoolId) {
           return of([]);
         }
-        return this.api.myStoreCart(params.schoolId).pipe(
-          map((rows) => (Array.isArray(rows) ? (rows as CartLine[]) : [])),
-        );
+        return this.api
+          .myStoreCart(params.schoolId)
+          .pipe(map((rows) => (Array.isArray(rows) ? (rows as CartLine[]) : [])));
       },
     });
   }

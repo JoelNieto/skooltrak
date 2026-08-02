@@ -1,4 +1,4 @@
-import { Injectable, signal } from '@angular/core';
+import { Service, signal } from '@angular/core';
 
 export interface LinkedChild {
   studentId: string;
@@ -14,7 +14,7 @@ export interface LinkedChild {
  * (progress, finances, communication) can scope data to that child's school/organization
  * in the federated (cross-organization) model.
  */
-@Injectable({ providedIn: 'root' })
+@Service()
 export class ParentContext {
   public readonly selectedChild = signal<LinkedChild | null>(null);
 

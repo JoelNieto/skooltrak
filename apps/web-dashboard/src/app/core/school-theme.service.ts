@@ -1,5 +1,5 @@
 import { isPlatformBrowser } from '@angular/common';
-import { effect, inject, Injectable, PLATFORM_ID } from '@angular/core';
+import { effect, inject, PLATFORM_ID, Service } from '@angular/core';
 import Store from './store';
 
 const THEME_VARS = [
@@ -30,9 +30,7 @@ function isValidHex(s: string | null | undefined): boolean {
   return /^#[0-9A-Fa-f]{3}([0-9A-Fa-f]{3})?$/.test(s) || /^#[0-9A-Fa-f]{6}$/.test(s);
 }
 
-@Injectable({
-  providedIn: 'root',
-})
+@Service()
 export class SchoolThemeService {
   private platformId = inject(PLATFORM_ID);
   private store = inject(Store);
@@ -47,7 +45,7 @@ export class SchoolThemeService {
   }
 
   private applySchoolTheme(
-    school: { primaryColor?: string | null; secondaryColor?: string | null; tertiaryColor?: string | null } | null
+    school: { primaryColor?: string | null; secondaryColor?: string | null; tertiaryColor?: string | null } | null,
   ): void {
     const root = document.documentElement;
 

@@ -1,16 +1,14 @@
+import { readAccessTokenFromStorage } from '#/client-auth';
 import { isPlatformBrowser } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { inject, Injectable, PLATFORM_ID, signal } from '@angular/core';
+import { inject, PLATFORM_ID, Service, signal } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
-import { readAccessTokenFromStorage } from '#/client-auth';
 
 export type StoreThemePreference = 'light' | 'dark' | 'system';
 
 const STORAGE_KEY = 'skooltrak-theme-preference';
 
-@Injectable({
-  providedIn: 'root',
-})
+@Service()
 export class StoreThemeService {
   private readonly platformId = inject(PLATFORM_ID);
   private readonly http = inject(HttpClient);
@@ -79,9 +77,7 @@ export class StoreThemeService {
     }
     if (readAccessTokenFromStorage()) {
       try {
-        await firstValueFrom(
-          this.http.patch('/api/v1/auth/me/theme', { themePreference: value }),
-        );
+        await firstValueFrom(this.http.patch('/api/v1/auth/me/theme', { themePreference: value }));
       } catch {
         // Theme still applied locally
       }

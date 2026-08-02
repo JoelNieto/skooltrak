@@ -1,5 +1,5 @@
 import { readAccessTokenFromStorage } from '#/client-auth';
-import { Injectable } from '@angular/core';
+import { Service } from '@angular/core';
 import { io, Socket } from 'socket.io-client';
 
 export type ChatMessageReceivedPayload = {
@@ -17,7 +17,7 @@ export type ChatMessageReceivedPayload = {
 type MessageHandler = (payload: ChatMessageReceivedPayload) => void;
 
 /** Singleton Socket.IO client for live chat message push (REST for send/history). */
-@Injectable({ providedIn: 'root' })
+@Service()
 export default class ChatSocketService {
   #socket: Socket | null = null;
   #joinedChats = new Set<string>();

@@ -1,6 +1,6 @@
 import { isPlatformBrowser } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { effect, inject, Injectable, PLATFORM_ID, signal } from '@angular/core';
+import { inject, PLATFORM_ID, Service, signal } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import Auth from '../auth/auth';
 
@@ -8,9 +8,7 @@ export type ThemePreference = 'light' | 'dark' | 'system';
 
 const STORAGE_KEY = 'skooltrak-theme-preference';
 
-@Injectable({
-  providedIn: 'root',
-})
+@Service()
 export class ThemeService {
   private platformId = inject(PLATFORM_ID);
   private http = inject(HttpClient);
@@ -82,9 +80,7 @@ export class ThemeService {
     }
     if (this.auth.isAuthenticated()) {
       try {
-        await firstValueFrom(
-          this.http.patch('/api/v1/auth/me/theme', { themePreference: value }),
-        );
+        await firstValueFrom(this.http.patch('/api/v1/auth/me/theme', { themePreference: value }));
         this.auth.reloadUser();
       } catch {
         // Silently ignore - theme is still applied locally

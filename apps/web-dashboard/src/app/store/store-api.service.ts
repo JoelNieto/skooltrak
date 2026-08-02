@@ -1,5 +1,5 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { inject, Injectable } from '@angular/core';
+import { inject, Service } from '@angular/core';
 import type { Observable } from 'rxjs';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -8,7 +8,7 @@ type Json = any;
 /**
  * REST client for dashboard store + auth session (replaces GraphQL store operations).
  */
-@Injectable({ providedIn: 'root' })
+@Service()
 export class StoreApiService {
   private readonly http = inject(HttpClient);
 
@@ -34,11 +34,7 @@ export class StoreApiService {
     });
   }
 
-  publicStoreProducts(
-    schoolId: string,
-    search?: string | null,
-    categoryId?: string | null,
-  ): Observable<Json[]> {
+  publicStoreProducts(schoolId: string, search?: string | null, categoryId?: string | null): Observable<Json[]> {
     let p = new HttpParams().set('schoolId', schoolId);
     if (search) p = p.set('search', search);
     if (categoryId) p = p.set('categoryId', categoryId);
@@ -61,11 +57,7 @@ export class StoreApiService {
     });
   }
 
-  storeProducts(
-    schoolId: string,
-    search?: string | null,
-    categoryId?: string | null,
-  ): Observable<Json[]> {
+  storeProducts(schoolId: string, search?: string | null, categoryId?: string | null): Observable<Json[]> {
     let p = new HttpParams().set('schoolId', schoolId);
     if (search) p = p.set('search', search);
     if (categoryId) p = p.set('categoryId', categoryId);

@@ -1,22 +1,12 @@
 import { Toast } from '#/ui';
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { isPlatformBrowser } from '@angular/common';
-import {
-  Injectable,
-  PLATFORM_ID,
-  computed,
-  effect,
-  inject,
-  linkedSignal,
-  signal,
-} from '@angular/core';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { PLATFORM_ID, Service, computed, effect, inject, linkedSignal, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { authClient } from './auth-client';
 
-@Injectable({
-  providedIn: 'root',
-})
+@Service()
 export default class Auth {
   private platformId = inject(PLATFORM_ID);
   private http = inject(HttpClient);
@@ -97,11 +87,7 @@ export default class Auth {
 
     try {
       const res = await firstValueFrom(
-        this.http.post<{ accessToken: string }>(
-          '/api/v1/auth/login',
-          { email, password },
-          { withCredentials: true },
-        ),
+        this.http.post<{ accessToken: string }>('/api/v1/auth/login', { email, password }, { withCredentials: true }),
       );
 
       const accessToken = res?.accessToken;

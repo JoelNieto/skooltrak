@@ -1,5 +1,5 @@
 import { SchoolContext } from '#/shared';
-import { effect, Injectable, computed, inject, signal } from '@angular/core';
+import { computed, effect, inject, Service, signal } from '@angular/core';
 import { Prisma } from '@generated/prisma';
 import Auth from '../auth/auth';
 
@@ -14,9 +14,7 @@ export type CurrentSchool = Omit<BaseSchool, 'primaryColor' | 'secondaryColor' |
   tertiaryColor?: string | null;
 };
 
-@Injectable({
-  providedIn: 'root',
-})
+@Service()
 export default class Store {
   private auth = inject(Auth);
   private schoolContext = inject(SchoolContext);

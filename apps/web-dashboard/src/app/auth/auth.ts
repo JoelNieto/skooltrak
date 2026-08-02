@@ -1,7 +1,7 @@
 import { Toast } from '#/ui';
 import { isPlatformBrowser } from '@angular/common';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { computed, effect, inject, Injectable, linkedSignal, PLATFORM_ID, signal } from '@angular/core';
+import { computed, effect, inject, linkedSignal, PLATFORM_ID, Service, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { authClient } from './auth-client';
@@ -15,9 +15,7 @@ export type DecodedToken = {
   exp: number;
 };
 
-@Injectable({
-  providedIn: 'root',
-})
+@Service()
 export default class Auth {
   private platformId = inject(PLATFORM_ID);
   private router = inject(Router);

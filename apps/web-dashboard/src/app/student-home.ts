@@ -141,9 +141,10 @@ type StudentAssignmentRow = {
             } @else if (gradeReportResource.hasValue() && gradeReportResource.value(); as report) {
               <div class="flex flex-col gap-2">
                 <p class="text-sm text-base-content/70">Periodo: {{ report.periodName || 'Selecciona un periodo' }}</p>
-                @if (report.overallGradesRow?.cumulativeAverage != null) {
+                @let cumulativeAverage = report.overallGradesRow?.cumulativeAverage;
+                @if (cumulativeAverage !== null && cumulativeAverage !== undefined) {
                   <p class="text-lg font-bold text-base-content">
-                    Promedio general: {{ report.overallGradesRow!.cumulativeAverage! | number: '1.1-1' }}
+                    Promedio general: {{ cumulativeAverage | number: '1.1-1' }}
                   </p>
                 } @else {
                   <p class="text-sm text-base-content/70">No hay calificaciones publicadas para este periodo.</p>

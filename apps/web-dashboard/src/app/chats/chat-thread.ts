@@ -188,7 +188,7 @@ export default class ChatThread {
       if (chat?.id) {
         this.http.patch(`/api/v1/chats/${chat.id}/read`, {}).subscribe({
           next: () => this.http.get<number>('/api/v1/chats/unread-count').subscribe(),
-          error: () => {},
+          error: () => undefined,
         });
       }
     });

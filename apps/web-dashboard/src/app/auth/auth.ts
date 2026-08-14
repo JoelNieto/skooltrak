@@ -152,7 +152,7 @@ export default class Auth {
   }
 
   #clearStoredCredentialsAfterAuthFailure(): void {
-    void authClient.signOut().catch(() => {});
+    void authClient.signOut().catch(() => undefined);
     this.sessionState.set(null);
     this.token.set(null);
     if (isPlatformBrowser(this.platformId)) {

@@ -1,6 +1,6 @@
 import { Loader, PageHeader, StatCard } from '#/ui';
 import { DatePipe, NgClass } from '@angular/common';
-import { HttpClient, httpResource } from '@angular/common/http';
+import { httpResource } from '@angular/common/http';
 import { Component, inject } from '@angular/core';
 import Store from '../core/store';
 import { isValidId } from '../core/validators';
@@ -131,7 +131,6 @@ const STATUS_COLORS: Record<string, string> = {
   `,
 })
 export default class StudentAttendance {
-  #http = inject(HttpClient);
   #store = inject(Store);
 
   public statsResource = httpResource<AttendanceStatsType | null>(() => {

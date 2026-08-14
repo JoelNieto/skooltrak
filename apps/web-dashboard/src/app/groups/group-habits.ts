@@ -40,10 +40,15 @@ type StudentEvaluation = {
         <!-- Selectors -->
         <div class="grid grid-cols-2 gap-4">
           <div class="form-control">
-            <label class="label">
+            <label class="label" for="habits-period">
               <span class="label-text">Período</span>
             </label>
-            <select class="select select-bordered" [(ngModel)]="selectedPeriodId" (ngModelChange)="onSelectionChange()">
+            <select
+              id="habits-period"
+              class="select select-bordered"
+              [(ngModel)]="selectedPeriodId"
+              (ngModelChange)="onSelectionChange()"
+            >
               <option [value]="null" disabled selected>Seleccione un período</option>
               @for (period of periods.value(); track period.id) {
                 <option [value]="period.id">{{ period.name }} - {{ period.year }}</option>
@@ -52,10 +57,15 @@ type StudentEvaluation = {
           </div>
 
           <div class="form-control">
-            <label class="label">
+            <label class="label" for="habits-metric">
               <span class="label-text">Criterio de evaluación</span>
             </label>
-            <select class="select select-bordered" [(ngModel)]="selectedMetricId" (ngModelChange)="onSelectionChange()">
+            <select
+              id="habits-metric"
+              class="select select-bordered"
+              [(ngModel)]="selectedMetricId"
+              (ngModelChange)="onSelectionChange()"
+            >
               <option [value]="null" disabled selected>Seleccione un criterio</option>
               @for (metric of activeMetrics(); track metric.id) {
                 <option [value]="metric.id">{{ metric.name }}</option>

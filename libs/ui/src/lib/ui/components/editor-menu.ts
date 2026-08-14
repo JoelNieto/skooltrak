@@ -154,61 +154,61 @@ import { Component, input } from '@angular/core';
         <ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-50 w-56 p-2 shadow-lg">
           <li class="menu-title">Columnas</li>
           <li>
-            <a (click)="editor().chain().focus().addColumnBefore().run()">
+            <button type="button" (click)="editor().chain().focus().addColumnBefore().run()">
               <span class="material-symbols-outlined">arrow_back</span>
               Agregar antes
-            </a>
+            </button>
           </li>
           <li>
-            <a (click)="editor().chain().focus().addColumnAfter().run()">
+            <button type="button" (click)="editor().chain().focus().addColumnAfter().run()">
               <span class="material-symbols-outlined">arrow_forward</span>
               Agregar después
-            </a>
+            </button>
           </li>
           <li>
-            <a class="text-error" (click)="editor().chain().focus().deleteColumn().run()">
+            <button type="button" class="text-error" (click)="editor().chain().focus().deleteColumn().run()">
               <span class="material-symbols-outlined">remove</span>
               Eliminar columna
-            </a>
+            </button>
           </li>
           <li class="menu-title">Filas</li>
           <li>
-            <a (click)="editor().chain().focus().addRowBefore().run()">
+            <button type="button" (click)="editor().chain().focus().addRowBefore().run()">
               <span class="material-symbols-outlined">arrow_upward</span>
               Agregar antes
-            </a>
+            </button>
           </li>
           <li>
-            <a (click)="editor().chain().focus().addRowAfter().run()">
+            <button type="button" (click)="editor().chain().focus().addRowAfter().run()">
               <span class="material-symbols-outlined">arrow_downward</span>
               Agregar después
-            </a>
+            </button>
           </li>
           <li>
-            <a class="text-error" (click)="editor().chain().focus().deleteRow().run()">
+            <button type="button" class="text-error" (click)="editor().chain().focus().deleteRow().run()">
               <span class="material-symbols-outlined">remove</span>
               Eliminar fila
-            </a>
+            </button>
           </li>
           <li class="menu-title">Celdas</li>
           <li>
-            <a (click)="editor().chain().focus().mergeCells().run()">
+            <button type="button" (click)="editor().chain().focus().mergeCells().run()">
               <span class="material-symbols-outlined">call_merge</span>
               Combinar celdas
-            </a>
+            </button>
           </li>
           <li>
-            <a (click)="editor().chain().focus().splitCell().run()">
+            <button type="button" (click)="editor().chain().focus().splitCell().run()">
               <span class="material-symbols-outlined">call_split</span>
               Dividir celda
-            </a>
+            </button>
           </li>
           <div class="divider my-0"></div>
           <li>
-            <a class="text-error" (click)="editor().chain().focus().deleteTable().run()">
+            <button type="button" class="text-error" (click)="editor().chain().focus().deleteTable().run()">
               <span class="material-symbols-outlined">delete</span>
               Eliminar tabla
-            </a>
+            </button>
           </li>
         </ul>
       </div>

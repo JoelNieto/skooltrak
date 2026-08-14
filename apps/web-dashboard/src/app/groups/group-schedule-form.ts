@@ -154,11 +154,12 @@ export default class GroupScheduleForm {
     this.form.remoteLink().markAsDirty();
     submit(this.form, async () => {
       const schedule = { ...this.form().value(), classGroupId: this.data()?.groupId };
-      if (this.data()?.schedule) {
+      const existing = this.data()?.schedule;
+      if (existing) {
         this.#http
           .patch('/api/v1/groups-schedules', {
             ...schedule,
-            id: this.data()?.schedule?.id!,
+            id: existing.id,
           })
           .subscribe({
             next: () => {

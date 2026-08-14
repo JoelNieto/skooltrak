@@ -6,6 +6,7 @@ import { afterRenderEffect, Component, computed, inject, input, signal } from '@
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { $Enums } from '@generated/prisma';
+import * as QRCode from 'qrcode';
 import Auth from '../auth/auth';
 import Store from '../core/store';
 import { isValidId } from '../core/validators';
@@ -227,6 +228,58 @@ const ENROLLMENT_STATUS_COLORS: Record<$Enums.EnrollmentStatus, string> = {
                           </div>
                         </dd>
                       </div>
+                      @if (auth.hasPermission('MANAGE_STUDENTS')) {
+                        <div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
+                          <dt class="text-sm/6 font-medium text-base-content">Conexión de padres (QR)</dt>
+                          <dd class="mt-1 text-sm/6 text-base-content/90 sm:col-span-2 sm:mt-0">
+                            @if (connectQr(); as qr) {
+                              <div class="flex flex-col gap-2">
+                                <img
+                                  [src]="qr"
+                                  alt="Código QR de conexión"
+                                  class="h-40 w-40 rounded-lg border border-base-300 bg-white p-2"
+                                />
+                                <div class="flex items-center gap-2">
+                                  <button type="button" class="btn btn-sm btn-outline" (click)="copyConnectUrl()">
+                                    <span class="material-symbols-outlined text-lg">link</span>
+                                    Copiar enlace
+                                  </button>
+                                  <button
+                                    type="button"
+                                    class="btn btn-sm btn-ghost"
+                                    [disabled]="connectQrLoading()"
+                                    (click)="generateConnectQr()"
+                                  >
+                                    @if (connectQrLoading()) {
+                                      <span class="loading loading-spinner loading-sm"></span>
+                                    } @else {
+                                      <span class="material-symbols-outlined text-lg">refresh</span>
+                                    }
+                                    Regenerar
+                                  </button>
+                                </div>
+                                <span class="text-xs text-base-content/50">
+                                  El código es de un solo uso y expira en 30 días. Regenerarlo invalida el anterior.
+                                </span>
+                              </div>
+                            } @else {
+                              <button
+                                type="button"
+                                class="btn btn-sm btn-primary"
+                                [disabled]="connectQrLoading()"
+                                (click)="generateConnectQr()"
+                              >
+                                @if (connectQrLoading()) {
+                                  <span class="loading loading-spinner loading-sm"></span>
+                                } @else {
+                                  <span class="material-symbols-outlined text-lg">qr_code_2</span>
+                                }
+                                Generar QR de conexión
+                              </button>
+                            }
+                          </dd>
+                        </div>
+                      }
                     </dl>
                   </div>
 
@@ -457,6 +510,48 @@ export default class Student {
       this.toasts.showSuccess('Código copiado');
     } catch {
       this.toasts.showError('No se pudo copiar el código');
+    }
+  }
+
+  public connectQr = signal<string | null>(null);
+  public connectQrLoading = signal(false);
+  private connectUrl = signal<string | null>(null);
+
+  /** Issue a single-use QR child-connect token and render it client-side. */
+  public generateConnectQr() {
+    if (!isValidId(this.id())) return;
+    this.connectQrLoading.set(true);
+    this.http
+      .post<{ token: string; url: string }>('/api/v1/auth/child-connect/issue', {
+        studentId: this.id(),
+      })
+      .subscribe({
+        next: async ({ url }) => {
+          try {
+            const dataUrl = await QRCode.toDataURL(url, { width: 320, margin: 2 });
+            this.connectUrl.set(url);
+            this.connectQr.set(dataUrl);
+          } catch {
+            this.toasts.showError('No se pudo generar el código QR');
+          } finally {
+            this.connectQrLoading.set(false);
+          }
+        },
+        error: () => {
+          this.connectQrLoading.set(false);
+          this.toasts.showError('No se pudo generar el código de conexión');
+        },
+      });
+  }
+
+  public async copyConnectUrl() {
+    const url = this.connectUrl();
+    if (!url) return;
+    try {
+      await navigator.clipboard.writeText(url);
+      this.toasts.showSuccess('Enlace copiado');
+    } catch {
+      this.toasts.showError('No se pudo copiar el enlace');
     }
   }
 }

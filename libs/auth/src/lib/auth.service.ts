@@ -1,4 +1,11 @@
-import { HttpException, HttpStatus, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  HttpException,
+  HttpStatus,
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { randomUUID } from 'crypto';
 import * as jwt from 'jsonwebtoken';
@@ -22,6 +29,14 @@ const JOIN_REQUEST_LIMIT = 10;
 const JOIN_REQUEST_WINDOW_MS = 15 * 60 * 1000;
 const LINK_CHILD_LIMIT = 10;
 const LINK_CHILD_WINDOW_MS = 15 * 60 * 1000;
+
+/**
+ * Roles allowed to link a child as a parent. Only role-less self-service
+ * sign-ups (represented by a null role, handled separately) and existing
+ * PARENT accounts may link. Staff (ORG_ADMIN/TEACHER) and STUDENT accounts are
+ * blocked so they cannot demote themselves or create spurious parent profiles.
+ */
+const PARENT_LINKABLE_ROLES = new Set<string>(['PARENT']);
 
 @Injectable()
 export class AuthService {
@@ -903,6 +918,32 @@ export class AuthService {
   }
 
   /**
+   * Throws if `roleName` belongs to an account that must not link as a parent
+   * (staff/students). A `null`/`undefined` role (fresh self-service sign-up) or
+   * an existing PARENT is allowed.
+   */
+  private assertRoleCanLinkAsParent(roleName: string | null | undefined): void {
+    if (roleName && !PARENT_LINKABLE_ROLES.has(roleName)) {
+      throw new ForbiddenException(
+        'Tu cuenta no puede vincularse como padre/tutor. Usa una cuenta de padre/tutor para conectar a un estudiante.',
+      );
+    }
+  }
+
+  /**
+   * Fetch the user's current role and reject up-front if they are not allowed
+   * to link as a parent. Used before consuming a single-use connect token so a
+   * blocked account cannot burn a token meant for a real parent.
+   */
+  private async assertUserCanLinkAsParent(userId: string): Promise<void> {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { role: { select: { name: true } } },
+    });
+    this.assertRoleCanLinkAsParent(user?.role?.name);
+  }
+
+  /**
    * Shared parent-linking core used by both the enrollment-code path
    * (`linkChildByCode`) and the QR child-connect token path. Keeping the
    * logic in one place prevents the two flows from diverging.
@@ -931,8 +972,30 @@ export class AuthService {
 
     const user = await this.prisma.user.findUniqueOrThrow({
       where: { id: userId },
-      select: { firstName: true, lastName: true, email: true, organizationId: true, roleId: true },
+      select: {
+        firstName: true,
+        lastName: true,
+        email: true,
+        organizationId: true,
+        roleId: true,
+        role: { select: { name: true } },
+      },
     });
+
+    // Only users without a role yet (fresh self-service sign-ups) or existing
+    // parents should receive the PARENT role. Never demote an existing
+    // ORG_ADMIN / TEACHER / STUDENT just because they redeemed a child-connect
+    // link or enrollment code — the account keeps its role and simply gains the
+    // Parent link.
+    const currentRoleName = user.role?.name;
+
+    // Staff and students must not be able to link themselves as a parent.
+    // Their accounts have a dedicated purpose; a parent connection would either
+    // demote them or create a spurious Parent profile. Only role-less
+    // self-service sign-ups and existing parents may link a child.
+    this.assertRoleCanLinkAsParent(currentRoleName);
+
+    const shouldAssignParentRole = !user.roleId || currentRoleName === 'PARENT';
 
     const existingParent = await this.prisma.parent.findFirst({
       where: { userId, organizationId: orgId },
@@ -1019,7 +1082,7 @@ export class AuthService {
       await tx.user.update({
         where: { id: userId },
         data: {
-          roleId: parentRole.id,
+          ...(shouldAssignParentRole ? { roleId: parentRole.id } : {}),
           ...(user.organizationId ? {} : { organizationId: orgId }),
         },
       });
@@ -1668,6 +1731,10 @@ export class AuthService {
     opts?: { ip?: string },
   ): Promise<{ status: string; studentId: string; organizationId: string; schoolId: string }> {
     const ip = opts?.ip ?? 'unknown';
+
+    // Reject staff/students before consuming the single-use token, so a blocked
+    // account cannot burn a token intended for a real parent.
+    await this.assertUserCanLinkAsParent(userId);
 
     const limit = this.authTokens.hitRateLimit(`child-connect-redeem:${ip}`);
     if (!limit.allowed) {

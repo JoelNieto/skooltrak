@@ -31,8 +31,9 @@ import Store from '../../core/store';
               </label>
 
               <div class="flex flex-col gap-2">
-                <label class="block text-sm font-medium">Archivo CSV</label>
+                <label class="block text-sm font-medium" for="csv-file">Archivo CSV</label>
                 <input
+                  id="csv-file"
                   type="file"
                   accept=".csv,text/csv"
                   class="file-input file-input-bordered w-full max-w-xs"
@@ -41,8 +42,9 @@ import Store from '../../core/store';
               </div>
 
               <div class="flex flex-col gap-2">
-                <label class="block text-sm font-medium">O pega el contenido CSV</label>
+                <label class="block text-sm font-medium" for="csv-text">O pega el contenido CSV</label>
                 <textarea
+                  id="csv-text"
                   class="textarea textarea-bordered w-full h-40"
                   placeholder="firstName,middleName,fatherName,motherName,documentId,birthDate,gender,address,phone&#10;Juan,,Perez,Garcia,12345678,2010-05-01,MASCULINO,Calle 1,555-1234"
                   [value]="csvText()"

@@ -1,7 +1,9 @@
 import { ConflictException, Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma.service';
-import { sendUserInvitation } from '@/auth';
+import { OnboardingStep, sendUserInvitation } from '@/auth';
 import type { ImportEntityType, Prisma } from '@generated/prisma';
+import * as bcrypt from 'bcrypt';
+import { randomBytes, randomUUID } from 'crypto';
 import Papa from 'papaparse';
 
 export interface RowValidationResult {
@@ -223,13 +225,16 @@ export class ImportService {
 
     for (const rowResult of validRows) {
       try {
-        if (job.entityType === 'STUDENT') {
-          await this.commitStudentRow(rowResult, job, userId);
+        const action =
+          job.entityType === 'STUDENT'
+            ? await this.commitStudentRow(rowResult, job, userId)
+            : await this.commitTeacherRow(rowResult, job, userId);
+        if (action === 'UPDATE') {
+          updatedCount++;
         } else {
-          await this.commitTeacherRow(rowResult, job, userId);
+          createdCount++;
         }
-        createdCount++;
-        results.push({ ...rowResult, action: 'CREATE' });
+        results.push({ ...rowResult, action });
       } catch (err) {
         errorCount++;
         results.push({
@@ -263,27 +268,31 @@ export class ImportService {
         action: 'BULK_IMPORT_COMMITTED',
         userId,
         organizationId: job.organizationId,
-        detail: `jobId=${jobId} entity=${job.entityType} created=${createdCount} errors=${errorCount}`,
+        detail: `jobId=${jobId} entity=${job.entityType} created=${createdCount} updated=${updatedCount} errors=${errorCount}`,
       },
     });
 
     return {
       jobId: updatedJob.id,
       totalRows: job.totalRows,
-      validRows: createdCount,
+      validRows: createdCount + updatedCount,
       errorRows: updatedJob.errorCount,
       results,
     };
   }
 
-  private async commitStudentRow(row: RowValidationResult, job: { organizationId: string; schoolId: string }, userId: string) {
+  private async commitStudentRow(
+    row: RowValidationResult,
+    job: { organizationId: string; schoolId: string },
+    userId: string,
+  ): Promise<'CREATE' | 'UPDATE'> {
     const data = row.data as Record<string, unknown>;
     const firstName = String(data.firstName || '').trim();
     const fatherName = String(data.fatherName || '').trim();
     const email = data.email ? String(data.email).trim() : undefined;
     const documentId = String(data.documentId || '').trim();
 
-    const hashedPassword = 'imported';
+    const hashedPassword = this.newPlaceholderCredential();
 
     const existingUser = email
       ? await this.prisma.user.findUnique({
@@ -308,14 +317,14 @@ export class ImportService {
           organizationId: job.organizationId,
           roleId: (await this.getStudentRoleId())!,
           emailVerified: false,
-          onboardingStep: 'completed',
+          onboardingStep: OnboardingStep.COMPLETED,
         },
       });
       userId_ = user.id;
 
       await this.prisma.account.create({
         data: {
-          id: `${user.id}-cred`,
+          id: randomUUID(),
           accountId: user.id,
           providerId: 'credential',
           userId: user.id,
@@ -338,7 +347,7 @@ export class ImportService {
         where: { id: existingStudent.id },
         data: { userId: userId_ },
       });
-      return;
+      return 'UPDATE';
     }
 
     const classGroup = data.classGroupName
@@ -347,7 +356,7 @@ export class ImportService {
         })
       : null;
 
-    await this.prisma.student.create({
+    const createdStudent = await this.prisma.student.create({
       data: {
         firstName,
         middleName: String(data.middleName || ''),
@@ -368,11 +377,24 @@ export class ImportService {
         organizationId: job.organizationId,
         schoolId: job.schoolId,
         classGroupId: classGroup?.id || null,
-        enrollmentCode: `${Math.random().toString(36).substring(2, 10).toUpperCase()}`,
+        enrollmentCode: await this.generateEnrollmentCode(),
       },
     });
 
+    // Keep class-group progression history in sync (Phase 2.5) instead of
+    // writing `classGroupId` without a history row.
+    if (classGroup?.id) {
+      await this.recordImportedClassGroup(
+        createdStudent.id,
+        classGroup.id,
+        job.schoolId,
+        job.organizationId,
+        userId,
+      );
+    }
+
     if (email && userId_) {
+      await this.setInvitationStatus(userId_, 'PENDING');
       try {
         await sendUserInvitation({
           prisma: this.prisma,
@@ -381,13 +403,21 @@ export class ImportService {
           role: 'student',
           organizationName: '',
         });
+        await this.setInvitationStatus(userId_, 'SENT');
       } catch (err) {
+        await this.setInvitationStatus(userId_, 'FAILED', (err as Error).message);
         this.logger.warn(`Failed to send invitation for imported student ${email}:`, err);
       }
     }
+
+    return 'CREATE';
   }
 
-  private async commitTeacherRow(row: RowValidationResult, job: { organizationId: string; schoolId: string }, userId: string) {
+  private async commitTeacherRow(
+    row: RowValidationResult,
+    job: { organizationId: string; schoolId: string },
+    userId: string,
+  ): Promise<'CREATE' | 'UPDATE'> {
     const data = row.data as Record<string, unknown>;
     const firstName = String(data.firstName || '').trim();
     const fatherName = String(data.fatherName || '').trim();
@@ -399,7 +429,7 @@ export class ImportService {
     const phoneNumber = String(data.phoneNumber || '').trim();
     const personalEmail = String(data.personalEmail || '').trim();
 
-    const hashedPassword = 'imported';
+    const hashedPassword = this.newPlaceholderCredential();
 
     const existingUser = personalEmail
       ? await this.prisma.user.findUnique({
@@ -424,14 +454,14 @@ export class ImportService {
           organizationId: job.organizationId,
           roleId: (await this.getTeacherRoleId())!,
           emailVerified: false,
-          onboardingStep: 'completed',
+          onboardingStep: OnboardingStep.COMPLETED,
         },
       });
       userId_ = user.id;
 
       await this.prisma.account.create({
         data: {
-          id: `${user.id}-cred`,
+          id: randomUUID(),
           accountId: user.id,
           providerId: 'credential',
           userId: user.id,
@@ -454,7 +484,7 @@ export class ImportService {
         where: { id: existingTeacher.id },
         data: { userId: userId_ },
       });
-      return;
+      return 'UPDATE';
     }
 
     await this.prisma.teacher.create({
@@ -475,6 +505,7 @@ export class ImportService {
     });
 
     if (personalEmail && userId_) {
+      await this.setInvitationStatus(userId_, 'PENDING');
       try {
         await sendUserInvitation({
           prisma: this.prisma,
@@ -483,20 +514,96 @@ export class ImportService {
           role: 'teacher',
           organizationName: '',
         });
+        await this.setInvitationStatus(userId_, 'SENT');
       } catch (err) {
+        await this.setInvitationStatus(userId_, 'FAILED', (err as Error).message);
         this.logger.warn(`Failed to send invitation for imported teacher ${personalEmail}:`, err);
       }
     }
+
+    return 'CREATE';
   }
 
   private async getStudentRoleId(): Promise<string | null> {
-    const role = await this.prisma.role.findFirst({ where: { name: 'STUDENT' } });
+    const role = await this.prisma.role.findFirst({
+      where: { organizationId: null, name: 'STUDENT' },
+    });
     return role?.id || null;
   }
 
   private async getTeacherRoleId(): Promise<string | null> {
-    const role = await this.prisma.role.findFirst({ where: { name: 'TEACHER' } });
+    const role = await this.prisma.role.findFirst({
+      where: { organizationId: null, name: 'TEACHER' },
+    });
     return role?.id || null;
+  }
+
+  /**
+   * Random, high-entropy placeholder secret — never derived from the document ID
+   * or any other guessable value. Imported accounts are only usable once the
+   * user sets their own password via the invitation/magic link (mirrors the
+   * Phase 1 hardening in StudentsService/TeachersService).
+   */
+  private newPlaceholderCredential(): string {
+    return bcrypt.hashSync(randomBytes(32).toString('hex'), 10);
+  }
+
+  /**
+   * Crypto-random, collision-checked enrollment code. Mirrors
+   * StudentsService.generateEnrollmentCode — `Student.enrollmentCode` is
+   * `@unique`, so a weak `Math.random` code risks throwing mid-import.
+   */
+  private async generateEnrollmentCode(): Promise<string> {
+    for (let attempt = 0; attempt < 5; attempt++) {
+      const code = randomBytes(5)
+        .toString('base64')
+        .toUpperCase()
+        .replace(/[^A-Z0-9]/g, '')
+        .slice(0, 8);
+      const existing = await this.prisma.student.findUnique({ where: { enrollmentCode: code } });
+      if (!existing) return code;
+    }
+    throw new Error('No se pudo generar un código de matrícula único');
+  }
+
+  /** Record the invitation email outcome so the admin UI badge is accurate. */
+  private async setInvitationStatus(
+    userId: string,
+    status: 'PENDING' | 'SENT' | 'FAILED',
+    detail?: string,
+  ) {
+    await this.prisma.invitationStatus.upsert({
+      where: { userId },
+      create: { userId, status, detail: detail ?? null },
+      update: { status, detail: detail ?? null },
+    });
+  }
+
+  /**
+   * Open a class-group history row for an imported student so progression
+   * tracking (Phase 2.5) is not bypassed by the importer.
+   */
+  private async recordImportedClassGroup(
+    studentId: string,
+    classGroupId: string,
+    schoolId: string,
+    organizationId: string,
+    createdById: string,
+  ) {
+    await this.prisma.studentClassGroupHistory.updateMany({
+      where: { studentId, endedAt: null },
+      data: { endedAt: new Date() },
+    });
+    await this.prisma.studentClassGroupHistory.create({
+      data: {
+        studentId,
+        classGroupId,
+        schoolId,
+        organizationId,
+        reason: 'import',
+        createdById,
+      },
+    });
   }
 
   async getJob(jobId: string) {

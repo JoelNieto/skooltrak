@@ -1,9 +1,17 @@
-import { OnboardingStep, sendUserInvitation } from '@/auth';
-import { ConflictException, Inject, Injectable, Logger, Scope } from '@nestjs/common';
+import { AuthService, OnboardingStep, sendUserInvitation } from '@/auth';
+import {
+  ConflictException,
+  Inject,
+  Injectable,
+  Logger,
+  NotFoundException,
+  Scope,
+} from '@nestjs/common';
 import { REQUEST } from '@nestjs/core';
 import * as bcrypt from 'bcrypt';
 import { randomBytes, randomUUID } from 'crypto';
 import { Request } from 'express';
+import * as QRCode from 'qrcode';
 import { ChatSyncService } from '../chats/chat-sync.service';
 import { FetchDataInput } from '../fetch-data.input';
 import { PrismaService } from '../prisma.service';
@@ -17,8 +25,16 @@ export class StudentsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly chatSync: ChatSyncService,
+    private readonly authService: AuthService,
     @Inject(REQUEST) private readonly request: Request,
   ) {}
+
+  /** Actor + organization pulled from the authenticated request. */
+  private requestActor(): { userId?: string; organizationId?: string } {
+    const user = (this.request as { user?: { id?: string; organizationId?: string } } | undefined)
+      ?.user;
+    return { userId: user?.id, organizationId: user?.organizationId };
+  }
   async create(createStudentInput: CreateStudentInput) {
     const {
       email,
@@ -563,6 +579,116 @@ export class StudentsService {
         data: { endedAt: new Date() },
       });
     }
+  }
+
+  /**
+   * Issue a fresh single-use QR child-connect token for the student and render
+   * it as a printable PNG (welcome letters / report cards). Issuing rotates any
+   * previously issued unconsumed token for this student. Returns the raw PNG
+   * bytes plus the encoded connect URL.
+   */
+  async getConnectTokenQrPng(id: string): Promise<{ png: Buffer; url: string }> {
+    const { userId, organizationId } = this.requestActor();
+    if (!organizationId || !userId) {
+      throw new NotFoundException('No autenticado');
+    }
+    const { url } = await this.authService.issueChildConnectToken(id, organizationId, userId);
+    const png = await QRCode.toBuffer(url, {
+      type: 'png',
+      width: 320,
+      margin: 2,
+      errorCorrectionLevel: 'M',
+    });
+    return { png, url };
+  }
+
+  /**
+   * Upgrade a profile-only (parent-proxy) student into an independent account:
+   * create the auth `User` + credential `Account`, set `Student.userId`, and
+   * send a passwordless magic link. History/grades/attendance are preserved
+   * because only the missing `userId` link is added (Phase 2.6 / task 31).
+   */
+  async attachUser(
+    id: string,
+    input: { email: string; firstName?: string; lastName?: string },
+  ) {
+    const email = input.email?.toLowerCase().trim();
+    if (!email) {
+      throw new ConflictException('El correo es obligatorio para crear el acceso');
+    }
+
+    const student = await this.prisma.student.findUniqueOrThrow({
+      where: { id },
+      select: {
+        id: true,
+        userId: true,
+        firstName: true,
+        fatherName: true,
+        organizationId: true,
+      },
+    });
+
+    if (student.userId) {
+      throw new ConflictException('El estudiante ya tiene una cuenta de acceso');
+    }
+
+    const existing = await this.prisma.user.findUnique({
+      where: { email },
+      select: { id: true },
+    });
+    if (existing) {
+      throw new ConflictException('Ya existe un usuario con ese correo');
+    }
+
+    const role = await this.prisma.role.findFirstOrThrow({
+      where: { organizationId: null, name: 'STUDENT' },
+    });
+
+    // High-entropy placeholder; the student sets their own password (or keeps
+    // using magic links) — this secret is never usable directly.
+    const hashedPassword = bcrypt.hashSync(randomBytes(32).toString('hex'), 10);
+
+    const updated = await this.prisma.$transaction(async (tx) => {
+      const user = await tx.user.create({
+        data: {
+          firstName: input.firstName ?? student.firstName,
+          lastName: input.lastName ?? student.fatherName,
+          email,
+          color: this.getRandomPastelColor(),
+          password: hashedPassword,
+          organizationId: student.organizationId,
+          roleId: role.id,
+          emailVerified: false,
+          onboardingStep: OnboardingStep.COMPLETED,
+        },
+      });
+
+      await tx.account.create({
+        data: {
+          id: randomUUID(),
+          accountId: user.id,
+          providerId: 'credential',
+          userId: user.id,
+          password: hashedPassword,
+        },
+      });
+
+      return tx.student.update({
+        where: { id: student.id },
+        data: { userId: user.id },
+        include: { classGroup: true, user: true, parents: true },
+      });
+    });
+
+    // Send a passwordless login link so the upgraded student can access without
+    // a shared password. Failure to email does not roll back the account.
+    try {
+      await this.authService.requestMagicLink(email);
+    } catch (error) {
+      this.logger.warn(`Failed to send magic link to attached student ${email}:`, error);
+    }
+
+    return updated;
   }
 
   async remove(id: string) {

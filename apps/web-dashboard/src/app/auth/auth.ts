@@ -414,6 +414,8 @@ export default class Auth {
       }
     } catch (err: any) {
       console.error('Child connect redeem error:', err);
+      const msg = err?.error?.message ?? 'No se pudo vincular el estudiante';
+      this.#toasts.showError(msg);
     } finally {
       localStorage.removeItem('pending_child_connect_token');
     }

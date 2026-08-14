@@ -1,7 +1,8 @@
 import { BetterAuthGuard, Perm, PermissionsGuard, RequirePermissions } from '@/auth';
 import { FetchDataQueryDto } from '@/api-contracts';
-import { Body, Controller, Delete, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query, Res, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import type { Response } from 'express';
 import { toFetchDataInput } from '../fetch-data-query.mapper';
 import { GradesService } from '../grades/grades.service';
 import { CreateStudentInput } from './dto/create-student.input';
@@ -85,6 +86,27 @@ export class StudentsController {
   @ApiOperation({ summary: 'Regenerate (revoke) student enrollment code' })
   regenerateEnrollmentCode(@Param('id') id: string) {
     return this.studentsService.regenerateEnrollmentCode(id);
+  }
+
+  @Get(':id/connect-token.png')
+  @RequirePermissions(Perm.MANAGE_STUDENTS)
+  @ApiOperation({ summary: 'Printable QR child-connect token (PNG) for welcome letters' })
+  async connectTokenQr(@Param('id') id: string, @Res() res: Response) {
+    const { png } = await this.studentsService.getConnectTokenQrPng(id);
+    res.setHeader('Content-Type', 'image/png');
+    res.setHeader('Content-Disposition', `inline; filename="connect-${id}.png"`);
+    res.setHeader('Cache-Control', 'no-store');
+    res.send(png);
+  }
+
+  @Post(':id/attach-user')
+  @RequirePermissions(Perm.MANAGE_STUDENTS)
+  @ApiOperation({ summary: 'Upgrade a profile-only student into an account with magic-link access' })
+  attachUser(
+    @Param('id') id: string,
+    @Body() body: { email: string; firstName?: string; lastName?: string },
+  ) {
+    return this.studentsService.attachUser(id, body);
   }
 
   @Post()

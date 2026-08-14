@@ -1,3 +1,4 @@
+import { AuthModule } from '@/auth';
 import { Module } from '@nestjs/common';
 import { ChatsModule } from '../chats/chats.module';
 import { GradesModule } from '../grades/grades.module';
@@ -10,6 +11,6 @@ import { StudentsService } from './students.service';
   providers: [
     StudentsService,
   ],
-  imports: [PrismaModule, GradesModule, ChatsModule],
+  imports: [PrismaModule, GradesModule, ChatsModule, AuthModule],
 })
 export class StudentsModule {}

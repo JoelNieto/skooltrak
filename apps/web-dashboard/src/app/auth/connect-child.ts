@@ -1,6 +1,6 @@
 import { Toast } from '#/ui';
 import { HttpClient } from '@angular/common/http';
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import Auth from './auth';
@@ -34,12 +34,10 @@ export default class ConnectChild implements OnInit {
   loading = signal(true);
   error = signal<string | null>(null);
 
-  constructor(
-    private http: HttpClient,
-    private router: Router,
-    private auth: Auth,
-    private toast: Toast,
-  ) {}
+  private readonly http = inject(HttpClient);
+  private readonly router = inject(Router);
+  private readonly auth = inject(Auth);
+  private readonly toast = inject(Toast);
 
   ngOnInit(): void {
     const params = new URLSearchParams(window.location.search);

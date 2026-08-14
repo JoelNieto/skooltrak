@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { AuthService } from './auth.service';
+import { AuthTokenService } from './auth-token.service';
 import { PrismaService } from './prisma.service';
 import { LinkChildInput } from './dto/link-child.input';
 
@@ -24,16 +25,21 @@ function makePrismaMock(state: {
     userUpdate: 0,
     studentConnect: 0,
   };
+  let lastUserUpdateData: any = undefined;
 
   const mock: any = {
     calls,
     student: {
       findUnique: vi.fn().mockResolvedValue(state.student ?? null),
+      findUniqueOrThrow: vi.fn().mockResolvedValue(state.student ?? null),
     },
     user: {
       findUniqueOrThrow: vi.fn().mockResolvedValue(
         state.user ?? { firstName: 'Ana', lastName: 'Torres', email: 'a@b.com', organizationId: null, roleId: null },
       ),
+      // Used by transitionOnboardingStep (current step lookup + persist).
+      findUnique: vi.fn().mockResolvedValue({ onboardingStep: null }),
+      update: vi.fn().mockResolvedValue({}),
     },
     parent: {
       findFirst: vi
@@ -53,6 +59,9 @@ function makePrismaMock(state: {
     },
     member: {
       upsert: vi.fn().mockResolvedValue({}),
+    },
+    onboardingAuditLog: {
+      create: vi.fn().mockResolvedValue({}),
     },
     $transaction: vi.fn(async (fn: (tx: any) => Promise<void>) => {
       const tx = {
@@ -76,6 +85,7 @@ function makePrismaMock(state: {
         user: {
           update: (...a: any[]) => {
             calls.userUpdate++;
+            lastUserUpdateData = a[0]?.data;
             return Promise.resolve({});
           },
         },
@@ -83,6 +93,10 @@ function makePrismaMock(state: {
       return fn(tx);
     }),
   };
+
+  Object.defineProperty(mock, 'lastUserUpdateData', {
+    get: () => lastUserUpdateData,
+  });
 
   return mock;
 }
@@ -110,7 +124,11 @@ describe('AuthService.linkChildByCode', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [AuthService, { provide: PrismaService, useValue: {} }],
+      providers: [
+        AuthService,
+        { provide: PrismaService, useValue: {} },
+        { provide: AuthTokenService, useValue: {} },
+      ],
     }).compile();
     service = module.get<AuthService>(AuthService);
   });
@@ -178,4 +196,57 @@ describe('AuthService.linkChildByCode', () => {
     expect(prisma.calls.parentCreate).toBe(1);
     expect(result.organizationId).toBe('org-2');
   });
+
+  it('assigns the PARENT role to a fresh user with no role', async () => {
+    const prisma = makePrismaMock({
+      student: studentInOrg('org-1', []),
+      existingParent: null,
+      user: { firstName: 'Ana', lastName: 'Torres', email: 'a@b.com', organizationId: null, roleId: null },
+    });
+    (service as any).prisma = prisma;
+    await service.linkChildByCode('user-1', validInput);
+    expect(prisma.lastUserUpdateData.roleId).toBe('role-parent');
+  });
+
+  it('links an existing PARENT without changing their role', async () => {
+    const prisma = makePrismaMock({
+      student: studentInOrg('org-1', []),
+      existingParent: null,
+      user: {
+        firstName: 'Pat',
+        lastName: 'Parent',
+        email: 'parent@b.com',
+        organizationId: 'org-1',
+        roleId: 'role-parent',
+        role: { name: 'PARENT' },
+      },
+    });
+    (service as any).prisma = prisma;
+    const result = await service.linkChildByCode('user-1', validInput);
+    expect(result.status).toBe('LINKED');
+    expect(prisma.calls.parentCreate).toBe(1);
+  });
+
+  it.each(['ORG_ADMIN', 'TEACHER', 'STUDENT'])(
+    'blocks a %s account from linking as a parent',
+    async (roleName) => {
+      const prisma = makePrismaMock({
+        student: studentInOrg('org-1', []),
+        existingParent: null,
+        user: {
+          firstName: 'Staff',
+          lastName: 'User',
+          email: 'staff@b.com',
+          organizationId: 'org-1',
+          roleId: `role-${roleName}`,
+          role: { name: roleName },
+        },
+      });
+      (service as any).prisma = prisma;
+      await expect(service.linkChildByCode('user-1', validInput)).rejects.toThrow(/padre\/tutor/i);
+      // No parent profile or link is created for a blocked account.
+      expect(prisma.calls.parentCreate).toBe(0);
+      expect(prisma.calls.userUpdate).toBe(0);
+    },
+  );
 });

@@ -930,8 +930,10 @@ model StudentClassGroupHistory {
   id             String       @id @default(cuid())
   studentId      String
   student        Student      @relation(fields: [studentId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  classGroupId   String
-  classGroup     ClassGroup   @relation(fields: [classGroupId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  // Nullable so a deleted class group does not destroy the audit trail: the
+  // FK is `SetNull`, which would otherwise violate NOT NULL on delete.
+  classGroupId   String?
+  classGroup     ClassGroup?  @relation(fields: [classGroupId], references: [id], onDelete: SetNull, onUpdate: Cascade)
   schoolId       String
   school         School       @relation(fields: [schoolId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   organizationId String

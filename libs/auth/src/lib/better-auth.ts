@@ -3,7 +3,7 @@ import { PrismaPg } from '@prisma/adapter-pg';
 import * as bcrypt from 'bcrypt';
 import { betterAuth } from 'better-auth';
 import { prismaAdapter } from 'better-auth/adapters/prisma';
-import { organization } from 'better-auth/plugins';
+import { magicLink, organization } from 'better-auth/plugins';
 import { sendEmail } from './resend.service';
 
 function createOpenApiAuthStub(): ReturnType<typeof betterAuth> {
@@ -18,7 +18,7 @@ function createOpenApiAuthStub(): ReturnType<typeof betterAuth> {
   } as ReturnType<typeof betterAuth>;
 }
 
-function createProductionAuth(): ReturnType<typeof betterAuth> {
+function createProductionAuth() {
   console.log('[Better Auth] Initializing...');
   console.log(
     '[Better Auth] DATABASE_URL:',
@@ -123,6 +123,25 @@ function createProductionAuth(): ReturnType<typeof betterAuth> {
       },
     },
     plugins: [
+      /**
+       * Registered so that a passwordless login can create a *real* better-auth
+       * session (row + signed cookie) without hand-rolling cookie crypto.
+       *
+       * Issuance is NOT done here: user-facing magic links are minted by
+       * `AuthTokenService` (hashed at rest, single-use, rate-limited, audited).
+       * `AuthService.verifyMagicLink` redeems our own token first and only then
+       * drives this plugin's verify endpoint with a short-lived internal token,
+       * so `/api/auth/sign-in/magic-link` is intentionally inert.
+       */
+      magicLink({
+        expiresIn: 30,
+        disableSignUp: true,
+        sendMagicLink: async ({ email }) => {
+          console.warn(
+            `[Better Auth] Ignoring built-in magic-link issuance for ${email}; use POST /v1/auth/magic-link/request instead.`,
+          );
+        },
+      }),
       organization({
         sendInvitationEmail: async (data) => {
           console.log('[Better Auth] sendInvitationEmail called for:', data.email);
@@ -166,11 +185,36 @@ function createProductionAuth(): ReturnType<typeof betterAuth> {
   });
 }
 
+/**
+ * The fully typed production instance, or `null` when only the OpenAPI stub is
+ * needed. Kept separate from `auth` because that export is widened to
+ * `ReturnType<typeof betterAuth>`, which erases plugin endpoint types.
+ */
+const productionAuth = process.env['OPENAPI_EXPORT'] === 'true' ? null : createProductionAuth();
+
 /** Cast avoids a union type when OPENAPI_EXPORT is only used by tooling. */
-export const auth = (
-  process.env['OPENAPI_EXPORT'] === 'true'
-    ? createOpenApiAuthStub()
-    : createProductionAuth()
-) as ReturnType<typeof betterAuth>;
+export const auth = (productionAuth ??
+  createOpenApiAuthStub()) as ReturnType<typeof betterAuth>;
+
+/**
+ * Drive better-auth's own magic-link verify endpoint so it creates the session
+ * row and signs the session cookie itself.
+ *
+ * `token` must reference a verification row created server-side; user-facing
+ * magic links are issued and redeemed by `AuthTokenService` instead. Returns the
+ * raw `Response` so the caller can forward `set-cookie`.
+ */
+export async function verifyMagicLinkInternally(token: string): Promise<Response> {
+  if (!productionAuth) {
+    throw new Error('better-auth no está inicializado');
+  }
+  // The endpoint declares `requireHeaders`, so an (empty) header set must be
+  // supplied even though this call originates server-side.
+  return productionAuth.api.magicLinkVerify({
+    query: { token },
+    headers: new Headers(),
+    asResponse: true,
+  });
+}
 
 export type Session = typeof auth.$Infer.Session;

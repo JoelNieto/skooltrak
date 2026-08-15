@@ -1,7 +1,13 @@
-import { ConflictException, Injectable, Logger } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma.service';
 import { OnboardingStep, sendUserInvitation } from '@/auth';
-import type { ImportEntityType, Prisma } from '@generated/prisma';
+import type { ImportEntityType } from '@generated/prisma';
 import * as bcrypt from 'bcrypt';
 import { randomBytes, randomUUID } from 'crypto';
 import Papa from 'papaparse';
@@ -22,6 +28,31 @@ export interface DryRunResult {
 }
 
 const MAX_ROWS = 500;
+
+/**
+ * `Gender` in Prisma is `MALE | FEMALE` only. CSV files are authored by school
+ * staff in Spanish, so both spellings are accepted and normalized here — the
+ * previous validator accepted `MASCULINO/FEMENINO/OTRO` and then failed at
+ * insert time because those values do not exist in the enum.
+ */
+const GENDER_ALIASES: Record<string, 'MALE' | 'FEMALE'> = {
+  MALE: 'MALE',
+  FEMALE: 'FEMALE',
+  M: 'MALE',
+  F: 'FEMALE',
+  MASCULINO: 'MALE',
+  FEMENINO: 'FEMALE',
+};
+
+const GENDER_INPUT_HINT = 'Use MASCULINO/FEMENINO (o MALE/FEMALE).';
+
+/** Normalize a CSV gender cell to the Prisma `Gender` enum, or null if invalid. */
+function normalizeGender(value: unknown): 'MALE' | 'FEMALE' | null {
+  const key = String(value ?? '')
+    .trim()
+    .toUpperCase();
+  return GENDER_ALIASES[key] ?? null;
+}
 
 const STUDENT_REQUIRED_COLUMNS = [
   'firstName',
@@ -61,12 +92,14 @@ export class ImportService {
     });
 
     if (parsed.errors.length > 0) {
-      throw new Error(`CSV parse error: ${parsed.errors[0].message}`);
+      throw new BadRequestException(`CSV parse error: ${parsed.errors[0].message}`);
     }
 
     const rows = parsed.data as Record<string, unknown>[];
     if (rows.length > MAX_ROWS) {
-      throw new Error(`El archivo supera el límite de ${MAX_ROWS} filas (${rows.length} detectadas).`);
+      throw new BadRequestException(
+        `El archivo supera el límite de ${MAX_ROWS} filas (${rows.length} detectadas).`,
+      );
     }
 
     return rows;
@@ -87,19 +120,26 @@ export class ImportService {
       }
     }
 
+    // Students are unique per school (`documentId` + `schoolId`), so the
+    // existence key must be school-scoped — it is built the same way in
+    // `dryRun`. An already-present student is an UPDATE, not an error.
     const documentId = String(row.documentId || '').trim();
-    if (documentId && existingDocumentIds.has(`${orgId}:${documentId}`)) {
-      errors.push(`documentId ${documentId} ya existe en esta organización`);
+    const alreadyExists = documentId ? existingDocumentIds.has(`${schoolId}:${documentId}`) : false;
+
+    const gender = normalizeGender(row.gender);
+    if (!gender) {
+      errors.push(`Género inválido: ${row.gender}. ${GENDER_INPUT_HINT}`);
     }
 
-    const gender = String(row.gender || '').toUpperCase();
-    if (!['MASCULINO', 'FEMENINO', 'OTRO'].includes(gender)) {
-      errors.push(`Género inválido: ${row.gender}. Use MASCULINO, FEMENINO u OTRO.`);
-    }
+    const action = errors.length > 0 ? 'SKIP' : alreadyExists ? 'UPDATE' : 'CREATE';
 
-    const action = errors.length === 0 ? 'CREATE' : 'SKIP';
-
-    return { rowNumber, action, errors, data: { ...row, organizationId: orgId, schoolId } };
+    return {
+      rowNumber,
+      action,
+      errors,
+      // Persist the normalized value so commit never re-derives it.
+      data: { ...row, gender: gender ?? row.gender, organizationId: orgId, schoolId },
+    };
   }
 
   validateTeacherRow(
@@ -117,19 +157,28 @@ export class ImportService {
       }
     }
 
+    // Teachers are unique per organization, so the existence key is org-scoped.
     const documentId = String(row.documentId || '').trim();
-    if (documentId && existingDocumentIds.has(`${orgId}:${documentId}`)) {
-      errors.push(`documentId ${documentId} ya existe en esta organización`);
-    }
+    const alreadyExists = documentId ? existingDocumentIds.has(`${orgId}:${documentId}`) : false;
 
     const personalEmail = String(row.personalEmail || '').trim();
     if (personalEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(personalEmail)) {
       errors.push(`Email inválido: ${personalEmail}`);
     }
 
-    const action = errors.length === 0 ? 'CREATE' : 'SKIP';
+    const gender = normalizeGender(row.gender);
+    if (!gender) {
+      errors.push(`Género inválido: ${row.gender}. ${GENDER_INPUT_HINT}`);
+    }
 
-    return { rowNumber, action, errors, data: { ...row, organizationId: orgId, schoolId } };
+    const action = errors.length > 0 ? 'SKIP' : alreadyExists ? 'UPDATE' : 'CREATE';
+
+    return {
+      rowNumber,
+      action,
+      errors,
+      data: { ...row, gender: gender ?? row.gender, organizationId: orgId, schoolId },
+    };
   }
 
   async dryRun(
@@ -160,6 +209,8 @@ export class ImportService {
 
     const results: RowValidationResult[] = [];
     let validCount = 0;
+    let createCount = 0;
+    let updateCount = 0;
     let errorCount = 0;
 
     for (let i = 0; i < rows.length; i++) {
@@ -173,8 +224,13 @@ export class ImportService {
         result = this.validateTeacherRow(row, rowNumber, organizationId, schoolId, existingDocumentIds);
       }
 
-      if (result.errors.length === 0) validCount++;
-      else errorCount++;
+      if (result.errors.length === 0) {
+        validCount++;
+        if (result.action === 'UPDATE') updateCount++;
+        else createCount++;
+      } else {
+        errorCount++;
+      }
 
       results.push(result);
     }
@@ -187,8 +243,8 @@ export class ImportService {
         status: 'DRY_RUN',
         createdById: userId,
         totalRows: rows.length,
-        createdCount: validCount,
-        updatedCount: 0,
+        createdCount: createCount,
+        updatedCount: updateCount,
         errorCount,
         errors: results as any,
       },
@@ -206,13 +262,13 @@ export class ImportService {
   async commit(jobId: string, userId: string): Promise<DryRunResult> {
     const job = await this.prisma.importJob.findUnique({ where: { id: jobId } });
     if (!job) {
-      throw new Error('ImportJob no encontrado');
+      throw new NotFoundException('ImportJob no encontrado');
     }
     if (job.status === 'COMMITTED') {
-      throw new Error('Este archivo ya fue importado');
+      throw new ConflictException('Este archivo ya fue importado');
     }
     if (job.status === 'FAILED') {
-      throw new Error('Este archivo no se puede importar');
+      throw new ConflictException('Este archivo no se puede importar');
     }
 
     const rows = (job.errors as unknown as RowValidationResult[]) || [];
@@ -292,6 +348,48 @@ export class ImportService {
     const email = data.email ? String(data.email).trim() : undefined;
     const documentId = String(data.documentId || '').trim();
 
+    // Resolve the existing student FIRST: an already-enrolled document ID is an
+    // idempotent UPDATE and must never mint a second user/credential for the
+    // same person.
+    const existingStudent = await this.prisma.student.findFirst({
+      where: { documentId, schoolId: job.schoolId },
+    });
+
+    if (existingStudent) {
+      await this.prisma.student.update({
+        where: { id: existingStudent.id },
+        data: {
+          firstName,
+          middleName: String(data.middleName || ''),
+          fatherName,
+          motherName: String(data.motherName || ''),
+          address: String(data.address || ''),
+          phone: String(data.phone || ''),
+        },
+      });
+
+      // Only attach a login when the row carries a real email and the student
+      // has none yet. Class-group moves are intentionally not handled here so
+      // the importer cannot bypass class-group history (see plan item B16).
+      if (email && !existingStudent.userId) {
+        const emailOwner = await this.prisma.user.findUnique({
+          where: { email },
+          include: { student: true },
+        });
+        if (emailOwner?.student && emailOwner.student.id !== existingStudent.id) {
+          throw new Error('El usuario ya tiene un perfil de estudiante');
+        }
+        if (emailOwner && !emailOwner.student) {
+          await this.prisma.student.update({
+            where: { id: existingStudent.id },
+            data: { userId: emailOwner.id },
+          });
+        }
+      }
+
+      return 'UPDATE';
+    }
+
     const hashedPassword = this.newPlaceholderCredential();
 
     const existingUser = email
@@ -338,18 +436,6 @@ export class ImportService {
       });
     }
 
-    const existingStudent = await this.prisma.student.findFirst({
-      where: { documentId, schoolId: job.schoolId },
-    });
-
-    if (existingStudent) {
-      await this.prisma.student.update({
-        where: { id: existingStudent.id },
-        data: { userId: userId_ },
-      });
-      return 'UPDATE';
-    }
-
     const classGroup = data.classGroupName
       ? await this.prisma.classGroup.findFirst({
           where: { name: String(data.classGroupName), schoolId: job.schoolId },
@@ -364,7 +450,7 @@ export class ImportService {
         motherName: String(data.motherName || ''),
         documentId,
         birthDate: new Date(String(data.birthDate)),
-        gender: String(data.gender || 'OTRO') as Prisma.StudentCreateInput['gender'],
+        gender: this.requireGender(data.gender),
         address: String(data.address || ''),
         phone: String(data.phone || ''),
         enrollmentStatus: 'ACTIVE',
@@ -425,9 +511,40 @@ export class ImportService {
     const motherName = String(data.motherName || '').trim();
     const documentId = String(data.documentId || '').trim();
     const birthDate = String(data.birthDate || '');
-    const gender = String(data.gender || '').toUpperCase();
+    const gender = this.requireGender(data.gender);
     const phoneNumber = String(data.phoneNumber || '').trim();
     const personalEmail = String(data.personalEmail || '').trim();
+
+    // Resolve the existing teacher FIRST so a repeat import updates the record
+    // instead of minting a second user/credential for the same document ID.
+    const existingTeacher = await this.prisma.teacher.findFirst({
+      where: { documentId, organizationId: job.organizationId },
+    });
+
+    if (existingTeacher) {
+      await this.prisma.teacher.update({
+        where: { id: existingTeacher.id },
+        data: { firstName, middleName, fatherName, motherName, phoneNumber, personalEmail },
+      });
+
+      if (personalEmail && !existingTeacher.userId) {
+        const emailOwner = await this.prisma.user.findUnique({
+          where: { email: personalEmail },
+          include: { teacher: true },
+        });
+        if (emailOwner?.teacher && emailOwner.teacher.id !== existingTeacher.id) {
+          throw new Error('El usuario ya tiene un perfil de profesor');
+        }
+        if (emailOwner && !emailOwner.teacher) {
+          await this.prisma.teacher.update({
+            where: { id: existingTeacher.id },
+            data: { userId: emailOwner.id },
+          });
+        }
+      }
+
+      return 'UPDATE';
+    }
 
     const hashedPassword = this.newPlaceholderCredential();
 
@@ -475,18 +592,6 @@ export class ImportService {
       });
     }
 
-    const existingTeacher = await this.prisma.teacher.findFirst({
-      where: { documentId, organizationId: job.organizationId },
-    });
-
-    if (existingTeacher) {
-      await this.prisma.teacher.update({
-        where: { id: existingTeacher.id },
-        data: { userId: userId_ },
-      });
-      return 'UPDATE';
-    }
-
     await this.prisma.teacher.create({
       data: {
         firstName,
@@ -495,7 +600,7 @@ export class ImportService {
         motherName: motherName,
         documentId,
         birthDate: new Date(birthDate),
-        gender: gender as Prisma.TeacherCreateInput['gender'],
+        gender,
         phoneNumber,
         personalEmail,
         address: '',
@@ -522,6 +627,18 @@ export class ImportService {
     }
 
     return 'CREATE';
+  }
+
+  /**
+   * Re-normalize the gender cell at commit time so a stale or hand-edited
+   * dry-run payload can never reach Prisma with a value outside the enum.
+   */
+  private requireGender(value: unknown): 'MALE' | 'FEMALE' {
+    const gender = normalizeGender(value);
+    if (!gender) {
+      throw new Error(`Género inválido: ${String(value ?? '')}. ${GENDER_INPUT_HINT}`);
+    }
+    return gender;
   }
 
   private async getStudentRoleId(): Promise<string | null> {

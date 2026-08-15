@@ -1,11 +1,10 @@
-import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { BetterAuthGuard, Perm, PermissionsGuard, RequirePermissions } from '@/auth';
-import { Request } from '@nestjs/common';
-import { ImportService, DryRunResult } from './imports.service';
+import { Body, Controller, Get, Param, Post, Request, UnauthorizedException, UseGuards } from '@nestjs/common';
+import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ImportService } from './imports.service';
 
 @ApiTags('imports')
-@Controller('api/v1/imports')
+@Controller('v1/imports')
 @UseGuards(BetterAuthGuard, PermissionsGuard)
 export class ImportsController {
   constructor(private readonly importService: ImportService) {}
@@ -16,7 +15,7 @@ export class ImportsController {
   async dryRun(@Request() req: any, @Body() body: any) {
     const userId = req.user?.userId;
     if (!userId) {
-      throw new Error('No autenticado');
+      throw new UnauthorizedException('No autenticado');
     }
     return this.importService.dryRun(body.organizationId, body.schoolId, body.entityType, body.csvText, userId);
   }
@@ -27,7 +26,7 @@ export class ImportsController {
   async commit(@Request() req: any, @Param('jobId') jobId: string) {
     const userId = req.user?.userId;
     if (!userId) {
-      throw new Error('No autenticado');
+      throw new UnauthorizedException('No autenticado');
     }
     return this.importService.commit(jobId, userId);
   }

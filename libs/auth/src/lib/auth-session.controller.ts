@@ -14,8 +14,9 @@ import {
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
 import type { Response } from 'express';
 import type { AuthenticatedRequest } from './auth.guard';
-import { AllowAnonymous, BetterAuthGuard } from './auth.guard';
+import { AllowAnonymous, BetterAuthGuard, PermissionsGuard, RequirePermissions } from './auth.guard';
 import { AuthService } from './auth.service';
+import { Perm } from './permissions/permissions.constants';
 import { CreateSchoolWithOrgInput } from './dto/create-school-with-org.input';
 import { RequestJoinSchoolInput } from './dto/request-join-school.input';
 import { LinkChildInput } from './dto/link-child.input';
@@ -292,12 +293,23 @@ export class AuthSessionController {
   @Post('magic-link/verify')
   @AllowAnonymous()
   @ApiOperation({ summary: 'Redeem a magic-link token and receive a JWT' })
-  async verifyMagicLink(@Body() body: { token: string }, @Req() req: AuthenticatedRequest) {
-    return this.authService.verifyMagicLink(body.token, { ip: this.clientIp(req) });
+  async verifyMagicLink(
+    @Body() body: { token: string },
+    @Req() req: AuthenticatedRequest,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    return this.authService.verifyMagicLink(body.token, {
+      ip: this.clientIp(req),
+      onSetCookie: (cookieHeader) => {
+        res.setHeader('set-cookie', cookieHeader);
+      },
+    });
   }
 
   @Post('child-connect/issue')
   @ApiBearerAuth()
+  @UseGuards(PermissionsGuard)
+  @RequirePermissions(Perm.MANAGE_STUDENTS)
   @ApiOperation({ summary: 'Issue a single-use QR child-connect token for a student (rotates prior tokens)' })
   async issueChildConnect(@Req() req: AuthenticatedRequest, @Body() body: { studentId: string }) {
     const userId = req.user?.userId;

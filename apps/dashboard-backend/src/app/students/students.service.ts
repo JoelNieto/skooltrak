@@ -1,12 +1,6 @@
+import type { AuthUserContext } from '@/auth';
 import { AuthService, OnboardingStep, sendUserInvitation } from '@/auth';
-import {
-  ConflictException,
-  Inject,
-  Injectable,
-  Logger,
-  NotFoundException,
-  Scope,
-} from '@nestjs/common';
+import { ConflictException, Inject, Injectable, Logger, Scope, UnauthorizedException } from '@nestjs/common';
 import { REQUEST } from '@nestjs/core';
 import * as bcrypt from 'bcrypt';
 import { randomBytes, randomUUID } from 'crypto';
@@ -29,11 +23,14 @@ export class StudentsService {
     @Inject(REQUEST) private readonly request: Request,
   ) {}
 
-  /** Actor + organization pulled from the authenticated request. */
+  /**
+   * Actor + organization pulled from the authenticated request. `BetterAuthGuard`
+   * populates `req.user` as an `AuthUserContext`, whose id field is `userId`
+   * (not `id`) — reading `id` silently yielded `undefined` for every actor.
+   */
   private requestActor(): { userId?: string; organizationId?: string } {
-    const user = (this.request as { user?: { id?: string; organizationId?: string } } | undefined)
-      ?.user;
-    return { userId: user?.id, organizationId: user?.organizationId };
+    const user = (this.request as { user?: AuthUserContext } | undefined)?.user;
+    return { userId: user?.userId, organizationId: user?.organizationId ?? undefined };
   }
   async create(createStudentInput: CreateStudentInput) {
     const {
@@ -192,7 +189,7 @@ export class StudentsService {
       parents: parentIds?.length ? { connect: parentIds.map((id) => ({ id })) } : undefined,
     };
 
-      this.logger.log(`Creating student with data: ${JSON.stringify(studentData, null, 2)}`);
+    this.logger.log(`Creating student with data: ${JSON.stringify(studentData, null, 2)}`);
 
     try {
       const student = await this.prisma.student.create({
@@ -535,7 +532,7 @@ export class StudentsService {
     }
 
     if (rest.classGroupId !== undefined) {
-      const actorId = (this.request as { user?: { id?: string } } | undefined)?.user?.id;
+      const actorId = this.requestActor().userId;
       await this.recordClassGroupChange(id, rest.classGroupId || null, 'update', actorId);
     }
 
@@ -590,7 +587,7 @@ export class StudentsService {
   async getConnectTokenQrPng(id: string): Promise<{ png: Buffer; url: string }> {
     const { userId, organizationId } = this.requestActor();
     if (!organizationId || !userId) {
-      throw new NotFoundException('No autenticado');
+      throw new UnauthorizedException('No autenticado');
     }
     const { url } = await this.authService.issueChildConnectToken(id, organizationId, userId);
     const png = await QRCode.toBuffer(url, {
@@ -608,10 +605,7 @@ export class StudentsService {
    * send a passwordless magic link. History/grades/attendance are preserved
    * because only the missing `userId` link is added (Phase 2.6 / task 31).
    */
-  async attachUser(
-    id: string,
-    input: { email: string; firstName?: string; lastName?: string },
-  ) {
+  async attachUser(id: string, input: { email: string; firstName?: string; lastName?: string }) {
     const email = input.email?.toLowerCase().trim();
     if (!email) {
       throw new ConflictException('El correo es obligatorio para crear el acceso');

@@ -53,7 +53,13 @@ export default class MagicLinkCallback implements OnInit {
   async verify(token: string) {
     try {
       const res = await firstValueFrom(
-        this.http.post<{ accessToken: string }>('/api/v1/auth/magic-link/verify', { token }),
+        // `withCredentials` so the better-auth session cookie set by the verify
+        // endpoint is stored alongside the JWT.
+        this.http.post<{ accessToken: string }>(
+          '/api/v1/auth/magic-link/verify',
+          { token },
+          { withCredentials: true },
+        ),
       );
       const accessToken = res?.accessToken;
       if (accessToken) {

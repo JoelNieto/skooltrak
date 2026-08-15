@@ -7,9 +7,9 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
-import { randomUUID } from 'crypto';
+import { randomBytes, randomUUID } from 'crypto';
 import * as jwt from 'jsonwebtoken';
-import { auth } from './better-auth';
+import { auth, verifyMagicLinkInternally } from './better-auth';
 import { OnboardingStep, assertTransition } from './onboarding-step';
 import type { Prisma } from '@generated/prisma';
 import { RateLimiter } from './rate-limiter';
@@ -1644,9 +1644,14 @@ export class AuthService {
   }
 
   /**
-   * Redeem a magic link. Single-use and time-limited; returns a fresh JWT.
+   * Redeem a magic link. Single-use and time-limited; returns a fresh JWT and
+   * establishes a better-auth session cookie so passwordless users are not
+   * second-class citizens on the session-backed routes (e.g. change-password).
    */
-  async verifyMagicLink(token: string, opts?: { ip?: string }): Promise<{ accessToken: string }> {
+  async verifyMagicLink(
+    token: string,
+    opts?: { ip?: string; onSetCookie?: (setCookieHeader: string) => void },
+  ): Promise<{ accessToken: string }> {
     const ip = opts?.ip ?? 'unknown';
 
     const limit = this.authTokens.hitRateLimit(`magic-redeem:${ip}`);
@@ -1671,8 +1676,67 @@ export class AuthService {
       throw new UnauthorizedException('Usuario no encontrado');
     }
 
+    if (opts?.onSetCookie) {
+      await this.establishSessionCookie(user, opts.onSetCookie, ip);
+    }
+
     await this.audit({ action: 'MAGIC_LINK_CONSUMED', userId: user.id, ip });
     return { accessToken: this.generateJwt(user) };
+  }
+
+  /**
+   * Create a better-auth session (row + signed cookie) for a user who has
+   * already proven their identity by another means.
+   *
+   * Delegates to better-auth's own magic-link verify endpoint via a
+   * server-side-only, 30-second verification token so the session row, cookie
+   * signing, and cookie cache all stay owned by the library. Never throws: a
+   * missing cookie degrades to JWT-only access rather than failing the login.
+   */
+  private async establishSessionCookie(
+    user: { id: string; email: string; firstName: string; lastName: string },
+    onSetCookie: (setCookieHeader: string) => void,
+    ip: string,
+  ): Promise<void> {
+    const internalToken = randomBytes(32).toString('base64url');
+    let verificationId: string | null = null;
+
+    try {
+      const verification = await this.prisma.verification.create({
+        data: {
+          id: randomUUID(),
+          identifier: internalToken,
+          value: JSON.stringify({
+            email: user.email,
+            name: `${user.firstName} ${user.lastName}`.trim(),
+          }),
+          expiresAt: new Date(Date.now() + 30 * 1000),
+        },
+      });
+      verificationId = verification.id;
+
+      const response = await verifyMagicLinkInternally(internalToken);
+
+      const setCookieHeader = response.headers.get('set-cookie');
+      if (setCookieHeader) {
+        onSetCookie(setCookieHeader);
+        // Consumed by better-auth on success.
+        verificationId = null;
+      }
+    } catch (error) {
+      await this.audit({
+        action: 'MAGIC_LINK_REJECTED',
+        userId: user.id,
+        detail: `session-cookie-failed: ${(error as Error).message}`,
+        ip,
+      });
+    } finally {
+      if (verificationId) {
+        await this.prisma.verification
+          .delete({ where: { id: verificationId } })
+          .catch(() => undefined);
+      }
+    }
   }
 
   // ==========================================
@@ -1682,6 +1746,11 @@ export class AuthService {
   /**
    * Issue a signed, single-use connect token for a student. Rotates any
    * previously issued (unconsumed) token for the same student.
+   *
+   * Authorization is enforced by the caller (`MANAGE_STUDENTS` on the HTTP
+   * routes) plus the organization check below. Note that the data model has no
+   * user-to-school membership (`Member` is organization-scoped only), so an
+   * actor-level *school* scope cannot be enforced here yet.
    */
   async issueChildConnectToken(
     studentId: string,
@@ -1692,9 +1761,9 @@ export class AuthService {
       where: { id: studentId },
       include: { school: true },
     });
-    if (!student) throw new Error('Estudiante no encontrado');
+    if (!student) throw new NotFoundException('Estudiante no encontrado');
     if (student.organizationId !== organizationId) {
-      throw new Error('El estudiante no pertenece a tu organización');
+      throw new ForbiddenException('El estudiante no pertenece a tu organización');
     }
 
     await this.authTokens.revokeFor({ type: 'CHILD_CONNECT', studentId });

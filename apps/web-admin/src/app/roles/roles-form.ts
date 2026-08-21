@@ -1,25 +1,25 @@
 import { Toast } from '#/ui';
 import { HttpClient, httpResource } from '@angular/common/http';
-import { Component, inject, input, model, OnInit, output } from '@angular/core';
-import { FormsModule, NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { afterRenderEffect, Component, inject, input, model, output, signal } from '@angular/core';
+import { form, FormField, required } from '@angular/forms/signals';
 import { Prisma } from '@generated/prisma';
 import { firstValueFrom } from 'rxjs';
 @Component({
   selector: 'app-roles-form',
-  imports: [ReactiveFormsModule, FormsModule],
+  imports: [FormField],
   template: `
-    <form [formGroup]="form" (ngSubmit)="createRole()">
+    <form (submit)="createRole($event)">
       <div class="fieldset">
         <label for="name">Nombre</label>
-        <input id="name" formControlName="name" class="input input-primary" />
+        <input id="name" [formField]="form.name" class="input input-primary" />
       </div>
       <div class="fieldset">
         <label for="description">Descripción</label>
-        <input id="description" formControlName="description" class="input input-primary" />
+        <input id="description" [formField]="form.description" class="input input-primary" />
       </div>
       <div class="fieldset">
         <label for="organizationId">Organización</label>
-        <select id="organizationId" formControlName="organizationId" class="select select-primary">
+        <select id="organizationId" [formField]="$any(form.organizationId)" class="select select-primary">
           <option [value]="null">Seleccionar Organización</option>
           @for (organization of organizations.value(); track organization.id) {
             <option [value]="organization.id">
@@ -49,9 +49,8 @@ import { firstValueFrom } from 'rxjs';
     </form>
   `,
 })
-export class RolesForm implements OnInit {
+export class RolesForm {
   private http = inject(HttpClient);
-  private fb = inject(NonNullableFormBuilder);
   private toast = inject(Toast);
   public closeModal = output<void>();
   public data = input<{
@@ -73,34 +72,46 @@ export class RolesForm implements OnInit {
 
   public selectedIds = model<string[]>([]);
 
-  public form = this.fb.group({
-    name: ['', [Validators.required]],
-    description: ['', [Validators.required]],
-    organizationId: this.fb.control<string | null>(null, []),
-    permissionIds: this.fb.control<string[]>([], []),
+  public formModel = signal<{
+    name: string;
+    description: string;
+    organizationId: string | null;
+    permissionIds: string[];
+  }>({
+    name: '',
+    description: '',
+    organizationId: null,
+    permissionIds: [],
   });
 
-  ngOnInit() {
-    if (this.data()?.role) {
-      this.form.patchValue(this.data()!.role!);
-      this.selectedIds.set(this.data()!.role!.permissions.map((p) => p.id));
-    }
+  public form = form(this.formModel, (schemaPath) => {
+    required(schemaPath.name);
+    required(schemaPath.name);
+  });
+
+  constructor() {
+    afterRenderEffect(() => {
+      const role = this.data()?.role;
+      if (role) {
+        this.formModel.update((value) => ({ ...value, ...role }));
+        this.selectedIds.set(role.permissions.map((p) => p.id));
+      }
+    });
   }
 
   togglePermission(id: string) {
     this.selectedIds.update((ids) => (ids.includes(id) ? ids.filter((id) => id !== id) : [...ids, id]));
   }
 
-  public createRole() {
-    if (this.form.invalid) {
+  public createRole(event: Event) {
+    event.preventDefault();
+    if (this.form().invalid()) {
       this.toast.showError('Formulario inválido');
       return;
     }
-    this.form.patchValue({
-      permissionIds: this.selectedIds(),
-    });
+    this.form.permissionIds().value.set(this.selectedIds());
 
-    const req = this.form.getRawValue();
+    const req = this.formModel();
 
     if (this.data()?.role) {
       void firstValueFrom(this.http.patch('/api/v1/roles', { ...req, id: this.data()!.role!.id }))

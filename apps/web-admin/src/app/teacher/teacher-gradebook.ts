@@ -1,5 +1,5 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { EmptyState, PageHeader, StatCard } from '#/ui';
+import { Component } from '@angular/core';
 
 @Component({
   selector: 'app-teacher-gradebook',
@@ -20,9 +20,7 @@ import { EmptyState, PageHeader, StatCard } from '#/ui';
 
     <div class="mt-6 card border border-base-200 bg-base-100">
       <div class="card-body">
-        <h2 class="text-lg font-semibold text-base-content">
-          Calificaciones recientes
-        </h2>
+        <h2 class="text-lg font-semibold text-base-content">Calificaciones recientes</h2>
         @if (grades.length === 0) {
           <lib-empty-state
             title="Sin calificaciones registradas"
@@ -58,7 +56,6 @@ import { EmptyState, PageHeader, StatCard } from '#/ui';
       </div>
     </div>
   `,
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class TeacherGradebook {
   grades = [

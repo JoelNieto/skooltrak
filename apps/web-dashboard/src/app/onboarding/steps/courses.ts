@@ -1,14 +1,14 @@
-import { markGroupDirty, Toast } from '#/ui';
+import { Toast } from '#/ui';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { Component, computed, inject, input, output, signal } from '@angular/core';
-import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { form, FormField, required } from '@angular/forms/signals';
 import { toFetchQueryRecord } from '../../core/fetch-query-params';
 import Store from '../../core/store';
 import { CreatedEntity } from '../setup-wizard';
 
 @Component({
   selector: 'app-courses-step',
-  imports: [ReactiveFormsModule],
+  imports: [FormField],
   template: `
     <div class="w-full max-w-md text-center space-y-8 animate-fade-in">
       <!-- Icon -->
@@ -56,12 +56,12 @@ import { CreatedEntity } from '../setup-wizard';
         </div>
       } @else {
         <!-- Form Fields -->
-        <form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-4 text-left">
+        <form (submit)="onSubmit($event)" class="space-y-4 text-left">
           <div class="fieldset">
             <label for="studyPlanId" class="label">
               <span class="label-text font-medium">Plan de Estudio</span>
             </label>
-            <select id="studyPlanId" formControlName="studyPlanId" class="select select-bordered w-full">
+            <select id="studyPlanId" [formField]="form.studyPlanId" class="select select-bordered w-full">
               <option value="" disabled>Selecciona un plan...</option>
               @for (plan of allStudyPlans(); track plan.id) {
                 <option [value]="plan.id">{{ plan.name }}</option>
@@ -73,7 +73,7 @@ import { CreatedEntity } from '../setup-wizard';
             <label for="subjectId" class="label">
               <span class="label-text font-medium">Asignatura</span>
             </label>
-            <select id="subjectId" formControlName="subjectId" class="select select-bordered w-full">
+            <select id="subjectId" [formField]="form.subjectId" class="select select-bordered w-full">
               <option value="" disabled>Selecciona una asignatura...</option>
               @for (subject of subjects.value(); track subject.id) {
                 <option [value]="subject.id">{{ subject.name }}</option>
@@ -94,7 +94,7 @@ import { CreatedEntity } from '../setup-wizard';
             <input
               type="text"
               id="code"
-              formControlName="code"
+              [formField]="form.code"
               class="input input-bordered w-full"
               placeholder="MAT-101"
             />
@@ -149,7 +149,6 @@ import { CreatedEntity } from '../setup-wizard';
   `,
 })
 export default class CoursesStep {
-  private fb = inject(NonNullableFormBuilder);
   #http = inject(HttpClient);
   private toasts = inject(Toast);
   private store = inject(Store);
@@ -201,15 +200,20 @@ export default class CoursesStep {
     return [...apiPlans, ...newPlans.filter((np) => !apiPlans.some((ap) => ap.id === np.id))];
   });
 
-  public form = this.fb.group({
-    code: [''],
-    subjectId: ['', [Validators.required]],
-    studyPlanId: ['', [Validators.required]],
+  private formModel = signal({
+    code: '',
+    subjectId: '',
+    studyPlanId: '',
   });
 
-  public onSubmit() {
-    if (this.form.invalid) {
-      markGroupDirty(this.form);
+  public form = form(this.formModel, (schemaPath) => {
+    required(schemaPath.subjectId);
+    required(schemaPath.studyPlanId);
+  });
+
+  public onSubmit(event: Event) {
+    event.preventDefault();
+    if (this.form().invalid()) {
       this.toasts.showError('Por favor, completa todos los campos requeridos');
       return;
     }
@@ -223,7 +227,7 @@ export default class CoursesStep {
 
     this.saving.set(true);
 
-    const formValue = this.form.getRawValue();
+    const formValue = this.formModel();
 
     this.#http
       .post<{ id: string; name: string }>('/api/v1/courses', {
@@ -238,7 +242,7 @@ export default class CoursesStep {
             this.entityCreated.emit({ id: course.id, name: course.name, type: 'course' });
             this.toasts.showSuccess(`Curso "${course.name}" creado`);
           }
-          this.form.reset();
+          this.form().reset();
 
           if (!this.addAnother) {
             this.completed.emit();

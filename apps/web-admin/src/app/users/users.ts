@@ -2,16 +2,8 @@ import { Confirmation, Error, Modal, Pagination, Paginator, Toast } from '#/ui';
 import { Menu, MenuContent, MenuItem, MenuTrigger } from '@angular/aria/menu';
 import { OverlayModule } from '@angular/cdk/overlay';
 import { DatePipe } from '@angular/common';
-import {
-  afterRenderEffect,
-  ChangeDetectionStrategy,
-  Component,
-  effect,
-  inject,
-  signal,
-  viewChild,
-} from '@angular/core';
-import { httpResource, HttpClient } from '@angular/common/http';
+import { HttpClient, httpResource } from '@angular/common/http';
+import { afterRenderEffect, Component, effect, inject, signal, viewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { Prisma } from '@generated/prisma';
@@ -19,7 +11,18 @@ import { toFetchQueryRecord } from '../core/fetch-query-params';
 import { UsersForm } from './users-form';
 @Component({
   selector: 'app-users',
-  imports: [RouterLink, DatePipe, Menu, MenuContent, MenuItem, MenuTrigger, OverlayModule, Paginator, FormsModule, Error],
+  imports: [
+    RouterLink,
+    DatePipe,
+    Menu,
+    MenuContent,
+    MenuItem,
+    MenuTrigger,
+    OverlayModule,
+    Paginator,
+    FormsModule,
+    Error,
+  ],
   providers: [Pagination],
   template: `<div class="breadcrumbs text-sm">
       <ul>
@@ -43,95 +46,91 @@ import { UsersForm } from './users-form';
       </div>
     </div>
     @if (users.error()) {
-      <lib-error
-        (retry)="users.reload()"
-        [description]="$safeNavigationMigration(users.error()?.message)"
-      />
+      <lib-error (retry)="users.reload()" [description]="$safeNavigationMigration(users.error()?.message)" />
     } @else {
-    <div class="overflow-x-auto">
-      <table class="table">
-        <thead>
-          <tr>
-            <th>Nombre</th>
-            <th>Correo</th>
-            <th>Rol</th>
-            <th>Organización</th>
-            <th>Fecha de creación</th>
-            <th>Fecha de actualización</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody>
-          @for (user of users.value(); track user.id) {
+      <div class="overflow-x-auto">
+        <table class="table">
+          <thead>
             <tr>
-              <td>{{ user.firstName }} {{ user.lastName }}</td>
-              <td>{{ user.email }}</td>
-              <td>{{ user.role?.name ?? 'Sin rol' }}</td>
-              <td>{{ user.organization?.name ?? 'Sin organización' }}</td>
-              <td>{{ user.createdAt | date: 'medium' }}</td>
-              <td>{{ user.updatedAt | date: 'medium' }}</td>
-              <td>
-                <button
-                  class="cursor-pointer hover:bg-base-200 p-1 rounded-lg flex items-center justify-center"
-                  ngMenuTrigger
-                  #origin
-                  #trigger="ngMenuTrigger"
-                  [menu]="formatMenu()"
-                >
-                  <span class="material-symbols-outlined text-xl">more_horiz</span>
-                </button>
-                <ng-template
-                  [cdkConnectedOverlayOpen]="trigger.expanded()"
-                  [cdkConnectedOverlay]="{ origin, usePopover: 'inline' }"
-                  [cdkConnectedOverlayPositions]="[
-                    {
-                      originX: 'end',
-                      originY: 'bottom',
-                      overlayX: 'end',
-                      overlayY: 'top',
-                      offsetY: 4,
-                    },
-                  ]"
-                  cdkAttachPopoverAsChild
-                >
-                  <div ngMenu class="bg-base-100 shadow-sm rounded-lg p-1 w-48" #formatMenu="ngMenu">
-                    <ng-template ngMenuContent>
-                      <button
-                        ngMenuItem
-                        value="Edit"
-                        class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-base-200 w-full"
-                        (click)="editUser($any(user))"
-                      >
-                        <span class="material-symbols-outlined text-lg">edit</span>
-                        <span>Editar</span>
-                      </button>
-                      <button
-                        ngMenuItem
-                        value="Delete"
-                        class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-base-200 w-full"
-                        (click)="deleteUser($any(user))"
-                      >
-                        <span class="material-symbols-outlined text-lg">delete</span>
-                        <span>Eliminar</span>
-                      </button>
-                    </ng-template>
-                  </div>
-                </ng-template>
-              </td>
+              <th>Nombre</th>
+              <th>Correo</th>
+              <th>Rol</th>
+              <th>Organización</th>
+              <th>Fecha de creación</th>
+              <th>Fecha de actualización</th>
+              <th></th>
             </tr>
-          }
-        </tbody>
-      </table>
-      <lib-paginator
-        [count]="pagination.count()"
-        [take]="pagination.take()"
-        [skip]="pagination.skip()"
-        (skipChange)="pagination.updateSkip($event)"
-        (takeChange)="pagination.updateTake($event)"
-      />
-    </div>
+          </thead>
+          <tbody>
+            @for (user of users.value(); track user.id) {
+              <tr>
+                <td>{{ user.firstName }} {{ user.lastName }}</td>
+                <td>{{ user.email }}</td>
+                <td>{{ user.role?.name ?? 'Sin rol' }}</td>
+                <td>{{ user.organization?.name ?? 'Sin organización' }}</td>
+                <td>{{ user.createdAt | date: 'medium' }}</td>
+                <td>{{ user.updatedAt | date: 'medium' }}</td>
+                <td>
+                  <button
+                    class="cursor-pointer hover:bg-base-200 p-1 rounded-lg flex items-center justify-center"
+                    ngMenuTrigger
+                    #origin
+                    #trigger="ngMenuTrigger"
+                    [menu]="formatMenu()"
+                  >
+                    <span class="material-symbols-outlined text-xl">more_horiz</span>
+                  </button>
+                  <ng-template
+                    [cdkConnectedOverlayOpen]="trigger.expanded()"
+                    [cdkConnectedOverlay]="{ origin, usePopover: 'inline' }"
+                    [cdkConnectedOverlayPositions]="[
+                      {
+                        originX: 'end',
+                        originY: 'bottom',
+                        overlayX: 'end',
+                        overlayY: 'top',
+                        offsetY: 4,
+                      },
+                    ]"
+                    cdkAttachPopoverAsChild
+                  >
+                    <div ngMenu class="bg-base-100 shadow-sm rounded-lg p-1 w-48" #formatMenu="ngMenu">
+                      <ng-template ngMenuContent>
+                        <button
+                          ngMenuItem
+                          value="Edit"
+                          class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-base-200 w-full"
+                          (click)="editUser($any(user))"
+                        >
+                          <span class="material-symbols-outlined text-lg">edit</span>
+                          <span>Editar</span>
+                        </button>
+                        <button
+                          ngMenuItem
+                          value="Delete"
+                          class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-base-200 w-full"
+                          (click)="deleteUser($any(user))"
+                        >
+                          <span class="material-symbols-outlined text-lg">delete</span>
+                          <span>Eliminar</span>
+                        </button>
+                      </ng-template>
+                    </div>
+                  </ng-template>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+        <lib-paginator
+          [count]="pagination.count()"
+          [take]="pagination.take()"
+          [skip]="pagination.skip()"
+          (skipChange)="pagination.updateSkip($event)"
+          (takeChange)="pagination.updateTake($event)"
+        />
+      </div>
     }`,
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Users {
   public pagination = inject(Pagination);

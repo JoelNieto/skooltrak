@@ -1,7 +1,8 @@
-import { markGroupDirty, Toast } from '#/ui';
+import { Toast } from '#/ui';
 import { HttpClient } from '@angular/common/http';
 import { Component, inject, signal } from '@angular/core';
-import { FormsModule, NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormsModule } from '@angular/forms';
+import { form, FormField, maxLength, required } from '@angular/forms/signals';
 import { Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import Auth from '../auth/auth';
@@ -9,7 +10,7 @@ import Store from '../core/store';
 
 @Component({
   selector: 'app-create-school',
-  imports: [ReactiveFormsModule, FormsModule],
+  imports: [FormField, FormsModule],
   template: `
     <div class="min-h-screen flex flex-col gradient-bg">
       <!-- Fixed Header -->
@@ -34,7 +35,7 @@ import Store from '../core/store';
           </div>
 
           <!-- School Form -->
-          <form [formGroup]="form" class="space-y-4 text-left">
+          <form class="space-y-4 text-left">
             <div class="fieldset">
               <label for="schoolName" class="label">
                 <span class="label-text font-medium">Nombre de la Escuela</span>
@@ -44,10 +45,13 @@ import Store from '../core/store';
                 id="schoolName"
                 class="input input-bordered w-full"
                 placeholder="Escuela Primaria Central"
-                formControlName="name"
+                [class.ng-invalid]="form.name().touched() && form.name().invalid()"
+                [formField]="form.name"
               />
-              @if (form.get('name')?.touched && form.get('name')?.hasError('required')) {
-                <p class="text-error text-xs mt-1">El nombre de la escuela es requerido</p>
+              @if (form.name().touched() && form.name().invalid()) {
+                @for (error of form.name().errors(); track error) {
+                  <p class="text-error text-sm">{{ error.message }}</p>
+                }
               }
             </div>
 
@@ -60,10 +64,13 @@ import Store from '../core/store';
                 id="schoolShortName"
                 class="input input-bordered w-full"
                 placeholder="EPC"
-                formControlName="shortName"
+                [formField]="form.shortName"
+                [class.ng-invalid]="form.shortName().touched() && form.shortName().invalid()"
               />
-              @if (form.get('shortName')?.touched && form.get('shortName')?.hasError('required')) {
-                <p class="text-error text-xs mt-1">El nombre corto es requerido</p>
+              @if (form.shortName().touched() && form.shortName().invalid()) {
+                @for (error of form.shortName().errors(); track error) {
+                  <p class="text-error text-sm">{{ error.message }}</p>
+                }
               }
               <p class="text-xs text-base-content/60 mt-1">Se usará para identificar rápidamente tu escuela</p>
             </div>
@@ -129,8 +136,8 @@ import Store from '../core/store';
         </button>
         <button
           class="btn btn-primary"
-          [disabled]="!acknowledged() || form.invalid || saving()"
-          (click)="createSchool()"
+          [disabled]="!acknowledged() || form().invalid() || saving()"
+          (click)="createSchool($event)"
         >
           @if (saving()) {
             <span class="loading loading-spinner loading-sm"></span>
@@ -162,7 +169,6 @@ import Store from '../core/store';
 })
 export default class CreateSchool {
   private router = inject(Router);
-  private fb = inject(NonNullableFormBuilder);
   private http = inject(HttpClient);
   private toasts = inject(Toast);
   private store = inject(Store);
@@ -171,14 +177,20 @@ export default class CreateSchool {
   public acknowledged = signal(false);
   public saving = signal(false);
 
-  public form = this.fb.group({
-    name: ['', [Validators.required]],
-    shortName: ['', [Validators.required]],
+  private formModel = signal({
+    name: '',
+    shortName: '',
   });
 
-  public createSchool() {
-    if (this.form.invalid) {
-      markGroupDirty(this.form);
+  public form = form(this.formModel, (schemaPath) => {
+    required(schemaPath.name, { message: 'Nombre de la escuela requerido' });
+    required(schemaPath.shortName, { message: 'Nombre corto de la escuela requerido' });
+    maxLength(schemaPath.shortName, 10, { message: 'Maximo 10 caractered' });
+  });
+
+  public createSchool(event: Event) {
+    event.preventDefault();
+    if (this.form().invalid()) {
       this.toasts.showError('Por favor, completa todos los campos');
       return;
     }
@@ -190,7 +202,7 @@ export default class CreateSchool {
 
     this.saving.set(true);
 
-    const { name, shortName } = this.form.getRawValue();
+    const { name, shortName } = this.formModel();
 
     (async () => {
       try {

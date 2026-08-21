@@ -1,55 +1,73 @@
-import { markGroupDirty, Toast } from '#/ui';
-import { Combobox } from '@angular/aria/combobox';
+import { Toast } from '#/ui';
+import { Combobox, ComboboxPopup, ComboboxWidget } from '@angular/aria/combobox';
 import { Listbox, Option } from '@angular/aria/listbox';
 import { OverlayModule } from '@angular/cdk/overlay';
 import { HttpClient, httpResource } from '@angular/common/http';
-import {
-  afterRenderEffect,
-  Component,
-  computed,
-  inject,
-  input,
-  output,
-  signal,
-  viewChild,
-  viewChildren,
-} from '@angular/core';
-import { FormsModule, NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Prisma } from '@generated/prisma';
+import { afterRenderEffect, Component, computed, inject, input, output, signal, viewChild } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { form, FormField, required } from '@angular/forms/signals';
+import { SubjectGetPayload } from 'generated/prisma/models';
 import { firstValueFrom } from 'rxjs';
 import { toFetchQueryParams } from '../../core/fetch-query-params';
 import Store from '../../core/store';
+
+interface CourseModel {
+  id: string;
+  name: string;
+  shortName: string;
+  code: string;
+  subjectId: string;
+  studyPlanId: string;
+  teacherId: string;
+  subject: SubjectGetPayload<{ include: undefined }>;
+}
 @Component({
   selector: 'app-courses-form',
-  imports: [ReactiveFormsModule, FormsModule, Combobox, Listbox, Option, OverlayModule],
-  template: `<form [formGroup]="form" (ngSubmit)="onSubmit()">
+  imports: [FormField, FormsModule, Combobox, ComboboxPopup, ComboboxWidget, Listbox, Option, OverlayModule],
+  template: `<form (submit)="onSubmit($event)">
     <div class="flex flex-col gap-2">
       <div class="fieldset">
         <label for="code">Código <span class="text-base-content/50 text-xs">(opcional)</span></label>
-        <input type="text" id="code" name="code" formControlName="code" class="input input-primary" />
+        <input type="text" id="code" [formField]="form.code" class="input input-primary" />
       </div>
       <div class="fieldset">
         <label for="subjectInput">Asignatura</label>
-        <div ngCombobox filterMode="highlight" class="relative">
-          <div #origin class="autocomplete">
+        <div class="relative flex flex-col">
+          <div #origin class="flex relative items-center input input-primary">
+            <span class="search-icon material-symbols-outlined" translate="no" aria-hidden="true">search</span>
             <input
+              #combobox="ngCombobox"
+              ngCombobox
               id="subjectInput"
               aria-label="Buscar asignatura"
+              autocomplete="off"
               placeholder="Buscar o crear asignatura..."
-              [(ngModel)]="subjectQuery"
-              [ngModelOptions]="{ standalone: true }"
-              ngComboboxInput
-              class="input input-primary w-full"
-              (blur)="onSubjectBlur()"
+              [(value)]="subjectQuery"
+              [(expanded)]="popupExpanded"
+              (click)="popupExpanded.set(true)"
+              class="w-full"
+              (focusout)="onSubjectBlur()"
             />
-          </div>
-          <ng-template ngComboboxPopupContainer>
-            <ng-template
-              [cdkConnectedOverlay]="{ origin, usePopover: 'inline', matchWidth: true }"
-              [cdkConnectedOverlayOpen]="true"
+            <button
+              type="button"
+              class="clear-button"
+              aria-label="Clear"
+              (mousedown)="$event.preventDefault()"
+              (click)="clear()"
             >
+              <span class="clear-icon material-symbols-outlined" translate="no" aria-hidden="true">close</span>
+            </button>
+          </div>
+          <div aria-live="polite" class="cdk-visually-hidden">
+            {{ filteredSubjects().length === 0 ? 'Sin asignaturas encontradas para "' + subjectQuery() + '"' : '' }}
+          </div>
+          <ng-template
+            [cdkConnectedOverlay]="{ origin, usePopover: 'inline', matchWidth: true }"
+            [cdkConnectedOverlayOpen]="popupExpanded()"
+          >
+            <ng-template ngComboboxPopup [combobox]="combobox">
               <div
-                class="popup bg-base-100 border border-base-300 rounded-box shadow-lg mt-1 max-h-60 overflow-auto z-50"
+                class="popup bg-base-100 border border-base-300 rounded-box w-full shadow-lg mt-1 max-h-60 overflow-auto z-50"
               >
                 @if (filteredSubjects().length === 0 && subjectQuery().trim()) {
                   <div
@@ -66,7 +84,18 @@ import Store from '../../core/store';
                 } @else if (filteredSubjects().length === 0) {
                   <div class="p-3 text-base-content/50">Escribe para buscar o crear una asignatura</div>
                 }
-                <div ngListbox>
+                <div
+                  #listbox="ngListbox"
+                  ngListbox
+                  ngComboboxWidget
+                  focusMode="activedescendant"
+                  [tabindex]="-1"
+                  class="w-full"
+                  [activeDescendant]="listbox.activeDescendant()"
+                  [(value)]="selectedOption"
+                  (click)="onSubjectCommit()"
+                  (keydown.enter)="onSubjectCommit()"
+                >
                   @for (subject of filteredSubjects(); track subject.id) {
                     <div
                       ngOption
@@ -74,8 +103,6 @@ import Store from '../../core/store';
                       [label]="subject.name"
                       tabindex="0"
                       class="p-3 cursor-pointer hover:bg-base-200 data-[active=true]:bg-base-200"
-                      (click)="selectSubject(subject)"
-                      (keydown.enter)="selectSubject(subject)"
                     >
                       {{ subject.name }}
                     </div>
@@ -93,7 +120,7 @@ import Store from '../../core/store';
       </div>
       <div class="fieldset">
         <label for="studyPlanId">Plan de estudio</label>
-        <select id="studyPlanId" name="studyPlanId" formControlName="studyPlanId" class="select select-primary">
+        <select id="studyPlanId" [formField]="form.studyPlanId" class="select select-primary">
           <option value="" disabled>Seleccionar plan</option>
           @for (studyPlan of studyPlans.value(); track studyPlan.id) {
             <option [value]="studyPlan.id">{{ studyPlan.name }}</option>
@@ -102,7 +129,7 @@ import Store from '../../core/store';
       </div>
       <div class="fieldset">
         <label for="teacherId">Docente</label>
-        <select id="teacherId" name="teacherId" formControlName="teacherId" class="select select-primary">
+        <select id="teacherId" [formField]="form.teacherId" class="select select-primary">
           <option [value]="null" disabled>Seleccionar docente...</option>
           @for (teacher of teachers.value(); track teacher.id) {
             <option [value]="teacher.id">{{ teacher.name }}</option>
@@ -136,11 +163,13 @@ import Store from '../../core/store';
   `,
 })
 export default class CoursesForm {
-  private fb = inject(NonNullableFormBuilder);
+  clear() {
+    this.subjectQuery.set('');
+    this.selectedOption.set([]);
+    this.popupExpanded.set(false);
+  }
   public data = input<{
-    course?: Prisma.CourseGetPayload<{
-      include: { school: true; subject: true; studyPlan: true };
-    }>;
+    course?: CourseModel;
   }>();
   public closeModal = output<void>();
   private toast = inject(Toast);
@@ -163,9 +192,10 @@ export default class CoursesForm {
     return subjects.filter((subject) => subject.name.toLowerCase().includes(query));
   });
 
-  public listbox = viewChild<Listbox<string>>(Listbox);
-  public options = viewChildren<Option<string>>(Option);
+  readonly listbox = viewChild(Listbox);
+  selectedOption = signal<string[]>([]);
   public combobox = viewChild(Combobox);
+  popupExpanded = signal(false);
 
   public subjects = httpResource<{ id: string; name: string }[]>(() => ({
     url: '/api/v1/subjects',
@@ -183,13 +213,18 @@ export default class CoursesForm {
     };
   });
 
-  public form = this.fb.group({
-    name: [''],
-    shortName: [''],
-    code: [''],
-    subjectId: ['', [Validators.required]],
-    studyPlanId: ['', [Validators.required]],
-    teacherId: this.fb.control<string | null>(null),
+  public formModel = signal<{
+    name: string;
+    shortName: string;
+    code: string;
+    subjectId: string;
+    studyPlanId: string;
+    teacherId: string;
+  }>({ name: '', shortName: '', code: '', subjectId: '', studyPlanId: '', teacherId: '' });
+
+  public form = form(this.formModel, (schemaPath) => {
+    required(schemaPath.subjectId, { message: 'Asignatura requerida' });
+    required(schemaPath.studyPlanId, { message: 'Plan requerido' });
   });
 
   public teachers = httpResource<{ id: string; name: string }[]>(() => ({
@@ -203,56 +238,36 @@ export default class CoursesForm {
 
   constructor() {
     afterRenderEffect(() => {
-      if (this.data()?.course) {
-        this.form.patchValue(this.data()!.course!);
+      const course = this.data()?.course;
+      if (course) {
+        this.formModel.set(course);
         // Set selected subject for editing
-        if (this.data()!.course!.subject) {
+        if (course.subject) {
           this.selectedSubject.set({
-            id: this.data()!.course!.subject.id,
-            name: this.data()!.course!.subject.name,
+            id: course.subject.id,
+            name: course.subject.name,
           });
-          this.subjectQuery.set(this.data()!.course!.subject.name);
+          this.subjectQuery.set(course.subject.name);
         }
-      }
-    });
-
-    // Scroll to active option when navigating
-    afterRenderEffect(() => {
-      const option = this.options().find((opt) => opt.active());
-      if (option) {
-        setTimeout(() => option.element.scrollIntoView({ block: 'nearest' }), 50);
       }
     });
 
     // Reset listbox scroll when combobox closes
     afterRenderEffect(() => {
-      if (!this.combobox()?.expanded()) {
-        setTimeout(() => this.listbox()?.element.scrollTo(0, 0), 150);
+      if (this.combobox()?.expanded() === true) {
+        this.listbox()?.scrollActiveItemIntoView();
       }
     });
   }
 
-  public selectSubject(subject: { id: string; name: string }) {
-    this.selectedSubject.set(subject);
-    this.subjectQuery.set(subject.name);
-    this.form.patchValue({ subjectId: subject.id });
+  public onSubjectBlur() {
+    this.commitSelection();
   }
 
-  public onSubjectBlur() {
-    const query = this.subjectQuery().trim().toLowerCase();
-    if (!query) return;
-
-    const filtered = this.filteredSubjects();
-    // If there's exactly one match, select it
-    if (filtered.length === 1) {
-      this.selectSubject(filtered[0]);
-      return;
-    }
-    // If the query exactly matches a subject name, select it
-    const exactMatch = filtered.find((s) => s.name.toLowerCase() === query);
-    if (exactMatch) {
-      this.selectSubject(exactMatch);
-    }
+  onSubjectCommit() {
+    this.commitSelection();
+    this.popupExpanded.set(false);
+    this.combobox()?.element.focus();
   }
 
   public async createSubject() {
@@ -271,14 +286,13 @@ export default class CoursesForm {
         .substring(0, 4) || name.substring(0, 4).toUpperCase();
 
     try {
-      const newSubject = await firstValueFrom(
+      await firstValueFrom(
         this.http.post<{ id: string; name: string }>('/api/v1/subjects', {
           name,
           code,
         }),
       );
 
-      this.selectSubject({ id: newSubject.id, name: newSubject.name });
       this.toast.showSuccess(`Asignatura "${name}" creada exitosamente`);
       // Reload subjects
       this.subjects.reload();
@@ -287,14 +301,26 @@ export default class CoursesForm {
     }
   }
 
-  public onSubmit() {
+  commitSelection() {
+    const selected = this.selectedOption();
+
+    if (selected.length > 0) {
+      const label = this.filteredSubjects().filter((x) => selected.includes(x.id));
+      this.subjectQuery.set(label[0].name);
+    } else {
+      this.subjectQuery.set('');
+      this.selectedOption.set([]);
+    }
+  }
+
+  public onSubmit(event: Event) {
+    event.preventDefault();
     this.errorMessage.set('');
-    if (this.form.invalid) {
+    if (this.form().invalid()) {
       this.toast.showError('Llenar todos los campos');
-      markGroupDirty(this.form);
       return;
     }
-    const req = this.form.getRawValue();
+    const req = this.formModel();
     if (this.data()?.course) {
       this.http
         .patch('/api/v1/courses', {

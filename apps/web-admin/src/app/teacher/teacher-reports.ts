@@ -1,5 +1,5 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { EmptyState, PageHeader } from '#/ui';
+import { Component } from '@angular/core';
 
 @Component({
   selector: 'app-teacher-reports',
@@ -26,9 +26,7 @@ import { EmptyState, PageHeader } from '#/ui';
     </div>
 
     <div class="mt-6">
-      <h2 class="text-lg font-semibold text-base-content mb-3">
-        Historial de reportes
-      </h2>
+      <h2 class="text-lg font-semibold text-base-content mb-3">Historial de reportes</h2>
       @if (reportHistory.length === 0) {
         <lib-empty-state
           title="Sin reportes generados"
@@ -44,7 +42,6 @@ import { EmptyState, PageHeader } from '#/ui';
       }
     </div>
   `,
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class TeacherReports {
   reportTypes = [

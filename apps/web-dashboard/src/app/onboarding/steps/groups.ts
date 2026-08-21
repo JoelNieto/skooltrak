@@ -1,13 +1,13 @@
-import { markGroupDirty, Toast } from '#/ui';
+import { Toast } from '#/ui';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { Component, computed, inject, input, output, signal } from '@angular/core';
-import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { form, FormField, required } from '@angular/forms/signals';
 import Store from '../../core/store';
 import { CreatedEntity } from '../setup-wizard';
 
 @Component({
   selector: 'app-groups-step',
-  imports: [ReactiveFormsModule],
+  imports: [FormField],
   template: `
     <div class="w-full max-w-md text-center space-y-8 animate-fade-in">
       <!-- Icon -->
@@ -55,12 +55,12 @@ import { CreatedEntity } from '../setup-wizard';
         </div>
       } @else {
         <!-- Form Fields -->
-        <form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-4 text-left">
+        <form (submit)="onSubmit($event)" class="space-y-4 text-left">
           <div class="fieldset">
             <label for="studyPlanId" class="label">
               <span class="label-text font-medium">Plan de Estudio</span>
             </label>
-            <select id="studyPlanId" formControlName="studyPlanId" class="select select-bordered w-full">
+            <select id="studyPlanId" [formField]="form.studyPlanId" class="select select-bordered w-full">
               <option value="" disabled>Selecciona un plan...</option>
               @for (plan of allStudyPlans(); track plan.id) {
                 <option [value]="plan.id">{{ plan.name }}</option>
@@ -75,12 +75,14 @@ import { CreatedEntity } from '../setup-wizard';
             <input
               type="text"
               id="name"
-              formControlName="name"
+              [formField]="form.name"
               class="input input-bordered w-full"
               placeholder="Ej: Grupo A - Generación 2025"
             />
-            @if (form.get('name')?.touched && form.get('name')?.hasError('required')) {
-              <p class="text-error text-xs mt-1">El nombre es requerido</p>
+            @if (form.name().touched() && form.name().invalid()) {
+              @for (error of form.name().errors(); track error) {
+                <p class="text-error text-sm">{{ error.message }}</p>
+              }
             }
           </div>
 
@@ -133,7 +135,6 @@ import { CreatedEntity } from '../setup-wizard';
   `,
 })
 export default class GroupsStep {
-  private fb = inject(NonNullableFormBuilder);
   #http = inject(HttpClient);
   private toasts = inject(Toast);
   private store = inject(Store);
@@ -177,15 +178,15 @@ export default class GroupsStep {
     return [...apiPlans, ...newPlans.filter((np) => !apiPlans.some((ap) => ap.id === np.id))];
   });
 
-  public form = this.fb.group({
-    name: ['', [Validators.required]],
-    studyPlanId: ['', [Validators.required]],
-    active: [true],
-  });
+  private formModel = signal({ name: '', studyPlanId: '', active: true });
 
-  public onSubmit() {
-    if (this.form.invalid) {
-      markGroupDirty(this.form);
+  public form = form(this.formModel, (schemaPath) => {
+    required(schemaPath.name, { message: 'Nombre requerido' });
+    required(schemaPath.studyPlanId);
+  });
+  public onSubmit(event: Event) {
+    event.preventDefault();
+    if (this.form().invalid()) {
       this.toasts.showError('Por favor, completa todos los campos');
       return;
     }
@@ -199,7 +200,7 @@ export default class GroupsStep {
 
     this.saving.set(true);
 
-    const formValue = this.form.getRawValue();
+    const formValue = this.formModel();
 
     this.#http
       .post<{ id: string; name: string }>('/api/v1/class-groups', {
@@ -214,7 +215,7 @@ export default class GroupsStep {
             this.entityCreated.emit({ id: group.id, name: group.name, type: 'group' });
             this.toasts.showSuccess(`Grupo "${group.name}" creado`);
           }
-          this.form.reset({ active: true });
+          this.form().value.set({ active: true, name: '', studyPlanId: '' });
 
           if (!this.addAnother) {
             this.completed.emit();

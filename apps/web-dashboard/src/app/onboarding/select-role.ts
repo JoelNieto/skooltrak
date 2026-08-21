@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { afterRenderEffect, Component, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 
 interface RoleOption {
@@ -76,7 +76,7 @@ interface RoleOption {
     }
   `,
 })
-export default class SelectRole implements OnInit {
+export default class SelectRole {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
 
@@ -114,13 +114,15 @@ export default class SelectRole implements OnInit {
     },
   ];
 
-  ngOnInit() {
-    this.schoolId.set(this.route.snapshot.queryParamMap.get('schoolId') || '');
-    this.schoolName.set(this.route.snapshot.queryParamMap.get('schoolName') || '');
+  constructor() {
+    afterRenderEffect(() => {
+      this.schoolId.set(this.route.snapshot.queryParamMap.get('schoolId') || '');
+      this.schoolName.set(this.route.snapshot.queryParamMap.get('schoolName') || '');
 
-    if (!this.schoolId()) {
-      this.router.navigate(['/onboarding/join-school']);
-    }
+      if (!this.schoolId()) {
+        this.router.navigate(['/onboarding/join-school']);
+      }
+    });
   }
 
   selectRole(roleId: string) {

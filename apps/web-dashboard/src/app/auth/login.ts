@@ -1,15 +1,13 @@
-import { Toast } from '#/ui';
+import { Loader, Toast } from '#/ui';
 import { Component, inject, signal } from '@angular/core';
-import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { NonNullableFormBuilder } from '@angular/forms';
+import { email, form, FormField, minLength, required } from '@angular/forms/signals';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-
-import { Loader, markGroupDirty } from '#/ui';
-
 import Auth from './auth';
 
 @Component({
   selector: 'app-login',
-  imports: [ReactiveFormsModule, Loader, RouterLink],
+  imports: [FormField, Loader, RouterLink],
 
   template: ` <div class="gradient-bg min-h-screen flex items-center justify-center p-4">
     @defer {
@@ -31,7 +29,7 @@ import Auth from './auth';
                 <span>Tu contraseña ha sido actualizada. Ya puedes iniciar sesión.</span>
               </div>
             }
-            <form id="loginForm" class="space-y-6" [formGroup]="form" (ngSubmit)="onSubmit()">
+            <form id="loginForm" class="space-y-6" (submit)="onSubmit($event)">
               <!-- Email Field -->
               <div class="fieldset">
                 <label for="email">Correo Electrónico</label>
@@ -42,16 +40,16 @@ import Auth from './auth';
                   <input
                     type="email"
                     id="email"
-                    name="email"
                     class="input input-primary"
                     placeholder="you@example.com"
-                    formControlName="email"
+                    [formField]="form.email"
+                    [class.ng-invalid]="form.email().invalid() && form.email().touched()"
                   />
                 </div>
-                @if (form.get('email')?.hasError('required')) {
-                  <p id="emailError" class="text-red-500 text-xs mt-1 hidden">
-                    Por favor, ingresa un correo electrónico válido
-                  </p>
+                @if (form.email().touched() && form.email().errors()) {
+                  @for (error of form.email().errors(); track error.message) {
+                    <p class="text-error text-xs mt-1">{{ error.message }}</p>
+                  }
                 }
               </div>
 
@@ -69,17 +67,16 @@ import Auth from './auth';
                   <input
                     type="password"
                     id="password"
-                    name="password"
                     class="input input-primary"
                     placeholder="••••••••"
-                    formControlName="password"
+                    [class.ng-invalid]="form.password().invalid() && form.password().touched()"
+                    [formField]="form.password"
                   />
-                  <button type="button" id="togglePassword" class="absolute inset-y-0 right-0 pr-3 flex items-center">
-                    <i class="fas fa-eye text-gray-400 hover:text-gray-600 transition duration-200"></i>
-                  </button>
                 </div>
-                @if (form.get('password')?.hasError('required')) {
-                  <p id="passwordError" class="text-error text-xs mt-1 hidden">Por favor, ingresa una contraseña</p>
+                @if (form.password().touched() && form.password().errors()) {
+                  @for (error of form.password().errors(); track error.message) {
+                    <p class="text-error text-xs mt-1">{{ error.message }}</p>
+                  }
                 }
               </div>
 
@@ -109,10 +106,18 @@ export default class Login {
   private route = inject(ActivatedRoute);
   private toasts = inject(Toast);
 
-  public form = this.fb.group({
-    email: ['', [Validators.required, Validators.email]],
-    password: ['', [Validators.required]],
+  private loginModel = signal({
+    email: '',
+    password: '',
   });
+
+  public form = form(this.loginModel, (schemaPath) => {
+    required(schemaPath.email, { message: 'El correo electrónico es requerido' });
+    required(schemaPath.password, { message: 'La contraseña es requerida' });
+    email(schemaPath.email, { message: 'El correo electrónico no es válido' });
+    minLength(schemaPath.password, 6, { message: 'La contraseña debe tener al menos 6 caracteres' });
+  });
+
   public loading = signal(false);
   public passwordResetSuccess = signal(false);
 
@@ -125,13 +130,13 @@ export default class Login {
     });
   }
 
-  public async onSubmit() {
-    if (this.form.invalid) {
+  public async onSubmit(event: Event) {
+    event.preventDefault();
+    if (this.form().invalid()) {
       this.toasts.showError('Llenar todos los campos');
-      markGroupDirty(this.form);
       return;
     }
-    const { email, password } = this.form.getRawValue();
+    const { email, password } = this.form().value();
     this.loading.set(true);
     await this.auth.signIn(email, password);
     this.loading.set(false);

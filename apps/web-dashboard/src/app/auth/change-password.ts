@@ -1,11 +1,11 @@
 import { Component, inject, signal } from '@angular/core';
-import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { form, FormField, minLength, required, validate } from '@angular/forms/signals';
 import { Router, RouterLink } from '@angular/router';
 import Auth from './auth';
 
 @Component({
   selector: 'app-change-password',
-  imports: [ReactiveFormsModule, RouterLink],
+  imports: [FormField, RouterLink],
   template: `
     <div class="flex flex-col gap-6">
       <div class="breadcrumbs text-sm">
@@ -35,12 +35,12 @@ import Auth from './auth';
           </div>
         }
 
-        <form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-4">
+        <form (submit)="onSubmit($event)" class="space-y-4">
           <div class="fieldset">
             <label for="currentPassword">Contraseña actual</label>
             <input
               id="currentPassword"
-              formControlName="currentPassword"
+              [formField]="form.currentPassword"
               type="password"
               autocomplete="current-password"
               class="input input-primary w-full"
@@ -51,36 +51,41 @@ import Auth from './auth';
             <label for="newPassword">Nueva contraseña</label>
             <input
               id="newPassword"
-              formControlName="newPassword"
+              [formField]="form.newPassword"
               type="password"
               autocomplete="new-password"
               class="input input-primary w-full"
+              [class.ng-invalid]="form.newPassword().touched() && form.newPassword().invalid()"
               placeholder="Mínimo 8 caracteres"
             />
+            @if (form.newPassword().touched() && form.newPassword().errors().length) {
+              @for (error of form.newPassword().errors(); track error) {
+                <p class="text-error text-sm">{{ error.message }}</p>
+              }
+            }
           </div>
           <div class="fieldset">
             <label for="confirmPassword">Confirmar contraseña</label>
             <input
               id="confirmPassword"
-              formControlName="confirmPassword"
+              [formField]="form.confirmPassword"
               type="password"
               autocomplete="new-password"
               class="input input-primary w-full"
+              [class.ng-invalid]="form.newPassword().touched() && form.newPassword().invalid()"
               placeholder="Repite la nueva contraseña"
             />
           </div>
 
-          @if (passwordMismatch()) {
-            <p class="text-error text-sm">Las contraseñas no coinciden.</p>
+          @if (form.confirmPassword().touched() && form.confirmPassword().errors().length) {
+            @for (error of form.confirmPassword().errors(); track error) {
+              <p class="text-error text-sm">{{ error.message }}</p>
+            }
           }
 
           <div class="flex flex-col sm:flex-row gap-3 pt-2">
             <a routerLink="/home" class="btn btn-outline w-full sm:w-auto"> Cancelar </a>
-            <button
-              type="submit"
-              [disabled]="loading() || form.invalid || passwordMismatch()"
-              class="btn btn-primary w-full sm:w-auto"
-            >
+            <button type="submit" [disabled]="loading() || form().invalid()" class="btn btn-primary w-full sm:w-auto">
               @if (loading()) {
                 <span class="loading loading-spinner loading-sm"></span>
                 Cambiando...
@@ -102,35 +107,41 @@ export default class ChangePasswordComponent {
   success = signal(false);
   error = signal(false);
   errorMessage = signal('Error al cambiar la contraseña. Verifica tu contraseña actual.');
-  passwordMismatch = signal(false);
 
-  form = new FormGroup({
-    currentPassword: new FormControl('', [Validators.required]),
-    newPassword: new FormControl('', [Validators.required, Validators.minLength(8)]),
-    confirmPassword: new FormControl('', [Validators.required]),
-  });
+  private formModel = signal({ currentPassword: '', newPassword: '', confirmPassword: '' });
 
-  constructor() {
-    // Watch for password mismatch
-    this.form.valueChanges.subscribe(() => {
-      const { newPassword, confirmPassword } = this.form.value;
-      this.passwordMismatch.set(!!newPassword && !!confirmPassword && newPassword !== confirmPassword);
-      // Clear success/error when form changes
+  form = form(this.formModel, (schemaPath) => {
+    required(schemaPath.currentPassword);
+    required(schemaPath.newPassword);
+    required(schemaPath.confirmPassword);
+    minLength(schemaPath.newPassword, 8, { message: 'Minimo 8 caracteres' });
+    validate(schemaPath.confirmPassword, ({ value, valueOf, stateOf }) => {
       if (this.success() || this.error()) {
         this.success.set(false);
         this.error.set(false);
       }
+      if (!stateOf(schemaPath.newPassword).touched()) {
+        return null;
+      }
+      if (value() !== valueOf(schemaPath.newPassword)) {
+        return {
+          kind: 'passwordMismatch',
+          message: 'Contrasenas no coiciden',
+        };
+      }
+      return null;
     });
-  }
+  });
 
-  async onSubmit() {
-    if (this.form.invalid || this.passwordMismatch()) return;
+  async onSubmit(event: Event) {
+    event.preventDefault();
+    if (this.form().invalid()) return;
 
     this.loading.set(true);
     this.error.set(false);
     this.success.set(false);
 
-    const { currentPassword, newPassword } = this.form.getRawValue();
+    const { currentPassword, newPassword } = this.formModel();
     if (!currentPassword || !newPassword) {
       this.loading.set(false);
       this.error.set(true);
@@ -143,7 +154,8 @@ export default class ChangePasswordComponent {
 
     if (result) {
       this.success.set(true);
-      this.form.reset();
+      this.form().reset();
+      this.formModel.set({ currentPassword: '', newPassword: '', confirmPassword: '' });
       // Navigate to home after a brief delay
       setTimeout(() => {
         this.router.navigate(['/home']);

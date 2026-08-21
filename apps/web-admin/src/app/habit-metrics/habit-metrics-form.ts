@@ -1,19 +1,19 @@
-import { markGroupDirty, Toast } from '#/ui';
+import { Toast } from '#/ui';
 import { HttpClient } from '@angular/common/http';
-import { Component, inject, input, OnInit, output } from '@angular/core';
-import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { afterRenderEffect, Component, inject, input, output, signal } from '@angular/core';
+import { form, FormField, min, required } from '@angular/forms/signals';
 import { Prisma } from '@generated/prisma';
 import { firstValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-habit-metrics-form',
-  imports: [ReactiveFormsModule],
-  template: `<form [formGroup]="form" (ngSubmit)="onSubmit()">
+  imports: [FormField],
+  template: `<form (submit)="onSubmit($event)">
     <div class="fieldset">
       <label for="name">Nombre</label>
       <input
         type="text"
-        formControlName="name"
+        [formField]="form.name"
         class="input input-primary"
         placeholder="Ej: Responsabilidad, Respeto, Puntualidad"
       />
@@ -21,7 +21,7 @@ import { firstValueFrom } from 'rxjs';
     <div class="fieldset">
       <label for="description">Descripción</label>
       <textarea
-        formControlName="description"
+        [formField]="form.description"
         class="textarea textarea-primary"
         rows="3"
         placeholder="Descripción opcional del criterio"
@@ -29,11 +29,11 @@ import { firstValueFrom } from 'rxjs';
     </div>
     <div class="fieldset">
       <label for="order">Orden de visualización</label>
-      <input type="number" formControlName="order" class="input input-primary" min="0" />
+      <input type="number" [formField]="form.order" class="input input-primary" />
     </div>
     <div class="form-control">
       <label class="label cursor-pointer justify-start gap-4">
-        <input type="checkbox" formControlName="active" class="checkbox" />
+        <input type="checkbox" [formField]="form.active" class="checkbox" />
         <span class="label-text">Activo</span>
       </label>
     </div>
@@ -43,42 +43,53 @@ import { firstValueFrom } from 'rxjs';
     </div>
   </form>`,
 })
-export default class HabitMetricsForm implements OnInit {
+export default class HabitMetricsForm {
   public closeModal = output<boolean>();
   public data = input<{
     metric?: Prisma.HabitMetricGetPayload<{ include: undefined }>;
   }>();
-  private fb = inject(NonNullableFormBuilder);
   private toast = inject(Toast);
   private http = inject(HttpClient);
-
-  public form = this.fb.group({
-    name: ['', [Validators.required]],
-    description: [''],
-    order: [0, [Validators.required]],
-    active: [true],
+  private habitMetricsModel = signal<{
+    name: string;
+    description: string;
+    order: number;
+    active: boolean;
+  }>({
+    name: '',
+    description: '',
+    order: 0,
+    active: true,
   });
 
-  ngOnInit(): void {
-    if (this.data()?.metric) {
-      const metric = this.data()!.metric!;
-      this.form.patchValue({
-        name: metric.name,
-        description: metric.description ?? '',
-        order: metric.order,
-        active: metric.active,
-      });
-    }
+  public form = form(this.habitMetricsModel, (schemaPath) => {
+    required(schemaPath.name, { message: 'El nombre es requerido' });
+    required(schemaPath.order, { message: 'El orden es requerido' });
+    min(schemaPath.order, 0, { message: 'El orden debe ser mayor o igual a 0' });
+  });
+
+  constructor() {
+    afterRenderEffect(() => {
+      if (this.data()?.metric) {
+        const metric = this.data()!.metric!;
+        this.form().value.set({
+          name: metric.name,
+          description: metric.description ?? '',
+          order: metric.order,
+          active: metric.active,
+        });
+      }
+    });
   }
 
-  onSubmit() {
-    if (this.form.invalid) {
-      markGroupDirty(this.form);
+  onSubmit(event: Event) {
+    event.preventDefault();
+    if (this.form().invalid()) {
       this.toast.showError('Por favor, completa todos los campos requeridos');
       return;
     }
 
-    const body = this.form.getRawValue();
+    const body = this.form().value();
     if (this.data()?.metric) {
       void firstValueFrom(this.http.patch('/api/v1/habit-metrics', { ...body, id: this.data()!.metric!.id }))
         .then(() => {

@@ -1,6 +1,6 @@
 import { Toast } from '#/ui';
 import { HttpClient } from '@angular/common/http';
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, afterRenderEffect, inject, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import Auth from './auth';
@@ -29,7 +29,7 @@ import Auth from './auth';
     </div>
   `,
 })
-export default class ConnectChild implements OnInit {
+export default class ConnectChild {
   token = signal<string | null>(null);
   loading = signal(true);
   error = signal<string | null>(null);
@@ -39,17 +39,19 @@ export default class ConnectChild implements OnInit {
   private readonly auth = inject(Auth);
   private readonly toast = inject(Toast);
 
-  ngOnInit(): void {
-    const params = new URLSearchParams(window.location.search);
-    const token = params.get('token');
-    if (!token) {
-      this.error.set('Código QR inválido: falta el token.');
-      this.loading.set(false);
-      return;
-    }
+  constructor() {
+    afterRenderEffect(() => {
+      const params = new URLSearchParams(window.location.search);
+      const token = params.get('token');
+      if (!token) {
+        this.error.set('Código QR inválido: falta el token.');
+        this.loading.set(false);
+        return;
+      }
 
-    this.token.set(token);
-    this.redeem(token);
+      this.token.set(token);
+      this.redeem(token);
+    });
   }
 
   async redeem(token: string) {

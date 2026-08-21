@@ -1,12 +1,11 @@
-import { Confirmation, Error, Modal, Toast } from '#/ui';
+import { Confirmation, Modal, Toast } from '#/ui';
 import { Menu, MenuContent, MenuItem, MenuTrigger } from '@angular/aria/menu';
 import { OverlayModule } from '@angular/cdk/overlay';
 import { DatePipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, inject, viewChild } from '@angular/core';
-import { httpResource } from '@angular/common/http';
+import { HttpClient, httpResource } from '@angular/common/http';
+import { Component, inject, viewChild } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { Prisma } from '@generated/prisma';
-import { HttpClient } from '@angular/common/http';
 import { RolesForm } from './roles-form';
 
 @Component({
@@ -103,8 +102,6 @@ import { RolesForm } from './roles-form';
         </tbody>
       </table>
     </div>`,
-  styles: ``,
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Roles {
   private modal = inject(Modal);
@@ -113,9 +110,10 @@ export class Roles {
   private confirmation = inject(Confirmation);
   private toast = inject(Toast);
 
-  public roles = httpResource<
-    Prisma.RoleGetPayload<{ include: { organization: true; permissions: true } }>[]
-  >(() => '/api/v1/roles', { defaultValue: [] });
+  public roles = httpResource<Prisma.RoleGetPayload<{ include: { organization: true; permissions: true } }>[]>(
+    () => '/api/v1/roles',
+    { defaultValue: [] },
+  );
 
   public editRole(role?: Prisma.RoleGetPayload<false>) {
     this.modal

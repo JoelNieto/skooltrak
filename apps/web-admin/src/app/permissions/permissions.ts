@@ -2,16 +2,8 @@ import { Confirmation, Error, Modal, Pagination, Paginator, Toast } from '#/ui';
 import { Menu, MenuContent, MenuItem, MenuTrigger } from '@angular/aria/menu';
 import { OverlayModule } from '@angular/cdk/overlay';
 import { DatePipe } from '@angular/common';
-import {
-  afterRenderEffect,
-  ChangeDetectionStrategy,
-  Component,
-  effect,
-  inject,
-  signal,
-  viewChild,
-} from '@angular/core';
-import { httpResource, HttpClient } from '@angular/common/http';
+import { HttpClient, httpResource } from '@angular/common/http';
+import { afterRenderEffect, Component, effect, inject, signal, viewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { Prisma } from '@generated/prisma';
@@ -41,9 +33,7 @@ import { PermissionsForm } from './permissions-form';
     <div class="flex justify-between items-center mb-4">
       <div>
         <h1 class="text-2xl text-base-content font-medium">Permisos</h1>
-        <p class="text-sm text-gray-500 dark:text-gray-400">
-          Listado de permisos
-        </p>
+        <p class="text-sm text-gray-500 dark:text-gray-400">Listado de permisos</p>
       </div>
 
       <button class="btn btn-neutral" (click)="editPermission()">
@@ -52,12 +42,7 @@ import { PermissionsForm } from './permissions-form';
     </div>
     <div class="flex justify-between items-center mb-4">
       <div class="md:w-96 w-full">
-        <input
-          type="text"
-          class="input "
-          placeholder="Buscar"
-          [(ngModel)]="searchText"
-        />
+        <input type="text" class="input " placeholder="Buscar" [(ngModel)]="searchText" />
       </div>
     </div>
     @if (permissions.error()) {
@@ -66,99 +51,87 @@ import { PermissionsForm } from './permissions-form';
         [description]="$safeNavigationMigration(permissions.error()?.message)"
       />
     } @else {
-    <div class="overflow-x-auto">
-      <table class="table">
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Descripción</th>
-            <th>Fecha de creación</th>
-            <th>Fecha de actualización</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody>
-          @for (permission of permissions.value(); track permission.id) {
-          <tr>
-            <td>{{ permission.descriptiveId }}</td>
-            <td>{{ permission.description }}</td>
-            <td>{{ permission.createdAt | date : 'medium' }}</td>
-            <td>{{ permission.updatedAt | date : 'medium' }}</td>
-            <td>
-              <button
-                class="cursor-pointer hover:bg-base-200 p-1 rounded-lg flex items-center justify-center"
-                ngMenuTrigger
-                #origin
-                #trigger="ngMenuTrigger"
-                [menu]="formatMenu()"
-              >
-                <span class="material-symbols-outlined text-xl"
-                  >more_horiz</span
-                >
-              </button>
-              <ng-template
-                [cdkConnectedOverlayOpen]="trigger.expanded()"
-                [cdkConnectedOverlay]="{origin, usePopover: 'inline'}"
-                [cdkConnectedOverlayPositions]="[
-                  {
-                    originX: 'end',
-                    originY: 'bottom',
-                    overlayX: 'end',
-                    overlayY: 'top',
-                    offsetY: 4
-                  }
-                ]"
-                cdkAttachPopoverAsChild
-              >
-                <div
-                  ngMenu
-                  class="bg-base-100 shadow-sm rounded-lg p-1 w-48"
-                  #formatMenu="ngMenu"
-                >
-                  <ng-template ngMenuContent>
-                    <button
-                      ngMenuItem
-                      value="Edit"
-                      class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-base-200 w-full"
-                      (click)="editPermission($any(permission))"
-                    >
-                      <span class="material-symbols-outlined text-lg"
-                        >edit</span
-                      >
-                      <span>Editar</span>
-                    </button>
-                    <button
-                      ngMenuItem
-                      value="Delete"
-                      class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-base-200 w-full"
-                      (click)="deletePermission($any(permission))"
-                    >
-                      <span class="material-symbols-outlined text-lg"
-                        >delete</span
-                      >
-                      <span>Eliminar</span>
-                    </button>
+      <div class="overflow-x-auto">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Descripción</th>
+              <th>Fecha de creación</th>
+              <th>Fecha de actualización</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (permission of permissions.value(); track permission.id) {
+              <tr>
+                <td>{{ permission.descriptiveId }}</td>
+                <td>{{ permission.description }}</td>
+                <td>{{ permission.createdAt | date: 'medium' }}</td>
+                <td>{{ permission.updatedAt | date: 'medium' }}</td>
+                <td>
+                  <button
+                    class="cursor-pointer hover:bg-base-200 p-1 rounded-lg flex items-center justify-center"
+                    ngMenuTrigger
+                    #origin
+                    #trigger="ngMenuTrigger"
+                    [menu]="formatMenu()"
+                  >
+                    <span class="material-symbols-outlined text-xl">more_horiz</span>
+                  </button>
+                  <ng-template
+                    [cdkConnectedOverlayOpen]="trigger.expanded()"
+                    [cdkConnectedOverlay]="{ origin, usePopover: 'inline' }"
+                    [cdkConnectedOverlayPositions]="[
+                      {
+                        originX: 'end',
+                        originY: 'bottom',
+                        overlayX: 'end',
+                        overlayY: 'top',
+                        offsetY: 4,
+                      },
+                    ]"
+                    cdkAttachPopoverAsChild
+                  >
+                    <div ngMenu class="bg-base-100 shadow-sm rounded-lg p-1 w-48" #formatMenu="ngMenu">
+                      <ng-template ngMenuContent>
+                        <button
+                          ngMenuItem
+                          value="Edit"
+                          class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-base-200 w-full"
+                          (click)="editPermission($any(permission))"
+                        >
+                          <span class="material-symbols-outlined text-lg">edit</span>
+                          <span>Editar</span>
+                        </button>
+                        <button
+                          ngMenuItem
+                          value="Delete"
+                          class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-base-200 w-full"
+                          (click)="deletePermission($any(permission))"
+                        >
+                          <span class="material-symbols-outlined text-lg">delete</span>
+                          <span>Eliminar</span>
+                        </button>
+                      </ng-template>
+                    </div>
                   </ng-template>
-                </div>
-              </ng-template>
-            </td>
-          </tr>
-          }
-        </tbody>
-      </table>
-    </div>
-    <div class="px-4">
-      <lib-paginator
-        [count]="pagination.count()"
-        [take]="pagination.take()"
-        [skip]="pagination.skip()"
-        (skipChange)="pagination.updateSkip($event)"
-        (takeChange)="pagination.updateTake($event)"
-      />
-    </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      <div class="px-4">
+        <lib-paginator
+          [count]="pagination.count()"
+          [take]="pagination.take()"
+          [skip]="pagination.skip()"
+          (skipChange)="pagination.updateSkip($event)"
+          (takeChange)="pagination.updateTake($event)"
+        />
+      </div>
     }`,
-  styles: ``,
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Permissions {
   private modal = inject(Modal);

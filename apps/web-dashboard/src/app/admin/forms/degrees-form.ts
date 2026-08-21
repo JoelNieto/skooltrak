@@ -1,25 +1,36 @@
-import { markGroupDirty, Toast } from '#/ui';
+import { Toast } from '#/ui';
 import { HttpClient, httpResource } from '@angular/common/http';
-import { Component, inject, input, OnInit, output } from '@angular/core';
-import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { afterRenderEffect, Component, inject, input, output, signal } from '@angular/core';
+import { disabled, form, FormField, required } from '@angular/forms/signals';
 import { Prisma } from '@generated/prisma';
 import Store from '../../core/store';
 @Component({
   selector: 'app-degrees-form',
-  imports: [ReactiveFormsModule],
-  template: `<form [formGroup]="form" (ngSubmit)="onSubmit()">
+  imports: [FormField],
+  template: `<form (submit)="onSubmit($event)">
     <div class="flex flex-col gap-2">
       <div class="fieldset">
         <label for="name">Nombre</label>
-        <input type="text" id="name" formControlName="name" class="input input-primary" />
+        <input type="text" id="name" [formField]="form.name" class="input input-primary" ç />
       </div>
       <div class="fieldset">
         <label for="shortName">Nombre corto</label>
-        <input type="text" id="shortName" formControlName="shortName" class="input input-primary" />
+        <input
+          type="text"
+          id="shortName"
+          [formField]="form.shortName"
+          class="input input-primary"
+          [class.ng-invalid]="form.shortName().touched() && form.shortName().invalid()"
+        />
       </div>
       <div class="fieldset">
         <label for="schoolId">Escuela</label>
-        <select id="schoolId" formControlName="schoolId" class="select select-primary">
+        <select
+          id="schoolId"
+          [formField]="form.schoolId"
+          class="select select-primary"
+          [class.ng-invalid]="form.schoolId().touched() && form.schoolId().invalid()"
+        >
           @for (school of schools.value(); track school.id) {
             <option [value]="school.id">{{ school.name }}</option>
           }
@@ -32,8 +43,7 @@ import Store from '../../core/store';
     </div>
   </form>`,
 })
-export default class DegreesForm implements OnInit {
-  private fb = inject(NonNullableFormBuilder);
+export default class DegreesForm {
   public store = inject(Store);
   public data = input<{
     degree?: Prisma.DegreeGetPayload<{ include: { school: true } }>;
@@ -43,28 +53,38 @@ export default class DegreesForm implements OnInit {
   private toasts = inject(Toast);
   public schools = httpResource<Array<{ id: string; name: string }>>(() => '/api/v1/schools', { defaultValue: [] });
 
-  public form = this.fb.group({
-    name: ['', [Validators.required]],
-    shortName: ['', [Validators.required]],
-    schoolId: ['', [Validators.required]],
+  private formModel = signal({ name: '', shortName: '', schoolId: '' });
+
+  public form = form(this.formModel, (schemaPath) => {
+    required(schemaPath.name, { message: 'Nombre requerido' });
+    required(schemaPath.shortName, { message: 'Nombre corto requerido' });
+    required(schemaPath.schoolId, { message: 'Colegio requerido' });
+    disabled(schemaPath.schoolId, { when: () => !!this.data()?.degree });
   });
 
-  ngOnInit(): void {
-    if (this.store.currentSchoolId()) {
-      this.form.get('schoolId')?.setValue(this.store.currentSchoolId()!);
-    }
-    if (this.data()?.degree) {
-      this.form.patchValue(this.data()!.degree!);
-    }
+  constructor() {
+    afterRenderEffect(() => {
+      if (this.store.currentSchoolId()) {
+        this.form.schoolId().value.set(this.store.currentSchoolId()!);
+      }
+    });
+
+    afterRenderEffect(() => {
+      if (this.data()?.degree) {
+        this.formModel.set(this.data()!.degree!);
+      }
+    });
   }
 
-  onSubmit() {
-    if (this.form.invalid) {
-      markGroupDirty(this.form);
+  onSubmit(event: Event) {
+    event.preventDefault();
+    if (this.form().invalid()) {
+      this.form.shortName().markAsTouched();
+      this.form.name().markAsTouched();
       this.toasts.showError('Llenar todos los campos');
       return;
     }
-    const request = this.form.getRawValue();
+    const request = this.formModel();
 
     if (this.data()?.degree) {
       this.#http.patch('/api/v1/degrees', { ...request, id: this.data()!.degree!.id }).subscribe({

@@ -1,6 +1,6 @@
 import { Loader, Toast } from '#/ui';
 import { HttpClient } from '@angular/common/http';
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { afterRenderEffect, Component, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import Auth from './auth';
@@ -134,7 +134,7 @@ import Auth from './auth';
     </div>
   `,
 })
-export default class VerifyEmail implements OnInit {
+export default class VerifyEmail {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private http = inject(HttpClient);
@@ -149,12 +149,14 @@ export default class VerifyEmail implements OnInit {
 
   private cooldownInterval: ReturnType<typeof setInterval> | null = null;
 
-  ngOnInit() {
-    const token = this.route.snapshot.queryParamMap.get('token');
-    const email = this.route.snapshot.queryParamMap.get('email') ?? this.auth.user()?.email;
-    if (token && email) {
-      void this.verifyToken(token, email);
-    }
+  constructor() {
+    afterRenderEffect(() => {
+      const token = this.route.snapshot.queryParamMap.get('token');
+      const email = this.route.snapshot.queryParamMap.get('email') ?? this.auth.user()?.email;
+      if (token && email) {
+        void this.verifyToken(token, email);
+      }
+    });
   }
 
   private async verifyToken(token: string, email: string) {

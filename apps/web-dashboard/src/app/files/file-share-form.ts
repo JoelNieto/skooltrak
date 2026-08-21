@@ -1,8 +1,8 @@
-import { markGroupDirty, Toast } from '#/ui';
+import { Toast } from '#/ui';
 import { HttpClient, httpResource } from '@angular/common/http';
-import { Component, computed, DestroyRef, inject, input, OnInit, output, signal } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { afterRenderEffect, Component, computed, effect, inject, input, output, signal } from '@angular/core';
+import { NonNullableFormBuilder } from '@angular/forms';
+import { form, FormField, required } from '@angular/forms/signals';
 import { forkJoin } from 'rxjs';
 import Store from '../core/store';
 
@@ -13,14 +13,21 @@ type ShareTargets = {
   USER: { ids: string[]; labels: Record<string, string> };
 };
 
+interface FileShareFormData {
+  targetType: 'COURSE' | 'CLASS_GROUP' | 'SCHOOL' | 'USER';
+  targetId: string;
+  courseId: string;
+  permission: 'VIEW' | 'EDIT';
+}
+
 @Component({
   selector: 'app-file-share-form',
-  imports: [ReactiveFormsModule],
-  template: `<form [formGroup]="form" (ngSubmit)="onSubmit()">
+  imports: [FormField],
+  template: `<form (submit)="onSubmit($event)">
     <div class="flex flex-col gap-4">
       <div class="fieldset">
         <label for="targetType">Compartir con</label>
-        <select id="targetType" formControlName="targetType" class="select select-primary w-full">
+        <select id="targetType" [formField]="form.targetType" class="select select-primary w-full">
           <option value="COURSE">Curso</option>
           <option value="CLASS_GROUP">Grupo</option>
           <option value="SCHOOL">Escuela</option>
@@ -29,9 +36,9 @@ type ShareTargets = {
       </div>
       <div class="fieldset">
         <label for="targetId">IDs de destino</label>
-        @if (targetType() === 'COURSE') {
+        @if (form.targetType().value() === 'COURSE') {
           <div class="flex flex-col sm:flex-row gap-2">
-            <select id="courseId" formControlName="courseId" class="select select-primary w-full sm:flex-1">
+            <select id="courseId" [formField]="form.courseId" class="select select-primary w-full sm:flex-1">
               <option value="" disabled selected>Seleccionar curso</option>
               @for (course of coursesResource.value(); track course.id) {
                 <option [value]="course.id">{{ course.name }}</option>
@@ -45,7 +52,7 @@ type ShareTargets = {
               id="targetId"
               type="text"
               class="input input-primary w-full sm:flex-1"
-              formControlName="targetId"
+              [formField]="form.targetId"
               placeholder="Pega un ID y agrega"
             />
             <button class="btn btn-secondary w-full sm:w-auto" type="button" (click)="addTarget()">Agregar</button>
@@ -64,7 +71,7 @@ type ShareTargets = {
       </div>
       <div class="fieldset">
         <label for="permission">Permiso</label>
-        <select id="permission" formControlName="permission" class="select select-primary w-full">
+        <select id="permission" [formField]="form.permission" class="select select-primary w-full">
           <option value="VIEW">Solo ver</option>
           <option value="EDIT">Puede editar</option>
         </select>
@@ -78,21 +85,26 @@ type ShareTargets = {
     </div>
   </form>`,
 })
-export default class FileShareForm implements OnInit {
+export default class FileShareForm {
   public data = input.required<{ fileId: string; shareTargets?: ShareTargets }>();
   public closeModal = output<{ shared: boolean } | undefined>();
   private fb = inject(NonNullableFormBuilder);
   private http = inject(HttpClient);
   private toast = inject(Toast);
   private store = inject(Store);
-  private destroyRef = inject(DestroyRef);
 
-  public form = this.fb.group({
-    targetType: this.fb.control<'COURSE' | 'CLASS_GROUP' | 'SCHOOL' | 'USER'>('COURSE', [Validators.required]),
-    targetId: this.fb.control(''),
-    courseId: this.fb.control<string | null>(null),
-    permission: this.fb.control<'VIEW' | 'EDIT'>('VIEW', [Validators.required]),
+  private fileShareModel = signal<FileShareFormData>({
+    targetType: 'COURSE',
+    targetId: '',
+    courseId: '',
+    permission: 'VIEW',
   });
+
+  public form = form(this.fileShareModel, (schemaPath) => {
+    required(schemaPath.targetType, { message: 'El tipo de destino es requerido' });
+    required(schemaPath.permission, { message: 'El permiso es requerido' });
+  });
+
   public targetIds = signal<string[]>([]);
   public removedTargetIds = signal<string[]>([]);
   public hasTargets = computed(() => this.targetIds().length > 0);
@@ -109,32 +121,26 @@ export default class FileShareForm implements OnInit {
   );
 
   constructor() {
-    this.form
-      .get('targetType')
-      ?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(() => {
-        const targetType = this.targetType();
-        const existingTargets = this.data().shareTargets?.[targetType]?.ids ?? [];
-        this.targetIds.set(existingTargets);
-        this.removedTargetIds.set([]);
-        this.form.get('targetId')?.setValue('');
-        this.form.get('courseId')?.setValue(null);
-      });
-  }
+    effect(() => {
+      const targetType = this.form.targetType().value();
+      const existingTargets = this.data().shareTargets?.[targetType]?.ids ?? [];
+      this.targetIds.set(existingTargets);
+      this.removedTargetIds.set([]);
 
-  ngOnInit() {
-    const initialTargetType = this.targetType();
-    const initialTargets = this.data().shareTargets?.[initialTargetType]?.ids ?? [];
-    this.targetIds.set(initialTargets);
-    this.removedTargetIds.set([]);
-  }
+      this.form.targetId().value.set('');
+      this.form.courseId().value.set('');
+    });
 
-  targetType() {
-    return this.form.getRawValue().targetType;
+    afterRenderEffect(() => {
+      const initialTargetType = this.form.targetType().value();
+      const initialTargets = this.data().shareTargets?.[initialTargetType]?.ids ?? [];
+      this.targetIds.set(initialTargets);
+      this.removedTargetIds.set([]);
+    });
   }
 
   addTarget() {
-    const formValue = this.form.getRawValue();
+    const formValue = this.form().value();
     const targetId = formValue.targetType === 'COURSE' ? (formValue.courseId?.trim() ?? '') : formValue.targetId.trim();
 
     if (!targetId) {
@@ -148,13 +154,13 @@ export default class FileShareForm implements OnInit {
       return [...current, targetId];
     });
     this.removedTargetIds.update((current) => current.filter((id) => id !== targetId));
-    this.form.get('targetId')?.setValue('');
-    this.form.get('courseId')?.setValue(null);
+    this.form.targetId().value.set('');
+    this.form.courseId().value.set('');
   }
 
   removeTarget(targetId: string) {
     this.targetIds.update((current) => current.filter((id) => id !== targetId));
-    const initialTargets = this.data().shareTargets?.[this.targetType()]?.ids ?? [];
+    const initialTargets = this.data().shareTargets?.[this.form.targetType().value()]?.ids ?? [];
     if (initialTargets.includes(targetId)) {
       this.removedTargetIds.update((current) => {
         if (current.includes(targetId)) {
@@ -166,7 +172,7 @@ export default class FileShareForm implements OnInit {
   }
 
   targetLabel(id: string) {
-    const targetType = this.targetType();
+    const targetType = this.form.targetType().value();
     const labels = this.data().shareTargets?.[targetType]?.labels ?? {};
     if (labels[id]) {
       return labels[id];
@@ -178,19 +184,19 @@ export default class FileShareForm implements OnInit {
     return course?.name ?? id;
   }
 
-  onSubmit() {
+  onSubmit(event: Event) {
+    event.preventDefault();
     if (!this.hasTargets()) {
       this.toast.showError('Agrega al menos un ID.');
       return;
     }
 
-    if (this.form.invalid) {
+    if (this.form().invalid()) {
       this.toast.showError('Formulario invalido');
-      markGroupDirty(this.form);
       return;
     }
 
-    const { targetType, permission } = this.form.getRawValue();
+    const { targetType, permission } = this.form().value();
     const fileId = this.data().fileId;
     const initialTargets = this.data().shareTargets?.[targetType]?.ids ?? [];
     const currentTargets = this.targetIds();

@@ -1,26 +1,26 @@
 import { Toast } from '#/ui';
 import { HttpClient, httpResource } from '@angular/common/http';
-import { Component, inject, output } from '@angular/core';
-import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Component, inject, output, signal } from '@angular/core';
+import { form, FormField, min, required } from '@angular/forms/signals';
 import Store from '../../core/store';
 
 @Component({
   selector: 'app-create-charge-form',
-  imports: [ReactiveFormsModule],
+  imports: [FormField],
   template: `
-    <form [formGroup]="form" (ngSubmit)="onSubmit()">
+    <form (submit)="onSubmit($event)">
       <div class="flex flex-col gap-4">
         <div class="fieldset">
           <label for="targetType">Objetivo</label>
-          <select formControlName="targetType" class="select select-primary w-full">
+          <select [formField]="form.targetType" class="select select-primary w-full">
             <option value="student">Estudiante</option>
             <option value="studyPlan">Plan de estudio</option>
           </select>
         </div>
-        @if (targetType === 'student') {
+        @if (form.targetType().value() === 'student') {
           <div class="fieldset">
             <label for="studentId">Estudiante</label>
-            <select formControlName="studentId" class="select select-primary w-full">
+            <select [formField]="form.studentId" class="select select-primary w-full">
               <option value="" disabled>Seleccionar estudiante...</option>
               @for (s of students.value(); track s.id) {
                 <option [value]="s.id">{{ s.firstName }} {{ s.fatherName }}</option>
@@ -28,10 +28,10 @@ import Store from '../../core/store';
             </select>
           </div>
         }
-        @if (targetType === 'studyPlan') {
+        @if (form.targetType().value() === 'studyPlan') {
           <div class="fieldset">
             <label for="studyPlanId">Plan de estudio</label>
-            <select formControlName="studyPlanId" class="select select-primary w-full">
+            <select [formField]="form.studyPlanId" class="select select-primary w-full">
               <option value="" disabled>Seleccionar plan...</option>
               @for (sp of studyPlans.value(); track sp.id) {
                 <option [value]="sp.id">{{ sp.name }}</option>
@@ -41,24 +41,24 @@ import Store from '../../core/store';
         }
         <div class="fieldset">
           <label for="amount">Monto</label>
-          <input type="number" step="0.01" min="0" formControlName="amount" class="input input-primary w-full" />
+          <input type="number" step="0.01" [formField]="form.amount" class="input input-primary w-full" />
         </div>
         <div class="fieldset">
           <label for="dueDate">Fecha de vencimiento</label>
-          <input type="date" formControlName="dueDate" class="input input-primary w-full" />
+          <input type="date" [formField]="form.dueDate" class="input input-primary w-full" />
         </div>
         <div class="fieldset">
           <label for="description">Descripción (opcional)</label>
           <input
             type="text"
-            formControlName="description"
+            [formField]="form.description"
             class="input input-primary w-full"
             placeholder="Ej. Colegiatura Septiembre"
           />
         </div>
         <div class="fieldset">
           <label for="chargeType">Tipo</label>
-          <select formControlName="chargeType" class="select select-primary w-full">
+          <select [formField]="form.chargeType" class="select select-primary w-full">
             <option value="CUSTOM">Personalizado</option>
             <option value="TUITION">Colegiatura</option>
             <option value="ENROLLMENT">Matrícula</option>
@@ -74,15 +74,9 @@ import Store from '../../core/store';
 })
 export default class CreateChargeForm {
   public closeModal = output<void>();
-  private fb = inject(NonNullableFormBuilder);
   private http = inject(HttpClient);
   private toast = inject(Toast);
   private store = inject(Store);
-
-  get targetType(): 'student' | 'studyPlan' {
-    const v = this.form.get('targetType')?.value as string | undefined;
-    return v === 'studyPlan' ? 'studyPlan' : 'student';
-  }
 
   public students = httpResource<{ id: string; firstName: string; fatherName: string }[]>(() => {
     const schoolId = this.store.currentSchoolId();
@@ -101,23 +95,37 @@ export default class CreateChargeForm {
     };
   });
 
-  public form = this.fb.group({
-    targetType: ['student' as const],
-    studentId: [''],
-    studyPlanId: [''],
-    amount: [0, [Validators.required, Validators.min(0.01)]],
-    dueDate: ['', Validators.required],
-    description: [''],
-    chargeType: ['CUSTOM' as const],
+  private formModel = signal<{
+    targetType: 'studyPlan' | 'student';
+    studentId: string;
+    studyPlanId: string;
+    amount: number;
+    dueDate: string;
+    description: string;
+    chargeType: 'CUSTOM' | 'TUITION' | 'ENROLLMENT';
+  }>({
+    targetType: 'student',
+    studentId: '',
+    studyPlanId: '',
+    amount: 0,
+    dueDate: '',
+    description: '',
+    chargeType: 'CUSTOM',
   });
 
-  onSubmit() {
-    if (this.form.invalid) {
-      this.form.markAllAsTouched();
+  public form = form(this.formModel, (schemaPath) => {
+    required(schemaPath.amount, { message: 'Monto requerido' });
+    required(schemaPath.dueDate, { message: 'Fecha de vencimiento requerida' });
+    min(schemaPath.amount, 0.01, { message: 'Monto minimo requerido' });
+  });
+
+  onSubmit(event: Event) {
+    event.preventDefault();
+    if (this.form().invalid()) {
       this.toast.showError('Completa los campos requeridos');
       return;
     }
-    const v = this.form.getRawValue();
+    const v = this.formModel();
     const schoolId = this.store.currentSchoolId();
     const school = this.store.currentSchool();
     if (!schoolId || !school) {

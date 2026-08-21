@@ -1,7 +1,8 @@
-import { markGroupDirty, TextEditor, Toast } from '#/ui';
+import { TextEditor, Toast } from '#/ui';
 import { HttpClient, httpResource } from '@angular/common/http';
-import { Component, effect, inject, input, OnInit, output, signal } from '@angular/core';
-import { FormArray, FormControl, NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { afterRenderEffect, Component, effect, inject, input, output, signal } from '@angular/core';
+import { NonNullableFormBuilder } from '@angular/forms';
+import { applyEach, form, FormField, required } from '@angular/forms/signals';
 import { addDays, format, setHours, setMinutes } from 'date-fns';
 import { firstValueFrom } from 'rxjs';
 import Store from '../core/store';
@@ -14,23 +15,33 @@ enum AssignmentType {
   PAPER = 'PAPER',
   NEW = 'NEW',
 }
+interface AssignmentFormData {
+  title: string;
+  details: string;
+  type: AssignmentType;
+  date: string;
+  requireSubmission: boolean;
+  teacherId: string;
+  courseId: string;
+  groupDates: { classGroupId: string; date: string }[];
+}
 
 @Component({
   selector: 'app-assignment-form',
-  imports: [ReactiveFormsModule, TextEditor],
-  template: `<form [formGroup]="form" (ngSubmit)="onSubmit()">
+  imports: [TextEditor, FormField],
+  template: `<form (submit)="onSubmit()">
     <div class="flex flex-col md:grid md:grid-cols-2 gap-4">
       <div class="fieldset col-span-2">
         <label for="title">Titulo</label>
-        <input type="text" formControlName="title" class="input input-primary" />
+        <input type="text" [formField]="form.title" class="input input-primary" />
       </div>
       <div class="fieldset col-span-2">
         <label for="details">Detalles</label>
-        <lib-text-editor formControlName="details" [bordered]="true" />
+        <lib-text-editor [formField]="form.details" [bordered]="true" />
       </div>
       <div class="fieldset col-span-2">
         <label for="courseId">Curso</label>
-        <select formControlName="courseId" class="select select-primary">
+        <select [formField]="form.courseId" class="select select-primary">
           <option disabled selected [value]="null">Seleccionar curso</option>
           @for (course of courses.value(); track course.id) {
             <option [value]="course.id">{{ course.name }}</option>
@@ -39,7 +50,7 @@ enum AssignmentType {
       </div>
       <div class="fieldset">
         <label for="type">Tipo</label>
-        <select formControlName="type" class="select select-primary">
+        <select [formField]="form.type" class="select select-primary">
           @for (type of types; track type.value) {
             <option [value]="type.value">{{ type.label }}</option>
           }
@@ -47,8 +58,8 @@ enum AssignmentType {
       </div>
       <div class="fieldset">
         <label for="teacherId">Profesor</label>
-        <select formControlName="teacherId" class="select select-primary">
-          <option disabled selected [value]="null">Seleccionar profesor</option>
+        <select [formField]="form.teacherId" class="select select-primary">
+          <option disabled selected [value]="">Seleccionar profesor</option>
           @for (teacher of teachers.value(); track teacher.id) {
             <option [value]="teacher.id">{{ teacher.name }}</option>
           }
@@ -56,30 +67,31 @@ enum AssignmentType {
       </div>
       <div class="fieldset">
         <label for="requireSubmission">Requiere envio</label>
-        <input type="checkbox" formControlName="requireSubmission" class="checkbox checkbox-primary" />
+        <input type="checkbox" [formField]="form.requireSubmission" class="checkbox checkbox-primary" />
       </div>
 
       @if (courseGroups.value()?.length) {
         <div class="col-span-2 mt-2">
           <h3 class="text-lg font-medium mb-2">Fechas de entrega por grupo</h3>
           <div class="grid gap-3">
-            @for (group of courseGroups.value(); track group.id; let i = $index) {
+            @for (group of form.groupDates; let i = $index; track i) {
               <div class="flex items-center gap-4 p-3 bg-base-200 rounded-lg">
                 <span class="font-medium min-w-24">{{ group.name }}</span>
                 <input
+                  [id]="'group-date-' + i"
                   type="datetime-local"
-                  [formControl]="getGroupDateControl(i)"
+                  [formField]="group.date"
                   class="input input-primary flex-1"
                 />
               </div>
             }
           </div>
         </div>
-      } @else if (!selectedCourseId()) {
+      } @else if (!form.courseId().value()) {
         <div class="col-span-2">
           <div class="fieldset">
             <label for="date">Fecha por defecto</label>
-            <input type="datetime-local" formControlName="date" class="input input-primary" />
+            <input type="datetime-local" [formField]="form.date" class="input input-primary" />
           </div>
         </div>
       }
@@ -90,15 +102,13 @@ enum AssignmentType {
     </div>
   </form>`,
 })
-export default class AssignmentForm implements OnInit {
+export default class AssignmentForm {
   public data = input<{ courseId?: string }>();
   private fb = inject(NonNullableFormBuilder);
   public closeModal = output<void>();
   private http = inject(HttpClient);
   private store = inject(Store);
   private toast = inject(Toast);
-
-  public selectedCourseId = signal<string | null>(null);
 
   public courses = httpResource<{ id: string; name: string }[]>(() => {
     const schoolId = this.store.currentSchoolId();
@@ -107,7 +117,7 @@ export default class AssignmentForm implements OnInit {
   });
 
   public courseGroups = httpResource<{ id: string; name: string }[]>(() => {
-    const courseId = this.selectedCourseId();
+    const courseId = this.form.courseId().value();
     if (!courseId) return undefined;
     return `/api/v1/class-groups/by-course/${courseId}`;
   });
@@ -129,24 +139,27 @@ export default class AssignmentForm implements OnInit {
 
   private defaultDate = format(addDays(setMinutes(setHours(new Date(), 8), 0), 1), "yyyy-MM-dd'T'HH:mm");
 
-  public form = this.fb.group({
-    title: ['', [Validators.required]],
-    details: [''],
-    type: this.fb.control<AssignmentType>(AssignmentType.NEW, [Validators.required]),
-    date: [this.defaultDate, [Validators.required]],
-    requireSubmission: [false],
-    teacherId: this.fb.control<string | null>(null, [Validators.required]),
-    courseId: this.fb.control<string | null>(null, [Validators.required]),
-    groupDates: this.fb.array<{ classGroupId: string; date: string }>([]),
+  assignmentModel = signal<AssignmentFormData>({
+    title: '',
+    details: '',
+    type: AssignmentType.NEW,
+    date: this.defaultDate,
+    requireSubmission: false,
+    teacherId: '',
+    courseId: '',
+    groupDates: [],
   });
 
-  get groupDatesArray(): FormArray {
-    return this.form.get('groupDates') as FormArray;
-  }
-
-  getGroupDateControl(index: number): FormControl<string> {
-    return this.groupDatesArray.at(index).get('date') as FormControl<string>;
-  }
+  form = form(this.assignmentModel, (model) => {
+    required(model.title, { message: 'El titulo es requerido' });
+    required(model.type, { message: 'El tipo es requerido' });
+    required(model.date, { message: 'La fecha es requerida' });
+    required(model.teacherId, { message: 'El profesor es requerido' });
+    required(model.courseId, { message: 'El curso es requerido' });
+    applyEach(model.groupDates, (groupDate) => {
+      required(groupDate.date, { message: 'La fecha es requerida' });
+    });
+  });
 
   constructor() {
     // Watch for course selection changes
@@ -156,44 +169,33 @@ export default class AssignmentForm implements OnInit {
         this.buildGroupDatesArray(groups);
       }
     });
-  }
-
-  ngOnInit() {
-    // Listen to courseId changes
-    this.form.get('courseId')?.valueChanges.subscribe((courseId) => {
-      this.selectedCourseId.set(courseId);
+    afterRenderEffect(() => {
+      if (this.data()?.courseId) {
+        this.form.courseId().value.set(this.data()!.courseId!);
+      }
+      if (this.store.currentTeacher()) {
+        this.form.teacherId().value.set(this.store.currentTeacher()!.id ?? '');
+      }
     });
-
-    if (this.data()?.courseId) {
-      this.form.get('courseId')?.setValue(this.data()!.courseId!);
-      this.selectedCourseId.set(this.data()!.courseId!);
-    }
-    if (this.store.currentTeacher()) {
-      this.form.get('teacherId')?.setValue(this.store.currentTeacher()!.id ?? '');
-      this.form.get('teacherId')?.disable();
-    }
   }
 
   private buildGroupDatesArray(groups: { id: string; name: string }[]) {
-    this.groupDatesArray.clear();
-    groups.forEach((group) => {
-      this.groupDatesArray.push(
-        this.fb.group({
-          classGroupId: [group.id],
-          date: [this.defaultDate, [Validators.required]],
-        }),
-      );
-    });
+    this.assignmentModel.update((model) => ({
+      ...model,
+      groupDates: groups.map((group) => ({
+        classGroupId: group.id,
+        date: this.defaultDate,
+      })),
+    }));
   }
 
   onSubmit() {
-    if (this.form.invalid) {
+    if (this.form().invalid()) {
       this.toast.showError('Formulario invalido');
-      markGroupDirty(this.form);
       return;
     }
 
-    const req = this.form.getRawValue();
+    const req = this.form().value();
     const groups = this.courseGroups.value();
 
     // Build groupDates array if groups exist

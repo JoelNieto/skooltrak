@@ -1,23 +1,32 @@
-import { markGroupDirty, Toast } from '#/ui';
+import { Toast } from '#/ui';
 import { HttpClient } from '@angular/common/http';
-import { afterRenderEffect, Component, inject, input, output } from '@angular/core';
-import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { afterRenderEffect, Component, inject, input, output, signal } from '@angular/core';
+import { form, FormField, max, min } from '@angular/forms/signals';
 import { Prisma } from '@generated/prisma';
-
-type Decimal = InstanceType<typeof Prisma.Decimal>;
 
 @Component({
   selector: 'app-student-grade-form',
-  imports: [ReactiveFormsModule],
-  template: `<form [formGroup]="form" (ngSubmit)="onSubmit()">
+  imports: [FormField],
+  template: `<form (submit)="onSubmit($event)">
     <div class="flex flex-col gap-3">
       <div class="fieldset">
         <label for="score">Calificacion</label>
-        <input type="number" formControlName="score" id="score" class="input input-primary" />
+        <input
+          type="number"
+          [formField]="form.score"
+          id="score"
+          class="input input-primary"
+          [class.ng-invalid]="form.score().touched() && form.score().invalid"
+        />
+        @if (form.score().touched() && form.score().invalid()) {
+          @for (error of form.score().errors(); track error) {
+            <p class="text-error text-sm">{{ error.message }}</p>
+          }
+        }
       </div>
       <div class="fieldset">
         <label for="comments">Comentarios</label>
-        <textarea formControlName="comments" id="comments" class="textarea textarea-primary"></textarea>
+        <textarea [formField]="form.comments" id="comments" class="textarea textarea-primary"></textarea>
       </div>
     </div>
     <div class="flex justify-end gap-2 mt-2">
@@ -31,43 +40,40 @@ export default class StudentGradeForm {
     studentGrade: Prisma.StudentGradeGetPayload<{ include: { student: true } }>;
     metric: Prisma.GradeMetricGetPayload<{ include: undefined }>;
   }>();
-  #fb = inject(NonNullableFormBuilder);
   #toast = inject(Toast);
   public closeModal = output<boolean>();
   #http = inject(HttpClient);
 
-  public form = this.#fb.group({
-    score: this.#fb.control<number | Decimal | null>(0),
-    comments: [''],
+  formModel = signal<{ score: number | null; comments: string }>({ score: 0, comments: '' });
+
+  public form = form(this.formModel, (schemaPath) => {
+    const minimum = this.data().metric.minimum as unknown as number;
+    const maximum = this.data().metric.maximum as unknown as number;
+    min(schemaPath.score, minimum, { message: `Valor debe ser mayor o igual a ${minimum}` });
+    max(schemaPath.score, maximum, { message: `Valor debe ser menor o igual a ${maximum}` });
   });
 
   constructor() {
     afterRenderEffect(() => {
-      this.form.setValue({
-        score: this.data().studentGrade.score,
-        comments: this.data().studentGrade.comments || '',
-      });
-
-      this.form
-        .get('score')
-        ?.setValidators([
-          Validators.min(this.data().metric.minimum as unknown as number),
-          Validators.max(this.data().metric.maximum as unknown as number),
-        ]);
+      const { score, comments } = this.data().studentGrade;
+      this.form.score().value.set(score as unknown as number);
+      this.form.comments().value.set(comments ?? '');
     });
   }
 
-  public onSubmit() {
-    if (this.form.invalid) {
+  public onSubmit(event: Event) {
+    event.preventDefault();
+    if (this.form().invalid()) {
       this.#toast.showError('Formulario invalido');
-      markGroupDirty(this.form);
       return;
     }
 
+    const { score, comments } = this.formModel();
+
     this.#http
       .patch('/api/v1/student-grades', {
-        score: Number(this.form.getRawValue().score),
-        comments: this.form.getRawValue().comments,
+        score: Number(score),
+        comments,
         id: this.data().studentGrade.id,
       })
       .subscribe({

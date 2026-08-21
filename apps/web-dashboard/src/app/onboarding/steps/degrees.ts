@@ -1,13 +1,13 @@
-import { markGroupDirty, Toast } from '#/ui';
+import { Toast } from '#/ui';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { Component, computed, inject, input, output, signal } from '@angular/core';
-import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { form, FormField, required } from '@angular/forms/signals';
 import Store from '../../core/store';
 import { CreatedEntity } from '../setup-wizard';
 
 @Component({
   selector: 'app-degrees-step',
-  imports: [ReactiveFormsModule],
+  imports: [FormField],
   template: `
     <div class="w-full max-w-md text-center space-y-8 animate-fade-in">
       <!-- Icon -->
@@ -41,7 +41,7 @@ import { CreatedEntity } from '../setup-wizard';
       }
 
       <!-- Form Fields -->
-      <form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-4 text-left">
+      <form (submit)="onSubmit($event)" class="space-y-4 text-left">
         <div class="fieldset">
           <label for="name" class="label">
             <span class="label-text font-medium">Nombre del Nivel</span>
@@ -49,12 +49,14 @@ import { CreatedEntity } from '../setup-wizard';
           <input
             type="text"
             id="name"
-            formControlName="name"
+            [formField]="form.name"
             class="input input-bordered w-full"
             placeholder="Ej: Educación Primaria"
           />
-          @if (form.get('name')?.touched && form.get('name')?.hasError('required')) {
-            <p class="text-error text-xs mt-1">El nombre es requerido</p>
+          @if (form.name().touched() && form.name().invalid()) {
+            @for (error of form.name().errors(); track error) {
+              <p class="text-error text-sm">{{ error.message }}</p>
+            }
           }
         </div>
 
@@ -65,12 +67,14 @@ import { CreatedEntity } from '../setup-wizard';
           <input
             type="text"
             id="shortName"
-            formControlName="shortName"
+            [formField]="form.shortName"
             class="input input-bordered w-full"
             placeholder="Ej: PRIM"
           />
-          @if (form.get('shortName')?.touched && form.get('shortName')?.hasError('required')) {
-            <p class="text-error text-xs mt-1">El nombre corto es requerido</p>
+          @if (form.shortName().touched() && form.shortName().invalid()) {
+            @for (error of form.shortName().errors(); track error) {
+              <p class="text-error text-sm">{{ error.message }}</p>
+            }
           }
         </div>
 
@@ -124,7 +128,6 @@ import { CreatedEntity } from '../setup-wizard';
   `,
 })
 export default class DegreesStep {
-  private fb = inject(NonNullableFormBuilder);
   #http = inject(HttpClient);
   private toasts = inject(Toast);
   private store = inject(Store);
@@ -147,14 +150,15 @@ export default class DegreesStep {
     return this.schools.value()?.[0]?.id;
   });
 
-  public form = this.fb.group({
-    name: ['', [Validators.required]],
-    shortName: ['', [Validators.required]],
-  });
+  private formModel = signal({ name: '', shortName: '' });
 
-  public onSubmit() {
-    if (this.form.invalid) {
-      markGroupDirty(this.form);
+  public form = form(this.formModel, (schemaPath) => {
+    required(schemaPath.name, { message: 'El nombre es requerido' });
+    required(schemaPath.shortName, { message: 'El nombre corto es requerido' });
+  });
+  public onSubmit(event: Event) {
+    event.preventDefault();
+    if (this.form().invalid()) {
       this.toasts.showError('Por favor, completa todos los campos');
       return;
     }
@@ -167,7 +171,7 @@ export default class DegreesStep {
 
     this.saving.set(true);
 
-    const { name, shortName } = this.form.getRawValue();
+    const { name, shortName } = this.formModel();
 
     this.#http
       .post<{ id: string; name: string }>('/api/v1/degrees', {
@@ -182,7 +186,7 @@ export default class DegreesStep {
             this.entityCreated.emit({ id: degree.id, name: degree.name, type: 'degree' });
             this.toasts.showSuccess(`Nivel "${degree.name}" creado`);
           }
-          this.form.reset();
+          this.form().reset();
 
           if (!this.addAnother) {
             this.completed.emit();

@@ -1,21 +1,15 @@
 import { writeAccessTokenToStorage } from '#/client-auth';
-import { Loader, markGroupDirty, Toast } from '#/ui';
+import { Loader, Toast } from '#/ui';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { Component, inject, OnInit, signal } from '@angular/core';
-import {
-  AbstractControl,
-  FormGroup,
-  NonNullableFormBuilder,
-  ReactiveFormsModule,
-  ValidationErrors,
-  Validators,
-} from '@angular/forms';
+import { afterRenderEffect, Component, inject, signal } from '@angular/core';
+import { AbstractControl, NonNullableFormBuilder, ValidationErrors } from '@angular/forms';
+import { email, form, FormField, minLength, required, validate } from '@angular/forms/signals';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import Auth from './auth';
 
 @Component({
   selector: 'app-register',
-  imports: [ReactiveFormsModule, Loader, RouterLink],
+  imports: [FormField, Loader, RouterLink],
   template: `
     @defer {
       <div class="min-h-screen flex flex-col gradient-bg">
@@ -68,7 +62,7 @@ import Auth from './auth';
             }
             @case ('email') {
               <!-- Step 1: Enter email -->
-              <form [formGroup]="emailForm" (ngSubmit)="sendVerificationLink()" class="w-full max-w-md">
+              <form (ngSubmit)="sendVerificationLink($event)" class="w-full max-w-md">
                 <div class="text-center space-y-8 animate-fade-in">
                   <div class="flex justify-center">
                     <div class="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center">
@@ -91,12 +85,12 @@ import Auth from './auth';
                         id="email"
                         class="input input-primary w-full"
                         placeholder="tu@email.com"
-                        formControlName="email"
+                        [formField]="emailForm.email"
                       />
-                      @if (emailForm.get('email')?.touched && emailForm.get('email')?.hasError('required')) {
-                        <p class="text-error text-xs mt-1">El correo electrónico es requerido</p>
-                      } @else if (emailForm.get('email')?.touched && emailForm.get('email')?.hasError('email')) {
-                        <p class="text-error text-xs mt-1">Ingresa un correo electrónico válido</p>
+                      @if (emailForm.email().touched() && emailForm.email().invalid()) {
+                        @for (error of emailForm.email().errors(); track error) {
+                          <p class="text-error text-xs mt-1">{{ error.message }}</p>
+                        }
                       }
                     </div>
                   </div>
@@ -186,7 +180,7 @@ import Auth from './auth';
             }
             @case ('register') {
               <!-- Step 3: Registration form -->
-              <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" class="w-full max-w-md">
+              <form (ngSubmit)="onSubmit($event)" class="w-full max-w-md">
                 <div class="text-center space-y-8 animate-fade-in">
                   <div class="flex justify-center">
                     <div class="w-20 h-20 rounded-full bg-success/10 flex items-center justify-center">
@@ -213,12 +207,11 @@ import Auth from './auth';
                           id="firstName"
                           class="input input-bordered w-full"
                           placeholder="Juan"
-                          formControlName="firstName"
+                          [formField]="registerForm.firstName"
+                          [class.ng-invalid]="registerForm.firstName().touched() && registerForm.firstName().invalid()"
                         />
-                        @if (
-                          registerForm.get('firstName')?.touched && registerForm.get('firstName')?.hasError('required')
-                        ) {
-                          <p class="text-error text-xs mt-1">Requerido</p>
+                        @if (registerForm.firstName().touched() && registerForm.firstName().invalid()) {
+                          <p class="text-error text-xs mt-1">{{ registerForm.firstName().errors()[0].message }}</p>
                         }
                       </div>
 
@@ -231,12 +224,11 @@ import Auth from './auth';
                           id="lastName"
                           class="input input-bordered w-full"
                           placeholder="Pérez"
-                          formControlName="lastName"
+                          [class.ng-invalid]="registerForm.lastName().touched() && registerForm.lastName().invalid()"
+                          [formField]="registerForm.lastName"
                         />
-                        @if (
-                          registerForm.get('lastName')?.touched && registerForm.get('lastName')?.hasError('required')
-                        ) {
-                          <p class="text-error text-xs mt-1">Requerido</p>
+                        @if (registerForm.lastName().touched() && registerForm.lastName().invalid()) {
+                          <p class="text-error text-xs mt-1">{{ registerForm.lastName().errors()[0].message }}</p>
                         }
                       </div>
                     </div>
@@ -250,16 +242,13 @@ import Auth from './auth';
                         id="password"
                         class="input input-bordered w-full"
                         placeholder="••••••••"
-                        formControlName="password"
+                        [class.ng-invalid]="registerForm.password().touched() && registerForm.password().invalid()"
+                        [formField]="registerForm.password"
                       />
-                      @if (
-                        registerForm.get('password')?.touched && registerForm.get('password')?.hasError('required')
-                      ) {
-                        <p class="text-error text-xs mt-1">La contraseña es requerida</p>
-                      } @else if (
-                        registerForm.get('password')?.touched && registerForm.get('password')?.hasError('minlength')
-                      ) {
-                        <p class="text-error text-xs mt-1">Mínimo 8 caracteres</p>
+                      @if (registerForm.password().touched() && registerForm.password().invalid()) {
+                        @for (error of registerForm.password().errors(); track error) {
+                          <p class="text-error text-xs mt-1">{{ error.message }}</p>
+                        }
                       }
                     </div>
 
@@ -272,17 +261,15 @@ import Auth from './auth';
                         id="confirmPassword"
                         class="input input-bordered w-full"
                         placeholder="••••••••"
-                        formControlName="confirmPassword"
+                        [class.ng-invalid]="
+                          registerForm.confirmPassword().touched() && registerForm.confirmPassword().invalid()
+                        "
+                        [formField]="registerForm.confirmPassword"
                       />
-                      @if (
-                        registerForm.get('confirmPassword')?.touched &&
-                        registerForm.get('confirmPassword')?.hasError('required')
-                      ) {
-                        <p class="text-error text-xs mt-1">Confirma tu contraseña</p>
-                      } @else if (
-                        registerForm.hasError('passwordMismatch') && registerForm.get('confirmPassword')?.touched
-                      ) {
-                        <p class="text-error text-xs mt-1">Las contraseñas no coinciden</p>
+                      @if (registerForm.confirmPassword().touched() && registerForm.confirmPassword().invalid()) {
+                        @for (error of registerForm.confirmPassword().errors(); track error) {
+                          <p class="text-error text-xs mt-1">{{ error.message }}</p>
+                        }
                       }
                     </div>
                   </div>
@@ -362,7 +349,7 @@ import Auth from './auth';
     }
   `,
 })
-export default class Register implements OnInit {
+export default class Register {
   private fb = inject(NonNullableFormBuilder);
   private http = inject(HttpClient);
   private router = inject(Router);
@@ -381,19 +368,33 @@ export default class Register implements OnInit {
   public cooldown = signal(0);
   private cooldownInterval: ReturnType<typeof setInterval> | null = null;
 
-  public emailForm = this.fb.group({
-    email: ['', [Validators.required, Validators.email]],
+  private emailModel = signal({ email: '' });
+  private registerModel = signal({ firstName: '', lastName: '', password: '', confirmPassword: '' });
+
+  public emailForm = form(this.emailModel, (schemaPath) => {
+    required(schemaPath.email, { message: 'El correo electrónico es requerido' });
+    email(schemaPath.email, { message: 'Ingresa un correo electrónico válido' });
   });
 
-  public registerForm = this.fb.group(
-    {
-      firstName: ['', [Validators.required]],
-      lastName: ['', [Validators.required]],
-      password: ['', [Validators.required, Validators.minLength(8)]],
-      confirmPassword: ['', [Validators.required]],
-    },
-    { validators: this.passwordMatchValidator },
-  );
+  public registerForm = form(this.registerModel, (schemaPath) => {
+    required(schemaPath.firstName, { message: 'Nombre requerido' });
+    required(schemaPath.lastName, { message: 'Apellido requerido' });
+    required(schemaPath.password, { message: 'Contrasena requerido' });
+    required(schemaPath.firstName, { message: 'Confirmar contrasena requerido' });
+    minLength(schemaPath.password, 8, { message: 'Minimo 8 caracteres' });
+    validate(schemaPath.confirmPassword, ({ value, valueOf, stateOf }) => {
+      if (!stateOf(schemaPath.password).touched()) {
+        return null;
+      }
+      if (value() !== valueOf(schemaPath.password)) {
+        return {
+          kind: 'passwordMismatch',
+          message: 'Contrasenas no coiciden',
+        };
+      }
+      return null;
+    });
+  });
 
   private passwordMatchValidator(control: AbstractControl): ValidationErrors | null {
     const password = control.get('password');
@@ -404,14 +405,16 @@ export default class Register implements OnInit {
     return null;
   }
 
-  ngOnInit() {
-    // Check if there's a token in the URL (user clicked email link)
-    const token = this.route.snapshot.queryParamMap.get('token');
-    const email = this.route.snapshot.queryParamMap.get('email');
+  constructor() {
+    afterRenderEffect(() => {
+      // Check if there's a token in the URL (user clicked email link)
+      const token = this.route.snapshot.queryParamMap.get('token');
+      const email = this.route.snapshot.queryParamMap.get('email');
 
-    if (token && email) {
-      this.validateToken(token, email);
-    }
+      if (token && email) {
+        this.validateToken(token, email);
+      }
+    });
   }
 
   private validateToken(token: string, email: string) {
@@ -434,14 +437,14 @@ export default class Register implements OnInit {
     });
   }
 
-  public sendVerificationLink() {
-    if (this.emailForm.invalid) {
-      markGroupDirty(this.emailForm as FormGroup);
+  public sendVerificationLink(event: Event) {
+    event.preventDefault();
+    if (this.emailForm().invalid()) {
       return;
     }
 
     this.loading.set(true);
-    const email = this.emailForm.getRawValue().email;
+    const email = this.emailModel().email;
 
     // First check for pending invitation (student/teacher created but not yet verified)
     this.http
@@ -546,16 +549,16 @@ export default class Register implements OnInit {
     }, 1000);
   }
 
-  public onSubmit() {
-    if (this.registerForm.invalid) {
-      markGroupDirty(this.registerForm as FormGroup);
+  public onSubmit(event: Event) {
+    event.preventDefault();
+    if (this.registerForm().invalid()) {
       this.toasts.showError('Por favor, completa todos los campos requeridos');
       return;
     }
 
     this.loading.set(true);
 
-    const { firstName, lastName, password } = this.registerForm.getRawValue();
+    const { firstName, lastName, password } = this.registerModel();
 
     this.http
       .post<{ accessToken: string }>('/api/v1/auth/sign-up', {

@@ -1,5 +1,5 @@
 import { PageHeader, StatCard } from '#/ui';
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { Component } from '@angular/core';
 
 @Component({
   selector: 'app-parent-child-progress',
@@ -44,7 +44,6 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
       </div>
     </div>
   `,
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class ParentChildProgress {
   progress = [

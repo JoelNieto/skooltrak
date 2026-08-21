@@ -1,44 +1,23 @@
 import { Toast } from '#/ui';
-import {
-  ChangeDetectionStrategy,
-  Component,
-  inject,
-  input,
-  OnInit,
-  output,
-} from '@angular/core';
-import {
-  NonNullableFormBuilder,
-  ReactiveFormsModule,
-  Validators,
-} from '@angular/forms';
-import { Prisma } from '@generated/prisma';
 import { HttpClient } from '@angular/common/http';
+import { afterRenderEffect, Component, inject, input, output, signal } from '@angular/core';
+import { form, FormField, required } from '@angular/forms/signals';
+import { Prisma } from '@generated/prisma';
 import { firstValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-organizations-form',
-  imports: [ReactiveFormsModule],
+  imports: [FormField],
   template: `
-    <form [formGroup]="form" (ngSubmit)="onSubmit()">
+    <form (submit)="onSubmit($event)">
       <div class="flex flex-col gap-4">
         <div class="fieldset">
           <label for="name">Nombre</label>
-          <input
-            type="text"
-            class="input input-primary"
-            id="name"
-            formControlName="name"
-          />
+          <input type="text" class="input input-primary" id="name" [formField]="form.name" />
         </div>
         <div class="fieldset">
           <label for="description">Descripción</label>
-          <input
-            type="text"
-            class="input input-primary"
-            id="description"
-            formControlName="description"
-          />
+          <input type="text" class="input input-primary" id="description" [formField]="form.description" />
         </div>
       </div>
       <div class="flex justify-end mt-4">
@@ -46,33 +25,36 @@ import { firstValueFrom } from 'rxjs';
       </div>
     </form>
   `,
-  styles: ``,
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class OrganizationsForm implements OnInit {
-  private readonly fb = inject(NonNullableFormBuilder);
+export class OrganizationsForm {
   public data = input<{ organization?: Prisma.OrganizationCreateInput }>();
   private http = inject(HttpClient);
   public closeModal = output<void>();
   private toasts = inject(Toast);
-  public form = this.fb.group({
-    name: ['', [Validators.required]],
-    description: ['', [Validators.required]],
+  public formModel = signal({ name: '', description: '' });
+
+  public form = form(this.formModel, (schemaPath) => {
+    required(schemaPath.name, { message: 'Nombre requerido' });
+    required(schemaPath.description, { message: 'Descripcion requerida' });
   });
 
-  public ngOnInit() {
-    if (this.data()?.organization) {
-      this.form.patchValue(this.data()!.organization!);
-    }
+  contructor() {
+    afterRenderEffect(() => {
+      const organization = this.data()?.organization;
+      if (organization) {
+        this.formModel.set(organization);
+      }
+    });
   }
 
-  public onSubmit() {
-    if (this.form.invalid) {
+  public onSubmit(event: Event) {
+    event.preventDefault();
+    if (this.form().invalid()) {
       this.toasts.showError('Formulario inválido');
       return;
     }
 
-    const req = this.form.getRawValue();
+    const req = this.formModel();
     if (this.data()?.organization) {
       void firstValueFrom(
         this.http.patch('/api/v1/organizations', {

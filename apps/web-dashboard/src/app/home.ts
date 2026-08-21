@@ -268,7 +268,6 @@ type PublishedNewsletter = {
       </div>
     </div>
   `,
-  styles: ``,
 })
 export default class Home {
   private http = inject(HttpClient);

@@ -1,9 +1,9 @@
-import { Loader, Toast, markGroupDirty } from '#/ui';
+import { Loader, Toast } from '#/ui';
 import { NgClass } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { Component, computed, inject, input, output, signal } from '@angular/core';
+import { afterRenderEffect, Component, computed, effect, inject, input, output, signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
-import { FormArray, FormGroup, NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { applyEach, form, FormField, required } from '@angular/forms/signals';
 import { Prisma } from '@generated/prisma';
 import { map, of, tap } from 'rxjs';
 
@@ -40,32 +40,21 @@ const STATUS_OPTIONS = [
 
 @Component({
   selector: 'app-attendance-form',
-  imports: [ReactiveFormsModule, Loader, NgClass],
+  imports: [FormField, Loader, NgClass],
   template: `
-    <form [formGroup]="form" (ngSubmit)="onSubmit()" class="flex flex-col gap-4">
+    <form (submit)="onSubmit($event)" class="flex flex-col gap-4">
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div class="form-control">
           <label class="label" for="date">
             <span class="label-text">Fecha</span>
           </label>
-          <input
-            type="date"
-            class="input input-bordered input-primary"
-            formControlName="date"
-            [attr.disabled]="isEditing() ? true : null"
-          />
+          <input type="date" class="input input-bordered input-primary" [formField]="form.date" />
         </div>
         <div class="form-control">
           <label class="label" for="classGroupId">
             <span class="label-text">Grupo</span>
           </label>
-          <select
-            id="classGroupId"
-            class="select select-bordered select-primary"
-            formControlName="classGroupId"
-            [disabled]="isEditing()"
-            (change)="onGroupChange()"
-          >
+          <select id="classGroupId" class="select select-bordered select-primary" [formField]="form.classGroupId">
             <option value="" disabled>Seleccionar grupo...</option>
             @for (group of data()?.groups || []; track group.id) {
               <option [value]="group.id">{{ group.name }}</option>
@@ -100,7 +89,7 @@ const STATUS_OPTIONS = [
         <lib-loader />
       }
 
-      @if (studentsResource.hasValue() && records.length > 0) {
+      @if (studentsResource.hasValue() && form.records.length > 0) {
         <div class="overflow-x-auto max-h-96">
           <table class="table table-sm table-pin-rows">
             <thead>
@@ -111,8 +100,8 @@ const STATUS_OPTIONS = [
               </tr>
             </thead>
             <tbody formArrayName="records">
-              @for (record of records.controls; track $index; let i = $index) {
-                <tr [formGroupName]="i" class="hover">
+              @for (record of form.records; track $index; let i = $index) {
+                <tr class="hover">
                   <td>
                     <div class="flex items-center gap-2">
                       <div class="avatar avatar-placeholder">
@@ -132,12 +121,12 @@ const STATUS_OPTIONS = [
                           type="button"
                           class="btn btn-xs btn-circle"
                           [ngClass]="{
-                            'btn-success': status.value === 'PRESENT' && record.get('status')?.value === 'PRESENT',
-                            'btn-error': status.value === 'ABSENT' && record.get('status')?.value === 'ABSENT',
-                            'btn-warning': status.value === 'LATE' && record.get('status')?.value === 'LATE',
-                            'btn-info': status.value === 'SICK_LEAVE' && record.get('status')?.value === 'SICK_LEAVE',
-                            'btn-neutral': status.value === 'EXCUSED' && record.get('status')?.value === 'EXCUSED',
-                            'btn-ghost': record.get('status')?.value !== status.value,
+                            'btn-success': status.value === 'PRESENT' && record.status().value() === 'PRESENT',
+                            'btn-error': status.value === 'ABSENT' && record.status().value() === 'ABSENT',
+                            'btn-warning': status.value === 'LATE' && record.status().value() === 'LATE',
+                            'btn-info': status.value === 'SICK_LEAVE' && record.status().value() === 'SICK_LEAVE',
+                            'btn-neutral': status.value === 'EXCUSED' && record.status().value() === 'EXCUSED',
+                            'btn-ghost': record.status().value() !== status.value,
                           }"
                           [title]="status.label"
                           (click)="setStatus(i, status.value)"
@@ -153,7 +142,7 @@ const STATUS_OPTIONS = [
                     <input
                       type="text"
                       class="input input-bordered input-sm w-full max-w-xs"
-                      formControlName="comment"
+                      [formField]="record.comment"
                       placeholder="Comentario opcional..."
                     />
                   </td>
@@ -192,7 +181,6 @@ export default class AttendanceForm {
   public closeModal = output<void>();
 
   #http = inject(HttpClient);
-  #fb = inject(NonNullableFormBuilder);
   #toast = inject(Toast);
 
   public statusOptions = STATUS_OPTIONS;
@@ -200,15 +188,23 @@ export default class AttendanceForm {
   public isEditing = computed(() => !!this.data()?.session);
   public selectedGroupId = signal<string>('');
 
-  public form = this.#fb.group({
-    date: ['', [Validators.required]],
-    classGroupId: ['', [Validators.required]],
-    records: this.#fb.array<FormGroup>([]),
+  private formModel = signal<{
+    date: string;
+    classGroupId: string;
+    records: { id?: string; studentId: string; status: string; comment: string }[];
+  }>({
+    date: '',
+    classGroupId: '',
+    records: [],
   });
 
-  get records() {
-    return this.form.get('records') as FormArray<FormGroup>;
-  }
+  public form = form(this.formModel, (schemaPath) => {
+    required(schemaPath.date, { message: 'Fecha requerida' });
+    required(schemaPath.classGroupId, { message: 'Grupo requerido' });
+    applyEach(schemaPath.records, (recordPath) => {
+      required(recordPath.status, { message: 'Status requerido' });
+    });
+  });
 
   public studentsResource = rxResource({
     params: () => ({
@@ -240,60 +236,43 @@ export default class AttendanceForm {
 
   constructor() {
     // Initialize form with session data if editing
-    const session = this.data()?.session;
-    if (session) {
-      this.form.patchValue({
-        date: session.date.split('T')[0],
-        classGroupId: session.classGroupId,
-      });
-      this.selectedGroupId.set(session.classGroupId);
-    }
-  }
+    afterRenderEffect(() => {
+      const session = this.data()?.session;
+      if (session) {
+        this.form.date().value.set(session.date.split('T')[0]);
+        this.form.classGroupId().value.set(session.classGroupId);
+        this.selectedGroupId.set(session.classGroupId);
+      }
+    });
 
-  onGroupChange() {
-    const groupId = this.form.get('classGroupId')?.value || '';
-    this.selectedGroupId.set(groupId);
+    effect(() => {
+      this.selectedGroupId.set(this.formModel().classGroupId);
+    });
   }
 
   private initializeFormWithSession(session: AttendanceSessionType) {
-    this.form.patchValue({
-      date: session.date.split('T')[0],
-      classGroupId: session.classGroupId,
-    });
+    this.form.date().value.set(session.date.split('T')[0]);
+    this.form.classGroupId().value.set(session.classGroupId);
 
     // Clear existing records
-    while (this.records.length) {
-      this.records.removeAt(0);
-    }
+    this.form.records().value.set([]);
 
     // Add records from session
     session.records.forEach((record) => {
-      this.records.push(
-        this.#fb.group({
-          id: [record.id],
-          studentId: [record.studentId],
-          status: [record.status, [Validators.required]],
-          comment: [record.comment || ''],
-        }),
-      );
+      const { id, studentId, status, comment } = record;
+      this.form.records().value.update((current) => [...current, { id, studentId, status, comment: comment ?? '' }]);
     });
   }
 
   private initializeRecords(students: StudentType[]) {
     // Clear existing records
-    while (this.records.length) {
-      this.records.removeAt(0);
-    }
+    this.form.records().value.set([]);
 
     // Add new records for each student
     students.forEach((student) => {
-      this.records.push(
-        this.#fb.group({
-          studentId: [student.id],
-          status: ['PRESENT', [Validators.required]],
-          comment: [''],
-        }),
-      );
+      this.form
+        .records()
+        .value.update((records) => [...records, { studentId: student.id, status: 'PRESENT', comment: '' }]);
     });
   }
 
@@ -312,23 +291,23 @@ export default class AttendanceForm {
   }
 
   setStatus(index: number, status: string) {
-    this.records.at(index).get('status')?.setValue(status);
+    this.form
+      .records()
+      .value.update((records) => records.map((record, i) => (i === index ? { ...record, status } : record)));
   }
 
   markAll(status: string) {
-    this.records.controls.forEach((control) => {
-      control.get('status')?.setValue(status);
-    });
+    this.form.records().value.update((records) => records.map((record) => ({ ...record, status })));
   }
 
-  onSubmit() {
-    if (this.form.invalid) {
+  onSubmit(event: Event) {
+    event.preventDefault();
+    if (this.form().invalid()) {
       this.#toast.showError('Por favor complete todos los campos requeridos');
-      markGroupDirty(this.form);
       return;
     }
 
-    if (this.records.length === 0) {
+    if (this.formModel().records.length === 0) {
       this.#toast.showError('No hay estudiantes para registrar asistencia');
       return;
     }
@@ -343,7 +322,7 @@ export default class AttendanceForm {
   }
 
   private createAttendance() {
-    const formValue = this.form.getRawValue();
+    const formValue = this.formModel();
 
     this.#http
       .post('/api/v1/attendance/sessions', {
@@ -371,7 +350,7 @@ export default class AttendanceForm {
   }
 
   private updateAttendance() {
-    const formValue = this.form.getRawValue();
+    const formValue = this.formModel();
 
     this.#http
       .patch('/api/v1/attendance/records/batch', {

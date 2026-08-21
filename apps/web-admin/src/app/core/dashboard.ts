@@ -1,9 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  ElementRef,
-  viewChild,
-} from '@angular/core';
+import { Component, ElementRef, viewChild } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 
 import { Sidebar } from './sidebar';
@@ -23,9 +18,7 @@ import { Sidebar } from './sidebar';
     ></div>
 
     <!-- Mobile sidebar toggle -->
-    <div
-      class="w-full fixed top-0 z-30 flex items-center px-2 lg:hidden bg-base-200"
-    >
+    <div class="w-full fixed top-0 z-30 flex items-center px-2 lg:hidden bg-base-200">
       <button
         #sidebarToggle
         id="sidebar-toggle"
@@ -56,19 +49,15 @@ import { Sidebar } from './sidebar';
       </main>
     </div>
   </div>`,
-  styles: ``,
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class Dashboard {
-  public sidebarOverlay =
-    viewChild.required<ElementRef<HTMLDivElement>>('sidebarOverlay');
+  public sidebarOverlay = viewChild.required<ElementRef<HTMLDivElement>>('sidebarOverlay');
 
   public sidebar = viewChild.required<Sidebar, ElementRef>('sidebar', {
     read: ElementRef,
   });
 
-  public sidebarToggle =
-    viewChild.required<ElementRef<HTMLElement>>('sidebarToggle');
+  public sidebarToggle = viewChild.required<ElementRef<HTMLElement>>('sidebarToggle');
 
   public openSidebar() {
     this.sidebarOverlay().nativeElement.classList.remove('hidden');

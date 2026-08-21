@@ -141,9 +141,9 @@
   outline: none;
 }
 
-input.ng-invalid.ng-dirty,
-select.ng-invalid.ng-dirty,
-textarea.ng-invalid.ng-dirty {
+input.ng-invalid,
+select.ng-invalid,
+textarea.ng-invalid {
   --input-color: var(--color-error);
 }
 

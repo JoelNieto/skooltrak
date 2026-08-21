@@ -1,5 +1,5 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { EmptyState, PageHeader } from '#/ui';
+import { Component } from '@angular/core';
 
 @Component({
   selector: 'app-student-assignment-submission',
@@ -14,9 +14,7 @@ import { EmptyState, PageHeader } from '#/ui';
 
     <div class="card border border-base-200 bg-base-100">
       <div class="card-body">
-        <h2 class="text-lg font-semibold text-base-content">
-          Pendientes por entregar
-        </h2>
+        <h2 class="text-lg font-semibold text-base-content">Pendientes por entregar</h2>
         <div class="overflow-x-auto">
           <table class="table">
             <thead>
@@ -45,9 +43,7 @@ import { EmptyState, PageHeader } from '#/ui';
     </div>
 
     <div class="mt-6">
-      <h2 class="text-lg font-semibold text-base-content mb-3">
-        Entregas recientes
-      </h2>
+      <h2 class="text-lg font-semibold text-base-content mb-3">Entregas recientes</h2>
       @if (recentSubmissions.length === 0) {
         <lib-empty-state
           title="Sin entregas recientes"
@@ -62,9 +58,7 @@ import { EmptyState, PageHeader } from '#/ui';
                 <p class="font-semibold text-base-content">
                   {{ submission.title }}
                 </p>
-                <p class="text-sm text-base-content/70">
-                  {{ submission.course }} · {{ submission.submittedAt }}
-                </p>
+                <p class="text-sm text-base-content/70">{{ submission.course }} · {{ submission.submittedAt }}</p>
               </div>
             </div>
           }
@@ -72,7 +66,6 @@ import { EmptyState, PageHeader } from '#/ui';
       }
     </div>
   `,
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class StudentAssignmentSubmission {
   pendingAssignments = [

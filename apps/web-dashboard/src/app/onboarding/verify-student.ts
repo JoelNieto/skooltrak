@@ -1,13 +1,13 @@
 import { Toast } from '#/ui';
 import { HttpClient } from '@angular/common/http';
-import { Component, inject, OnInit, signal } from '@angular/core';
-import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { afterRenderEffect, Component, inject, signal } from '@angular/core';
+import { form, FormField, required } from '@angular/forms/signals';
 import { ActivatedRoute, Router } from '@angular/router';
 import Auth from '../auth/auth';
 
 @Component({
   selector: 'app-verify-student',
-  imports: [ReactiveFormsModule],
+  imports: [FormField],
   template: `
     <div class="min-h-screen flex flex-col gradient-bg">
       <header class="p-4 md:p-6 flex items-center justify-between">
@@ -31,7 +31,7 @@ import Auth from '../auth/auth';
             </p>
           </div>
 
-          <form [formGroup]="form" (ngSubmit)="verify()" class="space-y-4 text-left">
+          <form (submit)="verify($event)" class="space-y-4 text-left">
             <div class="fieldset">
               <label for="documentId" class="label">
                 <span class="label-text font-medium">Documento de Identidad</span>
@@ -41,10 +41,10 @@ import Auth from '../auth/auth';
                 id="documentId"
                 class="input input-bordered w-full"
                 placeholder="Ej: 8-123-4567"
-                formControlName="documentId"
+                [formField]="form.documentId"
               />
-              @if (form.get('documentId')?.touched && form.get('documentId')?.hasError('required')) {
-                <p class="text-error text-xs mt-1">El documento es requerido</p>
+              @if (form.documentId().touched()) {
+                <p class="text-error text-xs mt-1">{{ form.documentId().errors()[0].message }}</p>
               }
             </div>
 
@@ -91,8 +91,7 @@ import Auth from '../auth/auth';
     }
   `,
 })
-export default class VerifyStudent implements OnInit {
-  private fb = inject(NonNullableFormBuilder);
+export default class VerifyStudent {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private http = inject(HttpClient);
@@ -103,27 +102,33 @@ export default class VerifyStudent implements OnInit {
   public schoolName = signal('');
   public loading = signal(false);
   public errorMessage = signal('');
-
-  public form = this.fb.group({
-    documentId: ['', [Validators.required]],
+  formModel = signal({
+    documentId: '',
   });
 
-  ngOnInit() {
-    this.schoolId.set(this.route.snapshot.queryParamMap.get('schoolId') || '');
-    this.schoolName.set(this.route.snapshot.queryParamMap.get('schoolName') || '');
+  public form = form(this.formModel, (schemaPath) => {
+    required(schemaPath.documentId, { message: 'El documento de identidad es requerido' });
+  });
 
-    if (!this.schoolId()) {
-      this.router.navigate(['/onboarding/join-school']);
-    }
+  constructor() {
+    afterRenderEffect(() => {
+      this.schoolId.set(this.route.snapshot.queryParamMap.get('schoolId') || '');
+      this.schoolName.set(this.route.snapshot.queryParamMap.get('schoolName') || '');
+
+      if (!this.schoolId()) {
+        this.router.navigate(['/onboarding/join-school']);
+      }
+    });
   }
 
-  verify() {
-    if (this.form.invalid) return;
+  verify(event: Event) {
+    event.preventDefault();
+    if (this.form().invalid()) return;
 
     this.loading.set(true);
     this.errorMessage.set('');
 
-    const { documentId } = this.form.getRawValue();
+    const documentId = this.form.documentId();
 
     this.http
       .post<{ status: string; message?: string }>('/api/v1/auth/request-join-school', {

@@ -1,5 +1,5 @@
 import { EmptyState, PageHeader } from '#/ui';
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
 @Component({
@@ -14,10 +14,7 @@ import { RouterLink } from '@angular/router';
       </ul>
     </div>
 
-    <lib-page-header
-      title="Módulo financiero"
-      subtitle="Gestión de pagos y cuotas (MVP en preparación)."
-    />
+    <lib-page-header title="Módulo financiero" subtitle="Gestión de pagos y cuotas (MVP en preparación)." />
 
     <lib-empty-state
       title="Funcionalidad en construcción"
@@ -25,6 +22,5 @@ import { RouterLink } from '@angular/router';
       icon="payments"
     />
   `,
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class FinancialModule {}

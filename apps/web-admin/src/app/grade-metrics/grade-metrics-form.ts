@@ -1,32 +1,32 @@
-import { markGroupDirty, Toast } from '#/ui';
+import { Toast } from '#/ui';
 import { HttpClient } from '@angular/common/http';
-import { Component, inject, input, OnInit, output } from '@angular/core';
-import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { afterRenderEffect, Component, inject, input, output, signal } from '@angular/core';
+import { form, FormField, min, required } from '@angular/forms/signals';
 import { Prisma } from '@generated/prisma';
 import { firstValueFrom } from 'rxjs';
 @Component({
   selector: 'app-grade-metrics-form',
-  imports: [ReactiveFormsModule],
-  template: `<form [formGroup]="form" (ngSubmit)="onSubmit()">
+  imports: [FormField],
+  template: `<form (submit)="onSubmit($event)">
     <div class="fieldset">
       <label for="name">Nombre</label>
-      <input type="text" formControlName="name" class="input input-primary" />
+      <input type="text" [formField]="form.name" class="input input-primary" />
     </div>
     <div class="fieldset">
       <label for="minimum">Minimo</label>
-      <input type="number" formControlName="minimum" class="input input-primary" />
+      <input type="number" [formField]="form.minimum" class="input input-primary" />
     </div>
     <div class="fieldset">
       <label for="maximum">Maximo</label>
-      <input type="number" formControlName="maximum" class="input input-primary" />
+      <input type="number" [formField]="form.maximum" class="input input-primary" />
     </div>
     <div class="fieldset">
       <label for="minimumApproval">Minimo de aprobacion</label>
-      <input type="number" formControlName="minimumApproval" class="input input-primary" />
+      <input type="number" [formField]="form.minimumApproval" class="input input-primary" />
     </div>
     <div class="fieldset">
       <label for="minimumExcellence">Minimo de excelencia</label>
-      <input type="number" formControlName="minimumExcellence" class="input input-primary" />
+      <input type="number" [formField]="form.minimumExcellence" class="input input-primary" />
     </div>
     <div class="flex justify-end gap-2 mt-4">
       <button class="btn btn-ghost" type="button" (click)="closeModal.emit(false)">Cancelar</button>
@@ -34,45 +34,55 @@ import { firstValueFrom } from 'rxjs';
     </div>
   </form>`,
 })
-export default class GradeMetricsForm implements OnInit {
+export default class GradeMetricsForm {
   public closeModal = output<boolean>();
   public data = input<{
     metric: Prisma.GradeMetricGetPayload<{ include: undefined }>;
   }>();
-  private fb = inject(NonNullableFormBuilder);
   private toast = inject(Toast);
   private http = inject(HttpClient);
 
-  public form = this.fb.group({
-    name: ['', [Validators.required]],
-    minimum: [0, [Validators.required]],
-    maximum: [0, [Validators.required]],
-    minimumApproval: [0, [Validators.required]],
-    minimumExcellence: [0, [Validators.required]],
+  private formModel = signal({
+    name: '',
+    minimum: 0,
+    maximum: 0,
+    minimumApproval: 0,
+    minimumExcellence: 0,
   });
 
-  ngOnInit(): void {
-    if (this.data()?.metric) {
-      const metric = this.data()!.metric;
-      const value = {
-        ...metric,
-        minimum: metric.minimum as unknown as number,
-        maximum: metric.maximum as unknown as number,
-        minimumApproval: metric.minimumApproval as unknown as number,
-        minimumExcellence: metric.minimumExcellence as unknown as number,
-      };
-      this.form.patchValue(value);
-    }
+  public form = form(this.formModel, (schemaPath) => {
+    required(schemaPath.name, { message: 'Nombre requerido' });
+    required(schemaPath.minimum, { message: 'Valor minimo requerido' });
+    min(schemaPath.minimum, 0, { message: 'Valor minimo de 0' });
+    required(schemaPath.maximum, { message: 'Valor maximo requerido' });
+    required(schemaPath.minimumApproval, { message: 'Valor minimo aprobacion requerido' });
+    required(schemaPath.minimumExcellence, { message: 'Valor minimo excelencia requerido' });
+  });
+
+  constructor() {
+    afterRenderEffect(() => {
+      if (this.data()?.metric) {
+        const metric = this.data()!.metric;
+        const value = {
+          ...metric,
+          minimum: metric.minimum as unknown as number,
+          maximum: metric.maximum as unknown as number,
+          minimumApproval: metric.minimumApproval as unknown as number,
+          minimumExcellence: metric.minimumExcellence as unknown as number,
+        };
+        this.formModel.set(value);
+      }
+    });
   }
 
-  onSubmit() {
-    if (this.form.invalid) {
-      markGroupDirty(this.form);
+  onSubmit(event: Event) {
+    event.preventDefault();
+    if (this.form().invalid()) {
       this.toast.showError('Por favor, completa todos los campos');
       return;
     }
 
-    const body = this.form.getRawValue();
+    const body = this.formModel();
     if (this.data()?.metric) {
       void firstValueFrom(this.http.patch('/api/v1/grade-metrics', { ...body, id: this.data()!.metric!.id }))
         .then(() => {

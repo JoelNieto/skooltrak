@@ -1,6 +1,6 @@
 import { Toast } from '#/ui';
 import { HttpClient } from '@angular/common/http';
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, afterRenderEffect, inject, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import Auth from './auth';
@@ -27,7 +27,7 @@ import Auth from './auth';
     </div>
   `,
 })
-export default class MagicLinkCallback implements OnInit {
+export default class MagicLinkCallback {
   token = signal<string | null>(null);
   loading = signal(true);
   error = signal<string | null>(null);
@@ -37,17 +37,19 @@ export default class MagicLinkCallback implements OnInit {
   private readonly auth = inject(Auth);
   private readonly toast = inject(Toast);
 
-  ngOnInit(): void {
-    const params = new URLSearchParams(window.location.search);
-    const token = params.get('token');
-    if (!token) {
-      this.error.set('Enlace inválido: falta el token.');
-      this.loading.set(false);
-      return;
-    }
+  constructor() {
+    afterRenderEffect(() => {
+      const params = new URLSearchParams(window.location.search);
+      const token = params.get('token');
+      if (!token) {
+        this.error.set('Enlace inválido: falta el token.');
+        this.loading.set(false);
+        return;
+      }
 
-    this.token.set(token);
-    this.verify(token);
+      this.token.set(token);
+      this.verify(token);
+    });
   }
 
   async verify(token: string) {
@@ -55,11 +57,7 @@ export default class MagicLinkCallback implements OnInit {
       const res = await firstValueFrom(
         // `withCredentials` so the better-auth session cookie set by the verify
         // endpoint is stored alongside the JWT.
-        this.http.post<{ accessToken: string }>(
-          '/api/v1/auth/magic-link/verify',
-          { token },
-          { withCredentials: true },
-        ),
+        this.http.post<{ accessToken: string }>('/api/v1/auth/magic-link/verify', { token }, { withCredentials: true }),
       );
       const accessToken = res?.accessToken;
       if (accessToken) {

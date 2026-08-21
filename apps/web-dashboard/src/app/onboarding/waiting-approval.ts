@@ -1,6 +1,6 @@
 import { Toast } from '#/ui';
 import { HttpClient } from '@angular/common/http';
-import { Component, inject, OnDestroy, OnInit, signal } from '@angular/core';
+import { afterRenderEffect, Component, inject, OnDestroy, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import Auth from '../auth/auth';
 
@@ -91,7 +91,7 @@ import Auth from '../auth/auth';
     }
   `,
 })
-export default class WaitingApproval implements OnInit, OnDestroy {
+export default class WaitingApproval implements OnDestroy {
   private http = inject(HttpClient);
   private router = inject(Router);
   private auth = inject(Auth);
@@ -110,10 +110,12 @@ export default class WaitingApproval implements OnInit, OnDestroy {
 
   public roleLabel = () => this.roleLabels[this.requestedRole()] || this.requestedRole();
 
-  ngOnInit() {
-    this.checkStatus();
-    // Poll every 30 seconds
-    this.pollInterval = setInterval(() => this.checkStatus(), 30000);
+  constructor() {
+    afterRenderEffect(() => {
+      this.checkStatus();
+      // Poll every 30 seconds
+      this.pollInterval = setInterval(() => this.checkStatus(), 30000);
+    });
   }
 
   ngOnDestroy() {

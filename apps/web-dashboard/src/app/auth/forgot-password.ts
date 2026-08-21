@@ -1,7 +1,7 @@
 import { Loader } from '#/ui';
 import { HttpClient } from '@angular/common/http';
 import { Component, inject, signal } from '@angular/core';
-import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { email, form, FormField, required } from '@angular/forms/signals';
 import { RouterLink } from '@angular/router';
 import Auth from './auth';
 
@@ -14,7 +14,7 @@ type LookupResult = {
 
 @Component({
   selector: 'app-forgot-password',
-  imports: [ReactiveFormsModule, RouterLink, Loader],
+  imports: [FormField, RouterLink, Loader],
   template: `
     <div class="gradient-bg min-h-screen flex items-center justify-center p-4">
       @defer {
@@ -107,12 +107,16 @@ type LookupResult = {
                       <strong>{{ searchedEmail() }}</strong>
                     </span>
                   </div>
-                  <button type="button" class="btn btn-primary w-full" (click)="step.set('email'); form.reset()">
+                  <button
+                    type="button"
+                    class="btn btn-primary w-full"
+                    (click)="step.set('email'); form().reset(); form.email().value.set('')"
+                  >
                     Probar con otro correo
                   </button>
                 </div>
               } @else {
-                <form [formGroup]="form" (ngSubmit)="onLookup()" class="space-y-6">
+                <form (ngSubmit)="onLookup($event)" class="space-y-6">
                   <div class="fieldset">
                     <label for="email">Correo Electrónico</label>
                     <div class="relative">
@@ -121,22 +125,22 @@ type LookupResult = {
                       </div>
                       <input
                         id="email"
-                        formControlName="email"
+                        [formField]="form.email"
                         type="email"
                         autocomplete="email"
                         class="input input-primary"
                         placeholder="tu@email.com"
                       />
                     </div>
-                    @if (form.get('email')?.touched && form.get('email')?.hasError('required')) {
-                      <p class="text-error text-xs mt-1">El correo electrónico es requerido</p>
-                    }
-                    @if (form.get('email')?.touched && form.get('email')?.hasError('email')) {
-                      <p class="text-error text-xs mt-1">Ingresa un correo electrónico válido</p>
+
+                    @if (form.email().touched() && form.email().invalid()) {
+                      @for (error of form.email().errors(); track error) {
+                        <p class="text-error text-xs mt-1">{{ error.message }}</p>
+                      }
                     }
                   </div>
 
-                  <button type="submit" [disabled]="loading() || form.invalid" class="btn btn-primary w-full">
+                  <button type="submit" [disabled]="loading() || form().invalid()" class="btn btn-primary w-full">
                     @if (loading()) {
                       <span class="loading loading-spinner loading-sm"></span>
                       Buscando...
@@ -167,9 +171,11 @@ type LookupResult = {
 export default class ForgotPasswordComponent {
   private auth = inject(Auth);
   private http = inject(HttpClient);
+  formModel = signal({ email: '' });
 
-  form = new FormGroup({
-    email: new FormControl('', [Validators.required, Validators.email]),
+  form = form(this.formModel, (schemaPath) => {
+    required(schemaPath.email, { message: 'El correo electrónico es requerido' });
+    email(schemaPath.email, { message: 'Ingresa un correo electrónico válido' });
   });
 
   step = signal<'email' | 'confirm' | 'sent' | 'not-found'>('email');
@@ -181,11 +187,12 @@ export default class ForgotPasswordComponent {
     organizationName?: string;
   }>({ roleLabel: '', displayName: '' });
 
-  onLookup() {
-    if (this.form.invalid) return;
+  onLookup(event: Event) {
+    event.preventDefault();
+    if (this.form().invalid()) return;
 
     this.loading.set(true);
-    const email = this.form.getRawValue().email;
+    const { email } = this.formModel();
     if (!email) return;
     this.searchedEmail.set(email);
 
@@ -222,7 +229,8 @@ export default class ForgotPasswordComponent {
 
   rejectAndGoBack() {
     this.step.set('email');
-    this.form.reset();
+    this.form().reset();
+    this.form.email().value.set('');
     this.searchedEmail.set('');
   }
 }

@@ -1,6 +1,6 @@
 import { PageHeader, Toast } from '#/ui';
 import { HttpClient } from '@angular/common/http';
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { afterRenderEffect, Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { LinkedChild, ParentContext } from './parent-context.service';
@@ -93,7 +93,7 @@ interface ParentMeResponse {
     }
   `,
 })
-export default class ParentPortal implements OnInit {
+export default class ParentPortal {
   private http = inject(HttpClient);
   private toasts = inject(Toast);
   private ctx = inject(ParentContext);
@@ -106,8 +106,10 @@ export default class ParentPortal implements OnInit {
   public addLoading = signal(false);
   public addError = signal('');
 
-  ngOnInit() {
-    this.loadChildren();
+  constructor() {
+    afterRenderEffect(() => {
+      this.loadChildren();
+    });
   }
 
   loadChildren() {

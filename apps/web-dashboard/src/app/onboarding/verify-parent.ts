@@ -1,13 +1,23 @@
 import { Toast } from '#/ui';
 import { HttpClient } from '@angular/common/http';
-import { Component, inject, OnInit, signal } from '@angular/core';
-import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { afterRenderEffect, Component, inject, signal } from '@angular/core';
+import { form, FormField, required } from '@angular/forms/signals';
 import { ActivatedRoute, Router } from '@angular/router';
 import Auth from '../auth/auth';
 
+interface LinkChildPayload {
+  enrollmentCode: string;
+  firstName: string;
+  fatherName: string;
+  documentId: string;
+  phone: string;
+  email: string;
+  relationship: 'PARENT' | 'GUARDIAN' | 'OTHER';
+}
+
 @Component({
   selector: 'app-verify-parent',
-  imports: [ReactiveFormsModule],
+  imports: [FormField],
   template: `
     <div class="min-h-screen flex flex-col gradient-bg">
       <header class="p-4 md:p-6 flex items-center justify-between">
@@ -30,7 +40,7 @@ import Auth from '../auth/auth';
             </p>
           </div>
 
-          <form [formGroup]="form" (ngSubmit)="link()" class="space-y-4 text-left">
+          <form (submit)="link($event)" class="space-y-4 text-left">
             <div class="fieldset">
               <label for="enrollmentCode" class="label">
                 <span class="label-text font-medium">Código de matrícula</span>
@@ -40,10 +50,12 @@ import Auth from '../auth/auth';
                 id="enrollmentCode"
                 class="input input-bordered w-full uppercase"
                 placeholder="Ej: A1B2C3D4"
-                formControlName="enrollmentCode"
+                [formField]="form.enrollmentCode"
               />
-              @if (form.get('enrollmentCode')?.touched && form.get('enrollmentCode')?.hasError('required')) {
-                <p class="text-error text-xs mt-1">El código es requerido</p>
+              @if (form.enrollmentCode().touched() && form.enrollmentCode().errors()) {
+                @for (error of form.enrollmentCode().errors(); track error.message) {
+                  <p class="text-error text-xs mt-1">{{ error.message }}</p>
+                }
               }
             </div>
 
@@ -52,13 +64,13 @@ import Auth from '../auth/auth';
                 <label for="firstName" class="label">
                   <span class="label-text font-medium">Nombres</span>
                 </label>
-                <input id="firstName" class="input input-bordered w-full" formControlName="firstName" />
+                <input id="firstName" class="input input-bordered w-full" [formField]="form.firstName" />
               </div>
               <div class="fieldset">
                 <label for="fatherName" class="label">
                   <span class="label-text font-medium">Apellidos</span>
                 </label>
-                <input id="fatherName" class="input input-bordered w-full" formControlName="fatherName" />
+                <input id="fatherName" class="input input-bordered w-full" [formField]="form.fatherName" />
               </div>
             </div>
 
@@ -66,7 +78,7 @@ import Auth from '../auth/auth';
               <label for="documentId" class="label">
                 <span class="label-text font-medium">Documento de identidad</span>
               </label>
-              <input id="documentId" class="input input-bordered w-full" formControlName="documentId" />
+              <input id="documentId" class="input input-bordered w-full" [formField]="form.documentId" />
             </div>
 
             <div class="grid grid-cols-2 gap-3">
@@ -74,13 +86,13 @@ import Auth from '../auth/auth';
                 <label for="phone" class="label">
                   <span class="label-text font-medium">Teléfono</span>
                 </label>
-                <input id="phone" class="input input-bordered w-full" formControlName="phone" />
+                <input id="phone" class="input input-bordered w-full" [formField]="form.phone" />
               </div>
               <div class="fieldset">
                 <label for="email" class="label">
                   <span class="label-text font-medium">Correo</span>
                 </label>
-                <input id="email" type="email" class="input input-bordered w-full" formControlName="email" />
+                <input id="email" type="email" class="input input-bordered w-full" [formField]="form.email" />
               </div>
             </div>
 
@@ -88,7 +100,7 @@ import Auth from '../auth/auth';
               <label for="relationship" class="label">
                 <span class="label-text font-medium">Parentesco</span>
               </label>
-              <select id="relationship" class="select select-bordered w-full" formControlName="relationship">
+              <select id="relationship" class="select select-bordered w-full" [formField]="form.relationship">
                 <option value="PARENT">Padre/Madre</option>
                 <option value="GUARDIAN">Tutor legal</option>
                 <option value="OTHER">Otro</option>
@@ -138,8 +150,7 @@ import Auth from '../auth/auth';
     }
   `,
 })
-export default class VerifyParent implements OnInit {
-  private fb = inject(NonNullableFormBuilder);
+export default class VerifyParent {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private http = inject(HttpClient);
@@ -151,31 +162,43 @@ export default class VerifyParent implements OnInit {
   public loading = signal(false);
   public errorMessage = signal('');
 
-  public form = this.fb.group({
-    enrollmentCode: ['', [Validators.required]],
-    firstName: ['', [Validators.required]],
-    fatherName: ['', [Validators.required]],
-    documentId: ['', [Validators.required]],
-    phone: ['', [Validators.required]],
-    email: ['', [Validators.required, Validators.email]],
-    relationship: ['PARENT', [Validators.required]],
+  linkModel = signal<LinkChildPayload>({
+    enrollmentCode: '',
+    firstName: '',
+    fatherName: '',
+    documentId: '',
+    phone: '',
+    email: '',
+    relationship: 'PARENT',
   });
 
-  ngOnInit() {
-    this.schoolId.set(this.route.snapshot.queryParamMap.get('schoolId') || '');
-    this.schoolName.set(this.route.snapshot.queryParamMap.get('schoolName') || '');
+  public form = form(this.linkModel, (schemaPath) => {
+    required(schemaPath.enrollmentCode, { message: 'El código de matrícula es requerido' });
+    required(schemaPath.firstName, { message: 'El nombre es requerido' });
+    required(schemaPath.fatherName, { message: 'El apellido es requerido' });
+    required(schemaPath.documentId, { message: 'El documento de identidad es requerido' });
+    required(schemaPath.phone, { message: 'El teléfono es requerido' });
+    required(schemaPath.email, { message: 'El correo es requerido' });
+    required(schemaPath.relationship, { message: 'El parentesco es requerido' });
+  });
+
+  contructor() {
+    afterRenderEffect(() => {
+      this.schoolId.set(this.route.snapshot.queryParamMap.get('schoolId') || '');
+      this.schoolName.set(this.route.snapshot.queryParamMap.get('schoolName') || '');
+    });
   }
 
-  link() {
-    if (this.form.invalid) {
-      this.form.markAllAsTouched();
+  link(event: Event) {
+    event.preventDefault();
+    if (this.form().invalid()) {
       return;
     }
 
     this.loading.set(true);
     this.errorMessage.set('');
 
-    const raw = this.form.getRawValue();
+    const raw = this.form().value();
     const payload = {
       enrollmentCode: raw.enrollmentCode.trim().toUpperCase(),
       firstName: raw.firstName,

@@ -1,13 +1,13 @@
 import { Loader, Toast } from '#/ui';
 import { HttpClient } from '@angular/common/http';
 import { Component, inject, signal } from '@angular/core';
-import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { form, FormField, minLength, required, validate } from '@angular/forms/signals';
 import { Router, RouterLink } from '@angular/router';
 import Auth from './auth';
 
 @Component({
   selector: 'app-reset-password',
-  imports: [ReactiveFormsModule, RouterLink, Loader],
+  imports: [FormField, RouterLink, Loader],
   template: `
     <div class="gradient-bg min-h-screen flex items-center justify-center p-4">
       @defer {
@@ -50,22 +50,21 @@ import Auth from './auth';
                   }
                 </div>
               } @else {
-                <form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-6">
+                <form (submit)="onSubmit($event)" class="space-y-6">
                   <div class="fieldset">
                     <label for="password">Nueva contraseña</label>
                     <input
                       id="password"
-                      formControlName="password"
+                      [formField]="form.password"
                       type="password"
                       autocomplete="new-password"
                       class="input input-primary w-full"
                       placeholder="Mínimo 8 caracteres"
                     />
-                    @if (form.get('password')?.touched && form.get('password')?.hasError('required')) {
-                      <p class="text-error text-xs mt-1">La contraseña es requerida</p>
-                    }
-                    @if (form.get('password')?.touched && form.get('password')?.hasError('minlength')) {
-                      <p class="text-error text-xs mt-1">La contraseña debe tener al menos 8 caracteres</p>
+                    @if (form.password().touched() && form.password().invalid()) {
+                      @for (error of form.password().errors(); track error) {
+                        <p class="text-error text-xs mt-1">{{ error.message }}</p>
+                      }
                     }
                   </div>
 
@@ -73,26 +72,20 @@ import Auth from './auth';
                     <label for="confirmPassword">Confirmar contraseña</label>
                     <input
                       id="confirmPassword"
-                      formControlName="confirmPassword"
+                      [formField]="form.confirmPassword"
                       type="password"
                       autocomplete="new-password"
                       class="input input-primary w-full"
                       placeholder="Repite la nueva contraseña"
                     />
-                    @if (form.get('confirmPassword')?.touched && form.get('confirmPassword')?.hasError('required')) {
-                      <p class="text-error text-xs mt-1">Confirma tu contraseña</p>
+                    @if (form.confirmPassword().touched() && form.confirmPassword().invalid()) {
+                      @for (error of form.confirmPassword().errors(); track error) {
+                        <p class="text-error text-xs mt-1">{{ error.message }}</p>
+                      }
                     }
                   </div>
 
-                  @if (passwordMismatch()) {
-                    <p class="text-error text-sm">Las contraseñas no coinciden.</p>
-                  }
-
-                  <button
-                    type="submit"
-                    [disabled]="loading() || form.invalid || passwordMismatch()"
-                    class="btn btn-primary w-full"
-                  >
+                  <button type="submit" [disabled]="loading() || form().invalid()" class="btn btn-primary w-full">
                     @if (loading()) {
                       <span class="loading loading-spinner loading-sm"></span>
                       Guardando...
@@ -131,11 +124,25 @@ export default class ResetPasswordComponent {
   loading = signal(false);
   resending = signal(false);
   resendSuccess = signal(false);
-  passwordMismatch = signal(false);
 
-  form = new FormGroup({
-    password: new FormControl('', [Validators.required, Validators.minLength(8)]),
-    confirmPassword: new FormControl('', [Validators.required]),
+  private formModel = signal({ password: '', confirmPassword: '' });
+
+  form = form(this.formModel, (schemaPath) => {
+    required(schemaPath.password, { message: 'Contrasena requerida' });
+    required(schemaPath.confirmPassword, { message: 'Confirma tu contraseña' });
+    minLength(schemaPath.password, 8, { message: 'Minimo 8 caracteres' });
+    validate(schemaPath.confirmPassword, ({ value, valueOf, stateOf }) => {
+      if (!stateOf(schemaPath.password).touched()) {
+        return null;
+      }
+      if (value() !== valueOf(schemaPath.password)) {
+        return {
+          kind: 'passwordMismatch',
+          message: 'Las contraseñas no coinciden.',
+        };
+      }
+      return null;
+    });
   });
 
   constructor() {
@@ -153,19 +160,14 @@ export default class ResetPasswordComponent {
         this.token.set(token);
       }
     }
-
-    // Watch for password mismatch
-    this.form.valueChanges.subscribe(() => {
-      const { password, confirmPassword } = this.form.value;
-      this.passwordMismatch.set(!!password && !!confirmPassword && password !== confirmPassword);
-    });
   }
 
-  async onSubmit() {
+  async onSubmit(event: Event) {
+    event.preventDefault();
     const token = this.token();
-    const password = this.form.value.password;
+    const { password } = this.formModel();
 
-    if (this.form.invalid || !token || this.passwordMismatch() || !password) {
+    if (this.form().invalid() || !token || !password) {
       return;
     }
 

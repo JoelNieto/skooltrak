@@ -1,14 +1,11 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { EmptyState, PageHeader } from '#/ui';
+import { Component } from '@angular/core';
 
 @Component({
   selector: 'app-parent-notifications',
   imports: [EmptyState, PageHeader],
   template: `
-    <lib-page-header
-      title="Notificaciones para padres"
-      subtitle="Alertas sobre asistencia, notas y comunicaciones."
-    />
+    <lib-page-header title="Notificaciones para padres" subtitle="Alertas sobre asistencia, notas y comunicaciones." />
 
     <div class="space-y-3">
       @for (notification of notifications; track notification.id) {
@@ -31,9 +28,7 @@ import { EmptyState, PageHeader } from '#/ui';
     </div>
 
     <div class="mt-6">
-      <h2 class="text-lg font-semibold text-base-content mb-3">
-        Alertas resueltas
-      </h2>
+      <h2 class="text-lg font-semibold text-base-content mb-3">Alertas resueltas</h2>
       @if (resolved.length === 0) {
         <lib-empty-state
           title="Sin alertas resueltas"
@@ -49,7 +44,6 @@ import { EmptyState, PageHeader } from '#/ui';
       }
     </div>
   `,
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class ParentNotifications {
   notifications = [

@@ -1,15 +1,15 @@
-import { markGroupDirty, Toast } from '#/ui';
+import { Toast } from '#/ui';
 import { HttpClient } from '@angular/common/http';
-import { Component, inject, input, output } from '@angular/core';
-import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Component, inject, input, output, signal } from '@angular/core';
+import { form, FormField, required } from '@angular/forms/signals';
 import { from, switchMap } from 'rxjs';
 
 type UploadResult = { created: boolean };
 
 @Component({
   selector: 'app-course-file-upload-form',
-  imports: [ReactiveFormsModule],
-  template: `<form [formGroup]="form" (ngSubmit)="onSubmit()">
+  imports: [FormField],
+  template: `<form (submit)="onSubmit($event)">
     <div class="flex flex-col gap-4">
       <div class="fieldset">
         <label for="file">Archivo</label>
@@ -20,7 +20,7 @@ type UploadResult = { created: boolean };
       </div>
       <div class="fieldset">
         <label for="permission">Permiso</label>
-        <select id="permission" formControlName="permission" class="select select-primary">
+        <select id="permission" [formField]="form.permission" class="select select-primary">
           <option value="VIEW">Solo ver</option>
           <option value="EDIT">Puede editar</option>
         </select>
@@ -35,14 +35,15 @@ type UploadResult = { created: boolean };
 export default class CourseFileUploadForm {
   public data = input.required<{ courseId: string }>();
   public closeModal = output<UploadResult | undefined>();
-  private fb = inject(NonNullableFormBuilder);
   private http = inject(HttpClient);
   private toast = inject(Toast);
 
   public selectedFile: File | null = null;
 
-  public form = this.fb.group({
-    permission: this.fb.control<'VIEW' | 'EDIT'>('VIEW', [Validators.required]),
+  formModel = signal<{ permission: 'VIEW' | 'EDIT' }>({ permission: 'VIEW' });
+
+  public form = form(this.formModel, (schemaPath) => {
+    required(schemaPath.permission);
   });
 
   onFileSelected(event: Event) {
@@ -50,19 +51,19 @@ export default class CourseFileUploadForm {
     this.selectedFile = inputElement.files?.[0] ?? null;
   }
 
-  onSubmit() {
+  onSubmit(event: Event) {
+    event.preventDefault();
     if (!this.selectedFile) {
       this.toast.showError('Selecciona un archivo para subir.');
       return;
     }
 
-    if (this.form.invalid) {
+    if (this.form().invalid()) {
       this.toast.showError('Formulario invalido');
-      markGroupDirty(this.form);
       return;
     }
 
-    const permission = this.form.getRawValue().permission;
+    const { permission } = this.formModel();
     const mimeType = this.selectedFile.type || 'application/octet-stream';
 
     this.http

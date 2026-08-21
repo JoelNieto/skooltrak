@@ -1,7 +1,7 @@
 import { Toast } from '#/ui';
 import { HttpClient, httpResource } from '@angular/common/http';
-import { Component, inject, input, OnInit, output } from '@angular/core';
-import { FormArray, NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { afterRenderEffect, Component, inject, input, output, signal } from '@angular/core';
+import { applyEach, form, FormField, required } from '@angular/forms/signals';
 import { Prisma } from '@generated/prisma';
 import { firstValueFrom } from 'rxjs';
 import Store from '../../core/store';
@@ -23,27 +23,26 @@ const MONTH_LABELS: Record<number, string> = {
 
 @Component({
   selector: 'app-study-plan-form',
-  imports: [ReactiveFormsModule],
-
+  imports: [FormField],
   template: `
-    <form [formGroup]="form" (ngSubmit)="onSubmit()">
+    <form (submit)="onSubmit($event)">
       <div class="flex flex-col md:grid md:grid-cols-4 md:gap-4 gap-2">
         <div class="fieldset md:col-span-2">
           <label for="name">Nombre</label>
-          <input type="text" formControlName="name" class="input input-primary" />
+          <input type="text" [formField]="form.name" class="input input-primary" />
         </div>
         <div class="fieldset">
           <label for="shortName">Nombre corto</label>
-          <input type="text" formControlName="shortName" class="input input-primary" />
+          <input type="text" [formField]="form.shortName" class="input input-primary" />
         </div>
         <div class="fieldset">
           <label for="level">Grado</label>
-          <input type="number" formControlName="level" class="input input-primary" />
+          <input type="number" [formField]="form.level" class="input input-primary" />
         </div>
 
         <div class="fieldset">
           <label for="degreeId">Nivel</label>
-          <select formControlName="degreeId" class="select select-primary">
+          <select [formField]="form.degreeId" class="select select-primary">
             <option value="" disabled>Selecciona nivel...</option>
             @for (degree of degrees.value(); track degree.id) {
               <option [value]="degree.id">
@@ -54,7 +53,7 @@ const MONTH_LABELS: Record<number, string> = {
         </div>
         <div class="fieldset">
           <label for="gradeMetricId">Metrica de calificaciones</label>
-          <select formControlName="gradeMetricId" class="select select-primary">
+          <select [formField]="form.gradeMetricId" class="select select-primary">
             <option value="" disabled>Selecciona metrica...</option>
             @for (metric of metrics.value(); track metric.id) {
               <option [value]="metric.id">
@@ -65,7 +64,7 @@ const MONTH_LABELS: Record<number, string> = {
         </div>
         <div class="fieldset md:col-span-4">
           <label for="description">Descripción</label>
-          <textarea formControlName="description" class="textarea textarea-primary w-full"></textarea>
+          <textarea [formField]="form.description" class="textarea textarea-primary w-full"></textarea>
         </div>
 
         <div class="fieldset md:col-span-4 border-t border-base-300 pt-4 mt-2">
@@ -76,8 +75,7 @@ const MONTH_LABELS: Record<number, string> = {
               <input
                 type="number"
                 step="0.01"
-                min="0"
-                formControlName="monthlyTuitionAmount"
+                [formField]="form.monthlyTuitionAmount"
                 class="input input-primary"
                 placeholder="0.00"
               />
@@ -92,7 +90,7 @@ const MONTH_LABELS: Record<number, string> = {
                     <input
                       type="checkbox"
                       [value]="m"
-                      [checked]="tuitionMonthsArray().includes(m)"
+                      [checked]="form.tuitionMonths().value().includes(m)"
                       (change)="toggleTuitionMonth(m, $event)"
                       class="checkbox checkbox-sm"
                     />
@@ -103,19 +101,18 @@ const MONTH_LABELS: Record<number, string> = {
             </div>
             <div class="fieldset">
               <label for="enrollmentCosts">Costos de matrícula</label>
-              <div formArrayName="enrollmentCosts" class="space-y-2">
-                @for (item of enrollmentCostsArray().controls; track $index; let i = $index) {
-                  <div [formGroupName]="i" class="flex gap-2 items-end">
+              <div class="space-y-2">
+                @for (item of form.enrollmentCosts; track $index; let i = $index) {
+                  <div class="flex gap-2 items-end">
                     <input
-                      formControlName="name"
+                      [formField]="item.name"
                       class="input input-primary flex-1"
                       placeholder="Ej. Matrícula, Seguro"
                     />
                     <input
-                      formControlName="amount"
+                      [formField]="item.amount"
                       type="number"
                       step="0.01"
-                      min="0"
                       class="input input-primary w-24!"
                       placeholder="0"
                     />
@@ -139,7 +136,7 @@ const MONTH_LABELS: Record<number, string> = {
     </form>
   `,
 })
-export default class StudyPlanForm implements OnInit {
+export default class StudyPlanForm {
   public data = input<{
     studyPlan?: Prisma.StudyPlanGetPayload<{
       include: { degree: true; school: true };
@@ -147,7 +144,6 @@ export default class StudyPlanForm implements OnInit {
   }>();
 
   public closeModal = output<void>();
-  private fb = inject(NonNullableFormBuilder);
   private http = inject(HttpClient);
   private toast = inject(Toast);
   private store = inject(Store);
@@ -162,46 +158,58 @@ export default class StudyPlanForm implements OnInit {
     };
   });
 
-  public form = this.fb.group({
-    name: ['', [Validators.required]],
-    shortName: ['', [Validators.required]],
-    description: ['', []],
-    level: [0, [Validators.required]],
-    degreeId: ['', [Validators.required]],
-    gradeMetricId: this.fb.control<string>('', [Validators.required]),
-    monthlyTuitionAmount: this.fb.control<number | null>(null),
-    tuitionMonths: this.fb.control<number[]>([], []),
-    enrollmentCosts: this.fb.array([]) as FormArray,
+  public formModel = signal<{
+    name: string;
+    shortName: string;
+    description: string;
+    level: number;
+    gradeMetricId: string;
+    degreeId: string;
+    monthlyTuitionAmount: number | null;
+    tuitionMonths: number[];
+    enrollmentCosts: { name: string; amount: number; order: number }[];
+  }>({
+    name: '',
+    shortName: '',
+    description: '',
+    level: 0,
+    degreeId: '',
+    gradeMetricId: '',
+    monthlyTuitionAmount: null,
+    tuitionMonths: [],
+    enrollmentCosts: [],
   });
 
-  enrollmentCostsArray() {
-    return this.form.get('enrollmentCosts') as FormArray;
-  }
-
-  tuitionMonthsArray() {
-    return this.form.get('tuitionMonths')?.value ?? [];
-  }
+  public form = form(this.formModel, (schemaPath) => {
+    required(schemaPath.name, { message: 'Nombre requerido' });
+    required(schemaPath.shortName, { message: 'Nombre corto requerido' });
+    required(schemaPath.degreeId, { message: 'Nombre corto requerido' });
+    required(schemaPath.gradeMetricId, { message: 'Nombre corto requerido' });
+    required(schemaPath.level, { message: 'Nombre corto requerido' });
+    applyEach(schemaPath.enrollmentCosts, (costPath) => {
+      required(costPath.name);
+      required(costPath.amount);
+    });
+  });
 
   monthLabel(m: number) {
     return MONTH_LABELS[m] ?? m;
   }
 
   addEnrollmentCost() {
-    (this.form.get('enrollmentCosts') as FormArray).push(
-      this.fb.group({
-        name: ['', Validators.required],
-        amount: [0, [Validators.required, Validators.min(0)]],
-        order: [0],
-      }),
-    );
+    console.log(this.formModel().enrollmentCosts);
+    this.formModel.update((current) => ({
+      ...current,
+      enrollmentCosts: [...current.enrollmentCosts, { name: '', amount: 0, order: 0 }],
+    }));
   }
 
   removeEnrollmentCost(i: number) {
-    (this.form.get('enrollmentCosts') as FormArray).removeAt(i);
+    this.formModel.update((current) => ({ ...current, enrollmentCosts: current.enrollmentCosts.splice(i, 1) }));
   }
 
   toggleTuitionMonth(m: number, ev: Event) {
-    const arr = [...(this.form.get('tuitionMonths')?.value ?? [])];
+    const arr = this.formModel().tuitionMonths;
     const idx = arr.indexOf(m);
     if ((ev.target as HTMLInputElement).checked) {
       if (idx === -1) arr.push(m);
@@ -209,49 +217,46 @@ export default class StudyPlanForm implements OnInit {
       if (idx >= 0) arr.splice(idx, 1);
     }
     arr.sort((a, b) => a - b);
-    this.form.get('tuitionMonths')?.setValue(arr);
+    this.form.tuitionMonths().value.set(arr);
   }
 
-  ngOnInit(): void {
-    const plan = this.data()?.studyPlan;
-    if (plan) {
-      const { enrollmentCosts, ...rest } = plan as {
-        enrollmentCosts?: { name: string; amount: unknown; order: number }[];
-        [k: string]: unknown;
-      };
-      const patch: Record<string, unknown> = { ...rest };
-      if ('monthlyTuitionAmount' in plan && plan.monthlyTuitionAmount != null) {
-        patch['monthlyTuitionAmount'] = Number(plan.monthlyTuitionAmount);
+  constructor() {
+    afterRenderEffect(() => {
+      const plan = this.data()?.studyPlan;
+      if (plan) {
+        const { enrollmentCosts, ...rest } = plan as {
+          enrollmentCosts?: { name: string; amount: unknown; order: number }[];
+          [k: string]: unknown;
+        };
+        const patch: Record<string, unknown> = { ...rest };
+        if ('monthlyTuitionAmount' in plan && plan.monthlyTuitionAmount != null) {
+          patch['monthlyTuitionAmount'] = Number(plan.monthlyTuitionAmount);
+        }
+        if ('tuitionMonths' in plan && Array.isArray(plan.tuitionMonths)) {
+          patch['tuitionMonths'] = plan.tuitionMonths;
+        }
+        this.formModel.set({ ...(patch as any), enrollmentCosts });
+        if (enrollmentCosts && Array.isArray(enrollmentCosts)) {
+          [...enrollmentCosts]
+            .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
+            .forEach((c, i) => {
+              this.formModel.update((current) => ({
+                ...current,
+                enrollmentCosts: [...current.enrollmentCosts, { name: c.name, amount: Number(c.amount), order: i }],
+              }));
+            });
+        }
       }
-      if ('tuitionMonths' in plan && Array.isArray(plan.tuitionMonths)) {
-        patch['tuitionMonths'] = plan.tuitionMonths;
-      }
-      this.form.patchValue(patch);
-      if (enrollmentCosts && Array.isArray(enrollmentCosts)) {
-        const arr = this.form.get('enrollmentCosts') as FormArray;
-        arr.clear();
-        [...enrollmentCosts]
-          .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
-          .forEach((c, i) => {
-            arr.push(
-              this.fb.group({
-                name: [c.name, Validators.required],
-                amount: [Number(c.amount), [Validators.required, Validators.min(0)]],
-                order: [i],
-              }),
-            );
-          });
-      }
-    }
+    });
   }
 
-  async onSubmit() {
-    if (this.form.invalid) {
-      this.form.markAllAsTouched();
+  async onSubmit(event: Event) {
+    event.preventDefault();
+    if (this.form().invalid()) {
       this.toast.showError('Por favor, completa todos los campos');
       return;
     }
-    const request = this.form.getRawValue();
+    const request = this.formModel();
     const plan = this.data()?.studyPlan;
     const schoolId = this.store.currentSchoolId();
 

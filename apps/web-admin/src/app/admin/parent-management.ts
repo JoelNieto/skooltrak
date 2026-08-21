@@ -1,5 +1,5 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { EmptyState, PageHeader } from '#/ui';
+import { Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
 @Component({
@@ -50,9 +50,7 @@ import { RouterLink } from '@angular/router';
     </div>
 
     <div class="mt-6">
-      <h2 class="text-lg font-semibold text-base-content mb-3">
-        Invitaciones pendientes
-      </h2>
+      <h2 class="text-lg font-semibold text-base-content mb-3">Invitaciones pendientes</h2>
       @if (pendingInvites.length === 0) {
         <lib-empty-state
           title="Sin invitaciones pendientes"
@@ -68,7 +66,6 @@ import { RouterLink } from '@angular/router';
       }
     </div>
   `,
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class ParentManagement {
   parents = [

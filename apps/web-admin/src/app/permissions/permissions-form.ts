@@ -1,77 +1,61 @@
 import { Toast } from '#/ui';
-import {
-  ChangeDetectionStrategy,
-  Component,
-  inject,
-  input,
-  OnInit,
-  output,
-} from '@angular/core';
-import {
-  NonNullableFormBuilder,
-  ReactiveFormsModule,
-  Validators,
-} from '@angular/forms';
-import { Prisma } from '@generated/prisma';
 import { HttpClient } from '@angular/common/http';
+import { afterRenderEffect, Component, inject, input, output, signal } from '@angular/core';
+import { form, FormField, required } from '@angular/forms/signals';
+import { Prisma } from '@generated/prisma';
 import { firstValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-permissions-form',
-  imports: [ReactiveFormsModule],
-  template: `<form [formGroup]="form" (ngSubmit)="onSubmit()">
+  imports: [FormField],
+  template: `<form (submit)="onSubmit($event)">
     <div class="fieldset">
       <label for="description">Descripción</label>
-      <input
-        id="description"
-        formControlName="description"
-        class="input input-primary"
-      />
+      <input id="description" [formField]="form.description" class="input input-primary" />
     </div>
     <div class="fieldset">
       <label for="descriptiveId">ID Descriptivo</label>
-      <input
-        id="descriptiveId"
-        formControlName="descriptiveId"
-        class="input input-primary"
-      />
+      <input id="descriptiveId" [formField]="form.descriptiveId" class="input input-primary" />
     </div>
     <div class="flex justify-end mt-4">
       <button class="btn btn-neutral" type="submit">Guardar</button>
     </div>
   </form>`,
-  styles: ``,
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class PermissionsForm implements OnInit {
-  private fb = inject(NonNullableFormBuilder);
+export class PermissionsForm {
   public closeModal = output<void>();
   public data = input<{ permission?: Prisma.PermissionGetPayload<false> }>();
   private toast = inject(Toast);
   private http = inject(HttpClient);
 
-  public form = this.fb.group({
-    descriptiveId: ['', [Validators.required]],
-    description: ['', [Validators.required]],
+  private formModel = signal({
+    descriptiveId: '',
+    description: '',
   });
 
-  public ngOnInit() {
-    if (this.data()?.permission) {
-      this.form.patchValue(this.data()!.permission!);
-    }
+  public form = form(this.formModel, (schemaPath) => {
+    required(schemaPath.description);
+    required(schemaPath.descriptiveId);
+  });
+
+  constructor() {
+    afterRenderEffect(() => {
+      if (this.data()?.permission) {
+        this.formModel.set(this.data()!.permission!);
+      }
+    });
   }
 
-  public onSubmit() {
-    if (this.form.invalid) {
+  public onSubmit(event: Event) {
+    event.preventDefault();
+    if (this.form().invalid()) {
       this.toast.showError('Formulario inválido');
       return;
     }
 
-    const req = this.form.getRawValue();
+    const req = this.formModel();
     if (this.data()?.permission) {
-      void firstValueFrom(
-        this.http.patch('/api/v1/permissions', { ...req, id: this.data()!.permission!.id! }),
-      )
+      void firstValueFrom(this.http.patch('/api/v1/permissions', { ...req, id: this.data()!.permission!.id! }))
         .then(() => {
           this.toast.showSuccess('Permiso actualizado exitosamente');
           this.closeModal.emit();

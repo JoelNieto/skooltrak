@@ -1,13 +1,13 @@
-import { markGroupDirty, Toast } from '#/ui';
+import { Toast } from '#/ui';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { Component, computed, inject, input, output, signal } from '@angular/core';
-import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { form, FormField, required } from '@angular/forms/signals';
 import Store from '../../core/store';
 import { CreatedEntity } from '../setup-wizard';
 
 @Component({
   selector: 'app-study-plans-step',
-  imports: [ReactiveFormsModule],
+  imports: [FormField],
   template: `
     <div class="w-full max-w-md text-center space-y-8 animate-fade-in">
       <!-- Icon -->
@@ -53,12 +53,12 @@ import { CreatedEntity } from '../setup-wizard';
         </div>
       } @else {
         <!-- Form Fields -->
-        <form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-4 text-left">
+        <form (submit)="onSubmit($event)" class="space-y-4 text-left">
           <div class="fieldset">
             <label for="degreeId" class="label">
               <span class="label-text font-medium">Nivel Académico</span>
             </label>
-            <select id="degreeId" formControlName="degreeId" class="select select-bordered w-full">
+            <select id="degreeId" [formField]="form.degreeId" class="select select-bordered w-full">
               <option value="" disabled>Selecciona un nivel...</option>
               @for (degree of allDegrees(); track degree.id) {
                 <option [value]="degree.id">{{ degree.name }}</option>
@@ -73,12 +73,14 @@ import { CreatedEntity } from '../setup-wizard';
             <input
               type="text"
               id="name"
-              formControlName="name"
+              [formField]="form.name"
               class="input input-bordered w-full"
               placeholder="Ej: Primer Grado"
             />
-            @if (form.get('name')?.touched && form.get('name')?.hasError('required')) {
-              <p class="text-error text-xs mt-1">El nombre es requerido</p>
+            @if (form.name().touched() && form.name().invalid()) {
+              @for (error of form.name().errors(); track error) {
+                <p class="text-error text-xs mt-1">{{ error.message }}</p>
+              }
             }
           </div>
 
@@ -90,7 +92,7 @@ import { CreatedEntity } from '../setup-wizard';
               <input
                 type="text"
                 id="shortName"
-                formControlName="shortName"
+                [formField]="form.shortName"
                 class="input input-bordered w-full"
                 placeholder="1ro"
               />
@@ -103,10 +105,9 @@ import { CreatedEntity } from '../setup-wizard';
               <input
                 type="number"
                 id="level"
-                formControlName="level"
+                [formField]="form.level"
                 class="input input-bordered w-full"
                 placeholder="1"
-                min="0"
               />
             </div>
           </div>
@@ -115,7 +116,7 @@ import { CreatedEntity } from '../setup-wizard';
             <label for="gradeMetricId" class="label">
               <span class="label-text font-medium">Métrica de Calificaciones</span>
             </label>
-            <select id="gradeMetricId" formControlName="gradeMetricId" class="select select-bordered w-full">
+            <select id="gradeMetricId" [formField]="form.gradeMetricId" class="select select-bordered w-full">
               <option value="" disabled>Selecciona una métrica...</option>
               @for (metric of gradeMetrics.value(); track metric.id) {
                 <option [value]="metric.id">{{ metric.name }}</option>
@@ -172,7 +173,6 @@ import { CreatedEntity } from '../setup-wizard';
   `,
 })
 export default class StudyPlansStep {
-  private fb = inject(NonNullableFormBuilder);
   #http = inject(HttpClient);
   private toasts = inject(Toast);
   private store = inject(Store);
@@ -220,17 +220,25 @@ export default class StudyPlansStep {
     return [...apiDegrees, ...newDegrees.filter((nd) => !apiDegrees.some((ad) => ad.id === nd.id))];
   };
 
-  public form = this.fb.group({
-    name: ['', [Validators.required]],
-    shortName: ['', [Validators.required]],
-    level: [1, [Validators.required]],
-    degreeId: ['', [Validators.required]],
-    gradeMetricId: ['', [Validators.required]],
+  private formModel = signal({
+    name: '',
+    shortName: '',
+    level: 1,
+    degreeId: '',
+    gradeMetricId: '',
   });
 
-  public onSubmit() {
-    if (this.form.invalid) {
-      markGroupDirty(this.form);
+  public form = form(this.formModel, (schemaPath) => {
+    required(schemaPath.name, { message: 'El nombre es requerido' });
+    required(schemaPath.shortName, { message: 'El nombre corto es requerido' });
+    required(schemaPath.level, { message: 'El nivel es requerido' });
+    required(schemaPath.degreeId, { message: 'El nivel es requerido' });
+    required(schemaPath.gradeMetricId, { message: 'Metrica requerido' });
+  });
+
+  public onSubmit(event: Event) {
+    event.preventDefault();
+    if (this.form().invalid()) {
       this.toasts.showError('Por favor, completa todos los campos');
       return;
     }
@@ -243,7 +251,7 @@ export default class StudyPlansStep {
 
     this.saving.set(true);
 
-    const formValue = this.form.getRawValue();
+    const formValue = this.formModel();
 
     this.#http
       .post<{ id: string; name: string }>('/api/v1/study-plans', {
@@ -258,7 +266,7 @@ export default class StudyPlansStep {
             this.entityCreated.emit({ id: studyPlan.id, name: studyPlan.name, type: 'studyPlan' });
             this.toasts.showSuccess(`Plan "${studyPlan.name}" creado`);
           }
-          this.form.reset({ level: 1 });
+          this.form().value.set({ name: '', shortName: '', level: 1, degreeId: '', gradeMetricId: '' });
 
           if (!this.addAnother) {
             this.completed.emit();

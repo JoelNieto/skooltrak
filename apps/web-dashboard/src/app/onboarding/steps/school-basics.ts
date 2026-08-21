@@ -1,12 +1,12 @@
-import { markGroupDirty, Toast } from '#/ui';
+import { Toast } from '#/ui';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { Component, computed, inject, output, signal } from '@angular/core';
-import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { form, FormField, required } from '@angular/forms/signals';
 import Store from '../../core/store';
 
 @Component({
   selector: 'app-school-basics-step',
-  imports: [ReactiveFormsModule],
+  imports: [FormField],
   template: `
     <div class="w-full max-w-md text-center space-y-8 animate-fade-in">
       <!-- Icon -->
@@ -23,12 +23,12 @@ import Store from '../../core/store';
       </div>
 
       <!-- Form Fields -->
-      <form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-4 text-left">
+      <form (ngSubmit)="onSubmit($event)" class="space-y-4 text-left">
         <div class="fieldset">
           <label for="currentYear" class="label">
             <span class="label-text font-medium">Año Académico Actual</span>
           </label>
-          <select id="currentYear" formControlName="currentYear" class="select select-bordered w-full">
+          <select id="currentYear" [formField]="form.currentYear" class="select select-bordered w-full">
             @for (year of years; track year) {
               <option [value]="year">{{ year }}</option>
             }
@@ -68,7 +68,6 @@ import Store from '../../core/store';
   `,
 })
 export default class SchoolBasicsStep {
-  private fb = inject(NonNullableFormBuilder);
   private http = inject(HttpClient);
   private toasts = inject(Toast);
   private store = inject(Store);
@@ -91,13 +90,15 @@ export default class SchoolBasicsStep {
     return schools?.[0]?.id;
   });
 
-  public form = this.fb.group({
-    currentYear: [new Date().getFullYear(), [Validators.required]],
+  private formModel = signal({ currentYear: new Date().getFullYear().toString() });
+
+  public form = form(this.formModel, (schemaPath) => {
+    required(schemaPath.currentYear);
   });
 
-  public onSubmit() {
-    if (this.form.invalid) {
-      markGroupDirty(this.form);
+  public onSubmit(event: Event) {
+    event.preventDefault();
+    if (this.form().invalid()) {
       this.toasts.showError('Por favor, completa todos los campos');
       return;
     }
@@ -110,7 +111,7 @@ export default class SchoolBasicsStep {
 
     this.saving.set(true);
 
-    const { currentYear } = this.form.getRawValue();
+    const { currentYear } = this.formModel();
 
     this.http
       .patch('/api/v1/schools', {

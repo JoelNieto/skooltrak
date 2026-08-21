@@ -1,30 +1,51 @@
-import { markGroupDirty, Toast } from '#/ui';
+import { Toast } from '#/ui';
 import { HttpClient, httpResource } from '@angular/common/http';
-import { afterRenderEffect, Component, inject, input, output } from '@angular/core';
-import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { afterRenderEffect, Component, inject, input, output, signal } from '@angular/core';
+import { form, FormField, required } from '@angular/forms/signals';
 import { Prisma } from '@generated/prisma';
 import Store from '../../core/store';
 @Component({
   selector: 'app-class-groups-form',
-  imports: [ReactiveFormsModule],
-  template: `<form [formGroup]="form" (ngSubmit)="onSubmit()">
+  imports: [FormField],
+  template: `<form (submit)="onSubmit($event)">
     <div class="flex flex-col md:grid md:grid-cols-2 gap-2">
       <div class="fieldset">
         <label for="name">Nombre</label>
-        <input type="text" id="name" name="name" formControlName="name" class="input input-primary" />
+        <input
+          type="text"
+          id="name"
+          [formField]="form.name"
+          [class.ng-invalid]="form.name().touched() && form.name().invalid()"
+          class="input input-primary"
+        />
+        @if (form.name().touched() && form.name().invalid()) {
+          @for (error of form.name().errors(); track error.message) {
+            <p class="text-error text-xs mt-1">{{ error.message }}</p>
+          }
+        }
       </div>
       <div class="fieldset">
         <label for="studyPlanId">Plan de estudio</label>
-        <select id="studyPlanId" name="studyPlanId" formControlName="studyPlanId" class="select select-primary">
+        <select
+          id="studyPlanId"
+          [formField]="form.studyPlanId"
+          class="select select-primary"
+          [class.ng-invalid]="form.studyPlanId().touched() && form.studyPlanId().invalid()"
+        >
           <option value="" disabled>Seleccionar plan...</option>
           @for (studyPlan of studyPlans.value(); track studyPlan.id) {
             <option [value]="studyPlan.id">{{ studyPlan.name }}</option>
           }
         </select>
+        @if (form.studyPlanId().touched() && form.studyPlanId().invalid()) {
+          @for (error of form.studyPlanId().errors(); track error.message) {
+            <p class="text-error text-xs mt-1">{{ error.message }}</p>
+          }
+        }
       </div>
       <div class="fieldset">
         <label for="teacherId">Profesor <span class="text-base-content/50 text-xs">(opcional)</span></label>
-        <select id="teacherId" name="teacherId" formControlName="teacherId" class="select select-primary">
+        <select id="teacherId" [formField]="$any(form.teacherId)" class="select select-primary">
           <option [value]="null" disabled>Seleccionar profesor...</option>
           @for (teacher of teachers.value(); track teacher.id) {
             <option [value]="teacher.id">{{ teacher.name }}</option>
@@ -33,7 +54,7 @@ import Store from '../../core/store';
       </div>
       <div class="fieldset">
         <label for="active">Activo</label>
-        <input type="checkbox" id="active" name="active" formControlName="active" class="checkbox checkbox-primary" />
+        <input type="checkbox" id="active" [formField]="form.active" class="checkbox checkbox-primary" />
       </div>
     </div>
     <div class="flex justify-end mt-4 gap-2">
@@ -66,34 +87,38 @@ export default class ClassGroupsForm {
     if (!currentSchoolId) {
       return undefined;
     }
-    return `/api/v1/study-plans/by-school/${currentSchoolId}`;
+    return `/api/v1/study-plans/by-school?schoold=${currentSchoolId}`;
   });
 
-  private fb = inject(NonNullableFormBuilder);
+  private formModel = signal<{ name: string; teacherId: null | string; studyPlanId: string; active: boolean }>({
+    name: '',
+    teacherId: '',
+    studyPlanId: '',
+    active: true,
+  });
 
-  public form = this.fb.group({
-    name: ['', [Validators.required]],
-    teacherId: this.fb.control<string | null>(null),
-    studyPlanId: ['', [Validators.required]],
-    active: [true],
+  public form = form(this.formModel, (schemaPath) => {
+    required(schemaPath.name, { message: 'Nombre requerido' });
+    required(schemaPath.studyPlanId, { message: 'Plan de estudios requerido' });
   });
 
   constructor() {
     afterRenderEffect(() => {
       if (this.data()?.group) {
-        this.form.patchValue(this.data()!.group!);
+        this.formModel.update((initial) => ({ ...initial, ...this.data()!.group! }));
       }
     });
   }
 
-  public onSubmit() {
-    if (this.form.invalid) {
+  public onSubmit(event: Event) {
+    event.preventDefault();
+    if (this.form().invalid()) {
+      this.form.studyPlanId().markAsTouched();
       this.toast.showError('Formulario inválido');
-      markGroupDirty(this.form);
       return;
     }
 
-    const req = this.form.getRawValue();
+    const req = this.formModel();
     const groupId = this.data()?.group?.id ?? '';
 
     if (this.data()?.group) {

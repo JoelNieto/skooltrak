@@ -1,6 +1,6 @@
 import { Toast } from '#/ui';
 import { HttpClient } from '@angular/common/http';
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { afterRenderEffect, Component, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 
 @Component({
@@ -65,7 +65,7 @@ import { ActivatedRoute, Router } from '@angular/router';
     }
   `,
 })
-export default class ConfirmRequest implements OnInit {
+export default class ConfirmRequest {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private http = inject(HttpClient);
@@ -83,14 +83,16 @@ export default class ConfirmRequest implements OnInit {
 
   public roleLabel = () => this.roleLabels[this.role()] || this.role();
 
-  ngOnInit() {
-    this.schoolId.set(this.route.snapshot.queryParamMap.get('schoolId') || '');
-    this.schoolName.set(this.route.snapshot.queryParamMap.get('schoolName') || '');
-    this.role.set(this.route.snapshot.queryParamMap.get('role') || '');
+  contructor() {
+    afterRenderEffect(() => {
+      this.schoolId.set(this.route.snapshot.queryParamMap.get('schoolId') || '');
+      this.schoolName.set(this.route.snapshot.queryParamMap.get('schoolName') || '');
+      this.role.set(this.route.snapshot.queryParamMap.get('role') || '');
 
-    if (!this.schoolId() || !this.role()) {
-      this.router.navigate(['/onboarding/join-school']);
-    }
+      if (!this.schoolId() || !this.role()) {
+        this.router.navigate(['/onboarding/join-school']);
+      }
+    });
   }
 
   sendRequest() {

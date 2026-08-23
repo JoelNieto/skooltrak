@@ -55,15 +55,12 @@ interface NewsletterDto {
                     id="title"
                     [formField]="formData.title"
                     class="input input-primary w-full"
-                    [class.ng-dirty]="formData.title().dirty()"
-                    [class.ng-invalid]="formData.title().invalid()"
+                    [class.ng-invalid]="formData.title().touched() && formData.title().invalid()"
                   />
-                  @if (formData.title().invalid() && formData.title().dirty()) {
-                    <ul>
-                      @for (error of formData.title().errors(); track error) {
-                        <li class="text-error text-sm">{{ error.message }}</li>
-                      }
-                    </ul>
+                  @if (formData.title().invalid() && formData.title().touched()) {
+                    @for (error of formData.title().errors(); track error) {
+                      <p class="text-error text-sm">{{ error.message }}</p>
+                    }
                   }
                 </div>
                 <div class="fieldset">

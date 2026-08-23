@@ -1,7 +1,7 @@
 import { Loader, Toast } from '#/ui';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { afterRenderEffect, Component, computed, inject, input, signal } from '@angular/core';
-import { email, form, FormField, required, submit } from '@angular/forms/signals';
+import { disabled, email, form, FormField, required, submit } from '@angular/forms/signals';
 import { Router, RouterLink } from '@angular/router';
 import { Prisma } from '@generated/prisma';
 import { firstValueFrom } from 'rxjs';
@@ -60,7 +60,7 @@ interface StudentFormData {
     @if (isEditMode() && studentResource.isLoading()) {
       <lib-loader />
     } @else {
-      <form (submit)="onSubmit($event)" novalidate="novalidate">
+      <form (submit)="onSubmit($event)">
         <div class="flex flex-col gap-6 divide-y divide-base-300">
           <!-- Personal Information Section -->
           <div class="sm:grid sm:grid-cols-4 sm:gap-4 pb-8">
@@ -79,15 +79,12 @@ interface StudentFormData {
                         type="text"
                         [formField]="studentForm.firstName"
                         class="input input-primary w-full"
-                        [class.ng-dirty]="studentForm.firstName().dirty()"
-                        [class.ng-invalid]="studentForm.firstName().invalid()"
+                        [class.ng-invalid]="studentForm.firstName().touched() && studentForm.firstName().invalid()"
                       />
-                      @if (studentForm.firstName().dirty() && studentForm.firstName().invalid()) {
-                        <ul>
-                          @for (error of studentForm.firstName().errors(); track error) {
-                            <li class="text-error text-sm">{{ error.message }}</li>
-                          }
-                        </ul>
+                      @if (studentForm.firstName().touched() && studentForm.firstName().invalid()) {
+                        @for (error of studentForm.firstName().errors(); track error) {
+                          <p class="text-error text-sm">{{ error.message }}</p>
+                        }
                       }
                     </div>
                     <div class="fieldset col-span-3">
@@ -109,15 +106,12 @@ interface StudentFormData {
                         type="text"
                         [formField]="studentForm.fatherName"
                         class="input input-primary w-full"
-                        [class.ng-dirty]="studentForm.fatherName().dirty()"
-                        [class.ng-invalid]="studentForm.fatherName().invalid()"
+                        [class.ng-invalid]="studentForm.fatherName().touched() && studentForm.fatherName().invalid()"
                       />
-                      @if (studentForm.fatherName().dirty() && studentForm.fatherName().invalid()) {
-                        <ul>
-                          @for (error of studentForm.fatherName().errors(); track error) {
-                            <li class="text-error text-sm">{{ error.message }}</li>
-                          }
-                        </ul>
+                      @if (studentForm.fatherName().touched() && studentForm.fatherName().invalid()) {
+                        @for (error of studentForm.fatherName().errors(); track error) {
+                          <p class="text-error text-sm">{{ error.message }}</p>
+                        }
                       }
                     </div>
                     <div class="fieldset col-span-3">
@@ -139,15 +133,12 @@ interface StudentFormData {
                         type="text"
                         [formField]="studentForm.documentId"
                         class="input input-primary w-full"
-                        [class.ng-dirty]="studentForm.documentId().dirty()"
-                        [class.ng-invalid]="studentForm.documentId().invalid()"
+                        [class.ng-invalid]="studentForm.documentId().touched() && studentForm.documentId().invalid()"
                       />
-                      @if (studentForm.documentId().dirty() && studentForm.documentId().invalid()) {
-                        <ul>
-                          @for (error of studentForm.documentId().errors(); track error) {
-                            <li class="text-error text-sm">{{ error.message }}</li>
-                          }
-                        </ul>
+                      @if (studentForm.documentId().touched() && studentForm.documentId().invalid()) {
+                        @for (error of studentForm.documentId().errors(); track error) {
+                          <p class="text-error text-sm">{{ error.message }}</p>
+                        }
                       }
                     </div>
                     <div class="fieldset col-span-2">
@@ -157,15 +148,12 @@ interface StudentFormData {
                         type="date"
                         [formField]="studentForm.birthDate"
                         class="input input-primary w-full"
-                        [class.ng-dirty]="studentForm.birthDate().dirty()"
-                        [class.ng-invalid]="studentForm.birthDate().invalid()"
+                        [class.ng-invalid]="studentForm.birthDate().touched() && studentForm.birthDate().invalid()"
                       />
-                      @if (studentForm.birthDate().dirty() && studentForm.birthDate().invalid()) {
-                        <ul>
-                          @for (error of studentForm.birthDate().errors(); track error) {
-                            <li class="text-error text-sm">{{ error.message }}</li>
-                          }
-                        </ul>
+                      @if (studentForm.birthDate().touched() && studentForm.birthDate().invalid()) {
+                        @for (error of studentForm.birthDate().errors(); track error) {
+                          <p class="text-error text-sm">{{ error.message }}</p>
+                        }
                       }
                     </div>
                     <div class="fieldset col-span-2">
@@ -174,19 +162,16 @@ interface StudentFormData {
                         id="gender"
                         [formField]="studentForm.gender"
                         class="select select-primary w-full"
-                        [class.ng-dirty]="studentForm.gender().dirty()"
-                        [class.ng-invalid]="studentForm.gender().invalid()"
+                        [class.ng-invalid]="studentForm.gender().touched() && studentForm.gender().invalid()"
                       >
                         <option value="" disabled>---Seleccionar---</option>
                         <option value="MALE">Masculino</option>
                         <option value="FEMALE">Femenino</option>
                       </select>
-                      @if (studentForm.gender().dirty() && studentForm.gender().invalid()) {
-                        <ul>
-                          @for (error of studentForm.gender().errors(); track error) {
-                            <li class="text-error text-sm">{{ error.message }}</li>
-                          }
-                        </ul>
+                      @if (studentForm.gender().touched() && studentForm.gender().invalid()) {
+                        @for (error of studentForm.gender().errors(); track error) {
+                          <p class="text-error text-sm">{{ error.message }}</p>
+                        }
                       }
                     </div>
                   </div>
@@ -256,15 +241,12 @@ interface StudentFormData {
                         type="email"
                         [formField]="studentForm.email"
                         class="input input-primary w-full"
-                        [class.ng-dirty]="studentForm.email().dirty()"
-                        [class.ng-invalid]="studentForm.email().invalid()"
+                        [class.ng-invalid]="studentForm.email().touched() && studentForm.email().invalid()"
                       />
-                      @if (studentForm.email().dirty() && studentForm.email().invalid()) {
-                        <ul>
-                          @for (error of studentForm.email().errors(); track error) {
-                            <li class="text-error text-sm">{{ error.message }}</li>
-                          }
-                        </ul>
+                      @if (studentForm.email().touched() && studentForm.email().invalid()) {
+                        @for (error of studentForm.email().errors(); track error) {
+                          <p class="text-error text-sm">{{ error.message }}</p>
+                        }
                       }
                     </div>
                     <div class="fieldset col-span-3">
@@ -274,15 +256,12 @@ interface StudentFormData {
                         type="text"
                         [formField]="studentForm.phone"
                         class="input input-primary w-full"
-                        [class.ng-dirty]="studentForm.phone().dirty()"
-                        [class.ng-invalid]="studentForm.phone().invalid()"
+                        [class.ng-invalid]="studentForm.phone().touched() && studentForm.phone().invalid()"
                       />
-                      @if (studentForm.phone().dirty() && studentForm.phone().invalid()) {
-                        <ul>
-                          @for (error of studentForm.phone().errors(); track error) {
-                            <li class="text-error text-sm">{{ error.message }}</li>
-                          }
-                        </ul>
+                      @if (studentForm.phone().touched() && studentForm.phone().invalid()) {
+                        @for (error of studentForm.phone().errors(); track error) {
+                          <p class="text-error text-sm">{{ error.message }}</p>
+                        }
                       }
                     </div>
                     <div class="fieldset col-span-6">
@@ -292,15 +271,12 @@ interface StudentFormData {
                         type="text"
                         [formField]="studentForm.address"
                         class="input input-primary w-full"
-                        [class.ng-dirty]="studentForm.address().dirty()"
-                        [class.ng-invalid]="studentForm.address().invalid()"
+                        [class.ng-invalid]="studentForm.address().touched() && studentForm.address().invalid()"
                       />
-                      @if (studentForm.address().dirty() && studentForm.address().invalid()) {
-                        <ul>
-                          @for (error of studentForm.address().errors(); track error) {
-                            <li class="text-error text-sm">{{ error.message }}</li>
-                          }
-                        </ul>
+                      @if (studentForm.address().touched() && studentForm.address().invalid()) {
+                        @for (error of studentForm.address().errors(); track error) {
+                          <p class="text-error text-sm">{{ error.message }}</p>
+                        }
                       }
                     </div>
                   </div>
@@ -464,6 +440,7 @@ export default class StudentForm {
     required(schemaPath.gender, { message: 'Género es requerido' });
     required(schemaPath.address, { message: 'Dirección es requerida' });
     required(schemaPath.phone, { message: 'Teléfono es requerido' });
+    disabled(schemaPath.email, { when: () => this.isEditMode() });
   });
 
   public groups = httpResource<Array<{ id: string; name: string }>>(

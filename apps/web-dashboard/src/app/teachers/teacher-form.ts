@@ -1,19 +1,11 @@
 import { Loader, Toast } from '#/ui';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { afterRenderEffect, Component, computed, inject, input, signal } from '@angular/core';
-import { email, form, FormField, required, submit } from '@angular/forms/signals';
+import { disabled, email, form, FormField, required, submit } from '@angular/forms/signals';
 import { Router, RouterLink } from '@angular/router';
-import { Prisma } from '@generated/prisma';
 import { firstValueFrom } from 'rxjs';
 import Store from '../core/store';
 import { isValidId } from '../core/validators';
-
-type TeacherType = Prisma.TeacherGetPayload<{
-  include: { user: true };
-}> & {
-  name: string;
-  email: string;
-};
 
 type TeacherDetail = {
   firstName?: string;
@@ -93,15 +85,12 @@ interface TeacherFormData {
                         type="text"
                         [formField]="teacherForm.firstName"
                         class="input input-primary w-full"
-                        [class.ng-dirty]="teacherForm.firstName().dirty()"
-                        [class.ng-invalid]="teacherForm.firstName().invalid()"
+                        [class.ng-invalid]="teacherForm.firstName().touched() && teacherForm.firstName().invalid()"
                       />
-                      @if (teacherForm.firstName().dirty() && teacherForm.firstName().invalid()) {
-                        <ul>
-                          @for (error of teacherForm.firstName().errors(); track error) {
-                            <li class="text-error text-sm">{{ error.message }}</li>
-                          }
-                        </ul>
+                      @if (teacherForm.firstName().touched() && teacherForm.firstName().invalid()) {
+                        @for (error of teacherForm.firstName().errors(); track error) {
+                          <p class="text-error text-sm">{{ error.message }}</p>
+                        }
                       }
                     </div>
                     <div class="fieldset col-span-3">
@@ -123,15 +112,12 @@ interface TeacherFormData {
                         type="text"
                         [formField]="teacherForm.fatherName"
                         class="input input-primary w-full"
-                        [class.ng-dirty]="teacherForm.fatherName().dirty()"
-                        [class.ng-invalid]="teacherForm.fatherName().invalid()"
+                        [class.ng-invalid]="teacherForm.fatherName().touched() && teacherForm.fatherName().invalid()"
                       />
-                      @if (teacherForm.fatherName().dirty() && teacherForm.fatherName().invalid()) {
-                        <ul>
-                          @for (error of teacherForm.fatherName().errors(); track error) {
-                            <li class="text-error text-sm">{{ error.message }}</li>
-                          }
-                        </ul>
+                      @if (teacherForm.fatherName().touched() && teacherForm.fatherName().invalid()) {
+                        @for (error of teacherForm.fatherName().errors(); track error) {
+                          <p class="text-error text-sm">{{ error.message }}</p>
+                        }
                       }
                     </div>
                     <div class="fieldset col-span-3">
@@ -153,15 +139,12 @@ interface TeacherFormData {
                         type="text"
                         [formField]="teacherForm.documentId"
                         class="input input-primary w-full"
-                        [class.ng-dirty]="teacherForm.documentId().dirty()"
-                        [class.ng-invalid]="teacherForm.documentId().invalid()"
+                        [class.ng-invalid]="teacherForm.documentId().touched() && teacherForm.documentId().invalid()"
                       />
-                      @if (teacherForm.documentId().dirty() && teacherForm.documentId().invalid()) {
-                        <ul>
-                          @for (error of teacherForm.documentId().errors(); track error) {
-                            <li class="text-error text-sm">{{ error.message }}</li>
-                          }
-                        </ul>
+                      @if (teacherForm.documentId().touched() && teacherForm.documentId().invalid()) {
+                        @for (error of teacherForm.documentId().errors(); track error) {
+                          <p class="text-error text-sm">{{ error.message }}</p>
+                        }
                       }
                     </div>
                     <div class="fieldset col-span-2">
@@ -171,10 +154,9 @@ interface TeacherFormData {
                         type="date"
                         [formField]="teacherForm.birthDate"
                         class="input input-primary w-full"
-                        [class.ng-dirty]="teacherForm.birthDate().dirty()"
-                        [class.ng-invalid]="teacherForm.birthDate().invalid()"
+                        [class.ng-invalid]="teacherForm.birthDate().touched() && teacherForm.birthDate().invalid()"
                       />
-                      @if (teacherForm.birthDate().dirty() && teacherForm.birthDate().invalid()) {
+                      @if (teacherForm.birthDate().touched() && teacherForm.birthDate().invalid()) {
                         <ul>
                           @for (error of teacherForm.birthDate().errors(); track error) {
                             <li class="text-error text-sm">{{ error.message }}</li>
@@ -188,19 +170,16 @@ interface TeacherFormData {
                         id="gender"
                         [formField]="teacherForm.gender"
                         class="select select-primary w-full"
-                        [class.ng-dirty]="teacherForm.gender().dirty()"
-                        [class.ng-invalid]="teacherForm.gender().invalid()"
+                        [class.ng-invalid]="teacherForm.gender().touched() && teacherForm.gender().invalid()"
                       >
                         <option value="" disabled>---Seleccionar---</option>
                         <option value="MALE">Masculino</option>
                         <option value="FEMALE">Femenino</option>
                       </select>
-                      @if (teacherForm.gender().dirty() && teacherForm.gender().invalid()) {
-                        <ul>
-                          @for (error of teacherForm.gender().errors(); track error) {
-                            <li class="text-error text-sm">{{ error.message }}</li>
-                          }
-                        </ul>
+                      @if (teacherForm.gender().touched() && teacherForm.gender().invalid()) {
+                        @for (error of teacherForm.gender().errors(); track error) {
+                          <p class="text-error text-sm">{{ error.message }}</p>
+                        }
                       }
                     </div>
                   </div>
@@ -226,15 +205,12 @@ interface TeacherFormData {
                         type="email"
                         [formField]="teacherForm.email"
                         class="input input-primary w-full"
-                        [class.ng-dirty]="teacherForm.email().dirty()"
-                        [class.ng-invalid]="teacherForm.email().invalid()"
+                        [class.ng-invalid]="teacherForm.email().touched() && teacherForm.email().invalid()"
                       />
-                      @if (teacherForm.email().dirty() && teacherForm.email().invalid()) {
-                        <ul>
-                          @for (error of teacherForm.email().errors(); track error) {
-                            <li class="text-error text-sm">{{ error.message }}</li>
-                          }
-                        </ul>
+                      @if (teacherForm.email().touched() && teacherForm.email().invalid()) {
+                        @for (error of teacherForm.email().errors(); track error) {
+                          <p class="text-error text-sm">{{ error.message }}</p>
+                        }
                       }
                     </div>
                     <div class="fieldset col-span-3">
@@ -384,6 +360,7 @@ export default class TeacherForm {
     email(schemaPath.email, { message: 'Ingrese un correo válido' });
     required(schemaPath.birthDate, { message: 'Fecha de nacimiento es requerida' });
     required(schemaPath.gender, { message: 'Género es requerido' });
+    disabled(schemaPath.email, { when: () => this.isEditMode() });
   });
 
   public teacherResource = httpResource<TeacherDetail | null>(() =>
@@ -417,13 +394,13 @@ export default class TeacherForm {
   onSubmit(event: Event) {
     event.preventDefault();
 
-    // Mark all required fields as dirty for validation display
-    this.teacherForm.firstName().markAsDirty();
-    this.teacherForm.fatherName().markAsDirty();
-    this.teacherForm.documentId().markAsDirty();
-    this.teacherForm.email().markAsDirty();
-    this.teacherForm.birthDate().markAsDirty();
-    this.teacherForm.gender().markAsDirty();
+    // Mark all required fields as touched for validation display
+    this.teacherForm.firstName().markAsTouched();
+    this.teacherForm.fatherName().markAsTouched();
+    this.teacherForm.documentId().markAsTouched();
+    this.teacherForm.email().markAsTouched();
+    this.teacherForm.birthDate().markAsTouched();
+    this.teacherForm.gender().markAsTouched();
 
     submit(this.teacherForm, async () => {
       this.isSaving.set(true);

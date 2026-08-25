@@ -62,7 +62,7 @@ import Auth from './auth';
             }
             @case ('email') {
               <!-- Step 1: Enter email -->
-              <form (ngSubmit)="sendVerificationLink($event)" class="w-full max-w-md">
+              <form (submit)="sendVerificationLink($event)" class="w-full max-w-md">
                 <div class="text-center space-y-8 animate-fade-in">
                   <div class="flex justify-center">
                     <div class="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center">
@@ -180,7 +180,7 @@ import Auth from './auth';
             }
             @case ('register') {
               <!-- Step 3: Registration form -->
-              <form (ngSubmit)="onSubmit($event)" class="w-full max-w-md">
+              <form (submit)="onSubmit($event)" class="w-full max-w-md">
                 <div class="text-center space-y-8 animate-fade-in">
                   <div class="flex justify-center">
                     <div class="w-20 h-20 rounded-full bg-success/10 flex items-center justify-center">

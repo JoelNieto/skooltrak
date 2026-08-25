@@ -83,7 +83,7 @@ export default class ConfirmRequest {
 
   public roleLabel = () => this.roleLabels[this.role()] || this.role();
 
-  contructor() {
+  constructor() {
     afterRenderEffect(() => {
       this.schoolId.set(this.route.snapshot.queryParamMap.get('schoolId') || '');
       this.schoolName.set(this.route.snapshot.queryParamMap.get('schoolName') || '');

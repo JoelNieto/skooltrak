@@ -7,7 +7,7 @@ import { form, FormField, required } from '@angular/forms/signals';
   selector: 'app-grade-bucket-form',
   imports: [FormField],
   template: `
-    <form (ngSubmit)="onSubmit()">
+    <form (submit)="onSubmit($event)">
       <div class="fieldset">
         <label for="name">Nombre</label>
         <input id="name" [formField]="form.name" class="input input-primary" />
@@ -51,7 +51,8 @@ export default class GradeBucketForm {
     });
   }
 
-  public onSubmit() {
+  public onSubmit(event: Event) {
+    event.preventDefault();
     if (this.form().invalid()) {
       this.#toast.showError('Formulario invalido');
       return;

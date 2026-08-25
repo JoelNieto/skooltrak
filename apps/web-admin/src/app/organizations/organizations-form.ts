@@ -38,7 +38,7 @@ export class OrganizationsForm {
     required(schemaPath.description, { message: 'Descripcion requerida' });
   });
 
-  contructor() {
+  constructor() {
     afterRenderEffect(() => {
       const organization = this.data()?.organization;
       if (organization) {

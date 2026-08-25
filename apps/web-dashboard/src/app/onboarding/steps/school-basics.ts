@@ -23,7 +23,7 @@ import Store from '../../core/store';
       </div>
 
       <!-- Form Fields -->
-      <form (ngSubmit)="onSubmit($event)" class="space-y-4 text-left">
+      <form (submit)="onSubmit($event)" class="space-y-4 text-left">
         <div class="fieldset">
           <label for="currentYear" class="label">
             <span class="label-text font-medium">Año Académico Actual</span>
@@ -116,7 +116,7 @@ export default class SchoolBasicsStep {
     this.http
       .patch('/api/v1/schools', {
         id: schoolId,
-        currentYear,
+        currentYear: Number(currentYear),
       })
       .subscribe({
         next: () => {

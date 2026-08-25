@@ -116,7 +116,7 @@ type LookupResult = {
                   </button>
                 </div>
               } @else {
-                <form (ngSubmit)="onLookup($event)" class="space-y-6">
+                <form (submit)="onLookup($event)" class="space-y-6">
                   <div class="fieldset">
                     <label for="email">Correo Electrónico</label>
                     <div class="relative">
@@ -188,6 +188,7 @@ export default class ForgotPasswordComponent {
   }>({ roleLabel: '', displayName: '' });
 
   onLookup(event: Event) {
+    console.log('Hoe');
     event.preventDefault();
     if (this.form().invalid()) return;
 

@@ -182,7 +182,7 @@ export default class VerifyParent {
     required(schemaPath.relationship, { message: 'El parentesco es requerido' });
   });
 
-  contructor() {
+  constructor() {
     afterRenderEffect(() => {
       this.schoolId.set(this.route.snapshot.queryParamMap.get('schoolId') || '');
       this.schoolName.set(this.route.snapshot.queryParamMap.get('schoolName') || '');

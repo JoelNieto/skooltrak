@@ -427,7 +427,12 @@ type SidebarSchool = {
           tabindex="0"
           class="dropdown-content menu bg-base-100 rounded-box z-50 w-full max-w-56 p-2 shadow-lg border border-base-200 mb-2"
         >
-          <li><a routerLink="profile">Perfil</a></li>
+          <li>
+            <a routerLink="profile">
+              <span class="material-symbols-outlined text-xl">person</span>
+              <span class="ml-1">Perfil</span>
+            </a>
+          </li>
           <li>
             <a routerLink="change-password">
               <span class="material-symbols-outlined text-xl">key</span>

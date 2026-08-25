@@ -205,7 +205,7 @@ import Auth from './auth';
                         <input
                           type="text"
                           id="firstName"
-                          class="input input-bordered w-full"
+                          class="input input-primary w-full"
                           placeholder="Juan"
                           [formField]="registerForm.firstName"
                           [class.ng-invalid]="registerForm.firstName().touched() && registerForm.firstName().invalid()"
@@ -222,7 +222,7 @@ import Auth from './auth';
                         <input
                           type="text"
                           id="lastName"
-                          class="input input-bordered w-full"
+                          class="input input-primary w-full"
                           placeholder="Pérez"
                           [class.ng-invalid]="registerForm.lastName().touched() && registerForm.lastName().invalid()"
                           [formField]="registerForm.lastName"
@@ -240,7 +240,7 @@ import Auth from './auth';
                       <input
                         type="password"
                         id="password"
-                        class="input input-bordered w-full"
+                        class="input input-primary w-full"
                         placeholder="••••••••"
                         [class.ng-invalid]="registerForm.password().touched() && registerForm.password().invalid()"
                         [formField]="registerForm.password"
@@ -259,7 +259,7 @@ import Auth from './auth';
                       <input
                         type="password"
                         id="confirmPassword"
-                        class="input input-bordered w-full"
+                        class="input input-primary w-full"
                         placeholder="••••••••"
                         [class.ng-invalid]="
                           registerForm.confirmPassword().touched() && registerForm.confirmPassword().invalid()

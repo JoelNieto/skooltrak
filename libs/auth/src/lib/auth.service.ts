@@ -746,7 +746,7 @@ export class AuthService {
 
       case 'TEACHER':
       case 'ORG_ADMIN':
-        return this.handleAdminTeacherJoin(userId, school, orgId, requestedRole);
+        return this.handleAdminTeacherJoin(userId, school, orgId, requestedRole, documentId);
 
       default:
         throw new Error('Rol no válido');
@@ -827,6 +827,7 @@ export class AuthService {
     school: { id: string; name: string },
     orgId: string,
     requestedRole: string,
+    documentId?: string,
   ) {
     await this.prisma.$transaction(async (tx) => {
       await tx.joinRequest.create({
@@ -834,6 +835,7 @@ export class AuthService {
           userId,
           schoolId: school.id,
           requestedRole,
+          documentId: documentId ?? null,
           status: 'PENDING',
         },
       });
@@ -1283,6 +1285,31 @@ export class AuthService {
           await tx.parent.update({
             where: { id: parent.id },
             data: { userId: joinRequest.userId },
+          });
+        }
+      }
+
+      // For TEACHER: create the teacher profile. Self-service onboarding does not
+      // collect all required Teacher fields, so we seed best-effort values and
+      // let the teacher complete their profile later. userId is @unique on
+      // Teacher, so guard against an already-existing record (re-approval, etc.).
+      if (requestedRole === 'TEACHER') {
+        const existingTeacher = await tx.teacher.findUnique({
+          where: { userId: joinRequest.userId },
+        });
+        if (!existingTeacher) {
+          await tx.teacher.create({
+            data: {
+              firstName: joinRequest.user.firstName,
+              middleName: '',
+              fatherName: joinRequest.user.lastName,
+              motherName: '',
+              documentId: joinRequest.documentId ?? '',
+              birthDate: new Date(),
+              gender: 'FEMALE',
+              organizationId: orgId,
+              userId: joinRequest.userId,
+            },
           });
         }
       }

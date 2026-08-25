@@ -59,9 +59,19 @@ type Teacher = Prisma.TeacherGetPayload<{ include: { user: true } }> & {
               <td>
                 <div class="flex gap-2 items-center cursor-pointer" [routerLink]="['/teachers', teacher.id]">
                   <div class="avatar avatar-placeholder">
-                    <div class="text-white w-8 rounded-full" [style.background]="teacher.user?.color">
-                      <span class="text-sm">{{ teacher.initials }}</span>
-                    </div>
+                    @if (avatarUrlFor(teacher)) {
+                      <div class="w-8 rounded-full overflow-hidden">
+                        <img
+                          [src]="avatarUrlFor(teacher)!"
+                          [alt]="teacher.name"
+                          class="w-full h-full object-cover"
+                        />
+                      </div>
+                    } @else {
+                      <div class="text-white w-8 rounded-full" [style.background]="teacher.user?.color">
+                        <span class="text-sm">{{ teacher.initials }}</span>
+                      </div>
+                    }
                   </div>
                   <div class="flex flex-col">
                     <div class="flex items-center gap-2">
@@ -204,6 +214,23 @@ export default class Teachers {
       orderDirection: this.pagination.sortOrder(),
     }),
   }));
+
+  public avatarMap = httpResource<Record<string, string | null>>(
+    () => {
+      const ids = (this.teachers.value() ?? [])
+        .map((t) => t.user?.id)
+        .filter((id): id is string => !!id);
+      if (!ids.length) return undefined;
+      return { method: 'POST', url: '/api/v1/users/avatar-urls', body: { userIds: ids } };
+    },
+    { defaultValue: {} },
+  );
+
+  public avatarUrlFor(teacher: Teacher): string | null {
+    const id = teacher.user?.id;
+    if (!id) return null;
+    return this.avatarMap.value()?.[id] ?? null;
+  }
 
   constructor() {
     afterRenderEffect(() => {

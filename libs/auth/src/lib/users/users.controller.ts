@@ -76,6 +76,12 @@ export class UsersController {
     return this.avatarService.createAvatarUploadUrl(input.userId, input.mimeType);
   }
 
+  @Post('avatar-urls')
+  @ApiOperation({ summary: 'Resolve avatar URLs for multiple users' })
+  getAvatarUrls(@Body() body: { userIds?: string[] }) {
+    return this.avatarService.getAvatarUrls(body.userIds ?? []);
+  }
+
   @Get('avatar-download-url')
   @ApiOperation({ summary: 'Presigned URL for avatar download' })
   getAvatarDownloadUrl(@Query('userId') userId: string) {

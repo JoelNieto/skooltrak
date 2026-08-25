@@ -1,7 +1,7 @@
 import { Loader } from '#/ui';
 import { DatePipe } from '@angular/common';
 import { httpResource } from '@angular/common/http';
-import { Component, inject, input } from '@angular/core';
+import { Component, computed, inject, input } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import Auth from '../auth/auth';
 import { isValidId } from '../core/validators';
@@ -25,9 +25,15 @@ type TeacherView = any;
           <div class="card-body flex flex-row justify-between items-center">
             <div class="flex gap-2 items-center ">
               <div class="avatar avatar-placeholder">
-                <div class="text-white w-12 rounded-full" [style.background]="teacher.user?.color">
-                  <span class="text-lg">{{ teacher.initials }}</span>
-                </div>
+                @if (avatarUrl()) {
+                  <div class="w-12 rounded-full overflow-hidden">
+                    <img [src]="avatarUrl()!" [alt]="teacher.name" class="w-full h-full object-cover" />
+                  </div>
+                } @else {
+                  <div class="text-white w-12 rounded-full" [style.background]="teacher.user?.color">
+                    <span class="text-lg">{{ teacher.initials }}</span>
+                  </div>
+                }
               </div>
               <div class="flex flex-col">
                 <div class="flex items-center gap-2">
@@ -208,4 +214,14 @@ export default class Teacher {
     }
     return { url: `/api/v1/teachers/${this.id()}` };
   });
+
+  public avatarResource = httpResource<{ url: string | null }>(() => {
+    const user = this.teacherResource.value()?.user;
+    if (!user?.id) {
+      return undefined;
+    }
+    return { url: `/api/v1/users/${user.id}/presigned-avatar-url` };
+  });
+
+  public avatarUrl = computed(() => this.avatarResource.value()?.url ?? null);
 }

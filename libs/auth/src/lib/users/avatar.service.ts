@@ -102,6 +102,36 @@ export class AvatarService {
     });
   }
 
+  async getAvatarUrls(userIds: string[]): Promise<Record<string, string | null>> {
+    const ids = Array.from(new Set(userIds.filter(Boolean)));
+    if (!ids.length) {
+      return {};
+    }
+
+    const users = await this.prisma.user.findMany({
+      where: { id: { in: ids } },
+      select: { id: true, image: true },
+    });
+
+    const result: Record<string, string | null> = {};
+    await Promise.all(
+      users.map(async (user) => {
+        const image = user.image ?? '';
+        if (!image) {
+          result[user.id] = null;
+          return;
+        }
+        if (image.startsWith('http')) {
+          result[user.id] = image;
+          return;
+        }
+        result[user.id] = await this.getAvatarUrl(image);
+      }),
+    );
+
+    return result;
+  }
+
   private getExtensionFromMimeType(mimeType: string): string {
     const mimeToExt: Record<string, string> = {
       'image/png': 'png',

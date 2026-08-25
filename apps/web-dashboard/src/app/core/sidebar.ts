@@ -412,10 +412,14 @@ type SidebarSchool = {
           class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-base-200 group cursor-pointer w-full"
         >
           <div
-            class="w-9 h-9 rounded-full flex items-center justify-center shrink-0"
+            class="w-9 h-9 rounded-full overflow-hidden flex items-center justify-center shrink-0"
             [style.background]="auth.userColor()"
           >
-            <span class="text-neutral-content text-sm font-medium">{{ auth.userInitials() }}</span>
+            @if (avatarUrl.value()) {
+              <img [src]="avatarUrl.value()" [alt]="auth.userName()" class="w-full h-full object-cover" />
+            } @else {
+              <span class="text-neutral-content text-sm font-medium">{{ auth.userInitials() }}</span>
+            }
           </div>
           <div class="flex-1 min-w-0 text-left">
             <p class="text-sm font-medium truncate">{{ auth.userName() }}</p>
@@ -515,6 +519,20 @@ export class Sidebar {
         ),
         map((items) => (items ?? []).reduce((sum, item) => sum + (item.quantity ?? 0), 0)),
       );
+    },
+  });
+
+  protected avatarUrl = rxResource({
+    injector: this.#injector,
+    params: () => ({ id: this.auth.user()?.id, image: this.auth.user()?.image }),
+    stream: ({ params }) => {
+      const { id, image } = params;
+      if (!image) return of(null);
+      if (image.startsWith('http')) return of(image);
+      if (!id) return of(null);
+      return this.#http
+        .get<{ url: string | null }>(`/api/v1/users/${id}/presigned-avatar-url`)
+        .pipe(map((r) => r.url));
     },
   });
 

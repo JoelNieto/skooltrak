@@ -34,7 +34,7 @@ type ChatRow = {
         <li>Chats</li>
       </ul>
     </div>
-    <div class="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
+    <div class="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-4">
       <h1 class="text-2xl font-semibold">Chats</h1>
       <a routerLink="/chats/new" class="btn btn-primary">Nuevo chat</a>
     </div>

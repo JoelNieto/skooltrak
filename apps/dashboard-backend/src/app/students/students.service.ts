@@ -93,6 +93,7 @@ export class StudentsService {
           data: {
             firstName,
             lastName: fatherName,
+            name: `${firstName} ${fatherName}`,
             organizationId,
             roleId: role.id,
             password: hashedPassword,
@@ -125,6 +126,7 @@ export class StudentsService {
           data: {
             firstName,
             lastName: fatherName,
+            name: `${firstName} ${fatherName}`,
             email: email,
             color: this.getRandomPastelColor(),
             password: hashedPassword,
@@ -647,6 +649,7 @@ export class StudentsService {
         data: {
           firstName: input.firstName ?? student.firstName,
           lastName: input.lastName ?? student.fatherName,
+          name: `${input.firstName ?? student.firstName} ${input.lastName ?? student.fatherName}`,
           email,
           color: this.getRandomPastelColor(),
           password: hashedPassword,

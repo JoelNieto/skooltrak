@@ -104,8 +104,14 @@ export default class ClassGroupsForm {
 
   constructor() {
     afterRenderEffect(() => {
-      if (this.data()?.group) {
-        this.formModel.update((initial) => ({ ...initial, ...this.data()!.group! }));
+      const group = this.data()?.group;
+      if (group) {
+        this.formModel.set({
+          name: group.name ?? '',
+          teacherId: group.teacherId ?? null,
+          studyPlanId: group.studyPlanId ?? '',
+          active: group.active ?? true,
+        });
       }
     });
   }

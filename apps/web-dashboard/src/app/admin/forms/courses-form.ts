@@ -70,14 +70,15 @@ interface CourseModel {
                 class="popup bg-base-100 border border-base-300 rounded-box w-full shadow-lg mt-1 max-h-60 overflow-auto z-50"
               >
                 @if (filteredSubjects().length === 0 && subjectQuery().trim()) {
-                  <div
-                    class="p-3 cursor-pointer hover:bg-base-200 flex items-center gap-2"
-                    tabindex="0"
-                    role="button"
-                    (click)="createSubject()"
-                    (keydown.enter)="createSubject()"
-                    (keydown.space)="createSubject(); $event.preventDefault()"
-                  >
+                   <div
+                     class="p-3 cursor-pointer hover:bg-base-200 flex items-center gap-2"
+                     tabindex="0"
+                     role="button"
+                     (mousedown)="$event.preventDefault()"
+                     (click)="createSubject()"
+                     (keydown.enter)="createSubject()"
+                     (keydown.space)="createSubject(); $event.preventDefault()"
+                   >
                     <span class="text-primary font-medium">+ Crear</span>
                     <span>"{{ subjectQuery() }}"</span>
                   </div>
@@ -271,6 +272,7 @@ export default class CoursesForm {
   }
 
   public async createSubject() {
+    console.log('Creating subject with name:', this.subjectQuery());
     const name = this.subjectQuery().trim();
     if (!name) {
       this.toast.showError('El nombre de la asignatura es requerido');
@@ -286,7 +288,7 @@ export default class CoursesForm {
         .substring(0, 4) || name.substring(0, 4).toUpperCase();
 
     try {
-      await firstValueFrom(
+      const created = await firstValueFrom(
         this.http.post<{ id: string; name: string }>('/api/v1/subjects', {
           name,
           code,
@@ -294,8 +296,12 @@ export default class CoursesForm {
       );
 
       this.toast.showSuccess(`Asignatura "${name}" creada exitosamente`);
-      // Reload subjects
-      this.subjects.reload();
+      // Reload subjects and select the newly created one
+      await this.subjects.reload();
+      this.selectedSubject.set({ id: created.id, name: created.name });
+      this.form.subjectId().value.set(created.id);
+      this.subjectQuery.set(created.name);
+      this.popupExpanded.set(false);
     } catch (err: any) {
       this.toast.showError(err.message || 'Error al crear la asignatura');
     }
@@ -305,8 +311,9 @@ export default class CoursesForm {
     const selected = this.selectedOption();
 
     if (selected.length > 0) {
-      const label = this.filteredSubjects().filter((x) => selected.includes(x.id));
-      this.subjectQuery.set(label[0].name);
+      const option = this.filteredSubjects().filter((x) => selected.includes(x.id));
+      this.form.subjectId().value.set(option[0].id);
+      this.subjectQuery.set(option[0].name);
     } else {
       this.subjectQuery.set('');
       this.selectedOption.set([]);
@@ -316,7 +323,7 @@ export default class CoursesForm {
   public onSubmit(event: Event) {
     event.preventDefault();
     this.errorMessage.set('');
-    if (this.form().invalid()) {
+    if (!this.form().valid()) {
       this.toast.showError('Llenar todos los campos');
       return;
     }
@@ -341,6 +348,7 @@ export default class CoursesForm {
     this.http
       .post('/api/v1/courses', {
         ...req,
+        teacherId: req.teacherId || null,
         organizationId: this.store.currentOrganizationId() ?? '',
         schoolId: this.store.currentSchoolId() ?? '',
       })

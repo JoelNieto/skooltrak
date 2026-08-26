@@ -181,9 +181,7 @@ export default class Auth {
     this.userLoadStatus.set('loading');
 
     try {
-      console.log('Loading current user...');
       const me = await firstValueFrom(this.http.get<any>('/api/v1/auth/me'));
-      console.log({ me });
       this.userState.set(me ?? null);
       this.userLoadStatus.set('resolved');
     } catch (err) {

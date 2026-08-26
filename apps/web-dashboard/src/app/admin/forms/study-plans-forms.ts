@@ -197,7 +197,6 @@ export default class StudyPlanForm {
   }
 
   addEnrollmentCost() {
-    console.log(this.formModel().enrollmentCosts);
     this.formModel.update((current) => ({
       ...current,
       enrollmentCosts: [...current.enrollmentCosts, { name: '', amount: 0, order: 0 }],

@@ -137,9 +137,28 @@ export class ClassGroupsService {
   }
 
   update(id: string, updateClassGroupInput: UpdateClassGroupInput) {
+    const { name, studyPlanId, teacherId, active, organizationId, schoolId } =
+      updateClassGroupInput;
+
+    const data: Prisma.ClassGroupUpdateInput = {};
+    if (name !== undefined) data.name = name;
+    if (active !== undefined) data.active = active;
+    if (studyPlanId !== undefined) {
+      data.studyPlan = { connect: { id: studyPlanId } };
+    }
+    if (teacherId !== undefined) {
+      data.teacher = teacherId ? { connect: { id: teacherId } } : { disconnect: true };
+    }
+    if (organizationId !== undefined) {
+      data.organization = { connect: { id: organizationId } };
+    }
+    if (schoolId !== undefined) {
+      data.school = { connect: { id: schoolId } };
+    }
+
     return this.prisma.classGroup.update({
       where: { id },
-      data: updateClassGroupInput,
+      data,
     });
   }
 

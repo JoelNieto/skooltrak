@@ -205,7 +205,10 @@ export default class StudyPlanForm {
   }
 
   removeEnrollmentCost(i: number) {
-    this.formModel.update((current) => ({ ...current, enrollmentCosts: current.enrollmentCosts.splice(i, 1) }));
+    this.formModel.update((current) => ({
+      ...current,
+      enrollmentCosts: current.enrollmentCosts.filter((_, idx) => idx !== i),
+    }));
   }
 
   toggleTuitionMonth(m: number, ev: Event) {
@@ -220,10 +223,13 @@ export default class StudyPlanForm {
     this.form.tuitionMonths().value.set(arr);
   }
 
+  private populatedPlanId = signal<string | null>(null);
+
   constructor() {
     afterRenderEffect(() => {
       const plan = this.data()?.studyPlan;
-      if (plan) {
+      if (plan && this.populatedPlanId() !== plan.id) {
+        this.populatedPlanId.set(plan.id);
         const { enrollmentCosts, ...rest } = plan as {
           enrollmentCosts?: { name: string; amount: unknown; order: number }[];
           [k: string]: unknown;
@@ -235,17 +241,13 @@ export default class StudyPlanForm {
         if ('tuitionMonths' in plan && Array.isArray(plan.tuitionMonths)) {
           patch['tuitionMonths'] = plan.tuitionMonths;
         }
-        this.formModel.set({ ...(patch as any), enrollmentCosts });
-        if (enrollmentCosts && Array.isArray(enrollmentCosts)) {
-          [...enrollmentCosts]
-            .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
-            .forEach((c, i) => {
-              this.formModel.update((current) => ({
-                ...current,
-                enrollmentCosts: [...current.enrollmentCosts, { name: c.name, amount: Number(c.amount), order: i }],
-              }));
-            });
-        }
+        const sortedCosts =
+          enrollmentCosts && Array.isArray(enrollmentCosts)
+            ? [...enrollmentCosts]
+                .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
+                .map((c, i) => ({ name: c.name, amount: Number(c.amount), order: i }))
+            : [];
+        this.formModel.set({ ...(patch as any), enrollmentCosts: sortedCosts });
       }
     });
   }
@@ -279,8 +281,8 @@ export default class StudyPlanForm {
         this.http.post('/api/v1/financial/study-plan-config', {
           studyPlanId,
           monthlyTuitionAmount: request.monthlyTuitionAmount ?? undefined,
-          tuitionMonths: request.tuitionMonths?.length ? request.tuitionMonths : undefined,
-          enrollmentCosts: costs.length ? costs : undefined,
+          tuitionMonths: request.tuitionMonths ?? [],
+          enrollmentCosts: costs,
         }),
       );
     };

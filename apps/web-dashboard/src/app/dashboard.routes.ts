@@ -161,6 +161,10 @@ export const DASHBOARD_ROUTES: Route[] = [
         loadComponent: () => import('./courses/course'),
       },
       {
+        path: 'financial-module',
+        loadComponent: () => import('./admin/pages/financial-module'),
+      },
+      {
         path: 'assignments',
         canActivate: [permissionGuard('VIEW_ASSIGNMENTS')],
         loadComponent: () => import('./assignments/assignments'),
@@ -262,7 +266,6 @@ export const DASHBOARD_ROUTES: Route[] = [
       },
       {
         path: 'students/:id',
-        canActivate: [permissionGuard('VIEW_STUDENTS')],
         loadComponent: () => import('./students/student'),
       },
       {
@@ -308,7 +311,6 @@ export const DASHBOARD_ROUTES: Route[] = [
       },
       {
         path: 'student/finances',
-        canActivate: [permissionGuard('VIEW_FINANCIALS')],
         loadComponent: () => import('./students/student-finances'),
       },
       {
@@ -353,7 +355,6 @@ export const DASHBOARD_ROUTES: Route[] = [
       },
       {
         path: 'parent/finances',
-        canActivate: [permissionGuard('VIEW_FINANCIALS')],
         loadComponent: () => import('./parent/parent-finances'),
       },
       {
@@ -443,10 +444,7 @@ export const DASHBOARD_ROUTES: Route[] = [
             path: 'attendance-reporting',
             loadComponent: () => import('./admin/pages/attendance-reporting'),
           },
-          {
-            path: 'financial-module',
-            loadComponent: () => import('./admin/pages/financial-module'),
-          },
+
           {
             path: 'events-calendar',
             loadComponent: () => import('./admin/pages/events-calendar'),

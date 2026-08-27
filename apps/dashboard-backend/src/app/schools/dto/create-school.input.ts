@@ -24,4 +24,5 @@ export class CreateSchoolInput implements CreateSchoolInputType {
     tertiaryColor?: string | null;
 
     currentYear: number;
+    schoolYearStartMonth?: number;
 }

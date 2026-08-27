@@ -1,7 +1,22 @@
-import { $Enums } from '@generated/prisma';
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { $Enums, Prisma } from '@generated/prisma';
+import { BadRequestException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma.service';
 import { CreateChargeInput } from './dto/create-charge.input';
+
+const MONTH_LABELS: Record<number, string> = {
+  1: 'Enero',
+  2: 'Febrero',
+  3: 'Marzo',
+  4: 'Abril',
+  5: 'Mayo',
+  6: 'Junio',
+  7: 'Julio',
+  8: 'Agosto',
+  9: 'Septiembre',
+  10: 'Octubre',
+  11: 'Noviembre',
+  12: 'Diciembre',
+};
 
 @Injectable()
 export class ChargesService {
@@ -102,5 +117,112 @@ export class ChargesService {
       where: { id },
       include: { school: true, student: true, studyPlan: true },
     });
+  }
+
+  /**
+   * Idempotently creates the enrollment-cost and monthly-tuition charges for a
+   * student based on their study plan. Skips silently if charges already exist
+   * for this student + study plan (safe to call on create and on class-group
+   * reassignment).
+   */
+  async generateFromStudyPlan(
+    studentId: string,
+    studyPlanId: string,
+    schoolId: string,
+    year: number,
+  ) {
+    const existing = await this.prisma.charge.count({
+      where: { studentId, studyPlanId },
+    });
+    if (existing > 0) return 0;
+
+    const studyPlan = await this.prisma.studyPlan.findUnique({
+      where: { id: studyPlanId },
+      include: { enrollmentCosts: { orderBy: { order: 'asc' } } },
+    });
+    if (!studyPlan) return 0;
+
+    const school = await this.prisma.school.findUnique({
+      where: { id: schoolId },
+      select: { currentYear: true, schoolYearStartMonth: true },
+    });
+    const startMonth = school?.schoolYearStartMonth ?? 8;
+    const baseYear = school?.currentYear ?? year;
+
+    const data: Prisma.ChargeCreateManyInput[] = [];
+
+    // Enrollment costs are due at the start of the academic year.
+    const enrollmentDue = new Date(baseYear, startMonth - 1, 1);
+    for (const cost of studyPlan.enrollmentCosts) {
+      data.push({
+        schoolId,
+        year: baseYear,
+        studentId,
+        studyPlanId,
+        amount: cost.amount,
+        dueDate: enrollmentDue,
+        description: cost.name,
+        chargeType: $Enums.ChargeType.ENROLLMENT,
+        status: $Enums.ChargeStatus.PENDING,
+      });
+    }
+
+    // One tuition charge per configured month.
+    const tuitionAmount = studyPlan.monthlyTuitionAmount;
+    const tuitionMonths = studyPlan.tuitionMonths ?? [];
+    if (tuitionAmount && tuitionAmount.gt(0) && tuitionMonths.length > 0) {
+      for (const m of tuitionMonths) {
+        const y = m >= startMonth ? baseYear : baseYear + 1;
+        data.push({
+          schoolId,
+          year: y,
+          studentId,
+          studyPlanId,
+          amount: tuitionAmount,
+          dueDate: new Date(y, m - 1, 1),
+          description: `Colegiatura ${MONTH_LABELS[m] ?? m}`,
+          chargeType: $Enums.ChargeType.TUITION,
+          status: $Enums.ChargeStatus.PENDING,
+        });
+      }
+    }
+
+    if (data.length === 0) return 0;
+
+    await this.prisma.charge.createMany({ data });
+    return data.length;
+  }
+
+  /**
+   * Backfills (or, with `force`, recreates) the study-plan charges for a
+   * student that was created before automatic generation existed. Returns the
+   * number of charges created.
+   */
+  async regenerateFromStudyPlan(studentId: string, force = false): Promise<{ created: number }> {
+    const student = await this.prisma.student.findUnique({
+      where: { id: studentId },
+      include: {
+        classGroup: { select: { studyPlanId: true } },
+        school: { select: { id: true, currentYear: true, schoolYearStartMonth: true } },
+      },
+    });
+    if (!student) {
+      throw new NotFoundException('Estudiante no encontrado');
+    }
+    const studyPlanId = student.classGroup?.studyPlanId;
+    if (!studyPlanId) {
+      throw new BadRequestException('El estudiante no tiene un plan de estudios asignado');
+    }
+    const schoolId = student.schoolId;
+    const year = student.school?.currentYear ?? new Date().getFullYear();
+
+    if (force) {
+      await this.prisma.charge.deleteMany({
+        where: { studentId, studyPlanId, status: { not: $Enums.ChargeStatus.PAID } },
+      });
+    }
+
+    const created = await this.generateFromStudyPlan(studentId, studyPlanId, schoolId, year);
+    return { created };
   }
 }

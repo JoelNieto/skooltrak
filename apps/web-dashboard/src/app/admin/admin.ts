@@ -38,9 +38,6 @@ import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
           <a routerLink="attendance-reporting" routerLinkActive="bg-primary text-primary-content">Asistencia</a>
         </li>
         <li>
-          <a routerLink="financial-module" routerLinkActive="bg-primary text-primary-content">Finanzas</a>
-        </li>
-        <li>
           <a routerLink="imports" routerLinkActive="bg-primary text-primary-content">Carga masiva</a>
         </li>
         <li>

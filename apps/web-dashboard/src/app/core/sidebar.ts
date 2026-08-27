@@ -355,6 +355,16 @@ type SidebarSchool = {
                 <span>Panel de admin</span>
               </a>
             </li>
+            <li>
+              <a
+                routerLink="financial-module"
+                routerLinkActive="bg-primary/10 text-primary font-semibold"
+                class="flex items-center gap-3 px-3 py-2 text-base-content/80 rounded-lg transition-all duration-150 hover:bg-base-200 hover:text-base-content group"
+              >
+                <span class="material-symbols-outlined text-xl">account_balance</span>
+                <span>Panel de financiero</span>
+              </a>
+            </li>
           </ul>
         </div>
       }
@@ -530,9 +540,7 @@ export class Sidebar {
       if (!image) return of(null);
       if (image.startsWith('http')) return of(image);
       if (!id) return of(null);
-      return this.#http
-        .get<{ url: string | null }>(`/api/v1/users/${id}/presigned-avatar-url`)
-        .pipe(map((r) => r.url));
+      return this.#http.get<{ url: string | null }>(`/api/v1/users/${id}/presigned-avatar-url`).pipe(map((r) => r.url));
     },
   });
 

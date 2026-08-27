@@ -8,4 +8,6 @@ export class CreatePaymentInput {
     reference?: string;
 
     createdBy?: string;
+
+    chargeId?: string;
 }

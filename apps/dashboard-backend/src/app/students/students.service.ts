@@ -9,6 +9,7 @@ import * as QRCode from 'qrcode';
 import { ChatSyncService } from '../chats/chat-sync.service';
 import { FetchDataInput } from '../fetch-data.input';
 import { PrismaService } from '../prisma.service';
+import { ChargesService } from '../financial/charges.service';
 import { CreateStudentInput } from './dto/create-student.input';
 import { UpdateStudentInput } from './dto/update-student.input';
 
@@ -20,6 +21,7 @@ export class StudentsService {
     private readonly prisma: PrismaService,
     private readonly chatSync: ChatSyncService,
     private readonly authService: AuthService,
+    private readonly chargesService: ChargesService,
     @Inject(REQUEST) private readonly request: Request,
   ) {}
 
@@ -151,11 +153,13 @@ export class StudentsService {
 
     // Only connect courses if classGroupId is provided
     let coursesToConnect: { id: string }[] = [];
+    let studyPlanId: string | undefined;
     if (classGroupId) {
       const group = await this.prisma.classGroup.findUnique({
         where: { id: classGroupId },
       });
       if (group) {
+        studyPlanId = group.studyPlanId;
         const courses = await this.prisma.course.findMany({
           where: { studyPlanId: group.studyPlanId },
         });
@@ -256,6 +260,23 @@ export class StudentsService {
         }
       } catch (chatError) {
         this.logger.warn(`Failed to add student to contextual chats:`, chatError);
+      }
+
+      // Auto-generate study-plan charges (enrollment + tuition) for the student.
+      if (studyPlanId) {
+        try {
+          await this.chargesService.generateFromStudyPlan(
+            student.id,
+            studyPlanId,
+            schoolId,
+            new Date().getFullYear(),
+          );
+        } catch (chargeError) {
+          this.logger.warn(
+            `Failed to generate study-plan charges for student ${student.id}:`,
+            chargeError,
+          );
+        }
       }
 
       return student;
@@ -493,12 +514,14 @@ export class StudentsService {
     }
 
     // Sync courses when classGroupId changes
+    let newStudyPlanId: string | undefined;
     if (rest.classGroupId !== undefined) {
       if (rest.classGroupId) {
         const group = await this.prisma.classGroup.findUnique({
           where: { id: rest.classGroupId },
         });
         if (group) {
+          newStudyPlanId = group.studyPlanId;
           const courses = await this.prisma.course.findMany({
             where: { studyPlanId: group.studyPlanId },
           });
@@ -517,6 +540,23 @@ export class StudentsService {
       data: updateData,
       include: { classGroup: true, user: true, parents: true },
     });
+
+    // Auto-generate study-plan charges when the student is assigned a class group.
+    if (newStudyPlanId) {
+      try {
+        await this.chargesService.generateFromStudyPlan(
+          id,
+          newStudyPlanId,
+          updated.schoolId,
+          new Date().getFullYear(),
+        );
+      } catch (chargeError) {
+        this.logger.warn(
+          `Failed to generate study-plan charges for student ${id}:`,
+          chargeError,
+        );
+      }
+    }
 
     // Add student to contextual chats when class group or courses change
     try {

@@ -5,13 +5,18 @@ import Auth from '../auth/auth';
 
 type BaseSchool = Prisma.SchoolGetPayload<{ include: undefined }>;
 
-export type CurrentSchool = Omit<BaseSchool, 'primaryColor' | 'secondaryColor' | 'tertiaryColor'> & {
+export type CurrentSchool = Omit<
+  BaseSchool,
+  'primaryColor' | 'secondaryColor' | 'tertiaryColor' | 'schoolYearStartMonth'
+> & {
   /** May be missing from some client-constructed objects until synced from API */
   slug?: string | null;
   logoUrl?: string | null;
   primaryColor?: string | null;
   secondaryColor?: string | null;
   tertiaryColor?: string | null;
+  /** Month (1-12) the academic year starts; defaults to 3 (March) when absent */
+  schoolYearStartMonth?: number;
 };
 
 @Service()

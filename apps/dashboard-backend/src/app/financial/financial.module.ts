@@ -12,5 +12,6 @@ import { PaymentsService } from './payments.service';
     ChargesService,
     PaymentsService,
   ],
+  exports: [ChargesService, PaymentsService],
 })
 export class FinancialModule {}

@@ -5,4 +5,6 @@ export class UpdateSchoolInput extends PartialType(CreateSchoolInput) {
     id: string;
 
     currentYear?: number;
+
+    schoolYearStartMonth?: number;
 }

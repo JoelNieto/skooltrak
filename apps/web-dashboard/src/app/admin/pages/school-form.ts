@@ -2,6 +2,7 @@ import { Loader, Toast } from '#/ui';
 import { HttpClient } from '@angular/common/http';
 import { afterRenderEffect, Component, computed, inject, input, signal, viewChild } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
+import { FormsModule } from '@angular/forms';
 import { form, FormField, required, submit } from '@angular/forms/signals';
 import { Router, RouterLink } from '@angular/router';
 import { ImageCroppedEvent, ImageCropperComponent } from 'ngx-image-cropper';
@@ -24,6 +25,7 @@ interface SchoolFromApi {
   primaryColor?: string | null;
   secondaryColor?: string | null;
   tertiaryColor?: string | null;
+  schoolYearStartMonth?: number | null;
 }
 
 interface SchoolFormData {
@@ -41,11 +43,12 @@ interface SchoolFormData {
   primaryColor: string;
   secondaryColor: string;
   tertiaryColor: string;
+  schoolYearStartMonth: number;
 }
 
 @Component({
   selector: 'app-school-form',
-  imports: [FormField, RouterLink, Loader, ImageCropperComponent],
+  imports: [FormField, RouterLink, Loader, ImageCropperComponent, FormsModule],
   template: `
     <div class="breadcrumbs text-sm">
       <ul>
@@ -338,6 +341,38 @@ interface SchoolFormData {
             </div>
           </div>
 
+          <!-- Academic Configuration Section -->
+          <div class="sm:grid sm:grid-cols-4 sm:gap-4 pb-8 pt-6">
+            <div class="mb-4">
+              <h2 class="text-lg/7 font-semibold text-base-content">Configuración académica</h2>
+              <p class="mt-1 text-sm text-base-content/70">
+                Mes en que inicia el año escolar. Se usa para generar los cargos de colegiatura.
+              </p>
+            </div>
+            <div class="sm:col-span-3">
+              <div class="card card-border border-base-300 bg-base-100">
+                <div class="card-body gap-y-4">
+                  <div class="sm:grid sm:grid-cols-6 sm:gap-4">
+                    <div class="fieldset col-span-3">
+                      <label for="schoolYearStartMonth">Inicio del año escolar</label>
+                      <select
+                        id="schoolYearStartMonth"
+                        class="select select-primary w-full"
+                        [ngModelOptions]="{ standalone: true }"
+                        [ngModel]="schoolForm.schoolYearStartMonth().value()"
+                        (ngModelChange)="onSchoolYearStartMonthChange($event)"
+                      >
+                        @for (m of schoolYearMonths; track m.value) {
+                          <option [value]="m.value">{{ m.label }}</option>
+                        }
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <!-- Theme / Colors Section -->
           <div class="sm:grid sm:grid-cols-4 sm:gap-4 pb-8 pt-6">
             <div class="mb-4">
@@ -472,6 +507,7 @@ export default class SchoolForm {
     primaryColor: '',
     secondaryColor: '',
     tertiaryColor: '',
+    schoolYearStartMonth: 8,
   });
 
   public schoolForm = form(this.#schoolModel, (schemaPath) => {
@@ -519,6 +555,7 @@ export default class SchoolForm {
           primaryColor: (school as { primaryColor?: string | null }).primaryColor ?? '',
           secondaryColor: (school as { secondaryColor?: string | null }).secondaryColor ?? '',
           tertiaryColor: (school as { tertiaryColor?: string | null }).tertiaryColor ?? '',
+          schoolYearStartMonth: school.schoolYearStartMonth ?? 8,
         });
 
         // Set logo download URL if available
@@ -647,6 +684,25 @@ export default class SchoolForm {
 
   onThemeColorChange(field: 'primaryColor' | 'secondaryColor' | 'tertiaryColor', value: string): void {
     this.#schoolModel.update((m) => ({ ...m, [field]: value }));
+  }
+
+  public schoolYearMonths = [
+    { value: 1, label: 'Enero' },
+    { value: 2, label: 'Febrero' },
+    { value: 3, label: 'Marzo' },
+    { value: 4, label: 'Abril' },
+    { value: 5, label: 'Mayo' },
+    { value: 6, label: 'Junio' },
+    { value: 7, label: 'Julio' },
+    { value: 8, label: 'Agosto' },
+    { value: 9, label: 'Septiembre' },
+    { value: 10, label: 'Octubre' },
+    { value: 11, label: 'Noviembre' },
+    { value: 12, label: 'Diciembre' },
+  ];
+
+  onSchoolYearStartMonthChange(value: string): void {
+    this.#schoolModel.update((m) => ({ ...m, schoolYearStartMonth: Number(value) }));
   }
 
   cancelCrop(): void {

@@ -21,6 +21,7 @@ export class School {
     tertiaryColor: string | null;
     currencyCode: string;
     currentYear: number;
+    schoolYearStartMonth: number;
     createdAt: Date;
     updatedAt: Date;
 }

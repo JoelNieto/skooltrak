@@ -10,6 +10,8 @@ export class Payment
 
     student: Student;
 
+    chargeId: string | null;
+
     amount: Prisma.Decimal;
 
     paidAt: Date;

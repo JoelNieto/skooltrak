@@ -11,6 +11,13 @@ export type FetchQueryParams = Partial<{
   search: string | null;
   studyPlanId: string;
   courseId: string;
+  year: number;
+  status: string;
+  chargeType: string;
+  studentId: string;
+  reference: string;
+  description: string;
+  reloadToken?: number;
 }>;
 
 export function toFetchQueryParams(q: FetchQueryParams): HttpParams {

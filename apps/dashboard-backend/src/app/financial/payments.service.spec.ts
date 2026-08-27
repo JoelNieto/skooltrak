@@ -10,6 +10,7 @@ describe('PaymentsService', () => {
     payment: {
       create: jest.fn(),
       findMany: jest.fn().mockResolvedValue([]),
+      count: jest.fn().mockResolvedValue(0),
       aggregate: jest.fn().mockResolvedValue({ _sum: { amount: null } }),
     },
     charge: {
@@ -104,6 +105,61 @@ describe('PaymentsService', () => {
       expect(summary.totalPaid).toBe(100);
       expect(summary.balance).toBe(0);
       expect(summary.charges[0].status).toBe($Enums.ChargeStatus.PAID);
+    });
+  });
+
+  describe('findBySchool', () => {
+    it('scopes through the student relation and returns { data, total }', async () => {
+      prisma.payment.findMany.mockResolvedValue([{ id: 'p1' }]);
+      prisma.payment.count.mockResolvedValue(7);
+
+      const result = await service.findBySchool({
+        schoolId: 'sch1',
+        year: 2026,
+        studentId: 's9',
+        reference: 'REF',
+        skip: 0,
+        take: 10,
+      });
+
+      expect(result.data).toEqual([{ id: 'p1' }]);
+      expect(result.total).toBe(7);
+      const where = prisma.payment.findMany.mock.calls[0][0].where;
+      expect(where.student).toEqual({ schoolId: 'sch1' });
+      expect(where.studentId).toBe('s9');
+      expect(where.reference).toEqual({ contains: 'REF', mode: 'insensitive' });
+      expect(where.paidAt).toEqual({
+        gte: new Date(2026, 0, 1),
+        lt: new Date(2027, 0, 1),
+      });
+    });
+
+    it('omits optional filters when not provided', async () => {
+      prisma.payment.findMany.mockResolvedValue([]);
+      prisma.payment.count.mockResolvedValue(0);
+
+      await service.findBySchool({ schoolId: 'sch1' });
+
+      const where = prisma.payment.findMany.mock.calls[0][0].where;
+      expect(where).toEqual({ student: { schoolId: 'sch1' } });
+    });
+  });
+
+  describe('findByStudentScoped', () => {
+    it('scopes entirely to the resolved student id and ignores client id', async () => {
+      prisma.payment.findMany.mockResolvedValue([]);
+      prisma.payment.count.mockResolvedValue(0);
+
+      await service.findByStudentScoped('s-owner', { year: 2025, reference: 'abc' });
+
+      const where = prisma.payment.findMany.mock.calls[0][0].where;
+      expect(where.studentId).toBe('s-owner');
+      expect(where).not.toHaveProperty('student');
+      expect(where.reference).toEqual({ contains: 'abc', mode: 'insensitive' });
+      expect(where.paidAt).toEqual({
+        gte: new Date(2025, 0, 1),
+        lt: new Date(2026, 0, 1),
+      });
     });
   });
 });

@@ -3,6 +3,8 @@ import { BadRequestException, Injectable, Logger, NotFoundException } from '@nes
 import { PrismaService } from '../prisma.service';
 import { CreateChargeInput } from './dto/create-charge.input';
 
+type ChargeWithRelations = Prisma.ChargeGetPayload<{ include: { student: true; studyPlan: true } }>;
+
 const MONTH_LABELS: Record<number, string> = {
   1: 'Enero',
   2: 'Febrero',
@@ -100,16 +102,83 @@ export class ChargesService {
     });
   }
 
-  async findBySchool(schoolId: string, year?: number) {
-    const where: { schoolId: string; year?: number } = { schoolId };
-    if (year != null) {
-      where.year = year;
+  async findBySchool(opts: {
+    schoolId: string;
+    year?: number;
+    status?: string;
+    chargeType?: string;
+    studentId?: string;
+    description?: string;
+    skip?: number;
+    take?: number;
+  }): Promise<{ data: ChargeWithRelations[]; total: number }> {
+    const where: Prisma.ChargeWhereInput = { schoolId: opts.schoolId };
+    if (opts.year != null) {
+      where.year = opts.year;
     }
-    return this.prisma.charge.findMany({
-      where,
-      include: { student: true, studyPlan: true },
-      orderBy: [{ year: 'desc' }, { dueDate: 'asc' }],
-    });
+    if (opts.status) {
+      where.status = opts.status as $Enums.ChargeStatus;
+    }
+    if (opts.chargeType) {
+      where.chargeType = opts.chargeType as $Enums.ChargeType;
+    }
+    if (opts.studentId) {
+      where.studentId = opts.studentId;
+    }
+    if (opts.description) {
+      where.description = { contains: opts.description, mode: 'insensitive' };
+    }
+    return this.findPaginated(where, opts.skip, opts.take);
+  }
+
+  /**
+   * Same filtering/pagination as `findBySchool`, but scoped to a single student.
+   * The student id is always resolved server-side (never trusted from the
+   * client), so this is safe to expose on a student-only endpoint.
+   */
+  async findByStudentScoped(
+    studentId: string,
+    opts: {
+      year?: number;
+      status?: string;
+      chargeType?: string;
+      description?: string;
+      skip?: number;
+      take?: number;
+    },
+  ): Promise<{ data: ChargeWithRelations[]; total: number }> {
+    const where: Prisma.ChargeWhereInput = { studentId };
+    if (opts.year != null) {
+      where.year = opts.year;
+    }
+    if (opts.status) {
+      where.status = opts.status as $Enums.ChargeStatus;
+    }
+    if (opts.chargeType) {
+      where.chargeType = opts.chargeType as $Enums.ChargeType;
+    }
+    if (opts.description) {
+      where.description = { contains: opts.description, mode: 'insensitive' };
+    }
+    return this.findPaginated(where, opts.skip, opts.take);
+  }
+
+  private async findPaginated(
+    where: Prisma.ChargeWhereInput,
+    skip?: number,
+    take?: number,
+  ): Promise<{ data: ChargeWithRelations[]; total: number }> {
+    const [data, total] = await Promise.all([
+      this.prisma.charge.findMany({
+        where,
+        include: { student: true, studyPlan: true },
+        orderBy: [{ year: 'desc' }, { dueDate: 'asc' }],
+        skip,
+        take,
+      }),
+      this.prisma.charge.count({ where }),
+    ]);
+    return { data, total };
   }
 
   async remove(id: string) {

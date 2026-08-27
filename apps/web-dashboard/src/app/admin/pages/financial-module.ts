@@ -1,43 +1,21 @@
-import { Confirmation, EmptyState, Modal, PageHeader, Toast } from '#/ui';
+import { Modal, PageHeader } from '#/ui';
 import { Tab, TabContent, TabList, TabPanel, Tabs } from '@angular/aria/tabs';
-import { DatePipe, DecimalPipe, NgClass } from '@angular/common';
-import { HttpClient, httpResource } from '@angular/common/http';
-import { Component, computed, DestroyRef, inject, signal } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Component, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { filter, switchMap } from 'rxjs';
 import Store from '../../core/store';
+import Auth from '../../auth/auth';
+import ChargesSection from '../components/charges-section';
+import PaymentsSection from '../components/payments-section';
 import CreateChargeForm from '../forms/create-charge-form';
-
-type ChargeType = {
-  id: string;
-  amount: number;
-  dueDate: string;
-  description: string;
-  chargeType: string;
-  status: string;
-  student: { id: string; firstName: string; fatherName: string };
-  studyPlan?: { id: string; name: string } | null;
-};
-
-type PaymentType = {
-  id: string;
-  amount: number;
-  paidAt: string;
-  reference?: string | null;
-  student: { id: string; firstName: string; fatherName: string };
-};
 
 @Component({
   selector: 'app-financial-module',
   imports: [
-    DatePipe,
-    DecimalPipe,
-    EmptyState,
+    ChargesSection,
     FormsModule,
-    NgClass,
     PageHeader,
+    PaymentsSection,
     RouterLink,
     TabList,
     Tab,
@@ -72,77 +50,22 @@ type PaymentType = {
               <option [value]="y">{{ y }}</option>
             }
           </select>
-          <button class="btn btn-primary btn-sm" (click)="openCreateCharge()">
-            <span class="material-symbols-outlined">add</span> Nuevo cargo
-          </button>
+          @if (!auth.isStudent()) {
+            <button class="btn btn-primary btn-sm" (click)="openCreateCharge()">
+              <span class="material-symbols-outlined">add</span> Nuevo cargo
+            </button>
+          }
         </div>
       </div>
       <div class="p-1">
         <div ngTabPanel value="charges">
           <ng-template ngTabContent>
-            <div class="bg-base-100 rounded-lg border border-base-300 mt-4">
-              @if (chargesResource.isLoading()) {
-                <div class="p-8 text-center">Cargando...</div>
-              } @else {
-                <table class="table">
-                  <thead>
-                    <tr>
-                      <th>Estudiante</th>
-                      <th>Descripción</th>
-                      <th>Tipo</th>
-                      <th>Monto</th>
-                      <th>Vencimiento</th>
-                      <th>Estado</th>
-                      <th></th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    @for (c of chargesResource.value(); track c.id) {
-                      <tr>
-                        <td>{{ c.student.firstName }} {{ c.student.fatherName }}</td>
-                        <td>{{ c.description || '-' }}</td>
-                        <td>
-                          <span class="badge badge-soft">{{ c.chargeType }}</span>
-                        </td>
-                        <td>{{ c.amount | number: '1.2-2' }}</td>
-                        <td>{{ c.dueDate | date: 'dd/MM/yyyy' }}</td>
-                        <td>
-                          <span class="badge" [ngClass]="statusClass(c.status)">{{ c.status }}</span>
-                        </td>
-                        <td>
-                          <button class="btn btn-ghost btn-sm" (click)="removeCharge(c.id)">
-                            <span class="material-symbols-outlined text-error">delete</span>
-                          </button>
-                        </td>
-                      </tr>
-                    } @empty {
-                      <tr>
-                        <td colspan="7">
-                          <lib-empty-state
-                            title="Sin cargos"
-                            description="Crea cargos para estudiantes o planes de estudio."
-                            icon="receipt_long"
-                            actionLabel="Nuevo cargo"
-                            (action)="openCreateCharge()"
-                          />
-                        </td>
-                      </tr>
-                    }
-                  </tbody>
-                </table>
-              }
-            </div>
+            <app-charges-section [year]="yearFilter()" [reloadToken]="chargesVersion()" />
           </ng-template>
         </div>
         <div ngTabPanel value="payments">
           <ng-template ngTabContent>
-            <div class="bg-base-100 rounded-lg border border-base-300 mt-4 p-4">
-              <lib-empty-state
-                title="Registro de pagos"
-                description="Los pagos se registran desde el detalle del estudiante o próximamente desde aquí."
-                icon="payments"
-              />
-            </div>
+            <app-payments-section [year]="yearFilter()" />
           </ng-template>
         </div>
       </div>
@@ -150,59 +73,23 @@ type PaymentType = {
   `,
 })
 export default class FinancialModule {
-  private http = inject(HttpClient);
   private store = inject(Store);
+  auth = inject(Auth);
   private modal = inject(Modal);
-  private confirmation = inject(Confirmation);
-  private toast = inject(Toast);
-  private destroyRef = inject(DestroyRef);
 
   yearFilter = signal<number>(new Date().getFullYear());
+  chargesVersion = signal(0);
 
   years = computed(() => {
     const y = this.store.currentSchool()?.currentYear ?? new Date().getFullYear();
     return [y, y - 1, y - 2];
   });
 
-  public chargesResource = httpResource<ChargeType[]>(() => {
-    const schoolId = this.store.currentSchoolId();
-    if (!schoolId) return undefined;
-    return {
-      url: `/api/v1/financial/charges/by-school`,
-      params: { schoolId, year: String(this.yearFilter()) },
-    };
-  });
-
-  statusClass(status: string): string {
-    const m: Record<string, string> = {
-      PENDING: 'badge-warning',
-      PAID: 'badge-success',
-      PARTIAL: 'badge-info',
-      OVERDUE: 'badge-error',
-    };
-    return m[status] ?? 'badge-ghost';
-  }
-
   openCreateCharge() {
-    this.modal.open(CreateChargeForm, { title: 'Nuevo cargo', size: 'medium' }).closed.subscribe(() => {
-      this.chargesResource.reload();
-    });
-  }
-
-  removeCharge(id: string) {
-    this.confirmation
-      .confirm({ title: 'Eliminar cargo', message: '¿Estás seguro de eliminar este cargo?' })
-      .pipe(
-        filter(Boolean),
-        switchMap(() => this.http.delete(`/api/v1/financial/charges/${id}`)),
-        takeUntilDestroyed(this.destroyRef),
-      )
-      .subscribe({
-        next: () => {
-          this.toast.showSuccess('Cargo eliminado');
-          this.chargesResource.reload();
-        },
-        error: (e) => this.toast.showError(e?.message ?? 'Error'),
+    this.modal
+      .open(CreateChargeForm, { title: 'Nuevo cargo', size: 'medium' })
+      .closed.subscribe(() => {
+        this.chargesVersion.update((v) => v + 1);
       });
   }
 }

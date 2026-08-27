@@ -8,9 +8,10 @@ describe('ChargesService', () => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const prisma: any = {
     charge: {
-      count: jest.fn(),
+      count: jest.fn().mockResolvedValue(0),
       createMany: jest.fn().mockResolvedValue({ count: 0 }),
       deleteMany: jest.fn().mockResolvedValue({ count: 0 }),
+      findMany: jest.fn().mockResolvedValue([]),
     },
     student: { findUnique: jest.fn() },
     studyPlan: { findUnique: jest.fn() },
@@ -152,6 +153,75 @@ describe('ChargesService', () => {
       });
 
       await expect(service.regenerateFromStudyPlan('s1')).rejects.toThrow();
+    });
+  });
+
+  describe('findBySchool', () => {
+    const baseWhere = { schoolId: 'sch1' };
+
+    it('returns { data, total } honoring filters and pagination', async () => {
+      prisma.charge.findMany.mockResolvedValue([{ id: 'c1' }]);
+      prisma.charge.count.mockResolvedValue(42);
+
+      const result = await service.findBySchool({
+        schoolId: 'sch1',
+        year: 2026,
+        status: 'PENDING',
+        chargeType: 'TUITION',
+        studentId: 's9',
+        description: 'coleg',
+        skip: 10,
+        take: 5,
+      });
+
+      expect(result.data).toEqual([{ id: 'c1' }]);
+      expect(result.total).toBe(42);
+      expect(prisma.charge.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: {
+            schoolId: 'sch1',
+            year: 2026,
+            status: 'PENDING',
+            chargeType: 'TUITION',
+            studentId: 's9',
+            description: { contains: 'coleg', mode: 'insensitive' },
+          },
+          skip: 10,
+          take: 5,
+        }),
+      );
+      expect(prisma.charge.count).toHaveBeenCalledWith({
+        where: expect.objectContaining(baseWhere),
+      });
+    });
+
+    it('omits optional filters when not provided', async () => {
+      prisma.charge.findMany.mockResolvedValue([]);
+      prisma.charge.count.mockResolvedValue(0);
+
+      await service.findBySchool({ schoolId: 'sch1' });
+
+      const where = prisma.charge.findMany.mock.calls[0][0].where;
+      expect(where).toEqual({ schoolId: 'sch1' });
+    });
+  });
+
+  describe('findByStudentScoped', () => {
+    it('scopes entirely to the resolved student id (ignores any client id)', async () => {
+      prisma.charge.findMany.mockResolvedValue([]);
+      prisma.charge.count.mockResolvedValue(0);
+
+      await service.findByStudentScoped('s-owner', {
+        year: 2026,
+        status: 'OVERDUE',
+        description: 'insc',
+      });
+
+      const where = prisma.charge.findMany.mock.calls[0][0].where;
+      expect(where.studentId).toBe('s-owner');
+      expect(where).not.toHaveProperty('schoolId');
+      expect(where.status).toBe('OVERDUE');
+      expect(where.description).toEqual({ contains: 'insc', mode: 'insensitive' });
     });
   });
 });

@@ -119,9 +119,111 @@ export class FinancialController {
 
   @Get('charges/by-school')
   @RequirePermissions(Perm.VIEW_FINANCIALS)
-  @ApiOperation({ summary: 'Charges by school' })
-  getChargesBySchool(@Query('schoolId') schoolId: string, @Query('year') year?: string) {
-    return this.chargesService.findBySchool(schoolId, year != null ? Number(year) : undefined);
+  @ApiOperation({ summary: 'Charges by school (filtered + paginated)' })
+  getChargesBySchool(
+    @Query('schoolId') schoolId: string,
+    @Query('year') year?: string,
+    @Query('status') status?: string,
+    @Query('chargeType') chargeType?: string,
+    @Query('studentId') studentId?: string,
+    @Query('description') description?: string,
+    @Query('skip') skip?: string,
+    @Query('take') take?: string,
+  ) {
+    return this.chargesService.findBySchool({
+      schoolId,
+      year: year != null ? Number(year) : undefined,
+      status,
+      chargeType,
+      studentId,
+      description,
+      skip: skip != null ? Number(skip) : undefined,
+      take: take != null ? Number(take) : undefined,
+    });
+  }
+
+  @Get('payments/by-school')
+  @RequirePermissions(Perm.VIEW_FINANCIALS)
+  @ApiOperation({ summary: 'Payments by school (filtered + paginated)' })
+  getPaymentsBySchool(
+    @Query('schoolId') schoolId: string,
+    @Query('year') year?: string,
+    @Query('studentId') studentId?: string,
+    @Query('reference') reference?: string,
+    @Query('skip') skip?: string,
+    @Query('take') take?: string,
+  ) {
+    return this.paymentsService.findBySchool({
+      schoolId,
+      year: year != null ? Number(year) : undefined,
+      studentId,
+      reference,
+      skip: skip != null ? Number(skip) : undefined,
+      take: take != null ? Number(take) : undefined,
+    });
+  }
+
+  @Get('charges/student')
+  @ApiOperation({ summary: 'Charges for the current student (filtered + paginated)' })
+  async getChargesForStudent(
+    @Req() req: AuthenticatedRequest,
+    @Query('year') year?: string,
+    @Query('status') status?: string,
+    @Query('chargeType') chargeType?: string,
+    @Query('description') description?: string,
+    @Query('skip') skip?: string,
+    @Query('take') take?: string,
+  ) {
+    const studentId = await this.resolveOwnStudentId(req);
+    return this.chargesService.findByStudentScoped(studentId, {
+      year: year != null ? Number(year) : undefined,
+      status,
+      chargeType,
+      description,
+      skip: skip != null ? Number(skip) : undefined,
+      take: take != null ? Number(take) : undefined,
+    });
+  }
+
+  @Get('payments/student')
+  @ApiOperation({ summary: 'Payments for the current student (filtered + paginated)' })
+  async getPaymentsForStudent(
+    @Req() req: AuthenticatedRequest,
+    @Query('year') year?: string,
+    @Query('reference') reference?: string,
+    @Query('skip') skip?: string,
+    @Query('take') take?: string,
+  ) {
+    const studentId = await this.resolveOwnStudentId(req);
+    return this.paymentsService.findByStudentScoped(studentId, {
+      year: year != null ? Number(year) : undefined,
+      reference,
+      skip: skip != null ? Number(skip) : undefined,
+      take: take != null ? Number(take) : undefined,
+    });
+  }
+
+  /**
+   * Resolves the calling user's own student id. Only STUDENT roles may call the
+   * student-scoped endpoints; the id is taken from the user's student profile so a
+   * client-supplied studentId is never trusted.
+   */
+  private async resolveOwnStudentId(req: AuthenticatedRequest): Promise<string> {
+    const user = req.user as AuthUserContext | undefined;
+    if (!user?.userId) {
+      throw new ForbiddenException('No autenticado');
+    }
+    if (user.role?.toUpperCase() !== 'STUDENT') {
+      throw new ForbiddenException('No autorizado');
+    }
+    const student = await this.prisma.student.findFirst({
+      where: { userId: user.userId },
+      select: { id: true, schoolId: true },
+    });
+    if (!student) {
+      throw new ForbiddenException('No tienes un perfil de estudiante');
+    }
+    return student.id;
   }
 
   @Post('charges')

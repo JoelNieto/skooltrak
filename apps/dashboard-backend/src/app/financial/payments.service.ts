@@ -3,11 +3,88 @@ import { $Enums, Prisma } from '@generated/prisma';
 import { PrismaService } from '../prisma.service';
 import { CreatePaymentInput } from './dto/create-payment.input';
 
+type PaymentWithStudent = Prisma.PaymentGetPayload<{ include: { student: true } }>;
+
 @Injectable()
 export class PaymentsService {
   private readonly logger = new Logger(PaymentsService.name);
 
   constructor(private readonly prisma: PrismaService) {}
+
+  /**
+   * Staff-facing, school-scoped, filtered + paginated payments. Payments have no
+   * `schoolId`, so we scope through the related student. `year` maps to a
+   * `paidAt` range. Returns `{ data, total }`.
+   */
+  async findBySchool(opts: {
+    schoolId: string;
+    year?: number;
+    studentId?: string;
+    reference?: string;
+    skip?: number;
+    take?: number;
+  }): Promise<{ data: PaymentWithStudent[]; total: number }> {
+    const where: Prisma.PaymentWhereInput = {
+      student: { schoolId: opts.schoolId },
+    };
+    if (opts.year != null) {
+      where.paidAt = {
+        gte: new Date(opts.year, 0, 1),
+        lt: new Date(opts.year + 1, 0, 1),
+      };
+    }
+    if (opts.studentId) {
+      where.studentId = opts.studentId;
+    }
+    if (opts.reference) {
+      where.reference = { contains: opts.reference, mode: 'insensitive' };
+    }
+    return this.findPaginated(where, opts.skip, opts.take);
+  }
+
+  /**
+   * Student-scoped payments. The student id is always resolved server-side, so
+   * any client-supplied `studentId` is ignored. `year` maps to a `paidAt` range.
+   */
+  async findByStudentScoped(
+    studentId: string,
+    opts: {
+      year?: number;
+      reference?: string;
+      skip?: number;
+      take?: number;
+    },
+  ): Promise<{ data: PaymentWithStudent[]; total: number }> {
+    const where: Prisma.PaymentWhereInput = { studentId };
+    if (opts.year != null) {
+      where.paidAt = {
+        gte: new Date(opts.year, 0, 1),
+        lt: new Date(opts.year + 1, 0, 1),
+      };
+    }
+    if (opts.reference) {
+      where.reference = { contains: opts.reference, mode: 'insensitive' };
+    }
+    return this.findPaginated(where, opts.skip, opts.take);
+  }
+
+  private async findPaginated(
+    where: Prisma.PaymentWhereInput,
+    skip?: number,
+    take?: number,
+  ): Promise<{ data: PaymentWithStudent[]; total: number }> {
+    const [data, total] = await Promise.all([
+      this.prisma.payment.findMany({
+        where,
+        include: { student: true },
+        orderBy: { paidAt: 'desc' },
+        skip,
+        take,
+      }),
+      this.prisma.payment.count({ where }),
+    ]);
+    return { data, total };
+  }
 
   async create(input: CreatePaymentInput) {
     const payment = await this.prisma.payment.create({

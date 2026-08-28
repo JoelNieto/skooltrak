@@ -15,6 +15,7 @@
         "@angular/platform-browser": "22.0.7",
         "@angular/platform-server": "22.0.7",
         "@angular/router": "22.0.7",
+        "@angular/service-worker": "22",
         "@angular/ssr": "22.0.7",
         "@auth0/angular-jwt": "^5.2.0",
         "@aws-sdk/client-s3": "^3.971.0",
@@ -94,6 +95,7 @@
         "@nx/web": "23.1.1",
         "@nx/webpack": "23.1.1",
         "@nx/workspace": "23.1.1",
+        "@oxc-project/runtime": "^0.115.0",
         "@playwright/test": "^1.36.0",
         "@schematics/angular": "22.0.7",
         "@swc-node/register": "1.12.1",
@@ -235,6 +237,8 @@
     "@angular/platform-server": ["@angular/platform-server@22.0.7", "", { "dependencies": { "tslib": "^2.3.0", "xhr2": "^0.2.0" }, "peerDependencies": { "@angular/common": "22.0.7", "@angular/compiler": "22.0.7", "@angular/core": "22.0.7", "@angular/platform-browser": "22.0.7", "rxjs": "^6.5.3 || ^7.4.0" } }, "sha512-/X1IMcq7fruViTOS09plfSC/VXnbTOHxlFieF5M817pcwOwOS7m+UUQ3W9ZU7U6ZRMNXPz2QsNS3g1ZKH0NaXg=="],
 
     "@angular/router": ["@angular/router@22.0.7", "", { "dependencies": { "tslib": "^2.3.0" }, "peerDependencies": { "@angular/common": "22.0.7", "@angular/core": "22.0.7", "@angular/platform-browser": "22.0.7", "rxjs": "^6.5.3 || ^7.4.0" } }, "sha512-uMh+2S5y5Z6hTeFL85tDehfqAwVYjnTlHxpCrW+75RD4Z+rLl0/ff2ag3bXknzNyg0Q9LPOH6t/eCcQYajNOQQ=="],
+
+    "@angular/service-worker": ["@angular/service-worker@22.1.4", "", { "dependencies": { "tslib": "^2.3.0" }, "peerDependencies": { "@angular/core": "22.1.4", "rxjs": "^6.5.3 || ^7.4.0" }, "bin": { "ngsw-config": "ngsw-config.js" } }, "sha512-UKRtwePIiZtrKFNn8Uc/I8TNu0941K7Z56klSXaP6F0xaS2U4FsOcqIdWxDBIL6CEnyxjjX1n4v71v2hbSkXQQ=="],
 
     "@angular/ssr": ["@angular/ssr@22.0.7", "", { "dependencies": { "tslib": "^2.3.0" }, "peerDependencies": { "@angular/common": "^22.0.0", "@angular/core": "^22.0.0", "@angular/platform-server": "^22.0.0", "@angular/router": "^22.0.0" }, "optionalPeers": ["@angular/platform-server"] }, "sha512-IsdHaerKedUjEliuAhYHLi0bk8svitm3UVMt3GwcN7DSwVJDU2phC57OCenxn6267esCltBYVZ32y5cnECw6AA=="],
 
@@ -1107,6 +1111,8 @@
     "@oxc-parser/binding-win32-ia32-msvc": ["@oxc-parser/binding-win32-ia32-msvc@0.121.0", "", { "os": "win32", "cpu": "ia32" }, "sha512-4Ob1qvYMPnlF2N9rdmKdkQFdrq16QVcQwBsO8yiPZXof0fHKFF+LmQV501XFbi7lHyrKm8rlJRfQ/M8bZZPVLw=="],
 
     "@oxc-parser/binding-win32-x64-msvc": ["@oxc-parser/binding-win32-x64-msvc@0.121.0", "", { "os": "win32", "cpu": "x64" }, "sha512-BOp1KCzdboB1tPqoCPXgntgFs0jjeSyOXHzgxVFR7B/qfr3F8r4YDacHkTOUNXtDgM8YwKnkf3rE5gwALYX7NA=="],
+
+    "@oxc-project/runtime": ["@oxc-project/runtime@0.115.0", "", {}, "sha512-Rg8Wlt5dCbXhQnsXPrkOjL1DTSvXLgb2R/KYfnf1/K+R0k6UMLEmbQXPM+kwrWqSmWA2t0B1EtHy2/3zikQpvQ=="],
 
     "@oxc-project/types": ["@oxc-project/types@0.121.0", "", {}, "sha512-CGtOARQb9tyv7ECgdAlFxi0Fv7lmzvmlm2rpD/RdijOO9rfk/JvB1CjT8EnoD+tjna/IYgKKw3IV7objRb+aYw=="],
 

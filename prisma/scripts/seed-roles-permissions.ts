@@ -57,6 +57,9 @@ enum Perm {
   VIEW_FINANCIALS = 'VIEW_FINANCIALS',
   MANAGE_ROLES = 'MANAGE_ROLES',
   MANAGE_PERMISSIONS = 'MANAGE_PERMISSIONS',
+  COMMUNICATION_VIEW = 'COMMUNICATION_VIEW',
+  COMMUNICATION_BROADCAST = 'COMMUNICATION_BROADCAST',
+  COMMUNICATION_APPROVE = 'COMMUNICATION_APPROVE',
 }
 
 const PERMISSION_DESCRIPTIONS: Record<Perm, string> = {
@@ -99,6 +102,9 @@ const PERMISSION_DESCRIPTIONS: Record<Perm, string> = {
   [Perm.VIEW_FINANCIALS]: 'View financial balance and payment history',
   [Perm.MANAGE_ROLES]: 'Create, update, and delete roles',
   [Perm.MANAGE_PERMISSIONS]: 'Manage permission assignments',
+  [Perm.COMMUNICATION_VIEW]: 'View communication threads and messages',
+  [Perm.COMMUNICATION_BROADCAST]: 'Create broadcasts to class or school',
+  [Perm.COMMUNICATION_APPROVE]: 'Approve pending broadcasts before fan-out',
 };
 
 const ALL_PERMISSIONS = Object.values(Perm);
@@ -147,6 +153,8 @@ const DEFAULT_ROLES: RoleDef[] = [
       Perm.MANAGE_FILES,
       Perm.MANAGE_QUIZZES,
       Perm.VIEW_NEWSLETTER,
+      Perm.COMMUNICATION_VIEW,
+      Perm.COMMUNICATION_BROADCAST,
     ],
   },
   {
@@ -172,6 +180,7 @@ const DEFAULT_ROLES: RoleDef[] = [
       Perm.VIEW_STUDY_PLANS,
       Perm.VIEW_PERIODS,
       Perm.VIEW_NEWSLETTER,
+      Perm.COMMUNICATION_VIEW,
     ],
   },
   {
@@ -186,6 +195,7 @@ const DEFAULT_ROLES: RoleDef[] = [
       Perm.VIEW_MESSAGES,
       Perm.VIEW_SCHEDULES,
       Perm.VIEW_NEWSLETTER,
+      Perm.COMMUNICATION_VIEW,
     ],
   },
 ];

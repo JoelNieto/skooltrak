@@ -30,6 +30,7 @@ import { NewslettersModule } from './newsletters/newsletters.module';
 import { ParentsModule } from './parents/parents.module';
 import { GradeReportModule } from './grade-report/grade-report.module';
 import { ChatsModule } from './chats/chats.module';
+import { CommunicationModule } from './communication/communication.module';
 import { HabitEvaluationsModule } from './habit-evaluations/habit-evaluations.module';
 import { HabitMetricsModule } from './habit-metrics/habit-metrics.module';
 import { FinancialModule } from './financial/financial.module';
@@ -67,6 +68,7 @@ const openApiExport = process.env['OPENAPI_EXPORT'] === 'true';
     ParentsModule,
     NewslettersModule,
     ChatsModule,
+    CommunicationModule,
     HabitEvaluationsModule,
     HabitMetricsModule,
     GradeReportModule,

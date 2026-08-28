@@ -87,6 +87,11 @@ model User {
   chatParticipants  ChatParticipant[]
   sentChatMessages  ChatMessage[]
   createdChats      Chat[]
+  communicationParticipants ThreadParticipant[]
+  sentCommunicationMessages CommunicationMessage[]
+  communicationDeliveries   MessageDelivery[]
+  recipientPreference       RecipientPreference?
+  communicationAuditLogs     CommunicationAuditLog[]
   storeCartItems    StoreCartItem[]
   storeOrders       StoreOrder[]
   // Better-auth relations
@@ -1010,6 +1015,157 @@ model Notification {
 
   @@index([recipientId])
   @@map("notifications")
+}
+
+// ==========================================
+// Communication Platform (Phase 0 — foundations)
+// ==========================================
+
+enum ThreadType {
+  CLASS_GROUP
+  COURSE
+  STUDENT_GUARDIANS
+  SCHOOL_WIDE
+  DIRECT
+}
+
+enum ThreadStatus {
+  ACTIVE
+  ARCHIVED
+  PENDING_APPROVAL
+  APPROVED
+}
+
+enum UrgencyTier {
+  ROUTINE
+  IMPORTANT
+  EMERGENCY
+}
+
+enum DeliveryChannel {
+  IN_APP
+  PUSH
+  EMAIL
+  SMS
+  VOICE // deferred seam (Phase 5)
+}
+
+enum DeliveryStatus {
+  PENDING
+  SENT
+  DELIVERED
+  READ
+  FAILED
+  BOUNCED
+}
+
+model CommunicationThread {
+  id              String        @id @default(cuid())
+  organizationId  String
+  type            ThreadType
+  scopeId         String? // courseId | classGroupId | schoolId | studentId depending on type
+  title           String
+  createdById     String // User id of owner (teacher or admin)
+  ownerRole       String // TEACHER | ORG_ADMIN  (parents never owners)
+  urgencyDefault  UrgencyTier   @default(ROUTINE)
+  status          ThreadStatus  @default(ACTIVE)
+  approvedById    String?
+  approvedAt      DateTime?
+  broadcast       Boolean       @default(false)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  deletedAt       DateTime?
+  participants    ThreadParticipant[]
+  messages        CommunicationMessage[]
+
+  @@index([organizationId])
+  @@index([scopeId])
+  @@index([status])
+  @@map("communication_threads")
+}
+
+model ThreadParticipant {
+  id         String   @id @default(cuid())
+  threadId   String
+  userId     String // recipient User (parent/student/teacher/admin)
+  role       String   @default("MEMBER") // OWNER | MEMBER
+  canInitiate Boolean @default(false) // false for parents (reply-only)
+  addedById  String?
+  joinedAt   DateTime @default(now())
+  lastReadAt DateTime?
+  thread     CommunicationThread @relation(fields: [threadId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  user       User                @relation(fields: [userId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+
+  @@unique([threadId, userId])
+  @@index([userId])
+  @@map("thread_participants")
+}
+
+model CommunicationMessage {
+  id         String      @id @default(cuid())
+  threadId   String
+  senderId   String // User id
+  body       String // original-language body (v1)
+  urgency    UrgencyTier @default(ROUTINE)
+  createdAt  DateTime    @default(now())
+  editedAt   DateTime?
+  deletedAt  DateTime?
+  deliveries MessageDelivery[]
+  thread     CommunicationThread @relation(fields: [threadId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  sender     User                @relation(fields: [senderId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+
+  @@index([threadId])
+  @@map("communication_messages")
+}
+
+// per-recipient, per-channel receipt — the read-receipt source of truth mirror
+model MessageDelivery {
+  id              String         @id @default(cuid())
+  messageId       String
+  recipientUserId String
+  channel         DeliveryChannel
+  status          DeliveryStatus @default(PENDING)
+  novuEventId     String? // links to Novu notification for webhook reconciliation
+  deliveredAt     DateTime?
+  readAt          DateTime?
+  failureReason   String?
+  message         CommunicationMessage @relation(fields: [messageId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  recipientUser   User                @relation(fields: [recipientUserId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+
+  @@unique([messageId, recipientUserId, channel])
+  @@index([recipientUserId])
+  @@unique([novuEventId])
+  @@map("message_deliveries")
+}
+
+model RecipientPreference {
+  userId          String  @id
+  language        String? // deferred translation; null = org default
+  timezone        String  @default("UTC")
+  quietHoursStart String? // "21:00"
+  quietHoursEnd   String? // "07:00"
+  channelPrefs    Json? // { push:true, email:true, sms:false }
+  novuSubscriberId String?
+  user            User    @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@map("recipient_preferences")
+}
+
+model CommunicationAuditLog {
+  id             String   @id @default(cuid())
+  actorId        String?
+  organizationId String?
+  action         String // THREAD_CREATED, MESSAGE_SENT, BROADCAST_APPROVED, PARTICIPANT_ADDED, ...
+  threadId       String?
+  messageId      String?
+  detail         String?
+  ip             String?
+  createdAt      DateTime @default(now())
+  actor          User?    @relation(fields: [actorId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+
+  @@index([organizationId])
+  @@index([action])
+  @@map("communication_audit_logs")
 }
 
 // ==========================================

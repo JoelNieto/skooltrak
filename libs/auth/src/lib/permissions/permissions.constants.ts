@@ -83,6 +83,11 @@ export enum Perm {
   // Roles & Permissions management
   MANAGE_ROLES = 'MANAGE_ROLES',
   MANAGE_PERMISSIONS = 'MANAGE_PERMISSIONS',
+
+  // Communication platform
+  COMMUNICATION_VIEW = 'COMMUNICATION_VIEW',
+  COMMUNICATION_BROADCAST = 'COMMUNICATION_BROADCAST',
+  COMMUNICATION_APPROVE = 'COMMUNICATION_APPROVE',
 }
 
 /**
@@ -130,6 +135,9 @@ export const PERMISSION_DESCRIPTIONS: Record<Perm, string> = {
   [Perm.VIEW_STORE]: 'Browse the school store and place orders',
   [Perm.MANAGE_ROLES]: 'Create, update, and delete roles',
   [Perm.MANAGE_PERMISSIONS]: 'Manage permission assignments',
+  [Perm.COMMUNICATION_VIEW]: 'View communication threads and messages',
+  [Perm.COMMUNICATION_BROADCAST]: 'Create broadcasts to class or school',
+  [Perm.COMMUNICATION_APPROVE]: 'Approve pending broadcasts before fan-out',
 };
 
 /** All permission values as an array */
@@ -180,6 +188,8 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<DefaultRole, Perm[]> = {
     Perm.MANAGE_QUIZZES,
     Perm.VIEW_NEWSLETTER,
     Perm.VIEW_STORE,
+    Perm.COMMUNICATION_VIEW,
+    Perm.COMMUNICATION_BROADCAST,
   ],
 
   [DefaultRole.STUDENT]: [
@@ -200,6 +210,7 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<DefaultRole, Perm[]> = {
     Perm.VIEW_PERIODS,
     Perm.VIEW_NEWSLETTER,
     Perm.VIEW_STORE,
+    Perm.COMMUNICATION_VIEW,
   ],
 
   [DefaultRole.PARENT]: [

@@ -44,7 +44,7 @@ type ChargeOption = {
             <select [formField]="form.chargeId" class="select select-primary w-full">
               <option value="">Sin cargo específico</option>
               @for (c of charges.value(); track c.id) {
-                <option [value]="c.id">
+                <option [value]="c.id" [disabled]="c.status === 'PAID'">
                   {{ c.description || c.chargeType }} — {{ c.amount | number: '1.2-2' }} ({{ c.status }})
                 </option>
               }

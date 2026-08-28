@@ -310,10 +310,6 @@ export const DASHBOARD_ROUTES: Route[] = [
         loadComponent: () => import('./students/student-attendance'),
       },
       {
-        path: 'student/finances',
-        loadComponent: () => import('./students/student-finances'),
-      },
-      {
         path: 'teacher/attendance',
         canActivate: [permissionGuard('MANAGE_ATTENDANCE')],
         loadComponent: () => import('./teacher/teacher-attendance'),

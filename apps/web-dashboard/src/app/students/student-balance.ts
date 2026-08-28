@@ -53,7 +53,7 @@ const STATUS_CLASS: Record<ChargeStatus, string> = {
 };
 
 @Component({
-  selector: 'app-student-finances',
+  selector: 'app-student-balance',
   imports: [Loader, PageHeader, StatCard, DatePipe],
   template: `
     <lib-page-header
@@ -70,7 +70,11 @@ const STATUS_CLASS: Record<ChargeStatus, string> = {
       </div>
     }
 
-    @if (summaryResource.hasValue()) {
+    @if (summaryResource.error()) {
+      <div class="alert alert-error">No se pudo cargar el estado de cuenta.</div>
+    }
+
+    @if (summaryResource.hasValue() && !summaryResource.isLoading()) {
       @let summary = summaryResource.value()!;
       <div class="grid gap-4 md:grid-cols-4">
         <lib-stat-card
@@ -182,15 +186,13 @@ const STATUS_CLASS: Record<ChargeStatus, string> = {
     }
   `,
 })
-export default class StudentFinances {
-  public studentId = input<string>('');
+export default class StudentBalance {
+  public studentId = input.required<string>();
 
   #store = inject(Store);
   #auth = inject(Auth);
   #http = inject(HttpClient);
   toasts = inject(Toast);
-
-  #resolvedId = computed(() => this.studentId() || this.#store.currentStudentId() || '');
 
   /** Only finance managers can backfill/recreate charges for a student. */
   public canRegenerate = computed(() => this.#auth.hasPermission('MANAGE_FINANCIALS'));
@@ -198,13 +200,13 @@ export default class StudentFinances {
   public regenerating = signal(false);
 
   public summaryResource = httpResource<StudentBalanceSummary | null>(() => {
-    const studentId = this.#resolvedId();
+    const studentId = this.studentId();
     if (!isValidId(studentId)) return undefined;
     return { url: '/api/v1/financial/student-balance-summary', params: { studentId } };
   });
 
   public async regenerate(force: boolean) {
-    const studentId = this.#resolvedId();
+    const studentId = this.studentId();
     if (!isValidId(studentId)) return;
     if (!window.confirm('¿Generar los cargos del plan de estudios para este alumno?')) return;
     this.regenerating.set(true);

@@ -11,7 +11,6 @@ import Auth from '../auth/auth';
 import Store from '../core/store';
 import { isValidId } from '../core/validators';
 import StudentAttendanceReport from './student-attendance-report';
-import StudentFinances from './student-finances';
 
 /** REST `GET /api/v1/students/:id` payload (includes nested relations used by this page). */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -44,7 +43,6 @@ const ENROLLMENT_STATUS_COLORS: Record<$Enums.EnrollmentStatus, string> = {
     DecimalPipe,
     NgClass,
     StudentAttendanceReport,
-    StudentFinances,
   ],
   template: `
     @if (studentResource.isLoading()) {
@@ -119,9 +117,6 @@ const ENROLLMENT_STATUS_COLORS: Record<$Enums.EnrollmentStatus, string> = {
               <div ngTab value="medical" class="tab">Información Médica</div>
               <div ngTab value="courses" class="tab">Cursos</div>
               <div ngTab value="attendance" class="tab">Asistencia</div>
-              @if (canViewFinances()) {
-                <div ngTab value="balance" class="tab">Estado de cuenta</div>
-              }
             </div>
             <div class="w-64">
               <select class="select select-primary" [ngModel]="periodId()" (ngModelChange)="periodId.set($event)">
@@ -414,14 +409,6 @@ const ENROLLMENT_STATUS_COLORS: Record<$Enums.EnrollmentStatus, string> = {
                 </div>
               </ng-template>
             </div>
-
-            @if (canViewFinances()) {
-              <div ngTabPanel value="balance">
-                <ng-template ngTabContent>
-                  <app-student-finances [studentId]="id()" />
-                </ng-template>
-              </div>
-            }
           </div>
         </div>
       } @else {
@@ -436,15 +423,6 @@ export default class Student {
   private store = inject(Store);
   public auth = inject(Auth);
   public periodId = signal<string>('');
-
-  /** Visible to finance staff, the student themselves, or a linked parent. */
-  public canViewFinances = computed(() => {
-    if (this.auth.hasPermission('VIEW_FINANCIALS')) return true;
-    if (this.store.currentStudentId() && this.store.currentStudentId() === this.id()) return true;
-    const student = this.studentResource.value();
-    return !!student?.parents?.some((p: { userId?: string | null }) => p.userId === this.auth.user()?.id);
-  });
-
 
   getStatusLabel(status: $Enums.EnrollmentStatus): string {
     return ENROLLMENT_STATUS_LABELS[status] || status;

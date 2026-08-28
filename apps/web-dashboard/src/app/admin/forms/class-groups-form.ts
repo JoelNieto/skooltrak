@@ -87,7 +87,7 @@ export default class ClassGroupsForm {
     if (!currentSchoolId) {
       return undefined;
     }
-    return `/api/v1/study-plans/by-school?schoold=${currentSchoolId}`;
+    return `/api/v1/study-plans/by-school?schoolId=${currentSchoolId}`;
   });
 
   private formModel = signal<{ name: string; teacherId: null | string; studyPlanId: string; active: boolean }>({

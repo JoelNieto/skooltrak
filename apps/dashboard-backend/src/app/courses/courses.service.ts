@@ -61,18 +61,29 @@ export class CoursesService {
     });
     const studyPlan = await this.prisma.studyPlan.findUnique({
       where: { id: createCourseInput.studyPlanId },
+      include: { school: true },
     });
+    if (!studyPlan) {
+      throw new ConflictException('El plan de estudio seleccionado no existe');
+    }
 
     // Use provided code or generate a unique one from subject name
     const code = createCourseInput.code
       ? createCourseInput.code
       : await this.generateUniqueCode(createCourseInput.schoolId, subject?.name ?? 'CRS');
 
+    // Derive school/org from the chosen study plan to avoid saving the
+    // course under the wrong school when the client context is stale.
+    const schoolId = studyPlan.schoolId;
+    const organizationId = studyPlan.school.organizationId;
+
     let course;
     try {
       course = await this.prisma.course.create({
         data: {
           ...createCourseInput,
+          organizationId,
+          schoolId,
           shortName: createCourseInput.shortName
             ? `${createCourseInput.shortName}`
             : `${subject?.code} - ${studyPlan?.shortName}`,
@@ -102,7 +113,7 @@ export class CoursesService {
     const studentsToConnect = await this.prisma.student.findMany({
       where: {
         classGroup: { studyPlanId: createCourseInput.studyPlanId },
-        schoolId: createCourseInput.schoolId,
+        schoolId,
       },
       select: { id: true },
     });
@@ -303,11 +314,37 @@ export class CoursesService {
   }
 
   update(id: string, updateCourseInput: UpdateCourseInput) {
+    const data = this.toCourseUpdateData(updateCourseInput);
     return this.prisma.course.update({
       where: { id },
-      data: updateCourseInput,
+      data,
       include: { school: true, subject: true, studyPlan: true },
     });
+  }
+
+  private toCourseUpdateData(input: UpdateCourseInput): Prisma.CourseUncheckedUpdateInput {
+    const source = input as unknown as Record<string, unknown>;
+    const data: Prisma.CourseUncheckedUpdateInput = {};
+
+    const scalarFields: (keyof CreateCourseInput)[] = [
+      'name',
+      'code',
+      'shortName',
+      'organizationId',
+      'schoolId',
+      'subjectId',
+      'studyPlanId',
+      'teacherId',
+    ];
+
+    for (const key of scalarFields) {
+      const value = source[key as string];
+      if (value !== undefined) {
+        (data as Record<string, unknown>)[key] = value;
+      }
+    }
+
+    return data;
   }
 
   remove(id: string) {

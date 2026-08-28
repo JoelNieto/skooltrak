@@ -32,7 +32,7 @@ type Student = Prisma.StudentGetPayload<{
               </div>
             </div>
             <div>
-              <p>{{ student.name }}</p>
+              <p>{{ student.user?.name }}</p>
               <p class="text-base-200 text-sm">{{ student.documentId }}</p>
             </div>
           </div>
@@ -46,7 +46,7 @@ export default class GroupStudents {
   public filteredStudents = computed(() =>
     this.students().filter(
       (student) =>
-        student.name.toLowerCase().includes(this.search().toLowerCase()) ||
+        student.user?.name?.toLowerCase().includes(this.search().toLowerCase()) ||
         student.documentId.toLowerCase().includes(this.search().toLowerCase()),
     ),
   );

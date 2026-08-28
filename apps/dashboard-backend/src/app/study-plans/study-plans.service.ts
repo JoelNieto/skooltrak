@@ -27,6 +27,7 @@ export class StudyPlansService {
   }
 
   findAllBySchoolId(schoolId: string, degreeId?: string) {
+    if (!schoolId) return [];
     const include = {
       degree: true,
       school: true,

@@ -137,8 +137,7 @@ export class ClassGroupsService {
   }
 
   update(id: string, updateClassGroupInput: UpdateClassGroupInput) {
-    const { name, studyPlanId, teacherId, active, organizationId, schoolId } =
-      updateClassGroupInput;
+    const { name, studyPlanId, teacherId, active, organizationId, schoolId } = updateClassGroupInput;
 
     const data: Prisma.ClassGroupUpdateInput = {};
     if (name !== undefined) data.name = name;

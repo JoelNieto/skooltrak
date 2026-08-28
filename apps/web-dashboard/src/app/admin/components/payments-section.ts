@@ -101,6 +101,7 @@ export default class PaymentsSection {
   public pagination = inject(Pagination);
 
   public year = input<number>(new Date().getFullYear());
+  public reloadToken = input<number>(0);
 
   public studentFilter = signal('');
 
@@ -117,6 +118,7 @@ export default class PaymentsSection {
   public paymentsResource = httpResource<{ data: PaymentType[]; total: number }>(
     () => {
       const year = this.year();
+      const reload = this.reloadToken();
       const skip = this.pagination.skip();
       const take = this.pagination.take();
       const search = this.pagination.search();
@@ -130,6 +132,7 @@ export default class PaymentsSection {
             reference: search,
             skip,
             take,
+            reloadToken: reload,
           }),
         };
       }
@@ -145,6 +148,7 @@ export default class PaymentsSection {
           reference: search,
           skip,
           take,
+          reloadToken: reload,
         }),
       };
     },

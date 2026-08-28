@@ -87,11 +87,12 @@ export class PaymentsService {
   }
 
   async create(input: CreatePaymentInput) {
+    const paidAt = input.paidAt instanceof Date ? input.paidAt : new Date(input.paidAt);
     const payment = await this.prisma.payment.create({
       data: {
         studentId: input.studentId,
         amount: input.amount,
-        paidAt: input.paidAt,
+        paidAt,
         reference: input.reference ?? undefined,
         createdBy: input.createdBy ?? undefined,
         chargeId: input.chargeId ?? undefined,

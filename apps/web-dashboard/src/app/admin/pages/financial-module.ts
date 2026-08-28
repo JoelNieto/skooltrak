@@ -8,6 +8,7 @@ import Auth from '../../auth/auth';
 import ChargesSection from '../components/charges-section';
 import PaymentsSection from '../components/payments-section';
 import CreateChargeForm from '../forms/create-charge-form';
+import CreatePaymentForm from '../forms/create-payment-form';
 
 @Component({
   selector: 'app-financial-module',
@@ -54,6 +55,9 @@ import CreateChargeForm from '../forms/create-charge-form';
             <button class="btn btn-primary btn-sm" (click)="openCreateCharge()">
               <span class="material-symbols-outlined">add</span> Nuevo cargo
             </button>
+            <button class="btn btn-primary btn-sm" (click)="openCreatePayment()">
+              <span class="material-symbols-outlined">add</span> Registrar pago
+            </button>
           }
         </div>
       </div>
@@ -65,7 +69,7 @@ import CreateChargeForm from '../forms/create-charge-form';
         </div>
         <div ngTabPanel value="payments">
           <ng-template ngTabContent>
-            <app-payments-section [year]="yearFilter()" />
+            <app-payments-section [year]="yearFilter()" [reloadToken]="paymentsVersion()" />
           </ng-template>
         </div>
       </div>
@@ -79,6 +83,7 @@ export default class FinancialModule {
 
   yearFilter = signal<number>(new Date().getFullYear());
   chargesVersion = signal(0);
+  paymentsVersion = signal(0);
 
   years = computed(() => {
     const y = this.store.currentSchool()?.currentYear ?? new Date().getFullYear();
@@ -90,6 +95,14 @@ export default class FinancialModule {
       .open(CreateChargeForm, { title: 'Nuevo cargo', size: 'medium' })
       .closed.subscribe(() => {
         this.chargesVersion.update((v) => v + 1);
+      });
+  }
+
+  openCreatePayment() {
+    this.modal
+      .open(CreatePaymentForm, { title: 'Registrar pago', size: 'medium' })
+      .closed.subscribe(() => {
+        this.paymentsVersion.update((v) => v + 1);
       });
   }
 }

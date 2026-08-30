@@ -109,14 +109,21 @@ export class CommunicationDeliveryService {
     });
     if (pending.length === 0) return;
 
-    await this.prisma.messageDelivery.updateMany({
-      where: { messageId, status: DeliveryStatus.PENDING },
-      data: {
-        status: DeliveryStatus.SENT,
-        deliveredAt: new Date(),
-        novuEventId: `stub-${messageId}-${Date.now()}`,
-      },
-    });
+    // Each delivery row maps to a distinct Novu event, so stamp a unique
+    // synthetic event id per row. `updateMany` can't vary the value per row,
+    // and `novuEventId` is unique — updating many rows to one value would fail.
+    await this.prisma.$transaction(
+      pending.map((delivery) =>
+        this.prisma.messageDelivery.update({
+          where: { id: delivery.id },
+          data: {
+            status: DeliveryStatus.SENT,
+            deliveredAt: new Date(),
+            novuEventId: `stub-${messageId}-${delivery.id}`,
+          },
+        }),
+      ),
+    );
 
     this.logger.debug(`Fan-out dispatched ${pending.length} delivery rows for message ${messageId}`);
   }

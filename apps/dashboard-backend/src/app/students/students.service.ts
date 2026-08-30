@@ -8,8 +8,8 @@ import { Request } from 'express';
 import * as QRCode from 'qrcode';
 import { ChatSyncService } from '../chats/chat-sync.service';
 import { FetchDataInput } from '../fetch-data.input';
-import { PrismaService } from '../prisma.service';
 import { ChargesService } from '../financial/charges.service';
+import { PrismaService } from '../prisma.service';
 import { CreateStudentInput } from './dto/create-student.input';
 import { UpdateStudentInput } from './dto/update-student.input';
 
@@ -265,17 +265,9 @@ export class StudentsService {
       // Auto-generate study-plan charges (enrollment + tuition) for the student.
       if (studyPlanId) {
         try {
-          await this.chargesService.generateFromStudyPlan(
-            student.id,
-            studyPlanId,
-            schoolId,
-            new Date().getFullYear(),
-          );
+          await this.chargesService.generateFromStudyPlan(student.id, studyPlanId, schoolId, new Date().getFullYear());
         } catch (chargeError) {
-          this.logger.warn(
-            `Failed to generate study-plan charges for student ${student.id}:`,
-            chargeError,
-          );
+          this.logger.warn(`Failed to generate study-plan charges for student ${student.id}:`, chargeError);
         }
       }
 
@@ -388,6 +380,14 @@ export class StudentsService {
   findManyByCourseId(courseId: string) {
     return this.prisma.student.findMany({
       where: { courses: { some: { id: courseId } } },
+      include: { classGroup: true, user: true },
+      orderBy: { user: { firstName: 'asc' } },
+    });
+  }
+
+  findManyByClassGroupId(groupId: string) {
+    return this.prisma.student.findMany({
+      where: { classGroupId: groupId },
       include: { classGroup: true, user: true },
       orderBy: { user: { firstName: 'asc' } },
     });
@@ -544,17 +544,9 @@ export class StudentsService {
     // Auto-generate study-plan charges when the student is assigned a class group.
     if (newStudyPlanId) {
       try {
-        await this.chargesService.generateFromStudyPlan(
-          id,
-          newStudyPlanId,
-          updated.schoolId,
-          new Date().getFullYear(),
-        );
+        await this.chargesService.generateFromStudyPlan(id, newStudyPlanId, updated.schoolId, new Date().getFullYear());
       } catch (chargeError) {
-        this.logger.warn(
-          `Failed to generate study-plan charges for student ${id}:`,
-          chargeError,
-        );
+        this.logger.warn(`Failed to generate study-plan charges for student ${id}:`, chargeError);
       }
     }
 

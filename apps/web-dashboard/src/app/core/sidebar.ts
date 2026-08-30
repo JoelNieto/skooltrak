@@ -326,6 +326,55 @@ type SidebarSchool = {
         </div>
       }
 
+      <!-- Teacher Section -->
+      @if (auth.isTeacher()) {
+        <div>
+          <p class="px-3 py-1.5 text-[11px] uppercase font-semibold text-base-content/50 tracking-wider">Docentes</p>
+          <ul class="space-y-0.5 mt-1">
+            <li>
+              <a
+                routerLink="teacher/communication"
+                routerLinkActive="bg-primary/10 text-primary font-semibold"
+                class="flex items-center gap-3 px-3 py-2 text-base-content/80 rounded-lg transition-all duration-150 hover:bg-base-200 hover:text-base-content group"
+              >
+                <span class="material-symbols-outlined text-xl">chat</span>
+                <span>Comunicación</span>
+              </a>
+            </li>
+            <li>
+              <a
+                routerLink="teacher/attendance"
+                routerLinkActive="bg-primary/10 text-primary font-semibold"
+                class="flex items-center gap-3 px-3 py-2 text-base-content/80 rounded-lg transition-all duration-150 hover:bg-base-200 hover:text-base-content group"
+              >
+                <span class="material-symbols-outlined text-xl">fact_check</span>
+                <span>Asistencia</span>
+              </a>
+            </li>
+            <li>
+              <a
+                routerLink="teacher/gradebook"
+                routerLinkActive="bg-primary/10 text-primary font-semibold"
+                class="flex items-center gap-3 px-3 py-2 text-base-content/80 rounded-lg transition-all duration-150 hover:bg-base-200 hover:text-base-content group"
+              >
+                <span class="material-symbols-outlined text-xl">grade</span>
+                <span>Calificaciones</span>
+              </a>
+            </li>
+            <li>
+              <a
+                routerLink="teacher/reports"
+                routerLinkActive="bg-primary/10 text-primary font-semibold"
+                class="flex items-center gap-3 px-3 py-2 text-base-content/80 rounded-lg transition-all duration-150 hover:bg-base-200 hover:text-base-content group"
+              >
+                <span class="material-symbols-outlined text-xl">analytics</span>
+                <span>Reportes</span>
+              </a>
+            </li>
+          </ul>
+        </div>
+      }
+
       <!-- Admin Section -->
       @if (auth.isAdmin()) {
         <div>

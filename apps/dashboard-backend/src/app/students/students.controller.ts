@@ -1,5 +1,5 @@
-import { BetterAuthGuard, Perm, PermissionsGuard, RequirePermissions } from '@/auth';
 import { FetchDataQueryDto } from '@/api-contracts';
+import { BetterAuthGuard, Perm, PermissionsGuard, RequirePermissions } from '@/auth';
 import { Body, Controller, Delete, Get, Param, Patch, Post, Query, Res, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import type { Response } from 'express';
@@ -49,6 +49,13 @@ export class StudentsController {
   @ApiOperation({ summary: 'Students by course' })
   async findManyByCourseId(@Param('courseId') courseId: string) {
     const list = await this.studentsService.findManyByCourseId(courseId);
+    return list.map((s) => enrichStudent(s as Student));
+  }
+
+  @Get('by-group/:groupId')
+  @ApiOperation({ summary: 'Students by class group' })
+  async findManyByClassGroupId(@Param('groupId') groupId: string) {
+    const list = await this.studentsService.findManyByClassGroupId(groupId);
     return list.map((s) => enrichStudent(s as Student));
   }
 
@@ -102,10 +109,7 @@ export class StudentsController {
   @Post(':id/attach-user')
   @RequirePermissions(Perm.MANAGE_STUDENTS)
   @ApiOperation({ summary: 'Upgrade a profile-only student into an account with magic-link access' })
-  attachUser(
-    @Param('id') id: string,
-    @Body() body: { email: string; firstName?: string; lastName?: string },
-  ) {
+  attachUser(@Param('id') id: string, @Body() body: { email: string; firstName?: string; lastName?: string }) {
     return this.studentsService.attachUser(id, body);
   }
 

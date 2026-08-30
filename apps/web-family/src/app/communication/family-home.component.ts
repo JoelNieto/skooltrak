@@ -4,6 +4,7 @@ import { ThreadComposer, ThreadList, MessageBubble, ThreadListItem } from '#/ui'
 import { CommunicationApi, Message, Thread } from './communication-api.service';
 import { CommunicationSocket } from './communication-socket.service';
 import { OfflineOutbox } from './offline-outbox.service';
+import { AuthService } from '../auth.service';
 import { readAccessTokenFromStorage } from '#/client-auth';
 
 function currentUserId(): string | null {
@@ -24,13 +25,16 @@ function currentUserId(): string | null {
   template: `
     <div class="flex h-[100dvh] bg-base-100">
       <aside class="w-80 border-r border-base-300 flex flex-col">
-        <header class="p-3 border-b border-base-300">
-          <h1 class="text-lg font-semibold">Family Messages</h1>
-          @if (outbox.pending.length) {
-            <p class="text-xs text-warning mt-1">
-              {{ outbox.pending.length }} message(s) queued offline
-            </p>
-          }
+        <header class="p-3 border-b border-base-300 flex items-center justify-between gap-2">
+          <div>
+            <h1 class="text-lg font-semibold">Family Messages</h1>
+            @if (outbox.pending.length) {
+              <p class="text-xs text-warning mt-1">
+                {{ outbox.pending.length }} message(s) queued offline
+              </p>
+            }
+          </div>
+          <button class="btn btn-sm btn-ghost" (click)="logout()">Sign out</button>
         </header>
         <div class="flex-1 overflow-y-auto">
           <lib-thread-list
@@ -74,6 +78,7 @@ export class FamilyHomeComponent implements OnInit, OnDestroy {
   readonly #api = inject(CommunicationApi);
   readonly #socket = inject(CommunicationSocket);
   readonly outbox = inject(OfflineOutbox);
+  readonly #auth = inject(AuthService);
 
   readonly threads = signal<Thread[]>([]);
   readonly selectedId = signal<string | null>(null);
@@ -135,8 +140,14 @@ export class FamilyHomeComponent implements OnInit, OnDestroy {
     }
   }
 
-  senderName(m: Message): string | undefined {
-    return m.sender ? `${m.sender.firstName ?? ''} ${m.sender.lastName ?? ''}`.trim() : undefined;
+  logout() {
+    this.#socket.disconnect();
+    this.#auth.logout();
+    location.reload();
+  }
+
+  senderName(m: Message): string {
+    return m.sender ? `${m.sender.firstName ?? ''} ${m.sender.lastName ?? ''}`.trim() : '';
   }
 
   sentAt(m: Message): string {

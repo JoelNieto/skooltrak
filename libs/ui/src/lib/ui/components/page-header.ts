@@ -1,17 +1,9 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  EventEmitter,
-  Input,
-  Output,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
 
 @Component({
   selector: 'lib-page-header',
   template: `
-    <div
-      class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-4"
-    >
+    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-4">
       <div>
         <h1 class="text-2xl font-semibold text-base-content">{{ title }}</h1>
         @if (subtitle) {
@@ -21,7 +13,7 @@ import {
         }
       </div>
       @if (actionLabel) {
-        <button class="btn btn-neutral" type="button" (click)="action.emit()">
+        <button class="btn btn-primary" type="button" (click)="action.emit()">
           @if (actionIcon) {
             <span class="material-symbols-outlined">{{ actionIcon }}</span>
           }

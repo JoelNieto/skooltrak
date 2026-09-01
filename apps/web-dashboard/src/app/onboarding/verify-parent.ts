@@ -186,6 +186,17 @@ export default class VerifyParent {
     afterRenderEffect(() => {
       this.schoolId.set(this.route.snapshot.queryParamMap.get('schoolId') || '');
       this.schoolName.set(this.route.snapshot.queryParamMap.get('schoolName') || '');
+      
+      // Pre-populate form with user's existing data
+      const user = this.auth.user();
+      if (user) {
+        this.linkModel.set({
+          ...this.linkModel(),
+          firstName: user.firstName || '',
+          fatherName: user.lastName || '',
+          email: user.email || '',
+        });
+      }
     });
   }
 

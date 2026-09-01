@@ -1,6 +1,6 @@
 import { EmptyState, Toast } from '#/ui';
 import { httpResource } from '@angular/common/http';
-import { ChangeDetectionStrategy, Component, inject, input, output, signal } from '@angular/core';
+import { Component, inject, input, output, signal } from '@angular/core';
 import { form, FormField, maxLength, required } from '@angular/forms/signals';
 import Store from '../core/store';
 import { CommunicationApi, Thread, ThreadType, UrgencyTier } from './communication-api.service';
@@ -18,7 +18,6 @@ interface StudentOption {
 @Component({
   selector: 'app-new-thread-form',
   imports: [FormField, EmptyState],
-  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <form (submit)="submit($event)" class="space-y-4">
       <div class="fieldset">

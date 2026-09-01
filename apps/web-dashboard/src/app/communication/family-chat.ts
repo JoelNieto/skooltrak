@@ -1,0 +1,160 @@
+import { MessageBubble, PageHeader, ThreadComposer, ThreadList, ThreadListItem } from '#/ui';
+import { Component, OnDestroy, OnInit, inject, signal } from '@angular/core';
+import { Router } from '@angular/router';
+import Auth from '../auth/auth';
+import { CommunicationApi, Thread, ThreadMessage } from './communication-api.service';
+import { CommunicationSocket } from './communication-socket.service';
+import { OfflineOutbox } from './offline-outbox.service';
+
+@Component({
+  selector: 'app-family-chat',
+  imports: [ThreadList, ThreadComposer, MessageBubble, PageHeader],
+  template: `
+    <div class="breadcrumbs text-sm">
+      <ul>
+        <li><a routerLink="/">Inicio</a></li>
+        <li>Chat escolar</li>
+      </ul>
+    </div>
+    <lib-page-header
+      title="Chat escolar"
+      subtitle="Conversaciones con profesores y personal escolar"
+    />
+    <div class="flex gap-4 h-[calc(100vh-12rem)]">
+      <aside class="w-80 shrink-0 border border-base-300 rounded-lg flex flex-col bg-base-100">
+        <div class="p-2 border-b border-base-300 space-y-2 shrink-0">
+          <div class="flex items-center justify-between gap-2">
+            <div>
+              <h1 class="text-lg font-semibold">Chat escolar</h1>
+              @if (outbox.pending.length) {
+                <p class="text-xs text-warning mt-1">{{ outbox.pending.length }} message(s) queued offline</p>
+              }
+            </div>
+          </div>
+        </div>
+        <div class="flex-1 overflow-y-auto">
+          <lib-thread-list [threads]="threadItems()" [selectedId]="selectedId()" (selected)="selectThread($event)" />
+        </div>
+      </aside>
+
+      <section class="flex-1 border border-base-300 rounded-lg flex flex-col bg-base-100 min-w-0">
+        @if (selectedThread(); as thread) {
+          <header class="p-3 border-b border-base-300 flex items-center gap-2">
+            <h2 class="font-semibold truncate">{{ thread.title }}</h2>
+            <span class="badge badge-soft badge-sm">{{ thread.type }}</span>
+            @if (thread.urgencyDefault === 'EMERGENCY') {
+              <span class="badge badge-warning badge-sm">Urgente</span>
+            }
+          </header>
+
+          <div #messagesContainer class="flex-1 overflow-y-auto p-3 space-y-2">
+            @for (m of messages(); track m.id) {
+              <div class="space-y-0.5">
+                <lib-message-bubble
+                  [body]="m.body"
+                  [senderName]="senderName(m)"
+                  [sentAt]="sentAt(m)"
+                  [urgency]="m.urgency"
+                  [mine]="m.senderId === meId()"
+                />
+              </div>
+            } @empty {
+              <p class="text-center text-sm opacity-60 mt-10">No messages yet.</p>
+            }
+          </div>
+
+          <div class="shrink-0 border-t border-base-300 p-2 bg-base-100">
+            <lib-thread-composer (send)="send($event)" />
+          </div>
+        } @else {
+          <div class="flex-1 grid place-items-center text-sm opacity-60">Selecciona una conversación para comenzar.</div>
+        }
+      </section>
+    </div>
+  `,
+})
+export default class FamilyChatComponent implements OnInit, OnDestroy {
+  readonly #api = inject(CommunicationApi);
+  readonly #socket = inject(CommunicationSocket);
+  readonly outbox = inject(OfflineOutbox);
+  readonly #auth = inject(Auth);
+  readonly #router = inject(Router);
+
+  readonly threads = signal<Thread[]>([]);
+  readonly selectedId = signal<string | null>(null);
+  readonly messages = signal<ThreadMessage[]>([]);
+  readonly meId = signal<string | null>(this.#auth.user()?.id ?? null);
+
+  #unsub: (() => void) | null = null;
+
+  ngOnInit(): void {
+    this.#api.listThreads().subscribe((threads) => this.threads.set(threads));
+    this.#unsub = this.#socket.onMessageReceived((payload) => {
+      if (payload.threadId === this.selectedId()) {
+        this.messages.update((m) => [...m, payload.message as ThreadMessage]);
+      }
+      this.#api.listThreads().subscribe((threads) => this.threads.set(threads));
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.#unsub?.();
+    this.#socket.disconnect();
+  }
+
+  selectedThread(): Thread | undefined {
+    return this.threads().find((t) => t.id === this.selectedId());
+  }
+
+  threadItems = (): ThreadListItem[] =>
+    this.threads().map((t) => ({
+      id: t.id,
+      title: t.title,
+      type: t.type,
+      urgent: t.urgencyDefault === 'EMERGENCY',
+    }));
+
+  selectThread(id: string) {
+    this.selectedId.set(id);
+    this.#socket.joinThread(id);
+    this.#api.getMessages(id).subscribe((messages) => this.messages.set(messages));
+  }
+
+  send(body: string) {
+    const threadId = this.selectedId();
+    if (!threadId) return;
+    const temp: ThreadMessage = {
+      id: crypto.randomUUID(),
+      threadId,
+      senderId: this.meId() ?? 'me',
+      body,
+      urgency: 'ROUTINE',
+      createdAt: new Date().toISOString(),
+    };
+    this.messages.update((m) => [...m, temp]);
+
+    if (navigator.onLine) {
+      this.#api.sendMessage(threadId, body).subscribe();
+    } else {
+      this.outbox.enqueue(threadId, body);
+    }
+  }
+
+  logout() {
+    this.#socket.disconnect();
+    void this.#auth.logout();
+  }
+
+  back() {
+    this.#socket.disconnect();
+    this.#router.navigateByUrl('/home');
+  }
+
+  senderName(m: ThreadMessage): string {
+    return m.sender ? `${m.sender.firstName ?? ''} ${m.sender.lastName ?? ''}`.trim() : '';
+  }
+
+  sentAt(m: ThreadMessage): string {
+    return new Date(m.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  }
+}

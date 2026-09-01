@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { BehaviorSubject, Observable, firstValueFrom } from 'rxjs';
-import { CommunicationApi, Message } from './communication-api.service';
+import { CommunicationApi, ThreadMessage, UrgencyTier } from './communication-api.service';
 
 export interface OutboxItem {
   id: string;
@@ -12,8 +12,7 @@ export interface OutboxItem {
 
 /**
  * Offline outgoing queue. Messages composed while offline are persisted to
- * IndexedDB/localStorage and flushed when connectivity returns. Phase 0 seam:
- * uses localStorage for simplicity; swap for IndexedDB + SW sync later.
+ * localStorage and flushed when connectivity returns.
  */
 @Injectable({ providedIn: 'root' })
 export class OfflineOutbox {
@@ -39,13 +38,13 @@ export class OfflineOutbox {
     return item;
   }
 
-  async flush(): Promise<Message[]> {
+  async flush(): Promise<ThreadMessage[]> {
     const queued = this.#items.value;
-    const sent: Message[] = [];
+    const sent: ThreadMessage[] = [];
     for (const item of queued) {
       try {
         const message = await firstValueFrom(
-          this.#api.sendMessage(item.threadId, item.body, (item.urgency as never) ?? undefined),
+          this.#api.sendMessage(item.threadId, item.body, (item.urgency as UrgencyTier) ?? undefined),
         );
         sent.push(message);
       } catch {

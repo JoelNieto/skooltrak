@@ -123,6 +123,7 @@ export const DASHBOARD_ROUTES: Route[] = [
       },
     ],
   },
+
   {
     path: '',
     canActivate: [authGuard, onboardingCompletedGuard],
@@ -149,6 +150,13 @@ export const DASHBOARD_ROUTES: Route[] = [
         path: 'home',
         canMatch: [parentGuard],
         loadComponent: () => import('./parent-home'),
+      },
+      {
+        path: 'family',
+        canActivate: [authGuard],
+        canMatch: [parentGuard],
+        loadComponent: () => import('./communication/family-chat'),
+        title: 'Mensajes de familia | Skooltrak',
       },
       {
         path: 'courses',

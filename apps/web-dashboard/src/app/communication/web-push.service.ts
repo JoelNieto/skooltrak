@@ -3,9 +3,9 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, firstValueFrom } from 'rxjs';
 
 /**
- * Web-push (VAPID) subscription seam. Phase 0 registers the service worker and
+ * Web-push (VAPID) subscription seam. Registers the service worker and
  * subscribes to push, posting the subscription to the backend subscriber-sync
- * endpoint. Real VAPID key + Novu push wiring is added in Phase 3.
+ * endpoint.
  */
 @Injectable({ providedIn: 'root' })
 export class WebPushService {

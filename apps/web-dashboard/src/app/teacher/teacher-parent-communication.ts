@@ -1,7 +1,7 @@
 import { MessageBubble, Modal, PageHeader, ThreadComposer, ThreadList, Toast } from '#/ui';
 import { DatePipe } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { ChangeDetectionStrategy, Component, effect, inject, signal } from '@angular/core';
+import { Component, effect, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import Auth from '../auth/auth';
@@ -26,7 +26,6 @@ interface ThreadListItem {
 @Component({
   selector: 'app-teacher-parent-communication',
   imports: [RouterLink, FormsModule, DatePipe, PageHeader, ThreadList, ThreadComposer, MessageBubble],
-  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="breadcrumbs text-sm">
       <ul>

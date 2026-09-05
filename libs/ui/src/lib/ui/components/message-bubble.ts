@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
+import { Component, input } from '@angular/core';
 
 type Urgency = 'ROUTINE' | 'IMPORTANT' | 'EMERGENCY';
 
@@ -19,8 +19,8 @@ const URGENCY_LABEL: Record<Urgency, string> = {
   template: `
     <div class="flex" [class.justify-end]="mine()">
       <div
-        class="max-w-[80%] rounded-2xl px-3 py-2 text-sm shadow-sm"
-        [class]="mine() ? 'bg-primary text-primary-content rounded-br-sm' : 'bg-base-200 text-base-content rounded-bl-sm'"
+        class="max-w-[80%] rounded-2xl px-3 py-2 text-sm"
+        [class]="mine() ? 'bg-primary/20 text-base-content' : 'bg-base-200 text-base-content'"
       >
         @if (!mine() && senderName()) {
           <p class="font-semibold text-xs opacity-80 mb-0.5">{{ senderName() }}</p>
@@ -37,7 +37,6 @@ const URGENCY_LABEL: Record<Urgency, string> = {
       </div>
     </div>
   `,
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MessageBubble {
   body = input.required<string>();

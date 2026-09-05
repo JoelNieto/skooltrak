@@ -1,4 +1,5 @@
 import { MessageBubble, PageHeader, ThreadComposer, ThreadList, ThreadListItem } from '#/ui';
+import { HttpClient } from '@angular/common/http';
 import { Component, OnDestroy, OnInit, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import Auth from '../auth/auth';
@@ -79,21 +80,35 @@ export default class FamilyChatComponent implements OnInit, OnDestroy {
   readonly outbox = inject(OfflineOutbox);
   readonly #auth = inject(Auth);
   readonly #router = inject(Router);
+  readonly #http = inject(HttpClient);
 
   readonly threads = signal<Thread[]>([]);
   readonly selectedId = signal<string | null>(null);
   readonly messages = signal<ThreadMessage[]>([]);
   readonly meId = signal<string | null>(this.#auth.user()?.id ?? null);
 
+  private studentNames = signal<Map<string, string>>(new Map());
+  private classGroupNames = signal<Map<string, string>>(new Map());
+
   #unsub: (() => void) | null = null;
 
   ngOnInit(): void {
-    this.#api.listThreads().subscribe((threads) => this.threads.set(threads));
+    this.#api.listThreads().subscribe((threads) => {
+      this.threads.set(threads);
+      this.fetchAudienceNames(threads);
+    });
     this.#unsub = this.#socket.onMessageReceived((payload) => {
       if (payload.threadId === this.selectedId()) {
-        this.messages.update((m) => [...m, payload.message as ThreadMessage]);
+        // Ignore messages we sent ourselves to prevent duplication
+        const message = payload.message as ThreadMessage;
+        if (message.senderId !== this.meId()) {
+          this.messages.update((m) => [...m, message]);
+        }
       }
-      this.#api.listThreads().subscribe((threads) => this.threads.set(threads));
+      this.#api.listThreads().subscribe((threads) => {
+        this.threads.set(threads);
+        this.fetchAudienceNames(threads);
+      });
     });
   }
 
@@ -107,12 +122,109 @@ export default class FamilyChatComponent implements OnInit, OnDestroy {
   }
 
   threadItems = (): ThreadListItem[] =>
-    this.threads().map((t) => ({
-      id: t.id,
-      title: t.title,
-      type: t.type,
-      urgent: t.urgencyDefault === 'EMERGENCY',
-    }));
+    this.threads().map((t) => {
+      const last = t.messages?.[0];
+
+      // Determine audience based on thread type
+      let audience: string | undefined;
+      if (t.scopeId) {
+        if (t.type === 'STUDENT_GUARDIANS') {
+          audience = `Estudiante: (${this.studentNames().get(t.scopeId) ?? `Estudiante (ID: ${t.scopeId})`})`;
+        } else if (t.type === 'CLASS_GROUP') {
+          audience = `Grupo: (${this.classGroupNames().get(t.scopeId) ?? `Grupo (ID: ${t.scopeId})`})`;
+        } else if (t.type === 'COURSE') {
+          audience = t.scopeId ? `Curso (ID: ${t.scopeId})` : 'Curso';
+        } else if (t.type === 'SCHOOL_WIDE') {
+          audience = 'Todo el Colegio';
+        } else if (t.type === 'DIRECT') {
+          audience = 'Mensaje Directo';
+        } else {
+          audience = t.type;
+        }
+      } else {
+        switch (t.type) {
+          case 'STUDENT_GUARDIANS':
+            audience = 'Estudiante';
+            break;
+          case 'CLASS_GROUP':
+            audience = 'Grupo de Clase';
+            break;
+          case 'COURSE':
+            audience = 'Curso';
+            break;
+          case 'SCHOOL_WIDE':
+            audience = 'Todo el Colegio';
+            break;
+          case 'DIRECT':
+            audience = 'Mensaje Directo';
+            break;
+          default:
+            audience = t.type;
+            break;
+        }
+      }
+
+      return {
+        id: t.id,
+        title: t.title,
+        preview: last?.body,
+        audience: audience,
+        type: t.type,
+        urgent: t.urgencyDefault === 'EMERGENCY',
+      };
+    });
+
+  private fetchAudienceNames(threads: Thread[]): void {
+    const studentIds = new Set<string>();
+    const classGroupIds = new Set<string>();
+
+    for (const thread of threads) {
+      if (thread.type === 'STUDENT_GUARDIANS' && thread.scopeId) {
+        studentIds.add(thread.scopeId);
+      } else if (thread.type === 'CLASS_GROUP' && thread.scopeId) {
+        classGroupIds.add(thread.scopeId);
+      }
+    }
+
+    if (studentIds.size > 0) {
+      const ids = Array.from(studentIds).join(',');
+      this.#http.get<{ id: string; firstName: string; lastName: string }[]>(`/api/v1/students`, {
+        params: { ids }
+      }).subscribe({
+        next: (students) => {
+          const map = new Map<string, string>();
+          for (const s of students) {
+            const fullName = `${s.firstName ?? ''} ${s.lastName ?? ''}`.trim();
+            if (fullName) {
+              map.set(s.id, fullName);
+            }
+          }
+          this.studentNames.set(map);
+        },
+        error: (err) => {
+          console.warn('Failed to fetch student names', err);
+        }
+      });
+    }
+
+    if (classGroupIds.size > 0) {
+      const ids = Array.from(classGroupIds).join(',');
+      this.#http.get<{ id: string; name: string }[]>(`/api/v1/class-groups`, {
+        params: { ids }
+      }).subscribe({
+        next: (classGroups) => {
+          const map = new Map<string, string>();
+          for (const cg of classGroups) {
+            map.set(cg.id, cg.name);
+          }
+          this.classGroupNames.set(map);
+        },
+        error: (err) => {
+          console.warn('Failed to fetch class group names', err);
+        }
+      });
+    }
+  }
 
   selectThread(id: string) {
     this.selectedId.set(id);

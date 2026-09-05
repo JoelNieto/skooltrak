@@ -1,10 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  computed,
-  input,
-  output,
-} from '@angular/core';
+import { Component, computed, input, output } from '@angular/core';
 import { DialogData } from '../types/dialog.type';
 
 @Component({
@@ -12,15 +6,14 @@ import { DialogData } from '../types/dialog.type';
   template: `<p class="my-4">{{ data().message }}</p>
     <div class="flex justify-end gap-2">
       @if (!data().hideCancel) {
-      <button class="btn btn-ghost" (click)="closeModal.emit(false)">
-        {{ data().cancelText || 'Cancelar' }}
-      </button>
+        <button class="btn btn-ghost" (click)="closeModal.emit(false)">
+          {{ data().cancelText || 'Cancelar' }}
+        </button>
       }
       <button [class]="buttonClass()" (click)="closeModal.emit(true)">
         {{ data().confirmText || 'Confirmar' }}
       </button>
     </div>`,
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ConfirmationDialog {
   public data = input.required<DialogData>();

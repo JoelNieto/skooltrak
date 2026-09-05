@@ -1,13 +1,5 @@
 import { NgClass } from '@angular/common';
-import {
-  ChangeDetectionStrategy,
-  Component,
-  ElementRef,
-  input,
-  output,
-  viewChild,
-  ViewContainerRef,
-} from '@angular/core';
+import { Component, ElementRef, input, output, viewChild, ViewContainerRef } from '@angular/core';
 @Component({
   selector: 'lib-modal',
   imports: [NgClass],
@@ -15,25 +7,23 @@ import {
     <div
       class="modal-content modal-box"
       [ngClass]="{
-      'sm:w-1/3 sm:max-w-sm w-[90vw]': size() === 'small',
-      'sm:w-2/3 sm:max-w-2xl w-[90vw]': size() === 'medium',
-      'sm:w-11/12 sm:max-w-6xl w-[90vw]': size() === 'large',
-      'sm:w-full sm:max-w-[90vw] w-[90vw]': size() === 'full',
-    }"
+        'sm:w-1/3 sm:max-w-sm w-[90vw]': size() === 'small',
+        'sm:w-2/3 sm:max-w-2xl w-[90vw]': size() === 'medium',
+        'sm:w-11/12 sm:max-w-6xl w-[90vw]': size() === 'large',
+        'sm:w-full sm:max-w-[90vw] w-[90vw]': size() === 'full',
+      }"
     >
       <form method="dialog">
-        @if(showCloseButton()) {
-        <button class="btn btn-sm btn-circle btn-ghost absolute right-4 top-6">
-          <span class="material-symbols-outlined text-xl">close</span>
-        </button>
+        @if (showCloseButton()) {
+          <button class="btn btn-sm btn-circle btn-ghost absolute right-4 top-6">
+            <span class="material-symbols-outlined text-xl">close</span>
+          </button>
         }
       </form>
       <h3 class="text-lg font-bold">{{ title() }}</h3>
       <ng-container #content></ng-container>
     </div>
   </dialog>`,
-  styles: ``,
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Modal {
   public title = input<string>();

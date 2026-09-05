@@ -1,10 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  computed,
-  input,
-  model,
-} from '@angular/core';
+import { Component, computed, input, model } from '@angular/core';
 
 /** Page number or ellipsis placeholder for compact pagination */
 export type PageItem = number | 'ellipsis';
@@ -13,20 +7,15 @@ export type PageItem = number | 'ellipsis';
   selector: 'lib-paginator',
   template: ` <div class="flex justify-between items-center w-full">
     <p class="text-sm text-base-content font-medium">
-      Mostrando de <strong>{{ start() }}</strong> a
-      <strong>{{ end() }}</strong> de <strong>{{ count() }}</strong>
+      Mostrando de <strong>{{ start() }}</strong> a <strong>{{ end() }}</strong> de <strong>{{ count() }}</strong>
     </p>
     <div>
       <div class="join join-horizontal">
-        <button
-          class="join-item btn btn-sm"
-          [class.btn-disabled]="!hasPreviousPage()"
-          (click)="previousPage()"
-        >
+        <button class="join-item btn btn-sm" [class.btn-disabled]="!hasPreviousPage()" (click)="previousPage()">
           ‹
         </button>
-        @for(item of pageItems(); track trackPageItem($index, item)) {
-          @if(item === 'ellipsis') {
+        @for (item of pageItems(); track trackPageItem($index, item)) {
+          @if (item === 'ellipsis') {
             <span class="join-item btn btn-sm btn-disabled no-pointer-events px-2">…</span>
           } @else {
             <button
@@ -38,23 +27,18 @@ export type PageItem = number | 'ellipsis';
             </button>
           }
         }
-        <button
-          class="join-item btn btn-sm"
-          [class.btn-disabled]="!hasNextPage()"
-          (click)="nextPage()"
-        >
-          ›
-        </button>
+        <button class="join-item btn btn-sm" [class.btn-disabled]="!hasNextPage()" (click)="nextPage()">›</button>
       </div>
     </div>
   </div>`,
-  styles: `:host {
-    width: 100%;
-  }
-  :host .no-pointer-events {
-    pointer-events: none;
-  }`,
-  changeDetection: ChangeDetectionStrategy.OnPush,
+  styles: `
+    :host {
+      width: 100%;
+    }
+    :host .no-pointer-events {
+      pointer-events: none;
+    }
+  `,
 })
 export class Paginator {
   public take = model.required<number>();
@@ -88,16 +72,10 @@ export class Paginator {
   trackPageItem(index: number, item: PageItem): string {
     return item === 'ellipsis' ? `ellipsis-${index}` : `page-${item}`;
   }
-  public currentPage = computed(
-    () => Math.floor(this.skip() / this.take()) + 1
-  );
+  public currentPage = computed(() => Math.floor(this.skip() / this.take()) + 1);
 
   public start = computed(() => this.skip() + 1);
-  public end = computed(() =>
-    this.skip() + this.take() > this.count()
-      ? this.count()
-      : this.skip() + this.take()
-  );
+  public end = computed(() => (this.skip() + this.take() > this.count() ? this.count() : this.skip() + this.take()));
 
   public hasPreviousPage = computed(() => this.currentPage() > 1);
   public hasNextPage = computed(() => this.currentPage() < this.pages());

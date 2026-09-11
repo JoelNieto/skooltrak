@@ -85,6 +85,18 @@
   --noise: 0;
 }
 
+:root {
+  --navy-900: #0f1e3b;
+  --navy-700: #1e3a6e;
+  --violet-600: #5f4fd6;
+  --violet-500: #7f72e8;
+  --amber-400: #f2a65a;
+  --ink: #161a2e;
+  --muted: #616a85;
+  --surface: #fcfcfd;
+  --line: #e3e6f0;
+}
+
 @theme {
   --font-sans: 'Geist', system-ui, sans-serif !important;
   --tab-border-color: var(--color-primary);

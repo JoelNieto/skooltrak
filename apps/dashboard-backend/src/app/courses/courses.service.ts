@@ -211,10 +211,21 @@ export class CoursesService {
         skip,
         take: pageSize,
         include: {
-          school: true,
-          subject: true,
-          studyPlan: true,
-          teacher: true,
+          school: {
+            select: { id: true, name: true },
+          },
+          subject: { select: { id: true, name: true } },
+          studyPlan: { select: { id: true, name: true, shortName: true } },
+          teacher: {
+            select: {
+              id: true,
+              firstName: true,
+              fatherName: true,
+              middleName: true,
+              motherName: true,
+              user: { select: { id: true, color: true, image: true, email: true } },
+            },
+          },
         },
         orderBy: {
           [orderField]: orderDir,

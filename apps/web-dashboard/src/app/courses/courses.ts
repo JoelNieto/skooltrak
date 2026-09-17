@@ -11,7 +11,14 @@ type CourseRow = {
   id: string;
   subject?: { name?: string };
   studyPlan?: { name?: string };
-  teacher?: { firstName?: string; fatherName?: string; name?: string };
+  teacher?: {
+    firstName?: string;
+    fatherName?: string;
+    name?: string;
+    initials?: string;
+    color?: string;
+    avatarUrl?: string;
+  };
 };
 
 @Component({
@@ -57,17 +64,29 @@ type CourseRow = {
             </figure>
             <div class="card-body p-3">
               <h2 class="card-title text-sm line-clamp-2">{{ course.subject?.name }}</h2>
-              @if (course.teacher?.name) {
-                <p class="text-xs text-base-content/60 flex items-center gap-1">
-                  <span class="material-symbols-outlined text-sm">person</span>
-                  {{ course.teacher?.name }}
-                </p>
-              } @else {
-                <p class="text-xs text-base-content/60 flex items-center gap-1">
-                  <span class="material-symbols-outlined text-sm">person</span>
-                  Sin docente asignado
-                </p>
-              }
+@if (course.teacher?.name) {
+                 <div class="text-xs text-base-content/60 flex items-center gap-1">
+                   @if (course.teacher?.avatarUrl) {
+                     <img [src]="course.teacher.avatarUrl" [alt]="course.teacher.name" class="w-7 h-7 rounded-full object-cover" />
+                   } @else {
+                     <div class="avatar avatar-placeholder">
+                       <div class="text-white w-7 rounded-full" [style.background]="course.teacher.color">
+                         <span class="text-xs">{{ course.teacher.initials }}</span>
+                       </div>
+                     </div>
+                   }
+                   {{ course.teacher?.name }}
+                 </div>
+               } @else {
+                 <div class="text-xs text-base-content/60 flex items-center gap-1">
+                   <div class="avatar avatar-placeholder">
+                     <div class="text-white w-7 rounded-full" [style.background]="course.teacher?.color ?? '#6B7280'">
+                       <span class="text-xs">?</span>
+                     </div>
+                   </div>
+                   Sin docente asignado
+                 </div>
+               }
             </div>
           </a>
         } @empty {
@@ -117,17 +136,30 @@ export default class Courses {
     };
   });
 
-  protected courses = computed(() =>
-    (this.coursesListResource.value()?.data ?? []).map((c) => ({
+protected courses = computed(() =>
+  (this.coursesListResource.value()?.data ?? []).map((c) => {
+    const teacher = c.teacher;
+    if (!teacher) return c;
+
+    const firstName = teacher.firstName ?? '';
+    const fatherName = teacher.fatherName ?? '';
+    const name = teacher.name ?? `${firstName} ${fatherName}`.trim();
+    const initials = `${(firstName || '?').charAt(0)}${(fatherName || '?').charAt(0)}`.toUpperCase();
+    // Use the teacher's color if available, otherwise a default
+    const color = teacher.color ?? '#4F46E5'; // Indigo-600
+
+    return {
       ...c,
-      teacher: c.teacher
-        ? {
-            ...c.teacher,
-            name: c.teacher.name ?? `${c.teacher.firstName ?? ''} ${c.teacher.fatherName ?? ''}`.trim(),
-          }
-        : c.teacher,
-    })),
-  );
+      teacher: {
+        ...teacher,
+        name,
+        initials,
+        color,
+        // avatarUrl is preserved from the original teacher object via spread
+      },
+    };
+  }),
+);
 
   constructor() {
     this.#debouncedSearch = debounceSignal(this.searchText, 400);

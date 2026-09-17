@@ -23,8 +23,10 @@ export class CoursesController {
 
   @Get()
   @ApiOperation({ summary: 'List courses' })
-  findAll(@Query() query: FetchDataQueryDto) {
-    return this.coursesService.findAll(query);
+  async findAll(@Query() query: FetchDataQueryDto) {
+    const resp = await this.coursesService.findAll(query);
+
+    return { ...resp, data: resp.data.map((i) => ({ ...i, teacher: enrichTeacher(i.teacher) })) };
   }
 
   @Get('count')
@@ -76,4 +78,25 @@ export class CoursesController {
   remove(@Param('id') id: string) {
     return this.coursesService.remove(id);
   }
+}
+
+function enrichTeacher(t: {
+  firstName: string;
+  middleName: string;
+  fatherName: string;
+  motherName: string;
+  user?: { color?: string | null } | Record<string, unknown> | null;
+}) {
+  if (!t) return;
+  const color =
+    t.user && typeof t.user === 'object' && 'color' in t.user
+      ? ((t.user as { color?: string | null }).color ?? null)
+      : null;
+  return {
+    ...t,
+    name: `${t.firstName} ${t.fatherName}`,
+    fullName: `${t.firstName} ${t.middleName} ${t.fatherName} ${t.motherName}`,
+    color,
+    initials: `${t.firstName.charAt(0).toUpperCase()}${t.fatherName.charAt(0).toUpperCase()}`,
+  };
 }

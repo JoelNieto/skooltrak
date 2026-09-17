@@ -1,10 +1,13 @@
-import { Confirmation, Modal, Toast } from '#/ui';
+import { Confirmation, EmptyState, Modal, PaginatorV2, Toast } from '#/ui';
 import { Menu, MenuContent, MenuItem, MenuTrigger } from '@angular/aria/menu';
 import { OverlayModule } from '@angular/cdk/overlay';
 import { DatePipe } from '@angular/common';
 import { HttpClient, httpResource } from '@angular/common/http';
-import { Component, inject, viewChild } from '@angular/core';
+import { Component, computed, inject, signal, viewChild } from '@angular/core';
+import { debounce, form, FormField } from '@angular/forms/signals';
 import { filter, switchMap } from 'rxjs';
+import { toFetchQueryRecord } from '../../core/fetch-query-params';
+import { PaginatedResponse } from '../../core/pagination-meta';
 import Store from '../../core/store';
 import StudyPlanForm from '../forms/study-plans-forms';
 
@@ -18,11 +21,30 @@ type StudyPlanRow = {
   updatedAt?: string;
 };
 
+type DegreeRow = {
+  id: string;
+  name: string;
+};
+
 @Component({
   selector: 'app-study-plans',
-  imports: [DatePipe, Menu, MenuContent, MenuItem, MenuTrigger, OverlayModule],
+  imports: [DatePipe, Menu, PaginatorV2, MenuContent, MenuItem, MenuTrigger, OverlayModule, FormField, EmptyState],
 
-  template: `<div class="flex justify-end">
+  template: `<div class="flex justify-between">
+      <div class="flex gap-2">
+        <div class="md:w-96 w-full">
+          <label class="input input-primary ">
+            <span class="material-symbols-outlined">search</span>
+            <input class="pl-0" type="search" placeholder="Buscar..." [formField]="form.searchText" />
+          </label>
+        </div>
+        <select class="select select-primary" [formField]="form.degreeId">
+          <option [value]="''">Elija nivel...</option>
+          @for (degree of degrees.value(); track degree.id) {
+            <option [value]="degree.id">{{ degree.name }}</option>
+          }
+        </select>
+      </div>
       <button class="btn btn-primary" (click)="editStudyPlan()">
         <span class="material-symbols-outlined">add_circle</span> Nuevo plan
       </button>
@@ -41,7 +63,7 @@ type StudyPlanRow = {
           </tr>
         </thead>
         <tbody>
-          @for (studyPlan of studyPlans.value(); track studyPlan.id) {
+          @for (studyPlan of studyPlans.value()?.data; track studyPlan.id) {
             <tr>
               <td>{{ studyPlan.name }}</td>
               <td>{{ studyPlan.shortName }}</td>
@@ -98,9 +120,28 @@ type StudyPlanRow = {
                 </ng-template>
               </td>
             </tr>
+          } @empty {
+            <tr>
+              <td colspan="7">
+                <lib-empty-state
+                  [title]="'No hay planes de estudio'"
+                  [description]="'No hay planes de estudio para mostrar'"
+                  [icon]="'group'"
+                />
+              </td>
+            </tr>
           }
         </tbody>
       </table>
+      <div class="p-4 rounded-b-lg ">
+        <lib-paginator
+          [total]="total()"
+          [page]="page()"
+          [pageSize]="pageSize()"
+          (pageChange)="page.set($event)"
+          (pageSizeChange)="pageSize.set($event)"
+        />
+      </div>
     </div>`,
 })
 export default class StudyPlans {
@@ -109,21 +150,52 @@ export default class StudyPlans {
   private toast = inject(Toast);
   private modal = inject(Modal);
   private confirmation = inject(Confirmation);
+  searchText = computed(() => this.formModel().searchText);
   actionsMenu = viewChild<Menu<string>>('actionsMenu');
 
-  public studyPlans = httpResource<StudyPlanRow[]>(
+  formModel = signal<{ searchText: string; degreeId: string }>({ searchText: '', degreeId: '' });
+
+  form = form(this.formModel, (f) => {
+    debounce(f.searchText, 400);
+  });
+
+  public pagination = computed(() => this.studyPlans.value()?.meta);
+  total = computed(() => this.pagination()?.total ?? 0);
+  public degrees = httpResource<DegreeRow[]>(
     () => {
       const schoolId = this.store.currentSchoolId();
-      if (!schoolId) {
-        return undefined;
-      }
+      if (!schoolId) return undefined;
       return {
-        url: '/api/v1/study-plans/by-school',
+        url: `/api/v1/degrees/by-school`,
         params: { schoolId },
       };
     },
     { defaultValue: [] },
   );
+
+  pageSize = signal(10);
+  page = signal(1);
+
+  public studyPlans = httpResource<PaginatedResponse<StudyPlanRow>>(() => {
+    const schoolId = this.store.currentSchoolId();
+    const page = this.page();
+    const pageSize = this.pageSize();
+
+    if (!schoolId) {
+      return undefined;
+    }
+
+    return {
+      url: '/api/v1/study-plans',
+      params: toFetchQueryRecord({
+        schoolId,
+        page,
+        pageSize,
+        degreeId: this.form.degreeId().value(),
+        search: this.form.searchText().value(),
+      }),
+    };
+  });
 
   public editStudyPlan(studyPlan?: StudyPlanRow) {
     this.modal

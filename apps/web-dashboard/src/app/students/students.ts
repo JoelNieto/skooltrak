@@ -1,15 +1,16 @@
-import { Confirmation, Pagination, Paginator, Toast } from '#/ui';
+import { Confirmation, EmptyState, Pagination, PaginatorV2, Toast } from '#/ui';
 import { Menu, MenuContent, MenuItem, MenuTrigger } from '@angular/aria/menu';
 import { OverlayModule } from '@angular/cdk/overlay';
 import { DatePipe, NgClass } from '@angular/common';
 import { HttpClient, httpResource } from '@angular/common/http';
-import { Component, effect, inject, signal, viewChild } from '@angular/core';
+import { Component, computed, inject, signal, viewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { $Enums } from '@generated/prisma';
 import { filter, of, switchMap } from 'rxjs';
 import Auth from '../auth/auth';
 import { toFetchQueryRecord } from '../core/fetch-query-params';
+import { PaginatedResponse } from '../core/pagination-meta';
 
 const ENROLLMENT_STATUS_LABELS: Record<$Enums.EnrollmentStatus, string> = {
   ACTIVE: 'Activo',
@@ -23,18 +24,31 @@ const ENROLLMENT_STATUS_COLORS: Record<$Enums.EnrollmentStatus, string> = {
   RETIRED: 'badge-neutral',
 };
 
+type StudentRow = {
+  id: string;
+  name: string;
+  email?: string;
+  documentId?: string;
+  enrollmentStatus?: $Enums.EnrollmentStatus;
+  classGroupId?: string;
+  classGroup?: { name: string };
+  user?: { emailVerified?: boolean };
+  createdAt?: string;
+};
+
 @Component({
   imports: [
     DatePipe,
     NgClass,
     RouterLink,
-    Paginator,
+    PaginatorV2,
     FormsModule,
     Menu,
     MenuContent,
     MenuItem,
     MenuTrigger,
     OverlayModule,
+    EmptyState,
   ],
   providers: [Pagination],
   template: `
@@ -76,7 +90,7 @@ const ENROLLMENT_STATUS_COLORS: Record<$Enums.EnrollmentStatus, string> = {
           </tr>
         </thead>
         <tbody>
-          @for (student of students.value(); track student.id) {
+          @for (student of students.value()?.data; track student.id) {
             <tr>
               <td>
                 <a [routerLink]="['/students', student.id]" class="link link-hover">{{ student.name }}</a>
@@ -184,16 +198,26 @@ const ENROLLMENT_STATUS_COLORS: Record<$Enums.EnrollmentStatus, string> = {
                 </ng-template>
               </td>
             </tr>
+          } @empty {
+            <tr>
+              <td colspan="7" class="text-center text-base-content/50 py-4">
+                <lib-empty-state
+                  title="No se encontraron estudiantes"
+                  icon="person"
+                  description="Intenta con otros criterios de búsqueda."
+                />
+              </td>
+            </tr>
           }
         </tbody>
       </table>
       <div class="p-4 rounded-b-lg ">
         <lib-paginator
-          [count]="pagination.count()"
-          [take]="pagination.take()"
-          [skip]="pagination.skip()"
-          (skipChange)="pagination.updateSkip($event)"
-          (takeChange)="pagination.updateTake($event)"
+          [total]="total()"
+          [page]="page()"
+          [pageSize]="pageSize()"
+          (pageChange)="page.set($event)"
+          (pageSizeChange)="pageSize.set($event)"
         />
       </div>
     </div>
@@ -207,51 +231,20 @@ export default class Students {
   public pagination = inject(Pagination);
   actionsMenu = viewChild<Menu<string>>('actionsMenu');
   public auth = inject(Auth);
-  public students = httpResource<
-    Array<{
-      id: string;
-      name: string;
-      email?: string;
-      documentId?: string;
-      enrollmentStatus?: $Enums.EnrollmentStatus;
-      classGroupId?: string;
-      classGroup?: { name: string };
-      user?: { emailVerified?: boolean };
-      createdAt?: string;
-    }>
-  >(
-    () => ({
-      url: '/api/v1/students',
-      params: toFetchQueryRecord({
-        take: this.pagination.take(),
-        skip: this.pagination.skip(),
-        search: this.pagination.search(),
-        orderBy: this.pagination.sortBy(),
-        orderDirection: this.pagination.sortOrder(),
-      }),
-    }),
-    { defaultValue: [] },
-  );
+  public page = signal(1);
+  public pageSize = signal(10);
+  public total = computed(() => this.students.value()?.meta?.total ?? 0);
 
-  private readonly studentsCount = httpResource<number>(() => ({
-    url: '/api/v1/students/count',
+  public students = httpResource<PaginatedResponse<StudentRow>>(() => ({
+    url: '/api/v1/students',
     params: toFetchQueryRecord({
-      take: this.pagination.take(),
-      skip: this.pagination.skip(),
-      search: this.pagination.search(),
+      page: this.page(),
+      take: this.pageSize(),
+      search: this.searchText(),
       orderBy: this.pagination.sortBy(),
       orderDirection: this.pagination.sortOrder(),
     }),
   }));
-
-  constructor() {
-    effect(() => {
-      const count = this.studentsCount.value();
-      if (count != null) {
-        this.pagination.updateCount(count);
-      }
-    });
-  }
 
   getStatusLabel(status: $Enums.EnrollmentStatus): string {
     return ENROLLMENT_STATUS_LABELS[status] || status;

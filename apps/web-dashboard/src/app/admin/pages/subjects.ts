@@ -1,17 +1,19 @@
-import { Confirmation, Modal, Pagination, Paginator, Toast } from '#/ui';
+import { Confirmation, Modal, Pagination, PaginatorV2, Toast } from '#/ui';
 import { Menu, MenuContent, MenuItem, MenuTrigger } from '@angular/aria/menu';
 import { OverlayModule } from '@angular/cdk/overlay';
 import { DatePipe } from '@angular/common';
 import { HttpClient, httpResource } from '@angular/common/http';
-import { afterRenderEffect, Component, effect, inject, signal, viewChild } from '@angular/core';
+import { Component, computed, inject, signal, viewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Prisma } from '@generated/prisma';
+
 import { filter, switchMap } from 'rxjs';
 import { toFetchQueryRecord } from '../../core/fetch-query-params';
+import { PaginatedResponse } from '../../core/pagination-meta';
 import SubjectsForm from '../forms/subjects-form';
 @Component({
   selector: 'app-subjects',
-  imports: [DatePipe, DatePipe, Paginator, FormsModule, Menu, MenuContent, MenuItem, MenuTrigger, OverlayModule],
+  imports: [DatePipe, DatePipe, PaginatorV2, FormsModule, Menu, MenuContent, MenuItem, MenuTrigger, OverlayModule],
   providers: [Pagination],
 
   template: `
@@ -91,7 +93,7 @@ import SubjectsForm from '../forms/subjects-form';
           </tr>
         </thead>
         <tbody>
-          @for (subject of subjects.value() ?? []; track subject.id) {
+          @for (subject of subjects.value()?.data ?? []; track subject.id) {
             <tr>
               <td>{{ subject.name }}</td>
               <td>{{ subject.code }}</td>
@@ -198,11 +200,11 @@ import SubjectsForm from '../forms/subjects-form';
       </table>
       <div class="p-4 rounded-b-lg ">
         <lib-paginator
-          [count]="pagination.count()"
-          [take]="pagination.take()"
-          [skip]="pagination.skip()"
-          (skipChange)="pagination.updateSkip($event)"
-          (takeChange)="pagination.updateTake($event)"
+          [total]="total()"
+          [page]="page()"
+          [pageSize]="pageSize()"
+          (pageChange)="page.set($event)"
+          (pageSizeChange)="pageSize.set($event)"
         />
       </div>
     </div>
@@ -216,42 +218,21 @@ export default class Subjects {
   pagination = inject(Pagination);
   searchText = signal('');
   actionsMenu = viewChild<Menu<string>>('actionsMenu');
-  public subjects = httpResource<Prisma.SubjectGetPayload<false>[]>(
-    () => ({
-      url: '/api/v1/subjects',
-      params: toFetchQueryRecord({
-        take: this.pagination.take(),
-        skip: this.pagination.skip(),
-        search: this.pagination.search(),
-        orderBy: this.pagination.sortBy(),
-        orderDirection: this.pagination.sortOrder(),
-      }),
-    }),
-    { defaultValue: [] },
-  );
+  public page = signal(1);
+  public pageSize = signal(10);
 
-  private readonly subjectsCount = httpResource<number>(() => ({
-    url: '/api/v1/subjects/count',
+  total = computed(() => this.subjects.value()?.meta?.total ?? 0);
+
+  public subjects = httpResource<PaginatedResponse<Prisma.SubjectGetPayload<false>>>(() => ({
+    url: '/api/v1/subjects',
     params: toFetchQueryRecord({
-      take: this.pagination.take(),
-      skip: this.pagination.skip(),
-      search: this.pagination.search(),
+      page: this.page(),
+      pageSize: this.pageSize(),
+      search: this.searchText(),
       orderBy: this.pagination.sortBy(),
       orderDirection: this.pagination.sortOrder(),
     }),
   }));
-
-  constructor() {
-    afterRenderEffect(() => {
-      this.pagination.updateSearch(this.searchText());
-    });
-    effect(() => {
-      const count = this.subjectsCount.value();
-      if (count != null) {
-        this.pagination.updateCount(count);
-      }
-    });
-  }
 
   public editSubject(subject?: Prisma.SubjectGetPayload<false>) {
     this.#modal

@@ -1,7 +1,7 @@
 import { MessageBubble, Modal, PageHeader, ThreadComposer, ThreadList, Toast } from '#/ui';
 import { DatePipe } from '@angular/common';
-import { HttpClient } from '@angular/common/http';
-import { Component, effect, inject, linkedSignal, signal } from '@angular/core';
+import { HttpClient, httpResource } from '@angular/common/http';
+import { afterRenderEffect, Component, computed, inject, linkedSignal, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { isBefore } from 'date-fns';
@@ -16,7 +16,7 @@ import {
 } from '../communication/communication-api.service';
 import { CommunicationSocket } from '../communication/communication-socket.service';
 import { NewThreadFormComponent } from '../communication/new-thread-form.component';
-
+const API = '/api/v1/communication';
 interface ThreadListItem {
   id: string;
   title: string;
@@ -82,7 +82,7 @@ interface ThreadListItem {
           <lib-thread-list
             [threads]="filteredThreadItems()"
             [selectedId]="selectedId()"
-            (selected)="selectThread($event)"
+            (selected)="this.selectedId.set($event)"
           />
         </div>
       </aside>
@@ -140,9 +140,9 @@ export default class TeacherParentCommunication {
   #toast = inject(Toast);
   #http = inject(HttpClient);
 
-  readonly threads = signal<Thread[]>([]);
   readonly selectedId = signal<string | null>(null);
-  readonly messages = signal<ThreadMessage[]>([]);
+
+  readonly cursor = signal('');
   readonly deliveriesByMessage = signal<Record<string, Delivery[]>>({});
   readonly composerUrgency = signal<UrgencyTier>('ROUTINE');
   readonly filterText = signal('');
@@ -155,16 +155,29 @@ export default class TeacherParentCommunication {
 
   #markedRead = new Set<string>();
 
-  constructor() {
-    this.loadThreads();
+  public currentMessages = httpResource<ThreadMessage[]>(
+    () => {
+      if (!this.selectedId()) return;
+      const limit = 50;
+      const params = new URLSearchParams({ limit: String(limit) });
+      if (this.cursor()) params.set('cursor', this.cursor());
+      return `${API}/threads/${this.selectedId()}/messages?${params.toString()}`;
+    },
+    { defaultValue: [] },
+  );
 
-    effect((onCleanup) => {
+  public treadsResource = httpResource<Thread[]>(() => `${API}/threads`, { defaultValue: [] });
+  readonly messages = linkedSignal(() => this.currentMessages.value());
+
+  constructor() {
+    afterRenderEffect((onCleanup) => {
       const id = this.selectedId();
       if (!id) return;
+      this.#socket.joinThread(id);
       const unsub = this.#socket.onMessageReceived((payload) => {
         if (payload.threadId !== id || !payload.message) return;
         const msg = payload.message as ThreadMessage;
-        this.messages.update((prev) => (prev.some((m) => m.id === msg.id) ? prev : [...prev, msg]));
+        this.messages.update((prev) => (prev?.some((m) => m.id === msg.id) ? prev : [...prev, msg]));
       });
       const unsubDelivery = this.#socket.onDeliveryUpdate(() => this.refreshDeliveries());
       onCleanup(() => {
@@ -173,18 +186,24 @@ export default class TeacherParentCommunication {
         this.#socket.leaveThread(id);
       });
     });
+
+    afterRenderEffect(() => {
+      if (!this.currentMessages.hasValue()) return;
+      this.markReceivedRead(this.currentMessages.value() ?? []);
+      this.refreshDeliveries();
+    });
+
+    afterRenderEffect(() => {
+      if (!this.treadsResource.hasValue()) return;
+      this.fetchAudienceNames(this.treadsResource.value() ?? []);
+    });
   }
 
-  get me(): string | null {
-    return this.meId();
-  }
+  selectedThread = computed(() => this.threads().find((t) => t.id === this.selectedId()));
 
-  selectedThread(): ThreadListItem | undefined {
-    return this.threadItems().find((t) => t.id === this.selectedId());
-  }
-
-  threadItems = linkedSignal(() => {
-    return this.threads()
+  threads = linkedSignal(() => {
+    return this.treadsResource
+      .value()
       .sort((a, b) => (isBefore(a.messages[0].createdAt, b.messages[0].createdAt) ? 1 : -1))
       .map((t) => {
         const last = t.messages?.[0];
@@ -242,25 +261,15 @@ export default class TeacherParentCommunication {
       });
   });
 
-  filteredThreadItems(): ThreadListItem[] {
+  filteredThreadItems = computed(() => {
     const q = this.filterText().trim().toLowerCase();
     const urg = this.urgencyFilter();
-    return this.threadItems().filter((t) => {
+    return this.threads().filter((t) => {
       const matchesUrgency = urg === 'ALL' || (urg === 'ROUTINE' && !t.urgent) || (urg === 'IMPORTANT' && t.urgent);
       const matchesText = !q || t.title.toLowerCase().includes(q) || (t.preview ?? '').toLowerCase().includes(q);
       return matchesUrgency && matchesText;
     });
-  }
-
-  loadThreads() {
-    this.#api.listThreads().subscribe({
-      next: (threads) => {
-        this.threads.set(threads ?? []);
-        this.fetchAudienceNames(threads ?? []);
-      },
-      error: () => this.#toast.showError('No se pudieron cargar los hilos'),
-    });
-  }
+  });
 
   private fetchAudienceNames(threads: Thread[]): void {
     const studentIds = new Set<string>();
@@ -326,23 +335,9 @@ export default class TeacherParentCommunication {
     ref.closed.subscribe((result) => {
       const thread = result as Thread | undefined;
       if (thread) {
-        this.loadThreads();
-        this.selectThread(thread.id);
+        this.treadsResource.reload();
+        this.selectedId.set(thread.id);
       }
-    });
-  }
-
-  selectThread(id: string) {
-    this.selectedId.set(id);
-    this.messages.set([]);
-    this.#socket.joinThread(id);
-    this.#api.getMessages(id).subscribe({
-      next: (messages) => {
-        this.messages.set(messages ?? []);
-        this.markReceivedRead(messages ?? []);
-        this.refreshDeliveries();
-      },
-      error: () => this.#toast.showError('No se pudieron cargar los mensajes'),
     });
   }
 
@@ -360,7 +355,7 @@ export default class TeacherParentCommunication {
     if (!id || !body.trim()) return;
     this.#api.sendMessage(id, body.trim(), this.composerUrgency()).subscribe({
       next: (msg) => {
-        this.messages.update((prev) => (prev.some((m) => m.id === msg.id) ? prev : [...prev, msg]));
+        this.messages.update((prev) => (prev?.some((m) => m.id === msg.id) ? prev : [...prev, msg]));
         this.refreshDeliveries();
       },
       error: () => this.#toast.showError('No se pudo enviar el mensaje'),

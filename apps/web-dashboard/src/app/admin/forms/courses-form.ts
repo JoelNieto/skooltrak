@@ -9,6 +9,7 @@ import { form, FormField, required } from '@angular/forms/signals';
 import { SubjectGetPayload } from 'generated/prisma/models';
 import { firstValueFrom } from 'rxjs';
 import { toFetchQueryParams } from '../../core/fetch-query-params';
+import { PaginatedResponse } from '../../core/pagination-meta';
 import Store from '../../core/store';
 
 interface CourseModel {
@@ -70,15 +71,15 @@ interface CourseModel {
                 class="popup bg-base-100 border border-base-300 rounded-box w-full shadow-lg mt-1 max-h-60 overflow-auto z-50"
               >
                 @if (filteredSubjects().length === 0 && subjectQuery().trim()) {
-                   <div
-                     class="p-3 cursor-pointer hover:bg-base-200 flex items-center gap-2"
-                     tabindex="0"
-                     role="button"
-                     (mousedown)="$event.preventDefault()"
-                     (click)="createSubject()"
-                     (keydown.enter)="createSubject()"
-                     (keydown.space)="createSubject(); $event.preventDefault()"
-                   >
+                  <div
+                    class="p-3 cursor-pointer hover:bg-base-200 flex items-center gap-2"
+                    tabindex="0"
+                    role="button"
+                    (mousedown)="$event.preventDefault()"
+                    (click)="createSubject()"
+                    (keydown.enter)="createSubject()"
+                    (keydown.space)="createSubject(); $event.preventDefault()"
+                  >
                     <span class="text-primary font-medium">+ Crear</span>
                     <span>"{{ subjectQuery() }}"</span>
                   </div>
@@ -132,7 +133,7 @@ interface CourseModel {
         <label for="teacherId">Docente</label>
         <select id="teacherId" [formField]="form.teacherId" class="select select-primary">
           <option [value]="null" disabled>Seleccionar docente...</option>
-          @for (teacher of teachers.value(); track teacher.id) {
+          @for (teacher of teachers.value()?.data; track teacher.id) {
             <option [value]="teacher.id">{{ teacher.name }}</option>
           }
         </select>
@@ -186,7 +187,7 @@ export default class CoursesForm {
 
   public filteredSubjects = computed(() => {
     const query = this.subjectQuery().toLowerCase().trim();
-    const subjects = this.subjects.value() ?? [];
+    const subjects = this.subjects.value()?.data ?? [];
     if (!query) {
       return subjects;
     }
@@ -198,10 +199,9 @@ export default class CoursesForm {
   public combobox = viewChild(Combobox);
   popupExpanded = signal(false);
 
-  public subjects = httpResource<{ id: string; name: string }[]>(() => ({
+  public subjects = httpResource<PaginatedResponse<{ id: string; name: string }>>(() => ({
     url: '/api/v1/subjects',
-    params: toFetchQueryParams({ take: 100, orderBy: 'name' }),
-    defaultValue: [],
+    params: toFetchQueryParams({ pageSize: 100, orderBy: 'name' }),
   }));
 
   public studyPlans = httpResource<{ id: string; name: string }[]>(() => {
@@ -228,7 +228,7 @@ export default class CoursesForm {
     required(schemaPath.studyPlanId, { message: 'Plan requerido' });
   });
 
-  public teachers = httpResource<{ id: string; name: string }[]>(() => ({
+  public teachers = httpResource<PaginatedResponse<{ id: string; name: string }>>(() => ({
     url: '/api/v1/teachers',
     params: toFetchQueryParams({
       take: 100,
@@ -297,7 +297,7 @@ export default class CoursesForm {
 
       this.toast.showSuccess(`Asignatura "${name}" creada exitosamente`);
       // Reload subjects and select the newly created one
-      await this.subjects.reload();
+      this.subjects.reload();
       this.selectedSubject.set({ id: created.id, name: created.name });
       this.form.subjectId().value.set(created.id);
       this.subjectQuery.set(created.name);

@@ -1,5 +1,5 @@
-import { BetterAuthGuard, Perm, PermissionsGuard, RequirePermissions } from '@/auth';
 import { FetchDataQueryDto } from '@/api-contracts';
+import { BetterAuthGuard, Perm, PermissionsGuard, RequirePermissions } from '@/auth';
 import { Body, Controller, Delete, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { toFetchDataInput } from '../fetch-data-query.mapper';
@@ -48,7 +48,7 @@ export class ParentsController {
   @Get()
   @ApiOperation({ summary: 'List parents' })
   async findAll(@Query() query: FetchDataQueryDto) {
-    const list = await this.parentsService.findAll(toFetchDataInput(query));
+    const list = await this.parentsService.findAll(query);
     return list.map((p) => enrichParent(p as Parent));
   }
 
@@ -63,9 +63,7 @@ export class ParentsController {
   @RequirePermissions(Perm.MANAGE_PARENTS)
   @ApiOperation({ summary: 'Update parent' })
   update(@Body() updateParentInput: UpdateParentInput) {
-    return this.parentsService
-      .update(updateParentInput.id, updateParentInput)
-      .then((p) => enrichParent(p as Parent));
+    return this.parentsService.update(updateParentInput.id, updateParentInput).then((p) => enrichParent(p as Parent));
   }
 
   @Delete(':id')

@@ -5,43 +5,44 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 
 import { AuthModule } from '@/auth';
-import { AssignmentsModule } from './assignments/assignments.module';
 import { AssignmentSubmissionsModule } from './assignment-submissions/assignment-submissions.module';
+import { AssignmentsModule } from './assignments/assignments.module';
 import { AttendanceModule } from './attendance/attendance.module';
+import { ChatsModule } from './chats/chats.module';
 import { ClassGroupsModule } from './class-groups/class-groups.module';
+import { CommunicationModule } from './communication/communication.module';
 import { CoursesModule } from './courses/courses.module';
 import { DegreesModule } from './degrees/degrees.module';
+import { FilesModule } from './files/files.module';
+import { FinancialModule } from './financial/financial.module';
+import { GradeBucketsModule } from './grade-buckets/grade-buckets.module';
+import { GradeMetricsModule } from './grade-metrics/grade-metrics.module';
+import { GradeReportModule } from './grade-report/grade-report.module';
+import { GradesModule } from './grades/grades.module';
+import { GroupsSchedulesModule } from './groups-schedules/groups-schedules.module';
+import { HabitEvaluationsModule } from './habit-evaluations/habit-evaluations.module';
+import { HabitMetricsModule } from './habit-metrics/habit-metrics.module';
+import { ImportsModule } from './imports/imports.module';
+import { MessagesModule } from './messages/messages.module';
+import { NewslettersModule } from './newsletters/newsletters.module';
+import { ParentsModule } from './parents/parents.module';
+import { PeriodsModule } from './periods/periods.module';
 import { PrismaModule } from './prisma.module';
+import { QuizzesModule } from './quizzes/quizzes.module';
 import { SchoolsModule } from './schools/schools.module';
+import { StoreModule } from './store/store.module';
+import { StudentGradesModule } from './student-grades/student-grades.module';
 import { StudentsModule } from './students/students.module';
 import { StudyPlansModule } from './study-plans/study-plans.module';
 import { SubjectsModule } from './subjects/subjects.module';
 import { TeachersModule } from './teachers/teachers.module';
-import { QuizzesModule } from './quizzes/quizzes.module';
-import { GradeMetricsModule } from './grade-metrics/grade-metrics.module';
-import { PeriodsModule } from './periods/periods.module';
-import { GradesModule } from './grades/grades.module';
-import { GradeBucketsModule } from './grade-buckets/grade-buckets.module';
-import { StudentGradesModule } from './student-grades/student-grades.module';
-import { MessagesModule } from './messages/messages.module';
-import { GroupsSchedulesModule } from './groups-schedules/groups-schedules.module';
-import { FilesModule } from './files/files.module';
-import { NewslettersModule } from './newsletters/newsletters.module';
-import { ParentsModule } from './parents/parents.module';
-import { GradeReportModule } from './grade-report/grade-report.module';
-import { ChatsModule } from './chats/chats.module';
-import { CommunicationModule } from './communication/communication.module';
-import { HabitEvaluationsModule } from './habit-evaluations/habit-evaluations.module';
-import { HabitMetricsModule } from './habit-metrics/habit-metrics.module';
-import { FinancialModule } from './financial/financial.module';
-import { StoreModule } from './store/store.module';
-import { ImportsModule } from './imports/imports.module';
 
 const openApiExport = process.env['OPENAPI_EXPORT'] === 'true';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
+    AuthModule,
     ...(openApiExport ? [] : [ScheduleModule.forRoot()]),
     PrismaModule,
     SchoolsModule,
@@ -55,7 +56,6 @@ const openApiExport = process.env['OPENAPI_EXPORT'] === 'true';
     AssignmentSubmissionsModule,
     AttendanceModule,
     ClassGroupsModule,
-    AuthModule,
     QuizzesModule,
     GradeMetricsModule,
     PeriodsModule,

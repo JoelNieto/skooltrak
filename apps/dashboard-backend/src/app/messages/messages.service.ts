@@ -1,7 +1,7 @@
+import { FetchDataQueryDto } from '@/api-contracts';
 import { Inject, Injectable, Scope } from '@nestjs/common';
 import { REQUEST } from '@nestjs/core';
 import { Request } from 'express';
-import { FetchDataInput } from '../fetch-data.input';
 import { PrismaService } from '../prisma.service';
 import { CreateMessageInput } from './dto/create-message.input';
 
@@ -37,10 +37,10 @@ export class MessagesService {
     });
   }
 
-  findManyBySender(query: FetchDataInput) {
+  findManyBySender(query: FetchDataQueryDto) {
     const req = this.request;
     const { userId } = req.user as any;
-    const { skip, take } = query;
+    const { skip, pageSize: take } = query;
 
     return this.prisma.message.findMany({
       where: {
@@ -62,10 +62,10 @@ export class MessagesService {
     });
   }
 
-  findMany(query: FetchDataInput) {
+  findMany(query: FetchDataQueryDto) {
     const req = this.request;
     const { userId } = req.user as any;
-    const { skip, take } = query;
+    const { skip, pageSize: take } = query;
 
     return this.prisma.messageRecipient.findMany({
       where: { userId, deletedAt: null },

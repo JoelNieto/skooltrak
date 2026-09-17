@@ -1,3 +1,4 @@
+import { FetchDataQueryDto } from '@/api-contracts';
 import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CreateStudyPlanInput } from './dto/create-study-plan.input';
@@ -17,8 +18,8 @@ export class StudyPlansController {
 
   @Get()
   @ApiOperation({ summary: 'List study plans' })
-  findAll() {
-    return this.studyPlansService.findAll();
+  findAll(@Query() query: FetchDataQueryDto) {
+    return this.studyPlansService.findMany(query);
   }
 
   @Get('by-school')

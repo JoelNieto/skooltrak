@@ -1,24 +1,11 @@
+import { FetchDataQueryDto } from '@/api-contracts';
 import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
-import { FetchDataQueryDto } from '@/api-contracts';
-import { FetchDataInput } from '../fetch-data-input';
+import { AvatarService } from './avatar.service';
 import { AvatarUploadUrlInput } from './dto/avatar-upload-url.input';
 import { CreateUserInput } from './dto/create-user.input';
 import { UpdateUserInput } from './dto/update-user.input';
-import { AvatarService } from './avatar.service';
 import { UsersService } from './users.service';
-
-function toFetchDataInput(q: FetchDataQueryDto): FetchDataInput {
-  return {
-    skip: q.skip,
-    take: q.take,
-    orderBy: q.orderBy ?? 'name',
-    orderDirection: q.orderDirection ?? 'asc',
-    schoolId: q.schoolId,
-    studyPlanId: q.studyPlanId,
-    search: q.search ?? '',
-  };
-}
 
 function enrichUser(user: unknown) {
   if (!user || typeof user !== 'object') return user;
@@ -47,14 +34,14 @@ export class UsersController {
   @Get()
   @ApiOperation({ summary: 'List users' })
   async findAll(@Query() query: FetchDataQueryDto) {
-    const list = await this.usersService.findAll(toFetchDataInput(query));
+    const list = await this.usersService.findAll(query);
     return list.map((u) => enrichUser(u));
   }
 
   @Get('count')
   @ApiOperation({ summary: 'Users count' })
   count(@Query() query: FetchDataQueryDto) {
-    return this.usersService.count(toFetchDataInput(query));
+    return this.usersService.count(query);
   }
 
   @Get(':id')

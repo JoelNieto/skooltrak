@@ -223,7 +223,6 @@ export default class Course {
     const c = this.courseResource.value();
     if (!c?.id) return c;
 
-    console.log('Transforming course data', c);
     const t = c.teacher;
     if (t) {
       const color = t.user?.color ?? '#888';

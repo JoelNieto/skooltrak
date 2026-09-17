@@ -3,8 +3,8 @@ import { FetchDataInput } from './fetch-data.input';
 
 export function toFetchDataInput(q: FetchDataQueryDto): FetchDataInput {
   return {
-    skip: q.skip,
-    take: q.take,
+    page: q.page,
+    pageSize: q.pageSize,
     orderBy: q.orderBy ?? 'createdAt',
     orderDirection: q.orderDirection ?? 'asc',
     schoolId: q.schoolId,

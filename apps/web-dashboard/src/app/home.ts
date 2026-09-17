@@ -128,7 +128,7 @@ type PublishedNewsletter = {
           <h2 class="text-base font-semibold text-base-content">Acciones rápidas</h2>
           <div class="grid gap-2 sm:grid-cols-2 lg:grid-cols-1 mt-2">
             <a
-              routerLink="/admin/students"
+              routerLink="/students"
               class="rounded-lg border border-base-200 p-3 transition-colors duration-150 hover:bg-base-200 flex items-center gap-3"
             >
               <span class="material-symbols-outlined text-xl text-primary">school</span>
@@ -138,7 +138,7 @@ type PublishedNewsletter = {
               </div>
             </a>
             <a
-              routerLink="/admin/teachers"
+              routerLink="/teachers"
               class="rounded-lg border border-base-200 p-3 transition-colors duration-150 hover:bg-base-200 flex items-center gap-3"
             >
               <span class="material-symbols-outlined text-xl text-accent">groups</span>

@@ -1,9 +1,9 @@
 import { Prisma } from '@generated/prisma';
 
+import { FetchDataQueryDto, PaginatedResponseDto } from '@/api-contracts';
 import { ConflictException, Inject, Injectable, Scope } from '@nestjs/common';
 import { REQUEST } from '@nestjs/core';
 import { Request } from 'express';
-import { FetchDataInput } from '../fetch-data.input';
 import { PrismaService } from '../prisma.service';
 import { DEFAULT_BUCKETS } from './default-buckets.constants';
 import { CreateCourseInput } from './dto/create-course.input';
@@ -175,10 +175,12 @@ export class CoursesService {
     return { count: createdCourses.length };
   }
 
-  findAll(fetchDataInput: FetchDataInput) {
+  async findAll(fetchDataInput: FetchDataQueryDto) {
     const req = this.request;
     const { role, userId } = req.user as any;
-    const { skip, take, schoolId, search, studyPlanId } = fetchDataInput;
+    const { skip, pageSize, page, schoolId, search, studyPlanId, orderBy, orderDirection } = fetchDataInput;
+    const orderField = orderBy ?? 'createdAt';
+    const orderDir = orderDirection ?? 'asc';
     let where: Prisma.CourseWhereInput = {
       schoolId,
       OR: [
@@ -203,20 +205,27 @@ export class CoursesService {
       where = { ...where, studyPlanId };
     }
 
-    return this.prisma.course.findMany({
-      where,
-      skip,
-      take,
-      include: {
-        school: true,
-        subject: true,
-        studyPlan: true,
-        teacher: true,
-      },
-    });
+    const [data, total] = await this.prisma.$transaction([
+      this.prisma.course.findMany({
+        where,
+        skip,
+        take: pageSize,
+        include: {
+          school: true,
+          subject: true,
+          studyPlan: true,
+          teacher: true,
+        },
+        orderBy: {
+          [orderField]: orderDir,
+        },
+      }),
+      this.prisma.course.count({ where }),
+    ]);
+    return new PaginatedResponseDto(data, total, page, pageSize);
   }
 
-  count(fetchDataInput: FetchDataInput) {
+  count(fetchDataInput: FetchDataQueryDto) {
     const req = this.request;
     const { role, userId } = req.user as any;
     const { schoolId, search, studyPlanId } = fetchDataInput;

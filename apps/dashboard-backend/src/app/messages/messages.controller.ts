@@ -2,7 +2,6 @@ import { FetchDataQueryDto } from '@/api-contracts';
 import { BetterAuthGuard, Perm, PermissionsGuard, RequirePermissions } from '@/auth';
 import { Body, Controller, Delete, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { toFetchDataInput } from '../fetch-data-query.mapper';
 import { CreateMessageInput } from './dto/create-message.input';
 import { MessagesService } from './messages.service';
 
@@ -24,13 +23,13 @@ export class MessagesController {
   @Get('mine')
   @ApiOperation({ summary: 'Messages sent by me' })
   findMyMessages(@Query() query: FetchDataQueryDto) {
-    return this.messagesService.findManyBySender(toFetchDataInput(query));
+    return this.messagesService.findManyBySender(query);
   }
 
   @Get()
   @ApiOperation({ summary: 'Inbox messages' })
   findManyMessages(@Query() query: FetchDataQueryDto) {
-    return this.messagesService.findMany(toFetchDataInput(query));
+    return this.messagesService.findMany(query);
   }
 
   @Get('count')

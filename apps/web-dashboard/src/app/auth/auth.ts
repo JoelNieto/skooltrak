@@ -99,6 +99,7 @@ export default class Auth {
   public isTeacher = computed(() => this.role() === 'TEACHER');
   public isStudent = computed(() => this.role() === 'STUDENT');
   public isParent = computed(() => this.role() === 'PARENT');
+  public readonly meId = computed<string>(() => this.user()?.id);
 
   public isAuthenticated = computed(() => {
     const session = this.sessionState();

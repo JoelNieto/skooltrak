@@ -3,7 +3,6 @@ import { BetterAuthGuard, Perm, PermissionsGuard, RequirePermissions } from '@/a
 import { Body, Controller, Delete, Get, Param, Patch, Post, Query, Res, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import type { Response } from 'express';
-import { toFetchDataInput } from '../fetch-data-query.mapper';
 import { GradesService } from '../grades/grades.service';
 import { CreateStudentInput } from './dto/create-student.input';
 import { UpdateStudentInput } from './dto/update-student.input';
@@ -35,7 +34,7 @@ export class StudentsController {
   @Get('count')
   @ApiOperation({ summary: 'Students count' })
   findManyStudentsCount(@Query() query: FetchDataQueryDto) {
-    return this.studentsService.getCount(toFetchDataInput(query));
+    return this.studentsService.getCount(query);
   }
 
   @Get('by-school/:schoolId')
@@ -62,8 +61,8 @@ export class StudentsController {
   @Get()
   @ApiOperation({ summary: 'List students' })
   async findAll(@Query() query: FetchDataQueryDto) {
-    const list = await this.studentsService.findAll(toFetchDataInput(query));
-    return list.map((s) => enrichStudent(s as Student));
+    const resp = await this.studentsService.findAll(query);
+    return { ...resp, data: resp.data.map((s) => enrichStudent(s as Student)) };
   }
 
   @Get(':id/grades')

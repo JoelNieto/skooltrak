@@ -70,13 +70,14 @@ interface AssignmentFormData {
         <input type="checkbox" [formField]="form.requireSubmission" class="checkbox checkbox-primary" />
       </div>
 
-      @if (courseGroups.value()?.length) {
+      @let groups = courseGroups.value();
+      @if (groups && groups.length) {
         <div class="col-span-2 mt-2">
           <h3 class="text-lg font-medium mb-2">Fechas de entrega por grupo</h3>
           <div class="grid gap-3">
             @for (group of form.groupDates; let i = $index; track i) {
               <div class="flex items-center gap-4 p-3 bg-base-200 rounded-lg">
-                <span class="font-medium min-w-24">{{ group.name }}</span>
+                <span class="font-medium min-w-24">{{ groups[i].name }}</span>
                 <input
                   [id]="'group-date-' + i"
                   type="datetime-local"
@@ -98,7 +99,7 @@ interface AssignmentFormData {
     </div>
     <div class="mt-4 flex justify-end gap-2">
       <button class="btn btn-ghost" type="button" (click)="closeModal.emit()">Cancelar</button>
-      <button class="btn btn-neutral" type="submit">Guardar</button>
+      <button class="btn btn-primary" type="submit">Guardar</button>
     </div>
   </form>`,
 })

@@ -1,16 +1,23 @@
-import { EmptyState, Pagination, Paginator } from '#/ui';
+import { EmptyState, Pagination, PaginatorV2 } from '#/ui';
 import { DatePipe } from '@angular/common';
-import { Component, inject } from '@angular/core';
-import { rxResource } from '@angular/core/rxjs-interop';
+import { Component, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
-import { HttpClient } from '@angular/common/http';
-import { forkJoin, map, of, tap } from 'rxjs';
-import { toFetchQueryParams } from '../core/fetch-query-params';
+import { HttpClient, httpResource } from '@angular/common/http';
+import { toFetchQueryRecord } from '../core/fetch-query-params';
+import { PaginatedResponse } from '../core/pagination-meta';
 import Store from '../core/store';
 
+type ClassGroupRow = {
+  id: string;
+  name: string;
+  createdAt: string;
+  updatedAt: string;
+  teacher?: { firstName?: string; fatherName?: string; name?: string };
+  studyPlan?: { name?: string };
+};
 @Component({
-  imports: [RouterLink, DatePipe, EmptyState, Paginator],
+  imports: [RouterLink, DatePipe, EmptyState, PaginatorV2],
   providers: [Pagination],
   template: `<div class="breadcrumbs text-sm">
       <ul>
@@ -31,7 +38,7 @@ import Store from '../core/store';
           </tr>
         </thead>
         <tbody>
-          @for (group of classGroups.value(); track group.id) {
+          @for (group of classGroups(); track group.id) {
             <tr>
               <td>
                 <a class="link link-primary" [routerLink]="[group.id]">{{ group.name }}</a>
@@ -56,11 +63,11 @@ import Store from '../core/store';
       </table>
       <div class="p-4 rounded-b-lg">
         <lib-paginator
-          [count]="pagination.count()"
-          [take]="pagination.take()"
-          [skip]="pagination.skip()"
-          (skipChange)="pagination.updateSkip($event)"
-          (takeChange)="pagination.updateTake($event)"
+          [total]="total()"
+          [page]="page()"
+          [pageSize]="pageSize()"
+          (pageChange)="page.set($event)"
+          (pageSizeChange)="pageSize.set($event)"
         />
       </div>
     </div>`,
@@ -68,46 +75,34 @@ import Store from '../core/store';
 export default class Groups {
   private store = inject(Store);
   private http = inject(HttpClient);
-  public pagination = inject(Pagination);
+  public total = computed(() => this.classGroupsResource.value()?.meta.total ?? 0);
+  public page = signal(1);
+  public pageSize = signal(10);
 
-  public classGroups = rxResource({
-    params: () => ({
-      schoolId: this.store.currentSchoolId(),
-      take: this.pagination.take(),
-      skip: this.pagination.skip(),
-    }),
-    stream: ({ params }) => {
-      const { schoolId, take, skip } = params;
-      if (!schoolId) {
-        return of([]);
-      }
-      const q = toFetchQueryParams({ schoolId, take, skip });
-      return forkJoin({
-        count: this.http.get<number>('/api/v1/class-groups/count', { params: q }),
-        list: this.http.get<
-          Array<{
-            id: string;
-            name: string;
-            createdAt: string;
-            updatedAt: string;
-            teacher?: { firstName?: string; fatherName?: string; name?: string };
-            studyPlan?: { name?: string };
-          }>
-        >('/api/v1/class-groups', { params: q }),
-      }).pipe(
-        tap(({ count }) => this.pagination.updateCount(count ?? 0)),
-        map(({ list }) =>
-          (list ?? []).map((g) => ({
-            ...g,
-            teacher: g.teacher
-              ? {
-                  ...g.teacher,
-                  name: g.teacher.name ?? `${g.teacher.firstName ?? ''} ${g.teacher.fatherName ?? ''}`.trim(),
-                }
-              : g.teacher,
-          })),
-        ),
-      );
-    },
+  public classGroupsResource = httpResource<PaginatedResponse<ClassGroupRow>>(() => {
+    const schoolId = this.store.currentSchoolId();
+    if (!schoolId) {
+      return undefined;
+    }
+    return {
+      url: '/api/v1/class-groups',
+      params: toFetchQueryRecord({
+        schoolId,
+        page: this.page(),
+        pageSize: this.pageSize(),
+      }),
+    };
   });
+
+  public classGroups = computed(() =>
+    this.classGroupsResource.value()?.data.map((g) => ({
+      ...g,
+      teacher: g.teacher
+        ? {
+            ...g.teacher,
+            name: g.teacher.name ?? `${g.teacher.firstName ?? ''} ${g.teacher.fatherName ?? ''}`.trim(),
+          }
+        : g.teacher,
+    })),
+  );
 }

@@ -1,13 +1,15 @@
-import { Confirmation, Modal, Paginator, Toast } from '#/ui';
+import { Confirmation, Modal, PaginatorV2, Toast } from '#/ui';
 import { Menu, MenuContent, MenuItem, MenuTrigger } from '@angular/aria/menu';
 import { OverlayModule } from '@angular/cdk/overlay';
 import { HttpClient, httpResource } from '@angular/common/http';
-import { Component, computed, effect, inject, signal, viewChild } from '@angular/core';
+import { Component, computed, inject, signal, viewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { debounce, form, FormField } from '@angular/forms/signals';
 import { RouterLink } from '@angular/router';
 import { Prisma, StudyPlan } from '@generated/prisma';
 import { filter, switchMap } from 'rxjs';
 import { toFetchQueryRecord } from '../../core/fetch-query-params';
+import { PaginatedResponse } from '../../core/pagination-meta';
 import Store from '../../core/store';
 import CoursesForm from '../forms/courses-form';
 
@@ -24,17 +26,17 @@ type CourseType = Prisma.CourseGetPayload<{
 
 @Component({
   selector: 'app-courses',
-  imports: [Paginator, RouterLink, FormsModule, Menu, MenuContent, MenuItem, MenuTrigger, OverlayModule],
+  imports: [PaginatorV2, RouterLink, FormsModule, Menu, MenuContent, MenuItem, MenuTrigger, OverlayModule, FormField],
   template: `<div class="flex justify-between">
       <div class="flex gap-2">
         <div class="md:w-96 w-full">
           <label class="input input-primary ">
             <span class="material-symbols-outlined">search</span>
-            <input class="pl-0" type="search" placeholder="Buscar..." [(ngModel)]="searchText" />
+            <input class="pl-0" type="search" placeholder="Buscar..." [formField]="form.searchText" />
           </label>
         </div>
-        <select class="select select-primary" [(ngModel)]="studyPlanId">
-          <option [ngValue]="null">Elija nivel...</option>
+        <select class="select select-primary" [formField]="form.studyPlanId">
+          <option value="">Elija nivel...</option>
           @for (studyPlan of studyPlans.value(); track studyPlan.id) {
             <option [value]="studyPlan.id">{{ studyPlan.name }}</option>
           }
@@ -59,7 +61,7 @@ type CourseType = Prisma.CourseGetPayload<{
           </tr>
         </thead>
         <tbody>
-          @for (course of courses.value(); track course.id) {
+          @for (course of courses.value()?.data; track course.id) {
             <tr>
               <td>
                 {{ course.name }}
@@ -71,7 +73,7 @@ type CourseType = Prisma.CourseGetPayload<{
               <td>
                 @if (course.teacher) {
                   <a [routerLink]="['/teachers', course.teacher.id]" class="link link-primary">
-                    {{ course.teacher.name }}
+                    {{ course.teacher.firstName }} {{ course.teacher.fatherName }}
                   </a>
                 } @else {
                   --
@@ -140,11 +142,11 @@ type CourseType = Prisma.CourseGetPayload<{
       </table>
       <div class="p-4 rounded-b-lg ">
         <lib-paginator
-          [count]="pagination().count"
-          [take]="pagination().take"
-          [skip]="pagination().skip"
-          (skipChange)="updateSkip($event)"
-          (takeChange)="updateTake($event)"
+          [total]="total()"
+          [page]="page()"
+          [pageSize]="pageSize()"
+          (pageChange)="page.set($event)"
+          (pageSizeChange)="pageSize.set($event)"
         />
       </div>
     </div> `,
@@ -156,24 +158,20 @@ export default class Courses {
   #store = inject(Store);
   #toast = inject(Toast);
   actionsMenu = viewChild<Menu<string>>('actionsMenu');
-  public searchText = signal('');
-  public studyPlanId = signal<string | null>(null);
 
-  public updateSkip(skip: number) {
-    this.pagination.update((prev) => ({ ...prev, skip }));
-  }
-
-  public updateTake(take: number) {
-    this.pagination.update((prev) => ({ ...prev, take }));
-  }
-  public take = computed(() => this.pagination().take);
-  public skip = computed(() => this.pagination().skip);
-
-  public pagination = signal({
-    take: 10,
-    skip: 0,
-    count: 0,
+  private formModel = signal<{ searchText: string; studyPlanId: string }>({
+    searchText: '',
+    studyPlanId: '',
   });
+
+  public form = form(this.formModel, (f) => {
+    debounce(f.searchText, 400);
+  });
+
+  public total = computed(() => this.courses.value()?.meta.total ?? 0);
+
+  public page = signal(1);
+  public pageSize = signal(10);
 
   public studyPlans = httpResource<StudyPlan[]>(
     () => {
@@ -189,51 +187,22 @@ export default class Courses {
     { defaultValue: [] },
   );
 
-  public courses = httpResource<CourseType[]>(
-    () => {
-      const schoolId = this.#store.currentSchoolId();
-      if (!schoolId) {
-        return undefined;
-      }
-      return {
-        url: '/api/v1/courses',
-        params: toFetchQueryRecord({
-          schoolId,
-          take: this.take(),
-          skip: this.skip(),
-          search: this.searchText(),
-          studyPlanId: this.studyPlanId() ?? undefined,
-        }),
-      };
-    },
-    { defaultValue: [] },
-  );
-
-  private readonly coursesCount = httpResource<number>(() => {
+  public courses = httpResource<PaginatedResponse<CourseType>>(() => {
     const schoolId = this.#store.currentSchoolId();
     if (!schoolId) {
       return undefined;
     }
     return {
-      url: '/api/v1/courses/count',
+      url: '/api/v1/courses',
       params: toFetchQueryRecord({
         schoolId,
-        take: this.take(),
-        skip: this.skip(),
-        search: this.searchText(),
-        studyPlanId: this.studyPlanId() ?? undefined,
+        page: this.page(),
+        pageSize: this.pageSize(),
+        search: this.form.searchText().value(),
+        studyPlanId: this.form.studyPlanId().value(),
       }),
     };
   });
-
-  constructor() {
-    effect(() => {
-      const count = this.coursesCount.value();
-      if (count != null) {
-        this.pagination.update((prev) => ({ ...prev, count }));
-      }
-    });
-  }
 
   public editCourse(
     course?: Prisma.CourseGetPayload<{

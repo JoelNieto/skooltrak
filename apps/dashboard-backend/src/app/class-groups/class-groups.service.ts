@@ -1,6 +1,6 @@
+import { FetchDataQueryDto, PaginatedResponseDto } from '@/api-contracts';
 import { Prisma } from '@generated/prisma';
 import { Injectable } from '@nestjs/common';
-import { FetchDataInput } from '../fetch-data.input';
 import { PrismaService } from '../prisma.service';
 import { CreateClassGroupInput } from './dto/create-class-group.input';
 import { UpdateClassGroupInput } from './dto/update-class-group.input';
@@ -14,11 +14,12 @@ export class ClassGroupsService {
     });
   }
 
-  findAll(fetchDataInput: FetchDataInput) {
-    const { skip, take, schoolId, search, studyPlanId } = fetchDataInput;
+  async findAll(fetchDataInput: FetchDataQueryDto) {
+    const { skip, page, pageSize, schoolId, search, studyPlanId, teacherId } = fetchDataInput;
     let where: Prisma.ClassGroupWhereInput = {
       schoolId,
       studyPlanId,
+      teacherId,
     };
     if (search) {
       where = {
@@ -26,22 +27,26 @@ export class ClassGroupsService {
         OR: [{ name: { contains: search, mode: 'insensitive' } }],
       };
     }
-    return this.prisma.classGroup.findMany({
-      include: {
-        teacher: true,
-        studyPlan: {
-          include: {
-            degree: true,
+    const [data, total] = await this.prisma.$transaction([
+      this.prisma.classGroup.findMany({
+        include: {
+          teacher: true,
+          studyPlan: {
+            include: {
+              degree: true,
+            },
           },
         },
-      },
-      where,
-      skip,
-      take,
-    });
+        where,
+        skip,
+        take: pageSize,
+      }),
+      this.prisma.classGroup.count({ where }),
+    ]);
+    return new PaginatedResponseDto(data, total, page, pageSize);
   }
 
-  count(fetchDataInput: FetchDataInput) {
+  count(fetchDataInput: FetchDataQueryDto) {
     const { schoolId, search, studyPlanId } = fetchDataInput;
     let where: Prisma.ClassGroupWhereInput = {
       schoolId,

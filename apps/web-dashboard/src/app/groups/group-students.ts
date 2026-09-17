@@ -1,3 +1,4 @@
+import { JsonPipe } from '@angular/common';
 import { Component, computed, input, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { Prisma } from '@generated/prisma';
@@ -10,7 +11,7 @@ type Student = Prisma.StudentGetPayload<{
 };
 @Component({
   selector: 'app-group-students',
-  imports: [RouterLink],
+  imports: [RouterLink, JsonPipe],
   template: `<h4 class="text-xl font-medium mb-2">Estudiantes</h4>
     <label class="input input-primary w-full md:w-96">
       <span class="material-symbols-outlined">search</span>
@@ -44,11 +45,16 @@ export default class GroupStudents {
   public students = input.required<Student[]>();
 
   public filteredStudents = computed(() =>
-    this.students().filter(
-      (student) =>
-        student.user?.name?.toLowerCase().includes(this.search().toLowerCase()) ||
-        student.documentId.toLowerCase().includes(this.search().toLowerCase()),
-    ),
+    this.students()
+      .filter(
+        (student) =>
+          student.user?.name?.toLowerCase().includes(this.search().toLowerCase()) ||
+          student.documentId.toLowerCase().includes(this.search().toLowerCase()),
+      )
+      .map((student) => ({
+        ...student,
+        initials: `${student.user?.firstName?.[0] || ''}${student.user?.lastName?.[0] || ''}`.toUpperCase(),
+      })),
   );
 
   public search = signal<string>('');

@@ -1,11 +1,10 @@
-import { BetterAuthGuard, Perm, PermissionsGuard, RequirePermissions } from '@/auth';
 import { FetchDataQueryDto } from '@/api-contracts';
+import { BetterAuthGuard, Perm, PermissionsGuard, RequirePermissions } from '@/auth';
 import { Body, Controller, Delete, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { toFetchDataInput } from '../fetch-data-query.mapper';
+import { CoursesService } from './courses.service';
 import { CreateCourseInput } from './dto/create-course.input';
 import { UpdateCourseInput } from './dto/update-course.input';
-import { CoursesService } from './courses.service';
 
 @ApiTags('courses')
 @ApiBearerAuth()
@@ -25,13 +24,13 @@ export class CoursesController {
   @Get()
   @ApiOperation({ summary: 'List courses' })
   findAll(@Query() query: FetchDataQueryDto) {
-    return this.coursesService.findAll(toFetchDataInput(query));
+    return this.coursesService.findAll(query);
   }
 
   @Get('count')
   @ApiOperation({ summary: 'Courses count' })
   count(@Query() query: FetchDataQueryDto) {
-    return this.coursesService.count(toFetchDataInput(query));
+    return this.coursesService.count(query);
   }
 
   @Get('by-school/:schoolId')

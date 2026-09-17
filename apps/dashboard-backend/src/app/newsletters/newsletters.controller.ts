@@ -1,5 +1,5 @@
-import { BetterAuthGuard, Perm, PermissionsGuard, RequirePermissions } from '@/auth';
 import { FetchDataQueryDto } from '@/api-contracts';
+import { BetterAuthGuard, Perm, PermissionsGuard, RequirePermissions } from '@/auth';
 import { Body, Controller, Delete, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { toFetchDataInput } from '../fetch-data-query.mapper';
@@ -37,7 +37,7 @@ export class NewslettersController {
   @Get()
   @ApiOperation({ summary: 'List newsletters' })
   findAll(@Query() query: FetchDataQueryDto) {
-    return this.newslettersService.findAll(toFetchDataInput(query));
+    return this.newslettersService.findAll(query);
   }
 
   @Get(':id')

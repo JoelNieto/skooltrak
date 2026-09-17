@@ -1,10 +1,9 @@
 import { FetchDataQueryDto } from '@/api-contracts';
 import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
-import { toFetchDataInput } from '../fetch-data-query.mapper';
+import { ClassGroupsService } from './class-groups.service';
 import { CreateClassGroupInput } from './dto/create-class-group.input';
 import { UpdateClassGroupInput } from './dto/update-class-group.input';
-import { ClassGroupsService } from './class-groups.service';
 
 @ApiTags('class-groups')
 @Controller('v1/class-groups')
@@ -20,13 +19,13 @@ export class ClassGroupsController {
   @Get()
   @ApiOperation({ summary: 'List class groups' })
   findAll(@Query() query: FetchDataQueryDto) {
-    return this.classGroupsService.findAll(toFetchDataInput(query));
+    return this.classGroupsService.findAll(query);
   }
 
   @Get('count')
   @ApiOperation({ summary: 'Class groups count' })
   count(@Query() query: FetchDataQueryDto) {
-    return this.classGroupsService.count(toFetchDataInput(query));
+    return this.classGroupsService.count(query);
   }
 
   @Get('by-organization/:organizationId')

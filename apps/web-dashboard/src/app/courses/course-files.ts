@@ -108,8 +108,8 @@ export default class CourseFiles {
       url: '/api/v1/files/for-course',
       params: toFetchQueryRecord({
         courseId: this.courseId(),
-        take: 50,
-        skip: 0,
+        pageSize: 50,
+        page: 1,
         search: this.#debouncedSearch(),
       }),
     }),

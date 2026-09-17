@@ -1,14 +1,14 @@
 import { GetObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { $Enums, Prisma } from '@generated/prisma';
-import { ForbiddenException, Inject, Injectable, Scope } from '@nestjs/common';
+import { ForbiddenException, Inject, Injectable, Logger, Scope } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { REQUEST } from '@nestjs/core';
 import { Request } from 'express';
-import { FetchDataInput } from '../fetch-data.input';
 import { PrismaService } from '../prisma.service';
 import { CreateFileInput } from './dto/create-file.input';
 
+import { FetchDataQueryDto } from '@/api-contracts';
 import { CreateFileUploadInput } from './dto/create-file-upload.input';
 import { FetchCourseFilesInput } from './dto/fetch-course-files.input';
 import { RemoveShareInput } from './dto/remove-share.input';
@@ -71,8 +71,9 @@ export class FilesService {
     });
   }
 
-  async findAccessible(query: FetchDataInput) {
+  async findAccessible(query: FetchDataQueryDto) {
     const { userId, organizationId } = this.getUserContext();
+    const { pageSize, skip, search, orderBy, orderDirection } = query;
     if (!organizationId) {
       throw new ForbiddenException('Organization context is required.');
     }
@@ -100,18 +101,17 @@ export class FilesService {
       });
     }
 
-    const orderByField = query.orderBy ?? 'createdAt';
-    const orderDirection = query.orderDirection ?? 'desc';
+    const orderByField = orderBy ?? 'createdAt';
 
     const files = await this.prisma.file.findMany({
       where: {
         organizationId,
         deletedAt: null,
         OR: orConditions,
-        name: query.search ? { contains: query.search, mode: 'insensitive' } : undefined,
+        name: search ? { contains: search, mode: 'insensitive' } : undefined,
       },
-      skip: query.skip,
-      take: query.take,
+      skip,
+      take: pageSize,
       orderBy: { [orderByField]: orderDirection },
       include: this.fileInclude,
     });
@@ -122,24 +122,24 @@ export class FilesService {
     }));
   }
 
-  async findOwned(query: FetchDataInput) {
+  async findOwned(query: FetchDataQueryDto) {
     const { userId, organizationId } = this.getUserContext();
+    const { skip, search, pageSize, orderBy, orderDirection } = query;
     if (!organizationId) {
       throw new ForbiddenException('Organization context is required.');
     }
 
-    const orderByField = query.orderBy ?? 'createdAt';
-    const orderDirection = query.orderDirection ?? 'desc';
+    const orderByField = orderBy ?? 'createdAt';
 
     const files = await this.prisma.file.findMany({
       where: {
         organizationId,
         deletedAt: null,
         ownerId: userId,
-        name: query.search ? { contains: query.search, mode: 'insensitive' } : undefined,
+        name: search ? { contains: search, mode: 'insensitive' } : undefined,
       },
-      skip: query.skip,
-      take: query.take,
+      skip,
+      take: pageSize,
       orderBy: { [orderByField]: orderDirection },
       include: this.fileInclude,
     });
@@ -150,8 +150,9 @@ export class FilesService {
     }));
   }
 
-  async findSharedWithMe(query: FetchDataInput) {
+  async findSharedWithMe(query: FetchDataQueryDto) {
     const { userId, organizationId } = this.getUserContext();
+    const { orderBy, skip, pageSize, search } = query;
     if (!organizationId) {
       throw new ForbiddenException('Organization context is required.');
     }
@@ -179,7 +180,7 @@ export class FilesService {
       });
     }
 
-    const orderByField = query.orderBy ?? 'createdAt';
+    const orderByField = orderBy ?? 'createdAt';
     const orderDirection = query.orderDirection ?? 'desc';
 
     const files = await this.prisma.file.findMany({
@@ -188,10 +189,10 @@ export class FilesService {
         deletedAt: null,
         ownerId: { not: userId },
         OR: orConditions,
-        name: query.search ? { contains: query.search, mode: 'insensitive' } : undefined,
+        name: search ? { contains: search, mode: 'insensitive' } : undefined,
       },
-      skip: query.skip,
-      take: query.take,
+      skip,
+      take: pageSize,
       orderBy: { [orderByField]: orderDirection },
       include: this.fileInclude,
     });
@@ -204,6 +205,8 @@ export class FilesService {
 
   async findByCourse(query: FetchCourseFilesInput) {
     const { userId, organizationId } = this.getUserContext();
+    const { orderBy, search, pageSize, skip, courseId } = query;
+    Logger.log(`Finding files for course ${courseId} with query: ${JSON.stringify(query)}`, 'FilesService');
     if (!organizationId) {
       throw new ForbiddenException('Organization context is required.');
     }
@@ -231,19 +234,19 @@ export class FilesService {
       });
     }
 
-    const orderByField = query.orderBy ?? 'createdAt';
+    const orderByField = orderBy ?? 'createdAt';
     const orderDirection = query.orderDirection ?? 'desc';
 
-    const files = await this.prisma.file.findMany({
+const files = await this.prisma.file.findMany({
       where: {
         organizationId,
         deletedAt: null,
-        sharesCourses: { some: { courseId: query.courseId } },
+        sharesCourses: { some: { courseId } },
         OR: orConditions,
-        name: query.search ? { contains: query.search, mode: 'insensitive' } : undefined,
+        name: search ? { contains: search, mode: 'insensitive' } : undefined,
       },
-      skip: Number(query.skip), // Ensure skip is a number
-      take: Number(query.take), // Ensure take is a number
+      skip: skip ?? 0, // Ensure skip defaults to 0
+      take: pageSize != null ? Number(pageSize) : 10, // Ensure take is a number, default to 10
       orderBy: { [orderByField]: orderDirection },
       include: this.fileInclude,
     });

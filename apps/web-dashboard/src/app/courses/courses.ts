@@ -1,9 +1,10 @@
-import { debounceSignal, EmptyState, Loader, Pagination, Paginator } from '#/ui';
+import { debounceSignal, EmptyState, Loader, Pagination, PaginatorV2 } from '#/ui';
 import { httpResource } from '@angular/common/http';
-import { Component, computed, effect, inject, Signal, signal } from '@angular/core';
+import { Component, computed, inject, Signal, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { toFetchQueryRecord } from '../core/fetch-query-params';
+import { PaginatedResponse } from '../core/pagination-meta';
 import Store from '../core/store';
 
 type CourseRow = {
@@ -15,7 +16,7 @@ type CourseRow = {
 
 @Component({
   selector: 'app-courses',
-  imports: [RouterLink, Loader, Paginator, FormsModule, EmptyState],
+  imports: [RouterLink, Loader, PaginatorV2, FormsModule, EmptyState],
   providers: [Pagination],
 
   template: `
@@ -82,42 +83,42 @@ type CourseRow = {
     }
     <div class="flex justify-end mt-4">
       <lib-paginator
-        [count]="pagination.count()"
-        [take]="pagination.take()"
-        [skip]="pagination.skip()"
-        (skipChange)="pagination.updateSkip($event)"
-        (takeChange)="pagination.updateTake($event)"
+        [total]="total()"
+        [page]="page()"
+        [pageSize]="pageSize()"
+        (pageChange)="page.set($event)"
+        (pageSizeChange)="pageSize.set($event)"
       />
     </div>
   `,
 })
 export default class Courses {
   #store = inject(Store);
-  public pagination = inject(Pagination);
   public searchText = signal<string>('');
   #debouncedSearch: Signal<string>;
+  total = computed(() => this.coursesListResource.value()?.meta.total ?? 0);
 
-  protected coursesListResource = httpResource<CourseRow[]>(
-    () => {
-      const schoolId = this.#store.currentSchoolId();
-      if (!schoolId) {
-        return undefined;
-      }
-      return {
-        url: '/api/v1/courses',
-        params: toFetchQueryRecord({
-          schoolId,
-          take: this.pagination.take(),
-          skip: this.pagination.skip(),
-          search: this.#debouncedSearch(),
-        }),
-      };
-    },
-    { defaultValue: [] },
-  );
+  public page = signal<number>(1);
+  public pageSize = signal<number>(12);
+
+  protected coursesListResource = httpResource<PaginatedResponse<CourseRow>>(() => {
+    const schoolId = this.#store.currentSchoolId();
+    if (!schoolId) {
+      return undefined;
+    }
+    return {
+      url: '/api/v1/courses',
+      params: toFetchQueryRecord({
+        schoolId,
+        page: this.page(),
+        pageSize: this.pageSize(),
+        search: this.#debouncedSearch(),
+      }),
+    };
+  });
 
   protected courses = computed(() =>
-    (this.coursesListResource.value() ?? []).map((c) => ({
+    (this.coursesListResource.value()?.data ?? []).map((c) => ({
       ...c,
       teacher: c.teacher
         ? {
@@ -128,30 +129,7 @@ export default class Courses {
     })),
   );
 
-  private readonly coursesCount = httpResource<number>(() => {
-    const schoolId = this.#store.currentSchoolId();
-    if (!schoolId) {
-      return undefined;
-    }
-    return {
-      url: '/api/v1/courses/count',
-      params: toFetchQueryRecord({
-        schoolId,
-        take: this.pagination.take(),
-        skip: this.pagination.skip(),
-        search: this.#debouncedSearch(),
-      }),
-    };
-  });
-
   constructor() {
-    this.pagination.updateTake(12);
     this.#debouncedSearch = debounceSignal(this.searchText, 400);
-    effect(() => {
-      const count = this.coursesCount.value();
-      if (count != null) {
-        this.pagination.updateCount(count);
-      }
-    });
   }
 }

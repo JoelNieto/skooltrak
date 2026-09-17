@@ -1,5 +1,5 @@
-import { FetchDataInput } from '../../fetch-data.input';
+import { FetchDataQueryDto } from '@/api-contracts';
 
-export class FetchCourseFilesInput extends FetchDataInput {
-    courseId: string;
+export class FetchCourseFilesInput extends FetchDataQueryDto {
+  courseId: string;
 }

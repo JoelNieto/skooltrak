@@ -1,5 +1,5 @@
+import { FetchDataQueryDto } from '@/api-contracts';
 import { Injectable } from '@nestjs/common';
-import { FetchDataInput } from '../fetch-data-input';
 import { PrismaService } from '../prisma.service';
 import { CreatePermissionInput } from './dto/create-permission.input';
 import { UpdatePermissionInput } from './dto/update-permission.input';
@@ -14,11 +14,11 @@ export class PermissionsService {
     });
   }
 
-  findAll(fetchDataInput: FetchDataInput) {
-    const { skip, take, search } = fetchDataInput;
+  findAll(fetchDataInput: FetchDataQueryDto) {
+    const { skip, pageSize, search } = fetchDataInput;
     return this.prisma.permission.findMany({
       skip,
-      take,
+      take: pageSize,
       where: {
         OR: [
           { description: { contains: search, mode: 'insensitive' } },
@@ -28,7 +28,7 @@ export class PermissionsService {
     });
   }
 
-  count(fetchDataInput: FetchDataInput) {
+  count(fetchDataInput: FetchDataQueryDto) {
     const { search } = fetchDataInput;
     return this.prisma.permission.count({
       where: {

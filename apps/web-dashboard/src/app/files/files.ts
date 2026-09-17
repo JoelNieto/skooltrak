@@ -1,4 +1,4 @@
-import { debounceSignal, Loader, Modal, PageHeader, Toast } from '#/ui';
+import { debounceSignal, EmptyState, Loader, Modal, PageHeader, Toast } from '#/ui';
 import { DatePipe } from '@angular/common';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { Component, inject, Signal, signal } from '@angular/core';
@@ -30,7 +30,7 @@ type FileItem = {
 
 @Component({
   selector: 'app-files',
-  imports: [Loader, FormsModule, RouterLink, DatePipe, PageHeader],
+  imports: [Loader, FormsModule, RouterLink, DatePipe, PageHeader, EmptyState],
   template: `
     <div class="breadcrumbs text-sm">
       <ul>
@@ -112,7 +112,13 @@ type FileItem = {
                   </tr>
                 } @empty {
                   <tr>
-                    <td colspan="7" class="text-center text-base-200">No hay archivos compartidos.</td>
+                    <td colspan="8" class="text-center text-base-200">
+                      <lib-empty-state
+                        title="No hay archivos compartidos"
+                        icon="folder_open"
+                        description="No has compartido ningún archivo aún."
+                      />
+                    </td>
                   </tr>
                 }
               </tbody>

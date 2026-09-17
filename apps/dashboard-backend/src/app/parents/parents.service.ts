@@ -1,3 +1,4 @@
+import { FetchDataQueryDto } from '@/api-contracts';
 import { Inject, Injectable, Scope } from '@nestjs/common';
 import { REQUEST } from '@nestjs/core';
 import { Request } from 'express';
@@ -25,8 +26,8 @@ export class ParentsService {
     });
   }
 
-  findAll(fetchDataInput: FetchDataInput) {
-    const { skip, take, search, orderBy, orderDirection } = fetchDataInput;
+  findAll(fetchDataInput: FetchDataQueryDto) {
+    const { skip, pageSize, search, orderBy, orderDirection } = fetchDataInput;
     const req = this.request;
     const { organizationId } = req.user as any;
 
@@ -44,7 +45,7 @@ export class ParentsService {
       },
       include: { students: { include: { user: true } } },
       skip,
-      take,
+      take: pageSize,
       orderBy: {
         [orderBy ?? 'createdAt']: orderDirection ?? 'desc',
       },

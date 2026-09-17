@@ -1,8 +1,7 @@
-import { BetterAuthGuard, Perm, PermissionsGuard, RequirePermissions } from '@/auth';
 import { FetchDataQueryDto } from '@/api-contracts';
-import { Body, Controller, Get, Param, Post, Query, UseGuards } from '@nestjs/common';
+import { BetterAuthGuard, Perm, PermissionsGuard, RequirePermissions } from '@/auth';
+import { Body, Controller, Get, Logger, Param, Post, Query, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { toFetchCourseFilesInput, toFetchDataInput } from '../fetch-data-query.mapper';
 import { CreateFileDownloadInput } from './dto/create-file-download.input';
 import { CreateFileUploadInput } from './dto/create-file-upload.input';
 import { CreateFileInput } from './dto/create-file.input';
@@ -42,25 +41,26 @@ export class FilesController {
   @Get('accessible')
   @ApiOperation({ summary: 'Files accessible to user' })
   filesAccessible(@Query() query: FetchDataQueryDto) {
-    return this.filesService.findAccessible(toFetchDataInput(query));
+    return this.filesService.findAccessible(query);
   }
 
   @Get('owned')
   @ApiOperation({ summary: 'Owned files' })
   filesOwned(@Query() query: FetchDataQueryDto) {
-    return this.filesService.findOwned(toFetchDataInput(query));
+    return this.filesService.findOwned(query);
   }
 
   @Get('shared-with-me')
   @ApiOperation({ summary: 'Files shared with me' })
   filesSharedWithMe(@Query() query: FetchDataQueryDto) {
-    return this.filesService.findSharedWithMe(toFetchDataInput(query));
+    return this.filesService.findSharedWithMe(query);
   }
 
   @Get('for-course')
   @ApiOperation({ summary: 'Files for course' })
   filesForCourse(@Query() query: FetchDataQueryDto & { courseId: string }) {
-    return this.filesService.findByCourse(toFetchCourseFilesInput(query));
+    Logger.log(`Fetching files for course ${query.courseId} with query: ${JSON.stringify(query)}`, 'FilesController');
+    return this.filesService.findByCourse(query);
   }
 
   @Get(':id')

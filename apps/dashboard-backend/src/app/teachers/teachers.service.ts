@@ -1,10 +1,11 @@
+import { FetchDataQueryDto, PaginatedResponseDto } from '@/api-contracts';
 import { OnboardingStep, sendUserInvitation } from '@/auth';
+import { Prisma } from '@generated/prisma';
 import { ConflictException, Inject, Injectable, Logger, Scope } from '@nestjs/common';
 import { REQUEST } from '@nestjs/core';
 import * as bcrypt from 'bcrypt';
 import { randomBytes, randomUUID } from 'crypto';
 import { Request } from 'express';
-import { FetchDataInput } from '../fetch-data.input';
 import { PrismaService } from '../prisma.service';
 import { CreateTeacherInput } from './dto/create-teacher.input';
 import { UpdateTeacherInput } from './dto/update-teacher.input';
@@ -177,26 +178,37 @@ export class TeachersService {
     return `hsl(${hue}, 70%, 70%)`;
   }
 
-  findAll(fetchDataInput: FetchDataInput) {
-    const { skip, take, search, orderBy, orderDirection } = fetchDataInput;
+  async findAll(fetchDataInput: FetchDataQueryDto) {
+    const { skip, pageSize, page, search, orderBy, orderDirection } = fetchDataInput;
     const req = this.request;
     const { organizationId } = req.user as any;
-    return this.prisma.teacher.findMany({
-      where: {
-        organizationId,
-        OR: [
-          { firstName: { contains: search, mode: 'insensitive' } },
-          { fatherName: { contains: search, mode: 'insensitive' } },
-          { user: { email: { contains: search, mode: 'insensitive' } } },
-        ],
-      },
-      include: { user: true },
-      skip,
-      take,
-      orderBy: {
-        [orderBy ?? 'createdAt']: orderDirection,
-      },
-    });
+
+    const orConditions: Prisma.TeacherWhereInput[] = [
+      { firstName: { contains: search, mode: 'insensitive' } },
+      { fatherName: { contains: search, mode: 'insensitive' } },
+      { user: { email: { contains: search, mode: 'insensitive' } } },
+    ];
+    const [data, total] = await this.prisma.$transaction([
+      this.prisma.teacher.findMany({
+        where: {
+          organizationId,
+          OR: orConditions,
+        },
+        include: { user: true },
+        skip,
+        take: pageSize,
+        orderBy: {
+          [orderBy ?? 'createdAt']: orderDirection,
+        },
+      }),
+      this.prisma.teacher.count({
+        where: {
+          organizationId,
+          OR: orConditions,
+        },
+      }),
+    ]);
+    return new PaginatedResponseDto(data, total, page, pageSize);
   }
 
   findManyByOrganizationId(organizationId: string) {
@@ -219,7 +231,7 @@ export class TeachersService {
     });
   }
 
-  findCount(fetchDataInput: FetchDataInput) {
+  findCount(fetchDataInput: FetchDataQueryDto) {
     const { search } = fetchDataInput;
     const req = this.request;
     const { organizationId } = req.user as any;

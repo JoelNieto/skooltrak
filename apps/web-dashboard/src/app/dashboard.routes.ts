@@ -109,20 +109,6 @@ export const DASHBOARD_ROUTES: Route[] = [
       { path: '', redirectTo: 'choose-path', pathMatch: 'full' },
     ],
   },
-  {
-    path: 'store',
-    children: [
-      {
-        path: '',
-        pathMatch: 'full',
-        loadComponent: () => import('./store/pages/school-picker-standalone'),
-      },
-      {
-        path: ':schoolSlug',
-        children: STORE_ROUTES,
-      },
-    ],
-  },
 
   {
     path: '',
@@ -135,6 +121,20 @@ export const DASHBOARD_ROUTES: Route[] = [
         path: 'home',
         canMatch: [adminGuard],
         loadComponent: () => import('./home'),
+      },
+      {
+        path: 'store',
+        children: [
+          {
+            path: '',
+            pathMatch: 'full',
+            loadComponent: () => import('./store/pages/school-picker-standalone'),
+          },
+          {
+            path: ':schoolSlug',
+            children: STORE_ROUTES,
+          },
+        ],
       },
       {
         path: 'home',

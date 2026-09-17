@@ -4,13 +4,17 @@ import { HttpParams } from '@angular/common/http';
 export type FetchQueryParams = Partial<{
   skip: number;
   take: number;
+  page: number;
+  pageSize: number;
   orderBy: string | null;
   orderDirection: 'asc' | 'desc' | null;
   schoolId: string;
   organizationId: string;
   search: string | null;
   studyPlanId: string;
+  teacherId: string;
   courseId: string;
+  degreeId: string;
   year: number;
   status: string;
   chargeType: string;

@@ -1,8 +1,7 @@
+import { FetchDataQueryDto } from '@/api-contracts';
 import { BetterAuthGuard, Perm, PermissionsGuard, RequirePermissions } from '@/auth';
 import { Body, Controller, Delete, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { FetchDataQueryDto } from '@/api-contracts';
-import { toFetchDataInput } from '../fetch-data-query.mapper';
 import { CreateSubjectInput } from './dto/create-subject.input';
 import { UpdateSubjectInput } from './dto/update-subject.input';
 import { SubjectsService } from './subjects.service';
@@ -25,13 +24,13 @@ export class SubjectsController {
   @Get()
   @ApiOperation({ summary: 'List subjects' })
   findAll(@Query() query: FetchDataQueryDto) {
-    return this.subjectsService.findAll(toFetchDataInput(query));
+    return this.subjectsService.findAll(query);
   }
 
   @Get('count')
   @ApiOperation({ summary: 'Subjects count' })
   findManySubjectsCount(@Query() query: FetchDataQueryDto) {
-    return this.subjectsService.findCount(toFetchDataInput(query));
+    return this.subjectsService.findCount(query);
   }
 
   @Get(':id')

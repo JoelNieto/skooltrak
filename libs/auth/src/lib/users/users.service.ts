@@ -1,7 +1,7 @@
+import { FetchDataQueryDto } from '@/api-contracts';
 import { Injectable, Logger } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { randomUUID } from 'crypto';
-import { FetchDataInput } from '../fetch-data-input';
 import { OnboardingStep } from '../onboarding-step';
 import { PrismaService } from '../prisma.service';
 import { sendUserInvitation } from '../resend.service';
@@ -77,25 +77,22 @@ export class UsersService {
         this.logger.log(`Welcome invitation sent to teacher: ${user.email}`);
       } catch (error) {
         // Log error but don't fail the creation
-        this.logger.error(
-          `Failed to send welcome invitation to ${user.email}:`,
-          error,
-        );
+        this.logger.error(`Failed to send welcome invitation to ${user.email}:`, error);
       }
     }
 
     return user;
   }
 
-  findAll(fetchDataInput: FetchDataInput) {
-    const { skip, take, search } = fetchDataInput;
+  findAll(fetchDataInput: FetchDataQueryDto) {
+    const { skip, pageSize, search } = fetchDataInput;
     return this.prisma.user.findMany({
       include: {
         role: { include: { permissions: true } },
         organization: true,
       },
       skip,
-      take,
+      take: pageSize,
       where: {
         OR: [
           { firstName: { contains: search, mode: 'insensitive' } },
@@ -106,7 +103,7 @@ export class UsersService {
     });
   }
 
-  count(fetchDataInput: FetchDataInput) {
+  count(fetchDataInput: FetchDataQueryDto) {
     const { search } = fetchDataInput;
     return this.prisma.user.count({
       where: {

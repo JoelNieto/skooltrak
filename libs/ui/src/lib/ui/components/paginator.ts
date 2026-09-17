@@ -43,7 +43,7 @@ export type PageItem = number | 'ellipsis';
 export class Paginator {
   public take = model.required<number>();
   public skip = model.required<number>();
-  public count = input.required<number>();
+  public count = input<number>(0);
 
   public pages = computed(() => Math.ceil(this.count() / this.take()));
 

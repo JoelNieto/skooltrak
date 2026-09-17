@@ -2,7 +2,6 @@ import { FetchDataQueryDto } from '@/api-contracts';
 import { BetterAuthGuard, Perm, PermissionsGuard, RequirePermissions } from '@/auth';
 import { Body, Controller, Delete, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { toFetchDataInput } from '../fetch-data-query.mapper';
 import { CreateTeacherInput } from './dto/create-teacher.input';
 import { UpdateTeacherInput } from './dto/update-teacher.input';
 import { TeachersService } from './teachers.service';
@@ -46,14 +45,14 @@ export class TeachersController {
   @Get()
   @ApiOperation({ summary: 'List teachers' })
   async findAll(@Query() query: FetchDataQueryDto) {
-    const list = await this.teachersService.findAll(toFetchDataInput(query));
-    return list.map((t) => enrichTeacher(t));
+    const resp = await this.teachersService.findAll(query);
+    return { ...resp, data: resp.data.map((t) => enrichTeacher(t)) };
   }
 
   @Get('count')
   @ApiOperation({ summary: 'Teachers count' })
   findManyTeachersCount(@Query() query: FetchDataQueryDto) {
-    return this.teachersService.findCount(toFetchDataInput(query));
+    return this.teachersService.findCount(query);
   }
 
   @Get('by-organization/:organizationId')

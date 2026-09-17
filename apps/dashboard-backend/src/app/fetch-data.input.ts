@@ -1,7 +1,7 @@
 export class FetchDataInput {
-  skip?: number;
+  page?: number;
 
-  take?: number;
+  pageSize?: number;
 
   orderBy?: string;
 
@@ -12,4 +12,6 @@ export class FetchDataInput {
   search?: string;
 
   studyPlanId?: string;
+
+  degreeId?: string;
 }

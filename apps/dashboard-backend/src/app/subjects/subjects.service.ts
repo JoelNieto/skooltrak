@@ -1,7 +1,7 @@
+import { FetchDataQueryDto, PaginatedResponseDto } from '@/api-contracts';
 import { Inject, Injectable, Scope } from '@nestjs/common';
 import { REQUEST } from '@nestjs/core';
 import { Request } from 'express';
-import { FetchDataInput } from '../fetch-data.input';
 import { PrismaService } from '../prisma.service';
 import { CreateSubjectInput } from './dto/create-subject.input';
 import { UpdateSubjectInput } from './dto/update-subject.input';
@@ -67,24 +67,39 @@ export class SubjectsService {
     });
   }
 
-  findAll(fetchDataInput: FetchDataInput) {
-    const { skip, take, orderBy, orderDirection, search } = fetchDataInput;
+  async findAll(fetchDataInput: FetchDataQueryDto) {
+    const { skip, page, pageSize, orderBy, orderDirection, search } = fetchDataInput;
     const req = this.request;
     const { organizationId } = req.user as any;
-    return this.prisma.subject.findMany({
-      where: {
-        organizationId,
-        OR: [{ name: { contains: search, mode: 'insensitive' } }, { code: { contains: search, mode: 'insensitive' } }],
-      },
-      skip,
-      take,
-      orderBy: {
-        [orderBy ?? 'name']: orderDirection,
-      },
-    });
+    const [data, count] = await this.prisma.$transaction([
+      this.prisma.subject.findMany({
+        where: {
+          organizationId,
+          OR: [
+            { name: { contains: search, mode: 'insensitive' } },
+            { code: { contains: search, mode: 'insensitive' } },
+          ],
+        },
+        skip,
+        take: pageSize,
+        orderBy: {
+          [orderBy ?? 'name']: orderDirection,
+        },
+      }),
+      this.prisma.subject.count({
+        where: {
+          organizationId,
+          OR: [
+            { name: { contains: search, mode: 'insensitive' } },
+            { code: { contains: search, mode: 'insensitive' } },
+          ],
+        },
+      }),
+    ]);
+    return new PaginatedResponseDto(data, count, page, pageSize);
   }
 
-  findCount(fetchDataInput: FetchDataInput) {
+  findCount(fetchDataInput: FetchDataQueryDto) {
     const { search } = fetchDataInput;
     const req = this.request;
     const { organizationId } = req.user as any;

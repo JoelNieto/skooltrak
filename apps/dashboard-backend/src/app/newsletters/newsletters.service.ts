@@ -1,3 +1,4 @@
+import { FetchDataQueryDto } from '@/api-contracts';
 import { Inject, Injectable, Scope } from '@nestjs/common';
 import { REQUEST } from '@nestjs/core';
 import { Request } from 'express';
@@ -35,9 +36,8 @@ export class NewslettersService {
     });
   }
 
-  findAll(fetchDataInput: FetchDataInput) {
-    const { skip, take, orderBy, orderDirection, search, schoolId } =
-      fetchDataInput;
+  findAll(fetchDataInput: FetchDataQueryDto) {
+    const { skip, pageSize, orderBy, orderDirection, search, schoolId } = fetchDataInput;
     const req = this.request;
     const { organizationId } = req.user as any;
 
@@ -45,12 +45,10 @@ export class NewslettersService {
       where: {
         organizationId,
         ...(schoolId ? { schoolId } : {}),
-        ...(search
-          ? { title: { contains: search, mode: 'insensitive' as const } }
-          : {}),
+        ...(search ? { title: { contains: search, mode: 'insensitive' as const } } : {}),
       },
       skip,
-      take,
+      take: pageSize,
       orderBy: {
         [orderBy ?? 'createdAt']: orderDirection ?? 'desc',
       },
@@ -67,9 +65,7 @@ export class NewslettersService {
       where: {
         organizationId,
         ...(schoolId ? { schoolId } : {}),
-        ...(search
-          ? { title: { contains: search, mode: 'insensitive' as const } }
-          : {}),
+        ...(search ? { title: { contains: search, mode: 'insensitive' as const } } : {}),
       },
     });
   }
@@ -103,10 +99,7 @@ export class NewslettersService {
     });
 
     // Set publishedAt when transitioning from draft to published
-    const publishedAt =
-      updateNewsletterInput.published && !existing?.published
-        ? new Date()
-        : existing?.publishedAt;
+    const publishedAt = updateNewsletterInput.published && !existing?.published ? new Date() : existing?.publishedAt;
 
     const { id: _id, schoolId, ...rest } = updateNewsletterInput;
 

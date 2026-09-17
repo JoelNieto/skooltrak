@@ -1,16 +1,18 @@
-import { Confirmation, Pagination, Paginator, Toast } from '#/ui';
+import { Confirmation, Pagination, PaginatorV2, Toast } from '#/ui';
 import { Menu, MenuContent, MenuItem, MenuTrigger } from '@angular/aria/menu';
 import { OverlayModule } from '@angular/cdk/overlay';
 import { DatePipe } from '@angular/common';
 import { HttpClient, httpResource } from '@angular/common/http';
-import { afterRenderEffect, Component, effect, inject, signal, viewChild } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { afterRenderEffect, Component, computed, inject, signal, viewChild } from '@angular/core';
+import { debounce, form, FormField } from '@angular/forms/signals';
 import { RouterLink } from '@angular/router';
 import { Prisma } from '@generated/prisma';
 import { catchError, filter, of, switchMap } from 'rxjs';
 import Auth from '../auth/auth';
 import { toFetchQueryRecord } from '../core/fetch-query-params';
+import { PaginatedResponse } from '../core/pagination-meta';
 import Store from '../core/store';
+
 type Teacher = Prisma.TeacherGetPayload<{ include: { user: true } }> & {
   name: string;
   initials: string;
@@ -19,9 +21,8 @@ type Teacher = Prisma.TeacherGetPayload<{ include: { user: true } }> & {
 
 @Component({
   selector: 'app-teachers',
-  imports: [DatePipe, Paginator, FormsModule, RouterLink, Menu, MenuTrigger, OverlayModule, MenuContent, MenuItem],
+  imports: [DatePipe, PaginatorV2, FormField, RouterLink, Menu, MenuTrigger, OverlayModule, MenuContent, MenuItem],
   providers: [Pagination],
-
   template: `
     <div class="breadcrumbs text-sm">
       <ul>
@@ -34,7 +35,7 @@ type Teacher = Prisma.TeacherGetPayload<{ include: { user: true } }> & {
       <div class="md:w-96 w-full">
         <label class="input input-primary ">
           <span class="material-symbols-outlined">search</span>
-          <input class="pl-0" type="search" placeholder="Buscar..." [(ngModel)]="searchText" />
+          <input class="pl-0" type="search" placeholder="Buscar..." [formField]="form.searchText" />
         </label>
       </div>
       @if (auth.hasPermission('MANAGE_TEACHERS')) {
@@ -54,18 +55,14 @@ type Teacher = Prisma.TeacherGetPayload<{ include: { user: true } }> & {
           </tr>
         </thead>
         <tbody>
-          @for (teacher of teachers.value(); track teacher.id) {
+          @for (teacher of teachers.value()?.data; track teacher.id) {
             <tr>
               <td>
                 <div class="flex gap-2 items-center cursor-pointer" [routerLink]="['/teachers', teacher.id]">
                   <div class="avatar avatar-placeholder">
                     @if (avatarUrlFor(teacher)) {
                       <div class="w-8 rounded-full overflow-hidden">
-                        <img
-                          [src]="avatarUrlFor(teacher)!"
-                          [alt]="teacher.name"
-                          class="w-full h-full object-cover"
-                        />
+                        <img [src]="avatarUrlFor(teacher)!" [alt]="teacher.name" class="w-full h-full object-cover" />
                       </div>
                     } @else {
                       <div class="text-white w-8 rounded-full" [style.background]="teacher.user?.color">
@@ -170,11 +167,11 @@ type Teacher = Prisma.TeacherGetPayload<{ include: { user: true } }> & {
       </table>
       <div class="p-4 rounded-b-lg ">
         <lib-paginator
-          [count]="pagination.count()"
-          [take]="pagination.take()"
-          [skip]="pagination.skip()"
-          (skipChange)="pagination.updateSkip($event)"
-          (takeChange)="pagination.updateTake($event)"
+          [total]="total()"
+          [page]="page()"
+          [pageSize]="pageSize()"
+          (pageChange)="page.set($event)"
+          (pageSizeChange)="pageSize.set($event)"
         />
       </div>
     </div>
@@ -189,27 +186,20 @@ export default class Teachers {
   #toasts = inject(Toast);
   actionsMenu = viewChild<Menu<string>>('actionsMenu');
   searchText = signal('');
+  public page = signal(1);
+  public pageSize = signal(10);
+  total = computed(() => this.teachers.value()?.meta.total ?? 0);
+  public formModel = signal<{ searchText: string }>({ searchText: '' });
+  public form = form(this.formModel, (f) => {
+    debounce(f.searchText, 400);
+  });
 
-  public teachers = httpResource<Teacher[]>(
-    () => ({
-      url: '/api/v1/teachers',
-      params: toFetchQueryRecord({
-        take: this.pagination.take(),
-        skip: this.pagination.skip(),
-        search: this.pagination.search(),
-        orderBy: this.pagination.sortBy(),
-        orderDirection: this.pagination.sortOrder(),
-      }),
-    }),
-    { defaultValue: [] },
-  );
-
-  private readonly teachersCount = httpResource<number>(() => ({
-    url: '/api/v1/teachers/count',
+  public teachers = httpResource<PaginatedResponse<Teacher>>(() => ({
+    url: '/api/v1/teachers',
     params: toFetchQueryRecord({
-      take: this.pagination.take(),
-      skip: this.pagination.skip(),
-      search: this.pagination.search(),
+      page: this.page(),
+      pageSize: this.pageSize(),
+      search: this.form().value().searchText,
       orderBy: this.pagination.sortBy(),
       orderDirection: this.pagination.sortOrder(),
     }),
@@ -217,9 +207,7 @@ export default class Teachers {
 
   public avatarMap = httpResource<Record<string, string | null>>(
     () => {
-      const ids = (this.teachers.value() ?? [])
-        .map((t) => t.user?.id)
-        .filter((id): id is string => !!id);
+      const ids = (this.teachers.value()?.data ?? []).map((t) => t.user?.id).filter((id): id is string => !!id);
       if (!ids.length) return undefined;
       return { method: 'POST', url: '/api/v1/users/avatar-urls', body: { userIds: ids } };
     },
@@ -235,12 +223,6 @@ export default class Teachers {
   constructor() {
     afterRenderEffect(() => {
       this.pagination.updateSearch(this.searchText());
-    });
-    effect(() => {
-      const count = this.teachersCount.value();
-      if (count != null) {
-        this.pagination.updateCount(count);
-      }
     });
   }
 

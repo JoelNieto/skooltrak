@@ -1,12 +1,18 @@
-import { Injectable } from '@nestjs/common';
+import { FetchDataQueryDto, PaginatedResponseDto } from '@/api-contracts';
+import { Prisma } from '@generated/prisma';
+import { Inject, Injectable } from '@nestjs/common';
+import { REQUEST } from '@nestjs/core';
+import { Request } from 'express';
+import type { UpdateStudyPlanFinancialInput } from '../financial/dto/update-study-plan-financial.input';
 import { PrismaService } from '../prisma.service';
 import { CreateStudyPlanInput } from './dto/create-study-plan.input';
 import { UpdateStudyPlanInput } from './dto/update-study-plan.input';
-import type { UpdateStudyPlanFinancialInput } from '../financial/dto/update-study-plan-financial.input';
-
 @Injectable()
 export class StudyPlansService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    @Inject(REQUEST) private readonly request: Request,
+  ) {}
 
   create(createStudyPlanInput: CreateStudyPlanInput) {
     return this.prisma.studyPlan.create({
@@ -26,6 +32,44 @@ export class StudyPlansService {
     });
   }
 
+  async findMany(fetchDataInput: FetchDataQueryDto) {
+    const { skip, page, pageSize, schoolId, search, degreeId, orderBy, orderDirection } = fetchDataInput;
+
+    const include = {
+      degree: { select: { id: true, name: true } },
+      gradeMetric: true,
+      enrollmentCosts: { orderBy: { order: 'asc' as const } },
+    };
+
+    const orderField = orderBy ?? 'createdAt';
+    const orderDir = orderDirection ?? 'asc';
+
+    let where: Prisma.StudyPlanWhereInput = {
+      schoolId,
+      OR: [
+        { name: { contains: search, mode: 'insensitive' } },
+        { shortName: { contains: search, mode: 'insensitive' } },
+      ],
+    };
+
+    if (degreeId) {
+      where = { ...where, degreeId };
+    }
+
+    const [data, total] = await this.prisma.$transaction([
+      this.prisma.studyPlan.findMany({
+        where,
+        skip,
+        take: pageSize,
+        include,
+        orderBy: { [orderField]: orderDir },
+      }),
+      this.prisma.studyPlan.count({ where }),
+    ]);
+
+    return new PaginatedResponseDto(data, total, page, pageSize);
+  }
+
   findAllBySchoolId(schoolId: string, degreeId?: string) {
     if (!schoolId) return [];
     const include = {
@@ -43,6 +87,7 @@ export class StudyPlansService {
     return this.prisma.studyPlan.findMany({
       where: { schoolId },
       include,
+      orderBy: { level: 'asc' },
     });
   }
 
@@ -71,8 +116,7 @@ export class StudyPlansService {
   }
 
   async updateFinancialConfig(input: UpdateStudyPlanFinancialInput) {
-    const { studyPlanId, monthlyTuitionAmount, tuitionMonths, enrollmentCosts } =
-      input;
+    const { studyPlanId, monthlyTuitionAmount, tuitionMonths, enrollmentCosts } = input;
 
     return this.prisma.$transaction(async (tx) => {
       if (enrollmentCosts !== undefined) {

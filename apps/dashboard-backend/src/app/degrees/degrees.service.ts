@@ -25,8 +25,8 @@ export class DegreesService {
       where: { schoolId },
       take: options?.take,
       skip: options?.skip,
-      orderBy: { name: 'asc' },
-      include: { school: true, studyPlans: true },
+      orderBy: { createdAt: 'asc' },
+      include: { school: true },
     });
   }
 
@@ -42,10 +42,14 @@ export class DegreesService {
   }
 
   update(id: string, updateDegreeInput: UpdateDegreeInput) {
+    const { name, shortName, schoolId } = updateDegreeInput;
     return this.prisma.degree.update({
       where: { id },
-      data: updateDegreeInput,
-      include: { school: true, studyPlans: true },
+      data: {
+        name,
+        shortName,
+        school: { connect: { id: schoolId } },
+      },
     });
   }
 

@@ -1,5 +1,7 @@
+import { FetchDataQueryDto, PaginatedResponseDto } from '@/api-contracts';
 import type { AuthUserContext } from '@/auth';
 import { AuthService, OnboardingStep, sendUserInvitation } from '@/auth';
+import { Prisma } from '@generated/prisma';
 import { ConflictException, Inject, Injectable, Logger, Scope, UnauthorizedException } from '@nestjs/common';
 import { REQUEST } from '@nestjs/core';
 import * as bcrypt from 'bcrypt';
@@ -7,7 +9,6 @@ import { randomBytes, randomUUID } from 'crypto';
 import { Request } from 'express';
 import * as QRCode from 'qrcode';
 import { ChatSyncService } from '../chats/chat-sync.service';
-import { FetchDataInput } from '../fetch-data.input';
 import { ChargesService } from '../financial/charges.service';
 import { PrismaService } from '../prisma.service';
 import { CreateStudentInput } from './dto/create-student.input';
@@ -332,29 +333,41 @@ export class StudentsService {
     return updated;
   }
 
-  findAll(fetchDataInput: FetchDataInput) {
-    const { skip, take, search, orderBy, orderDirection } = fetchDataInput;
+  async findAll(fetchDataInput: FetchDataQueryDto) {
+    const { skip, pageSize, page, search, orderBy, orderDirection } = fetchDataInput;
     const req = this.request;
     const { organizationId } = req.user as any;
-    return this.prisma.student.findMany({
-      where: {
-        organizationId,
-        OR: [
-          { user: { firstName: { contains: search, mode: 'insensitive' } } },
-          { user: { lastName: { contains: search, mode: 'insensitive' } } },
-          { user: { email: { contains: search, mode: 'insensitive' } } },
-        ],
-      },
-      include: { classGroup: true, user: true },
-      skip,
-      take,
-      orderBy: {
-        [orderBy ?? 'createdAt']: orderDirection,
-      },
-    });
+
+    const orConditions: Prisma.StudentWhereInput[] = [
+      { user: { firstName: { contains: search, mode: 'insensitive' } } },
+      { user: { lastName: { contains: search, mode: 'insensitive' } } },
+      { user: { email: { contains: search, mode: 'insensitive' } } },
+    ];
+
+    const [data, total] = await this.prisma.$transaction([
+      this.prisma.student.findMany({
+        where: {
+          organizationId,
+          OR: orConditions,
+        },
+        include: { classGroup: true, user: true },
+        skip,
+        take: pageSize,
+        orderBy: {
+          [orderBy ?? 'createdAt']: orderDirection,
+        },
+      }),
+      this.prisma.student.count({
+        where: {
+          organizationId,
+          OR: orConditions,
+        },
+      }),
+    ]);
+    return new PaginatedResponseDto(data, total, page, pageSize);
   }
 
-  getCount(fetchDataInput: FetchDataInput) {
+  getCount(fetchDataInput: FetchDataQueryDto) {
     const { search } = fetchDataInput;
     const req = this.request;
     const { organizationId } = req.user as any;

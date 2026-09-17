@@ -1,12 +1,14 @@
-import { Confirmation, EmptyState, Modal, Pagination, Paginator, Toast } from '#/ui';
+import { Confirmation, EmptyState, Modal, PaginatorV2, Toast } from '#/ui';
 import { Menu, MenuContent, MenuItem, MenuTrigger } from '@angular/aria/menu';
 import { OverlayModule } from '@angular/cdk/overlay';
 import { DatePipe } from '@angular/common';
 import { HttpClient, httpResource } from '@angular/common/http';
-import { Component, effect, inject, viewChild } from '@angular/core';
+import { Component, computed, inject, signal, viewChild } from '@angular/core';
+import { debounce, form, FormField } from '@angular/forms/signals';
 import { RouterLink } from '@angular/router';
 import { filter, switchMap } from 'rxjs';
 import { toFetchQueryRecord } from '../../core/fetch-query-params';
+import { PaginatedResponse } from '../../core/pagination-meta';
 import Store from '../../core/store';
 import ClassGroupsForm from '../forms/class-groups-form';
 
@@ -15,16 +17,45 @@ type ClassGroupRow = {
   name: string;
   createdAt?: string;
   updatedAt?: string;
-  teacher?: { name?: string };
+  teacher?: { firstName?: string; fatherName?: string };
   studyPlan: { name: string };
+};
+
+type StudyPlanRow = {
+  id: string;
+  name: string;
 };
 
 @Component({
   selector: 'app-groups',
-  imports: [DatePipe, RouterLink, Menu, MenuContent, MenuItem, MenuTrigger, OverlayModule, EmptyState, Paginator],
-  providers: [Pagination],
+  imports: [
+    DatePipe,
+    RouterLink,
+    Menu,
+    MenuContent,
+    MenuItem,
+    MenuTrigger,
+    OverlayModule,
+    EmptyState,
+    PaginatorV2,
+    FormField,
+  ],
   template: `
-    <div class="flex justify-end">
+    <div class="flex justify-between">
+      <div class="flex gap-2">
+        <div class="md:w-96 w-full">
+          <label class="input input-primary ">
+            <span class="material-symbols-outlined">search</span>
+            <input class="pl-0" type="search" placeholder="Buscar..." [formField]="form.searchText" />
+          </label>
+        </div>
+        <select class="select select-primary" [formField]="form.studyPlanId">
+          <option [value]="''">Elija plan...</option>
+          @for (studyPlan of studyPlans.value()?.data; track studyPlan.id) {
+            <option [value]="studyPlan.id">{{ studyPlan.name }}</option>
+          }
+        </select>
+      </div>
       <button class="btn btn-primary" (click)="editClassGroup()">
         <span class="material-symbols-outlined">add_circle</span> Nuevo Grupo
       </button>
@@ -42,12 +73,18 @@ type ClassGroupRow = {
           </tr>
         </thead>
         <tbody>
-          @for (group of classGroups.value(); track group.id) {
+          @for (group of classGroups.value()?.data; track group.id) {
             <tr>
               <td>
                 <a class="link link-primary" [routerLink]="['/groups', group.id]">{{ group.name }}</a>
               </td>
-              <td>{{ group.teacher?.name }}</td>
+              <td>
+                @if (group.teacher) {
+                  {{ group.teacher.firstName }} {{ group.teacher.fatherName }}
+                } @else {
+                  --
+                }
+              </td>
               <td>{{ group.studyPlan.name }}</td>
               <td>{{ group.createdAt | date: 'short' }}</td>
               <td>{{ group.updatedAt | date: 'short' }}</td>
@@ -126,11 +163,11 @@ type ClassGroupRow = {
       </table>
       <div class="p-4 rounded-b-lg">
         <lib-paginator
-          [count]="pagination.count()"
-          [take]="pagination.take()"
-          [skip]="pagination.skip()"
-          (skipChange)="pagination.updateSkip($event)"
-          (takeChange)="pagination.updateTake($event)"
+          [total]="total()"
+          [page]="page()"
+          [pageSize]="pageSize()"
+          (pageChange)="page.set($event)"
+          (pageSizeChange)="pageSize.set($event)"
         />
       </div>
     </div>
@@ -142,52 +179,58 @@ export default class ClassGroups {
   private store = inject(Store);
   private confirmation = inject(Confirmation);
   private toasts = inject(Toast);
-  public pagination = inject(Pagination);
+  private formModel = signal<{ searchText: string; teacherId: string; studyPlanId: string }>({
+    searchText: '',
+    teacherId: '',
+    studyPlanId: '',
+  });
+
+  public form = form(this.formModel, (f) => {
+    // Add validation rules here if needed
+    debounce(f.searchText, 400);
+  });
+
   actionsMenu = viewChild<Menu<string>>('actionsMenu');
+  pageSize = signal(10);
+  page = signal(1);
+  total = computed(() => this.classGroups.value()?.meta?.total ?? 0);
 
-  public classGroups = httpResource<ClassGroupRow[]>(
-    () => {
-      const schoolId = this.store.currentSchoolId();
-      if (!schoolId) {
-        return undefined;
-      }
-      return {
-        url: '/api/v1/class-groups',
-        params: toFetchQueryRecord({
-          schoolId,
-          take: this.pagination.take(),
-          skip: this.pagination.skip(),
-          search: this.pagination.search(),
-        }),
-      };
-    },
-    { defaultValue: [] },
-  );
-
-  private readonly classGroupsCount = httpResource<number>(() => {
+  public classGroups = httpResource<PaginatedResponse<ClassGroupRow>>(() => {
     const schoolId = this.store.currentSchoolId();
+    const page = this.page();
+    const pageSize = this.pageSize();
     if (!schoolId) {
       return undefined;
     }
     return {
-      url: '/api/v1/class-groups/count',
+      url: '/api/v1/class-groups',
       params: toFetchQueryRecord({
         schoolId,
-        take: this.pagination.take(),
-        skip: this.pagination.skip(),
-        search: this.pagination.search(),
+        page,
+        pageSize,
+        search: this.form.searchText().value(),
+        teacherId: this.form.teacherId().value(),
+        studyPlanId: this.form.studyPlanId().value(),
       }),
     };
   });
 
-  constructor() {
-    effect(() => {
-      const count = this.classGroupsCount.value();
-      if (count != null) {
-        this.pagination.updateCount(count);
-      }
-    });
-  }
+  public studyPlans = httpResource<PaginatedResponse<StudyPlanRow>>(() => {
+    const schoolId = this.store.currentSchoolId();
+
+    if (!schoolId) {
+      return undefined;
+    }
+
+    return {
+      url: '/api/v1/study-plans',
+      params: toFetchQueryRecord({
+        schoolId,
+        page: 1,
+        pageSize: 50,
+      }),
+    };
+  });
 
   public editClassGroup(group?: ClassGroupRow) {
     this.modal

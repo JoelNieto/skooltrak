@@ -9,6 +9,7 @@ import {
   WebSocketServer,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
+import { ThreadStatus } from '@generated/prisma';
 import { PrismaService } from '../prisma.service';
 import { CommunicationWsAuthService } from './communication-ws-auth.service';
 
@@ -50,11 +51,18 @@ export class CommunicationSocketGateway implements OnGatewayConnection, OnGatewa
   async handleJoinThread(@ConnectedSocket() client: Socket, @MessageBody() threadId: string) {
     const userId = client.data['userId'] as string | undefined;
     if (!userId || !threadId) return { ok: false };
-    const participant = await this.prisma.threadParticipant.findFirst({
-      where: { threadId, userId },
-      select: { id: true },
+    const thread = await this.prisma.communicationThread.findFirst({
+      where: { id: threadId, deletedAt: null },
+      select: {
+        status: true,
+        createdById: true,
+        participants: { where: { userId }, select: { id: true } },
+      },
     });
-    if (!participant) return { ok: false };
+    if (!thread || thread.participants.length === 0) return { ok: false };
+    if (thread.status === ThreadStatus.PENDING_APPROVAL && thread.createdById !== userId) {
+      return { ok: false };
+    }
     await client.join(this.threadRoom(threadId));
     return { ok: true };
   }
@@ -74,12 +82,16 @@ export class CommunicationSocketGateway implements OnGatewayConnection, OnGatewa
     return { ok: true };
   }
 
-  emitMessageNew(threadId: string, message: unknown) {
+  emitMessageNew(threadId: string, message: unknown, recipientUserIds: string[] = []) {
     if (!this.server) {
       this.logger.warn('Socket server not ready');
       return;
     }
-    this.server.to(this.threadRoom(threadId)).emit('thread:message.new', { threadId, message });
+    const payload = { threadId, message };
+    this.server.to(this.threadRoom(threadId)).emit('thread:message.new', payload);
+    for (const userId of recipientUserIds) {
+      this.server.to(this.userRoom(userId)).emit('thread:message.new', payload);
+    }
   }
 
   emitTyping(threadId: string, userId: string) {

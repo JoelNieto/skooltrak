@@ -1,7 +1,8 @@
 import { EmptyState, Toast } from '#/ui';
-import { httpResource } from '@angular/common/http';
+import { HttpParams, httpResource } from '@angular/common/http';
 import { Component, inject, input, output, signal } from '@angular/core';
-import { form, FormField, maxLength, required } from '@angular/forms/signals';
+import { form, FormField, maxLength, minLength, required } from '@angular/forms/signals';
+import { PaginatedResponse } from '../core/pagination-meta';
 import Store from '../core/store';
 import { CommunicationApi, Thread, ThreadType, UrgencyTier } from './communication-api.service';
 
@@ -32,7 +33,7 @@ interface StudentOption {
         <label for="class-group-id">Grupo de clase</label>
         <select class="select select-primary" [formField]="form.classGroupId">
           <option [value]="''" disabled>Selecciona un grupo…</option>
-          @for (cg of classGroups.value(); track cg.id) {
+          @for (cg of classGroups.value()?.data; track cg.id) {
             <option [value]="cg.id">{{ cg.name }}</option>
           }
         </select>
@@ -57,6 +58,11 @@ interface StudentOption {
       <div class="fieldset">
         <label for="title">Asunto</label>
         <input class="input input-primary" [formField]="form.title" />
+      </div>
+
+      <div class="fieldset">
+        <label for="body">Mensaje</label>
+        <textarea class="textarea textarea-primary w-full" rows="4" [formField]="form.body"></textarea>
       </div>
 
       <div class="fieldset">
@@ -91,12 +97,14 @@ export class NewThreadFormComponent {
     type: ThreadType;
     classGroupId: string;
     title: string;
+    body: string;
     studentId: string;
     urgency: UrgencyTier;
   }>({
     type: 'CLASS_GROUP',
     classGroupId: '',
     title: '',
+    body: '',
     studentId: '',
     urgency: 'ROUTINE',
   });
@@ -105,36 +113,39 @@ export class NewThreadFormComponent {
 
   public form = form(this.formModel, (schemaPath) => {
     required(schemaPath.title, { message: 'Asunto requerido' });
+    required(schemaPath.body, { message: 'Mensaje requerido' });
+    minLength(schemaPath.body, 1, { message: 'Mensaje requerido' });
     required(schemaPath.classGroupId, { message: 'Grupo requerido' });
-    maxLength(schemaPath.title, 120, { message: 'Maximo 120 caractere' });
+    maxLength(schemaPath.title, 120, { message: 'Máximo 120 caracteres' });
+    maxLength(schemaPath.body, 8000, { message: 'Máximo 8000 caracteres' });
     required(schemaPath.studentId, {
       message: 'Estudiante requerido',
       when: ({ valueOf }) => valueOf(schemaPath.type) === 'STUDENT_GUARDIANS',
     });
   });
 
-  public classGroups = httpResource<ClassGroupOption[]>(
-    () => {
-      const schoolId = this.#store.currentSchoolId();
-      if (!schoolId) {
-        return undefined;
-      }
-      return {
-        url: '/api/v1/class-groups',
-        params: {
-          schoolId,
-        },
-      };
-    },
-    { defaultValue: [] },
-  );
+  public classGroups = httpResource<PaginatedResponse<ClassGroupOption>>(() => {
+    const schoolId = this.#store.currentSchoolId();
+    if (!schoolId) {
+      return undefined;
+    }
+    const params = new HttpParams().set('schoolId', schoolId).set('pageSize', 100);
+    console.log({ params });
+    return {
+      url: '/api/v1/class-groups',
+      params: params,
+    };
+  });
 
   public studentsResource = httpResource<StudentOption[]>(
     () => {
       const groupId = this.form.classGroupId().value();
       if (!groupId) return undefined;
+      const params = new HttpParams();
+      params.set('pageSize', 50);
       return {
         url: `/api/v1/students/by-group/${groupId}`,
+        params,
       };
     },
     { defaultValue: [] },
@@ -149,7 +160,7 @@ export class NewThreadFormComponent {
     if (this.form().invalid() || this.submitting()) return;
     this.submitting.set(true);
 
-    const { type, studentId, classGroupId, title, urgency } = this.formModel();
+    const { type, studentId, classGroupId, title, body, urgency } = this.formModel();
 
     const scopeId = type === 'STUDENT_GUARDIANS' ? studentId : classGroupId;
 
@@ -158,6 +169,7 @@ export class NewThreadFormComponent {
         type: type,
         scopeId,
         title: title.trim(),
+        body: body.trim(),
         urgencyDefault: urgency,
       })
       .subscribe({

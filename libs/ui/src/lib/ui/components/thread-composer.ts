@@ -19,7 +19,7 @@ import { Component, input, output, signal } from '@angular/core';
   `,
 })
 export class ThreadComposer {
-  placeholder = input<string>('Write a message…');
+  placeholder = input<string>('Escribe un mensaje…');
   disabled = input<boolean>(false);
 
   draft = signal('');

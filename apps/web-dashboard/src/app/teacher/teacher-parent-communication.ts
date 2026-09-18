@@ -1,4 +1,4 @@
-import { MessageBubble, Modal, PageHeader, ThreadComposer, ThreadList, Toast } from '#/ui';
+import { MessageBubble, Modal, PageHeader, ThreadComposer, ThreadList, ThreadScrollPane, Toast } from '#/ui';
 import { DatePipe } from '@angular/common';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { afterRenderEffect, Component, computed, inject, linkedSignal, signal } from '@angular/core';
@@ -16,6 +16,7 @@ import {
 } from '../communication/communication-api.service';
 import { CommunicationSocket } from '../communication/communication-socket.service';
 import { NewThreadFormComponent } from '../communication/new-thread-form.component';
+import { OfflineOutbox } from '../communication/offline-outbox.service';
 const API = '/api/v1/communication';
 interface ThreadListItem {
   id: string;
@@ -29,7 +30,7 @@ interface ThreadListItem {
 
 @Component({
   selector: 'app-teacher-parent-communication',
-  imports: [RouterLink, FormsModule, DatePipe, PageHeader, ThreadList, ThreadComposer, MessageBubble],
+  imports: [RouterLink, FormsModule, DatePipe, PageHeader, ThreadList, ThreadComposer, ThreadScrollPane, MessageBubble],
   template: `
     <div class="breadcrumbs text-sm">
       <ul>
@@ -101,7 +102,11 @@ interface ThreadListItem {
             </div>
           </header>
 
-          <div #messagesContainer class="flex-1 overflow-y-auto p-3 space-y-2">
+          <lib-thread-scroll-pane
+            [itemCount]="messages().length"
+            [lastIsMine]="lastIsMine()"
+            [resetKey]="selectedId()"
+          >
             @for (m of messages(); track m.id) {
               <div class="space-y-0.5">
                 <lib-message-bubble
@@ -120,9 +125,21 @@ interface ThreadListItem {
             } @empty {
               <p class="text-center text-sm opacity-60 mt-10">Aún no hay mensajes.</p>
             }
-          </div>
+          </lib-thread-scroll-pane>
 
-          <lib-thread-composer (send)="send($event)" />
+          <lib-thread-composer placeholder="Escribe un mensaje…" (send)="send($event)" />
+          <div class="px-2 pb-2">
+            <label class="sr-only" for="teacher-urgency">Prioridad del mensaje</label>
+            <select
+              id="teacher-urgency"
+              class="select select-primary select-sm w-full"
+              [ngModel]="composerUrgency()"
+              (ngModelChange)="composerUrgency.set($event)"
+            >
+              <option value="ROUTINE">Rutina</option>
+              <option value="IMPORTANT">Importante</option>
+            </select>
+          </div>
         } @else {
           <div class="flex-1 grid place-items-center text-sm opacity-60">
             Selecciona una conversación para ver los mensajes.
@@ -139,6 +156,7 @@ export default class TeacherParentCommunication {
   #modal = inject(Modal);
   #toast = inject(Toast);
   #http = inject(HttpClient);
+  #outbox = inject(OfflineOutbox);
 
   readonly selectedId = signal<string | null>(null);
 
@@ -171,11 +189,9 @@ export default class TeacherParentCommunication {
 
   constructor() {
     afterRenderEffect((onCleanup) => {
-      const id = this.selectedId();
-      if (!id) return;
-      this.#socket.joinThread(id);
       const unsub = this.#socket.onMessageReceived((payload) => {
-        if (payload.threadId !== id || !payload.message) return;
+        this.treadsResource.reload();
+        if (payload.threadId !== this.selectedId() || !payload.message) return;
         const msg = payload.message as ThreadMessage;
         this.messages.update((prev) => (prev?.some((m) => m.id === msg.id) ? prev : [...prev, msg]));
       });
@@ -183,8 +199,22 @@ export default class TeacherParentCommunication {
       onCleanup(() => {
         unsub();
         unsubDelivery();
-        this.#socket.leaveThread(id);
       });
+    });
+
+    afterRenderEffect((onCleanup) => {
+      const id = this.selectedId();
+      if (!id) return;
+      this.#socket.joinThread(id);
+      onCleanup(() => this.#socket.leaveThread(id));
+    });
+
+    afterRenderEffect((onCleanup) => {
+      if (typeof window === 'undefined') return;
+      const onOnline = () => void this.flushOutbox();
+      window.addEventListener('online', onOnline);
+      void this.flushOutbox();
+      onCleanup(() => window.removeEventListener('online', onOnline));
     });
 
     afterRenderEffect(() => {
@@ -197,14 +227,30 @@ export default class TeacherParentCommunication {
       if (!this.treadsResource.hasValue()) return;
       this.fetchAudienceNames(this.treadsResource.value() ?? []);
     });
+
+    afterRenderEffect(() => {
+      const id = this.selectedId();
+      const thread = this.treadsResource.value().find((t) => t.id === id);
+      if (thread) this.composerUrgency.set(thread.urgencyDefault === 'IMPORTANT' ? 'IMPORTANT' : 'ROUTINE');
+    });
   }
 
   selectedThread = computed(() => this.threads().find((t) => t.id === this.selectedId()));
 
+  lastIsMine = computed(() => {
+    const messages = this.messages();
+    const last = messages[messages.length - 1];
+    return !!last && last.senderId === this.meId();
+  });
+
   threads = linkedSignal(() => {
     return this.treadsResource
       .value()
-      .sort((a, b) => (isBefore(a.messages[0].createdAt, b.messages[0].createdAt) ? 1 : -1))
+      .sort((a, b) => {
+        const aDate = a.messages?.[0]?.createdAt ?? a.updatedAt;
+        const bDate = b.messages?.[0]?.createdAt ?? b.updatedAt;
+        return isBefore(aDate, bDate) ? 1 : -1;
+      })
       .map((t) => {
         const last = t.messages?.[0];
 
@@ -286,13 +332,13 @@ export default class TeacherParentCommunication {
     if (studentIds.size > 0) {
       const ids = Array.from(studentIds).join(',');
       this.#http
-        .get<{ id: string; firstName: string; fatherName: string }[]>(`/api/v1/students`, {
+        .get<{ data: { id: string; firstName: string; fatherName: string }[] }>(`/api/v1/students`, {
           params: { ids },
         })
         .subscribe({
-          next: (students) => {
+          next: (resp) => {
             const map = new Map<string, string>();
-            for (const s of students) {
+            for (const s of resp.data) {
               const fullName = `${s.firstName ?? ''} ${s.fatherName ?? ''}`.trim();
               if (fullName) {
                 map.set(s.id, fullName);
@@ -309,13 +355,13 @@ export default class TeacherParentCommunication {
     if (classGroupIds.size > 0) {
       const ids = Array.from(classGroupIds).join(',');
       this.#http
-        .get<{ id: string; name: string }[]>(`/api/v1/class-groups`, {
+        .get<{ data: { id: string; name: string }[] }>(`/api/v1/class-groups`, {
           params: { ids },
         })
         .subscribe({
-          next: (classGroups) => {
+          next: (resp) => {
             const map = new Map<string, string>();
-            for (const cg of classGroups) {
+            for (const cg of resp.data) {
               map.set(cg.id, cg.name);
             }
             this.classGroupNames.set(map);
@@ -353,13 +399,31 @@ export default class TeacherParentCommunication {
   send(body: string) {
     const id = this.selectedId();
     if (!id || !body.trim()) return;
-    this.#api.sendMessage(id, body.trim(), this.composerUrgency()).subscribe({
+    const urgency = this.composerUrgency();
+    if (typeof navigator !== 'undefined' && !navigator.onLine) {
+      this.#outbox.enqueue(id, body.trim(), urgency);
+      this.#toast.showSuccess('Se enviará cuando vuelva la conexión');
+      return;
+    }
+    this.#api.sendMessage(id, body.trim(), urgency).subscribe({
       next: (msg) => {
         this.messages.update((prev) => (prev?.some((m) => m.id === msg.id) ? prev : [...prev, msg]));
         this.refreshDeliveries();
       },
       error: () => this.#toast.showError('No se pudo enviar el mensaje'),
     });
+  }
+
+  private async flushOutbox() {
+    const sent = await this.#outbox.flush();
+    if (sent.length === 0) return;
+    this.treadsResource.reload();
+    const selected = this.selectedId();
+    for (const msg of sent) {
+      if (msg.threadId !== selected) continue;
+      this.messages.update((prev) => (prev?.some((m) => m.id === msg.id) ? prev : [...prev, msg]));
+    }
+    this.refreshDeliveries();
   }
 
   private refreshDeliveries() {

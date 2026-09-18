@@ -75,6 +75,10 @@ export class CommunicationService {
     return ['TEACHER', 'ORG_ADMIN', 'ADMIN', 'SYSADMIN'].includes(role.toUpperCase());
   }
 
+  private isOrgAdmin(role: string): boolean {
+    return ['ORG_ADMIN', 'ADMIN', 'SYSADMIN'].includes(role.toUpperCase());
+  }
+
   private async audit(params: {
     actorId: string | null;
     organizationId: string | null;
@@ -142,9 +146,12 @@ export class CommunicationService {
     }
 
     if (type === ThreadType.SCHOOL_WIDE) {
+      const studentWhere = scopeId
+        ? { organizationId, schoolId: scopeId }
+        : { organizationId };
       const [students, teachers] = await Promise.all([
         this.prisma.student.findMany({
-          where: { organizationId },
+          where: studentWhere,
           include: { user: true, parents: { include: { user: true } } },
         }),
         this.prisma.teacher.findMany({
@@ -194,6 +201,9 @@ export class CommunicationService {
         .map((id) => ({ user: { connect: { id } }, role: 'MEMBER', canInitiate: false })),
     ];
 
+    const firstBody = input.body?.trim();
+    const urgency = input.urgencyDefault ?? UrgencyTier.ROUTINE;
+
     const thread = await this.prisma.communicationThread.create({
       data: {
         organizationId,
@@ -202,8 +212,19 @@ export class CommunicationService {
         title: input.title.trim(),
         createdById: userId,
         ownerRole: role.toUpperCase(),
-        urgencyDefault: input.urgencyDefault ?? UrgencyTier.ROUTINE,
+        urgencyDefault: urgency,
         participants: { create: participantData },
+        ...(firstBody
+          ? {
+              messages: {
+                create: {
+                  senderId: userId,
+                  body: firstBody,
+                  urgency,
+                },
+              },
+            }
+          : {}),
       },
       include: THREAD_INCLUDE,
     });
@@ -216,6 +237,23 @@ export class CommunicationService {
       detail: { type: input.type, scopeId: input.scopeId, participants: participantData.length },
     });
 
+    const firstMessage = thread.messages[0];
+    if (firstMessage) {
+      const recipientUserIds = thread.participants.filter((p) => p.userId !== userId).map((p) => p.userId);
+      if (recipientUserIds.length > 0) {
+        await this.delivery.materializeDeliveries(firstMessage.id, recipientUserIds);
+        await this.delivery.fanOut(firstMessage.id);
+      }
+      this.gateway.emitMessageNew(thread.id, firstMessage, recipientUserIds);
+      await this.audit({
+        actorId: userId,
+        organizationId,
+        action: 'MESSAGE_SENT',
+        threadId: thread.id,
+        messageId: firstMessage.id,
+      });
+    }
+
     return thread;
   }
 
@@ -227,8 +265,12 @@ export class CommunicationService {
       deletedAt: null,
       OR: [{ participants: { some: { userId } } }],
     };
-    if (this.isStaff(role)) {
+    // Teachers see only threads they own or sit on (they are always a participant
+    // on threads they create). Org-admins may list the whole organization.
+    if (this.isOrgAdmin(role)) {
       where.OR!.push({ organizationId });
+    } else {
+      where.status = { not: ThreadStatus.PENDING_APPROVAL };
     }
 
     return this.prisma.communicationThread.findMany({
@@ -246,8 +288,12 @@ export class CommunicationService {
     });
     if (!thread) throw new NotFoundException('Thread not found');
     const isParticipant = thread.participants.some((p) => p.userId === userId);
-    if (!isParticipant && !(this.isStaff(role) && thread.organizationId === organizationId)) {
+    const isAdmin = this.isOrgAdmin(role) && thread.organizationId === organizationId;
+    if (!isParticipant && !isAdmin) {
       throw new ForbiddenException('Not a participant of this thread');
+    }
+    if (thread.status === ThreadStatus.PENDING_APPROVAL && !isAdmin && thread.createdById !== userId) {
+      throw new ForbiddenException('Broadcast is pending approval');
     }
     return thread;
   }
@@ -256,12 +302,22 @@ export class CommunicationService {
     const { userId, organizationId, role } = this.getAuth();
     const thread = await this.prisma.communicationThread.findFirst({
       where: { id: threadId, deletedAt: null },
-      select: { id: true, organizationId: true, participants: { select: { userId: true } } },
+      select: {
+        id: true,
+        organizationId: true,
+        status: true,
+        createdById: true,
+        participants: { select: { userId: true } },
+      },
     });
     if (!thread) throw new NotFoundException('Thread not found');
     const isParticipant = thread.participants.some((p) => p.userId === userId);
-    if (!isParticipant && !(this.isStaff(role) && thread.organizationId === organizationId)) {
+    const isAdmin = this.isOrgAdmin(role) && thread.organizationId === organizationId;
+    if (!isParticipant && !isAdmin) {
       throw new ForbiddenException('Not a participant of this thread');
+    }
+    if (thread.status === ThreadStatus.PENDING_APPROVAL && !isAdmin && thread.createdById !== userId) {
+      throw new ForbiddenException('Broadcast is pending approval');
     }
 
     const messages = await this.prisma.communicationMessage.findMany({
@@ -313,7 +369,7 @@ export class CommunicationService {
       await this.delivery.fanOut(message.id);
     }
 
-    this.gateway.emitMessageNew(input.threadId, message);
+    this.gateway.emitMessageNew(input.threadId, message, recipientUserIds);
 
     await this.audit({
       actorId: userId,
@@ -331,31 +387,51 @@ export class CommunicationService {
     const { userId } = this.getAuth();
     const message = await this.prisma.communicationMessage.findUnique({
       where: { id: messageId },
-      select: { id: true, threadId: true },
+      select: { id: true, threadId: true, senderId: true },
     });
     if (!message) throw new NotFoundException('Message not found');
 
+    const readAt = new Date();
     await this.prisma.messageDelivery.updateMany({
       where: { messageId, recipientUserId: userId, channel: DeliveryChannel.IN_APP },
-      data: { status: DeliveryStatus.READ, readAt: new Date() },
+      data: { status: DeliveryStatus.READ, readAt },
     });
     await this.prisma.threadParticipant.updateMany({
       where: { threadId: message.threadId, userId },
-      data: { lastReadAt: new Date() },
+      data: { lastReadAt: readAt },
     });
+
+    const payload = {
+      messageId,
+      recipientUserId: userId,
+      channel: DeliveryChannel.IN_APP,
+      status: DeliveryStatus.READ,
+      readAt: readAt.toISOString(),
+    };
+    this.gateway.emitDeliveryUpdate(userId, payload);
+    if (message.senderId !== userId) {
+      this.gateway.emitDeliveryUpdate(message.senderId, payload);
+    }
 
     return { success: true };
   }
 
   async addParticipants(input: AddParticipantInput) {
-    const { userId, organizationId } = this.getAuth();
+    const { userId, organizationId, role } = this.getAuth();
     if (!organizationId) throw new ForbiddenException('Organization context required');
 
     const thread = await this.prisma.communicationThread.findFirst({
       where: { id: input.threadId, deletedAt: null },
-      select: { id: true, organizationId: true },
+      select: { id: true, organizationId: true, participants: { select: { userId: true } } },
     });
     if (!thread) throw new NotFoundException('Thread not found');
+    if (thread.organizationId !== organizationId) {
+      throw new ForbiddenException('Thread is not in your organization');
+    }
+    const isParticipant = thread.participants.some((p) => p.userId === userId);
+    if (!isParticipant && !this.isOrgAdmin(role)) {
+      throw new ForbiddenException('Not a participant of this thread');
+    }
 
     const users = await this.prisma.user.findMany({
       where: { id: { in: input.userIds }, organizationId },
@@ -468,8 +544,11 @@ export class CommunicationService {
   }
 
   async setPreference(userId: string, input: PreferenceInput) {
-    const { organizationId } = this.getAuth();
+    const { userId: actorId, organizationId, role } = this.getAuth();
     if (!organizationId) throw new ForbiddenException('Organization context required');
+    if (userId !== actorId && !this.isOrgAdmin(role)) {
+      throw new ForbiddenException('You can only update your own preferences');
+    }
     return this.prisma.recipientPreference.upsert({
       where: { userId },
       update: {
@@ -501,7 +580,8 @@ export class CommunicationService {
     });
   }
 
-  async handleNovuWebhook(payload: unknown) {
+  async handleNovuWebhook(payload: unknown, signature?: string) {
+    this.delivery.assertWebhookSignature(signature, payload);
     const typed = payload as {
       novuEventId?: string;
       messageId?: string;
@@ -524,6 +604,16 @@ export class CommunicationService {
   async createBroadcast(input: BroadcastInput) {
     const { userId, organizationId, role } = this.getAuth();
     if (!organizationId) throw new ForbiddenException('Organization context required');
+
+    if (
+      (input.type === ThreadType.CLASS_GROUP || input.type === ThreadType.COURSE) &&
+      !input.scopeId
+    ) {
+      throw new BadRequestException(`${input.type} requires scopeId`);
+    }
+    if (input.type === ThreadType.SCHOOL_WIDE && !input.scopeId) {
+      throw new BadRequestException('SCHOOL_WIDE requires scopeId (schoolId)');
+    }
 
     const recipients = await this.resolveRecipients(
       input.type,
@@ -573,7 +663,7 @@ export class CommunicationService {
     });
 
     if (status === ThreadStatus.APPROVED) {
-      await this.fanOutThreadMessages(thread.id, userId, organizationId);
+      await this.fanOutThreadMessages(thread.id, userId);
     }
 
     return thread;
@@ -581,8 +671,9 @@ export class CommunicationService {
 
   async approveBroadcast(threadId: string) {
     const { userId, organizationId } = this.getAuth();
+    if (!organizationId) throw new ForbiddenException('Organization context required');
     const thread = await this.prisma.communicationThread.findFirst({
-      where: { id: threadId, deletedAt: null, broadcast: true },
+      where: { id: threadId, organizationId, deletedAt: null, broadcast: true },
       select: { id: true, status: true, organizationId: true },
     });
     if (!thread) throw new NotFoundException('Broadcast not found');
@@ -595,7 +686,7 @@ export class CommunicationService {
       data: { status: ThreadStatus.APPROVED, approvedById: userId, approvedAt: new Date() },
     });
 
-    await this.fanOutThreadMessages(threadId, userId, organizationId);
+    await this.fanOutThreadMessages(threadId, userId);
 
     await this.audit({
       actorId: userId,
@@ -607,10 +698,10 @@ export class CommunicationService {
     return this.getThread(threadId);
   }
 
-  private async fanOutThreadMessages(threadId: string, actorId: string, _organizationId: string) {
+  private async fanOutThreadMessages(threadId: string, actorId: string) {
     const messages = await this.prisma.communicationMessage.findMany({
       where: { threadId, deletedAt: null },
-      select: { id: true },
+      include: MESSAGE_INCLUDE,
     });
     const others = (
       await this.prisma.threadParticipant.findMany({
@@ -623,14 +714,39 @@ export class CommunicationService {
     for (const m of messages) {
       await this.delivery.materializeDeliveries(m.id, others);
       await this.delivery.fanOut(m.id);
+      this.gateway.emitMessageNew(threadId, m, others);
     }
   }
 
-  async listAudit(organizationIdFilter?: string, limit = 100) {
+  async listBroadcasts(status?: ThreadStatus) {
+    const { userId, organizationId, role } = this.getAuth();
+    if (!organizationId) throw new ForbiddenException('Organization context required');
+    if (!this.isOrgAdmin(role) && !this.isStaff(role)) {
+      throw new ForbiddenException('Not allowed to list broadcasts');
+    }
+
+    return this.prisma.communicationThread.findMany({
+      where: {
+        organizationId,
+        broadcast: true,
+        deletedAt: null,
+        ...(status ? { status } : {}),
+        ...(!this.isOrgAdmin(role) ? { createdById: userId } : {}),
+      },
+      include: THREAD_INCLUDE,
+      orderBy: { createdAt: 'desc' },
+      take: 100,
+    });
+  }
+
+  async listAudit(limit = 100) {
     const { organizationId } = this.getAuth();
-    const org = organizationIdFilter ?? organizationId ?? undefined;
+    if (!organizationId) throw new ForbiddenException('Organization context required');
     return this.prisma.communicationAuditLog.findMany({
-      where: org ? { organizationId: org } : undefined,
+      where: { organizationId },
+      include: {
+        actor: { select: { id: true, firstName: true, lastName: true } },
+      },
       orderBy: { createdAt: 'desc' },
       take: limit,
     });

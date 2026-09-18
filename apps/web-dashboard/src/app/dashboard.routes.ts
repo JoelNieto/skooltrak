@@ -152,13 +152,6 @@ export const DASHBOARD_ROUTES: Route[] = [
         loadComponent: () => import('./parent-home'),
       },
       {
-        path: 'family',
-        canActivate: [authGuard],
-        canMatch: [parentGuard],
-        loadComponent: () => import('./communication/family-chat'),
-        title: 'Mensajes de familia | Skooltrak',
-      },
-      {
         path: 'courses',
         canActivate: [permissionGuard('VIEW_COURSES')],
         loadComponent: () => import('./courses/courses'),
@@ -329,7 +322,7 @@ export const DASHBOARD_ROUTES: Route[] = [
       },
       {
         path: 'teacher/communication',
-        canActivate: [permissionGuard('MANAGE_MESSAGES')],
+        canActivate: [permissionGuard('COMMUNICATION_VIEW', 'MANAGE_MESSAGES')],
         loadComponent: () => import('./teacher/teacher-parent-communication'),
       },
       {
@@ -349,7 +342,7 @@ export const DASHBOARD_ROUTES: Route[] = [
       },
       {
         path: 'parent/communication',
-        canActivate: [permissionGuard('VIEW_MESSAGES')],
+        canActivate: [permissionGuard('COMMUNICATION_VIEW', 'VIEW_MESSAGES')],
         loadComponent: () => import('./parent/parent-teacher-communication'),
       },
       {
@@ -456,6 +449,12 @@ export const DASHBOARD_ROUTES: Route[] = [
           {
             path: 'newsletters',
             loadComponent: () => import('./admin/pages/newsletters'),
+          },
+          {
+            path: 'communication',
+            canActivate: [permissionGuard('COMMUNICATION_BROADCAST')],
+            loadComponent: () => import('./admin/pages/communication'),
+            title: 'Comunicados | Skooltrak',
           },
           { path: '', redirectTo: 'schools', pathMatch: 'full' },
         ],

@@ -55,6 +55,19 @@ export interface Thread {
   messages: ThreadMessage[];
 }
 
+export interface AuditLog {
+  id: string;
+  actorId?: string | null;
+  organizationId?: string | null;
+  action: string;
+  threadId?: string | null;
+  messageId?: string | null;
+  detail?: string | null;
+  ip?: string | null;
+  createdAt: string;
+  actor?: ThreadParticipantUser | null;
+}
+
 export interface Delivery {
   id: string;
   messageId: string;
@@ -105,12 +118,36 @@ export class CommunicationApi {
     scopeId?: string | null;
     urgencyDefault?: UrgencyTier;
     participantUserIds?: string[];
+    body?: string;
   }): Observable<Thread> {
     return this.#http.post<Thread>(`${API}/threads`, input);
   }
 
   getDeliveries(messageId: string): Observable<Delivery[]> {
     return this.#http.get<Delivery[]>(`${API}/messages/${messageId}/deliveries`);
+  }
+
+  createBroadcast(input: {
+    type: ThreadType;
+    title: string;
+    body: string;
+    scopeId?: string | null;
+    urgency?: UrgencyTier;
+  }): Observable<Thread> {
+    return this.#http.post<Thread>(`${API}/broadcasts`, input);
+  }
+
+  listBroadcasts(status?: ThreadStatus): Observable<Thread[]> {
+    const params = status ? `?status=${encodeURIComponent(status)}` : '';
+    return this.#http.get<Thread[]>(`${API}/broadcasts${params}`);
+  }
+
+  approveBroadcast(id: string): Observable<Thread> {
+    return this.#http.post<Thread>(`${API}/broadcasts/${id}/approve`, {});
+  }
+
+  listAudit(): Observable<AuditLog[]> {
+    return this.#http.get<AuditLog[]>(`${API}/admin/audit`);
   }
 
   syncSubscriber(input: { userId: string; channelPrefs?: Record<string, boolean> }): Observable<unknown> {

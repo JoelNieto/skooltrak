@@ -3,14 +3,10 @@ import { DatePipe } from '@angular/common';
 import { httpResource } from '@angular/common/http';
 import { Component, computed, effect, inject, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
-import { toFetchQueryRecord } from './core/fetch-query-params';
+import Auth from './auth/auth';
 import Store from './core/store';
+import { Thread } from './communication/communication-api.service';
 import { LinkedChild, ParentContext } from './parent/parent-context.service';
-
-type InboxRow = {
-  id: string;
-  message?: { subject?: string; createdAt?: string; sender?: { name?: string } };
-};
 
 type PublishedNewsletter = {
   id: string;
@@ -42,7 +38,7 @@ type ParentMeResponse = {
       <lib-stat-card label="Hijos vinculados" [value]="children().length.toString()" helper="En tus escuelas" />
       <lib-stat-card
         label="Mensajes nuevos"
-        [value]="(recentMessages.value()?.length ?? 0).toString()"
+        [value]="unreadCount().toString()"
         helper="Bandeja de entrada"
       />
       <lib-stat-card
@@ -92,26 +88,32 @@ type ParentMeResponse = {
         <div class="card-body">
           <div class="flex items-center justify-between">
             <h2 class="text-lg font-semibold text-base-content">Mensajes recientes</h2>
-            <a routerLink="/messages" class="link link-primary text-sm"> Ir a mensajes </a>
+            <a routerLink="/parent/communication" class="link link-primary text-sm"> Ir a mensajes </a>
           </div>
-          @if ((recentMessages.value() ?? []).length === 0) {
+          @if ((recentThreads().length ?? 0) === 0) {
             <lib-empty-state
               title="Sin mensajes recientes"
-              description="Revisa tu bandeja para novedades."
+              description="Cuando un docente te escriba, el mensaje aparecerá aquí."
               icon="mail"
             />
           } @else {
             <div class="space-y-3">
-              @for (message of recentMessages.value() ?? []; track message.id) {
-                <div class="rounded-lg border border-base-200 p-3">
+              @for (thread of recentThreads(); track thread.id) {
+                <a
+                  routerLink="/parent/communication"
+                  class="block rounded-lg border border-base-200 p-3 hover:border-primary transition-colors"
+                >
                   <p class="font-medium text-base-content">
-                    {{ message.message?.subject }}
+                    {{ thread.title }}
                   </p>
-                  <div class="text-sm text-base-content/70">
-                    {{ message.message?.sender?.name }} ·
-                    {{ $safeNavigationMigration(message.message?.createdAt) | date: 'short' }}
+                  <p class="text-sm text-base-content/70 line-clamp-2">{{ thread.preview }}</p>
+                  <div class="text-sm text-base-content/70 mt-1">
+                    {{ thread.senderName }}
+                    @if (thread.createdAt) {
+                      · {{ thread.createdAt | date: 'short' }}
+                    }
                   </div>
-                </div>
+                </a>
               }
             </div>
           }
@@ -157,6 +159,7 @@ export default class ParentHome {
   #ctx = inject(ParentContext);
   #router = inject(Router);
   #toasts = inject(Toast);
+  #auth = inject(Auth);
 
   public loading = signal(true);
 
@@ -193,13 +196,39 @@ export default class ParentHome {
     });
   }
 
-  public recentMessages = httpResource<InboxRow[]>(
-    () => ({
-      url: '/api/v1/messages',
-      params: toFetchQueryRecord({ take: 4, skip: 0 }),
-    }),
-    { defaultValue: [] },
-  );
+  public recentMessages = httpResource<Thread[]>(() => '/api/v1/communication/threads', { defaultValue: [] });
+
+  public recentThreads = computed(() => {
+    return [...(this.recentMessages.value() ?? [])]
+      .sort((a, b) => {
+        const aDate = a.messages?.[0]?.createdAt ?? a.updatedAt;
+        const bDate = b.messages?.[0]?.createdAt ?? b.updatedAt;
+        return aDate < bDate ? 1 : -1;
+      })
+      .slice(0, 4)
+      .map((t) => {
+        const last = t.messages?.[0];
+        const sender = last?.sender;
+        return {
+          id: t.id,
+          title: t.title,
+          preview: last?.body ?? '',
+          senderName: sender ? `${sender.firstName ?? ''} ${sender.lastName ?? ''}`.trim() : '',
+          createdAt: last?.createdAt,
+        };
+      });
+  });
+
+  public unreadCount = computed(() => {
+    const me = this.#auth.meId();
+    return (this.recentMessages.value() ?? []).filter((t) => {
+      const last = t.messages?.[0];
+      if (!last || last.senderId === me) return false;
+      const mine = t.participants.find((p) => p.userId === me);
+      if (!mine?.lastReadAt) return true;
+      return new Date(last.createdAt) > new Date(mine.lastReadAt);
+    }).length;
+  });
 
   public recentNewsletters = httpResource<PublishedNewsletter[]>(
     () => {

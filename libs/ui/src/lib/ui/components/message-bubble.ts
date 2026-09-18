@@ -10,8 +10,8 @@ const URGENCY_BADGE: Record<Urgency, string> = {
 
 const URGENCY_LABEL: Record<Urgency, string> = {
   ROUTINE: '',
-  IMPORTANT: 'Important',
-  EMERGENCY: 'Emergency',
+  IMPORTANT: 'Importante',
+  EMERGENCY: 'Emergencia',
 };
 
 @Component({

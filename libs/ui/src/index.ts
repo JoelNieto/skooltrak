@@ -13,6 +13,7 @@ export * from './lib/ui/components/stat-card';
 export * from './lib/ui/components/text-editor';
 export * from './lib/ui/components/thread-composer';
 export * from './lib/ui/components/thread-list';
+export * from './lib/ui/components/thread-scroll-pane';
 export * from './lib/ui/components/toasts-container';
 export * from './lib/ui/pipes/decimal-pipe';
 export * from './lib/ui/pipes/time-ago.pipe';

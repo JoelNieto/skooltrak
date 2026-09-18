@@ -1,4 +1,5 @@
 import {
+  AllowAnonymous,
   BetterAuthGuard,
   Perm,
   PermissionsGuard,
@@ -8,6 +9,7 @@ import {
   Body,
   Controller,
   Get,
+  Headers,
   Param,
   Patch,
   Post,
@@ -17,15 +19,16 @@ import {
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Request } from 'express';
+import { ThreadStatus } from '@generated/prisma';
 import { CanInitiateGuard } from './communication.guards';
 import { CommunicationService } from './communication.service';
 import {
-  AddParticipantInput,
+  AddParticipantBodyInput,
   BroadcastInput,
   CreateThreadInput,
   DeliveryPreviewInput,
   PreferenceInput,
-  SendMessageInput,
+  SendMessageBodyInput,
   SubscriberSyncInput,
 } from './dto/communication.input';
 
@@ -70,7 +73,7 @@ export class CommunicationController {
 
   @Post('threads/:id/messages')
   @ApiOperation({ summary: 'Send a message (reply-only roles allowed)' })
-  sendMessage(@Param('id') id: string, @Body() body: Omit<SendMessageInput, 'threadId'>, @Req() req?: Request) {
+  sendMessage(@Param('id') id: string, @Body() body: SendMessageBodyInput, @Req() req?: Request) {
     return this.communication.sendMessage({ ...body, threadId: id }, req?.ip);
   }
 
@@ -79,7 +82,7 @@ export class CommunicationController {
   reply(
     @Param('id') id: string,
     @Param('mid') _mid: string,
-    @Body() body: Omit<SendMessageInput, 'threadId'>,
+    @Body() body: SendMessageBodyInput,
     @Req() req?: Request,
   ) {
     return this.communication.sendMessage({ ...body, threadId: id }, req?.ip);
@@ -113,7 +116,7 @@ export class CommunicationController {
   @Post('threads/:id/participants')
   @UseGuards(CanInitiateGuard)
   @ApiOperation({ summary: 'Add participants (parents blocked by guard)' })
-  addParticipants(@Param('id') id: string, @Body() input: Omit<AddParticipantInput, 'threadId'>) {
+  addParticipants(@Param('id') id: string, @Body() input: AddParticipantBodyInput) {
     return this.communication.addParticipants({ ...input, threadId: id });
   }
 
@@ -143,12 +146,20 @@ export class CommunicationController {
   }
 
   @Post('webhooks/novu')
-  @ApiOperation({ summary: 'Novu webhook → reconcile MessageDelivery' })
-  novuWebhook(@Body() payload: unknown) {
-    return this.communication.handleNovuWebhook(payload);
+  @AllowAnonymous()
+  @ApiOperation({ summary: 'Novu webhook → reconcile MessageDelivery (HMAC)' })
+  novuWebhook(@Body() payload: unknown, @Headers('x-novu-signature') signature?: string) {
+    return this.communication.handleNovuWebhook(payload, signature);
   }
 
   // ── Admin console (broadcasts + audit) ──────────────────────────────────
+  @Get('broadcasts')
+  @RequirePermissions(Perm.COMMUNICATION_BROADCAST)
+  @ApiOperation({ summary: 'List organization broadcasts' })
+  listBroadcasts(@Query('status') status?: ThreadStatus) {
+    return this.communication.listBroadcasts(status);
+  }
+
   @Post('broadcasts')
   @RequirePermissions(Perm.COMMUNICATION_BROADCAST)
   @ApiOperation({ summary: 'Create a broadcast (pending approval if policy requires)' })
@@ -164,8 +175,9 @@ export class CommunicationController {
   }
 
   @Get('admin/audit')
+  @RequirePermissions(Perm.COMMUNICATION_APPROVE)
   @ApiOperation({ summary: 'Communication audit log' })
-  audit(@Query('organizationId') organizationId?: string) {
-    return this.communication.listAudit(organizationId);
+  audit() {
+    return this.communication.listAudit();
   }
 }

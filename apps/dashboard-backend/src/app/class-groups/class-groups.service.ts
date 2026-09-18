@@ -1,6 +1,6 @@
 import { FetchDataQueryDto, PaginatedResponseDto } from '@/api-contracts';
 import { Prisma } from '@generated/prisma';
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma.service';
 import { CreateClassGroupInput } from './dto/create-class-group.input';
 import { UpdateClassGroupInput } from './dto/update-class-group.input';
@@ -27,6 +27,7 @@ export class ClassGroupsService {
         OR: [{ name: { contains: search, mode: 'insensitive' } }],
       };
     }
+    Logger.debug('Where', { where });
     const [data, total] = await this.prisma.$transaction([
       this.prisma.classGroup.findMany({
         include: {

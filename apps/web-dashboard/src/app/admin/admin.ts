@@ -49,6 +49,9 @@ import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
         <li>
           <a routerLink="newsletters" routerLinkActive="bg-primary text-primary-content">Boletines</a>
         </li>
+        <li>
+          <a routerLink="communication" routerLinkActive="bg-primary text-primary-content">Comunicados</a>
+        </li>
       </ul>
     </div>
     <div class="pt-4">

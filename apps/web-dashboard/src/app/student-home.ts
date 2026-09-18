@@ -8,6 +8,7 @@ import { endOfWeek, startOfWeek } from 'date-fns';
 import { forkJoin, of } from 'rxjs';
 import { toFetchQueryParams } from './core/fetch-query-params';
 import Store from './core/store';
+import { RecentBroadcasts } from './communication/recent-broadcasts';
 
 type InboxRow = {
   id: string;
@@ -35,7 +36,7 @@ type StudentAssignmentRow = {
 
 @Component({
   selector: 'app-student-home',
-  imports: [DatePipe, DecimalPipe, RouterLink, PageHeader, StatCard, EmptyState],
+  imports: [DatePipe, DecimalPipe, RouterLink, PageHeader, StatCard, EmptyState, RecentBroadcasts],
   template: `
     <lib-page-header title="Dashboard del estudiante" subtitle="Lo más importante de tu semana académica." />
 
@@ -55,6 +56,10 @@ type StudentAssignmentRow = {
         [value]="(statsResource.value()?.findManyMessagesCount ?? 0).toString()"
         helper="Bandeja de entrada"
       />
+    </div>
+
+    <div class="mt-6">
+      <app-recent-broadcasts />
     </div>
 
     <div class="mt-6 grid gap-6 lg:grid-cols-2">

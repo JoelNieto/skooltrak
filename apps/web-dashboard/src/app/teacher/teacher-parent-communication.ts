@@ -1,7 +1,7 @@
 import { MessageBubble, Modal, PageHeader, ThreadComposer, ThreadList, ThreadScrollPane, Toast } from '#/ui';
 import { DatePipe } from '@angular/common';
 import { HttpClient, httpResource } from '@angular/common/http';
-import { afterRenderEffect, Component, computed, inject, linkedSignal, signal } from '@angular/core';
+import { afterRenderEffect, Component, computed, effect, inject, input, linkedSignal, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { isBefore } from 'date-fns';
@@ -25,6 +25,9 @@ interface ThreadListItem {
   audience?: string;
   type: string;
   urgent?: boolean;
+  broadcast?: boolean;
+  repliesAllowed?: boolean;
+  createdById?: string;
   participants: ThreadParticipant[];
 }
 
@@ -90,14 +93,27 @@ interface ThreadListItem {
 
       <section class="flex-1 border border-base-300 rounded-lg flex flex-col bg-base-100 min-w-0">
         @if (selectedThread(); as thread) {
-          <header class="p-3 border-b border-base-300 flex flex-col gap-1">
-            <h2 class="font-semibold truncate">
-              {{ thread.title }}
-            </h2>
+          <header
+            class="p-3 border-b border-base-300 flex flex-col gap-1"
+            [class.bg-primary/5]="thread.broadcast"
+            [class.border-primary/20]="thread.broadcast"
+          >
+            <div class="flex items-center gap-2 min-w-0">
+              @if (thread.broadcast) {
+                <span class="material-symbols-outlined text-primary shrink-0">campaign</span>
+              }
+              <h2 class="font-semibold truncate">{{ thread.title }}</h2>
+              @if (thread.broadcast) {
+                <span class="badge badge-primary badge-soft badge-sm shrink-0">Comunicado</span>
+              }
+            </div>
             <div class="flex items-center gap-1">
               <span class="text-sm opacity-70">{{ thread.audience }}</span>
               @if (thread.urgent) {
                 <span class="badge badge-error badge-soft badge-xs">Importante</span>
+              }
+              @if (thread.broadcast && thread.repliesAllowed === false) {
+                <span class="badge badge-ghost badge-xs">Solo lectura</span>
               }
             </div>
           </header>
@@ -127,19 +143,25 @@ interface ThreadListItem {
             }
           </lib-thread-scroll-pane>
 
-          <lib-thread-composer placeholder="Escribe un mensaje…" (send)="send($event)" />
-          <div class="px-2 pb-2">
-            <label class="sr-only" for="teacher-urgency">Prioridad del mensaje</label>
-            <select
-              id="teacher-urgency"
-              class="select select-primary select-sm w-full"
-              [ngModel]="composerUrgency()"
-              (ngModelChange)="composerUrgency.set($event)"
-            >
-              <option value="ROUTINE">Rutina</option>
-              <option value="IMPORTANT">Importante</option>
-            </select>
-          </div>
+          @if (canReply(thread)) {
+            <lib-thread-composer placeholder="Escribe un mensaje…" (send)="send($event)" />
+            <div class="px-2 pb-2">
+              <label class="sr-only" for="teacher-urgency">Prioridad del mensaje</label>
+              <select
+                id="teacher-urgency"
+                class="select select-primary select-sm w-full"
+                [ngModel]="composerUrgency()"
+                (ngModelChange)="composerUrgency.set($event)"
+              >
+                <option value="ROUTINE">Rutina</option>
+                <option value="IMPORTANT">Importante</option>
+              </select>
+            </div>
+          } @else if (thread.broadcast && thread.repliesAllowed === false) {
+            <p class="p-3 text-center text-sm text-base-content/60 border-t border-base-300">
+              Este comunicado no admite respuestas.
+            </p>
+          }
         } @else {
           <div class="flex-1 grid place-items-center text-sm opacity-60">
             Selecciona una conversación para ver los mensajes.
@@ -167,6 +189,7 @@ export default class TeacherParentCommunication {
   readonly urgencyFilter = signal<'ALL' | UrgencyTier>('ALL');
 
   readonly meId = signal<string | null>(this.#auth.user()?.id ?? null);
+  readonly thread = input<string | undefined>();
 
   private studentNames = signal<Map<string, string>>(new Map());
   private classGroupNames = signal<Map<string, string>>(new Map());
@@ -188,6 +211,11 @@ export default class TeacherParentCommunication {
   readonly messages = linkedSignal(() => this.currentMessages.value());
 
   constructor() {
+    effect(() => {
+      const id = this.thread();
+      if (id) this.selectedId.set(id);
+    });
+
     afterRenderEffect((onCleanup) => {
       const unsub = this.#socket.onMessageReceived((payload) => {
         this.treadsResource.reload();
@@ -196,9 +224,11 @@ export default class TeacherParentCommunication {
         this.messages.update((prev) => (prev?.some((m) => m.id === msg.id) ? prev : [...prev, msg]));
       });
       const unsubDelivery = this.#socket.onDeliveryUpdate(() => this.refreshDeliveries());
+      const unsubUpdated = this.#socket.onThreadUpdated(() => this.treadsResource.reload());
       onCleanup(() => {
         unsub();
         unsubDelivery();
+        unsubUpdated();
       });
     });
 
@@ -302,6 +332,9 @@ export default class TeacherParentCommunication {
           audience: audience,
           type: t.type,
           urgent: t.urgencyDefault === 'IMPORTANT',
+          broadcast: t.broadcast,
+          repliesAllowed: t.repliesAllowed !== false,
+          createdById: t.createdById,
           participants: t.participants,
         };
       });
@@ -398,7 +431,8 @@ export default class TeacherParentCommunication {
 
   send(body: string) {
     const id = this.selectedId();
-    if (!id || !body.trim()) return;
+    const thread = this.selectedThread();
+    if (!id || !body.trim() || (thread && !this.canReply(thread))) return;
     const urgency = this.composerUrgency();
     if (typeof navigator !== 'undefined' && !navigator.onLine) {
       this.#outbox.enqueue(id, body.trim(), urgency);
@@ -442,6 +476,11 @@ export default class TeacherParentCommunication {
   recipientCount(thread: ThreadListItem): number {
     const me = this.meId();
     return thread.participants.filter((p) => p.userId !== me).length;
+  }
+
+  canReply(thread: ThreadListItem): boolean {
+    if (!thread.broadcast || thread.repliesAllowed !== false) return true;
+    return thread.createdById === this.meId();
   }
 
   readCount(deliveries: Delivery[]): number {

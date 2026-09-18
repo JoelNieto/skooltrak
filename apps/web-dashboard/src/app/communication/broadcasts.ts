@@ -5,16 +5,16 @@ import { httpResource } from '@angular/common/http';
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { form, FormField, maxLength, required } from '@angular/forms/signals';
 import { filter } from 'rxjs';
-import Auth from '../../auth/auth';
+import Auth from '../auth/auth';
+import { PaginatedResponse } from '../core/pagination-meta';
+import Store from '../core/store';
 import {
   AuditLog,
   CommunicationApi,
   Thread,
   ThreadType,
   UrgencyTier,
-} from '../../communication/communication-api.service';
-import { PaginatedResponse } from '../../core/pagination-meta';
-import Store from '../../core/store';
+} from './communication-api.service';
 
 interface ClassGroupOption {
   id: string;
@@ -26,11 +26,12 @@ const ACTION_LABELS: Record<string, string> = {
   MESSAGE_SENT: 'Mensaje enviado',
   BROADCAST_CREATED: 'Comunicado creado',
   BROADCAST_APPROVED: 'Comunicado aprobado',
+  BROADCAST_UPDATED: 'Comunicado actualizado',
   PARTICIPANT_ADDED: 'Participante agregado',
 };
 
 @Component({
-  selector: 'app-admin-communication',
+  selector: 'app-communication-broadcasts',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [DatePipe, FormField, PageHeader, EmptyState, TabList, Tab, Tabs, TabPanel, TabContent],
   template: `
@@ -90,21 +91,34 @@ const ACTION_LABELS: Record<string, string> = {
                           <span>·</span>
                           <span>{{ recipientCount(item) }} destinatarios</span>
                           <span>·</span>
+                          <span>{{ repliesLabel(item) }}</span>
+                          <span>·</span>
                           <span>{{ item.createdAt | date: 'short' }}</span>
                         </div>
-                        @if (canApprove()) {
-                          <button
-                            type="button"
-                            class="btn btn-primary btn-sm"
-                            [disabled]="approvingId() === item.id"
-                            (click)="approve(item)"
-                          >
-                            @if (approvingId() === item.id) {
-                              <span class="loading loading-spinner loading-sm"></span>
-                            }
-                            Aprobar y enviar
-                          </button>
-                        }
+                        <div class="flex flex-wrap items-center gap-3">
+                          <label class="label cursor-pointer gap-2 py-0">
+                            <span class="text-sm">Permitir respuestas</span>
+                            <input
+                              type="checkbox"
+                              class="toggle toggle-primary toggle-sm"
+                              [checked]="item.repliesAllowed !== false"
+                              (change)="toggleReplies(item, $event)"
+                            />
+                          </label>
+                          @if (canApprove()) {
+                            <button
+                              type="button"
+                              class="btn btn-primary btn-sm"
+                              [disabled]="approvingId() === item.id"
+                              (click)="approve(item)"
+                            >
+                              @if (approvingId() === item.id) {
+                                <span class="loading loading-spinner loading-sm"></span>
+                              }
+                              Aprobar y enviar
+                            </button>
+                          }
+                        </div>
                       </article>
                     }
                   </div>
@@ -169,6 +183,19 @@ const ACTION_LABELS: Record<string, string> = {
                       </select>
                     </div>
 
+                    <label class="label cursor-pointer justify-start gap-3">
+                      <input
+                        type="checkbox"
+                        class="toggle toggle-primary"
+                        [checked]="composeAllowsReplies()"
+                        (change)="setComposeReplies($event)"
+                      />
+                      <span>
+                        <span class="font-medium">Permitir respuestas</span>
+                        <span class="block text-sm text-base-content/60">Si lo desactivas, las familias solo podrán leer el aviso.</span>
+                      </span>
+                    </label>
+
                     @if (form.type().value() === 'SCHOOL_WIDE') {
                       <div role="alert" class="alert alert-info text-sm">
                         Este comunicado quedará pendiente de aprobación antes de enviarse.
@@ -206,6 +233,7 @@ const ACTION_LABELS: Record<string, string> = {
                             <th>Prioridad</th>
                             <th>Estado</th>
                             <th>Destinatarios</th>
+                            <th>Respuestas</th>
                             <th>Fecha</th>
                           </tr>
                         </thead>
@@ -225,6 +253,17 @@ const ACTION_LABELS: Record<string, string> = {
                                 </span>
                               </td>
                               <td>{{ recipientCount(item) }}</td>
+                              <td>
+                                <label class="label cursor-pointer justify-start gap-2 py-0">
+                                  <input
+                                    type="checkbox"
+                                    class="toggle toggle-primary toggle-sm"
+                                    [checked]="item.repliesAllowed !== false"
+                                    (change)="toggleReplies(item, $event)"
+                                  />
+                                  <span class="text-sm">{{ repliesLabel(item) }}</span>
+                                </label>
+                              </td>
                               <td>{{ item.createdAt | date: 'short' }}</td>
                             </tr>
                           }
@@ -299,6 +338,14 @@ const ACTION_LABELS: Record<string, string> = {
                         <p class="text-sm text-base-content/60">El personal puede enviarlos de inmediato.</p>
                       </div>
                       <input type="checkbox" class="toggle" checked disabled aria-label="Envío directo a grupos activo" />
+                    </li>
+                    <li class="flex items-start justify-between gap-4">
+                      <div>
+                        <p class="font-medium">Respuestas en comunicados</p>
+                        <p class="text-sm text-base-content/60">
+                          Se elige en cada aviso. Si se desactiva, las familias solo pueden leer.
+                        </p>
+                      </div>
                     </li>
                   </ul>
                 </div>
@@ -376,7 +423,7 @@ const ACTION_LABELS: Record<string, string> = {
     </div>
   `,
 })
-export default class AdminCommunication {
+export default class Broadcasts {
   #api = inject(CommunicationApi);
   #store = inject(Store);
   #toast = inject(Toast);
@@ -396,13 +443,17 @@ export default class AdminCommunication {
     title: string;
     body: string;
     urgency: UrgencyTier;
+    repliesAllowed: boolean;
   }>({
     type: 'CLASS_GROUP',
     classGroupId: '',
     title: '',
     body: '',
     urgency: 'ROUTINE',
+    repliesAllowed: true,
   });
+
+  readonly composeAllowsReplies = computed(() => this.formModel().repliesAllowed);
 
   readonly form = form(this.formModel, (schemaPath) => {
     required(schemaPath.title, { message: 'Asunto requerido' });
@@ -460,7 +511,7 @@ export default class AdminCommunication {
     event.preventDefault();
     if (this.form().invalid() || this.submitting()) return;
 
-    const { type, classGroupId, title, body, urgency } = this.formModel();
+    const { type, classGroupId, title, body, urgency, repliesAllowed } = this.formModel();
     const schoolId = this.#store.currentSchoolId();
     if (type === 'SCHOOL_WIDE' && !schoolId) {
       this.#toast.showError('Selecciona un colegio para enviar a toda la institución');
@@ -476,6 +527,7 @@ export default class AdminCommunication {
         body: body.trim(),
         scopeId,
         urgency,
+        repliesAllowed,
       })
       .subscribe({
         next: (thread) => {
@@ -486,6 +538,7 @@ export default class AdminCommunication {
             title: '',
             body: '',
             urgency: 'ROUTINE',
+            repliesAllowed: true,
           });
           this.reload();
           if (thread.status === 'PENDING_APPROVAL') {
@@ -530,6 +583,29 @@ export default class AdminCommunication {
 
   preview(item: Thread): string {
     return item.messages?.[0]?.body ?? '';
+  }
+
+  repliesLabel(item: Thread): string {
+    return item.repliesAllowed === false ? 'Sin respuestas' : 'Con respuestas';
+  }
+
+  setComposeReplies(event: Event) {
+    const allowed = (event.target as HTMLInputElement).checked;
+    this.formModel.update((current) => ({ ...current, repliesAllowed: allowed }));
+  }
+
+  toggleReplies(item: Thread, event: Event) {
+    const allowed = (event.target as HTMLInputElement).checked;
+    this.#api.updateBroadcast(item.id, { repliesAllowed: allowed }).subscribe({
+      next: () => {
+        this.reload();
+        this.#toast.showSuccess(allowed ? 'Respuestas habilitadas' : 'Respuestas deshabilitadas');
+      },
+      error: () => {
+        this.reload();
+        this.#toast.showError('No se pudo actualizar las respuestas');
+      },
+    });
   }
 
   recipientCount(item: Thread): number {

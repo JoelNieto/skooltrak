@@ -2,6 +2,7 @@ import { DeliveryChannel, ThreadType, UrgencyTier } from '@generated/prisma';
 import {
   ArrayMinSize,
   IsArray,
+  IsBoolean,
   IsEnum,
   IsIn,
   IsNotEmpty,
@@ -175,6 +176,16 @@ export class BroadcastInput {
   @IsOptional()
   @IsEnum(UrgencyTier)
   urgency?: UrgencyTier;
+
+  @IsOptional()
+  @IsBoolean()
+  repliesAllowed?: boolean;
+}
+
+export class UpdateBroadcastInput {
+  @IsOptional()
+  @IsBoolean()
+  repliesAllowed?: boolean;
 }
 
 export const DEFAULT_DELIVERY_CHANNELS: DeliveryChannel[] = [

@@ -48,6 +48,7 @@ export interface Thread {
   urgencyDefault: UrgencyTier;
   status: ThreadStatus;
   broadcast?: boolean;
+  repliesAllowed?: boolean;
   createdAt: string;
   updatedAt: string;
   deletedAt?: string | null;
@@ -133,6 +134,7 @@ export class CommunicationApi {
     body: string;
     scopeId?: string | null;
     urgency?: UrgencyTier;
+    repliesAllowed?: boolean;
   }): Observable<Thread> {
     return this.#http.post<Thread>(`${API}/broadcasts`, input);
   }
@@ -142,8 +144,16 @@ export class CommunicationApi {
     return this.#http.get<Thread[]>(`${API}/broadcasts${params}`);
   }
 
+  listRecentBroadcasts(take = 5): Observable<Thread[]> {
+    return this.#http.get<Thread[]>(`${API}/inbox/broadcasts?take=${encodeURIComponent(String(take))}`);
+  }
+
   approveBroadcast(id: string): Observable<Thread> {
     return this.#http.post<Thread>(`${API}/broadcasts/${id}/approve`, {});
+  }
+
+  updateBroadcast(id: string, input: { repliesAllowed: boolean }): Observable<Thread> {
+    return this.#http.patch<Thread>(`${API}/broadcasts/${id}`, input);
   }
 
   listAudit(): Observable<AuditLog[]> {

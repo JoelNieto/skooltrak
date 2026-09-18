@@ -104,6 +104,22 @@ export class CommunicationSocketGateway implements OnGatewayConnection, OnGatewa
     this.server.to(this.userRoom(recipientUserId)).emit('delivery:update', payload);
   }
 
+  emitThreadUpdated(
+    threadId: string,
+    payload: { repliesAllowed?: boolean },
+    recipientUserIds: string[] = [],
+  ) {
+    if (!this.server) {
+      this.logger.warn('Socket server not ready');
+      return;
+    }
+    const data = { threadId, ...payload };
+    this.server.to(this.threadRoom(threadId)).emit('thread:updated', data);
+    for (const userId of recipientUserIds) {
+      this.server.to(this.userRoom(userId)).emit('thread:updated', data);
+    }
+  }
+
   private userRoom(userId: string) {
     return `user:${userId}`;
   }

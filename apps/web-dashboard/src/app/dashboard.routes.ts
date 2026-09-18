@@ -311,6 +311,17 @@ export const DASHBOARD_ROUTES: Route[] = [
         loadComponent: () => import('./students/student-attendance'),
       },
       {
+        path: 'student/communication',
+        canActivate: [permissionGuard('COMMUNICATION_VIEW', 'VIEW_MESSAGES')],
+        loadComponent: () => import('./parent/parent-teacher-communication'),
+        title: 'Mensajes | Skooltrak',
+        data: {
+          pageTitle: 'Comunicados y mensajes',
+          pageSubtitle: 'Avisos de la institución y mensajes del equipo académico.',
+          emptyMessage: 'Cuando haya un aviso o mensaje, aparecerá aquí.',
+        },
+      },
+      {
         path: 'teacher/attendance',
         canActivate: [permissionGuard('MANAGE_ATTENDANCE')],
         loadComponent: () => import('./teacher/teacher-attendance'),
@@ -319,6 +330,12 @@ export const DASHBOARD_ROUTES: Route[] = [
         path: 'teacher/gradebook',
         canActivate: [permissionGuard('MANAGE_GRADES')],
         loadComponent: () => import('./teacher/teacher-gradebook'),
+      },
+      {
+        path: 'communication',
+        canActivate: [permissionGuard('COMMUNICATION_BROADCAST')],
+        loadComponent: () => import('./communication/broadcasts'),
+        title: 'Comunicados | Skooltrak',
       },
       {
         path: 'teacher/communication',
@@ -452,9 +469,8 @@ export const DASHBOARD_ROUTES: Route[] = [
           },
           {
             path: 'communication',
-            canActivate: [permissionGuard('COMMUNICATION_BROADCAST')],
-            loadComponent: () => import('./admin/pages/communication'),
-            title: 'Comunicados | Skooltrak',
+            redirectTo: '/communication',
+            pathMatch: 'full',
           },
           { path: '', redirectTo: 'schools', pathMatch: 'full' },
         ],

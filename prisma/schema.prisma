@@ -1072,6 +1072,7 @@ model CommunicationThread {
   approvedById    String?
   approvedAt      DateTime?
   broadcast       Boolean       @default(false)
+  repliesAllowed  Boolean       @default(true)
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @updatedAt
   deletedAt       DateTime?

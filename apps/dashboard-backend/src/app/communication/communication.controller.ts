@@ -30,6 +30,7 @@ import {
   PreferenceInput,
   SendMessageBodyInput,
   SubscriberSyncInput,
+  UpdateBroadcastInput,
 } from './dto/communication.input';
 
 @ApiTags('communication')
@@ -53,6 +54,12 @@ export class CommunicationController {
   @ApiOperation({ summary: 'List threads visible to the caller' })
   listThreads() {
     return this.communication.listThreads();
+  }
+
+  @Get('inbox/broadcasts')
+  @ApiOperation({ summary: 'Latest approved broadcasts visible to the caller' })
+  listInboxBroadcasts(@Query('take') take?: string) {
+    return this.communication.listRecentBroadcasts(take ? Number(take) : 5);
   }
 
   @Get('threads/:id')
@@ -172,6 +179,13 @@ export class CommunicationController {
   @ApiOperation({ summary: 'Approve a pending broadcast and fan out' })
   approveBroadcast(@Param('id') id: string) {
     return this.communication.approveBroadcast(id);
+  }
+
+  @Patch('broadcasts/:id')
+  @RequirePermissions(Perm.COMMUNICATION_BROADCAST)
+  @ApiOperation({ summary: 'Update broadcast settings such as repliesAllowed' })
+  updateBroadcast(@Param('id') id: string, @Body() input: UpdateBroadcastInput) {
+    return this.communication.updateBroadcast(id, input);
   }
 
   @Get('admin/audit')

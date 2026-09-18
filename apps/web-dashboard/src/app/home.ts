@@ -8,6 +8,7 @@ import { forkJoin, of } from 'rxjs';
 import { toFetchQueryParams } from './core/fetch-query-params';
 import Store from './core/store';
 import WelcomeBanner from './shared/welcome-banner';
+import { RecentBroadcasts } from './communication/recent-broadcasts';
 
 type DashboardStats = {
   coursesCount: number;
@@ -49,7 +50,7 @@ type PublishedNewsletter = {
 
 @Component({
   selector: 'app-home',
-  imports: [RouterLink, DatePipe, PageHeader, StatCard, EmptyState, WelcomeBanner],
+  imports: [RouterLink, DatePipe, PageHeader, StatCard, EmptyState, WelcomeBanner, RecentBroadcasts],
   template: `
     <!-- Welcome Banner for recently completed onboarding -->
     @if (showWelcomeBanner()) {
@@ -87,6 +88,10 @@ type PublishedNewsletter = {
         icon="library_books"
         color="success"
       />
+    </div>
+
+    <div class="mt-6">
+      <app-recent-broadcasts />
     </div>
 
     <div class="mt-6 grid gap-5 lg:grid-cols-3">

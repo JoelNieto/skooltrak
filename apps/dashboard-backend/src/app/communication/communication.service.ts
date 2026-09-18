@@ -28,6 +28,7 @@ import {
   PreferenceInput,
   SendMessageInput,
   SubscriberSyncInput,
+  UpdateBroadcastInput,
 } from './dto/communication.input';
 
 const THREAD_INCLUDE = {
@@ -280,6 +281,26 @@ export class CommunicationService {
     });
   }
 
+  async listRecentBroadcasts(take = 5) {
+    const { userId, organizationId, role } = this.getAuth();
+    if (!organizationId) return [];
+    const limit = Math.min(Math.max(Number.isFinite(take) ? take : 5, 1), 20);
+
+    return this.prisma.communicationThread.findMany({
+      where: {
+        deletedAt: null,
+        broadcast: true,
+        status: { not: ThreadStatus.PENDING_APPROVAL },
+        ...(this.isOrgAdmin(role)
+          ? { organizationId }
+          : { participants: { some: { userId } } }),
+      },
+      include: THREAD_INCLUDE,
+      orderBy: { createdAt: 'desc' },
+      take: limit,
+    });
+  }
+
   async getThread(id: string) {
     const { userId, organizationId, role } = this.getAuth();
     const thread = await this.prisma.communicationThread.findFirst({
@@ -331,7 +352,7 @@ export class CommunicationService {
   }
 
   async sendMessage(input: SendMessageInput, ip?: string) {
-    const { userId, organizationId } = this.getAuth();
+    const { userId, organizationId, role } = this.getAuth();
 
     const participant = await this.prisma.threadParticipant.findFirst({
       where: { threadId: input.threadId, userId },
@@ -340,11 +361,24 @@ export class CommunicationService {
 
     const thread = await this.prisma.communicationThread.findUnique({
       where: { id: input.threadId },
-      select: { id: true, broadcast: true, status: true, organizationId: true },
+      select: {
+        id: true,
+        broadcast: true,
+        status: true,
+        organizationId: true,
+        repliesAllowed: true,
+        createdById: true,
+      },
     });
     if (!thread) throw new NotFoundException('Thread not found');
     if (thread.broadcast && thread.status !== ThreadStatus.APPROVED) {
       throw new ForbiddenException('Broadcast thread is not approved for messaging');
+    }
+    if (thread.broadcast && !thread.repliesAllowed) {
+      const isOwner = thread.createdById === userId || participant.role === 'OWNER';
+      if (!isOwner && !this.isOrgAdmin(role)) {
+        throw new ForbiddenException('Replies are disabled on this broadcast');
+      }
     }
 
     const message = await this.prisma.communicationMessage.create({
@@ -641,6 +675,7 @@ export class CommunicationService {
         ownerRole: role.toUpperCase(),
         urgencyDefault: input.urgency ?? UrgencyTier.ROUTINE,
         broadcast: true,
+        repliesAllowed: input.repliesAllowed ?? true,
         status,
         participants: { create: participantData },
         messages: {
@@ -659,7 +694,7 @@ export class CommunicationService {
       organizationId,
       action: 'BROADCAST_CREATED',
       threadId: thread.id,
-      detail: { status, recipients: participantData.length },
+      detail: { status, recipients: participantData.length, repliesAllowed: input.repliesAllowed ?? true },
     });
 
     if (status === ThreadStatus.APPROVED) {
@@ -694,6 +729,46 @@ export class CommunicationService {
       action: 'BROADCAST_APPROVED',
       threadId,
     });
+
+    return this.getThread(threadId);
+  }
+
+  async updateBroadcast(threadId: string, input: UpdateBroadcastInput) {
+    const { userId, organizationId, role } = this.getAuth();
+    if (!organizationId) throw new ForbiddenException('Organization context required');
+    if (input.repliesAllowed === undefined) {
+      throw new BadRequestException('No broadcast fields to update');
+    }
+
+    const thread = await this.prisma.communicationThread.findFirst({
+      where: { id: threadId, organizationId, deletedAt: null, broadcast: true },
+      select: { id: true, createdById: true },
+    });
+    if (!thread) throw new NotFoundException('Broadcast not found');
+    if (!this.isOrgAdmin(role) && thread.createdById !== userId) {
+      throw new ForbiddenException('Not allowed to update this broadcast');
+    }
+
+    await this.prisma.communicationThread.update({
+      where: { id: threadId },
+      data: { repliesAllowed: input.repliesAllowed },
+    });
+
+    await this.audit({
+      actorId: userId,
+      organizationId,
+      action: 'BROADCAST_UPDATED',
+      threadId,
+      detail: { repliesAllowed: input.repliesAllowed },
+    });
+
+    const recipientUserIds = (
+      await this.prisma.threadParticipant.findMany({
+        where: { threadId, userId: { not: userId } },
+        select: { userId: true },
+      })
+    ).map((p) => p.userId);
+    this.gateway.emitThreadUpdated(threadId, { repliesAllowed: input.repliesAllowed }, recipientUserIds);
 
     return this.getThread(threadId);
   }

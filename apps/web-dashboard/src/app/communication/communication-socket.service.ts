@@ -23,8 +23,14 @@ export interface DeliveryUpdatePayload {
   readAt?: string | null;
 }
 
+export interface ThreadUpdatedPayload {
+  threadId: string;
+  repliesAllowed?: boolean;
+}
+
 type MessageHandler = (payload: ThreadMessagePayload) => void;
 type DeliveryHandler = (payload: DeliveryUpdatePayload) => void;
+type ThreadUpdatedHandler = (payload: ThreadUpdatedPayload) => void;
 
 /**
  * Socket.IO client for the `/communication` namespace. Mirrors the legacy chat
@@ -36,6 +42,7 @@ export class CommunicationSocket {
   #joined = new Set<string>();
   readonly #messageHandlers = new Set<MessageHandler>();
   readonly #deliveryHandlers = new Set<DeliveryHandler>();
+  readonly #threadUpdatedHandlers = new Set<ThreadUpdatedHandler>();
 
   connect(): Socket | null {
     if (this.#socket?.connected) return this.#socket;
@@ -54,6 +61,9 @@ export class CommunicationSocket {
     });
     this.#socket.on('delivery:update', (payload: DeliveryUpdatePayload) => {
       for (const h of this.#deliveryHandlers) h(payload);
+    });
+    this.#socket.on('thread:updated', (payload: ThreadUpdatedPayload) => {
+      for (const h of this.#threadUpdatedHandlers) h(payload);
     });
 
     return this.#socket;
@@ -92,5 +102,11 @@ export class CommunicationSocket {
     this.#deliveryHandlers.add(handler);
     this.connect();
     return () => this.#deliveryHandlers.delete(handler);
+  }
+
+  onThreadUpdated(handler: ThreadUpdatedHandler): () => void {
+    this.#threadUpdatedHandlers.add(handler);
+    this.connect();
+    return () => this.#threadUpdatedHandlers.delete(handler);
   }
 }

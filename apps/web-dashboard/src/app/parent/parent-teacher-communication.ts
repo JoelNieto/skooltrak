@@ -6,7 +6,9 @@ import {
   Component,
   afterRenderEffect,
   computed,
+  effect,
   inject,
+  input,
   linkedSignal,
   signal,
 } from '@angular/core';
@@ -32,8 +34,8 @@ const API = '/api/v1/communication';
       </ul>
     </div>
     <lib-page-header
-      title="Comunicación con docentes"
-      subtitle="Mensajes del equipo académico. Puedes responder, no iniciar conversaciones."
+      [title]="pageTitle()"
+      [subtitle]="pageSubtitle()"
     />
 
     <div class="flex gap-4 h-[calc(100vh-12rem)]">
@@ -63,14 +65,29 @@ const API = '/api/v1/communication';
 
       <section class="flex-1 border border-base-300 rounded-lg flex flex-col bg-base-100 min-w-0">
         @if (selectedThread(); as thread) {
-          <header class="p-3 border-b border-base-300 flex flex-col gap-1">
-            <h2 class="font-semibold truncate">{{ thread.title }}</h2>
+          <header
+            class="p-3 border-b border-base-300 flex flex-col gap-1"
+            [class.bg-primary/5]="thread.broadcast"
+            [class.border-primary/20]="thread.broadcast"
+          >
+            <div class="flex items-center gap-2 min-w-0">
+              @if (thread.broadcast) {
+                <span class="material-symbols-outlined text-primary shrink-0">campaign</span>
+              }
+              <h2 class="font-semibold truncate">{{ thread.title }}</h2>
+              @if (thread.broadcast) {
+                <span class="badge badge-primary badge-soft badge-sm shrink-0">Comunicado</span>
+              }
+            </div>
             <div class="flex items-center gap-1">
               @if (thread.audience) {
                 <span class="text-sm opacity-70">{{ thread.audience }}</span>
               }
               @if (thread.urgent) {
                 <span class="badge badge-error badge-soft badge-xs">Importante</span>
+              }
+              @if (thread.broadcast && thread.repliesAllowed === false) {
+                <span class="badge badge-ghost badge-xs">Solo lectura</span>
               }
             </div>
           </header>
@@ -93,10 +110,16 @@ const API = '/api/v1/communication';
             }
           </lib-thread-scroll-pane>
 
-          <lib-thread-composer placeholder="Escribe una respuesta…" (send)="send($event)" />
+          @if (thread.repliesAllowed !== false) {
+            <lib-thread-composer placeholder="Escribe una respuesta…" (send)="send($event)" />
+          } @else {
+            <p class="p-3 text-center text-sm text-base-content/60 border-t border-base-300">
+              Este comunicado no admite respuestas.
+            </p>
+          }
         } @else {
           <div class="flex-1 grid place-items-center px-6 text-center text-sm opacity-60">
-            Cuando un docente te escriba, el mensaje aparecerá aquí.
+            {{ emptyMessage() }}
           </div>
         }
       </section>
@@ -109,6 +132,13 @@ export default class ParentTeacherCommunication {
   #auth = inject(Auth);
   #toast = inject(Toast);
   #outbox = inject(OfflineOutbox);
+
+  readonly pageTitle = input('Comunicación con docentes');
+  readonly pageSubtitle = input(
+    'Mensajes del equipo académico. Puedes responder, no iniciar conversaciones.',
+  );
+  readonly emptyMessage = input('Cuando un docente te escriba, el mensaje aparecerá aquí.');
+  readonly thread = input<string | undefined>();
 
   readonly selectedId = signal<string | null>(null);
   readonly filterText = signal('');
@@ -132,6 +162,11 @@ export default class ParentTeacherCommunication {
   readonly messages = linkedSignal(() => this.currentMessages.value());
 
   constructor() {
+    effect(() => {
+      const id = this.thread();
+      if (id) this.selectedId.set(id);
+    });
+
     afterRenderEffect((onCleanup) => {
       const unsub = this.#socket.onMessageReceived((payload) => {
         this.threadsResource.reload();
@@ -139,7 +174,11 @@ export default class ParentTeacherCommunication {
         const msg = payload.message as ThreadMessage;
         this.messages.update((prev) => (prev?.some((m) => m.id === msg.id) ? prev : [...prev, msg]));
       });
-      onCleanup(unsub);
+      const unsubUpdated = this.#socket.onThreadUpdated(() => this.threadsResource.reload());
+      onCleanup(() => {
+        unsub();
+        unsubUpdated();
+      });
     });
 
     afterRenderEffect((onCleanup) => {
@@ -185,6 +224,8 @@ export default class ParentTeacherCommunication {
           audience,
           type: t.type,
           urgent: t.urgencyDefault === 'IMPORTANT' || t.urgencyDefault === 'EMERGENCY',
+          broadcast: !!t.broadcast,
+          repliesAllowed: t.repliesAllowed !== false,
         };
       });
   });
@@ -207,7 +248,8 @@ export default class ParentTeacherCommunication {
 
   send(body: string) {
     const id = this.selectedId();
-    if (!id || !body.trim()) return;
+    const thread = this.selectedThread();
+    if (!id || !body.trim() || thread?.repliesAllowed === false) return;
     if (typeof navigator !== 'undefined' && !navigator.onLine) {
       this.#outbox.enqueue(id, body.trim(), 'ROUTINE');
       this.#toast.showSuccess('Se enviará cuando vuelva la conexión');

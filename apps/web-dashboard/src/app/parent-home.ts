@@ -7,6 +7,7 @@ import Auth from './auth/auth';
 import Store from './core/store';
 import { Thread } from './communication/communication-api.service';
 import { LinkedChild, ParentContext } from './parent/parent-context.service';
+import { RecentBroadcasts } from './communication/recent-broadcasts';
 
 type PublishedNewsletter = {
   id: string;
@@ -30,7 +31,7 @@ type ParentMeResponse = {
 
 @Component({
   selector: 'app-parent-home',
-  imports: [DatePipe, RouterLink, PageHeader, StatCard, EmptyState],
+  imports: [DatePipe, RouterLink, PageHeader, StatCard, EmptyState, RecentBroadcasts],
   template: `
     <lib-page-header title="Dashboard de padres" subtitle="Resumen del progreso de tus hijos." />
 
@@ -81,6 +82,10 @@ type ParentMeResponse = {
           </div>
         }
       </div>
+    </div>
+
+    <div class="mt-6">
+      <app-recent-broadcasts />
     </div>
 
     <div class="mt-6 grid gap-6 lg:grid-cols-2">
@@ -200,6 +205,7 @@ export default class ParentHome {
 
   public recentThreads = computed(() => {
     return [...(this.recentMessages.value() ?? [])]
+      .filter((t) => !t.broadcast)
       .sort((a, b) => {
         const aDate = a.messages?.[0]?.createdAt ?? a.updatedAt;
         const bDate = b.messages?.[0]?.createdAt ?? b.updatedAt;

@@ -6,6 +6,7 @@ import { RouterLink } from '@angular/router';
 import { endOfWeek, startOfWeek } from 'date-fns';
 import { toFetchQueryRecord } from './core/fetch-query-params';
 import Store from './core/store';
+import { RecentBroadcasts } from './communication/recent-broadcasts';
 
 type AssignmentRow = {
   id: string;
@@ -29,7 +30,7 @@ type PublishedNewsletter = {
 
 @Component({
   selector: 'app-teacher-home',
-  imports: [DatePipe, RouterLink, PageHeader, StatCard, EmptyState],
+  imports: [DatePipe, RouterLink, PageHeader, StatCard, EmptyState, RecentBroadcasts],
   template: `
     <lib-page-header title="Dashboard docente" subtitle="Resumen de tus clases y seguimiento semanal." />
 
@@ -49,6 +50,10 @@ type PublishedNewsletter = {
         [value]="weeklyAssignmentsCount().toString()"
         helper="Por evaluar"
       />
+    </div>
+
+    <div class="mt-6">
+      <app-recent-broadcasts />
     </div>
 
     <div class="mt-6 grid gap-6 lg:grid-cols-2">

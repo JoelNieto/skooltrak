@@ -1,4 +1,4 @@
-import { Button, Loader, Toast } from '#/ui';
+import { Button, Loader, Toast, UiField, UiInput, UiSelect } from '#/ui';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { afterRenderEffect, Component, computed, inject, input, signal } from '@angular/core';
 import { disabled, email, form, FormField, required, submit } from '@angular/forms/signals';
@@ -37,7 +37,7 @@ interface StudentFormData {
 
 @Component({
   selector: 'app-student-form',
-  imports: [Button, FormField, RouterLink, Loader],
+  imports: [UiField, UiInput, UiSelect, Button, FormField, RouterLink, Loader],
   template: `
     <div class="breadcrumbs text-sm">
       <ul>
@@ -72,108 +72,31 @@ interface StudentFormData {
               <div class="card card-border border-base-300 bg-base-100">
                 <div class="card-body gap-y-4">
                   <div class="sm:grid sm:grid-cols-6 sm:gap-4">
-                    <div class="fieldset col-span-3">
-                      <label for="firstName">Primer nombre</label>
-                      <input
-                        id="firstName"
-                        type="text"
-                        [formField]="studentForm.firstName"
-                        class="input input-primary w-full"
-                        [class.ng-invalid]="studentForm.firstName().touched() && studentForm.firstName().invalid()"
-                      />
-                      @if (studentForm.firstName().touched() && studentForm.firstName().invalid()) {
-                        @for (error of studentForm.firstName().errors(); track error) {
-                          <p class="text-error text-sm">{{ error.message }}</p>
-                        }
-                      }
-                    </div>
-                    <div class="fieldset col-span-3">
-                      <label for="middleName">
-                        Segundo nombre
-                        <span class="text-base-content/50 text-xs">(opcional)</span>
-                      </label>
-                      <input
-                        id="middleName"
-                        type="text"
-                        [formField]="studentForm.middleName"
-                        class="input input-primary w-full"
-                      />
-                    </div>
-                    <div class="fieldset col-span-3">
-                      <label for="fatherName">Apellido paterno</label>
-                      <input
-                        id="fatherName"
-                        type="text"
-                        [formField]="studentForm.fatherName"
-                        class="input input-primary w-full"
-                        [class.ng-invalid]="studentForm.fatherName().touched() && studentForm.fatherName().invalid()"
-                      />
-                      @if (studentForm.fatherName().touched() && studentForm.fatherName().invalid()) {
-                        @for (error of studentForm.fatherName().errors(); track error) {
-                          <p class="text-error text-sm">{{ error.message }}</p>
-                        }
-                      }
-                    </div>
-                    <div class="fieldset col-span-3">
-                      <label for="motherName">
-                        Apellido materno
-                        <span class="text-base-content/50 text-xs">(opcional)</span>
-                      </label>
-                      <input
-                        id="motherName"
-                        type="text"
-                        [formField]="studentForm.motherName"
-                        class="input input-primary w-full"
-                      />
-                    </div>
-                    <div class="fieldset col-span-2">
-                      <label for="documentId">Nro. documento</label>
-                      <input
-                        id="documentId"
-                        type="text"
-                        [formField]="studentForm.documentId"
-                        class="input input-primary w-full"
-                        [class.ng-invalid]="studentForm.documentId().touched() && studentForm.documentId().invalid()"
-                      />
-                      @if (studentForm.documentId().touched() && studentForm.documentId().invalid()) {
-                        @for (error of studentForm.documentId().errors(); track error) {
-                          <p class="text-error text-sm">{{ error.message }}</p>
-                        }
-                      }
-                    </div>
-                    <div class="fieldset col-span-2">
-                      <label for="birthDate">Fecha de nacimiento</label>
-                      <input
-                        id="birthDate"
-                        type="date"
-                        [formField]="studentForm.birthDate"
-                        class="input input-primary w-full"
-                        [class.ng-invalid]="studentForm.birthDate().touched() && studentForm.birthDate().invalid()"
-                      />
-                      @if (studentForm.birthDate().touched() && studentForm.birthDate().invalid()) {
-                        @for (error of studentForm.birthDate().errors(); track error) {
-                          <p class="text-error text-sm">{{ error.message }}</p>
-                        }
-                      }
-                    </div>
-                    <div class="fieldset col-span-2">
-                      <label for="gender">Género</label>
-                      <select
-                        id="gender"
-                        [formField]="studentForm.gender"
-                        class="select select-primary w-full"
-                        [class.ng-invalid]="studentForm.gender().touched() && studentForm.gender().invalid()"
-                      >
+                    <ui-field label="Primer nombre" [field]="studentForm.firstName" class="col-span-3">
+                      <input uiInput id="firstName" type="text" [formField]="studentForm.firstName" />
+                    </ui-field>
+                    <ui-field label="Segundo nombre" [field]="studentForm.middleName" optional class="col-span-3">
+                      <input uiInput id="middleName" type="text" [formField]="studentForm.middleName" />
+                    </ui-field>
+                    <ui-field label="Apellido paterno" [field]="studentForm.fatherName" class="col-span-3">
+                      <input uiInput id="fatherName" type="text" [formField]="studentForm.fatherName" />
+                    </ui-field>
+                    <ui-field label="Apellido materno" [field]="studentForm.motherName" optional class="col-span-3">
+                      <input uiInput id="motherName" type="text" [formField]="studentForm.motherName" />
+                    </ui-field>
+                    <ui-field label="Nro. documento" [field]="studentForm.documentId" class="col-span-2">
+                      <input uiInput id="documentId" type="text" [formField]="studentForm.documentId" />
+                    </ui-field>
+                    <ui-field label="Fecha de nacimiento" [field]="studentForm.birthDate" class="col-span-2">
+                      <input uiInput id="birthDate" type="date" [formField]="studentForm.birthDate" />
+                    </ui-field>
+                    <ui-field label="Género" [field]="studentForm.gender" class="col-span-2">
+                      <select uiSelect id="gender" [formField]="studentForm.gender">
                         <option value="" disabled>---Seleccionar---</option>
                         <option value="MALE">Masculino</option>
                         <option value="FEMALE">Femenino</option>
                       </select>
-                      @if (studentForm.gender().touched() && studentForm.gender().invalid()) {
-                        @for (error of studentForm.gender().errors(); track error) {
-                          <p class="text-error text-sm">{{ error.message }}</p>
-                        }
-                      }
-                    </div>
+                    </ui-field>
                   </div>
                 </div>
               </div>
@@ -190,34 +113,21 @@ interface StudentFormData {
               <div class="card card-border border-base-300 bg-base-100">
                 <div class="card-body gap-y-4">
                   <div class="sm:grid sm:grid-cols-6 sm:gap-4">
-                    <div class="fieldset col-span-3">
-                      <label for="classGroupId">
-                        Grupo
-                        <span class="text-base-content/50 text-xs">(opcional)</span>
-                      </label>
-                      <select
-                        id="classGroupId"
-                        [formField]="studentForm.classGroupId"
-                        class="select select-primary w-full"
-                      >
+                    <ui-field label="Grupo" [field]="studentForm.classGroupId" optional class="col-span-3">
+                      <select uiSelect id="classGroupId" [formField]="studentForm.classGroupId">
                         <option value="">---Sin grupo---</option>
                         @for (group of groups.value(); track group.id) {
                           <option [value]="group.id">{{ group.name }}</option>
                         }
                       </select>
-                    </div>
-                    <div class="fieldset col-span-3">
-                      <label for="enrollmentStatus">Estado de matrícula</label>
-                      <select
-                        id="enrollmentStatus"
-                        [formField]="studentForm.enrollmentStatus"
-                        class="select select-primary w-full"
-                      >
+                    </ui-field>
+                    <ui-field label="Estado de matrícula" [field]="studentForm.enrollmentStatus" class="col-span-3">
+                      <select uiSelect id="enrollmentStatus" [formField]="studentForm.enrollmentStatus">
                         <option value="ACTIVE">Activo</option>
                         <option value="CANDIDATE">Candidato</option>
                         <option value="RETIRED">Retirado</option>
                       </select>
-                    </div>
+                    </ui-field>
                   </div>
                 </div>
               </div>
@@ -234,51 +144,15 @@ interface StudentFormData {
               <div class="card card-border border-base-300 bg-base-100">
                 <div class="card-body gap-y-4">
                   <div class="sm:grid sm:grid-cols-6 sm:gap-4">
-                    <div class="fieldset col-span-3">
-                      <label for="email">Correo electrónico</label>
-                      <input
-                        id="email"
-                        type="email"
-                        [formField]="studentForm.email"
-                        class="input input-primary w-full"
-                        [class.ng-invalid]="studentForm.email().touched() && studentForm.email().invalid()"
-                      />
-                      @if (studentForm.email().touched() && studentForm.email().invalid()) {
-                        @for (error of studentForm.email().errors(); track error) {
-                          <p class="text-error text-sm">{{ error.message }}</p>
-                        }
-                      }
-                    </div>
-                    <div class="fieldset col-span-3">
-                      <label for="phone">Teléfono</label>
-                      <input
-                        id="phone"
-                        type="text"
-                        [formField]="studentForm.phone"
-                        class="input input-primary w-full"
-                        [class.ng-invalid]="studentForm.phone().touched() && studentForm.phone().invalid()"
-                      />
-                      @if (studentForm.phone().touched() && studentForm.phone().invalid()) {
-                        @for (error of studentForm.phone().errors(); track error) {
-                          <p class="text-error text-sm">{{ error.message }}</p>
-                        }
-                      }
-                    </div>
-                    <div class="fieldset col-span-6">
-                      <label for="address">Dirección</label>
-                      <input
-                        id="address"
-                        type="text"
-                        [formField]="studentForm.address"
-                        class="input input-primary w-full"
-                        [class.ng-invalid]="studentForm.address().touched() && studentForm.address().invalid()"
-                      />
-                      @if (studentForm.address().touched() && studentForm.address().invalid()) {
-                        @for (error of studentForm.address().errors(); track error) {
-                          <p class="text-error text-sm">{{ error.message }}</p>
-                        }
-                      }
-                    </div>
+                    <ui-field label="Correo electrónico" [field]="studentForm.email" class="col-span-3">
+                      <input uiInput id="email" type="email" [formField]="studentForm.email" />
+                    </ui-field>
+                    <ui-field label="Teléfono" [field]="studentForm.phone" class="col-span-3">
+                      <input uiInput id="phone" type="text" [formField]="studentForm.phone" />
+                    </ui-field>
+                    <ui-field label="Dirección" [field]="studentForm.address" class="col-span-6">
+                      <input uiInput id="address" type="text" [formField]="studentForm.address" />
+                    </ui-field>
                   </div>
                 </div>
               </div>
@@ -295,12 +169,8 @@ interface StudentFormData {
               <div class="card card-border border-base-300 bg-base-100">
                 <div class="card-body gap-y-4">
                   <div class="sm:grid sm:grid-cols-6 sm:gap-4">
-                    <div class="fieldset col-span-2">
-                      <label for="bloodType">
-                        Tipo de sangre
-                        <span class="text-base-content/50 text-xs">(opcional)</span>
-                      </label>
-                      <select id="bloodType" [formField]="studentForm.bloodType" class="select select-primary w-full">
+                    <ui-field label="Tipo de sangre" [field]="studentForm.bloodType" optional class="col-span-2">
+                      <select uiSelect id="bloodType" [formField]="studentForm.bloodType">
                         <option value="">---Seleccionar---</option>
                         <option value="A+">A+</option>
                         <option value="A-">A-</option>
@@ -311,33 +181,25 @@ interface StudentFormData {
                         <option value="O+">O+</option>
                         <option value="O-">O-</option>
                       </select>
-                    </div>
-                    <div class="fieldset col-span-4">
-                      <label for="allergies">
-                        Alergias
-                        <span class="text-base-content/50 text-xs">(opcional)</span>
-                      </label>
+                    </ui-field>
+                    <ui-field label="Alergias" [field]="studentForm.allergies" optional class="col-span-4">
                       <input
+                        uiInput
                         id="allergies"
                         type="text"
                         [formField]="studentForm.allergies"
-                        class="input input-primary w-full"
                         placeholder="Ej: Penicilina, maní, etc."
                       />
-                    </div>
-                    <div class="fieldset col-span-6">
-                      <label for="medicalNotes">
-                        Notas médicas
-                        <span class="text-base-content/50 text-xs">(opcional)</span>
-                      </label>
+                    </ui-field>
+                    <ui-field label="Notas médicas" [field]="studentForm.medicalNotes" optional class="col-span-6">
                       <textarea
+                        uiInput
                         id="medicalNotes"
                         [formField]="studentForm.medicalNotes"
-                        class="textarea textarea-primary w-full"
                         rows="3"
                         placeholder="Condiciones médicas, medicamentos, etc."
                       ></textarea>
-                    </div>
+                    </ui-field>
                   </div>
                 </div>
               </div>
@@ -354,30 +216,32 @@ interface StudentFormData {
               <div class="card card-border border-base-300 bg-base-100">
                 <div class="card-body gap-y-4">
                   <div class="sm:grid sm:grid-cols-6 sm:gap-4">
-                    <div class="fieldset col-span-3">
-                      <label for="emergencyContactName">
-                        Nombre del contacto
-                        <span class="text-base-content/50 text-xs">(opcional)</span>
-                      </label>
+                    <ui-field
+                      label="Nombre del contacto"
+                      [field]="studentForm.emergencyContactName"
+                      optional
+                      class="col-span-3"
+                    >
                       <input
+                        uiInput
                         id="emergencyContactName"
                         type="text"
                         [formField]="studentForm.emergencyContactName"
-                        class="input input-primary w-full"
                       />
-                    </div>
-                    <div class="fieldset col-span-3">
-                      <label for="emergencyContactPhone">
-                        Teléfono de emergencia
-                        <span class="text-base-content/50 text-xs">(opcional)</span>
-                      </label>
+                    </ui-field>
+                    <ui-field
+                      label="Teléfono de emergencia"
+                      [field]="studentForm.emergencyContactPhone"
+                      optional
+                      class="col-span-3"
+                    >
                       <input
+                        uiInput
                         id="emergencyContactPhone"
                         type="text"
                         [formField]="studentForm.emergencyContactPhone"
-                        class="input input-primary w-full"
                       />
-                    </div>
+                    </ui-field>
                   </div>
                 </div>
               </div>

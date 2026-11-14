@@ -1,4 +1,4 @@
-import { Button, Toast } from '#/ui';
+import { Button, Toast, UiField, UiInput } from '#/ui';
 import { HttpClient } from '@angular/common/http';
 import { afterRenderEffect, Component, inject, input, output, signal } from '@angular/core';
 import { form, FormField, max, min } from '@angular/forms/signals';
@@ -6,28 +6,15 @@ import { Prisma } from '@generated/prisma';
 
 @Component({
   selector: 'app-student-grade-form',
-  imports: [Button, FormField],
+  imports: [UiField, UiInput, Button, FormField],
   template: `<form (submit)="onSubmit($event)">
     <div class="flex flex-col gap-3">
-      <div class="fieldset">
-        <label for="score">Calificacion</label>
-        <input
-          type="number"
-          [formField]="form.score"
-          id="score"
-          class="input input-primary"
-          [class.ng-invalid]="form.score().touched() && form.score().invalid"
-        />
-        @if (form.score().touched() && form.score().invalid()) {
-          @for (error of form.score().errors(); track error) {
-            <p class="text-error text-sm">{{ error.message }}</p>
-          }
-        }
-      </div>
-      <div class="fieldset">
-        <label for="comments">Comentarios</label>
-        <textarea [formField]="form.comments" id="comments" class="textarea textarea-primary"></textarea>
-      </div>
+      <ui-field label="Calificacion" [field]="form.score">
+        <input uiInput type="number" [formField]="form.score" id="score" />
+      </ui-field>
+      <ui-field label="Comentarios" [field]="form.comments">
+        <textarea uiInput [formField]="form.comments" id="comments"></textarea>
+      </ui-field>
     </div>
     <div class="flex justify-end gap-2 mt-2">
       <button uiButton variant="ghost" type="button" (click)="closeModal.emit(false)">Cancelar</button>

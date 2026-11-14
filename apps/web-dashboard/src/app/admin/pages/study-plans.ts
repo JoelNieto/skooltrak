@@ -1,4 +1,4 @@
-import { Button, Confirmation, EmptyState, Modal, PaginatorV2, Toast } from '#/ui';
+import { Button, Confirmation, EmptyState, Modal, PaginatorV2, Toast, UiSelect } from '#/ui';
 import { Menu, MenuContent, MenuItem, MenuTrigger } from '@angular/aria/menu';
 import { OverlayModule } from '@angular/cdk/overlay';
 import { DatePipe } from '@angular/common';
@@ -29,6 +29,7 @@ type DegreeRow = {
 @Component({
   selector: 'app-study-plans',
   imports: [
+    UiSelect,
     Button,
     DatePipe,
     Menu,
@@ -49,7 +50,7 @@ type DegreeRow = {
             <input class="pl-0" type="search" placeholder="Buscar..." [formField]="form.searchText" />
           </label>
         </div>
-        <select class="select select-primary" [formField]="form.degreeId">
+        <select uiSelect [formField]="form.degreeId">
           <option [value]="''">Elija nivel...</option>
           @for (degree of degrees.value(); track degree.id) {
             <option [value]="degree.id">{{ degree.name }}</option>

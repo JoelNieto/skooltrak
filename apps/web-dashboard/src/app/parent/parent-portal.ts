@@ -1,4 +1,4 @@
-import { Button, PageHeader, Toast } from '#/ui';
+import { Button, PageHeader, Toast, UiInput } from '#/ui';
 import { HttpClient } from '@angular/common/http';
 import { afterRenderEffect, Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -19,7 +19,7 @@ interface ParentMeResponse {
 
 @Component({
   selector: 'app-parent-portal',
-  imports: [Button, FormsModule, PageHeader],
+  imports: [UiInput, Button, FormsModule, PageHeader],
   template: `
     <lib-page-header title="Portal de padres" subtitle="Resumen rápido del progreso de tus hijos." />
 
@@ -67,11 +67,7 @@ interface ParentMeResponse {
             <h3 class="text-lg font-semibold text-base-content">Agregar hijo</h3>
             <p class="text-sm text-base-content/70">Ingresa el código de matrícula del estudiante.</p>
 
-            <input
-              class="input input-bordered w-full mt-2 uppercase"
-              placeholder="Código de matrícula"
-              [(ngModel)]="addCode"
-            />
+            <input uiInput class="mt-2 uppercase" placeholder="Código de matrícula" [(ngModel)]="addCode" />
 
             @if (addError()) {
               <p class="text-error text-sm mt-2">{{ addError() }}</p>

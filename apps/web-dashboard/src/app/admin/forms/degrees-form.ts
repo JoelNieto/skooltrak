@@ -1,4 +1,4 @@
-import { Button, Toast } from '#/ui';
+import { Button, Toast, UiField, UiInput, UiSelect } from '#/ui';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { afterRenderEffect, Component, inject, input, output, signal } from '@angular/core';
 import { disabled, form, FormField, required } from '@angular/forms/signals';
@@ -6,36 +6,22 @@ import { Prisma } from '@generated/prisma';
 import Store from '../../core/store';
 @Component({
   selector: 'app-degrees-form',
-  imports: [Button, FormField],
+  imports: [UiField, UiInput, UiSelect, Button, FormField],
   template: `<form (submit)="onSubmit($event)">
     <div class="flex flex-col gap-2">
-      <div class="fieldset">
-        <label for="name">Nombre</label>
-        <input type="text" id="name" [formField]="form.name" class="input input-primary" ç />
-      </div>
-      <div class="fieldset">
-        <label for="shortName">Nombre corto</label>
-        <input
-          type="text"
-          id="shortName"
-          [formField]="form.shortName"
-          class="input input-primary"
-          [class.ng-invalid]="form.shortName().touched() && form.shortName().invalid()"
-        />
-      </div>
-      <div class="fieldset">
-        <label for="schoolId">Escuela</label>
-        <select
-          id="schoolId"
-          [formField]="form.schoolId"
-          class="select select-primary"
-          [class.ng-invalid]="form.schoolId().touched() && form.schoolId().invalid()"
-        >
+      <ui-field label="Nombre" [field]="form.name">
+        <input uiInput type="text" id="name" [formField]="form.name" ç />
+      </ui-field>
+      <ui-field label="Nombre corto" [field]="form.shortName">
+        <input uiInput type="text" id="shortName" [formField]="form.shortName" />
+      </ui-field>
+      <ui-field label="Escuela" [field]="form.schoolId">
+        <select uiSelect id="schoolId" [formField]="form.schoolId">
           @for (school of schools.value(); track school.id) {
             <option [value]="school.id">{{ school.name }}</option>
           }
         </select>
-      </div>
+      </ui-field>
     </div>
     <div class="flex justify-end gap-2 mt-4">
       <button uiButton variant="ghost" (click)="closeModal.emit()" type="button">Cancelar</button>

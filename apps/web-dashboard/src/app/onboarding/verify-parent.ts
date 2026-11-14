@@ -1,4 +1,4 @@
-import { Button, Toast } from '#/ui';
+import { Button, Toast, UiField, UiInput, UiSelect } from '#/ui';
 import { HttpClient } from '@angular/common/http';
 import { afterRenderEffect, Component, inject, signal } from '@angular/core';
 import { form, FormField, required } from '@angular/forms/signals';
@@ -18,7 +18,7 @@ interface LinkChildPayload {
 
 @Component({
   selector: 'app-verify-parent',
-  imports: [Button, BrandLogo, FormField],
+  imports: [UiField, UiInput, UiSelect, Button, BrandLogo, FormField],
   template: `
     <div class="min-h-screen flex flex-col gradient-bg">
       <header class="p-4 md:p-6 flex items-center justify-between">
@@ -42,71 +42,46 @@ interface LinkChildPayload {
           </div>
 
           <form (submit)="link($event)" class="space-y-4 text-left">
-            <div class="fieldset">
-              <label for="enrollmentCode" class="label">
-                <span class="label-text font-medium">Código de matrícula</span>
-              </label>
+            <ui-field label="Código de matrícula" [field]="form.enrollmentCode">
               <input
+                uiInput
                 type="text"
                 id="enrollmentCode"
-                class="input input-bordered w-full uppercase"
+                class="uppercase"
                 placeholder="Ej: A1B2C3D4"
                 [formField]="form.enrollmentCode"
               />
-              @if (form.enrollmentCode().touched() && form.enrollmentCode().errors()) {
-                @for (error of form.enrollmentCode().errors(); track error.message) {
-                  <p class="text-error text-xs mt-1">{{ error.message }}</p>
-                }
-              }
-            </div>
+            </ui-field>
 
             <div class="grid grid-cols-2 gap-3">
-              <div class="fieldset">
-                <label for="firstName" class="label">
-                  <span class="label-text font-medium">Nombres</span>
-                </label>
-                <input id="firstName" class="input input-bordered w-full" [formField]="form.firstName" />
-              </div>
-              <div class="fieldset">
-                <label for="fatherName" class="label">
-                  <span class="label-text font-medium">Apellidos</span>
-                </label>
-                <input id="fatherName" class="input input-bordered w-full" [formField]="form.fatherName" />
-              </div>
+              <ui-field label="Nombres" [field]="form.firstName">
+                <input uiInput id="firstName" [formField]="form.firstName" />
+              </ui-field>
+              <ui-field label="Apellidos" [field]="form.fatherName">
+                <input uiInput id="fatherName" [formField]="form.fatherName" />
+              </ui-field>
             </div>
 
-            <div class="fieldset">
-              <label for="documentId" class="label">
-                <span class="label-text font-medium">Documento de identidad</span>
-              </label>
-              <input id="documentId" class="input input-bordered w-full" [formField]="form.documentId" />
-            </div>
+            <ui-field label="Documento de identidad" [field]="form.documentId">
+              <input uiInput id="documentId" [formField]="form.documentId" />
+            </ui-field>
 
             <div class="grid grid-cols-2 gap-3">
-              <div class="fieldset">
-                <label for="phone" class="label">
-                  <span class="label-text font-medium">Teléfono</span>
-                </label>
-                <input id="phone" class="input input-bordered w-full" [formField]="form.phone" />
-              </div>
-              <div class="fieldset">
-                <label for="email" class="label">
-                  <span class="label-text font-medium">Correo</span>
-                </label>
-                <input id="email" type="email" class="input input-bordered w-full" [formField]="form.email" />
-              </div>
+              <ui-field label="Teléfono" [field]="form.phone">
+                <input uiInput id="phone" [formField]="form.phone" />
+              </ui-field>
+              <ui-field label="Correo" [field]="form.email">
+                <input uiInput id="email" type="email" [formField]="form.email" />
+              </ui-field>
             </div>
 
-            <div class="fieldset">
-              <label for="relationship" class="label">
-                <span class="label-text font-medium">Parentesco</span>
-              </label>
-              <select id="relationship" class="select select-bordered w-full" [formField]="form.relationship">
+            <ui-field label="Parentesco" [field]="form.relationship">
+              <select uiSelect id="relationship" [formField]="form.relationship">
                 <option value="PARENT">Padre/Madre</option>
                 <option value="GUARDIAN">Tutor legal</option>
                 <option value="OTHER">Otro</option>
               </select>
-            </div>
+            </ui-field>
 
             @if (errorMessage()) {
               <div class="alert alert-error">
@@ -187,7 +162,7 @@ export default class VerifyParent {
     afterRenderEffect(() => {
       this.schoolId.set(this.route.snapshot.queryParamMap.get('schoolId') || '');
       this.schoolName.set(this.route.snapshot.queryParamMap.get('schoolName') || '');
-      
+
       // Pre-populate form with user's existing data
       const user = this.auth.user();
       if (user) {

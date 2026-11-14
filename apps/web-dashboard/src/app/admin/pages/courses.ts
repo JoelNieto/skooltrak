@@ -1,4 +1,4 @@
-import { Button, Confirmation, Modal, PaginatorV2, Toast } from '#/ui';
+import { Button, Confirmation, Modal, PaginatorV2, Toast, UiSelect } from '#/ui';
 import { Menu, MenuContent, MenuItem, MenuTrigger } from '@angular/aria/menu';
 import { OverlayModule } from '@angular/cdk/overlay';
 import { HttpClient, httpResource } from '@angular/common/http';
@@ -27,6 +27,7 @@ type CourseType = Prisma.CourseGetPayload<{
 @Component({
   selector: 'app-courses',
   imports: [
+    UiSelect,
     Button,
     PaginatorV2,
     RouterLink,
@@ -46,7 +47,7 @@ type CourseType = Prisma.CourseGetPayload<{
             <input class="pl-0" type="search" placeholder="Buscar..." [formField]="form.searchText" />
           </label>
         </div>
-        <select class="select select-primary" [formField]="form.studyPlanId">
+        <select uiSelect [formField]="form.studyPlanId">
           <option value="">Elija nivel...</option>
           @for (studyPlan of studyPlans.value(); track studyPlan.id) {
             <option [value]="studyPlan.id">{{ studyPlan.name }}</option>

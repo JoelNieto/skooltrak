@@ -1,4 +1,15 @@
-import { Button, Confirmation, EmptyState, PageHeader, Toast } from '#/ui';
+import {
+  Button,
+  Confirmation,
+  EmptyState,
+  PageHeader,
+  Toast,
+  UiChoice,
+  UiField,
+  UiInput,
+  UiSelect,
+  UiToggle,
+} from '#/ui';
 import { Tab, TabContent, TabList, TabPanel, Tabs } from '@angular/aria/tabs';
 import { DatePipe } from '@angular/common';
 import { httpResource } from '@angular/common/http';
@@ -7,13 +18,7 @@ import { form, FormField, maxLength, required } from '@angular/forms/signals';
 import { filter } from 'rxjs';
 import Auth from '../auth/auth';
 import Store from '../core/store';
-import {
-  AuditLog,
-  CommunicationApi,
-  Thread,
-  ThreadType,
-  UrgencyTier,
-} from './communication-api.service';
+import { AuditLog, CommunicationApi, Thread, ThreadType, UrgencyTier } from './communication-api.service';
 
 /** Targets the caller may broadcast to (teachers: own courses + related groups — BR-COM-002.7). */
 interface BroadcastAudiences {
@@ -33,7 +38,23 @@ const ACTION_LABELS: Record<string, string> = {
 @Component({
   selector: 'app-communication-broadcasts',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [Button, DatePipe, FormField, PageHeader, EmptyState, TabList, Tab, Tabs, TabPanel, TabContent],
+  imports: [
+    UiChoice,
+    UiField,
+    UiInput,
+    UiSelect,
+    UiToggle,
+    Button,
+    DatePipe,
+    FormField,
+    PageHeader,
+    EmptyState,
+    TabList,
+    Tab,
+    Tabs,
+    TabPanel,
+    TabContent,
+  ],
   template: `
     <lib-page-header
       title="Comunicados institucionales"
@@ -96,19 +117,21 @@ const ACTION_LABELS: Record<string, string> = {
                           <span>{{ item.createdAt | date: 'short' }}</span>
                         </div>
                         <div class="flex flex-wrap items-center gap-3">
-                          <label class="label cursor-pointer gap-2 py-0">
-                            <span class="text-sm">Permitir respuestas</span>
+                          <ui-choice label="Permitir respuestas" class="py-0">
                             <input
+                              uiToggle
+                              size="sm"
                               type="checkbox"
-                              class="toggle toggle-primary toggle-sm"
                               [checked]="item.repliesAllowed !== false"
                               (change)="toggleReplies(item, $event)"
                             />
-                          </label>
+                          </ui-choice>
                           @if (canApprove()) {
-                            <button uiButton variant="primary" size="sm"
+                            <button
+                              uiButton
+                              variant="primary"
+                              size="sm"
                               type="button"
-                             
                               [disabled]="approvingId() === item.id"
                               (click)="approve(item)"
                             >
@@ -139,67 +162,59 @@ const ACTION_LABELS: Record<string, string> = {
                   </p>
 
                   <form (submit)="submit($event)" class="space-y-4 mt-2">
-                    <div class="fieldset">
-                      <label for="audience">Destinatarios</label>
-                      <select id="audience" class="select select-primary" [formField]="form.type">
+                    <ui-field label="Destinatarios" [field]="form.type">
+                      <select uiSelect id="audience" [formField]="form.type">
                         <option value="CLASS_GROUP">Grupo de clase</option>
                         <option value="SCHOOL_WIDE">Toda la institución</option>
                       </select>
-                    </div>
+                    </ui-field>
 
                     @if (form.type().value() === 'CLASS_GROUP') {
-                      <div class="fieldset">
-                        <label for="class-group">Grupo</label>
-                        <select id="class-group" class="select select-primary" [formField]="form.classGroupId">
+                      <ui-field
+                        label="Grupo"
+                        [field]="form.classGroupId"
+                        [hint]="
+                          !audiences.isLoading() && audiences.value().classGroups.length === 0
+                            ? 'No hay grupos disponibles. Solo puedes enviar a los grupos relacionados con tus cursos.'
+                            : undefined
+                        "
+                      >
+                        <select uiSelect id="class-group" [formField]="form.classGroupId">
                           <option [value]="''" disabled>Selecciona un grupo…</option>
                           @for (cg of audiences.value().classGroups; track cg.id) {
                             <option [value]="cg.id">{{ cg.name }}</option>
                           }
                         </select>
-                        @if (!audiences.isLoading() && audiences.value().classGroups.length === 0) {
-                          <p class="text-sm text-base-content/60">
-                            No hay grupos disponibles. Solo puedes enviar a los grupos relacionados con tus cursos.
-                          </p>
-                        }
-                      </div>
+                      </ui-field>
                     }
 
-                    <div class="fieldset">
-                      <label for="title">Asunto</label>
-                      <input id="title" class="input input-primary" [formField]="form.title" />
-                    </div>
+                    <ui-field label="Asunto" [field]="form.title">
+                      <input uiInput id="title" [formField]="form.title" />
+                    </ui-field>
 
-                    <div class="fieldset">
-                      <label for="body">Mensaje</label>
-                      <textarea
-                        id="body"
-                        class="textarea textarea-primary w-full"
-                        rows="5"
-                        [formField]="form.body"
-                      ></textarea>
-                    </div>
+                    <ui-field label="Mensaje" [field]="form.body">
+                      <textarea uiInput id="body" rows="5" [formField]="form.body"></textarea>
+                    </ui-field>
 
-                    <div class="fieldset">
-                      <label for="urgency">Prioridad</label>
-                      <select id="urgency" class="select select-primary" [formField]="form.urgency">
+                    <ui-field label="Prioridad" [field]="form.urgency">
+                      <select uiSelect id="urgency" [formField]="form.urgency">
                         <option value="ROUTINE">Rutina</option>
                         <option value="IMPORTANT">Importante</option>
                         <option value="EMERGENCY">Emergencia (solo en la app)</option>
                       </select>
-                    </div>
+                    </ui-field>
 
-                    <label class="label cursor-pointer justify-start gap-3">
+                    <ui-choice
+                      label="Permitir respuestas"
+                      hint="Si lo desactivas, las familias solo podrán leer el aviso."
+                    >
                       <input
+                        uiToggle
                         type="checkbox"
-                        class="toggle toggle-primary"
                         [checked]="composeAllowsReplies()"
                         (change)="setComposeReplies($event)"
                       />
-                      <span>
-                        <span class="font-medium">Permitir respuestas</span>
-                        <span class="block text-sm text-base-content/60">Si lo desactivas, las familias solo podrán leer el aviso.</span>
-                      </span>
-                    </label>
+                    </ui-choice>
 
                     @if (form.type().value() === 'SCHOOL_WIDE') {
                       <div role="alert" class="alert alert-info text-sm">
@@ -259,15 +274,15 @@ const ACTION_LABELS: Record<string, string> = {
                               </td>
                               <td>{{ recipientCount(item) }}</td>
                               <td>
-                                <label class="label cursor-pointer justify-start gap-2 py-0">
+                                <ui-choice label="{{ repliesLabel(item) }}" class="py-0">
                                   <input
+                                    uiToggle
+                                    size="sm"
                                     type="checkbox"
-                                    class="toggle toggle-primary toggle-sm"
                                     [checked]="item.repliesAllowed !== false"
                                     (change)="toggleReplies(item, $event)"
                                   />
-                                  <span class="text-sm">{{ repliesLabel(item) }}</span>
-                                </label>
+                                </ui-choice>
                               </td>
                               <td>{{ item.createdAt | date: 'short' }}</td>
                             </tr>
@@ -335,14 +350,21 @@ const ACTION_LABELS: Record<string, string> = {
                         <p class="font-medium">Avisos a toda la institución</p>
                         <p class="text-sm text-base-content/60">Quedan en cola hasta que un admin los apruebe.</p>
                       </div>
-                      <input type="checkbox" class="toggle toggle-primary" checked disabled aria-label="Aprobación institucional activa" />
+                      <input uiToggle type="checkbox" checked disabled aria-label="Aprobación institucional activa" />
                     </li>
                     <li class="flex items-start justify-between gap-4">
                       <div>
                         <p class="font-medium">Avisos a un grupo de clase</p>
                         <p class="text-sm text-base-content/60">El personal puede enviarlos de inmediato.</p>
                       </div>
-                      <input type="checkbox" class="toggle" checked disabled aria-label="Envío directo a grupos activo" />
+                      <input
+                        uiToggle
+                        tone="neutral"
+                        type="checkbox"
+                        checked
+                        disabled
+                        aria-label="Envío directo a grupos activo"
+                      />
                     </li>
                     <li class="flex items-start justify-between gap-4">
                       <div>
@@ -368,21 +390,21 @@ const ACTION_LABELS: Record<string, string> = {
                         <p class="font-medium">En la aplicación</p>
                         <p class="text-sm text-base-content/60">Bandeja de padres y docentes, con avisos en vivo.</p>
                       </div>
-                      <input type="checkbox" class="toggle toggle-primary" checked disabled aria-label="Canal en la aplicación activo" />
+                      <input uiToggle type="checkbox" checked disabled aria-label="Canal en la aplicación activo" />
                     </li>
                     <li class="flex items-start justify-between gap-4">
                       <div>
                         <p class="font-medium">Correo electrónico</p>
                         <p class="text-sm text-base-content/60">Pendiente de configurar el proveedor de envío.</p>
                       </div>
-                      <input type="checkbox" class="toggle" disabled aria-label="Canal de correo inactivo" />
+                      <input uiToggle tone="neutral" type="checkbox" disabled aria-label="Canal de correo inactivo" />
                     </li>
                     <li class="flex items-start justify-between gap-4">
                       <div>
                         <p class="font-medium">SMS</p>
                         <p class="text-sm text-base-content/60">Requiere consentimiento y un proveedor de SMS.</p>
                       </div>
-                      <input type="checkbox" class="toggle" disabled aria-label="Canal SMS inactivo" />
+                      <input uiToggle tone="neutral" type="checkbox" disabled aria-label="Canal SMS inactivo" />
                     </li>
                   </ul>
                 </div>
@@ -392,8 +414,8 @@ const ACTION_LABELS: Record<string, string> = {
                 <div class="card-body">
                   <h2 class="card-title text-base">Prioridad y horario de silencio</h2>
                   <p class="text-sm text-base-content/60">
-                    Cada destinatario puede tener horario de silencio. La prioridad de emergencia lo omite, pero
-                    sigue llegando solo en la aplicación.
+                    Cada destinatario puede tener horario de silencio. La prioridad de emergencia lo omite, pero sigue
+                    llegando solo en la aplicación.
                   </p>
                   <div class="mt-3 overflow-x-auto">
                     <table class="table">

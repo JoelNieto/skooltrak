@@ -1,4 +1,4 @@
-import { Button, EditorViewer, Loader, Toast } from '#/ui';
+import { Button, EditorViewer, Loader, Toast, UiInput } from '#/ui';
 import { DatePipe } from '@angular/common';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { Component, computed, effect, inject, input, signal } from '@angular/core';
@@ -26,7 +26,7 @@ type MessageType = Prisma.MessageGetPayload<undefined> & {
 
 @Component({
   selector: 'app-message',
-  imports: [Button, Loader, RouterLink, DatePipe, EditorViewer, FormsModule],
+  imports: [UiInput, Button, Loader, RouterLink, DatePipe, EditorViewer, FormsModule],
   styles: `
     :host ::ng-deep blockquote {
       border-left: 3px solid oklch(var(--bc) / 0.3);
@@ -126,7 +126,8 @@ type MessageType = Prisma.MessageGetPayload<undefined> & {
               </div>
             }
             <textarea
-              class="textarea textarea-bordered w-full mt-3"
+              uiInput
+              class="mt-3"
               rows="4"
               placeholder="Escribe tu respuesta"
               [ngModel]="replyDraft().content"

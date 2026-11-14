@@ -1,4 +1,4 @@
-import { Button, Confirmation, EmptyState, Paginator, TimeAgoPipe, Toast } from '#/ui';
+import { Button, Confirmation, EmptyState, Paginator, TimeAgoPipe, Toast, UiCheckbox } from '#/ui';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { Component, computed, effect, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -30,7 +30,7 @@ type MessageRecipientType = {
 };
 
 @Component({
-  imports: [Button, RouterLink, Paginator, FormsModule, EmptyState],
+  imports: [UiCheckbox, Button, RouterLink, Paginator, FormsModule, EmptyState],
   providers: [TimeAgoPipe],
   template: `<div class="breadcrumbs text-sm">
       <ul>
@@ -60,11 +60,12 @@ type MessageRecipientType = {
               <tr>
                 <th class="w-12">
                   <input
+                    uiCheckbox
+                    tone="neutral"
                     type="checkbox"
                     [checked]="allSelected()"
                     [indeterminate]="someSelected()"
                     (change)="onSelectAllChange($event.target.checked)"
-                    class="checkbox"
                   />
                 </th>
                 <th class="w-[15rem]"></th>
@@ -78,8 +79,9 @@ type MessageRecipientType = {
                 <tr class="hover:bg-base-300" [class.bg-base-200]="!item.readAt">
                   <td>
                     <input
+                      uiCheckbox
+                      tone="neutral"
                       type="checkbox"
-                      class="checkbox"
                       [checked]="(item.id && selectedStates()[item.id]) || false"
                       (change)="item.id && onCheckboxChange(item.id, $any($event.target).checked)"
                     />
@@ -152,11 +154,12 @@ type MessageRecipientType = {
               <tr>
                 <th class="w-12">
                   <input
+                    uiCheckbox
+                    tone="neutral"
                     type="checkbox"
                     [checked]="allSentSelected()"
                     [indeterminate]="someSentSelected()"
                     (change)="onSelectAllSentChange($event.target.checked)"
-                    class="checkbox"
                   />
                 </th>
                 <th class="w-[15rem]">Para</th>
@@ -170,8 +173,9 @@ type MessageRecipientType = {
                 <tr [routerLink]="['/messages', item.id]" class="hover:bg-base-300">
                   <td>
                     <input
+                      uiCheckbox
+                      tone="neutral"
                       type="checkbox"
-                      class="checkbox"
                       [checked]="(item.id && sentSelectedStates()[item.id]) || false"
                       (change)="item.id && onSentCheckboxChange(item.id, $any($event.target).checked)"
                     />

@@ -5,11 +5,11 @@ import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { map, of } from 'rxjs';
 import { StoreApiService } from '../store-api.service';
-import { Button } from '#/ui';
+import { Button, UiInput } from '#/ui';
 
 @Component({
   selector: 'app-store-catalog',
-  imports: [Button, RouterLink, FormsModule],
+  imports: [UiInput, Button, RouterLink, FormsModule],
   template: `
     @if (!schoolId()) {
       <div class="alert alert-warning">
@@ -19,8 +19,9 @@ import { Button } from '#/ui';
     } @else {
       <div class="flex flex-col gap-4 mb-6">
         <input
+          uiInput
           type="search"
-          class="input input-bordered w-full max-w-md"
+          class="max-w-md"
           placeholder="Buscar productos..."
           [ngModel]="search()"
           (ngModelChange)="search.set($event)"

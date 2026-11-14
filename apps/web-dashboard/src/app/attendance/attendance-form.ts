@@ -1,4 +1,4 @@
-import { Button, Loader, Toast } from '#/ui';
+import { Button, Loader, Toast, UiInput, UiSelect } from '#/ui';
 import { NgClass } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { afterRenderEffect, Component, computed, effect, inject, input, output, signal } from '@angular/core';
@@ -40,7 +40,7 @@ const STATUS_OPTIONS = [
 
 @Component({
   selector: 'app-attendance-form',
-  imports: [Button, FormField, Loader, NgClass],
+  imports: [UiInput, UiSelect, Button, FormField, Loader, NgClass],
   template: `
     <form (submit)="onSubmit($event)" class="flex flex-col gap-4">
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -48,13 +48,13 @@ const STATUS_OPTIONS = [
           <label class="label" for="date">
             <span class="label-text">Fecha</span>
           </label>
-          <input type="date" class="input input-bordered input-primary" [formField]="form.date" />
+          <input uiInput type="date" [formField]="form.date" />
         </div>
         <div class="form-control">
           <label class="label" for="classGroupId">
             <span class="label-text">Grupo</span>
           </label>
-          <select id="classGroupId" class="select select-bordered select-primary" [formField]="form.classGroupId">
+          <select uiSelect id="classGroupId" [formField]="form.classGroupId">
             <option value="" disabled>Seleccionar grupo...</option>
             @for (group of data()?.groups || []; track group.id) {
               <option [value]="group.id">{{ group.name }}</option>
@@ -140,8 +140,9 @@ const STATUS_OPTIONS = [
                   </td>
                   <td>
                     <input
+                      uiInput
                       type="text"
-                      class="input input-bordered input-sm w-full max-w-xs"
+                      class="input-sm max-w-xs"
                       [formField]="record.comment"
                       placeholder="Comentario opcional..."
                     />

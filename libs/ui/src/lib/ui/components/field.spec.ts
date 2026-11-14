@@ -1,7 +1,7 @@
 import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { form, FormField, required } from '@angular/forms/signals';
-import { UiField, UiInput, UiSelect } from './field';
+import { UiCheckbox, UiChoice, UiField, UiInput, UiRadio, UiSelect, UiToggle } from './field';
 
 @Component({
   imports: [UiField, UiInput, UiSelect, FormField],
@@ -111,5 +111,104 @@ describe('ui-field + uiInput / uiSelect', () => {
     const { fields } = setup();
     const ids = Array.from(fields).map((f) => f.querySelector('input, select, textarea')?.id);
     expect(new Set(ids).size).toBe(3);
+  });
+});
+
+@Component({
+  imports: [UiField, UiInput, UiChoice, UiCheckbox, UiToggle, UiRadio, FormField],
+  template: `
+    <ui-field label="Código" optional><input uiInput /></ui-field>
+    <ui-field label="Nombre" optional [field]="f.name"><input uiInput [formField]="f.name" /></ui-field>
+
+    <ui-choice label="Acepto los términos" hint="Obligatorio para continuar" [field]="f.accepted">
+      <input type="checkbox" uiCheckbox [formField]="f.accepted" />
+    </ui-choice>
+
+    <ui-choice label="Permitir respuestas">
+      <input type="checkbox" uiToggle size="sm" id="replies" />
+    </ui-choice>
+
+    <input type="radio" uiRadio name="rating" value="X" tone="danger" class="standalone-radio" />
+    <input type="checkbox" uiCheckbox tone="neutral" class="row-select" />
+  `,
+})
+class ChoiceHost {
+  model = signal({ name: '', accepted: false });
+  f = form(this.model, (p) => {
+    required(p.name);
+    required(p.accepted, { message: 'Debes aceptar los términos' });
+  });
+}
+
+function setupChoices() {
+  TestBed.configureTestingModule({ imports: [ChoiceHost] });
+  const fixture = TestBed.createComponent(ChoiceHost);
+  fixture.detectChanges();
+  const root = fixture.nativeElement as HTMLElement;
+  return { fixture, host: fixture.componentInstance, root };
+}
+
+describe('ui-field optional marker', () => {
+  it('shows "(opcional)" only when the field is not required', () => {
+    const { root } = setupChoices();
+    const [code, name] = Array.from(root.querySelectorAll('ui-field'));
+    expect(code.querySelector('.ui-field-optional')?.textContent).toContain('opcional');
+    expect(name.querySelector('.ui-field-optional')).toBeNull(); // required() wins
+    expect(name.querySelector('.ui-field-required')).not.toBeNull();
+  });
+});
+
+describe('ui-choice + uiCheckbox / uiToggle / uiRadio', () => {
+  it('puts the label beside the control and links them', () => {
+    const { root } = setupChoices();
+    const choice = root.querySelector('ui-choice') as HTMLElement;
+    const checkbox = choice.querySelector('input') as HTMLInputElement;
+    const label = choice.querySelector('label') as HTMLLabelElement;
+    expect(checkbox.classList).toContain('checkbox');
+    expect(checkbox.classList).toContain('checkbox-primary'); // tone="action" by default
+    expect(label.htmlFor).toBe(checkbox.id);
+    expect(label.textContent).toContain('Acepto los términos');
+    expect(choice.querySelector('.ui-field-required')).not.toBeNull();
+    expect(checkbox.getAttribute('aria-describedby')).toBe(choice.querySelector('.ui-field-hint')?.id);
+  });
+
+  it('binds a boolean signal-forms field and shows its error once touched', () => {
+    const { fixture, host, root } = setupChoices();
+    const choice = root.querySelector('ui-choice') as HTMLElement;
+    const checkbox = choice.querySelector('input') as HTMLInputElement;
+
+    host.f.accepted().markAsTouched();
+    fixture.detectChanges();
+    expect(choice.querySelector('.ui-field-error')?.textContent).toContain('Debes aceptar los términos');
+    expect(checkbox.getAttribute('aria-invalid')).toBe('true');
+
+    checkbox.click();
+    fixture.detectChanges();
+    expect(host.model().accepted).toBe(true);
+    expect(choice.querySelector('.ui-field-error')).toBeNull();
+    expect(checkbox.getAttribute('aria-invalid')).toBeNull();
+  });
+
+  it('applies size and keeps an explicit id on a toggle', () => {
+    const { root } = setupChoices();
+    const choice = root.querySelectorAll('ui-choice')[1] as HTMLElement;
+    const toggle = choice.querySelector('input') as HTMLInputElement;
+    expect(toggle.classList).toContain('toggle');
+    expect(toggle.classList).toContain('toggle-sm');
+    expect(toggle.id).toBe('replies');
+    expect((choice.querySelector('label') as HTMLLabelElement).htmlFor).toBe('replies');
+  });
+
+  it('styles standalone controls without a field and maps tones', () => {
+    const { root } = setupChoices();
+    const radio = root.querySelector('.standalone-radio') as HTMLInputElement;
+    const rowCheckbox = root.querySelector('.row-select') as HTMLInputElement;
+    expect(radio.classList).toContain('radio');
+    expect(radio.classList).toContain('radio-error');
+    expect(radio.classList).not.toContain('radio-primary');
+    expect(radio.hasAttribute('id')).toBe(false);
+    expect(radio.hasAttribute('aria-invalid')).toBe(false);
+    expect(rowCheckbox.classList).toContain('checkbox');
+    expect(rowCheckbox.classList).not.toContain('checkbox-primary');
   });
 });

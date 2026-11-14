@@ -1,4 +1,4 @@
-import { Button, Toast } from '#/ui';
+import { Button, Toast, UiInput } from '#/ui';
 import { Component, inject, signal } from '@angular/core';
 import { email, form, FormField, required } from '@angular/forms/signals';
 
@@ -6,7 +6,7 @@ import Auth from './auth';
 
 @Component({
   selector: 'app-login',
-  imports: [Button, FormField],
+  imports: [UiInput, Button, FormField],
   template: ` <div class="gradient-bg min-h-screen flex items-center justify-center p-4">
     <div class="max-w-md w-full bg-white rounded-2xl shadow-xl overflow-hidden">
       <!-- Header Section -->
@@ -25,7 +25,7 @@ import Auth from './auth';
               <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                 <i class="fas fa-envelope text-gray-400"></i>
               </div>
-              <input type="email" id="email" class="input" placeholder="you@example.com" [formField]="form.email" />
+              <input uiInput type="email" id="email" placeholder="you@example.com" [formField]="form.email" />
             </div>
             @if (form.email().touched() && form.email().errors()) {
               @for (error of form.email().errors(); track error.message) {
@@ -44,7 +44,7 @@ import Auth from './auth';
               <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                 <i class="fas fa-lock text-gray-400"></i>
               </div>
-              <input type="password" id="password" class="input" placeholder="••••••••" [formField]="form.password" />
+              <input uiInput type="password" id="password" placeholder="••••••••" [formField]="form.password" />
               <button type="button" id="togglePassword" class="absolute inset-y-0 right-0 pr-3 flex items-center">
                 <i class="fas fa-eye text-gray-400 hover:text-gray-600 transition duration-200"></i>
               </button>

@@ -1,4 +1,4 @@
-import { Button, Toast } from '#/ui';
+import { Button, Toast, UiInput } from '#/ui';
 import { HttpClient } from '@angular/common/http';
 import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -8,7 +8,7 @@ import Store from '../../core/store';
 @Component({
   selector: 'app-imports',
   standalone: true,
-  imports: [Button, FormsModule],
+  imports: [UiInput, Button, FormsModule],
   template: `
     <div class="flex flex-col gap-6 p-4 max-w-6xl mx-auto">
       <h1 class="text-2xl font-bold">Importación masiva</h1>
@@ -44,8 +44,9 @@ import Store from '../../core/store';
               <div class="flex flex-col gap-2">
                 <label class="block text-sm font-medium" for="csv-text">O pega el contenido CSV</label>
                 <textarea
+                  uiInput
                   id="csv-text"
-                  class="textarea textarea-bordered w-full h-40"
+                  class="h-40"
                   placeholder="firstName,middleName,fatherName,motherName,documentId,birthDate,gender,address,phone&#10;Juan,,Perez,Garcia,12345678,2010-05-01,MASCULINO,Calle 1,555-1234"
                   [value]="csvText()"
                   (input)="onCsvInput($event)"

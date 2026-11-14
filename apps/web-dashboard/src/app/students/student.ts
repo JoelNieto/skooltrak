@@ -1,4 +1,4 @@
-import { Button, Loader, Toast } from '#/ui';
+import { Button, Loader, Toast, UiSelect } from '#/ui';
 import { Tab, TabContent, TabList, TabPanel, Tabs } from '@angular/aria/tabs';
 import { DatePipe, DecimalPipe, NgClass } from '@angular/common';
 import { HttpClient, httpResource } from '@angular/common/http';
@@ -31,6 +31,7 @@ const ENROLLMENT_STATUS_COLORS: Record<$Enums.EnrollmentStatus, string> = {
 @Component({
   selector: 'app-student',
   imports: [
+    UiSelect,
     Button,
     RouterLink,
     Loader,
@@ -120,7 +121,7 @@ const ENROLLMENT_STATUS_COLORS: Record<$Enums.EnrollmentStatus, string> = {
               <div ngTab value="attendance" class="tab">Asistencia</div>
             </div>
             <div class="w-64">
-              <select class="select select-primary" [ngModel]="periodId()" (ngModelChange)="periodId.set($event)">
+              <select uiSelect [ngModel]="periodId()" (ngModelChange)="periodId.set($event)">
                 <option disabled selected value="">Selecciona un periodo...</option>
                 @for (period of periodsResource.value(); track period.id) {
                   <option [value]="period.id">{{ period.name }}</option>

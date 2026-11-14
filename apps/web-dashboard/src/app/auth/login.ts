@@ -1,4 +1,4 @@
-import { Button, Loader, Toast } from '#/ui';
+import { Button, Loader, Toast, UiField, UiInput } from '#/ui';
 import { Component, ElementRef, inject, signal, viewChild } from '@angular/core';
 import { NonNullableFormBuilder } from '@angular/forms';
 import { email, form, FormField, minLength, required } from '@angular/forms/signals';
@@ -7,7 +7,7 @@ import Auth from './auth';
 
 @Component({
   selector: 'app-login',
-  imports: [Button, FormField, Loader, RouterLink],
+  imports: [UiField, UiInput, Button, FormField, Loader, RouterLink],
 
   template: ` <div class="min-h-screen main">
     @defer {
@@ -82,18 +82,16 @@ import Auth from './auth';
               </div>
             }
             <form class="space-y-5" (submit)="onSubmit($event)">
-              <div class="fieldset">
-                <label class="label pb-1.5" for="email">
-                  <span class="label-text text-ink-strong font-medium text-sm">Correo electrónico</span>
-                </label>
+              <ui-field label="Correo electrónico" [field]="form.email">
                 <input
+                  uiInput
                   id="email"
                   [formField]="form.email"
                   type="email"
                   placeholder="tu@correo.com"
-                  class="field-input input w-full rounded-xl h-12 px-4 pr-11 text-sm"
+                  class="field-input rounded-xl h-12 px-4 pr-11 text-sm"
                 />
-              </div>
+              </ui-field>
 
               <div class="form-control">
                 <div class="flex items-center justify-between pb-1.5">
@@ -106,12 +104,13 @@ import Auth from './auth';
                 </div>
                 <div class="relative">
                   <input
+                    uiInput
                     #passwordInput
                     id="password"
                     type="password"
                     placeholder="••••••••"
                     [formField]="form.password"
-                    class="field-input input w-full rounded-xl h-12 px-4 pr-11 text-sm"
+                    class="field-input rounded-xl h-12 px-4 pr-11 text-sm"
                   />
                   <button
                     type="button"
@@ -145,9 +144,7 @@ import Auth from './auth';
 
               <div class="divider text-ink-muted text-xs my-5">o</div>
 
-              <a uiButton size="lg" routerLink="/auth/magic-link" class="w-full text-sm">
-                Acceso sin contraseña
-              </a>
+              <a uiButton size="lg" routerLink="/auth/magic-link" class="w-full text-sm"> Acceso sin contraseña </a>
             </form>
 
             <p class="text-center text-sm text-ink-muted mt-8">

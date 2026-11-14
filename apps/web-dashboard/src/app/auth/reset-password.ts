@@ -1,4 +1,4 @@
-import { Button, Loader, Toast } from '#/ui';
+import { Button, Loader, Toast, UiField, UiInput } from '#/ui';
 import { HttpClient } from '@angular/common/http';
 import { Component, inject, signal } from '@angular/core';
 import { form, FormField, minLength, required, validate } from '@angular/forms/signals';
@@ -8,7 +8,7 @@ import { BrandLogo } from '../shared/brand-logo';
 
 @Component({
   selector: 'app-reset-password',
-  imports: [Button, BrandLogo, FormField, RouterLink, Loader],
+  imports: [UiField, UiInput, Button, BrandLogo, FormField, RouterLink, Loader],
   template: `
     <div class="gradient-bg min-h-screen flex items-center justify-center p-4">
       @defer {
@@ -37,7 +37,13 @@ import { BrandLogo } from '../shared/brand-logo';
                 </div>
                 <div class="flex flex-col gap-3 text-center">
                   @if (emailFromUrl()) {
-                    <button uiButton variant="primary" type="button" [disabled]="resending()" (click)="resendInvitation()">
+                    <button
+                      uiButton
+                      variant="primary"
+                      type="button"
+                      [disabled]="resending()"
+                      (click)="resendInvitation()"
+                    >
                       @if (resending()) {
                         <span class="loading loading-spinner loading-sm"></span>
                         Enviando...
@@ -52,41 +58,35 @@ import { BrandLogo } from '../shared/brand-logo';
                 </div>
               } @else {
                 <form (submit)="onSubmit($event)" class="space-y-6">
-                  <div class="fieldset">
-                    <label for="password">Nueva contraseña</label>
+                  <ui-field label="Nueva contraseña" [field]="form.password">
                     <input
+                      uiInput
                       id="password"
                       [formField]="form.password"
                       type="password"
                       autocomplete="new-password"
-                      class="input input-primary w-full"
                       placeholder="Mínimo 8 caracteres"
                     />
-                    @if (form.password().touched() && form.password().invalid()) {
-                      @for (error of form.password().errors(); track error) {
-                        <p class="text-error text-xs mt-1">{{ error.message }}</p>
-                      }
-                    }
-                  </div>
+                  </ui-field>
 
-                  <div class="fieldset">
-                    <label for="confirmPassword">Confirmar contraseña</label>
+                  <ui-field label="Confirmar contraseña" [field]="form.confirmPassword">
                     <input
+                      uiInput
                       id="confirmPassword"
                       [formField]="form.confirmPassword"
                       type="password"
                       autocomplete="new-password"
-                      class="input input-primary w-full"
                       placeholder="Repite la nueva contraseña"
                     />
-                    @if (form.confirmPassword().touched() && form.confirmPassword().invalid()) {
-                      @for (error of form.confirmPassword().errors(); track error) {
-                        <p class="text-error text-xs mt-1">{{ error.message }}</p>
-                      }
-                    }
-                  </div>
+                  </ui-field>
 
-                  <button uiButton variant="primary" type="submit" [disabled]="loading() || form().invalid()" class="w-full">
+                  <button
+                    uiButton
+                    variant="primary"
+                    type="submit"
+                    [disabled]="loading() || form().invalid()"
+                    class="w-full"
+                  >
                     @if (loading()) {
                       <span class="loading loading-spinner loading-sm"></span>
                       Guardando...

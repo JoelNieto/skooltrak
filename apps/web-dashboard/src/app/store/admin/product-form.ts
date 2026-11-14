@@ -1,5 +1,5 @@
 import { SchoolContext } from '#/shared';
-import { Button, Toast } from '#/ui';
+import { Button, Toast, UiChoice, UiInput, UiSelect, UiToggle } from '#/ui';
 import { Component, effect, inject, input, signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { applyEach, form, FormField, maxLength, min, required, submit } from '@angular/forms/signals';
@@ -35,7 +35,7 @@ function emptyStoreProductForm(): StoreProductFormModel {
 
 @Component({
   selector: 'app-product-form',
-  imports: [Button, FormField],
+  imports: [UiChoice, UiInput, UiSelect, UiToggle, Button, FormField],
   template: `
     <h3 class="text-lg font-medium mb-4">{{ id() ? 'Editar producto' : 'Nuevo producto' }}</h3>
     @if (!school.currentSchoolId()) {
@@ -44,15 +44,15 @@ function emptyStoreProductForm(): StoreProductFormModel {
       <form class="grid gap-4 max-w-2xl" (submit)="onSubmit($event)" novalidate>
         <label class="form-control">
           <span class="label-text">Nombre</span>
-          <input class="input input-bordered" [formField]="productForm.name" />
+          <input uiInput [formField]="productForm.name" />
         </label>
         <label class="form-control">
           <span class="label-text">Descripción</span>
-          <textarea class="textarea textarea-bordered" [formField]="productForm.description" rows="3"></textarea>
+          <textarea uiInput [formField]="productForm.description" rows="3"></textarea>
         </label>
         <label class="form-control">
           <span class="label-text">Categoría</span>
-          <select class="select select-bordered" [formField]="productForm.categoryId">
+          <select uiSelect [formField]="productForm.categoryId">
             <option value="">—</option>
             @for (c of categories.value(); track c.id) {
               <option [value]="c.id">{{ c.name }}</option>
@@ -61,11 +61,11 @@ function emptyStoreProductForm(): StoreProductFormModel {
         </label>
         <label class="form-control">
           <span class="label-text">Precio</span>
-          <input class="input input-bordered" type="number" step="0.01" [formField]="productForm.price" />
+          <input uiInput type="number" step="0.01" [formField]="productForm.price" />
         </label>
         <label class="form-control">
           <span class="label-text">URL de imagen (opcional)</span>
-          <input class="input input-bordered" [formField]="productForm.imageUrl" />
+          <input uiInput [formField]="productForm.imageUrl" />
         </label>
 
         <div class="space-y-2">
@@ -90,17 +90,13 @@ function emptyStoreProductForm(): StoreProductFormModel {
                 @for (row of productForm.variants; track $index) {
                   <tr>
                     <td>
-                      <input
-                        class="input input-bordered input-sm w-full max-w-40"
-                        [formField]="row.label"
-                        placeholder="S, M, 32…"
-                      />
+                      <input uiInput class="input-sm max-w-40" [formField]="row.label" placeholder="S, M, 32…" />
                     </td>
                     <td>
-                      <input class="input input-bordered input-sm w-24" type="number" [formField]="row.stock" />
+                      <input uiInput class="input-sm w-24" type="number" [formField]="row.stock" />
                     </td>
                     <td>
-                      <input class="input input-bordered input-sm w-16" type="number" [formField]="row.sortOrder" />
+                      <input uiInput class="input-sm w-16" type="number" [formField]="row.sortOrder" />
                     </td>
                     <td>
                       @if (productModel().variants.length > 1) {
@@ -123,10 +119,9 @@ function emptyStoreProductForm(): StoreProductFormModel {
           </div>
         </div>
 
-        <label class="label cursor-pointer justify-start gap-2">
-          <input type="checkbox" class="toggle" [formField]="productForm.active" />
-          <span class="label-text">Activo</span>
-        </label>
+        <ui-choice label="Activo">
+          <input uiToggle tone="neutral" type="checkbox" [formField]="productForm.active" />
+        </ui-choice>
         <div class="flex gap-2">
           <button uiButton variant="primary" type="submit" [disabled]="saving() || productForm().invalid()">
             Guardar

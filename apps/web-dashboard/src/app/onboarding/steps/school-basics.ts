@@ -1,4 +1,4 @@
-import { Button, Toast } from '#/ui';
+import { Button, Toast, UiField, UiSelect } from '#/ui';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { Component, computed, inject, output, signal } from '@angular/core';
 import { form, FormField, required } from '@angular/forms/signals';
@@ -6,7 +6,7 @@ import Store from '../../core/store';
 
 @Component({
   selector: 'app-school-basics-step',
-  imports: [Button, FormField],
+  imports: [UiField, UiSelect, Button, FormField],
   template: `
     <div class="w-full max-w-md text-center space-y-8 animate-fade-in">
       <!-- Icon -->
@@ -24,17 +24,17 @@ import Store from '../../core/store';
 
       <!-- Form Fields -->
       <form (submit)="onSubmit($event)" class="space-y-4 text-left">
-        <div class="fieldset">
-          <label for="currentYear" class="label">
-            <span class="label-text font-medium">Año Académico Actual</span>
-          </label>
-          <select id="currentYear" [formField]="form.currentYear" class="select select-bordered w-full">
+        <ui-field
+          label="Año Académico Actual"
+          [field]="form.currentYear"
+          hint="El año académico vigente para los cursos y asignaciones."
+        >
+          <select uiSelect id="currentYear" [formField]="form.currentYear">
             @for (year of years; track year) {
               <option [value]="year">{{ year }}</option>
             }
           </select>
-          <p class="text-xs text-base-content/60 mt-1">El año académico vigente para los cursos y asignaciones.</p>
-        </div>
+        </ui-field>
 
         <div class="pt-4">
           <button uiButton variant="primary" type="submit" class="w-full" [disabled]="saving()">

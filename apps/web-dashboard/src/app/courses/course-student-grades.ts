@@ -1,4 +1,4 @@
-import { DecimalToNumber } from '#/ui';
+import { DecimalToNumber, UiSelect } from '#/ui';
 import { DatePipe, DecimalPipe, NgClass } from '@angular/common';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { afterRenderEffect, Component, computed, inject, input, signal } from '@angular/core';
@@ -10,7 +10,7 @@ import Store from '../core/store';
 
 @Component({
   selector: 'app-course-student-grades',
-  imports: [FormsModule, NgClass, DatePipe, DecimalPipe],
+  imports: [UiSelect, FormsModule, NgClass, DatePipe, DecimalPipe],
   template: `
     <div class="flex flex-col gap-4">
       <div class="flex justify-between items-start">
@@ -42,7 +42,7 @@ import Store from '../core/store';
           </div>
         </div>
         <div class="w-64!">
-          <select class="select select-primary" [ngModel]="periodId()" (ngModelChange)="periodId.set($event)">
+          <select uiSelect [ngModel]="periodId()" (ngModelChange)="periodId.set($event)">
             <option disabled selected [value]="">Selecciona un periodo...</option>
             @for (period of periodsResource.value(); track period.id) {
               <option [value]="period.id">{{ period.name }}</option>

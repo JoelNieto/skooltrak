@@ -1,5 +1,5 @@
 import { SchoolContext } from '#/shared';
-import { Button, Toast } from '#/ui';
+import { Button, Toast, UiSelect } from '#/ui';
 import { Component, effect, inject, input, signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
@@ -10,7 +10,7 @@ import { StoreApiService } from '../store-api.service';
 
 @Component({
   selector: 'app-product-detail',
-  imports: [Button, RouterLink, FormsModule],
+  imports: [UiSelect, Button, RouterLink, FormsModule],
   template: `
     <a uiButton variant="ghost" size="sm" routerLink="../.." class="gap-1 mb-4">
       <span class="material-symbols-outlined">arrow_back</span>
@@ -44,11 +44,7 @@ import { StoreApiService } from '../store-api.service';
           @if (p.variants?.length) {
             <label class="form-control w-full max-w-xs">
               <span class="label-text">Talla / variante</span>
-              <select
-                class="select select-bordered"
-                [ngModel]="selectedVariantId()"
-                (ngModelChange)="selectedVariantId.set($event)"
-              >
+              <select uiSelect [ngModel]="selectedVariantId()" (ngModelChange)="selectedVariantId.set($event)">
                 @for (v of p.variants; track v.id) {
                   <option [value]="v.id" [disabled]="(v.stock ?? 0) <= 0">
                     {{ v.label }} — {{ (v.stock ?? 0) <= 0 ? 'Agotado' : v.stock + ' disponibles' }}

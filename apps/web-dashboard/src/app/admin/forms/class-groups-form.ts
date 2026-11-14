@@ -1,4 +1,4 @@
-import { Button, Toast } from '#/ui';
+import { Button, Toast, UiCheckbox, UiChoice, UiField, UiInput, UiSelect } from '#/ui';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { afterRenderEffect, Component, inject, input, output, signal } from '@angular/core';
 import { form, FormField, required } from '@angular/forms/signals';
@@ -6,56 +6,31 @@ import { Prisma } from '@generated/prisma';
 import Store from '../../core/store';
 @Component({
   selector: 'app-class-groups-form',
-  imports: [Button, FormField],
+  imports: [UiCheckbox, UiChoice, UiField, UiInput, UiSelect, Button, FormField],
   template: `<form (submit)="onSubmit($event)">
     <div class="flex flex-col md:grid md:grid-cols-2 gap-2">
-      <div class="fieldset">
-        <label for="name">Nombre</label>
-        <input
-          type="text"
-          id="name"
-          [formField]="form.name"
-          [class.ng-invalid]="form.name().touched() && form.name().invalid()"
-          class="input input-primary"
-        />
-        @if (form.name().touched() && form.name().invalid()) {
-          @for (error of form.name().errors(); track error.message) {
-            <p class="text-error text-xs mt-1">{{ error.message }}</p>
-          }
-        }
-      </div>
-      <div class="fieldset">
-        <label for="studyPlanId">Plan de estudio</label>
-        <select
-          id="studyPlanId"
-          [formField]="form.studyPlanId"
-          class="select select-primary"
-          [class.ng-invalid]="form.studyPlanId().touched() && form.studyPlanId().invalid()"
-        >
+      <ui-field label="Nombre" [field]="form.name">
+        <input uiInput type="text" id="name" [formField]="form.name" />
+      </ui-field>
+      <ui-field label="Plan de estudio" [field]="form.studyPlanId">
+        <select uiSelect id="studyPlanId" [formField]="form.studyPlanId">
           <option value="" disabled>Seleccionar plan...</option>
           @for (studyPlan of studyPlans.value(); track studyPlan.id) {
             <option [value]="studyPlan.id">{{ studyPlan.name }}</option>
           }
         </select>
-        @if (form.studyPlanId().touched() && form.studyPlanId().invalid()) {
-          @for (error of form.studyPlanId().errors(); track error.message) {
-            <p class="text-error text-xs mt-1">{{ error.message }}</p>
-          }
-        }
-      </div>
-      <div class="fieldset">
-        <label for="teacherId">Profesor <span class="text-base-content/50 text-xs">(opcional)</span></label>
-        <select id="teacherId" [formField]="$any(form.teacherId)" class="select select-primary">
+      </ui-field>
+      <ui-field label="Profesor" [field]="$any(form.teacherId)" optional>
+        <select uiSelect id="teacherId" [formField]="$any(form.teacherId)">
           <option [value]="null" disabled>Seleccionar profesor...</option>
           @for (teacher of teachers.value(); track teacher.id) {
             <option [value]="teacher.id">{{ teacher.name }}</option>
           }
         </select>
-      </div>
-      <div class="fieldset">
-        <label for="active">Activo</label>
-        <input type="checkbox" id="active" [formField]="form.active" class="checkbox checkbox-primary" />
-      </div>
+      </ui-field>
+      <ui-choice label="Activo" [field]="form.active">
+        <input uiCheckbox type="checkbox" id="active" [formField]="form.active" />
+      </ui-choice>
     </div>
     <div class="flex justify-end mt-4 gap-2">
       <button uiButton variant="ghost" type="button" (click)="closeModal.emit()">Cancelar</button>

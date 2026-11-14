@@ -1,4 +1,4 @@
-import { Button, Toast } from '#/ui';
+import { Button, Toast, UiField, UiInput, UiSelect } from '#/ui';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { afterRenderEffect, Component, computed, inject, input, output, signal } from '@angular/core';
 import { form, FormField, required } from '@angular/forms/signals';
@@ -7,20 +7,17 @@ import { firstValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-schools-form',
-  imports: [Button, FormField],
+  imports: [UiField, UiInput, UiSelect, Button, FormField],
   template: `<form (submit)="onSubmit($event)">
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-      <div class="fieldset">
-        <label for="name">Nombre</label>
-        <input type="text" id="name" class="input input-primary" [formField]="form.name" />
-      </div>
-      <div class="fieldset">
-        <label for="shortName">Nombre corto</label>
-        <input type="text" id="shortName" class="input input-primary" [formField]="form.shortName" />
-      </div>
-      <div class="fieldset">
-        <label for="organizationId">Organización</label>
-        <select id="organizationId" class="select select-primary" [formField]="form.organizationId">
+      <ui-field label="Nombre" [field]="form.name">
+        <input uiInput type="text" id="name" [formField]="form.name" />
+      </ui-field>
+      <ui-field label="Nombre corto" [field]="form.shortName">
+        <input uiInput type="text" id="shortName" [formField]="form.shortName" />
+      </ui-field>
+      <ui-field label="Organización" [field]="form.organizationId">
+        <select uiSelect id="organizationId" [formField]="form.organizationId">
           <option disabled selected value="">--Seleccionar Organización--</option>
           @for (organization of organizations.value(); track organization.id) {
             <option [value]="organization.id">
@@ -28,43 +25,34 @@ import { firstValueFrom } from 'rxjs';
             </option>
           }
         </select>
-      </div>
-      <div class="fieldset">
-        <label for="currentYear">Año actual</label>
-        <input type="number" id="currentYear" class="input input-primary" [formField]="form.currentYear" />
-      </div>
-      <div class="fieldset">
-        <label for="address">Dirección</label>
-        <input type="text" id="address" class="input input-primary" [formField]="form.address" />
-      </div>
-      <div class="fieldset">
-        <label for="city">Ciudad</label>
-        <input type="text" id="city" class="input input-primary" [formField]="form.city" />
-      </div>
-      <div class="fieldset">
-        <label for="state">Estado</label>
-        <input type="text" id="state" class="input input-primary" [formField]="form.state" />
-      </div>
-      <div class="fieldset">
-        <label for="zip">Código postal</label>
-        <input type="text" id="zip" class="input input-primary" [formField]="form.zip" />
-      </div>
-      <div class="fieldset">
-        <label for="country">País</label>
-        <input type="text" id="country" class="input input-primary" [formField]="form.country" />
-      </div>
-      <div class="fieldset">
-        <label for="email">Email</label>
-        <input type="email" id="email" class="input input-primary" [formField]="form.email" />
-      </div>
-      <div class="fieldset">
-        <label for="phone">Teléfono</label>
-        <input type="tel" id="phone" class="input input-primary" [formField]="form.phone" />
-      </div>
-      <div class="fieldset">
-        <label for="website">Sitio web</label>
-        <input type="url" id="website" class="input input-primary" [formField]="form.website" />
-      </div>
+      </ui-field>
+      <ui-field label="Año actual" [field]="form.currentYear">
+        <input uiInput type="number" id="currentYear" [formField]="form.currentYear" />
+      </ui-field>
+      <ui-field label="Dirección" [field]="form.address">
+        <input uiInput type="text" id="address" [formField]="form.address" />
+      </ui-field>
+      <ui-field label="Ciudad" [field]="form.city">
+        <input uiInput type="text" id="city" [formField]="form.city" />
+      </ui-field>
+      <ui-field label="Estado" [field]="form.state">
+        <input uiInput type="text" id="state" [formField]="form.state" />
+      </ui-field>
+      <ui-field label="Código postal" [field]="form.zip">
+        <input uiInput type="text" id="zip" [formField]="form.zip" />
+      </ui-field>
+      <ui-field label="País" [field]="form.country">
+        <input uiInput type="text" id="country" [formField]="form.country" />
+      </ui-field>
+      <ui-field label="Email" [field]="form.email">
+        <input uiInput type="email" id="email" [formField]="form.email" />
+      </ui-field>
+      <ui-field label="Teléfono" [field]="form.phone">
+        <input uiInput type="tel" id="phone" [formField]="form.phone" />
+      </ui-field>
+      <ui-field label="Sitio web" [field]="form.website">
+        <input uiInput type="url" id="website" [formField]="form.website" />
+      </ui-field>
     </div>
     <div class="flex justify-end mt-4">
       <button uiButton variant="primary" type="submit">Guardar</button>

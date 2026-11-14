@@ -237,13 +237,18 @@ h3 {
 .input-primary,
 .select-primary,
 .textarea-primary,
-.checkbox-primary,
 .ui-control {
   --input-color: var(--ui-line-strong);
   &:focus,
   &:focus-within {
     --input-color: var(--color-primary);
   }
+}
+
+/* Checkbox / radio (uiCheckbox, uiRadio): hairline border while empty, action colour once checked.
+ * DaisyUI fills a checked control with --input-color, so it must stay primary when checked. */
+:is(.checkbox-primary, .radio-primary):not(:checked, :indeterminate) {
+  --input-color: var(--ui-line-strong);
 }
 
 .input:focus,

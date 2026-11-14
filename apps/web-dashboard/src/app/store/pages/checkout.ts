@@ -1,5 +1,5 @@
 import { SchoolContext } from '#/shared';
-import { Button, Toast } from '#/ui';
+import { Button, Toast, UiCheckbox, UiChoice, UiInput } from '#/ui';
 import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -8,7 +8,7 @@ import { StoreApiService } from '../store-api.service';
 
 @Component({
   selector: 'app-checkout',
-  imports: [Button, FormsModule],
+  imports: [UiCheckbox, UiChoice, UiInput, Button, FormsModule],
   template: `
     <h2 class="text-xl font-semibold mb-4">Pago (simulado)</h2>
     @if (!school.currentSchoolId()) {
@@ -39,16 +39,15 @@ import { StoreApiService } from '../store-api.service';
           <div class="card-body gap-3">
             <label class="form-control">
               <span class="label-text">Nombre en la tarjeta (demo)</span>
-              <input class="input input-bordered" [(ngModel)]="cardName" />
+              <input uiInput [(ngModel)]="cardName" />
             </label>
             <label class="form-control">
               <span class="label-text">Últimos 4 dígitos (demo)</span>
-              <input class="input input-bordered" maxlength="4" [(ngModel)]="cardLast4" />
+              <input uiInput maxlength="4" [(ngModel)]="cardLast4" />
             </label>
-            <label class="label cursor-pointer justify-start gap-2">
-              <input type="checkbox" class="checkbox checkbox-primary" [(ngModel)]="simulateFail" />
-              <span class="label-text">Simular pago fallido</span>
-            </label>
+            <ui-choice label="Simular pago fallido">
+              <input uiCheckbox type="checkbox" [(ngModel)]="simulateFail" />
+            </ui-choice>
             <button uiButton variant="primary" type="button" [disabled]="paying()" (click)="pay()">
               @if (paying()) {
                 Procesando…

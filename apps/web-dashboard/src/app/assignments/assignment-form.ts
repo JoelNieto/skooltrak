@@ -1,4 +1,4 @@
-import { Button, TextEditor, Toast } from '#/ui';
+import { Button, TextEditor, Toast, UiCheckbox, UiChoice, UiField, UiInput, UiSelect } from '#/ui';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { afterRenderEffect, Component, effect, inject, input, output, signal } from '@angular/core';
 import { NonNullableFormBuilder } from '@angular/forms';
@@ -28,47 +28,42 @@ interface AssignmentFormData {
 
 @Component({
   selector: 'app-assignment-form',
-  imports: [Button, TextEditor, FormField],
+  imports: [UiCheckbox, UiChoice, UiField, UiInput, UiSelect, Button, TextEditor, FormField],
   template: `<form (submit)="onSubmit()">
     <div class="flex flex-col md:grid md:grid-cols-2 gap-4">
-      <div class="fieldset col-span-2">
-        <label for="title">Titulo</label>
-        <input type="text" [formField]="form.title" class="input input-primary" />
-      </div>
+      <ui-field label="Titulo" [field]="form.title" class="col-span-2">
+        <input uiInput type="text" [formField]="form.title" />
+      </ui-field>
       <div class="fieldset col-span-2">
         <label for="details">Detalles</label>
         <lib-text-editor [formField]="form.details" [bordered]="true" />
       </div>
-      <div class="fieldset col-span-2">
-        <label for="courseId">Curso</label>
-        <select [formField]="form.courseId" class="select select-primary">
+      <ui-field label="Curso" [field]="form.courseId" class="col-span-2">
+        <select uiSelect [formField]="form.courseId">
           <option disabled selected [value]="null">Seleccionar curso</option>
           @for (course of courses.value(); track course.id) {
             <option [value]="course.id">{{ course.name }}</option>
           }
         </select>
-      </div>
-      <div class="fieldset">
-        <label for="type">Tipo</label>
-        <select [formField]="form.type" class="select select-primary">
+      </ui-field>
+      <ui-field label="Tipo" [field]="form.type">
+        <select uiSelect [formField]="form.type">
           @for (type of types; track type.value) {
             <option [value]="type.value">{{ type.label }}</option>
           }
         </select>
-      </div>
-      <div class="fieldset">
-        <label for="teacherId">Profesor</label>
-        <select [formField]="form.teacherId" class="select select-primary">
+      </ui-field>
+      <ui-field label="Profesor" [field]="form.teacherId">
+        <select uiSelect [formField]="form.teacherId">
           <option disabled selected [value]="">Seleccionar profesor</option>
           @for (teacher of teachers.value(); track teacher.id) {
             <option [value]="teacher.id">{{ teacher.name }}</option>
           }
         </select>
-      </div>
-      <div class="fieldset">
-        <label for="requireSubmission">Requiere envio</label>
-        <input type="checkbox" [formField]="form.requireSubmission" class="checkbox checkbox-primary" />
-      </div>
+      </ui-field>
+      <ui-choice label="Requiere envio" [field]="form.requireSubmission">
+        <input uiCheckbox type="checkbox" [formField]="form.requireSubmission" />
+      </ui-choice>
 
       @let groups = courseGroups.value();
       @if (groups && groups.length) {
@@ -78,22 +73,16 @@ interface AssignmentFormData {
             @for (group of form.groupDates; let i = $index; track i) {
               <div class="flex items-center gap-4 p-3 bg-base-200 rounded-lg">
                 <span class="font-medium min-w-24">{{ groups[i].name }}</span>
-                <input
-                  [id]="'group-date-' + i"
-                  type="datetime-local"
-                  [formField]="group.date"
-                  class="input input-primary flex-1"
-                />
+                <input uiInput [id]="'group-date-' + i" type="datetime-local" [formField]="group.date" class="flex-1" />
               </div>
             }
           </div>
         </div>
       } @else if (!form.courseId().value()) {
         <div class="col-span-2">
-          <div class="fieldset">
-            <label for="date">Fecha por defecto</label>
-            <input type="datetime-local" [formField]="form.date" class="input input-primary" />
-          </div>
+          <ui-field label="Fecha por defecto" [field]="form.date">
+            <input uiInput type="datetime-local" [formField]="form.date" />
+          </ui-field>
         </div>
       }
     </div>

@@ -1,4 +1,4 @@
-import { Button, Confirmation, Loader, Modal, Pagination, Paginator } from '#/ui';
+import { Button, Confirmation, Loader, Modal, Pagination, Paginator, UiSelect } from '#/ui';
 import { Menu, MenuContent, MenuItem, MenuTrigger } from '@angular/aria/menu';
 import { OverlayModule } from '@angular/cdk/overlay';
 import { DatePipe, NgClass } from '@angular/common';
@@ -50,6 +50,7 @@ const STATUS_COLORS: Record<string, string> = {
 @Component({
   selector: 'app-course-attendance',
   imports: [
+    UiSelect,
     Button,
     Loader,
     FormsModule,
@@ -66,11 +67,7 @@ const STATUS_COLORS: Record<string, string> = {
   template: `
     <div class="flex flex-col md:flex-row justify-between gap-4 mb-4">
       <div class="flex gap-2 items-center">
-        <select
-          class="select select-primary"
-          [ngModel]="selectedGroupId()"
-          (ngModelChange)="selectedGroupId.set($event)"
-        >
+        <select uiSelect [ngModel]="selectedGroupId()" (ngModelChange)="selectedGroupId.set($event)">
           <option value="">Todos los grupos</option>
           @for (group of groupsResource.value(); track group.id) {
             <option [value]="group.id">{{ group.name }}</option>

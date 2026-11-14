@@ -1,4 +1,4 @@
-import { Button, Loader, Toast } from '#/ui';
+import { Button, Loader, Toast, UiField, UiInput } from '#/ui';
 import { HttpClient } from '@angular/common/http';
 import { afterRenderEffect, Component, computed, inject, signal } from '@angular/core';
 import { form, FormField, required, submit } from '@angular/forms/signals';
@@ -17,7 +17,7 @@ interface ProfileFormData {
 
 @Component({
   selector: 'app-profile',
-  imports: [Button, FormField, RouterLink, Loader, ImageCropperComponent],
+  imports: [UiField, UiInput, Button, FormField, RouterLink, Loader, ImageCropperComponent],
   template: `
     <div class="flex flex-col gap-6">
       <div class="breadcrumbs text-sm">
@@ -99,43 +99,17 @@ interface ProfileFormData {
 
                 <form (submit)="onSubmit($event)" novalidate="novalidate" class="space-y-4">
                   <div class="sm:grid sm:grid-cols-2 sm:gap-4">
-                    <div class="fieldset">
-                      <label for="firstName">Nombres</label>
-                      <input
-                        id="firstName"
-                        type="text"
-                        [formField]="profileForm.firstName"
-                        class="input input-primary w-full"
-                        [class.ng-invalid]="profileForm.firstName().touched() && profileForm.firstName().invalid()"
-                      />
-                      @if (profileForm.firstName().touched() && profileForm.firstName().invalid()) {
-                        @for (error of profileForm.firstName().errors(); track error) {
-                          <p class="text-error text-sm">{{ error.message }}</p>
-                        }
-                      }
-                    </div>
-                    <div class="fieldset">
-                      <label for="lastName">Apellidos</label>
-                      <input
-                        id="lastName"
-                        type="text"
-                        [formField]="profileForm.lastName"
-                        class="input input-primary w-full"
-                        [class.ng-invalid]="profileForm.lastName().touched() && profileForm.lastName().invalid()"
-                      />
-                      @if (profileForm.lastName().touched() && profileForm.lastName().invalid()) {
-                        @for (error of profileForm.lastName().errors(); track error) {
-                          <p class="text-error text-sm">{{ error.message }}</p>
-                        }
-                      }
-                    </div>
+                    <ui-field label="Nombres" [field]="profileForm.firstName">
+                      <input uiInput id="firstName" type="text" [formField]="profileForm.firstName" />
+                    </ui-field>
+                    <ui-field label="Apellidos" [field]="profileForm.lastName">
+                      <input uiInput id="lastName" type="text" [formField]="profileForm.lastName" />
+                    </ui-field>
                   </div>
 
-                  <div class="fieldset">
-                    <label for="email">Correo electrónico</label>
-                    <input id="email" type="email" class="input w-full" [value]="auth.user()?.email" disabled />
-                    <p class="text-base-content/50 text-xs">El correo electrónico no se puede cambiar.</p>
-                  </div>
+                  <ui-field label="Correo electrónico" hint="El correo electrónico no se puede cambiar.">
+                    <input uiInput id="email" type="email" [value]="auth.user()?.email" disabled />
+                  </ui-field>
 
                   <div class="fieldset">
                     <label for="avatarFileInput">Foto de perfil</label>

@@ -1,4 +1,4 @@
-import { Button, Toast } from '#/ui';
+import { Button, Toast, UiField, UiInput } from '#/ui';
 import { HttpClient } from '@angular/common/http';
 import { afterRenderEffect, Component, inject, signal } from '@angular/core';
 import { form, FormField, required } from '@angular/forms/signals';
@@ -8,7 +8,7 @@ import { BrandLogo } from '../shared/brand-logo';
 
 @Component({
   selector: 'app-verify-student',
-  imports: [Button, BrandLogo, FormField],
+  imports: [UiField, UiInput, Button, BrandLogo, FormField],
   template: `
     <div class="min-h-screen flex flex-col gradient-bg">
       <header class="p-4 md:p-6 flex items-center justify-between">
@@ -33,21 +33,9 @@ import { BrandLogo } from '../shared/brand-logo';
           </div>
 
           <form (submit)="verify($event)" class="space-y-4 text-left">
-            <div class="fieldset">
-              <label for="documentId" class="label">
-                <span class="label-text font-medium">Documento de Identidad</span>
-              </label>
-              <input
-                type="text"
-                id="documentId"
-                class="input input-bordered w-full"
-                placeholder="Ej: 8-123-4567"
-                [formField]="form.documentId"
-              />
-              @if (form.documentId().touched()) {
-                <p class="text-error text-xs mt-1">{{ form.documentId().errors()[0].message }}</p>
-              }
-            </div>
+            <ui-field label="Documento de Identidad" [field]="form.documentId">
+              <input uiInput type="text" id="documentId" placeholder="Ej: 8-123-4567" [formField]="form.documentId" />
+            </ui-field>
 
             @if (errorMessage()) {
               <div class="alert alert-error">

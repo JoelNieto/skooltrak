@@ -1,5 +1,6 @@
 import { afterRenderEffect, Component, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import { BrandLogo } from '../shared/brand-logo';
 
 interface RoleOption {
   id: string;
@@ -11,10 +12,11 @@ interface RoleOption {
 
 @Component({
   selector: 'app-select-role',
+  imports: [BrandLogo],
   template: `
     <div class="min-h-screen flex flex-col gradient-bg">
       <header class="p-4 md:p-6 flex items-center justify-between">
-        <img src="skooltrak.png" alt="Skooltrak" class="h-8 md:h-10" />
+        <app-brand-logo class="h-8 md:h-10" />
       </header>
 
       <main class="flex-1 flex flex-col items-center justify-center p-6">

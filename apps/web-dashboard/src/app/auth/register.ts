@@ -6,16 +6,17 @@ import { AbstractControl, NonNullableFormBuilder, ValidationErrors } from '@angu
 import { email, form, FormField, minLength, required, validate } from '@angular/forms/signals';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import Auth from './auth';
+import { BrandLogo } from '../shared/brand-logo';
 
 @Component({
   selector: 'app-register',
-  imports: [FormField, Loader, RouterLink],
+  imports: [BrandLogo, FormField, Loader, RouterLink],
   template: `
     @defer {
       <div class="min-h-screen flex flex-col gradient-bg">
         <!-- Fixed Header -->
         <header class="p-4 md:p-6 flex items-center justify-between">
-          <img src="skooltrak.png" alt="Skooltrak" class="h-8 md:h-10" />
+          <app-brand-logo class="h-8 md:h-10" />
         </header>
 
         <!-- Scrollable Content -->

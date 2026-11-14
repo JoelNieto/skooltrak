@@ -10,6 +10,7 @@ import DegreesStep from './steps/degrees';
 import GroupsStep from './steps/groups';
 import SchoolBasicsStep from './steps/school-basics';
 import StudyPlansStep from './steps/study-plans';
+import { BrandLogo } from '../shared/brand-logo';
 
 export type CreatedEntity = {
   id: string;
@@ -19,12 +20,12 @@ export type CreatedEntity = {
 
 @Component({
   selector: 'app-setup-wizard',
-  imports: [SchoolBasicsStep, DegreesStep, StudyPlansStep, CoursesStep, GroupsStep],
+  imports: [BrandLogo, SchoolBasicsStep, DegreesStep, StudyPlansStep, CoursesStep, GroupsStep],
   template: `
     <div class="min-h-screen flex flex-col gradient-bg">
       <!-- Fixed Header -->
       <header class="p-4 md:p-6 flex items-center justify-between">
-        <img src="skooltrak.png" alt="Skooltrak" class="h-8 md:h-10" />
+        <app-brand-logo class="h-8 md:h-10" />
         <div class="flex items-center gap-3">
           <span class="text-sm text-base-content/60 hidden sm:inline">
             Paso {{ currentStep() }} de {{ totalSteps }}

@@ -7,12 +7,9 @@
   "tags": [],
   "targets": {
     "test": {
-      "executor": "@nx/vitest:test",
-      "outputs": [
-        "{options.reportsDirectory}"
-      ],
+      "outputs": ["{projectRoot}/{options.coverage.reportsDirectory}", "{workspaceRoot}/coverage/libs/ui"],
       "options": {
-        "reportsDirectory": "{projectRoot}/../../coverage/libs/ui"
+        "coverage.reportsDirectory": "../../coverage/libs/ui"
       }
     },
     "lint": {

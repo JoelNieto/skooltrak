@@ -1,4 +1,4 @@
-import { Button, EmptyState, Loader } from '#/ui';
+import { Badge, Button, EmptyState, Loader } from '#/ui';
 import { httpResource } from '@angular/common/http';
 import { Component, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
@@ -26,7 +26,7 @@ type ChatRow = {
 
 @Component({
   selector: 'app-chats',
-  imports: [Button, RouterLink, Loader, EmptyState],
+  imports: [Badge, Button, RouterLink, Loader, EmptyState],
   template: `
     <div class="breadcrumbs text-sm">
       <ul>
@@ -71,10 +71,10 @@ type ChatRow = {
                   @let chatUser = otherParticipant(chat);
                   @if (chatUser) {
                     @if (roleLabel($safeNavigationMigration(chatUser.role?.name)); as label) {
-                      <span class="badge badge-secondary badge-soft badge-sm">{{ label }}</span>
+                      <span uiBadge size="sm">{{ label }}</span>
                     }
                     @if (chatUser.student?.classGroup?.name; as groupName) {
-                      <span class="badge badge-outline badge-primary badge-sm">{{ groupName }}</span>
+                      <span uiBadge tone="action" size="sm">{{ groupName }}</span>
                     }
                   }
                 </div>

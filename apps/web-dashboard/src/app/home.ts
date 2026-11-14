@@ -1,4 +1,4 @@
-import { Button, EmptyState, PageHeader, StatCard } from '#/ui';
+import { Button, Card, CardBody, EmptyState, PageHeader, StatCard } from '#/ui';
 import { DatePipe } from '@angular/common';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { Component, computed, inject } from '@angular/core';
@@ -50,7 +50,18 @@ type PublishedNewsletter = {
 
 @Component({
   selector: 'app-home',
-  imports: [Button, RouterLink, DatePipe, PageHeader, StatCard, EmptyState, WelcomeBanner, RecentBroadcasts],
+  imports: [
+    Card,
+    CardBody,
+    Button,
+    RouterLink,
+    DatePipe,
+    PageHeader,
+    StatCard,
+    EmptyState,
+    WelcomeBanner,
+    RecentBroadcasts,
+  ],
   template: `
     <!-- Welcome Banner for recently completed onboarding -->
     @if (showWelcomeBanner()) {
@@ -95,8 +106,8 @@ type PublishedNewsletter = {
     </div>
 
     <div class="mt-6 grid gap-5 lg:grid-cols-3">
-      <div class="card bg-base-100 lg:col-span-2 ">
-        <div class="card-body">
+      <div uiCard class="lg:col-span-2">
+        <div uiCardBody>
           <div class="flex items-center justify-between">
             <h2 class="text-base font-semibold text-base-content">Mensajes recientes</h2>
             <a uiButton variant="ghost" size="sm" routerLink="/messages" class="text-primary"> Ver todos </a>
@@ -128,8 +139,8 @@ type PublishedNewsletter = {
         </div>
       </div>
 
-      <div class="card bg-base-100">
-        <div class="card-body">
+      <div uiCard>
+        <div uiCardBody>
           <h2 class="text-base font-semibold text-base-content">Acciones rápidas</h2>
           <div class="grid gap-2 sm:grid-cols-2 lg:grid-cols-1 mt-2">
             <a
@@ -179,8 +190,8 @@ type PublishedNewsletter = {
 
     @if (!recentNewsletters.error()) {
       <div class="mt-5">
-        <div class="card bg-base-100">
-          <div class="card-body">
+        <div uiCard>
+          <div uiCardBody>
             <div class="flex items-center justify-between">
               <h2 class="text-base font-semibold text-base-content">Boletines recientes</h2>
               <a uiButton variant="ghost" size="sm" routerLink="/admin/newsletters" class="text-primary"> Ver todos </a>
@@ -216,8 +227,8 @@ type PublishedNewsletter = {
     }
 
     <div class="mt-5 grid gap-5 lg:grid-cols-2">
-      <div class="card bg-base-100">
-        <div class="card-body">
+      <div uiCard>
+        <div uiCardBody>
           <h2 class="text-base font-semibold text-base-content">Últimos estudiantes</h2>
           @if ((recentStudents.value() ?? []).length === 0) {
             <lib-empty-state
@@ -244,8 +255,8 @@ type PublishedNewsletter = {
         </div>
       </div>
 
-      <div class="card bg-base-100">
-        <div class="card-body">
+      <div uiCard>
+        <div uiCardBody>
           <h2 class="text-base font-semibold text-base-content">Docentes recientes</h2>
           @if ((recentTeachers.value() ?? []).length === 0) {
             <lib-empty-state

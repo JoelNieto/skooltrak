@@ -1,4 +1,4 @@
-import { Button, TextEditor, Toast, UiChoice, UiField, UiInput, UiToggle } from '#/ui';
+import { Button, Card, CardBody, TextEditor, Toast, UiChoice, UiField, UiInput, UiToggle } from '#/ui';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { afterRenderEffect, Component, computed, inject, input, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -16,7 +16,19 @@ interface NewsletterDto {
 
 @Component({
   selector: 'app-newsletter-form',
-  imports: [UiChoice, UiField, UiInput, UiToggle, Button, FormField, FormsModule, TextEditor, RouterLink],
+  imports: [
+    Card,
+    CardBody,
+    UiChoice,
+    UiField,
+    UiInput,
+    UiToggle,
+    Button,
+    FormField,
+    FormsModule,
+    TextEditor,
+    RouterLink,
+  ],
   template: `
     <div class="breadcrumbs text-sm">
       <ul>
@@ -46,8 +58,8 @@ interface NewsletterDto {
             <p class="mt-1 text-sm text-base-content/70">Título y estado del boletín.</p>
           </div>
           <div class="sm:col-span-3">
-            <div class="card card-border border-base-300 bg-base-100">
-              <div class="card-body gap-y-4">
+            <div uiCard>
+              <div uiCardBody class="gap-y-4">
                 <ui-field label="Título" [field]="formData.title">
                   <input uiInput type="text" id="title" [formField]="formData.title" />
                 </ui-field>
@@ -66,8 +78,8 @@ interface NewsletterDto {
             <p class="mt-1 text-sm text-base-content/70">Redacta el contenido del boletín.</p>
           </div>
           <div class="sm:col-span-3">
-            <div class="card card-border border-base-300 bg-base-100">
-              <div class="card-body">
+            <div uiCard>
+              <div uiCardBody>
                 <lib-text-editor [bordered]="true" [(ngModel)]="content" [ngModelOptions]="{ standalone: true }" />
               </div>
             </div>

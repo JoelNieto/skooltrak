@@ -1,4 +1,4 @@
-import { Button, Loader, Toast, UiField, UiInput, UiSelect } from '#/ui';
+import { Button, Card, CardBody, Loader, Toast, UiField, UiInput, UiSelect } from '#/ui';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { afterRenderEffect, Component, computed, inject, input, signal } from '@angular/core';
 import { disabled, email, form, FormField, required, submit } from '@angular/forms/signals';
@@ -43,7 +43,7 @@ interface TeacherFormData {
 
 @Component({
   selector: 'app-teacher-form',
-  imports: [UiField, UiInput, UiSelect, Button, FormField, RouterLink, Loader],
+  imports: [Card, CardBody, UiField, UiInput, UiSelect, Button, FormField, RouterLink, Loader],
   template: `
     <div class="breadcrumbs text-sm">
       <ul>
@@ -75,8 +75,8 @@ interface TeacherFormData {
               <p class="mt-1 text-sm text-base-content/70">Información personal del docente.</p>
             </div>
             <div class="sm:col-span-3">
-              <div class="card card-border border-base-300 bg-base-100">
-                <div class="card-body gap-y-4">
+              <div uiCard>
+                <div uiCardBody class="gap-y-4">
                   <div class="sm:grid sm:grid-cols-6 sm:gap-4">
                     <ui-field label="Primer nombre" [field]="teacherForm.firstName" class="col-span-3">
                       <input uiInput id="firstName" type="text" [formField]="teacherForm.firstName" />
@@ -116,8 +116,8 @@ interface TeacherFormData {
               <p class="mt-1 text-sm text-base-content/70">Información de contacto del docente.</p>
             </div>
             <div class="sm:col-span-3">
-              <div class="card card-border border-base-300 bg-base-100">
-                <div class="card-body gap-y-4">
+              <div uiCard>
+                <div uiCardBody class="gap-y-4">
                   <div class="sm:grid sm:grid-cols-6 sm:gap-4">
                     <ui-field label="Correo institucional" [field]="teacherForm.email" class="col-span-3">
                       <input uiInput id="email" type="email" [formField]="teacherForm.email" />
@@ -144,8 +144,8 @@ interface TeacherFormData {
               <p class="mt-1 text-sm text-base-content/70">Datos profesionales y de trayectoria.</p>
             </div>
             <div class="sm:col-span-3">
-              <div class="card card-border border-base-300 bg-base-100">
-                <div class="card-body gap-y-4">
+              <div uiCard>
+                <div uiCardBody class="gap-y-4">
                   <div class="sm:grid sm:grid-cols-6 sm:gap-4">
                     <ui-field
                       label="Docente desde (año)"

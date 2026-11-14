@@ -1,4 +1,6 @@
+export * from './lib/ui/components/badge';
 export * from './lib/ui/components/button';
+export * from './lib/ui/components/card';
 export * from './lib/ui/components/field';
 export * from './lib/ui/components/calendar';
 export * from './lib/ui/components/editor-menu';

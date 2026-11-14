@@ -1,4 +1,4 @@
-import { EmptyState } from '#/ui';
+import { Badge, Card, CardBody, EmptyState } from '#/ui';
 import { DatePipe } from '@angular/common';
 import { httpResource } from '@angular/common/http';
 import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
@@ -19,14 +19,14 @@ type BroadcastCardItem = {
 @Component({
   selector: 'app-broadcast-card',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [DatePipe],
+  imports: [Badge, DatePipe],
   template: `
     <div class="flex items-start justify-between gap-2">
       <p class="font-medium text-base-content flex items-center gap-2 min-w-0">
         <span class="material-symbols-outlined text-primary text-lg shrink-0">campaign</span>
         <span class="truncate">{{ item().title }}</span>
       </p>
-      <span class="badge badge-primary badge-soft badge-xs shrink-0">Comunicado</span>
+      <span uiBadge tone="action" size="sm" class="shrink-0">Comunicado</span>
     </div>
     @if (item().preview) {
       <p class="text-sm text-base-content/70 line-clamp-2 mt-1">{{ item().preview }}</p>
@@ -37,10 +37,10 @@ type BroadcastCardItem = {
         <span>· {{ item().createdAt | date: 'short' }}</span>
       }
       @if (item().urgent) {
-        <span class="badge badge-error badge-soft badge-xs">Importante</span>
+        <span uiBadge tone="danger" size="sm">Importante</span>
       }
       @if (!item().repliesAllowed) {
-        <span class="badge badge-ghost badge-xs">Solo lectura</span>
+        <span uiBadge size="sm">Solo lectura</span>
       }
     </div>
   `,
@@ -52,10 +52,10 @@ export class BroadcastCard {
 @Component({
   selector: 'app-recent-broadcasts',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink, EmptyState, BroadcastCard],
+  imports: [Card, CardBody, RouterLink, EmptyState, BroadcastCard],
   template: `
-    <div class="card border border-primary/25 bg-base-100">
-      <div class="card-body">
+    <div uiCard class="border-primary/25">
+      <div uiCardBody>
         <div class="flex items-center justify-between gap-3">
           <h2 class="text-lg font-semibold text-base-content flex items-center gap-2">
             <span class="material-symbols-outlined text-primary">campaign</span>

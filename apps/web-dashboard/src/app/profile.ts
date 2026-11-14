@@ -1,4 +1,4 @@
-import { Button, Loader, Toast, UiField, UiInput } from '#/ui';
+import { Badge, Button, Card, CardBody, CardTitle, Loader, Toast, UiField, UiInput } from '#/ui';
 import { HttpClient } from '@angular/common/http';
 import { afterRenderEffect, Component, computed, inject, signal } from '@angular/core';
 import { form, FormField, required, submit } from '@angular/forms/signals';
@@ -17,7 +17,19 @@ interface ProfileFormData {
 
 @Component({
   selector: 'app-profile',
-  imports: [UiField, UiInput, Button, FormField, RouterLink, Loader, ImageCropperComponent],
+  imports: [
+    Badge,
+    Card,
+    CardBody,
+    CardTitle,
+    UiField,
+    UiInput,
+    Button,
+    FormField,
+    RouterLink,
+    Loader,
+    ImageCropperComponent,
+  ],
   template: `
     <div class="flex flex-col gap-6">
       <div class="breadcrumbs text-sm">
@@ -38,8 +50,8 @@ interface ProfileFormData {
         <div class="sm:grid sm:grid-cols-3 sm:gap-6">
           <!-- Summary card -->
           <div class="sm:col-span-1">
-            <div class="card card-border border-base-300 bg-base-100">
-              <div class="card-body items-center text-center gap-3">
+            <div uiCard>
+              <div uiCardBody class="items-center text-center gap-3">
                 @if (avatarUrl()) {
                   <div class="avatar">
                     <div class="w-24 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2">
@@ -54,21 +66,21 @@ interface ProfileFormData {
                     {{ auth.userInitials() }}
                   </div>
                 }
-                <h2 class="card-title">{{ auth.userName() }}</h2>
+                <h2 uiCardTitle>{{ auth.userName() }}</h2>
                 <p class="text-sm text-base-content/70">{{ auth.user()?.email }}</p>
                 @if (roleLabel()) {
-                  <span class="badge badge-primary">{{ roleLabel() }}</span>
+                  <span uiBadge tone="action">{{ roleLabel() }}</span>
                 }
                 @if (auth.user()?.organization?.name) {
                   <p class="text-xs text-base-content/60">{{ auth.user()?.organization?.name }}</p>
                 }
                 @if (auth.user()?.emailVerified) {
-                  <span class="badge badge-success badge-sm gap-1">
+                  <span uiBadge tone="success" size="sm" class="gap-1">
                     <span class="material-symbols-outlined text-sm">verified</span>
                     Verificado
                   </span>
                 } @else {
-                  <span class="badge badge-warning badge-sm">Correo sin verificar</span>
+                  <span uiBadge tone="warning" size="sm">Correo sin verificar</span>
                 }
               </div>
             </div>
@@ -76,8 +88,8 @@ interface ProfileFormData {
 
           <!-- Edit form -->
           <div class="sm:col-span-2">
-            <div class="card card-border border-base-300 bg-base-100">
-              <div class="card-body gap-6">
+            <div uiCard>
+              <div uiCardBody class="gap-6">
                 <div>
                   <h2 class="text-lg/7 font-semibold text-base-content">Información personal</h2>
                   <p class="mt-1 text-sm text-base-content/70">Actualiza tus datos de perfil.</p>

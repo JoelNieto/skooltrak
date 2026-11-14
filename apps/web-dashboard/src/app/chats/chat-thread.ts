@@ -1,4 +1,4 @@
-import { Button, Loader, Toast, UiInput } from '#/ui';
+import { Badge, Button, Card, CardBody, Loader, Toast, UiInput } from '#/ui';
 import { DatePipe } from '@angular/common';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { Component, DestroyRef, effect, inject, input, signal, viewChild } from '@angular/core';
@@ -45,7 +45,7 @@ type ChatMessageDto = {
 
 @Component({
   selector: 'app-chat-thread',
-  imports: [UiInput, Button, RouterLink, Loader, FormsModule, DatePipe],
+  imports: [Badge, Card, CardBody, UiInput, Button, RouterLink, Loader, FormsModule, DatePipe],
   template: `
     <div class="breadcrumbs text-sm">
       <ul>
@@ -59,8 +59,8 @@ type ChatMessageDto = {
       <lib-loader />
     } @else if (chatResource.hasValue() && chatResource.value()) {
       @let chat = chatResource.value()!;
-      <div class="card bg-base-100 mt-4 flex flex-col max-h-[calc(100vh-6rem)]">
-        <div class="card-body p-0 flex flex-col flex-1 min-h-0">
+      <div uiCard class="mt-4 flex flex-col max-h-[calc(100vh-6rem)]">
+        <div uiCardBody class="p-0 flex flex-col flex-1 min-h-0">
           <div class="shrink-0 p-4 border-b border-base-300 flex items-center gap-2">
             <div class="avatar avatar-placeholder">
               @if (isContextualChat($any(chat).type)) {
@@ -85,10 +85,10 @@ type ChatMessageDto = {
                 <span class="text-sm text-base-content/60">{{ participantsCount($any(chat)) }} participantes</span>
                 @if (otherParticipant($any(chat)); as user) {
                   @if (roleLabel($safeNavigationMigration(user?.role?.name)); as label) {
-                    <span class="badge badge-secondary badge-soft badge-sm">{{ label }}</span>
+                    <span uiBadge size="sm">{{ label }}</span>
                   }
                   @if (user?.student?.classGroup?.name; as groupName) {
-                    <span class="badge badge-outline badge-primary badge-sm">{{ groupName }}</span>
+                    <span uiBadge tone="action" size="sm">{{ groupName }}</span>
                   }
                 }
               </div>

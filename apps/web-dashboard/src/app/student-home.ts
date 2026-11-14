@@ -1,4 +1,4 @@
-import { EmptyState, PageHeader, StatCard } from '#/ui';
+import { Card, CardBody, EmptyState, PageHeader, StatCard } from '#/ui';
 import { DatePipe, DecimalPipe } from '@angular/common';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { afterRenderEffect, Component, computed, inject, signal } from '@angular/core';
@@ -36,7 +36,7 @@ type StudentAssignmentRow = {
 
 @Component({
   selector: 'app-student-home',
-  imports: [DatePipe, DecimalPipe, RouterLink, PageHeader, StatCard, EmptyState, RecentBroadcasts],
+  imports: [Card, CardBody, DatePipe, DecimalPipe, RouterLink, PageHeader, StatCard, EmptyState, RecentBroadcasts],
   template: `
     <lib-page-header title="Dashboard del estudiante" subtitle="Lo más importante de tu semana académica." />
 
@@ -63,8 +63,8 @@ type StudentAssignmentRow = {
     </div>
 
     <div class="mt-6 grid gap-6 lg:grid-cols-2">
-      <div class="card border border-base-200 bg-base-100">
-        <div class="card-body">
+      <div uiCard>
+        <div uiCardBody>
           <div class="flex items-center justify-between">
             <h2 class="text-lg font-semibold text-base-content">Asignaciones próximas</h2>
             <a routerLink="/assignments" class="link link-primary text-sm"> Ver todas </a>
@@ -93,8 +93,8 @@ type StudentAssignmentRow = {
         </div>
       </div>
 
-      <div class="card border border-base-200 bg-base-100">
-        <div class="card-body">
+      <div uiCard>
+        <div uiCardBody>
           <div class="flex items-center justify-between">
             <h2 class="text-lg font-semibold text-base-content">Mensajes recientes</h2>
             <a routerLink="/messages" class="link link-primary text-sm"> Ir a mensajes </a>
@@ -126,8 +126,8 @@ type StudentAssignmentRow = {
 
     @if (gradeReportStudentId()) {
       <div class="mt-6">
-        <div class="card border border-base-200 bg-base-100">
-          <div class="card-body">
+        <div uiCard>
+          <div uiCardBody>
             <div class="flex items-center justify-between">
               <h2 class="text-lg font-semibold text-base-content">Informe de calificaciones</h2>
               @if (gradeReportResource.hasValue() && gradeReportResource.value()) {
@@ -175,8 +175,8 @@ type StudentAssignmentRow = {
 
     @if (!recentNewsletters.error()) {
       <div class="mt-6">
-        <div class="card border border-base-200 bg-base-100">
-          <div class="card-body">
+        <div uiCard>
+          <div uiCardBody>
             <h2 class="text-lg font-semibold text-base-content">Boletines recientes</h2>
             @if ((recentNewsletters.value() ?? []).length === 0) {
               <lib-empty-state

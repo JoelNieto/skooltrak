@@ -1,9 +1,9 @@
-import { EmptyState, PageHeader } from '#/ui';
+import { Card, CardBody, EmptyState, PageHeader } from '#/ui';
 import { Component } from '@angular/core';
 
 @Component({
   selector: 'app-parent-teacher-communication',
-  imports: [EmptyState, PageHeader],
+  imports: [Card, CardBody, EmptyState, PageHeader],
   template: `
     <lib-page-header
       title="Comunicación con docentes"
@@ -14,8 +14,8 @@ import { Component } from '@angular/core';
 
     <div class="space-y-3">
       @for (thread of threads; track thread.id) {
-        <div class="card border border-base-200 bg-base-100">
-          <div class="card-body">
+        <div uiCard>
+          <div uiCardBody>
             <div class="flex items-center justify-between">
               <p class="font-semibold text-base-content">{{ thread.teacher }}</p>
               <span class="text-xs text-base-content/60">

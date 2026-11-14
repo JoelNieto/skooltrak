@@ -1,12 +1,14 @@
 import { Component, computed, input } from '@angular/core';
+import { Card, CardBody } from './card';
 
 type StatCardColor = 'primary' | 'secondary' | 'accent' | 'info' | 'success' | 'warning' | 'error' | 'neutral';
 
 @Component({
   selector: 'lib-stat-card',
+  imports: [Card, CardBody],
   template: `
-    <div class="card bg-base-100 hover:shadow-md transition-shadow duration-200">
-      <div class="card-body p-4">
+    <div uiCard>
+      <div uiCardBody class="p-4">
         <div class="flex items-center justify-between">
           <p class="text-xs uppercase text-base-content/50 font-medium tracking-wider">{{ label() }}</p>
           @if (icon()) {

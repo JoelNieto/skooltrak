@@ -1,5 +1,5 @@
 import { SchoolContext } from '#/shared';
-import { Button, Toast } from '#/ui';
+import { Badge, Button, Toast } from '#/ui';
 import { Component, inject, signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
@@ -8,7 +8,7 @@ import { StoreApiService } from '../store-api.service';
 
 @Component({
   selector: 'app-products-admin',
-  imports: [Button, RouterLink],
+  imports: [Badge, Button, RouterLink],
   template: `
     <div class="flex justify-between items-center mb-4">
       <h3 class="text-lg font-medium">Productos</h3>
@@ -36,7 +36,7 @@ import { StoreApiService } from '../store-api.service';
                 <td>{{ p.totalStock }}</td>
                 <td>
                   @if (p.hasOutOfStockVariant) {
-                    <span class="badge badge-warning badge-sm">Alguna talla agotada</span>
+                    <span uiBadge tone="warning" size="sm">Alguna talla agotada</span>
                   } @else {
                     —
                   }

@@ -5,11 +5,11 @@ import { rxResource } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import { map } from 'rxjs';
 import { StoreApiService } from '../store-api.service';
-import { Button } from '#/ui';
+import { Badge, Button } from '#/ui';
 
 @Component({
   selector: 'app-order-detail',
-  imports: [Button, RouterLink, DatePipe],
+  imports: [Badge, Button, RouterLink, DatePipe],
   template: `
     <a uiButton variant="ghost" size="sm" [routerLink]="['..']" class="mb-4">← Mis pedidos</a>
     @if (order.isLoading()) {
@@ -22,8 +22,8 @@ import { Button } from '#/ui';
         <h2 class="text-xl font-semibold">Pedido {{ o.id }}</h2>
         <p class="text-sm text-base-content/70">{{ o.createdAt | date: 'medium' }}</p>
         <div class="flex flex-wrap gap-2">
-          <span class="badge badge-outline">Estado: {{ o.status }}</span>
-          <span class="badge badge-outline">Pago: {{ o.paymentStatus }}</span>
+          <span uiBadge>Estado: {{ o.status }}</span>
+          <span uiBadge>Pago: {{ o.paymentStatus }}</span>
         </div>
         <table class="table border border-base-200 rounded-box">
           <thead>

@@ -1,6 +1,6 @@
-import { Button, Loader, Toast, UiSelect } from '#/ui';
+import { Badge, BadgeTone, Button, Card, CardBody, Loader, Toast, UiSelect } from '#/ui';
 import { Tab, TabContent, TabList, TabPanel, Tabs } from '@angular/aria/tabs';
-import { DatePipe, DecimalPipe, NgClass } from '@angular/common';
+import { DatePipe, DecimalPipe } from '@angular/common';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { afterRenderEffect, Component, computed, inject, input, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -22,15 +22,18 @@ const ENROLLMENT_STATUS_LABELS: Record<$Enums.EnrollmentStatus, string> = {
   RETIRED: 'Retirado',
 };
 
-const ENROLLMENT_STATUS_COLORS: Record<$Enums.EnrollmentStatus, string> = {
-  ACTIVE: 'badge-success',
-  CANDIDATE: 'badge-warning',
-  RETIRED: 'badge-neutral',
+const ENROLLMENT_STATUS_TONES: Record<$Enums.EnrollmentStatus, BadgeTone> = {
+  ACTIVE: 'success',
+  CANDIDATE: 'warning',
+  RETIRED: 'neutral',
 };
 
 @Component({
   selector: 'app-student',
   imports: [
+    Badge,
+    Card,
+    CardBody,
     UiSelect,
     Button,
     RouterLink,
@@ -43,7 +46,6 @@ const ENROLLMENT_STATUS_COLORS: Record<$Enums.EnrollmentStatus, string> = {
     TabPanel,
     TabContent,
     DecimalPipe,
-    NgClass,
     StudentAttendanceReport,
   ],
   template: `
@@ -60,8 +62,8 @@ const ENROLLMENT_STATUS_COLORS: Record<$Enums.EnrollmentStatus, string> = {
             <li>{{ student.name }}</li>
           </ul>
         </div>
-        <div class="card w-full bg-base-100 mt-4">
-          <div class="card-body">
+        <div uiCard class="w-full mt-4">
+          <div uiCardBody>
             <div class="flex items-center justify-between">
               <div class="flex gap-3 items-center">
                 <div class="avatar avatar-placeholder">
@@ -72,16 +74,16 @@ const ENROLLMENT_STATUS_COLORS: Record<$Enums.EnrollmentStatus, string> = {
                 <div class="flex flex-col">
                   <div class="flex items-center gap-2">
                     <span class="font-semibold">{{ student.name }}</span>
-                    <span class="badge badge-sm" [ngClass]="getStatusColor(student.enrollmentStatus ?? 'ACTIVE')">
+                    <span uiBadge size="sm" [tone]="enrollmentTone(student.enrollmentStatus ?? 'ACTIVE')">
                       {{ getStatusLabel(student.enrollmentStatus ?? 'ACTIVE') }}
                     </span>
                     @if (student.user?.emailVerified) {
-                      <span class="badge badge-success badge-sm gap-1">
+                      <span uiBadge tone="success" size="sm" class="gap-1">
                         <span class="material-symbols-outlined text-xs">check_circle</span>
                         Verificado
                       </span>
                     } @else {
-                      <span class="badge badge-warning badge-sm gap-1">
+                      <span uiBadge tone="warning" size="sm" class="gap-1">
                         <span class="material-symbols-outlined text-xs">schedule</span>
                         Pendiente
                       </span>
@@ -156,8 +158,10 @@ const ENROLLMENT_STATUS_COLORS: Record<$Enums.EnrollmentStatus, string> = {
                         <dd class="mt-1 text-sm/6 text-base-content/90 sm:col-span-2 sm:mt-0">
                           @if (student.classGroup) {
                             <a
+                              uiBadge
+                              tone="action"
                               [routerLink]="['/groups', student.classGroup.id]"
-                              class="badge badge-soft badge-primary cursor-pointer"
+                              class="cursor-pointer"
                             >
                               <span class="text-sm">{{ student.classGroup.name }}</span>
                             </a>
@@ -193,9 +197,7 @@ const ENROLLMENT_STATUS_COLORS: Record<$Enums.EnrollmentStatus, string> = {
                         <dd class="mt-1 text-sm/6 text-base-content/90 sm:col-span-2 sm:mt-0">
                           <div class="flex items-center gap-2">
                             @if (student.enrollmentCode) {
-                              <span class="badge badge-soft badge-primary font-mono text-sm">{{
-                                student.enrollmentCode
-                              }}</span>
+                              <span uiBadge tone="action" class="font-mono text-sm">{{ student.enrollmentCode }}</span>
                               <button
                                 uiButton
                                 variant="ghost"
@@ -381,7 +383,7 @@ const ENROLLMENT_STATUS_COLORS: Record<$Enums.EnrollmentStatus, string> = {
               <ng-template ngTabContent>
                 <div class="flex flex-col gap-4">
                   @for (course of student.courses; track course.id) {
-                    <div class="card bg-base-100 card-border border-base-300">
+                    <div uiCard>
                       <div class="flex flex-col p-4 border-b border-base-300">
                         <h2 class="font-semibold">{{ course.subject?.name }}</h2>
                         <p class="text-sm text-base-content/60">{{ course.teacher?.name ?? 'Sin profesor' }}</p>
@@ -406,7 +408,7 @@ const ENROLLMENT_STATUS_COLORS: Record<$Enums.EnrollmentStatus, string> = {
                                   <td>{{ $safeNavigationMigration(grade.grade?.date) | date: 'dd/MM/yyyy' }}</td>
                                   <td>{{ grade.comments }}</td>
                                   <td>
-                                    <span class="badge badge-sm" [ngClass]="getGradeBadgeClass(grade, metric)">
+                                    <span uiBadge size="sm" [tone]="gradeTone(grade, metric)">
                                       {{ grade.score | number: '1.1-1' }}
                                     </span>
                                   </td>
@@ -440,19 +442,19 @@ export default class Student {
     return ENROLLMENT_STATUS_LABELS[status] || status;
   }
 
-  getStatusColor(status: $Enums.EnrollmentStatus): string {
-    return ENROLLMENT_STATUS_COLORS[status] || 'badge-ghost';
+  enrollmentTone(status: $Enums.EnrollmentStatus): BadgeTone {
+    return ENROLLMENT_STATUS_TONES[status] || 'neutral';
   }
 
-  getGradeBadgeClass(
+  gradeTone(
     grade: { score?: number | null },
     metric: { minimumExcellence?: number; minimumApproval?: number } | null | undefined,
-  ): string {
+  ): BadgeTone {
     if (!metric || grade.score == null || metric.minimumExcellence == null || metric.minimumApproval == null)
-      return 'badge-ghost';
-    if (grade.score >= metric.minimumExcellence) return 'badge-success';
-    if (grade.score >= metric.minimumApproval) return 'badge-warning';
-    return 'badge-error';
+      return 'neutral';
+    if (grade.score >= metric.minimumExcellence) return 'success';
+    if (grade.score >= metric.minimumApproval) return 'warning';
+    return 'danger';
   }
 
   public periodsResource = httpResource<Array<{ id: string; name: string; startDate: string; endDate: string }>>(

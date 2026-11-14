@@ -7,11 +7,11 @@ import { CartService } from '../cart.service';
 import { StoreApiService } from '../store-api.service';
 import StoreThemeToggle from '../store-theme-toggle';
 import { StoreThemeService } from '../store-theme.service';
-import { Button } from '#/ui';
+import { Badge, Button } from '#/ui';
 
 @Component({
   selector: 'app-store-layout',
-  imports: [Button, RouterOutlet, RouterLink, StoreThemeToggle],
+  imports: [Badge, Button, RouterOutlet, RouterLink, StoreThemeToggle],
   template: `
     <div class="layout-padding pb-10">
       <div class="breadcrumbs text-sm mb-4">
@@ -52,7 +52,7 @@ import { Button } from '#/ui';
             <span class="material-symbols-outlined text-lg">shopping_cart</span>
             Carrito
             @if (cartCount() > 0) {
-              <span class="badge badge-secondary">{{ cartCount() }}</span>
+              <span uiBadge>{{ cartCount() }}</span>
             }
           </a>
         </div>

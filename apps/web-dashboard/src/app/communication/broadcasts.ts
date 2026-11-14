@@ -1,5 +1,10 @@
 import {
+  Badge,
+  BadgeTone,
   Button,
+  Card,
+  CardBody,
+  CardTitle,
   Confirmation,
   EmptyState,
   PageHeader,
@@ -39,6 +44,10 @@ const ACTION_LABELS: Record<string, string> = {
   selector: 'app-communication-broadcasts',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
+    Badge,
+    Card,
+    CardBody,
+    CardTitle,
     UiChoice,
     UiField,
     UiInput,
@@ -70,7 +79,7 @@ const ACTION_LABELS: Record<string, string> = {
           <div ngTab value="pending" class="tab gap-2" [class.tab-active]="selectedTab() === 'pending'">
             Pendientes de aprobación
             @if (pending().length > 0) {
-              <span class="badge badge-warning badge-sm">{{ pending().length }}</span>
+              <span uiBadge tone="warning" size="sm">{{ pending().length }}</span>
             }
           </div>
           <div ngTab value="sent" class="tab" [class.tab-active]="selectedTab() === 'sent'">Mensajes enviados</div>
@@ -86,8 +95,8 @@ const ACTION_LABELS: Record<string, string> = {
       <div class="mt-4">
         <div ngTabPanel value="pending">
           <ng-template ngTabContent>
-            <section class="card border border-base-200 bg-base-100">
-              <div class="card-body">
+            <section uiCard>
+              <div uiCardBody>
                 @if (pending().length === 0) {
                   <lib-empty-state
                     title="Sin pendientes"
@@ -103,7 +112,7 @@ const ACTION_LABELS: Record<string, string> = {
                             <p class="font-semibold truncate">{{ item.title }}</p>
                             <p class="text-sm text-base-content/70 line-clamp-3">{{ preview(item) }}</p>
                           </div>
-                          <span class="badge badge-warning badge-soft shrink-0">Pendiente</span>
+                          <span uiBadge tone="warning" class="shrink-0">Pendiente</span>
                         </div>
                         <div class="flex flex-wrap items-center gap-2 text-xs text-base-content/60">
                           <span>{{ typeLabel(item.type) }}</span>
@@ -154,9 +163,9 @@ const ACTION_LABELS: Record<string, string> = {
         <div ngTabPanel value="sent">
           <ng-template ngTabContent>
             <div class="grid gap-6 xl:grid-cols-[minmax(0,22rem)_1fr]">
-              <section class="card border border-base-200 bg-base-100 h-fit">
-                <div class="card-body">
-                  <h2 class="card-title text-base">Nuevo comunicado</h2>
+              <section uiCard class="h-fit">
+                <div uiCardBody>
+                  <h2 uiCardTitle class="text-base">Nuevo comunicado</h2>
                   <p class="text-sm text-base-content/60">
                     Por ahora el aviso llega en la aplicación. SMS y correo se habilitarán más adelante.
                   </p>
@@ -234,9 +243,9 @@ const ACTION_LABELS: Record<string, string> = {
                 </div>
               </section>
 
-              <section class="card border border-base-200 bg-base-100">
-                <div class="card-body">
-                  <h2 class="card-title text-base">Historial de envíos</h2>
+              <section uiCard>
+                <div uiCardBody>
+                  <h2 uiCardTitle class="text-base">Historial de envíos</h2>
                   @if (sent().length === 0) {
                     <lib-empty-state
                       title="Sin comunicados enviados"
@@ -263,12 +272,12 @@ const ACTION_LABELS: Record<string, string> = {
                               <td class="font-medium">{{ item.title }}</td>
                               <td>{{ typeLabel(item.type) }}</td>
                               <td>
-                                <span class="badge badge-soft badge-sm" [class]="urgencyClass(item.urgencyDefault)">
+                                <span uiBadge size="sm" [tone]="urgencyTone(item.urgencyDefault)">
                                   {{ urgencyLabel(item.urgencyDefault) }}
                                 </span>
                               </td>
                               <td>
-                                <span class="badge badge-soft badge-sm" [class]="statusClass(item.status)">
+                                <span uiBadge size="sm" [tone]="statusTone(item.status)">
                                   {{ statusLabel(item.status) }}
                                 </span>
                               </td>
@@ -299,9 +308,9 @@ const ACTION_LABELS: Record<string, string> = {
 
         <div ngTabPanel value="audit">
           <ng-template ngTabContent>
-            <section class="card border border-base-200 bg-base-100">
-              <div class="card-body">
-                <h2 class="card-title text-base">Registro de actividad</h2>
+            <section uiCard>
+              <div uiCardBody>
+                <h2 uiCardTitle class="text-base">Registro de actividad</h2>
                 @if (auditResource.value().length === 0) {
                   <lib-empty-state
                     title="Sin actividad"
@@ -338,9 +347,9 @@ const ACTION_LABELS: Record<string, string> = {
         <div ngTabPanel value="settings">
           <ng-template ngTabContent>
             <div class="grid gap-6 xl:grid-cols-2">
-              <section class="card border border-base-200 bg-base-100">
-                <div class="card-body">
-                  <h2 class="card-title text-base">Política de aprobación</h2>
+              <section uiCard>
+                <div uiCardBody>
+                  <h2 uiCardTitle class="text-base">Política de aprobación</h2>
                   <p class="text-sm text-base-content/60">
                     Estas reglas se aplican a todos los comunicados de la institución.
                   </p>
@@ -378,9 +387,9 @@ const ACTION_LABELS: Record<string, string> = {
                 </div>
               </section>
 
-              <section class="card border border-base-200 bg-base-100">
-                <div class="card-body">
-                  <h2 class="card-title text-base">Canales de entrega</h2>
+              <section uiCard>
+                <div uiCardBody>
+                  <h2 uiCardTitle class="text-base">Canales de entrega</h2>
                   <p class="text-sm text-base-content/60">
                     Solo el canal en la aplicación está activo. El resto se conectará con Novu más adelante.
                   </p>
@@ -410,9 +419,9 @@ const ACTION_LABELS: Record<string, string> = {
                 </div>
               </section>
 
-              <section class="card border border-base-200 bg-base-100 xl:col-span-2">
-                <div class="card-body">
-                  <h2 class="card-title text-base">Prioridad y horario de silencio</h2>
+              <section uiCard class="xl:col-span-2">
+                <div uiCardBody>
+                  <h2 uiCardTitle class="text-base">Prioridad y horario de silencio</h2>
                   <p class="text-sm text-base-content/60">
                     Cada destinatario puede tener horario de silencio. La prioridad de emergencia lo omite, pero sigue
                     llegando solo en la aplicación.
@@ -427,15 +436,15 @@ const ACTION_LABELS: Record<string, string> = {
                       </thead>
                       <tbody>
                         <tr>
-                          <td><span class="badge badge-soft">Rutina</span></td>
+                          <td><span uiBadge>Rutina</span></td>
                           <td>Respeta horario de silencio. Solo canal en la app.</td>
                         </tr>
                         <tr>
-                          <td><span class="badge badge-warning badge-soft">Importante</span></td>
+                          <td><span uiBadge tone="warning">Importante</span></td>
                           <td>Respeta horario de silencio. Solo canal en la app.</td>
                         </tr>
                         <tr>
-                          <td><span class="badge badge-error badge-soft">Emergencia</span></td>
+                          <td><span uiBadge tone="danger">Emergencia</span></td>
                           <td>Omite horario de silencio. Solo canal en la app; sin SMS ni llamada.</td>
                         </tr>
                       </tbody>
@@ -666,10 +675,10 @@ export default class Broadcasts {
     return labels[urgency] ?? urgency;
   }
 
-  urgencyClass(urgency: UrgencyTier): string {
-    if (urgency === 'EMERGENCY') return 'badge-error';
-    if (urgency === 'IMPORTANT') return 'badge-warning';
-    return 'badge-ghost';
+  urgencyTone(urgency: UrgencyTier): BadgeTone {
+    if (urgency === 'EMERGENCY') return 'danger';
+    if (urgency === 'IMPORTANT') return 'warning';
+    return 'neutral';
   }
 
   statusLabel(status: string): string {
@@ -682,10 +691,10 @@ export default class Broadcasts {
     return labels[status] ?? status;
   }
 
-  statusClass(status: string): string {
-    if (status === 'PENDING_APPROVAL') return 'badge-warning';
-    if (status === 'APPROVED') return 'badge-success';
-    return 'badge-ghost';
+  statusTone(status: string): BadgeTone {
+    if (status === 'PENDING_APPROVAL') return 'warning';
+    if (status === 'APPROVED') return 'success';
+    return 'neutral';
   }
 
   actionLabel(action: string): string {

@@ -1,11 +1,12 @@
 import { Component, input } from '@angular/core';
+import { Badge, BadgeTone } from './badge';
 
 type Urgency = 'ROUTINE' | 'IMPORTANT' | 'EMERGENCY';
 
-const URGENCY_BADGE: Record<Urgency, string> = {
-  ROUTINE: '',
-  IMPORTANT: 'badge-warning',
-  EMERGENCY: 'badge-error',
+const URGENCY_TONE: Record<Urgency, BadgeTone> = {
+  ROUTINE: 'neutral',
+  IMPORTANT: 'warning',
+  EMERGENCY: 'danger',
 };
 
 const URGENCY_LABEL: Record<Urgency, string> = {
@@ -16,6 +17,7 @@ const URGENCY_LABEL: Record<Urgency, string> = {
 
 @Component({
   selector: 'lib-message-bubble',
+  imports: [Badge],
   template: `
     <div class="flex" [class.justify-end]="mine()">
       <div
@@ -28,7 +30,7 @@ const URGENCY_LABEL: Record<Urgency, string> = {
         <p class="whitespace-pre-wrap break-words">{{ body() }}</p>
         <div class="flex items-center gap-2 mt-1">
           @if (urgency() !== 'ROUTINE') {
-            <span class="badge badge-xs" [class]="badgeClass()">{{ urgencyLabel() }}</span>
+            <span uiBadge size="sm" [tone]="urgencyTone()">{{ urgencyLabel() }}</span>
           }
           @if (sentAt()) {
             <span class="text-[10px] opacity-70 ml-auto">{{ sentAt() }}</span>
@@ -45,6 +47,6 @@ export class MessageBubble {
   urgency = input<Urgency>('ROUTINE');
   mine = input<boolean>(false);
 
-  badgeClass = () => URGENCY_BADGE[this.urgency()];
+  urgencyTone = () => URGENCY_TONE[this.urgency()];
   urgencyLabel = () => URGENCY_LABEL[this.urgency()];
 }

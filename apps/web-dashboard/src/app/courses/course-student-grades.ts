@@ -1,4 +1,4 @@
-import { DecimalToNumber, UiSelect } from '#/ui';
+import { Card, CardBody, DecimalToNumber, UiSelect } from '#/ui';
 import { DatePipe, DecimalPipe, NgClass } from '@angular/common';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { afterRenderEffect, Component, computed, inject, input, signal } from '@angular/core';
@@ -10,12 +10,13 @@ import Store from '../core/store';
 
 @Component({
   selector: 'app-course-student-grades',
-  imports: [UiSelect, FormsModule, NgClass, DatePipe, DecimalPipe],
+  imports: [Card, CardBody, UiSelect, FormsModule, NgClass, DatePipe, DecimalPipe],
   template: `
     <div class="flex flex-col gap-4">
       <div class="flex justify-between items-start">
         <div
-          class="text-sm card card-compact bg-base-100 "
+          uiCard
+          class="text-sm"
           [ngClass]="{
             'bg-success/10': studentsResource.value().average >= metric().minimumApproval,
             'bg-warning/10':
@@ -24,7 +25,7 @@ import Store from '../core/store';
             'bg-error/10': studentsResource.value().average < metric().minimumApproval,
           }"
         >
-          <div class="card-body">
+          <div uiCardBody>
             <div class="text-sm text-base-content/70">Promedio del periodo:</div>
             <div class="text-lg font-bold">
               <span

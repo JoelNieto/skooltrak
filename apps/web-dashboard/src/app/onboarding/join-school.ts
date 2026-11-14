@@ -1,4 +1,4 @@
-import { Button, Loader, Toast, UiInput } from '#/ui';
+import { Button, Card, CardBody, Loader, Toast, UiInput } from '#/ui';
 import { HttpClient } from '@angular/common/http';
 import { Component, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
@@ -14,7 +14,7 @@ type AvailableSchool = {
 
 @Component({
   selector: 'app-join-school',
-  imports: [UiInput, Button, BrandLogo, Loader],
+  imports: [Card, CardBody, UiInput, Button, BrandLogo, Loader],
   template: `
     <div class="min-h-screen flex flex-col gradient-bg">
       <header class="p-4 md:p-6 flex items-center justify-between">
@@ -45,11 +45,8 @@ type AvailableSchool = {
           } @else if (searched()) {
             <div class="grid gap-4">
               @for (school of filteredSchools(); track school.id) {
-                <button
-                  class="card bg-base-100 shadow hover:shadow-lg transition-all cursor-pointer border border-base-200 hover:border-primary text-left w-full"
-                  (click)="selectSchool(school)"
-                >
-                  <div class="card-body flex-row items-center gap-4">
+                <button uiCard class="text-left w-full" (click)="selectSchool(school)">
+                  <div uiCardBody class="flex-row items-center gap-4">
                     <div class="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
                       <span class="material-symbols-outlined text-2xl text-primary">school</span>
                     </div>

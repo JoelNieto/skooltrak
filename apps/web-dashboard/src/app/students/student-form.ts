@@ -1,4 +1,4 @@
-import { Button, Loader, Toast, UiField, UiInput, UiSelect } from '#/ui';
+import { Button, Card, CardBody, Loader, Toast, UiField, UiInput, UiSelect } from '#/ui';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { afterRenderEffect, Component, computed, inject, input, signal } from '@angular/core';
 import { disabled, email, form, FormField, required, submit } from '@angular/forms/signals';
@@ -37,7 +37,7 @@ interface StudentFormData {
 
 @Component({
   selector: 'app-student-form',
-  imports: [UiField, UiInput, UiSelect, Button, FormField, RouterLink, Loader],
+  imports: [Card, CardBody, UiField, UiInput, UiSelect, Button, FormField, RouterLink, Loader],
   template: `
     <div class="breadcrumbs text-sm">
       <ul>
@@ -69,8 +69,8 @@ interface StudentFormData {
               <p class="mt-1 text-sm text-base-content/70">Información personal del estudiante.</p>
             </div>
             <div class="sm:col-span-3">
-              <div class="card card-border border-base-300 bg-base-100">
-                <div class="card-body gap-y-4">
+              <div uiCard>
+                <div uiCardBody class="gap-y-4">
                   <div class="sm:grid sm:grid-cols-6 sm:gap-4">
                     <ui-field label="Primer nombre" [field]="studentForm.firstName" class="col-span-3">
                       <input uiInput id="firstName" type="text" [formField]="studentForm.firstName" />
@@ -110,8 +110,8 @@ interface StudentFormData {
               <p class="mt-1 text-sm text-base-content/70">Información académica y estado de matrícula.</p>
             </div>
             <div class="sm:col-span-3">
-              <div class="card card-border border-base-300 bg-base-100">
-                <div class="card-body gap-y-4">
+              <div uiCard>
+                <div uiCardBody class="gap-y-4">
                   <div class="sm:grid sm:grid-cols-6 sm:gap-4">
                     <ui-field label="Grupo" [field]="studentForm.classGroupId" optional class="col-span-3">
                       <select uiSelect id="classGroupId" [formField]="studentForm.classGroupId">
@@ -141,8 +141,8 @@ interface StudentFormData {
               <p class="mt-1 text-sm text-base-content/70">Información de contacto del estudiante.</p>
             </div>
             <div class="sm:col-span-3">
-              <div class="card card-border border-base-300 bg-base-100">
-                <div class="card-body gap-y-4">
+              <div uiCard>
+                <div uiCardBody class="gap-y-4">
                   <div class="sm:grid sm:grid-cols-6 sm:gap-4">
                     <ui-field label="Correo electrónico" [field]="studentForm.email" class="col-span-3">
                       <input uiInput id="email" type="email" [formField]="studentForm.email" />
@@ -166,8 +166,8 @@ interface StudentFormData {
               <p class="mt-1 text-sm text-base-content/70">Datos médicos relevantes del estudiante.</p>
             </div>
             <div class="sm:col-span-3">
-              <div class="card card-border border-base-300 bg-base-100">
-                <div class="card-body gap-y-4">
+              <div uiCard>
+                <div uiCardBody class="gap-y-4">
                   <div class="sm:grid sm:grid-cols-6 sm:gap-4">
                     <ui-field label="Tipo de sangre" [field]="studentForm.bloodType" optional class="col-span-2">
                       <select uiSelect id="bloodType" [formField]="studentForm.bloodType">
@@ -213,8 +213,8 @@ interface StudentFormData {
               <p class="mt-1 text-sm text-base-content/70">Persona a contactar en caso de emergencia.</p>
             </div>
             <div class="sm:col-span-3">
-              <div class="card card-border border-base-300 bg-base-100">
-                <div class="card-body gap-y-4">
+              <div uiCard>
+                <div uiCardBody class="gap-y-4">
                   <div class="sm:grid sm:grid-cols-6 sm:gap-4">
                     <ui-field
                       label="Nombre del contacto"

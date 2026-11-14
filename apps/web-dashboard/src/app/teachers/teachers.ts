@@ -1,4 +1,4 @@
-import { Button, Confirmation, Pagination, PaginatorV2, Toast } from '#/ui';
+import { Badge, Button, Confirmation, Pagination, PaginatorV2, Toast } from '#/ui';
 import { Menu, MenuContent, MenuItem, MenuTrigger } from '@angular/aria/menu';
 import { OverlayModule } from '@angular/cdk/overlay';
 import { DatePipe } from '@angular/common';
@@ -22,6 +22,7 @@ type Teacher = Prisma.TeacherGetPayload<{ include: { user: true } }> & {
 @Component({
   selector: 'app-teachers',
   imports: [
+    Badge,
     Button,
     DatePipe,
     PaginatorV2,
@@ -85,12 +86,12 @@ type Teacher = Prisma.TeacherGetPayload<{ include: { user: true } }> & {
                     <div class="flex items-center gap-2">
                       {{ teacher.name }}
                       @if (teacher.user?.emailVerified) {
-                        <span class="badge badge-success badge-sm gap-1">
+                        <span uiBadge tone="success" size="sm" class="gap-1">
                           <span class="material-symbols-outlined text-sm!">check_circle</span>
                           Verificado
                         </span>
                       } @else {
-                        <span class="badge badge-warning badge-sm gap-1">
+                        <span uiBadge tone="warning" size="sm" class="gap-1">
                           <span class="material-symbols-outlined text-sm!">schedule</span>
                           Pendiente
                         </span>

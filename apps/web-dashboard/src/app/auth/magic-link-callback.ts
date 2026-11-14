@@ -1,4 +1,4 @@
-import { Button, Toast } from '#/ui';
+import { Button, Card, CardActions, CardBody, CardTitle, Toast } from '#/ui';
 import { HttpClient } from '@angular/common/http';
 import { Component, afterRenderEffect, inject, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
@@ -7,19 +7,19 @@ import Auth from './auth';
 
 @Component({
   selector: 'app-magic-link-callback',
-  imports: [Button, RouterLink],
+  imports: [Card, CardActions, CardBody, CardTitle, Button, RouterLink],
   template: `
     <div class="min-h-screen flex items-center justify-center bg-base-200 p-4">
-      <div class="card w-full max-w-md bg-base-100 shadow-xl">
-        <div class="card-body items-center text-center">
+      <div uiCard class="w-full max-w-md">
+        <div uiCardBody class="items-center text-center">
           <span class="material-symbols-outlined text-4xl" [class.text-primary]="!error()" [class.text-error]="error()">
             {{ error() ? 'error' : loading() ? 'hourglass_top' : 'check_circle' }}
           </span>
-          <h2 class="card-title justify-center mt-2">{{ error() ? 'Error' : 'Verificando enlace...' }}</h2>
+          <h2 uiCardTitle class="justify-center mt-2">{{ error() ? 'Error' : 'Verificando enlace...' }}</h2>
           <p class="text-base-content/70">
             {{ error() || 'Por favor espera mientras completamos tu acceso.' }}
           </p>
-          <div class="card-actions justify-center mt-4">
+          <div uiCardActions class="justify-center mt-4">
             <a uiButton variant="primary" routerLink="/login">Ir al inicio de sesión</a>
           </div>
         </div>

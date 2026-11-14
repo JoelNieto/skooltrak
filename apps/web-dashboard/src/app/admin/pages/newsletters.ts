@@ -1,4 +1,4 @@
-import { Button, Confirmation, Pagination, Paginator, Toast } from '#/ui';
+import { Badge, Button, Confirmation, Pagination, Paginator, Toast } from '#/ui';
 import { Menu, MenuContent, MenuItem, MenuTrigger } from '@angular/aria/menu';
 import { OverlayModule } from '@angular/cdk/overlay';
 import { DatePipe } from '@angular/common';
@@ -25,6 +25,7 @@ type NewsletterItem = {
 @Component({
   selector: 'app-newsletters',
   imports: [
+    Badge,
     Button,
     DatePipe,
     Paginator,
@@ -115,9 +116,9 @@ type NewsletterItem = {
                 <td>{{ newsletter.school.name }}</td>
                 <td>
                   @if (newsletter.published) {
-                    <span class="badge badge-success badge-sm">Publicado</span>
+                    <span uiBadge tone="success" size="sm">Publicado</span>
                   } @else {
-                    <span class="badge badge-neutral badge-sm">Borrador</span>
+                    <span uiBadge size="sm">Borrador</span>
                   }
                 </td>
                 <td>{{ newsletter.publishedAt ? (newsletter.publishedAt | date: 'short') : '-' }}</td>

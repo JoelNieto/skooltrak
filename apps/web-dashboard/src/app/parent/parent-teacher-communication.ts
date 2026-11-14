@@ -1,4 +1,4 @@
-import { MessageBubble, PageHeader, ThreadComposer, ThreadList, ThreadScrollPane, Toast, UiInput } from '#/ui';
+import { Badge, MessageBubble, PageHeader, ThreadComposer, ThreadList, ThreadScrollPane, Toast, UiInput } from '#/ui';
 import { DatePipe } from '@angular/common';
 import { httpResource } from '@angular/common/http';
 import {
@@ -26,6 +26,7 @@ const API = '/api/v1/communication';
   selector: 'app-parent-teacher-communication',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
+    Badge,
     UiInput,
     RouterLink,
     FormsModule,
@@ -86,7 +87,7 @@ const API = '/api/v1/communication';
               }
               <h2 class="font-semibold truncate">{{ thread.title }}</h2>
               @if (thread.broadcast) {
-                <span class="badge badge-primary badge-soft badge-sm shrink-0">Comunicado</span>
+                <span uiBadge tone="action" size="sm" class="shrink-0">Comunicado</span>
               }
             </div>
             <div class="flex items-center gap-1">
@@ -94,10 +95,10 @@ const API = '/api/v1/communication';
                 <span class="text-sm opacity-70">{{ thread.audience }}</span>
               }
               @if (thread.urgent) {
-                <span class="badge badge-error badge-soft badge-xs">Importante</span>
+                <span uiBadge tone="danger" size="sm">Importante</span>
               }
               @if (thread.broadcast && thread.repliesAllowed === false) {
-                <span class="badge badge-ghost badge-xs">Solo lectura</span>
+                <span uiBadge size="sm">Solo lectura</span>
               }
             </div>
           </header>

@@ -1,4 +1,4 @@
-import { Toast } from '#/ui';
+import { Button, Toast } from '#/ui';
 import { HttpClient } from '@angular/common/http';
 import { Component, inject, signal } from '@angular/core';
 import { debounce, email, form, FormField, required } from '@angular/forms/signals';
@@ -6,7 +6,7 @@ import { Router, RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-magic-link-request',
-  imports: [RouterLink, FormField],
+  imports: [Button, RouterLink, FormField],
   template: `
     <div class="min-h-screen flex items-center justify-center bg-base-200 p-4">
       <div class="card w-full max-w-md bg-base-100 shadow-xl">
@@ -29,7 +29,7 @@ import { Router, RouterLink } from '@angular/router';
               </ul>
             }
 
-            <button type="submit" class="btn btn-primary w-full" [disabled]="loading()">
+            <button uiButton variant="primary" type="submit" class="w-full" [disabled]="loading()">
               @if (loading()) {
                 <span class="loading loading-spinner"></span>
               } @else {

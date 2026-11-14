@@ -1,4 +1,4 @@
-import { Loader } from '#/ui';
+import { Button, Loader } from '#/ui';
 import { HttpClient } from '@angular/common/http';
 import { Component, inject, signal } from '@angular/core';
 import { email, form, FormField, required } from '@angular/forms/signals';
@@ -15,7 +15,7 @@ type LookupResult = {
 
 @Component({
   selector: 'app-forgot-password',
-  imports: [BrandLogo, FormField, RouterLink, Loader],
+  imports: [Button, BrandLogo, FormField, RouterLink, Loader],
   template: `
     <div class="gradient-bg min-h-screen flex items-center justify-center p-4">
       @defer {
@@ -55,7 +55,7 @@ type LookupResult = {
                   <span>Revisa tu correo electrónico. Te hemos enviado un enlace para restablecer tu contraseña.</span>
                 </div>
                 <div class="text-center">
-                  <a routerLink="/login" class="btn btn-primary"> Volver al inicio de sesión </a>
+                  <a uiButton variant="primary" routerLink="/login"> Volver al inicio de sesión </a>
                 </div>
               } @else if (step() === 'confirm') {
                 <div class="space-y-6">
@@ -75,9 +75,9 @@ type LookupResult = {
                     ¿Es tu cuenta? Confirma para enviarte el enlace de recuperación.
                   </p>
                   <div class="flex flex-col gap-3">
-                    <button
+                    <button uiButton variant="primary"
                       type="button"
-                      class="btn btn-primary w-full"
+                      class="w-full"
                       [disabled]="loading()"
                       (click)="confirmAndSendReset()"
                     >
@@ -89,9 +89,9 @@ type LookupResult = {
                         Sí, enviar enlace
                       }
                     </button>
-                    <button
+                    <button uiButton variant="ghost"
                       type="button"
-                      class="btn btn-ghost w-full"
+                      class="w-full"
                       [disabled]="loading()"
                       (click)="rejectAndGoBack()"
                     >
@@ -108,9 +108,9 @@ type LookupResult = {
                       <strong>{{ searchedEmail() }}</strong>
                     </span>
                   </div>
-                  <button
+                  <button uiButton variant="primary"
                     type="button"
-                    class="btn btn-primary w-full"
+                    class="w-full"
                     (click)="step.set('email'); form().reset(); form.email().value.set('')"
                   >
                     Probar con otro correo
@@ -141,7 +141,7 @@ type LookupResult = {
                     }
                   </div>
 
-                  <button type="submit" [disabled]="loading() || form().invalid()" class="btn btn-primary w-full">
+                  <button uiButton variant="primary" type="submit" [disabled]="loading() || form().invalid()" class="w-full">
                     @if (loading()) {
                       <span class="loading loading-spinner loading-sm"></span>
                       Buscando...

@@ -1,5 +1,5 @@
 import { writeAccessTokenToStorage } from '#/client-auth';
-import { Loader, Toast } from '#/ui';
+import { Button, Loader, Toast } from '#/ui';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { afterRenderEffect, Component, inject, signal } from '@angular/core';
 import { AbstractControl, NonNullableFormBuilder, ValidationErrors } from '@angular/forms';
@@ -10,7 +10,7 @@ import { BrandLogo } from '../shared/brand-logo';
 
 @Component({
   selector: 'app-register',
-  imports: [BrandLogo, FormField, Loader, RouterLink],
+  imports: [Button, BrandLogo, FormField, Loader, RouterLink],
   template: `
     @defer {
       <div class="min-h-screen flex flex-col gradient-bg">
@@ -40,9 +40,9 @@ import { BrandLogo } from '../shared/brand-logo';
                   </p>
                 </div>
                 <div class="pt-4">
-                  <button
+                  <button uiButton variant="primary"
                     type="button"
-                    class="btn btn-primary w-full"
+                    class="w-full"
                     [disabled]="loading()"
                     (click)="completePendingInvitation()"
                   >
@@ -55,7 +55,7 @@ import { BrandLogo } from '../shared/brand-logo';
                     }
                   </button>
                 </div>
-                <button class="btn btn-ghost btn-sm" (click)="step.set('email')">
+                <button uiButton variant="ghost" size="sm" (click)="step.set('email')">
                   <span class="material-symbols-outlined text-lg">arrow_back</span>
                   Usar otro correo
                 </button>
@@ -97,7 +97,7 @@ import { BrandLogo } from '../shared/brand-logo';
                   </div>
 
                   <div class="pt-4">
-                    <button type="submit" class="btn btn-primary w-full" [disabled]="loading()">
+                    <button uiButton variant="primary" type="submit" class="w-full" [disabled]="loading()">
                       @if (loading()) {
                         <span class="loading loading-spinner loading-sm"></span>
                         Enviando...
@@ -145,8 +145,8 @@ import { BrandLogo } from '../shared/brand-logo';
                 </div>
 
                 <div class="space-y-3">
-                  <button
-                    class="btn btn-outline btn-block"
+                  <button uiButton
+                    class="w-full"
                     (click)="resendLink()"
                     [disabled]="loading() || cooldown() > 0"
                   >
@@ -160,7 +160,7 @@ import { BrandLogo } from '../shared/brand-logo';
                       Reenviar enlace
                     }
                   </button>
-                  <button class="btn btn-ghost btn-sm" (click)="step.set('email')">
+                  <button uiButton variant="ghost" size="sm" (click)="step.set('email')">
                     <span class="material-symbols-outlined text-lg">arrow_back</span>
                     Cambiar correo electrónico
                   </button>
@@ -276,7 +276,7 @@ import { BrandLogo } from '../shared/brand-logo';
                   </div>
 
                   <div class="pt-4">
-                    <button type="submit" class="btn btn-primary w-full" [disabled]="loading()">
+                    <button uiButton variant="primary" type="submit" class="w-full" [disabled]="loading()">
                       @if (loading()) {
                         <span class="loading loading-spinner loading-sm"></span>
                         Creando cuenta...
@@ -303,7 +303,7 @@ import { BrandLogo } from '../shared/brand-logo';
                     {{ errorMessage() || 'El enlace de verificación es inválido o ha expirado.' }}
                   </p>
                 </div>
-                <button class="btn btn-primary" (click)="step.set('email')">
+                <button uiButton variant="primary" (click)="step.set('email')">
                   <span class="material-symbols-outlined">arrow_back</span>
                   Intentar de nuevo
                 </button>

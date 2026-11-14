@@ -1,4 +1,4 @@
-import { Loader, Toast } from '#/ui';
+import { Button, Loader, Toast } from '#/ui';
 import { Component, ElementRef, inject, signal, viewChild } from '@angular/core';
 import { NonNullableFormBuilder } from '@angular/forms';
 import { email, form, FormField, minLength, required } from '@angular/forms/signals';
@@ -7,7 +7,7 @@ import Auth from './auth';
 
 @Component({
   selector: 'app-login',
-  imports: [FormField, Loader, RouterLink],
+  imports: [Button, FormField, Loader, RouterLink],
 
   template: ` <div class="min-h-screen main">
     @defer {
@@ -139,20 +139,13 @@ import Auth from './auth';
                 </div>
               </div>
 
-              <button
-                type="submit"
-                class="btn-primary-custom btn border-0 w-full rounded-xl h-12 mt-2 mb-0 text-sm font-semibold"
-              >
+              <button uiButton variant="primary" size="lg" type="submit" class="w-full mt-2 text-sm">
                 Iniciar sesión
               </button>
 
               <div class="divider text-ink-muted text-xs my-5">o</div>
 
-              <a
-                routerLink="/auth/magic-link"
-                type="button"
-                class="btn-ghost-custom btn w-full rounded-xl h-12 text-sm font-semibold"
-              >
+              <a uiButton size="lg" routerLink="/auth/magic-link" class="w-full text-sm">
                 Acceso sin contraseña
               </a>
             </form>
@@ -226,32 +219,6 @@ import Auth from './auth';
       outline: none;
       border-color: var(--color-primary);
       box-shadow: 0 0 0 3px color-mix(in oklab, var(--color-primary) 22%, transparent);
-    }
-
-    /* Primary action: action colour, swapping to ink on hover (no lift, no gradient). */
-    .btn-primary-custom {
-      background: var(--color-primary);
-      color: var(--color-primary-content);
-      transition:
-        background-color 0.2s var(--ui-ease),
-        color 0.2s var(--ui-ease);
-    }
-    .btn-primary-custom:hover {
-      background: var(--ui-ink-strong);
-      color: var(--ui-surface-1);
-    }
-
-    .btn-ghost-custom {
-      background: var(--ui-surface-1);
-      border: 1px solid var(--ui-line-strong);
-      color: var(--ui-ink-strong);
-      transition:
-        border-color 0.15s ease,
-        background-color 0.15s ease;
-    }
-    .btn-ghost-custom:hover {
-      border-color: var(--ui-ink-subtle);
-      background: var(--ui-surface-2);
     }
 
     a.link-brand {

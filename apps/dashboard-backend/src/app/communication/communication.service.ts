@@ -649,6 +649,10 @@ export class CommunicationService {
       throw new BadRequestException('SCHOOL_WIDE requires scopeId (schoolId)');
     }
 
+    if (role.toUpperCase() === 'TEACHER') {
+      await this.assertTeacherCanTarget(userId, organizationId, input.type, input.scopeId ?? null);
+    }
+
     const recipients = await this.resolveRecipients(
       input.type,
       input.scopeId,
@@ -702,6 +706,86 @@ export class CommunicationService {
     }
 
     return thread;
+  }
+
+  // ── Teacher broadcast audience (BR-COM-002.7) ───────────────────────────
+  // A teacher may target only their own courses, and class groups related to those courses.
+  // Courses have no class-group link: a course belongs to a study plan and every class group of
+  // that plan takes its courses, so "related" = the group's study plan contains one of the
+  // teacher's courses. Being the homeroom teacher (ClassGroup.teacherId) alone does not count.
+  // See docs/product/frd/COM-002-broadcasts.md.
+
+  private teacherCourseWhere(teacherId: string): Prisma.CourseWhereInput {
+    return { teacherId };
+  }
+
+  private teacherClassGroupWhere(teacherId: string): Prisma.ClassGroupWhereInput {
+    return { studyPlan: { courses: { some: { teacherId } } } };
+  }
+
+  private findTeacher(userId: string, organizationId: string) {
+    return this.prisma.teacher.findFirst({
+      where: { userId, organizationId },
+      select: { id: true },
+    });
+  }
+
+  private async assertTeacherCanTarget(
+    userId: string,
+    organizationId: string,
+    type: ThreadType,
+    scopeId: string | null,
+  ) {
+    if (type !== ThreadType.CLASS_GROUP && type !== ThreadType.COURSE) return;
+
+    const teacher = scopeId ? await this.findTeacher(userId, organizationId) : null;
+    let allowed = false;
+    if (teacher && scopeId) {
+      allowed =
+        type === ThreadType.COURSE
+          ? (await this.prisma.course.count({
+              where: { id: scopeId, organizationId, ...this.teacherCourseWhere(teacher.id) },
+            })) > 0
+          : (await this.prisma.classGroup.count({
+              where: { id: scopeId, organizationId, ...this.teacherClassGroupWhere(teacher.id) },
+            })) > 0;
+    }
+
+    if (!allowed) {
+      throw new ForbiddenException('You can only broadcast to your own groups or courses');
+    }
+  }
+
+  /** Class groups and courses the caller may target with a broadcast (picker source). */
+  async listBroadcastAudiences(schoolId?: string) {
+    const { userId, organizationId, role } = this.getAuth();
+    if (!organizationId) throw new ForbiddenException('Organization context required');
+    if (!this.isStaff(role)) throw new ForbiddenException('Not allowed to create broadcasts');
+
+    const schoolFilter = schoolId ? { schoolId } : {};
+    let classGroupWhere: Prisma.ClassGroupWhereInput = { organizationId, ...schoolFilter };
+    let courseWhere: Prisma.CourseWhereInput = { organizationId, ...schoolFilter };
+
+    if (!this.isOrgAdmin(role)) {
+      const teacher = await this.findTeacher(userId, organizationId);
+      if (!teacher) return { classGroups: [], courses: [] };
+      classGroupWhere = { ...classGroupWhere, ...this.teacherClassGroupWhere(teacher.id) };
+      courseWhere = { ...courseWhere, ...this.teacherCourseWhere(teacher.id) };
+    }
+
+    const [classGroups, courses] = await Promise.all([
+      this.prisma.classGroup.findMany({
+        where: classGroupWhere,
+        select: { id: true, name: true },
+        orderBy: { name: 'asc' },
+      }),
+      this.prisma.course.findMany({
+        where: courseWhere,
+        select: { id: true, name: true, code: true },
+        orderBy: { name: 'asc' },
+      }),
+    ]);
+    return { classGroups, courses };
   }
 
   async approveBroadcast(threadId: string) {

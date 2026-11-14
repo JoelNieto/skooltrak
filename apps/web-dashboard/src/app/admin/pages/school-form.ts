@@ -1,4 +1,16 @@
-import { Button, Card, CardBody, Loader, Toast, UiField, UiInput, UiSelect } from '#/ui';
+import {
+  BreadcrumbItem,
+  Breadcrumbs,
+  Button,
+  Card,
+  CardBody,
+  Loader,
+  Spinner,
+  Toast,
+  UiField,
+  UiInput,
+  UiSelect,
+} from '#/ui';
 import { HttpClient } from '@angular/common/http';
 import { afterRenderEffect, Component, computed, inject, input, signal, viewChild } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
@@ -49,6 +61,8 @@ interface SchoolFormData {
 @Component({
   selector: 'app-school-form',
   imports: [
+    Spinner,
+    Breadcrumbs,
     Card,
     CardBody,
     UiField,
@@ -62,21 +76,7 @@ interface SchoolFormData {
     FormsModule,
   ],
   template: `
-    <div class="breadcrumbs text-sm">
-      <ul>
-        <li><a routerLink="/">Inicio</a></li>
-        <li><a routerLink="/admin">Admin</a></li>
-        <li><a routerLink="/admin/schools">Colegios</a></li>
-        @if (isEditMode()) {
-          <li>
-            <a [routerLink]="['/schools', id()]">{{ schoolResource.value()?.name }}</a>
-          </li>
-          <li>Editar</li>
-        } @else {
-          <li>Nuevo</li>
-        }
-      </ul>
-    </div>
+    <ui-breadcrumbs [items]="breadcrumbs()" />
 
     <div class="flex items-center justify-between mb-6">
       <h1 class="text-2xl font-semibold">
@@ -105,7 +105,7 @@ interface SchoolFormData {
                         class="w-32 min-h-16 max-h-48 rounded-lg border-2 border-dashed border-base-300 flex items-center justify-center overflow-hidden bg-base-200"
                       >
                         @if (isUploadingLogo()) {
-                          <span class="loading loading-spinner loading-lg text-primary"></span>
+                          <span uiSpinner size="lg" class="text-primary"></span>
                         } @else if (logoPreviewUrl() || logoDownloadUrl()) {
                           <img
                             [src]="logoPreviewUrl() || logoDownloadUrl()"
@@ -392,10 +392,13 @@ interface SchoolFormData {
         <!-- Form Actions -->
         <div class="flex justify-end gap-3 my-6 pt-6 border-t border-base-300">
           <a uiButton variant="ghost" [routerLink]="isEditMode() ? ['/schools', id()] : ['/admin/schools']">Cancelar</a>
-          <button uiButton variant="primary" type="submit" [disabled]="isSaving() || isUploadingLogo()">
-            @if (isSaving()) {
-              <span class="loading loading-spinner loading-sm"></span>
-            }
+          <button
+            uiButton
+            [loading]="isSaving()"
+            variant="primary"
+            type="submit"
+            [disabled]="isSaving() || isUploadingLogo()"
+          >
             {{ isEditMode() ? 'Guardar cambios' : 'Crear colegio' }}
           </button>
         </div>
@@ -404,6 +407,15 @@ interface SchoolFormData {
   `,
 })
 export default class SchoolForm {
+  readonly breadcrumbs = computed<BreadcrumbItem[]>(() => [
+    { label: 'Inicio', link: '/' },
+    { label: 'Admin', link: '/admin' },
+    { label: 'Colegios', link: '/admin/schools' },
+    ...(this.isEditMode()
+      ? [{ label: this.schoolResource.value()?.name ?? '', link: ['/schools', this.id()] }, { label: 'Editar' }]
+      : [{ label: 'Nuevo' }]),
+  ]);
+
   public id = input<string>();
 
   private http = inject(HttpClient);

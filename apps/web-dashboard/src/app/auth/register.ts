@@ -42,6 +42,7 @@ import { BrandLogo } from '../shared/brand-logo';
                 <div class="pt-4">
                   <button
                     uiButton
+                    [loading]="loading()"
                     variant="primary"
                     type="button"
                     class="w-full"
@@ -49,7 +50,6 @@ import { BrandLogo } from '../shared/brand-logo';
                     (click)="completePendingInvitation()"
                   >
                     @if (loading()) {
-                      <span class="loading loading-spinner loading-sm"></span>
                       Redirigiendo...
                     } @else {
                       Configurar mi cuenta
@@ -85,9 +85,15 @@ import { BrandLogo } from '../shared/brand-logo';
                   </div>
 
                   <div class="pt-4">
-                    <button uiButton variant="primary" type="submit" class="w-full" [disabled]="loading()">
+                    <button
+                      uiButton
+                      [loading]="loading()"
+                      variant="primary"
+                      type="submit"
+                      class="w-full"
+                      [disabled]="loading()"
+                    >
                       @if (loading()) {
-                        <span class="loading loading-spinner loading-sm"></span>
                         Enviando...
                       } @else {
                         Enviar enlace de verificación
@@ -133,9 +139,14 @@ import { BrandLogo } from '../shared/brand-logo';
                 </div>
 
                 <div class="space-y-3">
-                  <button uiButton class="w-full" (click)="resendLink()" [disabled]="loading() || cooldown() > 0">
+                  <button
+                    uiButton
+                    [loading]="loading()"
+                    class="w-full"
+                    (click)="resendLink()"
+                    [disabled]="loading() || cooldown() > 0"
+                  >
                     @if (loading()) {
-                      <span class="loading loading-spinner loading-sm"></span>
                       Enviando...
                     } @else if (cooldown() > 0) {
                       Reenviar en {{ cooldown() }}s
@@ -226,9 +237,15 @@ import { BrandLogo } from '../shared/brand-logo';
                   </div>
 
                   <div class="pt-4">
-                    <button uiButton variant="primary" type="submit" class="w-full" [disabled]="loading()">
+                    <button
+                      uiButton
+                      [loading]="loading()"
+                      variant="primary"
+                      type="submit"
+                      class="w-full"
+                      [disabled]="loading()"
+                    >
                       @if (loading()) {
-                        <span class="loading loading-spinner loading-sm"></span>
                         Creando cuenta...
                       } @else {
                         Crear Cuenta

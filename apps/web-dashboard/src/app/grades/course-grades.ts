@@ -1,4 +1,4 @@
-import { Badge, Button, DecimalToNumber, Modal, UiSelect } from '#/ui';
+import { Badge, Button, DecimalToNumber, Modal, UiSelect, UiTable } from '#/ui';
 import { DecimalPipe, NgClass } from '@angular/common';
 import { httpResource } from '@angular/common/http';
 import { afterRenderEffect, Component, computed, inject, input, signal } from '@angular/core';
@@ -19,7 +19,7 @@ export type StudentType = {
 
 @Component({
   selector: 'app-course-grades',
-  imports: [Badge, UiSelect, Button, FormsModule, DecimalPipe, RouterLink, NgClass],
+  imports: [UiTable, Badge, UiSelect, Button, FormsModule, DecimalPipe, RouterLink, NgClass],
   template: ` <div class="flex justify-end gap-2">
       <select uiSelect class="w-64!" [ngModel]="periodId()" (ngModelChange)="periodId.set($event)">
         <option disabled selected value="">Selecciona un periodo...</option>
@@ -30,7 +30,7 @@ export type StudentType = {
       <button uiButton (click)="editGrade()">Nueva calificacion</button>
     </div>
     <div class="overflow-x-auto w-full">
-      <table class="table table-zebra table-fixed w-full">
+      <table uiTable zebra class="table-fixed w-full">
         <thead>
           <tr>
             <th class="min-w-48 w-48">Estudiante</th>

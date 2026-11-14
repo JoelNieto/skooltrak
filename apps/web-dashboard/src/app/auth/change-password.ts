@@ -2,19 +2,14 @@ import { Component, inject, signal } from '@angular/core';
 import { form, FormField, minLength, required, validate } from '@angular/forms/signals';
 import { Router, RouterLink } from '@angular/router';
 import Auth from './auth';
-import { Button, UiField, UiInput } from '#/ui';
+import { Alert, Breadcrumbs, Button, UiField, UiInput } from '#/ui';
 
 @Component({
   selector: 'app-change-password',
-  imports: [UiField, UiInput, Button, FormField, RouterLink],
+  imports: [Alert, Breadcrumbs, UiField, UiInput, Button, FormField, RouterLink],
   template: `
     <div class="flex flex-col gap-6">
-      <div class="breadcrumbs text-sm">
-        <ul>
-          <li><a routerLink="/">Inicio</a></li>
-          <li>Cambiar contraseña</li>
-        </ul>
-      </div>
+      <ui-breadcrumbs [items]="[{ label: 'Inicio', link: '/' }, { label: 'Cambiar contraseña' }]" />
 
       <div class="bg-base-100 rounded-lg border border-base-300 p-6 max-w-xl w-full">
         <div class="mb-6">
@@ -23,14 +18,14 @@ import { Button, UiField, UiInput } from '#/ui';
         </div>
 
         @if (success()) {
-          <div class="alert alert-success mb-4">
+          <div uiAlert tone="success" class="mb-4">
             <span class="material-symbols-outlined">check_circle</span>
             <span>Contraseña cambiada exitosamente.</span>
           </div>
         }
 
         @if (error()) {
-          <div class="alert alert-error mb-4">
+          <div uiAlert tone="danger" class="mb-4">
             <span class="material-symbols-outlined">error</span>
             <span>{{ errorMessage() }}</span>
           </div>
@@ -78,13 +73,13 @@ import { Button, UiField, UiInput } from '#/ui';
             <a uiButton routerLink="/home" class="w-full sm:w-auto"> Cancelar </a>
             <button
               uiButton
+              [loading]="loading()"
               variant="primary"
               type="submit"
               [disabled]="loading() || form().invalid()"
               class="w-full sm:w-auto"
             >
               @if (loading()) {
-                <span class="loading loading-spinner loading-sm"></span>
                 Cambiando...
               } @else {
                 Cambiar contraseña

@@ -1,4 +1,4 @@
-import { Badge, Button, Card, CardActions, CardBody, CardTitle, Toast, UiInput } from '#/ui';
+import { Alert, Badge, Button, Card, CardActions, CardBody, CardTitle, Toast, UiInput, UiTable } from '#/ui';
 import { HttpClient } from '@angular/common/http';
 import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -8,13 +8,13 @@ import Store from '../../core/store';
 @Component({
   selector: 'app-imports',
   standalone: true,
-  imports: [Badge, Card, CardActions, CardBody, CardTitle, UiInput, Button, FormsModule],
+  imports: [Alert, UiTable, Badge, Card, CardActions, CardBody, CardTitle, UiInput, Button, FormsModule],
   template: `
     <div class="flex flex-col gap-6 p-4 max-w-6xl mx-auto">
       <h1 class="text-2xl font-bold">Importación masiva</h1>
 
       @if (!store.currentSchoolId()) {
-        <div class="alert alert-warning">Selecciona una escuela antes de importar.</div>
+        <div uiAlert tone="warning">Selecciona una escuela antes de importar.</div>
       } @else {
         <!-- Step 1: Upload -->
         <div uiCard>
@@ -55,14 +55,13 @@ import Store from '../../core/store';
 
               <button
                 uiButton
+                [loading]="loading()"
                 variant="primary"
                 class="w-fit"
                 [disabled]="loading() || !canDryRun"
                 (click)="runDryRun()"
               >
-                @if (loading()) {
-                  <span class="loading loading-spinner loading-sm"></span>
-                } @else {
+                @if (!loading()) {
                   <span class="material-symbols-outlined">visibility</span>
                 }
                 Validar (dry-run)
@@ -82,7 +81,7 @@ import Store from '../../core/store';
                 <span uiBadge>Total: {{ dryRunResult()?.totalRows }}</span>
               </div>
               <div class="overflow-x-auto max-h-96">
-                <table class="table table-sm table-zebra">
+                <table uiTable density="compact" zebra>
                   <thead>
                     <tr>
                       <th>#</th>
@@ -110,13 +109,12 @@ import Store from '../../core/store';
               <div uiCardActions class="justify-end mt-4">
                 <button
                   uiButton
+                  [loading]="loading()"
                   variant="primary"
                   [disabled]="dryRunResult()?.validRows === 0 || loading()"
                   (click)="commit()"
                 >
-                  @if (loading()) {
-                    <span class="loading loading-spinner loading-sm"></span>
-                  } @else {
+                  @if (!loading()) {
                     <span class="material-symbols-outlined">check</span>
                   }
                   Confirmar importación

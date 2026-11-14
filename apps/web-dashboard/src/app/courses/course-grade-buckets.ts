@@ -1,16 +1,16 @@
-import { Button, Modal } from '#/ui';
+import { Button, Modal, UiTable } from '#/ui';
 import { httpResource } from '@angular/common/http';
 import { Component, inject, input } from '@angular/core';
 import GradeBucketForm from './grade-buckets-form';
 @Component({
   selector: 'app-course-grade-buckets',
-  imports: [Button],
+  imports: [UiTable, Button],
   template: `
     <div class="flex justify-end">
       <button uiButton variant="primary" (click)="editBucket()">Agregar ponderacion</button>
     </div>
     <div class="overflow-x-auto">
-      <table class="table">
+      <table uiTable>
         <thead>
           <tr>
             <th>Nombre</th>

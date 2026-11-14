@@ -37,9 +37,8 @@ import Store from '../../core/store';
         </ui-field>
 
         <div class="pt-4">
-          <button uiButton variant="primary" type="submit" class="w-full" [disabled]="saving()">
+          <button uiButton [loading]="saving()" variant="primary" type="submit" class="w-full" [disabled]="saving()">
             @if (saving()) {
-              <span class="loading loading-spinner loading-sm"></span>
               Guardando...
             } @else {
               Guardar y Continuar

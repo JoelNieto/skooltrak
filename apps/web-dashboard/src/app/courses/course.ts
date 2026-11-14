@@ -1,7 +1,7 @@
-import { Button, Card, CardBody, CardTitle, Loader, Modal, Toast } from '#/ui';
+import { Breadcrumbs, Button, Card, CardBody, CardTitle, Loader, Modal, Toast } from '#/ui';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { Component, computed, inject, input, signal } from '@angular/core';
-import { Router, RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 import { ChatType } from '@generated/prisma';
 import { firstValueFrom } from 'rxjs';
 import AssignmentForm from '../assignments/assignment-form';
@@ -32,12 +32,12 @@ type CourseVm = {
 
 @Component({
   imports: [
+    Breadcrumbs,
     Card,
     CardBody,
     CardTitle,
     Button,
     Loader,
-    RouterLink,
     CourseAssignments,
     CourseAttendance,
     CourseFiles,
@@ -54,13 +54,9 @@ type CourseVm = {
     @if (courseResource.hasValue() && courseResource.value()?.id) {
       @let course = transformedCourse()!;
       <div>
-        <div class="breadcrumbs text-sm">
-          <ul>
-            <li><a routerLink="/">Inicio</a></li>
-            <li><a routerLink="/courses">Cursos</a></li>
-            <li>{{ course.name }}</li>
-          </ul>
-        </div>
+        <ui-breadcrumbs
+          [items]="[{ label: 'Inicio', link: '/' }, { label: 'Cursos', link: '/courses' }, { label: course.name }]"
+        />
         <div uiCard class="mt-4">
           <div uiCardBody class="flex md:flex-row md:gap-4 md:items-center">
             <img src="course-default.jpg" alt="Course" class="h-18 w-18 rounded-lg" />
@@ -79,15 +75,19 @@ type CourseVm = {
                     <span class="text-sm text-base-content/50">No hay docente asignado</span>
                   }
                 </div>
-                <p class="text-base-200">{{ course.code }}</p>
+                <p class="text-ink-muted">{{ course.code }}</p>
               </div>
 
               <div class="flex gap-2">
                 @if (canStartCourseChat()) {
-                  <button uiButton variant="ghost" (click)="startCourseChat()" [disabled]="startingChat()">
-                    @if (startingChat()) {
-                      <span class="loading loading-spinner loading-sm"></span>
-                    } @else {
+                  <button
+                    uiButton
+                    [loading]="startingChat()"
+                    variant="ghost"
+                    (click)="startCourseChat()"
+                    [disabled]="startingChat()"
+                  >
+                    @if (!startingChat()) {
                       <span class="material-symbols-outlined">chat</span>
                     }
                     Chat

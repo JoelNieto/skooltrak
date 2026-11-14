@@ -9,6 +9,7 @@ import {
   Toast,
   UiInput,
   UiSelect,
+  UiTable,
 } from '#/ui';
 import { DatePipe, DecimalPipe } from '@angular/common';
 import { HttpClient, httpResource } from '@angular/common/http';
@@ -34,7 +35,7 @@ type StudentOption = { id: string; firstName: string; fatherName: string };
 
 @Component({
   selector: 'app-charges-section',
-  imports: [Badge, UiInput, UiSelect, Button, DatePipe, DecimalPipe, EmptyState, FormsModule, Paginator],
+  imports: [UiTable, Badge, UiInput, UiSelect, Button, DatePipe, DecimalPipe, EmptyState, FormsModule, Paginator],
   providers: [Pagination],
   template: `
     <div class="bg-base-100 rounded-lg border border-base-300">
@@ -95,7 +96,7 @@ type StudentOption = { id: string; firstName: string; fatherName: string };
       @if (chargesResource.isLoading()) {
         <div class="p-8 text-center">Cargando...</div>
       } @else if (chargesResource.value()?.data.length) {
-        <table class="table">
+        <table uiTable>
           <thead>
             <tr>
               <th>Estudiante</th>

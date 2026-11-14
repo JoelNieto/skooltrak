@@ -1,4 +1,4 @@
-import { Card, CardBody, PageHeader, StatCard } from '#/ui';
+import { Card, CardBody, PageHeader, Spinner, StatCard, UiTable } from '#/ui';
 import { HttpClient } from '@angular/common/http';
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { Router } from '@angular/router';
@@ -13,7 +13,7 @@ interface GradeRow {
 
 @Component({
   selector: 'app-parent-child-progress',
-  imports: [Card, CardBody, PageHeader, StatCard],
+  imports: [Spinner, UiTable, Card, CardBody, PageHeader, StatCard],
   template: `
     <lib-page-header
       title="Progreso del estudiante"
@@ -39,11 +39,11 @@ interface GradeRow {
           <h2 class="text-lg font-semibold text-base-content">Calificaciones por materia</h2>
           @if (loading()) {
             <div class="flex justify-center py-8">
-              <span class="loading loading-spinner loading-md"></span>
+              <span uiSpinner></span>
             </div>
           } @else {
             <div class="overflow-x-auto">
-              <table class="table">
+              <table uiTable>
                 <thead>
                   <tr>
                     <th>Materia</th>

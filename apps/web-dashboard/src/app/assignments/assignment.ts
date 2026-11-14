@@ -1,4 +1,15 @@
-import { Badge, Button, Card, CardBody, CardTitle, EditorViewer, Error as ErrorComponent, Loader, Toast } from '#/ui';
+import {
+  Badge,
+  Breadcrumbs,
+  Button,
+  Card,
+  CardBody,
+  CardTitle,
+  EditorViewer,
+  Error as ErrorComponent,
+  Loader,
+  Toast,
+} from '#/ui';
 import { DatePipe } from '@angular/common';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { Component, inject, input, signal } from '@angular/core';
@@ -22,6 +33,7 @@ type AssignmentDetail = {
 
 @Component({
   imports: [
+    Breadcrumbs,
     Badge,
     Card,
     CardBody,
@@ -39,13 +51,13 @@ type AssignmentDetail = {
     @defer {
       @if (assignmentResource.hasValue() && assignmentResource.value()) {
         @let assignment = assignmentResource.value()!;
-        <div class="breadcrumbs text-sm">
-          <ul>
-            <li><a routerLink="/">Inicio</a></li>
-            <li><a routerLink="/assignments">Asignaciones</a></li>
-            <li>{{ assignment.title }}</li>
-          </ul>
-        </div>
+        <ui-breadcrumbs
+          [items]="[
+            { label: 'Inicio', link: '/' },
+            { label: 'Asignaciones', link: '/assignments' },
+            { label: assignment.title },
+          ]"
+        />
         <div uiCard class="mt-4">
           <div uiCardBody class="flex flex-row justify-between items-start">
             <div>
@@ -59,10 +71,15 @@ type AssignmentDetail = {
               </p>
             </div>
             @if (canStartAssignmentChat()) {
-              <button uiButton variant="ghost" size="sm" (click)="startAssignmentChat()" [disabled]="startingChat()">
-                @if (startingChat()) {
-                  <span class="loading loading-spinner loading-sm"></span>
-                } @else {
+              <button
+                uiButton
+                [loading]="startingChat()"
+                variant="ghost"
+                size="sm"
+                (click)="startAssignmentChat()"
+                [disabled]="startingChat()"
+              >
+                @if (!startingChat()) {
                   <span class="material-symbols-outlined">chat</span>
                 }
                 Chat

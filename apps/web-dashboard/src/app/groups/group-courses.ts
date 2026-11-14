@@ -29,7 +29,7 @@ import { UiInput } from '#/ui';
             </div>
             <div>
               <p>{{ course.subject.name }}</p>
-              <p class="text-base-200 text-sm">{{ course.code }}</p>
+              <p class="text-ink-muted text-sm">{{ course.code }}</p>
             </div>
           </a>
         </li>

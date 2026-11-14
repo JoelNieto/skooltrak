@@ -33,9 +33,15 @@ import { BrandLogo } from '../shared/brand-logo';
           </div>
 
           <div class="space-y-3">
-            <button uiButton variant="primary" class="w-full" (click)="sendRequest()" [disabled]="loading()">
+            <button
+              uiButton
+              [loading]="loading()"
+              variant="primary"
+              class="w-full"
+              (click)="sendRequest()"
+              [disabled]="loading()"
+            >
               @if (loading()) {
-                <span class="loading loading-spinner loading-sm"></span>
                 Enviando...
               } @else {
                 <span class="material-symbols-outlined">send</span>

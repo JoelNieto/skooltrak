@@ -1,4 +1,15 @@
-import { Badge, Card, CardBody, CardTitle, debounceSignal, EmptyState, Loader, Pagination, PaginatorV2 } from '#/ui';
+import {
+  Badge,
+  Breadcrumbs,
+  Card,
+  CardBody,
+  CardTitle,
+  debounceSignal,
+  EmptyState,
+  Loader,
+  Pagination,
+  PaginatorV2,
+} from '#/ui';
 import { httpResource } from '@angular/common/http';
 import { Component, computed, inject, Signal, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -23,16 +34,11 @@ type CourseRow = {
 
 @Component({
   selector: 'app-courses',
-  imports: [Badge, Card, CardBody, CardTitle, RouterLink, Loader, PaginatorV2, FormsModule, EmptyState],
+  imports: [Breadcrumbs, Badge, Card, CardBody, CardTitle, RouterLink, Loader, PaginatorV2, FormsModule, EmptyState],
   providers: [Pagination],
 
   template: `
-    <div class="breadcrumbs text-sm">
-      <ul>
-        <li><a routerLink="/">Inicio</a></li>
-        <li>Cursos</li>
-      </ul>
-    </div>
+    <ui-breadcrumbs [items]="[{ label: 'Inicio', link: '/' }, { label: 'Cursos' }]" />
     <h1 class="text-2xl font-semibold mb-2">Cursos</h1>
     <label class="input input-primary input-lg">
       <span class="material-symbols-outlined">search</span>

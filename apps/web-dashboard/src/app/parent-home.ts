@@ -1,4 +1,4 @@
-import { Card, CardBody, EmptyState, PageHeader, StatCard, Toast } from '#/ui';
+import { Card, CardBody, EmptyState, PageHeader, Spinner, StatCard, Toast } from '#/ui';
 import { DatePipe } from '@angular/common';
 import { httpResource } from '@angular/common/http';
 import { Component, computed, effect, inject, signal } from '@angular/core';
@@ -31,7 +31,7 @@ type ParentMeResponse = {
 
 @Component({
   selector: 'app-parent-home',
-  imports: [Card, CardBody, DatePipe, RouterLink, PageHeader, StatCard, EmptyState, RecentBroadcasts],
+  imports: [Spinner, Card, CardBody, DatePipe, RouterLink, PageHeader, StatCard, EmptyState, RecentBroadcasts],
   template: `
     <lib-page-header title="Dashboard de padres" subtitle="Resumen del progreso de tus hijos." />
 
@@ -53,7 +53,7 @@ type ParentMeResponse = {
         </div>
         @if (loading()) {
           <div class="flex justify-center py-8">
-            <span class="loading loading-spinner loading-md"></span>
+            <span uiSpinner></span>
           </div>
         } @else if (children().length === 0) {
           <lib-empty-state

@@ -1,4 +1,4 @@
-import { Badge, BadgeTone, Card, CardBody, Loader, PageHeader, StatCard } from '#/ui';
+import { Badge, BadgeTone, Card, CardBody, Loader, PageHeader, StatCard, UiTable } from '#/ui';
 import { DatePipe } from '@angular/common';
 import { httpResource } from '@angular/common/http';
 import { Component, inject } from '@angular/core';
@@ -50,7 +50,7 @@ const STATUS_TONES: Record<string, BadgeTone> = {
 
 @Component({
   selector: 'app-student-attendance',
-  imports: [Badge, Card, CardBody, Loader, PageHeader, StatCard, DatePipe],
+  imports: [UiTable, Badge, Card, CardBody, Loader, PageHeader, StatCard, DatePipe],
   template: `
     <lib-page-header title="Mi Asistencia" subtitle="Resumen de asistencia por curso y sesiones recientes." />
 
@@ -88,7 +88,7 @@ const STATUS_TONES: Record<string, BadgeTone> = {
 
         @if (recordsResource.hasValue()) {
           <div class="overflow-x-auto">
-            <table class="table">
+            <table uiTable>
               <thead>
                 <tr>
                   <th>Fecha</th>
@@ -99,7 +99,7 @@ const STATUS_TONES: Record<string, BadgeTone> = {
               </thead>
               <tbody>
                 @for (record of recordsResource.value(); track record.id) {
-                  <tr class="hover">
+                  <tr>
                     <td>
                       @if (record.attendanceSession) {
                         {{ record.attendanceSession.date | date: 'fullDate' }}

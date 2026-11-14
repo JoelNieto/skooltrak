@@ -1,4 +1,4 @@
-import { Button, Toast, UiField, UiInput, UiSelect } from '#/ui';
+import { Alert, Button, Toast, UiField, UiInput, UiSelect } from '#/ui';
 import { HttpClient } from '@angular/common/http';
 import { afterRenderEffect, Component, inject, signal } from '@angular/core';
 import { form, FormField, required } from '@angular/forms/signals';
@@ -18,7 +18,7 @@ interface LinkChildPayload {
 
 @Component({
   selector: 'app-verify-parent',
-  imports: [UiField, UiInput, UiSelect, Button, BrandLogo, FormField],
+  imports: [Alert, UiField, UiInput, UiSelect, Button, BrandLogo, FormField],
   template: `
     <div class="min-h-screen flex flex-col gradient-bg">
       <header class="p-4 md:p-6 flex items-center justify-between">
@@ -84,16 +84,22 @@ interface LinkChildPayload {
             </ui-field>
 
             @if (errorMessage()) {
-              <div class="alert alert-error">
+              <div uiAlert tone="danger">
                 <span class="material-symbols-outlined">error</span>
                 <span>{{ errorMessage() }}</span>
               </div>
             }
 
             <div class="pt-2 space-y-3">
-              <button uiButton variant="primary" type="submit" class="w-full" [disabled]="loading()">
+              <button
+                uiButton
+                [loading]="loading()"
+                variant="primary"
+                type="submit"
+                class="w-full"
+                [disabled]="loading()"
+              >
                 @if (loading()) {
-                  <span class="loading loading-spinner loading-sm"></span>
                   Vinculando...
                 } @else {
                   <span class="material-symbols-outlined">link</span>

@@ -1,4 +1,4 @@
-import { Badge, BadgeTone, Card, CardBody, Loader, StatCard } from '#/ui';
+import { Badge, BadgeTone, Card, CardBody, Loader, StatCard, UiTable } from '#/ui';
 import { DatePipe } from '@angular/common';
 import { httpResource } from '@angular/common/http';
 import { Component, input } from '@angular/core';
@@ -49,7 +49,7 @@ const STATUS_TONES: Record<string, BadgeTone> = {
 
 @Component({
   selector: 'app-student-attendance-report',
-  imports: [Badge, Card, CardBody, Loader, StatCard, DatePipe],
+  imports: [UiTable, Badge, Card, CardBody, Loader, StatCard, DatePipe],
   template: `
     @if (statsResource.isLoading()) {
       <div class="flex justify-center py-8">
@@ -85,7 +85,7 @@ const STATUS_TONES: Record<string, BadgeTone> = {
 
         @if (recordsResource.hasValue()) {
           <div class="overflow-x-auto">
-            <table class="table table-zebra">
+            <table uiTable zebra>
               <thead>
                 <tr>
                   <th>Fecha</th>
@@ -96,7 +96,7 @@ const STATUS_TONES: Record<string, BadgeTone> = {
               </thead>
               <tbody>
                 @for (record of recordsResource.value(); track record.id) {
-                  <tr class="hover">
+                  <tr>
                     <td>
                       @if (record.attendanceSession) {
                         {{ record.attendanceSession.date | date: 'fullDate' }}

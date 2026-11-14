@@ -34,7 +34,7 @@ type Student = Prisma.StudentGetPayload<{
             </div>
             <div>
               <p>{{ student.user?.name }}</p>
-              <p class="text-base-200 text-sm">{{ student.documentId }}</p>
+              <p class="text-ink-muted text-sm">{{ student.documentId }}</p>
             </div>
           </div>
         </li>

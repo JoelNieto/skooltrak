@@ -1,4 +1,4 @@
-import { Button, Loader, Toast, UiInput, UiSelect } from '#/ui';
+import { Alert, Button, Loader, Toast, UiInput, UiSelect, UiTable } from '#/ui';
 import { NgClass } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { afterRenderEffect, Component, computed, effect, inject, input, output, signal } from '@angular/core';
@@ -40,7 +40,7 @@ const STATUS_OPTIONS = [
 
 @Component({
   selector: 'app-attendance-form',
-  imports: [UiInput, UiSelect, Button, FormField, Loader, NgClass],
+  imports: [Alert, UiTable, UiInput, UiSelect, Button, FormField, Loader, NgClass],
   template: `
     <form (submit)="onSubmit($event)" class="flex flex-col gap-4">
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -91,7 +91,7 @@ const STATUS_OPTIONS = [
 
       @if (studentsResource.hasValue() && form.records.length > 0) {
         <div class="overflow-x-auto max-h-96">
-          <table class="table table-sm table-pin-rows">
+          <table uiTable density="compact" stickyHeader>
             <thead>
               <tr>
                 <th class="w-1/3">Estudiante</th>
@@ -101,7 +101,7 @@ const STATUS_OPTIONS = [
             </thead>
             <tbody formArrayName="records">
               @for (record of form.records; track $index; let i = $index) {
-                <tr class="hover">
+                <tr>
                   <td>
                     <div class="flex items-center gap-2">
                       <div class="avatar avatar-placeholder">
@@ -155,7 +155,7 @@ const STATUS_OPTIONS = [
       }
 
       @if (studentsResource.hasValue() && studentsResource.value()!.length === 0) {
-        <div class="alert alert-warning">
+        <div uiAlert tone="warning">
           <span class="material-symbols-outlined">warning</span>
           No hay estudiantes en este grupo para el curso seleccionado
         </div>
@@ -163,10 +163,7 @@ const STATUS_OPTIONS = [
 
       <div class="modal-action">
         <button uiButton type="button" (click)="closeModal.emit()">Cancelar</button>
-        <button uiButton variant="primary" type="submit" [disabled]="isSubmitting()">
-          @if (isSubmitting()) {
-            <span class="loading loading-spinner"></span>
-          }
+        <button uiButton [loading]="isSubmitting()" variant="primary" type="submit" [disabled]="isSubmitting()">
           {{ isEditing() ? 'Actualizar' : 'Guardar' }}
         </button>
       </div>

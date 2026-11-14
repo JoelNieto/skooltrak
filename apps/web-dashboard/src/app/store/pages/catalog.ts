@@ -5,14 +5,14 @@ import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { map, of } from 'rxjs';
 import { StoreApiService } from '../store-api.service';
-import { Badge, Button, Card, CardBody, CardTitle, UiInput } from '#/ui';
+import { Alert, Badge, Button, Card, CardBody, CardTitle, UiInput } from '#/ui';
 
 @Component({
   selector: 'app-store-catalog',
-  imports: [Badge, Card, CardBody, CardTitle, UiInput, Button, RouterLink, FormsModule],
+  imports: [Alert, Badge, Card, CardBody, CardTitle, UiInput, Button, RouterLink, FormsModule],
   template: `
     @if (!schoolId()) {
-      <div class="alert alert-warning">
+      <div uiAlert tone="warning">
         Elige una escuela en <a routerLink="/store" class="link link-primary">la lista de tiendas</a> para ver
         productos.
       </div>

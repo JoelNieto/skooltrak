@@ -1,15 +1,32 @@
-import { Component, input, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
+import { BreadcrumbItem, Breadcrumbs } from './breadcrumbs';
 import { Button } from './button';
 
+/**
+ * Top of a page: optional breadcrumb trail, title, subtitle and one primary action.
+ *
+ *   <lib-page-header
+ *     title="Cursos"
+ *     subtitle="Administra los cursos del periodo actual"
+ *     [breadcrumbs]="[{ label: 'Inicio', link: '/' }, { label: 'Cursos' }]"
+ *     actionLabel="Nuevo curso"
+ *     actionIcon="add"
+ *     (action)="create()"
+ *   />
+ */
 @Component({
   selector: 'lib-page-header',
-  imports: [Button],
+  imports: [Breadcrumbs, Button],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
+    @if (breadcrumbs()?.length) {
+      <ui-breadcrumbs [items]="breadcrumbs()!" class="mb-2" />
+    }
     <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-4">
       <div>
-        <h1 class="text-2xl font-semibold text-base-content">{{ title() }}</h1>
+        <h1 class="text-2xl font-semibold text-ink-strong">{{ title() }}</h1>
         @if (subtitle()) {
-          <p class="text-sm text-gray-500 dark:text-gray-400">
+          <p class="text-sm text-ink-muted">
             {{ subtitle() }}
           </p>
         }
@@ -24,10 +41,17 @@ import { Button } from './button';
       }
     </div>
   `,
+  styles: `
+    :host {
+      display: block;
+    }
+  `,
 })
 export class PageHeader {
   title = input.required<string>();
   subtitle = input<string | undefined>('');
+  /** Trail shown above the title; the last item is the current page. */
+  breadcrumbs = input<readonly BreadcrumbItem[]>();
   actionLabel = input<string | undefined>();
   actionIcon = input<string | undefined>();
   action = output<void>();

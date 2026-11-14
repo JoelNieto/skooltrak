@@ -1,4 +1,16 @@
-import { Badge, BadgeTone, Button, Confirmation, EmptyState, Pagination, PaginatorV2, Toast } from '#/ui';
+import {
+  Badge,
+  BadgeTone,
+  Breadcrumbs,
+  Button,
+  Card,
+  Confirmation,
+  EmptyState,
+  Pagination,
+  PaginatorV2,
+  Toast,
+  UiTable,
+} from '#/ui';
 import { Menu, MenuContent, MenuItem, MenuTrigger } from '@angular/aria/menu';
 import { OverlayModule } from '@angular/cdk/overlay';
 import { DatePipe } from '@angular/common';
@@ -38,6 +50,9 @@ type StudentRow = {
 
 @Component({
   imports: [
+    Breadcrumbs,
+    Card,
+    UiTable,
     Badge,
     Button,
     DatePipe,
@@ -53,12 +68,7 @@ type StudentRow = {
   ],
   providers: [Pagination],
   template: `
-    <div class="breadcrumbs text-sm">
-      <ul>
-        <li><a routerLink="/">Inicio</a></li>
-        <li>Alumnos</li>
-      </ul>
-    </div>
+    <ui-breadcrumbs [items]="[{ label: 'Inicio', link: '/' }, { label: 'Alumnos' }]" />
     <h1 class="text-2xl font-semibold mb-2">Alumnos</h1>
     <div class="flex flex-col gap-4 md:flex-row md:justify-between">
       <div class="md:w-96 w-full">
@@ -77,8 +87,8 @@ type StudentRow = {
         <span class="material-symbols-outlined">add_circle</span> Agregar Alumno
       </a>
     </div>
-    <div class="overflow-x-auto bg-base-100 rounded-lg mt-4">
-      <table class="table">
+    <div uiCard class="overflow-x-auto mt-4">
+      <table uiTable>
         <thead>
           <tr>
             <th>Nombre</th>

@@ -1,4 +1,4 @@
-import { Button, Card, CardBody, TextEditor, Toast, UiChoice, UiField, UiInput, UiToggle } from '#/ui';
+import { Breadcrumbs, Button, Card, CardBody, TextEditor, Toast, UiChoice, UiField, UiInput, UiToggle } from '#/ui';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { afterRenderEffect, Component, computed, inject, input, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -17,6 +17,7 @@ interface NewsletterDto {
 @Component({
   selector: 'app-newsletter-form',
   imports: [
+    Breadcrumbs,
     Card,
     CardBody,
     UiChoice,
@@ -30,18 +31,14 @@ interface NewsletterDto {
     RouterLink,
   ],
   template: `
-    <div class="breadcrumbs text-sm">
-      <ul>
-        <li><a routerLink="/">Inicio</a></li>
-        <li><a routerLink="/admin">Admin</a></li>
-        <li><a routerLink="/admin/newsletters">Boletines</a></li>
-        @if (isEditMode()) {
-          <li>Editar</li>
-        } @else {
-          <li>Nuevo</li>
-        }
-      </ul>
-    </div>
+    <ui-breadcrumbs
+      [items]="[
+        { label: 'Inicio', link: '/' },
+        { label: 'Admin', link: '/admin' },
+        { label: 'Boletines', link: '/admin/newsletters' },
+        { label: isEditMode() ? 'Editar' : 'Nuevo' },
+      ]"
+    />
 
     <div class="flex items-center justify-between mb-6">
       <h1 class="text-2xl font-semibold">
@@ -90,10 +87,7 @@ interface NewsletterDto {
       <!-- Form Actions -->
       <div class="flex justify-end gap-3 my-6 pt-6 border-t border-base-300">
         <a uiButton variant="ghost" routerLink="/admin/newsletters">Cancelar</a>
-        <button uiButton variant="primary" type="submit" [disabled]="isSaving()">
-          @if (isSaving()) {
-            <span class="loading loading-spinner loading-sm"></span>
-          }
+        <button uiButton [loading]="isSaving()" variant="primary" type="submit" [disabled]="isSaving()">
           {{ isEditMode() ? 'Guardar cambios' : 'Crear boletín' }}
         </button>
       </div>

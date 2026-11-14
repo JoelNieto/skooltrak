@@ -70,10 +70,14 @@ interface StudentOption {
 
       <div class="flex justify-end gap-2 pt-2">
         <button uiButton type="button" (click)="closeModal.emit(undefined)">Cancelar</button>
-        <button uiButton variant="primary" type="submit" [disabled]="submitting() || form().invalid()">
-          @if (submitting()) {
-            <span class="loading loading-spinner loading-sm"></span>
-          } @else {
+        <button
+          uiButton
+          [loading]="submitting()"
+          variant="primary"
+          type="submit"
+          [disabled]="submitting() || form().invalid()"
+        >
+          @if (!submitting()) {
             Crear hilo
           }
         </button>

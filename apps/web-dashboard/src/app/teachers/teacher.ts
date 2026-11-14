@@ -1,4 +1,4 @@
-import { Badge, Button, Card, CardBody, Loader } from '#/ui';
+import { Badge, Breadcrumbs, Button, Card, CardBody, Loader } from '#/ui';
 import { DatePipe } from '@angular/common';
 import { httpResource } from '@angular/common/http';
 import { Component, computed, inject, input } from '@angular/core';
@@ -10,17 +10,13 @@ import { isValidId } from '../core/validators';
 type TeacherView = any;
 
 @Component({
-  imports: [Badge, Card, CardBody, Button, Loader, RouterLink, DatePipe],
+  imports: [Breadcrumbs, Badge, Card, CardBody, Button, Loader, RouterLink, DatePipe],
   template: `@defer {
       @if (teacherResource.hasValue() && teacherResource.value()?.id) {
         @let teacher = teacherResource.value()!;
-        <div class="breadcrumbs text-sm">
-          <ul>
-            <li><a routerLink="/">Inicio</a></li>
-            <li><a routerLink="/teachers">Docentes</a></li>
-            <li>{{ teacher.name }}</li>
-          </ul>
-        </div>
+        <ui-breadcrumbs
+          [items]="[{ label: 'Inicio', link: '/' }, { label: 'Docentes', link: '/teachers' }, { label: teacher.name }]"
+        />
         <div uiCard class="mt-4">
           <div uiCardBody class="flex flex-row justify-between items-center">
             <div class="flex gap-2 items-center ">

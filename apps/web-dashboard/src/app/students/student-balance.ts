@@ -1,4 +1,4 @@
-import { Badge, BadgeTone, Card, CardBody, Loader, PageHeader, StatCard, Toast } from '#/ui';
+import { Alert, Badge, BadgeTone, Card, CardBody, Loader, PageHeader, StatCard, Toast, UiTable } from '#/ui';
 import { DatePipe } from '@angular/common';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { Component, computed, inject, input, signal } from '@angular/core';
@@ -54,7 +54,7 @@ const STATUS_TONES: Record<ChargeStatus, BadgeTone> = {
 
 @Component({
   selector: 'app-student-balance',
-  imports: [Badge, Card, CardBody, Loader, PageHeader, StatCard, DatePipe],
+  imports: [Alert, UiTable, Badge, Card, CardBody, Loader, PageHeader, StatCard, DatePipe],
   template: `
     <lib-page-header
       title="Estado de cuenta"
@@ -71,7 +71,7 @@ const STATUS_TONES: Record<ChargeStatus, BadgeTone> = {
     }
 
     @if (summaryResource.error()) {
-      <div class="alert alert-error">No se pudo cargar el estado de cuenta.</div>
+      <div uiAlert tone="danger">No se pudo cargar el estado de cuenta.</div>
     }
 
     @if (summaryResource.hasValue() && !summaryResource.isLoading()) {
@@ -119,7 +119,7 @@ const STATUS_TONES: Record<ChargeStatus, BadgeTone> = {
             <div uiCardBody>
               <h2 class="text-lg font-semibold text-base-content">{{ section.title }}</h2>
               <div class="overflow-x-auto">
-                <table class="table table-sm">
+                <table uiTable density="compact">
                   <thead>
                     <tr>
                       <th>Concepto</th>
@@ -131,7 +131,7 @@ const STATUS_TONES: Record<ChargeStatus, BadgeTone> = {
                   </thead>
                   <tbody>
                     @for (c of section.charges; track c.id) {
-                      <tr class="hover">
+                      <tr>
                         <td>{{ c.description }}</td>
                         <td>{{ c.dueDate | date: 'shortDate' }}</td>
                         <td>{{ formatCurrency(c.amount) }}</td>
@@ -159,7 +159,7 @@ const STATUS_TONES: Record<ChargeStatus, BadgeTone> = {
         <div uiCardBody>
           <h2 class="text-lg font-semibold text-base-content">Historial de pagos</h2>
           <div class="overflow-x-auto">
-            <table class="table table-sm">
+            <table uiTable density="compact">
               <thead>
                 <tr>
                   <th>Fecha</th>
@@ -169,7 +169,7 @@ const STATUS_TONES: Record<ChargeStatus, BadgeTone> = {
               </thead>
               <tbody>
                 @for (p of summary.payments; track p.id) {
-                  <tr class="hover">
+                  <tr>
                     <td>{{ p.paidAt | date: 'mediumDate' }}</td>
                     <td>{{ formatCurrency(p.amount) }}</td>
                     <td class="text-base-content/70">{{ p.reference || '-' }}</td>

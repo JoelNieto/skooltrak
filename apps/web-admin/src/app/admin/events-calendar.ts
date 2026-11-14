@@ -1,20 +1,12 @@
 import { Card, CardBody, EmptyState, PageHeader } from '#/ui';
 import { Component } from '@angular/core';
-import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-events-calendar',
-  imports: [Card, CardBody, EmptyState, PageHeader, RouterLink],
+  imports: [Card, CardBody, EmptyState, PageHeader],
   template: `
-    <div class="breadcrumbs text-sm">
-      <ul>
-        <li><a routerLink="/">Inicio</a></li>
-        <li>Administración</li>
-        <li>Eventos</li>
-      </ul>
-    </div>
-
     <lib-page-header
+      [breadcrumbs]="[{ label: 'Inicio', link: '/' }, { label: 'Administración' }, { label: 'Eventos' }]"
       title="Calendario de eventos"
       subtitle="Eventos escolares y fechas importantes."
       actionLabel="Nuevo evento"

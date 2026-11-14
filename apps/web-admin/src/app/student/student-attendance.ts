@@ -1,9 +1,9 @@
-import { Badge, BadgeTone, Card, CardBody, EmptyState, PageHeader, StatCard } from '#/ui';
+import { Badge, BadgeTone, Card, CardBody, EmptyState, PageHeader, StatCard, UiTable } from '#/ui';
 import { Component } from '@angular/core';
 
 @Component({
   selector: 'app-student-attendance',
-  imports: [Badge, Card, CardBody, EmptyState, PageHeader, StatCard],
+  imports: [UiTable, Badge, Card, CardBody, EmptyState, PageHeader, StatCard],
   template: `
     <lib-page-header
       title="Asistencia del estudiante"
@@ -20,7 +20,7 @@ import { Component } from '@angular/core';
       <div uiCardBody>
         <h2 class="text-lg font-semibold text-base-content">Registro reciente</h2>
         <div class="overflow-x-auto">
-          <table class="table">
+          <table uiTable>
             <thead>
               <tr>
                 <th>Fecha</th>

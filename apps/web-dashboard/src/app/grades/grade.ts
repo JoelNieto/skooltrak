@@ -1,5 +1,6 @@
 import {
   Badge,
+  Breadcrumbs,
   Button,
   Card,
   CardBody,
@@ -10,6 +11,7 @@ import {
   Loader,
   Modal,
   Toast,
+  UiTable,
 } from '#/ui';
 import { DatePipe, DecimalPipe, NgClass } from '@angular/common';
 import { Component, computed, inject, input } from '@angular/core';
@@ -45,6 +47,8 @@ type GradeDetail = {
 @Component({
   selector: 'app-grade',
   imports: [
+    Breadcrumbs,
+    UiTable,
     Badge,
     Card,
     CardBody,
@@ -62,13 +66,9 @@ type GradeDetail = {
     @defer {
       @if (gradeResource.hasValue()) {
         @let grade = gradeResource.value()!;
-        <div class="breadcrumbs text-sm">
-          <ul>
-            <li><a routerLink="/">Inicio</a></li>
-            <li>Calificaciones</li>
-            <li>{{ grade.title }}</li>
-          </ul>
-        </div>
+        <ui-breadcrumbs
+          [items]="[{ label: 'Inicio', link: '/' }, { label: 'Calificaciones' }, { label: grade.title }]"
+        />
         <div uiCard class="mt-4">
           <div uiCardBody>
             <div class="flex justify-between items-center">
@@ -104,7 +104,7 @@ type GradeDetail = {
           <div uiCardBody>
             <h3 uiCardTitle>Calificaciones</h3>
             <div class="overflow-x-auto w-full">
-              <table class="table w-full">
+              <table uiTable class="w-full">
                 <thead>
                   <tr>
                     <th>Nombre</th>

@@ -1,4 +1,4 @@
-import { Card, CardBody, EmptyState, PageHeader, StatCard } from '#/ui';
+import { Card, CardBody, EmptyState, PageHeader, Spinner, StatCard } from '#/ui';
 import { DatePipe, DecimalPipe } from '@angular/common';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { afterRenderEffect, Component, computed, inject, signal } from '@angular/core';
@@ -36,7 +36,18 @@ type StudentAssignmentRow = {
 
 @Component({
   selector: 'app-student-home',
-  imports: [Card, CardBody, DatePipe, DecimalPipe, RouterLink, PageHeader, StatCard, EmptyState, RecentBroadcasts],
+  imports: [
+    Spinner,
+    Card,
+    CardBody,
+    DatePipe,
+    DecimalPipe,
+    RouterLink,
+    PageHeader,
+    StatCard,
+    EmptyState,
+    RecentBroadcasts,
+  ],
   template: `
     <lib-page-header title="Dashboard del estudiante" subtitle="Lo más importante de tu semana académica." />
 
@@ -141,7 +152,7 @@ type StudentAssignmentRow = {
             </div>
             @if (gradeReportResource.isLoading()) {
               <div class="flex justify-center py-8">
-                <span class="loading loading-spinner loading-md"></span>
+                <span uiSpinner></span>
               </div>
             } @else if (gradeReportResource.hasValue() && gradeReportResource.value(); as report) {
               <div class="flex flex-col gap-2">

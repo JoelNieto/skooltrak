@@ -15,7 +15,7 @@ type UploadResult = { created: boolean };
         <label for="file">Archivo</label>
         <input id="file" type="file" class="file-input file-input-primary w-full" (change)="onFileSelected($event)" />
         @if (selectedFile) {
-          <p class="text-sm text-base-200 mt-1">{{ selectedFile.name }} · {{ formatBytes(selectedFile.size) }}</p>
+          <p class="text-sm text-ink-muted mt-1">{{ selectedFile.name }} · {{ formatBytes(selectedFile.size) }}</p>
         }
       </div>
       <ui-field label="Permiso" [field]="form.permission">

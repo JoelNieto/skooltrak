@@ -1,9 +1,9 @@
-import { Badge, Card, CardBody, EmptyState, PageHeader } from '#/ui';
+import { Badge, Card, CardBody, EmptyState, PageHeader, UiTable } from '#/ui';
 import { Component } from '@angular/core';
 
 @Component({
   selector: 'app-student-assignment-submission',
-  imports: [Badge, Card, CardBody, EmptyState, PageHeader],
+  imports: [UiTable, Badge, Card, CardBody, EmptyState, PageHeader],
   template: `
     <lib-page-header
       title="Entrega de asignaciones"
@@ -16,7 +16,7 @@ import { Component } from '@angular/core';
       <div uiCardBody>
         <h2 class="text-lg font-semibold text-base-content">Pendientes por entregar</h2>
         <div class="overflow-x-auto">
-          <table class="table">
+          <table uiTable>
             <thead>
               <tr>
                 <th>Asignación</th>

@@ -1,4 +1,4 @@
-import { Badge, Button, EmptyState, Loader } from '#/ui';
+import { Badge, Breadcrumbs, Button, EmptyState, Loader } from '#/ui';
 import { httpResource } from '@angular/common/http';
 import { Component, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
@@ -26,14 +26,9 @@ type ChatRow = {
 
 @Component({
   selector: 'app-chats',
-  imports: [Badge, Button, RouterLink, Loader, EmptyState],
+  imports: [Breadcrumbs, Badge, Button, RouterLink, Loader, EmptyState],
   template: `
-    <div class="breadcrumbs text-sm">
-      <ul>
-        <li><a routerLink="/">Inicio</a></li>
-        <li>Chats</li>
-      </ul>
-    </div>
+    <ui-breadcrumbs [items]="[{ label: 'Inicio', link: '/' }, { label: 'Chats' }]" />
     <div class="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-4">
       <h1 class="text-2xl font-semibold">Chats</h1>
       <a uiButton variant="primary" routerLink="/chats/new">Nuevo chat</a>

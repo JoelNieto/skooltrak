@@ -1,9 +1,8 @@
-import { Button, Card, CardBody, EditorViewer, Loader, Toast, UiInput } from '#/ui';
+import { Breadcrumbs, Button, Card, CardBody, EditorViewer, Loader, Toast, UiInput } from '#/ui';
 import { DatePipe } from '@angular/common';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { Component, computed, effect, inject, input, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
 import { Prisma } from '@generated/prisma';
 import Auth from '../auth/auth';
 
@@ -26,7 +25,7 @@ type MessageType = Prisma.MessageGetPayload<undefined> & {
 
 @Component({
   selector: 'app-message',
-  imports: [Card, CardBody, UiInput, Button, Loader, RouterLink, DatePipe, EditorViewer, FormsModule],
+  imports: [Breadcrumbs, Card, CardBody, UiInput, Button, Loader, DatePipe, EditorViewer, FormsModule],
   styles: `
     :host ::ng-deep blockquote {
       border-left: 3px solid oklch(var(--bc) / 0.3);
@@ -39,13 +38,13 @@ type MessageType = Prisma.MessageGetPayload<undefined> & {
   template: `@defer {
       @if (messageResource.hasValue()) {
         @let message = messageResource.value();
-        <div class="breadcrumbs text-sm">
-          <ul>
-            <li><a routerLink="/">Inicio</a></li>
-            <li><a routerLink="/messages">Mensajes</a></li>
-            <li>{{ message.sender?.name }}: {{ message.subject }}</li>
-          </ul>
-        </div>
+        <ui-breadcrumbs
+          [items]="[
+            { label: 'Inicio', link: '/' },
+            { label: 'Mensajes', link: '/messages' },
+            { label: message.sender?.name + ': ' + message.subject },
+          ]"
+        />
         <div uiCard class="mt-4">
           <div uiCardBody>
             <div class="border-b border-base-300">
@@ -137,14 +136,12 @@ type MessageType = Prisma.MessageGetPayload<undefined> & {
             <div class="flex justify-end gap-2 mt-3">
               <button
                 uiButton
+                [loading]="isSending()"
                 variant="primary"
                 size="sm"
                 (click)="sendReply()"
                 [disabled]="isSending() || !replyDraft().content.trim()"
               >
-                @if (isSending()) {
-                  <span class="loading loading-spinner loading-sm"></span>
-                }
                 Enviar respuesta
               </button>
             </div>

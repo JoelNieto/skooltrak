@@ -1,4 +1,4 @@
-import { Badge, Button, Confirmation, Pagination, PaginatorV2, Toast } from '#/ui';
+import { Badge, Breadcrumbs, Button, Card, Confirmation, Pagination, PaginatorV2, Toast, UiTable } from '#/ui';
 import { Menu, MenuContent, MenuItem, MenuTrigger } from '@angular/aria/menu';
 import { OverlayModule } from '@angular/cdk/overlay';
 import { DatePipe } from '@angular/common';
@@ -22,6 +22,9 @@ type Teacher = Prisma.TeacherGetPayload<{ include: { user: true } }> & {
 @Component({
   selector: 'app-teachers',
   imports: [
+    Breadcrumbs,
+    Card,
+    UiTable,
     Badge,
     Button,
     DatePipe,
@@ -36,12 +39,7 @@ type Teacher = Prisma.TeacherGetPayload<{ include: { user: true } }> & {
   ],
   providers: [Pagination],
   template: `
-    <div class="breadcrumbs text-sm">
-      <ul>
-        <li><a routerLink="/">Inicio</a></li>
-        <li>Docentes</li>
-      </ul>
-    </div>
+    <ui-breadcrumbs [items]="[{ label: 'Inicio', link: '/' }, { label: 'Docentes' }]" />
     <h1 class="text-2xl font-semibold mb-2">Docentes</h1>
     <div class="flex flex-col gap-4 md:flex-row md:justify-between">
       <div class="md:w-96 w-full">
@@ -56,8 +54,8 @@ type Teacher = Prisma.TeacherGetPayload<{ include: { user: true } }> & {
         </a>
       }
     </div>
-    <div class="overflow-x-auto bg-base-100 rounded-lg mt-4 border border-base-300">
-      <table class="table">
+    <div uiCard class="overflow-x-auto mt-4">
+      <table uiTable>
         <thead>
           <tr>
             <th>Nombre</th>

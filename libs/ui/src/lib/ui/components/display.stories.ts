@@ -14,12 +14,13 @@ export const PageHeaderStory: StoryObj<PageHeader> = {
   name: 'Page header',
   render: (args) => ({
     props: args,
-    template: `<lib-page-header [title]="title" [subtitle]="subtitle" [actionLabel]="actionLabel" [actionIcon]="actionIcon" (action)="action()" />`,
+    template: `<lib-page-header [title]="title" [subtitle]="subtitle" [breadcrumbs]="breadcrumbs" [actionLabel]="actionLabel" [actionIcon]="actionIcon" (action)="action()" />`,
     moduleMetadata: { imports: [PageHeader] },
   }),
   args: {
     title: 'Cursos',
     subtitle: 'Administra los cursos del periodo actual',
+    breadcrumbs: [{ label: 'Inicio', link: '/' }, { label: 'Administración', link: '/admin' }, { label: 'Cursos' }],
     actionLabel: 'Nuevo curso',
     actionIcon: 'add',
     action: fn() as never,

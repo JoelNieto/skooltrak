@@ -1,4 +1,4 @@
-import { Button, Confirmation, Modal, Pagination, PaginatorV2, Toast } from '#/ui';
+import { Button, Card, Confirmation, Modal, Pagination, PaginatorV2, Toast, UiTable } from '#/ui';
 import { Menu, MenuContent, MenuItem, MenuTrigger } from '@angular/aria/menu';
 import { OverlayModule } from '@angular/cdk/overlay';
 import { DatePipe } from '@angular/common';
@@ -14,6 +14,8 @@ import SubjectsForm from '../forms/subjects-form';
 @Component({
   selector: 'app-subjects',
   imports: [
+    Card,
+    UiTable,
     Button,
     DatePipe,
     DatePipe,
@@ -40,8 +42,8 @@ import SubjectsForm from '../forms/subjects-form';
         <span class="material-symbols-outlined">add_circle</span> Nueva asignatura
       </button>
     </div>
-    <div class="overflow-x-auto bg-base-100 rounded-lg mt-4 border border-base-300">
-      <table class="table">
+    <div uiCard class="overflow-x-auto mt-4">
+      <table uiTable>
         <thead>
           <tr>
             <th

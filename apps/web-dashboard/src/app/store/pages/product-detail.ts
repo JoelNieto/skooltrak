@@ -1,5 +1,5 @@
 import { SchoolContext } from '#/shared';
-import { Badge, Button, Toast, UiSelect } from '#/ui';
+import { Alert, Badge, Button, Toast, UiSelect } from '#/ui';
 import { Component, effect, inject, input, signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
@@ -10,7 +10,7 @@ import { StoreApiService } from '../store-api.service';
 
 @Component({
   selector: 'app-product-detail',
-  imports: [Badge, UiSelect, Button, RouterLink, FormsModule],
+  imports: [Alert, Badge, UiSelect, Button, RouterLink, FormsModule],
   template: `
     <a uiButton variant="ghost" size="sm" routerLink="../.." class="gap-1 mb-4">
       <span class="material-symbols-outlined">arrow_back</span>
@@ -19,7 +19,7 @@ import { StoreApiService } from '../store-api.service';
     @if (product.isLoading()) {
       <p>Cargando…</p>
     } @else if (!product.value()) {
-      <div class="alert alert-error">Producto no encontrado.</div>
+      <div uiAlert tone="danger">Producto no encontrado.</div>
     } @else {
       @let p = product.value()!;
       <div class="grid gap-8 lg:grid-cols-2">
@@ -35,7 +35,7 @@ import { StoreApiService } from '../store-api.service';
         <div class="space-y-4">
           <h1 class="text-3xl font-bold">{{ p.name }}</h1>
           @if (p.hasOutOfStockVariant) {
-            <div class="alert alert-warning py-2 text-sm">Alguna talla está agotada</div>
+            <div uiAlert tone="warning" class="py-2 text-sm">Alguna talla está agotada</div>
           }
           <p class="text-2xl font-semibold text-primary">{{ formatPrice(p.price) }}</p>
           @if (p.description) {

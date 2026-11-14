@@ -1,4 +1,16 @@
-import { Button, Card, CardBody, CardTitle, Loader, TextEditor, Toast, UiField, UiInput, UiSelect } from '#/ui';
+import {
+  Breadcrumbs,
+  Button,
+  Card,
+  CardBody,
+  CardTitle,
+  Loader,
+  TextEditor,
+  Toast,
+  UiField,
+  UiInput,
+  UiSelect,
+} from '#/ui';
 import { Component, computed, effect, inject, input, signal } from '@angular/core';
 import {
   FormArray,
@@ -9,7 +21,7 @@ import {
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 import { $Enums } from '@generated/prisma';
 
 import { HttpClient, httpResource } from '@angular/common/http';
@@ -20,6 +32,7 @@ import { QuizQuestionControl } from './quiz-question-control';
 @Component({
   selector: 'app-quiz-form',
   imports: [
+    Breadcrumbs,
     Card,
     CardBody,
     CardTitle,
@@ -27,7 +40,6 @@ import { QuizQuestionControl } from './quiz-question-control';
     UiInput,
     UiSelect,
     Button,
-    RouterLink,
     ReactiveFormsModule,
     FormsModule,
     TextEditor,
@@ -35,13 +47,13 @@ import { QuizQuestionControl } from './quiz-question-control';
     Loader,
   ],
   template: `
-    <div class="breadcrumbs text-sm">
-      <ul>
-        <li><a routerLink="/">Inicio</a></li>
-        <li><a routerLink="/quizzes">Quizes</a></li>
-        <li>{{ isEditMode() ? 'Editar' : 'Nuevo quiz' }}</li>
-      </ul>
-    </div>
+    <ui-breadcrumbs
+      [items]="[
+        { label: 'Inicio', link: '/' },
+        { label: 'Quizes', link: '/quizzes' },
+        { label: isEditMode() ? 'Editar' : 'Nuevo quiz' },
+      ]"
+    />
     <h1 class="text-2xl font-semibold mb-2">{{ isEditMode() ? 'Editar quiz' : 'Nuevo quiz' }}</h1>
 
     @if (isEditMode() && quizResource.isLoading()) {
@@ -82,10 +94,7 @@ import { QuizQuestionControl } from './quiz-question-control';
               </div>
             </div>
             <div class="flex justify-end mt-4">
-              <button uiButton variant="primary" type="submit" [disabled]="isSaving()">
-                @if (isSaving()) {
-                  <span class="loading loading-spinner loading-sm"></span>
-                }
+              <button uiButton [loading]="isSaving()" variant="primary" type="submit" [disabled]="isSaving()">
                 Guardar
               </button>
             </div>

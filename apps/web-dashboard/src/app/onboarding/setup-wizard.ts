@@ -106,9 +106,15 @@ export type CreatedEntity = {
           }
 
           @if (currentStep() === totalSteps) {
-            <button uiButton variant="primary" type="button" (click)="completeOnboarding()" [disabled]="completing()">
+            <button
+              uiButton
+              [loading]="completing()"
+              variant="primary"
+              type="button"
+              (click)="completeOnboarding()"
+              [disabled]="completing()"
+            >
               @if (completing()) {
-                <span class="loading loading-spinner loading-sm"></span>
                 Finalizando...
               } @else {
                 Finalizar configuración

@@ -1,4 +1,4 @@
-import { Button, Loader, Toast, UiField, UiInput } from '#/ui';
+import { Alert, Button, Loader, Toast, UiField, UiInput } from '#/ui';
 import { Component, ElementRef, inject, signal, viewChild } from '@angular/core';
 import { NonNullableFormBuilder } from '@angular/forms';
 import { email, form, FormField, minLength, required } from '@angular/forms/signals';
@@ -7,7 +7,7 @@ import Auth from './auth';
 
 @Component({
   selector: 'app-login',
-  imports: [UiField, UiInput, Button, FormField, Loader, RouterLink],
+  imports: [Alert, UiField, UiInput, Button, FormField, Loader, RouterLink],
 
   template: ` <div class="min-h-screen main">
     @defer {
@@ -76,7 +76,7 @@ import Auth from './auth';
             <h2 class="text-2xl font-semibold text-ink-strong">Bienvenido de nuevo</h2>
             <p class="text-ink-muted mt-1.5 mb-8 text-sm">Inicia sesión para continuar en tu cuenta.</p>
             @if (passwordResetSuccess()) {
-              <div class="alert alert-success mb-4">
+              <div uiAlert tone="success" class="mb-4">
                 <span class="material-symbols-outlined">check_circle</span>
                 <span>Tu contraseña ha sido actualizada. Ya puedes iniciar sesión.</span>
               </div>

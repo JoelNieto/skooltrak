@@ -29,7 +29,7 @@ import Store from '../core/store';
                 <span class="text-base-300 ml-1">({{ marker.data.groupName }})</span>
               }
             </div>
-            <time [attr.datetime]="marker.date | date: 'yyyy-MM-dd'" class="text-base-200 text-xs flex-none">
+            <time [attr.datetime]="marker.date | date: 'yyyy-MM-dd'" class="text-ink-muted text-xs flex-none">
               {{ marker.date | date: 'h:mm a' }}
             </time>
           </div>

@@ -1,4 +1,4 @@
-import { Button, Confirmation, Pagination, Paginator, Toast } from '#/ui';
+import { Button, Card, Confirmation, Pagination, Paginator, Toast, UiTable } from '#/ui';
 import { Menu, MenuContent, MenuItem, MenuTrigger } from '@angular/aria/menu';
 import { OverlayModule } from '@angular/cdk/overlay';
 import { DatePipe } from '@angular/common';
@@ -22,6 +22,8 @@ type SchoolRow = {
 @Component({
   selector: 'app-schools',
   imports: [
+    Card,
+    UiTable,
     Button,
     DatePipe,
     Paginator,
@@ -52,8 +54,8 @@ type SchoolRow = {
         <span class="material-symbols-outlined">add_circle</span> Agregar Colegio
       </a>
     </div>
-    <div class="overflow-x-auto bg-base-100 rounded-lg mt-4">
-      <table class="table">
+    <div uiCard class="overflow-x-auto mt-4">
+      <table uiTable>
         <thead>
           <tr>
             <th>Colegio</th>

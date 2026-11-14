@@ -1,4 +1,4 @@
-import { Button, Confirmation, Error, Loader, Toast } from '#/ui';
+import { Breadcrumbs, Button, Confirmation, Error, Loader, Toast, UiTable } from '#/ui';
 import { DatePipe } from '@angular/common';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { Component, inject } from '@angular/core';
@@ -19,14 +19,9 @@ type QuizListItem = {
 
 @Component({
   selector: 'app-quizzes',
-  imports: [Button, RouterLink, DatePipe, Loader, Error, StripHtmlPipe],
+  imports: [Breadcrumbs, UiTable, Button, RouterLink, DatePipe, Loader, Error, StripHtmlPipe],
   template: `
-    <div class="breadcrumbs text-sm">
-      <ul>
-        <li><a routerLink="/">Inicio</a></li>
-        <li>Quizes</li>
-      </ul>
-    </div>
+    <ui-breadcrumbs [items]="[{ label: 'Inicio', link: '/' }, { label: 'Quizes' }]" />
     <div class="flex items-center justify-between">
       <h1 class="text-2xl font-semibold mb-2">Quizes</h1>
       @if (auth.hasPermission('MANAGE_QUIZZES')) {
@@ -36,7 +31,7 @@ type QuizListItem = {
     <div class="overflow-x-auto bg-base-100 rounded-lg shadow-sm mt-4 border border-base-300">
       @if (quizzesResource.hasValue()) {
         @let list = quizzesResource.value() ?? [];
-        <table class="table">
+        <table uiTable>
           <thead>
             <tr>
               <th>Título</th>

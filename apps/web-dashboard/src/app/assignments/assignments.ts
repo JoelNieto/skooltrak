@@ -1,4 +1,4 @@
-import { Badge, Button, Error, Loader } from '#/ui';
+import { Badge, Breadcrumbs, Button, Error, Loader, UiTable } from '#/ui';
 import { DatePipe } from '@angular/common';
 import { Component, Pipe, PipeTransform, computed, inject, signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
@@ -23,14 +23,9 @@ export class StripHtmlPipe implements PipeTransform {
 
 @Component({
   selector: 'app-assignments',
-  imports: [Badge, Button, RouterLink, DatePipe, StripHtmlPipe, Error, Loader],
+  imports: [Breadcrumbs, UiTable, Badge, Button, RouterLink, DatePipe, StripHtmlPipe, Error, Loader],
 
-  template: `<div class="breadcrumbs text-sm">
-      <ul>
-        <li><a routerLink="/">Inicio</a></li>
-        <li>Asignaciones</li>
-      </ul>
-    </div>
+  template: `<ui-breadcrumbs [items]="[{ label: 'Inicio', link: '/' }, { label: 'Asignaciones' }]" />
     <h1 class="text-2xl font-semibold mb-2">Asignaciones</h1>
     <div class="flex items-center gap-2 justify-between px-8">
       <div class="flex items-center gap-2 flex-1">
@@ -50,7 +45,7 @@ export class StripHtmlPipe implements PipeTransform {
     <div class="overflow-x-auto bg-base-100 rounded-lg mt-4">
       @if (assignmentDatesResource.hasValue()) {
         @let list = assignmentDatesResource.value()!;
-        <table class="table">
+        <table uiTable>
           <thead>
             <tr>
               <th>Título</th>

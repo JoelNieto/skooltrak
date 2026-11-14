@@ -231,9 +231,13 @@ export class UiField extends UiFieldBase {
 })
 export class UiChoice extends UiFieldBase {}
 
-/** Shared wiring between a control directive and its enclosing ui-field / ui-choice. */
+/**
+ * Shared wiring between a control and its enclosing ui-field / ui-choice: `controlId()`,
+ * `invalid()` and `describedBy()`. The control directives below extend it; a custom control
+ * component (e.g. ui-combobox) extends it too and binds them to its inner native element.
+ */
 @Directive()
-abstract class UiControl {
+export abstract class UiControl {
   protected readonly fieldContext = inject(UI_FIELD, { optional: true });
   /** Keeps an explicit `id` on the control; otherwise the field's generated id is used. */
   readonly id = input<string>();

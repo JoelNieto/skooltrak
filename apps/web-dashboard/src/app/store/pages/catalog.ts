@@ -44,7 +44,7 @@ import { StoreApiService } from '../store-api.service';
         @for (p of products.value(); track p.id) {
           <a
             [routerLink]="['product', p.id]"
-            class="card bg-base-100 shadow-md card-interactive border border-base-200 overflow-hidden"
+            class="card bg-base-100 shadow-md border border-base-200 overflow-hidden transition-colors duration-200 hover:border-line-strong"
           >
             <figure class="aspect-square bg-base-200">
               @if (p.imageUrl) {

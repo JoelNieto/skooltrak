@@ -1,4 +1,4 @@
-import { Button, Modal, PageHeader } from '#/ui';
+import { Button, Modal, PageHeader, UiSelect } from '#/ui';
 import { Tab, TabContent, TabList, TabPanel, Tabs } from '@angular/aria/tabs';
 import { Component, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -15,6 +15,7 @@ import CreatePaymentForm from '../forms/create-payment-form';
 @Component({
   selector: 'app-financial-module',
   imports: [
+    UiSelect,
     Button,
     ChargesSection,
     FormsModule,
@@ -47,11 +48,7 @@ import CreatePaymentForm from '../forms/create-payment-form';
           <div ngTab value="balances" class="tab">Saldos</div>
         </div>
         <div class="flex gap-2 items-center">
-          <select
-            class="select select-primary select-sm"
-            [ngModel]="yearFilter()"
-            (ngModelChange)="yearFilter.set($event)"
-          >
+          <select uiSelect class="select-sm" [ngModel]="yearFilter()" (ngModelChange)="yearFilter.set($event)">
             @for (y of years(); track y) {
               <option [value]="y">{{ y }}</option>
             }

@@ -1,4 +1,4 @@
-import { Button, TextEditor, Toast } from '#/ui';
+import { Button, TextEditor, Toast, UiChoice, UiField, UiInput, UiToggle } from '#/ui';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { afterRenderEffect, Component, computed, inject, input, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -16,7 +16,7 @@ interface NewsletterDto {
 
 @Component({
   selector: 'app-newsletter-form',
-  imports: [Button, FormField, FormsModule, TextEditor, RouterLink],
+  imports: [UiChoice, UiField, UiInput, UiToggle, Button, FormField, FormsModule, TextEditor, RouterLink],
   template: `
     <div class="breadcrumbs text-sm">
       <ul>
@@ -48,32 +48,12 @@ interface NewsletterDto {
           <div class="sm:col-span-3">
             <div class="card card-border border-base-300 bg-base-100">
               <div class="card-body gap-y-4">
-                <div class="fieldset">
-                  <label for="title">Título</label>
-                  <input
-                    type="text"
-                    id="title"
-                    [formField]="formData.title"
-                    class="input input-primary w-full"
-                    [class.ng-invalid]="formData.title().touched() && formData.title().invalid()"
-                  />
-                  @if (formData.title().invalid() && formData.title().touched()) {
-                    @for (error of formData.title().errors(); track error) {
-                      <p class="text-error text-sm">{{ error.message }}</p>
-                    }
-                  }
-                </div>
-                <div class="fieldset">
-                  <label class="flex items-center gap-2 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      class="toggle toggle-primary"
-                      [(ngModel)]="published"
-                      [ngModelOptions]="{ standalone: true }"
-                    />
-                    <span>Publicar inmediatamente</span>
-                  </label>
-                </div>
+                <ui-field label="Título" [field]="formData.title">
+                  <input uiInput type="text" id="title" [formField]="formData.title" />
+                </ui-field>
+                <ui-choice label="Publicar inmediatamente">
+                  <input uiToggle type="checkbox" [(ngModel)]="published" [ngModelOptions]="{ standalone: true }" />
+                </ui-choice>
               </div>
             </div>
           </div>

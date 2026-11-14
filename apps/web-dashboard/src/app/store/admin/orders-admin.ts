@@ -1,5 +1,5 @@
 import { SchoolContext } from '#/shared';
-import { Toast } from '#/ui';
+import { Toast, UiSelect } from '#/ui';
 import { DatePipe } from '@angular/common';
 import { Component, inject, signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
@@ -9,7 +9,7 @@ import { StoreApiService } from '../store-api.service';
 
 @Component({
   selector: 'app-orders-admin',
-  imports: [FormsModule, DatePipe],
+  imports: [UiSelect, FormsModule, DatePipe],
   template: `
     <h3 class="text-lg font-medium mb-4">Pedidos (escuela)</h3>
     @if (!school.currentSchoolId()) {
@@ -38,11 +38,7 @@ import { StoreApiService } from '../store-api.service';
                 <td>{{ o.status }}</td>
                 <td>{{ o.paymentStatus }}</td>
                 <td>
-                  <select
-                    class="select select-bordered select-xs"
-                    [ngModel]="o.status"
-                    (ngModelChange)="updateStatus(o.id!, $event)"
-                  >
+                  <select uiSelect class="select-xs" [ngModel]="o.status" (ngModelChange)="updateStatus(o.id!, $event)">
                     <option value="PENDING">PENDING</option>
                     <option value="CONFIRMED">CONFIRMED</option>
                     <option value="PROCESSING">PROCESSING</option>

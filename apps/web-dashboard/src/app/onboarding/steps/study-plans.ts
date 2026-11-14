@@ -1,4 +1,4 @@
-import { Button, Toast } from '#/ui';
+import { Button, Toast, UiField, UiInput, UiSelect } from '#/ui';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { Component, computed, inject, input, output, signal } from '@angular/core';
 import { form, FormField, required } from '@angular/forms/signals';
@@ -7,7 +7,7 @@ import { CreatedEntity } from '../setup-wizard';
 
 @Component({
   selector: 'app-study-plans-step',
-  imports: [Button, FormField],
+  imports: [UiField, UiInput, UiSelect, Button, FormField],
   template: `
     <div class="w-full max-w-md text-center space-y-8 animate-fade-in">
       <!-- Icon -->
@@ -54,75 +54,37 @@ import { CreatedEntity } from '../setup-wizard';
       } @else {
         <!-- Form Fields -->
         <form (submit)="onSubmit($event)" class="space-y-4 text-left">
-          <div class="fieldset">
-            <label for="degreeId" class="label">
-              <span class="label-text font-medium">Nivel Académico</span>
-            </label>
-            <select id="degreeId" [formField]="form.degreeId" class="select select-bordered w-full">
+          <ui-field label="Nivel Académico" [field]="form.degreeId">
+            <select uiSelect id="degreeId" [formField]="form.degreeId">
               <option value="" disabled>Selecciona un nivel...</option>
               @for (degree of allDegrees(); track degree.id) {
                 <option [value]="degree.id">{{ degree.name }}</option>
               }
             </select>
-          </div>
+          </ui-field>
 
-          <div class="fieldset">
-            <label for="name" class="label">
-              <span class="label-text font-medium">Nombre del Plan</span>
-            </label>
-            <input
-              type="text"
-              id="name"
-              [formField]="form.name"
-              class="input input-bordered w-full"
-              placeholder="Ej: Primer Grado"
-            />
-            @if (form.name().touched() && form.name().invalid()) {
-              @for (error of form.name().errors(); track error) {
-                <p class="text-error text-xs mt-1">{{ error.message }}</p>
-              }
-            }
-          </div>
+          <ui-field label="Nombre del Plan" [field]="form.name">
+            <input uiInput type="text" id="name" [formField]="form.name" placeholder="Ej: Primer Grado" />
+          </ui-field>
 
           <div class="grid grid-cols-2 gap-4">
-            <div class="fieldset">
-              <label for="shortName" class="label">
-                <span class="label-text font-medium">Nombre Corto</span>
-              </label>
-              <input
-                type="text"
-                id="shortName"
-                [formField]="form.shortName"
-                class="input input-bordered w-full"
-                placeholder="1ro"
-              />
-            </div>
+            <ui-field label="Nombre Corto" [field]="form.shortName">
+              <input uiInput type="text" id="shortName" [formField]="form.shortName" placeholder="1ro" />
+            </ui-field>
 
-            <div class="fieldset">
-              <label for="level" class="label">
-                <span class="label-text font-medium">Grado/Nivel</span>
-              </label>
-              <input
-                type="number"
-                id="level"
-                [formField]="form.level"
-                class="input input-bordered w-full"
-                placeholder="1"
-              />
-            </div>
+            <ui-field label="Grado/Nivel" [field]="form.level">
+              <input uiInput type="number" id="level" [formField]="form.level" placeholder="1" />
+            </ui-field>
           </div>
 
-          <div class="fieldset">
-            <label for="gradeMetricId" class="label">
-              <span class="label-text font-medium">Métrica de Calificaciones</span>
-            </label>
-            <select id="gradeMetricId" [formField]="form.gradeMetricId" class="select select-bordered w-full">
+          <ui-field label="Métrica de Calificaciones" [field]="form.gradeMetricId">
+            <select uiSelect id="gradeMetricId" [formField]="form.gradeMetricId">
               <option value="" disabled>Selecciona una métrica...</option>
               @for (metric of gradeMetrics.value(); track metric.id) {
                 <option [value]="metric.id">{{ metric.name }}</option>
               }
             </select>
-          </div>
+          </ui-field>
 
           <div class="flex gap-3 pt-4">
             <button uiButton type="submit" class="flex-1" [disabled]="saving()" (click)="addAnother = true">

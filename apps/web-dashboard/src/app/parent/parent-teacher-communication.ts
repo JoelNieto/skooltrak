@@ -1,4 +1,4 @@
-import { MessageBubble, PageHeader, ThreadComposer, ThreadList, ThreadScrollPane, Toast } from '#/ui';
+import { MessageBubble, PageHeader, ThreadComposer, ThreadList, ThreadScrollPane, Toast, UiInput } from '#/ui';
 import { DatePipe } from '@angular/common';
 import { httpResource } from '@angular/common/http';
 import {
@@ -25,7 +25,17 @@ const API = '/api/v1/communication';
 @Component({
   selector: 'app-parent-teacher-communication',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink, FormsModule, DatePipe, PageHeader, ThreadList, ThreadComposer, ThreadScrollPane, MessageBubble],
+  imports: [
+    UiInput,
+    RouterLink,
+    FormsModule,
+    DatePipe,
+    PageHeader,
+    ThreadList,
+    ThreadComposer,
+    ThreadScrollPane,
+    MessageBubble,
+  ],
   template: `
     <div class="breadcrumbs text-sm">
       <ul>
@@ -41,9 +51,9 @@ const API = '/api/v1/communication';
     <div class="flex gap-4 h-[calc(100vh-12rem)]">
       <aside class="w-80 shrink-0 border border-base-300 rounded-lg flex flex-col bg-base-100">
         <div class="p-2 border-b border-base-300 shrink-0">
-          <input
+          <input uiInput
             type="search"
-            class="input input-primary input-sm w-full"
+            class="input-sm"
             placeholder="Buscar conversación…"
             [(ngModel)]="filterText"
           />
@@ -134,9 +144,7 @@ export default class ParentTeacherCommunication {
   #outbox = inject(OfflineOutbox);
 
   readonly pageTitle = input('Comunicación con docentes');
-  readonly pageSubtitle = input(
-    'Mensajes del equipo académico. Puedes responder, no iniciar conversaciones.',
-  );
+  readonly pageSubtitle = input('Mensajes del equipo académico. Puedes responder, no iniciar conversaciones.');
   readonly emptyMessage = input('Cuando un docente te escriba, el mensaje aparecerá aquí.');
   readonly thread = input<string | undefined>();
 
@@ -212,11 +220,10 @@ export default class ParentTeacherCommunication {
       })
       .map((t) => {
         const last = t.messages?.[0];
-        const owner = t.participants.find((p) => p.role === 'OWNER' && p.userId !== me)?.user
-          ?? t.participants.find((p) => p.role === 'OWNER')?.user;
-        const audience = owner
-          ? `${owner.firstName ?? ''} ${owner.lastName ?? ''}`.trim() || undefined
-          : undefined;
+        const owner =
+          t.participants.find((p) => p.role === 'OWNER' && p.userId !== me)?.user ??
+          t.participants.find((p) => p.role === 'OWNER')?.user;
+        const audience = owner ? `${owner.firstName ?? ''} ${owner.lastName ?? ''}`.trim() || undefined : undefined;
         return {
           id: t.id,
           title: t.title,

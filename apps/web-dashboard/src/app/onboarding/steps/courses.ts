@@ -1,4 +1,4 @@
-import { Button, Toast } from '#/ui';
+import { Button, Toast, UiField, UiInput, UiSelect } from '#/ui';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { Component, computed, inject, input, output, signal } from '@angular/core';
 import { form, FormField, required } from '@angular/forms/signals';
@@ -8,7 +8,7 @@ import { CreatedEntity } from '../setup-wizard';
 
 @Component({
   selector: 'app-courses-step',
-  imports: [Button, FormField],
+  imports: [UiField, UiInput, UiSelect, Button, FormField],
   template: `
     <div class="w-full max-w-md text-center space-y-8 animate-fade-in">
       <!-- Icon -->
@@ -57,48 +57,31 @@ import { CreatedEntity } from '../setup-wizard';
       } @else {
         <!-- Form Fields -->
         <form (submit)="onSubmit($event)" class="space-y-4 text-left">
-          <div class="fieldset">
-            <label for="studyPlanId" class="label">
-              <span class="label-text font-medium">Plan de Estudio</span>
-            </label>
-            <select id="studyPlanId" [formField]="form.studyPlanId" class="select select-bordered w-full">
+          <ui-field label="Plan de Estudio" [field]="form.studyPlanId">
+            <select uiSelect id="studyPlanId" [formField]="form.studyPlanId">
               <option value="" disabled>Selecciona un plan...</option>
               @for (plan of allStudyPlans(); track plan.id) {
                 <option [value]="plan.id">{{ plan.name }}</option>
               }
             </select>
-          </div>
+          </ui-field>
 
-          <div class="fieldset">
-            <label for="subjectId" class="label">
-              <span class="label-text font-medium">Asignatura</span>
-            </label>
-            <select id="subjectId" [formField]="form.subjectId" class="select select-bordered w-full">
+          <ui-field
+            label="Asignatura"
+            [field]="form.subjectId"
+            hint="Si no encuentras la asignatura, podrás crearla después en administración."
+          >
+            <select uiSelect id="subjectId" [formField]="form.subjectId">
               <option value="" disabled>Selecciona una asignatura...</option>
               @for (subject of subjects.value(); track subject.id) {
                 <option [value]="subject.id">{{ subject.name }}</option>
               }
             </select>
-            <p class="text-xs text-base-content/60 mt-1">
-              Si no encuentras la asignatura, podrás crearla después en administración.
-            </p>
-          </div>
+          </ui-field>
 
-          <div class="fieldset">
-            <label for="code" class="label">
-              <span class="label-text font-medium">
-                Código del Curso
-                <span class="text-base-content/50 font-normal">(opcional)</span>
-              </span>
-            </label>
-            <input
-              type="text"
-              id="code"
-              [formField]="form.code"
-              class="input input-bordered w-full"
-              placeholder="MAT-101"
-            />
-          </div>
+          <ui-field label="Código del Curso" [field]="form.code" optional>
+            <input uiInput type="text" id="code" [formField]="form.code" placeholder="MAT-101" />
+          </ui-field>
 
           <div class="flex gap-3 pt-4">
             <button uiButton type="submit" class="flex-1" [disabled]="saving()" (click)="addAnother = true">

@@ -2,11 +2,11 @@ import { Component, inject, signal } from '@angular/core';
 import { form, FormField, minLength, required, validate } from '@angular/forms/signals';
 import { Router, RouterLink } from '@angular/router';
 import Auth from './auth';
-import { Button } from '#/ui';
+import { Button, UiField, UiInput } from '#/ui';
 
 @Component({
   selector: 'app-change-password',
-  imports: [Button, FormField, RouterLink],
+  imports: [UiField, UiInput, Button, FormField, RouterLink],
   template: `
     <div class="flex flex-col gap-6">
       <div class="breadcrumbs text-sm">
@@ -37,46 +37,36 @@ import { Button } from '#/ui';
         }
 
         <form (submit)="onSubmit($event)" class="space-y-4">
-          <div class="fieldset">
-            <label for="currentPassword">Contraseña actual</label>
+          <ui-field label="Contraseña actual" [field]="form.currentPassword">
             <input
+              uiInput
               id="currentPassword"
               [formField]="form.currentPassword"
               type="password"
               autocomplete="current-password"
-              class="input input-primary w-full"
               placeholder="••••••••"
             />
-          </div>
-          <div class="fieldset">
-            <label for="newPassword">Nueva contraseña</label>
+          </ui-field>
+          <ui-field label="Nueva contraseña" [field]="form.newPassword">
             <input
+              uiInput
               id="newPassword"
               [formField]="form.newPassword"
               type="password"
               autocomplete="new-password"
-              class="input input-primary w-full"
-              [class.ng-invalid]="form.newPassword().touched() && form.newPassword().invalid()"
               placeholder="Mínimo 8 caracteres"
             />
-            @if (form.newPassword().touched() && form.newPassword().errors().length) {
-              @for (error of form.newPassword().errors(); track error) {
-                <p class="text-error text-sm">{{ error.message }}</p>
-              }
-            }
-          </div>
-          <div class="fieldset">
-            <label for="confirmPassword">Confirmar contraseña</label>
+          </ui-field>
+          <ui-field label="Confirmar contraseña" [field]="form.confirmPassword">
             <input
+              uiInput
               id="confirmPassword"
               [formField]="form.confirmPassword"
               type="password"
               autocomplete="new-password"
-              class="input input-primary w-full"
-              [class.ng-invalid]="form.newPassword().touched() && form.newPassword().invalid()"
               placeholder="Repite la nueva contraseña"
             />
-          </div>
+          </ui-field>
 
           @if (form.confirmPassword().touched() && form.confirmPassword().errors().length) {
             @for (error of form.confirmPassword().errors(); track error) {

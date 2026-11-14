@@ -1,4 +1,4 @@
-import { Button, Toast } from '#/ui';
+import { Button, Toast, UiField, UiInput, UiSelect } from '#/ui';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { afterRenderEffect, Component, inject, input, output, signal } from '@angular/core';
 import { form, FormField, required } from '@angular/forms/signals';
@@ -7,43 +7,37 @@ import { firstValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-users-form',
-  imports: [Button, FormField],
+  imports: [UiField, UiInput, UiSelect, Button, FormField],
   template: `<form (submit)="onSubmit($event)">
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-      <div class="fieldset">
-        <label for="firstName">Nombre</label>
-        <input type="text" class="input input-primary" [formField]="form.firstName" id="firstName" />
-      </div>
-      <div class="fieldset">
-        <label for="lastName">Apellido</label>
-        <input type="text" class="input input-primary" [formField]="form.lastName" id="lastName" />
-      </div>
-      <div class="fieldset">
-        <label for="email">Email</label>
-        <input type="email" class="input input-primary" [formField]="form.email" id="email" />
-      </div>
-      <div class="fieldset">
-        <label for="role">Rol</label>
-        <select class="select select-primary" [formField]="form.roleId" id="roleId">
+      <ui-field label="Nombre" [field]="form.firstName">
+        <input uiInput type="text" [formField]="form.firstName" id="firstName" />
+      </ui-field>
+      <ui-field label="Apellido" [field]="form.lastName">
+        <input uiInput type="text" [formField]="form.lastName" id="lastName" />
+      </ui-field>
+      <ui-field label="Email" [field]="form.email">
+        <input uiInput type="email" [formField]="form.email" id="email" />
+      </ui-field>
+      <ui-field label="Rol" [field]="form.roleId">
+        <select uiSelect [formField]="form.roleId" id="roleId">
           @for (role of roles.value(); track role.id) {
             <option [value]="role.id">{{ role.name }}</option>
           }
         </select>
-      </div>
-      <div class="fieldset">
-        <label for="organizationId">Organización</label>
-        <select class="select select-primary" [formField]="form.organizationId" id="organizationId">
+      </ui-field>
+      <ui-field label="Organización" [field]="form.organizationId">
+        <select uiSelect [formField]="form.organizationId" id="organizationId">
           @for (organization of organizations.value(); track organization.id) {
             <option [value]="organization.id">
               {{ organization.name }}
             </option>
           }
         </select>
-      </div>
-      <div class="fieldset">
-        <label for="password">Password</label>
-        <input type="password" class="input input-primary" [formField]="form.password" id="password" />
-      </div>
+      </ui-field>
+      <ui-field label="Password" [field]="form.password">
+        <input uiInput type="password" [formField]="form.password" id="password" />
+      </ui-field>
     </div>
     <div class="flex justify-end gap-2 mt-4">
       <button uiButton variant="ghost" (click)="closeModal.emit()">Cancelar</button>

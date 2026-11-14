@@ -1,5 +1,5 @@
 import { writeAccessTokenToStorage } from '#/client-auth';
-import { Button, Loader, Toast } from '#/ui';
+import { Button, Loader, Toast, UiField, UiInput } from '#/ui';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { afterRenderEffect, Component, inject, signal } from '@angular/core';
 import { AbstractControl, NonNullableFormBuilder, ValidationErrors } from '@angular/forms';
@@ -10,7 +10,7 @@ import { BrandLogo } from '../shared/brand-logo';
 
 @Component({
   selector: 'app-register',
-  imports: [Button, BrandLogo, FormField, Loader, RouterLink],
+  imports: [UiField, UiInput, Button, BrandLogo, FormField, Loader, RouterLink],
   template: `
     @defer {
       <div class="min-h-screen flex flex-col gradient-bg">
@@ -40,7 +40,9 @@ import { BrandLogo } from '../shared/brand-logo';
                   </p>
                 </div>
                 <div class="pt-4">
-                  <button uiButton variant="primary"
+                  <button
+                    uiButton
+                    variant="primary"
                     type="button"
                     class="w-full"
                     [disabled]="loading()"
@@ -77,23 +79,9 @@ import { BrandLogo } from '../shared/brand-logo';
                   </div>
 
                   <div class="space-y-4 text-left">
-                    <div class="fieldset">
-                      <label for="email" class="label">
-                        <span class="label-text font-medium">Correo Electrónico</span>
-                      </label>
-                      <input
-                        type="email"
-                        id="email"
-                        class="input input-primary w-full"
-                        placeholder="tu@email.com"
-                        [formField]="emailForm.email"
-                      />
-                      @if (emailForm.email().touched() && emailForm.email().invalid()) {
-                        @for (error of emailForm.email().errors(); track error) {
-                          <p class="text-error text-xs mt-1">{{ error.message }}</p>
-                        }
-                      }
-                    </div>
+                    <ui-field label="Correo Electrónico" [field]="emailForm.email">
+                      <input uiInput type="email" id="email" placeholder="tu@email.com" [formField]="emailForm.email" />
+                    </ui-field>
                   </div>
 
                   <div class="pt-4">
@@ -145,11 +133,7 @@ import { BrandLogo } from '../shared/brand-logo';
                 </div>
 
                 <div class="space-y-3">
-                  <button uiButton
-                    class="w-full"
-                    (click)="resendLink()"
-                    [disabled]="loading() || cooldown() > 0"
-                  >
+                  <button uiButton class="w-full" (click)="resendLink()" [disabled]="loading() || cooldown() > 0">
                     @if (loading()) {
                       <span class="loading loading-spinner loading-sm"></span>
                       Enviando...
@@ -199,80 +183,46 @@ import { BrandLogo } from '../shared/brand-logo';
 
                   <div class="space-y-4 text-left">
                     <div class="grid grid-cols-2 gap-4">
-                      <div class="fieldset">
-                        <label for="firstName" class="label">
-                          <span class="label-text font-medium">Nombre</span>
-                        </label>
+                      <ui-field label="Nombre" [field]="registerForm.firstName">
                         <input
+                          uiInput
                           type="text"
                           id="firstName"
-                          class="input input-primary w-full"
                           placeholder="Juan"
                           [formField]="registerForm.firstName"
-                          [class.ng-invalid]="registerForm.firstName().touched() && registerForm.firstName().invalid()"
                         />
-                        @if (registerForm.firstName().touched() && registerForm.firstName().invalid()) {
-                          <p class="text-error text-xs mt-1">{{ registerForm.firstName().errors()[0].message }}</p>
-                        }
-                      </div>
+                      </ui-field>
 
-                      <div class="fieldset">
-                        <label for="lastName" class="label">
-                          <span class="label-text font-medium">Apellido</span>
-                        </label>
+                      <ui-field label="Apellido" [field]="registerForm.lastName">
                         <input
+                          uiInput
                           type="text"
                           id="lastName"
-                          class="input input-primary w-full"
                           placeholder="Pérez"
-                          [class.ng-invalid]="registerForm.lastName().touched() && registerForm.lastName().invalid()"
                           [formField]="registerForm.lastName"
                         />
-                        @if (registerForm.lastName().touched() && registerForm.lastName().invalid()) {
-                          <p class="text-error text-xs mt-1">{{ registerForm.lastName().errors()[0].message }}</p>
-                        }
-                      </div>
+                      </ui-field>
                     </div>
 
-                    <div class="fieldset">
-                      <label for="password" class="label">
-                        <span class="label-text font-medium">Contraseña</span>
-                      </label>
+                    <ui-field label="Contraseña" [field]="registerForm.password">
                       <input
+                        uiInput
                         type="password"
                         id="password"
-                        class="input input-primary w-full"
                         placeholder="••••••••"
-                        [class.ng-invalid]="registerForm.password().touched() && registerForm.password().invalid()"
                         [formField]="registerForm.password"
                       />
-                      @if (registerForm.password().touched() && registerForm.password().invalid()) {
-                        @for (error of registerForm.password().errors(); track error) {
-                          <p class="text-error text-xs mt-1">{{ error.message }}</p>
-                        }
-                      }
-                    </div>
+                    </ui-field>
 
-                    <div class="fieldset">
-                      <label for="confirmPassword" class="label">
-                        <span class="label-text font-medium">Confirmar Contraseña</span>
-                      </label>
+                    <ui-field label="Confirmar Contraseña" [field]="registerForm.confirmPassword">
                       <input
+                        uiInput
                         type="password"
                         id="confirmPassword"
-                        class="input input-primary w-full"
                         placeholder="••••••••"
-                        [class.ng-invalid]="
-                          registerForm.confirmPassword().touched() && registerForm.confirmPassword().invalid()
-                        "
                         [formField]="registerForm.confirmPassword"
                       />
-                      @if (registerForm.confirmPassword().touched() && registerForm.confirmPassword().invalid()) {
-                        @for (error of registerForm.confirmPassword().errors(); track error) {
-                          <p class="text-error text-xs mt-1">{{ error.message }}</p>
-                        }
-                      }
-                    </div>
+                    </ui-field>
                   </div>
 
                   <div class="pt-4">

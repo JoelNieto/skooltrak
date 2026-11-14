@@ -1,4 +1,4 @@
-import { Button, DecimalToNumber, Modal } from '#/ui';
+import { Button, DecimalToNumber, Modal, UiSelect } from '#/ui';
 import { DecimalPipe, NgClass } from '@angular/common';
 import { httpResource } from '@angular/common/http';
 import { afterRenderEffect, Component, computed, inject, input, signal } from '@angular/core';
@@ -19,9 +19,9 @@ export type StudentType = {
 
 @Component({
   selector: 'app-course-grades',
-  imports: [Button, FormsModule, DecimalPipe, RouterLink, NgClass],
+  imports: [UiSelect, Button, FormsModule, DecimalPipe, RouterLink, NgClass],
   template: ` <div class="flex justify-end gap-2">
-      <select class="select select-primary w-64!" [ngModel]="periodId()" (ngModelChange)="periodId.set($event)">
+      <select uiSelect class="w-64!" [ngModel]="periodId()" (ngModelChange)="periodId.set($event)">
         <option disabled selected value="">Selecciona un periodo...</option>
         @for (period of periodsResource.value()!; track period.id) {
           <option [value]="period.id">{{ period.name }}</option>

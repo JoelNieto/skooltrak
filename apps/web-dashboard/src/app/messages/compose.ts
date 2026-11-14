@@ -1,4 +1,4 @@
-import { Button, TextEditor, Toast } from '#/ui';
+import { Button, TextEditor, Toast, UiInput } from '#/ui';
 import { HttpClient } from '@angular/common/http';
 import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -14,7 +14,7 @@ interface ComposeFormData {
 
 @Component({
   selector: 'app-compose',
-  imports: [Button, RouterLink, Contacts, TextEditor, FormsModule, FormField],
+  imports: [UiInput, Button, RouterLink, Contacts, TextEditor, FormsModule, FormField],
   template: `<div class="breadcrumbs text-sm">
       <ul>
         <li><a routerLink="/">Inicio</a></li>
@@ -40,8 +40,9 @@ interface ComposeFormData {
         </div>
         <div class="flex flex-col gap-1 py-2 border-b border-base-300">
           <input
+            uiInput
             type="text"
-            class="input-lg input input-ghost w-full"
+            class="input-lg input-ghost"
             placeholder="Asunto"
             [formField]="composeForm.subject"
           />

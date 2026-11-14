@@ -1,4 +1,4 @@
-import { Button, Toast } from '#/ui';
+import { Button, Toast, UiField, UiInput, UiSelect } from '#/ui';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { afterRenderEffect, Component, computed, effect, inject, input, output, signal } from '@angular/core';
 import { NonNullableFormBuilder } from '@angular/forms';
@@ -22,23 +22,22 @@ interface FileShareFormData {
 
 @Component({
   selector: 'app-file-share-form',
-  imports: [Button, FormField],
+  imports: [UiField, UiInput, UiSelect, Button, FormField],
   template: `<form (submit)="onSubmit($event)">
     <div class="flex flex-col gap-4">
-      <div class="fieldset">
-        <label for="targetType">Compartir con</label>
-        <select id="targetType" [formField]="form.targetType" class="select select-primary w-full">
+      <ui-field label="Compartir con" [field]="form.targetType">
+        <select uiSelect id="targetType" [formField]="form.targetType">
           <option value="COURSE">Curso</option>
           <option value="CLASS_GROUP">Grupo</option>
           <option value="SCHOOL">Escuela</option>
           <option value="USER">Usuario</option>
         </select>
-      </div>
+      </ui-field>
       <div class="fieldset">
         <label for="targetId">IDs de destino</label>
         @if (form.targetType().value() === 'COURSE') {
           <div class="flex flex-col sm:flex-row gap-2">
-            <select id="courseId" [formField]="form.courseId" class="select select-primary w-full sm:flex-1">
+            <select uiSelect id="courseId" [formField]="form.courseId" class="sm:flex-1">
               <option value="" disabled selected>Seleccionar curso</option>
               @for (course of coursesResource.value(); track course.id) {
                 <option [value]="course.id">{{ course.name }}</option>
@@ -49,9 +48,10 @@ interface FileShareFormData {
         } @else {
           <div class="flex flex-col sm:flex-row gap-2">
             <input
+              uiInput
               id="targetId"
               type="text"
-              class="input input-primary w-full sm:flex-1"
+              class="sm:flex-1"
               [formField]="form.targetId"
               placeholder="Pega un ID y agrega"
             />
@@ -69,13 +69,12 @@ interface FileShareFormData {
           </div>
         }
       </div>
-      <div class="fieldset">
-        <label for="permission">Permiso</label>
-        <select id="permission" [formField]="form.permission" class="select select-primary w-full">
+      <ui-field label="Permiso" [field]="form.permission">
+        <select uiSelect id="permission" [formField]="form.permission">
           <option value="VIEW">Solo ver</option>
           <option value="EDIT">Puede editar</option>
         </select>
-      </div>
+      </ui-field>
     </div>
     <div class="mt-6 flex flex-col-reverse sm:flex-row sm:justify-end gap-2">
       <button uiButton variant="ghost" class="w-full sm:w-auto" type="button" (click)="closeModal.emit(undefined)">

@@ -1,4 +1,4 @@
-import { Button, Loader } from '#/ui';
+import { Button, Loader, UiInput } from '#/ui';
 import { HttpClient } from '@angular/common/http';
 import { Component, inject, signal } from '@angular/core';
 import { email, form, FormField, required } from '@angular/forms/signals';
@@ -15,7 +15,7 @@ type LookupResult = {
 
 @Component({
   selector: 'app-forgot-password',
-  imports: [Button, BrandLogo, FormField, RouterLink, Loader],
+  imports: [UiInput, Button, BrandLogo, FormField, RouterLink, Loader],
   template: `
     <div class="gradient-bg min-h-screen flex items-center justify-center p-4">
       @defer {
@@ -75,7 +75,9 @@ type LookupResult = {
                     ¿Es tu cuenta? Confirma para enviarte el enlace de recuperación.
                   </p>
                   <div class="flex flex-col gap-3">
-                    <button uiButton variant="primary"
+                    <button
+                      uiButton
+                      variant="primary"
                       type="button"
                       class="w-full"
                       [disabled]="loading()"
@@ -89,7 +91,9 @@ type LookupResult = {
                         Sí, enviar enlace
                       }
                     </button>
-                    <button uiButton variant="ghost"
+                    <button
+                      uiButton
+                      variant="ghost"
                       type="button"
                       class="w-full"
                       [disabled]="loading()"
@@ -108,7 +112,9 @@ type LookupResult = {
                       <strong>{{ searchedEmail() }}</strong>
                     </span>
                   </div>
-                  <button uiButton variant="primary"
+                  <button
+                    uiButton
+                    variant="primary"
                     type="button"
                     class="w-full"
                     (click)="step.set('email'); form().reset(); form.email().value.set('')"
@@ -125,11 +131,11 @@ type LookupResult = {
                         <span class="material-symbols-outlined">mail</span>
                       </div>
                       <input
+                        uiInput
                         id="email"
                         [formField]="form.email"
                         type="email"
                         autocomplete="email"
-                        class="input input-primary"
                         placeholder="tu@email.com"
                       />
                     </div>
@@ -141,7 +147,13 @@ type LookupResult = {
                     }
                   </div>
 
-                  <button uiButton variant="primary" type="submit" [disabled]="loading() || form().invalid()" class="w-full">
+                  <button
+                    uiButton
+                    variant="primary"
+                    type="submit"
+                    [disabled]="loading() || form().invalid()"
+                    class="w-full"
+                  >
                     @if (loading()) {
                       <span class="loading loading-spinner loading-sm"></span>
                       Buscando...

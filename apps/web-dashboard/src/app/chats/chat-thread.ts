@@ -1,4 +1,4 @@
-import { Button, Loader, Toast } from '#/ui';
+import { Button, Loader, Toast, UiInput } from '#/ui';
 import { DatePipe } from '@angular/common';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { Component, DestroyRef, effect, inject, input, signal, viewChild } from '@angular/core';
@@ -45,7 +45,7 @@ type ChatMessageDto = {
 
 @Component({
   selector: 'app-chat-thread',
-  imports: [Button, RouterLink, Loader, FormsModule, DatePipe],
+  imports: [UiInput, Button, RouterLink, Loader, FormsModule, DatePipe],
   template: `
     <div class="breadcrumbs text-sm">
       <ul>
@@ -138,8 +138,9 @@ type ChatMessageDto = {
           <form (submit)="sendMessage($event)" class="shrink-0 p-4 border-t border-base-300 bg-base-100 rounded-b-lg">
             <div class="flex gap-2">
               <input
+                uiInput
                 type="text"
-                class="input input-primary flex-1"
+                class="flex-1"
                 placeholder="Escribe un mensaje..."
                 [(ngModel)]="messageContent"
                 name="content"

@@ -1,4 +1,4 @@
-import { Button, Toast } from '#/ui';
+import { Button, Toast, UiCheckbox, UiChoice, UiField, UiInput } from '#/ui';
 import { HttpClient } from '@angular/common/http';
 import { afterRenderEffect, Component, inject, input, output, signal } from '@angular/core';
 import { form, FormField, min, required } from '@angular/forms/signals';
@@ -7,35 +7,26 @@ import { firstValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-habit-metrics-form',
-  imports: [Button, FormField],
+  imports: [UiCheckbox, UiChoice, UiField, UiInput, Button, FormField],
   template: `<form (submit)="onSubmit($event)">
-    <div class="fieldset">
-      <label for="name">Nombre</label>
-      <input
-        type="text"
-        [formField]="form.name"
-        class="input input-primary"
-        placeholder="Ej: Responsabilidad, Respeto, Puntualidad"
-      />
-    </div>
-    <div class="fieldset">
-      <label for="description">Descripción</label>
+    <ui-field label="Nombre" [field]="form.name">
+      <input uiInput type="text" [formField]="form.name" placeholder="Ej: Responsabilidad, Respeto, Puntualidad" />
+    </ui-field>
+    <ui-field label="Descripción" [field]="form.description">
       <textarea
+        uiInput
         [formField]="form.description"
-        class="textarea textarea-primary"
         rows="3"
         placeholder="Descripción opcional del criterio"
       ></textarea>
-    </div>
-    <div class="fieldset">
-      <label for="order">Orden de visualización</label>
-      <input type="number" [formField]="form.order" class="input input-primary" />
-    </div>
+    </ui-field>
+    <ui-field label="Orden de visualización" [field]="form.order">
+      <input uiInput type="number" [formField]="form.order" />
+    </ui-field>
     <div class="form-control">
-      <label class="label cursor-pointer justify-start gap-4">
-        <input type="checkbox" [formField]="form.active" class="checkbox" />
-        <span class="label-text">Activo</span>
-      </label>
+      <ui-choice label="Activo">
+        <input uiCheckbox tone="neutral" type="checkbox" [formField]="form.active" />
+      </ui-choice>
     </div>
     <div class="flex justify-end gap-2 mt-4">
       <button uiButton variant="ghost" type="button" (click)="closeModal.emit(false)">Cancelar</button>

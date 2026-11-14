@@ -1,4 +1,4 @@
-import { Button, Toast } from '#/ui';
+import { Button, Toast, UiField, UiInput, UiSelect } from '#/ui';
 import { Combobox, ComboboxPopup, ComboboxWidget } from '@angular/aria/combobox';
 import { Listbox, Option } from '@angular/aria/listbox';
 import { OverlayModule } from '@angular/cdk/overlay';
@@ -24,13 +24,25 @@ interface CourseModel {
 }
 @Component({
   selector: 'app-courses-form',
-  imports: [Button, FormField, FormsModule, Combobox, ComboboxPopup, ComboboxWidget, Listbox, Option, OverlayModule],
+  imports: [
+    UiField,
+    UiInput,
+    UiSelect,
+    Button,
+    FormField,
+    FormsModule,
+    Combobox,
+    ComboboxPopup,
+    ComboboxWidget,
+    Listbox,
+    Option,
+    OverlayModule,
+  ],
   template: `<form (submit)="onSubmit($event)">
     <div class="flex flex-col gap-2">
-      <div class="fieldset">
-        <label for="code">Código <span class="text-base-content/50 text-xs">(opcional)</span></label>
-        <input type="text" id="code" [formField]="form.code" class="input input-primary" />
-      </div>
+      <ui-field label="Código" [field]="form.code" optional>
+        <input uiInput type="text" id="code" [formField]="form.code" />
+      </ui-field>
       <div class="fieldset">
         <label for="subjectInput">Asignatura</label>
         <div class="relative flex flex-col">
@@ -120,24 +132,22 @@ interface CourseModel {
           </div>
         }
       </div>
-      <div class="fieldset">
-        <label for="studyPlanId">Plan de estudio</label>
-        <select id="studyPlanId" [formField]="form.studyPlanId" class="select select-primary">
+      <ui-field label="Plan de estudio" [field]="form.studyPlanId">
+        <select uiSelect id="studyPlanId" [formField]="form.studyPlanId">
           <option value="" disabled>Seleccionar plan</option>
           @for (studyPlan of studyPlans.value(); track studyPlan.id) {
             <option [value]="studyPlan.id">{{ studyPlan.name }}</option>
           }
         </select>
-      </div>
-      <div class="fieldset">
-        <label for="teacherId">Docente</label>
-        <select id="teacherId" [formField]="form.teacherId" class="select select-primary">
+      </ui-field>
+      <ui-field label="Docente" [field]="form.teacherId">
+        <select uiSelect id="teacherId" [formField]="form.teacherId">
           <option [value]="null" disabled>Seleccionar docente...</option>
           @for (teacher of teachers.value()?.data; track teacher.id) {
             <option [value]="teacher.id">{{ teacher.name }}</option>
           }
         </select>
-      </div>
+      </ui-field>
     </div>
     @if (errorMessage()) {
       <div role="alert" class="alert alert-error mt-3">

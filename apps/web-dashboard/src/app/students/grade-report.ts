@@ -1,4 +1,4 @@
-import { Button, Loader } from '#/ui';
+import { Button, Loader, UiSelect } from '#/ui';
 import { DecimalPipe } from '@angular/common';
 import { httpResource } from '@angular/common/http';
 import { afterRenderEffect, Component, computed, inject, input, signal } from '@angular/core';
@@ -60,7 +60,7 @@ interface GradeReportData {
 
 @Component({
   selector: 'app-grade-report',
-  imports: [Button, DecimalPipe, FormsModule, Loader, RouterLink],
+  imports: [UiSelect, Button, DecimalPipe, FormsModule, Loader, RouterLink],
   template: `
     <div class="grade-report-container">
       <div class="flex justify-between items-center mb-4 print:hidden">
@@ -73,7 +73,7 @@ interface GradeReportData {
           </ul>
         </div>
         <div class="flex gap-2 items-center">
-          <select class="select select-primary w-48" [ngModel]="periodId()" (ngModelChange)="periodId.set($event)">
+          <select uiSelect class="w-48" [ngModel]="periodId()" (ngModelChange)="periodId.set($event)">
             <option disabled [ngValue]="''">Selecciona un periodo...</option>
             @for (period of periodsResource.value(); track period.id) {
               <option [ngValue]="period.id">{{ period.name }}</option>

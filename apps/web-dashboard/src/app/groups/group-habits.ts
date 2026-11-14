@@ -1,4 +1,4 @@
-import { Button, Loader, Toast } from '#/ui';
+import { Button, Loader, Toast, UiInput, UiRadio, UiSelect } from '#/ui';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { Component, computed, inject, input, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -22,7 +22,7 @@ type StudentEvaluation = {
 
 @Component({
   selector: 'app-group-habits',
-  imports: [Button, FormsModule, Loader],
+  imports: [UiInput, UiRadio, UiSelect, Button, FormsModule, Loader],
   template: `
     <div class="space-y-4">
       <!-- Empty state: No metrics configured -->
@@ -43,12 +43,7 @@ type StudentEvaluation = {
             <label class="label" for="habits-period">
               <span class="label-text">Período</span>
             </label>
-            <select
-              id="habits-period"
-              class="select select-bordered"
-              [(ngModel)]="selectedPeriodId"
-              (ngModelChange)="onSelectionChange()"
-            >
+            <select uiSelect id="habits-period" [(ngModel)]="selectedPeriodId" (ngModelChange)="onSelectionChange()">
               <option [value]="null" disabled selected>Seleccione un período</option>
               @for (period of periods.value(); track period.id) {
                 <option [value]="period.id">{{ period.name }} - {{ period.year }}</option>
@@ -60,12 +55,7 @@ type StudentEvaluation = {
             <label class="label" for="habits-metric">
               <span class="label-text">Criterio de evaluación</span>
             </label>
-            <select
-              id="habits-metric"
-              class="select select-bordered"
-              [(ngModel)]="selectedMetricId"
-              (ngModelChange)="onSelectionChange()"
-            >
+            <select uiSelect id="habits-metric" [(ngModel)]="selectedMetricId" (ngModelChange)="onSelectionChange()">
               <option [value]="null" disabled selected>Seleccione un criterio</option>
               @for (metric of activeMetrics(); track metric.id) {
                 <option [value]="metric.id">{{ metric.name }}</option>
@@ -87,15 +77,15 @@ type StudentEvaluation = {
           <div class="flex gap-4 items-center p-4 bg-base-200 rounded-lg">
             <span class="font-semibold">Leyenda:</span>
             <div class="flex gap-2 items-center">
-              <input type="radio" class="radio radio-error radio-sm" disabled />
+              <input uiRadio tone="danger" size="sm" type="radio" disabled />
               <span><strong>X</strong> = Deficiente</span>
             </div>
             <div class="flex gap-2 items-center">
-              <input type="radio" class="radio radio-warning radio-sm" disabled />
+              <input uiRadio tone="warning" size="sm" type="radio" disabled />
               <span><strong>R</strong> = Regular</span>
             </div>
             <div class="flex gap-2 items-center">
-              <input type="radio" class="radio radio-success radio-sm" disabled />
+              <input uiRadio tone="success" size="sm" type="radio" disabled />
               <span><strong>S</strong> = Satisfactorio</span>
             </div>
           </div>
@@ -130,10 +120,12 @@ type StudentEvaluation = {
                       <div class="flex gap-4">
                         <label class="flex items-center gap-1 cursor-pointer">
                           <input
+                            uiRadio
+                            tone="danger"
+                            size="sm"
                             type="radio"
                             [name]="'eval-' + student.id"
                             value="X"
-                            class="radio radio-error radio-sm"
                             [checked]="getValue(student.id) === 'X'"
                             (change)="updateValue(student.id, 'X')"
                           />
@@ -141,10 +133,12 @@ type StudentEvaluation = {
                         </label>
                         <label class="flex items-center gap-1 cursor-pointer">
                           <input
+                            uiRadio
+                            tone="warning"
+                            size="sm"
                             type="radio"
                             [name]="'eval-' + student.id"
                             value="R"
-                            class="radio radio-warning radio-sm"
                             [checked]="getValue(student.id) === 'R'"
                             (change)="updateValue(student.id, 'R')"
                           />
@@ -152,10 +146,12 @@ type StudentEvaluation = {
                         </label>
                         <label class="flex items-center gap-1 cursor-pointer">
                           <input
+                            uiRadio
+                            tone="success"
+                            size="sm"
                             type="radio"
                             [name]="'eval-' + student.id"
                             value="S"
-                            class="radio radio-success radio-sm"
                             [checked]="getValue(student.id) === 'S'"
                             (change)="updateValue(student.id, 'S')"
                           />
@@ -165,8 +161,9 @@ type StudentEvaluation = {
                     </td>
                     <td>
                       <input
+                        uiInput
                         type="text"
-                        class="input input-bordered input-sm w-full"
+                        class="input-sm"
                         [value]="getComments(student.id)"
                         (input)="updateComments(student.id, $any($event.target).value)"
                         placeholder="Comentarios opcionales"

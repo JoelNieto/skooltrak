@@ -1,5 +1,5 @@
 import { SchoolContext } from '#/shared';
-import { Button, Toast } from '#/ui';
+import { Button, Toast, UiInput, UiToggle } from '#/ui';
 import { Component, inject, signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
@@ -8,14 +8,14 @@ import { StoreApiService } from '../store-api.service';
 
 @Component({
   selector: 'app-categories-admin',
-  imports: [Button, FormsModule],
+  imports: [UiInput, UiToggle, Button, FormsModule],
   template: `
     <h3 class="text-lg font-medium mb-4">Categorías</h3>
     @if (!school.currentSchoolId()) {
       <div class="alert alert-warning">Selecciona una escuela.</div>
     } @else {
       <form class="flex flex-wrap gap-2 mb-6" (ngSubmit)="create(); $event.preventDefault()">
-        <input class="input input-bordered input-sm" placeholder="Nueva categoría" [(ngModel)]="newName" name="n" />
+        <input uiInput class="input-sm" placeholder="Nueva categoría" [(ngModel)]="newName" name="n" />
         <button uiButton variant="primary" size="sm" type="submit">Agregar</button>
       </form>
       <div class="overflow-x-auto rounded-box border border-base-200">
@@ -32,18 +32,26 @@ import { StoreApiService } from '../store-api.service';
             @for (c of categories.value(); track c.id) {
               <tr>
                 <td>
-                  <input class="input input-bordered input-sm" [(ngModel)]="editNames[c.id!]" [name]="'n' + c.id" />
+                  <input uiInput class="input-sm" [(ngModel)]="editNames[c.id!]" [name]="'n' + c.id" />
                 </td>
                 <td>
                   <input
-                    class="input input-bordered input-sm w-20"
+                    uiInput
+                    class="input-sm w-20"
                     type="number"
                     [(ngModel)]="editOrder[c.id!]"
                     [name]="'o' + c.id"
                   />
                 </td>
                 <td>
-                  <input type="checkbox" class="toggle toggle-sm" [(ngModel)]="editActive[c.id!]" [name]="'a' + c.id" />
+                  <input
+                    uiToggle
+                    tone="neutral"
+                    size="sm"
+                    type="checkbox"
+                    [(ngModel)]="editActive[c.id!]"
+                    [name]="'a' + c.id"
+                  />
                 </td>
                 <td class="flex gap-2">
                   <button uiButton size="sm" type="button" (click)="save(c.id!)">Guardar</button>

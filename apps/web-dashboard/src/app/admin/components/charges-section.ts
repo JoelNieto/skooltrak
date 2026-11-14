@@ -1,4 +1,4 @@
-import { Button, Confirmation, EmptyState, Pagination, Paginator, Toast } from '#/ui';
+import { Button, Confirmation, EmptyState, Pagination, Paginator, Toast, UiInput, UiSelect } from '#/ui';
 import { DatePipe, DecimalPipe, NgClass } from '@angular/common';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { Component, computed, effect, inject, input, signal } from '@angular/core';
@@ -23,12 +23,7 @@ type StudentOption = { id: string; firstName: string; fatherName: string };
 
 @Component({
   selector: 'app-charges-section',
-  imports: [Button, DatePipe,
-    DecimalPipe,
-    EmptyState,
-    FormsModule,
-    NgClass,
-    Paginator,],
+  imports: [UiInput, UiSelect, Button, DatePipe, DecimalPipe, EmptyState, FormsModule, NgClass, Paginator],
   providers: [Pagination],
   template: `
     <div class="bg-base-100 rounded-lg border border-base-300">
@@ -36,7 +31,8 @@ type StudentOption = { id: string; firstName: string; fatherName: string };
         <label class="form-control">
           <span class="label-text text-xs">Estado</span>
           <select
-            class="select select-sm select-primary"
+            uiSelect
+            class="select-sm"
             [ngModel]="statusFilter()"
             (ngModelChange)="onFilterChange('status', $event)"
           >
@@ -49,11 +45,7 @@ type StudentOption = { id: string; firstName: string; fatherName: string };
         </label>
         <label class="form-control">
           <span class="label-text text-xs">Tipo</span>
-          <select
-            class="select select-sm select-primary"
-            [ngModel]="typeFilter()"
-            (ngModelChange)="onFilterChange('type', $event)"
-          >
+          <select uiSelect class="select-sm" [ngModel]="typeFilter()" (ngModelChange)="onFilterChange('type', $event)">
             <option value="">Todos</option>
             <option value="CUSTOM">CUSTOM</option>
             <option value="TUITION">TUITION</option>
@@ -64,7 +56,8 @@ type StudentOption = { id: string; firstName: string; fatherName: string };
           <label class="form-control">
             <span class="label-text text-xs">Estudiante</span>
             <select
-              class="select select-sm select-primary"
+              uiSelect
+              class="select-sm"
               [ngModel]="studentFilter()"
               (ngModelChange)="onFilterChange('student', $event)"
             >
@@ -78,7 +71,8 @@ type StudentOption = { id: string; firstName: string; fatherName: string };
         <label class="form-control grow min-w-48">
           <span class="label-text text-xs">Descripción</span>
           <input
-            class="input input-sm input-primary"
+            uiInput
+            class="input-sm"
             type="search"
             placeholder="Buscar descripción..."
             [ngModel]="pagination.search()"

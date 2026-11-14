@@ -1,4 +1,4 @@
-import { Button, Confirmation, Error, Modal, Pagination, Paginator, Toast } from '#/ui';
+import { Button, Confirmation, Error, Modal, Pagination, Paginator, Toast, UiInput } from '#/ui';
 import { Menu, MenuContent, MenuItem, MenuTrigger } from '@angular/aria/menu';
 import { OverlayModule } from '@angular/cdk/overlay';
 import { DatePipe } from '@angular/common';
@@ -12,6 +12,7 @@ import { UsersForm } from './users-form';
 @Component({
   selector: 'app-users',
   imports: [
+    UiInput,
     Button,
     RouterLink,
     DatePipe,
@@ -43,7 +44,7 @@ import { UsersForm } from './users-form';
     </div>
     <div class="flex justify-between items-center mb-4">
       <div class="md:w-96 w-full">
-        <input type="text" class="input" placeholder="Buscar" [(ngModel)]="searchText" />
+        <input uiInput type="text" placeholder="Buscar" [(ngModel)]="searchText" />
       </div>
     </div>
     @if (users.error()) {

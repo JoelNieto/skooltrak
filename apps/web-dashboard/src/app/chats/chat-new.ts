@@ -1,4 +1,4 @@
-import { Loader, Toast } from '#/ui';
+import { Loader, Toast, UiInput } from '#/ui';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -8,7 +8,7 @@ import Auth from '../auth/auth';
 
 @Component({
   selector: 'app-chat-new',
-  imports: [RouterLink, Loader, FormsModule],
+  imports: [UiInput, RouterLink, Loader, FormsModule],
   template: `
     <div class="breadcrumbs text-sm">
       <ul>
@@ -21,8 +21,9 @@ import Auth from '../auth/auth';
     <p class="text-base-content/70 mt-1">Selecciona un contacto para iniciar una conversación</p>
 
     <input
+      uiInput
       type="text"
-      class="input input-bordered w-full max-w-md mt-4"
+      class="max-w-md mt-4"
       placeholder="Buscar por nombre..."
       [ngModel]="searchQuery()"
       (ngModelChange)="searchQuery.set($event)"

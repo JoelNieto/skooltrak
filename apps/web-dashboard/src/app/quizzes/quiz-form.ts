@@ -1,4 +1,4 @@
-import { Button, Loader, TextEditor, Toast } from '#/ui';
+import { Button, Loader, TextEditor, Toast, UiField, UiInput, UiSelect } from '#/ui';
 import { Component, computed, effect, inject, input, signal } from '@angular/core';
 import {
   FormArray,
@@ -19,7 +19,18 @@ import { QuizQuestionControl } from './quiz-question-control';
 
 @Component({
   selector: 'app-quiz-form',
-  imports: [Button, RouterLink, ReactiveFormsModule, FormsModule, TextEditor, QuizQuestionControl, Loader],
+  imports: [
+    UiField,
+    UiInput,
+    UiSelect,
+    Button,
+    RouterLink,
+    ReactiveFormsModule,
+    FormsModule,
+    TextEditor,
+    QuizQuestionControl,
+    Loader,
+  ],
   template: `
     <div class="breadcrumbs text-sm">
       <ul>
@@ -38,24 +49,22 @@ import { QuizQuestionControl } from './quiz-question-control';
           <div class="card-body">
             <h2 class="card-title">Datos del quiz</h2>
             <div class="flex flex-col gap-4">
-              <div class="fieldset">
-                <label for="title">Titulo</label>
+              <ui-field label="Titulo">
                 <input
+                  uiInput
                   type="text"
                   id="title"
                   name="title"
                   formControlName="title"
-                  class="input input-primary"
                   placeholder="Titulo del quiz..."
                 />
-              </div>
-              <div class="fieldset">
-                <label for="courseId">Curso</label>
+              </ui-field>
+              <ui-field label="Curso">
                 <select
+                  uiSelect
                   id="courseId"
                   name="courseId"
                   formControlName="courseId"
-                  class="select select-primary"
                   placeholder="Selecciona un curso..."
                 >
                   <option value="" disabled selected>Selecciona un curso...</option>
@@ -63,7 +72,7 @@ import { QuizQuestionControl } from './quiz-question-control';
                     <option [value]="course.id">{{ course.name }}</option>
                   }
                 </select>
-              </div>
+              </ui-field>
               <div class="fieldset">
                 <label for="details">Descripción</label>
                 <lib-text-editor id="details" name="details" formControlName="details" [bordered]="true" />

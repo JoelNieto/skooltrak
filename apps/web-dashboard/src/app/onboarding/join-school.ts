@@ -1,4 +1,4 @@
-import { Button, Loader, Toast } from '#/ui';
+import { Button, Loader, Toast, UiInput } from '#/ui';
 import { HttpClient } from '@angular/common/http';
 import { Component, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
@@ -14,7 +14,7 @@ type AvailableSchool = {
 
 @Component({
   selector: 'app-join-school',
-  imports: [Button, BrandLogo, Loader],
+  imports: [UiInput, Button, BrandLogo, Loader],
   template: `
     <div class="min-h-screen flex flex-col gradient-bg">
       <header class="p-4 md:p-6 flex items-center justify-between">
@@ -30,12 +30,7 @@ type AvailableSchool = {
 
           <!-- Search -->
           <div class="form-control">
-            <input
-              type="text"
-              class="input input-bordered w-full"
-              placeholder="Buscar escuela..."
-              (input)="onSearch($event)"
-            />
+            <input uiInput type="text" placeholder="Buscar escuela..." (input)="onSearch($event)" />
           </div>
 
           @if (loading()) {

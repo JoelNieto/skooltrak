@@ -1,4 +1,4 @@
-import { Button, Toast } from '#/ui';
+import { Button, Toast, UiField, UiInput } from '#/ui';
 import { HttpClient } from '@angular/common/http';
 import { afterRenderEffect, Component, inject, input, output, signal } from '@angular/core';
 import { form, FormField, required } from '@angular/forms/signals';
@@ -7,16 +7,14 @@ import { firstValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-permissions-form',
-  imports: [Button, FormField],
+  imports: [UiField, UiInput, Button, FormField],
   template: `<form (submit)="onSubmit($event)">
-    <div class="fieldset">
-      <label for="description">Descripción</label>
-      <input id="description" [formField]="form.description" class="input input-primary" />
-    </div>
-    <div class="fieldset">
-      <label for="descriptiveId">ID Descriptivo</label>
-      <input id="descriptiveId" [formField]="form.descriptiveId" class="input input-primary" />
-    </div>
+    <ui-field label="Descripción" [field]="form.description">
+      <input uiInput id="description" [formField]="form.description" />
+    </ui-field>
+    <ui-field label="ID Descriptivo" [field]="form.descriptiveId">
+      <input uiInput id="descriptiveId" [formField]="form.descriptiveId" />
+    </ui-field>
     <div class="flex justify-end mt-4">
       <button uiButton variant="primary" type="submit">Guardar</button>
     </div>

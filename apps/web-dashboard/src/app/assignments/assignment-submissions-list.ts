@@ -1,19 +1,19 @@
-import { Badge, Button, Toast } from '#/ui';
+import { Alert, Badge, Button, Card, Spinner, Toast, UiTable } from '#/ui';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { Component, inject, input, signal } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-assignment-submissions-list',
-  imports: [Badge, Button],
+  imports: [Alert, Spinner, Card, UiTable, Badge, Button],
   template: `
     <div class="space-y-4">
       @if (studentsResource.isLoading()) {
         <div class="flex items-center justify-center py-8">
-          <span class="loading loading-spinner loading-md"></span>
+          <span uiSpinner></span>
         </div>
       } @else if (studentsResource.error()) {
-        <div class="alert alert-error">
+        <div uiAlert tone="danger">
           <span class="material-symbols-outlined">error</span>
           <span>Error al cargar los estudiantes.</span>
         </div>
@@ -40,8 +40,8 @@ import { firstValueFrom } from 'rxjs';
           </div>
         </div>
 
-        <div class="overflow-x-auto bg-base-100 rounded-lg">
-          <table class="table">
+        <div uiCard class="overflow-x-auto">
+          <table uiTable>
             <thead>
               <tr>
                 <th>Estudiante</th>
@@ -107,14 +107,13 @@ import { firstValueFrom } from 'rxjs';
                     @if (fileId) {
                       <button
                         uiButton
+                        [loading]="downloadingFileId() === fileId"
                         variant="ghost"
                         size="sm"
                         (click)="downloadFile(fileId)"
                         [disabled]="downloadingFileId() === fileId"
                       >
-                        @if (downloadingFileId() === fileId) {
-                          <span class="loading loading-spinner loading-xs"></span>
-                        } @else {
+                        @if (!(downloadingFileId() === fileId)) {
                           <span class="material-symbols-outlined">download</span>
                         }
                       </button>

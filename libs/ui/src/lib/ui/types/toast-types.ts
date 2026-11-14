@@ -3,6 +3,5 @@ export type ToastObject = {
   detail?: string;
   type: 'success' | 'error' | 'warning' | 'info';
   timeout?: number;
-  className?: string;
   id?: string;
 };

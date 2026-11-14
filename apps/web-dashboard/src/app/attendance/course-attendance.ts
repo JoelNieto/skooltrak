@@ -1,4 +1,16 @@
-import { Badge, BadgeTone, Button, Confirmation, Loader, Modal, Pagination, Paginator, UiSelect } from '#/ui';
+import {
+  Alert,
+  Badge,
+  BadgeTone,
+  Button,
+  Confirmation,
+  Loader,
+  Modal,
+  Pagination,
+  Paginator,
+  UiSelect,
+  UiTable,
+} from '#/ui';
 import { Menu, MenuContent, MenuItem, MenuTrigger } from '@angular/aria/menu';
 import { OverlayModule } from '@angular/cdk/overlay';
 import { DatePipe } from '@angular/common';
@@ -50,6 +62,8 @@ const STATUS_TONES: Record<string, BadgeTone> = {
 @Component({
   selector: 'app-course-attendance',
   imports: [
+    Alert,
+    UiTable,
     Badge,
     UiSelect,
     Button,
@@ -85,7 +99,7 @@ const STATUS_TONES: Record<string, BadgeTone> = {
     }
 
     @if (sessionsResource.error()) {
-      <div class="alert alert-error">
+      <div uiAlert tone="danger">
         <span class="material-symbols-outlined">error</span>
         Error al cargar las sesiones de asistencia
       </div>
@@ -93,7 +107,7 @@ const STATUS_TONES: Record<string, BadgeTone> = {
 
     @if (sessionsResource.hasValue()) {
       <div class="overflow-x-auto">
-        <table class="table table-zebra">
+        <table uiTable zebra>
           <thead>
             <tr>
               <th>Fecha</th>
@@ -108,7 +122,7 @@ const STATUS_TONES: Record<string, BadgeTone> = {
           <tbody>
             @for (session of sessionsResource.value(); track session.id) {
               @let stats = getStats(session);
-              <tr class="hover">
+              <tr>
                 <td>
                   <span class="font-medium">
                     {{ session.date | date: 'fullDate' }}
@@ -237,7 +251,7 @@ const STATUS_TONES: Record<string, BadgeTone> = {
             {{ selectedSession()!.classGroup.name }}
           </div>
           <div class="overflow-x-auto max-h-96">
-            <table class="table table-sm">
+            <table uiTable density="compact">
               <thead>
                 <tr>
                   <th>Estudiante</th>

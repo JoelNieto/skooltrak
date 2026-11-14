@@ -29,10 +29,15 @@ import { Router, RouterLink } from '@angular/router';
               </ul>
             }
 
-            <button uiButton variant="primary" type="submit" class="w-full" [disabled]="loading()">
-              @if (loading()) {
-                <span class="loading loading-spinner"></span>
-              } @else {
+            <button
+              uiButton
+              [loading]="loading()"
+              variant="primary"
+              type="submit"
+              class="w-full"
+              [disabled]="loading()"
+            >
+              @if (!loading()) {
                 <span class="material-symbols-outlined">link</span>
               }
               {{ loading() ? 'Enviando...' : 'Enviar enlace de acceso' }}

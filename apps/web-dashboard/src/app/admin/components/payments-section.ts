@@ -1,4 +1,4 @@
-import { EmptyState, Pagination, Paginator, UiInput, UiSelect } from '#/ui';
+import { EmptyState, Pagination, Paginator, UiInput, UiSelect, UiTable } from '#/ui';
 import { DatePipe, DecimalPipe } from '@angular/common';
 import { httpResource } from '@angular/common/http';
 import { Component, computed, effect, inject, input, signal } from '@angular/core';
@@ -19,7 +19,7 @@ type StudentOption = { id: string; firstName: string; fatherName: string };
 
 @Component({
   selector: 'app-payments-section',
-  imports: [UiInput, UiSelect, DatePipe, DecimalPipe, EmptyState, FormsModule, Paginator],
+  imports: [UiTable, UiInput, UiSelect, DatePipe, DecimalPipe, EmptyState, FormsModule, Paginator],
   providers: [Pagination],
   template: `
     <div class="bg-base-100 rounded-lg border border-base-300">
@@ -51,7 +51,7 @@ type StudentOption = { id: string; firstName: string; fatherName: string };
       @if (paymentsResource.isLoading()) {
         <div class="p-8 text-center">Cargando...</div>
       } @else if (paymentsResource.value()?.data.length) {
-        <table class="table">
+        <table uiTable>
           <thead>
             <tr>
               <th>Estudiante</th>

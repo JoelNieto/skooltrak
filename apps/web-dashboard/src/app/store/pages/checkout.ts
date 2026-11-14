@@ -1,5 +1,5 @@
 import { SchoolContext } from '#/shared';
-import { Button, Card, CardBody, Toast, UiCheckbox, UiChoice, UiInput } from '#/ui';
+import { Alert, Button, Card, CardBody, Toast, UiCheckbox, UiChoice, UiInput } from '#/ui';
 import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -8,11 +8,11 @@ import { StoreApiService } from '../store-api.service';
 
 @Component({
   selector: 'app-checkout',
-  imports: [Card, CardBody, UiCheckbox, UiChoice, UiInput, Button, FormsModule],
+  imports: [Alert, Card, CardBody, UiCheckbox, UiChoice, UiInput, Button, FormsModule],
   template: `
     <h2 class="text-xl font-semibold mb-4">Pago (simulado)</h2>
     @if (!school.currentSchoolId()) {
-      <div class="alert alert-warning">Selecciona una escuela.</div>
+      <div uiAlert tone="warning">Selecciona una escuela.</div>
     } @else if (!cart.lines().length) {
       <p class="mb-4">No hay artículos en el carrito.</p>
     } @else {

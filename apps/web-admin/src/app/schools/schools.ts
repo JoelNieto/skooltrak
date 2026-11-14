@@ -1,18 +1,18 @@
-import { Button, Confirmation, Error, Loader, Modal, Pagination, Paginator, Toast } from '#/ui';
+import { Breadcrumbs, Button, Confirmation, Error, Loader, Modal, Pagination, Paginator, Toast, UiTable } from '#/ui';
 import { Menu, MenuContent, MenuItem, MenuTrigger } from '@angular/aria/menu';
 import { OverlayModule } from '@angular/cdk/overlay';
 import { DatePipe } from '@angular/common';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { Component, effect, inject, viewChild } from '@angular/core';
-import { RouterLink } from '@angular/router';
 import { Prisma } from '@generated/prisma';
 import { toFetchQueryRecord } from '../core/fetch-query-params';
 import { SchoolsForm } from './schools-form';
 @Component({
   selector: 'app-schools',
   imports: [
+    Breadcrumbs,
+    UiTable,
     Button,
-    RouterLink,
     DatePipe,
     Menu,
     MenuContent,
@@ -24,12 +24,7 @@ import { SchoolsForm } from './schools-form';
     Loader,
   ],
   providers: [Pagination],
-  template: `<div class="breadcrumbs text-sm">
-      <ul>
-        <li><a routerLink="/">Inicio</a></li>
-        <li>Escuelas</li>
-      </ul>
-    </div>
+  template: `<ui-breadcrumbs [items]="[{ label: 'Inicio', link: '/' }, { label: 'Escuelas' }]" />
     <div class="flex justify-between items-center mb-4">
       <div>
         <h1 class="text-2xl text-base-content font-medium">Escuelas</h1>
@@ -46,7 +41,7 @@ import { SchoolsForm } from './schools-form';
       <lib-loader />
     } @else {
       <div class="overflow-x-auto">
-        <table class="table">
+        <table uiTable>
           <thead>
             <tr>
               <th>Nombre</th>

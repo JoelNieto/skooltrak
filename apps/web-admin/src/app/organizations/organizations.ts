@@ -1,22 +1,16 @@
-import { Button, Confirmation, Error, Modal, Toast } from '#/ui';
+import { Breadcrumbs, Button, Confirmation, Error, Modal, Toast, UiTable } from '#/ui';
 import { Menu, MenuContent, MenuItem, MenuTrigger } from '@angular/aria/menu';
 import { OverlayModule } from '@angular/cdk/overlay';
 import { DatePipe } from '@angular/common';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { Component, inject, viewChild } from '@angular/core';
-import { RouterLink } from '@angular/router';
 import { Prisma } from '@generated/prisma';
 import { OrganizationsForm } from './organizations-form';
 @Component({
   selector: 'app-organizations',
-  imports: [Button, DatePipe, RouterLink, Menu, MenuContent, MenuItem, MenuTrigger, OverlayModule, Error],
+  imports: [Breadcrumbs, UiTable, Button, DatePipe, Menu, MenuContent, MenuItem, MenuTrigger, OverlayModule, Error],
 
-  template: `<div class="breadcrumbs text-sm">
-      <ul>
-        <li><a routerLink="/">Inicio</a></li>
-        <li>Organizaciones</li>
-      </ul>
-    </div>
+  template: `<ui-breadcrumbs [items]="[{ label: 'Inicio', link: '/' }, { label: 'Organizaciones' }]" />
     <div class="flex justify-between items-center mb-4">
       <div>
         <h1 class="text-2xl text-base-content font-medium">Organizaciones</h1>
@@ -34,7 +28,7 @@ import { OrganizationsForm } from './organizations-form';
       />
     } @else {
       <div class="overflow-x-auto">
-        <table class="table">
+        <table uiTable>
           <thead>
             <tr>
               <th>Nombre</th>

@@ -1,5 +1,5 @@
 import { SchoolContext } from '#/shared';
-import { Button, Toast } from '#/ui';
+import { Alert, Button, Card, Toast, UiTable } from '#/ui';
 import { Component, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { CartLine, CartService } from '../cart.service';
@@ -7,17 +7,17 @@ import { StoreApiService } from '../store-api.service';
 
 @Component({
   selector: 'app-cart-page',
-  imports: [Button, RouterLink],
+  imports: [Alert, Card, UiTable, Button, RouterLink],
   template: `
     <h2 class="text-xl font-semibold mb-4">Carrito</h2>
     @if (!school.currentSchoolId()) {
-      <div class="alert alert-warning">Selecciona una escuela.</div>
+      <div uiAlert tone="warning">Selecciona una escuela.</div>
     } @else if (!lines().length) {
       <p class="text-base-content/70 mb-4">Tu carrito está vacío.</p>
       <a uiButton variant="primary" [routerLink]="['..']">Seguir comprando</a>
     } @else {
-      <div class="overflow-x-auto rounded-box border border-base-200">
-        <table class="table">
+      <div uiCard class="overflow-x-auto">
+        <table uiTable>
           <thead>
             <tr>
               <th>Producto</th>

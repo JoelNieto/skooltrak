@@ -1,9 +1,9 @@
-import { Card, CardBody, PageHeader, StatCard } from '#/ui';
+import { Card, CardBody, PageHeader, StatCard, UiTable } from '#/ui';
 import { Component } from '@angular/core';
 
 @Component({
   selector: 'app-parent-child-progress',
-  imports: [Card, CardBody, PageHeader, StatCard],
+  imports: [UiTable, Card, CardBody, PageHeader, StatCard],
   template: `
     <lib-page-header
       title="Progreso del estudiante"
@@ -22,7 +22,7 @@ import { Component } from '@angular/core';
       <div uiCardBody>
         <h2 class="text-lg font-semibold text-base-content">Calificaciones por materia</h2>
         <div class="overflow-x-auto">
-          <table class="table">
+          <table uiTable>
             <thead>
               <tr>
                 <th>Materia</th>

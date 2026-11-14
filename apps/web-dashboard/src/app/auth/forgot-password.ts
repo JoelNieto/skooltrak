@@ -1,4 +1,4 @@
-import { Button, Loader, UiInput } from '#/ui';
+import { Alert, Button, Loader, UiInput } from '#/ui';
 import { HttpClient } from '@angular/common/http';
 import { Component, inject, signal } from '@angular/core';
 import { email, form, FormField, required } from '@angular/forms/signals';
@@ -15,7 +15,7 @@ type LookupResult = {
 
 @Component({
   selector: 'app-forgot-password',
-  imports: [UiInput, Button, BrandLogo, FormField, RouterLink, Loader],
+  imports: [Alert, UiInput, Button, BrandLogo, FormField, RouterLink, Loader],
   template: `
     <div class="gradient-bg min-h-screen flex items-center justify-center p-4">
       @defer {
@@ -50,7 +50,7 @@ type LookupResult = {
             <!-- Form Section -->
             <div class="p-8 bg-base-100">
               @if (step() === 'sent') {
-                <div class="alert alert-success mb-4">
+                <div uiAlert tone="success" class="mb-4">
                   <span class="material-symbols-outlined">check_circle</span>
                   <span>Revisa tu correo electrónico. Te hemos enviado un enlace para restablecer tu contraseña.</span>
                 </div>
@@ -77,6 +77,7 @@ type LookupResult = {
                   <div class="flex flex-col gap-3">
                     <button
                       uiButton
+                      [loading]="loading()"
                       variant="primary"
                       type="button"
                       class="w-full"
@@ -84,7 +85,6 @@ type LookupResult = {
                       (click)="confirmAndSendReset()"
                     >
                       @if (loading()) {
-                        <span class="loading loading-spinner loading-sm"></span>
                         Enviando...
                       } @else {
                         <span class="material-symbols-outlined">check_circle</span>
@@ -105,7 +105,7 @@ type LookupResult = {
                 </div>
               } @else if (step() === 'not-found') {
                 <div class="space-y-6">
-                  <div class="alert alert-warning">
+                  <div uiAlert tone="warning">
                     <span class="material-symbols-outlined">info</span>
                     <span>
                       No encontramos ninguna cuenta con
@@ -149,13 +149,13 @@ type LookupResult = {
 
                   <button
                     uiButton
+                    [loading]="loading()"
                     variant="primary"
                     type="submit"
                     [disabled]="loading() || form().invalid()"
                     class="w-full"
                   >
                     @if (loading()) {
-                      <span class="loading loading-spinner loading-sm"></span>
                       Buscando...
                     } @else {
                       Buscar cuenta
@@ -173,7 +173,7 @@ type LookupResult = {
             </div>
           </div>
 
-          <p class="text-base-200 text-center">2025 © Skooltrak. Todos los derechos reservados.</p>
+          <p class="text-ink-muted text-center">2025 © Skooltrak. Todos los derechos reservados.</p>
         </div>
       } @placeholder {
         <lib-loader />

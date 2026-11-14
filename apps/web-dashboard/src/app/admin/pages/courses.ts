@@ -1,4 +1,4 @@
-import { Button, Confirmation, Modal, PaginatorV2, Toast, UiSelect } from '#/ui';
+import { Button, Card, Confirmation, Modal, PaginatorV2, Toast, UiSelect, UiTable } from '#/ui';
 import { Menu, MenuContent, MenuItem, MenuTrigger } from '@angular/aria/menu';
 import { OverlayModule } from '@angular/cdk/overlay';
 import { HttpClient, httpResource } from '@angular/common/http';
@@ -27,6 +27,8 @@ type CourseType = Prisma.CourseGetPayload<{
 @Component({
   selector: 'app-courses',
   imports: [
+    Card,
+    UiTable,
     UiSelect,
     Button,
     PaginatorV2,
@@ -59,8 +61,8 @@ type CourseType = Prisma.CourseGetPayload<{
         <span class="material-symbols-outlined">add_circle</span> Nuevo curso
       </button>
     </div>
-    <div class="overflow-x-auto bg-base-100 rounded-lg mt-4 border border-base-300">
-      <table class="table">
+    <div uiCard class="overflow-x-auto mt-4">
+      <table uiTable>
         <thead>
           <tr>
             <th>Nombre</th>

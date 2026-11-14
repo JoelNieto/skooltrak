@@ -1,5 +1,5 @@
 import { SchoolContext } from '#/shared';
-import { Button, Toast, UiChoice, UiInput, UiSelect, UiToggle } from '#/ui';
+import { Alert, Button, Card, Toast, UiChoice, UiInput, UiSelect, UiTable, UiToggle } from '#/ui';
 import { Component, effect, inject, input, signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { applyEach, form, FormField, maxLength, min, required, submit } from '@angular/forms/signals';
@@ -35,11 +35,11 @@ function emptyStoreProductForm(): StoreProductFormModel {
 
 @Component({
   selector: 'app-product-form',
-  imports: [UiChoice, UiInput, UiSelect, UiToggle, Button, FormField],
+  imports: [Alert, Card, UiTable, UiChoice, UiInput, UiSelect, UiToggle, Button, FormField],
   template: `
     <h3 class="text-lg font-medium mb-4">{{ id() ? 'Editar producto' : 'Nuevo producto' }}</h3>
     @if (!school.currentSchoolId()) {
-      <div class="alert alert-warning">Selecciona una escuela.</div>
+      <div uiAlert tone="warning">Selecciona una escuela.</div>
     } @else {
       <form class="grid gap-4 max-w-2xl" (submit)="onSubmit($event)" novalidate>
         <label class="form-control">
@@ -76,8 +76,8 @@ function emptyStoreProductForm(): StoreProductFormModel {
           <p class="text-sm text-base-content/60">
             Ej.: S, M, L o 28, 30, 32. Cada fila es una talla con su propio inventario.
           </p>
-          <div class="overflow-x-auto rounded-box border border-base-200">
-            <table class="table table-sm">
+          <div uiCard class="overflow-x-auto">
+            <table uiTable density="compact">
               <thead>
                 <tr>
                   <th>Etiqueta</th>

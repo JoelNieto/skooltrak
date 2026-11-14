@@ -1,4 +1,4 @@
-import { Button, Toast, UiField, UiInput, UiSelect } from '#/ui';
+import { Alert, Button, Toast, UiField, UiInput, UiSelect } from '#/ui';
 import { Combobox, ComboboxPopup, ComboboxWidget } from '@angular/aria/combobox';
 import { Listbox, Option } from '@angular/aria/listbox';
 import { OverlayModule } from '@angular/cdk/overlay';
@@ -25,6 +25,7 @@ interface CourseModel {
 @Component({
   selector: 'app-courses-form',
   imports: [
+    Alert,
     UiField,
     UiInput,
     UiSelect,
@@ -150,7 +151,7 @@ interface CourseModel {
       </ui-field>
     </div>
     @if (errorMessage()) {
-      <div role="alert" class="alert alert-error mt-3">
+      <div uiAlert tone="danger" class="mt-3">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 shrink-0 stroke-current" fill="none" viewBox="0 0 24 24">
           <path
             stroke-linecap="round"

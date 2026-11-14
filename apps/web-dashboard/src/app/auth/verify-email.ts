@@ -59,10 +59,8 @@ import { BrandLogo } from '../shared/brand-logo';
                 {{ error() }}
               </p>
             </div>
-            <button uiButton variant="primary" (click)="resendEmail()" [disabled]="resending()">
-              @if (resending()) {
-                <span class="loading loading-spinner loading-sm"></span>
-              } @else {
+            <button uiButton [loading]="resending()" variant="primary" (click)="resendEmail()" [disabled]="resending()">
+              @if (!resending()) {
                 <span class="material-symbols-outlined">mail</span>
               }
               Reenviar correo de verificación
@@ -100,9 +98,14 @@ import { BrandLogo } from '../shared/brand-logo';
             </div>
 
             <div class="space-y-3">
-              <button uiButton class="w-full" (click)="resendEmail()" [disabled]="resending() || cooldown() > 0">
+              <button
+                uiButton
+                [loading]="resending()"
+                class="w-full"
+                (click)="resendEmail()"
+                [disabled]="resending() || cooldown() > 0"
+              >
                 @if (resending()) {
-                  <span class="loading loading-spinner loading-sm"></span>
                   Enviando...
                 } @else if (cooldown() > 0) {
                   Reenviar en {{ cooldown() }}s

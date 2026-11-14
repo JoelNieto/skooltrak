@@ -1,4 +1,4 @@
-import { Badge, BadgeTone, Button, Card, CardBody, Loader, Toast, UiSelect } from '#/ui';
+import { Badge, BadgeTone, Breadcrumbs, Button, Card, CardBody, Loader, Toast, UiSelect, UiTable } from '#/ui';
 import { Tab, TabContent, TabList, TabPanel, Tabs } from '@angular/aria/tabs';
 import { DatePipe, DecimalPipe } from '@angular/common';
 import { HttpClient, httpResource } from '@angular/common/http';
@@ -31,6 +31,8 @@ const ENROLLMENT_STATUS_TONES: Record<$Enums.EnrollmentStatus, BadgeTone> = {
 @Component({
   selector: 'app-student',
   imports: [
+    Breadcrumbs,
+    UiTable,
     Badge,
     Card,
     CardBody,
@@ -55,13 +57,9 @@ const ENROLLMENT_STATUS_TONES: Record<$Enums.EnrollmentStatus, BadgeTone> = {
       @if (studentResource.hasValue() && studentResource.value()?.id) {
         @let student = studentResource.value()!;
         @let metric = $safeNavigationMigration(student.classGroup?.studyPlan?.gradeMetric);
-        <div class="breadcrumbs text-sm">
-          <ul>
-            <li><a routerLink="/">Inicio</a></li>
-            <li><a routerLink="/students">Alumnos</a></li>
-            <li>{{ student.name }}</li>
-          </ul>
-        </div>
+        <ui-breadcrumbs
+          [items]="[{ label: 'Inicio', link: '/' }, { label: 'Alumnos', link: '/students' }, { label: student.name }]"
+        />
         <div uiCard class="w-full mt-4">
           <div uiCardBody>
             <div class="flex items-center justify-between">
@@ -215,6 +213,7 @@ const ENROLLMENT_STATUS_TONES: Record<$Enums.EnrollmentStatus, BadgeTone> = {
                             @if (auth.hasPermission('MANAGE_STUDENTS')) {
                               <button
                                 uiButton
+                                [loading]="regenerating()"
                                 variant="ghost"
                                 size="sm"
                                 iconOnly
@@ -223,9 +222,7 @@ const ENROLLMENT_STATUS_TONES: Record<$Enums.EnrollmentStatus, BadgeTone> = {
                                 [disabled]="regenerating()"
                                 (click)="regenerate()"
                               >
-                                @if (regenerating()) {
-                                  <span class="loading loading-spinner loading-sm"></span>
-                                } @else {
+                                @if (!regenerating()) {
                                   <span class="material-symbols-outlined text-lg">refresh</span>
                                 }
                               </button>
@@ -256,15 +253,14 @@ const ENROLLMENT_STATUS_TONES: Record<$Enums.EnrollmentStatus, BadgeTone> = {
                                   </button>
                                   <button
                                     uiButton
+                                    [loading]="connectQrLoading()"
                                     variant="ghost"
                                     size="sm"
                                     type="button"
                                     [disabled]="connectQrLoading()"
                                     (click)="generateConnectQr()"
                                   >
-                                    @if (connectQrLoading()) {
-                                      <span class="loading loading-spinner loading-sm"></span>
-                                    } @else {
+                                    @if (!connectQrLoading()) {
                                       <span class="material-symbols-outlined text-lg">refresh</span>
                                     }
                                     Regenerar
@@ -277,15 +273,14 @@ const ENROLLMENT_STATUS_TONES: Record<$Enums.EnrollmentStatus, BadgeTone> = {
                             } @else {
                               <button
                                 uiButton
+                                [loading]="connectQrLoading()"
                                 variant="primary"
                                 size="sm"
                                 type="button"
                                 [disabled]="connectQrLoading()"
                                 (click)="generateConnectQr()"
                               >
-                                @if (connectQrLoading()) {
-                                  <span class="loading loading-spinner loading-sm"></span>
-                                } @else {
+                                @if (!connectQrLoading()) {
                                   <span class="material-symbols-outlined text-lg">qr_code_2</span>
                                 }
                                 Generar QR de conexión
@@ -389,7 +384,7 @@ const ENROLLMENT_STATUS_TONES: Record<$Enums.EnrollmentStatus, BadgeTone> = {
                         <p class="text-sm text-base-content/60">{{ course.teacher?.name ?? 'Sin profesor' }}</p>
                       </div>
                       <div class="overflow-x-auto">
-                        <table class="table table-sm table-zebra">
+                        <table uiTable density="compact" zebra>
                           <thead>
                             <tr>
                               <th class="w-1/5">Nombre</th>

@@ -1,20 +1,20 @@
-import { Button, Confirmation, Error, Modal, Pagination, Paginator, Toast, UiInput } from '#/ui';
+import { Breadcrumbs, Button, Confirmation, Error, Modal, Pagination, Paginator, Toast, UiInput, UiTable } from '#/ui';
 import { Menu, MenuContent, MenuItem, MenuTrigger } from '@angular/aria/menu';
 import { OverlayModule } from '@angular/cdk/overlay';
 import { DatePipe } from '@angular/common';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { afterRenderEffect, Component, effect, inject, signal, viewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
 import { Prisma } from '@generated/prisma';
 import { toFetchQueryRecord } from '../core/fetch-query-params';
 import { UsersForm } from './users-form';
 @Component({
   selector: 'app-users',
   imports: [
+    Breadcrumbs,
+    UiTable,
     UiInput,
     Button,
-    RouterLink,
     DatePipe,
     Menu,
     MenuContent,
@@ -26,12 +26,7 @@ import { UsersForm } from './users-form';
     Error,
   ],
   providers: [Pagination],
-  template: `<div class="breadcrumbs text-sm">
-      <ul>
-        <li><a routerLink="/">Inicio</a></li>
-        <li>Usuarios</li>
-      </ul>
-    </div>
+  template: `<ui-breadcrumbs [items]="[{ label: 'Inicio', link: '/' }, { label: 'Usuarios' }]" />
     <div class="flex justify-between items-center mb-4">
       <div>
         <h1 class="text-2xl text-base-content font-medium">Usuarios</h1>
@@ -51,7 +46,7 @@ import { UsersForm } from './users-form';
       <lib-error (retry)="users.reload()" [description]="$safeNavigationMigration(users.error()?.message)" />
     } @else {
       <div class="overflow-x-auto">
-        <table class="table">
+        <table uiTable>
           <thead>
             <tr>
               <th>Nombre</th>

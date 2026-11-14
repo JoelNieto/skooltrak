@@ -1,22 +1,18 @@
-import { Badge, Loader, Toast, UiInput } from '#/ui';
+import { Badge, Breadcrumbs, Loader, Spinner, Toast, UiInput } from '#/ui';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import Auth from '../auth/auth';
 
 @Component({
   selector: 'app-chat-new',
-  imports: [Badge, UiInput, RouterLink, Loader, FormsModule],
+  imports: [Spinner, Breadcrumbs, Badge, UiInput, Loader, FormsModule],
   template: `
-    <div class="breadcrumbs text-sm">
-      <ul>
-        <li><a routerLink="/">Inicio</a></li>
-        <li><a routerLink="/chats">Chats</a></li>
-        <li>Nuevo chat</li>
-      </ul>
-    </div>
+    <ui-breadcrumbs
+      [items]="[{ label: 'Inicio', link: '/' }, { label: 'Chats', link: '/chats' }, { label: 'Nuevo chat' }]"
+    />
     <h1 class="text-2xl font-semibold mt-4">Nuevo chat</h1>
     <p class="text-base-content/70 mt-1">Selecciona un contacto para iniciar una conversación</p>
 
@@ -59,7 +55,7 @@ import Auth from '../auth/auth';
               </div>
             </div>
             @if (creating() === contact.id) {
-              <span class="loading loading-spinner loading-sm"></span>
+              <span uiSpinner size="sm"></span>
             } @else {
               <span class="material-symbols-outlined text-base-content/50">chat</span>
             }

@@ -1,4 +1,15 @@
-import { Button, Confirmation, EmptyState, Paginator, TimeAgoPipe, Toast, UiCheckbox } from '#/ui';
+import {
+  Breadcrumbs,
+  Button,
+  Card,
+  Confirmation,
+  EmptyState,
+  Paginator,
+  TimeAgoPipe,
+  Toast,
+  UiCheckbox,
+  UiTable,
+} from '#/ui';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { Component, computed, effect, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -30,14 +41,9 @@ type MessageRecipientType = {
 };
 
 @Component({
-  imports: [UiCheckbox, Button, RouterLink, Paginator, FormsModule, EmptyState],
+  imports: [Breadcrumbs, Card, UiTable, UiCheckbox, Button, RouterLink, Paginator, FormsModule, EmptyState],
   providers: [TimeAgoPipe],
-  template: `<div class="breadcrumbs text-sm">
-      <ul>
-        <li><a routerLink="/">Inicio</a></li>
-        <li>Mensajes</li>
-      </ul>
-    </div>
+  template: `<ui-breadcrumbs [items]="[{ label: 'Inicio', link: '/' }, { label: 'Mensajes' }]" />
     <div class="flex flex:col md:flex-row md:justify-between md:items-center">
       <h1 class="text-2xl font-semibold">Mensajes</h1>
       <div class="flex gap-2">
@@ -54,8 +60,8 @@ type MessageRecipientType = {
         (change)="setActiveTab('inbox')"
       />
       <div class="tab-content bg-base-100 border-base-300 p-4">
-        <div class="overflow-x-auto bg-base-100 rounded-lg">
-          <table class="table">
+        <div uiCard class="overflow-x-auto">
+          <table uiTable>
             <thead>
               <tr>
                 <th class="w-12">
@@ -148,8 +154,8 @@ type MessageRecipientType = {
         (change)="setActiveTab('outbox')"
       />
       <div class="tab-content bg-base-100 border-base-300 p-4">
-        <div class="overflow-x-auto bg-base-100 rounded-lg">
-          <table class="table">
+        <div uiCard class="overflow-x-auto">
+          <table uiTable rowHover>
             <thead>
               <tr>
                 <th class="w-12">
@@ -170,7 +176,7 @@ type MessageRecipientType = {
             </thead>
             <tbody>
               @for (item of sentMessagesResource.value(); track item.id) {
-                <tr [routerLink]="['/messages', item.id]" class="hover:bg-base-300">
+                <tr [routerLink]="['/messages', item.id]">
                   <td>
                     <input
                       uiCheckbox

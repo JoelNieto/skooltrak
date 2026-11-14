@@ -15,7 +15,6 @@ import { DatePipe } from '@angular/common';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { afterRenderEffect, Component, computed, effect, inject, input, linkedSignal, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
 import { isBefore } from 'date-fns';
 import Auth from '../auth/auth';
 import {
@@ -50,7 +49,6 @@ interface ThreadListItem {
     UiInput,
     UiSelect,
     Button,
-    RouterLink,
     FormsModule,
     DatePipe,
     PageHeader,
@@ -60,13 +58,7 @@ interface ThreadListItem {
     MessageBubble,
   ],
   template: `
-    <div class="breadcrumbs text-sm">
-      <ul>
-        <li><a routerLink="/">Inicio</a></li>
-        <li>Comunicaciones</li>
-      </ul>
-    </div>
-    <lib-page-header
+    <lib-page-header [breadcrumbs]="[{ label: 'Inicio', link: '/' }, { label: 'Comunicaciones' }]"
       title="Comunicación con familias"
       subtitle="Crea hilos con grupos de clase o padres de un estudiante."
       actionLabel="Nuevo mensaje"

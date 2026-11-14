@@ -1,4 +1,4 @@
-import { Button, Toast } from '#/ui';
+import { Button, Spinner, Toast } from '#/ui';
 import { HttpClient } from '@angular/common/http';
 import { afterRenderEffect, Component, inject, OnDestroy, signal } from '@angular/core';
 import { Router } from '@angular/router';
@@ -7,7 +7,7 @@ import { BrandLogo } from '../shared/brand-logo';
 
 @Component({
   selector: 'app-waiting-approval',
-  imports: [Button, BrandLogo,],
+  imports: [Spinner, Button, BrandLogo],
   template: `
     <div class="min-h-screen flex flex-col gradient-bg">
       <header class="p-4 md:p-6 flex items-center justify-between">
@@ -61,7 +61,7 @@ import { BrandLogo } from '../shared/brand-logo';
 
           @if (checking()) {
             <div class="flex items-center justify-center gap-2 text-base-content/50">
-              <span class="loading loading-spinner loading-xs"></span>
+              <span uiSpinner size="xs"></span>
               <span class="text-sm">Verificando estado...</span>
             </div>
           }

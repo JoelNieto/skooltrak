@@ -1,4 +1,4 @@
-import { Card, CardBody, DecimalToNumber, UiSelect } from '#/ui';
+import { Card, CardBody, DecimalToNumber, UiSelect, UiTable } from '#/ui';
 import { DatePipe, DecimalPipe, NgClass } from '@angular/common';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { afterRenderEffect, Component, computed, inject, input, signal } from '@angular/core';
@@ -10,7 +10,7 @@ import Store from '../core/store';
 
 @Component({
   selector: 'app-course-student-grades',
-  imports: [Card, CardBody, UiSelect, FormsModule, NgClass, DatePipe, DecimalPipe],
+  imports: [UiTable, Card, CardBody, UiSelect, FormsModule, NgClass, DatePipe, DecimalPipe],
   template: `
     <div class="flex flex-col gap-4">
       <div class="flex justify-between items-start">
@@ -58,7 +58,7 @@ import Store from '../core/store';
         }
       </div>
       <div class="overflow-x-auto">
-        <table class="table table-zebra table-fixed">
+        <table uiTable zebra class="table-fixed">
           <thead>
             <tr>
               <th class="w-1/5">Nombre</th>

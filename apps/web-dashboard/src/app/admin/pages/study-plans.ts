@@ -1,4 +1,4 @@
-import { Button, Confirmation, EmptyState, Modal, PaginatorV2, Toast, UiSelect } from '#/ui';
+import { Button, Card, Confirmation, EmptyState, Modal, PaginatorV2, Toast, UiSelect, UiTable } from '#/ui';
 import { Menu, MenuContent, MenuItem, MenuTrigger } from '@angular/aria/menu';
 import { OverlayModule } from '@angular/cdk/overlay';
 import { DatePipe } from '@angular/common';
@@ -29,6 +29,8 @@ type DegreeRow = {
 @Component({
   selector: 'app-study-plans',
   imports: [
+    Card,
+    UiTable,
     UiSelect,
     Button,
     DatePipe,
@@ -61,8 +63,8 @@ type DegreeRow = {
         <span class="material-symbols-outlined">add_circle</span> Nuevo plan
       </button>
     </div>
-    <div class="bg-base-100 rounded-lg border border-base-300 mt-4">
-      <table class="table">
+    <div uiCard class="mt-4">
+      <table uiTable>
         <thead>
           <tr>
             <th>Nombre</th>

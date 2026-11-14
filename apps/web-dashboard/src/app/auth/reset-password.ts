@@ -1,4 +1,4 @@
-import { Button, Loader, Toast, UiField, UiInput } from '#/ui';
+import { Alert, Button, Loader, Toast, UiField, UiInput } from '#/ui';
 import { HttpClient } from '@angular/common/http';
 import { Component, inject, signal } from '@angular/core';
 import { form, FormField, minLength, required, validate } from '@angular/forms/signals';
@@ -8,7 +8,7 @@ import { BrandLogo } from '../shared/brand-logo';
 
 @Component({
   selector: 'app-reset-password',
-  imports: [UiField, UiInput, Button, BrandLogo, FormField, RouterLink, Loader],
+  imports: [Alert, UiField, UiInput, Button, BrandLogo, FormField, RouterLink, Loader],
   template: `
     <div class="gradient-bg min-h-screen flex items-center justify-center p-4">
       @defer {
@@ -25,13 +25,13 @@ import { BrandLogo } from '../shared/brand-logo';
             <!-- Form Section -->
             <div class="p-8 bg-base-100">
               @if (resendSuccess()) {
-                <div class="alert alert-success mb-4">
+                <div uiAlert tone="success" class="mb-4">
                   <span class="material-symbols-outlined">check_circle</span>
                   <span>Invitación reenviada. Revisa tu bandeja de entrada.</span>
                 </div>
                 <a uiButton variant="primary" routerLink="/login" class="w-full"> Volver al inicio de sesión </a>
               } @else if (error()) {
-                <div class="alert alert-error mb-4">
+                <div uiAlert tone="danger" class="mb-4">
                   <span class="material-symbols-outlined">error</span>
                   <span>El enlace es inválido o ha expirado. Solicita uno nuevo.</span>
                 </div>
@@ -39,13 +39,13 @@ import { BrandLogo } from '../shared/brand-logo';
                   @if (emailFromUrl()) {
                     <button
                       uiButton
+                      [loading]="resending()"
                       variant="primary"
                       type="button"
                       [disabled]="resending()"
                       (click)="resendInvitation()"
                     >
                       @if (resending()) {
-                        <span class="loading loading-spinner loading-sm"></span>
                         Enviando...
                       } @else {
                         <span class="material-symbols-outlined">mail</span>
@@ -82,13 +82,13 @@ import { BrandLogo } from '../shared/brand-logo';
 
                   <button
                     uiButton
+                    [loading]="loading()"
                     variant="primary"
                     type="submit"
                     [disabled]="loading() || form().invalid()"
                     class="w-full"
                   >
                     @if (loading()) {
-                      <span class="loading loading-spinner loading-sm"></span>
                       Guardando...
                     } @else {
                       Guardar nueva contraseña
@@ -105,7 +105,7 @@ import { BrandLogo } from '../shared/brand-logo';
             </div>
           </div>
 
-          <p class="text-base-200 text-center">2025 © Skooltrak. Todos los derechos reservados.</p>
+          <p class="text-ink-muted text-center">2025 © Skooltrak. Todos los derechos reservados.</p>
         </div>
       } @placeholder {
         <lib-loader />

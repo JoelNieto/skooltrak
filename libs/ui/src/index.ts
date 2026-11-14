@@ -1,4 +1,6 @@
+export * from './lib/ui/components/alert';
 export * from './lib/ui/components/badge';
+export * from './lib/ui/components/breadcrumbs';
 export * from './lib/ui/components/button';
 export * from './lib/ui/components/card';
 export * from './lib/ui/components/field';
@@ -13,7 +15,9 @@ export * from './lib/ui/components/multiselect';
 export * from './lib/ui/components/page-header';
 export * from './lib/ui/components/paginator';
 export * from './lib/ui/components/paginator-v2';
+export * from './lib/ui/components/spinner';
 export * from './lib/ui/components/stat-card';
+export * from './lib/ui/components/table';
 export * from './lib/ui/components/text-editor';
 export * from './lib/ui/components/thread-composer';
 export * from './lib/ui/components/thread-list';

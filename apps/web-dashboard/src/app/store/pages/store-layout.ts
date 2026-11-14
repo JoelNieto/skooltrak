@@ -1,5 +1,5 @@
 import { SchoolContext } from '#/shared';
-import { Component, DestroyRef, effect, inject, signal } from '@angular/core';
+import { Component, computed, DestroyRef, effect, inject, signal } from '@angular/core';
 import { rxResource, takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, RouterLink, RouterOutlet } from '@angular/router';
 import { catchError, distinctUntilChanged, filter, map, of, switchMap } from 'rxjs';
@@ -7,22 +7,14 @@ import { CartService } from '../cart.service';
 import { StoreApiService } from '../store-api.service';
 import StoreThemeToggle from '../store-theme-toggle';
 import { StoreThemeService } from '../store-theme.service';
-import { Badge, Button } from '#/ui';
+import { Badge, BreadcrumbItem, Breadcrumbs, Button } from '#/ui';
 
 @Component({
   selector: 'app-store-layout',
-  imports: [Badge, Button, RouterOutlet, RouterLink, StoreThemeToggle],
+  imports: [Breadcrumbs, Badge, Button, RouterOutlet, RouterLink, StoreThemeToggle],
   template: `
     <div class="layout-padding pb-10">
-      <div class="breadcrumbs text-sm mb-4">
-        <ul>
-          <li><a routerLink="/">Inicio</a></li>
-          <li><a routerLink="/store">Tiendas</a></li>
-          @if (schoolName()) {
-            <li class="text-base-content/80">{{ schoolName() }}</li>
-          }
-        </ul>
-      </div>
+      <ui-breadcrumbs class="mb-4" [items]="breadcrumbs()" />
       <div class="flex flex-wrap items-center justify-between gap-3 mb-6">
         <div class="flex min-w-0 flex-1 items-center gap-3">
           @if (schoolLogoUrl()) {
@@ -62,6 +54,15 @@ import { Badge, Button } from '#/ui';
   `,
 })
 export default class StoreLayout {
+  readonly breadcrumbs = computed<BreadcrumbItem[]>(() => {
+    const school = this.schoolName();
+    return [
+      { label: 'Inicio', link: '/' },
+      { label: 'Tiendas', link: '/store' },
+      ...(school ? [{ label: school }] : []),
+    ];
+  });
+
   private readonly api = inject(StoreApiService);
   private readonly route = inject(ActivatedRoute);
   private readonly schoolContext = inject(SchoolContext);

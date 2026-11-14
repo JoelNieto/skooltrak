@@ -1,5 +1,5 @@
 import { SchoolContext } from '#/shared';
-import { Toast, UiSelect } from '#/ui';
+import { Alert, Card, Toast, UiSelect, UiTable } from '#/ui';
 import { DatePipe } from '@angular/common';
 import { Component, inject, signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
@@ -9,14 +9,14 @@ import { StoreApiService } from '../store-api.service';
 
 @Component({
   selector: 'app-orders-admin',
-  imports: [UiSelect, FormsModule, DatePipe],
+  imports: [Alert, Card, UiTable, UiSelect, FormsModule, DatePipe],
   template: `
     <h3 class="text-lg font-medium mb-4">Pedidos (escuela)</h3>
     @if (!school.currentSchoolId()) {
-      <div class="alert alert-warning">Selecciona una escuela.</div>
+      <div uiAlert tone="warning">Selecciona una escuela.</div>
     } @else {
-      <div class="overflow-x-auto rounded-box border border-base-200">
-        <table class="table table-sm">
+      <div uiCard class="overflow-x-auto">
+        <table uiTable density="compact">
           <thead>
             <tr>
               <th>ID</th>

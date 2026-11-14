@@ -70,16 +70,22 @@ import { CreatedEntity } from '../setup-wizard';
           </ui-field>
 
           <div class="flex gap-3 pt-4">
-            <button uiButton type="submit" class="flex-1" [disabled]="saving()" (click)="addAnother = true">
-              @if (saving() && addAnother) {
-                <span class="loading loading-spinner loading-sm"></span>
-              } @else {
+            <button
+              uiButton
+              [loading]="saving() && addAnother"
+              type="submit"
+              class="flex-1"
+              [disabled]="saving()"
+              (click)="addAnother = true"
+            >
+              @if (!(saving() && addAnother)) {
                 <span class="material-symbols-outlined text-xl">add</span>
               }
               Agregar otro
             </button>
             <button
               uiButton
+              [loading]="saving() && !addAnother"
               variant="primary"
               type="submit"
               class="flex-1"
@@ -87,7 +93,6 @@ import { CreatedEntity } from '../setup-wizard';
               (click)="addAnother = false"
             >
               @if (saving() && !addAnother) {
-                <span class="loading loading-spinner loading-sm"></span>
                 Guardando...
               } @else {
                 Finalizar

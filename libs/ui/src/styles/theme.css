@@ -311,6 +311,15 @@ h3 {
   }
 }
 
+/* uiTable rowHover: rows that open something on click. */
+.ui-table-row-hover tbody > tr {
+  cursor: pointer;
+  transition: background-color 0.15s var(--ui-ease);
+  &:hover {
+    background-color: var(--ui-surface-2);
+  }
+}
+
 /* Card (uiCard directives in libs/ui). In the components layer so utilities on the host still win.
  * `.card.ui-card` outranks DaisyUI's `.card` in the same layer. */
 @layer components {
@@ -363,13 +372,18 @@ h3 {
   background-color: color-mix(in oklab, var(--badge-color, var(--ui-ink)) 12%, var(--ui-surface-1));
 }
 
-.layout-padding {
-  @apply mx-auto mt-4 max-w-7xl px-4 sm:px-6 lg:px-8;
+/* Alert (uiAlert): same readable-tone approach as badges, plus a hairline border in the tone. */
+.alert.ui-alert {
+  color: color-mix(in oklab, var(--alert-color, var(--ui-ink)) 62%, var(--ui-ink-strong));
+  background: color-mix(in oklab, var(--alert-color, var(--ui-ink)) 9%, var(--ui-surface-1));
+  border: 1px solid color-mix(in oklab, var(--alert-color, var(--ui-ink)) 22%, var(--ui-surface-1));
+  border-radius: var(--radius-field);
+  font-size: 0.875rem;
+  line-height: 1.25rem;
 }
 
-/* Deprecated: overrides Tailwind's `text-base-200` to mean muted text (11 templates). Use `text-ink-muted`. */
-.text-base-200 {
-  color: var(--ui-ink-muted);
+.layout-padding {
+  @apply mx-auto mt-4 max-w-7xl px-4 sm:px-6 lg:px-8;
 }
 
 @media (prefers-reduced-motion: reduce) {

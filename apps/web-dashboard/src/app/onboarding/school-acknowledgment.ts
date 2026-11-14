@@ -113,12 +113,12 @@ import { BrandLogo } from '../shared/brand-logo';
         <div></div>
         <button
           uiButton
+          [loading]="saving()"
           variant="primary"
           [disabled]="!acknowledged() || form().invalid() || saving()"
           (click)="createSchool()"
         >
           @if (saving()) {
-            <span class="loading loading-spinner loading-sm"></span>
             Creando escuela...
           } @else {
             Crear Escuela y Continuar

@@ -1,4 +1,4 @@
-import { Badge, Card, CardBody, EmptyState } from '#/ui';
+import { Badge, Card, CardBody, EmptyState, Spinner } from '#/ui';
 import { DatePipe } from '@angular/common';
 import { httpResource } from '@angular/common/http';
 import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
@@ -52,7 +52,7 @@ export class BroadcastCard {
 @Component({
   selector: 'app-recent-broadcasts',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [Card, CardBody, RouterLink, EmptyState, BroadcastCard],
+  imports: [Spinner, Card, CardBody, RouterLink, EmptyState, BroadcastCard],
   template: `
     <div uiCard class="border-primary/25">
       <div uiCardBody>
@@ -67,7 +67,7 @@ export class BroadcastCard {
         </div>
         @if (resource.isLoading() && items().length === 0) {
           <div class="flex justify-center py-8">
-            <span class="loading loading-spinner loading-md"></span>
+            <span uiSpinner></span>
           </div>
         } @else if (items().length === 0) {
           <lib-empty-state

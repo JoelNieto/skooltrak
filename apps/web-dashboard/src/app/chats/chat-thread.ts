@@ -1,10 +1,9 @@
-import { Badge, Button, Card, CardBody, Loader, Toast, UiInput } from '#/ui';
+import { Badge, Breadcrumbs, Button, Card, CardBody, Loader, Toast, UiInput } from '#/ui';
 import { DatePipe } from '@angular/common';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { Component, DestroyRef, effect, inject, input, signal, viewChild } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
 import Auth from '../auth/auth';
 import ChatSocketService, { ChatMessageReceivedPayload } from './chat-socket.service';
 
@@ -45,15 +44,11 @@ type ChatMessageDto = {
 
 @Component({
   selector: 'app-chat-thread',
-  imports: [Badge, Card, CardBody, UiInput, Button, RouterLink, Loader, FormsModule, DatePipe],
+  imports: [Breadcrumbs, Badge, Card, CardBody, UiInput, Button, Loader, FormsModule, DatePipe],
   template: `
-    <div class="breadcrumbs text-sm">
-      <ul>
-        <li><a routerLink="/">Inicio</a></li>
-        <li><a routerLink="/chats">Chats</a></li>
-        <li>{{ chatDisplayName() }}</li>
-      </ul>
-    </div>
+    <ui-breadcrumbs
+      [items]="[{ label: 'Inicio', link: '/' }, { label: 'Chats', link: '/chats' }, { label: chatDisplayName() }]"
+    />
 
     @if (chatResource.isLoading()) {
       <lib-loader />
@@ -145,10 +140,14 @@ type ChatMessageDto = {
                 [(ngModel)]="messageContent"
                 name="content"
               />
-              <button uiButton variant="primary" type="submit" [disabled]="!messageContent().trim() || sending()">
-                @if (sending()) {
-                  <span class="loading loading-spinner loading-sm"></span>
-                } @else {
+              <button
+                uiButton
+                [loading]="sending()"
+                variant="primary"
+                type="submit"
+                [disabled]="!messageContent().trim() || sending()"
+              >
+                @if (!sending()) {
                   <span class="material-symbols-outlined">send</span>
                 }
               </button>

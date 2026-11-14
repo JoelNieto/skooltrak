@@ -6,10 +6,10 @@ import { Button } from './button';
 import { ToastsContainer } from './toasts-container';
 
 const sample: ToastObject[] = [
-  { id: '1', type: 'success', className: 'alert-success', message: 'Calificaciones guardadas' },
-  { id: '2', type: 'info', className: 'alert-info', message: 'Nuevo mensaje', detail: 'De: Coordinación académica' },
-  { id: '3', type: 'warning', className: 'alert-warning', message: 'La sesión expira en 5 minutos' },
-  { id: '4', type: 'error', className: 'alert-error', message: 'No se pudo guardar', detail: 'Revisa tu conexión' },
+  { id: '1', type: 'success', message: 'Calificaciones guardadas' },
+  { id: '2', type: 'info', message: 'Nuevo mensaje', detail: 'De: Coordinación académica' },
+  { id: '3', type: 'warning', message: 'La sesión expira en 5 minutos' },
+  { id: '4', type: 'error', message: 'No se pudo guardar', detail: 'Revisa tu conexión' },
 ];
 
 /** Same wiring as app.ts: buttons call the `Toast` service, the container renders `toastList()`. */

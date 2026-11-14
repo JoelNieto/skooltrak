@@ -1,4 +1,14 @@
-import { Badge, MessageBubble, PageHeader, ThreadComposer, ThreadList, ThreadScrollPane, Toast, UiInput } from '#/ui';
+import {
+  Badge,
+  MessageBubble,
+  PageHeader,
+  Spinner,
+  ThreadComposer,
+  ThreadList,
+  ThreadScrollPane,
+  Toast,
+  UiInput,
+} from '#/ui';
 import { DatePipe } from '@angular/common';
 import { httpResource } from '@angular/common/http';
 import {
@@ -13,7 +23,6 @@ import {
   signal,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
 import { isBefore } from 'date-fns';
 import Auth from '../auth/auth';
 import { CommunicationApi, Thread, ThreadMessage } from '../communication/communication-api.service';
@@ -26,9 +35,9 @@ const API = '/api/v1/communication';
   selector: 'app-parent-teacher-communication',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
+    Spinner,
     Badge,
     UiInput,
-    RouterLink,
     FormsModule,
     DatePipe,
     PageHeader,
@@ -38,13 +47,7 @@ const API = '/api/v1/communication';
     MessageBubble,
   ],
   template: `
-    <div class="breadcrumbs text-sm">
-      <ul>
-        <li><a routerLink="/">Inicio</a></li>
-        <li>Mensajes</li>
-      </ul>
-    </div>
-    <lib-page-header
+    <lib-page-header [breadcrumbs]="[{ label: 'Inicio', link: '/' }, { label: 'Mensajes' }]"
       [title]="pageTitle()"
       [subtitle]="pageSubtitle()"
     />
@@ -62,7 +65,7 @@ const API = '/api/v1/communication';
         <div class="flex-1 overflow-y-auto">
           @if (threadsResource.isLoading() && threadsResource.value().length === 0) {
             <div class="flex justify-center py-8">
-              <span class="loading loading-spinner loading-md"></span>
+              <span uiSpinner></span>
             </div>
           } @else {
             <lib-thread-list

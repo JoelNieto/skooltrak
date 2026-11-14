@@ -1,4 +1,5 @@
 import {
+  Alert,
   Badge,
   BadgeTone,
   Button,
@@ -13,6 +14,7 @@ import {
   UiField,
   UiInput,
   UiSelect,
+  UiTable,
   UiToggle,
 } from '#/ui';
 import { Tab, TabContent, TabList, TabPanel, Tabs } from '@angular/aria/tabs';
@@ -44,6 +46,8 @@ const ACTION_LABELS: Record<string, string> = {
   selector: 'app-communication-broadcasts',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
+    Alert,
+    UiTable,
     Badge,
     Card,
     CardBody,
@@ -138,15 +142,13 @@ const ACTION_LABELS: Record<string, string> = {
                           @if (canApprove()) {
                             <button
                               uiButton
+                              [loading]="approvingId() === item.id"
                               variant="primary"
                               size="sm"
                               type="button"
                               [disabled]="approvingId() === item.id"
                               (click)="approve(item)"
                             >
-                              @if (approvingId() === item.id) {
-                                <span class="loading loading-spinner loading-sm"></span>
-                              }
                               Aprobar y enviar
                             </button>
                           }
@@ -226,16 +228,19 @@ const ACTION_LABELS: Record<string, string> = {
                     </ui-choice>
 
                     @if (form.type().value() === 'SCHOOL_WIDE') {
-                      <div role="alert" class="alert alert-info text-sm">
+                      <div uiAlert class="text-sm">
                         Este comunicado quedará pendiente de aprobación antes de enviarse.
                       </div>
                     }
 
                     <div class="flex justify-end">
-                      <button uiButton variant="primary" type="submit" [disabled]="submitting() || form().invalid()">
-                        @if (submitting()) {
-                          <span class="loading loading-spinner loading-sm"></span>
-                        }
+                      <button
+                        uiButton
+                        [loading]="submitting()"
+                        variant="primary"
+                        type="submit"
+                        [disabled]="submitting() || form().invalid()"
+                      >
                         Enviar comunicado
                       </button>
                     </div>
@@ -254,7 +259,7 @@ const ACTION_LABELS: Record<string, string> = {
                     />
                   } @else {
                     <div class="overflow-x-auto">
-                      <table class="table">
+                      <table uiTable>
                         <thead>
                           <tr>
                             <th>Asunto</th>
@@ -319,7 +324,7 @@ const ACTION_LABELS: Record<string, string> = {
                   />
                 } @else {
                   <div class="overflow-x-auto">
-                    <table class="table">
+                    <table uiTable>
                       <thead>
                         <tr>
                           <th>Acción</th>
@@ -427,7 +432,7 @@ const ACTION_LABELS: Record<string, string> = {
                     llegando solo en la aplicación.
                   </p>
                   <div class="mt-3 overflow-x-auto">
-                    <table class="table">
+                    <table uiTable>
                       <thead>
                         <tr>
                           <th>Prioridad</th>

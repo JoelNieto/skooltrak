@@ -1,4 +1,4 @@
-import { Badge, Button, Card, CardBody, Loader } from '#/ui';
+import { Badge, Breadcrumbs, Button, Card, CardBody, Loader } from '#/ui';
 import { Tab, TabContent, TabList, TabPanel, Tabs } from '@angular/aria/tabs';
 import { DatePipe } from '@angular/common';
 import { httpResource } from '@angular/common/http';
@@ -26,21 +26,35 @@ type SchoolDetail = {
 
 @Component({
   selector: 'app-school',
-  imports: [Badge, Card, CardBody, Button, RouterLink, Loader, DatePipe, TabList, Tab, Tabs, TabPanel, TabContent],
+  imports: [
+    Breadcrumbs,
+    Badge,
+    Card,
+    CardBody,
+    Button,
+    RouterLink,
+    Loader,
+    DatePipe,
+    TabList,
+    Tab,
+    Tabs,
+    TabPanel,
+    TabContent,
+  ],
   template: `
     @if (schoolResource.isLoading()) {
       <lib-loader />
     } @else {
       @if (schoolResource.hasValue() && schoolResource.value()?.id) {
         @let school = schoolResource.value()!;
-        <div class="breadcrumbs text-sm">
-          <ul>
-            <li><a routerLink="/">Inicio</a></li>
-            <li><a routerLink="/admin">Admin</a></li>
-            <li><a routerLink="/admin/schools">Colegios</a></li>
-            <li>{{ school.name }}</li>
-          </ul>
-        </div>
+        <ui-breadcrumbs
+          [items]="[
+            { label: 'Inicio', link: '/' },
+            { label: 'Admin', link: '/admin' },
+            { label: 'Colegios', link: '/admin/schools' },
+            { label: school.name },
+          ]"
+        />
 
         <!-- Header Card -->
         <div uiCard class="w-full mt-4">

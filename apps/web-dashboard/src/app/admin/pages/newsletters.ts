@@ -1,4 +1,4 @@
-import { Badge, Button, Confirmation, Pagination, Paginator, Toast } from '#/ui';
+import { Alert, Badge, Button, Card, Confirmation, Pagination, Paginator, Toast, UiTable } from '#/ui';
 import { Menu, MenuContent, MenuItem, MenuTrigger } from '@angular/aria/menu';
 import { OverlayModule } from '@angular/cdk/overlay';
 import { DatePipe } from '@angular/common';
@@ -25,6 +25,9 @@ type NewsletterItem = {
 @Component({
   selector: 'app-newsletters',
   imports: [
+    Alert,
+    Card,
+    UiTable,
     Badge,
     Button,
     DatePipe,
@@ -40,7 +43,7 @@ type NewsletterItem = {
   providers: [Pagination],
   template: `
     @if (newsletters.error()) {
-      <div role="alert" class="alert alert-error">
+      <div uiAlert tone="danger">
         <span class="material-symbols-outlined">error</span>
         <span>Error al cargar los boletines. Verifica tus permisos o intenta de nuevo.</span>
         <button uiButton variant="ghost" size="sm" (click)="newsletters.reload()">Reintentar</button>
@@ -57,8 +60,8 @@ type NewsletterItem = {
           <span class="material-symbols-outlined">add_circle</span> Nuevo boletín
         </a>
       </div>
-      <div class="overflow-x-auto bg-base-100 rounded-lg mt-4 border border-base-300">
-        <table class="table">
+      <div uiCard class="overflow-x-auto mt-4">
+        <table uiTable>
           <thead>
             <tr>
               <th

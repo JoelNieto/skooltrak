@@ -1,4 +1,4 @@
-import { Button, Modal, Toast } from '#/ui';
+import { Button, Modal, Spinner, Toast } from '#/ui';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { Component, computed, inject, input, linkedSignal, signal } from '@angular/core';
 import { Prisma } from '@generated/prisma';
@@ -22,19 +22,19 @@ type ScheduleLayout = {
 
 @Component({
   selector: 'app-group-schedule',
-  imports: [Button],
+  imports: [Spinner, Button],
   template: `
     <div class="flex flex-col gap-6">
       <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h4 class="text-lg font-semibold text-base-content">Horario semanal del grupo</h4>
-          <p class="text-sm text-base-200">Visualiza las clases en un calendario semanal por horas.</p>
+          <p class="text-sm text-ink-muted">Visualiza las clases en un calendario semanal por horas.</p>
         </div>
         <button uiButton variant="primary" size="sm" (click)="editSchedule()">Agregar clase</button>
       </div>
       @if (schedulesResource.isLoading()) {
-        <div class="flex items-center gap-2 text-sm text-base-200">
-          <span class="loading loading-spinner loading-sm"></span>
+        <div class="flex items-center gap-2 text-sm text-ink-muted">
+          <span uiSpinner size="sm"></span>
           Cargando horario...
         </div>
       } @else {
@@ -59,7 +59,7 @@ type ScheduleLayout = {
                 <div class="relative border-r border-base-300 mt-4" [style.height.px]="gridHeight">
                   @for (hour of hourMarks; track hour.label) {
                     <div
-                      class="absolute left-0 right-0 -translate-y-1/2 px-2 text-[11px] text-base-200 pt-4 border-t border-base-300"
+                      class="absolute left-0 right-0 -translate-y-1/2 px-2 text-[11px] text-ink-muted pt-4 border-t border-base-300"
                       [style.top.px]="hour.top"
                     >
                       {{ hour.label }}
@@ -102,7 +102,7 @@ type ScheduleLayout = {
                         <p class="text-[11px] text-base-content">
                           {{ entry.schedule.startTime }} - {{ entry.schedule.endTime }}
                         </p>
-                        <p class="text-[11px] text-base-200">
+                        <p class="text-[11px] text-ink-muted">
                           {{ entry.schedule.location }}
                         </p>
                       </div>
@@ -115,7 +115,7 @@ type ScheduleLayout = {
         } @else {
           <div class="rounded-xl border border-dashed border-base-300 bg-base-100 p-6">
             <h5 class="text-base font-semibold text-base-content">Aún no hay horario semanal</h5>
-            <p class="text-sm text-base-200 mt-1">Empieza agregando las clases para cada día de la semana.</p>
+            <p class="text-sm text-ink-muted mt-1">Empieza agregando las clases para cada día de la semana.</p>
             <button uiButton variant="primary" size="sm" class="mt-4" (click)="editSchedule()">Crear horario</button>
           </div>
         }

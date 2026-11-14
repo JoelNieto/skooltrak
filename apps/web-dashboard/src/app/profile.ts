@@ -1,4 +1,17 @@
-import { Badge, Button, Card, CardBody, CardTitle, Loader, Toast, UiField, UiInput } from '#/ui';
+import {
+  Alert,
+  Badge,
+  Breadcrumbs,
+  Button,
+  Card,
+  CardBody,
+  CardTitle,
+  Loader,
+  Spinner,
+  Toast,
+  UiField,
+  UiInput,
+} from '#/ui';
 import { HttpClient } from '@angular/common/http';
 import { afterRenderEffect, Component, computed, inject, signal } from '@angular/core';
 import { form, FormField, required, submit } from '@angular/forms/signals';
@@ -18,6 +31,9 @@ interface ProfileFormData {
 @Component({
   selector: 'app-profile',
   imports: [
+    Alert,
+    Spinner,
+    Breadcrumbs,
     Badge,
     Card,
     CardBody,
@@ -32,17 +48,12 @@ interface ProfileFormData {
   ],
   template: `
     <div class="flex flex-col gap-6">
-      <div class="breadcrumbs text-sm">
-        <ul>
-          <li><a routerLink="/">Inicio</a></li>
-          <li>Mi perfil</li>
-        </ul>
-      </div>
+      <ui-breadcrumbs [items]="[{ label: 'Inicio', link: '/' }, { label: 'Mi perfil' }]" />
 
       @if (auth.isUserLoading()) {
         <lib-loader />
       } @else if (!auth.user()) {
-        <div class="alert alert-warning">
+        <div uiAlert tone="warning">
           <span class="material-symbols-outlined">warning</span>
           <span>No se pudo cargar la información de tu perfil.</span>
         </div>
@@ -96,14 +107,14 @@ interface ProfileFormData {
                 </div>
 
                 @if (saved()) {
-                  <div class="alert alert-success">
+                  <div uiAlert tone="success">
                     <span class="material-symbols-outlined">check_circle</span>
                     <span>Perfil actualizado exitosamente.</span>
                   </div>
                 }
 
                 @if (errorMessage()) {
-                  <div class="alert alert-error">
+                  <div uiAlert tone="danger">
                     <span class="material-symbols-outlined">error</span>
                     <span>{{ errorMessage() }}</span>
                   </div>
@@ -131,7 +142,7 @@ interface ProfileFormData {
                           class="w-24 h-24 rounded-full border-2 border-dashed border-base-300 flex items-center justify-center overflow-hidden bg-base-200"
                         >
                           @if (isUploadingAvatar()) {
-                            <span class="loading loading-spinner loading-lg text-primary"></span>
+                            <span uiSpinner size="lg" class="text-primary"></span>
                           } @else if (avatarUrl()) {
                             <img [src]="avatarUrl()" alt="Avatar" class="w-full h-full object-cover" />
                           } @else {
@@ -241,10 +252,13 @@ interface ProfileFormData {
 
                   <div class="flex justify-end gap-3 pt-2">
                     <a uiButton variant="ghost" routerLink="/home">Cancelar</a>
-                    <button uiButton variant="primary" type="submit" [disabled]="isSaving() || profileForm().invalid()">
-                      @if (isSaving()) {
-                        <span class="loading loading-spinner loading-sm"></span>
-                      }
+                    <button
+                      uiButton
+                      [loading]="isSaving()"
+                      variant="primary"
+                      type="submit"
+                      [disabled]="isSaving() || profileForm().invalid()"
+                    >
                       Guardar cambios
                     </button>
                   </div>

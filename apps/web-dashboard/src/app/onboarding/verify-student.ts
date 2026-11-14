@@ -1,4 +1,4 @@
-import { Button, Toast, UiField, UiInput } from '#/ui';
+import { Alert, Button, Toast, UiField, UiInput } from '#/ui';
 import { HttpClient } from '@angular/common/http';
 import { afterRenderEffect, Component, inject, signal } from '@angular/core';
 import { form, FormField, required } from '@angular/forms/signals';
@@ -8,7 +8,7 @@ import { BrandLogo } from '../shared/brand-logo';
 
 @Component({
   selector: 'app-verify-student',
-  imports: [UiField, UiInput, Button, BrandLogo, FormField],
+  imports: [Alert, UiField, UiInput, Button, BrandLogo, FormField],
   template: `
     <div class="min-h-screen flex flex-col gradient-bg">
       <header class="p-4 md:p-6 flex items-center justify-between">
@@ -38,16 +38,22 @@ import { BrandLogo } from '../shared/brand-logo';
             </ui-field>
 
             @if (errorMessage()) {
-              <div class="alert alert-error">
+              <div uiAlert tone="danger">
                 <span class="material-symbols-outlined">error</span>
                 <span>{{ errorMessage() }}</span>
               </div>
             }
 
             <div class="pt-2 space-y-3">
-              <button uiButton variant="primary" type="submit" class="w-full" [disabled]="loading()">
+              <button
+                uiButton
+                [loading]="loading()"
+                variant="primary"
+                type="submit"
+                class="w-full"
+                [disabled]="loading()"
+              >
                 @if (loading()) {
-                  <span class="loading loading-spinner loading-sm"></span>
                   Verificando...
                 } @else {
                   <span class="material-symbols-outlined">check</span>

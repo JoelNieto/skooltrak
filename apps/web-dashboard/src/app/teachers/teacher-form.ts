@@ -1,4 +1,4 @@
-import { Button, Card, CardBody, Loader, Toast, UiField, UiInput, UiSelect } from '#/ui';
+import { Breadcrumbs, Button, Card, CardBody, Loader, Toast, UiField, UiInput, UiSelect } from '#/ui';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { afterRenderEffect, Component, computed, inject, input, signal } from '@angular/core';
 import { disabled, email, form, FormField, required, submit } from '@angular/forms/signals';
@@ -43,19 +43,15 @@ interface TeacherFormData {
 
 @Component({
   selector: 'app-teacher-form',
-  imports: [Card, CardBody, UiField, UiInput, UiSelect, Button, FormField, RouterLink, Loader],
+  imports: [Breadcrumbs, Card, CardBody, UiField, UiInput, UiSelect, Button, FormField, RouterLink, Loader],
   template: `
-    <div class="breadcrumbs text-sm">
-      <ul>
-        <li><a routerLink="/">Inicio</a></li>
-        <li><a routerLink="/teachers">Docentes</a></li>
-        @if (isEditMode()) {
-          <li>Editar</li>
-        } @else {
-          <li>Nuevo</li>
-        }
-      </ul>
-    </div>
+    <ui-breadcrumbs
+      [items]="[
+        { label: 'Inicio', link: '/' },
+        { label: 'Docentes', link: '/teachers' },
+        { label: isEditMode() ? 'Editar' : 'Nuevo' },
+      ]"
+    />
 
     <div class="flex items-center justify-between mb-6">
       <h1 class="text-2xl font-semibold">
@@ -183,10 +179,7 @@ interface TeacherFormData {
         <!-- Form Actions -->
         <div class="flex justify-end gap-3 my-6 pt-6 border-t border-base-300">
           <a uiButton variant="ghost" routerLink="/teachers">Cancelar</a>
-          <button uiButton variant="primary" type="submit" [disabled]="isSaving()">
-            @if (isSaving()) {
-              <span class="loading loading-spinner loading-sm"></span>
-            }
+          <button uiButton [loading]="isSaving()" variant="primary" type="submit" [disabled]="isSaving()">
             {{ isEditMode() ? 'Guardar cambios' : 'Crear docente' }}
           </button>
         </div>

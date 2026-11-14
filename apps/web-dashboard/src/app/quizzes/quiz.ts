@@ -1,5 +1,6 @@
 import {
   Badge,
+  Breadcrumbs,
   Button,
   Card,
   CardBody,
@@ -41,18 +42,14 @@ type QuizDetail = {
 
 @Component({
   selector: 'app-quiz',
-  imports: [Badge, Card, CardBody, CardTitle, Button, RouterLink, Loader, EditorViewer, ErrorComponent],
+  imports: [Breadcrumbs, Badge, Card, CardBody, CardTitle, Button, RouterLink, Loader, EditorViewer, ErrorComponent],
   template: `
     @defer {
       @if (quizResource.hasValue()) {
         @let quiz = quizResource.value()!;
-        <div class="breadcrumbs text-sm">
-          <ul>
-            <li><a routerLink="/">Inicio</a></li>
-            <li><a routerLink="/quizzes">Quizes</a></li>
-            <li>{{ quiz.title }}</li>
-          </ul>
-        </div>
+        <ui-breadcrumbs
+          [items]="[{ label: 'Inicio', link: '/' }, { label: 'Quizes', link: '/quizzes' }, { label: quiz.title }]"
+        />
         <div uiCard class="mt-4">
           <div uiCardBody>
             <div class="flex justify-between items-start">

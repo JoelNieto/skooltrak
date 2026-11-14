@@ -1,4 +1,4 @@
-import { Button, Loader, Toast, UiInput, UiRadio, UiSelect } from '#/ui';
+import { Alert, Button, Loader, Toast, UiInput, UiRadio, UiSelect, UiTable } from '#/ui';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { Component, computed, inject, input, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -22,14 +22,14 @@ type StudentEvaluation = {
 
 @Component({
   selector: 'app-group-habits',
-  imports: [UiInput, UiRadio, UiSelect, Button, FormsModule, Loader],
+  imports: [Alert, UiTable, UiInput, UiRadio, UiSelect, Button, FormsModule, Loader],
   template: `
     <div class="space-y-4">
       <!-- Empty state: No metrics configured -->
       @if (habitMetrics.isLoading()) {
         <lib-loader />
       } @else if (!habitMetrics.value() || habitMetrics.value()!.length === 0) {
-        <div class="alert alert-info">
+        <div uiAlert>
           <span class="material-symbols-outlined">info</span>
           <span
             >No hay criterios de hábitos configurados. Solicite al administrador que configure los criterios desde el
@@ -66,7 +66,7 @@ type StudentEvaluation = {
 
         <!-- Prompt to select period and metric -->
         @if (!selectedPeriodId() || !selectedMetricId()) {
-          <div class="alert alert-warning">
+          <div uiAlert tone="warning">
             <span class="material-symbols-outlined">warning</span>
             <span>Por favor, seleccione un período y un criterio para comenzar la evaluación.</span>
           </div>
@@ -92,7 +92,7 @@ type StudentEvaluation = {
 
           <!-- Students Evaluation Table -->
           <div class="overflow-x-auto">
-            <table class="table table-zebra">
+            <table uiTable zebra>
               <thead>
                 <tr>
                   <th>Estudiante</th>
@@ -177,9 +177,8 @@ type StudentEvaluation = {
 
           <!-- Save Button -->
           <div class="flex justify-end gap-2">
-            <button uiButton variant="primary" (click)="saveAll()" [class.loading]="saving()">
+            <button uiButton [loading]="saving()" variant="primary" (click)="saveAll()" [class.loading]="saving()">
               @if (saving()) {
-                <span class="loading loading-spinner"></span>
                 Guardando...
               } @else {
                 <span class="material-symbols-outlined">save</span>

@@ -1,16 +1,12 @@
 import { Component } from '@angular/core';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { Breadcrumbs } from '#/ui';
 
 @Component({
   selector: 'app-admin',
-  imports: [RouterOutlet, RouterLink, RouterLinkActive],
+  imports: [Breadcrumbs, RouterOutlet, RouterLink, RouterLinkActive],
   template: `
-    <div class="breadcrumbs text-sm">
-      <ul>
-        <li><a routerLink="/">Inicio</a></li>
-        <li>Admin</li>
-      </ul>
-    </div>
+    <ui-breadcrumbs [items]="[{ label: 'Inicio', link: '/' }, { label: 'Admin' }]" />
     <div class="border-b border-base-300">
       <ul class="menu menu-horizontal gap-2 ">
         <li>

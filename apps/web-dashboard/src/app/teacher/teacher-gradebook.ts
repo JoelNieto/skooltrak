@@ -1,9 +1,9 @@
-import { Card, CardBody, EmptyState, PageHeader, StatCard } from '#/ui';
+import { Card, CardBody, EmptyState, PageHeader, StatCard, UiTable } from '#/ui';
 import { Component } from '@angular/core';
 
 @Component({
   selector: 'app-teacher-gradebook',
-  imports: [Card, CardBody, EmptyState, PageHeader, StatCard],
+  imports: [UiTable, Card, CardBody, EmptyState, PageHeader, StatCard],
   template: `
     <lib-page-header
       title="Libro de calificaciones"
@@ -29,7 +29,7 @@ import { Component } from '@angular/core';
           />
         } @else {
           <div class="overflow-x-auto">
-            <table class="table">
+            <table uiTable>
               <thead>
                 <tr>
                   <th>Estudiante</th>

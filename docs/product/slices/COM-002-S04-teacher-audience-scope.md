@@ -4,7 +4,7 @@
 |---|---|
 | **FRD** | [COM-002](../frd/COM-002-broadcasts.md) |
 | **Implements** | FR-COM-002.1 (tightened), resolves Q1. Adds BR-COM-002.7 |
-| **Status** | In review (code + unit tests done; e2e blocked, see Done checklist) |
+| **Status** | In review (code + unit tests done; e2e written, awaiting first run) |
 | **Branch** | `feat/COM-002-S04-teacher-audience-scope` |
 | **Estimate** | 1 day |
 
@@ -68,7 +68,7 @@ Scenario: admin is unrestricted
 - [x] Nest: `GET /api/v1/communication/broadcasts/audiences?schoolId=` (`COMMUNICATION_BROADCAST`) returns `{ classGroups, courses }`. Teachers get only their own courses and related groups; admins get everything in the school; a teacher with no record gets empty lists; non-staff get 403. It uses the same `where` helpers as the create check, so the picker and the API can't disagree.
 - [x] Angular `communication/broadcasts.ts`: the picker loads from that endpoint for every role, replacing `/api/v1/class-groups`. It shows an explanatory empty state, and a 403 on submit shows a specific toast.
 - [x] Nest unit tests (`communication/communication-broadcast-audience.spec.ts`, 11 tests): related group allowed, unrelated 403 with nothing created, homeroom not used, other teacher's course 403, no teacher record 403, school-wide unaffected, admin unrestricted, audiences filtering (teacher / no record / admin / non-staff).
-- [ ] Playwright `@FR-COM-002.1`: **blocked**. `apps/web-dashboard-e2e` has only a placeholder spec, with no login fixture or seeded teacher/class-group data. That is a prerequisite slice of its own (test fixtures).
+- [x] Playwright `@FR-COM-002.1` (`apps/web-dashboard-e2e/src/communication/broadcast-audience.spec.ts`, 4 tests): teacher picker contents, teacher send to related group, API audiences + 403 for homeroom-only group and other teacher's course, admin picker. Runs on the isolated e2e stack (see `docs/product/README.md` → Running e2e tests). **Written, not yet run.**
 
 ## Out of scope
 - Restricting `STUDENT_GUARDIANS` / `DIRECT` threads (COM-001).
@@ -78,4 +78,4 @@ Scenario: admin is unrestricted
 - [x] Acceptance criteria pass at unit level (API scenarios). The picker has not been checked in a running app.
 - [x] Cross-tenant / wrong-role access refused (test): every query is filtered by the caller's `organizationId`, and non-staff get 403.
 - [x] COM-002 slice table + Q1 marked resolved
-- [ ] e2e test tagged `@FR-COM-002.1` (blocked on e2e fixtures)
+- [ ] e2e test tagged `@FR-COM-002.1`: written; mark Done after the first green `bun nx e2e web-dashboard-e2e`

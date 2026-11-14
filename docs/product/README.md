@@ -73,6 +73,19 @@ Slice:  Proposed ──► Ready ──► In progress ──► Done
 - It is **independently shippable**: if work stops after this slice, nothing is half-built. Hide unfinished paths behind permissions or flags if needed.
 - It is **small**: 1–3 days. If it's bigger, split by persona, by rule, by happy path vs edge cases, or by read vs write.
 
+## Running e2e tests
+
+```bash
+bun nx e2e web-dashboard-e2e                    # rebuild + seed the e2e DB, start the isolated stack, run all specs
+bun nx e2e web-dashboard-e2e -- --grep @FR-COM-002   # one FRD
+```
+
+- **Isolated database.** The default is `skooltrak-e2e` on the same server as `.env`'s `DATABASE_URL`; override it with `E2E_DATABASE_URL`. `prepare-db` **wipes** it, then rebuilds it from migrations and seeds roles plus the dataset in `apps/web-dashboard-e2e/src/support/fixtures.ts`. Any database whose name doesn't contain `e2e` is refused.
+- **Isolated ports.** The API runs on `:3100` and the web app on `:4300` (`web-dashboard:serve:e2e`), so a running dev stack on `:3000` / `:4200` is never reused.
+- **Personas.** The `setup` project logs in every persona in `fixtures.ts` and saves its state to `apps/web-dashboard-e2e/.auth/` (gitignored). Specs choose one with `test.use({ storageState: storageStatePath('teacher') })`.
+- **New data for a slice.** Add it to `fixtures.ts` and `scripts/prepare-db.ts` together, and reference it by name from the spec.
+- **CI.** The GitLab job has no Postgres service yet, so `e2e` can't run there until one is added (a `services: [postgres]` entry and an `E2E_DATABASE_URL` variable).
+
 ## As-is FRDs for existing features
 
 Most of the product already exists without FRDs. Document it gradually; don't stop feature work to do it:

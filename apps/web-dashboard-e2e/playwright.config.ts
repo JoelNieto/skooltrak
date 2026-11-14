@@ -1,68 +1,43 @@
 import { defineConfig, devices } from '@playwright/test';
 import { nxE2EPreset } from '@nx/playwright/preset';
 import { workspaceRoot } from '@nx/devkit';
-
-// For CI, you may want to set BASE_URL to the deployed application.
-const baseURL = process.env['BASE_URL'] || 'http://localhost:4200';
+import { E2E_API_PORT, E2E_WEB_PORT, e2eDatabaseUrl } from './scripts/e2e-env';
 
 /**
- * Read environment variables from file.
- * https://github.com/motdotla/dotenv
+ * The e2e stack is isolated from the dev stack:
+ * - API on :3100 and web on :4300 (dev uses :3000 / :4200), so a running dev server is never reused;
+ * - the API talks to the e2e database (`skooltrak-e2e` by default), which `prepare-db` rebuilds
+ *   and seeds before every run (`nx e2e web-dashboard-e2e` runs it first).
+ * Set BASE_URL to test a deployed environment instead (no local servers are started then).
  */
-// require('dotenv').config();
+const baseURL = process.env['BASE_URL'] || `http://localhost:${E2E_WEB_PORT}`;
 
-/**
- * See https://playwright.dev/docs/test-configuration.
- */
 export default defineConfig({
   ...nxE2EPreset(__filename, { testDir: './src' }),
-  /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     baseURL,
-    /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on-first-retry',
   },
-  /* Run your local dev server before starting the tests */
-  webServer: {
-    command: 'bun nx run web-dashboard:serve',
-    url: 'http://localhost:4200',
-    reuseExistingServer: true,
-    cwd: workspaceRoot,
-  },
+  webServer: process.env['BASE_URL']
+    ? undefined
+    : {
+        command: 'bun nx run web-dashboard:serve:e2e --tui=false',
+        url: baseURL,
+        reuseExistingServer: false,
+        cwd: workspaceRoot,
+        timeout: 240_000,
+        env: {
+          PORT: String(E2E_API_PORT),
+          DATABASE_URL: e2eDatabaseUrl(),
+        },
+      },
   projects: [
+    // Logs every persona in once and saves its storage state (see src/auth.setup.ts).
+    { name: 'setup', testMatch: /auth\.setup\.ts/ },
     {
       name: 'chromium',
       use: { ...devices['Desktop Chrome'] },
+      dependencies: ['setup'],
     },
-
-    {
-      name: 'firefox',
-      use: { ...devices['Desktop Firefox'] },
-    },
-
-    {
-      name: 'webkit',
-      use: { ...devices['Desktop Safari'] },
-    },
-
-    // Uncomment for mobile browsers support
-    /* {
-      name: 'Mobile Chrome',
-      use: { ...devices['Pixel 5'] },
-    },
-    {
-      name: 'Mobile Safari',
-      use: { ...devices['iPhone 12'] },
-    }, */
-
-    // Uncomment for branded browsers
-    /* {
-      name: 'Microsoft Edge',
-      use: { ...devices['Desktop Edge'], channel: 'msedge' },
-    },
-    {
-      name: 'Google Chrome',
-      use: { ...devices['Desktop Chrome'], channel: 'chrome' },
-    } */
   ],
 });

@@ -229,10 +229,16 @@ h3 {
   @apply text-sm/6 placeholder:text-ink-subtle;
 }
 
+.textarea {
+  @apply text-sm/6 placeholder:text-ink-subtle;
+}
+
+/* `ui-control` is added by the uiInput / uiSelect directives in libs/ui. */
 .input-primary,
 .select-primary,
 .textarea-primary,
-.checkbox-primary {
+.checkbox-primary,
+.ui-control {
   --input-color: var(--ui-line-strong);
   &:focus,
   &:focus-within {
@@ -249,13 +255,17 @@ h3 {
   outline: none;
 }
 
-/* Reactive forms only (signal forms don't add ng-* classes): flag errors once the user has interacted. */
-input.ng-invalid.ng-touched,
-input.ng-invalid.ng-dirty,
-select.ng-invalid.ng-touched,
-select.ng-invalid.ng-dirty,
-textarea.ng-invalid.ng-touched,
-textarea.ng-invalid.ng-dirty {
+/* Visible focus ring for the primitives (the outline above is removed). */
+.ui-control:focus-visible,
+.ui-control:focus-within {
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--color-primary) 20%, transparent);
+}
+
+/* Invalid state, from three sources:
+ *  - aria-invalid="true", set by uiInput/uiSelect inside a ui-field once the field is touched;
+ *  - [class.ng-invalid]="x().touched() && x().invalid()", set by hand in signal-form templates;
+ *  - reactive/template forms, once touched (they keep `ng-untouched` until then). */
+:is(input, select, textarea):is(.ng-invalid:not(.ng-untouched), [aria-invalid='true']) {
   --input-color: var(--color-error);
 }
 

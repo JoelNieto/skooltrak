@@ -5,13 +5,12 @@
   "implicitDependencies": ["dashboard-backend"],
   "targets": {
     "e2e": {
-      "executor": "@nx/jest:jest",
-      "outputs": ["{workspaceRoot}/coverage/{e2eProjectRoot}"],
+      "cache": false,
+      "outputs": ["{workspaceRoot}/coverage/{e2eProjectRoot}", "{workspaceRoot}/coverage/dashboard-backend-e2e"],
+      "dependsOn": ["dashboard-backend:build", "dashboard-backend:serve"],
       "options": {
-        "jestConfig": "apps/dashboard-backend-e2e/jest.config.ts",
         "passWithNoTests": true
-      },
-      "dependsOn": ["dashboard-backend:build", "dashboard-backend:serve"]
+      }
     }
   }
 }

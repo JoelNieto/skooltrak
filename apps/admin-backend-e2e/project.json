@@ -5,13 +5,12 @@
   "implicitDependencies": ["admin-backend"],
   "targets": {
     "e2e": {
-      "executor": "@nx/jest:jest",
-      "outputs": ["{workspaceRoot}/coverage/{e2eProjectRoot}"],
+      "cache": false,
+      "outputs": ["{workspaceRoot}/coverage/{e2eProjectRoot}", "{workspaceRoot}/coverage/admin-backend-e2e"],
+      "dependsOn": ["admin-backend:build", "admin-backend:serve"],
       "options": {
-        "jestConfig": "apps/admin-backend-e2e/jest.config.ts",
         "passWithNoTests": true
-      },
-      "dependsOn": ["admin-backend:build", "admin-backend:serve"]
+      }
     }
   }
 }

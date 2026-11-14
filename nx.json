@@ -68,6 +68,13 @@
         "testMode": "watch",
         "testTargetName": "test"
       }
+    },
+    {
+      "plugin": "@nx/jest/plugin",
+      "options": {
+        "targetName": "e2e"
+      },
+      "include": ["apps/admin-backend-e2e/**/*", "apps/dashboard-backend-e2e/**/*"]
     }
   ],
   "generators": {

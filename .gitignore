@@ -60,3 +60,5 @@ vitest.config.*.timestamp*
 .claude/settings.local.json
 .nx/self-healing
 .nx/migrate-runs
+
+graphify-out/cache

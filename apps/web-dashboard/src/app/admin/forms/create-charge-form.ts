@@ -1,4 +1,4 @@
-import { Toast } from '#/ui';
+import { Button, Toast } from '#/ui';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { Component, inject, output, signal } from '@angular/core';
 import { form, FormField, min, required } from '@angular/forms/signals';
@@ -6,7 +6,7 @@ import Store from '../../core/store';
 
 @Component({
   selector: 'app-create-charge-form',
-  imports: [FormField],
+  imports: [Button, FormField],
   template: `
     <form (submit)="onSubmit($event)">
       <div class="flex flex-col gap-4">
@@ -66,8 +66,8 @@ import Store from '../../core/store';
         </div>
       </div>
       <div class="flex justify-end gap-2 mt-4">
-        <button type="button" class="btn btn-ghost" (click)="closeModal.emit()">Cancelar</button>
-        <button type="submit" class="btn btn-primary">Crear cargo</button>
+        <button uiButton variant="ghost" type="button" (click)="closeModal.emit()">Cancelar</button>
+        <button uiButton variant="primary" type="submit">Crear cargo</button>
       </div>
     </form>
   `,

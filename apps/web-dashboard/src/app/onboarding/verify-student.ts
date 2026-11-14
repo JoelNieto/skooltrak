@@ -1,4 +1,4 @@
-import { Toast } from '#/ui';
+import { Button, Toast } from '#/ui';
 import { HttpClient } from '@angular/common/http';
 import { afterRenderEffect, Component, inject, signal } from '@angular/core';
 import { form, FormField, required } from '@angular/forms/signals';
@@ -8,7 +8,7 @@ import { BrandLogo } from '../shared/brand-logo';
 
 @Component({
   selector: 'app-verify-student',
-  imports: [BrandLogo, FormField],
+  imports: [Button, BrandLogo, FormField],
   template: `
     <div class="min-h-screen flex flex-col gradient-bg">
       <header class="p-4 md:p-6 flex items-center justify-between">
@@ -57,7 +57,7 @@ import { BrandLogo } from '../shared/brand-logo';
             }
 
             <div class="pt-2 space-y-3">
-              <button type="submit" class="btn btn-primary w-full" [disabled]="loading()">
+              <button uiButton variant="primary" type="submit" class="w-full" [disabled]="loading()">
                 @if (loading()) {
                   <span class="loading loading-spinner loading-sm"></span>
                   Verificando...
@@ -66,7 +66,7 @@ import { BrandLogo } from '../shared/brand-logo';
                   Verificar y Vincular
                 }
               </button>
-              <button type="button" class="btn btn-ghost btn-sm w-full" (click)="goBack()">
+              <button uiButton variant="ghost" size="sm" type="button" class="w-full" (click)="goBack()">
                 <span class="material-symbols-outlined text-lg">arrow_back</span>
                 Volver
               </button>

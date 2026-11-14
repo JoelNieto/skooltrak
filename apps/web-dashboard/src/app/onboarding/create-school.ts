@@ -1,4 +1,4 @@
-import { Toast } from '#/ui';
+import { Button, Toast } from '#/ui';
 import { HttpClient } from '@angular/common/http';
 import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -11,7 +11,7 @@ import { BrandLogo } from '../shared/brand-logo';
 
 @Component({
   selector: 'app-create-school',
-  imports: [BrandLogo, FormField, FormsModule],
+  imports: [Button, BrandLogo, FormField, FormsModule],
   template: `
     <div class="min-h-screen flex flex-col gradient-bg">
       <!-- Fixed Header -->
@@ -131,12 +131,13 @@ import { BrandLogo } from '../shared/brand-logo';
       <footer
         class="p-4 md:p-6 flex justify-between items-center border-t border-base-200 bg-base-100/80 backdrop-blur-sm"
       >
-        <button class="btn btn-ghost" (click)="goBack()">
+        <button uiButton variant="ghost" (click)="goBack()">
           <span class="material-symbols-outlined">arrow_back</span>
           Volver
         </button>
         <button
-          class="btn btn-primary"
+          uiButton
+          variant="primary"
           [disabled]="!acknowledged() || form().invalid() || saving()"
           (click)="createSchool($event)"
         >

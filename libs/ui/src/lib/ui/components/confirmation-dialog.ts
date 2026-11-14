@@ -1,12 +1,14 @@
 import { Component, computed, input, output } from '@angular/core';
 import { DialogData } from '../types/dialog.type';
+import { Button } from './button';
 
 @Component({
   selector: 'lib-confirmation',
+  imports: [Button],
   template: `<p class="my-4">{{ data().message }}</p>
     <div class="flex justify-end gap-2">
       @if (!data().hideCancel) {
-        <button class="btn btn-ghost" (click)="closeModal.emit(false)">
+        <button uiButton variant="ghost" (click)="closeModal.emit(false)">
           {{ data().cancelText || 'Cancelar' }}
         </button>
       }

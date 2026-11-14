@@ -1,4 +1,4 @@
-import { Toast } from '#/ui';
+import { Button, Toast } from '#/ui';
 import { HttpClient } from '@angular/common/http';
 import { afterRenderEffect, Component, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -6,7 +6,7 @@ import { BrandLogo } from '../shared/brand-logo';
 
 @Component({
   selector: 'app-confirm-request',
-  imports: [BrandLogo],
+  imports: [Button, BrandLogo],
   template: `
     <div class="min-h-screen flex flex-col gradient-bg">
       <header class="p-4 md:p-6 flex items-center justify-between">
@@ -33,7 +33,7 @@ import { BrandLogo } from '../shared/brand-logo';
           </div>
 
           <div class="space-y-3">
-            <button class="btn btn-primary w-full" (click)="sendRequest()" [disabled]="loading()">
+            <button uiButton variant="primary" class="w-full" (click)="sendRequest()" [disabled]="loading()">
               @if (loading()) {
                 <span class="loading loading-spinner loading-sm"></span>
                 Enviando...
@@ -42,7 +42,7 @@ import { BrandLogo } from '../shared/brand-logo';
                 Enviar Solicitud
               }
             </button>
-            <button class="btn btn-ghost btn-sm" (click)="goBack()">
+            <button uiButton variant="ghost" size="sm" (click)="goBack()">
               <span class="material-symbols-outlined text-lg">arrow_back</span>
               Volver
             </button>

@@ -1,4 +1,4 @@
-import { EmptyState, PageHeader, StatCard } from '#/ui';
+import { Button, EmptyState, PageHeader, StatCard } from '#/ui';
 import { DatePipe } from '@angular/common';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { Component, computed, inject } from '@angular/core';
@@ -50,7 +50,7 @@ type PublishedNewsletter = {
 
 @Component({
   selector: 'app-home',
-  imports: [RouterLink, DatePipe, PageHeader, StatCard, EmptyState, WelcomeBanner, RecentBroadcasts],
+  imports: [Button, RouterLink, DatePipe, PageHeader, StatCard, EmptyState, WelcomeBanner, RecentBroadcasts],
   template: `
     <!-- Welcome Banner for recently completed onboarding -->
     @if (showWelcomeBanner()) {
@@ -99,7 +99,7 @@ type PublishedNewsletter = {
         <div class="card-body">
           <div class="flex items-center justify-between">
             <h2 class="text-base font-semibold text-base-content">Mensajes recientes</h2>
-            <a routerLink="/messages" class="btn btn-sm btn-ghost text-primary"> Ver todos </a>
+            <a uiButton variant="ghost" size="sm" routerLink="/messages" class="text-primary"> Ver todos </a>
           </div>
           @if ((recentMessages.value() ?? []).length === 0) {
             <lib-empty-state
@@ -183,7 +183,7 @@ type PublishedNewsletter = {
           <div class="card-body">
             <div class="flex items-center justify-between">
               <h2 class="text-base font-semibold text-base-content">Boletines recientes</h2>
-              <a routerLink="/admin/newsletters" class="btn btn-sm btn-ghost text-primary"> Ver todos </a>
+              <a uiButton variant="ghost" size="sm" routerLink="/admin/newsletters" class="text-primary"> Ver todos </a>
             </div>
             @if ((recentNewsletters.value() ?? []).length === 0) {
               <lib-empty-state

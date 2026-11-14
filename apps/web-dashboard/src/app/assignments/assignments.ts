@@ -1,4 +1,4 @@
-import { Error, Loader } from '#/ui';
+import { Button, Error, Loader } from '#/ui';
 import { DatePipe } from '@angular/common';
 import { Component, Pipe, PipeTransform, computed, inject, signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
@@ -23,7 +23,7 @@ export class StripHtmlPipe implements PipeTransform {
 
 @Component({
   selector: 'app-assignments',
-  imports: [RouterLink, DatePipe, StripHtmlPipe, Error, Loader],
+  imports: [Button, RouterLink, DatePipe, StripHtmlPipe, Error, Loader],
 
   template: `<div class="breadcrumbs text-sm">
       <ul>
@@ -34,17 +34,17 @@ export class StripHtmlPipe implements PipeTransform {
     <h1 class="text-2xl font-semibold mb-2">Asignaciones</h1>
     <div class="flex items-center gap-2 justify-between px-8">
       <div class="flex items-center gap-2 flex-1">
-        <button class="btn btn-primary btn-soft btn-circle" (click)="previousWeek()">
+        <button uiButton iconOnly (click)="previousWeek()">
           <span class="material-symbols-outlined">chevron_left</span>
         </button>
 
-        <button class="btn btn-primary btn-soft btn-circle" (click)="nextWeek()">
+        <button uiButton iconOnly (click)="nextWeek()">
           <span class="material-symbols-outlined">chevron_right</span>
         </button>
       </div>
       <div class="flex-1 text-center text-base-content">{{ startDate() | date }} - {{ endDate() | date }}</div>
       <div class="flex-1 flex justify-end">
-        <button class="btn btn-soft" (click)="today()"><span class="material-symbols-outlined">today</span> Hoy</button>
+        <button uiButton (click)="today()"><span class="material-symbols-outlined">today</span> Hoy</button>
       </div>
     </div>
     <div class="overflow-x-auto bg-base-100 rounded-lg mt-4">

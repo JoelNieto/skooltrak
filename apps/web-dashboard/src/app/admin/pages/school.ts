@@ -1,4 +1,4 @@
-import { Loader } from '#/ui';
+import { Button, Loader } from '#/ui';
 import { Tab, TabContent, TabList, TabPanel, Tabs } from '@angular/aria/tabs';
 import { DatePipe } from '@angular/common';
 import { httpResource } from '@angular/common/http';
@@ -26,7 +26,7 @@ type SchoolDetail = {
 
 @Component({
   selector: 'app-school',
-  imports: [RouterLink, Loader, DatePipe, TabList, Tab, Tabs, TabPanel, TabContent],
+  imports: [Button, RouterLink, Loader, DatePipe, TabList, Tab, Tabs, TabPanel, TabContent],
   template: `
     @if (schoolResource.isLoading()) {
       <lib-loader />
@@ -68,7 +68,7 @@ type SchoolDetail = {
                   }
                 </div>
               </div>
-              <a [routerLink]="['/schools', school.id, 'edit']" class="btn btn-primary btn-sm">
+              <a uiButton variant="primary" size="sm" [routerLink]="['/schools', school.id, 'edit']">
                 <span class="material-symbols-outlined text-lg">edit</span>
                 Editar
               </a>
@@ -234,12 +234,7 @@ type SchoolDetail = {
                   <!-- Map placeholder - could be enhanced with actual map integration -->
                   @if (school.address || school.city) {
                     <div class="mt-6 px-4 sm:px-0">
-                      <a
-                        [href]="getGoogleMapsUrl(school)"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        class="btn btn-outline btn-sm"
-                      >
+                      <a uiButton size="sm" [href]="getGoogleMapsUrl(school)" target="_blank" rel="noopener noreferrer">
                         <span class="material-symbols-outlined text-lg">map</span>
                         Ver en Google Maps
                       </a>

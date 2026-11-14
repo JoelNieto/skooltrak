@@ -1,10 +1,10 @@
-import { TextEditor, Toast } from '#/ui';
+import { Button, TextEditor, Toast } from '#/ui';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { Component, inject, input, output, signal } from '@angular/core';
 import { form, FormField, required } from '@angular/forms/signals';
 @Component({
   selector: 'app-grades-form',
-  imports: [FormField, TextEditor],
+  imports: [Button, FormField, TextEditor],
   template: `<form (submit)="onSubmit($event)">
     <div class="flex flex-col md:grid md:grid-cols-4 gap-4">
       <div class="fieldset md:col-span-2">
@@ -63,8 +63,8 @@ import { form, FormField, required } from '@angular/forms/signals';
       </div>
     </div>
     <div class="flex justify-end gap-2">
-      <button class="btn btn-soft" type="button" (click)="closeModal.emit(false)">Cancelar</button>
-      <button class="btn btn-primary" type="submit">Guardar</button>
+      <button uiButton type="button" (click)="closeModal.emit(false)">Cancelar</button>
+      <button uiButton variant="primary" type="submit">Guardar</button>
     </div>
   </form>`,
 })

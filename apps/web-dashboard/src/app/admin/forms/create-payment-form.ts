@@ -1,4 +1,4 @@
-import { Toast } from '#/ui';
+import { Button, Toast } from '#/ui';
 import { DecimalPipe } from '@angular/common';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { Component, inject, output, signal } from '@angular/core';
@@ -17,7 +17,7 @@ type ChargeOption = {
 
 @Component({
   selector: 'app-create-payment-form',
-  imports: [DecimalPipe, FormField],
+  imports: [Button, DecimalPipe, FormField],
   template: `
     <form (submit)="onSubmit($event)">
       <div class="flex flex-col gap-4">
@@ -62,8 +62,8 @@ type ChargeOption = {
         </div>
       </div>
       <div class="flex justify-end gap-2 mt-4">
-        <button type="button" class="btn btn-ghost" (click)="closeModal.emit()">Cancelar</button>
-        <button type="submit" class="btn btn-primary">Registrar pago</button>
+        <button uiButton variant="ghost" type="button" (click)="closeModal.emit()">Cancelar</button>
+        <button uiButton variant="primary" type="submit">Registrar pago</button>
       </div>
     </form>
   `,

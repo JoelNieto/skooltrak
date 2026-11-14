@@ -1,4 +1,4 @@
-import { Modal, Toast } from '#/ui';
+import { Button, Modal, Toast } from '#/ui';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { Component, computed, inject, input, linkedSignal, signal } from '@angular/core';
 import { Prisma } from '@generated/prisma';
@@ -22,6 +22,7 @@ type ScheduleLayout = {
 
 @Component({
   selector: 'app-group-schedule',
+  imports: [Button],
   template: `
     <div class="flex flex-col gap-6">
       <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
@@ -29,7 +30,7 @@ type ScheduleLayout = {
           <h4 class="text-lg font-semibold text-base-content">Horario semanal del grupo</h4>
           <p class="text-sm text-base-200">Visualiza las clases en un calendario semanal por horas.</p>
         </div>
-        <button class="btn btn-primary btn-sm" (click)="editSchedule()">Agregar clase</button>
+        <button uiButton variant="primary" size="sm" (click)="editSchedule()">Agregar clase</button>
       </div>
       @if (schedulesResource.isLoading()) {
         <div class="flex items-center gap-2 text-sm text-base-200">
@@ -50,7 +51,7 @@ type ScheduleLayout = {
                   <div class="border-b border-base-200 bg-base-200 px-3 py-2 text-xs font-semibold">
                     <div class="flex items-center justify-between">
                       <span>{{ day.label }}</span>
-                      <button class="btn btn-ghost btn-xs" (click)="editSchedule(undefined, day.key)">+</button>
+                      <button uiButton variant="ghost" size="sm" (click)="editSchedule(undefined, day.key)">+</button>
                     </div>
                   </div>
                 }
@@ -89,7 +90,9 @@ type ScheduleLayout = {
                             {{ entry.schedule.course.subject.name }}
                           </p>
                           <button
-                            class="btn btn-ghost btn-xs"
+                            uiButton
+                            variant="ghost"
+                            size="sm"
                             type="button"
                             (click)="editSchedule(entry.schedule); $event.stopPropagation()"
                           >
@@ -113,7 +116,7 @@ type ScheduleLayout = {
           <div class="rounded-xl border border-dashed border-base-300 bg-base-100 p-6">
             <h5 class="text-base font-semibold text-base-content">Aún no hay horario semanal</h5>
             <p class="text-sm text-base-200 mt-1">Empieza agregando las clases para cada día de la semana.</p>
-            <button class="btn btn-primary btn-sm mt-4" (click)="editSchedule()">Crear horario</button>
+            <button uiButton variant="primary" size="sm" class="mt-4" (click)="editSchedule()">Crear horario</button>
           </div>
         }
       }

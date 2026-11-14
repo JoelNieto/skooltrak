@@ -1,4 +1,4 @@
-import { Toast } from '#/ui';
+import { Button, Toast } from '#/ui';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { afterRenderEffect, Component, inject, input, output, signal } from '@angular/core';
 import { applyEach, form, FormField, required } from '@angular/forms/signals';
@@ -23,7 +23,7 @@ const MONTH_LABELS: Record<number, string> = {
 
 @Component({
   selector: 'app-study-plan-form',
-  imports: [FormField],
+  imports: [Button, FormField],
   template: `
     <form (submit)="onSubmit($event)">
       <div class="flex flex-col md:grid md:grid-cols-4 md:gap-4 gap-2">
@@ -116,13 +116,13 @@ const MONTH_LABELS: Record<number, string> = {
                       class="input input-primary w-24!"
                       placeholder="0"
                     />
-                    <button type="button" class="btn btn-ghost btn-sm" (click)="removeEnrollmentCost(i)">
+                    <button uiButton variant="ghost" size="sm" type="button" (click)="removeEnrollmentCost(i)">
                       <span class="material-symbols-outlined text-lg">remove_circle</span>
                     </button>
                   </div>
                 }
               </div>
-              <button type="button" class="btn btn-ghost btn-sm mt-2" (click)="addEnrollmentCost()">
+              <button uiButton variant="ghost" size="sm" type="button" class="mt-2" (click)="addEnrollmentCost()">
                 <span class="material-symbols-outlined text-lg">add_circle</span> Agregar costo
               </button>
             </div>
@@ -130,8 +130,8 @@ const MONTH_LABELS: Record<number, string> = {
         </div>
       </div>
       <div class="flex justify-end gap-2 mt-4">
-        <button type="button" class="btn btn-ghost" (click)="closeModal.emit()">Cancelar</button>
-        <button type="submit" class="btn btn-primary">Guardar</button>
+        <button uiButton variant="ghost" type="button" (click)="closeModal.emit()">Cancelar</button>
+        <button uiButton variant="primary" type="submit">Guardar</button>
       </div>
     </form>
   `,

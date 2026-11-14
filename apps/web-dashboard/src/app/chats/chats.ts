@@ -1,4 +1,4 @@
-import { EmptyState, Loader } from '#/ui';
+import { Button, EmptyState, Loader } from '#/ui';
 import { httpResource } from '@angular/common/http';
 import { Component, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
@@ -26,7 +26,7 @@ type ChatRow = {
 
 @Component({
   selector: 'app-chats',
-  imports: [RouterLink, Loader, EmptyState],
+  imports: [Button, RouterLink, Loader, EmptyState],
   template: `
     <div class="breadcrumbs text-sm">
       <ul>
@@ -36,7 +36,7 @@ type ChatRow = {
     </div>
     <div class="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-4">
       <h1 class="text-2xl font-semibold">Chats</h1>
-      <a routerLink="/chats/new" class="btn btn-primary">Nuevo chat</a>
+      <a uiButton variant="primary" routerLink="/chats/new">Nuevo chat</a>
     </div>
 
     @if (chatsResource.isLoading()) {

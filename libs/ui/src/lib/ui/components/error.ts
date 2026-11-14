@@ -1,8 +1,10 @@
 import { Component, inject, input, output } from '@angular/core';
 import { Router } from '@angular/router';
+import { Button } from './button';
 
 @Component({
   selector: 'lib-error',
+  imports: [Button],
   template: `
     <div class="bg-linear-to-br from-blue-50 to-red-100 min-h-screen flex items-center justify-center p-4">
       <div class="max-w-lg w-full bg-white rounded-2xl shadow-xl overflow-hidden">
@@ -25,11 +27,11 @@ import { Router } from '@angular/router';
 
           <!-- Action Buttons -->
           <div class="flex flex-col sm:flex-row gap-4 justify-center">
-            <button class="btn btn-error btn-soft btn-lg" (click)="goHome()">
+            <button uiButton variant="danger" size="lg" (click)="goHome()">
               <span class="material-symbols-outlined">home</span>
               Inicio
             </button>
-            <button class="btn btn-error btn-lg" (click)="retry.emit()">
+            <button uiButton variant="danger" size="lg" (click)="retry.emit()">
               <span class="material-symbols-outlined">refresh</span>
               Reintentar
             </button>

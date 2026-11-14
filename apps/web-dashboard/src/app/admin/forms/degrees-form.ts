@@ -1,4 +1,4 @@
-import { Toast } from '#/ui';
+import { Button, Toast } from '#/ui';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { afterRenderEffect, Component, inject, input, output, signal } from '@angular/core';
 import { disabled, form, FormField, required } from '@angular/forms/signals';
@@ -6,7 +6,7 @@ import { Prisma } from '@generated/prisma';
 import Store from '../../core/store';
 @Component({
   selector: 'app-degrees-form',
-  imports: [FormField],
+  imports: [Button, FormField],
   template: `<form (submit)="onSubmit($event)">
     <div class="flex flex-col gap-2">
       <div class="fieldset">
@@ -38,8 +38,8 @@ import Store from '../../core/store';
       </div>
     </div>
     <div class="flex justify-end gap-2 mt-4">
-      <button class="btn btn-ghost" (click)="closeModal.emit()" type="button">Cancelar</button>
-      <button class="btn btn-primary" type="submit">Guardar</button>
+      <button uiButton variant="ghost" (click)="closeModal.emit()" type="button">Cancelar</button>
+      <button uiButton variant="primary" type="submit">Guardar</button>
     </div>
   </form>`,
 })

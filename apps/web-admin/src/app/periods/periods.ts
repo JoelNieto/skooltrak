@@ -1,4 +1,4 @@
-import { Confirmation, Modal, Toast } from '#/ui';
+import { Button, Confirmation, Modal, Toast } from '#/ui';
 import { Menu, MenuContent, MenuItem, MenuTrigger } from '@angular/aria/menu';
 import { OverlayModule } from '@angular/cdk/overlay';
 import { DatePipe } from '@angular/common';
@@ -11,7 +11,7 @@ import PeriodsForm from './periods-form';
 
 @Component({
   selector: 'app-periods',
-  imports: [RouterLink, DatePipe, Menu, MenuContent, MenuItem, MenuTrigger, OverlayModule],
+  imports: [Button, RouterLink, DatePipe, Menu, MenuContent, MenuItem, MenuTrigger, OverlayModule],
   template: `
     <div class="breadcrumbs text-sm">
       <ul>
@@ -24,7 +24,7 @@ import PeriodsForm from './periods-form';
         <h1 class="text-2xl text-base-content font-medium">Periodos</h1>
         <p class="text-sm text-gray-500 dark:text-gray-400">Listado de periodos globales</p>
       </div>
-      <button class="btn btn-primary" (click)="editPeriod()">
+      <button uiButton variant="primary" (click)="editPeriod()">
         <span class="material-symbols-outlined">add_circle</span>
         Nuevo periodo
       </button>

@@ -1,4 +1,4 @@
-import { Toast } from '#/ui';
+import { Button, Toast } from '#/ui';
 import { Combobox, ComboboxPopup, ComboboxWidget } from '@angular/aria/combobox';
 import { Listbox, Option } from '@angular/aria/listbox';
 import { OverlayModule } from '@angular/cdk/overlay';
@@ -24,7 +24,7 @@ interface CourseModel {
 }
 @Component({
   selector: 'app-courses-form',
-  imports: [FormField, FormsModule, Combobox, ComboboxPopup, ComboboxWidget, Listbox, Option, OverlayModule],
+  imports: [Button, FormField, FormsModule, Combobox, ComboboxPopup, ComboboxWidget, Listbox, Option, OverlayModule],
   template: `<form (submit)="onSubmit($event)">
     <div class="flex flex-col gap-2">
       <div class="fieldset">
@@ -153,8 +153,8 @@ interface CourseModel {
       </div>
     }
     <div class="flex justify-end gap-2 mt-4">
-      <button type="button" class="btn btn-ghost" (click)="closeModal.emit()">Cancelar</button>
-      <button type="submit" class="btn btn-primary">Guardar</button>
+      <button uiButton variant="ghost" type="button" (click)="closeModal.emit()">Cancelar</button>
+      <button uiButton variant="primary" type="submit">Guardar</button>
     </div>
   </form>`,
 

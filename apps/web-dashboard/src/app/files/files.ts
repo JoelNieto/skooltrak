@@ -1,4 +1,4 @@
-import { debounceSignal, EmptyState, Loader, Modal, PageHeader, Toast } from '#/ui';
+import { Button, debounceSignal, EmptyState, Loader, Modal, PageHeader, Toast } from '#/ui';
 import { DatePipe } from '@angular/common';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { Component, inject, Signal, signal } from '@angular/core';
@@ -30,7 +30,7 @@ type FileItem = {
 
 @Component({
   selector: 'app-files',
-  imports: [Loader, FormsModule, RouterLink, DatePipe, PageHeader, EmptyState],
+  imports: [Button, Loader, FormsModule, RouterLink, DatePipe, PageHeader, EmptyState],
   template: `
     <div class="breadcrumbs text-sm">
       <ul>
@@ -105,8 +105,8 @@ type FileItem = {
                     </td>
                     <td class="text-right">
                       @if (file.id) {
-                        <button class="btn btn-primary btn-xs" (click)="openFile(file.id)">Abrir</button>
-                        <button class="btn btn-ghost btn-xs" (click)="downloadFile(file.id)">Descargar</button>
+                        <button uiButton variant="primary" size="sm" (click)="openFile(file.id)">Abrir</button>
+                        <button uiButton variant="ghost" size="sm" (click)="downloadFile(file.id)">Descargar</button>
                       }
                     </td>
                   </tr>

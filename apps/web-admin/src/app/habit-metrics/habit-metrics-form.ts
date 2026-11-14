@@ -1,4 +1,4 @@
-import { Toast } from '#/ui';
+import { Button, Toast } from '#/ui';
 import { HttpClient } from '@angular/common/http';
 import { afterRenderEffect, Component, inject, input, output, signal } from '@angular/core';
 import { form, FormField, min, required } from '@angular/forms/signals';
@@ -7,7 +7,7 @@ import { firstValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-habit-metrics-form',
-  imports: [FormField],
+  imports: [Button, FormField],
   template: `<form (submit)="onSubmit($event)">
     <div class="fieldset">
       <label for="name">Nombre</label>
@@ -38,8 +38,8 @@ import { firstValueFrom } from 'rxjs';
       </label>
     </div>
     <div class="flex justify-end gap-2 mt-4">
-      <button class="btn btn-ghost" type="button" (click)="closeModal.emit(false)">Cancelar</button>
-      <button class="btn btn-primary" type="submit">Guardar</button>
+      <button uiButton variant="ghost" type="button" (click)="closeModal.emit(false)">Cancelar</button>
+      <button uiButton variant="primary" type="submit">Guardar</button>
     </div>
   </form>`,
 })

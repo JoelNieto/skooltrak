@@ -1,4 +1,4 @@
-import { Confirmation, EmptyState, Modal, PaginatorV2, Toast } from '#/ui';
+import { Button, Confirmation, EmptyState, Modal, PaginatorV2, Toast } from '#/ui';
 import { Menu, MenuContent, MenuItem, MenuTrigger } from '@angular/aria/menu';
 import { OverlayModule } from '@angular/cdk/overlay';
 import { DatePipe } from '@angular/common';
@@ -28,7 +28,18 @@ type DegreeRow = {
 
 @Component({
   selector: 'app-study-plans',
-  imports: [DatePipe, Menu, PaginatorV2, MenuContent, MenuItem, MenuTrigger, OverlayModule, FormField, EmptyState],
+  imports: [
+    Button,
+    DatePipe,
+    Menu,
+    PaginatorV2,
+    MenuContent,
+    MenuItem,
+    MenuTrigger,
+    OverlayModule,
+    FormField,
+    EmptyState,
+  ],
 
   template: `<div class="flex justify-between">
       <div class="flex gap-2">
@@ -45,7 +56,7 @@ type DegreeRow = {
           }
         </select>
       </div>
-      <button class="btn btn-primary" (click)="editStudyPlan()">
+      <button uiButton variant="primary" (click)="editStudyPlan()">
         <span class="material-symbols-outlined">add_circle</span> Nuevo plan
       </button>
     </div>

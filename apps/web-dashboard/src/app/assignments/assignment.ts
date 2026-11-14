@@ -1,4 +1,4 @@
-import { EditorViewer, Error as ErrorComponent, Loader, Toast } from '#/ui';
+import { Button, EditorViewer, Error as ErrorComponent, Loader, Toast } from '#/ui';
 import { DatePipe } from '@angular/common';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { Component, inject, input, signal } from '@angular/core';
@@ -22,6 +22,7 @@ type AssignmentDetail = {
 
 @Component({
   imports: [
+    Button,
     RouterLink,
     DatePipe,
     Loader,
@@ -54,7 +55,7 @@ type AssignmentDetail = {
               </p>
             </div>
             @if (canStartAssignmentChat()) {
-              <button class="btn btn-ghost btn-sm" (click)="startAssignmentChat()" [disabled]="startingChat()">
+              <button uiButton variant="ghost" size="sm" (click)="startAssignmentChat()" [disabled]="startingChat()">
                 @if (startingChat()) {
                   <span class="loading loading-spinner loading-sm"></span>
                 } @else {

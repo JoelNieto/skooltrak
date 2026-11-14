@@ -1,4 +1,4 @@
-import { Modal, PageHeader } from '#/ui';
+import { Button, Modal, PageHeader } from '#/ui';
 import { Tab, TabContent, TabList, TabPanel, Tabs } from '@angular/aria/tabs';
 import { Component, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -15,6 +15,7 @@ import CreatePaymentForm from '../forms/create-payment-form';
 @Component({
   selector: 'app-financial-module',
   imports: [
+    Button,
     ChargesSection,
     FormsModule,
     PageHeader,
@@ -56,10 +57,10 @@ import CreatePaymentForm from '../forms/create-payment-form';
             }
           </select>
           @if (!auth.isStudent()) {
-            <button class="btn btn-primary btn-sm" (click)="openCreateCharge()">
+            <button uiButton variant="primary" size="sm" (click)="openCreateCharge()">
               <span class="material-symbols-outlined">add</span> Nuevo cargo
             </button>
-            <button class="btn btn-primary btn-sm" (click)="openCreatePayment()">
+            <button uiButton variant="primary" size="sm" (click)="openCreatePayment()">
               <span class="material-symbols-outlined">add</span> Registrar pago
             </button>
           }

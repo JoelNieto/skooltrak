@@ -1,5 +1,5 @@
 import { SchoolContext } from '#/shared';
-import { Toast } from '#/ui';
+import { Button, Toast } from '#/ui';
 import { Component, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { CartLine, CartService } from '../cart.service';
@@ -7,14 +7,14 @@ import { StoreApiService } from '../store-api.service';
 
 @Component({
   selector: 'app-cart-page',
-  imports: [RouterLink],
+  imports: [Button, RouterLink],
   template: `
     <h2 class="text-xl font-semibold mb-4">Carrito</h2>
     @if (!school.currentSchoolId()) {
       <div class="alert alert-warning">Selecciona una escuela.</div>
     } @else if (!lines().length) {
       <p class="text-base-content/70 mb-4">Tu carrito está vacío.</p>
-      <a [routerLink]="['..']" class="btn btn-primary">Seguir comprando</a>
+      <a uiButton variant="primary" [routerLink]="['..']">Seguir comprando</a>
     } @else {
       <div class="overflow-x-auto rounded-box border border-base-200">
         <table class="table">
@@ -39,18 +39,37 @@ import { StoreApiService } from '../store-api.service';
                 <td>{{ formatPrice($safeNavigationMigration(line.product?.price)) }}</td>
                 <td>
                   <div class="join">
-                    <button type="button" class="btn btn-sm join-item" (click)="setQty(line, (line.quantity ?? 0) - 1)">
+                    <button
+                      uiButton
+                      size="sm"
+                      type="button"
+                      class="join-item"
+                      (click)="setQty(line, (line.quantity ?? 0) - 1)"
+                    >
                       −
                     </button>
                     <span class="btn btn-sm join-item no-animation">{{ line.quantity }}</span>
-                    <button type="button" class="btn btn-sm join-item" (click)="setQty(line, (line.quantity ?? 0) + 1)">
+                    <button
+                      uiButton
+                      size="sm"
+                      type="button"
+                      class="join-item"
+                      (click)="setQty(line, (line.quantity ?? 0) + 1)"
+                    >
                       +
                     </button>
                   </div>
                 </td>
                 <td>{{ formatPrice(lineSubtotal(line)) }}</td>
                 <td>
-                  <button type="button" class="btn btn-ghost btn-sm text-error" (click)="remove(line.id!)">
+                  <button
+                    uiButton
+                    variant="ghost"
+                    size="sm"
+                    type="button"
+                    class="text-error"
+                    (click)="remove(line.id!)"
+                  >
                     Quitar
                   </button>
                 </td>
@@ -60,10 +79,10 @@ import { StoreApiService } from '../store-api.service';
         </table>
       </div>
       <div class="flex justify-between items-center mt-6">
-        <button type="button" class="btn btn-outline btn-sm" (click)="clear()">Vaciar carrito</button>
+        <button uiButton size="sm" type="button" (click)="clear()">Vaciar carrito</button>
         <div class="text-right">
           <p class="text-lg font-semibold">Total: {{ formatPrice(total()) }}</p>
-          <a [routerLink]="['..', 'checkout']" class="btn btn-primary mt-2">Proceder al pago</a>
+          <a uiButton variant="primary" [routerLink]="['..', 'checkout']" class="mt-2">Proceder al pago</a>
         </div>
       </div>
     }

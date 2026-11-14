@@ -1,4 +1,4 @@
-import { Confirmation, EmptyState, PageHeader, Toast } from '#/ui';
+import { Button, Confirmation, EmptyState, PageHeader, Toast } from '#/ui';
 import { Tab, TabContent, TabList, TabPanel, Tabs } from '@angular/aria/tabs';
 import { DatePipe } from '@angular/common';
 import { httpResource } from '@angular/common/http';
@@ -33,7 +33,7 @@ const ACTION_LABELS: Record<string, string> = {
 @Component({
   selector: 'app-communication-broadcasts',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [DatePipe, FormField, PageHeader, EmptyState, TabList, Tab, Tabs, TabPanel, TabContent],
+  imports: [Button, DatePipe, FormField, PageHeader, EmptyState, TabList, Tab, Tabs, TabPanel, TabContent],
   template: `
     <lib-page-header
       title="Comunicados institucionales"
@@ -56,7 +56,7 @@ const ACTION_LABELS: Record<string, string> = {
           <div ngTab value="audit" class="tab" [class.tab-active]="selectedTab() === 'audit'">Auditoría</div>
           <div ngTab value="settings" class="tab" [class.tab-active]="selectedTab() === 'settings'">Ajustes</div>
         </div>
-        <button type="button" class="btn btn-ghost btn-sm" (click)="reload()">
+        <button uiButton variant="ghost" size="sm" type="button" (click)="reload()">
           <span class="material-symbols-outlined text-base">refresh</span>
           Actualizar
         </button>
@@ -106,9 +106,9 @@ const ACTION_LABELS: Record<string, string> = {
                             />
                           </label>
                           @if (canApprove()) {
-                            <button
+                            <button uiButton variant="primary" size="sm"
                               type="button"
-                              class="btn btn-primary btn-sm"
+                             
                               [disabled]="approvingId() === item.id"
                               (click)="approve(item)"
                             >
@@ -208,7 +208,7 @@ const ACTION_LABELS: Record<string, string> = {
                     }
 
                     <div class="flex justify-end">
-                      <button type="submit" class="btn btn-primary" [disabled]="submitting() || form().invalid()">
+                      <button uiButton variant="primary" type="submit" [disabled]="submitting() || form().invalid()">
                         @if (submitting()) {
                           <span class="loading loading-spinner loading-sm"></span>
                         }

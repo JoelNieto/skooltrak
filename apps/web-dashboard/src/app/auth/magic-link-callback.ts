@@ -1,4 +1,4 @@
-import { Toast } from '#/ui';
+import { Button, Toast } from '#/ui';
 import { HttpClient } from '@angular/common/http';
 import { Component, afterRenderEffect, inject, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
@@ -7,7 +7,7 @@ import Auth from './auth';
 
 @Component({
   selector: 'app-magic-link-callback',
-  imports: [RouterLink],
+  imports: [Button, RouterLink],
   template: `
     <div class="min-h-screen flex items-center justify-center bg-base-200 p-4">
       <div class="card w-full max-w-md bg-base-100 shadow-xl">
@@ -20,7 +20,7 @@ import Auth from './auth';
             {{ error() || 'Por favor espera mientras completamos tu acceso.' }}
           </p>
           <div class="card-actions justify-center mt-4">
-            <a routerLink="/login" class="btn btn-primary">Ir al inicio de sesión</a>
+            <a uiButton variant="primary" routerLink="/login">Ir al inicio de sesión</a>
           </div>
         </div>
       </div>

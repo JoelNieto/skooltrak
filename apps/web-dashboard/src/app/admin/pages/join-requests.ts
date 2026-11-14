@@ -1,4 +1,4 @@
-import { EmptyState, Loader, Toast } from '#/ui';
+import { Button, EmptyState, Loader, Toast } from '#/ui';
 import { DatePipe } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { Component, inject, signal } from '@angular/core';
@@ -20,7 +20,7 @@ type JoinRequestRow = {
 
 @Component({
   selector: 'app-join-requests',
-  imports: [Loader, DatePipe, EmptyState],
+  imports: [Button, Loader, DatePipe, EmptyState],
   template: `
     <div class="space-y-6">
       <div class="flex items-center justify-between">
@@ -28,7 +28,7 @@ type JoinRequestRow = {
           <h1 class="text-2xl font-bold text-base-content">Solicitudes de Acceso</h1>
           <p class="text-base-content/60">Administra las solicitudes de usuarios que desean unirse a tu escuela.</p>
         </div>
-        <button class="btn btn-ghost btn-sm" (click)="loadRequests()">
+        <button uiButton variant="ghost" size="sm" (click)="loadRequests()">
           <span class="material-symbols-outlined">refresh</span>
           Actualizar
         </button>
@@ -78,15 +78,17 @@ type JoinRequestRow = {
                   </div>
 
                   <div class="flex gap-2">
-                    <button class="btn btn-success btn-sm" (click)="approve(request.id)" [disabled]="processing()">
+                    <button
+                      uiButton
+                      variant="primary"
+                      size="sm"
+                      (click)="approve(request.id)"
+                      [disabled]="processing()"
+                    >
                       <span class="material-symbols-outlined text-lg">check</span>
                       Aprobar
                     </button>
-                    <button
-                      class="btn btn-error btn-sm btn-outline"
-                      (click)="reject(request.id)"
-                      [disabled]="processing()"
-                    >
+                    <button uiButton variant="danger" size="sm" (click)="reject(request.id)" [disabled]="processing()">
                       <span class="material-symbols-outlined text-lg">close</span>
                       Rechazar
                     </button>

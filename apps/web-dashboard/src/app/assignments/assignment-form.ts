@@ -1,4 +1,4 @@
-import { TextEditor, Toast } from '#/ui';
+import { Button, TextEditor, Toast } from '#/ui';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { afterRenderEffect, Component, effect, inject, input, output, signal } from '@angular/core';
 import { NonNullableFormBuilder } from '@angular/forms';
@@ -28,7 +28,7 @@ interface AssignmentFormData {
 
 @Component({
   selector: 'app-assignment-form',
-  imports: [TextEditor, FormField],
+  imports: [Button, TextEditor, FormField],
   template: `<form (submit)="onSubmit()">
     <div class="flex flex-col md:grid md:grid-cols-2 gap-4">
       <div class="fieldset col-span-2">
@@ -98,8 +98,8 @@ interface AssignmentFormData {
       }
     </div>
     <div class="mt-4 flex justify-end gap-2">
-      <button class="btn btn-ghost" type="button" (click)="closeModal.emit()">Cancelar</button>
-      <button class="btn btn-primary" type="submit">Guardar</button>
+      <button uiButton variant="ghost" type="button" (click)="closeModal.emit()">Cancelar</button>
+      <button uiButton variant="primary" type="submit">Guardar</button>
     </div>
   </form>`,
 })

@@ -1,4 +1,4 @@
-import { Confirmation, Pagination, Paginator, Toast } from '#/ui';
+import { Button, Confirmation, Pagination, Paginator, Toast } from '#/ui';
 import { Menu, MenuContent, MenuItem, MenuTrigger } from '@angular/aria/menu';
 import { OverlayModule } from '@angular/cdk/overlay';
 import { DatePipe } from '@angular/common';
@@ -21,7 +21,18 @@ type SchoolRow = {
 
 @Component({
   selector: 'app-schools',
-  imports: [DatePipe, Paginator, FormsModule, RouterLink, Menu, MenuContent, MenuItem, MenuTrigger, OverlayModule],
+  imports: [
+    Button,
+    DatePipe,
+    Paginator,
+    FormsModule,
+    RouterLink,
+    Menu,
+    MenuContent,
+    MenuItem,
+    MenuTrigger,
+    OverlayModule,
+  ],
   providers: [Pagination],
   template: `
     <div class="flex flex-col gap-4 md:flex-row md:justify-between">
@@ -37,7 +48,7 @@ type SchoolRow = {
           />
         </label>
       </div>
-      <a routerLink="/schools/new" class="btn btn-primary">
+      <a uiButton variant="primary" routerLink="/schools/new">
         <span class="material-symbols-outlined">add_circle</span> Agregar Colegio
       </a>
     </div>

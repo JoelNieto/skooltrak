@@ -1,4 +1,4 @@
-import { Toast } from '#/ui';
+import { Button, Toast } from '#/ui';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { afterRenderEffect, Component, computed, inject, input, output, signal } from '@angular/core';
 import { form, FormField, required } from '@angular/forms/signals';
@@ -7,7 +7,7 @@ import { firstValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-schools-form',
-  imports: [FormField],
+  imports: [Button, FormField],
   template: `<form (submit)="onSubmit($event)">
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
       <div class="fieldset">
@@ -67,7 +67,7 @@ import { firstValueFrom } from 'rxjs';
       </div>
     </div>
     <div class="flex justify-end mt-4">
-      <button class="btn btn-neutral" type="submit">Guardar</button>
+      <button uiButton variant="primary" type="submit">Guardar</button>
     </div>
   </form>`,
 })

@@ -1,4 +1,4 @@
-import { Toast } from '#/ui';
+import { Button, Toast } from '#/ui';
 import { HttpClient } from '@angular/common/http';
 import { Component, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
@@ -20,7 +20,7 @@ export type CreatedEntity = {
 
 @Component({
   selector: 'app-setup-wizard',
-  imports: [BrandLogo, SchoolBasicsStep, DegreesStep, StudyPlansStep, CoursesStep, GroupsStep],
+  imports: [Button, BrandLogo, SchoolBasicsStep, DegreesStep, StudyPlansStep, CoursesStep, GroupsStep],
   template: `
     <div class="min-h-screen flex flex-col gradient-bg">
       <!-- Fixed Header -->
@@ -93,7 +93,7 @@ export type CreatedEntity = {
       >
         <div>
           @if (currentStep() > 1) {
-            <button type="button" class="btn btn-ghost" (click)="previousStep()">
+            <button uiButton variant="ghost" type="button" (click)="previousStep()">
               <span class="material-symbols-outlined text-xl">arrow_back</span>
               Anterior
             </button>
@@ -102,11 +102,11 @@ export type CreatedEntity = {
 
         <div class="flex items-center gap-3">
           @if (currentStep() > 1 && currentStep() < totalSteps) {
-            <button type="button" class="btn btn-ghost" (click)="skipStep()">Omitir por ahora</button>
+            <button uiButton variant="ghost" type="button" (click)="skipStep()">Omitir por ahora</button>
           }
 
           @if (currentStep() === totalSteps) {
-            <button type="button" class="btn btn-primary" (click)="completeOnboarding()" [disabled]="completing()">
+            <button uiButton variant="primary" type="button" (click)="completeOnboarding()" [disabled]="completing()">
               @if (completing()) {
                 <span class="loading loading-spinner loading-sm"></span>
                 Finalizando...

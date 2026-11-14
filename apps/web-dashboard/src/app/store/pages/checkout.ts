@@ -1,5 +1,5 @@
 import { SchoolContext } from '#/shared';
-import { Toast } from '#/ui';
+import { Button, Toast } from '#/ui';
 import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -8,7 +8,7 @@ import { StoreApiService } from '../store-api.service';
 
 @Component({
   selector: 'app-checkout',
-  imports: [FormsModule],
+  imports: [Button, FormsModule],
   template: `
     <h2 class="text-xl font-semibold mb-4">Pago (simulado)</h2>
     @if (!school.currentSchoolId()) {
@@ -49,7 +49,7 @@ import { StoreApiService } from '../store-api.service';
               <input type="checkbox" class="checkbox checkbox-primary" [(ngModel)]="simulateFail" />
               <span class="label-text">Simular pago fallido</span>
             </label>
-            <button type="button" class="btn btn-primary" [disabled]="paying()" (click)="pay()">
+            <button uiButton variant="primary" type="button" [disabled]="paying()" (click)="pay()">
               @if (paying()) {
                 Procesando…
               } @else {

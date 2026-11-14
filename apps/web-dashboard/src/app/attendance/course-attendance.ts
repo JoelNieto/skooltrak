@@ -1,4 +1,4 @@
-import { Confirmation, Loader, Modal, Pagination, Paginator } from '#/ui';
+import { Button, Confirmation, Loader, Modal, Pagination, Paginator } from '#/ui';
 import { Menu, MenuContent, MenuItem, MenuTrigger } from '@angular/aria/menu';
 import { OverlayModule } from '@angular/cdk/overlay';
 import { DatePipe, NgClass } from '@angular/common';
@@ -49,7 +49,19 @@ const STATUS_COLORS: Record<string, string> = {
 
 @Component({
   selector: 'app-course-attendance',
-  imports: [Loader, FormsModule, DatePipe, NgClass, Paginator, Menu, MenuContent, MenuItem, MenuTrigger, OverlayModule],
+  imports: [
+    Button,
+    Loader,
+    FormsModule,
+    DatePipe,
+    NgClass,
+    Paginator,
+    Menu,
+    MenuContent,
+    MenuItem,
+    MenuTrigger,
+    OverlayModule,
+  ],
   providers: [Pagination],
   template: `
     <div class="flex flex-col md:flex-row justify-between gap-4 mb-4">
@@ -65,7 +77,7 @@ const STATUS_COLORS: Record<string, string> = {
           }
         </select>
       </div>
-      <button class="btn btn-primary" (click)="openForm()">
+      <button uiButton variant="primary" (click)="openForm()">
         <span class="material-symbols-outlined">add</span>
         Nueva asistencia
       </button>
@@ -135,9 +147,12 @@ const STATUS_COLORS: Record<string, string> = {
                 </td>
                 <td class="text-right">
                   <button
-                    class="btn btn-sm btn-ghost"
+                    uiButton
+                    variant="ghost"
+                    size="sm"
                     ngMenuTrigger
-                    #origin
+                    cdkOverlayOrigin
+                    #origin="cdkOverlayOrigin"
                     #trigger="ngMenuTrigger"
                     [menu]="actionsMenu()"
                   >
@@ -254,7 +269,7 @@ const STATUS_COLORS: Record<string, string> = {
             </table>
           </div>
           <div class="modal-action">
-            <button class="btn" (click)="selectedSession.set(null)">Cerrar</button>
+            <button uiButton (click)="selectedSession.set(null)">Cerrar</button>
           </div>
         </div>
         <form method="dialog" class="modal-backdrop">

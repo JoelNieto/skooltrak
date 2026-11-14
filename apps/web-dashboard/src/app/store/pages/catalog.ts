@@ -5,10 +5,11 @@ import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { map, of } from 'rxjs';
 import { StoreApiService } from '../store-api.service';
+import { Button } from '#/ui';
 
 @Component({
   selector: 'app-store-catalog',
-  imports: [RouterLink, FormsModule],
+  imports: [Button, RouterLink, FormsModule],
   template: `
     @if (!schoolId()) {
       <div class="alert alert-warning">
@@ -25,14 +26,23 @@ import { StoreApiService } from '../store-api.service';
           (ngModelChange)="search.set($event)"
         />
         <div class="flex flex-wrap gap-2">
-          <button type="button" class="btn btn-sm" [class.btn-primary]="!categoryId()" (click)="categoryId.set(null)">
+          <button
+            uiButton
+            size="sm"
+            type="button"
+            [variant]="!categoryId() ? 'primary' : 'secondary'"
+            [attr.aria-pressed]="!categoryId()"
+            (click)="categoryId.set(null)"
+          >
             Todos
           </button>
           @for (c of categories.value(); track c.id) {
             <button
               type="button"
-              class="btn btn-sm"
-              [class.btn-primary]="categoryId() === c.id!"
+              uiButton
+              size="sm"
+              [variant]="categoryId() === c.id! ? 'primary' : 'secondary'"
+              [attr.aria-pressed]="categoryId() === c.id!"
               (click)="categoryId.set(c.id!)"
             >
               {{ c.name }}

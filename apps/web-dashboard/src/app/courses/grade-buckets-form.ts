@@ -1,11 +1,11 @@
-import { Toast } from '#/ui';
+import { Button, Toast } from '#/ui';
 import { HttpClient } from '@angular/common/http';
 import { afterRenderEffect, Component, inject, input, output, signal } from '@angular/core';
 import { form, FormField, required } from '@angular/forms/signals';
 
 @Component({
   selector: 'app-grade-bucket-form',
-  imports: [FormField],
+  imports: [Button, FormField],
   template: `
     <form (submit)="onSubmit($event)">
       <div class="fieldset">
@@ -17,8 +17,8 @@ import { form, FormField, required } from '@angular/forms/signals';
         <input id="weight" [formField]="form.weight" type="number" class="input input-primary" />
       </div>
       <div class="flex justify-end gap-2 mt-2">
-        <button type="button" class="btn btn-ghost" (click)="closeModal.emit(false)">Cancelar</button>
-        <button type="submit" class="btn btn-primary">Guardar</button>
+        <button uiButton variant="ghost" type="button" (click)="closeModal.emit(false)">Cancelar</button>
+        <button uiButton variant="primary" type="submit">Guardar</button>
       </div>
     </form>
   `,

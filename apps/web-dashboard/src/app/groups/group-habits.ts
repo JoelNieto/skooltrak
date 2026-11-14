@@ -1,4 +1,4 @@
-import { Loader, Toast } from '#/ui';
+import { Button, Loader, Toast } from '#/ui';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { Component, computed, inject, input, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -22,7 +22,7 @@ type StudentEvaluation = {
 
 @Component({
   selector: 'app-group-habits',
-  imports: [FormsModule, Loader],
+  imports: [Button, FormsModule, Loader],
   template: `
     <div class="space-y-4">
       <!-- Empty state: No metrics configured -->
@@ -180,7 +180,7 @@ type StudentEvaluation = {
 
           <!-- Save Button -->
           <div class="flex justify-end gap-2">
-            <button class="btn btn-primary" (click)="saveAll()" [class.loading]="saving()">
+            <button uiButton variant="primary" (click)="saveAll()" [class.loading]="saving()">
               @if (saving()) {
                 <span class="loading loading-spinner"></span>
                 Guardando...

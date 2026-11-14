@@ -1,4 +1,4 @@
-import { Loader, Toast } from '#/ui';
+import { Button, Loader, Toast } from '#/ui';
 import { DatePipe } from '@angular/common';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { Component, DestroyRef, effect, inject, input, signal, viewChild } from '@angular/core';
@@ -45,7 +45,7 @@ type ChatMessageDto = {
 
 @Component({
   selector: 'app-chat-thread',
-  imports: [RouterLink, Loader, FormsModule, DatePipe],
+  imports: [Button, RouterLink, Loader, FormsModule, DatePipe],
   template: `
     <div class="breadcrumbs text-sm">
       <ul>
@@ -144,7 +144,7 @@ type ChatMessageDto = {
                 [(ngModel)]="messageContent"
                 name="content"
               />
-              <button type="submit" class="btn btn-primary" [disabled]="!messageContent().trim() || sending()">
+              <button uiButton variant="primary" type="submit" [disabled]="!messageContent().trim() || sending()">
                 @if (sending()) {
                   <span class="loading loading-spinner loading-sm"></span>
                 } @else {

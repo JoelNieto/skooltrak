@@ -1,4 +1,4 @@
-import { Toast } from '#/ui';
+import { Button, Toast } from '#/ui';
 import { HttpClient } from '@angular/common/http';
 import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -10,7 +10,7 @@ import { BrandLogo } from '../shared/brand-logo';
 
 @Component({
   selector: 'app-school-acknowledgment',
-  imports: [BrandLogo, FormField, FormsModule],
+  imports: [Button, BrandLogo, FormField, FormsModule],
   template: `
     <div class="min-h-screen flex flex-col gradient-bg">
       <!-- Fixed Header -->
@@ -130,7 +130,8 @@ import { BrandLogo } from '../shared/brand-logo';
       >
         <div></div>
         <button
-          class="btn btn-primary"
+          uiButton
+          variant="primary"
           [disabled]="!acknowledged() || form().invalid() || saving()"
           (click)="createSchool()"
         >

@@ -1,6 +1,7 @@
 import { afterRenderEffect, Component, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { BrandLogo } from '../shared/brand-logo';
+import { Button } from '#/ui';
 
 interface RoleOption {
   id: string;
@@ -12,7 +13,7 @@ interface RoleOption {
 
 @Component({
   selector: 'app-select-role',
-  imports: [BrandLogo],
+  imports: [Button, BrandLogo],
   template: `
     <div class="min-h-screen flex flex-col gradient-bg">
       <header class="p-4 md:p-6 flex items-center justify-between">
@@ -54,7 +55,7 @@ interface RoleOption {
             }
           </div>
 
-          <button class="btn btn-ghost btn-sm" (click)="goBack()">
+          <button uiButton variant="ghost" size="sm" (click)="goBack()">
             <span class="material-symbols-outlined text-lg">arrow_back</span>
             Cambiar escuela
           </button>

@@ -1,4 +1,4 @@
-import { Loader, TextEditor, Toast } from '#/ui';
+import { Button, Loader, TextEditor, Toast } from '#/ui';
 import { Component, computed, effect, inject, input, signal } from '@angular/core';
 import {
   FormArray,
@@ -19,7 +19,7 @@ import { QuizQuestionControl } from './quiz-question-control';
 
 @Component({
   selector: 'app-quiz-form',
-  imports: [RouterLink, ReactiveFormsModule, FormsModule, TextEditor, QuizQuestionControl, Loader],
+  imports: [Button, RouterLink, ReactiveFormsModule, FormsModule, TextEditor, QuizQuestionControl, Loader],
   template: `
     <div class="breadcrumbs text-sm">
       <ul>
@@ -70,7 +70,7 @@ import { QuizQuestionControl } from './quiz-question-control';
               </div>
             </div>
             <div class="flex justify-end mt-4">
-              <button type="submit" class="btn btn-primary" [disabled]="isSaving()">
+              <button uiButton variant="primary" type="submit" [disabled]="isSaving()">
                 @if (isSaving()) {
                   <span class="loading loading-spinner loading-sm"></span>
                 }
@@ -89,7 +89,7 @@ import { QuizQuestionControl } from './quiz-question-control';
                   <div class="card-body">
                     <div class="flex justify-between">
                       <h2 class="card-title">Pregunta {{ $index + 1 }}</h2>
-                      <button type="button" class="btn btn-soft btn-error" (click)="removeQuestion($index)">
+                      <button uiButton variant="danger" type="button" (click)="removeQuestion($index)">
                         <span class="material-symbols-outlined">delete</span>
                       </button>
                     </div>
@@ -97,7 +97,7 @@ import { QuizQuestionControl } from './quiz-question-control';
                   </div>
                 </div>
               }
-              <button type="button" class="btn btn-primary btn-soft" (click)="addQuestion()">
+              <button uiButton type="button" (click)="addQuestion()">
                 <span class="material-symbols-outlined">add_circle</span>
                 Agregar pregunta
               </button>

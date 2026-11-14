@@ -1,4 +1,4 @@
-import { Confirmation, EditorViewer, Error, Loader, Modal, Toast } from '#/ui';
+import { Button, Confirmation, EditorViewer, Error, Loader, Modal, Toast } from '#/ui';
 import { DatePipe, DecimalPipe, NgClass } from '@angular/common';
 import { Component, computed, inject, input } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
@@ -32,7 +32,7 @@ type GradeDetail = {
 
 @Component({
   selector: 'app-grade',
-  imports: [Loader, RouterLink, EditorViewer, DatePipe, Error, DecimalPipe, NgClass],
+  imports: [Button, Loader, RouterLink, EditorViewer, DatePipe, Error, DecimalPipe, NgClass],
   template: `
     @defer {
       @if (gradeResource.hasValue()) {
@@ -55,12 +55,12 @@ type GradeDetail = {
                     Publicada</span
                   >
                 } @else {
-                  <button class="btn btn-primary btn-sm" (click)="publishGrade()">
+                  <button uiButton variant="primary" size="sm" (click)="publishGrade()">
                     <span class="material-symbols-outlined">publish</span>
                     Publicar
                   </button>
                 }
-                <button class="btn btn-error btn-sm btn-soft" (click)="deleteGrade()">
+                <button uiButton variant="danger" size="sm" (click)="deleteGrade()">
                   <span class="material-symbols-outlined">delete</span> Eliminar
                 </button>
               </div>

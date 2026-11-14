@@ -1,4 +1,4 @@
-import { Loader, Toast } from '#/ui';
+import { Button, Loader, Toast } from '#/ui';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { afterRenderEffect, Component, computed, inject, input, signal } from '@angular/core';
 import { disabled, email, form, FormField, required, submit } from '@angular/forms/signals';
@@ -37,7 +37,7 @@ interface StudentFormData {
 
 @Component({
   selector: 'app-student-form',
-  imports: [FormField, RouterLink, Loader],
+  imports: [Button, FormField, RouterLink, Loader],
   template: `
     <div class="breadcrumbs text-sm">
       <ul>
@@ -387,8 +387,8 @@ interface StudentFormData {
 
         <!-- Form Actions -->
         <div class="flex justify-end gap-3 my-6 pt-6 border-t border-base-300">
-          <a routerLink="/students" class="btn btn-ghost">Cancelar</a>
-          <button type="submit" class="btn btn-primary" [disabled]="isSaving()">
+          <a uiButton variant="ghost" routerLink="/students">Cancelar</a>
+          <button uiButton variant="primary" type="submit" [disabled]="isSaving()">
             @if (isSaving()) {
               <span class="loading loading-spinner loading-sm"></span>
             }

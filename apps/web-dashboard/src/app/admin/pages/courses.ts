@@ -1,4 +1,4 @@
-import { Confirmation, Modal, PaginatorV2, Toast } from '#/ui';
+import { Button, Confirmation, Modal, PaginatorV2, Toast } from '#/ui';
 import { Menu, MenuContent, MenuItem, MenuTrigger } from '@angular/aria/menu';
 import { OverlayModule } from '@angular/cdk/overlay';
 import { HttpClient, httpResource } from '@angular/common/http';
@@ -26,7 +26,18 @@ type CourseType = Prisma.CourseGetPayload<{
 
 @Component({
   selector: 'app-courses',
-  imports: [PaginatorV2, RouterLink, FormsModule, Menu, MenuContent, MenuItem, MenuTrigger, OverlayModule, FormField],
+  imports: [
+    Button,
+    PaginatorV2,
+    RouterLink,
+    FormsModule,
+    Menu,
+    MenuContent,
+    MenuItem,
+    MenuTrigger,
+    OverlayModule,
+    FormField,
+  ],
   template: `<div class="flex justify-between">
       <div class="flex gap-2">
         <div class="md:w-96 w-full">
@@ -43,7 +54,7 @@ type CourseType = Prisma.CourseGetPayload<{
         </select>
       </div>
 
-      <button class="btn btn-primary" (click)="editCourse()">
+      <button uiButton variant="primary" (click)="editCourse()">
         <span class="material-symbols-outlined">add_circle</span> Nuevo curso
       </button>
     </div>

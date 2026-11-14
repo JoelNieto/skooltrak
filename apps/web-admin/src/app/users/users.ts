@@ -1,4 +1,4 @@
-import { Confirmation, Error, Modal, Pagination, Paginator, Toast } from '#/ui';
+import { Button, Confirmation, Error, Modal, Pagination, Paginator, Toast } from '#/ui';
 import { Menu, MenuContent, MenuItem, MenuTrigger } from '@angular/aria/menu';
 import { OverlayModule } from '@angular/cdk/overlay';
 import { DatePipe } from '@angular/common';
@@ -12,6 +12,7 @@ import { UsersForm } from './users-form';
 @Component({
   selector: 'app-users',
   imports: [
+    Button,
     RouterLink,
     DatePipe,
     Menu,
@@ -36,7 +37,7 @@ import { UsersForm } from './users-form';
         <p class="text-sm text-gray-500 dark:text-gray-400">Listado de usuarios</p>
       </div>
 
-      <button class="btn btn-neutral" (click)="editUser()">
+      <button uiButton variant="primary" (click)="editUser()">
         <span class="material-symbols-outlined">add_circle</span> Nuevo Usuario
       </button>
     </div>

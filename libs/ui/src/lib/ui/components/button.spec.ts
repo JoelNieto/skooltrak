@@ -7,7 +7,15 @@ import { Button, ButtonSize, ButtonVariant } from './button';
 @Component({
   imports: [Button, RouterLink],
   template: `
-    <button uiButton id="btn" [variant]="variant()" [size]="size()" [iconOnly]="iconOnly()" [loading]="loading()" (click)="clicks = clicks + 1">
+    <button
+      uiButton
+      id="btn"
+      [variant]="variant()"
+      [size]="size()"
+      [iconOnly]="iconOnly()"
+      [loading]="loading()"
+      (click)="clicks = clicks + 1"
+    >
       Guardar
     </button>
     <a uiButton id="link" variant="ghost" size="sm" routerLink="/cursos">Ver cursos</a>

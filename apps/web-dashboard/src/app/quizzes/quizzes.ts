@@ -1,4 +1,4 @@
-import { Confirmation, Error, Loader, Toast } from '#/ui';
+import { Button, Confirmation, Error, Loader, Toast } from '#/ui';
 import { DatePipe } from '@angular/common';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { Component, inject } from '@angular/core';
@@ -19,7 +19,7 @@ type QuizListItem = {
 
 @Component({
   selector: 'app-quizzes',
-  imports: [RouterLink, DatePipe, Loader, Error, StripHtmlPipe],
+  imports: [Button, RouterLink, DatePipe, Loader, Error, StripHtmlPipe],
   template: `
     <div class="breadcrumbs text-sm">
       <ul>
@@ -30,7 +30,7 @@ type QuizListItem = {
     <div class="flex items-center justify-between">
       <h1 class="text-2xl font-semibold mb-2">Quizes</h1>
       @if (auth.hasPermission('MANAGE_QUIZZES')) {
-        <a class="btn btn-primary" routerLink="new">Nuevo quiz</a>
+        <a uiButton variant="primary" routerLink="new">Nuevo quiz</a>
       }
     </div>
     <div class="overflow-x-auto bg-base-100 rounded-lg shadow-sm mt-4 border border-base-300">
@@ -66,9 +66,9 @@ type QuizListItem = {
                 <td>
                   @if (auth.hasPermission('MANAGE_QUIZZES')) {
                     <div class="flex gap-2">
-                      <a [routerLink]="['/quizzes', item.id]" class="btn btn-ghost btn-sm">Ver</a>
-                      <a [routerLink]="['/quizzes', item.id, 'edit']" class="btn btn-ghost btn-sm">Editar</a>
-                      <button class="btn btn-ghost btn-sm" (click)="deleteQuiz(item)">
+                      <a uiButton variant="ghost" size="sm" [routerLink]="['/quizzes', item.id]">Ver</a>
+                      <a uiButton variant="ghost" size="sm" [routerLink]="['/quizzes', item.id, 'edit']">Editar</a>
+                      <button uiButton variant="ghost" size="sm" (click)="deleteQuiz(item)">
                         <span class="material-symbols-outlined">delete</span>
                       </button>
                     </div>

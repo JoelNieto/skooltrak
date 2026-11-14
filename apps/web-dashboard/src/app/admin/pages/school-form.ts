@@ -1,4 +1,4 @@
-import { Loader, Toast } from '#/ui';
+import { Button, Loader, Toast } from '#/ui';
 import { HttpClient } from '@angular/common/http';
 import { afterRenderEffect, Component, computed, inject, input, signal, viewChild } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
@@ -48,7 +48,7 @@ interface SchoolFormData {
 
 @Component({
   selector: 'app-school-form',
-  imports: [FormField, RouterLink, Loader, ImageCropperComponent, FormsModule],
+  imports: [Button, FormField, RouterLink, Loader, ImageCropperComponent, FormsModule],
   template: `
     <div class="breadcrumbs text-sm">
       <ul>
@@ -105,7 +105,14 @@ interface SchoolFormData {
                         }
                       </div>
                       @if ((logoPreviewUrl() || logoDownloadUrl() || schoolForm.logo().value()) && !isUploadingLogo()) {
-                        <button type="button" class="btn btn-ghost btn-xs text-error" (click)="removeLogo()">
+                        <button
+                          uiButton
+                          variant="ghost"
+                          size="sm"
+                          type="button"
+                          class="text-error"
+                          (click)="removeLogo()"
+                        >
                           <span class="material-symbols-outlined text-sm">delete</span>
                           Eliminar
                         </button>
@@ -115,12 +122,7 @@ interface SchoolFormData {
                     <!-- Upload Controls -->
                     <div class="flex-1">
                       <input type="file" #fileInput class="hidden" accept="image/*" (change)="onFileSelected($event)" />
-                      <button
-                        type="button"
-                        class="btn btn-outline btn-primary"
-                        (click)="fileInput.click()"
-                        [disabled]="isUploadingLogo()"
-                      >
+                      <button uiButton type="button" (click)="fileInput.click()" [disabled]="isUploadingLogo()">
                         <span class="material-symbols-outlined">upload</span>
                         {{ schoolForm.logo().value() || logoPreviewUrl() ? 'Cambiar imagen' : 'Subir imagen' }}
                       </button>
@@ -163,10 +165,11 @@ interface SchoolFormData {
                         </div>
                       </div>
                       <div class="flex justify-end gap-2 mt-4">
-                        <button type="button" class="btn btn-ghost" (click)="cancelCrop()">Cancelar</button>
+                        <button uiButton variant="ghost" type="button" (click)="cancelCrop()">Cancelar</button>
                         <button
+                          uiButton
+                          variant="primary"
                           type="button"
-                          class="btn btn-primary"
                           (click)="applyCrop()"
                           [disabled]="!cropPreviewUrl()"
                         >
@@ -457,8 +460,8 @@ interface SchoolFormData {
 
         <!-- Form Actions -->
         <div class="flex justify-end gap-3 my-6 pt-6 border-t border-base-300">
-          <a [routerLink]="isEditMode() ? ['/schools', id()] : ['/admin/schools']" class="btn btn-ghost">Cancelar</a>
-          <button type="submit" class="btn btn-primary" [disabled]="isSaving() || isUploadingLogo()">
+          <a uiButton variant="ghost" [routerLink]="isEditMode() ? ['/schools', id()] : ['/admin/schools']">Cancelar</a>
+          <button uiButton variant="primary" type="submit" [disabled]="isSaving() || isUploadingLogo()">
             @if (isSaving()) {
               <span class="loading loading-spinner loading-sm"></span>
             }

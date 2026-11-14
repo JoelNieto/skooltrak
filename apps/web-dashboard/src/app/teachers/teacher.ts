@@ -1,4 +1,4 @@
-import { Loader } from '#/ui';
+import { Button, Loader } from '#/ui';
 import { DatePipe } from '@angular/common';
 import { httpResource } from '@angular/common/http';
 import { Component, computed, inject, input } from '@angular/core';
@@ -10,7 +10,7 @@ import { isValidId } from '../core/validators';
 type TeacherView = any;
 
 @Component({
-  imports: [Loader, RouterLink, DatePipe],
+  imports: [Button, Loader, RouterLink, DatePipe],
   template: `@defer {
       @if (teacherResource.hasValue() && teacherResource.value()?.id) {
         @let teacher = teacherResource.value()!;
@@ -55,11 +55,9 @@ type TeacherView = any;
             </div>
             <div class="flex gap-2 items-center">
               @if (auth.hasPermission('MANAGE_TEACHERS')) {
-                <a class="btn btn-secondary btn-sm" routerLink="edit">
-                  <span class="material-symbols-outlined">edit</span></a
-                >
+                <a uiButton size="sm" routerLink="edit"> <span class="material-symbols-outlined">edit</span></a>
               }
-              <button class="btn btn-primary btn-sm"><span class="material-symbols-outlined">chat</span></button>
+              <button uiButton variant="primary" size="sm"><span class="material-symbols-outlined">chat</span></button>
             </div>
           </div>
         </div>

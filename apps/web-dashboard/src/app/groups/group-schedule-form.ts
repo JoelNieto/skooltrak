@@ -1,4 +1,4 @@
-import { Toast } from '#/ui';
+import { Button, Toast } from '#/ui';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { afterRenderEffect, Component, inject, input, output, signal } from '@angular/core';
 import { form, FormField, required, submit } from '@angular/forms/signals';
@@ -6,7 +6,7 @@ import { Prisma } from '@generated/prisma';
 
 @Component({
   selector: 'app-group-schedule-form',
-  imports: [FormField],
+  imports: [Button, FormField],
   template: ` <form (submit)="save($event)" novalidate>
     <div class="flex flex-col md:grid md:grid-cols-2 gap-2">
       <div class="fieldset">
@@ -90,8 +90,8 @@ import { Prisma } from '@generated/prisma';
       </div>
     </div>
     <div class="flex justify-end gap-2 mt-4">
-      <button type="button" class="btn btn-ghost" (click)="closeModal.emit()">Cancelar</button>
-      <button type="submit" class="btn btn-primary">Guardar</button>
+      <button uiButton variant="ghost" type="button" (click)="closeModal.emit()">Cancelar</button>
+      <button uiButton variant="primary" type="submit">Guardar</button>
     </div>
   </form>`,
 })

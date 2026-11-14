@@ -1,7 +1,9 @@
 import { Component, input, output } from '@angular/core';
+import { Button } from './button';
 
 @Component({
   selector: 'lib-page-header',
+  imports: [Button],
   template: `
     <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-4">
       <div>
@@ -13,7 +15,7 @@ import { Component, input, output } from '@angular/core';
         }
       </div>
       @if (actionLabel()) {
-        <button class="btn btn-primary" type="button" (click)="action.emit()">
+        <button uiButton variant="primary" type="button" (click)="action.emit()">
           @if (actionIcon()) {
             <span class="material-symbols-outlined">{{ actionIcon() }}</span>
           }

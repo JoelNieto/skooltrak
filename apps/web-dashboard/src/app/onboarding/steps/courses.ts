@@ -1,4 +1,4 @@
-import { Toast } from '#/ui';
+import { Button, Toast } from '#/ui';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { Component, computed, inject, input, output, signal } from '@angular/core';
 import { form, FormField, required } from '@angular/forms/signals';
@@ -8,7 +8,7 @@ import { CreatedEntity } from '../setup-wizard';
 
 @Component({
   selector: 'app-courses-step',
-  imports: [FormField],
+  imports: [Button, FormField],
   template: `
     <div class="w-full max-w-md text-center space-y-8 animate-fade-in">
       <!-- Icon -->
@@ -101,7 +101,7 @@ import { CreatedEntity } from '../setup-wizard';
           </div>
 
           <div class="flex gap-3 pt-4">
-            <button type="submit" class="btn btn-outline flex-1" [disabled]="saving()" (click)="addAnother = true">
+            <button uiButton type="submit" class="flex-1" [disabled]="saving()" (click)="addAnother = true">
               @if (saving() && addAnother) {
                 <span class="loading loading-spinner loading-sm"></span>
               } @else {
@@ -109,7 +109,14 @@ import { CreatedEntity } from '../setup-wizard';
               }
               Agregar otro
             </button>
-            <button type="submit" class="btn btn-primary flex-1" [disabled]="saving()" (click)="addAnother = false">
+            <button
+              uiButton
+              variant="primary"
+              type="submit"
+              class="flex-1"
+              [disabled]="saving()"
+              (click)="addAnother = false"
+            >
               @if (saving() && !addAnother) {
                 <span class="loading loading-spinner loading-sm"></span>
                 Guardando...
@@ -125,7 +132,7 @@ import { CreatedEntity } from '../setup-wizard';
       <!-- Skip Option -->
       @if (createdEntities().length === 0) {
         <div class="text-center">
-          <button type="button" class="btn btn-ghost btn-sm" (click)="onSkip()">Omitir por ahora</button>
+          <button uiButton variant="ghost" size="sm" type="button" (click)="onSkip()">Omitir por ahora</button>
           <p class="text-xs text-base-content/50 mt-1">Podrás crear cursos más adelante.</p>
         </div>
       }

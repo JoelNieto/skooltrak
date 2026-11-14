@@ -1,4 +1,4 @@
-import { PageHeader, Toast } from '#/ui';
+import { Button, PageHeader, Toast } from '#/ui';
 import { HttpClient } from '@angular/common/http';
 import { afterRenderEffect, Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -19,7 +19,7 @@ interface ParentMeResponse {
 
 @Component({
   selector: 'app-parent-portal',
-  imports: [FormsModule, PageHeader],
+  imports: [Button, FormsModule, PageHeader],
   template: `
     <lib-page-header title="Portal de padres" subtitle="Resumen rápido del progreso de tus hijos." />
 
@@ -27,7 +27,7 @@ interface ParentMeResponse {
       <div class="card-body">
         <div class="flex items-center justify-between">
           <h2 class="text-lg font-semibold text-base-content">Hijos vinculados</h2>
-          <button class="btn btn-primary btn-sm" (click)="openAddChild()">
+          <button uiButton variant="primary" size="sm" (click)="openAddChild()">
             <span class="material-symbols-outlined text-lg">add</span>
             Agregar hijo
           </button>
@@ -78,8 +78,8 @@ interface ParentMeResponse {
             }
 
             <div class="flex justify-end gap-2 mt-4">
-              <button class="btn btn-ghost btn-sm" (click)="closeAddChild()">Cancelar</button>
-              <button class="btn btn-primary btn-sm" [disabled]="addLoading()" (click)="submitAddChild()">
+              <button uiButton variant="ghost" size="sm" (click)="closeAddChild()">Cancelar</button>
+              <button uiButton variant="primary" size="sm" [disabled]="addLoading()" (click)="submitAddChild()">
                 @if (addLoading()) {
                   <span class="loading loading-spinner loading-sm"></span>
                 } @else {

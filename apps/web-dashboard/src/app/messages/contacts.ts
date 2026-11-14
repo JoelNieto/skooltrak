@@ -1,6 +1,7 @@
 import { httpResource } from '@angular/common/http';
 import { Component, computed, effect, ElementRef, input, model, output, signal, viewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { Button } from '#/ui';
 export type Contact = {
   id: string;
   initials: string;
@@ -18,7 +19,7 @@ export interface SelectedContact extends Contact {
 }
 @Component({
   selector: 'app-contacts',
-  imports: [FormsModule],
+  imports: [Button, FormsModule],
 
   template: ` <div class="relative w-full min-h-12 bg-white px-3 py-2">
       <div class="flex flex-wrap gap-2 items-center">
@@ -99,7 +100,7 @@ export interface SelectedContact extends Contact {
         <span>
           Removido: <strong>{{ lastAddedContact()?.name }}</strong>
         </span>
-        <button type="button" class="btn btn-ghost btn-xs" (click)="addLatestContact()">
+        <button uiButton variant="ghost" size="sm" type="button" (click)="addLatestContact()">
           <span class="material-symbols-outlined">close</span>
         </button>
       </div>

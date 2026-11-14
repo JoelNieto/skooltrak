@@ -102,7 +102,11 @@
         "port": 4300,
         "staticFilePath": "dist/apps/web-admin/browser",
         "spa": true
-      }
+      },
+      "readyWhen": {
+        "signal": true
+      },
+      "dependsOn": ["build"]
     }
   }
 }

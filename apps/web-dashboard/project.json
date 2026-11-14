@@ -102,7 +102,11 @@
         "port": 4200,
         "staticFilePath": "dist/apps/web-dashboard/browser",
         "spa": true
-      }
+      },
+      "readyWhen": {
+        "signal": true
+      },
+      "dependsOn": ["build"]
     }
   }
 }

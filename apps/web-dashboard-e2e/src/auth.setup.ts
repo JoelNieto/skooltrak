@@ -1,4 +1,4 @@
-import { expect, test as setup } from '@playwright/test';
+import { expect, test } from '@playwright/test';
 import { E2E_PASSWORD, PersonaKey, personas, storageStatePath } from './support/fixtures';
 
 /**
@@ -9,7 +9,7 @@ import { E2E_PASSWORD, PersonaKey, personas, storageStatePath } from './support/
  * accidentally pointed at another database.
  */
 for (const key of Object.keys(personas) as PersonaKey[]) {
-  setup(`authenticate ${key}`, async ({ page, request }) => {
+  test(`authenticate ${key}`, async ({ page, request }) => {
     const response = await request.post('/api/v1/auth/login', {
       data: { email: personas[key].email, password: E2E_PASSWORD },
     });

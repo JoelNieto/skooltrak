@@ -1,3 +1,4 @@
+export * from './lib/ui/components/button';
 export * from './lib/ui/components/calendar';
 export * from './lib/ui/components/editor-menu';
 export * from './lib/ui/components/editor-viewer';

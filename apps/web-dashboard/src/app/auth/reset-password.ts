@@ -1,4 +1,4 @@
-import { Loader, Toast } from '#/ui';
+import { Button, Loader, Toast } from '#/ui';
 import { HttpClient } from '@angular/common/http';
 import { Component, inject, signal } from '@angular/core';
 import { form, FormField, minLength, required, validate } from '@angular/forms/signals';
@@ -8,7 +8,7 @@ import { BrandLogo } from '../shared/brand-logo';
 
 @Component({
   selector: 'app-reset-password',
-  imports: [BrandLogo, FormField, RouterLink, Loader],
+  imports: [Button, BrandLogo, FormField, RouterLink, Loader],
   template: `
     <div class="gradient-bg min-h-screen flex items-center justify-center p-4">
       @defer {
@@ -29,7 +29,7 @@ import { BrandLogo } from '../shared/brand-logo';
                   <span class="material-symbols-outlined">check_circle</span>
                   <span>Invitación reenviada. Revisa tu bandeja de entrada.</span>
                 </div>
-                <a routerLink="/login" class="btn btn-primary w-full"> Volver al inicio de sesión </a>
+                <a uiButton variant="primary" routerLink="/login" class="w-full"> Volver al inicio de sesión </a>
               } @else if (error()) {
                 <div class="alert alert-error mb-4">
                   <span class="material-symbols-outlined">error</span>
@@ -37,7 +37,7 @@ import { BrandLogo } from '../shared/brand-logo';
                 </div>
                 <div class="flex flex-col gap-3 text-center">
                   @if (emailFromUrl()) {
-                    <button type="button" class="btn btn-primary" [disabled]="resending()" (click)="resendInvitation()">
+                    <button uiButton variant="primary" type="button" [disabled]="resending()" (click)="resendInvitation()">
                       @if (resending()) {
                         <span class="loading loading-spinner loading-sm"></span>
                         Enviando...
@@ -47,7 +47,7 @@ import { BrandLogo } from '../shared/brand-logo';
                       }
                     </button>
                   } @else {
-                    <a routerLink="/forgot-password" class="btn btn-primary"> Solicitar nuevo enlace </a>
+                    <a uiButton variant="primary" routerLink="/forgot-password"> Solicitar nuevo enlace </a>
                   }
                 </div>
               } @else {
@@ -86,7 +86,7 @@ import { BrandLogo } from '../shared/brand-logo';
                     }
                   </div>
 
-                  <button type="submit" [disabled]="loading() || form().invalid()" class="btn btn-primary w-full">
+                  <button uiButton variant="primary" type="submit" [disabled]="loading() || form().invalid()" class="w-full">
                     @if (loading()) {
                       <span class="loading loading-spinner loading-sm"></span>
                       Guardando...

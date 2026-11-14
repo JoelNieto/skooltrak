@@ -1,4 +1,4 @@
-import { Loader, Toast } from '#/ui';
+import { Button, Loader, Toast } from '#/ui';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { Component, computed, inject, input, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
@@ -12,7 +12,7 @@ import GroupSchedule from './group-schedule';
 import GroupStudents from './group-students';
 
 @Component({
-  imports: [RouterLink, Loader, GroupStudents, GroupCourses, GroupSchedule, GroupHabits],
+  imports: [Button, RouterLink, Loader, GroupStudents, GroupCourses, GroupSchedule, GroupHabits],
   template: `
     @let group = groupResource.value();
     @if (groupResource.isLoading()) {
@@ -41,7 +41,7 @@ import GroupStudents from './group-students';
               </div>
             </div>
             @if (canStartGroupChat()) {
-              <button class="btn btn-ghost btn-sm" (click)="startGroupChat()" [disabled]="startingChat()">
+              <button uiButton variant="ghost" size="sm" (click)="startGroupChat()" [disabled]="startingChat()">
                 @if (startingChat()) {
                   <span class="loading loading-spinner loading-sm"></span>
                 } @else {

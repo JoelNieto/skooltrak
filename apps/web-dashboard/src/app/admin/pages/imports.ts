@@ -1,4 +1,4 @@
-import { Toast } from '#/ui';
+import { Button, Toast } from '#/ui';
 import { HttpClient } from '@angular/common/http';
 import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -8,7 +8,7 @@ import Store from '../../core/store';
 @Component({
   selector: 'app-imports',
   standalone: true,
-  imports: [FormsModule],
+  imports: [Button, FormsModule],
   template: `
     <div class="flex flex-col gap-6 p-4 max-w-6xl mx-auto">
       <h1 class="text-2xl font-bold">Importación masiva</h1>
@@ -52,7 +52,13 @@ import Store from '../../core/store';
                 ></textarea>
               </div>
 
-              <button class="btn btn-primary w-fit" [disabled]="loading() || !canDryRun" (click)="runDryRun()">
+              <button
+                uiButton
+                variant="primary"
+                class="w-fit"
+                [disabled]="loading() || !canDryRun"
+                (click)="runDryRun()"
+              >
                 @if (loading()) {
                   <span class="loading loading-spinner loading-sm"></span>
                 } @else {
@@ -102,7 +108,8 @@ import Store from '../../core/store';
               </div>
               <div class="card-actions justify-end mt-4">
                 <button
-                  class="btn btn-primary"
+                  uiButton
+                  variant="primary"
                   [disabled]="dryRunResult()?.validRows === 0 || loading()"
                   (click)="commit()"
                 >
@@ -128,8 +135,8 @@ import Store from '../../core/store';
                 <span class="badge badge-error">Errores: {{ commitResult()?.errorRows }}</span>
               </div>
               <div class="card-actions justify-end">
-                <button class="btn btn-ghost" (click)="downloadErrors()">Descargar errores CSV</button>
-                <button class="btn btn-primary" (click)="reset()">Nueva importación</button>
+                <button uiButton variant="ghost" (click)="downloadErrors()">Descargar errores CSV</button>
+                <button uiButton variant="primary" (click)="reset()">Nueva importación</button>
               </div>
             </div>
           </div>

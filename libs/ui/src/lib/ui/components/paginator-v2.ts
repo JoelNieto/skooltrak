@@ -1,38 +1,65 @@
 import { afterRenderEffect, Component, computed, input, model } from '@angular/core';
+import { Button } from './button';
 
 /** Page number or ellipsis placeholder for compact pagination */
 type PageItem = number | 'ellipsis';
 
 @Component({
   selector: 'lib-paginator',
+  imports: [Button],
   template: `<div class="flex justify-between items-center w-full">
     <p class="text-sm text-base-content font-medium">
       Mostrando de <strong>{{ start() }}</strong> a <strong>{{ end() }}</strong> de <strong>{{ total() }}</strong>
     </p>
     <div>
-      <div class="join join-horizontal">
-        <button class="join-item btn btn-sm" [class.btn-disabled]="!hasPreviousPage()" (click)="previousPage()">
+      <nav class="flex items-center gap-1" aria-label="Paginación">
+        <button
+          uiButton
+          variant="ghost"
+          size="sm"
+          iconOnly
+          type="button"
+          aria-label="Página anterior"
+          [disabled]="!hasPreviousPage()"
+          (click)="previousPage()"
+        >
           ‹
         </button>
         @for (item of pageItems(); track trackPageItem($index, item)) {
           @if (item === 'ellipsis') {
-            <span class="join-item btn btn-sm btn-disabled no-pointer-events px-2">…</span>
+            <span class="px-1 text-sm text-ink-subtle" aria-hidden="true">…</span>
           } @else {
-            <button class="join-item btn btn-sm min-w-9" [class.btn-active]="item === page()" (click)="page.set(item)">
+            <button
+              uiButton
+              size="sm"
+              iconOnly
+              type="button"
+              [variant]="item === page() ? 'primary' : 'ghost'"
+              [attr.aria-current]="item === page() ? 'page' : null"
+              (click)="page.set(item)"
+            >
               {{ item }}
             </button>
           }
         }
-        <button class="join-item btn btn-sm" [class.btn-disabled]="!hasNextPage()" (click)="nextPage()">›</button>
-      </div>
+        <button
+          uiButton
+          variant="ghost"
+          size="sm"
+          iconOnly
+          type="button"
+          aria-label="Página siguiente"
+          [disabled]="!hasNextPage()"
+          (click)="nextPage()"
+        >
+          ›
+        </button>
+      </nav>
     </div>
   </div>`,
   styles: `
     :host {
       width: 100%;
-    }
-    :host .no-pointer-events {
-      pointer-events: none;
     }
   `,
 })

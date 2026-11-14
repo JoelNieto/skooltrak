@@ -13,6 +13,7 @@ import {
   subMonths,
 } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { Button } from './button';
 
 export interface CalendarMarkerData<Data = unknown> {
   date: Date;
@@ -20,7 +21,7 @@ export interface CalendarMarkerData<Data = unknown> {
 }
 @Component({
   selector: 'lib-calendar',
-  imports: [NgClass, DatePipe, NgTemplateOutlet],
+  imports: [Button, NgClass, DatePipe, NgTemplateOutlet],
   template: `<div class="calendar-container">
     <header class="calendar-header my-4 flex items-center justify-between">
       <h2 class="text-xl font-semibold">
@@ -28,17 +29,11 @@ export interface CalendarMarkerData<Data = unknown> {
       </h2>
 
       <div class="flex items-center gap-1">
-        <button
-          (click)="this.toCurrentMonth()"
-          [disabled]="isCurrentMonth()"
-          class="btn btn-neutral btn-sm btn-outline"
-        >
-          Hoy
-        </button>
-        <button (click)="prevMonth()" class="btn btn-primary btn-soft btn-sm">
+        <button uiButton size="sm" (click)="this.toCurrentMonth()" [disabled]="isCurrentMonth()">Hoy</button>
+        <button uiButton size="sm" (click)="prevMonth()">
           <span class="material-symbols-outlined">chevron_left</span>
         </button>
-        <button (click)="nextMonth()" class="btn btn-primary btn-sm btn-soft">
+        <button uiButton size="sm" (click)="nextMonth()">
           <span class="material-symbols-outlined">chevron_right</span>
         </button>
       </div>

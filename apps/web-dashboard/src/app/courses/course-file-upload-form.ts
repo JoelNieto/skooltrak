@@ -1,4 +1,4 @@
-import { Toast } from '#/ui';
+import { Button, Toast } from '#/ui';
 import { HttpClient } from '@angular/common/http';
 import { Component, inject, input, output, signal } from '@angular/core';
 import { form, FormField, required } from '@angular/forms/signals';
@@ -8,7 +8,7 @@ type UploadResult = { created: boolean };
 
 @Component({
   selector: 'app-course-file-upload-form',
-  imports: [FormField],
+  imports: [Button, FormField],
   template: `<form (submit)="onSubmit($event)">
     <div class="flex flex-col gap-4">
       <div class="fieldset">
@@ -27,8 +27,8 @@ type UploadResult = { created: boolean };
       </div>
     </div>
     <div class="mt-6 flex justify-end gap-2">
-      <button class="btn btn-ghost" type="button" (click)="closeModal.emit(undefined)">Cancelar</button>
-      <button class="btn btn-primary" type="submit">Subir</button>
+      <button uiButton variant="ghost" type="button" (click)="closeModal.emit(undefined)">Cancelar</button>
+      <button uiButton variant="primary" type="submit">Subir</button>
     </div>
   </form>`,
 })

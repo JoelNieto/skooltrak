@@ -1,4 +1,4 @@
-import { Toast } from '#/ui';
+import { Button, Toast } from '#/ui';
 import { HttpClient } from '@angular/common/http';
 import { afterRenderEffect, Component, inject, OnDestroy, signal } from '@angular/core';
 import { Router } from '@angular/router';
@@ -7,12 +7,12 @@ import { BrandLogo } from '../shared/brand-logo';
 
 @Component({
   selector: 'app-waiting-approval',
-  imports: [BrandLogo, ],
+  imports: [Button, BrandLogo,],
   template: `
     <div class="min-h-screen flex flex-col gradient-bg">
       <header class="p-4 md:p-6 flex items-center justify-between">
         <app-brand-logo class="h-8 md:h-10" />
-        <button class="btn btn-ghost btn-sm" (click)="logout()">
+        <button uiButton variant="ghost" size="sm" (click)="logout()">
           <span class="material-symbols-outlined">logout</span>
           Cerrar sesión
         </button>

@@ -1,4 +1,4 @@
-import { TextEditor, Toast } from '#/ui';
+import { Button, TextEditor, Toast } from '#/ui';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { afterRenderEffect, Component, computed, inject, input, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -16,7 +16,7 @@ interface NewsletterDto {
 
 @Component({
   selector: 'app-newsletter-form',
-  imports: [FormField, FormsModule, TextEditor, RouterLink],
+  imports: [Button, FormField, FormsModule, TextEditor, RouterLink],
   template: `
     <div class="breadcrumbs text-sm">
       <ul>
@@ -97,8 +97,8 @@ interface NewsletterDto {
 
       <!-- Form Actions -->
       <div class="flex justify-end gap-3 my-6 pt-6 border-t border-base-300">
-        <a routerLink="/admin/newsletters" class="btn btn-ghost">Cancelar</a>
-        <button type="submit" class="btn btn-primary" [disabled]="isSaving()">
+        <a uiButton variant="ghost" routerLink="/admin/newsletters">Cancelar</a>
+        <button uiButton variant="primary" type="submit" [disabled]="isSaving()">
           @if (isSaving()) {
             <span class="loading loading-spinner loading-sm"></span>
           }

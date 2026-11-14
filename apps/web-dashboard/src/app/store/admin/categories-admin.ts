@@ -1,5 +1,5 @@
 import { SchoolContext } from '#/shared';
-import { Toast } from '#/ui';
+import { Button, Toast } from '#/ui';
 import { Component, inject, signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
@@ -8,7 +8,7 @@ import { StoreApiService } from '../store-api.service';
 
 @Component({
   selector: 'app-categories-admin',
-  imports: [FormsModule],
+  imports: [Button, FormsModule],
   template: `
     <h3 class="text-lg font-medium mb-4">Categorías</h3>
     @if (!school.currentSchoolId()) {
@@ -16,7 +16,7 @@ import { StoreApiService } from '../store-api.service';
     } @else {
       <form class="flex flex-wrap gap-2 mb-6" (ngSubmit)="create(); $event.preventDefault()">
         <input class="input input-bordered input-sm" placeholder="Nueva categoría" [(ngModel)]="newName" name="n" />
-        <button type="submit" class="btn btn-primary btn-sm">Agregar</button>
+        <button uiButton variant="primary" size="sm" type="submit">Agregar</button>
       </form>
       <div class="overflow-x-auto rounded-box border border-base-200">
         <table class="table">
@@ -46,8 +46,8 @@ import { StoreApiService } from '../store-api.service';
                   <input type="checkbox" class="toggle toggle-sm" [(ngModel)]="editActive[c.id!]" [name]="'a' + c.id" />
                 </td>
                 <td class="flex gap-2">
-                  <button type="button" class="btn btn-primary btn-soft btn-sm" (click)="save(c.id!)">Guardar</button>
-                  <button type="button" class="btn btn-error btn-soft btn-sm" (click)="remove(c.id!)">Eliminar</button>
+                  <button uiButton size="sm" type="button" (click)="save(c.id!)">Guardar</button>
+                  <button uiButton variant="danger" size="sm" type="button" (click)="remove(c.id!)">Eliminar</button>
                 </td>
               </tr>
             } @empty {

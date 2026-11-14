@@ -1,4 +1,4 @@
-import { Confirmation, EmptyState, Modal, PaginatorV2, Toast } from '#/ui';
+import { Button, Confirmation, EmptyState, Modal, PaginatorV2, Toast } from '#/ui';
 import { Menu, MenuContent, MenuItem, MenuTrigger } from '@angular/aria/menu';
 import { OverlayModule } from '@angular/cdk/overlay';
 import { DatePipe } from '@angular/common';
@@ -29,6 +29,7 @@ type StudyPlanRow = {
 @Component({
   selector: 'app-groups',
   imports: [
+    Button,
     DatePipe,
     RouterLink,
     Menu,
@@ -56,7 +57,7 @@ type StudyPlanRow = {
           }
         </select>
       </div>
-      <button class="btn btn-primary" (click)="editClassGroup()">
+      <button uiButton variant="primary" (click)="editClassGroup()">
         <span class="material-symbols-outlined">add_circle</span> Nuevo Grupo
       </button>
     </div>

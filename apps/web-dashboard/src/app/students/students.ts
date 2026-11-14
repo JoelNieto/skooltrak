@@ -1,4 +1,4 @@
-import { Confirmation, EmptyState, Pagination, PaginatorV2, Toast } from '#/ui';
+import { Button, Confirmation, EmptyState, Pagination, PaginatorV2, Toast } from '#/ui';
 import { Menu, MenuContent, MenuItem, MenuTrigger } from '@angular/aria/menu';
 import { OverlayModule } from '@angular/cdk/overlay';
 import { DatePipe, NgClass } from '@angular/common';
@@ -38,6 +38,7 @@ type StudentRow = {
 
 @Component({
   imports: [
+    Button,
     DatePipe,
     NgClass,
     RouterLink,
@@ -72,7 +73,7 @@ type StudentRow = {
           />
         </label>
       </div>
-      <a routerLink="/students/new" class="btn btn-primary">
+      <a uiButton variant="primary" routerLink="/students/new">
         <span class="material-symbols-outlined">add_circle</span> Agregar Alumno
       </a>
     </div>

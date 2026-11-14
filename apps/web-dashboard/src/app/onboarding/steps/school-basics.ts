@@ -1,4 +1,4 @@
-import { Toast } from '#/ui';
+import { Button, Toast } from '#/ui';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { Component, computed, inject, output, signal } from '@angular/core';
 import { form, FormField, required } from '@angular/forms/signals';
@@ -6,7 +6,7 @@ import Store from '../../core/store';
 
 @Component({
   selector: 'app-school-basics-step',
-  imports: [FormField],
+  imports: [Button, FormField],
   template: `
     <div class="w-full max-w-md text-center space-y-8 animate-fade-in">
       <!-- Icon -->
@@ -37,7 +37,7 @@ import Store from '../../core/store';
         </div>
 
         <div class="pt-4">
-          <button type="submit" class="btn btn-primary w-full" [disabled]="saving()">
+          <button uiButton variant="primary" type="submit" class="w-full" [disabled]="saving()">
             @if (saving()) {
               <span class="loading loading-spinner loading-sm"></span>
               Guardando...

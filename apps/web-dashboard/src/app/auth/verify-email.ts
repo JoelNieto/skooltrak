@@ -1,4 +1,4 @@
-import { Loader, Toast } from '#/ui';
+import { Button, Loader, Toast } from '#/ui';
 import { HttpClient } from '@angular/common/http';
 import { afterRenderEffect, Component, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -8,7 +8,7 @@ import { BrandLogo } from '../shared/brand-logo';
 
 @Component({
   selector: 'app-verify-email',
-  imports: [BrandLogo, Loader],
+  imports: [Button, BrandLogo, Loader],
   template: `
     <div class="min-h-screen flex flex-col gradient-bg">
       <!-- Fixed Header -->
@@ -42,7 +42,7 @@ import { BrandLogo } from '../shared/brand-logo';
                 escuela.
               </p>
             </div>
-            <button class="btn btn-primary btn-lg" (click)="continueToOnboarding()">
+            <button uiButton variant="primary" size="lg" (click)="continueToOnboarding()">
               Continuar
               <span class="material-symbols-outlined">arrow_forward</span>
             </button>
@@ -59,7 +59,7 @@ import { BrandLogo } from '../shared/brand-logo';
                 {{ error() }}
               </p>
             </div>
-            <button class="btn btn-primary" (click)="resendEmail()" [disabled]="resending()">
+            <button uiButton variant="primary" (click)="resendEmail()" [disabled]="resending()">
               @if (resending()) {
                 <span class="loading loading-spinner loading-sm"></span>
               } @else {
@@ -100,11 +100,7 @@ import { BrandLogo } from '../shared/brand-logo';
             </div>
 
             <div class="space-y-3">
-              <button
-                class="btn btn-outline btn-block"
-                (click)="resendEmail()"
-                [disabled]="resending() || cooldown() > 0"
-              >
+              <button uiButton class="w-full" (click)="resendEmail()" [disabled]="resending() || cooldown() > 0">
                 @if (resending()) {
                   <span class="loading loading-spinner loading-sm"></span>
                   Enviando...
@@ -116,7 +112,7 @@ import { BrandLogo } from '../shared/brand-logo';
                 }
               </button>
 
-              <button class="btn btn-ghost btn-sm" (click)="checkVerification()">
+              <button uiButton variant="ghost" size="sm" (click)="checkVerification()">
                 <span class="material-symbols-outlined text-lg">sync</span>
                 Ya verifiqué mi correo
               </button>

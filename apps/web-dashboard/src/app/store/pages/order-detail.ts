@@ -5,12 +5,13 @@ import { rxResource } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import { map } from 'rxjs';
 import { StoreApiService } from '../store-api.service';
+import { Button } from '#/ui';
 
 @Component({
   selector: 'app-order-detail',
-  imports: [RouterLink, DatePipe],
+  imports: [Button, RouterLink, DatePipe],
   template: `
-    <a [routerLink]="['..']" class="btn btn-ghost btn-sm mb-4">← Mis pedidos</a>
+    <a uiButton variant="ghost" size="sm" [routerLink]="['..']" class="mb-4">← Mis pedidos</a>
     @if (order.isLoading()) {
       <p>Cargando…</p>
     } @else if (!order.value()) {

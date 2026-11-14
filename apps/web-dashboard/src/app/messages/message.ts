@@ -1,4 +1,4 @@
-import { EditorViewer, Loader, Toast } from '#/ui';
+import { Button, EditorViewer, Loader, Toast } from '#/ui';
 import { DatePipe } from '@angular/common';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { Component, computed, effect, inject, input, signal } from '@angular/core';
@@ -26,7 +26,7 @@ type MessageType = Prisma.MessageGetPayload<undefined> & {
 
 @Component({
   selector: 'app-message',
-  imports: [Loader, RouterLink, DatePipe, EditorViewer, FormsModule],
+  imports: [Button, Loader, RouterLink, DatePipe, EditorViewer, FormsModule],
   styles: `
     :host ::ng-deep blockquote {
       border-left: 3px solid oklch(var(--bc) / 0.3);
@@ -69,8 +69,10 @@ type MessageType = Prisma.MessageGetPayload<undefined> & {
               <lib-editor-viewer [innerHTML]="message.content" />
             </div>
             <div class="flex justify-end gap-2 border-t border-base-300 pt-3">
-              <button class="btn btn-ghost btn-sm" (click)="prepareReply(message)">Responder</button>
-              <button class="btn btn-ghost btn-sm" (click)="prepareReply(message, true)">Responder con cita</button>
+              <button uiButton variant="ghost" size="sm" (click)="prepareReply(message)">Responder</button>
+              <button uiButton variant="ghost" size="sm" (click)="prepareReply(message, true)">
+                Responder con cita
+              </button>
             </div>
           </div>
         </div>
@@ -97,8 +99,10 @@ type MessageType = Prisma.MessageGetPayload<undefined> & {
                       <lib-editor-viewer [innerHTML]="item.content" />
                     </div>
                     <div class="mt-3 flex gap-2">
-                      <button class="btn btn-ghost btn-xs" (click)="prepareReplyFromReply(item)">Responder</button>
-                      <button class="btn btn-ghost btn-xs" (click)="prepareReplyFromReply(item, true)">
+                      <button uiButton variant="ghost" size="sm" (click)="prepareReplyFromReply(item)">
+                        Responder
+                      </button>
+                      <button uiButton variant="ghost" size="sm" (click)="prepareReplyFromReply(item, true)">
                         Responder con cita
                       </button>
                     </div>
@@ -117,7 +121,7 @@ type MessageType = Prisma.MessageGetPayload<undefined> & {
                 <div class="text-xs text-base-content/60">Cita de {{ replyDraft().quotedAuthor }}</div>
                 <div class="text-sm">{{ replyDraft().quotedText }}</div>
                 <div class="mt-2">
-                  <button class="btn btn-ghost btn-xs" (click)="clearQuote()">Quitar cita</button>
+                  <button uiButton variant="ghost" size="sm" (click)="clearQuote()">Quitar cita</button>
                 </div>
               </div>
             }
@@ -131,7 +135,9 @@ type MessageType = Prisma.MessageGetPayload<undefined> & {
             ></textarea>
             <div class="flex justify-end gap-2 mt-3">
               <button
-                class="btn btn-primary btn-sm"
+                uiButton
+                variant="primary"
+                size="sm"
                 (click)="sendReply()"
                 [disabled]="isSending() || !replyDraft().content.trim()"
               >

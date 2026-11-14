@@ -1,4 +1,4 @@
-import { Toast } from '#/ui';
+import { Button, Toast } from '#/ui';
 import { Component, inject, signal } from '@angular/core';
 import { email, form, FormField, required } from '@angular/forms/signals';
 
@@ -6,7 +6,7 @@ import Auth from './auth';
 
 @Component({
   selector: 'app-login',
-  imports: [FormField],
+  imports: [Button, FormField],
   template: ` <div class="gradient-bg min-h-screen flex items-center justify-center p-4">
     <div class="max-w-md w-full bg-white rounded-2xl shadow-xl overflow-hidden">
       <!-- Header Section -->
@@ -56,7 +56,7 @@ import Auth from './auth';
             }
           </div>
 
-          <button type="submit" class="btn btn-neutral w-full">Iniciar Sesión</button>
+          <button uiButton variant="primary" type="submit" class="w-full">Iniciar Sesión</button>
         </form>
       </div>
     </div>

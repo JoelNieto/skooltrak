@@ -1,9 +1,11 @@
 import { Component, computed, input, output } from '@angular/core';
+import { Button } from './button';
 
 type EmptyStateColor = 'primary' | 'secondary' | 'accent' | 'info' | 'success' | 'warning' | 'neutral';
 
 @Component({
   selector: 'lib-empty-state',
+  imports: [Button],
   template: `
     <div class="border border-dashed rounded-lg p-6 text-center" [class]="containerClass()">
       @if (icon()) {
@@ -16,7 +18,14 @@ type EmptyStateColor = 'primary' | 'secondary' | 'accent' | 'info' | 'success' |
         <p class="text-xs mt-1.5 text-base-content/60 max-w-xs mx-auto">{{ description() }}</p>
       }
       @if (actionLabel()) {
-        <button class="btn btn-sm mt-4" [class]="buttonClass()" (click)="onAction()">
+        <button
+          uiButton
+          size="sm"
+          type="button"
+          class="mt-4"
+          [variant]="color() === 'neutral' ? 'ghost' : 'secondary'"
+          (click)="onAction()"
+        >
           {{ actionLabel() }}
         </button>
       }
@@ -66,19 +75,6 @@ export class EmptyState {
       success: 'text-success',
       warning: 'text-warning',
       neutral: 'text-base-content/60',
-    };
-    return colorMap[this.color()];
-  });
-
-  buttonClass = computed(() => {
-    const colorMap: Record<EmptyStateColor, string> = {
-      primary: 'btn-primary btn-soft',
-      secondary: 'btn-secondary btn-soft',
-      accent: 'btn-accent btn-soft',
-      info: 'btn-info btn-soft',
-      success: 'btn-success btn-soft',
-      warning: 'btn-warning btn-soft',
-      neutral: 'btn-ghost',
     };
     return colorMap[this.color()];
   });

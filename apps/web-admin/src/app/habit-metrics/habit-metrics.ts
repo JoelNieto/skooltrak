@@ -1,4 +1,4 @@
-import { Confirmation, Error, Modal, Toast } from '#/ui';
+import { Button, Confirmation, Error, Modal, Toast } from '#/ui';
 import { Menu, MenuContent, MenuItem, MenuTrigger } from '@angular/aria/menu';
 import { OverlayModule } from '@angular/cdk/overlay';
 import { DatePipe } from '@angular/common';
@@ -10,7 +10,7 @@ import HabitMetricsForm from './habit-metrics-form';
 
 @Component({
   selector: 'app-habit-metrics',
-  imports: [RouterLink, DatePipe, Menu, MenuContent, MenuItem, MenuTrigger, OverlayModule, Error],
+  imports: [Button, RouterLink, DatePipe, Menu, MenuContent, MenuItem, MenuTrigger, OverlayModule, Error],
   template: `
     <div class="breadcrumbs text-sm">
       <ul>
@@ -26,7 +26,7 @@ import HabitMetricsForm from './habit-metrics-form';
         </p>
       </div>
 
-      <button class="btn btn-primary" (click)="editHabitMetric()">
+      <button uiButton variant="primary" (click)="editHabitMetric()">
         <span class="material-symbols-outlined">add_circle</span>
         Nueva métrica
       </button>

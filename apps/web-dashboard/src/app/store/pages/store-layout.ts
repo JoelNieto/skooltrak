@@ -7,10 +7,11 @@ import { CartService } from '../cart.service';
 import { StoreApiService } from '../store-api.service';
 import StoreThemeToggle from '../store-theme-toggle';
 import { StoreThemeService } from '../store-theme.service';
+import { Button } from '#/ui';
 
 @Component({
   selector: 'app-store-layout',
-  imports: [RouterOutlet, RouterLink, StoreThemeToggle],
+  imports: [Button, RouterOutlet, RouterLink, StoreThemeToggle],
   template: `
     <div class="layout-padding pb-10">
       <div class="breadcrumbs text-sm mb-4">
@@ -45,9 +46,9 @@ import { StoreThemeService } from '../store-theme.service';
         <div class="flex flex-wrap items-center gap-2">
           <app-store-theme-toggle />
           @if (canManage()) {
-            <a routerLink="admin" class="btn btn-outline btn-sm">Administrar tienda</a>
+            <a uiButton size="sm" routerLink="admin">Administrar tienda</a>
           }
-          <a routerLink="cart" class="btn btn-primary btn-sm gap-1">
+          <a uiButton variant="primary" size="sm" routerLink="cart" class="gap-1">
             <span class="material-symbols-outlined text-lg">shopping_cart</span>
             Carrito
             @if (cartCount() > 0) {

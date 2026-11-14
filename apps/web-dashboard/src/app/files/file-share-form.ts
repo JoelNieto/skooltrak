@@ -1,4 +1,4 @@
-import { Toast } from '#/ui';
+import { Button, Toast } from '#/ui';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { afterRenderEffect, Component, computed, effect, inject, input, output, signal } from '@angular/core';
 import { NonNullableFormBuilder } from '@angular/forms';
@@ -22,7 +22,7 @@ interface FileShareFormData {
 
 @Component({
   selector: 'app-file-share-form',
-  imports: [FormField],
+  imports: [Button, FormField],
   template: `<form (submit)="onSubmit($event)">
     <div class="flex flex-col gap-4">
       <div class="fieldset">
@@ -44,7 +44,7 @@ interface FileShareFormData {
                 <option [value]="course.id">{{ course.name }}</option>
               }
             </select>
-            <button class="btn btn-secondary w-full sm:w-auto" type="button" (click)="addTarget()">Agregar</button>
+            <button uiButton class="w-full sm:w-auto" type="button" (click)="addTarget()">Agregar</button>
           </div>
         } @else {
           <div class="flex flex-col sm:flex-row gap-2">
@@ -55,7 +55,7 @@ interface FileShareFormData {
               [formField]="form.targetId"
               placeholder="Pega un ID y agrega"
             />
-            <button class="btn btn-secondary w-full sm:w-auto" type="button" (click)="addTarget()">Agregar</button>
+            <button uiButton class="w-full sm:w-auto" type="button" (click)="addTarget()">Agregar</button>
           </div>
         }
         @if (targetIds().length > 0) {
@@ -78,10 +78,10 @@ interface FileShareFormData {
       </div>
     </div>
     <div class="mt-6 flex flex-col-reverse sm:flex-row sm:justify-end gap-2">
-      <button class="btn btn-ghost w-full sm:w-auto" type="button" (click)="closeModal.emit(undefined)">
+      <button uiButton variant="ghost" class="w-full sm:w-auto" type="button" (click)="closeModal.emit(undefined)">
         Cancelar
       </button>
-      <button class="btn btn-primary w-full sm:w-auto" type="submit">Compartir</button>
+      <button uiButton variant="primary" class="w-full sm:w-auto" type="submit">Compartir</button>
     </div>
   </form>`,
 })

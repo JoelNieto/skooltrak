@@ -1,4 +1,4 @@
-import { Loader } from '#/ui';
+import { Button, Loader } from '#/ui';
 import { DecimalPipe } from '@angular/common';
 import { httpResource } from '@angular/common/http';
 import { afterRenderEffect, Component, computed, inject, input, signal } from '@angular/core';
@@ -60,7 +60,7 @@ interface GradeReportData {
 
 @Component({
   selector: 'app-grade-report',
-  imports: [DecimalPipe, FormsModule, Loader, RouterLink],
+  imports: [Button, DecimalPipe, FormsModule, Loader, RouterLink],
   template: `
     <div class="grade-report-container">
       <div class="flex justify-between items-center mb-4 print:hidden">
@@ -79,7 +79,7 @@ interface GradeReportData {
               <option [ngValue]="period.id">{{ period.name }}</option>
             }
           </select>
-          <button class="btn btn-primary" (click)="printReport()">
+          <button uiButton variant="primary" (click)="printReport()">
             <span class="material-symbols-outlined">print</span>
             Imprimir / Descargar PDF
           </button>

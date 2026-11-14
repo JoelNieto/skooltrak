@@ -1,4 +1,4 @@
-import { Toast } from '#/ui';
+import { Button, Toast } from '#/ui';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { afterRenderEffect, Component, inject, input, model, output, signal } from '@angular/core';
 import { form, FormField, required } from '@angular/forms/signals';
@@ -6,7 +6,7 @@ import { Prisma } from '@generated/prisma';
 import { firstValueFrom } from 'rxjs';
 @Component({
   selector: 'app-roles-form',
-  imports: [FormField],
+  imports: [Button, FormField],
   template: `
     <form (submit)="createRole($event)">
       <div class="fieldset">
@@ -44,7 +44,7 @@ import { firstValueFrom } from 'rxjs';
         }
       </div>
       <div class="flex justify-end mt-4">
-        <button type="submit" class="btn btn-primary">Guardar</button>
+        <button uiButton variant="primary" type="submit">Guardar</button>
       </div>
     </form>
   `,

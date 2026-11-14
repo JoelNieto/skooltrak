@@ -1,4 +1,4 @@
-import { Confirmation } from '#/ui';
+import { Button, Confirmation } from '#/ui';
 import { HttpClient } from '@angular/common/http';
 import { afterRenderEffect, Component, computed, EnvironmentInjector, inject } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
@@ -20,7 +20,7 @@ type SidebarSchool = {
 @Component({
   // eslint-disable-next-line @angular-eslint/component-selector
   selector: '[appSidebar]',
-  imports: [BrandLogo, RouterLink, RouterLinkActive],
+  imports: [Button, BrandLogo, RouterLink, RouterLinkActive],
   template: `<div class="flex flex-col h-full">
     <div class="flex items-center justify-between px-4 py-5 shrink-0">
       <h1 class="text-xl font-semibold text-primary flex items-center gap-2">
@@ -420,9 +420,7 @@ type SidebarSchool = {
 
       @if (auth.isAdmin() || auth.isStudent()) {
         <div>
-          <p class="px-3 py-1.5 text-[11px] uppercase font-semibold text-base-content/50 tracking-wider">
-            Finanzas
-          </p>
+          <p class="px-3 py-1.5 text-[11px] uppercase font-semibold text-base-content/50 tracking-wider">Finanzas</p>
           <ul class="space-y-0.5 mt-1">
             <li>
               <a
@@ -454,32 +452,41 @@ type SidebarSchool = {
       </a>
       <div class="flex gap-1 p-2 rounded-lg bg-base-200/50" role="group" aria-label="Tema">
         <button
+          uiButton
+          size="sm"
+          iconOnly
           type="button"
           (click)="theme.setTheme('light')"
-          [class.btn-active]="theme.theme() === 'light'"
-          class="btn btn-ghost btn-sm btn-square"
+          [variant]="theme.theme() === 'light' ? 'primary' : 'ghost'"
           [attr.aria-pressed]="theme.theme() === 'light'"
           title="Claro"
+          aria-label="Claro"
         >
           <span class="material-symbols-outlined text-lg">light_mode</span>
         </button>
         <button
+          uiButton
+          size="sm"
+          iconOnly
           type="button"
           (click)="theme.setTheme('dark')"
-          [class.btn-active]="theme.theme() === 'dark'"
-          class="btn btn-ghost btn-sm btn-square"
+          [variant]="theme.theme() === 'dark' ? 'primary' : 'ghost'"
           [attr.aria-pressed]="theme.theme() === 'dark'"
           title="Oscuro"
+          aria-label="Oscuro"
         >
           <span class="material-symbols-outlined text-lg">dark_mode</span>
         </button>
         <button
+          uiButton
+          size="sm"
+          iconOnly
           type="button"
           (click)="theme.setTheme('system')"
-          [class.btn-active]="theme.theme() === 'system'"
-          class="btn btn-ghost btn-sm btn-square"
+          [variant]="theme.theme() === 'system' ? 'primary' : 'ghost'"
           [attr.aria-pressed]="theme.theme() === 'system'"
           title="Sistema"
+          aria-label="Sistema"
         >
           <span class="material-symbols-outlined text-lg">contrast</span>
         </button>

@@ -2,10 +2,11 @@ import { Component, inject, signal } from '@angular/core';
 import { form, FormField, minLength, required, validate } from '@angular/forms/signals';
 import { Router, RouterLink } from '@angular/router';
 import Auth from './auth';
+import { Button } from '#/ui';
 
 @Component({
   selector: 'app-change-password',
-  imports: [FormField, RouterLink],
+  imports: [Button, FormField, RouterLink],
   template: `
     <div class="flex flex-col gap-6">
       <div class="breadcrumbs text-sm">
@@ -84,8 +85,14 @@ import Auth from './auth';
           }
 
           <div class="flex flex-col sm:flex-row gap-3 pt-2">
-            <a routerLink="/home" class="btn btn-outline w-full sm:w-auto"> Cancelar </a>
-            <button type="submit" [disabled]="loading() || form().invalid()" class="btn btn-primary w-full sm:w-auto">
+            <a uiButton routerLink="/home" class="w-full sm:w-auto"> Cancelar </a>
+            <button
+              uiButton
+              variant="primary"
+              type="submit"
+              [disabled]="loading() || form().invalid()"
+              class="w-full sm:w-auto"
+            >
               @if (loading()) {
                 <span class="loading loading-spinner loading-sm"></span>
                 Cambiando...

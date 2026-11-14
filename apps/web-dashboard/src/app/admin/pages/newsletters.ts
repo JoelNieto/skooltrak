@@ -1,4 +1,4 @@
-import { Confirmation, Pagination, Paginator, Toast } from '#/ui';
+import { Button, Confirmation, Pagination, Paginator, Toast } from '#/ui';
 import { Menu, MenuContent, MenuItem, MenuTrigger } from '@angular/aria/menu';
 import { OverlayModule } from '@angular/cdk/overlay';
 import { DatePipe } from '@angular/common';
@@ -24,14 +24,25 @@ type NewsletterItem = {
 
 @Component({
   selector: 'app-newsletters',
-  imports: [DatePipe, Paginator, FormsModule, RouterLink, Menu, MenuContent, MenuItem, MenuTrigger, OverlayModule],
+  imports: [
+    Button,
+    DatePipe,
+    Paginator,
+    FormsModule,
+    RouterLink,
+    Menu,
+    MenuContent,
+    MenuItem,
+    MenuTrigger,
+    OverlayModule,
+  ],
   providers: [Pagination],
   template: `
     @if (newsletters.error()) {
       <div role="alert" class="alert alert-error">
         <span class="material-symbols-outlined">error</span>
         <span>Error al cargar los boletines. Verifica tus permisos o intenta de nuevo.</span>
-        <button class="btn btn-sm btn-ghost" (click)="newsletters.reload()">Reintentar</button>
+        <button uiButton variant="ghost" size="sm" (click)="newsletters.reload()">Reintentar</button>
       </div>
     } @else {
       <div class="flex flex-col gap-4 md:flex-row md:justify-between">
@@ -41,7 +52,7 @@ type NewsletterItem = {
             <input class="pl-0" type="search" placeholder="Buscar..." [(ngModel)]="searchText" />
           </label>
         </div>
-        <a routerLink="/admin/newsletters/new" class="btn btn-primary">
+        <a uiButton variant="primary" routerLink="/admin/newsletters/new">
           <span class="material-symbols-outlined">add_circle</span> Nuevo boletín
         </a>
       </div>

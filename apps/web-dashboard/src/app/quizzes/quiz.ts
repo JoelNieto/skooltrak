@@ -1,4 +1,4 @@
-import { Confirmation, EditorViewer, Error as ErrorComponent, Loader, Toast } from '#/ui';
+import { Button, Confirmation, EditorViewer, Error as ErrorComponent, Loader, Toast } from '#/ui';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { Component, inject, input } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
@@ -30,7 +30,7 @@ type QuizDetail = {
 
 @Component({
   selector: 'app-quiz',
-  imports: [RouterLink, Loader, EditorViewer, ErrorComponent],
+  imports: [Button, RouterLink, Loader, EditorViewer, ErrorComponent],
   template: `
     @defer {
       @if (quizResource.hasValue()) {
@@ -59,11 +59,11 @@ type QuizDetail = {
               </div>
               @if (auth.hasPermission('MANAGE_QUIZZES')) {
                 <div class="flex gap-2">
-                  <a [routerLink]="['/quizzes', quiz.id, 'edit']" class="btn btn-primary btn-sm">
+                  <a uiButton variant="primary" size="sm" [routerLink]="['/quizzes', quiz.id, 'edit']">
                     <span class="material-symbols-outlined">edit</span>
                     Editar
                   </a>
-                  <button class="btn btn-error btn-sm btn-soft" (click)="deleteQuiz(quiz)">
+                  <button uiButton variant="danger" size="sm" (click)="deleteQuiz(quiz)">
                     <span class="material-symbols-outlined">delete</span>
                     Eliminar
                   </button>

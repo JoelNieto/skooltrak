@@ -1,4 +1,5 @@
 import { Component, computed, input, output, signal } from '@angular/core';
+import { Button } from '#/ui';
 
 export type UploadedFile = {
   file: File;
@@ -7,6 +8,7 @@ export type UploadedFile = {
 
 @Component({
   selector: 'app-assignment-dropzone',
+  imports: [Button],
   template: `
     <div
       class="border-2 border-dashed rounded-lg p-6 text-center transition-colors"
@@ -76,9 +78,9 @@ export type UploadedFile = {
                   </p>
                 </div>
               </div>
-              <button
+              <button uiButton variant="ghost" size="sm" iconOnly
                 type="button"
-                class="btn btn-ghost btn-sm btn-circle"
+               
                 (click)="removeFile(uploadedFile)"
               >
                 <span class="material-symbols-outlined">close</span>

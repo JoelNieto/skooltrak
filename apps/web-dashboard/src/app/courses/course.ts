@@ -1,4 +1,4 @@
-import { Loader, Modal, Toast } from '#/ui';
+import { Button, Loader, Modal, Toast } from '#/ui';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { Component, computed, inject, input, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
@@ -32,6 +32,7 @@ type CourseVm = {
 
 @Component({
   imports: [
+    Button,
     Loader,
     RouterLink,
     CourseAssignments,
@@ -80,7 +81,7 @@ type CourseVm = {
 
               <div class="flex gap-2">
                 @if (canStartCourseChat()) {
-                  <button class="btn btn-ghost" (click)="startCourseChat()" [disabled]="startingChat()">
+                  <button uiButton variant="ghost" (click)="startCourseChat()" [disabled]="startingChat()">
                     @if (startingChat()) {
                       <span class="loading loading-spinner loading-sm"></span>
                     } @else {
@@ -90,15 +91,13 @@ type CourseVm = {
                   </button>
                 }
                 @if (auth.hasPermission('MANAGE_ASSIGNMENTS')) {
-                  <button class="btn btn-neutral" (click)="addAssignment()">
+                  <button uiButton variant="primary" (click)="addAssignment()">
                     <span class="material-symbols-outlined">assignment_add</span>
                     Nueva asignacion
                   </button>
                 }
                 @if (auth.hasPermission('MANAGE_COURSES')) {
-                  <button class="btn btn-primary btn-soft">
-                    <span class="material-symbols-outlined">edit</span> Editar
-                  </button>
+                  <button uiButton><span class="material-symbols-outlined">edit</span> Editar</button>
                 }
               </div>
             </div>

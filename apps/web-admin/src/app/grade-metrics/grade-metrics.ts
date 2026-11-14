@@ -1,4 +1,4 @@
-import { Confirmation, Error, Modal, Toast } from '#/ui';
+import { Button, Confirmation, Error, Modal, Toast } from '#/ui';
 import { Menu, MenuContent, MenuItem, MenuTrigger } from '@angular/aria/menu';
 import { OverlayModule } from '@angular/cdk/overlay';
 import { DatePipe, DecimalPipe } from '@angular/common';
@@ -9,7 +9,7 @@ import { Prisma } from '@generated/prisma';
 import GradeMetricsForm from './grade-metrics-form';
 @Component({
   selector: 'app-grade-metrics',
-  imports: [RouterLink, DecimalPipe, DatePipe, Menu, MenuContent, MenuItem, MenuTrigger, OverlayModule, Error],
+  imports: [Button, RouterLink, DecimalPipe, DatePipe, Menu, MenuContent, MenuItem, MenuTrigger, OverlayModule, Error],
   template: `
     <div class="breadcrumbs text-sm">
       <ul>
@@ -23,7 +23,7 @@ import GradeMetricsForm from './grade-metrics-form';
         <p class="text-sm text-gray-500 dark:text-gray-400">Listado de metricas de calificaciones</p>
       </div>
 
-      <button class="btn btn-neutral" (click)="editGradeMetric()">
+      <button uiButton variant="primary" (click)="editGradeMetric()">
         <span class="material-symbols-outlined">add_circle</span>
         Nueva métrica
       </button>

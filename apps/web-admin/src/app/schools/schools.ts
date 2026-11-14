@@ -1,4 +1,4 @@
-import { Confirmation, Error, Loader, Modal, Pagination, Paginator, Toast } from '#/ui';
+import { Button, Confirmation, Error, Loader, Modal, Pagination, Paginator, Toast } from '#/ui';
 import { Menu, MenuContent, MenuItem, MenuTrigger } from '@angular/aria/menu';
 import { OverlayModule } from '@angular/cdk/overlay';
 import { DatePipe } from '@angular/common';
@@ -10,7 +10,19 @@ import { toFetchQueryRecord } from '../core/fetch-query-params';
 import { SchoolsForm } from './schools-form';
 @Component({
   selector: 'app-schools',
-  imports: [RouterLink, DatePipe, Menu, MenuContent, MenuItem, MenuTrigger, OverlayModule, Paginator, Error, Loader],
+  imports: [
+    Button,
+    RouterLink,
+    DatePipe,
+    Menu,
+    MenuContent,
+    MenuItem,
+    MenuTrigger,
+    OverlayModule,
+    Paginator,
+    Error,
+    Loader,
+  ],
   providers: [Pagination],
   template: `<div class="breadcrumbs text-sm">
       <ul>
@@ -24,7 +36,7 @@ import { SchoolsForm } from './schools-form';
         <p class="text-sm text-gray-500 dark:text-gray-400">Listado de escuelas</p>
       </div>
 
-      <button class="btn btn-neutral" (click)="editSchool()">
+      <button uiButton variant="primary" (click)="editSchool()">
         <span class="material-symbols-outlined">add_circle</span> Nueva Escuela
       </button>
     </div>

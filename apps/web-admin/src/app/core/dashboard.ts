@@ -2,9 +2,10 @@ import { Component, ElementRef, viewChild } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 
 import { Sidebar } from './sidebar';
+import { Button } from '#/ui';
 @Component({
   selector: 'app-dashboard',
-  imports: [RouterOutlet, Sidebar],
+  imports: [Button, RouterOutlet, Sidebar],
 
   template: ` <div class="flex h-screen overflow-hidden">
     <!-- Mobile sidebar overlay -->
@@ -20,9 +21,10 @@ import { Sidebar } from './sidebar';
     <!-- Mobile sidebar toggle -->
     <div class="w-full fixed top-0 z-30 flex items-center px-2 lg:hidden bg-base-200">
       <button
+        uiButton
         #sidebarToggle
         id="sidebar-toggle"
-        class="btn btn-primary btn-outline border-none"
+        class="border-none"
         (click)="openSidebar()"
         (keydown)="openSidebar()"
         tabindex="0"
@@ -57,7 +59,7 @@ export default class Dashboard {
     read: ElementRef,
   });
 
-  public sidebarToggle = viewChild.required<ElementRef<HTMLElement>>('sidebarToggle');
+  public sidebarToggle = viewChild.required('sidebarToggle', { read: ElementRef<HTMLElement> });
 
   public openSidebar() {
     this.sidebarOverlay().nativeElement.classList.remove('hidden');

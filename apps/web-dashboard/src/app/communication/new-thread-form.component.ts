@@ -1,4 +1,4 @@
-import { EmptyState, Toast } from '#/ui';
+import { Button, EmptyState, Toast } from '#/ui';
 import { HttpParams, httpResource } from '@angular/common/http';
 import { Component, inject, input, output, signal } from '@angular/core';
 import { form, FormField, maxLength, minLength, required } from '@angular/forms/signals';
@@ -18,7 +18,7 @@ interface StudentOption {
 
 @Component({
   selector: 'app-new-thread-form',
-  imports: [FormField, EmptyState],
+  imports: [Button, FormField, EmptyState],
   template: `
     <form (submit)="submit($event)" class="space-y-4">
       <div class="fieldset">
@@ -74,8 +74,8 @@ interface StudentOption {
       </div>
 
       <div class="flex justify-end gap-2 pt-2">
-        <button type="button" class="btn" (click)="closeModal.emit(undefined)">Cancelar</button>
-        <button type="submit" class="btn btn-primary" [disabled]="submitting() || form().invalid()">
+        <button uiButton type="button" (click)="closeModal.emit(undefined)">Cancelar</button>
+        <button uiButton variant="primary" type="submit" [disabled]="submitting() || form().invalid()">
           @if (submitting()) {
             <span class="loading loading-spinner loading-sm"></span>
           } @else {

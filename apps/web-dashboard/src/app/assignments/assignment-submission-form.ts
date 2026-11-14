@@ -1,4 +1,4 @@
-import { Toast } from '#/ui';
+import { Button, Toast } from '#/ui';
 import { DatePipe } from '@angular/common';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { Component, inject, input, signal } from '@angular/core';
@@ -13,7 +13,7 @@ interface MySubmission {
 
 @Component({
   selector: 'app-assignment-submission-form',
-  imports: [AssignmentDropzone, DatePipe],
+  imports: [Button, AssignmentDropzone, DatePipe],
   template: `
     <div class="space-y-4">
       @if (submissionResource.isLoading()) {
@@ -42,7 +42,9 @@ interface MySubmission {
           </div>
           <div class="flex items-center gap-2">
             <button
-              class="btn btn-ghost btn-sm"
+              uiButton
+              variant="ghost"
+              size="sm"
               (click)="downloadFile(submission.file.id)"
               [disabled]="isDownloading()"
             >
@@ -53,7 +55,10 @@ interface MySubmission {
               }
             </button>
             <button
-              class="btn btn-ghost btn-sm text-error"
+              uiButton
+              variant="ghost"
+              size="sm"
+              class="text-error"
               (click)="deleteSubmission(submission.id)"
               [disabled]="isDeleting()"
             >
@@ -71,7 +76,7 @@ interface MySubmission {
       } @else {
         <app-assignment-dropzone [maxSize]="maxFileSize" (filesChange)="onFilesChange($event)" />
         @if (selectedFiles().length > 0) {
-          <button class="btn btn-primary w-full" (click)="submitAssignment()" [disabled]="isUploading()">
+          <button uiButton variant="primary" class="w-full" (click)="submitAssignment()" [disabled]="isUploading()">
             @if (isUploading()) {
               <span class="loading loading-spinner loading-sm"></span>
               Subiendo...

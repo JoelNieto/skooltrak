@@ -1,8 +1,9 @@
 import { NgClass } from '@angular/common';
 import { Component, ElementRef, input, output, viewChild, ViewContainerRef } from '@angular/core';
+import { Button } from './button';
 @Component({
   selector: 'lib-modal',
-  imports: [NgClass],
+  imports: [Button, NgClass],
   template: `<dialog #dialog class="modal">
     <div
       class="modal-content modal-box"
@@ -15,7 +16,7 @@ import { Component, ElementRef, input, output, viewChild, ViewContainerRef } fro
     >
       <form method="dialog">
         @if (showCloseButton()) {
-          <button class="btn btn-sm btn-circle btn-ghost absolute right-4 top-6">
+          <button uiButton variant="ghost" size="sm" iconOnly class="absolute right-4 top-6">
             <span class="material-symbols-outlined text-xl">close</span>
           </button>
         }

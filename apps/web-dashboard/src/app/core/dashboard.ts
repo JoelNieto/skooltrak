@@ -6,9 +6,10 @@ import Auth from '../auth/auth';
 import { SchoolThemeService } from './school-theme.service';
 import { Sidebar } from './sidebar';
 import { ThemeService } from './theme.service';
+import { Button } from '#/ui';
 @Component({
   selector: 'app-dashboard',
-  imports: [RouterOutlet, Sidebar],
+  imports: [Button, RouterOutlet, Sidebar],
   viewProviders: [],
   template: `<div class="flex h-screen overflow-hidden">
     <!-- Mobile sidebar overlay -->
@@ -32,9 +33,12 @@ import { ThemeService } from './theme.service';
       <!-- Mobile menu toggle only -->
       <div id="mobile-menu-bar" class="lg:hidden shrink-0 p-2 print:hidden">
         <button
+          uiButton
+          variant="ghost"
+          size="sm"
           #sidebarToggle
           id="sidebar-toggle"
-          class="btn btn-sm btn-ghost border-none"
+          class="border-none"
           (click)="openSidebar()"
           (keydown)="openSidebar()"
           tabindex="0"
@@ -58,7 +62,7 @@ export default class Dashboard {
     read: ElementRef,
   });
 
-  public sidebarToggle = viewChild.required<ElementRef<HTMLElement>>('sidebarToggle');
+  public sidebarToggle = viewChild.required('sidebarToggle', { read: ElementRef<HTMLElement> });
 
   #router = inject(Router);
   #theme = inject(ThemeService);

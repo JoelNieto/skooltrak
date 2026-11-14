@@ -1,5 +1,5 @@
 import { SchoolContext } from '#/shared';
-import { Toast } from '#/ui';
+import { Button, Toast } from '#/ui';
 import { Component, effect, inject, input, signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { applyEach, form, FormField, maxLength, min, required, submit } from '@angular/forms/signals';
@@ -35,7 +35,7 @@ function emptyStoreProductForm(): StoreProductFormModel {
 
 @Component({
   selector: 'app-product-form',
-  imports: [FormField],
+  imports: [Button, FormField],
   template: `
     <h3 class="text-lg font-medium mb-4">{{ id() ? 'Editar producto' : 'Nuevo producto' }}</h3>
     @if (!school.currentSchoolId()) {
@@ -71,7 +71,7 @@ function emptyStoreProductForm(): StoreProductFormModel {
         <div class="space-y-2">
           <div class="flex justify-between items-center">
             <span class="font-medium">Tallas / variantes y stock</span>
-            <button type="button" class="btn btn-ghost btn-sm" (click)="addVariantRow()">+ Añadir talla</button>
+            <button uiButton variant="ghost" size="sm" type="button" (click)="addVariantRow()">+ Añadir talla</button>
           </div>
           <p class="text-sm text-base-content/60">
             Ej.: S, M, L o 28, 30, 32. Cada fila es una talla con su propio inventario.
@@ -105,8 +105,11 @@ function emptyStoreProductForm(): StoreProductFormModel {
                     <td>
                       @if (productModel().variants.length > 1) {
                         <button
+                          uiButton
+                          variant="ghost"
+                          size="sm"
                           type="button"
-                          class="btn btn-ghost btn-xs text-error"
+                          class="text-error"
                           (click)="removeVariantRow($index)"
                         >
                           Quitar
@@ -125,10 +128,10 @@ function emptyStoreProductForm(): StoreProductFormModel {
           <span class="label-text">Activo</span>
         </label>
         <div class="flex gap-2">
-          <button type="submit" class="btn btn-primary" [disabled]="saving() || productForm().invalid()">
+          <button uiButton variant="primary" type="submit" [disabled]="saving() || productForm().invalid()">
             Guardar
           </button>
-          <button type="button" class="btn btn-ghost" (click)="goToProductsAdmin()">Cancelar</button>
+          <button uiButton variant="ghost" type="button" (click)="goToProductsAdmin()">Cancelar</button>
         </div>
       </form>
     }

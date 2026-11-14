@@ -4,10 +4,11 @@ import { rxResource } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import { map } from 'rxjs';
 import { StoreApiService } from '../store-api.service';
+import { Button } from '#/ui';
 
 @Component({
   selector: 'app-order-confirmation',
-  imports: [RouterLink],
+  imports: [Button, RouterLink],
   template: `
     <div class="max-w-lg mx-auto text-center space-y-4 py-8">
       <span class="material-symbols-outlined text-6xl text-success">check_circle</span>
@@ -17,8 +18,8 @@ import { StoreApiService } from '../store-api.service';
           Número de pedido: <strong>{{ o.id }}</strong>
         </p>
         <p class="text-lg font-semibold">Total: {{ formatPrice(o.total) }}</p>
-        <a [routerLink]="['..', 'orders']" class="btn btn-primary">Ver mis pedidos</a>
-        <a [routerLink]="['..']" class="btn btn-ghost btn-sm">Volver a la tienda</a>
+        <a uiButton variant="primary" [routerLink]="['..', 'orders']">Ver mis pedidos</a>
+        <a uiButton variant="ghost" size="sm" [routerLink]="['..']">Volver a la tienda</a>
       } @else if (order.isLoading()) {
         <p>Cargando…</p>
       }

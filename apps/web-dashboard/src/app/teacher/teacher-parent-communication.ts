@@ -1,4 +1,4 @@
-import { MessageBubble, Modal, PageHeader, ThreadComposer, ThreadList, ThreadScrollPane, Toast } from '#/ui';
+import { Button, MessageBubble, Modal, PageHeader, ThreadComposer, ThreadList, ThreadScrollPane, Toast } from '#/ui';
 import { DatePipe } from '@angular/common';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { afterRenderEffect, Component, computed, effect, inject, input, linkedSignal, signal } from '@angular/core';
@@ -33,7 +33,17 @@ interface ThreadListItem {
 
 @Component({
   selector: 'app-teacher-parent-communication',
-  imports: [RouterLink, FormsModule, DatePipe, PageHeader, ThreadList, ThreadComposer, ThreadScrollPane, MessageBubble],
+  imports: [
+    Button,
+    RouterLink,
+    FormsModule,
+    DatePipe,
+    PageHeader,
+    ThreadList,
+    ThreadComposer,
+    ThreadScrollPane,
+    MessageBubble,
+  ],
   template: `
     <div class="breadcrumbs text-sm">
       <ul>
@@ -60,22 +70,31 @@ interface ThreadListItem {
           />
           <div class="flex flex-wrap gap-1">
             <button
-              class="btn btn-xs"
-              [class.btn-primary]="urgencyFilter() === 'ALL'"
+              uiButton
+              size="sm"
+              type="button"
+              [variant]="urgencyFilter() === 'ALL' ? 'primary' : 'secondary'"
+              [attr.aria-pressed]="urgencyFilter() === 'ALL'"
               (click)="urgencyFilter.set('ALL')"
             >
               Todas
             </button>
             <button
-              class="btn btn-xs btn-soft"
-              [class.btn-warning]="urgencyFilter() === 'ROUTINE'"
+              uiButton
+              size="sm"
+              type="button"
+              [variant]="urgencyFilter() === 'ROUTINE' ? 'primary' : 'secondary'"
+              [attr.aria-pressed]="urgencyFilter() === 'ROUTINE'"
               (click)="urgencyFilter.set('ROUTINE')"
             >
               Rutina
             </button>
             <button
-              class="btn btn-xs btn-soft"
-              [class.btn-error]="urgencyFilter() === 'IMPORTANT'"
+              uiButton
+              size="sm"
+              type="button"
+              [variant]="urgencyFilter() === 'IMPORTANT' ? 'primary' : 'secondary'"
+              [attr.aria-pressed]="urgencyFilter() === 'IMPORTANT'"
               (click)="urgencyFilter.set('IMPORTANT')"
             >
               Importante

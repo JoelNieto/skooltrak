@@ -1,4 +1,4 @@
-import { Loader, Toast } from '#/ui';
+import { Button, Loader, Toast } from '#/ui';
 import { NgClass } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { afterRenderEffect, Component, computed, effect, inject, input, output, signal } from '@angular/core';
@@ -40,7 +40,7 @@ const STATUS_OPTIONS = [
 
 @Component({
   selector: 'app-attendance-form',
-  imports: [FormField, Loader, NgClass],
+  imports: [Button, FormField, Loader, NgClass],
   template: `
     <form (submit)="onSubmit($event)" class="flex flex-col gap-4">
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -161,8 +161,8 @@ const STATUS_OPTIONS = [
       }
 
       <div class="modal-action">
-        <button type="button" class="btn" (click)="closeModal.emit()">Cancelar</button>
-        <button type="submit" class="btn btn-primary" [disabled]="isSubmitting()">
+        <button uiButton type="button" (click)="closeModal.emit()">Cancelar</button>
+        <button uiButton variant="primary" type="submit" [disabled]="isSubmitting()">
           @if (isSubmitting()) {
             <span class="loading loading-spinner"></span>
           }

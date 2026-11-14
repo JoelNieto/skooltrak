@@ -1,4 +1,4 @@
-import { Confirmation, Pagination, PaginatorV2, Toast } from '#/ui';
+import { Button, Confirmation, Pagination, PaginatorV2, Toast } from '#/ui';
 import { Menu, MenuContent, MenuItem, MenuTrigger } from '@angular/aria/menu';
 import { OverlayModule } from '@angular/cdk/overlay';
 import { DatePipe } from '@angular/common';
@@ -21,7 +21,18 @@ type Teacher = Prisma.TeacherGetPayload<{ include: { user: true } }> & {
 
 @Component({
   selector: 'app-teachers',
-  imports: [DatePipe, PaginatorV2, FormField, RouterLink, Menu, MenuTrigger, OverlayModule, MenuContent, MenuItem],
+  imports: [
+    Button,
+    DatePipe,
+    PaginatorV2,
+    FormField,
+    RouterLink,
+    Menu,
+    MenuTrigger,
+    OverlayModule,
+    MenuContent,
+    MenuItem,
+  ],
   providers: [Pagination],
   template: `
     <div class="breadcrumbs text-sm">
@@ -39,7 +50,7 @@ type Teacher = Prisma.TeacherGetPayload<{ include: { user: true } }> & {
         </label>
       </div>
       @if (auth.hasPermission('MANAGE_TEACHERS')) {
-        <a routerLink="/teachers/new" class="btn btn-primary">
+        <a uiButton variant="primary" routerLink="/teachers/new">
           <span class="material-symbols-outlined">add_circle</span> Agregar Profesor
         </a>
       }

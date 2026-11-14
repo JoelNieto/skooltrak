@@ -1,37 +1,48 @@
 import { Component, inject } from '@angular/core';
 import { StoreThemeService } from './store-theme.service';
+import { Button } from '#/ui';
 
 @Component({
   selector: 'app-store-theme-toggle',
+  imports: [Button],
   template: `
     <div class="flex gap-1 p-2 rounded-lg bg-base-200/50" role="group" aria-label="Tema">
       <button
+        uiButton
+        size="sm"
+        iconOnly
         type="button"
         (click)="theme.setTheme('light')"
-        [class.btn-active]="theme.theme() === 'light'"
-        class="btn btn-ghost btn-sm btn-square"
+        [variant]="theme.theme() === 'light' ? 'primary' : 'ghost'"
         [attr.aria-pressed]="theme.theme() === 'light'"
         title="Claro"
+        aria-label="Claro"
       >
         <span class="material-symbols-outlined text-lg">light_mode</span>
       </button>
       <button
+        uiButton
+        size="sm"
+        iconOnly
         type="button"
         (click)="theme.setTheme('dark')"
-        [class.btn-active]="theme.theme() === 'dark'"
-        class="btn btn-ghost btn-sm btn-square"
+        [variant]="theme.theme() === 'dark' ? 'primary' : 'ghost'"
         [attr.aria-pressed]="theme.theme() === 'dark'"
         title="Oscuro"
+        aria-label="Oscuro"
       >
         <span class="material-symbols-outlined text-lg">dark_mode</span>
       </button>
       <button
+        uiButton
+        size="sm"
+        iconOnly
         type="button"
         (click)="theme.setTheme('system')"
-        [class.btn-active]="theme.theme() === 'system'"
-        class="btn btn-ghost btn-sm btn-square"
+        [variant]="theme.theme() === 'system' ? 'primary' : 'ghost'"
         [attr.aria-pressed]="theme.theme() === 'system'"
         title="Sistema"
+        aria-label="Sistema"
       >
         <span class="material-symbols-outlined text-lg">contrast</span>
       </button>

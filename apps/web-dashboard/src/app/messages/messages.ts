@@ -1,4 +1,4 @@
-import { Confirmation, EmptyState, Paginator, TimeAgoPipe, Toast } from '#/ui';
+import { Button, Confirmation, EmptyState, Paginator, TimeAgoPipe, Toast } from '#/ui';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { Component, computed, effect, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -30,7 +30,7 @@ type MessageRecipientType = {
 };
 
 @Component({
-  imports: [RouterLink, Paginator, FormsModule, EmptyState],
+  imports: [Button, RouterLink, Paginator, FormsModule, EmptyState],
   providers: [TimeAgoPipe],
   template: `<div class="breadcrumbs text-sm">
       <ul>
@@ -41,7 +41,7 @@ type MessageRecipientType = {
     <div class="flex flex:col md:flex-row md:justify-between md:items-center">
       <h1 class="text-2xl font-semibold">Mensajes</h1>
       <div class="flex gap-2">
-        <a [routerLink]="['/messages/compose']" class="btn btn-primary">Nuevo mensaje</a>
+        <a uiButton variant="primary" [routerLink]="['/messages/compose']">Nuevo mensaje</a>
       </div>
     </div>
     <div class="tabs tabs-box mt-4">

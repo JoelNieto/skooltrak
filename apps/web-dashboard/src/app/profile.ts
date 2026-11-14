@@ -1,4 +1,4 @@
-import { Loader, Toast } from '#/ui';
+import { Button, Loader, Toast } from '#/ui';
 import { HttpClient } from '@angular/common/http';
 import { afterRenderEffect, Component, computed, inject, signal } from '@angular/core';
 import { form, FormField, required, submit } from '@angular/forms/signals';
@@ -17,7 +17,7 @@ interface ProfileFormData {
 
 @Component({
   selector: 'app-profile',
-  imports: [FormField, RouterLink, Loader, ImageCropperComponent],
+  imports: [Button, FormField, RouterLink, Loader, ImageCropperComponent],
   template: `
     <div class="flex flex-col gap-6">
       <div class="breadcrumbs text-sm">
@@ -153,7 +153,14 @@ interface ProfileFormData {
                           }
                         </div>
                         @if (avatarUrl() && !isUploadingAvatar()) {
-                          <button type="button" class="btn btn-ghost btn-xs text-error" (click)="removeAvatar()">
+                          <button
+                            uiButton
+                            variant="ghost"
+                            size="sm"
+                            type="button"
+                            class="text-error"
+                            (click)="removeAvatar()"
+                          >
                             <span class="material-symbols-outlined text-sm">delete</span>
                             Eliminar
                           </button>
@@ -169,8 +176,8 @@ interface ProfileFormData {
                           (change)="onAvatarFileSelected($event)"
                         />
                         <button
+                          uiButton
                           type="button"
-                          class="btn btn-outline btn-primary"
                           (click)="avatarFileInput.click()"
                           [disabled]="isUploadingAvatar()"
                         >
@@ -213,10 +220,11 @@ interface ProfileFormData {
                           </div>
                         </div>
                         <div class="flex justify-end gap-2 mt-4">
-                          <button type="button" class="btn btn-ghost" (click)="cancelAvatarCrop()">Cancelar</button>
+                          <button uiButton variant="ghost" type="button" (click)="cancelAvatarCrop()">Cancelar</button>
                           <button
+                            uiButton
+                            variant="primary"
                             type="button"
-                            class="btn btn-primary"
                             (click)="applyAvatarCrop()"
                             [disabled]="!avatarCropPreviewUrl() || isUploadingAvatar()"
                           >
@@ -229,12 +237,13 @@ interface ProfileFormData {
 
                   <div class="fieldset">
                     <span class="label">Tema de la interfaz</span>
-                    <div class="join">
+                    <div class="flex flex-wrap gap-2" role="group" aria-label="Tema de la interfaz">
                       @for (option of themeOptions; track option.value) {
                         <button
+                          uiButton
                           type="button"
-                          class="btn join-item"
-                          [class.btn-primary]="profileForm.themePreference().value() === option.value"
+                          [variant]="profileForm.themePreference().value() === option.value ? 'primary' : 'secondary'"
+                          [attr.aria-pressed]="profileForm.themePreference().value() === option.value"
                           (click)="setTheme(option.value)"
                         >
                           <span class="material-symbols-outlined">{{ option.icon }}</span>
@@ -245,8 +254,8 @@ interface ProfileFormData {
                   </div>
 
                   <div class="flex justify-end gap-3 pt-2">
-                    <a routerLink="/home" class="btn btn-ghost">Cancelar</a>
-                    <button type="submit" class="btn btn-primary" [disabled]="isSaving() || profileForm().invalid()">
+                    <a uiButton variant="ghost" routerLink="/home">Cancelar</a>
+                    <button uiButton variant="primary" type="submit" [disabled]="isSaving() || profileForm().invalid()">
                       @if (isSaving()) {
                         <span class="loading loading-spinner loading-sm"></span>
                       }

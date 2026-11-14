@@ -1,4 +1,4 @@
-import { Confirmation, EmptyState, Paginator, Pagination, Toast } from '#/ui';
+import { Button, Confirmation, EmptyState, Pagination, Paginator, Toast } from '#/ui';
 import { DatePipe, DecimalPipe, NgClass } from '@angular/common';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { Component, computed, effect, inject, input, signal } from '@angular/core';
@@ -23,14 +23,12 @@ type StudentOption = { id: string; firstName: string; fatherName: string };
 
 @Component({
   selector: 'app-charges-section',
-  imports: [
-    DatePipe,
+  imports: [Button, DatePipe,
     DecimalPipe,
     EmptyState,
     FormsModule,
     NgClass,
-    Paginator,
-  ],
+    Paginator,],
   providers: [Pagination],
   template: `
     <div class="bg-base-100 rounded-lg border border-base-300">
@@ -119,7 +117,7 @@ type StudentOption = { id: string; firstName: string; fatherName: string };
                 </td>
                 <td>
                   @if (!isStudent()) {
-                    <button class="btn btn-ghost btn-sm" (click)="removeCharge(c.id)">
+                    <button uiButton variant="ghost" size="sm" (click)="removeCharge(c.id)">
                       <span class="material-symbols-outlined text-error">delete</span>
                     </button>
                   }

@@ -3,6 +3,7 @@ import { httpResource } from '@angular/common/http';
 import { Component, input, ViewEncapsulation } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { isValidId } from '../core/validators';
+import { Button } from '#/ui';
 
 type NewsletterDetail = {
   id: string;
@@ -16,7 +17,7 @@ type NewsletterDetail = {
 
 @Component({
   selector: 'app-newsletter-view',
-  imports: [DatePipe, RouterLink],
+  imports: [Button, DatePipe, RouterLink],
   template: `
     <div class="breadcrumbs text-sm">
       <ul>
@@ -33,7 +34,7 @@ type NewsletterDetail = {
       <div class="alert alert-error mt-4">
         <span class="material-symbols-outlined">error</span>
         <span>No se pudo cargar el boletín.</span>
-        <a routerLink="/home" class="btn btn-sm btn-ghost">Volver al inicio</a>
+        <a uiButton variant="ghost" size="sm" routerLink="/home">Volver al inicio</a>
       </div>
     } @else if (newsletter.value(); as item) {
       @if (item?.id) {
@@ -55,7 +56,7 @@ type NewsletterDetail = {
           <div class="prose prose-sm max-w-none newsletter-content" [innerHTML]="item.content"></div>
 
           <div class="mt-10 pt-6 border-t border-base-300">
-            <a routerLink="/home" class="btn btn-ghost btn-sm">
+            <a uiButton variant="ghost" size="sm" routerLink="/home">
               <span class="material-symbols-outlined text-base">arrow_back</span>
               Volver al inicio
             </a>

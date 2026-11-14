@@ -1,7 +1,9 @@
 import { Component, input, output, signal } from '@angular/core';
+import { Button } from './button';
 
 @Component({
   selector: 'lib-thread-composer',
+  imports: [Button],
   template: `
     <form class="flex items-end gap-2 border-t border-base-300 p-2 bg-base-100" (submit)="onSubmit($event)">
       <textarea
@@ -12,7 +14,7 @@ import { Component, input, output, signal } from '@angular/core';
         [value]="draft()"
         (input)="onInput($event)"
       ></textarea>
-      <button class="btn btn-primary" type="submit" [disabled]="disabled() || !draft().trim()">
+      <button uiButton variant="primary" type="submit" [disabled]="disabled() || !draft().trim()">
         <span class="material-symbols-outlined">send</span>
       </button>
     </form>

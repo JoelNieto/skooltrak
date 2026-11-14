@@ -1,9 +1,11 @@
 import { afterRenderEffect, Component, computed, ElementRef, input, signal, untracked, viewChild } from '@angular/core';
+import { Button } from './button';
 
 const NEAR_BOTTOM_PX = 96;
 
 @Component({
   selector: 'lib-thread-scroll-pane',
+  imports: [Button],
   host: {
     class: 'relative flex flex-col flex-1 min-h-0',
   },
@@ -13,8 +15,12 @@ const NEAR_BOTTOM_PX = 96;
     </div>
     @if (showJump()) {
       <button
+        uiButton
+        variant="primary"
+        size="sm"
+        iconOnly
         type="button"
-        class="btn btn-circle btn-primary btn-sm absolute bottom-3 right-3 z-10 shadow-md"
+        class="absolute bottom-3 right-3 z-10 shadow-md"
         (click)="scrollToBottom()"
         aria-label="Ir al último mensaje"
         title="Ir al último mensaje"

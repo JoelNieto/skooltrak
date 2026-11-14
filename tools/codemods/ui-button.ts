@@ -144,24 +144,46 @@ function addImport(src: string, file: string): string {
         src = src.replace(head, replaced);
       }
     } else {
-      const sel = /(\n(\s*)selector:[^\n]*\n)/.exec(head);
-      if (sel) src = src.replace(head, head.replace(sel[1], `${sel[1]}${sel[2]}imports: [Button],\n`));
+      const sel = /(\n(\s*)selector:[^\n]*)/.exec(head);
+      if (sel) src = src.replace(head, head.replace(sel[1], `${sel[1]}\n${sel[2]}imports: [Button],`));
     }
   }
   return src;
+}
+
+/**
+ * Components whose template uses `uiButton` but whose `imports` lack `Button`. Angular reports
+ * unknown *bindings* ([variant]) at build time, but a static `variant="primary"` on an element with
+ * no matching directive is just an attribute: the button renders unstyled with no error.
+ */
+function missingButtonImport(src: string): boolean {
+  for (const m of src.matchAll(/@Component\(\{([\s\S]*?)\n\}\)/g)) {
+    const block = m[1];
+    if (!block.includes('uiButton')) continue;
+    const arr = /imports:\s*\[([\s\S]*?)\]/.exec(block);
+    if (!arr || !/\bButton\b/.test(arr[1])) return true;
+  }
+  return false;
 }
 
 const args = process.argv.slice(2);
 const dry = args.includes('--dry');
 const files = args.filter((a) => a !== '--dry');
 let total = 0;
+const unregistered: string[] = [];
 for (const file of files) {
   const src = readFileSync(file, 'utf8');
   const { out, result } = convertTemplate(src);
   total += result.converted;
   const final = result.converted > 0 ? addImport(out, file) : out;
+  if (!file.endsWith('components/button.ts') && missingButtonImport(final)) unregistered.push(file);
   if (!dry && final !== src) writeFileSync(file, final);
   console.log(`${file}: ${result.converted} converted, ${result.skipped.length} left for review`);
   for (const s of result.skipped) console.log(`  L${s.line} ${s.reason}: ${s.snippet}`);
 }
 console.log(`total converted: ${total}${dry ? ' (dry run)' : ''}`);
+if (unregistered.length) {
+  console.error(`\nButton not registered in @Component imports (buttons would render unstyled):`);
+  for (const f of unregistered) console.error(`  ${f}`);
+  process.exitCode = 1;
+}

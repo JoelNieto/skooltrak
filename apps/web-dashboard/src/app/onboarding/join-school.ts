@@ -1,4 +1,4 @@
-import { Loader, Toast } from '#/ui';
+import { Button, Loader, Toast } from '#/ui';
 import { HttpClient } from '@angular/common/http';
 import { Component, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
@@ -14,7 +14,7 @@ type AvailableSchool = {
 
 @Component({
   selector: 'app-join-school',
-  imports: [BrandLogo, Loader],
+  imports: [Button, BrandLogo, Loader],
   template: `
     <div class="min-h-screen flex flex-col gradient-bg">
       <header class="p-4 md:p-6 flex items-center justify-between">
@@ -80,7 +80,7 @@ type AvailableSchool = {
           }
 
           <div class="text-center">
-            <button class="btn btn-ghost btn-sm" (click)="goBack()">
+            <button uiButton variant="ghost" size="sm" (click)="goBack()">
               <span class="material-symbols-outlined text-lg">arrow_back</span>
               Volver
             </button>

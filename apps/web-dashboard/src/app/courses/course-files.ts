@@ -1,4 +1,4 @@
-import { debounceSignal, Loader, Modal, Toast } from '#/ui';
+import { Button, debounceSignal, Loader, Modal, Toast } from '#/ui';
 import { DatePipe } from '@angular/common';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { Component, inject, input, Signal, signal } from '@angular/core';
@@ -17,7 +17,7 @@ type CourseFile = {
 
 @Component({
   selector: 'app-course-files',
-  imports: [Loader, FormsModule, DatePipe],
+  imports: [Button, Loader, FormsModule, DatePipe],
   template: `
     <div class="flex flex-col gap-4">
       <div class="flex justify-between items-start gap-4">
@@ -25,7 +25,7 @@ type CourseFile = {
           <span class="material-symbols-outlined">search</span>
           <input class="pl-0" type="search" placeholder="Buscar archivos..." [(ngModel)]="searchText" />
         </label>
-        <button class="btn btn-primary" (click)="openUploadModal()">
+        <button uiButton variant="primary" (click)="openUploadModal()">
           <span class="material-symbols-outlined">upload_file</span>
           Subir archivos
         </button>

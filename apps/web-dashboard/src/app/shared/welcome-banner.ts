@@ -1,5 +1,6 @@
 import { Component, computed, input, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { Button } from '#/ui';
 
 export type OnboardingSummary = {
   schoolName?: string;
@@ -11,7 +12,7 @@ export type OnboardingSummary = {
 
 @Component({
   selector: 'app-welcome-banner',
-  imports: [RouterLink],
+  imports: [Button, RouterLink],
   template: `
     @if (!dismissed()) {
       <div
@@ -24,7 +25,11 @@ export type OnboardingSummary = {
           <!-- Close button (only after first view) -->
           @if (canDismiss()) {
             <button
-              class="absolute right-0 top-0 btn btn-ghost btn-sm btn-circle"
+              uiButton
+              variant="ghost"
+              size="sm"
+              iconOnly
+              class="absolute right-0 top-0"
               (click)="dismiss()"
               aria-label="Cerrar"
             >
@@ -69,23 +74,25 @@ export type OnboardingSummary = {
           <div class="space-y-2">
             <h3 class="text-sm font-medium text-base-content/70">Próximos pasos recomendados:</h3>
             <div class="flex flex-wrap gap-2">
-              <a routerLink="/teachers/new" class="btn btn-primary btn-sm">
+              <a uiButton variant="primary" size="sm" routerLink="/teachers/new">
                 <span class="material-symbols-outlined text-lg">person_add</span>
                 Invitar Docentes
               </a>
-              <a routerLink="/students/new" class="btn btn-outline btn-sm">
+              <a uiButton size="sm" routerLink="/students/new">
                 <span class="material-symbols-outlined text-lg">school</span>
                 Registrar Estudiantes
               </a>
-              <a routerLink="/admin/schools" class="btn btn-ghost btn-sm">
+              <a uiButton variant="ghost" size="sm" routerLink="/admin/schools">
                 <span class="material-symbols-outlined text-lg">settings</span>
                 Personalizar Escuela
               </a>
               <a
+                uiButton
+                variant="ghost"
+                size="sm"
                 href="https://docs.skooltrak.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                class="btn btn-ghost btn-sm"
               >
                 <span class="material-symbols-outlined text-lg">help</span>
                 Ver Guía

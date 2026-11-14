@@ -1,10 +1,11 @@
-import { Toast } from '#/ui';
+import { Button, Toast } from '#/ui';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { Component, inject, input, signal } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-assignment-submissions-list',
+  imports: [Button],
   template: `
     <div class="space-y-4">
       @if (studentsResource.isLoading()) {
@@ -105,7 +106,9 @@ import { firstValueFrom } from 'rxjs';
                     @let fileId = $safeNavigationMigration(submission?.file?.id);
                     @if (fileId) {
                       <button
-                        class="btn btn-ghost btn-sm"
+                        uiButton
+                        variant="ghost"
+                        size="sm"
                         (click)="downloadFile(fileId)"
                         [disabled]="downloadingFileId() === fileId"
                       >

@@ -1,4 +1,4 @@
-import { Loader, Toast } from '#/ui';
+import { Button, Loader, Toast } from '#/ui';
 import { Tab, TabContent, TabList, TabPanel, Tabs } from '@angular/aria/tabs';
 import { DatePipe, DecimalPipe, NgClass } from '@angular/common';
 import { HttpClient, httpResource } from '@angular/common/http';
@@ -31,6 +31,7 @@ const ENROLLMENT_STATUS_COLORS: Record<$Enums.EnrollmentStatus, string> = {
 @Component({
   selector: 'app-student',
   imports: [
+    Button,
     RouterLink,
     Loader,
     DatePipe,
@@ -94,12 +95,12 @@ const ENROLLMENT_STATUS_COLORS: Record<$Enums.EnrollmentStatus, string> = {
               </div>
               <div class="flex flex-col items-end gap-3">
                 <div class="flex gap-2">
-                  <a [routerLink]="['/students', student.id, 'grade-report']" class="btn btn-ghost btn-sm">
+                  <a uiButton variant="ghost" size="sm" [routerLink]="['/students', student.id, 'grade-report']">
                     <span class="material-symbols-outlined text-lg">description</span>
                     Boletín
                   </a>
                   @if (auth.hasPermission('MANAGE_STUDENTS')) {
-                    <a [routerLink]="['/students', student.id, 'edit']" class="btn btn-primary btn-sm">
+                    <a uiButton variant="primary" size="sm" [routerLink]="['/students', student.id, 'edit']">
                       <span class="material-symbols-outlined text-lg">edit</span>
                       Editar
                     </a>
@@ -195,8 +196,11 @@ const ENROLLMENT_STATUS_COLORS: Record<$Enums.EnrollmentStatus, string> = {
                                 student.enrollmentCode
                               }}</span>
                               <button
+                                uiButton
+                                variant="ghost"
+                                size="sm"
+                                iconOnly
                                 type="button"
-                                class="btn btn-ghost btn-sm btn-square"
                                 title="Copiar código"
                                 (click)="copyCode()"
                               >
@@ -207,8 +211,11 @@ const ENROLLMENT_STATUS_COLORS: Record<$Enums.EnrollmentStatus, string> = {
                             }
                             @if (auth.hasPermission('MANAGE_STUDENTS')) {
                               <button
+                                uiButton
+                                variant="ghost"
+                                size="sm"
+                                iconOnly
                                 type="button"
-                                class="btn btn-ghost btn-sm btn-square"
                                 title="Regenerar código"
                                 [disabled]="regenerating()"
                                 (click)="regenerate()"
@@ -240,13 +247,15 @@ const ENROLLMENT_STATUS_COLORS: Record<$Enums.EnrollmentStatus, string> = {
                                   class="h-40 w-40 rounded-lg border border-base-300 bg-white p-2"
                                 />
                                 <div class="flex items-center gap-2">
-                                  <button type="button" class="btn btn-sm btn-outline" (click)="copyConnectUrl()">
+                                  <button uiButton size="sm" type="button" (click)="copyConnectUrl()">
                                     <span class="material-symbols-outlined text-lg">link</span>
                                     Copiar enlace
                                   </button>
                                   <button
+                                    uiButton
+                                    variant="ghost"
+                                    size="sm"
                                     type="button"
-                                    class="btn btn-sm btn-ghost"
                                     [disabled]="connectQrLoading()"
                                     (click)="generateConnectQr()"
                                   >
@@ -264,8 +273,10 @@ const ENROLLMENT_STATUS_COLORS: Record<$Enums.EnrollmentStatus, string> = {
                               </div>
                             } @else {
                               <button
+                                uiButton
+                                variant="primary"
+                                size="sm"
                                 type="button"
-                                class="btn btn-sm btn-primary"
                                 [disabled]="connectQrLoading()"
                                 (click)="generateConnectQr()"
                               >

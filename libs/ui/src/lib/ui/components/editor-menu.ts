@@ -1,13 +1,19 @@
 import { Component, input } from '@angular/core';
+import { Button } from './button';
 
 @Component({
   selector: 'lib-editor-menu',
+  imports: [Button],
   template: `<div class="flex gap-2 flex-wrap">
     <div class="tooltip" data-tip="Negrita">
       <button
+        uiButton
+        size="sm"
+        iconOnly
         type="button"
-        class="btn btn-ghost btn-primary btn-sm"
-        [class.btn-soft]="editor().isActive('bold')"
+        aria-label="Negrita"
+        [variant]="editor().isActive('bold') ? 'secondary' : 'ghost'"
+        [attr.aria-pressed]="editor().isActive('bold')"
         (click)="editor().chain().focus().toggleBold().run()"
       >
         <span class="material-symbols-outlined">format_bold</span>
@@ -15,9 +21,13 @@ import { Component, input } from '@angular/core';
     </div>
     <div class="tooltip" data-tip="Cursiva">
       <button
+        uiButton
+        size="sm"
+        iconOnly
         type="button"
-        class="btn btn-ghost btn-primary btn-sm"
-        [class.btn-soft]="editor().isActive('italic')"
+        aria-label="Cursiva"
+        [variant]="editor().isActive('italic') ? 'secondary' : 'ghost'"
+        [attr.aria-pressed]="editor().isActive('italic')"
         (click)="editor().chain().focus().toggleItalic().run()"
       >
         <span class="material-symbols-outlined">format_italic</span>
@@ -25,9 +35,13 @@ import { Component, input } from '@angular/core';
     </div>
     <div class="tooltip" data-tip="Tachado">
       <button
+        uiButton
+        size="sm"
+        iconOnly
         type="button"
-        class="btn btn-ghost btn-primary btn-sm"
-        [class.btn-soft]="editor().isActive('strike')"
+        aria-label="Tachado"
+        [variant]="editor().isActive('strike') ? 'secondary' : 'ghost'"
+        [attr.aria-pressed]="editor().isActive('strike')"
         (click)="editor().chain().focus().toggleStrike().run()"
       >
         <span class="material-symbols-outlined">format_strikethrough</span>
@@ -35,9 +49,13 @@ import { Component, input } from '@angular/core';
     </div>
     <div class="tooltip" data-tip="Subrayado">
       <button
+        uiButton
+        size="sm"
+        iconOnly
         type="button"
-        class="btn btn-ghost btn-primary btn-sm"
-        [class.btn-soft]="editor().isActive('underline')"
+        aria-label="Subrayado"
+        [variant]="editor().isActive('underline') ? 'secondary' : 'ghost'"
+        [attr.aria-pressed]="editor().isActive('underline')"
         (click)="editor().chain().focus().toggleUnderline().run()"
       >
         <span class="material-symbols-outlined">format_underlined</span>
@@ -45,9 +63,13 @@ import { Component, input } from '@angular/core';
     </div>
     <div class="tooltip" data-tip="Destacado">
       <button
+        uiButton
+        size="sm"
+        iconOnly
         type="button"
-        class="btn btn-ghost btn-primary btn-sm "
-        [class.btn-soft]="editor().isActive('highlight')"
+        aria-label="Destacado"
+        [variant]="editor().isActive('highlight') ? 'secondary' : 'ghost'"
+        [attr.aria-pressed]="editor().isActive('highlight')"
         (click)="editor().chain().focus().toggleHighlight().run()"
       >
         <span class="material-symbols-outlined">highlight</span>
@@ -55,9 +77,13 @@ import { Component, input } from '@angular/core';
     </div>
     <div class="tooltip" data-tip="Código">
       <button
+        uiButton
+        size="sm"
+        iconOnly
         type="button"
-        class="btn btn-ghost btn-primary btn-sm"
-        [class.btn-soft]="editor().isActive('code')"
+        aria-label="Código"
+        [variant]="editor().isActive('code') ? 'secondary' : 'ghost'"
+        [attr.aria-pressed]="editor().isActive('code')"
         (click)="editor().chain().focus().toggleCode().run()"
       >
         <span class="material-symbols-outlined">code</span>
@@ -65,9 +91,13 @@ import { Component, input } from '@angular/core';
     </div>
     <div class="tooltip" data-tip="Lista desordenada">
       <button
+        uiButton
+        size="sm"
+        iconOnly
         type="button"
-        class="btn btn-ghost btn-primary btn-sm"
-        [class.btn-soft]="editor().isActive('bulletList')"
+        aria-label="Lista desordenada"
+        [variant]="editor().isActive('bulletList') ? 'secondary' : 'ghost'"
+        [attr.aria-pressed]="editor().isActive('bulletList')"
         (click)="editor().chain().focus().toggleBulletList().run()"
       >
         <span class="material-symbols-outlined">format_list_bulleted</span>
@@ -75,9 +105,13 @@ import { Component, input } from '@angular/core';
     </div>
     <div class="tooltip" data-tip="Lista ordenada">
       <button
+        uiButton
+        size="sm"
+        iconOnly
         type="button"
-        class="btn btn-ghost btn-primary btn-sm"
-        [class.btn-soft]="editor().isActive('orderedList')"
+        aria-label="Lista ordenada"
+        [variant]="editor().isActive('orderedList') ? 'secondary' : 'ghost'"
+        [attr.aria-pressed]="editor().isActive('orderedList')"
         (click)="editor().chain().focus().toggleOrderedList().run()"
       >
         <span class="material-symbols-outlined">format_list_numbered</span>
@@ -85,9 +119,13 @@ import { Component, input } from '@angular/core';
     </div>
     <div class="tooltip" data-tip="Encabezado 1">
       <button
+        uiButton
+        size="sm"
+        iconOnly
         type="button"
-        class="btn btn-ghost btn-primary btn-sm"
-        [class.btn-soft]="editor().isActive('heading', { level: 1 })"
+        aria-label="Encabezado 1"
+        [variant]="editor().isActive('heading', { level: 1 }) ? 'secondary' : 'ghost'"
+        [attr.aria-pressed]="editor().isActive('heading', { level: 1 })"
         (click)="editor().chain().focus().toggleHeading({ level: 1 }).run()"
       >
         <span class="material-symbols-outlined">format_h1</span>
@@ -95,9 +133,13 @@ import { Component, input } from '@angular/core';
     </div>
     <div class="tooltip" data-tip="Encabezado 2">
       <button
+        uiButton
+        size="sm"
+        iconOnly
         type="button"
-        class="btn btn-ghost btn-primary btn-sm"
-        [class.btn-soft]="editor().isActive('heading', { level: 2 })"
+        aria-label="Encabezado 2"
+        [variant]="editor().isActive('heading', { level: 2 }) ? 'secondary' : 'ghost'"
+        [attr.aria-pressed]="editor().isActive('heading', { level: 2 })"
         (click)="editor().chain().focus().toggleHeading({ level: 2 }).run()"
       >
         <span class="material-symbols-outlined">format_h2</span>
@@ -105,9 +147,13 @@ import { Component, input } from '@angular/core';
     </div>
     <div class="tooltip" data-tip="Encabezado 3">
       <button
+        uiButton
+        size="sm"
+        iconOnly
         type="button"
-        class="btn btn-ghost btn-primary btn-sm"
-        [class.btn-soft]="editor().isActive('heading', { level: 3 })"
+        aria-label="Encabezado 3"
+        [variant]="editor().isActive('heading', { level: 3 }) ? 'secondary' : 'ghost'"
+        [attr.aria-pressed]="editor().isActive('heading', { level: 3 })"
         (click)="editor().chain().focus().toggleHeading({ level: 3 }).run()"
       >
         <span class="material-symbols-outlined">format_h3</span>
@@ -115,9 +161,13 @@ import { Component, input } from '@angular/core';
     </div>
     <div class="tooltip" data-tip="Encabezado 4">
       <button
+        uiButton
+        size="sm"
+        iconOnly
         type="button"
-        class="btn btn-ghost btn-primary btn-sm"
-        [class.btn-soft]="editor().isActive('heading', { level: 4 })"
+        aria-label="Encabezado 4"
+        [variant]="editor().isActive('heading', { level: 4 }) ? 'secondary' : 'ghost'"
+        [attr.aria-pressed]="editor().isActive('heading', { level: 4 })"
         (click)="editor().chain().focus().toggleHeading({ level: 4 }).run()"
       >
         <span class="material-symbols-outlined">format_h4</span>
@@ -125,9 +175,13 @@ import { Component, input } from '@angular/core';
     </div>
     <div class="tooltip" data-tip="Encabezado 5">
       <button
+        uiButton
+        size="sm"
+        iconOnly
         type="button"
-        class="btn btn-ghost btn-primary btn-sm"
-        [class.btn-soft]="editor().isActive('heading', { level: 5 })"
+        aria-label="Encabezado 5"
+        [variant]="editor().isActive('heading', { level: 5 }) ? 'secondary' : 'ghost'"
+        [attr.aria-pressed]="editor().isActive('heading', { level: 5 })"
         (click)="editor().chain().focus().toggleHeading({ level: 5 }).run()"
       >
         <span class="material-symbols-outlined">format_h5</span>
@@ -135,9 +189,13 @@ import { Component, input } from '@angular/core';
     </div>
     <div class="tooltip" data-tip="Cita">
       <button
+        uiButton
+        size="sm"
+        iconOnly
         type="button"
-        class="btn btn-ghost btn-primary btn-sm"
-        [class.btn-soft]="editor().isActive('blockquote')"
+        aria-label="Cita"
+        [variant]="editor().isActive('blockquote') ? 'secondary' : 'ghost'"
+        [attr.aria-pressed]="editor().isActive('blockquote')"
         (click)="editor().chain().focus().toggleBlockquote().run()"
       >
         <span class="material-symbols-outlined">format_quote</span>
@@ -215,8 +273,10 @@ import { Component, input } from '@angular/core';
     } @else {
       <div class="tooltip" data-tip="Insertar tabla">
         <button
+          uiButton
+          variant="ghost"
+          size="sm"
           type="button"
-          class="btn btn-ghost btn-primary btn-sm"
           (click)="editor().chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run()"
         >
           <span class="material-symbols-outlined">grid_on</span>

@@ -2,13 +2,13 @@ import { Button, Toast, UiField, UiInput, UiSelect } from '#/ui';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { Component, computed, inject, input, output, signal } from '@angular/core';
 import { form, FormField, required } from '@angular/forms/signals';
-import { toFetchQueryRecord } from '../../core/fetch-query-params';
 import Store from '../../core/store';
+import { SubjectCombobox } from '../../shared/subject-combobox';
 import { CreatedEntity } from '../setup-wizard';
 
 @Component({
   selector: 'app-courses-step',
-  imports: [UiField, UiInput, UiSelect, Button, FormField],
+  imports: [UiField, UiInput, UiSelect, Button, FormField, SubjectCombobox],
   template: `
     <div class="w-full max-w-md text-center space-y-8 animate-fade-in">
       <!-- Icon -->
@@ -69,14 +69,9 @@ import { CreatedEntity } from '../setup-wizard';
           <ui-field
             label="Asignatura"
             [field]="form.subjectId"
-            hint="Si no encuentras la asignatura, podrás crearla después en administración."
+            hint="Si no existe, escribe su nombre y elige «Crear asignatura»."
           >
-            <select uiSelect id="subjectId" [formField]="form.subjectId">
-              <option value="" disabled>Selecciona una asignatura...</option>
-              @for (subject of subjects.value(); track subject.id) {
-                <option [value]="subject.id">{{ subject.name }}</option>
-              }
-            </select>
+            <app-subject-combobox [formField]="form.subjectId" />
           </ui-field>
 
           <ui-field label="Código del Curso" [field]="form.code" optional>
@@ -177,14 +172,6 @@ export default class CoursesStep {
       }
       return { url: '/api/v1/study-plans/by-school', params: { schoolId } };
     },
-    { defaultValue: [] },
-  );
-
-  public subjects = httpResource<Array<{ id: string; name: string }>>(
-    () => ({
-      url: '/api/v1/subjects',
-      params: toFetchQueryRecord({ take: 100, orderBy: 'name' }),
-    }),
     { defaultValue: [] },
   );
 

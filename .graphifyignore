@@ -4,6 +4,4 @@ tmp/
 generated/
 .nx/
 coverage/
-web-family/
-web-family-e2e/
 **/*.spec.ts

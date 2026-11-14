@@ -62,3 +62,5 @@ vitest.config.*.timestamp*
 .nx/migrate-runs
 
 graphify-out/cache
+# Playwright e2e auth state (contains access tokens)
+apps/web-dashboard-e2e/.auth/

@@ -66,6 +66,11 @@
         },
         "development": {
           "buildTarget": "web-dashboard:build:development"
+        },
+        "e2e": {
+          "buildTarget": "web-dashboard:build:development",
+          "port": 4300,
+          "proxyConfig": "apps/web-dashboard/proxy.e2e.conf.json"
         }
       },
       "readyWhen": {

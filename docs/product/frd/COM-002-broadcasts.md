@@ -86,6 +86,6 @@ Found while reverse-engineering. Each is a candidate slice.
 | COM-002-S01 | Staff creates group/course broadcast, recipients receive it | .1 .2 .3 | Done (pre-FRD) |
 | COM-002-S02 | School-wide approval flow + audit | .4 .7 .8 | Done (pre-FRD) |
 | COM-002-S03 | Optional replies + latest broadcasts on every home | .5 .6 | Done (`758e28d`) |
-| [COM-002-S04](../slices/COM-002-S04-teacher-audience-scope.md) | Teachers can only broadcast to groups/courses they teach | .1, BR .7 | In review (e2e pending) |
+| [COM-002-S04](../slices/COM-002-S04-teacher-audience-scope.md) | Teachers can only broadcast to groups/courses they teach | .1, BR .7 | In review (e2e awaiting first run) |
 | COM-002-S05 | School-wide audience limited to that school's teachers | .2, Q2 | Proposed |
 | COM-002-S06 | Reject / withdraw a pending broadcast | Q5 | Proposed |

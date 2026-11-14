@@ -6,7 +6,6 @@ import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@a
 import { form, FormField, maxLength, required } from '@angular/forms/signals';
 import { filter } from 'rxjs';
 import Auth from '../auth/auth';
-import { PaginatedResponse } from '../core/pagination-meta';
 import Store from '../core/store';
 import {
   AuditLog,
@@ -16,9 +15,10 @@ import {
   UrgencyTier,
 } from './communication-api.service';
 
-interface ClassGroupOption {
-  id: string;
-  name: string;
+/** Targets the caller may broadcast to (teachers: own courses + related groups — BR-COM-002.7). */
+interface BroadcastAudiences {
+  classGroups: { id: string; name: string }[];
+  courses: { id: string; name: string; code: string }[];
 }
 
 const ACTION_LABELS: Record<string, string> = {
@@ -152,10 +152,15 @@ const ACTION_LABELS: Record<string, string> = {
                         <label for="class-group">Grupo</label>
                         <select id="class-group" class="select select-primary" [formField]="form.classGroupId">
                           <option [value]="''" disabled>Selecciona un grupo…</option>
-                          @for (cg of classGroups.value()?.data ?? []; track cg.id) {
+                          @for (cg of audiences.value().classGroups; track cg.id) {
                             <option [value]="cg.id">{{ cg.name }}</option>
                           }
                         </select>
+                        @if (!audiences.isLoading() && audiences.value().classGroups.length === 0) {
+                          <p class="text-sm text-base-content/60">
+                            No hay grupos disponibles. Solo puedes enviar a los grupos relacionados con tus cursos.
+                          </p>
+                        }
                       </div>
                     }
 
@@ -466,14 +471,17 @@ export default class Broadcasts {
     });
   });
 
-  readonly classGroups = httpResource<PaginatedResponse<ClassGroupOption>>(() => {
-    const schoolId = this.#store.currentSchoolId();
-    if (!schoolId) return undefined;
-    return {
-      url: '/api/v1/class-groups',
-      params: { schoolId, pageSize: '100' },
-    };
-  });
+  readonly audiences = httpResource<BroadcastAudiences>(
+    () => {
+      const schoolId = this.#store.currentSchoolId();
+      if (!schoolId) return undefined;
+      return {
+        url: '/api/v1/communication/broadcasts/audiences',
+        params: { schoolId },
+      };
+    },
+    { defaultValue: { classGroups: [], courses: [] } },
+  );
 
   readonly broadcastsResource = httpResource<Thread[]>(
     () => {
@@ -548,9 +556,13 @@ export default class Broadcasts {
             this.#toast.showSuccess('Comunicado enviado');
           }
         },
-        error: () => {
+        error: (err: { status?: number }) => {
           this.submitting.set(false);
-          this.#toast.showError('No se pudo crear el comunicado');
+          this.#toast.showError(
+            err?.status === 403
+              ? 'Solo puedes enviar comunicados a los grupos relacionados con tus cursos'
+              : 'No se pudo crear el comunicado',
+          );
         },
       });
   }

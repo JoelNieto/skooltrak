@@ -167,6 +167,13 @@ export class CommunicationController {
     return this.communication.listBroadcasts(status);
   }
 
+  @Get('broadcasts/audiences')
+  @RequirePermissions(Perm.COMMUNICATION_BROADCAST)
+  @ApiOperation({ summary: 'Class groups and courses the caller may target with a broadcast' })
+  listBroadcastAudiences(@Query('schoolId') schoolId?: string) {
+    return this.communication.listBroadcastAudiences(schoolId);
+  }
+
   @Post('broadcasts')
   @RequirePermissions(Perm.COMMUNICATION_BROADCAST)
   @ApiOperation({ summary: 'Create a broadcast (pending approval if policy requires)' })

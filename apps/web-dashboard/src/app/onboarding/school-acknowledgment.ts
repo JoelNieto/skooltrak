@@ -6,15 +6,16 @@ import { form, FormField, maxLength, required } from '@angular/forms/signals';
 import { Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import Store from '../core/store';
+import { BrandLogo } from '../shared/brand-logo';
 
 @Component({
   selector: 'app-school-acknowledgment',
-  imports: [FormField, FormsModule],
+  imports: [BrandLogo, FormField, FormsModule],
   template: `
     <div class="min-h-screen flex flex-col gradient-bg">
       <!-- Fixed Header -->
       <header class="p-4 md:p-6 flex items-center justify-between">
-        <img src="skooltrak.png" alt="Skooltrak" class="h-8 md:h-10" />
+        <app-brand-logo class="h-8 md:h-10" />
       </header>
 
       <!-- Scrollable Content -->

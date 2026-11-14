@@ -4,15 +4,16 @@ import { Component, inject, signal } from '@angular/core';
 import { form, FormField, minLength, required, validate } from '@angular/forms/signals';
 import { Router, RouterLink } from '@angular/router';
 import Auth from './auth';
+import { BrandLogo } from '../shared/brand-logo';
 
 @Component({
   selector: 'app-reset-password',
-  imports: [FormField, RouterLink, Loader],
+  imports: [BrandLogo, FormField, RouterLink, Loader],
   template: `
     <div class="gradient-bg min-h-screen flex items-center justify-center p-4">
       @defer {
         <div class="max-w-md w-full flex flex-col gap-8 items-center">
-          <div><img src="skooltrak.png" alt="" class="h-12" /></div>
+          <div><app-brand-logo alt="" class="h-12" /></div>
 
           <div class="w-full rounded-2xl shadow-xl overflow-hidden flex flex-col">
             <!-- Header Section -->

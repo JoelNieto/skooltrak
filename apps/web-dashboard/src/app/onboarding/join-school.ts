@@ -2,6 +2,7 @@ import { Loader, Toast } from '#/ui';
 import { HttpClient } from '@angular/common/http';
 import { Component, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
+import { BrandLogo } from '../shared/brand-logo';
 
 type AvailableSchool = {
   id: string;
@@ -13,11 +14,11 @@ type AvailableSchool = {
 
 @Component({
   selector: 'app-join-school',
-  imports: [Loader],
+  imports: [BrandLogo, Loader],
   template: `
     <div class="min-h-screen flex flex-col gradient-bg">
       <header class="p-4 md:p-6 flex items-center justify-between">
-        <img src="skooltrak.png" alt="Skooltrak" class="h-8 md:h-10" />
+        <app-brand-logo class="h-8 md:h-10" />
       </header>
 
       <main class="flex-1 flex flex-col items-center p-6 overflow-y-auto">

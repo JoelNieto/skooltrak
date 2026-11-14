@@ -1,11 +1,11 @@
-import { Button, Toast } from '#/ui';
+import { Badge, Button, Toast } from '#/ui';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { Component, inject, input, signal } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-assignment-submissions-list',
-  imports: [Button],
+  imports: [Badge, Button],
   template: `
     <div class="space-y-4">
       @if (studentsResource.isLoading()) {
@@ -63,12 +63,12 @@ import { firstValueFrom } from 'rxjs';
                   </td>
                   <td>
                     @if (submission) {
-                      <span class="badge badge-success badge-sm gap-1">
+                      <span uiBadge tone="success" size="sm" class="gap-1">
                         <span class="material-symbols-outlined text-sm!">check</span>
                         Entregado
                       </span>
                     } @else {
-                      <span class="badge badge-warning badge-sm gap-1">
+                      <span uiBadge tone="warning" size="sm" class="gap-1">
                         <span class="material-symbols-outlined text-sm!">schedule</span>
                         Pendiente
                       </span>

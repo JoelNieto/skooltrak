@@ -1,4 +1,4 @@
-import { Button, Loader, TextEditor, Toast, UiField, UiInput, UiSelect } from '#/ui';
+import { Button, Card, CardBody, CardTitle, Loader, TextEditor, Toast, UiField, UiInput, UiSelect } from '#/ui';
 import { Component, computed, effect, inject, input, signal } from '@angular/core';
 import {
   FormArray,
@@ -20,6 +20,9 @@ import { QuizQuestionControl } from './quiz-question-control';
 @Component({
   selector: 'app-quiz-form',
   imports: [
+    Card,
+    CardBody,
+    CardTitle,
     UiField,
     UiInput,
     UiSelect,
@@ -45,9 +48,9 @@ import { QuizQuestionControl } from './quiz-question-control';
       <lib-loader />
     } @else {
       <form [formGroup]="quizForm" (ngSubmit)="saveChanges()">
-        <div class="card bg-base-100 card-border border-neutral-300">
-          <div class="card-body">
-            <h2 class="card-title">Datos del quiz</h2>
+        <div uiCard>
+          <div uiCardBody>
+            <h2 uiCardTitle>Datos del quiz</h2>
             <div class="flex flex-col gap-4">
               <ui-field label="Titulo">
                 <input
@@ -88,16 +91,16 @@ import { QuizQuestionControl } from './quiz-question-control';
             </div>
           </div>
         </div>
-        <div class="card bg-base-100 card-border border-neutral-300 my-4">
-          <div class="card-body">
-            <h2 class="card-title text-xl font-semibold">Preguntas</h2>
+        <div uiCard class="my-4">
+          <div uiCardBody>
+            <h2 uiCardTitle class="text-xl font-semibold">Preguntas</h2>
 
             <div formArrayName="questions" class="flex flex-col gap-4">
               @for (question of questions.controls; track $index) {
-                <div class="card bg-base-100 card-border border-neutral-300">
-                  <div class="card-body">
+                <div uiCard>
+                  <div uiCardBody>
                     <div class="flex justify-between">
-                      <h2 class="card-title">Pregunta {{ $index + 1 }}</h2>
+                      <h2 uiCardTitle>Pregunta {{ $index + 1 }}</h2>
                       <button uiButton variant="danger" type="button" (click)="removeQuestion($index)">
                         <span class="material-symbols-outlined">delete</span>
                       </button>

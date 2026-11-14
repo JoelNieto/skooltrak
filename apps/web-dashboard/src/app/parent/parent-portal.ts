@@ -1,4 +1,4 @@
-import { Button, PageHeader, Toast, UiInput } from '#/ui';
+import { Button, Card, CardBody, PageHeader, Toast, UiInput } from '#/ui';
 import { HttpClient } from '@angular/common/http';
 import { afterRenderEffect, Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -19,12 +19,12 @@ interface ParentMeResponse {
 
 @Component({
   selector: 'app-parent-portal',
-  imports: [UiInput, Button, FormsModule, PageHeader],
+  imports: [Card, CardBody, UiInput, Button, FormsModule, PageHeader],
   template: `
     <lib-page-header title="Portal de padres" subtitle="Resumen rápido del progreso de tus hijos." />
 
-    <div class="mt-6 card border border-base-200 bg-base-100">
-      <div class="card-body">
+    <div uiCard class="mt-6">
+      <div uiCardBody>
         <div class="flex items-center justify-between">
           <h2 class="text-lg font-semibold text-base-content">Hijos vinculados</h2>
           <button uiButton variant="primary" size="sm" (click)="openAddChild()">
@@ -62,8 +62,8 @@ interface ParentMeResponse {
 
     @if (showAddChild()) {
       <div class="fixed inset-0 bg-black/40 flex items-center justify-center p-4 z-50">
-        <div class="card w-full max-w-md bg-base-100">
-          <div class="card-body">
+        <div uiCard class="w-full max-w-md">
+          <div uiCardBody>
             <h3 class="text-lg font-semibold text-base-content">Agregar hijo</h3>
             <p class="text-sm text-base-content/70">Ingresa el código de matrícula del estudiante.</p>
 

@@ -1,7 +1,7 @@
-import { Button, Confirmation, Loader, Modal, Pagination, Paginator, UiSelect } from '#/ui';
+import { Badge, BadgeTone, Button, Confirmation, Loader, Modal, Pagination, Paginator, UiSelect } from '#/ui';
 import { Menu, MenuContent, MenuItem, MenuTrigger } from '@angular/aria/menu';
 import { OverlayModule } from '@angular/cdk/overlay';
-import { DatePipe, NgClass } from '@angular/common';
+import { DatePipe } from '@angular/common';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { Component, inject, input, signal, viewChild } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
@@ -39,23 +39,23 @@ const STATUS_LABELS: Record<string, string> = {
   EXCUSED: 'Excusado',
 };
 
-const STATUS_COLORS: Record<string, string> = {
-  PRESENT: 'badge-success',
-  ABSENT: 'badge-error',
-  LATE: 'badge-warning',
-  SICK_LEAVE: 'badge-info',
-  EXCUSED: 'badge-neutral',
+const STATUS_TONES: Record<string, BadgeTone> = {
+  PRESENT: 'success',
+  ABSENT: 'danger',
+  LATE: 'warning',
+  SICK_LEAVE: 'info',
+  EXCUSED: 'neutral',
 };
 
 @Component({
   selector: 'app-course-attendance',
   imports: [
+    Badge,
     UiSelect,
     Button,
     Loader,
     FormsModule,
     DatePipe,
-    NgClass,
     Paginator,
     Menu,
     MenuContent,
@@ -115,30 +115,30 @@ const STATUS_COLORS: Record<string, string> = {
                   </span>
                 </td>
                 <td>
-                  <span class="badge badge-ghost">
+                  <span uiBadge>
                     {{ session.classGroup.name }}
                   </span>
                 </td>
                 <td>
-                  <span class="badge badge-success gap-1">
+                  <span uiBadge tone="success" class="gap-1">
                     <span class="material-symbols-outlined text-sm!">check</span>
                     {{ stats.present }}
                   </span>
                 </td>
                 <td>
-                  <span class="badge badge-error gap-1">
+                  <span uiBadge tone="danger" class="gap-1">
                     <span class="material-symbols-outlined text-sm!">close</span>
                     {{ stats.absent }}
                   </span>
                 </td>
                 <td>
-                  <span class="badge badge-warning gap-1">
+                  <span uiBadge tone="warning" class="gap-1">
                     <span class="material-symbols-outlined text-sm!">schedule</span>
                     {{ stats.late }}
                   </span>
                 </td>
                 <td>
-                  <span class="badge badge-info gap-1">
+                  <span uiBadge tone="info" class="gap-1">
                     {{ stats.other }}
                   </span>
                 </td>
@@ -233,7 +233,7 @@ const STATUS_COLORS: Record<string, string> = {
       <dialog class="modal modal-open">
         <div class="modal-box max-w-3xl">
           <h3 class="font-bold text-lg mb-4">Asistencia - {{ selectedSession()!.date | date: 'fullDate' }}</h3>
-          <div class="badge badge-ghost mb-4">
+          <div uiBadge class="mb-4">
             {{ selectedSession()!.classGroup.name }}
           </div>
           <div class="overflow-x-auto max-h-96">
@@ -253,7 +253,7 @@ const STATUS_COLORS: Record<string, string> = {
                       {{ record.student.fatherName }}
                     </td>
                     <td>
-                      <span class="badge" [ngClass]="getStatusColor(record.status)">
+                      <span uiBadge [tone]="statusTone(record.status)">
                         {{ getStatusLabel(record.status) }}
                       </span>
                     </td>
@@ -337,8 +337,8 @@ export default class CourseAttendance {
     return STATUS_LABELS[status] || status;
   }
 
-  getStatusColor(status: string): string {
-    return STATUS_COLORS[status] || 'badge-ghost';
+  statusTone(status: string): BadgeTone {
+    return STATUS_TONES[status] || 'neutral';
   }
 
   openForm(session?: AttendanceSessionType) {

@@ -1,4 +1,4 @@
-import { Button, EditorViewer, Loader, Toast, UiInput } from '#/ui';
+import { Button, Card, CardBody, EditorViewer, Loader, Toast, UiInput } from '#/ui';
 import { DatePipe } from '@angular/common';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { Component, computed, effect, inject, input, signal } from '@angular/core';
@@ -26,7 +26,7 @@ type MessageType = Prisma.MessageGetPayload<undefined> & {
 
 @Component({
   selector: 'app-message',
-  imports: [UiInput, Button, Loader, RouterLink, DatePipe, EditorViewer, FormsModule],
+  imports: [Card, CardBody, UiInput, Button, Loader, RouterLink, DatePipe, EditorViewer, FormsModule],
   styles: `
     :host ::ng-deep blockquote {
       border-left: 3px solid oklch(var(--bc) / 0.3);
@@ -46,8 +46,8 @@ type MessageType = Prisma.MessageGetPayload<undefined> & {
             <li>{{ message.sender?.name }}: {{ message.subject }}</li>
           </ul>
         </div>
-        <div class="card card-border bg-base-100 border-base-300 mt-4">
-          <div class="card-body">
+        <div uiCard class="mt-4">
+          <div uiCardBody>
             <div class="border-b border-base-300">
               <h1 class="text-2xl font-bold mb-4">{{ message.subject }}</h1>
             </div>
@@ -82,8 +82,8 @@ type MessageType = Prisma.MessageGetPayload<undefined> & {
             <h2 class="text-xl font-semibold">Conversacion</h2>
             <div class="mt-4 space-y-3">
               @for (item of repliesOnly(); track item.id) {
-                <div class="card card-bordered bg-base-100">
-                  <div class="card-body p-4">
+                <div uiCard>
+                  <div uiCardBody class="p-4">
                     <div class="flex items-center justify-between text-sm">
                       <div class="flex items-center gap-2">
                         <div class="avatar avatar-placeholder">
@@ -113,8 +113,8 @@ type MessageType = Prisma.MessageGetPayload<undefined> & {
           </div>
         }
 
-        <div class="card card-bordered bg-base-100 mt-6">
-          <div class="card-body">
+        <div uiCard class="mt-6">
+          <div uiCardBody>
             <h3 class="text-lg font-semibold">Responder</h3>
             @if (replyDraft().quotedText) {
               <div class="message-quote">

@@ -1,9 +1,9 @@
-import { EmptyState, PageHeader, StatCard } from '#/ui';
+import { Card, CardBody, EmptyState, PageHeader, StatCard } from '#/ui';
 import { Component } from '@angular/core';
 
 @Component({
   selector: 'app-teacher-gradebook',
-  imports: [EmptyState, PageHeader, StatCard],
+  imports: [Card, CardBody, EmptyState, PageHeader, StatCard],
   template: `
     <lib-page-header
       title="Libro de calificaciones"
@@ -18,8 +18,8 @@ import { Component } from '@angular/core';
       <lib-stat-card label="Estudiantes" value="25" helper="2°B" />
     </div>
 
-    <div class="mt-6 card border border-base-200 bg-base-100">
-      <div class="card-body">
+    <div uiCard class="mt-6">
+      <div uiCardBody>
         <h2 class="text-lg font-semibold text-base-content">Calificaciones recientes</h2>
         @if (grades.length === 0) {
           <lib-empty-state

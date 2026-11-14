@@ -1,5 +1,5 @@
 import { SchoolContext } from '#/shared';
-import { Button, Toast, UiCheckbox, UiChoice, UiInput } from '#/ui';
+import { Button, Card, CardBody, Toast, UiCheckbox, UiChoice, UiInput } from '#/ui';
 import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -8,7 +8,7 @@ import { StoreApiService } from '../store-api.service';
 
 @Component({
   selector: 'app-checkout',
-  imports: [UiCheckbox, UiChoice, UiInput, Button, FormsModule],
+  imports: [Card, CardBody, UiCheckbox, UiChoice, UiInput, Button, FormsModule],
   template: `
     <h2 class="text-xl font-semibold mb-4">Pago (simulado)</h2>
     @if (!school.currentSchoolId()) {
@@ -35,8 +35,8 @@ import { StoreApiService } from '../store-api.service';
           </ul>
           <p class="text-lg font-semibold pt-2 border-t border-base-300">Total: {{ formatPrice(cart.subtotal()) }}</p>
         </div>
-        <div class="card bg-base-100 border border-base-200 shadow-sm">
-          <div class="card-body gap-3">
+        <div uiCard>
+          <div uiCardBody class="gap-3">
             <label class="form-control">
               <span class="label-text">Nombre en la tarjeta (demo)</span>
               <input uiInput [(ngModel)]="cardName" />

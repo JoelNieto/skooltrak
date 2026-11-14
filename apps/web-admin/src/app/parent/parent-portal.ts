@@ -1,9 +1,9 @@
-import { EmptyState, PageHeader, StatCard } from '#/ui';
+import { Card, CardBody, EmptyState, PageHeader, StatCard } from '#/ui';
 import { Component } from '@angular/core';
 
 @Component({
   selector: 'app-parent-portal',
-  imports: [EmptyState, PageHeader, StatCard],
+  imports: [Card, CardBody, EmptyState, PageHeader, StatCard],
   template: `
     <lib-page-header title="Portal de padres" subtitle="Resumen rápido del progreso de tus hijos." />
 
@@ -13,8 +13,8 @@ import { Component } from '@angular/core';
       <lib-stat-card label="Alertas" value="2" helper="Pendientes de revisar" />
     </div>
 
-    <div class="mt-6 card border border-base-200 bg-base-100">
-      <div class="card-body">
+    <div uiCard class="mt-6">
+      <div uiCardBody>
         <h2 class="text-lg font-semibold text-base-content">Hijos vinculados</h2>
         <div class="grid gap-4 md:grid-cols-2">
           @for (child of children; track child.id) {
@@ -39,8 +39,8 @@ import { Component } from '@angular/core';
       } @else {
         <div class="space-y-3">
           @for (announcement of announcements; track announcement.id) {
-            <div class="card border border-base-200 bg-base-100">
-              <div class="card-body">
+            <div uiCard>
+              <div uiCardBody>
                 <p class="font-semibold text-base-content">
                   {{ announcement.title }}
                 </p>

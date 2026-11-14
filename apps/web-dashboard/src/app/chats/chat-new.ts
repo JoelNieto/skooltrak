@@ -1,4 +1,4 @@
-import { Loader, Toast, UiInput } from '#/ui';
+import { Badge, Loader, Toast, UiInput } from '#/ui';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -8,7 +8,7 @@ import Auth from '../auth/auth';
 
 @Component({
   selector: 'app-chat-new',
-  imports: [UiInput, RouterLink, Loader, FormsModule],
+  imports: [Badge, UiInput, RouterLink, Loader, FormsModule],
   template: `
     <div class="breadcrumbs text-sm">
       <ul>
@@ -51,10 +51,10 @@ import Auth from '../auth/auth';
               <div class="flex flex-wrap items-center gap-1.5 mt-0.5">
                 <span class="text-sm text-base-content/60">{{ contact.email }}</span>
                 @if (roleLabel($safeNavigationMigration(contact?.role?.name)); as label) {
-                  <span class="badge badge-secondary badge-soft badge-sm">{{ label }}</span>
+                  <span uiBadge size="sm">{{ label }}</span>
                 }
                 @if (contact?.student?.classGroup?.name; as groupName) {
-                  <span class="badge badge-outline badge-primary badge-sm">{{ groupName }}</span>
+                  <span uiBadge tone="action" size="sm">{{ groupName }}</span>
                 }
               </div>
             </div>

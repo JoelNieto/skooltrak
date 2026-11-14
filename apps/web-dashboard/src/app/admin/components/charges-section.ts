@@ -1,5 +1,16 @@
-import { Button, Confirmation, EmptyState, Pagination, Paginator, Toast, UiInput, UiSelect } from '#/ui';
-import { DatePipe, DecimalPipe, NgClass } from '@angular/common';
+import {
+  Badge,
+  BadgeTone,
+  Button,
+  Confirmation,
+  EmptyState,
+  Pagination,
+  Paginator,
+  Toast,
+  UiInput,
+  UiSelect,
+} from '#/ui';
+import { DatePipe, DecimalPipe } from '@angular/common';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { Component, computed, effect, inject, input, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -23,7 +34,7 @@ type StudentOption = { id: string; firstName: string; fatherName: string };
 
 @Component({
   selector: 'app-charges-section',
-  imports: [UiInput, UiSelect, Button, DatePipe, DecimalPipe, EmptyState, FormsModule, NgClass, Paginator],
+  imports: [Badge, UiInput, UiSelect, Button, DatePipe, DecimalPipe, EmptyState, FormsModule, Paginator],
   providers: [Pagination],
   template: `
     <div class="bg-base-100 rounded-lg border border-base-300">
@@ -102,12 +113,12 @@ type StudentOption = { id: string; firstName: string; fatherName: string };
                 <td>{{ c.student.firstName }} {{ c.student.fatherName }}</td>
                 <td>{{ c.description || '-' }}</td>
                 <td>
-                  <span class="badge badge-soft">{{ c.chargeType }}</span>
+                  <span uiBadge>{{ c.chargeType }}</span>
                 </td>
                 <td>{{ c.amount | number: '1.2-2' }}</td>
                 <td>{{ c.dueDate | date: 'dd/MM/yyyy' }}</td>
                 <td>
-                  <span class="badge" [ngClass]="statusClass(c.status)">{{ c.status }}</span>
+                  <span uiBadge [tone]="statusTone(c.status)">{{ c.status }}</span>
                 </td>
                 <td>
                   @if (!isStudent()) {
@@ -229,14 +240,14 @@ export default class ChargesSection {
     this.pagination.updateSkip(0);
   }
 
-  statusClass(status: string): string {
-    const m: Record<string, string> = {
-      PENDING: 'badge-warning',
-      PAID: 'badge-success',
-      PARTIAL: 'badge-info',
-      OVERDUE: 'badge-error',
+  statusTone(status: string): BadgeTone {
+    const m: Record<string, BadgeTone> = {
+      PENDING: 'warning',
+      PAID: 'success',
+      PARTIAL: 'info',
+      OVERDUE: 'danger',
     };
-    return m[status] ?? 'badge-ghost';
+    return m[status] ?? 'neutral';
   }
 
   removeCharge(id: string) {

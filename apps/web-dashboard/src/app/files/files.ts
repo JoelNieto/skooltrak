@@ -1,4 +1,4 @@
-import { Button, debounceSignal, EmptyState, Loader, Modal, PageHeader, Toast } from '#/ui';
+import { Badge, Button, debounceSignal, EmptyState, Loader, Modal, PageHeader, Toast } from '#/ui';
 import { DatePipe } from '@angular/common';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { Component, inject, Signal, signal } from '@angular/core';
@@ -30,7 +30,7 @@ type FileItem = {
 
 @Component({
   selector: 'app-files',
-  imports: [Button, Loader, FormsModule, RouterLink, DatePipe, PageHeader, EmptyState],
+  imports: [Badge, Button, Loader, FormsModule, RouterLink, DatePipe, PageHeader, EmptyState],
   template: `
     <div class="breadcrumbs text-sm">
       <ul>
@@ -89,11 +89,7 @@ type FileItem = {
                     <td class="text-base-200">{{ formatBytes(file.size) }}</td>
                     <td>
                       @if (file.access) {
-                        <span
-                          class="badge"
-                          [class.badge-success]="file.access === 'EDIT'"
-                          [class.badge-info]="file.access === 'VIEW'"
-                        >
+                        <span uiBadge [tone]="file.access === 'EDIT' ? 'success' : 'info'">
                           {{ file.access === 'EDIT' ? 'Editar' : 'Ver' }}
                         </span>
                       } @else {

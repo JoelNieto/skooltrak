@@ -1,10 +1,10 @@
-import { PageHeader, StatCard } from '#/ui';
+import { Card, CardBody, PageHeader, StatCard } from '#/ui';
 import { Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-attendance-reporting',
-  imports: [PageHeader, RouterLink, StatCard],
+  imports: [Card, CardBody, PageHeader, RouterLink, StatCard],
   template: `
     <div class="breadcrumbs text-sm">
       <ul>
@@ -27,8 +27,8 @@ import { RouterLink } from '@angular/router';
       <lib-stat-card label="Alertas activas" value="5" helper="Pendientes" />
     </div>
 
-    <div class="mt-6 card border border-base-200 bg-base-100">
-      <div class="card-body">
+    <div uiCard class="mt-6">
+      <div uiCardBody>
         <h2 class="text-lg font-semibold text-base-content">Resumen por curso</h2>
         <div class="overflow-x-auto">
           <table class="table">

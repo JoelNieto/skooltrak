@@ -5,11 +5,11 @@ import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { map, of } from 'rxjs';
 import { StoreApiService } from '../store-api.service';
-import { Button, UiInput } from '#/ui';
+import { Badge, Button, Card, CardBody, CardTitle, UiInput } from '#/ui';
 
 @Component({
   selector: 'app-store-catalog',
-  imports: [UiInput, Button, RouterLink, FormsModule],
+  imports: [Badge, Card, CardBody, CardTitle, UiInput, Button, RouterLink, FormsModule],
   template: `
     @if (!schoolId()) {
       <div class="alert alert-warning">
@@ -53,10 +53,7 @@ import { Button, UiInput } from '#/ui';
       </div>
       <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         @for (p of products.value(); track p.id) {
-          <a
-            [routerLink]="['product', p.id]"
-            class="card bg-base-100 shadow-md border border-base-200 overflow-hidden transition-colors duration-200 hover:border-line-strong"
-          >
+          <a uiCard [routerLink]="['product', p.id]" class="overflow-hidden">
             <figure class="aspect-square bg-base-200">
               @if (p.imageUrl) {
                 <img [src]="p.imageUrl" [alt]="p.name" class="h-full w-full object-cover" />
@@ -66,14 +63,14 @@ import { Button, UiInput } from '#/ui';
                 </div>
               }
             </figure>
-            <div class="card-body p-4 gap-1">
-              <h2 class="card-title text-base line-clamp-2">{{ p.name }}</h2>
+            <div uiCardBody class="p-4 gap-1">
+              <h2 uiCardTitle class="text-base line-clamp-2">{{ p.name }}</h2>
               @if (p.hasOutOfStockVariant) {
-                <span class="badge badge-warning badge-sm">Alguna talla agotada</span>
+                <span uiBadge tone="warning" size="sm">Alguna talla agotada</span>
               }
               <p class="text-lg font-semibold text-primary">{{ formatPrice(p.price) }}</p>
               @if ((p.totalStock ?? 0) <= 0) {
-                <span class="badge badge-error badge-sm">Agotado</span>
+                <span uiBadge tone="danger" size="sm">Agotado</span>
               }
             </div>
           </a>

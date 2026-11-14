@@ -1,4 +1,4 @@
-import { Button, Loader } from '#/ui';
+import { Badge, Button, Card, CardBody, Loader } from '#/ui';
 import { Tab, TabContent, TabList, TabPanel, Tabs } from '@angular/aria/tabs';
 import { DatePipe } from '@angular/common';
 import { httpResource } from '@angular/common/http';
@@ -26,7 +26,7 @@ type SchoolDetail = {
 
 @Component({
   selector: 'app-school',
-  imports: [Button, RouterLink, Loader, DatePipe, TabList, Tab, Tabs, TabPanel, TabContent],
+  imports: [Badge, Card, CardBody, Button, RouterLink, Loader, DatePipe, TabList, Tab, Tabs, TabPanel, TabContent],
   template: `
     @if (schoolResource.isLoading()) {
       <lib-loader />
@@ -43,8 +43,8 @@ type SchoolDetail = {
         </div>
 
         <!-- Header Card -->
-        <div class="card w-full bg-base-100 mt-4">
-          <div class="card-body">
+        <div uiCard class="w-full mt-4">
+          <div uiCardBody>
             <div class="flex items-center justify-between">
               <div class="flex gap-4 items-center">
                 <div
@@ -59,7 +59,7 @@ type SchoolDetail = {
                 <div class="flex flex-col">
                   <div class="flex items-center gap-2">
                     <span class="font-semibold text-lg">{{ school.name }}</span>
-                    <span class="badge badge-primary badge-sm">{{ school.shortName }}</span>
+                    <span uiBadge tone="action" size="sm">{{ school.shortName }}</span>
                   </div>
                   @if (school.city || school.country) {
                     <span class="text-sm text-base-content/60">

@@ -311,6 +311,58 @@ h3 {
   }
 }
 
+/* Card (uiCard directives in libs/ui). In the components layer so utilities on the host still win.
+ * `.card.ui-card` outranks DaisyUI's `.card` in the same layer. */
+@layer components {
+  .card.ui-card {
+    background-color: var(--ui-surface-1);
+    border: 1px solid var(--ui-line);
+    border-radius: var(--radius-box);
+    box-shadow: none;
+    color: var(--ui-ink);
+  }
+  .card.ui-card-interactive {
+    cursor: pointer;
+    transition: border-color 0.2s var(--ui-ease);
+    &:hover {
+      border-color: var(--ui-line-strong);
+    }
+    &:focus-visible {
+      outline: none;
+      box-shadow: 0 0 0 3px color-mix(in oklab, var(--color-primary) 20%, transparent);
+    }
+  }
+  .card-title.ui-card-title {
+    font-size: 1rem;
+    line-height: 1.5rem;
+    font-weight: 600;
+    color: var(--ui-ink-strong);
+    letter-spacing: -0.01em;
+  }
+
+  /* Badge (uiBadge): one soft style, tone carries meaning. */
+  .badge.ui-badge {
+    font-weight: 500;
+    border-color: transparent;
+    white-space: nowrap;
+  }
+  a.badge.ui-badge {
+    transition: filter 0.2s var(--ui-ease);
+    &:hover {
+      filter: brightness(0.95);
+    }
+  }
+}
+
+/* Badge text: DaisyUI's soft badge uses the raw tone colour as text, which is too light for the
+ * success/warning tones on a light surface. Mixing toward the strongest ink darkens it in light mode
+ * and lightens it in dark mode; the fill is a touch stronger than DaisyUI's 8% so it reads on the
+ * page background. Unlayered so it beats DaisyUI's layered badge rules. */
+.badge.ui-badge {
+  color: color-mix(in oklab, var(--badge-color, var(--ui-ink)) 62%, var(--ui-ink-strong));
+  background-color: color-mix(in oklab, var(--badge-color, var(--ui-ink)) 12%, var(--ui-surface-1));
+}
+
 .layout-padding {
   @apply mx-auto mt-4 max-w-7xl px-4 sm:px-6 lg:px-8;
 }

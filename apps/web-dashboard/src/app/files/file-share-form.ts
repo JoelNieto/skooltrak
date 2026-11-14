@@ -1,4 +1,4 @@
-import { Button, Toast, UiField, UiInput, UiSelect } from '#/ui';
+import { Badge, Button, Toast, UiField, UiInput, UiSelect } from '#/ui';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { afterRenderEffect, Component, computed, effect, inject, input, output, signal } from '@angular/core';
 import { NonNullableFormBuilder } from '@angular/forms';
@@ -22,7 +22,7 @@ interface FileShareFormData {
 
 @Component({
   selector: 'app-file-share-form',
-  imports: [UiField, UiInput, UiSelect, Button, FormField],
+  imports: [Badge, UiField, UiInput, UiSelect, Button, FormField],
   template: `<form (submit)="onSubmit($event)">
     <div class="flex flex-col gap-4">
       <ui-field label="Compartir con" [field]="form.targetType">
@@ -61,7 +61,7 @@ interface FileShareFormData {
         @if (targetIds().length > 0) {
           <div class="mt-2 flex flex-wrap gap-2">
             @for (id of targetIds(); track id) {
-              <span class="badge badge-outline gap-2">
+              <span uiBadge class="gap-2">
                 {{ targetLabel(id) }}
                 <button type="button" class="text-xs" (click)="removeTarget(id)">✕</button>
               </span>

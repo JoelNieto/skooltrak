@@ -1,4 +1,4 @@
-import { debounceSignal, EmptyState, Loader, Pagination, PaginatorV2 } from '#/ui';
+import { Badge, Card, CardBody, CardTitle, debounceSignal, EmptyState, Loader, Pagination, PaginatorV2 } from '#/ui';
 import { httpResource } from '@angular/common/http';
 import { Component, computed, inject, Signal, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -23,7 +23,7 @@ type CourseRow = {
 
 @Component({
   selector: 'app-courses',
-  imports: [RouterLink, Loader, PaginatorV2, FormsModule, EmptyState],
+  imports: [Badge, Card, CardBody, CardTitle, RouterLink, Loader, PaginatorV2, FormsModule, EmptyState],
   providers: [Pagination],
 
   template: `
@@ -47,10 +47,7 @@ type CourseRow = {
     @if (coursesListResource.hasValue()) {
       <div class="flex flex-col md:grid md:grid-cols-2 lg:grid-cols-4 gap-5 mt-4">
         @for (course of courses(); track course.id) {
-          <a
-            [routerLink]="['/courses', course.id]"
-            class="group card bg-base-100 hover:shadow hover:-translate-y-1 transition-all duration-300 overflow-hidden cursor-pointer"
-          >
+          <a uiCard [routerLink]="['/courses', course.id]" class="group overflow-hidden">
             <figure class="relative overflow-hidden">
               <img
                 src="course-default.jpg"
@@ -58,35 +55,39 @@ type CourseRow = {
                 class="h-28 w-full object-cover transition-transform duration-300 group-hover:scale-110"
               />
               <div class="absolute inset-0 bg-linear-to-t from-black/60 to-transparent"></div>
-              <span class="absolute bottom-2 left-2 badge badge-sm badge-primary">
+              <span uiBadge tone="action" size="sm" class="absolute bottom-2 left-2">
                 {{ course.studyPlan?.name }}
               </span>
             </figure>
-            <div class="card-body p-3">
-              <h2 class="card-title text-sm line-clamp-2">{{ course.subject?.name }}</h2>
-@if (course.teacher?.name) {
-                 <div class="text-xs text-base-content/60 flex items-center gap-1">
-                   @if (course.teacher?.avatarUrl) {
-                     <img [src]="course.teacher.avatarUrl" [alt]="course.teacher.name" class="w-7 h-7 rounded-full object-cover" />
-                   } @else {
-                     <div class="avatar avatar-placeholder">
-                       <div class="text-white w-7 rounded-full" [style.background]="course.teacher.color">
-                         <span class="text-xs">{{ course.teacher.initials }}</span>
-                       </div>
-                     </div>
-                   }
-                   {{ course.teacher?.name }}
-                 </div>
-               } @else {
-                 <div class="text-xs text-base-content/60 flex items-center gap-1">
-                   <div class="avatar avatar-placeholder">
-                     <div class="text-white w-7 rounded-full" [style.background]="course.teacher?.color ?? '#6B7280'">
-                       <span class="text-xs">?</span>
-                     </div>
-                   </div>
-                   Sin docente asignado
-                 </div>
-               }
+            <div uiCardBody class="p-3">
+              <h2 uiCardTitle class="text-sm line-clamp-2">{{ course.subject?.name }}</h2>
+              @if (course.teacher?.name) {
+                <div class="text-xs text-base-content/60 flex items-center gap-1">
+                  @if (course.teacher?.avatarUrl) {
+                    <img
+                      [src]="course.teacher.avatarUrl"
+                      [alt]="course.teacher.name"
+                      class="w-7 h-7 rounded-full object-cover"
+                    />
+                  } @else {
+                    <div class="avatar avatar-placeholder">
+                      <div class="text-white w-7 rounded-full" [style.background]="course.teacher.color">
+                        <span class="text-xs">{{ course.teacher.initials }}</span>
+                      </div>
+                    </div>
+                  }
+                  {{ course.teacher?.name }}
+                </div>
+              } @else {
+                <div class="text-xs text-base-content/60 flex items-center gap-1">
+                  <div class="avatar avatar-placeholder">
+                    <div class="text-white w-7 rounded-full" [style.background]="course.teacher?.color ?? '#6B7280'">
+                      <span class="text-xs">?</span>
+                    </div>
+                  </div>
+                  Sin docente asignado
+                </div>
+              }
             </div>
           </a>
         } @empty {
@@ -136,30 +137,30 @@ export default class Courses {
     };
   });
 
-protected courses = computed(() =>
-  (this.coursesListResource.value()?.data ?? []).map((c) => {
-    const teacher = c.teacher;
-    if (!teacher) return c;
+  protected courses = computed(() =>
+    (this.coursesListResource.value()?.data ?? []).map((c) => {
+      const teacher = c.teacher;
+      if (!teacher) return c;
 
-    const firstName = teacher.firstName ?? '';
-    const fatherName = teacher.fatherName ?? '';
-    const name = teacher.name ?? `${firstName} ${fatherName}`.trim();
-    const initials = `${(firstName || '?').charAt(0)}${(fatherName || '?').charAt(0)}`.toUpperCase();
-    // Use the teacher's color if available, otherwise a default
-    const color = teacher.color ?? '#4F46E5'; // Indigo-600
+      const firstName = teacher.firstName ?? '';
+      const fatherName = teacher.fatherName ?? '';
+      const name = teacher.name ?? `${firstName} ${fatherName}`.trim();
+      const initials = `${(firstName || '?').charAt(0)}${(fatherName || '?').charAt(0)}`.toUpperCase();
+      // Use the teacher's color if available, otherwise a default
+      const color = teacher.color ?? '#4F46E5'; // Indigo-600
 
-    return {
-      ...c,
-      teacher: {
-        ...teacher,
-        name,
-        initials,
-        color,
-        // avatarUrl is preserved from the original teacher object via spread
-      },
-    };
-  }),
-);
+      return {
+        ...c,
+        teacher: {
+          ...teacher,
+          name,
+          initials,
+          color,
+          // avatarUrl is preserved from the original teacher object via spread
+        },
+      };
+    }),
+  );
 
   constructor() {
     this.#debouncedSearch = debounceSignal(this.searchText, 400);

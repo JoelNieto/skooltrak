@@ -1,4 +1,4 @@
-import { Button, Confirmation, Error, Modal, Toast } from '#/ui';
+import { Badge, Button, Confirmation, Error, Modal, Toast } from '#/ui';
 import { Menu, MenuContent, MenuItem, MenuTrigger } from '@angular/aria/menu';
 import { OverlayModule } from '@angular/cdk/overlay';
 import { DatePipe } from '@angular/common';
@@ -10,7 +10,7 @@ import HabitMetricsForm from './habit-metrics-form';
 
 @Component({
   selector: 'app-habit-metrics',
-  imports: [Button, RouterLink, DatePipe, Menu, MenuContent, MenuItem, MenuTrigger, OverlayModule, Error],
+  imports: [Badge, Button, RouterLink, DatePipe, Menu, MenuContent, MenuItem, MenuTrigger, OverlayModule, Error],
   template: `
     <div class="breadcrumbs text-sm">
       <ul>
@@ -59,7 +59,7 @@ import HabitMetricsForm from './habit-metrics-form';
                 <td>{{ metric.name }}</td>
                 <td class="max-w-64 truncate">{{ metric.description || '-' }}</td>
                 <td>
-                  <span class="badge" [class.badge-success]="metric.active" [class.badge-error]="!metric.active">
+                  <span uiBadge [tone]="metric.active ? 'success' : 'danger'">
                     {{ metric.active ? 'Activo' : 'Inactivo' }}
                   </span>
                 </td>

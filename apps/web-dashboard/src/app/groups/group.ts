@@ -1,4 +1,4 @@
-import { Button, Loader, Toast } from '#/ui';
+import { Button, Card, CardBody, Loader, Toast } from '#/ui';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { Component, computed, inject, input, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
@@ -12,7 +12,7 @@ import GroupSchedule from './group-schedule';
 import GroupStudents from './group-students';
 
 @Component({
-  imports: [Button, RouterLink, Loader, GroupStudents, GroupCourses, GroupSchedule, GroupHabits],
+  imports: [Card, CardBody, Button, RouterLink, Loader, GroupStudents, GroupCourses, GroupSchedule, GroupHabits],
   template: `
     @let group = groupResource.value();
     @if (groupResource.isLoading()) {
@@ -26,8 +26,8 @@ import GroupStudents from './group-students';
             <li>{{ group.name }}</li>
           </ul>
         </div>
-        <div class="card card-border border-base-300 bg-base-100">
-          <div class="card-body flex flex-row justify-between items-center">
+        <div uiCard>
+          <div uiCardBody class="flex flex-row justify-between items-center">
             <div>
               <h1 class="text-xl  font-semibold">{{ group.name }}</h1>
               <h3 class="text-base-200">{{ group.studyPlan?.name }} / {{ group.studyPlan?.degree?.name }}</h3>

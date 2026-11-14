@@ -1,4 +1,4 @@
-import { EmptyState, PageHeader, StatCard } from '#/ui';
+import { Card, CardBody, EmptyState, PageHeader, StatCard } from '#/ui';
 import { DatePipe } from '@angular/common';
 import { httpResource } from '@angular/common/http';
 import { Component, computed, inject, signal } from '@angular/core';
@@ -30,7 +30,7 @@ type PublishedNewsletter = {
 
 @Component({
   selector: 'app-teacher-home',
-  imports: [DatePipe, RouterLink, PageHeader, StatCard, EmptyState, RecentBroadcasts],
+  imports: [Card, CardBody, DatePipe, RouterLink, PageHeader, StatCard, EmptyState, RecentBroadcasts],
   template: `
     <lib-page-header title="Dashboard docente" subtitle="Resumen de tus clases y seguimiento semanal." />
 
@@ -57,8 +57,8 @@ type PublishedNewsletter = {
     </div>
 
     <div class="mt-6 grid gap-6 lg:grid-cols-2">
-      <div class="card border border-base-200 bg-base-100">
-        <div class="card-body">
+      <div uiCard>
+        <div uiCardBody>
           <div class="flex items-center justify-between">
             <h2 class="text-lg font-semibold text-base-content">Asignaciones de la semana</h2>
             <a routerLink="/assignments" class="link link-primary text-sm"> Ver todas </a>
@@ -90,8 +90,8 @@ type PublishedNewsletter = {
         </div>
       </div>
 
-      <div class="card border border-base-200 bg-base-100">
-        <div class="card-body">
+      <div uiCard>
+        <div uiCardBody>
           <div class="flex items-center justify-between">
             <h2 class="text-lg font-semibold text-base-content">Mensajes recientes</h2>
             <a routerLink="/messages" class="link link-primary text-sm"> Ir a mensajes </a>
@@ -123,8 +123,8 @@ type PublishedNewsletter = {
 
     @if (!recentNewsletters.error()) {
       <div class="mt-6">
-        <div class="card border border-base-200 bg-base-100">
-          <div class="card-body">
+        <div uiCard>
+          <div uiCardBody>
             <h2 class="text-lg font-semibold text-base-content">Boletines recientes</h2>
             @if ((recentNewsletters.value() ?? []).length === 0) {
               <lib-empty-state

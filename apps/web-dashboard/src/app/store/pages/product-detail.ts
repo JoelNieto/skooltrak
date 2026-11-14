@@ -1,5 +1,5 @@
 import { SchoolContext } from '#/shared';
-import { Button, Toast, UiSelect } from '#/ui';
+import { Badge, Button, Toast, UiSelect } from '#/ui';
 import { Component, effect, inject, input, signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
@@ -10,7 +10,7 @@ import { StoreApiService } from '../store-api.service';
 
 @Component({
   selector: 'app-product-detail',
-  imports: [UiSelect, Button, RouterLink, FormsModule],
+  imports: [Badge, UiSelect, Button, RouterLink, FormsModule],
   template: `
     <a uiButton variant="ghost" size="sm" routerLink="../.." class="gap-1 mb-4">
       <span class="material-symbols-outlined">arrow_back</span>
@@ -54,7 +54,7 @@ import { StoreApiService } from '../store-api.service';
             </label>
           }
           @if (!selectedVariant() || (selectedVariant()?.stock ?? 0) <= 0) {
-            <div class="badge badge-error">Sin stock en la talla seleccionada</div>
+            <div uiBadge tone="danger">Sin stock en la talla seleccionada</div>
           } @else {
             <div class="flex flex-wrap gap-2 mt-4">
               <button uiButton variant="primary" type="button" (click)="add(1)">Agregar al carrito</button>

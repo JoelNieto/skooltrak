@@ -1,10 +1,11 @@
 import { Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { BrandLogo } from '../shared/brand-logo';
+import { Badge, Card, CardBody, CardTitle } from '#/ui';
 
 @Component({
   selector: 'app-choose-path',
-  imports: [BrandLogo, RouterLink],
+  imports: [Badge, Card, CardBody, CardTitle, BrandLogo, RouterLink],
   template: `
     <div class="min-h-screen flex flex-col gradient-bg">
       <header class="p-4 md:p-6 flex items-center justify-between">
@@ -26,36 +27,30 @@ import { BrandLogo } from '../shared/brand-logo';
 
           <div class="grid md:grid-cols-2 gap-6">
             <!-- Create School -->
-            <a
-              routerLink="/onboarding/create-school"
-              class="card bg-base-100 shadow-lg hover:shadow-xl transition-all cursor-pointer border border-base-200 hover:border-primary"
-            >
-              <div class="card-body items-center text-center space-y-4">
+            <a uiCard routerLink="/onboarding/create-school">
+              <div uiCardBody class="items-center text-center space-y-4">
                 <div class="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
                   <span class="material-symbols-outlined text-4xl text-primary">add_business</span>
                 </div>
-                <h2 class="card-title">Crear una Escuela</h2>
+                <h2 uiCardTitle>Crear una Escuela</h2>
                 <p class="text-base-content/60 text-sm">
                   Registra tu institución educativa y configura cursos, grados y grupos.
                 </p>
-                <div class="badge badge-primary badge-outline">Administrador</div>
+                <div uiBadge tone="action">Administrador</div>
               </div>
             </a>
 
             <!-- Join School -->
-            <a
-              routerLink="/onboarding/join-school"
-              class="card bg-base-100 shadow-lg hover:shadow-xl transition-all cursor-pointer border border-base-200 hover:border-secondary"
-            >
-              <div class="card-body items-center text-center space-y-4">
+            <a uiCard routerLink="/onboarding/join-school">
+              <div uiCardBody class="items-center text-center space-y-4">
                 <div class="w-16 h-16 rounded-full bg-secondary/10 flex items-center justify-center">
                   <span class="material-symbols-outlined text-4xl text-secondary">group_add</span>
                 </div>
-                <h2 class="card-title">Unirse a una Escuela</h2>
+                <h2 uiCardTitle>Unirse a una Escuela</h2>
                 <p class="text-base-content/60 text-sm">
                   Busca tu escuela y únete como docente, estudiante o padre de familia.
                 </p>
-                <div class="badge badge-secondary badge-outline">Docente / Estudiante / Padre</div>
+                <div uiBadge>Docente / Estudiante / Padre</div>
               </div>
             </a>
           </div>

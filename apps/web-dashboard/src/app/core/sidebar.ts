@@ -1,4 +1,4 @@
-import { Button, Confirmation } from '#/ui';
+import { Badge, Button, Confirmation } from '#/ui';
 import { HttpClient } from '@angular/common/http';
 import { afterRenderEffect, Component, computed, EnvironmentInjector, inject } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
@@ -20,7 +20,7 @@ type SidebarSchool = {
 @Component({
   // eslint-disable-next-line @angular-eslint/component-selector
   selector: '[appSidebar]',
-  imports: [Button, BrandLogo, RouterLink, RouterLinkActive],
+  imports: [Badge, Button, BrandLogo, RouterLink, RouterLinkActive],
   template: `<div class="flex flex-col h-full">
     <div class="flex items-center justify-between px-4 py-5 shrink-0">
       <h1 class="text-xl font-semibold text-primary flex items-center gap-2">
@@ -169,7 +169,7 @@ type SidebarSchool = {
             <span>Tienda</span>
             @if (storeCartCount.value(); as cnt) {
               @if (cnt > 0) {
-                <span class="badge badge-primary badge-sm ml-auto">{{ cnt > 99 ? '99+' : cnt }}</span>
+                <span uiBadge tone="action" size="sm" class="ml-auto">{{ cnt > 99 ? '99+' : cnt }}</span>
               }
             }
           </a>
@@ -209,7 +209,7 @@ type SidebarSchool = {
               <span>Chats</span>
               @if (chatUnreadCount.value(); as count) {
                 @if (count > 0) {
-                  <span class="badge badge-primary badge-sm ml-auto">{{ count > 99 ? '99+' : count }}</span>
+                  <span uiBadge tone="action" size="sm" class="ml-auto">{{ count > 99 ? '99+' : count }}</span>
                 }
               }
             </a>
@@ -446,7 +446,7 @@ type SidebarSchool = {
         <span>Mensajes</span>
         @if (unreadCount.value(); as count) {
           @if (count > 0) {
-            <span class="badge badge-primary badge-sm ml-auto">{{ count > 99 ? '99+' : count }}</span>
+            <span uiBadge tone="action" size="sm" class="ml-auto">{{ count > 99 ? '99+' : count }}</span>
           }
         }
       </a>

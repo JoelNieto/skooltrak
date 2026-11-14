@@ -1,4 +1,4 @@
-import { Button, Loader, Modal, Toast } from '#/ui';
+import { Button, Card, CardBody, CardTitle, Loader, Modal, Toast } from '#/ui';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { Component, computed, inject, input, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
@@ -32,6 +32,9 @@ type CourseVm = {
 
 @Component({
   imports: [
+    Card,
+    CardBody,
+    CardTitle,
     Button,
     Loader,
     RouterLink,
@@ -58,12 +61,12 @@ type CourseVm = {
             <li>{{ course.name }}</li>
           </ul>
         </div>
-        <div class="card mt-4 bg-base-100">
-          <div class="card-body flex md:flex-row md:gap-4 md:items-center">
+        <div uiCard class="mt-4">
+          <div uiCardBody class="flex md:flex-row md:gap-4 md:items-center">
             <img src="course-default.jpg" alt="Course" class="h-18 w-18 rounded-lg" />
             <div class="flex justify-between items-center w-full">
               <div>
-                <h2 class="card-title text-xl">{{ course.name }}</h2>
+                <h2 uiCardTitle class="text-xl">{{ course.name }}</h2>
                 <div class="flex items-center gap-1 text-sm">
                   @if (course.teacher) {
                     <div class="avatar avatar-placeholder">

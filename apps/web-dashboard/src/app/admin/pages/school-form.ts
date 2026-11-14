@@ -1,4 +1,4 @@
-import { Button, Loader, Toast, UiField, UiInput, UiSelect } from '#/ui';
+import { Button, Card, CardBody, Loader, Toast, UiField, UiInput, UiSelect } from '#/ui';
 import { HttpClient } from '@angular/common/http';
 import { afterRenderEffect, Component, computed, inject, input, signal, viewChild } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
@@ -48,7 +48,19 @@ interface SchoolFormData {
 
 @Component({
   selector: 'app-school-form',
-  imports: [UiField, UiInput, UiSelect, Button, FormField, RouterLink, Loader, ImageCropperComponent, FormsModule],
+  imports: [
+    Card,
+    CardBody,
+    UiField,
+    UiInput,
+    UiSelect,
+    Button,
+    FormField,
+    RouterLink,
+    Loader,
+    ImageCropperComponent,
+    FormsModule,
+  ],
   template: `
     <div class="breadcrumbs text-sm">
       <ul>
@@ -84,8 +96,8 @@ interface SchoolFormData {
               <p class="mt-1 text-sm text-base-content/70">Logo del colegio.</p>
             </div>
             <div class="sm:col-span-3">
-              <div class="card card-border border-base-300 bg-base-100">
-                <div class="card-body gap-y-4">
+              <div uiCard>
+                <div uiCardBody class="gap-y-4">
                   <div class="flex flex-col sm:flex-row gap-6 items-start">
                     <!-- Logo Preview -->
                     <div class="flex flex-col items-center gap-3">
@@ -190,8 +202,8 @@ interface SchoolFormData {
               <p class="mt-1 text-sm text-base-content/70">Datos principales del colegio.</p>
             </div>
             <div class="sm:col-span-3">
-              <div class="card card-border border-base-300 bg-base-100">
-                <div class="card-body gap-y-4">
+              <div uiCard>
+                <div uiCardBody class="gap-y-4">
                   <div class="sm:grid sm:grid-cols-6 sm:gap-4">
                     <ui-field label="Nombre del colegio" [field]="schoolForm.name" class="col-span-4">
                       <input uiInput id="name" type="text" [formField]="schoolForm.name" />
@@ -212,8 +224,8 @@ interface SchoolFormData {
               <p class="mt-1 text-sm text-base-content/70">Información de contacto del colegio.</p>
             </div>
             <div class="sm:col-span-3">
-              <div class="card card-border border-base-300 bg-base-100">
-                <div class="card-body gap-y-4">
+              <div uiCard>
+                <div uiCardBody class="gap-y-4">
                   <div class="sm:grid sm:grid-cols-6 sm:gap-4">
                     <ui-field label="Correo electrónico" [field]="schoolForm.email" optional class="col-span-3">
                       <input uiInput id="email" type="email" [formField]="schoolForm.email" />
@@ -237,8 +249,8 @@ interface SchoolFormData {
               <p class="mt-1 text-sm text-base-content/70">Dirección física del colegio.</p>
             </div>
             <div class="sm:col-span-3">
-              <div class="card card-border border-base-300 bg-base-100">
-                <div class="card-body gap-y-4">
+              <div uiCard>
+                <div uiCardBody class="gap-y-4">
                   <div class="sm:grid sm:grid-cols-6 sm:gap-4">
                     <ui-field label="Dirección" [field]="schoolForm.address" optional class="col-span-6">
                       <input uiInput id="address" type="text" [formField]="schoolForm.address" />
@@ -270,8 +282,8 @@ interface SchoolFormData {
               </p>
             </div>
             <div class="sm:col-span-3">
-              <div class="card card-border border-base-300 bg-base-100">
-                <div class="card-body gap-y-4">
+              <div uiCard>
+                <div uiCardBody class="gap-y-4">
                   <div class="sm:grid sm:grid-cols-6 sm:gap-4">
                     <ui-field label="Inicio del año escolar" class="col-span-3">
                       <select
@@ -301,8 +313,8 @@ interface SchoolFormData {
               </p>
             </div>
             <div class="sm:col-span-3">
-              <div class="card card-border border-base-300 bg-base-100">
-                <div class="card-body gap-y-4">
+              <div uiCard>
+                <div uiCardBody class="gap-y-4">
                   <div class="sm:grid sm:grid-cols-6 sm:gap-4">
                     <div class="fieldset col-span-2">
                       <label for="primaryColor">

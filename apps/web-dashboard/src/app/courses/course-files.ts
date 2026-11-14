@@ -1,4 +1,4 @@
-import { Button, debounceSignal, Loader, Modal, Toast } from '#/ui';
+import { Badge, Button, debounceSignal, Loader, Modal, Toast } from '#/ui';
 import { DatePipe } from '@angular/common';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { Component, inject, input, Signal, signal } from '@angular/core';
@@ -17,7 +17,7 @@ type CourseFile = {
 
 @Component({
   selector: 'app-course-files',
-  imports: [Button, Loader, FormsModule, DatePipe],
+  imports: [Badge, Button, Loader, FormsModule, DatePipe],
   template: `
     <div class="flex flex-col gap-4">
       <div class="flex justify-between items-start gap-4">
@@ -58,11 +58,7 @@ type CourseFile = {
                   <td class="text-base-200">{{ formatBytes(file.size ?? 0) }}</td>
                   <td>
                     @if (file.access) {
-                      <span
-                        class="badge"
-                        [class.badge-success]="file.access === 'EDIT'"
-                        [class.badge-info]="file.access === 'VIEW'"
-                      >
+                      <span uiBadge [tone]="file.access === 'EDIT' ? 'success' : 'info'">
                         {{ file.access === 'EDIT' ? 'Editar' : 'Ver' }}
                       </span>
                     } @else {

@@ -1,4 +1,4 @@
-import { EmptyState, PageHeader, StatCard, Toast } from '#/ui';
+import { Card, CardBody, EmptyState, PageHeader, StatCard, Toast } from '#/ui';
 import { DatePipe } from '@angular/common';
 import { httpResource } from '@angular/common/http';
 import { Component, computed, effect, inject, signal } from '@angular/core';
@@ -31,17 +31,13 @@ type ParentMeResponse = {
 
 @Component({
   selector: 'app-parent-home',
-  imports: [DatePipe, RouterLink, PageHeader, StatCard, EmptyState, RecentBroadcasts],
+  imports: [Card, CardBody, DatePipe, RouterLink, PageHeader, StatCard, EmptyState, RecentBroadcasts],
   template: `
     <lib-page-header title="Dashboard de padres" subtitle="Resumen del progreso de tus hijos." />
 
     <div class="grid gap-4 md:grid-cols-3">
       <lib-stat-card label="Hijos vinculados" [value]="children().length.toString()" helper="En tus escuelas" />
-      <lib-stat-card
-        label="Mensajes nuevos"
-        [value]="unreadCount().toString()"
-        helper="Bandeja de entrada"
-      />
+      <lib-stat-card label="Mensajes nuevos" [value]="unreadCount().toString()" helper="Bandeja de entrada" />
       <lib-stat-card
         label="Boletines recientes"
         [value]="(recentNewsletters.value()?.length ?? 0).toString()"
@@ -49,8 +45,8 @@ type ParentMeResponse = {
       />
     </div>
 
-    <div class="mt-6 card border border-base-200 bg-base-100">
-      <div class="card-body">
+    <div uiCard class="mt-6">
+      <div uiCardBody>
         <div class="flex items-center justify-between">
           <h2 class="text-lg font-semibold text-base-content">Hijos vinculados</h2>
           <a routerLink="/parent/portal" class="link link-primary text-sm"> Administrar </a>
@@ -89,8 +85,8 @@ type ParentMeResponse = {
     </div>
 
     <div class="mt-6 grid gap-6 lg:grid-cols-2">
-      <div class="card border border-base-200 bg-base-100">
-        <div class="card-body">
+      <div uiCard>
+        <div uiCardBody>
           <div class="flex items-center justify-between">
             <h2 class="text-lg font-semibold text-base-content">Mensajes recientes</h2>
             <a routerLink="/parent/communication" class="link link-primary text-sm"> Ir a mensajes </a>
@@ -126,8 +122,8 @@ type ParentMeResponse = {
       </div>
 
       @if (!recentNewsletters.error()) {
-        <div class="card border border-base-200 bg-base-100">
-          <div class="card-body">
+        <div uiCard>
+          <div uiCardBody>
             <h2 class="text-lg font-semibold text-base-content">Boletines recientes</h2>
             @if ((recentNewsletters.value() ?? []).length === 0) {
               <lib-empty-state

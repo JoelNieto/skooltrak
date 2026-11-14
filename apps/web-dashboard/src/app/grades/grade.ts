@@ -1,4 +1,16 @@
-import { Button, Confirmation, EditorViewer, Error, Loader, Modal, Toast } from '#/ui';
+import {
+  Badge,
+  Button,
+  Card,
+  CardBody,
+  CardTitle,
+  Confirmation,
+  EditorViewer,
+  Error,
+  Loader,
+  Modal,
+  Toast,
+} from '#/ui';
 import { DatePipe, DecimalPipe, NgClass } from '@angular/common';
 import { Component, computed, inject, input } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
@@ -32,7 +44,20 @@ type GradeDetail = {
 
 @Component({
   selector: 'app-grade',
-  imports: [Button, Loader, RouterLink, EditorViewer, DatePipe, Error, DecimalPipe, NgClass],
+  imports: [
+    Badge,
+    Card,
+    CardBody,
+    CardTitle,
+    Button,
+    Loader,
+    RouterLink,
+    EditorViewer,
+    DatePipe,
+    Error,
+    DecimalPipe,
+    NgClass,
+  ],
   template: `
     @defer {
       @if (gradeResource.hasValue()) {
@@ -44,13 +69,13 @@ type GradeDetail = {
             <li>{{ grade.title }}</li>
           </ul>
         </div>
-        <div class="card card-border border-base-300 mt-4 bg-base-100">
-          <div class="card-body">
+        <div uiCard class="mt-4">
+          <div uiCardBody>
             <div class="flex justify-between items-center">
               <h1 class="text-xl font-semibold">{{ grade.title }}</h1>
               <div class="flex items-center gap-2">
                 @if (grade.published) {
-                  <span class="badge badge-success">
+                  <span uiBadge tone="success">
                     <span class="material-symbols-outlined">check_circle</span>
                     Publicada</span
                   >
@@ -75,9 +100,9 @@ type GradeDetail = {
             <lib-editor-viewer [innerHTML]="grade.comments" />
           </div>
         </div>
-        <div class="card card-border border-base-300 mt-4 bg-base-100">
-          <div class="card-body">
-            <h3 class="card-title">Calificaciones</h3>
+        <div uiCard class="mt-4">
+          <div uiCardBody>
+            <h3 uiCardTitle>Calificaciones</h3>
             <div class="overflow-x-auto w-full">
               <table class="table w-full">
                 <thead>

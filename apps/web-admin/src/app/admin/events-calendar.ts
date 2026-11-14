@@ -1,10 +1,10 @@
-import { EmptyState, PageHeader } from '#/ui';
+import { Card, CardBody, EmptyState, PageHeader } from '#/ui';
 import { Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-events-calendar',
-  imports: [EmptyState, PageHeader, RouterLink],
+  imports: [Card, CardBody, EmptyState, PageHeader, RouterLink],
   template: `
     <div class="breadcrumbs text-sm">
       <ul>
@@ -21,8 +21,8 @@ import { RouterLink } from '@angular/router';
       actionIcon="event_available"
     />
 
-    <div class="card border border-base-200 bg-base-100">
-      <div class="card-body">
+    <div uiCard>
+      <div uiCardBody>
         <h2 class="text-lg font-semibold text-base-content">Próximos eventos</h2>
         @if (events.length === 0) {
           <lib-empty-state

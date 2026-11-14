@@ -1,4 +1,4 @@
-import { Button, Error, Loader } from '#/ui';
+import { Badge, Button, Error, Loader } from '#/ui';
 import { DatePipe } from '@angular/common';
 import { Component, Pipe, PipeTransform, computed, inject, signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
@@ -23,7 +23,7 @@ export class StripHtmlPipe implements PipeTransform {
 
 @Component({
   selector: 'app-assignments',
-  imports: [Button, RouterLink, DatePipe, StripHtmlPipe, Error, Loader],
+  imports: [Badge, Button, RouterLink, DatePipe, StripHtmlPipe, Error, Loader],
 
   template: `<div class="breadcrumbs text-sm">
       <ul>
@@ -78,7 +78,7 @@ export class StripHtmlPipe implements PipeTransform {
                 <td>{{ item.date | date: 'medium' }}</td>
                 @if (!isStudent()) {
                   <td>
-                    <span class="badge badge-outline">{{ item.classGroup.name }}</span>
+                    <span uiBadge>{{ item.classGroup.name }}</span>
                   </td>
                 }
                 <td>{{ item.assignment.course.name }}</td>

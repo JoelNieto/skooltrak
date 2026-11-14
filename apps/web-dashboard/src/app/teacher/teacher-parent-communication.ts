@@ -1,4 +1,5 @@
 import {
+  Badge,
   Button,
   MessageBubble,
   Modal,
@@ -45,6 +46,7 @@ interface ThreadListItem {
 @Component({
   selector: 'app-teacher-parent-communication',
   imports: [
+    Badge,
     UiInput,
     UiSelect,
     Button,
@@ -136,16 +138,16 @@ interface ThreadListItem {
               }
               <h2 class="font-semibold truncate">{{ thread.title }}</h2>
               @if (thread.broadcast) {
-                <span class="badge badge-primary badge-soft badge-sm shrink-0">Comunicado</span>
+                <span uiBadge tone="action" size="sm" class="shrink-0">Comunicado</span>
               }
             </div>
             <div class="flex items-center gap-1">
               <span class="text-sm opacity-70">{{ thread.audience }}</span>
               @if (thread.urgent) {
-                <span class="badge badge-error badge-soft badge-xs">Importante</span>
+                <span uiBadge tone="danger" size="sm">Importante</span>
               }
               @if (thread.broadcast && thread.repliesAllowed === false) {
-                <span class="badge badge-ghost badge-xs">Solo lectura</span>
+                <span uiBadge size="sm">Solo lectura</span>
               }
             </div>
           </header>

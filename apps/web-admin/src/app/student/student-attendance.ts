@@ -1,9 +1,9 @@
-import { EmptyState, PageHeader, StatCard } from '#/ui';
+import { Badge, BadgeTone, Card, CardBody, EmptyState, PageHeader, StatCard } from '#/ui';
 import { Component } from '@angular/core';
 
 @Component({
   selector: 'app-student-attendance',
-  imports: [EmptyState, PageHeader, StatCard],
+  imports: [Badge, Card, CardBody, EmptyState, PageHeader, StatCard],
   template: `
     <lib-page-header
       title="Asistencia del estudiante"
@@ -16,8 +16,8 @@ import { Component } from '@angular/core';
       <lib-stat-card label="Faltas" value="1" helper="Justificada" />
     </div>
 
-    <div class="mt-6 card border border-base-200 bg-base-100">
-      <div class="card-body">
+    <div uiCard class="mt-6">
+      <div uiCardBody>
         <h2 class="text-lg font-semibold text-base-content">Registro reciente</h2>
         <div class="overflow-x-auto">
           <table class="table">
@@ -35,7 +35,7 @@ import { Component } from '@angular/core';
                   <td>{{ entry.date }}</td>
                   <td>{{ entry.course }}</td>
                   <td>
-                    <span class="badge" [class]="entry.badgeClass">
+                    <span uiBadge [tone]="entry.tone">
                       {{ entry.status }}
                     </span>
                   </td>
@@ -69,13 +69,13 @@ import { Component } from '@angular/core';
   `,
 })
 export default class StudentAttendance {
-  attendance = [
+  attendance: { id: string; date: string; course: string; status: string; tone: BadgeTone; note: string }[] = [
     {
       id: 'att-1',
       date: 'Mar 12',
       course: 'Matemáticas',
       status: 'Presente',
-      badgeClass: 'badge-success',
+      tone: 'success',
       note: 'Sin observaciones',
     },
     {
@@ -83,7 +83,7 @@ export default class StudentAttendance {
       date: 'Mar 11',
       course: 'Historia',
       status: 'Tarde',
-      badgeClass: 'badge-warning',
+      tone: 'warning',
       note: 'Llegó 10 min tarde',
     },
     {
@@ -91,7 +91,7 @@ export default class StudentAttendance {
       date: 'Mar 10',
       course: 'Ciencias',
       status: 'Falta',
-      badgeClass: 'badge-error',
+      tone: 'danger',
       note: 'Justificada por médico',
     },
   ];

@@ -1,7 +1,7 @@
-import { Button, Confirmation, EmptyState, Pagination, PaginatorV2, Toast } from '#/ui';
+import { Badge, BadgeTone, Button, Confirmation, EmptyState, Pagination, PaginatorV2, Toast } from '#/ui';
 import { Menu, MenuContent, MenuItem, MenuTrigger } from '@angular/aria/menu';
 import { OverlayModule } from '@angular/cdk/overlay';
-import { DatePipe, NgClass } from '@angular/common';
+import { DatePipe } from '@angular/common';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { Component, computed, inject, signal, viewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -18,10 +18,10 @@ const ENROLLMENT_STATUS_LABELS: Record<$Enums.EnrollmentStatus, string> = {
   RETIRED: 'Retirado',
 };
 
-const ENROLLMENT_STATUS_COLORS: Record<$Enums.EnrollmentStatus, string> = {
-  ACTIVE: 'badge-success',
-  CANDIDATE: 'badge-warning',
-  RETIRED: 'badge-neutral',
+const ENROLLMENT_STATUS_TONES: Record<$Enums.EnrollmentStatus, BadgeTone> = {
+  ACTIVE: 'success',
+  CANDIDATE: 'warning',
+  RETIRED: 'neutral',
 };
 
 type StudentRow = {
@@ -38,9 +38,9 @@ type StudentRow = {
 
 @Component({
   imports: [
+    Badge,
     Button,
     DatePipe,
-    NgClass,
     RouterLink,
     PaginatorV2,
     FormsModule,
@@ -100,11 +100,11 @@ type StudentRow = {
                 <div class="flex items-center gap-2">
                   {{ student.email }}
                   @if (student.user?.emailVerified) {
-                    <span class="badge badge-success badge-xs" title="Verificado">
+                    <span uiBadge tone="success" size="sm" title="Verificado">
                       <span class="material-symbols-outlined text-xs!">check_circle</span>
                     </span>
                   } @else {
-                    <span class="badge badge-warning badge-xs" title="Pendiente de verificación">
+                    <span uiBadge tone="warning" size="sm" title="Pendiente de verificación">
                       <span class="material-symbols-outlined text-xs!">schedule</span>
                     </span>
                   }
@@ -112,13 +112,13 @@ type StudentRow = {
               </td>
               <td>{{ student.documentId }}</td>
               <td>
-                <span class="badge badge-sm" [ngClass]="getStatusColor(student.enrollmentStatus ?? 'ACTIVE')">
+                <span uiBadge size="sm" [tone]="enrollmentTone(student.enrollmentStatus ?? 'ACTIVE')">
                   {{ getStatusLabel(student.enrollmentStatus ?? 'ACTIVE') }}
                 </span>
               </td>
               <td>
                 @if (student.classGroup) {
-                  <a class="badge badge-primary badge-sm" [routerLink]="['/groups', student.classGroupId]">
+                  <a uiBadge tone="action" size="sm" [routerLink]="['/groups', student.classGroupId]">
                     {{ student.classGroup.name }}
                   </a>
                 } @else {
@@ -251,8 +251,8 @@ export default class Students {
     return ENROLLMENT_STATUS_LABELS[status] || status;
   }
 
-  getStatusColor(status: $Enums.EnrollmentStatus): string {
-    return ENROLLMENT_STATUS_COLORS[status] || 'badge-ghost';
+  enrollmentTone(status: $Enums.EnrollmentStatus): BadgeTone {
+    return ENROLLMENT_STATUS_TONES[status] || 'neutral';
   }
 
   public resendInvitationForStudent(student: { email?: string }) {

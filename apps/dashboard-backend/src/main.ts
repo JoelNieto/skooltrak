@@ -42,7 +42,9 @@ async function bootstrap() {
     useGlobalPrefix: true,
   });
 
-  const port = process.env.PORT || 3000;
+  // API_PORT wins over PORT: the Angular dev server also honours PORT, so a stack that runs both
+  // (e.g. the e2e stack) sets API_PORT for the API. Hosts like Railway keep using PORT.
+  const port = process.env.API_PORT || process.env.PORT || 3000;
   await app.listen(port);
   Logger.log(
     `🚀 Application is running on: http://localhost:${port}/${globalPrefix}`

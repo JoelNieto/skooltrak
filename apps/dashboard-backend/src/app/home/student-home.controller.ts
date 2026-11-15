@@ -1,7 +1,7 @@
 import { AuthenticatedRequest, BetterAuthGuard, Perm, PermissionsGuard, RequirePermissions } from '@/auth';
 import { Controller, Get, Req, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { StudentToday, StudentWork } from './entities/student-home.entity';
+import { StudentProgress, StudentToday, StudentWork } from './entities/student-home.entity';
 import { StudentHomeService } from './student-home.service';
 
 /** Student home sections (HOM-001). Also needs the caller's own Student record (BR-HOM-001.8); no studentId is accepted. */
@@ -23,5 +23,11 @@ export class StudentHomeController {
   @ApiOperation({ summary: 'Student home: upcoming and overdue work for the student’s group (FR-HOM-001.14)' })
   work(@Req() req: AuthenticatedRequest): Promise<StudentWork> {
     return this.studentHome.work(req.user);
+  }
+
+  @Get('progress')
+  @ApiOperation({ summary: 'Student home: KPIs, course averages on the study plan scale, recent grades, habits (FR-HOM-001.13, .16, .17)' })
+  progress(@Req() req: AuthenticatedRequest): Promise<StudentProgress> {
+    return this.studentHome.progress(req.user);
   }
 }

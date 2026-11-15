@@ -62,3 +62,66 @@ export class StudentWork {
   /** Overdue first (oldest first), then by due date. */
   items: StudentWorkItem[];
 }
+
+export type GradeBandValue = 'EXCELLENT' | 'PASSING' | 'BELOW';
+
+export class StudentScale {
+  maximum: number;
+  minimumApproval: number;
+  minimumExcellence: number;
+}
+
+export class StudentCourseAverage {
+  id: string;
+  name: string;
+  /** Weighted average of published scores this period, one decimal; null without scored grades. */
+  average: number | null;
+  /** Null without an average or without a scale. */
+  band: GradeBandValue | null;
+}
+
+export class StudentRecentGrade {
+  id: string;
+  title: string;
+  course: HomeRef;
+  score: number;
+  band: GradeBandValue | null;
+  /** ISO instant of the grade. */
+  date: string;
+}
+
+export class StudentHabitFlag {
+  name: string;
+  /** R (regular) or X (bad). */
+  value: 'R' | 'X';
+}
+
+export class StudentHabits {
+  total: number;
+  /** Marks with value S. */
+  satisfactory: number;
+  flagged: StudentHabitFlag[];
+}
+
+/** FR-HOM-001.13, .16, .17 */
+export class StudentProgress {
+  studentId: string;
+  period: HomeRef | null;
+  previousPeriod: HomeRef | null;
+  /** The student's study plan grade metric; null when not configured (BR-HOM-001.1). */
+  scale: StudentScale | null;
+  average: {
+    /** Mean of this period's course averages, one decimal. */
+    value: number | null;
+    previous: number | null;
+    /** value − previous, one decimal, when both exist. */
+    delta: number | null;
+  };
+  courses: StudentCourseAverage[];
+  recentGrades: StudentRecentGrade[];
+  /** BR-HOM-001.5 over the period up to today; null without a period. */
+  attendance: { rate: number | null; absences: number; late: number } | null;
+  messages: { unread: number; fromTeachers: number; broadcasts: number };
+  /** Published habit marks of the current period; null without a period or class group. */
+  habits: StudentHabits | null;
+}

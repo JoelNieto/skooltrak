@@ -45,4 +45,13 @@ export const data = {
     early: { startTime: '00:00', endTime: '00:30' },
     late: { startTime: '23:30', endTime: '23:59' },
   },
+  /**
+   * HOM-001-S02. The school year is the current one; its period started 30 days ago and closes
+   * 10 days after the seed runs (inside the 14-day banner window). In `teacher`'s course, `grade` is
+   * unpublished and has a score for the first related student only (2 empty cells), and
+   * `assignment` is due today for `related`, handed in by the first student and not yet reviewed.
+   */
+  period: { name: 'Periodo E2E', closesInDays: 10 },
+  grade: { title: 'Prueba corta E2E', bucket: 'Pruebas' },
+  assignment: { title: 'Proyecto E2E' },
 } as const;

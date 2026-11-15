@@ -651,11 +651,14 @@ model AssignmentSubmission {
   fileId       String
   file         File       @relation(fields: [fileId], references: [id], onDelete: Cascade)
   submittedAt  DateTime   @default(now())
+  /// Set when the course's teacher (or an admin) marks it reviewed; null = "por revisar" (BR-HOM-001.17).
+  reviewedAt   DateTime?
   updatedAt    DateTime   @updatedAt
 
   @@unique([assignmentId, studentId])
   @@index([assignmentId])
   @@index([studentId])
+  @@index([assignmentId, reviewedAt])
   @@map("assignment_submissions")
 }
 

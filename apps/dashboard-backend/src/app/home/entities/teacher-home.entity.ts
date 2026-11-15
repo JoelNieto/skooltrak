@@ -1,3 +1,5 @@
+import { AssignmentType } from '@generated/prisma';
+
 /**
  * Responses of `GET /v1/home/teacher/*` (HOM-001).
  * Dates are school-local `YYYY-MM-DD`; times are `HH:mm` in the school's timezone.
@@ -66,8 +68,73 @@ export class TeacherWeekAttendance {
   lowestGroup: TeacherGroupRate | null;
 }
 
+export class TeacherReviewTop {
+  assignmentId: string;
+  title: string;
+  courseName: string;
+  count: number;
+}
+
+/** Submissions with `reviewedAt` null on the teacher's assignments (BR-HOM-001.17). */
+export class TeacherToReview {
+  submissions: number;
+  assignments: number;
+  /** ISO instant of the oldest submission still to review. */
+  oldestSubmittedAt: string | null;
+  /** The assignment with the most submissions to review. */
+  top: TeacherReviewTop | null;
+}
+
+/** Grade completeness of the teacher's courses in the current period (BR-HOM-001.3). */
+export class TeacherGrades {
+  periodId: string;
+  /** Enrolled-student slots without a score, over all grades of the period. */
+  emptyCells: number;
+  coursesWithEmptyCells: number;
+  /** Grades not yet published. */
+  unpublished: number;
+  coursesWithUnpublished: number;
+  totalCourses: number;
+  /** The course with the most empty cells, else with the most unpublished grades. */
+  topCourseId: string | null;
+}
+
+/** Present when the current period ends within 14 days (FR-HOM-001.5). */
+export class TeacherPeriodClose {
+  name: string;
+  endDate: string;
+  daysLeft: number;
+}
+
 export class TeacherSummary {
   weekStart: string;
   weekEnd: string;
   attendance: TeacherWeekAttendance;
+  toReview: TeacherToReview;
+  /** Null when the school year has no current or past period. */
+  grades: TeacherGrades | null;
+  periodClose: TeacherPeriodClose | null;
+}
+
+export class TeacherWeekItem {
+  assignmentId: string;
+  title: string;
+  type: AssignmentType;
+  requireSubmission: boolean;
+  course: HomeRef;
+  classGroup: HomeRef;
+  /** ISO instant the assignment is due for this group (`AssignmentDate.date`). */
+  dueAt: string;
+  /** Active students of the group enrolled in the course who have a submission. */
+  submitted: number;
+  /** Active students of the group enrolled in the course. */
+  expected: number;
+}
+
+/** FR-HOM-001.9: assignments of the teacher's courses due this week, per class group. */
+export class TeacherWeek {
+  timezone: string;
+  weekStart: string;
+  weekEnd: string;
+  items: TeacherWeekItem[];
 }

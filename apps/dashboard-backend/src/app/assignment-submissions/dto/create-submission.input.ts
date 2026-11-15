@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsString, IsInt, Min } from 'class-validator';
+import { IsBoolean, IsNotEmpty, IsString, IsInt, Min } from 'class-validator';
 
 export class CreateSubmissionUploadInput {
     @IsString()
@@ -34,4 +34,10 @@ export class CreateAssignmentSubmissionInput {
     @IsString()
   @IsNotEmpty()
   storageKey: string;
+}
+
+/** Body of `PATCH /v1/assignment-submissions/:id/review` (BR-HOM-001.17). */
+export class ReviewSubmissionInput {
+  @IsBoolean()
+  reviewed: boolean;
 }

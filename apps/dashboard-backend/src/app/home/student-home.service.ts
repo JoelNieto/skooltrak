@@ -23,9 +23,18 @@ export const WORK_WINDOW = { aheadDays: 14, overdueDays: 7 } as const;
 /** FR-HOM-001.16 */
 export const RECENT_GRADES = 3;
 
-interface StudentContext {
+const STUDENT_SELECT = {
+  id: true,
+  firstName: true,
+  classGroup: { select: { id: true, name: true } },
+  school: { select: { id: true, currentYear: true, timezone: true } },
+} as const;
+
+/** Whose student data is read: the caller (student home) or a linked child (parent home). */
+export interface StudentContext {
   organizationId: string;
-  userId: string;
+  /** The student's own user, for their message counts; null when the student has no login. */
+  userId: string | null;
   student: {
     id: string;
     firstName: string;
@@ -93,7 +102,10 @@ export class StudentHomeService {
 
   /** FR-HOM-001.14: work of the student's group due from today to +14 days, and overdue work of the last 7 days. */
   async work(user: AuthUserContext | undefined): Promise<StudentWork> {
-    const { organizationId, student, local } = await this.context(user);
+    return this.workFor(await this.context(user));
+  }
+
+  async workFor({ organizationId, student, local }: StudentContext): Promise<StudentWork> {
     const group = student.classGroup;
     if (!group) return { timezone: local.timezone, today: local.date, classGroup: null, items: [] };
 
@@ -154,7 +166,10 @@ export class StudentHomeService {
    * Published grades only (BR-HOM-001.2); thresholds from the group's study plan (BR-HOM-001.1).
    */
   async progress(user: AuthUserContext | undefined): Promise<StudentProgress> {
-    const { organizationId, userId, student, local } = await this.context(user);
+    return this.progressFor(await this.context(user));
+  }
+
+  async progressFor({ organizationId, userId, student, local }: StudentContext): Promise<StudentProgress> {
     const group = student.classGroup;
 
     const [{ current, previous }, enrolled, planRow] = await Promise.all([
@@ -217,7 +232,9 @@ export class StudentHomeService {
             _count: { _all: true },
           })
         : Promise.resolve(null),
-      this.prisma.communicationThread.findMany({
+      !userId
+        ? Promise.resolve([])
+        : this.prisma.communicationThread.findMany({
         where: {
           organizationId,
           deletedAt: null,
@@ -315,6 +332,20 @@ export class StudentHomeService {
     };
   }
 
+  /**
+   * A linked child's context for the parent home. The caller must have checked the link
+   * (BR-HOM-001.9); times, period and scale are the child's own school's.
+   */
+  async contextForStudent(studentId: string): Promise<StudentContext> {
+    const student = await this.prisma.student.findUnique({
+      where: { id: studentId },
+      select: { ...STUDENT_SELECT, organizationId: true, userId: true },
+    });
+    if (!student) throw new ForbiddenException('No puedes ver la información de este estudiante');
+    const { organizationId, userId, ...rest } = student;
+    return { organizationId, userId, student: rest, local: schoolLocalTime(this.clock.now(), rest.school.timezone) };
+  }
+
   /** BR-HOM-001.8: the caller's own Student record in their organization. */
   private async context(user: AuthUserContext | undefined): Promise<StudentContext> {
     if (!user?.userId) throw new ForbiddenException('Not authenticated');
@@ -323,12 +354,7 @@ export class StudentHomeService {
 
     const student = await this.prisma.student.findFirst({
       where: { userId: user.userId, organizationId },
-      select: {
-        id: true,
-        firstName: true,
-        classGroup: { select: { id: true, name: true } },
-        school: { select: { id: true, currentYear: true, timezone: true } },
-      },
+      select: STUDENT_SELECT,
     });
     if (!student) throw new ForbiddenException('No student profile in this organization');
 

@@ -7,7 +7,6 @@ import {
   AttentionReason,
   AttentionStudent,
   FamilyThread,
-  HomePeriod,
   TeacherAttention,
   TeacherAverage,
   TeacherGrades,
@@ -23,7 +22,8 @@ import {
 } from './entities/teacher-home.entity';
 import { addCount, attendanceRate, AttendanceStatusCounts } from './home-attendance';
 import { averageKey, GradeThresholds, round1, toThresholds, weightedAverages } from './home-grades';
-import { PeriodRef, resolveCurrentPeriod, resolvePeriodPair } from './home-period';
+import { PeriodRef, resolveCurrentPeriod, resolvePeriodPair, toHomePeriod } from './home-period';
+import { timeState } from './home-schedule';
 import {
   addDays,
   CLOCK,
@@ -601,12 +601,11 @@ export function slotState(
   now: string,
   hasAttendance: boolean,
 ): TeacherSlotState {
-  const started = slot.startTime <= now;
-  const ended = slot.endTime <= now;
-  if (started && !ended) return 'NOW';
-  if (slot.recess) return ended ? 'PAST' : 'LATER';
+  const time = timeState(slot, now);
+  if (time === 'NOW') return 'NOW';
+  if (slot.recess) return time;
   if (hasAttendance) return 'DONE';
-  return ended ? 'MISSED' : 'LATER';
+  return time === 'PAST' ? 'MISSED' : 'LATER';
 }
 
 /** FR-HOM-001.5: only while the period is still running and ends within the window. */
@@ -649,9 +648,6 @@ function sumValues(m: Map<string, number>) {
   return [...m.values()].reduce((sum, n) => sum + n, 0);
 }
 
-function toHomePeriod(period: PeriodRef | null): HomePeriod | null {
-  return period ? { id: period.id, name: period.name, endDate: period.endDate.toISOString().slice(0, 10) } : null;
-}
 
 function sumCounts(counts: AttendanceStatusCounts) {
   return Object.values(counts).reduce<number>((sum, n) => sum + (n ?? 0), 0);

@@ -299,6 +299,26 @@ async function seedFixtures(databaseUrl: string) {
     });
     console.log(`  guardian ${guardian.id} linked to the first related student`);
 
+    // HOM-001-S04: the student persona is the first related student; work for each status.
+    await prisma.student.update({ where: { id: relatedStudentIds[0] }, data: { userId: users.student.userId } });
+    for (const [key, w] of Object.entries(data.studentWork)) {
+      const otherGroup = key === 'otherGroup';
+      const due = new Date(now + w.inDays * day);
+      await prisma.assignment.create({
+        data: {
+          title: w.title,
+          details: 'Trabajo de prueba',
+          type: w.type,
+          date: due,
+          requireSubmission: w.requireSubmission,
+          schoolId: school.id,
+          courseId: otherGroup ? otherTeachersCourse.id : teacherCourse.id,
+          teacherId: otherGroup ? users.otherTeacher.teacherId : users.teacher.teacherId,
+          dates: { create: { classGroupId: otherGroup ? homeroomOnlyGroup.id : relatedGroup.id, date: due } },
+        },
+      });
+    }
+
     console.log(`✓ Seeded e2e fixtures (org ${org.id})`);
   } finally {
     await prisma.$disconnect();

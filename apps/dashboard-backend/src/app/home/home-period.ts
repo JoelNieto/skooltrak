@@ -1,3 +1,4 @@
+import { HomePeriod } from './entities/teacher-home.entity';
 import { PrismaService } from '../prisma.service';
 import { addDays, utcDate } from './home-time';
 
@@ -59,4 +60,9 @@ export async function resolveCurrentPeriod(
   today: string,
 ): Promise<PeriodRef | null> {
   return pickCurrentPeriod(await loadPeriods(prisma, year), today);
+}
+
+/** API shape of a period: id, name and its last day (`YYYY-MM-DD`). */
+export function toHomePeriod(period: PeriodRef | null): HomePeriod | null {
+  return period ? { id: period.id, name: period.name, endDate: period.endDate.toISOString().slice(0, 10) } : null;
 }

@@ -20,8 +20,8 @@ interface ComposeFormData {
     />
     <h1 class="text-2xl font-semibold">Nuevo mensaje</h1>
     <form (submit)="onSubmit($event)">
-      <div class="bg-base-100 p-4 rounded-lg border border-base-300 mt-4">
-        <div class="flex flex-col gap-1 border-b border-base-300 pb-2">
+      <div class="bg-surface-1 p-4 rounded-lg border border-line mt-4">
+        <div class="flex flex-col gap-1 border-b border-line pb-2">
           <div class="flex gap-2 items-center">
             <label for="to">Para:</label>
             <app-contacts [selectedContacts]="formModel().to" (selectedContactsChange)="updateRecipients($event)" />
@@ -34,14 +34,8 @@ interface ComposeFormData {
             </ul>
           }
         </div>
-        <div class="flex flex-col gap-1 py-2 border-b border-base-300">
-          <input
-            uiInput
-            type="text"
-            class="input-lg input-ghost"
-            placeholder="Asunto"
-            [formField]="composeForm.subject"
-          />
+        <div class="flex flex-col gap-1 py-2 border-b border-line">
+          <input uiInput size="lg" ghost type="text" placeholder="Asunto" [formField]="composeForm.subject" />
           @if (composeForm.subject().touched() && composeForm.subject().invalid()) {
             <ul class="text-error text-sm">
               @for (error of composeForm.subject().errors(); track error.kind) {
@@ -50,7 +44,7 @@ interface ComposeFormData {
             </ul>
           }
         </div>
-        <div class="flex flex-col gap-1 border-b border-base-300 py-2">
+        <div class="flex flex-col gap-1 border-b border-line py-2">
           <lib-text-editor
             [bordered]="false"
             [(ngModel)]="formModel().content"

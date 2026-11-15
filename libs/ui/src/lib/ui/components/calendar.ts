@@ -42,7 +42,7 @@ export interface CalendarMarkerData<Data = unknown> {
       @for (item of this.dayNamesFormatted; track item.dayName) {
         <div
           class="uppercase"
-          [ngClass]="[item.isToday ? 'text-primary' : 'text-slate-500', item.isToday ? 'font-bold' : 'font-normal']"
+          [ngClass]="[item.isToday ? 'text-primary' : 'text-ink-muted', item.isToday ? 'font-bold' : 'font-normal']"
         >
           {{ item.dayName }}
         </div>
@@ -63,9 +63,9 @@ export interface CalendarMarkerData<Data = unknown> {
             'items-center',
             'justify-center',
             'rounded-xl',
-            'bg-base-200',
+            'bg-surface-0',
             day.colStartClass,
-            'text-base-content',
+            'text-ink-strong',
             day.isToday ? 'font-medium' : 'font-normal',
           ]"
         >

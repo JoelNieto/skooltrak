@@ -77,7 +77,7 @@ const STATUS_TONES: Record<string, BadgeTone> = {
 
     <div uiCard>
       <div uiCardBody>
-        <h2 class="text-lg font-semibold text-base-content">Historial de asistencia</h2>
+        <h2 class="text-lg font-semibold text-ink-strong">Historial de asistencia</h2>
 
         @if (recordsResource.isLoading()) {
           <lib-loader />
@@ -110,13 +110,13 @@ const STATUS_TONES: Record<string, BadgeTone> = {
                         {{ getStatusLabel(record.status) }}
                       </span>
                     </td>
-                    <td class="text-sm text-base-content/70">
+                    <td class="text-sm text-ink-muted">
                       {{ record.comment || '-' }}
                     </td>
                   </tr>
                 } @empty {
                   <tr>
-                    <td colspan="4" class="text-center py-8 text-base-content/60">
+                    <td colspan="4" class="text-center py-8 text-ink-muted">
                       No hay registros de asistencia para este estudiante
                     </td>
                   </tr>

@@ -1,0 +1,9 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "outDir": "../../dist/out-tsc",
+    "types": ["jest", "node"],
+    "isolatedModules": true
+  },
+  "include": ["jest.config.ts", "jest.config.cts", "**/*.test.ts", "**/*.spec.ts", "**/*.d.ts"]
+}

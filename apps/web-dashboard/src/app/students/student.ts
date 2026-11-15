@@ -88,9 +88,9 @@ const ENROLLMENT_STATUS_TONES: Record<$Enums.EnrollmentStatus, BadgeTone> = {
                     }
                   </div>
                   @if (student.classGroup) {
-                    <span class="text-sm text-base-content/60">{{ student.classGroup.name }}</span>
+                    <span class="text-sm text-ink-muted">{{ student.classGroup.name }}</span>
                   } @else {
-                    <span class="text-sm text-base-content/50">Sin grupo asignado</span>
+                    <span class="text-sm text-ink-subtle">Sin grupo asignado</span>
                   }
                 </div>
               </div>
@@ -132,28 +132,28 @@ const ENROLLMENT_STATUS_TONES: Record<$Enums.EnrollmentStatus, BadgeTone> = {
           <div class="p-1">
             <div ngTabPanel value="info">
               <ng-template ngTabContent>
-                <div class="bg-base-100 border-base-300 p-4 rounded-lg">
+                <div class="bg-surface-1 border-line p-4 rounded-lg">
                   <div class="px-4 sm:px-0">
                     <h3 class="text-base/7 font-semibold">Información Personal</h3>
-                    <p class="mt-1 max-w-2xl text-sm/6 text-base-content/60">Detalles personales y de contacto</p>
+                    <p class="mt-1 max-w-2xl text-sm/6 text-ink-muted">Detalles personales y de contacto</p>
                   </div>
-                  <div class="mt-6 border-t border-base-300">
-                    <dl class="divide-y divide-base-300">
+                  <div class="mt-6 border-t border-line">
+                    <dl class="divide-y divide-line">
                       <div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
-                        <dt class="text-sm/6 font-medium text-base-content">Nombre completo</dt>
-                        <dd class="mt-1 text-sm/6 text-base-content/90 sm:col-span-2 sm:mt-0">
+                        <dt class="text-sm/6 font-medium text-ink-strong">Nombre completo</dt>
+                        <dd class="mt-1 text-sm/6 text-ink sm:col-span-2 sm:mt-0">
                           {{ student.fullName }}
                         </dd>
                       </div>
                       <div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
-                        <dt class="text-sm/6 font-medium text-base-content">Documento de identidad</dt>
-                        <dd class="mt-1 text-sm/6 text-base-content/90 sm:col-span-2 sm:mt-0">
+                        <dt class="text-sm/6 font-medium text-ink-strong">Documento de identidad</dt>
+                        <dd class="mt-1 text-sm/6 text-ink sm:col-span-2 sm:mt-0">
                           {{ student.documentId }}
                         </dd>
                       </div>
                       <div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
-                        <dt class="text-sm/6 font-medium text-base-content">Grupo</dt>
-                        <dd class="mt-1 text-sm/6 text-base-content/90 sm:col-span-2 sm:mt-0">
+                        <dt class="text-sm/6 font-medium text-ink-strong">Grupo</dt>
+                        <dd class="mt-1 text-sm/6 text-ink sm:col-span-2 sm:mt-0">
                           @if (student.classGroup) {
                             <a
                               uiBadge
@@ -164,35 +164,35 @@ const ENROLLMENT_STATUS_TONES: Record<$Enums.EnrollmentStatus, BadgeTone> = {
                               <span class="text-sm">{{ student.classGroup.name }}</span>
                             </a>
                           } @else {
-                            <span class="text-base-content/50">-</span>
+                            <span class="text-ink-subtle">-</span>
                           }
                         </dd>
                       </div>
                       <div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
-                        <dt class="text-sm/6 font-medium text-base-content">Fecha de nacimiento</dt>
-                        <dd class="mt-1 text-sm/6 text-base-content/90 sm:col-span-2 sm:mt-0">
+                        <dt class="text-sm/6 font-medium text-ink-strong">Fecha de nacimiento</dt>
+                        <dd class="mt-1 text-sm/6 text-ink sm:col-span-2 sm:mt-0">
                           {{ student.birthDate | date: 'dd/MM/yyyy' }}
                         </dd>
                       </div>
                       <div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
-                        <dt class="text-sm/6 font-medium text-base-content">Correo electrónico</dt>
-                        <dd class="mt-1 text-sm/6 text-base-content/90 sm:col-span-2 sm:mt-0">{{ student.email }}</dd>
+                        <dt class="text-sm/6 font-medium text-ink-strong">Correo electrónico</dt>
+                        <dd class="mt-1 text-sm/6 text-ink sm:col-span-2 sm:mt-0">{{ student.email }}</dd>
                       </div>
                       <div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
-                        <dt class="text-sm/6 font-medium text-base-content">Teléfono</dt>
-                        <dd class="mt-1 text-sm/6 text-base-content/90 sm:col-span-2 sm:mt-0">
+                        <dt class="text-sm/6 font-medium text-ink-strong">Teléfono</dt>
+                        <dd class="mt-1 text-sm/6 text-ink sm:col-span-2 sm:mt-0">
                           {{ student.phone || '-' }}
                         </dd>
                       </div>
                       <div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
-                        <dt class="text-sm/6 font-medium text-base-content">Dirección</dt>
-                        <dd class="mt-1 text-sm/6 text-base-content/90 sm:col-span-2 sm:mt-0">
+                        <dt class="text-sm/6 font-medium text-ink-strong">Dirección</dt>
+                        <dd class="mt-1 text-sm/6 text-ink sm:col-span-2 sm:mt-0">
                           {{ student.address || '-' }}
                         </dd>
                       </div>
                       <div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
-                        <dt class="text-sm/6 font-medium text-base-content">Código de matrícula</dt>
-                        <dd class="mt-1 text-sm/6 text-base-content/90 sm:col-span-2 sm:mt-0">
+                        <dt class="text-sm/6 font-medium text-ink-strong">Código de matrícula</dt>
+                        <dd class="mt-1 text-sm/6 text-ink sm:col-span-2 sm:mt-0">
                           <div class="flex items-center gap-2">
                             @if (student.enrollmentCode) {
                               <span uiBadge tone="action" class="font-mono text-sm">{{ student.enrollmentCode }}</span>
@@ -208,7 +208,7 @@ const ENROLLMENT_STATUS_TONES: Record<$Enums.EnrollmentStatus, BadgeTone> = {
                                 <span class="material-symbols-outlined text-lg">content_copy</span>
                               </button>
                             } @else {
-                              <span class="text-sm text-base-content/50">Sin código</span>
+                              <span class="text-sm text-ink-subtle">Sin código</span>
                             }
                             @if (auth.hasPermission('MANAGE_STUDENTS')) {
                               <button
@@ -228,7 +228,7 @@ const ENROLLMENT_STATUS_TONES: Record<$Enums.EnrollmentStatus, BadgeTone> = {
                               </button>
                             }
                             @if (student.enrollmentCode && student.enrollmentCodeGeneratedAt) {
-                              <span class="text-xs text-base-content/50">
+                              <span class="text-xs text-ink-subtle">
                                 Generado {{ student.enrollmentCodeGeneratedAt | date: 'dd/MM/yyyy HH:mm' }}
                               </span>
                             }
@@ -237,15 +237,17 @@ const ENROLLMENT_STATUS_TONES: Record<$Enums.EnrollmentStatus, BadgeTone> = {
                       </div>
                       @if (auth.hasPermission('MANAGE_STUDENTS')) {
                         <div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
-                          <dt class="text-sm/6 font-medium text-base-content">Conexión de padres (QR)</dt>
-                          <dd class="mt-1 text-sm/6 text-base-content/90 sm:col-span-2 sm:mt-0">
+                          <dt class="text-sm/6 font-medium text-ink-strong">Conexión de padres (QR)</dt>
+                          <dd class="mt-1 text-sm/6 text-ink sm:col-span-2 sm:mt-0">
                             @if (connectQr(); as qr) {
                               <div class="flex flex-col gap-2">
+                                <!-- eslint-disable @nx/workspace-design-tokens -- QR codes need a white quiet zone to scan in dark mode -->
                                 <img
                                   [src]="qr"
                                   alt="Código QR de conexión"
-                                  class="h-40 w-40 rounded-lg border border-base-300 bg-white p-2"
+                                  class="h-40 w-40 rounded-lg border border-line bg-white p-2"
                                 />
+                                <!-- eslint-enable @nx/workspace-design-tokens -->
                                 <div class="flex items-center gap-2">
                                   <button uiButton size="sm" type="button" (click)="copyConnectUrl()">
                                     <span class="material-symbols-outlined text-lg">link</span>
@@ -266,7 +268,7 @@ const ENROLLMENT_STATUS_TONES: Record<$Enums.EnrollmentStatus, BadgeTone> = {
                                     Regenerar
                                   </button>
                                 </div>
-                                <span class="text-xs text-base-content/50">
+                                <span class="text-xs text-ink-subtle">
                                   El código es de un solo uso y expira en 30 días. Regenerarlo invalida el anterior.
                                 </span>
                               </div>
@@ -296,17 +298,17 @@ const ENROLLMENT_STATUS_TONES: Record<$Enums.EnrollmentStatus, BadgeTone> = {
                   <div class="mt-8 px-4 sm:px-0">
                     <h3 class="text-base/7 font-semibold">Contacto de Emergencia</h3>
                   </div>
-                  <div class="mt-4 border-t border-base-300">
-                    <dl class="divide-y divide-base-300">
+                  <div class="mt-4 border-t border-line">
+                    <dl class="divide-y divide-line">
                       <div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
-                        <dt class="text-sm/6 font-medium text-base-content">Nombre</dt>
-                        <dd class="mt-1 text-sm/6 text-base-content/90 sm:col-span-2 sm:mt-0">
+                        <dt class="text-sm/6 font-medium text-ink-strong">Nombre</dt>
+                        <dd class="mt-1 text-sm/6 text-ink sm:col-span-2 sm:mt-0">
                           {{ student.emergencyContactName || '-' }}
                         </dd>
                       </div>
                       <div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
-                        <dt class="text-sm/6 font-medium text-base-content">Teléfono</dt>
-                        <dd class="mt-1 text-sm/6 text-base-content/90 sm:col-span-2 sm:mt-0">
+                        <dt class="text-sm/6 font-medium text-ink-strong">Teléfono</dt>
+                        <dd class="mt-1 text-sm/6 text-ink sm:col-span-2 sm:mt-0">
                           {{ student.emergencyContactPhone || '-' }}
                         </dd>
                       </div>
@@ -318,14 +320,14 @@ const ENROLLMENT_STATUS_TONES: Record<$Enums.EnrollmentStatus, BadgeTone> = {
                     <div class="mt-8 px-4 sm:px-0">
                       <h3 class="text-base/7 font-semibold">Padres/Representantes</h3>
                     </div>
-                    <div class="mt-4 border-t border-base-300">
-                      <dl class="divide-y divide-base-300">
+                    <div class="mt-4 border-t border-line">
+                      <dl class="divide-y divide-line">
                         @for (parent of student.parents; track parent.id) {
                           <div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
-                            <dt class="text-sm/6 font-medium text-base-content">{{ parent.relationship }}</dt>
-                            <dd class="mt-1 text-sm/6 text-base-content/90 sm:col-span-2 sm:mt-0">
+                            <dt class="text-sm/6 font-medium text-ink-strong">{{ parent.relationship }}</dt>
+                            <dd class="mt-1 text-sm/6 text-ink sm:col-span-2 sm:mt-0">
                               <div>{{ parent.name }}</div>
-                              <div class="text-sm text-base-content/60">{{ parent.phone }} · {{ parent.email }}</div>
+                              <div class="text-sm text-ink-muted">{{ parent.phone }} · {{ parent.email }}</div>
                             </dd>
                           </div>
                         }
@@ -338,28 +340,28 @@ const ENROLLMENT_STATUS_TONES: Record<$Enums.EnrollmentStatus, BadgeTone> = {
 
             <div ngTabPanel value="medical">
               <ng-template ngTabContent>
-                <div class="bg-base-100 border-base-300 p-4 rounded-lg">
+                <div class="bg-surface-1 border-line p-4 rounded-lg">
                   <div class="px-4 sm:px-0">
                     <h3 class="text-base/7 font-semibold">Información Médica</h3>
-                    <p class="mt-1 max-w-2xl text-sm/6 text-base-content/60">Datos médicos relevantes del estudiante</p>
+                    <p class="mt-1 max-w-2xl text-sm/6 text-ink-muted">Datos médicos relevantes del estudiante</p>
                   </div>
-                  <div class="mt-6 border-t border-base-300">
-                    <dl class="divide-y divide-base-300">
+                  <div class="mt-6 border-t border-line">
+                    <dl class="divide-y divide-line">
                       <div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
-                        <dt class="text-sm/6 font-medium text-base-content">Tipo de sangre</dt>
-                        <dd class="mt-1 text-sm/6 text-base-content/90 sm:col-span-2 sm:mt-0">
+                        <dt class="text-sm/6 font-medium text-ink-strong">Tipo de sangre</dt>
+                        <dd class="mt-1 text-sm/6 text-ink sm:col-span-2 sm:mt-0">
                           {{ student.bloodType || '-' }}
                         </dd>
                       </div>
                       <div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
-                        <dt class="text-sm/6 font-medium text-base-content">Alergias</dt>
-                        <dd class="mt-1 text-sm/6 text-base-content/90 sm:col-span-2 sm:mt-0">
+                        <dt class="text-sm/6 font-medium text-ink-strong">Alergias</dt>
+                        <dd class="mt-1 text-sm/6 text-ink sm:col-span-2 sm:mt-0">
                           {{ student.allergies || 'Ninguna registrada' }}
                         </dd>
                       </div>
                       <div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
-                        <dt class="text-sm/6 font-medium text-base-content">Notas médicas</dt>
-                        <dd class="mt-1 text-sm/6 text-base-content/90 sm:col-span-2 sm:mt-0">
+                        <dt class="text-sm/6 font-medium text-ink-strong">Notas médicas</dt>
+                        <dd class="mt-1 text-sm/6 text-ink sm:col-span-2 sm:mt-0">
                           {{ student.medicalNotes || 'Ninguna' }}
                         </dd>
                       </div>
@@ -379,9 +381,9 @@ const ENROLLMENT_STATUS_TONES: Record<$Enums.EnrollmentStatus, BadgeTone> = {
                 <div class="flex flex-col gap-4">
                   @for (course of student.courses; track course.id) {
                     <div uiCard>
-                      <div class="flex flex-col p-4 border-b border-base-300">
+                      <div class="flex flex-col p-4 border-b border-line">
                         <h2 class="font-semibold">{{ course.subject?.name }}</h2>
-                        <p class="text-sm text-base-content/60">{{ course.teacher?.name ?? 'Sin profesor' }}</p>
+                        <p class="text-sm text-ink-muted">{{ course.teacher?.name ?? 'Sin profesor' }}</p>
                       </div>
                       <div class="overflow-x-auto">
                         <table uiTable density="compact" zebra>

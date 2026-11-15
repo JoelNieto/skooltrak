@@ -56,8 +56,8 @@ export type StudentType = {
         </thead>
         <tbody>
           @for (group of groupedGradesByClassGroup(); track group.classGroup?.id ?? '__none__') {
-            <tr class="bg-base-200/50">
-              <td colspan="100" class="font-semibold text-base-content/80 py-2">
+            <tr class="bg-surface-0/50">
+              <td colspan="100" class="font-semibold text-ink py-2">
                 @if (group.classGroup) {
                   {{ group.classGroup.name }}
                 } @else {

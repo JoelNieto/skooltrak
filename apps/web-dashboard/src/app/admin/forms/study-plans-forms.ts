@@ -61,15 +61,14 @@ const MONTH_LABELS: Record<number, string> = {
           <textarea uiInput [formField]="form.description"></textarea>
         </ui-field>
 
-        <div class="fieldset md:col-span-4 border-t border-base-300 pt-4 mt-2">
+        <section class="md:col-span-4 border-t border-line pt-4 mt-2">
           <h3 class="font-semibold mb-2">Configuración financiera</h3>
           <div class="flex flex-col gap-4">
-            <div class="fieldset">
-              <label for="monthlyTuitionAmount">Colegiatura mensual</label>
+            <ui-field label="Colegiatura mensual" [field]="form.monthlyTuitionAmount">
               <input uiInput type="number" step="0.01" [formField]="form.monthlyTuitionAmount" placeholder="0.00" />
-            </div>
-            <div class="fieldset">
-              <label for="tuitionMonths">Meses de colegiatura</label>
+            </ui-field>
+            <fieldset>
+              <legend class="text-sm font-medium text-ink-strong mb-2">Meses de colegiatura</legend>
               <div class="flex flex-wrap gap-2">
                 @for (m of [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]; track m) {
                   <ui-choice label="{{ monthLabel(m) }}" class="flex! border border-primary rounded-lg px-3 py-2">
@@ -85,9 +84,9 @@ const MONTH_LABELS: Record<number, string> = {
                   </ui-choice>
                 }
               </div>
-            </div>
-            <div class="fieldset">
-              <label for="enrollmentCosts">Costos de matrícula</label>
+            </fieldset>
+            <fieldset>
+              <legend class="text-sm font-medium text-ink-strong mb-2">Costos de matrícula</legend>
               <div class="space-y-2">
                 @for (item of form.enrollmentCosts; track $index; let i = $index) {
                   <div class="flex gap-2 items-end">
@@ -102,9 +101,9 @@ const MONTH_LABELS: Record<number, string> = {
               <button uiButton variant="ghost" size="sm" type="button" class="mt-2" (click)="addEnrollmentCost()">
                 <span class="material-symbols-outlined text-lg">add_circle</span> Agregar costo
               </button>
-            </div>
+            </fieldset>
           </div>
-        </div>
+        </section>
       </div>
       <div class="flex justify-end gap-2 mt-4">
         <button uiButton variant="ghost" type="button" (click)="closeModal.emit()">Cancelar</button>

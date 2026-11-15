@@ -6,15 +6,15 @@ import { Button } from './button';
   selector: 'lib-error',
   imports: [Button],
   template: `
-    <div class="bg-linear-to-br from-blue-50 to-red-100 min-h-screen flex items-center justify-center p-4">
-      <div class="max-w-lg w-full bg-white rounded-2xl shadow-xl overflow-hidden">
+    <div class="bg-surface-0 min-h-screen flex items-center justify-center p-4">
+      <div class="max-w-lg w-full bg-surface-1 border border-line rounded-2xl overflow-hidden">
         <div class="p-8">
           <!-- Error Code -->
           <div class="text-center mb-8">
-            <h2 class="text-4xl font-semibold text-gray-800 mt-4">
+            <h2 class="text-4xl font-semibold text-ink-strong mt-4">
               {{ title() }}
             </h2>
-            <p class="text-gray-600 mt-2">
+            <p class="text-ink-muted mt-2">
               {{ description() }}
             </p>
           </div>

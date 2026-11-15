@@ -8,10 +8,9 @@ import QuestionOptionControl from './question-option-control';
   selector: 'app-quiz-question-control',
   imports: [UiField, UiInput, UiSelect, Button, TextEditor, ReactiveFormsModule, QuestionOptionControl],
   template: `<form [formGroup]="question()" class="flex flex-col gap-6">
-    <div class="fieldset">
-      <label for="question">Pregunta</label>
+    <ui-field label="Pregunta">
       <lib-text-editor id="question" name="question" formControlName="question" />
-    </div>
+    </ui-field>
     <ui-field label="Tipo de Pregunta">
       <select uiSelect id="type" name="type" formControlName="type">
         <option value="" disabled selected>Selecciona un tipo...</option>
@@ -52,7 +51,7 @@ import QuestionOptionControl from './question-option-control';
       </div>
     }
     @if (question().value.type === TYPE_ENUM.QuizQuestionType.TEXT) {
-      <p class="text-sm text-base-content/60">El estudiante responderá con texto libre.</p>
+      <p class="text-sm text-ink-muted">El estudiante responderá con texto libre.</p>
     }
     <ui-field label="Puntos">
       <input uiInput type="number" [id]="'value-' + index()" formControlName="value" min="0" step="0.5" />

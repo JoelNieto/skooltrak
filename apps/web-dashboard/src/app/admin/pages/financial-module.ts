@@ -44,7 +44,7 @@ import CreatePaymentForm from '../forms/create-payment-form';
           <div ngTab value="balances" class="tab">Saldos</div>
         </div>
         <div class="flex gap-2 items-center">
-          <select uiSelect class="select-sm" [ngModel]="yearFilter()" (ngModelChange)="yearFilter.set($event)">
+          <select uiSelect size="sm" [ngModel]="yearFilter()" (ngModelChange)="yearFilter.set($event)">
             @for (y of years(); track y) {
               <option [value]="y">{{ y }}</option>
             }

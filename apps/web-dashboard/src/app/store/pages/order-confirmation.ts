@@ -14,7 +14,7 @@ import { Button } from '#/ui';
       <span class="material-symbols-outlined text-6xl text-success">check_circle</span>
       <h1 class="text-2xl font-bold">¡Pedido confirmado!</h1>
       @if (order.value(); as o) {
-        <p class="text-base-content/80">
+        <p class="text-ink">
           Número de pedido: <strong>{{ o.id }}</strong>
         </p>
         <p class="text-lg font-semibold">Total: {{ formatPrice(o.total) }}</p>

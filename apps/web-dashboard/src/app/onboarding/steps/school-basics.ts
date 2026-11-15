@@ -18,8 +18,8 @@ import Store from '../../core/store';
 
       <!-- Title & Subtitle -->
       <div class="space-y-2">
-        <h1 class="text-2xl md:text-3xl font-bold text-base-content">Configura tu Escuela</h1>
-        <p class="text-base-content/70">Establece la configuración básica de tu institución educativa.</p>
+        <h1 class="text-2xl md:text-3xl font-bold text-ink-strong">Configura tu Escuela</h1>
+        <p class="text-ink-muted">Establece la configuración básica de tu institución educativa.</p>
       </div>
 
       <!-- Form Fields -->

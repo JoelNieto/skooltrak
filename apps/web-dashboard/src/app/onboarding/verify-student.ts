@@ -24,8 +24,8 @@ import { BrandLogo } from '../shared/brand-logo';
           </div>
 
           <div class="space-y-2">
-            <h1 class="text-2xl md:text-3xl font-bold text-base-content">Verificación de Estudiante</h1>
-            <p class="text-base-content/70">
+            <h1 class="text-2xl md:text-3xl font-bold text-ink-strong">Verificación de Estudiante</h1>
+            <p class="text-ink-muted">
               Ingresa tu documento de identidad para vincular tu cuenta con tu registro en
               <strong>{{ schoolName() }}</strong
               >.

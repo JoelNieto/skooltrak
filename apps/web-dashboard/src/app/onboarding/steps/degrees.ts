@@ -19,8 +19,8 @@ import { CreatedEntity } from '../setup-wizard';
 
       <!-- Title & Subtitle -->
       <div class="space-y-2">
-        <h1 class="text-2xl md:text-3xl font-bold text-base-content">Crea tu Primer Nivel Académico</h1>
-        <p class="text-base-content/70">
+        <h1 class="text-2xl md:text-3xl font-bold text-ink-strong">Crea tu Primer Nivel Académico</h1>
+        <p class="text-ink-muted">
           Los niveles representan programas académicos como "Primaria", "Secundaria" o "Bachillerato".
         </p>
       </div>
@@ -87,7 +87,7 @@ import { CreatedEntity } from '../setup-wizard';
       @if (createdEntities().length === 0) {
         <div class="text-center">
           <button uiButton variant="ghost" size="sm" type="button" (click)="onSkip()">Omitir por ahora</button>
-          <p class="text-xs text-base-content/50 mt-1">
+          <p class="text-xs text-ink-subtle mt-1">
             Podrás crear niveles más adelante desde el panel de administración.
           </p>
         </div>

@@ -35,7 +35,8 @@ import { EditorMenu } from './editor-menu';
     @reference "tailwindcss";
 
     .ProseMirror p.is-editor-empty:first-child::before {
-      @apply text-neutral-400 float-left pointer-events-none h-0;
+      @apply float-left pointer-events-none h-0;
+      color: var(--ui-ink-subtle);
       content: attr(data-placeholder);
     }
     .tiptap ul,
@@ -52,7 +53,8 @@ import { EditorMenu } from './editor-menu';
       font-size: 0.85rem;
     }
     .tiptap > p > code {
-      @apply bg-neutral-500 text-neutral-50;
+      background-color: var(--ui-surface-2);
+      color: var(--ui-ink);
     }
 
     .tiptap h1 {
@@ -74,7 +76,8 @@ import { EditorMenu } from './editor-menu';
       @apply text-xs font-bold;
     }
     .tiptap blockquote {
-      @apply border-l-2 border-neutral-500 pl-2;
+      @apply border-l-2 pl-2;
+      border-color: var(--ui-line-strong);
     }
     .tiptap table {
       border-collapse: collapse;

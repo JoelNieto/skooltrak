@@ -72,7 +72,7 @@ type CourseVm = {
                     </div>
                     {{ course.teacher.name }}
                   } @else {
-                    <span class="text-sm text-base-content/50">No hay docente asignado</span>
+                    <span class="text-sm text-ink-subtle">No hay docente asignado</span>
                   }
                 </div>
                 <p class="text-ink-muted">{{ course.code }}</p>
@@ -115,7 +115,7 @@ type CourseVm = {
             </span>
           </label>
 
-          <div class="tab-content bg-base-100 p-6">
+          <div class="tab-content bg-surface-1 p-6">
             @if (auth.isTeacher() || auth.isAdmin()) {
               <app-course-grades [courseId]="id()" [metric]="$any(course.studyPlan.gradeMetric)" />
             }
@@ -129,7 +129,7 @@ type CourseVm = {
               <span class="material-symbols-outlined text-xl">calendar_month</span>Calendario</span
             >
           </label>
-          <div class="tab-content bg-base-100 border-base-300 p-6">
+          <div class="tab-content bg-surface-1 border-line p-6">
             <app-course-assignments [courseId]="id()" (reload)="courseResource.reload()" />
           </div>
           @if (auth.isTeacher() || auth.isAdmin()) {
@@ -139,7 +139,7 @@ type CourseVm = {
                 <span class="material-symbols-outlined text-xl">how_to_reg</span>Asistencia</span
               >
             </label>
-            <div class="tab-content bg-base-100 p-6">
+            <div class="tab-content bg-surface-1 p-6">
               <app-course-attendance [courseId]="id()" />
             </div>
           }
@@ -149,7 +149,7 @@ type CourseVm = {
               <span class="material-symbols-outlined text-xl">groups</span>Participantes</span
             >
           </label>
-          <div class="tab-content bg-base-100 p-6">Tab content 2</div>
+          <div class="tab-content bg-surface-1 p-6">Tab content 2</div>
 
           <label class="tab">
             <input type="radio" name="my_tabs_6" aria-label="Archivos" />
@@ -158,7 +158,7 @@ type CourseVm = {
             >
           </label>
 
-          <div class="tab-content bg-base-100 p-6">
+          <div class="tab-content bg-surface-1 p-6">
             <app-course-files [courseId]="id()" />
           </div>
           @if (auth.isTeacher() || auth.isAdmin()) {
@@ -169,7 +169,7 @@ type CourseVm = {
               >
             </label>
 
-            <div class="tab-content bg-base-100 p-6">
+            <div class="tab-content bg-surface-1 p-6">
               <app-course-grade-buckets [courseId]="id()" />
             </div>
           }
@@ -227,7 +227,7 @@ export default class Course {
 
     const t = c.teacher;
     if (t) {
-      const color = t.user?.color ?? '#888';
+      const color = t.user?.color ?? 'var(--ui-ink-subtle)';
       const fn = t.user?.firstName ?? t.firstName ?? '';
       const ln = t.user?.lastName ?? t.fatherName ?? '';
       const name = `${fn} ${ln}`.trim();

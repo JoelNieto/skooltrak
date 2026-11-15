@@ -38,7 +38,7 @@ import { StoreApiService } from '../store-api.service';
                 <td>{{ o.status }}</td>
                 <td>{{ o.paymentStatus }}</td>
                 <td>
-                  <select uiSelect class="select-xs" [ngModel]="o.status" (ngModelChange)="updateStatus(o.id!, $event)">
+                  <select uiSelect size="xs" [ngModel]="o.status" (ngModelChange)="updateStatus(o.id!, $event)">
                     <option value="PENDING">PENDING</option>
                     <option value="CONFIRMED">CONFIRMED</option>
                     <option value="PROCESSING">PROCESSING</option>

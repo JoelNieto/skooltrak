@@ -25,8 +25,8 @@ type JoinRequestRow = {
     <div class="space-y-6">
       <div class="flex items-center justify-between">
         <div>
-          <h1 class="text-2xl font-bold text-base-content">Solicitudes de Acceso</h1>
-          <p class="text-base-content/60">Administra las solicitudes de usuarios que desean unirse a tu escuela.</p>
+          <h1 class="text-2xl font-bold text-ink-strong">Solicitudes de Acceso</h1>
+          <p class="text-ink-muted">Administra las solicitudes de usuarios que desean unirse a tu escuela.</p>
         </div>
         <button uiButton variant="ghost" size="sm" (click)="loadRequests()">
           <span class="material-symbols-outlined">refresh</span>
@@ -59,22 +59,22 @@ type JoinRequestRow = {
                   </div>
 
                   <div class="flex-1 min-w-0">
-                    <h3 class="font-semibold text-base-content">
+                    <h3 class="font-semibold text-ink-strong">
                       {{ request.userFirstName }} {{ request.userLastName }}
                     </h3>
-                    <p class="text-sm text-base-content/60">{{ request.userEmail }}</p>
+                    <p class="text-sm text-ink-muted">{{ request.userEmail }}</p>
                     <div class="flex items-center gap-3 mt-2">
                       <span uiBadge [tone]="roleTone(request.requestedRole)">
                         {{ getRoleLabel(request.requestedRole) }}
                       </span>
-                      <span class="text-xs text-base-content/40">
+                      <span class="text-xs text-ink-subtle">
                         {{ request.schoolName }}
                       </span>
                       @if (request.documentId) {
-                        <span class="text-xs text-base-content/40"> Doc: {{ request.documentId }} </span>
+                        <span class="text-xs text-ink-subtle"> Doc: {{ request.documentId }} </span>
                       }
                     </div>
-                    <p class="text-xs text-base-content/40 mt-1">Solicitado {{ request.createdAt | date: 'medium' }}</p>
+                    <p class="text-xs text-ink-subtle mt-1">Solicitado {{ request.createdAt | date: 'medium' }}</p>
                   </div>
 
                   <div class="flex gap-2">

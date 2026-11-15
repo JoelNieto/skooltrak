@@ -27,16 +27,14 @@ export type CreatedEntity = {
       <header class="p-4 md:p-6 flex items-center justify-between">
         <app-brand-logo class="h-8 md:h-10" />
         <div class="flex items-center gap-3">
-          <span class="text-sm text-base-content/60 hidden sm:inline">
-            Paso {{ currentStep() }} de {{ totalSteps }}
-          </span>
+          <span class="text-sm text-ink-muted hidden sm:inline"> Paso {{ currentStep() }} de {{ totalSteps }} </span>
           <div class="flex gap-2">
             @for (step of steps; track step; let i = $index) {
               <div
                 class="w-2.5 h-2.5 rounded-full transition-colors duration-300"
                 [class.bg-primary]="i < currentStep()"
                 [class.bg-primary]="i + 1 === currentStep()"
-                [class.bg-base-300]="i + 1 > currentStep()"
+                [class.bg-surface-2]="i + 1 > currentStep()"
               ></div>
             }
           </div>
@@ -89,7 +87,7 @@ export type CreatedEntity = {
 
       <!-- Fixed Footer -->
       <footer
-        class="p-4 md:p-6 flex justify-between items-center border-t border-base-200 bg-base-100/80 backdrop-blur-sm"
+        class="p-4 md:p-6 flex justify-between items-center border-t border-line bg-surface-1/80 backdrop-blur-sm"
       >
         <div>
           @if (currentStep() > 1) {

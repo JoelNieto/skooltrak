@@ -21,7 +21,7 @@ export interface ThreadListItem {
       @for (thread of threads(); track thread.id) {
         <li class="w-full">
           <button
-            class="flex justify-between items-center gap-0.5 rounded-xl border border-transparent hover:bg-primary/20 active:bg-base-100 transition-colors duration-200 ease-in-out px-3 py-2 w-full"
+            class="flex justify-between items-center gap-0.5 rounded-xl border border-transparent hover:bg-primary/20 active:bg-surface-1 transition-colors duration-200 ease-in-out px-3 py-2 w-full"
             [class.bg-primary/10]="thread.id === selectedId()"
             [class.border-primary/30]="thread.broadcast"
             [class.bg-primary/5]="thread.broadcast && thread.id !== selectedId()"

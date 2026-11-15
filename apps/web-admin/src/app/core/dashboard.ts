@@ -12,14 +12,14 @@ import { Button } from '#/ui';
     <div
       #sidebarOverlay
       id="sidebar-overlay"
-      class="fixed inset-0 bg-white/50 dark:bg-black/50 backdrop-blur-md z-40 lg:hidden hidden"
+      class="fixed inset-0 bg-surface-0/60 backdrop-blur-md z-40 lg:hidden hidden"
       (click)="closeSidebar()"
       (keydown)="closeSidebar()"
       tabindex="0"
     ></div>
 
     <!-- Mobile sidebar toggle -->
-    <div class="w-full fixed top-0 z-30 flex items-center px-2 lg:hidden bg-base-200">
+    <div class="w-full fixed top-0 z-30 flex items-center px-2 lg:hidden bg-surface-0">
       <button
         uiButton
         #sidebarToggle
@@ -38,13 +38,13 @@ import { Button } from '#/ui';
       #sidebar
       id="sidebar"
       appSidebar
-      class="fixed flex flex-col lg:relative z-50 w-64 h-screen bg-base-100 border-r border-neutral-300 dark:border-white/10 transform -translate-x-full lg:translate-x-0 transition-transform duration-200 ease-in-out"
+      class="fixed flex flex-col lg:relative z-50 w-64 h-screen bg-surface-1 border-r border-line transform -translate-x-full lg:translate-x-0 transition-transform duration-200 ease-in-out"
     ></aside>
 
     <!-- Main content -->
     <div class="flex-1 flex flex-col overflow-hidden lg:pt-0 pt-8">
       <!-- Page content -->
-      <main class="flex-1 overflow-y-auto px-4 bg-base-100">
+      <main class="flex-1 overflow-y-auto px-4 bg-surface-1">
         <div class="mx-auto">
           <router-outlet />
         </div>

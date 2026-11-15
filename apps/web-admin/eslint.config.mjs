@@ -28,7 +28,9 @@ export default [
   },
   {
     files: ['**/*.html'],
-    // Override or add rules here
-    rules: {},
+    rules: {
+      // Templates use libs/ui primitives and design tokens (tools/eslint-rules/rules/design-tokens.ts).
+      '@nx/workspace-design-tokens': 'error',
+    },
   },
 ];

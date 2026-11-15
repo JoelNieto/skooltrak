@@ -1,4 +1,4 @@
-import { Button, Card, Confirmation, Pagination, Paginator, Toast, UiTable } from '#/ui';
+import { Button, Card, Confirmation, Pagination, Paginator, Toast, UiInputGroup, UiTable } from '#/ui';
 import { Menu, MenuContent, MenuItem, MenuTrigger } from '@angular/aria/menu';
 import { OverlayModule } from '@angular/cdk/overlay';
 import { DatePipe } from '@angular/common';
@@ -34,12 +34,13 @@ type SchoolRow = {
     MenuItem,
     MenuTrigger,
     OverlayModule,
+    UiInputGroup,
   ],
   providers: [Pagination],
   template: `
     <div class="flex flex-col gap-4 md:flex-row md:justify-between">
       <div class="md:w-96 w-full">
-        <label class="input input-primary">
+        <label uiInputGroup>
           <span class="material-symbols-outlined">search</span>
           <input
             class="pl-0"
@@ -73,12 +74,12 @@ type SchoolRow = {
               <td>
                 <a [routerLink]="['/schools', school.id]" class="flex items-center gap-3 hover:opacity-80">
                   <div
-                    class="min-w-10 max-w-16 min-h-8 max-h-12 rounded-lg border border-base-300 flex items-center justify-center overflow-hidden bg-base-200 shrink-0"
+                    class="min-w-10 max-w-16 min-h-8 max-h-12 rounded-lg border border-line flex items-center justify-center overflow-hidden bg-surface-0 shrink-0"
                   >
                     @if (school.logoUrl) {
                       <img [src]="school.logoUrl" [alt]="school.name" class="w-full h-auto object-contain" />
                     } @else {
-                      <span class="material-symbols-outlined text-xl text-base-content/40">school</span>
+                      <span class="material-symbols-outlined text-xl text-ink-subtle">school</span>
                     }
                   </div>
                   <span class="link link-hover font-medium">{{ school.name }}</span>
@@ -91,7 +92,7 @@ type SchoolRow = {
               <td>{{ school.createdAt | date: 'short' }}</td>
               <td>
                 <button
-                  class="cursor-pointer hover:bg-base-200 p-1 rounded-lg flex items-center justify-center"
+                  class="cursor-pointer hover:bg-surface-2 p-1 rounded-lg flex items-center justify-center"
                   ngMenuTrigger
                   #origin
                   #trigger="ngMenuTrigger"
@@ -113,13 +114,13 @@ type SchoolRow = {
                   ]"
                   cdkAttachPopoverAsChild
                 >
-                  <div ngMenu class="bg-base-100 shadow-sm rounded-lg p-1 w-48" #actionsMenu="ngMenu">
+                  <div ngMenu class="bg-surface-1 shadow-sm rounded-lg p-1 w-48" #actionsMenu="ngMenu">
                     <ng-template ngMenuContent>
                       <a
                         ngMenuItem
                         value="view"
                         [routerLink]="['/schools', school.id]"
-                        class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-base-200 w-full"
+                        class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-surface-2 w-full"
                       >
                         <span class="material-symbols-outlined text-lg">visibility</span>
                         <span>Ver</span>
@@ -128,7 +129,7 @@ type SchoolRow = {
                         ngMenuItem
                         value="edit"
                         [routerLink]="['/schools', school.id, 'edit']"
-                        class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-base-200 w-full"
+                        class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-surface-2 w-full"
                       >
                         <span class="material-symbols-outlined text-lg">edit</span>
                         <span>Editar</span>
@@ -136,7 +137,7 @@ type SchoolRow = {
                       <button
                         ngMenuItem
                         value="delete"
-                        class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-base-200 w-full"
+                        class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-surface-2 w-full"
                         (click)="deleteSchool(school)"
                       >
                         <span class="material-symbols-outlined text-lg">delete</span>

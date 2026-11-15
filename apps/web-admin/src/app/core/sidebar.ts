@@ -13,8 +13,8 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
         <li>
           <a
             routerLink="home"
-            [routerLinkActive]="['bg-base-200', 'text-primary', 'dark:text-white']"
-            class="flex items-center p-2 text-base-content rounded-lg hover:bg-primary-50 hover:text-primary-600 group"
+            [routerLinkActive]="['bg-surface-0', 'text-primary']"
+            class="flex items-center p-2 text-ink-strong rounded-lg hover:bg-primary-50 hover:text-primary-600 group"
           >
             <span class="material-symbols-outlined text-xl">home</span>
             <span class="ml-3">Inicio</span>
@@ -23,8 +23,8 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
         <li>
           <a
             routerLink="organizations"
-            [routerLinkActive]="['bg-base-200', 'text-primary', 'dark:text-white']"
-            class="flex items-center p-2 text-base-content rounded-lg hover:bg-primary-50 hover:text-primary-600 group"
+            [routerLinkActive]="['bg-surface-0', 'text-primary']"
+            class="flex items-center p-2 text-ink-strong rounded-lg hover:bg-primary-50 hover:text-primary-600 group"
           >
             <span class="material-symbols-outlined text-xl">account_tree</span>
             <span class="ml-3">Organizaciones</span>
@@ -33,8 +33,8 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
         <li>
           <a
             routerLink="schools"
-            [routerLinkActive]="['bg-base-200', 'text-primary', 'dark:text-white']"
-            class="flex items-center p-2 text-base-content rounded-lg hover:bg-primary-50 hover:text-primary-600 group"
+            [routerLinkActive]="['bg-surface-0', 'text-primary']"
+            class="flex items-center p-2 text-ink-strong rounded-lg hover:bg-primary-50 hover:text-primary-600 group"
           >
             <span class="material-symbols-outlined text-xl">domain</span>
             <span class="ml-3">Escuelas</span>
@@ -43,8 +43,8 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
         <li>
           <a
             routerLink="roles"
-            [routerLinkActive]="['bg-base-200', 'text-primary', 'dark:text-white']"
-            class="flex items-center p-2 text-base-content rounded-lg hover:bg-primary-50 hover:text-primary-600 group"
+            [routerLinkActive]="['bg-surface-0', 'text-primary']"
+            class="flex items-center p-2 text-ink-strong rounded-lg hover:bg-primary-50 hover:text-primary-600 group"
           >
             <span class="material-symbols-outlined text-xl">manage_accounts</span>
             <span class="ml-3">Roles</span>
@@ -53,8 +53,8 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
         <li>
           <a
             routerLink="grade-metrics"
-            [routerLinkActive]="['bg-base-200', 'text-primary', 'dark:text-white']"
-            class="flex items-center p-2 text-base-content rounded-lg hover:bg-primary-50 hover:text-primary-600 group"
+            [routerLinkActive]="['bg-surface-0', 'text-primary']"
+            class="flex items-center p-2 text-ink-strong rounded-lg hover:bg-primary-50 hover:text-primary-600 group"
           >
             <span class="material-symbols-outlined text-xl">table_chart</span>
             <span class="ml-3">Metricas</span>
@@ -63,8 +63,8 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
         <li>
           <a
             routerLink="habit-metrics"
-            [routerLinkActive]="['bg-base-200', 'text-primary', 'dark:text-white']"
-            class="flex items-center p-2 text-base-content rounded-lg hover:bg-primary-50 hover:text-primary-600 group"
+            [routerLinkActive]="['bg-surface-0', 'text-primary']"
+            class="flex items-center p-2 text-ink-strong rounded-lg hover:bg-primary-50 hover:text-primary-600 group"
           >
             <span class="material-symbols-outlined text-xl">psychology</span>
             <span class="ml-3">Hábitos y actitudes</span>
@@ -73,8 +73,8 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
         <li>
           <a
             routerLink="periods"
-            [routerLinkActive]="['bg-base-200', 'text-primary', 'dark:text-white']"
-            class="flex items-center p-2 text-base-content rounded-lg hover:bg-primary-50 hover:text-primary-600 group"
+            [routerLinkActive]="['bg-surface-0', 'text-primary']"
+            class="flex items-center p-2 text-ink-strong rounded-lg hover:bg-primary-50 hover:text-primary-600 group"
           >
             <span class="material-symbols-outlined text-xl">calendar_month</span>
             <span class="ml-3">Periodos</span>
@@ -83,8 +83,8 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
         <li>
           <a
             routerLink="permissions"
-            [routerLinkActive]="['bg-base-200', 'text-primary', 'dark:text-white']"
-            class="flex items-center p-2 text-base-content rounded-lg hover:bg-primary-50 hover:text-primary-600 group"
+            [routerLinkActive]="['bg-surface-0', 'text-primary']"
+            class="flex items-center p-2 text-ink-strong rounded-lg hover:bg-primary-50 hover:text-primary-600 group"
           >
             <span class="material-symbols-outlined text-xl">folder_managed</span>
             <span class="ml-3">Permisos</span>
@@ -93,19 +93,19 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
         <li>
           <a
             routerLink="users"
-            [routerLinkActive]="['bg-base-200', 'text-primary', 'dark:text-white']"
-            class="flex items-center p-2 text-base-content rounded-lg hover:bg-primary-50 hover:text-primary-600 group"
+            [routerLinkActive]="['bg-surface-0', 'text-primary']"
+            class="flex items-center p-2 text-ink-strong rounded-lg hover:bg-primary-50 hover:text-primary-600 group"
           >
             <span class="material-symbols-outlined text-xl">group</span>
             <span class="ml-3">Usuarios</span>
           </a>
         </li>
-        <li class="px-2 text-xs uppercase text-base-content/60">Administración</li>
+        <li class="px-2 text-xs uppercase text-ink-muted">Administración</li>
         <li>
           <a
             routerLink="parent-management"
-            [routerLinkActive]="['bg-base-200', 'text-primary', 'dark:text-white']"
-            class="flex items-center p-2 text-base-content rounded-lg hover:bg-primary-50 hover:text-primary-600 group"
+            [routerLinkActive]="['bg-surface-0', 'text-primary']"
+            class="flex items-center p-2 text-ink-strong rounded-lg hover:bg-primary-50 hover:text-primary-600 group"
           >
             <span class="material-symbols-outlined text-xl">supervisor_account</span>
             <span class="ml-3">Padres</span>
@@ -114,8 +114,8 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
         <li>
           <a
             routerLink="attendance-reporting"
-            [routerLinkActive]="['bg-base-200', 'text-primary', 'dark:text-white']"
-            class="flex items-center p-2 text-base-content rounded-lg hover:bg-primary-50 hover:text-primary-600 group"
+            [routerLinkActive]="['bg-surface-0', 'text-primary']"
+            class="flex items-center p-2 text-ink-strong rounded-lg hover:bg-primary-50 hover:text-primary-600 group"
           >
             <span class="material-symbols-outlined text-xl">fact_check</span>
             <span class="ml-3">Asistencia</span>
@@ -124,8 +124,8 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
         <li>
           <a
             routerLink="financial-module"
-            [routerLinkActive]="['bg-base-200', 'text-primary', 'dark:text-white']"
-            class="flex items-center p-2 text-base-content rounded-lg hover:bg-primary-50 hover:text-primary-600 group"
+            [routerLinkActive]="['bg-surface-0', 'text-primary']"
+            class="flex items-center p-2 text-ink-strong rounded-lg hover:bg-primary-50 hover:text-primary-600 group"
           >
             <span class="material-symbols-outlined text-xl">payments</span>
             <span class="ml-3">Finanzas</span>
@@ -134,19 +134,19 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
         <li>
           <a
             routerLink="events-calendar"
-            [routerLinkActive]="['bg-base-200', 'text-primary', 'dark:text-white']"
-            class="flex items-center p-2 text-base-content rounded-lg hover:bg-primary-50 hover:text-primary-600 group"
+            [routerLinkActive]="['bg-surface-0', 'text-primary']"
+            class="flex items-center p-2 text-ink-strong rounded-lg hover:bg-primary-50 hover:text-primary-600 group"
           >
             <span class="material-symbols-outlined text-xl">event</span>
             <span class="ml-3">Eventos</span>
           </a>
         </li>
-        <li class="px-2 text-xs uppercase text-base-content/60">Estudiante</li>
+        <li class="px-2 text-xs uppercase text-ink-muted">Estudiante</li>
         <li>
           <a
             routerLink="student/schedule"
-            [routerLinkActive]="['bg-base-200', 'text-primary', 'dark:text-white']"
-            class="flex items-center p-2 text-base-content rounded-lg hover:bg-primary-50 hover:text-primary-600 group"
+            [routerLinkActive]="['bg-surface-0', 'text-primary']"
+            class="flex items-center p-2 text-ink-strong rounded-lg hover:bg-primary-50 hover:text-primary-600 group"
           >
             <span class="material-symbols-outlined text-xl">event</span>
             <span class="ml-3">Agenda</span>
@@ -155,8 +155,8 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
         <li>
           <a
             routerLink="student/assignments"
-            [routerLinkActive]="['bg-base-200', 'text-primary', 'dark:text-white']"
-            class="flex items-center p-2 text-base-content rounded-lg hover:bg-primary-50 hover:text-primary-600 group"
+            [routerLinkActive]="['bg-surface-0', 'text-primary']"
+            class="flex items-center p-2 text-ink-strong rounded-lg hover:bg-primary-50 hover:text-primary-600 group"
           >
             <span class="material-symbols-outlined text-xl">upload_file</span>
             <span class="ml-3">Entregas</span>
@@ -165,8 +165,8 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
         <li>
           <a
             routerLink="student/notifications"
-            [routerLinkActive]="['bg-base-200', 'text-primary', 'dark:text-white']"
-            class="flex items-center p-2 text-base-content rounded-lg hover:bg-primary-50 hover:text-primary-600 group"
+            [routerLinkActive]="['bg-surface-0', 'text-primary']"
+            class="flex items-center p-2 text-ink-strong rounded-lg hover:bg-primary-50 hover:text-primary-600 group"
           >
             <span class="material-symbols-outlined text-xl">notifications</span>
             <span class="ml-3">Notificaciones</span>
@@ -175,19 +175,19 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
         <li>
           <a
             routerLink="student/attendance"
-            [routerLinkActive]="['bg-base-200', 'text-primary', 'dark:text-white']"
-            class="flex items-center p-2 text-base-content rounded-lg hover:bg-primary-50 hover:text-primary-600 group"
+            [routerLinkActive]="['bg-surface-0', 'text-primary']"
+            class="flex items-center p-2 text-ink-strong rounded-lg hover:bg-primary-50 hover:text-primary-600 group"
           >
             <span class="material-symbols-outlined text-xl">fact_check</span>
             <span class="ml-3">Asistencia</span>
           </a>
         </li>
-        <li class="px-2 text-xs uppercase text-base-content/60">Docente</li>
+        <li class="px-2 text-xs uppercase text-ink-muted">Docente</li>
         <li>
           <a
             routerLink="teacher/attendance"
-            [routerLinkActive]="['bg-base-200', 'text-primary', 'dark:text-white']"
-            class="flex items-center p-2 text-base-content rounded-lg hover:bg-primary-50 hover:text-primary-600 group"
+            [routerLinkActive]="['bg-surface-0', 'text-primary']"
+            class="flex items-center p-2 text-ink-strong rounded-lg hover:bg-primary-50 hover:text-primary-600 group"
           >
             <span class="material-symbols-outlined text-xl">playlist_add_check</span>
             <span class="ml-3">Tomar asistencia</span>
@@ -196,8 +196,8 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
         <li>
           <a
             routerLink="teacher/gradebook"
-            [routerLinkActive]="['bg-base-200', 'text-primary', 'dark:text-white']"
-            class="flex items-center p-2 text-base-content rounded-lg hover:bg-primary-50 hover:text-primary-600 group"
+            [routerLinkActive]="['bg-surface-0', 'text-primary']"
+            class="flex items-center p-2 text-ink-strong rounded-lg hover:bg-primary-50 hover:text-primary-600 group"
           >
             <span class="material-symbols-outlined text-xl">table</span>
             <span class="ml-3">Libro de notas</span>
@@ -206,8 +206,8 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
         <li>
           <a
             routerLink="teacher/communication"
-            [routerLinkActive]="['bg-base-200', 'text-primary', 'dark:text-white']"
-            class="flex items-center p-2 text-base-content rounded-lg hover:bg-primary-50 hover:text-primary-600 group"
+            [routerLinkActive]="['bg-surface-0', 'text-primary']"
+            class="flex items-center p-2 text-ink-strong rounded-lg hover:bg-primary-50 hover:text-primary-600 group"
           >
             <span class="material-symbols-outlined text-xl">forum</span>
             <span class="ml-3">Comunicación</span>
@@ -216,19 +216,19 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
         <li>
           <a
             routerLink="teacher/reports"
-            [routerLinkActive]="['bg-base-200', 'text-primary', 'dark:text-white']"
-            class="flex items-center p-2 text-base-content rounded-lg hover:bg-primary-50 hover:text-primary-600 group"
+            [routerLinkActive]="['bg-surface-0', 'text-primary']"
+            class="flex items-center p-2 text-ink-strong rounded-lg hover:bg-primary-50 hover:text-primary-600 group"
           >
             <span class="material-symbols-outlined text-xl">assessment</span>
             <span class="ml-3">Reportes</span>
           </a>
         </li>
-        <li class="px-2 text-xs uppercase text-base-content/60">Padres</li>
+        <li class="px-2 text-xs uppercase text-ink-muted">Padres</li>
         <li>
           <a
             routerLink="parent/portal"
-            [routerLinkActive]="['bg-base-200', 'text-primary', 'dark:text-white']"
-            class="flex items-center p-2 text-base-content rounded-lg hover:bg-primary-50 hover:text-primary-600 group"
+            [routerLinkActive]="['bg-surface-0', 'text-primary']"
+            class="flex items-center p-2 text-ink-strong rounded-lg hover:bg-primary-50 hover:text-primary-600 group"
           >
             <span class="material-symbols-outlined text-xl">family_restroom</span>
             <span class="ml-3">Portal</span>
@@ -237,8 +237,8 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
         <li>
           <a
             routerLink="parent/progress"
-            [routerLinkActive]="['bg-base-200', 'text-primary', 'dark:text-white']"
-            class="flex items-center p-2 text-base-content rounded-lg hover:bg-primary-50 hover:text-primary-600 group"
+            [routerLinkActive]="['bg-surface-0', 'text-primary']"
+            class="flex items-center p-2 text-ink-strong rounded-lg hover:bg-primary-50 hover:text-primary-600 group"
           >
             <span class="material-symbols-outlined text-xl">bar_chart</span>
             <span class="ml-3">Progreso</span>
@@ -247,8 +247,8 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
         <li>
           <a
             routerLink="parent/communication"
-            [routerLinkActive]="['bg-base-200', 'text-primary', 'dark:text-white']"
-            class="flex items-center p-2 text-base-content rounded-lg hover:bg-primary-50 hover:text-primary-600 group"
+            [routerLinkActive]="['bg-surface-0', 'text-primary']"
+            class="flex items-center p-2 text-ink-strong rounded-lg hover:bg-primary-50 hover:text-primary-600 group"
           >
             <span class="material-symbols-outlined text-xl">chat</span>
             <span class="ml-3">Mensajes</span>
@@ -257,8 +257,8 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
         <li>
           <a
             routerLink="parent/notifications"
-            [routerLinkActive]="['bg-base-200', 'text-primary', 'dark:text-white']"
-            class="flex items-center p-2 text-base-content rounded-lg hover:bg-primary-50 hover:text-primary-600 group"
+            [routerLinkActive]="['bg-surface-0', 'text-primary']"
+            class="flex items-center p-2 text-ink-strong rounded-lg hover:bg-primary-50 hover:text-primary-600 group"
           >
             <span class="material-symbols-outlined text-xl">notifications_active</span>
             <span class="ml-3">Alertas</span>

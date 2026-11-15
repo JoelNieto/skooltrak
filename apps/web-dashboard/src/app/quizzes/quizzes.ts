@@ -28,7 +28,7 @@ type QuizListItem = {
         <a uiButton variant="primary" routerLink="new">Nuevo quiz</a>
       }
     </div>
-    <div class="overflow-x-auto bg-base-100 rounded-lg shadow-sm mt-4 border border-base-300">
+    <div class="overflow-x-auto bg-surface-1 rounded-lg shadow-sm mt-4 border border-line">
       @if (quizzesResource.hasValue()) {
         @let list = quizzesResource.value() ?? [];
         <table uiTable>
@@ -72,7 +72,7 @@ type QuizListItem = {
               </tr>
             } @empty {
               <tr>
-                <td colspan="6" class="text-center py-8 text-base-content/60">No hay quizzes</td>
+                <td colspan="6" class="text-center py-8 text-ink-muted">No hay quizzes</td>
               </tr>
             }
           </tbody>

@@ -15,7 +15,8 @@ import { Component } from '@angular/core';
       list-style-type: decimal !important;
     }
     :host ::ng-deep p > code {
-      @apply bg-neutral-200 text-neutral-600;
+      background-color: var(--ui-surface-2);
+      color: var(--ui-ink);
     }
   `,
 })

@@ -14,14 +14,14 @@ import { Badge } from '#/ui';
       <div class="flex flex-wrap items-start justify-between gap-4 mb-6">
         <div class="min-w-0">
           <h1 class="text-2xl font-semibold mb-2">Tiendas escolares</h1>
-          <p class="text-base-content/70">Elige una escuela para ver sus productos.</p>
+          <p class="text-ink-muted">Elige una escuela para ver sus productos.</p>
         </div>
         <app-store-theme-toggle class="shrink-0" />
       </div>
       @if (schools.isLoading()) {
         <p>Cargando…</p>
       } @else {
-        <ul class="menu bg-base-100 rounded-box border border-base-200 mt-0">
+        <ul class="menu bg-surface-1 rounded-box border border-line mt-0">
           @for (s of schools.value(); track s.id) {
             <li>
               <a [routerLink]="['/store', s.slug]" class="justify-between gap-3">
@@ -30,7 +30,7 @@ import { Badge } from '#/ui';
                     <img
                       [src]="s.logoUrl"
                       [alt]=""
-                      class="h-9 w-9 shrink-0 rounded-md border border-base-300 bg-base-200 object-contain"
+                      class="h-9 w-9 shrink-0 rounded-md border border-line bg-surface-0 object-contain"
                     />
                   } @else {
                     <span
@@ -45,7 +45,7 @@ import { Badge } from '#/ui';
               </a>
             </li>
           } @empty {
-            <li class="px-4 py-3 text-base-content/60">No hay escuelas publicadas aún.</li>
+            <li class="px-4 py-3 text-ink-muted">No hay escuelas publicadas aún.</li>
           }
         </ul>
       }

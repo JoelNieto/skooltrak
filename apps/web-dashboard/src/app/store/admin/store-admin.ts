@@ -5,7 +5,7 @@ import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
   selector: 'app-store-admin',
   imports: [RouterOutlet, RouterLink, RouterLinkActive],
   template: `
-    <div class="border-b border-base-300 mb-4">
+    <div class="border-b border-line mb-4">
       <ul class="menu menu-horizontal flex-wrap gap-1">
         <li>
           <a routerLink="products" routerLinkActive="bg-primary text-primary-content">Productos</a>

@@ -1,7 +1,17 @@
-import { Alert, Button, Loader, Toast, UiInput, UiSelect, UiTable } from '#/ui';
+import { Alert, Button, Loader, Toast, UiField, UiInput, UiSelect, UiTable } from '#/ui';
 import { NgClass } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { afterRenderEffect, Component, computed, effect, inject, input, output, signal, untracked } from '@angular/core';
+import {
+  afterRenderEffect,
+  Component,
+  computed,
+  effect,
+  inject,
+  input,
+  output,
+  signal,
+  untracked,
+} from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { applyEach, form, FormField, required } from '@angular/forms/signals';
 import { Prisma } from '@generated/prisma';
@@ -30,56 +40,66 @@ type ClassGroupType = {
   name: string;
 };
 
+/** `color` tints the icon; `selected` fills the row's picker button once that status is chosen. */
 const STATUS_OPTIONS = [
-  { value: 'PRESENT', label: 'Presente', icon: 'check_circle', color: 'text-success' },
-  { value: 'ABSENT', label: 'Ausente', icon: 'cancel', color: 'text-error' },
-  { value: 'LATE', label: 'Tardanza', icon: 'schedule', color: 'text-warning' },
-  { value: 'SICK_LEAVE', label: 'Permiso médico', icon: 'healing', color: 'text-info' },
-  { value: 'EXCUSED', label: 'Excusado', icon: 'event_busy', color: 'text-neutral' },
+  {
+    value: 'PRESENT',
+    label: 'Presente',
+    icon: 'check_circle',
+    color: 'text-success',
+    selected: 'bg-success text-success-content',
+  },
+  { value: 'ABSENT', label: 'Ausente', icon: 'cancel', color: 'text-error', selected: 'bg-error text-error-content' },
+  {
+    value: 'LATE',
+    label: 'Tardanza',
+    icon: 'schedule',
+    color: 'text-warning',
+    selected: 'bg-warning text-warning-content',
+  },
+  {
+    value: 'SICK_LEAVE',
+    label: 'Permiso médico',
+    icon: 'healing',
+    color: 'text-info',
+    selected: 'bg-info text-info-content',
+  },
+  {
+    value: 'EXCUSED',
+    label: 'Excusado',
+    icon: 'event_busy',
+    color: 'text-ink-muted',
+    selected: 'bg-neutral text-neutral-content',
+  },
 ];
 
 @Component({
   selector: 'app-attendance-form',
-  imports: [Alert, UiTable, UiInput, UiSelect, Button, FormField, Loader, NgClass],
+  imports: [Alert, UiTable, UiInput, UiSelect, Button, FormField, Loader, NgClass, UiField],
   template: `
     <form (submit)="onSubmit($event)" class="flex flex-col gap-4">
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div class="form-control">
-          <label class="label" for="date">
-            <span class="label-text">Fecha</span>
-          </label>
+        <ui-field label="Fecha">
           <input uiInput type="date" [formField]="form.date" />
-        </div>
-        <div class="form-control">
-          <label class="label" for="classGroupId">
-            <span class="label-text">Grupo</span>
-          </label>
+        </ui-field>
+        <ui-field label="Grupo">
           <select uiSelect id="classGroupId" [formField]="form.classGroupId">
             <option value="" disabled>Seleccionar grupo...</option>
             @for (group of data()?.groups || []; track group.id) {
               <option [value]="group.id">{{ group.name }}</option>
             }
           </select>
-        </div>
+        </ui-field>
       </div>
 
       <!-- Bulk Actions -->
       <div class="flex gap-2 flex-wrap">
         <span class="text-sm font-medium self-center">Marcar todos:</span>
         @for (status of statusOptions; track status.value) {
-          <button
-            type="button"
-            class="btn btn-sm btn-outline"
-            [ngClass]="{
-              'btn-success': status.value === 'PRESENT',
-              'btn-error': status.value === 'ABSENT',
-              'btn-warning': status.value === 'LATE',
-              'btn-info': status.value === 'SICK_LEAVE',
-              'btn-neutral': status.value === 'EXCUSED',
-            }"
-            (click)="markAll(status.value)"
-          >
-            <span class="material-symbols-outlined text-sm">{{ status.icon }}</span>
+          <button uiButton size="sm" type="button" (click)="markAll(status.value)">
+            <span class="material-symbols-outlined text-sm" [class]="status.color" aria-hidden="true">{{
+              status.icon
+            }}</span>
             {{ status.label }}
           </button>
         }
@@ -115,25 +135,22 @@ const STATUS_OPTIONS = [
                     </div>
                   </td>
                   <td>
-                    <div class="flex gap-1">
+                    <div class="flex gap-1" role="group" [attr.aria-label]="'Estado de ' + getStudentName(i)">
                       @for (status of statusOptions; track status.value) {
                         <button
                           type="button"
-                          class="btn btn-xs btn-circle"
-                          [ngClass]="{
-                            'btn-success': status.value === 'PRESENT' && record.status().value() === 'PRESENT',
-                            'btn-error': status.value === 'ABSENT' && record.status().value() === 'ABSENT',
-                            'btn-warning': status.value === 'LATE' && record.status().value() === 'LATE',
-                            'btn-info': status.value === 'SICK_LEAVE' && record.status().value() === 'SICK_LEAVE',
-                            'btn-neutral': status.value === 'EXCUSED' && record.status().value() === 'EXCUSED',
-                            'btn-ghost': record.status().value() !== status.value,
-                          }"
+                          class="inline-flex size-7 items-center justify-center rounded-full transition-colors"
+                          [ngClass]="
+                            record.status().value() === status.value
+                              ? status.selected
+                              : 'text-ink-subtle hover:bg-surface-2 hover:text-ink'
+                          "
                           [title]="status.label"
+                          [attr.aria-label]="status.label"
+                          [attr.aria-pressed]="record.status().value() === status.value"
                           (click)="setStatus(i, status.value)"
                         >
-                          <span class="material-symbols-outlined text-sm">
-                            {{ status.icon }}
-                          </span>
+                          <span class="material-symbols-outlined text-sm" aria-hidden="true">{{ status.icon }}</span>
                         </button>
                       }
                     </div>
@@ -141,8 +158,9 @@ const STATUS_OPTIONS = [
                   <td>
                     <input
                       uiInput
+                      size="sm"
                       type="text"
-                      class="input-sm max-w-xs"
+                      class="max-w-xs"
                       [formField]="record.comment"
                       placeholder="Comentario opcional..."
                     />

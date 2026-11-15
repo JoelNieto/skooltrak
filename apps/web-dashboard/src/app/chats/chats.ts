@@ -44,11 +44,11 @@ type ChatRow = {
             <a
               [routerLink]="['/chats', chat.id]"
               routerLinkActive="bg-primary/10"
-              class="flex items-center gap-3 p-4 rounded-lg bg-base-200 hover:bg-base-100 transition-colors"
+              class="flex items-center gap-3 p-4 rounded-lg bg-surface-0 hover:bg-surface-1 transition-colors"
             >
               <div class="avatar avatar-placeholder">
                 @if (isContextualChat(chat.type)) {
-                  <div class="flex items-center justify-center w-10 h-10 rounded-full text-white bg-primary">
+                  <div class="flex items-center justify-center w-10 h-10 rounded-full text-primary-content bg-primary">
                     <span class="material-symbols-outlined text-xl">{{ contextualChatIcon(chat.type) }}</span>
                   </div>
                 } @else {
@@ -62,7 +62,7 @@ type ChatRow = {
                   {{ chatDisplayName(chat) }}
                 </p>
                 <div class="flex flex-wrap items-center gap-1.5 mt-0.5">
-                  <span class="text-sm text-base-content/60">{{ chatTypeLabel(chat.type) }}</span>
+                  <span class="text-sm text-ink-muted">{{ chatTypeLabel(chat.type) }}</span>
                   @let chatUser = otherParticipant(chat);
                   @if (chatUser) {
                     @if (roleLabel($safeNavigationMigration(chatUser.role?.name)); as label) {
@@ -74,7 +74,7 @@ type ChatRow = {
                   }
                 </div>
               </div>
-              <span class="material-symbols-outlined text-base-content/50">chevron_right</span>
+              <span class="material-symbols-outlined text-ink-subtle">chevron_right</span>
             </a>
           }
         </div>
@@ -111,7 +111,7 @@ export default class Chats {
 
   participantStyle(chat: ChatRow): { color: string; initials: string } {
     const u = this.otherParticipant(chat);
-    const color = u?.color || 'oklch(var(--p))';
+    const color = u?.color || 'var(--color-primary)';
     if (u?.initials?.trim()) {
       return { color, initials: u.initials };
     }
@@ -148,11 +148,11 @@ export default class Chats {
 
   contextualChatColor(type: ChatType) {
     const colors: Record<string, string> = {
-      [ChatType.COURSE]: 'oklch(var(--p))',
-      [ChatType.ASSIGNMENT]: 'oklch(var(--s))',
-      [ChatType.CLASS_GROUP]: 'oklch(var(--a))',
+      [ChatType.COURSE]: 'var(--color-primary)',
+      [ChatType.ASSIGNMENT]: 'var(--color-secondary)',
+      [ChatType.CLASS_GROUP]: 'var(--color-accent)',
     };
-    return colors[type] ?? 'oklch(var(--p))';
+    return colors[type] ?? 'var(--color-primary)';
   }
 
   roleLabel(roleName?: string | null): string | null {

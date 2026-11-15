@@ -9,6 +9,7 @@ import {
   Pagination,
   PaginatorV2,
   Toast,
+  UiInputGroup,
   UiTable,
 } from '#/ui';
 import { Menu, MenuContent, MenuItem, MenuTrigger } from '@angular/aria/menu';
@@ -65,6 +66,7 @@ type StudentRow = {
     MenuTrigger,
     OverlayModule,
     EmptyState,
+    UiInputGroup,
   ],
   providers: [Pagination],
   template: `
@@ -72,7 +74,7 @@ type StudentRow = {
     <h1 class="text-2xl font-semibold mb-2">Alumnos</h1>
     <div class="flex flex-col gap-4 md:flex-row md:justify-between">
       <div class="md:w-96 w-full">
-        <label class="input input-primary ">
+        <label uiInputGroup>
           <span class="material-symbols-outlined">search</span>
           <input
             class="pl-0"
@@ -132,13 +134,13 @@ type StudentRow = {
                     {{ student.classGroup.name }}
                   </a>
                 } @else {
-                  <span class="text-base-content/50">-</span>
+                  <span class="text-ink-subtle">-</span>
                 }
               </td>
               <td>{{ student.createdAt | date: 'short' }}</td>
               <td>
                 <button
-                  class="cursor-pointer hover:bg-base-200 p-1 rounded-lg flex items-center justify-center"
+                  class="cursor-pointer hover:bg-surface-2 p-1 rounded-lg flex items-center justify-center"
                   ngMenuTrigger
                   #origin
                   #trigger="ngMenuTrigger"
@@ -160,13 +162,13 @@ type StudentRow = {
                   ]"
                   cdkAttachPopoverAsChild
                 >
-                  <div ngMenu class="bg-base-100 shadow-sm rounded-lg p-1 w-48" #actionsMenu="ngMenu">
+                  <div ngMenu class="bg-surface-1 shadow-sm rounded-lg p-1 w-48" #actionsMenu="ngMenu">
                     <ng-template ngMenuContent>
                       <a
                         ngMenuItem
                         value="view"
                         [routerLink]="['/students', student.id]"
-                        class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-base-200 w-full"
+                        class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-surface-2 w-full"
                       >
                         <span class="material-symbols-outlined text-lg">visibility</span>
                         <span>Ver</span>
@@ -176,7 +178,7 @@ type StudentRow = {
                           ngMenuItem
                           value="edit"
                           [routerLink]="['/students', student.id, 'edit']"
-                          class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-base-200 w-full"
+                          class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-surface-2 w-full"
                         >
                           <span class="material-symbols-outlined text-lg">edit</span>
                           <span>Editar</span>
@@ -186,7 +188,7 @@ type StudentRow = {
                         <button
                           ngMenuItem
                           value="resend"
-                          class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-base-200 w-full"
+                          class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-surface-2 w-full"
                           (click)="resendInvitationForStudent(student)"
                         >
                           <span class="material-symbols-outlined text-lg">mail</span>
@@ -197,7 +199,7 @@ type StudentRow = {
                         <button
                           ngMenuItem
                           value="delete"
-                          class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-base-200 w-full"
+                          class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-surface-2 w-full"
                           (click)="deleteStudent(student)"
                         >
                           <span class="material-symbols-outlined text-lg">delete</span>
@@ -211,7 +213,7 @@ type StudentRow = {
             </tr>
           } @empty {
             <tr>
-              <td colspan="7" class="text-center text-base-content/50 py-4">
+              <td colspan="7" class="text-center text-ink-subtle py-4">
                 <lib-empty-state
                   title="No se encontraron estudiantes"
                   icon="person"

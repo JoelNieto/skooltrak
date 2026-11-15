@@ -15,13 +15,13 @@ import { Component } from '@angular/core';
 
     <div uiCard class="mt-6">
       <div uiCardBody>
-        <h2 class="text-lg font-semibold text-base-content">Hijos vinculados</h2>
+        <h2 class="text-lg font-semibold text-ink-strong">Hijos vinculados</h2>
         <div class="grid gap-4 md:grid-cols-2">
           @for (child of children; track child.id) {
-            <div class="border border-base-200 rounded-lg p-4">
-              <p class="font-semibold text-base-content">{{ child.name }}</p>
-              <p class="text-sm text-base-content/70">{{ child.grade }} · {{ child.group }}</p>
-              <p class="text-sm text-base-content/70">Última nota: {{ child.lastGrade }}</p>
+            <div class="border border-line rounded-lg p-4">
+              <p class="font-semibold text-ink-strong">{{ child.name }}</p>
+              <p class="text-sm text-ink-muted">{{ child.grade }} · {{ child.group }}</p>
+              <p class="text-sm text-ink-muted">Última nota: {{ child.lastGrade }}</p>
             </div>
           }
         </div>
@@ -29,7 +29,7 @@ import { Component } from '@angular/core';
     </div>
 
     <div class="mt-6">
-      <h2 class="text-lg font-semibold text-base-content mb-3">Comunicados recientes</h2>
+      <h2 class="text-lg font-semibold text-ink-strong mb-3">Comunicados recientes</h2>
       @if (announcements.length === 0) {
         <lib-empty-state
           title="Sin comunicados nuevos"
@@ -41,10 +41,10 @@ import { Component } from '@angular/core';
           @for (announcement of announcements; track announcement.id) {
             <div uiCard>
               <div uiCardBody>
-                <p class="font-semibold text-base-content">
+                <p class="font-semibold text-ink-strong">
                   {{ announcement.title }}
                 </p>
-                <p class="text-sm text-base-content/70">
+                <p class="text-sm text-ink-muted">
                   {{ announcement.summary }}
                 </p>
               </div>

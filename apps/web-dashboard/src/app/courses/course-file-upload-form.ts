@@ -11,13 +11,12 @@ type UploadResult = { created: boolean };
   imports: [UiField, UiSelect, Button, FormField],
   template: `<form (submit)="onSubmit($event)">
     <div class="flex flex-col gap-4">
-      <div class="fieldset">
-        <label for="file">Archivo</label>
+      <ui-field label="Archivo">
         <input id="file" type="file" class="file-input file-input-primary w-full" (change)="onFileSelected($event)" />
         @if (selectedFile) {
           <p class="text-sm text-ink-muted mt-1">{{ selectedFile.name }} · {{ formatBytes(selectedFile.size) }}</p>
         }
-      </div>
+      </ui-field>
       <ui-field label="Permiso" [field]="form.permission">
         <select uiSelect id="permission" [formField]="form.permission">
           <option value="VIEW">Solo ver</option>

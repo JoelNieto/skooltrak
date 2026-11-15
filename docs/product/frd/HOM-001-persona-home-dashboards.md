@@ -215,7 +215,7 @@ Each slice replaces its part of the existing home in place. Old widgets that are
 | [HOM-001-S02](../slices/HOM-001-S02-teacher-pending-week.md) | Teacher: Pendientes, period-close banner, this week's assignments with progress (adds `ui-meter`, `AssignmentSubmission.reviewedAt`) | .5 .7 .8 (partial, Q11 Q12) .9, BR .2 .17 | In review |
 | [HOM-001-S03](../slices/HOM-001-S03-teacher-attention.md) | Teacher: students needing attention, unanswered family threads, average KPI, grade-distribution placeholder (adds `ui-chart-placeholder`, grade thresholds) | .2 .4 .7 .8 .10 .11, BR .1 .11 .13 | In review |
 | [HOM-001-S04](../slices/HOM-001-S04-student-today-work.md) | Student: now/next, today strip, upcoming/overdue work for own group (adds student e2e persona; quizzes deferred, Q12) | .1 .12 .14, BR .8 .12 | In review |
-| HOM-001-S05 | Student: KPIs, per-course averages with bands, recent grades, habits, progress placeholder | .2 .13 .16 .17, BR .1 .2 | Proposed |
+| [HOM-001-S05](../slices/HOM-001-S05-student-progress.md) | Student: KPIs, per-course averages with bands, recent grades, habits, progress placeholder | .2 .4 .13 .16 .17, BR .1 .2 | In review |
 | HOM-001-S06 | Parent: child switcher with alert counts, alerts and KPIs for the selected child (adds parent e2e persona) | .18 .19 .20, BR .9 | Proposed |
 | HOM-001-S07 | Parent: upcoming work, recent grades, teacher messages, account summary, attendance and trend placeholders | .21 .22 .23 .4, BR .14 .16 | Proposed |
 | HOM-001-S08 | Admin: attention tiles, period banner, KPI row (adds `VIEW_SCHOOL_DASHBOARD`) | .5 .24 .25, BR .10 .14 .15 .16 | Proposed |

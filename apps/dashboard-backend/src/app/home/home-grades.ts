@@ -54,3 +54,12 @@ export function toThresholds(
 
 /** One decimal, as grades are shown. */
 export const round1 = (n: number) => Math.round(n * 10) / 10;
+
+export type GradeBand = 'EXCELLENT' | 'PASSING' | 'BELOW';
+
+/** BR-HOM-001.1 bands on the study plan's scale; null without a scale. */
+export function gradeBand(score: number | null | undefined, scale: GradeThresholds | null): GradeBand | null {
+  if (score === null || score === undefined || !scale) return null;
+  if (score >= scale.minimumExcellence) return 'EXCELLENT';
+  return score >= scale.minimumApproval ? 'PASSING' : 'BELOW';
+}

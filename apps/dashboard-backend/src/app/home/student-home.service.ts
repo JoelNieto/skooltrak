@@ -1,22 +1,31 @@
 import { AuthUserContext } from '@/auth';
+import { AttendanceStatus, HabitValue, ThreadStatus } from '@generated/prisma';
 import { ForbiddenException, Inject, Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma.service';
 import {
+  StudentHabits,
+  StudentProgress,
   StudentSlot,
   StudentToday,
   StudentWork,
   StudentWorkItem,
   StudentWorkStatus,
 } from './entities/student-home.entity';
-import { resolveCurrentPeriod, toHomePeriod } from './home-period';
+import { addCount, attendanceRate, AttendanceStatusCounts } from './home-attendance';
+import { averageKey, gradeBand, round1, toThresholds, weightedAverages } from './home-grades';
+import { resolveCurrentPeriod, resolvePeriodPair, toHomePeriod } from './home-period';
 import { timeState } from './home-schedule';
-import { addDays, CLOCK, Clock, localMidnight, SchoolLocalTime, schoolLocalTime } from './home-time';
+import { addDays, CLOCK, Clock, localMidnight, SchoolLocalTime, schoolLocalTime, utcDate } from './home-time';
 
 /** FR-HOM-001.14 window. */
 export const WORK_WINDOW = { aheadDays: 14, overdueDays: 7 } as const;
 
+/** FR-HOM-001.16 */
+export const RECENT_GRADES = 3;
+
 interface StudentContext {
   organizationId: string;
+  userId: string;
   student: {
     id: string;
     firstName: string;
@@ -140,6 +149,172 @@ export class StudentHomeService {
     return { timezone: tz, today: local.date, classGroup: group, items };
   }
 
+  /**
+   * FR-HOM-001.13 KPIs, .16 per-course averages and recent grades on the student's scale, .17 habits.
+   * Published grades only (BR-HOM-001.2); thresholds from the group's study plan (BR-HOM-001.1).
+   */
+  async progress(user: AuthUserContext | undefined): Promise<StudentProgress> {
+    const { organizationId, userId, student, local } = await this.context(user);
+    const group = student.classGroup;
+
+    const [{ current, previous }, enrolled, planRow] = await Promise.all([
+      resolvePeriodPair(this.prisma, student.school.currentYear, local.date),
+      this.prisma.course.findMany({
+        where: { organizationId, students: { some: { id: student.id } } },
+        select: { id: true, name: true },
+        orderBy: { name: 'asc' },
+      }),
+      group
+        ? this.prisma.classGroup.findUnique({
+            where: { id: group.id },
+            select: {
+              studyPlan: {
+                select: { gradeMetric: { select: { maximum: true, minimumApproval: true, minimumExcellence: true } } },
+              },
+            },
+          })
+        : Promise.resolve(null),
+    ]);
+    const scale = toThresholds(planRow?.studyPlan?.gradeMetric);
+    const periodIds = [current?.id, previous?.id].filter((id): id is string => Boolean(id));
+    const attendanceTo = current ? minDate(current.endDate.toISOString().slice(0, 10), local.date) : null;
+
+    const [scores, recent, attendanceRows, threads, habitMarks] = await Promise.all([
+      periodIds.length
+        ? this.prisma.studentGrade.findMany({
+            where: {
+              studentId: student.id,
+              score: { not: null },
+              grade: { published: true, periodId: { in: periodIds }, course: { organizationId } },
+            },
+            select: {
+              studentId: true,
+              score: true,
+              grade: { select: { courseId: true, periodId: true, bucket: { select: { weight: true } } } },
+            },
+          })
+        : Promise.resolve([]),
+      this.prisma.studentGrade.findMany({
+        where: { studentId: student.id, score: { not: null }, grade: { published: true, course: { organizationId } } },
+        orderBy: { grade: { date: 'desc' } },
+        take: RECENT_GRADES,
+        select: {
+          id: true,
+          score: true,
+          grade: { select: { title: true, date: true, course: { select: { id: true, name: true } } } },
+        },
+      }),
+      current && attendanceTo
+        ? this.prisma.attendanceRecord.groupBy({
+            by: ['status'],
+            where: {
+              studentId: student.id,
+              attendanceSession: {
+                organizationId,
+                date: { gte: utcDate(current.startDate.toISOString().slice(0, 10)), lte: utcDate(attendanceTo) },
+              },
+            },
+            _count: { _all: true },
+          })
+        : Promise.resolve(null),
+      this.prisma.communicationThread.findMany({
+        where: {
+          organizationId,
+          deletedAt: null,
+          status: { in: [ThreadStatus.ACTIVE, ThreadStatus.APPROVED] },
+          participants: { some: { userId } },
+        },
+        select: {
+          broadcast: true,
+          participants: { where: { userId }, select: { lastReadAt: true } },
+          messages: {
+            where: { deletedAt: null },
+            orderBy: { createdAt: 'desc' },
+            take: 1,
+            select: { senderId: true, createdAt: true },
+          },
+        },
+      }),
+      current && group
+        ? this.prisma.studentHabitEvaluation.findMany({
+            where: {
+              studentId: student.id,
+              habitEvaluation: { classGroupId: group.id, periodId: current.id, published: true },
+            },
+            select: { value: true, habitEvaluation: { select: { habitMetric: { select: { name: true, order: true } } } } },
+          })
+        : Promise.resolve(null),
+    ]);
+
+    const averages = weightedAverages(scores);
+    const avgFor = (courseId: string, periodId: string | undefined) =>
+      periodId ? averages.get(averageKey(student.id, courseId, periodId)) : undefined;
+    const courses = enrolled.map((c) => {
+      const avg = avgFor(c.id, current?.id);
+      return {
+        id: c.id,
+        name: c.name,
+        average: avg === undefined ? null : round1(avg),
+        band: gradeBand(avg, scale),
+      };
+    });
+    const mean = (periodId: string | undefined) => {
+      const values = enrolled.map((c) => avgFor(c.id, periodId)).filter((v): v is number => v !== undefined);
+      return values.length ? values.reduce((a, b) => a + b, 0) / values.length : null;
+    };
+    const now = mean(current?.id);
+    const before = mean(previous?.id);
+
+    let attendance: StudentProgress['attendance'] = null;
+    if (attendanceRows) {
+      const counts: AttendanceStatusCounts = {};
+      for (const row of attendanceRows) addCount(counts, row.status, row._count._all);
+      attendance = {
+        rate: attendanceRate(counts),
+        absences: counts[AttendanceStatus.ABSENT] ?? 0,
+        late: counts[AttendanceStatus.LATE] ?? 0,
+      };
+    }
+
+    const unread = threads.filter((t) => {
+      const last = t.messages[0];
+      if (!last || last.senderId === userId) return false;
+      const lastReadAt = t.participants[0]?.lastReadAt;
+      return !lastReadAt || last.createdAt > lastReadAt;
+    });
+
+    return {
+      studentId: student.id,
+      period: current ? { id: current.id, name: current.name } : null,
+      previousPeriod: previous ? { id: previous.id, name: previous.name } : null,
+      scale,
+      average: {
+        value: now === null ? null : round1(now),
+        previous: before === null ? null : round1(before),
+        delta: now !== null && before !== null ? round1(now - before) : null,
+      },
+      courses,
+      recentGrades: recent.map((g) => {
+        const score = g.score ? g.score.toNumber() : 0;
+        return {
+          id: g.id,
+          title: g.grade.title,
+          course: g.grade.course,
+          score,
+          band: gradeBand(score, scale),
+          date: g.grade.date.toISOString(),
+        };
+      }),
+      attendance,
+      messages: {
+        unread: unread.length,
+        fromTeachers: unread.filter((t) => !t.broadcast).length,
+        broadcasts: unread.filter((t) => t.broadcast).length,
+      },
+      habits: habitMarks ? habitsSummary(habitMarks) : null,
+    };
+  }
+
   /** BR-HOM-001.8: the caller's own Student record in their organization. */
   private async context(user: AuthUserContext | undefined): Promise<StudentContext> {
     if (!user?.userId) throw new ForbiddenException('Not authenticated');
@@ -157,7 +332,12 @@ export class StudentHomeService {
     });
     if (!student) throw new ForbiddenException('No student profile in this organization');
 
-    return { organizationId, student, local: schoolLocalTime(this.clock.now(), student.school.timezone) };
+    return {
+      organizationId,
+      userId: user.userId,
+      student,
+      local: schoolLocalTime(this.clock.now(), student.school.timezone),
+    };
   }
 }
 
@@ -169,4 +349,19 @@ export function workStatus(
   if (item.submitted) return 'ENTREGADO';
   if (!item.requireSubmission) return 'PRESENCIAL';
   return item.dueAt < now ? 'VENCIDA' : 'PENDIENTE';
+}
+
+function minDate(a: string, b: string) {
+  return a < b ? a : b;
+}
+
+/** FR-HOM-001.17: S marks counted; R and X listed in the habits' display order. */
+export function habitsSummary(
+  marks: { value: HabitValue; habitEvaluation: { habitMetric: { name: string; order: number } } }[],
+): StudentHabits {
+  const flagged = marks
+    .filter((m) => m.value !== HabitValue.S)
+    .sort((a, b) => a.habitEvaluation.habitMetric.order - b.habitEvaluation.habitMetric.order)
+    .map((m) => ({ name: m.habitEvaluation.habitMetric.name, value: m.value as 'R' | 'X' }));
+  return { total: marks.length, satisfactory: marks.length - flagged.length, flagged };
 }

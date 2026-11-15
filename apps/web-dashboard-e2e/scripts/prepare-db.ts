@@ -312,6 +312,45 @@ async function seedFixtures(databaseUrl: string) {
       },
     });
 
+    // HOM-001-S08: what the school admin must attend to.
+    const applicant = await prisma.user.create({
+      data: {
+        email: data.admin.applicant.email,
+        name: `${data.admin.applicant.firstName} ${data.admin.applicant.lastName}`,
+        firstName: data.admin.applicant.firstName,
+        lastName: data.admin.applicant.lastName,
+        password: passwordHash,
+        emailVerified: true,
+      },
+    });
+    await prisma.joinRequest.create({ data: { userId: applicant.id, schoolId: school.id, requestedRole: 'TEACHER' } });
+    await prisma.communicationThread.create({
+      data: {
+        organizationId: org.id,
+        type: 'SCHOOL_WIDE',
+        scopeId: school.id,
+        title: data.admin.pendingBroadcast,
+        createdById: users.teacher.userId,
+        ownerRole: 'TEACHER',
+        broadcast: true,
+        status: 'PENDING_APPROVAL',
+      },
+    });
+    const overdueDue = new Date(now + data.admin.overdueCharge.inDays * day);
+    await prisma.charge.create({
+      data: {
+        schoolId: school.id,
+        year: new Date().getFullYear(),
+        studentId: relatedStudentIds[2],
+        amount: data.admin.overdueCharge.amount,
+        dueDate: new Date(Date.UTC(overdueDue.getUTCFullYear(), overdueDue.getUTCMonth(), overdueDue.getUTCDate())),
+        description: data.admin.overdueCharge.description,
+      },
+    });
+    await prisma.importJob.create({
+      data: { organizationId: org.id, schoolId: school.id, entityType: 'STUDENT', status: 'FAILED', totalRows: 10, errorCount: 3 },
+    });
+
     // HOM-001-S04: the student persona is the first related student; work for each status.
     await prisma.student.update({ where: { id: relatedStudentIds[0] }, data: { userId: users.student.userId } });
     for (const [key, w] of Object.entries(data.studentWork)) {

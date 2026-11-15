@@ -60,6 +60,8 @@ enum Perm {
   COMMUNICATION_VIEW = 'COMMUNICATION_VIEW',
   COMMUNICATION_BROADCAST = 'COMMUNICATION_BROADCAST',
   COMMUNICATION_APPROVE = 'COMMUNICATION_APPROVE',
+  // Home dashboards (HOM-001)
+  VIEW_SCHOOL_DASHBOARD = 'VIEW_SCHOOL_DASHBOARD',
 }
 
 const PERMISSION_DESCRIPTIONS: Record<Perm, string> = {
@@ -105,6 +107,7 @@ const PERMISSION_DESCRIPTIONS: Record<Perm, string> = {
   [Perm.COMMUNICATION_VIEW]: 'View communication threads and messages',
   [Perm.COMMUNICATION_BROADCAST]: 'Create broadcasts to class or school',
   [Perm.COMMUNICATION_APPROVE]: 'Approve pending broadcasts before fan-out',
+  [Perm.VIEW_SCHOOL_DASHBOARD]: 'View the school dashboard on the home page',
 };
 
 const ALL_PERMISSIONS = Object.values(Perm);

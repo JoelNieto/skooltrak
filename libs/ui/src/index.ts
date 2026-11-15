@@ -12,6 +12,7 @@ export * from './lib/ui/components/empty-state';
 export * from './lib/ui/components/error';
 export * from './lib/ui/components/loader';
 export * from './lib/ui/components/message-bubble';
+export * from './lib/ui/components/meter';
 export * from './lib/ui/components/multiselect';
 export * from './lib/ui/components/page-header';
 export * from './lib/ui/components/paginator';

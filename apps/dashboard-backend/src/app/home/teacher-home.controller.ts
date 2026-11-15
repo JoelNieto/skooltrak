@@ -1,7 +1,7 @@
 import { AuthenticatedRequest, BetterAuthGuard, Perm, PermissionsGuard, RequirePermissions } from '@/auth';
 import { Controller, Get, Query, Req, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { TeacherSummary, TeacherToday } from './entities/teacher-home.entity';
+import { TeacherSummary, TeacherToday, TeacherWeek } from './entities/teacher-home.entity';
 import { TeacherHomeService } from './teacher-home.service';
 
 /** Teacher home sections (HOM-001). Also needs a Teacher record in the caller's org (BR-HOM-001.7). */
@@ -20,8 +20,14 @@ export class TeacherHomeController {
   }
 
   @Get('summary')
-  @ApiOperation({ summary: 'Teacher home: KPIs scoped to own courses (FR-HOM-001.7)' })
+  @ApiOperation({ summary: 'Teacher home: KPIs, Pendientes and period-close banner (FR-HOM-001.5, .7, .8)' })
   summary(@Req() req: AuthenticatedRequest, @Query('schoolId') schoolId: string): Promise<TeacherSummary> {
     return this.teacherHome.summary(req.user, schoolId);
+  }
+
+  @Get('week')
+  @ApiOperation({ summary: "Teacher home: this week's assignments with hand-in progress (FR-HOM-001.9)" })
+  week(@Req() req: AuthenticatedRequest, @Query('schoolId') schoolId: string): Promise<TeacherWeek> {
+    return this.teacherHome.week(req.user, schoolId);
   }
 }

@@ -63,13 +63,21 @@ import { firstValueFrom } from 'rxjs';
                   </td>
                   <td>
                     @if (submission) {
-                      <span uiBadge tone="success" size="sm" class="gap-1">
-                        <span class="material-symbols-outlined text-sm!">check</span>
-                        Entregado
-                      </span>
+                      <div class="flex flex-wrap gap-1">
+                        <span uiBadge tone="success" size="sm" class="gap-1">
+                          <span class="material-symbols-outlined text-sm!" aria-hidden="true">check</span>
+                          Entregado
+                        </span>
+                        @if (submission.reviewedAt) {
+                          <span uiBadge tone="info" size="sm" class="gap-1">
+                            <span class="material-symbols-outlined text-sm!" aria-hidden="true">done_all</span>
+                            Revisada
+                          </span>
+                        }
+                      </div>
                     } @else {
                       <span uiBadge tone="warning" size="sm" class="gap-1">
-                        <span class="material-symbols-outlined text-sm!">schedule</span>
+                        <span class="material-symbols-outlined text-sm!" aria-hidden="true">schedule</span>
                         Pendiente
                       </span>
                     }
@@ -103,6 +111,20 @@ import { firstValueFrom } from 'rxjs';
                     }
                   </td>
                   <td>
+                    <div class="flex items-center justify-end gap-1">
+                    @if (submission) {
+                      <button
+                        uiButton
+                        variant="ghost"
+                        size="sm"
+                        type="button"
+                        [loading]="reviewingId() === submission.id"
+                        [disabled]="reviewingId() === submission.id"
+                        (click)="toggleReviewed(submission)"
+                      >
+                        {{ submission.reviewedAt ? 'Quitar revisión' : 'Marcar revisada' }}
+                      </button>
+                    }
                     @let fileId = $safeNavigationMigration(submission?.file?.id);
                     @if (fileId) {
                       <button
@@ -114,10 +136,12 @@ import { firstValueFrom } from 'rxjs';
                         [disabled]="downloadingFileId() === fileId"
                       >
                         @if (!(downloadingFileId() === fileId)) {
-                          <span class="material-symbols-outlined">download</span>
+                          <span class="material-symbols-outlined" aria-hidden="true">download</span>
+                          <span class="sr-only">Descargar</span>
                         }
                       </button>
                     }
+                    </div>
                   </td>
                 </tr>
               } @empty {
@@ -141,6 +165,7 @@ export default class AssignmentSubmissionsList {
   private toast = inject(Toast);
 
   downloadingFileId = signal<string | null>(null);
+  reviewingId = signal<string | null>(null);
 
   studentsResource = httpResource<
     {
@@ -149,11 +174,29 @@ export default class AssignmentSubmissionsList {
       fatherName: string;
       motherName: string;
       assignmentSubmissions: Array<{
+        id: string;
+        reviewedAt?: string | null;
         submittedAt?: string | Date | null;
         file: { id: string; name: string; mimeType: string; size: number };
       }>;
     }[]
   >(() => `/api/v1/assignment-submissions/students-for-assignment/${this.assignmentId()}`);
+
+  /** BR-HOM-001.17: the course's teacher marks a submission reviewed (feeds "Entregas por revisar"). */
+  async toggleReviewed(submission: { id: string; reviewedAt?: string | null }) {
+    this.reviewingId.set(submission.id);
+    try {
+      await firstValueFrom(
+        this.http.patch(`/api/v1/assignment-submissions/${submission.id}/review`, { reviewed: !submission.reviewedAt }),
+      );
+      this.studentsResource.reload();
+    } catch (error) {
+      const message = (error as { error?: { message?: string } })?.error?.message;
+      this.toast.showError(message || 'No se pudo actualizar la revisión.');
+    } finally {
+      this.reviewingId.set(null);
+    }
+  }
 
   getSubmittedCount(students: Array<{ assignmentSubmissions?: unknown[] }>): number {
     return students.filter((s) => (s.assignmentSubmissions?.length ?? 0) > 0).length;
@@ -184,7 +227,8 @@ export default class AssignmentSubmissionsList {
   formatSubmissionDate(value: unknown): string {
     if (value == null) return '-';
     const date = value instanceof Date ? value : new Date(String(value));
-    return isNaN(date.getTime()) ? '-' : date.toLocaleDateString(undefined, { dateStyle: 'short', timeStyle: 'short' });
+    // toLocaleDateString rejects timeStyle (TypeError), which broke the list whenever a submission existed.
+    return isNaN(date.getTime()) ? '-' : date.toLocaleString(undefined, { dateStyle: 'short', timeStyle: 'short' });
   }
 
   getFileIcon(mimeType: string): string {

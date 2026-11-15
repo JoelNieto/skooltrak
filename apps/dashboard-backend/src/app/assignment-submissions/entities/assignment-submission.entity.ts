@@ -25,6 +25,9 @@ export class AssignmentSubmission
 
     submittedAt: Date;
 
+    /** Null until the course's teacher marks it reviewed (BR-HOM-001.17). */
+    reviewedAt: Date | null;
+
     updatedAt: Date;
 }
 

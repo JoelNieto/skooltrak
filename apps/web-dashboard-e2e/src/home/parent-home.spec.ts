@@ -53,6 +53,69 @@ test.describe('Parent home', () => {
     await expect(alerts.getByText('Pago próximo a vencer')).toHaveCount(0);
   });
 
+  test("shows the selected child's work, recent grades, teacher messages and account @FR-HOM-001.21 @FR-HOM-001.22 @FR-HOM-001.23", async ({
+    page,
+  }) => {
+    await page.goto('/home');
+
+    const work = page.getByRole('region', { name: 'Próximas tareas y evaluaciones' });
+    for (const [title, status] of [
+      [data.studentWork.overdue.title, 'Vencida'],
+      [data.assignment.title, 'Entregado'],
+      [data.studentWork.pending.title, 'Pendiente'],
+    ]) {
+      await expect(work.getByRole('listitem').filter({ hasText: title })).toContainText(status);
+    }
+
+    const grades = page.getByRole('region', { name: 'Calificaciones recientes' });
+    await expect(grades.getByText(data.publishedGrade.title, { exact: false })).toBeVisible();
+    await expect(grades.getByText(data.grade.title, { exact: false })).toHaveCount(0); // unpublished
+
+    // The family thread is about Ana; its last sender depends on whether the S03 reply ran first.
+    const messages = page.getByRole('region', { name: 'Mensajes de docentes' });
+    await expect(messages.getByText(data.familyThread.title)).toBeVisible();
+
+    const account = page.getByRole('region', { name: 'Estado de cuenta' });
+    await expect(account.getByText('Pendiente', { exact: true })).toBeVisible();
+    await expect(account).toContainText('285');
+    await expect(account).toContainText(data.charge.description);
+    await expect(account.getByText('Sin pagos registrados')).toBeVisible();
+    await expect(account.getByRole('link', { name: 'Ver estado de cuenta' })).toHaveAttribute('href', '/parent/finances');
+
+    await expect(page.getByRole('img', { name: /Gráfico por desarrollar: Calendario de calor/ })).toBeVisible();
+    await expect(page.getByRole('img', { name: /Gráfico por desarrollar: Línea/ })).toBeVisible();
+
+    await page.getByRole('group', { name: 'Elegir hijo' }).getByRole('button', { name: new RegExp(beto) }).click();
+    await expect(page.getByRole('region', { name: `Requiere tu atención · ${data.relatedStudents[1]}` })).toBeVisible();
+    await expect(page.getByRole('region', { name: 'Mensajes de docentes' }).getByText(data.familyThread.title)).toHaveCount(0);
+    await expect(page.getByRole('region', { name: 'Estado de cuenta' }).getByText('Al día', { exact: true })).toBeVisible();
+  });
+
+  test('account summary needs VIEW_FINANCIALS and a linked child @FR-HOM-001.22', async ({ page, request, browser }) => {
+    await page.goto('/home');
+    const token = await page.evaluate(() => localStorage.getItem('access_token'));
+    const { children } = (await (
+      await request.get('/api/v1/home/parent/children', { headers: { Authorization: `Bearer ${token}` } })
+    ).json()) as { children: { studentId: string }[] };
+    const childId = children[0].studentId;
+    expect(
+      (await request.get(`/api/v1/home/parent/child/${childId}/account`, { headers: { Authorization: `Bearer ${token}` } })).status(),
+    ).toBe(200);
+
+    for (const persona of ['teacher', 'student'] as const) {
+      const ctx = await browser.newContext({ storageState: storageStatePath(persona) });
+      const p = await ctx.newPage();
+      await p.goto('/login');
+      const other = await p.evaluate(() => localStorage.getItem('access_token'));
+      await ctx.close();
+      // Teacher: no VIEW_FINANCIALS. Student: has it for themself, but is not this child's parent.
+      const res = await request.get(`/api/v1/home/parent/child/${childId}/account`, {
+        headers: { Authorization: `Bearer ${other}` },
+      });
+      expect(res.status(), persona).toBe(403);
+    }
+  });
+
   test('refuses a student who is not linked, and non-parents @FR-HOM-001.18', async ({ page, request, browser }) => {
     await page.goto('/home');
     const token = await page.evaluate(() => localStorage.getItem('access_token'));

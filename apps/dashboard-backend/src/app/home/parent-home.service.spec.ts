@@ -49,6 +49,7 @@ describe('ParentHomeService (HOM-001-S06)', () => {
       parents?: unknown[];
       linked?: unknown;
       facts?: Record<string, { below?: boolean; overdue?: number; absences?: unknown[]; late?: number; charges?: unknown[]; payments?: unknown[] }>;
+      threads?: unknown[];
     } = {},
   ) {
     const facts = opts.facts ?? {};
@@ -63,6 +64,7 @@ describe('ParentHomeService (HOM-001-S06)', () => {
       school: { findUnique: jest.fn().mockResolvedValue({ currencyCode: 'USD' }) },
       charge: { findMany: jest.fn().mockImplementation(({ where }) => Promise.resolve(facts[where.studentId]?.charges ?? [])) },
       payment: { findMany: jest.fn().mockImplementation(({ where }) => Promise.resolve(facts[where.studentId]?.payments ?? [])) },
+      communicationThread: { findMany: jest.fn().mockResolvedValue(opts.threads ?? []) },
     };
     const studentHome = {
       contextForStudent: jest.fn().mockImplementation((id: string) => Promise.resolve(ctxFor(id))),
@@ -112,6 +114,115 @@ describe('ParentHomeService (HOM-001-S06)', () => {
       const { service } = build({ parents: [] });
 
       await expect(service.children(parentUser)).rejects.toThrow(new ForbiddenException('No parent profile'));
+    });
+  });
+
+  describe('child details (FR-HOM-001.21, .23)', () => {
+    const linked = kid('st-sofia', 'Sofía');
+
+    it('asks for 4 recent grades and lists the teacher threads about this child', async () => {
+      const msg = (senderId: string, createdAt: string, body = 'Hola') => ({
+        body,
+        createdAt: new Date(createdAt),
+        senderId,
+        sender: { name: senderId === 'user-parent' ? 'María Pérez' : 'Carlos Méndez', firstName: null, lastName: null },
+      });
+      const { service, prisma, studentHome } = build({
+        linked,
+        threads: [
+          { id: 't-old', title: 'Taller', participants: [{ lastReadAt: new Date('2026-11-15') }], messages: [msg('user-teacher', '2026-11-14T10:00:00Z')] },
+          { id: 't-new', title: 'Reunión', participants: [{ lastReadAt: null }], messages: [msg('user-teacher', '2026-11-16T10:00:00Z', 'x'.repeat(200))] },
+          { id: 't-mine', title: 'Respuesta', participants: [{ lastReadAt: null }], messages: [msg('user-parent', '2026-11-16T11:00:00Z')] },
+          { id: 't-empty', title: 'Vacío', participants: [], messages: [] },
+        ],
+      });
+
+      const home = await service.child(parentUser, 'st-sofia');
+
+      expect(studentHome.progressFor).toHaveBeenCalledWith(expect.anything(), { recentGrades: 4 });
+      expect(prisma.communicationThread.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: {
+            type: 'STUDENT_GUARDIANS',
+            scopeId: 'st-sofia',
+            broadcast: false,
+            deletedAt: null,
+            participants: { some: { userId: 'user-parent' } },
+          },
+        }),
+      );
+      expect(home.messages.map((m) => [m.id, m.unread])).toEqual([
+        ['t-mine', false],
+        ['t-new', true],
+        ['t-old', false],
+      ]);
+      expect(home.messages[1].preview).toHaveLength(140);
+      expect(home.messages[1].senderName).toBe('Carlos Méndez');
+      expect(home.work.map((w) => w.status)).toEqual(['PENDIENTE', 'ENTREGADO']);
+    });
+  });
+
+  describe('account (FR-HOM-001.22)', () => {
+    const linked = kid('st-sofia', 'Sofía');
+    const charge = (id: string, amount: number, due: string, description = id) => ({
+      id,
+      amount: decimal(amount),
+      dueDate: new Date(`${due}T00:00:00Z`),
+      description,
+    });
+
+    it('is "Pendiente" with the next charge when nothing is overdue', async () => {
+      const { service } = build({
+        linked,
+        facts: { 'st-sofia': { charges: [charge('dic', 285, '2026-12-01', 'Mensualidad diciembre')], payments: [] } },
+      });
+
+      expect(await service.account(parentUser, 'st-sofia')).toEqual({
+        currencyCode: 'USD',
+        status: 'PENDIENTE',
+        balance: 285,
+        overdue: 0,
+        nextCharge: { description: 'Mensualidad diciembre', outstanding: 285, dueDate: '2026-12-01' },
+        lastPayment: null,
+      });
+    });
+
+    it('is "Vencido" when a charge is overdue, and still shows the next upcoming one', async () => {
+      const { service } = build({
+        linked,
+        facts: {
+          'st-sofia': {
+            charges: [charge('nov', 285, '2026-11-01'), charge('dic', 285, '2026-12-01')],
+            payments: [{ chargeId: 'nov', amount: decimal(85), paidAt: new Date('2026-11-03T00:00:00Z') }],
+          },
+        },
+      });
+
+      const account = await service.account(parentUser, 'st-sofia');
+
+      expect(account).toMatchObject({ status: 'VENCIDO', balance: 485, overdue: 200, lastPayment: { amount: 85, paidAt: '2026-11-03' } });
+      expect(account.nextCharge?.description).toBe('dic');
+    });
+
+    it('is "Al día" with nothing owed', async () => {
+      const { service } = build({
+        linked,
+        facts: {
+          'st-sofia': {
+            charges: [charge('nov', 285, '2026-11-01')],
+            payments: [{ chargeId: 'nov', amount: decimal(285), paidAt: new Date('2026-11-02T00:00:00Z') }],
+          },
+        },
+      });
+
+      expect(await service.account(parentUser, 'st-sofia')).toMatchObject({ status: 'AL_DIA', balance: 0, nextCharge: null });
+    });
+
+    it('refuses a student not linked to the caller', async () => {
+      const { service, prisma } = build({ linked: null });
+
+      await expect(service.account(parentUser, 'st-other')).rejects.toThrow(ForbiddenException);
+      expect(prisma.charge.findMany).not.toHaveBeenCalled();
     });
   });
 

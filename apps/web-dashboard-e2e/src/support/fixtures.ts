@@ -9,6 +9,8 @@ export const personas = {
   admin: { email: 'admin.e2e@skooltrak.test', firstName: 'Ada', lastName: 'Admin', role: 'ORG_ADMIN' },
   teacher: { email: 'teacher.e2e@skooltrak.test', firstName: 'Tomás', lastName: 'Docente', role: 'TEACHER' },
   otherTeacher: { email: 'teacher2.e2e@skooltrak.test', firstName: 'Olga', lastName: 'Docente', role: 'TEACHER' },
+  /** Guardian of the first related student (HOM-001-S03 family thread; parent home later). */
+  parent: { email: 'parent.e2e@skooltrak.test', firstName: 'Paula', lastName: 'Acudiente', role: 'PARENT' },
 } as const;
 
 export type PersonaKey = keyof typeof personas;
@@ -54,4 +56,14 @@ export const data = {
   period: { name: 'Periodo E2E', closesInDays: 10 },
   grade: { title: 'Prueba corta E2E', bucket: 'Pruebas' },
   assignment: { title: 'Proyecto E2E' },
+  /**
+   * HOM-001-S03. The 7° study plan uses `metric` (pass mark 3.0 of 5.0). `publishedGrade` is
+   * published and fully scored with `publishedScores` (one per related student, in order), so the
+   * second student is below the pass mark and the tile average is 3.5. `familyThread`'s last message
+   * is from `parent`, waiting for `teacher`'s answer.
+   */
+  metric: { name: 'Escala 1–5 E2E', minimum: 1, maximum: 5, minimumApproval: 3, minimumExcellence: 4.5 },
+  publishedGrade: { title: 'Taller E2E' },
+  publishedScores: [4, 2, 4.5],
+  familyThread: { title: 'Consulta sobre Ana', parentMessage: '¿Podemos hablar sobre las notas de Ana?' },
 } as const;

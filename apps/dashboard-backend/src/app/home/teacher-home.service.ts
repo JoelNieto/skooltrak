@@ -1,10 +1,15 @@
 import { AuthUserContext } from '@/auth';
-import { AttendanceStatus, EnrollmentStatus } from '@generated/prisma';
+import { AttendanceStatus, EnrollmentStatus, ThreadStatus } from '@generated/prisma';
 import { BadRequestException, ForbiddenException, Inject, Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma.service';
 import { teacherClassGroupWhere, teacherCourseWhere } from '../teachers/teacher-scope';
 import {
+  AttentionReason,
+  AttentionStudent,
+  FamilyThread,
   HomePeriod,
+  TeacherAttention,
+  TeacherAverage,
   TeacherGrades,
   TeacherGroupRate,
   TeacherPeriodClose,
@@ -17,7 +22,8 @@ import {
   TeacherWeekItem,
 } from './entities/teacher-home.entity';
 import { addCount, attendanceRate, AttendanceStatusCounts } from './home-attendance';
-import { PeriodRef, resolveCurrentPeriod } from './home-period';
+import { averageKey, GradeThresholds, round1, toThresholds, weightedAverages } from './home-grades';
+import { PeriodRef, resolveCurrentPeriod, resolvePeriodPair } from './home-period';
 import {
   addDays,
   CLOCK,
@@ -34,8 +40,31 @@ export const PERIOD_CLOSE_WINDOW_DAYS = 14;
 
 const ACTIVE = EnrollmentStatus.ACTIVE;
 
+/** BR-HOM-001.11 (teacher view), fixed in v1 (Q5). */
+export const ATTENTION = { absences: 3, late: 3, drop: 0.5, listed: 5 } as const;
+/** BR-HOM-001.13 */
+export const STALE_THREAD_MS = 48 * 3_600_000;
+const PREVIEW_LENGTH = 140;
+
+interface TeacherCourseScale {
+  id: string;
+  name: string;
+  thresholds: GradeThresholds | null;
+}
+
+/** Published-score averages of the teacher's courses for the current and previous period. */
+interface GradeInsights {
+  current: PeriodRef | null;
+  previous: PeriodRef | null;
+  courses: TeacherCourseScale[];
+  averages: Map<string, number>;
+  /** Students with at least one current-period average, by id. */
+  studentIds: Set<string>;
+}
+
 interface TeacherContext {
   organizationId: string;
+  userId: string;
   school: { id: string; currentYear: number; timezone: string };
   teacher: { id: string; firstName: string };
   local: SchoolLocalTime;
@@ -126,10 +155,12 @@ export class TeacherHomeService {
   async summary(user: AuthUserContext | undefined, schoolId: string | undefined): Promise<TeacherSummary> {
     const ctx = await this.context(user, schoolId);
     const period = await resolveCurrentPeriod(this.prisma, ctx.school.currentYear, ctx.local.date);
-    const [attendance, toReview, grades] = await Promise.all([
+    const [attendance, toReview, grades, insights, threads] = await Promise.all([
       this.weekAttendance(ctx),
       this.toReview(ctx),
       period ? this.gradeCompleteness(ctx, period.id) : Promise.resolve(null),
+      this.gradeInsights(ctx),
+      this.unansweredThreads(ctx),
     ]);
 
     return {
@@ -139,7 +170,88 @@ export class TeacherHomeService {
       toReview,
       grades,
       periodClose: periodClose(period, ctx.local.date),
+      average: insights.current ? averageTile(insights) : null,
+      familyMessages: { unanswered: threads.length, stale: threads.filter((t) => t.stale).length },
     };
+  }
+
+  /** FR-HOM-001.10 students needing attention and FR-HOM-001.11 unanswered family threads. */
+  async attention(user: AuthUserContext | undefined, schoolId: string | undefined): Promise<TeacherAttention> {
+    const ctx = await this.context(user, schoolId);
+    const [insights, absences, threads] = await Promise.all([
+      this.gradeInsights(ctx),
+      this.weekAbsenceCounts(ctx),
+      this.unansweredThreads(ctx),
+    ]);
+
+    const reasonsByStudent = new Map<string, { reasons: AttentionReason[]; worst: number | null }>();
+    const add = (studentId: string, reason: AttentionReason) => {
+      const entry = reasonsByStudent.get(studentId) ?? { reasons: [], worst: null };
+      entry.reasons.push(reason);
+      reasonsByStudent.set(studentId, entry);
+    };
+
+    if (insights.current) {
+      for (const studentId of insights.studentIds) {
+        for (const course of insights.courses) {
+          const now = insights.averages.get(averageKey(studentId, course.id, insights.current.id));
+          if (now === undefined) continue;
+          const ref = { id: course.id, name: course.name };
+          if (course.thresholds && now < course.thresholds.minimumApproval) {
+            add(studentId, { kind: 'BELOW_PASS', course: ref, value: round1(now) });
+          }
+          const before = insights.previous
+            ? insights.averages.get(averageKey(studentId, course.id, insights.previous.id))
+            : undefined;
+          if (before !== undefined && before - now >= ATTENTION.drop) {
+            add(studentId, { kind: 'DROP', course: ref, value: round1(before - now) });
+          }
+        }
+      }
+    }
+    for (const [studentId, counts] of absences) {
+      if (counts.absent >= ATTENTION.absences) add(studentId, { kind: 'ABSENCES', course: null, value: counts.absent });
+      if (counts.late >= ATTENTION.late) add(studentId, { kind: 'LATE', course: null, value: counts.late });
+    }
+
+    // Worst current average, for ranking and display.
+    for (const [studentId, entry] of reasonsByStudent) {
+      const current = insights.current;
+      const avgs = current
+        ? insights.courses
+            .map((c) => insights.averages.get(averageKey(studentId, c.id, current.id)))
+            .filter((v): v is number => v !== undefined)
+        : [];
+      entry.worst = avgs.length ? round1(Math.min(...avgs)) : null;
+    }
+
+    const ids = [...reasonsByStudent.keys()];
+    const people = ids.length
+      ? await this.prisma.student.findMany({
+          where: { id: { in: ids }, organizationId: ctx.organizationId },
+          select: { id: true, firstName: true, fatherName: true, classGroup: { select: { id: true, name: true } } },
+        })
+      : [];
+
+    const students: AttentionStudent[] = people
+      .map((p) => {
+        const entry = reasonsByStudent.get(p.id) ?? { reasons: [], worst: null };
+        return {
+          id: p.id,
+          name: `${p.firstName} ${p.fatherName}`.trim(),
+          classGroup: p.classGroup,
+          worstAverage: entry.worst,
+          reasons: entry.reasons,
+        };
+      })
+      .sort(
+        (a, b) =>
+          b.reasons.length - a.reasons.length ||
+          (a.worstAverage ?? Infinity) - (b.worstAverage ?? Infinity) ||
+          a.name.localeCompare(b.name),
+      );
+
+    return { students: students.slice(0, ATTENTION.listed), totalStudents: students.length, threads: threads.slice(0, 5) };
   }
 
   /** FR-HOM-001.9: this week's assignment dates of the teacher's courses, with hand-in progress. */
@@ -315,6 +427,125 @@ export class TeacherHomeService {
     };
   }
 
+  /**
+   * Averages of active students of the teacher's related groups in the teacher's courses, for the
+   * current and previous period: one query over published, scored grades (BR-HOM-001.2).
+   */
+  private async gradeInsights({ organizationId, school, teacher, local }: TeacherContext): Promise<GradeInsights> {
+    const [{ current, previous }, rawCourses] = await Promise.all([
+      resolvePeriodPair(this.prisma, school.currentYear, local.date),
+      this.prisma.course.findMany({
+        where: { organizationId, schoolId: school.id, ...teacherCourseWhere(teacher.id) },
+        select: {
+          id: true,
+          name: true,
+          studyPlan: { select: { gradeMetric: { select: { maximum: true, minimumApproval: true, minimumExcellence: true } } } },
+        },
+      }),
+    ]);
+    const courses = rawCourses.map((c) => ({ id: c.id, name: c.name, thresholds: toThresholds(c.studyPlan?.gradeMetric) }));
+    const periodIds = [current?.id, previous?.id].filter((id): id is string => Boolean(id));
+    if (!current || !courses.length) {
+      return { current, previous, courses, averages: new Map(), studentIds: new Set() };
+    }
+
+    const courseIds = courses.map((c) => c.id);
+    const rows = await this.prisma.studentGrade.findMany({
+      where: {
+        score: { not: null },
+        grade: { published: true, periodId: { in: periodIds }, courseId: { in: courseIds } },
+        student: {
+          organizationId,
+          enrollmentStatus: ACTIVE,
+          classGroup: teacherClassGroupWhere(teacher.id),
+          courses: { some: { id: { in: courseIds } } },
+        },
+      },
+      select: {
+        studentId: true,
+        score: true,
+        grade: { select: { courseId: true, periodId: true, bucket: { select: { weight: true } } } },
+      },
+    });
+
+    const averages = weightedAverages(rows);
+    const studentIds = new Set(rows.filter((r) => r.grade.periodId === current.id).map((r) => r.studentId));
+    return { current, previous, courses, averages, studentIds };
+  }
+
+  /** ABSENT and LATE records per student this week in the teacher's classes. */
+  private async weekAbsenceCounts({ organizationId, school, teacher, local }: TeacherContext) {
+    const rows = await this.prisma.attendanceRecord.groupBy({
+      by: ['studentId', 'status'],
+      where: {
+        status: { in: [AttendanceStatus.ABSENT, AttendanceStatus.LATE] },
+        student: { enrollmentStatus: ACTIVE },
+        attendanceSession: {
+          organizationId,
+          date: { gte: utcDate(local.weekStart), lte: utcDate(local.weekEnd) },
+          course: { schoolId: school.id, ...teacherCourseWhere(teacher.id) },
+          classGroup: teacherClassGroupWhere(teacher.id),
+        },
+      },
+      _count: { _all: true },
+    });
+    const byStudent = new Map<string, { absent: number; late: number }>();
+    for (const row of rows) {
+      const counts = byStudent.get(row.studentId) ?? { absent: 0, late: 0 };
+      if (row.status === AttendanceStatus.ABSENT) counts.absent += row._count._all;
+      else counts.late += row._count._all;
+      byStudent.set(row.studentId, counts);
+    }
+    return byStudent;
+  }
+
+  /** BR-HOM-001.13: the teacher's active non-broadcast threads whose last message is from a parent, newest first. */
+  private async unansweredThreads({ organizationId, userId }: TeacherContext): Promise<FamilyThread[]> {
+    const threads = await this.prisma.communicationThread.findMany({
+      where: {
+        organizationId,
+        broadcast: false,
+        deletedAt: null,
+        status: ThreadStatus.ACTIVE,
+        participants: { some: { userId } },
+      },
+      select: {
+        id: true,
+        title: true,
+        participants: { where: { userId }, select: { lastReadAt: true } },
+        messages: {
+          where: { deletedAt: null },
+          orderBy: { createdAt: 'desc' },
+          take: 1,
+          select: {
+            body: true,
+            createdAt: true,
+            sender: { select: { name: true, firstName: true, lastName: true, role: { select: { name: true } } } },
+          },
+        },
+      },
+    });
+
+    const now = this.clock.now().getTime();
+    return threads
+      .filter((t) => t.messages[0]?.sender?.role?.name?.toUpperCase() === 'PARENT')
+      .map((t) => {
+        const last = t.messages[0];
+        const lastReadAt = t.participants[0]?.lastReadAt;
+        const sender = last.sender;
+        return {
+          id: t.id,
+          title: t.title,
+          senderName: (sender?.name?.trim() || [sender?.firstName, sender?.lastName].filter(Boolean).join(' ')).trim() || '—',
+          lastMessageAt: last.createdAt.toISOString(),
+          preview: last.body.length > PREVIEW_LENGTH ? `${last.body.slice(0, PREVIEW_LENGTH - 1)}…` : last.body,
+          unread: !lastReadAt || last.createdAt > lastReadAt,
+          stale: now - last.createdAt.getTime() > STALE_THREAD_MS,
+        };
+      })
+      .sort((a, b) => b.lastMessageAt.localeCompare(a.lastMessageAt));
+  }
+
   /** BR-HOM-001.7 / .10: caller's org, a school of that org, and a teacher record in it. */
   private async context(user: AuthUserContext | undefined, schoolId: string | undefined): Promise<TeacherContext> {
     if (!user?.userId) throw new ForbiddenException('Not authenticated');
@@ -335,7 +566,13 @@ export class TeacherHomeService {
     if (!school) throw new ForbiddenException('School not in your organization');
     if (!teacher) throw new ForbiddenException('No teacher profile in this organization');
 
-    return { organizationId, school, teacher, local: schoolLocalTime(this.clock.now(), school.timezone) };
+    return {
+      organizationId,
+      userId: user.userId,
+      school,
+      teacher,
+      local: schoolLocalTime(this.clock.now(), school.timezone),
+    };
   }
 
   private async recordCountsBySession(sessionIds: string[]) {
@@ -378,6 +615,34 @@ export function periodClose(period: PeriodRef | null, today: string): TeacherPer
   const endDate = period.endDate.toISOString().slice(0, 10);
   const daysLeft = daysBetween(today, endDate);
   return daysLeft >= 0 && daysLeft <= PERIOD_CLOSE_WINDOW_DAYS ? { name: period.name, endDate, daysLeft } : null;
+}
+
+/** FR-HOM-001.7 average tile (BR-HOM-001.1): no value when the courses use different scales. */
+export function averageTile(insights: GradeInsights): TeacherAverage {
+  const current = insights.current;
+  const coursesWithoutScale = insights.courses.filter((c) => !c.thresholds).length;
+  if (!current) return { value: null, max: null, studentsBelowPass: null, coursesWithoutScale };
+
+  const values: number[] = [];
+  const maxima = new Set<number>();
+  const below = new Set<string>();
+  for (const course of insights.courses) {
+    for (const studentId of insights.studentIds) {
+      const avg = insights.averages.get(averageKey(studentId, course.id, current.id));
+      if (avg === undefined) continue;
+      values.push(avg);
+      maxima.add(course.thresholds?.maximum ?? Number.NaN);
+      if (course.thresholds && avg < course.thresholds.minimumApproval) below.add(studentId);
+    }
+  }
+  const sameScale = maxima.size === 1 && !maxima.has(Number.NaN);
+  const max = sameScale ? [...maxima][0] : null;
+  return {
+    value: values.length && sameScale ? round1(values.reduce((a, b) => a + b, 0) / values.length) : null,
+    max,
+    studentsBelowPass: coursesWithoutScale === insights.courses.length ? null : below.size,
+    coursesWithoutScale,
+  };
 }
 
 function sumValues(m: Map<string, number>) {

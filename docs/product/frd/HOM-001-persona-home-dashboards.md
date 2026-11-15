@@ -117,11 +117,11 @@ Every number is scoped to what that person is responsible for. Pass and excellen
   - The default child is the one with the most alerts; ties go to the first alphabetically.
   - Each child's data comes from that child's school and organization.
 - **BR-HOM-001.10**: **Admin scope.** `schoolId` must belong to the caller's organization (`403` otherwise). Every query filters by `organizationId` and `schoolId`.
-- **BR-HOM-001.11**: **Needs attention / follow-up.** A student qualifies if either condition holds:
-  - 3 or more `ABSENT` records in the current week;
-  - 2 or more courses with a period average below the pass mark (BR .1).
-
-  For a teacher, only their courses and groups count. Teachers also see two extra reasons: an average that dropped ≥ 0.5 from the previous period, and ≥ 3 `LATE` records this week. All thresholds are fixed constants in v1 (Q5).
+- **BR-HOM-001.11**: **Needs attention / follow-up.**
+  - **School admin** view: a student qualifies with ≥ 3 `ABSENT` records in the current week, or with 2 or more courses whose period average is below the pass mark (BR .1).
+  - **Teacher** view: only the teacher's courses and related groups count, and one course below the pass mark is enough. A student also qualifies with ≥ 3 `ABSENT` or ≥ 3 `LATE` records this week in the teacher's classes, or with an average that dropped ≥ 0.5 from the previous period. *(Clarified 2026-11-15 in S03: requiring two of the teacher's own courses would hide most struggling students.)*
+  - Averages are weighted by grade bucket over published scores (as in `grades.service.ts`). A student with no scored grade has no average.
+  - All thresholds are fixed constants in v1 (Q5).
 - **BR-HOM-001.12**: **Work status.** Due dates come from `AssignmentDate` for the student's class group, not `Assignment.date`.
   - *Vencida*: the date has passed, `requireSubmission` is true, and there is no `AssignmentSubmission`.
   - *Entregado*: a submission exists.
@@ -213,7 +213,7 @@ Each slice replaces its part of the existing home in place. Old widgets that are
 |---|---|---|---|
 | [HOM-001-S01](../slices/HOM-001-S01-teacher-my-day.md) | Teacher: "Mi día" with attendance state + scoped attendance KPI (home module foundation, school timezone) | .1 .6 .7 (attendance tile), BR .3 .4 .5 .7 .15 | In review |
 | [HOM-001-S02](../slices/HOM-001-S02-teacher-pending-week.md) | Teacher: Pendientes, period-close banner, this week's assignments with progress (adds `ui-meter`, `AssignmentSubmission.reviewedAt`) | .5 .7 .8 (partial, Q11 Q12) .9, BR .2 .17 | In review |
-| HOM-001-S03 | Teacher: students needing attention, unanswered family threads, average KPI, grade-distribution placeholder (adds `ChartPlaceholder`, grade thresholds) | .2 .4 .7 .10 .11, BR .1 .11 .13 | Proposed |
+| [HOM-001-S03](../slices/HOM-001-S03-teacher-attention.md) | Teacher: students needing attention, unanswered family threads, average KPI, grade-distribution placeholder (adds `ui-chart-placeholder`, grade thresholds) | .2 .4 .7 .8 .10 .11, BR .1 .11 .13 | In review |
 | HOM-001-S04 | Student: now/next, today strip, upcoming/overdue work for own group, quizzes (adds student e2e persona) | .1 .12 .14 .15, BR .8 .12 | Proposed |
 | HOM-001-S05 | Student: KPIs, per-course averages with bands, recent grades, habits, progress placeholder | .2 .13 .16 .17, BR .1 .2 | Proposed |
 | HOM-001-S06 | Parent: child switcher with alert counts, alerts and KPIs for the selected child (adds parent e2e persona) | .18 .19 .20, BR .9 | Proposed |

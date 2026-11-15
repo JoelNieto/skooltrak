@@ -245,6 +245,60 @@ async function seedFixtures(databaseUrl: string) {
       data: { assignmentId: assignment.id, studentId: relatedStudentIds[0], fileId: file.id },
     });
 
+    // HOM-001-S03: a grade metric on the 7° plan, a published low grade, and a parent waiting for an answer.
+    const metric = await prisma.gradeMetric.create({ data: data.metric });
+    await prisma.studyPlan.update({ where: { id: seventh.id }, data: { gradeMetricId: metric.id } });
+    const publishedGrade = await prisma.grade.create({
+      data: {
+        title: data.publishedGrade.title,
+        courseId: teacherCourse.id,
+        bucketId: bucket.id,
+        periodId: period.id,
+        date: new Date(now - 2 * day),
+        published: true,
+      },
+    });
+    await prisma.studentGrade.createMany({
+      data: data.publishedScores.map((score, i) => ({ gradeId: publishedGrade.id, studentId: relatedStudentIds[i], score })),
+    });
+
+    const guardian = await prisma.parent.create({
+      data: {
+        firstName: personas.parent.firstName,
+        fatherName: personas.parent.lastName,
+        documentId: 'E2E-PAR-1',
+        phone: '000-0000',
+        email: personas.parent.email,
+        relationship: 'Madre',
+        organizationId: org.id,
+        userId: users.parent.userId,
+        students: { connect: { id: relatedStudentIds[0] } },
+      },
+    });
+    await prisma.communicationThread.create({
+      data: {
+        organizationId: org.id,
+        type: 'STUDENT_GUARDIANS',
+        scopeId: relatedStudentIds[0],
+        title: data.familyThread.title,
+        createdById: users.teacher.userId,
+        ownerRole: 'TEACHER',
+        participants: {
+          create: [
+            { userId: users.teacher.userId, role: 'OWNER', canInitiate: true },
+            { userId: users.parent.userId, role: 'MEMBER', canInitiate: false },
+          ],
+        },
+        messages: {
+          create: [
+            { senderId: users.teacher.userId, body: 'Buenos días, le escribo por el taller.', createdAt: new Date(now - 3 * day) },
+            { senderId: users.parent.userId, body: data.familyThread.parentMessage, createdAt: new Date(now - 3_600_000) },
+          ],
+        },
+      },
+    });
+    console.log(`  guardian ${guardian.id} linked to the first related student`);
+
     console.log(`✓ Seeded e2e fixtures (org ${org.id})`);
   } finally {
     await prisma.$disconnect();

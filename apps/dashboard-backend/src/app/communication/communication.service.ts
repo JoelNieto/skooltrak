@@ -17,6 +17,7 @@ import {
   UrgencyTier,
 } from '@generated/prisma';
 import { PrismaService } from '../prisma.service';
+import { teacherClassGroupWhere, teacherCourseWhere } from '../teachers/teacher-scope';
 import { CommunicationDeliveryService } from './communication-delivery.service';
 import { CommunicationSocketGateway } from './communication-socket.gateway';
 import { TranslationService } from './translation.service';
@@ -715,14 +716,6 @@ export class CommunicationService {
   // teacher's courses. Being the homeroom teacher (ClassGroup.teacherId) alone does not count.
   // See docs/product/frd/COM-002-broadcasts.md.
 
-  private teacherCourseWhere(teacherId: string): Prisma.CourseWhereInput {
-    return { teacherId };
-  }
-
-  private teacherClassGroupWhere(teacherId: string): Prisma.ClassGroupWhereInput {
-    return { studyPlan: { courses: { some: { teacherId } } } };
-  }
-
   private findTeacher(userId: string, organizationId: string) {
     return this.prisma.teacher.findFirst({
       where: { userId, organizationId },
@@ -744,10 +737,10 @@ export class CommunicationService {
       allowed =
         type === ThreadType.COURSE
           ? (await this.prisma.course.count({
-              where: { id: scopeId, organizationId, ...this.teacherCourseWhere(teacher.id) },
+              where: { id: scopeId, organizationId, ...teacherCourseWhere(teacher.id) },
             })) > 0
           : (await this.prisma.classGroup.count({
-              where: { id: scopeId, organizationId, ...this.teacherClassGroupWhere(teacher.id) },
+              where: { id: scopeId, organizationId, ...teacherClassGroupWhere(teacher.id) },
             })) > 0;
     }
 
@@ -769,8 +762,8 @@ export class CommunicationService {
     if (!this.isOrgAdmin(role)) {
       const teacher = await this.findTeacher(userId, organizationId);
       if (!teacher) return { classGroups: [], courses: [] };
-      classGroupWhere = { ...classGroupWhere, ...this.teacherClassGroupWhere(teacher.id) };
-      courseWhere = { ...courseWhere, ...this.teacherCourseWhere(teacher.id) };
+      classGroupWhere = { ...classGroupWhere, ...teacherClassGroupWhere(teacher.id) };
+      courseWhere = { ...courseWhere, ...teacherCourseWhere(teacher.id) };
     }
 
     const [classGroups, courses] = await Promise.all([

@@ -116,7 +116,7 @@ Code: `home` (planned); `web-dashboard` `/home` → `home.ts`, `teacher-home.ts`
 
 | Capability | Status | FRD |
 |---|---|---|
-| Teacher home (my day, pending, week, attention) | Partial (legacy home, school-wide counts) | [HOM-001](frd/HOM-001-persona-home-dashboards.md) |
+| Teacher home (my day, pending, week, attention) | Partial ("Mi día" + scoped attendance KPI in review: HOM-001-S01) | [HOM-001](frd/HOM-001-persona-home-dashboards.md) |
 | Student home (today, work, progress) | Partial (legacy home, unscoped assignments) | [HOM-001](frd/HOM-001-persona-home-dashboards.md) |
 | Parent home (per-child alerts, progress, account) | Partial (legacy home) | [HOM-001](frd/HOM-001-persona-home-dashboards.md) |
 | School admin home (attention, KPIs, academics, finance, reach) | Partial (legacy home) | [HOM-001](frd/HOM-001-persona-home-dashboards.md) |

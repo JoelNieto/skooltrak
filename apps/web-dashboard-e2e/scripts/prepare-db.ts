@@ -110,7 +110,7 @@ async function seedFixtures(databaseUrl: string) {
     const math = await subject('Matemáticas', 'MAT');
     const science = await subject('Ciencias', 'CIE');
 
-    await prisma.course.create({
+    const teacherCourse = await prisma.course.create({
       data: {
         ...data.courses.teacherOwn,
         shortName: 'MAT7',
@@ -121,7 +121,7 @@ async function seedFixtures(databaseUrl: string) {
         teacherId: users.teacher.teacherId,
       },
     });
-    await prisma.course.create({
+    const otherTeachersCourse = await prisma.course.create({
       data: {
         ...data.courses.otherTeachers,
         shortName: 'CIE8',
@@ -133,7 +133,7 @@ async function seedFixtures(databaseUrl: string) {
       },
     });
 
-    await prisma.classGroup.create({
+    const relatedGroup = await prisma.classGroup.create({
       data: {
         name: data.classGroups.related,
         organizationId: org.id,
@@ -142,7 +142,7 @@ async function seedFixtures(databaseUrl: string) {
         active: true,
       },
     });
-    await prisma.classGroup.create({
+    const homeroomOnlyGroup = await prisma.classGroup.create({
       data: {
         name: data.classGroups.homeroomOnly,
         organizationId: org.id,
@@ -151,6 +151,41 @@ async function seedFixtures(databaseUrl: string) {
         active: true,
         teacherId: users.teacher.teacherId, // homeroom only
       },
+    });
+
+    // HOM-001-S01: students to take attendance for, and slots on every weekday.
+    for (const [i, firstName] of data.relatedStudents.entries()) {
+      await prisma.student.create({
+        data: {
+          firstName,
+          middleName: '',
+          fatherName: 'E2E',
+          motherName: '',
+          documentId: `E2E-STU-${i + 1}`,
+          organizationId: org.id,
+          schoolId: school.id,
+          classGroupId: relatedGroup.id,
+          birthDate: new Date('2013-05-01'),
+          gender: i % 2 ? 'MALE' : 'FEMALE',
+          address: 'Calle 1',
+          phone: '000-0000',
+          courses: { connect: { id: teacherCourse.id } },
+        },
+      });
+    }
+    const weekdays = ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY'] as const;
+    await prisma.classGroupWeeklySchedule.createMany({
+      data: weekdays.flatMap((weekday) => [
+        { weekday, classGroupId: relatedGroup.id, courseId: teacherCourse.id, location: 'Aula 7', ...data.schedule.early },
+        { weekday, classGroupId: relatedGroup.id, courseId: teacherCourse.id, location: 'Aula 7', ...data.schedule.late },
+        {
+          weekday,
+          classGroupId: homeroomOnlyGroup.id,
+          courseId: otherTeachersCourse.id,
+          location: 'Aula 8',
+          ...data.schedule.early,
+        },
+      ]),
     });
 
     console.log(`✓ Seeded e2e fixtures (org ${org.id})`);

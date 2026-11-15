@@ -7,7 +7,7 @@ type BaseSchool = Prisma.SchoolGetPayload<{ include: undefined }>;
 
 export type CurrentSchool = Omit<
   BaseSchool,
-  'primaryColor' | 'secondaryColor' | 'tertiaryColor' | 'schoolYearStartMonth'
+  'primaryColor' | 'secondaryColor' | 'tertiaryColor' | 'schoolYearStartMonth' | 'timezone'
 > & {
   /** May be missing from some client-constructed objects until synced from API */
   slug?: string | null;
@@ -17,6 +17,8 @@ export type CurrentSchool = Omit<
   tertiaryColor?: string | null;
   /** Month (1-12) the academic year starts; defaults to 3 (March) when absent */
   schoolYearStartMonth?: number;
+  /** IANA timezone; the API defaults it to America/Panama */
+  timezone?: string;
 };
 
 @Service()

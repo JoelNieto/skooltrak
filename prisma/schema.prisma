@@ -358,6 +358,8 @@ model School {
   assignments    Assignment[]
   currentYear    Int               @default(2025)
   schoolYearStartMonth Int          @default(3)
+  /// IANA timezone (e.g. "America/Panama"). Home dashboards evaluate "today"/"now" in it (BR-HOM-001.4).
+  timezone       String            @default("America/Panama")
   fileShares     FileShareSchool[]
   joinRequests   JoinRequest[]
   newsletters    Newsletter[]

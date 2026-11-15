@@ -1,3 +1,4 @@
+import { StudentRecentGrade, StudentWorkItem } from './student-home.entity';
 import { HomeRef } from './teacher-home.entity';
 
 /** Responses of `GET /v1/home/parent/*` (HOM-001). */
@@ -46,4 +47,32 @@ export class ParentChildHome {
   /** Danger first, then warning. */
   alerts: ParentAlert[];
   kpis: ParentKpis;
+  /** FR-HOM-001.21: the child's work (S04 rules), read-only. */
+  work: StudentWorkItem[];
+  /** FR-HOM-001.21: latest 4 published grades. */
+  recentGrades: StudentRecentGrade[];
+  /** FR-HOM-001.23: latest threads with the child's teachers. */
+  messages: ParentThread[];
+}
+
+export class ParentThread {
+  id: string;
+  title: string;
+  senderName: string;
+  /** ISO instant */
+  lastMessageAt: string;
+  preview: string;
+  unread: boolean;
+}
+
+export type AccountStatus = 'AL_DIA' | 'PENDIENTE' | 'VENCIDO';
+
+/** FR-HOM-001.22 (needs VIEW_FINANCIALS). */
+export class ParentAccount {
+  currencyCode: string;
+  status: AccountStatus;
+  balance: number;
+  overdue: number;
+  nextCharge: { description: string; outstanding: number; dueDate: string } | null;
+  lastPayment: { amount: number; paidAt: string } | null;
 }

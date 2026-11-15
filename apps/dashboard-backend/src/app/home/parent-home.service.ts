@@ -1,14 +1,41 @@
 import type { AuthUserContext } from '@/auth';
-import { AttendanceStatus } from '@generated/prisma';
+import { AttendanceStatus, ThreadType } from '@generated/prisma';
 import { ForbiddenException, Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma.service';
 import { StudentProgress, StudentWork } from './entities/student-home.entity';
-import { ParentAlert, ParentChildHome, ParentChildren, ParentKpis } from './entities/parent-home.entity';
+import {
+  AccountStatus,
+  ParentAccount,
+  ParentAlert,
+  ParentChildHome,
+  ParentChildren,
+  ParentKpis,
+  ParentThread,
+} from './entities/parent-home.entity';
 import { addDays, utcDate } from './home-time';
 import { StudentContext, StudentHomeService } from './student-home.service';
 
 /** BR-HOM-001.9 / FR-HOM-001.19 windows, fixed in v1 (Q5). */
 export const PARENT_ALERTS = { absenceDays: 7, chargeDueDays: 7, late: 3 } as const;
+/** FR-HOM-001.21 / .23 list sizes. */
+export const PARENT_LISTS = { recentGrades: 4, messages: 4 } as const;
+const PREVIEW_LENGTH = 140;
+
+interface OpenCharge {
+  description: string;
+  outstanding: number;
+  dueDate: Date;
+}
+
+/** BR-HOM-001.14, same arithmetic as payments.service.ts:getStudentBalanceSummary. */
+interface FinanceFacts {
+  balance: number;
+  /** Charges with an outstanding amount, by due date. */
+  open: OpenCharge[];
+  overdue: OpenCharge[];
+  dueSoon: OpenCharge[];
+  lastPayment: { amount: number; paidAt: Date } | null;
+}
 
 const NOT_LINKED = 'No puedes ver la información de este estudiante';
 /** `Perm.VIEW_FINANCIALS` */
@@ -22,11 +49,7 @@ interface ChildFacts {
   absences: { date: Date; course: string }[];
   lateThisWeek: number;
   /** Null without VIEW_FINANCIALS. */
-  finance: {
-    balance: number;
-    overdue: { description: string; outstanding: number; dueDate: Date }[];
-    dueSoon: { description: string; outstanding: number; dueDate: Date }[];
-  } | null;
+  finance: FinanceFacts | null;
   currencyCode: string;
 }
 
@@ -89,19 +112,12 @@ export class ParentHomeService {
   /** FR-HOM-001.19 alerts and FR-HOM-001.20 KPIs of one linked child. */
   async child(user: AuthUserContext | undefined, studentId: string): Promise<ParentChildHome> {
     const userId = requireUser(user);
-    const linked = await this.prisma.student.findFirst({
-      where: { id: studentId, parents: { some: { userId } } },
-      select: {
-        id: true,
-        firstName: true,
-        fatherName: true,
-        classGroup: { select: { id: true, name: true } },
-        school: { select: { id: true, name: true } },
-      },
-    });
-    if (!linked) throw new ForbiddenException(NOT_LINKED);
+    const linked = await this.linkedChild(userId, studentId);
 
-    const facts = await this.facts(linked.id, canSeeFinance(user));
+    const [facts, messages] = await Promise.all([
+      this.facts(linked.id, canSeeFinance(user)),
+      this.childThreads(userId, linked.id),
+    ]);
     const { progress, work, finance } = facts;
     const kpis: ParentKpis = {
       average: {
@@ -131,6 +147,132 @@ export class ParentHomeService {
       currencyCode: facts.currencyCode,
       alerts: buildAlerts(facts),
       kpis,
+      work: work.items,
+      recentGrades: progress.recentGrades,
+      messages,
+    };
+  }
+
+  /** FR-HOM-001.22: where the child's account stands (the controller requires VIEW_FINANCIALS). */
+  async account(user: AuthUserContext | undefined, studentId: string): Promise<ParentAccount> {
+    const userId = requireUser(user);
+    const linked = await this.linkedChild(userId, studentId);
+    const ctx = await this.studentHome.contextForStudent(linked.id);
+    const [finance, school] = await Promise.all([
+      this.finance(linked.id, ctx.local.date),
+      this.prisma.school.findUnique({ where: { id: ctx.student.school.id }, select: { currencyCode: true } }),
+    ]);
+
+    const overdue = finance.overdue.reduce((sum, c) => sum + c.outstanding, 0);
+    const status: AccountStatus = overdue > 0 ? 'VENCIDO' : finance.balance > 0 ? 'PENDIENTE' : 'AL_DIA';
+    const next = finance.open.find((c) => !finance.overdue.includes(c)) ?? finance.open[0] ?? null;
+    return {
+      currencyCode: school?.currencyCode ?? 'USD',
+      status,
+      balance: finance.balance,
+      overdue,
+      nextCharge: next
+        ? { description: next.description, outstanding: next.outstanding, dueDate: next.dueDate.toISOString().slice(0, 10) }
+        : null,
+      lastPayment: finance.lastPayment
+        ? { amount: finance.lastPayment.amount, paidAt: finance.lastPayment.paidAt.toISOString().slice(0, 10) }
+        : null,
+    };
+  }
+
+  /** BR-HOM-001.9: the student, only if linked to the caller. */
+  private async linkedChild(userId: string, studentId: string) {
+    const linked = await this.prisma.student.findFirst({
+      where: { id: studentId, parents: { some: { userId } } },
+      select: {
+        id: true,
+        firstName: true,
+        fatherName: true,
+        classGroup: { select: { id: true, name: true } },
+        school: { select: { id: true, name: true } },
+      },
+    });
+    if (!linked) throw new ForbiddenException(NOT_LINKED);
+    return linked;
+  }
+
+  /** FR-HOM-001.23: STUDENT_GUARDIANS threads about this child that the parent is in, newest first. */
+  private async childThreads(userId: string, studentId: string): Promise<ParentThread[]> {
+    const threads = await this.prisma.communicationThread.findMany({
+      where: {
+        type: ThreadType.STUDENT_GUARDIANS,
+        scopeId: studentId,
+        broadcast: false,
+        deletedAt: null,
+        participants: { some: { userId } },
+      },
+      select: {
+        id: true,
+        title: true,
+        participants: { where: { userId }, select: { lastReadAt: true } },
+        messages: {
+          where: { deletedAt: null },
+          orderBy: { createdAt: 'desc' },
+          take: 1,
+          select: {
+            body: true,
+            createdAt: true,
+            senderId: true,
+            sender: { select: { name: true, firstName: true, lastName: true } },
+          },
+        },
+      },
+    });
+
+    return threads
+      .filter((t) => t.messages.length > 0)
+      .map((t) => {
+        const last = t.messages[0];
+        const lastReadAt = t.participants[0]?.lastReadAt;
+        const sender = last.sender;
+        return {
+          id: t.id,
+          title: t.title,
+          senderName: (sender?.name?.trim() || [sender?.firstName, sender?.lastName].filter(Boolean).join(' ')).trim() || '—',
+          lastMessageAt: last.createdAt.toISOString(),
+          preview: last.body.length > PREVIEW_LENGTH ? `${last.body.slice(0, PREVIEW_LENGTH - 1)}…` : last.body,
+          unread: last.senderId !== userId && (!lastReadAt || last.createdAt > lastReadAt),
+        };
+      })
+      .sort((a, b) => b.lastMessageAt.localeCompare(a.lastMessageAt))
+      .slice(0, PARENT_LISTS.messages);
+  }
+
+  private async finance(studentId: string, today: string): Promise<FinanceFacts> {
+    const [charges, payments] = await Promise.all([
+      this.prisma.charge.findMany({
+        where: { studentId },
+        select: { id: true, amount: true, dueDate: true, description: true },
+        orderBy: { dueDate: 'asc' },
+      }),
+      this.prisma.payment.findMany({
+        where: { studentId },
+        select: { chargeId: true, amount: true, paidAt: true },
+        orderBy: { paidAt: 'desc' },
+      }),
+    ]);
+    const paidByCharge = new Map<string, number>();
+    for (const p of payments) {
+      if (p.chargeId) paidByCharge.set(p.chargeId, (paidByCharge.get(p.chargeId) ?? 0) + p.amount.toNumber());
+    }
+    const todayDate = utcDate(today);
+    const soonLimit = utcDate(addDays(today, PARENT_ALERTS.chargeDueDays));
+    const open = charges
+      .map((c) => ({ description: c.description, dueDate: c.dueDate, outstanding: c.amount.toNumber() - (paidByCharge.get(c.id) ?? 0) }))
+      .filter((c) => c.outstanding > 0);
+    const last = payments[0];
+    return {
+      balance:
+        charges.reduce((sum, c) => sum + c.amount.toNumber(), 0) - payments.reduce((sum, p) => sum + p.amount.toNumber(), 0),
+      open,
+      overdue: open.filter((c) => c.dueDate < todayDate),
+      dueSoon: open.filter((c) => c.dueDate >= todayDate && c.dueDate <= soonLimit),
+      lastPayment: last ? { amount: last.amount.toNumber(), paidAt: last.paidAt } : null,
     };
   }
 
@@ -140,9 +282,9 @@ export class ParentHomeService {
     const { local } = ctx;
     const today = utcDate(local.date);
 
-    const [work, progress, absenceRows, lateThisWeek, school, charges, payments] = await Promise.all([
+    const [work, progress, absenceRows, lateThisWeek, school, finance] = await Promise.all([
       this.studentHome.workFor(ctx),
-      this.studentHome.progressFor(ctx),
+      this.studentHome.progressFor(ctx, { recentGrades: PARENT_LISTS.recentGrades }),
       this.prisma.attendanceRecord.findMany({
         where: {
           studentId,
@@ -166,41 +308,8 @@ export class ParentHomeService {
         },
       }),
       this.prisma.school.findUnique({ where: { id: ctx.student.school.id }, select: { currencyCode: true } }),
-      withFinance
-        ? this.prisma.charge.findMany({
-            where: { studentId },
-            select: { id: true, amount: true, dueDate: true, description: true },
-            orderBy: { dueDate: 'asc' },
-          })
-        : Promise.resolve(null),
-      withFinance
-        ? this.prisma.payment.findMany({ where: { studentId }, select: { chargeId: true, amount: true } })
-        : Promise.resolve(null),
+      withFinance ? this.finance(studentId, local.date) : Promise.resolve(null),
     ]);
-
-    let finance: ChildFacts['finance'] = null;
-    if (charges && payments) {
-      // Same rules as payments.service.ts:getStudentBalanceSummary (BR-HOM-001.14).
-      const paidByCharge = new Map<string, number>();
-      for (const p of payments) {
-        if (p.chargeId) paidByCharge.set(p.chargeId, (paidByCharge.get(p.chargeId) ?? 0) + p.amount.toNumber());
-      }
-      const soonLimit = utcDate(addDays(local.date, PARENT_ALERTS.chargeDueDays));
-      const open = charges
-        .map((c) => ({
-          description: c.description,
-          dueDate: c.dueDate,
-          outstanding: c.amount.toNumber() - (paidByCharge.get(c.id) ?? 0),
-        }))
-        .filter((c) => c.outstanding > 0);
-      finance = {
-        balance:
-          charges.reduce((sum, c) => sum + c.amount.toNumber(), 0) -
-          payments.reduce((sum, p) => sum + p.amount.toNumber(), 0),
-        overdue: open.filter((c) => c.dueDate < today),
-        dueSoon: open.filter((c) => c.dueDate >= today && c.dueDate <= soonLimit),
-      };
-    }
 
     return {
       ctx,

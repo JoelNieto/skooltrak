@@ -272,7 +272,7 @@ async function seedFixtures(databaseUrl: string) {
         relationship: 'Madre',
         organizationId: org.id,
         userId: users.parent.userId,
-        students: { connect: { id: relatedStudentIds[0] } },
+        students: { connect: [{ id: relatedStudentIds[0] }, { id: relatedStudentIds[1] }] },
       },
     });
     await prisma.communicationThread.create({
@@ -298,6 +298,19 @@ async function seedFixtures(databaseUrl: string) {
       },
     });
     console.log(`  guardian ${guardian.id} linked to the first related student`);
+
+    // HOM-001-S06: a charge of the first related student due soon.
+    const chargeDue = new Date(now + data.charge.inDays * day);
+    await prisma.charge.create({
+      data: {
+        schoolId: school.id,
+        year: new Date().getFullYear(),
+        studentId: relatedStudentIds[0],
+        amount: data.charge.amount,
+        dueDate: new Date(Date.UTC(chargeDue.getUTCFullYear(), chargeDue.getUTCMonth(), chargeDue.getUTCDate())),
+        description: data.charge.description,
+      },
+    });
 
     // HOM-001-S04: the student persona is the first related student; work for each status.
     await prisma.student.update({ where: { id: relatedStudentIds[0] }, data: { userId: users.student.userId } });

@@ -90,7 +90,7 @@ interface GradeReportData {
           <lib-loader />
         </div>
       } @else if (reportResource.hasValue() && reportResource.value(); as report) {
-        <div class="grade-report-content bg-base-100 rounded-lg p-6 shadow-sm print:shadow-none print:p-2">
+        <div class="grade-report-content bg-surface-1 rounded-lg p-6 shadow-sm print:shadow-none print:p-2">
           <!-- HEADER: Ministerio + logos -->
           <div class="flex items-start justify-between gap-4 pb-4 mb-6 print:pb-1 print:mb-2">
             <div class="w-36 h-24 shrink-0 print:w-32 print:h-24 flex items-center justify-start">
@@ -104,14 +104,14 @@ interface GradeReportData {
               }
             </div>
             <div class="flex-1 text-center min-w-0">
-              <h1 class="text-xl font-bold text-base-content mt-2 print:text-sm print:uppercase">
+              <h1 class="text-xl font-bold text-ink-strong mt-2 print:text-sm print:uppercase">
                 Ministerio de Educación
               </h1>
-              <h2 class="text-xl font-bold text-base-content mt-1 print:text-sm print:uppercase">
+              <h2 class="text-xl font-bold text-ink-strong mt-1 print:text-sm print:uppercase">
                 {{ report.schoolName }}
               </h2>
               <h3 class="text-xl font-semibold mt-1 print:text-xs print:uppercase">Boletín de calificaciones</h3>
-              <p class="text-base-content/80 mt-1 print:text-xs print:uppercase">{{ report.periodName }}</p>
+              <p class="text-ink mt-1 print:text-xs print:uppercase">{{ report.periodName }}</p>
             </div>
             <div class="w-36 h-24 flex-shrink-0 flex items-center justify-end print:w-32 print:h-24">
               <img
@@ -125,30 +125,30 @@ interface GradeReportData {
 
           <!-- MAIN INFO -->
           <div
-            class="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm print:grid-cols-2 print:gap-1 print:mb-2 print:text-[10px] print:uppercase print:border print:border-gray-700 print:p-4"
+            class="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm print:grid-cols-2 print:gap-1 print:mb-2 print:text-[10px] print:uppercase print:border print:border-ink print:p-4"
           >
             <div>
-              <span class="font-medium text-base-content/70">Estudiante:</span>
+              <span class="font-medium text-ink-muted">Estudiante:</span>
               <span class="ml-2">{{ report.studentName }}</span>
             </div>
             <div>
-              <span class="font-medium text-base-content/70">Documento:</span>
+              <span class="font-medium text-ink-muted">Documento:</span>
               <span class="ml-2">{{ report.documentId }}</span>
             </div>
             <div>
-              <span class="font-medium text-base-content/70">Grupo:</span>
+              <span class="font-medium text-ink-muted">Grupo:</span>
               <span class="ml-2">{{ report.classGroupName ?? '-' }}</span>
             </div>
             <div>
-              <span class="font-medium text-base-content/70">Profesor:</span>
+              <span class="font-medium text-ink-muted">Profesor:</span>
               <span class="ml-2">{{ report.teacherName ?? '-' }}</span>
             </div>
             <div>
-              <span class="font-medium text-base-content/70">Plan de estudio:</span>
+              <span class="font-medium text-ink-muted">Plan de estudio:</span>
               <span class="ml-2">{{ report.studyPlanName ?? '-' }}</span>
             </div>
             <div>
-              <span class="font-medium text-base-content/70">Nivel:</span>
+              <span class="font-medium text-ink-muted">Nivel:</span>
               <span class="ml-2">{{ report.level ?? '-' }}</span>
             </div>
           </div>
@@ -186,7 +186,7 @@ interface GradeReportData {
                       </tr>
                     }
                     @if (report.overallGradesRow) {
-                      <tr class="bg-base-200 font-semibold">
+                      <tr class="bg-surface-0 font-semibold">
                         <td class="uppercase font-bold">Promedio general</td>
                         @for (avg of report.overallGradesRow.periodAverages; track $index) {
                           <td class="text-center">
@@ -215,7 +215,7 @@ interface GradeReportData {
                   <thead>
                     <tr>
                       @for (period of report.periods; track period.id) {
-                        <th class="text-center min-w-10 border-l border-base-300 first:border-l-0" title="Faltas">F</th>
+                        <th class="text-center min-w-10 border-l border-line first:border-l-0" title="Faltas">F</th>
                         <th class="text-center min-w-10" title="Tardanzas">T</th>
                       }
                     </tr>
@@ -224,22 +224,22 @@ interface GradeReportData {
                     @for (row of report.attendanceRows; track row.courseId) {
                       <tr>
                         @for (pa of row.periodAttendance; track pa.periodId) {
-                          <td class="text-center border-l border-base-300 first:border-l-0">{{ pa.absent }}</td>
+                          <td class="text-center border-l border-line first:border-l-0">{{ pa.absent }}</td>
                           <td class="text-center">{{ pa.late }}</td>
                         }
                       </tr>
                     }
                     @if (report.overallGradesRow) {
-                      <tr class="bg-base-200">
+                      <tr class="bg-surface-0">
                         @for (period of report.periods; track period.id) {
-                          <td colspan="2" class="text-center border-l border-base-300 first:border-l-0">-</td>
+                          <td colspan="2" class="text-center border-l border-line first:border-l-0">-</td>
                         }
                       </tr>
                     }
                   </tbody>
                 </table>
               </div>
-              <p class="text-xs text-base-content/60 mt-1 print:text-[9px]">F = Faltas, T = Tardanzas</p>
+              <p class="text-xs text-ink-muted mt-1 print:text-[9px]">F = Faltas, T = Tardanzas</p>
             </section>
           </div>
 
@@ -262,13 +262,13 @@ interface GradeReportData {
                     </tr>
                   } @empty {
                     <tr>
-                      <td colspan="2" class="text-center text-base-content/60">Sin datos de hábitos</td>
+                      <td colspan="2" class="text-center text-ink-muted">Sin datos de hábitos</td>
                     </tr>
                   }
                 </tbody>
               </table>
             </div>
-            <p class="text-xs text-base-content/60 mt-2 print:mt-0.5 print:text-[9px]">
+            <p class="text-xs text-ink-muted mt-2 print:mt-0.5 print:text-[9px]">
               Leyenda: X = Deficiente, R = Regular, S = Satisfactorio
             </p>
           </section>

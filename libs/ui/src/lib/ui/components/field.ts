@@ -254,7 +254,13 @@ export abstract class UiControl {
   }
 }
 
-/** Text input or textarea: `<input uiInput …>` · `<textarea uiInput …>`. */
+/** Control height: `md` (default) for forms; `sm`/`xs` for filters and dense table rows. */
+export type UiControlSize = 'xs' | 'sm' | 'md' | 'lg';
+
+/**
+ * Text input or textarea: `<input uiInput …>` · `<textarea uiInput …>`.
+ * `size` sets the height; `ghost` drops the border and fill (inline editing, a message subject line).
+ */
 @Directive({
   selector: 'input[uiInput], textarea[uiInput]',
   host: {
@@ -264,10 +270,20 @@ export abstract class UiControl {
     '[attr.aria-describedby]': 'describedBy()',
     '[class.input]': '!isTextarea',
     '[class.textarea]': 'isTextarea',
+    '[class.input-xs]': "!isTextarea && size() === 'xs'",
+    '[class.input-sm]': "!isTextarea && size() === 'sm'",
+    '[class.input-lg]': "!isTextarea && size() === 'lg'",
+    '[class.textarea-xs]': "isTextarea && size() === 'xs'",
+    '[class.textarea-sm]': "isTextarea && size() === 'sm'",
+    '[class.textarea-lg]': "isTextarea && size() === 'lg'",
+    '[class.input-ghost]': '!isTextarea && ghost()',
+    '[class.textarea-ghost]': 'isTextarea && ghost()',
   },
 })
 export class UiInput extends UiControl {
   protected readonly isTextarea = inject(ElementRef).nativeElement.tagName === 'TEXTAREA';
+  readonly size = input<UiControlSize>('md');
+  readonly ghost = input(false, { transform: booleanAttribute });
 }
 
 /** Native select: `<select uiSelect …>`. */
@@ -278,9 +294,37 @@ export class UiInput extends UiControl {
     '[attr.id]': 'controlId()',
     '[attr.aria-invalid]': 'invalid() || null',
     '[attr.aria-describedby]': 'describedBy()',
+    '[class.select-xs]': "size() === 'xs'",
+    '[class.select-sm]': "size() === 'sm'",
+    '[class.select-lg]': "size() === 'lg'",
   },
 })
-export class UiSelect extends UiControl {}
+export class UiSelect extends UiControl {
+  readonly size = input<UiControlSize>('md');
+}
+
+/**
+ * A text box with an icon or other content beside the input, e.g. a search box:
+ *
+ *   <label uiInputGroup>
+ *     <span class="material-symbols-outlined" aria-hidden="true">search</span>
+ *     <input type="search" placeholder="Buscar…" aria-label="Buscar" [(ngModel)]="query" />
+ *   </label>
+ *
+ * The wrapper carries the border and focus ring; the inner `<input>` stays unstyled (no uiInput).
+ */
+@Directive({
+  selector: 'label[uiInputGroup], div[uiInputGroup]',
+  host: {
+    class: 'ui-control ui-input-group input',
+    '[class.input-xs]': "size() === 'xs'",
+    '[class.input-sm]': "size() === 'sm'",
+    '[class.input-lg]': "size() === 'lg'",
+  },
+})
+export class UiInputGroup {
+  readonly size = input<UiControlSize>('md');
+}
 
 /**
  * Colour of a checked checkbox / toggle / radio. `action` (default) follows the school's primary

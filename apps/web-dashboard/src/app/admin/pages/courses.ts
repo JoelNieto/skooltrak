@@ -1,4 +1,4 @@
-import { Button, Card, Confirmation, Modal, PaginatorV2, Toast, UiSelect, UiTable } from '#/ui';
+import { Button, Card, Confirmation, Modal, PaginatorV2, Toast, UiInputGroup, UiSelect, UiTable } from '#/ui';
 import { Menu, MenuContent, MenuItem, MenuTrigger } from '@angular/aria/menu';
 import { OverlayModule } from '@angular/cdk/overlay';
 import { HttpClient, httpResource } from '@angular/common/http';
@@ -40,11 +40,12 @@ type CourseType = Prisma.CourseGetPayload<{
     MenuTrigger,
     OverlayModule,
     FormField,
+    UiInputGroup,
   ],
   template: `<div class="flex justify-between">
       <div class="flex gap-2">
         <div class="md:w-96 w-full">
-          <label class="input input-primary ">
+          <label uiInputGroup>
             <span class="material-symbols-outlined">search</span>
             <input class="pl-0" type="search" placeholder="Buscar..." [formField]="form.searchText" />
           </label>
@@ -95,7 +96,7 @@ type CourseType = Prisma.CourseGetPayload<{
               </td>
               <td>
                 <button
-                  class="cursor-pointer hover:bg-base-200 p-1 rounded-lg flex items-center justify-center"
+                  class="cursor-pointer hover:bg-surface-2 p-1 rounded-lg flex items-center justify-center"
                   ngMenuTrigger
                   #origin
                   #trigger="ngMenuTrigger"
@@ -117,13 +118,13 @@ type CourseType = Prisma.CourseGetPayload<{
                   ]"
                   cdkAttachPopoverAsChild
                 >
-                  <div ngMenu class="bg-base-100 shadow-sm rounded-lg p-1 w-48" #actionsMenu="ngMenu">
+                  <div ngMenu class="bg-surface-1 shadow-sm rounded-lg p-1 w-48" #actionsMenu="ngMenu">
                     <ng-template ngMenuContent>
                       <a
                         ngMenuItem
                         value="view"
                         [routerLink]="['/courses', course.id]"
-                        class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-base-200 w-full"
+                        class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-surface-2 w-full"
                       >
                         <span class="material-symbols-outlined text-lg">visibility</span>
                         <span>Ver</span>
@@ -131,7 +132,7 @@ type CourseType = Prisma.CourseGetPayload<{
                       <button
                         ngMenuItem
                         value="edit"
-                        class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-base-200 w-full"
+                        class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-surface-2 w-full"
                         (click)="editCourse(course)"
                       >
                         <span class="material-symbols-outlined text-lg">edit</span>
@@ -140,7 +141,7 @@ type CourseType = Prisma.CourseGetPayload<{
                       <button
                         ngMenuItem
                         value="delete"
-                        class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-base-200 w-full"
+                        class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-surface-2 w-full"
                         (click)="deleteCourse(course)"
                       >
                         <span class="material-symbols-outlined text-lg">delete</span>

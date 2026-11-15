@@ -28,14 +28,14 @@ interface MySubmission {
             <p class="text-sm">Entregaste el {{ submission.submittedAt | date: 'medium' }}</p>
           </div>
         </div>
-        <div class="flex items-center justify-between p-4 bg-base-200 rounded-lg">
+        <div class="flex items-center justify-between p-4 bg-surface-0 rounded-lg">
           <div class="flex items-center gap-3">
             <span class="material-symbols-outlined text-2xl">
               {{ getFileIcon(submission.file.mimeType) }}
             </span>
             <div>
               <p class="font-medium">{{ submission.file.name }}</p>
-              <p class="text-sm text-base-content/50">
+              <p class="text-sm text-ink-subtle">
                 {{ formatBytes(submission.file.size) }}
               </p>
             </div>
@@ -68,9 +68,7 @@ interface MySubmission {
             </button>
           </div>
         </div>
-        <p class="text-sm text-base-content/70">
-          ¿Deseas reemplazar tu entrega? Elimina el archivo actual y sube uno nuevo.
-        </p>
+        <p class="text-sm text-ink-muted">¿Deseas reemplazar tu entrega? Elimina el archivo actual y sube uno nuevo.</p>
       } @else {
         <app-assignment-dropzone [maxSize]="maxFileSize" (filesChange)="onFilesChange($event)" />
         @if (selectedFiles().length > 0) {

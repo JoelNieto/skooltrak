@@ -38,8 +38,7 @@ interface StudentOption {
       </ui-field>
 
       @if (form.type().value() === 'STUDENT_GUARDIANS') {
-        <div class="fieldset">
-          <label for="student">Estudiante</label>
+        <ui-field label="Estudiante">
           @if (!studentsResource.isLoading() && studentsResource.value().length === 0) {
             <lib-empty-state title="Sin estudiantes" description="Elige primero un grupo de clase." icon="group" />
           } @else {
@@ -50,7 +49,7 @@ interface StudentOption {
               }
             </select>
           }
-        </div>
+        </ui-field>
       }
 
       <ui-field label="Asunto" [field]="form.title">

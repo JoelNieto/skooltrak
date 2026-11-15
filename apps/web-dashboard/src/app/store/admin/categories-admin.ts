@@ -15,7 +15,7 @@ import { StoreApiService } from '../store-api.service';
       <div uiAlert tone="warning">Selecciona una escuela.</div>
     } @else {
       <form class="flex flex-wrap gap-2 mb-6" (ngSubmit)="create(); $event.preventDefault()">
-        <input uiInput class="input-sm" placeholder="Nueva categoría" [(ngModel)]="newName" name="n" />
+        <input uiInput size="sm" placeholder="Nueva categoría" [(ngModel)]="newName" name="n" />
         <button uiButton variant="primary" size="sm" type="submit">Agregar</button>
       </form>
       <div uiCard class="overflow-x-auto">
@@ -32,12 +32,13 @@ import { StoreApiService } from '../store-api.service';
             @for (c of categories.value(); track c.id) {
               <tr>
                 <td>
-                  <input uiInput class="input-sm" [(ngModel)]="editNames[c.id!]" [name]="'n' + c.id" />
+                  <input uiInput size="sm" [(ngModel)]="editNames[c.id!]" [name]="'n' + c.id" />
                 </td>
                 <td>
                   <input
                     uiInput
-                    class="input-sm w-20"
+                    size="sm"
+                    class="w-20"
                     type="number"
                     [(ngModel)]="editOrder[c.id!]"
                     [name]="'o' + c.id"

@@ -19,7 +19,7 @@ import Auth from './auth';
           <div class="absolute inset-0 dot-grid opacity-60 pointer-events-none"></div>
 
           <!-- decorative floating badges (desktop only) -->
-          <div class="hidden lg:block absolute top-24 right-10 badge-float">
+          <div class="hidden lg:block absolute top-24 right-10 brand-float">
             <div
               class="w-12 h-12 rounded-2xl bg-white/10 backdrop-blur-sm border border-white/20 flex items-center justify-center"
             >
@@ -93,11 +93,9 @@ import Auth from './auth';
                 />
               </ui-field>
 
-              <div class="form-control">
+              <div>
                 <div class="flex items-center justify-between pb-1.5">
-                  <label class="label p-0" for="password">
-                    <span class="label-text text-ink-strong font-medium text-sm">Contraseña</span>
-                  </label>
+                  <label class="text-sm font-medium text-ink-strong" for="password">Contraseña</label>
                   <a routerLink="/forgot-password" class="link-brand text-xs font-medium no-underline hover:underline"
                     >¿Olvidaste tu contraseña?</a
                   >
@@ -183,7 +181,7 @@ import Auth from './auth';
       background-image: radial-gradient(rgba(255, 255, 255, 0.16) 1px, transparent 1px);
       background-size: 22px 22px;
     }
-    .badge-float {
+    .brand-float {
       animation: floaty 5s ease-in-out infinite;
     }
     @keyframes floaty {
@@ -196,7 +194,7 @@ import Auth from './auth';
       }
     }
     @media (prefers-reduced-motion: reduce) {
-      .badge-float {
+      .brand-float {
         animation: none;
       }
     }

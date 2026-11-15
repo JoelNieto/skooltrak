@@ -56,7 +56,7 @@ type ChatMessageDto = {
       @let chat = chatResource.value()!;
       <div uiCard class="mt-4 flex flex-col max-h-[calc(100vh-6rem)]">
         <div uiCardBody class="p-0 flex flex-col flex-1 min-h-0">
-          <div class="shrink-0 p-4 border-b border-base-300 flex items-center gap-2">
+          <div class="shrink-0 p-4 border-b border-line flex items-center gap-2">
             <div class="avatar avatar-placeholder">
               @if (isContextualChat($any(chat).type)) {
                 <div
@@ -68,7 +68,7 @@ type ChatMessageDto = {
               } @else {
                 <div
                   class="text-white rounded-full w-8"
-                  [style.background]="otherParticipant($any(chat))?.color || 'oklch(var(--p))'"
+                  [style.background]="otherParticipant($any(chat))?.color || 'var(--color-primary)'"
                 >
                   <span class="text-xs">{{ otherParticipant($any(chat))?.initials || '?' }}</span>
                 </div>
@@ -77,7 +77,7 @@ type ChatMessageDto = {
             <div class="flex-1 min-w-0">
               <h2 class="font-semibold">{{ chatDisplayName() }}</h2>
               <div class="flex flex-wrap items-center gap-1.5 mt-0.5">
-                <span class="text-sm text-base-content/60">{{ participantsCount($any(chat)) }} participantes</span>
+                <span class="text-sm text-ink-muted">{{ participantsCount($any(chat)) }} participantes</span>
                 @if (otherParticipant($any(chat)); as user) {
                   @if (roleLabel($safeNavigationMigration(user?.role?.name)); as label) {
                     <span uiBadge size="sm">{{ label }}</span>
@@ -104,7 +104,7 @@ type ChatMessageDto = {
                       <div class="avatar avatar-placeholder">
                         <div
                           class="text-white rounded-full w-8"
-                          [style.background]="msg.sender?.color || 'oklch(var(--p))'"
+                          [style.background]="msg.sender?.color || 'var(--color-primary)'"
                         >
                           <span class="text-xs">{{ msg.sender?.initials }}</span>
                         </div>
@@ -117,7 +117,7 @@ type ChatMessageDto = {
                       class="chat-bubble"
                       [class.bg-primary]="!isOwnMessage(msg)"
                       [class.text-primary-content]="!isOwnMessage(msg)"
-                      [class.bg-base-200]="isOwnMessage(msg)"
+                      [class.bg-surface-0]="isOwnMessage(msg)"
                     >
                       <p class="text-sm whitespace-pre-wrap">{{ msg.content }}</p>
                     </div>
@@ -130,7 +130,7 @@ type ChatMessageDto = {
             }
           </div>
 
-          <form (submit)="sendMessage($event)" class="shrink-0 p-4 border-t border-base-300 bg-base-100 rounded-b-lg">
+          <form (submit)="sendMessage($event)" class="shrink-0 p-4 border-t border-line bg-surface-1 rounded-b-lg">
             <div class="flex gap-2">
               <input
                 uiInput
@@ -156,7 +156,7 @@ type ChatMessageDto = {
         </div>
       </div>
     } @else {
-      <p class="mt-4 text-base-content/60">Chat no encontrado</p>
+      <p class="mt-4 text-ink-muted">Chat no encontrado</p>
     }
   `,
 })
@@ -282,11 +282,11 @@ export default class ChatThread {
 
   contextualChatColor(type: string) {
     const colors: Record<string, string> = {
-      COURSE: 'oklch(var(--p))',
-      ASSIGNMENT: 'oklch(var(--s))',
-      CLASS_GROUP: 'oklch(var(--a))',
+      COURSE: 'var(--color-primary)',
+      ASSIGNMENT: 'var(--color-secondary)',
+      CLASS_GROUP: 'var(--color-accent)',
     };
-    return colors[type] ?? 'oklch(var(--p))';
+    return colors[type] ?? 'var(--color-primary)';
   }
 
   sendMessage(e: Event) {

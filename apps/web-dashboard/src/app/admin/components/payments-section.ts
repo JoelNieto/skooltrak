@@ -1,4 +1,4 @@
-import { EmptyState, Pagination, Paginator, UiInput, UiSelect, UiTable } from '#/ui';
+import { EmptyState, Pagination, Paginator, UiField, UiInput, UiSelect, UiTable } from '#/ui';
 import { DatePipe, DecimalPipe } from '@angular/common';
 import { httpResource } from '@angular/common/http';
 import { Component, computed, effect, inject, input, signal } from '@angular/core';
@@ -19,33 +19,31 @@ type StudentOption = { id: string; firstName: string; fatherName: string };
 
 @Component({
   selector: 'app-payments-section',
-  imports: [UiTable, UiInput, UiSelect, DatePipe, DecimalPipe, EmptyState, FormsModule, Paginator],
+  imports: [UiTable, UiInput, UiSelect, DatePipe, DecimalPipe, EmptyState, FormsModule, Paginator, UiField],
   providers: [Pagination],
   template: `
-    <div class="bg-base-100 rounded-lg border border-base-300">
-      <div class="flex flex-wrap gap-2 items-end p-3 border-b border-base-300">
+    <div class="bg-surface-1 rounded-lg border border-line">
+      <div class="flex flex-wrap gap-2 items-end p-3 border-b border-line">
         @if (showStudentFilter()) {
-          <label class="form-control">
-            <span class="label-text text-xs">Estudiante</span>
-            <select uiSelect class="select-sm" [ngModel]="studentFilter()" (ngModelChange)="onStudentChange($event)">
+          <ui-field label="Estudiante">
+            <select uiSelect size="sm" [ngModel]="studentFilter()" (ngModelChange)="onStudentChange($event)">
               <option value="">Todos</option>
               @for (s of students.value(); track s.id) {
                 <option [value]="s.id">{{ s.firstName }} {{ s.fatherName }}</option>
               }
             </select>
-          </label>
+          </ui-field>
         }
-        <label class="form-control grow min-w-48">
-          <span class="label-text text-xs">Referencia</span>
+        <ui-field label="Referencia" class="grow min-w-48">
           <input
             uiInput
-            class="input-sm"
+            size="sm"
             type="search"
             placeholder="Buscar referencia..."
             [ngModel]="pagination.search()"
             (ngModelChange)="pagination.updateSearch($event)"
           />
-        </label>
+        </ui-field>
       </div>
 
       @if (paymentsResource.isLoading()) {

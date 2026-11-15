@@ -21,8 +21,8 @@ import { Badge, Card, CardBody, CardTitle } from '#/ui';
           </div>
 
           <div class="space-y-2">
-            <h1 class="text-2xl md:text-3xl font-bold text-base-content">¿Qué deseas hacer?</h1>
-            <p class="text-base-content/70">Elige cómo deseas usar Skooltrak</p>
+            <h1 class="text-2xl md:text-3xl font-bold text-ink-strong">¿Qué deseas hacer?</h1>
+            <p class="text-ink-muted">Elige cómo deseas usar Skooltrak</p>
           </div>
 
           <div class="grid md:grid-cols-2 gap-6">
@@ -33,7 +33,7 @@ import { Badge, Card, CardBody, CardTitle } from '#/ui';
                   <span class="material-symbols-outlined text-4xl text-primary">add_business</span>
                 </div>
                 <h2 uiCardTitle>Crear una Escuela</h2>
-                <p class="text-base-content/60 text-sm">
+                <p class="text-ink-muted text-sm">
                   Registra tu institución educativa y configura cursos, grados y grupos.
                 </p>
                 <div uiBadge tone="action">Administrador</div>
@@ -47,7 +47,7 @@ import { Badge, Card, CardBody, CardTitle } from '#/ui';
                   <span class="material-symbols-outlined text-4xl text-secondary">group_add</span>
                 </div>
                 <h2 uiCardTitle>Unirse a una Escuela</h2>
-                <p class="text-base-content/60 text-sm">
+                <p class="text-ink-muted text-sm">
                   Busca tu escuela y únete como docente, estudiante o padre de familia.
                 </p>
                 <div uiBadge>Docente / Estudiante / Padre</div>
@@ -57,8 +57,8 @@ import { Badge, Card, CardBody, CardTitle } from '#/ui';
         </div>
       </main>
 
-      <footer class="p-4 md:p-6 flex justify-center border-t border-base-200 bg-base-100/80 backdrop-blur-sm">
-        <p class="text-sm text-base-content/60">
+      <footer class="p-4 md:p-6 flex justify-center border-t border-line bg-surface-1/80 backdrop-blur-sm">
+        <p class="text-sm text-ink-muted">
           ¿Necesitas ayuda?
           <a href="mailto:soporte@skooltrak.com" class="link link-primary">Contactar soporte</a>
         </p>

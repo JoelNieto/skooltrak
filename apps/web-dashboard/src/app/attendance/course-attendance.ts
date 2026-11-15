@@ -183,12 +183,12 @@ const STATUS_TONES: Record<string, BadgeTone> = {
                     ]"
                     cdkAttachPopoverAsChild
                   >
-                    <div ngMenu class="bg-base-100 shadow-sm rounded-lg p-1 w-48" #actionsMenu="ngMenu">
+                    <div ngMenu class="bg-surface-1 shadow-sm rounded-lg p-1 w-48" #actionsMenu="ngMenu">
                       <ng-template ngMenuContent>
                         <button
                           ngMenuItem
                           value="View"
-                          class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-base-200 w-full"
+                          class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-surface-2 w-full"
                           (click)="viewSession(session)"
                           title="Ver detalles"
                         >
@@ -198,7 +198,7 @@ const STATUS_TONES: Record<string, BadgeTone> = {
                         <button
                           ngMenuItem
                           value="Edit"
-                          class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-base-200 w-full"
+                          class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-surface-2 w-full"
                           (click)="editSession(session)"
                           title="Editar"
                         >
@@ -208,7 +208,7 @@ const STATUS_TONES: Record<string, BadgeTone> = {
                         <button
                           ngMenuItem
                           value="Delete"
-                          class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-base-200 w-full"
+                          class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-surface-2 w-full"
                           (click)="deleteSession(session)"
                           title="Eliminar"
                         >
@@ -222,9 +222,7 @@ const STATUS_TONES: Record<string, BadgeTone> = {
               </tr>
             } @empty {
               <tr>
-                <td colspan="7" class="text-center py-8 text-base-content/60">
-                  No hay sesiones de asistencia registradas
-                </td>
+                <td colspan="7" class="text-center py-8 text-ink-muted">No hay sesiones de asistencia registradas</td>
               </tr>
             }
           </tbody>
@@ -271,7 +269,7 @@ const STATUS_TONES: Record<string, BadgeTone> = {
                         {{ getStatusLabel(record.status) }}
                       </span>
                     </td>
-                    <td class="text-sm text-base-content/70">
+                    <td class="text-sm text-ink-muted">
                       {{ record.comment || '-' }}
                     </td>
                   </tr>

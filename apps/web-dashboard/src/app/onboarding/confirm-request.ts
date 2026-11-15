@@ -22,12 +22,12 @@ import { BrandLogo } from '../shared/brand-logo';
           </div>
 
           <div class="space-y-2">
-            <h1 class="text-2xl md:text-3xl font-bold text-base-content">Confirmar Solicitud</h1>
-            <p class="text-base-content/70">
+            <h1 class="text-2xl md:text-3xl font-bold text-ink-strong">Confirmar Solicitud</h1>
+            <p class="text-ink-muted">
               Estás solicitando unirte a <strong>{{ schoolName() }}</strong> como <strong>{{ roleLabel() }}</strong
               >.
             </p>
-            <p class="text-base-content/50 text-sm">
+            <p class="text-ink-subtle text-sm">
               El administrador de la escuela recibirá tu solicitud y deberá aprobarla.
             </p>
           </div>

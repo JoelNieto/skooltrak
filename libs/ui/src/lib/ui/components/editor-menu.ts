@@ -209,7 +209,7 @@ import { Button } from './button';
           Tabla
           <span class="material-symbols-outlined text-xs">expand_more</span>
         </div>
-        <ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-50 w-56 p-2 shadow-lg">
+        <ul tabindex="0" class="dropdown-content menu bg-surface-1 rounded-box z-50 w-56 p-2 shadow-lg">
           <li class="menu-title">Columnas</li>
           <li>
             <button type="button" (click)="editor().chain().focus().addColumnBefore().run()">

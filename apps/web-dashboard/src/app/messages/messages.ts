@@ -59,7 +59,7 @@ type MessageRecipientType = {
         [checked]="activeTab() === 'inbox'"
         (change)="setActiveTab('inbox')"
       />
-      <div class="tab-content bg-base-100 border-base-300 p-4">
+      <div class="tab-content bg-surface-1 border-line p-4">
         <div uiCard class="overflow-x-auto">
           <table uiTable>
             <thead>
@@ -82,7 +82,7 @@ type MessageRecipientType = {
             </thead>
             <tbody>
               @for (item of messagesResource.value(); track item.id) {
-                <tr class="hover:bg-base-300" [class.bg-base-200]="!item.readAt">
+                <tr class="hover:bg-surface-2" [class.bg-surface-0]="!item.readAt">
                   <td>
                     <input
                       uiCheckbox
@@ -106,10 +106,10 @@ type MessageRecipientType = {
                     </div>
                     {{ item.message?.sender?.name }}
                   </td>
-                  <td [class.font-semibold]="!item.readAt" [class.text-neutral-500]="item.readAt">
+                  <td [class.font-semibold]="!item.readAt" [class.text-ink-muted]="item.readAt">
                     <a [routerLink]="['/messages', item.message?.id ?? '']">{{ item.message?.subject }}</a>
                   </td>
-                  <td class="text-neutral-500">
+                  <td class="text-ink-muted">
                     {{ formatTimeAgo($safeNavigationMigration(item.message?.createdAt)) }}
                   </td>
                   <td>
@@ -153,7 +153,7 @@ type MessageRecipientType = {
         [checked]="activeTab() === 'outbox'"
         (change)="setActiveTab('outbox')"
       />
-      <div class="tab-content bg-base-100 border-base-300 p-4">
+      <div class="tab-content bg-surface-1 border-line p-4">
         <div uiCard class="overflow-x-auto">
           <table uiTable rowHover>
             <thead>
@@ -186,7 +186,7 @@ type MessageRecipientType = {
                       (change)="item.id && onSentCheckboxChange(item.id, $any($event.target).checked)"
                     />
                   </td>
-                  <td class="text-neutral-900! font-semibold">
+                  <td class="text-ink-strong! font-semibold">
                     <div class="flex items-center gap-2">
                       @for (recipient of (item.recipients ?? []).slice(0, 2); track recipient.id ?? recipient) {
                         <div class="avatar avatar-placeholder">
@@ -201,10 +201,10 @@ type MessageRecipientType = {
                       <span>{{ getRecipientsText(item) }}</span>
                     </div>
                   </td>
-                  <td class="text-neutral-500!">
+                  <td class="text-ink-muted!">
                     <a>{{ item.subject }}</a>
                   </td>
-                  <td class="text-neutral-500!">
+                  <td class="text-ink-muted!">
                     {{ formatTimeAgo(item.createdAt) }}
                   </td>
                   <td>

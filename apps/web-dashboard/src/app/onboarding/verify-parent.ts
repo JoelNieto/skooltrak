@@ -34,8 +34,8 @@ interface LinkChildPayload {
           </div>
 
           <div class="space-y-2">
-            <h1 class="text-2xl md:text-3xl font-bold text-base-content">Vincula a tu hijo/a</h1>
-            <p class="text-base-content/70">
+            <h1 class="text-2xl md:text-3xl font-bold text-ink-strong">Vincula a tu hijo/a</h1>
+            <p class="text-ink-muted">
               Ingresa el código de matrícula que te proporcionó la escuela. Tu cuenta quedará vinculada de inmediato,
               sin esperar aprobación.
             </p>

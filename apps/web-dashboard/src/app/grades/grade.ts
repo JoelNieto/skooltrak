@@ -115,8 +115,8 @@ type GradeDetail = {
                 </thead>
                 <tbody>
                   @for (group of studentGradesByClassGroup(); track group.classGroup?.id ?? '__none__') {
-                    <tr class="bg-base-200/50">
-                      <td colspan="4" class="font-semibold text-base-content/80 py-2">
+                    <tr class="bg-surface-0/50">
+                      <td colspan="4" class="font-semibold text-ink py-2">
                         @if (group.classGroup) {
                           {{ group.classGroup.name }}
                         } @else {
@@ -133,7 +133,7 @@ type GradeDetail = {
                           </span>
                         </td>
                         <td
-                          class="font-semibold text-center px-0! cursor-pointer hover:bg-base-200"
+                          class="font-semibold text-center px-0! cursor-pointer hover:bg-surface-2"
                           (click)="editGradeItem(studentGrade)"
                           [ngClass]="{
                             'text-success! bg-success/10':

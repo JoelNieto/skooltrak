@@ -33,8 +33,7 @@ interface FileShareFormData {
           <option value="USER">Usuario</option>
         </select>
       </ui-field>
-      <div class="fieldset">
-        <label for="targetId">IDs de destino</label>
+      <ui-field label="IDs de destino">
         @if (form.targetType().value() === 'COURSE') {
           <div class="flex flex-col sm:flex-row gap-2">
             <select uiSelect id="courseId" [formField]="form.courseId" class="sm:flex-1">
@@ -68,7 +67,7 @@ interface FileShareFormData {
             }
           </div>
         }
-      </div>
+      </ui-field>
       <ui-field label="Permiso" [field]="form.permission">
         <select uiSelect id="permission" [formField]="form.permission">
           <option value="VIEW">Solo ver</option>

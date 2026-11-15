@@ -31,8 +31,8 @@ import { BrandLogo } from '../shared/brand-logo';
 
           <!-- Title & Subtitle -->
           <div class="space-y-3">
-            <h1 class="text-2xl md:text-3xl font-bold text-base-content">Crea tu Escuela</h1>
-            <p class="text-base-content/70 text-lg">Configura tu institución educativa en Skooltrak.</p>
+            <h1 class="text-2xl md:text-3xl font-bold text-ink-strong">Crea tu Escuela</h1>
+            <p class="text-ink-muted text-lg">Configura tu institución educativa en Skooltrak.</p>
           </div>
 
           <!-- School Form -->
@@ -58,14 +58,14 @@ import { BrandLogo } from '../shared/brand-logo';
 
           <!-- Explanation Cards -->
           <div class="space-y-4 text-left">
-            <div class="bg-base-100 rounded-xl p-4 border border-base-200 shadow-sm">
+            <div class="bg-surface-1 rounded-xl p-4 border border-line shadow-sm">
               <div class="flex items-start gap-4">
                 <div class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
                   <span class="material-symbols-outlined text-primary">database</span>
                 </div>
                 <div>
-                  <h3 class="font-semibold text-base-content">Tu escuela será el contenedor de todos tus datos</h3>
-                  <p class="text-sm text-base-content/60 mt-1">
+                  <h3 class="font-semibold text-ink-strong">Tu escuela será el contenedor de todos tus datos</h3>
+                  <p class="text-sm text-ink-muted mt-1">
                     Programas académicos, cursos, estudiantes, docentes y toda la información de tu institución estará
                     organizada aquí.
                   </p>
@@ -73,14 +73,14 @@ import { BrandLogo } from '../shared/brand-logo';
               </div>
             </div>
 
-            <div class="bg-base-100 rounded-xl p-4 border border-base-200 shadow-sm">
+            <div class="bg-surface-1 rounded-xl p-4 border border-line shadow-sm">
               <div class="flex items-start gap-4">
                 <div class="w-10 h-10 rounded-lg bg-accent/10 flex items-center justify-center shrink-0">
                   <span class="material-symbols-outlined text-accent">admin_panel_settings</span>
                 </div>
                 <div>
-                  <h3 class="font-semibold text-base-content">Serás el administrador principal</h3>
-                  <p class="text-sm text-base-content/60 mt-1">
+                  <h3 class="font-semibold text-ink-strong">Serás el administrador principal</h3>
+                  <p class="text-sm text-ink-muted mt-1">
                     Tendrás control total sobre la configuración y podrás invitar a otros usuarios como docentes o
                     administradores.
                   </p>
@@ -90,7 +90,7 @@ import { BrandLogo } from '../shared/brand-logo';
           </div>
 
           <!-- Confirmation Checkbox -->
-          <div class="bg-base-200/50 rounded-xl p-4">
+          <div class="bg-surface-0/50 rounded-xl p-4">
             <ui-choice
               label="Entiendo que estoy configurando una nueva escuela y seré el administrador principal de la misma."
               class="items-start"
@@ -109,7 +109,7 @@ import { BrandLogo } from '../shared/brand-logo';
 
       <!-- Fixed Footer -->
       <footer
-        class="p-4 md:p-6 flex justify-between items-center border-t border-base-200 bg-base-100/80 backdrop-blur-sm"
+        class="p-4 md:p-6 flex justify-between items-center border-t border-line bg-surface-1/80 backdrop-blur-sm"
       >
         <button uiButton variant="ghost" (click)="goBack()">
           <span class="material-symbols-outlined">arrow_back</span>

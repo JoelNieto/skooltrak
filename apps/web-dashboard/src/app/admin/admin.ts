@@ -7,7 +7,7 @@ import { Breadcrumbs } from '#/ui';
   imports: [Breadcrumbs, RouterOutlet, RouterLink, RouterLinkActive],
   template: `
     <ui-breadcrumbs [items]="[{ label: 'Inicio', link: '/' }, { label: 'Admin' }]" />
-    <div class="border-b border-base-300">
+    <div class="border-b border-line">
       <ul class="menu menu-horizontal gap-2 ">
         <li>
           <a routerLink="schools" routerLinkActive="bg-primary text-primary-content">Colegios</a>

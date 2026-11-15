@@ -1,4 +1,4 @@
-import { Badge, Button, Card, debounceSignal, Loader, Modal, Toast, UiTable } from '#/ui';
+import { Badge, Button, Card, debounceSignal, Loader, Modal, Toast, UiInputGroup, UiTable } from '#/ui';
 import { DatePipe } from '@angular/common';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { Component, inject, input, Signal, signal } from '@angular/core';
@@ -17,11 +17,11 @@ type CourseFile = {
 
 @Component({
   selector: 'app-course-files',
-  imports: [Card, UiTable, Badge, Button, Loader, FormsModule, DatePipe],
+  imports: [Card, UiTable, Badge, Button, Loader, FormsModule, DatePipe, UiInputGroup],
   template: `
     <div class="flex flex-col gap-4">
       <div class="flex justify-between items-start gap-4">
-        <label class="input input-primary input-md">
+        <label uiInputGroup>
           <span class="material-symbols-outlined">search</span>
           <input class="pl-0" type="search" placeholder="Buscar archivos..." [(ngModel)]="searchText" />
         </label>

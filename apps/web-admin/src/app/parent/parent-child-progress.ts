@@ -20,7 +20,7 @@ import { Component } from '@angular/core';
 
     <div uiCard class="mt-6">
       <div uiCardBody>
-        <h2 class="text-lg font-semibold text-base-content">Calificaciones por materia</h2>
+        <h2 class="text-lg font-semibold text-ink-strong">Calificaciones por materia</h2>
         <div class="overflow-x-auto">
           <table uiTable>
             <thead>
@@ -35,7 +35,7 @@ import { Component } from '@angular/core';
                 <tr>
                   <td>{{ item.subject }}</td>
                   <td>{{ item.score }}</td>
-                  <td class="text-sm text-base-content/70">{{ item.note }}</td>
+                  <td class="text-sm text-ink-muted">{{ item.note }}</td>
                 </tr>
               }
             </tbody>

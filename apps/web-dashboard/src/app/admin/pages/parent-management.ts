@@ -15,7 +15,7 @@ import { Component } from '@angular/core';
 
     <div uiCard>
       <div uiCardBody>
-        <h2 class="text-lg font-semibold text-base-content">Directorio</h2>
+        <h2 class="text-lg font-semibold text-ink-strong">Directorio</h2>
         <div class="overflow-x-auto">
           <table uiTable>
             <thead>
@@ -42,7 +42,7 @@ import { Component } from '@angular/core';
     </div>
 
     <div class="mt-6">
-      <h2 class="text-lg font-semibold text-base-content mb-3">Invitaciones pendientes</h2>
+      <h2 class="text-lg font-semibold text-ink-strong mb-3">Invitaciones pendientes</h2>
       @if (pendingInvites.length === 0) {
         <lib-empty-state
           title="Sin invitaciones pendientes"
@@ -50,7 +50,7 @@ import { Component } from '@angular/core';
           icon="mail"
         />
       } @else {
-        <ul class="list-disc pl-5 text-sm text-base-content/70">
+        <ul class="list-disc pl-5 text-sm text-ink-muted">
           @for (invite of pendingInvites; track invite.id) {
             <li>{{ invite.label }}</li>
           }

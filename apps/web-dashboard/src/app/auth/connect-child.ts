@@ -9,14 +9,14 @@ import Auth from './auth';
   selector: 'app-connect-child',
   imports: [Card, CardActions, CardBody, CardTitle, Button, RouterLink],
   template: `
-    <div class="min-h-screen flex items-center justify-center bg-base-200 p-4">
+    <div class="min-h-screen flex items-center justify-center bg-surface-0 p-4">
       <div uiCard class="w-full max-w-md">
         <div uiCardBody class="items-center text-center">
           <span class="material-symbols-outlined text-4xl" [class.text-primary]="!error()" [class.text-error]="error()">
             {{ error() ? 'error' : loading() ? 'hourglass_top' : 'child_care' }}
           </span>
           <h2 uiCardTitle class="justify-center mt-2">{{ error() ? 'Error' : 'Vinculando estudiante...' }}</h2>
-          <p class="text-base-content/70">
+          <p class="text-ink-muted">
             {{ error() || 'Por favor espera mientras vinculamos al estudiante a tu cuenta.' }}
           </p>
           @if (error() || !loading()) {

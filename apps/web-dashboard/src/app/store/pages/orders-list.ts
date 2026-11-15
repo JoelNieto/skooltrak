@@ -44,7 +44,7 @@ import { Alert, Card, UiTable } from '#/ui';
                 </tr>
               } @else {
                 <tr>
-                  <td colspan="5" class="text-base-content/60">Sin pedidos aún.</td>
+                  <td colspan="5" class="text-ink-muted">Sin pedidos aún.</td>
                 </tr>
               }
             }

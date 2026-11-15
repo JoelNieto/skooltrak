@@ -31,8 +31,8 @@ import { BrandLogo } from '../shared/brand-logo';
                   </div>
                 </div>
                 <div class="space-y-2">
-                  <h1 class="text-2xl md:text-3xl font-bold text-base-content">Invitación Pendiente</h1>
-                  <p class="text-base-content/70">
+                  <h1 class="text-2xl md:text-3xl font-bold text-ink-strong">Invitación Pendiente</h1>
+                  <p class="text-ink-muted">
                     Tienes una invitación pendiente como
                     <strong>{{ pendingInvitationRole() === 'student' ? 'estudiante' : 'docente' }}</strong> en
                     <strong>{{ pendingInvitationOrg() }}</strong
@@ -74,8 +74,8 @@ import { BrandLogo } from '../shared/brand-logo';
                   </div>
 
                   <div class="space-y-2">
-                    <h1 class="text-2xl md:text-3xl font-bold text-base-content">Crea tu Cuenta</h1>
-                    <p class="text-base-content/70">Ingresa tu correo electrónico para comenzar el registro.</p>
+                    <h1 class="text-2xl md:text-3xl font-bold text-ink-strong">Crea tu Cuenta</h1>
+                    <p class="text-ink-muted">Ingresa tu correo electrónico para comenzar el registro.</p>
                   </div>
 
                   <div class="space-y-4 text-left">
@@ -114,26 +114,26 @@ import { BrandLogo } from '../shared/brand-logo';
                 </div>
 
                 <div class="space-y-2">
-                  <h1 class="text-2xl md:text-3xl font-bold text-base-content">Revisa tu Correo</h1>
-                  <p class="text-base-content/70">
+                  <h1 class="text-2xl md:text-3xl font-bold text-ink-strong">Revisa tu Correo</h1>
+                  <p class="text-ink-muted">
                     Te hemos enviado un enlace de verificación a <strong>{{ sentEmail() }}</strong
                     >. Haz clic en el enlace para continuar con el registro.
                   </p>
                 </div>
 
-                <div class="bg-base-200 rounded-xl p-6 space-y-4">
+                <div class="bg-surface-0 rounded-xl p-6 space-y-4">
                   <div class="flex items-start gap-3 text-left">
                     <span class="material-symbols-outlined text-primary mt-0.5">inbox</span>
                     <div>
-                      <p class="font-medium text-base-content">Revisa tu bandeja de entrada</p>
-                      <p class="text-sm text-base-content/60">El correo puede tardar unos minutos en llegar</p>
+                      <p class="font-medium text-ink-strong">Revisa tu bandeja de entrada</p>
+                      <p class="text-sm text-ink-muted">El correo puede tardar unos minutos en llegar</p>
                     </div>
                   </div>
                   <div class="flex items-start gap-3 text-left">
                     <span class="material-symbols-outlined text-primary mt-0.5">folder</span>
                     <div>
-                      <p class="font-medium text-base-content">Revisa la carpeta de spam</p>
-                      <p class="text-sm text-base-content/60">A veces los correos pueden llegar ahí</p>
+                      <p class="font-medium text-ink-strong">Revisa la carpeta de spam</p>
+                      <p class="text-sm text-ink-muted">A veces los correos pueden llegar ahí</p>
                     </div>
                   </div>
                 </div>
@@ -169,8 +169,8 @@ import { BrandLogo } from '../shared/brand-logo';
                   <lib-loader />
                 </div>
                 <div class="space-y-2">
-                  <h1 class="text-2xl md:text-3xl font-bold text-base-content">Verificando...</h1>
-                  <p class="text-base-content/70">Validando tu enlace de verificación.</p>
+                  <h1 class="text-2xl md:text-3xl font-bold text-ink-strong">Verificando...</h1>
+                  <p class="text-ink-muted">Validando tu enlace de verificación.</p>
                 </div>
               </div>
             }
@@ -185,8 +185,8 @@ import { BrandLogo } from '../shared/brand-logo';
                   </div>
 
                   <div class="space-y-2">
-                    <h1 class="text-2xl md:text-3xl font-bold text-base-content">Completa tu Registro</h1>
-                    <p class="text-base-content/70">
+                    <h1 class="text-2xl md:text-3xl font-bold text-ink-strong">Completa tu Registro</h1>
+                    <p class="text-ink-muted">
                       Tu correo <strong>{{ verifiedEmail() }}</strong> ha sido verificado. Completa los datos para crear
                       tu cuenta.
                     </p>
@@ -265,8 +265,8 @@ import { BrandLogo } from '../shared/brand-logo';
                   </div>
                 </div>
                 <div class="space-y-2">
-                  <h1 class="text-2xl md:text-3xl font-bold text-base-content">Enlace Inválido</h1>
-                  <p class="text-base-content/70">
+                  <h1 class="text-2xl md:text-3xl font-bold text-ink-strong">Enlace Inválido</h1>
+                  <p class="text-ink-muted">
                     {{ errorMessage() || 'El enlace de verificación es inválido o ha expirado.' }}
                   </p>
                 </div>
@@ -281,7 +281,7 @@ import { BrandLogo } from '../shared/brand-logo';
           <!-- Login Link (centered below form) -->
           @if (step() === 'email' || step() === 'register' || step() === 'pending-invitation') {
             <div class="mt-8 text-center">
-              <p class="text-sm text-base-content/70">
+              <p class="text-sm text-ink-muted">
                 ¿Ya tienes cuenta?
                 <a routerLink="/login" class="link link-primary font-medium">Inicia sesión</a>
               </p>
@@ -290,8 +290,8 @@ import { BrandLogo } from '../shared/brand-logo';
         </main>
 
         <!-- Fixed Footer -->
-        <footer class="p-4 md:p-6 flex justify-center border-t border-base-200 bg-base-100/80 backdrop-blur-sm">
-          <p class="text-sm text-base-content/60">2025 © Skooltrak. Todos los derechos reservados.</p>
+        <footer class="p-4 md:p-6 flex justify-center border-t border-line bg-surface-1/80 backdrop-blur-sm">
+          <p class="text-sm text-ink-muted">2025 © Skooltrak. Todos los derechos reservados.</p>
         </footer>
       </div>
     } @placeholder {

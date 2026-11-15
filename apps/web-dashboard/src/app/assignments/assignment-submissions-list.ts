@@ -82,7 +82,7 @@ import { firstValueFrom } from 'rxjs';
                       </span>
                     }
                   </td>
-                  <td class="text-base-content/70 text-sm">
+                  <td class="text-ink-muted text-sm">
                     @if (submission) {
                       {{ formatSubmissionDate(submission.submittedAt) }}
                     } @else {
@@ -104,49 +104,49 @@ import { firstValueFrom } from 'rxjs';
                         <span class="text-sm truncate max-w-37.5">
                           {{ submission.file.name }}
                         </span>
-                        <span class="text-xs text-base-content/50"> ({{ formatBytes(submission.file.size) }}) </span>
+                        <span class="text-xs text-ink-subtle"> ({{ formatBytes(submission.file.size) }}) </span>
                       </div>
                     } @else {
-                      <span class="text-base-content/50 text-sm">-</span>
+                      <span class="text-ink-subtle text-sm">-</span>
                     }
                   </td>
                   <td>
                     <div class="flex items-center justify-end gap-1">
-                    @if (submission) {
-                      <button
-                        uiButton
-                        variant="ghost"
-                        size="sm"
-                        type="button"
-                        [loading]="reviewingId() === submission.id"
-                        [disabled]="reviewingId() === submission.id"
-                        (click)="toggleReviewed(submission)"
-                      >
-                        {{ submission.reviewedAt ? 'Quitar revisión' : 'Marcar revisada' }}
-                      </button>
-                    }
-                    @let fileId = $safeNavigationMigration(submission?.file?.id);
-                    @if (fileId) {
-                      <button
-                        uiButton
-                        [loading]="downloadingFileId() === fileId"
-                        variant="ghost"
-                        size="sm"
-                        (click)="downloadFile(fileId)"
-                        [disabled]="downloadingFileId() === fileId"
-                      >
-                        @if (!(downloadingFileId() === fileId)) {
-                          <span class="material-symbols-outlined" aria-hidden="true">download</span>
-                          <span class="sr-only">Descargar</span>
-                        }
-                      </button>
-                    }
+                      @if (submission) {
+                        <button
+                          uiButton
+                          variant="ghost"
+                          size="sm"
+                          type="button"
+                          [loading]="reviewingId() === submission.id"
+                          [disabled]="reviewingId() === submission.id"
+                          (click)="toggleReviewed(submission)"
+                        >
+                          {{ submission.reviewedAt ? 'Quitar revisión' : 'Marcar revisada' }}
+                        </button>
+                      }
+                      @let fileId = $safeNavigationMigration(submission?.file?.id);
+                      @if (fileId) {
+                        <button
+                          uiButton
+                          [loading]="downloadingFileId() === fileId"
+                          variant="ghost"
+                          size="sm"
+                          (click)="downloadFile(fileId)"
+                          [disabled]="downloadingFileId() === fileId"
+                        >
+                          @if (!(downloadingFileId() === fileId)) {
+                            <span class="material-symbols-outlined" aria-hidden="true">download</span>
+                            <span class="sr-only">Descargar</span>
+                          }
+                        </button>
+                      }
                     </div>
                   </td>
                 </tr>
               } @empty {
                 <tr>
-                  <td colspan="5" class="text-center text-base-content/50 py-8">
+                  <td colspan="5" class="text-center text-ink-subtle py-8">
                     No hay estudiantes inscritos en este curso.
                   </td>
                 </tr>

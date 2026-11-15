@@ -22,7 +22,7 @@ const URGENCY_LABEL: Record<Urgency, string> = {
     <div class="flex" [class.justify-end]="mine()">
       <div
         class="max-w-[80%] rounded-2xl px-3 py-2 text-sm"
-        [class]="mine() ? 'bg-primary/20 text-base-content' : 'bg-base-200 text-base-content'"
+        [class]="mine() ? 'bg-primary/20 text-ink-strong' : 'bg-surface-0 text-ink-strong'"
       >
         @if (!mine() && senderName()) {
           <p class="font-semibold text-xs opacity-80 mb-0.5">{{ senderName() }}</p>

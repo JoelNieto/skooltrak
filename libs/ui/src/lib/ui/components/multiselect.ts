@@ -105,7 +105,8 @@ import { NG_VALUE_ACCESSOR, ReactiveFormsModule } from '@angular/forms';
       transform: rotate(180deg);
     }
     .example-popup-container {
-      @apply bg-white shadow-sm;
+      @apply shadow-sm;
+      background-color: var(--ui-surface-1);
       width: 100%;
       padding: 0.5rem;
       margin-top: 8px;

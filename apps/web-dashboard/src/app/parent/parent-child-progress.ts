@@ -25,7 +25,7 @@ interface GradeRow {
 
     @if (!child()) {
       <div uiCard class="mt-6">
-        <div uiCardBody class="text-base-content/70">Selecciona un hijo desde el portal para ver su progreso.</div>
+        <div uiCardBody class="text-ink-muted">Selecciona un hijo desde el portal para ver su progreso.</div>
       </div>
     } @else {
       <div class="grid gap-4 md:grid-cols-3">
@@ -36,7 +36,7 @@ interface GradeRow {
 
       <div uiCard class="mt-6">
         <div uiCardBody>
-          <h2 class="text-lg font-semibold text-base-content">Calificaciones por materia</h2>
+          <h2 class="text-lg font-semibold text-ink-strong">Calificaciones por materia</h2>
           @if (loading()) {
             <div class="flex justify-center py-8">
               <span uiSpinner></span>
@@ -56,11 +56,11 @@ interface GradeRow {
                     <tr>
                       <td>{{ item.subject }}</td>
                       <td>{{ item.score }}</td>
-                      <td class="text-sm text-base-content/70">{{ item.note }}</td>
+                      <td class="text-sm text-ink-muted">{{ item.note }}</td>
                     </tr>
                   } @empty {
                     <tr>
-                      <td colspan="3" class="text-base-content/70">Sin calificaciones publicadas.</td>
+                      <td colspan="3" class="text-ink-muted">Sin calificaciones publicadas.</td>
                     </tr>
                   }
                 </tbody>

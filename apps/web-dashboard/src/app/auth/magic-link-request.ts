@@ -1,4 +1,4 @@
-import { Button, Card, CardBody, CardTitle, Toast } from '#/ui';
+import { Button, Card, CardBody, CardTitle, Toast, UiInputGroup } from '#/ui';
 import { HttpClient } from '@angular/common/http';
 import { Component, inject, signal } from '@angular/core';
 import { debounce, email, form, FormField, required } from '@angular/forms/signals';
@@ -6,18 +6,16 @@ import { Router, RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-magic-link-request',
-  imports: [Card, CardBody, CardTitle, Button, RouterLink, FormField],
+  imports: [Card, CardBody, CardTitle, Button, RouterLink, FormField, UiInputGroup],
   template: `
-    <div class="min-h-screen flex items-center justify-center bg-base-200 p-4">
+    <div class="min-h-screen flex items-center justify-center bg-surface-0 p-4">
       <div uiCard class="w-full max-w-md">
         <div uiCardBody>
           <h2 uiCardTitle class="text-2xl justify-center">Acceso sin contraseña</h2>
-          <p class="text-center text-base-content/70 mb-4">
-            Ingresa tu correo y te enviaremos un enlace de acceso único.
-          </p>
+          <p class="text-center text-ink-muted mb-4">Ingresa tu correo y te enviaremos un enlace de acceso único.</p>
 
           <form (submit)="request($event)" class="flex flex-col gap-4">
-            <label class="input input-bordered w-full">
+            <label uiInputGroup class="w-full">
               <span class="material-symbols-outlined">email</span>
               <input type="email" placeholder="correo@ejemplo.com" [formField]="emailForm.email" />
             </label>

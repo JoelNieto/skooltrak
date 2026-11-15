@@ -1,5 +1,5 @@
 import { SchoolContext } from '#/shared';
-import { Alert, Badge, Button, Toast, UiSelect } from '#/ui';
+import { Alert, Badge, Button, Toast, UiField, UiSelect } from '#/ui';
 import { Component, effect, inject, input, signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
@@ -10,7 +10,7 @@ import { StoreApiService } from '../store-api.service';
 
 @Component({
   selector: 'app-product-detail',
-  imports: [Alert, Badge, UiSelect, Button, RouterLink, FormsModule],
+  imports: [Alert, Badge, UiSelect, Button, RouterLink, FormsModule, UiField],
   template: `
     <a uiButton variant="ghost" size="sm" routerLink="../.." class="gap-1 mb-4">
       <span class="material-symbols-outlined">arrow_back</span>
@@ -23,11 +23,11 @@ import { StoreApiService } from '../store-api.service';
     } @else {
       @let p = product.value()!;
       <div class="grid gap-8 lg:grid-cols-2">
-        <figure class="rounded-box bg-base-200 aspect-square overflow-hidden">
+        <figure class="rounded-box bg-surface-0 aspect-square overflow-hidden">
           @if (p.imageUrl) {
             <img [src]="p.imageUrl" [alt]="p.name" class="h-full w-full object-cover" />
           } @else {
-            <div class="flex h-full items-center justify-center text-base-content/30">
+            <div class="flex h-full items-center justify-center text-ink-subtle">
               <span class="material-symbols-outlined text-8xl">inventory_2</span>
             </div>
           }
@@ -39,11 +39,10 @@ import { StoreApiService } from '../store-api.service';
           }
           <p class="text-2xl font-semibold text-primary">{{ formatPrice(p.price) }}</p>
           @if (p.description) {
-            <p class="text-base-content/80 whitespace-pre-wrap">{{ p.description }}</p>
+            <p class="text-ink whitespace-pre-wrap">{{ p.description }}</p>
           }
           @if (p.variants?.length) {
-            <label class="form-control w-full max-w-xs">
-              <span class="label-text">Talla / variante</span>
+            <ui-field label="Talla / variante" class="w-full max-w-xs">
               <select uiSelect [ngModel]="selectedVariantId()" (ngModelChange)="selectedVariantId.set($event)">
                 @for (v of p.variants; track v.id) {
                   <option [value]="v.id" [disabled]="(v.stock ?? 0) <= 0">
@@ -51,7 +50,7 @@ import { StoreApiService } from '../store-api.service';
                   </option>
                 }
               </select>
-            </label>
+            </ui-field>
           }
           @if (!selectedVariant() || (selectedVariant()?.stock ?? 0) <= 0) {
             <div uiBadge tone="danger">Sin stock en la talla seleccionada</div>

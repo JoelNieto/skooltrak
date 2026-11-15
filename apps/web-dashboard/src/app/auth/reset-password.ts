@@ -17,13 +17,13 @@ import { BrandLogo } from '../shared/brand-logo';
 
           <div class="w-full rounded-2xl shadow-xl overflow-hidden flex flex-col">
             <!-- Header Section -->
-            <div class="bg-primary p-6 text-white text-center">
+            <div class="bg-primary p-6 text-primary-content text-center">
               <h1 class="text-2xl font-bold">Nueva contraseña</h1>
               <p class="text-primary-content mt-2">Ingresa tu nueva contraseña</p>
             </div>
 
             <!-- Form Section -->
-            <div class="p-8 bg-base-100">
+            <div class="p-8 bg-surface-1">
               @if (resendSuccess()) {
                 <div uiAlert tone="success" class="mb-4">
                   <span class="material-symbols-outlined">check_circle</span>

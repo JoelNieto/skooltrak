@@ -1,13 +1,13 @@
 import { Component, computed, input, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { Prisma } from '@generated/prisma';
-import { UiInput } from '#/ui';
+import { UiInput, UiInputGroup } from '#/ui';
 
 @Component({
   selector: 'app-group-courses',
-  imports: [UiInput, RouterLink],
+  imports: [UiInput, RouterLink, UiInputGroup],
   template: ` <h4 class="text-xl font-medium mb-2">Cursos</h4>
-    <label class="input">
+    <label uiInputGroup>
       <span class="material-symbols-outlined">search</span>
       <input
         uiInput

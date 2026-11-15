@@ -1,21 +1,49 @@
-import { Button, Card, CardBody, EmptyState, PageHeader, StatCard } from '#/ui';
+import { Alert, Button, Card, CardBody, EmptyState, PageHeader, Spinner, StatCard } from '#/ui';
 import { DatePipe } from '@angular/common';
-import { HttpClient, httpResource } from '@angular/common/http';
+import { httpResource } from '@angular/common/http';
 import { Component, computed, inject } from '@angular/core';
-import { rxResource } from '@angular/core/rxjs-interop';
-import { RouterLink } from '@angular/router';
-import { forkJoin, of } from 'rxjs';
+import { Router, RouterLink } from '@angular/router';
 import { toFetchQueryParams } from './core/fetch-query-params';
 import Store from './core/store';
 import WelcomeBanner from './shared/welcome-banner';
 import { RecentBroadcasts } from './communication/recent-broadcasts';
 
-type DashboardStats = {
-  coursesCount: number;
-  findManyStudentsCount: number;
-  findManyTeachersCount: number;
-  findManySubjectsCount: number;
+type Ref = { id: string; name: string };
+
+/** `GET /api/v1/home/admin/attention` (HOM-001 FR .5 .24). */
+type AdminAttention = {
+  firstName: string;
+  school: Ref;
+  timezone: string;
+  date: string;
+  time: string;
+  period: Ref | null;
+  periodClose: { name: string; endDate: string; daysLeft: number; coursesWithMissingGrades: number; totalCourses: number } | null;
+  currencyCode: string;
+  tiles: {
+    joinRequests: { total: number; teachers: number; parents: number; others: number; oldestAt: string | null };
+    broadcastsToApprove: number;
+    missedAttendance: number;
+    overdueCharges: { count: number; amount: number; families: number } | null;
+    failedImports: number;
+    plansWithoutScale: number;
+  };
 };
+
+/** `GET /api/v1/home/admin/kpis` (HOM-001 FR .25). */
+type AdminKpis = {
+  students: { active: number; candidates: number };
+  attendanceToday: { rate: number | null; absent: number; late: number; lastWeekRate: number | null };
+  collection: { rate: number | null; collected: number; billed: number } | null;
+  passing: { evaluated: number; rate: number | null; belowPass: number; allExcellent: number } | null;
+  currencyCode: string;
+};
+
+type AttentionTile = { icon: string; iconClass: string; count: number; label: string; detail: string; link: string };
+
+const percent = new Intl.NumberFormat('es', { style: 'percent', maximumFractionDigits: 1 });
+const integer = new Intl.NumberFormat('es-MX');
+const longDate = new Intl.DateTimeFormat('es', { weekday: 'long', day: 'numeric', month: 'long', timeZone: 'UTC' });
 
 type RecentStudent = {
   id: string;
@@ -51,6 +79,8 @@ type PublishedNewsletter = {
 @Component({
   selector: 'app-home',
   imports: [
+    Alert,
+    Spinner,
     Card,
     CardBody,
     Button,
@@ -68,37 +98,63 @@ type PublishedNewsletter = {
       <app-welcome-banner [summary]="onboardingSummary()" [firstVisit]="isFirstVisit()" />
     }
 
-    <lib-page-header title="Panel administrativo" subtitle="Resumen general de la institución." />
+    <lib-page-header
+      [title]="greeting()"
+      [subtitle]="headerSubtitle()"
+      actionLabel="Nuevo comunicado"
+      actionIcon="campaign"
+      (action)="newBroadcast()"
+    />
 
-    <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-      <lib-stat-card
-        label="Estudiantes"
-        [value]="(statsResource.value()?.findManyStudentsCount ?? 0).toString()"
-        helper="Matriculados"
-        icon="school"
-        color="primary"
-      />
-      <lib-stat-card
-        label="Docentes"
-        [value]="(statsResource.value()?.findManyTeachersCount ?? 0).toString()"
-        helper="Activos"
-        icon="groups"
-        color="accent"
-      />
-      <lib-stat-card
-        label="Cursos"
-        [value]="(statsResource.value()?.coursesCount ?? 0).toString()"
-        helper="En la institución"
-        icon="menu_book"
-        color="info"
-      />
-      <lib-stat-card
-        label="Asignaturas"
-        [value]="(statsResource.value()?.findManySubjectsCount ?? 0).toString()"
-        helper="Plan académico"
-        icon="library_books"
-        color="success"
-      />
+    @if (attention.value()?.periodClose; as close) {
+      <div uiAlert tone="info" class="mb-4">
+        <span class="material-symbols-outlined" aria-hidden="true">event_upcoming</span>
+        <span class="flex-1">
+          <strong>{{ close.daysLeft === 0 ? 'Hoy cierra el ' + close.name : 'Cierre del ' + close.name + ' en ' + close.daysLeft + (close.daysLeft === 1 ? ' día' : ' días') }}</strong>
+          · {{ close.coursesWithMissingGrades }} de {{ close.totalCourses }} cursos tienen calificaciones incompletas.
+        </span>
+        <a routerLink="/admin/courses" class="link font-medium">Ver cursos</a>
+      </div>
+    }
+
+    <section uiCard aria-labelledby="admin-attention-title">
+      <div uiCardBody>
+        <h2 id="admin-attention-title" class="text-base font-semibold text-ink-strong">Requiere tu atención</h2>
+        @if (attention.isLoading()) {
+          <div class="flex justify-center py-6"><span uiSpinner></span></div>
+        } @else if (attention.error()) {
+          <div uiAlert tone="danger" role="alert" class="mt-2">
+            <span>No se pudo cargar el resumen de la escuela.</span>
+            <button uiButton variant="ghost" size="sm" type="button" (click)="attention.reload()">Reintentar</button>
+          </div>
+        } @else if (tiles().length === 0) {
+          <lib-empty-state title="Todo al día" description="No hay solicitudes, aprobaciones ni pendientes de la escuela." icon="task_alt" color="success" />
+        } @else {
+          <ul class="mt-2 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+            @for (tile of tiles(); track tile.label) {
+              <li>
+                <a [routerLink]="tile.link" class="flex h-full flex-col gap-1.5 rounded-field border border-line p-3.5 text-ink hover:border-line-strong hover:no-underline">
+                  <span class="flex items-center gap-2">
+                    <span class="material-symbols-outlined flex size-9 items-center justify-center rounded-field" [class]="tile.iconClass" aria-hidden="true">{{ tile.icon }}</span>
+                    <strong class="text-2xl text-ink-strong">{{ tile.count }}</strong>
+                  </span>
+                  <span class="font-medium text-ink-strong">{{ tile.label }}</span>
+                  <span class="text-xs text-ink-muted">{{ tile.detail }}</span>
+                </a>
+              </li>
+            }
+          </ul>
+        }
+      </div>
+    </section>
+
+    <div class="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+      <lib-stat-card label="Estudiantes activos" [value]="studentsValue()" [helper]="studentsHelper()" icon="school" color="primary" />
+      <lib-stat-card label="Asistencia hoy" [value]="attendanceValue()" [helper]="attendanceHelper()" icon="how_to_reg" color="success" />
+      @if (kpis.value()?.collection !== null) {
+        <lib-stat-card label="Cobranza del mes" [value]="collectionValue()" [helper]="collectionHelper()" icon="payments" color="info" />
+      }
+      <lib-stat-card label="Aprobando todas las materias" [value]="passingValue()" [helper]="passingHelper()" icon="grade" color="warning" />
     </div>
 
     <div class="mt-6">
@@ -286,7 +342,6 @@ type PublishedNewsletter = {
   `,
 })
 export default class Home {
-  private http = inject(HttpClient);
   private store = inject(Store);
   private FIRST_VISIT_KEY = 'skooltrak_first_visit_shown';
 
@@ -340,26 +395,124 @@ export default class Home {
     return false;
   });
 
-  public statsResource = rxResource({
-    params: () => ({ schoolId: this.store.currentSchoolId() }),
-    stream: ({ params }): import('rxjs').Observable<DashboardStats> => {
-      if (!params.schoolId) {
-        return of<DashboardStats>({
-          coursesCount: 0,
-          findManyStudentsCount: 0,
-          findManyTeachersCount: 0,
-          findManySubjectsCount: 0,
-        });
-      }
-      const q = toFetchQueryParams({ schoolId: params.schoolId });
-      return forkJoin({
-        coursesCount: this.http.get<number>('/api/v1/courses/count', { params: q }),
-        findManyStudentsCount: this.http.get<number>('/api/v1/students/count', { params: q }),
-        findManyTeachersCount: this.http.get<number>('/api/v1/teachers/count', { params: q }),
-        findManySubjectsCount: this.http.get<number>('/api/v1/subjects/count', { params: q }),
-      });
-    },
+  // ── HOM-001-S08: attention tiles, period banner, KPI row ─────────────────
+  #router = inject(Router);
+
+  public attention = httpResource<AdminAttention>(() => {
+    const schoolId = this.store.currentSchoolId();
+    return schoolId ? { url: '/api/v1/home/admin/attention', params: { schoolId } } : undefined;
   });
+
+  public kpis = httpResource<AdminKpis>(() => {
+    const schoolId = this.store.currentSchoolId();
+    return schoolId ? { url: '/api/v1/home/admin/kpis', params: { schoolId } } : undefined;
+  });
+
+  public greeting = computed(() => {
+    const a = this.attention.value();
+    if (!a) return 'Panel administrativo';
+    const hour = Number(a.time.slice(0, 2));
+    const salutation = hour < 12 ? 'Buenos días' : hour < 19 ? 'Buenas tardes' : 'Buenas noches';
+    return a.firstName ? `${salutation}, ${a.firstName}` : salutation;
+  });
+
+  public headerSubtitle = computed(() => {
+    const a = this.attention.value();
+    if (!a) return 'Resumen general de la institución.';
+    const date = capitalize(longDate.format(new Date(`${a.date}T00:00:00Z`)));
+    return [date, a.period?.name, a.school.name].filter(Boolean).join(' · ');
+  });
+
+  /** FR-HOM-001.24 tiles with a non-zero count. */
+  public tiles = computed<AttentionTile[]>(() => {
+    const a = this.attention.value();
+    if (!a) return [];
+    const t = a.tiles;
+    const tiles: AttentionTile[] = [];
+    if (t.joinRequests.total) {
+      const parts = [
+        t.joinRequests.teachers ? plural(t.joinRequests.teachers, 'docente', 'docentes') : '',
+        t.joinRequests.parents ? plural(t.joinRequests.parents, 'acudiente', 'acudientes') : '',
+        t.joinRequests.others ? plural(t.joinRequests.others, 'otro', 'otros') : '',
+      ].filter(Boolean);
+      const days = t.joinRequests.oldestAt ? Math.floor((Date.now() - new Date(t.joinRequests.oldestAt).getTime()) / 86_400_000) : null;
+      if (days !== null && days > 0) parts.push(`la más antigua hace ${plural(days, 'día', 'días')}`);
+      tiles.push({ icon: 'how_to_reg', iconClass: 'bg-warning/15 text-warning', count: t.joinRequests.total, label: 'Solicitudes de ingreso', detail: parts.join(' · '), link: '/admin/join-requests' });
+    }
+    if (t.broadcastsToApprove) {
+      tiles.push({ icon: 'approval', iconClass: 'bg-primary/15 text-primary', count: t.broadcastsToApprove, label: 'Comunicados por aprobar', detail: 'Enviados a toda la escuela', link: '/communication' });
+    }
+    if (t.missedAttendance) {
+      tiles.push({ icon: 'fact_check', iconClass: 'bg-info/15 text-info', count: t.missedAttendance, label: 'Clases sin asistencia hoy', detail: 'Ya pasó su hora de inicio', link: '/admin/attendance-reporting' });
+    }
+    if (t.overdueCharges?.count) {
+      const amount = new Intl.NumberFormat('es-MX', { style: 'currency', currency: a.currencyCode }).format(t.overdueCharges.amount);
+      tiles.push({
+        icon: 'receipt_long',
+        iconClass: 'bg-error/15 text-error',
+        count: t.overdueCharges.count,
+        label: 'Cargos vencidos',
+        detail: `${amount} sin cobrar · ${plural(t.overdueCharges.families, 'familia', 'familias')}`,
+        link: '/financial-module',
+      });
+    }
+    if (t.failedImports) {
+      tiles.push({ icon: 'upload_file', iconClass: 'bg-surface-2 text-ink', count: t.failedImports, label: t.failedImports === 1 ? 'Importación con errores' : 'Importaciones con errores', detail: 'Últimos 30 días', link: '/admin/imports' });
+    }
+    if (t.plansWithoutScale) {
+      tiles.push({ icon: 'rule', iconClass: 'bg-warning/15 text-warning', count: t.plansWithoutScale, label: 'Planes sin escala de notas', detail: 'Sin ella no se calcula la nota mínima', link: '/admin/study-plans' });
+    }
+    return tiles;
+  });
+
+  public studentsValue = computed(() => (this.kpis.isLoading() ? '…' : integer.format(this.kpis.value()?.students.active ?? 0)));
+  public studentsHelper = computed(() => {
+    const c = this.kpis.value()?.students.candidates ?? 0;
+    return c ? `+${plural(c, 'candidato', 'candidatos')} por matricular` : 'Matriculados';
+  });
+
+  public attendanceValue = computed(() => {
+    if (this.kpis.isLoading()) return '…';
+    const rate = this.kpis.value()?.attendanceToday.rate;
+    return rate === null || rate === undefined ? '—' : percent.format(rate);
+  });
+  public attendanceHelper = computed(() => {
+    const a = this.kpis.value()?.attendanceToday;
+    if (!a || a.rate === null) return 'Aún sin registros hoy';
+    const parts = [plural(a.absent, 'ausente', 'ausentes'), plural(a.late, 'tardanza', 'tardanzas')];
+    if (a.lastWeekRate !== null) parts.push(`semana pasada ${percent.format(a.lastWeekRate)}`);
+    return parts.join(' · ');
+  });
+
+  public collectionValue = computed(() => {
+    if (this.kpis.isLoading()) return '…';
+    const rate = this.kpis.value()?.collection?.rate;
+    return rate === null || rate === undefined ? '—' : percent.format(rate);
+  });
+  public collectionHelper = computed(() => {
+    const k = this.kpis.value();
+    const c = k?.collection;
+    if (!k || !c) return '';
+    if (!c.billed) return 'Sin cargos este mes';
+    const money = new Intl.NumberFormat('es-MX', { style: 'currency', currency: k.currencyCode });
+    return `${money.format(c.collected)} de ${money.format(c.billed)} facturado`;
+  });
+
+  public passingValue = computed(() => {
+    if (this.kpis.isLoading()) return '…';
+    const rate = this.kpis.value()?.passing?.rate;
+    return rate === null || rate === undefined ? '—' : percent.format(rate);
+  });
+  public passingHelper = computed(() => {
+    const p = this.kpis.value()?.passing;
+    if (!p) return 'Sin periodo activo';
+    if (!p.evaluated) return 'Sin calificaciones publicadas';
+    return `${integer.format(p.belowPass)} bajo la nota mínima en al menos una materia · ${integer.format(p.allExcellent)} en excelencia`;
+  });
+
+  newBroadcast() {
+    this.#router.navigate(['/communication']);
+  }
 
   public recentMessages = httpResource<InboxRow[]>(() => ({
     url: '/api/v1/messages',
@@ -409,4 +562,12 @@ export default class Home {
       }),
     };
   });
+}
+
+function plural(n: number, one: string, many: string) {
+  return `${n} ${n === 1 ? one : many}`;
+}
+
+function capitalize(text: string) {
+  return text.charAt(0).toUpperCase() + text.slice(1);
 }

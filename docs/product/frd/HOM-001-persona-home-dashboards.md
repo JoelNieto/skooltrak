@@ -208,7 +208,7 @@ Each slice replaces its part of the existing home in place. Old widgets that are
 
 | Slice | Title | FRs | Status |
 |---|---|---|---|
-| [HOM-001-S01](../slices/HOM-001-S01-teacher-my-day.md) | Teacher: "Mi día" with attendance state + scoped attendance KPI (home module foundation, school timezone) | .1 .6 .7 (attendance tile), BR .3 .4 .5 .7 .15 | Ready |
+| [HOM-001-S01](../slices/HOM-001-S01-teacher-my-day.md) | Teacher: "Mi día" with attendance state + scoped attendance KPI (home module foundation, school timezone) | .1 .6 .7 (attendance tile), BR .3 .4 .5 .7 .15 | In review |
 | HOM-001-S02 | Teacher: Pendientes, period-close banner, this week's assignments with progress (adds `Meter`, `AssignmentSubmission.reviewedAt`) | .5 .7 .8 .9, BR .2 | Proposed |
 | HOM-001-S03 | Teacher: students needing attention, unanswered family threads, average KPI, grade-distribution placeholder (adds `ChartPlaceholder`, grade thresholds) | .2 .4 .7 .10 .11, BR .1 .11 .13 | Proposed |
 | HOM-001-S04 | Student: now/next, today strip, upcoming/overdue work for own group, quizzes (adds student e2e persona) | .1 .12 .14 .15, BR .8 .12 | Proposed |

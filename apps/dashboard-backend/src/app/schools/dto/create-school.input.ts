@@ -25,4 +25,7 @@ export class CreateSchoolInput implements CreateSchoolInputType {
 
     currentYear: number;
     schoolYearStartMonth?: number;
+
+    /** IANA timezone name, e.g. "America/Panama". */
+    timezone?: string;
 }

@@ -1,7 +1,7 @@
 import { Alert, Button, Loader, Toast, UiInput, UiSelect, UiTable } from '#/ui';
 import { NgClass } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { afterRenderEffect, Component, computed, effect, inject, input, output, signal } from '@angular/core';
+import { afterRenderEffect, Component, computed, effect, inject, input, output, signal, untracked } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { applyEach, form, FormField, required } from '@angular/forms/signals';
 import { Prisma } from '@generated/prisma';
@@ -175,6 +175,10 @@ export default class AttendanceForm {
     courseId: string;
     session?: AttendanceSessionType;
     groups?: ClassGroupType[];
+    /** Preselects the group of a new session (e.g. from the teacher home, HOM-001-S01). */
+    classGroupId?: string;
+    /** Preselects the date of a new session, `YYYY-MM-DD`. */
+    date?: string;
   }>();
   public closeModal = output<void>();
 
@@ -235,11 +239,15 @@ export default class AttendanceForm {
   constructor() {
     // Initialize form with session data if editing
     afterRenderEffect(() => {
-      const session = this.data()?.session;
+      const data = this.data();
+      const session = data?.session;
       if (session) {
         this.form.date().value.set(session.date.split('T')[0]);
         this.form.classGroupId().value.set(session.classGroupId);
         this.selectedGroupId.set(session.classGroupId);
+      } else if (data?.classGroupId && !untracked(() => this.formModel().classGroupId)) {
+        this.form.classGroupId().value.set(data.classGroupId);
+        if (data.date) this.form.date().value.set(data.date);
       }
     });
 

@@ -22,6 +22,9 @@ import { firstValueFrom, map, of, switchMap } from 'rxjs';
 import Store from '../../core/store';
 import { isValidId } from '../../core/validators';
 
+/** Matches the `School.timezone` column default (HOM-001-S01). */
+const DEFAULT_TIMEZONE = 'America/Panama';
+
 interface SchoolFromApi {
   name: string | null;
   shortName: string | null;
@@ -38,6 +41,7 @@ interface SchoolFromApi {
   secondaryColor?: string | null;
   tertiaryColor?: string | null;
   schoolYearStartMonth?: number | null;
+  timezone?: string | null;
 }
 
 interface SchoolFormData {
@@ -56,6 +60,7 @@ interface SchoolFormData {
   secondaryColor: string;
   tertiaryColor: string;
   schoolYearStartMonth: number;
+  timezone: string;
 }
 
 @Component({
@@ -278,7 +283,8 @@ interface SchoolFormData {
             <div class="mb-4">
               <h2 class="text-lg/7 font-semibold text-base-content">Configuración académica</h2>
               <p class="mt-1 text-sm text-base-content/70">
-                Mes en que inicia el año escolar. Se usa para generar los cargos de colegiatura.
+                Mes en que inicia el año escolar (se usa para generar los cargos de colegiatura) y zona horaria de la
+                escuela (define «hoy» en los tableros de inicio).
               </p>
             </div>
             <div class="sm:col-span-3">
@@ -295,6 +301,19 @@ interface SchoolFormData {
                       >
                         @for (m of schoolYearMonths; track m.value) {
                           <option [value]="m.value">{{ m.label }}</option>
+                        }
+                      </select>
+                    </ui-field>
+                    <ui-field label="Zona horaria" class="col-span-3">
+                      <select
+                        uiSelect
+                        id="timezone"
+                        [ngModelOptions]="{ standalone: true }"
+                        [ngModel]="schoolForm.timezone().value()"
+                        (ngModelChange)="onTimezoneChange($event)"
+                      >
+                        @for (tz of timezones(); track tz) {
+                          <option [value]="tz">{{ tz }}</option>
                         }
                       </select>
                     </ui-field>
@@ -454,6 +473,7 @@ export default class SchoolForm {
     secondaryColor: '',
     tertiaryColor: '',
     schoolYearStartMonth: 8,
+    timezone: DEFAULT_TIMEZONE,
   });
 
   public schoolForm = form(this.#schoolModel, (schemaPath) => {
@@ -502,6 +522,7 @@ export default class SchoolForm {
           secondaryColor: (school as { secondaryColor?: string | null }).secondaryColor ?? '',
           tertiaryColor: (school as { tertiaryColor?: string | null }).tertiaryColor ?? '',
           schoolYearStartMonth: school.schoolYearStartMonth ?? 8,
+          timezone: school.timezone || DEFAULT_TIMEZONE,
         });
 
         // Set logo download URL if available
@@ -649,6 +670,19 @@ export default class SchoolForm {
 
   onSchoolYearStartMonthChange(value: string): void {
     this.#schoolModel.update((m) => ({ ...m, schoolYearStartMonth: Number(value) }));
+  }
+
+  /** IANA zones the browser knows, keeping the school's current value even if the list lacks it. */
+  public timezones = computed(() => {
+    const supportedValuesOf = (Intl as unknown as { supportedValuesOf?: (key: 'timeZone') => string[] })
+      .supportedValuesOf;
+    const zones = supportedValuesOf ? supportedValuesOf('timeZone') : [];
+    const current = this.#schoolModel().timezone;
+    return zones.includes(current) ? zones : [current, ...zones];
+  });
+
+  onTimezoneChange(value: string): void {
+    this.#schoolModel.update((m) => ({ ...m, timezone: value }));
   }
 
   cancelCrop(): void {

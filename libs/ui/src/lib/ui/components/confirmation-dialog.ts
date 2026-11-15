@@ -1,18 +1,19 @@
-import { Component, computed, input, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input, output } from '@angular/core';
 import { DialogData } from '../types/dialog.type';
-import { Button } from './button';
+import { Button, ButtonVariant } from './button';
 
 @Component({
   selector: 'lib-confirmation',
   imports: [Button],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `<p class="my-4">{{ data().message }}</p>
     <div class="flex justify-end gap-2">
       @if (!data().hideCancel) {
-        <button uiButton variant="ghost" (click)="closeModal.emit(false)">
+        <button uiButton variant="ghost" type="button" (click)="closeModal.emit(false)">
           {{ data().cancelText || 'Cancelar' }}
         </button>
       }
-      <button [class]="buttonClass()" (click)="closeModal.emit(true)">
+      <button uiButton [variant]="confirmVariant()" type="button" (click)="closeModal.emit(true)">
         {{ data().confirmText || 'Confirmar' }}
       </button>
     </div>`,
@@ -20,18 +21,9 @@ import { Button } from './button';
 export class ConfirmationDialog {
   public data = input.required<DialogData>();
   public closeModal = output<boolean>();
-  public buttonClass = computed(() => {
-    switch (this.data().severity) {
-      case 'success':
-        return 'btn btn-success btn-soft';
-      case 'info':
-        return 'btn btn-info btn-soft';
-      case 'warning':
-        return 'btn btn-warning btn-soft';
-      case 'error':
-        return 'btn btn-error btn-soft';
-      default:
-        return 'btn btn-error btn-soft';
-    }
+  /** Destructive by default (no severity, or `error`); any other severity is a regular confirm. */
+  public confirmVariant = computed<ButtonVariant>(() => {
+    const severity = this.data().severity;
+    return !severity || severity === 'error' ? 'danger' : 'primary';
   });
 }

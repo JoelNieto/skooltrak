@@ -47,7 +47,7 @@ import { Component } from '@angular/core';
         <lib-empty-state
           title="Sin evaluaciones próximas"
           description="Agrega exámenes desde el módulo docente."
-          icon="event_busy"
+          icon="calendar-x"
         />
       } @else {
         <div class="grid gap-4 md:grid-cols-2">

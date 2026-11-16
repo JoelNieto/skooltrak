@@ -1,4 +1,4 @@
-import { Button, Card, Confirmation, Modal, Paginator, Toast, UiTable } from '#/ui';
+import { Button, Card, Confirmation, Icon, Modal, Paginator, Toast, UiTable } from '#/ui';
 import { Menu, MenuContent, MenuItem, MenuTrigger } from '@angular/aria/menu';
 import { OverlayModule } from '@angular/cdk/overlay';
 import { DatePipe } from '@angular/common';
@@ -19,12 +19,10 @@ type DegreeRow = {
 };
 @Component({
   selector: 'app-degrees',
-  imports: [Card, UiTable, Button, DatePipe, Paginator, Menu, MenuContent, MenuItem, MenuTrigger, OverlayModule],
+  imports: [Card, UiTable, Button, DatePipe, Paginator, Menu, MenuContent, MenuItem, MenuTrigger, OverlayModule, Icon],
 
   template: ` <div class="flex justify-end">
-      <button uiButton variant="primary" (click)="editDegree()">
-        <span class="material-symbols-outlined">add_circle</span> Agregar nivel
-      </button>
+      <button uiButton variant="primary" (click)="editDegree()"><ui-icon name="circle-plus" /> Agregar nivel</button>
     </div>
     <div uiCard class="overflow-x-auto mt-4">
       <table uiTable>
@@ -54,7 +52,7 @@ type DegreeRow = {
                   #trigger="ngMenuTrigger"
                   [menu]="actionsMenu()"
                 >
-                  <span class="material-symbols-outlined text-xl">more_horiz</span>
+                  <ui-icon name="ellipsis" class="text-xl" />
                 </button>
                 <ng-template
                   [cdkConnectedOverlayOpen]="trigger.expanded()"
@@ -78,7 +76,7 @@ type DegreeRow = {
                         class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-surface-2 w-full"
                         (click)="editDegree(degree)"
                       >
-                        <span class="material-symbols-outlined text-lg">edit</span>
+                        <ui-icon name="pencil" class="text-lg" />
                         <span>Editar</span>
                       </button>
                       <button
@@ -87,7 +85,7 @@ type DegreeRow = {
                         class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-surface-2 w-full"
                         (click)="deleteDegree(degree)"
                       >
-                        <span class="material-symbols-outlined text-lg">delete</span>
+                        <ui-icon name="trash-2" class="text-lg" />
                         <span>Eliminar</span>
                       </button>
                     </ng-template>

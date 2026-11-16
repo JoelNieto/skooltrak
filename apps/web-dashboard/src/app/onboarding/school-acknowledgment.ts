@@ -1,4 +1,4 @@
-import { BrandLogo, Button, Toast, UiCheckbox, UiChoice, UiField, UiInput } from '#/ui';
+import { BrandLogo, Button, Icon, Toast, UiCheckbox, UiChoice, UiField, UiInput } from '#/ui';
 import { HttpClient } from '@angular/common/http';
 import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -9,7 +9,7 @@ import Store from '../core/store';
 
 @Component({
   selector: 'app-school-acknowledgment',
-  imports: [UiCheckbox, UiChoice, UiField, UiInput, Button, BrandLogo, FormField, FormsModule],
+  imports: [UiCheckbox, UiChoice, UiField, UiInput, Button, BrandLogo, FormField, FormsModule, Icon],
   template: `
     <div class="min-h-screen flex flex-col bg-surface-0">
       <!-- Fixed Header -->
@@ -23,7 +23,7 @@ import Store from '../core/store';
           <!-- Icon -->
           <div class="flex justify-center">
             <div class="w-24 h-24 rounded-full bg-action-subtle flex items-center justify-center">
-              <span class="material-symbols-outlined text-6xl text-primary">apartment</span>
+              <ui-icon name="building-2" class="text-6xl text-primary" />
             </div>
           </div>
 
@@ -59,7 +59,7 @@ import Store from '../core/store';
             <div class="bg-surface-1 rounded-xl p-4 border border-line shadow-sm">
               <div class="flex items-start gap-4">
                 <div class="w-10 h-10 rounded-lg bg-action-subtle flex items-center justify-center shrink-0">
-                  <span class="material-symbols-outlined text-primary">database</span>
+                  <ui-icon name="database" class="text-primary" />
                 </div>
                 <div>
                   <h3 class="font-semibold text-ink-strong">Tu escuela será el contenedor de todos tus datos</h3>
@@ -74,7 +74,7 @@ import Store from '../core/store';
             <div class="bg-surface-1 rounded-xl p-4 border border-line shadow-sm">
               <div class="flex items-start gap-4">
                 <div class="w-10 h-10 rounded-lg bg-accent/10 flex items-center justify-center shrink-0">
-                  <span class="material-symbols-outlined text-accent">admin_panel_settings</span>
+                  <ui-icon name="shield-user" class="text-accent" />
                 </div>
                 <div>
                   <h3 class="font-semibold text-ink-strong">Serás el administrador principal</h3>
@@ -121,7 +121,7 @@ import Store from '../core/store';
             Creando escuela...
           } @else {
             Crear Escuela y Continuar
-            <span class="material-symbols-outlined text-xl">arrow_forward</span>
+            <ui-icon name="arrow-right" class="text-xl" />
           }
         </button>
       </footer>

@@ -1,14 +1,14 @@
 import { Component, computed, input, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { Prisma } from '@generated/prisma';
-import { UiInput, UiInputGroup } from '#/ui';
+import { Icon, UiInput, UiInputGroup } from '#/ui';
 
 @Component({
   selector: 'app-group-courses',
-  imports: [UiInput, RouterLink, UiInputGroup],
+  imports: [UiInput, RouterLink, UiInputGroup, Icon],
   template: ` <h4 class="text-xl font-medium mb-2">Cursos</h4>
     <label uiInputGroup>
-      <span class="material-symbols-outlined">search</span>
+      <ui-icon name="search" />
       <input
         uiInput
         class="pl-0"
@@ -24,7 +24,7 @@ import { UiInput, UiInputGroup } from '#/ui';
           <a class="flex items-center gap-4" [routerLink]="['/courses', course.id]">
             <div class="avatar avatar-placeholder">
               <div class="bg-secondary text-secondary-content w-10 rounded-full">
-                <span class="material-symbols-outlined text-lg">menu_book</span>
+                <ui-icon name="book-open" class="text-lg" />
               </div>
             </div>
             <div>

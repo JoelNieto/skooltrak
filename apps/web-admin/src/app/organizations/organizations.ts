@@ -1,4 +1,4 @@
-import { Breadcrumbs, Button, Confirmation, Error, Modal, Toast, UiTable } from '#/ui';
+import { Breadcrumbs, Button, Confirmation, Error, Icon, Modal, Toast, UiTable } from '#/ui';
 import { Menu, MenuContent, MenuItem, MenuTrigger } from '@angular/aria/menu';
 import { OverlayModule } from '@angular/cdk/overlay';
 import { DatePipe } from '@angular/common';
@@ -8,7 +8,19 @@ import { Prisma } from '@generated/prisma';
 import { OrganizationsForm } from './organizations-form';
 @Component({
   selector: 'app-organizations',
-  imports: [Breadcrumbs, UiTable, Button, DatePipe, Menu, MenuContent, MenuItem, MenuTrigger, OverlayModule, Error],
+  imports: [
+    Breadcrumbs,
+    UiTable,
+    Button,
+    DatePipe,
+    Menu,
+    MenuContent,
+    MenuItem,
+    MenuTrigger,
+    OverlayModule,
+    Error,
+    Icon,
+  ],
 
   template: `<ui-breadcrumbs [items]="[{ label: 'Inicio', link: '/' }, { label: 'Organizaciones' }]" />
     <div class="flex justify-between items-center mb-4">
@@ -18,7 +30,7 @@ import { OrganizationsForm } from './organizations-form';
       </div>
 
       <button uiButton variant="primary" (click)="editOrganization()">
-        <span class="material-symbols-outlined">add_circle</span> Nueva Organizacións
+        <ui-icon name="circle-plus" /> Nueva Organizacións
       </button>
     </div>
     @if (organizations.error()) {
@@ -53,7 +65,7 @@ import { OrganizationsForm } from './organizations-form';
                     #trigger="ngMenuTrigger"
                     [menu]="actionsMenu()"
                   >
-                    <span class="material-symbols-outlined text-xl">more_horiz</span>
+                    <ui-icon name="ellipsis" class="text-xl" />
                   </button>
                   <ng-template
                     [cdkConnectedOverlayOpen]="trigger.expanded()"
@@ -79,7 +91,7 @@ import { OrganizationsForm } from './organizations-form';
                           (click)="editOrganization($any(organization))"
                           type="button"
                         >
-                          <span class="material-symbols-outlined text-lg">edit</span>
+                          <ui-icon name="pencil" class="text-lg" />
                           <span>Editar</span>
                         </button>
                         <button
@@ -90,7 +102,7 @@ import { OrganizationsForm } from './organizations-form';
                           (keydown.enter)="deleteOrganization($any(organization))"
                           type="button"
                         >
-                          <span class="material-symbols-outlined text-lg">delete</span>
+                          <ui-icon name="trash-2" class="text-lg" />
                           <span>Eliminar</span>
                         </button>
                       </ng-template>

@@ -34,7 +34,7 @@ import { Component } from '@angular/core';
         <lib-empty-state
           title="Sin respuestas pendientes"
           description="Cuando un padre responda verás la alerta aquí."
-          icon="mark_email_read"
+          icon="mail-check"
         />
       } @else {
         <ul class="list-disc pl-5 text-sm text-ink-muted">

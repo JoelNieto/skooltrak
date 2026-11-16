@@ -1,4 +1,4 @@
-import { BrandLogo, Button, Loader, Toast } from '#/ui';
+import { BrandLogo, Button, Icon, Loader, Toast } from '#/ui';
 import { HttpClient } from '@angular/common/http';
 import { afterRenderEffect, Component, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -7,7 +7,7 @@ import Auth from './auth';
 
 @Component({
   selector: 'app-verify-email',
-  imports: [Button, BrandLogo, Loader],
+  imports: [Button, BrandLogo, Loader, Icon],
   template: `
     <div class="min-h-screen flex flex-col bg-surface-0">
       <!-- Fixed Header -->
@@ -31,7 +31,7 @@ import Auth from './auth';
             <!-- Verified state -->
             <div class="flex justify-center">
               <div class="w-20 h-20 rounded-full bg-success/10 flex items-center justify-center">
-                <span class="material-symbols-outlined text-5xl text-success">check_circle</span>
+                <ui-icon name="circle-check" class="text-5xl text-success" />
               </div>
             </div>
             <div class="space-y-2">
@@ -43,13 +43,13 @@ import Auth from './auth';
             </div>
             <button uiButton variant="primary" size="lg" (click)="continueToOnboarding()">
               Continuar
-              <span class="material-symbols-outlined">arrow_forward</span>
+              <ui-icon name="arrow-right" />
             </button>
           } @else if (error()) {
             <!-- Error state -->
             <div class="flex justify-center">
               <div class="w-20 h-20 rounded-full bg-error/10 flex items-center justify-center">
-                <span class="material-symbols-outlined text-5xl text-error">error</span>
+                <ui-icon name="circle-alert" class="text-5xl text-error" />
               </div>
             </div>
             <div class="space-y-2">
@@ -60,7 +60,7 @@ import Auth from './auth';
             </div>
             <button uiButton [loading]="resending()" variant="primary" (click)="resendEmail()" [disabled]="resending()">
               @if (!resending()) {
-                <span class="material-symbols-outlined">mail</span>
+                <ui-icon name="mail" />
               }
               Reenviar correo de verificación
             </button>
@@ -68,7 +68,7 @@ import Auth from './auth';
             <!-- Waiting for verification state -->
             <div class="flex justify-center">
               <div class="w-20 h-20 rounded-full bg-action-subtle flex items-center justify-center">
-                <span class="material-symbols-outlined text-5xl text-primary">mark_email_unread</span>
+                <ui-icon name="mail-check" class="text-5xl text-primary" />
               </div>
             </div>
             <div class="space-y-2">
@@ -81,14 +81,14 @@ import Auth from './auth';
 
             <div class="bg-surface-0 rounded-xl p-6 space-y-4">
               <div class="flex items-start gap-3 text-left">
-                <span class="material-symbols-outlined text-primary mt-0.5">inbox</span>
+                <ui-icon name="inbox" class="text-primary mt-0.5" />
                 <div>
                   <p class="font-medium text-ink-strong">Revisa tu bandeja de entrada</p>
                   <p class="text-sm text-ink-muted">El correo puede tardar unos minutos en llegar</p>
                 </div>
               </div>
               <div class="flex items-start gap-3 text-left">
-                <span class="material-symbols-outlined text-primary mt-0.5">folder</span>
+                <ui-icon name="folder" class="text-primary mt-0.5" />
                 <div>
                   <p class="font-medium text-ink-strong">Revisa la carpeta de spam</p>
                   <p class="text-sm text-ink-muted">A veces los correos pueden llegar ahí</p>
@@ -109,13 +109,13 @@ import Auth from './auth';
                 } @else if (cooldown() > 0) {
                   Reenviar en {{ cooldown() }}s
                 } @else {
-                  <span class="material-symbols-outlined">refresh</span>
+                  <ui-icon name="refresh-cw" />
                   Reenviar correo de verificación
                 }
               </button>
 
               <button uiButton variant="ghost" size="sm" (click)="checkVerification()">
-                <span class="material-symbols-outlined text-lg">sync</span>
+                <ui-icon name="refresh-ccw" class="text-lg" />
                 Ya verifiqué mi correo
               </button>
             </div>

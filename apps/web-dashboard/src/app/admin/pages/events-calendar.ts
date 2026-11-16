@@ -10,7 +10,7 @@ import { Component } from '@angular/core';
       title="Calendario de eventos"
       subtitle="Eventos escolares y fechas importantes."
       actionLabel="Nuevo evento"
-      actionIcon="event_available"
+      actionIcon="calendar-check"
     />
 
     <div uiCard>
@@ -20,7 +20,7 @@ import { Component } from '@angular/core';
           <lib-empty-state
             title="Sin eventos próximos"
             description="Agrega fechas institucionales y reuniones."
-            icon="event_busy"
+            icon="calendar-x"
           />
         } @else {
           <div class="space-y-3">

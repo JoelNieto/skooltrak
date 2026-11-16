@@ -1,4 +1,16 @@
-import { Breadcrumbs, Button, Confirmation, Error, Loader, Modal, Pagination, Paginator, Toast, UiTable } from '#/ui';
+import {
+  Breadcrumbs,
+  Button,
+  Confirmation,
+  Error,
+  Icon,
+  Loader,
+  Modal,
+  Pagination,
+  Paginator,
+  Toast,
+  UiTable,
+} from '#/ui';
 import { Menu, MenuContent, MenuItem, MenuTrigger } from '@angular/aria/menu';
 import { OverlayModule } from '@angular/cdk/overlay';
 import { DatePipe } from '@angular/common';
@@ -22,6 +34,7 @@ import { SchoolsForm } from './schools-form';
     Paginator,
     Error,
     Loader,
+    Icon,
   ],
   providers: [Pagination],
   template: `<ui-breadcrumbs [items]="[{ label: 'Inicio', link: '/' }, { label: 'Escuelas' }]" />
@@ -31,9 +44,7 @@ import { SchoolsForm } from './schools-form';
         <p class="text-sm text-ink-muted">Listado de escuelas</p>
       </div>
 
-      <button uiButton variant="primary" (click)="editSchool()">
-        <span class="material-symbols-outlined">add_circle</span> Nueva Escuela
-      </button>
+      <button uiButton variant="primary" (click)="editSchool()"><ui-icon name="circle-plus" /> Nueva Escuela</button>
     </div>
     @if (schools.error()) {
       <lib-error (retry)="schools.reload()" [description]="$safeNavigationMigration(schools.error()?.message)" />
@@ -68,7 +79,7 @@ import { SchoolsForm } from './schools-form';
                     #trigger="ngMenuTrigger"
                     [menu]="formatMenu()"
                   >
-                    <span class="material-symbols-outlined text-xl">more_horiz</span>
+                    <ui-icon name="ellipsis" class="text-xl" />
                   </button>
                   <ng-template
                     [cdkConnectedOverlayOpen]="trigger.expanded()"
@@ -94,7 +105,7 @@ import { SchoolsForm } from './schools-form';
                           (click)="editSchool($any(school))"
                           type="button"
                         >
-                          <span class="material-symbols-outlined text-lg">edit</span>
+                          <ui-icon name="pencil" class="text-lg" />
                           <span>Editar</span>
                         </button>
                         <button
@@ -105,7 +116,7 @@ import { SchoolsForm } from './schools-form';
                           (keydown.enter)="deleteSchool($any(school))"
                           type="button"
                         >
-                          <span class="material-symbols-outlined text-lg">delete</span>
+                          <ui-icon name="trash-2" class="text-lg" />
                           <span>Eliminar</span>
                         </button>
                       </ng-template>

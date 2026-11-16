@@ -56,7 +56,7 @@ import { Component } from '@angular/core';
         <lib-empty-state
           title="Sin justificaciones pendientes"
           description="Puedes subir justificativos desde aquí si es necesario."
-          icon="check_circle"
+          icon="circle-check"
         />
       } @else {
         <ul class="list-disc pl-5 text-sm text-ink-muted">

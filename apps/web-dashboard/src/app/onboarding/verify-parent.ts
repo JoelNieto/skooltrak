@@ -1,4 +1,4 @@
-import { Alert, BrandLogo, Button, Toast, UiField, UiInput, UiSelect } from '#/ui';
+import { Alert, BrandLogo, Button, Icon, Toast, UiField, UiInput, UiSelect } from '#/ui';
 import { HttpClient } from '@angular/common/http';
 import { afterRenderEffect, Component, inject, signal } from '@angular/core';
 import { form, FormField, required } from '@angular/forms/signals';
@@ -17,7 +17,7 @@ interface LinkChildPayload {
 
 @Component({
   selector: 'app-verify-parent',
-  imports: [Alert, UiField, UiInput, UiSelect, Button, BrandLogo, FormField],
+  imports: [Alert, UiField, UiInput, UiSelect, Button, BrandLogo, FormField, Icon],
   template: `
     <div class="min-h-screen flex flex-col bg-surface-0">
       <header class="p-4 md:p-6 flex items-center justify-between">
@@ -28,7 +28,7 @@ interface LinkChildPayload {
         <div class="w-full max-w-md text-center space-y-8 animate-fade-in">
           <div class="flex justify-center">
             <div class="w-20 h-20 rounded-full bg-warning/10 flex items-center justify-center">
-              <span class="material-symbols-outlined text-5xl text-warning">family_restroom</span>
+              <ui-icon name="users-round" class="text-5xl text-warning" />
             </div>
           </div>
 
@@ -84,7 +84,7 @@ interface LinkChildPayload {
 
             @if (errorMessage()) {
               <div uiAlert tone="danger">
-                <span class="material-symbols-outlined">error</span>
+                <ui-icon name="circle-alert" />
                 <span>{{ errorMessage() }}</span>
               </div>
             }
@@ -101,12 +101,12 @@ interface LinkChildPayload {
                 @if (loading()) {
                   Vinculando...
                 } @else {
-                  <span class="material-symbols-outlined">link</span>
+                  <ui-icon name="link" />
                   Vincular cuenta
                 }
               </button>
               <button uiButton variant="ghost" size="sm" type="button" class="w-full" (click)="goBack()">
-                <span class="material-symbols-outlined text-lg">arrow_back</span>
+                <ui-icon name="arrow-left" class="text-lg" />
                 Volver
               </button>
             </div>

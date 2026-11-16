@@ -307,7 +307,7 @@ export class UiSelect extends UiControl {
  * A text box with an icon or other content beside the input, e.g. a search box:
  *
  *   <label uiInputGroup>
- *     <span class="material-symbols-outlined" aria-hidden="true">search</span>
+ *     <ui-icon name="search" />
  *     <input type="search" placeholder="Buscar…" aria-label="Buscar" [(ngModel)]="query" />
  *   </label>
  *

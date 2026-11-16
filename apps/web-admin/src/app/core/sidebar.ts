@@ -1,11 +1,11 @@
-import { BrandLogo } from '#/ui';
+import { BrandLogo, Icon } from '#/ui';
 import { Component } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 
 @Component({
   // eslint-disable-next-line @angular-eslint/component-selector
   selector: '[appSidebar]',
-  imports: [BrandLogo, RouterLink, RouterLinkActive],
+  imports: [BrandLogo, RouterLink, RouterLinkActive, Icon],
   template: `<div class="flex items-center justify-between px-4 pt-4 pb-2">
       <h1 class="flex items-center gap-2">
         <ui-brand-logo class="h-7" />
@@ -20,7 +20,7 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
             [routerLinkActive]="['bg-surface-0', 'text-primary']"
             class="flex items-center p-2 text-ink-strong rounded-lg hover:bg-primary-50 hover:text-primary-600 group"
           >
-            <span class="material-symbols-outlined text-xl">home</span>
+            <ui-icon name="house" class="text-xl" />
             <span class="ml-3">Inicio</span>
           </a>
         </li>
@@ -30,7 +30,7 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
             [routerLinkActive]="['bg-surface-0', 'text-primary']"
             class="flex items-center p-2 text-ink-strong rounded-lg hover:bg-primary-50 hover:text-primary-600 group"
           >
-            <span class="material-symbols-outlined text-xl">account_tree</span>
+            <ui-icon name="network" class="text-xl" />
             <span class="ml-3">Organizaciones</span>
           </a>
         </li>
@@ -40,7 +40,7 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
             [routerLinkActive]="['bg-surface-0', 'text-primary']"
             class="flex items-center p-2 text-ink-strong rounded-lg hover:bg-primary-50 hover:text-primary-600 group"
           >
-            <span class="material-symbols-outlined text-xl">domain</span>
+            <ui-icon name="building-2" class="text-xl" />
             <span class="ml-3">Escuelas</span>
           </a>
         </li>
@@ -50,7 +50,7 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
             [routerLinkActive]="['bg-surface-0', 'text-primary']"
             class="flex items-center p-2 text-ink-strong rounded-lg hover:bg-primary-50 hover:text-primary-600 group"
           >
-            <span class="material-symbols-outlined text-xl">manage_accounts</span>
+            <ui-icon name="user-cog" class="text-xl" />
             <span class="ml-3">Roles</span>
           </a>
         </li>
@@ -60,7 +60,7 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
             [routerLinkActive]="['bg-surface-0', 'text-primary']"
             class="flex items-center p-2 text-ink-strong rounded-lg hover:bg-primary-50 hover:text-primary-600 group"
           >
-            <span class="material-symbols-outlined text-xl">table_chart</span>
+            <ui-icon name="sheet" class="text-xl" />
             <span class="ml-3">Metricas</span>
           </a>
         </li>
@@ -70,7 +70,7 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
             [routerLinkActive]="['bg-surface-0', 'text-primary']"
             class="flex items-center p-2 text-ink-strong rounded-lg hover:bg-primary-50 hover:text-primary-600 group"
           >
-            <span class="material-symbols-outlined text-xl">psychology</span>
+            <ui-icon name="brain" class="text-xl" />
             <span class="ml-3">Hábitos y actitudes</span>
           </a>
         </li>
@@ -80,7 +80,7 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
             [routerLinkActive]="['bg-surface-0', 'text-primary']"
             class="flex items-center p-2 text-ink-strong rounded-lg hover:bg-primary-50 hover:text-primary-600 group"
           >
-            <span class="material-symbols-outlined text-xl">calendar_month</span>
+            <ui-icon name="calendar-days" class="text-xl" />
             <span class="ml-3">Periodos</span>
           </a>
         </li>
@@ -90,7 +90,7 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
             [routerLinkActive]="['bg-surface-0', 'text-primary']"
             class="flex items-center p-2 text-ink-strong rounded-lg hover:bg-primary-50 hover:text-primary-600 group"
           >
-            <span class="material-symbols-outlined text-xl">folder_managed</span>
+            <ui-icon name="folder-cog" class="text-xl" />
             <span class="ml-3">Permisos</span>
           </a>
         </li>
@@ -100,7 +100,7 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
             [routerLinkActive]="['bg-surface-0', 'text-primary']"
             class="flex items-center p-2 text-ink-strong rounded-lg hover:bg-primary-50 hover:text-primary-600 group"
           >
-            <span class="material-symbols-outlined text-xl">group</span>
+            <ui-icon name="users" class="text-xl" />
             <span class="ml-3">Usuarios</span>
           </a>
         </li>
@@ -111,7 +111,7 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
             [routerLinkActive]="['bg-surface-0', 'text-primary']"
             class="flex items-center p-2 text-ink-strong rounded-lg hover:bg-primary-50 hover:text-primary-600 group"
           >
-            <span class="material-symbols-outlined text-xl">supervisor_account</span>
+            <ui-icon name="users-round" class="text-xl" />
             <span class="ml-3">Padres</span>
           </a>
         </li>
@@ -121,7 +121,7 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
             [routerLinkActive]="['bg-surface-0', 'text-primary']"
             class="flex items-center p-2 text-ink-strong rounded-lg hover:bg-primary-50 hover:text-primary-600 group"
           >
-            <span class="material-symbols-outlined text-xl">fact_check</span>
+            <ui-icon name="clipboard-check" class="text-xl" />
             <span class="ml-3">Asistencia</span>
           </a>
         </li>
@@ -131,7 +131,7 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
             [routerLinkActive]="['bg-surface-0', 'text-primary']"
             class="flex items-center p-2 text-ink-strong rounded-lg hover:bg-primary-50 hover:text-primary-600 group"
           >
-            <span class="material-symbols-outlined text-xl">payments</span>
+            <ui-icon name="banknote" class="text-xl" />
             <span class="ml-3">Finanzas</span>
           </a>
         </li>
@@ -141,7 +141,7 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
             [routerLinkActive]="['bg-surface-0', 'text-primary']"
             class="flex items-center p-2 text-ink-strong rounded-lg hover:bg-primary-50 hover:text-primary-600 group"
           >
-            <span class="material-symbols-outlined text-xl">event</span>
+            <ui-icon name="calendar" class="text-xl" />
             <span class="ml-3">Eventos</span>
           </a>
         </li>
@@ -152,7 +152,7 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
             [routerLinkActive]="['bg-surface-0', 'text-primary']"
             class="flex items-center p-2 text-ink-strong rounded-lg hover:bg-primary-50 hover:text-primary-600 group"
           >
-            <span class="material-symbols-outlined text-xl">event</span>
+            <ui-icon name="calendar" class="text-xl" />
             <span class="ml-3">Agenda</span>
           </a>
         </li>
@@ -162,7 +162,7 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
             [routerLinkActive]="['bg-surface-0', 'text-primary']"
             class="flex items-center p-2 text-ink-strong rounded-lg hover:bg-primary-50 hover:text-primary-600 group"
           >
-            <span class="material-symbols-outlined text-xl">upload_file</span>
+            <ui-icon name="file-up" class="text-xl" />
             <span class="ml-3">Entregas</span>
           </a>
         </li>
@@ -172,7 +172,7 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
             [routerLinkActive]="['bg-surface-0', 'text-primary']"
             class="flex items-center p-2 text-ink-strong rounded-lg hover:bg-primary-50 hover:text-primary-600 group"
           >
-            <span class="material-symbols-outlined text-xl">notifications</span>
+            <ui-icon name="bell" class="text-xl" />
             <span class="ml-3">Notificaciones</span>
           </a>
         </li>
@@ -182,7 +182,7 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
             [routerLinkActive]="['bg-surface-0', 'text-primary']"
             class="flex items-center p-2 text-ink-strong rounded-lg hover:bg-primary-50 hover:text-primary-600 group"
           >
-            <span class="material-symbols-outlined text-xl">fact_check</span>
+            <ui-icon name="clipboard-check" class="text-xl" />
             <span class="ml-3">Asistencia</span>
           </a>
         </li>
@@ -193,7 +193,7 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
             [routerLinkActive]="['bg-surface-0', 'text-primary']"
             class="flex items-center p-2 text-ink-strong rounded-lg hover:bg-primary-50 hover:text-primary-600 group"
           >
-            <span class="material-symbols-outlined text-xl">playlist_add_check</span>
+            <ui-icon name="list-checks" class="text-xl" />
             <span class="ml-3">Tomar asistencia</span>
           </a>
         </li>
@@ -203,7 +203,7 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
             [routerLinkActive]="['bg-surface-0', 'text-primary']"
             class="flex items-center p-2 text-ink-strong rounded-lg hover:bg-primary-50 hover:text-primary-600 group"
           >
-            <span class="material-symbols-outlined text-xl">table</span>
+            <ui-icon name="table" class="text-xl" />
             <span class="ml-3">Libro de notas</span>
           </a>
         </li>
@@ -213,7 +213,7 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
             [routerLinkActive]="['bg-surface-0', 'text-primary']"
             class="flex items-center p-2 text-ink-strong rounded-lg hover:bg-primary-50 hover:text-primary-600 group"
           >
-            <span class="material-symbols-outlined text-xl">forum</span>
+            <ui-icon name="messages-square" class="text-xl" />
             <span class="ml-3">Comunicación</span>
           </a>
         </li>
@@ -223,7 +223,7 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
             [routerLinkActive]="['bg-surface-0', 'text-primary']"
             class="flex items-center p-2 text-ink-strong rounded-lg hover:bg-primary-50 hover:text-primary-600 group"
           >
-            <span class="material-symbols-outlined text-xl">assessment</span>
+            <ui-icon name="chart-column" class="text-xl" />
             <span class="ml-3">Reportes</span>
           </a>
         </li>
@@ -234,7 +234,7 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
             [routerLinkActive]="['bg-surface-0', 'text-primary']"
             class="flex items-center p-2 text-ink-strong rounded-lg hover:bg-primary-50 hover:text-primary-600 group"
           >
-            <span class="material-symbols-outlined text-xl">family_restroom</span>
+            <ui-icon name="users-round" class="text-xl" />
             <span class="ml-3">Portal</span>
           </a>
         </li>
@@ -244,7 +244,7 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
             [routerLinkActive]="['bg-surface-0', 'text-primary']"
             class="flex items-center p-2 text-ink-strong rounded-lg hover:bg-primary-50 hover:text-primary-600 group"
           >
-            <span class="material-symbols-outlined text-xl">bar_chart</span>
+            <ui-icon name="chart-column" class="text-xl" />
             <span class="ml-3">Progreso</span>
           </a>
         </li>
@@ -254,7 +254,7 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
             [routerLinkActive]="['bg-surface-0', 'text-primary']"
             class="flex items-center p-2 text-ink-strong rounded-lg hover:bg-primary-50 hover:text-primary-600 group"
           >
-            <span class="material-symbols-outlined text-xl">chat</span>
+            <ui-icon name="message-circle" class="text-xl" />
             <span class="ml-3">Mensajes</span>
           </a>
         </li>
@@ -264,7 +264,7 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
             [routerLinkActive]="['bg-surface-0', 'text-primary']"
             class="flex items-center p-2 text-ink-strong rounded-lg hover:bg-primary-50 hover:text-primary-600 group"
           >
-            <span class="material-symbols-outlined text-xl">notifications_active</span>
+            <ui-icon name="bell-ring" class="text-xl" />
             <span class="ml-3">Alertas</span>
           </a>
         </li>

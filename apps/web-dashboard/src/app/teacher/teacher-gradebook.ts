@@ -25,7 +25,7 @@ import { Component } from '@angular/core';
           <lib-empty-state
             title="Sin calificaciones registradas"
             description="Registra una evaluación para ver resultados."
-            icon="assignment"
+            icon="clipboard-list"
           />
         } @else {
           <div class="overflow-x-auto">

@@ -4,6 +4,7 @@ import {
   Button,
   Card,
   CardBody,
+  Icon,
   Loader,
   UiTab,
   UiTabContent,
@@ -36,6 +37,7 @@ type TeacherView = any;
     UiTabList,
     UiTabPanel,
     UiTabs,
+    Icon,
   ],
   template: `@defer {
       @if (teacherResource.hasValue() && teacherResource.value()?.id) {
@@ -62,12 +64,12 @@ type TeacherView = any;
                   {{ teacher.name }}
                   @if (teacher.user?.emailVerified) {
                     <span uiBadge tone="success" size="sm" class="gap-1">
-                      <span class="material-symbols-outlined text-sm!">check_circle</span>
+                      <ui-icon name="circle-check" class="text-sm!" />
                       Verificado
                     </span>
                   } @else {
                     <span uiBadge tone="warning" size="sm" class="gap-1">
-                      <span class="material-symbols-outlined text-sm!">schedule</span>
+                      <ui-icon name="clock" class="text-sm!" />
                       Pendiente
                     </span>
                   }
@@ -77,9 +79,9 @@ type TeacherView = any;
             </div>
             <div class="flex gap-2 items-center">
               @if (auth.hasPermission('MANAGE_TEACHERS')) {
-                <a uiButton size="sm" routerLink="edit"> <span class="material-symbols-outlined">edit</span></a>
+                <a uiButton size="sm" routerLink="edit"> <ui-icon name="pencil" /></a>
               }
-              <button uiButton variant="primary" size="sm"><span class="material-symbols-outlined">chat</span></button>
+              <button uiButton variant="primary" size="sm"><ui-icon name="message-circle" /></button>
             </div>
           </div>
         </div>

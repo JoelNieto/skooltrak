@@ -6,6 +6,7 @@ import {
   Card,
   Confirmation,
   EmptyState,
+  Icon,
   Pagination,
   PaginatorV2,
   Toast,
@@ -67,6 +68,7 @@ type StudentRow = {
     OverlayModule,
     EmptyState,
     UiInputGroup,
+    Icon,
   ],
   providers: [Pagination],
   template: `
@@ -75,7 +77,7 @@ type StudentRow = {
     <div class="flex flex-col gap-4 md:flex-row md:justify-between">
       <div class="md:w-96 w-full">
         <label uiInputGroup>
-          <span class="material-symbols-outlined">search</span>
+          <ui-icon name="search" />
           <input
             class="pl-0"
             type="search"
@@ -85,9 +87,7 @@ type StudentRow = {
           />
         </label>
       </div>
-      <a uiButton variant="primary" routerLink="/students/new">
-        <span class="material-symbols-outlined">add_circle</span> Agregar Alumno
-      </a>
+      <a uiButton variant="primary" routerLink="/students/new"> <ui-icon name="circle-plus" /> Agregar Alumno </a>
     </div>
     <div uiCard class="overflow-x-auto mt-4">
       <table uiTable>
@@ -113,11 +113,11 @@ type StudentRow = {
                   {{ student.email }}
                   @if (student.user?.emailVerified) {
                     <span uiBadge tone="success" size="sm" title="Verificado">
-                      <span class="material-symbols-outlined text-xs!">check_circle</span>
+                      <ui-icon name="circle-check" class="text-xs!" />
                     </span>
                   } @else {
                     <span uiBadge tone="warning" size="sm" title="Pendiente de verificación">
-                      <span class="material-symbols-outlined text-xs!">schedule</span>
+                      <ui-icon name="clock" class="text-xs!" />
                     </span>
                   }
                 </div>
@@ -146,7 +146,7 @@ type StudentRow = {
                   #trigger="ngMenuTrigger"
                   [menu]="actionsMenu()"
                 >
-                  <span class="material-symbols-outlined text-xl">more_horiz</span>
+                  <ui-icon name="ellipsis" class="text-xl" />
                 </button>
                 <ng-template
                   [cdkConnectedOverlayOpen]="trigger.expanded()"
@@ -170,7 +170,7 @@ type StudentRow = {
                         [routerLink]="['/students', student.id]"
                         class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-surface-2 w-full"
                       >
-                        <span class="material-symbols-outlined text-lg">visibility</span>
+                        <ui-icon name="eye" class="text-lg" />
                         <span>Ver</span>
                       </a>
                       @if (auth.hasPermission('MANAGE_STUDENTS')) {
@@ -180,7 +180,7 @@ type StudentRow = {
                           [routerLink]="['/students', student.id, 'edit']"
                           class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-surface-2 w-full"
                         >
-                          <span class="material-symbols-outlined text-lg">edit</span>
+                          <ui-icon name="pencil" class="text-lg" />
                           <span>Editar</span>
                         </a>
                       }
@@ -191,7 +191,7 @@ type StudentRow = {
                           class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-surface-2 w-full"
                           (click)="resendInvitationForStudent(student)"
                         >
-                          <span class="material-symbols-outlined text-lg">mail</span>
+                          <ui-icon name="mail" class="text-lg" />
                           <span>Reenviar invitación</span>
                         </button>
                       }
@@ -202,7 +202,7 @@ type StudentRow = {
                           class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-surface-2 w-full"
                           (click)="deleteStudent(student)"
                         >
-                          <span class="material-symbols-outlined text-lg">delete</span>
+                          <ui-icon name="trash-2" class="text-lg" />
                           <span>Eliminar</span>
                         </button>
                       }
@@ -216,7 +216,7 @@ type StudentRow = {
               <td colspan="7" class="text-center text-ink-subtle py-4">
                 <lib-empty-state
                   title="No se encontraron estudiantes"
-                  icon="person"
+                  icon="user"
                   description="Intenta con otros criterios de búsqueda."
                 />
               </td>

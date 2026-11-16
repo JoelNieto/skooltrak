@@ -1,4 +1,16 @@
-import { Alert, Button, Modal, PageHeader, UiSelect, UiTab, UiTabContent, UiTabList, UiTabPanel, UiTabs } from '#/ui';
+import {
+  Alert,
+  Button,
+  Icon,
+  Modal,
+  PageHeader,
+  UiSelect,
+  UiTab,
+  UiTabContent,
+  UiTabList,
+  UiTabPanel,
+  UiTabs,
+} from '#/ui';
 import { Component, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import Auth from '../../auth/auth';
@@ -27,6 +39,7 @@ import CreatePaymentForm from '../forms/create-payment-form';
     UiTabContent,
     StudentSearch,
     StudentBalance,
+    Icon,
   ],
   template: `
     <lib-page-header
@@ -50,10 +63,10 @@ import CreatePaymentForm from '../forms/create-payment-form';
           </select>
           @if (!auth.isStudent()) {
             <button uiButton variant="primary" size="sm" (click)="openCreateCharge()">
-              <span class="material-symbols-outlined">add</span> Nuevo cargo
+              <ui-icon name="plus" /> Nuevo cargo
             </button>
             <button uiButton variant="primary" size="sm" (click)="openCreatePayment()">
-              <span class="material-symbols-outlined">add</span> Registrar pago
+              <ui-icon name="plus" /> Registrar pago
             </button>
           }
         </div>

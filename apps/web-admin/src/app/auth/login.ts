@@ -1,4 +1,4 @@
-import { BrandLogo, Button, Card, CardBody, Toast, UiField, UiInput } from '#/ui';
+import { BrandLogo, Button, Card, CardBody, Icon, Toast, UiField, UiInput } from '#/ui';
 import { Component, inject, signal } from '@angular/core';
 import { email, form, FormField, required } from '@angular/forms/signals';
 
@@ -6,7 +6,7 @@ import Auth from './auth';
 
 @Component({
   selector: 'app-login',
-  imports: [BrandLogo, Button, Card, CardBody, FormField, UiField, UiInput],
+  imports: [BrandLogo, Button, Card, CardBody, FormField, UiField, UiInput, Icon],
   template: `
     <div class="bg-surface-0 min-h-screen flex flex-col items-center justify-center gap-8 p-4">
       <ui-brand-logo class="h-10" />
@@ -43,9 +43,7 @@ import Auth from './auth';
                   [attr.aria-pressed]="showPassword()"
                   (click)="showPassword.set(!showPassword())"
                 >
-                  <span class="material-symbols-outlined text-xl" aria-hidden="true">{{
-                    showPassword() ? 'visibility_off' : 'visibility'
-                  }}</span>
+                  <ui-icon [name]="showPassword() ? 'eye-off' : 'eye'" class="text-xl" />
                 </button>
               </div>
             </ui-field>

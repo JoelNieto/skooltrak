@@ -1,4 +1,4 @@
-import { BrandLogo, Button, Toast } from '#/ui';
+import { BrandLogo, Button, Icon, Toast } from '#/ui';
 import { HttpClient } from '@angular/common/http';
 import { Component, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
@@ -19,7 +19,7 @@ export type CreatedEntity = {
 
 @Component({
   selector: 'app-setup-wizard',
-  imports: [Button, BrandLogo, SchoolBasicsStep, DegreesStep, StudyPlansStep, CoursesStep, GroupsStep],
+  imports: [Button, BrandLogo, SchoolBasicsStep, DegreesStep, StudyPlansStep, CoursesStep, GroupsStep, Icon],
   template: `
     <div class="min-h-screen flex flex-col bg-surface-0">
       <!-- Fixed Header -->
@@ -91,7 +91,7 @@ export type CreatedEntity = {
         <div>
           @if (currentStep() > 1) {
             <button uiButton variant="ghost" type="button" (click)="previousStep()">
-              <span class="material-symbols-outlined text-xl">arrow_back</span>
+              <ui-icon name="arrow-left" class="text-xl" />
               Anterior
             </button>
           }
@@ -115,7 +115,7 @@ export type CreatedEntity = {
                 Finalizando...
               } @else {
                 Finalizar configuración
-                <span class="material-symbols-outlined text-xl">check</span>
+                <ui-icon name="check" class="text-xl" />
               }
             </button>
           }

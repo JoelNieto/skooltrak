@@ -1,4 +1,4 @@
-import { Button, Toast, UiField, UiInput, UiSelect } from '#/ui';
+import { Button, Icon, Toast, UiField, UiInput, UiSelect } from '#/ui';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { Component, computed, inject, input, output, signal } from '@angular/core';
 import { form, FormField, required } from '@angular/forms/signals';
@@ -8,13 +8,13 @@ import { CreatedEntity } from '../setup-wizard';
 
 @Component({
   selector: 'app-courses-step',
-  imports: [UiField, UiInput, UiSelect, Button, FormField, SubjectCombobox],
+  imports: [UiField, UiInput, UiSelect, Button, FormField, SubjectCombobox, Icon],
   template: `
     <div class="w-full max-w-md text-center space-y-8 animate-fade-in">
       <!-- Icon -->
       <div class="flex justify-center">
         <div class="w-20 h-20 rounded-full bg-success/10 flex items-center justify-center">
-          <span class="material-symbols-outlined text-5xl text-success">menu_book</span>
+          <ui-icon name="book-open" class="text-5xl text-success" />
         </div>
       </div>
 
@@ -33,7 +33,7 @@ import { CreatedEntity } from '../setup-wizard';
           <ul class="space-y-1">
             @for (entity of createdEntities(); track entity.id) {
               <li class="flex items-center gap-2 text-sm">
-                <span class="material-symbols-outlined text-success text-lg">check_circle</span>
+                <ui-icon name="circle-check" class="text-success text-lg" />
                 {{ entity.name }}
               </li>
             }
@@ -45,7 +45,7 @@ import { CreatedEntity } from '../setup-wizard';
       @if (allStudyPlans().length === 0) {
         <div class="bg-warning/10 rounded-xl p-4 text-left">
           <div class="flex items-start gap-3">
-            <span class="material-symbols-outlined text-warning mt-0.5">warning</span>
+            <ui-icon name="triangle-alert" class="text-warning mt-0.5" />
             <div>
               <h3 class="font-medium text-warning">No hay planes de estudio</h3>
               <p class="text-sm text-ink-muted mt-1">
@@ -88,7 +88,7 @@ import { CreatedEntity } from '../setup-wizard';
               (click)="addAnother = true"
             >
               @if (!(saving() && addAnother)) {
-                <span class="material-symbols-outlined text-xl">add</span>
+                <ui-icon name="plus" class="text-xl" />
               }
               Agregar otro
             </button>
@@ -105,7 +105,7 @@ import { CreatedEntity } from '../setup-wizard';
                 Guardando...
               } @else {
                 Guardar y Continuar
-                <span class="material-symbols-outlined text-xl">arrow_forward</span>
+                <ui-icon name="arrow-right" class="text-xl" />
               }
             </button>
           </div>

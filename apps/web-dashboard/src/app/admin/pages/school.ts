@@ -4,6 +4,7 @@ import {
   Button,
   Card,
   CardBody,
+  Icon,
   Loader,
   UiTab,
   UiTabContent,
@@ -51,6 +52,7 @@ type SchoolDetail = {
     UiTabs,
     UiTabPanel,
     UiTabContent,
+    Icon,
   ],
   template: `
     @if (schoolResource.isLoading()) {
@@ -78,7 +80,7 @@ type SchoolDetail = {
                   @if (school.logoUrl) {
                     <img [src]="school.logoUrl" [alt]="school.name" class="w-full h-auto object-contain" />
                   } @else {
-                    <span class="material-symbols-outlined text-3xl text-ink-subtle">school</span>
+                    <ui-icon name="school" class="text-3xl text-ink-subtle" />
                   }
                 </div>
                 <div class="flex flex-col">
@@ -94,7 +96,7 @@ type SchoolDetail = {
                 </div>
               </div>
               <a uiButton variant="primary" size="sm" [routerLink]="['/schools', school.id, 'edit']">
-                <span class="material-symbols-outlined text-lg">edit</span>
+                <ui-icon name="pencil" class="text-lg" />
                 Editar
               </a>
             </div>
@@ -198,7 +200,7 @@ type SchoolDetail = {
                               class="link link-primary"
                             >
                               {{ school.website }}
-                              <span class="material-symbols-outlined text-sm align-middle">open_in_new</span>
+                              <ui-icon name="external-link" class="text-sm align-middle" />
                             </a>
                           } @else {
                             <span class="text-ink-subtle">-</span>
@@ -258,7 +260,7 @@ type SchoolDetail = {
                   @if (school.address || school.city) {
                     <div class="mt-6 px-4 sm:px-0">
                       <a uiButton size="sm" [href]="getGoogleMapsUrl(school)" target="_blank" rel="noopener noreferrer">
-                        <span class="material-symbols-outlined text-lg">map</span>
+                        <ui-icon name="map" class="text-lg" />
                         Ver en Google Maps
                       </a>
                     </div>

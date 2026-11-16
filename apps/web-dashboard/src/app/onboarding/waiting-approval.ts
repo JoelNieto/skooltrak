@@ -1,4 +1,4 @@
-import { BrandLogo, Button, Spinner, Toast } from '#/ui';
+import { BrandLogo, Button, Icon, Spinner, Toast } from '#/ui';
 import { HttpClient } from '@angular/common/http';
 import { afterRenderEffect, Component, inject, OnDestroy, signal } from '@angular/core';
 import { Router } from '@angular/router';
@@ -6,13 +6,13 @@ import Auth from '../auth/auth';
 
 @Component({
   selector: 'app-waiting-approval',
-  imports: [Spinner, Button, BrandLogo],
+  imports: [Spinner, Button, BrandLogo, Icon],
   template: `
     <div class="min-h-screen flex flex-col bg-surface-0">
       <header class="p-4 md:p-6 flex items-center justify-between">
         <ui-brand-logo class="h-8 md:h-10" />
         <button uiButton variant="ghost" size="sm" (click)="logout()">
-          <span class="material-symbols-outlined">logout</span>
+          <ui-icon name="log-out" />
           Cerrar sesión
         </button>
       </header>
@@ -21,7 +21,7 @@ import Auth from '../auth/auth';
         <div class="w-full max-w-md text-center space-y-8 animate-fade-in">
           <div class="flex justify-center">
             <div class="w-20 h-20 rounded-full bg-warning/10 flex items-center justify-center">
-              <span class="material-symbols-outlined text-5xl text-warning">hourglass_top</span>
+              <ui-icon name="hourglass" class="text-5xl text-warning" />
             </div>
           </div>
 
@@ -39,7 +39,7 @@ import Auth from '../auth/auth';
 
           <div class="bg-surface-0 rounded-xl p-6 space-y-4">
             <div class="flex items-start gap-3 text-left">
-              <span class="material-symbols-outlined text-warning mt-0.5">schedule</span>
+              <ui-icon name="clock" class="text-warning mt-0.5" />
               <div>
                 <p class="font-medium text-ink-strong">Solicitud en revisión</p>
                 <p class="text-sm text-ink-muted">
@@ -48,7 +48,7 @@ import Auth from '../auth/auth';
               </div>
             </div>
             <div class="flex items-start gap-3 text-left">
-              <span class="material-symbols-outlined text-primary mt-0.5">notifications</span>
+              <ui-icon name="bell" class="text-primary mt-0.5" />
               <div>
                 <p class="font-medium text-ink-strong">Te avisaremos</p>
                 <p class="text-sm text-ink-muted">

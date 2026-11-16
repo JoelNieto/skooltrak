@@ -1,4 +1,4 @@
-import { Alert, BrandLogo, Button, Card, CardBody, Spinner } from '#/ui';
+import { Alert, BrandLogo, Button, Card, CardBody, Icon, Spinner } from '#/ui';
 import { Component, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import Auth from './auth';
@@ -6,7 +6,7 @@ import { authClient } from './auth-client';
 
 @Component({
   selector: 'app-accept-invitation',
-  imports: [Alert, Button, Card, CardBody, Spinner, BrandLogo, RouterLink],
+  imports: [Alert, Button, Card, CardBody, Spinner, BrandLogo, RouterLink, Icon],
   template: `
     <div class="bg-surface-0 min-h-screen flex items-center justify-center p-4">
       <div class="max-w-md w-full flex flex-col gap-8 items-center">
@@ -18,7 +18,7 @@ import { authClient } from './auth-client';
               <p class="text-ink-muted">Procesando tu invitación…</p>
             } @else if (error()) {
               <div uiAlert tone="danger" class="text-left">
-                <span class="material-symbols-outlined" aria-hidden="true">error</span>
+                <ui-icon name="circle-alert" />
                 <div>
                   <h2 class="font-semibold">No pudimos aceptar la invitación</h2>
                   <p>{{ error() }}</p>
@@ -27,7 +27,7 @@ import { authClient } from './auth-client';
               <a uiButton variant="ghost" routerLink="/login">Ir a iniciar sesión</a>
             } @else if (success()) {
               <div uiAlert tone="success" class="text-left">
-                <span class="material-symbols-outlined" aria-hidden="true">check_circle</span>
+                <ui-icon name="circle-check" />
                 <div>
                   <h2 class="font-semibold">¡Bienvenido!</h2>
                   <p>Te uniste a {{ organizationName() }}.</p>

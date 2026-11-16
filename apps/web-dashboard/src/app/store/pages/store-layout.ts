@@ -7,11 +7,11 @@ import { CartService } from '../cart.service';
 import { StoreApiService } from '../store-api.service';
 import StoreThemeToggle from '../store-theme-toggle';
 import { StoreThemeService } from '../store-theme.service';
-import { Badge, BreadcrumbItem, Breadcrumbs, Button } from '#/ui';
+import { Badge, BreadcrumbItem, Breadcrumbs, Button, Icon } from '#/ui';
 
 @Component({
   selector: 'app-store-layout',
-  imports: [Breadcrumbs, Badge, Button, RouterOutlet, RouterLink, StoreThemeToggle],
+  imports: [Breadcrumbs, Badge, Button, RouterOutlet, RouterLink, StoreThemeToggle, Icon],
   template: `
     <div class="layout-padding pb-10">
       <ui-breadcrumbs class="mb-4" [items]="breadcrumbs()" />
@@ -25,7 +25,7 @@ import { Badge, BreadcrumbItem, Breadcrumbs, Button } from '#/ui';
             />
           } @else {
             <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-action-subtle text-primary">
-              <span class="material-symbols-outlined text-2xl">apartment</span>
+              <ui-icon name="building-2" class="text-2xl" />
             </div>
           }
           <div class="min-w-0">
@@ -41,7 +41,7 @@ import { Badge, BreadcrumbItem, Breadcrumbs, Button } from '#/ui';
             <a uiButton size="sm" routerLink="admin">Administrar tienda</a>
           }
           <a uiButton variant="primary" size="sm" routerLink="cart" class="gap-1">
-            <span class="material-symbols-outlined text-lg">shopping_cart</span>
+            <ui-icon name="shopping-cart" class="text-lg" />
             Carrito
             @if (cartCount() > 0) {
               <span uiBadge>{{ cartCount() }}</span>

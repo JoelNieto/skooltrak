@@ -4,6 +4,7 @@ import {
   Button,
   Card,
   CardBody,
+  Icon,
   Loader,
   Spinner,
   Toast,
@@ -79,6 +80,7 @@ interface SchoolFormData {
     Loader,
     ImageCropperComponent,
     FormsModule,
+    Icon,
   ],
   template: `
     <ui-breadcrumbs [items]="breadcrumbs()" />
@@ -118,7 +120,7 @@ interface SchoolFormData {
                             class="w-full h-auto object-contain"
                           />
                         } @else {
-                          <span class="material-symbols-outlined text-5xl text-ink-subtle">school</span>
+                          <ui-icon name="school" class="text-5xl text-ink-subtle" />
                         }
                       </div>
                       @if ((logoPreviewUrl() || logoDownloadUrl() || schoolForm.logo().value()) && !isUploadingLogo()) {
@@ -130,7 +132,7 @@ interface SchoolFormData {
                           class="text-error"
                           (click)="removeLogo()"
                         >
-                          <span class="material-symbols-outlined text-sm">delete</span>
+                          <ui-icon name="trash-2" class="text-sm" />
                           Eliminar
                         </button>
                       }
@@ -140,7 +142,7 @@ interface SchoolFormData {
                     <div class="flex-1">
                       <input type="file" #fileInput class="hidden" accept="image/*" (change)="onFileSelected($event)" />
                       <button uiButton type="button" (click)="fileInput.click()" [disabled]="isUploadingLogo()">
-                        <span class="material-symbols-outlined">upload</span>
+                        <ui-icon name="upload" />
                         {{ schoolForm.logo().value() || logoPreviewUrl() ? 'Cambiar imagen' : 'Subir imagen' }}
                       </button>
                       <p class="text-sm text-ink-subtle mt-2">PNG, JPG o GIF. Máximo 5MB.</p>
@@ -174,7 +176,7 @@ interface SchoolFormData {
                             @if (cropPreviewUrl()) {
                               <img [src]="cropPreviewUrl()" alt="Preview" class="w-full h-auto object-contain" />
                             } @else {
-                              <span class="material-symbols-outlined text-4xl text-ink-subtle">crop</span>
+                              <ui-icon name="crop" class="text-4xl text-ink-subtle" />
                             }
                           </div>
                         </div>

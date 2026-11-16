@@ -1,4 +1,4 @@
-import { Badge, BrandLogo, Button, Confirmation } from '#/ui';
+import { Badge, BrandLogo, Button, Confirmation, Icon } from '#/ui';
 import { HttpClient } from '@angular/common/http';
 import { afterRenderEffect, Component, computed, EnvironmentInjector, inject } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
@@ -19,7 +19,7 @@ type SidebarSchool = {
 @Component({
   // eslint-disable-next-line @angular-eslint/component-selector
   selector: '[appSidebar]',
-  imports: [Badge, Button, BrandLogo, RouterLink, RouterLinkActive],
+  imports: [Badge, Button, BrandLogo, RouterLink, RouterLinkActive, Icon],
   template: `<div class="flex flex-col h-full">
     <div class="flex items-center justify-between px-4 py-5 shrink-0">
       <h1 class="text-xl font-semibold text-primary flex items-center gap-2">
@@ -42,10 +42,10 @@ type SidebarSchool = {
                 class="min-w-6 max-w-10 h-6 rounded object-contain"
               />
             } @else {
-              <span class="material-symbols-outlined text-xl">apartment</span>
+              <ui-icon name="building-2" class="text-xl" />
             }
             <span class="flex-1 truncate text-sm">{{ store.currentSchool()?.name }}</span>
-            <span class="material-symbols-outlined text-lg opacity-70">expand_more</span>
+            <ui-icon name="chevron-down" class="text-lg opacity-70" />
           </div>
           <ul
             tabindex="0"
@@ -62,7 +62,7 @@ type SidebarSchool = {
                   @if (school.logoUrl) {
                     <img [src]="school.logoUrl" [alt]="school.name" class="w-5 h-5 rounded object-contain" />
                   } @else {
-                    <span class="material-symbols-outlined text-lg">apartment</span>
+                    <ui-icon name="building-2" class="text-lg" />
                   }
                   <span>{{ school.name }}</span>
                 </div>
@@ -81,7 +81,7 @@ type SidebarSchool = {
             routerLinkActive="bg-action-subtle text-primary font-semibold"
             class="flex items-center gap-3 px-3 py-2 text-ink rounded-lg transition-all duration-150 hover:bg-surface-2 hover:text-ink-strong group"
           >
-            <span class="material-symbols-outlined text-xl">home</span>
+            <ui-icon name="house" class="text-xl" />
             <span>Inicio</span>
           </a>
         </li>
@@ -92,7 +92,7 @@ type SidebarSchool = {
               routerLinkActive="bg-action-subtle text-primary font-semibold"
               class="flex items-center gap-3 px-3 py-2 text-ink rounded-lg transition-all duration-150 hover:bg-surface-2 hover:text-ink-strong group"
             >
-              <span class="material-symbols-outlined text-xl">menu_book</span>
+              <ui-icon name="book-open" class="text-xl" />
               <span>Cursos</span>
             </a>
           </li>
@@ -104,7 +104,7 @@ type SidebarSchool = {
               routerLinkActive="bg-action-subtle text-primary font-semibold"
               class="flex items-center gap-3 px-3 py-2 text-ink rounded-lg transition-all duration-150 hover:bg-surface-2 hover:text-ink-strong group"
             >
-              <span class="material-symbols-outlined text-xl">folder_special</span>
+              <ui-icon name="folder-heart" class="text-xl" />
               <span>Archivos</span>
             </a>
           </li>
@@ -116,7 +116,7 @@ type SidebarSchool = {
               routerLinkActive="bg-action-subtle text-primary font-semibold"
               class="flex items-center gap-3 px-3 py-2 text-ink rounded-lg transition-all duration-150 hover:bg-surface-2 hover:text-ink-strong group"
             >
-              <span class="material-symbols-outlined text-xl">people</span>
+              <ui-icon name="users" class="text-xl" />
               <span>Alumnos</span>
             </a>
           </li>
@@ -128,7 +128,7 @@ type SidebarSchool = {
               routerLinkActive="bg-action-subtle text-primary font-semibold"
               class="flex items-center gap-3 px-3 py-2 text-ink rounded-lg transition-all duration-150 hover:bg-surface-2 hover:text-ink-strong group"
             >
-              <span class="material-symbols-outlined text-xl">school</span>
+              <ui-icon name="school" class="text-xl" />
               <span>Docentes</span>
             </a>
           </li>
@@ -140,7 +140,7 @@ type SidebarSchool = {
               routerLinkActive="bg-action-subtle text-primary font-semibold"
               class="flex items-center gap-3 px-3 py-2 text-ink rounded-lg transition-all duration-150 hover:bg-surface-2 hover:text-ink-strong group"
             >
-              <span class="material-symbols-outlined text-xl">bookmarks</span>
+              <ui-icon name="bookmark" class="text-xl" />
               <span>Asignaciones</span>
             </a>
           </li>
@@ -152,7 +152,7 @@ type SidebarSchool = {
               routerLinkActive="bg-action-subtle text-primary font-semibold"
               class="flex items-center gap-3 px-3 py-2 text-ink rounded-lg transition-all duration-150 hover:bg-surface-2 hover:text-ink-strong group"
             >
-              <span class="material-symbols-outlined text-xl">groups</span>
+              <ui-icon name="users" class="text-xl" />
               <span>Grupos</span>
             </a>
           </li>
@@ -164,7 +164,7 @@ type SidebarSchool = {
             routerLinkActive="bg-action-subtle text-primary font-semibold"
             class="flex items-center gap-3 px-3 py-2 text-ink rounded-lg transition-all duration-150 hover:bg-surface-2 hover:text-ink-strong group"
           >
-            <span class="material-symbols-outlined text-xl">storefront</span>
+            <ui-icon name="store" class="text-xl" />
             <span>Tienda</span>
             @if (storeCartCount.value(); as cnt) {
               @if (cnt > 0) {
@@ -182,7 +182,7 @@ type SidebarSchool = {
               [routerLinkActiveOptions]="{ exact: false }"
               class="flex items-center gap-3 px-3 py-2 text-ink rounded-lg transition-all duration-150 hover:bg-surface-2 hover:text-ink-strong group"
             >
-              <span class="material-symbols-outlined text-xl">inventory_2</span>
+              <ui-icon name="archive" class="text-xl" />
               <span>Administrar tienda</span>
             </a>
           </li>
@@ -194,7 +194,7 @@ type SidebarSchool = {
               routerLinkActive="bg-action-subtle text-primary font-semibold"
               class="flex items-center gap-3 px-3 py-2 text-ink rounded-lg transition-all duration-150 hover:bg-surface-2 hover:text-ink-strong group"
             >
-              <span class="material-symbols-outlined text-xl">mail</span>
+              <ui-icon name="mail" class="text-xl" />
               <span>Mensajes</span>
             </a>
           </li>
@@ -204,7 +204,7 @@ type SidebarSchool = {
               routerLinkActive="bg-action-subtle text-primary font-semibold"
               class="flex items-center gap-3 px-3 py-2 text-ink rounded-lg transition-all duration-150 hover:bg-surface-2 hover:text-ink-strong group"
             >
-              <span class="material-symbols-outlined text-xl">chat</span>
+              <ui-icon name="message-circle" class="text-xl" />
               <span>Chats</span>
               @if (chatUnreadCount.value(); as count) {
                 @if (count > 0) {
@@ -227,7 +227,7 @@ type SidebarSchool = {
                 routerLinkActive="bg-action-subtle text-primary font-semibold"
                 class="flex items-center gap-3 px-3 py-2 text-ink rounded-lg transition-all duration-150 hover:bg-surface-2 hover:text-ink-strong group"
               >
-                <span class="material-symbols-outlined text-xl">event</span>
+                <ui-icon name="calendar" class="text-xl" />
                 <span>Agenda</span>
               </a>
             </li>
@@ -237,7 +237,7 @@ type SidebarSchool = {
                 routerLinkActive="bg-action-subtle text-primary font-semibold"
                 class="flex items-center gap-3 px-3 py-2 text-ink rounded-lg transition-all duration-150 hover:bg-surface-2 hover:text-ink-strong group"
               >
-                <span class="material-symbols-outlined text-xl">upload_file</span>
+                <ui-icon name="file-up" class="text-xl" />
                 <span>Entregas</span>
               </a>
             </li>
@@ -247,7 +247,7 @@ type SidebarSchool = {
                 routerLinkActive="bg-action-subtle text-primary font-semibold"
                 class="flex items-center gap-3 px-3 py-2 text-ink rounded-lg transition-all duration-150 hover:bg-surface-2 hover:text-ink-strong group"
               >
-                <span class="material-symbols-outlined text-xl">notifications</span>
+                <ui-icon name="bell" class="text-xl" />
                 <span>Notificaciones</span>
               </a>
             </li>
@@ -257,7 +257,7 @@ type SidebarSchool = {
                 routerLinkActive="bg-action-subtle text-primary font-semibold"
                 class="flex items-center gap-3 px-3 py-2 text-ink rounded-lg transition-all duration-150 hover:bg-surface-2 hover:text-ink-strong group"
               >
-                <span class="material-symbols-outlined text-xl">campaign</span>
+                <ui-icon name="megaphone" class="text-xl" />
                 <span>Comunicados</span>
               </a>
             </li>
@@ -267,7 +267,7 @@ type SidebarSchool = {
                 routerLinkActive="bg-action-subtle text-primary font-semibold"
                 class="flex items-center gap-3 px-3 py-2 text-ink rounded-lg transition-all duration-150 hover:bg-surface-2 hover:text-ink-strong group"
               >
-                <span class="material-symbols-outlined text-xl">fact_check</span>
+                <ui-icon name="clipboard-check" class="text-xl" />
                 <span>Asistencia</span>
               </a>
             </li>
@@ -286,7 +286,7 @@ type SidebarSchool = {
                 routerLinkActive="bg-action-subtle text-primary font-semibold"
                 class="flex items-center gap-3 px-3 py-2 text-ink rounded-lg transition-all duration-150 hover:bg-surface-2 hover:text-ink-strong group"
               >
-                <span class="material-symbols-outlined text-xl">family_restroom</span>
+                <ui-icon name="users-round" class="text-xl" />
                 <span>Portal</span>
               </a>
             </li>
@@ -296,7 +296,7 @@ type SidebarSchool = {
                 routerLinkActive="bg-action-subtle text-primary font-semibold"
                 class="flex items-center gap-3 px-3 py-2 text-ink rounded-lg transition-all duration-150 hover:bg-surface-2 hover:text-ink-strong group"
               >
-                <span class="material-symbols-outlined text-xl">bar_chart</span>
+                <ui-icon name="chart-column" class="text-xl" />
                 <span>Progreso</span>
               </a>
             </li>
@@ -306,7 +306,7 @@ type SidebarSchool = {
                 routerLinkActive="bg-action-subtle text-primary font-semibold"
                 class="flex items-center gap-3 px-3 py-2 text-ink rounded-lg transition-all duration-150 hover:bg-surface-2 hover:text-ink-strong group"
               >
-                <span class="material-symbols-outlined text-xl">chat</span>
+                <ui-icon name="message-circle" class="text-xl" />
                 <span>Mensajes</span>
               </a>
             </li>
@@ -316,7 +316,7 @@ type SidebarSchool = {
                 routerLinkActive="bg-action-subtle text-primary font-semibold"
                 class="flex items-center gap-3 px-3 py-2 text-ink rounded-lg transition-all duration-150 hover:bg-surface-2 hover:text-ink-strong group"
               >
-                <span class="material-symbols-outlined text-xl">notifications_active</span>
+                <ui-icon name="bell-ring" class="text-xl" />
                 <span>Alertas</span>
               </a>
             </li>
@@ -327,7 +327,7 @@ type SidebarSchool = {
                   routerLinkActive="bg-action-subtle text-primary font-semibold"
                   class="flex items-center gap-3 px-3 py-2 text-ink rounded-lg transition-all duration-150 hover:bg-surface-2 hover:text-ink-strong group"
                 >
-                  <span class="material-symbols-outlined text-xl">account_balance_wallet</span>
+                  <ui-icon name="wallet" class="text-xl" />
                   <span>Estado de cuenta</span>
                 </a>
               </li>
@@ -347,7 +347,7 @@ type SidebarSchool = {
                 routerLinkActive="bg-action-subtle text-primary font-semibold"
                 class="flex items-center gap-3 px-3 py-2 text-ink rounded-lg transition-all duration-150 hover:bg-surface-2 hover:text-ink-strong group"
               >
-                <span class="material-symbols-outlined text-xl">chat</span>
+                <ui-icon name="message-circle" class="text-xl" />
                 <span>Comunicación</span>
               </a>
             </li>
@@ -357,7 +357,7 @@ type SidebarSchool = {
                 routerLinkActive="bg-action-subtle text-primary font-semibold"
                 class="flex items-center gap-3 px-3 py-2 text-ink rounded-lg transition-all duration-150 hover:bg-surface-2 hover:text-ink-strong group"
               >
-                <span class="material-symbols-outlined text-xl">fact_check</span>
+                <ui-icon name="clipboard-check" class="text-xl" />
                 <span>Asistencia</span>
               </a>
             </li>
@@ -367,7 +367,7 @@ type SidebarSchool = {
                 routerLinkActive="bg-action-subtle text-primary font-semibold"
                 class="flex items-center gap-3 px-3 py-2 text-ink rounded-lg transition-all duration-150 hover:bg-surface-2 hover:text-ink-strong group"
               >
-                <span class="material-symbols-outlined text-xl">grade</span>
+                <ui-icon name="star" class="text-xl" />
                 <span>Calificaciones</span>
               </a>
             </li>
@@ -377,7 +377,7 @@ type SidebarSchool = {
                 routerLinkActive="bg-action-subtle text-primary font-semibold"
                 class="flex items-center gap-3 px-3 py-2 text-ink rounded-lg transition-all duration-150 hover:bg-surface-2 hover:text-ink-strong group"
               >
-                <span class="material-symbols-outlined text-xl">analytics</span>
+                <ui-icon name="chart-line" class="text-xl" />
                 <span>Reportes</span>
               </a>
             </li>
@@ -397,7 +397,7 @@ type SidebarSchool = {
                 [routerLinkActiveOptions]="{ exact: true }"
                 class="flex items-center gap-3 px-3 py-2 text-ink rounded-lg transition-all duration-150 hover:bg-surface-2 hover:text-ink-strong group"
               >
-                <span class="material-symbols-outlined text-xl">admin_panel_settings</span>
+                <ui-icon name="shield-user" class="text-xl" />
                 <span>Panel de admin</span>
               </a>
             </li>
@@ -407,7 +407,7 @@ type SidebarSchool = {
                 routerLinkActive="bg-action-subtle text-primary font-semibold"
                 class="flex items-center gap-3 px-3 py-2 text-ink rounded-lg transition-all duration-150 hover:bg-surface-2 hover:text-ink-strong group"
               >
-                <span class="material-symbols-outlined text-xl">campaign</span>
+                <ui-icon name="megaphone" class="text-xl" />
                 <span>Comunicados</span>
               </a>
             </li>
@@ -425,7 +425,7 @@ type SidebarSchool = {
                 routerLinkActive="bg-action-subtle text-primary font-semibold"
                 class="flex items-center gap-3 px-3 py-2 text-ink rounded-lg transition-all duration-150 hover:bg-surface-2 hover:text-ink-strong group"
               >
-                <span class="material-symbols-outlined text-xl">account_balance</span>
+                <ui-icon name="landmark" class="text-xl" />
                 <span>Panel de financiero</span>
               </a>
             </li>
@@ -439,7 +439,7 @@ type SidebarSchool = {
         routerLink="messages"
         class="flex items-center gap-3 px-3 py-2 text-ink rounded-lg transition-all duration-150 hover:bg-surface-2 hover:text-ink-strong group w-full"
       >
-        <span class="material-symbols-outlined text-xl">mail_outline</span>
+        <ui-icon name="mail" class="text-xl" />
         <span>Mensajes</span>
         @if (unreadCount.value(); as count) {
           @if (count > 0) {
@@ -459,7 +459,7 @@ type SidebarSchool = {
           title="Claro"
           aria-label="Claro"
         >
-          <span class="material-symbols-outlined text-lg">light_mode</span>
+          <ui-icon name="sun" class="text-lg" />
         </button>
         <button
           uiButton
@@ -472,7 +472,7 @@ type SidebarSchool = {
           title="Oscuro"
           aria-label="Oscuro"
         >
-          <span class="material-symbols-outlined text-lg">dark_mode</span>
+          <ui-icon name="moon" class="text-lg" />
         </button>
         <button
           uiButton
@@ -485,7 +485,7 @@ type SidebarSchool = {
           title="Sistema"
           aria-label="Sistema"
         >
-          <span class="material-symbols-outlined text-lg">contrast</span>
+          <ui-icon name="sun-moon" class="text-lg" />
         </button>
       </div>
       <div class="dropdown dropdown-top w-full">
@@ -508,7 +508,7 @@ type SidebarSchool = {
             <p class="text-sm font-medium truncate">{{ auth.userName() }}</p>
             <p class="text-xs text-ink-muted truncate">Ver perfil</p>
           </div>
-          <span class="material-symbols-outlined text-lg opacity-70">expand_less</span>
+          <ui-icon name="chevron-up" class="text-lg opacity-70" />
         </div>
         <ul
           tabindex="0"
@@ -516,19 +516,19 @@ type SidebarSchool = {
         >
           <li>
             <a routerLink="profile">
-              <span class="material-symbols-outlined text-xl">person</span>
+              <ui-icon name="user" class="text-xl" />
               <span class="ml-1">Perfil</span>
             </a>
           </li>
           <li>
             <a routerLink="change-password">
-              <span class="material-symbols-outlined text-xl">key</span>
+              <ui-icon name="key-round" class="text-xl" />
               <span class="ml-1">Cambiar contraseña</span>
             </a>
           </li>
           <li>
             <button (click)="logout()">
-              <span class="material-symbols-outlined text-xl">logout</span>
+              <ui-icon name="log-out" class="text-xl" />
               <span class="ml-1">Cerrar sesión</span>
             </button>
           </li>

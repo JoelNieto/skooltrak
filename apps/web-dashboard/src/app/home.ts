@@ -1,4 +1,4 @@
-import { Alert, Button, Card, CardBody, EmptyState, PageHeader, Spinner, StatCard } from '#/ui';
+import { Alert, Button, Card, CardBody, EmptyState, Icon, PageHeader, Spinner, StatCard, UiIconName } from '#/ui';
 import { DatePipe } from '@angular/common';
 import { httpResource } from '@angular/common/http';
 import { Component, computed, inject } from '@angular/core';
@@ -45,7 +45,14 @@ type AdminKpis = {
   currencyCode: string;
 };
 
-type AttentionTile = { icon: string; iconClass: string; count: number; label: string; detail: string; link: string };
+type AttentionTile = {
+  icon: UiIconName;
+  iconClass: string;
+  count: number;
+  label: string;
+  detail: string;
+  link: string;
+};
 
 const percent = new Intl.NumberFormat('es', { style: 'percent', maximumFractionDigits: 1 });
 const integer = new Intl.NumberFormat('es-MX');
@@ -97,6 +104,7 @@ type PublishedNewsletter = {
     EmptyState,
     WelcomeBanner,
     RecentBroadcasts,
+    Icon,
   ],
   template: `
     <!-- Welcome Banner for recently completed onboarding -->
@@ -108,13 +116,13 @@ type PublishedNewsletter = {
       [title]="greeting()"
       [subtitle]="headerSubtitle()"
       actionLabel="Nuevo comunicado"
-      actionIcon="campaign"
+      actionIcon="megaphone"
       (action)="newBroadcast()"
     />
 
     @if (attention.value()?.periodClose; as close) {
       <div uiAlert tone="info" class="mb-4">
-        <span class="material-symbols-outlined" aria-hidden="true">event_upcoming</span>
+        <ui-icon name="calendar-clock" />
         <span class="flex-1">
           <strong>{{
             close.daysLeft === 0
@@ -141,7 +149,7 @@ type PublishedNewsletter = {
           <lib-empty-state
             title="Todo al día"
             description="No hay solicitudes, aprobaciones ni pendientes de la escuela."
-            icon="task_alt"
+            icon="circle-check-big"
             color="success"
           />
         } @else {
@@ -153,12 +161,11 @@ type PublishedNewsletter = {
                   class="flex h-full flex-col gap-1.5 rounded-field border border-line p-3.5 text-ink hover:border-line-strong hover:no-underline"
                 >
                   <span class="flex items-center gap-2">
-                    <span
-                      class="material-symbols-outlined flex size-9 items-center justify-center rounded-field"
+                    <ui-icon
+                      [name]="tile.icon"
+                      class="flex size-9 items-center justify-center rounded-field"
                       [class]="tile.iconClass"
-                      aria-hidden="true"
-                      >{{ tile.icon }}</span
-                    >
+                    />
                     <strong class="text-2xl text-ink-strong">{{ tile.count }}</strong>
                   </span>
                   <span class="font-medium text-ink-strong">{{ tile.label }}</span>
@@ -183,7 +190,7 @@ type PublishedNewsletter = {
         label="Asistencia hoy"
         [value]="attendanceValue()"
         [helper]="attendanceHelper()"
-        icon="how_to_reg"
+        icon="user-check"
         color="success"
       />
       @if (kpis.value()?.collection !== null) {
@@ -191,7 +198,7 @@ type PublishedNewsletter = {
           label="Cobranza del mes"
           [value]="collectionValue()"
           [helper]="collectionHelper()"
-          icon="payments"
+          icon="banknote"
           color="info"
         />
       }
@@ -199,7 +206,7 @@ type PublishedNewsletter = {
         label="Aprobando todas las materias"
         [value]="passingValue()"
         [helper]="passingHelper()"
-        icon="grade"
+        icon="star"
         color="warning"
       />
     </div>
@@ -250,7 +257,7 @@ type PublishedNewsletter = {
               routerLink="/students"
               class="rounded-lg border border-line p-3 transition-colors duration-150 hover:bg-surface-2 flex items-center gap-3"
             >
-              <span class="material-symbols-outlined text-xl text-primary">school</span>
+              <ui-icon name="school" class="text-xl text-primary" />
               <div>
                 <p class="font-medium text-sm text-ink-strong">Gestionar alumnos</p>
                 <p class="text-xs text-ink-muted">Altas y seguimiento</p>
@@ -260,7 +267,7 @@ type PublishedNewsletter = {
               routerLink="/teachers"
               class="rounded-lg border border-line p-3 transition-colors duration-150 hover:bg-surface-2 flex items-center gap-3"
             >
-              <span class="material-symbols-outlined text-xl text-accent">groups</span>
+              <ui-icon name="users" class="text-xl text-accent" />
               <div>
                 <p class="font-medium text-sm text-ink-strong">Gestionar docentes</p>
                 <p class="text-xs text-ink-muted">Equipo académico</p>
@@ -270,7 +277,7 @@ type PublishedNewsletter = {
               routerLink="/admin/subjects"
               class="rounded-lg border border-line p-3 transition-colors duration-150 hover:bg-surface-2 flex items-center gap-3"
             >
-              <span class="material-symbols-outlined text-xl text-info">library_books</span>
+              <ui-icon name="library" class="text-xl text-info" />
               <div>
                 <p class="font-medium text-sm text-ink-strong">Asignaturas</p>
                 <p class="text-xs text-ink-muted">Plan curricular</p>
@@ -280,7 +287,7 @@ type PublishedNewsletter = {
               routerLink="/messages"
               class="rounded-lg border border-line p-3 transition-colors duration-150 hover:bg-surface-2 flex items-center gap-3"
             >
-              <span class="material-symbols-outlined text-xl text-success">forum</span>
+              <ui-icon name="messages-square" class="text-xl text-success" />
               <div>
                 <p class="font-medium text-sm text-ink-strong">Mensajería</p>
                 <p class="text-xs text-ink-muted">Comunicación interna</p>
@@ -365,7 +372,7 @@ type PublishedNewsletter = {
             <lib-empty-state
               title="Sin docentes recientes"
               description="Nuevas contrataciones aparecerán aquí."
-              icon="groups"
+              icon="users"
               color="accent"
             />
           } @else {
@@ -487,7 +494,7 @@ export default class Home {
         : null;
       if (days !== null && days > 0) parts.push(`la más antigua hace ${plural(days, 'día', 'días')}`);
       tiles.push({
-        icon: 'how_to_reg',
+        icon: 'user-check',
         iconClass: 'bg-warning/15 text-warning',
         count: t.joinRequests.total,
         label: 'Solicitudes de ingreso',
@@ -497,7 +504,7 @@ export default class Home {
     }
     if (t.broadcastsToApprove) {
       tiles.push({
-        icon: 'approval',
+        icon: 'stamp',
         iconClass: 'bg-action-subtle text-primary',
         count: t.broadcastsToApprove,
         label: 'Comunicados por aprobar',
@@ -507,7 +514,7 @@ export default class Home {
     }
     if (t.missedAttendance) {
       tiles.push({
-        icon: 'fact_check',
+        icon: 'clipboard-check',
         iconClass: 'bg-info/15 text-info',
         count: t.missedAttendance,
         label: 'Clases sin asistencia hoy',
@@ -520,7 +527,7 @@ export default class Home {
         t.overdueCharges.amount,
       );
       tiles.push({
-        icon: 'receipt_long',
+        icon: 'receipt',
         iconClass: 'bg-error/15 text-error',
         count: t.overdueCharges.count,
         label: 'Cargos vencidos',
@@ -530,7 +537,7 @@ export default class Home {
     }
     if (t.failedImports) {
       tiles.push({
-        icon: 'upload_file',
+        icon: 'file-up',
         iconClass: 'bg-surface-2 text-ink',
         count: t.failedImports,
         label: t.failedImports === 1 ? 'Importación con errores' : 'Importaciones con errores',
@@ -540,7 +547,7 @@ export default class Home {
     }
     if (t.plansWithoutScale) {
       tiles.push({
-        icon: 'rule',
+        icon: 'list-checks',
         iconClass: 'bg-warning/15 text-warning',
         count: t.plansWithoutScale,
         label: 'Planes sin escala de notas',

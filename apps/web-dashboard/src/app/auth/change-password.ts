@@ -2,11 +2,11 @@ import { Component, inject, signal } from '@angular/core';
 import { form, FormField, minLength, required, validate } from '@angular/forms/signals';
 import { Router, RouterLink } from '@angular/router';
 import Auth from './auth';
-import { Alert, Breadcrumbs, Button, UiField, UiInput } from '#/ui';
+import { Alert, Breadcrumbs, Button, Icon, UiField, UiInput } from '#/ui';
 
 @Component({
   selector: 'app-change-password',
-  imports: [Alert, Breadcrumbs, UiField, UiInput, Button, FormField, RouterLink],
+  imports: [Alert, Breadcrumbs, UiField, UiInput, Button, FormField, RouterLink, Icon],
   template: `
     <div class="flex flex-col gap-6">
       <ui-breadcrumbs [items]="[{ label: 'Inicio', link: '/' }, { label: 'Cambiar contraseña' }]" />
@@ -19,14 +19,14 @@ import { Alert, Breadcrumbs, Button, UiField, UiInput } from '#/ui';
 
         @if (success()) {
           <div uiAlert tone="success" class="mb-4">
-            <span class="material-symbols-outlined">check_circle</span>
+            <ui-icon name="circle-check" />
             <span>Contraseña cambiada exitosamente.</span>
           </div>
         }
 
         @if (error()) {
           <div uiAlert tone="danger" class="mb-4">
-            <span class="material-symbols-outlined">error</span>
+            <ui-icon name="circle-alert" />
             <span>{{ errorMessage() }}</span>
           </div>
         }

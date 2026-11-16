@@ -1,4 +1,4 @@
-import { Breadcrumbs, Button, Confirmation, Error, Loader, Toast, UiTable } from '#/ui';
+import { Breadcrumbs, Button, Confirmation, Error, Icon, Loader, Toast, UiTable } from '#/ui';
 import { DatePipe } from '@angular/common';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { Component, inject } from '@angular/core';
@@ -19,7 +19,7 @@ type QuizListItem = {
 
 @Component({
   selector: 'app-quizzes',
-  imports: [Breadcrumbs, UiTable, Button, RouterLink, DatePipe, Loader, Error, StripHtmlPipe],
+  imports: [Breadcrumbs, UiTable, Button, RouterLink, DatePipe, Loader, Error, StripHtmlPipe, Icon],
   template: `
     <ui-breadcrumbs [items]="[{ label: 'Inicio', link: '/' }, { label: 'Quizes' }]" />
     <div class="flex items-center justify-between">
@@ -64,7 +64,7 @@ type QuizListItem = {
                       <a uiButton variant="ghost" size="sm" [routerLink]="['/quizzes', item.id]">Ver</a>
                       <a uiButton variant="ghost" size="sm" [routerLink]="['/quizzes', item.id, 'edit']">Editar</a>
                       <button uiButton variant="ghost" size="sm" (click)="deleteQuiz(item)">
-                        <span class="material-symbols-outlined">delete</span>
+                        <ui-icon name="trash-2" />
                       </button>
                     </div>
                   }

@@ -1,4 +1,4 @@
-import { Button, Card, Confirmation, Modal, PaginatorV2, Toast, UiInputGroup, UiSelect, UiTable } from '#/ui';
+import { Button, Card, Confirmation, Icon, Modal, PaginatorV2, Toast, UiInputGroup, UiSelect, UiTable } from '#/ui';
 import { Menu, MenuContent, MenuItem, MenuTrigger } from '@angular/aria/menu';
 import { OverlayModule } from '@angular/cdk/overlay';
 import { HttpClient, httpResource } from '@angular/common/http';
@@ -41,12 +41,13 @@ type CourseType = Prisma.CourseGetPayload<{
     OverlayModule,
     FormField,
     UiInputGroup,
+    Icon,
   ],
   template: `<div class="flex justify-between">
       <div class="flex gap-2">
         <div class="md:w-96 w-full">
           <label uiInputGroup>
-            <span class="material-symbols-outlined">search</span>
+            <ui-icon name="search" />
             <input class="pl-0" type="search" placeholder="Buscar..." [formField]="form.searchText" />
           </label>
         </div>
@@ -58,9 +59,7 @@ type CourseType = Prisma.CourseGetPayload<{
         </select>
       </div>
 
-      <button uiButton variant="primary" (click)="editCourse()">
-        <span class="material-symbols-outlined">add_circle</span> Nuevo curso
-      </button>
+      <button uiButton variant="primary" (click)="editCourse()"><ui-icon name="circle-plus" /> Nuevo curso</button>
     </div>
     <div uiCard class="overflow-x-auto mt-4">
       <table uiTable>
@@ -102,7 +101,7 @@ type CourseType = Prisma.CourseGetPayload<{
                   #trigger="ngMenuTrigger"
                   [menu]="actionsMenu()"
                 >
-                  <span class="material-symbols-outlined text-xl">more_horiz</span>
+                  <ui-icon name="ellipsis" class="text-xl" />
                 </button>
                 <ng-template
                   [cdkConnectedOverlayOpen]="trigger.expanded()"
@@ -126,7 +125,7 @@ type CourseType = Prisma.CourseGetPayload<{
                         [routerLink]="['/courses', course.id]"
                         class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-surface-2 w-full"
                       >
-                        <span class="material-symbols-outlined text-lg">visibility</span>
+                        <ui-icon name="eye" class="text-lg" />
                         <span>Ver</span>
                       </a>
                       <button
@@ -135,7 +134,7 @@ type CourseType = Prisma.CourseGetPayload<{
                         class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-surface-2 w-full"
                         (click)="editCourse(course)"
                       >
-                        <span class="material-symbols-outlined text-lg">edit</span>
+                        <ui-icon name="pencil" class="text-lg" />
                         <span>Editar</span>
                       </button>
                       <button
@@ -144,7 +143,7 @@ type CourseType = Prisma.CourseGetPayload<{
                         class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-surface-2 w-full"
                         (click)="deleteCourse(course)"
                       >
-                        <span class="material-symbols-outlined text-lg">delete</span>
+                        <ui-icon name="trash-2" class="text-lg" />
                         <span>Eliminar</span>
                       </button>
                     </ng-template>

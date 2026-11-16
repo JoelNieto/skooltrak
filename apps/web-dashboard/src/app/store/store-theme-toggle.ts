@@ -1,10 +1,10 @@
 import { Component, inject } from '@angular/core';
 import { StoreThemeService } from './store-theme.service';
-import { Button } from '#/ui';
+import { Button, Icon } from '#/ui';
 
 @Component({
   selector: 'app-store-theme-toggle',
-  imports: [Button],
+  imports: [Button, Icon],
   template: `
     <div class="flex gap-1 p-2 rounded-lg bg-surface-0/50" role="group" aria-label="Tema">
       <button
@@ -18,7 +18,7 @@ import { Button } from '#/ui';
         title="Claro"
         aria-label="Claro"
       >
-        <span class="material-symbols-outlined text-lg">light_mode</span>
+        <ui-icon name="sun" class="text-lg" />
       </button>
       <button
         uiButton
@@ -31,7 +31,7 @@ import { Button } from '#/ui';
         title="Oscuro"
         aria-label="Oscuro"
       >
-        <span class="material-symbols-outlined text-lg">dark_mode</span>
+        <ui-icon name="moon" class="text-lg" />
       </button>
       <button
         uiButton
@@ -44,7 +44,7 @@ import { Button } from '#/ui';
         title="Sistema"
         aria-label="Sistema"
       >
-        <span class="material-symbols-outlined text-lg">contrast</span>
+        <ui-icon name="sun-moon" class="text-lg" />
       </button>
     </div>
   `,

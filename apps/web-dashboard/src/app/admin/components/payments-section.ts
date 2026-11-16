@@ -83,7 +83,7 @@ type StudentOption = { id: string; firstName: string; fatherName: string };
           <lib-empty-state
             title="Sin pagos"
             description="No se encontraron pagos con los filtros aplicados."
-            icon="payments"
+            icon="banknote"
           />
         </div>
       }

@@ -2,7 +2,7 @@ import { OverlayModule } from '@angular/cdk/overlay';
 import { httpResource } from '@angular/common/http';
 import { Component, effect, output, signal, viewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Badge, Button, UiInputGroup } from '#/ui';
+import { Badge, Button, Icon, UiInputGroup } from '#/ui';
 
 type StudentSearchItem = {
   id: string;
@@ -12,7 +12,7 @@ type StudentSearchItem = {
 
 @Component({
   selector: 'app-student-search',
-  imports: [Badge, Button, FormsModule, OverlayModule, UiInputGroup],
+  imports: [Badge, Button, FormsModule, OverlayModule, UiInputGroup, Icon],
   template: `
     <div class="relative flex flex-col" #origin>
       <div uiInputGroup class="flex relative items-center w-full max-w-md">
@@ -28,11 +28,11 @@ type StudentSearchItem = {
               aria-label="Quitar selección"
               (click)="clearSelection()"
             >
-              <span class="material-symbols-outlined text-sm">close</span>
+              <ui-icon name="x" class="text-sm" />
             </button>
           </span>
         } @else {
-          <span class="material-symbols-outlined text-ink-subtle">search</span>
+          <ui-icon name="search" class="text-ink-subtle" />
           <input
             #input
             autocomplete="off"

@@ -6,6 +6,8 @@ export * from './lib/ui/components/button';
 export * from './lib/ui/components/card';
 export * from './lib/ui/components/combobox';
 export * from './lib/ui/components/field';
+export * from './lib/ui/components/icon';
+export * from './lib/ui/icons/icons';
 export * from './lib/ui/components/calendar';
 export * from './lib/ui/components/chart-placeholder';
 export * from './lib/ui/components/editor-menu';

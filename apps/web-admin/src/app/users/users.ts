@@ -1,4 +1,16 @@
-import { Breadcrumbs, Button, Confirmation, Error, Modal, Pagination, Paginator, Toast, UiInput, UiTable } from '#/ui';
+import {
+  Breadcrumbs,
+  Button,
+  Confirmation,
+  Error,
+  Icon,
+  Modal,
+  Pagination,
+  Paginator,
+  Toast,
+  UiInput,
+  UiTable,
+} from '#/ui';
 import { Menu, MenuContent, MenuItem, MenuTrigger } from '@angular/aria/menu';
 import { OverlayModule } from '@angular/cdk/overlay';
 import { DatePipe } from '@angular/common';
@@ -24,6 +36,7 @@ import { UsersForm } from './users-form';
     Paginator,
     FormsModule,
     Error,
+    Icon,
   ],
   providers: [Pagination],
   template: `<ui-breadcrumbs [items]="[{ label: 'Inicio', link: '/' }, { label: 'Usuarios' }]" />
@@ -33,9 +46,7 @@ import { UsersForm } from './users-form';
         <p class="text-sm text-ink-muted">Listado de usuarios</p>
       </div>
 
-      <button uiButton variant="primary" (click)="editUser()">
-        <span class="material-symbols-outlined">add_circle</span> Nuevo Usuario
-      </button>
+      <button uiButton variant="primary" (click)="editUser()"><ui-icon name="circle-plus" /> Nuevo Usuario</button>
     </div>
     <div class="flex justify-between items-center mb-4">
       <div class="md:w-96 w-full">
@@ -75,7 +86,7 @@ import { UsersForm } from './users-form';
                     #trigger="ngMenuTrigger"
                     [menu]="formatMenu()"
                   >
-                    <span class="material-symbols-outlined text-xl">more_horiz</span>
+                    <ui-icon name="ellipsis" class="text-xl" />
                   </button>
                   <ng-template
                     [cdkConnectedOverlayOpen]="trigger.expanded()"
@@ -99,7 +110,7 @@ import { UsersForm } from './users-form';
                           class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-surface-2 w-full"
                           (click)="editUser($any(user))"
                         >
-                          <span class="material-symbols-outlined text-lg">edit</span>
+                          <ui-icon name="pencil" class="text-lg" />
                           <span>Editar</span>
                         </button>
                         <button
@@ -108,7 +119,7 @@ import { UsersForm } from './users-form';
                           class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-surface-2 w-full"
                           (click)="deleteUser($any(user))"
                         >
-                          <span class="material-symbols-outlined text-lg">delete</span>
+                          <ui-icon name="trash-2" class="text-lg" />
                           <span>Eliminar</span>
                         </button>
                       </ng-template>

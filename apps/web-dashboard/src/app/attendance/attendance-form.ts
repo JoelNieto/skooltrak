@@ -1,4 +1,4 @@
-import { Alert, Button, Loader, Toast, UiField, UiInput, UiSelect, UiTable } from '#/ui';
+import { Alert, Button, Icon, Loader, Toast, UiField, UiIconName, UiInput, UiSelect, UiTable } from '#/ui';
 import { NgClass } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import {
@@ -41,33 +41,33 @@ type ClassGroupType = {
 };
 
 /** `color` tints the icon; `selected` fills the row's picker button once that status is chosen. */
-const STATUS_OPTIONS = [
+const STATUS_OPTIONS: { value: string; label: string; icon: UiIconName; color: string; selected: string }[] = [
   {
     value: 'PRESENT',
     label: 'Presente',
-    icon: 'check_circle',
+    icon: 'circle-check',
     color: 'text-success',
     selected: 'bg-success text-success-content',
   },
-  { value: 'ABSENT', label: 'Ausente', icon: 'cancel', color: 'text-error', selected: 'bg-error text-error-content' },
+  { value: 'ABSENT', label: 'Ausente', icon: 'circle-x', color: 'text-error', selected: 'bg-error text-error-content' },
   {
     value: 'LATE',
     label: 'Tardanza',
-    icon: 'schedule',
+    icon: 'clock',
     color: 'text-warning',
     selected: 'bg-warning text-warning-content',
   },
   {
     value: 'SICK_LEAVE',
     label: 'Permiso médico',
-    icon: 'healing',
+    icon: 'heart-pulse',
     color: 'text-info',
     selected: 'bg-info text-info-content',
   },
   {
     value: 'EXCUSED',
     label: 'Excusado',
-    icon: 'event_busy',
+    icon: 'calendar-x',
     color: 'text-ink-muted',
     selected: 'bg-neutral text-neutral-content',
   },
@@ -75,7 +75,7 @@ const STATUS_OPTIONS = [
 
 @Component({
   selector: 'app-attendance-form',
-  imports: [Alert, UiTable, UiInput, UiSelect, Button, FormField, Loader, NgClass, UiField],
+  imports: [Alert, UiTable, UiInput, UiSelect, Button, FormField, Loader, NgClass, UiField, Icon],
   template: `
     <form (submit)="onSubmit($event)" class="flex flex-col gap-4">
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -97,9 +97,7 @@ const STATUS_OPTIONS = [
         <span class="text-sm font-medium self-center">Marcar todos:</span>
         @for (status of statusOptions; track status.value) {
           <button uiButton size="sm" type="button" (click)="markAll(status.value)">
-            <span class="material-symbols-outlined text-sm" [class]="status.color" aria-hidden="true">{{
-              status.icon
-            }}</span>
+            <ui-icon [name]="status.icon" class="text-sm" [class]="status.color" />
             {{ status.label }}
           </button>
         }
@@ -150,7 +148,7 @@ const STATUS_OPTIONS = [
                           [attr.aria-pressed]="record.status().value() === status.value"
                           (click)="setStatus(i, status.value)"
                         >
-                          <span class="material-symbols-outlined text-sm" aria-hidden="true">{{ status.icon }}</span>
+                          <ui-icon [name]="status.icon" class="text-sm" />
                         </button>
                       }
                     </div>
@@ -174,7 +172,7 @@ const STATUS_OPTIONS = [
 
       @if (studentsResource.hasValue() && studentsResource.value()!.length === 0) {
         <div uiAlert tone="warning">
-          <span class="material-symbols-outlined">warning</span>
+          <ui-icon name="triangle-alert" />
           No hay estudiantes en este grupo para el curso seleccionado
         </div>
       }

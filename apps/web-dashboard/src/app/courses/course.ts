@@ -5,6 +5,7 @@ import {
   CardBody,
   CardTitle,
   EmptyState,
+  Icon,
   Loader,
   Modal,
   Toast,
@@ -65,6 +66,7 @@ type CourseVm = {
     CourseGradeBuckets,
     CourseGrades,
     CourseStudentGrades,
+    Icon,
   ],
   template: ` @if (courseResource.isLoading()) {
       <lib-loader />
@@ -109,19 +111,19 @@ type CourseVm = {
                     [disabled]="startingChat()"
                   >
                     @if (!startingChat()) {
-                      <span class="material-symbols-outlined">chat</span>
+                      <ui-icon name="message-circle" />
                     }
                     Chat
                   </button>
                 }
                 @if (auth.hasPermission('MANAGE_ASSIGNMENTS')) {
                   <button uiButton variant="primary" (click)="addAssignment()">
-                    <span class="material-symbols-outlined">assignment_add</span>
+                    <ui-icon name="clipboard-plus" />
                     Nueva asignacion
                   </button>
                 }
                 @if (auth.hasPermission('MANAGE_COURSES')) {
-                  <button uiButton><span class="material-symbols-outlined">edit</span> Editar</button>
+                  <button uiButton><ui-icon name="pencil" /> Editar</button>
                 }
               </div>
             </div>
@@ -130,30 +132,30 @@ type CourseVm = {
         <div uiTabs class="mt-4 flex flex-col gap-4">
           <div uiTabList [(selectedTab)]="tab" aria-label="Secciones del curso">
             <button uiTab value="grades">
-              <span class="material-symbols-outlined text-xl" aria-hidden="true">grade</span>
+              <ui-icon name="star" class="text-xl" />
               Calificaciones
             </button>
             <button uiTab value="calendar">
-              <span class="material-symbols-outlined text-xl" aria-hidden="true">calendar_month</span>
+              <ui-icon name="calendar-days" class="text-xl" />
               Calendario
             </button>
             @if (auth.isTeacher() || auth.isAdmin()) {
               <button uiTab value="attendance">
-                <span class="material-symbols-outlined text-xl" aria-hidden="true">how_to_reg</span>
+                <ui-icon name="user-check" class="text-xl" />
                 Asistencia
               </button>
             }
             <button uiTab value="participants">
-              <span class="material-symbols-outlined text-xl" aria-hidden="true">groups</span>
+              <ui-icon name="users" class="text-xl" />
               Participantes
             </button>
             <button uiTab value="files">
-              <span class="material-symbols-outlined text-xl" aria-hidden="true">folder_special</span>
+              <ui-icon name="folder-heart" class="text-xl" />
               Archivos
             </button>
             @if (auth.isTeacher() || auth.isAdmin()) {
               <button uiTab value="weights">
-                <span class="material-symbols-outlined text-xl" aria-hidden="true">balance</span>
+                <ui-icon name="scale" class="text-xl" />
                 Ponderación
               </button>
             }
@@ -184,7 +186,7 @@ type CourseVm = {
               <lib-empty-state
                 title="Participantes"
                 description="La lista de participantes del curso estará disponible pronto."
-                icon="groups"
+                icon="users"
               />
             </ng-template>
           </div>

@@ -1,4 +1,4 @@
-import { Alert, BrandLogo, Button, Loader, Toast, UiField, UiInput } from '#/ui';
+import { Alert, BrandLogo, Button, Icon, Loader, Toast, UiField, UiInput } from '#/ui';
 import { HttpClient } from '@angular/common/http';
 import { Component, inject, signal } from '@angular/core';
 import { form, FormField, minLength, required, validate } from '@angular/forms/signals';
@@ -7,7 +7,7 @@ import Auth from './auth';
 
 @Component({
   selector: 'app-reset-password',
-  imports: [Alert, UiField, UiInput, Button, BrandLogo, FormField, RouterLink, Loader],
+  imports: [Alert, UiField, UiInput, Button, BrandLogo, FormField, RouterLink, Loader, Icon],
   template: `
     <div class="bg-surface-0 min-h-screen flex items-center justify-center p-4">
       @defer {
@@ -25,13 +25,13 @@ import Auth from './auth';
             <div class="p-8 bg-surface-1">
               @if (resendSuccess()) {
                 <div uiAlert tone="success" class="mb-4">
-                  <span class="material-symbols-outlined">check_circle</span>
+                  <ui-icon name="circle-check" />
                   <span>Invitación reenviada. Revisa tu bandeja de entrada.</span>
                 </div>
                 <a uiButton variant="primary" routerLink="/login" class="w-full"> Volver al inicio de sesión </a>
               } @else if (error()) {
                 <div uiAlert tone="danger" class="mb-4">
-                  <span class="material-symbols-outlined">error</span>
+                  <ui-icon name="circle-alert" />
                   <span>El enlace es inválido o ha expirado. Solicita uno nuevo.</span>
                 </div>
                 <div class="flex flex-col gap-3 text-center">
@@ -47,7 +47,7 @@ import Auth from './auth';
                       @if (resending()) {
                         Enviando...
                       } @else {
-                        <span class="material-symbols-outlined">mail</span>
+                        <ui-icon name="mail" />
                         Reenviar invitación
                       }
                     </button>

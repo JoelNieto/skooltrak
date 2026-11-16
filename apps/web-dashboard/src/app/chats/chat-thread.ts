@@ -1,4 +1,4 @@
-import { Badge, Breadcrumbs, Button, Card, CardBody, Loader, Toast, UiInput } from '#/ui';
+import { Badge, Breadcrumbs, Button, Card, CardBody, Icon, Loader, Toast, UiIconName, UiInput } from '#/ui';
 import { DatePipe } from '@angular/common';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { Component, DestroyRef, effect, inject, input, signal, viewChild } from '@angular/core';
@@ -44,7 +44,7 @@ type ChatMessageDto = {
 
 @Component({
   selector: 'app-chat-thread',
-  imports: [Breadcrumbs, Badge, Card, CardBody, UiInput, Button, Loader, FormsModule, DatePipe],
+  imports: [Breadcrumbs, Badge, Card, CardBody, UiInput, Button, Loader, FormsModule, DatePipe, Icon],
   template: `
     <ui-breadcrumbs
       [items]="[{ label: 'Inicio', link: '/' }, { label: 'Chats', link: '/chats' }, { label: chatDisplayName() }]"
@@ -63,7 +63,7 @@ type ChatMessageDto = {
                   class="flex items-center justify-center w-8 h-8 rounded-full text-white"
                   [style.background]="contextualChatColor($any(chat).type)"
                 >
-                  <span class="material-symbols-outlined text-base">{{ contextualChatIcon($any(chat).type) }}</span>
+                  <ui-icon [name]="contextualChatIcon($any(chat).type)" class="text-base" />
                 </div>
               } @else {
                 <div
@@ -148,7 +148,7 @@ type ChatMessageDto = {
                 [disabled]="!messageContent().trim() || sending()"
               >
                 @if (!sending()) {
-                  <span class="material-symbols-outlined">send</span>
+                  <ui-icon name="send" />
                 }
               </button>
             </div>
@@ -271,13 +271,13 @@ export default class ChatThread {
     return type === 'COURSE' || type === 'ASSIGNMENT' || type === 'CLASS_GROUP';
   }
 
-  contextualChatIcon(type: string) {
-    const icons: Record<string, string> = {
+  contextualChatIcon(type: string): UiIconName {
+    const icons: Record<string, UiIconName> = {
       COURSE: 'school',
-      ASSIGNMENT: 'assignment',
-      CLASS_GROUP: 'groups',
+      ASSIGNMENT: 'clipboard-list',
+      CLASS_GROUP: 'users',
     };
-    return icons[type] ?? 'chat';
+    return icons[type] ?? 'message-circle';
   }
 
   contextualChatColor(type: string) {

@@ -6,6 +6,7 @@ import {
   CardTitle,
   debounceSignal,
   EmptyState,
+  Icon,
   Loader,
   Pagination,
   PaginatorV2,
@@ -47,6 +48,7 @@ type CourseRow = {
     FormsModule,
     EmptyState,
     UiInputGroup,
+    Icon,
   ],
   providers: [Pagination],
 
@@ -54,7 +56,7 @@ type CourseRow = {
     <ui-breadcrumbs [items]="[{ label: 'Inicio', link: '/' }, { label: 'Cursos' }]" />
     <h1 class="text-2xl font-semibold mb-2">Cursos</h1>
     <label uiInputGroup size="lg">
-      <span class="material-symbols-outlined">search</span>
+      <ui-icon name="search" />
       <input class="pl-0" type="search" placeholder="Buscar..." [(ngModel)]="searchText" />
     </label>
     @if (coursesListResource.isLoading()) {

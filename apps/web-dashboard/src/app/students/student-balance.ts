@@ -60,7 +60,7 @@ const STATUS_TONES: Record<ChargeStatus, BadgeTone> = {
       title="Estado de cuenta"
       subtitle="Resumen de cargos, pagos y saldo."
       [actionLabel]="canRegenerate() ? 'Generar desde plan de estudios' : undefined"
-      actionIcon="autorenew"
+      actionIcon="refresh-cw"
       (action)="regenerate(false)"
     />
 

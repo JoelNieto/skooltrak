@@ -1,4 +1,4 @@
-import { BrandLogo, Button, Card, CardBody, Loader, Toast, UiInput } from '#/ui';
+import { BrandLogo, Button, Card, CardBody, Icon, Loader, Toast, UiInput } from '#/ui';
 import { HttpClient } from '@angular/common/http';
 import { Component, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
@@ -13,7 +13,7 @@ type AvailableSchool = {
 
 @Component({
   selector: 'app-join-school',
-  imports: [Card, CardBody, UiInput, Button, BrandLogo, Loader],
+  imports: [Card, CardBody, UiInput, Button, BrandLogo, Loader, Icon],
   template: `
     <div class="min-h-screen flex flex-col bg-surface-0">
       <header class="p-4 md:p-6 flex items-center justify-between">
@@ -38,7 +38,7 @@ type AvailableSchool = {
             </div>
           } @else if (searched() && filteredSchools().length === 0) {
             <div class="text-center py-12">
-              <span class="material-symbols-outlined text-6xl text-ink-subtle">school</span>
+              <ui-icon name="school" class="text-6xl text-ink-subtle" />
               <p class="mt-4 text-ink-muted">No se encontraron escuelas</p>
             </div>
           } @else if (searched()) {
@@ -47,7 +47,7 @@ type AvailableSchool = {
                 <button uiCard class="text-left w-full" (click)="selectSchool(school)">
                   <div uiCardBody class="flex-row items-center gap-4">
                     <div class="w-12 h-12 rounded-lg bg-action-subtle flex items-center justify-center shrink-0">
-                      <span class="material-symbols-outlined text-2xl text-primary">school</span>
+                      <ui-icon name="school" class="text-2xl text-primary" />
                     </div>
                     <div class="flex-1 min-w-0">
                       <h3 class="font-semibold text-ink-strong truncate">{{ school.name }}</h3>
@@ -58,21 +58,21 @@ type AvailableSchool = {
                         </p>
                       }
                     </div>
-                    <span class="material-symbols-outlined text-ink-subtle">chevron_right</span>
+                    <ui-icon name="chevron-right" class="text-ink-subtle" />
                   </div>
                 </button>
               }
             </div>
           } @else {
             <div class="text-center py-12">
-              <span class="material-symbols-outlined text-6xl text-ink-subtle">search</span>
+              <ui-icon name="search" class="text-6xl text-ink-subtle" />
               <p class="mt-4 text-ink-subtle">Comienza a escribir para buscar escuelas</p>
             </div>
           }
 
           <div class="text-center">
             <button uiButton variant="ghost" size="sm" (click)="goBack()">
-              <span class="material-symbols-outlined text-lg">arrow_back</span>
+              <ui-icon name="arrow-left" class="text-lg" />
               Volver
             </button>
           </div>

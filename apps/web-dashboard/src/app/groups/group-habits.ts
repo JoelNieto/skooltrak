@@ -1,4 +1,4 @@
-import { Alert, Button, Loader, Toast, UiField, UiInput, UiRadio, UiSelect, UiTable } from '#/ui';
+import { Alert, Button, Icon, Loader, Toast, UiField, UiInput, UiRadio, UiSelect, UiTable } from '#/ui';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { Component, computed, inject, input, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -22,7 +22,7 @@ type StudentEvaluation = {
 
 @Component({
   selector: 'app-group-habits',
-  imports: [Alert, UiTable, UiInput, UiRadio, UiSelect, Button, FormsModule, Loader, UiField],
+  imports: [Alert, UiTable, UiInput, UiRadio, UiSelect, Button, FormsModule, Loader, UiField, Icon],
   template: `
     <div class="space-y-4">
       <!-- Empty state: No metrics configured -->
@@ -30,7 +30,7 @@ type StudentEvaluation = {
         <lib-loader />
       } @else if (!habitMetrics.value() || habitMetrics.value()!.length === 0) {
         <div uiAlert>
-          <span class="material-symbols-outlined">info</span>
+          <ui-icon name="info" />
           <span
             >No hay criterios de hábitos configurados. Solicite al administrador que configure los criterios desde el
             panel de administración.</span
@@ -61,7 +61,7 @@ type StudentEvaluation = {
         <!-- Prompt to select period and metric -->
         @if (!selectedPeriodId() || !selectedMetricId()) {
           <div uiAlert tone="warning">
-            <span class="material-symbols-outlined">warning</span>
+            <ui-icon name="triangle-alert" />
             <span>Por favor, seleccione un período y un criterio para comenzar la evaluación.</span>
           </div>
         } @else if (evaluationsLoading()) {
@@ -175,7 +175,7 @@ type StudentEvaluation = {
               @if (saving()) {
                 Guardando...
               } @else {
-                <span class="material-symbols-outlined">save</span>
+                <ui-icon name="save" />
                 Guardar cambios
               }
             </button>

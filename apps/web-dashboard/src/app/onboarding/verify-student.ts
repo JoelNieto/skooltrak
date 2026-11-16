@@ -1,4 +1,4 @@
-import { Alert, BrandLogo, Button, Toast, UiField, UiInput } from '#/ui';
+import { Alert, BrandLogo, Button, Icon, Toast, UiField, UiInput } from '#/ui';
 import { HttpClient } from '@angular/common/http';
 import { afterRenderEffect, Component, inject, signal } from '@angular/core';
 import { form, FormField, required } from '@angular/forms/signals';
@@ -7,7 +7,7 @@ import Auth from '../auth/auth';
 
 @Component({
   selector: 'app-verify-student',
-  imports: [Alert, UiField, UiInput, Button, BrandLogo, FormField],
+  imports: [Alert, UiField, UiInput, Button, BrandLogo, FormField, Icon],
   template: `
     <div class="min-h-screen flex flex-col bg-surface-0">
       <header class="p-4 md:p-6 flex items-center justify-between">
@@ -18,7 +18,7 @@ import Auth from '../auth/auth';
         <div class="w-full max-w-md text-center space-y-8 animate-fade-in">
           <div class="flex justify-center">
             <div class="w-20 h-20 rounded-full bg-success/10 flex items-center justify-center">
-              <span class="material-symbols-outlined text-5xl text-success">badge</span>
+              <ui-icon name="id-card" class="text-5xl text-success" />
             </div>
           </div>
 
@@ -38,7 +38,7 @@ import Auth from '../auth/auth';
 
             @if (errorMessage()) {
               <div uiAlert tone="danger">
-                <span class="material-symbols-outlined">error</span>
+                <ui-icon name="circle-alert" />
                 <span>{{ errorMessage() }}</span>
               </div>
             }
@@ -55,12 +55,12 @@ import Auth from '../auth/auth';
                 @if (loading()) {
                   Verificando...
                 } @else {
-                  <span class="material-symbols-outlined">check</span>
+                  <ui-icon name="check" />
                   Verificar y Vincular
                 }
               </button>
               <button uiButton variant="ghost" size="sm" type="button" class="w-full" (click)="goBack()">
-                <span class="material-symbols-outlined text-lg">arrow_back</span>
+                <ui-icon name="arrow-left" class="text-lg" />
                 Volver
               </button>
             </div>

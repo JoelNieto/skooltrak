@@ -1,11 +1,11 @@
-import { Alert, Badge, Button, Card, Spinner, Toast, UiTable } from '#/ui';
+import { Alert, Badge, Button, Card, Icon, Spinner, Toast, UiIconName, UiTable } from '#/ui';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { Component, inject, input, signal } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-assignment-submissions-list',
-  imports: [Alert, Spinner, Card, UiTable, Badge, Button],
+  imports: [Alert, Spinner, Card, UiTable, Badge, Button, Icon],
   template: `
     <div class="space-y-4">
       @if (studentsResource.isLoading()) {
@@ -14,7 +14,7 @@ import { firstValueFrom } from 'rxjs';
         </div>
       } @else if (studentsResource.error()) {
         <div uiAlert tone="danger">
-          <span class="material-symbols-outlined">error</span>
+          <ui-icon name="circle-alert" />
           <span>Error al cargar los estudiantes.</span>
         </div>
       } @else if (studentsResource.hasValue()) {
@@ -65,19 +65,19 @@ import { firstValueFrom } from 'rxjs';
                     @if (submission) {
                       <div class="flex flex-wrap gap-1">
                         <span uiBadge tone="success" size="sm" class="gap-1">
-                          <span class="material-symbols-outlined text-sm!" aria-hidden="true">check</span>
+                          <ui-icon name="check" class="text-sm!" />
                           Entregado
                         </span>
                         @if (submission.reviewedAt) {
                           <span uiBadge tone="info" size="sm" class="gap-1">
-                            <span class="material-symbols-outlined text-sm!" aria-hidden="true">done_all</span>
+                            <ui-icon name="check-check" class="text-sm!" />
                             Revisada
                           </span>
                         }
                       </div>
                     } @else {
                       <span uiBadge tone="warning" size="sm" class="gap-1">
-                        <span class="material-symbols-outlined text-sm!" aria-hidden="true">schedule</span>
+                        <ui-icon name="clock" class="text-sm!" />
                         Pendiente
                       </span>
                     }
@@ -92,15 +92,14 @@ import { firstValueFrom } from 'rxjs';
                   <td>
                     @if (submission) {
                       <div class="flex items-center gap-2">
-                        <span
-                          class="material-symbols-outlined text-lg"
+                        <ui-icon
+                          [name]="getFileIcon(submission.file.mimeType)"
+                          class="text-lg"
                           [class.text-error]="submission.file.mimeType.includes('pdf')"
                           [class.text-info]="
                             submission.file.mimeType.includes('word') || submission.file.mimeType.includes('document')
                           "
-                        >
-                          {{ getFileIcon(submission.file.mimeType) }}
-                        </span>
+                        />
                         <span class="text-sm truncate max-w-37.5">
                           {{ submission.file.name }}
                         </span>
@@ -136,7 +135,7 @@ import { firstValueFrom } from 'rxjs';
                           [disabled]="downloadingFileId() === fileId"
                         >
                           @if (!(downloadingFileId() === fileId)) {
-                            <span class="material-symbols-outlined" aria-hidden="true">download</span>
+                            <ui-icon name="download" />
                             <span class="sr-only">Descargar</span>
                           }
                         </button>
@@ -231,12 +230,12 @@ export default class AssignmentSubmissionsList {
     return isNaN(date.getTime()) ? '-' : date.toLocaleString(undefined, { dateStyle: 'short', timeStyle: 'short' });
   }
 
-  getFileIcon(mimeType: string): string {
-    if (mimeType.includes('pdf')) return 'picture_as_pdf';
+  getFileIcon(mimeType: string): UiIconName {
+    if (mimeType.includes('pdf')) return 'file-text';
     if (mimeType.includes('image')) return 'image';
-    if (mimeType.includes('word') || mimeType.includes('document')) return 'description';
-    if (mimeType.includes('spreadsheet') || mimeType.includes('excel')) return 'table_chart';
-    return 'insert_drive_file';
+    if (mimeType.includes('word') || mimeType.includes('document')) return 'file-text';
+    if (mimeType.includes('spreadsheet') || mimeType.includes('excel')) return 'sheet';
+    return 'file';
   }
 
   formatBytes(bytes: number): string {

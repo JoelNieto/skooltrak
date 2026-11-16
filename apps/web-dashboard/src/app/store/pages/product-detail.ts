@@ -1,5 +1,5 @@
 import { SchoolContext } from '#/shared';
-import { Alert, Badge, Button, Toast, UiField, UiSelect } from '#/ui';
+import { Alert, Badge, Button, Icon, Toast, UiField, UiSelect } from '#/ui';
 import { Component, effect, inject, input, signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
@@ -10,10 +10,10 @@ import { StoreApiService } from '../store-api.service';
 
 @Component({
   selector: 'app-product-detail',
-  imports: [Alert, Badge, UiSelect, Button, RouterLink, FormsModule, UiField],
+  imports: [Alert, Badge, UiSelect, Button, RouterLink, FormsModule, UiField, Icon],
   template: `
     <a uiButton variant="ghost" size="sm" routerLink="../.." class="gap-1 mb-4">
-      <span class="material-symbols-outlined">arrow_back</span>
+      <ui-icon name="arrow-left" />
       Volver
     </a>
     @if (product.isLoading()) {
@@ -28,7 +28,7 @@ import { StoreApiService } from '../store-api.service';
             <img [src]="p.imageUrl" [alt]="p.name" class="h-full w-full object-cover" />
           } @else {
             <div class="flex h-full items-center justify-center text-ink-subtle">
-              <span class="material-symbols-outlined text-8xl">inventory_2</span>
+              <ui-icon name="archive" class="text-8xl" />
             </div>
           }
         </figure>

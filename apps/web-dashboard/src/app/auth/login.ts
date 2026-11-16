@@ -1,4 +1,4 @@
-import { Alert, BrandLogo, Button, Loader, Toast, UiField, UiInput } from '#/ui';
+import { Alert, BrandLogo, Button, Icon, Loader, Toast, UiField, UiInput } from '#/ui';
 import { Component, inject, signal } from '@angular/core';
 import { email, form, FormField, minLength, required } from '@angular/forms/signals';
 import { ActivatedRoute, RouterLink } from '@angular/router';
@@ -7,7 +7,7 @@ import { LoginHero } from './login-hero';
 
 @Component({
   selector: 'app-login',
-  imports: [Alert, BrandLogo, Button, FormField, Loader, LoginHero, RouterLink, UiField, UiInput],
+  imports: [Alert, BrandLogo, Button, FormField, Loader, LoginHero, RouterLink, UiField, UiInput, Icon],
   template: `
     <div class="login">
       @defer {
@@ -31,7 +31,7 @@ import { LoginHero } from './login-hero';
 
                 @if (passwordResetSuccess()) {
                   <div uiAlert tone="success" class="mt-6">
-                    <span class="material-symbols-outlined" aria-hidden="true">check_circle</span>
+                    <ui-icon name="circle-check" />
                     <span>Tu contraseña ha sido actualizada. Ya puedes iniciar sesión.</span>
                   </div>
                 }

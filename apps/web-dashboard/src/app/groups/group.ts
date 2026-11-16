@@ -1,4 +1,16 @@
-import { Breadcrumbs, Button, Card, CardBody, Loader, Toast } from '#/ui';
+import {
+  Breadcrumbs,
+  Button,
+  Card,
+  CardBody,
+  Loader,
+  Toast,
+  UiTab,
+  UiTabContent,
+  UiTabList,
+  UiTabPanel,
+  UiTabs,
+} from '#/ui';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { Component, computed, inject, input, signal } from '@angular/core';
 import { Router } from '@angular/router';
@@ -12,7 +24,22 @@ import GroupSchedule from './group-schedule';
 import GroupStudents from './group-students';
 
 @Component({
-  imports: [Breadcrumbs, Card, CardBody, Button, Loader, GroupStudents, GroupCourses, GroupSchedule, GroupHabits],
+  imports: [
+    Breadcrumbs,
+    Card,
+    CardBody,
+    Button,
+    Loader,
+    GroupStudents,
+    GroupCourses,
+    GroupSchedule,
+    GroupHabits,
+    UiTab,
+    UiTabContent,
+    UiTabList,
+    UiTabPanel,
+    UiTabs,
+  ],
   template: `
     @let group = groupResource.value();
     @if (groupResource.isLoading()) {
@@ -54,49 +81,47 @@ import GroupStudents from './group-students';
           </div>
         </div>
 
-        <div class="tabs tabs-box mt-4">
-          <label class="tab">
-            <input type="radio" name="my_tabs_1" class="tab" checked />
-            <span class="flex items-center gap-2">
-              <span class="material-symbols-outlined text-xl">group</span>
-              Estudiantes</span
-            >
-          </label>
-
-          <div class="tab-content bg-surface-1 border-line p-6">
-            <app-group-students [students]="$any(group.students ?? [])" />
-          </div>
-          <label class="tab">
-            <input type="radio" name="my_tabs_1" class="tab" />
-            <span class="flex items-center gap-2">
-              <span class="material-symbols-outlined text-xl">menu_book</span>
+        <div uiTabs class="mt-4 flex flex-col gap-4">
+          <div uiTabList [(selectedTab)]="tab" aria-label="Secciones del grupo">
+            <button uiTab value="estudiantes">
+              <span class="material-symbols-outlined text-xl" aria-hidden="true">group</span>
+              Estudiantes
+            </button>
+            <button uiTab value="cursos">
+              <span class="material-symbols-outlined text-xl" aria-hidden="true">menu_book</span>
               Cursos
-            </span>
-          </label>
-
-          <div class="tab-content bg-surface-1 border-line p-6">
-            <app-group-courses [courses]="$any(group.courses ?? [])" />
-          </div>
-          <label class="tab">
-            <input type="radio" name="my_tabs_1" class="tab" />
-            <span class="flex items-center gap-2">
-              <span class="material-symbols-outlined text-xl">calendar_month</span>
+            </button>
+            <button uiTab value="horario">
+              <span class="material-symbols-outlined text-xl" aria-hidden="true">calendar_month</span>
               Horario
-            </span>
-          </label>
-          <div class="tab-content bg-surface-1 border-line p-6">
-            <app-group-schedule [id]="id()" />
+            </button>
+            @if (canManageHabits()) {
+              <button uiTab value="habitos">
+                <span class="material-symbols-outlined text-xl" aria-hidden="true">psychology</span>
+                Hábitos y actitudes
+              </button>
+            }
+          </div>
+          <div uiTabPanel uiCard value="estudiantes" class="p-6">
+            <ng-template uiTabContent>
+              <app-group-students [students]="$any(group.students ?? [])" />
+            </ng-template>
+          </div>
+          <div uiTabPanel uiCard value="cursos" class="p-6">
+            <ng-template uiTabContent>
+              <app-group-courses [courses]="$any(group.courses ?? [])" />
+            </ng-template>
+          </div>
+          <div uiTabPanel uiCard value="horario" class="p-6">
+            <ng-template uiTabContent>
+              <app-group-schedule [id]="id()" />
+            </ng-template>
           </div>
           @if (canManageHabits()) {
-            <label class="tab">
-              <input type="radio" name="my_tabs_1" class="tab" />
-              <span class="flex items-center gap-2">
-                <span class="material-symbols-outlined text-xl">psychology</span>
-                Hábitos y actitudes
-              </span>
-            </label>
-            <div class="tab-content bg-surface-1 border-line p-6">
-              <app-group-habits [groupId]="id()" [students]="$any(group.students ?? [])" />
+            <div uiTabPanel uiCard value="habitos" class="p-6">
+              <ng-template uiTabContent>
+                <app-group-habits [groupId]="id()" [students]="$any(group.students ?? [])" />
+              </ng-template>
             </div>
           }
         </div>
@@ -107,6 +132,8 @@ import GroupStudents from './group-students';
   `,
 })
 export default class Group {
+  /** Selected section; the tab list and panels follow it. */
+  readonly tab = signal('estudiantes');
   public id = input.required<string>();
   private http = inject(HttpClient);
   private router = inject(Router);

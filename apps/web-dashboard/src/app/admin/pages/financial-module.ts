@@ -1,5 +1,4 @@
-import { Alert, Button, Modal, PageHeader, UiSelect } from '#/ui';
-import { Tab, TabContent, TabList, TabPanel, Tabs } from '@angular/aria/tabs';
+import { Alert, Button, Modal, PageHeader, UiSelect, UiTab, UiTabContent, UiTabList, UiTabPanel, UiTabs } from '#/ui';
 import { Component, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import Auth from '../../auth/auth';
@@ -21,11 +20,11 @@ import CreatePaymentForm from '../forms/create-payment-form';
     FormsModule,
     PageHeader,
     PaymentsSection,
-    TabList,
-    Tab,
-    Tabs,
-    TabPanel,
-    TabContent,
+    UiTabList,
+    UiTab,
+    UiTabs,
+    UiTabPanel,
+    UiTabContent,
     StudentSearch,
     StudentBalance,
   ],
@@ -36,12 +35,12 @@ import CreatePaymentForm from '../forms/create-payment-form';
       subtitle="Gestión de cargos, pagos y estados de cuenta."
     />
 
-    <div ngTabs>
+    <div uiTabs>
       <div class="flex justify-between items-center mt-4">
-        <div ngTabList selectionMode="follow" selectedTab="charges" class="tabs tabs-box">
-          <div ngTab value="charges" class="tab">Cargos</div>
-          <div ngTab value="payments" class="tab">Pagos</div>
-          <div ngTab value="balances" class="tab">Saldos</div>
+        <div uiTabList selectedTab="charges" aria-label="Secciones de finanzas">
+          <button uiTab value="charges">Cargos</button>
+          <button uiTab value="payments">Pagos</button>
+          <button uiTab value="balances">Saldos</button>
         </div>
         <div class="flex gap-2 items-center">
           <select uiSelect size="sm" [ngModel]="yearFilter()" (ngModelChange)="yearFilter.set($event)">
@@ -60,18 +59,18 @@ import CreatePaymentForm from '../forms/create-payment-form';
         </div>
       </div>
       <div class="p-1">
-        <div ngTabPanel value="charges">
-          <ng-template ngTabContent>
+        <div uiTabPanel value="charges">
+          <ng-template uiTabContent>
             <app-charges-section [year]="yearFilter()" [reloadToken]="chargesVersion()" />
           </ng-template>
         </div>
-        <div ngTabPanel value="payments">
-          <ng-template ngTabContent>
+        <div uiTabPanel value="payments">
+          <ng-template uiTabContent>
             <app-payments-section [year]="yearFilter()" [reloadToken]="paymentsVersion()" />
           </ng-template>
         </div>
-        <div ngTabPanel value="balances">
-          <ng-template ngTabContent>
+        <div uiTabPanel value="balances">
+          <ng-template uiTabContent>
             @if (isStaff()) {
               <div class="flex flex-col gap-4">
                 <app-student-search (selected)="onStudentSelected($event)" />

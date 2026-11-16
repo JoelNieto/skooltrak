@@ -80,13 +80,16 @@ describe('check()', () => {
     ['label-text', 'rawPrimitive'],
     ['toggle-success', 'rawPrimitive'],
     ['table-zebra', 'rawPrimitive'],
+    ['tabs-box', 'rawPrimitive'],
+    ['tab-active', 'rawPrimitive'],
+    ['tab-content', 'rawPrimitive'],
     ['ring-offset-base-100', 'baseColour'],
     ['text-black', 'paletteColour'],
   ])('%s → %s', (cls, messageId) => {
     expect(check(cls, true)?.messageId).toBe(messageId);
   });
 
-  it.each(['text-white', 'tabs', 'avatar', 'hover:btn', 'table-cell', 'text-ink-strong', 'bg-surface-0/60'])(
+  it.each(['text-white', 'tab-size-4', 'avatar', 'hover:btn', 'table-cell', 'text-ink-strong', 'bg-surface-0/60'])(
     '%s is allowed',
     (cls) => expect(check(cls, true)).toBeNull(),
   );

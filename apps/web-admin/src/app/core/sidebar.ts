@@ -1,12 +1,16 @@
+import { BrandLogo } from '#/ui';
 import { Component } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 
 @Component({
   // eslint-disable-next-line @angular-eslint/component-selector
   selector: '[appSidebar]',
-  imports: [RouterLink, RouterLinkActive],
+  imports: [BrandLogo, RouterLink, RouterLinkActive],
   template: `<div class="flex items-center justify-between px-4 pt-4 pb-2">
-      <h1 class="text-xl font-semibold text-primary flex items-center gap-2">SkoolTrak</h1>
+      <h1 class="flex items-center gap-2">
+        <ui-brand-logo class="h-7" />
+        <span class="font-mono text-xs font-medium uppercase tracking-widest text-ink-muted">Admin</span>
+      </h1>
     </div>
     <nav class="p-2 flex flex-col gap-8 flex-1 min-h-0 overflow-y-auto">
       <ul class="space-y-4">

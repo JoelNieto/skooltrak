@@ -1,7 +1,10 @@
 # Skooltrak Platform
 
 <p align="center">
-  <img src="apps/web-dashboard/public/skooltrak.png" alt="Skooltrak logo" width="160">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="libs/ui/src/assets/brand/skooltrak-logo-horizontal-on-dark.svg">
+    <img src="libs/ui/src/assets/brand/skooltrak-logo-horizontal-color.svg" alt="Skooltrak logo" width="240">
+  </picture>
   
 </p>
 
@@ -160,7 +163,10 @@ Use `bunx nx g` to generate code (apps, libs, components, etc.).
 # Plataforma Skooltrak
 
 <p align="center">
-  <img src="apps/web-dashboard/public/skooltrak.png" alt="Logo Skooltrak" width="160">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="libs/ui/src/assets/brand/skooltrak-logo-horizontal-on-dark.svg">
+    <img src="libs/ui/src/assets/brand/skooltrak-logo-horizontal-color.svg" alt="Logo Skooltrak" width="240">
+  </picture>
   
 </p>
 

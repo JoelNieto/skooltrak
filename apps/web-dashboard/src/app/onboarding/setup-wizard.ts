@@ -1,4 +1,4 @@
-import { Button, Toast } from '#/ui';
+import { BrandLogo, Button, Toast } from '#/ui';
 import { HttpClient } from '@angular/common/http';
 import { Component, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
@@ -10,7 +10,6 @@ import DegreesStep from './steps/degrees';
 import GroupsStep from './steps/groups';
 import SchoolBasicsStep from './steps/school-basics';
 import StudyPlansStep from './steps/study-plans';
-import { BrandLogo } from '../shared/brand-logo';
 
 export type CreatedEntity = {
   id: string;
@@ -25,7 +24,7 @@ export type CreatedEntity = {
     <div class="min-h-screen flex flex-col gradient-bg">
       <!-- Fixed Header -->
       <header class="p-4 md:p-6 flex items-center justify-between">
-        <app-brand-logo class="h-8 md:h-10" />
+        <ui-brand-logo class="h-8 md:h-10" />
         <div class="flex items-center gap-3">
           <span class="text-sm text-ink-muted hidden sm:inline"> Paso {{ currentStep() }} de {{ totalSteps }} </span>
           <div class="flex gap-2">

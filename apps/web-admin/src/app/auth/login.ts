@@ -1,4 +1,4 @@
-import { Button, Card, CardBody, Toast, UiField, UiInput } from '#/ui';
+import { BrandLogo, Button, Card, CardBody, Toast, UiField, UiInput } from '#/ui';
 import { Component, inject, signal } from '@angular/core';
 import { email, form, FormField, required } from '@angular/forms/signals';
 
@@ -6,9 +6,10 @@ import Auth from './auth';
 
 @Component({
   selector: 'app-login',
-  imports: [Button, Card, CardBody, FormField, UiField, UiInput],
+  imports: [BrandLogo, Button, Card, CardBody, FormField, UiField, UiInput],
   template: `
-    <div class="bg-surface-0 min-h-screen flex items-center justify-center p-4">
+    <div class="bg-surface-0 min-h-screen flex flex-col items-center justify-center gap-8 p-4">
+      <ui-brand-logo class="h-10" />
       <div uiCard class="max-w-md w-full overflow-hidden">
         <div class="bg-neutral p-6 text-neutral-content text-center">
           <h1 class="text-2xl font-semibold">Bienvenido</h1>

@@ -1,9 +1,8 @@
-import { Button, Spinner, Toast } from '#/ui';
+import { BrandLogo, Button, Spinner, Toast } from '#/ui';
 import { HttpClient } from '@angular/common/http';
 import { afterRenderEffect, Component, inject, OnDestroy, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import Auth from '../auth/auth';
-import { BrandLogo } from '../shared/brand-logo';
 
 @Component({
   selector: 'app-waiting-approval',
@@ -11,7 +10,7 @@ import { BrandLogo } from '../shared/brand-logo';
   template: `
     <div class="min-h-screen flex flex-col gradient-bg">
       <header class="p-4 md:p-6 flex items-center justify-between">
-        <app-brand-logo class="h-8 md:h-10" />
+        <ui-brand-logo class="h-8 md:h-10" />
         <button uiButton variant="ghost" size="sm" (click)="logout()">
           <span class="material-symbols-outlined">logout</span>
           Cerrar sesión

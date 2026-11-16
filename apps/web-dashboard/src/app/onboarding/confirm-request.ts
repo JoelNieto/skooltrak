@@ -1,8 +1,7 @@
-import { Button, Toast } from '#/ui';
+import { BrandLogo, Button, Toast } from '#/ui';
 import { HttpClient } from '@angular/common/http';
 import { afterRenderEffect, Component, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { BrandLogo } from '../shared/brand-logo';
 
 @Component({
   selector: 'app-confirm-request',
@@ -10,7 +9,7 @@ import { BrandLogo } from '../shared/brand-logo';
   template: `
     <div class="min-h-screen flex flex-col gradient-bg">
       <header class="p-4 md:p-6 flex items-center justify-between">
-        <app-brand-logo class="h-8 md:h-10" />
+        <ui-brand-logo class="h-8 md:h-10" />
       </header>
 
       <main class="flex-1 flex flex-col items-center justify-center p-6">

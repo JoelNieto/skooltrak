@@ -1,9 +1,8 @@
-import { Alert, Button, Card, CardBody, Spinner } from '#/ui';
+import { Alert, BrandLogo, Button, Card, CardBody, Spinner } from '#/ui';
 import { Component, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import Auth from './auth';
 import { authClient } from './auth-client';
-import { BrandLogo } from '../shared/brand-logo';
 
 @Component({
   selector: 'app-accept-invitation',
@@ -11,7 +10,7 @@ import { BrandLogo } from '../shared/brand-logo';
   template: `
     <div class="gradient-bg min-h-screen flex items-center justify-center p-4">
       <div class="max-w-md w-full flex flex-col gap-8 items-center">
-        <app-brand-logo alt="" class="h-12" />
+        <ui-brand-logo alt="" class="h-12" />
         <div uiCard class="w-full">
           <div uiCardBody class="gap-6 text-center">
             @if (loading()) {

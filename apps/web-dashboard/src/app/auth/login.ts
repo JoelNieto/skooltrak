@@ -1,4 +1,4 @@
-import { Alert, Button, Loader, Toast, UiField, UiInput } from '#/ui';
+import { Alert, BrandLogo, Button, Loader, Toast, UiField, UiInput } from '#/ui';
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { email, form, FormField, minLength, required } from '@angular/forms/signals';
 import { ActivatedRoute, RouterLink } from '@angular/router';
@@ -8,7 +8,7 @@ import { LoginBackdrop, LoginHero } from './login-hero';
 @Component({
   selector: 'app-login',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [Alert, Button, FormField, Loader, LoginBackdrop, LoginHero, RouterLink, UiField, UiInput],
+  imports: [Alert, BrandLogo, Button, FormField, Loader, LoginBackdrop, LoginHero, RouterLink, UiField, UiInput],
   template: `
     <div class="login">
       @defer {
@@ -16,16 +16,7 @@ import { LoginBackdrop, LoginHero } from './login-hero';
 
         <div class="shell">
           <header class="top enter" style="--d: 0s">
-            <span class="brand">
-              <svg width="36" height="36" viewBox="0 0 40 40" aria-hidden="true">
-                <rect class="logo-bg" width="40" height="40" rx="14" />
-                <rect class="logo-face" x="7" y="11" width="26" height="18" rx="9" />
-                <circle class="logo-eye" cx="16" cy="20" r="2.6" />
-                <circle class="logo-eye" cx="24" cy="20" r="2.6" />
-                <rect class="logo-face" x="18" y="5" width="4" height="6" rx="2" />
-              </svg>
-              Skooltrak
-            </span>
+            <ui-brand-logo class="brand" />
             <a routerLink="/register" class="top-cta">
               <span class="top-cta-hint">¿Nuevo en Skooltrak?</span>
               Crear cuenta
@@ -226,21 +217,7 @@ import { LoginBackdrop, LoginHero } from './login-hero';
       gap: 1rem;
     }
     .brand {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.625rem;
-      font-size: 1.125rem;
-      font-weight: 600;
-      letter-spacing: -0.02em;
-    }
-    .logo-bg {
-      fill: color-mix(in oklab, var(--lg-accent) 14%, var(--ui-surface-1));
-    }
-    .logo-face {
-      fill: var(--lg-accent);
-    }
-    .logo-eye {
-      fill: var(--ui-surface-1);
+      height: 2.25rem;
     }
     .top-cta {
       display: inline-flex;

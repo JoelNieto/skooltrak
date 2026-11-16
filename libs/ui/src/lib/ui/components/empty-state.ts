@@ -42,7 +42,7 @@ export class EmptyState {
 
   containerClass = computed(() => {
     const colorMap: Record<EmptyStateColor, string> = {
-      primary: 'border-primary/30 bg-primary/5',
+      primary: 'border-primary/30 bg-action-subtle',
       secondary: 'border-secondary/30 bg-secondary/5',
       accent: 'border-accent/30 bg-accent/5',
       info: 'border-info/30 bg-info/5',
@@ -55,7 +55,7 @@ export class EmptyState {
 
   iconBgClass = computed(() => {
     const colorMap: Record<EmptyStateColor, string> = {
-      primary: 'bg-primary/10',
+      primary: 'bg-action-subtle',
       secondary: 'bg-secondary/10',
       accent: 'bg-accent/10',
       info: 'bg-info/10',

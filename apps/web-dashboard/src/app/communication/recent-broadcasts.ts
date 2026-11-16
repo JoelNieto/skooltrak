@@ -80,14 +80,14 @@ export class BroadcastCard {
             @for (item of items(); track item.id) {
               @if (inboxLink(); as link) {
                 <a
-                  class="block rounded-lg border border-primary/20 bg-primary/5 p-3 hover:border-primary transition-colors"
+                  class="block rounded-lg border border-primary/20 bg-action-subtle p-3 hover:border-primary transition-colors"
                   [routerLink]="link"
                   [queryParams]="{ thread: item.id }"
                 >
                   <app-broadcast-card [item]="item" />
                 </a>
               } @else {
-                <div class="rounded-lg border border-primary/20 bg-primary/5 p-3">
+                <div class="rounded-lg border border-primary/20 bg-action-subtle p-3">
                   <app-broadcast-card [item]="item" />
                 </div>
               }

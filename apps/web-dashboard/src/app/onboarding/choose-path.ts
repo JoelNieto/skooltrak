@@ -15,7 +15,7 @@ import { Badge, Card, CardBody, CardTitle } from '#/ui';
       <main class="flex-1 flex flex-col items-center justify-center p-6">
         <div class="w-full max-w-2xl text-center space-y-8 animate-fade-in">
           <div class="flex justify-center">
-            <div class="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center">
+            <div class="w-20 h-20 rounded-full bg-action-subtle flex items-center justify-center">
               <span class="material-symbols-outlined text-5xl text-primary">route</span>
             </div>
           </div>
@@ -29,7 +29,7 @@ import { Badge, Card, CardBody, CardTitle } from '#/ui';
             <!-- Create School -->
             <a uiCard routerLink="/onboarding/create-school">
               <div uiCardBody class="items-center text-center space-y-4">
-                <div class="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
+                <div class="w-16 h-16 rounded-full bg-action-subtle flex items-center justify-center">
                   <span class="material-symbols-outlined text-4xl text-primary">add_business</span>
                 </div>
                 <h2 uiCardTitle>Crear una Escuela</h2>

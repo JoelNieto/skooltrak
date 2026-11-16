@@ -84,13 +84,23 @@ describe('check()', () => {
     ['tab-active', 'rawPrimitive'],
     ['tab-content', 'rawPrimitive'],
     ['ring-offset-base-100', 'baseColour'],
+    ['bg-primary/10', 'baseColour'],
+    ['hover:bg-primary/5', 'baseColour'],
     ['text-black', 'paletteColour'],
   ])('%s → %s', (cls, messageId) => {
     expect(check(cls, true)?.messageId).toBe(messageId);
   });
 
-  it.each(['text-white', 'tab-size-4', 'avatar', 'hover:btn', 'table-cell', 'text-ink-strong', 'bg-surface-0/60'])(
-    '%s is allowed',
-    (cls) => expect(check(cls, true)).toBeNull(),
-  );
+  it.each([
+    'text-white',
+    'tab-size-4',
+    'avatar',
+    'hover:btn',
+    'table-cell',
+    'text-ink-strong',
+    'bg-surface-0/60',
+    'bg-primary/20',
+    'bg-action-subtle',
+    'bg-new',
+  ])('%s is allowed', (cls) => expect(check(cls, true)).toBeNull());
 });

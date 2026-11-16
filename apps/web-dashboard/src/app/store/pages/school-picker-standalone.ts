@@ -34,7 +34,7 @@ import { Badge } from '#/ui';
                     />
                   } @else {
                     <span
-                      class="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary"
+                      class="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-action-subtle text-primary"
                     >
                       <span class="material-symbols-outlined text-xl">apartment</span>
                     </span>

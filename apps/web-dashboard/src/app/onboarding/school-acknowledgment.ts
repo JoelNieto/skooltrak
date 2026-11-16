@@ -23,7 +23,7 @@ import { BrandLogo } from '../shared/brand-logo';
         <div class="w-full max-w-lg text-center space-y-8 animate-fade-in">
           <!-- Icon -->
           <div class="flex justify-center">
-            <div class="w-24 h-24 rounded-full bg-primary/10 flex items-center justify-center">
+            <div class="w-24 h-24 rounded-full bg-action-subtle flex items-center justify-center">
               <span class="material-symbols-outlined text-6xl text-primary">apartment</span>
             </div>
           </div>
@@ -59,7 +59,7 @@ import { BrandLogo } from '../shared/brand-logo';
           <div class="space-y-4 text-left">
             <div class="bg-surface-1 rounded-xl p-4 border border-line shadow-sm">
               <div class="flex items-start gap-4">
-                <div class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                <div class="w-10 h-10 rounded-lg bg-action-subtle flex items-center justify-center shrink-0">
                   <span class="material-symbols-outlined text-primary">database</span>
                 </div>
                 <div>

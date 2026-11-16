@@ -19,7 +19,7 @@ export type OnboardingSummary = {
         class="bg-linear-to-r from-primary/10 via-primary/5 to-transparent border border-primary/20 rounded-2xl p-6 mb-6 relative overflow-hidden"
       >
         <!-- Background decoration -->
-        <div class="absolute right-0 top-0 w-64 h-64 bg-primary/5 rounded-full -translate-y-1/2 translate-x-1/2"></div>
+        <div class="absolute right-0 top-0 w-64 h-64 bg-action-subtle rounded-full -translate-y-1/2 translate-x-1/2"></div>
 
         <div class="relative">
           <!-- Close button (only after first view) -->

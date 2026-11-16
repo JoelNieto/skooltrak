@@ -7,10 +7,7 @@
   "tags": [],
   "targets": {
     "test": {
-      "outputs": [
-        "{projectRoot}/{options.coverage.reportsDirectory}",
-        "{workspaceRoot}/coverage/libs/ui"
-      ],
+      "outputs": ["{projectRoot}/{options.coverage.reportsDirectory}", "{workspaceRoot}/coverage/libs/ui"],
       "options": {
         "coverage.reportsDirectory": "../../coverage/libs/ui"
       }
@@ -24,9 +21,7 @@
         "{workspaceRoot}/eslint.config.mjs",
         "{workspaceRoot}/tools/eslint-rules/**/*",
         {
-          "externalDependencies": [
-            "eslint"
-          ]
+          "externalDependencies": ["eslint"]
         }
       ]
     },
@@ -42,9 +37,7 @@
         "configDir": "libs/ui/.storybook",
         "browserTarget": "ui:build-storybook",
         "compodoc": false,
-        "styles": [
-          "libs/ui/.storybook/styles.css"
-        ]
+        "styles": ["libs/ui/src/styles/storybook.css"]
       },
       "configurations": {
         "ci": {
@@ -54,17 +47,13 @@
     },
     "build-storybook": {
       "executor": "@storybook/angular:build-storybook",
-      "outputs": [
-        "{options.outputDir}"
-      ],
+      "outputs": ["{options.outputDir}"],
       "options": {
         "outputDir": "dist/storybook/ui",
         "configDir": "libs/ui/.storybook",
         "browserTarget": "ui:build-storybook",
         "compodoc": false,
-        "styles": [
-          "libs/ui/.storybook/styles.css"
-        ]
+        "styles": ["libs/ui/src/styles/storybook.css"]
       },
       "configurations": {
         "ci": {

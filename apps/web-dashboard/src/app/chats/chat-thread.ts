@@ -119,7 +119,7 @@ type ChatMessageDto = {
                       [class.text-primary-content]="!isOwnMessage(msg)"
                       [class.bg-surface-0]="isOwnMessage(msg)"
                     >
-                      <p class="text-sm whitespace-pre-wrap">{{ msg.content }}</p>
+                      <p class="type-body-lg whitespace-pre-wrap">{{ msg.content }}</p>
                     </div>
                     <div class="chat-footer">
                       <p class="text-xs opacity-70">{{ msg.createdAt | date: 'short' }}</p>

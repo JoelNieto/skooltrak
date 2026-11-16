@@ -10,14 +10,14 @@ type StatCardColor = 'primary' | 'secondary' | 'accent' | 'info' | 'success' | '
     <div uiCard>
       <div uiCardBody class="p-4">
         <div class="flex items-center justify-between">
-          <p class="text-xs uppercase text-ink-muted font-medium tracking-wider">{{ label() }}</p>
+          <p class="type-caption uppercase tracking-wider text-ink-muted">{{ label() }}</p>
           @if (icon()) {
             <span class="material-symbols-outlined text-lg" [class]="iconColorClass()">{{ icon() }}</span>
           }
         </div>
-        <div class="text-2xl font-semibold text-ink-strong mt-1">{{ value() }}</div>
+        <div class="font-display text-2xl font-bold text-ink-strong mt-1">{{ value() }}</div>
         @if (helper()) {
-          <p class="text-xs text-ink-muted mt-1">{{ helper() }}</p>
+          <p class="type-caption text-ink-muted mt-1">{{ helper() }}</p>
         }
       </div>
     </div>

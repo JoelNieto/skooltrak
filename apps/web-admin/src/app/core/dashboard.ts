@@ -44,7 +44,7 @@ import { Button, Icon } from '#/ui';
     <!-- Main content -->
     <div class="flex-1 flex flex-col overflow-hidden lg:pt-0 pt-8">
       <!-- Page content -->
-      <main class="flex-1 overflow-y-auto px-4 bg-surface-1">
+      <main class="ui-page flex-1 overflow-y-auto">
         <div class="mx-auto">
           <router-outlet />
         </div>

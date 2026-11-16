@@ -1,4 +1,19 @@
-import { Breadcrumbs, Button, Card, CardBody, CardTitle, Loader, Modal, Toast } from '#/ui';
+import {
+  Breadcrumbs,
+  Button,
+  Card,
+  CardBody,
+  CardTitle,
+  EmptyState,
+  Loader,
+  Modal,
+  Toast,
+  UiTab,
+  UiTabContent,
+  UiTabList,
+  UiTabPanel,
+  UiTabs,
+} from '#/ui';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { Component, computed, inject, input, signal } from '@angular/core';
 import { Router } from '@angular/router';
@@ -32,6 +47,12 @@ type CourseVm = {
 
 @Component({
   imports: [
+    EmptyState,
+    UiTabs,
+    UiTabList,
+    UiTab,
+    UiTabPanel,
+    UiTabContent,
     Breadcrumbs,
     Card,
     CardBody,
@@ -106,71 +127,73 @@ type CourseVm = {
             </div>
           </div>
         </div>
-        <div class="tabs tabs-box mt-4">
-          <label class="tab">
-            <input type="radio" name="my_tabs_6" class="tab" aria-label="Calificaciones" checked="checked" />
-            <span class="flex items-center gap-2">
-              <span class="material-symbols-outlined text-xl">grade</span>
+        <div uiTabs class="mt-4 flex flex-col gap-4">
+          <div uiTabList [(selectedTab)]="tab" aria-label="Secciones del curso">
+            <button uiTab value="grades">
+              <span class="material-symbols-outlined text-xl" aria-hidden="true">grade</span>
               Calificaciones
-            </span>
-          </label>
-
-          <div class="tab-content bg-surface-1 p-6">
+            </button>
+            <button uiTab value="calendar">
+              <span class="material-symbols-outlined text-xl" aria-hidden="true">calendar_month</span>
+              Calendario
+            </button>
             @if (auth.isTeacher() || auth.isAdmin()) {
-              <app-course-grades [courseId]="id()" [metric]="$any(course.studyPlan.gradeMetric)" />
+              <button uiTab value="attendance">
+                <span class="material-symbols-outlined text-xl" aria-hidden="true">how_to_reg</span>
+                Asistencia
+              </button>
             }
-            @if (auth.isStudent()) {
-              <app-course-student-grades [courseId]="id()" [metric]="$any(course.studyPlan.gradeMetric)" />
+            <button uiTab value="participants">
+              <span class="material-symbols-outlined text-xl" aria-hidden="true">groups</span>
+              Participantes
+            </button>
+            <button uiTab value="files">
+              <span class="material-symbols-outlined text-xl" aria-hidden="true">folder_special</span>
+              Archivos
+            </button>
+            @if (auth.isTeacher() || auth.isAdmin()) {
+              <button uiTab value="weights">
+                <span class="material-symbols-outlined text-xl" aria-hidden="true">balance</span>
+                Ponderación
+              </button>
             }
           </div>
-          <label class="tab">
-            <input type="radio" name="my_tabs_6" class="tab" aria-label="Calendario" />
-            <span class="flex items-center gap-2">
-              <span class="material-symbols-outlined text-xl">calendar_month</span>Calendario</span
-            >
-          </label>
-          <div class="tab-content bg-surface-1 border-line p-6">
-            <app-course-assignments [courseId]="id()" (reload)="courseResource.reload()" />
+
+          <div uiTabPanel uiCard value="grades" class="p-6">
+            <ng-template uiTabContent>
+              @if (auth.isTeacher() || auth.isAdmin()) {
+                <app-course-grades [courseId]="id()" [metric]="$any(course.studyPlan.gradeMetric)" />
+              }
+              @if (auth.isStudent()) {
+                <app-course-student-grades [courseId]="id()" [metric]="$any(course.studyPlan.gradeMetric)" />
+              }
+            </ng-template>
+          </div>
+          <div uiTabPanel uiCard value="calendar" class="p-6">
+            <ng-template uiTabContent>
+              <app-course-assignments [courseId]="id()" (reload)="courseResource.reload()" />
+            </ng-template>
           </div>
           @if (auth.isTeacher() || auth.isAdmin()) {
-            <label class="tab">
-              <input type="radio" name="my_tabs_6" class="tab" aria-label="Asistencia" />
-              <span class="flex items-center gap-2">
-                <span class="material-symbols-outlined text-xl">how_to_reg</span>Asistencia</span
-              >
-            </label>
-            <div class="tab-content bg-surface-1 p-6">
-              <app-course-attendance [courseId]="id()" />
+            <div uiTabPanel uiCard value="attendance" class="p-6">
+              <ng-template uiTabContent><app-course-attendance [courseId]="id()" /></ng-template>
             </div>
           }
-          <label class="tab">
-            <input type="radio" name="my_tabs_6" aria-label="Participantes" />
-            <span class="flex items-center gap-2">
-              <span class="material-symbols-outlined text-xl">groups</span>Participantes</span
-            >
-          </label>
-          <div class="tab-content bg-surface-1 p-6">Tab content 2</div>
-
-          <label class="tab">
-            <input type="radio" name="my_tabs_6" aria-label="Archivos" />
-            <span class="flex items-center gap-2">
-              <span class="material-symbols-outlined">folder_special</span>Archivos</span
-            >
-          </label>
-
-          <div class="tab-content bg-surface-1 p-6">
-            <app-course-files [courseId]="id()" />
+          <div uiTabPanel uiCard value="participants" class="p-6">
+            <ng-template uiTabContent>
+              <lib-empty-state
+                title="Participantes"
+                description="La lista de participantes del curso estará disponible pronto."
+                icon="groups"
+              />
+            </ng-template>
+          </div>
+          <div uiTabPanel uiCard value="files" class="p-6">
+            <ng-template uiTabContent><app-course-files [courseId]="id()" /></ng-template>
           </div>
           @if (auth.isTeacher() || auth.isAdmin()) {
-            <label class="tab">
-              <input type="radio" name="my_tabs_6" aria-label="Ponderacion" />
-              <span class="flex items-center gap-2">
-                <span class="material-symbols-outlined">folder_special</span>Ponderacion</span
-              >
-            </label>
-
-            <div class="tab-content bg-surface-1 p-6">
-              <app-course-grade-buckets [courseId]="id()" />
+            <div uiTabPanel uiCard value="weights" class="p-6">
+              <ng-template uiTabContent><app-course-grade-buckets [courseId]="id()" /></ng-template>
             </div>
           }
         </div>
@@ -186,6 +209,8 @@ export default class Course {
   private modal = inject(Modal);
   private router = inject(Router);
   private toast = inject(Toast);
+  /** Selected section; the tab list and panels follow it. */
+  readonly tab = signal('grades');
   startingChat = signal(false);
 
   canStartCourseChat() {

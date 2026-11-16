@@ -382,6 +382,81 @@ h3 {
   line-height: 1.25rem;
 }
 
+/* Tabs (uiTabList / uiTab / uiTabPanel). Unlayered so they beat DaisyUI's layered tab rules.
+ * box: pill segmented control on a sunken track; line: hairline rule, action-coloured underline. */
+.ui-tab-list {
+  max-width: 100%;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.ui-tab-list .ui-tab {
+  color: var(--ui-ink-muted);
+  font-weight: 500;
+  white-space: nowrap;
+  gap: 0.375rem;
+  transition:
+    color 0.15s var(--ui-ease),
+    background-color 0.15s var(--ui-ease);
+  &:hover,
+  &.tab-active {
+    color: var(--ui-ink-strong);
+  }
+  &.tab-disabled {
+    color: var(--ui-ink-subtle);
+    cursor: not-allowed;
+  }
+  &:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px color-mix(in oklab, var(--color-primary) 20%, transparent);
+  }
+}
+.ui-tab-list.tabs-box {
+  width: fit-content;
+  gap: 0.125rem;
+  padding: 0.25rem;
+  border-radius: 9999px;
+  background-color: var(--ui-surface-2);
+  box-shadow: none;
+  .ui-tab {
+    --tab-height: 2rem;
+    border-radius: 9999px;
+  }
+  .ui-tab.tab-active {
+    background-color: var(--ui-surface-1);
+    box-shadow: 0 0 0 1px var(--ui-line);
+  }
+}
+.ui-tab-list.ui-tab-list-line {
+  gap: 1rem;
+  border-bottom: 1px solid var(--ui-line);
+  .ui-tab {
+    --tab-p: 0.25rem;
+    border-radius: 0;
+  }
+  /* DaisyUI draws the underline on ::before and colours it with currentColor when active. */
+  .ui-tab::before {
+    left: 0;
+    width: 100%;
+    height: 2px;
+    border-top: 0;
+    border-radius: 2px;
+    background-color: transparent;
+  }
+  .ui-tab.tab-active::before {
+    background-color: var(--ui-action);
+  }
+}
+/* @angular/aria marks inactive panels inert; hide them too. */
+.ui-tab-panel[inert] {
+  display: none;
+}
+.ui-tab-panel:focus-visible {
+  outline: none;
+  border-radius: var(--radius-box);
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--color-primary) 20%, transparent);
+}
+
 .layout-padding {
   @apply mx-auto mt-4 max-w-7xl px-4 sm:px-6 lg:px-8;
 }

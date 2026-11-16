@@ -1,5 +1,20 @@
-import { Badge, BadgeTone, Breadcrumbs, Button, Card, CardBody, Loader, Toast, UiSelect, UiTable } from '#/ui';
-import { Tab, TabContent, TabList, TabPanel, Tabs } from '@angular/aria/tabs';
+import {
+  Badge,
+  BadgeTone,
+  Breadcrumbs,
+  Button,
+  Card,
+  CardBody,
+  Loader,
+  Toast,
+  UiSelect,
+  UiTab,
+  UiTabContent,
+  UiTabList,
+  UiTabPanel,
+  UiTable,
+  UiTabs,
+} from '#/ui';
 import { DatePipe, DecimalPipe } from '@angular/common';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { afterRenderEffect, Component, computed, inject, input, signal } from '@angular/core';
@@ -42,11 +57,11 @@ const ENROLLMENT_STATUS_TONES: Record<$Enums.EnrollmentStatus, BadgeTone> = {
     Loader,
     DatePipe,
     FormsModule,
-    TabList,
-    Tab,
-    Tabs,
-    TabPanel,
-    TabContent,
+    UiTabList,
+    UiTab,
+    UiTabs,
+    UiTabPanel,
+    UiTabContent,
     DecimalPipe,
     StudentAttendanceReport,
   ],
@@ -112,13 +127,13 @@ const ENROLLMENT_STATUS_TONES: Record<$Enums.EnrollmentStatus, BadgeTone> = {
           </div>
         </div>
 
-        <div ngTabs>
+        <div uiTabs>
           <div class="flex justify-between items-center mt-4">
-            <div ngTabList selectionMode="follow" selectedTab="info" class="tabs tabs-box">
-              <div ngTab value="info" class="tab">Información Personal</div>
-              <div ngTab value="medical" class="tab">Información Médica</div>
-              <div ngTab value="courses" class="tab">Cursos</div>
-              <div ngTab value="attendance" class="tab">Asistencia</div>
+            <div uiTabList selectedTab="info" aria-label="Secciones del estudiante">
+              <button uiTab value="info">Información Personal</button>
+              <button uiTab value="medical">Información Médica</button>
+              <button uiTab value="courses">Cursos</button>
+              <button uiTab value="attendance">Asistencia</button>
             </div>
             <div class="w-64">
               <select uiSelect [ngModel]="periodId()" (ngModelChange)="periodId.set($event)">
@@ -130,8 +145,8 @@ const ENROLLMENT_STATUS_TONES: Record<$Enums.EnrollmentStatus, BadgeTone> = {
             </div>
           </div>
           <div class="p-1">
-            <div ngTabPanel value="info">
-              <ng-template ngTabContent>
+            <div uiTabPanel value="info">
+              <ng-template uiTabContent>
                 <div class="bg-surface-1 border-line p-4 rounded-lg">
                   <div class="px-4 sm:px-0">
                     <h3 class="text-base/7 font-semibold">Información Personal</h3>
@@ -338,8 +353,8 @@ const ENROLLMENT_STATUS_TONES: Record<$Enums.EnrollmentStatus, BadgeTone> = {
               </ng-template>
             </div>
 
-            <div ngTabPanel value="medical">
-              <ng-template ngTabContent>
+            <div uiTabPanel value="medical">
+              <ng-template uiTabContent>
                 <div class="bg-surface-1 border-line p-4 rounded-lg">
                   <div class="px-4 sm:px-0">
                     <h3 class="text-base/7 font-semibold">Información Médica</h3>
@@ -370,14 +385,14 @@ const ENROLLMENT_STATUS_TONES: Record<$Enums.EnrollmentStatus, BadgeTone> = {
                 </div>
               </ng-template>
             </div>
-            <div ngTabPanel value="attendance">
-              <ng-template ngTabContent>
+            <div uiTabPanel value="attendance">
+              <ng-template uiTabContent>
                 <app-student-attendance-report [studentId]="id()" />
               </ng-template>
             </div>
 
-            <div ngTabPanel value="courses">
-              <ng-template ngTabContent>
+            <div uiTabPanel value="courses">
+              <ng-template uiTabContent>
                 <div class="flex flex-col gap-4">
                   @for (course of student.courses; track course.id) {
                     <div uiCard>

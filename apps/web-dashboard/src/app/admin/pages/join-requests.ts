@@ -51,7 +51,7 @@ type JoinRequestRow = {
               <div uiCardBody>
                 <div class="flex items-start gap-4">
                   <div class="avatar avatar-placeholder">
-                    <div class="w-12 h-12 rounded-full bg-primary/10 text-primary">
+                    <div class="w-12 h-12 rounded-full bg-action-subtle text-primary">
                       <span class="text-lg font-medium">
                         {{ request.userFirstName.charAt(0) }}{{ request.userLastName.charAt(0) }}
                       </span>

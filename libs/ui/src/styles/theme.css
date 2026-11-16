@@ -13,87 +13,130 @@
  * on <html> at runtime. --ui-action follows --color-primary, so a school's colour reaches every
  * action without touching neutrals or text contrast.
  *
- * Design direction: neutral-first and Filllo-inspired (fixed ink and surfaces, one accent for
- * actions, hairline borders instead of shadows, Geist with tight headings).
+ * Values come from the Skooltrak brand system (Track Blue, Runner Orange, Night ink; Space Grotesk
+ * headings, Geist text): https://claude.ai/artifact/RQXcMiWa88ZKmxoC8dSJaS. Tokens marked
+ * "derived" fill levels the brand doesn't name (body ink, subtle ink, sunken surface, strong line,
+ * control border), chosen for contrast: every ink ≥4.5:1 and control borders ≥3:1 on every surface.
+ * Surfaces keep this app's model (grey page, white cards); the brand's own pages use the inverse.
  */
+
+/* Space Grotesk (headings), self-hosted Latin subset from the brand system; covers Spanish. */
+@font-face {
+  font-family: 'Space Grotesk';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('./fonts/SpaceGrotesk-400.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Space Grotesk';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('./fonts/SpaceGrotesk-500.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Space Grotesk';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('./fonts/SpaceGrotesk-700.woff2') format('woff2');
+}
 
 @plugin 'daisyui';
 
-/* ── 1. Primitives ─────────────────────────────────────────────────────── */
+/* ── 1. Primitives (brand values; "derived" ones are not in the brand system) ── */
 :root {
-  --ui-p-navy-950: #0b1430;
-  --ui-p-navy-800: #2b3452;
-  --ui-p-slate-500: #5d6680;
-  --ui-p-slate-400: #8f96aa;
-  --ui-p-slate-300: #c9ceda;
-  --ui-p-slate-200: #e1e4eb;
-  --ui-p-slate-150: #eceef3;
-  --ui-p-slate-100: #f4f5f8;
+  /* Night: ink, and the dark theme's page */
+  --ui-p-night: #0b1530;
+  --ui-p-night-raised: #131f42;
+  --ui-p-night-sunken: #1b2a55; /* derived */
+  --ui-p-night-line: #24315a;
+  --ui-p-night-line-strong: #34437a; /* derived */
+  --ui-p-night-control: #617099; /* derived: 3.3:1 on night-raised */
+  --ui-p-ink-body: #26314f; /* derived */
+  --ui-p-ink-muted: #475069;
+  --ui-p-ink-subtle: #5f6884; /* derived: ≥4.7:1 on every light surface */
+  --ui-p-mist: #f1f5ff;
+  --ui-p-mist-body: #d3daec; /* derived */
+  --ui-p-mist-muted: #a7b0c8;
+  --ui-p-mist-subtle: #8b94af; /* derived: ≥4.6:1 on every dark surface */
+
+  /* Light surfaces */
   --ui-p-white: #ffffff;
+  --ui-p-paper: #f4f6fb; /* the brand's surface-raised */
+  --ui-p-paper-sunken: #e9edf6; /* derived */
+  --ui-p-line: #dce2ef;
+  --ui-p-line-strong: #c3cbdd; /* derived */
+  --ui-p-control: #838ca5; /* derived: 3.1:1 on paper */
 
-  --ui-p-night-1000: #0a0e19;
-  --ui-p-night-900: #111727;
-  --ui-p-night-850: #192135;
-  --ui-p-night-800: #232c43;
-  --ui-p-night-700: #34405e;
-  --ui-p-mist-100: #f2f4fa;
-  --ui-p-mist-200: #d3d8e5;
-  --ui-p-mist-400: #99a0b6;
-  --ui-p-mist-500: #6a728a;
+  /* Track Blue: the default action colour when a school has no brand colour */
+  --ui-p-track-blue: #1d4ed8;
+  --ui-p-track-blue-dark: #93c5fd;
 
-  /* Skooltrak violet: the default action colour when a school has no brand colour. */
-  --ui-p-violet-light: oklch(60% 0.25 292.717);
-  --ui-p-violet-dark: oklch(68% 0.2 292.717);
+  /* Runner Orange: "something new is waiting". A fill (ink on it, never white) or accent-text. */
+  --ui-p-runner-orange: #f97316;
+  --ui-p-runner-text: #c2410c;
+  --ui-p-runner-text-dark: #fdba74;
 }
 
 /* ── 2. Semantic (light) ───────────────────────────────────────────────── */
 :root,
 [data-theme='light'] {
-  --ui-surface-0: var(--ui-p-slate-100); /* page background */
+  --ui-surface-0: var(--ui-p-paper); /* page background */
   --ui-surface-1: var(--ui-p-white); /* cards, panels, inputs */
-  --ui-surface-2: var(--ui-p-slate-150); /* sunken / hover / secondary fill */
-  --ui-line: var(--ui-p-slate-200);
-  --ui-line-strong: var(--ui-p-slate-300);
-  --ui-ink-strong: var(--ui-p-navy-950); /* headings, primary text */
-  --ui-ink: var(--ui-p-navy-800); /* body text */
-  --ui-ink-muted: var(--ui-p-slate-500); /* secondary text, labels of lesser weight */
-  --ui-ink-subtle: var(--ui-p-slate-400); /* hints, placeholders, disabled */
-  --ui-inverse: var(--ui-p-navy-950);
+  --ui-surface-2: var(--ui-p-paper-sunken); /* sunken / hover / secondary fill */
+  --ui-line: var(--ui-p-line);
+  --ui-line-strong: var(--ui-p-line-strong);
+  --ui-line-control: var(--ui-p-control); /* input, select and checkbox borders */
+  --ui-ink-strong: var(--ui-p-night); /* headings, primary text */
+  --ui-ink: var(--ui-p-ink-body); /* body text */
+  --ui-ink-muted: var(--ui-p-ink-muted); /* secondary text: timestamps, helper text, captions */
+  --ui-ink-subtle: var(--ui-p-ink-subtle); /* hints, placeholders, disabled */
+  --ui-inverse: var(--ui-p-night);
   --ui-inverse-content: var(--ui-p-white);
-  --ui-action-default: var(--ui-p-violet-light);
+  --ui-action-default: var(--ui-p-track-blue);
+  --ui-action-subtle-amount: 8%;
+  --ui-new-text: var(--ui-p-runner-text);
 }
 
 /* ── 2. Semantic (dark) ────────────────────────────────────────────────── */
 [data-theme='dark'] {
-  --ui-surface-0: var(--ui-p-night-1000);
-  --ui-surface-1: var(--ui-p-night-900);
-  --ui-surface-2: var(--ui-p-night-850);
-  --ui-line: var(--ui-p-night-800);
-  --ui-line-strong: var(--ui-p-night-700);
-  --ui-ink-strong: var(--ui-p-mist-100);
-  --ui-ink: var(--ui-p-mist-200);
-  --ui-ink-muted: var(--ui-p-mist-400);
-  --ui-ink-subtle: var(--ui-p-mist-500);
-  --ui-inverse: var(--ui-p-mist-100);
-  --ui-inverse-content: var(--ui-p-navy-950);
-  --ui-action-default: var(--ui-p-violet-dark);
+  --ui-surface-0: var(--ui-p-night);
+  --ui-surface-1: var(--ui-p-night-raised);
+  --ui-surface-2: var(--ui-p-night-sunken);
+  --ui-line: var(--ui-p-night-line);
+  --ui-line-strong: var(--ui-p-night-line-strong);
+  --ui-line-control: var(--ui-p-night-control);
+  --ui-ink-strong: var(--ui-p-mist);
+  --ui-ink: var(--ui-p-mist-body);
+  --ui-ink-muted: var(--ui-p-mist-muted);
+  --ui-ink-subtle: var(--ui-p-mist-subtle);
+  --ui-inverse: var(--ui-p-mist);
+  --ui-inverse-content: var(--ui-p-night);
+  --ui-action-default: var(--ui-p-track-blue-dark);
+  --ui-action-subtle-amount: 14%;
+  --ui-new-text: var(--ui-p-runner-text-dark);
 }
 
 /* Before ThemeService sets data-theme (SSR login, first paint), follow the OS. */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme]) {
-    --ui-surface-0: var(--ui-p-night-1000);
-    --ui-surface-1: var(--ui-p-night-900);
-    --ui-surface-2: var(--ui-p-night-850);
-    --ui-line: var(--ui-p-night-800);
-    --ui-line-strong: var(--ui-p-night-700);
-    --ui-ink-strong: var(--ui-p-mist-100);
-    --ui-ink: var(--ui-p-mist-200);
-    --ui-ink-muted: var(--ui-p-mist-400);
-    --ui-ink-subtle: var(--ui-p-mist-500);
-    --ui-inverse: var(--ui-p-mist-100);
-    --ui-inverse-content: var(--ui-p-navy-950);
-    --ui-action-default: var(--ui-p-violet-dark);
+    --ui-surface-0: var(--ui-p-night);
+    --ui-surface-1: var(--ui-p-night-raised);
+    --ui-surface-2: var(--ui-p-night-sunken);
+    --ui-line: var(--ui-p-night-line);
+    --ui-line-strong: var(--ui-p-night-line-strong);
+    --ui-line-control: var(--ui-p-night-control);
+    --ui-ink-strong: var(--ui-p-mist);
+    --ui-ink: var(--ui-p-mist-body);
+    --ui-ink-muted: var(--ui-p-mist-muted);
+    --ui-ink-subtle: var(--ui-p-mist-subtle);
+    --ui-inverse: var(--ui-p-mist);
+    --ui-inverse-content: var(--ui-p-night);
+    --ui-action-default: var(--ui-p-track-blue-dark);
+    --ui-action-subtle-amount: 14%;
+    --ui-new-text: var(--ui-p-runner-text-dark);
   }
 }
 
@@ -101,6 +144,11 @@
 :root {
   --ui-action: var(--color-primary);
   --ui-action-content: var(--color-primary-content);
+  /* Selected rows, the active nav item, info banners. Follows a school's own colour. Never text. */
+  --ui-action-subtle: color-mix(in oklab, var(--ui-action) var(--ui-action-subtle-amount), var(--ui-surface-1));
+  /* Runner Orange is Skooltrak's, not a school colour: schools override DaisyUI's accent, not this. */
+  --ui-new: var(--ui-p-runner-orange);
+  --ui-new-content: var(--ui-p-night);
   --ui-ease: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -115,25 +163,27 @@
   --color-base-300: var(--ui-surface-2);
   --color-base-content: var(--ui-ink-strong);
   --color-primary: var(--ui-action-default);
-  --color-primary-content: oklch(98% 0.01 292.717);
+  --color-primary-content: #ffffff;
+  /* secondary / accent are school colours (school-theme.service.ts); these are the defaults. */
   --color-secondary: oklch(77% 0.152 181.912);
   --color-secondary-content: oklch(30% 0.06 188.216);
   --color-accent: oklch(39% 0.195 277.366);
   --color-accent-content: oklch(96% 0.018 272.314);
   --color-neutral: var(--ui-inverse);
   --color-neutral-content: var(--ui-inverse-content);
-  --color-info: oklch(58% 0.158 241.966);
-  --color-info-content: oklch(97% 0.013 236.62);
-  --color-success: oklch(76% 0.177 163.223);
-  --color-success-content: oklch(37% 0.077 168.94);
-  --color-warning: oklch(68% 0.162 75.834);
-  --color-warning-content: oklch(98% 0.026 102.212);
-  --color-error: oklch(58% 0.253 17.585);
-  --color-error-content: oklch(96% 0.015 12.422);
+  --color-info: #1d4ed8;
+  --color-info-content: #ffffff;
+  --color-success: #15803d;
+  --color-success-content: #ffffff;
+  /* Yellow, so warnings never read as Runner Orange ("new"). */
+  --color-warning: #a16207;
+  --color-warning-content: #ffffff;
+  --color-error: #b91c1c;
+  --color-error-content: #ffffff;
   /* selector: checkbox/toggle/badge · field: button/input/select · box: card/modal/alert/menu */
   --radius-selector: 0.5rem;
-  --radius-field: 0.75rem;
-  --radius-box: 1.25rem;
+  --radius-field: 0.5rem;
+  --radius-box: 1rem;
   --size-selector: 0.25rem;
   --size-field: 0.25rem;
   --border: 1px;
@@ -151,24 +201,24 @@
   --color-base-300: var(--ui-surface-2);
   --color-base-content: var(--ui-ink-strong);
   --color-primary: var(--ui-action-default);
-  --color-primary-content: oklch(15% 0.03 292.717);
+  --color-primary-content: #0b1530;
   --color-secondary: oklch(70% 0.06 265);
   --color-secondary-content: oklch(15% 0.02 265);
   --color-accent: oklch(68% 0.14 195);
   --color-accent-content: oklch(15% 0.02 195);
   --color-neutral: var(--ui-inverse);
   --color-neutral-content: var(--ui-inverse-content);
-  --color-info: oklch(68% 0.16 245);
-  --color-info-content: oklch(15% 0.02 245);
-  --color-success: oklch(68% 0.16 155);
-  --color-success-content: oklch(15% 0.02 155);
-  --color-warning: oklch(78% 0.16 70);
-  --color-warning-content: oklch(20% 0.06 70);
-  --color-error: oklch(65% 0.2 25);
-  --color-error-content: oklch(98% 0.02 25);
+  --color-info: #93c5fd;
+  --color-info-content: #0b1530;
+  --color-success: #4ade80;
+  --color-success-content: #0b1530;
+  --color-warning: #facc15;
+  --color-warning-content: #0b1530;
+  --color-error: #f87171;
+  --color-error-content: #0b1530;
   --radius-selector: 0.5rem;
-  --radius-field: 0.75rem;
-  --radius-box: 1.25rem;
+  --radius-field: 0.5rem;
+  --radius-box: 1rem;
   --size-selector: 0.25rem;
   --size-field: 0.25rem;
   --border: 1px;
@@ -202,11 +252,18 @@
   --color-ink-subtle: var(--ui-ink-subtle);
   --color-action: var(--ui-action);
   --color-action-content: var(--ui-action-content);
+  --color-action-subtle: var(--ui-action-subtle);
+  --color-new: var(--ui-new);
+  --color-new-content: var(--ui-new-content);
+  --color-new-text: var(--ui-new-text);
+  --color-line-control: var(--ui-line-control);
   --ease-standard: var(--ui-ease);
 }
 
 @theme {
   --font-sans: 'Geist', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  /* Headlines and screen titles (font-display); applied to headings in DS 11 (type scale). */
+  --font-display: 'Space Grotesk', 'Geist', ui-sans-serif, system-ui, sans-serif;
   --tab-border-color: var(--color-primary);
 }
 
@@ -238,7 +295,7 @@ h3 {
 .select-primary,
 .textarea-primary,
 .ui-control {
-  --input-color: var(--ui-line-strong);
+  --input-color: var(--ui-line-control);
   &:focus,
   &:focus-within {
     --input-color: var(--color-primary);
@@ -248,7 +305,7 @@ h3 {
 /* Checkbox / radio (uiCheckbox, uiRadio): hairline border while empty, action colour once checked.
  * DaisyUI fills a checked control with --input-color, so it must stay primary when checked. */
 :is(.checkbox-primary, .radio-primary):not(:checked, :indeterminate) {
-  --input-color: var(--ui-line-strong);
+  --input-color: var(--ui-line-control);
 }
 
 .input:focus,
@@ -368,8 +425,14 @@ h3 {
  * and lightens it in dark mode; the fill is a touch stronger than DaisyUI's 8% so it reads on the
  * page background. Unlayered so it beats DaisyUI's layered badge rules. */
 .badge.ui-badge {
+  border-radius: 9999px; /* the brand's pill; unlayered because DaisyUI's badge sits in a later layer */
   color: color-mix(in oklab, var(--badge-color, var(--ui-ink)) 62%, var(--ui-ink-strong));
   background-color: color-mix(in oklab, var(--badge-color, var(--ui-ink)) 12%, var(--ui-surface-1));
+}
+/* tone="new": Runner Orange is a fill with ink on it (white on orange is only 2.8:1). */
+.badge.ui-badge.ui-badge-new {
+  color: var(--ui-new-content);
+  background-color: var(--ui-new);
 }
 
 /* Alert (uiAlert): same readable-tone approach as badges, plus a hairline border in the tone. */

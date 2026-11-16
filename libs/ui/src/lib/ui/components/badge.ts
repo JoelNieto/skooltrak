@@ -3,18 +3,20 @@ import { Directive, input } from '@angular/core';
 /**
  * Meaning of a badge. `action` follows the school's primary colour (links to a course or group,
  * the current item); status tones are for states (active, pending, overdue); `neutral` is for
- * plain labels and counts.
+ * plain labels and counts; `new` (Runner Orange, solid) marks something waiting to be seen:
+ * unread counts, "Nuevo". Use `new` sparingly: it is the brand's signal for "look here".
  */
-export type BadgeTone = 'neutral' | 'action' | 'info' | 'success' | 'warning' | 'danger';
+export type BadgeTone = 'neutral' | 'action' | 'info' | 'success' | 'warning' | 'danger' | 'new';
 export type BadgeSize = 'sm' | 'md';
 
 /**
- * Small label for a status, category or count. One style (soft: tinted fill, coloured text); the
- * tone carries the meaning:
+ * Small pill for a status, category or count. One style (soft: tinted fill, coloured text; `new`
+ * is a solid orange fill with ink text); the tone carries the meaning:
  *
  *   <span uiBadge tone="success">Activo</span>
  *   <span uiBadge size="sm" [tone]="statusTone(charge.status)">{{ charge.status }}</span>
  *   <a uiBadge tone="action" [routerLink]="['/courses', course.id]">{{ course.name }}</a>
+ *   <span uiBadge tone="new" size="sm">3</span>
  *
  * Map data to tones in TypeScript (`(status) => BadgeTone`) and bind `[tone]`, instead of building
  * DaisyUI class strings. DaisyUI's `.badge` stays underneath; this is the only place templates
@@ -29,6 +31,7 @@ export type BadgeSize = 'sm' | 'md';
     '[class.badge-success]': "tone() === 'success'",
     '[class.badge-warning]': "tone() === 'warning'",
     '[class.badge-error]': "tone() === 'danger'",
+    '[class.ui-badge-new]': "tone() === 'new'",
     '[class.badge-sm]': "size() === 'sm'",
   },
 })

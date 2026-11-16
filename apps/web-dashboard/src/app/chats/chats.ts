@@ -43,7 +43,7 @@ type ChatRow = {
           @for (chat of chats; track chat.id) {
             <a
               [routerLink]="['/chats', chat.id]"
-              routerLinkActive="bg-primary/10"
+              routerLinkActive="bg-action-subtle"
               class="flex items-center gap-3 p-4 rounded-lg bg-surface-0 hover:bg-surface-1 transition-colors"
             >
               <div class="avatar avatar-placeholder">

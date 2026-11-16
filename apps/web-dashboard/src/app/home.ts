@@ -498,7 +498,7 @@ export default class Home {
     if (t.broadcastsToApprove) {
       tiles.push({
         icon: 'approval',
-        iconClass: 'bg-primary/15 text-primary',
+        iconClass: 'bg-action-subtle text-primary',
         count: t.broadcastsToApprove,
         label: 'Comunicados por aprobar',
         detail: 'Enviados a toda la escuela',

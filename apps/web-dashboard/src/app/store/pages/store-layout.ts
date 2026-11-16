@@ -24,7 +24,7 @@ import { Badge, BreadcrumbItem, Breadcrumbs, Button } from '#/ui';
               class="h-12 w-12 shrink-0 rounded-lg border border-line bg-surface-0 object-contain"
             />
           } @else {
-            <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+            <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-action-subtle text-primary">
               <span class="material-symbols-outlined text-2xl">apartment</span>
             </div>
           }

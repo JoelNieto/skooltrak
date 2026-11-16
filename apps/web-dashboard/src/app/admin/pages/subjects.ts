@@ -49,7 +49,7 @@ import SubjectsForm from '../forms/subjects-form';
           <tr>
             <th
               class="cursor-pointer hover:bg-surface-2 w-1/4"
-              [class]="pagination.sortBy() === 'name' ? 'bg-primary/10 !text-primary hover:bg-primary/20' : ''"
+              [class]="pagination.sortBy() === 'name' ? 'bg-action-subtle !text-primary hover:bg-primary/20' : ''"
               (click)="pagination.setOrder('name')"
             >
               <div class="flex items-center gap-2">
@@ -63,7 +63,7 @@ import SubjectsForm from '../forms/subjects-form';
             </th>
             <th
               class="hover:bg-surface-2 cursor-pointer w-1/5"
-              [class]="pagination.sortBy() === 'code' ? 'bg-primary/10 text-primary! hover:bg-primary/20' : ''"
+              [class]="pagination.sortBy() === 'code' ? 'bg-action-subtle text-primary! hover:bg-primary/20' : ''"
               (click)="pagination.setOrder('code')"
             >
               <div class="flex items-center gap-2">
@@ -77,7 +77,7 @@ import SubjectsForm from '../forms/subjects-form';
             </th>
             <th
               class="hover:bg-surface-2 cursor-pointer"
-              [class]="pagination.sortBy() === 'createdAt' ? 'bg-primary/10 !text-primary hover:bg-primary/20' : ''"
+              [class]="pagination.sortBy() === 'createdAt' ? 'bg-action-subtle !text-primary hover:bg-primary/20' : ''"
               (click)="pagination.setOrder('createdAt')"
             >
               <div class="flex items-center gap-2">
@@ -91,7 +91,7 @@ import SubjectsForm from '../forms/subjects-form';
             </th>
             <th
               class="hover:bg-surface-2 cursor-pointer"
-              [class]="pagination.sortBy() === 'updatedAt' ? 'bg-primary/10 !text-primary hover:bg-primary/20' : ''"
+              [class]="pagination.sortBy() === 'updatedAt' ? 'bg-action-subtle !text-primary hover:bg-primary/20' : ''"
               (click)="pagination.setOrder('updatedAt')"
             >
               <div class="flex items-center gap-2">

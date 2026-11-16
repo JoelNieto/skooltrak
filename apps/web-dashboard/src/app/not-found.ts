@@ -18,7 +18,7 @@ import { Button } from '#/ui';
 
         <!-- Illustration -->
         <div class="flex justify-center mb-8">
-          <div class="w-48 h-48 bg-primary/10 rounded-full flex items-center justify-center">
+          <div class="w-48 h-48 bg-action-subtle rounded-full flex items-center justify-center">
             <svg
               class="w-32 h-32 text-primary"
               fill="none"

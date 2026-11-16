@@ -47,7 +47,7 @@ type AvailableSchool = {
               @for (school of filteredSchools(); track school.id) {
                 <button uiCard class="text-left w-full" (click)="selectSchool(school)">
                   <div uiCardBody class="flex-row items-center gap-4">
-                    <div class="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                    <div class="w-12 h-12 rounded-lg bg-action-subtle flex items-center justify-center shrink-0">
                       <span class="material-symbols-outlined text-2xl text-primary">school</span>
                     </div>
                     <div class="flex-1 min-w-0">

@@ -667,7 +667,7 @@ export default class TeacherHome {
     if (grades && grades.unpublished > 0) {
       rows.push({
         icon: 'publish',
-        iconClass: 'bg-primary/15 text-primary',
+        iconClass: 'bg-action-subtle text-primary',
         title: `Publicar ${plural(grades.unpublished, 'calificación', 'calificaciones')}`,
         detail: `En ${plural(grades.coursesWithUnpublished, 'curso', 'cursos')}`,
         link: grades.topCourseId ? ['/courses', grades.topCourseId] : '/courses',
@@ -688,7 +688,7 @@ export default class TeacherHome {
   }
 
   slotClass(slot: TeacherSlot): string {
-    if (slot.state === 'NOW') return 'border-primary bg-primary/5';
+    if (slot.state === 'NOW') return 'border-primary bg-action-subtle';
     if (slot.recess) return 'border-line bg-surface-2';
     return 'border-line';
   }

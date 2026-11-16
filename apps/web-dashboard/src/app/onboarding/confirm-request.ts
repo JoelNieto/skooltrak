@@ -16,7 +16,7 @@ import { BrandLogo } from '../shared/brand-logo';
       <main class="flex-1 flex flex-col items-center justify-center p-6">
         <div class="w-full max-w-md text-center space-y-8 animate-fade-in">
           <div class="flex justify-center">
-            <div class="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center">
+            <div class="w-20 h-20 rounded-full bg-action-subtle flex items-center justify-center">
               <span class="material-symbols-outlined text-5xl text-primary">send</span>
             </div>
           </div>

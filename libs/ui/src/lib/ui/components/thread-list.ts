@@ -22,9 +22,9 @@ export interface ThreadListItem {
         <li class="w-full">
           <button
             class="flex justify-between items-center gap-0.5 rounded-xl border border-transparent hover:bg-primary/20 active:bg-surface-1 transition-colors duration-200 ease-in-out px-3 py-2 w-full"
-            [class.bg-primary/10]="thread.id === selectedId()"
+            [class.bg-action-subtle]="thread.id === selectedId()"
             [class.border-primary/30]="thread.broadcast"
-            [class.bg-primary/5]="thread.broadcast && thread.id !== selectedId()"
+            [class.bg-action-subtle]="thread.broadcast && thread.id !== selectedId()"
             (click)="selected.emit(thread.id)"
           >
             <div class="flex flex-col items-start min-w-0">

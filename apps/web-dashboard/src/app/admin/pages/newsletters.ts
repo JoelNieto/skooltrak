@@ -67,7 +67,7 @@ type NewsletterItem = {
             <tr>
               <th
                 class="cursor-pointer hover:bg-surface-2"
-                [class]="pagination.sortBy() === 'title' ? 'bg-primary/10 text-primary! hover:bg-primary/20' : ''"
+                [class]="pagination.sortBy() === 'title' ? 'bg-action-subtle text-primary! hover:bg-primary/20' : ''"
                 (click)="pagination.setOrder('title')"
               >
                 <div class="flex items-center gap-2">
@@ -83,7 +83,7 @@ type NewsletterItem = {
               <th>Estado</th>
               <th
                 class="cursor-pointer hover:bg-surface-2"
-                [class]="pagination.sortBy() === 'publishedAt' ? 'bg-primary/10 text-primary! hover:bg-primary/20' : ''"
+                [class]="pagination.sortBy() === 'publishedAt' ? 'bg-action-subtle text-primary! hover:bg-primary/20' : ''"
                 (click)="pagination.setOrder('publishedAt')"
               >
                 <div class="flex items-center gap-2">
@@ -98,7 +98,7 @@ type NewsletterItem = {
               <th>Autor</th>
               <th
                 class="cursor-pointer hover:bg-surface-2"
-                [class]="pagination.sortBy() === 'createdAt' ? 'bg-primary/10 text-primary! hover:bg-primary/20' : ''"
+                [class]="pagination.sortBy() === 'createdAt' ? 'bg-action-subtle text-primary! hover:bg-primary/20' : ''"
                 (click)="pagination.setOrder('createdAt')"
               >
                 <div class="flex items-center gap-2">

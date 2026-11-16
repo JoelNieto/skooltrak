@@ -13,7 +13,7 @@ export type UploadedFile = {
     <div
       class="border-2 border-dashed rounded-lg p-6 text-center transition-colors"
       [class.border-primary]="isDragOver()"
-      [class.bg-primary/5]="isDragOver()"
+      [class.bg-action-subtle]="isDragOver()"
       [class.border-line]="!isDragOver()"
       [class.hover:border-primary]="!isDragOver()"
       (dragover)="onDragOver($event)"

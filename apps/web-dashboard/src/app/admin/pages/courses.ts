@@ -1,8 +1,26 @@
-import { Button, Card, Confirmation, Icon, Modal, PaginatorV2, Toast, UiInputGroup, UiSelect, UiTable } from '#/ui';
-import { Menu, MenuContent, MenuItem, MenuTrigger } from '@angular/aria/menu';
-import { OverlayModule } from '@angular/cdk/overlay';
+import {
+  Button,
+  Card,
+  Confirmation,
+  Icon,
+  Modal,
+  PaginatorV2,
+  Toast,
+  UiField,
+  UiFilterChip,
+  UiFilterMenu,
+  UiInputGroup,
+  UiRowAction,
+  UiRowActions,
+  UiSelect,
+  UiTable,
+  UiTableEmpty,
+  UiTableError,
+  UiTableSkeleton,
+  UiTableToolbar,
+} from '#/ui';
 import { HttpClient, httpResource } from '@angular/common/http';
-import { Component, computed, inject, signal, viewChild } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { debounce, form, FormField } from '@angular/forms/signals';
 import { RouterLink } from '@angular/router';
@@ -34,35 +52,44 @@ type CourseType = Prisma.CourseGetPayload<{
     PaginatorV2,
     RouterLink,
     FormsModule,
-    Menu,
-    MenuContent,
-    MenuItem,
-    MenuTrigger,
-    OverlayModule,
     FormField,
     UiInputGroup,
     Icon,
+    UiRowActions,
+    UiTableEmpty,
+    UiTableError,
+    UiTableSkeleton,
+    UiField,
+    UiFilterChip,
+    UiFilterMenu,
+    UiTableToolbar,
   ],
-  template: `<div class="flex justify-between">
-      <div class="flex gap-2">
-        <div class="md:w-96 w-full">
-          <label uiInputGroup>
-            <ui-icon name="search" />
-            <input class="pl-0" type="search" placeholder="Buscar..." [formField]="form.searchText" />
-          </label>
-        </div>
-        <select uiSelect [formField]="form.studyPlanId">
-          <option value="">Elija nivel...</option>
-          @for (studyPlan of studyPlans.value(); track studyPlan.id) {
-            <option [value]="studyPlan.id">{{ studyPlan.name }}</option>
-          }
-        </select>
-      </div>
-
-      <button uiButton variant="primary" (click)="editCourse()"><ui-icon name="circle-plus" /> Nuevo curso</button>
-    </div>
+  template: `<ui-table-toolbar label="Filtrar cursos">
+      <label uiInputGroup size="sm">
+        <ui-icon name="search" class="text-base text-ink-subtle" />
+        <input type="search" placeholder="Buscar curso" aria-label="Buscar curso" [formField]="form.searchText" />
+      </label>
+      <ui-filter-menu [activeCount]="form.studyPlanId().value() ? 1 : 0" (clear)="form.studyPlanId().value.set('')">
+        <ui-field label="Plan de estudios">
+          <select uiSelect [formField]="form.studyPlanId">
+            <option value="">Todos los planes</option>
+            @for (studyPlan of studyPlans.value(); track studyPlan.id) {
+              <option [value]="studyPlan.id">{{ studyPlan.name }}</option>
+            }
+          </select>
+        </ui-field>
+      </ui-filter-menu>
+      <button uiToolbarEnd uiButton variant="primary" size="sm" type="button" (click)="editCourse()">
+        <ui-icon name="circle-plus" class="text-base" /> Nuevo curso
+      </button>
+      @if (form.studyPlanId().value()) {
+        <ng-container uiToolbarChips>
+          <ui-filter-chip [label]="'Plan: ' + selectedStudyPlanName()" (remove)="form.studyPlanId().value.set('')" />
+        </ng-container>
+      }
+    </ui-table-toolbar>
     <div uiCard class="overflow-x-auto mt-4">
-      <table uiTable>
+      <table uiTable [attr.aria-busy]="courses.isLoading()">
         <thead>
           <tr>
             <th>Nombre</th>
@@ -71,88 +98,58 @@ type CourseType = Prisma.CourseGetPayload<{
             <th>Asignatura</th>
             <th>Plan de estudio</th>
             <th>Docente</th>
-            <th></th>
+            <th class="w-12"><span class="sr-only">Acciones</span></th>
           </tr>
         </thead>
-        <tbody>
-          @for (course of courses.value()?.data; track course.id) {
-            <tr>
-              <td>
-                {{ course.name }}
-              </td>
-              <td>{{ course.shortName }}</td>
-              <td>{{ course.code }}</td>
-              <td>{{ course.subject.name }}</td>
-              <td>{{ course.studyPlan.name }}</td>
-              <td>
-                @if (course.teacher) {
-                  <a [routerLink]="['/teachers', course.teacher.id]" class="link link-primary">
-                    {{ course.teacher.firstName }} {{ course.teacher.fatherName }}
-                  </a>
-                } @else {
-                  --
-                }
-              </td>
-              <td>
-                <button
-                  class="cursor-pointer hover:bg-surface-2 p-1 rounded-lg flex items-center justify-center"
-                  ngMenuTrigger
-                  #origin
-                  #trigger="ngMenuTrigger"
-                  [menu]="actionsMenu()"
-                >
-                  <ui-icon name="ellipsis" class="text-xl" />
-                </button>
-                <ng-template
-                  [cdkConnectedOverlayOpen]="trigger.expanded()"
-                  [cdkConnectedOverlay]="{ origin, usePopover: 'inline' }"
-                  [cdkConnectedOverlayPositions]="[
-                    {
-                      originX: 'end',
-                      originY: 'bottom',
-                      overlayX: 'end',
-                      overlayY: 'top',
-                      offsetY: 4,
-                    },
-                  ]"
-                  cdkAttachPopoverAsChild
-                >
-                  <div ngMenu class="bg-surface-1 shadow-sm rounded-lg p-1 w-48" #actionsMenu="ngMenu">
-                    <ng-template ngMenuContent>
-                      <a
-                        ngMenuItem
-                        value="view"
-                        [routerLink]="['/courses', course.id]"
-                        class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-surface-2 w-full"
-                      >
-                        <ui-icon name="eye" class="text-lg" />
-                        <span>Ver</span>
-                      </a>
-                      <button
-                        ngMenuItem
-                        value="edit"
-                        class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-surface-2 w-full"
-                        (click)="editCourse(course)"
-                      >
-                        <ui-icon name="pencil" class="text-lg" />
-                        <span>Editar</span>
-                      </button>
-                      <button
-                        ngMenuItem
-                        value="delete"
-                        class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-surface-2 w-full"
-                        (click)="deleteCourse(course)"
-                      >
-                        <ui-icon name="trash-2" class="text-lg" />
-                        <span>Eliminar</span>
-                      </button>
-                    </ng-template>
-                  </div>
-                </ng-template>
-              </td>
-            </tr>
-          }
-        </tbody>
+        @if (courses.isLoading() && !courses.hasValue()) {
+          <tbody uiTableSkeleton [columns]="7"></tbody>
+        } @else if (courses.error()) {
+          <tbody>
+            <tr uiTableError [columns]="7" (retry)="courses.reload()"></tr>
+          </tbody>
+        } @else {
+          <tbody>
+            @for (course of courses.value()?.data; track course.id) {
+              <tr>
+                <td>
+                  {{ course.name }}
+                </td>
+                <td>{{ course.shortName }}</td>
+                <td>{{ course.code }}</td>
+                <td>{{ course.subject.name }}</td>
+                <td>{{ course.studyPlan.name }}</td>
+                <td>
+                  @if (course.teacher) {
+                    <a [routerLink]="['/teachers', course.teacher.id]" class="link link-primary">
+                      {{ course.teacher.firstName }} {{ course.teacher.fatherName }}
+                    </a>
+                  } @else {
+                    --
+                  }
+                </td>
+                <td>
+                  <ui-row-actions
+                    [actions]="rowActions(course)"
+                    [label]="'Acciones para ' + course.name"
+                    (action)="onRowAction($event, course)"
+                  />
+                </td>
+              </tr>
+            } @empty {
+              @if (form.searchText().value()) {
+                <tr
+                  uiTableEmpty
+                  [columns]="7"
+                  icon="search-x"
+                  title="Sin resultados"
+                  description="Ningún resultado coincide con la búsqueda."
+                ></tr>
+              } @else {
+                <tr uiTableEmpty [columns]="7" icon="book-open" title="Aún no hay cursos"></tr>
+              }
+            }
+          </tbody>
+        }
       </table>
       <div class="p-4 rounded-b-lg ">
         <lib-paginator
@@ -166,12 +163,15 @@ type CourseType = Prisma.CourseGetPayload<{
     </div> `,
 })
 export default class Courses {
+  /** Name of the selected filter, for its chip. */
+  protected readonly selectedStudyPlanName = computed(
+    () => (this.studyPlans.value() ?? []).find((x) => x.id === this.form.studyPlanId().value())?.name ?? '',
+  );
   #modal = inject(Modal);
   #http = inject(HttpClient);
   #confirmation = inject(Confirmation);
   #store = inject(Store);
   #toast = inject(Toast);
-  actionsMenu = viewChild<Menu<string>>('actionsMenu');
 
   private formModel = signal<{ searchText: string; studyPlanId: string }>({
     searchText: '',
@@ -255,5 +255,25 @@ export default class Courses {
           this.#toast.showError('Error al eliminar el curso');
         },
       });
+  }
+
+  /** The actions in each row's menu (ui-row-actions). */
+  protected rowActions(course: CourseType): UiRowAction[] {
+    return [
+      { id: 'view', label: 'Ver', icon: 'eye', link: ['/courses', course.id] },
+      { id: 'edit', label: 'Editar', icon: 'pencil' },
+      { id: 'delete', label: 'Eliminar', icon: 'trash-2', tone: 'danger' },
+    ];
+  }
+
+  protected onRowAction(action: string, course: CourseType): void {
+    switch (action) {
+      case 'edit':
+        this.editCourse(course);
+        break;
+      case 'delete':
+        this.deleteCourse(course);
+        break;
+    }
   }
 }

@@ -21,7 +21,7 @@ export type CreatedEntity = {
   selector: 'app-setup-wizard',
   imports: [Button, BrandLogo, SchoolBasicsStep, DegreesStep, StudyPlansStep, CoursesStep, GroupsStep],
   template: `
-    <div class="min-h-screen flex flex-col gradient-bg">
+    <div class="min-h-screen flex flex-col bg-surface-0">
       <!-- Fixed Header -->
       <header class="p-4 md:p-6 flex items-center justify-between">
         <ui-brand-logo class="h-8 md:h-10" />

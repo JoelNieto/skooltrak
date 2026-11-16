@@ -188,21 +188,22 @@ export default class GroupSchedule {
     return hours;
   }
 
+  /** Slot and hour rules, drawn as 1px hard-stop stripes in the line tokens (flat lines, not a fade). */
   public get gridBackground() {
     const minor = this.slotHeight;
     const major = this.slotHeight * (60 / this.slotMinutes);
     return `
       repeating-linear-gradient(
         to bottom,
-        rgba(148, 163, 184, 0.08) 0,
-        rgba(148, 163, 184, 0.08) 1px,
+        var(--ui-line) 0,
+        var(--ui-line) 1px,
         transparent 1px,
         transparent ${minor}px
       ),
       repeating-linear-gradient(
         to bottom,
-        rgba(148, 163, 184, 0.25) 0,
-        rgba(148, 163, 184, 0.25) 1px,
+        var(--ui-line-strong) 0,
+        var(--ui-line-strong) 1px,
         transparent 1px,
         transparent ${major}px
       )

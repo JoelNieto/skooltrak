@@ -13,6 +13,8 @@
  *   arbitraryColour  bg-[#123456], text-[oklch(…)] …
  *                 (bg-primary/5, /10, /15 are reported as baseColour: use bg-action-subtle)
  *   darkVariant   dark:… (tokens already switch with the theme).
+ *   gradient      bg-linear-*, bg-radial-*, bg-conic-*, from-* / via-* / to-* (the brand uses flat fills;
+ *                 component styles are checked by flat-styles).
  *
  * When a DaisyUI component gets a primitive (tabs, avatar, …), add it to PRIMITIVES below.
  * An intentional exception takes an HTML comment with the reason:
@@ -25,7 +27,7 @@ import { ESLintUtils, type TSESTree } from '@typescript-eslint/utils';
 export const RULE_NAME = 'design-tokens';
 
 type Options = [{ primitives?: boolean }];
-type MessageIds = 'rawPrimitive' | 'baseColour' | 'paletteColour' | 'arbitraryColour' | 'darkVariant';
+type MessageIds = 'rawPrimitive' | 'baseColour' | 'paletteColour' | 'arbitraryColour' | 'darkVariant' | 'gradient';
 
 /** DaisyUI classes that have a primitive, and what to use instead. */
 export const PRIMITIVES: [RegExp, string][] = [
@@ -59,6 +61,8 @@ const PALETTE = new RegExp(
 const SOLID_WHITE_BLACK = new RegExp(`^${UTIL}-(white|black)$`);
 /** Light tints of the action colour: one token, bg-action-subtle (the brand's brand-subtle). */
 const ACTION_TINT = /^bg-primary\/(5|10|15)$/;
+/** Tailwind gradient utilities and their colour stops. */
+const GRADIENT = /^(bg-(linear|radial|conic|gradient)(-.+)?|(from|via|to)-.+)$/;
 const ARBITRARY = /^[a-z-]+-\[(#|rgba?\(|hsla?\(|oklch\(|oklab\(|color-mix\()/;
 
 const HINT_BASE =
@@ -76,6 +80,8 @@ function parse(token: string): { variants: string[]; util: string } {
 export function check(token: string, primitives: boolean): { messageId: MessageIds; hint: string } | null {
   const { variants, util } = parse(token);
   if (variants.includes('dark')) return { messageId: 'darkVariant', hint: 'tokens already switch with the theme' };
+  if (GRADIENT.test(util))
+    return { messageId: 'gradient', hint: 'use a flat token fill (bg-surface-*, bg-action-subtle)' };
   if (BASE.test(util)) return { messageId: 'baseColour', hint: HINT_BASE };
   if (PALETTE.test(util)) return { messageId: 'paletteColour', hint: HINT_PALETTE };
   if (SOLID_WHITE_BLACK.test(util) && !/^text-white$/.test(util))
@@ -150,6 +156,7 @@ export const rule = ESLintUtils.RuleCreator(() => __filename)<Options, MessageId
       paletteColour: '`{{cls}}` is a fixed palette colour: {{hint}}.',
       arbitraryColour: '`{{cls}}` hard-codes a colour: {{hint}}.',
       darkVariant: '`{{cls}}`: {{hint}}; drop the dark: variant and use a token.',
+      gradient: '`{{cls}}` draws a gradient; the brand uses flat fills: {{hint}}.',
     },
   },
   defaultOptions: [{ primitives: true }],

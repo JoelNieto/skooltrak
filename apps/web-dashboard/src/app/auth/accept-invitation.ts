@@ -8,7 +8,7 @@ import { authClient } from './auth-client';
   selector: 'app-accept-invitation',
   imports: [Alert, Button, Card, CardBody, Spinner, BrandLogo, RouterLink],
   template: `
-    <div class="gradient-bg min-h-screen flex items-center justify-center p-4">
+    <div class="bg-surface-0 min-h-screen flex items-center justify-center p-4">
       <div class="max-w-md w-full flex flex-col gap-8 items-center">
         <ui-brand-logo alt="" class="h-12" />
         <div uiCard class="w-full">

@@ -6,7 +6,7 @@ import { Button } from '#/ui';
 @Component({
   selector: 'app-not-found',
   imports: [Button],
-  template: `<div class="gradient-bg min-h-screen flex items-center justify-center p-4">
+  template: `<div class="bg-surface-0 min-h-screen flex items-center justify-center p-4">
     <div class="max-w-lg w-full bg-surface-1 border border-line rounded-2xl overflow-hidden">
       <div class="p-8">
         <!-- Error Code -->

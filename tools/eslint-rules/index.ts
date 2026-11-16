@@ -1,3 +1,4 @@
+import { RULE_NAME as flatStylesName, rule as flatStyles } from './rules/flat-styles';
 import { RULE_NAME as designTokensName, rule as designTokens } from './rules/design-tokens';
 /**
  * Import your custom workspace rules at the top of this file.
@@ -24,5 +25,5 @@ module.exports = {
    *  [myCustomRuleName]: myCustomRule
    * }
    */
-  rules: { [designTokensName]: designTokens },
+  rules: { [designTokensName]: designTokens, [flatStylesName]: flatStyles },
 };

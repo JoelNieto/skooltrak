@@ -12,7 +12,7 @@ import Store from '../core/store';
   selector: 'app-create-school',
   imports: [UiCheckbox, UiChoice, UiField, UiInput, Button, BrandLogo, FormField, FormsModule],
   template: `
-    <div class="min-h-screen flex flex-col gradient-bg">
+    <div class="min-h-screen flex flex-col bg-surface-0">
       <!-- Fixed Header -->
       <header class="p-4 md:p-6 flex items-center justify-between">
         <ui-brand-logo class="h-8 md:h-10" />

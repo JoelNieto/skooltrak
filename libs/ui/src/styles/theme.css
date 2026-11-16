@@ -14,7 +14,7 @@
  * action without touching neutrals or text contrast.
  *
  * Values come from the Skooltrak brand system (Track Blue, Runner Orange, Night ink; Space Grotesk
- * headings, Geist text): https://claude.ai/artifact/RQXcMiWa88ZKmxoC8dSJaS. Tokens marked
+ * headings, Geist text, Geist Mono codes): https://claude.ai/artifact/RQXcMiWa88ZKmxoC8dSJaS. Tokens marked
  * "derived" fill levels the brand doesn't name (body ink, subtle ink, sunken surface, strong line,
  * control border), chosen for contrast: every ink ≥4.5:1 and control borders ≥3:1 on every surface.
  * Surfaces keep this app's model (grey page, white cards); the brand's own pages use the inverse.
@@ -264,6 +264,9 @@
   --font-sans: 'Geist', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
   /* Headlines and screen titles (font-display); applied to headings in DS 11 (type scale). */
   --font-display: 'Space Grotesk', 'Geist', ui-sans-serif, system-ui, sans-serif;
+  /* Codes and identifiers (enrollment and invitation codes, the login activity log). Loaded from
+   * Google Fonts with Geist in each app's styles.css. */
+  --font-mono: 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   --tab-border-color: var(--color-primary);
 }
 

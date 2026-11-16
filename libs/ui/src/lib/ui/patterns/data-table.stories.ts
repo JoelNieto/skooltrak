@@ -1,4 +1,4 @@
-import { Component, computed, input, signal, WritableSignal } from '@angular/core';
+import { Component, computed, input, resource, signal, WritableSignal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import type { Meta, StoryObj } from '@storybook/angular';
 import { Badge, BadgeTone } from '../components/badge';
@@ -11,6 +11,7 @@ import { UiRowAction, UiRowActions } from '../components/row-actions';
 import { UiSortHeader, UiTable, UiTableSort } from '../components/table';
 import { UiTableEmpty, UiTableError, UiTableSkeleton } from '../components/table-states';
 import { UiFilterChip, UiTableToolbar } from '../components/table-toolbar';
+import { listState } from '../services/list-state';
 
 type Status = 'Al día' | 'Pendiente' | 'En riesgo';
 interface Student {
@@ -44,7 +45,9 @@ type DemoState = 'ready' | 'loading' | 'error' | 'empty';
 
 /**
  * Reference composition: toolbar (search, filters, active-filter chips, result count, main action),
- * sortable headers, row actions and the loading / error / empty / no-results states.
+ * sortable headers, row actions and the loading / error / empty / no-results states. Rows come
+ * through a resource with simulated latency and listState: the skeleton shows only on a first load
+ * slower than 200ms, and later searches, filters and sorts keep the rows on screen, dimmed.
  */
 @Component({
   selector: 'ui-data-table-demo',
@@ -112,7 +115,7 @@ type DemoState = 'ready' | 'loading' | 'error' | 'empty';
           </ui-field>
         </ui-filter-menu>
         <span uiToolbarEnd class="text-sm text-ink-muted tabular-nums" aria-live="polite">
-          {{ visible().length }} de {{ total() }}
+          {{ list.rows()?.length ?? 0 }} de {{ total() }}
         </span>
         <button uiToolbarEnd uiButton variant="primary" size="sm" type="button">
           <ui-icon name="plus" class="text-base" />Agregar estudiante
@@ -137,7 +140,7 @@ type DemoState = 'ready' | 'loading' | 'error' | 'empty';
       </ui-table-toolbar>
 
       <div uiCard class="overflow-x-auto">
-        <table uiTable rowHover [(sort)]="sort" [attr.aria-busy]="state() === 'loading'">
+        <table uiTable rowHover [(sort)]="sort" [attr.aria-busy]="results.isLoading()">
           <thead>
             <tr>
               <th uiSortHeader="name">Estudiante</th>
@@ -147,54 +150,58 @@ type DemoState = 'ready' | 'loading' | 'error' | 'empty';
               <th class="w-12"><span class="sr-only">Acciones</span></th>
             </tr>
           </thead>
-          @if (state() === 'loading') {
-            <tbody uiTableSkeleton [columns]="5"></tbody>
-          } @else if (state() === 'error') {
-            <tbody>
-              <tr uiTableError [columns]="5"></tr>
-            </tbody>
-          } @else {
-            <tbody>
-              @for (s of visible(); track s.name) {
-                <tr>
-                  <td>{{ s.name }}</td>
-                  <td>{{ s.group }}</td>
-                  <td class="text-right tabular-nums">{{ s.average.toFixed(1) }}</td>
-                  <td>
-                    <span uiBadge size="sm" [tone]="tone[s.status]">{{ s.status }}</span>
-                  </td>
-                  <td class="text-right">
-                    <ui-row-actions
-                      [actions]="actions"
-                      [label]="'Acciones para ' + s.name"
-                      (action)="last.set($event + ' · ' + s.name)"
-                    />
-                  </td>
-                </tr>
-              } @empty {
-                @if (total() === 0) {
-                  <tr
-                    uiTableEmpty
-                    [columns]="5"
-                    icon="users"
-                    title="Aún no hay estudiantes en este grupo"
-                    description="Importa la lista desde un CSV o agrégalos uno por uno."
-                  >
-                    <button uiButton size="sm" variant="primary" type="button">Agregar estudiante</button>
+          @switch (list.phase()) {
+            @case ('skeleton') {
+              <tbody uiTableSkeleton [columns]="5" [rows]="10"></tbody>
+            }
+            @case ('error') {
+              <tbody>
+                <tr uiTableError [columns]="5" (retry)="results.reload()"></tr>
+              </tbody>
+            }
+            @case ('ready') {
+              <tbody>
+                @for (s of list.rows(); track s.name) {
+                  <tr>
+                    <td>{{ s.name }}</td>
+                    <td>{{ s.group }}</td>
+                    <td class="text-right tabular-nums">{{ s.average.toFixed(1) }}</td>
+                    <td>
+                      <span uiBadge size="sm" [tone]="tone[s.status]">{{ s.status }}</span>
+                    </td>
+                    <td class="text-right">
+                      <ui-row-actions
+                        [actions]="actions"
+                        [label]="'Acciones para ' + s.name"
+                        (action)="last.set($event + ' · ' + s.name)"
+                      />
+                    </td>
                   </tr>
-                } @else {
-                  <tr
-                    uiTableEmpty
-                    [columns]="5"
-                    icon="search-x"
-                    title="Sin resultados"
-                    description="Ningún estudiante coincide con estos filtros."
-                  >
-                    <button uiButton size="sm" type="button" (click)="clear()">Limpiar filtros</button>
-                  </tr>
+                } @empty {
+                  @if (total() === 0) {
+                    <tr
+                      uiTableEmpty
+                      [columns]="5"
+                      icon="users"
+                      title="Aún no hay estudiantes en este grupo"
+                      description="Importa la lista desde un CSV o agrégalos uno por uno."
+                    >
+                      <button uiButton size="sm" variant="primary" type="button">Agregar estudiante</button>
+                    </tr>
+                  } @else {
+                    <tr
+                      uiTableEmpty
+                      [columns]="5"
+                      icon="search-x"
+                      title="Sin resultados"
+                      description="Ningún estudiante coincide con estos filtros."
+                    >
+                      <button uiButton size="sm" type="button" (click)="clear()">Limpiar filtros</button>
+                    </tr>
+                  }
                 }
-              }
-            </tbody>
+              </tbody>
+            }
           }
         </table>
       </div>
@@ -204,6 +211,8 @@ type DemoState = 'ready' | 'loading' | 'error' | 'empty';
 })
 class DataTableDemo {
   readonly state = input<DemoState>('ready');
+  /** Simulated response time (ms). */
+  readonly latency = input(0);
 
   protected readonly groups = ['7° A', '7° B', '7° C'];
   protected readonly statuses: Status[] = ['Al día', 'Pendiente', 'En riesgo'];
@@ -232,25 +241,41 @@ class DataTableDemo {
   protected readonly hasFilters = computed(() => !!this.query() || this.activeCount() > 0);
   protected readonly bandLabel = computed(() => this.bands.find((b) => b.value === this.band())?.label ?? '');
 
-  protected readonly visible = computed(() => {
-    const q = this.query().trim().toLocaleLowerCase('es');
-    const groups = this.selectedGroups();
-    const statuses = this.selectedStatuses();
-    const band = this.bands.find((b) => b.value === this.band()) ?? this.bands[0];
-    const filtered = this.rows().filter(
-      (s) =>
-        (!q || s.name.toLocaleLowerCase('es').includes(q)) &&
-        (!groups.length || groups.includes(s.group)) &&
-        (!statuses.length || statuses.includes(s.status)) &&
-        s.average >= band.min &&
-        s.average < band.max,
-    );
-    const sort = this.sort();
-    if (!sort) return filtered;
-    const key = sort.active as keyof Student;
-    const dir = sort.direction === 'asc' ? 1 : -1;
-    return [...filtered].sort((a, b) => (a[key] > b[key] ? dir : a[key] < b[key] ? -dir : 0));
+  /** The "server": filters and sorts after `latency`; the loading state never answers, error fails. */
+  protected readonly results = resource({
+    params: () => ({
+      state: this.state(),
+      rows: this.rows(),
+      query: this.query().trim().toLocaleLowerCase('es'),
+      groups: this.selectedGroups(),
+      statuses: this.selectedStatuses(),
+      band: this.bands.find((b) => b.value === this.band()) ?? this.bands[0],
+      sort: this.sort(),
+    }),
+    loader: async ({ params: p, abortSignal }) => {
+      await new Promise<void>((resolve, reject) => {
+        const t = p.state === 'loading' ? undefined : setTimeout(resolve, this.latency());
+        abortSignal.addEventListener('abort', () => {
+          clearTimeout(t);
+          reject(abortSignal.reason);
+        });
+      });
+      if (p.state === 'error') throw new Error('No se pudo cargar la lista');
+      const filtered = p.rows.filter(
+        (s) =>
+          (!p.query || s.name.toLocaleLowerCase('es').includes(p.query)) &&
+          (!p.groups.length || p.groups.includes(s.group)) &&
+          (!p.statuses.length || p.statuses.includes(s.status)) &&
+          s.average >= p.band.min &&
+          s.average < p.band.max,
+      );
+      if (!p.sort) return filtered;
+      const key = p.sort.active as keyof Student;
+      const dir = p.sort.direction === 'asc' ? 1 : -1;
+      return [...filtered].sort((a, b) => (a[key] > b[key] ? dir : a[key] < b[key] ? -dir : 0));
+    },
   });
+  protected readonly list = listState(this.results);
 
   protected toggle<T>(list: WritableSignal<T[]>, value: T): void {
     list.update((values) => (values.includes(value) ? values.filter((v) => v !== value) : [...values, value]));
@@ -273,8 +298,11 @@ class DataTableDemo {
 const meta: Meta<DataTableDemo> = {
   title: 'Patterns/Data table',
   component: DataTableDemo,
-  argTypes: { state: { control: 'inline-radio', options: ['ready', 'loading', 'error', 'empty'] } },
-  args: { state: 'ready' },
+  argTypes: {
+    state: { control: 'inline-radio', options: ['ready', 'loading', 'error', 'empty'] },
+    latency: { control: { type: 'range', min: 0, max: 2000, step: 50 } },
+  },
+  args: { state: 'ready', latency: 120 },
 };
 
 export default meta;
@@ -282,6 +310,8 @@ type Story = StoryObj<DataTableDemo>;
 
 /** Search, filter (chips show what's active), sort and act on rows. Filter to nothing to see "no results". */
 export const Interactive: Story = {};
+/** A slow connection: the skeleton on the first load, then the rows stay (dimmed) while results load. */
+export const SlowNetwork: Story = { args: { latency: 900 } };
 export const Loading: Story = { args: { state: 'loading' } };
 export const LoadFailed: Story = { args: { state: 'error' } };
 export const NoStudentsYet: Story = { args: { state: 'empty' } };

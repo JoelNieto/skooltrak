@@ -16,6 +16,7 @@ import {
   UiTableError,
   UiTableSkeleton,
   UiTableToolbar,
+  listState,
 } from '#/ui';
 import { DatePipe } from '@angular/common';
 import { HttpClient, httpResource } from '@angular/common/http';
@@ -74,42 +75,46 @@ import SubjectsForm from '../forms/subjects-form';
             <th class="w-12"><span class="sr-only">Acciones</span></th>
           </tr>
         </thead>
-        @if (subjects.isLoading() && !subjects.hasValue()) {
-          <tbody uiTableSkeleton [columns]="5"></tbody>
-        } @else if (subjects.error()) {
-          <tbody>
-            <tr uiTableError [columns]="5" (retry)="subjects.reload()"></tr>
-          </tbody>
-        } @else {
-          <tbody>
-            @for (subject of subjects.value()?.data ?? []; track subject.id) {
-              <tr>
-                <td>{{ subject.name }}</td>
-                <td>{{ subject.code }}</td>
-                <td>{{ subject.createdAt | date: 'short' }}</td>
-                <td>{{ subject.updatedAt | date: 'short' }}</td>
-                <td>
-                  <ui-row-actions
-                    [actions]="rowActions"
-                    [label]="'Acciones para ' + subject.name"
-                    (action)="onRowAction($event, subject)"
-                  />
-                </td>
-              </tr>
-            } @empty {
-              @if (searchText()) {
-                <tr
-                  uiTableEmpty
-                  [columns]="5"
-                  icon="search-x"
-                  title="Sin resultados"
-                  description="Ningún resultado coincide con la búsqueda."
-                ></tr>
-              } @else {
-                <tr uiTableEmpty [columns]="5" icon="book-open" title="Aún no hay materias"></tr>
+        @switch (subjectsList.phase()) {
+          @case ('skeleton') {
+            <tbody uiTableSkeleton [rows]="pageSize()" [columns]="5"></tbody>
+          }
+          @case ('error') {
+            <tbody>
+              <tr uiTableError [columns]="5" (retry)="subjects.reload()"></tr>
+            </tbody>
+          }
+          @case ('ready') {
+            <tbody>
+              @for (subject of subjectsList.rows()?.data ?? []; track subject.id) {
+                <tr>
+                  <td>{{ subject.name }}</td>
+                  <td>{{ subject.code }}</td>
+                  <td>{{ subject.createdAt | date: 'short' }}</td>
+                  <td>{{ subject.updatedAt | date: 'short' }}</td>
+                  <td>
+                    <ui-row-actions
+                      [actions]="rowActions"
+                      [label]="'Acciones para ' + subject.name"
+                      (action)="onRowAction($event, subject)"
+                    />
+                  </td>
+                </tr>
+              } @empty {
+                @if (searchText()) {
+                  <tr
+                    uiTableEmpty
+                    [columns]="5"
+                    icon="search-x"
+                    title="Sin resultados"
+                    description="Ningún resultado coincide con la búsqueda."
+                  ></tr>
+                } @else {
+                  <tr uiTableEmpty [columns]="5" icon="book-open" title="Aún no hay materias"></tr>
+                }
               }
-            }
-          </tbody>
+            </tbody>
+          }
         }
       </table>
       <div class="p-4 rounded-b-lg ">
@@ -134,7 +139,7 @@ export default class Subjects {
   public page = signal(1);
   public pageSize = signal(10);
 
-  total = computed(() => this.subjects.value()?.meta?.total ?? 0);
+  total = computed(() => this.subjectsList.rows()?.meta?.total ?? 0);
 
   public subjects = httpResource<PaginatedResponse<Prisma.SubjectGetPayload<false>>>(() => ({
     url: '/api/v1/subjects',
@@ -146,6 +151,8 @@ export default class Subjects {
       orderDirection: this.pagination.sortOrder(),
     }),
   }));
+  /** subjects with smooth loading: previous rows stay while the next page / sort / search loads. */
+  protected readonly subjectsList = listState(this.subjects);
 
   public editSubject(subject?: Prisma.SubjectGetPayload<false>) {
     this.#modal

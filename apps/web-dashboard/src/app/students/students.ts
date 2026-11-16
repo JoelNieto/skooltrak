@@ -17,6 +17,7 @@ import {
   UiTableError,
   UiTableSkeleton,
   UiTableToolbar,
+  listState,
 } from '#/ui';
 import { DatePipe } from '@angular/common';
 import { HttpClient, httpResource } from '@angular/common/http';
@@ -105,77 +106,81 @@ type StudentRow = {
             <th class="w-12"><span class="sr-only">Acciones</span></th>
           </tr>
         </thead>
-        @if (students.isLoading() && !students.hasValue()) {
-          <tbody uiTableSkeleton [columns]="7"></tbody>
-        } @else if (students.error()) {
-          <tbody>
-            <tr uiTableError [columns]="7" (retry)="students.reload()"></tr>
-          </tbody>
-        } @else {
-          <tbody>
-            @for (student of students.value()?.data; track student.id) {
-              <tr>
-                <td>
-                  <a [routerLink]="['/students', student.id]" class="link link-hover">{{ student.name }}</a>
-                </td>
-                <td>
-                  <div class="flex items-center gap-2">
-                    {{ student.email }}
-                    @if (student.user?.emailVerified) {
-                      <span uiBadge tone="success" size="sm" title="Verificado">
-                        <ui-icon name="circle-check" class="text-xs!" />
-                      </span>
+        @switch (studentsList.phase()) {
+          @case ('skeleton') {
+            <tbody uiTableSkeleton [rows]="pageSize()" [columns]="7"></tbody>
+          }
+          @case ('error') {
+            <tbody>
+              <tr uiTableError [columns]="7" (retry)="students.reload()"></tr>
+            </tbody>
+          }
+          @case ('ready') {
+            <tbody>
+              @for (student of studentsList.rows()?.data; track student.id) {
+                <tr>
+                  <td>
+                    <a [routerLink]="['/students', student.id]" class="link link-hover">{{ student.name }}</a>
+                  </td>
+                  <td>
+                    <div class="flex items-center gap-2">
+                      {{ student.email }}
+                      @if (student.user?.emailVerified) {
+                        <span uiBadge tone="success" size="sm" title="Verificado">
+                          <ui-icon name="circle-check" class="text-xs!" />
+                        </span>
+                      } @else {
+                        <span uiBadge tone="warning" size="sm" title="Pendiente de verificación">
+                          <ui-icon name="clock" class="text-xs!" />
+                        </span>
+                      }
+                    </div>
+                  </td>
+                  <td>{{ student.documentId }}</td>
+                  <td>
+                    <span uiBadge size="sm" [tone]="enrollmentTone(student.enrollmentStatus ?? 'ACTIVE')">
+                      {{ getStatusLabel(student.enrollmentStatus ?? 'ACTIVE') }}
+                    </span>
+                  </td>
+                  <td>
+                    @if (student.classGroup) {
+                      <a uiBadge tone="action" size="sm" [routerLink]="['/groups', student.classGroupId]">
+                        {{ student.classGroup.name }}
+                      </a>
                     } @else {
-                      <span uiBadge tone="warning" size="sm" title="Pendiente de verificación">
-                        <ui-icon name="clock" class="text-xs!" />
-                      </span>
+                      <span class="text-ink-subtle">-</span>
                     }
-                  </div>
-                </td>
-                <td>{{ student.documentId }}</td>
-                <td>
-                  <span uiBadge size="sm" [tone]="enrollmentTone(student.enrollmentStatus ?? 'ACTIVE')">
-                    {{ getStatusLabel(student.enrollmentStatus ?? 'ACTIVE') }}
-                  </span>
-                </td>
-                <td>
-                  @if (student.classGroup) {
-                    <a uiBadge tone="action" size="sm" [routerLink]="['/groups', student.classGroupId]">
-                      {{ student.classGroup.name }}
-                    </a>
-                  } @else {
-                    <span class="text-ink-subtle">-</span>
-                  }
-                </td>
-                <td>{{ student.createdAt | date: 'short' }}</td>
-                <td>
-                  <ui-row-actions
-                    [actions]="rowActions(student)"
-                    [label]="'Acciones para ' + student.name"
-                    (action)="onRowAction($event, student)"
-                  />
-                </td>
-              </tr>
-            } @empty {
-              @if (searchText()) {
-                <tr
-                  uiTableEmpty
-                  [columns]="7"
-                  icon="search-x"
-                  title="Sin resultados"
-                  description="Ningún resultado coincide con la búsqueda."
-                ></tr>
-              } @else {
-                <tr
-                  uiTableEmpty
-                  [columns]="7"
-                  icon="users"
-                  title="Aún no hay estudiantes"
-                  description="Agrégalos uno por uno o impórtalos desde un CSV."
-                ></tr>
+                  </td>
+                  <td>{{ student.createdAt | date: 'short' }}</td>
+                  <td>
+                    <ui-row-actions
+                      [actions]="rowActions(student)"
+                      [label]="'Acciones para ' + student.name"
+                      (action)="onRowAction($event, student)"
+                    />
+                  </td>
+                </tr>
+              } @empty {
+                @if (searchText()) {
+                  <tr
+                    uiTableEmpty
+                    [columns]="7"
+                    icon="search-x"
+                    title="Sin resultados"
+                    description="Ningún resultado coincide con la búsqueda."
+                  ></tr>
+                } @else {
+                  <tr
+                    uiTableEmpty
+                    [columns]="7"
+                    icon="users"
+                    title="Aún no hay estudiantes"
+                    description="Agrégalos uno por uno o impórtalos desde un CSV."
+                  ></tr>
+                }
               }
-            }
-          </tbody>
+            </tbody>
+          }
         }
       </table>
       <div class="p-4 rounded-b-lg ">
@@ -199,7 +204,7 @@ export default class Students {
   public auth = inject(Auth);
   public page = signal(1);
   public pageSize = signal(10);
-  public total = computed(() => this.students.value()?.meta?.total ?? 0);
+  public total = computed(() => this.studentsList.rows()?.meta?.total ?? 0);
 
   public students = httpResource<PaginatedResponse<StudentRow>>(() => ({
     url: '/api/v1/students',
@@ -211,6 +216,8 @@ export default class Students {
       orderDirection: this.pagination.sortOrder(),
     }),
   }));
+  /** students with smooth loading: previous rows stay while the next page / sort / search loads. */
+  protected readonly studentsList = listState(this.students);
 
   getStatusLabel(status: $Enums.EnrollmentStatus): string {
     return ENROLLMENT_STATUS_LABELS[status] || status;

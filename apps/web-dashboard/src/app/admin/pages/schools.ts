@@ -14,6 +14,7 @@ import {
   UiTableError,
   UiTableSkeleton,
   UiTableToolbar,
+  listState,
 } from '#/ui';
 import { DatePipe } from '@angular/common';
 import { HttpClient, httpResource } from '@angular/common/http';
@@ -82,57 +83,61 @@ type SchoolRow = {
             <th class="w-12"><span class="sr-only">Acciones</span></th>
           </tr>
         </thead>
-        @if (schools.isLoading() && !schools.hasValue()) {
-          <tbody uiTableSkeleton [columns]="7"></tbody>
-        } @else if (schools.error()) {
-          <tbody>
-            <tr uiTableError [columns]="7" (retry)="schools.reload()"></tr>
-          </tbody>
-        } @else {
-          <tbody>
-            @for (school of schools.value() ?? []; track school.id) {
-              <tr>
-                <td>
-                  <a [routerLink]="['/schools', school.id]" class="flex items-center gap-3 hover:opacity-80">
-                    <div
-                      class="min-w-10 max-w-16 min-h-8 max-h-12 rounded-lg border border-line flex items-center justify-center overflow-hidden bg-surface-0 shrink-0"
-                    >
-                      @if (school.logoUrl) {
-                        <img [src]="school.logoUrl" [alt]="school.name" class="w-full h-auto object-contain" />
-                      } @else {
-                        <ui-icon name="school" class="text-xl text-ink-subtle" />
-                      }
-                    </div>
-                    <span class="link link-hover font-medium">{{ school.name }}</span>
-                  </a>
-                </td>
-                <td>{{ school.shortName }}</td>
-                <td>{{ school.city || '-' }}</td>
-                <td>{{ school.email || '-' }}</td>
-                <td>{{ school.phone || '-' }}</td>
-                <td>{{ school.createdAt | date: 'short' }}</td>
-                <td>
-                  <ui-row-actions
-                    [actions]="rowActions(school)"
-                    [label]="'Acciones para ' + school.name"
-                    (action)="onRowAction($event, school)"
-                  />
-                </td>
-              </tr>
-            } @empty {
-              @if (searchText()) {
-                <tr
-                  uiTableEmpty
-                  [columns]="7"
-                  icon="search-x"
-                  title="Sin resultados"
-                  description="Ningún resultado coincide con la búsqueda."
-                ></tr>
-              } @else {
-                <tr uiTableEmpty [columns]="7" icon="school" title="Aún no hay colegios"></tr>
+        @switch (schoolsList.phase()) {
+          @case ('skeleton') {
+            <tbody uiTableSkeleton [rows]="pagination.take()" [columns]="7"></tbody>
+          }
+          @case ('error') {
+            <tbody>
+              <tr uiTableError [columns]="7" (retry)="schools.reload()"></tr>
+            </tbody>
+          }
+          @case ('ready') {
+            <tbody>
+              @for (school of schoolsList.rows() ?? []; track school.id) {
+                <tr>
+                  <td>
+                    <a [routerLink]="['/schools', school.id]" class="flex items-center gap-3 hover:opacity-80">
+                      <div
+                        class="min-w-10 max-w-16 min-h-8 max-h-12 rounded-lg border border-line flex items-center justify-center overflow-hidden bg-surface-0 shrink-0"
+                      >
+                        @if (school.logoUrl) {
+                          <img [src]="school.logoUrl" [alt]="school.name" class="w-full h-auto object-contain" />
+                        } @else {
+                          <ui-icon name="school" class="text-xl text-ink-subtle" />
+                        }
+                      </div>
+                      <span class="link link-hover font-medium">{{ school.name }}</span>
+                    </a>
+                  </td>
+                  <td>{{ school.shortName }}</td>
+                  <td>{{ school.city || '-' }}</td>
+                  <td>{{ school.email || '-' }}</td>
+                  <td>{{ school.phone || '-' }}</td>
+                  <td>{{ school.createdAt | date: 'short' }}</td>
+                  <td>
+                    <ui-row-actions
+                      [actions]="rowActions(school)"
+                      [label]="'Acciones para ' + school.name"
+                      (action)="onRowAction($event, school)"
+                    />
+                  </td>
+                </tr>
+              } @empty {
+                @if (searchText()) {
+                  <tr
+                    uiTableEmpty
+                    [columns]="7"
+                    icon="search-x"
+                    title="Sin resultados"
+                    description="Ningún resultado coincide con la búsqueda."
+                  ></tr>
+                } @else {
+                  <tr uiTableEmpty [columns]="7" icon="school" title="Aún no hay colegios"></tr>
+                }
               }
-            }
-          </tbody>
+            </tbody>
+          }
         }
       </table>
       <div class="p-4 rounded-b-lg">
@@ -155,6 +160,8 @@ export default class Schools {
   searchText = signal('');
 
   public schools = httpResource<SchoolRow[]>(() => '/api/v1/schools', { defaultValue: [] });
+  /** schools with smooth loading: previous rows stay while the next page / sort / search loads. */
+  protected readonly schoolsList = listState(this.schools);
 
   constructor() {
     afterRenderEffect(() => {

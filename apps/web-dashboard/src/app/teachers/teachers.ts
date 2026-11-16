@@ -16,6 +16,7 @@ import {
   UiTableError,
   UiTableSkeleton,
   UiTableToolbar,
+  listState,
 } from '#/ui';
 import { DatePipe } from '@angular/common';
 import { HttpClient, httpResource } from '@angular/common/http';
@@ -80,72 +81,80 @@ type Teacher = Prisma.TeacherGetPayload<{ include: { user: true } }> & {
             <th class="w-12"><span class="sr-only">Acciones</span></th>
           </tr>
         </thead>
-        @if (teachers.isLoading() && !teachers.hasValue()) {
-          <tbody uiTableSkeleton [columns]="4"></tbody>
-        } @else if (teachers.error()) {
-          <tbody>
-            <tr uiTableError [columns]="4" (retry)="teachers.reload()"></tr>
-          </tbody>
-        } @else {
-          <tbody>
-            @for (teacher of teachers.value()?.data; track teacher.id) {
-              <tr>
-                <td>
-                  <div class="flex gap-2 items-center cursor-pointer" [routerLink]="['/teachers', teacher.id]">
-                    <div class="avatar avatar-placeholder">
-                      @if (avatarUrlFor(teacher)) {
-                        <div class="w-8 rounded-full overflow-hidden">
-                          <img [src]="avatarUrlFor(teacher)!" [alt]="teacher.name" class="w-full h-full object-cover" />
-                        </div>
-                      } @else {
-                        <div class="text-white w-8 rounded-full" [style.background]="teacher.user?.color">
-                          <span class="text-sm">{{ teacher.initials }}</span>
-                        </div>
-                      }
-                    </div>
-                    <div class="flex flex-col">
-                      <div class="flex items-center gap-2">
-                        {{ teacher.name }}
-                        @if (teacher.user?.emailVerified) {
-                          <span uiBadge tone="success" size="sm" class="gap-1">
-                            <ui-icon name="circle-check" class="text-sm!" />
-                            Verificado
-                          </span>
+        @switch (teachersList.phase()) {
+          @case ('skeleton') {
+            <tbody uiTableSkeleton [rows]="pageSize()" [columns]="4"></tbody>
+          }
+          @case ('error') {
+            <tbody>
+              <tr uiTableError [columns]="4" (retry)="teachers.reload()"></tr>
+            </tbody>
+          }
+          @case ('ready') {
+            <tbody>
+              @for (teacher of teachersList.rows()?.data; track teacher.id) {
+                <tr>
+                  <td>
+                    <div class="flex gap-2 items-center cursor-pointer" [routerLink]="['/teachers', teacher.id]">
+                      <div class="avatar avatar-placeholder">
+                        @if (avatarUrlFor(teacher)) {
+                          <div class="w-8 rounded-full overflow-hidden">
+                            <img
+                              [src]="avatarUrlFor(teacher)!"
+                              [alt]="teacher.name"
+                              class="w-full h-full object-cover"
+                            />
+                          </div>
                         } @else {
-                          <span uiBadge tone="warning" size="sm" class="gap-1">
-                            <ui-icon name="clock" class="text-sm!" />
-                            Pendiente
-                          </span>
+                          <div class="text-white w-8 rounded-full" [style.background]="teacher.user?.color">
+                            <span class="text-sm">{{ teacher.initials }}</span>
+                          </div>
                         }
                       </div>
-                      <span class="text-sm text-ink-subtle">{{ teacher.user?.email }}</span>
+                      <div class="flex flex-col">
+                        <div class="flex items-center gap-2">
+                          {{ teacher.name }}
+                          @if (teacher.user?.emailVerified) {
+                            <span uiBadge tone="success" size="sm" class="gap-1">
+                              <ui-icon name="circle-check" class="text-sm!" />
+                              Verificado
+                            </span>
+                          } @else {
+                            <span uiBadge tone="warning" size="sm" class="gap-1">
+                              <ui-icon name="clock" class="text-sm!" />
+                              Pendiente
+                            </span>
+                          }
+                        </div>
+                        <span class="text-sm text-ink-subtle">{{ teacher.user?.email }}</span>
+                      </div>
                     </div>
-                  </div>
-                </td>
-                <td>{{ teacher.createdAt | date: 'short' }}</td>
-                <td>{{ teacher.updatedAt | date: 'short' }}</td>
-                <td>
-                  <ui-row-actions
-                    [actions]="rowActions(teacher)"
-                    [label]="'Acciones para ' + teacher.name"
-                    (action)="onRowAction($event, teacher)"
-                  />
-                </td>
-              </tr>
-            } @empty {
-              @if (form.searchText().value()) {
-                <tr
-                  uiTableEmpty
-                  [columns]="4"
-                  icon="search-x"
-                  title="Sin resultados"
-                  description="Ningún resultado coincide con la búsqueda."
-                ></tr>
-              } @else {
-                <tr uiTableEmpty [columns]="4" icon="users" title="Aún no hay docentes"></tr>
+                  </td>
+                  <td>{{ teacher.createdAt | date: 'short' }}</td>
+                  <td>{{ teacher.updatedAt | date: 'short' }}</td>
+                  <td>
+                    <ui-row-actions
+                      [actions]="rowActions(teacher)"
+                      [label]="'Acciones para ' + teacher.name"
+                      (action)="onRowAction($event, teacher)"
+                    />
+                  </td>
+                </tr>
+              } @empty {
+                @if (form.searchText().value()) {
+                  <tr
+                    uiTableEmpty
+                    [columns]="4"
+                    icon="search-x"
+                    title="Sin resultados"
+                    description="Ningún resultado coincide con la búsqueda."
+                  ></tr>
+                } @else {
+                  <tr uiTableEmpty [columns]="4" icon="users" title="Aún no hay docentes"></tr>
+                }
               }
-            }
-          </tbody>
+            </tbody>
+          }
         }
       </table>
       <div class="p-4 rounded-b-lg ">
@@ -170,7 +179,7 @@ export default class Teachers {
   searchText = signal('');
   public page = signal(1);
   public pageSize = signal(10);
-  total = computed(() => this.teachers.value()?.meta.total ?? 0);
+  total = computed(() => this.teachersList.rows()?.meta.total ?? 0);
   public formModel = signal<{ searchText: string }>({ searchText: '' });
   public form = form(this.formModel, (f) => {
     debounce(f.searchText, 400);
@@ -186,10 +195,12 @@ export default class Teachers {
       orderDirection: this.pagination.sortOrder(),
     }),
   }));
+  /** teachers with smooth loading: previous rows stay while the next page / sort / search loads. */
+  protected readonly teachersList = listState(this.teachers);
 
   public avatarMap = httpResource<Record<string, string | null>>(
     () => {
-      const ids = (this.teachers.value()?.data ?? []).map((t) => t.user?.id).filter((id): id is string => !!id);
+      const ids = (this.teachersList.rows()?.data ?? []).map((t) => t.user?.id).filter((id): id is string => !!id);
       if (!ids.length) return undefined;
       return { method: 'POST', url: '/api/v1/users/avatar-urls', body: { userIds: ids } };
     },

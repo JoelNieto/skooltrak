@@ -18,6 +18,7 @@ import {
   UiTableError,
   UiTableSkeleton,
   UiTableToolbar,
+  listState,
 } from '#/ui';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { Component, computed, inject, signal } from '@angular/core';
@@ -101,54 +102,58 @@ type CourseType = Prisma.CourseGetPayload<{
             <th class="w-12"><span class="sr-only">Acciones</span></th>
           </tr>
         </thead>
-        @if (courses.isLoading() && !courses.hasValue()) {
-          <tbody uiTableSkeleton [columns]="7"></tbody>
-        } @else if (courses.error()) {
-          <tbody>
-            <tr uiTableError [columns]="7" (retry)="courses.reload()"></tr>
-          </tbody>
-        } @else {
-          <tbody>
-            @for (course of courses.value()?.data; track course.id) {
-              <tr>
-                <td>
-                  {{ course.name }}
-                </td>
-                <td>{{ course.shortName }}</td>
-                <td>{{ course.code }}</td>
-                <td>{{ course.subject.name }}</td>
-                <td>{{ course.studyPlan.name }}</td>
-                <td>
-                  @if (course.teacher) {
-                    <a [routerLink]="['/teachers', course.teacher.id]" class="link link-primary">
-                      {{ course.teacher.firstName }} {{ course.teacher.fatherName }}
-                    </a>
-                  } @else {
-                    --
-                  }
-                </td>
-                <td>
-                  <ui-row-actions
-                    [actions]="rowActions(course)"
-                    [label]="'Acciones para ' + course.name"
-                    (action)="onRowAction($event, course)"
-                  />
-                </td>
-              </tr>
-            } @empty {
-              @if (form.searchText().value()) {
-                <tr
-                  uiTableEmpty
-                  [columns]="7"
-                  icon="search-x"
-                  title="Sin resultados"
-                  description="Ningún resultado coincide con la búsqueda."
-                ></tr>
-              } @else {
-                <tr uiTableEmpty [columns]="7" icon="book-open" title="Aún no hay cursos"></tr>
+        @switch (coursesList.phase()) {
+          @case ('skeleton') {
+            <tbody uiTableSkeleton [rows]="pageSize()" [columns]="7"></tbody>
+          }
+          @case ('error') {
+            <tbody>
+              <tr uiTableError [columns]="7" (retry)="courses.reload()"></tr>
+            </tbody>
+          }
+          @case ('ready') {
+            <tbody>
+              @for (course of coursesList.rows()?.data; track course.id) {
+                <tr>
+                  <td>
+                    {{ course.name }}
+                  </td>
+                  <td>{{ course.shortName }}</td>
+                  <td>{{ course.code }}</td>
+                  <td>{{ course.subject.name }}</td>
+                  <td>{{ course.studyPlan.name }}</td>
+                  <td>
+                    @if (course.teacher) {
+                      <a [routerLink]="['/teachers', course.teacher.id]" class="link link-primary">
+                        {{ course.teacher.firstName }} {{ course.teacher.fatherName }}
+                      </a>
+                    } @else {
+                      --
+                    }
+                  </td>
+                  <td>
+                    <ui-row-actions
+                      [actions]="rowActions(course)"
+                      [label]="'Acciones para ' + course.name"
+                      (action)="onRowAction($event, course)"
+                    />
+                  </td>
+                </tr>
+              } @empty {
+                @if (form.searchText().value()) {
+                  <tr
+                    uiTableEmpty
+                    [columns]="7"
+                    icon="search-x"
+                    title="Sin resultados"
+                    description="Ningún resultado coincide con la búsqueda."
+                  ></tr>
+                } @else {
+                  <tr uiTableEmpty [columns]="7" icon="book-open" title="Aún no hay cursos"></tr>
+                }
               }
-            }
-          </tbody>
+            </tbody>
+          }
         }
       </table>
       <div class="p-4 rounded-b-lg ">
@@ -182,7 +187,7 @@ export default class Courses {
     debounce(f.searchText, 400);
   });
 
-  public total = computed(() => this.courses.value()?.meta.total ?? 0);
+  public total = computed(() => this.coursesList.rows()?.meta.total ?? 0);
 
   public page = signal(1);
   public pageSize = signal(10);
@@ -217,6 +222,8 @@ export default class Courses {
       }),
     };
   });
+  /** courses with smooth loading: previous rows stay while the next page / sort / search loads. */
+  protected readonly coursesList = listState(this.courses);
 
   public editCourse(
     course?: Prisma.CourseGetPayload<{

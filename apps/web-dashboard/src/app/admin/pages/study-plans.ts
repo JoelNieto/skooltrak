@@ -18,6 +18,7 @@ import {
   UiTableError,
   UiTableSkeleton,
   UiTableToolbar,
+  listState,
 } from '#/ui';
 import { DatePipe } from '@angular/common';
 import { HttpClient, httpResource } from '@angular/common/http';
@@ -103,44 +104,48 @@ type DegreeRow = {
             <th>Acciones</th>
           </tr>
         </thead>
-        @if (studyPlans.isLoading() && !studyPlans.hasValue()) {
-          <tbody uiTableSkeleton [columns]="7"></tbody>
-        } @else if (studyPlans.error()) {
-          <tbody>
-            <tr uiTableError [columns]="7" (retry)="studyPlans.reload()"></tr>
-          </tbody>
-        } @else {
-          <tbody>
-            @for (studyPlan of studyPlans.value()?.data; track studyPlan.id) {
-              <tr>
-                <td>{{ studyPlan.name }}</td>
-                <td>{{ studyPlan.shortName }}</td>
-                <td>{{ studyPlan.level }}</td>
-                <td>{{ studyPlan.degree.name }}</td>
-                <td>{{ studyPlan.createdAt | date: 'short' }}</td>
-                <td>{{ studyPlan.updatedAt | date: 'short' }}</td>
-                <td>
-                  <ui-row-actions
-                    [actions]="rowActions"
-                    [label]="'Acciones para ' + studyPlan.name"
-                    (action)="onRowAction($event, studyPlan)"
-                  />
-                </td>
-              </tr>
-            } @empty {
-              @if (form.searchText().value()) {
-                <tr
-                  uiTableEmpty
-                  [columns]="7"
-                  icon="search-x"
-                  title="Sin resultados"
-                  description="Ningún resultado coincide con la búsqueda."
-                ></tr>
-              } @else {
-                <tr uiTableEmpty [columns]="7" icon="clipboard-list" title="Aún no hay planes de estudio"></tr>
+        @switch (studyPlansList.phase()) {
+          @case ('skeleton') {
+            <tbody uiTableSkeleton [rows]="pageSize()" [columns]="7"></tbody>
+          }
+          @case ('error') {
+            <tbody>
+              <tr uiTableError [columns]="7" (retry)="studyPlans.reload()"></tr>
+            </tbody>
+          }
+          @case ('ready') {
+            <tbody>
+              @for (studyPlan of studyPlansList.rows()?.data; track studyPlan.id) {
+                <tr>
+                  <td>{{ studyPlan.name }}</td>
+                  <td>{{ studyPlan.shortName }}</td>
+                  <td>{{ studyPlan.level }}</td>
+                  <td>{{ studyPlan.degree.name }}</td>
+                  <td>{{ studyPlan.createdAt | date: 'short' }}</td>
+                  <td>{{ studyPlan.updatedAt | date: 'short' }}</td>
+                  <td>
+                    <ui-row-actions
+                      [actions]="rowActions"
+                      [label]="'Acciones para ' + studyPlan.name"
+                      (action)="onRowAction($event, studyPlan)"
+                    />
+                  </td>
+                </tr>
+              } @empty {
+                @if (form.searchText().value()) {
+                  <tr
+                    uiTableEmpty
+                    [columns]="7"
+                    icon="search-x"
+                    title="Sin resultados"
+                    description="Ningún resultado coincide con la búsqueda."
+                  ></tr>
+                } @else {
+                  <tr uiTableEmpty [columns]="7" icon="clipboard-list" title="Aún no hay planes de estudio"></tr>
+                }
               }
-            }
-          </tbody>
+            </tbody>
+          }
         }
       </table>
       <div class="p-4 rounded-b-lg ">
@@ -172,7 +177,7 @@ export default class StudyPlans {
     debounce(f.searchText, 400);
   });
 
-  public pagination = computed(() => this.studyPlans.value()?.meta);
+  public pagination = computed(() => this.studyPlansList.rows()?.meta);
   total = computed(() => this.pagination()?.total ?? 0);
   public degrees = httpResource<DegreeRow[]>(
     () => {
@@ -209,6 +214,8 @@ export default class StudyPlans {
       }),
     };
   });
+  /** studyPlans with smooth loading: previous rows stay while the next page / sort / search loads. */
+  protected readonly studyPlansList = listState(this.studyPlans);
 
   public editStudyPlan(studyPlan?: StudyPlanRow) {
     this.modal

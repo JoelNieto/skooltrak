@@ -18,6 +18,7 @@ import {
   UiTableError,
   UiTableSkeleton,
   UiTableToolbar,
+  listState,
 } from '#/ui';
 import { DatePipe } from '@angular/common';
 import { HttpClient, httpResource } from '@angular/common/http';
@@ -103,51 +104,55 @@ type StudyPlanRow = {
             <th class="w-12"><span class="sr-only">Acciones</span></th>
           </tr>
         </thead>
-        @if (classGroups.isLoading() && !classGroups.hasValue()) {
-          <tbody uiTableSkeleton [columns]="6"></tbody>
-        } @else if (classGroups.error()) {
-          <tbody>
-            <tr uiTableError [columns]="6" (retry)="classGroups.reload()"></tr>
-          </tbody>
-        } @else {
-          <tbody>
-            @for (group of classGroups.value()?.data; track group.id) {
-              <tr>
-                <td>
-                  <a class="link link-primary" [routerLink]="['/groups', group.id]">{{ group.name }}</a>
-                </td>
-                <td>
-                  @if (group.teacher) {
-                    {{ group.teacher.firstName }} {{ group.teacher.fatherName }}
-                  } @else {
-                    --
-                  }
-                </td>
-                <td>{{ group.studyPlan.name }}</td>
-                <td>{{ group.createdAt | date: 'short' }}</td>
-                <td>{{ group.updatedAt | date: 'short' }}</td>
-                <td>
-                  <ui-row-actions
-                    [actions]="rowActions(group)"
-                    [label]="'Acciones para ' + group.name"
-                    (action)="onRowAction($event, group)"
-                  />
-                </td>
-              </tr>
-            } @empty {
-              @if (form.searchText().value()) {
-                <tr
-                  uiTableEmpty
-                  [columns]="6"
-                  icon="search-x"
-                  title="Sin resultados"
-                  description="Ningún resultado coincide con la búsqueda."
-                ></tr>
-              } @else {
-                <tr uiTableEmpty [columns]="6" icon="users" title="Aún no hay grupos"></tr>
+        @switch (classGroupsList.phase()) {
+          @case ('skeleton') {
+            <tbody uiTableSkeleton [rows]="pageSize()" [columns]="6"></tbody>
+          }
+          @case ('error') {
+            <tbody>
+              <tr uiTableError [columns]="6" (retry)="classGroups.reload()"></tr>
+            </tbody>
+          }
+          @case ('ready') {
+            <tbody>
+              @for (group of classGroupsList.rows()?.data; track group.id) {
+                <tr>
+                  <td>
+                    <a class="link link-primary" [routerLink]="['/groups', group.id]">{{ group.name }}</a>
+                  </td>
+                  <td>
+                    @if (group.teacher) {
+                      {{ group.teacher.firstName }} {{ group.teacher.fatherName }}
+                    } @else {
+                      --
+                    }
+                  </td>
+                  <td>{{ group.studyPlan.name }}</td>
+                  <td>{{ group.createdAt | date: 'short' }}</td>
+                  <td>{{ group.updatedAt | date: 'short' }}</td>
+                  <td>
+                    <ui-row-actions
+                      [actions]="rowActions(group)"
+                      [label]="'Acciones para ' + group.name"
+                      (action)="onRowAction($event, group)"
+                    />
+                  </td>
+                </tr>
+              } @empty {
+                @if (form.searchText().value()) {
+                  <tr
+                    uiTableEmpty
+                    [columns]="6"
+                    icon="search-x"
+                    title="Sin resultados"
+                    description="Ningún resultado coincide con la búsqueda."
+                  ></tr>
+                } @else {
+                  <tr uiTableEmpty [columns]="6" icon="users" title="Aún no hay grupos"></tr>
+                }
               }
-            }
-          </tbody>
+            </tbody>
+          }
         }
       </table>
       <div class="p-4 rounded-b-lg">
@@ -185,7 +190,7 @@ export default class ClassGroups {
 
   pageSize = signal(10);
   page = signal(1);
-  total = computed(() => this.classGroups.value()?.meta?.total ?? 0);
+  total = computed(() => this.classGroupsList.rows()?.meta?.total ?? 0);
 
   public classGroups = httpResource<PaginatedResponse<ClassGroupRow>>(() => {
     const schoolId = this.store.currentSchoolId();
@@ -206,6 +211,8 @@ export default class ClassGroups {
       }),
     };
   });
+  /** classGroups with smooth loading: previous rows stay while the next page / sort / search loads. */
+  protected readonly classGroupsList = listState(this.classGroups);
 
   public studyPlans = httpResource<PaginatedResponse<StudyPlanRow>>(() => {
     const schoolId = this.store.currentSchoolId();

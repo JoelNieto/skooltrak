@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { Component } from '@angular/core';
 
 /** Decorative activity lines for the log (aria-hidden; not real data). */
 const LOG_LINES = [
@@ -13,16 +13,18 @@ const LOG_LINES = [
 const MODULES = ['Asistencia', 'Calificaciones', 'Mensajes', 'Horarios', 'Tareas', 'Reportes'];
 
 /**
- * The login page's hero: headline, an animated constellation of the school's actors (desktop),
- * a scrolling activity log (desktop) and a module marquee (tablet / phone).
- * Reads the --lg-* custom properties set by the Login page, so it follows the theme.
+ * The login page's hero: headline, the brand's track motif (desktop), a scrolling activity log
+ * (desktop) and a module marquee (tablet / phone).
+ *
+ * Follows the brand system: flat fills, no gradients or shadows. The lanes are the track from the
+ * mark; Runner Orange marks the current position on it, one of the uses the brand reserves for it.
+ * Reads the --lg-* custom properties set by the Login page, so it follows the theme and the school's
+ * colour. The log and marquee keep an edge fade: a mask that only clips scrolling content.
  */
 @Component({
   selector: 'app-login-hero',
   template: `
-    <p class="hero-eyebrow hero-in" style="--d: 0.06s">
-      <span class="hero-pulse"></span>Plataforma escolar inteligente
-    </p>
+    <p class="hero-eyebrow hero-in" style="--d: 0.06s"><span class="hero-dot"></span>Plataforma escolar inteligente</p>
     <h1 class="hero-h1 hero-in" style="--d: 0.14s">
       Tu escuela, conectada <span class="hero-accent">en tiempo real</span
       ><span class="hero-caret" aria-hidden="true"></span>
@@ -31,42 +33,13 @@ const MODULES = ['Asistencia', 'Calificaciones', 'Mensajes', 'Horarios', 'Tareas
       Calificaciones, asistencia y comunicación en un solo lugar para docentes, estudiantes y familias.
     </p>
 
-    <div class="viz hero-in" style="--d: 0.3s" aria-hidden="true">
-      <svg viewBox="0 0 560 400">
-        <g class="viz-orbit viz-orbit-1"><circle cx="280" cy="200" r="88" /></g>
-        <g class="viz-orbit viz-orbit-2">
-          <circle cx="280" cy="200" r="150" />
-          <circle class="viz-sat" cx="430" cy="200" r="3.5" />
-          <circle class="viz-sat viz-teal" cx="130" cy="200" r="2.5" />
-        </g>
-        @for (end of ends; track $index) {
-          <line class="viz-link" x1="280" y1="200" [attr.x2]="end.x" [attr.y2]="end.y" />
-          <line
-            class="viz-flow"
-            [class.viz-flow-in]="end.inbound"
-            x1="280"
-            y1="200"
-            [attr.x2]="end.x"
-            [attr.y2]="end.y"
-            [style.animation-delay]="end.delay"
-          />
-        }
-        <circle class="viz-halo" cx="280" cy="200" r="40" />
-        <circle class="viz-ring" cx="280" cy="200" r="34" />
-        <circle class="viz-ring viz-ring-2" cx="280" cy="200" r="34" />
-        <circle class="viz-core" cx="280" cy="200" r="32" />
-        <g transform="translate(262 182) scale(0.9)">
-          <rect class="viz-face" x="7" y="11" width="26" height="18" rx="9" />
-          <circle class="viz-eye" cx="16" cy="20" r="2.6" />
-          <circle class="viz-eye" cx="24" cy="20" r="2.6" />
-          <rect class="viz-face" x="18" y="5" width="4" height="6" rx="2" />
-        </g>
-      </svg>
-      @for (node of nodes; track node.label) {
-        <span class="viz-node" [style.left.%]="node.left" [style.top.%]="node.top" [style.animation-delay]="node.delay">
-          <span class="dot" [class.dot-teal]="node.teal"></span>{{ node.label }}
-        </span>
+    <div class="track hero-in" style="--d: 0.3s" aria-hidden="true">
+      @for (lane of lanes; track lane.label) {
+        <div class="lane" [class.lane-ink]="lane.ink" [style.width.%]="lane.width" [style.margin-left.%]="lane.offset">
+          {{ lane.label }}
+        </div>
       }
+      <span class="runner"></span>
     </div>
 
     <div class="log hero-in" style="--d: 0.38s" aria-hidden="true">
@@ -106,28 +79,18 @@ const MODULES = ['Asistencia', 'Calificaciones', 'Mensajes', 'Horarios', 'Tareas
       text-transform: uppercase;
       color: var(--ui-ink);
     }
-    .hero-pulse {
-      position: relative;
+    .hero-dot {
       width: 8px;
       height: 8px;
       border-radius: 50%;
       background: var(--lg-accent);
-    }
-    .hero-pulse::after {
-      content: '';
-      position: absolute;
-      inset: 0;
-      border-radius: 50%;
-      background: var(--lg-accent);
-      animation: ping 2s var(--ui-ease) infinite;
     }
     .hero-h1 {
       margin: 1.125rem 0 0;
       max-width: 39rem;
       font-size: clamp(2.125rem, 4.1vw, 3.5rem);
       line-height: 1.04;
-      letter-spacing: -0.04em;
-      font-weight: 600;
+      font-weight: 700;
     }
     .hero-accent {
       color: var(--lg-accent-ink);
@@ -150,115 +113,48 @@ const MODULES = ['Asistencia', 'Calificaciones', 'Mensajes', 'Horarios', 'Tareas
       color: var(--ui-ink-muted);
     }
 
-    .viz {
+    /* The track: three pill lanes, the runner out ahead on the shortest one. */
+    .track {
       position: relative;
       width: 100%;
-      max-width: 35rem;
-      aspect-ratio: 560 / 400;
-      margin-top: 1.25rem;
+      max-width: 30rem;
+      margin-top: 2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
     }
-    .viz svg {
-      position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      overflow: visible;
-    }
-    .viz-orbit {
-      fill: none;
-      stroke: color-mix(in oklab, var(--ui-ink-strong) 16%, transparent);
-      transform-box: view-box;
-      transform-origin: 280px 200px;
-    }
-    .viz-orbit-1 {
-      stroke-dasharray: 2 7;
-      animation: spin 50s linear infinite;
-    }
-    .viz-orbit-2 {
-      stroke: color-mix(in oklab, var(--ui-ink-strong) 10%, transparent);
-      animation: spin 34s linear infinite reverse;
-    }
-    .viz-sat {
-      fill: var(--lg-accent);
-      stroke: none;
-    }
-    .viz-teal {
-      fill: var(--lg-teal);
-    }
-    .viz-link {
-      stroke: color-mix(in oklab, var(--ui-ink-strong) 12%, transparent);
-    }
-    .viz-flow {
-      stroke: var(--lg-accent);
-      stroke-width: 1.5;
-      stroke-linecap: round;
-      stroke-dasharray: 5 15;
-      animation: dash 2.2s linear infinite;
-    }
-    .viz-flow-in {
-      stroke: var(--lg-teal);
-      animation-direction: reverse;
-    }
-    .viz-halo {
-      fill: color-mix(in oklab, var(--lg-accent) 28%, transparent);
-      filter: blur(14px);
-    }
-    .viz-ring {
-      fill: none;
-      stroke: var(--lg-accent);
-      transform-box: view-box;
-      transform-origin: 280px 200px;
-      animation: ring 3.2s var(--ui-ease) infinite;
-    }
-    .viz-ring-2 {
-      animation-delay: 1.6s;
-    }
-    .viz-core {
-      fill: var(--ui-surface-1);
-      stroke: color-mix(in oklab, var(--lg-accent) 60%, var(--ui-surface-1));
-      stroke-width: 1.25;
-    }
-    .viz-face {
-      fill: var(--lg-accent);
-    }
-    .viz-eye {
-      fill: var(--ui-surface-1);
-    }
-    .viz-node,
-    .chip {
-      display: inline-flex;
+    .lane {
+      height: 3.25rem;
+      box-sizing: border-box;
+      display: flex;
       align-items: center;
-      gap: 0.5rem;
-      padding: 0.4375rem 0.75rem;
+      padding: 0 1.375rem;
       border-radius: 9999px;
-      border: 1px solid var(--ui-line-strong);
-      background: var(--lg-chip);
-      font: 500 0.75rem/1 var(--lg-mono);
-      color: var(--ui-ink);
-      white-space: nowrap;
-    }
-    .viz-node {
-      position: absolute;
-      backdrop-filter: blur(8px);
-      box-shadow: 0 8px 24px -12px var(--lg-shadow);
-      transform: translate(-50%, -50%);
-      animation: bob 6s ease-in-out infinite;
-    }
-    .dot {
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
       background: var(--lg-accent);
+      color: var(--ui-action-content);
+      font: 500 0.8125rem/1 var(--lg-mono);
     }
-    .dot-teal {
-      background: var(--lg-teal);
+    .lane-ink {
+      background: var(--ui-ink-strong);
+      color: var(--ui-surface-1);
+    }
+    .runner {
+      position: absolute;
+      bottom: 0;
+      left: calc(64% - 1.625rem);
+      width: 3.25rem;
+      height: 3.25rem;
+      border-radius: 50%;
+      background: var(--ui-new);
+      box-shadow: 0 0 0 0.375rem var(--ui-surface-0);
+      animation: run 6s var(--ui-ease) infinite alternate;
     }
 
     .log {
       width: 100%;
       max-width: 29rem;
       height: 72px;
-      margin-top: 0.875rem;
+      margin-top: 1.75rem;
       overflow: hidden;
       mask-image: linear-gradient(transparent, #000 30%, #000 70%, transparent);
     }
@@ -278,7 +174,7 @@ const MODULES = ['Asistencia', 'Calificaciones', 'Mensajes', 'Horarios', 'Tareas
       color: var(--lg-accent-ink);
     }
     .log-ok {
-      color: color-mix(in oklab, var(--lg-teal) 70%, var(--ui-ink-strong));
+      color: var(--color-success);
     }
 
     .marquee {
@@ -295,6 +191,24 @@ const MODULES = ['Asistencia', 'Calificaciones', 'Mensajes', 'Horarios', 'Tareas
       width: max-content;
       animation: scroll-x 22s linear infinite;
     }
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.4375rem 0.75rem;
+      border-radius: 9999px;
+      border: 1px solid var(--ui-line);
+      background: var(--ui-surface-1);
+      font: 500 0.75rem/1 var(--lg-mono);
+      color: var(--ui-ink);
+      white-space: nowrap;
+    }
+    .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--lg-accent);
+    }
 
     .hero-in {
       opacity: 0;
@@ -308,39 +222,14 @@ const MODULES = ['Asistencia', 'Calificaciones', 'Mensajes', 'Horarios', 'Tareas
         transform: none;
       }
     }
-    @keyframes ping {
-      to {
-        transform: scale(3);
-        opacity: 0;
-      }
-    }
     @keyframes blink {
       50% {
         opacity: 0;
       }
     }
-    @keyframes spin {
-      to {
-        transform: rotate(360deg);
-      }
-    }
-    @keyframes dash {
-      to {
-        stroke-dashoffset: -40;
-      }
-    }
-    @keyframes ring {
+    @keyframes run {
       from {
-        opacity: 0.55;
-      }
-      to {
-        transform: scale(2.6);
-        opacity: 0;
-      }
-    }
-    @keyframes bob {
-      50% {
-        transform: translate(-50%, calc(-50% - 7px));
+        transform: translateX(-9rem);
       }
     }
     @keyframes scroll-y {
@@ -370,7 +259,7 @@ const MODULES = ['Asistencia', 'Calificaciones', 'Mensajes', 'Horarios', 'Tareas
         align-items: center;
         text-align: center;
       }
-      .viz,
+      .track,
       .log {
         display: none;
       }
@@ -392,107 +281,12 @@ const MODULES = ['Asistencia', 'Calificaciones', 'Mensajes', 'Horarios', 'Tareas
   `,
 })
 export class LoginHero {
-  protected readonly ends = [
-    { x: 280, y: 40, inbound: false, delay: '0s' },
-    { x: 498, y: 120, inbound: true, delay: '-0.6s' },
-    { x: 470, y: 340, inbound: false, delay: '-1.1s' },
-    { x: 100, y: 340, inbound: true, delay: '-0.3s' },
-    { x: 62, y: 120, inbound: false, delay: '-1.5s' },
-  ];
-  protected readonly nodes = [
-    { label: 'Estudiantes', left: 50, top: 10, teal: false, delay: '0s' },
-    { label: 'Docentes', left: 89, top: 30, teal: true, delay: '-1.2s' },
-    { label: 'Familias', left: 84, top: 85, teal: false, delay: '-2.4s' },
-    { label: 'Calificaciones', left: 18, top: 85, teal: true, delay: '-3.6s' },
-    { label: 'Asistencia', left: 11, top: 30, teal: false, delay: '-4.8s' },
+  protected readonly lanes = [
+    { label: 'Asistencia', width: 92, offset: 0, ink: false },
+    { label: 'Calificaciones', width: 76, offset: 12, ink: true },
+    { label: 'Mensajes', width: 60, offset: 4, ink: false },
   ];
   // Doubled so the scrolling animations loop without a jump.
   protected readonly logRows = [...LOG_LINES, ...LOG_LINES];
   protected readonly modules = [...MODULES, ...MODULES];
 }
-
-/**
- * The login page's ambient layer: a fading dot grid, two drifting glows and a scan line.
- * Fills the nearest positioned ancestor behind its content.
- */
-@Component({
-  selector: 'app-login-backdrop',
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  host: { 'aria-hidden': 'true' },
-  template: `
-    <div class="grid"></div>
-    <div class="glow glow-a"></div>
-    <div class="glow glow-b"></div>
-    <div class="scan"></div>
-  `,
-  styles: `
-    :host {
-      position: absolute;
-      inset: 0;
-      z-index: -1;
-      pointer-events: none;
-    }
-    .grid {
-      position: absolute;
-      inset: 0;
-      background-image: radial-gradient(
-        color-mix(in oklab, var(--ui-ink-strong) 14%, transparent) 1px,
-        transparent 1px
-      );
-      background-size: 28px 28px;
-      mask-image: radial-gradient(ellipse 75% 70% at 32% 45%, #000 25%, transparent 78%);
-    }
-    .glow {
-      position: absolute;
-      border-radius: 50%;
-      filter: blur(100px);
-      animation: drift 18s ease-in-out infinite alternate;
-    }
-    .glow-a {
-      width: 560px;
-      height: 560px;
-      left: -160px;
-      top: -180px;
-      background: color-mix(in oklab, var(--lg-accent) var(--lg-glow-a), transparent);
-    }
-    .glow-b {
-      width: 460px;
-      height: 460px;
-      right: -140px;
-      bottom: -200px;
-      background: color-mix(in oklab, var(--lg-teal) var(--lg-glow-b), transparent);
-      animation-duration: 24s;
-      animation-direction: alternate-reverse;
-    }
-    .scan {
-      position: absolute;
-      inset: 0 0 auto;
-      height: 2px;
-      opacity: 0.5;
-      background: linear-gradient(
-        90deg,
-        transparent,
-        color-mix(in oklab, var(--lg-accent) 55%, transparent),
-        transparent
-      );
-      animation: scan 8s linear infinite;
-    }
-    @keyframes drift {
-      to {
-        transform: translate(80px, 60px) scale(1.12);
-      }
-    }
-    @keyframes scan {
-      to {
-        transform: translateY(100vh);
-      }
-    }
-    @media (prefers-reduced-motion: reduce) {
-      .glow,
-      .scan {
-        animation: none;
-      }
-    }
-  `,
-})
-export class LoginBackdrop {}

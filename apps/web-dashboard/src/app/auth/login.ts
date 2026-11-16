@@ -1,19 +1,16 @@
 import { Alert, BrandLogo, Button, Loader, Toast, UiField, UiInput } from '#/ui';
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { email, form, FormField, minLength, required } from '@angular/forms/signals';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import Auth from './auth';
-import { LoginBackdrop, LoginHero } from './login-hero';
+import { LoginHero } from './login-hero';
 
 @Component({
   selector: 'app-login',
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [Alert, BrandLogo, Button, FormField, Loader, LoginBackdrop, LoginHero, RouterLink, UiField, UiInput],
+  imports: [Alert, BrandLogo, Button, FormField, Loader, LoginHero, RouterLink, UiField, UiInput],
   template: `
     <div class="login">
       @defer {
-        <app-login-backdrop />
-
         <div class="shell">
           <header class="top enter" style="--d: 0s">
             <ui-brand-logo class="brand" />
@@ -28,7 +25,7 @@ import { LoginBackdrop, LoginHero } from './login-hero';
 
             <section class="panel-wrap enter" style="--d: 0.2s">
               <div class="panel">
-                <p class="eyebrow"><span class="pulse"></span>Acceso seguro</p>
+                <p class="eyebrow"><span class="eyebrow-dot"></span>Acceso seguro</p>
                 <h2 class="panel-title">Bienvenido de nuevo</h2>
                 <p class="panel-sub">Inicia sesión para continuar en tu cuenta.</p>
 
@@ -55,7 +52,6 @@ import { LoginBackdrop, LoginHero } from './login-hero';
                         class="control-input"
                         [formField]="form.email"
                       />
-                      <span class="beam" aria-hidden="true"></span>
                     </div>
                   </ui-field>
 
@@ -75,7 +71,6 @@ import { LoginBackdrop, LoginHero } from './login-hero';
                           class="control-input control-input-pw"
                           [formField]="form.password"
                         />
-                        <span class="beam" aria-hidden="true"></span>
                         <button
                           uiButton
                           variant="ghost"
@@ -160,42 +155,19 @@ import { LoginBackdrop, LoginHero } from './login-hero';
   `,
   styles: `
     /* Colours come from the theme tokens (libs/ui/src/styles/theme.css), so the page follows the
-     * user's light/dark theme and the school's primary colour. The --lg-* properties are shared
-     * with app-login-hero; only glow strength and glass opacity differ per theme. */
+     * user's light/dark theme and the school's primary colour. Brand rules: flat fills, hairlines
+     * instead of shadows, no gradients (the hero's log keeps an edge fade on scrolling content).
+     * The --lg-* properties are shared with app-login-hero. */
     :host {
       display: block;
-      --lg-accent: var(--color-primary);
-      --lg-accent-ink: color-mix(in oklab, var(--color-primary) 72%, var(--ui-ink-strong));
-      --lg-teal: oklch(72% 0.14 182);
-      --lg-glow-a: 24%;
-      --lg-glow-b: 18%;
-      --lg-glass: color-mix(in oklab, var(--ui-surface-1) 80%, transparent);
-      --lg-chip: color-mix(in oklab, var(--ui-surface-1) 90%, transparent);
-      --lg-shadow: rgb(11 20 48 / 0.3);
-      --lg-mono: 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
-    }
-    :host-context([data-theme='dark']) {
-      --lg-glow-a: 50%;
-      --lg-glow-b: 22%;
-      --lg-glass: color-mix(in oklab, var(--ui-surface-1) 66%, transparent);
-      --lg-chip: color-mix(in oklab, var(--ui-surface-1) 82%, transparent);
-      --lg-shadow: rgb(0 0 0 / 0.55);
-    }
-    @media (prefers-color-scheme: dark) {
-      :host-context(html:not([data-theme])) {
-        --lg-glow-a: 50%;
-        --lg-glow-b: 22%;
-        --lg-glass: color-mix(in oklab, var(--ui-surface-1) 66%, transparent);
-        --lg-chip: color-mix(in oklab, var(--ui-surface-1) 82%, transparent);
-        --lg-shadow: rgb(0 0 0 / 0.55);
-      }
+      --lg-accent: var(--ui-action);
+      /* Readable as text whatever colour a school picks. */
+      --lg-accent-ink: color-mix(in oklab, var(--ui-action) 72%, var(--ui-ink-strong));
+      --lg-mono: var(--font-mono);
     }
 
     .login {
-      position: relative;
       min-height: 100vh;
-      overflow: hidden;
-      isolation: isolate;
       background: var(--ui-surface-0);
       color: var(--ui-ink-strong);
     }
@@ -226,8 +198,8 @@ import { LoginBackdrop, LoginHero } from './login-hero';
       min-height: 2.75rem;
       padding: 0 1rem;
       border-radius: 9999px;
-      border: 1px solid var(--ui-line-strong);
-      background: var(--lg-chip);
+      border: 1px solid var(--ui-line);
+      background: var(--ui-surface-1);
       font-size: 0.875rem;
       font-weight: 500;
       color: var(--ui-ink-strong);
@@ -253,44 +225,17 @@ import { LoginBackdrop, LoginHero } from './login-hero';
       color: var(--ui-ink-muted);
     }
 
-    /* Card, with a light that travels around its border */
+    /* Card: flat surface, hairline border */
     .panel-wrap {
-      position: relative;
       justify-self: end;
       width: 100%;
       max-width: 27.5rem;
-      padding: 1px;
-      border-radius: 1.5rem;
-      background: var(--ui-line-strong);
-      box-shadow:
-        0 30px 80px -36px var(--lg-shadow),
-        0 40px 110px -50px color-mix(in oklab, var(--lg-accent) 55%, transparent);
-    }
-    .panel-wrap::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      padding: 1px;
-      border-radius: inherit;
-      background: conic-gradient(
-        from var(--login-angle),
-        transparent 0 60%,
-        var(--lg-accent) 78%,
-        var(--lg-teal) 86%,
-        transparent 94%
-      );
-      mask:
-        linear-gradient(#000 0 0) content-box,
-        linear-gradient(#000 0 0);
-      mask-composite: exclude;
-      animation: rotate 6s linear infinite;
-      pointer-events: none;
     }
     .panel {
       padding: 2.5rem 2.25rem 1.75rem;
-      border-radius: calc(1.5rem - 1px);
-      background: var(--lg-glass);
-      backdrop-filter: blur(24px) saturate(150%);
+      border-radius: var(--radius-box);
+      border: 1px solid var(--ui-line);
+      background: var(--ui-surface-1);
     }
     .eyebrow {
       display: inline-flex;
@@ -302,27 +247,18 @@ import { LoginBackdrop, LoginHero } from './login-hero';
       text-transform: uppercase;
       color: var(--ui-ink);
     }
-    .pulse {
-      position: relative;
+    .eyebrow-dot {
       width: 8px;
       height: 8px;
       border-radius: 50%;
       background: var(--lg-accent);
     }
-    .pulse::after {
-      content: '';
-      position: absolute;
-      inset: 0;
-      border-radius: 50%;
-      background: var(--lg-accent);
-      animation: ping 2s var(--ui-ease) infinite;
-    }
     .panel-title {
       margin: 1rem 0 0;
       font-size: 1.75rem;
       line-height: 1.15;
-      letter-spacing: -0.03em;
-      font-weight: 600;
+      letter-spacing: -0.01em;
+      font-weight: 500;
     }
     .panel-sub {
       margin: 0.5rem 0 0;
@@ -336,7 +272,7 @@ import { LoginBackdrop, LoginHero } from './login-hero';
       margin-top: 1.75rem;
     }
 
-    /* uiInput plus a leading icon, a focus glow and a beam underneath */
+    /* uiInput plus a leading icon */
     .control {
       position: relative;
       display: flex;
@@ -354,27 +290,9 @@ import { LoginBackdrop, LoginHero } from './login-hero';
     }
     .control-input {
       padding-inline-start: 2.75rem;
-      transition: box-shadow 0.3s var(--ui-ease);
     }
     .control-input-pw {
       padding-inline-end: 3.25rem;
-    }
-    .control-input:focus {
-      box-shadow:
-        0 0 0 4px color-mix(in oklab, var(--lg-accent) 18%, transparent),
-        0 10px 28px -14px var(--lg-accent);
-    }
-    .beam {
-      position: absolute;
-      inset: auto 0.75rem 0;
-      height: 1px;
-      background: linear-gradient(90deg, transparent, var(--lg-accent), var(--lg-teal), transparent);
-      transform: scaleX(0);
-      transition: transform 0.6s var(--ui-ease);
-      pointer-events: none;
-    }
-    .control:focus-within .beam {
-      transform: scaleX(1);
     }
     .eye {
       position: absolute;
@@ -417,24 +335,8 @@ import { LoginBackdrop, LoginHero } from './login-hero';
       text-underline-offset: 3px;
     }
 
-    /* uiButton primary plus a glow and a light sweep on hover */
     .cta {
-      position: relative;
-      overflow: hidden;
       margin-top: 0.375rem;
-      box-shadow: 0 12px 30px -12px var(--lg-accent);
-    }
-    .cta::after {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(110deg, transparent 30%, rgb(255 255 255 / 0.3) 50%, transparent 70%);
-      transform: translateX(-120%);
-      pointer-events: none;
-    }
-    .cta:hover::after {
-      transform: translateX(120%);
-      transition: transform 0.9s var(--ui-ease);
     }
     .arrow {
       transition: transform 0.3s var(--ui-ease);
@@ -466,7 +368,7 @@ import { LoginBackdrop, LoginHero } from './login-hero';
       content: '';
       flex: 1;
       height: 1px;
-      background: var(--ui-line-strong);
+      background: var(--ui-line);
     }
     .signup {
       margin: 1.375rem 0 0;
@@ -498,29 +400,12 @@ import { LoginBackdrop, LoginHero } from './login-hero';
       animation-delay: var(--d, 0s);
     }
 
-    @property --login-angle {
-      syntax: '<angle>';
-      initial-value: 0deg;
-      inherits: false;
-    }
     @keyframes up {
       to {
         opacity: 1;
         transform: none;
       }
     }
-    @keyframes ping {
-      to {
-        transform: scale(3);
-        opacity: 0;
-      }
-    }
-    @keyframes rotate {
-      to {
-        --login-angle: 360deg;
-      }
-    }
-
     @media (prefers-reduced-motion: reduce) {
       .login *,
       .login *::before,

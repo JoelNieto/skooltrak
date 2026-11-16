@@ -8,7 +8,7 @@ import Auth from '../auth/auth';
   selector: 'app-waiting-approval',
   imports: [Spinner, Button, BrandLogo],
   template: `
-    <div class="min-h-screen flex flex-col gradient-bg">
+    <div class="min-h-screen flex flex-col bg-surface-0">
       <header class="p-4 md:p-6 flex items-center justify-between">
         <ui-brand-logo class="h-8 md:h-10" />
         <button uiButton variant="ghost" size="sm" (click)="logout()">

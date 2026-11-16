@@ -1,4 +1,4 @@
-import { Button, Toast, UiCheckbox, UiChoice, UiField, UiInput } from '#/ui';
+import { BrandLogo, Button, Toast, UiCheckbox, UiChoice, UiField, UiInput } from '#/ui';
 import { HttpClient } from '@angular/common/http';
 import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -7,7 +7,6 @@ import { Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import Auth from '../auth/auth';
 import Store from '../core/store';
-import { BrandLogo } from '../shared/brand-logo';
 
 @Component({
   selector: 'app-create-school',
@@ -16,7 +15,7 @@ import { BrandLogo } from '../shared/brand-logo';
     <div class="min-h-screen flex flex-col gradient-bg">
       <!-- Fixed Header -->
       <header class="p-4 md:p-6 flex items-center justify-between">
-        <app-brand-logo class="h-8 md:h-10" />
+        <ui-brand-logo class="h-8 md:h-10" />
       </header>
 
       <!-- Scrollable Content -->

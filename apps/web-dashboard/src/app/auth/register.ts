@@ -1,12 +1,11 @@
 import { writeAccessTokenToStorage } from '#/client-auth';
-import { Button, Loader, Toast, UiField, UiInput } from '#/ui';
+import { BrandLogo, Button, Loader, Toast, UiField, UiInput } from '#/ui';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { afterRenderEffect, Component, inject, signal } from '@angular/core';
 import { AbstractControl, NonNullableFormBuilder, ValidationErrors } from '@angular/forms';
 import { email, form, FormField, minLength, required, validate } from '@angular/forms/signals';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import Auth from './auth';
-import { BrandLogo } from '../shared/brand-logo';
 
 @Component({
   selector: 'app-register',
@@ -16,7 +15,7 @@ import { BrandLogo } from '../shared/brand-logo';
       <div class="min-h-screen flex flex-col gradient-bg">
         <!-- Fixed Header -->
         <header class="p-4 md:p-6 flex items-center justify-between">
-          <app-brand-logo class="h-8 md:h-10" />
+          <ui-brand-logo class="h-8 md:h-10" />
         </header>
 
         <!-- Scrollable Content -->

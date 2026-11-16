@@ -1,7 +1,6 @@
 import { Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { BrandLogo } from '../shared/brand-logo';
-import { Badge, Card, CardBody, CardTitle } from '#/ui';
+import { Badge, BrandLogo, Card, CardBody, CardTitle } from '#/ui';
 
 @Component({
   selector: 'app-choose-path',
@@ -9,7 +8,7 @@ import { Badge, Card, CardBody, CardTitle } from '#/ui';
   template: `
     <div class="min-h-screen flex flex-col gradient-bg">
       <header class="p-4 md:p-6 flex items-center justify-between">
-        <app-brand-logo class="h-8 md:h-10" />
+        <ui-brand-logo class="h-8 md:h-10" />
       </header>
 
       <main class="flex-1 flex flex-col items-center justify-center p-6">

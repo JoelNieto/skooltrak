@@ -135,7 +135,7 @@ type PublishedNewsletter = {
       </div>
     }
 
-    <section uiCard aria-labelledby="admin-attention-title">
+    <section uiCard bleed aria-labelledby="admin-attention-title">
       <div uiCardBody>
         <h2 id="admin-attention-title" class="text-base font-semibold text-ink-strong">Requiere tu atención</h2>
         @if (attention.isLoading()) {

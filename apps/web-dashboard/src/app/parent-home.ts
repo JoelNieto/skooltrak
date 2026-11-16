@@ -198,7 +198,7 @@ const grade = (n: number) => n.toFixed(1);
         }
       </div>
 
-      <section uiCard class="mt-6" aria-labelledby="alerts-title">
+      <section uiCard bleed class="mt-6" aria-labelledby="alerts-title">
         <div uiCardBody>
           <div class="flex flex-wrap items-center justify-between gap-2">
             <h2 id="alerts-title" class="text-base font-semibold text-ink-strong">
@@ -277,7 +277,7 @@ const grade = (n: number) => n.toFixed(1);
 
       @if (home.value(); as child) {
         <div class="mt-6 flex flex-wrap gap-6">
-          <section uiCard class="min-w-0 flex-[999_1_560px]" aria-labelledby="work-title">
+          <section uiCard bleed class="min-w-0 flex-[999_1_560px]" aria-labelledby="work-title">
             <div uiCardBody>
               <div class="flex items-center justify-between">
                 <h2 id="work-title" class="text-base font-semibold text-ink-strong">Próximas tareas y evaluaciones</h2>
@@ -312,7 +312,7 @@ const grade = (n: number) => n.toFixed(1);
             </div>
           </section>
 
-          <section uiCard class="min-w-0 flex-[1_1_340px]" aria-labelledby="grades-title">
+          <section uiCard bleed class="min-w-0 flex-[1_1_340px]" aria-labelledby="grades-title">
             <div uiCardBody>
               <h2 id="grades-title" class="text-base font-semibold text-ink-strong">Calificaciones recientes</h2>
               @if (child.recentGrades.length === 0) {
@@ -418,7 +418,7 @@ const grade = (n: number) => n.toFixed(1);
         </div>
 
         <div class="mt-6 flex flex-wrap gap-6">
-          <section uiCard class="min-w-0 flex-[999_1_560px]" aria-labelledby="teacher-messages-title">
+          <section uiCard bleed class="min-w-0 flex-[999_1_560px]" aria-labelledby="teacher-messages-title">
             <div uiCardBody>
               <div class="flex items-center justify-between">
                 <h2 id="teacher-messages-title" class="text-base font-semibold text-ink-strong">

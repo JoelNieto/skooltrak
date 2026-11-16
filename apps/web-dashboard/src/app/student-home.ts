@@ -126,7 +126,7 @@ const longDate = new Intl.DateTimeFormat('es', { weekday: 'long', day: 'numeric'
   template: `
     <lib-page-header [title]="greeting()" [subtitle]="headerSubtitle()" />
 
-    <section uiCard aria-labelledby="today-title">
+    <section uiCard bleed aria-labelledby="today-title">
       <div uiCardBody>
         <h2 id="today-title" class="sr-only">Hoy</h2>
         @if (today.isLoading()) {
@@ -254,7 +254,7 @@ const longDate = new Intl.DateTimeFormat('es', { weekday: 'long', day: 'numeric'
     </div>
 
     <div class="mt-6 flex flex-wrap gap-6">
-      <section uiCard class="min-w-0 flex-[999_1_560px]" aria-labelledby="work-title">
+      <section uiCard bleed class="min-w-0 flex-[999_1_560px]" aria-labelledby="work-title">
         <div uiCardBody>
           <div class="flex items-center justify-between">
             <h2 id="work-title" class="text-base font-semibold text-ink-strong">Próximas entregas y evaluaciones</h2>
@@ -321,7 +321,7 @@ const longDate = new Intl.DateTimeFormat('es', { weekday: 'long', day: 'numeric'
     </div>
 
     <div class="mt-6 flex flex-wrap gap-6">
-      <section uiCard class="min-w-0 flex-[999_1_560px]" aria-labelledby="grades-title">
+      <section uiCard bleed class="min-w-0 flex-[999_1_560px]" aria-labelledby="grades-title">
         <div uiCardBody>
           <div class="flex flex-wrap items-center justify-between gap-2">
             <h2 id="grades-title" class="text-base font-semibold text-ink-strong">

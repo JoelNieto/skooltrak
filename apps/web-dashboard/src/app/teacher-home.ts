@@ -218,7 +218,7 @@ const longDate = new Intl.DateTimeFormat('es', { weekday: 'long', day: 'numeric'
     </div>
 
     <div class="mt-6 flex flex-wrap gap-6">
-      <section uiCard class="min-w-0 flex-[999_1_560px]" aria-labelledby="my-day-title">
+      <section uiCard bleed class="min-w-0 flex-[999_1_560px]" aria-labelledby="my-day-title">
         <div uiCardBody>
           <h2 id="my-day-title" class="text-base font-semibold text-ink-strong">Mi día</h2>
 
@@ -306,7 +306,7 @@ const longDate = new Intl.DateTimeFormat('es', { weekday: 'long', day: 'numeric'
         </div>
       </section>
 
-      <section uiCard class="min-w-0 flex-[1_1_340px]" aria-labelledby="pending-title">
+      <section uiCard bleed class="min-w-0 flex-[1_1_340px]" aria-labelledby="pending-title">
         <div uiCardBody>
           <h2 id="pending-title" class="text-base font-semibold text-ink-strong">Pendientes</h2>
           @if (summary.isLoading()) {
@@ -351,7 +351,7 @@ const longDate = new Intl.DateTimeFormat('es', { weekday: 'long', day: 'numeric'
     </div>
 
     <div class="mt-6 flex flex-wrap gap-6">
-      <section uiCard class="min-w-0 flex-[999_1_560px]" aria-labelledby="week-title">
+      <section uiCard bleed class="min-w-0 flex-[999_1_560px]" aria-labelledby="week-title">
         <div uiCardBody>
           <div class="flex items-center justify-between">
             <h2 id="week-title" class="text-base font-semibold text-ink-strong">Asignaciones de la semana</h2>
@@ -405,7 +405,7 @@ const longDate = new Intl.DateTimeFormat('es', { weekday: 'long', day: 'numeric'
         </div>
       </section>
 
-      <section uiCard class="min-w-0 flex-[1_1_340px]" aria-labelledby="attention-title">
+      <section uiCard bleed class="min-w-0 flex-[1_1_340px]" aria-labelledby="attention-title">
         <div uiCardBody>
           <h2 id="attention-title" class="text-base font-semibold text-ink-strong">Necesitan atención</h2>
           @if (attention.isLoading()) {
@@ -470,7 +470,7 @@ const longDate = new Intl.DateTimeFormat('es', { weekday: 'long', day: 'numeric'
         </div>
       </section>
 
-      <section uiCard class="min-w-0 flex-[1_1_340px]" aria-labelledby="family-title">
+      <section uiCard bleed class="min-w-0 flex-[1_1_340px]" aria-labelledby="family-title">
         <div uiCardBody>
           <div class="flex items-center justify-between">
             <h2 id="family-title" class="text-base font-semibold text-ink-strong">Mensajes de acudientes</h2>

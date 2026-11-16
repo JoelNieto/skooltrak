@@ -609,6 +609,29 @@ h3 {
   box-shadow: 0 0 0 3px color-mix(in oklab, var(--color-primary) 20%, transparent);
 }
 
+/* The content area of each app (<main class="ui-page">): page surface and its side gutter.
+ * Surface model A: white cards on the tinted page. */
+.ui-page {
+  --ui-page-gutter: 1rem;
+  padding-inline: var(--ui-page-gutter);
+  background-color: var(--ui-surface-0);
+}
+
+/* Lists and tables run edge to edge on phones: side borders and corners go, the top and bottom
+ * hairlines stay as dividers, and the content lines up with the page gutter. Opt in with
+ * <div uiCard bleed>; a card that wraps a uiTable directly does it on its own. */
+@media (width < 40rem) {
+  /* Not when nested in another card (a table inside a padded panel stays inside it). */
+  .card.ui-card:is(.ui-card-bleed, :has(> table.ui-table)):not(.ui-card .ui-card) {
+    margin-inline: calc(-1 * var(--ui-page-gutter, 1rem));
+    border-inline-width: 0;
+    border-radius: 0;
+    > .card-body {
+      padding-inline: var(--ui-page-gutter, 1rem);
+    }
+  }
+}
+
 .layout-padding {
   @apply mx-auto mt-4 max-w-7xl px-4 sm:px-6 lg:px-8;
 }

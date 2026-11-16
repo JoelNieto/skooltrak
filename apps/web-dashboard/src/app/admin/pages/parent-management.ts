@@ -10,7 +10,7 @@ import { Component } from '@angular/core';
       title="Gestión de padres"
       subtitle="Crea cuentas y vincula estudiantes."
       actionLabel="Invitar padre"
-      actionIcon="person_add"
+      actionIcon="user-plus"
     />
 
     <div uiCard>

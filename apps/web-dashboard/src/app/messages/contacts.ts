@@ -1,7 +1,7 @@
 import { httpResource } from '@angular/common/http';
 import { Component, computed, effect, ElementRef, input, model, output, signal, viewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Alert, Badge, Button } from '#/ui';
+import { Alert, Badge, Button, Icon } from '#/ui';
 export type Contact = {
   id: string;
   initials: string;
@@ -19,13 +19,13 @@ export interface SelectedContact extends Contact {
 }
 @Component({
   selector: 'app-contacts',
-  imports: [Alert, Badge, Button, FormsModule],
+  imports: [Alert, Badge, Button, FormsModule, Icon],
 
   template: ` <div class="relative w-full min-h-12 bg-surface-1 px-3 py-2">
       <div class="flex flex-wrap gap-2 items-center">
         @for (contact of selectedContacts(); track contact.id) {
           <div uiBadge [tone]="contact.isValid ? 'neutral' : 'danger'" class="inline-flex items-center px-2 py-1">
-            <span class="material-symbols-outlined text-base!">person</span>
+            <ui-icon name="user" class="text-base!" />
             <span class="mr-1">{{ contact.name }}</span>
             <button
               type="button"
@@ -98,7 +98,7 @@ export interface SelectedContact extends Contact {
           Removido: <strong>{{ lastAddedContact()?.name }}</strong>
         </span>
         <button uiButton variant="ghost" size="sm" type="button" (click)="addLatestContact()">
-          <span class="material-symbols-outlined">close</span>
+          <ui-icon name="x" />
         </button>
       </div>
     }`,

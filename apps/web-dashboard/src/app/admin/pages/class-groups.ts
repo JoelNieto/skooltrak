@@ -3,6 +3,7 @@ import {
   Card,
   Confirmation,
   EmptyState,
+  Icon,
   Modal,
   PaginatorV2,
   Toast,
@@ -55,13 +56,14 @@ type StudyPlanRow = {
     PaginatorV2,
     FormField,
     UiInputGroup,
+    Icon,
   ],
   template: `
     <div class="flex justify-between">
       <div class="flex gap-2">
         <div class="md:w-96 w-full">
           <label uiInputGroup>
-            <span class="material-symbols-outlined">search</span>
+            <ui-icon name="search" />
             <input class="pl-0" type="search" placeholder="Buscar..." [formField]="form.searchText" />
           </label>
         </div>
@@ -72,9 +74,7 @@ type StudyPlanRow = {
           }
         </select>
       </div>
-      <button uiButton variant="primary" (click)="editClassGroup()">
-        <span class="material-symbols-outlined">add_circle</span> Nuevo Grupo
-      </button>
+      <button uiButton variant="primary" (click)="editClassGroup()"><ui-icon name="circle-plus" /> Nuevo Grupo</button>
     </div>
     <div uiCard class="overflow-x-auto mt-4">
       <table uiTable>
@@ -112,7 +112,7 @@ type StudyPlanRow = {
                   #trigger="ngMenuTrigger"
                   [menu]="actionsMenu()"
                 >
-                  <span class="material-symbols-outlined text-xl">more_horiz</span>
+                  <ui-icon name="ellipsis" class="text-xl" />
                 </button>
                 <ng-template
                   [cdkConnectedOverlayOpen]="trigger.expanded()"
@@ -136,7 +136,7 @@ type StudyPlanRow = {
                         [routerLink]="['/groups', group.id]"
                         class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-surface-2 w-full"
                       >
-                        <span class="material-symbols-outlined text-lg">visibility</span>
+                        <ui-icon name="eye" class="text-lg" />
                         <span>Ver</span>
                       </a>
                       <button
@@ -145,7 +145,7 @@ type StudyPlanRow = {
                         class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-surface-2 w-full"
                         (click)="editClassGroup(group)"
                       >
-                        <span class="material-symbols-outlined text-lg">edit</span>
+                        <ui-icon name="pencil" class="text-lg" />
                         <span>Editar</span>
                       </button>
                       <button
@@ -154,7 +154,7 @@ type StudyPlanRow = {
                         class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-surface-2 w-full"
                         (click)="deleteClassGroup(group.id)"
                       >
-                        <span class="material-symbols-outlined text-lg">delete</span>
+                        <ui-icon name="trash-2" class="text-lg" />
                         <span>Eliminar</span>
                       </button>
                     </ng-template>
@@ -168,7 +168,7 @@ type StudyPlanRow = {
                 <lib-empty-state
                   title="No hay grupos"
                   description="No hay grupos para mostrar"
-                  icon="group"
+                  icon="users"
                   actionLabel="Nuevo grupo"
                   (action)="editClassGroup()"
                 />

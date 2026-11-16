@@ -22,7 +22,7 @@ export const PageHeaderStory: StoryObj<PageHeader> = {
     subtitle: 'Administra los cursos del periodo actual',
     breadcrumbs: [{ label: 'Inicio', link: '/' }, { label: 'Administración', link: '/admin' }, { label: 'Cursos' }],
     actionLabel: 'Nuevo curso',
-    actionIcon: 'add',
+    actionIcon: 'plus',
     action: fn() as never,
   },
 };
@@ -42,7 +42,7 @@ export const EmptyStateStory: StoryObj<EmptyState> = {
   args: {
     title: 'Sin tareas',
     description: 'Aún no hay tareas asignadas para este curso.',
-    icon: 'assignment',
+    icon: 'clipboard-list',
     color: 'primary',
     actionLabel: 'Crear tarea',
     action: fn() as never,
@@ -54,9 +54,9 @@ export const StatCards: StoryObj = {
   render: () => ({
     template: `
       <div class="grid max-w-3xl gap-4 sm:grid-cols-3">
-        <lib-stat-card label="Estudiantes" value="1,248" helper="+32 este mes" icon="groups" color="primary" />
-        <lib-stat-card label="Asistencia" value="94.2%" helper="Promedio semanal" icon="event_available" color="success" />
-        <lib-stat-card label="Pendientes" value="17" helper="Tareas sin calificar" icon="pending_actions" color="warning" />
+        <lib-stat-card label="Estudiantes" value="1,248" helper="+32 este mes" icon="users" color="primary" />
+        <lib-stat-card label="Asistencia" value="94.2%" helper="Promedio semanal" icon="calendar-check" color="success" />
+        <lib-stat-card label="Pendientes" value="17" helper="Tareas sin calificar" icon="clipboard-clock" color="warning" />
       </div>
     `,
     moduleMetadata: { imports: [StatCard] },

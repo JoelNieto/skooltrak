@@ -4,6 +4,7 @@ import {
   BadgeTone,
   Button,
   Confirmation,
+  Icon,
   Loader,
   Modal,
   Pagination,
@@ -76,6 +77,7 @@ const STATUS_TONES: Record<string, BadgeTone> = {
     MenuItem,
     MenuTrigger,
     OverlayModule,
+    Icon,
   ],
   providers: [Pagination],
   template: `
@@ -89,7 +91,7 @@ const STATUS_TONES: Record<string, BadgeTone> = {
         </select>
       </div>
       <button uiButton variant="primary" (click)="openForm()">
-        <span class="material-symbols-outlined">add</span>
+        <ui-icon name="plus" />
         Nueva asistencia
       </button>
     </div>
@@ -100,7 +102,7 @@ const STATUS_TONES: Record<string, BadgeTone> = {
 
     @if (sessionsResource.error()) {
       <div uiAlert tone="danger">
-        <span class="material-symbols-outlined">error</span>
+        <ui-icon name="circle-alert" />
         Error al cargar las sesiones de asistencia
       </div>
     }
@@ -135,19 +137,19 @@ const STATUS_TONES: Record<string, BadgeTone> = {
                 </td>
                 <td>
                   <span uiBadge tone="success" class="gap-1">
-                    <span class="material-symbols-outlined text-sm!">check</span>
+                    <ui-icon name="check" class="text-sm!" />
                     {{ stats.present }}
                   </span>
                 </td>
                 <td>
                   <span uiBadge tone="danger" class="gap-1">
-                    <span class="material-symbols-outlined text-sm!">close</span>
+                    <ui-icon name="x" class="text-sm!" />
                     {{ stats.absent }}
                   </span>
                 </td>
                 <td>
                   <span uiBadge tone="warning" class="gap-1">
-                    <span class="material-symbols-outlined text-sm!">schedule</span>
+                    <ui-icon name="clock" class="text-sm!" />
                     {{ stats.late }}
                   </span>
                 </td>
@@ -167,7 +169,7 @@ const STATUS_TONES: Record<string, BadgeTone> = {
                     #trigger="ngMenuTrigger"
                     [menu]="actionsMenu()"
                   >
-                    <span class="material-symbols-outlined text-xl!">more_horiz</span>
+                    <ui-icon name="ellipsis" class="text-xl!" />
                   </button>
                   <ng-template
                     [cdkConnectedOverlayOpen]="trigger.expanded()"
@@ -192,7 +194,7 @@ const STATUS_TONES: Record<string, BadgeTone> = {
                           (click)="viewSession(session)"
                           title="Ver detalles"
                         >
-                          <span class="material-symbols-outlined">visibility</span>
+                          <ui-icon name="eye" />
                           <span>Ver detalles</span>
                         </button>
                         <button
@@ -202,7 +204,7 @@ const STATUS_TONES: Record<string, BadgeTone> = {
                           (click)="editSession(session)"
                           title="Editar"
                         >
-                          <span class="material-symbols-outlined">edit</span>
+                          <ui-icon name="pencil" />
                           <span>Editar</span>
                         </button>
                         <button
@@ -212,7 +214,7 @@ const STATUS_TONES: Record<string, BadgeTone> = {
                           (click)="deleteSession(session)"
                           title="Eliminar"
                         >
-                          <span class="material-symbols-outlined">delete</span>
+                          <ui-icon name="trash-2" />
                           <span>Eliminar</span>
                         </button>
                       </ng-template>

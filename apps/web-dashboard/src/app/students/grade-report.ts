@@ -1,4 +1,4 @@
-import { Alert, Breadcrumbs, Button, Loader, UiSelect, UiTable } from '#/ui';
+import { Alert, Breadcrumbs, Button, Icon, Loader, UiSelect, UiTable } from '#/ui';
 import { DecimalPipe } from '@angular/common';
 import { httpResource } from '@angular/common/http';
 import { afterRenderEffect, Component, computed, inject, input, signal } from '@angular/core';
@@ -59,7 +59,7 @@ interface GradeReportData {
 
 @Component({
   selector: 'app-grade-report',
-  imports: [Alert, Breadcrumbs, UiTable, UiSelect, Button, DecimalPipe, FormsModule, Loader],
+  imports: [Alert, Breadcrumbs, UiTable, UiSelect, Button, DecimalPipe, FormsModule, Loader, Icon],
   template: `
     <div class="grade-report-container">
       <div class="flex justify-between items-center mb-4 print:hidden">
@@ -79,7 +79,7 @@ interface GradeReportData {
             }
           </select>
           <button uiButton variant="primary" (click)="printReport()">
-            <span class="material-symbols-outlined">print</span>
+            <ui-icon name="printer" />
             Imprimir / Descargar PDF
           </button>
         </div>

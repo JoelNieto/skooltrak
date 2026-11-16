@@ -4,6 +4,7 @@ import {
   Button,
   Card,
   Confirmation,
+  Icon,
   Pagination,
   PaginatorV2,
   Toast,
@@ -48,6 +49,7 @@ type Teacher = Prisma.TeacherGetPayload<{ include: { user: true } }> & {
     MenuContent,
     MenuItem,
     UiInputGroup,
+    Icon,
   ],
   providers: [Pagination],
   template: `
@@ -56,14 +58,12 @@ type Teacher = Prisma.TeacherGetPayload<{ include: { user: true } }> & {
     <div class="flex flex-col gap-4 md:flex-row md:justify-between">
       <div class="md:w-96 w-full">
         <label uiInputGroup>
-          <span class="material-symbols-outlined">search</span>
+          <ui-icon name="search" />
           <input class="pl-0" type="search" placeholder="Buscar..." [formField]="form.searchText" />
         </label>
       </div>
       @if (auth.hasPermission('MANAGE_TEACHERS')) {
-        <a uiButton variant="primary" routerLink="/teachers/new">
-          <span class="material-symbols-outlined">add_circle</span> Agregar Profesor
-        </a>
+        <a uiButton variant="primary" routerLink="/teachers/new"> <ui-icon name="circle-plus" /> Agregar Profesor </a>
       }
     </div>
     <div uiCard class="overflow-x-auto mt-4">
@@ -97,12 +97,12 @@ type Teacher = Prisma.TeacherGetPayload<{ include: { user: true } }> & {
                       {{ teacher.name }}
                       @if (teacher.user?.emailVerified) {
                         <span uiBadge tone="success" size="sm" class="gap-1">
-                          <span class="material-symbols-outlined text-sm!">check_circle</span>
+                          <ui-icon name="circle-check" class="text-sm!" />
                           Verificado
                         </span>
                       } @else {
                         <span uiBadge tone="warning" size="sm" class="gap-1">
-                          <span class="material-symbols-outlined text-sm!">schedule</span>
+                          <ui-icon name="clock" class="text-sm!" />
                           Pendiente
                         </span>
                       }
@@ -121,7 +121,7 @@ type Teacher = Prisma.TeacherGetPayload<{ include: { user: true } }> & {
                   #trigger="ngMenuTrigger"
                   [menu]="actionsMenu()"
                 >
-                  <span class="material-symbols-outlined text-xl">more_horiz</span>
+                  <ui-icon name="ellipsis" class="text-xl" />
                 </button>
                 <ng-template
                   [cdkConnectedOverlayOpen]="trigger.expanded()"
@@ -145,7 +145,7 @@ type Teacher = Prisma.TeacherGetPayload<{ include: { user: true } }> & {
                         [routerLink]="['/teachers', teacher.id]"
                         class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-surface-2 w-full"
                       >
-                        <span class="material-symbols-outlined text-lg">visibility</span>
+                        <ui-icon name="eye" class="text-lg" />
                         <span>Ver</span>
                       </a>
                       @if (auth.hasPermission('MANAGE_TEACHERS')) {
@@ -155,7 +155,7 @@ type Teacher = Prisma.TeacherGetPayload<{ include: { user: true } }> & {
                           [routerLink]="['/teachers', teacher.id, 'edit']"
                           class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-surface-2 w-full"
                         >
-                          <span class="material-symbols-outlined text-lg">edit</span>
+                          <ui-icon name="pencil" class="text-lg" />
                           <span>Editar</span>
                         </a>
                         @if (teacher.user && !teacher.user.emailVerified) {
@@ -165,7 +165,7 @@ type Teacher = Prisma.TeacherGetPayload<{ include: { user: true } }> & {
                             class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-surface-2 w-full"
                             (click)="resendInvitationForTeacher(teacher)"
                           >
-                            <span class="material-symbols-outlined text-lg">mail</span>
+                            <ui-icon name="mail" class="text-lg" />
                             <span>Reenviar invitación</span>
                           </button>
                         }
@@ -175,7 +175,7 @@ type Teacher = Prisma.TeacherGetPayload<{ include: { user: true } }> & {
                           class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-surface-2 w-full"
                           (click)="deleteTeacher(teacher)"
                         >
-                          <span class="material-symbols-outlined text-lg">delete</span>
+                          <ui-icon name="trash-2" class="text-lg" />
                           <span>Eliminar</span>
                         </button>
                       }

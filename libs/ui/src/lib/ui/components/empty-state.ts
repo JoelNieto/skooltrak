@@ -1,16 +1,18 @@
 import { Component, computed, input, output } from '@angular/core';
 import { Button } from './button';
+import { UiIconName } from '../icons/icons';
+import { Icon } from './icon';
 
 type EmptyStateColor = 'primary' | 'secondary' | 'accent' | 'info' | 'success' | 'warning' | 'neutral';
 
 @Component({
   selector: 'lib-empty-state',
-  imports: [Button],
+  imports: [Button, Icon],
   template: `
     <div class="border border-dashed rounded-lg p-6 text-center" [class]="containerClass()">
-      @if (icon()) {
+      @if (icon(); as iconName) {
         <div class="inline-flex items-center justify-center w-12 h-12 rounded-full mb-3" [class]="iconBgClass()">
-          <span class="material-symbols-outlined text-2xl" [class]="iconColorClass()">{{ icon() }}</span>
+          <ui-icon [name]="iconName" class="text-2xl" [class]="iconColorClass()" />
         </div>
       }
       <p class="type-label text-ink-strong">{{ title() }}</p>
@@ -35,7 +37,7 @@ type EmptyStateColor = 'primary' | 'secondary' | 'accent' | 'info' | 'success' |
 export class EmptyState {
   title = input('');
   description = input<string>();
-  icon = input<string>();
+  icon = input<UiIconName>();
   color = input<EmptyStateColor>('primary');
   actionLabel = input<string>();
   action = output<void>();

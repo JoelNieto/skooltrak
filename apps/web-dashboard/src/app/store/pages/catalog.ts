@@ -5,11 +5,11 @@ import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { map, of } from 'rxjs';
 import { StoreApiService } from '../store-api.service';
-import { Alert, Badge, Button, Card, CardBody, CardTitle, UiInput } from '#/ui';
+import { Alert, Badge, Button, Card, CardBody, CardTitle, Icon, UiInput } from '#/ui';
 
 @Component({
   selector: 'app-store-catalog',
-  imports: [Alert, Badge, Card, CardBody, CardTitle, UiInput, Button, RouterLink, FormsModule],
+  imports: [Alert, Badge, Card, CardBody, CardTitle, UiInput, Button, RouterLink, FormsModule, Icon],
   template: `
     @if (!schoolId()) {
       <div uiAlert tone="warning">
@@ -59,7 +59,7 @@ import { Alert, Badge, Button, Card, CardBody, CardTitle, UiInput } from '#/ui';
                 <img [src]="p.imageUrl" [alt]="p.name" class="h-full w-full object-cover" />
               } @else {
                 <div class="flex h-full w-full items-center justify-center text-ink-subtle">
-                  <span class="material-symbols-outlined text-5xl">inventory_2</span>
+                  <ui-icon name="archive" class="text-5xl" />
                 </div>
               }
             </figure>

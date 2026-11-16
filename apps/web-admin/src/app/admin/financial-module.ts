@@ -14,7 +14,7 @@ import { Component } from '@angular/core';
     <lib-empty-state
       title="Funcionalidad en construcción"
       description="Aquí podrás gestionar colegiaturas, pagos y estados de cuenta."
-      icon="payments"
+      icon="banknote"
     />
   `,
 })

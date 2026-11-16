@@ -8,6 +8,7 @@ import {
   CardTitle,
   Confirmation,
   EmptyState,
+  Icon,
   PageHeader,
   Toast,
   UiChoice,
@@ -16,9 +17,9 @@ import {
   UiSelect,
   UiTab,
   UiTabContent,
+  UiTable,
   UiTabList,
   UiTabPanel,
-  UiTable,
   UiTabs,
   UiToggle,
 } from '#/ui';
@@ -71,13 +72,14 @@ const ACTION_LABELS: Record<string, string> = {
     UiTab,
     UiTabPanel,
     UiTabContent,
+    Icon,
   ],
   template: `
     <lib-page-header
       title="Comunicados institucionales"
       subtitle="Aprueba avisos, consulta el historial y revisa la política de envío. Los avisos institucionales quedan pendientes de aprobación."
       actionLabel="Nuevo comunicado"
-      actionIcon="campaign"
+      actionIcon="megaphone"
       (action)="openComposer()"
     />
 
@@ -95,7 +97,7 @@ const ACTION_LABELS: Record<string, string> = {
           <button uiTab value="settings">Ajustes</button>
         </div>
         <button uiButton variant="ghost" size="sm" type="button" (click)="reload()">
-          <span class="material-symbols-outlined text-base">refresh</span>
+          <ui-icon name="refresh-cw" class="text-base" />
           Actualizar
         </button>
       </div>
@@ -109,7 +111,7 @@ const ACTION_LABELS: Record<string, string> = {
                   <lib-empty-state
                     title="Sin pendientes"
                     description="Los comunicados institucionales aparecerán aquí hasta que se aprueben."
-                    icon="task_alt"
+                    icon="circle-check-big"
                   />
                 } @else {
                   <div class="space-y-3">
@@ -259,7 +261,7 @@ const ACTION_LABELS: Record<string, string> = {
                     <lib-empty-state
                       title="Sin comunicados enviados"
                       description="Cuando apruebes o envíes un aviso aparecerá aquí."
-                      icon="campaign"
+                      icon="megaphone"
                     />
                   } @else {
                     <div class="overflow-x-auto">

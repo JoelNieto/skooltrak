@@ -1,6 +1,7 @@
 import {
   Badge,
   Button,
+  Icon,
   MessageBubble,
   Modal,
   PageHeader,
@@ -56,6 +57,7 @@ interface ThreadListItem {
     ThreadComposer,
     ThreadScrollPane,
     MessageBubble,
+    Icon,
   ],
   template: `
     <lib-page-header [breadcrumbs]="[{ label: 'Inicio', link: '/' }, { label: 'Comunicaciones' }]"
@@ -126,7 +128,7 @@ interface ThreadListItem {
           >
             <div class="flex items-center gap-2 min-w-0">
               @if (thread.broadcast) {
-                <span class="material-symbols-outlined text-primary shrink-0">campaign</span>
+                <ui-icon name="megaphone" class="text-primary shrink-0" />
               }
               <h2 class="font-semibold truncate">{{ thread.title }}</h2>
               @if (thread.broadcast) {

@@ -3,6 +3,7 @@ import {
   Button,
   Card,
   CardBody,
+  Icon,
   Loader,
   Toast,
   UiTab,
@@ -39,6 +40,7 @@ import GroupStudents from './group-students';
     UiTabList,
     UiTabPanel,
     UiTabs,
+    Icon,
   ],
   template: `
     @let group = groupResource.value();
@@ -73,7 +75,7 @@ import GroupStudents from './group-students';
                 [disabled]="startingChat()"
               >
                 @if (!startingChat()) {
-                  <span class="material-symbols-outlined">chat</span>
+                  <ui-icon name="message-circle" />
                 }
                 Chat
               </button>
@@ -84,20 +86,20 @@ import GroupStudents from './group-students';
         <div uiTabs class="mt-4 flex flex-col gap-4">
           <div uiTabList [(selectedTab)]="tab" aria-label="Secciones del grupo">
             <button uiTab value="estudiantes">
-              <span class="material-symbols-outlined text-xl" aria-hidden="true">group</span>
+              <ui-icon name="users" class="text-xl" />
               Estudiantes
             </button>
             <button uiTab value="cursos">
-              <span class="material-symbols-outlined text-xl" aria-hidden="true">menu_book</span>
+              <ui-icon name="book-open" class="text-xl" />
               Cursos
             </button>
             <button uiTab value="horario">
-              <span class="material-symbols-outlined text-xl" aria-hidden="true">calendar_month</span>
+              <ui-icon name="calendar-days" class="text-xl" />
               Horario
             </button>
             @if (canManageHabits()) {
               <button uiTab value="habitos">
-                <span class="material-symbols-outlined text-xl" aria-hidden="true">psychology</span>
+                <ui-icon name="brain" class="text-xl" />
                 Hábitos y actitudes
               </button>
             }

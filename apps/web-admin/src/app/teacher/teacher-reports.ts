@@ -9,7 +9,7 @@ import { Component } from '@angular/core';
       title="Reportes docentes"
       subtitle="Genera y exporta informes de rendimiento."
       actionLabel="Generar reporte"
-      actionIcon="description"
+      actionIcon="file-text"
     />
 
     <div class="grid gap-4 md:grid-cols-3">
@@ -31,7 +31,7 @@ import { Component } from '@angular/core';
         <lib-empty-state
           title="Sin reportes generados"
           description="Los reportes exportados aparecerán aquí."
-          icon="insert_drive_file"
+          icon="file"
         />
       } @else {
         <ul class="list-disc pl-5 text-sm text-ink-muted">

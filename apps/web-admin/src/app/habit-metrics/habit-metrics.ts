@@ -1,4 +1,4 @@
-import { Badge, Breadcrumbs, Button, Confirmation, Error, Modal, Spinner, Toast, UiTable } from '#/ui';
+import { Badge, Breadcrumbs, Button, Confirmation, Error, Icon, Modal, Spinner, Toast, UiTable } from '#/ui';
 import { Menu, MenuContent, MenuItem, MenuTrigger } from '@angular/aria/menu';
 import { OverlayModule } from '@angular/cdk/overlay';
 import { DatePipe } from '@angular/common';
@@ -22,6 +22,7 @@ import HabitMetricsForm from './habit-metrics-form';
     MenuTrigger,
     OverlayModule,
     Error,
+    Icon,
   ],
   template: `
     <ui-breadcrumbs [items]="[{ label: 'Inicio', link: '/' }, { label: 'Hábitos y actitudes' }]" />
@@ -32,7 +33,7 @@ import HabitMetricsForm from './habit-metrics-form';
       </div>
 
       <button uiButton variant="primary" (click)="editHabitMetric()">
-        <span class="material-symbols-outlined">add_circle</span>
+        <ui-icon name="circle-plus" />
         Nueva métrica
       </button>
     </div>
@@ -78,7 +79,7 @@ import HabitMetricsForm from './habit-metrics-form';
                     #trigger="ngMenuTrigger"
                     [menu]="optionsMenu()"
                   >
-                    <span class="material-symbols-outlined text-xl">more_horiz</span>
+                    <ui-icon name="ellipsis" class="text-xl" />
                   </button>
                   <ng-template
                     [cdkConnectedOverlayOpen]="trigger.expanded()"
@@ -102,7 +103,7 @@ import HabitMetricsForm from './habit-metrics-form';
                           class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-surface-2 w-full"
                           (click)="editHabitMetric($any(metric))"
                         >
-                          <span class="material-symbols-outlined text-lg">edit</span>
+                          <ui-icon name="pencil" class="text-lg" />
                           <span>Editar</span>
                         </button>
                         <button
@@ -111,7 +112,7 @@ import HabitMetricsForm from './habit-metrics-form';
                           class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-surface-2 w-full"
                           (click)="deleteHabitMetric(metric.id!)"
                         >
-                          <span class="material-symbols-outlined text-lg">delete</span>
+                          <ui-icon name="trash-2" class="text-lg" />
                           <span>Eliminar</span>
                         </button>
                       </ng-template>

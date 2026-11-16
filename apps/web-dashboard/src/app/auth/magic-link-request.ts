@@ -1,4 +1,4 @@
-import { Button, Card, CardBody, CardTitle, Toast, UiInputGroup } from '#/ui';
+import { Button, Card, CardBody, CardTitle, Icon, Toast, UiInputGroup } from '#/ui';
 import { HttpClient } from '@angular/common/http';
 import { Component, inject, signal } from '@angular/core';
 import { debounce, email, form, FormField, required } from '@angular/forms/signals';
@@ -6,7 +6,7 @@ import { Router, RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-magic-link-request',
-  imports: [Card, CardBody, CardTitle, Button, RouterLink, FormField, UiInputGroup],
+  imports: [Card, CardBody, CardTitle, Button, RouterLink, FormField, UiInputGroup, Icon],
   template: `
     <div class="min-h-screen flex items-center justify-center bg-surface-0 p-4">
       <div uiCard class="w-full max-w-md">
@@ -16,7 +16,7 @@ import { Router, RouterLink } from '@angular/router';
 
           <form (submit)="request($event)" class="flex flex-col gap-4">
             <label uiInputGroup class="w-full">
-              <span class="material-symbols-outlined">email</span>
+              <ui-icon name="mail" />
               <input type="email" placeholder="correo@ejemplo.com" [formField]="emailForm.email" />
             </label>
             @if (emailForm.email().touched() && emailForm.email().invalid()) {
@@ -36,7 +36,7 @@ import { Router, RouterLink } from '@angular/router';
               [disabled]="loading()"
             >
               @if (!loading()) {
-                <span class="material-symbols-outlined">link</span>
+                <ui-icon name="link" />
               }
               {{ loading() ? 'Enviando...' : 'Enviar enlace de acceso' }}
             </button>

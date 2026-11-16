@@ -4,11 +4,11 @@ import { RouterLink } from '@angular/router';
 import { map } from 'rxjs';
 import { StoreApiService } from '../store-api.service';
 import StoreThemeToggle from '../store-theme-toggle';
-import { Badge } from '#/ui';
+import { Badge, Icon } from '#/ui';
 
 @Component({
   selector: 'app-school-picker-standalone',
-  imports: [Badge, RouterLink, StoreThemeToggle],
+  imports: [Badge, RouterLink, StoreThemeToggle, Icon],
   template: `
     <div class="layout-padding max-w-3xl mx-auto py-10">
       <div class="flex flex-wrap items-start justify-between gap-4 mb-6">
@@ -36,7 +36,7 @@ import { Badge } from '#/ui';
                     <span
                       class="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-action-subtle text-primary"
                     >
-                      <span class="material-symbols-outlined text-xl">apartment</span>
+                      <ui-icon name="building-2" class="text-xl" />
                     </span>
                   }
                   <span class="truncate font-medium">{{ s.name }}</span>

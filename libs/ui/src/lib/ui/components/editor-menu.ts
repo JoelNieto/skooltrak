@@ -1,9 +1,10 @@
 import { Component, input } from '@angular/core';
 import { Button } from './button';
+import { Icon } from './icon';
 
 @Component({
   selector: 'lib-editor-menu',
-  imports: [Button],
+  imports: [Button, Icon],
   template: `<div class="flex gap-2 flex-wrap">
     <div class="tooltip" data-tip="Negrita">
       <button
@@ -16,7 +17,7 @@ import { Button } from './button';
         [attr.aria-pressed]="editor().isActive('bold')"
         (click)="editor().chain().focus().toggleBold().run()"
       >
-        <span class="material-symbols-outlined">format_bold</span>
+        <ui-icon name="bold" />
       </button>
     </div>
     <div class="tooltip" data-tip="Cursiva">
@@ -30,7 +31,7 @@ import { Button } from './button';
         [attr.aria-pressed]="editor().isActive('italic')"
         (click)="editor().chain().focus().toggleItalic().run()"
       >
-        <span class="material-symbols-outlined">format_italic</span>
+        <ui-icon name="italic" />
       </button>
     </div>
     <div class="tooltip" data-tip="Tachado">
@@ -44,7 +45,7 @@ import { Button } from './button';
         [attr.aria-pressed]="editor().isActive('strike')"
         (click)="editor().chain().focus().toggleStrike().run()"
       >
-        <span class="material-symbols-outlined">format_strikethrough</span>
+        <ui-icon name="strikethrough" />
       </button>
     </div>
     <div class="tooltip" data-tip="Subrayado">
@@ -58,7 +59,7 @@ import { Button } from './button';
         [attr.aria-pressed]="editor().isActive('underline')"
         (click)="editor().chain().focus().toggleUnderline().run()"
       >
-        <span class="material-symbols-outlined">format_underlined</span>
+        <ui-icon name="underline" />
       </button>
     </div>
     <div class="tooltip" data-tip="Destacado">
@@ -72,7 +73,7 @@ import { Button } from './button';
         [attr.aria-pressed]="editor().isActive('highlight')"
         (click)="editor().chain().focus().toggleHighlight().run()"
       >
-        <span class="material-symbols-outlined">highlight</span>
+        <ui-icon name="highlighter" />
       </button>
     </div>
     <div class="tooltip" data-tip="Código">
@@ -86,7 +87,7 @@ import { Button } from './button';
         [attr.aria-pressed]="editor().isActive('code')"
         (click)="editor().chain().focus().toggleCode().run()"
       >
-        <span class="material-symbols-outlined">code</span>
+        <ui-icon name="code" />
       </button>
     </div>
     <div class="tooltip" data-tip="Lista desordenada">
@@ -100,7 +101,7 @@ import { Button } from './button';
         [attr.aria-pressed]="editor().isActive('bulletList')"
         (click)="editor().chain().focus().toggleBulletList().run()"
       >
-        <span class="material-symbols-outlined">format_list_bulleted</span>
+        <ui-icon name="list" />
       </button>
     </div>
     <div class="tooltip" data-tip="Lista ordenada">
@@ -114,7 +115,7 @@ import { Button } from './button';
         [attr.aria-pressed]="editor().isActive('orderedList')"
         (click)="editor().chain().focus().toggleOrderedList().run()"
       >
-        <span class="material-symbols-outlined">format_list_numbered</span>
+        <ui-icon name="list-ordered" />
       </button>
     </div>
     <div class="tooltip" data-tip="Encabezado 1">
@@ -128,7 +129,7 @@ import { Button } from './button';
         [attr.aria-pressed]="editor().isActive('heading', { level: 1 })"
         (click)="editor().chain().focus().toggleHeading({ level: 1 }).run()"
       >
-        <span class="material-symbols-outlined">format_h1</span>
+        <ui-icon name="heading-1" />
       </button>
     </div>
     <div class="tooltip" data-tip="Encabezado 2">
@@ -142,7 +143,7 @@ import { Button } from './button';
         [attr.aria-pressed]="editor().isActive('heading', { level: 2 })"
         (click)="editor().chain().focus().toggleHeading({ level: 2 }).run()"
       >
-        <span class="material-symbols-outlined">format_h2</span>
+        <ui-icon name="heading-2" />
       </button>
     </div>
     <div class="tooltip" data-tip="Encabezado 3">
@@ -156,7 +157,7 @@ import { Button } from './button';
         [attr.aria-pressed]="editor().isActive('heading', { level: 3 })"
         (click)="editor().chain().focus().toggleHeading({ level: 3 }).run()"
       >
-        <span class="material-symbols-outlined">format_h3</span>
+        <ui-icon name="heading-3" />
       </button>
     </div>
     <div class="tooltip" data-tip="Encabezado 4">
@@ -170,7 +171,7 @@ import { Button } from './button';
         [attr.aria-pressed]="editor().isActive('heading', { level: 4 })"
         (click)="editor().chain().focus().toggleHeading({ level: 4 }).run()"
       >
-        <span class="material-symbols-outlined">format_h4</span>
+        <ui-icon name="heading-4" />
       </button>
     </div>
     <div class="tooltip" data-tip="Encabezado 5">
@@ -184,7 +185,7 @@ import { Button } from './button';
         [attr.aria-pressed]="editor().isActive('heading', { level: 5 })"
         (click)="editor().chain().focus().toggleHeading({ level: 5 }).run()"
       >
-        <span class="material-symbols-outlined">format_h5</span>
+        <ui-icon name="heading-5" />
       </button>
     </div>
     <div class="tooltip" data-tip="Cita">
@@ -198,73 +199,73 @@ import { Button } from './button';
         [attr.aria-pressed]="editor().isActive('blockquote')"
         (click)="editor().chain().focus().toggleBlockquote().run()"
       >
-        <span class="material-symbols-outlined">format_quote</span>
+        <ui-icon name="quote" />
       </button>
     </div>
     <div class="divider divider-horizontal mx-0"></div>
     @if (editor().isActive('table')) {
       <div class="dropdown">
         <div tabindex="0" role="button" class="btn btn-ghost btn-primary btn-sm btn-soft">
-          <span class="material-symbols-outlined">grid_on</span>
+          <ui-icon name="grid-3x3" />
           Tabla
-          <span class="material-symbols-outlined text-xs">expand_more</span>
+          <ui-icon name="chevron-down" class="text-xs" />
         </div>
         <ul tabindex="0" class="dropdown-content menu bg-surface-1 rounded-box z-50 w-56 p-2 shadow-lg">
           <li class="menu-title">Columnas</li>
           <li>
             <button type="button" (click)="editor().chain().focus().addColumnBefore().run()">
-              <span class="material-symbols-outlined">arrow_back</span>
+              <ui-icon name="arrow-left" />
               Agregar antes
             </button>
           </li>
           <li>
             <button type="button" (click)="editor().chain().focus().addColumnAfter().run()">
-              <span class="material-symbols-outlined">arrow_forward</span>
+              <ui-icon name="arrow-right" />
               Agregar después
             </button>
           </li>
           <li>
             <button type="button" class="text-error" (click)="editor().chain().focus().deleteColumn().run()">
-              <span class="material-symbols-outlined">remove</span>
+              <ui-icon name="minus" />
               Eliminar columna
             </button>
           </li>
           <li class="menu-title">Filas</li>
           <li>
             <button type="button" (click)="editor().chain().focus().addRowBefore().run()">
-              <span class="material-symbols-outlined">arrow_upward</span>
+              <ui-icon name="arrow-up" />
               Agregar antes
             </button>
           </li>
           <li>
             <button type="button" (click)="editor().chain().focus().addRowAfter().run()">
-              <span class="material-symbols-outlined">arrow_downward</span>
+              <ui-icon name="arrow-down" />
               Agregar después
             </button>
           </li>
           <li>
             <button type="button" class="text-error" (click)="editor().chain().focus().deleteRow().run()">
-              <span class="material-symbols-outlined">remove</span>
+              <ui-icon name="minus" />
               Eliminar fila
             </button>
           </li>
           <li class="menu-title">Celdas</li>
           <li>
             <button type="button" (click)="editor().chain().focus().mergeCells().run()">
-              <span class="material-symbols-outlined">call_merge</span>
+              <ui-icon name="merge" />
               Combinar celdas
             </button>
           </li>
           <li>
             <button type="button" (click)="editor().chain().focus().splitCell().run()">
-              <span class="material-symbols-outlined">call_split</span>
+              <ui-icon name="split" />
               Dividir celda
             </button>
           </li>
           <div class="divider my-0"></div>
           <li>
             <button type="button" class="text-error" (click)="editor().chain().focus().deleteTable().run()">
-              <span class="material-symbols-outlined">delete</span>
+              <ui-icon name="trash-2" />
               Eliminar tabla
             </button>
           </li>
@@ -279,7 +280,7 @@ import { Button } from './button';
           type="button"
           (click)="editor().chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run()"
         >
-          <span class="material-symbols-outlined">grid_on</span>
+          <ui-icon name="grid-3x3" />
         </button>
       </div>
     }

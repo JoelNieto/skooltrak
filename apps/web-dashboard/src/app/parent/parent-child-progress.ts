@@ -19,7 +19,7 @@ interface GradeRow {
       title="Progreso del estudiante"
       [subtitle]="child() ? child()!.name + ' · ' + child()!.schoolName : 'Detalle de calificaciones'"
       actionLabel="Volver"
-      actionIcon="arrow_back"
+      actionIcon="arrow-left"
       (action)="back()"
     />
 

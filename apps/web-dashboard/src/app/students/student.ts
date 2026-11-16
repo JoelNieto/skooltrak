@@ -5,14 +5,15 @@ import {
   Button,
   Card,
   CardBody,
+  Icon,
   Loader,
   Toast,
   UiSelect,
   UiTab,
   UiTabContent,
+  UiTable,
   UiTabList,
   UiTabPanel,
-  UiTable,
   UiTabs,
 } from '#/ui';
 import { DatePipe, DecimalPipe } from '@angular/common';
@@ -64,6 +65,7 @@ const ENROLLMENT_STATUS_TONES: Record<$Enums.EnrollmentStatus, BadgeTone> = {
     UiTabContent,
     DecimalPipe,
     StudentAttendanceReport,
+    Icon,
   ],
   template: `
     @if (studentResource.isLoading()) {
@@ -92,12 +94,12 @@ const ENROLLMENT_STATUS_TONES: Record<$Enums.EnrollmentStatus, BadgeTone> = {
                     </span>
                     @if (student.user?.emailVerified) {
                       <span uiBadge tone="success" size="sm" class="gap-1">
-                        <span class="material-symbols-outlined text-xs">check_circle</span>
+                        <ui-icon name="circle-check" class="text-xs" />
                         Verificado
                       </span>
                     } @else {
                       <span uiBadge tone="warning" size="sm" class="gap-1">
-                        <span class="material-symbols-outlined text-xs">schedule</span>
+                        <ui-icon name="clock" class="text-xs" />
                         Pendiente
                       </span>
                     }
@@ -112,12 +114,12 @@ const ENROLLMENT_STATUS_TONES: Record<$Enums.EnrollmentStatus, BadgeTone> = {
               <div class="flex flex-col items-end gap-3">
                 <div class="flex gap-2">
                   <a uiButton variant="ghost" size="sm" [routerLink]="['/students', student.id, 'grade-report']">
-                    <span class="material-symbols-outlined text-lg">description</span>
+                    <ui-icon name="file-text" class="text-lg" />
                     Boletín
                   </a>
                   @if (auth.hasPermission('MANAGE_STUDENTS')) {
                     <a uiButton variant="primary" size="sm" [routerLink]="['/students', student.id, 'edit']">
-                      <span class="material-symbols-outlined text-lg">edit</span>
+                      <ui-icon name="pencil" class="text-lg" />
                       Editar
                     </a>
                   }
@@ -220,7 +222,7 @@ const ENROLLMENT_STATUS_TONES: Record<$Enums.EnrollmentStatus, BadgeTone> = {
                                 title="Copiar código"
                                 (click)="copyCode()"
                               >
-                                <span class="material-symbols-outlined text-lg">content_copy</span>
+                                <ui-icon name="copy" class="text-lg" />
                               </button>
                             } @else {
                               <span class="text-sm text-ink-subtle">Sin código</span>
@@ -238,7 +240,7 @@ const ENROLLMENT_STATUS_TONES: Record<$Enums.EnrollmentStatus, BadgeTone> = {
                                 (click)="regenerate()"
                               >
                                 @if (!regenerating()) {
-                                  <span class="material-symbols-outlined text-lg">refresh</span>
+                                  <ui-icon name="refresh-cw" class="text-lg" />
                                 }
                               </button>
                             }
@@ -265,7 +267,7 @@ const ENROLLMENT_STATUS_TONES: Record<$Enums.EnrollmentStatus, BadgeTone> = {
                                 <!-- eslint-enable @nx/workspace-design-tokens -->
                                 <div class="flex items-center gap-2">
                                   <button uiButton size="sm" type="button" (click)="copyConnectUrl()">
-                                    <span class="material-symbols-outlined text-lg">link</span>
+                                    <ui-icon name="link" class="text-lg" />
                                     Copiar enlace
                                   </button>
                                   <button
@@ -278,7 +280,7 @@ const ENROLLMENT_STATUS_TONES: Record<$Enums.EnrollmentStatus, BadgeTone> = {
                                     (click)="generateConnectQr()"
                                   >
                                     @if (!connectQrLoading()) {
-                                      <span class="material-symbols-outlined text-lg">refresh</span>
+                                      <ui-icon name="refresh-cw" class="text-lg" />
                                     }
                                     Regenerar
                                   </button>
@@ -298,7 +300,7 @@ const ENROLLMENT_STATUS_TONES: Record<$Enums.EnrollmentStatus, BadgeTone> = {
                                 (click)="generateConnectQr()"
                               >
                                 @if (!connectQrLoading()) {
-                                  <span class="material-symbols-outlined text-lg">qr_code_2</span>
+                                  <ui-icon name="qr-code" class="text-lg" />
                                 }
                                 Generar QR de conexión
                               </button>

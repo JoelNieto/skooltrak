@@ -1,4 +1,4 @@
-import { Badge, Breadcrumbs, Loader, Spinner, Toast, UiInput } from '#/ui';
+import { Badge, Breadcrumbs, Icon, Loader, Spinner, Toast, UiInput } from '#/ui';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -8,7 +8,7 @@ import Auth from '../auth/auth';
 
 @Component({
   selector: 'app-chat-new',
-  imports: [Spinner, Breadcrumbs, Badge, UiInput, Loader, FormsModule],
+  imports: [Spinner, Breadcrumbs, Badge, UiInput, Loader, FormsModule, Icon],
   template: `
     <ui-breadcrumbs
       [items]="[{ label: 'Inicio', link: '/' }, { label: 'Chats', link: '/chats' }, { label: 'Nuevo chat' }]"
@@ -57,7 +57,7 @@ import Auth from '../auth/auth';
             @if (creating() === contact.id) {
               <span uiSpinner size="sm"></span>
             } @else {
-              <span class="material-symbols-outlined text-ink-subtle">chat</span>
+              <ui-icon name="message-circle" class="text-ink-subtle" />
             }
           </button>
         }

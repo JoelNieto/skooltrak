@@ -1,10 +1,11 @@
 import { Component, input, output, signal } from '@angular/core';
 import { Button } from './button';
 import { UiInput } from './field';
+import { Icon } from './icon';
 
 @Component({
   selector: 'lib-thread-composer',
-  imports: [UiInput, Button],
+  imports: [UiInput, Button, Icon],
   template: `
     <form class="flex items-end gap-2 border-t border-line p-2 bg-surface-1" (submit)="onSubmit($event)">
       <textarea
@@ -17,7 +18,7 @@ import { UiInput } from './field';
         (input)="onInput($event)"
       ></textarea>
       <button uiButton variant="primary" type="submit" [disabled]="disabled() || !draft().trim()">
-        <span class="material-symbols-outlined">send</span>
+        <ui-icon name="send" />
       </button>
     </form>
   `,

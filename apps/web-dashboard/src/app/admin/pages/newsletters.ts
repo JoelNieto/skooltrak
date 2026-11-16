@@ -1,4 +1,16 @@
-import { Alert, Badge, Button, Card, Confirmation, Pagination, Paginator, Toast, UiInputGroup, UiTable } from '#/ui';
+import {
+  Alert,
+  Badge,
+  Button,
+  Card,
+  Confirmation,
+  Icon,
+  Pagination,
+  Paginator,
+  Toast,
+  UiInputGroup,
+  UiTable,
+} from '#/ui';
 import { Menu, MenuContent, MenuItem, MenuTrigger } from '@angular/aria/menu';
 import { OverlayModule } from '@angular/cdk/overlay';
 import { DatePipe } from '@angular/common';
@@ -40,12 +52,13 @@ type NewsletterItem = {
     MenuTrigger,
     OverlayModule,
     UiInputGroup,
+    Icon,
   ],
   providers: [Pagination],
   template: `
     @if (newsletters.error()) {
       <div uiAlert tone="danger">
-        <span class="material-symbols-outlined">error</span>
+        <ui-icon name="circle-alert" />
         <span>Error al cargar los boletines. Verifica tus permisos o intenta de nuevo.</span>
         <button uiButton variant="ghost" size="sm" (click)="newsletters.reload()">Reintentar</button>
       </div>
@@ -53,12 +66,12 @@ type NewsletterItem = {
       <div class="flex flex-col gap-4 md:flex-row md:justify-between">
         <div class="md:w-96 w-full">
           <label uiInputGroup>
-            <span class="material-symbols-outlined">search</span>
+            <ui-icon name="search" />
             <input class="pl-0" type="search" placeholder="Buscar..." [(ngModel)]="searchText" />
           </label>
         </div>
         <a uiButton variant="primary" routerLink="/admin/newsletters/new">
-          <span class="material-symbols-outlined">add_circle</span> Nuevo boletín
+          <ui-icon name="circle-plus" /> Nuevo boletín
         </a>
       </div>
       <div uiCard class="overflow-x-auto mt-4">
@@ -73,9 +86,7 @@ type NewsletterItem = {
                 <div class="flex items-center gap-2">
                   Título
                   @if (pagination.sortBy() === 'title') {
-                    <span class="material-symbols-outlined text-xl">
-                      {{ pagination.sortOrder() === 'asc' ? 'arrow_upward' : 'arrow_downward' }}
-                    </span>
+                    <ui-icon [name]="pagination.sortOrder() === 'asc' ? 'arrow-up' : 'arrow-down'" class="text-xl" />
                   }
                 </div>
               </th>
@@ -83,30 +94,30 @@ type NewsletterItem = {
               <th>Estado</th>
               <th
                 class="cursor-pointer hover:bg-surface-2"
-                [class]="pagination.sortBy() === 'publishedAt' ? 'bg-action-subtle text-primary! hover:bg-primary/20' : ''"
+                [class]="
+                  pagination.sortBy() === 'publishedAt' ? 'bg-action-subtle text-primary! hover:bg-primary/20' : ''
+                "
                 (click)="pagination.setOrder('publishedAt')"
               >
                 <div class="flex items-center gap-2">
                   Publicado
                   @if (pagination.sortBy() === 'publishedAt') {
-                    <span class="material-symbols-outlined text-xl">
-                      {{ pagination.sortOrder() === 'asc' ? 'arrow_upward' : 'arrow_downward' }}
-                    </span>
+                    <ui-icon [name]="pagination.sortOrder() === 'asc' ? 'arrow-up' : 'arrow-down'" class="text-xl" />
                   }
                 </div>
               </th>
               <th>Autor</th>
               <th
                 class="cursor-pointer hover:bg-surface-2"
-                [class]="pagination.sortBy() === 'createdAt' ? 'bg-action-subtle text-primary! hover:bg-primary/20' : ''"
+                [class]="
+                  pagination.sortBy() === 'createdAt' ? 'bg-action-subtle text-primary! hover:bg-primary/20' : ''
+                "
                 (click)="pagination.setOrder('createdAt')"
               >
                 <div class="flex items-center gap-2">
                   Creado
                   @if (pagination.sortBy() === 'createdAt') {
-                    <span class="material-symbols-outlined text-xl">
-                      {{ pagination.sortOrder() === 'asc' ? 'arrow_upward' : 'arrow_downward' }}
-                    </span>
+                    <ui-icon [name]="pagination.sortOrder() === 'asc' ? 'arrow-up' : 'arrow-down'" class="text-xl" />
                   }
                 </div>
               </th>
@@ -136,7 +147,7 @@ type NewsletterItem = {
                     #trigger="ngMenuTrigger"
                     [menu]="actionsMenu()"
                   >
-                    <span class="material-symbols-outlined text-xl">more_horiz</span>
+                    <ui-icon name="ellipsis" class="text-xl" />
                   </button>
                   <ng-template
                     [cdkConnectedOverlayOpen]="trigger.expanded()"
@@ -160,7 +171,7 @@ type NewsletterItem = {
                           class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-surface-2 w-full"
                           [routerLink]="['/admin/newsletters', newsletter.id, 'edit']"
                         >
-                          <span class="material-symbols-outlined text-lg">edit</span>
+                          <ui-icon name="pencil" class="text-lg" />
                           <span>Editar</span>
                         </a>
                         <button
@@ -169,9 +180,7 @@ type NewsletterItem = {
                           class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-surface-2 w-full"
                           (click)="togglePublish(newsletter)"
                         >
-                          <span class="material-symbols-outlined text-lg">
-                            {{ newsletter.published ? 'unpublished' : 'publish' }}
-                          </span>
+                          <ui-icon [name]="newsletter.published ? 'undo-2' : 'send'" class="text-lg" />
                           <span>{{ newsletter.published ? 'Despublicar' : 'Publicar' }}</span>
                         </button>
                         <button
@@ -180,7 +189,7 @@ type NewsletterItem = {
                           class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-surface-2 w-full"
                           (click)="deleteNewsletter(newsletter)"
                         >
-                          <span class="material-symbols-outlined text-lg">delete</span>
+                          <ui-icon name="trash-2" class="text-lg" />
                           <span>Eliminar</span>
                         </button>
                       </ng-template>

@@ -2,7 +2,9 @@ import {
   Badge,
   Button,
   Card,
+  debounceSignal,
   EmptyState,
+  Icon,
   Loader,
   Modal,
   PageHeader,
@@ -10,11 +12,10 @@ import {
   UiInputGroup,
   UiTab,
   UiTabContent,
+  UiTable,
   UiTabList,
   UiTabPanel,
-  UiTable,
   UiTabs,
-  debounceSignal,
 } from '#/ui';
 import { DatePipe } from '@angular/common';
 import { HttpClient, httpResource } from '@angular/common/http';
@@ -62,6 +63,7 @@ type FileItem = {
     UiTabList,
     UiTabPanel,
     UiTabs,
+    Icon,
   ],
   template: `
     <lib-page-header
@@ -72,7 +74,7 @@ type FileItem = {
 
     <div class="flex flex-col md:flex-row md:justify-between md:items-center">
       <label uiInputGroup class="mt-3 md:mt-0">
-        <span class="material-symbols-outlined">search</span>
+        <ui-icon name="search" />
         <input class="pl-0" type="search" placeholder="Buscar archivos..." [(ngModel)]="searchText" />
       </label>
     </div>
@@ -145,7 +147,7 @@ type FileItem = {
                       <td colspan="8" class="text-center text-ink-muted">
                         <lib-empty-state
                           title="No hay archivos compartidos"
-                          icon="folder_open"
+                          icon="folder-open"
                           description="No has compartido ningún archivo aún."
                         />
                       </td>
@@ -194,19 +196,19 @@ type FileItem = {
                             class="text-ink-strong hover:text-success p-1 rounded-lg  cursor-pointer"
                             (click)="openFile(file.id)"
                           >
-                            <span class="material-symbols-outlined text-medium!">open_in_new</span>
+                            <ui-icon name="external-link" class="text-medium!" />
                           </button>
                           <button
                             class="text-ink-strong hover:text-action p-1 rounded-lg  cursor-pointer"
                             (click)="downloadFile(file.id)"
                           >
-                            <span class="material-symbols-outlined text-medium!">download</span>
+                            <ui-icon name="download" class="text-medium!" />
                           </button>
                           <button
                             class="text-ink-strong hover:text-primary p-1 rounded-lg cursor-pointer"
                             (click)="openShareModal(file)"
                           >
-                            <span class="material-symbols-outlined text-medium!">share</span>
+                            <ui-icon name="share-2" class="text-medium!" />
                           </button>
                         }
                       </td>

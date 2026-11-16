@@ -1,10 +1,11 @@
 import { Component, inject, input, output } from '@angular/core';
 import { Router } from '@angular/router';
 import { Button } from './button';
+import { Icon } from './icon';
 
 @Component({
   selector: 'lib-error',
-  imports: [Button],
+  imports: [Button, Icon],
   template: `
     <div class="bg-surface-0 min-h-screen flex items-center justify-center p-4">
       <div class="max-w-lg w-full bg-surface-1 border border-line rounded-2xl overflow-hidden">
@@ -21,18 +22,18 @@ import { Button } from './button';
 
           <div class="flex justify-center mb-8">
             <div class="w-48 h-48 bg-error/30 rounded-full flex items-center justify-center">
-              <span class="material-symbols-outlined text-[5rem] text-error!">error</span>
+              <ui-icon name="circle-alert" class="text-[5rem] text-error!" />
             </div>
           </div>
 
           <!-- Action Buttons -->
           <div class="flex flex-col sm:flex-row gap-4 justify-center">
             <button uiButton variant="danger" size="lg" (click)="goHome()">
-              <span class="material-symbols-outlined">home</span>
+              <ui-icon name="house" />
               Inicio
             </button>
             <button uiButton variant="danger" size="lg" (click)="retry.emit()">
-              <span class="material-symbols-outlined">refresh</span>
+              <ui-icon name="refresh-cw" />
               Reintentar
             </button>
           </div>

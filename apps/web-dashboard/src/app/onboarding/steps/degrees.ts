@@ -1,4 +1,4 @@
-import { Button, Toast, UiField, UiInput } from '#/ui';
+import { Button, Icon, Toast, UiField, UiInput } from '#/ui';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { Component, computed, inject, input, output, signal } from '@angular/core';
 import { form, FormField, required } from '@angular/forms/signals';
@@ -7,13 +7,13 @@ import { CreatedEntity } from '../setup-wizard';
 
 @Component({
   selector: 'app-degrees-step',
-  imports: [UiField, UiInput, Button, FormField],
+  imports: [UiField, UiInput, Button, FormField, Icon],
   template: `
     <div class="w-full max-w-md text-center space-y-8 animate-fade-in">
       <!-- Icon -->
       <div class="flex justify-center">
         <div class="w-20 h-20 rounded-full bg-accent/10 flex items-center justify-center">
-          <span class="material-symbols-outlined text-5xl text-accent">school</span>
+          <ui-icon name="school" class="text-5xl text-accent" />
         </div>
       </div>
 
@@ -32,7 +32,7 @@ import { CreatedEntity } from '../setup-wizard';
           <ul class="space-y-1">
             @for (entity of createdEntities(); track entity.id) {
               <li class="flex items-center gap-2 text-sm">
-                <span class="material-symbols-outlined text-success text-lg">check_circle</span>
+                <ui-icon name="circle-check" class="text-success text-lg" />
                 {{ entity.name }}
               </li>
             }
@@ -60,7 +60,7 @@ import { CreatedEntity } from '../setup-wizard';
             (click)="addAnother = true"
           >
             @if (!(saving() && addAnother)) {
-              <span class="material-symbols-outlined text-xl">add</span>
+              <ui-icon name="plus" class="text-xl" />
             }
             Agregar otro
           </button>
@@ -77,7 +77,7 @@ import { CreatedEntity } from '../setup-wizard';
               Guardando...
             } @else {
               Guardar y Continuar
-              <span class="material-symbols-outlined text-xl">arrow_forward</span>
+              <ui-icon name="arrow-right" class="text-xl" />
             }
           </button>
         </div>

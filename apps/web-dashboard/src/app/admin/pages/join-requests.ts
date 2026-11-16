@@ -1,4 +1,4 @@
-import { Badge, BadgeTone, Button, Card, CardBody, EmptyState, Loader, Toast } from '#/ui';
+import { Badge, BadgeTone, Button, Card, CardBody, EmptyState, Icon, Loader, Toast } from '#/ui';
 import { DatePipe } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { Component, inject, signal } from '@angular/core';
@@ -20,7 +20,7 @@ type JoinRequestRow = {
 
 @Component({
   selector: 'app-join-requests',
-  imports: [Badge, Card, CardBody, Button, Loader, DatePipe, EmptyState],
+  imports: [Badge, Card, CardBody, Button, Loader, DatePipe, EmptyState, Icon],
   template: `
     <div class="space-y-6">
       <div class="flex items-center justify-between">
@@ -29,7 +29,7 @@ type JoinRequestRow = {
           <p class="text-ink-muted">Administra las solicitudes de usuarios que desean unirse a tu escuela.</p>
         </div>
         <button uiButton variant="ghost" size="sm" (click)="loadRequests()">
-          <span class="material-symbols-outlined">refresh</span>
+          <ui-icon name="refresh-cw" />
           Actualizar
         </button>
       </div>
@@ -85,11 +85,11 @@ type JoinRequestRow = {
                       (click)="approve(request.id)"
                       [disabled]="processing()"
                     >
-                      <span class="material-symbols-outlined text-lg">check</span>
+                      <ui-icon name="check" class="text-lg" />
                       Aprobar
                     </button>
                     <button uiButton variant="danger" size="sm" (click)="reject(request.id)" [disabled]="processing()">
-                      <span class="material-symbols-outlined text-lg">close</span>
+                      <ui-icon name="x" class="text-lg" />
                       Rechazar
                     </button>
                   </div>

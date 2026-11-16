@@ -1,6 +1,8 @@
 import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
 import { BreadcrumbItem, Breadcrumbs } from './breadcrumbs';
 import { Button } from './button';
+import { UiIconName } from '../icons/icons';
+import { Icon } from './icon';
 
 /**
  * Top of a page: optional breadcrumb trail, title, subtitle and one primary action.
@@ -10,13 +12,13 @@ import { Button } from './button';
  *     subtitle="Administra los cursos del periodo actual"
  *     [breadcrumbs]="[{ label: 'Inicio', link: '/' }, { label: 'Cursos' }]"
  *     actionLabel="Nuevo curso"
- *     actionIcon="add"
+ *     actionIcon="plus"
  *     (action)="create()"
  *   />
  */
 @Component({
   selector: 'lib-page-header',
-  imports: [Breadcrumbs, Button],
+  imports: [Breadcrumbs, Button, Icon],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     @if (breadcrumbs()?.length) {
@@ -33,8 +35,8 @@ import { Button } from './button';
       </div>
       @if (actionLabel()) {
         <button uiButton variant="primary" type="button" (click)="action.emit()">
-          @if (actionIcon()) {
-            <span class="material-symbols-outlined">{{ actionIcon() }}</span>
+          @if (actionIcon(); as iconName) {
+            <ui-icon [name]="iconName" />
           }
           {{ actionLabel() }}
         </button>
@@ -53,6 +55,6 @@ export class PageHeader {
   /** Trail shown above the title; the last item is the current page. */
   breadcrumbs = input<readonly BreadcrumbItem[]>();
   actionLabel = input<string | undefined>();
-  actionIcon = input<string | undefined>();
+  actionIcon = input<UiIconName | undefined>();
   action = output<void>();
 }

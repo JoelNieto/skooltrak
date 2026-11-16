@@ -1,4 +1,4 @@
-import { Button, TextEditor, UiField, UiInput, UiSelect } from '#/ui';
+import { Button, Icon, TextEditor, UiField, UiInput, UiSelect } from '#/ui';
 import { Component, inject, input } from '@angular/core';
 import { FormArray, FormControl, FormGroup, NonNullableFormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { $Enums } from '@generated/prisma';
@@ -6,7 +6,7 @@ import QuestionOptionControl from './question-option-control';
 
 @Component({
   selector: 'app-quiz-question-control',
-  imports: [UiField, UiInput, UiSelect, Button, TextEditor, ReactiveFormsModule, QuestionOptionControl],
+  imports: [UiField, UiInput, UiSelect, Button, TextEditor, ReactiveFormsModule, QuestionOptionControl, Icon],
   template: `<form [formGroup]="question()" class="flex flex-col gap-6">
     <ui-field label="Pregunta">
       <lib-text-editor id="question" name="question" formControlName="question" />
@@ -40,12 +40,12 @@ import QuestionOptionControl from './question-option-control';
               (click)="removeOption($index)"
               title="Eliminar opción"
             >
-              <span class="material-symbols-outlined text-error">delete</span>
+              <ui-icon name="trash-2" class="text-error" />
             </button>
           </div>
         }
         <button uiButton size="sm" type="button" (click)="addOption()">
-          <span class="material-symbols-outlined">add</span>
+          <ui-icon name="plus" />
           Agregar opción
         </button>
       </div>

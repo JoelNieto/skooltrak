@@ -3,7 +3,7 @@ import { httpResource } from '@angular/common/http';
 import { Component, input, ViewEncapsulation } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { isValidId } from '../core/validators';
-import { Alert, Breadcrumbs, Button, Spinner } from '#/ui';
+import { Alert, Breadcrumbs, Button, Icon, Spinner } from '#/ui';
 
 type NewsletterDetail = {
   id: string;
@@ -17,7 +17,7 @@ type NewsletterDetail = {
 
 @Component({
   selector: 'app-newsletter-view',
-  imports: [Alert, Spinner, Breadcrumbs, Button, DatePipe, RouterLink],
+  imports: [Alert, Spinner, Breadcrumbs, Button, DatePipe, RouterLink, Icon],
   template: `
     <ui-breadcrumbs [items]="[{ label: 'Inicio', link: '/' }, { label: 'Boletín' }]" />
 
@@ -27,7 +27,7 @@ type NewsletterDetail = {
       </div>
     } @else if (newsletter.error()) {
       <div uiAlert tone="danger" class="mt-4">
-        <span class="material-symbols-outlined">error</span>
+        <ui-icon name="circle-alert" />
         <span>No se pudo cargar el boletín.</span>
         <a uiButton variant="ghost" size="sm" routerLink="/home">Volver al inicio</a>
       </div>
@@ -37,13 +37,13 @@ type NewsletterDetail = {
           <header class="mb-8">
             <h1 class="text-3xl font-bold text-ink-strong">{{ item.title }}</h1>
             <div class="mt-3 flex items-center gap-2 text-sm text-ink-muted">
-              <span class="material-symbols-outlined text-base">person</span>
+              <ui-icon name="user" class="text-base" />
               <span>{{ item.author?.name }}</span>
               <span class="mx-1">·</span>
-              <span class="material-symbols-outlined text-base">calendar_today</span>
+              <ui-icon name="calendar" class="text-base" />
               <span>{{ item.publishedAt | date: 'longDate' }}</span>
               <span class="mx-1">·</span>
-              <span class="material-symbols-outlined text-base">apartment</span>
+              <ui-icon name="building-2" class="text-base" />
               <span>{{ item.school?.name }}</span>
             </div>
           </header>
@@ -52,7 +52,7 @@ type NewsletterDetail = {
 
           <div class="mt-10 pt-6 border-t border-line">
             <a uiButton variant="ghost" size="sm" routerLink="/home">
-              <span class="material-symbols-outlined text-base">arrow_back</span>
+              <ui-icon name="arrow-left" class="text-base" />
               Volver al inicio
             </a>
           </div>

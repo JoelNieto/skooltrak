@@ -1,4 +1,4 @@
-import { Button, Card, CardBody, PageHeader, Spinner, Toast, UiInput } from '#/ui';
+import { Button, Card, CardBody, Icon, PageHeader, Spinner, Toast, UiInput } from '#/ui';
 import { HttpClient } from '@angular/common/http';
 import { afterRenderEffect, Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -19,7 +19,7 @@ interface ParentMeResponse {
 
 @Component({
   selector: 'app-parent-portal',
-  imports: [Spinner, Card, CardBody, UiInput, Button, FormsModule, PageHeader],
+  imports: [Spinner, Card, CardBody, UiInput, Button, FormsModule, PageHeader, Icon],
   template: `
     <lib-page-header title="Portal de padres" subtitle="Resumen rápido del progreso de tus hijos." />
 
@@ -28,7 +28,7 @@ interface ParentMeResponse {
         <div class="flex items-center justify-between">
           <h2 class="text-lg font-semibold text-ink-strong">Hijos vinculados</h2>
           <button uiButton variant="primary" size="sm" (click)="openAddChild()">
-            <span class="material-symbols-outlined text-lg">add</span>
+            <ui-icon name="plus" class="text-lg" />
             Agregar hijo
           </button>
         </div>

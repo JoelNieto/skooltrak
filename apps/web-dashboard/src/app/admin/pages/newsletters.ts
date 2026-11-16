@@ -16,6 +16,7 @@ import {
   UiTableError,
   UiTableSkeleton,
   UiTableToolbar,
+  listState,
 } from '#/ui';
 import { DatePipe } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
@@ -87,55 +88,59 @@ type NewsletterItem = {
             <th class="w-12"><span class="sr-only">Acciones</span></th>
           </tr>
         </thead>
-        @if (newsletters.isLoading() && !newsletters.hasValue()) {
-          <tbody uiTableSkeleton [columns]="7"></tbody>
-        } @else if (newsletters.error()) {
-          <tbody>
-            <tr
-              uiTableError
-              [columns]="7"
-              description="Verifica tus permisos o intenta de nuevo."
-              (retry)="newsletters.reload()"
-            ></tr>
-          </tbody>
-        } @else {
-          <tbody>
-            @for (newsletter of newsletters.value() ?? []; track newsletter.id) {
-              <tr>
-                <td>{{ newsletter.title }}</td>
-                <td>{{ newsletter.school.name }}</td>
-                <td>
-                  @if (newsletter.published) {
-                    <span uiBadge tone="success" size="sm">Publicado</span>
-                  } @else {
-                    <span uiBadge size="sm">Borrador</span>
-                  }
-                </td>
-                <td>{{ newsletter.publishedAt ? (newsletter.publishedAt | date: 'short') : '-' }}</td>
-                <td>{{ newsletter.author.name }}</td>
-                <td>{{ newsletter.createdAt | date: 'short' }}</td>
-                <td>
-                  <ui-row-actions
-                    [actions]="rowActions(newsletter)"
-                    [label]="'Acciones para ' + newsletter.title"
-                    (action)="onRowAction($event, newsletter)"
-                  />
-                </td>
-              </tr>
-            } @empty {
-              @if (searchText()) {
-                <tr
-                  uiTableEmpty
-                  [columns]="7"
-                  icon="search-x"
-                  title="Sin resultados"
-                  description="Ningún resultado coincide con la búsqueda."
-                ></tr>
-              } @else {
-                <tr uiTableEmpty [columns]="7" icon="newspaper" title="Aún no hay boletines"></tr>
+        @switch (newslettersList.phase()) {
+          @case ('skeleton') {
+            <tbody uiTableSkeleton [rows]="pagination.take()" [columns]="7"></tbody>
+          }
+          @case ('error') {
+            <tbody>
+              <tr
+                uiTableError
+                [columns]="7"
+                description="Verifica tus permisos o intenta de nuevo."
+                (retry)="newsletters.reload()"
+              ></tr>
+            </tbody>
+          }
+          @case ('ready') {
+            <tbody>
+              @for (newsletter of newslettersList.rows() ?? []; track newsletter.id) {
+                <tr>
+                  <td>{{ newsletter.title }}</td>
+                  <td>{{ newsletter.school.name }}</td>
+                  <td>
+                    @if (newsletter.published) {
+                      <span uiBadge tone="success" size="sm">Publicado</span>
+                    } @else {
+                      <span uiBadge size="sm">Borrador</span>
+                    }
+                  </td>
+                  <td>{{ newsletter.publishedAt ? (newsletter.publishedAt | date: 'short') : '-' }}</td>
+                  <td>{{ newsletter.author.name }}</td>
+                  <td>{{ newsletter.createdAt | date: 'short' }}</td>
+                  <td>
+                    <ui-row-actions
+                      [actions]="rowActions(newsletter)"
+                      [label]="'Acciones para ' + newsletter.title"
+                      (action)="onRowAction($event, newsletter)"
+                    />
+                  </td>
+                </tr>
+              } @empty {
+                @if (searchText()) {
+                  <tr
+                    uiTableEmpty
+                    [columns]="7"
+                    icon="search-x"
+                    title="Sin resultados"
+                    description="Ningún resultado coincide con la búsqueda."
+                  ></tr>
+                } @else {
+                  <tr uiTableEmpty [columns]="7" icon="newspaper" title="Aún no hay boletines"></tr>
+                }
               }
-            }
-          </tbody>
+            </tbody>
+          }
         }
       </table>
       <div class="p-4 rounded-b-lg">
@@ -216,6 +221,8 @@ export default class Newsletters {
       );
     },
   });
+  /** newsletters with smooth loading: previous rows stay while the next page / sort / search loads. */
+  protected readonly newslettersList = listState(this.newsletters);
 
   constructor() {
     afterRenderEffect(() => {

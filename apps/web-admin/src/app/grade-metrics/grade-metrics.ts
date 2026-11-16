@@ -11,6 +11,7 @@ import {
   UiTableEmpty,
   UiTableError,
   UiTableSkeleton,
+  listState,
 } from '#/ui';
 import { DatePipe, DecimalPipe } from '@angular/common';
 import { HttpClient, httpResource } from '@angular/common/http';
@@ -57,35 +58,39 @@ import GradeMetricsForm from './grade-metrics-form';
             <th>Acciones</th>
           </tr>
         </thead>
-        @if (metrics.isLoading() && !metrics.hasValue()) {
-          <tbody uiTableSkeleton [columns]="7"></tbody>
-        } @else if (metrics.error()) {
-          <tbody>
-            <tr uiTableError [columns]="7" (retry)="metrics.reload()"></tr>
-          </tbody>
-        } @else {
-          <tbody>
-            @for (metric of metrics.value()!; track metric.id) {
-              <tr>
-                <td>{{ metric.name }}</td>
-                <td>{{ $any(metric).minimum | number: '1.2-2' }}</td>
-                <td>{{ $any(metric).maximum | number: '1.2-2' }}</td>
-                <td>{{ $any(metric).minimumApproval | number: '1.2-2' }}</td>
-                <td>{{ $any(metric).minimumExcellence | number: '1.2-2' }}</td>
-                <td>{{ metric.createdAt | date: 'short' }}</td>
-                <td>{{ metric.updatedAt | date: 'short' }}</td>
-                <td>
-                  <ui-row-actions
-                    [actions]="rowActions"
-                    [label]="'Acciones para ' + metric.name"
-                    (action)="onRowAction($event, metric)"
-                  />
-                </td>
-              </tr>
-            } @empty {
-              <tr uiTableEmpty [columns]="7" icon="chart-column" title="Aún no hay escalas de calificación"></tr>
-            }
-          </tbody>
+        @switch (metricsList.phase()) {
+          @case ('skeleton') {
+            <tbody uiTableSkeleton [columns]="7"></tbody>
+          }
+          @case ('error') {
+            <tbody>
+              <tr uiTableError [columns]="7" (retry)="metrics.reload()"></tr>
+            </tbody>
+          }
+          @case ('ready') {
+            <tbody>
+              @for (metric of metricsList.rows()!; track metric.id) {
+                <tr>
+                  <td>{{ metric.name }}</td>
+                  <td>{{ $any(metric).minimum | number: '1.2-2' }}</td>
+                  <td>{{ $any(metric).maximum | number: '1.2-2' }}</td>
+                  <td>{{ $any(metric).minimumApproval | number: '1.2-2' }}</td>
+                  <td>{{ $any(metric).minimumExcellence | number: '1.2-2' }}</td>
+                  <td>{{ metric.createdAt | date: 'short' }}</td>
+                  <td>{{ metric.updatedAt | date: 'short' }}</td>
+                  <td>
+                    <ui-row-actions
+                      [actions]="rowActions"
+                      [label]="'Acciones para ' + metric.name"
+                      (action)="onRowAction($event, metric)"
+                    />
+                  </td>
+                </tr>
+              } @empty {
+                <tr uiTableEmpty [columns]="7" icon="chart-column" title="Aún no hay escalas de calificación"></tr>
+              }
+            </tbody>
+          }
         }
       </table>
     </div>
@@ -101,6 +106,8 @@ export default class GradeMetrics {
   public metrics = httpResource<Prisma.GradeMetricGetPayload<{ include: undefined }>[]>(() => '/api/v1/grade-metrics', {
     defaultValue: [],
   });
+  /** metrics with smooth loading: previous rows stay while the next page / sort / search loads. */
+  protected readonly metricsList = listState(this.metrics);
 
   editGradeMetric(metric?: Prisma.GradeMetricGetPayload<{ include: undefined }>) {
     this.modal

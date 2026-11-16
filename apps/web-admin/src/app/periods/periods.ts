@@ -11,6 +11,7 @@ import {
   UiTableEmpty,
   UiTableError,
   UiTableSkeleton,
+  listState,
 } from '#/ui';
 import { DatePipe } from '@angular/common';
 import { HttpClient, httpResource } from '@angular/common/http';
@@ -47,34 +48,38 @@ import PeriodsForm from './periods-form';
             <th>Acciones</th>
           </tr>
         </thead>
-        @if (periods.isLoading() && !periods.hasValue()) {
-          <tbody uiTableSkeleton [columns]="7"></tbody>
-        } @else if (periods.error()) {
-          <tbody>
-            <tr uiTableError [columns]="7" (retry)="periods.reload()"></tr>
-          </tbody>
-        } @else {
-          <tbody>
-            @for (period of periods.value(); track period.id) {
-              <tr>
-                <td>{{ period.name }}</td>
-                <td>{{ period.shortName }}</td>
-                <td>{{ period.year }}</td>
-                <td>{{ period.startDate | date: 'shortDate' }}</td>
-                <td>{{ period.endDate | date: 'shortDate' }}</td>
-                <td>{{ period.createdAt | date: 'short' }}</td>
-                <td class="flex gap-2">
-                  <ui-row-actions
-                    [actions]="rowActions"
-                    [label]="'Acciones para ' + period.name"
-                    (action)="onRowAction($event, period)"
-                  />
-                </td>
-              </tr>
-            } @empty {
-              <tr uiTableEmpty [columns]="7" icon="calendar" title="Aún no hay periodos"></tr>
-            }
-          </tbody>
+        @switch (periodsList.phase()) {
+          @case ('skeleton') {
+            <tbody uiTableSkeleton [columns]="7"></tbody>
+          }
+          @case ('error') {
+            <tbody>
+              <tr uiTableError [columns]="7" (retry)="periods.reload()"></tr>
+            </tbody>
+          }
+          @case ('ready') {
+            <tbody>
+              @for (period of periodsList.rows(); track period.id) {
+                <tr>
+                  <td>{{ period.name }}</td>
+                  <td>{{ period.shortName }}</td>
+                  <td>{{ period.year }}</td>
+                  <td>{{ period.startDate | date: 'shortDate' }}</td>
+                  <td>{{ period.endDate | date: 'shortDate' }}</td>
+                  <td>{{ period.createdAt | date: 'short' }}</td>
+                  <td class="flex gap-2">
+                    <ui-row-actions
+                      [actions]="rowActions"
+                      [label]="'Acciones para ' + period.name"
+                      (action)="onRowAction($event, period)"
+                    />
+                  </td>
+                </tr>
+              } @empty {
+                <tr uiTableEmpty [columns]="7" icon="calendar" title="Aún no hay periodos"></tr>
+              }
+            </tbody>
+          }
         }
       </table>
     </div>
@@ -88,6 +93,8 @@ export default class Periods {
   public periods = httpResource<Prisma.PeriodGetPayload<{ include: undefined }>[]>(() => '/api/v1/periods', {
     defaultValue: [],
   });
+  /** periods with smooth loading: previous rows stay while the next page / sort / search loads. */
+  protected readonly periodsList = listState(this.periods);
 
   editPeriod(period?: Prisma.PeriodGetPayload<{ include: undefined }>) {
     this.modal

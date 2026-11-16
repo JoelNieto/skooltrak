@@ -13,6 +13,7 @@ import {
   UiTableEmpty,
   UiTableError,
   UiTableSkeleton,
+  listState,
 } from '#/ui';
 import { DatePipe } from '@angular/common';
 import { HttpClient, httpResource } from '@angular/common/http';
@@ -56,33 +57,37 @@ import { SchoolsForm } from './schools-form';
             <th class="w-12"><span class="sr-only">Acciones</span></th>
           </tr>
         </thead>
-        @if (schools.isLoading() && !schools.hasValue()) {
-          <tbody uiTableSkeleton [columns]="6"></tbody>
-        } @else if (schools.error()) {
-          <tbody>
-            <tr uiTableError [columns]="6" (retry)="schools.reload()"></tr>
-          </tbody>
-        } @else {
-          <tbody>
-            @for (school of schools.value(); track school.id) {
-              <tr>
-                <td>{{ school.name }}</td>
-                <td>{{ school.organization?.name }}</td>
-                <td>{{ school.currentYear }}</td>
-                <td>{{ school.createdAt | date: 'medium' }}</td>
-                <td>{{ school.updatedAt | date: 'medium' }}</td>
-                <td>
-                  <ui-row-actions
-                    [actions]="rowActions"
-                    [label]="'Acciones para ' + school.name"
-                    (action)="onRowAction($event, school)"
-                  />
-                </td>
-              </tr>
-            } @empty {
-              <tr uiTableEmpty [columns]="6" icon="school" title="Aún no hay colegios"></tr>
-            }
-          </tbody>
+        @switch (schoolsList.phase()) {
+          @case ('skeleton') {
+            <tbody uiTableSkeleton [rows]="pagination.take()" [columns]="6"></tbody>
+          }
+          @case ('error') {
+            <tbody>
+              <tr uiTableError [columns]="6" (retry)="schools.reload()"></tr>
+            </tbody>
+          }
+          @case ('ready') {
+            <tbody>
+              @for (school of schoolsList.rows(); track school.id) {
+                <tr>
+                  <td>{{ school.name }}</td>
+                  <td>{{ school.organization?.name }}</td>
+                  <td>{{ school.currentYear }}</td>
+                  <td>{{ school.createdAt | date: 'medium' }}</td>
+                  <td>{{ school.updatedAt | date: 'medium' }}</td>
+                  <td>
+                    <ui-row-actions
+                      [actions]="rowActions"
+                      [label]="'Acciones para ' + school.name"
+                      (action)="onRowAction($event, school)"
+                    />
+                  </td>
+                </tr>
+              } @empty {
+                <tr uiTableEmpty [columns]="6" icon="school" title="Aún no hay colegios"></tr>
+              }
+            </tbody>
+          }
         }
       </table>
       <div class="p-2">
@@ -113,6 +118,8 @@ export class Schools {
     }),
     { defaultValue: [] },
   );
+  /** schools with smooth loading: previous rows stay while the next page / sort / search loads. */
+  protected readonly schoolsList = listState(this.schools);
 
   private readonly schoolsCount = httpResource<number>(() => '/api/v1/schools/count');
 

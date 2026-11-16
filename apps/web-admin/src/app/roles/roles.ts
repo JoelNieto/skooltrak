@@ -11,6 +11,7 @@ import {
   UiTableEmpty,
   UiTableError,
   UiTableSkeleton,
+  listState,
 } from '#/ui';
 import { DatePipe } from '@angular/common';
 import { HttpClient, httpResource } from '@angular/common/http';
@@ -43,34 +44,38 @@ import { RolesForm } from './roles-form';
             <th class="w-12"><span class="sr-only">Acciones</span></th>
           </tr>
         </thead>
-        @if (roles.isLoading() && !roles.hasValue()) {
-          <tbody uiTableSkeleton [columns]="7"></tbody>
-        } @else if (roles.error()) {
-          <tbody>
-            <tr uiTableError [columns]="7" (retry)="roles.reload()"></tr>
-          </tbody>
-        } @else {
-          <tbody>
-            @for (role of roles.value(); track role.id) {
-              <tr>
-                <td>{{ role.name }}</td>
-                <td>{{ role.description }}</td>
-                <td>{{ role.name }}</td>
-                <td>{{ role.organization?.name }}</td>
-                <td>{{ role.createdAt | date: 'medium' }}</td>
-                <td>{{ role.updatedAt | date: 'medium' }}</td>
-                <td>
-                  <ui-row-actions
-                    [actions]="rowActions"
-                    [label]="'Acciones para ' + role.name"
-                    (action)="onRowAction($event, role)"
-                  />
-                </td>
-              </tr>
-            } @empty {
-              <tr uiTableEmpty [columns]="7" icon="shield-user" title="Aún no hay roles"></tr>
-            }
-          </tbody>
+        @switch (rolesList.phase()) {
+          @case ('skeleton') {
+            <tbody uiTableSkeleton [columns]="7"></tbody>
+          }
+          @case ('error') {
+            <tbody>
+              <tr uiTableError [columns]="7" (retry)="roles.reload()"></tr>
+            </tbody>
+          }
+          @case ('ready') {
+            <tbody>
+              @for (role of rolesList.rows(); track role.id) {
+                <tr>
+                  <td>{{ role.name }}</td>
+                  <td>{{ role.description }}</td>
+                  <td>{{ role.name }}</td>
+                  <td>{{ role.organization?.name }}</td>
+                  <td>{{ role.createdAt | date: 'medium' }}</td>
+                  <td>{{ role.updatedAt | date: 'medium' }}</td>
+                  <td>
+                    <ui-row-actions
+                      [actions]="rowActions"
+                      [label]="'Acciones para ' + role.name"
+                      (action)="onRowAction($event, role)"
+                    />
+                  </td>
+                </tr>
+              } @empty {
+                <tr uiTableEmpty [columns]="7" icon="shield-user" title="Aún no hay roles"></tr>
+              }
+            </tbody>
+          }
         }
       </table>
     </div>`,
@@ -85,6 +90,8 @@ export class Roles {
     () => '/api/v1/roles',
     { defaultValue: [] },
   );
+  /** roles with smooth loading: previous rows stay while the next page / sort / search loads. */
+  protected readonly rolesList = listState(this.roles);
 
   public editRole(role?: Prisma.RoleGetPayload<false>) {
     this.modal

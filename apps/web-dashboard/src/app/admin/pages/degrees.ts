@@ -12,6 +12,7 @@ import {
   UiTableEmpty,
   UiTableError,
   UiTableSkeleton,
+  listState,
 } from '#/ui';
 import { DatePipe } from '@angular/common';
 import { HttpClient, httpResource } from '@angular/common/http';
@@ -59,33 +60,37 @@ type DegreeRow = {
             <th class="w-12"><span class="sr-only">Acciones</span></th>
           </tr>
         </thead>
-        @if (degrees.isLoading() && !degrees.hasValue()) {
-          <tbody uiTableSkeleton [columns]="6"></tbody>
-        } @else if (degrees.error()) {
-          <tbody>
-            <tr uiTableError [columns]="6" (retry)="degrees.reload()"></tr>
-          </tbody>
-        } @else {
-          <tbody>
-            @for (degree of degrees.value(); track degree.id) {
-              <tr>
-                <td>{{ degree.name }}</td>
-                <td>{{ degree.shortName }}</td>
-                <td>{{ degree.school.name }}</td>
-                <td>{{ degree.createdAt | date: 'short' }}</td>
-                <td>{{ degree.updatedAt | date: 'short' }}</td>
-                <td>
-                  <ui-row-actions
-                    [actions]="rowActions"
-                    [label]="'Acciones para ' + degree.name"
-                    (action)="onRowAction($event, degree)"
-                  />
-                </td>
-              </tr>
-            } @empty {
-              <tr uiTableEmpty [columns]="6" icon="school" title="Aún no hay niveles"></tr>
-            }
-          </tbody>
+        @switch (degreesList.phase()) {
+          @case ('skeleton') {
+            <tbody uiTableSkeleton [columns]="6"></tbody>
+          }
+          @case ('error') {
+            <tbody>
+              <tr uiTableError [columns]="6" (retry)="degrees.reload()"></tr>
+            </tbody>
+          }
+          @case ('ready') {
+            <tbody>
+              @for (degree of degreesList.rows(); track degree.id) {
+                <tr>
+                  <td>{{ degree.name }}</td>
+                  <td>{{ degree.shortName }}</td>
+                  <td>{{ degree.school.name }}</td>
+                  <td>{{ degree.createdAt | date: 'short' }}</td>
+                  <td>{{ degree.updatedAt | date: 'short' }}</td>
+                  <td>
+                    <ui-row-actions
+                      [actions]="rowActions"
+                      [label]="'Acciones para ' + degree.name"
+                      (action)="onRowAction($event, degree)"
+                    />
+                  </td>
+                </tr>
+              } @empty {
+                <tr uiTableEmpty [columns]="6" icon="school" title="Aún no hay niveles"></tr>
+              }
+            </tbody>
+          }
         }
       </table>
       <div class="p-4 rounded-b-lg">
@@ -138,6 +143,8 @@ export default class Degrees {
     },
     { defaultValue: [] },
   );
+  /** degrees with smooth loading: previous rows stay while the next page / sort / search loads. */
+  protected readonly degreesList = listState(this.degrees);
 
   #degreesCount = httpResource<number>(() => {
     const schoolId = this.store.currentSchoolId();

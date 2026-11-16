@@ -53,11 +53,13 @@ import { Skeleton } from './skeleton';
 })
 export class UiTableSkeleton {
   readonly columns = input.required<number>();
+  /** Match the page size, so real rows replace the skeleton without the page changing height. */
   readonly rows = input(5);
   /** Announced to screen readers once. */
   readonly label = input('Cargando…');
 
-  protected readonly rowList = computed(() => Array.from({ length: this.rows() }, (_, i) => i));
+  /** Capped: more placeholder rows than fit on screen add nothing. */
+  protected readonly rowList = computed(() => Array.from({ length: Math.min(this.rows(), 12) }, (_, i) => i));
   protected readonly columnList = computed(() => Array.from({ length: this.columns() }, (_, i) => i));
 
   /** A fixed, varied width per cell (first column widest), so the placeholder reads like a table. */

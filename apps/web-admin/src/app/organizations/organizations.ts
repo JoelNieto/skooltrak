@@ -11,6 +11,7 @@ import {
   UiTableEmpty,
   UiTableError,
   UiTableSkeleton,
+  listState,
 } from '#/ui';
 import { DatePipe } from '@angular/common';
 import { HttpClient, httpResource } from '@angular/common/http';
@@ -43,32 +44,36 @@ import { OrganizationsForm } from './organizations-form';
             <th class="w-12"><span class="sr-only">Acciones</span></th>
           </tr>
         </thead>
-        @if (organizations.isLoading() && !organizations.hasValue()) {
-          <tbody uiTableSkeleton [columns]="5"></tbody>
-        } @else if (organizations.error()) {
-          <tbody>
-            <tr uiTableError [columns]="5" (retry)="organizations.reload()"></tr>
-          </tbody>
-        } @else {
-          <tbody>
-            @for (organization of organizations.value(); track organization.id) {
-              <tr>
-                <td>{{ organization.name }}</td>
-                <td>{{ organization.description }}</td>
-                <td>{{ organization.createdAt | date: 'medium' }}</td>
-                <td>{{ organization.updatedAt | date: 'medium' }}</td>
-                <td>
-                  <ui-row-actions
-                    [actions]="rowActions"
-                    [label]="'Acciones para ' + organization.name"
-                    (action)="onRowAction($event, organization)"
-                  />
-                </td>
-              </tr>
-            } @empty {
-              <tr uiTableEmpty [columns]="5" icon="building-2" title="Aún no hay organizaciones"></tr>
-            }
-          </tbody>
+        @switch (organizationsList.phase()) {
+          @case ('skeleton') {
+            <tbody uiTableSkeleton [columns]="5"></tbody>
+          }
+          @case ('error') {
+            <tbody>
+              <tr uiTableError [columns]="5" (retry)="organizations.reload()"></tr>
+            </tbody>
+          }
+          @case ('ready') {
+            <tbody>
+              @for (organization of organizationsList.rows(); track organization.id) {
+                <tr>
+                  <td>{{ organization.name }}</td>
+                  <td>{{ organization.description }}</td>
+                  <td>{{ organization.createdAt | date: 'medium' }}</td>
+                  <td>{{ organization.updatedAt | date: 'medium' }}</td>
+                  <td>
+                    <ui-row-actions
+                      [actions]="rowActions"
+                      [label]="'Acciones para ' + organization.name"
+                      (action)="onRowAction($event, organization)"
+                    />
+                  </td>
+                </tr>
+              } @empty {
+                <tr uiTableEmpty [columns]="5" icon="building-2" title="Aún no hay organizaciones"></tr>
+              }
+            </tbody>
+          }
         }
       </table>
     </div> `,
@@ -82,6 +87,8 @@ export class Organizations {
   public organizations = httpResource<Prisma.OrganizationCreateInput[]>(() => '/api/v1/organizations', {
     defaultValue: [],
   });
+  /** organizations with smooth loading: previous rows stay while the next page / sort / search loads. */
+  protected readonly organizationsList = listState(this.organizations);
 
   public editOrganization(organization?: Prisma.OrganizationCreateInput) {
     this.modal

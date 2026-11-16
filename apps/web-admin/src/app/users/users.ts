@@ -14,6 +14,7 @@ import {
   UiTableEmpty,
   UiTableError,
   UiTableSkeleton,
+  listState,
 } from '#/ui';
 import { DatePipe } from '@angular/common';
 import { HttpClient, httpResource } from '@angular/common/http';
@@ -66,44 +67,48 @@ import { UsersForm } from './users-form';
             <th class="w-12"><span class="sr-only">Acciones</span></th>
           </tr>
         </thead>
-        @if (users.isLoading() && !users.hasValue()) {
-          <tbody uiTableSkeleton [columns]="7"></tbody>
-        } @else if (users.error()) {
-          <tbody>
-            <tr uiTableError [columns]="7" (retry)="users.reload()"></tr>
-          </tbody>
-        } @else {
-          <tbody>
-            @for (user of users.value(); track user.id) {
-              <tr>
-                <td>{{ user.firstName }} {{ user.lastName }}</td>
-                <td>{{ user.email }}</td>
-                <td>{{ user.role?.name ?? 'Sin rol' }}</td>
-                <td>{{ user.organization?.name ?? 'Sin organización' }}</td>
-                <td>{{ user.createdAt | date: 'medium' }}</td>
-                <td>{{ user.updatedAt | date: 'medium' }}</td>
-                <td>
-                  <ui-row-actions
-                    [actions]="rowActions"
-                    [label]="'Acciones para ' + user.firstName"
-                    (action)="onRowAction($event, user)"
-                  />
-                </td>
-              </tr>
-            } @empty {
-              @if (searchText()) {
-                <tr
-                  uiTableEmpty
-                  [columns]="7"
-                  icon="search-x"
-                  title="Sin resultados"
-                  description="Ningún resultado coincide con la búsqueda."
-                ></tr>
-              } @else {
-                <tr uiTableEmpty [columns]="7" icon="users" title="Aún no hay usuarios"></tr>
+        @switch (usersList.phase()) {
+          @case ('skeleton') {
+            <tbody uiTableSkeleton [rows]="pagination.take()" [columns]="7"></tbody>
+          }
+          @case ('error') {
+            <tbody>
+              <tr uiTableError [columns]="7" (retry)="users.reload()"></tr>
+            </tbody>
+          }
+          @case ('ready') {
+            <tbody>
+              @for (user of usersList.rows(); track user.id) {
+                <tr>
+                  <td>{{ user.firstName }} {{ user.lastName }}</td>
+                  <td>{{ user.email }}</td>
+                  <td>{{ user.role?.name ?? 'Sin rol' }}</td>
+                  <td>{{ user.organization?.name ?? 'Sin organización' }}</td>
+                  <td>{{ user.createdAt | date: 'medium' }}</td>
+                  <td>{{ user.updatedAt | date: 'medium' }}</td>
+                  <td>
+                    <ui-row-actions
+                      [actions]="rowActions"
+                      [label]="'Acciones para ' + user.firstName"
+                      (action)="onRowAction($event, user)"
+                    />
+                  </td>
+                </tr>
+              } @empty {
+                @if (searchText()) {
+                  <tr
+                    uiTableEmpty
+                    [columns]="7"
+                    icon="search-x"
+                    title="Sin resultados"
+                    description="Ningún resultado coincide con la búsqueda."
+                  ></tr>
+                } @else {
+                  <tr uiTableEmpty [columns]="7" icon="users" title="Aún no hay usuarios"></tr>
+                }
               }
-            }
-          </tbody>
+            </tbody>
+          }
         }
       </table>
       <lib-paginator
@@ -133,6 +138,8 @@ export class Users {
     }),
     { defaultValue: [] },
   );
+  /** users with smooth loading: previous rows stay while the next page / sort / search loads. */
+  protected readonly usersList = listState(this.users);
 
   private readonly usersCount = httpResource<number>(() => ({
     url: '/api/v1/users/count',

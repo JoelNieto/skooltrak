@@ -12,6 +12,7 @@ import {
   UiTableEmpty,
   UiTableError,
   UiTableSkeleton,
+  listState,
 } from '#/ui';
 import { DatePipe } from '@angular/common';
 import { HttpClient, httpResource } from '@angular/common/http';
@@ -58,37 +59,41 @@ import HabitMetricsForm from './habit-metrics-form';
             <th>Acciones</th>
           </tr>
         </thead>
-        @if (metrics.isLoading() && !metrics.hasValue()) {
-          <tbody uiTableSkeleton [columns]="6"></tbody>
-        } @else if (metrics.error()) {
-          <tbody>
-            <tr uiTableError [columns]="6" (retry)="metrics.reload()"></tr>
-          </tbody>
-        } @else {
-          <tbody>
-            @for (metric of metrics.value(); track metric.id) {
-              <tr>
-                <td>{{ metric.name }}</td>
-                <td class="max-w-64 truncate">{{ metric.description || '-' }}</td>
-                <td>
-                  <span uiBadge [tone]="metric.active ? 'success' : 'danger'">
-                    {{ metric.active ? 'Activo' : 'Inactivo' }}
-                  </span>
-                </td>
-                <td>{{ metric.order }}</td>
-                <td>{{ metric.createdAt | date: 'short' }}</td>
-                <td>
-                  <ui-row-actions
-                    [actions]="rowActions"
-                    [label]="'Acciones para ' + metric.name"
-                    (action)="onRowAction($event, metric)"
-                  />
-                </td>
-              </tr>
-            } @empty {
-              <tr uiTableEmpty [columns]="6" icon="list-checks" title="Aún no hay criterios de hábitos"></tr>
-            }
-          </tbody>
+        @switch (metricsList.phase()) {
+          @case ('skeleton') {
+            <tbody uiTableSkeleton [columns]="6"></tbody>
+          }
+          @case ('error') {
+            <tbody>
+              <tr uiTableError [columns]="6" (retry)="metrics.reload()"></tr>
+            </tbody>
+          }
+          @case ('ready') {
+            <tbody>
+              @for (metric of metricsList.rows(); track metric.id) {
+                <tr>
+                  <td>{{ metric.name }}</td>
+                  <td class="max-w-64 truncate">{{ metric.description || '-' }}</td>
+                  <td>
+                    <span uiBadge [tone]="metric.active ? 'success' : 'danger'">
+                      {{ metric.active ? 'Activo' : 'Inactivo' }}
+                    </span>
+                  </td>
+                  <td>{{ metric.order }}</td>
+                  <td>{{ metric.createdAt | date: 'short' }}</td>
+                  <td>
+                    <ui-row-actions
+                      [actions]="rowActions"
+                      [label]="'Acciones para ' + metric.name"
+                      (action)="onRowAction($event, metric)"
+                    />
+                  </td>
+                </tr>
+              } @empty {
+                <tr uiTableEmpty [columns]="6" icon="list-checks" title="Aún no hay criterios de hábitos"></tr>
+              }
+            </tbody>
+          }
         }
       </table>
     </div>
@@ -103,6 +108,8 @@ export default class HabitMetrics {
   public metrics = httpResource<Prisma.HabitMetricGetPayload<{ include: undefined }>[]>(() => '/api/v1/habit-metrics', {
     defaultValue: [],
   });
+  /** metrics with smooth loading: previous rows stay while the next page / sort / search loads. */
+  protected readonly metricsList = listState(this.metrics);
 
   editHabitMetric(metric?: Prisma.HabitMetricGetPayload<{ include: undefined }>) {
     this.modal

@@ -477,6 +477,25 @@ h3 {
 }
 .ui-table-skeleton-bar {
   height: 0.875rem;
+  /* Same height as a list row with its row-actions button (2rem), so swapping skeleton for rows
+   * doesn't shift the page. */
+  margin-block: 0.5625rem;
+}
+
+/* Rows fade in when they replace the skeleton, and dim while a new page / sort / search loads
+ * behind them (listState keeps them on screen; the table sets aria-busy). Reduced motion turns the
+ * animation off globally. */
+.table.ui-table > tbody:not(.ui-table-skeleton) {
+  animation: ui-rows-in 0.18s var(--ui-ease);
+  transition: opacity 0.2s var(--ui-ease);
+}
+.table.ui-table[aria-busy='true'] > tbody:not(.ui-table-skeleton) {
+  opacity: 0.55;
+}
+@keyframes ui-rows-in {
+  from {
+    opacity: 0;
+  }
 }
 
 /* Sortable header (th[uiSortHeader]): the label is a button; the arrow shows the direction. */

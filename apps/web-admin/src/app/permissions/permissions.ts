@@ -14,6 +14,7 @@ import {
   UiTableEmpty,
   UiTableError,
   UiTableSkeleton,
+  listState,
 } from '#/ui';
 import { DatePipe } from '@angular/common';
 import { HttpClient, httpResource } from '@angular/common/http';
@@ -67,42 +68,46 @@ import { PermissionsForm } from './permissions-form';
             <th class="w-12"><span class="sr-only">Acciones</span></th>
           </tr>
         </thead>
-        @if (permissions.isLoading() && !permissions.hasValue()) {
-          <tbody uiTableSkeleton [columns]="5"></tbody>
-        } @else if (permissions.error()) {
-          <tbody>
-            <tr uiTableError [columns]="5" (retry)="permissions.reload()"></tr>
-          </tbody>
-        } @else {
-          <tbody>
-            @for (permission of permissions.value(); track permission.id) {
-              <tr>
-                <td>{{ permission.descriptiveId }}</td>
-                <td>{{ permission.description }}</td>
-                <td>{{ permission.createdAt | date: 'medium' }}</td>
-                <td>{{ permission.updatedAt | date: 'medium' }}</td>
-                <td>
-                  <ui-row-actions
-                    [actions]="rowActions"
-                    [label]="'Acciones para ' + permission.descriptiveId"
-                    (action)="onRowAction($event, permission)"
-                  />
-                </td>
-              </tr>
-            } @empty {
-              @if (searchText()) {
-                <tr
-                  uiTableEmpty
-                  [columns]="5"
-                  icon="search-x"
-                  title="Sin resultados"
-                  description="Ningún resultado coincide con la búsqueda."
-                ></tr>
-              } @else {
-                <tr uiTableEmpty [columns]="5" icon="key-round" title="Aún no hay permisos"></tr>
+        @switch (permissionsList.phase()) {
+          @case ('skeleton') {
+            <tbody uiTableSkeleton [rows]="pagination.take()" [columns]="5"></tbody>
+          }
+          @case ('error') {
+            <tbody>
+              <tr uiTableError [columns]="5" (retry)="permissions.reload()"></tr>
+            </tbody>
+          }
+          @case ('ready') {
+            <tbody>
+              @for (permission of permissionsList.rows(); track permission.id) {
+                <tr>
+                  <td>{{ permission.descriptiveId }}</td>
+                  <td>{{ permission.description }}</td>
+                  <td>{{ permission.createdAt | date: 'medium' }}</td>
+                  <td>{{ permission.updatedAt | date: 'medium' }}</td>
+                  <td>
+                    <ui-row-actions
+                      [actions]="rowActions"
+                      [label]="'Acciones para ' + permission.descriptiveId"
+                      (action)="onRowAction($event, permission)"
+                    />
+                  </td>
+                </tr>
+              } @empty {
+                @if (searchText()) {
+                  <tr
+                    uiTableEmpty
+                    [columns]="5"
+                    icon="search-x"
+                    title="Sin resultados"
+                    description="Ningún resultado coincide con la búsqueda."
+                  ></tr>
+                } @else {
+                  <tr uiTableEmpty [columns]="5" icon="key-round" title="Aún no hay permisos"></tr>
+                }
               }
-            }
-          </tbody>
+            </tbody>
+          }
         }
       </table>
     </div>
@@ -136,6 +141,8 @@ export class Permissions {
     }),
     { defaultValue: [] },
   );
+  /** permissions with smooth loading: previous rows stay while the next page / sort / search loads. */
+  protected readonly permissionsList = listState(this.permissions);
 
   private readonly permissionsCount = httpResource<number>(() => ({
     url: '/api/v1/permissions/count',

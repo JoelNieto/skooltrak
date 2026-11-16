@@ -1,17 +1,24 @@
 import { Menu, MenuContent, MenuItem, MenuTrigger } from '@angular/aria/menu';
 import { ConnectedPosition, OverlayModule } from '@angular/cdk/overlay';
 import { Component, computed, input, output, viewChild } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { UiIconName } from '../icons/icons';
 import { Button } from './button';
 import { Icon } from './icon';
 
-/** One entry in a row's actions menu. `danger` for destructive actions (shown last, in red). */
+/**
+ * One entry in a row's actions menu. `danger` for destructive actions (shown last, in red);
+ * `link` makes it navigate (a real link, so it opens in a new tab too) instead of emitting;
+ * `hidden` leaves it out (permissions, row state).
+ */
 export interface UiRowAction {
   id: string;
   label: string;
   icon?: UiIconName;
   tone?: 'danger';
   disabled?: boolean;
+  hidden?: boolean;
+  link?: string | readonly unknown[];
 }
 
 /**
@@ -28,7 +35,7 @@ export interface UiRowAction {
  */
 @Component({
   selector: 'ui-row-actions',
-  imports: [Button, Icon, Menu, MenuContent, MenuItem, MenuTrigger, OverlayModule],
+  imports: [Button, Icon, Menu, MenuContent, MenuItem, MenuTrigger, OverlayModule, RouterLink],
   host: { class: 'ui-row-actions' },
   template: `
     <button
@@ -55,19 +62,35 @@ export interface UiRowAction {
       <div ngMenu class="ui-menu" #menuRef="ngMenu" (itemSelected)="onSelected($event)">
         <ng-template ngMenuContent>
           @for (a of ordered(); track a.id) {
-            <button
-              ngMenuItem
-              type="button"
-              class="ui-menu-item"
-              [class.ui-menu-item-danger]="a.tone === 'danger'"
-              [value]="a.id"
-              [disabled]="!!a.disabled"
-            >
-              @if (a.icon) {
-                <ui-icon [name]="a.icon" class="text-base" />
-              }
-              <span>{{ a.label }}</span>
-            </button>
+            @if (a.link) {
+              <a
+                ngMenuItem
+                class="ui-menu-item"
+                [class.ui-menu-item-danger]="a.tone === 'danger'"
+                [value]="a.id"
+                [disabled]="!!a.disabled"
+                [routerLink]="a.link"
+              >
+                @if (a.icon) {
+                  <ui-icon [name]="a.icon" class="text-base" />
+                }
+                <span>{{ a.label }}</span>
+              </a>
+            } @else {
+              <button
+                ngMenuItem
+                type="button"
+                class="ui-menu-item"
+                [class.ui-menu-item-danger]="a.tone === 'danger'"
+                [value]="a.id"
+                [disabled]="!!a.disabled"
+              >
+                @if (a.icon) {
+                  <ui-icon [name]="a.icon" class="text-base" />
+                }
+                <span>{{ a.label }}</span>
+              </button>
+            }
           }
         </ng-template>
       </div>
@@ -80,18 +103,20 @@ export class UiRowActions {
   readonly label = input('Acciones');
   readonly action = output<string>();
 
-  /** Destructive actions go last, after the rest. */
-  protected readonly ordered = computed(() => [
-    ...this.actions().filter((a) => a.tone !== 'danger'),
-    ...this.actions().filter((a) => a.tone === 'danger'),
-  ]);
+  /** Visible actions, destructive ones last. */
+  protected readonly ordered = computed(() => {
+    const shown = this.actions().filter((a) => !a.hidden);
+    return [...shown.filter((a) => a.tone !== 'danger'), ...shown.filter((a) => a.tone === 'danger')];
+  });
   protected readonly menu = viewChild<Menu<string>>('menuRef');
   protected readonly positions: ConnectedPosition[] = [
     { originX: 'end', originY: 'bottom', overlayX: 'end', overlayY: 'top', offsetY: 4 },
     { originX: 'end', originY: 'top', overlayX: 'end', overlayY: 'bottom', offsetY: -4 },
   ];
 
+  /** Links navigate on their own; the rest are emitted for the page to handle. */
   protected onSelected(id: string | undefined): void {
-    if (id) this.action.emit(id);
+    const chosen = this.actions().find((a) => a.id === id);
+    if (chosen && !chosen.link) this.action.emit(chosen.id);
   }
 }

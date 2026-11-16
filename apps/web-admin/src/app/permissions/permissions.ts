@@ -2,20 +2,22 @@ import {
   Breadcrumbs,
   Button,
   Confirmation,
-  Error,
   Icon,
   Modal,
   Pagination,
   Paginator,
   Toast,
   UiInput,
+  UiRowAction,
+  UiRowActions,
   UiTable,
+  UiTableEmpty,
+  UiTableError,
+  UiTableSkeleton,
 } from '#/ui';
-import { Menu, MenuContent, MenuItem, MenuTrigger } from '@angular/aria/menu';
-import { OverlayModule } from '@angular/cdk/overlay';
 import { DatePipe } from '@angular/common';
 import { HttpClient, httpResource } from '@angular/common/http';
-import { afterRenderEffect, Component, effect, inject, signal, viewChild } from '@angular/core';
+import { afterRenderEffect, Component, effect, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Prisma } from '@generated/prisma';
 import { toFetchQueryRecord } from '../core/fetch-query-params';
@@ -28,18 +30,17 @@ import { PermissionsForm } from './permissions-form';
     UiInput,
     Button,
     DatePipe,
-    Menu,
-    MenuContent,
-    MenuItem,
-    MenuTrigger,
-    OverlayModule,
     Paginator,
     FormsModule,
-    Error,
     Icon,
+    UiRowActions,
+    UiTableEmpty,
+    UiTableError,
+    UiTableSkeleton,
   ],
   providers: [Pagination],
-  template: ` <ui-breadcrumbs [items]="[{ label: 'Inicio', link: '/' }, { label: 'Permisos' }]" />
+  template: `
+    <ui-breadcrumbs [items]="[{ label: 'Inicio', link: '/' }, { label: 'Permisos' }]" />
     <div class="flex justify-between items-center mb-4">
       <div>
         <h1 class="text-2xl text-ink-strong font-medium">Permisos</h1>
@@ -55,23 +56,24 @@ import { PermissionsForm } from './permissions-form';
         <input uiInput type="text" placeholder="Buscar" [(ngModel)]="searchText" />
       </div>
     </div>
-    @if (permissions.error()) {
-      <lib-error
-        (retry)="permissions.reload()"
-        [description]="$safeNavigationMigration(permissions.error()?.message)"
-      />
-    } @else {
-      <div class="overflow-x-auto">
-        <table uiTable>
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Descripción</th>
-              <th>Fecha de creación</th>
-              <th>Fecha de actualización</th>
-              <th></th>
-            </tr>
-          </thead>
+    <div class="overflow-x-auto">
+      <table uiTable [attr.aria-busy]="permissions.isLoading()">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Descripción</th>
+            <th>Fecha de creación</th>
+            <th>Fecha de actualización</th>
+            <th class="w-12"><span class="sr-only">Acciones</span></th>
+          </tr>
+        </thead>
+        @if (permissions.isLoading() && !permissions.hasValue()) {
+          <tbody uiTableSkeleton [columns]="5"></tbody>
+        } @else if (permissions.error()) {
+          <tbody>
+            <tr uiTableError [columns]="5" (retry)="permissions.reload()"></tr>
+          </tbody>
+        } @else {
           <tbody>
             @for (permission of permissions.value(); track permission.id) {
               <tr>
@@ -80,73 +82,44 @@ import { PermissionsForm } from './permissions-form';
                 <td>{{ permission.createdAt | date: 'medium' }}</td>
                 <td>{{ permission.updatedAt | date: 'medium' }}</td>
                 <td>
-                  <button
-                    class="cursor-pointer hover:bg-surface-2 p-1 rounded-lg flex items-center justify-center"
-                    ngMenuTrigger
-                    #origin
-                    #trigger="ngMenuTrigger"
-                    [menu]="formatMenu()"
-                  >
-                    <ui-icon name="ellipsis" class="text-xl" />
-                  </button>
-                  <ng-template
-                    [cdkConnectedOverlayOpen]="trigger.expanded()"
-                    [cdkConnectedOverlay]="{ origin, usePopover: 'inline' }"
-                    [cdkConnectedOverlayPositions]="[
-                      {
-                        originX: 'end',
-                        originY: 'bottom',
-                        overlayX: 'end',
-                        overlayY: 'top',
-                        offsetY: 4,
-                      },
-                    ]"
-                    cdkAttachPopoverAsChild
-                  >
-                    <div ngMenu class="bg-surface-1 shadow-sm rounded-lg p-1 w-48" #formatMenu="ngMenu">
-                      <ng-template ngMenuContent>
-                        <button
-                          ngMenuItem
-                          value="Edit"
-                          class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-surface-2 w-full"
-                          (click)="editPermission($any(permission))"
-                        >
-                          <ui-icon name="pencil" class="text-lg" />
-                          <span>Editar</span>
-                        </button>
-                        <button
-                          ngMenuItem
-                          value="Delete"
-                          class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-surface-2 w-full"
-                          (click)="deletePermission($any(permission))"
-                        >
-                          <ui-icon name="trash-2" class="text-lg" />
-                          <span>Eliminar</span>
-                        </button>
-                      </ng-template>
-                    </div>
-                  </ng-template>
+                  <ui-row-actions
+                    [actions]="rowActions"
+                    [label]="'Acciones para ' + permission.descriptiveId"
+                    (action)="onRowAction($event, permission)"
+                  />
                 </td>
               </tr>
+            } @empty {
+              @if (searchText()) {
+                <tr
+                  uiTableEmpty
+                  [columns]="5"
+                  icon="search-x"
+                  title="Sin resultados"
+                  description="Ningún resultado coincide con la búsqueda."
+                ></tr>
+              } @else {
+                <tr uiTableEmpty [columns]="5" icon="key-round" title="Aún no hay permisos"></tr>
+              }
             }
           </tbody>
-        </table>
-      </div>
-      <div class="px-4">
-        <lib-paginator
-          [count]="pagination.count()"
-          [take]="pagination.take()"
-          [skip]="pagination.skip()"
-          (skipChange)="pagination.updateSkip($event)"
-          (takeChange)="pagination.updateTake($event)"
-        />
-      </div>
-    }`,
+        }
+      </table>
+    </div>
+    <div class="px-4">
+      <lib-paginator
+        [count]="pagination.count()"
+        [take]="pagination.take()"
+        [skip]="pagination.skip()"
+        (skipChange)="pagination.updateSkip($event)"
+        (takeChange)="pagination.updateTake($event)"
+      />
+    </div>
+  `,
 })
 export class Permissions {
   private modal = inject(Modal);
   public pagination = inject(Pagination);
-  formatMenu = viewChild<Menu<string>>('formatMenu');
   searchText = signal('');
   private http = inject(HttpClient);
   private confirmation = inject(Confirmation);
@@ -217,5 +190,22 @@ export class Permissions {
           });
         }
       });
+  }
+
+  /** The actions in each row's menu (ui-row-actions). */
+  protected readonly rowActions: UiRowAction[] = [
+    { id: 'edit', label: 'Editar', icon: 'pencil' },
+    { id: 'delete', label: 'Eliminar', icon: 'trash-2', tone: 'danger' },
+  ];
+
+  protected onRowAction(action: string, permission: Prisma.PermissionGetPayload<false>): void {
+    switch (action) {
+      case 'edit':
+        this.editPermission(permission);
+        break;
+      case 'delete':
+        this.deletePermission(permission);
+        break;
+    }
   }
 }

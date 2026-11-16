@@ -2,20 +2,21 @@ import {
   Breadcrumbs,
   Button,
   Confirmation,
-  Error,
   Icon,
-  Loader,
   Modal,
   Pagination,
   Paginator,
   Toast,
+  UiRowAction,
+  UiRowActions,
   UiTable,
+  UiTableEmpty,
+  UiTableError,
+  UiTableSkeleton,
 } from '#/ui';
-import { Menu, MenuContent, MenuItem, MenuTrigger } from '@angular/aria/menu';
-import { OverlayModule } from '@angular/cdk/overlay';
 import { DatePipe } from '@angular/common';
 import { HttpClient, httpResource } from '@angular/common/http';
-import { Component, effect, inject, viewChild } from '@angular/core';
+import { Component, effect, inject } from '@angular/core';
 import { Prisma } from '@generated/prisma';
 import { toFetchQueryRecord } from '../core/fetch-query-params';
 import { SchoolsForm } from './schools-form';
@@ -26,15 +27,12 @@ import { SchoolsForm } from './schools-form';
     UiTable,
     Button,
     DatePipe,
-    Menu,
-    MenuContent,
-    MenuItem,
-    MenuTrigger,
-    OverlayModule,
     Paginator,
-    Error,
-    Loader,
     Icon,
+    UiRowActions,
+    UiTableEmpty,
+    UiTableError,
+    UiTableSkeleton,
   ],
   providers: [Pagination],
   template: `<ui-breadcrumbs [items]="[{ label: 'Inicio', link: '/' }, { label: 'Escuelas' }]" />
@@ -46,23 +44,25 @@ import { SchoolsForm } from './schools-form';
 
       <button uiButton variant="primary" (click)="editSchool()"><ui-icon name="circle-plus" /> Nueva Escuela</button>
     </div>
-    @if (schools.error()) {
-      <lib-error (retry)="schools.reload()" [description]="$safeNavigationMigration(schools.error()?.message)" />
-    } @else if (!schools.hasValue()) {
-      <lib-loader />
-    } @else {
-      <div class="overflow-x-auto">
-        <table uiTable>
-          <thead>
-            <tr>
-              <th>Nombre</th>
-              <th>Organización</th>
-              <th>Año actual</th>
-              <th>Fecha de creación</th>
-              <th>Fecha de actualización</th>
-              <th></th>
-            </tr>
-          </thead>
+    <div class="overflow-x-auto">
+      <table uiTable [attr.aria-busy]="schools.isLoading()">
+        <thead>
+          <tr>
+            <th>Nombre</th>
+            <th>Organización</th>
+            <th>Año actual</th>
+            <th>Fecha de creación</th>
+            <th>Fecha de actualización</th>
+            <th class="w-12"><span class="sr-only">Acciones</span></th>
+          </tr>
+        </thead>
+        @if (schools.isLoading() && !schools.hasValue()) {
+          <tbody uiTableSkeleton [columns]="6"></tbody>
+        } @else if (schools.error()) {
+          <tbody>
+            <tr uiTableError [columns]="6" (retry)="schools.reload()"></tr>
+          </tbody>
+        } @else {
           <tbody>
             @for (school of schools.value(); track school.id) {
               <tr>
@@ -72,72 +72,29 @@ import { SchoolsForm } from './schools-form';
                 <td>{{ school.createdAt | date: 'medium' }}</td>
                 <td>{{ school.updatedAt | date: 'medium' }}</td>
                 <td>
-                  <button
-                    class="cursor-pointer hover:bg-surface-2 p-1 rounded-lg flex items-center justify-center"
-                    ngMenuTrigger
-                    #origin
-                    #trigger="ngMenuTrigger"
-                    [menu]="formatMenu()"
-                  >
-                    <ui-icon name="ellipsis" class="text-xl" />
-                  </button>
-                  <ng-template
-                    [cdkConnectedOverlayOpen]="trigger.expanded()"
-                    [cdkConnectedOverlay]="{ origin, usePopover: 'inline' }"
-                    [cdkConnectedOverlayPositions]="[
-                      {
-                        originX: 'end',
-                        originY: 'bottom',
-                        overlayX: 'end',
-                        overlayY: 'top',
-                        offsetY: 4,
-                      },
-                    ]"
-                    cdkAttachPopoverAsChild
-                  >
-                    <div ngMenu class="bg-surface-1 shadow-sm rounded-lg p-1 w-48" #formatMenu="ngMenu">
-                      <ng-template ngMenuContent>
-                        <button
-                          ngMenuItem
-                          value="Edit"
-                          class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-surface-2 w-full"
-                          (keydown.enter)="editSchool($any(school))"
-                          (click)="editSchool($any(school))"
-                          type="button"
-                        >
-                          <ui-icon name="pencil" class="text-lg" />
-                          <span>Editar</span>
-                        </button>
-                        <button
-                          ngMenuItem
-                          value="Delete"
-                          class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-surface-2 w-full"
-                          (click)="deleteSchool($any(school))"
-                          (keydown.enter)="deleteSchool($any(school))"
-                          type="button"
-                        >
-                          <ui-icon name="trash-2" class="text-lg" />
-                          <span>Eliminar</span>
-                        </button>
-                      </ng-template>
-                    </div>
-                  </ng-template>
+                  <ui-row-actions
+                    [actions]="rowActions"
+                    [label]="'Acciones para ' + school.name"
+                    (action)="onRowAction($event, school)"
+                  />
                 </td>
               </tr>
+            } @empty {
+              <tr uiTableEmpty [columns]="6" icon="school" title="Aún no hay colegios"></tr>
             }
           </tbody>
-        </table>
-        <div class="p-2">
-          <lib-paginator
-            [count]="pagination.count()"
-            [take]="pagination.take()"
-            [skip]="pagination.skip()"
-            (skipChange)="pagination.updateSkip($event)"
-            (takeChange)="pagination.updateTake($event)"
-          />
-        </div>
+        }
+      </table>
+      <div class="p-2">
+        <lib-paginator
+          [count]="pagination.count()"
+          [take]="pagination.take()"
+          [skip]="pagination.skip()"
+          (skipChange)="pagination.updateSkip($event)"
+          (takeChange)="pagination.updateTake($event)"
+        />
       </div>
-    }`,
+    </div> `,
 })
 export class Schools {
   private readonly modal = inject(Modal);
@@ -145,7 +102,6 @@ export class Schools {
   private readonly http = inject(HttpClient);
   private readonly toasts = inject(Toast);
   private readonly confirmation = inject(Confirmation);
-  formatMenu = viewChild<Menu<string>>('formatMenu');
 
   public schools = httpResource<Prisma.SchoolGetPayload<{ include: { organization: true } }>[]>(
     () => ({
@@ -202,5 +158,22 @@ export class Schools {
           });
         }
       });
+  }
+
+  /** The actions in each row's menu (ui-row-actions). */
+  protected readonly rowActions: UiRowAction[] = [
+    { id: 'edit', label: 'Editar', icon: 'pencil' },
+    { id: 'delete', label: 'Eliminar', icon: 'trash-2', tone: 'danger' },
+  ];
+
+  protected onRowAction(action: string, school: Prisma.SchoolGetPayload<{ include: { organization: true } }>): void {
+    switch (action) {
+      case 'edit':
+        this.editSchool(school);
+        break;
+      case 'delete':
+        this.deleteSchool(school);
+        break;
+    }
   }
 }

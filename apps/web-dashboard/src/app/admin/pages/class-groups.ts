@@ -2,20 +2,26 @@ import {
   Button,
   Card,
   Confirmation,
-  EmptyState,
   Icon,
   Modal,
   PaginatorV2,
   Toast,
+  UiField,
+  UiFilterChip,
+  UiFilterMenu,
   UiInputGroup,
+  UiRowAction,
+  UiRowActions,
   UiSelect,
   UiTable,
+  UiTableEmpty,
+  UiTableError,
+  UiTableSkeleton,
+  UiTableToolbar,
 } from '#/ui';
-import { Menu, MenuContent, MenuItem, MenuTrigger } from '@angular/aria/menu';
-import { OverlayModule } from '@angular/cdk/overlay';
 import { DatePipe } from '@angular/common';
 import { HttpClient, httpResource } from '@angular/common/http';
-import { Component, computed, inject, signal, viewChild } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { debounce, form, FormField } from '@angular/forms/signals';
 import { RouterLink } from '@angular/router';
 import { filter, switchMap } from 'rxjs';
@@ -47,37 +53,46 @@ type StudyPlanRow = {
     Button,
     DatePipe,
     RouterLink,
-    Menu,
-    MenuContent,
-    MenuItem,
-    MenuTrigger,
-    OverlayModule,
-    EmptyState,
     PaginatorV2,
     FormField,
     UiInputGroup,
     Icon,
+    UiRowActions,
+    UiTableEmpty,
+    UiTableError,
+    UiTableSkeleton,
+    UiField,
+    UiFilterChip,
+    UiFilterMenu,
+    UiTableToolbar,
   ],
   template: `
-    <div class="flex justify-between">
-      <div class="flex gap-2">
-        <div class="md:w-96 w-full">
-          <label uiInputGroup>
-            <ui-icon name="search" />
-            <input class="pl-0" type="search" placeholder="Buscar..." [formField]="form.searchText" />
-          </label>
-        </div>
-        <select uiSelect [formField]="form.studyPlanId">
-          <option [value]="''">Elija plan...</option>
-          @for (studyPlan of studyPlans.value()?.data; track studyPlan.id) {
-            <option [value]="studyPlan.id">{{ studyPlan.name }}</option>
-          }
-        </select>
-      </div>
-      <button uiButton variant="primary" (click)="editClassGroup()"><ui-icon name="circle-plus" /> Nuevo Grupo</button>
-    </div>
+    <ui-table-toolbar label="Filtrar grupos">
+      <label uiInputGroup size="sm">
+        <ui-icon name="search" class="text-base text-ink-subtle" />
+        <input type="search" placeholder="Buscar grupo" aria-label="Buscar grupo" [formField]="form.searchText" />
+      </label>
+      <ui-filter-menu [activeCount]="form.studyPlanId().value() ? 1 : 0" (clear)="form.studyPlanId().value.set('')">
+        <ui-field label="Plan de estudios">
+          <select uiSelect [formField]="form.studyPlanId">
+            <option value="">Todos los planes</option>
+            @for (studyPlan of studyPlans.value()?.data; track studyPlan.id) {
+              <option [value]="studyPlan.id">{{ studyPlan.name }}</option>
+            }
+          </select>
+        </ui-field>
+      </ui-filter-menu>
+      <button uiToolbarEnd uiButton variant="primary" size="sm" type="button" (click)="editClassGroup()">
+        <ui-icon name="circle-plus" class="text-base" /> Nuevo grupo
+      </button>
+      @if (form.studyPlanId().value()) {
+        <ng-container uiToolbarChips>
+          <ui-filter-chip [label]="'Plan: ' + selectedStudyPlanName()" (remove)="form.studyPlanId().value.set('')" />
+        </ng-container>
+      }
+    </ui-table-toolbar>
     <div uiCard class="overflow-x-auto mt-4">
-      <table uiTable>
+      <table uiTable [attr.aria-busy]="classGroups.isLoading()">
         <thead>
           <tr>
             <th>Nombre</th>
@@ -85,97 +100,55 @@ type StudyPlanRow = {
             <th>Plan de estudio</th>
             <th>Fecha de creación</th>
             <th>Fecha de actualización</th>
-            <th></th>
+            <th class="w-12"><span class="sr-only">Acciones</span></th>
           </tr>
         </thead>
-        <tbody>
-          @for (group of classGroups.value()?.data; track group.id) {
-            <tr>
-              <td>
-                <a class="link link-primary" [routerLink]="['/groups', group.id]">{{ group.name }}</a>
-              </td>
-              <td>
-                @if (group.teacher) {
-                  {{ group.teacher.firstName }} {{ group.teacher.fatherName }}
-                } @else {
-                  --
-                }
-              </td>
-              <td>{{ group.studyPlan.name }}</td>
-              <td>{{ group.createdAt | date: 'short' }}</td>
-              <td>{{ group.updatedAt | date: 'short' }}</td>
-              <td>
-                <button
-                  class="cursor-pointer hover:bg-surface-2 p-1 rounded-lg flex items-center justify-center"
-                  ngMenuTrigger
-                  #origin
-                  #trigger="ngMenuTrigger"
-                  [menu]="actionsMenu()"
-                >
-                  <ui-icon name="ellipsis" class="text-xl" />
-                </button>
-                <ng-template
-                  [cdkConnectedOverlayOpen]="trigger.expanded()"
-                  [cdkConnectedOverlay]="{ origin, usePopover: 'inline' }"
-                  [cdkConnectedOverlayPositions]="[
-                    {
-                      originX: 'end',
-                      originY: 'bottom',
-                      overlayX: 'end',
-                      overlayY: 'top',
-                      offsetY: 4,
-                    },
-                  ]"
-                  cdkAttachPopoverAsChild
-                >
-                  <div ngMenu class="bg-surface-1 shadow-sm rounded-lg p-1 w-48" #actionsMenu="ngMenu">
-                    <ng-template ngMenuContent>
-                      <a
-                        ngMenuItem
-                        value="view"
-                        [routerLink]="['/groups', group.id]"
-                        class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-surface-2 w-full"
-                      >
-                        <ui-icon name="eye" class="text-lg" />
-                        <span>Ver</span>
-                      </a>
-                      <button
-                        ngMenuItem
-                        value="edit"
-                        class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-surface-2 w-full"
-                        (click)="editClassGroup(group)"
-                      >
-                        <ui-icon name="pencil" class="text-lg" />
-                        <span>Editar</span>
-                      </button>
-                      <button
-                        ngMenuItem
-                        value="delete"
-                        class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-surface-2 w-full"
-                        (click)="deleteClassGroup(group.id)"
-                      >
-                        <ui-icon name="trash-2" class="text-lg" />
-                        <span>Eliminar</span>
-                      </button>
-                    </ng-template>
-                  </div>
-                </ng-template>
-              </td>
-            </tr>
-          } @empty {
-            <tr>
-              <td colspan="6" class="text-center">
-                <lib-empty-state
-                  title="No hay grupos"
-                  description="No hay grupos para mostrar"
-                  icon="users"
-                  actionLabel="Nuevo grupo"
-                  (action)="editClassGroup()"
-                />
-              </td>
-            </tr>
-          }
-        </tbody>
+        @if (classGroups.isLoading() && !classGroups.hasValue()) {
+          <tbody uiTableSkeleton [columns]="6"></tbody>
+        } @else if (classGroups.error()) {
+          <tbody>
+            <tr uiTableError [columns]="6" (retry)="classGroups.reload()"></tr>
+          </tbody>
+        } @else {
+          <tbody>
+            @for (group of classGroups.value()?.data; track group.id) {
+              <tr>
+                <td>
+                  <a class="link link-primary" [routerLink]="['/groups', group.id]">{{ group.name }}</a>
+                </td>
+                <td>
+                  @if (group.teacher) {
+                    {{ group.teacher.firstName }} {{ group.teacher.fatherName }}
+                  } @else {
+                    --
+                  }
+                </td>
+                <td>{{ group.studyPlan.name }}</td>
+                <td>{{ group.createdAt | date: 'short' }}</td>
+                <td>{{ group.updatedAt | date: 'short' }}</td>
+                <td>
+                  <ui-row-actions
+                    [actions]="rowActions(group)"
+                    [label]="'Acciones para ' + group.name"
+                    (action)="onRowAction($event, group)"
+                  />
+                </td>
+              </tr>
+            } @empty {
+              @if (form.searchText().value()) {
+                <tr
+                  uiTableEmpty
+                  [columns]="6"
+                  icon="search-x"
+                  title="Sin resultados"
+                  description="Ningún resultado coincide con la búsqueda."
+                ></tr>
+              } @else {
+                <tr uiTableEmpty [columns]="6" icon="users" title="Aún no hay grupos"></tr>
+              }
+            }
+          </tbody>
+        }
       </table>
       <div class="p-4 rounded-b-lg">
         <lib-paginator
@@ -190,6 +163,10 @@ type StudyPlanRow = {
   `,
 })
 export default class ClassGroups {
+  /** Name of the selected filter, for its chip. */
+  protected readonly selectedStudyPlanName = computed(
+    () => (this.studyPlans.value()?.data ?? []).find((x) => x.id === this.form.studyPlanId().value())?.name ?? '',
+  );
   private modal = inject(Modal);
   private http = inject(HttpClient);
   private store = inject(Store);
@@ -206,7 +183,6 @@ export default class ClassGroups {
     debounce(f.searchText, 400);
   });
 
-  actionsMenu = viewChild<Menu<string>>('actionsMenu');
   pageSize = signal(10);
   page = signal(1);
   total = computed(() => this.classGroups.value()?.meta?.total ?? 0);
@@ -275,5 +251,25 @@ export default class ClassGroups {
         this.toasts.showSuccess('Grupo eliminado correctamente');
         this.classGroups.reload();
       });
+  }
+
+  /** The actions in each row's menu (ui-row-actions). */
+  protected rowActions(group: ClassGroupRow): UiRowAction[] {
+    return [
+      { id: 'view', label: 'Ver', icon: 'eye', link: ['/groups', group.id] },
+      { id: 'edit', label: 'Editar', icon: 'pencil' },
+      { id: 'delete', label: 'Eliminar', icon: 'trash-2', tone: 'danger' },
+    ];
+  }
+
+  protected onRowAction(action: string, group: ClassGroupRow): void {
+    switch (action) {
+      case 'edit':
+        this.editClassGroup(group);
+        break;
+      case 'delete':
+        this.deleteClassGroup(group.id);
+        break;
+    }
   }
 }

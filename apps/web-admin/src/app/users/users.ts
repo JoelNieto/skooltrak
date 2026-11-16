@@ -2,20 +2,22 @@ import {
   Breadcrumbs,
   Button,
   Confirmation,
-  Error,
   Icon,
   Modal,
   Pagination,
   Paginator,
   Toast,
   UiInput,
+  UiRowAction,
+  UiRowActions,
   UiTable,
+  UiTableEmpty,
+  UiTableError,
+  UiTableSkeleton,
 } from '#/ui';
-import { Menu, MenuContent, MenuItem, MenuTrigger } from '@angular/aria/menu';
-import { OverlayModule } from '@angular/cdk/overlay';
 import { DatePipe } from '@angular/common';
 import { HttpClient, httpResource } from '@angular/common/http';
-import { afterRenderEffect, Component, effect, inject, signal, viewChild } from '@angular/core';
+import { afterRenderEffect, Component, effect, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Prisma } from '@generated/prisma';
 import { toFetchQueryRecord } from '../core/fetch-query-params';
@@ -28,15 +30,13 @@ import { UsersForm } from './users-form';
     UiInput,
     Button,
     DatePipe,
-    Menu,
-    MenuContent,
-    MenuItem,
-    MenuTrigger,
-    OverlayModule,
     Paginator,
     FormsModule,
-    Error,
     Icon,
+    UiRowActions,
+    UiTableEmpty,
+    UiTableError,
+    UiTableSkeleton,
   ],
   providers: [Pagination],
   template: `<ui-breadcrumbs [items]="[{ label: 'Inicio', link: '/' }, { label: 'Usuarios' }]" />
@@ -53,22 +53,26 @@ import { UsersForm } from './users-form';
         <input uiInput type="text" placeholder="Buscar" [(ngModel)]="searchText" />
       </div>
     </div>
-    @if (users.error()) {
-      <lib-error (retry)="users.reload()" [description]="$safeNavigationMigration(users.error()?.message)" />
-    } @else {
-      <div class="overflow-x-auto">
-        <table uiTable>
-          <thead>
-            <tr>
-              <th>Nombre</th>
-              <th>Correo</th>
-              <th>Rol</th>
-              <th>Organización</th>
-              <th>Fecha de creación</th>
-              <th>Fecha de actualización</th>
-              <th></th>
-            </tr>
-          </thead>
+    <div class="overflow-x-auto">
+      <table uiTable [attr.aria-busy]="users.isLoading()">
+        <thead>
+          <tr>
+            <th>Nombre</th>
+            <th>Correo</th>
+            <th>Rol</th>
+            <th>Organización</th>
+            <th>Fecha de creación</th>
+            <th>Fecha de actualización</th>
+            <th class="w-12"><span class="sr-only">Acciones</span></th>
+          </tr>
+        </thead>
+        @if (users.isLoading() && !users.hasValue()) {
+          <tbody uiTableSkeleton [columns]="7"></tbody>
+        } @else if (users.error()) {
+          <tbody>
+            <tr uiTableError [columns]="7" (retry)="users.reload()"></tr>
+          </tbody>
+        } @else {
           <tbody>
             @for (user of users.value(); track user.id) {
               <tr>
@@ -79,73 +83,43 @@ import { UsersForm } from './users-form';
                 <td>{{ user.createdAt | date: 'medium' }}</td>
                 <td>{{ user.updatedAt | date: 'medium' }}</td>
                 <td>
-                  <button
-                    class="cursor-pointer hover:bg-surface-2 p-1 rounded-lg flex items-center justify-center"
-                    ngMenuTrigger
-                    #origin
-                    #trigger="ngMenuTrigger"
-                    [menu]="formatMenu()"
-                  >
-                    <ui-icon name="ellipsis" class="text-xl" />
-                  </button>
-                  <ng-template
-                    [cdkConnectedOverlayOpen]="trigger.expanded()"
-                    [cdkConnectedOverlay]="{ origin, usePopover: 'inline' }"
-                    [cdkConnectedOverlayPositions]="[
-                      {
-                        originX: 'end',
-                        originY: 'bottom',
-                        overlayX: 'end',
-                        overlayY: 'top',
-                        offsetY: 4,
-                      },
-                    ]"
-                    cdkAttachPopoverAsChild
-                  >
-                    <div ngMenu class="bg-surface-1 shadow-sm rounded-lg p-1 w-48" #formatMenu="ngMenu">
-                      <ng-template ngMenuContent>
-                        <button
-                          ngMenuItem
-                          value="Edit"
-                          class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-surface-2 w-full"
-                          (click)="editUser($any(user))"
-                        >
-                          <ui-icon name="pencil" class="text-lg" />
-                          <span>Editar</span>
-                        </button>
-                        <button
-                          ngMenuItem
-                          value="Delete"
-                          class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-surface-2 w-full"
-                          (click)="deleteUser($any(user))"
-                        >
-                          <ui-icon name="trash-2" class="text-lg" />
-                          <span>Eliminar</span>
-                        </button>
-                      </ng-template>
-                    </div>
-                  </ng-template>
+                  <ui-row-actions
+                    [actions]="rowActions"
+                    [label]="'Acciones para ' + user.firstName"
+                    (action)="onRowAction($event, user)"
+                  />
                 </td>
               </tr>
+            } @empty {
+              @if (searchText()) {
+                <tr
+                  uiTableEmpty
+                  [columns]="7"
+                  icon="search-x"
+                  title="Sin resultados"
+                  description="Ningún resultado coincide con la búsqueda."
+                ></tr>
+              } @else {
+                <tr uiTableEmpty [columns]="7" icon="users" title="Aún no hay usuarios"></tr>
+              }
             }
           </tbody>
-        </table>
-        <lib-paginator
-          [count]="pagination.count()"
-          [take]="pagination.take()"
-          [skip]="pagination.skip()"
-          (skipChange)="pagination.updateSkip($event)"
-          (takeChange)="pagination.updateTake($event)"
-        />
-      </div>
-    }`,
+        }
+      </table>
+      <lib-paginator
+        [count]="pagination.count()"
+        [take]="pagination.take()"
+        [skip]="pagination.skip()"
+        (skipChange)="pagination.updateSkip($event)"
+        (takeChange)="pagination.updateTake($event)"
+      />
+    </div> `,
 })
 export class Users {
   public pagination = inject(Pagination);
   private modal = inject(Modal);
   private http = inject(HttpClient);
   private toasts = inject(Toast);
-  formatMenu = viewChild<Menu<string>>('formatMenu');
   private confirmation = inject(Confirmation);
   public searchText = signal('');
   public users = httpResource<Prisma.UserGetPayload<{ include: { organization: true; role: true } }>[]>(
@@ -218,5 +192,27 @@ export class Users {
           });
         }
       });
+  }
+
+  /** The actions in each row's menu (ui-row-actions). */
+  protected readonly rowActions: UiRowAction[] = [
+    { id: 'edit', label: 'Editar', icon: 'pencil' },
+    { id: 'delete', label: 'Eliminar', icon: 'trash-2', tone: 'danger' },
+  ];
+
+  protected onRowAction(
+    action: string,
+    user: Prisma.UserGetPayload<{
+      include: { organization: true; role: true };
+    }>,
+  ): void {
+    switch (action) {
+      case 'edit':
+        this.editUser(user);
+        break;
+      case 'delete':
+        this.deleteUser(user);
+        break;
+    }
   }
 }

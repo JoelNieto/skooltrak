@@ -169,7 +169,7 @@ const MESSAGE_STYLES = `
     .ui-field-label {
       font-size: 0.875rem;
       line-height: 1.25rem;
-      font-weight: 500;
+      font-weight: 600; /* type-label */
       color: var(--ui-ink-strong);
     }
     ${MESSAGE_STYLES}
@@ -222,7 +222,7 @@ export class UiField extends UiFieldBase {
     .ui-choice-label {
       font-size: 0.875rem;
       line-height: 1.25rem;
-      font-weight: 500;
+      font-weight: 600; /* type-label */
       color: var(--ui-ink-strong);
       cursor: pointer;
     }

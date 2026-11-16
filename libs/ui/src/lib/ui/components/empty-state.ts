@@ -13,9 +13,9 @@ type EmptyStateColor = 'primary' | 'secondary' | 'accent' | 'info' | 'success' |
           <span class="material-symbols-outlined text-2xl" [class]="iconColorClass()">{{ icon() }}</span>
         </div>
       }
-      <p class="font-medium text-sm text-ink-strong">{{ title() }}</p>
+      <p class="type-label text-ink-strong">{{ title() }}</p>
       @if (description()) {
-        <p class="text-xs mt-1.5 text-ink-muted max-w-xs mx-auto">{{ description() }}</p>
+        <p class="text-sm mt-1.5 text-ink-muted max-w-xs mx-auto">{{ description() }}</p>
       }
       @if (actionLabel()) {
         <button

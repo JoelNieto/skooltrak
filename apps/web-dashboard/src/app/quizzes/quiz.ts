@@ -83,7 +83,7 @@ type QuizDetail = {
         <div uiCard class="mt-4">
           <div uiCardBody>
             <h3 uiCardTitle>Descripción</h3>
-            <lib-editor-viewer [innerHTML]="quiz.details" />
+            <lib-editor-viewer class="type-body" [innerHTML]="quiz.details" />
           </div>
         </div>
         <div uiCard class="mt-4">

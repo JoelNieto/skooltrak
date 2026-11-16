@@ -65,7 +65,7 @@ type MessageType = Prisma.MessageGetPayload<undefined> & {
               <span class="text-sm text-ink-muted">{{ message.createdAt | date: 'short' }}</span>
             </div>
             <div class="py-3">
-              <lib-editor-viewer [innerHTML]="message.content" />
+              <lib-editor-viewer class="type-body-lg" [innerHTML]="message.content" />
             </div>
             <div class="flex justify-end gap-2 border-t border-line pt-3">
               <button uiButton variant="ghost" size="sm" (click)="prepareReply(message)">Responder</button>
@@ -95,7 +95,7 @@ type MessageType = Prisma.MessageGetPayload<undefined> & {
                       <span class="text-ink-muted">{{ item.createdAt | date: 'short' }}</span>
                     </div>
                     <div class="mt-2 text-sm">
-                      <lib-editor-viewer [innerHTML]="item.content" />
+                      <lib-editor-viewer class="type-body-lg" [innerHTML]="item.content" />
                     </div>
                     <div class="mt-3 flex gap-2">
                       <button uiButton variant="ghost" size="sm" (click)="prepareReplyFromReply(item)">

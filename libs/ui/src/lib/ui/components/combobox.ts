@@ -195,7 +195,7 @@ const normalize = (text: string) =>
       border: 1px solid var(--ui-line);
       border-radius: var(--radius-field);
       background: var(--ui-surface-1);
-      box-shadow: 0 10px 25px -5px rgb(0 0 0 / 0.15);
+      box-shadow: var(--ui-shadow-float);
       font-size: 0.875rem;
       line-height: 1.25rem;
     }

@@ -158,6 +158,10 @@ import {
   X,
   ClipboardX,
   TrendingDown,
+  ChevronsUpDown,
+  SearchX,
+  Funnel,
+  FunnelX,
 } from 'lucide';
 
 /** Lucide's icon data: SVG child elements as [tag, attributes]. */
@@ -321,6 +325,10 @@ export const UI_ICONS = {
   x: X,
   'clipboard-x': ClipboardX,
   'trending-down': TrendingDown,
+  'chevrons-up-down': ChevronsUpDown,
+  'search-x': SearchX,
+  funnel: Funnel,
+  'funnel-x': FunnelX,
 } as const satisfies Record<string, UiIconNode>;
 
 /** Name of an icon in the registry: `<ui-icon name="calendar" />`. */

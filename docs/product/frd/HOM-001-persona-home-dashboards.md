@@ -220,6 +220,6 @@ Each slice replaces its part of the existing home in place. Old widgets that are
 | [HOM-001-S05](../slices/HOM-001-S05-student-progress.md) | Student: KPIs, per-course averages with bands, recent grades, habits, progress placeholder | .2 .4 .13 .16 .17, BR .1 .2 | In review |
 | [HOM-001-S06](../slices/HOM-001-S06-parent-children.md) | Parent: child switcher with alert counts, alerts and KPIs for the selected child | .18 .19 .20, BR .9 .14 .16 | In review |
 | [HOM-001-S07](../slices/HOM-001-S07-parent-detail.md) | Parent: upcoming work, recent grades, teacher messages, account summary, attendance and trend placeholders | .4 .21 .22 .23, BR .14 .16 | In review |
-| HOM-001-S08 | Admin: attention tiles, period banner, KPI row (adds `VIEW_SCHOOL_DASHBOARD`) | .5 .24 .25, BR .10 .14 .15 .16 | Proposed |
+| [HOM-001-S08](../slices/HOM-001-S08-admin-attention.md) | Admin: attention tiles, period banner, KPI row (adds `VIEW_SCHOOL_DASHBOARD`) | .5 .24 .25, BR .10 .14 .15 .16 | In review |
 | HOM-001-S09 | Admin: lowest-attendance groups, follow-up students, attendance and academics placeholders | .26 .27 .4, BR .11 | Proposed |
 | HOM-001-S10 | Admin: month finance, broadcast read rates, store orders; remove the old "Últimos estudiantes / Docentes recientes" | .28 .29 .30, BR .14 .16 | Proposed |

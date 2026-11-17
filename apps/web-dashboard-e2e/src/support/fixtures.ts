@@ -86,4 +86,14 @@ export const data = {
    * mark (2 alerts), so the tie goes to the first alphabetically.
    */
   charge: { description: 'Mensualidad E2E', amount: 285, inDays: 3 },
+  /**
+   * HOM-001-S08 admin attention: a pending teacher join request, a school-wide broadcast awaiting
+   * approval, an overdue charge of the third related student (not linked to `parent`) and a failed
+   * import. The 8° study plan has no grade metric, and the 00:00 slots give classes without attendance.
+   */
+  admin: {
+    applicant: { email: 'applicant.e2e@skooltrak.test', firstName: 'Pedro', lastName: 'Postulante' },
+    pendingBroadcast: 'Aviso por aprobar E2E',
+    overdueCharge: { description: 'Matrícula E2E', amount: 150, inDays: -10 },
+  },
 } as const;

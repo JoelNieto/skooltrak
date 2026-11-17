@@ -1,9 +1,24 @@
-import { Button, Card, Confirmation, Icon, Pagination, Paginator, Toast, UiInputGroup, UiTable } from '#/ui';
-import { Menu, MenuContent, MenuItem, MenuTrigger } from '@angular/aria/menu';
-import { OverlayModule } from '@angular/cdk/overlay';
+import {
+  Button,
+  Card,
+  Confirmation,
+  Icon,
+  Pagination,
+  Paginator,
+  Toast,
+  UiInputGroup,
+  UiRowAction,
+  UiRowActions,
+  UiTable,
+  UiTableEmpty,
+  UiTableError,
+  UiTableSkeleton,
+  UiTableToolbar,
+  listState,
+} from '#/ui';
 import { DatePipe } from '@angular/common';
 import { HttpClient, httpResource } from '@angular/common/http';
-import { afterRenderEffect, Component, inject, signal, viewChild } from '@angular/core';
+import { afterRenderEffect, Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { filter, switchMap } from 'rxjs';
@@ -22,6 +37,7 @@ type SchoolRow = {
 @Component({
   selector: 'app-schools',
   imports: [
+    UiTableToolbar,
     Card,
     UiTable,
     Button,
@@ -29,33 +45,33 @@ type SchoolRow = {
     Paginator,
     FormsModule,
     RouterLink,
-    Menu,
-    MenuContent,
-    MenuItem,
-    MenuTrigger,
-    OverlayModule,
     UiInputGroup,
     Icon,
+    UiRowActions,
+    UiTableEmpty,
+    UiTableError,
+    UiTableSkeleton,
   ],
   providers: [Pagination],
   template: `
-    <div class="flex flex-col gap-4 md:flex-row md:justify-between">
-      <div class="md:w-96 w-full">
-        <label uiInputGroup>
-          <ui-icon name="search" />
-          <input
-            class="pl-0"
-            type="search"
-            placeholder="Buscar..."
-            [(ngModel)]="searchText"
-            (input)="pagination.updateSearch($event.target.value)"
-          />
-        </label>
-      </div>
-      <a uiButton variant="primary" routerLink="/schools/new"> <ui-icon name="circle-plus" /> Agregar Colegio </a>
-    </div>
+    <ui-table-toolbar>
+      <label uiInputGroup size="sm">
+        <ui-icon name="search" class="text-base text-ink-subtle" />
+        <input
+          aria-label="Buscar"
+          class="pl-0"
+          type="search"
+          placeholder="Buscar..."
+          [(ngModel)]="searchText"
+          (input)="pagination.updateSearch($event.target.value)"
+        />
+      </label>
+      <a uiToolbarEnd uiButton variant="primary" size="sm" routerLink="/schools/new">
+        <ui-icon name="circle-plus" class="text-base" /> Agregar Colegio
+      </a>
+    </ui-table-toolbar>
     <div uiCard class="overflow-x-auto mt-4">
-      <table uiTable>
+      <table uiTable [attr.aria-busy]="schools.isLoading()">
         <thead>
           <tr>
             <th>Colegio</th>
@@ -64,114 +80,65 @@ type SchoolRow = {
             <th>Email</th>
             <th>Teléfono</th>
             <th>Creado</th>
-            <th></th>
+            <th class="w-12"><span class="sr-only">Acciones</span></th>
           </tr>
         </thead>
-        <tbody>
-          @for (school of schools.value() ?? []; track school.id) {
-            <tr>
-              <td>
-                <a [routerLink]="['/schools', school.id]" class="flex items-center gap-3 hover:opacity-80">
-                  <div
-                    class="min-w-10 max-w-16 min-h-8 max-h-12 rounded-lg border border-line flex items-center justify-center overflow-hidden bg-surface-0 shrink-0"
-                  >
-                    @if (school.logoUrl) {
-                      <img [src]="school.logoUrl" [alt]="school.name" class="w-full h-auto object-contain" />
-                    } @else {
-                      <ui-icon name="school" class="text-xl text-ink-subtle" />
-                    }
-                  </div>
-                  <span class="link link-hover font-medium">{{ school.name }}</span>
-                </a>
-              </td>
-              <td>{{ school.shortName }}</td>
-              <td>{{ school.city || '-' }}</td>
-              <td>{{ school.email || '-' }}</td>
-              <td>{{ school.phone || '-' }}</td>
-              <td>{{ school.createdAt | date: 'short' }}</td>
-              <td>
-                <button
-                  class="cursor-pointer hover:bg-surface-2 p-1 rounded-lg flex items-center justify-center"
-                  ngMenuTrigger
-                  #origin
-                  #trigger="ngMenuTrigger"
-                  [menu]="actionsMenu()"
-                >
-                  <ui-icon name="ellipsis" class="text-xl" />
-                </button>
-                <ng-template
-                  [cdkConnectedOverlayOpen]="trigger.expanded()"
-                  [cdkConnectedOverlay]="{ origin, usePopover: 'inline' }"
-                  [cdkConnectedOverlayPositions]="[
-                    {
-                      originX: 'end',
-                      originY: 'bottom',
-                      overlayX: 'end',
-                      overlayY: 'top',
-                      offsetY: 4,
-                    },
-                  ]"
-                  cdkAttachPopoverAsChild
-                >
-                  <div ngMenu class="bg-surface-1 shadow-sm rounded-lg p-1 w-48" #actionsMenu="ngMenu">
-                    <ng-template ngMenuContent>
-                      <a
-                        ngMenuItem
-                        value="view"
-                        [routerLink]="['/schools', school.id]"
-                        class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-surface-2 w-full"
-                      >
-                        <ui-icon name="eye" class="text-lg" />
-                        <span>Ver</span>
-                      </a>
-                      <a
-                        ngMenuItem
-                        value="edit"
-                        [routerLink]="['/schools', school.id, 'edit']"
-                        class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-surface-2 w-full"
-                      >
-                        <ui-icon name="pencil" class="text-lg" />
-                        <span>Editar</span>
-                      </a>
-                      <button
-                        ngMenuItem
-                        value="delete"
-                        class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-surface-2 w-full"
-                        (click)="deleteSchool(school)"
-                      >
-                        <ui-icon name="trash-2" class="text-lg" />
-                        <span>Eliminar</span>
-                      </button>
-                    </ng-template>
-                  </div>
-                </ng-template>
-              </td>
-            </tr>
-          } @empty {
-            @if (schools.isLoading()) {
-              @for (_ of [1, 2, 3, 4, 5]; track _) {
+        @switch (schoolsList.phase()) {
+          @case ('skeleton') {
+            <tbody uiTableSkeleton [rows]="pagination.take()" [columns]="7"></tbody>
+          }
+          @case ('error') {
+            <tbody>
+              <tr uiTableError [columns]="7" (retry)="schools.reload()"></tr>
+            </tbody>
+          }
+          @case ('ready') {
+            <tbody>
+              @for (school of schoolsList.rows() ?? []; track school.id) {
                 <tr>
                   <td>
-                    <div class="flex items-center gap-3">
-                      <div class="skeleton w-10 h-10 rounded-lg"></div>
-                      <div class="skeleton h-4 w-32"></div>
-                    </div>
+                    <a [routerLink]="['/schools', school.id]" class="flex items-center gap-3 hover:opacity-80">
+                      <div
+                        class="min-w-10 max-w-16 min-h-8 max-h-12 rounded-lg border border-line flex items-center justify-center overflow-hidden bg-surface-0 shrink-0"
+                      >
+                        @if (school.logoUrl) {
+                          <img [src]="school.logoUrl" [alt]="school.name" class="w-full h-auto object-contain" />
+                        } @else {
+                          <ui-icon name="school" class="text-xl text-ink-subtle" />
+                        }
+                      </div>
+                      <span class="link link-hover font-medium">{{ school.name }}</span>
+                    </a>
                   </td>
-                  <td><div class="skeleton h-4 w-full"></div></td>
-                  <td><div class="skeleton h-4 w-full"></div></td>
-                  <td><div class="skeleton h-4 w-full"></div></td>
-                  <td><div class="skeleton h-4 w-full"></div></td>
-                  <td><div class="skeleton h-4 w-full"></div></td>
-                  <td><div class="skeleton h-4 w-full"></div></td>
+                  <td>{{ school.shortName }}</td>
+                  <td>{{ school.city || '-' }}</td>
+                  <td>{{ school.email || '-' }}</td>
+                  <td>{{ school.phone || '-' }}</td>
+                  <td>{{ school.createdAt | date: 'short' }}</td>
+                  <td>
+                    <ui-row-actions
+                      [actions]="rowActions(school)"
+                      [label]="'Acciones para ' + school.name"
+                      (action)="onRowAction($event, school)"
+                    />
+                  </td>
                 </tr>
+              } @empty {
+                @if (searchText()) {
+                  <tr
+                    uiTableEmpty
+                    [columns]="7"
+                    icon="search-x"
+                    title="Sin resultados"
+                    description="Ningún resultado coincide con la búsqueda."
+                  ></tr>
+                } @else {
+                  <tr uiTableEmpty [columns]="7" icon="school" title="Aún no hay colegios"></tr>
+                }
               }
-            } @else {
-              <tr>
-                <td colspan="7" class="text-center">Sin colegios registrados</td>
-              </tr>
-            }
+            </tbody>
           }
-        </tbody>
+        }
       </table>
       <div class="p-4 rounded-b-lg">
         <lib-paginator
@@ -191,9 +158,10 @@ export default class Schools {
   #toast = inject(Toast);
   pagination = inject(Pagination);
   searchText = signal('');
-  actionsMenu = viewChild<Menu<string>>('actionsMenu');
 
   public schools = httpResource<SchoolRow[]>(() => '/api/v1/schools', { defaultValue: [] });
+  /** schools with smooth loading: previous rows stay while the next page / sort / search loads. */
+  protected readonly schoolsList = listState(this.schools);
 
   constructor() {
     afterRenderEffect(() => {
@@ -223,5 +191,22 @@ export default class Schools {
           this.#toast.showError('Error al eliminar el colegio');
         },
       });
+  }
+
+  /** The actions in each row's menu (ui-row-actions). */
+  protected rowActions(school: SchoolRow): UiRowAction[] {
+    return [
+      { id: 'view', label: 'Ver', icon: 'eye', link: ['/schools', school.id] },
+      { id: 'edit', label: 'Editar', icon: 'pencil', link: ['/schools', school.id, 'edit'] },
+      { id: 'delete', label: 'Eliminar', icon: 'trash-2', tone: 'danger' },
+    ];
+  }
+
+  protected onRowAction(action: string, school: SchoolRow): void {
+    switch (action) {
+      case 'delete':
+        this.deleteSchool(school);
+        break;
+    }
   }
 }

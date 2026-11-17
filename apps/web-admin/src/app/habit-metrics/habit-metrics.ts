@@ -1,28 +1,38 @@
-import { Badge, Breadcrumbs, Button, Confirmation, Error, Icon, Modal, Spinner, Toast, UiTable } from '#/ui';
-import { Menu, MenuContent, MenuItem, MenuTrigger } from '@angular/aria/menu';
-import { OverlayModule } from '@angular/cdk/overlay';
+import {
+  Badge,
+  Breadcrumbs,
+  Button,
+  Confirmation,
+  Icon,
+  Modal,
+  Toast,
+  UiRowAction,
+  UiRowActions,
+  UiTable,
+  UiTableEmpty,
+  UiTableError,
+  UiTableSkeleton,
+  listState,
+} from '#/ui';
 import { DatePipe } from '@angular/common';
 import { HttpClient, httpResource } from '@angular/common/http';
-import { Component, inject, viewChild } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { Prisma } from '@generated/prisma';
 import HabitMetricsForm from './habit-metrics-form';
 
 @Component({
   selector: 'app-habit-metrics',
   imports: [
-    Spinner,
     Breadcrumbs,
     UiTable,
     Badge,
     Button,
     DatePipe,
-    Menu,
-    MenuContent,
-    MenuItem,
-    MenuTrigger,
-    OverlayModule,
-    Error,
     Icon,
+    UiRowActions,
+    UiTableEmpty,
+    UiTableError,
+    UiTableSkeleton,
   ],
   template: `
     <ui-breadcrumbs [items]="[{ label: 'Inicio', link: '/' }, { label: 'Hábitos y actitudes' }]" />
@@ -37,94 +47,56 @@ import HabitMetricsForm from './habit-metrics-form';
         Nueva métrica
       </button>
     </div>
-    @if (metrics.error()) {
-      <lib-error (retry)="metrics.reload()" [description]="$safeNavigationMigration(metrics.error()?.message)" />
-    } @else {
-      <div class="overflow-x-auto">
-        <table uiTable>
-          <thead>
-            <tr>
-              <th>Nombre</th>
-              <th class="w-96">Descripción</th>
-              <th>Estado</th>
-              <th>Orden</th>
-              <th>Fecha de creación</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            @if (metrics.isLoading()) {
-              <tr>
-                <td colspan="6" class="text-center">
-                  <span uiSpinner></span>
-                </td>
-              </tr>
-            }
-            @for (metric of metrics.value(); track metric.id) {
-              <tr>
-                <td>{{ metric.name }}</td>
-                <td class="max-w-64 truncate">{{ metric.description || '-' }}</td>
-                <td>
-                  <span uiBadge [tone]="metric.active ? 'success' : 'danger'">
-                    {{ metric.active ? 'Activo' : 'Inactivo' }}
-                  </span>
-                </td>
-                <td>{{ metric.order }}</td>
-                <td>{{ metric.createdAt | date: 'short' }}</td>
-                <td>
-                  <button
-                    class="cursor-pointer hover:bg-surface-2 p-1 rounded-lg flex items-center justify-center"
-                    ngMenuTrigger
-                    #origin
-                    #trigger="ngMenuTrigger"
-                    [menu]="optionsMenu()"
-                  >
-                    <ui-icon name="ellipsis" class="text-xl" />
-                  </button>
-                  <ng-template
-                    [cdkConnectedOverlayOpen]="trigger.expanded()"
-                    [cdkConnectedOverlay]="{ origin, usePopover: 'inline' }"
-                    [cdkConnectedOverlayPositions]="[
-                      {
-                        originX: 'end',
-                        originY: 'bottom',
-                        overlayX: 'end',
-                        overlayY: 'top',
-                        offsetY: 4,
-                      },
-                    ]"
-                    cdkAttachPopoverAsChild
-                  >
-                    <div ngMenu class="bg-surface-1 shadow-sm rounded-lg p-1 w-48" #optionsMenu="ngMenu">
-                      <ng-template ngMenuContent>
-                        <button
-                          ngMenuItem
-                          value="Edit"
-                          class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-surface-2 w-full"
-                          (click)="editHabitMetric($any(metric))"
-                        >
-                          <ui-icon name="pencil" class="text-lg" />
-                          <span>Editar</span>
-                        </button>
-                        <button
-                          ngMenuItem
-                          value="Delete"
-                          class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-surface-2 w-full"
-                          (click)="deleteHabitMetric(metric.id!)"
-                        >
-                          <ui-icon name="trash-2" class="text-lg" />
-                          <span>Eliminar</span>
-                        </button>
-                      </ng-template>
-                    </div></ng-template
-                  >
-                </td>
-              </tr>
-            }
-          </tbody>
-        </table>
-      </div>
-    }
+    <div class="overflow-x-auto">
+      <table uiTable [attr.aria-busy]="metrics.isLoading()">
+        <thead>
+          <tr>
+            <th>Nombre</th>
+            <th class="w-96">Descripción</th>
+            <th>Estado</th>
+            <th>Orden</th>
+            <th>Fecha de creación</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        @switch (metricsList.phase()) {
+          @case ('skeleton') {
+            <tbody uiTableSkeleton [columns]="6"></tbody>
+          }
+          @case ('error') {
+            <tbody>
+              <tr uiTableError [columns]="6" (retry)="metrics.reload()"></tr>
+            </tbody>
+          }
+          @case ('ready') {
+            <tbody>
+              @for (metric of metricsList.rows(); track metric.id) {
+                <tr>
+                  <td>{{ metric.name }}</td>
+                  <td class="max-w-64 truncate">{{ metric.description || '-' }}</td>
+                  <td>
+                    <span uiBadge [tone]="metric.active ? 'success' : 'danger'">
+                      {{ metric.active ? 'Activo' : 'Inactivo' }}
+                    </span>
+                  </td>
+                  <td>{{ metric.order }}</td>
+                  <td>{{ metric.createdAt | date: 'short' }}</td>
+                  <td>
+                    <ui-row-actions
+                      [actions]="rowActions"
+                      [label]="'Acciones para ' + metric.name"
+                      (action)="onRowAction($event, metric)"
+                    />
+                  </td>
+                </tr>
+              } @empty {
+                <tr uiTableEmpty [columns]="6" icon="list-checks" title="Aún no hay criterios de hábitos"></tr>
+              }
+            </tbody>
+          }
+        }
+      </table>
+    </div>
   `,
 })
 export default class HabitMetrics {
@@ -132,11 +104,12 @@ export default class HabitMetrics {
   private toasts = inject(Toast);
   private confirmation = inject(Confirmation);
   private modal = inject(Modal);
-  optionsMenu = viewChild<Menu<string>>('optionsMenu');
 
   public metrics = httpResource<Prisma.HabitMetricGetPayload<{ include: undefined }>[]>(() => '/api/v1/habit-metrics', {
     defaultValue: [],
   });
+  /** metrics with smooth loading: previous rows stay while the next page / sort / search loads. */
+  protected readonly metricsList = listState(this.metrics);
 
   editHabitMetric(metric?: Prisma.HabitMetricGetPayload<{ include: undefined }>) {
     this.modal
@@ -171,5 +144,22 @@ export default class HabitMetrics {
           },
         });
       });
+  }
+
+  /** The actions in each row's menu (ui-row-actions). */
+  protected readonly rowActions: UiRowAction[] = [
+    { id: 'edit', label: 'Editar', icon: 'pencil' },
+    { id: 'delete', label: 'Eliminar', icon: 'trash-2', tone: 'danger' },
+  ];
+
+  protected onRowAction(action: string, metric: Prisma.HabitMetricGetPayload<{ include: undefined }>): void {
+    switch (action) {
+      case 'edit':
+        this.editHabitMetric(metric);
+        break;
+      case 'delete':
+        this.deleteHabitMetric(metric.id);
+        break;
+    }
   }
 }

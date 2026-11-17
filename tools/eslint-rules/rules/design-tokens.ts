@@ -46,6 +46,7 @@ export const PRIMITIVES: [RegExp, string][] = [
   [/^breadcrumbs$/, 'lib-page-header [breadcrumbs]'],
   [/^loading(-(spinner|dots|ring|ball|bars|infinity|xs|sm|md|lg|xl))?$/, 'uiSpinner'],
   [/^alert(-.+)?$/, 'uiAlert'],
+  [/^skeleton$/, 'uiSkeleton (or tbody[uiTableSkeleton] for table rows)'],
   // Material Symbols (icon font) was replaced by Lucide SVGs in DS 13; the font is no longer loaded.
   [/^material-(symbols|icons)(-(outlined|rounded|sharp))?$/, '<ui-icon name="…"> (Lucide)'],
   [

@@ -1,5 +1,4 @@
 import {
-  Alert,
   Badge,
   Button,
   Card,
@@ -9,13 +8,19 @@ import {
   Paginator,
   Toast,
   UiInputGroup,
+  UiRowAction,
+  UiRowActions,
+  UiSortHeader,
   UiTable,
+  UiTableEmpty,
+  UiTableError,
+  UiTableSkeleton,
+  UiTableToolbar,
+  listState,
 } from '#/ui';
-import { Menu, MenuContent, MenuItem, MenuTrigger } from '@angular/aria/menu';
-import { OverlayModule } from '@angular/cdk/overlay';
 import { DatePipe } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { afterRenderEffect, Component, inject, signal, viewChild } from '@angular/core';
+import { afterRenderEffect, Component, inject, signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
@@ -37,7 +42,8 @@ type NewsletterItem = {
 @Component({
   selector: 'app-newsletters',
   imports: [
-    Alert,
+    UiTableToolbar,
+    UiSortHeader,
     Card,
     UiTable,
     Badge,
@@ -46,189 +52,107 @@ type NewsletterItem = {
     Paginator,
     FormsModule,
     RouterLink,
-    Menu,
-    MenuContent,
-    MenuItem,
-    MenuTrigger,
-    OverlayModule,
     UiInputGroup,
     Icon,
+    UiRowActions,
+    UiTableEmpty,
+    UiTableError,
+    UiTableSkeleton,
   ],
   providers: [Pagination],
   template: `
-    @if (newsletters.error()) {
-      <div uiAlert tone="danger">
-        <ui-icon name="circle-alert" />
-        <span>Error al cargar los boletines. Verifica tus permisos o intenta de nuevo.</span>
-        <button uiButton variant="ghost" size="sm" (click)="newsletters.reload()">Reintentar</button>
-      </div>
-    } @else {
-      <div class="flex flex-col gap-4 md:flex-row md:justify-between">
-        <div class="md:w-96 w-full">
-          <label uiInputGroup>
-            <ui-icon name="search" />
-            <input class="pl-0" type="search" placeholder="Buscar..." [(ngModel)]="searchText" />
-          </label>
-        </div>
-        <a uiButton variant="primary" routerLink="/admin/newsletters/new">
-          <ui-icon name="circle-plus" /> Nuevo boletín
-        </a>
-      </div>
-      <div uiCard class="overflow-x-auto mt-4">
-        <table uiTable>
-          <thead>
-            <tr>
-              <th
-                class="cursor-pointer hover:bg-surface-2"
-                [class]="pagination.sortBy() === 'title' ? 'bg-action-subtle text-primary! hover:bg-primary/20' : ''"
-                (click)="pagination.setOrder('title')"
-              >
-                <div class="flex items-center gap-2">
-                  Título
-                  @if (pagination.sortBy() === 'title') {
-                    <ui-icon [name]="pagination.sortOrder() === 'asc' ? 'arrow-up' : 'arrow-down'" class="text-xl" />
-                  }
-                </div>
-              </th>
-              <th>Colegio</th>
-              <th>Estado</th>
-              <th
-                class="cursor-pointer hover:bg-surface-2"
-                [class]="
-                  pagination.sortBy() === 'publishedAt' ? 'bg-action-subtle text-primary! hover:bg-primary/20' : ''
-                "
-                (click)="pagination.setOrder('publishedAt')"
-              >
-                <div class="flex items-center gap-2">
-                  Publicado
-                  @if (pagination.sortBy() === 'publishedAt') {
-                    <ui-icon [name]="pagination.sortOrder() === 'asc' ? 'arrow-up' : 'arrow-down'" class="text-xl" />
-                  }
-                </div>
-              </th>
-              <th>Autor</th>
-              <th
-                class="cursor-pointer hover:bg-surface-2"
-                [class]="
-                  pagination.sortBy() === 'createdAt' ? 'bg-action-subtle text-primary! hover:bg-primary/20' : ''
-                "
-                (click)="pagination.setOrder('createdAt')"
-              >
-                <div class="flex items-center gap-2">
-                  Creado
-                  @if (pagination.sortBy() === 'createdAt') {
-                    <ui-icon [name]="pagination.sortOrder() === 'asc' ? 'arrow-up' : 'arrow-down'" class="text-xl" />
-                  }
-                </div>
-              </th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (newsletter of newsletters.value() ?? []; track newsletter.id) {
-              <tr>
-                <td>{{ newsletter.title }}</td>
-                <td>{{ newsletter.school.name }}</td>
-                <td>
-                  @if (newsletter.published) {
-                    <span uiBadge tone="success" size="sm">Publicado</span>
-                  } @else {
-                    <span uiBadge size="sm">Borrador</span>
-                  }
-                </td>
-                <td>{{ newsletter.publishedAt ? (newsletter.publishedAt | date: 'short') : '-' }}</td>
-                <td>{{ newsletter.author.name }}</td>
-                <td>{{ newsletter.createdAt | date: 'short' }}</td>
-                <td>
-                  <button
-                    class="cursor-pointer hover:bg-surface-2 p-1 rounded-lg flex items-center justify-center"
-                    ngMenuTrigger
-                    #origin
-                    #trigger="ngMenuTrigger"
-                    [menu]="actionsMenu()"
-                  >
-                    <ui-icon name="ellipsis" class="text-xl" />
-                  </button>
-                  <ng-template
-                    [cdkConnectedOverlayOpen]="trigger.expanded()"
-                    [cdkConnectedOverlay]="{ origin, usePopover: 'inline' }"
-                    [cdkConnectedOverlayPositions]="[
-                      {
-                        originX: 'end',
-                        originY: 'bottom',
-                        overlayX: 'end',
-                        overlayY: 'top',
-                        offsetY: 4,
-                      },
-                    ]"
-                    cdkAttachPopoverAsChild
-                  >
-                    <div ngMenu class="bg-surface-1 shadow-sm rounded-lg p-1 w-48" #actionsMenu="ngMenu">
-                      <ng-template ngMenuContent>
-                        <a
-                          ngMenuItem
-                          value="Edit"
-                          class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-surface-2 w-full"
-                          [routerLink]="['/admin/newsletters', newsletter.id, 'edit']"
-                        >
-                          <ui-icon name="pencil" class="text-lg" />
-                          <span>Editar</span>
-                        </a>
-                        <button
-                          ngMenuItem
-                          [value]="newsletter.published ? 'Unpublish' : 'Publish'"
-                          class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-surface-2 w-full"
-                          (click)="togglePublish(newsletter)"
-                        >
-                          <ui-icon [name]="newsletter.published ? 'undo-2' : 'send'" class="text-lg" />
-                          <span>{{ newsletter.published ? 'Despublicar' : 'Publicar' }}</span>
-                        </button>
-                        <button
-                          ngMenuItem
-                          value="Delete"
-                          class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-surface-2 w-full"
-                          (click)="deleteNewsletter(newsletter)"
-                        >
-                          <ui-icon name="trash-2" class="text-lg" />
-                          <span>Eliminar</span>
-                        </button>
-                      </ng-template>
-                    </div>
-                  </ng-template>
-                </td>
-              </tr>
-            } @empty {
-              @if (newsletters.isLoading()) {
-                @for (row of [1, 2, 3, 4, 5]; track row) {
-                  <tr>
-                    <td><div class="skeleton h-4 w-full"></div></td>
-                    <td><div class="skeleton h-4 w-full"></div></td>
-                    <td><div class="skeleton h-4 w-full"></div></td>
-                    <td><div class="skeleton h-4 w-full"></div></td>
-                    <td><div class="skeleton h-4 w-full"></div></td>
-                    <td><div class="skeleton h-4 w-full"></div></td>
-                    <td><div class="skeleton h-4 w-full"></div></td>
-                  </tr>
-                }
-              } @else {
+    <ui-table-toolbar>
+      <label uiInputGroup size="sm">
+        <ui-icon name="search" class="text-base text-ink-subtle" />
+        <input aria-label="Buscar" class="pl-0" type="search" placeholder="Buscar..." [(ngModel)]="searchText" />
+      </label>
+      <a uiToolbarEnd uiButton variant="primary" size="sm" routerLink="/admin/newsletters/new">
+        <ui-icon name="circle-plus" class="text-base" /> Nuevo boletín
+      </a>
+    </ui-table-toolbar>
+    <div uiCard class="overflow-x-auto mt-4">
+      <table
+        uiTable
+        [sort]="pagination.sort()"
+        (sortChange)="pagination.setSort($event)"
+        [attr.aria-busy]="newsletters.isLoading()"
+      >
+        <thead>
+          <tr>
+            <th uiSortHeader="title">Título</th>
+            <th>Colegio</th>
+            <th>Estado</th>
+            <th uiSortHeader="publishedAt">Publicado</th>
+            <th>Autor</th>
+            <th uiSortHeader="createdAt">Creado</th>
+            <th class="w-12"><span class="sr-only">Acciones</span></th>
+          </tr>
+        </thead>
+        @switch (newslettersList.phase()) {
+          @case ('skeleton') {
+            <tbody uiTableSkeleton [rows]="pagination.take()" [columns]="7"></tbody>
+          }
+          @case ('error') {
+            <tbody>
+              <tr
+                uiTableError
+                [columns]="7"
+                description="Verifica tus permisos o intenta de nuevo."
+                (retry)="newsletters.reload()"
+              ></tr>
+            </tbody>
+          }
+          @case ('ready') {
+            <tbody>
+              @for (newsletter of newslettersList.rows() ?? []; track newsletter.id) {
                 <tr>
-                  <td colspan="7" class="text-center">Sin boletines para este filtro</td>
+                  <td>{{ newsletter.title }}</td>
+                  <td>{{ newsletter.school.name }}</td>
+                  <td>
+                    @if (newsletter.published) {
+                      <span uiBadge tone="success" size="sm">Publicado</span>
+                    } @else {
+                      <span uiBadge size="sm">Borrador</span>
+                    }
+                  </td>
+                  <td>{{ newsletter.publishedAt ? (newsletter.publishedAt | date: 'short') : '-' }}</td>
+                  <td>{{ newsletter.author.name }}</td>
+                  <td>{{ newsletter.createdAt | date: 'short' }}</td>
+                  <td>
+                    <ui-row-actions
+                      [actions]="rowActions(newsletter)"
+                      [label]="'Acciones para ' + newsletter.title"
+                      (action)="onRowAction($event, newsletter)"
+                    />
+                  </td>
                 </tr>
+              } @empty {
+                @if (searchText()) {
+                  <tr
+                    uiTableEmpty
+                    [columns]="7"
+                    icon="search-x"
+                    title="Sin resultados"
+                    description="Ningún resultado coincide con la búsqueda."
+                  ></tr>
+                } @else {
+                  <tr uiTableEmpty [columns]="7" icon="newspaper" title="Aún no hay boletines"></tr>
+                }
               }
-            }
-          </tbody>
-        </table>
-        <div class="p-4 rounded-b-lg">
-          <lib-paginator
-            [count]="pagination.count()"
-            [take]="pagination.take()"
-            [skip]="pagination.skip()"
-            (skipChange)="pagination.updateSkip($event)"
-            (takeChange)="pagination.updateTake($event)"
-          />
-        </div>
+            </tbody>
+          }
+        }
+      </table>
+      <div class="p-4 rounded-b-lg">
+        <lib-paginator
+          [count]="pagination.count()"
+          [take]="pagination.take()"
+          [skip]="pagination.skip()"
+          (skipChange)="pagination.updateSkip($event)"
+          (takeChange)="pagination.updateTake($event)"
+        />
       </div>
-    }
+    </div>
   `,
 })
 export default class Newsletters {
@@ -238,7 +162,6 @@ export default class Newsletters {
   #store = inject(Store);
   pagination = inject(Pagination);
   searchText = signal('');
-  actionsMenu = viewChild<Menu<string>>('actionsMenu');
 
   private enrichAuthorName(
     n: {
@@ -298,6 +221,8 @@ export default class Newsletters {
       );
     },
   });
+  /** newsletters with smooth loading: previous rows stay while the next page / sort / search loads. */
+  protected readonly newslettersList = listState(this.newsletters);
 
   constructor() {
     afterRenderEffect(() => {
@@ -343,5 +268,25 @@ export default class Newsletters {
           this.#toast.showError('Error al eliminar el boletín');
         },
       });
+  }
+
+  /** The actions in each row's menu (ui-row-actions). */
+  protected rowActions(newsletter: NewsletterItem): UiRowAction[] {
+    return [
+      { id: 'edit', label: 'Editar', icon: 'pencil', link: ['/admin/newsletters', newsletter.id, 'edit'] },
+      { id: 'togglepublish', label: newsletter.published ? 'Despublicar' : 'Publicar' },
+      { id: 'delete', label: 'Eliminar', icon: 'trash-2', tone: 'danger' },
+    ];
+  }
+
+  protected onRowAction(action: string, newsletter: NewsletterItem): void {
+    switch (action) {
+      case 'togglepublish':
+        this.togglePublish(newsletter);
+        break;
+      case 'delete':
+        this.deleteNewsletter(newsletter);
+        break;
+    }
   }
 }

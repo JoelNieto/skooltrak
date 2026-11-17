@@ -1,9 +1,22 @@
-import { Button, Card, Confirmation, Icon, Modal, Paginator, Toast, UiTable } from '#/ui';
-import { Menu, MenuContent, MenuItem, MenuTrigger } from '@angular/aria/menu';
-import { OverlayModule } from '@angular/cdk/overlay';
+import {
+  Button,
+  Card,
+  Confirmation,
+  Icon,
+  Modal,
+  Paginator,
+  Toast,
+  UiRowAction,
+  UiRowActions,
+  UiTable,
+  UiTableEmpty,
+  UiTableError,
+  UiTableSkeleton,
+  listState,
+} from '#/ui';
 import { DatePipe } from '@angular/common';
 import { HttpClient, httpResource } from '@angular/common/http';
-import { Component, computed, effect, inject, signal, viewChild } from '@angular/core';
+import { Component, computed, effect, inject, signal } from '@angular/core';
 import { filter, switchMap } from 'rxjs';
 import { toFetchQueryRecord } from '../../core/fetch-query-params';
 import Store from '../../core/store';
@@ -19,13 +32,24 @@ type DegreeRow = {
 };
 @Component({
   selector: 'app-degrees',
-  imports: [Card, UiTable, Button, DatePipe, Paginator, Menu, MenuContent, MenuItem, MenuTrigger, OverlayModule, Icon],
+  imports: [
+    Card,
+    UiTable,
+    Button,
+    DatePipe,
+    Paginator,
+    Icon,
+    UiRowActions,
+    UiTableEmpty,
+    UiTableError,
+    UiTableSkeleton,
+  ],
 
   template: ` <div class="flex justify-end">
       <button uiButton variant="primary" (click)="editDegree()"><ui-icon name="circle-plus" /> Agregar nivel</button>
     </div>
     <div uiCard class="overflow-x-auto mt-4">
-      <table uiTable>
+      <table uiTable [attr.aria-busy]="degrees.isLoading()">
         <thead>
           <tr>
             <th>Nombre</th>
@@ -33,68 +57,41 @@ type DegreeRow = {
             <th>Escuela</th>
             <th>Fecha de creación</th>
             <th>Fecha de actualización</th>
-            <th></th>
+            <th class="w-12"><span class="sr-only">Acciones</span></th>
           </tr>
         </thead>
-        <tbody>
-          @for (degree of degrees.value(); track degree.id) {
-            <tr>
-              <td>{{ degree.name }}</td>
-              <td>{{ degree.shortName }}</td>
-              <td>{{ degree.school.name }}</td>
-              <td>{{ degree.createdAt | date: 'short' }}</td>
-              <td>{{ degree.updatedAt | date: 'short' }}</td>
-              <td>
-                <button
-                  class="cursor-pointer hover:bg-surface-2 p-1 rounded-lg flex items-center justify-center"
-                  ngMenuTrigger
-                  #origin
-                  #trigger="ngMenuTrigger"
-                  [menu]="actionsMenu()"
-                >
-                  <ui-icon name="ellipsis" class="text-xl" />
-                </button>
-                <ng-template
-                  [cdkConnectedOverlayOpen]="trigger.expanded()"
-                  [cdkConnectedOverlay]="{ origin, usePopover: 'inline' }"
-                  [cdkConnectedOverlayPositions]="[
-                    {
-                      originX: 'end',
-                      originY: 'bottom',
-                      overlayX: 'end',
-                      overlayY: 'top',
-                      offsetY: 4,
-                    },
-                  ]"
-                  cdkAttachPopoverAsChild
-                >
-                  <div ngMenu class="bg-surface-1 shadow-sm rounded-lg p-1 w-48" #actionsMenu="ngMenu">
-                    <ng-template ngMenuContent>
-                      <button
-                        ngMenuItem
-                        value="Edit"
-                        class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-surface-2 w-full"
-                        (click)="editDegree(degree)"
-                      >
-                        <ui-icon name="pencil" class="text-lg" />
-                        <span>Editar</span>
-                      </button>
-                      <button
-                        ngMenuItem
-                        value="Delete"
-                        class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-surface-2 w-full"
-                        (click)="deleteDegree(degree)"
-                      >
-                        <ui-icon name="trash-2" class="text-lg" />
-                        <span>Eliminar</span>
-                      </button>
-                    </ng-template>
-                  </div>
-                </ng-template>
-              </td>
-            </tr>
+        @switch (degreesList.phase()) {
+          @case ('skeleton') {
+            <tbody uiTableSkeleton [columns]="6"></tbody>
           }
-        </tbody>
+          @case ('error') {
+            <tbody>
+              <tr uiTableError [columns]="6" (retry)="degrees.reload()"></tr>
+            </tbody>
+          }
+          @case ('ready') {
+            <tbody>
+              @for (degree of degreesList.rows(); track degree.id) {
+                <tr>
+                  <td>{{ degree.name }}</td>
+                  <td>{{ degree.shortName }}</td>
+                  <td>{{ degree.school.name }}</td>
+                  <td>{{ degree.createdAt | date: 'short' }}</td>
+                  <td>{{ degree.updatedAt | date: 'short' }}</td>
+                  <td>
+                    <ui-row-actions
+                      [actions]="rowActions"
+                      [label]="'Acciones para ' + degree.name"
+                      (action)="onRowAction($event, degree)"
+                    />
+                  </td>
+                </tr>
+              } @empty {
+                <tr uiTableEmpty [columns]="6" icon="school" title="Aún no hay niveles"></tr>
+              }
+            </tbody>
+          }
+        }
       </table>
       <div class="p-4 rounded-b-lg">
         <lib-paginator
@@ -113,7 +110,6 @@ export default class Degrees {
   private toast = inject(Toast);
   private modal = inject(Modal);
   private confirmation = inject(Confirmation);
-  actionsMenu = viewChild<Menu<string>>('actionsMenu');
 
   public pagination = signal({
     take: 10,
@@ -147,6 +143,8 @@ export default class Degrees {
     },
     { defaultValue: [] },
   );
+  /** degrees with smooth loading: previous rows stay while the next page / sort / search loads. */
+  protected readonly degreesList = listState(this.degrees);
 
   #degreesCount = httpResource<number>(() => {
     const schoolId = this.store.currentSchoolId();
@@ -199,5 +197,22 @@ export default class Degrees {
           this.toast.showError('Error al eliminar el nivel');
         },
       });
+  }
+
+  /** The actions in each row's menu (ui-row-actions). */
+  protected readonly rowActions: UiRowAction[] = [
+    { id: 'edit', label: 'Editar', icon: 'pencil' },
+    { id: 'delete', label: 'Eliminar', icon: 'trash-2', tone: 'danger' },
+  ];
+
+  protected onRowAction(action: string, degree: DegreeRow): void {
+    switch (action) {
+      case 'edit':
+        this.editDegree(degree);
+        break;
+      case 'delete':
+        this.deleteDegree(degree);
+        break;
+    }
   }
 }

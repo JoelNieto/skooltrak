@@ -2,20 +2,27 @@ import {
   Button,
   Card,
   Confirmation,
-  EmptyState,
   Icon,
   Modal,
   PaginatorV2,
   Toast,
+  UiField,
+  UiFilterChip,
+  UiFilterMenu,
   UiInputGroup,
+  UiRowAction,
+  UiRowActions,
   UiSelect,
   UiTable,
+  UiTableEmpty,
+  UiTableError,
+  UiTableSkeleton,
+  UiTableToolbar,
+  listState,
 } from '#/ui';
-import { Menu, MenuContent, MenuItem, MenuTrigger } from '@angular/aria/menu';
-import { OverlayModule } from '@angular/cdk/overlay';
 import { DatePipe } from '@angular/common';
 import { HttpClient, httpResource } from '@angular/common/http';
-import { Component, computed, inject, signal, viewChild } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { debounce, form, FormField } from '@angular/forms/signals';
 import { filter, switchMap } from 'rxjs';
 import { toFetchQueryRecord } from '../../core/fetch-query-params';
@@ -46,37 +53,46 @@ type DegreeRow = {
     UiSelect,
     Button,
     DatePipe,
-    Menu,
     PaginatorV2,
-    MenuContent,
-    MenuItem,
-    MenuTrigger,
-    OverlayModule,
     FormField,
-    EmptyState,
     UiInputGroup,
     Icon,
+    UiRowActions,
+    UiTableEmpty,
+    UiTableError,
+    UiTableSkeleton,
+    UiField,
+    UiFilterChip,
+    UiFilterMenu,
+    UiTableToolbar,
   ],
 
-  template: `<div class="flex justify-between">
-      <div class="flex gap-2">
-        <div class="md:w-96 w-full">
-          <label uiInputGroup>
-            <ui-icon name="search" />
-            <input class="pl-0" type="search" placeholder="Buscar..." [formField]="form.searchText" />
-          </label>
-        </div>
-        <select uiSelect [formField]="form.degreeId">
-          <option [value]="''">Elija nivel...</option>
-          @for (degree of degrees.value(); track degree.id) {
-            <option [value]="degree.id">{{ degree.name }}</option>
-          }
-        </select>
-      </div>
-      <button uiButton variant="primary" (click)="editStudyPlan()"><ui-icon name="circle-plus" /> Nuevo plan</button>
-    </div>
+  template: `<ui-table-toolbar label="Filtrar planes de estudio">
+      <label uiInputGroup size="sm">
+        <ui-icon name="search" class="text-base text-ink-subtle" />
+        <input type="search" placeholder="Buscar plan" aria-label="Buscar plan" [formField]="form.searchText" />
+      </label>
+      <ui-filter-menu [activeCount]="form.degreeId().value() ? 1 : 0" (clear)="form.degreeId().value.set('')">
+        <ui-field label="Nivel">
+          <select uiSelect [formField]="form.degreeId">
+            <option value="">Todos los niveles</option>
+            @for (degree of degrees.value(); track degree.id) {
+              <option [value]="degree.id">{{ degree.name }}</option>
+            }
+          </select>
+        </ui-field>
+      </ui-filter-menu>
+      <button uiToolbarEnd uiButton variant="primary" size="sm" type="button" (click)="editStudyPlan()">
+        <ui-icon name="circle-plus" class="text-base" /> Nuevo plan
+      </button>
+      @if (form.degreeId().value()) {
+        <ng-container uiToolbarChips>
+          <ui-filter-chip [label]="'Nivel: ' + selectedDegreeName()" (remove)="form.degreeId().value.set('')" />
+        </ng-container>
+      }
+    </ui-table-toolbar>
     <div uiCard class="mt-4">
-      <table uiTable>
+      <table uiTable [attr.aria-busy]="studyPlans.isLoading()">
         <thead>
           <tr>
             <th>Nombre</th>
@@ -88,76 +104,49 @@ type DegreeRow = {
             <th>Acciones</th>
           </tr>
         </thead>
-        <tbody>
-          @for (studyPlan of studyPlans.value()?.data; track studyPlan.id) {
-            <tr>
-              <td>{{ studyPlan.name }}</td>
-              <td>{{ studyPlan.shortName }}</td>
-              <td>{{ studyPlan.level }}</td>
-              <td>{{ studyPlan.degree.name }}</td>
-              <td>{{ studyPlan.createdAt | date: 'short' }}</td>
-              <td>{{ studyPlan.updatedAt | date: 'short' }}</td>
-              <td>
-                <button
-                  class="cursor-pointer hover:bg-surface-2 p-1 rounded-lg flex items-center justify-center"
-                  ngMenuTrigger
-                  #origin
-                  #trigger="ngMenuTrigger"
-                  [menu]="actionsMenu()"
-                >
-                  <ui-icon name="ellipsis" class="text-xl" />
-                </button>
-                <ng-template
-                  [cdkConnectedOverlayOpen]="trigger.expanded()"
-                  [cdkConnectedOverlay]="{ origin, usePopover: 'inline' }"
-                  [cdkConnectedOverlayPositions]="[
-                    {
-                      originX: 'end',
-                      originY: 'bottom',
-                      overlayX: 'end',
-                      overlayY: 'top',
-                      offsetY: 4,
-                    },
-                  ]"
-                  cdkAttachPopoverAsChild
-                >
-                  <div ngMenu class="bg-surface-1 shadow-sm rounded-lg p-1 w-48" #actionsMenu="ngMenu">
-                    <ng-template ngMenuContent>
-                      <button
-                        ngMenuItem
-                        value="Edit"
-                        class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-surface-2 w-full"
-                        (click)="editStudyPlan(studyPlan)"
-                      >
-                        <ui-icon name="pencil" class="text-lg" />
-                        <span>Editar</span>
-                      </button>
-                      <button
-                        ngMenuItem
-                        value="Delete"
-                        class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-surface-2 w-full"
-                        (click)="deleteStudyPlan(studyPlan)"
-                      >
-                        <ui-icon name="trash-2" class="text-lg" />
-                        <span>Eliminar</span>
-                      </button>
-                    </ng-template>
-                  </div>
-                </ng-template>
-              </td>
-            </tr>
-          } @empty {
-            <tr>
-              <td colspan="7">
-                <lib-empty-state
-                  [title]="'No hay planes de estudio'"
-                  [description]="'No hay planes de estudio para mostrar'"
-                  [icon]="'users'"
-                />
-              </td>
-            </tr>
+        @switch (studyPlansList.phase()) {
+          @case ('skeleton') {
+            <tbody uiTableSkeleton [rows]="pageSize()" [columns]="7"></tbody>
           }
-        </tbody>
+          @case ('error') {
+            <tbody>
+              <tr uiTableError [columns]="7" (retry)="studyPlans.reload()"></tr>
+            </tbody>
+          }
+          @case ('ready') {
+            <tbody>
+              @for (studyPlan of studyPlansList.rows()?.data; track studyPlan.id) {
+                <tr>
+                  <td>{{ studyPlan.name }}</td>
+                  <td>{{ studyPlan.shortName }}</td>
+                  <td>{{ studyPlan.level }}</td>
+                  <td>{{ studyPlan.degree.name }}</td>
+                  <td>{{ studyPlan.createdAt | date: 'short' }}</td>
+                  <td>{{ studyPlan.updatedAt | date: 'short' }}</td>
+                  <td>
+                    <ui-row-actions
+                      [actions]="rowActions"
+                      [label]="'Acciones para ' + studyPlan.name"
+                      (action)="onRowAction($event, studyPlan)"
+                    />
+                  </td>
+                </tr>
+              } @empty {
+                @if (form.searchText().value()) {
+                  <tr
+                    uiTableEmpty
+                    [columns]="7"
+                    icon="search-x"
+                    title="Sin resultados"
+                    description="Ningún resultado coincide con la búsqueda."
+                  ></tr>
+                } @else {
+                  <tr uiTableEmpty [columns]="7" icon="clipboard-list" title="Aún no hay planes de estudio"></tr>
+                }
+              }
+            </tbody>
+          }
+        }
       </table>
       <div class="p-4 rounded-b-lg ">
         <lib-paginator
@@ -171,13 +160,16 @@ type DegreeRow = {
     </div>`,
 })
 export default class StudyPlans {
+  /** Name of the selected filter, for its chip. */
+  protected readonly selectedDegreeName = computed(
+    () => (this.degrees.value() ?? []).find((x) => x.id === this.form.degreeId().value())?.name ?? '',
+  );
   private http = inject(HttpClient);
   private store = inject(Store);
   private toast = inject(Toast);
   private modal = inject(Modal);
   private confirmation = inject(Confirmation);
   searchText = computed(() => this.formModel().searchText);
-  actionsMenu = viewChild<Menu<string>>('actionsMenu');
 
   formModel = signal<{ searchText: string; degreeId: string }>({ searchText: '', degreeId: '' });
 
@@ -185,7 +177,7 @@ export default class StudyPlans {
     debounce(f.searchText, 400);
   });
 
-  public pagination = computed(() => this.studyPlans.value()?.meta);
+  public pagination = computed(() => this.studyPlansList.rows()?.meta);
   total = computed(() => this.pagination()?.total ?? 0);
   public degrees = httpResource<DegreeRow[]>(
     () => {
@@ -222,6 +214,8 @@ export default class StudyPlans {
       }),
     };
   });
+  /** studyPlans with smooth loading: previous rows stay while the next page / sort / search loads. */
+  protected readonly studyPlansList = listState(this.studyPlans);
 
   public editStudyPlan(studyPlan?: StudyPlanRow) {
     this.modal
@@ -259,5 +253,22 @@ export default class StudyPlans {
           this.toast.showError('Error al eliminar el plan de estudio');
         },
       });
+  }
+
+  /** The actions in each row's menu (ui-row-actions). */
+  protected readonly rowActions: UiRowAction[] = [
+    { id: 'edit', label: 'Editar', icon: 'pencil' },
+    { id: 'delete', label: 'Eliminar', icon: 'trash-2', tone: 'danger' },
+  ];
+
+  protected onRowAction(action: string, studyPlan: StudyPlanRow): void {
+    switch (action) {
+      case 'edit':
+        this.editStudyPlan(studyPlan);
+        break;
+      case 'delete':
+        this.deleteStudyPlan(studyPlan);
+        break;
+    }
   }
 }

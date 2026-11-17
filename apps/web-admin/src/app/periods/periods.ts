@@ -1,16 +1,28 @@
-import { Breadcrumbs, Button, Confirmation, Icon, Modal, Toast, UiTable } from '#/ui';
-import { Menu, MenuContent, MenuItem, MenuTrigger } from '@angular/aria/menu';
-import { OverlayModule } from '@angular/cdk/overlay';
+import {
+  Breadcrumbs,
+  Button,
+  Confirmation,
+  Icon,
+  Modal,
+  Toast,
+  UiRowAction,
+  UiRowActions,
+  UiTable,
+  UiTableEmpty,
+  UiTableError,
+  UiTableSkeleton,
+  listState,
+} from '#/ui';
 import { DatePipe } from '@angular/common';
 import { HttpClient, httpResource } from '@angular/common/http';
-import { Component, inject, viewChild } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { Prisma } from '@generated/prisma';
 import { filter, switchMap } from 'rxjs';
 import PeriodsForm from './periods-form';
 
 @Component({
   selector: 'app-periods',
-  imports: [Breadcrumbs, UiTable, Button, DatePipe, Menu, MenuContent, MenuItem, MenuTrigger, OverlayModule, Icon],
+  imports: [Breadcrumbs, UiTable, Button, DatePipe, Icon, UiRowActions, UiTableEmpty, UiTableError, UiTableSkeleton],
   template: `
     <ui-breadcrumbs [items]="[{ label: 'Inicio', link: '/' }, { label: 'Periodos' }]" />
     <div class="flex justify-between items-center mb-4">
@@ -24,7 +36,7 @@ import PeriodsForm from './periods-form';
       </button>
     </div>
     <div class="overflow-x-auto">
-      <table uiTable>
+      <table uiTable [attr.aria-busy]="periods.isLoading()">
         <thead>
           <tr>
             <th>Nombre</th>
@@ -36,66 +48,39 @@ import PeriodsForm from './periods-form';
             <th>Acciones</th>
           </tr>
         </thead>
-        <tbody>
-          @for (period of periods.value(); track period.id) {
-            <tr>
-              <td>{{ period.name }}</td>
-              <td>{{ period.shortName }}</td>
-              <td>{{ period.year }}</td>
-              <td>{{ period.startDate | date: 'shortDate' }}</td>
-              <td>{{ period.endDate | date: 'shortDate' }}</td>
-              <td>{{ period.createdAt | date: 'short' }}</td>
-              <td class="flex gap-2">
-                <button
-                  class="cursor-pointer hover:bg-surface-2 p-1 rounded-lg flex items-center justify-center"
-                  ngMenuTrigger
-                  #origin
-                  #trigger="ngMenuTrigger"
-                  [menu]="optionsMenu()"
-                >
-                  <ui-icon name="ellipsis" class="text-xl" />
-                </button>
-                <ng-template
-                  [cdkConnectedOverlayOpen]="trigger.expanded()"
-                  [cdkConnectedOverlay]="{ origin, usePopover: 'inline' }"
-                  [cdkConnectedOverlayPositions]="[
-                    {
-                      originX: 'end',
-                      originY: 'bottom',
-                      overlayX: 'end',
-                      overlayY: 'top',
-                      offsetY: 4,
-                    },
-                  ]"
-                  cdkAttachPopoverAsChild
-                >
-                  <div ngMenu class="bg-surface-1 shadow-sm rounded-lg p-1 w-48" #optionsMenu="ngMenu">
-                    <ng-template ngMenuContent>
-                      <button
-                        ngMenuItem
-                        value="Edit"
-                        class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-surface-2 w-full"
-                        (click)="editPeriod($any(period))"
-                      >
-                        <ui-icon name="pencil" class="text-lg" />
-                        <span>Editar</span>
-                      </button>
-                      <button
-                        ngMenuItem
-                        value="Delete"
-                        class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-surface-2 w-full"
-                        (click)="deletePeriod($any(period))"
-                      >
-                        <ui-icon name="trash-2" class="text-lg" />
-                        <span>Eliminar</span>
-                      </button>
-                    </ng-template>
-                  </div>
-                </ng-template>
-              </td>
-            </tr>
+        @switch (periodsList.phase()) {
+          @case ('skeleton') {
+            <tbody uiTableSkeleton [columns]="7"></tbody>
           }
-        </tbody>
+          @case ('error') {
+            <tbody>
+              <tr uiTableError [columns]="7" (retry)="periods.reload()"></tr>
+            </tbody>
+          }
+          @case ('ready') {
+            <tbody>
+              @for (period of periodsList.rows(); track period.id) {
+                <tr>
+                  <td>{{ period.name }}</td>
+                  <td>{{ period.shortName }}</td>
+                  <td>{{ period.year }}</td>
+                  <td>{{ period.startDate | date: 'shortDate' }}</td>
+                  <td>{{ period.endDate | date: 'shortDate' }}</td>
+                  <td>{{ period.createdAt | date: 'short' }}</td>
+                  <td class="flex gap-2">
+                    <ui-row-actions
+                      [actions]="rowActions"
+                      [label]="'Acciones para ' + period.name"
+                      (action)="onRowAction($event, period)"
+                    />
+                  </td>
+                </tr>
+              } @empty {
+                <tr uiTableEmpty [columns]="7" icon="calendar" title="Aún no hay periodos"></tr>
+              }
+            </tbody>
+          }
+        }
       </table>
     </div>
   `,
@@ -105,10 +90,11 @@ export default class Periods {
   private toast = inject(Toast);
   private modal = inject(Modal);
   private confirmation = inject(Confirmation);
-  optionsMenu = viewChild<Menu<string>>('optionsMenu');
   public periods = httpResource<Prisma.PeriodGetPayload<{ include: undefined }>[]>(() => '/api/v1/periods', {
     defaultValue: [],
   });
+  /** periods with smooth loading: previous rows stay while the next page / sort / search loads. */
+  protected readonly periodsList = listState(this.periods);
 
   editPeriod(period?: Prisma.PeriodGetPayload<{ include: undefined }>) {
     this.modal
@@ -143,5 +129,22 @@ export default class Periods {
           this.toast.showError('Error al eliminar el periodo');
         },
       });
+  }
+
+  /** The actions in each row's menu (ui-row-actions). */
+  protected readonly rowActions: UiRowAction[] = [
+    { id: 'edit', label: 'Editar', icon: 'pencil' },
+    { id: 'delete', label: 'Eliminar', icon: 'trash-2', tone: 'danger' },
+  ];
+
+  protected onRowAction(action: string, period: Prisma.PeriodGetPayload<{ include: undefined }>): void {
+    switch (action) {
+      case 'edit':
+        this.editPeriod(period);
+        break;
+      case 'delete':
+        this.deletePeriod(period);
+        break;
+    }
   }
 }

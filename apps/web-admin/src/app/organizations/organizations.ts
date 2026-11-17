@@ -1,26 +1,26 @@
-import { Breadcrumbs, Button, Confirmation, Error, Icon, Modal, Toast, UiTable } from '#/ui';
-import { Menu, MenuContent, MenuItem, MenuTrigger } from '@angular/aria/menu';
-import { OverlayModule } from '@angular/cdk/overlay';
+import {
+  Breadcrumbs,
+  Button,
+  Confirmation,
+  Icon,
+  Modal,
+  Toast,
+  UiRowAction,
+  UiRowActions,
+  UiTable,
+  UiTableEmpty,
+  UiTableError,
+  UiTableSkeleton,
+  listState,
+} from '#/ui';
 import { DatePipe } from '@angular/common';
 import { HttpClient, httpResource } from '@angular/common/http';
-import { Component, inject, viewChild } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { Prisma } from '@generated/prisma';
 import { OrganizationsForm } from './organizations-form';
 @Component({
   selector: 'app-organizations',
-  imports: [
-    Breadcrumbs,
-    UiTable,
-    Button,
-    DatePipe,
-    Menu,
-    MenuContent,
-    MenuItem,
-    MenuTrigger,
-    OverlayModule,
-    Error,
-    Icon,
-  ],
+  imports: [Breadcrumbs, UiTable, Button, DatePipe, Icon, UiRowActions, UiTableEmpty, UiTableError, UiTableSkeleton],
 
   template: `<ui-breadcrumbs [items]="[{ label: 'Inicio', link: '/' }, { label: 'Organizaciones' }]" />
     <div class="flex justify-between items-center mb-4">
@@ -33,99 +33,62 @@ import { OrganizationsForm } from './organizations-form';
         <ui-icon name="circle-plus" /> Nueva Organizacións
       </button>
     </div>
-    @if (organizations.error()) {
-      <lib-error
-        (retry)="organizations.reload()"
-        [description]="$safeNavigationMigration(organizations.error()?.message)"
-      />
-    } @else {
-      <div class="overflow-x-auto">
-        <table uiTable>
-          <thead>
-            <tr>
-              <th>Nombre</th>
-              <th>Descripción</th>
-              <th>Fecha de creación</th>
-              <th>Fecha de actualización</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (organization of organizations.value(); track organization.id) {
-              <tr>
-                <td>{{ organization.name }}</td>
-                <td>{{ organization.description }}</td>
-                <td>{{ organization.createdAt | date: 'medium' }}</td>
-                <td>{{ organization.updatedAt | date: 'medium' }}</td>
-                <td>
-                  <button
-                    class="cursor-pointer hover:bg-surface-2 p-1 rounded-lg flex items-center justify-center"
-                    ngMenuTrigger
-                    #origin
-                    #trigger="ngMenuTrigger"
-                    [menu]="actionsMenu()"
-                  >
-                    <ui-icon name="ellipsis" class="text-xl" />
-                  </button>
-                  <ng-template
-                    [cdkConnectedOverlayOpen]="trigger.expanded()"
-                    [cdkConnectedOverlay]="{ origin, usePopover: 'inline' }"
-                    [cdkConnectedOverlayPositions]="[
-                      {
-                        originX: 'end',
-                        originY: 'bottom',
-                        overlayX: 'end',
-                        overlayY: 'top',
-                        offsetY: 4,
-                      },
-                    ]"
-                    cdkAttachPopoverAsChild
-                  >
-                    <div ngMenu class="bg-surface-1 shadow-sm rounded-lg p-1 w-48" #actionsMenu="ngMenu">
-                      <ng-template ngMenuContent>
-                        <button
-                          ngMenuItem
-                          value="Edit"
-                          class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-surface-2 w-full"
-                          (keydown.enter)="editOrganization($any(organization))"
-                          (click)="editOrganization($any(organization))"
-                          type="button"
-                        >
-                          <ui-icon name="pencil" class="text-lg" />
-                          <span>Editar</span>
-                        </button>
-                        <button
-                          ngMenuItem
-                          value="Delete"
-                          class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-surface-2 w-full"
-                          (click)="deleteOrganization($any(organization))"
-                          (keydown.enter)="deleteOrganization($any(organization))"
-                          type="button"
-                        >
-                          <ui-icon name="trash-2" class="text-lg" />
-                          <span>Eliminar</span>
-                        </button>
-                      </ng-template>
-                    </div>
-                  </ng-template>
-                </td>
-              </tr>
-            }
-          </tbody>
-        </table>
-      </div>
-    }`,
+    <div class="overflow-x-auto">
+      <table uiTable [attr.aria-busy]="organizations.isLoading()">
+        <thead>
+          <tr>
+            <th>Nombre</th>
+            <th>Descripción</th>
+            <th>Fecha de creación</th>
+            <th>Fecha de actualización</th>
+            <th class="w-12"><span class="sr-only">Acciones</span></th>
+          </tr>
+        </thead>
+        @switch (organizationsList.phase()) {
+          @case ('skeleton') {
+            <tbody uiTableSkeleton [columns]="5"></tbody>
+          }
+          @case ('error') {
+            <tbody>
+              <tr uiTableError [columns]="5" (retry)="organizations.reload()"></tr>
+            </tbody>
+          }
+          @case ('ready') {
+            <tbody>
+              @for (organization of organizationsList.rows(); track organization.id) {
+                <tr>
+                  <td>{{ organization.name }}</td>
+                  <td>{{ organization.description }}</td>
+                  <td>{{ organization.createdAt | date: 'medium' }}</td>
+                  <td>{{ organization.updatedAt | date: 'medium' }}</td>
+                  <td>
+                    <ui-row-actions
+                      [actions]="rowActions"
+                      [label]="'Acciones para ' + organization.name"
+                      (action)="onRowAction($event, organization)"
+                    />
+                  </td>
+                </tr>
+              } @empty {
+                <tr uiTableEmpty [columns]="5" icon="building-2" title="Aún no hay organizaciones"></tr>
+              }
+            </tbody>
+          }
+        }
+      </table>
+    </div> `,
 })
 export class Organizations {
   private readonly http = inject(HttpClient);
   private modal = inject(Modal);
   private confirmation = inject(Confirmation);
   private toasts = inject(Toast);
-  actionsMenu = viewChild<Menu<string>>('actionsMenu');
 
   public organizations = httpResource<Prisma.OrganizationCreateInput[]>(() => '/api/v1/organizations', {
     defaultValue: [],
   });
+  /** organizations with smooth loading: previous rows stay while the next page / sort / search loads. */
+  protected readonly organizationsList = listState(this.organizations);
 
   public editOrganization(organization?: Prisma.OrganizationCreateInput) {
     this.modal
@@ -160,5 +123,22 @@ export class Organizations {
           });
         }
       });
+  }
+
+  /** The actions in each row's menu (ui-row-actions). */
+  protected readonly rowActions: UiRowAction[] = [
+    { id: 'edit', label: 'Editar', icon: 'pencil' },
+    { id: 'delete', label: 'Eliminar', icon: 'trash-2', tone: 'danger' },
+  ];
+
+  protected onRowAction(action: string, organization: Prisma.OrganizationCreateInput): void {
+    switch (action) {
+      case 'edit':
+        this.editOrganization(organization);
+        break;
+      case 'delete':
+        this.deleteOrganization(organization);
+        break;
+    }
   }
 }

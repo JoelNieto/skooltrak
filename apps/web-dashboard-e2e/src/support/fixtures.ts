@@ -9,6 +9,8 @@ export const personas = {
   admin: { email: 'admin.e2e@skooltrak.test', firstName: 'Ada', lastName: 'Admin', role: 'ORG_ADMIN' },
   teacher: { email: 'teacher.e2e@skooltrak.test', firstName: 'Tomás', lastName: 'Docente', role: 'TEACHER' },
   otherTeacher: { email: 'teacher2.e2e@skooltrak.test', firstName: 'Olga', lastName: 'Docente', role: 'TEACHER' },
+  /** Logs in as the first related student (HOM-001-S04 student home). */
+  student: { email: 'student.e2e@skooltrak.test', firstName: 'Ana', lastName: 'E2E', role: 'STUDENT' },
   /** Guardian of the first related student (HOM-001-S03 family thread; parent home later). */
   parent: { email: 'parent.e2e@skooltrak.test', firstName: 'Paula', lastName: 'Acudiente', role: 'PARENT' },
 } as const;
@@ -66,4 +68,16 @@ export const data = {
   publishedGrade: { title: 'Taller E2E' },
   publishedScores: [4, 2, 4.5],
   familyThread: { title: 'Consulta sobre Ana', parentMessage: '¿Podemos hablar sobre las notas de Ana?' },
+  /**
+   * HOM-001-S04 work of `related` in `teacher`'s course, relative to the seed time, plus one
+   * assignment of the other teacher for `homeroomOnly` that the student must never see.
+   * With `assignment` (due now, handed in by the first student) the student home lists, in order:
+   * overdue, handed in, in class, pending.
+   */
+  studentWork: {
+    overdue: { title: 'Ensayo vencido E2E', type: 'PAPER', inDays: -2, requireSubmission: true },
+    inClass: { title: 'Examen E2E', type: 'EXAM', inDays: 1, requireSubmission: false },
+    pending: { title: 'Tarea pendiente E2E', type: 'HOMEWORK', inDays: 3, requireSubmission: true },
+    otherGroup: { title: 'Tarea 8° E2E', type: 'HOMEWORK', inDays: 1, requireSubmission: true },
+  },
 } as const;

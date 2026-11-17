@@ -1,31 +1,23 @@
-import { EmptyState, PageHeader } from '#/ui';
+import { Badge, Card, CardBody, EmptyState, PageHeader, UiTable } from '#/ui';
 import { Component } from '@angular/core';
-import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-parent-management',
-  imports: [EmptyState, PageHeader, RouterLink],
+  imports: [UiTable, Badge, Card, CardBody, EmptyState, PageHeader],
   template: `
-    <div class="breadcrumbs text-sm">
-      <ul>
-        <li><a routerLink="/">Inicio</a></li>
-        <li><a routerLink="/admin">Admin</a></li>
-        <li>Padres</li>
-      </ul>
-    </div>
-
     <lib-page-header
+      [breadcrumbs]="[{ label: 'Inicio', link: '/' }, { label: 'Admin', link: '/admin' }, { label: 'Padres' }]"
       title="Gestión de padres"
       subtitle="Crea cuentas y vincula estudiantes."
       actionLabel="Invitar padre"
       actionIcon="person_add"
     />
 
-    <div class="card border border-base-200 bg-base-100">
-      <div class="card-body">
+    <div uiCard>
+      <div uiCardBody>
         <h2 class="text-lg font-semibold text-base-content">Directorio</h2>
         <div class="overflow-x-auto">
-          <table class="table">
+          <table uiTable>
             <thead>
               <tr>
                 <th>Padre/Madre</th>
@@ -39,7 +31,7 @@ import { RouterLink } from '@angular/router';
                   <td>{{ parent.name }}</td>
                   <td>{{ parent.children }}</td>
                   <td>
-                    <span class="badge badge-success">Activo</span>
+                    <span uiBadge tone="success">Activo</span>
                   </td>
                 </tr>
               }

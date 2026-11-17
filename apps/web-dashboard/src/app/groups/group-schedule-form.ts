@@ -1,4 +1,4 @@
-import { Toast } from '#/ui';
+import { Button, Toast, UiCheckbox, UiChoice, UiField, UiInput, UiSelect } from '#/ui';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { afterRenderEffect, Component, inject, input, output, signal } from '@angular/core';
 import { form, FormField, required, submit } from '@angular/forms/signals';
@@ -6,34 +6,19 @@ import { Prisma } from '@generated/prisma';
 
 @Component({
   selector: 'app-group-schedule-form',
-  imports: [FormField],
+  imports: [UiCheckbox, UiChoice, UiField, UiInput, UiSelect, Button, FormField],
   template: ` <form (submit)="save($event)" novalidate>
     <div class="flex flex-col md:grid md:grid-cols-2 gap-2">
-      <div class="fieldset">
-        <label for="courseId">Curso</label>
-        <select
-          [formField]="form.courseId"
-          class="select select-primary"
-          [class.ng-invalid]="form.courseId().touched() && form.courseId().invalid()"
-        >
+      <ui-field label="Curso" [field]="form.courseId">
+        <select uiSelect [formField]="form.courseId">
           <option value="" disabled>---Seleccionar---</option>
           @for (course of courses.value(); track course.id) {
             <option [value]="course.id">{{ course.name }}</option>
           }
         </select>
-        @if (form.courseId().touched() && form.courseId().invalid()) {
-          @for (error of form.courseId().errors(); track error) {
-            <p class="text-error text-xs mt-1">{{ error.message }}</p>
-          }
-        }
-      </div>
-      <div class="fieldset">
-        <label for="weekday">Día de la semana</label>
-        <select
-          [formField]="form.weekday"
-          class="select select-primary"
-          [class.ng-invalid]="form.weekday().touched() && form.weekday().invalid()"
-        >
+      </ui-field>
+      <ui-field label="Día de la semana" [field]="form.weekday">
+        <select uiSelect [formField]="form.weekday">
           <option value="MONDAY">Lunes</option>
           <option value="TUESDAY">Martes</option>
           <option value="WEDNESDAY">Miércoles</option>
@@ -42,56 +27,26 @@ import { Prisma } from '@generated/prisma';
           <option value="SATURDAY">Sábado</option>
           <option value="SUNDAY">Domingo</option>
         </select>
-        @if (form.weekday().touched() && form.weekday().invalid()) {
-          @for (error of form.weekday().errors(); track error) {
-            <p class="text-error text-xs mt-1">{{ error.message }}</p>
-          }
-        }
-      </div>
-      <div class="fieldset">
-        <label for="startTime">Hora de inicio</label>
-        <input
-          [formField]="form.startTime"
-          type="time"
-          class="input input-primary"
-          [class.ng-invalid]="form.startTime().touched() && form.startTime().invalid()"
-        />
-        @if (form.startTime().touched() && form.startTime().invalid()) {
-          @for (error of form.startTime().errors(); track error) {
-            <p class="text-error text-xs mt-1">{{ error.message }}</p>
-          }
-        }
-      </div>
-      <div class="fieldset">
-        <label for="endTime">Hora de fin</label>
-        <input
-          [formField]="form.endTime"
-          type="time"
-          class="input input-primary"
-          [class.ng-invalid]="form.endTime().touched() && form.endTime().invalid()"
-        />
-        @if (form.endTime().touched() && form.endTime().invalid()) {
-          @for (error of form.endTime().errors(); track error) {
-            <p class="text-error text-xs mt-1">{{ error.message }}</p>
-          }
-        }
-      </div>
-      <div class="fieldset md:col-span-2">
-        <label for="location">Ubicación</label>
-        <input [formField]="form.location" type="text" class="input input-primary" />
-      </div>
-      <div class="fieldset">
-        <label for="remote">Remoto</label>
-        <input [formField]="form.remote" type="checkbox" class="checkbox checkbox-primary" />
-      </div>
-      <div class="fieldset">
-        <label for="remoteLink">Enlace remoto</label>
-        <input [formField]="form.remoteLink" type="text" class="input input-primary" />
-      </div>
+      </ui-field>
+      <ui-field label="Hora de inicio" [field]="form.startTime">
+        <input uiInput [formField]="form.startTime" type="time" />
+      </ui-field>
+      <ui-field label="Hora de fin" [field]="form.endTime">
+        <input uiInput [formField]="form.endTime" type="time" />
+      </ui-field>
+      <ui-field label="Ubicación" [field]="form.location" class="md:col-span-2">
+        <input uiInput [formField]="form.location" type="text" />
+      </ui-field>
+      <ui-choice label="Remoto" [field]="form.remote">
+        <input uiCheckbox [formField]="form.remote" type="checkbox" />
+      </ui-choice>
+      <ui-field label="Enlace remoto" [field]="form.remoteLink">
+        <input uiInput [formField]="form.remoteLink" type="text" />
+      </ui-field>
     </div>
     <div class="flex justify-end gap-2 mt-4">
-      <button type="button" class="btn btn-ghost" (click)="closeModal.emit()">Cancelar</button>
-      <button type="submit" class="btn btn-primary">Guardar</button>
+      <button uiButton variant="ghost" type="button" (click)="closeModal.emit()">Cancelar</button>
+      <button uiButton variant="primary" type="submit">Guardar</button>
     </div>
   </form>`,
 })

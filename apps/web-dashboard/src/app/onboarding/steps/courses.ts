@@ -1,14 +1,14 @@
-import { Toast } from '#/ui';
+import { Button, Toast, UiField, UiInput, UiSelect } from '#/ui';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { Component, computed, inject, input, output, signal } from '@angular/core';
 import { form, FormField, required } from '@angular/forms/signals';
-import { toFetchQueryRecord } from '../../core/fetch-query-params';
 import Store from '../../core/store';
+import { SubjectCombobox } from '../../shared/subject-combobox';
 import { CreatedEntity } from '../setup-wizard';
 
 @Component({
   selector: 'app-courses-step',
-  imports: [FormField],
+  imports: [UiField, UiInput, UiSelect, Button, FormField, SubjectCombobox],
   template: `
     <div class="w-full max-w-md text-center space-y-8 animate-fade-in">
       <!-- Icon -->
@@ -57,61 +57,51 @@ import { CreatedEntity } from '../setup-wizard';
       } @else {
         <!-- Form Fields -->
         <form (submit)="onSubmit($event)" class="space-y-4 text-left">
-          <div class="fieldset">
-            <label for="studyPlanId" class="label">
-              <span class="label-text font-medium">Plan de Estudio</span>
-            </label>
-            <select id="studyPlanId" [formField]="form.studyPlanId" class="select select-bordered w-full">
+          <ui-field label="Plan de Estudio" [field]="form.studyPlanId">
+            <select uiSelect id="studyPlanId" [formField]="form.studyPlanId">
               <option value="" disabled>Selecciona un plan...</option>
               @for (plan of allStudyPlans(); track plan.id) {
                 <option [value]="plan.id">{{ plan.name }}</option>
               }
             </select>
-          </div>
+          </ui-field>
 
-          <div class="fieldset">
-            <label for="subjectId" class="label">
-              <span class="label-text font-medium">Asignatura</span>
-            </label>
-            <select id="subjectId" [formField]="form.subjectId" class="select select-bordered w-full">
-              <option value="" disabled>Selecciona una asignatura...</option>
-              @for (subject of subjects.value(); track subject.id) {
-                <option [value]="subject.id">{{ subject.name }}</option>
-              }
-            </select>
-            <p class="text-xs text-base-content/60 mt-1">
-              Si no encuentras la asignatura, podrás crearla después en administración.
-            </p>
-          </div>
+          <ui-field
+            label="Asignatura"
+            [field]="form.subjectId"
+            hint="Si no existe, escribe su nombre y elige «Crear asignatura»."
+          >
+            <app-subject-combobox [formField]="form.subjectId" />
+          </ui-field>
 
-          <div class="fieldset">
-            <label for="code" class="label">
-              <span class="label-text font-medium">
-                Código del Curso
-                <span class="text-base-content/50 font-normal">(opcional)</span>
-              </span>
-            </label>
-            <input
-              type="text"
-              id="code"
-              [formField]="form.code"
-              class="input input-bordered w-full"
-              placeholder="MAT-101"
-            />
-          </div>
+          <ui-field label="Código del Curso" [field]="form.code" optional>
+            <input uiInput type="text" id="code" [formField]="form.code" placeholder="MAT-101" />
+          </ui-field>
 
           <div class="flex gap-3 pt-4">
-            <button type="submit" class="btn btn-outline flex-1" [disabled]="saving()" (click)="addAnother = true">
-              @if (saving() && addAnother) {
-                <span class="loading loading-spinner loading-sm"></span>
-              } @else {
+            <button
+              uiButton
+              [loading]="saving() && addAnother"
+              type="submit"
+              class="flex-1"
+              [disabled]="saving()"
+              (click)="addAnother = true"
+            >
+              @if (!(saving() && addAnother)) {
                 <span class="material-symbols-outlined text-xl">add</span>
               }
               Agregar otro
             </button>
-            <button type="submit" class="btn btn-primary flex-1" [disabled]="saving()" (click)="addAnother = false">
+            <button
+              uiButton
+              [loading]="saving() && !addAnother"
+              variant="primary"
+              type="submit"
+              class="flex-1"
+              [disabled]="saving()"
+              (click)="addAnother = false"
+            >
               @if (saving() && !addAnother) {
-                <span class="loading loading-spinner loading-sm"></span>
                 Guardando...
               } @else {
                 Guardar y Continuar
@@ -125,7 +115,7 @@ import { CreatedEntity } from '../setup-wizard';
       <!-- Skip Option -->
       @if (createdEntities().length === 0) {
         <div class="text-center">
-          <button type="button" class="btn btn-ghost btn-sm" (click)="onSkip()">Omitir por ahora</button>
+          <button uiButton variant="ghost" size="sm" type="button" (click)="onSkip()">Omitir por ahora</button>
           <p class="text-xs text-base-content/50 mt-1">Podrás crear cursos más adelante.</p>
         </div>
       }
@@ -182,14 +172,6 @@ export default class CoursesStep {
       }
       return { url: '/api/v1/study-plans/by-school', params: { schoolId } };
     },
-    { defaultValue: [] },
-  );
-
-  public subjects = httpResource<Array<{ id: string; name: string }>>(
-    () => ({
-      url: '/api/v1/subjects',
-      params: toFetchQueryRecord({ take: 100, orderBy: 'name' }),
-    }),
     { defaultValue: [] },
   );
 

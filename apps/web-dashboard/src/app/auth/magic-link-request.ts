@@ -1,4 +1,4 @@
-import { Toast } from '#/ui';
+import { Button, Card, CardBody, CardTitle, Toast } from '#/ui';
 import { HttpClient } from '@angular/common/http';
 import { Component, inject, signal } from '@angular/core';
 import { debounce, email, form, FormField, required } from '@angular/forms/signals';
@@ -6,12 +6,12 @@ import { Router, RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-magic-link-request',
-  imports: [RouterLink, FormField],
+  imports: [Card, CardBody, CardTitle, Button, RouterLink, FormField],
   template: `
     <div class="min-h-screen flex items-center justify-center bg-base-200 p-4">
-      <div class="card w-full max-w-md bg-base-100 shadow-xl">
-        <div class="card-body">
-          <h2 class="card-title text-2xl justify-center">Acceso sin contraseña</h2>
+      <div uiCard class="w-full max-w-md">
+        <div uiCardBody>
+          <h2 uiCardTitle class="text-2xl justify-center">Acceso sin contraseña</h2>
           <p class="text-center text-base-content/70 mb-4">
             Ingresa tu correo y te enviaremos un enlace de acceso único.
           </p>
@@ -29,10 +29,15 @@ import { Router, RouterLink } from '@angular/router';
               </ul>
             }
 
-            <button type="submit" class="btn btn-primary w-full" [disabled]="loading()">
-              @if (loading()) {
-                <span class="loading loading-spinner"></span>
-              } @else {
+            <button
+              uiButton
+              [loading]="loading()"
+              variant="primary"
+              type="submit"
+              class="w-full"
+              [disabled]="loading()"
+            >
+              @if (!loading()) {
                 <span class="material-symbols-outlined">link</span>
               }
               {{ loading() ? 'Enviando...' : 'Enviar enlace de acceso' }}

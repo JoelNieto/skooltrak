@@ -1,18 +1,22 @@
 import { Component, input, output, signal } from '@angular/core';
+import { Button } from './button';
+import { UiInput } from './field';
 
 @Component({
   selector: 'lib-thread-composer',
+  imports: [UiInput, Button],
   template: `
     <form class="flex items-end gap-2 border-t border-base-300 p-2 bg-base-100" (submit)="onSubmit($event)">
       <textarea
-        class="textarea textarea-primary flex-1 resize-none"
+        uiInput
+        class="flex-1 resize-none"
         rows="1"
         [placeholder]="placeholder()"
         [disabled]="disabled()"
         [value]="draft()"
         (input)="onInput($event)"
       ></textarea>
-      <button class="btn btn-primary" type="submit" [disabled]="disabled() || !draft().trim()">
+      <button uiButton variant="primary" type="submit" [disabled]="disabled() || !draft().trim()">
         <span class="material-symbols-outlined">send</span>
       </button>
     </form>

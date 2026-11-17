@@ -1,7 +1,8 @@
-import { Loader, Toast } from '#/ui';
+import { Button, Card, CardBody, Loader, Toast, UiInput } from '#/ui';
 import { HttpClient } from '@angular/common/http';
 import { Component, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
+import { BrandLogo } from '../shared/brand-logo';
 
 type AvailableSchool = {
   id: string;
@@ -13,11 +14,11 @@ type AvailableSchool = {
 
 @Component({
   selector: 'app-join-school',
-  imports: [Loader],
+  imports: [Card, CardBody, UiInput, Button, BrandLogo, Loader],
   template: `
     <div class="min-h-screen flex flex-col gradient-bg">
       <header class="p-4 md:p-6 flex items-center justify-between">
-        <img src="skooltrak.png" alt="Skooltrak" class="h-8 md:h-10" />
+        <app-brand-logo class="h-8 md:h-10" />
       </header>
 
       <main class="flex-1 flex flex-col items-center p-6 overflow-y-auto">
@@ -29,12 +30,7 @@ type AvailableSchool = {
 
           <!-- Search -->
           <div class="form-control">
-            <input
-              type="text"
-              class="input input-bordered w-full"
-              placeholder="Buscar escuela..."
-              (input)="onSearch($event)"
-            />
+            <input uiInput type="text" placeholder="Buscar escuela..." (input)="onSearch($event)" />
           </div>
 
           @if (loading()) {
@@ -49,11 +45,8 @@ type AvailableSchool = {
           } @else if (searched()) {
             <div class="grid gap-4">
               @for (school of filteredSchools(); track school.id) {
-                <button
-                  class="card bg-base-100 shadow hover:shadow-lg transition-all cursor-pointer border border-base-200 hover:border-primary text-left w-full"
-                  (click)="selectSchool(school)"
-                >
-                  <div class="card-body flex-row items-center gap-4">
+                <button uiCard class="text-left w-full" (click)="selectSchool(school)">
+                  <div uiCardBody class="flex-row items-center gap-4">
                     <div class="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
                       <span class="material-symbols-outlined text-2xl text-primary">school</span>
                     </div>
@@ -79,7 +72,7 @@ type AvailableSchool = {
           }
 
           <div class="text-center">
-            <button class="btn btn-ghost btn-sm" (click)="goBack()">
+            <button uiButton variant="ghost" size="sm" (click)="goBack()">
               <span class="material-symbols-outlined text-lg">arrow_back</span>
               Volver
             </button>

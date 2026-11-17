@@ -5,17 +5,18 @@ import { rxResource } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import { map, of } from 'rxjs';
 import { StoreApiService } from '../store-api.service';
+import { Alert, Card, UiTable } from '#/ui';
 
 @Component({
   selector: 'app-orders-list',
-  imports: [RouterLink, DatePipe],
+  imports: [Alert, Card, UiTable, RouterLink, DatePipe],
   template: `
     <h2 class="text-xl font-semibold mb-4">Mis pedidos</h2>
     @if (!school.currentSchoolId()) {
-      <div class="alert alert-warning">Selecciona una escuela.</div>
+      <div uiAlert tone="warning">Selecciona una escuela.</div>
     } @else {
-      <div class="overflow-x-auto rounded-box border border-base-200">
-        <table class="table">
+      <div uiCard class="overflow-x-auto">
+        <table uiTable>
           <thead>
             <tr>
               <th>Fecha</th>

@@ -1,7 +1,7 @@
-import { Loader, Toast } from '#/ui';
+import { Breadcrumbs, Button, Card, CardBody, Loader, Toast } from '#/ui';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { Component, computed, inject, input, signal } from '@angular/core';
-import { Router, RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 import { ChatType } from '@generated/prisma';
 import { firstValueFrom } from 'rxjs';
 import Auth from '../auth/auth';
@@ -12,25 +12,21 @@ import GroupSchedule from './group-schedule';
 import GroupStudents from './group-students';
 
 @Component({
-  imports: [RouterLink, Loader, GroupStudents, GroupCourses, GroupSchedule, GroupHabits],
+  imports: [Breadcrumbs, Card, CardBody, Button, Loader, GroupStudents, GroupCourses, GroupSchedule, GroupHabits],
   template: `
     @let group = groupResource.value();
     @if (groupResource.isLoading()) {
       <lib-loader />
     } @else {
       @if (group && group.id) {
-        <div class="breadcrumbs text-sm">
-          <ul>
-            <li><a routerLink="/">Inicio</a></li>
-            <li><a routerLink="/groups">Grupos</a></li>
-            <li>{{ group.name }}</li>
-          </ul>
-        </div>
-        <div class="card card-border border-base-300 bg-base-100">
-          <div class="card-body flex flex-row justify-between items-center">
+        <ui-breadcrumbs
+          [items]="[{ label: 'Inicio', link: '/' }, { label: 'Grupos', link: '/groups' }, { label: group.name }]"
+        />
+        <div uiCard>
+          <div uiCardBody class="flex flex-row justify-between items-center">
             <div>
               <h1 class="text-xl  font-semibold">{{ group.name }}</h1>
-              <h3 class="text-base-200">{{ group.studyPlan?.name }} / {{ group.studyPlan?.degree?.name }}</h3>
+              <h3 class="text-ink-muted">{{ group.studyPlan?.name }} / {{ group.studyPlan?.degree?.name }}</h3>
               <div class="flex items-center gap-2">
                 <div class="avatar avatar-placeholder">
                   <div class="text-white w-7 rounded-full" [style.background]="group.teacher?.color">
@@ -41,10 +37,15 @@ import GroupStudents from './group-students';
               </div>
             </div>
             @if (canStartGroupChat()) {
-              <button class="btn btn-ghost btn-sm" (click)="startGroupChat()" [disabled]="startingChat()">
-                @if (startingChat()) {
-                  <span class="loading loading-spinner loading-sm"></span>
-                } @else {
+              <button
+                uiButton
+                [loading]="startingChat()"
+                variant="ghost"
+                size="sm"
+                (click)="startGroupChat()"
+                [disabled]="startingChat()"
+              >
+                @if (!startingChat()) {
                   <span class="material-symbols-outlined">chat</span>
                 }
                 Chat

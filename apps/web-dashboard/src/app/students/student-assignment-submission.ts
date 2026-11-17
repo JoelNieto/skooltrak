@@ -1,9 +1,9 @@
-import { EmptyState, PageHeader } from '#/ui';
+import { Badge, Card, CardBody, EmptyState, PageHeader, UiTable } from '#/ui';
 import { Component } from '@angular/core';
 
 @Component({
   selector: 'app-student-assignment-submission',
-  imports: [EmptyState, PageHeader],
+  imports: [UiTable, Badge, Card, CardBody, EmptyState, PageHeader],
   template: `
     <lib-page-header
       title="Entrega de asignaciones"
@@ -12,11 +12,11 @@ import { Component } from '@angular/core';
       actionIcon="upload_file"
     />
 
-    <div class="card border border-base-200 bg-base-100">
-      <div class="card-body">
+    <div uiCard>
+      <div uiCardBody>
         <h2 class="text-lg font-semibold text-base-content">Pendientes por entregar</h2>
         <div class="overflow-x-auto">
-          <table class="table">
+          <table uiTable>
             <thead>
               <tr>
                 <th>Asignación</th>
@@ -32,7 +32,7 @@ import { Component } from '@angular/core';
                   <td>{{ item.course }}</td>
                   <td>{{ item.dueDate }}</td>
                   <td>
-                    <span class="badge badge-warning">Pendiente</span>
+                    <span uiBadge tone="warning">Pendiente</span>
                   </td>
                 </tr>
               }
@@ -53,8 +53,8 @@ import { Component } from '@angular/core';
       } @else {
         <div class="space-y-3">
           @for (submission of recentSubmissions; track submission.id) {
-            <div class="card border border-base-200 bg-base-100">
-              <div class="card-body">
+            <div uiCard>
+              <div uiCardBody>
                 <p class="font-semibold text-base-content">
                   {{ submission.title }}
                 </p>

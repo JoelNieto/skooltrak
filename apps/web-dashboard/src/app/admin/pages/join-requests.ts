@@ -1,4 +1,4 @@
-import { EmptyState, Loader, Toast } from '#/ui';
+import { Badge, BadgeTone, Button, Card, CardBody, EmptyState, Loader, Toast } from '#/ui';
 import { DatePipe } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { Component, inject, signal } from '@angular/core';
@@ -20,7 +20,7 @@ type JoinRequestRow = {
 
 @Component({
   selector: 'app-join-requests',
-  imports: [Loader, DatePipe, EmptyState],
+  imports: [Badge, Card, CardBody, Button, Loader, DatePipe, EmptyState],
   template: `
     <div class="space-y-6">
       <div class="flex items-center justify-between">
@@ -28,7 +28,7 @@ type JoinRequestRow = {
           <h1 class="text-2xl font-bold text-base-content">Solicitudes de Acceso</h1>
           <p class="text-base-content/60">Administra las solicitudes de usuarios que desean unirse a tu escuela.</p>
         </div>
-        <button class="btn btn-ghost btn-sm" (click)="loadRequests()">
+        <button uiButton variant="ghost" size="sm" (click)="loadRequests()">
           <span class="material-symbols-outlined">refresh</span>
           Actualizar
         </button>
@@ -47,8 +47,8 @@ type JoinRequestRow = {
       } @else {
         <div class="grid gap-4">
           @for (request of requests(); track request.id) {
-            <div class="card bg-base-100 shadow">
-              <div class="card-body">
+            <div uiCard>
+              <div uiCardBody>
                 <div class="flex items-start gap-4">
                   <div class="avatar avatar-placeholder">
                     <div class="w-12 h-12 rounded-full bg-primary/10 text-primary">
@@ -64,7 +64,7 @@ type JoinRequestRow = {
                     </h3>
                     <p class="text-sm text-base-content/60">{{ request.userEmail }}</p>
                     <div class="flex items-center gap-3 mt-2">
-                      <span class="badge" [class]="getRoleBadgeClass(request.requestedRole)">
+                      <span uiBadge [tone]="roleTone(request.requestedRole)">
                         {{ getRoleLabel(request.requestedRole) }}
                       </span>
                       <span class="text-xs text-base-content/40">
@@ -78,15 +78,17 @@ type JoinRequestRow = {
                   </div>
 
                   <div class="flex gap-2">
-                    <button class="btn btn-success btn-sm" (click)="approve(request.id)" [disabled]="processing()">
+                    <button
+                      uiButton
+                      variant="primary"
+                      size="sm"
+                      (click)="approve(request.id)"
+                      [disabled]="processing()"
+                    >
                       <span class="material-symbols-outlined text-lg">check</span>
                       Aprobar
                     </button>
-                    <button
-                      class="btn btn-error btn-sm btn-outline"
-                      (click)="reject(request.id)"
-                      [disabled]="processing()"
-                    >
+                    <button uiButton variant="danger" size="sm" (click)="reject(request.id)" [disabled]="processing()">
                       <span class="material-symbols-outlined text-lg">close</span>
                       Rechazar
                     </button>
@@ -122,16 +124,16 @@ export default class JoinRequests {
     return this.roleLabels[role] || role;
   }
 
-  getRoleBadgeClass(role: string): string {
+  roleTone(role: string): BadgeTone {
     switch (role) {
       case 'ORG_ADMIN':
-        return 'badge-error';
+        return 'danger';
       case 'TEACHER':
-        return 'badge-primary';
+        return 'action';
       case 'PARENT':
-        return 'badge-warning';
+        return 'warning';
       default:
-        return 'badge-ghost';
+        return 'neutral';
     }
   }
 

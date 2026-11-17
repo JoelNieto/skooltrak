@@ -1,9 +1,20 @@
-import { MessageBubble, Modal, PageHeader, ThreadComposer, ThreadList, ThreadScrollPane, Toast } from '#/ui';
+import {
+  Badge,
+  Button,
+  MessageBubble,
+  Modal,
+  PageHeader,
+  ThreadComposer,
+  ThreadList,
+  ThreadScrollPane,
+  Toast,
+  UiInput,
+  UiSelect,
+} from '#/ui';
 import { DatePipe } from '@angular/common';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { afterRenderEffect, Component, computed, effect, inject, input, linkedSignal, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
 import { isBefore } from 'date-fns';
 import Auth from '../auth/auth';
 import {
@@ -33,15 +44,21 @@ interface ThreadListItem {
 
 @Component({
   selector: 'app-teacher-parent-communication',
-  imports: [RouterLink, FormsModule, DatePipe, PageHeader, ThreadList, ThreadComposer, ThreadScrollPane, MessageBubble],
+  imports: [
+    Badge,
+    UiInput,
+    UiSelect,
+    Button,
+    FormsModule,
+    DatePipe,
+    PageHeader,
+    ThreadList,
+    ThreadComposer,
+    ThreadScrollPane,
+    MessageBubble,
+  ],
   template: `
-    <div class="breadcrumbs text-sm">
-      <ul>
-        <li><a routerLink="/">Inicio</a></li>
-        <li>Comunicaciones</li>
-      </ul>
-    </div>
-    <lib-page-header
+    <lib-page-header [breadcrumbs]="[{ label: 'Inicio', link: '/' }, { label: 'Comunicaciones' }]"
       title="Comunicación con familias"
       subtitle="Crea hilos con grupos de clase o padres de un estudiante."
       actionLabel="Nuevo mensaje"
@@ -52,30 +69,39 @@ interface ThreadListItem {
     <div class="flex gap-4 h-[calc(100vh-12rem)]">
       <aside class="w-80 shrink-0 border border-base-300 rounded-lg flex flex-col bg-base-100">
         <div class="p-2 border-b border-base-300 space-y-2 shrink-0">
-          <input
+          <input uiInput
             type="search"
-            class="input input-primary input-sm w-full"
+            class="input-sm"
             placeholder="Buscar conversación…"
             [(ngModel)]="filterText"
           />
           <div class="flex flex-wrap gap-1">
             <button
-              class="btn btn-xs"
-              [class.btn-primary]="urgencyFilter() === 'ALL'"
+              uiButton
+              size="sm"
+              type="button"
+              [variant]="urgencyFilter() === 'ALL' ? 'primary' : 'secondary'"
+              [attr.aria-pressed]="urgencyFilter() === 'ALL'"
               (click)="urgencyFilter.set('ALL')"
             >
               Todas
             </button>
             <button
-              class="btn btn-xs btn-soft"
-              [class.btn-warning]="urgencyFilter() === 'ROUTINE'"
+              uiButton
+              size="sm"
+              type="button"
+              [variant]="urgencyFilter() === 'ROUTINE' ? 'primary' : 'secondary'"
+              [attr.aria-pressed]="urgencyFilter() === 'ROUTINE'"
               (click)="urgencyFilter.set('ROUTINE')"
             >
               Rutina
             </button>
             <button
-              class="btn btn-xs btn-soft"
-              [class.btn-error]="urgencyFilter() === 'IMPORTANT'"
+              uiButton
+              size="sm"
+              type="button"
+              [variant]="urgencyFilter() === 'IMPORTANT' ? 'primary' : 'secondary'"
+              [attr.aria-pressed]="urgencyFilter() === 'IMPORTANT'"
               (click)="urgencyFilter.set('IMPORTANT')"
             >
               Importante
@@ -104,16 +130,16 @@ interface ThreadListItem {
               }
               <h2 class="font-semibold truncate">{{ thread.title }}</h2>
               @if (thread.broadcast) {
-                <span class="badge badge-primary badge-soft badge-sm shrink-0">Comunicado</span>
+                <span uiBadge tone="action" size="sm" class="shrink-0">Comunicado</span>
               }
             </div>
             <div class="flex items-center gap-1">
               <span class="text-sm opacity-70">{{ thread.audience }}</span>
               @if (thread.urgent) {
-                <span class="badge badge-error badge-soft badge-xs">Importante</span>
+                <span uiBadge tone="danger" size="sm">Importante</span>
               }
               @if (thread.broadcast && thread.repliesAllowed === false) {
-                <span class="badge badge-ghost badge-xs">Solo lectura</span>
+                <span uiBadge size="sm">Solo lectura</span>
               }
             </div>
           </header>
@@ -147,9 +173,9 @@ interface ThreadListItem {
             <lib-thread-composer placeholder="Escribe un mensaje…" (send)="send($event)" />
             <div class="px-2 pb-2">
               <label class="sr-only" for="teacher-urgency">Prioridad del mensaje</label>
-              <select
+              <select uiSelect
                 id="teacher-urgency"
-                class="select select-primary select-sm w-full"
+                class="select-sm"
                 [ngModel]="composerUrgency()"
                 (ngModelChange)="composerUrgency.set($event)"
               >

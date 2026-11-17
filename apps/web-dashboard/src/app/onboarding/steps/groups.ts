@@ -1,4 +1,4 @@
-import { Toast } from '#/ui';
+import { Button, Toast, UiField, UiInput, UiSelect } from '#/ui';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { Component, computed, inject, input, output, signal } from '@angular/core';
 import { form, FormField, required } from '@angular/forms/signals';
@@ -7,7 +7,7 @@ import { CreatedEntity } from '../setup-wizard';
 
 @Component({
   selector: 'app-groups-step',
-  imports: [FormField],
+  imports: [UiField, UiInput, UiSelect, Button, FormField],
   template: `
     <div class="w-full max-w-md text-center space-y-8 animate-fade-in">
       <!-- Icon -->
@@ -56,48 +56,43 @@ import { CreatedEntity } from '../setup-wizard';
       } @else {
         <!-- Form Fields -->
         <form (submit)="onSubmit($event)" class="space-y-4 text-left">
-          <div class="fieldset">
-            <label for="studyPlanId" class="label">
-              <span class="label-text font-medium">Plan de Estudio</span>
-            </label>
-            <select id="studyPlanId" [formField]="form.studyPlanId" class="select select-bordered w-full">
+          <ui-field label="Plan de Estudio" [field]="form.studyPlanId">
+            <select uiSelect id="studyPlanId" [formField]="form.studyPlanId">
               <option value="" disabled>Selecciona un plan...</option>
               @for (plan of allStudyPlans(); track plan.id) {
                 <option [value]="plan.id">{{ plan.name }}</option>
               }
             </select>
-          </div>
+          </ui-field>
 
-          <div class="fieldset">
-            <label for="name" class="label">
-              <span class="label-text font-medium">Nombre del Grupo</span>
-            </label>
-            <input
-              type="text"
-              id="name"
-              [formField]="form.name"
-              class="input input-bordered w-full"
-              placeholder="Ej: Grupo A - Generación 2025"
-            />
-            @if (form.name().touched() && form.name().invalid()) {
-              @for (error of form.name().errors(); track error) {
-                <p class="text-error text-sm">{{ error.message }}</p>
-              }
-            }
-          </div>
+          <ui-field label="Nombre del Grupo" [field]="form.name">
+            <input uiInput type="text" id="name" [formField]="form.name" placeholder="Ej: Grupo A - Generación 2025" />
+          </ui-field>
 
           <div class="flex gap-3 pt-4">
-            <button type="submit" class="btn btn-outline flex-1" [disabled]="saving()" (click)="addAnother = true">
-              @if (saving() && addAnother) {
-                <span class="loading loading-spinner loading-sm"></span>
-              } @else {
+            <button
+              uiButton
+              [loading]="saving() && addAnother"
+              type="submit"
+              class="flex-1"
+              [disabled]="saving()"
+              (click)="addAnother = true"
+            >
+              @if (!(saving() && addAnother)) {
                 <span class="material-symbols-outlined text-xl">add</span>
               }
               Agregar otro
             </button>
-            <button type="submit" class="btn btn-primary flex-1" [disabled]="saving()" (click)="addAnother = false">
+            <button
+              uiButton
+              [loading]="saving() && !addAnother"
+              variant="primary"
+              type="submit"
+              class="flex-1"
+              [disabled]="saving()"
+              (click)="addAnother = false"
+            >
               @if (saving() && !addAnother) {
-                <span class="loading loading-spinner loading-sm"></span>
                 Guardando...
               } @else {
                 Finalizar
@@ -111,7 +106,7 @@ import { CreatedEntity } from '../setup-wizard';
       <!-- Skip Option -->
       @if (createdEntities().length === 0) {
         <div class="text-center">
-          <button type="button" class="btn btn-ghost btn-sm" (click)="onSkip()">Omitir por ahora</button>
+          <button uiButton variant="ghost" size="sm" type="button" (click)="onSkip()">Omitir por ahora</button>
           <p class="text-xs text-base-content/50 mt-1">Podrás crear grupos más adelante.</p>
         </div>
       }

@@ -1,18 +1,20 @@
-import { Confirmation, Error, Modal, Pagination, Paginator, Toast } from '#/ui';
+import { Breadcrumbs, Button, Confirmation, Error, Modal, Pagination, Paginator, Toast, UiInput, UiTable } from '#/ui';
 import { Menu, MenuContent, MenuItem, MenuTrigger } from '@angular/aria/menu';
 import { OverlayModule } from '@angular/cdk/overlay';
 import { DatePipe } from '@angular/common';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { afterRenderEffect, Component, effect, inject, signal, viewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
 import { Prisma } from '@generated/prisma';
 import { toFetchQueryRecord } from '../core/fetch-query-params';
 import { PermissionsForm } from './permissions-form';
 @Component({
   selector: 'app-permissions',
   imports: [
-    RouterLink,
+    Breadcrumbs,
+    UiTable,
+    UiInput,
+    Button,
     DatePipe,
     Menu,
     MenuContent,
@@ -24,25 +26,20 @@ import { PermissionsForm } from './permissions-form';
     Error,
   ],
   providers: [Pagination],
-  template: ` <div class="breadcrumbs text-sm">
-      <ul>
-        <li><a routerLink="/">Inicio</a></li>
-        <li>Permisos</li>
-      </ul>
-    </div>
+  template: ` <ui-breadcrumbs [items]="[{ label: 'Inicio', link: '/' }, { label: 'Permisos' }]" />
     <div class="flex justify-between items-center mb-4">
       <div>
         <h1 class="text-2xl text-base-content font-medium">Permisos</h1>
         <p class="text-sm text-gray-500 dark:text-gray-400">Listado de permisos</p>
       </div>
 
-      <button class="btn btn-neutral" (click)="editPermission()">
+      <button uiButton variant="primary" (click)="editPermission()">
         <span class="material-symbols-outlined">add_circle</span> Nuevo Permiso
       </button>
     </div>
     <div class="flex justify-between items-center mb-4">
       <div class="md:w-96 w-full">
-        <input type="text" class="input " placeholder="Buscar" [(ngModel)]="searchText" />
+        <input uiInput type="text" placeholder="Buscar" [(ngModel)]="searchText" />
       </div>
     </div>
     @if (permissions.error()) {
@@ -52,7 +49,7 @@ import { PermissionsForm } from './permissions-form';
       />
     } @else {
       <div class="overflow-x-auto">
-        <table class="table">
+        <table uiTable>
           <thead>
             <tr>
               <th>ID</th>

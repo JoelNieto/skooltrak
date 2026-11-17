@@ -1,9 +1,9 @@
-import { EmptyState, PageHeader } from '#/ui';
+import { Card, CardBody, EmptyState, PageHeader } from '#/ui';
 import { Component } from '@angular/core';
 
 @Component({
   selector: 'app-teacher-reports',
-  imports: [EmptyState, PageHeader],
+  imports: [Card, CardBody, EmptyState, PageHeader],
   template: `
     <lib-page-header
       title="Reportes docentes"
@@ -14,8 +14,8 @@ import { Component } from '@angular/core';
 
     <div class="grid gap-4 md:grid-cols-3">
       @for (report of reportTypes; track report.id) {
-        <div class="card border border-base-200 bg-base-100">
-          <div class="card-body">
+        <div uiCard>
+          <div uiCardBody>
             <p class="font-semibold text-base-content">{{ report.title }}</p>
             <p class="text-sm text-base-content/70">
               {{ report.description }}

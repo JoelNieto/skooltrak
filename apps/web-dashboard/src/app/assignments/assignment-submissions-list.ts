@@ -1,18 +1,19 @@
-import { Toast } from '#/ui';
+import { Alert, Badge, Button, Card, Spinner, Toast, UiTable } from '#/ui';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { Component, inject, input, signal } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-assignment-submissions-list',
+  imports: [Alert, Spinner, Card, UiTable, Badge, Button],
   template: `
     <div class="space-y-4">
       @if (studentsResource.isLoading()) {
         <div class="flex items-center justify-center py-8">
-          <span class="loading loading-spinner loading-md"></span>
+          <span uiSpinner></span>
         </div>
       } @else if (studentsResource.error()) {
-        <div class="alert alert-error">
+        <div uiAlert tone="danger">
           <span class="material-symbols-outlined">error</span>
           <span>Error al cargar los estudiantes.</span>
         </div>
@@ -39,8 +40,8 @@ import { firstValueFrom } from 'rxjs';
           </div>
         </div>
 
-        <div class="overflow-x-auto bg-base-100 rounded-lg">
-          <table class="table">
+        <div uiCard class="overflow-x-auto">
+          <table uiTable>
             <thead>
               <tr>
                 <th>Estudiante</th>
@@ -62,12 +63,12 @@ import { firstValueFrom } from 'rxjs';
                   </td>
                   <td>
                     @if (submission) {
-                      <span class="badge badge-success badge-sm gap-1">
+                      <span uiBadge tone="success" size="sm" class="gap-1">
                         <span class="material-symbols-outlined text-sm!">check</span>
                         Entregado
                       </span>
                     } @else {
-                      <span class="badge badge-warning badge-sm gap-1">
+                      <span uiBadge tone="warning" size="sm" class="gap-1">
                         <span class="material-symbols-outlined text-sm!">schedule</span>
                         Pendiente
                       </span>
@@ -105,13 +106,14 @@ import { firstValueFrom } from 'rxjs';
                     @let fileId = $safeNavigationMigration(submission?.file?.id);
                     @if (fileId) {
                       <button
-                        class="btn btn-ghost btn-sm"
+                        uiButton
+                        [loading]="downloadingFileId() === fileId"
+                        variant="ghost"
+                        size="sm"
                         (click)="downloadFile(fileId)"
                         [disabled]="downloadingFileId() === fileId"
                       >
-                        @if (downloadingFileId() === fileId) {
-                          <span class="loading loading-spinner loading-xs"></span>
-                        } @else {
+                        @if (!(downloadingFileId() === fileId)) {
                           <span class="material-symbols-outlined">download</span>
                         }
                       </button>

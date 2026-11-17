@@ -1,4 +1,4 @@
-import { Toast } from '#/ui';
+import { Button, Toast, UiField, UiInput } from '#/ui';
 import { HttpClient } from '@angular/common/http';
 import { afterRenderEffect, Component, inject, input, output, signal } from '@angular/core';
 import { form, FormField, min, required } from '@angular/forms/signals';
@@ -6,31 +6,26 @@ import { Prisma } from '@generated/prisma';
 import { firstValueFrom } from 'rxjs';
 @Component({
   selector: 'app-grade-metrics-form',
-  imports: [FormField],
+  imports: [UiField, UiInput, Button, FormField],
   template: `<form (submit)="onSubmit($event)">
-    <div class="fieldset">
-      <label for="name">Nombre</label>
-      <input type="text" [formField]="form.name" class="input input-primary" />
-    </div>
-    <div class="fieldset">
-      <label for="minimum">Minimo</label>
-      <input type="number" [formField]="form.minimum" class="input input-primary" />
-    </div>
-    <div class="fieldset">
-      <label for="maximum">Maximo</label>
-      <input type="number" [formField]="form.maximum" class="input input-primary" />
-    </div>
-    <div class="fieldset">
-      <label for="minimumApproval">Minimo de aprobacion</label>
-      <input type="number" [formField]="form.minimumApproval" class="input input-primary" />
-    </div>
-    <div class="fieldset">
-      <label for="minimumExcellence">Minimo de excelencia</label>
-      <input type="number" [formField]="form.minimumExcellence" class="input input-primary" />
-    </div>
+    <ui-field label="Nombre" [field]="form.name">
+      <input uiInput type="text" [formField]="form.name" />
+    </ui-field>
+    <ui-field label="Minimo" [field]="form.minimum">
+      <input uiInput type="number" [formField]="form.minimum" />
+    </ui-field>
+    <ui-field label="Maximo" [field]="form.maximum">
+      <input uiInput type="number" [formField]="form.maximum" />
+    </ui-field>
+    <ui-field label="Minimo de aprobacion" [field]="form.minimumApproval">
+      <input uiInput type="number" [formField]="form.minimumApproval" />
+    </ui-field>
+    <ui-field label="Minimo de excelencia" [field]="form.minimumExcellence">
+      <input uiInput type="number" [formField]="form.minimumExcellence" />
+    </ui-field>
     <div class="flex justify-end gap-2 mt-4">
-      <button class="btn btn-ghost" type="button" (click)="closeModal.emit(false)">Cancelar</button>
-      <button class="btn btn-primary" type="submit">Guardar</button>
+      <button uiButton variant="ghost" type="button" (click)="closeModal.emit(false)">Cancelar</button>
+      <button uiButton variant="primary" type="submit">Guardar</button>
     </div>
   </form>`,
 })

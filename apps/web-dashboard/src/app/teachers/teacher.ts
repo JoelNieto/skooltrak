@@ -1,4 +1,4 @@
-import { Loader } from '#/ui';
+import { Badge, Breadcrumbs, Button, Card, CardBody, Loader } from '#/ui';
 import { DatePipe } from '@angular/common';
 import { httpResource } from '@angular/common/http';
 import { Component, computed, inject, input } from '@angular/core';
@@ -10,19 +10,15 @@ import { isValidId } from '../core/validators';
 type TeacherView = any;
 
 @Component({
-  imports: [Loader, RouterLink, DatePipe],
+  imports: [Breadcrumbs, Badge, Card, CardBody, Button, Loader, RouterLink, DatePipe],
   template: `@defer {
       @if (teacherResource.hasValue() && teacherResource.value()?.id) {
         @let teacher = teacherResource.value()!;
-        <div class="breadcrumbs text-sm">
-          <ul>
-            <li><a routerLink="/">Inicio</a></li>
-            <li><a routerLink="/teachers">Docentes</a></li>
-            <li>{{ teacher.name }}</li>
-          </ul>
-        </div>
-        <div class="card card-border border-base-200 bg-base-100 mt-4">
-          <div class="card-body flex flex-row justify-between items-center">
+        <ui-breadcrumbs
+          [items]="[{ label: 'Inicio', link: '/' }, { label: 'Docentes', link: '/teachers' }, { label: teacher.name }]"
+        />
+        <div uiCard class="mt-4">
+          <div uiCardBody class="flex flex-row justify-between items-center">
             <div class="flex gap-2 items-center ">
               <div class="avatar avatar-placeholder">
                 @if (avatarUrl()) {
@@ -39,12 +35,12 @@ type TeacherView = any;
                 <div class="flex items-center gap-2">
                   {{ teacher.name }}
                   @if (teacher.user?.emailVerified) {
-                    <span class="badge badge-success badge-sm gap-1">
+                    <span uiBadge tone="success" size="sm" class="gap-1">
                       <span class="material-symbols-outlined text-sm!">check_circle</span>
                       Verificado
                     </span>
                   } @else {
-                    <span class="badge badge-warning badge-sm gap-1">
+                    <span uiBadge tone="warning" size="sm" class="gap-1">
                       <span class="material-symbols-outlined text-sm!">schedule</span>
                       Pendiente
                     </span>
@@ -55,11 +51,9 @@ type TeacherView = any;
             </div>
             <div class="flex gap-2 items-center">
               @if (auth.hasPermission('MANAGE_TEACHERS')) {
-                <a class="btn btn-secondary btn-sm" routerLink="edit">
-                  <span class="material-symbols-outlined">edit</span></a
-                >
+                <a uiButton size="sm" routerLink="edit"> <span class="material-symbols-outlined">edit</span></a>
               }
-              <button class="btn btn-primary btn-sm"><span class="material-symbols-outlined">chat</span></button>
+              <button uiButton variant="primary" size="sm"><span class="material-symbols-outlined">chat</span></button>
             </div>
           </div>
         </div>
@@ -154,7 +148,7 @@ type TeacherView = any;
                     <dd class="mt-1 text-sm/6 text-base-content/90 sm:col-span-2 sm:mt-0">
                       <div class="flex flex-wrap gap-2">
                         @for (subject of teacher.subjects; track subject.id) {
-                          <span class="badge badge-secondary">
+                          <span uiBadge>
                             {{ subject.name }}
                           </span>
                         } @empty {
@@ -168,7 +162,7 @@ type TeacherView = any;
                     <dd class="mt-1 text-sm/6 text-base-content/90 sm:col-span-2 sm:mt-0">
                       <div class="flex flex-wrap gap-2">
                         @for (course of teacher.courses; track course.id) {
-                          <a [routerLink]="['/courses', course.id]" class="badge badge-primary">
+                          <a uiBadge tone="action" [routerLink]="['/courses', course.id]">
                             {{ course.name }}
                           </a>
                         } @empty {
@@ -182,7 +176,7 @@ type TeacherView = any;
                     <dd class="mt-2 text-sm text-base-content/90 sm:col-span-2 sm:mt-0">
                       <div class="flex flex-wrap gap-2">
                         @for (group of teacher.classGroups; track group.id) {
-                          <a [routerLink]="['/groups', group.id]" class="badge badge-secondary">
+                          <a uiBadge [routerLink]="['/groups', group.id]">
                             {{ group.name }}
                           </a>
                         } @empty {

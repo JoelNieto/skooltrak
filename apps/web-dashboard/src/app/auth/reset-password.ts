@@ -1,18 +1,19 @@
-import { Loader, Toast } from '#/ui';
+import { Alert, Button, Loader, Toast, UiField, UiInput } from '#/ui';
 import { HttpClient } from '@angular/common/http';
 import { Component, inject, signal } from '@angular/core';
 import { form, FormField, minLength, required, validate } from '@angular/forms/signals';
 import { Router, RouterLink } from '@angular/router';
 import Auth from './auth';
+import { BrandLogo } from '../shared/brand-logo';
 
 @Component({
   selector: 'app-reset-password',
-  imports: [FormField, RouterLink, Loader],
+  imports: [Alert, UiField, UiInput, Button, BrandLogo, FormField, RouterLink, Loader],
   template: `
     <div class="gradient-bg min-h-screen flex items-center justify-center p-4">
       @defer {
         <div class="max-w-md w-full flex flex-col gap-8 items-center">
-          <div><img src="skooltrak.png" alt="" class="h-12" /></div>
+          <div><app-brand-logo alt="" class="h-12" /></div>
 
           <div class="w-full rounded-2xl shadow-xl overflow-hidden flex flex-col">
             <!-- Header Section -->
@@ -24,21 +25,27 @@ import Auth from './auth';
             <!-- Form Section -->
             <div class="p-8 bg-base-100">
               @if (resendSuccess()) {
-                <div class="alert alert-success mb-4">
+                <div uiAlert tone="success" class="mb-4">
                   <span class="material-symbols-outlined">check_circle</span>
                   <span>Invitación reenviada. Revisa tu bandeja de entrada.</span>
                 </div>
-                <a routerLink="/login" class="btn btn-primary w-full"> Volver al inicio de sesión </a>
+                <a uiButton variant="primary" routerLink="/login" class="w-full"> Volver al inicio de sesión </a>
               } @else if (error()) {
-                <div class="alert alert-error mb-4">
+                <div uiAlert tone="danger" class="mb-4">
                   <span class="material-symbols-outlined">error</span>
                   <span>El enlace es inválido o ha expirado. Solicita uno nuevo.</span>
                 </div>
                 <div class="flex flex-col gap-3 text-center">
                   @if (emailFromUrl()) {
-                    <button type="button" class="btn btn-primary" [disabled]="resending()" (click)="resendInvitation()">
+                    <button
+                      uiButton
+                      [loading]="resending()"
+                      variant="primary"
+                      type="button"
+                      [disabled]="resending()"
+                      (click)="resendInvitation()"
+                    >
                       @if (resending()) {
-                        <span class="loading loading-spinner loading-sm"></span>
                         Enviando...
                       } @else {
                         <span class="material-symbols-outlined">mail</span>
@@ -46,48 +53,42 @@ import Auth from './auth';
                       }
                     </button>
                   } @else {
-                    <a routerLink="/forgot-password" class="btn btn-primary"> Solicitar nuevo enlace </a>
+                    <a uiButton variant="primary" routerLink="/forgot-password"> Solicitar nuevo enlace </a>
                   }
                 </div>
               } @else {
                 <form (submit)="onSubmit($event)" class="space-y-6">
-                  <div class="fieldset">
-                    <label for="password">Nueva contraseña</label>
+                  <ui-field label="Nueva contraseña" [field]="form.password">
                     <input
+                      uiInput
                       id="password"
                       [formField]="form.password"
                       type="password"
                       autocomplete="new-password"
-                      class="input input-primary w-full"
                       placeholder="Mínimo 8 caracteres"
                     />
-                    @if (form.password().touched() && form.password().invalid()) {
-                      @for (error of form.password().errors(); track error) {
-                        <p class="text-error text-xs mt-1">{{ error.message }}</p>
-                      }
-                    }
-                  </div>
+                  </ui-field>
 
-                  <div class="fieldset">
-                    <label for="confirmPassword">Confirmar contraseña</label>
+                  <ui-field label="Confirmar contraseña" [field]="form.confirmPassword">
                     <input
+                      uiInput
                       id="confirmPassword"
                       [formField]="form.confirmPassword"
                       type="password"
                       autocomplete="new-password"
-                      class="input input-primary w-full"
                       placeholder="Repite la nueva contraseña"
                     />
-                    @if (form.confirmPassword().touched() && form.confirmPassword().invalid()) {
-                      @for (error of form.confirmPassword().errors(); track error) {
-                        <p class="text-error text-xs mt-1">{{ error.message }}</p>
-                      }
-                    }
-                  </div>
+                  </ui-field>
 
-                  <button type="submit" [disabled]="loading() || form().invalid()" class="btn btn-primary w-full">
+                  <button
+                    uiButton
+                    [loading]="loading()"
+                    variant="primary"
+                    type="submit"
+                    [disabled]="loading() || form().invalid()"
+                    class="w-full"
+                  >
                     @if (loading()) {
-                      <span class="loading loading-spinner loading-sm"></span>
                       Guardando...
                     } @else {
                       Guardar nueva contraseña
@@ -104,7 +105,7 @@ import Auth from './auth';
             </div>
           </div>
 
-          <p class="text-base-200 text-center">2025 © Skooltrak. Todos los derechos reservados.</p>
+          <p class="text-ink-muted text-center">2025 © Skooltrak. Todos los derechos reservados.</p>
         </div>
       } @placeholder {
         <lib-loader />

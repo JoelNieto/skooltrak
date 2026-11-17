@@ -1,20 +1,12 @@
-import { PageHeader, StatCard } from '#/ui';
+import { Card, CardBody, PageHeader, StatCard, UiTable } from '#/ui';
 import { Component } from '@angular/core';
-import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-attendance-reporting',
-  imports: [PageHeader, RouterLink, StatCard],
+  imports: [UiTable, Card, CardBody, PageHeader, StatCard],
   template: `
-    <div class="breadcrumbs text-sm">
-      <ul>
-        <li><a routerLink="/">Inicio</a></li>
-        <li><a routerLink="/admin">Admin</a></li>
-        <li>Asistencia</li>
-      </ul>
-    </div>
-
     <lib-page-header
+      [breadcrumbs]="[{ label: 'Inicio', link: '/' }, { label: 'Admin', link: '/admin' }, { label: 'Asistencia' }]"
       title="Reporte de asistencia"
       subtitle="Indicadores generales por curso y nivel."
       actionLabel="Exportar"
@@ -27,11 +19,11 @@ import { RouterLink } from '@angular/router';
       <lib-stat-card label="Alertas activas" value="5" helper="Pendientes" />
     </div>
 
-    <div class="mt-6 card border border-base-200 bg-base-100">
-      <div class="card-body">
+    <div uiCard class="mt-6">
+      <div uiCardBody>
         <h2 class="text-lg font-semibold text-base-content">Resumen por curso</h2>
         <div class="overflow-x-auto">
-          <table class="table">
+          <table uiTable>
             <thead>
               <tr>
                 <th>Curso</th>

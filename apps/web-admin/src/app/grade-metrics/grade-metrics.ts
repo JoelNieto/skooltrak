@@ -1,29 +1,35 @@
-import { Confirmation, Error, Modal, Toast } from '#/ui';
+import { Breadcrumbs, Button, Confirmation, Error, Modal, Toast, UiTable } from '#/ui';
 import { Menu, MenuContent, MenuItem, MenuTrigger } from '@angular/aria/menu';
 import { OverlayModule } from '@angular/cdk/overlay';
 import { DatePipe, DecimalPipe } from '@angular/common';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { Component, inject, viewChild } from '@angular/core';
-import { RouterLink } from '@angular/router';
 import { Prisma } from '@generated/prisma';
 import GradeMetricsForm from './grade-metrics-form';
 @Component({
   selector: 'app-grade-metrics',
-  imports: [RouterLink, DecimalPipe, DatePipe, Menu, MenuContent, MenuItem, MenuTrigger, OverlayModule, Error],
+  imports: [
+    Breadcrumbs,
+    UiTable,
+    Button,
+    DecimalPipe,
+    DatePipe,
+    Menu,
+    MenuContent,
+    MenuItem,
+    MenuTrigger,
+    OverlayModule,
+    Error,
+  ],
   template: `
-    <div class="breadcrumbs text-sm">
-      <ul>
-        <li><a routerLink="/">Inicio</a></li>
-        <li>Metricas de calificaciones</li>
-      </ul>
-    </div>
+    <ui-breadcrumbs [items]="[{ label: 'Inicio', link: '/' }, { label: 'Metricas de calificaciones' }]" />
     <div class="flex justify-between items-center mb-4">
       <div>
         <h1 class="text-2xl text-base-content font-medium">Metricas de calificaciones</h1>
         <p class="text-sm text-gray-500 dark:text-gray-400">Listado de metricas de calificaciones</p>
       </div>
 
-      <button class="btn btn-neutral" (click)="editGradeMetric()">
+      <button uiButton variant="primary" (click)="editGradeMetric()">
         <span class="material-symbols-outlined">add_circle</span>
         Nueva métrica
       </button>
@@ -32,7 +38,7 @@ import GradeMetricsForm from './grade-metrics-form';
       <lib-error (retry)="metrics.reload()" [description]="$safeNavigationMigration(metrics.error()?.message)" />
     } @else {
       <div class="overflow-x-auto">
-        <table class="table">
+        <table uiTable>
           <thead>
             <tr>
               <th>Nombre</th>

@@ -1,23 +1,30 @@
-import { Confirmation, Error, Modal, Toast } from '#/ui';
+import { Badge, Breadcrumbs, Button, Confirmation, Error, Modal, Spinner, Toast, UiTable } from '#/ui';
 import { Menu, MenuContent, MenuItem, MenuTrigger } from '@angular/aria/menu';
 import { OverlayModule } from '@angular/cdk/overlay';
 import { DatePipe } from '@angular/common';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { Component, inject, viewChild } from '@angular/core';
-import { RouterLink } from '@angular/router';
 import { Prisma } from '@generated/prisma';
 import HabitMetricsForm from './habit-metrics-form';
 
 @Component({
   selector: 'app-habit-metrics',
-  imports: [RouterLink, DatePipe, Menu, MenuContent, MenuItem, MenuTrigger, OverlayModule, Error],
+  imports: [
+    Spinner,
+    Breadcrumbs,
+    UiTable,
+    Badge,
+    Button,
+    DatePipe,
+    Menu,
+    MenuContent,
+    MenuItem,
+    MenuTrigger,
+    OverlayModule,
+    Error,
+  ],
   template: `
-    <div class="breadcrumbs text-sm">
-      <ul>
-        <li><a routerLink="/">Inicio</a></li>
-        <li>Hábitos y actitudes</li>
-      </ul>
-    </div>
+    <ui-breadcrumbs [items]="[{ label: 'Inicio', link: '/' }, { label: 'Hábitos y actitudes' }]" />
     <div class="flex justify-between items-center mb-4">
       <div>
         <h1 class="text-2xl text-base-content font-medium">Criterios de hábitos y actitudes</h1>
@@ -26,7 +33,7 @@ import HabitMetricsForm from './habit-metrics-form';
         </p>
       </div>
 
-      <button class="btn btn-primary" (click)="editHabitMetric()">
+      <button uiButton variant="primary" (click)="editHabitMetric()">
         <span class="material-symbols-outlined">add_circle</span>
         Nueva métrica
       </button>
@@ -35,7 +42,7 @@ import HabitMetricsForm from './habit-metrics-form';
       <lib-error (retry)="metrics.reload()" [description]="$safeNavigationMigration(metrics.error()?.message)" />
     } @else {
       <div class="overflow-x-auto">
-        <table class="table">
+        <table uiTable>
           <thead>
             <tr>
               <th>Nombre</th>
@@ -50,7 +57,7 @@ import HabitMetricsForm from './habit-metrics-form';
             @if (metrics.isLoading()) {
               <tr>
                 <td colspan="6" class="text-center">
-                  <span class="loading loading-spinner loading-md"></span>
+                  <span uiSpinner></span>
                 </td>
               </tr>
             }
@@ -59,7 +66,7 @@ import HabitMetricsForm from './habit-metrics-form';
                 <td>{{ metric.name }}</td>
                 <td class="max-w-64 truncate">{{ metric.description || '-' }}</td>
                 <td>
-                  <span class="badge" [class.badge-success]="metric.active" [class.badge-error]="!metric.active">
+                  <span uiBadge [tone]="metric.active ? 'success' : 'danger'">
                     {{ metric.active ? 'Activo' : 'Inactivo' }}
                   </span>
                 </td>

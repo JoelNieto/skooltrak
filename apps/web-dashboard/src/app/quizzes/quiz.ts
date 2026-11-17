@@ -1,4 +1,16 @@
-import { Confirmation, EditorViewer, Error as ErrorComponent, Loader, Toast } from '#/ui';
+import {
+  Badge,
+  Breadcrumbs,
+  Button,
+  Card,
+  CardBody,
+  CardTitle,
+  Confirmation,
+  EditorViewer,
+  Error as ErrorComponent,
+  Loader,
+  Toast,
+} from '#/ui';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { Component, inject, input } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
@@ -30,24 +42,20 @@ type QuizDetail = {
 
 @Component({
   selector: 'app-quiz',
-  imports: [RouterLink, Loader, EditorViewer, ErrorComponent],
+  imports: [Breadcrumbs, Badge, Card, CardBody, CardTitle, Button, RouterLink, Loader, EditorViewer, ErrorComponent],
   template: `
     @defer {
       @if (quizResource.hasValue()) {
         @let quiz = quizResource.value()!;
-        <div class="breadcrumbs text-sm">
-          <ul>
-            <li><a routerLink="/">Inicio</a></li>
-            <li><a routerLink="/quizzes">Quizes</a></li>
-            <li>{{ quiz.title }}</li>
-          </ul>
-        </div>
-        <div class="card card-border border-base-300 bg-base-100 mt-4">
-          <div class="card-body">
+        <ui-breadcrumbs
+          [items]="[{ label: 'Inicio', link: '/' }, { label: 'Quizes', link: '/quizzes' }, { label: quiz.title }]"
+        />
+        <div uiCard class="mt-4">
+          <div uiCardBody>
             <div class="flex justify-between items-start">
               <div>
                 <h1 class="text-xl font-semibold mb-2">{{ quiz.title }}</h1>
-                <a class="badge badge-primary badge-soft" [routerLink]="['/courses', quiz.course.id]">
+                <a uiBadge tone="action" [routerLink]="['/courses', quiz.course.id]">
                   {{ quiz.course.name }}
                 </a>
                 @if (quiz.teacher) {
@@ -59,11 +67,11 @@ type QuizDetail = {
               </div>
               @if (auth.hasPermission('MANAGE_QUIZZES')) {
                 <div class="flex gap-2">
-                  <a [routerLink]="['/quizzes', quiz.id, 'edit']" class="btn btn-primary btn-sm">
+                  <a uiButton variant="primary" size="sm" [routerLink]="['/quizzes', quiz.id, 'edit']">
                     <span class="material-symbols-outlined">edit</span>
                     Editar
                   </a>
-                  <button class="btn btn-error btn-sm btn-soft" (click)="deleteQuiz(quiz)">
+                  <button uiButton variant="danger" size="sm" (click)="deleteQuiz(quiz)">
                     <span class="material-symbols-outlined">delete</span>
                     Eliminar
                   </button>
@@ -72,25 +80,25 @@ type QuizDetail = {
             </div>
           </div>
         </div>
-        <div class="card card-border border-base-300 bg-base-100 mt-4">
-          <div class="card-body">
-            <h3 class="card-title">Descripción</h3>
+        <div uiCard class="mt-4">
+          <div uiCardBody>
+            <h3 uiCardTitle>Descripción</h3>
             <lib-editor-viewer [innerHTML]="quiz.details" />
           </div>
         </div>
-        <div class="card card-border border-base-300 bg-base-100 mt-4">
-          <div class="card-body">
-            <h3 class="card-title flex items-center gap-2">
+        <div uiCard class="mt-4">
+          <div uiCardBody>
+            <h3 uiCardTitle class="flex items-center gap-2">
               <span class="material-symbols-outlined">quiz</span>
               Preguntas ({{ quiz.questions.length }})
             </h3>
             <div class="flex flex-col gap-4">
               @for (q of quiz.questions; track q.id; let i = $index) {
-                <div class="card bg-base-200">
-                  <div class="card-body py-4">
+                <div uiCard class="bg-base-200">
+                  <div uiCardBody class="py-4">
                     <div class="flex justify-between items-start">
                       <h4 class="font-semibold">Pregunta {{ i + 1 }}</h4>
-                      <span class="badge badge-ghost badge-sm">
+                      <span uiBadge size="sm">
                         {{ QUESTION_TYPE_LABELS[q.type] ?? q.type }}
                       </span>
                     </div>
@@ -107,7 +115,7 @@ type QuizDetail = {
                           <li class="flex items-center gap-2">
                             {{ opt.option }}
                             @if (opt.isCorrect) {
-                              <span class="badge badge-success badge-sm gap-1">
+                              <span uiBadge tone="success" size="sm" class="gap-1">
                                 <span class="material-symbols-outlined text-sm!">check_circle</span>
                                 Correcta
                               </span>

@@ -1,5 +1,5 @@
 import { SchoolContext } from '#/shared';
-import { Toast } from '#/ui';
+import { Alert, Badge, Button, Card, Toast, UiTable } from '#/ui';
 import { Component, inject, signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
@@ -8,17 +8,17 @@ import { StoreApiService } from '../store-api.service';
 
 @Component({
   selector: 'app-products-admin',
-  imports: [RouterLink],
+  imports: [Alert, Card, UiTable, Badge, Button, RouterLink],
   template: `
     <div class="flex justify-between items-center mb-4">
       <h3 class="text-lg font-medium">Productos</h3>
-      <a routerLink="new" class="btn btn-primary btn-sm">Nuevo producto</a>
+      <a uiButton variant="primary" size="sm" routerLink="new">Nuevo producto</a>
     </div>
     @if (!school.currentSchoolId()) {
-      <div class="alert alert-warning">Selecciona una escuela.</div>
+      <div uiAlert tone="warning">Selecciona una escuela.</div>
     } @else {
-      <div class="overflow-x-auto rounded-box border border-base-200">
-        <table class="table">
+      <div uiCard class="overflow-x-auto">
+        <table uiTable>
           <thead>
             <tr>
               <th>Nombre</th>
@@ -36,7 +36,7 @@ import { StoreApiService } from '../store-api.service';
                 <td>{{ p.totalStock }}</td>
                 <td>
                   @if (p.hasOutOfStockVariant) {
-                    <span class="badge badge-warning badge-sm">Alguna talla agotada</span>
+                    <span uiBadge tone="warning" size="sm">Alguna talla agotada</span>
                   } @else {
                     —
                   }
@@ -44,8 +44,8 @@ import { StoreApiService } from '../store-api.service';
                 <td>{{ formatPrice(p.price) }}</td>
                 <td>{{ p.active ? 'Sí' : 'No' }}</td>
                 <td class="flex gap-2">
-                  <a [routerLink]="[p.id, 'edit']" class="btn btn-primary btn-soft btn-sm">Editar</a>
-                  <button type="button" class="btn btn-error btn-soft btn-sm" (click)="remove(p.id!)">Eliminar</button>
+                  <a uiButton size="sm" [routerLink]="[p.id, 'edit']">Editar</a>
+                  <button uiButton variant="danger" size="sm" type="button" (click)="remove(p.id!)">Eliminar</button>
                 </td>
               </tr>
             } @empty {

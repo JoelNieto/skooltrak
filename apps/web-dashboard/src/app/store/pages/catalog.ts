@@ -5,34 +5,45 @@ import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { map, of } from 'rxjs';
 import { StoreApiService } from '../store-api.service';
+import { Alert, Badge, Button, Card, CardBody, CardTitle, UiInput } from '#/ui';
 
 @Component({
   selector: 'app-store-catalog',
-  imports: [RouterLink, FormsModule],
+  imports: [Alert, Badge, Card, CardBody, CardTitle, UiInput, Button, RouterLink, FormsModule],
   template: `
     @if (!schoolId()) {
-      <div class="alert alert-warning">
+      <div uiAlert tone="warning">
         Elige una escuela en <a routerLink="/store" class="link link-primary">la lista de tiendas</a> para ver
         productos.
       </div>
     } @else {
       <div class="flex flex-col gap-4 mb-6">
         <input
+          uiInput
           type="search"
-          class="input input-bordered w-full max-w-md"
+          class="max-w-md"
           placeholder="Buscar productos..."
           [ngModel]="search()"
           (ngModelChange)="search.set($event)"
         />
         <div class="flex flex-wrap gap-2">
-          <button type="button" class="btn btn-sm" [class.btn-primary]="!categoryId()" (click)="categoryId.set(null)">
+          <button
+            uiButton
+            size="sm"
+            type="button"
+            [variant]="!categoryId() ? 'primary' : 'secondary'"
+            [attr.aria-pressed]="!categoryId()"
+            (click)="categoryId.set(null)"
+          >
             Todos
           </button>
           @for (c of categories.value(); track c.id) {
             <button
               type="button"
-              class="btn btn-sm"
-              [class.btn-primary]="categoryId() === c.id!"
+              uiButton
+              size="sm"
+              [variant]="categoryId() === c.id! ? 'primary' : 'secondary'"
+              [attr.aria-pressed]="categoryId() === c.id!"
               (click)="categoryId.set(c.id!)"
             >
               {{ c.name }}
@@ -42,10 +53,7 @@ import { StoreApiService } from '../store-api.service';
       </div>
       <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         @for (p of products.value(); track p.id) {
-          <a
-            [routerLink]="['product', p.id]"
-            class="card bg-base-100 shadow-md card-interactive border border-base-200 overflow-hidden"
-          >
+          <a uiCard [routerLink]="['product', p.id]" class="overflow-hidden">
             <figure class="aspect-square bg-base-200">
               @if (p.imageUrl) {
                 <img [src]="p.imageUrl" [alt]="p.name" class="h-full w-full object-cover" />
@@ -55,14 +63,14 @@ import { StoreApiService } from '../store-api.service';
                 </div>
               }
             </figure>
-            <div class="card-body p-4 gap-1">
-              <h2 class="card-title text-base line-clamp-2">{{ p.name }}</h2>
+            <div uiCardBody class="p-4 gap-1">
+              <h2 uiCardTitle class="text-base line-clamp-2">{{ p.name }}</h2>
               @if (p.hasOutOfStockVariant) {
-                <span class="badge badge-warning badge-sm">Alguna talla agotada</span>
+                <span uiBadge tone="warning" size="sm">Alguna talla agotada</span>
               }
               <p class="text-lg font-semibold text-primary">{{ formatPrice(p.price) }}</p>
               @if ((p.totalStock ?? 0) <= 0) {
-                <span class="badge badge-error badge-sm">Agotado</span>
+                <span uiBadge tone="danger" size="sm">Agotado</span>
               }
             </div>
           </a>

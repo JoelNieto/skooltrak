@@ -1,9 +1,8 @@
-import { debounceSignal, EmptyState, Loader, Modal, PageHeader, Toast } from '#/ui';
+import { Badge, Button, Card, debounceSignal, EmptyState, Loader, Modal, PageHeader, Toast, UiTable } from '#/ui';
 import { DatePipe } from '@angular/common';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { Component, inject, Signal, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
 import { toFetchQueryRecord } from '../core/fetch-query-params';
 import FileShareForm from './file-share-form';
 
@@ -30,15 +29,13 @@ type FileItem = {
 
 @Component({
   selector: 'app-files',
-  imports: [Loader, FormsModule, RouterLink, DatePipe, PageHeader, EmptyState],
+  imports: [Card, UiTable, Badge, Button, Loader, FormsModule, DatePipe, PageHeader, EmptyState],
   template: `
-    <div class="breadcrumbs text-sm">
-      <ul>
-        <li><a routerLink="/">Inicio</a></li>
-        <li>Archivos</li>
-      </ul>
-    </div>
-    <lib-page-header title="Archivos" subtitle="Archivos compartidos conmigo" />
+    <lib-page-header
+      [breadcrumbs]="[{ label: 'Inicio', link: '/' }, { label: 'Archivos' }]"
+      title="Archivos"
+      subtitle="Archivos compartidos conmigo"
+    />
 
     <div class="flex flex-col md:flex-row md:justify-between md:items-center">
       <label class="input input-primary input-md mt-3 md:mt-0">
@@ -56,8 +53,8 @@ type FileItem = {
           <p>Error al cargar archivos compartidos</p>
         }
         @if (sharedFilesResource.hasValue()) {
-          <div class="overflow-x-auto bg-base-100 rounded-lg">
-            <table class="table">
+          <div uiCard class="overflow-x-auto">
+            <table uiTable>
               <thead>
                 <tr>
                   <th>Nombre</th>
@@ -84,35 +81,31 @@ type FileItem = {
                         {{ file.owner.name }}
                       </div>
                     </td>
-                    <td class="text-base-200">{{ courseLabel(file) }}</td>
-                    <td class="text-base-200">{{ file.mimeType }}</td>
-                    <td class="text-base-200">{{ formatBytes(file.size) }}</td>
+                    <td class="text-ink-muted">{{ courseLabel(file) }}</td>
+                    <td class="text-ink-muted">{{ file.mimeType }}</td>
+                    <td class="text-ink-muted">{{ formatBytes(file.size) }}</td>
                     <td>
                       @if (file.access) {
-                        <span
-                          class="badge"
-                          [class.badge-success]="file.access === 'EDIT'"
-                          [class.badge-info]="file.access === 'VIEW'"
-                        >
+                        <span uiBadge [tone]="file.access === 'EDIT' ? 'success' : 'info'">
                           {{ file.access === 'EDIT' ? 'Editar' : 'Ver' }}
                         </span>
                       } @else {
-                        <span class="text-base-200">-</span>
+                        <span class="text-ink-muted">-</span>
                       }
                     </td>
-                    <td class="text-base-200">
+                    <td class="text-ink-muted">
                       {{ file.updatedAt | date: 'short' }}
                     </td>
                     <td class="text-right">
                       @if (file.id) {
-                        <button class="btn btn-primary btn-xs" (click)="openFile(file.id)">Abrir</button>
-                        <button class="btn btn-ghost btn-xs" (click)="downloadFile(file.id)">Descargar</button>
+                        <button uiButton variant="primary" size="sm" (click)="openFile(file.id)">Abrir</button>
+                        <button uiButton variant="ghost" size="sm" (click)="downloadFile(file.id)">Descargar</button>
                       }
                     </td>
                   </tr>
                 } @empty {
                   <tr>
-                    <td colspan="8" class="text-center text-base-200">
+                    <td colspan="8" class="text-center text-ink-muted">
                       <lib-empty-state
                         title="No hay archivos compartidos"
                         icon="folder_open"
@@ -135,8 +128,8 @@ type FileItem = {
           <p>Error al cargar mis archivos</p>
         }
         @if (ownedFilesResource.hasValue()) {
-          <div class="overflow-x-auto bg-base-100 rounded-lg">
-            <table class="table">
+          <div uiCard class="overflow-x-auto">
+            <table uiTable>
               <thead>
                 <tr>
                   <th>Nombre</th>
@@ -151,10 +144,10 @@ type FileItem = {
                 @for (file of ownedFilesResource.value(); track file.id) {
                   <tr>
                     <td class="font-medium">{{ file.name }}</td>
-                    <td class="text-base-200">{{ courseLabel(file) }}</td>
-                    <td class="text-base-200">{{ file.mimeType }}</td>
-                    <td class="text-base-200">{{ formatBytes(file.size) }}</td>
-                    <td class="text-base-200">
+                    <td class="text-ink-muted">{{ courseLabel(file) }}</td>
+                    <td class="text-ink-muted">{{ file.mimeType }}</td>
+                    <td class="text-ink-muted">{{ formatBytes(file.size) }}</td>
+                    <td class="text-ink-muted">
                       {{ file.updatedAt | date: 'short' }}
                     </td>
                     <td class="text-right">
@@ -182,7 +175,7 @@ type FileItem = {
                   </tr>
                 } @empty {
                   <tr>
-                    <td colspan="5" class="text-center text-base-200">No has subido archivos.</td>
+                    <td colspan="5" class="text-center text-ink-muted">No has subido archivos.</td>
                   </tr>
                 }
               </tbody>

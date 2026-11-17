@@ -1,14 +1,16 @@
-import { Toast } from '#/ui';
+import { Button, Toast } from '#/ui';
 import { HttpClient } from '@angular/common/http';
 import { afterRenderEffect, Component, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import { BrandLogo } from '../shared/brand-logo';
 
 @Component({
   selector: 'app-confirm-request',
+  imports: [Button, BrandLogo],
   template: `
     <div class="min-h-screen flex flex-col gradient-bg">
       <header class="p-4 md:p-6 flex items-center justify-between">
-        <img src="skooltrak.png" alt="Skooltrak" class="h-8 md:h-10" />
+        <app-brand-logo class="h-8 md:h-10" />
       </header>
 
       <main class="flex-1 flex flex-col items-center justify-center p-6">
@@ -31,16 +33,22 @@ import { ActivatedRoute, Router } from '@angular/router';
           </div>
 
           <div class="space-y-3">
-            <button class="btn btn-primary w-full" (click)="sendRequest()" [disabled]="loading()">
+            <button
+              uiButton
+              [loading]="loading()"
+              variant="primary"
+              class="w-full"
+              (click)="sendRequest()"
+              [disabled]="loading()"
+            >
               @if (loading()) {
-                <span class="loading loading-spinner loading-sm"></span>
                 Enviando...
               } @else {
                 <span class="material-symbols-outlined">send</span>
                 Enviar Solicitud
               }
             </button>
-            <button class="btn btn-ghost btn-sm" (click)="goBack()">
+            <button uiButton variant="ghost" size="sm" (click)="goBack()">
               <span class="material-symbols-outlined text-lg">arrow_back</span>
               Volver
             </button>

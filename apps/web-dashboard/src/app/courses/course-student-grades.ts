@@ -1,4 +1,4 @@
-import { DecimalToNumber } from '#/ui';
+import { Card, CardBody, DecimalToNumber, UiSelect, UiTable } from '#/ui';
 import { DatePipe, DecimalPipe, NgClass } from '@angular/common';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { afterRenderEffect, Component, computed, inject, input, signal } from '@angular/core';
@@ -10,12 +10,13 @@ import Store from '../core/store';
 
 @Component({
   selector: 'app-course-student-grades',
-  imports: [FormsModule, NgClass, DatePipe, DecimalPipe],
+  imports: [UiTable, Card, CardBody, UiSelect, FormsModule, NgClass, DatePipe, DecimalPipe],
   template: `
     <div class="flex flex-col gap-4">
       <div class="flex justify-between items-start">
         <div
-          class="text-sm card card-compact bg-base-100 "
+          uiCard
+          class="text-sm"
           [ngClass]="{
             'bg-success/10': studentsResource.value().average >= metric().minimumApproval,
             'bg-warning/10':
@@ -24,7 +25,7 @@ import Store from '../core/store';
             'bg-error/10': studentsResource.value().average < metric().minimumApproval,
           }"
         >
-          <div class="card-body">
+          <div uiCardBody>
             <div class="text-sm text-base-content/70">Promedio del periodo:</div>
             <div class="text-lg font-bold">
               <span
@@ -42,7 +43,7 @@ import Store from '../core/store';
           </div>
         </div>
         <div class="w-64!">
-          <select class="select select-primary" [ngModel]="periodId()" (ngModelChange)="periodId.set($event)">
+          <select uiSelect [ngModel]="periodId()" (ngModelChange)="periodId.set($event)">
             <option disabled selected [value]="">Selecciona un periodo...</option>
             @for (period of periodsResource.value(); track period.id) {
               <option [value]="period.id">{{ period.name }}</option>
@@ -57,7 +58,7 @@ import Store from '../core/store';
         }
       </div>
       <div class="overflow-x-auto">
-        <table class="table table-zebra table-fixed">
+        <table uiTable zebra class="table-fixed">
           <thead>
             <tr>
               <th class="w-1/5">Nombre</th>

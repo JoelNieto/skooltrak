@@ -1,24 +1,22 @@
-import { Toast } from '#/ui';
+import { Button, Toast, UiField, UiInput } from '#/ui';
 import { HttpClient } from '@angular/common/http';
 import { afterRenderEffect, Component, inject, input, output, signal } from '@angular/core';
 import { form, FormField, required } from '@angular/forms/signals';
 
 @Component({
   selector: 'app-grade-bucket-form',
-  imports: [FormField],
+  imports: [UiField, UiInput, Button, FormField],
   template: `
     <form (submit)="onSubmit($event)">
-      <div class="fieldset">
-        <label for="name">Nombre</label>
-        <input id="name" [formField]="form.name" class="input input-primary" />
-      </div>
-      <div class="fieldset">
-        <label for="weight">Ponderacion</label>
-        <input id="weight" [formField]="form.weight" type="number" class="input input-primary" />
-      </div>
+      <ui-field label="Nombre" [field]="form.name">
+        <input uiInput id="name" [formField]="form.name" />
+      </ui-field>
+      <ui-field label="Ponderacion" [field]="form.weight">
+        <input uiInput id="weight" [formField]="form.weight" type="number" />
+      </ui-field>
       <div class="flex justify-end gap-2 mt-2">
-        <button type="button" class="btn btn-ghost" (click)="closeModal.emit(false)">Cancelar</button>
-        <button type="submit" class="btn btn-primary">Guardar</button>
+        <button uiButton variant="ghost" type="button" (click)="closeModal.emit(false)">Cancelar</button>
+        <button uiButton variant="primary" type="submit">Guardar</button>
       </div>
     </form>
   `,

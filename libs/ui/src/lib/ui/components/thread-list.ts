@@ -1,4 +1,5 @@
 import { Component, input, output } from '@angular/core';
+import { Badge } from './badge';
 
 export interface ThreadListItem {
   id: string;
@@ -14,6 +15,7 @@ export interface ThreadListItem {
 
 @Component({
   selector: 'lib-thread-list',
+  imports: [Badge],
   template: `
     <ul class="menu w-full gap-2">
       @for (thread of threads(); track thread.id) {
@@ -32,11 +34,11 @@ export interface ThreadListItem {
                 }
                 <span class="font-medium truncate">{{ thread.title }}</span>
                 @if (thread.broadcast) {
-                  <span class="badge badge-primary badge-soft badge-xs shrink-0">Comunicado</span>
+                  <span uiBadge tone="action" size="sm" class="shrink-0">Comunicado</span>
                 }
                 @if (thread.unreadCount; as unread) {
                   @if (unread > 0) {
-                    <span class="badge badge-sm badge-primary ml-auto">{{ unread }}</span>
+                    <span uiBadge tone="action" size="sm" class="ml-auto">{{ unread }}</span>
                   }
                 }
               </div>
@@ -48,7 +50,7 @@ export interface ThreadListItem {
               }
             </div>
             @if (thread.urgent) {
-              <span class="badge badge-sm badge-soft badge-error">Importante</span>
+              <span uiBadge tone="danger" size="sm">Importante</span>
             }
           </button>
         </li>

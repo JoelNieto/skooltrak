@@ -1,7 +1,19 @@
-import { Confirmation, Loader, Modal, Pagination, Paginator } from '#/ui';
+import {
+  Alert,
+  Badge,
+  BadgeTone,
+  Button,
+  Confirmation,
+  Loader,
+  Modal,
+  Pagination,
+  Paginator,
+  UiSelect,
+  UiTable,
+} from '#/ui';
 import { Menu, MenuContent, MenuItem, MenuTrigger } from '@angular/aria/menu';
 import { OverlayModule } from '@angular/cdk/overlay';
-import { DatePipe, NgClass } from '@angular/common';
+import { DatePipe } from '@angular/common';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { Component, inject, input, signal, viewChild } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
@@ -39,33 +51,44 @@ const STATUS_LABELS: Record<string, string> = {
   EXCUSED: 'Excusado',
 };
 
-const STATUS_COLORS: Record<string, string> = {
-  PRESENT: 'badge-success',
-  ABSENT: 'badge-error',
-  LATE: 'badge-warning',
-  SICK_LEAVE: 'badge-info',
-  EXCUSED: 'badge-neutral',
+const STATUS_TONES: Record<string, BadgeTone> = {
+  PRESENT: 'success',
+  ABSENT: 'danger',
+  LATE: 'warning',
+  SICK_LEAVE: 'info',
+  EXCUSED: 'neutral',
 };
 
 @Component({
   selector: 'app-course-attendance',
-  imports: [Loader, FormsModule, DatePipe, NgClass, Paginator, Menu, MenuContent, MenuItem, MenuTrigger, OverlayModule],
+  imports: [
+    Alert,
+    UiTable,
+    Badge,
+    UiSelect,
+    Button,
+    Loader,
+    FormsModule,
+    DatePipe,
+    Paginator,
+    Menu,
+    MenuContent,
+    MenuItem,
+    MenuTrigger,
+    OverlayModule,
+  ],
   providers: [Pagination],
   template: `
     <div class="flex flex-col md:flex-row justify-between gap-4 mb-4">
       <div class="flex gap-2 items-center">
-        <select
-          class="select select-primary"
-          [ngModel]="selectedGroupId()"
-          (ngModelChange)="selectedGroupId.set($event)"
-        >
+        <select uiSelect [ngModel]="selectedGroupId()" (ngModelChange)="selectedGroupId.set($event)">
           <option value="">Todos los grupos</option>
           @for (group of groupsResource.value(); track group.id) {
             <option [value]="group.id">{{ group.name }}</option>
           }
         </select>
       </div>
-      <button class="btn btn-primary" (click)="openForm()">
+      <button uiButton variant="primary" (click)="openForm()">
         <span class="material-symbols-outlined">add</span>
         Nueva asistencia
       </button>
@@ -76,7 +99,7 @@ const STATUS_COLORS: Record<string, string> = {
     }
 
     @if (sessionsResource.error()) {
-      <div class="alert alert-error">
+      <div uiAlert tone="danger">
         <span class="material-symbols-outlined">error</span>
         Error al cargar las sesiones de asistencia
       </div>
@@ -84,7 +107,7 @@ const STATUS_COLORS: Record<string, string> = {
 
     @if (sessionsResource.hasValue()) {
       <div class="overflow-x-auto">
-        <table class="table table-zebra">
+        <table uiTable zebra>
           <thead>
             <tr>
               <th>Fecha</th>
@@ -99,45 +122,48 @@ const STATUS_COLORS: Record<string, string> = {
           <tbody>
             @for (session of sessionsResource.value(); track session.id) {
               @let stats = getStats(session);
-              <tr class="hover">
+              <tr>
                 <td>
                   <span class="font-medium">
                     {{ session.date | date: 'fullDate' }}
                   </span>
                 </td>
                 <td>
-                  <span class="badge badge-ghost">
+                  <span uiBadge>
                     {{ session.classGroup.name }}
                   </span>
                 </td>
                 <td>
-                  <span class="badge badge-success gap-1">
+                  <span uiBadge tone="success" class="gap-1">
                     <span class="material-symbols-outlined text-sm!">check</span>
                     {{ stats.present }}
                   </span>
                 </td>
                 <td>
-                  <span class="badge badge-error gap-1">
+                  <span uiBadge tone="danger" class="gap-1">
                     <span class="material-symbols-outlined text-sm!">close</span>
                     {{ stats.absent }}
                   </span>
                 </td>
                 <td>
-                  <span class="badge badge-warning gap-1">
+                  <span uiBadge tone="warning" class="gap-1">
                     <span class="material-symbols-outlined text-sm!">schedule</span>
                     {{ stats.late }}
                   </span>
                 </td>
                 <td>
-                  <span class="badge badge-info gap-1">
+                  <span uiBadge tone="info" class="gap-1">
                     {{ stats.other }}
                   </span>
                 </td>
                 <td class="text-right">
                   <button
-                    class="btn btn-sm btn-ghost"
+                    uiButton
+                    variant="ghost"
+                    size="sm"
                     ngMenuTrigger
-                    #origin
+                    cdkOverlayOrigin
+                    #origin="cdkOverlayOrigin"
                     #trigger="ngMenuTrigger"
                     [menu]="actionsMenu()"
                   >
@@ -221,11 +247,11 @@ const STATUS_COLORS: Record<string, string> = {
       <dialog class="modal modal-open">
         <div class="modal-box max-w-3xl">
           <h3 class="font-bold text-lg mb-4">Asistencia - {{ selectedSession()!.date | date: 'fullDate' }}</h3>
-          <div class="badge badge-ghost mb-4">
+          <div uiBadge class="mb-4">
             {{ selectedSession()!.classGroup.name }}
           </div>
           <div class="overflow-x-auto max-h-96">
-            <table class="table table-sm">
+            <table uiTable density="compact">
               <thead>
                 <tr>
                   <th>Estudiante</th>
@@ -241,7 +267,7 @@ const STATUS_COLORS: Record<string, string> = {
                       {{ record.student.fatherName }}
                     </td>
                     <td>
-                      <span class="badge" [ngClass]="getStatusColor(record.status)">
+                      <span uiBadge [tone]="statusTone(record.status)">
                         {{ getStatusLabel(record.status) }}
                       </span>
                     </td>
@@ -254,7 +280,7 @@ const STATUS_COLORS: Record<string, string> = {
             </table>
           </div>
           <div class="modal-action">
-            <button class="btn" (click)="selectedSession.set(null)">Cerrar</button>
+            <button uiButton (click)="selectedSession.set(null)">Cerrar</button>
           </div>
         </div>
         <form method="dialog" class="modal-backdrop">
@@ -325,8 +351,8 @@ export default class CourseAttendance {
     return STATUS_LABELS[status] || status;
   }
 
-  getStatusColor(status: string): string {
-    return STATUS_COLORS[status] || 'badge-ghost';
+  statusTone(status: string): BadgeTone {
+    return STATUS_TONES[status] || 'neutral';
   }
 
   openForm(session?: AttendanceSessionType) {

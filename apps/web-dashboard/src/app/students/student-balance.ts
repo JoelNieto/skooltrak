@@ -1,4 +1,4 @@
-import { Loader, PageHeader, StatCard, Toast } from '#/ui';
+import { Alert, Badge, BadgeTone, Card, CardBody, Loader, PageHeader, StatCard, Toast, UiTable } from '#/ui';
 import { DatePipe } from '@angular/common';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { Component, computed, inject, input, signal } from '@angular/core';
@@ -45,16 +45,16 @@ const STATUS_LABELS: Record<ChargeStatus, string> = {
   OVERDUE: 'Vencido',
 };
 
-const STATUS_CLASS: Record<ChargeStatus, string> = {
-  PAID: 'badge-success',
-  PARTIAL: 'badge-info',
-  PENDING: 'badge-warning',
-  OVERDUE: 'badge-error',
+const STATUS_TONES: Record<ChargeStatus, BadgeTone> = {
+  PAID: 'success',
+  PARTIAL: 'info',
+  PENDING: 'warning',
+  OVERDUE: 'danger',
 };
 
 @Component({
   selector: 'app-student-balance',
-  imports: [Loader, PageHeader, StatCard, DatePipe],
+  imports: [Alert, UiTable, Badge, Card, CardBody, Loader, PageHeader, StatCard, DatePipe],
   template: `
     <lib-page-header
       title="Estado de cuenta"
@@ -71,7 +71,7 @@ const STATUS_CLASS: Record<ChargeStatus, string> = {
     }
 
     @if (summaryResource.error()) {
-      <div class="alert alert-error">No se pudo cargar el estado de cuenta.</div>
+      <div uiAlert tone="danger">No se pudo cargar el estado de cuenta.</div>
     }
 
     @if (summaryResource.hasValue() && !summaryResource.isLoading()) {
@@ -106,19 +106,20 @@ const STATUS_CLASS: Record<ChargeStatus, string> = {
       @let overdue = summary.charges.filter((c) => c.status === 'OVERDUE');
       @let active = summary.charges.filter((c) => c.status === 'PENDING' || c.status === 'PARTIAL');
       @let paid = summary.charges.filter((c) => c.status === 'PAID');
-      @let sections = [
-        { title: 'Cargos vencidos', charges: overdue, empty: 'Sin cargos vencidos' },
-        { title: 'Cargos vigentes', charges: active, empty: 'Sin cargos pendientes' },
-        { title: 'Cargos pagados', charges: paid, empty: 'Sin cargos pagados' },
-      ];
+      @let sections =
+        [
+          { title: 'Cargos vencidos', charges: overdue, empty: 'Sin cargos vencidos' },
+          { title: 'Cargos vigentes', charges: active, empty: 'Sin cargos pendientes' },
+          { title: 'Cargos pagados', charges: paid, empty: 'Sin cargos pagados' },
+        ];
 
       <div class="mt-6 grid gap-6">
         @for (section of sections; track section.title) {
-          <div class="card border border-base-200 bg-base-100">
-            <div class="card-body">
+          <div uiCard>
+            <div uiCardBody>
               <h2 class="text-lg font-semibold text-base-content">{{ section.title }}</h2>
               <div class="overflow-x-auto">
-                <table class="table table-sm">
+                <table uiTable density="compact">
                   <thead>
                     <tr>
                       <th>Concepto</th>
@@ -130,13 +131,13 @@ const STATUS_CLASS: Record<ChargeStatus, string> = {
                   </thead>
                   <tbody>
                     @for (c of section.charges; track c.id) {
-                      <tr class="hover">
+                      <tr>
                         <td>{{ c.description }}</td>
                         <td>{{ c.dueDate | date: 'shortDate' }}</td>
                         <td>{{ formatCurrency(c.amount) }}</td>
                         <td>{{ c.paidAmount > 0 ? formatCurrency(c.paidAmount) : '-' }}</td>
                         <td>
-                          <span class="badge badge-sm" [class]="statusClass(c.status)">
+                          <span uiBadge size="sm" [tone]="statusTone(c.status)">
                             {{ statusLabel(c.status) }}
                           </span>
                         </td>
@@ -154,11 +155,11 @@ const STATUS_CLASS: Record<ChargeStatus, string> = {
         }
       </div>
 
-      <div class="mt-6 card border border-base-200 bg-base-100">
-        <div class="card-body">
+      <div uiCard class="mt-6">
+        <div uiCardBody>
           <h2 class="text-lg font-semibold text-base-content">Historial de pagos</h2>
           <div class="overflow-x-auto">
-            <table class="table table-sm">
+            <table uiTable density="compact">
               <thead>
                 <tr>
                   <th>Fecha</th>
@@ -168,7 +169,7 @@ const STATUS_CLASS: Record<ChargeStatus, string> = {
               </thead>
               <tbody>
                 @for (p of summary.payments; track p.id) {
-                  <tr class="hover">
+                  <tr>
                     <td>{{ p.paidAt | date: 'mediumDate' }}</td>
                     <td>{{ formatCurrency(p.amount) }}</td>
                     <td class="text-base-content/70">{{ p.reference || '-' }}</td>
@@ -242,7 +243,7 @@ export default class StudentBalance {
     return STATUS_LABELS[status] ?? status;
   }
 
-  statusClass(status: ChargeStatus): string {
-    return STATUS_CLASS[status] ?? 'badge-ghost';
+  statusTone(status: ChargeStatus): BadgeTone {
+    return STATUS_TONES[status] ?? 'neutral';
   }
 }

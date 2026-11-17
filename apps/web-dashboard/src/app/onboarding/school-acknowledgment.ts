@@ -1,4 +1,4 @@
-import { Toast } from '#/ui';
+import { Button, Toast, UiCheckbox, UiChoice, UiField, UiInput } from '#/ui';
 import { HttpClient } from '@angular/common/http';
 import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -6,15 +6,16 @@ import { form, FormField, maxLength, required } from '@angular/forms/signals';
 import { Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import Store from '../core/store';
+import { BrandLogo } from '../shared/brand-logo';
 
 @Component({
   selector: 'app-school-acknowledgment',
-  imports: [FormField, FormsModule],
+  imports: [UiCheckbox, UiChoice, UiField, UiInput, Button, BrandLogo, FormField, FormsModule],
   template: `
     <div class="min-h-screen flex flex-col gradient-bg">
       <!-- Fixed Header -->
       <header class="p-4 md:p-6 flex items-center justify-between">
-        <img src="skooltrak.png" alt="Skooltrak" class="h-8 md:h-10" />
+        <app-brand-logo class="h-8 md:h-10" />
       </header>
 
       <!-- Scrollable Content -->
@@ -35,42 +36,23 @@ import Store from '../core/store';
 
           <!-- School Form -->
           <form class="space-y-4 text-left">
-            <div class="fieldset">
-              <label for="schoolName" class="label">
-                <span class="label-text font-medium">Nombre de la Escuela</span>
-              </label>
+            <ui-field label="Nombre de la Escuela" [field]="form.name">
               <input
+                uiInput
                 type="text"
                 id="schoolName"
-                class="input input-bordered w-full"
                 placeholder="Escuela Primaria Central"
                 [formField]="form.name"
               />
-              @if (form.name().touched() && form.name().invalid()) {
-                @for (error of form.name().errors(); track error) {
-                  <p class="text-error text-sm">{{ error.message }}</p>
-                }
-              }
-            </div>
+            </ui-field>
 
-            <div class="fieldset">
-              <label for="schoolShortName" class="label">
-                <span class="label-text font-medium">Nombre Corto / Siglas</span>
-              </label>
-              <input
-                type="text"
-                id="schoolShortName"
-                class="input input-bordered w-full"
-                placeholder="EPC"
-                [formField]="form.shortName"
-              />
-              @if (form.shortName().touched() && form.shortName().invalid()) {
-                @for (error of form.shortName().errors(); track error) {
-                  <p class="text-error text-sm">{{ error.message }}</p>
-                }
-              }
-              <p class="text-xs text-base-content/60 mt-1">Se usará para identificar rápidamente tu escuela</p>
-            </div>
+            <ui-field
+              label="Nombre Corto / Siglas"
+              [field]="form.shortName"
+              hint="Se usará para identificar rápidamente tu escuela"
+            >
+              <input uiInput type="text" id="schoolShortName" placeholder="EPC" [formField]="form.shortName" />
+            </ui-field>
           </form>
 
           <!-- Explanation Cards -->
@@ -108,17 +90,18 @@ import Store from '../core/store';
 
           <!-- Confirmation Checkbox -->
           <div class="bg-base-200/50 rounded-xl p-4">
-            <label class="flex items-start gap-3 cursor-pointer">
+            <ui-choice
+              label="Entiendo que estoy configurando una nueva escuela y seré el administrador principal de la misma."
+              class="items-start"
+            >
               <input
+                uiCheckbox
                 type="checkbox"
-                class="checkbox checkbox-primary mt-0.5"
+                class="mt-0.5"
                 [(ngModel)]="acknowledged"
                 [ngModelOptions]="{ standalone: true }"
               />
-              <span class="text-sm text-base-content text-left">
-                Entiendo que estoy configurando una nueva escuela y seré el administrador principal de la misma.
-              </span>
-            </label>
+            </ui-choice>
           </div>
         </div>
       </main>
@@ -129,12 +112,13 @@ import Store from '../core/store';
       >
         <div></div>
         <button
-          class="btn btn-primary"
+          uiButton
+          [loading]="saving()"
+          variant="primary"
           [disabled]="!acknowledged() || form().invalid() || saving()"
           (click)="createSchool()"
         >
           @if (saving()) {
-            <span class="loading loading-spinner loading-sm"></span>
             Creando escuela...
           } @else {
             Crear Escuela y Continuar

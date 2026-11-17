@@ -1,5 +1,7 @@
 import { afterRenderEffect, Component, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import { BrandLogo } from '../shared/brand-logo';
+import { Button, Card, CardBody } from '#/ui';
 
 interface RoleOption {
   id: string;
@@ -11,10 +13,11 @@ interface RoleOption {
 
 @Component({
   selector: 'app-select-role',
+  imports: [Card, CardBody, Button, BrandLogo],
   template: `
     <div class="min-h-screen flex flex-col gradient-bg">
       <header class="p-4 md:p-6 flex items-center justify-between">
-        <img src="skooltrak.png" alt="Skooltrak" class="h-8 md:h-10" />
+        <app-brand-logo class="h-8 md:h-10" />
       </header>
 
       <main class="flex-1 flex flex-col items-center justify-center p-6">
@@ -34,11 +37,8 @@ interface RoleOption {
 
           <div class="grid md:grid-cols-2 gap-4">
             @for (role of roles; track role.id) {
-              <button
-                class="card bg-base-100 shadow hover:shadow-lg transition-all cursor-pointer border border-base-200 hover:border-primary text-left w-full"
-                (click)="selectRole(role.id)"
-              >
-                <div class="card-body items-center text-center space-y-3">
+              <button uiCard class="text-left w-full" (click)="selectRole(role.id)">
+                <div uiCardBody class="items-center text-center space-y-3">
                   <div
                     class="w-14 h-14 rounded-full flex items-center justify-center"
                     [style.background]="role.color + '15'"
@@ -52,7 +52,7 @@ interface RoleOption {
             }
           </div>
 
-          <button class="btn btn-ghost btn-sm" (click)="goBack()">
+          <button uiButton variant="ghost" size="sm" (click)="goBack()">
             <span class="material-symbols-outlined text-lg">arrow_back</span>
             Cambiar escuela
           </button>

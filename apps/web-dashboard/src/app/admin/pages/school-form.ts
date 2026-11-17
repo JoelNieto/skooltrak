@@ -1,4 +1,16 @@
-import { Loader, Toast } from '#/ui';
+import {
+  BreadcrumbItem,
+  Breadcrumbs,
+  Button,
+  Card,
+  CardBody,
+  Loader,
+  Spinner,
+  Toast,
+  UiField,
+  UiInput,
+  UiSelect,
+} from '#/ui';
 import { HttpClient } from '@angular/common/http';
 import { afterRenderEffect, Component, computed, inject, input, signal, viewChild } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
@@ -48,23 +60,23 @@ interface SchoolFormData {
 
 @Component({
   selector: 'app-school-form',
-  imports: [FormField, RouterLink, Loader, ImageCropperComponent, FormsModule],
+  imports: [
+    Spinner,
+    Breadcrumbs,
+    Card,
+    CardBody,
+    UiField,
+    UiInput,
+    UiSelect,
+    Button,
+    FormField,
+    RouterLink,
+    Loader,
+    ImageCropperComponent,
+    FormsModule,
+  ],
   template: `
-    <div class="breadcrumbs text-sm">
-      <ul>
-        <li><a routerLink="/">Inicio</a></li>
-        <li><a routerLink="/admin">Admin</a></li>
-        <li><a routerLink="/admin/schools">Colegios</a></li>
-        @if (isEditMode()) {
-          <li>
-            <a [routerLink]="['/schools', id()]">{{ schoolResource.value()?.name }}</a>
-          </li>
-          <li>Editar</li>
-        } @else {
-          <li>Nuevo</li>
-        }
-      </ul>
-    </div>
+    <ui-breadcrumbs [items]="breadcrumbs()" />
 
     <div class="flex items-center justify-between mb-6">
       <h1 class="text-2xl font-semibold">
@@ -84,8 +96,8 @@ interface SchoolFormData {
               <p class="mt-1 text-sm text-base-content/70">Logo del colegio.</p>
             </div>
             <div class="sm:col-span-3">
-              <div class="card card-border border-base-300 bg-base-100">
-                <div class="card-body gap-y-4">
+              <div uiCard>
+                <div uiCardBody class="gap-y-4">
                   <div class="flex flex-col sm:flex-row gap-6 items-start">
                     <!-- Logo Preview -->
                     <div class="flex flex-col items-center gap-3">
@@ -93,7 +105,7 @@ interface SchoolFormData {
                         class="w-32 min-h-16 max-h-48 rounded-lg border-2 border-dashed border-base-300 flex items-center justify-center overflow-hidden bg-base-200"
                       >
                         @if (isUploadingLogo()) {
-                          <span class="loading loading-spinner loading-lg text-primary"></span>
+                          <span uiSpinner size="lg" class="text-primary"></span>
                         } @else if (logoPreviewUrl() || logoDownloadUrl()) {
                           <img
                             [src]="logoPreviewUrl() || logoDownloadUrl()"
@@ -105,7 +117,14 @@ interface SchoolFormData {
                         }
                       </div>
                       @if ((logoPreviewUrl() || logoDownloadUrl() || schoolForm.logo().value()) && !isUploadingLogo()) {
-                        <button type="button" class="btn btn-ghost btn-xs text-error" (click)="removeLogo()">
+                        <button
+                          uiButton
+                          variant="ghost"
+                          size="sm"
+                          type="button"
+                          class="text-error"
+                          (click)="removeLogo()"
+                        >
                           <span class="material-symbols-outlined text-sm">delete</span>
                           Eliminar
                         </button>
@@ -115,12 +134,7 @@ interface SchoolFormData {
                     <!-- Upload Controls -->
                     <div class="flex-1">
                       <input type="file" #fileInput class="hidden" accept="image/*" (change)="onFileSelected($event)" />
-                      <button
-                        type="button"
-                        class="btn btn-outline btn-primary"
-                        (click)="fileInput.click()"
-                        [disabled]="isUploadingLogo()"
-                      >
+                      <button uiButton type="button" (click)="fileInput.click()" [disabled]="isUploadingLogo()">
                         <span class="material-symbols-outlined">upload</span>
                         {{ schoolForm.logo().value() || logoPreviewUrl() ? 'Cambiar imagen' : 'Subir imagen' }}
                       </button>
@@ -163,10 +177,11 @@ interface SchoolFormData {
                         </div>
                       </div>
                       <div class="flex justify-end gap-2 mt-4">
-                        <button type="button" class="btn btn-ghost" (click)="cancelCrop()">Cancelar</button>
+                        <button uiButton variant="ghost" type="button" (click)="cancelCrop()">Cancelar</button>
                         <button
+                          uiButton
+                          variant="primary"
                           type="button"
-                          class="btn btn-primary"
                           (click)="applyCrop()"
                           [disabled]="!cropPreviewUrl()"
                         >
@@ -187,45 +202,15 @@ interface SchoolFormData {
               <p class="mt-1 text-sm text-base-content/70">Datos principales del colegio.</p>
             </div>
             <div class="sm:col-span-3">
-              <div class="card card-border border-base-300 bg-base-100">
-                <div class="card-body gap-y-4">
+              <div uiCard>
+                <div uiCardBody class="gap-y-4">
                   <div class="sm:grid sm:grid-cols-6 sm:gap-4">
-                    <div class="fieldset col-span-4">
-                      <label for="name">Nombre del colegio</label>
-                      <input
-                        id="name"
-                        type="text"
-                        [formField]="schoolForm.name"
-                        class="input input-primary w-full"
-                        [class.ng-dirty]="schoolForm.name().dirty()"
-                        [class.ng-invalid]="schoolForm.name().invalid()"
-                      />
-                      @if (schoolForm.name().dirty() && schoolForm.name().invalid()) {
-                        <ul>
-                          @for (error of schoolForm.name().errors(); track error) {
-                            <li class="text-error text-sm">{{ error.message }}</li>
-                          }
-                        </ul>
-                      }
-                    </div>
-                    <div class="fieldset col-span-2">
-                      <label for="shortName">Abreviatura</label>
-                      <input
-                        id="shortName"
-                        type="text"
-                        [formField]="schoolForm.shortName"
-                        class="input input-primary w-full"
-                        [class.ng-dirty]="schoolForm.shortName().dirty()"
-                        [class.ng-invalid]="schoolForm.shortName().invalid()"
-                      />
-                      @if (schoolForm.shortName().dirty() && schoolForm.shortName().invalid()) {
-                        <ul>
-                          @for (error of schoolForm.shortName().errors(); track error) {
-                            <li class="text-error text-sm">{{ error.message }}</li>
-                          }
-                        </ul>
-                      }
-                    </div>
+                    <ui-field label="Nombre del colegio" [field]="schoolForm.name" class="col-span-4">
+                      <input uiInput id="name" type="text" [formField]="schoolForm.name" />
+                    </ui-field>
+                    <ui-field label="Abreviatura" [field]="schoolForm.shortName" class="col-span-2">
+                      <input uiInput id="shortName" type="text" [formField]="schoolForm.shortName" />
+                    </ui-field>
                   </div>
                 </div>
               </div>
@@ -239,41 +224,18 @@ interface SchoolFormData {
               <p class="mt-1 text-sm text-base-content/70">Información de contacto del colegio.</p>
             </div>
             <div class="sm:col-span-3">
-              <div class="card card-border border-base-300 bg-base-100">
-                <div class="card-body gap-y-4">
+              <div uiCard>
+                <div uiCardBody class="gap-y-4">
                   <div class="sm:grid sm:grid-cols-6 sm:gap-4">
-                    <div class="fieldset col-span-3">
-                      <label for="email">
-                        Correo electrónico
-                        <span class="text-base-content/50 text-xs">(opcional)</span>
-                      </label>
-                      <input
-                        id="email"
-                        type="email"
-                        [formField]="schoolForm.email"
-                        class="input input-primary w-full"
-                      />
-                    </div>
-                    <div class="fieldset col-span-3">
-                      <label for="phone">
-                        Teléfono
-                        <span class="text-base-content/50 text-xs">(opcional)</span>
-                      </label>
-                      <input id="phone" type="tel" [formField]="schoolForm.phone" class="input input-primary w-full" />
-                    </div>
-                    <div class="fieldset col-span-6">
-                      <label for="website">
-                        Sitio Web
-                        <span class="text-base-content/50 text-xs">(opcional)</span>
-                      </label>
-                      <input
-                        id="website"
-                        type="url"
-                        [formField]="schoolForm.website"
-                        class="input input-primary w-full"
-                        placeholder="https://"
-                      />
-                    </div>
+                    <ui-field label="Correo electrónico" [field]="schoolForm.email" optional class="col-span-3">
+                      <input uiInput id="email" type="email" [formField]="schoolForm.email" />
+                    </ui-field>
+                    <ui-field label="Teléfono" [field]="schoolForm.phone" optional class="col-span-3">
+                      <input uiInput id="phone" type="tel" [formField]="schoolForm.phone" />
+                    </ui-field>
+                    <ui-field label="Sitio Web" [field]="schoolForm.website" optional class="col-span-6">
+                      <input uiInput id="website" type="url" [formField]="schoolForm.website" placeholder="https://" />
+                    </ui-field>
                   </div>
                 </div>
               </div>
@@ -287,54 +249,24 @@ interface SchoolFormData {
               <p class="mt-1 text-sm text-base-content/70">Dirección física del colegio.</p>
             </div>
             <div class="sm:col-span-3">
-              <div class="card card-border border-base-300 bg-base-100">
-                <div class="card-body gap-y-4">
+              <div uiCard>
+                <div uiCardBody class="gap-y-4">
                   <div class="sm:grid sm:grid-cols-6 sm:gap-4">
-                    <div class="fieldset col-span-6">
-                      <label for="address">
-                        Dirección
-                        <span class="text-base-content/50 text-xs">(opcional)</span>
-                      </label>
-                      <input
-                        id="address"
-                        type="text"
-                        [formField]="schoolForm.address"
-                        class="input input-primary w-full"
-                      />
-                    </div>
-                    <div class="fieldset col-span-3">
-                      <label for="city">
-                        Ciudad
-                        <span class="text-base-content/50 text-xs">(opcional)</span>
-                      </label>
-                      <input id="city" type="text" [formField]="schoolForm.city" class="input input-primary w-full" />
-                    </div>
-                    <div class="fieldset col-span-3">
-                      <label for="state">
-                        Estado/Provincia
-                        <span class="text-base-content/50 text-xs">(opcional)</span>
-                      </label>
-                      <input id="state" type="text" [formField]="schoolForm.state" class="input input-primary w-full" />
-                    </div>
-                    <div class="fieldset col-span-3">
-                      <label for="zip">
-                        Código Postal
-                        <span class="text-base-content/50 text-xs">(opcional)</span>
-                      </label>
-                      <input id="zip" type="text" [formField]="schoolForm.zip" class="input input-primary w-full" />
-                    </div>
-                    <div class="fieldset col-span-3">
-                      <label for="country">
-                        País
-                        <span class="text-base-content/50 text-xs">(opcional)</span>
-                      </label>
-                      <input
-                        id="country"
-                        type="text"
-                        [formField]="schoolForm.country"
-                        class="input input-primary w-full"
-                      />
-                    </div>
+                    <ui-field label="Dirección" [field]="schoolForm.address" optional class="col-span-6">
+                      <input uiInput id="address" type="text" [formField]="schoolForm.address" />
+                    </ui-field>
+                    <ui-field label="Ciudad" [field]="schoolForm.city" optional class="col-span-3">
+                      <input uiInput id="city" type="text" [formField]="schoolForm.city" />
+                    </ui-field>
+                    <ui-field label="Estado/Provincia" [field]="schoolForm.state" optional class="col-span-3">
+                      <input uiInput id="state" type="text" [formField]="schoolForm.state" />
+                    </ui-field>
+                    <ui-field label="Código Postal" [field]="schoolForm.zip" optional class="col-span-3">
+                      <input uiInput id="zip" type="text" [formField]="schoolForm.zip" />
+                    </ui-field>
+                    <ui-field label="País" [field]="schoolForm.country" optional class="col-span-3">
+                      <input uiInput id="country" type="text" [formField]="schoolForm.country" />
+                    </ui-field>
                   </div>
                 </div>
               </div>
@@ -350,14 +282,13 @@ interface SchoolFormData {
               </p>
             </div>
             <div class="sm:col-span-3">
-              <div class="card card-border border-base-300 bg-base-100">
-                <div class="card-body gap-y-4">
+              <div uiCard>
+                <div uiCardBody class="gap-y-4">
                   <div class="sm:grid sm:grid-cols-6 sm:gap-4">
-                    <div class="fieldset col-span-3">
-                      <label for="schoolYearStartMonth">Inicio del año escolar</label>
+                    <ui-field label="Inicio del año escolar" class="col-span-3">
                       <select
+                        uiSelect
                         id="schoolYearStartMonth"
-                        class="select select-primary w-full"
                         [ngModelOptions]="{ standalone: true }"
                         [ngModel]="schoolForm.schoolYearStartMonth().value()"
                         (ngModelChange)="onSchoolYearStartMonthChange($event)"
@@ -366,7 +297,7 @@ interface SchoolFormData {
                           <option [value]="m.value">{{ m.label }}</option>
                         }
                       </select>
-                    </div>
+                    </ui-field>
                   </div>
                 </div>
               </div>
@@ -382,8 +313,8 @@ interface SchoolFormData {
               </p>
             </div>
             <div class="sm:col-span-3">
-              <div class="card card-border border-base-300 bg-base-100">
-                <div class="card-body gap-y-4">
+              <div uiCard>
+                <div uiCardBody class="gap-y-4">
                   <div class="sm:grid sm:grid-cols-6 sm:gap-4">
                     <div class="fieldset col-span-2">
                       <label for="primaryColor">
@@ -398,10 +329,11 @@ interface SchoolFormData {
                           class="w-12 h-10 rounded cursor-pointer border border-base-300 p-1 bg-base-200 shrink-0"
                         />
                         <input
+                          uiInput
                           id="primaryColor"
                           type="text"
                           [formField]="schoolForm.primaryColor"
-                          class="input input-primary flex-1 font-mono text-sm"
+                          class="flex-1 font-mono text-sm"
                           placeholder="#3b82f6"
                         />
                       </div>
@@ -419,10 +351,11 @@ interface SchoolFormData {
                           class="w-12 h-10 rounded cursor-pointer border border-base-300 p-1 bg-base-200 shrink-0"
                         />
                         <input
+                          uiInput
                           id="secondaryColor"
                           type="text"
                           [formField]="schoolForm.secondaryColor"
-                          class="input input-primary flex-1 font-mono text-sm"
+                          class="flex-1 font-mono text-sm"
                           placeholder="#10b981"
                         />
                       </div>
@@ -440,10 +373,11 @@ interface SchoolFormData {
                           class="w-12 h-10 rounded cursor-pointer border border-base-300 p-1 bg-base-200 shrink-0"
                         />
                         <input
+                          uiInput
                           id="tertiaryColor"
                           type="text"
                           [formField]="schoolForm.tertiaryColor"
-                          class="input input-primary flex-1 font-mono text-sm"
+                          class="flex-1 font-mono text-sm"
                           placeholder="#8b5cf6"
                         />
                       </div>
@@ -457,11 +391,14 @@ interface SchoolFormData {
 
         <!-- Form Actions -->
         <div class="flex justify-end gap-3 my-6 pt-6 border-t border-base-300">
-          <a [routerLink]="isEditMode() ? ['/schools', id()] : ['/admin/schools']" class="btn btn-ghost">Cancelar</a>
-          <button type="submit" class="btn btn-primary" [disabled]="isSaving() || isUploadingLogo()">
-            @if (isSaving()) {
-              <span class="loading loading-spinner loading-sm"></span>
-            }
+          <a uiButton variant="ghost" [routerLink]="isEditMode() ? ['/schools', id()] : ['/admin/schools']">Cancelar</a>
+          <button
+            uiButton
+            [loading]="isSaving()"
+            variant="primary"
+            type="submit"
+            [disabled]="isSaving() || isUploadingLogo()"
+          >
             {{ isEditMode() ? 'Guardar cambios' : 'Crear colegio' }}
           </button>
         </div>
@@ -470,6 +407,15 @@ interface SchoolFormData {
   `,
 })
 export default class SchoolForm {
+  readonly breadcrumbs = computed<BreadcrumbItem[]>(() => [
+    { label: 'Inicio', link: '/' },
+    { label: 'Admin', link: '/admin' },
+    { label: 'Colegios', link: '/admin/schools' },
+    ...(this.isEditMode()
+      ? [{ label: this.schoolResource.value()?.name ?? '', link: ['/schools', this.id()] }, { label: 'Editar' }]
+      : [{ label: 'Nuevo' }]),
+  ]);
+
   public id = input<string>();
 
   private http = inject(HttpClient);

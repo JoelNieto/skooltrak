@@ -1,5 +1,5 @@
 import { SchoolContext } from '#/shared';
-import { Toast } from '#/ui';
+import { Alert, Button, Card, Toast, UiChoice, UiInput, UiSelect, UiTable, UiToggle } from '#/ui';
 import { Component, effect, inject, input, signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { applyEach, form, FormField, maxLength, min, required, submit } from '@angular/forms/signals';
@@ -35,24 +35,24 @@ function emptyStoreProductForm(): StoreProductFormModel {
 
 @Component({
   selector: 'app-product-form',
-  imports: [FormField],
+  imports: [Alert, Card, UiTable, UiChoice, UiInput, UiSelect, UiToggle, Button, FormField],
   template: `
     <h3 class="text-lg font-medium mb-4">{{ id() ? 'Editar producto' : 'Nuevo producto' }}</h3>
     @if (!school.currentSchoolId()) {
-      <div class="alert alert-warning">Selecciona una escuela.</div>
+      <div uiAlert tone="warning">Selecciona una escuela.</div>
     } @else {
       <form class="grid gap-4 max-w-2xl" (submit)="onSubmit($event)" novalidate>
         <label class="form-control">
           <span class="label-text">Nombre</span>
-          <input class="input input-bordered" [formField]="productForm.name" />
+          <input uiInput [formField]="productForm.name" />
         </label>
         <label class="form-control">
           <span class="label-text">Descripción</span>
-          <textarea class="textarea textarea-bordered" [formField]="productForm.description" rows="3"></textarea>
+          <textarea uiInput [formField]="productForm.description" rows="3"></textarea>
         </label>
         <label class="form-control">
           <span class="label-text">Categoría</span>
-          <select class="select select-bordered" [formField]="productForm.categoryId">
+          <select uiSelect [formField]="productForm.categoryId">
             <option value="">—</option>
             @for (c of categories.value(); track c.id) {
               <option [value]="c.id">{{ c.name }}</option>
@@ -61,23 +61,23 @@ function emptyStoreProductForm(): StoreProductFormModel {
         </label>
         <label class="form-control">
           <span class="label-text">Precio</span>
-          <input class="input input-bordered" type="number" step="0.01" [formField]="productForm.price" />
+          <input uiInput type="number" step="0.01" [formField]="productForm.price" />
         </label>
         <label class="form-control">
           <span class="label-text">URL de imagen (opcional)</span>
-          <input class="input input-bordered" [formField]="productForm.imageUrl" />
+          <input uiInput [formField]="productForm.imageUrl" />
         </label>
 
         <div class="space-y-2">
           <div class="flex justify-between items-center">
             <span class="font-medium">Tallas / variantes y stock</span>
-            <button type="button" class="btn btn-ghost btn-sm" (click)="addVariantRow()">+ Añadir talla</button>
+            <button uiButton variant="ghost" size="sm" type="button" (click)="addVariantRow()">+ Añadir talla</button>
           </div>
           <p class="text-sm text-base-content/60">
             Ej.: S, M, L o 28, 30, 32. Cada fila es una talla con su propio inventario.
           </p>
-          <div class="overflow-x-auto rounded-box border border-base-200">
-            <table class="table table-sm">
+          <div uiCard class="overflow-x-auto">
+            <table uiTable density="compact">
               <thead>
                 <tr>
                   <th>Etiqueta</th>
@@ -90,23 +90,22 @@ function emptyStoreProductForm(): StoreProductFormModel {
                 @for (row of productForm.variants; track $index) {
                   <tr>
                     <td>
-                      <input
-                        class="input input-bordered input-sm w-full max-w-40"
-                        [formField]="row.label"
-                        placeholder="S, M, 32…"
-                      />
+                      <input uiInput class="input-sm max-w-40" [formField]="row.label" placeholder="S, M, 32…" />
                     </td>
                     <td>
-                      <input class="input input-bordered input-sm w-24" type="number" [formField]="row.stock" />
+                      <input uiInput class="input-sm w-24" type="number" [formField]="row.stock" />
                     </td>
                     <td>
-                      <input class="input input-bordered input-sm w-16" type="number" [formField]="row.sortOrder" />
+                      <input uiInput class="input-sm w-16" type="number" [formField]="row.sortOrder" />
                     </td>
                     <td>
                       @if (productModel().variants.length > 1) {
                         <button
+                          uiButton
+                          variant="ghost"
+                          size="sm"
                           type="button"
-                          class="btn btn-ghost btn-xs text-error"
+                          class="text-error"
                           (click)="removeVariantRow($index)"
                         >
                           Quitar
@@ -120,15 +119,14 @@ function emptyStoreProductForm(): StoreProductFormModel {
           </div>
         </div>
 
-        <label class="label cursor-pointer justify-start gap-2">
-          <input type="checkbox" class="toggle" [formField]="productForm.active" />
-          <span class="label-text">Activo</span>
-        </label>
+        <ui-choice label="Activo">
+          <input uiToggle tone="neutral" type="checkbox" [formField]="productForm.active" />
+        </ui-choice>
         <div class="flex gap-2">
-          <button type="submit" class="btn btn-primary" [disabled]="saving() || productForm().invalid()">
+          <button uiButton variant="primary" type="submit" [disabled]="saving() || productForm().invalid()">
             Guardar
           </button>
-          <button type="button" class="btn btn-ghost" (click)="goToProductsAdmin()">Cancelar</button>
+          <button uiButton variant="ghost" type="button" (click)="goToProductsAdmin()">Cancelar</button>
         </div>
       </form>
     }

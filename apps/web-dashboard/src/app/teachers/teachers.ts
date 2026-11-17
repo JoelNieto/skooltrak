@@ -1,4 +1,4 @@
-import { Confirmation, Pagination, PaginatorV2, Toast } from '#/ui';
+import { Badge, Breadcrumbs, Button, Card, Confirmation, Pagination, PaginatorV2, Toast, UiTable } from '#/ui';
 import { Menu, MenuContent, MenuItem, MenuTrigger } from '@angular/aria/menu';
 import { OverlayModule } from '@angular/cdk/overlay';
 import { DatePipe } from '@angular/common';
@@ -21,15 +21,25 @@ type Teacher = Prisma.TeacherGetPayload<{ include: { user: true } }> & {
 
 @Component({
   selector: 'app-teachers',
-  imports: [DatePipe, PaginatorV2, FormField, RouterLink, Menu, MenuTrigger, OverlayModule, MenuContent, MenuItem],
+  imports: [
+    Breadcrumbs,
+    Card,
+    UiTable,
+    Badge,
+    Button,
+    DatePipe,
+    PaginatorV2,
+    FormField,
+    RouterLink,
+    Menu,
+    MenuTrigger,
+    OverlayModule,
+    MenuContent,
+    MenuItem,
+  ],
   providers: [Pagination],
   template: `
-    <div class="breadcrumbs text-sm">
-      <ul>
-        <li><a routerLink="/">Inicio</a></li>
-        <li>Docentes</li>
-      </ul>
-    </div>
+    <ui-breadcrumbs [items]="[{ label: 'Inicio', link: '/' }, { label: 'Docentes' }]" />
     <h1 class="text-2xl font-semibold mb-2">Docentes</h1>
     <div class="flex flex-col gap-4 md:flex-row md:justify-between">
       <div class="md:w-96 w-full">
@@ -39,13 +49,13 @@ type Teacher = Prisma.TeacherGetPayload<{ include: { user: true } }> & {
         </label>
       </div>
       @if (auth.hasPermission('MANAGE_TEACHERS')) {
-        <a routerLink="/teachers/new" class="btn btn-primary">
+        <a uiButton variant="primary" routerLink="/teachers/new">
           <span class="material-symbols-outlined">add_circle</span> Agregar Profesor
         </a>
       }
     </div>
-    <div class="overflow-x-auto bg-base-100 rounded-lg mt-4 border border-base-300">
-      <table class="table">
+    <div uiCard class="overflow-x-auto mt-4">
+      <table uiTable>
         <thead>
           <tr>
             <th>Nombre</th>
@@ -74,12 +84,12 @@ type Teacher = Prisma.TeacherGetPayload<{ include: { user: true } }> & {
                     <div class="flex items-center gap-2">
                       {{ teacher.name }}
                       @if (teacher.user?.emailVerified) {
-                        <span class="badge badge-success badge-sm gap-1">
+                        <span uiBadge tone="success" size="sm" class="gap-1">
                           <span class="material-symbols-outlined text-sm!">check_circle</span>
                           Verificado
                         </span>
                       } @else {
-                        <span class="badge badge-warning badge-sm gap-1">
+                        <span uiBadge tone="warning" size="sm" class="gap-1">
                           <span class="material-symbols-outlined text-sm!">schedule</span>
                           Pendiente
                         </span>

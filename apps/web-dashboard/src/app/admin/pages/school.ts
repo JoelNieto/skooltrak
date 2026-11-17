@@ -1,4 +1,4 @@
-import { Loader } from '#/ui';
+import { Badge, Breadcrumbs, Button, Card, CardBody, Loader } from '#/ui';
 import { Tab, TabContent, TabList, TabPanel, Tabs } from '@angular/aria/tabs';
 import { DatePipe } from '@angular/common';
 import { httpResource } from '@angular/common/http';
@@ -26,25 +26,39 @@ type SchoolDetail = {
 
 @Component({
   selector: 'app-school',
-  imports: [RouterLink, Loader, DatePipe, TabList, Tab, Tabs, TabPanel, TabContent],
+  imports: [
+    Breadcrumbs,
+    Badge,
+    Card,
+    CardBody,
+    Button,
+    RouterLink,
+    Loader,
+    DatePipe,
+    TabList,
+    Tab,
+    Tabs,
+    TabPanel,
+    TabContent,
+  ],
   template: `
     @if (schoolResource.isLoading()) {
       <lib-loader />
     } @else {
       @if (schoolResource.hasValue() && schoolResource.value()?.id) {
         @let school = schoolResource.value()!;
-        <div class="breadcrumbs text-sm">
-          <ul>
-            <li><a routerLink="/">Inicio</a></li>
-            <li><a routerLink="/admin">Admin</a></li>
-            <li><a routerLink="/admin/schools">Colegios</a></li>
-            <li>{{ school.name }}</li>
-          </ul>
-        </div>
+        <ui-breadcrumbs
+          [items]="[
+            { label: 'Inicio', link: '/' },
+            { label: 'Admin', link: '/admin' },
+            { label: 'Colegios', link: '/admin/schools' },
+            { label: school.name },
+          ]"
+        />
 
         <!-- Header Card -->
-        <div class="card w-full bg-base-100 mt-4">
-          <div class="card-body">
+        <div uiCard class="w-full mt-4">
+          <div uiCardBody>
             <div class="flex items-center justify-between">
               <div class="flex gap-4 items-center">
                 <div
@@ -59,7 +73,7 @@ type SchoolDetail = {
                 <div class="flex flex-col">
                   <div class="flex items-center gap-2">
                     <span class="font-semibold text-lg">{{ school.name }}</span>
-                    <span class="badge badge-primary badge-sm">{{ school.shortName }}</span>
+                    <span uiBadge tone="action" size="sm">{{ school.shortName }}</span>
                   </div>
                   @if (school.city || school.country) {
                     <span class="text-sm text-base-content/60">
@@ -68,7 +82,7 @@ type SchoolDetail = {
                   }
                 </div>
               </div>
-              <a [routerLink]="['/schools', school.id, 'edit']" class="btn btn-primary btn-sm">
+              <a uiButton variant="primary" size="sm" [routerLink]="['/schools', school.id, 'edit']">
                 <span class="material-symbols-outlined text-lg">edit</span>
                 Editar
               </a>
@@ -234,12 +248,7 @@ type SchoolDetail = {
                   <!-- Map placeholder - could be enhanced with actual map integration -->
                   @if (school.address || school.city) {
                     <div class="mt-6 px-4 sm:px-0">
-                      <a
-                        [href]="getGoogleMapsUrl(school)"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        class="btn btn-outline btn-sm"
-                      >
+                      <a uiButton size="sm" [href]="getGoogleMapsUrl(school)" target="_blank" rel="noopener noreferrer">
                         <span class="material-symbols-outlined text-lg">map</span>
                         Ver en Google Maps
                       </a>

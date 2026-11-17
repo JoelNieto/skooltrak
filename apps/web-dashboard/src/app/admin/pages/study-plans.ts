@@ -1,4 +1,4 @@
-import { Confirmation, EmptyState, Modal, PaginatorV2, Toast } from '#/ui';
+import { Button, Card, Confirmation, EmptyState, Modal, PaginatorV2, Toast, UiSelect, UiTable } from '#/ui';
 import { Menu, MenuContent, MenuItem, MenuTrigger } from '@angular/aria/menu';
 import { OverlayModule } from '@angular/cdk/overlay';
 import { DatePipe } from '@angular/common';
@@ -28,7 +28,21 @@ type DegreeRow = {
 
 @Component({
   selector: 'app-study-plans',
-  imports: [DatePipe, Menu, PaginatorV2, MenuContent, MenuItem, MenuTrigger, OverlayModule, FormField, EmptyState],
+  imports: [
+    Card,
+    UiTable,
+    UiSelect,
+    Button,
+    DatePipe,
+    Menu,
+    PaginatorV2,
+    MenuContent,
+    MenuItem,
+    MenuTrigger,
+    OverlayModule,
+    FormField,
+    EmptyState,
+  ],
 
   template: `<div class="flex justify-between">
       <div class="flex gap-2">
@@ -38,19 +52,19 @@ type DegreeRow = {
             <input class="pl-0" type="search" placeholder="Buscar..." [formField]="form.searchText" />
           </label>
         </div>
-        <select class="select select-primary" [formField]="form.degreeId">
+        <select uiSelect [formField]="form.degreeId">
           <option [value]="''">Elija nivel...</option>
           @for (degree of degrees.value(); track degree.id) {
             <option [value]="degree.id">{{ degree.name }}</option>
           }
         </select>
       </div>
-      <button class="btn btn-primary" (click)="editStudyPlan()">
+      <button uiButton variant="primary" (click)="editStudyPlan()">
         <span class="material-symbols-outlined">add_circle</span> Nuevo plan
       </button>
     </div>
-    <div class="bg-base-100 rounded-lg border border-base-300 mt-4">
-      <table class="table">
+    <div uiCard class="mt-4">
+      <table uiTable>
         <thead>
           <tr>
             <th>Nombre</th>

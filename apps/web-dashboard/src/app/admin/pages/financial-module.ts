@@ -1,8 +1,7 @@
-import { Modal, PageHeader } from '#/ui';
+import { Alert, Button, Modal, PageHeader, UiSelect } from '#/ui';
 import { Tab, TabContent, TabList, TabPanel, Tabs } from '@angular/aria/tabs';
 import { Component, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
 import Auth from '../../auth/auth';
 import Store from '../../core/store';
 import StudentBalance from '../../students/student-balance';
@@ -15,11 +14,13 @@ import CreatePaymentForm from '../forms/create-payment-form';
 @Component({
   selector: 'app-financial-module',
   imports: [
+    Alert,
+    UiSelect,
+    Button,
     ChargesSection,
     FormsModule,
     PageHeader,
     PaymentsSection,
-    RouterLink,
     TabList,
     Tab,
     Tabs,
@@ -29,14 +30,11 @@ import CreatePaymentForm from '../forms/create-payment-form';
     StudentBalance,
   ],
   template: `
-    <div class="breadcrumbs text-sm">
-      <ul>
-        <li><a routerLink="/">Inicio</a></li>
-        <li>Finanzas</li>
-      </ul>
-    </div>
-
-    <lib-page-header title="Módulo financiero" subtitle="Gestión de cargos, pagos y estados de cuenta." />
+    <lib-page-header
+      [breadcrumbs]="[{ label: 'Inicio', link: '/' }, { label: 'Finanzas' }]"
+      title="Módulo financiero"
+      subtitle="Gestión de cargos, pagos y estados de cuenta."
+    />
 
     <div ngTabs>
       <div class="flex justify-between items-center mt-4">
@@ -46,20 +44,16 @@ import CreatePaymentForm from '../forms/create-payment-form';
           <div ngTab value="balances" class="tab">Saldos</div>
         </div>
         <div class="flex gap-2 items-center">
-          <select
-            class="select select-primary select-sm"
-            [ngModel]="yearFilter()"
-            (ngModelChange)="yearFilter.set($event)"
-          >
+          <select uiSelect class="select-sm" [ngModel]="yearFilter()" (ngModelChange)="yearFilter.set($event)">
             @for (y of years(); track y) {
               <option [value]="y">{{ y }}</option>
             }
           </select>
           @if (!auth.isStudent()) {
-            <button class="btn btn-primary btn-sm" (click)="openCreateCharge()">
+            <button uiButton variant="primary" size="sm" (click)="openCreateCharge()">
               <span class="material-symbols-outlined">add</span> Nuevo cargo
             </button>
-            <button class="btn btn-primary btn-sm" (click)="openCreatePayment()">
+            <button uiButton variant="primary" size="sm" (click)="openCreatePayment()">
               <span class="material-symbols-outlined">add</span> Registrar pago
             </button>
           }
@@ -84,14 +78,14 @@ import CreatePaymentForm from '../forms/create-payment-form';
                 @if (selectedStudentId(); as id) {
                   <app-student-balance [studentId]="id" />
                 } @else {
-                  <div class="alert alert-info">Selecciona un alumno para consultar su estado de cuenta.</div>
+                  <div uiAlert>Selecciona un alumno para consultar su estado de cuenta.</div>
                 }
               </div>
             } @else {
               @if (store.currentStudentId(); as id) {
                 <app-student-balance [studentId]="id" />
               } @else {
-                <div class="alert alert-warning">No se encontró un alumno asociado a esta cuenta.</div>
+                <div uiAlert tone="warning">No se encontró un alumno asociado a esta cuenta.</div>
               }
             }
           </ng-template>

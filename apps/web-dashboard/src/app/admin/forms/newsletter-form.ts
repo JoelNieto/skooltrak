@@ -1,4 +1,4 @@
-import { TextEditor, Toast } from '#/ui';
+import { Breadcrumbs, Button, Card, CardBody, TextEditor, Toast, UiChoice, UiField, UiInput, UiToggle } from '#/ui';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { afterRenderEffect, Component, computed, inject, input, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -16,20 +16,29 @@ interface NewsletterDto {
 
 @Component({
   selector: 'app-newsletter-form',
-  imports: [FormField, FormsModule, TextEditor, RouterLink],
+  imports: [
+    Breadcrumbs,
+    Card,
+    CardBody,
+    UiChoice,
+    UiField,
+    UiInput,
+    UiToggle,
+    Button,
+    FormField,
+    FormsModule,
+    TextEditor,
+    RouterLink,
+  ],
   template: `
-    <div class="breadcrumbs text-sm">
-      <ul>
-        <li><a routerLink="/">Inicio</a></li>
-        <li><a routerLink="/admin">Admin</a></li>
-        <li><a routerLink="/admin/newsletters">Boletines</a></li>
-        @if (isEditMode()) {
-          <li>Editar</li>
-        } @else {
-          <li>Nuevo</li>
-        }
-      </ul>
-    </div>
+    <ui-breadcrumbs
+      [items]="[
+        { label: 'Inicio', link: '/' },
+        { label: 'Admin', link: '/admin' },
+        { label: 'Boletines', link: '/admin/newsletters' },
+        { label: isEditMode() ? 'Editar' : 'Nuevo' },
+      ]"
+    />
 
     <div class="flex items-center justify-between mb-6">
       <h1 class="text-2xl font-semibold">
@@ -46,34 +55,14 @@ interface NewsletterDto {
             <p class="mt-1 text-sm text-base-content/70">Título y estado del boletín.</p>
           </div>
           <div class="sm:col-span-3">
-            <div class="card card-border border-base-300 bg-base-100">
-              <div class="card-body gap-y-4">
-                <div class="fieldset">
-                  <label for="title">Título</label>
-                  <input
-                    type="text"
-                    id="title"
-                    [formField]="formData.title"
-                    class="input input-primary w-full"
-                    [class.ng-invalid]="formData.title().touched() && formData.title().invalid()"
-                  />
-                  @if (formData.title().invalid() && formData.title().touched()) {
-                    @for (error of formData.title().errors(); track error) {
-                      <p class="text-error text-sm">{{ error.message }}</p>
-                    }
-                  }
-                </div>
-                <div class="fieldset">
-                  <label class="flex items-center gap-2 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      class="toggle toggle-primary"
-                      [(ngModel)]="published"
-                      [ngModelOptions]="{ standalone: true }"
-                    />
-                    <span>Publicar inmediatamente</span>
-                  </label>
-                </div>
+            <div uiCard>
+              <div uiCardBody class="gap-y-4">
+                <ui-field label="Título" [field]="formData.title">
+                  <input uiInput type="text" id="title" [formField]="formData.title" />
+                </ui-field>
+                <ui-choice label="Publicar inmediatamente">
+                  <input uiToggle type="checkbox" [(ngModel)]="published" [ngModelOptions]="{ standalone: true }" />
+                </ui-choice>
               </div>
             </div>
           </div>
@@ -86,8 +75,8 @@ interface NewsletterDto {
             <p class="mt-1 text-sm text-base-content/70">Redacta el contenido del boletín.</p>
           </div>
           <div class="sm:col-span-3">
-            <div class="card card-border border-base-300 bg-base-100">
-              <div class="card-body">
+            <div uiCard>
+              <div uiCardBody>
                 <lib-text-editor [bordered]="true" [(ngModel)]="content" [ngModelOptions]="{ standalone: true }" />
               </div>
             </div>
@@ -97,11 +86,8 @@ interface NewsletterDto {
 
       <!-- Form Actions -->
       <div class="flex justify-end gap-3 my-6 pt-6 border-t border-base-300">
-        <a routerLink="/admin/newsletters" class="btn btn-ghost">Cancelar</a>
-        <button type="submit" class="btn btn-primary" [disabled]="isSaving()">
-          @if (isSaving()) {
-            <span class="loading loading-spinner loading-sm"></span>
-          }
+        <a uiButton variant="ghost" routerLink="/admin/newsletters">Cancelar</a>
+        <button uiButton [loading]="isSaving()" variant="primary" type="submit" [disabled]="isSaving()">
           {{ isEditMode() ? 'Guardar cambios' : 'Crear boletín' }}
         </button>
       </div>

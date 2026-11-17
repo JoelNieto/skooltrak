@@ -1,4 +1,4 @@
-import { Toast } from '#/ui';
+import { Button, Toast, UiField, UiInput } from '#/ui';
 import { HttpClient } from '@angular/common/http';
 import { afterRenderEffect, Component, inject, input, output, signal } from '@angular/core';
 import { form, FormField, required, submit } from '@angular/forms/signals';
@@ -6,49 +6,19 @@ import { Prisma } from '@generated/prisma';
 
 @Component({
   selector: 'app-subjects-form',
-  imports: [FormField],
+  imports: [UiField, UiInput, Button, FormField],
   template: `<form (submit)="onSubmit($event)" novalidate="novalidate">
     <div class="flex flex-col gap-2">
-      <div class="fieldset">
-        <label for="name">Nombre</label>
-        <input
-          type="text"
-          id="name"
-          [formField]="form.name"
-          class="input input-primary"
-          [class.ng-dirty]="form.name().dirty()"
-          [class.ng-invalid]="form.name().invalid()"
-        />
-        @if (form.name().invalid() && form.name().dirty()) {
-          <ul>
-            @for (error of form.name().errors(); track error) {
-              <li class="text-error">{{ error.message }}</li>
-            }
-          </ul>
-        }
-      </div>
-      <div class="fieldset">
-        <label for="code">Código</label>
-        <input
-          type="text"
-          id="code"
-          [formField]="form.code"
-          class="input input-primary"
-          [class.ng-dirty]="form.code().dirty()"
-          [class.ng-invalid]="form.code().invalid()"
-        />
-        @if (form.code().invalid() && form.code().dirty()) {
-          <ul>
-            @for (error of form.code().errors(); track error) {
-              <li class="text-error">{{ error.message }}</li>
-            }
-          </ul>
-        }
-      </div>
+      <ui-field label="Nombre" [field]="form.name">
+        <input uiInput type="text" id="name" [formField]="form.name" />
+      </ui-field>
+      <ui-field label="Código" [field]="form.code">
+        <input uiInput type="text" id="code" [formField]="form.code" />
+      </ui-field>
     </div>
     <div class="flex justify-end gap-2 mt-4">
-      <button class="btn btn-ghost" (click)="closeModal.emit()" type="button">Cancelar</button>
-      <button class="btn btn-primary" type="submit">Guardar</button>
+      <button uiButton variant="ghost" (click)="closeModal.emit()" type="button">Cancelar</button>
+      <button uiButton variant="primary" type="submit">Guardar</button>
     </div>
   </form>`,
 })

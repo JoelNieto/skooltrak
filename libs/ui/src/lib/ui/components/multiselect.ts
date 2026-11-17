@@ -4,6 +4,14 @@ import { OverlayModule } from '@angular/cdk/overlay';
 import { afterRenderEffect, Component, computed, forwardRef, viewChild, viewChildren } from '@angular/core';
 import { NG_VALUE_ACCESSOR, ReactiveFormsModule } from '@angular/forms';
 
+/**
+ * FUTURE: placeholder, to be rebuilt from scratch before first use. Not used by any app yet.
+ *
+ * Known problems with this version (a copy of the @angular/aria combobox example):
+ * - styles reference CSS variables that don't exist (`--hot-pink`, `--primary-contrast`) instead of design tokens
+ * - options are hard-coded (`labels`) instead of an input
+ * - provides NG_VALUE_ACCESSOR without implementing ControlValueAccessor, so binding it to a form throws
+ */
 @Component({
   selector: 'lib-multiselect',
   imports: [ReactiveFormsModule, Combobox, Listbox, Option, OverlayModule],

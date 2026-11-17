@@ -1,4 +1,4 @@
-import { Toast } from '#/ui';
+import { Button, Toast } from '#/ui';
 import { HttpClient } from '@angular/common/http';
 import { Component, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
@@ -10,6 +10,7 @@ import DegreesStep from './steps/degrees';
 import GroupsStep from './steps/groups';
 import SchoolBasicsStep from './steps/school-basics';
 import StudyPlansStep from './steps/study-plans';
+import { BrandLogo } from '../shared/brand-logo';
 
 export type CreatedEntity = {
   id: string;
@@ -19,12 +20,12 @@ export type CreatedEntity = {
 
 @Component({
   selector: 'app-setup-wizard',
-  imports: [SchoolBasicsStep, DegreesStep, StudyPlansStep, CoursesStep, GroupsStep],
+  imports: [Button, BrandLogo, SchoolBasicsStep, DegreesStep, StudyPlansStep, CoursesStep, GroupsStep],
   template: `
     <div class="min-h-screen flex flex-col gradient-bg">
       <!-- Fixed Header -->
       <header class="p-4 md:p-6 flex items-center justify-between">
-        <img src="skooltrak.png" alt="Skooltrak" class="h-8 md:h-10" />
+        <app-brand-logo class="h-8 md:h-10" />
         <div class="flex items-center gap-3">
           <span class="text-sm text-base-content/60 hidden sm:inline">
             Paso {{ currentStep() }} de {{ totalSteps }}
@@ -92,7 +93,7 @@ export type CreatedEntity = {
       >
         <div>
           @if (currentStep() > 1) {
-            <button type="button" class="btn btn-ghost" (click)="previousStep()">
+            <button uiButton variant="ghost" type="button" (click)="previousStep()">
               <span class="material-symbols-outlined text-xl">arrow_back</span>
               Anterior
             </button>
@@ -101,13 +102,19 @@ export type CreatedEntity = {
 
         <div class="flex items-center gap-3">
           @if (currentStep() > 1 && currentStep() < totalSteps) {
-            <button type="button" class="btn btn-ghost" (click)="skipStep()">Omitir por ahora</button>
+            <button uiButton variant="ghost" type="button" (click)="skipStep()">Omitir por ahora</button>
           }
 
           @if (currentStep() === totalSteps) {
-            <button type="button" class="btn btn-primary" (click)="completeOnboarding()" [disabled]="completing()">
+            <button
+              uiButton
+              [loading]="completing()"
+              variant="primary"
+              type="button"
+              (click)="completeOnboarding()"
+              [disabled]="completing()"
+            >
               @if (completing()) {
-                <span class="loading loading-spinner loading-sm"></span>
                 Finalizando...
               } @else {
                 Finalizar configuración

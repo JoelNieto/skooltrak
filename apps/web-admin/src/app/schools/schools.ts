@@ -1,30 +1,37 @@
-import { Confirmation, Error, Loader, Modal, Pagination, Paginator, Toast } from '#/ui';
+import { Breadcrumbs, Button, Confirmation, Error, Loader, Modal, Pagination, Paginator, Toast, UiTable } from '#/ui';
 import { Menu, MenuContent, MenuItem, MenuTrigger } from '@angular/aria/menu';
 import { OverlayModule } from '@angular/cdk/overlay';
 import { DatePipe } from '@angular/common';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { Component, effect, inject, viewChild } from '@angular/core';
-import { RouterLink } from '@angular/router';
 import { Prisma } from '@generated/prisma';
 import { toFetchQueryRecord } from '../core/fetch-query-params';
 import { SchoolsForm } from './schools-form';
 @Component({
   selector: 'app-schools',
-  imports: [RouterLink, DatePipe, Menu, MenuContent, MenuItem, MenuTrigger, OverlayModule, Paginator, Error, Loader],
+  imports: [
+    Breadcrumbs,
+    UiTable,
+    Button,
+    DatePipe,
+    Menu,
+    MenuContent,
+    MenuItem,
+    MenuTrigger,
+    OverlayModule,
+    Paginator,
+    Error,
+    Loader,
+  ],
   providers: [Pagination],
-  template: `<div class="breadcrumbs text-sm">
-      <ul>
-        <li><a routerLink="/">Inicio</a></li>
-        <li>Escuelas</li>
-      </ul>
-    </div>
+  template: `<ui-breadcrumbs [items]="[{ label: 'Inicio', link: '/' }, { label: 'Escuelas' }]" />
     <div class="flex justify-between items-center mb-4">
       <div>
         <h1 class="text-2xl text-base-content font-medium">Escuelas</h1>
         <p class="text-sm text-gray-500 dark:text-gray-400">Listado de escuelas</p>
       </div>
 
-      <button class="btn btn-neutral" (click)="editSchool()">
+      <button uiButton variant="primary" (click)="editSchool()">
         <span class="material-symbols-outlined">add_circle</span> Nueva Escuela
       </button>
     </div>
@@ -34,7 +41,7 @@ import { SchoolsForm } from './schools-form';
       <lib-loader />
     } @else {
       <div class="overflow-x-auto">
-        <table class="table">
+        <table uiTable>
           <thead>
             <tr>
               <th>Nombre</th>

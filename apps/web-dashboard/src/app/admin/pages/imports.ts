@@ -1,4 +1,4 @@
-import { Toast } from '#/ui';
+import { Alert, Badge, Button, Card, CardActions, CardBody, CardTitle, Toast, UiInput, UiTable } from '#/ui';
 import { HttpClient } from '@angular/common/http';
 import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -8,18 +8,18 @@ import Store from '../../core/store';
 @Component({
   selector: 'app-imports',
   standalone: true,
-  imports: [FormsModule],
+  imports: [Alert, UiTable, Badge, Card, CardActions, CardBody, CardTitle, UiInput, Button, FormsModule],
   template: `
     <div class="flex flex-col gap-6 p-4 max-w-6xl mx-auto">
       <h1 class="text-2xl font-bold">Importación masiva</h1>
 
       @if (!store.currentSchoolId()) {
-        <div class="alert alert-warning">Selecciona una escuela antes de importar.</div>
+        <div uiAlert tone="warning">Selecciona una escuela antes de importar.</div>
       } @else {
         <!-- Step 1: Upload -->
-        <div class="card bg-base-100 shadow">
-          <div class="card-body">
-            <h2 class="card-title">Paso 1: Cargar CSV</h2>
+        <div uiCard>
+          <div uiCardBody>
+            <h2 uiCardTitle>Paso 1: Cargar CSV</h2>
             <div class="flex flex-col gap-4">
               <label class="select select-bordered w-full max-w-xs">
                 <span class="material-symbols-outlined">school</span>
@@ -44,18 +44,24 @@ import Store from '../../core/store';
               <div class="flex flex-col gap-2">
                 <label class="block text-sm font-medium" for="csv-text">O pega el contenido CSV</label>
                 <textarea
+                  uiInput
                   id="csv-text"
-                  class="textarea textarea-bordered w-full h-40"
+                  class="h-40"
                   placeholder="firstName,middleName,fatherName,motherName,documentId,birthDate,gender,address,phone&#10;Juan,,Perez,Garcia,12345678,2010-05-01,MASCULINO,Calle 1,555-1234"
                   [value]="csvText()"
                   (input)="onCsvInput($event)"
                 ></textarea>
               </div>
 
-              <button class="btn btn-primary w-fit" [disabled]="loading() || !canDryRun" (click)="runDryRun()">
-                @if (loading()) {
-                  <span class="loading loading-spinner loading-sm"></span>
-                } @else {
+              <button
+                uiButton
+                [loading]="loading()"
+                variant="primary"
+                class="w-fit"
+                [disabled]="loading() || !canDryRun"
+                (click)="runDryRun()"
+              >
+                @if (!loading()) {
                   <span class="material-symbols-outlined">visibility</span>
                 }
                 Validar (dry-run)
@@ -66,16 +72,16 @@ import Store from '../../core/store';
 
         <!-- Step 2: Preview -->
         @if (dryRunResult()) {
-          <div class="card bg-base-100 shadow">
-            <div class="card-body">
-              <h2 class="card-title">Paso 2: Vista previa</h2>
+          <div uiCard>
+            <div uiCardBody>
+              <h2 uiCardTitle>Paso 2: Vista previa</h2>
               <div class="flex gap-4 mb-4">
-                <span class="badge badge-success">Válidos: {{ dryRunResult()?.validRows }}</span>
-                <span class="badge badge-error">Errores: {{ dryRunResult()?.errorRows }}</span>
-                <span class="badge badge-ghost">Total: {{ dryRunResult()?.totalRows }}</span>
+                <span uiBadge tone="success">Válidos: {{ dryRunResult()?.validRows }}</span>
+                <span uiBadge tone="danger">Errores: {{ dryRunResult()?.errorRows }}</span>
+                <span uiBadge>Total: {{ dryRunResult()?.totalRows }}</span>
               </div>
               <div class="overflow-x-auto max-h-96">
-                <table class="table table-sm table-zebra">
+                <table uiTable density="compact" zebra>
                   <thead>
                     <tr>
                       <th>#</th>
@@ -89,9 +95,9 @@ import Store from '../../core/store';
                         <td>{{ row.rowNumber }}</td>
                         <td>
                           @if (row.errors.length === 0) {
-                            <span class="badge badge-success badge-sm">{{ row.action }}</span>
+                            <span uiBadge tone="success" size="sm">{{ row.action }}</span>
                           } @else {
-                            <span class="badge badge-error badge-sm">SKIP</span>
+                            <span uiBadge tone="danger" size="sm">SKIP</span>
                           }
                         </td>
                         <td class="text-error text-xs">{{ row.errors.join('; ') }}</td>
@@ -100,15 +106,15 @@ import Store from '../../core/store';
                   </tbody>
                 </table>
               </div>
-              <div class="card-actions justify-end mt-4">
+              <div uiCardActions class="justify-end mt-4">
                 <button
-                  class="btn btn-primary"
+                  uiButton
+                  [loading]="loading()"
+                  variant="primary"
                   [disabled]="dryRunResult()?.validRows === 0 || loading()"
                   (click)="commit()"
                 >
-                  @if (loading()) {
-                    <span class="loading loading-spinner loading-sm"></span>
-                  } @else {
+                  @if (!loading()) {
                     <span class="material-symbols-outlined">check</span>
                   }
                   Confirmar importación
@@ -120,16 +126,16 @@ import Store from '../../core/store';
 
         <!-- Step 3: Result -->
         @if (commitResult()) {
-          <div class="card bg-base-100 shadow">
-            <div class="card-body">
-              <h2 class="card-title">Importación completada</h2>
+          <div uiCard>
+            <div uiCardBody>
+              <h2 uiCardTitle>Importación completada</h2>
               <div class="flex gap-4 mb-4">
-                <span class="badge badge-success">Creados: {{ commitResult()?.validRows }}</span>
-                <span class="badge badge-error">Errores: {{ commitResult()?.errorRows }}</span>
+                <span uiBadge tone="success">Creados: {{ commitResult()?.validRows }}</span>
+                <span uiBadge tone="danger">Errores: {{ commitResult()?.errorRows }}</span>
               </div>
-              <div class="card-actions justify-end">
-                <button class="btn btn-ghost" (click)="downloadErrors()">Descargar errores CSV</button>
-                <button class="btn btn-primary" (click)="reset()">Nueva importación</button>
+              <div uiCardActions class="justify-end">
+                <button uiButton variant="ghost" (click)="downloadErrors()">Descargar errores CSV</button>
+                <button uiButton variant="primary" (click)="reset()">Nueva importación</button>
               </div>
             </div>
           </div>

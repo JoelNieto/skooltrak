@@ -1,4 +1,4 @@
-import { Toast } from '#/ui';
+import { Alert, Button, Spinner, Toast } from '#/ui';
 import { DatePipe } from '@angular/common';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { Component, inject, input, signal } from '@angular/core';
@@ -13,15 +13,15 @@ interface MySubmission {
 
 @Component({
   selector: 'app-assignment-submission-form',
-  imports: [AssignmentDropzone, DatePipe],
+  imports: [Alert, Spinner, Button, AssignmentDropzone, DatePipe],
   template: `
     <div class="space-y-4">
       @if (submissionResource.isLoading()) {
         <div class="flex items-center justify-center py-8">
-          <span class="loading loading-spinner loading-md"></span>
+          <span uiSpinner></span>
         </div>
       } @else if (submissionResource.value(); as submission) {
-        <div class="alert alert-success">
+        <div uiAlert tone="success">
           <span class="material-symbols-outlined">check_circle</span>
           <div>
             <h3 class="font-bold">Entrega completada</h3>
@@ -42,24 +42,27 @@ interface MySubmission {
           </div>
           <div class="flex items-center gap-2">
             <button
-              class="btn btn-ghost btn-sm"
+              uiButton
+              [loading]="isDownloading()"
+              variant="ghost"
+              size="sm"
               (click)="downloadFile(submission.file.id)"
               [disabled]="isDownloading()"
             >
-              @if (isDownloading()) {
-                <span class="loading loading-spinner loading-xs"></span>
-              } @else {
+              @if (!isDownloading()) {
                 <span class="material-symbols-outlined">download</span>
               }
             </button>
             <button
-              class="btn btn-ghost btn-sm text-error"
+              uiButton
+              [loading]="isDeleting()"
+              variant="ghost"
+              size="sm"
+              class="text-error"
               (click)="deleteSubmission(submission.id)"
               [disabled]="isDeleting()"
             >
-              @if (isDeleting()) {
-                <span class="loading loading-spinner loading-xs"></span>
-              } @else {
+              @if (!isDeleting()) {
                 <span class="material-symbols-outlined">delete</span>
               }
             </button>
@@ -71,9 +74,15 @@ interface MySubmission {
       } @else {
         <app-assignment-dropzone [maxSize]="maxFileSize" (filesChange)="onFilesChange($event)" />
         @if (selectedFiles().length > 0) {
-          <button class="btn btn-primary w-full" (click)="submitAssignment()" [disabled]="isUploading()">
+          <button
+            uiButton
+            [loading]="isUploading()"
+            variant="primary"
+            class="w-full"
+            (click)="submitAssignment()"
+            [disabled]="isUploading()"
+          >
             @if (isUploading()) {
-              <span class="loading loading-spinner loading-sm"></span>
               Subiendo...
             } @else {
               <span class="material-symbols-outlined">upload</span>

@@ -1,4 +1,4 @@
-import { EmptyState, Pagination, PaginatorV2 } from '#/ui';
+import { Breadcrumbs, Card, EmptyState, Pagination, PaginatorV2, UiTable } from '#/ui';
 import { DatePipe } from '@angular/common';
 import { Component, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
@@ -17,17 +17,12 @@ type ClassGroupRow = {
   studyPlan?: { name?: string };
 };
 @Component({
-  imports: [RouterLink, DatePipe, EmptyState, PaginatorV2],
+  imports: [Breadcrumbs, Card, UiTable, RouterLink, DatePipe, EmptyState, PaginatorV2],
   providers: [Pagination],
-  template: `<div class="breadcrumbs text-sm">
-      <ul>
-        <li><a routerLink="/">Inicio</a></li>
-        <li>Grupos</li>
-      </ul>
-    </div>
+  template: `<ui-breadcrumbs [items]="[{ label: 'Inicio', link: '/' }, { label: 'Grupos' }]" />
     <h1 class="text-2xl font-semibold">Grupos</h1>
-    <div class="overflow-x-auto bg-base-100 rounded-lg mt-4">
-      <table class="table">
+    <div uiCard class="overflow-x-auto mt-4">
+      <table uiTable>
         <thead>
           <tr>
             <th>Nombre</th>

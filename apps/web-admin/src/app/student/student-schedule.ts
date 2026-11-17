@@ -1,9 +1,9 @@
-import { EmptyState, PageHeader, StatCard } from '#/ui';
+import { Card, CardBody, EmptyState, PageHeader, StatCard, UiTable } from '#/ui';
 import { Component } from '@angular/core';
 
 @Component({
   selector: 'app-student-schedule',
-  imports: [EmptyState, PageHeader, StatCard],
+  imports: [UiTable, Card, CardBody, EmptyState, PageHeader, StatCard],
   template: `
     <lib-page-header title="Agenda del estudiante" subtitle="Calendario semanal y próximos hitos académicos." />
 
@@ -13,11 +13,11 @@ import { Component } from '@angular/core';
       <lib-stat-card label="Próximos exámenes" value="1" helper="Matemáticas - viernes" />
     </div>
 
-    <div class="mt-6 card border border-base-200 bg-base-100">
-      <div class="card-body">
+    <div uiCard class="mt-6">
+      <div uiCardBody>
         <h2 class="text-lg font-semibold text-base-content">Horario semanal</h2>
         <div class="overflow-x-auto">
-          <table class="table">
+          <table uiTable>
             <thead>
               <tr>
                 <th>Día</th>
@@ -52,8 +52,8 @@ import { Component } from '@angular/core';
       } @else {
         <div class="grid gap-4 md:grid-cols-2">
           @for (exam of upcomingExams; track exam.id) {
-            <div class="card border border-base-200 bg-base-100">
-              <div class="card-body">
+            <div uiCard>
+              <div uiCardBody>
                 <p class="font-semibold text-base-content">{{ exam.title }}</p>
                 <p class="text-sm text-base-content/70">{{ exam.date }} · {{ exam.course }}</p>
               </div>

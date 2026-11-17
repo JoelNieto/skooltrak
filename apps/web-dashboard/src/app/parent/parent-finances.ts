@@ -1,4 +1,4 @@
-import { Loader, PageHeader } from '#/ui';
+import { Card, CardBody, CardTitle, Loader, PageHeader } from '#/ui';
 import { httpResource } from '@angular/common/http';
 import { Component, inject } from '@angular/core';
 import Store from '../core/store';
@@ -14,7 +14,7 @@ type StudentFinancialSummaryType = {
 
 @Component({
   selector: 'app-parent-finances',
-  imports: [Loader, PageHeader],
+  imports: [Card, CardBody, CardTitle, Loader, PageHeader],
   template: `
     <lib-page-header title="Estado de cuenta" subtitle="Resumen financiero de tus hijos." />
 
@@ -33,9 +33,9 @@ type StudentFinancialSummaryType = {
       } @else {
         <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           @for (child of items; track child.studentId) {
-            <div class="card border border-base-200 bg-base-100">
-              <div class="card-body">
-                <h3 class="card-title text-base">{{ child.firstName }} {{ child.fatherName }}</h3>
+            <div uiCard>
+              <div uiCardBody>
+                <h3 uiCardTitle class="text-base">{{ child.firstName }} {{ child.fatherName }}</h3>
                 <div class="mt-2 grid grid-cols-2 gap-2 text-sm">
                   <div>
                     <span class="text-base-content/60">Cargos:</span>

@@ -1,4 +1,4 @@
-import { Confirmation, Modal, Pagination, PaginatorV2, Toast } from '#/ui';
+import { Button, Card, Confirmation, Modal, Pagination, PaginatorV2, Toast, UiTable } from '#/ui';
 import { Menu, MenuContent, MenuItem, MenuTrigger } from '@angular/aria/menu';
 import { OverlayModule } from '@angular/cdk/overlay';
 import { DatePipe } from '@angular/common';
@@ -13,7 +13,20 @@ import { PaginatedResponse } from '../../core/pagination-meta';
 import SubjectsForm from '../forms/subjects-form';
 @Component({
   selector: 'app-subjects',
-  imports: [DatePipe, DatePipe, PaginatorV2, FormsModule, Menu, MenuContent, MenuItem, MenuTrigger, OverlayModule],
+  imports: [
+    Card,
+    UiTable,
+    Button,
+    DatePipe,
+    DatePipe,
+    PaginatorV2,
+    FormsModule,
+    Menu,
+    MenuContent,
+    MenuItem,
+    MenuTrigger,
+    OverlayModule,
+  ],
   providers: [Pagination],
 
   template: `
@@ -25,12 +38,12 @@ import SubjectsForm from '../forms/subjects-form';
         </label>
       </div>
 
-      <button class="btn btn-primary" (click)="editSubject()">
+      <button uiButton variant="primary" (click)="editSubject()">
         <span class="material-symbols-outlined">add_circle</span> Nueva asignatura
       </button>
     </div>
-    <div class="overflow-x-auto bg-base-100 rounded-lg mt-4 border border-base-300">
-      <table class="table">
+    <div uiCard class="overflow-x-auto mt-4">
+      <table uiTable>
         <thead>
           <tr>
             <th

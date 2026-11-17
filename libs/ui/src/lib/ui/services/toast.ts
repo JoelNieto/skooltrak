@@ -8,9 +8,7 @@ import { ToastObject } from '../types/toast-types';
 export class Toast {
   public toasts = signal<Record<string, ToastObject>>({});
   private timeouts = new Map<string, ReturnType<typeof setTimeout>>();
-  public toastList = computed<ToastObject[]>(() =>
-    Object.values(this.toasts()).reverse()
-  );
+  public toastList = computed<ToastObject[]>(() => Object.values(this.toasts()).reverse());
 
   public showSuccess(message: string) {
     this.showToast({
@@ -42,28 +40,9 @@ export class Toast {
 
   public showToast(toast: ToastObject) {
     const id = v7();
-    let className: string;
-
-    switch (toast.type) {
-      case 'success':
-        className = 'alert-success';
-        break;
-      case 'error':
-        className = 'alert-error';
-        break;
-      case 'warning':
-        className = 'alert-warning';
-        break;
-      case 'info':
-        className = 'alert-info';
-        break;
-      default:
-        className = '';
-    }
-
     this.toasts.update((toasts) => ({
       ...toasts,
-      [id]: { ...toast, className, id },
+      [id]: { ...toast, id },
     }));
 
     const timeout = setTimeout(() => {

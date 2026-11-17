@@ -1,4 +1,4 @@
-import { PageHeader, StatCard } from '#/ui';
+import { Card, CardBody, PageHeader, Spinner, StatCard, UiTable } from '#/ui';
 import { HttpClient } from '@angular/common/http';
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { Router } from '@angular/router';
@@ -13,7 +13,7 @@ interface GradeRow {
 
 @Component({
   selector: 'app-parent-child-progress',
-  imports: [PageHeader, StatCard],
+  imports: [Spinner, UiTable, Card, CardBody, PageHeader, StatCard],
   template: `
     <lib-page-header
       title="Progreso del estudiante"
@@ -24,8 +24,8 @@ interface GradeRow {
     />
 
     @if (!child()) {
-      <div class="mt-6 card border border-base-200 bg-base-100">
-        <div class="card-body text-base-content/70">Selecciona un hijo desde el portal para ver su progreso.</div>
+      <div uiCard class="mt-6">
+        <div uiCardBody class="text-base-content/70">Selecciona un hijo desde el portal para ver su progreso.</div>
       </div>
     } @else {
       <div class="grid gap-4 md:grid-cols-3">
@@ -34,16 +34,16 @@ interface GradeRow {
         <lib-stat-card label="Escuela" [value]="child()!.schoolName" helper="Contexto del hijo" />
       </div>
 
-      <div class="mt-6 card border border-base-200 bg-base-100">
-        <div class="card-body">
+      <div uiCard class="mt-6">
+        <div uiCardBody>
           <h2 class="text-lg font-semibold text-base-content">Calificaciones por materia</h2>
           @if (loading()) {
             <div class="flex justify-center py-8">
-              <span class="loading loading-spinner loading-md"></span>
+              <span uiSpinner></span>
             </div>
           } @else {
             <div class="overflow-x-auto">
-              <table class="table">
+              <table uiTable>
                 <thead>
                   <tr>
                     <th>Materia</th>

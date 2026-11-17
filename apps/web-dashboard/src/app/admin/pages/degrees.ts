@@ -1,4 +1,4 @@
-import { Confirmation, Modal, Paginator, Toast } from '#/ui';
+import { Button, Card, Confirmation, Modal, Paginator, Toast, UiTable } from '#/ui';
 import { Menu, MenuContent, MenuItem, MenuTrigger } from '@angular/aria/menu';
 import { OverlayModule } from '@angular/cdk/overlay';
 import { DatePipe } from '@angular/common';
@@ -19,15 +19,15 @@ type DegreeRow = {
 };
 @Component({
   selector: 'app-degrees',
-  imports: [DatePipe, Paginator, Menu, MenuContent, MenuItem, MenuTrigger, OverlayModule],
+  imports: [Card, UiTable, Button, DatePipe, Paginator, Menu, MenuContent, MenuItem, MenuTrigger, OverlayModule],
 
   template: ` <div class="flex justify-end">
-      <button class="btn btn-primary" (click)="editDegree()">
+      <button uiButton variant="primary" (click)="editDegree()">
         <span class="material-symbols-outlined">add_circle</span> Agregar nivel
       </button>
     </div>
-    <div class="overflow-x-auto bg-base-100 rounded-lg mt-4 border border-base-300">
-      <table class="table">
+    <div uiCard class="overflow-x-auto mt-4">
+      <table uiTable>
         <thead>
           <tr>
             <th>Nombre</th>

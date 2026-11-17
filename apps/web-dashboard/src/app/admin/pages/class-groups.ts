@@ -1,4 +1,4 @@
-import { Confirmation, EmptyState, Modal, PaginatorV2, Toast } from '#/ui';
+import { Button, Card, Confirmation, EmptyState, Modal, PaginatorV2, Toast, UiSelect, UiTable } from '#/ui';
 import { Menu, MenuContent, MenuItem, MenuTrigger } from '@angular/aria/menu';
 import { OverlayModule } from '@angular/cdk/overlay';
 import { DatePipe } from '@angular/common';
@@ -29,6 +29,10 @@ type StudyPlanRow = {
 @Component({
   selector: 'app-groups',
   imports: [
+    Card,
+    UiTable,
+    UiSelect,
+    Button,
     DatePipe,
     RouterLink,
     Menu,
@@ -49,19 +53,19 @@ type StudyPlanRow = {
             <input class="pl-0" type="search" placeholder="Buscar..." [formField]="form.searchText" />
           </label>
         </div>
-        <select class="select select-primary" [formField]="form.studyPlanId">
+        <select uiSelect [formField]="form.studyPlanId">
           <option [value]="''">Elija plan...</option>
           @for (studyPlan of studyPlans.value()?.data; track studyPlan.id) {
             <option [value]="studyPlan.id">{{ studyPlan.name }}</option>
           }
         </select>
       </div>
-      <button class="btn btn-primary" (click)="editClassGroup()">
+      <button uiButton variant="primary" (click)="editClassGroup()">
         <span class="material-symbols-outlined">add_circle</span> Nuevo Grupo
       </button>
     </div>
-    <div class="overflow-x-auto bg-base-100 rounded-lg border border-base-300 mt-4">
-      <table class="table">
+    <div uiCard class="overflow-x-auto mt-4">
+      <table uiTable>
         <thead>
           <tr>
             <th>Nombre</th>

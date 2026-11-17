@@ -1,4 +1,4 @@
-import { TextEditor, Toast } from '#/ui';
+import { Breadcrumbs, Button, TextEditor, Toast, UiInput } from '#/ui';
 import { HttpClient } from '@angular/common/http';
 import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -14,14 +14,10 @@ interface ComposeFormData {
 
 @Component({
   selector: 'app-compose',
-  imports: [RouterLink, Contacts, TextEditor, FormsModule, FormField],
-  template: `<div class="breadcrumbs text-sm">
-      <ul>
-        <li><a routerLink="/">Inicio</a></li>
-        <li><a routerLink="/messages">Mensajes</a></li>
-        <li>Nuevo mensaje</li>
-      </ul>
-    </div>
+  imports: [Breadcrumbs, UiInput, Button, RouterLink, Contacts, TextEditor, FormsModule, FormField],
+  template: `<ui-breadcrumbs
+      [items]="[{ label: 'Inicio', link: '/' }, { label: 'Mensajes', link: '/messages' }, { label: 'Nuevo mensaje' }]"
+    />
     <h1 class="text-2xl font-semibold">Nuevo mensaje</h1>
     <form (submit)="onSubmit($event)">
       <div class="bg-base-100 p-4 rounded-lg border border-base-300 mt-4">
@@ -40,8 +36,9 @@ interface ComposeFormData {
         </div>
         <div class="flex flex-col gap-1 py-2 border-b border-base-300">
           <input
+            uiInput
             type="text"
-            class="input-lg input input-ghost w-full"
+            class="input-lg input-ghost"
             placeholder="Asunto"
             [formField]="composeForm.subject"
           />
@@ -69,8 +66,8 @@ interface ComposeFormData {
           }
         </div>
         <div class="flex justify-end gap-2 mt-4">
-          <button type="button" class="btn btn-ghost" routerLink="/messages">Cancelar</button>
-          <button type="submit" class="btn btn-primary">Enviar</button>
+          <button uiButton variant="ghost" type="button" routerLink="/messages">Cancelar</button>
+          <button uiButton variant="primary" type="submit">Enviar</button>
         </div>
       </div>
     </form>`,

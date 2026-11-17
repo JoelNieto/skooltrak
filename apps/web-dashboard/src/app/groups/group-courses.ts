@@ -1,15 +1,17 @@
 import { Component, computed, input, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { Prisma } from '@generated/prisma';
+import { UiInput } from '#/ui';
 
 @Component({
   selector: 'app-group-courses',
-  imports: [RouterLink],
+  imports: [UiInput, RouterLink],
   template: ` <h4 class="text-xl font-medium mb-2">Cursos</h4>
     <label class="input">
       <span class="material-symbols-outlined">search</span>
       <input
-        class="input input-bordered pl-0"
+        uiInput
+        class="pl-0"
         type="search"
         placeholder="Buscar..."
         [value]="search()"
@@ -27,7 +29,7 @@ import { Prisma } from '@generated/prisma';
             </div>
             <div>
               <p>{{ course.subject.name }}</p>
-              <p class="text-base-200 text-sm">{{ course.code }}</p>
+              <p class="text-ink-muted text-sm">{{ course.code }}</p>
             </div>
           </a>
         </li>

@@ -1,4 +1,4 @@
-import { Loader, Toast } from '#/ui';
+import { Alert, Button, Loader, Toast, UiField, UiInput } from '#/ui';
 import { Component, ElementRef, inject, signal, viewChild } from '@angular/core';
 import { NonNullableFormBuilder } from '@angular/forms';
 import { email, form, FormField, minLength, required } from '@angular/forms/signals';
@@ -7,7 +7,7 @@ import Auth from './auth';
 
 @Component({
   selector: 'app-login',
-  imports: [FormField, Loader, RouterLink],
+  imports: [Alert, UiField, UiInput, Button, FormField, Loader, RouterLink],
 
   template: ` <div class="min-h-screen main">
     @defer {
@@ -48,16 +48,16 @@ import Auth from './auth';
             <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
               <rect width="40" height="40" rx="14" fill="white" fill-opacity="0.12" />
               <rect x="7" y="11" width="26" height="18" rx="9" fill="white" />
-              <circle cx="16" cy="20" r="2.6" fill="var(--navy-700)" />
-              <circle cx="24" cy="20" r="2.6" fill="var(--navy-700)" />
+              <circle cx="16" cy="20" r="2.6" fill="var(--brand-navy-700)" />
+              <circle cx="24" cy="20" r="2.6" fill="var(--brand-navy-700)" />
               <rect x="18" y="5" width="4" height="6" rx="2" fill="white" />
             </svg>
-            <span class="font-display font-semibold text-xl text-white">Skooltrak</span>
+            <span class="font-semibold text-xl tracking-tight text-white">Skooltrak</span>
           </div>
 
           <!-- Headline -->
           <div class="relative z-10 max-w-sm mt-10 lg:mt-0">
-            <h1 class="font-display text-3xl sm:text-4xl font-semibold text-white leading-tight">
+            <h1 class="text-3xl sm:text-4xl font-semibold text-white leading-tight">
               Todo lo que pasa en la escuela, en un solo lugar.
             </h1>
             <p class="mt-4 text-white/75 text-base leading-relaxed">
@@ -73,32 +73,30 @@ import Auth from './auth';
         <!-- Form panel -->
         <div class="lg:col-span-3 flex items-center justify-center px-6 sm:px-10 py-12">
           <div class="w-full max-w-sm">
-            <h2 class="font-display text-2xl font-semibold text-[var(--ink)]">Bienvenido de nuevo</h2>
-            <p class="text-[var(--muted)] mt-1.5 mb-8 text-sm">Inicia sesión para continuar en tu cuenta.</p>
+            <h2 class="text-2xl font-semibold text-ink-strong">Bienvenido de nuevo</h2>
+            <p class="text-ink-muted mt-1.5 mb-8 text-sm">Inicia sesión para continuar en tu cuenta.</p>
             @if (passwordResetSuccess()) {
-              <div class="alert alert-success mb-4">
+              <div uiAlert tone="success" class="mb-4">
                 <span class="material-symbols-outlined">check_circle</span>
                 <span>Tu contraseña ha sido actualizada. Ya puedes iniciar sesión.</span>
               </div>
             }
             <form class="space-y-5" (submit)="onSubmit($event)">
-              <div class="fieldset">
-                <label class="label pb-1.5" for="email">
-                  <span class="label-text text-[var(--ink)] font-medium text-sm">Correo electrónico</span>
-                </label>
+              <ui-field label="Correo electrónico" [field]="form.email">
                 <input
+                  uiInput
                   id="email"
                   [formField]="form.email"
                   type="email"
                   placeholder="tu@correo.com"
-                  class="field-input input w-full rounded-xl h-12 px-4 pr-11 text-sm"
+                  class="field-input rounded-xl h-12 px-4 pr-11 text-sm"
                 />
-              </div>
+              </ui-field>
 
               <div class="form-control">
                 <div class="flex items-center justify-between pb-1.5">
                   <label class="label p-0" for="password">
-                    <span class="label-text text-[var(--ink)] font-medium text-sm">Contraseña</span>
+                    <span class="label-text text-ink-strong font-medium text-sm">Contraseña</span>
                   </label>
                   <a routerLink="/forgot-password" class="link-brand text-xs font-medium no-underline hover:underline"
                     >¿Olvidaste tu contraseña?</a
@@ -106,18 +104,19 @@ import Auth from './auth';
                 </div>
                 <div class="relative">
                   <input
+                    uiInput
                     #passwordInput
                     id="password"
                     type="password"
                     placeholder="••••••••"
                     [formField]="form.password"
-                    class="field-input input w-full rounded-xl h-12 px-4 pr-11 text-sm"
+                    class="field-input rounded-xl h-12 px-4 pr-11 text-sm"
                   />
                   <button
                     type="button"
                     (click)="togglePassword()"
                     aria-label="Mostrar contraseña"
-                    class="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--muted)] hover:text-[var(--navy-700)] cursor-pointer"
+                    class="absolute right-3 top-1/2 -translate-y-1/2 text-ink-muted hover:text-ink-strong cursor-pointer"
                   >
                     <svg
                       id="eye-icon"
@@ -139,30 +138,21 @@ import Auth from './auth';
                 </div>
               </div>
 
-              <button
-                type="submit"
-                class="btn-primary-custom btn border-0 w-full rounded-xl h-12 mt-2 mb-0 text-sm font-semibold"
-              >
+              <button uiButton variant="primary" size="lg" type="submit" class="w-full mt-2 text-sm">
                 Iniciar sesión
               </button>
 
-              <div class="divider text-[var(--muted)] text-xs my-5">o</div>
+              <div class="divider text-ink-muted text-xs my-5">o</div>
 
-              <a
-                routerLink="/auth/magic-link"
-                type="button"
-                class="btn-ghost-custom btn w-full rounded-xl h-12 text-sm font-semibold"
-              >
-                Acceso sin contraseña
-              </a>
+              <a uiButton size="lg" routerLink="/auth/magic-link" class="w-full text-sm"> Acceso sin contraseña </a>
             </form>
 
-            <p class="text-center text-sm text-[var(--muted)] mt-8">
+            <p class="text-center text-sm text-ink-muted mt-8">
               ¿No tienes cuenta?
               <a routerLink="/register" class="link-brand font-medium no-underline hover:underline">Regístrate aquí</a>
             </p>
 
-            <p class="lg:hidden text-center text-xs text-[var(--muted)] mt-10">
+            <p class="lg:hidden text-center text-xs text-ink-muted mt-10">
               © 2026 Skooltrak. Todos los derechos reservados.
             </p>
           </div>
@@ -175,31 +165,19 @@ import Auth from './auth';
     }
   </div>`,
   styles: `
-    :root {
-      --navy-900: #0f1e3b;
-      --navy-700: #1e3a6e;
-      --violet-600: #5f4fd6;
-      --violet-500: #7f72e8;
-      --amber-400: #f2a65a;
-      --ink: #161a2e;
-      --muted: #616a85;
-      --surface: #fcfcfd;
-      --line: #e3e6f0;
-    }
-
     .main {
-      font-family: 'Inter', sans-serif;
-      color: var(--ink);
-      background: var(--surface);
-    }
-    .font-display {
-      font-family: 'Lexend', sans-serif;
+      color: var(--ui-ink-strong);
+      background: var(--ui-surface-1);
     }
 
+    /* Brand panel: a fixed navy-to-violet band in both themes (not school-branded). */
     .brand-panel {
+      --brand-navy-900: #0f1e3b;
+      --brand-navy-700: #1e3a6e;
+      --brand-violet-600: #5f4fd6;
       background:
         radial-gradient(circle at 15% 20%, rgba(255, 255, 255, 0.1), transparent 40%),
-        linear-gradient(155deg, var(--navy-900) 0%, var(--navy-700) 45%, var(--violet-600) 100%);
+        linear-gradient(155deg, var(--brand-navy-900) 0%, var(--brand-navy-700) 45%, var(--brand-violet-600) 100%);
     }
     .dot-grid {
       background-image: radial-gradient(rgba(255, 255, 255, 0.16) 1px, transparent 1px);
@@ -224,54 +202,31 @@ import Auth from './auth';
     }
 
     .field-input {
-      background: #fff;
-      border: 1px solid var(--line);
-      color: var(--ink);
+      background: var(--ui-surface-1);
+      border: 1px solid var(--ui-line-strong);
+      color: var(--ui-ink-strong);
       transition:
         border-color 0.15s ease,
         box-shadow 0.15s ease;
     }
+    .field-input::placeholder {
+      color: var(--ui-ink-subtle);
+    }
     .field-input:focus {
       outline: none;
-      border-color: var(--violet-500);
-      box-shadow: 0 0 0 3px rgba(127, 114, 232, 0.2);
-    }
-    .btn-primary-custom {
-      background: linear-gradient(135deg, var(--navy-700), var(--violet-600));
-      color: #fff;
-      transition:
-        filter 0.15s ease,
-        transform 0.05s ease;
-    }
-    .btn-primary-custom:hover {
-      filter: brightness(1.08);
-    }
-    .btn-primary-custom:active {
-      transform: translateY(1px);
-    }
-
-    .btn-ghost-custom {
-      background: #fff;
-      border: 1.5px solid var(--line);
-      color: var(--navy-700);
-      transition:
-        border-color 0.15s ease,
-        background 0.15s ease;
-    }
-    .btn-ghost-custom:hover {
-      border-color: var(--violet-500);
-      background: #fafaff;
+      border-color: var(--color-primary);
+      box-shadow: 0 0 0 3px color-mix(in oklab, var(--color-primary) 22%, transparent);
     }
 
     a.link-brand {
-      color: var(--violet-600);
+      color: var(--color-primary);
     }
     a.link-brand:hover {
-      color: var(--navy-700);
+      color: var(--ui-ink-strong);
     }
 
     :focus-visible {
-      outline: 2px solid var(--violet-500);
+      outline: 2px solid var(--color-primary);
       outline-offset: 2px;
     }
   `,

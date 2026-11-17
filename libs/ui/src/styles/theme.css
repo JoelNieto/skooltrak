@@ -1,0 +1,396 @@
+/*
+ * Skooltrak design tokens: the single source of truth for web-dashboard and web-admin.
+ *
+ * Each app's styles.css imports this file right after `@import 'tailwindcss'`.
+ *
+ *   1. Primitives (--ui-p-*)  raw values; never referenced from templates.
+ *   2. Semantic   (--ui-*)    what things mean (surface, ink, line, action, status). Redefined for dark mode.
+ *   3. Consumers              DaisyUI themes and Tailwind utilities read the semantic layer:
+ *                               bg-surface-0/1/2 · text-ink-strong/ink/ink-muted/ink-subtle
+ *                               border-line / border-line-strong · bg-action / text-action-content
+ *
+ * School branding (core/school-theme.service.ts) overwrites --color-primary/-secondary/-accent
+ * on <html> at runtime. --ui-action follows --color-primary, so a school's colour reaches every
+ * action without touching neutrals or text contrast.
+ *
+ * Design direction: neutral-first and Filllo-inspired (fixed ink and surfaces, one accent for
+ * actions, hairline borders instead of shadows, Geist with tight headings).
+ */
+
+@plugin 'daisyui';
+
+/* ── 1. Primitives ─────────────────────────────────────────────────────── */
+:root {
+  --ui-p-navy-950: #0b1430;
+  --ui-p-navy-800: #2b3452;
+  --ui-p-slate-500: #5d6680;
+  --ui-p-slate-400: #8f96aa;
+  --ui-p-slate-300: #c9ceda;
+  --ui-p-slate-200: #e1e4eb;
+  --ui-p-slate-150: #eceef3;
+  --ui-p-slate-100: #f4f5f8;
+  --ui-p-white: #ffffff;
+
+  --ui-p-night-1000: #0a0e19;
+  --ui-p-night-900: #111727;
+  --ui-p-night-850: #192135;
+  --ui-p-night-800: #232c43;
+  --ui-p-night-700: #34405e;
+  --ui-p-mist-100: #f2f4fa;
+  --ui-p-mist-200: #d3d8e5;
+  --ui-p-mist-400: #99a0b6;
+  --ui-p-mist-500: #6a728a;
+
+  /* Skooltrak violet: the default action colour when a school has no brand colour. */
+  --ui-p-violet-light: oklch(60% 0.25 292.717);
+  --ui-p-violet-dark: oklch(68% 0.2 292.717);
+}
+
+/* ── 2. Semantic (light) ───────────────────────────────────────────────── */
+:root,
+[data-theme='light'] {
+  --ui-surface-0: var(--ui-p-slate-100); /* page background */
+  --ui-surface-1: var(--ui-p-white); /* cards, panels, inputs */
+  --ui-surface-2: var(--ui-p-slate-150); /* sunken / hover / secondary fill */
+  --ui-line: var(--ui-p-slate-200);
+  --ui-line-strong: var(--ui-p-slate-300);
+  --ui-ink-strong: var(--ui-p-navy-950); /* headings, primary text */
+  --ui-ink: var(--ui-p-navy-800); /* body text */
+  --ui-ink-muted: var(--ui-p-slate-500); /* secondary text, labels of lesser weight */
+  --ui-ink-subtle: var(--ui-p-slate-400); /* hints, placeholders, disabled */
+  --ui-inverse: var(--ui-p-navy-950);
+  --ui-inverse-content: var(--ui-p-white);
+  --ui-action-default: var(--ui-p-violet-light);
+}
+
+/* ── 2. Semantic (dark) ────────────────────────────────────────────────── */
+[data-theme='dark'] {
+  --ui-surface-0: var(--ui-p-night-1000);
+  --ui-surface-1: var(--ui-p-night-900);
+  --ui-surface-2: var(--ui-p-night-850);
+  --ui-line: var(--ui-p-night-800);
+  --ui-line-strong: var(--ui-p-night-700);
+  --ui-ink-strong: var(--ui-p-mist-100);
+  --ui-ink: var(--ui-p-mist-200);
+  --ui-ink-muted: var(--ui-p-mist-400);
+  --ui-ink-subtle: var(--ui-p-mist-500);
+  --ui-inverse: var(--ui-p-mist-100);
+  --ui-inverse-content: var(--ui-p-navy-950);
+  --ui-action-default: var(--ui-p-violet-dark);
+}
+
+/* Before ThemeService sets data-theme (SSR login, first paint), follow the OS. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) {
+    --ui-surface-0: var(--ui-p-night-1000);
+    --ui-surface-1: var(--ui-p-night-900);
+    --ui-surface-2: var(--ui-p-night-850);
+    --ui-line: var(--ui-p-night-800);
+    --ui-line-strong: var(--ui-p-night-700);
+    --ui-ink-strong: var(--ui-p-mist-100);
+    --ui-ink: var(--ui-p-mist-200);
+    --ui-ink-muted: var(--ui-p-mist-400);
+    --ui-ink-subtle: var(--ui-p-mist-500);
+    --ui-inverse: var(--ui-p-mist-100);
+    --ui-inverse-content: var(--ui-p-navy-950);
+    --ui-action-default: var(--ui-p-violet-dark);
+  }
+}
+
+/* The action colour is DaisyUI's primary, which a school may override at runtime. */
+:root {
+  --ui-action: var(--color-primary);
+  --ui-action-content: var(--color-primary-content);
+  --ui-ease: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ── 3a. DaisyUI themes (read the semantic layer) ──────────────────────── */
+@plugin "daisyui/theme" {
+  name: 'light';
+  default: true;
+  prefersdark: false;
+  color-scheme: 'light';
+  --color-base-100: var(--ui-surface-1);
+  --color-base-200: var(--ui-surface-0);
+  --color-base-300: var(--ui-surface-2);
+  --color-base-content: var(--ui-ink-strong);
+  --color-primary: var(--ui-action-default);
+  --color-primary-content: oklch(98% 0.01 292.717);
+  --color-secondary: oklch(77% 0.152 181.912);
+  --color-secondary-content: oklch(30% 0.06 188.216);
+  --color-accent: oklch(39% 0.195 277.366);
+  --color-accent-content: oklch(96% 0.018 272.314);
+  --color-neutral: var(--ui-inverse);
+  --color-neutral-content: var(--ui-inverse-content);
+  --color-info: oklch(58% 0.158 241.966);
+  --color-info-content: oklch(97% 0.013 236.62);
+  --color-success: oklch(76% 0.177 163.223);
+  --color-success-content: oklch(37% 0.077 168.94);
+  --color-warning: oklch(68% 0.162 75.834);
+  --color-warning-content: oklch(98% 0.026 102.212);
+  --color-error: oklch(58% 0.253 17.585);
+  --color-error-content: oklch(96% 0.015 12.422);
+  /* selector: checkbox/toggle/badge · field: button/input/select · box: card/modal/alert/menu */
+  --radius-selector: 0.5rem;
+  --radius-field: 0.75rem;
+  --radius-box: 1.25rem;
+  --size-selector: 0.25rem;
+  --size-field: 0.25rem;
+  --border: 1px;
+  --depth: 0;
+  --noise: 0;
+}
+
+@plugin "daisyui/theme" {
+  name: 'dark';
+  default: false;
+  prefersdark: true;
+  color-scheme: 'dark';
+  --color-base-100: var(--ui-surface-1);
+  --color-base-200: var(--ui-surface-0);
+  --color-base-300: var(--ui-surface-2);
+  --color-base-content: var(--ui-ink-strong);
+  --color-primary: var(--ui-action-default);
+  --color-primary-content: oklch(15% 0.03 292.717);
+  --color-secondary: oklch(70% 0.06 265);
+  --color-secondary-content: oklch(15% 0.02 265);
+  --color-accent: oklch(68% 0.14 195);
+  --color-accent-content: oklch(15% 0.02 195);
+  --color-neutral: var(--ui-inverse);
+  --color-neutral-content: var(--ui-inverse-content);
+  --color-info: oklch(68% 0.16 245);
+  --color-info-content: oklch(15% 0.02 245);
+  --color-success: oklch(68% 0.16 155);
+  --color-success-content: oklch(15% 0.02 155);
+  --color-warning: oklch(78% 0.16 70);
+  --color-warning-content: oklch(20% 0.06 70);
+  --color-error: oklch(65% 0.2 25);
+  --color-error-content: oklch(98% 0.02 25);
+  --radius-selector: 0.5rem;
+  --radius-field: 0.75rem;
+  --radius-box: 1.25rem;
+  --size-selector: 0.25rem;
+  --size-field: 0.25rem;
+  --border: 1px;
+  --depth: 0;
+  --noise: 0;
+}
+
+/* `dark:` follows the app's theme choice (ThemeService sets data-theme on <html>), not only the OS.
+ * Before data-theme is set (SSR, first paint) it falls back to prefers-color-scheme. */
+@custom-variant dark {
+  &:where([data-theme='dark'], [data-theme='dark'] *) {
+    @slot;
+  }
+  @media (prefers-color-scheme: dark) {
+    &:where(:root:not([data-theme]), :root:not([data-theme]) *) {
+      @slot;
+    }
+  }
+}
+
+/* ── 3b. Tailwind utilities for the semantic layer ─────────────────────── */
+@theme inline {
+  --color-surface-0: var(--ui-surface-0);
+  --color-surface-1: var(--ui-surface-1);
+  --color-surface-2: var(--ui-surface-2);
+  --color-line: var(--ui-line);
+  --color-line-strong: var(--ui-line-strong);
+  --color-ink-strong: var(--ui-ink-strong);
+  --color-ink: var(--ui-ink);
+  --color-ink-muted: var(--ui-ink-muted);
+  --color-ink-subtle: var(--ui-ink-subtle);
+  --color-action: var(--ui-action);
+  --color-action-content: var(--ui-action-content);
+  --ease-standard: var(--ui-ease);
+}
+
+@theme {
+  --font-sans: 'Geist', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --tab-border-color: var(--color-primary);
+}
+
+/* ── Base element styles shared by both apps ───────────────────────────── */
+h1,
+h2,
+h3 {
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+
+.fieldset {
+  @apply gap-1;
+  label {
+    @apply mb-0 block text-sm/6 font-medium text-ink-strong;
+  }
+}
+
+.input {
+  @apply text-sm/6 placeholder:text-ink-subtle;
+}
+
+.textarea {
+  @apply text-sm/6 placeholder:text-ink-subtle;
+}
+
+/* `ui-control` is added by the uiInput / uiSelect directives in libs/ui. */
+.input-primary,
+.select-primary,
+.textarea-primary,
+.ui-control {
+  --input-color: var(--ui-line-strong);
+  &:focus,
+  &:focus-within {
+    --input-color: var(--color-primary);
+  }
+}
+
+/* Checkbox / radio (uiCheckbox, uiRadio): hairline border while empty, action colour once checked.
+ * DaisyUI fills a checked control with --input-color, so it must stay primary when checked. */
+:is(.checkbox-primary, .radio-primary):not(:checked, :indeterminate) {
+  --input-color: var(--ui-line-strong);
+}
+
+.input:focus,
+.input:focus-within,
+.select:focus,
+.select:focus-within,
+.textarea:focus,
+.textarea:focus-within {
+  outline: none;
+}
+
+/* Visible focus ring for the primitives (the outline above is removed). */
+.ui-control:focus-visible,
+.ui-control:focus-within {
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--color-primary) 20%, transparent);
+}
+
+/* Invalid state, from three sources:
+ *  - aria-invalid="true", set by uiInput/uiSelect inside a ui-field once the field is touched;
+ *  - [class.ng-invalid]="x().touched() && x().invalid()", set by hand in signal-form templates;
+ *  - reactive/template forms, once touched (they keep `ng-untouched` until then). */
+:is(input, select, textarea):is(.ng-invalid:not(.ng-untouched), [aria-invalid='true']) {
+  --input-color: var(--color-error);
+}
+
+.input,
+.select,
+.textarea {
+  @apply w-full;
+}
+
+.table {
+  @apply overflow-x-auto;
+  thead > tr {
+    @apply border-b border-line;
+    th {
+      @apply font-medium text-ink-muted;
+    }
+    th:first-child {
+      @apply pl-4;
+    }
+    th:last-child {
+      @apply pr-4;
+    }
+  }
+  tbody > tr {
+    @apply border-b border-line last:border-b-0;
+    td {
+      @apply text-ink;
+    }
+    td:first-child {
+      @apply pl-4 font-medium text-ink-strong;
+    }
+    td:last-child {
+      @apply pr-4;
+    }
+  }
+  td {
+    @apply whitespace-nowrap;
+  }
+}
+
+/* uiTable rowHover: rows that open something on click. */
+.ui-table-row-hover tbody > tr {
+  cursor: pointer;
+  transition: background-color 0.15s var(--ui-ease);
+  &:hover {
+    background-color: var(--ui-surface-2);
+  }
+}
+
+/* Card (uiCard directives in libs/ui). In the components layer so utilities on the host still win.
+ * `.card.ui-card` outranks DaisyUI's `.card` in the same layer. */
+@layer components {
+  .card.ui-card {
+    background-color: var(--ui-surface-1);
+    border: 1px solid var(--ui-line);
+    border-radius: var(--radius-box);
+    box-shadow: none;
+    color: var(--ui-ink);
+  }
+  .card.ui-card-interactive {
+    cursor: pointer;
+    transition: border-color 0.2s var(--ui-ease);
+    &:hover {
+      border-color: var(--ui-line-strong);
+    }
+    &:focus-visible {
+      outline: none;
+      box-shadow: 0 0 0 3px color-mix(in oklab, var(--color-primary) 20%, transparent);
+    }
+  }
+  .card-title.ui-card-title {
+    font-size: 1rem;
+    line-height: 1.5rem;
+    font-weight: 600;
+    color: var(--ui-ink-strong);
+    letter-spacing: -0.01em;
+  }
+
+  /* Badge (uiBadge): one soft style, tone carries meaning. */
+  .badge.ui-badge {
+    font-weight: 500;
+    border-color: transparent;
+    white-space: nowrap;
+  }
+  a.badge.ui-badge {
+    transition: filter 0.2s var(--ui-ease);
+    &:hover {
+      filter: brightness(0.95);
+    }
+  }
+}
+
+/* Badge text: DaisyUI's soft badge uses the raw tone colour as text, which is too light for the
+ * success/warning tones on a light surface. Mixing toward the strongest ink darkens it in light mode
+ * and lightens it in dark mode; the fill is a touch stronger than DaisyUI's 8% so it reads on the
+ * page background. Unlayered so it beats DaisyUI's layered badge rules. */
+.badge.ui-badge {
+  color: color-mix(in oklab, var(--badge-color, var(--ui-ink)) 62%, var(--ui-ink-strong));
+  background-color: color-mix(in oklab, var(--badge-color, var(--ui-ink)) 12%, var(--ui-surface-1));
+}
+
+/* Alert (uiAlert): same readable-tone approach as badges, plus a hairline border in the tone. */
+.alert.ui-alert {
+  color: color-mix(in oklab, var(--alert-color, var(--ui-ink)) 62%, var(--ui-ink-strong));
+  background: color-mix(in oklab, var(--alert-color, var(--ui-ink)) 9%, var(--ui-surface-1));
+  border: 1px solid color-mix(in oklab, var(--alert-color, var(--ui-ink)) 22%, var(--ui-surface-1));
+  border-radius: var(--radius-field);
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+}
+
+.layout-padding {
+  @apply mx-auto mt-4 max-w-7xl px-4 sm:px-6 lg:px-8;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}

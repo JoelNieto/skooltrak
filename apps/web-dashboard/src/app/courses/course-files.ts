@@ -1,4 +1,4 @@
-import { debounceSignal, Loader, Modal, Toast } from '#/ui';
+import { Badge, Button, Card, debounceSignal, Loader, Modal, Toast, UiTable } from '#/ui';
 import { DatePipe } from '@angular/common';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { Component, inject, input, Signal, signal } from '@angular/core';
@@ -17,7 +17,7 @@ type CourseFile = {
 
 @Component({
   selector: 'app-course-files',
-  imports: [Loader, FormsModule, DatePipe],
+  imports: [Card, UiTable, Badge, Button, Loader, FormsModule, DatePipe],
   template: `
     <div class="flex flex-col gap-4">
       <div class="flex justify-between items-start gap-4">
@@ -25,7 +25,7 @@ type CourseFile = {
           <span class="material-symbols-outlined">search</span>
           <input class="pl-0" type="search" placeholder="Buscar archivos..." [(ngModel)]="searchText" />
         </label>
-        <button class="btn btn-primary" (click)="openUploadModal()">
+        <button uiButton variant="primary" (click)="openUploadModal()">
           <span class="material-symbols-outlined">upload_file</span>
           Subir archivos
         </button>
@@ -38,8 +38,8 @@ type CourseFile = {
         <p>Error al cargar archivos</p>
       }
       @if (filesResource.hasValue()) {
-        <div class="overflow-x-auto bg-base-100 rounded-lg">
-          <table class="table">
+        <div uiCard class="overflow-x-auto">
+          <table uiTable>
             <thead>
               <tr>
                 <th>Nombre</th>
@@ -54,22 +54,18 @@ type CourseFile = {
               @for (file of filesResource.value(); track file.id) {
                 <tr>
                   <td class="font-medium">{{ file.name }}</td>
-                  <td class="text-base-200">{{ file.mimeType }}</td>
-                  <td class="text-base-200">{{ formatBytes(file.size ?? 0) }}</td>
+                  <td class="text-ink-muted">{{ file.mimeType }}</td>
+                  <td class="text-ink-muted">{{ formatBytes(file.size ?? 0) }}</td>
                   <td>
                     @if (file.access) {
-                      <span
-                        class="badge"
-                        [class.badge-success]="file.access === 'EDIT'"
-                        [class.badge-info]="file.access === 'VIEW'"
-                      >
+                      <span uiBadge [tone]="file.access === 'EDIT' ? 'success' : 'info'">
                         {{ file.access === 'EDIT' ? 'Editar' : 'Ver' }}
                       </span>
                     } @else {
-                      <span class="text-base-200">-</span>
+                      <span class="text-ink-muted">-</span>
                     }
                   </td>
-                  <td class="text-base-200">
+                  <td class="text-ink-muted">
                     {{ file.updatedAt | date: 'short' }}
                   </td>
                   <td class="text-right">
@@ -85,7 +81,7 @@ type CourseFile = {
                 </tr>
               } @empty {
                 <tr>
-                  <td colspan="5" class="text-center text-base-200">No hay archivos para este curso.</td>
+                  <td colspan="5" class="text-center text-ink-muted">No hay archivos para este curso.</td>
                 </tr>
               }
             </tbody>

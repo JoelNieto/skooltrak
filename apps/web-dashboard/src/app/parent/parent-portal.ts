@@ -1,4 +1,4 @@
-import { PageHeader, Toast } from '#/ui';
+import { Button, Card, CardBody, PageHeader, Spinner, Toast, UiInput } from '#/ui';
 import { HttpClient } from '@angular/common/http';
 import { afterRenderEffect, Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -19,15 +19,15 @@ interface ParentMeResponse {
 
 @Component({
   selector: 'app-parent-portal',
-  imports: [FormsModule, PageHeader],
+  imports: [Spinner, Card, CardBody, UiInput, Button, FormsModule, PageHeader],
   template: `
     <lib-page-header title="Portal de padres" subtitle="Resumen rápido del progreso de tus hijos." />
 
-    <div class="mt-6 card border border-base-200 bg-base-100">
-      <div class="card-body">
+    <div uiCard class="mt-6">
+      <div uiCardBody>
         <div class="flex items-center justify-between">
           <h2 class="text-lg font-semibold text-base-content">Hijos vinculados</h2>
-          <button class="btn btn-primary btn-sm" (click)="openAddChild()">
+          <button uiButton variant="primary" size="sm" (click)="openAddChild()">
             <span class="material-symbols-outlined text-lg">add</span>
             Agregar hijo
           </button>
@@ -35,7 +35,7 @@ interface ParentMeResponse {
 
         @if (loading()) {
           <div class="flex justify-center py-8">
-            <span class="loading loading-spinner loading-md"></span>
+            <span uiSpinner></span>
           </div>
         } @else if (children().length === 0) {
           <div class="py-8 text-center text-base-content/70">
@@ -62,27 +62,28 @@ interface ParentMeResponse {
 
     @if (showAddChild()) {
       <div class="fixed inset-0 bg-black/40 flex items-center justify-center p-4 z-50">
-        <div class="card w-full max-w-md bg-base-100">
-          <div class="card-body">
+        <div uiCard class="w-full max-w-md">
+          <div uiCardBody>
             <h3 class="text-lg font-semibold text-base-content">Agregar hijo</h3>
             <p class="text-sm text-base-content/70">Ingresa el código de matrícula del estudiante.</p>
 
-            <input
-              class="input input-bordered w-full mt-2 uppercase"
-              placeholder="Código de matrícula"
-              [(ngModel)]="addCode"
-            />
+            <input uiInput class="mt-2 uppercase" placeholder="Código de matrícula" [(ngModel)]="addCode" />
 
             @if (addError()) {
               <p class="text-error text-sm mt-2">{{ addError() }}</p>
             }
 
             <div class="flex justify-end gap-2 mt-4">
-              <button class="btn btn-ghost btn-sm" (click)="closeAddChild()">Cancelar</button>
-              <button class="btn btn-primary btn-sm" [disabled]="addLoading()" (click)="submitAddChild()">
-                @if (addLoading()) {
-                  <span class="loading loading-spinner loading-sm"></span>
-                } @else {
+              <button uiButton variant="ghost" size="sm" (click)="closeAddChild()">Cancelar</button>
+              <button
+                uiButton
+                [loading]="addLoading()"
+                variant="primary"
+                size="sm"
+                [disabled]="addLoading()"
+                (click)="submitAddChild()"
+              >
+                @if (!addLoading()) {
                   Vincular
                 }
               </button>

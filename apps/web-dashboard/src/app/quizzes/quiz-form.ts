@@ -1,4 +1,16 @@
-import { Loader, TextEditor, Toast } from '#/ui';
+import {
+  Breadcrumbs,
+  Button,
+  Card,
+  CardBody,
+  CardTitle,
+  Loader,
+  TextEditor,
+  Toast,
+  UiField,
+  UiInput,
+  UiSelect,
+} from '#/ui';
 import { Component, computed, effect, inject, input, signal } from '@angular/core';
 import {
   FormArray,
@@ -9,7 +21,7 @@ import {
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 import { $Enums } from '@generated/prisma';
 
 import { HttpClient, httpResource } from '@angular/common/http';
@@ -19,43 +31,55 @@ import { QuizQuestionControl } from './quiz-question-control';
 
 @Component({
   selector: 'app-quiz-form',
-  imports: [RouterLink, ReactiveFormsModule, FormsModule, TextEditor, QuizQuestionControl, Loader],
+  imports: [
+    Breadcrumbs,
+    Card,
+    CardBody,
+    CardTitle,
+    UiField,
+    UiInput,
+    UiSelect,
+    Button,
+    ReactiveFormsModule,
+    FormsModule,
+    TextEditor,
+    QuizQuestionControl,
+    Loader,
+  ],
   template: `
-    <div class="breadcrumbs text-sm">
-      <ul>
-        <li><a routerLink="/">Inicio</a></li>
-        <li><a routerLink="/quizzes">Quizes</a></li>
-        <li>{{ isEditMode() ? 'Editar' : 'Nuevo quiz' }}</li>
-      </ul>
-    </div>
+    <ui-breadcrumbs
+      [items]="[
+        { label: 'Inicio', link: '/' },
+        { label: 'Quizes', link: '/quizzes' },
+        { label: isEditMode() ? 'Editar' : 'Nuevo quiz' },
+      ]"
+    />
     <h1 class="text-2xl font-semibold mb-2">{{ isEditMode() ? 'Editar quiz' : 'Nuevo quiz' }}</h1>
 
     @if (isEditMode() && quizResource.isLoading()) {
       <lib-loader />
     } @else {
       <form [formGroup]="quizForm" (ngSubmit)="saveChanges()">
-        <div class="card bg-base-100 card-border border-neutral-300">
-          <div class="card-body">
-            <h2 class="card-title">Datos del quiz</h2>
+        <div uiCard>
+          <div uiCardBody>
+            <h2 uiCardTitle>Datos del quiz</h2>
             <div class="flex flex-col gap-4">
-              <div class="fieldset">
-                <label for="title">Titulo</label>
+              <ui-field label="Titulo">
                 <input
+                  uiInput
                   type="text"
                   id="title"
                   name="title"
                   formControlName="title"
-                  class="input input-primary"
                   placeholder="Titulo del quiz..."
                 />
-              </div>
-              <div class="fieldset">
-                <label for="courseId">Curso</label>
+              </ui-field>
+              <ui-field label="Curso">
                 <select
+                  uiSelect
                   id="courseId"
                   name="courseId"
                   formControlName="courseId"
-                  class="select select-primary"
                   placeholder="Selecciona un curso..."
                 >
                   <option value="" disabled selected>Selecciona un curso...</option>
@@ -63,33 +87,30 @@ import { QuizQuestionControl } from './quiz-question-control';
                     <option [value]="course.id">{{ course.name }}</option>
                   }
                 </select>
-              </div>
+              </ui-field>
               <div class="fieldset">
                 <label for="details">Descripción</label>
                 <lib-text-editor id="details" name="details" formControlName="details" [bordered]="true" />
               </div>
             </div>
             <div class="flex justify-end mt-4">
-              <button type="submit" class="btn btn-primary" [disabled]="isSaving()">
-                @if (isSaving()) {
-                  <span class="loading loading-spinner loading-sm"></span>
-                }
+              <button uiButton [loading]="isSaving()" variant="primary" type="submit" [disabled]="isSaving()">
                 Guardar
               </button>
             </div>
           </div>
         </div>
-        <div class="card bg-base-100 card-border border-neutral-300 my-4">
-          <div class="card-body">
-            <h2 class="card-title text-xl font-semibold">Preguntas</h2>
+        <div uiCard class="my-4">
+          <div uiCardBody>
+            <h2 uiCardTitle class="text-xl font-semibold">Preguntas</h2>
 
             <div formArrayName="questions" class="flex flex-col gap-4">
               @for (question of questions.controls; track $index) {
-                <div class="card bg-base-100 card-border border-neutral-300">
-                  <div class="card-body">
+                <div uiCard>
+                  <div uiCardBody>
                     <div class="flex justify-between">
-                      <h2 class="card-title">Pregunta {{ $index + 1 }}</h2>
-                      <button type="button" class="btn btn-soft btn-error" (click)="removeQuestion($index)">
+                      <h2 uiCardTitle>Pregunta {{ $index + 1 }}</h2>
+                      <button uiButton variant="danger" type="button" (click)="removeQuestion($index)">
                         <span class="material-symbols-outlined">delete</span>
                       </button>
                     </div>
@@ -97,7 +118,7 @@ import { QuizQuestionControl } from './quiz-question-control';
                   </div>
                 </div>
               }
-              <button type="button" class="btn btn-primary btn-soft" (click)="addQuestion()">
+              <button uiButton type="button" (click)="addQuestion()">
                 <span class="material-symbols-outlined">add_circle</span>
                 Agregar pregunta
               </button>

@@ -1,4 +1,4 @@
-import { Loader, Toast } from '#/ui';
+import { Alert, Button, Loader, Toast, UiInput, UiRadio, UiSelect, UiTable } from '#/ui';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { Component, computed, inject, input, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -22,14 +22,14 @@ type StudentEvaluation = {
 
 @Component({
   selector: 'app-group-habits',
-  imports: [FormsModule, Loader],
+  imports: [Alert, UiTable, UiInput, UiRadio, UiSelect, Button, FormsModule, Loader],
   template: `
     <div class="space-y-4">
       <!-- Empty state: No metrics configured -->
       @if (habitMetrics.isLoading()) {
         <lib-loader />
       } @else if (!habitMetrics.value() || habitMetrics.value()!.length === 0) {
-        <div class="alert alert-info">
+        <div uiAlert>
           <span class="material-symbols-outlined">info</span>
           <span
             >No hay criterios de hábitos configurados. Solicite al administrador que configure los criterios desde el
@@ -43,12 +43,7 @@ type StudentEvaluation = {
             <label class="label" for="habits-period">
               <span class="label-text">Período</span>
             </label>
-            <select
-              id="habits-period"
-              class="select select-bordered"
-              [(ngModel)]="selectedPeriodId"
-              (ngModelChange)="onSelectionChange()"
-            >
+            <select uiSelect id="habits-period" [(ngModel)]="selectedPeriodId" (ngModelChange)="onSelectionChange()">
               <option [value]="null" disabled selected>Seleccione un período</option>
               @for (period of periods.value(); track period.id) {
                 <option [value]="period.id">{{ period.name }} - {{ period.year }}</option>
@@ -60,12 +55,7 @@ type StudentEvaluation = {
             <label class="label" for="habits-metric">
               <span class="label-text">Criterio de evaluación</span>
             </label>
-            <select
-              id="habits-metric"
-              class="select select-bordered"
-              [(ngModel)]="selectedMetricId"
-              (ngModelChange)="onSelectionChange()"
-            >
+            <select uiSelect id="habits-metric" [(ngModel)]="selectedMetricId" (ngModelChange)="onSelectionChange()">
               <option [value]="null" disabled selected>Seleccione un criterio</option>
               @for (metric of activeMetrics(); track metric.id) {
                 <option [value]="metric.id">{{ metric.name }}</option>
@@ -76,7 +66,7 @@ type StudentEvaluation = {
 
         <!-- Prompt to select period and metric -->
         @if (!selectedPeriodId() || !selectedMetricId()) {
-          <div class="alert alert-warning">
+          <div uiAlert tone="warning">
             <span class="material-symbols-outlined">warning</span>
             <span>Por favor, seleccione un período y un criterio para comenzar la evaluación.</span>
           </div>
@@ -87,22 +77,22 @@ type StudentEvaluation = {
           <div class="flex gap-4 items-center p-4 bg-base-200 rounded-lg">
             <span class="font-semibold">Leyenda:</span>
             <div class="flex gap-2 items-center">
-              <input type="radio" class="radio radio-error radio-sm" disabled />
+              <input uiRadio tone="danger" size="sm" type="radio" disabled />
               <span><strong>X</strong> = Deficiente</span>
             </div>
             <div class="flex gap-2 items-center">
-              <input type="radio" class="radio radio-warning radio-sm" disabled />
+              <input uiRadio tone="warning" size="sm" type="radio" disabled />
               <span><strong>R</strong> = Regular</span>
             </div>
             <div class="flex gap-2 items-center">
-              <input type="radio" class="radio radio-success radio-sm" disabled />
+              <input uiRadio tone="success" size="sm" type="radio" disabled />
               <span><strong>S</strong> = Satisfactorio</span>
             </div>
           </div>
 
           <!-- Students Evaluation Table -->
           <div class="overflow-x-auto">
-            <table class="table table-zebra">
+            <table uiTable zebra>
               <thead>
                 <tr>
                   <th>Estudiante</th>
@@ -130,10 +120,12 @@ type StudentEvaluation = {
                       <div class="flex gap-4">
                         <label class="flex items-center gap-1 cursor-pointer">
                           <input
+                            uiRadio
+                            tone="danger"
+                            size="sm"
                             type="radio"
                             [name]="'eval-' + student.id"
                             value="X"
-                            class="radio radio-error radio-sm"
                             [checked]="getValue(student.id) === 'X'"
                             (change)="updateValue(student.id, 'X')"
                           />
@@ -141,10 +133,12 @@ type StudentEvaluation = {
                         </label>
                         <label class="flex items-center gap-1 cursor-pointer">
                           <input
+                            uiRadio
+                            tone="warning"
+                            size="sm"
                             type="radio"
                             [name]="'eval-' + student.id"
                             value="R"
-                            class="radio radio-warning radio-sm"
                             [checked]="getValue(student.id) === 'R'"
                             (change)="updateValue(student.id, 'R')"
                           />
@@ -152,10 +146,12 @@ type StudentEvaluation = {
                         </label>
                         <label class="flex items-center gap-1 cursor-pointer">
                           <input
+                            uiRadio
+                            tone="success"
+                            size="sm"
                             type="radio"
                             [name]="'eval-' + student.id"
                             value="S"
-                            class="radio radio-success radio-sm"
                             [checked]="getValue(student.id) === 'S'"
                             (change)="updateValue(student.id, 'S')"
                           />
@@ -165,8 +161,9 @@ type StudentEvaluation = {
                     </td>
                     <td>
                       <input
+                        uiInput
                         type="text"
-                        class="input input-bordered input-sm w-full"
+                        class="input-sm"
                         [value]="getComments(student.id)"
                         (input)="updateComments(student.id, $any($event.target).value)"
                         placeholder="Comentarios opcionales"
@@ -180,9 +177,8 @@ type StudentEvaluation = {
 
           <!-- Save Button -->
           <div class="flex justify-end gap-2">
-            <button class="btn btn-primary" (click)="saveAll()" [class.loading]="saving()">
+            <button uiButton [loading]="saving()" variant="primary" (click)="saveAll()" [class.loading]="saving()">
               @if (saving()) {
-                <span class="loading loading-spinner"></span>
                 Guardando...
               } @else {
                 <span class="material-symbols-outlined">save</span>

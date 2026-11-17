@@ -1,4 +1,4 @@
-import { Toast } from '#/ui';
+import { Button, Toast, UiField, UiSelect } from '#/ui';
 import { HttpClient } from '@angular/common/http';
 import { Component, inject, input, output, signal } from '@angular/core';
 import { form, FormField, required } from '@angular/forms/signals';
@@ -8,27 +8,26 @@ type UploadResult = { created: boolean };
 
 @Component({
   selector: 'app-course-file-upload-form',
-  imports: [FormField],
+  imports: [UiField, UiSelect, Button, FormField],
   template: `<form (submit)="onSubmit($event)">
     <div class="flex flex-col gap-4">
       <div class="fieldset">
         <label for="file">Archivo</label>
         <input id="file" type="file" class="file-input file-input-primary w-full" (change)="onFileSelected($event)" />
         @if (selectedFile) {
-          <p class="text-sm text-base-200 mt-1">{{ selectedFile.name }} · {{ formatBytes(selectedFile.size) }}</p>
+          <p class="text-sm text-ink-muted mt-1">{{ selectedFile.name }} · {{ formatBytes(selectedFile.size) }}</p>
         }
       </div>
-      <div class="fieldset">
-        <label for="permission">Permiso</label>
-        <select id="permission" [formField]="form.permission" class="select select-primary">
+      <ui-field label="Permiso" [field]="form.permission">
+        <select uiSelect id="permission" [formField]="form.permission">
           <option value="VIEW">Solo ver</option>
           <option value="EDIT">Puede editar</option>
         </select>
-      </div>
+      </ui-field>
     </div>
     <div class="mt-6 flex justify-end gap-2">
-      <button class="btn btn-ghost" type="button" (click)="closeModal.emit(undefined)">Cancelar</button>
-      <button class="btn btn-primary" type="submit">Subir</button>
+      <button uiButton variant="ghost" type="button" (click)="closeModal.emit(undefined)">Cancelar</button>
+      <button uiButton variant="primary" type="submit">Subir</button>
     </div>
   </form>`,
 })

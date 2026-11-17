@@ -1,70 +1,37 @@
-import { TextEditor, Toast } from '#/ui';
+import { Button, TextEditor, Toast, UiCheckbox, UiChoice, UiField, UiInput, UiSelect } from '#/ui';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { Component, inject, input, output, signal } from '@angular/core';
 import { form, FormField, required } from '@angular/forms/signals';
 @Component({
   selector: 'app-grades-form',
-  imports: [FormField, TextEditor],
+  imports: [UiCheckbox, UiChoice, UiField, UiInput, UiSelect, Button, FormField, TextEditor],
   template: `<form (submit)="onSubmit($event)">
     <div class="flex flex-col md:grid md:grid-cols-4 gap-4">
-      <div class="fieldset md:col-span-2">
-        <label for="title">Titulo</label>
-        <input
-          type="text"
-          [formField]="form.title"
-          class="input input-primary"
-          [class.ng-invalid]="form.title().touched() && form.title().invalid()"
-        />
-        @if (form.title().touched() && form.title().invalid()) {
-          @for (error of form.title().errors(); track error) {
-            <p class="text-error text-sm">{{ error.message }}</p>
-          }
-        }
-      </div>
-      <div class="fieldset">
-        <label for="bucketId">Tipo</label>
-        <select
-          [formField]="form.bucketId"
-          class="select select-primary"
-          [class.ng-invalid]="form.bucketId().touched() && form.bucketId().invalid()"
-        >
+      <ui-field label="Titulo" [field]="form.title" class="md:col-span-2">
+        <input uiInput type="text" [formField]="form.title" />
+      </ui-field>
+      <ui-field label="Tipo" [field]="form.bucketId">
+        <select uiSelect [formField]="form.bucketId">
           @for (bucket of bucketsResource.value()!; track bucket.id) {
             <option [value]="bucket.id">{{ bucket.name }}</option>
           }
         </select>
-        @if (form.bucketId().touched() && form.bucketId().invalid()) {
-          @for (error of form.bucketId().errors(); track error) {
-            <p class="text-error text-sm">{{ error.message }}</p>
-          }
-        }
-      </div>
-      <div class="fieldset">
-        <label for="date">Fecha</label>
-        <input
-          type="date"
-          [formField]="form.date"
-          class="input input-primary"
-          [class.ng-invalid]="form.date().touched() && form.date().invalid()"
-        />
-        @if (form.date().touched() && form.date().invalid()) {
-          @for (error of form.date().errors(); track error) {
-            <p class="text-error text-sm">{{ error.message }}</p>
-          }
-        }
-      </div>
+      </ui-field>
+      <ui-field label="Fecha" [field]="form.date">
+        <input uiInput type="date" [formField]="form.date" />
+      </ui-field>
       <div class="fieldset md:col-span-4">
         <label for="comments">Comentarios</label>
         <lib-text-editor [formField]="form.comments" [bordered]="true" />
       </div>
 
-      <div class="fieldset">
-        <label for="published">Publicada</label>
-        <input type="checkbox" [formField]="form.published" class="checkbox checkbox-primary" />
-      </div>
+      <ui-choice label="Publicada" [field]="form.published">
+        <input uiCheckbox type="checkbox" [formField]="form.published" />
+      </ui-choice>
     </div>
     <div class="flex justify-end gap-2">
-      <button class="btn btn-soft" type="button" (click)="closeModal.emit(false)">Cancelar</button>
-      <button class="btn btn-primary" type="submit">Guardar</button>
+      <button uiButton type="button" (click)="closeModal.emit(false)">Cancelar</button>
+      <button uiButton variant="primary" type="submit">Guardar</button>
     </div>
   </form>`,
 })

@@ -1,5 +1,5 @@
 import { SchoolContext } from '#/shared';
-import { Toast } from '#/ui';
+import { Alert, Badge, Button, Toast, UiSelect } from '#/ui';
 import { Component, effect, inject, input, signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
@@ -10,16 +10,16 @@ import { StoreApiService } from '../store-api.service';
 
 @Component({
   selector: 'app-product-detail',
-  imports: [RouterLink, FormsModule],
+  imports: [Alert, Badge, UiSelect, Button, RouterLink, FormsModule],
   template: `
-    <a routerLink="../.." class="btn btn-ghost btn-sm gap-1 mb-4">
+    <a uiButton variant="ghost" size="sm" routerLink="../.." class="gap-1 mb-4">
       <span class="material-symbols-outlined">arrow_back</span>
       Volver
     </a>
     @if (product.isLoading()) {
       <p>Cargando…</p>
     } @else if (!product.value()) {
-      <div class="alert alert-error">Producto no encontrado.</div>
+      <div uiAlert tone="danger">Producto no encontrado.</div>
     } @else {
       @let p = product.value()!;
       <div class="grid gap-8 lg:grid-cols-2">
@@ -35,7 +35,7 @@ import { StoreApiService } from '../store-api.service';
         <div class="space-y-4">
           <h1 class="text-3xl font-bold">{{ p.name }}</h1>
           @if (p.hasOutOfStockVariant) {
-            <div class="alert alert-warning py-2 text-sm">Alguna talla está agotada</div>
+            <div uiAlert tone="warning" class="py-2 text-sm">Alguna talla está agotada</div>
           }
           <p class="text-2xl font-semibold text-primary">{{ formatPrice(p.price) }}</p>
           @if (p.description) {
@@ -44,11 +44,7 @@ import { StoreApiService } from '../store-api.service';
           @if (p.variants?.length) {
             <label class="form-control w-full max-w-xs">
               <span class="label-text">Talla / variante</span>
-              <select
-                class="select select-bordered"
-                [ngModel]="selectedVariantId()"
-                (ngModelChange)="selectedVariantId.set($event)"
-              >
+              <select uiSelect [ngModel]="selectedVariantId()" (ngModelChange)="selectedVariantId.set($event)">
                 @for (v of p.variants; track v.id) {
                   <option [value]="v.id" [disabled]="(v.stock ?? 0) <= 0">
                     {{ v.label }} — {{ (v.stock ?? 0) <= 0 ? 'Agotado' : v.stock + ' disponibles' }}
@@ -58,10 +54,10 @@ import { StoreApiService } from '../store-api.service';
             </label>
           }
           @if (!selectedVariant() || (selectedVariant()?.stock ?? 0) <= 0) {
-            <div class="badge badge-error">Sin stock en la talla seleccionada</div>
+            <div uiBadge tone="danger">Sin stock en la talla seleccionada</div>
           } @else {
             <div class="flex flex-wrap gap-2 mt-4">
-              <button type="button" class="btn btn-primary" (click)="add(1)">Agregar al carrito</button>
+              <button uiButton variant="primary" type="button" (click)="add(1)">Agregar al carrito</button>
             </div>
           }
         </div>

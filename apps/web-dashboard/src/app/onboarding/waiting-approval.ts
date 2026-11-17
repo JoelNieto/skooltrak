@@ -1,17 +1,18 @@
-import { Toast } from '#/ui';
+import { Button, Spinner, Toast } from '#/ui';
 import { HttpClient } from '@angular/common/http';
 import { afterRenderEffect, Component, inject, OnDestroy, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import Auth from '../auth/auth';
+import { BrandLogo } from '../shared/brand-logo';
 
 @Component({
   selector: 'app-waiting-approval',
-  imports: [],
+  imports: [Spinner, Button, BrandLogo],
   template: `
     <div class="min-h-screen flex flex-col gradient-bg">
       <header class="p-4 md:p-6 flex items-center justify-between">
-        <img src="skooltrak.png" alt="Skooltrak" class="h-8 md:h-10" />
-        <button class="btn btn-ghost btn-sm" (click)="logout()">
+        <app-brand-logo class="h-8 md:h-10" />
+        <button uiButton variant="ghost" size="sm" (click)="logout()">
           <span class="material-symbols-outlined">logout</span>
           Cerrar sesión
         </button>
@@ -60,7 +61,7 @@ import Auth from '../auth/auth';
 
           @if (checking()) {
             <div class="flex items-center justify-center gap-2 text-base-content/50">
-              <span class="loading loading-spinner loading-xs"></span>
+              <span uiSpinner size="xs"></span>
               <span class="text-sm">Verificando estado...</span>
             </div>
           }

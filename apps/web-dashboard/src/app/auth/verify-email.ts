@@ -1,18 +1,19 @@
-import { Loader, Toast } from '#/ui';
+import { Button, Loader, Toast } from '#/ui';
 import { HttpClient } from '@angular/common/http';
 import { afterRenderEffect, Component, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import Auth from './auth';
+import { BrandLogo } from '../shared/brand-logo';
 
 @Component({
   selector: 'app-verify-email',
-  imports: [Loader],
+  imports: [Button, BrandLogo, Loader],
   template: `
     <div class="min-h-screen flex flex-col gradient-bg">
       <!-- Fixed Header -->
       <header class="p-4 md:p-6 flex items-center justify-between">
-        <img src="skooltrak.png" alt="Skooltrak" class="h-8 md:h-10" />
+        <app-brand-logo class="h-8 md:h-10" />
       </header>
 
       <!-- Content -->
@@ -41,7 +42,7 @@ import Auth from './auth';
                 escuela.
               </p>
             </div>
-            <button class="btn btn-primary btn-lg" (click)="continueToOnboarding()">
+            <button uiButton variant="primary" size="lg" (click)="continueToOnboarding()">
               Continuar
               <span class="material-symbols-outlined">arrow_forward</span>
             </button>
@@ -58,10 +59,8 @@ import Auth from './auth';
                 {{ error() }}
               </p>
             </div>
-            <button class="btn btn-primary" (click)="resendEmail()" [disabled]="resending()">
-              @if (resending()) {
-                <span class="loading loading-spinner loading-sm"></span>
-              } @else {
+            <button uiButton [loading]="resending()" variant="primary" (click)="resendEmail()" [disabled]="resending()">
+              @if (!resending()) {
                 <span class="material-symbols-outlined">mail</span>
               }
               Reenviar correo de verificación
@@ -100,12 +99,13 @@ import Auth from './auth';
 
             <div class="space-y-3">
               <button
-                class="btn btn-outline btn-block"
+                uiButton
+                [loading]="resending()"
+                class="w-full"
                 (click)="resendEmail()"
                 [disabled]="resending() || cooldown() > 0"
               >
                 @if (resending()) {
-                  <span class="loading loading-spinner loading-sm"></span>
                   Enviando...
                 } @else if (cooldown() > 0) {
                   Reenviar en {{ cooldown() }}s
@@ -115,7 +115,7 @@ import Auth from './auth';
                 }
               </button>
 
-              <button class="btn btn-ghost btn-sm" (click)="checkVerification()">
+              <button uiButton variant="ghost" size="sm" (click)="checkVerification()">
                 <span class="material-symbols-outlined text-lg">sync</span>
                 Ya verifiqué mi correo
               </button>

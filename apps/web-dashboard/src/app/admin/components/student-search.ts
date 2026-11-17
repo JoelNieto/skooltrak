@@ -2,6 +2,7 @@ import { OverlayModule } from '@angular/cdk/overlay';
 import { httpResource } from '@angular/common/http';
 import { Component, effect, output, signal, viewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { Badge, Button } from '#/ui';
 
 type StudentSearchItem = {
   id: string;
@@ -11,16 +12,19 @@ type StudentSearchItem = {
 
 @Component({
   selector: 'app-student-search',
-  imports: [FormsModule, OverlayModule],
+  imports: [Badge, Button, FormsModule, OverlayModule],
   template: `
     <div class="relative flex flex-col" #origin>
       <div class="flex relative items-center input input-primary w-full max-w-md">
         @if (selectedStudent(); as s) {
-          <span class="badge badge-primary gap-2">
+          <span uiBadge tone="action" class="gap-2">
             {{ s.name }}
             <button
+              uiButton
+              variant="ghost"
+              size="sm"
+              iconOnly
               type="button"
-              class="btn btn-ghost btn-xs btn-square"
               aria-label="Quitar selección"
               (click)="clearSelection()"
             >

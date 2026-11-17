@@ -1,5 +1,5 @@
-import { Loader, StatCard } from '#/ui';
-import { DatePipe, NgClass } from '@angular/common';
+import { Badge, BadgeTone, Card, CardBody, Loader, StatCard, UiTable } from '#/ui';
+import { DatePipe } from '@angular/common';
 import { httpResource } from '@angular/common/http';
 import { Component, input } from '@angular/core';
 import { isValidId } from '../core/validators';
@@ -39,17 +39,17 @@ const STATUS_LABELS: Record<string, string> = {
   EXCUSED: 'Excusado',
 };
 
-const STATUS_COLORS: Record<string, string> = {
-  PRESENT: 'badge-success',
-  ABSENT: 'badge-error',
-  LATE: 'badge-warning',
-  SICK_LEAVE: 'badge-info',
-  EXCUSED: 'badge-neutral',
+const STATUS_TONES: Record<string, BadgeTone> = {
+  PRESENT: 'success',
+  ABSENT: 'danger',
+  LATE: 'warning',
+  SICK_LEAVE: 'info',
+  EXCUSED: 'neutral',
 };
 
 @Component({
   selector: 'app-student-attendance-report',
-  imports: [Loader, StatCard, DatePipe, NgClass],
+  imports: [UiTable, Badge, Card, CardBody, Loader, StatCard, DatePipe],
   template: `
     @if (statsResource.isLoading()) {
       <div class="flex justify-center py-8">
@@ -75,8 +75,8 @@ const STATUS_COLORS: Record<string, string> = {
       </div>
     }
 
-    <div class="card border border-base-200 bg-base-100">
-      <div class="card-body">
+    <div uiCard>
+      <div uiCardBody>
         <h2 class="text-lg font-semibold text-base-content">Historial de asistencia</h2>
 
         @if (recordsResource.isLoading()) {
@@ -85,7 +85,7 @@ const STATUS_COLORS: Record<string, string> = {
 
         @if (recordsResource.hasValue()) {
           <div class="overflow-x-auto">
-            <table class="table table-zebra">
+            <table uiTable zebra>
               <thead>
                 <tr>
                   <th>Fecha</th>
@@ -96,7 +96,7 @@ const STATUS_COLORS: Record<string, string> = {
               </thead>
               <tbody>
                 @for (record of recordsResource.value(); track record.id) {
-                  <tr class="hover">
+                  <tr>
                     <td>
                       @if (record.attendanceSession) {
                         {{ record.attendanceSession.date | date: 'fullDate' }}
@@ -106,7 +106,7 @@ const STATUS_COLORS: Record<string, string> = {
                     </td>
                     <td>{{ record.attendanceSession?.course?.subject?.name ?? '-' }}</td>
                     <td>
-                      <span class="badge" [ngClass]="getStatusColor(record.status)">
+                      <span uiBadge [tone]="statusTone(record.status)">
                         {{ getStatusLabel(record.status) }}
                       </span>
                     </td>
@@ -151,7 +151,7 @@ export default class StudentAttendanceReport {
     return STATUS_LABELS[status] || status;
   }
 
-  getStatusColor(status: string): string {
-    return STATUS_COLORS[status] || 'badge-ghost';
+  statusTone(status: string): BadgeTone {
+    return STATUS_TONES[status] || 'neutral';
   }
 }

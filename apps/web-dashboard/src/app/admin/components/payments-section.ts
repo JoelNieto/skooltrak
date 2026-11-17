@@ -1,4 +1,4 @@
-import { EmptyState, Paginator, Pagination } from '#/ui';
+import { EmptyState, Pagination, Paginator, UiInput, UiSelect, UiTable } from '#/ui';
 import { DatePipe, DecimalPipe } from '@angular/common';
 import { httpResource } from '@angular/common/http';
 import { Component, computed, effect, inject, input, signal } from '@angular/core';
@@ -19,7 +19,7 @@ type StudentOption = { id: string; firstName: string; fatherName: string };
 
 @Component({
   selector: 'app-payments-section',
-  imports: [DatePipe, DecimalPipe, EmptyState, FormsModule, Paginator],
+  imports: [UiTable, UiInput, UiSelect, DatePipe, DecimalPipe, EmptyState, FormsModule, Paginator],
   providers: [Pagination],
   template: `
     <div class="bg-base-100 rounded-lg border border-base-300">
@@ -27,11 +27,7 @@ type StudentOption = { id: string; firstName: string; fatherName: string };
         @if (showStudentFilter()) {
           <label class="form-control">
             <span class="label-text text-xs">Estudiante</span>
-            <select
-              class="select select-sm select-primary"
-              [ngModel]="studentFilter()"
-              (ngModelChange)="onStudentChange($event)"
-            >
+            <select uiSelect class="select-sm" [ngModel]="studentFilter()" (ngModelChange)="onStudentChange($event)">
               <option value="">Todos</option>
               @for (s of students.value(); track s.id) {
                 <option [value]="s.id">{{ s.firstName }} {{ s.fatherName }}</option>
@@ -42,7 +38,8 @@ type StudentOption = { id: string; firstName: string; fatherName: string };
         <label class="form-control grow min-w-48">
           <span class="label-text text-xs">Referencia</span>
           <input
-            class="input input-sm input-primary"
+            uiInput
+            class="input-sm"
             type="search"
             placeholder="Buscar referencia..."
             [ngModel]="pagination.search()"
@@ -54,7 +51,7 @@ type StudentOption = { id: string; firstName: string; fatherName: string };
       @if (paymentsResource.isLoading()) {
         <div class="p-8 text-center">Cargando...</div>
       } @else if (paymentsResource.value()?.data.length) {
-        <table class="table">
+        <table uiTable>
           <thead>
             <tr>
               <th>Estudiante</th>

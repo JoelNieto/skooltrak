@@ -1,17 +1,18 @@
-import { Toast } from '#/ui';
+import { Alert, Button, Toast, UiField, UiInput } from '#/ui';
 import { HttpClient } from '@angular/common/http';
 import { afterRenderEffect, Component, inject, signal } from '@angular/core';
 import { form, FormField, required } from '@angular/forms/signals';
 import { ActivatedRoute, Router } from '@angular/router';
 import Auth from '../auth/auth';
+import { BrandLogo } from '../shared/brand-logo';
 
 @Component({
   selector: 'app-verify-student',
-  imports: [FormField],
+  imports: [Alert, UiField, UiInput, Button, BrandLogo, FormField],
   template: `
     <div class="min-h-screen flex flex-col gradient-bg">
       <header class="p-4 md:p-6 flex items-center justify-between">
-        <img src="skooltrak.png" alt="Skooltrak" class="h-8 md:h-10" />
+        <app-brand-logo class="h-8 md:h-10" />
       </header>
 
       <main class="flex-1 flex flex-col items-center justify-center p-6">
@@ -32,40 +33,34 @@ import Auth from '../auth/auth';
           </div>
 
           <form (submit)="verify($event)" class="space-y-4 text-left">
-            <div class="fieldset">
-              <label for="documentId" class="label">
-                <span class="label-text font-medium">Documento de Identidad</span>
-              </label>
-              <input
-                type="text"
-                id="documentId"
-                class="input input-bordered w-full"
-                placeholder="Ej: 8-123-4567"
-                [formField]="form.documentId"
-              />
-              @if (form.documentId().touched()) {
-                <p class="text-error text-xs mt-1">{{ form.documentId().errors()[0].message }}</p>
-              }
-            </div>
+            <ui-field label="Documento de Identidad" [field]="form.documentId">
+              <input uiInput type="text" id="documentId" placeholder="Ej: 8-123-4567" [formField]="form.documentId" />
+            </ui-field>
 
             @if (errorMessage()) {
-              <div class="alert alert-error">
+              <div uiAlert tone="danger">
                 <span class="material-symbols-outlined">error</span>
                 <span>{{ errorMessage() }}</span>
               </div>
             }
 
             <div class="pt-2 space-y-3">
-              <button type="submit" class="btn btn-primary w-full" [disabled]="loading()">
+              <button
+                uiButton
+                [loading]="loading()"
+                variant="primary"
+                type="submit"
+                class="w-full"
+                [disabled]="loading()"
+              >
                 @if (loading()) {
-                  <span class="loading loading-spinner loading-sm"></span>
                   Verificando...
                 } @else {
                   <span class="material-symbols-outlined">check</span>
                   Verificar y Vincular
                 }
               </button>
-              <button type="button" class="btn btn-ghost btn-sm w-full" (click)="goBack()">
+              <button uiButton variant="ghost" size="sm" type="button" class="w-full" (click)="goBack()">
                 <span class="material-symbols-outlined text-lg">arrow_back</span>
                 Volver
               </button>

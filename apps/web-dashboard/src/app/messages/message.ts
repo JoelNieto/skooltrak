@@ -1,9 +1,8 @@
-import { EditorViewer, Loader, Toast } from '#/ui';
+import { Breadcrumbs, Button, Card, CardBody, EditorViewer, Loader, Toast, UiInput } from '#/ui';
 import { DatePipe } from '@angular/common';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { Component, computed, effect, inject, input, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
 import { Prisma } from '@generated/prisma';
 import Auth from '../auth/auth';
 
@@ -26,7 +25,7 @@ type MessageType = Prisma.MessageGetPayload<undefined> & {
 
 @Component({
   selector: 'app-message',
-  imports: [Loader, RouterLink, DatePipe, EditorViewer, FormsModule],
+  imports: [Breadcrumbs, Card, CardBody, UiInput, Button, Loader, DatePipe, EditorViewer, FormsModule],
   styles: `
     :host ::ng-deep blockquote {
       border-left: 3px solid oklch(var(--bc) / 0.3);
@@ -39,15 +38,15 @@ type MessageType = Prisma.MessageGetPayload<undefined> & {
   template: `@defer {
       @if (messageResource.hasValue()) {
         @let message = messageResource.value();
-        <div class="breadcrumbs text-sm">
-          <ul>
-            <li><a routerLink="/">Inicio</a></li>
-            <li><a routerLink="/messages">Mensajes</a></li>
-            <li>{{ message.sender?.name }}: {{ message.subject }}</li>
-          </ul>
-        </div>
-        <div class="card card-border bg-base-100 border-base-300 mt-4">
-          <div class="card-body">
+        <ui-breadcrumbs
+          [items]="[
+            { label: 'Inicio', link: '/' },
+            { label: 'Mensajes', link: '/messages' },
+            { label: message.sender?.name + ': ' + message.subject },
+          ]"
+        />
+        <div uiCard class="mt-4">
+          <div uiCardBody>
             <div class="border-b border-base-300">
               <h1 class="text-2xl font-bold mb-4">{{ message.subject }}</h1>
             </div>
@@ -69,8 +68,10 @@ type MessageType = Prisma.MessageGetPayload<undefined> & {
               <lib-editor-viewer [innerHTML]="message.content" />
             </div>
             <div class="flex justify-end gap-2 border-t border-base-300 pt-3">
-              <button class="btn btn-ghost btn-sm" (click)="prepareReply(message)">Responder</button>
-              <button class="btn btn-ghost btn-sm" (click)="prepareReply(message, true)">Responder con cita</button>
+              <button uiButton variant="ghost" size="sm" (click)="prepareReply(message)">Responder</button>
+              <button uiButton variant="ghost" size="sm" (click)="prepareReply(message, true)">
+                Responder con cita
+              </button>
             </div>
           </div>
         </div>
@@ -80,8 +81,8 @@ type MessageType = Prisma.MessageGetPayload<undefined> & {
             <h2 class="text-xl font-semibold">Conversacion</h2>
             <div class="mt-4 space-y-3">
               @for (item of repliesOnly(); track item.id) {
-                <div class="card card-bordered bg-base-100">
-                  <div class="card-body p-4">
+                <div uiCard>
+                  <div uiCardBody class="p-4">
                     <div class="flex items-center justify-between text-sm">
                       <div class="flex items-center gap-2">
                         <div class="avatar avatar-placeholder">
@@ -97,8 +98,10 @@ type MessageType = Prisma.MessageGetPayload<undefined> & {
                       <lib-editor-viewer [innerHTML]="item.content" />
                     </div>
                     <div class="mt-3 flex gap-2">
-                      <button class="btn btn-ghost btn-xs" (click)="prepareReplyFromReply(item)">Responder</button>
-                      <button class="btn btn-ghost btn-xs" (click)="prepareReplyFromReply(item, true)">
+                      <button uiButton variant="ghost" size="sm" (click)="prepareReplyFromReply(item)">
+                        Responder
+                      </button>
+                      <button uiButton variant="ghost" size="sm" (click)="prepareReplyFromReply(item, true)">
                         Responder con cita
                       </button>
                     </div>
@@ -109,20 +112,21 @@ type MessageType = Prisma.MessageGetPayload<undefined> & {
           </div>
         }
 
-        <div class="card card-bordered bg-base-100 mt-6">
-          <div class="card-body">
+        <div uiCard class="mt-6">
+          <div uiCardBody>
             <h3 class="text-lg font-semibold">Responder</h3>
             @if (replyDraft().quotedText) {
               <div class="message-quote">
                 <div class="text-xs text-base-content/60">Cita de {{ replyDraft().quotedAuthor }}</div>
                 <div class="text-sm">{{ replyDraft().quotedText }}</div>
                 <div class="mt-2">
-                  <button class="btn btn-ghost btn-xs" (click)="clearQuote()">Quitar cita</button>
+                  <button uiButton variant="ghost" size="sm" (click)="clearQuote()">Quitar cita</button>
                 </div>
               </div>
             }
             <textarea
-              class="textarea textarea-bordered w-full mt-3"
+              uiInput
+              class="mt-3"
               rows="4"
               placeholder="Escribe tu respuesta"
               [ngModel]="replyDraft().content"
@@ -131,13 +135,13 @@ type MessageType = Prisma.MessageGetPayload<undefined> & {
             ></textarea>
             <div class="flex justify-end gap-2 mt-3">
               <button
-                class="btn btn-primary btn-sm"
+                uiButton
+                [loading]="isSending()"
+                variant="primary"
+                size="sm"
                 (click)="sendReply()"
                 [disabled]="isSending() || !replyDraft().content.trim()"
               >
-                @if (isSending()) {
-                  <span class="loading loading-spinner loading-sm"></span>
-                }
                 Enviar respuesta
               </button>
             </div>

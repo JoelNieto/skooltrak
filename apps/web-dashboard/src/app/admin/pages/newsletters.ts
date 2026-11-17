@@ -1,4 +1,4 @@
-import { Confirmation, Pagination, Paginator, Toast } from '#/ui';
+import { Alert, Badge, Button, Card, Confirmation, Pagination, Paginator, Toast, UiTable } from '#/ui';
 import { Menu, MenuContent, MenuItem, MenuTrigger } from '@angular/aria/menu';
 import { OverlayModule } from '@angular/cdk/overlay';
 import { DatePipe } from '@angular/common';
@@ -24,14 +24,29 @@ type NewsletterItem = {
 
 @Component({
   selector: 'app-newsletters',
-  imports: [DatePipe, Paginator, FormsModule, RouterLink, Menu, MenuContent, MenuItem, MenuTrigger, OverlayModule],
+  imports: [
+    Alert,
+    Card,
+    UiTable,
+    Badge,
+    Button,
+    DatePipe,
+    Paginator,
+    FormsModule,
+    RouterLink,
+    Menu,
+    MenuContent,
+    MenuItem,
+    MenuTrigger,
+    OverlayModule,
+  ],
   providers: [Pagination],
   template: `
     @if (newsletters.error()) {
-      <div role="alert" class="alert alert-error">
+      <div uiAlert tone="danger">
         <span class="material-symbols-outlined">error</span>
         <span>Error al cargar los boletines. Verifica tus permisos o intenta de nuevo.</span>
-        <button class="btn btn-sm btn-ghost" (click)="newsletters.reload()">Reintentar</button>
+        <button uiButton variant="ghost" size="sm" (click)="newsletters.reload()">Reintentar</button>
       </div>
     } @else {
       <div class="flex flex-col gap-4 md:flex-row md:justify-between">
@@ -41,12 +56,12 @@ type NewsletterItem = {
             <input class="pl-0" type="search" placeholder="Buscar..." [(ngModel)]="searchText" />
           </label>
         </div>
-        <a routerLink="/admin/newsletters/new" class="btn btn-primary">
+        <a uiButton variant="primary" routerLink="/admin/newsletters/new">
           <span class="material-symbols-outlined">add_circle</span> Nuevo boletín
         </a>
       </div>
-      <div class="overflow-x-auto bg-base-100 rounded-lg mt-4 border border-base-300">
-        <table class="table">
+      <div uiCard class="overflow-x-auto mt-4">
+        <table uiTable>
           <thead>
             <tr>
               <th
@@ -104,9 +119,9 @@ type NewsletterItem = {
                 <td>{{ newsletter.school.name }}</td>
                 <td>
                   @if (newsletter.published) {
-                    <span class="badge badge-success badge-sm">Publicado</span>
+                    <span uiBadge tone="success" size="sm">Publicado</span>
                   } @else {
-                    <span class="badge badge-neutral badge-sm">Borrador</span>
+                    <span uiBadge size="sm">Borrador</span>
                   }
                 </td>
                 <td>{{ newsletter.publishedAt ? (newsletter.publishedAt | date: 'short') : '-' }}</td>

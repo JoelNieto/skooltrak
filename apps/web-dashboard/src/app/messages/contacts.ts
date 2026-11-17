@@ -1,6 +1,7 @@
 import { httpResource } from '@angular/common/http';
 import { Component, computed, effect, ElementRef, input, model, output, signal, viewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { Alert, Badge, Button } from '#/ui';
 export type Contact = {
   id: string;
   initials: string;
@@ -18,15 +19,12 @@ export interface SelectedContact extends Contact {
 }
 @Component({
   selector: 'app-contacts',
-  imports: [FormsModule],
+  imports: [Alert, Badge, Button, FormsModule],
 
   template: ` <div class="relative w-full min-h-12 bg-white px-3 py-2">
       <div class="flex flex-wrap gap-2 items-center">
         @for (contact of selectedContacts(); track contact.id) {
-          <div
-            [class]="contact.isValid ? 'badge-neutral' : 'badge-error'"
-            class="badge badge-soft inline-flex items-center px-2 py-1 font-medium transition-all duration-200 hover:shadow-sm"
-          >
+          <div uiBadge [tone]="contact.isValid ? 'neutral' : 'danger'" class="inline-flex items-center px-2 py-1">
             <span class="material-symbols-outlined text-base!">person</span>
             <span class="mr-1">{{ contact.name }}</span>
             <button
@@ -95,11 +93,11 @@ export interface SelectedContact extends Contact {
     </div>
 
     @if (lastAddedContact()) {
-      <div class="mt-2 alert alert-warning alert-soft flex items-center justify-between">
+      <div uiAlert tone="warning" class="mt-2 flex items-center justify-between">
         <span>
           Removido: <strong>{{ lastAddedContact()?.name }}</strong>
         </span>
-        <button type="button" class="btn btn-ghost btn-xs" (click)="addLatestContact()">
+        <button uiButton variant="ghost" size="sm" type="button" (click)="addLatestContact()">
           <span class="material-symbols-outlined">close</span>
         </button>
       </div>

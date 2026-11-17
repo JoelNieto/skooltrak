@@ -1,4 +1,4 @@
-import { Confirmation, Modal, PaginatorV2, Toast } from '#/ui';
+import { Button, Card, Confirmation, Modal, PaginatorV2, Toast, UiSelect, UiTable } from '#/ui';
 import { Menu, MenuContent, MenuItem, MenuTrigger } from '@angular/aria/menu';
 import { OverlayModule } from '@angular/cdk/overlay';
 import { HttpClient, httpResource } from '@angular/common/http';
@@ -26,7 +26,21 @@ type CourseType = Prisma.CourseGetPayload<{
 
 @Component({
   selector: 'app-courses',
-  imports: [PaginatorV2, RouterLink, FormsModule, Menu, MenuContent, MenuItem, MenuTrigger, OverlayModule, FormField],
+  imports: [
+    Card,
+    UiTable,
+    UiSelect,
+    Button,
+    PaginatorV2,
+    RouterLink,
+    FormsModule,
+    Menu,
+    MenuContent,
+    MenuItem,
+    MenuTrigger,
+    OverlayModule,
+    FormField,
+  ],
   template: `<div class="flex justify-between">
       <div class="flex gap-2">
         <div class="md:w-96 w-full">
@@ -35,7 +49,7 @@ type CourseType = Prisma.CourseGetPayload<{
             <input class="pl-0" type="search" placeholder="Buscar..." [formField]="form.searchText" />
           </label>
         </div>
-        <select class="select select-primary" [formField]="form.studyPlanId">
+        <select uiSelect [formField]="form.studyPlanId">
           <option value="">Elija nivel...</option>
           @for (studyPlan of studyPlans.value(); track studyPlan.id) {
             <option [value]="studyPlan.id">{{ studyPlan.name }}</option>
@@ -43,12 +57,12 @@ type CourseType = Prisma.CourseGetPayload<{
         </select>
       </div>
 
-      <button class="btn btn-primary" (click)="editCourse()">
+      <button uiButton variant="primary" (click)="editCourse()">
         <span class="material-symbols-outlined">add_circle</span> Nuevo curso
       </button>
     </div>
-    <div class="overflow-x-auto bg-base-100 rounded-lg mt-4 border border-base-300">
-      <table class="table">
+    <div uiCard class="overflow-x-auto mt-4">
+      <table uiTable>
         <thead>
           <tr>
             <th>Nombre</th>

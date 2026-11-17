@@ -1,4 +1,4 @@
-import { Toast } from '#/ui';
+import { Button, Toast, UiCheckbox, UiChoice, UiField, UiInput, UiSelect } from '#/ui';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { afterRenderEffect, Component, inject, input, output, signal } from '@angular/core';
 import { applyEach, form, FormField, required } from '@angular/forms/signals';
@@ -23,26 +23,22 @@ const MONTH_LABELS: Record<number, string> = {
 
 @Component({
   selector: 'app-study-plan-form',
-  imports: [FormField],
+  imports: [UiCheckbox, UiChoice, UiField, UiInput, UiSelect, Button, FormField],
   template: `
     <form (submit)="onSubmit($event)">
       <div class="flex flex-col md:grid md:grid-cols-4 md:gap-4 gap-2">
-        <div class="fieldset md:col-span-2">
-          <label for="name">Nombre</label>
-          <input type="text" [formField]="form.name" class="input input-primary" />
-        </div>
-        <div class="fieldset">
-          <label for="shortName">Nombre corto</label>
-          <input type="text" [formField]="form.shortName" class="input input-primary" />
-        </div>
-        <div class="fieldset">
-          <label for="level">Grado</label>
-          <input type="number" [formField]="form.level" class="input input-primary" />
-        </div>
+        <ui-field label="Nombre" [field]="form.name" class="md:col-span-2">
+          <input uiInput type="text" [formField]="form.name" />
+        </ui-field>
+        <ui-field label="Nombre corto" [field]="form.shortName">
+          <input uiInput type="text" [formField]="form.shortName" />
+        </ui-field>
+        <ui-field label="Grado" [field]="form.level">
+          <input uiInput type="number" [formField]="form.level" />
+        </ui-field>
 
-        <div class="fieldset">
-          <label for="degreeId">Nivel</label>
-          <select [formField]="form.degreeId" class="select select-primary">
+        <ui-field label="Nivel" [field]="form.degreeId">
+          <select uiSelect [formField]="form.degreeId">
             <option value="" disabled>Selecciona nivel...</option>
             @for (degree of degrees.value(); track degree.id) {
               <option [value]="degree.id">
@@ -50,10 +46,9 @@ const MONTH_LABELS: Record<number, string> = {
               </option>
             }
           </select>
-        </div>
-        <div class="fieldset">
-          <label for="gradeMetricId">Metrica de calificaciones</label>
-          <select [formField]="form.gradeMetricId" class="select select-primary">
+        </ui-field>
+        <ui-field label="Metrica de calificaciones" [field]="form.gradeMetricId">
+          <select uiSelect [formField]="form.gradeMetricId">
             <option value="" disabled>Selecciona metrica...</option>
             @for (metric of metrics.value(); track metric.id) {
               <option [value]="metric.id">
@@ -61,41 +56,33 @@ const MONTH_LABELS: Record<number, string> = {
               </option>
             }
           </select>
-        </div>
-        <div class="fieldset md:col-span-4">
-          <label for="description">Descripción</label>
-          <textarea [formField]="form.description" class="textarea textarea-primary w-full"></textarea>
-        </div>
+        </ui-field>
+        <ui-field label="Descripción" [field]="form.description" class="md:col-span-4">
+          <textarea uiInput [formField]="form.description"></textarea>
+        </ui-field>
 
         <div class="fieldset md:col-span-4 border-t border-base-300 pt-4 mt-2">
           <h3 class="font-semibold mb-2">Configuración financiera</h3>
           <div class="flex flex-col gap-4">
             <div class="fieldset">
               <label for="monthlyTuitionAmount">Colegiatura mensual</label>
-              <input
-                type="number"
-                step="0.01"
-                [formField]="form.monthlyTuitionAmount"
-                class="input input-primary"
-                placeholder="0.00"
-              />
+              <input uiInput type="number" step="0.01" [formField]="form.monthlyTuitionAmount" placeholder="0.00" />
             </div>
             <div class="fieldset">
               <label for="tuitionMonths">Meses de colegiatura</label>
               <div class="flex flex-wrap gap-2">
                 @for (m of [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]; track m) {
-                  <label
-                    class="label cursor-pointer flex! items-center gap-2 border border-primary rounded-lg px-3 py-2"
-                  >
+                  <ui-choice label="{{ monthLabel(m) }}" class="flex! border border-primary rounded-lg px-3 py-2">
                     <input
+                      uiCheckbox
+                      tone="neutral"
+                      size="sm"
                       type="checkbox"
                       [value]="m"
                       [checked]="form.tuitionMonths().value().includes(m)"
                       (change)="toggleTuitionMonth(m, $event)"
-                      class="checkbox checkbox-sm"
                     />
-                    <span class="text-sm">{{ monthLabel(m) }}</span>
-                  </label>
+                  </ui-choice>
                 }
               </div>
             </div>
@@ -104,25 +91,15 @@ const MONTH_LABELS: Record<number, string> = {
               <div class="space-y-2">
                 @for (item of form.enrollmentCosts; track $index; let i = $index) {
                   <div class="flex gap-2 items-end">
-                    <input
-                      [formField]="item.name"
-                      class="input input-primary flex-1"
-                      placeholder="Ej. Matrícula, Seguro"
-                    />
-                    <input
-                      [formField]="item.amount"
-                      type="number"
-                      step="0.01"
-                      class="input input-primary w-24!"
-                      placeholder="0"
-                    />
-                    <button type="button" class="btn btn-ghost btn-sm" (click)="removeEnrollmentCost(i)">
+                    <input uiInput [formField]="item.name" class="flex-1" placeholder="Ej. Matrícula, Seguro" />
+                    <input uiInput [formField]="item.amount" type="number" step="0.01" class="w-24!" placeholder="0" />
+                    <button uiButton variant="ghost" size="sm" type="button" (click)="removeEnrollmentCost(i)">
                       <span class="material-symbols-outlined text-lg">remove_circle</span>
                     </button>
                   </div>
                 }
               </div>
-              <button type="button" class="btn btn-ghost btn-sm mt-2" (click)="addEnrollmentCost()">
+              <button uiButton variant="ghost" size="sm" type="button" class="mt-2" (click)="addEnrollmentCost()">
                 <span class="material-symbols-outlined text-lg">add_circle</span> Agregar costo
               </button>
             </div>
@@ -130,8 +107,8 @@ const MONTH_LABELS: Record<number, string> = {
         </div>
       </div>
       <div class="flex justify-end gap-2 mt-4">
-        <button type="button" class="btn btn-ghost" (click)="closeModal.emit()">Cancelar</button>
-        <button type="submit" class="btn btn-primary">Guardar</button>
+        <button uiButton variant="ghost" type="button" (click)="closeModal.emit()">Cancelar</button>
+        <button uiButton variant="primary" type="submit">Guardar</button>
       </div>
     </form>
   `,

@@ -1,4 +1,4 @@
-import { Toast } from '#/ui';
+import { Button, Toast, UiField, UiInput, UiSelect } from '#/ui';
 import { DecimalPipe } from '@angular/common';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { Component, inject, output, signal } from '@angular/core';
@@ -17,31 +17,27 @@ type ChargeOption = {
 
 @Component({
   selector: 'app-create-payment-form',
-  imports: [DecimalPipe, FormField],
+  imports: [UiField, UiInput, UiSelect, Button, DecimalPipe, FormField],
   template: `
     <form (submit)="onSubmit($event)">
       <div class="flex flex-col gap-4">
-        <div class="fieldset">
-          <label for="studentId">Estudiante</label>
-          <select [formField]="form.studentId" (change)="onStudentChange()" class="select select-primary w-full">
+        <ui-field label="Estudiante" [field]="form.studentId">
+          <select uiSelect [formField]="form.studentId" (change)="onStudentChange()">
             <option value="" disabled>Seleccionar estudiante...</option>
             @for (s of students.value(); track s.id) {
               <option [value]="s.id">{{ s.firstName }} {{ s.fatherName }}</option>
             }
           </select>
-        </div>
-        <div class="fieldset">
-          <label for="amount">Monto</label>
-          <input type="number" step="0.01" [formField]="form.amount" class="input input-primary w-full" />
-        </div>
-        <div class="fieldset">
-          <label for="paidAt">Fecha de pago</label>
-          <input type="date" [formField]="form.paidAt" class="input input-primary w-full" />
-        </div>
+        </ui-field>
+        <ui-field label="Monto" [field]="form.amount">
+          <input uiInput type="number" step="0.01" [formField]="form.amount" />
+        </ui-field>
+        <ui-field label="Fecha de pago" [field]="form.paidAt">
+          <input uiInput type="date" [formField]="form.paidAt" />
+        </ui-field>
         @if (form.studentId().value()) {
-          <div class="fieldset">
-            <label for="chargeId">Aplicar a un cargo (opcional)</label>
-            <select [formField]="form.chargeId" class="select select-primary w-full">
+          <ui-field label="Aplicar a un cargo (opcional)" [field]="form.chargeId">
+            <select uiSelect [formField]="form.chargeId">
               <option value="">Sin cargo específico</option>
               @for (c of charges.value(); track c.id) {
                 <option [value]="c.id" [disabled]="c.status === 'PAID'">
@@ -49,21 +45,20 @@ type ChargeOption = {
                 </option>
               }
             </select>
-          </div>
+          </ui-field>
         }
-        <div class="fieldset">
-          <label for="reference">Referencia (opcional)</label>
+        <ui-field label="Referencia (opcional)" [field]="form.reference">
           <input
+            uiInput
             type="text"
             [formField]="form.reference"
-            class="input input-primary w-full"
             placeholder="Ej. Comprobante, número de transferencia"
           />
-        </div>
+        </ui-field>
       </div>
       <div class="flex justify-end gap-2 mt-4">
-        <button type="button" class="btn btn-ghost" (click)="closeModal.emit()">Cancelar</button>
-        <button type="submit" class="btn btn-primary">Registrar pago</button>
+        <button uiButton variant="ghost" type="button" (click)="closeModal.emit()">Cancelar</button>
+        <button uiButton variant="primary" type="submit">Registrar pago</button>
       </div>
     </form>
   `,

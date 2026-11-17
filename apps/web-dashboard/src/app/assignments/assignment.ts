@@ -1,4 +1,15 @@
-import { EditorViewer, Error as ErrorComponent, Loader, Toast } from '#/ui';
+import {
+  Badge,
+  Breadcrumbs,
+  Button,
+  Card,
+  CardBody,
+  CardTitle,
+  EditorViewer,
+  Error as ErrorComponent,
+  Loader,
+  Toast,
+} from '#/ui';
 import { DatePipe } from '@angular/common';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { Component, inject, input, signal } from '@angular/core';
@@ -22,6 +33,12 @@ type AssignmentDetail = {
 
 @Component({
   imports: [
+    Breadcrumbs,
+    Badge,
+    Card,
+    CardBody,
+    CardTitle,
+    Button,
     RouterLink,
     DatePipe,
     Loader,
@@ -34,18 +51,18 @@ type AssignmentDetail = {
     @defer {
       @if (assignmentResource.hasValue() && assignmentResource.value()) {
         @let assignment = assignmentResource.value()!;
-        <div class="breadcrumbs text-sm">
-          <ul>
-            <li><a routerLink="/">Inicio</a></li>
-            <li><a routerLink="/assignments">Asignaciones</a></li>
-            <li>{{ assignment.title }}</li>
-          </ul>
-        </div>
-        <div class="card card-border border-base-300 bg-base-100 mt-4">
-          <div class="card-body flex flex-row justify-between items-start">
+        <ui-breadcrumbs
+          [items]="[
+            { label: 'Inicio', link: '/' },
+            { label: 'Asignaciones', link: '/assignments' },
+            { label: assignment.title },
+          ]"
+        />
+        <div uiCard class="mt-4">
+          <div uiCardBody class="flex flex-row justify-between items-start">
             <div>
               <h1 class="text-xl font-semibold mb-2">{{ assignment.title }}</h1>
-              <a class="badge badge-primary badge-soft" [routerLink]="['/courses', assignment.course.id]">
+              <a uiBadge tone="action" [routerLink]="['/courses', assignment.course.id]">
                 {{ assignment.course.name }}
               </a>
               <p class="flex items-center gap-2 mt-2">
@@ -54,10 +71,15 @@ type AssignmentDetail = {
               </p>
             </div>
             @if (canStartAssignmentChat()) {
-              <button class="btn btn-ghost btn-sm" (click)="startAssignmentChat()" [disabled]="startingChat()">
-                @if (startingChat()) {
-                  <span class="loading loading-spinner loading-sm"></span>
-                } @else {
+              <button
+                uiButton
+                [loading]="startingChat()"
+                variant="ghost"
+                size="sm"
+                (click)="startAssignmentChat()"
+                [disabled]="startingChat()"
+              >
+                @if (!startingChat()) {
                   <span class="material-symbols-outlined">chat</span>
                 }
                 Chat
@@ -65,17 +87,17 @@ type AssignmentDetail = {
             }
           </div>
         </div>
-        <div class="card card-border border-base-300 bg-base-100 mt-4">
-          <div class="card-body">
-            <h3 class="card-title">Detalles</h3>
+        <div uiCard class="mt-4">
+          <div uiCardBody>
+            <h3 uiCardTitle>Detalles</h3>
             <lib-editor-viewer [innerHTML]="assignment.details" />
           </div>
         </div>
 
         @if (assignment.requireSubmission) {
-          <div class="card card-border border-base-300 bg-base-100 mt-4">
-            <div class="card-body">
-              <h3 class="card-title flex items-center gap-2">
+          <div uiCard class="mt-4">
+            <div uiCardBody>
+              <h3 uiCardTitle class="flex items-center gap-2">
                 <span class="material-symbols-outlined">assignment_turned_in</span>
                 Entregas
               </h3>

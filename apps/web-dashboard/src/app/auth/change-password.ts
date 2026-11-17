@@ -2,18 +2,14 @@ import { Component, inject, signal } from '@angular/core';
 import { form, FormField, minLength, required, validate } from '@angular/forms/signals';
 import { Router, RouterLink } from '@angular/router';
 import Auth from './auth';
+import { Alert, Breadcrumbs, Button, UiField, UiInput } from '#/ui';
 
 @Component({
   selector: 'app-change-password',
-  imports: [FormField, RouterLink],
+  imports: [Alert, Breadcrumbs, UiField, UiInput, Button, FormField, RouterLink],
   template: `
     <div class="flex flex-col gap-6">
-      <div class="breadcrumbs text-sm">
-        <ul>
-          <li><a routerLink="/">Inicio</a></li>
-          <li>Cambiar contraseña</li>
-        </ul>
-      </div>
+      <ui-breadcrumbs [items]="[{ label: 'Inicio', link: '/' }, { label: 'Cambiar contraseña' }]" />
 
       <div class="bg-base-100 rounded-lg border border-base-300 p-6 max-w-xl w-full">
         <div class="mb-6">
@@ -22,60 +18,50 @@ import Auth from './auth';
         </div>
 
         @if (success()) {
-          <div class="alert alert-success mb-4">
+          <div uiAlert tone="success" class="mb-4">
             <span class="material-symbols-outlined">check_circle</span>
             <span>Contraseña cambiada exitosamente.</span>
           </div>
         }
 
         @if (error()) {
-          <div class="alert alert-error mb-4">
+          <div uiAlert tone="danger" class="mb-4">
             <span class="material-symbols-outlined">error</span>
             <span>{{ errorMessage() }}</span>
           </div>
         }
 
         <form (submit)="onSubmit($event)" class="space-y-4">
-          <div class="fieldset">
-            <label for="currentPassword">Contraseña actual</label>
+          <ui-field label="Contraseña actual" [field]="form.currentPassword">
             <input
+              uiInput
               id="currentPassword"
               [formField]="form.currentPassword"
               type="password"
               autocomplete="current-password"
-              class="input input-primary w-full"
               placeholder="••••••••"
             />
-          </div>
-          <div class="fieldset">
-            <label for="newPassword">Nueva contraseña</label>
+          </ui-field>
+          <ui-field label="Nueva contraseña" [field]="form.newPassword">
             <input
+              uiInput
               id="newPassword"
               [formField]="form.newPassword"
               type="password"
               autocomplete="new-password"
-              class="input input-primary w-full"
-              [class.ng-invalid]="form.newPassword().touched() && form.newPassword().invalid()"
               placeholder="Mínimo 8 caracteres"
             />
-            @if (form.newPassword().touched() && form.newPassword().errors().length) {
-              @for (error of form.newPassword().errors(); track error) {
-                <p class="text-error text-sm">{{ error.message }}</p>
-              }
-            }
-          </div>
-          <div class="fieldset">
-            <label for="confirmPassword">Confirmar contraseña</label>
+          </ui-field>
+          <ui-field label="Confirmar contraseña" [field]="form.confirmPassword">
             <input
+              uiInput
               id="confirmPassword"
               [formField]="form.confirmPassword"
               type="password"
               autocomplete="new-password"
-              class="input input-primary w-full"
-              [class.ng-invalid]="form.newPassword().touched() && form.newPassword().invalid()"
               placeholder="Repite la nueva contraseña"
             />
-          </div>
+          </ui-field>
 
           @if (form.confirmPassword().touched() && form.confirmPassword().errors().length) {
             @for (error of form.confirmPassword().errors(); track error) {
@@ -84,10 +70,16 @@ import Auth from './auth';
           }
 
           <div class="flex flex-col sm:flex-row gap-3 pt-2">
-            <a routerLink="/home" class="btn btn-outline w-full sm:w-auto"> Cancelar </a>
-            <button type="submit" [disabled]="loading() || form().invalid()" class="btn btn-primary w-full sm:w-auto">
+            <a uiButton routerLink="/home" class="w-full sm:w-auto"> Cancelar </a>
+            <button
+              uiButton
+              [loading]="loading()"
+              variant="primary"
+              type="submit"
+              [disabled]="loading() || form().invalid()"
+              class="w-full sm:w-auto"
+            >
               @if (loading()) {
-                <span class="loading loading-spinner loading-sm"></span>
                 Cambiando...
               } @else {
                 Cambiar contraseña

@@ -1,9 +1,8 @@
-import { Loader } from '#/ui';
+import { Alert, Breadcrumbs, Button, Loader, UiSelect, UiTable } from '#/ui';
 import { DecimalPipe } from '@angular/common';
 import { httpResource } from '@angular/common/http';
 import { afterRenderEffect, Component, computed, inject, input, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
 import Store from '../core/store';
 
 interface GradeReportPeriodInfo {
@@ -60,26 +59,26 @@ interface GradeReportData {
 
 @Component({
   selector: 'app-grade-report',
-  imports: [DecimalPipe, FormsModule, Loader, RouterLink],
+  imports: [Alert, Breadcrumbs, UiTable, UiSelect, Button, DecimalPipe, FormsModule, Loader],
   template: `
     <div class="grade-report-container">
       <div class="flex justify-between items-center mb-4 print:hidden">
-        <div class="breadcrumbs text-sm">
-          <ul>
-            <li><a routerLink="/">Inicio</a></li>
-            <li><a routerLink="/students">Alumnos</a></li>
-            <li><a [routerLink]="['/students', id()]">Estudiante</a></li>
-            <li>Boletín de calificaciones</li>
-          </ul>
-        </div>
+        <ui-breadcrumbs
+          [items]="[
+            { label: 'Inicio', link: '/' },
+            { label: 'Alumnos', link: '/students' },
+            { label: 'Estudiante', link: ['/students', id()] },
+            { label: 'Boletín de calificaciones' },
+          ]"
+        />
         <div class="flex gap-2 items-center">
-          <select class="select select-primary w-48" [ngModel]="periodId()" (ngModelChange)="periodId.set($event)">
+          <select uiSelect class="w-48" [ngModel]="periodId()" (ngModelChange)="periodId.set($event)">
             <option disabled [ngValue]="''">Selecciona un periodo...</option>
             @for (period of periodsResource.value(); track period.id) {
               <option [ngValue]="period.id">{{ period.name }}</option>
             }
           </select>
-          <button class="btn btn-primary" (click)="printReport()">
+          <button uiButton variant="primary" (click)="printReport()">
             <span class="material-symbols-outlined">print</span>
             Imprimir / Descargar PDF
           </button>
@@ -162,7 +161,7 @@ interface GradeReportData {
             <section class="grade-table-section">
               <h3 class="text-lg font-semibold mb-3 print:mb-1">Calificaciones</h3>
               <div class="overflow-x-auto grades-table-wrap">
-                <table class="table table-sm w-full">
+                <table uiTable density="compact" class="w-full">
                   <thead>
                     <tr>
                       <th class="min-w-32">Materias</th>
@@ -212,7 +211,7 @@ interface GradeReportData {
             <section>
               <h3 class="text-lg font-semibold mb-3 print:mb-1">Asistencia</h3>
               <div class="overflow-x-auto">
-                <table class="table table-sm w-full">
+                <table uiTable density="compact" class="w-full">
                   <thead>
                     <tr>
                       @for (period of report.periods; track period.id) {
@@ -248,7 +247,7 @@ interface GradeReportData {
           <section class="print:mt-1">
             <h3 class="text-lg font-semibold mb-3 print:text-xs print:mb-1">Méritos (Hábitos)</h3>
             <div class="overflow-x-auto">
-              <table class="table table-sm w-full max-w-md">
+              <table uiTable density="compact" class="w-full max-w-md">
                 <thead>
                   <tr>
                     <th>Criterio</th>
@@ -275,7 +274,7 @@ interface GradeReportData {
           </section>
         </div>
       } @else if (reportResource.error()) {
-        <div class="alert alert-error">No se pudo cargar el boletín. Verifica que el periodo esté seleccionado.</div>
+        <div uiAlert tone="danger">No se pudo cargar el boletín. Verifica que el periodo esté seleccionado.</div>
       }
     </div>
   `,

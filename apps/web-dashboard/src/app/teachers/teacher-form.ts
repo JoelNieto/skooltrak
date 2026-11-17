@@ -1,4 +1,4 @@
-import { Loader, Toast } from '#/ui';
+import { Breadcrumbs, Button, Card, CardBody, Loader, Toast, UiField, UiInput, UiSelect } from '#/ui';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { afterRenderEffect, Component, computed, inject, input, signal } from '@angular/core';
 import { disabled, email, form, FormField, required, submit } from '@angular/forms/signals';
@@ -43,19 +43,15 @@ interface TeacherFormData {
 
 @Component({
   selector: 'app-teacher-form',
-  imports: [FormField, RouterLink, Loader],
+  imports: [Breadcrumbs, Card, CardBody, UiField, UiInput, UiSelect, Button, FormField, RouterLink, Loader],
   template: `
-    <div class="breadcrumbs text-sm">
-      <ul>
-        <li><a routerLink="/">Inicio</a></li>
-        <li><a routerLink="/teachers">Docentes</a></li>
-        @if (isEditMode()) {
-          <li>Editar</li>
-        } @else {
-          <li>Nuevo</li>
-        }
-      </ul>
-    </div>
+    <ui-breadcrumbs
+      [items]="[
+        { label: 'Inicio', link: '/' },
+        { label: 'Docentes', link: '/teachers' },
+        { label: isEditMode() ? 'Editar' : 'Nuevo' },
+      ]"
+    />
 
     <div class="flex items-center justify-between mb-6">
       <h1 class="text-2xl font-semibold">
@@ -75,113 +71,34 @@ interface TeacherFormData {
               <p class="mt-1 text-sm text-base-content/70">Información personal del docente.</p>
             </div>
             <div class="sm:col-span-3">
-              <div class="card card-border border-base-300 bg-base-100">
-                <div class="card-body gap-y-4">
+              <div uiCard>
+                <div uiCardBody class="gap-y-4">
                   <div class="sm:grid sm:grid-cols-6 sm:gap-4">
-                    <div class="fieldset col-span-3">
-                      <label for="firstName">Primer nombre</label>
-                      <input
-                        id="firstName"
-                        type="text"
-                        [formField]="teacherForm.firstName"
-                        class="input input-primary w-full"
-                        [class.ng-invalid]="teacherForm.firstName().touched() && teacherForm.firstName().invalid()"
-                      />
-                      @if (teacherForm.firstName().touched() && teacherForm.firstName().invalid()) {
-                        @for (error of teacherForm.firstName().errors(); track error) {
-                          <p class="text-error text-sm">{{ error.message }}</p>
-                        }
-                      }
-                    </div>
-                    <div class="fieldset col-span-3">
-                      <label for="middleName">
-                        Segundo nombre
-                        <span class="text-base-content/50 text-xs">(opcional)</span>
-                      </label>
-                      <input
-                        id="middleName"
-                        type="text"
-                        [formField]="teacherForm.middleName"
-                        class="input input-primary w-full"
-                      />
-                    </div>
-                    <div class="fieldset col-span-3">
-                      <label for="fatherName">Apellido paterno</label>
-                      <input
-                        id="fatherName"
-                        type="text"
-                        [formField]="teacherForm.fatherName"
-                        class="input input-primary w-full"
-                        [class.ng-invalid]="teacherForm.fatherName().touched() && teacherForm.fatherName().invalid()"
-                      />
-                      @if (teacherForm.fatherName().touched() && teacherForm.fatherName().invalid()) {
-                        @for (error of teacherForm.fatherName().errors(); track error) {
-                          <p class="text-error text-sm">{{ error.message }}</p>
-                        }
-                      }
-                    </div>
-                    <div class="fieldset col-span-3">
-                      <label for="motherName">
-                        Apellido materno
-                        <span class="text-base-content/50 text-xs">(opcional)</span>
-                      </label>
-                      <input
-                        id="motherName"
-                        type="text"
-                        [formField]="teacherForm.motherName"
-                        class="input input-primary w-full"
-                      />
-                    </div>
-                    <div class="fieldset col-span-2">
-                      <label for="documentId">Nro. documento</label>
-                      <input
-                        id="documentId"
-                        type="text"
-                        [formField]="teacherForm.documentId"
-                        class="input input-primary w-full"
-                        [class.ng-invalid]="teacherForm.documentId().touched() && teacherForm.documentId().invalid()"
-                      />
-                      @if (teacherForm.documentId().touched() && teacherForm.documentId().invalid()) {
-                        @for (error of teacherForm.documentId().errors(); track error) {
-                          <p class="text-error text-sm">{{ error.message }}</p>
-                        }
-                      }
-                    </div>
-                    <div class="fieldset col-span-2">
-                      <label for="birthDate">Fecha de nacimiento</label>
-                      <input
-                        id="birthDate"
-                        type="date"
-                        [formField]="teacherForm.birthDate"
-                        class="input input-primary w-full"
-                        [class.ng-invalid]="teacherForm.birthDate().touched() && teacherForm.birthDate().invalid()"
-                      />
-                      @if (teacherForm.birthDate().touched() && teacherForm.birthDate().invalid()) {
-                        <ul>
-                          @for (error of teacherForm.birthDate().errors(); track error) {
-                            <li class="text-error text-sm">{{ error.message }}</li>
-                          }
-                        </ul>
-                      }
-                    </div>
-                    <div class="fieldset col-span-2">
-                      <label for="gender">Género</label>
-                      <select
-                        id="gender"
-                        [formField]="teacherForm.gender"
-                        class="select select-primary w-full"
-                        [class.ng-invalid]="teacherForm.gender().touched() && teacherForm.gender().invalid()"
-                      >
+                    <ui-field label="Primer nombre" [field]="teacherForm.firstName" class="col-span-3">
+                      <input uiInput id="firstName" type="text" [formField]="teacherForm.firstName" />
+                    </ui-field>
+                    <ui-field label="Segundo nombre" [field]="teacherForm.middleName" optional class="col-span-3">
+                      <input uiInput id="middleName" type="text" [formField]="teacherForm.middleName" />
+                    </ui-field>
+                    <ui-field label="Apellido paterno" [field]="teacherForm.fatherName" class="col-span-3">
+                      <input uiInput id="fatherName" type="text" [formField]="teacherForm.fatherName" />
+                    </ui-field>
+                    <ui-field label="Apellido materno" [field]="teacherForm.motherName" optional class="col-span-3">
+                      <input uiInput id="motherName" type="text" [formField]="teacherForm.motherName" />
+                    </ui-field>
+                    <ui-field label="Nro. documento" [field]="teacherForm.documentId" class="col-span-2">
+                      <input uiInput id="documentId" type="text" [formField]="teacherForm.documentId" />
+                    </ui-field>
+                    <ui-field label="Fecha de nacimiento" [field]="teacherForm.birthDate" class="col-span-2">
+                      <input uiInput id="birthDate" type="date" [formField]="teacherForm.birthDate" />
+                    </ui-field>
+                    <ui-field label="Género" [field]="teacherForm.gender" class="col-span-2">
+                      <select uiSelect id="gender" [formField]="teacherForm.gender">
                         <option value="" disabled>---Seleccionar---</option>
                         <option value="MALE">Masculino</option>
                         <option value="FEMALE">Femenino</option>
                       </select>
-                      @if (teacherForm.gender().touched() && teacherForm.gender().invalid()) {
-                        @for (error of teacherForm.gender().errors(); track error) {
-                          <p class="text-error text-sm">{{ error.message }}</p>
-                        }
-                      }
-                    </div>
+                    </ui-field>
                   </div>
                 </div>
               </div>
@@ -195,60 +112,21 @@ interface TeacherFormData {
               <p class="mt-1 text-sm text-base-content/70">Información de contacto del docente.</p>
             </div>
             <div class="sm:col-span-3">
-              <div class="card card-border border-base-300 bg-base-100">
-                <div class="card-body gap-y-4">
+              <div uiCard>
+                <div uiCardBody class="gap-y-4">
                   <div class="sm:grid sm:grid-cols-6 sm:gap-4">
-                    <div class="fieldset col-span-3">
-                      <label for="email">Correo institucional</label>
-                      <input
-                        id="email"
-                        type="email"
-                        [formField]="teacherForm.email"
-                        class="input input-primary w-full"
-                        [class.ng-invalid]="teacherForm.email().touched() && teacherForm.email().invalid()"
-                      />
-                      @if (teacherForm.email().touched() && teacherForm.email().invalid()) {
-                        @for (error of teacherForm.email().errors(); track error) {
-                          <p class="text-error text-sm">{{ error.message }}</p>
-                        }
-                      }
-                    </div>
-                    <div class="fieldset col-span-3">
-                      <label for="personalEmail">
-                        Correo personal
-                        <span class="text-base-content/50 text-xs">(opcional)</span>
-                      </label>
-                      <input
-                        id="personalEmail"
-                        type="email"
-                        [formField]="teacherForm.personalEmail"
-                        class="input input-primary w-full"
-                      />
-                    </div>
-                    <div class="fieldset col-span-3">
-                      <label for="phoneNumber">
-                        Teléfono
-                        <span class="text-base-content/50 text-xs">(opcional)</span>
-                      </label>
-                      <input
-                        id="phoneNumber"
-                        type="text"
-                        [formField]="teacherForm.phoneNumber"
-                        class="input input-primary w-full"
-                      />
-                    </div>
-                    <div class="fieldset col-span-3">
-                      <label for="address">
-                        Dirección
-                        <span class="text-base-content/50 text-xs">(opcional)</span>
-                      </label>
-                      <input
-                        id="address"
-                        type="text"
-                        [formField]="teacherForm.address"
-                        class="input input-primary w-full"
-                      />
-                    </div>
+                    <ui-field label="Correo institucional" [field]="teacherForm.email" class="col-span-3">
+                      <input uiInput id="email" type="email" [formField]="teacherForm.email" />
+                    </ui-field>
+                    <ui-field label="Correo personal" [field]="teacherForm.personalEmail" optional class="col-span-3">
+                      <input uiInput id="personalEmail" type="email" [formField]="teacherForm.personalEmail" />
+                    </ui-field>
+                    <ui-field label="Teléfono" [field]="teacherForm.phoneNumber" optional class="col-span-3">
+                      <input uiInput id="phoneNumber" type="text" [formField]="teacherForm.phoneNumber" />
+                    </ui-field>
+                    <ui-field label="Dirección" [field]="teacherForm.address" optional class="col-span-3">
+                      <input uiInput id="address" type="text" [formField]="teacherForm.address" />
+                    </ui-field>
                   </div>
                 </div>
               </div>
@@ -262,47 +140,35 @@ interface TeacherFormData {
               <p class="mt-1 text-sm text-base-content/70">Datos profesionales y de trayectoria.</p>
             </div>
             <div class="sm:col-span-3">
-              <div class="card card-border border-base-300 bg-base-100">
-                <div class="card-body gap-y-4">
+              <div uiCard>
+                <div uiCardBody class="gap-y-4">
                   <div class="sm:grid sm:grid-cols-6 sm:gap-4">
-                    <div class="fieldset col-span-3">
-                      <label for="teacherSince">
-                        Docente desde (año)
-                        <span class="text-base-content/50 text-xs">(opcional)</span>
-                      </label>
+                    <ui-field
+                      label="Docente desde (año)"
+                      [field]="teacherForm.teacherSince"
+                      optional
+                      class="col-span-3"
+                    >
                       <input
+                        uiInput
                         id="teacherSince"
                         type="number"
                         [formField]="teacherForm.teacherSince"
-                        class="input input-primary w-full"
                         placeholder="Ej: 2015"
                       />
-                    </div>
-                    <div class="fieldset col-span-3">
-                      <label for="memberSince">
-                        Miembro desde
-                        <span class="text-base-content/50 text-xs">(opcional)</span>
-                      </label>
-                      <input
-                        id="memberSince"
-                        type="date"
-                        [formField]="teacherForm.memberSince"
-                        class="input input-primary w-full"
-                      />
-                    </div>
-                    <div class="fieldset col-span-6">
-                      <label for="about">
-                        Acerca de
-                        <span class="text-base-content/50 text-xs">(opcional)</span>
-                      </label>
+                    </ui-field>
+                    <ui-field label="Miembro desde" [field]="teacherForm.memberSince" optional class="col-span-3">
+                      <input uiInput id="memberSince" type="date" [formField]="teacherForm.memberSince" />
+                    </ui-field>
+                    <ui-field label="Acerca de" [field]="teacherForm.about" optional class="col-span-6">
                       <textarea
+                        uiInput
                         id="about"
                         [formField]="teacherForm.about"
-                        class="textarea textarea-primary w-full"
                         rows="4"
                         placeholder="Biografía breve, especialidades, intereses..."
                       ></textarea>
-                    </div>
+                    </ui-field>
                   </div>
                 </div>
               </div>
@@ -312,11 +178,8 @@ interface TeacherFormData {
 
         <!-- Form Actions -->
         <div class="flex justify-end gap-3 my-6 pt-6 border-t border-base-300">
-          <a routerLink="/teachers" class="btn btn-ghost">Cancelar</a>
-          <button type="submit" class="btn btn-primary" [disabled]="isSaving()">
-            @if (isSaving()) {
-              <span class="loading loading-spinner loading-sm"></span>
-            }
+          <a uiButton variant="ghost" routerLink="/teachers">Cancelar</a>
+          <button uiButton [loading]="isSaving()" variant="primary" type="submit" [disabled]="isSaving()">
             {{ isEditMode() ? 'Guardar cambios' : 'Crear docente' }}
           </button>
         </div>

@@ -1,4 +1,14 @@
-import { MessageBubble, PageHeader, ThreadComposer, ThreadList, ThreadScrollPane, Toast } from '#/ui';
+import {
+  Badge,
+  MessageBubble,
+  PageHeader,
+  Spinner,
+  ThreadComposer,
+  ThreadList,
+  ThreadScrollPane,
+  Toast,
+  UiInput,
+} from '#/ui';
 import { DatePipe } from '@angular/common';
 import { httpResource } from '@angular/common/http';
 import {
@@ -13,7 +23,6 @@ import {
   signal,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
 import { isBefore } from 'date-fns';
 import Auth from '../auth/auth';
 import { CommunicationApi, Thread, ThreadMessage } from '../communication/communication-api.service';
@@ -25,15 +34,20 @@ const API = '/api/v1/communication';
 @Component({
   selector: 'app-parent-teacher-communication',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink, FormsModule, DatePipe, PageHeader, ThreadList, ThreadComposer, ThreadScrollPane, MessageBubble],
+  imports: [
+    Spinner,
+    Badge,
+    UiInput,
+    FormsModule,
+    DatePipe,
+    PageHeader,
+    ThreadList,
+    ThreadComposer,
+    ThreadScrollPane,
+    MessageBubble,
+  ],
   template: `
-    <div class="breadcrumbs text-sm">
-      <ul>
-        <li><a routerLink="/">Inicio</a></li>
-        <li>Mensajes</li>
-      </ul>
-    </div>
-    <lib-page-header
+    <lib-page-header [breadcrumbs]="[{ label: 'Inicio', link: '/' }, { label: 'Mensajes' }]"
       [title]="pageTitle()"
       [subtitle]="pageSubtitle()"
     />
@@ -41,9 +55,9 @@ const API = '/api/v1/communication';
     <div class="flex gap-4 h-[calc(100vh-12rem)]">
       <aside class="w-80 shrink-0 border border-base-300 rounded-lg flex flex-col bg-base-100">
         <div class="p-2 border-b border-base-300 shrink-0">
-          <input
+          <input uiInput
             type="search"
-            class="input input-primary input-sm w-full"
+            class="input-sm"
             placeholder="Buscar conversación…"
             [(ngModel)]="filterText"
           />
@@ -51,7 +65,7 @@ const API = '/api/v1/communication';
         <div class="flex-1 overflow-y-auto">
           @if (threadsResource.isLoading() && threadsResource.value().length === 0) {
             <div class="flex justify-center py-8">
-              <span class="loading loading-spinner loading-md"></span>
+              <span uiSpinner></span>
             </div>
           } @else {
             <lib-thread-list
@@ -76,7 +90,7 @@ const API = '/api/v1/communication';
               }
               <h2 class="font-semibold truncate">{{ thread.title }}</h2>
               @if (thread.broadcast) {
-                <span class="badge badge-primary badge-soft badge-sm shrink-0">Comunicado</span>
+                <span uiBadge tone="action" size="sm" class="shrink-0">Comunicado</span>
               }
             </div>
             <div class="flex items-center gap-1">
@@ -84,10 +98,10 @@ const API = '/api/v1/communication';
                 <span class="text-sm opacity-70">{{ thread.audience }}</span>
               }
               @if (thread.urgent) {
-                <span class="badge badge-error badge-soft badge-xs">Importante</span>
+                <span uiBadge tone="danger" size="sm">Importante</span>
               }
               @if (thread.broadcast && thread.repliesAllowed === false) {
-                <span class="badge badge-ghost badge-xs">Solo lectura</span>
+                <span uiBadge size="sm">Solo lectura</span>
               }
             </div>
           </header>
@@ -134,9 +148,7 @@ export default class ParentTeacherCommunication {
   #outbox = inject(OfflineOutbox);
 
   readonly pageTitle = input('Comunicación con docentes');
-  readonly pageSubtitle = input(
-    'Mensajes del equipo académico. Puedes responder, no iniciar conversaciones.',
-  );
+  readonly pageSubtitle = input('Mensajes del equipo académico. Puedes responder, no iniciar conversaciones.');
   readonly emptyMessage = input('Cuando un docente te escriba, el mensaje aparecerá aquí.');
   readonly thread = input<string | undefined>();
 
@@ -212,11 +224,10 @@ export default class ParentTeacherCommunication {
       })
       .map((t) => {
         const last = t.messages?.[0];
-        const owner = t.participants.find((p) => p.role === 'OWNER' && p.userId !== me)?.user
-          ?? t.participants.find((p) => p.role === 'OWNER')?.user;
-        const audience = owner
-          ? `${owner.firstName ?? ''} ${owner.lastName ?? ''}`.trim() || undefined
-          : undefined;
+        const owner =
+          t.participants.find((p) => p.role === 'OWNER' && p.userId !== me)?.user ??
+          t.participants.find((p) => p.role === 'OWNER')?.user;
+        const audience = owner ? `${owner.firstName ?? ''} ${owner.lastName ?? ''}`.trim() || undefined : undefined;
         return {
           id: t.id,
           title: t.title,

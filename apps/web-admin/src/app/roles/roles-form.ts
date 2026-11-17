@@ -1,4 +1,4 @@
-import { Toast } from '#/ui';
+import { Button, Toast, UiField, UiInput, UiSelect, UiToggle } from '#/ui';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { afterRenderEffect, Component, inject, input, model, output, signal } from '@angular/core';
 import { form, FormField, required } from '@angular/forms/signals';
@@ -6,20 +6,17 @@ import { Prisma } from '@generated/prisma';
 import { firstValueFrom } from 'rxjs';
 @Component({
   selector: 'app-roles-form',
-  imports: [FormField],
+  imports: [UiField, UiInput, UiSelect, UiToggle, Button, FormField],
   template: `
     <form (submit)="createRole($event)">
-      <div class="fieldset">
-        <label for="name">Nombre</label>
-        <input id="name" [formField]="form.name" class="input input-primary" />
-      </div>
-      <div class="fieldset">
-        <label for="description">Descripción</label>
-        <input id="description" [formField]="form.description" class="input input-primary" />
-      </div>
-      <div class="fieldset">
-        <label for="organizationId">Organización</label>
-        <select id="organizationId" [formField]="$any(form.organizationId)" class="select select-primary">
+      <ui-field label="Nombre" [field]="form.name">
+        <input uiInput id="name" [formField]="form.name" />
+      </ui-field>
+      <ui-field label="Descripción" [field]="form.description">
+        <input uiInput id="description" [formField]="form.description" />
+      </ui-field>
+      <ui-field label="Organización" [field]="$any(form.organizationId)">
+        <select uiSelect id="organizationId" [formField]="$any(form.organizationId)">
           <option [value]="null">Seleccionar Organización</option>
           @for (organization of organizations.value(); track organization.id) {
             <option [value]="organization.id">
@@ -27,14 +24,14 @@ import { firstValueFrom } from 'rxjs';
             </option>
           }
         </select>
-      </div>
+      </ui-field>
       <div class="fieldset">
         <label for="permissionIds">Permisos</label>
         @for (permission of permissions.value(); track permission.id) {
           <label class="label flex gap-2 items-center">
             <input
+              uiToggle
               type="checkbox"
-              class="toggle toggle-primary"
               [checked]="selectedIds().includes(permission.id!)"
               [id]="permission.id"
               (change)="togglePermission(permission.id!)"
@@ -44,7 +41,7 @@ import { firstValueFrom } from 'rxjs';
         }
       </div>
       <div class="flex justify-end mt-4">
-        <button type="submit" class="btn btn-primary">Guardar</button>
+        <button uiButton variant="primary" type="submit">Guardar</button>
       </div>
     </form>
   `,

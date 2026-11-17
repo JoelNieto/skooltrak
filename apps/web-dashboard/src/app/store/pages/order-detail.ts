@@ -5,26 +5,27 @@ import { rxResource } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import { map } from 'rxjs';
 import { StoreApiService } from '../store-api.service';
+import { Alert, Badge, Button, UiTable } from '#/ui';
 
 @Component({
   selector: 'app-order-detail',
-  imports: [RouterLink, DatePipe],
+  imports: [Alert, UiTable, Badge, Button, RouterLink, DatePipe],
   template: `
-    <a [routerLink]="['..']" class="btn btn-ghost btn-sm mb-4">← Mis pedidos</a>
+    <a uiButton variant="ghost" size="sm" [routerLink]="['..']" class="mb-4">← Mis pedidos</a>
     @if (order.isLoading()) {
       <p>Cargando…</p>
     } @else if (!order.value()) {
-      <div class="alert alert-error">Pedido no encontrado.</div>
+      <div uiAlert tone="danger">Pedido no encontrado.</div>
     } @else {
       @let o = order.value()!;
       <div class="space-y-4">
         <h2 class="text-xl font-semibold">Pedido {{ o.id }}</h2>
         <p class="text-sm text-base-content/70">{{ o.createdAt | date: 'medium' }}</p>
         <div class="flex flex-wrap gap-2">
-          <span class="badge badge-outline">Estado: {{ o.status }}</span>
-          <span class="badge badge-outline">Pago: {{ o.paymentStatus }}</span>
+          <span uiBadge>Estado: {{ o.status }}</span>
+          <span uiBadge>Pago: {{ o.paymentStatus }}</span>
         </div>
-        <table class="table border border-base-200 rounded-box">
+        <table uiTable class="border border-base-200 rounded-box">
           <thead>
             <tr>
               <th>Producto</th>

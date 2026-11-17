@@ -1,4 +1,4 @@
-import { EmptyState, Toast } from '#/ui';
+import { Button, EmptyState, Toast, UiField, UiInput, UiSelect } from '#/ui';
 import { HttpParams, httpResource } from '@angular/common/http';
 import { Component, inject, input, output, signal } from '@angular/core';
 import { form, FormField, maxLength, minLength, required } from '@angular/forms/signals';
@@ -18,26 +18,24 @@ interface StudentOption {
 
 @Component({
   selector: 'app-new-thread-form',
-  imports: [FormField, EmptyState],
+  imports: [UiField, UiInput, UiSelect, Button, FormField, EmptyState],
   template: `
     <form (submit)="submit($event)" class="space-y-4">
-      <div class="fieldset">
-        <label for="type">Tipo de hilo</label>
-        <select class="select select-primary" [formField]="form.type">
+      <ui-field label="Tipo de hilo" [field]="form.type">
+        <select uiSelect [formField]="form.type">
           <option value="CLASS_GROUP">Grupo de clase</option>
           <option value="STUDENT_GUARDIANS">Padres de un estudiante</option>
         </select>
-      </div>
+      </ui-field>
 
-      <div class="fieldset">
-        <label for="class-group-id">Grupo de clase</label>
-        <select class="select select-primary" [formField]="form.classGroupId">
+      <ui-field label="Grupo de clase" [field]="form.classGroupId">
+        <select uiSelect [formField]="form.classGroupId">
           <option [value]="''" disabled>Selecciona un grupo…</option>
           @for (cg of classGroups.value()?.data; track cg.id) {
             <option [value]="cg.id">{{ cg.name }}</option>
           }
         </select>
-      </div>
+      </ui-field>
 
       @if (form.type().value() === 'STUDENT_GUARDIANS') {
         <div class="fieldset">
@@ -45,7 +43,7 @@ interface StudentOption {
           @if (!studentsResource.isLoading() && studentsResource.value().length === 0) {
             <lib-empty-state title="Sin estudiantes" description="Elige primero un grupo de clase." icon="group" />
           } @else {
-            <select class="select select-primary" [formField]="form.studentId">
+            <select uiSelect [formField]="form.studentId">
               <option [value]="''" disabled>Selecciona un estudiante…</option>
               @for (s of studentsResource.value(); track s.id) {
                 <option [value]="s.id">{{ s.name }}</option>
@@ -55,30 +53,31 @@ interface StudentOption {
         </div>
       }
 
-      <div class="fieldset">
-        <label for="title">Asunto</label>
-        <input class="input input-primary" [formField]="form.title" />
-      </div>
+      <ui-field label="Asunto" [field]="form.title">
+        <input uiInput [formField]="form.title" />
+      </ui-field>
 
-      <div class="fieldset">
-        <label for="body">Mensaje</label>
-        <textarea class="textarea textarea-primary w-full" rows="4" [formField]="form.body"></textarea>
-      </div>
+      <ui-field label="Mensaje" [field]="form.body">
+        <textarea uiInput rows="4" [formField]="form.body"></textarea>
+      </ui-field>
 
-      <div class="fieldset">
-        <label for="urgency">Prioridad</label>
-        <select class="select select-primary" [formField]="form.urgency">
+      <ui-field label="Prioridad" [field]="form.urgency">
+        <select uiSelect [formField]="form.urgency">
           <option value="ROUTINE">Rutina</option>
           <option value="IMPORTANT">Importante</option>
         </select>
-      </div>
+      </ui-field>
 
       <div class="flex justify-end gap-2 pt-2">
-        <button type="button" class="btn" (click)="closeModal.emit(undefined)">Cancelar</button>
-        <button type="submit" class="btn btn-primary" [disabled]="submitting() || form().invalid()">
-          @if (submitting()) {
-            <span class="loading loading-spinner loading-sm"></span>
-          } @else {
+        <button uiButton type="button" (click)="closeModal.emit(undefined)">Cancelar</button>
+        <button
+          uiButton
+          [loading]="submitting()"
+          variant="primary"
+          type="submit"
+          [disabled]="submitting() || form().invalid()"
+        >
+          @if (!submitting()) {
             Crear hilo
           }
         </button>

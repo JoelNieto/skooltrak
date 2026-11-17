@@ -1,34 +1,28 @@
-import { Confirmation, Modal, Toast } from '#/ui';
+import { Breadcrumbs, Button, Confirmation, Modal, Toast, UiTable } from '#/ui';
 import { Menu, MenuContent, MenuItem, MenuTrigger } from '@angular/aria/menu';
 import { OverlayModule } from '@angular/cdk/overlay';
 import { DatePipe } from '@angular/common';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { Component, inject, viewChild } from '@angular/core';
-import { RouterLink } from '@angular/router';
 import { Prisma } from '@generated/prisma';
 import { RolesForm } from './roles-form';
 
 @Component({
   selector: 'app-roles',
-  imports: [RouterLink, DatePipe, Menu, MenuContent, MenuItem, MenuTrigger, OverlayModule],
-  template: `<div class="breadcrumbs text-sm">
-      <ul>
-        <li><a routerLink="/">Inicio</a></li>
-        <li>Roles</li>
-      </ul>
-    </div>
+  imports: [Breadcrumbs, UiTable, Button, DatePipe, Menu, MenuContent, MenuItem, MenuTrigger, OverlayModule],
+  template: `<ui-breadcrumbs [items]="[{ label: 'Inicio', link: '/' }, { label: 'Roles' }]" />
     <div class="flex justify-between items-center mb-4">
       <div>
         <h1 class="text-2xl text-base-content font-medium">Roles</h1>
         <p class="text-sm text-gray-500 dark:text-gray-400">Listado de roles</p>
       </div>
 
-      <button class="btn btn-primary" (click)="editRole()">
+      <button uiButton variant="primary" (click)="editRole()">
         <span class="material-symbols-outlined">add_circle</span> Nuevo Rol
       </button>
     </div>
     <div class="overflow-x-auto">
-      <table class="table">
+      <table uiTable>
         <thead>
           <tr>
             <th>Nombre</th>

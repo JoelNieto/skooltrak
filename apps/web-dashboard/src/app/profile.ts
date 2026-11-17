@@ -1,4 +1,17 @@
-import { Loader, Toast } from '#/ui';
+import {
+  Alert,
+  Badge,
+  Breadcrumbs,
+  Button,
+  Card,
+  CardBody,
+  CardTitle,
+  Loader,
+  Spinner,
+  Toast,
+  UiField,
+  UiInput,
+} from '#/ui';
 import { HttpClient } from '@angular/common/http';
 import { afterRenderEffect, Component, computed, inject, signal } from '@angular/core';
 import { form, FormField, required, submit } from '@angular/forms/signals';
@@ -17,20 +30,30 @@ interface ProfileFormData {
 
 @Component({
   selector: 'app-profile',
-  imports: [FormField, RouterLink, Loader, ImageCropperComponent],
+  imports: [
+    Alert,
+    Spinner,
+    Breadcrumbs,
+    Badge,
+    Card,
+    CardBody,
+    CardTitle,
+    UiField,
+    UiInput,
+    Button,
+    FormField,
+    RouterLink,
+    Loader,
+    ImageCropperComponent,
+  ],
   template: `
     <div class="flex flex-col gap-6">
-      <div class="breadcrumbs text-sm">
-        <ul>
-          <li><a routerLink="/">Inicio</a></li>
-          <li>Mi perfil</li>
-        </ul>
-      </div>
+      <ui-breadcrumbs [items]="[{ label: 'Inicio', link: '/' }, { label: 'Mi perfil' }]" />
 
       @if (auth.isUserLoading()) {
         <lib-loader />
       } @else if (!auth.user()) {
-        <div class="alert alert-warning">
+        <div uiAlert tone="warning">
           <span class="material-symbols-outlined">warning</span>
           <span>No se pudo cargar la información de tu perfil.</span>
         </div>
@@ -38,8 +61,8 @@ interface ProfileFormData {
         <div class="sm:grid sm:grid-cols-3 sm:gap-6">
           <!-- Summary card -->
           <div class="sm:col-span-1">
-            <div class="card card-border border-base-300 bg-base-100">
-              <div class="card-body items-center text-center gap-3">
+            <div uiCard>
+              <div uiCardBody class="items-center text-center gap-3">
                 @if (avatarUrl()) {
                   <div class="avatar">
                     <div class="w-24 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2">
@@ -54,21 +77,21 @@ interface ProfileFormData {
                     {{ auth.userInitials() }}
                   </div>
                 }
-                <h2 class="card-title">{{ auth.userName() }}</h2>
+                <h2 uiCardTitle>{{ auth.userName() }}</h2>
                 <p class="text-sm text-base-content/70">{{ auth.user()?.email }}</p>
                 @if (roleLabel()) {
-                  <span class="badge badge-primary">{{ roleLabel() }}</span>
+                  <span uiBadge tone="action">{{ roleLabel() }}</span>
                 }
                 @if (auth.user()?.organization?.name) {
                   <p class="text-xs text-base-content/60">{{ auth.user()?.organization?.name }}</p>
                 }
                 @if (auth.user()?.emailVerified) {
-                  <span class="badge badge-success badge-sm gap-1">
+                  <span uiBadge tone="success" size="sm" class="gap-1">
                     <span class="material-symbols-outlined text-sm">verified</span>
                     Verificado
                   </span>
                 } @else {
-                  <span class="badge badge-warning badge-sm">Correo sin verificar</span>
+                  <span uiBadge tone="warning" size="sm">Correo sin verificar</span>
                 }
               </div>
             </div>
@@ -76,22 +99,22 @@ interface ProfileFormData {
 
           <!-- Edit form -->
           <div class="sm:col-span-2">
-            <div class="card card-border border-base-300 bg-base-100">
-              <div class="card-body gap-6">
+            <div uiCard>
+              <div uiCardBody class="gap-6">
                 <div>
                   <h2 class="text-lg/7 font-semibold text-base-content">Información personal</h2>
                   <p class="mt-1 text-sm text-base-content/70">Actualiza tus datos de perfil.</p>
                 </div>
 
                 @if (saved()) {
-                  <div class="alert alert-success">
+                  <div uiAlert tone="success">
                     <span class="material-symbols-outlined">check_circle</span>
                     <span>Perfil actualizado exitosamente.</span>
                   </div>
                 }
 
                 @if (errorMessage()) {
-                  <div class="alert alert-error">
+                  <div uiAlert tone="danger">
                     <span class="material-symbols-outlined">error</span>
                     <span>{{ errorMessage() }}</span>
                   </div>
@@ -99,43 +122,17 @@ interface ProfileFormData {
 
                 <form (submit)="onSubmit($event)" novalidate="novalidate" class="space-y-4">
                   <div class="sm:grid sm:grid-cols-2 sm:gap-4">
-                    <div class="fieldset">
-                      <label for="firstName">Nombres</label>
-                      <input
-                        id="firstName"
-                        type="text"
-                        [formField]="profileForm.firstName"
-                        class="input input-primary w-full"
-                        [class.ng-invalid]="profileForm.firstName().touched() && profileForm.firstName().invalid()"
-                      />
-                      @if (profileForm.firstName().touched() && profileForm.firstName().invalid()) {
-                        @for (error of profileForm.firstName().errors(); track error) {
-                          <p class="text-error text-sm">{{ error.message }}</p>
-                        }
-                      }
-                    </div>
-                    <div class="fieldset">
-                      <label for="lastName">Apellidos</label>
-                      <input
-                        id="lastName"
-                        type="text"
-                        [formField]="profileForm.lastName"
-                        class="input input-primary w-full"
-                        [class.ng-invalid]="profileForm.lastName().touched() && profileForm.lastName().invalid()"
-                      />
-                      @if (profileForm.lastName().touched() && profileForm.lastName().invalid()) {
-                        @for (error of profileForm.lastName().errors(); track error) {
-                          <p class="text-error text-sm">{{ error.message }}</p>
-                        }
-                      }
-                    </div>
+                    <ui-field label="Nombres" [field]="profileForm.firstName">
+                      <input uiInput id="firstName" type="text" [formField]="profileForm.firstName" />
+                    </ui-field>
+                    <ui-field label="Apellidos" [field]="profileForm.lastName">
+                      <input uiInput id="lastName" type="text" [formField]="profileForm.lastName" />
+                    </ui-field>
                   </div>
 
-                  <div class="fieldset">
-                    <label for="email">Correo electrónico</label>
-                    <input id="email" type="email" class="input w-full" [value]="auth.user()?.email" disabled />
-                    <p class="text-base-content/50 text-xs">El correo electrónico no se puede cambiar.</p>
-                  </div>
+                  <ui-field label="Correo electrónico" hint="El correo electrónico no se puede cambiar.">
+                    <input uiInput id="email" type="email" [value]="auth.user()?.email" disabled />
+                  </ui-field>
 
                   <div class="fieldset">
                     <label for="avatarFileInput">Foto de perfil</label>
@@ -145,7 +142,7 @@ interface ProfileFormData {
                           class="w-24 h-24 rounded-full border-2 border-dashed border-base-300 flex items-center justify-center overflow-hidden bg-base-200"
                         >
                           @if (isUploadingAvatar()) {
-                            <span class="loading loading-spinner loading-lg text-primary"></span>
+                            <span uiSpinner size="lg" class="text-primary"></span>
                           } @else if (avatarUrl()) {
                             <img [src]="avatarUrl()" alt="Avatar" class="w-full h-full object-cover" />
                           } @else {
@@ -153,7 +150,14 @@ interface ProfileFormData {
                           }
                         </div>
                         @if (avatarUrl() && !isUploadingAvatar()) {
-                          <button type="button" class="btn btn-ghost btn-xs text-error" (click)="removeAvatar()">
+                          <button
+                            uiButton
+                            variant="ghost"
+                            size="sm"
+                            type="button"
+                            class="text-error"
+                            (click)="removeAvatar()"
+                          >
                             <span class="material-symbols-outlined text-sm">delete</span>
                             Eliminar
                           </button>
@@ -169,8 +173,8 @@ interface ProfileFormData {
                           (change)="onAvatarFileSelected($event)"
                         />
                         <button
+                          uiButton
                           type="button"
-                          class="btn btn-outline btn-primary"
                           (click)="avatarFileInput.click()"
                           [disabled]="isUploadingAvatar()"
                         >
@@ -213,10 +217,11 @@ interface ProfileFormData {
                           </div>
                         </div>
                         <div class="flex justify-end gap-2 mt-4">
-                          <button type="button" class="btn btn-ghost" (click)="cancelAvatarCrop()">Cancelar</button>
+                          <button uiButton variant="ghost" type="button" (click)="cancelAvatarCrop()">Cancelar</button>
                           <button
+                            uiButton
+                            variant="primary"
                             type="button"
-                            class="btn btn-primary"
                             (click)="applyAvatarCrop()"
                             [disabled]="!avatarCropPreviewUrl() || isUploadingAvatar()"
                           >
@@ -229,12 +234,13 @@ interface ProfileFormData {
 
                   <div class="fieldset">
                     <span class="label">Tema de la interfaz</span>
-                    <div class="join">
+                    <div class="flex flex-wrap gap-2" role="group" aria-label="Tema de la interfaz">
                       @for (option of themeOptions; track option.value) {
                         <button
+                          uiButton
                           type="button"
-                          class="btn join-item"
-                          [class.btn-primary]="profileForm.themePreference().value() === option.value"
+                          [variant]="profileForm.themePreference().value() === option.value ? 'primary' : 'secondary'"
+                          [attr.aria-pressed]="profileForm.themePreference().value() === option.value"
                           (click)="setTheme(option.value)"
                         >
                           <span class="material-symbols-outlined">{{ option.icon }}</span>
@@ -245,11 +251,14 @@ interface ProfileFormData {
                   </div>
 
                   <div class="flex justify-end gap-3 pt-2">
-                    <a routerLink="/home" class="btn btn-ghost">Cancelar</a>
-                    <button type="submit" class="btn btn-primary" [disabled]="isSaving() || profileForm().invalid()">
-                      @if (isSaving()) {
-                        <span class="loading loading-spinner loading-sm"></span>
-                      }
+                    <a uiButton variant="ghost" routerLink="/home">Cancelar</a>
+                    <button
+                      uiButton
+                      [loading]="isSaving()"
+                      variant="primary"
+                      type="submit"
+                      [disabled]="isSaving() || profileForm().invalid()"
+                    >
                       Guardar cambios
                     </button>
                   </div>

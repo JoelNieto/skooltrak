@@ -1,10 +1,10 @@
-import { TextEditor } from '#/ui';
+import { TextEditor, UiCheckbox, UiChoice } from '#/ui';
 import { Component, input } from '@angular/core';
 import { FormGroup, ReactiveFormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-question-option-control',
-  imports: [TextEditor, ReactiveFormsModule],
+  imports: [UiCheckbox, UiChoice, TextEditor, ReactiveFormsModule],
   template: `
     <div class="flex flex-col gap-2 w-full">
       <div class="fieldset">
@@ -17,10 +17,9 @@ import { FormGroup, ReactiveFormsModule } from '@angular/forms';
           placeholder="Opción..."
         />
       </div>
-      <div class="fieldset flex items-center gap-2">
-        <input type="checkbox" id="isCorrect" formControlName="isCorrect" class="checkbox checkbox-primary" />
-        <label for="isCorrect" class="cursor-pointer">Correcta</label>
-      </div>
+      <ui-choice label="Correcta">
+        <input uiCheckbox type="checkbox" formControlName="isCorrect" />
+      </ui-choice>
     </div>
   `,
 })

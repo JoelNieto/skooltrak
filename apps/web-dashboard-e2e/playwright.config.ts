@@ -18,19 +18,32 @@ export default defineConfig({
     baseURL,
     trace: 'on-first-retry',
   },
+  // Two servers, started outside `nx serve`: Nx shares a running continuous task across processes,
+  // so going through `web-dashboard:serve` (which depends on `dashboard-backend:serve`) would wait on
+  // a developer's running dev API (dev database) instead of starting the isolated one.
   webServer: process.env['BASE_URL']
     ? undefined
-    : {
-        command: 'bun nx run web-dashboard:serve:e2e --tui=false',
-        url: baseURL,
-        reuseExistingServer: false,
-        cwd: workspaceRoot,
-        timeout: 240_000,
-        env: {
-          PORT: String(E2E_API_PORT),
-          DATABASE_URL: e2eDatabaseUrl(),
+    : [
+        {
+          command: 'bun nx run dashboard-backend:build --tui=false && node dist/apps/dashboard-backend/main.js',
+          url: `http://localhost:${E2E_API_PORT}/api`,
+          reuseExistingServer: false,
+          cwd: workspaceRoot,
+          timeout: 240_000,
+          env: {
+            // Not PORT: the Angular dev server would take it too and collide with the API.
+            API_PORT: String(E2E_API_PORT),
+            DATABASE_URL: e2eDatabaseUrl(),
+          },
         },
-      },
+        {
+          command: 'bun nx run web-dashboard:serve:e2e --excludeTaskDependencies --tui=false',
+          url: baseURL,
+          reuseExistingServer: false,
+          cwd: workspaceRoot,
+          timeout: 240_000,
+        },
+      ],
   projects: [
     // Logs every persona in once and saves its storage state (see src/auth.setup.ts).
     { name: 'setup', testMatch: /auth\.setup\.ts/ },

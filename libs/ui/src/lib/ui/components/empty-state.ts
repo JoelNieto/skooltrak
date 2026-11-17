@@ -1,9 +1,11 @@
 import { Component, computed, input, output } from '@angular/core';
+import { Button } from './button';
 
 type EmptyStateColor = 'primary' | 'secondary' | 'accent' | 'info' | 'success' | 'warning' | 'neutral';
 
 @Component({
   selector: 'lib-empty-state',
+  imports: [Button],
   template: `
     <div class="border border-dashed rounded-lg p-6 text-center" [class]="containerClass()">
       @if (icon()) {
@@ -11,12 +13,19 @@ type EmptyStateColor = 'primary' | 'secondary' | 'accent' | 'info' | 'success' |
           <span class="material-symbols-outlined text-2xl" [class]="iconColorClass()">{{ icon() }}</span>
         </div>
       }
-      <p class="font-medium text-sm text-base-content">{{ title() }}</p>
+      <p class="font-medium text-sm text-ink-strong">{{ title() }}</p>
       @if (description()) {
-        <p class="text-xs mt-1.5 text-base-content/60 max-w-xs mx-auto">{{ description() }}</p>
+        <p class="text-xs mt-1.5 text-ink-muted max-w-xs mx-auto">{{ description() }}</p>
       }
       @if (actionLabel()) {
-        <button class="btn btn-sm mt-4" [class]="buttonClass()" (click)="onAction()">
+        <button
+          uiButton
+          size="sm"
+          type="button"
+          class="mt-4"
+          [variant]="color() === 'neutral' ? 'ghost' : 'secondary'"
+          (click)="onAction()"
+        >
           {{ actionLabel() }}
         </button>
       }
@@ -39,7 +48,7 @@ export class EmptyState {
       info: 'border-info/30 bg-info/5',
       success: 'border-success/30 bg-success/5',
       warning: 'border-warning/30 bg-warning/5',
-      neutral: 'border-base-300 bg-base-200/50',
+      neutral: 'border-line-strong bg-surface-2/50',
     };
     return colorMap[this.color()];
   });
@@ -52,7 +61,7 @@ export class EmptyState {
       info: 'bg-info/10',
       success: 'bg-success/10',
       warning: 'bg-warning/10',
-      neutral: 'bg-base-300',
+      neutral: 'bg-surface-2',
     };
     return colorMap[this.color()];
   });
@@ -65,20 +74,7 @@ export class EmptyState {
       info: 'text-info',
       success: 'text-success',
       warning: 'text-warning',
-      neutral: 'text-base-content/60',
-    };
-    return colorMap[this.color()];
-  });
-
-  buttonClass = computed(() => {
-    const colorMap: Record<EmptyStateColor, string> = {
-      primary: 'btn-primary btn-soft',
-      secondary: 'btn-secondary btn-soft',
-      accent: 'btn-accent btn-soft',
-      info: 'btn-info btn-soft',
-      success: 'btn-success btn-soft',
-      warning: 'btn-warning btn-soft',
-      neutral: 'btn-ghost',
+      neutral: 'text-ink-muted',
     };
     return colorMap[this.color()];
   });

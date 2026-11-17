@@ -1,21 +1,22 @@
 import { writeAccessTokenToStorage } from '#/client-auth';
-import { Loader, Toast } from '#/ui';
+import { Button, Loader, Toast, UiField, UiInput } from '#/ui';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { afterRenderEffect, Component, inject, signal } from '@angular/core';
 import { AbstractControl, NonNullableFormBuilder, ValidationErrors } from '@angular/forms';
 import { email, form, FormField, minLength, required, validate } from '@angular/forms/signals';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import Auth from './auth';
+import { BrandLogo } from '../shared/brand-logo';
 
 @Component({
   selector: 'app-register',
-  imports: [FormField, Loader, RouterLink],
+  imports: [UiField, UiInput, Button, BrandLogo, FormField, Loader, RouterLink],
   template: `
     @defer {
       <div class="min-h-screen flex flex-col gradient-bg">
         <!-- Fixed Header -->
         <header class="p-4 md:p-6 flex items-center justify-between">
-          <img src="skooltrak.png" alt="Skooltrak" class="h-8 md:h-10" />
+          <app-brand-logo class="h-8 md:h-10" />
         </header>
 
         <!-- Scrollable Content -->
@@ -40,13 +41,15 @@ import Auth from './auth';
                 </div>
                 <div class="pt-4">
                   <button
+                    uiButton
+                    [loading]="loading()"
+                    variant="primary"
                     type="button"
-                    class="btn btn-primary w-full"
+                    class="w-full"
                     [disabled]="loading()"
                     (click)="completePendingInvitation()"
                   >
                     @if (loading()) {
-                      <span class="loading loading-spinner loading-sm"></span>
                       Redirigiendo...
                     } @else {
                       Configurar mi cuenta
@@ -54,7 +57,7 @@ import Auth from './auth';
                     }
                   </button>
                 </div>
-                <button class="btn btn-ghost btn-sm" (click)="step.set('email')">
+                <button uiButton variant="ghost" size="sm" (click)="step.set('email')">
                   <span class="material-symbols-outlined text-lg">arrow_back</span>
                   Usar otro correo
                 </button>
@@ -76,29 +79,21 @@ import Auth from './auth';
                   </div>
 
                   <div class="space-y-4 text-left">
-                    <div class="fieldset">
-                      <label for="email" class="label">
-                        <span class="label-text font-medium">Correo Electrónico</span>
-                      </label>
-                      <input
-                        type="email"
-                        id="email"
-                        class="input input-primary w-full"
-                        placeholder="tu@email.com"
-                        [formField]="emailForm.email"
-                      />
-                      @if (emailForm.email().touched() && emailForm.email().invalid()) {
-                        @for (error of emailForm.email().errors(); track error) {
-                          <p class="text-error text-xs mt-1">{{ error.message }}</p>
-                        }
-                      }
-                    </div>
+                    <ui-field label="Correo Electrónico" [field]="emailForm.email">
+                      <input uiInput type="email" id="email" placeholder="tu@email.com" [formField]="emailForm.email" />
+                    </ui-field>
                   </div>
 
                   <div class="pt-4">
-                    <button type="submit" class="btn btn-primary w-full" [disabled]="loading()">
+                    <button
+                      uiButton
+                      [loading]="loading()"
+                      variant="primary"
+                      type="submit"
+                      class="w-full"
+                      [disabled]="loading()"
+                    >
                       @if (loading()) {
-                        <span class="loading loading-spinner loading-sm"></span>
                         Enviando...
                       } @else {
                         Enviar enlace de verificación
@@ -145,12 +140,13 @@ import Auth from './auth';
 
                 <div class="space-y-3">
                   <button
-                    class="btn btn-outline btn-block"
+                    uiButton
+                    [loading]="loading()"
+                    class="w-full"
                     (click)="resendLink()"
                     [disabled]="loading() || cooldown() > 0"
                   >
                     @if (loading()) {
-                      <span class="loading loading-spinner loading-sm"></span>
                       Enviando...
                     } @else if (cooldown() > 0) {
                       Reenviar en {{ cooldown() }}s
@@ -159,7 +155,7 @@ import Auth from './auth';
                       Reenviar enlace
                     }
                   </button>
-                  <button class="btn btn-ghost btn-sm" (click)="step.set('email')">
+                  <button uiButton variant="ghost" size="sm" (click)="step.set('email')">
                     <span class="material-symbols-outlined text-lg">arrow_back</span>
                     Cambiar correo electrónico
                   </button>
@@ -198,86 +194,58 @@ import Auth from './auth';
 
                   <div class="space-y-4 text-left">
                     <div class="grid grid-cols-2 gap-4">
-                      <div class="fieldset">
-                        <label for="firstName" class="label">
-                          <span class="label-text font-medium">Nombre</span>
-                        </label>
+                      <ui-field label="Nombre" [field]="registerForm.firstName">
                         <input
+                          uiInput
                           type="text"
                           id="firstName"
-                          class="input input-primary w-full"
                           placeholder="Juan"
                           [formField]="registerForm.firstName"
-                          [class.ng-invalid]="registerForm.firstName().touched() && registerForm.firstName().invalid()"
                         />
-                        @if (registerForm.firstName().touched() && registerForm.firstName().invalid()) {
-                          <p class="text-error text-xs mt-1">{{ registerForm.firstName().errors()[0].message }}</p>
-                        }
-                      </div>
+                      </ui-field>
 
-                      <div class="fieldset">
-                        <label for="lastName" class="label">
-                          <span class="label-text font-medium">Apellido</span>
-                        </label>
+                      <ui-field label="Apellido" [field]="registerForm.lastName">
                         <input
+                          uiInput
                           type="text"
                           id="lastName"
-                          class="input input-primary w-full"
                           placeholder="Pérez"
-                          [class.ng-invalid]="registerForm.lastName().touched() && registerForm.lastName().invalid()"
                           [formField]="registerForm.lastName"
                         />
-                        @if (registerForm.lastName().touched() && registerForm.lastName().invalid()) {
-                          <p class="text-error text-xs mt-1">{{ registerForm.lastName().errors()[0].message }}</p>
-                        }
-                      </div>
+                      </ui-field>
                     </div>
 
-                    <div class="fieldset">
-                      <label for="password" class="label">
-                        <span class="label-text font-medium">Contraseña</span>
-                      </label>
+                    <ui-field label="Contraseña" [field]="registerForm.password">
                       <input
+                        uiInput
                         type="password"
                         id="password"
-                        class="input input-primary w-full"
                         placeholder="••••••••"
-                        [class.ng-invalid]="registerForm.password().touched() && registerForm.password().invalid()"
                         [formField]="registerForm.password"
                       />
-                      @if (registerForm.password().touched() && registerForm.password().invalid()) {
-                        @for (error of registerForm.password().errors(); track error) {
-                          <p class="text-error text-xs mt-1">{{ error.message }}</p>
-                        }
-                      }
-                    </div>
+                    </ui-field>
 
-                    <div class="fieldset">
-                      <label for="confirmPassword" class="label">
-                        <span class="label-text font-medium">Confirmar Contraseña</span>
-                      </label>
+                    <ui-field label="Confirmar Contraseña" [field]="registerForm.confirmPassword">
                       <input
+                        uiInput
                         type="password"
                         id="confirmPassword"
-                        class="input input-primary w-full"
                         placeholder="••••••••"
-                        [class.ng-invalid]="
-                          registerForm.confirmPassword().touched() && registerForm.confirmPassword().invalid()
-                        "
                         [formField]="registerForm.confirmPassword"
                       />
-                      @if (registerForm.confirmPassword().touched() && registerForm.confirmPassword().invalid()) {
-                        @for (error of registerForm.confirmPassword().errors(); track error) {
-                          <p class="text-error text-xs mt-1">{{ error.message }}</p>
-                        }
-                      }
-                    </div>
+                    </ui-field>
                   </div>
 
                   <div class="pt-4">
-                    <button type="submit" class="btn btn-primary w-full" [disabled]="loading()">
+                    <button
+                      uiButton
+                      [loading]="loading()"
+                      variant="primary"
+                      type="submit"
+                      class="w-full"
+                      [disabled]="loading()"
+                    >
                       @if (loading()) {
-                        <span class="loading loading-spinner loading-sm"></span>
                         Creando cuenta...
                       } @else {
                         Crear Cuenta
@@ -302,7 +270,7 @@ import Auth from './auth';
                     {{ errorMessage() || 'El enlace de verificación es inválido o ha expirado.' }}
                   </p>
                 </div>
-                <button class="btn btn-primary" (click)="step.set('email')">
+                <button uiButton variant="primary" (click)="step.set('email')">
                   <span class="material-symbols-outlined">arrow_back</span>
                   Intentar de nuevo
                 </button>

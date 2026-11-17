@@ -1,4 +1,4 @@
-import { Toast } from '#/ui';
+import { Button, Toast, UiField, UiInput, UiSelect } from '#/ui';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { Component, inject, output, signal } from '@angular/core';
 import { form, FormField, min, required } from '@angular/forms/signals';
@@ -6,68 +6,56 @@ import Store from '../../core/store';
 
 @Component({
   selector: 'app-create-charge-form',
-  imports: [FormField],
+  imports: [UiField, UiInput, UiSelect, Button, FormField],
   template: `
     <form (submit)="onSubmit($event)">
       <div class="flex flex-col gap-4">
-        <div class="fieldset">
-          <label for="targetType">Objetivo</label>
-          <select [formField]="form.targetType" class="select select-primary w-full">
+        <ui-field label="Objetivo" [field]="form.targetType">
+          <select uiSelect [formField]="form.targetType">
             <option value="student">Estudiante</option>
             <option value="studyPlan">Plan de estudio</option>
           </select>
-        </div>
+        </ui-field>
         @if (form.targetType().value() === 'student') {
-          <div class="fieldset">
-            <label for="studentId">Estudiante</label>
-            <select [formField]="form.studentId" class="select select-primary w-full">
+          <ui-field label="Estudiante" [field]="form.studentId">
+            <select uiSelect [formField]="form.studentId">
               <option value="" disabled>Seleccionar estudiante...</option>
               @for (s of students.value(); track s.id) {
                 <option [value]="s.id">{{ s.firstName }} {{ s.fatherName }}</option>
               }
             </select>
-          </div>
+          </ui-field>
         }
         @if (form.targetType().value() === 'studyPlan') {
-          <div class="fieldset">
-            <label for="studyPlanId">Plan de estudio</label>
-            <select [formField]="form.studyPlanId" class="select select-primary w-full">
+          <ui-field label="Plan de estudio" [field]="form.studyPlanId">
+            <select uiSelect [formField]="form.studyPlanId">
               <option value="" disabled>Seleccionar plan...</option>
               @for (sp of studyPlans.value(); track sp.id) {
                 <option [value]="sp.id">{{ sp.name }}</option>
               }
             </select>
-          </div>
+          </ui-field>
         }
-        <div class="fieldset">
-          <label for="amount">Monto</label>
-          <input type="number" step="0.01" [formField]="form.amount" class="input input-primary w-full" />
-        </div>
-        <div class="fieldset">
-          <label for="dueDate">Fecha de vencimiento</label>
-          <input type="date" [formField]="form.dueDate" class="input input-primary w-full" />
-        </div>
-        <div class="fieldset">
-          <label for="description">Descripción (opcional)</label>
-          <input
-            type="text"
-            [formField]="form.description"
-            class="input input-primary w-full"
-            placeholder="Ej. Colegiatura Septiembre"
-          />
-        </div>
-        <div class="fieldset">
-          <label for="chargeType">Tipo</label>
-          <select [formField]="form.chargeType" class="select select-primary w-full">
+        <ui-field label="Monto" [field]="form.amount">
+          <input uiInput type="number" step="0.01" [formField]="form.amount" />
+        </ui-field>
+        <ui-field label="Fecha de vencimiento" [field]="form.dueDate">
+          <input uiInput type="date" [formField]="form.dueDate" />
+        </ui-field>
+        <ui-field label="Descripción (opcional)" [field]="form.description">
+          <input uiInput type="text" [formField]="form.description" placeholder="Ej. Colegiatura Septiembre" />
+        </ui-field>
+        <ui-field label="Tipo" [field]="form.chargeType">
+          <select uiSelect [formField]="form.chargeType">
             <option value="CUSTOM">Personalizado</option>
             <option value="TUITION">Colegiatura</option>
             <option value="ENROLLMENT">Matrícula</option>
           </select>
-        </div>
+        </ui-field>
       </div>
       <div class="flex justify-end gap-2 mt-4">
-        <button type="button" class="btn btn-ghost" (click)="closeModal.emit()">Cancelar</button>
-        <button type="submit" class="btn btn-primary">Crear cargo</button>
+        <button uiButton variant="ghost" type="button" (click)="closeModal.emit()">Cancelar</button>
+        <button uiButton variant="primary" type="submit">Crear cargo</button>
       </div>
     </form>
   `,

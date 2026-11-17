@@ -1,8 +1,9 @@
 import { HttpParams } from '@angular/common/http';
 
+/** Mirrors backend `FetchDataQueryDto` for list endpoints. */
 export type FetchQueryParams = Partial<{
-  skip: number;
-  take: number;
+  page: number;
+  pageSize: number;
   orderBy: string;
   orderDirection: 'asc' | 'desc';
   schoolId: string;
@@ -11,6 +12,18 @@ export type FetchQueryParams = Partial<{
   studyPlanId: string;
   courseId: string;
 }>;
+
+/** Largest page the backend accepts (`FetchDataQueryDto.pageSize` max). */
+export const MAX_PAGE_SIZE = 100;
+
+/**
+ * Converts the paginator's offset state (`skip`/`take`) to the backend's
+ * `page`/`pageSize`. The paginator always moves `skip` in steps of `take`.
+ */
+export function toPageQuery(pagination: { skip(): number; take(): number }): Pick<FetchQueryParams, 'page' | 'pageSize'> {
+  const pageSize = pagination.take();
+  return { page: Math.floor(pagination.skip() / pageSize) + 1, pageSize };
+}
 
 export function toFetchQueryParams(q: FetchQueryParams): HttpParams {
   let p = new HttpParams();

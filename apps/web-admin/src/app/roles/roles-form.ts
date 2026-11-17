@@ -4,6 +4,7 @@ import { afterRenderEffect, Component, inject, input, model, output, signal } fr
 import { form, FormField, required } from '@angular/forms/signals';
 import { Prisma } from '@generated/prisma';
 import { firstValueFrom } from 'rxjs';
+import { MAX_PAGE_SIZE } from '../core/fetch-query-params';
 @Component({
   selector: 'app-roles-form',
   imports: [UiField, UiChoice, UiInput, UiSelect, UiToggle, Button, FormField],
@@ -57,7 +58,7 @@ export class RolesForm {
   public permissions = httpResource<Array<{ id: string; descriptiveId: string; description: string }>>(
     () => ({
       url: '/api/v1/permissions',
-      params: { take: '500' },
+      params: { pageSize: String(MAX_PAGE_SIZE) },
     }),
     { defaultValue: [] },
   );

@@ -1,5 +1,17 @@
 import { SchoolContext } from '#/shared';
-import { Alert, Button, Card, Toast, UiInput, UiTable, UiToggle } from '#/ui';
+import {
+  Alert,
+  Button,
+  Card,
+  Toast,
+  UiInput,
+  UiTable,
+  UiTableEmpty,
+  UiTableError,
+  UiTableSkeleton,
+  UiToggle,
+  listState,
+} from '#/ui';
 import { Component, inject, signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
@@ -8,7 +20,7 @@ import { StoreApiService } from '../store-api.service';
 
 @Component({
   selector: 'app-categories-admin',
-  imports: [Alert, Card, UiTable, UiInput, UiToggle, Button, FormsModule],
+  imports: [Alert, Card, UiTable, UiTableEmpty, UiTableError, UiTableSkeleton, UiInput, UiToggle, Button, FormsModule],
   template: `
     <h3 class="text-lg font-medium mb-4">Categorías</h3>
     @if (!school.currentSchoolId()) {
@@ -19,58 +31,70 @@ import { StoreApiService } from '../store-api.service';
         <button uiButton variant="primary" size="sm" type="submit">Agregar</button>
       </form>
       <div uiCard class="overflow-x-auto">
-        <table uiTable>
+        <table uiTable [attr.aria-busy]="categories.isLoading()">
           <thead>
             <tr>
               <th>Nombre</th>
               <th>Orden</th>
               <th>Activo</th>
-              <th></th>
+              <th><span class="sr-only">Acciones</span></th>
             </tr>
           </thead>
-          <tbody>
-            @for (c of categories.value(); track c.id) {
-              <tr>
-                <td>
-                  <input uiInput size="sm" [(ngModel)]="editNames[c.id!]" [name]="'n' + c.id" />
-                </td>
-                <td>
-                  <input
-                    uiInput
-                    size="sm"
-                    class="w-20"
-                    type="number"
-                    [(ngModel)]="editOrder[c.id!]"
-                    [name]="'o' + c.id"
-                  />
-                </td>
-                <td>
-                  <input
-                    uiToggle
-                    tone="neutral"
-                    size="sm"
-                    type="checkbox"
-                    [(ngModel)]="editActive[c.id!]"
-                    [name]="'a' + c.id"
-                  />
-                </td>
-                <td class="flex gap-2">
-                  <button uiButton size="sm" type="button" (click)="save(c.id!)">Guardar</button>
-                  <button uiButton variant="danger" size="sm" type="button" (click)="remove(c.id!)">Eliminar</button>
-                </td>
-              </tr>
-            } @empty {
-              @if (categories.isLoading()) {
-                <tr>
-                  <td colspan="4">Cargando…</td>
-                </tr>
-              } @else {
-                <tr>
-                  <td colspan="4">Sin categorías.</td>
-                </tr>
-              }
+          @switch (categoriesList.phase()) {
+            @case ('skeleton') {
+              <tbody uiTableSkeleton [columns]="4"></tbody>
             }
-          </tbody>
+            @case ('error') {
+              <tbody>
+                <tr uiTableError [columns]="4" (retry)="categories.reload()"></tr>
+              </tbody>
+            }
+            @case ('ready') {
+              <tbody>
+                @for (c of categoriesList.rows() ?? []; track c.id) {
+                  <tr>
+                    <td>
+                      <input uiInput size="sm" [(ngModel)]="editNames[c.id!]" [name]="'n' + c.id" />
+                    </td>
+                    <td>
+                      <input
+                        uiInput
+                        size="sm"
+                        class="w-20"
+                        type="number"
+                        [(ngModel)]="editOrder[c.id!]"
+                        [name]="'o' + c.id"
+                      />
+                    </td>
+                    <td>
+                      <input
+                        uiToggle
+                        tone="neutral"
+                        size="sm"
+                        type="checkbox"
+                        [(ngModel)]="editActive[c.id!]"
+                        [name]="'a' + c.id"
+                      />
+                    </td>
+                    <td class="flex gap-2">
+                      <button uiButton size="sm" type="button" (click)="save(c.id!)">Guardar</button>
+                      <button uiButton variant="danger" size="sm" type="button" (click)="remove(c.id!)">
+                        Eliminar
+                      </button>
+                    </td>
+                  </tr>
+                } @empty {
+                  <tr
+                    uiTableEmpty
+                    [columns]="4"
+                    icon="tag"
+                    title="Aún no hay categorías"
+                    description="Agrega la primera con el campo de arriba."
+                  ></tr>
+                }
+              </tbody>
+            }
+          }
         </table>
       </div>
     }
@@ -105,6 +129,9 @@ export default class CategoriesAdmin {
       );
     },
   });
+
+  /** categories with smooth loading: rows stay while the list reloads after a change. */
+  protected readonly categoriesList = listState(this.categories);
 
   protected create() {
     console.log('create', this.newName);

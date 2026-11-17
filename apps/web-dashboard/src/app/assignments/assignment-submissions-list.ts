@@ -1,24 +1,27 @@
-import { Alert, Badge, Button, Card, Icon, Spinner, Toast, UiIconName, UiTable } from '#/ui';
+import {
+  Badge,
+  Button,
+  Card,
+  Icon,
+  listState,
+  Toast,
+  UiIconName,
+  UiTable,
+  UiTableEmpty,
+  UiTableError,
+  UiTableSkeleton,
+} from '#/ui';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { Component, inject, input, signal } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-assignment-submissions-list',
-  imports: [Alert, Spinner, Card, UiTable, Badge, Button, Icon],
+  imports: [Card, UiTable, UiTableEmpty, UiTableError, UiTableSkeleton, Badge, Button, Icon],
   template: `
     <div class="space-y-4">
-      @if (studentsResource.isLoading()) {
-        <div class="flex items-center justify-center py-8">
-          <span uiSpinner></span>
-        </div>
-      } @else if (studentsResource.error()) {
-        <div uiAlert tone="danger">
-          <ui-icon name="circle-alert" />
-          <span>Error al cargar los estudiantes.</span>
-        </div>
-      } @else if (studentsResource.hasValue()) {
-        @let students = studentsResource.value()!;
+      @let students = studentsList.rows() ?? [];
+      @if (students.length) {
         <div class="flex items-center justify-between mb-4">
           <div class="stats shadow">
             <div class="stat py-2 px-4">
@@ -39,121 +42,134 @@ import { firstValueFrom } from 'rxjs';
             </div>
           </div>
         </div>
+      }
 
-        <div uiCard class="overflow-x-auto">
-          <table uiTable>
-            <thead>
-              <tr>
-                <th>Estudiante</th>
-                <th>Estado</th>
-                <th>Fecha de entrega</th>
-                <th>Archivo</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody>
-              @for (student of students; track student.id ?? '') {
-                @let submission = student.assignmentSubmissions[0];
-                <tr>
-                  <td>
-                    <div class="font-medium">
-                      {{ student.fatherName }} {{ student.motherName }},
-                      {{ student.firstName }}
-                    </div>
-                  </td>
-                  <td>
-                    @if (submission) {
-                      <div class="flex flex-wrap gap-1">
-                        <span uiBadge tone="success" size="sm" class="gap-1">
-                          <ui-icon name="check" class="text-sm!" />
-                          Entregado
-                        </span>
-                        @if (submission.reviewedAt) {
-                          <span uiBadge tone="info" size="sm" class="gap-1">
-                            <ui-icon name="check-check" class="text-sm!" />
-                            Revisada
+      <div uiCard class="overflow-x-auto">
+        <table uiTable [attr.aria-busy]="studentsResource.isLoading()">
+          <thead>
+            <tr>
+              <th>Estudiante</th>
+              <th>Estado</th>
+              <th>Fecha de entrega</th>
+              <th>Archivo</th>
+              <th><span class="sr-only">Acciones</span></th>
+            </tr>
+          </thead>
+          @switch (studentsList.phase()) {
+            @case ('skeleton') {
+              <tbody uiTableSkeleton [columns]="5"></tbody>
+            }
+            @case ('error') {
+              <tbody>
+                <tr
+                  uiTableError
+                  [columns]="5"
+                  title="No se pudieron cargar las entregas"
+                  (retry)="studentsResource.reload()"
+                ></tr>
+              </tbody>
+            }
+            @case ('ready') {
+              <tbody>
+                @for (student of students; track student.id ?? '') {
+                  @let submission = student.assignmentSubmissions[0];
+                  <tr>
+                    <td>
+                      <div class="font-medium">
+                        {{ student.fatherName }} {{ student.motherName }},
+                        {{ student.firstName }}
+                      </div>
+                    </td>
+                    <td>
+                      @if (submission) {
+                        <div class="flex flex-wrap gap-1">
+                          <span uiBadge tone="success" size="sm" class="gap-1">
+                            <ui-icon name="check" class="text-sm!" />
+                            Entregado
                           </span>
+                          @if (submission.reviewedAt) {
+                            <span uiBadge tone="info" size="sm" class="gap-1">
+                              <ui-icon name="check-check" class="text-sm!" />
+                              Revisada
+                            </span>
+                          }
+                        </div>
+                      } @else {
+                        <span uiBadge tone="warning" size="sm" class="gap-1">
+                          <ui-icon name="clock" class="text-sm!" />
+                          Pendiente
+                        </span>
+                      }
+                    </td>
+                    <td class="text-ink-muted text-sm">
+                      @if (submission) {
+                        {{ formatSubmissionDate(submission.submittedAt) }}
+                      } @else {
+                        -
+                      }
+                    </td>
+                    <td>
+                      @if (submission) {
+                        <div class="flex items-center gap-2">
+                          <ui-icon
+                            [name]="getFileIcon(submission.file.mimeType)"
+                            class="text-lg"
+                            [class.text-error]="submission.file.mimeType.includes('pdf')"
+                            [class.text-info]="
+                              submission.file.mimeType.includes('word') || submission.file.mimeType.includes('document')
+                            "
+                          />
+                          <span class="text-sm truncate max-w-37.5">
+                            {{ submission.file.name }}
+                          </span>
+                          <span class="text-xs text-ink-subtle"> ({{ formatBytes(submission.file.size) }}) </span>
+                        </div>
+                      } @else {
+                        <span class="text-ink-subtle text-sm">-</span>
+                      }
+                    </td>
+                    <td>
+                      <div class="flex items-center justify-end gap-1">
+                        @if (submission) {
+                          <button
+                            uiButton
+                            variant="ghost"
+                            size="sm"
+                            type="button"
+                            [loading]="reviewingId() === submission.id"
+                            [disabled]="reviewingId() === submission.id"
+                            (click)="toggleReviewed(submission)"
+                          >
+                            {{ submission.reviewedAt ? 'Quitar revisión' : 'Marcar revisada' }}
+                          </button>
+                        }
+                        @let fileId = submission?.file?.id;
+                        @if (fileId) {
+                          <button
+                            uiButton
+                            [loading]="downloadingFileId() === fileId"
+                            variant="ghost"
+                            size="sm"
+                            (click)="downloadFile(fileId)"
+                            [disabled]="downloadingFileId() === fileId"
+                          >
+                            @if (!(downloadingFileId() === fileId)) {
+                              <ui-icon name="download" />
+                              <span class="sr-only">Descargar {{ submission?.file?.name }}</span>
+                            }
+                          </button>
                         }
                       </div>
-                    } @else {
-                      <span uiBadge tone="warning" size="sm" class="gap-1">
-                        <ui-icon name="clock" class="text-sm!" />
-                        Pendiente
-                      </span>
-                    }
-                  </td>
-                  <td class="text-ink-muted text-sm">
-                    @if (submission) {
-                      {{ formatSubmissionDate(submission.submittedAt) }}
-                    } @else {
-                      -
-                    }
-                  </td>
-                  <td>
-                    @if (submission) {
-                      <div class="flex items-center gap-2">
-                        <ui-icon
-                          [name]="getFileIcon(submission.file.mimeType)"
-                          class="text-lg"
-                          [class.text-error]="submission.file.mimeType.includes('pdf')"
-                          [class.text-info]="
-                            submission.file.mimeType.includes('word') || submission.file.mimeType.includes('document')
-                          "
-                        />
-                        <span class="text-sm truncate max-w-37.5">
-                          {{ submission.file.name }}
-                        </span>
-                        <span class="text-xs text-ink-subtle"> ({{ formatBytes(submission.file.size) }}) </span>
-                      </div>
-                    } @else {
-                      <span class="text-ink-subtle text-sm">-</span>
-                    }
-                  </td>
-                  <td>
-                    <div class="flex items-center justify-end gap-1">
-                      @if (submission) {
-                        <button
-                          uiButton
-                          variant="ghost"
-                          size="sm"
-                          type="button"
-                          [loading]="reviewingId() === submission.id"
-                          [disabled]="reviewingId() === submission.id"
-                          (click)="toggleReviewed(submission)"
-                        >
-                          {{ submission.reviewedAt ? 'Quitar revisión' : 'Marcar revisada' }}
-                        </button>
-                      }
-                      @let fileId = $safeNavigationMigration(submission?.file?.id);
-                      @if (fileId) {
-                        <button
-                          uiButton
-                          [loading]="downloadingFileId() === fileId"
-                          variant="ghost"
-                          size="sm"
-                          (click)="downloadFile(fileId)"
-                          [disabled]="downloadingFileId() === fileId"
-                        >
-                          @if (!(downloadingFileId() === fileId)) {
-                            <ui-icon name="download" />
-                            <span class="sr-only">Descargar</span>
-                          }
-                        </button>
-                      }
-                    </div>
-                  </td>
-                </tr>
-              } @empty {
-                <tr>
-                  <td colspan="5" class="text-center text-ink-subtle py-8">
-                    No hay estudiantes inscritos en este curso.
-                  </td>
-                </tr>
-              }
-            </tbody>
-          </table>
-        </div>
-      }
+                    </td>
+                  </tr>
+                } @empty {
+                  <tr uiTableEmpty [columns]="5" icon="users" title="No hay estudiantes inscritos en este curso"></tr>
+                }
+              </tbody>
+            }
+          }
+        </table>
+      </div>
     </div>
   `,
 })
@@ -180,6 +196,9 @@ export default class AssignmentSubmissionsList {
       }>;
     }[]
   >(() => `/api/v1/assignment-submissions/students-for-assignment/${this.assignmentId()}`);
+
+  /** students with smooth loading: rows stay while the list reloads after a review. */
+  protected readonly studentsList = listState(this.studentsResource);
 
   /** BR-HOM-001.17: the course's teacher marks a submission reviewed (feeds "Entregas por revisar"). */
   async toggleReviewed(submission: { id: string; reviewedAt?: string | null }) {

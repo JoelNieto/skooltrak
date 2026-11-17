@@ -12,6 +12,7 @@ import {
   UiInput,
   UiSelect,
   UiTable,
+  UiTableEmpty,
 } from '#/ui';
 import { HttpClient } from '@angular/common/http';
 import { Component, inject, signal } from '@angular/core';
@@ -25,6 +26,7 @@ import Store from '../../core/store';
   imports: [
     Alert,
     UiTable,
+    UiTableEmpty,
     Badge,
     Card,
     CardActions,
@@ -128,6 +130,14 @@ import Store from '../../core/store';
                         </td>
                         <td class="text-error text-xs">{{ row.errors.join('; ') }}</td>
                       </tr>
+                    } @empty {
+                      <tr
+                        uiTableEmpty
+                        [columns]="3"
+                        icon="sheet"
+                        title="El CSV no tiene filas"
+                        description="Revisa que el archivo tenga datos debajo de la fila de encabezados."
+                      ></tr>
                     }
                   </tbody>
                 </table>

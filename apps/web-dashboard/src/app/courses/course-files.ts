@@ -1,4 +1,19 @@
-import { Badge, Button, Card, debounceSignal, Icon, Loader, Modal, Toast, UiInputGroup, UiTable } from '#/ui';
+import {
+  Badge,
+  Button,
+  Card,
+  debounceSignal,
+  Icon,
+  listState,
+  Modal,
+  Toast,
+  UiInputGroup,
+  UiTable,
+  UiTableEmpty,
+  UiTableError,
+  UiTableSkeleton,
+  UiTableToolbar,
+} from '#/ui';
 import { DatePipe } from '@angular/common';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { Component, inject, input, Signal, signal } from '@angular/core';
@@ -17,41 +32,61 @@ type CourseFile = {
 
 @Component({
   selector: 'app-course-files',
-  imports: [Card, UiTable, Badge, Button, Loader, FormsModule, DatePipe, UiInputGroup, Icon],
+  imports: [
+    Card,
+    UiTable,
+    UiTableEmpty,
+    UiTableError,
+    UiTableSkeleton,
+    UiTableToolbar,
+    Badge,
+    Button,
+    FormsModule,
+    DatePipe,
+    UiInputGroup,
+    Icon,
+  ],
   template: `
-    <div class="flex flex-col gap-4">
-      <div class="flex justify-between items-start gap-4">
-        <label uiInputGroup>
-          <ui-icon name="search" />
-          <input class="pl-0" type="search" placeholder="Buscar archivos..." [(ngModel)]="searchText" />
-        </label>
-        <button uiButton variant="primary" (click)="openUploadModal()">
-          <ui-icon name="file-up" />
-          Subir archivos
-        </button>
-      </div>
-
-      @if (filesResource.isLoading()) {
-        <lib-loader />
-      }
-      @if (filesResource.error()) {
-        <p>Error al cargar archivos</p>
-      }
-      @if (filesResource.hasValue()) {
-        <div uiCard class="overflow-x-auto">
-          <table uiTable>
-            <thead>
-              <tr>
-                <th>Nombre</th>
-                <th>Tipo</th>
-                <th>Tamaño</th>
-                <th>Acceso</th>
-                <th>Actualizado</th>
-                <th></th>
-              </tr>
-            </thead>
+    <ui-table-toolbar>
+      <label uiInputGroup size="sm">
+        <ui-icon name="search" class="text-base text-ink-subtle" />
+        <input
+          aria-label="Buscar archivos"
+          class="pl-0"
+          type="search"
+          placeholder="Buscar archivos..."
+          [(ngModel)]="searchText"
+        />
+      </label>
+      <button uiToolbarEnd uiButton variant="primary" size="sm" (click)="openUploadModal()">
+        <ui-icon name="file-up" class="text-base" />
+        Subir archivos
+      </button>
+    </ui-table-toolbar>
+    <div uiCard class="overflow-x-auto mt-4">
+      <table uiTable [attr.aria-busy]="filesResource.isLoading()">
+        <thead>
+          <tr>
+            <th>Nombre</th>
+            <th>Tipo</th>
+            <th>Tamaño</th>
+            <th>Acceso</th>
+            <th>Actualizado</th>
+            <th class="w-12"><span class="sr-only">Abrir</span></th>
+          </tr>
+        </thead>
+        @switch (filesList.phase()) {
+          @case ('skeleton') {
+            <tbody uiTableSkeleton [columns]="6"></tbody>
+          }
+          @case ('error') {
             <tbody>
-              @for (file of filesResource.value(); track file.id) {
+              <tr uiTableError [columns]="6" (retry)="filesResource.reload()"></tr>
+            </tbody>
+          }
+          @case ('ready') {
+            <tbody>
+              @for (file of filesList.rows() ?? []; track file.id) {
                 <tr>
                   <td class="font-medium">{{ file.name }}</td>
                   <td class="text-ink-muted">{{ file.mimeType }}</td>
@@ -71,23 +106,40 @@ type CourseFile = {
                   <td class="text-right">
                     @if (file.access) {
                       <button
-                        class="cursor-pointer hover:text-primary p-1 text-xs rounded-lg flex items-center justify-center"
-                        (click)="file.id ? openFile(file.id) : null"
+                        uiButton
+                        variant="ghost"
+                        size="sm"
+                        iconOnly
+                        type="button"
+                        [attr.aria-label]="'Abrir ' + file.name"
+                        (click)="openFile(file.id)"
                       >
-                        <ui-icon name="external-link" class="text-medium!" />
+                        <ui-icon name="external-link" class="text-base" />
                       </button>
                     }
                   </td>
                 </tr>
               } @empty {
-                <tr>
-                  <td colspan="5" class="text-center text-ink-muted">No hay archivos para este curso.</td>
-                </tr>
+                @if (searchText()) {
+                  <tr
+                    uiTableEmpty
+                    [columns]="6"
+                    icon="search-x"
+                    title="Sin resultados"
+                    description="Ningún archivo coincide con la búsqueda."
+                  >
+                    <button uiButton variant="ghost" size="sm" (click)="searchText.set('')">Limpiar búsqueda</button>
+                  </tr>
+                } @else {
+                  <tr uiTableEmpty [columns]="6" icon="folder-open" title="Aún no hay archivos en este curso">
+                    <button uiButton size="sm" (click)="openUploadModal()">Subir archivos</button>
+                  </tr>
+                }
               }
             </tbody>
-          </table>
-        </div>
-      }
+          }
+        }
+      </table>
     </div>
   `,
 })
@@ -111,6 +163,9 @@ export default class CourseFiles {
     }),
     { defaultValue: [] },
   );
+
+  /** files with smooth loading: rows stay while a search or reload is in flight. */
+  protected readonly filesList = listState(this.filesResource);
 
   constructor() {
     this.#debouncedSearch = debounceSignal(this.searchText, 400);

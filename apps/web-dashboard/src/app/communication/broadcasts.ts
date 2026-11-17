@@ -18,10 +18,14 @@ import {
   UiTab,
   UiTabContent,
   UiTable,
+  UiTableEmpty,
+  UiTableError,
+  UiTableSkeleton,
   UiTabList,
   UiTabPanel,
   UiTabs,
   UiToggle,
+  listState,
 } from '#/ui';
 import { DatePipe } from '@angular/common';
 import { httpResource } from '@angular/common/http';
@@ -53,6 +57,9 @@ const ACTION_LABELS: Record<string, string> = {
   imports: [
     Alert,
     UiTable,
+    UiTableEmpty,
+    UiTableError,
+    UiTableSkeleton,
     Badge,
     Card,
     CardBody,
@@ -107,7 +114,15 @@ const ACTION_LABELS: Record<string, string> = {
           <ng-template uiTabContent>
             <section uiCard>
               <div uiCardBody>
-                @if (pending().length === 0) {
+                @if (broadcastsList.phase() === 'error') {
+                  <div uiAlert tone="danger">
+                    <ui-icon name="circle-alert" />
+                    <span>No se pudieron cargar los comunicados.</span>
+                    <button uiButton size="sm" type="button" (click)="broadcastsResource.reload()">Reintentar</button>
+                  </div>
+                } @else if (broadcastsList.phase() !== 'ready') {
+                  <p class="text-sm text-ink-muted" role="status">Cargando…</p>
+                } @else if (pending().length === 0) {
                   <lib-empty-state
                     title="Sin pendientes"
                     description="Los comunicados institucionales aparecerán aquí hasta que se aprueben."
@@ -257,60 +272,72 @@ const ACTION_LABELS: Record<string, string> = {
               <section uiCard>
                 <div uiCardBody>
                   <h2 uiCardTitle class="text-base">Historial de envíos</h2>
-                  @if (sent().length === 0) {
-                    <lib-empty-state
-                      title="Sin comunicados enviados"
-                      description="Cuando apruebes o envíes un aviso aparecerá aquí."
-                      icon="megaphone"
-                    />
-                  } @else {
-                    <div class="overflow-x-auto">
-                      <table uiTable>
-                        <thead>
-                          <tr>
-                            <th>Asunto</th>
-                            <th>Destino</th>
-                            <th>Prioridad</th>
-                            <th>Estado</th>
-                            <th>Destinatarios</th>
-                            <th>Respuestas</th>
-                            <th>Fecha</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          @for (item of sent(); track item.id) {
-                            <tr>
-                              <td class="font-medium">{{ item.title }}</td>
-                              <td>{{ typeLabel(item.type) }}</td>
-                              <td>
-                                <span uiBadge size="sm" [tone]="urgencyTone(item.urgencyDefault)">
-                                  {{ urgencyLabel(item.urgencyDefault) }}
-                                </span>
-                              </td>
-                              <td>
-                                <span uiBadge size="sm" [tone]="statusTone(item.status)">
-                                  {{ statusLabel(item.status) }}
-                                </span>
-                              </td>
-                              <td>{{ recipientCount(item) }}</td>
-                              <td>
-                                <ui-choice label="{{ repliesLabel(item) }}" class="py-0">
-                                  <input
-                                    uiToggle
-                                    size="sm"
-                                    type="checkbox"
-                                    [checked]="item.repliesAllowed !== false"
-                                    (change)="toggleReplies(item, $event)"
-                                  />
-                                </ui-choice>
-                              </td>
-                              <td>{{ item.createdAt | date: 'short' }}</td>
-                            </tr>
-                          }
-                        </tbody>
-                      </table>
-                    </div>
-                  }
+                  <div class="overflow-x-auto">
+                    <table uiTable [attr.aria-busy]="broadcastsResource.isLoading()">
+                      <thead>
+                        <tr>
+                          <th>Asunto</th>
+                          <th>Destino</th>
+                          <th>Prioridad</th>
+                          <th>Estado</th>
+                          <th>Destinatarios</th>
+                          <th>Respuestas</th>
+                          <th>Fecha</th>
+                        </tr>
+                      </thead>
+                      @switch (broadcastsList.phase()) {
+                        @case ('skeleton') {
+                          <tbody uiTableSkeleton [columns]="7"></tbody>
+                        }
+                        @case ('error') {
+                          <tbody>
+                            <tr uiTableError [columns]="7" (retry)="broadcastsResource.reload()"></tr>
+                          </tbody>
+                        }
+                        @case ('ready') {
+                          <tbody>
+                            @for (item of sent(); track item.id) {
+                              <tr>
+                                <td class="font-medium">{{ item.title }}</td>
+                                <td>{{ typeLabel(item.type) }}</td>
+                                <td>
+                                  <span uiBadge size="sm" [tone]="urgencyTone(item.urgencyDefault)">
+                                    {{ urgencyLabel(item.urgencyDefault) }}
+                                  </span>
+                                </td>
+                                <td>
+                                  <span uiBadge size="sm" [tone]="statusTone(item.status)">
+                                    {{ statusLabel(item.status) }}
+                                  </span>
+                                </td>
+                                <td>{{ recipientCount(item) }}</td>
+                                <td>
+                                  <ui-choice label="{{ repliesLabel(item) }}" class="py-0">
+                                    <input
+                                      uiToggle
+                                      size="sm"
+                                      type="checkbox"
+                                      [checked]="item.repliesAllowed !== false"
+                                      (change)="toggleReplies(item, $event)"
+                                    />
+                                  </ui-choice>
+                                </td>
+                                <td>{{ item.createdAt | date: 'short' }}</td>
+                              </tr>
+                            } @empty {
+                              <tr
+                                uiTableEmpty
+                                [columns]="7"
+                                icon="megaphone"
+                                title="Sin comunicados enviados"
+                                description="Cuando apruebes o envíes un aviso aparecerá aquí."
+                              ></tr>
+                            }
+                          </tbody>
+                        }
+                      }
+                    </table>
+                  </div>
                 </div>
               </section>
             </div>
@@ -322,34 +349,46 @@ const ACTION_LABELS: Record<string, string> = {
             <section uiCard>
               <div uiCardBody>
                 <h2 uiCardTitle class="text-base">Registro de actividad</h2>
-                @if (auditResource.value().length === 0) {
-                  <lib-empty-state
-                    title="Sin actividad"
-                    description="Las acciones de comunicación se listan aquí."
-                    icon="history"
-                  />
-                } @else {
-                  <div class="overflow-x-auto">
-                    <table uiTable>
-                      <thead>
-                        <tr>
-                          <th>Acción</th>
-                          <th>Actor</th>
-                          <th>Fecha</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        @for (row of auditResource.value(); track row.id) {
-                          <tr>
-                            <td>{{ actionLabel(row.action) }}</td>
-                            <td>{{ actorName(row) }}</td>
-                            <td>{{ row.createdAt | date: 'short' }}</td>
-                          </tr>
-                        }
-                      </tbody>
-                    </table>
-                  </div>
-                }
+                <div class="overflow-x-auto">
+                  <table uiTable [attr.aria-busy]="auditResource.isLoading()">
+                    <thead>
+                      <tr>
+                        <th>Acción</th>
+                        <th>Actor</th>
+                        <th>Fecha</th>
+                      </tr>
+                    </thead>
+                    @switch (auditList.phase()) {
+                      @case ('skeleton') {
+                        <tbody uiTableSkeleton [columns]="3"></tbody>
+                      }
+                      @case ('error') {
+                        <tbody>
+                          <tr uiTableError [columns]="3" (retry)="auditResource.reload()"></tr>
+                        </tbody>
+                      }
+                      @case ('ready') {
+                        <tbody>
+                          @for (row of auditList.rows() ?? []; track row.id) {
+                            <tr>
+                              <td>{{ actionLabel(row.action) }}</td>
+                              <td>{{ actorName(row) }}</td>
+                              <td>{{ row.createdAt | date: 'short' }}</td>
+                            </tr>
+                          } @empty {
+                            <tr
+                              uiTableEmpty
+                              [columns]="3"
+                              icon="history"
+                              title="Sin actividad"
+                              description="Las acciones de comunicación se listan aquí."
+                            ></tr>
+                          }
+                        </tbody>
+                      }
+                    }
+                  </table>
+                </div>
               </div>
             </section>
           </ng-template>
@@ -541,13 +580,13 @@ export default class Broadcasts {
     { defaultValue: [] },
   );
 
-  readonly pending = computed(() =>
-    (this.broadcastsResource.value() ?? []).filter((t) => t.status === 'PENDING_APPROVAL'),
-  );
+  /** Both lists with smooth loading: rows stay while "Actualizar" or an approval reloads them. */
+  protected readonly broadcastsList = listState(this.broadcastsResource);
+  protected readonly auditList = listState(this.auditResource);
 
-  readonly sent = computed(() =>
-    (this.broadcastsResource.value() ?? []).filter((t) => t.status !== 'PENDING_APPROVAL'),
-  );
+  readonly pending = computed(() => (this.broadcastsList.rows() ?? []).filter((t) => t.status === 'PENDING_APPROVAL'));
+
+  readonly sent = computed(() => (this.broadcastsList.rows() ?? []).filter((t) => t.status !== 'PENDING_APPROVAL'));
 
   openComposer() {
     this.selectedTab.set('sent');

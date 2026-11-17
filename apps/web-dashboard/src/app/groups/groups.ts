@@ -1,9 +1,19 @@
-import { Breadcrumbs, Card, EmptyState, Pagination, PaginatorV2, UiTable } from '#/ui';
+import {
+  Breadcrumbs,
+  Card,
+  Pagination,
+  PaginatorV2,
+  UiTable,
+  UiTableEmpty,
+  UiTableError,
+  UiTableSkeleton,
+  listState,
+} from '#/ui';
 import { DatePipe } from '@angular/common';
 import { Component, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
-import { HttpClient, httpResource } from '@angular/common/http';
+import { httpResource } from '@angular/common/http';
 import { toFetchQueryRecord } from '../core/fetch-query-params';
 import { PaginatedResponse } from '../core/pagination-meta';
 import Store from '../core/store';
@@ -17,12 +27,12 @@ type ClassGroupRow = {
   studyPlan?: { name?: string };
 };
 @Component({
-  imports: [Breadcrumbs, Card, UiTable, RouterLink, DatePipe, EmptyState, PaginatorV2],
+  imports: [Breadcrumbs, Card, UiTable, UiTableEmpty, UiTableError, UiTableSkeleton, RouterLink, DatePipe, PaginatorV2],
   providers: [Pagination],
   template: `<ui-breadcrumbs [items]="[{ label: 'Inicio', link: '/' }, { label: 'Grupos' }]" />
     <h1 class="text-2xl font-semibold">Grupos</h1>
     <div uiCard class="overflow-x-auto mt-4">
-      <table uiTable>
+      <table uiTable [attr.aria-busy]="classGroupsResource.isLoading()">
         <thead>
           <tr>
             <th>Nombre</th>
@@ -32,29 +42,33 @@ type ClassGroupRow = {
             <th>Fecha de actualización</th>
           </tr>
         </thead>
-        <tbody>
-          @for (group of classGroups(); track group.id) {
-            <tr>
-              <td>
-                <a class="link link-primary" [routerLink]="[group.id]">{{ group.name }}</a>
-              </td>
-              <td>{{ group.teacher?.name }}</td>
-              <td>{{ group.studyPlan?.name }}</td>
-              <td>{{ group.createdAt | date: 'short' }}</td>
-              <td>{{ group.updatedAt | date: 'short' }}</td>
-            </tr>
-          } @empty {
-            <tr>
-              <td colspan="6">
-                <lib-empty-state
-                  [title]="'No hay grupos'"
-                  [description]="'No hay grupos para mostrar'"
-                  [icon]="'users'"
-                />
-              </td>
-            </tr>
+        @switch (classGroupsList.phase()) {
+          @case ('skeleton') {
+            <tbody uiTableSkeleton [rows]="pageSize()" [columns]="5"></tbody>
           }
-        </tbody>
+          @case ('error') {
+            <tbody>
+              <tr uiTableError [columns]="5" (retry)="classGroupsResource.reload()"></tr>
+            </tbody>
+          }
+          @case ('ready') {
+            <tbody>
+              @for (group of classGroups(); track group.id) {
+                <tr>
+                  <td>
+                    <a class="link link-primary" [routerLink]="[group.id]">{{ group.name }}</a>
+                  </td>
+                  <td>{{ group.teacher?.name }}</td>
+                  <td>{{ group.studyPlan?.name }}</td>
+                  <td>{{ group.createdAt | date: 'short' }}</td>
+                  <td>{{ group.updatedAt | date: 'short' }}</td>
+                </tr>
+              } @empty {
+                <tr uiTableEmpty [columns]="5" icon="users" title="Aún no hay grupos"></tr>
+              }
+            </tbody>
+          }
+        }
       </table>
       <div class="p-4 rounded-b-lg">
         <lib-paginator
@@ -69,8 +83,7 @@ type ClassGroupRow = {
 })
 export default class Groups {
   private store = inject(Store);
-  private http = inject(HttpClient);
-  public total = computed(() => this.classGroupsResource.value()?.meta.total ?? 0);
+  public total = computed(() => this.classGroupsList.rows()?.meta.total ?? 0);
   public page = signal(1);
   public pageSize = signal(10);
 
@@ -89,8 +102,11 @@ export default class Groups {
     };
   });
 
+  /** class groups with smooth loading: previous rows stay while the next page loads. */
+  protected readonly classGroupsList = listState(this.classGroupsResource);
+
   public classGroups = computed(() =>
-    this.classGroupsResource.value()?.data.map((g) => ({
+    (this.classGroupsList.rows()?.data ?? []).map((g) => ({
       ...g,
       teacher: g.teacher
         ? {

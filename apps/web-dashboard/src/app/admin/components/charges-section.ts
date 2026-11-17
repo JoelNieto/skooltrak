@@ -2,16 +2,25 @@ import {
   Badge,
   BadgeTone,
   Button,
+  Card,
   Confirmation,
-  EmptyState,
   Icon,
+  listState,
   Pagination,
   Paginator,
   Toast,
   UiField,
-  UiInput,
+  UiFilterChip,
+  UiFilterMenu,
+  UiInputGroup,
+  UiRowAction,
+  UiRowActions,
   UiSelect,
   UiTable,
+  UiTableEmpty,
+  UiTableError,
+  UiTableSkeleton,
+  UiTableToolbar,
 } from '#/ui';
 import { DatePipe, DecimalPipe } from '@angular/common';
 import { HttpClient, httpResource } from '@angular/common/http';
@@ -38,14 +47,21 @@ type StudentOption = { id: string; firstName: string; fatherName: string };
 @Component({
   selector: 'app-charges-section',
   imports: [
+    Card,
     UiTable,
+    UiTableEmpty,
+    UiTableError,
+    UiTableSkeleton,
+    UiTableToolbar,
+    UiFilterMenu,
+    UiFilterChip,
+    UiRowActions,
+    UiInputGroup,
     Badge,
-    UiInput,
     UiSelect,
     Button,
     DatePipe,
     DecimalPipe,
-    EmptyState,
     FormsModule,
     Paginator,
     UiField,
@@ -53,10 +69,21 @@ type StudentOption = { id: string; firstName: string; fatherName: string };
   ],
   providers: [Pagination],
   template: `
-    <div class="bg-surface-1 rounded-lg border border-line">
-      <div class="flex flex-wrap gap-2 items-end p-3 border-b border-line">
+    <ui-table-toolbar label="Filtrar cargos">
+      <label uiInputGroup size="sm">
+        <ui-icon name="search" class="text-base text-ink-subtle" />
+        <input
+          aria-label="Buscar descripción"
+          class="pl-0"
+          type="search"
+          placeholder="Buscar descripción..."
+          [ngModel]="pagination.search()"
+          (ngModelChange)="pagination.updateSearch($event)"
+        />
+      </label>
+      <ui-filter-menu [activeCount]="activeFilterCount()" (clear)="clearMenuFilters()">
         <ui-field label="Estado">
-          <select uiSelect size="sm" [ngModel]="statusFilter()" (ngModelChange)="onFilterChange('status', $event)">
+          <select uiSelect [ngModel]="statusFilter()" (ngModelChange)="onFilterChange('status', $event)">
             <option value="">Todos</option>
             <option value="PENDING">PENDING</option>
             <option value="PARTIAL">PARTIAL</option>
@@ -65,7 +92,7 @@ type StudentOption = { id: string; firstName: string; fatherName: string };
           </select>
         </ui-field>
         <ui-field label="Tipo">
-          <select uiSelect size="sm" [ngModel]="typeFilter()" (ngModelChange)="onFilterChange('type', $event)">
+          <select uiSelect [ngModel]="typeFilter()" (ngModelChange)="onFilterChange('type', $event)">
             <option value="">Todos</option>
             <option value="CUSTOM">CUSTOM</option>
             <option value="TUITION">TUITION</option>
@@ -74,7 +101,7 @@ type StudentOption = { id: string; firstName: string; fatherName: string };
         </ui-field>
         @if (showStudentFilter()) {
           <ui-field label="Estudiante">
-            <select uiSelect size="sm" [ngModel]="studentFilter()" (ngModelChange)="onFilterChange('student', $event)">
+            <select uiSelect [ngModel]="studentFilter()" (ngModelChange)="onFilterChange('student', $event)">
               <option value="">Todos</option>
               @for (s of students.value(); track s.id) {
                 <option [value]="s.id">{{ s.firstName }} {{ s.fatherName }}</option>
@@ -82,57 +109,89 @@ type StudentOption = { id: string; firstName: string; fatherName: string };
             </select>
           </ui-field>
         }
-        <ui-field label="Descripción" class="grow min-w-48">
-          <input
-            uiInput
-            size="sm"
-            type="search"
-            placeholder="Buscar descripción..."
-            [ngModel]="pagination.search()"
-            (ngModelChange)="pagination.updateSearch($event)"
-          />
-        </ui-field>
-      </div>
-
-      @if (chargesResource.isLoading()) {
-        <div class="p-8 text-center">Cargando...</div>
-      } @else if (chargesResource.value()?.data.length) {
-        <table uiTable>
-          <thead>
-            <tr>
-              <th>Estudiante</th>
-              <th>Descripción</th>
-              <th>Tipo</th>
-              <th>Monto</th>
-              <th>Vencimiento</th>
-              <th>Estado</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (c of chargesResource.value()?.data ?? []; track c.id) {
-              <tr>
-                <td>{{ c.student.firstName }} {{ c.student.fatherName }}</td>
-                <td>{{ c.description || '-' }}</td>
-                <td>
-                  <span uiBadge>{{ c.chargeType }}</span>
-                </td>
-                <td>{{ c.amount | number: '1.2-2' }}</td>
-                <td>{{ c.dueDate | date: 'dd/MM/yyyy' }}</td>
-                <td>
-                  <span uiBadge [tone]="statusTone(c.status)">{{ c.status }}</span>
-                </td>
-                <td>
-                  @if (!isStudent()) {
-                    <button uiButton variant="ghost" size="sm" (click)="removeCharge(c.id)">
-                      <ui-icon name="trash-2" class="text-error" />
-                    </button>
-                  }
-                </td>
-              </tr>
+      </ui-filter-menu>
+      @if (activeFilterCount()) {
+        <ng-container uiToolbarChips>
+          @if (statusFilter()) {
+            <ui-filter-chip [label]="'Estado: ' + statusFilter()" (remove)="onFilterChange('status', '')" />
+          }
+          @if (typeFilter()) {
+            <ui-filter-chip [label]="'Tipo: ' + typeFilter()" (remove)="onFilterChange('type', '')" />
+          }
+          @if (studentFilter()) {
+            <ui-filter-chip [label]="'Estudiante: ' + selectedStudentName()" (remove)="onFilterChange('student', '')" />
+          }
+        </ng-container>
+      }
+    </ui-table-toolbar>
+    <div uiCard class="overflow-x-auto mt-4">
+      <table uiTable [attr.aria-busy]="chargesResource.isLoading()">
+        <thead>
+          <tr>
+            <th>Estudiante</th>
+            <th>Descripción</th>
+            <th>Tipo</th>
+            <th>Monto</th>
+            <th>Vencimiento</th>
+            <th>Estado</th>
+            @if (!isStudent()) {
+              <th class="w-12"><span class="sr-only">Acciones</span></th>
             }
-          </tbody>
-        </table>
+          </tr>
+        </thead>
+        @switch (chargesList.phase()) {
+          @case ('skeleton') {
+            <tbody uiTableSkeleton [rows]="pagination.take()" [columns]="columns()"></tbody>
+          }
+          @case ('error') {
+            <tbody>
+              <tr uiTableError [columns]="columns()" (retry)="chargesResource.reload()"></tr>
+            </tbody>
+          }
+          @case ('ready') {
+            <tbody>
+              @for (c of chargesList.rows()?.data ?? []; track c.id) {
+                <tr>
+                  <td>{{ c.student.firstName }} {{ c.student.fatherName }}</td>
+                  <td>{{ c.description || '-' }}</td>
+                  <td>
+                    <span uiBadge>{{ c.chargeType }}</span>
+                  </td>
+                  <td>{{ c.amount | number: '1.2-2' }}</td>
+                  <td>{{ c.dueDate | date: 'dd/MM/yyyy' }}</td>
+                  <td>
+                    <span uiBadge [tone]="statusTone(c.status)">{{ c.status }}</span>
+                  </td>
+                  @if (!isStudent()) {
+                    <td>
+                      <ui-row-actions
+                        [actions]="rowActions"
+                        [label]="'Acciones para el cargo de ' + c.student.firstName + ' ' + c.student.fatherName"
+                        (action)="onRowAction($event, c)"
+                      />
+                    </td>
+                  }
+                </tr>
+              } @empty {
+                @if (filtered()) {
+                  <tr
+                    uiTableEmpty
+                    [columns]="columns()"
+                    icon="search-x"
+                    title="Sin resultados"
+                    description="Ningún cargo coincide con los filtros aplicados."
+                  >
+                    <button uiButton variant="ghost" size="sm" (click)="clearFilters()">Limpiar filtros</button>
+                  </tr>
+                } @else {
+                  <tr uiTableEmpty [columns]="columns()" icon="receipt" title="Aún no hay cargos este año"></tr>
+                }
+              }
+            </tbody>
+          }
+        }
+      </table>
+      @if (pagination.count()) {
         <div class="p-4">
           <lib-paginator
             [take]="pagination.take()"
@@ -140,14 +199,6 @@ type StudentOption = { id: string; firstName: string; fatherName: string };
             [count]="pagination.count()"
             (skipChange)="pagination.updateSkip($event)"
             (takeChange)="pagination.updateTake($event)"
-          />
-        </div>
-      } @else {
-        <div class="p-8">
-          <lib-empty-state
-            title="Sin cargos"
-            description="No se encontraron cargos con los filtros aplicados."
-            icon="receipt"
           />
         </div>
       }
@@ -225,6 +276,29 @@ export default class ChargesSection {
     { defaultValue: { data: [], total: 0 } },
   );
 
+  /** charges with smooth loading: rows stay while the next page / filter loads. */
+  protected readonly chargesList = listState(this.chargesResource);
+
+  /** Students don't get the actions column. */
+  protected readonly columns = computed(() => (this.isStudent() ? 6 : 7));
+
+  protected readonly activeFilterCount = computed(
+    () => [this.statusFilter(), this.typeFilter(), this.studentFilter()].filter(Boolean).length,
+  );
+  protected readonly filtered = computed(() => this.activeFilterCount() > 0 || !!this.pagination.search());
+
+  protected readonly selectedStudentName = computed(() => {
+    const s = this.students.value()?.find((st) => st.id === this.studentFilter());
+    return s ? `${s.firstName} ${s.fatherName}` : '';
+  });
+
+  /** The actions in each row's menu (ui-row-actions). */
+  protected readonly rowActions: UiRowAction[] = [{ id: 'delete', label: 'Eliminar', icon: 'trash-2', tone: 'danger' }];
+
+  protected onRowAction(action: string, charge: ChargeType): void {
+    if (action === 'delete') this.removeCharge(charge.id);
+  }
+
   constructor() {
     this.pagination.updateTake(10);
     effect(() => {
@@ -240,6 +314,18 @@ export default class ChargesSection {
     else if (kind === 'type') this.typeFilter.set(value);
     else this.studentFilter.set(value);
     this.pagination.updateSkip(0);
+  }
+
+  protected clearMenuFilters() {
+    this.statusFilter.set('');
+    this.typeFilter.set('');
+    this.studentFilter.set('');
+    this.pagination.updateSkip(0);
+  }
+
+  protected clearFilters() {
+    this.pagination.updateSearch('');
+    this.clearMenuFilters();
   }
 
   statusTone(status: string): BadgeTone {

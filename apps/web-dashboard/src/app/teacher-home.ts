@@ -1,10 +1,23 @@
-import { Alert, Badge, BadgeTone, Button, Card, CardBody, EmptyState, Meter, Modal, PageHeader, Spinner, StatCard } from '#/ui';
-import { DatePipe } from '@angular/common';
+import {
+  Alert,
+  Badge,
+  BadgeTone,
+  Button,
+  Card,
+  CardBody,
+  ChartPlaceholder,
+  EmptyState,
+  Meter,
+  Modal,
+  PageHeader,
+  Spinner,
+  StatCard,
+  TimeAgoPipe,
+} from '#/ui';
 import { httpResource } from '@angular/common/http';
 import { Component, computed, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import AttendanceForm from './attendance/attendance-form';
-import { toFetchQueryRecord } from './core/fetch-query-params';
 import Store from './core/store';
 import { RecentBroadcasts } from './communication/recent-broadcasts';
 
@@ -54,7 +67,33 @@ type TeacherSummary = {
     topCourseId: string | null;
   } | null;
   periodClose: { name: string; endDate: string; daysLeft: number } | null;
+  average: { value: number | null; max: number | null; studentsBelowPass: number | null; coursesWithoutScale: number } | null;
+  familyMessages: { unanswered: number; stale: number };
 };
+
+/** `GET /api/v1/home/teacher/attention` (HOM-001 FR .10 .11). */
+type AttentionReason = {
+  kind: 'BELOW_PASS' | 'DROP' | 'ABSENCES' | 'LATE';
+  course: { id: string; name: string } | null;
+  value: number;
+};
+type AttentionStudent = {
+  id: string;
+  name: string;
+  classGroup: { id: string; name: string } | null;
+  worstAverage: number | null;
+  reasons: AttentionReason[];
+};
+type FamilyThread = {
+  id: string;
+  title: string;
+  senderName: string;
+  lastMessageAt: string;
+  preview: string;
+  unread: boolean;
+  stale: boolean;
+};
+type TeacherAttention = { students: AttentionStudent[]; totalStudents: number; threads: FamilyThread[] };
 
 type AssignmentType = 'HOMEWORK' | 'EXAM' | 'QUIZ' | 'PROJECT' | 'PAPER' | 'NEW';
 
@@ -84,20 +123,9 @@ const ASSIGNMENT_TYPES: Record<AssignmentType, { label: string; tone: BadgeTone 
   PAPER: { label: 'Ensayo', tone: 'success' },
 };
 
-type InboxRow = {
-  id: string;
-  message?: { subject?: string; createdAt?: string; sender?: { name?: string } };
-};
-
-type PublishedNewsletter = {
-  id: string;
-  title: string;
-  content: string;
-  publishedAt: string;
-  author: { name: string };
-};
-
 const percent = new Intl.NumberFormat('es', { style: 'percent', maximumFractionDigits: 0 });
+/** Grades show with one decimal and a point, as elsewhere in the app (e.g. "3.7"). */
+const decimal = { format: (n: number) => n.toFixed(1) };
 const longDate = new Intl.DateTimeFormat('es', { weekday: 'long', day: 'numeric', month: 'long', timeZone: 'UTC' });
 
 @Component({
@@ -108,7 +136,7 @@ const longDate = new Intl.DateTimeFormat('es', { weekday: 'long', day: 'numeric'
     Button,
     Card,
     CardBody,
-    DatePipe,
+    ChartPlaceholder,
     EmptyState,
     PageHeader,
     RecentBroadcasts,
@@ -116,6 +144,7 @@ const longDate = new Intl.DateTimeFormat('es', { weekday: 'long', day: 'numeric'
     Meter,
     Spinner,
     StatCard,
+    TimeAgoPipe,
   ],
   template: `
     <lib-page-header
@@ -157,6 +186,20 @@ const longDate = new Intl.DateTimeFormat('es', { weekday: 'long', day: 'numeric'
         [helper]="attendanceHelper()"
         icon="how_to_reg"
         color="success"
+      />
+      <lib-stat-card
+        label="Promedio de mis cursos"
+        [value]="averageValue()"
+        [helper]="averageHelper()"
+        icon="grade"
+        color="primary"
+      />
+      <lib-stat-card
+        label="Mensajes de acudientes"
+        [value]="messagesValue()"
+        [helper]="messagesHelper()"
+        icon="forum"
+        color="info"
       />
     </div>
 
@@ -263,7 +306,8 @@ const longDate = new Intl.DateTimeFormat('es', { weekday: 'long', day: 'numeric'
     </section>
     </div>
 
-    <section uiCard class="mt-6" aria-labelledby="week-title">
+    <div class="mt-6 flex flex-wrap gap-6">
+    <section uiCard class="min-w-0 flex-[999_1_560px]" aria-labelledby="week-title">
       <div uiCardBody>
         <div class="flex items-center justify-between">
           <h2 id="week-title" class="text-base font-semibold text-ink-strong">Asignaciones de la semana</h2>
@@ -317,75 +361,120 @@ const longDate = new Intl.DateTimeFormat('es', { weekday: 'long', day: 'numeric'
       </div>
     </section>
 
+    <section uiCard class="min-w-0 flex-[1_1_340px]" aria-labelledby="attention-title">
+      <div uiCardBody>
+        <h2 id="attention-title" class="text-base font-semibold text-ink-strong">Necesitan atención</h2>
+        @if (attention.isLoading()) {
+          <div class="flex justify-center py-8"><span uiSpinner></span></div>
+        } @else if (attention.error()) {
+          <div uiAlert tone="danger" role="alert" class="mt-2">
+            <span>No se pudo cargar el seguimiento.</span>
+            <button uiButton variant="ghost" size="sm" type="button" (click)="attention.reload()">Reintentar</button>
+          </div>
+        } @else if (attentionStudents().length === 0) {
+          <lib-empty-state
+            title="Nadie en riesgo"
+            description="Aquí aparecen estudiantes con notas bajo la mínima, ausencias o tardanzas frecuentes."
+            icon="sentiment_satisfied"
+            color="success"
+          />
+        } @else {
+          <ul class="mt-1 flex flex-col">
+            @for (student of attentionStudents(); track student.id) {
+              <li class="border-t border-line first:border-t-0">
+                <a [routerLink]="['/students', student.id]" class="flex min-h-11 flex-col gap-1 py-2.5 text-ink hover:no-underline">
+                  <span>
+                    <span class="font-medium text-ink-strong">{{ student.name }}</span>
+                    @if (student.classGroup) {
+                      <span class="text-xs text-ink-muted"> · {{ student.classGroup.name }}</span>
+                    }
+                  </span>
+                  <span class="flex flex-wrap gap-1">
+                    @for (reason of student.reasons; track $index) {
+                      <span uiBadge size="sm" [tone]="reasonTone(reason)">{{ reasonLabel(reason) }}</span>
+                    }
+                  </span>
+                </a>
+              </li>
+            }
+          </ul>
+          @if ((attention.value()?.totalStudents ?? 0) > attentionStudents().length) {
+            <p class="mt-2 text-xs text-ink-muted">
+              y {{ (attention.value()?.totalStudents ?? 0) - attentionStudents().length }} más
+            </p>
+          }
+        }
+      </div>
+    </section>
+    </div>
+
+    <div class="mt-6 flex flex-wrap gap-6">
+      <section uiCard class="min-w-0 flex-[999_1_560px]" aria-labelledby="distribution-title">
+        <div uiCardBody>
+          <h2 id="distribution-title" class="text-base font-semibold text-ink-strong">Distribución de calificaciones</h2>
+          <ui-chart-placeholder
+            class="mt-2"
+            kind="Histograma"
+            description="Notas del curso elegido por rango en la escala de su plan de estudio, con líneas en aprobación y excelencia y comparación con el periodo anterior"
+            source="student_grades / grade_metrics"
+          />
+        </div>
+      </section>
+
+      <section uiCard class="min-w-0 flex-[1_1_340px]" aria-labelledby="family-title">
+        <div uiCardBody>
+          <div class="flex items-center justify-between">
+            <h2 id="family-title" class="text-base font-semibold text-ink-strong">Mensajes de acudientes</h2>
+            <a routerLink="/teacher/communication" class="link link-primary text-sm">Ir a mensajes</a>
+          </div>
+          @if (attention.isLoading()) {
+            <div class="flex justify-center py-8"><span uiSpinner></span></div>
+          } @else if (attention.error()) {
+            <div uiAlert tone="danger" role="alert" class="mt-2">
+              <span>No se pudieron cargar los mensajes.</span>
+              <button uiButton variant="ghost" size="sm" type="button" (click)="attention.reload()">Reintentar</button>
+            </div>
+          } @else if (familyThreads().length === 0) {
+            <lib-empty-state
+              title="Sin mensajes por responder"
+              description="Los mensajes de acudientes que esperan tu respuesta aparecerán aquí."
+              icon="mark_chat_read"
+            />
+          } @else {
+            <ul class="mt-1 flex flex-col">
+              @for (thread of familyThreads(); track thread.id) {
+                <li class="border-t border-line first:border-t-0">
+                  <a routerLink="/teacher/communication" class="flex min-h-11 items-start gap-3 py-2.5 text-ink hover:no-underline">
+                    <span
+                      class="mt-1.5 size-2 shrink-0 rounded-full"
+                      [class]="thread.unread ? 'bg-primary' : 'bg-transparent'"
+                      [attr.aria-label]="thread.unread ? 'Sin leer' : null"
+                      [attr.role]="thread.unread ? 'img' : null"
+                    ></span>
+                    <span class="min-w-0 flex-1">
+                      <span class="flex flex-wrap items-center gap-x-2">
+                        <span class="font-medium text-ink-strong">{{ thread.senderName }}</span>
+                        <span class="text-xs text-ink-muted">{{ thread.lastMessageAt | timeAgo }}</span>
+                        @if (thread.stale) {
+                          <span uiBadge tone="warning" size="sm">Más de 48 h</span>
+                        }
+                      </span>
+                      <span class="block truncate text-xs text-ink-muted">{{ thread.title }}</span>
+                      <span class="line-clamp-2 text-sm text-ink">{{ thread.preview }}</span>
+                    </span>
+                  </a>
+                </li>
+              }
+            </ul>
+          }
+        </div>
+      </section>
+    </div>
+
     <div class="mt-6">
       <app-recent-broadcasts />
     </div>
 
-    <div class="mt-6">
-      <div uiCard>
-        <div uiCardBody>
-          <div class="flex items-center justify-between">
-            <h2 class="text-lg font-semibold text-base-content">Mensajes recientes</h2>
-            <a routerLink="/messages" class="link link-primary text-sm"> Ir a mensajes </a>
-          </div>
-          @if ((recentMessages.value() ?? []).length === 0) {
-            <lib-empty-state
-              title="Sin mensajes recientes"
-              description="Revisa tu bandeja para novedades."
-              icon="mail"
-            />
-          } @else {
-            <div class="space-y-3">
-              @for (message of recentMessages.value() ?? []; track message.id) {
-                <div class="rounded-lg border border-base-200 p-3">
-                  <p class="font-medium text-base-content">
-                    {{ message.message?.subject }}
-                  </p>
-                  <div class="text-sm text-base-content/70">
-                    {{ message.message?.sender?.name }} ·
-                    {{ message.message?.createdAt | date: 'short' }}
-                  </div>
-                </div>
-              }
-            </div>
-          }
-        </div>
-      </div>
-    </div>
-
-    @if (!recentNewsletters.error()) {
-      <div class="mt-6">
-        <div uiCard>
-          <div uiCardBody>
-            <h2 class="text-lg font-semibold text-base-content">Boletines recientes</h2>
-            @if ((recentNewsletters.value() ?? []).length === 0) {
-              <lib-empty-state
-                title="Sin boletines recientes"
-                description="Los boletines publicados aparecerán aquí."
-                icon="newspaper"
-              />
-            } @else {
-              <div class="space-y-3">
-                @for (newsletter of recentNewsletters.value() ?? []; track newsletter.id) {
-                  <div class="rounded-lg border border-base-200 p-3">
-                    <p class="font-medium text-base-content">{{ newsletter.title }}</p>
-                    <p class="text-sm text-base-content/70 mt-1 line-clamp-2">
-                      {{ stripHtml(newsletter.content) }}
-                    </p>
-                    <div class="flex items-center justify-between mt-2">
-                      <span class="text-sm text-base-content/70">
-                        {{ newsletter.author.name }} · {{ newsletter.publishedAt | date: 'mediumDate' }}
-                      </span>
-                      <a [routerLink]="['/newsletters', newsletter.id]" class="link link-primary text-sm"> Ver más </a>
-                    </div>
-                  </div>
-                }
-              </div>
-            }
-          </div>
-        </div>
-      </div>
-    }
   `,
 })
 export default class TeacherHome {
@@ -413,6 +502,64 @@ export default class TeacherHome {
   });
 
   public weekItems = computed(() => this.week.value()?.items ?? []);
+
+  // ── HOM-001-S03: needing attention, family messages, average ─────────────
+  public attention = httpResource<TeacherAttention>(() => {
+    const schoolId = this.#store.currentSchoolId();
+    if (!schoolId) return undefined;
+    return { url: '/api/v1/home/teacher/attention', params: { schoolId } };
+  });
+
+  public attentionStudents = computed(() => this.attention.value()?.students ?? []);
+  public familyThreads = computed(() => this.attention.value()?.threads ?? []);
+
+  public averageValue = computed(() => {
+    if (this.summary.isLoading()) return '…';
+    const average = this.summary.value()?.average;
+    if (!average || average.value === null) return '—';
+    return average.max !== null ? `${decimal.format(average.value)} / ${decimal.format(average.max)}` : decimal.format(average.value);
+  });
+
+  public averageHelper = computed(() => {
+    if (this.summary.error()) return 'No se pudo cargar';
+    const average = this.summary.value()?.average;
+    if (!average) return 'Sin periodo activo';
+    if (average.studentsBelowPass === null) return 'Escala de notas no configurada';
+    return average.studentsBelowPass === 0
+      ? 'Nadie bajo la nota mínima'
+      : `${plural(average.studentsBelowPass, 'estudiante', 'estudiantes')} bajo la nota mínima`;
+  });
+
+  public messagesValue = computed(() => {
+    if (this.summary.isLoading()) return '…';
+    return String(this.summary.value()?.familyMessages.unanswered ?? '—');
+  });
+
+  public messagesHelper = computed(() => {
+    if (this.summary.error()) return 'No se pudo cargar';
+    const messages = this.summary.value()?.familyMessages;
+    if (!messages || messages.unanswered === 0) return 'Nada por responder';
+    return messages.stale > 0
+      ? `Sin responder · ${messages.stale} desde hace más de 48 h`
+      : 'Sin responder';
+  });
+
+  reasonLabel(reason: AttentionReason): string {
+    switch (reason.kind) {
+      case 'BELOW_PASS':
+        return `${reason.course?.name ?? 'Curso'} ${decimal.format(reason.value)}`;
+      case 'DROP':
+        return `Bajó ${decimal.format(reason.value)} en ${reason.course?.name ?? 'un curso'}`;
+      case 'ABSENCES':
+        return plural(reason.value, 'ausencia', 'ausencias');
+      case 'LATE':
+        return plural(reason.value, 'tardanza', 'tardanzas');
+    }
+  }
+
+  reasonTone(reason: AttentionReason): BadgeTone {
+    return reason.kind === 'BELOW_PASS' || reason.kind === 'ABSENCES' ? 'danger' : 'warning';
+  }
 
   public slots = computed(() => this.today.value()?.slots ?? []);
 
@@ -508,6 +655,15 @@ export default class TeacherHome {
         link: grades.topCourseId ? ['/courses', grades.topCourseId] : '/courses',
       });
     }
+    if (summary.familyMessages.unanswered > 0) {
+      rows.push({
+        icon: 'mark_chat_unread',
+        iconClass: 'bg-info/15 text-info',
+        title: `Responder ${plural(summary.familyMessages.unanswered, 'mensaje', 'mensajes')}`,
+        detail: 'De acudientes',
+        link: '/teacher/communication',
+      });
+    }
     if (grades && grades.unpublished > 0) {
       rows.push({
         icon: 'publish',
@@ -557,34 +713,6 @@ export default class TeacherHome {
       });
 
   }
-
-  // ── Pre-HOM sections, replaced in HOM-001-S03 ─────────────────────────────
-  public recentMessages = httpResource<InboxRow[]>(
-    () => ({
-      url: '/api/v1/messages',
-      params: toFetchQueryRecord({ take: 4, skip: 0 }),
-    }),
-    { defaultValue: [] },
-  );
-
-  public recentNewsletters = httpResource<PublishedNewsletter[]>(
-    () => {
-      const schoolId = this.#store.currentSchoolId();
-      if (!schoolId) return undefined;
-      return {
-        url: '/api/v1/newsletters/published',
-        params: { schoolId, take: '3' },
-      };
-    },
-    { defaultValue: [] },
-  );
-
-  stripHtml(html: string): string {
-    const div = document.createElement('div');
-    div.innerHTML = html;
-    return div.textContent?.trim() ?? '';
-  }
-
 }
 
 function plural(n: number, one: string, many: string) {

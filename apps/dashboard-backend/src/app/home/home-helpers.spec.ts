@@ -1,6 +1,7 @@
 import { AttendanceStatus, WeekDay } from '@generated/prisma';
 import { attendanceRate } from './home-attendance';
-import { pickCurrentPeriod } from './home-period';
+import { averageKey, weightedAverages } from './home-grades';
+import { pickCurrentPeriod, pickPreviousPeriod } from './home-period';
 import { daysBetween, localMidnight, schoolLocalTime } from './home-time';
 
 describe('HOM-001 helpers', () => {
@@ -78,6 +79,42 @@ describe('HOM-001 helpers', () => {
 
     it('returns null before the first period starts', () => {
       expect(pickCurrentPeriod(periods, '2026-02-01')).toBeNull();
+    });
+  });
+
+  describe('pickPreviousPeriod', () => {
+    const p = (id: string, start: string, end: string) => ({
+      id,
+      name: id,
+      startDate: new Date(`${start}T05:00:00Z`),
+      endDate: new Date(`${end}T05:00:00Z`),
+    });
+    const periods = [p('I', '2026-03-02', '2026-06-05'), p('II', '2026-06-15', '2026-09-11'), p('III', '2026-09-21', '2026-12-04')];
+
+    it('is the period that ended just before the current one started', () => {
+      expect(pickPreviousPeriod(periods, periods[2])?.id).toBe('II');
+      expect(pickPreviousPeriod(periods, periods[0])).toBeNull();
+      expect(pickPreviousPeriod(periods, null)).toBeNull();
+    });
+  });
+
+  describe('weightedAverages (BR-HOM-001.11)', () => {
+    const row = (score: number | null, weight: number, courseId = 'c', periodId = 'p', studentId = 's') => ({
+      studentId,
+      score,
+      grade: { courseId, periodId, bucket: { weight } },
+    });
+
+    it('weights scores by bucket and skips unscored rows', () => {
+      const avgs = weightedAverages([row(2, 3), row(3.6, 1), row(null, 10)]);
+      expect(avgs.get(averageKey('s', 'c', 'p'))).toBeCloseTo(2.4);
+    });
+
+    it('has no average without a scored grade, and keeps courses and periods apart', () => {
+      const avgs = weightedAverages([row(null, 1), row(4, 1, 'c2'), row(3, 1, 'c2', 'p0')]);
+      expect(avgs.has(averageKey('s', 'c', 'p'))).toBe(false);
+      expect(avgs.get(averageKey('s', 'c2', 'p'))).toBe(4);
+      expect(avgs.get(averageKey('s', 'c2', 'p0'))).toBe(3);
     });
   });
 

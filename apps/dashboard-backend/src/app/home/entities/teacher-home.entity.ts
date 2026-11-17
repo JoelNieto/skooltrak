@@ -106,6 +106,25 @@ export class TeacherPeriodClose {
   daysLeft: number;
 }
 
+/** FR-HOM-001.7 average tile; thresholds from each course's study plan (BR-HOM-001.1). */
+export class TeacherAverage {
+  /** Mean of the student averages in the teacher's courses, one decimal; null without grades or with mixed scales. */
+  value: number | null;
+  /** The shared scale maximum of those courses; null when they differ or none has a metric. */
+  max: number | null;
+  /** Distinct students below `minimumApproval` in at least one of the teacher's courses; null when no course has a metric. */
+  studentsBelowPass: number | null;
+  /** Teacher's courses whose study plan has no grade metric. */
+  coursesWithoutScale: number;
+}
+
+/** BR-HOM-001.13 */
+export class TeacherFamilyMessages {
+  unanswered: number;
+  /** Unanswered for more than 48 h. */
+  stale: number;
+}
+
 export class TeacherSummary {
   weekStart: string;
   weekEnd: string;
@@ -114,6 +133,50 @@ export class TeacherSummary {
   /** Null when the school year has no current or past period. */
   grades: TeacherGrades | null;
   periodClose: TeacherPeriodClose | null;
+  /** Null when the school year has no current or past period. */
+  average: TeacherAverage | null;
+  familyMessages: TeacherFamilyMessages;
+}
+
+export type AttentionReasonKind = 'BELOW_PASS' | 'DROP' | 'ABSENCES' | 'LATE';
+
+export class AttentionReason {
+  kind: AttentionReasonKind;
+  /** BELOW_PASS / DROP: the course. */
+  course: HomeRef | null;
+  /** BELOW_PASS: the average · DROP: points lost · ABSENCES / LATE: records this week. */
+  value: number;
+}
+
+export class AttentionStudent {
+  id: string;
+  name: string;
+  classGroup: HomeRef | null;
+  /** Lowest current average among the teacher's courses, one decimal. */
+  worstAverage: number | null;
+  reasons: AttentionReason[];
+}
+
+export class FamilyThread {
+  id: string;
+  title: string;
+  senderName: string;
+  /** ISO instant */
+  lastMessageAt: string;
+  /** First 140 characters of the last message. */
+  preview: string;
+  unread: boolean;
+  /** Unanswered for more than 48 h. */
+  stale: boolean;
+}
+
+/** FR-HOM-001.10 / .11 */
+export class TeacherAttention {
+  /** Up to 5, most reasons first, then lowest average. */
+  students: AttentionStudent[];
+  totalStudents: number;
+  /** Latest 5 unanswered family threads. */
+  threads: FamilyThread[];
 }
 
 export class TeacherWeekItem {

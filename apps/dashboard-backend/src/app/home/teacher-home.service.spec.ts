@@ -33,10 +33,13 @@ describe('TeacherHomeService (HOM-001-S01)', () => {
       teacher?: unknown;
       slots?: unknown[];
       sessions?: unknown[];
-      records?: { attendanceSessionId: string; status: AttendanceStatus; _count: { _all: number } }[];
+      records?: { attendanceSessionId?: string; studentId?: string; status: AttendanceStatus; _count: { _all: number } }[];
       periods?: unknown[];
       toReview?: { assignmentId: string; _count: { _all: number }; _min: { submittedAt: Date | null } }[];
-      courses?: { id: string; _count: { students: number } }[];
+      courses?: { id: string; name?: string; _count?: { students: number }; studyPlan?: unknown }[];
+      scores?: unknown[];
+      threads?: unknown[];
+      people?: unknown[];
       grades?: { courseId: string; published: boolean; _count: { studentGrades: number } }[];
       assignmentDates?: unknown[];
       students?: unknown[];
@@ -83,7 +86,14 @@ describe('TeacherHomeService (HOM-001-S01)', () => {
       course: { findMany: jest.fn().mockResolvedValue(opts.courses ?? []) },
       grade: { findMany: jest.fn().mockResolvedValue(opts.grades ?? []) },
       assignmentDate: { findMany: jest.fn().mockResolvedValue(opts.assignmentDates ?? []) },
-      student: { findMany: jest.fn().mockResolvedValue(opts.students ?? []) },
+      student: {
+        // week() asks for enrolment (students); attention() asks for names (people).
+        findMany: jest.fn().mockImplementation(({ select }) =>
+          Promise.resolve(select?.firstName ? (opts.people ?? []) : (opts.students ?? [])),
+        ),
+      },
+      studentGrade: { findMany: jest.fn().mockResolvedValue(opts.scores ?? []) },
+      communicationThread: { findMany: jest.fn().mockResolvedValue(opts.threads ?? []) },
     };
     const service = new TeacherHomeService(prisma as never, { now: () => NOW });
     return { service, prisma };
@@ -400,6 +410,202 @@ describe('TeacherHomeService (HOM-001-S01)', () => {
       const { service } = build({ teacher: null });
 
       await expect(service.week(user, SCHOOL)).rejects.toThrow(ForbiddenException);
+    });
+  });
+
+  describe('attention and the average tile (FR-HOM-001.10, BR-HOM-001.1, .11)', () => {
+    const PERIODS = [
+      { id: 'p1', name: 'I Trimestre', startDate: new Date('2026-06-01T05:00:00Z'), endDate: new Date('2026-08-28T05:00:00Z') },
+      { id: 'p2', name: 'II Trimestre', startDate: new Date('2026-09-01T05:00:00Z'), endDate: new Date('2026-11-27T05:00:00Z') },
+    ];
+    const metric = (maximum: number, minimumApproval: number) => ({
+      gradeMetric: { maximum, minimumApproval, minimumExcellence: maximum * 0.9 },
+    });
+    const score = (studentId: string, courseId: string, periodId: string, value: number, weight = 1) => ({
+      studentId,
+      score: value,
+      grade: { courseId, periodId, bucket: { weight } },
+    });
+    const people = [
+      { id: 'st-low', firstName: 'Diego', fatherName: 'Herrera', classGroup: { id: 'cg-7a', name: '7°A' } },
+      { id: 'st-drop', firstName: 'Andrés', fatherName: 'Castillo', classGroup: { id: 'cg-7a', name: '7°A' } },
+      { id: 'st-abs', firstName: 'Isabella', fatherName: 'Mora', classGroup: { id: 'cg-7b', name: '7°B' } },
+    ];
+
+    it('flags low averages against the study plan pass mark, drops, absences and lateness', async () => {
+      const { service, prisma } = build({
+        periods: PERIODS,
+        courses: [{ id: 'c-math', name: 'Matemáticas', studyPlan: metric(5, 3) }],
+        scores: [
+          // 2.0 × weight 3 + 3.6 × weight 1 → 2.4
+          score('st-low', 'c-math', 'p2', 2, 3),
+          score('st-low', 'c-math', 'p2', 3.6, 1),
+          score('st-drop', 'c-math', 'p1', 4.6),
+          score('st-drop', 'c-math', 'p2', 3.8),
+          score('st-ok', 'c-math', 'p2', 4.5),
+        ],
+        records: [
+          { studentId: 'st-abs', status: AttendanceStatus.ABSENT, _count: { _all: 3 } },
+          { studentId: 'st-abs', status: AttendanceStatus.LATE, _count: { _all: 4 } },
+          { studentId: 'st-ok', status: AttendanceStatus.ABSENT, _count: { _all: 2 } },
+        ],
+        people,
+      });
+
+      const attention = await service.attention(user, SCHOOL);
+
+      expect(prisma.studentGrade.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: {
+            score: { not: null },
+            grade: { published: true, periodId: { in: ['p2', 'p1'] }, courseId: { in: ['c-math'] } },
+            student: {
+              organizationId: ORG,
+              enrollmentStatus: 'ACTIVE',
+              classGroup: RELATED,
+              courses: { some: { id: { in: ['c-math'] } } },
+            },
+          },
+        }),
+      );
+      const math = { id: 'c-math', name: 'Matemáticas' };
+      expect(attention.students).toEqual([
+        {
+          id: 'st-abs',
+          name: 'Isabella Mora',
+          classGroup: { id: 'cg-7b', name: '7°B' },
+          worstAverage: null,
+          reasons: [
+            { kind: 'ABSENCES', course: null, value: 3 },
+            { kind: 'LATE', course: null, value: 4 },
+          ],
+        },
+        {
+          id: 'st-low',
+          name: 'Diego Herrera',
+          classGroup: { id: 'cg-7a', name: '7°A' },
+          worstAverage: 2.4,
+          reasons: [{ kind: 'BELOW_PASS', course: math, value: 2.4 }],
+        },
+        {
+          id: 'st-drop',
+          name: 'Andrés Castillo',
+          classGroup: { id: 'cg-7a', name: '7°A' },
+          worstAverage: 3.8,
+          reasons: [{ kind: 'DROP', course: math, value: 0.8 }],
+        },
+      ]);
+      expect(attention.totalStudents).toBe(3);
+    });
+
+    it('gives no below-pass reason for a course whose plan has no grade metric', async () => {
+      const { service } = build({
+        periods: PERIODS,
+        courses: [{ id: 'c-math', name: 'Matemáticas', studyPlan: { gradeMetric: null } }],
+        scores: [score('st-low', 'c-math', 'p2', 1)],
+        people,
+      });
+
+      expect((await service.attention(user, SCHOOL)).students).toEqual([]);
+    });
+
+    it('shows the average with its scale and counts students below the pass mark', async () => {
+      const { service } = build({
+        periods: PERIODS,
+        courses: [
+          { id: 'c-math', name: 'Matemáticas', _count: { students: 2 }, studyPlan: metric(5, 3) },
+          { id: 'c-alg', name: 'Álgebra', _count: { students: 1 }, studyPlan: metric(5, 3) },
+        ],
+        scores: [score('st-a', 'c-math', 'p2', 2.5), score('st-b', 'c-math', 'p2', 4.5), score('st-b', 'c-alg', 'p2', 4)],
+      });
+
+      expect((await service.summary(user, SCHOOL)).average).toEqual({
+        value: 3.7, // (2.5 + 4.5 + 4) / 3
+        max: 5,
+        studentsBelowPass: 1,
+        coursesWithoutScale: 0,
+      });
+    });
+
+    it('hides the average value when the courses use different scales', async () => {
+      const { service } = build({
+        periods: PERIODS,
+        courses: [
+          { id: 'c-math', name: 'Matemáticas', _count: { students: 1 }, studyPlan: metric(5, 3) },
+          { id: 'c-art', name: 'Arte', _count: { students: 1 }, studyPlan: metric(100, 70) },
+        ],
+        scores: [score('st-a', 'c-math', 'p2', 4), score('st-a', 'c-art', 'p2', 65)],
+      });
+
+      expect((await service.summary(user, SCHOOL)).average).toEqual({
+        value: null,
+        max: null,
+        studentsBelowPass: 1,
+        coursesWithoutScale: 0,
+      });
+    });
+
+    it('has no below-pass count when no course has a scale', async () => {
+      const { service } = build({
+        periods: PERIODS,
+        courses: [{ id: 'c-math', name: 'Matemáticas', _count: { students: 1 } }],
+        scores: [score('st-a', 'c-math', 'p2', 1)],
+      });
+
+      expect((await service.summary(user, SCHOOL)).average).toEqual({
+        value: null,
+        max: null,
+        studentsBelowPass: null,
+        coursesWithoutScale: 1,
+      });
+    });
+  });
+
+  describe('family threads (FR-HOM-001.11, BR-HOM-001.13)', () => {
+    const thread = (id: string, role: string, createdAt: string, opts: { lastReadAt?: string; body?: string } = {}) => ({
+      id,
+      title: `Hilo ${id}`,
+      participants: [{ lastReadAt: opts.lastReadAt ? new Date(opts.lastReadAt) : null }],
+      messages: [
+        {
+          body: opts.body ?? 'Hola profesor',
+          createdAt: new Date(createdAt),
+          sender: { name: `${role} user`, firstName: null, lastName: null, role: { name: role } },
+        },
+      ],
+    });
+
+    it('lists threads whose last message is from a parent, newest first, with unread and stale flags', async () => {
+      const { service, prisma } = build({
+        threads: [
+          thread('old', 'PARENT', '2026-11-13T14:00:00Z', { lastReadAt: '2026-11-14T00:00:00Z' }),
+          thread('mine', 'TEACHER', '2026-11-16T13:00:00Z'),
+          thread('new', 'PARENT', '2026-11-16T12:00:00Z', { body: 'x'.repeat(200) }),
+        ],
+      });
+
+      const { threads } = await service.attention(user, SCHOOL);
+
+      expect(prisma.communicationThread.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: {
+            organizationId: ORG,
+            broadcast: false,
+            deletedAt: null,
+            status: 'ACTIVE',
+            participants: { some: { userId: 'user-1' } },
+          },
+        }),
+      );
+      expect(threads.map((t) => [t.id, t.unread, t.stale])).toEqual([
+        ['new', true, false],
+        ['old', false, true],
+      ]);
+      expect(threads[0].preview).toHaveLength(140);
+      expect(threads[0].senderName).toBe('PARENT user');
+
+      const summary = await service.summary(user, SCHOOL);
+      expect(summary.familyMessages).toEqual({ unanswered: 2, stale: 1 });
     });
   });
 

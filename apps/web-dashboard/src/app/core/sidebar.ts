@@ -1,4 +1,4 @@
-import { Badge, Button, Confirmation } from '#/ui';
+import { Badge, BrandLogo, Button, Confirmation } from '#/ui';
 import { HttpClient } from '@angular/common/http';
 import { afterRenderEffect, Component, computed, EnvironmentInjector, inject } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
@@ -7,7 +7,6 @@ import { forkJoin, map, of, switchMap, timer } from 'rxjs';
 import Auth from '../auth/auth';
 import Store, { CurrentSchool } from './store';
 import { ThemeService } from './theme.service';
-import { BrandLogo } from '../shared/brand-logo';
 
 type SidebarSchool = {
   id: string;
@@ -24,7 +23,7 @@ type SidebarSchool = {
   template: `<div class="flex flex-col h-full">
     <div class="flex items-center justify-between px-4 py-5 shrink-0">
       <h1 class="text-xl font-semibold text-primary flex items-center gap-2">
-        <app-brand-logo class="h-8" />
+        <ui-brand-logo class="h-8" />
       </h1>
     </div>
     <!-- School selector -->

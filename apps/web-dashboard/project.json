@@ -19,6 +19,16 @@
           {
             "glob": "**/*",
             "input": "apps/web-dashboard/public"
+          },
+          {
+            "glob": "**/*",
+            "input": "libs/ui/src/assets/brand",
+            "output": "brand"
+          },
+          {
+            "glob": "favicon.ico",
+            "input": "libs/ui/src/assets/brand",
+            "output": "."
           }
         ],
         "styles": ["apps/web-dashboard/src/styles.css"],

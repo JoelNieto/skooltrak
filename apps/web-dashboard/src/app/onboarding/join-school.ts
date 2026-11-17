@@ -1,8 +1,7 @@
-import { Button, Card, CardBody, Loader, Toast, UiInput } from '#/ui';
+import { BrandLogo, Button, Card, CardBody, Loader, Toast, UiInput } from '#/ui';
 import { HttpClient } from '@angular/common/http';
 import { Component, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
-import { BrandLogo } from '../shared/brand-logo';
 
 type AvailableSchool = {
   id: string;
@@ -18,7 +17,7 @@ type AvailableSchool = {
   template: `
     <div class="min-h-screen flex flex-col gradient-bg">
       <header class="p-4 md:p-6 flex items-center justify-between">
-        <app-brand-logo class="h-8 md:h-10" />
+        <ui-brand-logo class="h-8 md:h-10" />
       </header>
 
       <main class="flex-1 flex flex-col items-center p-6 overflow-y-auto">

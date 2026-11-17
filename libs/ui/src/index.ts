@@ -1,5 +1,6 @@
 export * from './lib/ui/components/alert';
 export * from './lib/ui/components/badge';
+export * from './lib/ui/components/brand-logo';
 export * from './lib/ui/components/breadcrumbs';
 export * from './lib/ui/components/button';
 export * from './lib/ui/components/card';

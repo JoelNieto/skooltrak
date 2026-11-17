@@ -18,7 +18,13 @@
         "assets": [
           {
             "glob": "**/*",
-            "input": "apps/web-admin/public"
+            "input": "libs/ui/src/assets/brand",
+            "output": "brand"
+          },
+          {
+            "glob": "favicon.ico",
+            "input": "libs/ui/src/assets/brand",
+            "output": "."
           }
         ],
         "styles": ["apps/web-admin/src/styles.css"],

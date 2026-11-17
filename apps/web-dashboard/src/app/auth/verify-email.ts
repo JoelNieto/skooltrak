@@ -1,10 +1,9 @@
-import { Button, Loader, Toast } from '#/ui';
+import { BrandLogo, Button, Loader, Toast } from '#/ui';
 import { HttpClient } from '@angular/common/http';
 import { afterRenderEffect, Component, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import Auth from './auth';
-import { BrandLogo } from '../shared/brand-logo';
 
 @Component({
   selector: 'app-verify-email',
@@ -13,7 +12,7 @@ import { BrandLogo } from '../shared/brand-logo';
     <div class="min-h-screen flex flex-col gradient-bg">
       <!-- Fixed Header -->
       <header class="p-4 md:p-6 flex items-center justify-between">
-        <app-brand-logo class="h-8 md:h-10" />
+        <ui-brand-logo class="h-8 md:h-10" />
       </header>
 
       <!-- Content -->

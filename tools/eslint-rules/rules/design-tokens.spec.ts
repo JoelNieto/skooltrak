@@ -18,7 +18,7 @@ ruleTester.run(RULE_NAME, rule, {
     `<p class="text-error bg-success/10 text-primary-content bg-neutral text-neutral-content">x</p>`,
     // white text on a user's avatar colour, scrims over photos
     `<div class="text-white" [style.background]="color"></div>`,
-    `<div class="bg-black/40 from-black/60 bg-white/10 border-white/20"></div>`,
+    `<div class="bg-black/40 bg-white/10 border-white/20"></div>`,
     // Tailwind table layout utilities are not DaisyUI's table
     `<div class="table-fixed table-auto"></div>`,
     // dynamic class expressions: only literals are checked
@@ -43,6 +43,15 @@ ruleTester.run(RULE_NAME, rule, {
     { code: `<div class="bg-white"></div>`, errors: [{ messageId: 'paletteColour' }] },
     { code: `<div class="bg-[#3b82f6]"></div>`, errors: [{ messageId: 'arbitraryColour' }] },
     { code: `<div class="text-ink dark:text-white"></div>`, errors: [{ messageId: 'darkVariant' }] },
+    {
+      code: `<div class="bg-linear-to-r from-primary/10 via-primary/5 to-transparent"></div>`,
+      errors: [
+        { messageId: 'gradient' },
+        { messageId: 'gradient' },
+        { messageId: 'gradient' },
+        { messageId: 'gradient' },
+      ],
+    },
     // bound class sources
     { code: `<tr [class.bg-base-200]="unread"></tr>`, errors: [{ messageId: 'baseColour' }] },
     {

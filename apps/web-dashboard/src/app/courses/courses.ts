@@ -68,12 +68,7 @@ type CourseRow = {
         @for (course of courses(); track course.id) {
           <a uiCard [routerLink]="['/courses', course.id]" class="group overflow-hidden">
             <figure class="relative overflow-hidden">
-              <img
-                src="course-default.jpg"
-                alt="Course"
-                class="h-28 w-full object-cover transition-transform duration-300 group-hover:scale-110"
-              />
-              <div class="absolute inset-0 bg-linear-to-t from-black/60 to-transparent"></div>
+              <img src="course-default.jpg" alt="Course" class="h-28 w-full object-cover" />
               <span uiBadge tone="action" size="sm" class="absolute bottom-2 left-2">
                 {{ course.studyPlan?.name }}
               </span>

@@ -27,6 +27,13 @@ export default [
     },
   },
   {
+    files: ['**/*.ts'],
+    rules: {
+      // Component styles use flat fills (tools/eslint-rules/rules/flat-styles.ts).
+      '@nx/workspace-flat-styles': 'error',
+    },
+  },
+  {
     files: ['**/*.html'],
     rules: {
       // Primitives apply DaisyUI classes here, so only the token checks run (tools/eslint-rules).

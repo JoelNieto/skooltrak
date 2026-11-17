@@ -12,7 +12,7 @@ import Auth from './auth';
   imports: [UiField, UiInput, Button, BrandLogo, FormField, Loader, RouterLink],
   template: `
     @defer {
-      <div class="min-h-screen flex flex-col gradient-bg">
+      <div class="min-h-screen flex flex-col bg-surface-0">
         <!-- Fixed Header -->
         <header class="p-4 md:p-6 flex items-center justify-between">
           <ui-brand-logo class="h-8 md:h-10" />
@@ -294,7 +294,7 @@ import Auth from './auth';
         </footer>
       </div>
     } @placeholder {
-      <div class="min-h-screen flex items-center justify-center gradient-bg">
+      <div class="min-h-screen flex items-center justify-center bg-surface-0">
         <lib-loader />
       </div>
     }

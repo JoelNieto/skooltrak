@@ -16,7 +16,7 @@ type LookupResult = {
   selector: 'app-forgot-password',
   imports: [Alert, UiInput, Button, BrandLogo, FormField, RouterLink, Loader, UiField],
   template: `
-    <div class="gradient-bg min-h-screen flex items-center justify-center p-4">
+    <div class="bg-surface-0 min-h-screen flex items-center justify-center p-4">
       @defer {
         <div class="max-w-md w-full flex flex-col gap-8 items-center">
           <div><ui-brand-logo alt="" class="h-12" /></div>

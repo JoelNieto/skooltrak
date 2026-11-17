@@ -20,7 +20,10 @@ import {
 type AuthUserContext = {
   userId: string;
   organizationId?: string | null;
+  role?: string;
 };
+
+const ADMIN_ROLES = ['ORG_ADMIN', 'ADMIN', 'SYSADMIN'];
 
 @Injectable({ scope: Scope.REQUEST })
 export class AssignmentSubmissionsService {
@@ -385,10 +388,40 @@ export class AssignmentSubmissionsService {
     return { downloadUrl };
   }
 
+  /**
+   * BR-HOM-001.17: the teacher of the assignment's course (or an org admin) marks a submission
+   * reviewed, or clears it. Null `reviewedAt` = "por revisar" on the teacher home.
+   */
+  async setReviewed(submissionId: string, reviewed: boolean) {
+    const { userId, organizationId, role } = this.getUserContext();
+    if (!organizationId) {
+      throw new ForbiddenException('Organization context is required.');
+    }
+
+    const submission = await this.prisma.assignmentSubmission.findFirst({
+      where: { id: submissionId, assignment: { course: { organizationId } } },
+      select: { id: true, assignment: { select: { course: { select: { teacher: { select: { userId: true } } } } } } },
+    });
+    if (!submission) {
+      throw new NotFoundException('Entrega no encontrada');
+    }
+
+    const isAdmin = ADMIN_ROLES.includes((role ?? '').toUpperCase());
+    if (!isAdmin && submission.assignment.course.teacher?.userId !== userId) {
+      throw new ForbiddenException('Solo el docente del curso puede revisar esta entrega');
+    }
+
+    return this.prisma.assignmentSubmission.update({
+      where: { id: submission.id },
+      data: { reviewedAt: reviewed ? new Date() : null },
+      select: { id: true, reviewedAt: true },
+    });
+  }
+
   private getUserContext() {
     const req = this.request;
-    const { userId, organizationId } = req.user as AuthUserContext;
-    return { userId, organizationId };
+    const { userId, organizationId, role } = req.user as AuthUserContext;
+    return { userId, organizationId, role };
   }
 
   private getRequiredConfig(key: string) {

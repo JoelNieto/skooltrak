@@ -136,6 +136,7 @@ Every number is scoped to what that person is responsible for. Pass and excellen
   - Amounts are formatted with `school.currencyCode`.
 - **BR-HOM-001.15**: **Missed attendance.** A schedule slot for today that is not recess, whose start time has passed, and has no `AttendanceSession` for (`courseId`, `classGroupId`, `date = today`).
 - **BR-HOM-001.16**: **Permission-gated sections are omitted.** If a section needs a permission the caller lacks, the API doesn't return it and the UI doesn't draw it. It is not shown as empty.
+- **BR-HOM-001.17**: **Submission review state.** "To review" means `AssignmentSubmission.reviewedAt IS NULL`. Only the teacher of the assignment's course, or an org admin, can mark a submission reviewed or unmark it (`MANAGE_ASSIGNMENTS`; otherwise `403`). A re-submission creates a new row, so it is "to review" again. See [S02](../slices/HOM-001-S02-teacher-pending-week.md).
 
 ## 5. Data
 - Read-only over existing models: `Period`, `ClassGroupWeeklySchedule`, `AttendanceSession` / `AttendanceRecord`, `Course`, `ClassGroup`, `StudyPlan` → `GradeMetric`, `Grade` / `StudentGrade` / `GradeBucket`, `HabitEvaluation` / `StudentHabitEvaluation`, `Assignment` / `AssignmentDate` / `AssignmentSubmission`, `Quiz` / `QuizSchedule` / `QuizSubmission`, `CommunicationThread` / `CommunicationMessage` / `ThreadParticipant` / `MessageDelivery`, `Charge` / `Payment`, `JoinRequest`, `ImportJob`, `StoreOrder`, `Student`, `Parent`, `Teacher`.
@@ -201,6 +202,8 @@ Events / side effects: none. Sections are fetched on page load, with no sockets 
 - [ ] **Q7 — Justifying absences.** The design's parent alert says *"Enviar justificación"*, but no justification flow exists. Keep *"Escribir al docente"* for now (proposed), or plan an ATT feature?
 - [ ] **Q8 — Gap: assignments by school.** `GET /v1/assignments/by-school` (`assignments.controller.ts:24`) has no `@RequirePermissions`, filters only by `schoolId` (no `organizationId`), and doesn't scope to the caller's groups or courses. The current student and teacher homes therefore list every assignment in the school. → candidate slice in a future ACA as-is FRD.
 - [ ] **Q9 — Gap: attendance stats ownership.** `GET /v1/attendance/stats/by-student/:studentId` (`attendance.service.ts:326`) checks neither organization nor ownership. Any `VIEW_ATTENDANCE` holder, including any student or parent, can read any student's stats by id. → candidate slice in a future ATT as-is FRD.
+- [ ] **Q11 — Gap: habit evaluations can't be published.** The API accepts `published` (`habit-evaluations.service.ts:86`), but the only UI always sends `published: false` (`groups/group-habits.ts:342`). FR .8's "habits not published" row is left out of S02 until a publish action exists. That would be an ASM slice. Should it be planned?
+- [ ] **Q12 — Gap: quizzes can't be scheduled.** `QuizSchedule` exists in the schema, but no API or UI creates one, so every quiz would count as "unscheduled". FR .8's quiz row and FR .15 (student quizzes open now) depend on scheduling, an ACA feature. Should it be planned before S04?
 - [ ] **Q10 — Slice order.** Ship teacher first (proposed, because it fixes the school-wide numbers and is used daily), or parent first (largest audience)?
 
 ## 11. Slices
@@ -209,7 +212,7 @@ Each slice replaces its part of the existing home in place. Old widgets that are
 | Slice | Title | FRs | Status |
 |---|---|---|---|
 | [HOM-001-S01](../slices/HOM-001-S01-teacher-my-day.md) | Teacher: "Mi día" with attendance state + scoped attendance KPI (home module foundation, school timezone) | .1 .6 .7 (attendance tile), BR .3 .4 .5 .7 .15 | In review |
-| HOM-001-S02 | Teacher: Pendientes, period-close banner, this week's assignments with progress (adds `Meter`, `AssignmentSubmission.reviewedAt`) | .5 .7 .8 .9, BR .2 | Proposed |
+| [HOM-001-S02](../slices/HOM-001-S02-teacher-pending-week.md) | Teacher: Pendientes, period-close banner, this week's assignments with progress (adds `ui-meter`, `AssignmentSubmission.reviewedAt`) | .5 .7 .8 (partial, Q11 Q12) .9, BR .2 .17 | In review |
 | HOM-001-S03 | Teacher: students needing attention, unanswered family threads, average KPI, grade-distribution placeholder (adds `ChartPlaceholder`, grade thresholds) | .2 .4 .7 .10 .11, BR .1 .11 .13 | Proposed |
 | HOM-001-S04 | Student: now/next, today strip, upcoming/overdue work for own group, quizzes (adds student e2e persona) | .1 .12 .14 .15, BR .8 .12 | Proposed |
 | HOM-001-S05 | Student: KPIs, per-course averages with bands, recent grades, habits, progress placeholder | .2 .13 .16 .17, BR .1 .2 | Proposed |

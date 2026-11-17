@@ -1,8 +1,12 @@
 import { BetterAuthGuard, Perm, PermissionsGuard, RequirePermissions } from '@/auth';
-import { Body, Controller, Delete, Get, Param, Post, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { AssignmentSubmissionsService } from './assignment-submissions.service';
-import { CreateAssignmentSubmissionInput, CreateSubmissionUploadInput } from './dto/create-submission.input';
+import {
+  CreateAssignmentSubmissionInput,
+  CreateSubmissionUploadInput,
+  ReviewSubmissionInput,
+} from './dto/create-submission.input';
 
 @ApiTags('assignment-submissions')
 @ApiBearerAuth()
@@ -31,6 +35,13 @@ export class AssignmentSubmissionsController {
   @ApiOperation({ summary: 'Delete submission' })
   deleteAssignmentSubmission(@Param('submissionId') submissionId: string) {
     return this.assignmentSubmissionsService.deleteSubmission(submissionId);
+  }
+
+  @Patch(':submissionId/review')
+  @RequirePermissions(Perm.MANAGE_ASSIGNMENTS)
+  @ApiOperation({ summary: 'Mark a submission reviewed, or clear it (BR-HOM-001.17)' })
+  reviewAssignmentSubmission(@Param('submissionId') submissionId: string, @Body() input: ReviewSubmissionInput) {
+    return this.assignmentSubmissionsService.setReviewed(submissionId, input.reviewed);
   }
 
   @Get('mine')

@@ -1,9 +1,8 @@
-import { Alert, Badge, Button, Card, CardBody, EmptyState, Modal, PageHeader, Spinner, StatCard } from '#/ui';
+import { Alert, Badge, BadgeTone, Button, Card, CardBody, EmptyState, Meter, Modal, PageHeader, Spinner, StatCard } from '#/ui';
 import { DatePipe } from '@angular/common';
 import { httpResource } from '@angular/common/http';
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { endOfWeek, startOfWeek } from 'date-fns';
 import AttendanceForm from './attendance/attendance-form';
 import { toFetchQueryRecord } from './core/fetch-query-params';
 import Store from './core/store';
@@ -34,18 +33,55 @@ type TeacherToday = {
   pendingAttendance: number;
 };
 
-/** `GET /api/v1/home/teacher/summary` (HOM-001 FR .7). */
+/** `GET /api/v1/home/teacher/summary` (HOM-001 FR .5 .7 .8). */
 type TeacherSummary = {
   weekStart: string;
   weekEnd: string;
   attendance: { rate: number | null; lowestGroup: { id: string; name: string; rate: number } | null };
+  toReview: {
+    submissions: number;
+    assignments: number;
+    oldestSubmittedAt: string | null;
+    top: { assignmentId: string; title: string; courseName: string; count: number } | null;
+  };
+  grades: {
+    periodId: string;
+    emptyCells: number;
+    coursesWithEmptyCells: number;
+    unpublished: number;
+    coursesWithUnpublished: number;
+    totalCourses: number;
+    topCourseId: string | null;
+  } | null;
+  periodClose: { name: string; endDate: string; daysLeft: number } | null;
 };
 
-type AssignmentRow = {
-  id: string;
+type AssignmentType = 'HOMEWORK' | 'EXAM' | 'QUIZ' | 'PROJECT' | 'PAPER' | 'NEW';
+
+/** `GET /api/v1/home/teacher/week` (HOM-001 FR .9). */
+type TeacherWeekItem = {
+  assignmentId: string;
   title: string;
-  date?: string;
-  course: { name: string };
+  type: AssignmentType;
+  requireSubmission: boolean;
+  course: { id: string; name: string };
+  classGroup: { id: string; name: string };
+  dueAt: string;
+  submitted: number;
+  expected: number;
+};
+type TeacherWeek = { timezone: string; weekStart: string; weekEnd: string; items: TeacherWeekItem[] };
+
+type PendingRow = { icon: string; iconClass: string; title: string; detail: string; link: (string | null)[] | string };
+
+/** Labels as in the assignment form. */
+const ASSIGNMENT_TYPES: Record<AssignmentType, { label: string; tone: BadgeTone }> = {
+  NEW: { label: 'Nuevo', tone: 'neutral' },
+  HOMEWORK: { label: 'Tarea', tone: 'info' },
+  EXAM: { label: 'Examen', tone: 'warning' },
+  PROJECT: { label: 'Proyecto', tone: 'action' },
+  QUIZ: { label: 'Quiz', tone: 'neutral' },
+  PAPER: { label: 'Ensayo', tone: 'success' },
 };
 
 type InboxRow = {
@@ -77,6 +113,7 @@ const longDate = new Intl.DateTimeFormat('es', { weekday: 'long', day: 'numeric'
     PageHeader,
     RecentBroadcasts,
     RouterLink,
+    Meter,
     Spinner,
     StatCard,
   ],
@@ -89,7 +126,31 @@ const longDate = new Intl.DateTimeFormat('es', { weekday: 'long', day: 'numeric'
       (action)="takeAttendance(nextPendingSlot()!)"
     />
 
+    @if (summary.value()?.periodClose; as close) {
+      <div uiAlert tone="info" class="mb-4">
+        <span class="material-symbols-outlined" aria-hidden="true">event_upcoming</span>
+        <span class="flex-1">
+          <strong>{{ periodCloseTitle() }}</strong>
+          @if (summary.value()?.grades; as grades) {
+            @if (grades.coursesWithEmptyCells > 0) {
+              · faltan notas en {{ grades.coursesWithEmptyCells }} de tus {{ grades.totalCourses }} cursos.
+            } @else {
+              · tus cursos tienen todas las notas.
+            }
+          }
+        </span>
+        <a routerLink="/courses" class="link font-medium">Ver mis cursos</a>
+      </div>
+    }
+
     <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+      <lib-stat-card
+        label="Entregas por revisar"
+        [value]="toReviewValue()"
+        [helper]="toReviewHelper()"
+        icon="inbox"
+        color="warning"
+      />
       <lib-stat-card
         label="Asistencia de mis grupos"
         [value]="attendanceValue()"
@@ -99,7 +160,8 @@ const longDate = new Intl.DateTimeFormat('es', { weekday: 'long', day: 'numeric'
       />
     </div>
 
-    <section uiCard class="mt-6" aria-labelledby="my-day-title">
+    <div class="mt-6 flex flex-wrap gap-6">
+    <section uiCard class="min-w-0 flex-[999_1_560px]" aria-labelledby="my-day-title">
       <div uiCardBody>
         <h2 id="my-day-title" class="text-base font-semibold text-ink-strong">Mi día</h2>
 
@@ -169,44 +231,97 @@ const longDate = new Intl.DateTimeFormat('es', { weekday: 'long', day: 'numeric'
       </div>
     </section>
 
+    <section uiCard class="min-w-0 flex-[1_1_340px]" aria-labelledby="pending-title">
+      <div uiCardBody>
+        <h2 id="pending-title" class="text-base font-semibold text-ink-strong">Pendientes</h2>
+        @if (summary.isLoading()) {
+          <div class="flex justify-center py-8"><span uiSpinner></span></div>
+        } @else if (summary.error()) {
+          <div uiAlert tone="danger" role="alert" class="mt-2">
+            <span>No se pudieron cargar tus pendientes.</span>
+            <button uiButton variant="ghost" size="sm" type="button" (click)="summary.reload()">Reintentar</button>
+          </div>
+        } @else if (pendingRows().length === 0) {
+          <lib-empty-state title="Todo al día" description="No tienes entregas ni notas pendientes." icon="task_alt" color="success" />
+        } @else {
+          <ul class="mt-1 flex flex-col">
+            @for (row of pendingRows(); track row.title) {
+              <li class="border-t border-line first:border-t-0">
+                <a [routerLink]="row.link" class="flex min-h-11 items-center gap-3 py-2.5 text-ink hover:no-underline">
+                  <span class="material-symbols-outlined flex size-9 shrink-0 items-center justify-center rounded-field" [class]="row.iconClass" aria-hidden="true">{{ row.icon }}</span>
+                  <span class="min-w-0 flex-1">
+                    <span class="block font-medium text-ink-strong">{{ row.title }}</span>
+                    <span class="block text-xs text-ink-muted">{{ row.detail }}</span>
+                  </span>
+                  <span class="material-symbols-outlined text-ink-subtle" aria-hidden="true">chevron_right</span>
+                </a>
+              </li>
+            }
+          </ul>
+        }
+      </div>
+    </section>
+    </div>
+
+    <section uiCard class="mt-6" aria-labelledby="week-title">
+      <div uiCardBody>
+        <div class="flex items-center justify-between">
+          <h2 id="week-title" class="text-base font-semibold text-ink-strong">Asignaciones de la semana</h2>
+          <a routerLink="/assignments" class="link link-primary text-sm">Ver todas</a>
+        </div>
+        @if (week.isLoading()) {
+          <div class="flex justify-center py-8"><span uiSpinner></span></div>
+        } @else if (week.error()) {
+          <div uiAlert tone="danger" role="alert" class="mt-2">
+            <span>No se pudieron cargar las asignaciones de la semana.</span>
+            <button uiButton variant="ghost" size="sm" type="button" (click)="week.reload()">Reintentar</button>
+          </div>
+        } @else if (weekItems().length === 0) {
+          <lib-empty-state
+            title="Sin asignaciones esta semana"
+            description="Las asignaciones de tus cursos con fecha esta semana aparecerán aquí."
+            icon="assignment"
+          />
+        } @else {
+          <ul class="mt-1 flex flex-col">
+            @for (item of weekItems(); track item.assignmentId + item.classGroup.id) {
+              <li class="border-t border-line first:border-t-0">
+                <a
+                  [routerLink]="['/assignments', item.assignmentId]"
+                  class="flex min-h-11 flex-wrap items-center gap-x-4 gap-y-2 py-2.5 text-ink hover:no-underline"
+                >
+                  <span class="min-w-56 flex-[1_1_240px]">
+                    <span class="flex flex-wrap items-center gap-2">
+                      <span uiBadge [tone]="typeOf(item).tone" size="sm">{{ typeOf(item).label }}</span>
+                      <span class="font-medium text-ink-strong">{{ item.title }}</span>
+                    </span>
+                    <span class="mt-0.5 block text-xs text-ink-muted">
+                      {{ item.course.name }} · {{ item.classGroup.name }} · vence {{ dueLabel(item) }}
+                    </span>
+                  </span>
+                  @if (item.requireSubmission) {
+                    <ui-meter
+                      class="flex-[0_1_220px]"
+                      [value]="item.submitted"
+                      [max]="item.expected"
+                      [label]="item.submitted + '/' + item.expected + ' entregaron'"
+                    />
+                  } @else {
+                    <span uiBadge tone="neutral">Sin entrega en línea</span>
+                  }
+                </a>
+              </li>
+            }
+          </ul>
+        }
+      </div>
+    </section>
+
     <div class="mt-6">
       <app-recent-broadcasts />
     </div>
 
-    <div class="mt-6 grid gap-6 lg:grid-cols-2">
-      <div uiCard>
-        <div uiCardBody>
-          <div class="flex items-center justify-between">
-            <h2 class="text-lg font-semibold text-base-content">Asignaciones de la semana</h2>
-            <a routerLink="/assignments" class="link link-primary text-sm"> Ver todas </a>
-          </div>
-          @if (upcomingAssignments().length === 0) {
-            <lib-empty-state
-              title="Sin asignaciones esta semana"
-              description="Cuando se registren nuevas tareas aparecerán aquí."
-              icon="assignment"
-            />
-          } @else {
-            <div class="space-y-3">
-              @for (assignment of upcomingAssignments(); track assignment.id) {
-                <div
-                  class="rounded-lg border border-base-200 cursor-pointer hover:bg-base-100 transition-colors p-3"
-                  [routerLink]="['/assignments', assignment.id]"
-                >
-                  <p class="font-medium text-base-content">
-                    {{ assignment.title }}
-                  </p>
-                  <div class="text-sm text-base-content/70">
-                    {{ assignment.course.name }} ·
-                    {{ assignment.date | date: 'mediumDate' }}
-                  </div>
-                </div>
-              }
-            </div>
-          }
-        </div>
-      </div>
-
+    <div class="mt-6">
       <div uiCard>
         <div uiCardBody>
           <div class="flex items-center justify-between">
@@ -290,6 +405,15 @@ export default class TeacherHome {
     return { url: '/api/v1/home/teacher/summary', params: { schoolId } };
   });
 
+  // ── HOM-001-S02: Pendientes, period banner, this week's assignments ──────
+  public week = httpResource<TeacherWeek>(() => {
+    const schoolId = this.#store.currentSchoolId();
+    if (!schoolId) return undefined;
+    return { url: '/api/v1/home/teacher/week', params: { schoolId } };
+  });
+
+  public weekItems = computed(() => this.week.value()?.items ?? []);
+
   public slots = computed(() => this.today.value()?.slots ?? []);
 
   /** The class to take attendance for from the header: the current one, else the earliest missed one. */
@@ -336,6 +460,77 @@ export default class TeacherHome {
     return lowest ? `Esta semana · ${lowest.name} es el más bajo (${percent.format(lowest.rate)})` : 'Esta semana';
   });
 
+  public periodCloseTitle = computed(() => {
+    const close = this.summary.value()?.periodClose;
+    if (!close) return '';
+    if (close.daysLeft === 0) return `Hoy cierra el ${close.name}`;
+    return `Cierre del ${close.name} en ${close.daysLeft} ${close.daysLeft === 1 ? 'día' : 'días'}`;
+  });
+
+  public toReviewValue = computed(() => {
+    if (this.summary.isLoading()) return '…';
+    return String(this.summary.value()?.toReview.submissions ?? '—');
+  });
+
+  public toReviewHelper = computed(() => {
+    if (this.summary.error()) return 'No se pudo cargar';
+    const review = this.summary.value()?.toReview;
+    if (!review || review.submissions === 0) return 'Nada por revisar';
+    const parts = [review.assignments === 1 ? 'De 1 asignación' : `De ${review.assignments} asignaciones`];
+    if (review.oldestSubmittedAt) {
+      const days = Math.floor((Date.now() - new Date(review.oldestSubmittedAt).getTime()) / 86_400_000);
+      parts.push(days <= 0 ? 'la más antigua es de hoy' : `la más antigua hace ${days} ${days === 1 ? 'día' : 'días'}`);
+    }
+    return parts.join(' · ');
+  });
+
+  /** FR-HOM-001.8 rows with a non-zero count, each linking to where it is resolved. */
+  public pendingRows = computed<PendingRow[]>(() => {
+    const summary = this.summary.value();
+    if (!summary) return [];
+    const rows: PendingRow[] = [];
+    const { toReview, grades } = summary;
+    if (toReview.submissions > 0) {
+      rows.push({
+        icon: 'assignment_turned_in',
+        iconClass: 'bg-warning/15 text-warning',
+        title: `Revisar ${plural(toReview.submissions, 'entrega', 'entregas')}`,
+        detail: toReview.top ? `${toReview.top.title} (${toReview.top.courseName}) · ${toReview.top.count} por revisar` : '',
+        link: toReview.top ? ['/assignments', toReview.top.assignmentId] : '/assignments',
+      });
+    }
+    if (grades && grades.emptyCells > 0) {
+      rows.push({
+        icon: 'edit_note',
+        iconClass: 'bg-error/15 text-error',
+        title: `Completar notas en ${plural(grades.coursesWithEmptyCells, 'curso', 'cursos')}`,
+        detail: `${plural(grades.emptyCells, 'casilla vacía', 'casillas vacías')} en el periodo`,
+        link: grades.topCourseId ? ['/courses', grades.topCourseId] : '/courses',
+      });
+    }
+    if (grades && grades.unpublished > 0) {
+      rows.push({
+        icon: 'publish',
+        iconClass: 'bg-primary/15 text-primary',
+        title: `Publicar ${plural(grades.unpublished, 'calificación', 'calificaciones')}`,
+        detail: `En ${plural(grades.coursesWithUnpublished, 'curso', 'cursos')}`,
+        link: grades.topCourseId ? ['/courses', grades.topCourseId] : '/courses',
+      });
+    }
+    return rows;
+  });
+
+  typeOf(item: TeacherWeekItem) {
+    return ASSIGNMENT_TYPES[item.type] ?? ASSIGNMENT_TYPES.NEW;
+  }
+
+  dueLabel(item: TeacherWeekItem): string {
+    const timeZone = this.week.value()?.timezone ?? 'UTC';
+    return new Intl.DateTimeFormat('es', { weekday: 'short', day: 'numeric', month: 'short', timeZone }).format(
+      new Date(item.dueAt),
+    );
+  }
+
   slotClass(slot: TeacherSlot): string {
     if (slot.state === 'NOW') return 'border-primary bg-primary/5';
     if (slot.recess) return 'border-line bg-surface-2';
@@ -360,29 +555,10 @@ export default class TeacherHome {
         this.today.reload();
         this.summary.reload();
       });
+
   }
 
-  // ── Pre-HOM sections, replaced in HOM-001-S02 / S03 ───────────────────────
-  private currentDate = signal(new Date());
-  private startDate = computed(() => startOfWeek(this.currentDate(), { weekStartsOn: 1 }));
-  private endDate = computed(() => endOfWeek(this.currentDate(), { weekStartsOn: 1 }));
-
-  public assignmentsResource = httpResource<AssignmentRow[]>(
-    () => {
-      const schoolId = this.#store.currentSchoolId();
-      if (!schoolId) return undefined;
-      return {
-        url: '/api/v1/assignments/by-school',
-        params: {
-          schoolId,
-          startDate: this.startDate().toISOString(),
-          endDate: this.endDate().toISOString(),
-        },
-      };
-    },
-    { defaultValue: [] },
-  );
-
+  // ── Pre-HOM sections, replaced in HOM-001-S03 ─────────────────────────────
   public recentMessages = httpResource<InboxRow[]>(
     () => ({
       url: '/api/v1/messages',
@@ -409,12 +585,10 @@ export default class TeacherHome {
     return div.textContent?.trim() ?? '';
   }
 
-  public upcomingAssignments = computed(() => {
-    const assignments = this.assignmentsResource.value() ?? [];
-    return [...assignments]
-      .sort((a, b) => new Date(a.date ?? 0).getTime() - new Date(b.date ?? 0).getTime())
-      .slice(0, 4);
-  });
+}
+
+function plural(n: number, one: string, many: string) {
+  return `${n} ${n === 1 ? one : many}`;
 }
 
 function capitalize(text: string) {

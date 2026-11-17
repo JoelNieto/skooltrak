@@ -50,6 +50,7 @@ async function seedFixtures(databaseUrl: string) {
         email: 'colegio@skooltrak.test',
         phone: '000-0000',
         website: 'https://skooltrak.test',
+        currentYear: new Date().getFullYear(),
       },
     });
 
@@ -154,8 +155,9 @@ async function seedFixtures(databaseUrl: string) {
     });
 
     // HOM-001-S01: students to take attendance for, and slots on every weekday.
+    const relatedStudentIds: string[] = [];
     for (const [i, firstName] of data.relatedStudents.entries()) {
-      await prisma.student.create({
+      const student = await prisma.student.create({
         data: {
           firstName,
           middleName: '',
@@ -172,6 +174,7 @@ async function seedFixtures(databaseUrl: string) {
           courses: { connect: { id: teacherCourse.id } },
         },
       });
+      relatedStudentIds.push(student.id);
     }
     const weekdays = ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY'] as const;
     await prisma.classGroupWeeklySchedule.createMany({
@@ -186,6 +189,60 @@ async function seedFixtures(databaseUrl: string) {
           ...data.schedule.early,
         },
       ]),
+    });
+
+    // HOM-001-S02: a current period closing soon, an incomplete unpublished grade, and a submission to review.
+    const day = 86_400_000;
+    const now = Date.now();
+    const period = await prisma.period.create({
+      data: {
+        name: data.period.name,
+        shortName: 'PE2E',
+        year: new Date().getFullYear(),
+        startDate: new Date(now - 30 * day),
+        endDate: new Date(now + data.period.closesInDays * day),
+      },
+    });
+    const bucket = await prisma.gradeBucket.create({
+      data: { name: data.grade.bucket, weight: 100, courseId: teacherCourse.id },
+    });
+    const grade = await prisma.grade.create({
+      data: {
+        title: data.grade.title,
+        courseId: teacherCourse.id,
+        bucketId: bucket.id,
+        periodId: period.id,
+        date: new Date(now - day),
+        published: false,
+      },
+    });
+    await prisma.studentGrade.create({ data: { gradeId: grade.id, studentId: relatedStudentIds[0], score: 4.5 } });
+
+    const assignment = await prisma.assignment.create({
+      data: {
+        title: data.assignment.title,
+        details: 'Entrega de prueba',
+        type: 'PROJECT',
+        date: new Date(now),
+        requireSubmission: true,
+        schoolId: school.id,
+        courseId: teacherCourse.id,
+        teacherId: users.teacher.teacherId,
+        dates: { create: { classGroupId: relatedGroup.id, date: new Date(now) } },
+      },
+    });
+    const file = await prisma.file.create({
+      data: {
+        organizationId: org.id,
+        ownerId: users.admin.userId,
+        name: 'proyecto.pdf',
+        mimeType: 'application/pdf',
+        size: 1024,
+        storageKey: 'e2e/proyecto.pdf',
+      },
+    });
+    await prisma.assignmentSubmission.create({
+      data: { assignmentId: assignment.id, studentId: relatedStudentIds[0], fileId: file.id },
     });
 
     console.log(`✓ Seeded e2e fixtures (org ${org.id})`);

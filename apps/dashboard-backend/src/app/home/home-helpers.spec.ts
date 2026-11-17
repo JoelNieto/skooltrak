@@ -1,7 +1,7 @@
 import { AttendanceStatus, WeekDay } from '@generated/prisma';
 import { attendanceRate } from './home-attendance';
 import { pickCurrentPeriod } from './home-period';
-import { schoolLocalTime } from './home-time';
+import { daysBetween, localMidnight, schoolLocalTime } from './home-time';
 
 describe('HOM-001 helpers', () => {
   describe('schoolLocalTime (BR-HOM-001.4)', () => {
@@ -35,6 +35,26 @@ describe('HOM-001 helpers', () => {
 
       expect(local.timezone).toBe('UTC');
       expect(local.date).toBe('2026-11-17');
+    });
+  });
+
+  describe('localMidnight', () => {
+    it('is the UTC instant a school-local day starts', () => {
+      expect(localMidnight('2026-11-16', 'America/Panama')).toEqual(new Date('2026-11-16T05:00:00Z'));
+      expect(localMidnight('2026-11-16', 'Asia/Tokyo')).toEqual(new Date('2026-11-15T15:00:00Z'));
+      expect(localMidnight('2026-11-16', 'UTC')).toEqual(new Date('2026-11-16T00:00:00Z'));
+    });
+
+    it('falls back to UTC for an unknown timezone', () => {
+      expect(localMidnight('2026-11-16', 'Mars/Olympus')).toEqual(new Date('2026-11-16T00:00:00Z'));
+    });
+  });
+
+  describe('daysBetween', () => {
+    it('counts whole days, negative backwards', () => {
+      expect(daysBetween('2026-11-16', '2026-11-27')).toBe(11);
+      expect(daysBetween('2026-11-16', '2026-11-16')).toBe(0);
+      expect(daysBetween('2026-11-16', '2026-11-10')).toBe(-6);
     });
   });
 

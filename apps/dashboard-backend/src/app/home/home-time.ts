@@ -83,3 +83,31 @@ export function schoolLocalTime(now: Date, timezone: string | null | undefined):
     weekEnd: addDays(weekStart, 6),
   };
 }
+
+/**
+ * The UTC instant at which `date` (`YYYY-MM-DD`) starts on the school's wall clock, for range
+ * filters on `DateTime` columns such as `AssignmentDate.date`. An unknown timezone falls back to UTC.
+ */
+export function localMidnight(date: string, timezone: string | null | undefined): Date {
+  const tz = isValidTimezone(timezone) ? timezone : FALLBACK_TIMEZONE;
+  const guess = utcDate(date);
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone: tz,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hourCycle: 'h23',
+  }).formatToParts(guess);
+  const n = (type: Intl.DateTimeFormatPartTypes) => Number(parts.find((p) => p.type === type)?.value ?? 0);
+  const wallClockAsUtc = Date.UTC(n('year'), n('month') - 1, n('day'), n('hour'), n('minute'), n('second'));
+  const offset = wallClockAsUtc - guess.getTime();
+  return new Date(guess.getTime() - offset);
+}
+
+/** Whole days from `from` to `to` (both `YYYY-MM-DD`); negative when `to` is earlier. */
+export function daysBetween(from: string, to: string): number {
+  return Math.round((utcDate(to).getTime() - utcDate(from).getTime()) / 86_400_000);
+}

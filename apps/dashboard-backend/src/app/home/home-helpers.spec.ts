@@ -1,6 +1,6 @@
 import { AttendanceStatus, WeekDay } from '@generated/prisma';
 import { attendanceRate } from './home-attendance';
-import { averageKey, weightedAverages } from './home-grades';
+import { averageKey, gradeBand, weightedAverages } from './home-grades';
 import { pickCurrentPeriod, pickPreviousPeriod } from './home-period';
 import { daysBetween, localMidnight, schoolLocalTime } from './home-time';
 
@@ -115,6 +115,24 @@ describe('HOM-001 helpers', () => {
       expect(avgs.has(averageKey('s', 'c', 'p'))).toBe(false);
       expect(avgs.get(averageKey('s', 'c2', 'p'))).toBe(4);
       expect(avgs.get(averageKey('s', 'c2', 'p0'))).toBe(3);
+    });
+  });
+
+  describe('gradeBand (BR-HOM-001.1)', () => {
+    const scale = { maximum: 5, minimumApproval: 3, minimumExcellence: 4.5 };
+
+    it.each([
+      [4.5, 'EXCELLENT'],
+      [4.49, 'PASSING'],
+      [3, 'PASSING'],
+      [2.99, 'BELOW'],
+    ])('%s → %s', (score, band) => {
+      expect(gradeBand(score, scale)).toBe(band);
+    });
+
+    it('has no band without a score or a scale', () => {
+      expect(gradeBand(null, scale)).toBeNull();
+      expect(gradeBand(4, null)).toBeNull();
     });
   });
 

@@ -1,4 +1,15 @@
-import { Badge, Breadcrumbs, Button, Error, Icon, Loader, UiTable } from '#/ui';
+import {
+  Badge,
+  Breadcrumbs,
+  Button,
+  Card,
+  Icon,
+  UiTable,
+  UiTableEmpty,
+  UiTableError,
+  UiTableSkeleton,
+  listState,
+} from '#/ui';
 import { DatePipe } from '@angular/common';
 import { Component, Pipe, PipeTransform, computed, inject, signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
@@ -23,17 +34,30 @@ export class StripHtmlPipe implements PipeTransform {
 
 @Component({
   selector: 'app-assignments',
-  imports: [Breadcrumbs, UiTable, Badge, Button, RouterLink, DatePipe, StripHtmlPipe, Error, Loader, Icon],
+  imports: [
+    Breadcrumbs,
+    Card,
+    UiTable,
+    UiTableEmpty,
+    UiTableError,
+    UiTableSkeleton,
+    Badge,
+    Button,
+    RouterLink,
+    DatePipe,
+    StripHtmlPipe,
+    Icon,
+  ],
 
   template: `<ui-breadcrumbs [items]="[{ label: 'Inicio', link: '/' }, { label: 'Asignaciones' }]" />
     <h1 class="text-2xl font-semibold mb-2">Asignaciones</h1>
     <div class="flex items-center gap-2 justify-between px-8">
       <div class="flex items-center gap-2 flex-1">
-        <button uiButton iconOnly (click)="previousWeek()">
+        <button uiButton iconOnly aria-label="Semana anterior" (click)="previousWeek()">
           <ui-icon name="chevron-left" />
         </button>
 
-        <button uiButton iconOnly (click)="nextWeek()">
+        <button uiButton iconOnly aria-label="Semana siguiente" (click)="nextWeek()">
           <ui-icon name="chevron-right" />
         </button>
       </div>
@@ -42,62 +66,66 @@ export class StripHtmlPipe implements PipeTransform {
         <button uiButton (click)="today()"><ui-icon name="calendar-check" /> Hoy</button>
       </div>
     </div>
-    <div class="overflow-x-auto bg-surface-1 rounded-lg mt-4">
-      @if (assignmentDatesResource.hasValue()) {
-        @let list = assignmentDatesResource.value()!;
-        <table uiTable>
-          <thead>
-            <tr>
-              <th>Título</th>
-              <th>Detalles</th>
-              <th>Fecha de entrega</th>
-              @if (!isStudent()) {
-                <th>Grupo</th>
-              }
-              <th>Curso</th>
-              <th>Profesor</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (item of list; track item.id) {
-              <tr>
-                <td>
-                  <a [routerLink]="['/assignments', item.assignment.id]" class="link link-primary">{{
-                    item.assignment.title
-                  }}</a>
-                </td>
-                <td class="max-w-[24rem] truncate">
-                  {{ item.assignment.details | stripHtml }}
-                </td>
-                <td>{{ item.date | date: 'medium' }}</td>
-                @if (!isStudent()) {
-                  <td>
-                    <span uiBadge>{{ item.classGroup.name }}</span>
-                  </td>
-                }
-                <td>{{ item.assignment.course.name }}</td>
-                <td>
-                  {{ item.assignment.teacher.firstName }}
-                  {{ item.assignment.teacher.fatherName }}
-                </td>
-                <td></td>
-              </tr>
-            } @empty {
-              <tr>
-                <td [attr.colspan]="isStudent() ? 6 : 7" class="text-center">No hay asignaciones para esta semana</td>
-              </tr>
+    <div uiCard class="overflow-x-auto mt-4">
+      <table uiTable [attr.aria-busy]="assignmentDatesResource.isLoading()">
+        <thead>
+          <tr>
+            <th>Título</th>
+            <th>Detalles</th>
+            <th>Fecha de entrega</th>
+            @if (!isStudent()) {
+              <th>Grupo</th>
             }
-          </tbody>
-        </table>
-      } @else if (assignmentDatesResource.error()) {
-        <lib-error
-          (retry)="assignmentDatesResource.reload()"
-          [description]="$safeNavigationMigration(assignmentDatesResource.error()?.message)"
-        />
-      } @else {
-        <lib-loader />
-      }
+            <th>Curso</th>
+            <th>Profesor</th>
+          </tr>
+        </thead>
+        @switch (assignmentsList.phase()) {
+          @case ('skeleton') {
+            <tbody uiTableSkeleton [columns]="columns()"></tbody>
+          }
+          @case ('error') {
+            <tbody>
+              <tr uiTableError [columns]="columns()" (retry)="assignmentDatesResource.reload()"></tr>
+            </tbody>
+          }
+          @case ('ready') {
+            <tbody>
+              @for (item of assignmentsList.rows() ?? []; track item.id) {
+                <tr>
+                  <td>
+                    <a [routerLink]="['/assignments', item.assignment.id]" class="link link-primary">{{
+                      item.assignment.title
+                    }}</a>
+                  </td>
+                  <td class="max-w-[24rem] truncate">
+                    {{ item.assignment.details | stripHtml }}
+                  </td>
+                  <td>{{ item.date | date: 'medium' }}</td>
+                  @if (!isStudent()) {
+                    <td>
+                      <span uiBadge>{{ item.classGroup.name }}</span>
+                    </td>
+                  }
+                  <td>{{ item.assignment.course.name }}</td>
+                  <td>
+                    {{ item.assignment.teacher.firstName }}
+                    {{ item.assignment.teacher.fatherName }}
+                  </td>
+                </tr>
+              } @empty {
+                <tr
+                  uiTableEmpty
+                  [columns]="columns()"
+                  icon="calendar-x"
+                  title="No hay asignaciones esta semana"
+                  description="Usa las flechas para ver otras semanas."
+                ></tr>
+              }
+            </tbody>
+          }
+        }
+      </table>
     </div>`,
 })
 export default class Assignments {
@@ -106,6 +134,8 @@ export default class Assignments {
   private auth = inject(Auth);
 
   public isStudent = this.auth.isStudent;
+  /** Students don't see the group column. */
+  protected readonly columns = computed(() => (this.isStudent() ? 5 : 6));
   public currentDate = signal(new Date());
   public startDate = computed(() => startOfWeek(this.currentDate(), { weekStartsOn: 1 }));
   public endDate = computed(() => endOfWeek(this.currentDate(), { weekStartsOn: 1 }));
@@ -166,4 +196,6 @@ export default class Assignments {
         );
     },
   });
+  /** assignments with smooth loading: this week's rows stay while the next week loads. */
+  protected readonly assignmentsList = listState(this.assignmentDatesResource);
 }

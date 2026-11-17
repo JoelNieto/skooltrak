@@ -210,7 +210,7 @@ export default class Students {
     url: '/api/v1/students',
     params: toFetchQueryRecord({
       page: this.page(),
-      take: this.pageSize(),
+      pageSize: this.pageSize(),
       search: this.searchText(),
       orderBy: this.pagination.sortBy(),
       orderDirection: this.pagination.sortOrder(),

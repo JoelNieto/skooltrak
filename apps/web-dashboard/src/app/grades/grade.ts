@@ -97,7 +97,7 @@ type GradeDetail = {
               {{ grade.bucket?.name }}
             </div>
 
-            <lib-editor-viewer [innerHTML]="grade.comments" />
+            <lib-editor-viewer class="type-body" [innerHTML]="grade.comments" />
           </div>
         </div>
         <div uiCard class="mt-4">

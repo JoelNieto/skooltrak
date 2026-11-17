@@ -90,7 +90,7 @@ type AssignmentDetail = {
         <div uiCard class="mt-4">
           <div uiCardBody>
             <h3 uiCardTitle>Detalles</h3>
-            <lib-editor-viewer [innerHTML]="assignment.details" />
+            <lib-editor-viewer class="type-body" [innerHTML]="assignment.details" />
           </div>
         </div>
 

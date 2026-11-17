@@ -1,5 +1,16 @@
-import { Badge, Breadcrumbs, Button, Card, CardBody, Loader } from '#/ui';
-import { Tab, TabContent, TabList, TabPanel, Tabs } from '@angular/aria/tabs';
+import {
+  Badge,
+  Breadcrumbs,
+  Button,
+  Card,
+  CardBody,
+  Loader,
+  UiTab,
+  UiTabContent,
+  UiTabList,
+  UiTabPanel,
+  UiTabs,
+} from '#/ui';
 import { DatePipe } from '@angular/common';
 import { httpResource } from '@angular/common/http';
 import { Component, input } from '@angular/core';
@@ -35,11 +46,11 @@ type SchoolDetail = {
     RouterLink,
     Loader,
     DatePipe,
-    TabList,
-    Tab,
-    Tabs,
-    TabPanel,
-    TabContent,
+    UiTabList,
+    UiTab,
+    UiTabs,
+    UiTabPanel,
+    UiTabContent,
   ],
   template: `
     @if (schoolResource.isLoading()) {
@@ -91,18 +102,18 @@ type SchoolDetail = {
         </div>
 
         <!-- Tabs -->
-        <div ngTabs>
+        <div uiTabs>
           <div class="flex justify-between items-center mt-4 px-1">
-            <div ngTabList selectionMode="follow" selectedTab="info" class="tabs tabs-box">
-              <div ngTab value="info" class="tab">Información General</div>
-              <div ngTab value="contact" class="tab">Contacto</div>
-              <div ngTab value="location" class="tab">Ubicación</div>
+            <div uiTabList selectedTab="info" aria-label="Secciones del colegio">
+              <button uiTab value="info">Información General</button>
+              <button uiTab value="contact">Contacto</button>
+              <button uiTab value="location">Ubicación</button>
             </div>
           </div>
           <div class="p-1">
             <!-- Info Tab -->
-            <div ngTabPanel value="info">
-              <ng-template ngTabContent>
+            <div uiTabPanel value="info">
+              <ng-template uiTabContent>
                 <div class="bg-surface-1 border-line p-4 rounded-lg">
                   <div class="px-4 sm:px-0">
                     <h3 class="text-base/7 font-semibold">Información General</h3>
@@ -147,8 +158,8 @@ type SchoolDetail = {
             </div>
 
             <!-- Contact Tab -->
-            <div ngTabPanel value="contact">
-              <ng-template ngTabContent>
+            <div uiTabPanel value="contact">
+              <ng-template uiTabContent>
                 <div class="bg-surface-1 border-line p-4 rounded-lg">
                   <div class="px-4 sm:px-0">
                     <h3 class="text-base/7 font-semibold">Información de Contacto</h3>
@@ -201,8 +212,8 @@ type SchoolDetail = {
             </div>
 
             <!-- Location Tab -->
-            <div ngTabPanel value="location">
-              <ng-template ngTabContent>
+            <div uiTabPanel value="location">
+              <ng-template uiTabContent>
                 <div class="bg-surface-1 border-line p-4 rounded-lg">
                   <div class="px-4 sm:px-0">
                     <h3 class="text-base/7 font-semibold">Ubicación</h3>

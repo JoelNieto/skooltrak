@@ -14,10 +14,14 @@ import {
   UiField,
   UiInput,
   UiSelect,
+  UiTab,
+  UiTabContent,
+  UiTabList,
+  UiTabPanel,
   UiTable,
+  UiTabs,
   UiToggle,
 } from '#/ui';
-import { Tab, TabContent, TabList, TabPanel, Tabs } from '@angular/aria/tabs';
 import { DatePipe } from '@angular/common';
 import { httpResource } from '@angular/common/http';
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
@@ -62,11 +66,11 @@ const ACTION_LABELS: Record<string, string> = {
     FormField,
     PageHeader,
     EmptyState,
-    TabList,
-    Tab,
-    Tabs,
-    TabPanel,
-    TabContent,
+    UiTabs,
+    UiTabList,
+    UiTab,
+    UiTabPanel,
+    UiTabContent,
   ],
   template: `
     <lib-page-header
@@ -77,18 +81,18 @@ const ACTION_LABELS: Record<string, string> = {
       (action)="openComposer()"
     />
 
-    <div ngTabs>
+    <div uiTabs>
       <div class="flex flex-wrap items-center justify-between gap-3 mt-2">
-        <div ngTabList selectionMode="follow" [(selectedTab)]="selectedTab" class="tabs tabs-box">
-          <div ngTab value="pending" class="tab gap-2" [class.tab-active]="selectedTab() === 'pending'">
+        <div uiTabList [(selectedTab)]="selectedTab" aria-label="Comunicados">
+          <button uiTab value="pending">
             Pendientes de aprobación
             @if (pending().length > 0) {
               <span uiBadge tone="warning" size="sm">{{ pending().length }}</span>
             }
-          </div>
-          <div ngTab value="sent" class="tab" [class.tab-active]="selectedTab() === 'sent'">Mensajes enviados</div>
-          <div ngTab value="audit" class="tab" [class.tab-active]="selectedTab() === 'audit'">Auditoría</div>
-          <div ngTab value="settings" class="tab" [class.tab-active]="selectedTab() === 'settings'">Ajustes</div>
+          </button>
+          <button uiTab value="sent">Mensajes enviados</button>
+          <button uiTab value="audit">Auditoría</button>
+          <button uiTab value="settings">Ajustes</button>
         </div>
         <button uiButton variant="ghost" size="sm" type="button" (click)="reload()">
           <span class="material-symbols-outlined text-base">refresh</span>
@@ -97,8 +101,8 @@ const ACTION_LABELS: Record<string, string> = {
       </div>
 
       <div class="mt-4">
-        <div ngTabPanel value="pending">
-          <ng-template ngTabContent>
+        <div uiTabPanel value="pending">
+          <ng-template uiTabContent>
             <section uiCard>
               <div uiCardBody>
                 @if (pending().length === 0) {
@@ -162,8 +166,8 @@ const ACTION_LABELS: Record<string, string> = {
           </ng-template>
         </div>
 
-        <div ngTabPanel value="sent">
-          <ng-template ngTabContent>
+        <div uiTabPanel value="sent">
+          <ng-template uiTabContent>
             <div class="grid gap-6 xl:grid-cols-[minmax(0,22rem)_1fr]">
               <section uiCard class="h-fit">
                 <div uiCardBody>
@@ -311,8 +315,8 @@ const ACTION_LABELS: Record<string, string> = {
           </ng-template>
         </div>
 
-        <div ngTabPanel value="audit">
-          <ng-template ngTabContent>
+        <div uiTabPanel value="audit">
+          <ng-template uiTabContent>
             <section uiCard>
               <div uiCardBody>
                 <h2 uiCardTitle class="text-base">Registro de actividad</h2>
@@ -349,8 +353,8 @@ const ACTION_LABELS: Record<string, string> = {
           </ng-template>
         </div>
 
-        <div ngTabPanel value="settings">
-          <ng-template ngTabContent>
+        <div uiTabPanel value="settings">
+          <ng-template uiTabContent>
             <div class="grid gap-6 xl:grid-cols-2">
               <section uiCard>
                 <div uiCardBody>

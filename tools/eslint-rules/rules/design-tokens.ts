@@ -43,6 +43,10 @@ export const PRIMITIVES: [RegExp, string][] = [
   [/^breadcrumbs$/, 'lib-page-header [breadcrumbs]'],
   [/^loading(-(spinner|dots|ring|ball|bars|infinity|xs|sm|md|lg|xl))?$/, 'uiSpinner'],
   [/^alert(-.+)?$/, 'uiAlert'],
+  [
+    /^tabs?(-(box|border|lift|lifted|boxed|bordered|active|disabled|content|xs|sm|md|lg|xl|top|bottom))?$/,
+    'uiTabs / uiTabList / uiTab / uiTabPanel',
+  ],
 ];
 
 const UTIL =

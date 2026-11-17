@@ -2,14 +2,19 @@ import {
   Badge,
   Button,
   Card,
-  debounceSignal,
   EmptyState,
   Loader,
   Modal,
   PageHeader,
   Toast,
   UiInputGroup,
+  UiTab,
+  UiTabContent,
+  UiTabList,
+  UiTabPanel,
   UiTable,
+  UiTabs,
+  debounceSignal,
 } from '#/ui';
 import { DatePipe } from '@angular/common';
 import { HttpClient, httpResource } from '@angular/common/http';
@@ -41,7 +46,23 @@ type FileItem = {
 
 @Component({
   selector: 'app-files',
-  imports: [Card, UiTable, Badge, Button, Loader, FormsModule, DatePipe, PageHeader, EmptyState, UiInputGroup],
+  imports: [
+    Card,
+    UiTable,
+    Badge,
+    Button,
+    Loader,
+    FormsModule,
+    DatePipe,
+    PageHeader,
+    EmptyState,
+    UiInputGroup,
+    UiTab,
+    UiTabContent,
+    UiTabList,
+    UiTabPanel,
+    UiTabs,
+  ],
   template: `
     <lib-page-header
       [breadcrumbs]="[{ label: 'Inicio', link: '/' }, { label: 'Archivos' }]"
@@ -55,150 +76,158 @@ type FileItem = {
         <input class="pl-0" type="search" placeholder="Buscar archivos..." [(ngModel)]="searchText" />
       </label>
     </div>
-    <div class="tabs tabs-box mt-4">
-      <input class="tab" type="radio" name="files_tabs" aria-label="Compartidos conmigo" checked="checked" />
-      <div class="tab-content bg-surface-1 border-line p-4">
-        @if (sharedFilesResource.isLoading()) {
-          <lib-loader />
-        }
-        @if (sharedFilesResource.error()) {
-          <p>Error al cargar archivos compartidos</p>
-        }
-        @if (sharedFilesResource.hasValue()) {
-          <div uiCard class="overflow-x-auto">
-            <table uiTable>
-              <thead>
-                <tr>
-                  <th>Nombre</th>
-                  <th>Propietario</th>
-                  <th>Curso</th>
-                  <th>Tipo</th>
-                  <th>Tamaño</th>
-                  <th>Acceso</th>
-                  <th></th>
-                  <th class="text-right">Acciones</th>
-                </tr>
-              </thead>
-              <tbody>
-                @for (file of sharedFilesResource.value(); track file.id) {
-                  <tr class="hover:bg-surface-2">
-                    <td class="font-medium">{{ file.name }}</td>
-                    <td>
-                      <div class="flex items-center gap-2">
-                        <div class="avatar avatar-placeholder">
-                          <div class="text-white w-7 rounded-full" [style.background]="file.owner.color">
-                            <span class="text-xs">{{ file.owner.initials }}</span>
-                          </div>
-                        </div>
-                        {{ file.owner.name }}
-                      </div>
-                    </td>
-                    <td class="text-ink-muted">{{ courseLabel(file) }}</td>
-                    <td class="text-ink-muted">{{ file.mimeType }}</td>
-                    <td class="text-ink-muted">{{ formatBytes(file.size) }}</td>
-                    <td>
-                      @if (file.access) {
-                        <span uiBadge [tone]="file.access === 'EDIT' ? 'success' : 'info'">
-                          {{ file.access === 'EDIT' ? 'Editar' : 'Ver' }}
-                        </span>
-                      } @else {
-                        <span class="text-ink-muted">-</span>
-                      }
-                    </td>
-                    <td class="text-ink-muted">
-                      {{ file.updatedAt | date: 'short' }}
-                    </td>
-                    <td class="text-right">
-                      @if (file.id) {
-                        <button uiButton variant="primary" size="sm" (click)="openFile(file.id)">Abrir</button>
-                        <button uiButton variant="ghost" size="sm" (click)="downloadFile(file.id)">Descargar</button>
-                      }
-                    </td>
-                  </tr>
-                } @empty {
-                  <tr>
-                    <td colspan="8" class="text-center text-ink-muted">
-                      <lib-empty-state
-                        title="No hay archivos compartidos"
-                        icon="folder_open"
-                        description="No has compartido ningún archivo aún."
-                      />
-                    </td>
-                  </tr>
-                }
-              </tbody>
-            </table>
-          </div>
-        }
+    <div uiTabs class="mt-4 flex flex-col gap-4">
+      <div uiTabList [(selectedTab)]="tab" aria-label="Archivos">
+        <button uiTab value="compartidos-conmigo">Compartidos conmigo</button>
+        <button uiTab value="mis-archivos">Mis archivos</button>
       </div>
-      <input class="tab" type="radio" name="files_tabs" aria-label="Mis archivos" />
-      <div class="tab-content bg-surface-1 border-line p-4">
-        @if (ownedFilesResource.isLoading()) {
-          <lib-loader />
-        }
-        @if (ownedFilesResource.error()) {
-          <p>Error al cargar mis archivos</p>
-        }
-        @if (ownedFilesResource.hasValue()) {
-          <div uiCard class="overflow-x-auto">
-            <table uiTable>
-              <thead>
-                <tr>
-                  <th>Nombre</th>
-                  <th>Curso</th>
-                  <th>Tipo</th>
-                  <th>Tamaño</th>
-                  <th>Actualizado</th>
-                  <th class="text-right"></th>
-                </tr>
-              </thead>
-              <tbody>
-                @for (file of ownedFilesResource.value(); track file.id) {
+      <div uiTabPanel value="compartidos-conmigo">
+        <ng-template uiTabContent>
+          @if (sharedFilesResource.isLoading()) {
+            <lib-loader />
+          }
+          @if (sharedFilesResource.error()) {
+            <p>Error al cargar archivos compartidos</p>
+          }
+          @if (sharedFilesResource.hasValue()) {
+            <div uiCard class="overflow-x-auto">
+              <table uiTable>
+                <thead>
                   <tr>
-                    <td class="font-medium">{{ file.name }}</td>
-                    <td class="text-ink-muted">{{ courseLabel(file) }}</td>
-                    <td class="text-ink-muted">{{ file.mimeType }}</td>
-                    <td class="text-ink-muted">{{ formatBytes(file.size) }}</td>
-                    <td class="text-ink-muted">
-                      {{ file.updatedAt | date: 'short' }}
-                    </td>
-                    <td class="text-right">
-                      @if (file.id) {
-                        <button
-                          class="text-ink-strong hover:text-success p-1 rounded-lg  cursor-pointer"
-                          (click)="openFile(file.id)"
-                        >
-                          <span class="material-symbols-outlined text-medium!">open_in_new</span>
-                        </button>
-                        <button
-                          class="text-ink-strong hover:text-action p-1 rounded-lg  cursor-pointer"
-                          (click)="downloadFile(file.id)"
-                        >
-                          <span class="material-symbols-outlined text-medium!">download</span>
-                        </button>
-                        <button
-                          class="text-ink-strong hover:text-primary p-1 rounded-lg cursor-pointer"
-                          (click)="openShareModal(file)"
-                        >
-                          <span class="material-symbols-outlined text-medium!">share</span>
-                        </button>
-                      }
-                    </td>
+                    <th>Nombre</th>
+                    <th>Propietario</th>
+                    <th>Curso</th>
+                    <th>Tipo</th>
+                    <th>Tamaño</th>
+                    <th>Acceso</th>
+                    <th></th>
+                    <th class="text-right">Acciones</th>
                   </tr>
-                } @empty {
+                </thead>
+                <tbody>
+                  @for (file of sharedFilesResource.value(); track file.id) {
+                    <tr class="hover:bg-surface-2">
+                      <td class="font-medium">{{ file.name }}</td>
+                      <td>
+                        <div class="flex items-center gap-2">
+                          <div class="avatar avatar-placeholder">
+                            <div class="text-white w-7 rounded-full" [style.background]="file.owner.color">
+                              <span class="text-xs">{{ file.owner.initials }}</span>
+                            </div>
+                          </div>
+                          {{ file.owner.name }}
+                        </div>
+                      </td>
+                      <td class="text-ink-muted">{{ courseLabel(file) }}</td>
+                      <td class="text-ink-muted">{{ file.mimeType }}</td>
+                      <td class="text-ink-muted">{{ formatBytes(file.size) }}</td>
+                      <td>
+                        @if (file.access) {
+                          <span uiBadge [tone]="file.access === 'EDIT' ? 'success' : 'info'">
+                            {{ file.access === 'EDIT' ? 'Editar' : 'Ver' }}
+                          </span>
+                        } @else {
+                          <span class="text-ink-muted">-</span>
+                        }
+                      </td>
+                      <td class="text-ink-muted">
+                        {{ file.updatedAt | date: 'short' }}
+                      </td>
+                      <td class="text-right">
+                        @if (file.id) {
+                          <button uiButton variant="primary" size="sm" (click)="openFile(file.id)">Abrir</button>
+                          <button uiButton variant="ghost" size="sm" (click)="downloadFile(file.id)">Descargar</button>
+                        }
+                      </td>
+                    </tr>
+                  } @empty {
+                    <tr>
+                      <td colspan="8" class="text-center text-ink-muted">
+                        <lib-empty-state
+                          title="No hay archivos compartidos"
+                          icon="folder_open"
+                          description="No has compartido ningún archivo aún."
+                        />
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          }
+        </ng-template>
+      </div>
+      <div uiTabPanel value="mis-archivos">
+        <ng-template uiTabContent>
+          @if (ownedFilesResource.isLoading()) {
+            <lib-loader />
+          }
+          @if (ownedFilesResource.error()) {
+            <p>Error al cargar mis archivos</p>
+          }
+          @if (ownedFilesResource.hasValue()) {
+            <div uiCard class="overflow-x-auto">
+              <table uiTable>
+                <thead>
                   <tr>
-                    <td colspan="5" class="text-center text-ink-muted">No has subido archivos.</td>
+                    <th>Nombre</th>
+                    <th>Curso</th>
+                    <th>Tipo</th>
+                    <th>Tamaño</th>
+                    <th>Actualizado</th>
+                    <th class="text-right"></th>
                   </tr>
-                }
-              </tbody>
-            </table>
-          </div>
-        }
+                </thead>
+                <tbody>
+                  @for (file of ownedFilesResource.value(); track file.id) {
+                    <tr>
+                      <td class="font-medium">{{ file.name }}</td>
+                      <td class="text-ink-muted">{{ courseLabel(file) }}</td>
+                      <td class="text-ink-muted">{{ file.mimeType }}</td>
+                      <td class="text-ink-muted">{{ formatBytes(file.size) }}</td>
+                      <td class="text-ink-muted">
+                        {{ file.updatedAt | date: 'short' }}
+                      </td>
+                      <td class="text-right">
+                        @if (file.id) {
+                          <button
+                            class="text-ink-strong hover:text-success p-1 rounded-lg  cursor-pointer"
+                            (click)="openFile(file.id)"
+                          >
+                            <span class="material-symbols-outlined text-medium!">open_in_new</span>
+                          </button>
+                          <button
+                            class="text-ink-strong hover:text-action p-1 rounded-lg  cursor-pointer"
+                            (click)="downloadFile(file.id)"
+                          >
+                            <span class="material-symbols-outlined text-medium!">download</span>
+                          </button>
+                          <button
+                            class="text-ink-strong hover:text-primary p-1 rounded-lg cursor-pointer"
+                            (click)="openShareModal(file)"
+                          >
+                            <span class="material-symbols-outlined text-medium!">share</span>
+                          </button>
+                        }
+                      </td>
+                    </tr>
+                  } @empty {
+                    <tr>
+                      <td colspan="5" class="text-center text-ink-muted">No has subido archivos.</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          }
+        </ng-template>
       </div>
     </div>
   `,
 })
 export default class FilesPage {
+  /** Selected section; the tab list and panels follow it. */
+  readonly tab = signal('compartidos-conmigo');
   #http = inject(HttpClient);
   #toast = inject(Toast);
   #modal = inject(Modal);

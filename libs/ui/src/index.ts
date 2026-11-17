@@ -21,6 +21,7 @@ export * from './lib/ui/components/paginator-v2';
 export * from './lib/ui/components/spinner';
 export * from './lib/ui/components/stat-card';
 export * from './lib/ui/components/table';
+export * from './lib/ui/components/tabs';
 export * from './lib/ui/components/text-editor';
 export * from './lib/ui/components/thread-composer';
 export * from './lib/ui/components/thread-list';

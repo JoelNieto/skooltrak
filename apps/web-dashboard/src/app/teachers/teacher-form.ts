@@ -63,12 +63,12 @@ interface TeacherFormData {
       <lib-loader />
     } @else {
       <form (submit)="onSubmit($event)" novalidate="novalidate">
-        <div class="flex flex-col gap-6 divide-y divide-base-300">
+        <div class="flex flex-col gap-6 divide-y divide-line">
           <!-- Personal Information Section -->
           <div class="sm:grid sm:grid-cols-4 sm:gap-4 pb-8">
             <div class="mb-4">
-              <h2 class="text-lg/7 font-semibold text-base-content">Datos Personales</h2>
-              <p class="mt-1 text-sm text-base-content/70">Información personal del docente.</p>
+              <h2 class="text-lg/7 font-semibold text-ink-strong">Datos Personales</h2>
+              <p class="mt-1 text-sm text-ink-muted">Información personal del docente.</p>
             </div>
             <div class="sm:col-span-3">
               <div uiCard>
@@ -108,8 +108,8 @@ interface TeacherFormData {
           <!-- Contact Information Section -->
           <div class="sm:grid sm:grid-cols-4 sm:gap-4 pb-8 pt-6">
             <div class="mb-4">
-              <h2 class="text-lg/7 font-semibold text-base-content">Contacto</h2>
-              <p class="mt-1 text-sm text-base-content/70">Información de contacto del docente.</p>
+              <h2 class="text-lg/7 font-semibold text-ink-strong">Contacto</h2>
+              <p class="mt-1 text-sm text-ink-muted">Información de contacto del docente.</p>
             </div>
             <div class="sm:col-span-3">
               <div uiCard>
@@ -136,8 +136,8 @@ interface TeacherFormData {
           <!-- Professional Information Section -->
           <div class="sm:grid sm:grid-cols-4 sm:gap-4 pb-8 pt-6">
             <div class="mb-4">
-              <h2 class="text-lg/7 font-semibold text-base-content">Información Profesional</h2>
-              <p class="mt-1 text-sm text-base-content/70">Datos profesionales y de trayectoria.</p>
+              <h2 class="text-lg/7 font-semibold text-ink-strong">Información Profesional</h2>
+              <p class="mt-1 text-sm text-ink-muted">Datos profesionales y de trayectoria.</p>
             </div>
             <div class="sm:col-span-3">
               <div uiCard>
@@ -177,7 +177,7 @@ interface TeacherFormData {
         </div>
 
         <!-- Form Actions -->
-        <div class="flex justify-end gap-3 my-6 pt-6 border-t border-base-300">
+        <div class="flex justify-end gap-3 my-6 pt-6 border-t border-line">
           <a uiButton variant="ghost" routerLink="/teachers">Cancelar</a>
           <button uiButton [loading]="isSaving()" variant="primary" type="submit" [disabled]="isSaving()">
             {{ isEditMode() ? 'Guardar cambios' : 'Crear docente' }}

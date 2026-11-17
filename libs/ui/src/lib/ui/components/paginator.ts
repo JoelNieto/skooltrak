@@ -8,7 +8,7 @@ export type PageItem = number | 'ellipsis';
   selector: 'lib-paginator',
   imports: [Button],
   template: ` <div class="flex justify-between items-center w-full">
-    <p class="text-sm text-base-content font-medium">
+    <p class="text-sm text-ink-strong font-medium">
       Mostrando de <strong>{{ start() }}</strong> a <strong>{{ end() }}</strong> de <strong>{{ count() }}</strong>
     </p>
     <div>

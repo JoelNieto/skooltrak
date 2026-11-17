@@ -110,15 +110,15 @@ const ACTION_LABELS: Record<string, string> = {
                 } @else {
                   <div class="space-y-3">
                     @for (item of pending(); track item.id) {
-                      <article class="rounded-lg border border-base-200 p-4 space-y-2">
+                      <article class="rounded-lg border border-line p-4 space-y-2">
                         <div class="flex items-start justify-between gap-2">
                           <div class="min-w-0">
                             <p class="font-semibold truncate">{{ item.title }}</p>
-                            <p class="text-sm text-base-content/70 line-clamp-3">{{ preview(item) }}</p>
+                            <p class="text-sm text-ink-muted line-clamp-3">{{ preview(item) }}</p>
                           </div>
                           <span uiBadge tone="warning" class="shrink-0">Pendiente</span>
                         </div>
-                        <div class="flex flex-wrap items-center gap-2 text-xs text-base-content/60">
+                        <div class="flex flex-wrap items-center gap-2 text-xs text-ink-muted">
                           <span>{{ typeLabel(item.type) }}</span>
                           <span>·</span>
                           <span>{{ urgencyLabel(item.urgencyDefault) }}</span>
@@ -168,7 +168,7 @@ const ACTION_LABELS: Record<string, string> = {
               <section uiCard class="h-fit">
                 <div uiCardBody>
                   <h2 uiCardTitle class="text-base">Nuevo comunicado</h2>
-                  <p class="text-sm text-base-content/60">
+                  <p class="text-sm text-ink-muted">
                     Por ahora el aviso llega en la aplicación. SMS y correo se habilitarán más adelante.
                   </p>
 
@@ -355,21 +355,21 @@ const ACTION_LABELS: Record<string, string> = {
               <section uiCard>
                 <div uiCardBody>
                   <h2 uiCardTitle class="text-base">Política de aprobación</h2>
-                  <p class="text-sm text-base-content/60">
+                  <p class="text-sm text-ink-muted">
                     Estas reglas se aplican a todos los comunicados de la institución.
                   </p>
                   <ul class="mt-2 space-y-3">
                     <li class="flex items-start justify-between gap-4">
                       <div>
                         <p class="font-medium">Avisos a toda la institución</p>
-                        <p class="text-sm text-base-content/60">Quedan en cola hasta que un admin los apruebe.</p>
+                        <p class="text-sm text-ink-muted">Quedan en cola hasta que un admin los apruebe.</p>
                       </div>
                       <input uiToggle type="checkbox" checked disabled aria-label="Aprobación institucional activa" />
                     </li>
                     <li class="flex items-start justify-between gap-4">
                       <div>
                         <p class="font-medium">Avisos a un grupo de clase</p>
-                        <p class="text-sm text-base-content/60">El personal puede enviarlos de inmediato.</p>
+                        <p class="text-sm text-ink-muted">El personal puede enviarlos de inmediato.</p>
                       </div>
                       <input
                         uiToggle
@@ -383,7 +383,7 @@ const ACTION_LABELS: Record<string, string> = {
                     <li class="flex items-start justify-between gap-4">
                       <div>
                         <p class="font-medium">Respuestas en comunicados</p>
-                        <p class="text-sm text-base-content/60">
+                        <p class="text-sm text-ink-muted">
                           Se elige en cada aviso. Si se desactiva, las familias solo pueden leer.
                         </p>
                       </div>
@@ -395,28 +395,28 @@ const ACTION_LABELS: Record<string, string> = {
               <section uiCard>
                 <div uiCardBody>
                   <h2 uiCardTitle class="text-base">Canales de entrega</h2>
-                  <p class="text-sm text-base-content/60">
+                  <p class="text-sm text-ink-muted">
                     Solo el canal en la aplicación está activo. El resto se conectará con Novu más adelante.
                   </p>
                   <ul class="mt-2 space-y-3">
                     <li class="flex items-start justify-between gap-4">
                       <div>
                         <p class="font-medium">En la aplicación</p>
-                        <p class="text-sm text-base-content/60">Bandeja de padres y docentes, con avisos en vivo.</p>
+                        <p class="text-sm text-ink-muted">Bandeja de padres y docentes, con avisos en vivo.</p>
                       </div>
                       <input uiToggle type="checkbox" checked disabled aria-label="Canal en la aplicación activo" />
                     </li>
                     <li class="flex items-start justify-between gap-4">
                       <div>
                         <p class="font-medium">Correo electrónico</p>
-                        <p class="text-sm text-base-content/60">Pendiente de configurar el proveedor de envío.</p>
+                        <p class="text-sm text-ink-muted">Pendiente de configurar el proveedor de envío.</p>
                       </div>
                       <input uiToggle tone="neutral" type="checkbox" disabled aria-label="Canal de correo inactivo" />
                     </li>
                     <li class="flex items-start justify-between gap-4">
                       <div>
                         <p class="font-medium">SMS</p>
-                        <p class="text-sm text-base-content/60">Requiere consentimiento y un proveedor de SMS.</p>
+                        <p class="text-sm text-ink-muted">Requiere consentimiento y un proveedor de SMS.</p>
                       </div>
                       <input uiToggle tone="neutral" type="checkbox" disabled aria-label="Canal SMS inactivo" />
                     </li>
@@ -427,7 +427,7 @@ const ACTION_LABELS: Record<string, string> = {
               <section uiCard class="xl:col-span-2">
                 <div uiCardBody>
                   <h2 uiCardTitle class="text-base">Prioridad y horario de silencio</h2>
-                  <p class="text-sm text-base-content/60">
+                  <p class="text-sm text-ink-muted">
                     Cada destinatario puede tener horario de silencio. La prioridad de emergencia lo omite, pero sigue
                     llegando solo en la aplicación.
                   </p>

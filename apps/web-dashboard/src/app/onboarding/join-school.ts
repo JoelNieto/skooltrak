@@ -24,12 +24,12 @@ type AvailableSchool = {
       <main class="flex-1 flex flex-col items-center p-6 overflow-y-auto">
         <div class="w-full max-w-3xl space-y-6 animate-fade-in">
           <div class="text-center space-y-2">
-            <h1 class="text-2xl md:text-3xl font-bold text-base-content">Selecciona tu Escuela</h1>
-            <p class="text-base-content/70">Escribe al menos 3 caracteres para buscar tu escuela</p>
+            <h1 class="text-2xl md:text-3xl font-bold text-ink-strong">Selecciona tu Escuela</h1>
+            <p class="text-ink-muted">Escribe al menos 3 caracteres para buscar tu escuela</p>
           </div>
 
           <!-- Search -->
-          <div class="form-control">
+          <div>
             <input uiInput type="text" placeholder="Buscar escuela..." (input)="onSearch($event)" />
           </div>
 
@@ -39,8 +39,8 @@ type AvailableSchool = {
             </div>
           } @else if (searched() && filteredSchools().length === 0) {
             <div class="text-center py-12">
-              <span class="material-symbols-outlined text-6xl text-base-content/30">school</span>
-              <p class="mt-4 text-base-content/60">No se encontraron escuelas</p>
+              <span class="material-symbols-outlined text-6xl text-ink-subtle">school</span>
+              <p class="mt-4 text-ink-muted">No se encontraron escuelas</p>
             </div>
           } @else if (searched()) {
             <div class="grid gap-4">
@@ -51,23 +51,23 @@ type AvailableSchool = {
                       <span class="material-symbols-outlined text-2xl text-primary">school</span>
                     </div>
                     <div class="flex-1 min-w-0">
-                      <h3 class="font-semibold text-base-content truncate">{{ school.name }}</h3>
-                      <p class="text-sm text-base-content/60">{{ school.organizationName ?? '' }}</p>
+                      <h3 class="font-semibold text-ink-strong truncate">{{ school.name }}</h3>
+                      <p class="text-sm text-ink-muted">{{ school.organizationName ?? '' }}</p>
                       @if (school.city) {
-                        <p class="text-xs text-base-content/40">
+                        <p class="text-xs text-ink-subtle">
                           {{ school.city }}{{ school.country ? ', ' + school.country : '' }}
                         </p>
                       }
                     </div>
-                    <span class="material-symbols-outlined text-base-content/30">chevron_right</span>
+                    <span class="material-symbols-outlined text-ink-subtle">chevron_right</span>
                   </div>
                 </button>
               }
             </div>
           } @else {
             <div class="text-center py-12">
-              <span class="material-symbols-outlined text-6xl text-base-content/30">search</span>
-              <p class="mt-4 text-base-content/50">Comienza a escribir para buscar escuelas</p>
+              <span class="material-symbols-outlined text-6xl text-ink-subtle">search</span>
+              <p class="mt-4 text-ink-subtle">Comienza a escribir para buscar escuelas</p>
             </div>
           }
 

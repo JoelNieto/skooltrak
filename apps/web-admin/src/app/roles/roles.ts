@@ -13,8 +13,8 @@ import { RolesForm } from './roles-form';
   template: `<ui-breadcrumbs [items]="[{ label: 'Inicio', link: '/' }, { label: 'Roles' }]" />
     <div class="flex justify-between items-center mb-4">
       <div>
-        <h1 class="text-2xl text-base-content font-medium">Roles</h1>
-        <p class="text-sm text-gray-500 dark:text-gray-400">Listado de roles</p>
+        <h1 class="text-2xl text-ink-strong font-medium">Roles</h1>
+        <p class="text-sm text-ink-muted">Listado de roles</p>
       </div>
 
       <button uiButton variant="primary" (click)="editRole()">
@@ -45,7 +45,7 @@ import { RolesForm } from './roles-form';
               <td>{{ role.updatedAt | date: 'medium' }}</td>
               <td>
                 <button
-                  class="cursor-pointer hover:bg-base-200 p-1 rounded-lg flex items-center justify-center"
+                  class="cursor-pointer hover:bg-surface-2 p-1 rounded-lg flex items-center justify-center"
                   ngMenuTrigger
                   #origin
                   #trigger="ngMenuTrigger"
@@ -67,12 +67,12 @@ import { RolesForm } from './roles-form';
                   ]"
                   cdkAttachPopoverAsChild
                 >
-                  <div ngMenu class="bg-base-100 shadow-sm rounded-lg p-1 w-48" #formatMenu="ngMenu">
+                  <div ngMenu class="bg-surface-1 shadow-sm rounded-lg p-1 w-48" #formatMenu="ngMenu">
                     <ng-template ngMenuContent>
                       <button
                         ngMenuItem
                         value="Edit"
-                        class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-base-200 w-full"
+                        class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-surface-2 w-full"
                         (click)="editRole($any(role))"
                       >
                         <span class="material-symbols-outlined text-lg">edit</span>
@@ -81,7 +81,7 @@ import { RolesForm } from './roles-form';
                       <button
                         ngMenuItem
                         value="Delete"
-                        class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-base-200 w-full"
+                        class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-surface-2 w-full"
                         (click)="deleteRole($any(role))"
                       >
                         <span class="material-symbols-outlined text-lg">delete</span>

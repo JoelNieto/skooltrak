@@ -29,8 +29,8 @@ interface RoleOption {
           </div>
 
           <div class="space-y-2">
-            <h1 class="text-2xl md:text-3xl font-bold text-base-content">¿Cuál es tu rol?</h1>
-            <p class="text-base-content/70">
+            <h1 class="text-2xl md:text-3xl font-bold text-ink-strong">¿Cuál es tu rol?</h1>
+            <p class="text-ink-muted">
               Selecciona tu rol en <strong>{{ schoolName() }}</strong>
             </p>
           </div>
@@ -45,8 +45,8 @@ interface RoleOption {
                   >
                     <span class="material-symbols-outlined text-3xl" [style.color]="role.color">{{ role.icon }}</span>
                   </div>
-                  <h3 class="font-semibold text-base-content">{{ role.label }}</h3>
-                  <p class="text-sm text-base-content/60">{{ role.description }}</p>
+                  <h3 class="font-semibold text-ink-strong">{{ role.label }}</h3>
+                  <p class="text-sm text-ink-muted">{{ role.description }}</p>
                 </div>
               </button>
             }

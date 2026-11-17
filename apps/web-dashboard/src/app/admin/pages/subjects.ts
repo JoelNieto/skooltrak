@@ -1,4 +1,4 @@
-import { Button, Card, Confirmation, Modal, Pagination, PaginatorV2, Toast, UiTable } from '#/ui';
+import { Button, Card, Confirmation, Modal, Pagination, PaginatorV2, Toast, UiInputGroup, UiTable } from '#/ui';
 import { Menu, MenuContent, MenuItem, MenuTrigger } from '@angular/aria/menu';
 import { OverlayModule } from '@angular/cdk/overlay';
 import { DatePipe } from '@angular/common';
@@ -26,13 +26,14 @@ import SubjectsForm from '../forms/subjects-form';
     MenuItem,
     MenuTrigger,
     OverlayModule,
+    UiInputGroup,
   ],
   providers: [Pagination],
 
   template: `
     <div class="flex flex-col gap-4 md:flex-row md:justify-between">
       <div class="md:w-96 w-full">
-        <label class="input input-primary ">
+        <label uiInputGroup>
           <span class="material-symbols-outlined">search</span>
           <input class="pl-0" type="search" placeholder="Buscar..." [(ngModel)]="searchText" />
         </label>
@@ -47,7 +48,7 @@ import SubjectsForm from '../forms/subjects-form';
         <thead>
           <tr>
             <th
-              class="cursor-pointer hover:bg-base-200 w-1/4"
+              class="cursor-pointer hover:bg-surface-2 w-1/4"
               [class]="pagination.sortBy() === 'name' ? 'bg-primary/10 !text-primary hover:bg-primary/20' : ''"
               (click)="pagination.setOrder('name')"
             >
@@ -61,7 +62,7 @@ import SubjectsForm from '../forms/subjects-form';
               </div>
             </th>
             <th
-              class="hover:bg-base-200 cursor-pointer w-1/5"
+              class="hover:bg-surface-2 cursor-pointer w-1/5"
               [class]="pagination.sortBy() === 'code' ? 'bg-primary/10 text-primary! hover:bg-primary/20' : ''"
               (click)="pagination.setOrder('code')"
             >
@@ -75,7 +76,7 @@ import SubjectsForm from '../forms/subjects-form';
               </div>
             </th>
             <th
-              class="hover:bg-base-200 cursor-pointer"
+              class="hover:bg-surface-2 cursor-pointer"
               [class]="pagination.sortBy() === 'createdAt' ? 'bg-primary/10 !text-primary hover:bg-primary/20' : ''"
               (click)="pagination.setOrder('createdAt')"
             >
@@ -89,7 +90,7 @@ import SubjectsForm from '../forms/subjects-form';
               </div>
             </th>
             <th
-              class="hover:bg-base-200 cursor-pointer"
+              class="hover:bg-surface-2 cursor-pointer"
               [class]="pagination.sortBy() === 'updatedAt' ? 'bg-primary/10 !text-primary hover:bg-primary/20' : ''"
               (click)="pagination.setOrder('updatedAt')"
             >
@@ -114,7 +115,7 @@ import SubjectsForm from '../forms/subjects-form';
               <td>{{ subject.updatedAt | date: 'short' }}</td>
               <td>
                 <button
-                  class="cursor-pointer hover:bg-base-200 p-1 rounded-lg flex items-center justify-center"
+                  class="cursor-pointer hover:bg-surface-2 p-1 rounded-lg flex items-center justify-center"
                   ngMenuTrigger
                   #origin
                   #trigger="ngMenuTrigger"
@@ -136,12 +137,12 @@ import SubjectsForm from '../forms/subjects-form';
                   ]"
                   cdkAttachPopoverAsChild
                 >
-                  <div ngMenu class="bg-base-100 shadow-sm rounded-lg p-1 w-48" #actionsMenu="ngMenu">
+                  <div ngMenu class="bg-surface-1 shadow-sm rounded-lg p-1 w-48" #actionsMenu="ngMenu">
                     <ng-template ngMenuContent>
                       <button
                         ngMenuItem
                         value="Edit"
-                        class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-base-200 w-full"
+                        class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-surface-2 w-full"
                         (click)="editSubject(subject)"
                       >
                         <span class="material-symbols-outlined text-lg">edit</span>
@@ -150,7 +151,7 @@ import SubjectsForm from '../forms/subjects-form';
                       <button
                         ngMenuItem
                         value="Delete"
-                        class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-base-200 w-full"
+                        class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-surface-2 w-full"
                         (click)="deleteSubject(subject)"
                       >
                         <span class="material-symbols-outlined text-lg">delete</span>

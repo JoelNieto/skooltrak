@@ -13,7 +13,7 @@ import { StoreApiService } from '../store-api.service';
     @if (!school.currentSchoolId()) {
       <div uiAlert tone="warning">Selecciona una escuela.</div>
     } @else if (!lines().length) {
-      <p class="text-base-content/70 mb-4">Tu carrito está vacío.</p>
+      <p class="text-ink-muted mb-4">Tu carrito está vacío.</p>
       <a uiButton variant="primary" [routerLink]="['..']">Seguir comprando</a>
     } @else {
       <div uiCard class="overflow-x-auto">
@@ -33,7 +33,7 @@ import { StoreApiService } from '../store-api.service';
                 <td>
                   <div class="font-medium">{{ line.product?.name }}</div>
                   @if (line.variant?.label) {
-                    <div class="text-sm text-base-content/60">Talla: {{ line.variant?.label }}</div>
+                    <div class="text-sm text-ink-muted">Talla: {{ line.variant?.label }}</div>
                   }
                 </td>
                 <td>{{ formatPrice($safeNavigationMigration(line.product?.price)) }}</td>
@@ -48,7 +48,11 @@ import { StoreApiService } from '../store-api.service';
                     >
                       −
                     </button>
-                    <span class="btn btn-sm join-item no-animation">{{ line.quantity }}</span>
+                    <span
+                      class="join-item inline-flex h-8 min-w-10 items-center justify-center border-y border-line bg-surface-1 px-3 text-sm font-medium tabular-nums"
+                      aria-live="polite"
+                      >{{ line.quantity }}</span
+                    >
                     <button
                       uiButton
                       size="sm"

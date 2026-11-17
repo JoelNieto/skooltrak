@@ -59,7 +59,7 @@ type QuizDetail = {
                   {{ quiz.course.name }}
                 </a>
                 @if (quiz.teacher) {
-                  <p class="mt-2 flex items-center gap-2 text-sm text-base-content/70">
+                  <p class="mt-2 flex items-center gap-2 text-sm text-ink-muted">
                     <span class="material-symbols-outlined text-lg">person</span>
                     {{ quiz.teacher.firstName }} {{ quiz.teacher.fatherName }}
                   </p>
@@ -94,7 +94,7 @@ type QuizDetail = {
             </h3>
             <div class="flex flex-col gap-4">
               @for (q of quiz.questions; track q.id; let i = $index) {
-                <div uiCard class="bg-base-200">
+                <div uiCard class="bg-surface-0">
                   <div uiCardBody class="py-4">
                     <div class="flex justify-between items-start">
                       <h4 class="font-semibold">Pregunta {{ i + 1 }}</h4>
@@ -104,7 +104,7 @@ type QuizDetail = {
                     </div>
                     <div class="prose prose-sm max-w-none" [innerHTML]="q.question"></div>
                     @if (q.timeLimit && q.timeLimit > 0) {
-                      <p class="text-sm text-base-content/60">
+                      <p class="text-sm text-ink-muted">
                         <span class="material-symbols-outlined text-base align-middle">timer</span>
                         {{ q.timeLimit }} segundos
                       </p>

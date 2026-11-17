@@ -15,7 +15,7 @@ import { Component } from '@angular/core';
 
     <div uiCard class="mt-6">
       <div uiCardBody>
-        <h2 class="text-lg font-semibold text-base-content">Horario semanal</h2>
+        <h2 class="text-lg font-semibold text-ink-strong">Horario semanal</h2>
         <div class="overflow-x-auto">
           <table uiTable>
             <thead>
@@ -42,7 +42,7 @@ import { Component } from '@angular/core';
     </div>
 
     <div class="mt-6">
-      <h2 class="text-lg font-semibold text-base-content mb-3">Exámenes próximos</h2>
+      <h2 class="text-lg font-semibold text-ink-strong mb-3">Exámenes próximos</h2>
       @if (upcomingExams.length === 0) {
         <lib-empty-state
           title="Sin evaluaciones próximas"
@@ -54,8 +54,8 @@ import { Component } from '@angular/core';
           @for (exam of upcomingExams; track exam.id) {
             <div uiCard>
               <div uiCardBody>
-                <p class="font-semibold text-base-content">{{ exam.title }}</p>
-                <p class="text-sm text-base-content/70">{{ exam.date }} · {{ exam.course }}</p>
+                <p class="font-semibold text-ink-strong">{{ exam.title }}</p>
+                <p class="text-sm text-ink-muted">{{ exam.date }} · {{ exam.course }}</p>
               </div>
             </div>
           }

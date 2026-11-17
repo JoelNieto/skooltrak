@@ -6,7 +6,7 @@ import { UiInput } from './field';
   selector: 'lib-thread-composer',
   imports: [UiInput, Button],
   template: `
-    <form class="flex items-end gap-2 border-t border-base-300 p-2 bg-base-100" (submit)="onSubmit($event)">
+    <form class="flex items-end gap-2 border-t border-line p-2 bg-surface-1" (submit)="onSubmit($event)">
       <textarea
         uiInput
         class="flex-1 resize-none"

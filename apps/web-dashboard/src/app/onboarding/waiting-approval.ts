@@ -27,23 +27,23 @@ import { BrandLogo } from '../shared/brand-logo';
           </div>
 
           <div class="space-y-2">
-            <h1 class="text-2xl md:text-3xl font-bold text-base-content">Esperando Aprobación</h1>
+            <h1 class="text-2xl md:text-3xl font-bold text-ink-strong">Esperando Aprobación</h1>
             @if (schoolName()) {
-              <p class="text-base-content/70">
+              <p class="text-ink-muted">
                 Tu solicitud para unirte a <strong>{{ schoolName() }}</strong> como
                 <strong>{{ roleLabel() }}</strong> ha sido enviada.
               </p>
             } @else {
-              <p class="text-base-content/70">Tu solicitud ha sido enviada al administrador de la escuela.</p>
+              <p class="text-ink-muted">Tu solicitud ha sido enviada al administrador de la escuela.</p>
             }
           </div>
 
-          <div class="bg-base-200 rounded-xl p-6 space-y-4">
+          <div class="bg-surface-0 rounded-xl p-6 space-y-4">
             <div class="flex items-start gap-3 text-left">
               <span class="material-symbols-outlined text-warning mt-0.5">schedule</span>
               <div>
-                <p class="font-medium text-base-content">Solicitud en revisión</p>
-                <p class="text-sm text-base-content/60">
+                <p class="font-medium text-ink-strong">Solicitud en revisión</p>
+                <p class="text-sm text-ink-muted">
                   El administrador de la escuela revisará tu solicitud y te notificará cuando sea aprobada.
                 </p>
               </div>
@@ -51,8 +51,8 @@ import { BrandLogo } from '../shared/brand-logo';
             <div class="flex items-start gap-3 text-left">
               <span class="material-symbols-outlined text-primary mt-0.5">notifications</span>
               <div>
-                <p class="font-medium text-base-content">Te avisaremos</p>
-                <p class="text-sm text-base-content/60">
+                <p class="font-medium text-ink-strong">Te avisaremos</p>
+                <p class="text-sm text-ink-muted">
                   Verificamos automáticamente cada 30 segundos. También recibirás una notificación.
                 </p>
               </div>
@@ -60,7 +60,7 @@ import { BrandLogo } from '../shared/brand-logo';
           </div>
 
           @if (checking()) {
-            <div class="flex items-center justify-center gap-2 text-base-content/50">
+            <div class="flex items-center justify-center gap-2 text-ink-subtle">
               <span uiSpinner size="xs"></span>
               <span class="text-sm">Verificando estado...</span>
             </div>
@@ -68,8 +68,8 @@ import { BrandLogo } from '../shared/brand-logo';
         </div>
       </main>
 
-      <footer class="p-4 md:p-6 flex justify-center border-t border-base-200 bg-base-100/80 backdrop-blur-sm">
-        <p class="text-sm text-base-content/60">
+      <footer class="p-4 md:p-6 flex justify-center border-t border-line bg-surface-1/80 backdrop-blur-sm">
+        <p class="text-sm text-ink-muted">
           ¿Necesitas ayuda?
           <a href="mailto:soporte@skooltrak.com" class="link link-primary">Contactar soporte</a>
         </p>

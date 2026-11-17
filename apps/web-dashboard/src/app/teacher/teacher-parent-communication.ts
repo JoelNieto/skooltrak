@@ -67,11 +67,11 @@ interface ThreadListItem {
     />
 
     <div class="flex gap-4 h-[calc(100vh-12rem)]">
-      <aside class="w-80 shrink-0 border border-base-300 rounded-lg flex flex-col bg-base-100">
-        <div class="p-2 border-b border-base-300 space-y-2 shrink-0">
-          <input uiInput
+      <aside class="w-80 shrink-0 border border-line rounded-lg flex flex-col bg-surface-1">
+        <div class="p-2 border-b border-line space-y-2 shrink-0">
+          <input uiInput size="sm"
             type="search"
-            class="input-sm"
+           
             placeholder="Buscar conversación…"
             [(ngModel)]="filterText"
           />
@@ -117,10 +117,10 @@ interface ThreadListItem {
         </div>
       </aside>
 
-      <section class="flex-1 border border-base-300 rounded-lg flex flex-col bg-base-100 min-w-0">
+      <section class="flex-1 border border-line rounded-lg flex flex-col bg-surface-1 min-w-0">
         @if (selectedThread(); as thread) {
           <header
-            class="p-3 border-b border-base-300 flex flex-col gap-1"
+            class="p-3 border-b border-line flex flex-col gap-1"
             [class.bg-primary/5]="thread.broadcast"
             [class.border-primary/20]="thread.broadcast"
           >
@@ -173,9 +173,9 @@ interface ThreadListItem {
             <lib-thread-composer placeholder="Escribe un mensaje…" (send)="send($event)" />
             <div class="px-2 pb-2">
               <label class="sr-only" for="teacher-urgency">Prioridad del mensaje</label>
-              <select uiSelect
+              <select uiSelect size="sm"
                 id="teacher-urgency"
-                class="select-sm"
+               
                 [ngModel]="composerUrgency()"
                 (ngModelChange)="composerUrgency.set($event)"
               >
@@ -184,7 +184,7 @@ interface ThreadListItem {
               </select>
             </div>
           } @else if (thread.broadcast && thread.repliesAllowed === false) {
-            <p class="p-3 text-center text-sm text-base-content/60 border-t border-base-300">
+            <p class="p-3 text-center text-sm text-ink-muted border-t border-line">
               Este comunicado no admite respuestas.
             </p>
           }

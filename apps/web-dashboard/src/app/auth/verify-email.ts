@@ -25,8 +25,8 @@ import { BrandLogo } from '../shared/brand-logo';
               <lib-loader />
             </div>
             <div class="space-y-2">
-              <h1 class="text-2xl md:text-3xl font-bold text-base-content">Verificando tu correo...</h1>
-              <p class="text-base-content/70">Por favor espera mientras verificamos tu correo electrónico.</p>
+              <h1 class="text-2xl md:text-3xl font-bold text-ink-strong">Verificando tu correo...</h1>
+              <p class="text-ink-muted">Por favor espera mientras verificamos tu correo electrónico.</p>
             </div>
           } @else if (verified()) {
             <!-- Verified state -->
@@ -36,8 +36,8 @@ import { BrandLogo } from '../shared/brand-logo';
               </div>
             </div>
             <div class="space-y-2">
-              <h1 class="text-2xl md:text-3xl font-bold text-base-content">Correo Verificado</h1>
-              <p class="text-base-content/70">
+              <h1 class="text-2xl md:text-3xl font-bold text-ink-strong">Correo Verificado</h1>
+              <p class="text-ink-muted">
                 Tu correo electrónico ha sido verificado exitosamente. Ahora puedes continuar con la configuración de tu
                 escuela.
               </p>
@@ -54,8 +54,8 @@ import { BrandLogo } from '../shared/brand-logo';
               </div>
             </div>
             <div class="space-y-2">
-              <h1 class="text-2xl md:text-3xl font-bold text-base-content">Error de Verificación</h1>
-              <p class="text-base-content/70">
+              <h1 class="text-2xl md:text-3xl font-bold text-ink-strong">Error de Verificación</h1>
+              <p class="text-ink-muted">
                 {{ error() }}
               </p>
             </div>
@@ -73,26 +73,26 @@ import { BrandLogo } from '../shared/brand-logo';
               </div>
             </div>
             <div class="space-y-2">
-              <h1 class="text-2xl md:text-3xl font-bold text-base-content">Verifica tu Correo</h1>
-              <p class="text-base-content/70">
+              <h1 class="text-2xl md:text-3xl font-bold text-ink-strong">Verifica tu Correo</h1>
+              <p class="text-ink-muted">
                 Te hemos enviado un correo de verificación. Por favor revisa tu bandeja de entrada y haz clic en el
                 enlace para continuar.
               </p>
             </div>
 
-            <div class="bg-base-200 rounded-xl p-6 space-y-4">
+            <div class="bg-surface-0 rounded-xl p-6 space-y-4">
               <div class="flex items-start gap-3 text-left">
                 <span class="material-symbols-outlined text-primary mt-0.5">inbox</span>
                 <div>
-                  <p class="font-medium text-base-content">Revisa tu bandeja de entrada</p>
-                  <p class="text-sm text-base-content/60">El correo puede tardar unos minutos en llegar</p>
+                  <p class="font-medium text-ink-strong">Revisa tu bandeja de entrada</p>
+                  <p class="text-sm text-ink-muted">El correo puede tardar unos minutos en llegar</p>
                 </div>
               </div>
               <div class="flex items-start gap-3 text-left">
                 <span class="material-symbols-outlined text-primary mt-0.5">folder</span>
                 <div>
-                  <p class="font-medium text-base-content">Revisa la carpeta de spam</p>
-                  <p class="text-sm text-base-content/60">A veces los correos pueden llegar ahí</p>
+                  <p class="font-medium text-ink-strong">Revisa la carpeta de spam</p>
+                  <p class="text-sm text-ink-muted">A veces los correos pueden llegar ahí</p>
                 </div>
               </div>
             </div>
@@ -125,8 +125,8 @@ import { BrandLogo } from '../shared/brand-logo';
       </main>
 
       <!-- Fixed Footer -->
-      <footer class="p-4 md:p-6 flex justify-center border-t border-base-200 bg-base-100/80 backdrop-blur-sm">
-        <p class="text-sm text-base-content/60">
+      <footer class="p-4 md:p-6 flex justify-center border-t border-line bg-surface-1/80 backdrop-blur-sm">
+        <p class="text-sm text-ink-muted">
           ¿Necesitas ayuda?
           <a href="mailto:soporte@skooltrak.com" class="link link-primary">Contactar soporte</a>
         </p>

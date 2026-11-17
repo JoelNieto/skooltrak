@@ -19,8 +19,8 @@ import { CreatedEntity } from '../setup-wizard';
 
       <!-- Title & Subtitle -->
       <div class="space-y-2">
-        <h1 class="text-2xl md:text-3xl font-bold text-base-content">Configura Planes de Estudio</h1>
-        <p class="text-base-content/70">Los planes de estudio definen el currículo dentro de cada nivel académico.</p>
+        <h1 class="text-2xl md:text-3xl font-bold text-ink-strong">Configura Planes de Estudio</h1>
+        <p class="text-ink-muted">Los planes de estudio definen el currículo dentro de cada nivel académico.</p>
       </div>
 
       <!-- Created Study Plans List -->
@@ -45,7 +45,7 @@ import { CreatedEntity } from '../setup-wizard';
             <span class="material-symbols-outlined text-warning mt-0.5">warning</span>
             <div>
               <h3 class="font-medium text-warning">No hay niveles académicos</h3>
-              <p class="text-sm text-base-content/70 mt-1">
+              <p class="text-sm text-ink-muted mt-1">
                 Necesitas crear al menos un nivel académico antes de crear planes de estudio.
               </p>
             </div>
@@ -124,7 +124,7 @@ import { CreatedEntity } from '../setup-wizard';
       @if (createdEntities().length === 0) {
         <div class="text-center">
           <button uiButton variant="ghost" size="sm" type="button" (click)="onSkip()">Omitir por ahora</button>
-          <p class="text-xs text-base-content/50 mt-1">Podrás crear planes de estudio más adelante.</p>
+          <p class="text-xs text-ink-subtle mt-1">Podrás crear planes de estudio más adelante.</p>
         </div>
       }
     </div>

@@ -93,12 +93,12 @@ interface SchoolFormData {
       <lib-loader />
     } @else {
       <form (submit)="onSubmit($event)" novalidate="novalidate">
-        <div class="flex flex-col gap-6 divide-y divide-base-300">
+        <div class="flex flex-col gap-6 divide-y divide-line">
           <!-- Logo Section -->
           <div class="sm:grid sm:grid-cols-4 sm:gap-4 pb-8">
             <div class="mb-4">
-              <h2 class="text-lg/7 font-semibold text-base-content">Logo</h2>
-              <p class="mt-1 text-sm text-base-content/70">Logo del colegio.</p>
+              <h2 class="text-lg/7 font-semibold text-ink-strong">Logo</h2>
+              <p class="mt-1 text-sm text-ink-muted">Logo del colegio.</p>
             </div>
             <div class="sm:col-span-3">
               <div uiCard>
@@ -107,7 +107,7 @@ interface SchoolFormData {
                     <!-- Logo Preview -->
                     <div class="flex flex-col items-center gap-3">
                       <div
-                        class="w-32 min-h-16 max-h-48 rounded-lg border-2 border-dashed border-base-300 flex items-center justify-center overflow-hidden bg-base-200"
+                        class="w-32 min-h-16 max-h-48 rounded-lg border-2 border-dashed border-line flex items-center justify-center overflow-hidden bg-surface-0"
                       >
                         @if (isUploadingLogo()) {
                           <span uiSpinner size="lg" class="text-primary"></span>
@@ -118,7 +118,7 @@ interface SchoolFormData {
                             class="w-full h-auto object-contain"
                           />
                         } @else {
-                          <span class="material-symbols-outlined text-5xl text-base-content/30">school</span>
+                          <span class="material-symbols-outlined text-5xl text-ink-subtle">school</span>
                         }
                       </div>
                       @if ((logoPreviewUrl() || logoDownloadUrl() || schoolForm.logo().value()) && !isUploadingLogo()) {
@@ -143,17 +143,15 @@ interface SchoolFormData {
                         <span class="material-symbols-outlined">upload</span>
                         {{ schoolForm.logo().value() || logoPreviewUrl() ? 'Cambiar imagen' : 'Subir imagen' }}
                       </button>
-                      <p class="text-sm text-base-content/50 mt-2">PNG, JPG o GIF. Máximo 5MB.</p>
+                      <p class="text-sm text-ink-subtle mt-2">PNG, JPG o GIF. Máximo 5MB.</p>
                     </div>
                   </div>
 
                   <!-- Image Cropper Modal -->
                   @if (showCropper()) {
-                    <div class="mt-4 p-4 bg-base-200 rounded-lg">
+                    <div class="mt-4 p-4 bg-surface-0 rounded-lg">
                       <h3 class="font-medium mb-3">Recortar imagen</h3>
-                      <p class="text-sm text-base-content/60 mb-4">
-                        Arrastra las esquinas para ajustar el área de recorte.
-                      </p>
+                      <p class="text-sm text-ink-muted mb-4">Arrastra las esquinas para ajustar el área de recorte.</p>
                       <div class="flex flex-col lg:flex-row gap-6">
                         <!-- Cropper Area -->
                         <div class="flex-1 min-w-0">
@@ -169,14 +167,14 @@ interface SchoolFormData {
                         </div>
                         <!-- Preview Area -->
                         <div class="flex flex-col items-center gap-3 lg:w-48">
-                          <span class="text-sm font-medium text-base-content/70">Vista previa</span>
+                          <span class="text-sm font-medium text-ink-muted">Vista previa</span>
                           <div
-                            class="w-32 min-h-16 max-h-48 rounded-lg border-2 border-base-300 flex items-center justify-center overflow-hidden bg-base-100"
+                            class="w-32 min-h-16 max-h-48 rounded-lg border-2 border-line flex items-center justify-center overflow-hidden bg-surface-1"
                           >
                             @if (cropPreviewUrl()) {
                               <img [src]="cropPreviewUrl()" alt="Preview" class="w-full h-auto object-contain" />
                             } @else {
-                              <span class="material-symbols-outlined text-4xl text-base-content/20">crop</span>
+                              <span class="material-symbols-outlined text-4xl text-ink-subtle">crop</span>
                             }
                           </div>
                         </div>
@@ -203,8 +201,8 @@ interface SchoolFormData {
           <!-- Basic Information Section -->
           <div class="sm:grid sm:grid-cols-4 sm:gap-4 pb-8 pt-6">
             <div class="mb-4">
-              <h2 class="text-lg/7 font-semibold text-base-content">Información Básica</h2>
-              <p class="mt-1 text-sm text-base-content/70">Datos principales del colegio.</p>
+              <h2 class="text-lg/7 font-semibold text-ink-strong">Información Básica</h2>
+              <p class="mt-1 text-sm text-ink-muted">Datos principales del colegio.</p>
             </div>
             <div class="sm:col-span-3">
               <div uiCard>
@@ -225,8 +223,8 @@ interface SchoolFormData {
           <!-- Contact Information Section -->
           <div class="sm:grid sm:grid-cols-4 sm:gap-4 pb-8 pt-6">
             <div class="mb-4">
-              <h2 class="text-lg/7 font-semibold text-base-content">Contacto</h2>
-              <p class="mt-1 text-sm text-base-content/70">Información de contacto del colegio.</p>
+              <h2 class="text-lg/7 font-semibold text-ink-strong">Contacto</h2>
+              <p class="mt-1 text-sm text-ink-muted">Información de contacto del colegio.</p>
             </div>
             <div class="sm:col-span-3">
               <div uiCard>
@@ -250,8 +248,8 @@ interface SchoolFormData {
           <!-- Address Section -->
           <div class="sm:grid sm:grid-cols-4 sm:gap-4 pb-8 pt-6">
             <div class="mb-4">
-              <h2 class="text-lg/7 font-semibold text-base-content">Ubicación</h2>
-              <p class="mt-1 text-sm text-base-content/70">Dirección física del colegio.</p>
+              <h2 class="text-lg/7 font-semibold text-ink-strong">Ubicación</h2>
+              <p class="mt-1 text-sm text-ink-muted">Dirección física del colegio.</p>
             </div>
             <div class="sm:col-span-3">
               <div uiCard>
@@ -281,8 +279,8 @@ interface SchoolFormData {
           <!-- Academic Configuration Section -->
           <div class="sm:grid sm:grid-cols-4 sm:gap-4 pb-8 pt-6">
             <div class="mb-4">
-              <h2 class="text-lg/7 font-semibold text-base-content">Configuración académica</h2>
-              <p class="mt-1 text-sm text-base-content/70">
+              <h2 class="text-lg/7 font-semibold text-ink-strong">Configuración académica</h2>
+              <p class="mt-1 text-sm text-ink-muted">
                 Mes en que inicia el año escolar (se usa para generar los cargos de colegiatura) y zona horaria de la
                 escuela (define «hoy» en los tableros de inicio).
               </p>
@@ -326,8 +324,8 @@ interface SchoolFormData {
           <!-- Theme / Colors Section -->
           <div class="sm:grid sm:grid-cols-4 sm:gap-4 pb-8 pt-6">
             <div class="mb-4">
-              <h2 class="text-lg/7 font-semibold text-base-content">Tema / Colores</h2>
-              <p class="mt-1 text-sm text-base-content/70">
+              <h2 class="text-lg/7 font-semibold text-ink-strong">Tema / Colores</h2>
+              <p class="mt-1 text-sm text-ink-muted">
                 Colores de marca del colegio. Se aplican en toda la aplicación cuando este colegio está seleccionado.
               </p>
             </div>
@@ -335,17 +333,13 @@ interface SchoolFormData {
               <div uiCard>
                 <div uiCardBody class="gap-y-4">
                   <div class="sm:grid sm:grid-cols-6 sm:gap-4">
-                    <div class="fieldset col-span-2">
-                      <label for="primaryColor">
-                        Color primario
-                        <span class="text-base-content/50 text-xs">(opcional)</span>
-                      </label>
+                    <ui-field label="Color primario" optional class="col-span-2">
                       <div class="flex gap-2 items-center">
                         <input
                           type="color"
                           [value]="schoolForm.primaryColor().value() || '#3b82f6'"
                           (input)="onThemeColorChange('primaryColor', $any($event.target).value)"
-                          class="w-12 h-10 rounded cursor-pointer border border-base-300 p-1 bg-base-200 shrink-0"
+                          class="w-12 h-10 rounded cursor-pointer border border-line p-1 bg-surface-0 shrink-0"
                         />
                         <input
                           uiInput
@@ -356,18 +350,14 @@ interface SchoolFormData {
                           placeholder="#3b82f6"
                         />
                       </div>
-                    </div>
-                    <div class="fieldset col-span-2">
-                      <label for="secondaryColor">
-                        Color secundario
-                        <span class="text-base-content/50 text-xs">(opcional)</span>
-                      </label>
+                    </ui-field>
+                    <ui-field label="Color secundario" optional class="col-span-2">
                       <div class="flex gap-2 items-center">
                         <input
                           type="color"
                           [value]="schoolForm.secondaryColor().value() || '#10b981'"
                           (input)="onThemeColorChange('secondaryColor', $any($event.target).value)"
-                          class="w-12 h-10 rounded cursor-pointer border border-base-300 p-1 bg-base-200 shrink-0"
+                          class="w-12 h-10 rounded cursor-pointer border border-line p-1 bg-surface-0 shrink-0"
                         />
                         <input
                           uiInput
@@ -378,18 +368,14 @@ interface SchoolFormData {
                           placeholder="#10b981"
                         />
                       </div>
-                    </div>
-                    <div class="fieldset col-span-2">
-                      <label for="tertiaryColor">
-                        Color terciario
-                        <span class="text-base-content/50 text-xs">(opcional)</span>
-                      </label>
+                    </ui-field>
+                    <ui-field label="Color terciario" optional class="col-span-2">
                       <div class="flex gap-2 items-center">
                         <input
                           type="color"
                           [value]="schoolForm.tertiaryColor().value() || '#8b5cf6'"
                           (input)="onThemeColorChange('tertiaryColor', $any($event.target).value)"
-                          class="w-12 h-10 rounded cursor-pointer border border-base-300 p-1 bg-base-200 shrink-0"
+                          class="w-12 h-10 rounded cursor-pointer border border-line p-1 bg-surface-0 shrink-0"
                         />
                         <input
                           uiInput
@@ -400,7 +386,7 @@ interface SchoolFormData {
                           placeholder="#8b5cf6"
                         />
                       </div>
-                    </div>
+                    </ui-field>
                   </div>
                 </div>
               </div>
@@ -409,7 +395,7 @@ interface SchoolFormData {
         </div>
 
         <!-- Form Actions -->
-        <div class="flex justify-end gap-3 my-6 pt-6 border-t border-base-300">
+        <div class="flex justify-end gap-3 my-6 pt-6 border-t border-line">
           <a uiButton variant="ghost" [routerLink]="isEditMode() ? ['/schools', id()] : ['/admin/schools']">Cancelar</a>
           <button
             uiButton

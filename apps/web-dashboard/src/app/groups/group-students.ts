@@ -1,7 +1,7 @@
 import { Component, computed, input, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { Prisma } from '@generated/prisma';
-import { Card } from '#/ui';
+import { Card, UiInputGroup } from '#/ui';
 
 type Student = Prisma.StudentGetPayload<{
   include: { user: true };
@@ -11,9 +11,9 @@ type Student = Prisma.StudentGetPayload<{
 };
 @Component({
   selector: 'app-group-students',
-  imports: [Card, RouterLink],
+  imports: [Card, RouterLink, UiInputGroup],
   template: `<h4 class="text-xl font-medium mb-2">Estudiantes</h4>
-    <label class="input input-primary w-full md:w-96">
+    <label uiInputGroup class="w-full md:w-96">
       <span class="material-symbols-outlined">search</span>
       <input
         class="pl-0"
@@ -25,10 +25,13 @@ type Student = Prisma.StudentGetPayload<{
     </label>
     <ul class="flex-col gap-4 mt-4 md:grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
       @for (student of filteredStudents(); track student.id) {
-        <li uiCard interactive class="bg-base-200 p-4 hover:bg-base-200" [routerLink]="['/students', student.id]">
+        <li uiCard interactive class="bg-surface-0 p-4 hover:bg-surface-2" [routerLink]="['/students', student.id]">
           <div class="flex items-center gap-4">
             <div class="avatar avatar-placeholder">
-              <div class="text-primary-content w-10 rounded-full" [style.background]="student.user?.color || '#a1a1aa'">
+              <div
+                class="text-primary-content w-10 rounded-full"
+                [style.background]="student.user?.color || 'var(--ui-ink-subtle)'"
+              >
                 <span class="text-sm">{{ student.initials }}</span>
               </div>
             </div>

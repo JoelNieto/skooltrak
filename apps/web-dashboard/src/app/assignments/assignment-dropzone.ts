@@ -14,7 +14,7 @@ export type UploadedFile = {
       class="border-2 border-dashed rounded-lg p-6 text-center transition-colors"
       [class.border-primary]="isDragOver()"
       [class.bg-primary/5]="isDragOver()"
-      [class.border-base-300]="!isDragOver()"
+      [class.border-line]="!isDragOver()"
       [class.hover:border-primary]="!isDragOver()"
       (dragover)="onDragOver($event)"
       (dragleave)="onDragLeave($event)"
@@ -22,25 +22,26 @@ export type UploadedFile = {
     >
       @if (files().length === 0) {
         <div class="flex flex-col items-center gap-2">
-          <span class="material-symbols-outlined text-4xl text-base-content/50">
+          <span class="material-symbols-outlined text-4xl text-ink-subtle">
             cloud_upload
           </span>
-          <p class="text-base-content/70">
+          <p class="text-ink-muted">
             Arrastra y suelta archivos aquí o
           </p>
-          <label class="btn btn-primary btn-sm">
-            <span class="material-symbols-outlined text-lg">attach_file</span>
+          <button uiButton variant="primary" size="sm" type="button" (click)="fileInput.click()">
+            <span class="material-symbols-outlined text-lg" aria-hidden="true">attach_file</span>
             Seleccionar archivo
-            <input
-              type="file"
-              class="hidden"
-              [accept]="accept()"
-              [multiple]="multiple()"
-              (change)="onFileSelect($event)"
-            />
-          </label>
+          </button>
+          <input
+            #fileInput
+            type="file"
+            class="hidden"
+            [accept]="accept()"
+            [multiple]="multiple()"
+            (change)="onFileSelect($event)"
+          />
           @if (maxSize()) {
-            <p class="text-xs text-base-content/50 mt-1">
+            <p class="text-xs text-ink-subtle mt-1">
               Tamaño máximo: {{ formatBytes(maxSize()!) }}
             </p>
           }
@@ -49,7 +50,7 @@ export type UploadedFile = {
         <div class="space-y-3">
           @for (uploadedFile of files(); track uploadedFile.file.name) {
             <div
-              class="flex items-center justify-between p-3 bg-base-200 rounded-lg"
+              class="flex items-center justify-between p-3 bg-surface-0 rounded-lg"
             >
               <div class="flex items-center gap-3">
                 <span
@@ -73,7 +74,7 @@ export type UploadedFile = {
                   <p class="font-medium text-sm truncate max-w-xs">
                     {{ uploadedFile.file.name }}
                   </p>
-                  <p class="text-xs text-base-content/50">
+                  <p class="text-xs text-ink-subtle">
                     {{ formatBytes(uploadedFile.file.size) }}
                   </p>
                 </div>
@@ -88,17 +89,18 @@ export type UploadedFile = {
             </div>
           }
           @if (multiple()) {
-            <label class="btn btn-outline btn-sm">
-              <span class="material-symbols-outlined text-lg">add</span>
+            <button uiButton variant="secondary" size="sm" type="button" (click)="moreFilesInput.click()">
+              <span class="material-symbols-outlined text-lg" aria-hidden="true">add</span>
               Agregar más archivos
-              <input
-                type="file"
-                class="hidden"
-                [accept]="accept()"
-                [multiple]="multiple()"
-                (change)="onFileSelect($event)"
-              />
-            </label>
+            </button>
+            <input
+              #moreFilesInput
+              type="file"
+              class="hidden"
+              [accept]="accept()"
+              [multiple]="multiple()"
+              (change)="onFileSelect($event)"
+            />
           }
         </div>
       }

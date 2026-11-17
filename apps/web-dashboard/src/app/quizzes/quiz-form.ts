@@ -88,10 +88,9 @@ import { QuizQuestionControl } from './quiz-question-control';
                   }
                 </select>
               </ui-field>
-              <div class="fieldset">
-                <label for="details">Descripción</label>
+              <ui-field label="Descripción">
                 <lib-text-editor id="details" name="details" formControlName="details" [bordered]="true" />
-              </div>
+              </ui-field>
             </div>
             <div class="flex justify-end mt-4">
               <button uiButton [loading]="isSaving()" variant="primary" type="submit" [disabled]="isSaving()">

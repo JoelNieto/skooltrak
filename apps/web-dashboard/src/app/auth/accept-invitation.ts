@@ -1,88 +1,63 @@
+import { Alert, Button, Card, CardBody, Spinner } from '#/ui';
 import { Component, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import Auth from './auth';
 import { authClient } from './auth-client';
+import { BrandLogo } from '../shared/brand-logo';
 
 @Component({
   selector: 'app-accept-invitation',
-  imports: [RouterLink],
+  imports: [Alert, Button, Card, CardBody, Spinner, BrandLogo, RouterLink],
   template: `
-    <div class="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div class="max-w-md w-full space-y-8">
-        @if (loading()) {
-          <div class="text-center">
-            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
-            <p class="mt-4 text-gray-600">Processing your invitation...</p>
-          </div>
-        } @else if (error()) {
-          <div class="rounded-md bg-red-50 p-4">
-            <div class="flex">
-              <div class="shrink-0">
-                <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
-                  <path
-                    fill-rule="evenodd"
-                    d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-                    clip-rule="evenodd"
-                  />
-                </svg>
+    <div class="gradient-bg min-h-screen flex items-center justify-center p-4">
+      <div class="max-w-md w-full flex flex-col gap-8 items-center">
+        <app-brand-logo alt="" class="h-12" />
+        <div uiCard class="w-full">
+          <div uiCardBody class="gap-6 text-center">
+            @if (loading()) {
+              <span uiSpinner size="lg" class="mx-auto"></span>
+              <p class="text-ink-muted">Procesando tu invitación…</p>
+            } @else if (error()) {
+              <div uiAlert tone="danger" class="text-left">
+                <span class="material-symbols-outlined" aria-hidden="true">error</span>
+                <div>
+                  <h2 class="font-semibold">No pudimos aceptar la invitación</h2>
+                  <p>{{ error() }}</p>
+                </div>
               </div>
-              <div class="ml-3">
-                <h3 class="text-sm font-medium text-red-800">Error</h3>
-                <p class="text-sm text-red-700 mt-1">{{ error() }}</p>
+              <a uiButton variant="ghost" routerLink="/login">Ir a iniciar sesión</a>
+            } @else if (success()) {
+              <div uiAlert tone="success" class="text-left">
+                <span class="material-symbols-outlined" aria-hidden="true">check_circle</span>
+                <div>
+                  <h2 class="font-semibold">¡Bienvenido!</h2>
+                  <p>Te uniste a {{ organizationName() }}.</p>
+                </div>
               </div>
-            </div>
-          </div>
-          <div class="text-center">
-            <a routerLink="/login" class="font-medium text-indigo-600 hover:text-indigo-500"> Go to sign in </a>
-          </div>
-        } @else if (success()) {
-          <div class="rounded-md bg-green-50 p-4">
-            <div class="flex">
-              <div class="shrink-0">
-                <svg class="h-5 w-5 text-green-400" viewBox="0 0 20 20" fill="currentColor">
-                  <path
-                    fill-rule="evenodd"
-                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                    clip-rule="evenodd"
-                  />
-                </svg>
+              <a uiButton variant="primary" routerLink="/home">Ir al inicio</a>
+            } @else if (needsAuth()) {
+              <div>
+                <h1 class="text-2xl font-semibold text-ink-strong">Inicia sesión para continuar</h1>
+                <p class="mt-2 text-ink-muted">Necesitas una cuenta para aceptar esta invitación.</p>
               </div>
-              <div class="ml-3">
-                <h3 class="text-sm font-medium text-green-800">Welcome!</h3>
-                <p class="text-sm text-green-700 mt-1">You've successfully joined {{ organizationName() }}.</p>
+              <div class="flex flex-wrap justify-center gap-3">
+                <a
+                  uiButton
+                  variant="primary"
+                  [routerLink]="['/login']"
+                  [queryParams]="{ returnUrl: '/accept-invitation/' + invitationId() }"
+                  >Iniciar sesión</a
+                >
+                <a
+                  uiButton
+                  [routerLink]="['/register']"
+                  [queryParams]="{ returnUrl: '/accept-invitation/' + invitationId() }"
+                  >Crear cuenta</a
+                >
               </div>
-            </div>
+            }
           </div>
-          <div class="text-center">
-            <a
-              routerLink="/home"
-              class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700"
-            >
-              Go to Dashboard
-            </a>
-          </div>
-        } @else if (needsAuth()) {
-          <div class="text-center">
-            <h2 class="text-2xl font-bold text-gray-900">Sign in required</h2>
-            <p class="mt-2 text-gray-600">Please sign in to accept this invitation.</p>
-            <div class="mt-6 space-x-4">
-              <a
-                [routerLink]="['/login']"
-                [queryParams]="{ returnUrl: '/accept-invitation/' + invitationId() }"
-                class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700"
-              >
-                Sign in
-              </a>
-              <a
-                [routerLink]="['/register']"
-                [queryParams]="{ returnUrl: '/accept-invitation/' + invitationId() }"
-                class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md shadow-sm text-gray-700 bg-white hover:bg-gray-50"
-              >
-                Create account
-              </a>
-            </div>
-          </div>
-        }
+        </div>
       </div>
     </div>
   `,
@@ -108,7 +83,7 @@ export default class AcceptInvitationComponent {
     const invitationId = this.invitationId();
 
     if (!invitationId) {
-      this.error.set('Invalid invitation link');
+      this.error.set('El enlace de invitación no es válido.');
       this.loading.set(false);
       return;
     }
@@ -126,15 +101,15 @@ export default class AcceptInvitationComponent {
       });
 
       if (error) {
-        this.error.set(error.message || 'Failed to accept invitation');
+        this.error.set(error.message || 'No se pudo aceptar la invitación.');
         this.loading.set(false);
         return;
       }
 
       this.success.set(true);
-      this.organizationName.set((data as any)?.organization?.name || 'the organization');
+      this.organizationName.set((data as any)?.organization?.name || 'la organización');
     } catch (err: any) {
-      this.error.set(err.message || 'Failed to accept invitation');
+      this.error.set(err.message || 'No se pudo aceptar la invitación.');
     } finally {
       this.loading.set(false);
     }

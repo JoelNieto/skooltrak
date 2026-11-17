@@ -34,10 +34,9 @@ interface AssignmentFormData {
       <ui-field label="Titulo" [field]="form.title" class="col-span-2">
         <input uiInput type="text" [formField]="form.title" />
       </ui-field>
-      <div class="fieldset col-span-2">
-        <label for="details">Detalles</label>
+      <ui-field label="Detalles" class="col-span-2">
         <lib-text-editor [formField]="form.details" [bordered]="true" />
-      </div>
+      </ui-field>
       <ui-field label="Curso" [field]="form.courseId" class="col-span-2">
         <select uiSelect [formField]="form.courseId">
           <option disabled selected [value]="null">Seleccionar curso</option>
@@ -71,7 +70,7 @@ interface AssignmentFormData {
           <h3 class="text-lg font-medium mb-2">Fechas de entrega por grupo</h3>
           <div class="grid gap-3">
             @for (group of form.groupDates; let i = $index; track i) {
-              <div class="flex items-center gap-4 p-3 bg-base-200 rounded-lg">
+              <div class="flex items-center gap-4 p-3 bg-surface-0 rounded-lg">
                 <span class="font-medium min-w-24">{{ groups[i].name }}</span>
                 <input uiInput [id]="'group-date-' + i" type="datetime-local" [formField]="group.date" class="flex-1" />
               </div>

@@ -37,12 +37,12 @@ export class StripHtmlPipe implements PipeTransform {
           <span class="material-symbols-outlined">chevron_right</span>
         </button>
       </div>
-      <div class="flex-1 text-center text-base-content">{{ startDate() | date }} - {{ endDate() | date }}</div>
+      <div class="flex-1 text-center text-ink-strong">{{ startDate() | date }} - {{ endDate() | date }}</div>
       <div class="flex-1 flex justify-end">
         <button uiButton (click)="today()"><span class="material-symbols-outlined">today</span> Hoy</button>
       </div>
     </div>
-    <div class="overflow-x-auto bg-base-100 rounded-lg mt-4">
+    <div class="overflow-x-auto bg-surface-1 rounded-lg mt-4">
       @if (assignmentDatesResource.hasValue()) {
         @let list = assignmentDatesResource.value()!;
         <table uiTable>

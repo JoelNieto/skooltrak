@@ -22,16 +22,16 @@ type BroadcastCardItem = {
   imports: [Badge, DatePipe],
   template: `
     <div class="flex items-start justify-between gap-2">
-      <p class="font-medium text-base-content flex items-center gap-2 min-w-0">
+      <p class="font-medium text-ink-strong flex items-center gap-2 min-w-0">
         <span class="material-symbols-outlined text-primary text-lg shrink-0">campaign</span>
         <span class="truncate">{{ item().title }}</span>
       </p>
       <span uiBadge tone="action" size="sm" class="shrink-0">Comunicado</span>
     </div>
     @if (item().preview) {
-      <p class="text-sm text-base-content/70 line-clamp-2 mt-1">{{ item().preview }}</p>
+      <p class="text-sm text-ink-muted line-clamp-2 mt-1">{{ item().preview }}</p>
     }
-    <div class="flex flex-wrap items-center gap-2 text-xs text-base-content/60 mt-2">
+    <div class="flex flex-wrap items-center gap-2 text-xs text-ink-muted mt-2">
       <span>{{ item().senderName }}</span>
       @if (item().createdAt) {
         <span>· {{ item().createdAt | date: 'short' }}</span>
@@ -57,7 +57,7 @@ export class BroadcastCard {
     <div uiCard class="border-primary/25">
       <div uiCardBody>
         <div class="flex items-center justify-between gap-3">
-          <h2 class="text-lg font-semibold text-base-content flex items-center gap-2">
+          <h2 class="text-lg font-semibold text-ink-strong flex items-center gap-2">
             <span class="material-symbols-outlined text-primary">campaign</span>
             Comunicados
           </h2>

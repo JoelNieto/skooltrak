@@ -20,7 +20,7 @@ import { Component } from '@angular/core';
 
     <div uiCard class="mt-6">
       <div uiCardBody>
-        <h2 class="text-lg font-semibold text-base-content">Calificaciones recientes</h2>
+        <h2 class="text-lg font-semibold text-ink-strong">Calificaciones recientes</h2>
         @if (grades.length === 0) {
           <lib-empty-state
             title="Sin calificaciones registradas"
@@ -44,7 +44,7 @@ import { Component } from '@angular/core';
                     <td>{{ grade.student }}</td>
                     <td>{{ grade.assessment }}</td>
                     <td>{{ grade.score }}</td>
-                    <td class="text-sm text-base-content/70">
+                    <td class="text-sm text-ink-muted">
                       {{ grade.note }}
                     </td>
                   </tr>

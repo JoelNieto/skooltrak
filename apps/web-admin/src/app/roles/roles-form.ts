@@ -1,4 +1,4 @@
-import { Button, Toast, UiField, UiInput, UiSelect, UiToggle } from '#/ui';
+import { Button, Toast, UiChoice, UiField, UiInput, UiSelect, UiToggle } from '#/ui';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { afterRenderEffect, Component, inject, input, model, output, signal } from '@angular/core';
 import { form, FormField, required } from '@angular/forms/signals';
@@ -6,7 +6,7 @@ import { Prisma } from '@generated/prisma';
 import { firstValueFrom } from 'rxjs';
 @Component({
   selector: 'app-roles-form',
-  imports: [UiField, UiInput, UiSelect, UiToggle, Button, FormField],
+  imports: [UiField, UiChoice, UiInput, UiSelect, UiToggle, Button, FormField],
   template: `
     <form (submit)="createRole($event)">
       <ui-field label="Nombre" [field]="form.name">
@@ -25,10 +25,10 @@ import { firstValueFrom } from 'rxjs';
           }
         </select>
       </ui-field>
-      <div class="fieldset">
-        <label for="permissionIds">Permisos</label>
+      <fieldset class="flex flex-col gap-3 mt-4">
+        <legend class="text-sm font-medium text-ink-strong mb-2">Permisos</legend>
         @for (permission of permissions.value(); track permission.id) {
-          <label class="label flex gap-2 items-center">
+          <ui-choice label="{{ permission.description }} {{ permission.descriptiveId }}">
             <input
               uiToggle
               type="checkbox"
@@ -36,10 +36,9 @@ import { firstValueFrom } from 'rxjs';
               [id]="permission.id"
               (change)="togglePermission(permission.id!)"
             />
-            <span class="label-text ml-2">{{ permission.description }} {{ permission.descriptiveId }}</span>
-          </label>
+          </ui-choice>
         }
-      </div>
+      </fieldset>
       <div class="flex justify-end mt-4">
         <button uiButton variant="primary" type="submit">Guardar</button>
       </div>

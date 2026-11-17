@@ -1,4 +1,16 @@
-import { Badge, Button, Card, debounceSignal, EmptyState, Loader, Modal, PageHeader, Toast, UiTable } from '#/ui';
+import {
+  Badge,
+  Button,
+  Card,
+  debounceSignal,
+  EmptyState,
+  Loader,
+  Modal,
+  PageHeader,
+  Toast,
+  UiInputGroup,
+  UiTable,
+} from '#/ui';
 import { DatePipe } from '@angular/common';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { Component, inject, Signal, signal } from '@angular/core';
@@ -29,7 +41,7 @@ type FileItem = {
 
 @Component({
   selector: 'app-files',
-  imports: [Card, UiTable, Badge, Button, Loader, FormsModule, DatePipe, PageHeader, EmptyState],
+  imports: [Card, UiTable, Badge, Button, Loader, FormsModule, DatePipe, PageHeader, EmptyState, UiInputGroup],
   template: `
     <lib-page-header
       [breadcrumbs]="[{ label: 'Inicio', link: '/' }, { label: 'Archivos' }]"
@@ -38,14 +50,14 @@ type FileItem = {
     />
 
     <div class="flex flex-col md:flex-row md:justify-between md:items-center">
-      <label class="input input-primary input-md mt-3 md:mt-0">
+      <label uiInputGroup class="mt-3 md:mt-0">
         <span class="material-symbols-outlined">search</span>
         <input class="pl-0" type="search" placeholder="Buscar archivos..." [(ngModel)]="searchText" />
       </label>
     </div>
     <div class="tabs tabs-box mt-4">
       <input class="tab" type="radio" name="files_tabs" aria-label="Compartidos conmigo" checked="checked" />
-      <div class="tab-content bg-base-100 border-base-300 p-4">
+      <div class="tab-content bg-surface-1 border-line p-4">
         @if (sharedFilesResource.isLoading()) {
           <lib-loader />
         }
@@ -69,7 +81,7 @@ type FileItem = {
               </thead>
               <tbody>
                 @for (file of sharedFilesResource.value(); track file.id) {
-                  <tr class="hover:bg-base-300">
+                  <tr class="hover:bg-surface-2">
                     <td class="font-medium">{{ file.name }}</td>
                     <td>
                       <div class="flex items-center gap-2">
@@ -120,7 +132,7 @@ type FileItem = {
         }
       </div>
       <input class="tab" type="radio" name="files_tabs" aria-label="Mis archivos" />
-      <div class="tab-content bg-base-100 border-base-300 p-4">
+      <div class="tab-content bg-surface-1 border-line p-4">
         @if (ownedFilesResource.isLoading()) {
           <lib-loader />
         }
@@ -153,19 +165,19 @@ type FileItem = {
                     <td class="text-right">
                       @if (file.id) {
                         <button
-                          class="text-base-content hover:text-success p-1 rounded-lg  cursor-pointer"
+                          class="text-ink-strong hover:text-success p-1 rounded-lg  cursor-pointer"
                           (click)="openFile(file.id)"
                         >
                           <span class="material-symbols-outlined text-medium!">open_in_new</span>
                         </button>
                         <button
-                          class="text-base-content hover:text-blue-500 p-1 rounded-lg  cursor-pointer"
+                          class="text-ink-strong hover:text-action p-1 rounded-lg  cursor-pointer"
                           (click)="downloadFile(file.id)"
                         >
                           <span class="material-symbols-outlined text-medium!">download</span>
                         </button>
                         <button
-                          class="text-base-content hover:text-primary p-1 rounded-lg cursor-pointer"
+                          class="text-ink-strong hover:text-primary p-1 rounded-lg cursor-pointer"
                           (click)="openShareModal(file)"
                         >
                           <span class="material-symbols-outlined text-medium!">share</span>

@@ -28,10 +28,10 @@ type MessageType = Prisma.MessageGetPayload<undefined> & {
   imports: [Breadcrumbs, Card, CardBody, UiInput, Button, Loader, DatePipe, EditorViewer, FormsModule],
   styles: `
     :host ::ng-deep blockquote {
-      border-left: 3px solid oklch(var(--bc) / 0.3);
+      border-left: 3px solid var(--ui-line-strong);
       padding-left: 1rem;
       margin: 0.5rem 0;
-      color: oklch(var(--bc) / 0.7);
+      color: var(--ui-ink-muted);
       font-style: italic;
     }
   `,
@@ -47,10 +47,10 @@ type MessageType = Prisma.MessageGetPayload<undefined> & {
         />
         <div uiCard class="mt-4">
           <div uiCardBody>
-            <div class="border-b border-base-300">
+            <div class="border-b border-line">
               <h1 class="text-2xl font-bold mb-4">{{ message.subject }}</h1>
             </div>
-            <div class="flex items-center justify-between border-b border-base-300 w-full py-4">
+            <div class="flex items-center justify-between border-b border-line w-full py-4">
               <div class="flex items-center gap-2">
                 <div class="avatar avatar-placeholder">
                   <div class="bg-neutral text-neutral-content w-10 rounded-full">
@@ -59,15 +59,15 @@ type MessageType = Prisma.MessageGetPayload<undefined> & {
                 </div>
                 <div class="flex flex-col text-sm">
                   <div class="font-semibold">{{ message.sender?.name }}</div>
-                  <div class="text-base-content/60">Para: {{ receivers() }}</div>
+                  <div class="text-ink-muted">Para: {{ receivers() }}</div>
                 </div>
               </div>
-              <span class="text-sm text-base-content/60">{{ message.createdAt | date: 'short' }}</span>
+              <span class="text-sm text-ink-muted">{{ message.createdAt | date: 'short' }}</span>
             </div>
             <div class="py-3">
               <lib-editor-viewer [innerHTML]="message.content" />
             </div>
-            <div class="flex justify-end gap-2 border-t border-base-300 pt-3">
+            <div class="flex justify-end gap-2 border-t border-line pt-3">
               <button uiButton variant="ghost" size="sm" (click)="prepareReply(message)">Responder</button>
               <button uiButton variant="ghost" size="sm" (click)="prepareReply(message, true)">
                 Responder con cita
@@ -92,7 +92,7 @@ type MessageType = Prisma.MessageGetPayload<undefined> & {
                         </div>
                         <div class="font-semibold">{{ item.sender?.name }}</div>
                       </div>
-                      <span class="text-base-content/60">{{ item.createdAt | date: 'short' }}</span>
+                      <span class="text-ink-muted">{{ item.createdAt | date: 'short' }}</span>
                     </div>
                     <div class="mt-2 text-sm">
                       <lib-editor-viewer [innerHTML]="item.content" />
@@ -117,7 +117,7 @@ type MessageType = Prisma.MessageGetPayload<undefined> & {
             <h3 class="text-lg font-semibold">Responder</h3>
             @if (replyDraft().quotedText) {
               <div class="message-quote">
-                <div class="text-xs text-base-content/60">Cita de {{ replyDraft().quotedAuthor }}</div>
+                <div class="text-xs text-ink-muted">Cita de {{ replyDraft().quotedAuthor }}</div>
                 <div class="text-sm">{{ replyDraft().quotedText }}</div>
                 <div class="mt-2">
                   <button uiButton variant="ghost" size="sm" (click)="clearQuote()">Quitar cita</button>

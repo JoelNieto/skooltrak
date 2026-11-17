@@ -63,7 +63,7 @@ import GroupStudents from './group-students';
             >
           </label>
 
-          <div class="tab-content bg-base-100 border-base-300 p-6">
+          <div class="tab-content bg-surface-1 border-line p-6">
             <app-group-students [students]="$any(group.students ?? [])" />
           </div>
           <label class="tab">
@@ -74,7 +74,7 @@ import GroupStudents from './group-students';
             </span>
           </label>
 
-          <div class="tab-content bg-base-100 border-base-300 p-6">
+          <div class="tab-content bg-surface-1 border-line p-6">
             <app-group-courses [courses]="$any(group.courses ?? [])" />
           </div>
           <label class="tab">
@@ -84,7 +84,7 @@ import GroupStudents from './group-students';
               Horario
             </span>
           </label>
-          <div class="tab-content bg-base-100 border-base-300 p-6">
+          <div class="tab-content bg-surface-1 border-line p-6">
             <app-group-schedule [id]="id()" />
           </div>
           @if (canManageHabits()) {
@@ -95,7 +95,7 @@ import GroupStudents from './group-students';
                 Hábitos y actitudes
               </span>
             </label>
-            <div class="tab-content bg-base-100 border-base-300 p-6">
+            <div class="tab-content bg-surface-1 border-line p-6">
               <app-group-habits [groupId]="id()" [students]="$any(group.students ?? [])" />
             </div>
           }

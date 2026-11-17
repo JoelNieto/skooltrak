@@ -1,4 +1,4 @@
-import { Alert, Badge, Button, Card, Confirmation, Pagination, Paginator, Toast, UiTable } from '#/ui';
+import { Alert, Badge, Button, Card, Confirmation, Pagination, Paginator, Toast, UiInputGroup, UiTable } from '#/ui';
 import { Menu, MenuContent, MenuItem, MenuTrigger } from '@angular/aria/menu';
 import { OverlayModule } from '@angular/cdk/overlay';
 import { DatePipe } from '@angular/common';
@@ -39,6 +39,7 @@ type NewsletterItem = {
     MenuItem,
     MenuTrigger,
     OverlayModule,
+    UiInputGroup,
   ],
   providers: [Pagination],
   template: `
@@ -51,7 +52,7 @@ type NewsletterItem = {
     } @else {
       <div class="flex flex-col gap-4 md:flex-row md:justify-between">
         <div class="md:w-96 w-full">
-          <label class="input input-primary">
+          <label uiInputGroup>
             <span class="material-symbols-outlined">search</span>
             <input class="pl-0" type="search" placeholder="Buscar..." [(ngModel)]="searchText" />
           </label>
@@ -65,7 +66,7 @@ type NewsletterItem = {
           <thead>
             <tr>
               <th
-                class="cursor-pointer hover:bg-base-200"
+                class="cursor-pointer hover:bg-surface-2"
                 [class]="pagination.sortBy() === 'title' ? 'bg-primary/10 text-primary! hover:bg-primary/20' : ''"
                 (click)="pagination.setOrder('title')"
               >
@@ -81,7 +82,7 @@ type NewsletterItem = {
               <th>Colegio</th>
               <th>Estado</th>
               <th
-                class="cursor-pointer hover:bg-base-200"
+                class="cursor-pointer hover:bg-surface-2"
                 [class]="pagination.sortBy() === 'publishedAt' ? 'bg-primary/10 text-primary! hover:bg-primary/20' : ''"
                 (click)="pagination.setOrder('publishedAt')"
               >
@@ -96,7 +97,7 @@ type NewsletterItem = {
               </th>
               <th>Autor</th>
               <th
-                class="cursor-pointer hover:bg-base-200"
+                class="cursor-pointer hover:bg-surface-2"
                 [class]="pagination.sortBy() === 'createdAt' ? 'bg-primary/10 text-primary! hover:bg-primary/20' : ''"
                 (click)="pagination.setOrder('createdAt')"
               >
@@ -129,7 +130,7 @@ type NewsletterItem = {
                 <td>{{ newsletter.createdAt | date: 'short' }}</td>
                 <td>
                   <button
-                    class="cursor-pointer hover:bg-base-200 p-1 rounded-lg flex items-center justify-center"
+                    class="cursor-pointer hover:bg-surface-2 p-1 rounded-lg flex items-center justify-center"
                     ngMenuTrigger
                     #origin
                     #trigger="ngMenuTrigger"
@@ -151,12 +152,12 @@ type NewsletterItem = {
                     ]"
                     cdkAttachPopoverAsChild
                   >
-                    <div ngMenu class="bg-base-100 shadow-sm rounded-lg p-1 w-48" #actionsMenu="ngMenu">
+                    <div ngMenu class="bg-surface-1 shadow-sm rounded-lg p-1 w-48" #actionsMenu="ngMenu">
                       <ng-template ngMenuContent>
                         <a
                           ngMenuItem
                           value="Edit"
-                          class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-base-200 w-full"
+                          class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-surface-2 w-full"
                           [routerLink]="['/admin/newsletters', newsletter.id, 'edit']"
                         >
                           <span class="material-symbols-outlined text-lg">edit</span>
@@ -165,7 +166,7 @@ type NewsletterItem = {
                         <button
                           ngMenuItem
                           [value]="newsletter.published ? 'Unpublish' : 'Publish'"
-                          class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-base-200 w-full"
+                          class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-surface-2 w-full"
                           (click)="togglePublish(newsletter)"
                         >
                           <span class="material-symbols-outlined text-lg">
@@ -176,7 +177,7 @@ type NewsletterItem = {
                         <button
                           ngMenuItem
                           value="Delete"
-                          class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-base-200 w-full"
+                          class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-surface-2 w-full"
                           (click)="deleteNewsletter(newsletter)"
                         >
                           <span class="material-symbols-outlined text-lg">delete</span>

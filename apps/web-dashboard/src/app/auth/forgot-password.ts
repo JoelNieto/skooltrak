@@ -1,4 +1,4 @@
-import { Alert, Button, Loader, UiInput } from '#/ui';
+import { Alert, Button, Loader, UiField, UiInput } from '#/ui';
 import { HttpClient } from '@angular/common/http';
 import { Component, inject, signal } from '@angular/core';
 import { email, form, FormField, required } from '@angular/forms/signals';
@@ -15,7 +15,7 @@ type LookupResult = {
 
 @Component({
   selector: 'app-forgot-password',
-  imports: [Alert, UiInput, Button, BrandLogo, FormField, RouterLink, Loader],
+  imports: [Alert, UiInput, Button, BrandLogo, FormField, RouterLink, Loader, UiField],
   template: `
     <div class="gradient-bg min-h-screen flex items-center justify-center p-4">
       @defer {
@@ -24,7 +24,7 @@ type LookupResult = {
 
           <div class="w-full rounded-2xl shadow-xl overflow-hidden flex flex-col">
             <!-- Header Section -->
-            <div class="bg-primary p-6 text-white text-center">
+            <div class="bg-primary p-6 text-primary-content text-center">
               <h1 class="text-2xl font-bold">Recuperar contraseña</h1>
               <p class="text-primary-content mt-2">
                 @switch (step()) {
@@ -48,7 +48,7 @@ type LookupResult = {
             </div>
 
             <!-- Form Section -->
-            <div class="p-8 bg-base-100">
+            <div class="p-8 bg-surface-1">
               @if (step() === 'sent') {
                 <div uiAlert tone="success" class="mb-4">
                   <span class="material-symbols-outlined">check_circle</span>
@@ -59,8 +59,8 @@ type LookupResult = {
                 </div>
               } @else if (step() === 'confirm') {
                 <div class="space-y-6">
-                  <div class="bg-base-200 rounded-lg p-4">
-                    <p class="text-base-content/90">
+                  <div class="bg-surface-0 rounded-lg p-4">
+                    <p class="text-ink">
                       Encontramos una cuenta asociada a <strong>{{ searchedEmail() }}</strong
                       >:
                     </p>
@@ -71,9 +71,7 @@ type LookupResult = {
                       }
                     </p>
                   </div>
-                  <p class="text-sm text-base-content/70">
-                    ¿Es tu cuenta? Confirma para enviarte el enlace de recuperación.
-                  </p>
+                  <p class="text-sm text-ink-muted">¿Es tu cuenta? Confirma para enviarte el enlace de recuperación.</p>
                   <div class="flex flex-col gap-3">
                     <button
                       uiButton
@@ -124,8 +122,7 @@ type LookupResult = {
                 </div>
               } @else {
                 <form (submit)="onLookup($event)" class="space-y-6">
-                  <div class="fieldset">
-                    <label for="email">Correo Electrónico</label>
+                  <ui-field label="Correo Electrónico">
                     <div class="relative">
                       <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                         <span class="material-symbols-outlined">mail</span>
@@ -145,7 +142,7 @@ type LookupResult = {
                         <p class="text-error text-xs mt-1">{{ error.message }}</p>
                       }
                     }
-                  </div>
+                  </ui-field>
 
                   <button
                     uiButton

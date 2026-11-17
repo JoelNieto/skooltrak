@@ -26,7 +26,7 @@ import Store from '../core/store';
           }"
         >
           <div uiCardBody>
-            <div class="text-sm text-base-content/70">Promedio del periodo:</div>
+            <div class="text-sm text-ink-muted">Promedio del periodo:</div>
             <div class="text-lg font-bold">
               <span
                 [ngClass]="{
@@ -54,7 +54,7 @@ import Store from '../core/store';
       <div class="flex items-center justify-between">
         @if (studentsResource.value().studentGradesByCourseId.length) {
         } @else {
-          <div class="text-sm text-base-content/70">Promedio del periodo: -</div>
+          <div class="text-sm text-ink-muted">Promedio del periodo: -</div>
         }
       </div>
       <div class="overflow-x-auto">

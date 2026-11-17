@@ -6,7 +6,7 @@ import { Button } from '#/ui';
   selector: 'app-store-theme-toggle',
   imports: [Button],
   template: `
-    <div class="flex gap-1 p-2 rounded-lg bg-base-200/50" role="group" aria-label="Tema">
+    <div class="flex gap-1 p-2 rounded-lg bg-surface-0/50" role="group" aria-label="Tema">
       <button
         uiButton
         size="sm"

@@ -27,7 +27,7 @@ type StudentFinancialSummaryType = {
     @if (summaryResource.hasValue()) {
       @let items = summaryResource.value() ?? [];
       @if (items.length === 0) {
-        <div class="rounded-lg border border-base-200 bg-base-100 p-8 text-center text-base-content/70">
+        <div class="rounded-lg border border-line bg-surface-1 p-8 text-center text-ink-muted">
           No tienes estudiantes vinculados o no hay información financiera disponible.
         </div>
       } @else {
@@ -38,15 +38,15 @@ type StudentFinancialSummaryType = {
                 <h3 uiCardTitle class="text-base">{{ child.firstName }} {{ child.fatherName }}</h3>
                 <div class="mt-2 grid grid-cols-2 gap-2 text-sm">
                   <div>
-                    <span class="text-base-content/60">Cargos:</span>
+                    <span class="text-ink-muted">Cargos:</span>
                     <span class="ml-1 font-medium">{{ formatCurrency(child.totalCharges) }}</span>
                   </div>
                   <div>
-                    <span class="text-base-content/60">Pagos:</span>
+                    <span class="text-ink-muted">Pagos:</span>
                     <span class="ml-1 font-medium">{{ formatCurrency(child.totalPayments) }}</span>
                   </div>
-                  <div class="col-span-2 mt-1 border-t border-base-200 pt-2">
-                    <span class="text-base-content/60">Saldo:</span>
+                  <div class="col-span-2 mt-1 border-t border-line pt-2">
+                    <span class="text-ink-muted">Saldo:</span>
                     <span
                       class="ml-1 font-semibold"
                       [class.text-success]="child.balance >= 0"
@@ -54,7 +54,7 @@ type StudentFinancialSummaryType = {
                     >
                       {{ formatCurrency(child.balance) }}
                     </span>
-                    <span class="ml-1 text-xs text-base-content/60">
+                    <span class="ml-1 text-xs text-ink-muted">
                       {{ child.balance >= 0 ? '(Al día)' : '(Pendiente)' }}
                     </span>
                   </div>

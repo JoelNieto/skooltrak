@@ -1,4 +1,4 @@
-import { Alert, Button, Loader, Toast, UiInput, UiRadio, UiSelect, UiTable } from '#/ui';
+import { Alert, Button, Loader, Toast, UiField, UiInput, UiRadio, UiSelect, UiTable } from '#/ui';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { Component, computed, inject, input, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -22,7 +22,7 @@ type StudentEvaluation = {
 
 @Component({
   selector: 'app-group-habits',
-  imports: [Alert, UiTable, UiInput, UiRadio, UiSelect, Button, FormsModule, Loader],
+  imports: [Alert, UiTable, UiInput, UiRadio, UiSelect, Button, FormsModule, Loader, UiField],
   template: `
     <div class="space-y-4">
       <!-- Empty state: No metrics configured -->
@@ -39,29 +39,23 @@ type StudentEvaluation = {
       } @else {
         <!-- Selectors -->
         <div class="grid grid-cols-2 gap-4">
-          <div class="form-control">
-            <label class="label" for="habits-period">
-              <span class="label-text">Período</span>
-            </label>
+          <ui-field label="Período">
             <select uiSelect id="habits-period" [(ngModel)]="selectedPeriodId" (ngModelChange)="onSelectionChange()">
               <option [value]="null" disabled selected>Seleccione un período</option>
               @for (period of periods.value(); track period.id) {
                 <option [value]="period.id">{{ period.name }} - {{ period.year }}</option>
               }
             </select>
-          </div>
+          </ui-field>
 
-          <div class="form-control">
-            <label class="label" for="habits-metric">
-              <span class="label-text">Criterio de evaluación</span>
-            </label>
+          <ui-field label="Criterio de evaluación">
             <select uiSelect id="habits-metric" [(ngModel)]="selectedMetricId" (ngModelChange)="onSelectionChange()">
               <option [value]="null" disabled selected>Seleccione un criterio</option>
               @for (metric of activeMetrics(); track metric.id) {
                 <option [value]="metric.id">{{ metric.name }}</option>
               }
             </select>
-          </div>
+          </ui-field>
         </div>
 
         <!-- Prompt to select period and metric -->
@@ -74,7 +68,7 @@ type StudentEvaluation = {
           <lib-loader />
         } @else {
           <!-- Legend -->
-          <div class="flex gap-4 items-center p-4 bg-base-200 rounded-lg">
+          <div class="flex gap-4 items-center p-4 bg-surface-0 rounded-lg">
             <span class="font-semibold">Leyenda:</span>
             <div class="flex gap-2 items-center">
               <input uiRadio tone="danger" size="sm" type="radio" disabled />
@@ -108,7 +102,7 @@ type StudentEvaluation = {
                         <div class="avatar avatar-placeholder">
                           <div
                             class="bg-neutral text-neutral-content w-8 rounded-full"
-                            [style.background]="student.user?.color || '#a1a1aa'"
+                            [style.background]="student.user?.color || 'var(--ui-ink-subtle)'"
                           >
                             <span class="text-xs">{{ student.initials }}</span>
                           </div>
@@ -162,8 +156,8 @@ type StudentEvaluation = {
                     <td>
                       <input
                         uiInput
+                        size="sm"
                         type="text"
-                        class="input-sm"
                         [value]="getComments(student.id)"
                         (input)="updateComments(student.id, $any($event.target).value)"
                         placeholder="Comentarios opcionales"
@@ -177,7 +171,7 @@ type StudentEvaluation = {
 
           <!-- Save Button -->
           <div class="flex justify-end gap-2">
-            <button uiButton [loading]="saving()" variant="primary" (click)="saveAll()" [class.loading]="saving()">
+            <button uiButton [loading]="saving()" variant="primary" (click)="saveAll()">
               @if (saving()) {
                 Guardando...
               } @else {

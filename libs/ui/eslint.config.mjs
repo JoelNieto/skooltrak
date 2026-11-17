@@ -28,7 +28,9 @@ export default [
   },
   {
     files: ['**/*.html'],
-    // Override or add rules here
-    rules: {},
+    rules: {
+      // Primitives apply DaisyUI classes here, so only the token checks run (tools/eslint-rules).
+      '@nx/workspace-design-tokens': ['error', { primitives: false }],
+    },
   },
 ];

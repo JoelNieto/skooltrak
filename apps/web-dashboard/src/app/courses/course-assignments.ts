@@ -23,10 +23,10 @@ import Store from '../core/store';
             class="flex items-center gap-2 justify-between cursor-pointer"
             [routerLink]="['/assignments', marker.data.assignmentId]"
           >
-            <div class="overflow-hidden text-ellipsis text-base-content whitespace-nowrap text-xs">
+            <div class="overflow-hidden text-ellipsis text-ink-strong whitespace-nowrap text-xs">
               {{ marker.data.title }}
               @if (!isStudent() && marker.data.groupName) {
-                <span class="text-base-300 ml-1">({{ marker.data.groupName }})</span>
+                <span class="text-ink-subtle ml-1">({{ marker.data.groupName }})</span>
               }
             </div>
             <time [attr.datetime]="marker.date | date: 'yyyy-MM-dd'" class="text-ink-muted text-xs flex-none">

@@ -1,22 +1,15 @@
-import { TextEditor, UiCheckbox, UiChoice } from '#/ui';
+import { TextEditor, UiCheckbox, UiChoice, UiField } from '#/ui';
 import { Component, input } from '@angular/core';
 import { FormGroup, ReactiveFormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-question-option-control',
-  imports: [UiCheckbox, UiChoice, TextEditor, ReactiveFormsModule],
+  imports: [UiCheckbox, UiChoice, TextEditor, ReactiveFormsModule, UiField],
   template: `
     <div class="flex flex-col gap-2 w-full">
-      <div class="fieldset">
-        <label for="option">Opción {{ index() + 1 }}</label>
-        <lib-text-editor
-          id="option"
-          name="option"
-          formControlName="option"
-          class="input input-primary"
-          placeholder="Opción..."
-        />
-      </div>
+      <ui-field label="Opción {{ index() + 1 }}">
+        <lib-text-editor id="option" name="option" formControlName="option" [bordered]="true" placeholder="Opción..." />
+      </ui-field>
       <ui-choice label="Correcta">
         <input uiCheckbox type="checkbox" formControlName="isCorrect" />
       </ui-choice>

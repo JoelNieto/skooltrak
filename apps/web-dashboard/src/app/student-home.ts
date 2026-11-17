@@ -141,7 +141,7 @@ const longDate = new Intl.DateTimeFormat('es', { weekday: 'long', day: 'numeric'
         } @else {
           <div class="flex flex-wrap items-center gap-4">
             @if (highlight(); as main) {
-              <span class="material-symbols-outlined flex size-12 shrink-0 items-center justify-center rounded-field bg-primary/10 text-2xl text-primary" aria-hidden="true">co_present</span>
+              <span class="material-symbols-outlined flex size-12 shrink-0 items-center justify-center rounded-field bg-action-subtle text-2xl text-primary" aria-hidden="true">co_present</span>
               <div class="min-w-0 flex-[1_1_280px]">
                 <p class="flex items-center gap-2 text-sm text-ink-muted">
                   @if (main.state === 'NOW') {
@@ -175,7 +175,7 @@ const longDate = new Intl.DateTimeFormat('es', { weekday: 'long', day: 'numeric'
             @for (slot of classes(); track slot.id) {
               <li
                 class="flex min-w-28 flex-[1_1_120px] flex-col rounded-field border px-3 py-2"
-                [class]="slot.state === 'NOW' ? 'border-primary bg-primary/5' : slot.state === 'PAST' ? 'border-line opacity-60' : 'border-line'"
+                [class]="slot.state === 'NOW' ? 'border-primary bg-action-subtle' : slot.state === 'PAST' ? 'border-line opacity-60' : 'border-line'"
                 [attr.aria-current]="slot.state === 'NOW' ? 'time' : null"
               >
                 <span class="text-xs tabular-nums" [class]="slot.state === 'NOW' ? 'font-semibold text-primary' : 'text-ink-muted'">{{ slot.startTime }}</span>

@@ -7,7 +7,7 @@ const meta: Meta<BadgeArgs> = {
   title: 'Primitives/Badge',
   component: Badge,
   argTypes: {
-    tone: { control: 'inline-radio', options: ['neutral', 'action', 'info', 'success', 'warning', 'danger'] },
+    tone: { control: 'inline-radio', options: ['neutral', 'action', 'info', 'success', 'warning', 'danger', 'new'] },
     size: { control: 'inline-radio', options: ['sm', 'md'] },
     label: { control: 'text' },
   },
@@ -34,6 +34,7 @@ export const Tones: Story = {
           <span uiBadge tone="success">Pagado</span>
           <span uiBadge tone="warning">Pendiente</span>
           <span uiBadge tone="danger">Vencido</span>
+          <span uiBadge tone="new">3 nuevos</span>
         </div>
         <div class="flex flex-wrap items-center gap-2">
           <span uiBadge size="sm">Solo lectura</span>
@@ -42,6 +43,7 @@ export const Tones: Story = {
           <span uiBadge size="sm" tone="success">Pagado</span>
           <span uiBadge size="sm" tone="warning">Pendiente</span>
           <span uiBadge size="sm" tone="danger">Vencido</span>
+          <span uiBadge size="sm" tone="new">3</span>
         </div>
       </div>
     `,

@@ -121,7 +121,7 @@ interface ThreadListItem {
         @if (selectedThread(); as thread) {
           <header
             class="p-3 border-b border-line flex flex-col gap-1"
-            [class.bg-primary/5]="thread.broadcast"
+            [class.bg-action-subtle]="thread.broadcast"
             [class.border-primary/20]="thread.broadcast"
           >
             <div class="flex items-center gap-2 min-w-0">

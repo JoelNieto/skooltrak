@@ -11,6 +11,7 @@
  *                 fills → tokens or status colours. text-white and black/white at an opacity
  *                 (photo scrims, text on a user's avatar colour) are allowed.
  *   arbitraryColour  bg-[#123456], text-[oklch(…)] …
+ *                 (bg-primary/5, /10, /15 are reported as baseColour: use bg-action-subtle)
  *   darkVariant   dark:… (tokens already switch with the theme).
  *
  * When a DaisyUI component gets a primitive (tabs, avatar, …), add it to PRIMITIVES below.
@@ -56,6 +57,8 @@ const PALETTE = new RegExp(
   `^${UTIL}-(slate|gray|zinc|neutral|stone|red|orange|amber|yellow|lime|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink|rose)-\\d{2,3}(/\\d+)?$`,
 );
 const SOLID_WHITE_BLACK = new RegExp(`^${UTIL}-(white|black)$`);
+/** Light tints of the action colour: one token, bg-action-subtle (the brand's brand-subtle). */
+const ACTION_TINT = /^bg-primary\/(5|10|15)$/;
 const ARBITRARY = /^[a-z-]+-\[(#|rgba?\(|hsla?\(|oklch\(|oklab\(|color-mix\()/;
 
 const HINT_BASE =
@@ -77,6 +80,8 @@ export function check(token: string, primitives: boolean): { messageId: MessageI
   if (PALETTE.test(util)) return { messageId: 'paletteColour', hint: HINT_PALETTE };
   if (SOLID_WHITE_BLACK.test(util) && !/^text-white$/.test(util))
     return { messageId: 'paletteColour', hint: HINT_PALETTE };
+  if (ACTION_TINT.test(util))
+    return { messageId: 'baseColour', hint: 'selected / highlighted fills use bg-action-subtle' };
   if (ARBITRARY.test(util)) return { messageId: 'arbitraryColour', hint: HINT_PALETTE };
   if (primitives && variants.length === 0) {
     const hit = PRIMITIVES.find(([re]) => re.test(util));

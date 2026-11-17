@@ -11,7 +11,7 @@ import Store from '../../core/store';
     <div class="w-full max-w-md text-center space-y-8 animate-fade-in">
       <!-- Icon -->
       <div class="flex justify-center">
-        <div class="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center">
+        <div class="w-20 h-20 rounded-full bg-action-subtle flex items-center justify-center">
           <span class="material-symbols-outlined text-5xl text-primary">settings</span>
         </div>
       </div>

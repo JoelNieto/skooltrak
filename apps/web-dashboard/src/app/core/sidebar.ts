@@ -79,7 +79,7 @@ type SidebarSchool = {
         <li>
           <a
             routerLink="home"
-            routerLinkActive="bg-primary/10 text-primary font-semibold"
+            routerLinkActive="bg-action-subtle text-primary font-semibold"
             class="flex items-center gap-3 px-3 py-2 text-ink rounded-lg transition-all duration-150 hover:bg-surface-2 hover:text-ink-strong group"
           >
             <span class="material-symbols-outlined text-xl">home</span>
@@ -90,7 +90,7 @@ type SidebarSchool = {
           <li>
             <a
               routerLink="courses"
-              routerLinkActive="bg-primary/10 text-primary font-semibold"
+              routerLinkActive="bg-action-subtle text-primary font-semibold"
               class="flex items-center gap-3 px-3 py-2 text-ink rounded-lg transition-all duration-150 hover:bg-surface-2 hover:text-ink-strong group"
             >
               <span class="material-symbols-outlined text-xl">menu_book</span>
@@ -102,7 +102,7 @@ type SidebarSchool = {
           <li>
             <a
               routerLink="files"
-              routerLinkActive="bg-primary/10 text-primary font-semibold"
+              routerLinkActive="bg-action-subtle text-primary font-semibold"
               class="flex items-center gap-3 px-3 py-2 text-ink rounded-lg transition-all duration-150 hover:bg-surface-2 hover:text-ink-strong group"
             >
               <span class="material-symbols-outlined text-xl">folder_special</span>
@@ -114,7 +114,7 @@ type SidebarSchool = {
           <li>
             <a
               routerLink="students"
-              routerLinkActive="bg-primary/10 text-primary font-semibold"
+              routerLinkActive="bg-action-subtle text-primary font-semibold"
               class="flex items-center gap-3 px-3 py-2 text-ink rounded-lg transition-all duration-150 hover:bg-surface-2 hover:text-ink-strong group"
             >
               <span class="material-symbols-outlined text-xl">people</span>
@@ -126,7 +126,7 @@ type SidebarSchool = {
           <li>
             <a
               routerLink="teachers"
-              routerLinkActive="bg-primary/10 text-primary font-semibold"
+              routerLinkActive="bg-action-subtle text-primary font-semibold"
               class="flex items-center gap-3 px-3 py-2 text-ink rounded-lg transition-all duration-150 hover:bg-surface-2 hover:text-ink-strong group"
             >
               <span class="material-symbols-outlined text-xl">school</span>
@@ -138,7 +138,7 @@ type SidebarSchool = {
           <li>
             <a
               routerLink="assignments"
-              routerLinkActive="bg-primary/10 text-primary font-semibold"
+              routerLinkActive="bg-action-subtle text-primary font-semibold"
               class="flex items-center gap-3 px-3 py-2 text-ink rounded-lg transition-all duration-150 hover:bg-surface-2 hover:text-ink-strong group"
             >
               <span class="material-symbols-outlined text-xl">bookmarks</span>
@@ -150,7 +150,7 @@ type SidebarSchool = {
           <li>
             <a
               routerLink="groups"
-              routerLinkActive="bg-primary/10 text-primary font-semibold"
+              routerLinkActive="bg-action-subtle text-primary font-semibold"
               class="flex items-center gap-3 px-3 py-2 text-ink rounded-lg transition-all duration-150 hover:bg-surface-2 hover:text-ink-strong group"
             >
               <span class="material-symbols-outlined text-xl">groups</span>
@@ -162,7 +162,7 @@ type SidebarSchool = {
         <li>
           <a
             [routerLink]="storeLink()"
-            routerLinkActive="bg-primary/10 text-primary font-semibold"
+            routerLinkActive="bg-action-subtle text-primary font-semibold"
             class="flex items-center gap-3 px-3 py-2 text-ink rounded-lg transition-all duration-150 hover:bg-surface-2 hover:text-ink-strong group"
           >
             <span class="material-symbols-outlined text-xl">storefront</span>
@@ -179,7 +179,7 @@ type SidebarSchool = {
           <li>
             <a
               [routerLink]="storeAdminLink()"
-              routerLinkActive="bg-primary/10 text-primary font-semibold"
+              routerLinkActive="bg-action-subtle text-primary font-semibold"
               [routerLinkActiveOptions]="{ exact: false }"
               class="flex items-center gap-3 px-3 py-2 text-ink rounded-lg transition-all duration-150 hover:bg-surface-2 hover:text-ink-strong group"
             >
@@ -192,7 +192,7 @@ type SidebarSchool = {
           <li>
             <a
               routerLink="messages"
-              routerLinkActive="bg-primary/10 text-primary font-semibold"
+              routerLinkActive="bg-action-subtle text-primary font-semibold"
               class="flex items-center gap-3 px-3 py-2 text-ink rounded-lg transition-all duration-150 hover:bg-surface-2 hover:text-ink-strong group"
             >
               <span class="material-symbols-outlined text-xl">mail</span>
@@ -202,14 +202,14 @@ type SidebarSchool = {
           <li>
             <a
               routerLink="chats"
-              routerLinkActive="bg-primary/10 text-primary font-semibold"
+              routerLinkActive="bg-action-subtle text-primary font-semibold"
               class="flex items-center gap-3 px-3 py-2 text-ink rounded-lg transition-all duration-150 hover:bg-surface-2 hover:text-ink-strong group"
             >
               <span class="material-symbols-outlined text-xl">chat</span>
               <span>Chats</span>
               @if (chatUnreadCount.value(); as count) {
                 @if (count > 0) {
-                  <span uiBadge tone="action" size="sm" class="ml-auto">{{ count > 99 ? '99+' : count }}</span>
+                  <span uiBadge tone="new" size="sm" class="ml-auto">{{ count > 99 ? '99+' : count }}</span>
                 }
               }
             </a>
@@ -225,7 +225,7 @@ type SidebarSchool = {
             <li>
               <a
                 routerLink="student/schedule"
-                routerLinkActive="bg-primary/10 text-primary font-semibold"
+                routerLinkActive="bg-action-subtle text-primary font-semibold"
                 class="flex items-center gap-3 px-3 py-2 text-ink rounded-lg transition-all duration-150 hover:bg-surface-2 hover:text-ink-strong group"
               >
                 <span class="material-symbols-outlined text-xl">event</span>
@@ -235,7 +235,7 @@ type SidebarSchool = {
             <li>
               <a
                 routerLink="student/assignments"
-                routerLinkActive="bg-primary/10 text-primary font-semibold"
+                routerLinkActive="bg-action-subtle text-primary font-semibold"
                 class="flex items-center gap-3 px-3 py-2 text-ink rounded-lg transition-all duration-150 hover:bg-surface-2 hover:text-ink-strong group"
               >
                 <span class="material-symbols-outlined text-xl">upload_file</span>
@@ -245,7 +245,7 @@ type SidebarSchool = {
             <li>
               <a
                 routerLink="student/notifications"
-                routerLinkActive="bg-primary/10 text-primary font-semibold"
+                routerLinkActive="bg-action-subtle text-primary font-semibold"
                 class="flex items-center gap-3 px-3 py-2 text-ink rounded-lg transition-all duration-150 hover:bg-surface-2 hover:text-ink-strong group"
               >
                 <span class="material-symbols-outlined text-xl">notifications</span>
@@ -255,7 +255,7 @@ type SidebarSchool = {
             <li>
               <a
                 routerLink="student/communication"
-                routerLinkActive="bg-primary/10 text-primary font-semibold"
+                routerLinkActive="bg-action-subtle text-primary font-semibold"
                 class="flex items-center gap-3 px-3 py-2 text-ink rounded-lg transition-all duration-150 hover:bg-surface-2 hover:text-ink-strong group"
               >
                 <span class="material-symbols-outlined text-xl">campaign</span>
@@ -265,7 +265,7 @@ type SidebarSchool = {
             <li>
               <a
                 routerLink="student/attendance"
-                routerLinkActive="bg-primary/10 text-primary font-semibold"
+                routerLinkActive="bg-action-subtle text-primary font-semibold"
                 class="flex items-center gap-3 px-3 py-2 text-ink rounded-lg transition-all duration-150 hover:bg-surface-2 hover:text-ink-strong group"
               >
                 <span class="material-symbols-outlined text-xl">fact_check</span>
@@ -284,7 +284,7 @@ type SidebarSchool = {
             <li>
               <a
                 routerLink="parent/portal"
-                routerLinkActive="bg-primary/10 text-primary font-semibold"
+                routerLinkActive="bg-action-subtle text-primary font-semibold"
                 class="flex items-center gap-3 px-3 py-2 text-ink rounded-lg transition-all duration-150 hover:bg-surface-2 hover:text-ink-strong group"
               >
                 <span class="material-symbols-outlined text-xl">family_restroom</span>
@@ -294,7 +294,7 @@ type SidebarSchool = {
             <li>
               <a
                 routerLink="parent/progress"
-                routerLinkActive="bg-primary/10 text-primary font-semibold"
+                routerLinkActive="bg-action-subtle text-primary font-semibold"
                 class="flex items-center gap-3 px-3 py-2 text-ink rounded-lg transition-all duration-150 hover:bg-surface-2 hover:text-ink-strong group"
               >
                 <span class="material-symbols-outlined text-xl">bar_chart</span>
@@ -304,7 +304,7 @@ type SidebarSchool = {
             <li>
               <a
                 routerLink="parent/communication"
-                routerLinkActive="bg-primary/10 text-primary font-semibold"
+                routerLinkActive="bg-action-subtle text-primary font-semibold"
                 class="flex items-center gap-3 px-3 py-2 text-ink rounded-lg transition-all duration-150 hover:bg-surface-2 hover:text-ink-strong group"
               >
                 <span class="material-symbols-outlined text-xl">chat</span>
@@ -314,7 +314,7 @@ type SidebarSchool = {
             <li>
               <a
                 routerLink="parent/notifications"
-                routerLinkActive="bg-primary/10 text-primary font-semibold"
+                routerLinkActive="bg-action-subtle text-primary font-semibold"
                 class="flex items-center gap-3 px-3 py-2 text-ink rounded-lg transition-all duration-150 hover:bg-surface-2 hover:text-ink-strong group"
               >
                 <span class="material-symbols-outlined text-xl">notifications_active</span>
@@ -325,7 +325,7 @@ type SidebarSchool = {
               <li>
                 <a
                   routerLink="parent/finances"
-                  routerLinkActive="bg-primary/10 text-primary font-semibold"
+                  routerLinkActive="bg-action-subtle text-primary font-semibold"
                   class="flex items-center gap-3 px-3 py-2 text-ink rounded-lg transition-all duration-150 hover:bg-surface-2 hover:text-ink-strong group"
                 >
                   <span class="material-symbols-outlined text-xl">account_balance_wallet</span>
@@ -345,7 +345,7 @@ type SidebarSchool = {
             <li>
               <a
                 routerLink="teacher/communication"
-                routerLinkActive="bg-primary/10 text-primary font-semibold"
+                routerLinkActive="bg-action-subtle text-primary font-semibold"
                 class="flex items-center gap-3 px-3 py-2 text-ink rounded-lg transition-all duration-150 hover:bg-surface-2 hover:text-ink-strong group"
               >
                 <span class="material-symbols-outlined text-xl">chat</span>
@@ -355,7 +355,7 @@ type SidebarSchool = {
             <li>
               <a
                 routerLink="teacher/attendance"
-                routerLinkActive="bg-primary/10 text-primary font-semibold"
+                routerLinkActive="bg-action-subtle text-primary font-semibold"
                 class="flex items-center gap-3 px-3 py-2 text-ink rounded-lg transition-all duration-150 hover:bg-surface-2 hover:text-ink-strong group"
               >
                 <span class="material-symbols-outlined text-xl">fact_check</span>
@@ -365,7 +365,7 @@ type SidebarSchool = {
             <li>
               <a
                 routerLink="teacher/gradebook"
-                routerLinkActive="bg-primary/10 text-primary font-semibold"
+                routerLinkActive="bg-action-subtle text-primary font-semibold"
                 class="flex items-center gap-3 px-3 py-2 text-ink rounded-lg transition-all duration-150 hover:bg-surface-2 hover:text-ink-strong group"
               >
                 <span class="material-symbols-outlined text-xl">grade</span>
@@ -375,7 +375,7 @@ type SidebarSchool = {
             <li>
               <a
                 routerLink="teacher/reports"
-                routerLinkActive="bg-primary/10 text-primary font-semibold"
+                routerLinkActive="bg-action-subtle text-primary font-semibold"
                 class="flex items-center gap-3 px-3 py-2 text-ink rounded-lg transition-all duration-150 hover:bg-surface-2 hover:text-ink-strong group"
               >
                 <span class="material-symbols-outlined text-xl">analytics</span>
@@ -394,7 +394,7 @@ type SidebarSchool = {
             <li>
               <a
                 routerLink="admin"
-                routerLinkActive="bg-primary/10 text-primary font-semibold"
+                routerLinkActive="bg-action-subtle text-primary font-semibold"
                 [routerLinkActiveOptions]="{ exact: true }"
                 class="flex items-center gap-3 px-3 py-2 text-ink rounded-lg transition-all duration-150 hover:bg-surface-2 hover:text-ink-strong group"
               >
@@ -405,7 +405,7 @@ type SidebarSchool = {
             <li>
               <a
                 routerLink="communication"
-                routerLinkActive="bg-primary/10 text-primary font-semibold"
+                routerLinkActive="bg-action-subtle text-primary font-semibold"
                 class="flex items-center gap-3 px-3 py-2 text-ink rounded-lg transition-all duration-150 hover:bg-surface-2 hover:text-ink-strong group"
               >
                 <span class="material-symbols-outlined text-xl">campaign</span>
@@ -423,7 +423,7 @@ type SidebarSchool = {
             <li>
               <a
                 routerLink="financial-module"
-                routerLinkActive="bg-primary/10 text-primary font-semibold"
+                routerLinkActive="bg-action-subtle text-primary font-semibold"
                 class="flex items-center gap-3 px-3 py-2 text-ink rounded-lg transition-all duration-150 hover:bg-surface-2 hover:text-ink-strong group"
               >
                 <span class="material-symbols-outlined text-xl">account_balance</span>
@@ -444,7 +444,7 @@ type SidebarSchool = {
         <span>Mensajes</span>
         @if (unreadCount.value(); as count) {
           @if (count > 0) {
-            <span uiBadge tone="action" size="sm" class="ml-auto">{{ count > 99 ? '99+' : count }}</span>
+            <span uiBadge tone="new" size="sm" class="ml-auto">{{ count > 99 ? '99+' : count }}</span>
           }
         }
       </a>

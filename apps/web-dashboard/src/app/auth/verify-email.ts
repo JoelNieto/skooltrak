@@ -68,7 +68,7 @@ import { BrandLogo } from '../shared/brand-logo';
           } @else {
             <!-- Waiting for verification state -->
             <div class="flex justify-center">
-              <div class="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center">
+              <div class="w-20 h-20 rounded-full bg-action-subtle flex items-center justify-center">
                 <span class="material-symbols-outlined text-5xl text-primary">mark_email_unread</span>
               </div>
             </div>

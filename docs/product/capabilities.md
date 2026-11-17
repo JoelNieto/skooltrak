@@ -118,7 +118,7 @@ Code: `home` (planned); `web-dashboard` `/home` → `home.ts`, `teacher-home.ts`
 |---|---|---|
 | Teacher home (my day, pending, week, attention) | Partial (HOM-001 S01–S03 in review; Pendientes rows for habits/quizzes blocked by Q11/Q12) | [HOM-001](frd/HOM-001-persona-home-dashboards.md) |
 | Student home (today, work, progress) | Partial (HOM-001 S04–S05 in review; quizzes wait for Q12, habits publishing for Q11) | [HOM-001](frd/HOM-001-persona-home-dashboards.md) |
-| Parent home (per-child alerts, progress, account) | Partial (legacy home) | [HOM-001](frd/HOM-001-persona-home-dashboards.md) |
+| Parent home (per-child alerts, progress, account) | Partial (HOM-001-S06 switcher, alerts and KPIs in review; S07 pending) | [HOM-001](frd/HOM-001-persona-home-dashboards.md) |
 | School admin home (attention, KPIs, academics, finance, reach) | Partial (legacy home) | [HOM-001](frd/HOM-001-persona-home-dashboards.md) |
 
 ## PLT: Platform Administration

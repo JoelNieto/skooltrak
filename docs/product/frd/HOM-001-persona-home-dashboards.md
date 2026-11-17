@@ -204,6 +204,8 @@ Events / side effects: none. Sections are fetched on page load, with no sockets 
 - [ ] **Q9 — Gap: attendance stats ownership.** `GET /v1/attendance/stats/by-student/:studentId` (`attendance.service.ts:326`) checks neither organization nor ownership. Any `VIEW_ATTENDANCE` holder, including any student or parent, can read any student's stats by id. → candidate slice in a future ATT as-is FRD.
 - [ ] **Q11 — Gap: habit evaluations can't be published.** The API accepts `published` (`habit-evaluations.service.ts:86`), but the only UI always sends `published: false` (`groups/group-habits.ts:342`). FR .8's "habits not published" row is left out of S02 until a publish action exists. That would be an ASM slice. Should it be planned?
 - [x] **Q12 — Gap: quizzes can't be scheduled.** `QuizSchedule` exists in the schema, but no API or UI creates one. **Decided 2026-11-14:** the student home ships without the quizzes section (FR .15 deferred), and quiz scheduling is to be planned as an ACA feature. FR .8's quiz row waits for it too.
+- [ ] **Q13 — Gap: the students directory hides students without a login.** `students.service.ts:findAll` always applies `OR` on `user.firstName / lastName / email`, even with no search term, so students without a linked `User` never appear in `GET /v1/students` (found in S06 e2e). → candidate slice in a future PPL as-is FRD.
+- [ ] **Q14 — Gap: parents get 403 on the school list.** The app shell (`core/sidebar.ts`) calls `GET /v1/schools`, which needs `VIEW_SCHOOLS`, and PARENT doesn't have it. The call fails on every parent page, so parents may have no current school (affects the legacy newsletters card until S07). Should parents get the children's schools from `/v1/parents/me` instead, or a read-only list? → candidate IAM/SET slice.
 - [ ] **Q10 — Slice order.** Ship teacher first (proposed, because it fixes the school-wide numbers and is used daily), or parent first (largest audience)?
 
 ## 11. Slices
@@ -216,7 +218,7 @@ Each slice replaces its part of the existing home in place. Old widgets that are
 | [HOM-001-S03](../slices/HOM-001-S03-teacher-attention.md) | Teacher: students needing attention, unanswered family threads, average KPI, grade-distribution placeholder (adds `ui-chart-placeholder`, grade thresholds) | .2 .4 .7 .8 .10 .11, BR .1 .11 .13 | In review |
 | [HOM-001-S04](../slices/HOM-001-S04-student-today-work.md) | Student: now/next, today strip, upcoming/overdue work for own group (adds student e2e persona; quizzes deferred, Q12) | .1 .12 .14, BR .8 .12 | In review |
 | [HOM-001-S05](../slices/HOM-001-S05-student-progress.md) | Student: KPIs, per-course averages with bands, recent grades, habits, progress placeholder | .2 .4 .13 .16 .17, BR .1 .2 | In review |
-| HOM-001-S06 | Parent: child switcher with alert counts, alerts and KPIs for the selected child (adds parent e2e persona) | .18 .19 .20, BR .9 | Proposed |
+| [HOM-001-S06](../slices/HOM-001-S06-parent-children.md) | Parent: child switcher with alert counts, alerts and KPIs for the selected child | .18 .19 .20, BR .9 .14 .16 | In review |
 | HOM-001-S07 | Parent: upcoming work, recent grades, teacher messages, account summary, attendance and trend placeholders | .21 .22 .23 .4, BR .14 .16 | Proposed |
 | HOM-001-S08 | Admin: attention tiles, period banner, KPI row (adds `VIEW_SCHOOL_DASHBOARD`) | .5 .24 .25, BR .10 .14 .15 .16 | Proposed |
 | HOM-001-S09 | Admin: lowest-attendance groups, follow-up students, attendance and academics placeholders | .26 .27 .4, BR .11 | Proposed |

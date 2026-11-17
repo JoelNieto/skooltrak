@@ -80,4 +80,10 @@ export const data = {
     pending: { title: 'Tarea pendiente E2E', type: 'HOMEWORK', inDays: 3, requireSubmission: true },
     otherGroup: { title: 'Tarea 8° E2E', type: 'HOMEWORK', inDays: 1, requireSubmission: true },
   },
+  /**
+   * HOM-001-S06. `parent` is linked to the first two related students. The first has a charge due
+   * in 3 days and overdue work (2 alerts); the second has overdue work and an average below the pass
+   * mark (2 alerts), so the tie goes to the first alphabetically.
+   */
+  charge: { description: 'Mensualidad E2E', amount: 285, inDays: 3 },
 } as const;

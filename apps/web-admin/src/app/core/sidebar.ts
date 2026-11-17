@@ -1,266 +1,270 @@
+import { BrandLogo, Icon } from '#/ui';
 import { Component } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 
 @Component({
   // eslint-disable-next-line @angular-eslint/component-selector
   selector: '[appSidebar]',
-  imports: [RouterLink, RouterLinkActive],
+  imports: [BrandLogo, RouterLink, RouterLinkActive, Icon],
   template: `<div class="flex items-center justify-between px-4 pt-4 pb-2">
-      <h1 class="text-xl font-semibold text-primary flex items-center gap-2">SkoolTrak</h1>
+      <h1 class="flex items-center gap-2">
+        <ui-brand-logo class="h-7" />
+        <span class="font-mono text-xs font-medium uppercase tracking-widest text-ink-muted">Admin</span>
+      </h1>
     </div>
     <nav class="p-2 flex flex-col gap-8 flex-1 min-h-0 overflow-y-auto">
       <ul class="space-y-4">
         <li>
           <a
             routerLink="home"
-            [routerLinkActive]="['bg-base-200', 'text-primary', 'dark:text-white']"
-            class="flex items-center p-2 text-base-content rounded-lg hover:bg-primary-50 hover:text-primary-600 group"
+            [routerLinkActive]="['bg-surface-0', 'text-primary']"
+            class="flex items-center p-2 text-ink-strong rounded-lg hover:bg-primary-50 hover:text-primary-600 group"
           >
-            <span class="material-symbols-outlined text-xl">home</span>
+            <ui-icon name="house" class="text-xl" />
             <span class="ml-3">Inicio</span>
           </a>
         </li>
         <li>
           <a
             routerLink="organizations"
-            [routerLinkActive]="['bg-base-200', 'text-primary', 'dark:text-white']"
-            class="flex items-center p-2 text-base-content rounded-lg hover:bg-primary-50 hover:text-primary-600 group"
+            [routerLinkActive]="['bg-surface-0', 'text-primary']"
+            class="flex items-center p-2 text-ink-strong rounded-lg hover:bg-primary-50 hover:text-primary-600 group"
           >
-            <span class="material-symbols-outlined text-xl">account_tree</span>
+            <ui-icon name="network" class="text-xl" />
             <span class="ml-3">Organizaciones</span>
           </a>
         </li>
         <li>
           <a
             routerLink="schools"
-            [routerLinkActive]="['bg-base-200', 'text-primary', 'dark:text-white']"
-            class="flex items-center p-2 text-base-content rounded-lg hover:bg-primary-50 hover:text-primary-600 group"
+            [routerLinkActive]="['bg-surface-0', 'text-primary']"
+            class="flex items-center p-2 text-ink-strong rounded-lg hover:bg-primary-50 hover:text-primary-600 group"
           >
-            <span class="material-symbols-outlined text-xl">domain</span>
+            <ui-icon name="building-2" class="text-xl" />
             <span class="ml-3">Escuelas</span>
           </a>
         </li>
         <li>
           <a
             routerLink="roles"
-            [routerLinkActive]="['bg-base-200', 'text-primary', 'dark:text-white']"
-            class="flex items-center p-2 text-base-content rounded-lg hover:bg-primary-50 hover:text-primary-600 group"
+            [routerLinkActive]="['bg-surface-0', 'text-primary']"
+            class="flex items-center p-2 text-ink-strong rounded-lg hover:bg-primary-50 hover:text-primary-600 group"
           >
-            <span class="material-symbols-outlined text-xl">manage_accounts</span>
+            <ui-icon name="user-cog" class="text-xl" />
             <span class="ml-3">Roles</span>
           </a>
         </li>
         <li>
           <a
             routerLink="grade-metrics"
-            [routerLinkActive]="['bg-base-200', 'text-primary', 'dark:text-white']"
-            class="flex items-center p-2 text-base-content rounded-lg hover:bg-primary-50 hover:text-primary-600 group"
+            [routerLinkActive]="['bg-surface-0', 'text-primary']"
+            class="flex items-center p-2 text-ink-strong rounded-lg hover:bg-primary-50 hover:text-primary-600 group"
           >
-            <span class="material-symbols-outlined text-xl">table_chart</span>
+            <ui-icon name="sheet" class="text-xl" />
             <span class="ml-3">Metricas</span>
           </a>
         </li>
         <li>
           <a
             routerLink="habit-metrics"
-            [routerLinkActive]="['bg-base-200', 'text-primary', 'dark:text-white']"
-            class="flex items-center p-2 text-base-content rounded-lg hover:bg-primary-50 hover:text-primary-600 group"
+            [routerLinkActive]="['bg-surface-0', 'text-primary']"
+            class="flex items-center p-2 text-ink-strong rounded-lg hover:bg-primary-50 hover:text-primary-600 group"
           >
-            <span class="material-symbols-outlined text-xl">psychology</span>
+            <ui-icon name="brain" class="text-xl" />
             <span class="ml-3">Hábitos y actitudes</span>
           </a>
         </li>
         <li>
           <a
             routerLink="periods"
-            [routerLinkActive]="['bg-base-200', 'text-primary', 'dark:text-white']"
-            class="flex items-center p-2 text-base-content rounded-lg hover:bg-primary-50 hover:text-primary-600 group"
+            [routerLinkActive]="['bg-surface-0', 'text-primary']"
+            class="flex items-center p-2 text-ink-strong rounded-lg hover:bg-primary-50 hover:text-primary-600 group"
           >
-            <span class="material-symbols-outlined text-xl">calendar_month</span>
+            <ui-icon name="calendar-days" class="text-xl" />
             <span class="ml-3">Periodos</span>
           </a>
         </li>
         <li>
           <a
             routerLink="permissions"
-            [routerLinkActive]="['bg-base-200', 'text-primary', 'dark:text-white']"
-            class="flex items-center p-2 text-base-content rounded-lg hover:bg-primary-50 hover:text-primary-600 group"
+            [routerLinkActive]="['bg-surface-0', 'text-primary']"
+            class="flex items-center p-2 text-ink-strong rounded-lg hover:bg-primary-50 hover:text-primary-600 group"
           >
-            <span class="material-symbols-outlined text-xl">folder_managed</span>
+            <ui-icon name="folder-cog" class="text-xl" />
             <span class="ml-3">Permisos</span>
           </a>
         </li>
         <li>
           <a
             routerLink="users"
-            [routerLinkActive]="['bg-base-200', 'text-primary', 'dark:text-white']"
-            class="flex items-center p-2 text-base-content rounded-lg hover:bg-primary-50 hover:text-primary-600 group"
+            [routerLinkActive]="['bg-surface-0', 'text-primary']"
+            class="flex items-center p-2 text-ink-strong rounded-lg hover:bg-primary-50 hover:text-primary-600 group"
           >
-            <span class="material-symbols-outlined text-xl">group</span>
+            <ui-icon name="users" class="text-xl" />
             <span class="ml-3">Usuarios</span>
           </a>
         </li>
-        <li class="px-2 text-xs uppercase text-base-content/60">Administración</li>
+        <li class="px-2 text-xs uppercase text-ink-muted">Administración</li>
         <li>
           <a
             routerLink="parent-management"
-            [routerLinkActive]="['bg-base-200', 'text-primary', 'dark:text-white']"
-            class="flex items-center p-2 text-base-content rounded-lg hover:bg-primary-50 hover:text-primary-600 group"
+            [routerLinkActive]="['bg-surface-0', 'text-primary']"
+            class="flex items-center p-2 text-ink-strong rounded-lg hover:bg-primary-50 hover:text-primary-600 group"
           >
-            <span class="material-symbols-outlined text-xl">supervisor_account</span>
+            <ui-icon name="users-round" class="text-xl" />
             <span class="ml-3">Padres</span>
           </a>
         </li>
         <li>
           <a
             routerLink="attendance-reporting"
-            [routerLinkActive]="['bg-base-200', 'text-primary', 'dark:text-white']"
-            class="flex items-center p-2 text-base-content rounded-lg hover:bg-primary-50 hover:text-primary-600 group"
+            [routerLinkActive]="['bg-surface-0', 'text-primary']"
+            class="flex items-center p-2 text-ink-strong rounded-lg hover:bg-primary-50 hover:text-primary-600 group"
           >
-            <span class="material-symbols-outlined text-xl">fact_check</span>
+            <ui-icon name="clipboard-check" class="text-xl" />
             <span class="ml-3">Asistencia</span>
           </a>
         </li>
         <li>
           <a
             routerLink="financial-module"
-            [routerLinkActive]="['bg-base-200', 'text-primary', 'dark:text-white']"
-            class="flex items-center p-2 text-base-content rounded-lg hover:bg-primary-50 hover:text-primary-600 group"
+            [routerLinkActive]="['bg-surface-0', 'text-primary']"
+            class="flex items-center p-2 text-ink-strong rounded-lg hover:bg-primary-50 hover:text-primary-600 group"
           >
-            <span class="material-symbols-outlined text-xl">payments</span>
+            <ui-icon name="banknote" class="text-xl" />
             <span class="ml-3">Finanzas</span>
           </a>
         </li>
         <li>
           <a
             routerLink="events-calendar"
-            [routerLinkActive]="['bg-base-200', 'text-primary', 'dark:text-white']"
-            class="flex items-center p-2 text-base-content rounded-lg hover:bg-primary-50 hover:text-primary-600 group"
+            [routerLinkActive]="['bg-surface-0', 'text-primary']"
+            class="flex items-center p-2 text-ink-strong rounded-lg hover:bg-primary-50 hover:text-primary-600 group"
           >
-            <span class="material-symbols-outlined text-xl">event</span>
+            <ui-icon name="calendar" class="text-xl" />
             <span class="ml-3">Eventos</span>
           </a>
         </li>
-        <li class="px-2 text-xs uppercase text-base-content/60">Estudiante</li>
+        <li class="px-2 text-xs uppercase text-ink-muted">Estudiante</li>
         <li>
           <a
             routerLink="student/schedule"
-            [routerLinkActive]="['bg-base-200', 'text-primary', 'dark:text-white']"
-            class="flex items-center p-2 text-base-content rounded-lg hover:bg-primary-50 hover:text-primary-600 group"
+            [routerLinkActive]="['bg-surface-0', 'text-primary']"
+            class="flex items-center p-2 text-ink-strong rounded-lg hover:bg-primary-50 hover:text-primary-600 group"
           >
-            <span class="material-symbols-outlined text-xl">event</span>
+            <ui-icon name="calendar" class="text-xl" />
             <span class="ml-3">Agenda</span>
           </a>
         </li>
         <li>
           <a
             routerLink="student/assignments"
-            [routerLinkActive]="['bg-base-200', 'text-primary', 'dark:text-white']"
-            class="flex items-center p-2 text-base-content rounded-lg hover:bg-primary-50 hover:text-primary-600 group"
+            [routerLinkActive]="['bg-surface-0', 'text-primary']"
+            class="flex items-center p-2 text-ink-strong rounded-lg hover:bg-primary-50 hover:text-primary-600 group"
           >
-            <span class="material-symbols-outlined text-xl">upload_file</span>
+            <ui-icon name="file-up" class="text-xl" />
             <span class="ml-3">Entregas</span>
           </a>
         </li>
         <li>
           <a
             routerLink="student/notifications"
-            [routerLinkActive]="['bg-base-200', 'text-primary', 'dark:text-white']"
-            class="flex items-center p-2 text-base-content rounded-lg hover:bg-primary-50 hover:text-primary-600 group"
+            [routerLinkActive]="['bg-surface-0', 'text-primary']"
+            class="flex items-center p-2 text-ink-strong rounded-lg hover:bg-primary-50 hover:text-primary-600 group"
           >
-            <span class="material-symbols-outlined text-xl">notifications</span>
+            <ui-icon name="bell" class="text-xl" />
             <span class="ml-3">Notificaciones</span>
           </a>
         </li>
         <li>
           <a
             routerLink="student/attendance"
-            [routerLinkActive]="['bg-base-200', 'text-primary', 'dark:text-white']"
-            class="flex items-center p-2 text-base-content rounded-lg hover:bg-primary-50 hover:text-primary-600 group"
+            [routerLinkActive]="['bg-surface-0', 'text-primary']"
+            class="flex items-center p-2 text-ink-strong rounded-lg hover:bg-primary-50 hover:text-primary-600 group"
           >
-            <span class="material-symbols-outlined text-xl">fact_check</span>
+            <ui-icon name="clipboard-check" class="text-xl" />
             <span class="ml-3">Asistencia</span>
           </a>
         </li>
-        <li class="px-2 text-xs uppercase text-base-content/60">Docente</li>
+        <li class="px-2 text-xs uppercase text-ink-muted">Docente</li>
         <li>
           <a
             routerLink="teacher/attendance"
-            [routerLinkActive]="['bg-base-200', 'text-primary', 'dark:text-white']"
-            class="flex items-center p-2 text-base-content rounded-lg hover:bg-primary-50 hover:text-primary-600 group"
+            [routerLinkActive]="['bg-surface-0', 'text-primary']"
+            class="flex items-center p-2 text-ink-strong rounded-lg hover:bg-primary-50 hover:text-primary-600 group"
           >
-            <span class="material-symbols-outlined text-xl">playlist_add_check</span>
+            <ui-icon name="list-checks" class="text-xl" />
             <span class="ml-3">Tomar asistencia</span>
           </a>
         </li>
         <li>
           <a
             routerLink="teacher/gradebook"
-            [routerLinkActive]="['bg-base-200', 'text-primary', 'dark:text-white']"
-            class="flex items-center p-2 text-base-content rounded-lg hover:bg-primary-50 hover:text-primary-600 group"
+            [routerLinkActive]="['bg-surface-0', 'text-primary']"
+            class="flex items-center p-2 text-ink-strong rounded-lg hover:bg-primary-50 hover:text-primary-600 group"
           >
-            <span class="material-symbols-outlined text-xl">table</span>
+            <ui-icon name="table" class="text-xl" />
             <span class="ml-3">Libro de notas</span>
           </a>
         </li>
         <li>
           <a
             routerLink="teacher/communication"
-            [routerLinkActive]="['bg-base-200', 'text-primary', 'dark:text-white']"
-            class="flex items-center p-2 text-base-content rounded-lg hover:bg-primary-50 hover:text-primary-600 group"
+            [routerLinkActive]="['bg-surface-0', 'text-primary']"
+            class="flex items-center p-2 text-ink-strong rounded-lg hover:bg-primary-50 hover:text-primary-600 group"
           >
-            <span class="material-symbols-outlined text-xl">forum</span>
+            <ui-icon name="messages-square" class="text-xl" />
             <span class="ml-3">Comunicación</span>
           </a>
         </li>
         <li>
           <a
             routerLink="teacher/reports"
-            [routerLinkActive]="['bg-base-200', 'text-primary', 'dark:text-white']"
-            class="flex items-center p-2 text-base-content rounded-lg hover:bg-primary-50 hover:text-primary-600 group"
+            [routerLinkActive]="['bg-surface-0', 'text-primary']"
+            class="flex items-center p-2 text-ink-strong rounded-lg hover:bg-primary-50 hover:text-primary-600 group"
           >
-            <span class="material-symbols-outlined text-xl">assessment</span>
+            <ui-icon name="chart-column" class="text-xl" />
             <span class="ml-3">Reportes</span>
           </a>
         </li>
-        <li class="px-2 text-xs uppercase text-base-content/60">Padres</li>
+        <li class="px-2 text-xs uppercase text-ink-muted">Padres</li>
         <li>
           <a
             routerLink="parent/portal"
-            [routerLinkActive]="['bg-base-200', 'text-primary', 'dark:text-white']"
-            class="flex items-center p-2 text-base-content rounded-lg hover:bg-primary-50 hover:text-primary-600 group"
+            [routerLinkActive]="['bg-surface-0', 'text-primary']"
+            class="flex items-center p-2 text-ink-strong rounded-lg hover:bg-primary-50 hover:text-primary-600 group"
           >
-            <span class="material-symbols-outlined text-xl">family_restroom</span>
+            <ui-icon name="users-round" class="text-xl" />
             <span class="ml-3">Portal</span>
           </a>
         </li>
         <li>
           <a
             routerLink="parent/progress"
-            [routerLinkActive]="['bg-base-200', 'text-primary', 'dark:text-white']"
-            class="flex items-center p-2 text-base-content rounded-lg hover:bg-primary-50 hover:text-primary-600 group"
+            [routerLinkActive]="['bg-surface-0', 'text-primary']"
+            class="flex items-center p-2 text-ink-strong rounded-lg hover:bg-primary-50 hover:text-primary-600 group"
           >
-            <span class="material-symbols-outlined text-xl">bar_chart</span>
+            <ui-icon name="chart-column" class="text-xl" />
             <span class="ml-3">Progreso</span>
           </a>
         </li>
         <li>
           <a
             routerLink="parent/communication"
-            [routerLinkActive]="['bg-base-200', 'text-primary', 'dark:text-white']"
-            class="flex items-center p-2 text-base-content rounded-lg hover:bg-primary-50 hover:text-primary-600 group"
+            [routerLinkActive]="['bg-surface-0', 'text-primary']"
+            class="flex items-center p-2 text-ink-strong rounded-lg hover:bg-primary-50 hover:text-primary-600 group"
           >
-            <span class="material-symbols-outlined text-xl">chat</span>
+            <ui-icon name="message-circle" class="text-xl" />
             <span class="ml-3">Mensajes</span>
           </a>
         </li>
         <li>
           <a
             routerLink="parent/notifications"
-            [routerLinkActive]="['bg-base-200', 'text-primary', 'dark:text-white']"
-            class="flex items-center p-2 text-base-content rounded-lg hover:bg-primary-50 hover:text-primary-600 group"
+            [routerLinkActive]="['bg-surface-0', 'text-primary']"
+            class="flex items-center p-2 text-ink-strong rounded-lg hover:bg-primary-50 hover:text-primary-600 group"
           >
-            <span class="material-symbols-outlined text-xl">notifications_active</span>
+            <ui-icon name="bell-ring" class="text-xl" />
             <span class="ml-3">Alertas</span>
           </a>
         </li>

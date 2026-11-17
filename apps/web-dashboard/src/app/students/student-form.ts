@@ -57,12 +57,12 @@ interface StudentFormData {
       <lib-loader />
     } @else {
       <form (submit)="onSubmit($event)">
-        <div class="flex flex-col gap-6 divide-y divide-base-300">
+        <div class="flex flex-col gap-6 divide-y divide-line">
           <!-- Personal Information Section -->
           <div class="sm:grid sm:grid-cols-4 sm:gap-4 pb-8">
             <div class="mb-4">
-              <h2 class="text-lg/7 font-semibold text-base-content">Datos Personales</h2>
-              <p class="mt-1 text-sm text-base-content/70">Información personal del estudiante.</p>
+              <h2 class="text-lg/7 font-semibold text-ink-strong">Datos Personales</h2>
+              <p class="mt-1 text-sm text-ink-muted">Información personal del estudiante.</p>
             </div>
             <div class="sm:col-span-3">
               <div uiCard>
@@ -102,8 +102,8 @@ interface StudentFormData {
           <!-- Academic Information Section -->
           <div class="sm:grid sm:grid-cols-4 sm:gap-4 pb-8 pt-6">
             <div class="mb-4">
-              <h2 class="text-lg/7 font-semibold text-base-content">Datos Académicos</h2>
-              <p class="mt-1 text-sm text-base-content/70">Información académica y estado de matrícula.</p>
+              <h2 class="text-lg/7 font-semibold text-ink-strong">Datos Académicos</h2>
+              <p class="mt-1 text-sm text-ink-muted">Información académica y estado de matrícula.</p>
             </div>
             <div class="sm:col-span-3">
               <div uiCard>
@@ -133,8 +133,8 @@ interface StudentFormData {
           <!-- Contact Information Section -->
           <div class="sm:grid sm:grid-cols-4 sm:gap-4 pb-8 pt-6">
             <div class="mb-4">
-              <h2 class="text-lg/7 font-semibold text-base-content">Contacto</h2>
-              <p class="mt-1 text-sm text-base-content/70">Información de contacto del estudiante.</p>
+              <h2 class="text-lg/7 font-semibold text-ink-strong">Contacto</h2>
+              <p class="mt-1 text-sm text-ink-muted">Información de contacto del estudiante.</p>
             </div>
             <div class="sm:col-span-3">
               <div uiCard>
@@ -158,8 +158,8 @@ interface StudentFormData {
           <!-- Medical Information Section -->
           <div class="sm:grid sm:grid-cols-4 sm:gap-4 pb-8 pt-6">
             <div class="mb-4">
-              <h2 class="text-lg/7 font-semibold text-base-content">Información Médica</h2>
-              <p class="mt-1 text-sm text-base-content/70">Datos médicos relevantes del estudiante.</p>
+              <h2 class="text-lg/7 font-semibold text-ink-strong">Información Médica</h2>
+              <p class="mt-1 text-sm text-ink-muted">Datos médicos relevantes del estudiante.</p>
             </div>
             <div class="sm:col-span-3">
               <div uiCard>
@@ -205,8 +205,8 @@ interface StudentFormData {
           <!-- Emergency Contact Section -->
           <div class="sm:grid sm:grid-cols-4 sm:gap-4 pb-8 pt-6">
             <div class="mb-4">
-              <h2 class="text-lg/7 font-semibold text-base-content">Contacto de Emergencia</h2>
-              <p class="mt-1 text-sm text-base-content/70">Persona a contactar en caso de emergencia.</p>
+              <h2 class="text-lg/7 font-semibold text-ink-strong">Contacto de Emergencia</h2>
+              <p class="mt-1 text-sm text-ink-muted">Persona a contactar en caso de emergencia.</p>
             </div>
             <div class="sm:col-span-3">
               <div uiCard>
@@ -246,7 +246,7 @@ interface StudentFormData {
         </div>
 
         <!-- Form Actions -->
-        <div class="flex justify-end gap-3 my-6 pt-6 border-t border-base-300">
+        <div class="flex justify-end gap-3 my-6 pt-6 border-t border-line">
           <a uiButton variant="ghost" routerLink="/students">Cancelar</a>
           <button uiButton [loading]="isSaving()" variant="primary" type="submit" [disabled]="isSaving()">
             {{ isEditMode() ? 'Guardar cambios' : 'Crear alumno' }}

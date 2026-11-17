@@ -1,4 +1,4 @@
-import { Button, Card, CardBody, PageHeader, Spinner, Toast, UiInput } from '#/ui';
+import { Button, Card, CardBody, Icon, PageHeader, Spinner, Toast, UiInput } from '#/ui';
 import { HttpClient } from '@angular/common/http';
 import { afterRenderEffect, Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -19,16 +19,16 @@ interface ParentMeResponse {
 
 @Component({
   selector: 'app-parent-portal',
-  imports: [Spinner, Card, CardBody, UiInput, Button, FormsModule, PageHeader],
+  imports: [Spinner, Card, CardBody, UiInput, Button, FormsModule, PageHeader, Icon],
   template: `
     <lib-page-header title="Portal de padres" subtitle="Resumen rápido del progreso de tus hijos." />
 
     <div uiCard class="mt-6">
       <div uiCardBody>
         <div class="flex items-center justify-between">
-          <h2 class="text-lg font-semibold text-base-content">Hijos vinculados</h2>
+          <h2 class="text-lg font-semibold text-ink-strong">Hijos vinculados</h2>
           <button uiButton variant="primary" size="sm" (click)="openAddChild()">
-            <span class="material-symbols-outlined text-lg">add</span>
+            <ui-icon name="plus" class="text-lg" />
             Agregar hijo
           </button>
         </div>
@@ -38,20 +38,20 @@ interface ParentMeResponse {
             <span uiSpinner></span>
           </div>
         } @else if (children().length === 0) {
-          <div class="py-8 text-center text-base-content/70">
+          <div class="py-8 text-center text-ink-muted">
             Aún no tienes hijos vinculados. Usa "Agregar hijo" con el código de matrícula.
           </div>
         } @else {
           <div class="grid gap-4 md:grid-cols-2 mt-2">
             @for (child of children(); track child.studentId) {
               <button
-                class="text-left border border-base-200 rounded-lg p-4 hover:border-primary transition-colors"
+                class="text-left border border-line rounded-lg p-4 hover:border-primary transition-colors"
                 (click)="openChild(child)"
               >
-                <p class="font-semibold text-base-content">{{ child.name }}</p>
-                <p class="text-sm text-base-content/70">{{ child.schoolName }}</p>
+                <p class="font-semibold text-ink-strong">{{ child.name }}</p>
+                <p class="text-sm text-ink-muted">{{ child.schoolName }}</p>
                 @if (child.classGroupName) {
-                  <p class="text-sm text-base-content/70">Grupo: {{ child.classGroupName }}</p>
+                  <p class="text-sm text-ink-muted">Grupo: {{ child.classGroupName }}</p>
                 }
               </button>
             }
@@ -64,8 +64,8 @@ interface ParentMeResponse {
       <div class="fixed inset-0 bg-black/40 flex items-center justify-center p-4 z-50">
         <div uiCard class="w-full max-w-md">
           <div uiCardBody>
-            <h3 class="text-lg font-semibold text-base-content">Agregar hijo</h3>
-            <p class="text-sm text-base-content/70">Ingresa el código de matrícula del estudiante.</p>
+            <h3 class="text-lg font-semibold text-ink-strong">Agregar hijo</h3>
+            <p class="text-sm text-ink-muted">Ingresa el código de matrícula del estudiante.</p>
 
             <input uiInput class="mt-2 uppercase" placeholder="Código de matrícula" [(ngModel)]="addCode" />
 

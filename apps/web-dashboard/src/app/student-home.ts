@@ -7,6 +7,7 @@ import {
   CardBody,
   ChartPlaceholder,
   EmptyState,
+  Icon,
   Meter,
   MeterTone,
   PageHeader,
@@ -120,11 +121,12 @@ const longDate = new Intl.DateTimeFormat('es', { weekday: 'long', day: 'numeric'
     EmptyState,
     RecentBroadcasts,
     StatCard,
+    Icon,
   ],
   template: `
     <lib-page-header [title]="greeting()" [subtitle]="headerSubtitle()" />
 
-    <section uiCard aria-labelledby="today-title">
+    <section uiCard bleed aria-labelledby="today-title">
       <div uiCardBody>
         <h2 id="today-title" class="sr-only">Hoy</h2>
         @if (today.isLoading()) {
@@ -135,13 +137,24 @@ const longDate = new Intl.DateTimeFormat('es', { weekday: 'long', day: 'numeric'
             <button uiButton variant="ghost" size="sm" type="button" (click)="today.reload()">Reintentar</button>
           </div>
         } @else if (!today.value()?.classGroup) {
-          <lib-empty-state title="Aún no tienes grupo asignado" description="Cuando te asignen a un grupo verás aquí tu horario." icon="groups" />
+          <lib-empty-state
+            title="Aún no tienes grupo asignado"
+            description="Cuando te asignen a un grupo verás aquí tu horario."
+            icon="users"
+          />
         } @else if (classes().length === 0) {
-          <lib-empty-state title="No tienes clases hoy" description="Tu horario de la semana aparecerá aquí." icon="event_available" />
+          <lib-empty-state
+            title="No tienes clases hoy"
+            description="Tu horario de la semana aparecerá aquí."
+            icon="calendar-check"
+          />
         } @else {
           <div class="flex flex-wrap items-center gap-4">
             @if (highlight(); as main) {
-              <span class="material-symbols-outlined flex size-12 shrink-0 items-center justify-center rounded-field bg-primary/10 text-2xl text-primary" aria-hidden="true">co_present</span>
+              <ui-icon
+                name="presentation"
+                class="flex size-12 shrink-0 items-center justify-center rounded-field bg-action-subtle text-2xl text-primary"
+              />
               <div class="min-w-0 flex-[1_1_280px]">
                 <p class="flex items-center gap-2 text-sm text-ink-muted">
                   @if (main.state === 'NOW') {
@@ -154,8 +167,15 @@ const longDate = new Intl.DateTimeFormat('es', { weekday: 'long', day: 'numeric'
                 <p class="text-sm text-ink-muted">{{ slotWhere(main) }}</p>
               </div>
               @if (main.remote && main.remoteLink) {
-                <a uiButton variant="primary" size="sm" [href]="main.remoteLink" target="_blank" rel="noopener noreferrer">
-                  <span class="material-symbols-outlined" aria-hidden="true">videocam</span>
+                <a
+                  uiButton
+                  variant="primary"
+                  size="sm"
+                  [href]="main.remoteLink"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <ui-icon name="video" />
                   Abrir enlace
                 </a>
               }
@@ -175,14 +195,24 @@ const longDate = new Intl.DateTimeFormat('es', { weekday: 'long', day: 'numeric'
             @for (slot of classes(); track slot.id) {
               <li
                 class="flex min-w-28 flex-[1_1_120px] flex-col rounded-field border px-3 py-2"
-                [class]="slot.state === 'NOW' ? 'border-primary bg-primary/5' : slot.state === 'PAST' ? 'border-line opacity-60' : 'border-line'"
+                [class]="
+                  slot.state === 'NOW'
+                    ? 'border-primary bg-action-subtle'
+                    : slot.state === 'PAST'
+                      ? 'border-line opacity-60'
+                      : 'border-line'
+                "
                 [attr.aria-current]="slot.state === 'NOW' ? 'time' : null"
               >
-                <span class="text-xs tabular-nums" [class]="slot.state === 'NOW' ? 'font-semibold text-primary' : 'text-ink-muted'">{{ slot.startTime }}</span>
+                <span
+                  class="text-xs tabular-nums"
+                  [class]="slot.state === 'NOW' ? 'font-semibold text-primary' : 'text-ink-muted'"
+                  >{{ slot.startTime }}</span
+                >
                 <span class="flex items-center gap-1 text-sm font-medium text-ink-strong">
                   {{ slot.course.name }}
                   @if (slot.remote) {
-                    <span class="material-symbols-outlined text-base text-ink-muted" aria-label="Clase virtual" role="img">videocam</span>
+                    <ui-icon name="video" class="text-base text-ink-muted" aria-label="Clase virtual" role="img" />
                   }
                 </span>
               </li>
@@ -193,75 +223,114 @@ const longDate = new Intl.DateTimeFormat('es', { weekday: 'long', day: 'numeric'
     </section>
 
     <div class="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-      <lib-stat-card label="Promedio del periodo" [value]="averageValue()" [helper]="averageHelper()" icon="grade" color="primary" />
-      <lib-stat-card label="Asistencia" [value]="attendanceValue()" [helper]="attendanceHelper()" icon="how_to_reg" color="success" />
-      <lib-stat-card label="Por entregar" [value]="toDoValue()" [helper]="toDoHelper()" icon="assignment" color="warning" />
-      <lib-stat-card label="Mensajes nuevos" [value]="messagesValue()" [helper]="messagesHelper()" icon="mail" color="info" />
+      <lib-stat-card
+        label="Promedio del periodo"
+        [value]="averageValue()"
+        [helper]="averageHelper()"
+        icon="star"
+        color="primary"
+      />
+      <lib-stat-card
+        label="Asistencia"
+        [value]="attendanceValue()"
+        [helper]="attendanceHelper()"
+        icon="user-check"
+        color="success"
+      />
+      <lib-stat-card
+        label="Por entregar"
+        [value]="toDoValue()"
+        [helper]="toDoHelper()"
+        icon="clipboard-list"
+        color="warning"
+      />
+      <lib-stat-card
+        label="Mensajes nuevos"
+        [value]="messagesValue()"
+        [helper]="messagesHelper()"
+        icon="mail"
+        color="info"
+      />
     </div>
 
     <div class="mt-6 flex flex-wrap gap-6">
-    <section uiCard class="min-w-0 flex-[999_1_560px]" aria-labelledby="work-title">
-      <div uiCardBody>
-        <div class="flex items-center justify-between">
-          <h2 id="work-title" class="text-base font-semibold text-ink-strong">Próximas entregas y evaluaciones</h2>
-          <a routerLink="/student/assignments" class="link link-primary text-sm">Ver todas</a>
-        </div>
-        @if (work.isLoading()) {
-          <div class="flex justify-center py-8"><span uiSpinner></span></div>
-        } @else if (work.error()) {
-          <div uiAlert tone="danger" role="alert" class="mt-2">
-            <span>No se pudieron cargar tus entregas.</span>
-            <button uiButton variant="ghost" size="sm" type="button" (click)="work.reload()">Reintentar</button>
+      <section uiCard bleed class="min-w-0 flex-[999_1_560px]" aria-labelledby="work-title">
+        <div uiCardBody>
+          <div class="flex items-center justify-between">
+            <h2 id="work-title" class="text-base font-semibold text-ink-strong">Próximas entregas y evaluaciones</h2>
+            <a routerLink="/student/assignments" class="link link-primary text-sm">Ver todas</a>
           </div>
-        } @else if (workItems().length === 0) {
-          <lib-empty-state
-            title="Sin entregas próximas"
-            description="Las tareas y evaluaciones de las próximas dos semanas aparecerán aquí."
-            icon="assignment"
-          />
-        } @else {
-          <ul class="mt-1 flex flex-col">
-            @for (item of workItems(); track item.assignmentId) {
-              <li class="flex min-h-11 flex-wrap items-center gap-x-4 gap-y-2 border-t border-line py-2.5 first:border-t-0">
-                <div class="min-w-56 flex-[1_1_240px]">
-                  <p class="flex flex-wrap items-center gap-2">
-                    <span uiBadge [tone]="typeOf(item).tone" size="sm">{{ typeOf(item).label }}</span>
-                    <a [routerLink]="['/assignments', item.assignmentId]" class="font-medium text-ink-strong">{{ item.title }}</a>
-                  </p>
-                  <p class="mt-0.5 text-xs text-ink-muted">
-                    {{ item.course.name }} ·
-                    <span [class]="item.status === 'VENCIDA' ? 'font-medium text-error' : ''">{{ dueLabel(item) }}</span>
-                  </p>
-                </div>
-                <span uiBadge [tone]="statusOf(item).tone">{{ statusOf(item).label }}</span>
-                @if (item.status === 'PENDIENTE' || item.status === 'VENCIDA') {
-                  <a uiButton [variant]="item.status === 'PENDIENTE' ? 'primary' : 'secondary'" size="sm" [routerLink]="['/assignments', item.assignmentId]">
-                    Entregar
-                  </a>
-                } @else if (item.status === 'ENTREGADO') {
-                  <a uiButton variant="ghost" size="sm" [routerLink]="['/assignments', item.assignmentId]">Ver entrega</a>
-                }
-              </li>
-            }
-          </ul>
-        }
-      </div>
-    </section>
+          @if (work.isLoading()) {
+            <div class="flex justify-center py-8"><span uiSpinner></span></div>
+          } @else if (work.error()) {
+            <div uiAlert tone="danger" role="alert" class="mt-2">
+              <span>No se pudieron cargar tus entregas.</span>
+              <button uiButton variant="ghost" size="sm" type="button" (click)="work.reload()">Reintentar</button>
+            </div>
+          } @else if (workItems().length === 0) {
+            <lib-empty-state
+              title="Sin entregas próximas"
+              description="Las tareas y evaluaciones de las próximas dos semanas aparecerán aquí."
+              icon="clipboard-list"
+            />
+          } @else {
+            <ul class="mt-1 flex flex-col">
+              @for (item of workItems(); track item.assignmentId) {
+                <li
+                  class="flex min-h-11 flex-wrap items-center gap-x-4 gap-y-2 border-t border-line py-2.5 first:border-t-0"
+                >
+                  <div class="min-w-56 flex-[1_1_240px]">
+                    <p class="flex flex-wrap items-center gap-2">
+                      <span uiBadge [tone]="typeOf(item).tone" size="sm">{{ typeOf(item).label }}</span>
+                      <a [routerLink]="['/assignments', item.assignmentId]" class="font-medium text-ink-strong">{{
+                        item.title
+                      }}</a>
+                    </p>
+                    <p class="mt-0.5 text-xs text-ink-muted">
+                      {{ item.course.name }} ·
+                      <span [class]="item.status === 'VENCIDA' ? 'font-medium text-error' : ''">{{
+                        dueLabel(item)
+                      }}</span>
+                    </p>
+                  </div>
+                  <span uiBadge [tone]="statusOf(item).tone">{{ statusOf(item).label }}</span>
+                  @if (item.status === 'PENDIENTE' || item.status === 'VENCIDA') {
+                    <a
+                      uiButton
+                      [variant]="item.status === 'PENDIENTE' ? 'primary' : 'secondary'"
+                      size="sm"
+                      [routerLink]="['/assignments', item.assignmentId]"
+                    >
+                      Entregar
+                    </a>
+                  } @else if (item.status === 'ENTREGADO') {
+                    <a uiButton variant="ghost" size="sm" [routerLink]="['/assignments', item.assignmentId]"
+                      >Ver entrega</a
+                    >
+                  }
+                </li>
+              }
+            </ul>
+          }
+        </div>
+      </section>
 
-    <div class="min-w-0 flex-[1_1_340px]">
-      <app-recent-broadcasts />
-    </div>
+      <div class="min-w-0 flex-[1_1_340px]">
+        <app-recent-broadcasts />
+      </div>
     </div>
 
     <div class="mt-6 flex flex-wrap gap-6">
-      <section uiCard class="min-w-0 flex-[999_1_560px]" aria-labelledby="grades-title">
+      <section uiCard bleed class="min-w-0 flex-[999_1_560px]" aria-labelledby="grades-title">
         <div uiCardBody>
           <div class="flex flex-wrap items-center justify-between gap-2">
             <h2 id="grades-title" class="text-base font-semibold text-ink-strong">
               Mis calificaciones{{ progress.value()?.period ? ' · ' + progress.value()?.period?.name : '' }}
             </h2>
             @if (progress.value()?.studentId; as studentId) {
-              <a [routerLink]="['/students', studentId, 'grade-report']" class="link link-primary text-sm">Ver informe completo</a>
+              <a [routerLink]="['/students', studentId, 'grade-report']" class="link link-primary text-sm"
+                >Ver informe completo</a
+              >
             }
           </div>
           @if (progress.isLoading()) {
@@ -272,9 +341,17 @@ const longDate = new Intl.DateTimeFormat('es', { weekday: 'long', day: 'numeric'
               <button uiButton variant="ghost" size="sm" type="button" (click)="progress.reload()">Reintentar</button>
             </div>
           } @else if (!progress.value()?.period) {
-            <lib-empty-state title="No hay un periodo activo" description="Tus promedios aparecerán cuando inicie el periodo." icon="event_busy" />
+            <lib-empty-state
+              title="No hay un periodo activo"
+              description="Tus promedios aparecerán cuando inicie el periodo."
+              icon="calendar-x"
+            />
           } @else if (courseRows().length === 0) {
-            <lib-empty-state title="Sin cursos inscritos" description="Tus cursos y promedios aparecerán aquí." icon="menu_book" />
+            <lib-empty-state
+              title="Sin cursos inscritos"
+              description="Tus cursos y promedios aparecerán aquí."
+              icon="book-open"
+            />
           } @else {
             <ul class="mt-1 flex flex-col">
               @for (course of courseRows(); track course.id) {
@@ -292,15 +369,27 @@ const longDate = new Intl.DateTimeFormat('es', { weekday: 'long', day: 'numeric'
                   } @else {
                     <span class="flex-1"></span>
                   }
-                  <strong class="w-10 text-right tabular-nums text-ink-strong">{{ course.average === null ? '—' : gradeText(course.average) }}</strong>
+                  <strong class="w-10 text-right tabular-nums text-ink-strong">{{
+                    course.average === null ? '—' : gradeText(course.average)
+                  }}</strong>
                 </li>
               }
             </ul>
             @if (progress.value()?.scale; as scale) {
               <p class="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-ink-muted">
-                <span class="inline-flex items-center gap-1.5"><span class="size-2.5 rounded-sm bg-success" aria-hidden="true"></span>Excelencia ({{ gradeText(scale.minimumExcellence) }}+)</span>
-                <span class="inline-flex items-center gap-1.5"><span class="size-2.5 rounded-sm bg-primary" aria-hidden="true"></span>Aprobado ({{ gradeText(scale.minimumApproval) }}+)</span>
-                <span class="inline-flex items-center gap-1.5"><span class="size-2.5 rounded-sm bg-error" aria-hidden="true"></span>Bajo el mínimo</span>
+                <span class="inline-flex items-center gap-1.5"
+                  ><span class="size-2.5 rounded-sm bg-success" aria-hidden="true"></span>Excelencia ({{
+                    gradeText(scale.minimumExcellence)
+                  }}+)</span
+                >
+                <span class="inline-flex items-center gap-1.5"
+                  ><span class="size-2.5 rounded-sm bg-primary" aria-hidden="true"></span>Aprobado ({{
+                    gradeText(scale.minimumApproval)
+                  }}+)</span
+                >
+                <span class="inline-flex items-center gap-1.5"
+                  ><span class="size-2.5 rounded-sm bg-error" aria-hidden="true"></span>Bajo el mínimo</span
+                >
                 <span>Según la escala de tu plan de estudio</span>
               </p>
             } @else {
@@ -310,7 +399,9 @@ const longDate = new Intl.DateTimeFormat('es', { weekday: 'long', day: 'numeric'
               <div class="mt-3 flex flex-wrap items-center gap-2 border-t border-line pt-3">
                 <span class="text-xs font-medium text-ink-muted">Notas recientes:</span>
                 @for (g of recentGrades(); track g.id) {
-                  <span uiBadge [tone]="g.band ? bandBadge[g.band] : 'neutral'">{{ g.course.name }} · {{ g.title }} · {{ gradeText(g.score) }}</span>
+                  <span uiBadge [tone]="g.band ? bandBadge[g.band] : 'neutral'"
+                    >{{ g.course.name }} · {{ g.title }} · {{ gradeText(g.score) }}</span
+                  >
                 }
               </div>
             }
@@ -329,7 +420,10 @@ const longDate = new Intl.DateTimeFormat('es', { weekday: 'long', day: 'numeric'
             source="grade-report"
           />
           <div class="mt-3 flex items-center gap-3 rounded-field bg-surface-2 p-3">
-            <span class="material-symbols-outlined flex size-9 shrink-0 items-center justify-center rounded-field bg-success/15 text-success" aria-hidden="true">psychology</span>
+            <ui-icon
+              name="brain"
+              class="flex size-9 shrink-0 items-center justify-center rounded-field bg-success/15 text-success"
+            />
             <span class="min-w-0 flex-1">
               <span class="block font-medium text-ink-strong">Hábitos y actitudes</span>
               <span class="block text-xs text-ink-muted">{{ habitsText() }}</span>
@@ -341,7 +435,6 @@ const longDate = new Intl.DateTimeFormat('es', { weekday: 'long', day: 'numeric'
   `,
 })
 export default class StudentHome {
-
   // ── HOM-001-S04: now / next, today's classes, upcoming and overdue work ──
   public today = httpResource<StudentToday>(() => '/api/v1/home/student/today');
   public work = httpResource<StudentWork>(() => '/api/v1/home/student/work');
@@ -406,7 +499,9 @@ export default class StudentHome {
     tomorrow.setUTCDate(tomorrow.getUTCDate() + 1);
     const tomorrowKey = tomorrow.toISOString().slice(0, 10);
     const dueTomorrow = items.filter(
-      (i) => i.status === 'PENDIENTE' && new Intl.DateTimeFormat('en-CA', { timeZone: tz }).format(new Date(i.dueAt)) === tomorrowKey,
+      (i) =>
+        i.status === 'PENDIENTE' &&
+        new Intl.DateTimeFormat('en-CA', { timeZone: tz }).format(new Date(i.dueAt)) === tomorrowKey,
     ).length;
     return dueTomorrow > 0 ? `${dueTomorrow} vence${dueTomorrow === 1 ? '' : 'n'} mañana` : 'Próximas dos semanas';
   });

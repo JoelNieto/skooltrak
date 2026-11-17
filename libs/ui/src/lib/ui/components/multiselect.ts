@@ -3,6 +3,8 @@ import { Listbox, Option } from '@angular/aria/listbox';
 import { OverlayModule } from '@angular/cdk/overlay';
 import { afterRenderEffect, Component, computed, forwardRef, viewChild, viewChildren } from '@angular/core';
 import { NG_VALUE_ACCESSOR, ReactiveFormsModule } from '@angular/forms';
+import { UiIconName } from '../icons/icons';
+import { Icon } from './icon';
 
 /**
  * FUTURE: placeholder, to be rebuilt from scratch before first use. Not used by any app yet.
@@ -14,7 +16,7 @@ import { NG_VALUE_ACCESSOR, ReactiveFormsModule } from '@angular/forms';
  */
 @Component({
   selector: 'lib-multiselect',
-  imports: [ReactiveFormsModule, Combobox, Listbox, Option, OverlayModule],
+  imports: [ReactiveFormsModule, Combobox, Listbox, Option, OverlayModule, Icon],
   providers: [
     {
       provide: NG_VALUE_ACCESSOR,
@@ -25,11 +27,13 @@ import { NG_VALUE_ACCESSOR, ReactiveFormsModule } from '@angular/forms';
   template: `<div ngCombobox readonly>
     <div #origin class="select">
       <span class="combobox-label">
-        <span class="selected-label-icon material-symbols-outlined" translate="no">{{ displayIcon() }}</span>
+        @if (displayIcon(); as iconName) {
+          <ui-icon [name]="iconName" class="selected-label-icon" />
+        }
         <span class="selected-label-text">{{ displayValue() }}</span>
       </span>
       <input aria-label="Label dropdown" placeholder="Select a label" ngComboboxInput />
-      <span class="example-arrow material-symbols-outlined" translate="no">arrow_drop_down</span>
+      <ui-icon name="chevron-down" class="example-arrow" />
     </div>
     <ng-template ngComboboxPopupContainer>
       <ng-template
@@ -40,9 +44,9 @@ import { NG_VALUE_ACCESSOR, ReactiveFormsModule } from '@angular/forms';
           <div ngListbox multi>
             @for (label of labels; track label.value) {
               <div ngOption [value]="label.value" [label]="label.value">
-                <span class="example-option-icon material-symbols-outlined" translate="no">{{ label.icon }}</span>
+                <ui-icon [name]="label.icon" class="example-option-icon" />
                 <span class="example-option-text">{{ label.value }}</span>
-                <span class="example-option-check material-symbols-outlined" translate="no">check</span>
+                <ui-icon name="check" class="example-option-check" />
               </div>
             }
           </div>
@@ -105,7 +109,8 @@ import { NG_VALUE_ACCESSOR, ReactiveFormsModule } from '@angular/forms';
       transform: rotate(180deg);
     }
     .example-popup-container {
-      @apply bg-white shadow-sm;
+      @apply shadow-sm;
+      background-color: var(--ui-surface-1);
       width: 100%;
       padding: 0.5rem;
       margin-top: 8px;
@@ -185,7 +190,7 @@ export class MultiSelect {
   displayIcon = computed(() => {
     const values = this.listbox()?.value() || [];
     const label = this.labels.find((label) => label.value === values[0]);
-    return label ? label.icon : '';
+    return label?.icon ?? null;
   });
   /** The string that is displayed in the combobox. */
   displayValue = computed(() => {
@@ -199,15 +204,15 @@ export class MultiSelect {
     return `${values[0]} + ${values.length - 1} more`;
   });
   /** The labels that are available for selection. */
-  labels = [
-    { value: 'Important', icon: 'label' },
+  labels: { value: string; icon: UiIconName }[] = [
+    { value: 'Important', icon: 'tag' },
     { value: 'Starred', icon: 'star' },
-    { value: 'Work', icon: 'work' },
-    { value: 'Personal', icon: 'person' },
-    { value: 'To Do', icon: 'checklist' },
-    { value: 'Later', icon: 'schedule' },
-    { value: 'Read', icon: 'menu_book' },
-    { value: 'Travel', icon: 'flight' },
+    { value: 'Work', icon: 'briefcase' },
+    { value: 'Personal', icon: 'user' },
+    { value: 'To Do', icon: 'list-checks' },
+    { value: 'Later', icon: 'clock' },
+    { value: 'Read', icon: 'book-open' },
+    { value: 'Travel', icon: 'plane' },
   ];
   constructor() {
     // Scrolls to the active item when the active option changes.

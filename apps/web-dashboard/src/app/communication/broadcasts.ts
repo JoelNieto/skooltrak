@@ -8,16 +8,21 @@ import {
   CardTitle,
   Confirmation,
   EmptyState,
+  Icon,
   PageHeader,
   Toast,
   UiChoice,
   UiField,
   UiInput,
   UiSelect,
+  UiTab,
+  UiTabContent,
   UiTable,
+  UiTabList,
+  UiTabPanel,
+  UiTabs,
   UiToggle,
 } from '#/ui';
-import { Tab, TabContent, TabList, TabPanel, Tabs } from '@angular/aria/tabs';
 import { DatePipe } from '@angular/common';
 import { httpResource } from '@angular/common/http';
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
@@ -62,63 +67,64 @@ const ACTION_LABELS: Record<string, string> = {
     FormField,
     PageHeader,
     EmptyState,
-    TabList,
-    Tab,
-    Tabs,
-    TabPanel,
-    TabContent,
+    UiTabs,
+    UiTabList,
+    UiTab,
+    UiTabPanel,
+    UiTabContent,
+    Icon,
   ],
   template: `
     <lib-page-header
       title="Comunicados institucionales"
       subtitle="Aprueba avisos, consulta el historial y revisa la política de envío. Los avisos institucionales quedan pendientes de aprobación."
       actionLabel="Nuevo comunicado"
-      actionIcon="campaign"
+      actionIcon="megaphone"
       (action)="openComposer()"
     />
 
-    <div ngTabs>
+    <div uiTabs>
       <div class="flex flex-wrap items-center justify-between gap-3 mt-2">
-        <div ngTabList selectionMode="follow" [(selectedTab)]="selectedTab" class="tabs tabs-box">
-          <div ngTab value="pending" class="tab gap-2" [class.tab-active]="selectedTab() === 'pending'">
+        <div uiTabList [(selectedTab)]="selectedTab" aria-label="Comunicados">
+          <button uiTab value="pending">
             Pendientes de aprobación
             @if (pending().length > 0) {
               <span uiBadge tone="warning" size="sm">{{ pending().length }}</span>
             }
-          </div>
-          <div ngTab value="sent" class="tab" [class.tab-active]="selectedTab() === 'sent'">Mensajes enviados</div>
-          <div ngTab value="audit" class="tab" [class.tab-active]="selectedTab() === 'audit'">Auditoría</div>
-          <div ngTab value="settings" class="tab" [class.tab-active]="selectedTab() === 'settings'">Ajustes</div>
+          </button>
+          <button uiTab value="sent">Mensajes enviados</button>
+          <button uiTab value="audit">Auditoría</button>
+          <button uiTab value="settings">Ajustes</button>
         </div>
         <button uiButton variant="ghost" size="sm" type="button" (click)="reload()">
-          <span class="material-symbols-outlined text-base">refresh</span>
+          <ui-icon name="refresh-cw" class="text-base" />
           Actualizar
         </button>
       </div>
 
       <div class="mt-4">
-        <div ngTabPanel value="pending">
-          <ng-template ngTabContent>
+        <div uiTabPanel value="pending">
+          <ng-template uiTabContent>
             <section uiCard>
               <div uiCardBody>
                 @if (pending().length === 0) {
                   <lib-empty-state
                     title="Sin pendientes"
                     description="Los comunicados institucionales aparecerán aquí hasta que se aprueben."
-                    icon="task_alt"
+                    icon="circle-check-big"
                   />
                 } @else {
                   <div class="space-y-3">
                     @for (item of pending(); track item.id) {
-                      <article class="rounded-lg border border-base-200 p-4 space-y-2">
+                      <article class="rounded-lg border border-line p-4 space-y-2">
                         <div class="flex items-start justify-between gap-2">
                           <div class="min-w-0">
                             <p class="font-semibold truncate">{{ item.title }}</p>
-                            <p class="text-sm text-base-content/70 line-clamp-3">{{ preview(item) }}</p>
+                            <p class="text-sm text-ink-muted line-clamp-3">{{ preview(item) }}</p>
                           </div>
                           <span uiBadge tone="warning" class="shrink-0">Pendiente</span>
                         </div>
-                        <div class="flex flex-wrap items-center gap-2 text-xs text-base-content/60">
+                        <div class="flex flex-wrap items-center gap-2 text-xs text-ink-muted">
                           <span>{{ typeLabel(item.type) }}</span>
                           <span>·</span>
                           <span>{{ urgencyLabel(item.urgencyDefault) }}</span>
@@ -162,13 +168,13 @@ const ACTION_LABELS: Record<string, string> = {
           </ng-template>
         </div>
 
-        <div ngTabPanel value="sent">
-          <ng-template ngTabContent>
+        <div uiTabPanel value="sent">
+          <ng-template uiTabContent>
             <div class="grid gap-6 xl:grid-cols-[minmax(0,22rem)_1fr]">
               <section uiCard class="h-fit">
                 <div uiCardBody>
                   <h2 uiCardTitle class="text-base">Nuevo comunicado</h2>
-                  <p class="text-sm text-base-content/60">
+                  <p class="text-sm text-ink-muted">
                     Por ahora el aviso llega en la aplicación. SMS y correo se habilitarán más adelante.
                   </p>
 
@@ -255,7 +261,7 @@ const ACTION_LABELS: Record<string, string> = {
                     <lib-empty-state
                       title="Sin comunicados enviados"
                       description="Cuando apruebes o envíes un aviso aparecerá aquí."
-                      icon="campaign"
+                      icon="megaphone"
                     />
                   } @else {
                     <div class="overflow-x-auto">
@@ -311,8 +317,8 @@ const ACTION_LABELS: Record<string, string> = {
           </ng-template>
         </div>
 
-        <div ngTabPanel value="audit">
-          <ng-template ngTabContent>
+        <div uiTabPanel value="audit">
+          <ng-template uiTabContent>
             <section uiCard>
               <div uiCardBody>
                 <h2 uiCardTitle class="text-base">Registro de actividad</h2>
@@ -349,27 +355,27 @@ const ACTION_LABELS: Record<string, string> = {
           </ng-template>
         </div>
 
-        <div ngTabPanel value="settings">
-          <ng-template ngTabContent>
+        <div uiTabPanel value="settings">
+          <ng-template uiTabContent>
             <div class="grid gap-6 xl:grid-cols-2">
               <section uiCard>
                 <div uiCardBody>
                   <h2 uiCardTitle class="text-base">Política de aprobación</h2>
-                  <p class="text-sm text-base-content/60">
+                  <p class="text-sm text-ink-muted">
                     Estas reglas se aplican a todos los comunicados de la institución.
                   </p>
                   <ul class="mt-2 space-y-3">
                     <li class="flex items-start justify-between gap-4">
                       <div>
                         <p class="font-medium">Avisos a toda la institución</p>
-                        <p class="text-sm text-base-content/60">Quedan en cola hasta que un admin los apruebe.</p>
+                        <p class="text-sm text-ink-muted">Quedan en cola hasta que un admin los apruebe.</p>
                       </div>
                       <input uiToggle type="checkbox" checked disabled aria-label="Aprobación institucional activa" />
                     </li>
                     <li class="flex items-start justify-between gap-4">
                       <div>
                         <p class="font-medium">Avisos a un grupo de clase</p>
-                        <p class="text-sm text-base-content/60">El personal puede enviarlos de inmediato.</p>
+                        <p class="text-sm text-ink-muted">El personal puede enviarlos de inmediato.</p>
                       </div>
                       <input
                         uiToggle
@@ -383,7 +389,7 @@ const ACTION_LABELS: Record<string, string> = {
                     <li class="flex items-start justify-between gap-4">
                       <div>
                         <p class="font-medium">Respuestas en comunicados</p>
-                        <p class="text-sm text-base-content/60">
+                        <p class="text-sm text-ink-muted">
                           Se elige en cada aviso. Si se desactiva, las familias solo pueden leer.
                         </p>
                       </div>
@@ -395,28 +401,28 @@ const ACTION_LABELS: Record<string, string> = {
               <section uiCard>
                 <div uiCardBody>
                   <h2 uiCardTitle class="text-base">Canales de entrega</h2>
-                  <p class="text-sm text-base-content/60">
+                  <p class="text-sm text-ink-muted">
                     Solo el canal en la aplicación está activo. El resto se conectará con Novu más adelante.
                   </p>
                   <ul class="mt-2 space-y-3">
                     <li class="flex items-start justify-between gap-4">
                       <div>
                         <p class="font-medium">En la aplicación</p>
-                        <p class="text-sm text-base-content/60">Bandeja de padres y docentes, con avisos en vivo.</p>
+                        <p class="text-sm text-ink-muted">Bandeja de padres y docentes, con avisos en vivo.</p>
                       </div>
                       <input uiToggle type="checkbox" checked disabled aria-label="Canal en la aplicación activo" />
                     </li>
                     <li class="flex items-start justify-between gap-4">
                       <div>
                         <p class="font-medium">Correo electrónico</p>
-                        <p class="text-sm text-base-content/60">Pendiente de configurar el proveedor de envío.</p>
+                        <p class="text-sm text-ink-muted">Pendiente de configurar el proveedor de envío.</p>
                       </div>
                       <input uiToggle tone="neutral" type="checkbox" disabled aria-label="Canal de correo inactivo" />
                     </li>
                     <li class="flex items-start justify-between gap-4">
                       <div>
                         <p class="font-medium">SMS</p>
-                        <p class="text-sm text-base-content/60">Requiere consentimiento y un proveedor de SMS.</p>
+                        <p class="text-sm text-ink-muted">Requiere consentimiento y un proveedor de SMS.</p>
                       </div>
                       <input uiToggle tone="neutral" type="checkbox" disabled aria-label="Canal SMS inactivo" />
                     </li>
@@ -427,7 +433,7 @@ const ACTION_LABELS: Record<string, string> = {
               <section uiCard class="xl:col-span-2">
                 <div uiCardBody>
                   <h2 uiCardTitle class="text-base">Prioridad y horario de silencio</h2>
-                  <p class="text-sm text-base-content/60">
+                  <p class="text-sm text-ink-muted">
                     Cada destinatario puede tener horario de silencio. La prioridad de emergencia lo omite, pero sigue
                     llegando solo en la aplicación.
                   </p>

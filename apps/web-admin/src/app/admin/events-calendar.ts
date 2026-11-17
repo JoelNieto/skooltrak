@@ -10,24 +10,24 @@ import { Component } from '@angular/core';
       title="Calendario de eventos"
       subtitle="Eventos escolares y fechas importantes."
       actionLabel="Nuevo evento"
-      actionIcon="event_available"
+      actionIcon="calendar-check"
     />
 
     <div uiCard>
       <div uiCardBody>
-        <h2 class="text-lg font-semibold text-base-content">Próximos eventos</h2>
+        <h2 class="text-lg font-semibold text-ink-strong">Próximos eventos</h2>
         @if (events.length === 0) {
           <lib-empty-state
             title="Sin eventos próximos"
             description="Agrega fechas institucionales y reuniones."
-            icon="event_busy"
+            icon="calendar-x"
           />
         } @else {
           <div class="space-y-3">
             @for (event of events; track event.id) {
-              <div class="border border-base-200 rounded-lg p-4">
-                <p class="font-semibold text-base-content">{{ event.title }}</p>
-                <p class="text-sm text-base-content/70">{{ event.date }} · {{ event.location }}</p>
+              <div class="border border-line rounded-lg p-4">
+                <p class="font-semibold text-ink-strong">{{ event.title }}</p>
+                <p class="text-sm text-ink-muted">{{ event.date }} · {{ event.location }}</p>
               </div>
             }
           </div>

@@ -1,9 +1,26 @@
-import { Button, Card, Confirmation, Modal, Pagination, PaginatorV2, Toast, UiTable } from '#/ui';
-import { Menu, MenuContent, MenuItem, MenuTrigger } from '@angular/aria/menu';
-import { OverlayModule } from '@angular/cdk/overlay';
+import {
+  Button,
+  Card,
+  Confirmation,
+  Icon,
+  Modal,
+  Pagination,
+  PaginatorV2,
+  Toast,
+  UiInputGroup,
+  UiRowAction,
+  UiRowActions,
+  UiSortHeader,
+  UiTable,
+  UiTableEmpty,
+  UiTableError,
+  UiTableSkeleton,
+  UiTableToolbar,
+  listState,
+} from '#/ui';
 import { DatePipe } from '@angular/common';
 import { HttpClient, httpResource } from '@angular/common/http';
-import { Component, computed, inject, signal, viewChild } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Prisma } from '@generated/prisma';
 
@@ -14,6 +31,8 @@ import SubjectsForm from '../forms/subjects-form';
 @Component({
   selector: 'app-subjects',
   imports: [
+    UiTableToolbar,
+    UiSortHeader,
     Card,
     UiTable,
     Button,
@@ -21,195 +40,82 @@ import SubjectsForm from '../forms/subjects-form';
     DatePipe,
     PaginatorV2,
     FormsModule,
-    Menu,
-    MenuContent,
-    MenuItem,
-    MenuTrigger,
-    OverlayModule,
+    UiInputGroup,
+    Icon,
+    UiRowActions,
+    UiTableEmpty,
+    UiTableError,
+    UiTableSkeleton,
   ],
   providers: [Pagination],
 
   template: `
-    <div class="flex flex-col gap-4 md:flex-row md:justify-between">
-      <div class="md:w-96 w-full">
-        <label class="input input-primary ">
-          <span class="material-symbols-outlined">search</span>
-          <input class="pl-0" type="search" placeholder="Buscar..." [(ngModel)]="searchText" />
-        </label>
-      </div>
-
-      <button uiButton variant="primary" (click)="editSubject()">
-        <span class="material-symbols-outlined">add_circle</span> Nueva asignatura
+    <ui-table-toolbar>
+      <label uiInputGroup size="sm">
+        <ui-icon name="search" class="text-base text-ink-subtle" />
+        <input aria-label="Buscar" class="pl-0" type="search" placeholder="Buscar..." [(ngModel)]="searchText" />
+      </label>
+      <button uiToolbarEnd uiButton variant="primary" size="sm" (click)="editSubject()">
+        <ui-icon name="circle-plus" class="text-base" /> Nueva asignatura
       </button>
-    </div>
+    </ui-table-toolbar>
     <div uiCard class="overflow-x-auto mt-4">
-      <table uiTable>
+      <table
+        uiTable
+        [sort]="pagination.sort()"
+        (sortChange)="pagination.setSort($event)"
+        [attr.aria-busy]="subjects.isLoading()"
+      >
         <thead>
           <tr>
-            <th
-              class="cursor-pointer hover:bg-base-200 w-1/4"
-              [class]="pagination.sortBy() === 'name' ? 'bg-primary/10 !text-primary hover:bg-primary/20' : ''"
-              (click)="pagination.setOrder('name')"
-            >
-              <div class="flex items-center gap-2">
-                Nombre
-                @if (pagination.sortBy() === 'name') {
-                  <span class="material-symbols-outlined text-xl">
-                    {{ pagination.sortOrder() === 'asc' ? 'arrow_upward' : 'arrow_downward' }}
-                  </span>
-                }
-              </div>
-            </th>
-            <th
-              class="hover:bg-base-200 cursor-pointer w-1/5"
-              [class]="pagination.sortBy() === 'code' ? 'bg-primary/10 text-primary! hover:bg-primary/20' : ''"
-              (click)="pagination.setOrder('code')"
-            >
-              <div class="flex items-center gap-2">
-                Código
-                @if (pagination.sortBy() === 'code') {
-                  <span class="material-symbols-outlined text-xl">
-                    {{ pagination.sortOrder() === 'asc' ? 'arrow_upward' : 'arrow_downward' }}
-                  </span>
-                }
-              </div>
-            </th>
-            <th
-              class="hover:bg-base-200 cursor-pointer"
-              [class]="pagination.sortBy() === 'createdAt' ? 'bg-primary/10 !text-primary hover:bg-primary/20' : ''"
-              (click)="pagination.setOrder('createdAt')"
-            >
-              <div class="flex items-center gap-2">
-                Creado
-                @if (pagination.sortBy() === 'createdAt') {
-                  <span class="material-symbols-outlined text-xl">
-                    {{ pagination.sortOrder() === 'asc' ? 'arrow_upward' : 'arrow_downward' }}
-                  </span>
-                }
-              </div>
-            </th>
-            <th
-              class="hover:bg-base-200 cursor-pointer"
-              [class]="pagination.sortBy() === 'updatedAt' ? 'bg-primary/10 !text-primary hover:bg-primary/20' : ''"
-              (click)="pagination.setOrder('updatedAt')"
-            >
-              <div class="flex items-center gap-2">
-                Actualizado
-                @if (pagination.sortBy() === 'updatedAt') {
-                  <span class="material-symbols-outlined text-xl">
-                    {{ pagination.sortOrder() === 'asc' ? 'arrow_upward' : 'arrow_downward' }}
-                  </span>
-                }
-              </div>
-            </th>
-            <th></th>
+            <th uiSortHeader="name" class="w-1/4">Nombre</th>
+            <th uiSortHeader="code" class="w-1/5">Código</th>
+            <th uiSortHeader="createdAt">Creado</th>
+            <th uiSortHeader="updatedAt">Actualizado</th>
+            <th class="w-12"><span class="sr-only">Acciones</span></th>
           </tr>
         </thead>
-        <tbody>
-          @for (subject of subjects.value()?.data ?? []; track subject.id) {
-            <tr>
-              <td>{{ subject.name }}</td>
-              <td>{{ subject.code }}</td>
-              <td>{{ subject.createdAt | date: 'short' }}</td>
-              <td>{{ subject.updatedAt | date: 'short' }}</td>
-              <td>
-                <button
-                  class="cursor-pointer hover:bg-base-200 p-1 rounded-lg flex items-center justify-center"
-                  ngMenuTrigger
-                  #origin
-                  #trigger="ngMenuTrigger"
-                  [menu]="actionsMenu()"
-                >
-                  <span class="material-symbols-outlined text-xl">more_horiz</span>
-                </button>
-                <ng-template
-                  [cdkConnectedOverlayOpen]="trigger.expanded()"
-                  [cdkConnectedOverlay]="{ origin, usePopover: 'inline' }"
-                  [cdkConnectedOverlayPositions]="[
-                    {
-                      originX: 'end',
-                      originY: 'bottom',
-                      overlayX: 'end',
-                      overlayY: 'top',
-                      offsetY: 4,
-                    },
-                  ]"
-                  cdkAttachPopoverAsChild
-                >
-                  <div ngMenu class="bg-base-100 shadow-sm rounded-lg p-1 w-48" #actionsMenu="ngMenu">
-                    <ng-template ngMenuContent>
-                      <button
-                        ngMenuItem
-                        value="Edit"
-                        class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-base-200 w-full"
-                        (click)="editSubject(subject)"
-                      >
-                        <span class="material-symbols-outlined text-lg">edit</span>
-                        <span>Editar</span>
-                      </button>
-                      <button
-                        ngMenuItem
-                        value="Delete"
-                        class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-base-200 w-full"
-                        (click)="deleteSubject(subject)"
-                      >
-                        <span class="material-symbols-outlined text-lg">delete</span>
-                        <span>Eliminar</span>
-                      </button>
-                    </ng-template>
-                  </div>
-                </ng-template>
-              </td>
-            </tr>
-          } @empty {
-            @if (subjects.isLoading()) {
-              <tr>
-                <td><div class="skeleton h-4 w-full"></div></td>
-                <td><div class="skeleton h-4 w-full"></div></td>
-                <td><div class="skeleton h-4 w-full"></div></td>
-                <td><div class="skeleton h-4 w-full"></div></td>
-                <td><div class="skeleton h-4 w-full"></div></td>
-                <td><div class="skeleton h-4 w-full"></div></td>
-              </tr>
-              <tr>
-                <td><div class="skeleton h-4 w-full"></div></td>
-                <td><div class="skeleton h-4 w-full"></div></td>
-                <td><div class="skeleton h-4 w-full"></div></td>
-                <td><div class="skeleton h-4 w-full"></div></td>
-                <td><div class="skeleton h-4 w-full"></div></td>
-                <td><div class="skeleton h-4 w-full"></div></td>
-              </tr>
-              <tr>
-                <td><div class="skeleton h-4 w-full"></div></td>
-                <td><div class="skeleton h-4 w-full"></div></td>
-                <td><div class="skeleton h-4 w-full"></div></td>
-                <td><div class="skeleton h-4 w-full"></div></td>
-                <td><div class="skeleton h-4 w-full"></div></td>
-                <td><div class="skeleton h-4 w-full"></div></td>
-              </tr>
-              <tr>
-                <td><div class="skeleton h-4 w-full"></div></td>
-                <td><div class="skeleton h-4 w-full"></div></td>
-                <td><div class="skeleton h-4 w-full"></div></td>
-                <td><div class="skeleton h-4 w-full"></div></td>
-                <td><div class="skeleton h-4 w-full"></div></td>
-                <td><div class="skeleton h-4 w-full"></div></td>
-              </tr>
-              <tr>
-                <td><div class="skeleton h-4 w-full"></div></td>
-                <td><div class="skeleton h-4 w-full"></div></td>
-                <td><div class="skeleton h-4 w-full"></div></td>
-                <td><div class="skeleton h-4 w-full"></div></td>
-                <td><div class="skeleton h-4 w-full"></div></td>
-                <td><div class="skeleton h-4 w-full"></div></td>
-              </tr>
-            } @else {
-              <tr>
-                <td colspan="6" class="text-center">Sin valores para este filtro</td>
-              </tr>
-            }
+        @switch (subjectsList.phase()) {
+          @case ('skeleton') {
+            <tbody uiTableSkeleton [rows]="pageSize()" [columns]="5"></tbody>
           }
-        </tbody>
+          @case ('error') {
+            <tbody>
+              <tr uiTableError [columns]="5" (retry)="subjects.reload()"></tr>
+            </tbody>
+          }
+          @case ('ready') {
+            <tbody>
+              @for (subject of subjectsList.rows()?.data ?? []; track subject.id) {
+                <tr>
+                  <td>{{ subject.name }}</td>
+                  <td>{{ subject.code }}</td>
+                  <td>{{ subject.createdAt | date: 'short' }}</td>
+                  <td>{{ subject.updatedAt | date: 'short' }}</td>
+                  <td>
+                    <ui-row-actions
+                      [actions]="rowActions"
+                      [label]="'Acciones para ' + subject.name"
+                      (action)="onRowAction($event, subject)"
+                    />
+                  </td>
+                </tr>
+              } @empty {
+                @if (searchText()) {
+                  <tr
+                    uiTableEmpty
+                    [columns]="5"
+                    icon="search-x"
+                    title="Sin resultados"
+                    description="Ningún resultado coincide con la búsqueda."
+                  ></tr>
+                } @else {
+                  <tr uiTableEmpty [columns]="5" icon="book-open" title="Aún no hay materias"></tr>
+                }
+              }
+            </tbody>
+          }
+        }
       </table>
       <div class="p-4 rounded-b-lg ">
         <lib-paginator
@@ -230,11 +136,10 @@ export default class Subjects {
   #toast = inject(Toast);
   pagination = inject(Pagination);
   searchText = signal('');
-  actionsMenu = viewChild<Menu<string>>('actionsMenu');
   public page = signal(1);
   public pageSize = signal(10);
 
-  total = computed(() => this.subjects.value()?.meta?.total ?? 0);
+  total = computed(() => this.subjectsList.rows()?.meta?.total ?? 0);
 
   public subjects = httpResource<PaginatedResponse<Prisma.SubjectGetPayload<false>>>(() => ({
     url: '/api/v1/subjects',
@@ -246,6 +151,8 @@ export default class Subjects {
       orderDirection: this.pagination.sortOrder(),
     }),
   }));
+  /** subjects with smooth loading: previous rows stay while the next page / sort / search loads. */
+  protected readonly subjectsList = listState(this.subjects);
 
   public editSubject(subject?: Prisma.SubjectGetPayload<false>) {
     this.#modal
@@ -280,5 +187,22 @@ export default class Subjects {
           this.#toast.showError('Error al eliminar la asignatura');
         },
       });
+  }
+
+  /** The actions in each row's menu (ui-row-actions). */
+  protected readonly rowActions: UiRowAction[] = [
+    { id: 'edit', label: 'Editar', icon: 'pencil' },
+    { id: 'delete', label: 'Eliminar', icon: 'trash-2', tone: 'danger' },
+  ];
+
+  protected onRowAction(action: string, subject: Prisma.SubjectGetPayload<false>): void {
+    switch (action) {
+      case 'edit':
+        this.editSubject(subject);
+        break;
+      case 'delete':
+        this.deleteSubject(subject);
+        break;
+    }
   }
 }

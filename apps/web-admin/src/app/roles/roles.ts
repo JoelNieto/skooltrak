@@ -1,28 +1,38 @@
-import { Breadcrumbs, Button, Confirmation, Modal, Toast, UiTable } from '#/ui';
-import { Menu, MenuContent, MenuItem, MenuTrigger } from '@angular/aria/menu';
-import { OverlayModule } from '@angular/cdk/overlay';
+import {
+  Breadcrumbs,
+  Button,
+  Confirmation,
+  Icon,
+  Modal,
+  Toast,
+  UiRowAction,
+  UiRowActions,
+  UiTable,
+  UiTableEmpty,
+  UiTableError,
+  UiTableSkeleton,
+  listState,
+} from '#/ui';
 import { DatePipe } from '@angular/common';
 import { HttpClient, httpResource } from '@angular/common/http';
-import { Component, inject, viewChild } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { Prisma } from '@generated/prisma';
 import { RolesForm } from './roles-form';
 
 @Component({
   selector: 'app-roles',
-  imports: [Breadcrumbs, UiTable, Button, DatePipe, Menu, MenuContent, MenuItem, MenuTrigger, OverlayModule],
+  imports: [Breadcrumbs, UiTable, Button, DatePipe, Icon, UiRowActions, UiTableEmpty, UiTableError, UiTableSkeleton],
   template: `<ui-breadcrumbs [items]="[{ label: 'Inicio', link: '/' }, { label: 'Roles' }]" />
     <div class="flex justify-between items-center mb-4">
       <div>
-        <h1 class="text-2xl text-base-content font-medium">Roles</h1>
-        <p class="text-sm text-gray-500 dark:text-gray-400">Listado de roles</p>
+        <h1 class="text-2xl text-ink-strong font-medium">Roles</h1>
+        <p class="text-sm text-ink-muted">Listado de roles</p>
       </div>
 
-      <button uiButton variant="primary" (click)="editRole()">
-        <span class="material-symbols-outlined">add_circle</span> Nuevo Rol
-      </button>
+      <button uiButton variant="primary" (click)="editRole()"><ui-icon name="circle-plus" /> Nuevo Rol</button>
     </div>
     <div class="overflow-x-auto">
-      <table uiTable>
+      <table uiTable [attr.aria-busy]="roles.isLoading()">
         <thead>
           <tr>
             <th>Nombre</th>
@@ -31,76 +41,48 @@ import { RolesForm } from './roles-form';
             <th>Organización</th>
             <th>Fecha de creación</th>
             <th>Fecha de actualización</th>
-            <th></th>
+            <th class="w-12"><span class="sr-only">Acciones</span></th>
           </tr>
         </thead>
-        <tbody>
-          @for (role of roles.value(); track role.id) {
-            <tr>
-              <td>{{ role.name }}</td>
-              <td>{{ role.description }}</td>
-              <td>{{ role.name }}</td>
-              <td>{{ role.organization?.name }}</td>
-              <td>{{ role.createdAt | date: 'medium' }}</td>
-              <td>{{ role.updatedAt | date: 'medium' }}</td>
-              <td>
-                <button
-                  class="cursor-pointer hover:bg-base-200 p-1 rounded-lg flex items-center justify-center"
-                  ngMenuTrigger
-                  #origin
-                  #trigger="ngMenuTrigger"
-                  [menu]="formatMenu()"
-                >
-                  <span class="material-symbols-outlined text-xl">more_horiz</span>
-                </button>
-                <ng-template
-                  [cdkConnectedOverlayOpen]="trigger.expanded()"
-                  [cdkConnectedOverlay]="{ origin, usePopover: 'inline' }"
-                  [cdkConnectedOverlayPositions]="[
-                    {
-                      originX: 'end',
-                      originY: 'bottom',
-                      overlayX: 'end',
-                      overlayY: 'top',
-                      offsetY: 4,
-                    },
-                  ]"
-                  cdkAttachPopoverAsChild
-                >
-                  <div ngMenu class="bg-base-100 shadow-sm rounded-lg p-1 w-48" #formatMenu="ngMenu">
-                    <ng-template ngMenuContent>
-                      <button
-                        ngMenuItem
-                        value="Edit"
-                        class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-base-200 w-full"
-                        (click)="editRole($any(role))"
-                      >
-                        <span class="material-symbols-outlined text-lg">edit</span>
-                        <span>Editar</span>
-                      </button>
-                      <button
-                        ngMenuItem
-                        value="Delete"
-                        class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-base-200 w-full"
-                        (click)="deleteRole($any(role))"
-                      >
-                        <span class="material-symbols-outlined text-lg">delete</span>
-                        <span>Eliminar</span>
-                      </button>
-                    </ng-template>
-                  </div>
-                </ng-template>
-              </td>
-            </tr>
+        @switch (rolesList.phase()) {
+          @case ('skeleton') {
+            <tbody uiTableSkeleton [columns]="7"></tbody>
           }
-        </tbody>
+          @case ('error') {
+            <tbody>
+              <tr uiTableError [columns]="7" (retry)="roles.reload()"></tr>
+            </tbody>
+          }
+          @case ('ready') {
+            <tbody>
+              @for (role of rolesList.rows(); track role.id) {
+                <tr>
+                  <td>{{ role.name }}</td>
+                  <td>{{ role.description }}</td>
+                  <td>{{ role.name }}</td>
+                  <td>{{ role.organization?.name }}</td>
+                  <td>{{ role.createdAt | date: 'medium' }}</td>
+                  <td>{{ role.updatedAt | date: 'medium' }}</td>
+                  <td>
+                    <ui-row-actions
+                      [actions]="rowActions"
+                      [label]="'Acciones para ' + role.name"
+                      (action)="onRowAction($event, role)"
+                    />
+                  </td>
+                </tr>
+              } @empty {
+                <tr uiTableEmpty [columns]="7" icon="shield-user" title="Aún no hay roles"></tr>
+              }
+            </tbody>
+          }
+        }
       </table>
     </div>`,
 })
 export class Roles {
   private modal = inject(Modal);
   private http = inject(HttpClient);
-  formatMenu = viewChild<Menu<string>>('formatMenu');
   private confirmation = inject(Confirmation);
   private toast = inject(Toast);
 
@@ -108,6 +90,8 @@ export class Roles {
     () => '/api/v1/roles',
     { defaultValue: [] },
   );
+  /** roles with smooth loading: previous rows stay while the next page / sort / search loads. */
+  protected readonly rolesList = listState(this.roles);
 
   public editRole(role?: Prisma.RoleGetPayload<false>) {
     this.modal
@@ -141,5 +125,22 @@ export class Roles {
           });
         }
       });
+  }
+
+  /** The actions in each row's menu (ui-row-actions). */
+  protected readonly rowActions: UiRowAction[] = [
+    { id: 'edit', label: 'Editar', icon: 'pencil' },
+    { id: 'delete', label: 'Eliminar', icon: 'trash-2', tone: 'danger' },
+  ];
+
+  protected onRowAction(action: string, role: Prisma.RoleGetPayload<false>): void {
+    switch (action) {
+      case 'edit':
+        this.editRole(role);
+        break;
+      case 'delete':
+        this.deleteRole(role);
+        break;
+    }
   }
 }

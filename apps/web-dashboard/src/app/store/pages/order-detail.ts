@@ -20,12 +20,12 @@ import { Alert, Badge, Button, UiTable } from '#/ui';
       @let o = order.value()!;
       <div class="space-y-4">
         <h2 class="text-xl font-semibold">Pedido {{ o.id }}</h2>
-        <p class="text-sm text-base-content/70">{{ o.createdAt | date: 'medium' }}</p>
+        <p class="text-sm text-ink-muted">{{ o.createdAt | date: 'medium' }}</p>
         <div class="flex flex-wrap gap-2">
           <span uiBadge>Estado: {{ o.status }}</span>
           <span uiBadge>Pago: {{ o.paymentStatus }}</span>
         </div>
-        <table uiTable class="border border-base-200 rounded-box">
+        <table uiTable class="border border-line rounded-box">
           <thead>
             <tr>
               <th>Producto</th>

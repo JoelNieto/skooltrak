@@ -60,7 +60,7 @@ const STATUS_TONES: Record<ChargeStatus, BadgeTone> = {
       title="Estado de cuenta"
       subtitle="Resumen de cargos, pagos y saldo."
       [actionLabel]="canRegenerate() ? 'Generar desde plan de estudios' : undefined"
-      actionIcon="autorenew"
+      actionIcon="refresh-cw"
       (action)="regenerate(false)"
     />
 
@@ -117,7 +117,7 @@ const STATUS_TONES: Record<ChargeStatus, BadgeTone> = {
         @for (section of sections; track section.title) {
           <div uiCard>
             <div uiCardBody>
-              <h2 class="text-lg font-semibold text-base-content">{{ section.title }}</h2>
+              <h2 class="text-lg font-semibold text-ink-strong">{{ section.title }}</h2>
               <div class="overflow-x-auto">
                 <table uiTable density="compact">
                   <thead>
@@ -144,7 +144,7 @@ const STATUS_TONES: Record<ChargeStatus, BadgeTone> = {
                       </tr>
                     } @empty {
                       <tr>
-                        <td colspan="5" class="text-center py-6 text-base-content/60">{{ section.empty }}</td>
+                        <td colspan="5" class="text-center py-6 text-ink-muted">{{ section.empty }}</td>
                       </tr>
                     }
                   </tbody>
@@ -157,7 +157,7 @@ const STATUS_TONES: Record<ChargeStatus, BadgeTone> = {
 
       <div uiCard class="mt-6">
         <div uiCardBody>
-          <h2 class="text-lg font-semibold text-base-content">Historial de pagos</h2>
+          <h2 class="text-lg font-semibold text-ink-strong">Historial de pagos</h2>
           <div class="overflow-x-auto">
             <table uiTable density="compact">
               <thead>
@@ -172,11 +172,11 @@ const STATUS_TONES: Record<ChargeStatus, BadgeTone> = {
                   <tr>
                     <td>{{ p.paidAt | date: 'mediumDate' }}</td>
                     <td>{{ formatCurrency(p.amount) }}</td>
-                    <td class="text-base-content/70">{{ p.reference || '-' }}</td>
+                    <td class="text-ink-muted">{{ p.reference || '-' }}</td>
                   </tr>
                 } @empty {
                   <tr>
-                    <td colspan="3" class="text-center py-6 text-base-content/60">No hay pagos registrados</td>
+                    <td colspan="3" class="text-center py-6 text-ink-muted">No hay pagos registrados</td>
                   </tr>
                 }
               </tbody>

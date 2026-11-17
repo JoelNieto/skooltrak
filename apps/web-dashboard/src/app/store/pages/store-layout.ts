@@ -7,11 +7,11 @@ import { CartService } from '../cart.service';
 import { StoreApiService } from '../store-api.service';
 import StoreThemeToggle from '../store-theme-toggle';
 import { StoreThemeService } from '../store-theme.service';
-import { Badge, BreadcrumbItem, Breadcrumbs, Button } from '#/ui';
+import { Badge, BreadcrumbItem, Breadcrumbs, Button, Icon } from '#/ui';
 
 @Component({
   selector: 'app-store-layout',
-  imports: [Breadcrumbs, Badge, Button, RouterOutlet, RouterLink, StoreThemeToggle],
+  imports: [Breadcrumbs, Badge, Button, RouterOutlet, RouterLink, StoreThemeToggle, Icon],
   template: `
     <div class="layout-padding pb-10">
       <ui-breadcrumbs class="mb-4" [items]="breadcrumbs()" />
@@ -21,18 +21,18 @@ import { Badge, BreadcrumbItem, Breadcrumbs, Button } from '#/ui';
             <img
               [src]="schoolLogoUrl()!"
               [alt]="schoolName() ?? 'Escuela'"
-              class="h-12 w-12 shrink-0 rounded-lg border border-base-300 bg-base-200 object-contain"
+              class="h-12 w-12 shrink-0 rounded-lg border border-line bg-surface-0 object-contain"
             />
           } @else {
-            <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
-              <span class="material-symbols-outlined text-2xl">apartment</span>
+            <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-action-subtle text-primary">
+              <ui-icon name="building-2" class="text-2xl" />
             </div>
           }
           <div class="min-w-0">
-            <h1 class="truncate text-2xl font-semibold text-base-content">
+            <h1 class="truncate text-2xl font-semibold text-ink-strong">
               {{ schoolName() ?? 'Tienda escolar' }}
             </h1>
-            <p class="text-sm text-base-content/60">Tienda escolar</p>
+            <p class="text-sm text-ink-muted">Tienda escolar</p>
           </div>
         </div>
         <div class="flex flex-wrap items-center gap-2">
@@ -41,7 +41,7 @@ import { Badge, BreadcrumbItem, Breadcrumbs, Button } from '#/ui';
             <a uiButton size="sm" routerLink="admin">Administrar tienda</a>
           }
           <a uiButton variant="primary" size="sm" routerLink="cart" class="gap-1">
-            <span class="material-symbols-outlined text-lg">shopping_cart</span>
+            <ui-icon name="shopping-cart" class="text-lg" />
             Carrito
             @if (cartCount() > 0) {
               <span uiBadge>{{ cartCount() }}</span>

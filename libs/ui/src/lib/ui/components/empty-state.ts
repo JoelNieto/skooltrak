@@ -1,21 +1,23 @@
 import { Component, computed, input, output } from '@angular/core';
 import { Button } from './button';
+import { UiIconName } from '../icons/icons';
+import { Icon } from './icon';
 
 type EmptyStateColor = 'primary' | 'secondary' | 'accent' | 'info' | 'success' | 'warning' | 'neutral';
 
 @Component({
   selector: 'lib-empty-state',
-  imports: [Button],
+  imports: [Button, Icon],
   template: `
     <div class="border border-dashed rounded-lg p-6 text-center" [class]="containerClass()">
-      @if (icon()) {
+      @if (icon(); as iconName) {
         <div class="inline-flex items-center justify-center w-12 h-12 rounded-full mb-3" [class]="iconBgClass()">
-          <span class="material-symbols-outlined text-2xl" [class]="iconColorClass()">{{ icon() }}</span>
+          <ui-icon [name]="iconName" class="text-2xl" [class]="iconColorClass()" />
         </div>
       }
-      <p class="font-medium text-sm text-ink-strong">{{ title() }}</p>
+      <p class="type-label text-ink-strong">{{ title() }}</p>
       @if (description()) {
-        <p class="text-xs mt-1.5 text-ink-muted max-w-xs mx-auto">{{ description() }}</p>
+        <p class="text-sm mt-1.5 text-ink-muted max-w-xs mx-auto">{{ description() }}</p>
       }
       @if (actionLabel()) {
         <button
@@ -35,14 +37,14 @@ type EmptyStateColor = 'primary' | 'secondary' | 'accent' | 'info' | 'success' |
 export class EmptyState {
   title = input('');
   description = input<string>();
-  icon = input<string>();
+  icon = input<UiIconName>();
   color = input<EmptyStateColor>('primary');
   actionLabel = input<string>();
   action = output<void>();
 
   containerClass = computed(() => {
     const colorMap: Record<EmptyStateColor, string> = {
-      primary: 'border-primary/30 bg-primary/5',
+      primary: 'border-primary/30 bg-action-subtle',
       secondary: 'border-secondary/30 bg-secondary/5',
       accent: 'border-accent/30 bg-accent/5',
       info: 'border-info/30 bg-info/5',
@@ -55,7 +57,7 @@ export class EmptyState {
 
   iconBgClass = computed(() => {
     const colorMap: Record<EmptyStateColor, string> = {
-      primary: 'bg-primary/10',
+      primary: 'bg-action-subtle',
       secondary: 'bg-secondary/10',
       accent: 'bg-accent/10',
       info: 'bg-info/10',

@@ -4,6 +4,7 @@ import {
   Card,
   CardBody,
   CardTitle,
+  Icon,
   Loader,
   TextEditor,
   Toast,
@@ -45,6 +46,7 @@ import { QuizQuestionControl } from './quiz-question-control';
     TextEditor,
     QuizQuestionControl,
     Loader,
+    Icon,
   ],
   template: `
     <ui-breadcrumbs
@@ -88,10 +90,9 @@ import { QuizQuestionControl } from './quiz-question-control';
                   }
                 </select>
               </ui-field>
-              <div class="fieldset">
-                <label for="details">Descripción</label>
+              <ui-field label="Descripción">
                 <lib-text-editor id="details" name="details" formControlName="details" [bordered]="true" />
-              </div>
+              </ui-field>
             </div>
             <div class="flex justify-end mt-4">
               <button uiButton [loading]="isSaving()" variant="primary" type="submit" [disabled]="isSaving()">
@@ -111,7 +112,7 @@ import { QuizQuestionControl } from './quiz-question-control';
                     <div class="flex justify-between">
                       <h2 uiCardTitle>Pregunta {{ $index + 1 }}</h2>
                       <button uiButton variant="danger" type="button" (click)="removeQuestion($index)">
-                        <span class="material-symbols-outlined">delete</span>
+                        <ui-icon name="trash-2" />
                       </button>
                     </div>
                     <app-quiz-question-control [question]="question" [index]="$index" />
@@ -119,7 +120,7 @@ import { QuizQuestionControl } from './quiz-question-control';
                 </div>
               }
               <button uiButton type="button" (click)="addQuestion()">
-                <span class="material-symbols-outlined">add_circle</span>
+                <ui-icon name="circle-plus" />
                 Agregar pregunta
               </button>
             </div>

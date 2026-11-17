@@ -1,33 +1,32 @@
-import { Button, Toast } from '#/ui';
+import { BrandLogo, Button, Icon, Toast } from '#/ui';
 import { HttpClient } from '@angular/common/http';
 import { afterRenderEffect, Component, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { BrandLogo } from '../shared/brand-logo';
 
 @Component({
   selector: 'app-confirm-request',
-  imports: [Button, BrandLogo],
+  imports: [Button, BrandLogo, Icon],
   template: `
-    <div class="min-h-screen flex flex-col gradient-bg">
+    <div class="min-h-screen flex flex-col bg-surface-0">
       <header class="p-4 md:p-6 flex items-center justify-between">
-        <app-brand-logo class="h-8 md:h-10" />
+        <ui-brand-logo class="h-8 md:h-10" />
       </header>
 
       <main class="flex-1 flex flex-col items-center justify-center p-6">
         <div class="w-full max-w-md text-center space-y-8 animate-fade-in">
           <div class="flex justify-center">
-            <div class="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center">
-              <span class="material-symbols-outlined text-5xl text-primary">send</span>
+            <div class="w-20 h-20 rounded-full bg-action-subtle flex items-center justify-center">
+              <ui-icon name="send" class="text-5xl text-primary" />
             </div>
           </div>
 
           <div class="space-y-2">
-            <h1 class="text-2xl md:text-3xl font-bold text-base-content">Confirmar Solicitud</h1>
-            <p class="text-base-content/70">
+            <h1 class="text-2xl md:text-3xl font-bold text-ink-strong">Confirmar Solicitud</h1>
+            <p class="text-ink-muted">
               Estás solicitando unirte a <strong>{{ schoolName() }}</strong> como <strong>{{ roleLabel() }}</strong
               >.
             </p>
-            <p class="text-base-content/50 text-sm">
+            <p class="text-ink-subtle text-sm">
               El administrador de la escuela recibirá tu solicitud y deberá aprobarla.
             </p>
           </div>
@@ -44,12 +43,12 @@ import { BrandLogo } from '../shared/brand-logo';
               @if (loading()) {
                 Enviando...
               } @else {
-                <span class="material-symbols-outlined">send</span>
+                <ui-icon name="send" />
                 Enviar Solicitud
               }
             </button>
             <button uiButton variant="ghost" size="sm" (click)="goBack()">
-              <span class="material-symbols-outlined text-lg">arrow_back</span>
+              <ui-icon name="arrow-left" class="text-lg" />
               Volver
             </button>
           </div>

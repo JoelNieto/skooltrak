@@ -10,7 +10,14 @@ const webpack: typeof import('webpack') = require(
 
 const config: StorybookConfig = {
   stories: ['../src/**/*.@(mdx|stories.@(js|jsx|ts|tsx))'],
-  addons: ['@storybook/addon-docs'],
+  addons: [
+    '@storybook/addon-docs',
+    '@storybook/addon-a11y',
+    '@storybook/addon-vitest',
+    '@chromatic-com/storybook'
+  ],
+  // Brand logos and icons, served at /brand/ as in the apps (ui-brand-logo).
+  staticDirs: [{ from: '../src/assets/brand', to: '/brand' }],
   framework: {
     name: '@storybook/angular',
     options: {},

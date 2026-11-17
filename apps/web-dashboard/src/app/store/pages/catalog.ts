@@ -5,11 +5,11 @@ import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { map, of } from 'rxjs';
 import { StoreApiService } from '../store-api.service';
-import { Alert, Badge, Button, Card, CardBody, CardTitle, UiInput } from '#/ui';
+import { Alert, Badge, Button, Card, CardBody, CardTitle, Icon, UiInput } from '#/ui';
 
 @Component({
   selector: 'app-store-catalog',
-  imports: [Alert, Badge, Card, CardBody, CardTitle, UiInput, Button, RouterLink, FormsModule],
+  imports: [Alert, Badge, Card, CardBody, CardTitle, UiInput, Button, RouterLink, FormsModule, Icon],
   template: `
     @if (!schoolId()) {
       <div uiAlert tone="warning">
@@ -54,12 +54,12 @@ import { Alert, Badge, Button, Card, CardBody, CardTitle, UiInput } from '#/ui';
       <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         @for (p of products.value(); track p.id) {
           <a uiCard [routerLink]="['product', p.id]" class="overflow-hidden">
-            <figure class="aspect-square bg-base-200">
+            <figure class="aspect-square bg-surface-0">
               @if (p.imageUrl) {
                 <img [src]="p.imageUrl" [alt]="p.name" class="h-full w-full object-cover" />
               } @else {
-                <div class="flex h-full w-full items-center justify-center text-base-content/40">
-                  <span class="material-symbols-outlined text-5xl">inventory_2</span>
+                <div class="flex h-full w-full items-center justify-center text-ink-subtle">
+                  <ui-icon name="archive" class="text-5xl" />
                 </div>
               }
             </figure>
@@ -76,9 +76,9 @@ import { Alert, Badge, Button, Card, CardBody, CardTitle, UiInput } from '#/ui';
           </a>
         } @empty {
           @if (products.isLoading()) {
-            <p class="text-base-content/60">Cargando…</p>
+            <p class="text-ink-muted">Cargando…</p>
           } @else {
-            <p class="text-base-content/60">No hay productos.</p>
+            <p class="text-ink-muted">No hay productos.</p>
           }
         }
       </div>

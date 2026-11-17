@@ -1,7 +1,7 @@
 import { httpResource } from '@angular/common/http';
 import { Component, computed, effect, ElementRef, input, model, output, signal, viewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Alert, Badge, Button } from '#/ui';
+import { Alert, Badge, Button, Icon } from '#/ui';
 export type Contact = {
   id: string;
   initials: string;
@@ -19,13 +19,13 @@ export interface SelectedContact extends Contact {
 }
 @Component({
   selector: 'app-contacts',
-  imports: [Alert, Badge, Button, FormsModule],
+  imports: [Alert, Badge, Button, FormsModule, Icon],
 
-  template: ` <div class="relative w-full min-h-12 bg-white px-3 py-2">
+  template: ` <div class="relative w-full min-h-12 bg-surface-1 px-3 py-2">
       <div class="flex flex-wrap gap-2 items-center">
         @for (contact of selectedContacts(); track contact.id) {
           <div uiBadge [tone]="contact.isValid ? 'neutral' : 'danger'" class="inline-flex items-center px-2 py-1">
-            <span class="material-symbols-outlined text-base!">person</span>
+            <ui-icon name="user" class="text-base!" />
             <span class="mr-1">{{ contact.name }}</span>
             <button
               type="button"
@@ -47,7 +47,7 @@ export interface SelectedContact extends Contact {
             (keydown)="onKeyDown($event)"
             (blur)="onBlur()"
             placeholder="Agregar destinatario..."
-            class="w-full h-8 outline-none bg-transparent text-gray-900 placeholder-gray-500"
+            class="w-full h-8 outline-none bg-transparent text-ink-strong placeholder:text-ink-subtle"
           />
         </div>
       </div>
@@ -55,17 +55,17 @@ export interface SelectedContact extends Contact {
       <!-- Dropdown menu -->
       @if (showDropdown() && filteredContacts().length > 0) {
         <div
-          class="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-10 max-h-60 overflow-y-auto"
+          class="absolute top-full left-0 right-0 mt-1 bg-surface-1 border border-line rounded-lg shadow-lg z-10 max-h-60 overflow-y-auto"
         >
           @for (contact of filteredContacts(); track contact.id) {
             <div
               (mousedown)="selectContact(contact)"
-              class="px-4 py-3 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-b-0 transition-colors"
+              class="px-4 py-3 hover:bg-surface-2 cursor-pointer border-b border-line last:border-b-0 transition-colors"
             >
               <div class="flex items-center">
                 <!-- Avatar -->
                 @if (contact.avatar) {
-                  <div class="w-8 h-8 rounded-full bg-gray-300 mr-3 flex-shrink-0 overflow-hidden">
+                  <div class="w-8 h-8 rounded-full bg-surface-2 mr-3 flex-shrink-0 overflow-hidden">
                     <img [src]="contact.avatar" [alt]="contact.name" class="w-full h-full object-cover" />
                   </div>
                 } @else {
@@ -77,10 +77,10 @@ export interface SelectedContact extends Contact {
                   </div>
 
                   <div class="flex-1 min-w-0">
-                    <div class="text-sm font-medium text-gray-900 truncate">
+                    <div class="text-sm font-medium text-ink-strong truncate">
                       {{ contact.name }}
                     </div>
-                    <div class="text-sm text-gray-500 truncate">
+                    <div class="text-sm text-ink-muted truncate">
                       {{ contact.email }}
                     </div>
                   </div>
@@ -98,7 +98,7 @@ export interface SelectedContact extends Contact {
           Removido: <strong>{{ lastAddedContact()?.name }}</strong>
         </span>
         <button uiButton variant="ghost" size="sm" type="button" (click)="addLatestContact()">
-          <span class="material-symbols-outlined">close</span>
+          <ui-icon name="x" />
         </button>
       </div>
     }`,

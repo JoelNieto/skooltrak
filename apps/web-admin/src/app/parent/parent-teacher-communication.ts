@@ -17,27 +17,27 @@ import { Component } from '@angular/core';
         <div uiCard>
           <div uiCardBody>
             <div class="flex items-center justify-between">
-              <p class="font-semibold text-base-content">{{ thread.teacher }}</p>
-              <span class="text-xs text-base-content/60">
+              <p class="font-semibold text-ink-strong">{{ thread.teacher }}</p>
+              <span class="text-xs text-ink-muted">
                 {{ thread.lastMessage }}
               </span>
             </div>
-            <p class="text-sm text-base-content/70">{{ thread.summary }}</p>
+            <p class="text-sm text-ink-muted">{{ thread.summary }}</p>
           </div>
         </div>
       }
     </div>
 
     <div class="mt-6">
-      <h2 class="text-lg font-semibold text-base-content mb-3">Consultas abiertas</h2>
+      <h2 class="text-lg font-semibold text-ink-strong mb-3">Consultas abiertas</h2>
       @if (openRequests.length === 0) {
         <lib-empty-state
           title="Sin consultas abiertas"
           description="Cuando envíes un mensaje nuevo aparecerá aquí."
-          icon="question_answer"
+          icon="messages-square"
         />
       } @else {
-        <ul class="list-disc pl-5 text-sm text-base-content/70">
+        <ul class="list-disc pl-5 text-sm text-ink-muted">
           @for (item of openRequests; track item.id) {
             <li>{{ item.label }}</li>
           }

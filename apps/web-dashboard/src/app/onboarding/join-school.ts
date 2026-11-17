@@ -1,8 +1,7 @@
-import { Button, Card, CardBody, Loader, Toast, UiInput } from '#/ui';
+import { BrandLogo, Button, Card, CardBody, Icon, Loader, Toast, UiInput } from '#/ui';
 import { HttpClient } from '@angular/common/http';
 import { Component, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
-import { BrandLogo } from '../shared/brand-logo';
 
 type AvailableSchool = {
   id: string;
@@ -14,22 +13,22 @@ type AvailableSchool = {
 
 @Component({
   selector: 'app-join-school',
-  imports: [Card, CardBody, UiInput, Button, BrandLogo, Loader],
+  imports: [Card, CardBody, UiInput, Button, BrandLogo, Loader, Icon],
   template: `
-    <div class="min-h-screen flex flex-col gradient-bg">
+    <div class="min-h-screen flex flex-col bg-surface-0">
       <header class="p-4 md:p-6 flex items-center justify-between">
-        <app-brand-logo class="h-8 md:h-10" />
+        <ui-brand-logo class="h-8 md:h-10" />
       </header>
 
       <main class="flex-1 flex flex-col items-center p-6 overflow-y-auto">
         <div class="w-full max-w-3xl space-y-6 animate-fade-in">
           <div class="text-center space-y-2">
-            <h1 class="text-2xl md:text-3xl font-bold text-base-content">Selecciona tu Escuela</h1>
-            <p class="text-base-content/70">Escribe al menos 3 caracteres para buscar tu escuela</p>
+            <h1 class="text-2xl md:text-3xl font-bold text-ink-strong">Selecciona tu Escuela</h1>
+            <p class="text-ink-muted">Escribe al menos 3 caracteres para buscar tu escuela</p>
           </div>
 
           <!-- Search -->
-          <div class="form-control">
+          <div>
             <input uiInput type="text" placeholder="Buscar escuela..." (input)="onSearch($event)" />
           </div>
 
@@ -39,41 +38,41 @@ type AvailableSchool = {
             </div>
           } @else if (searched() && filteredSchools().length === 0) {
             <div class="text-center py-12">
-              <span class="material-symbols-outlined text-6xl text-base-content/30">school</span>
-              <p class="mt-4 text-base-content/60">No se encontraron escuelas</p>
+              <ui-icon name="school" class="text-6xl text-ink-subtle" />
+              <p class="mt-4 text-ink-muted">No se encontraron escuelas</p>
             </div>
           } @else if (searched()) {
             <div class="grid gap-4">
               @for (school of filteredSchools(); track school.id) {
                 <button uiCard class="text-left w-full" (click)="selectSchool(school)">
                   <div uiCardBody class="flex-row items-center gap-4">
-                    <div class="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                      <span class="material-symbols-outlined text-2xl text-primary">school</span>
+                    <div class="w-12 h-12 rounded-lg bg-action-subtle flex items-center justify-center shrink-0">
+                      <ui-icon name="school" class="text-2xl text-primary" />
                     </div>
                     <div class="flex-1 min-w-0">
-                      <h3 class="font-semibold text-base-content truncate">{{ school.name }}</h3>
-                      <p class="text-sm text-base-content/60">{{ school.organizationName ?? '' }}</p>
+                      <h3 class="font-semibold text-ink-strong truncate">{{ school.name }}</h3>
+                      <p class="text-sm text-ink-muted">{{ school.organizationName ?? '' }}</p>
                       @if (school.city) {
-                        <p class="text-xs text-base-content/40">
+                        <p class="text-xs text-ink-subtle">
                           {{ school.city }}{{ school.country ? ', ' + school.country : '' }}
                         </p>
                       }
                     </div>
-                    <span class="material-symbols-outlined text-base-content/30">chevron_right</span>
+                    <ui-icon name="chevron-right" class="text-ink-subtle" />
                   </div>
                 </button>
               }
             </div>
           } @else {
             <div class="text-center py-12">
-              <span class="material-symbols-outlined text-6xl text-base-content/30">search</span>
-              <p class="mt-4 text-base-content/50">Comienza a escribir para buscar escuelas</p>
+              <ui-icon name="search" class="text-6xl text-ink-subtle" />
+              <p class="mt-4 text-ink-subtle">Comienza a escribir para buscar escuelas</p>
             </div>
           }
 
           <div class="text-center">
             <button uiButton variant="ghost" size="sm" (click)="goBack()">
-              <span class="material-symbols-outlined text-lg">arrow_back</span>
+              <ui-icon name="arrow-left" class="text-lg" />
               Volver
             </button>
           </div>

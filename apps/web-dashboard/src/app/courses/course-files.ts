@@ -1,4 +1,4 @@
-import { Badge, Button, Card, debounceSignal, Loader, Modal, Toast, UiTable } from '#/ui';
+import { Badge, Button, Card, debounceSignal, Icon, Loader, Modal, Toast, UiInputGroup, UiTable } from '#/ui';
 import { DatePipe } from '@angular/common';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { Component, inject, input, Signal, signal } from '@angular/core';
@@ -17,16 +17,16 @@ type CourseFile = {
 
 @Component({
   selector: 'app-course-files',
-  imports: [Card, UiTable, Badge, Button, Loader, FormsModule, DatePipe],
+  imports: [Card, UiTable, Badge, Button, Loader, FormsModule, DatePipe, UiInputGroup, Icon],
   template: `
     <div class="flex flex-col gap-4">
       <div class="flex justify-between items-start gap-4">
-        <label class="input input-primary input-md">
-          <span class="material-symbols-outlined">search</span>
+        <label uiInputGroup>
+          <ui-icon name="search" />
           <input class="pl-0" type="search" placeholder="Buscar archivos..." [(ngModel)]="searchText" />
         </label>
         <button uiButton variant="primary" (click)="openUploadModal()">
-          <span class="material-symbols-outlined">upload_file</span>
+          <ui-icon name="file-up" />
           Subir archivos
         </button>
       </div>
@@ -74,7 +74,7 @@ type CourseFile = {
                         class="cursor-pointer hover:text-primary p-1 text-xs rounded-lg flex items-center justify-center"
                         (click)="file.id ? openFile(file.id) : null"
                       >
-                        <span class="material-symbols-outlined text-medium!">open_in_new</span>
+                        <ui-icon name="external-link" class="text-medium!" />
                       </button>
                     }
                   </td>

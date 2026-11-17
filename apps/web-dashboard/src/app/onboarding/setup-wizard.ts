@@ -1,4 +1,4 @@
-import { Button, Toast } from '#/ui';
+import { BrandLogo, Button, Icon, Toast } from '#/ui';
 import { HttpClient } from '@angular/common/http';
 import { Component, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
@@ -10,7 +10,6 @@ import DegreesStep from './steps/degrees';
 import GroupsStep from './steps/groups';
 import SchoolBasicsStep from './steps/school-basics';
 import StudyPlansStep from './steps/study-plans';
-import { BrandLogo } from '../shared/brand-logo';
 
 export type CreatedEntity = {
   id: string;
@@ -20,23 +19,21 @@ export type CreatedEntity = {
 
 @Component({
   selector: 'app-setup-wizard',
-  imports: [Button, BrandLogo, SchoolBasicsStep, DegreesStep, StudyPlansStep, CoursesStep, GroupsStep],
+  imports: [Button, BrandLogo, SchoolBasicsStep, DegreesStep, StudyPlansStep, CoursesStep, GroupsStep, Icon],
   template: `
-    <div class="min-h-screen flex flex-col gradient-bg">
+    <div class="min-h-screen flex flex-col bg-surface-0">
       <!-- Fixed Header -->
       <header class="p-4 md:p-6 flex items-center justify-between">
-        <app-brand-logo class="h-8 md:h-10" />
+        <ui-brand-logo class="h-8 md:h-10" />
         <div class="flex items-center gap-3">
-          <span class="text-sm text-base-content/60 hidden sm:inline">
-            Paso {{ currentStep() }} de {{ totalSteps }}
-          </span>
+          <span class="text-sm text-ink-muted hidden sm:inline"> Paso {{ currentStep() }} de {{ totalSteps }} </span>
           <div class="flex gap-2">
             @for (step of steps; track step; let i = $index) {
               <div
                 class="w-2.5 h-2.5 rounded-full transition-colors duration-300"
                 [class.bg-primary]="i < currentStep()"
                 [class.bg-primary]="i + 1 === currentStep()"
-                [class.bg-base-300]="i + 1 > currentStep()"
+                [class.bg-surface-2]="i + 1 > currentStep()"
               ></div>
             }
           </div>
@@ -89,12 +86,12 @@ export type CreatedEntity = {
 
       <!-- Fixed Footer -->
       <footer
-        class="p-4 md:p-6 flex justify-between items-center border-t border-base-200 bg-base-100/80 backdrop-blur-sm"
+        class="p-4 md:p-6 flex justify-between items-center border-t border-line bg-surface-1/80 backdrop-blur-sm"
       >
         <div>
           @if (currentStep() > 1) {
             <button uiButton variant="ghost" type="button" (click)="previousStep()">
-              <span class="material-symbols-outlined text-xl">arrow_back</span>
+              <ui-icon name="arrow-left" class="text-xl" />
               Anterior
             </button>
           }
@@ -118,7 +115,7 @@ export type CreatedEntity = {
                 Finalizando...
               } @else {
                 Finalizar configuración
-                <span class="material-symbols-outlined text-xl">check</span>
+                <ui-icon name="check" class="text-xl" />
               }
             </button>
           }

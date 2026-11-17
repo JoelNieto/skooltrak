@@ -13,87 +13,134 @@
  * on <html> at runtime. --ui-action follows --color-primary, so a school's colour reaches every
  * action without touching neutrals or text contrast.
  *
- * Design direction: neutral-first and Filllo-inspired (fixed ink and surfaces, one accent for
- * actions, hairline borders instead of shadows, Geist with tight headings).
+ * Values come from the Skooltrak brand system (Track Blue, Runner Orange, Night ink; Space Grotesk
+ * headings, Geist text, Geist Mono codes): https://claude.ai/artifact/RQXcMiWa88ZKmxoC8dSJaS. Tokens marked
+ * "derived" fill levels the brand doesn't name (body ink, subtle ink, sunken surface, strong line,
+ * control border), chosen for contrast: every ink ≥4.5:1 and control borders ≥3:1 on every surface.
+ * Surfaces keep this app's model (grey page, white cards); the brand's own pages use the inverse.
  */
+
+/* Space Grotesk (headings), self-hosted Latin subset from the brand system; covers Spanish. */
+@font-face {
+  font-family: 'Space Grotesk';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('./fonts/SpaceGrotesk-400.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Space Grotesk';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('./fonts/SpaceGrotesk-500.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Space Grotesk';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('./fonts/SpaceGrotesk-700.woff2') format('woff2');
+}
 
 @plugin 'daisyui';
 
-/* ── 1. Primitives ─────────────────────────────────────────────────────── */
+/* ── 1. Primitives (brand values; "derived" ones are not in the brand system) ── */
 :root {
-  --ui-p-navy-950: #0b1430;
-  --ui-p-navy-800: #2b3452;
-  --ui-p-slate-500: #5d6680;
-  --ui-p-slate-400: #8f96aa;
-  --ui-p-slate-300: #c9ceda;
-  --ui-p-slate-200: #e1e4eb;
-  --ui-p-slate-150: #eceef3;
-  --ui-p-slate-100: #f4f5f8;
+  /* Night: ink, and the dark theme's page */
+  --ui-p-night: #0b1530;
+  --ui-p-night-raised: #131f42;
+  --ui-p-night-sunken: #1b2a55; /* derived */
+  --ui-p-night-line: #24315a;
+  --ui-p-night-line-strong: #34437a; /* derived */
+  --ui-p-night-control: #617099; /* derived: 3.3:1 on night-raised */
+  --ui-p-ink-body: #26314f; /* derived */
+  --ui-p-ink-muted: #475069;
+  --ui-p-ink-subtle: #5f6884; /* derived: ≥4.7:1 on every light surface */
+  --ui-p-mist: #f1f5ff;
+  --ui-p-mist-body: #d3daec; /* derived */
+  --ui-p-mist-muted: #a7b0c8;
+  --ui-p-mist-subtle: #8b94af; /* derived: ≥4.6:1 on every dark surface */
+
+  /* Light surfaces */
   --ui-p-white: #ffffff;
+  --ui-p-paper: #f4f6fb; /* the brand's surface-raised */
+  --ui-p-paper-sunken: #e9edf6; /* derived */
+  --ui-p-line: #dce2ef;
+  --ui-p-line-strong: #c3cbdd; /* derived */
+  --ui-p-control: #838ca5; /* derived: 3.1:1 on paper */
 
-  --ui-p-night-1000: #0a0e19;
-  --ui-p-night-900: #111727;
-  --ui-p-night-850: #192135;
-  --ui-p-night-800: #232c43;
-  --ui-p-night-700: #34405e;
-  --ui-p-mist-100: #f2f4fa;
-  --ui-p-mist-200: #d3d8e5;
-  --ui-p-mist-400: #99a0b6;
-  --ui-p-mist-500: #6a728a;
+  /* Track Blue: the default action colour when a school has no brand colour */
+  --ui-p-track-blue: #1d4ed8;
+  --ui-p-track-blue-dark: #93c5fd;
 
-  /* Skooltrak violet: the default action colour when a school has no brand colour. */
-  --ui-p-violet-light: oklch(60% 0.25 292.717);
-  --ui-p-violet-dark: oklch(68% 0.2 292.717);
+  /* Runner Orange: "something new is waiting". A fill (ink on it, never white) or accent-text. */
+  --ui-p-runner-orange: #f97316;
+  --ui-p-runner-text: #c2410c;
+  --ui-p-runner-text-dark: #fdba74;
 }
 
 /* ── 2. Semantic (light) ───────────────────────────────────────────────── */
 :root,
 [data-theme='light'] {
-  --ui-surface-0: var(--ui-p-slate-100); /* page background */
+  --ui-surface-0: var(--ui-p-paper); /* page background */
   --ui-surface-1: var(--ui-p-white); /* cards, panels, inputs */
-  --ui-surface-2: var(--ui-p-slate-150); /* sunken / hover / secondary fill */
-  --ui-line: var(--ui-p-slate-200);
-  --ui-line-strong: var(--ui-p-slate-300);
-  --ui-ink-strong: var(--ui-p-navy-950); /* headings, primary text */
-  --ui-ink: var(--ui-p-navy-800); /* body text */
-  --ui-ink-muted: var(--ui-p-slate-500); /* secondary text, labels of lesser weight */
-  --ui-ink-subtle: var(--ui-p-slate-400); /* hints, placeholders, disabled */
-  --ui-inverse: var(--ui-p-navy-950);
+  --ui-surface-2: var(--ui-p-paper-sunken); /* sunken / hover / secondary fill */
+  --ui-line: var(--ui-p-line);
+  --ui-line-strong: var(--ui-p-line-strong);
+  --ui-line-control: var(--ui-p-control); /* input, select and checkbox borders */
+  --ui-ink-strong: var(--ui-p-night); /* headings, primary text */
+  --ui-ink: var(--ui-p-ink-body); /* body text */
+  --ui-ink-muted: var(--ui-p-ink-muted); /* secondary text: timestamps, helper text, captions */
+  --ui-ink-subtle: var(--ui-p-ink-subtle); /* hints, placeholders, disabled */
+  --ui-inverse: var(--ui-p-night);
   --ui-inverse-content: var(--ui-p-white);
-  --ui-action-default: var(--ui-p-violet-light);
+  --ui-action-default: var(--ui-p-track-blue);
+  --ui-action-subtle-amount: 8%;
+  --ui-new-text: var(--ui-p-runner-text);
+  /* Floating layers only (menus, popovers, dropdown lists): the one exception to "lines, not shadows". */
+  --ui-shadow-float: 0 12px 32px -12px rgb(11 21 48 / 0.22), 0 2px 6px -2px rgb(11 21 48 / 0.08);
 }
 
 /* ── 2. Semantic (dark) ────────────────────────────────────────────────── */
 [data-theme='dark'] {
-  --ui-surface-0: var(--ui-p-night-1000);
-  --ui-surface-1: var(--ui-p-night-900);
-  --ui-surface-2: var(--ui-p-night-850);
-  --ui-line: var(--ui-p-night-800);
-  --ui-line-strong: var(--ui-p-night-700);
-  --ui-ink-strong: var(--ui-p-mist-100);
-  --ui-ink: var(--ui-p-mist-200);
-  --ui-ink-muted: var(--ui-p-mist-400);
-  --ui-ink-subtle: var(--ui-p-mist-500);
-  --ui-inverse: var(--ui-p-mist-100);
-  --ui-inverse-content: var(--ui-p-navy-950);
-  --ui-action-default: var(--ui-p-violet-dark);
+  --ui-surface-0: var(--ui-p-night);
+  --ui-surface-1: var(--ui-p-night-raised);
+  --ui-surface-2: var(--ui-p-night-sunken);
+  --ui-line: var(--ui-p-night-line);
+  --ui-line-strong: var(--ui-p-night-line-strong);
+  --ui-line-control: var(--ui-p-night-control);
+  --ui-ink-strong: var(--ui-p-mist);
+  --ui-ink: var(--ui-p-mist-body);
+  --ui-ink-muted: var(--ui-p-mist-muted);
+  --ui-ink-subtle: var(--ui-p-mist-subtle);
+  --ui-inverse: var(--ui-p-mist);
+  --ui-inverse-content: var(--ui-p-night);
+  --ui-action-default: var(--ui-p-track-blue-dark);
+  --ui-action-subtle-amount: 14%;
+  --ui-new-text: var(--ui-p-runner-text-dark);
+  --ui-shadow-float: 0 16px 40px -12px rgb(0 0 0 / 0.6), 0 2px 8px -2px rgb(0 0 0 / 0.4);
 }
 
 /* Before ThemeService sets data-theme (SSR login, first paint), follow the OS. */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme]) {
-    --ui-surface-0: var(--ui-p-night-1000);
-    --ui-surface-1: var(--ui-p-night-900);
-    --ui-surface-2: var(--ui-p-night-850);
-    --ui-line: var(--ui-p-night-800);
-    --ui-line-strong: var(--ui-p-night-700);
-    --ui-ink-strong: var(--ui-p-mist-100);
-    --ui-ink: var(--ui-p-mist-200);
-    --ui-ink-muted: var(--ui-p-mist-400);
-    --ui-ink-subtle: var(--ui-p-mist-500);
-    --ui-inverse: var(--ui-p-mist-100);
-    --ui-inverse-content: var(--ui-p-navy-950);
-    --ui-action-default: var(--ui-p-violet-dark);
+    --ui-surface-0: var(--ui-p-night);
+    --ui-surface-1: var(--ui-p-night-raised);
+    --ui-surface-2: var(--ui-p-night-sunken);
+    --ui-line: var(--ui-p-night-line);
+    --ui-line-strong: var(--ui-p-night-line-strong);
+    --ui-line-control: var(--ui-p-night-control);
+    --ui-ink-strong: var(--ui-p-mist);
+    --ui-ink: var(--ui-p-mist-body);
+    --ui-ink-muted: var(--ui-p-mist-muted);
+    --ui-ink-subtle: var(--ui-p-mist-subtle);
+    --ui-inverse: var(--ui-p-mist);
+    --ui-inverse-content: var(--ui-p-night);
+    --ui-action-default: var(--ui-p-track-blue-dark);
+    --ui-action-subtle-amount: 14%;
+    --ui-new-text: var(--ui-p-runner-text-dark);
+    --ui-shadow-float: 0 16px 40px -12px rgb(0 0 0 / 0.6), 0 2px 8px -2px rgb(0 0 0 / 0.4);
   }
 }
 
@@ -101,6 +148,11 @@
 :root {
   --ui-action: var(--color-primary);
   --ui-action-content: var(--color-primary-content);
+  /* Selected rows, the active nav item, info banners. Follows a school's own colour. Never text. */
+  --ui-action-subtle: color-mix(in oklab, var(--ui-action) var(--ui-action-subtle-amount), var(--ui-surface-1));
+  /* Runner Orange is Skooltrak's, not a school colour: schools override DaisyUI's accent, not this. */
+  --ui-new: var(--ui-p-runner-orange);
+  --ui-new-content: var(--ui-p-night);
   --ui-ease: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -115,25 +167,27 @@
   --color-base-300: var(--ui-surface-2);
   --color-base-content: var(--ui-ink-strong);
   --color-primary: var(--ui-action-default);
-  --color-primary-content: oklch(98% 0.01 292.717);
+  --color-primary-content: #ffffff;
+  /* secondary / accent are school colours (school-theme.service.ts); these are the defaults. */
   --color-secondary: oklch(77% 0.152 181.912);
   --color-secondary-content: oklch(30% 0.06 188.216);
   --color-accent: oklch(39% 0.195 277.366);
   --color-accent-content: oklch(96% 0.018 272.314);
   --color-neutral: var(--ui-inverse);
   --color-neutral-content: var(--ui-inverse-content);
-  --color-info: oklch(58% 0.158 241.966);
-  --color-info-content: oklch(97% 0.013 236.62);
-  --color-success: oklch(76% 0.177 163.223);
-  --color-success-content: oklch(37% 0.077 168.94);
-  --color-warning: oklch(68% 0.162 75.834);
-  --color-warning-content: oklch(98% 0.026 102.212);
-  --color-error: oklch(58% 0.253 17.585);
-  --color-error-content: oklch(96% 0.015 12.422);
+  --color-info: #1d4ed8;
+  --color-info-content: #ffffff;
+  --color-success: #15803d;
+  --color-success-content: #ffffff;
+  /* Yellow, so warnings never read as Runner Orange ("new"). */
+  --color-warning: #a16207;
+  --color-warning-content: #ffffff;
+  --color-error: #b91c1c;
+  --color-error-content: #ffffff;
   /* selector: checkbox/toggle/badge · field: button/input/select · box: card/modal/alert/menu */
   --radius-selector: 0.5rem;
-  --radius-field: 0.75rem;
-  --radius-box: 1.25rem;
+  --radius-field: 0.5rem;
+  --radius-box: 1rem;
   --size-selector: 0.25rem;
   --size-field: 0.25rem;
   --border: 1px;
@@ -151,24 +205,24 @@
   --color-base-300: var(--ui-surface-2);
   --color-base-content: var(--ui-ink-strong);
   --color-primary: var(--ui-action-default);
-  --color-primary-content: oklch(15% 0.03 292.717);
+  --color-primary-content: #0b1530;
   --color-secondary: oklch(70% 0.06 265);
   --color-secondary-content: oklch(15% 0.02 265);
   --color-accent: oklch(68% 0.14 195);
   --color-accent-content: oklch(15% 0.02 195);
   --color-neutral: var(--ui-inverse);
   --color-neutral-content: var(--ui-inverse-content);
-  --color-info: oklch(68% 0.16 245);
-  --color-info-content: oklch(15% 0.02 245);
-  --color-success: oklch(68% 0.16 155);
-  --color-success-content: oklch(15% 0.02 155);
-  --color-warning: oklch(78% 0.16 70);
-  --color-warning-content: oklch(20% 0.06 70);
-  --color-error: oklch(65% 0.2 25);
-  --color-error-content: oklch(98% 0.02 25);
+  --color-info: #93c5fd;
+  --color-info-content: #0b1530;
+  --color-success: #4ade80;
+  --color-success-content: #0b1530;
+  --color-warning: #facc15;
+  --color-warning-content: #0b1530;
+  --color-error: #f87171;
+  --color-error-content: #0b1530;
   --radius-selector: 0.5rem;
-  --radius-field: 0.75rem;
-  --radius-box: 1.25rem;
+  --radius-field: 0.5rem;
+  --radius-box: 1rem;
   --size-selector: 0.25rem;
   --size-field: 0.25rem;
   --border: 1px;
@@ -202,18 +256,100 @@
   --color-ink-subtle: var(--ui-ink-subtle);
   --color-action: var(--ui-action);
   --color-action-content: var(--ui-action-content);
+  --color-action-subtle: var(--ui-action-subtle);
+  --color-new: var(--ui-new);
+  --color-new-content: var(--ui-new-content);
+  --color-new-text: var(--ui-new-text);
+  --color-line-control: var(--ui-line-control);
   --ease-standard: var(--ui-ease);
 }
 
 @theme {
   --font-sans: 'Geist', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  /* Headlines and screen titles: h1–h3 and the type-display / type-heading-* styles. */
+  --font-display: 'Space Grotesk', 'Geist', ui-sans-serif, system-ui, sans-serif;
+  /* Codes and identifiers (enrollment and invitation codes, the login activity log). Loaded from
+   * Google Fonts with Geist in each app's styles.css. */
+  --font-mono: 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   --tab-border-color: var(--color-primary);
 }
 
+/* ── Type scale (brand system "Type") ──────────────────────────────────────
+ * One utility per brand text style; family, size, line height, weight and tracking together.
+ *   type-display     48/52 700  Space Grotesk  heroes, onboarding, empty-state headlines; once a screen
+ *   type-heading-lg  32/38 700  Space Grotesk  screen titles (lib-page-header)
+ *   type-heading-md  22/28 500  Space Grotesk  section titles
+ *   type-body-lg     18/28 400  Geist          message bodies and announcements: what parents read
+ *   type-body        16/24 400  Geist          descriptions, reading text, form fields
+ *   type-label       14/20 600  Geist          buttons, tabs, form labels, list titles
+ *   type-caption     12/16 500  Geist +.02em   timestamps, metadata; always ink-muted or stronger
+ *   type-code        13/20 400  Geist Mono     codes and identifiers
+ * Product adaptations: display and heading-lg step down on phones (long Spanish titles); tables and
+ * dense admin views stay at 14px; card titles use heading-md's face and weight at 18px. */
+@utility type-display {
+  font-family: var(--font-display);
+  font-size: 2.25rem;
+  line-height: 2.5rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  @media (width >= 40rem) {
+    font-size: 3rem;
+    line-height: 3.25rem;
+  }
+}
+@utility type-heading-lg {
+  font-family: var(--font-display);
+  font-size: 1.625rem;
+  line-height: 2rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  @media (width >= 40rem) {
+    font-size: 2rem;
+    line-height: 2.375rem;
+  }
+}
+@utility type-heading-md {
+  font-family: var(--font-display);
+  font-size: 1.375rem;
+  line-height: 1.75rem;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+@utility type-body-lg {
+  font-size: 1.125rem;
+  line-height: 1.75rem;
+  font-weight: 400;
+}
+@utility type-body {
+  font-size: 1rem;
+  line-height: 1.5rem;
+  font-weight: 400;
+}
+@utility type-label {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  font-weight: 600;
+}
+@utility type-caption {
+  font-size: 0.75rem;
+  line-height: 1rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}
+@utility type-code {
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  line-height: 1.25rem;
+  font-weight: 400;
+}
+
 /* ── Base element styles shared by both apps ───────────────────────────── */
+/* Headings take the display face; sizes stay with each heading's utilities or a type-* style.
+ * Space Grotesk ships 400/500/700, so font-semibold headings render at 700. */
 h1,
 h2,
 h3 {
+  font-family: var(--font-display);
   letter-spacing: -0.02em;
   text-wrap: balance;
 }
@@ -225,12 +361,25 @@ h3 {
   }
 }
 
-.input {
-  @apply text-sm/6 placeholder:text-ink-subtle;
-}
-
+/* Form fields read at type-body (16px); at 16px or more iOS Safari also stops zooming in on focus.
+ * The compact sizes (filters, table rows) step down. */
+.input,
+.select,
 .textarea {
-  @apply text-sm/6 placeholder:text-ink-subtle;
+  font-size: 1rem;
+  line-height: 1.5rem;
+}
+.input,
+.textarea {
+  @apply placeholder:text-ink-subtle;
+}
+:is(.input-sm, .select-sm, .textarea-sm) {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+}
+:is(.input-xs, .select-xs, .textarea-xs) {
+  font-size: 0.75rem;
+  line-height: 1rem;
 }
 
 /* `ui-control` is added by the uiInput / uiSelect directives in libs/ui. */
@@ -238,7 +387,7 @@ h3 {
 .select-primary,
 .textarea-primary,
 .ui-control {
-  --input-color: var(--ui-line-strong);
+  --input-color: var(--ui-line-control);
   &:focus,
   &:focus-within {
     --input-color: var(--color-primary);
@@ -248,7 +397,7 @@ h3 {
 /* Checkbox / radio (uiCheckbox, uiRadio): hairline border while empty, action colour once checked.
  * DaisyUI fills a checked control with --input-color, so it must stay primary when checked. */
 :is(.checkbox-primary, .radio-primary):not(:checked, :indeterminate) {
-  --input-color: var(--ui-line-strong);
+  --input-color: var(--ui-line-control);
 }
 
 .input:focus,
@@ -311,6 +460,322 @@ h3 {
   }
 }
 
+/* Skeleton (uiSkeleton): a flat pulse on the sunken surface. Unlayered to replace DaisyUI's
+ * gradient shimmer (the brand uses flat fills). */
+.skeleton.ui-skeleton {
+  display: block;
+  min-height: 0.75rem;
+  border-radius: 0.375rem;
+  background-color: var(--ui-surface-2);
+  background-image: none;
+  animation: ui-skeleton-pulse 1.6s var(--ui-ease) infinite;
+}
+@keyframes ui-skeleton-pulse {
+  50% {
+    opacity: 0.5;
+  }
+}
+.ui-table-skeleton-bar {
+  height: 0.875rem;
+  /* Same height as a list row with its row-actions button (2rem), so swapping skeleton for rows
+   * doesn't shift the page. */
+  margin-block: 0.5625rem;
+}
+
+/* Rows fade in when they replace the skeleton, and dim while a new page / sort / search loads
+ * behind them (listState keeps them on screen; the table sets aria-busy). Reduced motion turns the
+ * animation off globally. */
+.table.ui-table > tbody:not(.ui-table-skeleton) {
+  animation: ui-rows-in 0.18s var(--ui-ease);
+  transition: opacity 0.2s var(--ui-ease);
+}
+.table.ui-table[aria-busy='true'] > tbody:not(.ui-table-skeleton) {
+  opacity: 0.55;
+}
+@keyframes ui-rows-in {
+  from {
+    opacity: 0;
+  }
+}
+
+/* Sortable header (th[uiSortHeader]): the label is a button; the arrow shows the direction. */
+.table.ui-table th.ui-sort-header {
+  padding-block: 0.375rem;
+}
+.ui-sort-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin-inline: -0.375rem;
+  padding: 0.25rem 0.375rem;
+  border: 0;
+  border-radius: 0.375rem;
+  background: none;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  &:hover {
+    color: var(--ui-ink-strong);
+    background-color: var(--ui-surface-2);
+  }
+  &:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px color-mix(in oklab, var(--color-primary) 20%, transparent);
+  }
+}
+.ui-sort-icon {
+  font-size: 0.875rem;
+  color: var(--ui-ink-subtle);
+}
+.ui-sort-active .ui-sort-button {
+  color: var(--ui-ink-strong);
+  .ui-sort-icon {
+    color: var(--ui-action);
+  }
+}
+
+/* Empty and error rows (tr[uiTableEmpty], tr[uiTableError]): one cell across the table. Selectors
+ * outrank the .table cell rules above (nowrap, first-column weight). */
+.table.ui-table tbody > tr.ui-table-state-row {
+  border-bottom: 0;
+  > td.ui-table-state-cell {
+    padding: 2.5rem 1rem;
+    white-space: normal;
+    font-weight: 400;
+    background: none;
+  }
+}
+.ui-table-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  max-width: 26rem;
+  margin-inline: auto;
+  text-align: center;
+}
+.ui-table-state-icon {
+  display: grid;
+  place-items: center;
+  width: 3rem;
+  height: 3rem;
+  margin-bottom: 0.5rem;
+  border-radius: 9999px;
+  background-color: var(--ui-surface-2);
+  color: var(--ui-ink-muted);
+  > ui-icon {
+    font-size: 1.375rem;
+  }
+}
+.ui-table-state-title {
+  margin: 0;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--ui-ink-strong);
+}
+.ui-table-state-text {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--ui-ink-muted);
+}
+.ui-table-state-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+  &:empty {
+    display: none;
+  }
+}
+.ui-table-state-error .ui-table-state-icon {
+  color: var(--color-error);
+  background-color: color-mix(in oklab, var(--color-error) 12%, var(--ui-surface-1));
+}
+
+/* Table toolbar (ui-table-toolbar) and active-filter chips (ui-filter-chip). */
+.ui-table-toolbar {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+.ui-table-toolbar-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+.ui-table-toolbar-filters,
+.ui-table-toolbar-end,
+.ui-table-toolbar-chips {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+}
+.ui-table-toolbar-filters {
+  flex: 1 1 20rem;
+  /* Controls size to their content here (the form-wide rule makes them full width); search grows. */
+  > :is(.input, .select, .textarea) {
+    width: auto;
+    min-width: 10rem;
+  }
+  > .ui-input-group {
+    flex: 1 1 14rem;
+    max-width: 22rem;
+  }
+}
+.ui-table-toolbar-end:empty,
+.ui-table-toolbar-chips:empty {
+  display: none;
+}
+.ui-filter-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  height: 1.75rem;
+  padding-inline: 0.75rem 0.25rem;
+  border-radius: 9999px;
+  background-color: var(--ui-action-subtle);
+  color: var(--ui-ink-strong);
+  font-size: 0.8125rem;
+  font-weight: 500;
+}
+.ui-filter-chip-remove {
+  display: grid;
+  place-items: center;
+  width: 1.375rem;
+  height: 1.375rem;
+  border: 0;
+  border-radius: 9999px;
+  background: none;
+  color: var(--ui-ink-muted);
+  cursor: pointer;
+  > ui-icon {
+    font-size: 0.875rem;
+  }
+  &:hover {
+    color: var(--ui-ink-strong);
+    background-color: color-mix(in oklab, var(--ui-action) 14%, var(--ui-surface-1));
+  }
+  &:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px color-mix(in oklab, var(--color-primary) 20%, transparent);
+  }
+}
+
+/* Filter menu (ui-filter-menu): a button with the active count and a floating panel of filters. */
+.ui-filter-menu-trigger.ui-filter-menu-on {
+  background-color: var(--ui-action-subtle);
+  color: var(--ui-ink-strong);
+}
+.ui-filter-menu-count {
+  display: inline-grid;
+  place-items: center;
+  min-width: 1.25rem;
+  height: 1.25rem;
+  padding-inline: 0.375rem;
+  border-radius: 9999px;
+  background-color: var(--ui-action);
+  color: var(--ui-action-content);
+  font-size: 0.75rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.ui-filter-panel {
+  display: flex;
+  flex-direction: column;
+  width: min(22rem, calc(100vw - 2rem));
+  max-height: min(32rem, calc(100vh - 6rem));
+  border: 1px solid var(--ui-line);
+  border-radius: 0.75rem;
+  background-color: var(--ui-surface-1);
+  box-shadow: var(--ui-shadow-float);
+  color: var(--ui-ink);
+}
+.ui-filter-panel-body {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  padding: 1rem;
+  overflow-y: auto;
+  fieldset {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+  }
+  legend {
+    margin-bottom: 0.5rem;
+    padding: 0;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--ui-ink-strong);
+  }
+  /* Options in a list read as text under their bold legend. Outranks ui-choice's own label style. */
+  ui-choice .ui-choice-label {
+    font-weight: 400;
+    color: var(--ui-ink);
+  }
+}
+.ui-filter-panel-foot {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  border-top: 1px solid var(--ui-line);
+}
+
+/* Menus (ui-row-actions; @angular/aria menu): a hairline panel with the floating-layer shadow. */
+.ui-menu {
+  min-width: 11rem;
+  padding: 0.25rem;
+  border: 1px solid var(--ui-line);
+  border-radius: 0.75rem;
+  background-color: var(--ui-surface-1);
+  box-shadow: var(--ui-shadow-float);
+  &:focus {
+    outline: none;
+  }
+}
+.ui-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.5rem 0.625rem;
+  border: 0;
+  border-radius: 0.5rem;
+  background: none;
+  color: var(--ui-ink);
+  font: inherit;
+  font-size: 0.875rem;
+  text-align: left;
+  cursor: pointer;
+  &:hover,
+  &[data-active='true'] {
+    background-color: var(--ui-surface-2);
+    color: var(--ui-ink-strong);
+  }
+  &[aria-disabled='true'] {
+    color: var(--ui-ink-subtle);
+    cursor: not-allowed;
+  }
+}
+.ui-menu-item-danger,
+.ui-menu-item-danger:hover,
+.ui-menu-item-danger[data-active='true'] {
+  color: var(--color-error);
+}
+.ui-row-actions {
+  display: inline-flex;
+}
+
 /* uiTable rowHover: rows that open something on click. */
 .ui-table-row-hover tbody > tr {
   cursor: pointer;
@@ -342,9 +807,10 @@ h3 {
     }
   }
   .card-title.ui-card-title {
-    font-size: 1rem;
+    font-family: var(--font-display);
+    font-size: 1.125rem;
     line-height: 1.5rem;
-    font-weight: 600;
+    font-weight: 500;
     color: var(--ui-ink-strong);
     letter-spacing: -0.01em;
   }
@@ -368,8 +834,14 @@ h3 {
  * and lightens it in dark mode; the fill is a touch stronger than DaisyUI's 8% so it reads on the
  * page background. Unlayered so it beats DaisyUI's layered badge rules. */
 .badge.ui-badge {
+  border-radius: 9999px; /* the brand's pill; unlayered because DaisyUI's badge sits in a later layer */
   color: color-mix(in oklab, var(--badge-color, var(--ui-ink)) 62%, var(--ui-ink-strong));
   background-color: color-mix(in oklab, var(--badge-color, var(--ui-ink)) 12%, var(--ui-surface-1));
+}
+/* tone="new": Runner Orange is a fill with ink on it (white on orange is only 2.8:1). */
+.badge.ui-badge.ui-badge-new {
+  color: var(--ui-new-content);
+  background-color: var(--ui-new);
 }
 
 /* Alert (uiAlert): same readable-tone approach as badges, plus a hairline border in the tone. */
@@ -380,6 +852,104 @@ h3 {
   border-radius: var(--radius-field);
   font-size: 0.875rem;
   line-height: 1.25rem;
+}
+
+/* Tabs (uiTabList / uiTab / uiTabPanel). Unlayered so they beat DaisyUI's layered tab rules.
+ * box: pill segmented control on a sunken track; line: hairline rule, action-coloured underline. */
+.ui-tab-list {
+  max-width: 100%;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.ui-tab-list .ui-tab {
+  color: var(--ui-ink-muted);
+  font-weight: 600; /* type-label */
+  white-space: nowrap;
+  gap: 0.375rem;
+  transition:
+    color 0.15s var(--ui-ease),
+    background-color 0.15s var(--ui-ease);
+  &:hover,
+  &.tab-active {
+    color: var(--ui-ink-strong);
+  }
+  &.tab-disabled {
+    color: var(--ui-ink-subtle);
+    cursor: not-allowed;
+  }
+  &:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px color-mix(in oklab, var(--color-primary) 20%, transparent);
+  }
+}
+.ui-tab-list.tabs-box {
+  width: fit-content;
+  gap: 0.125rem;
+  padding: 0.25rem;
+  border-radius: 9999px;
+  background-color: var(--ui-surface-2);
+  box-shadow: none;
+  .ui-tab {
+    --tab-height: 2rem;
+    border-radius: 9999px;
+  }
+  .ui-tab.tab-active {
+    background-color: var(--ui-surface-1);
+    box-shadow: 0 0 0 1px var(--ui-line);
+  }
+}
+.ui-tab-list.ui-tab-list-line {
+  gap: 1rem;
+  border-bottom: 1px solid var(--ui-line);
+  .ui-tab {
+    --tab-p: 0.25rem;
+    border-radius: 0;
+  }
+  /* DaisyUI draws the underline on ::before and colours it with currentColor when active. */
+  .ui-tab::before {
+    left: 0;
+    width: 100%;
+    height: 2px;
+    border-top: 0;
+    border-radius: 2px;
+    background-color: transparent;
+  }
+  .ui-tab.tab-active::before {
+    background-color: var(--ui-action);
+  }
+}
+/* @angular/aria marks inactive panels inert; hide them too. */
+.ui-tab-panel[inert] {
+  display: none;
+}
+.ui-tab-panel:focus-visible {
+  outline: none;
+  border-radius: var(--radius-box);
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--color-primary) 20%, transparent);
+}
+
+/* The content area of each app (<main class="ui-page">): page surface and its side gutter.
+ * Surface model A: white cards on the tinted page. */
+.ui-page {
+  --ui-page-gutter: 1rem;
+  padding-inline: var(--ui-page-gutter);
+  background-color: var(--ui-surface-0);
+}
+
+/* Lists and tables run edge to edge on phones: side borders and corners go, the top and bottom
+ * hairlines stay as dividers, and the content lines up with the page gutter. Opt in with
+ * <div uiCard bleed>; a card that wraps a uiTable directly does it on its own. */
+@media (width < 40rem) {
+  /* Not when nested in another card (a table inside a padded panel stays inside it). */
+  .card.ui-card:is(.ui-card-bleed, :has(> table.ui-table)):not(.ui-card .ui-card) {
+    margin-inline: calc(-1 * var(--ui-page-gutter, 1rem));
+    border-inline-width: 0;
+    border-radius: 0;
+    > .card-body {
+      padding-inline: var(--ui-page-gutter, 1rem);
+    }
+  }
 }
 
 .layout-padding {

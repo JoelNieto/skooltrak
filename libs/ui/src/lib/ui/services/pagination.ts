@@ -1,4 +1,5 @@
 import { computed, effect, Injectable, signal, Signal } from '@angular/core';
+import type { UiTableSort } from '../components/table';
 import { debounceSignal } from './util';
 
 type PaginationState = {
@@ -31,16 +32,25 @@ export class Pagination {
 
   public search = computed(() => this.#state().search);
 
+  /** The sort as a table[uiTable] reads it: `[sort]="pagination.sort()" (sortChange)="pagination.setSort($event)"`. */
+  public sort = computed<UiTableSort | null>(() => {
+    const { sortBy, sortOrder } = this.#state();
+    return sortBy ? { active: sortBy, direction: sortOrder } : null;
+  });
+
+  public setSort(sort: UiTableSort | null) {
+    this.#state.update((current) => ({
+      ...current,
+      sortBy: sort?.active ?? null,
+      sortOrder: sort?.direction ?? 'asc',
+    }));
+  }
+
   public setOrder(column: string) {
     this.#state.update((current) => ({
       ...current,
       sortBy: column,
-      sortOrder:
-        current.sortBy === column
-          ? current.sortOrder === 'asc'
-            ? 'desc'
-            : 'asc'
-          : 'asc',
+      sortOrder: current.sortBy === column ? (current.sortOrder === 'asc' ? 'desc' : 'asc') : 'asc',
     }));
   }
 

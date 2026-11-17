@@ -21,7 +21,7 @@ import { Component } from '@angular/core';
       position: absolute;
       inset: 0px;
       border-radius: 50%;
-      border: 10px solid #fff;
+      border: 10px solid;
       border-color: var(--color-primary);
       animation: prixClipFix 2s linear infinite;
     }

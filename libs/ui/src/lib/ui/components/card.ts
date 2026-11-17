@@ -25,11 +25,18 @@ import { booleanAttribute, computed, Directive, ElementRef, inject, input } from
   host: {
     class: 'card ui-card',
     '[class.ui-card-interactive]': 'isInteractive()',
+    '[class.ui-card-bleed]': 'bleed()',
   },
 })
 export class Card {
   /** Hover and focus styling for a clickable card. Links and buttons get it automatically. */
   readonly interactive = input(false, { transform: booleanAttribute });
+  /**
+   * On phones (below 640px) the card runs edge to edge: no side borders or rounded corners, its
+   * content aligned with the page gutter. For cards that hold a list or table. Cards that wrap a
+   * uiTable directly do this without the input.
+   */
+  readonly bleed = input(false, { transform: booleanAttribute });
 
   private readonly isLinkOrButton = ['A', 'BUTTON'].includes(inject(ElementRef).nativeElement.tagName);
   readonly isInteractive = computed(() => this.interactive() || this.isLinkOrButton);

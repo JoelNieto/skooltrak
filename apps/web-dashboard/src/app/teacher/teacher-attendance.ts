@@ -20,12 +20,12 @@ import { Component } from '@angular/core';
 
     <div uiCard class="mt-6">
       <div uiCardBody>
-        <h2 class="text-lg font-semibold text-base-content">Lista de estudiantes</h2>
+        <h2 class="text-lg font-semibold text-ink-strong">Lista de estudiantes</h2>
         @if (roster.length === 0) {
           <lib-empty-state
             title="Sin estudiantes asignados"
             description="Cuando se asignen estudiantes aparecerán aquí."
-            icon="group"
+            icon="users"
           />
         } @else {
           <div class="overflow-x-auto">
@@ -46,7 +46,7 @@ import { Component } from '@angular/core';
                         {{ student.status }}
                       </span>
                     </td>
-                    <td class="text-sm text-base-content/70">
+                    <td class="text-sm text-ink-muted">
                       {{ student.note }}
                     </td>
                   </tr>

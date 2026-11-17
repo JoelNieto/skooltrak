@@ -9,12 +9,12 @@ import { Component } from '@angular/core';
       title="Entrega de asignaciones"
       subtitle="Sube archivos y revisa el estado de entrega."
       actionLabel="Subir archivo"
-      actionIcon="upload_file"
+      actionIcon="file-up"
     />
 
     <div uiCard>
       <div uiCardBody>
-        <h2 class="text-lg font-semibold text-base-content">Pendientes por entregar</h2>
+        <h2 class="text-lg font-semibold text-ink-strong">Pendientes por entregar</h2>
         <div class="overflow-x-auto">
           <table uiTable>
             <thead>
@@ -43,22 +43,22 @@ import { Component } from '@angular/core';
     </div>
 
     <div class="mt-6">
-      <h2 class="text-lg font-semibold text-base-content mb-3">Entregas recientes</h2>
+      <h2 class="text-lg font-semibold text-ink-strong mb-3">Entregas recientes</h2>
       @if (recentSubmissions.length === 0) {
         <lib-empty-state
           title="Sin entregas recientes"
           description="Cuando subas un archivo aparecerá aquí."
-          icon="cloud_upload"
+          icon="cloud-upload"
         />
       } @else {
         <div class="space-y-3">
           @for (submission of recentSubmissions; track submission.id) {
             <div uiCard>
               <div uiCardBody>
-                <p class="font-semibold text-base-content">
+                <p class="font-semibold text-ink-strong">
                   {{ submission.title }}
                 </p>
-                <p class="text-sm text-base-content/70">{{ submission.course }} · {{ submission.submittedAt }}</p>
+                <p class="text-sm text-ink-muted">{{ submission.course }} · {{ submission.submittedAt }}</p>
               </div>
             </div>
           }

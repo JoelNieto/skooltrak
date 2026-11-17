@@ -1,4 +1,4 @@
-import { Badge, Breadcrumbs, Button, Error, Loader, UiTable } from '#/ui';
+import { Badge, Breadcrumbs, Button, Error, Icon, Loader, UiTable } from '#/ui';
 import { DatePipe } from '@angular/common';
 import { Component, Pipe, PipeTransform, computed, inject, signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
@@ -23,26 +23,26 @@ export class StripHtmlPipe implements PipeTransform {
 
 @Component({
   selector: 'app-assignments',
-  imports: [Breadcrumbs, UiTable, Badge, Button, RouterLink, DatePipe, StripHtmlPipe, Error, Loader],
+  imports: [Breadcrumbs, UiTable, Badge, Button, RouterLink, DatePipe, StripHtmlPipe, Error, Loader, Icon],
 
   template: `<ui-breadcrumbs [items]="[{ label: 'Inicio', link: '/' }, { label: 'Asignaciones' }]" />
     <h1 class="text-2xl font-semibold mb-2">Asignaciones</h1>
     <div class="flex items-center gap-2 justify-between px-8">
       <div class="flex items-center gap-2 flex-1">
         <button uiButton iconOnly (click)="previousWeek()">
-          <span class="material-symbols-outlined">chevron_left</span>
+          <ui-icon name="chevron-left" />
         </button>
 
         <button uiButton iconOnly (click)="nextWeek()">
-          <span class="material-symbols-outlined">chevron_right</span>
+          <ui-icon name="chevron-right" />
         </button>
       </div>
-      <div class="flex-1 text-center text-base-content">{{ startDate() | date }} - {{ endDate() | date }}</div>
+      <div class="flex-1 text-center text-ink-strong">{{ startDate() | date }} - {{ endDate() | date }}</div>
       <div class="flex-1 flex justify-end">
-        <button uiButton (click)="today()"><span class="material-symbols-outlined">today</span> Hoy</button>
+        <button uiButton (click)="today()"><ui-icon name="calendar-check" /> Hoy</button>
       </div>
     </div>
-    <div class="overflow-x-auto bg-base-100 rounded-lg mt-4">
+    <div class="overflow-x-auto bg-surface-1 rounded-lg mt-4">
       @if (assignmentDatesResource.hasValue()) {
         @let list = assignmentDatesResource.value()!;
         <table uiTable>

@@ -1,4 +1,4 @@
-import { Alert, Button, Spinner, Toast } from '#/ui';
+import { Alert, Button, Icon, Spinner, Toast, UiIconName } from '#/ui';
 import { DatePipe } from '@angular/common';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { Component, inject, input, signal } from '@angular/core';
@@ -13,7 +13,7 @@ interface MySubmission {
 
 @Component({
   selector: 'app-assignment-submission-form',
-  imports: [Alert, Spinner, Button, AssignmentDropzone, DatePipe],
+  imports: [Alert, Spinner, Button, AssignmentDropzone, DatePipe, Icon],
   template: `
     <div class="space-y-4">
       @if (submissionResource.isLoading()) {
@@ -22,20 +22,18 @@ interface MySubmission {
         </div>
       } @else if (submissionResource.value(); as submission) {
         <div uiAlert tone="success">
-          <span class="material-symbols-outlined">check_circle</span>
+          <ui-icon name="circle-check" />
           <div>
             <h3 class="font-bold">Entrega completada</h3>
             <p class="text-sm">Entregaste el {{ submission.submittedAt | date: 'medium' }}</p>
           </div>
         </div>
-        <div class="flex items-center justify-between p-4 bg-base-200 rounded-lg">
+        <div class="flex items-center justify-between p-4 bg-surface-0 rounded-lg">
           <div class="flex items-center gap-3">
-            <span class="material-symbols-outlined text-2xl">
-              {{ getFileIcon(submission.file.mimeType) }}
-            </span>
+            <ui-icon [name]="getFileIcon(submission.file.mimeType)" class="text-2xl" />
             <div>
               <p class="font-medium">{{ submission.file.name }}</p>
-              <p class="text-sm text-base-content/50">
+              <p class="text-sm text-ink-subtle">
                 {{ formatBytes(submission.file.size) }}
               </p>
             </div>
@@ -50,7 +48,7 @@ interface MySubmission {
               [disabled]="isDownloading()"
             >
               @if (!isDownloading()) {
-                <span class="material-symbols-outlined">download</span>
+                <ui-icon name="download" />
               }
             </button>
             <button
@@ -63,14 +61,12 @@ interface MySubmission {
               [disabled]="isDeleting()"
             >
               @if (!isDeleting()) {
-                <span class="material-symbols-outlined">delete</span>
+                <ui-icon name="trash-2" />
               }
             </button>
           </div>
         </div>
-        <p class="text-sm text-base-content/70">
-          ¿Deseas reemplazar tu entrega? Elimina el archivo actual y sube uno nuevo.
-        </p>
+        <p class="text-sm text-ink-muted">¿Deseas reemplazar tu entrega? Elimina el archivo actual y sube uno nuevo.</p>
       } @else {
         <app-assignment-dropzone [maxSize]="maxFileSize" (filesChange)="onFilesChange($event)" />
         @if (selectedFiles().length > 0) {
@@ -85,7 +81,7 @@ interface MySubmission {
             @if (isUploading()) {
               Subiendo...
             } @else {
-              <span class="material-symbols-outlined">upload</span>
+              <ui-icon name="upload" />
               Entregar tarea
             }
           </button>
@@ -202,12 +198,12 @@ export default class AssignmentSubmissionForm {
       .finally(() => this.isDownloading.set(false));
   }
 
-  getFileIcon(mimeType: string): string {
-    if (mimeType.includes('pdf')) return 'picture_as_pdf';
+  getFileIcon(mimeType: string): UiIconName {
+    if (mimeType.includes('pdf')) return 'file-text';
     if (mimeType.includes('image')) return 'image';
-    if (mimeType.includes('word') || mimeType.includes('document')) return 'description';
-    if (mimeType.includes('spreadsheet') || mimeType.includes('excel')) return 'table_chart';
-    return 'insert_drive_file';
+    if (mimeType.includes('word') || mimeType.includes('document')) return 'file-text';
+    if (mimeType.includes('spreadsheet') || mimeType.includes('excel')) return 'sheet';
+    return 'file';
   }
 
   formatBytes(bytes: number): string {

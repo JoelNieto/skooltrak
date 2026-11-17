@@ -1,38 +1,39 @@
 import { Component, inject, input, output } from '@angular/core';
 import { Router } from '@angular/router';
 import { Button } from './button';
+import { Icon } from './icon';
 
 @Component({
   selector: 'lib-error',
-  imports: [Button],
+  imports: [Button, Icon],
   template: `
-    <div class="bg-linear-to-br from-blue-50 to-red-100 min-h-screen flex items-center justify-center p-4">
-      <div class="max-w-lg w-full bg-white rounded-2xl shadow-xl overflow-hidden">
+    <div class="bg-surface-0 min-h-screen flex items-center justify-center p-4">
+      <div class="max-w-lg w-full bg-surface-1 border border-line rounded-2xl overflow-hidden">
         <div class="p-8">
           <!-- Error Code -->
           <div class="text-center mb-8">
-            <h2 class="text-4xl font-semibold text-gray-800 mt-4">
+            <h2 class="text-4xl font-semibold text-ink-strong mt-4">
               {{ title() }}
             </h2>
-            <p class="text-gray-600 mt-2">
+            <p class="text-ink-muted mt-2">
               {{ description() }}
             </p>
           </div>
 
           <div class="flex justify-center mb-8">
             <div class="w-48 h-48 bg-error/30 rounded-full flex items-center justify-center">
-              <span class="material-symbols-outlined text-[5rem] text-error!">error</span>
+              <ui-icon name="circle-alert" class="text-[5rem] text-error!" />
             </div>
           </div>
 
           <!-- Action Buttons -->
           <div class="flex flex-col sm:flex-row gap-4 justify-center">
             <button uiButton variant="danger" size="lg" (click)="goHome()">
-              <span class="material-symbols-outlined">home</span>
+              <ui-icon name="house" />
               Inicio
             </button>
             <button uiButton variant="danger" size="lg" (click)="retry.emit()">
-              <span class="material-symbols-outlined">refresh</span>
+              <ui-icon name="refresh-cw" />
               Reintentar
             </button>
           </div>

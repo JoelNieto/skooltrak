@@ -23,7 +23,7 @@ import { firstValueFrom } from 'rxjs';
     <ui-field label="Orden de visualización" [field]="form.order">
       <input uiInput type="number" [formField]="form.order" />
     </ui-field>
-    <div class="form-control">
+    <div>
       <ui-choice label="Activo">
         <input uiCheckbox tone="neutral" type="checkbox" [formField]="form.active" />
       </ui-choice>

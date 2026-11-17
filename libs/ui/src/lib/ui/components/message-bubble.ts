@@ -21,11 +21,11 @@ const URGENCY_LABEL: Record<Urgency, string> = {
   template: `
     <div class="flex" [class.justify-end]="mine()">
       <div
-        class="max-w-[80%] rounded-2xl px-3 py-2 text-sm"
-        [class]="mine() ? 'bg-primary/20 text-base-content' : 'bg-base-200 text-base-content'"
+        class="max-w-[80%] rounded-2xl px-3 py-2 type-body-lg"
+        [class]="mine() ? 'bg-primary/20 text-ink-strong' : 'bg-surface-0 text-ink-strong'"
       >
         @if (!mine() && senderName()) {
-          <p class="font-semibold text-xs opacity-80 mb-0.5">{{ senderName() }}</p>
+          <p class="type-caption opacity-80 mb-0.5">{{ senderName() }}</p>
         }
         <p class="whitespace-pre-wrap break-words">{{ body() }}</p>
         <div class="flex items-center gap-2 mt-1">

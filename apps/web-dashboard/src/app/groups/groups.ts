@@ -49,7 +49,7 @@ type ClassGroupRow = {
                 <lib-empty-state
                   [title]="'No hay grupos'"
                   [description]="'No hay grupos para mostrar'"
-                  [icon]="'group'"
+                  [icon]="'users'"
                 />
               </td>
             </tr>

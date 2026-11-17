@@ -2,7 +2,7 @@ import { OverlayModule } from '@angular/cdk/overlay';
 import { httpResource } from '@angular/common/http';
 import { Component, effect, output, signal, viewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Badge, Button } from '#/ui';
+import { Badge, Button, Icon, UiInputGroup } from '#/ui';
 
 type StudentSearchItem = {
   id: string;
@@ -12,10 +12,10 @@ type StudentSearchItem = {
 
 @Component({
   selector: 'app-student-search',
-  imports: [Badge, Button, FormsModule, OverlayModule],
+  imports: [Badge, Button, FormsModule, OverlayModule, UiInputGroup, Icon],
   template: `
     <div class="relative flex flex-col" #origin>
-      <div class="flex relative items-center input input-primary w-full max-w-md">
+      <div uiInputGroup class="flex relative items-center w-full max-w-md">
         @if (selectedStudent(); as s) {
           <span uiBadge tone="action" class="gap-2">
             {{ s.name }}
@@ -28,11 +28,11 @@ type StudentSearchItem = {
               aria-label="Quitar selección"
               (click)="clearSelection()"
             >
-              <span class="material-symbols-outlined text-sm">close</span>
+              <ui-icon name="x" class="text-sm" />
             </button>
           </span>
         } @else {
-          <span class="material-symbols-outlined text-base-content/50">search</span>
+          <ui-icon name="search" class="text-ink-subtle" />
           <input
             #input
             autocomplete="off"
@@ -50,25 +50,25 @@ type StudentSearchItem = {
         [cdkConnectedOverlayOpen]="opened() && !selectedStudent()"
       >
         <div
-          class="popup bg-base-100 border border-base-300 rounded-box w-full shadow-lg mt-1 max-h-64 overflow-auto z-50"
+          class="popup bg-surface-1 border border-line rounded-box w-full shadow-lg mt-1 max-h-64 overflow-auto z-50"
         >
           @if (results.isLoading()) {
-            <div class="p-3 text-base-content/50">Buscando...</div>
+            <div class="p-3 text-ink-subtle">Buscando...</div>
           } @else if (debouncedQuery().trim().length >= 2 && results.value().length === 0) {
-            <div class="p-3 text-base-content/50">Sin resultados</div>
+            <div class="p-3 text-ink-subtle">Sin resultados</div>
           } @else if (debouncedQuery().trim().length < 2) {
-            <div class="p-3 text-base-content/50">Escribe al menos 2 caracteres</div>
+            <div class="p-3 text-ink-subtle">Escribe al menos 2 caracteres</div>
           }
           @for (s of results.value(); track s.id) {
             <button
               type="button"
-              class="w-full text-left p-3 cursor-pointer hover:bg-base-200 flex items-center justify-between gap-2"
+              class="w-full text-left p-3 cursor-pointer hover:bg-surface-2 flex items-center justify-between gap-2"
               (mousedown)="$event.preventDefault()"
               (click)="choose(s)"
             >
               <span class="font-medium">{{ s.name }}</span>
               @if (s.classGroup?.name) {
-                <span class="text-xs text-base-content/50">{{ s.classGroup.name }}</span>
+                <span class="text-xs text-ink-subtle">{{ s.classGroup.name }}</span>
               }
             </button>
           }

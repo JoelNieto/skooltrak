@@ -1,4 +1,4 @@
-import { Badge, Breadcrumbs, Loader, Spinner, Toast, UiInput } from '#/ui';
+import { Badge, Breadcrumbs, Icon, Loader, Spinner, Toast, UiInput } from '#/ui';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -8,13 +8,13 @@ import Auth from '../auth/auth';
 
 @Component({
   selector: 'app-chat-new',
-  imports: [Spinner, Breadcrumbs, Badge, UiInput, Loader, FormsModule],
+  imports: [Spinner, Breadcrumbs, Badge, UiInput, Loader, FormsModule, Icon],
   template: `
     <ui-breadcrumbs
       [items]="[{ label: 'Inicio', link: '/' }, { label: 'Chats', link: '/chats' }, { label: 'Nuevo chat' }]"
     />
     <h1 class="text-2xl font-semibold mt-4">Nuevo chat</h1>
-    <p class="text-base-content/70 mt-1">Selecciona un contacto para iniciar una conversación</p>
+    <p class="text-ink-muted mt-1">Selecciona un contacto para iniciar una conversación</p>
 
     <input
       uiInput
@@ -35,17 +35,17 @@ import Auth from '../auth/auth';
             type="button"
             (click)="contact.id && startChat(contact.id)"
             [disabled]="creating()"
-            class="flex items-center gap-3 p-4 rounded-lg bg-base-100 hover:bg-base-200 w-full text-left transition-colors"
+            class="flex items-center gap-3 p-4 rounded-lg bg-surface-1 hover:bg-surface-2 w-full text-left transition-colors"
           >
             <div class="avatar avatar-placeholder">
-              <div class="text-white rounded-full w-10" [style.background]="contact.color || 'oklch(var(--p))'">
+              <div class="text-white rounded-full w-10" [style.background]="contact.color || 'var(--color-primary)'">
                 <span>{{ contact.initials }}</span>
               </div>
             </div>
             <div class="flex-1 min-w-0">
               <p class="font-medium">{{ contact.name }}</p>
               <div class="flex flex-wrap items-center gap-1.5 mt-0.5">
-                <span class="text-sm text-base-content/60">{{ contact.email }}</span>
+                <span class="text-sm text-ink-muted">{{ contact.email }}</span>
                 @if (roleLabel($safeNavigationMigration(contact?.role?.name)); as label) {
                   <span uiBadge size="sm">{{ label }}</span>
                 }
@@ -57,12 +57,12 @@ import Auth from '../auth/auth';
             @if (creating() === contact.id) {
               <span uiSpinner size="sm"></span>
             } @else {
-              <span class="material-symbols-outlined text-base-content/50">chat</span>
+              <ui-icon name="message-circle" class="text-ink-subtle" />
             }
           </button>
         }
         @if (filteredContacts().length === 0) {
-          <p class="text-base-content/60 py-8">No se encontraron contactos</p>
+          <p class="text-ink-muted py-8">No se encontraron contactos</p>
         }
       </div>
     }

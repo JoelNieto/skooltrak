@@ -1,5 +1,5 @@
 import { SchoolContext } from '#/shared';
-import { Alert, Button, Card, Toast, UiChoice, UiInput, UiSelect, UiTable, UiToggle } from '#/ui';
+import { Alert, Button, Card, Toast, UiChoice, UiField, UiInput, UiSelect, UiTable, UiToggle } from '#/ui';
 import { Component, effect, inject, input, signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { applyEach, form, FormField, maxLength, min, required, submit } from '@angular/forms/signals';
@@ -35,45 +35,40 @@ function emptyStoreProductForm(): StoreProductFormModel {
 
 @Component({
   selector: 'app-product-form',
-  imports: [Alert, Card, UiTable, UiChoice, UiInput, UiSelect, UiToggle, Button, FormField],
+  imports: [Alert, Card, UiTable, UiChoice, UiInput, UiSelect, UiToggle, Button, FormField, UiField],
   template: `
     <h3 class="text-lg font-medium mb-4">{{ id() ? 'Editar producto' : 'Nuevo producto' }}</h3>
     @if (!school.currentSchoolId()) {
       <div uiAlert tone="warning">Selecciona una escuela.</div>
     } @else {
       <form class="grid gap-4 max-w-2xl" (submit)="onSubmit($event)" novalidate>
-        <label class="form-control">
-          <span class="label-text">Nombre</span>
+        <ui-field label="Nombre">
           <input uiInput [formField]="productForm.name" />
-        </label>
-        <label class="form-control">
-          <span class="label-text">Descripción</span>
+        </ui-field>
+        <ui-field label="Descripción">
           <textarea uiInput [formField]="productForm.description" rows="3"></textarea>
-        </label>
-        <label class="form-control">
-          <span class="label-text">Categoría</span>
+        </ui-field>
+        <ui-field label="Categoría">
           <select uiSelect [formField]="productForm.categoryId">
             <option value="">—</option>
             @for (c of categories.value(); track c.id) {
               <option [value]="c.id">{{ c.name }}</option>
             }
           </select>
-        </label>
-        <label class="form-control">
-          <span class="label-text">Precio</span>
+        </ui-field>
+        <ui-field label="Precio">
           <input uiInput type="number" step="0.01" [formField]="productForm.price" />
-        </label>
-        <label class="form-control">
-          <span class="label-text">URL de imagen (opcional)</span>
+        </ui-field>
+        <ui-field label="URL de imagen" optional>
           <input uiInput [formField]="productForm.imageUrl" />
-        </label>
+        </ui-field>
 
         <div class="space-y-2">
           <div class="flex justify-between items-center">
             <span class="font-medium">Tallas / variantes y stock</span>
             <button uiButton variant="ghost" size="sm" type="button" (click)="addVariantRow()">+ Añadir talla</button>
           </div>
-          <p class="text-sm text-base-content/60">
+          <p class="text-sm text-ink-muted">
             Ej.: S, M, L o 28, 30, 32. Cada fila es una talla con su propio inventario.
           </p>
           <div uiCard class="overflow-x-auto">
@@ -90,13 +85,13 @@ function emptyStoreProductForm(): StoreProductFormModel {
                 @for (row of productForm.variants; track $index) {
                   <tr>
                     <td>
-                      <input uiInput class="input-sm max-w-40" [formField]="row.label" placeholder="S, M, 32…" />
+                      <input uiInput size="sm" class="max-w-40" [formField]="row.label" placeholder="S, M, 32…" />
                     </td>
                     <td>
-                      <input uiInput class="input-sm w-24" type="number" [formField]="row.stock" />
+                      <input uiInput size="sm" class="w-24" type="number" [formField]="row.stock" />
                     </td>
                     <td>
-                      <input uiInput class="input-sm w-16" type="number" [formField]="row.sortOrder" />
+                      <input uiInput size="sm" class="w-16" type="number" [formField]="row.sortOrder" />
                     </td>
                     <td>
                       @if (productModel().variants.length > 1) {

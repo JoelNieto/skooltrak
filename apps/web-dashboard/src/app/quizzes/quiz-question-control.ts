@@ -1,4 +1,4 @@
-import { Button, TextEditor, UiField, UiInput, UiSelect } from '#/ui';
+import { Button, Icon, TextEditor, UiField, UiInput, UiSelect } from '#/ui';
 import { Component, inject, input } from '@angular/core';
 import { FormArray, FormControl, FormGroup, NonNullableFormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { $Enums } from '@generated/prisma';
@@ -6,12 +6,11 @@ import QuestionOptionControl from './question-option-control';
 
 @Component({
   selector: 'app-quiz-question-control',
-  imports: [UiField, UiInput, UiSelect, Button, TextEditor, ReactiveFormsModule, QuestionOptionControl],
+  imports: [UiField, UiInput, UiSelect, Button, TextEditor, ReactiveFormsModule, QuestionOptionControl, Icon],
   template: `<form [formGroup]="question()" class="flex flex-col gap-6">
-    <div class="fieldset">
-      <label for="question">Pregunta</label>
+    <ui-field label="Pregunta">
       <lib-text-editor id="question" name="question" formControlName="question" />
-    </div>
+    </ui-field>
     <ui-field label="Tipo de Pregunta">
       <select uiSelect id="type" name="type" formControlName="type">
         <option value="" disabled selected>Selecciona un tipo...</option>
@@ -41,18 +40,18 @@ import QuestionOptionControl from './question-option-control';
               (click)="removeOption($index)"
               title="Eliminar opción"
             >
-              <span class="material-symbols-outlined text-error">delete</span>
+              <ui-icon name="trash-2" class="text-error" />
             </button>
           </div>
         }
         <button uiButton size="sm" type="button" (click)="addOption()">
-          <span class="material-symbols-outlined">add</span>
+          <ui-icon name="plus" />
           Agregar opción
         </button>
       </div>
     }
     @if (question().value.type === TYPE_ENUM.QuizQuestionType.TEXT) {
-      <p class="text-sm text-base-content/60">El estudiante responderá con texto libre.</p>
+      <p class="text-sm text-ink-muted">El estudiante responderá con texto libre.</p>
     }
     <ui-field label="Puntos">
       <input uiInput type="number" [id]="'value-' + index()" formControlName="value" min="0" step="0.5" />

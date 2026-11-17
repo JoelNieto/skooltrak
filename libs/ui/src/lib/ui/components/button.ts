@@ -9,7 +9,7 @@ export type ButtonSize = 'sm' | 'md' | 'lg';
  *
  *   <button uiButton variant="primary" (click)="save()">Guardar</button>
  *   <a uiButton variant="ghost" size="sm" routerLink="/cursos">Ver cursos</a>
- *   <button uiButton variant="ghost" iconOnly aria-label="Cerrar"><span class="material-symbols-outlined">close</span></button>
+ *   <button uiButton variant="ghost" iconOnly aria-label="Cerrar"><ui-icon name="x" /></button>
  *   <button uiButton variant="primary" type="submit" [loading]="saving()">Guardar</button>
  *
  * Variants: primary (the school's action colour, swaps to ink on hover) · secondary (neutral fill,

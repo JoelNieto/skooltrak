@@ -9,7 +9,7 @@ import { SchoolsService } from './schools.service';
 function toFetchDataInput(q: FetchDataQueryDto): FetchDataInput {
   return {
     skip: q.skip,
-    take: q.take,
+    take: q.pageSize,
     orderBy: q.orderBy ?? 'name',
     orderDirection: q.orderDirection ?? 'asc',
     organizationId: q.organizationId,

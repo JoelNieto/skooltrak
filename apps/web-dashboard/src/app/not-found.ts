@@ -1,26 +1,26 @@
 import { Location } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import { Router } from '@angular/router';
-import { Button } from '#/ui';
+import { Button, Icon } from '#/ui';
 
 @Component({
   selector: 'app-not-found',
-  imports: [Button],
-  template: `<div class="bg-linear-to-br from-blue-50 to-indigo-100 min-h-screen flex items-center justify-center p-4">
-    <div class="max-w-lg w-full bg-white rounded-2xl shadow-xl overflow-hidden">
+  imports: [Button, Icon],
+  template: `<div class="bg-surface-0 min-h-screen flex items-center justify-center p-4">
+    <div class="max-w-lg w-full bg-surface-1 border border-line rounded-2xl overflow-hidden">
       <div class="p-8">
         <!-- Error Code -->
         <div class="text-center mb-8">
           <h1 class="text-9xl font-bold text-primary">404</h1>
-          <h2 class="text-2xl font-semibold text-gray-800 mt-4">Pagina no encontrada</h2>
-          <p class="text-gray-600 mt-2">Lo siento, no pudimos encontrar la pagina que estabas buscando.</p>
+          <h2 class="text-2xl font-semibold text-ink-strong mt-4">Pagina no encontrada</h2>
+          <p class="text-ink-muted mt-2">Lo siento, no pudimos encontrar la pagina que estabas buscando.</p>
         </div>
 
         <!-- Illustration -->
         <div class="flex justify-center mb-8">
-          <div class="w-48 h-48 bg-indigo-100 rounded-full flex items-center justify-center">
+          <div class="w-48 h-48 bg-action-subtle rounded-full flex items-center justify-center">
             <svg
-              class="w-32 h-32 text-indigo-500"
+              class="w-32 h-32 text-primary"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -39,11 +39,11 @@ import { Button } from '#/ui';
         <!-- Action Buttons -->
         <div class="flex flex-col sm:flex-row gap-4 justify-center">
           <button uiButton variant="primary" size="lg" (click)="goHome()">
-            <span class="material-symbols-outlined">home</span>
+            <ui-icon name="house" />
             Inicio
           </button>
           <button uiButton size="lg" (click)="goBack()">
-            <span class="material-symbols-outlined">arrow_back</span>
+            <ui-icon name="arrow-left" />
             Regresar
           </button>
         </div>

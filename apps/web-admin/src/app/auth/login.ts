@@ -1,4 +1,4 @@
-import { Button, Toast, UiInput } from '#/ui';
+import { BrandLogo, Button, Card, CardBody, Icon, Toast, UiField, UiInput } from '#/ui';
 import { Component, inject, signal } from '@angular/core';
 import { email, form, FormField, required } from '@angular/forms/signals';
 
@@ -6,61 +6,56 @@ import Auth from './auth';
 
 @Component({
   selector: 'app-login',
-  imports: [UiInput, Button, FormField],
-  template: ` <div class="gradient-bg min-h-screen flex items-center justify-center p-4">
-    <div class="max-w-md w-full bg-white rounded-2xl shadow-xl overflow-hidden">
-      <!-- Header Section -->
-      <div class="bg-neutral p-6 text-white text-center">
-        <h1 class="text-2xl font-bold">Bienvenido</h1>
-        <p class="text-neutral-content mt-2">Inicia sesión para continuar</p>
-      </div>
+  imports: [BrandLogo, Button, Card, CardBody, FormField, UiField, UiInput, Icon],
+  template: `
+    <div class="bg-surface-0 min-h-screen flex flex-col items-center justify-center gap-8 p-4">
+      <ui-brand-logo class="h-10" />
+      <div uiCard class="max-w-md w-full overflow-hidden">
+        <div class="bg-neutral p-6 text-neutral-content text-center">
+          <h1 class="text-2xl font-semibold">Bienvenido</h1>
+          <p class="mt-2 opacity-80">Inicia sesión para continuar</p>
+        </div>
 
-      <!-- Form Section -->
-      <div class="p-8">
-        <form id="loginForm" class="space-y-6" (submit)="onSubmit($event)">
-          <!-- Email Field -->
-          <div>
-            <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Correo Electrónico</label>
-            <div class="relative">
-              <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <i class="fas fa-envelope text-gray-400"></i>
+        <div uiCardBody class="p-8">
+          <form id="loginForm" class="flex flex-col gap-4" (submit)="onSubmit($event)">
+            <ui-field label="Correo electrónico" [field]="form.email">
+              <input uiInput type="email" autocomplete="email" placeholder="tu@correo.com" [formField]="form.email" />
+            </ui-field>
+
+            <ui-field label="Contraseña" [field]="form.password">
+              <div class="relative">
+                <input
+                  uiInput
+                  [type]="showPassword() ? 'text' : 'password'"
+                  autocomplete="current-password"
+                  placeholder="••••••••"
+                  class="pr-12"
+                  [formField]="form.password"
+                />
+                <button
+                  uiButton
+                  variant="ghost"
+                  size="sm"
+                  iconOnly
+                  type="button"
+                  class="absolute inset-y-0 right-1 my-auto"
+                  [attr.aria-label]="showPassword() ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+                  [attr.aria-pressed]="showPassword()"
+                  (click)="showPassword.set(!showPassword())"
+                >
+                  <ui-icon [name]="showPassword() ? 'eye-off' : 'eye'" class="text-xl" />
+                </button>
               </div>
-              <input uiInput type="email" id="email" placeholder="you@example.com" [formField]="form.email" />
-            </div>
-            @if (form.email().touched() && form.email().errors()) {
-              @for (error of form.email().errors(); track error.message) {
-                <p class="text-red-500 text-xs mt-1">{{ error.message }}</p>
-              }
-            }
-          </div>
+            </ui-field>
 
-          <!-- Password Field -->
-          <div>
-            <div class="flex justify-between items-center mb-1">
-              <label for="password" class="block text-sm font-medium text-gray-700">Contraseña</label>
-              <a href="#" class="text-sm link ">¿Olvidaste tu contraseña?</a>
-            </div>
-            <div class="relative">
-              <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <i class="fas fa-lock text-gray-400"></i>
-              </div>
-              <input uiInput type="password" id="password" placeholder="••••••••" [formField]="form.password" />
-              <button type="button" id="togglePassword" class="absolute inset-y-0 right-0 pr-3 flex items-center">
-                <i class="fas fa-eye text-gray-400 hover:text-gray-600 transition duration-200"></i>
-              </button>
-            </div>
-            @if (form.password().touched() && form.password().errors()) {
-              @for (error of form.password().errors(); track error.message) {
-                <p class="text-red-500 text-xs mt-1">{{ error.message }}</p>
-              }
-            }
-          </div>
-
-          <button uiButton variant="primary" type="submit" class="w-full">Iniciar Sesión</button>
-        </form>
+            <button uiButton variant="primary" type="submit" class="w-full mt-2" [loading]="loading()">
+              Iniciar sesión
+            </button>
+          </form>
+        </div>
       </div>
     </div>
-  </div>`,
+  `,
 })
 export default class Login {
   #auth = inject(Auth);
@@ -77,6 +72,7 @@ export default class Login {
 
   private toasts = inject(Toast);
   public loading = signal(false);
+  public showPassword = signal(false);
 
   public async onSubmit(event: Event) {
     event.preventDefault();

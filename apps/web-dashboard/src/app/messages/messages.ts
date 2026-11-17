@@ -4,11 +4,17 @@ import {
   Card,
   Confirmation,
   EmptyState,
+  Icon,
   Paginator,
   TimeAgoPipe,
   Toast,
   UiCheckbox,
+  UiTab,
+  UiTabContent,
   UiTable,
+  UiTabList,
+  UiTabPanel,
+  UiTabs,
 } from '#/ui';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { Component, computed, effect, inject, signal } from '@angular/core';
@@ -41,7 +47,23 @@ type MessageRecipientType = {
 };
 
 @Component({
-  imports: [Breadcrumbs, Card, UiTable, UiCheckbox, Button, RouterLink, Paginator, FormsModule, EmptyState],
+  imports: [
+    Breadcrumbs,
+    Card,
+    UiTable,
+    UiCheckbox,
+    Button,
+    RouterLink,
+    Paginator,
+    FormsModule,
+    EmptyState,
+    UiTab,
+    UiTabContent,
+    UiTabList,
+    UiTabPanel,
+    UiTabs,
+    Icon,
+  ],
   providers: [TimeAgoPipe],
   template: `<ui-breadcrumbs [items]="[{ label: 'Inicio', link: '/' }, { label: 'Mensajes' }]" />
     <div class="flex flex:col md:flex-row md:justify-between md:items-center">
@@ -50,194 +72,185 @@ type MessageRecipientType = {
         <a uiButton variant="primary" [routerLink]="['/messages/compose']">Nuevo mensaje</a>
       </div>
     </div>
-    <div class="tabs tabs-box mt-4">
-      <input
-        class="tab"
-        type="radio"
-        name="messages_tabs"
-        aria-label="Inbox"
-        [checked]="activeTab() === 'inbox'"
-        (change)="setActiveTab('inbox')"
-      />
-      <div class="tab-content bg-base-100 border-base-300 p-4">
-        <div uiCard class="overflow-x-auto">
-          <table uiTable>
-            <thead>
-              <tr>
-                <th class="w-12">
-                  <input
-                    uiCheckbox
-                    tone="neutral"
-                    type="checkbox"
-                    [checked]="allSelected()"
-                    [indeterminate]="someSelected()"
-                    (change)="onSelectAllChange($event.target.checked)"
-                  />
-                </th>
-                <th class="w-[15rem]"></th>
-                <th></th>
-                <th></th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody>
-              @for (item of messagesResource.value(); track item.id) {
-                <tr class="hover:bg-base-300" [class.bg-base-200]="!item.readAt">
-                  <td>
-                    <input
-                      uiCheckbox
-                      tone="neutral"
-                      type="checkbox"
-                      [checked]="(item.id && selectedStates()[item.id]) || false"
-                      (change)="item.id && onCheckboxChange(item.id, $any($event.target).checked)"
-                    />
-                  </td>
-                  <td class="flex items-center gap-2" [class.font-bold]="!item.readAt">
-                    @if (!item.readAt) {
-                      <span class="w-2 h-2 bg-primary rounded-full"></span>
-                    }
-                    <div class="avatar avatar-placeholder">
-                      <div
-                        class="text-neutral-content w-7 rounded-full"
-                        [style.background]="item.message?.sender?.color"
-                      >
-                        <span>{{ item.message?.sender?.initials }}</span>
-                      </div>
-                    </div>
-                    {{ item.message?.sender?.name }}
-                  </td>
-                  <td [class.font-semibold]="!item.readAt" [class.text-neutral-500]="item.readAt">
-                    <a [routerLink]="['/messages', item.message?.id ?? '']">{{ item.message?.subject }}</a>
-                  </td>
-                  <td class="text-neutral-500">
-                    {{ formatTimeAgo($safeNavigationMigration(item.message?.createdAt)) }}
-                  </td>
-                  <td>
-                    <button class="hover:text-error cursor-pointer" (click)="deleteMessage(item)">
-                      <span class="material-symbols-outlined text-lg">delete</span>
-                    </button>
-                  </td>
-                </tr>
-              } @empty {
-                <tr>
-                  <td colspan="5" class="text-center">
-                    <lib-empty-state
-                      title="Sin mensajes"
-                      description="No hay mensajes en tu bandeja de entrada"
-                      icon="mail"
-                      color="primary"
-                    />
-                  </td>
-                </tr>
-              }
-            </tbody>
-            <tfoot></tfoot>
-          </table>
-          <div class="p-4 rounded-b-lg ">
-            <lib-paginator
-              [count]="inboxPagination().count"
-              [take]="inboxPagination().take"
-              [skip]="inboxPagination().skip"
-              (skipChange)="updateInboxSkip($event)"
-              (takeChange)="updateInboxTake($event)"
-            />
-          </div>
-        </div>
+    <div uiTabs class="mt-4 flex flex-col gap-4">
+      <div uiTabList [(selectedTab)]="activeTab" aria-label="Bandejas de mensajes">
+        <button uiTab value="inbox">Recibidos</button>
+        <button uiTab value="outbox">Enviados</button>
       </div>
-
-      <input
-        class="tab"
-        type="radio"
-        name="messages_tabs"
-        aria-label="Enviados"
-        [checked]="activeTab() === 'outbox'"
-        (change)="setActiveTab('outbox')"
-      />
-      <div class="tab-content bg-base-100 border-base-300 p-4">
-        <div uiCard class="overflow-x-auto">
-          <table uiTable rowHover>
-            <thead>
-              <tr>
-                <th class="w-12">
-                  <input
-                    uiCheckbox
-                    tone="neutral"
-                    type="checkbox"
-                    [checked]="allSentSelected()"
-                    [indeterminate]="someSentSelected()"
-                    (change)="onSelectAllSentChange($event.target.checked)"
-                  />
-                </th>
-                <th class="w-[15rem]">Para</th>
-                <th>Asunto</th>
-                <th>Fecha</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody>
-              @for (item of sentMessagesResource.value(); track item.id) {
-                <tr [routerLink]="['/messages', item.id]">
-                  <td>
+      <div uiTabPanel value="inbox">
+        <ng-template uiTabContent>
+          <div uiCard class="overflow-x-auto">
+            <table uiTable>
+              <thead>
+                <tr>
+                  <th class="w-12">
                     <input
                       uiCheckbox
                       tone="neutral"
                       type="checkbox"
-                      [checked]="(item.id && sentSelectedStates()[item.id]) || false"
-                      (change)="item.id && onSentCheckboxChange(item.id, $any($event.target).checked)"
+                      [checked]="allSelected()"
+                      [indeterminate]="someSelected()"
+                      (change)="onSelectAllChange($event.target.checked)"
                     />
-                  </td>
-                  <td class="text-neutral-900! font-semibold">
-                    <div class="flex items-center gap-2">
-                      @for (recipient of (item.recipients ?? []).slice(0, 2); track recipient.id ?? recipient) {
-                        <div class="avatar avatar-placeholder">
-                          <div
-                            class="text-neutral-content w-7 rounded-full text-xs"
-                            [style.background]="recipient.user?.color"
-                          >
-                            <span>{{ recipient.user?.initials }}</span>
-                          </div>
-                        </div>
+                  </th>
+                  <th class="w-[15rem]"></th>
+                  <th></th>
+                  <th></th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (item of messagesResource.value(); track item.id) {
+                  <tr class="hover:bg-surface-2" [class.bg-surface-0]="!item.readAt">
+                    <td>
+                      <input
+                        uiCheckbox
+                        tone="neutral"
+                        type="checkbox"
+                        [checked]="(item.id && selectedStates()[item.id]) || false"
+                        (change)="item.id && onCheckboxChange(item.id, $any($event.target).checked)"
+                      />
+                    </td>
+                    <td class="flex items-center gap-2" [class.font-bold]="!item.readAt">
+                      @if (!item.readAt) {
+                        <span class="w-2 h-2 bg-primary rounded-full"></span>
                       }
-                      <span>{{ getRecipientsText(item) }}</span>
-                    </div>
-                  </td>
-                  <td class="text-neutral-500!">
-                    <a>{{ item.subject }}</a>
-                  </td>
-                  <td class="text-neutral-500!">
-                    {{ formatTimeAgo(item.createdAt) }}
-                  </td>
-                  <td>
-                    <button class="hover:text-error cursor-pointer" (click)="deleteSentMessage(item)">
-                      <span class="material-symbols-outlined text-lg">delete</span>
-                    </button>
-                  </td>
-                </tr>
-              } @empty {
-                <tr>
-                  <td colspan="5" class="text-center">
-                    <lib-empty-state
-                      title="Sin mensajes enviados"
-                      description="No has enviado ningún mensaje"
-                      icon="send"
-                      color="primary"
-                    />
-                  </td>
-                </tr>
-              }
-            </tbody>
-            <tfoot></tfoot>
-          </table>
-          <div class="p-4 rounded-b-lg">
-            <lib-paginator
-              [count]="outboxPagination().count"
-              [take]="outboxPagination().take"
-              [skip]="outboxPagination().skip"
-              (skipChange)="updateOutboxSkip($event)"
-              (takeChange)="updateOutboxTake($event)"
-            />
+                      <div class="avatar avatar-placeholder">
+                        <div
+                          class="text-neutral-content w-7 rounded-full"
+                          [style.background]="item.message?.sender?.color"
+                        >
+                          <span>{{ item.message?.sender?.initials }}</span>
+                        </div>
+                      </div>
+                      {{ item.message?.sender?.name }}
+                    </td>
+                    <td [class.font-semibold]="!item.readAt" [class.text-ink-muted]="item.readAt">
+                      <a [routerLink]="['/messages', item.message?.id ?? '']">{{ item.message?.subject }}</a>
+                    </td>
+                    <td class="text-ink-muted">
+                      {{ formatTimeAgo($safeNavigationMigration(item.message?.createdAt)) }}
+                    </td>
+                    <td>
+                      <button class="hover:text-error cursor-pointer" (click)="deleteMessage(item)">
+                        <ui-icon name="trash-2" class="text-lg" />
+                      </button>
+                    </td>
+                  </tr>
+                } @empty {
+                  <tr>
+                    <td colspan="5" class="text-center">
+                      <lib-empty-state
+                        title="Sin mensajes"
+                        description="No hay mensajes en tu bandeja de entrada"
+                        icon="mail"
+                        color="primary"
+                      />
+                    </td>
+                  </tr>
+                }
+              </tbody>
+              <tfoot></tfoot>
+            </table>
+            <div class="p-4 rounded-b-lg ">
+              <lib-paginator
+                [count]="inboxPagination().count"
+                [take]="inboxPagination().take"
+                [skip]="inboxPagination().skip"
+                (skipChange)="updateInboxSkip($event)"
+                (takeChange)="updateInboxTake($event)"
+              />
+            </div>
           </div>
-        </div>
+        </ng-template>
+      </div>
+      <div uiTabPanel value="outbox">
+        <ng-template uiTabContent>
+          <div uiCard class="overflow-x-auto">
+            <table uiTable rowHover>
+              <thead>
+                <tr>
+                  <th class="w-12">
+                    <input
+                      uiCheckbox
+                      tone="neutral"
+                      type="checkbox"
+                      [checked]="allSentSelected()"
+                      [indeterminate]="someSentSelected()"
+                      (change)="onSelectAllSentChange($event.target.checked)"
+                    />
+                  </th>
+                  <th class="w-[15rem]">Para</th>
+                  <th>Asunto</th>
+                  <th>Fecha</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (item of sentMessagesResource.value(); track item.id) {
+                  <tr [routerLink]="['/messages', item.id]">
+                    <td>
+                      <input
+                        uiCheckbox
+                        tone="neutral"
+                        type="checkbox"
+                        [checked]="(item.id && sentSelectedStates()[item.id]) || false"
+                        (change)="item.id && onSentCheckboxChange(item.id, $any($event.target).checked)"
+                      />
+                    </td>
+                    <td class="text-ink-strong! font-semibold">
+                      <div class="flex items-center gap-2">
+                        @for (recipient of (item.recipients ?? []).slice(0, 2); track recipient.id ?? recipient) {
+                          <div class="avatar avatar-placeholder">
+                            <div
+                              class="text-neutral-content w-7 rounded-full text-xs"
+                              [style.background]="recipient.user?.color"
+                            >
+                              <span>{{ recipient.user?.initials }}</span>
+                            </div>
+                          </div>
+                        }
+                        <span>{{ getRecipientsText(item) }}</span>
+                      </div>
+                    </td>
+                    <td class="text-ink-muted!">
+                      <a>{{ item.subject }}</a>
+                    </td>
+                    <td class="text-ink-muted!">
+                      {{ formatTimeAgo(item.createdAt) }}
+                    </td>
+                    <td>
+                      <button class="hover:text-error cursor-pointer" (click)="deleteSentMessage(item)">
+                        <ui-icon name="trash-2" class="text-lg" />
+                      </button>
+                    </td>
+                  </tr>
+                } @empty {
+                  <tr>
+                    <td colspan="5" class="text-center">
+                      <lib-empty-state
+                        title="Sin mensajes enviados"
+                        description="No has enviado ningún mensaje"
+                        icon="send"
+                        color="primary"
+                      />
+                    </td>
+                  </tr>
+                }
+              </tbody>
+              <tfoot></tfoot>
+            </table>
+            <div class="p-4 rounded-b-lg">
+              <lib-paginator
+                [count]="outboxPagination().count"
+                [take]="outboxPagination().take"
+                [skip]="outboxPagination().skip"
+                (skipChange)="updateOutboxSkip($event)"
+                (takeChange)="updateOutboxTake($event)"
+              />
+            </div>
+          </div>
+        </ng-template>
       </div>
     </div> `,
 })
@@ -248,10 +261,6 @@ export default class Messages {
   #timeAgo = inject(TimeAgoPipe);
 
   activeTab = signal<'inbox' | 'outbox'>('inbox');
-
-  setActiveTab(tab: 'inbox' | 'outbox') {
-    this.activeTab.set(tab);
-  }
 
   inboxPagination = signal({ take: 10, skip: 0, count: 0 });
   outboxPagination = signal({ take: 10, skip: 0, count: 0 });

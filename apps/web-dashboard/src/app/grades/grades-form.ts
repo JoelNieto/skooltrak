@@ -20,10 +20,9 @@ import { form, FormField, required } from '@angular/forms/signals';
       <ui-field label="Fecha" [field]="form.date">
         <input uiInput type="date" [formField]="form.date" />
       </ui-field>
-      <div class="fieldset md:col-span-4">
-        <label for="comments">Comentarios</label>
+      <ui-field label="Comentarios" class="md:col-span-4">
         <lib-text-editor [formField]="form.comments" [bordered]="true" />
-      </div>
+      </ui-field>
 
       <ui-choice label="Publicada" [field]="form.published">
         <input uiCheckbox type="checkbox" [formField]="form.published" />

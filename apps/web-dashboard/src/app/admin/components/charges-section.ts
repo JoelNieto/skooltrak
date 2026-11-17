@@ -4,9 +4,11 @@ import {
   Button,
   Confirmation,
   EmptyState,
+  Icon,
   Pagination,
   Paginator,
   Toast,
+  UiField,
   UiInput,
   UiSelect,
   UiTable,
@@ -35,62 +37,61 @@ type StudentOption = { id: string; firstName: string; fatherName: string };
 
 @Component({
   selector: 'app-charges-section',
-  imports: [UiTable, Badge, UiInput, UiSelect, Button, DatePipe, DecimalPipe, EmptyState, FormsModule, Paginator],
+  imports: [
+    UiTable,
+    Badge,
+    UiInput,
+    UiSelect,
+    Button,
+    DatePipe,
+    DecimalPipe,
+    EmptyState,
+    FormsModule,
+    Paginator,
+    UiField,
+    Icon,
+  ],
   providers: [Pagination],
   template: `
-    <div class="bg-base-100 rounded-lg border border-base-300">
-      <div class="flex flex-wrap gap-2 items-end p-3 border-b border-base-300">
-        <label class="form-control">
-          <span class="label-text text-xs">Estado</span>
-          <select
-            uiSelect
-            class="select-sm"
-            [ngModel]="statusFilter()"
-            (ngModelChange)="onFilterChange('status', $event)"
-          >
+    <div class="bg-surface-1 rounded-lg border border-line">
+      <div class="flex flex-wrap gap-2 items-end p-3 border-b border-line">
+        <ui-field label="Estado">
+          <select uiSelect size="sm" [ngModel]="statusFilter()" (ngModelChange)="onFilterChange('status', $event)">
             <option value="">Todos</option>
             <option value="PENDING">PENDING</option>
             <option value="PARTIAL">PARTIAL</option>
             <option value="PAID">PAID</option>
             <option value="OVERDUE">OVERDUE</option>
           </select>
-        </label>
-        <label class="form-control">
-          <span class="label-text text-xs">Tipo</span>
-          <select uiSelect class="select-sm" [ngModel]="typeFilter()" (ngModelChange)="onFilterChange('type', $event)">
+        </ui-field>
+        <ui-field label="Tipo">
+          <select uiSelect size="sm" [ngModel]="typeFilter()" (ngModelChange)="onFilterChange('type', $event)">
             <option value="">Todos</option>
             <option value="CUSTOM">CUSTOM</option>
             <option value="TUITION">TUITION</option>
             <option value="ENROLLMENT">ENROLLMENT</option>
           </select>
-        </label>
+        </ui-field>
         @if (showStudentFilter()) {
-          <label class="form-control">
-            <span class="label-text text-xs">Estudiante</span>
-            <select
-              uiSelect
-              class="select-sm"
-              [ngModel]="studentFilter()"
-              (ngModelChange)="onFilterChange('student', $event)"
-            >
+          <ui-field label="Estudiante">
+            <select uiSelect size="sm" [ngModel]="studentFilter()" (ngModelChange)="onFilterChange('student', $event)">
               <option value="">Todos</option>
               @for (s of students.value(); track s.id) {
                 <option [value]="s.id">{{ s.firstName }} {{ s.fatherName }}</option>
               }
             </select>
-          </label>
+          </ui-field>
         }
-        <label class="form-control grow min-w-48">
-          <span class="label-text text-xs">Descripción</span>
+        <ui-field label="Descripción" class="grow min-w-48">
           <input
             uiInput
-            class="input-sm"
+            size="sm"
             type="search"
             placeholder="Buscar descripción..."
             [ngModel]="pagination.search()"
             (ngModelChange)="pagination.updateSearch($event)"
           />
-        </label>
+        </ui-field>
       </div>
 
       @if (chargesResource.isLoading()) {
@@ -124,7 +125,7 @@ type StudentOption = { id: string; firstName: string; fatherName: string };
                 <td>
                   @if (!isStudent()) {
                     <button uiButton variant="ghost" size="sm" (click)="removeCharge(c.id)">
-                      <span class="material-symbols-outlined text-error">delete</span>
+                      <ui-icon name="trash-2" class="text-error" />
                     </button>
                   }
                 </td>
@@ -146,7 +147,7 @@ type StudentOption = { id: string; firstName: string; fatherName: string };
           <lib-empty-state
             title="Sin cargos"
             description="No se encontraron cargos con los filtros aplicados."
-            icon="receipt_long"
+            icon="receipt"
           />
         </div>
       }

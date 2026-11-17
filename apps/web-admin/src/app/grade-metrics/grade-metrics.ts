@@ -1,9 +1,21 @@
-import { Breadcrumbs, Button, Confirmation, Error, Modal, Toast, UiTable } from '#/ui';
-import { Menu, MenuContent, MenuItem, MenuTrigger } from '@angular/aria/menu';
-import { OverlayModule } from '@angular/cdk/overlay';
+import {
+  Breadcrumbs,
+  Button,
+  Confirmation,
+  Icon,
+  Modal,
+  Toast,
+  UiRowAction,
+  UiRowActions,
+  UiTable,
+  UiTableEmpty,
+  UiTableError,
+  UiTableSkeleton,
+  listState,
+} from '#/ui';
 import { DatePipe, DecimalPipe } from '@angular/common';
 import { HttpClient, httpResource } from '@angular/common/http';
-import { Component, inject, viewChild } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { Prisma } from '@generated/prisma';
 import GradeMetricsForm from './grade-metrics-form';
 @Component({
@@ -14,110 +26,88 @@ import GradeMetricsForm from './grade-metrics-form';
     Button,
     DecimalPipe,
     DatePipe,
-    Menu,
-    MenuContent,
-    MenuItem,
-    MenuTrigger,
-    OverlayModule,
-    Error,
+    Icon,
+    UiRowActions,
+    UiTableEmpty,
+    UiTableError,
+    UiTableSkeleton,
   ],
   template: `
     <ui-breadcrumbs [items]="[{ label: 'Inicio', link: '/' }, { label: 'Metricas de calificaciones' }]" />
     <div class="flex justify-between items-center mb-4">
       <div>
-        <h1 class="text-2xl text-base-content font-medium">Metricas de calificaciones</h1>
-        <p class="text-sm text-gray-500 dark:text-gray-400">Listado de metricas de calificaciones</p>
+        <h1 class="text-2xl text-ink-strong font-medium">Metricas de calificaciones</h1>
+        <p class="text-sm text-ink-muted">Listado de metricas de calificaciones</p>
       </div>
 
       <button uiButton variant="primary" (click)="editGradeMetric()">
-        <span class="material-symbols-outlined">add_circle</span>
+        <ui-icon name="circle-plus" />
         Nueva métrica
       </button>
     </div>
-    @if (metrics.error()) {
-      <lib-error (retry)="metrics.reload()" [description]="$safeNavigationMigration(metrics.error()?.message)" />
-    } @else {
-      <div class="overflow-x-auto">
-        <table uiTable>
-          <thead>
-            <tr>
-              <th>Nombre</th>
-              <th>Minimo</th>
-              <th>Maximo</th>
-              <th>Minimo de aprobacion</th>
-              <th>Minimo de excelencia</th>
-              <th>Fecha de creacion</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (metric of metrics.value()!; track metric.id) {
-              <tr>
-                <td>{{ metric.name }}</td>
-                <td>{{ $any(metric).minimum | number: '1.2-2' }}</td>
-                <td>{{ $any(metric).maximum | number: '1.2-2' }}</td>
-                <td>{{ $any(metric).minimumApproval | number: '1.2-2' }}</td>
-                <td>{{ $any(metric).minimumExcellence | number: '1.2-2' }}</td>
-                <td>{{ metric.createdAt | date: 'short' }}</td>
-                <td>{{ metric.updatedAt | date: 'short' }}</td>
-                <td>
-                  <button
-                    class="cursor-pointer hover:bg-base-200 p-1 rounded-lg flex items-center justify-center"
-                    ngMenuTrigger
-                    #origin
-                    #trigger="ngMenuTrigger"
-                    [menu]="optionsMenu()"
-                  >
-                    <span class="material-symbols-outlined text-xl">more_horiz</span>
-                  </button>
-                  <ng-template
-                    [cdkConnectedOverlayOpen]="trigger.expanded()"
-                    [cdkConnectedOverlay]="{ origin, usePopover: 'inline' }"
-                    [cdkConnectedOverlayPositions]="[
-                      {
-                        originX: 'end',
-                        originY: 'bottom',
-                        overlayX: 'end',
-                        overlayY: 'top',
-                        offsetY: 4,
-                      },
-                    ]"
-                    cdkAttachPopoverAsChild
-                  >
-                    <div ngMenu class="bg-base-100 shadow-sm rounded-lg p-1 w-48" #optionsMenu="ngMenu">
-                      <ng-template ngMenuContent>
-                        <button
-                          ngMenuItem
-                          value="Edit"
-                          class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-base-200 w-full"
-                          (click)="editGradeMetric($any(metric))"
-                        >
-                          <span class="material-symbols-outlined text-lg">edit</span>
-                          <span>Editar</span>
-                        </button>
-                      </ng-template>
-                    </div>
-                  </ng-template>
-                </td>
-              </tr>
-            }
-          </tbody>
-        </table>
-      </div>
-    }
+    <div class="overflow-x-auto">
+      <table uiTable [attr.aria-busy]="metrics.isLoading()">
+        <thead>
+          <tr>
+            <th>Nombre</th>
+            <th>Minimo</th>
+            <th>Maximo</th>
+            <th>Minimo de aprobacion</th>
+            <th>Minimo de excelencia</th>
+            <th>Fecha de creacion</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        @switch (metricsList.phase()) {
+          @case ('skeleton') {
+            <tbody uiTableSkeleton [columns]="7"></tbody>
+          }
+          @case ('error') {
+            <tbody>
+              <tr uiTableError [columns]="7" (retry)="metrics.reload()"></tr>
+            </tbody>
+          }
+          @case ('ready') {
+            <tbody>
+              @for (metric of metricsList.rows()!; track metric.id) {
+                <tr>
+                  <td>{{ metric.name }}</td>
+                  <td>{{ $any(metric).minimum | number: '1.2-2' }}</td>
+                  <td>{{ $any(metric).maximum | number: '1.2-2' }}</td>
+                  <td>{{ $any(metric).minimumApproval | number: '1.2-2' }}</td>
+                  <td>{{ $any(metric).minimumExcellence | number: '1.2-2' }}</td>
+                  <td>{{ metric.createdAt | date: 'short' }}</td>
+                  <td>{{ metric.updatedAt | date: 'short' }}</td>
+                  <td>
+                    <ui-row-actions
+                      [actions]="rowActions"
+                      [label]="'Acciones para ' + metric.name"
+                      (action)="onRowAction($event, metric)"
+                    />
+                  </td>
+                </tr>
+              } @empty {
+                <tr uiTableEmpty [columns]="7" icon="chart-column" title="Aún no hay escalas de calificación"></tr>
+              }
+            </tbody>
+          }
+        }
+      </table>
+    </div>
   `,
 })
 export default class GradeMetrics {
   private http = inject(HttpClient);
   private toasts = inject(Toast);
   private confirmation = inject(Confirmation);
-  optionsMenu = viewChild<Menu<string>>('optionsMenu');
 
   private modal = inject(Modal);
 
   public metrics = httpResource<Prisma.GradeMetricGetPayload<{ include: undefined }>[]>(() => '/api/v1/grade-metrics', {
     defaultValue: [],
   });
+  /** metrics with smooth loading: previous rows stay while the next page / sort / search loads. */
+  protected readonly metricsList = listState(this.metrics);
 
   editGradeMetric(metric?: Prisma.GradeMetricGetPayload<{ include: undefined }>) {
     this.modal
@@ -130,5 +120,16 @@ export default class GradeMetrics {
           this.metrics.reload();
         }
       });
+  }
+
+  /** The actions in each row's menu (ui-row-actions). */
+  protected readonly rowActions: UiRowAction[] = [{ id: 'edit', label: 'Editar', icon: 'pencil' }];
+
+  protected onRowAction(action: string, metric: Prisma.GradeMetricGetPayload<{ include: undefined }>): void {
+    switch (action) {
+      case 'edit':
+        this.editGradeMetric(metric);
+        break;
+    }
   }
 }

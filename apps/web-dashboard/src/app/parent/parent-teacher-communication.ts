@@ -1,5 +1,6 @@
 import {
   Badge,
+  Icon,
   MessageBubble,
   PageHeader,
   Spinner,
@@ -45,6 +46,7 @@ const API = '/api/v1/communication';
     ThreadComposer,
     ThreadScrollPane,
     MessageBubble,
+    Icon,
   ],
   template: `
     <lib-page-header [breadcrumbs]="[{ label: 'Inicio', link: '/' }, { label: 'Mensajes' }]"
@@ -53,11 +55,11 @@ const API = '/api/v1/communication';
     />
 
     <div class="flex gap-4 h-[calc(100vh-12rem)]">
-      <aside class="w-80 shrink-0 border border-base-300 rounded-lg flex flex-col bg-base-100">
-        <div class="p-2 border-b border-base-300 shrink-0">
-          <input uiInput
+      <aside class="w-80 shrink-0 border border-line rounded-lg flex flex-col bg-surface-1">
+        <div class="p-2 border-b border-line shrink-0">
+          <input uiInput size="sm"
             type="search"
-            class="input-sm"
+           
             placeholder="Buscar conversación…"
             [(ngModel)]="filterText"
           />
@@ -77,16 +79,16 @@ const API = '/api/v1/communication';
         </div>
       </aside>
 
-      <section class="flex-1 border border-base-300 rounded-lg flex flex-col bg-base-100 min-w-0">
+      <section class="flex-1 border border-line rounded-lg flex flex-col bg-surface-1 min-w-0">
         @if (selectedThread(); as thread) {
           <header
-            class="p-3 border-b border-base-300 flex flex-col gap-1"
-            [class.bg-primary/5]="thread.broadcast"
+            class="p-3 border-b border-line flex flex-col gap-1"
+            [class.bg-action-subtle]="thread.broadcast"
             [class.border-primary/20]="thread.broadcast"
           >
             <div class="flex items-center gap-2 min-w-0">
               @if (thread.broadcast) {
-                <span class="material-symbols-outlined text-primary shrink-0">campaign</span>
+                <ui-icon name="megaphone" class="text-primary shrink-0" />
               }
               <h2 class="font-semibold truncate">{{ thread.title }}</h2>
               @if (thread.broadcast) {
@@ -127,7 +129,7 @@ const API = '/api/v1/communication';
           @if (thread.repliesAllowed !== false) {
             <lib-thread-composer placeholder="Escribe una respuesta…" (send)="send($event)" />
           } @else {
-            <p class="p-3 text-center text-sm text-base-content/60 border-t border-base-300">
+            <p class="p-3 text-center text-sm text-ink-muted border-t border-line">
               Este comunicado no admite respuestas.
             </p>
           }

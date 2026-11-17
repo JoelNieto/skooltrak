@@ -27,8 +27,17 @@ export default [
     },
   },
   {
+    files: ['**/*.ts'],
+    rules: {
+      // Component styles use flat fills (tools/eslint-rules/rules/flat-styles.ts).
+      '@nx/workspace-flat-styles': 'error',
+    },
+  },
+  {
     files: ['**/*.html'],
-    // Override or add rules here
-    rules: {},
+    rules: {
+      // Templates use libs/ui primitives and design tokens (tools/eslint-rules/rules/design-tokens.ts).
+      '@nx/workspace-design-tokens': 'error',
+    },
   },
 ];

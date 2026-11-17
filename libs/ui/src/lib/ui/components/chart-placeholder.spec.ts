@@ -33,9 +33,11 @@ describe('ui-chart-placeholder', () => {
   it('draws a decorative skeleton for its shape and no source when none is given', () => {
     const q = setup();
 
-    expect(q('.bars svg')).toBeNull();
+    // The skeleton's own drawing, not the shape icon (ui-icon is an SVG too).
+    const skeletonSvg = (sel: string) => [...q(sel).querySelectorAll('svg')].find((svg) => !svg.closest('ui-icon'));
+    expect(skeletonSvg('.bars')).toBeUndefined();
     expect(q('.bars [aria-hidden="true"] div')).not.toBeNull();
-    expect(q('.line svg')).not.toBeNull();
+    expect(skeletonSvg('.line')).toBeDefined();
     expect(q('.line').textContent).not.toContain('fuente');
   });
 });

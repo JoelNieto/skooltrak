@@ -15,6 +15,7 @@ import {
   viewChild,
 } from '@angular/core';
 import { UiControl } from './field';
+import { Icon } from './icon';
 
 export interface ComboboxOption {
   value: string;
@@ -52,7 +53,7 @@ const normalize = (text: string) =>
 @Component({
   selector: 'ui-combobox',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [Combobox, ComboboxPopup, ComboboxWidget, Listbox, Option, OverlayModule],
+  imports: [Combobox, ComboboxPopup, ComboboxWidget, Listbox, Option, OverlayModule, Icon],
   host: {
     class: 'ui-combobox',
     // The id belongs to the inner input (UiControl's `id` input); keep it off the host element.
@@ -65,7 +66,7 @@ const normalize = (text: string) =>
       [class.ui-combobox-invalid]="invalid()"
       [class.ui-combobox-disabled]="disabled()"
     >
-      <span class="material-symbols-outlined ui-combobox-icon" translate="no" aria-hidden="true">search</span>
+      <ui-icon name="search" class="ui-combobox-icon" />
       <input
         #combobox="ngCombobox"
         ngCombobox
@@ -90,7 +91,7 @@ const normalize = (text: string) =>
           (mousedown)="$event.preventDefault()"
           (click)="clear()"
         >
-          <span class="material-symbols-outlined" translate="no" aria-hidden="true">close</span>
+          <ui-icon name="x" />
         </button>
       }
     </div>
@@ -117,7 +118,7 @@ const normalize = (text: string) =>
               <div ngOption class="ui-combobox-option" [value]="option.value" [label]="option.label">
                 <span class="ui-combobox-option-label">{{ option.label }}</span>
                 @if (option.value === value()) {
-                  <span class="material-symbols-outlined ui-combobox-check" translate="no" aria-hidden="true">check</span>
+                  <ui-icon name="check" class="ui-combobox-check" />
                 }
               </div>
             }
@@ -128,7 +129,7 @@ const normalize = (text: string) =>
                 [value]="CREATE"
                 [label]="createLabel() + ' «' + query().trim() + '»'"
               >
-                <span class="material-symbols-outlined" translate="no" aria-hidden="true">add</span>
+                <ui-icon name="plus" />
                 <span>
                   {{ createLabel() }} <span class="ui-combobox-create-text">«{{ query().trim() }}»</span>
                 </span>
@@ -180,7 +181,7 @@ const normalize = (text: string) =>
         color: var(--ui-ink-strong);
         background: var(--ui-surface-2);
       }
-      .material-symbols-outlined {
+      ui-icon {
         font-size: 1.125rem;
       }
     }
@@ -194,7 +195,7 @@ const normalize = (text: string) =>
       border: 1px solid var(--ui-line);
       border-radius: var(--radius-field);
       background: var(--ui-surface-1);
-      box-shadow: 0 10px 25px -5px rgb(0 0 0 / 0.15);
+      box-shadow: var(--ui-shadow-float);
       font-size: 0.875rem;
       line-height: 1.25rem;
     }
@@ -221,7 +222,7 @@ const normalize = (text: string) =>
     }
     .ui-combobox-create {
       color: var(--color-primary);
-      .material-symbols-outlined {
+      ui-icon {
         font-size: 1.125rem;
       }
     }

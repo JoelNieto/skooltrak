@@ -1,4 +1,4 @@
-import { Badge, Card, CardBody, EmptyState, Spinner } from '#/ui';
+import { Badge, Card, CardBody, EmptyState, Icon, Spinner } from '#/ui';
 import { DatePipe } from '@angular/common';
 import { httpResource } from '@angular/common/http';
 import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
@@ -19,19 +19,19 @@ type BroadcastCardItem = {
 @Component({
   selector: 'app-broadcast-card',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [Badge, DatePipe],
+  imports: [Badge, DatePipe, Icon],
   template: `
     <div class="flex items-start justify-between gap-2">
-      <p class="font-medium text-base-content flex items-center gap-2 min-w-0">
-        <span class="material-symbols-outlined text-primary text-lg shrink-0">campaign</span>
+      <p class="font-medium text-ink-strong flex items-center gap-2 min-w-0">
+        <ui-icon name="megaphone" class="text-primary text-lg shrink-0" />
         <span class="truncate">{{ item().title }}</span>
       </p>
       <span uiBadge tone="action" size="sm" class="shrink-0">Comunicado</span>
     </div>
     @if (item().preview) {
-      <p class="text-sm text-base-content/70 line-clamp-2 mt-1">{{ item().preview }}</p>
+      <p class="text-sm text-ink-muted line-clamp-2 mt-1">{{ item().preview }}</p>
     }
-    <div class="flex flex-wrap items-center gap-2 text-xs text-base-content/60 mt-2">
+    <div class="flex flex-wrap items-center gap-2 text-xs text-ink-muted mt-2">
       <span>{{ item().senderName }}</span>
       @if (item().createdAt) {
         <span>· {{ item().createdAt | date: 'short' }}</span>
@@ -52,13 +52,13 @@ export class BroadcastCard {
 @Component({
   selector: 'app-recent-broadcasts',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [Spinner, Card, CardBody, RouterLink, EmptyState, BroadcastCard],
+  imports: [Spinner, Card, CardBody, RouterLink, EmptyState, BroadcastCard, Icon],
   template: `
     <div uiCard class="border-primary/25">
       <div uiCardBody>
         <div class="flex items-center justify-between gap-3">
-          <h2 class="text-lg font-semibold text-base-content flex items-center gap-2">
-            <span class="material-symbols-outlined text-primary">campaign</span>
+          <h2 class="text-lg font-semibold text-ink-strong flex items-center gap-2">
+            <ui-icon name="megaphone" class="text-primary" />
             Comunicados
           </h2>
           @if (inboxLink(); as link) {
@@ -73,21 +73,21 @@ export class BroadcastCard {
           <lib-empty-state
             title="Sin comunicados recientes"
             description="Los avisos institucionales aparecerán aquí."
-            icon="campaign"
+            icon="megaphone"
           />
         } @else {
           <div class="space-y-3 mt-1">
             @for (item of items(); track item.id) {
               @if (inboxLink(); as link) {
                 <a
-                  class="block rounded-lg border border-primary/20 bg-primary/5 p-3 hover:border-primary transition-colors"
+                  class="block rounded-lg border border-primary/20 bg-action-subtle p-3 hover:border-primary transition-colors"
                   [routerLink]="link"
                   [queryParams]="{ thread: item.id }"
                 >
                   <app-broadcast-card [item]="item" />
                 </a>
               } @else {
-                <div class="rounded-lg border border-primary/20 bg-primary/5 p-3">
+                <div class="rounded-lg border border-primary/20 bg-action-subtle p-3">
                   <app-broadcast-card [item]="item" />
                 </div>
               }

@@ -8,6 +8,7 @@ import {
   Confirmation,
   EditorViewer,
   Error as ErrorComponent,
+  Icon,
   Loader,
   Toast,
 } from '#/ui';
@@ -42,7 +43,19 @@ type QuizDetail = {
 
 @Component({
   selector: 'app-quiz',
-  imports: [Breadcrumbs, Badge, Card, CardBody, CardTitle, Button, RouterLink, Loader, EditorViewer, ErrorComponent],
+  imports: [
+    Breadcrumbs,
+    Badge,
+    Card,
+    CardBody,
+    CardTitle,
+    Button,
+    RouterLink,
+    Loader,
+    EditorViewer,
+    ErrorComponent,
+    Icon,
+  ],
   template: `
     @defer {
       @if (quizResource.hasValue()) {
@@ -59,8 +72,8 @@ type QuizDetail = {
                   {{ quiz.course.name }}
                 </a>
                 @if (quiz.teacher) {
-                  <p class="mt-2 flex items-center gap-2 text-sm text-base-content/70">
-                    <span class="material-symbols-outlined text-lg">person</span>
+                  <p class="mt-2 flex items-center gap-2 text-sm text-ink-muted">
+                    <ui-icon name="user" class="text-lg" />
                     {{ quiz.teacher.firstName }} {{ quiz.teacher.fatherName }}
                   </p>
                 }
@@ -68,11 +81,11 @@ type QuizDetail = {
               @if (auth.hasPermission('MANAGE_QUIZZES')) {
                 <div class="flex gap-2">
                   <a uiButton variant="primary" size="sm" [routerLink]="['/quizzes', quiz.id, 'edit']">
-                    <span class="material-symbols-outlined">edit</span>
+                    <ui-icon name="pencil" />
                     Editar
                   </a>
                   <button uiButton variant="danger" size="sm" (click)="deleteQuiz(quiz)">
-                    <span class="material-symbols-outlined">delete</span>
+                    <ui-icon name="trash-2" />
                     Eliminar
                   </button>
                 </div>
@@ -83,18 +96,18 @@ type QuizDetail = {
         <div uiCard class="mt-4">
           <div uiCardBody>
             <h3 uiCardTitle>Descripción</h3>
-            <lib-editor-viewer [innerHTML]="quiz.details" />
+            <lib-editor-viewer class="type-body" [innerHTML]="quiz.details" />
           </div>
         </div>
         <div uiCard class="mt-4">
           <div uiCardBody>
             <h3 uiCardTitle class="flex items-center gap-2">
-              <span class="material-symbols-outlined">quiz</span>
+              <ui-icon name="clipboard-list" />
               Preguntas ({{ quiz.questions.length }})
             </h3>
             <div class="flex flex-col gap-4">
               @for (q of quiz.questions; track q.id; let i = $index) {
-                <div uiCard class="bg-base-200">
+                <div uiCard class="bg-surface-0">
                   <div uiCardBody class="py-4">
                     <div class="flex justify-between items-start">
                       <h4 class="font-semibold">Pregunta {{ i + 1 }}</h4>
@@ -104,8 +117,8 @@ type QuizDetail = {
                     </div>
                     <div class="prose prose-sm max-w-none" [innerHTML]="q.question"></div>
                     @if (q.timeLimit && q.timeLimit > 0) {
-                      <p class="text-sm text-base-content/60">
-                        <span class="material-symbols-outlined text-base align-middle">timer</span>
+                      <p class="text-sm text-ink-muted">
+                        <ui-icon name="timer" class="text-base align-middle" />
                         {{ q.timeLimit }} segundos
                       </p>
                     }
@@ -116,7 +129,7 @@ type QuizDetail = {
                             {{ opt.option }}
                             @if (opt.isCorrect) {
                               <span uiBadge tone="success" size="sm" class="gap-1">
-                                <span class="material-symbols-outlined text-sm!">check_circle</span>
+                                <ui-icon name="circle-check" class="text-sm!" />
                                 Correcta
                               </span>
                             }

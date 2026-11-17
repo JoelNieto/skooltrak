@@ -4,18 +4,19 @@ import {
   BadgeTone,
   Button,
   Confirmation,
+  Icon,
   Loader,
   Modal,
   Pagination,
   Paginator,
+  UiRowAction,
+  UiRowActions,
   UiSelect,
   UiTable,
 } from '#/ui';
-import { Menu, MenuContent, MenuItem, MenuTrigger } from '@angular/aria/menu';
-import { OverlayModule } from '@angular/cdk/overlay';
 import { DatePipe } from '@angular/common';
 import { HttpClient, httpResource } from '@angular/common/http';
-import { Component, inject, input, signal, viewChild } from '@angular/core';
+import { Component, inject, input, signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { Prisma } from '@generated/prisma';
@@ -61,22 +62,7 @@ const STATUS_TONES: Record<string, BadgeTone> = {
 
 @Component({
   selector: 'app-course-attendance',
-  imports: [
-    Alert,
-    UiTable,
-    Badge,
-    UiSelect,
-    Button,
-    Loader,
-    FormsModule,
-    DatePipe,
-    Paginator,
-    Menu,
-    MenuContent,
-    MenuItem,
-    MenuTrigger,
-    OverlayModule,
-  ],
+  imports: [Alert, UiTable, Badge, UiSelect, Button, Loader, FormsModule, DatePipe, Paginator, Icon, UiRowActions],
   providers: [Pagination],
   template: `
     <div class="flex flex-col md:flex-row justify-between gap-4 mb-4">
@@ -89,7 +75,7 @@ const STATUS_TONES: Record<string, BadgeTone> = {
         </select>
       </div>
       <button uiButton variant="primary" (click)="openForm()">
-        <span class="material-symbols-outlined">add</span>
+        <ui-icon name="plus" />
         Nueva asistencia
       </button>
     </div>
@@ -100,7 +86,7 @@ const STATUS_TONES: Record<string, BadgeTone> = {
 
     @if (sessionsResource.error()) {
       <div uiAlert tone="danger">
-        <span class="material-symbols-outlined">error</span>
+        <ui-icon name="circle-alert" />
         Error al cargar las sesiones de asistencia
       </div>
     }
@@ -135,19 +121,19 @@ const STATUS_TONES: Record<string, BadgeTone> = {
                 </td>
                 <td>
                   <span uiBadge tone="success" class="gap-1">
-                    <span class="material-symbols-outlined text-sm!">check</span>
+                    <ui-icon name="check" class="text-sm!" />
                     {{ stats.present }}
                   </span>
                 </td>
                 <td>
                   <span uiBadge tone="danger" class="gap-1">
-                    <span class="material-symbols-outlined text-sm!">close</span>
+                    <ui-icon name="x" class="text-sm!" />
                     {{ stats.absent }}
                   </span>
                 </td>
                 <td>
                   <span uiBadge tone="warning" class="gap-1">
-                    <span class="material-symbols-outlined text-sm!">schedule</span>
+                    <ui-icon name="clock" class="text-sm!" />
                     {{ stats.late }}
                   </span>
                 </td>
@@ -157,74 +143,16 @@ const STATUS_TONES: Record<string, BadgeTone> = {
                   </span>
                 </td>
                 <td class="text-right">
-                  <button
-                    uiButton
-                    variant="ghost"
-                    size="sm"
-                    ngMenuTrigger
-                    cdkOverlayOrigin
-                    #origin="cdkOverlayOrigin"
-                    #trigger="ngMenuTrigger"
-                    [menu]="actionsMenu()"
-                  >
-                    <span class="material-symbols-outlined text-xl!">more_horiz</span>
-                  </button>
-                  <ng-template
-                    [cdkConnectedOverlayOpen]="trigger.expanded()"
-                    [cdkConnectedOverlay]="{ origin, usePopover: 'inline' }"
-                    [cdkConnectedOverlayPositions]="[
-                      {
-                        originX: 'end',
-                        originY: 'bottom',
-                        overlayX: 'end',
-                        overlayY: 'top',
-                        offsetY: 4,
-                      },
-                    ]"
-                    cdkAttachPopoverAsChild
-                  >
-                    <div ngMenu class="bg-base-100 shadow-sm rounded-lg p-1 w-48" #actionsMenu="ngMenu">
-                      <ng-template ngMenuContent>
-                        <button
-                          ngMenuItem
-                          value="View"
-                          class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-base-200 w-full"
-                          (click)="viewSession(session)"
-                          title="Ver detalles"
-                        >
-                          <span class="material-symbols-outlined">visibility</span>
-                          <span>Ver detalles</span>
-                        </button>
-                        <button
-                          ngMenuItem
-                          value="Edit"
-                          class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-base-200 w-full"
-                          (click)="editSession(session)"
-                          title="Editar"
-                        >
-                          <span class="material-symbols-outlined">edit</span>
-                          <span>Editar</span>
-                        </button>
-                        <button
-                          ngMenuItem
-                          value="Delete"
-                          class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-base-200 w-full"
-                          (click)="deleteSession(session)"
-                          title="Eliminar"
-                        >
-                          <span class="material-symbols-outlined">delete</span>
-                          <span>Eliminar</span>
-                        </button>
-                      </ng-template>
-                    </div>
-                  </ng-template>
+                  <ui-row-actions
+                    [actions]="rowActions"
+                    [label]="'Acciones para ' + session.classGroup.name"
+                    (action)="onRowAction($event, session)"
+                  />
                 </td>
               </tr>
             } @empty {
               <tr>
-                <td colspan="7" class="text-center py-8 text-base-content/60">
-                  No hay sesiones de asistencia registradas
-                </td>
+                <td colspan="7" class="text-center py-8 text-ink-muted">No hay sesiones de asistencia registradas</td>
               </tr>
             }
           </tbody>
@@ -271,7 +199,7 @@ const STATUS_TONES: Record<string, BadgeTone> = {
                         {{ getStatusLabel(record.status) }}
                       </span>
                     </td>
-                    <td class="text-sm text-base-content/70">
+                    <td class="text-sm text-ink-muted">
                       {{ record.comment || '-' }}
                     </td>
                   </tr>
@@ -297,7 +225,6 @@ export default class CourseAttendance {
   #modal = inject(Modal);
   #confirmation = inject(Confirmation);
   public pagination = inject(Pagination);
-  public actionsMenu = viewChild<Menu<string>>('actionsMenu');
   public selectedGroupId = signal<string>('');
   public selectedSession = signal<AttendanceSessionType | null>(null);
 
@@ -396,5 +323,26 @@ export default class CourseAttendance {
           });
         }
       });
+  }
+
+  /** The actions in each row's menu (ui-row-actions). */
+  protected readonly rowActions: UiRowAction[] = [
+    { id: 'view', label: 'Ver detalles', icon: 'eye' },
+    { id: 'edit', label: 'Editar', icon: 'pencil' },
+    { id: 'delete', label: 'Eliminar', icon: 'trash-2', tone: 'danger' },
+  ];
+
+  protected onRowAction(action: string, session: AttendanceSessionType): void {
+    switch (action) {
+      case 'view':
+        this.viewSession(session);
+        break;
+      case 'edit':
+        this.editSession(session);
+        break;
+      case 'delete':
+        this.deleteSession(session);
+        break;
+    }
   }
 }

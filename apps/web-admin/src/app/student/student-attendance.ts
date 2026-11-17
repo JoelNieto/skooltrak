@@ -18,7 +18,7 @@ import { Component } from '@angular/core';
 
     <div uiCard class="mt-6">
       <div uiCardBody>
-        <h2 class="text-lg font-semibold text-base-content">Registro reciente</h2>
+        <h2 class="text-lg font-semibold text-ink-strong">Registro reciente</h2>
         <div class="overflow-x-auto">
           <table uiTable>
             <thead>
@@ -39,7 +39,7 @@ import { Component } from '@angular/core';
                       {{ entry.status }}
                     </span>
                   </td>
-                  <td class="text-sm text-base-content/70">
+                  <td class="text-sm text-ink-muted">
                     {{ entry.note }}
                   </td>
                 </tr>
@@ -51,15 +51,15 @@ import { Component } from '@angular/core';
     </div>
 
     <div class="mt-6">
-      <h2 class="text-lg font-semibold text-base-content mb-3">Justificaciones pendientes</h2>
+      <h2 class="text-lg font-semibold text-ink-strong mb-3">Justificaciones pendientes</h2>
       @if (pendingJustifications.length === 0) {
         <lib-empty-state
           title="Sin justificaciones pendientes"
           description="Puedes subir justificativos desde aquí si es necesario."
-          icon="check_circle"
+          icon="circle-check"
         />
       } @else {
-        <ul class="list-disc pl-5 text-sm text-base-content/70">
+        <ul class="list-disc pl-5 text-sm text-ink-muted">
           @for (item of pendingJustifications; track item.id) {
             <li>{{ item.label }}</li>
           }

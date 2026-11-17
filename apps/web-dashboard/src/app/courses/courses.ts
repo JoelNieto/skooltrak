@@ -6,9 +6,11 @@ import {
   CardTitle,
   debounceSignal,
   EmptyState,
+  Icon,
   Loader,
   Pagination,
   PaginatorV2,
+  UiInputGroup,
 } from '#/ui';
 import { httpResource } from '@angular/common/http';
 import { Component, computed, inject, Signal, signal } from '@angular/core';
@@ -34,14 +36,27 @@ type CourseRow = {
 
 @Component({
   selector: 'app-courses',
-  imports: [Breadcrumbs, Badge, Card, CardBody, CardTitle, RouterLink, Loader, PaginatorV2, FormsModule, EmptyState],
+  imports: [
+    Breadcrumbs,
+    Badge,
+    Card,
+    CardBody,
+    CardTitle,
+    RouterLink,
+    Loader,
+    PaginatorV2,
+    FormsModule,
+    EmptyState,
+    UiInputGroup,
+    Icon,
+  ],
   providers: [Pagination],
 
   template: `
     <ui-breadcrumbs [items]="[{ label: 'Inicio', link: '/' }, { label: 'Cursos' }]" />
     <h1 class="text-2xl font-semibold mb-2">Cursos</h1>
-    <label class="input input-primary input-lg">
-      <span class="material-symbols-outlined">search</span>
+    <label uiInputGroup size="lg">
+      <ui-icon name="search" />
       <input class="pl-0" type="search" placeholder="Buscar..." [(ngModel)]="searchText" />
     </label>
     @if (coursesListResource.isLoading()) {
@@ -55,12 +70,7 @@ type CourseRow = {
         @for (course of courses(); track course.id) {
           <a uiCard [routerLink]="['/courses', course.id]" class="group overflow-hidden">
             <figure class="relative overflow-hidden">
-              <img
-                src="course-default.jpg"
-                alt="Course"
-                class="h-28 w-full object-cover transition-transform duration-300 group-hover:scale-110"
-              />
-              <div class="absolute inset-0 bg-linear-to-t from-black/60 to-transparent"></div>
+              <img src="course-default.jpg" alt="Course" class="h-28 w-full object-cover" />
               <span uiBadge tone="action" size="sm" class="absolute bottom-2 left-2">
                 {{ course.studyPlan?.name }}
               </span>
@@ -68,7 +78,7 @@ type CourseRow = {
             <div uiCardBody class="p-3">
               <h2 uiCardTitle class="text-sm line-clamp-2">{{ course.subject?.name }}</h2>
               @if (course.teacher?.name) {
-                <div class="text-xs text-base-content/60 flex items-center gap-1">
+                <div class="text-xs text-ink-muted flex items-center gap-1">
                   @if (course.teacher?.avatarUrl) {
                     <img
                       [src]="course.teacher.avatarUrl"
@@ -85,9 +95,12 @@ type CourseRow = {
                   {{ course.teacher?.name }}
                 </div>
               } @else {
-                <div class="text-xs text-base-content/60 flex items-center gap-1">
+                <div class="text-xs text-ink-muted flex items-center gap-1">
                   <div class="avatar avatar-placeholder">
-                    <div class="text-white w-7 rounded-full" [style.background]="course.teacher?.color ?? '#6B7280'">
+                    <div
+                      class="text-white w-7 rounded-full"
+                      [style.background]="course.teacher?.color ?? 'var(--ui-ink-subtle)'"
+                    >
                       <span class="text-xs">?</span>
                     </div>
                   </div>
@@ -153,7 +166,7 @@ export default class Courses {
       const name = teacher.name ?? `${firstName} ${fatherName}`.trim();
       const initials = `${(firstName || '?').charAt(0)}${(fatherName || '?').charAt(0)}`.toUpperCase();
       // Use the teacher's color if available, otherwise a default
-      const color = teacher.color ?? '#4F46E5'; // Indigo-600
+      const color = teacher.color ?? 'var(--ui-ink-subtle)';
 
       return {
         ...c,

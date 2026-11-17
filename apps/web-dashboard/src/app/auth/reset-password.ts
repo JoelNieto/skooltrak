@@ -1,38 +1,37 @@
-import { Alert, Button, Loader, Toast, UiField, UiInput } from '#/ui';
+import { Alert, BrandLogo, Button, Icon, Loader, Toast, UiField, UiInput } from '#/ui';
 import { HttpClient } from '@angular/common/http';
 import { Component, inject, signal } from '@angular/core';
 import { form, FormField, minLength, required, validate } from '@angular/forms/signals';
 import { Router, RouterLink } from '@angular/router';
 import Auth from './auth';
-import { BrandLogo } from '../shared/brand-logo';
 
 @Component({
   selector: 'app-reset-password',
-  imports: [Alert, UiField, UiInput, Button, BrandLogo, FormField, RouterLink, Loader],
+  imports: [Alert, UiField, UiInput, Button, BrandLogo, FormField, RouterLink, Loader, Icon],
   template: `
-    <div class="gradient-bg min-h-screen flex items-center justify-center p-4">
+    <div class="bg-surface-0 min-h-screen flex items-center justify-center p-4">
       @defer {
         <div class="max-w-md w-full flex flex-col gap-8 items-center">
-          <div><app-brand-logo alt="" class="h-12" /></div>
+          <div><ui-brand-logo alt="" class="h-12" /></div>
 
           <div class="w-full rounded-2xl shadow-xl overflow-hidden flex flex-col">
             <!-- Header Section -->
-            <div class="bg-primary p-6 text-white text-center">
+            <div class="bg-primary p-6 text-primary-content text-center">
               <h1 class="text-2xl font-bold">Nueva contraseña</h1>
               <p class="text-primary-content mt-2">Ingresa tu nueva contraseña</p>
             </div>
 
             <!-- Form Section -->
-            <div class="p-8 bg-base-100">
+            <div class="p-8 bg-surface-1">
               @if (resendSuccess()) {
                 <div uiAlert tone="success" class="mb-4">
-                  <span class="material-symbols-outlined">check_circle</span>
+                  <ui-icon name="circle-check" />
                   <span>Invitación reenviada. Revisa tu bandeja de entrada.</span>
                 </div>
                 <a uiButton variant="primary" routerLink="/login" class="w-full"> Volver al inicio de sesión </a>
               } @else if (error()) {
                 <div uiAlert tone="danger" class="mb-4">
-                  <span class="material-symbols-outlined">error</span>
+                  <ui-icon name="circle-alert" />
                   <span>El enlace es inválido o ha expirado. Solicita uno nuevo.</span>
                 </div>
                 <div class="flex flex-col gap-3 text-center">
@@ -48,7 +47,7 @@ import { BrandLogo } from '../shared/brand-logo';
                       @if (resending()) {
                         Enviando...
                       } @else {
-                        <span class="material-symbols-outlined">mail</span>
+                        <ui-icon name="mail" />
                         Reenviar invitación
                       }
                     </button>

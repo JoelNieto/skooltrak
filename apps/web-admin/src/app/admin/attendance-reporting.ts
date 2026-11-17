@@ -21,7 +21,7 @@ import { Component } from '@angular/core';
 
     <div uiCard class="mt-6">
       <div uiCardBody>
-        <h2 class="text-lg font-semibold text-base-content">Resumen por curso</h2>
+        <h2 class="text-lg font-semibold text-ink-strong">Resumen por curso</h2>
         <div class="overflow-x-auto">
           <table uiTable>
             <thead>
@@ -38,7 +38,7 @@ import { Component } from '@angular/core';
                   <td>{{ row.course }}</td>
                   <td>{{ row.attendance }}</td>
                   <td>{{ row.absences }}</td>
-                  <td class="text-sm text-base-content/70">{{ row.note }}</td>
+                  <td class="text-sm text-ink-muted">{{ row.note }}</td>
                 </tr>
               }
             </tbody>

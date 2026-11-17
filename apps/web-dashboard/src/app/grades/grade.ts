@@ -8,6 +8,7 @@ import {
   Confirmation,
   EditorViewer,
   Error,
+  Icon,
   Loader,
   Modal,
   Toast,
@@ -61,6 +62,7 @@ type GradeDetail = {
     Error,
     DecimalPipe,
     NgClass,
+    Icon,
   ],
   template: `
     @defer {
@@ -76,17 +78,17 @@ type GradeDetail = {
               <div class="flex items-center gap-2">
                 @if (grade.published) {
                   <span uiBadge tone="success">
-                    <span class="material-symbols-outlined">check_circle</span>
+                    <ui-icon name="circle-check" />
                     Publicada</span
                   >
                 } @else {
                   <button uiButton variant="primary" size="sm" (click)="publishGrade()">
-                    <span class="material-symbols-outlined">publish</span>
+                    <ui-icon name="send" />
                     Publicar
                   </button>
                 }
                 <button uiButton variant="danger" size="sm" (click)="deleteGrade()">
-                  <span class="material-symbols-outlined">delete</span> Eliminar
+                  <ui-icon name="trash-2" /> Eliminar
                 </button>
               </div>
             </div>
@@ -97,7 +99,7 @@ type GradeDetail = {
               {{ grade.bucket?.name }}
             </div>
 
-            <lib-editor-viewer [innerHTML]="grade.comments" />
+            <lib-editor-viewer class="type-body" [innerHTML]="grade.comments" />
           </div>
         </div>
         <div uiCard class="mt-4">
@@ -115,8 +117,8 @@ type GradeDetail = {
                 </thead>
                 <tbody>
                   @for (group of studentGradesByClassGroup(); track group.classGroup?.id ?? '__none__') {
-                    <tr class="bg-base-200/50">
-                      <td colspan="4" class="font-semibold text-base-content/80 py-2">
+                    <tr class="bg-surface-0/50">
+                      <td colspan="4" class="font-semibold text-ink py-2">
                         @if (group.classGroup) {
                           {{ group.classGroup.name }}
                         } @else {
@@ -133,7 +135,7 @@ type GradeDetail = {
                           </span>
                         </td>
                         <td
-                          class="font-semibold text-center px-0! cursor-pointer hover:bg-base-200"
+                          class="font-semibold text-center px-0! cursor-pointer hover:bg-surface-2"
                           (click)="editGradeItem(studentGrade)"
                           [ngClass]="{
                             'text-success! bg-success/10':
@@ -157,7 +159,7 @@ type GradeDetail = {
                           @if (studentGrade.score) {
                             {{ studentGrade.score | number: '1.1-1' }}
                           } @else {
-                            <span class="material-symbols-outlined text-2xl">more_horiz</span>
+                            <ui-icon name="ellipsis" class="text-2xl" />
                           }
                         </td>
                         <td class="overflow-hidden text-ellipsis whitespace-nowrap max-w-50 pl-2!">

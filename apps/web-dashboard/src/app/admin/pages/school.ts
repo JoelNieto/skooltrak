@@ -1,5 +1,17 @@
-import { Badge, Breadcrumbs, Button, Card, CardBody, Loader } from '#/ui';
-import { Tab, TabContent, TabList, TabPanel, Tabs } from '@angular/aria/tabs';
+import {
+  Badge,
+  Breadcrumbs,
+  Button,
+  Card,
+  CardBody,
+  Icon,
+  Loader,
+  UiTab,
+  UiTabContent,
+  UiTabList,
+  UiTabPanel,
+  UiTabs,
+} from '#/ui';
 import { DatePipe } from '@angular/common';
 import { httpResource } from '@angular/common/http';
 import { Component, input } from '@angular/core';
@@ -35,11 +47,12 @@ type SchoolDetail = {
     RouterLink,
     Loader,
     DatePipe,
-    TabList,
-    Tab,
-    Tabs,
-    TabPanel,
-    TabContent,
+    UiTabList,
+    UiTab,
+    UiTabs,
+    UiTabPanel,
+    UiTabContent,
+    Icon,
   ],
   template: `
     @if (schoolResource.isLoading()) {
@@ -62,12 +75,12 @@ type SchoolDetail = {
             <div class="flex items-center justify-between">
               <div class="flex gap-4 items-center">
                 <div
-                  class="min-w-16 max-w-24 min-h-12 max-h-20 rounded-lg border border-base-300 flex items-center justify-center overflow-hidden bg-base-200"
+                  class="min-w-16 max-w-24 min-h-12 max-h-20 rounded-lg border border-line flex items-center justify-center overflow-hidden bg-surface-0"
                 >
                   @if (school.logoUrl) {
                     <img [src]="school.logoUrl" [alt]="school.name" class="w-full h-auto object-contain" />
                   } @else {
-                    <span class="material-symbols-outlined text-3xl text-base-content/30">school</span>
+                    <ui-icon name="school" class="text-3xl text-ink-subtle" />
                   }
                 </div>
                 <div class="flex flex-col">
@@ -76,14 +89,14 @@ type SchoolDetail = {
                     <span uiBadge tone="action" size="sm">{{ school.shortName }}</span>
                   </div>
                   @if (school.city || school.country) {
-                    <span class="text-sm text-base-content/60">
+                    <span class="text-sm text-ink-muted">
                       {{ getLocationString(school) }}
                     </span>
                   }
                 </div>
               </div>
               <a uiButton variant="primary" size="sm" [routerLink]="['/schools', school.id, 'edit']">
-                <span class="material-symbols-outlined text-lg">edit</span>
+                <ui-icon name="pencil" class="text-lg" />
                 Editar
               </a>
             </div>
@@ -91,52 +104,52 @@ type SchoolDetail = {
         </div>
 
         <!-- Tabs -->
-        <div ngTabs>
+        <div uiTabs>
           <div class="flex justify-between items-center mt-4 px-1">
-            <div ngTabList selectionMode="follow" selectedTab="info" class="tabs tabs-box">
-              <div ngTab value="info" class="tab">Información General</div>
-              <div ngTab value="contact" class="tab">Contacto</div>
-              <div ngTab value="location" class="tab">Ubicación</div>
+            <div uiTabList selectedTab="info" aria-label="Secciones del colegio">
+              <button uiTab value="info">Información General</button>
+              <button uiTab value="contact">Contacto</button>
+              <button uiTab value="location">Ubicación</button>
             </div>
           </div>
           <div class="p-1">
             <!-- Info Tab -->
-            <div ngTabPanel value="info">
-              <ng-template ngTabContent>
-                <div class="bg-base-100 border-base-300 p-4 rounded-lg">
+            <div uiTabPanel value="info">
+              <ng-template uiTabContent>
+                <div class="bg-surface-1 border-line p-4 rounded-lg">
                   <div class="px-4 sm:px-0">
                     <h3 class="text-base/7 font-semibold">Información General</h3>
-                    <p class="mt-1 max-w-2xl text-sm/6 text-base-content/60">Datos principales del colegio</p>
+                    <p class="mt-1 max-w-2xl text-sm/6 text-ink-muted">Datos principales del colegio</p>
                   </div>
-                  <div class="mt-6 border-t border-base-300">
-                    <dl class="divide-y divide-base-300">
+                  <div class="mt-6 border-t border-line">
+                    <dl class="divide-y divide-line">
                       <div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
-                        <dt class="text-sm/6 font-medium text-base-content">Nombre completo</dt>
-                        <dd class="mt-1 text-sm/6 text-base-content/90 sm:col-span-2 sm:mt-0">
+                        <dt class="text-sm/6 font-medium text-ink-strong">Nombre completo</dt>
+                        <dd class="mt-1 text-sm/6 text-ink sm:col-span-2 sm:mt-0">
                           {{ school.name }}
                         </dd>
                       </div>
                       <div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
-                        <dt class="text-sm/6 font-medium text-base-content">Abreviatura</dt>
-                        <dd class="mt-1 text-sm/6 text-base-content/90 sm:col-span-2 sm:mt-0">
+                        <dt class="text-sm/6 font-medium text-ink-strong">Abreviatura</dt>
+                        <dd class="mt-1 text-sm/6 text-ink sm:col-span-2 sm:mt-0">
                           {{ school.shortName }}
                         </dd>
                       </div>
                       <div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
-                        <dt class="text-sm/6 font-medium text-base-content">Año actual</dt>
-                        <dd class="mt-1 text-sm/6 text-base-content/90 sm:col-span-2 sm:mt-0">
+                        <dt class="text-sm/6 font-medium text-ink-strong">Año actual</dt>
+                        <dd class="mt-1 text-sm/6 text-ink sm:col-span-2 sm:mt-0">
                           {{ school.currentYear || '-' }}
                         </dd>
                       </div>
                       <div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
-                        <dt class="text-sm/6 font-medium text-base-content">Fecha de creación</dt>
-                        <dd class="mt-1 text-sm/6 text-base-content/90 sm:col-span-2 sm:mt-0">
+                        <dt class="text-sm/6 font-medium text-ink-strong">Fecha de creación</dt>
+                        <dd class="mt-1 text-sm/6 text-ink sm:col-span-2 sm:mt-0">
                           {{ school.createdAt | date: 'dd/MM/yyyy' }}
                         </dd>
                       </div>
                       <div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
-                        <dt class="text-sm/6 font-medium text-base-content">Última actualización</dt>
-                        <dd class="mt-1 text-sm/6 text-base-content/90 sm:col-span-2 sm:mt-0">
+                        <dt class="text-sm/6 font-medium text-ink-strong">Última actualización</dt>
+                        <dd class="mt-1 text-sm/6 text-ink sm:col-span-2 sm:mt-0">
                           {{ school.updatedAt | date: 'dd/MM/yyyy HH:mm' }}
                         </dd>
                       </div>
@@ -147,40 +160,38 @@ type SchoolDetail = {
             </div>
 
             <!-- Contact Tab -->
-            <div ngTabPanel value="contact">
-              <ng-template ngTabContent>
-                <div class="bg-base-100 border-base-300 p-4 rounded-lg">
+            <div uiTabPanel value="contact">
+              <ng-template uiTabContent>
+                <div class="bg-surface-1 border-line p-4 rounded-lg">
                   <div class="px-4 sm:px-0">
                     <h3 class="text-base/7 font-semibold">Información de Contacto</h3>
-                    <p class="mt-1 max-w-2xl text-sm/6 text-base-content/60">
-                      Datos de contacto y comunicación del colegio
-                    </p>
+                    <p class="mt-1 max-w-2xl text-sm/6 text-ink-muted">Datos de contacto y comunicación del colegio</p>
                   </div>
-                  <div class="mt-6 border-t border-base-300">
-                    <dl class="divide-y divide-base-300">
+                  <div class="mt-6 border-t border-line">
+                    <dl class="divide-y divide-line">
                       <div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
-                        <dt class="text-sm/6 font-medium text-base-content">Correo electrónico</dt>
-                        <dd class="mt-1 text-sm/6 text-base-content/90 sm:col-span-2 sm:mt-0">
+                        <dt class="text-sm/6 font-medium text-ink-strong">Correo electrónico</dt>
+                        <dd class="mt-1 text-sm/6 text-ink sm:col-span-2 sm:mt-0">
                           @if (school.email) {
                             <a [href]="'mailto:' + school.email" class="link link-primary">{{ school.email }}</a>
                           } @else {
-                            <span class="text-base-content/50">-</span>
+                            <span class="text-ink-subtle">-</span>
                           }
                         </dd>
                       </div>
                       <div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
-                        <dt class="text-sm/6 font-medium text-base-content">Teléfono</dt>
-                        <dd class="mt-1 text-sm/6 text-base-content/90 sm:col-span-2 sm:mt-0">
+                        <dt class="text-sm/6 font-medium text-ink-strong">Teléfono</dt>
+                        <dd class="mt-1 text-sm/6 text-ink sm:col-span-2 sm:mt-0">
                           @if (school.phone) {
                             <a [href]="'tel:' + school.phone" class="link link-primary">{{ school.phone }}</a>
                           } @else {
-                            <span class="text-base-content/50">-</span>
+                            <span class="text-ink-subtle">-</span>
                           }
                         </dd>
                       </div>
                       <div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
-                        <dt class="text-sm/6 font-medium text-base-content">Sitio web</dt>
-                        <dd class="mt-1 text-sm/6 text-base-content/90 sm:col-span-2 sm:mt-0">
+                        <dt class="text-sm/6 font-medium text-ink-strong">Sitio web</dt>
+                        <dd class="mt-1 text-sm/6 text-ink sm:col-span-2 sm:mt-0">
                           @if (school.website) {
                             <a
                               [href]="school.website"
@@ -189,10 +200,10 @@ type SchoolDetail = {
                               class="link link-primary"
                             >
                               {{ school.website }}
-                              <span class="material-symbols-outlined text-sm align-middle">open_in_new</span>
+                              <ui-icon name="external-link" class="text-sm align-middle" />
                             </a>
                           } @else {
-                            <span class="text-base-content/50">-</span>
+                            <span class="text-ink-subtle">-</span>
                           }
                         </dd>
                       </div>
@@ -203,42 +214,42 @@ type SchoolDetail = {
             </div>
 
             <!-- Location Tab -->
-            <div ngTabPanel value="location">
-              <ng-template ngTabContent>
-                <div class="bg-base-100 border-base-300 p-4 rounded-lg">
+            <div uiTabPanel value="location">
+              <ng-template uiTabContent>
+                <div class="bg-surface-1 border-line p-4 rounded-lg">
                   <div class="px-4 sm:px-0">
                     <h3 class="text-base/7 font-semibold">Ubicación</h3>
-                    <p class="mt-1 max-w-2xl text-sm/6 text-base-content/60">Dirección física del colegio</p>
+                    <p class="mt-1 max-w-2xl text-sm/6 text-ink-muted">Dirección física del colegio</p>
                   </div>
-                  <div class="mt-6 border-t border-base-300">
-                    <dl class="divide-y divide-base-300">
+                  <div class="mt-6 border-t border-line">
+                    <dl class="divide-y divide-line">
                       <div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
-                        <dt class="text-sm/6 font-medium text-base-content">Dirección</dt>
-                        <dd class="mt-1 text-sm/6 text-base-content/90 sm:col-span-2 sm:mt-0">
+                        <dt class="text-sm/6 font-medium text-ink-strong">Dirección</dt>
+                        <dd class="mt-1 text-sm/6 text-ink sm:col-span-2 sm:mt-0">
                           {{ school.address || '-' }}
                         </dd>
                       </div>
                       <div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
-                        <dt class="text-sm/6 font-medium text-base-content">Ciudad</dt>
-                        <dd class="mt-1 text-sm/6 text-base-content/90 sm:col-span-2 sm:mt-0">
+                        <dt class="text-sm/6 font-medium text-ink-strong">Ciudad</dt>
+                        <dd class="mt-1 text-sm/6 text-ink sm:col-span-2 sm:mt-0">
                           {{ school.city || '-' }}
                         </dd>
                       </div>
                       <div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
-                        <dt class="text-sm/6 font-medium text-base-content">Estado/Provincia</dt>
-                        <dd class="mt-1 text-sm/6 text-base-content/90 sm:col-span-2 sm:mt-0">
+                        <dt class="text-sm/6 font-medium text-ink-strong">Estado/Provincia</dt>
+                        <dd class="mt-1 text-sm/6 text-ink sm:col-span-2 sm:mt-0">
                           {{ school.state || '-' }}
                         </dd>
                       </div>
                       <div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
-                        <dt class="text-sm/6 font-medium text-base-content">Código postal</dt>
-                        <dd class="mt-1 text-sm/6 text-base-content/90 sm:col-span-2 sm:mt-0">
+                        <dt class="text-sm/6 font-medium text-ink-strong">Código postal</dt>
+                        <dd class="mt-1 text-sm/6 text-ink sm:col-span-2 sm:mt-0">
                           {{ school.zip || '-' }}
                         </dd>
                       </div>
                       <div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
-                        <dt class="text-sm/6 font-medium text-base-content">País</dt>
-                        <dd class="mt-1 text-sm/6 text-base-content/90 sm:col-span-2 sm:mt-0">
+                        <dt class="text-sm/6 font-medium text-ink-strong">País</dt>
+                        <dd class="mt-1 text-sm/6 text-ink sm:col-span-2 sm:mt-0">
                           {{ school.country || '-' }}
                         </dd>
                       </div>
@@ -249,7 +260,7 @@ type SchoolDetail = {
                   @if (school.address || school.city) {
                     <div class="mt-6 px-4 sm:px-0">
                       <a uiButton size="sm" [href]="getGoogleMapsUrl(school)" target="_blank" rel="noopener noreferrer">
-                        <span class="material-symbols-outlined text-lg">map</span>
+                        <ui-icon name="map" class="text-lg" />
                         Ver en Google Maps
                       </a>
                     </div>

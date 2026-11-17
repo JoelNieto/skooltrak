@@ -7,6 +7,7 @@ import {
   CardTitle,
   EditorViewer,
   Error as ErrorComponent,
+  Icon,
   Loader,
   Toast,
 } from '#/ui';
@@ -46,6 +47,7 @@ type AssignmentDetail = {
     ErrorComponent,
     AssignmentSubmissionForm,
     AssignmentSubmissionsList,
+    Icon,
   ],
   template: `
     @defer {
@@ -66,7 +68,7 @@ type AssignmentDetail = {
                 {{ assignment.course.name }}
               </a>
               <p class="flex items-center gap-2 mt-2">
-                <span class="material-symbols-outlined">calendar_month</span>
+                <ui-icon name="calendar-days" />
                 {{ assignment.date | date: 'medium' }}
               </p>
             </div>
@@ -80,7 +82,7 @@ type AssignmentDetail = {
                 [disabled]="startingChat()"
               >
                 @if (!startingChat()) {
-                  <span class="material-symbols-outlined">chat</span>
+                  <ui-icon name="message-circle" />
                 }
                 Chat
               </button>
@@ -90,7 +92,7 @@ type AssignmentDetail = {
         <div uiCard class="mt-4">
           <div uiCardBody>
             <h3 uiCardTitle>Detalles</h3>
-            <lib-editor-viewer [innerHTML]="assignment.details" />
+            <lib-editor-viewer class="type-body" [innerHTML]="assignment.details" />
           </div>
         </div>
 
@@ -98,7 +100,7 @@ type AssignmentDetail = {
           <div uiCard class="mt-4">
             <div uiCardBody>
               <h3 uiCardTitle class="flex items-center gap-2">
-                <span class="material-symbols-outlined">assignment_turned_in</span>
+                <ui-icon name="clipboard-check" />
                 Entregas
               </h3>
               @if (auth.isStudent()) {

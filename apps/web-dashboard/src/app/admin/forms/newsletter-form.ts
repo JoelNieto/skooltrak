@@ -47,12 +47,12 @@ interface NewsletterDto {
     </div>
 
     <form (submit)="onSubmit($event)" novalidate="novalidate">
-      <div class="flex flex-col gap-6 divide-y divide-base-300">
+      <div class="flex flex-col gap-6 divide-y divide-line">
         <!-- Title & Status Section -->
         <div class="sm:grid sm:grid-cols-4 sm:gap-4 pb-8">
           <div class="mb-4">
-            <h2 class="text-lg/7 font-semibold text-base-content">Información</h2>
-            <p class="mt-1 text-sm text-base-content/70">Título y estado del boletín.</p>
+            <h2 class="text-lg/7 font-semibold text-ink-strong">Información</h2>
+            <p class="mt-1 text-sm text-ink-muted">Título y estado del boletín.</p>
           </div>
           <div class="sm:col-span-3">
             <div uiCard>
@@ -71,8 +71,8 @@ interface NewsletterDto {
         <!-- Content Section -->
         <div class="sm:grid sm:grid-cols-4 sm:gap-4 pb-8 pt-6">
           <div class="mb-4">
-            <h2 class="text-lg/7 font-semibold text-base-content">Contenido</h2>
-            <p class="mt-1 text-sm text-base-content/70">Redacta el contenido del boletín.</p>
+            <h2 class="text-lg/7 font-semibold text-ink-strong">Contenido</h2>
+            <p class="mt-1 text-sm text-ink-muted">Redacta el contenido del boletín.</p>
           </div>
           <div class="sm:col-span-3">
             <div uiCard>
@@ -85,7 +85,7 @@ interface NewsletterDto {
       </div>
 
       <!-- Form Actions -->
-      <div class="flex justify-end gap-3 my-6 pt-6 border-t border-base-300">
+      <div class="flex justify-end gap-3 my-6 pt-6 border-t border-line">
         <a uiButton variant="ghost" routerLink="/admin/newsletters">Cancelar</a>
         <button uiButton [loading]="isSaving()" variant="primary" type="submit" [disabled]="isSaving()">
           {{ isEditMode() ? 'Guardar cambios' : 'Crear boletín' }}

@@ -1,4 +1,20 @@
-import { Breadcrumbs, Button, Card, CardBody, CardTitle, Loader, Modal, Toast } from '#/ui';
+import {
+  Breadcrumbs,
+  Button,
+  Card,
+  CardBody,
+  CardTitle,
+  EmptyState,
+  Icon,
+  Loader,
+  Modal,
+  Toast,
+  UiTab,
+  UiTabContent,
+  UiTabList,
+  UiTabPanel,
+  UiTabs,
+} from '#/ui';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { Component, computed, inject, input, signal } from '@angular/core';
 import { Router } from '@angular/router';
@@ -32,6 +48,12 @@ type CourseVm = {
 
 @Component({
   imports: [
+    EmptyState,
+    UiTabs,
+    UiTabList,
+    UiTab,
+    UiTabPanel,
+    UiTabContent,
     Breadcrumbs,
     Card,
     CardBody,
@@ -44,6 +66,7 @@ type CourseVm = {
     CourseGradeBuckets,
     CourseGrades,
     CourseStudentGrades,
+    Icon,
   ],
   template: ` @if (courseResource.isLoading()) {
       <lib-loader />
@@ -72,7 +95,7 @@ type CourseVm = {
                     </div>
                     {{ course.teacher.name }}
                   } @else {
-                    <span class="text-sm text-base-content/50">No hay docente asignado</span>
+                    <span class="text-sm text-ink-subtle">No hay docente asignado</span>
                   }
                 </div>
                 <p class="text-ink-muted">{{ course.code }}</p>
@@ -88,89 +111,91 @@ type CourseVm = {
                     [disabled]="startingChat()"
                   >
                     @if (!startingChat()) {
-                      <span class="material-symbols-outlined">chat</span>
+                      <ui-icon name="message-circle" />
                     }
                     Chat
                   </button>
                 }
                 @if (auth.hasPermission('MANAGE_ASSIGNMENTS')) {
                   <button uiButton variant="primary" (click)="addAssignment()">
-                    <span class="material-symbols-outlined">assignment_add</span>
+                    <ui-icon name="clipboard-plus" />
                     Nueva asignacion
                   </button>
                 }
                 @if (auth.hasPermission('MANAGE_COURSES')) {
-                  <button uiButton><span class="material-symbols-outlined">edit</span> Editar</button>
+                  <button uiButton><ui-icon name="pencil" /> Editar</button>
                 }
               </div>
             </div>
           </div>
         </div>
-        <div class="tabs tabs-box mt-4">
-          <label class="tab">
-            <input type="radio" name="my_tabs_6" class="tab" aria-label="Calificaciones" checked="checked" />
-            <span class="flex items-center gap-2">
-              <span class="material-symbols-outlined text-xl">grade</span>
+        <div uiTabs class="mt-4 flex flex-col gap-4">
+          <div uiTabList [(selectedTab)]="tab" aria-label="Secciones del curso">
+            <button uiTab value="grades">
+              <ui-icon name="star" class="text-xl" />
               Calificaciones
-            </span>
-          </label>
-
-          <div class="tab-content bg-base-100 p-6">
+            </button>
+            <button uiTab value="calendar">
+              <ui-icon name="calendar-days" class="text-xl" />
+              Calendario
+            </button>
             @if (auth.isTeacher() || auth.isAdmin()) {
-              <app-course-grades [courseId]="id()" [metric]="$any(course.studyPlan.gradeMetric)" />
+              <button uiTab value="attendance">
+                <ui-icon name="user-check" class="text-xl" />
+                Asistencia
+              </button>
             }
-            @if (auth.isStudent()) {
-              <app-course-student-grades [courseId]="id()" [metric]="$any(course.studyPlan.gradeMetric)" />
+            <button uiTab value="participants">
+              <ui-icon name="users" class="text-xl" />
+              Participantes
+            </button>
+            <button uiTab value="files">
+              <ui-icon name="folder-heart" class="text-xl" />
+              Archivos
+            </button>
+            @if (auth.isTeacher() || auth.isAdmin()) {
+              <button uiTab value="weights">
+                <ui-icon name="scale" class="text-xl" />
+                Ponderación
+              </button>
             }
           </div>
-          <label class="tab">
-            <input type="radio" name="my_tabs_6" class="tab" aria-label="Calendario" />
-            <span class="flex items-center gap-2">
-              <span class="material-symbols-outlined text-xl">calendar_month</span>Calendario</span
-            >
-          </label>
-          <div class="tab-content bg-base-100 border-base-300 p-6">
-            <app-course-assignments [courseId]="id()" (reload)="courseResource.reload()" />
+
+          <div uiTabPanel uiCard value="grades" class="p-6">
+            <ng-template uiTabContent>
+              @if (auth.isTeacher() || auth.isAdmin()) {
+                <app-course-grades [courseId]="id()" [metric]="$any(course.studyPlan.gradeMetric)" />
+              }
+              @if (auth.isStudent()) {
+                <app-course-student-grades [courseId]="id()" [metric]="$any(course.studyPlan.gradeMetric)" />
+              }
+            </ng-template>
+          </div>
+          <div uiTabPanel uiCard value="calendar" class="p-6">
+            <ng-template uiTabContent>
+              <app-course-assignments [courseId]="id()" (reload)="courseResource.reload()" />
+            </ng-template>
           </div>
           @if (auth.isTeacher() || auth.isAdmin()) {
-            <label class="tab">
-              <input type="radio" name="my_tabs_6" class="tab" aria-label="Asistencia" />
-              <span class="flex items-center gap-2">
-                <span class="material-symbols-outlined text-xl">how_to_reg</span>Asistencia</span
-              >
-            </label>
-            <div class="tab-content bg-base-100 p-6">
-              <app-course-attendance [courseId]="id()" />
+            <div uiTabPanel uiCard value="attendance" class="p-6">
+              <ng-template uiTabContent><app-course-attendance [courseId]="id()" /></ng-template>
             </div>
           }
-          <label class="tab">
-            <input type="radio" name="my_tabs_6" aria-label="Participantes" />
-            <span class="flex items-center gap-2">
-              <span class="material-symbols-outlined text-xl">groups</span>Participantes</span
-            >
-          </label>
-          <div class="tab-content bg-base-100 p-6">Tab content 2</div>
-
-          <label class="tab">
-            <input type="radio" name="my_tabs_6" aria-label="Archivos" />
-            <span class="flex items-center gap-2">
-              <span class="material-symbols-outlined">folder_special</span>Archivos</span
-            >
-          </label>
-
-          <div class="tab-content bg-base-100 p-6">
-            <app-course-files [courseId]="id()" />
+          <div uiTabPanel uiCard value="participants" class="p-6">
+            <ng-template uiTabContent>
+              <lib-empty-state
+                title="Participantes"
+                description="La lista de participantes del curso estará disponible pronto."
+                icon="users"
+              />
+            </ng-template>
+          </div>
+          <div uiTabPanel uiCard value="files" class="p-6">
+            <ng-template uiTabContent><app-course-files [courseId]="id()" /></ng-template>
           </div>
           @if (auth.isTeacher() || auth.isAdmin()) {
-            <label class="tab">
-              <input type="radio" name="my_tabs_6" aria-label="Ponderacion" />
-              <span class="flex items-center gap-2">
-                <span class="material-symbols-outlined">folder_special</span>Ponderacion</span
-              >
-            </label>
-
-            <div class="tab-content bg-base-100 p-6">
-              <app-course-grade-buckets [courseId]="id()" />
+            <div uiTabPanel uiCard value="weights" class="p-6">
+              <ng-template uiTabContent><app-course-grade-buckets [courseId]="id()" /></ng-template>
             </div>
           }
         </div>
@@ -186,6 +211,8 @@ export default class Course {
   private modal = inject(Modal);
   private router = inject(Router);
   private toast = inject(Toast);
+  /** Selected section; the tab list and panels follow it. */
+  readonly tab = signal('grades');
   startingChat = signal(false);
 
   canStartCourseChat() {
@@ -227,7 +254,7 @@ export default class Course {
 
     const t = c.teacher;
     if (t) {
-      const color = t.user?.color ?? '#888';
+      const color = t.user?.color ?? 'var(--ui-ink-subtle)';
       const fn = t.user?.firstName ?? t.firstName ?? '';
       const ln = t.user?.lastName ?? t.fatherName ?? '';
       const name = `${fn} ${ln}`.trim();

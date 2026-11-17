@@ -14,6 +14,7 @@ import {
 } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { Button } from './button';
+import { Icon } from './icon';
 
 export interface CalendarMarkerData<Data = unknown> {
   date: Date;
@@ -21,7 +22,7 @@ export interface CalendarMarkerData<Data = unknown> {
 }
 @Component({
   selector: 'lib-calendar',
-  imports: [Button, NgClass, DatePipe, NgTemplateOutlet],
+  imports: [Button, NgClass, DatePipe, NgTemplateOutlet, Icon],
   template: `<div class="calendar-container">
     <header class="calendar-header my-4 flex items-center justify-between">
       <h2 class="text-xl font-semibold">
@@ -31,10 +32,10 @@ export interface CalendarMarkerData<Data = unknown> {
       <div class="flex items-center gap-1">
         <button uiButton size="sm" (click)="this.toCurrentMonth()" [disabled]="isCurrentMonth()">Hoy</button>
         <button uiButton size="sm" (click)="prevMonth()">
-          <span class="material-symbols-outlined">chevron_left</span>
+          <ui-icon name="chevron-left" />
         </button>
         <button uiButton size="sm" (click)="nextMonth()">
-          <span class="material-symbols-outlined">chevron_right</span>
+          <ui-icon name="chevron-right" />
         </button>
       </div>
     </header>
@@ -42,7 +43,7 @@ export interface CalendarMarkerData<Data = unknown> {
       @for (item of this.dayNamesFormatted; track item.dayName) {
         <div
           class="uppercase"
-          [ngClass]="[item.isToday ? 'text-primary' : 'text-slate-500', item.isToday ? 'font-bold' : 'font-normal']"
+          [ngClass]="[item.isToday ? 'text-primary' : 'text-ink-muted', item.isToday ? 'font-bold' : 'font-normal']"
         >
           {{ item.dayName }}
         </div>
@@ -63,9 +64,9 @@ export interface CalendarMarkerData<Data = unknown> {
             'items-center',
             'justify-center',
             'rounded-xl',
-            'bg-base-200',
+            'bg-surface-0',
             day.colStartClass,
-            'text-base-content',
+            'text-ink-strong',
             day.isToday ? 'font-medium' : 'font-normal',
           ]"
         >

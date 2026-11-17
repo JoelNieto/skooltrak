@@ -1,0 +1,19 @@
+/* Storybook global styles: same stack as the apps (Geist, Tailwind 4, DaisyUI,
+ * design tokens) so stories render exactly like web-dashboard / web-admin.
+ * Kept next to theme.css on purpose: Tailwind rebases url()s in imported files relative to this
+ * entry file, and Storybook's css-loader then resolves them from theme.css's folder. With both in
+ * the same folder the two agree, so theme.css's font files resolve (libs/ui/project.json). */
+@import url('https://fonts.googleapis.com/css2?family=Geist:ital,wght@0,100..900;1,100..900&family=Geist+Mono:wght@400;500&display=swap');
+@import 'tailwindcss';
+@import '@angular/cdk/overlay-prebuilt.css';
+@import './theme.css';
+
+@source '../**/*.ts';
+
+html,
+body {
+  min-height: 100%;
+  background: var(--ui-surface-0);
+  color: var(--ui-ink);
+  font-family: 'Geist', ui-sans-serif, system-ui, sans-serif;
+}

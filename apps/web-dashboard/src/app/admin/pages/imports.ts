@@ -1,4 +1,18 @@
-import { Alert, Badge, Button, Card, CardActions, CardBody, CardTitle, Toast, UiInput, UiTable } from '#/ui';
+import {
+  Alert,
+  Badge,
+  Button,
+  Card,
+  CardActions,
+  CardBody,
+  CardTitle,
+  Icon,
+  Toast,
+  UiField,
+  UiInput,
+  UiSelect,
+  UiTable,
+} from '#/ui';
 import { HttpClient } from '@angular/common/http';
 import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -8,7 +22,21 @@ import Store from '../../core/store';
 @Component({
   selector: 'app-imports',
   standalone: true,
-  imports: [Alert, UiTable, Badge, Card, CardActions, CardBody, CardTitle, UiInput, Button, FormsModule],
+  imports: [
+    Alert,
+    UiTable,
+    Badge,
+    Card,
+    CardActions,
+    CardBody,
+    CardTitle,
+    UiField,
+    UiInput,
+    UiSelect,
+    Button,
+    FormsModule,
+    Icon,
+  ],
   template: `
     <div class="flex flex-col gap-6 p-4 max-w-6xl mx-auto">
       <h1 class="text-2xl font-bold">Importación masiva</h1>
@@ -21,14 +49,12 @@ import Store from '../../core/store';
           <div uiCardBody>
             <h2 uiCardTitle>Paso 1: Cargar CSV</h2>
             <div class="flex flex-col gap-4">
-              <label class="select select-bordered w-full max-w-xs">
-                <span class="material-symbols-outlined">school</span>
-                <span>Entidad</span>
-                <select [ngModel]="entityType()" (ngModelChange)="entityType.set($event)">
+              <ui-field label="Entidad" class="w-full max-w-xs">
+                <select uiSelect [ngModel]="entityType()" (ngModelChange)="entityType.set($event)">
                   <option value="STUDENT">Estudiantes</option>
                   <option value="TEACHER">Profesores</option>
                 </select>
-              </label>
+              </ui-field>
 
               <div class="flex flex-col gap-2">
                 <label class="block text-sm font-medium" for="csv-file">Archivo CSV</label>
@@ -62,7 +88,7 @@ import Store from '../../core/store';
                 (click)="runDryRun()"
               >
                 @if (!loading()) {
-                  <span class="material-symbols-outlined">visibility</span>
+                  <ui-icon name="eye" />
                 }
                 Validar (dry-run)
               </button>
@@ -115,7 +141,7 @@ import Store from '../../core/store';
                   (click)="commit()"
                 >
                   @if (!loading()) {
-                    <span class="material-symbols-outlined">check</span>
+                    <ui-icon name="check" />
                   }
                   Confirmar importación
                 </button>

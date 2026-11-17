@@ -27,7 +27,7 @@ type ScheduleLayout = {
     <div class="flex flex-col gap-6">
       <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h4 class="text-lg font-semibold text-base-content">Horario semanal del grupo</h4>
+          <h4 class="text-lg font-semibold text-ink-strong">Horario semanal del grupo</h4>
           <p class="text-sm text-ink-muted">Visualiza las clases en un calendario semanal por horas.</p>
         </div>
         <button uiButton variant="primary" size="sm" (click)="editSchedule()">Agregar clase</button>
@@ -43,12 +43,12 @@ type ScheduleLayout = {
           <div class="w-full overflow-x-auto">
             <div class="min-w-275">
               <div
-                class="grid border border-base-300 rounded-lg bg-base-100"
+                class="grid border border-line rounded-lg bg-surface-1"
                 [style.gridTemplateColumns]="gridTemplateColumns"
               >
-                <div class="border-b border-base-200 bg-base-200 px-3 py-2 text-xs font-semibold">Hora</div>
+                <div class="border-b border-line bg-surface-0 px-3 py-2 text-xs font-semibold">Hora</div>
                 @for (day of weekdays; track day.key) {
-                  <div class="border-b border-base-200 bg-base-200 px-3 py-2 text-xs font-semibold">
+                  <div class="border-b border-line bg-surface-0 px-3 py-2 text-xs font-semibold">
                     <div class="flex items-center justify-between">
                       <span>{{ day.label }}</span>
                       <button uiButton variant="ghost" size="sm" (click)="editSchedule(undefined, day.key)">+</button>
@@ -56,10 +56,10 @@ type ScheduleLayout = {
                   </div>
                 }
 
-                <div class="relative border-r border-base-300 mt-4" [style.height.px]="gridHeight">
+                <div class="relative border-r border-line mt-4" [style.height.px]="gridHeight">
                   @for (hour of hourMarks; track hour.label) {
                     <div
-                      class="absolute left-0 right-0 -translate-y-1/2 px-2 text-[11px] text-ink-muted pt-4 border-t border-base-300"
+                      class="absolute left-0 right-0 -translate-y-1/2 px-2 text-[11px] text-ink-muted pt-4 border-t border-line"
                       [style.top.px]="hour.top"
                     >
                       {{ hour.label }}
@@ -69,7 +69,7 @@ type ScheduleLayout = {
 
                 @for (day of weekdays; track day.key) {
                   <div
-                    class="relative border-r border-base-300 schedule-day-column"
+                    class="relative border-r border-line schedule-day-column"
                     [attr.data-day]="day.key"
                     [style.height.px]="gridHeight"
                     [style.backgroundImage]="gridBackground"
@@ -99,7 +99,7 @@ type ScheduleLayout = {
                             Editar
                           </button>
                         </div>
-                        <p class="text-[11px] text-base-content">
+                        <p class="text-[11px] text-ink-strong">
                           {{ entry.schedule.startTime }} - {{ entry.schedule.endTime }}
                         </p>
                         <p class="text-[11px] text-ink-muted">
@@ -113,8 +113,8 @@ type ScheduleLayout = {
             </div>
           </div>
         } @else {
-          <div class="rounded-xl border border-dashed border-base-300 bg-base-100 p-6">
-            <h5 class="text-base font-semibold text-base-content">Aún no hay horario semanal</h5>
+          <div class="rounded-xl border border-dashed border-line bg-surface-1 p-6">
+            <h5 class="text-base font-semibold text-ink-strong">Aún no hay horario semanal</h5>
             <p class="text-sm text-ink-muted mt-1">Empieza agregando las clases para cada día de la semana.</p>
             <button uiButton variant="primary" size="sm" class="mt-4" (click)="editSchedule()">Crear horario</button>
           </div>
@@ -188,21 +188,22 @@ export default class GroupSchedule {
     return hours;
   }
 
+  /** Slot and hour rules, drawn as 1px hard-stop stripes in the line tokens (flat lines, not a fade). */
   public get gridBackground() {
     const minor = this.slotHeight;
     const major = this.slotHeight * (60 / this.slotMinutes);
     return `
       repeating-linear-gradient(
         to bottom,
-        rgba(148, 163, 184, 0.08) 0,
-        rgba(148, 163, 184, 0.08) 1px,
+        var(--ui-line) 0,
+        var(--ui-line) 1px,
         transparent 1px,
         transparent ${minor}px
       ),
       repeating-linear-gradient(
         to bottom,
-        rgba(148, 163, 184, 0.25) 0,
-        rgba(148, 163, 184, 0.25) 1px,
+        var(--ui-line-strong) 0,
+        var(--ui-line-strong) 1px,
         transparent 1px,
         transparent ${major}px
       )

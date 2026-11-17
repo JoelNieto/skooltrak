@@ -1,31 +1,30 @@
-import { Alert, Button, Toast, UiField, UiInput } from '#/ui';
+import { Alert, BrandLogo, Button, Icon, Toast, UiField, UiInput } from '#/ui';
 import { HttpClient } from '@angular/common/http';
 import { afterRenderEffect, Component, inject, signal } from '@angular/core';
 import { form, FormField, required } from '@angular/forms/signals';
 import { ActivatedRoute, Router } from '@angular/router';
 import Auth from '../auth/auth';
-import { BrandLogo } from '../shared/brand-logo';
 
 @Component({
   selector: 'app-verify-student',
-  imports: [Alert, UiField, UiInput, Button, BrandLogo, FormField],
+  imports: [Alert, UiField, UiInput, Button, BrandLogo, FormField, Icon],
   template: `
-    <div class="min-h-screen flex flex-col gradient-bg">
+    <div class="min-h-screen flex flex-col bg-surface-0">
       <header class="p-4 md:p-6 flex items-center justify-between">
-        <app-brand-logo class="h-8 md:h-10" />
+        <ui-brand-logo class="h-8 md:h-10" />
       </header>
 
       <main class="flex-1 flex flex-col items-center justify-center p-6">
         <div class="w-full max-w-md text-center space-y-8 animate-fade-in">
           <div class="flex justify-center">
             <div class="w-20 h-20 rounded-full bg-success/10 flex items-center justify-center">
-              <span class="material-symbols-outlined text-5xl text-success">badge</span>
+              <ui-icon name="id-card" class="text-5xl text-success" />
             </div>
           </div>
 
           <div class="space-y-2">
-            <h1 class="text-2xl md:text-3xl font-bold text-base-content">Verificación de Estudiante</h1>
-            <p class="text-base-content/70">
+            <h1 class="text-2xl md:text-3xl font-bold text-ink-strong">Verificación de Estudiante</h1>
+            <p class="text-ink-muted">
               Ingresa tu documento de identidad para vincular tu cuenta con tu registro en
               <strong>{{ schoolName() }}</strong
               >.
@@ -39,7 +38,7 @@ import { BrandLogo } from '../shared/brand-logo';
 
             @if (errorMessage()) {
               <div uiAlert tone="danger">
-                <span class="material-symbols-outlined">error</span>
+                <ui-icon name="circle-alert" />
                 <span>{{ errorMessage() }}</span>
               </div>
             }
@@ -56,12 +55,12 @@ import { BrandLogo } from '../shared/brand-logo';
                 @if (loading()) {
                   Verificando...
                 } @else {
-                  <span class="material-symbols-outlined">check</span>
+                  <ui-icon name="check" />
                   Verificar y Vincular
                 }
               </button>
               <button uiButton variant="ghost" size="sm" type="button" class="w-full" (click)="goBack()">
-                <span class="material-symbols-outlined text-lg">arrow_back</span>
+                <ui-icon name="arrow-left" class="text-lg" />
                 Volver
               </button>
             </div>

@@ -1,11 +1,12 @@
 import { afterRenderEffect, Component, computed, ElementRef, input, signal, untracked, viewChild } from '@angular/core';
 import { Button } from './button';
+import { Icon } from './icon';
 
 const NEAR_BOTTOM_PX = 96;
 
 @Component({
   selector: 'lib-thread-scroll-pane',
-  imports: [Button],
+  imports: [Button, Icon],
   host: {
     class: 'relative flex flex-col flex-1 min-h-0',
   },
@@ -25,7 +26,7 @@ const NEAR_BOTTOM_PX = 96;
         aria-label="Ir al último mensaje"
         title="Ir al último mensaje"
       >
-        <span class="material-symbols-outlined text-base">arrow_downward</span>
+        <ui-icon name="arrow-down" class="text-base" />
       </button>
     }
   `,

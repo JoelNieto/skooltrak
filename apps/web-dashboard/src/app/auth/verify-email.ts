@@ -1,19 +1,18 @@
-import { Button, Loader, Toast } from '#/ui';
+import { BrandLogo, Button, Icon, Loader, Toast } from '#/ui';
 import { HttpClient } from '@angular/common/http';
 import { afterRenderEffect, Component, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import Auth from './auth';
-import { BrandLogo } from '../shared/brand-logo';
 
 @Component({
   selector: 'app-verify-email',
-  imports: [Button, BrandLogo, Loader],
+  imports: [Button, BrandLogo, Loader, Icon],
   template: `
-    <div class="min-h-screen flex flex-col gradient-bg">
+    <div class="min-h-screen flex flex-col bg-surface-0">
       <!-- Fixed Header -->
       <header class="p-4 md:p-6 flex items-center justify-between">
-        <app-brand-logo class="h-8 md:h-10" />
+        <ui-brand-logo class="h-8 md:h-10" />
       </header>
 
       <!-- Content -->
@@ -25,74 +24,74 @@ import { BrandLogo } from '../shared/brand-logo';
               <lib-loader />
             </div>
             <div class="space-y-2">
-              <h1 class="text-2xl md:text-3xl font-bold text-base-content">Verificando tu correo...</h1>
-              <p class="text-base-content/70">Por favor espera mientras verificamos tu correo electrónico.</p>
+              <h1 class="text-2xl md:text-3xl font-bold text-ink-strong">Verificando tu correo...</h1>
+              <p class="text-ink-muted">Por favor espera mientras verificamos tu correo electrónico.</p>
             </div>
           } @else if (verified()) {
             <!-- Verified state -->
             <div class="flex justify-center">
               <div class="w-20 h-20 rounded-full bg-success/10 flex items-center justify-center">
-                <span class="material-symbols-outlined text-5xl text-success">check_circle</span>
+                <ui-icon name="circle-check" class="text-5xl text-success" />
               </div>
             </div>
             <div class="space-y-2">
-              <h1 class="text-2xl md:text-3xl font-bold text-base-content">Correo Verificado</h1>
-              <p class="text-base-content/70">
+              <h1 class="text-2xl md:text-3xl font-bold text-ink-strong">Correo Verificado</h1>
+              <p class="text-ink-muted">
                 Tu correo electrónico ha sido verificado exitosamente. Ahora puedes continuar con la configuración de tu
                 escuela.
               </p>
             </div>
             <button uiButton variant="primary" size="lg" (click)="continueToOnboarding()">
               Continuar
-              <span class="material-symbols-outlined">arrow_forward</span>
+              <ui-icon name="arrow-right" />
             </button>
           } @else if (error()) {
             <!-- Error state -->
             <div class="flex justify-center">
               <div class="w-20 h-20 rounded-full bg-error/10 flex items-center justify-center">
-                <span class="material-symbols-outlined text-5xl text-error">error</span>
+                <ui-icon name="circle-alert" class="text-5xl text-error" />
               </div>
             </div>
             <div class="space-y-2">
-              <h1 class="text-2xl md:text-3xl font-bold text-base-content">Error de Verificación</h1>
-              <p class="text-base-content/70">
+              <h1 class="text-2xl md:text-3xl font-bold text-ink-strong">Error de Verificación</h1>
+              <p class="text-ink-muted">
                 {{ error() }}
               </p>
             </div>
             <button uiButton [loading]="resending()" variant="primary" (click)="resendEmail()" [disabled]="resending()">
               @if (!resending()) {
-                <span class="material-symbols-outlined">mail</span>
+                <ui-icon name="mail" />
               }
               Reenviar correo de verificación
             </button>
           } @else {
             <!-- Waiting for verification state -->
             <div class="flex justify-center">
-              <div class="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center">
-                <span class="material-symbols-outlined text-5xl text-primary">mark_email_unread</span>
+              <div class="w-20 h-20 rounded-full bg-action-subtle flex items-center justify-center">
+                <ui-icon name="mail-check" class="text-5xl text-primary" />
               </div>
             </div>
             <div class="space-y-2">
-              <h1 class="text-2xl md:text-3xl font-bold text-base-content">Verifica tu Correo</h1>
-              <p class="text-base-content/70">
+              <h1 class="text-2xl md:text-3xl font-bold text-ink-strong">Verifica tu Correo</h1>
+              <p class="text-ink-muted">
                 Te hemos enviado un correo de verificación. Por favor revisa tu bandeja de entrada y haz clic en el
                 enlace para continuar.
               </p>
             </div>
 
-            <div class="bg-base-200 rounded-xl p-6 space-y-4">
+            <div class="bg-surface-0 rounded-xl p-6 space-y-4">
               <div class="flex items-start gap-3 text-left">
-                <span class="material-symbols-outlined text-primary mt-0.5">inbox</span>
+                <ui-icon name="inbox" class="text-primary mt-0.5" />
                 <div>
-                  <p class="font-medium text-base-content">Revisa tu bandeja de entrada</p>
-                  <p class="text-sm text-base-content/60">El correo puede tardar unos minutos en llegar</p>
+                  <p class="font-medium text-ink-strong">Revisa tu bandeja de entrada</p>
+                  <p class="text-sm text-ink-muted">El correo puede tardar unos minutos en llegar</p>
                 </div>
               </div>
               <div class="flex items-start gap-3 text-left">
-                <span class="material-symbols-outlined text-primary mt-0.5">folder</span>
+                <ui-icon name="folder" class="text-primary mt-0.5" />
                 <div>
-                  <p class="font-medium text-base-content">Revisa la carpeta de spam</p>
-                  <p class="text-sm text-base-content/60">A veces los correos pueden llegar ahí</p>
+                  <p class="font-medium text-ink-strong">Revisa la carpeta de spam</p>
+                  <p class="text-sm text-ink-muted">A veces los correos pueden llegar ahí</p>
                 </div>
               </div>
             </div>
@@ -110,13 +109,13 @@ import { BrandLogo } from '../shared/brand-logo';
                 } @else if (cooldown() > 0) {
                   Reenviar en {{ cooldown() }}s
                 } @else {
-                  <span class="material-symbols-outlined">refresh</span>
+                  <ui-icon name="refresh-cw" />
                   Reenviar correo de verificación
                 }
               </button>
 
               <button uiButton variant="ghost" size="sm" (click)="checkVerification()">
-                <span class="material-symbols-outlined text-lg">sync</span>
+                <ui-icon name="refresh-ccw" class="text-lg" />
                 Ya verifiqué mi correo
               </button>
             </div>
@@ -125,8 +124,8 @@ import { BrandLogo } from '../shared/brand-logo';
       </main>
 
       <!-- Fixed Footer -->
-      <footer class="p-4 md:p-6 flex justify-center border-t border-base-200 bg-base-100/80 backdrop-blur-sm">
-        <p class="text-sm text-base-content/60">
+      <footer class="p-4 md:p-6 flex justify-center border-t border-line bg-surface-1/80 backdrop-blur-sm">
+        <p class="text-sm text-ink-muted">
           ¿Necesitas ayuda?
           <a href="mailto:soporte@skooltrak.com" class="link link-primary">Contactar soporte</a>
         </p>

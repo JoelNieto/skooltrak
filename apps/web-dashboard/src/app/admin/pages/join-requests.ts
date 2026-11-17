@@ -1,4 +1,4 @@
-import { Badge, BadgeTone, Button, Card, CardBody, EmptyState, Loader, Toast } from '#/ui';
+import { Badge, BadgeTone, Button, Card, CardBody, EmptyState, Icon, Loader, Toast } from '#/ui';
 import { DatePipe } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { Component, inject, signal } from '@angular/core';
@@ -20,16 +20,16 @@ type JoinRequestRow = {
 
 @Component({
   selector: 'app-join-requests',
-  imports: [Badge, Card, CardBody, Button, Loader, DatePipe, EmptyState],
+  imports: [Badge, Card, CardBody, Button, Loader, DatePipe, EmptyState, Icon],
   template: `
     <div class="space-y-6">
       <div class="flex items-center justify-between">
         <div>
-          <h1 class="text-2xl font-bold text-base-content">Solicitudes de Acceso</h1>
-          <p class="text-base-content/60">Administra las solicitudes de usuarios que desean unirse a tu escuela.</p>
+          <h1 class="text-2xl font-bold text-ink-strong">Solicitudes de Acceso</h1>
+          <p class="text-ink-muted">Administra las solicitudes de usuarios que desean unirse a tu escuela.</p>
         </div>
         <button uiButton variant="ghost" size="sm" (click)="loadRequests()">
-          <span class="material-symbols-outlined">refresh</span>
+          <ui-icon name="refresh-cw" />
           Actualizar
         </button>
       </div>
@@ -51,7 +51,7 @@ type JoinRequestRow = {
               <div uiCardBody>
                 <div class="flex items-start gap-4">
                   <div class="avatar avatar-placeholder">
-                    <div class="w-12 h-12 rounded-full bg-primary/10 text-primary">
+                    <div class="w-12 h-12 rounded-full bg-action-subtle text-primary">
                       <span class="text-lg font-medium">
                         {{ request.userFirstName.charAt(0) }}{{ request.userLastName.charAt(0) }}
                       </span>
@@ -59,22 +59,22 @@ type JoinRequestRow = {
                   </div>
 
                   <div class="flex-1 min-w-0">
-                    <h3 class="font-semibold text-base-content">
+                    <h3 class="font-semibold text-ink-strong">
                       {{ request.userFirstName }} {{ request.userLastName }}
                     </h3>
-                    <p class="text-sm text-base-content/60">{{ request.userEmail }}</p>
+                    <p class="text-sm text-ink-muted">{{ request.userEmail }}</p>
                     <div class="flex items-center gap-3 mt-2">
                       <span uiBadge [tone]="roleTone(request.requestedRole)">
                         {{ getRoleLabel(request.requestedRole) }}
                       </span>
-                      <span class="text-xs text-base-content/40">
+                      <span class="text-xs text-ink-subtle">
                         {{ request.schoolName }}
                       </span>
                       @if (request.documentId) {
-                        <span class="text-xs text-base-content/40"> Doc: {{ request.documentId }} </span>
+                        <span class="text-xs text-ink-subtle"> Doc: {{ request.documentId }} </span>
                       }
                     </div>
-                    <p class="text-xs text-base-content/40 mt-1">Solicitado {{ request.createdAt | date: 'medium' }}</p>
+                    <p class="text-xs text-ink-subtle mt-1">Solicitado {{ request.createdAt | date: 'medium' }}</p>
                   </div>
 
                   <div class="flex gap-2">
@@ -85,11 +85,11 @@ type JoinRequestRow = {
                       (click)="approve(request.id)"
                       [disabled]="processing()"
                     >
-                      <span class="material-symbols-outlined text-lg">check</span>
+                      <ui-icon name="check" class="text-lg" />
                       Aprobar
                     </button>
                     <button uiButton variant="danger" size="sm" (click)="reject(request.id)" [disabled]="processing()">
-                      <span class="material-symbols-outlined text-lg">close</span>
+                      <ui-icon name="x" class="text-lg" />
                       Rechazar
                     </button>
                   </div>

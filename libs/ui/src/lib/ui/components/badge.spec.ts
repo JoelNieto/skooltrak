@@ -47,6 +47,15 @@ describe('uiBadge', () => {
     expect(status.classList).not.toContain('badge-error');
   });
 
+  it('marks the new tone with its own class and no DaisyUI tone class', () => {
+    const { fixture, host, q } = setup();
+    host.tone.set('new');
+    fixture.detectChanges();
+    const status = q('.status');
+    expect(status.classList).toContain('ui-badge-new');
+    expect([...status.classList].filter((c) => /^badge-(primary|info|success|warning|error)$/.test(c))).toEqual([]);
+  });
+
   it('works on links with the action tone', () => {
     const { q } = setup();
     expect(q('.link').tagName).toBe('A');

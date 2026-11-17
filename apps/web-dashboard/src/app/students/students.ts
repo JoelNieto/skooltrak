@@ -5,17 +5,23 @@ import {
   Button,
   Card,
   Confirmation,
-  EmptyState,
+  Icon,
   Pagination,
   PaginatorV2,
   Toast,
+  UiInputGroup,
+  UiRowAction,
+  UiRowActions,
   UiTable,
+  UiTableEmpty,
+  UiTableError,
+  UiTableSkeleton,
+  UiTableToolbar,
+  listState,
 } from '#/ui';
-import { Menu, MenuContent, MenuItem, MenuTrigger } from '@angular/aria/menu';
-import { OverlayModule } from '@angular/cdk/overlay';
 import { DatePipe } from '@angular/common';
 import { HttpClient, httpResource } from '@angular/common/http';
-import { Component, computed, inject, signal, viewChild } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { $Enums } from '@generated/prisma';
@@ -50,6 +56,7 @@ type StudentRow = {
 
 @Component({
   imports: [
+    UiTableToolbar,
     Breadcrumbs,
     Card,
     UiTable,
@@ -59,36 +66,35 @@ type StudentRow = {
     RouterLink,
     PaginatorV2,
     FormsModule,
-    Menu,
-    MenuContent,
-    MenuItem,
-    MenuTrigger,
-    OverlayModule,
-    EmptyState,
+    UiInputGroup,
+    Icon,
+    UiRowActions,
+    UiTableEmpty,
+    UiTableError,
+    UiTableSkeleton,
   ],
   providers: [Pagination],
   template: `
     <ui-breadcrumbs [items]="[{ label: 'Inicio', link: '/' }, { label: 'Alumnos' }]" />
     <h1 class="text-2xl font-semibold mb-2">Alumnos</h1>
-    <div class="flex flex-col gap-4 md:flex-row md:justify-between">
-      <div class="md:w-96 w-full">
-        <label class="input input-primary ">
-          <span class="material-symbols-outlined">search</span>
-          <input
-            class="pl-0"
-            type="search"
-            placeholder="Buscar..."
-            [(ngModel)]="searchText"
-            (input)="pagination.updateSearch($event.target.value)"
-          />
-        </label>
-      </div>
-      <a uiButton variant="primary" routerLink="/students/new">
-        <span class="material-symbols-outlined">add_circle</span> Agregar Alumno
+    <ui-table-toolbar>
+      <label uiInputGroup size="sm">
+        <ui-icon name="search" class="text-base text-ink-subtle" />
+        <input
+          aria-label="Buscar"
+          class="pl-0"
+          type="search"
+          placeholder="Buscar..."
+          [(ngModel)]="searchText"
+          (input)="pagination.updateSearch($event.target.value)"
+        />
+      </label>
+      <a uiToolbarEnd uiButton variant="primary" size="sm" routerLink="/students/new">
+        <ui-icon name="circle-plus" class="text-base" /> Agregar Alumno
       </a>
-    </div>
+    </ui-table-toolbar>
     <div uiCard class="overflow-x-auto mt-4">
-      <table uiTable>
+      <table uiTable [attr.aria-busy]="students.isLoading()">
         <thead>
           <tr>
             <th>Nombre</th>
@@ -97,130 +103,85 @@ type StudentRow = {
             <th>Estado</th>
             <th>Grupo</th>
             <th>Fecha de creación</th>
-            <th></th>
+            <th class="w-12"><span class="sr-only">Acciones</span></th>
           </tr>
         </thead>
-        <tbody>
-          @for (student of students.value()?.data; track student.id) {
-            <tr>
-              <td>
-                <a [routerLink]="['/students', student.id]" class="link link-hover">{{ student.name }}</a>
-              </td>
-              <td>
-                <div class="flex items-center gap-2">
-                  {{ student.email }}
-                  @if (student.user?.emailVerified) {
-                    <span uiBadge tone="success" size="sm" title="Verificado">
-                      <span class="material-symbols-outlined text-xs!">check_circle</span>
-                    </span>
-                  } @else {
-                    <span uiBadge tone="warning" size="sm" title="Pendiente de verificación">
-                      <span class="material-symbols-outlined text-xs!">schedule</span>
-                    </span>
-                  }
-                </div>
-              </td>
-              <td>{{ student.documentId }}</td>
-              <td>
-                <span uiBadge size="sm" [tone]="enrollmentTone(student.enrollmentStatus ?? 'ACTIVE')">
-                  {{ getStatusLabel(student.enrollmentStatus ?? 'ACTIVE') }}
-                </span>
-              </td>
-              <td>
-                @if (student.classGroup) {
-                  <a uiBadge tone="action" size="sm" [routerLink]="['/groups', student.classGroupId]">
-                    {{ student.classGroup.name }}
-                  </a>
-                } @else {
-                  <span class="text-base-content/50">-</span>
-                }
-              </td>
-              <td>{{ student.createdAt | date: 'short' }}</td>
-              <td>
-                <button
-                  class="cursor-pointer hover:bg-base-200 p-1 rounded-lg flex items-center justify-center"
-                  ngMenuTrigger
-                  #origin
-                  #trigger="ngMenuTrigger"
-                  [menu]="actionsMenu()"
-                >
-                  <span class="material-symbols-outlined text-xl">more_horiz</span>
-                </button>
-                <ng-template
-                  [cdkConnectedOverlayOpen]="trigger.expanded()"
-                  [cdkConnectedOverlay]="{ origin, usePopover: 'inline' }"
-                  [cdkConnectedOverlayPositions]="[
-                    {
-                      originX: 'end',
-                      originY: 'bottom',
-                      overlayX: 'end',
-                      overlayY: 'top',
-                      offsetY: 4,
-                    },
-                  ]"
-                  cdkAttachPopoverAsChild
-                >
-                  <div ngMenu class="bg-base-100 shadow-sm rounded-lg p-1 w-48" #actionsMenu="ngMenu">
-                    <ng-template ngMenuContent>
-                      <a
-                        ngMenuItem
-                        value="view"
-                        [routerLink]="['/students', student.id]"
-                        class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-base-200 w-full"
-                      >
-                        <span class="material-symbols-outlined text-lg">visibility</span>
-                        <span>Ver</span>
-                      </a>
-                      @if (auth.hasPermission('MANAGE_STUDENTS')) {
-                        <a
-                          ngMenuItem
-                          value="edit"
-                          [routerLink]="['/students', student.id, 'edit']"
-                          class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-base-200 w-full"
-                        >
-                          <span class="material-symbols-outlined text-lg">edit</span>
-                          <span>Editar</span>
-                        </a>
-                      }
-                      @if (student.user && !student.user.emailVerified) {
-                        <button
-                          ngMenuItem
-                          value="resend"
-                          class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-base-200 w-full"
-                          (click)="resendInvitationForStudent(student)"
-                        >
-                          <span class="material-symbols-outlined text-lg">mail</span>
-                          <span>Reenviar invitación</span>
-                        </button>
-                      }
-                      @if (auth.hasPermission('MANAGE_STUDENTS')) {
-                        <button
-                          ngMenuItem
-                          value="delete"
-                          class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-base-200 w-full"
-                          (click)="deleteStudent(student)"
-                        >
-                          <span class="material-symbols-outlined text-lg">delete</span>
-                          <span>Eliminar</span>
-                        </button>
-                      }
-                    </ng-template>
-                  </div>
-                </ng-template>
-              </td>
-            </tr>
-          } @empty {
-            <tr>
-              <td colspan="7" class="text-center text-base-content/50 py-4">
-                <lib-empty-state
-                  title="No se encontraron estudiantes"
-                  icon="person"
-                  description="Intenta con otros criterios de búsqueda."
-                />
-              </td>
-            </tr>
+        @switch (studentsList.phase()) {
+          @case ('skeleton') {
+            <tbody uiTableSkeleton [rows]="pageSize()" [columns]="7"></tbody>
           }
-        </tbody>
+          @case ('error') {
+            <tbody>
+              <tr uiTableError [columns]="7" (retry)="students.reload()"></tr>
+            </tbody>
+          }
+          @case ('ready') {
+            <tbody>
+              @for (student of studentsList.rows()?.data; track student.id) {
+                <tr>
+                  <td>
+                    <a [routerLink]="['/students', student.id]" class="link link-hover">{{ student.name }}</a>
+                  </td>
+                  <td>
+                    <div class="flex items-center gap-2">
+                      {{ student.email }}
+                      @if (student.user?.emailVerified) {
+                        <span uiBadge tone="success" size="sm" title="Verificado">
+                          <ui-icon name="circle-check" class="text-xs!" />
+                        </span>
+                      } @else {
+                        <span uiBadge tone="warning" size="sm" title="Pendiente de verificación">
+                          <ui-icon name="clock" class="text-xs!" />
+                        </span>
+                      }
+                    </div>
+                  </td>
+                  <td>{{ student.documentId }}</td>
+                  <td>
+                    <span uiBadge size="sm" [tone]="enrollmentTone(student.enrollmentStatus ?? 'ACTIVE')">
+                      {{ getStatusLabel(student.enrollmentStatus ?? 'ACTIVE') }}
+                    </span>
+                  </td>
+                  <td>
+                    @if (student.classGroup) {
+                      <a uiBadge tone="action" size="sm" [routerLink]="['/groups', student.classGroupId]">
+                        {{ student.classGroup.name }}
+                      </a>
+                    } @else {
+                      <span class="text-ink-subtle">-</span>
+                    }
+                  </td>
+                  <td>{{ student.createdAt | date: 'short' }}</td>
+                  <td>
+                    <ui-row-actions
+                      [actions]="rowActions(student)"
+                      [label]="'Acciones para ' + student.name"
+                      (action)="onRowAction($event, student)"
+                    />
+                  </td>
+                </tr>
+              } @empty {
+                @if (searchText()) {
+                  <tr
+                    uiTableEmpty
+                    [columns]="7"
+                    icon="search-x"
+                    title="Sin resultados"
+                    description="Ningún resultado coincide con la búsqueda."
+                  ></tr>
+                } @else {
+                  <tr
+                    uiTableEmpty
+                    [columns]="7"
+                    icon="users"
+                    title="Aún no hay estudiantes"
+                    description="Agrégalos uno por uno o impórtalos desde un CSV."
+                  ></tr>
+                }
+              }
+            </tbody>
+          }
+        }
       </table>
       <div class="p-4 rounded-b-lg ">
         <lib-paginator
@@ -240,11 +201,10 @@ export default class Students {
   private confirmation = inject(Confirmation);
   public searchText = signal('');
   public pagination = inject(Pagination);
-  actionsMenu = viewChild<Menu<string>>('actionsMenu');
   public auth = inject(Auth);
   public page = signal(1);
   public pageSize = signal(10);
-  public total = computed(() => this.students.value()?.meta?.total ?? 0);
+  public total = computed(() => this.studentsList.rows()?.meta?.total ?? 0);
 
   public students = httpResource<PaginatedResponse<StudentRow>>(() => ({
     url: '/api/v1/students',
@@ -256,6 +216,8 @@ export default class Students {
       orderDirection: this.pagination.sortOrder(),
     }),
   }));
+  /** students with smooth loading: previous rows stay while the next page / sort / search loads. */
+  protected readonly studentsList = listState(this.students);
 
   getStatusLabel(status: $Enums.EnrollmentStatus): string {
     return ENROLLMENT_STATUS_LABELS[status] || status;
@@ -310,5 +272,43 @@ export default class Students {
           this.toasts.showError('Error al eliminar el alumno');
         },
       });
+  }
+
+  /** The actions in each row's menu (ui-row-actions). */
+  protected rowActions(student: StudentRow): UiRowAction[] {
+    return [
+      { id: 'view', label: 'Ver', icon: 'eye', link: ['/students', student.id] },
+      {
+        id: 'edit',
+        label: 'Editar',
+        icon: 'pencil',
+        link: ['/students', student.id, 'edit'],
+        hidden: !this.auth.hasPermission('MANAGE_STUDENTS'),
+      },
+      {
+        id: 'resend',
+        label: 'Reenviar invitación',
+        icon: 'mail',
+        hidden: !(student.user && !student.user.emailVerified),
+      },
+      {
+        id: 'delete',
+        label: 'Eliminar',
+        icon: 'trash-2',
+        tone: 'danger',
+        hidden: !this.auth.hasPermission('MANAGE_STUDENTS'),
+      },
+    ];
+  }
+
+  protected onRowAction(action: string, student: StudentRow): void {
+    switch (action) {
+      case 'resend':
+        this.resendInvitationForStudent(student);
+        break;
+      case 'delete':
+        this.deleteStudent(student);
+        break;
+    }
   }
 }

@@ -1,5 +1,6 @@
 import { Component, input, output } from '@angular/core';
 import { Badge } from './badge';
+import { Icon } from './icon';
 
 export interface ThreadListItem {
   id: string;
@@ -15,22 +16,22 @@ export interface ThreadListItem {
 
 @Component({
   selector: 'lib-thread-list',
-  imports: [Badge],
+  imports: [Badge, Icon],
   template: `
     <ul class="menu w-full gap-2">
       @for (thread of threads(); track thread.id) {
         <li class="w-full">
           <button
-            class="flex justify-between items-center gap-0.5 rounded-xl border border-transparent hover:bg-primary/20 active:bg-base-100 transition-colors duration-200 ease-in-out px-3 py-2 w-full"
-            [class.bg-primary/10]="thread.id === selectedId()"
+            class="flex justify-between items-center gap-0.5 rounded-xl border border-transparent hover:bg-primary/20 active:bg-surface-1 transition-colors duration-200 ease-in-out px-3 py-2 w-full"
+            [class.bg-action-subtle]="thread.id === selectedId()"
             [class.border-primary/30]="thread.broadcast"
-            [class.bg-primary/5]="thread.broadcast && thread.id !== selectedId()"
+            [class.bg-action-subtle]="thread.broadcast && thread.id !== selectedId()"
             (click)="selected.emit(thread.id)"
           >
             <div class="flex flex-col items-start min-w-0">
               <div class="flex w-full items-center gap-2">
                 @if (thread.broadcast) {
-                  <span class="material-symbols-outlined text-primary text-base shrink-0">campaign</span>
+                  <ui-icon name="megaphone" class="text-primary text-base shrink-0" />
                 }
                 <span class="font-medium truncate">{{ thread.title }}</span>
                 @if (thread.broadcast) {

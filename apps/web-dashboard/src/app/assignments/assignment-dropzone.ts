@@ -1,5 +1,5 @@
 import { Component, computed, input, output, signal } from '@angular/core';
-import { Button } from '#/ui';
+import { Button, Icon, UiIconName } from '#/ui';
 
 export type UploadedFile = {
   file: File;
@@ -8,13 +8,13 @@ export type UploadedFile = {
 
 @Component({
   selector: 'app-assignment-dropzone',
-  imports: [Button],
+  imports: [Button, Icon],
   template: `
     <div
       class="border-2 border-dashed rounded-lg p-6 text-center transition-colors"
       [class.border-primary]="isDragOver()"
-      [class.bg-primary/5]="isDragOver()"
-      [class.border-base-300]="!isDragOver()"
+      [class.bg-action-subtle]="isDragOver()"
+      [class.border-line]="!isDragOver()"
       [class.hover:border-primary]="!isDragOver()"
       (dragover)="onDragOver($event)"
       (dragleave)="onDragLeave($event)"
@@ -22,83 +22,68 @@ export type UploadedFile = {
     >
       @if (files().length === 0) {
         <div class="flex flex-col items-center gap-2">
-          <span class="material-symbols-outlined text-4xl text-base-content/50">
-            cloud_upload
-          </span>
-          <p class="text-base-content/70">
-            Arrastra y suelta archivos aquí o
-          </p>
-          <label class="btn btn-primary btn-sm">
-            <span class="material-symbols-outlined text-lg">attach_file</span>
+          <ui-icon name="cloud-upload" class="text-4xl text-ink-subtle" />
+          <p class="text-ink-muted">Arrastra y suelta archivos aquí o</p>
+          <button uiButton variant="primary" size="sm" type="button" (click)="fileInput.click()">
+            <ui-icon name="paperclip" class="text-lg" />
             Seleccionar archivo
+          </button>
+          <input
+            #fileInput
+            type="file"
+            class="hidden"
+            [accept]="accept()"
+            [multiple]="multiple()"
+            (change)="onFileSelect($event)"
+          />
+          @if (maxSize()) {
+            <p class="text-xs text-ink-subtle mt-1">Tamaño máximo: {{ formatBytes(maxSize()!) }}</p>
+          }
+        </div>
+      } @else {
+        <div class="space-y-3">
+          @for (uploadedFile of files(); track uploadedFile.file.name) {
+            <div class="flex items-center justify-between p-3 bg-surface-0 rounded-lg">
+              <div class="flex items-center gap-3">
+                <ui-icon
+                  [name]="getFileIcon(uploadedFile.file.type)"
+                  class="text-2xl"
+                  [class.text-error]="uploadedFile.file.type.includes('pdf')"
+                  [class.text-info]="
+                    uploadedFile.file.type.includes('word') || uploadedFile.file.type.includes('document')
+                  "
+                  [class.text-success]="uploadedFile.file.type.includes('image')"
+                  [class.text-warning]="
+                    uploadedFile.file.type.includes('spreadsheet') || uploadedFile.file.type.includes('excel')
+                  "
+                />
+                <div class="text-left">
+                  <p class="font-medium text-sm truncate max-w-xs">
+                    {{ uploadedFile.file.name }}
+                  </p>
+                  <p class="text-xs text-ink-subtle">
+                    {{ formatBytes(uploadedFile.file.size) }}
+                  </p>
+                </div>
+              </div>
+              <button uiButton variant="ghost" size="sm" iconOnly type="button" (click)="removeFile(uploadedFile)">
+                <ui-icon name="x" />
+              </button>
+            </div>
+          }
+          @if (multiple()) {
+            <button uiButton variant="secondary" size="sm" type="button" (click)="moreFilesInput.click()">
+              <ui-icon name="plus" class="text-lg" />
+              Agregar más archivos
+            </button>
             <input
+              #moreFilesInput
               type="file"
               class="hidden"
               [accept]="accept()"
               [multiple]="multiple()"
               (change)="onFileSelect($event)"
             />
-          </label>
-          @if (maxSize()) {
-            <p class="text-xs text-base-content/50 mt-1">
-              Tamaño máximo: {{ formatBytes(maxSize()!) }}
-            </p>
-          }
-        </div>
-      } @else {
-        <div class="space-y-3">
-          @for (uploadedFile of files(); track uploadedFile.file.name) {
-            <div
-              class="flex items-center justify-between p-3 bg-base-200 rounded-lg"
-            >
-              <div class="flex items-center gap-3">
-                <span
-                  class="material-symbols-outlined text-2xl"
-                  [class.text-error]="uploadedFile.file.type.includes('pdf')"
-                  [class.text-info]="
-                    uploadedFile.file.type.includes('word') ||
-                    uploadedFile.file.type.includes('document')
-                  "
-                  [class.text-success]="
-                    uploadedFile.file.type.includes('image')
-                  "
-                  [class.text-warning]="
-                    uploadedFile.file.type.includes('spreadsheet') ||
-                    uploadedFile.file.type.includes('excel')
-                  "
-                >
-                  {{ getFileIcon(uploadedFile.file.type) }}
-                </span>
-                <div class="text-left">
-                  <p class="font-medium text-sm truncate max-w-xs">
-                    {{ uploadedFile.file.name }}
-                  </p>
-                  <p class="text-xs text-base-content/50">
-                    {{ formatBytes(uploadedFile.file.size) }}
-                  </p>
-                </div>
-              </div>
-              <button uiButton variant="ghost" size="sm" iconOnly
-                type="button"
-               
-                (click)="removeFile(uploadedFile)"
-              >
-                <span class="material-symbols-outlined">close</span>
-              </button>
-            </div>
-          }
-          @if (multiple()) {
-            <label class="btn btn-outline btn-sm">
-              <span class="material-symbols-outlined text-lg">add</span>
-              Agregar más archivos
-              <input
-                type="file"
-                class="hidden"
-                [accept]="accept()"
-                [multiple]="multiple()"
-                (change)="onFileSelect($event)"
-              />
-            </label>
           }
         </div>
       }
@@ -213,16 +198,16 @@ export default class AssignmentDropzone {
     this.filesChange.emit([]);
   }
 
-  getFileIcon(mimeType: string): string {
-    if (mimeType.includes('pdf')) return 'picture_as_pdf';
+  getFileIcon(mimeType: string): UiIconName {
+    if (mimeType.includes('pdf')) return 'file-text';
     if (mimeType.includes('image')) return 'image';
-    if (mimeType.includes('word') || mimeType.includes('document')) return 'description';
-    if (mimeType.includes('spreadsheet') || mimeType.includes('excel')) return 'table_chart';
-    if (mimeType.includes('presentation') || mimeType.includes('powerpoint')) return 'slideshow';
-    if (mimeType.includes('zip') || mimeType.includes('rar')) return 'folder_zip';
-    if (mimeType.includes('video')) return 'movie';
-    if (mimeType.includes('audio')) return 'audio_file';
-    return 'insert_drive_file';
+    if (mimeType.includes('word') || mimeType.includes('document')) return 'file-text';
+    if (mimeType.includes('spreadsheet') || mimeType.includes('excel')) return 'sheet';
+    if (mimeType.includes('presentation') || mimeType.includes('powerpoint')) return 'presentation';
+    if (mimeType.includes('zip') || mimeType.includes('rar')) return 'file-archive';
+    if (mimeType.includes('video')) return 'file-video';
+    if (mimeType.includes('audio')) return 'file-audio';
+    return 'file';
   }
 
   formatBytes(bytes: number): string {

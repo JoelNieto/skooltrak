@@ -1,0 +1,84 @@
+# Production stack: one Docker host, Caddy in front, managed Postgres (Neon) outside.
+# The deploy workflow copies this file and the Caddyfile to the server and runs
+#   IMAGE_TAG=<git sha> docker compose up -d
+# Secrets live only in .env next to this file on the server (see .env.example).
+
+# Frontends override env_file with [], so the backend secrets never reach them.
+x-app: &app
+  restart: unless-stopped
+  env_file: .env
+  logging:
+    driver: json-file
+    options:
+      max-size: '10m'
+      max-file: '5'
+
+services:
+  caddy:
+    image: caddy:2.10-alpine
+    restart: unless-stopped
+    ports:
+      - '80:80'
+      - '443:443'
+      - '443:443/udp'
+    environment:
+      APP_DOMAIN: ${APP_DOMAIN:?set APP_DOMAIN in .env}
+      ADMIN_DOMAIN: ${ADMIN_DOMAIN:?set ADMIN_DOMAIN in .env}
+      ACME_EMAIL: ${ACME_EMAIL:?set ACME_EMAIL in .env}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      web-dashboard:
+        condition: service_healthy
+      web-admin:
+        condition: service_healthy
+
+  dashboard-backend:
+    <<: *app
+    image: ${REGISTRY:-ghcr.io/joelnieto}/skooltrak-dashboard-backend:${IMAGE_TAG:-latest}
+    environment:
+      PORT: 3000
+      APP_URL: https://${APP_DOMAIN}
+      BETTER_AUTH_URL: https://${APP_DOMAIN}
+      CORS_ORIGINS: https://${APP_DOMAIN}
+      TRUSTED_ORIGINS: https://${APP_DOMAIN}
+
+  admin-backend:
+    <<: *app
+    image: ${REGISTRY:-ghcr.io/joelnieto}/skooltrak-admin-backend:${IMAGE_TAG:-latest}
+    environment:
+      PORT: 5050
+      APP_URL: https://${ADMIN_DOMAIN}
+      BETTER_AUTH_URL: https://${ADMIN_DOMAIN}
+      CORS_ORIGINS: https://${ADMIN_DOMAIN}
+      TRUSTED_ORIGINS: https://${ADMIN_DOMAIN}
+
+  web-dashboard:
+    <<: *app
+    image: ${REGISTRY:-ghcr.io/joelnieto}/skooltrak-web-dashboard:${IMAGE_TAG:-latest}
+    env_file: []
+    environment:
+      PORT: 4200
+      NG_ALLOWED_HOSTS: ${APP_DOMAIN}
+      NG_TRUST_PROXY_HEADERS: x-forwarded-proto,x-forwarded-host
+    depends_on:
+      dashboard-backend:
+        condition: service_healthy
+
+  web-admin:
+    <<: *app
+    image: ${REGISTRY:-ghcr.io/joelnieto}/skooltrak-web-admin:${IMAGE_TAG:-latest}
+    env_file: []
+    environment:
+      PORT: 4300
+      NG_ALLOWED_HOSTS: ${ADMIN_DOMAIN}
+      NG_TRUST_PROXY_HEADERS: x-forwarded-proto,x-forwarded-host
+    depends_on:
+      admin-backend:
+        condition: service_healthy
+
+volumes:
+  caddy_data:
+  caddy_config:

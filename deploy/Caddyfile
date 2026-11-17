@@ -1,0 +1,49 @@
+# Edge proxy for the whole platform. Caddy gets and renews the TLS certificates itself.
+#
+# The frontends call /api and /socket.io on their own origin (the auth client uses
+# window.location.origin, the chat sockets use location.host), so each domain sends those
+# paths to its backend and everything else to its Angular SSR server. WebSocket upgrades
+# and X-Forwarded-* headers are handled by reverse_proxy out of the box.
+
+{
+	email {$ACME_EMAIL}
+}
+
+(common) {
+	encode zstd gzip
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		-Server
+	}
+	log {
+		output stdout
+		format console
+	}
+}
+
+{$APP_DOMAIN} {
+	import common
+
+	handle /api/* {
+		reverse_proxy dashboard-backend:3000
+	}
+	handle /socket.io/* {
+		reverse_proxy dashboard-backend:3000
+	}
+	handle {
+		reverse_proxy web-dashboard:4200
+	}
+}
+
+{$ADMIN_DOMAIN} {
+	import common
+
+	handle /api/* {
+		reverse_proxy admin-backend:5050
+	}
+	handle {
+		reverse_proxy web-admin:4300
+	}
+}

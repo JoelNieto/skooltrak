@@ -1,288 +1,185 @@
-# Skooltrak Platform - Deployment Guide
+# Deployment
 
-This guide covers deploying the Skooltrak platform to Railway with Neon PostgreSQL, Cloudflare R2, and Resend. The stack is an **Nx** monorepo: **Angular 21** standalone frontends (with SSR), **NestJS 11** backends with **typed REST** (OpenAPI/Swagger) and **Socket.IO** for live chat, **Prisma 7** + PostgreSQL, and **Bun** as the package manager / runtime for backends and CI builds.
-
-## Current Status
-
-| Area            | Version / detail                                                                                           |
-| --------------- | ---------------------------------------------------------------------------------------------------------- |
-| Package manager | Bun `1.2.2` (see root `package.json`)                                                                      |
-| Nx              | `22.6.5`                                                                                                   |
-| Angular         | `21.1.1`                                                                                                   |
-| NestJS          | `11`                                                                                                       |
-| Prisma          | `7`                                                                                                        |
-| API             | REST at `/api/v1/*` (Swagger at `/api/docs`); live chat via Socket.IO at `/socket.io` on dashboard-backend |
-
-### Deployable apps
-
-| App                 | Role                                                                                                   | Dockerfile today                                                                                             |
-| ------------------- | ------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------ |
-| `web-dashboard`     | Angular SSR app: dashboard, onboarding, authenticated features, public school store under `/store/...` | [apps/web-dashboard/Dockerfile](../apps/web-dashboard/Dockerfile) — Node **20** SSR, default `PORT` **4200** |
-| `web-admin`         | Standalone Angular SSR admin app                                                                       | [apps/web-admin/Dockerfile](../apps/web-admin/Dockerfile)                                                    |
-| `dashboard-backend` | NestJS REST + Socket.IO, port `3000`                                                                   | [apps/dashboard-backend/Dockerfile](../apps/dashboard-backend/Dockerfile)                                    |
-| `admin-backend`     | NestJS REST, port `5050`                                                                               | [apps/admin-backend/Dockerfile](../apps/admin-backend/Dockerfile)                                            |
-
-**CI:** The repo is hosted on **GitHub**. The CI definition at `.gitlab-ci.yml` (legacy filename) installs Bun, runs `bun nx run-many -t lint test build e2e`, then `bun nx fix-ci` (Nx Cloud self-healing), and can run a manual deploy with `railway up --detach` on `main`. When using **GitHub Actions** exclusively, port these steps into `.github/workflows/` and remove or replace the legacy file.
-
-## Architecture Overview
-
-The school dashboard, onboarding, authenticated features, and public school store are all served by **`web-dashboard`** (Angular SSR). REST traffic goes to `dashboard-backend` at `/api/v1/*`. Admin uses a separate Angular SSR app and `admin-backend`.
+Skooltrak runs as one Docker Compose stack on a single server, with Caddy in front, a managed
+Postgres (Neon) next to it, Cloudflare R2 for files and Resend for email. GitHub Actions builds
+the images, migrates the database and rolls the server forward on every push to `main`.
 
 ```mermaid
-flowchart TB
-    cf["Cloudflare DNS / CDN"]
-    subgraph Railway
-      dash["web-dashboard<br/>Angular SSR<br/>app.skooltrak.com / store.skooltrak.com"]
-      admin["web-admin<br/>Angular SSR<br/>admin.skooltrak.com"]
-      api["dashboard-backend<br/>NestJS REST + Socket.IO<br/>api.skooltrak.com"]
-      apiAdmin["admin-backend<br/>NestJS REST<br/>api-admin.skooltrak.com"]
+flowchart LR
+    user["Browser"] -->|"https"| caddy
+    subgraph server["Docker host · US East"]
+      caddy["Caddy<br/>TLS, routing"]
+      wd["web-dashboard<br/>Angular SSR :4200"]
+      wa["web-admin<br/>Angular SSR :4300"]
+      db["dashboard-backend<br/>NestJS :3000"]
+      ab["admin-backend<br/>NestJS :5050"]
     end
-    neon[("Neon Postgres")]
-    r2[("Cloudflare R2")]
-    resend["Resend"]
-    cf --> dash
-    cf --> admin
-    cf --> api
-    cf --> apiAdmin
-    dash -->|"/api/v1/*"| api
-    admin -->|"/api/v1/*"| apiAdmin
-    dash -.->|"/socket.io"| api
-    api --> neon
-    apiAdmin --> neon
-    api --> r2
-    apiAdmin --> r2
-    api --> resend
-    apiAdmin --> resend
+    caddy -->|"app domain /"| wd
+    caddy -->|"app domain /api, /socket.io"| db
+    caddy -->|"admin domain /"| wa
+    caddy -->|"admin domain /api"| ab
+    db --> neon[("Neon Postgres<br/>us-east-1")]
+    ab --> neon
+    db --> r2[("Cloudflare R2")]
+    ab --> r2
+    db --> resend["Resend"]
+    ab --> resend
 ```
 
-## Prerequisites
+## Why this shape
 
-- [Railway](https://railway.app) account
-- [Neon](https://neon.tech) account (PostgreSQL)
-- [Cloudflare](https://cloudflare.com) account (R2, DNS)
-- [Resend](https://resend.com) account (Email)
-- Domain name (e.g., skooltrak.com)
-- **Bun** `1.2.2` (or compatible) for local scripts and Docker build stages
-- **Node.js 20** — required at runtime for `web-admin` and `web-dashboard` SSR in their Docker images; not required on your laptop if you only use Bun + Nx via the repo
-- Optional: **Nx Cloud** token for CI features (see CI config at repo root / Nx docs)
+- **Same-origin API is required, not optional.** The frontends call `/api` and `/socket.io` on
+  their own origin (the auth client uses `window.location.origin`, the chat sockets use
+  `location.host`), and there is no setting to point them at another host. Caddy routes those
+  paths to the right backend per domain, and handles TLS and WebSocket upgrades on its own.
+- **Region: US East.** Users are in Panama (the default school timezone), which is closer to
+  Virginia than to São Paulo. The server and Neon sit in the same metro (Ashburn / AWS
+  `us-east-1`), so each database query stays around a millisecond.
+- **One server** is the simplest thing that fits today's load: five small containers, about
+  2–3 GB of RAM in total. Postgres is managed, so the server holds no data and can be rebuilt
+  from this repo and its `.env` at any time.
 
-## Phase 1: Database Setup
+## Layout
 
-### 1.1 Create Neon Project
+| Path | What it is |
+| --- | --- |
+| `apps/*/Dockerfile` | One image per app. Backends run on Bun, frontends on Node 24 (Angular 22 needs `^22.22.3 \|\| ^24.15.0`). |
+| `deploy/compose.yml` | The production stack. Images are `ghcr.io/joelnieto/skooltrak-<app>:<git sha>`. |
+| `deploy/Caddyfile` | Domains, TLS, routing. |
+| `deploy/.env.example` | Every variable the server needs. The real `.env` lives only on the server. |
+| `.github/workflows/ci.yml` | Lint and build on pull requests (tests run but don't block yet). |
+| `.github/workflows/deploy.yml` | CI → build and push images → migrate → roll out. |
 
-1. Go to [Neon Console](https://console.neon.tech)
-2. Create a new project
-3. Select **AWS São Paulo (sa-east-1)** region for LATAM
-4. Copy the connection string (add `?sslmode=require` if not present)
+## One-time setup
 
-### 1.2 Run Migrations
+### 1. Neon (database)
 
-Prisma **7** generates the client used by NestJS and (via build) some Angular code that references `@generated/prisma`.
+1. Create a project in **AWS `us-east-1`**, Postgres 17, database `skooltrak`.
+2. Turn on point-in-time restore (history retention) for the production branch.
+3. Copy two connection strings:
+   - **Pooled** (host contains `-pooler`): the apps use this one → `DATABASE_URL` in the server `.env`.
+   - **Direct**: migrations use this one → GitHub secret `MIGRATION_DATABASE_URL`.
+
+### 2. Cloudflare R2 (files)
+
+Create a bucket and an API token scoped to that bucket (Object Read & Write). Note the account
+endpoint, key ID and secret.
+
+### 3. Resend (email)
+
+Add and verify your sending domain (it gives SPF/DKIM records to add in DNS) and create an API key.
+Sign-up requires email verification, so this must work before the first user signs up.
+
+### 4. Server
+
+Any Ubuntu 24.04 VM in US East with **2 vCPU / 4 GB RAM** (e.g. Hetzner Cloud in Ashburn,
+DigitalOcean NYC, AWS Lightsail `us-east-1`).
 
 ```bash
-# Set your database URL
-export DATABASE_URL="postgresql://user:password@host/dbname?sslmode=require"
+# as root
+curl -fsSL https://get.docker.com | sh
+adduser --disabled-password --gecos '' deploy
+usermod -aG docker deploy
+ufw allow OpenSSH && ufw allow 80/tcp && ufw allow 443/tcp && ufw allow 443/udp && ufw --force enable
 
-# Run migrations
-bun prisma migrate deploy
-
-# Seed initial admin (optional)
-bun run prisma/scripts/seed-admin.ts
+# as deploy
+mkdir -p ~/skooltrak && cd ~/skooltrak
+# create .env from deploy/.env.example, fill it in, then:
+chmod 600 .env
 ```
 
-## Phase 2: Railway Setup
+Create an SSH key pair for GitHub Actions (on your machine, not the server), add the public key
+to `/home/deploy/.ssh/authorized_keys`, and keep the private key for the next step.
 
-### 2.1 Create Railway Project
+### 5. DNS
 
-1. Create a new project at [Railway](https://railway.app/new)
-2. Add **4** services: `dashboard-backend`, `admin-backend`, `web-dashboard`, `web-admin`
+Point both domains at the server's IP (A, plus AAAA if it has IPv6). If they are on Cloudflare,
+set the records to **DNS only** (grey cloud) so Caddy can get its certificates; you can turn the
+proxy on later with SSL mode "Full (strict)".
 
-### 2.2 Configure Each Service
+### 6. GitHub
 
-For each service, set in Railway dashboard (repo root = monorepo root):
+Create the environment **`production`** (Settings → Environments) with:
 
-| Setting         | dashboard-backend                   | admin-backend                   | web-admin                   | web-dashboard                   |
-| --------------- | ----------------------------------- | ------------------------------- | --------------------------- | ------------------------------- |
-| Root Directory  | `/`                                 | `/`                             | `/`                         | `/`                             |
-| Dockerfile Path | `apps/dashboard-backend/Dockerfile` | `apps/admin-backend/Dockerfile` | `apps/web-admin/Dockerfile` | `apps/web-dashboard/Dockerfile` |
+| Kind | Name | Value |
+| --- | --- | --- |
+| Secret | `MIGRATION_DATABASE_URL` | Neon **direct** connection string |
+| Secret | `DEPLOY_HOST` | Server IP or hostname |
+| Secret | `DEPLOY_USER` | `deploy` |
+| Secret | `DEPLOY_SSH_KEY` | The private key from step 4 |
+| Secret | `DEPLOY_KNOWN_HOSTS` | Output of `ssh-keyscan <server>` (pins the server's key) |
+| Variable | `APP_DOMAIN` | e.g. `app.skooltrak.com` (shown as the deployment URL) |
 
-**Default ports (set via `EXPOSE` / `ENV PORT` in Dockerfiles or Railway):**
+Optionally add yourself as a **required reviewer** so each deploy waits for a click.
 
-| Service                  | Port                          |
-| ------------------------ | ----------------------------- |
-| dashboard-backend        | `3000`                        |
-| admin-backend            | `5050`                        |
-| web-admin                | `4300`                        |
-| web-dashboard (Node SSR) | `4200` (override with `PORT`) |
+### 7. First deploy
 
-**Via environment variable:** set `RAILWAY_DOCKERFILE_PATH` per service to the paths above.
-
-### 2.3 Connect Repository
-
-- Connect your **GitHub** repository to Railway
-- Railway can auto-deploy on push to `main` (or your chosen branch)
-- Or use manual deploy from CI (see Phase 5)
-
-## Phase 3: Environment Variables
-
-Configure these in Railway for **backend** services (`dashboard-backend`, `admin-backend`):
-
-| Variable                          | Description                                                    | Example                             |
-| --------------------------------- | -------------------------------------------------------------- | ----------------------------------- |
-| `DATABASE_URL`                    | Neon connection string                                         | `postgresql://...?sslmode=require`  |
-| `BETTER_AUTH_SECRET`              | Auth secret                                                    | `openssl rand -base64 32`           |
-| `JWT_SECRET`                      | JWT signing secret                                             | Same as `BETTER_AUTH_SECRET`        |
-| `APP_URL`                         | Public app URL                                                 | `https://skooltrak.com`             |
-| `CORS_ORIGINS`                    | Allowed browser origins (comma-separated, no trailing slashes) | See below                           |
-| `TRUSTED_ORIGINS`                 | Better Auth trusted origins                                    | Typically align with `CORS_ORIGINS` |
-| `CLOUDFLARE_R2_ENDPOINT`          | R2 endpoint URL                                                | From Cloudflare R2                  |
-| `CLOUDFLARE_R2_ACCESS_KEY_ID`     | R2 access key                                                  | From Cloudflare R2                  |
-| `CLOUDFLARE_R2_SECRET_ACCESS_KEY` | R2 secret                                                      | From Cloudflare R2                  |
-| `CLOUDFLARE_R2_BUCKET`            | R2 bucket name                                                 | Your bucket name                    |
-| `RESEND_API_KEY`                  | Resend API key                                                 | From Resend dashboard               |
-| `EMAIL_FROM`                      | From email                                                     | `Skooltrak <noreply@skooltrak.com>` |
-
-### admin-backend CORS
-
-Set `CORS_ORIGINS` to include **`https://admin.skooltrak.com`** (web-admin origin).
-
-### dashboard-backend CORS
-
-Include every origin that calls **`/api/v1/*`** or **`/socket.io`** in the browser. Typically just the dashboard origin:
-
-- `https://skooltrak.com` (web-dashboard primary domain)
-- `https://app.skooltrak.com` (if you serve the dashboard on a subdomain)
-
-Example:
-
-`https://skooltrak.com,https://app.skooltrak.com`
-
-Adjust if you use different hostnames.
-
-### REST API and Socket.IO
-
-- REST: **`/api/v1/*`** (OpenAPI docs at **`/api/docs`**, JSON at **`/api/openapi.json`**)
-- Live chat: **Socket.IO** at **`/socket.io`** on dashboard-backend (proxied same-origin in dev)
-
-When using a reverse proxy on the dashboard domain, route **`/api/*`** and **`/socket.io`** to **dashboard-backend**.
-
-### Frontend / proxy
-
-If you keep **same-origin** API calls from the dashboard (e.g. `skooltrak.com/api/...` → backend), configure Cloudflare or a Worker to route **`/api/*`** and **`/socket.io`** to `dashboard-backend`. If clients call **`https://api.skooltrak.com`** directly, ensure CORS and cookies (if any) match your auth setup.
-
-## Phase 4: Domain Configuration
-
-### 4.1 Railway Custom Domains
-
-| Service           | Suggested domain                     |
-| ----------------- | ------------------------------------ |
-| web-dashboard     | skooltrak.com (or app.skooltrak.com) |
-| web-admin         | admin.skooltrak.com                  |
-| dashboard-backend | api.skooltrak.com                    |
-| admin-backend     | api-admin.skooltrak.com              |
-
-### 4.2 Cloudflare DNS
-
-1. Add your domain to Cloudflare
-2. Create CNAME (or Railway-provided targets) for:
-   - `skooltrak.com` → Railway **web-dashboard**
-   - `admin` → Railway **web-admin**
-   - `api` → Railway **dashboard-backend**
-   - `api-admin` → Railway **admin-backend**
-
-### 4.3 Reverse proxy
-
-- **Same-origin API:** route `/api/*` and `/socket.io` on the dashboard domain to **dashboard-backend** (Worker or Cloudflare rules). This avoids cross-origin cookies and simplifies CORS.
-
-## Phase 5: CI/CD (GitHub)
-
-The pipeline in `.gitlab-ci.yml` uses a **Node 20** image, installs **Bun**, then:
-
-1. `bun install --no-cache`
-2. `bun playwright install --with-deps`
-3. `bun nx run-many -t lint test build e2e`
-4. `bun nx fix-ci` (after_script; Nx Cloud self-healing)
-
-Runs on `main` and merge requests (test stage). **Deploy** stage (`deploy` job) is **manual**, **only on `main`**, and runs:
-
-- Install Railway CLI
-- `railway up --detach`
-
-If you standardize on **GitHub Actions**, recreate the same jobs in `.github/workflows/` (and add `RAILWAY_TOKEN` as a repository secret).
-
-### Manual deploy via GitHub Actions
-
-1. Add `RAILWAY_TOKEN` as a **repository secret** (GitHub → **Settings** → **Secrets and variables** → **Actions**)
-   - Create a token in Railway (Project Settings → Tokens)
-2. `railway link` locally selects **one** default service; **`railway up` deploys that linked service only**
-3. For **four** services, either:
-   - Use **Railway Git integration** so each service builds and deploys from the same repo with its own `RAILWAY_DOCKERFILE_PATH`, or
-   - Maintain **separate CI jobs / tokens** per service, or run `railway up` with the correct service context per deployment
-
-### Automatic deploy via Railway
-
-1. Connect the **GitHub** repo in Railway
-2. Each service uses its Dockerfile path from the monorepo root
-3. Configure branch triggers (e.g. `main`) per service
-
-## Phase 6: Local Docker Verification
-
-Test images locally before deploying (from repository root):
+Run **Actions → Deploy → Run workflow**. It applies every migration to the empty database and
+seeds roles and permissions. Then create the first admin from your machine (once):
 
 ```bash
-# dashboard-backend (REST at http://localhost:3000/api/v1, Swagger at /api/docs)
-docker build -f apps/dashboard-backend/Dockerfile -t skooltrak-dashboard-backend .
-docker run -p 3000:3000 -e DATABASE_URL="postgresql://..." skooltrak-dashboard-backend
-
-# admin-backend
-docker build -f apps/admin-backend/Dockerfile -t skooltrak-admin-backend .
-docker run -p 5050:5050 -e DATABASE_URL="postgresql://..." skooltrak-admin-backend
-
-# web-admin (Angular SSR)
-docker build -f apps/web-admin/Dockerfile -t skooltrak-web-admin .
-docker run -p 4300:4300 skooltrak-web-admin
-
-# web-dashboard (Angular SSR)
-docker build -f apps/web-dashboard/Dockerfile -t skooltrak-web-dashboard .
-docker run -p 4200:4200 skooltrak-web-dashboard
+DATABASE_URL='<direct url>' ADMIN_EMAIL=... ADMIN_PASSWORD=... ADMIN_FIRST_NAME=... ADMIN_LAST_NAME=... \
+  bun run prisma/scripts/seed-admin.ts
 ```
 
-## Cost Estimate (Monthly)
+## Every deploy
 
-| Service               | Cost                        |
-| --------------------- | --------------------------- |
-| Railway (4 services)  | ~$20–80 (usage varies)      |
-| Neon PostgreSQL (Pro) | $19                         |
-| Cloudflare R2         | ~$5 (usage-based)           |
-| Cloudflare CDN        | Free tier                   |
-| Resend                | Free tier (3k emails/month) |
-| **Total**             | **~$44–104/month** (rough)  |
+Merging to `main` runs `deploy.yml`:
+
+1. **CI**: lint and build the affected projects.
+2. **Images**: build the four images and push them tagged with the commit SHA (and `latest`).
+3. **Migrate**: `prisma migrate deploy` against Neon, then the idempotent roles/permissions seed.
+4. **Roll out**: copy `compose.yml` and `Caddyfile` to the server, pull the new images and restart;
+   `--wait` fails the job if a container doesn't become healthy within 3 minutes.
+
+Deploys never overlap. A newer push waits for the running one to finish.
+
+## Rollback
+
+- **Code**: every image is kept by SHA. On the server:
+  `cd ~/skooltrak && IMAGE_TAG=<previous sha> docker compose up -d --wait`.
+- **Database**: migrations only go forward. Restore the Neon branch to a point before the deploy
+  (or branch from it), and roll the code back with it. Don't run old code against a schema that a
+  newer migration changed.
+
+## Operating it
+
+| Task | Command (in `~/skooltrak` on the server) |
+| --- | --- |
+| Status / health | `docker compose ps` |
+| Logs | `docker compose logs -f --tail=200 dashboard-backend` |
+| Restart one service | `docker compose restart web-dashboard` |
+| Change a secret | edit `.env`, then `docker compose up -d` |
+| Reload routing | `docker compose exec caddy caddy reload --config /etc/caddy/Caddyfile` |
+
+## Check before a launch
+
+- [ ] Sign up → verification email arrives → log in → log out.
+- [ ] Password reset email and link.
+- [ ] Students and messages page through correctly.
+- [ ] File upload and download (R2).
+- [ ] Chat updates live (Socket.IO through Caddy).
+- [ ] Public store at `/store/<slug>`.
+- [ ] Admin: log in, page users / permissions / schools, open the roles form.
+- [ ] View source on a dashboard page shows rendered HTML (SSR), not an empty shell.
+
+## Rough monthly cost
+
+| Item | Cost |
+| --- | --- |
+| Server (2 vCPU / 4 GB) | ~$10–25 |
+| Neon (Launch plan) | ~$19 |
+| Cloudflare R2 | ~$0–5 |
+| Resend | free tier to start |
+| GitHub Actions + GHCR | free for this usage on a public repo; minutes count on a private one |
 
 ## Troubleshooting
 
-### Build fails with "Cannot find module '@generated/prisma'"
-
-Ensure Prisma client is generated during the Docker build. Dockerfiles run `bunx prisma generate` before the Nx build. Backend images also copy `generated/` and link `node_modules/@generated/prisma` — keep that pattern if you add new Dockerfiles.
-
-### REST 401/403 or CORS on `/api/v1/*`
-
-- Verify `CORS_ORIGINS` includes every browser origin that calls the API (dashboard + admin as applicable).
-- Ensure the reverse proxy forwards **`Authorization`** headers and WebSocket upgrades for **`/socket.io`**.
-
-### CORS errors in production
-
-Verify `CORS_ORIGINS` includes your frontend URLs (with `https://`). No trailing slashes.
-
-### Database connection fails
-
-- Check `DATABASE_URL` includes `?sslmode=require` for Neon
-- Neon typically allows connections from cloud providers without IP allowlisting
-
-### Frontend can't reach API
-
-- **Same domain:** ensure the reverse proxy routes `/api` and `/socket.io` to **dashboard-backend**
-- **Subdomain API:** point frontends at `https://api.skooltrak.com/api/v1/*` and ensure CORS is set on the backend
-
-### `@generated/prisma` missing at runtime (backend)
-
-Same as build-time: both NestJS Dockerfiles must keep Prisma `generated` output and the `@generated/prisma` symlink step; do not omit when customizing images.
+- **`PrismaConfigEnvError: DATABASE_URL`** in a build: `prisma.config.ts` needs the variable even
+  for `generate`. The Dockerfiles and CI set a placeholder; keep it if you add new ones.
+- **SSR returns 4xx / falls back to client rendering**: the request host isn't in
+  `NG_ALLOWED_HOSTS` (set from `APP_DOMAIN` / `ADMIN_DOMAIN` in `compose.yml`).
+- **Login works but API calls 401 / CORS errors**: `APP_DOMAIN` / `ADMIN_DOMAIN` in `.env` must match
+  the browser's host exactly (they feed `CORS_ORIGINS`, `TRUSTED_ORIGINS` and `BETTER_AUTH_URL`).
+- **Caddy can't get a certificate**: DNS doesn't point at the server yet, port 80 is blocked, or
+  Cloudflare's proxy is on (grey-cloud the records first).

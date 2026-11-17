@@ -57,7 +57,7 @@ prisma/
 - **Backend**: NestJS 11, GraphQL (Apollo 5), Prisma 7, PostgreSQL
 - **Auth**: Better-auth 1.4, JWT, Passport
 - **Tooling**: Nx 22.4.5, TypeScript 5.9, ESLint 9
-- **CI/CD**: GitLab CI
+- **CI/CD**: GitHub Actions → GHCR → Docker Compose + Caddy (see `docs/DEPLOYMENT.md`)
 
 ## Common Commands
 
@@ -326,15 +326,14 @@ chore: maintenance
 
 ## CI/CD
 
-### GitLab CI Pipeline
+### GitHub Actions
 
-On every push to `main` or merge request:
+- **Pull requests** (`.github/workflows/ci.yml`): `bun nx affected -t lint build`; unit tests run
+  in a separate job that doesn't block yet.
+- **Push to `main`** (`.github/workflows/deploy.yml`): CI, then build and push the four images to
+  GHCR, run `prisma migrate deploy` and the roles/permissions seed, and roll out the server.
 
-1. Install bun
-2. `bun install --no-cache`
-3. `bun playwright install --with-deps`
-4. `bun nx run-many -t lint test build e2e`
-5. `bun nx fix-ci` (Nx Cloud self-healing)
+Setup, secrets and rollback are in [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md).
 
 ### Nx Cloud
 

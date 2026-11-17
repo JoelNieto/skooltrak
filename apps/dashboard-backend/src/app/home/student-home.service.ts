@@ -169,7 +169,10 @@ export class StudentHomeService {
     return this.progressFor(await this.context(user));
   }
 
-  async progressFor({ organizationId, userId, student, local }: StudentContext): Promise<StudentProgress> {
+  async progressFor(
+    { organizationId, userId, student, local }: StudentContext,
+    opts: { recentGrades?: number } = {},
+  ): Promise<StudentProgress> {
     const group = student.classGroup;
 
     const [{ current, previous }, enrolled, planRow] = await Promise.all([
@@ -212,7 +215,7 @@ export class StudentHomeService {
       this.prisma.studentGrade.findMany({
         where: { studentId: student.id, score: { not: null }, grade: { published: true, course: { organizationId } } },
         orderBy: { grade: { date: 'desc' } },
-        take: RECENT_GRADES,
+        take: opts.recentGrades ?? RECENT_GRADES,
         select: {
           id: true,
           score: true,

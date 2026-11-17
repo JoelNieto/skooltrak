@@ -4,6 +4,7 @@ import {
   Button,
   Confirmation,
   EmptyState,
+  Icon,
   Pagination,
   Paginator,
   Toast,
@@ -48,6 +49,7 @@ type StudentOption = { id: string; firstName: string; fatherName: string };
     FormsModule,
     Paginator,
     UiField,
+    Icon,
   ],
   providers: [Pagination],
   template: `
@@ -123,7 +125,7 @@ type StudentOption = { id: string; firstName: string; fatherName: string };
                 <td>
                   @if (!isStudent()) {
                     <button uiButton variant="ghost" size="sm" (click)="removeCharge(c.id)">
-                      <span class="material-symbols-outlined text-error">delete</span>
+                      <ui-icon name="trash-2" class="text-error" />
                     </button>
                   }
                 </td>
@@ -145,7 +147,7 @@ type StudentOption = { id: string; firstName: string; fatherName: string };
           <lib-empty-state
             title="Sin cargos"
             description="No se encontraron cargos con los filtros aplicados."
-            icon="receipt_long"
+            icon="receipt"
           />
         </div>
       }

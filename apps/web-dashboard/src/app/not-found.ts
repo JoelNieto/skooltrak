@@ -1,11 +1,11 @@
 import { Location } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import { Router } from '@angular/router';
-import { Button } from '#/ui';
+import { Button, Icon } from '#/ui';
 
 @Component({
   selector: 'app-not-found',
-  imports: [Button],
+  imports: [Button, Icon],
   template: `<div class="bg-surface-0 min-h-screen flex items-center justify-center p-4">
     <div class="max-w-lg w-full bg-surface-1 border border-line rounded-2xl overflow-hidden">
       <div class="p-8">
@@ -39,11 +39,11 @@ import { Button } from '#/ui';
         <!-- Action Buttons -->
         <div class="flex flex-col sm:flex-row gap-4 justify-center">
           <button uiButton variant="primary" size="lg" (click)="goHome()">
-            <span class="material-symbols-outlined">home</span>
+            <ui-icon name="house" />
             Inicio
           </button>
           <button uiButton size="lg" (click)="goBack()">
-            <span class="material-symbols-outlined">arrow_back</span>
+            <ui-icon name="arrow-left" />
             Regresar
           </button>
         </div>

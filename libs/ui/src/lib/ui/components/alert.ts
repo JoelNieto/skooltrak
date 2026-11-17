@@ -6,7 +6,7 @@ export type AlertTone = 'info' | 'success' | 'warning' | 'danger';
  * Inline message inside a page or form: a load error, a warning before an action, a confirmation.
  *
  *   <div uiAlert tone="danger">
- *     <span class="material-symbols-outlined">error</span>
+ *     <ui-icon name="circle-alert" />
  *     <span>No se pudo cargar el boletín.</span>
  *     <button uiButton variant="ghost" size="sm" (click)="reload()">Reintentar</button>
  *   </div>

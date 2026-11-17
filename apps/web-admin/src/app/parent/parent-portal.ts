@@ -34,7 +34,7 @@ import { Component } from '@angular/core';
         <lib-empty-state
           title="Sin comunicados nuevos"
           description="Los avisos importantes aparecerán aquí."
-          icon="campaign"
+          icon="megaphone"
         />
       } @else {
         <div class="space-y-3">

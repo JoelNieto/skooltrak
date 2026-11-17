@@ -7,10 +7,12 @@ import {
   CardBody,
   ChartPlaceholder,
   EmptyState,
+  Icon,
   PageHeader,
   Spinner,
   StatCard,
   TimeAgoPipe,
+  UiIconName,
 } from '#/ui';
 import { httpResource } from '@angular/common/http';
 import { Component, computed, inject } from '@angular/core';
@@ -37,7 +39,13 @@ type AlertKind = 'ABSENCE' | 'OVERDUE_WORK' | 'BELOW_PASS' | 'CHARGE_OVERDUE' | 
 type ParentChildHome = {
   student: { id: string; name: string; firstName: string; classGroup: Ref | null; school: Ref };
   currencyCode: string;
-  alerts: { kind: AlertKind; tone: 'danger' | 'warning'; title: string; detail: string; action: { label: string; link: string } }[];
+  alerts: {
+    kind: AlertKind;
+    tone: 'danger' | 'warning';
+    title: string;
+    detail: string;
+    action: { label: string; link: string };
+  }[];
   kpis: {
     average: { value: number | null; max: number | null; delta: number | null; previousPeriodName: string | null };
     attendance: { rate: number | null; absences: number; late: number } | null;
@@ -46,13 +54,27 @@ type ParentChildHome = {
   };
   work: WorkItem[];
   recentGrades: { id: string; title: string; course: Ref; score: number; band: GradeBand | null; date: string }[];
-  messages: { id: string; title: string; senderName: string; lastMessageAt: string; preview: string; unread: boolean }[];
+  messages: {
+    id: string;
+    title: string;
+    senderName: string;
+    lastMessageAt: string;
+    preview: string;
+    unread: boolean;
+  }[];
 };
 
 type AssignmentType = 'HOMEWORK' | 'EXAM' | 'QUIZ' | 'PROJECT' | 'PAPER' | 'NEW';
 type WorkStatus = 'PENDIENTE' | 'ENTREGADO' | 'VENCIDA' | 'PRESENCIAL';
 type GradeBand = 'EXCELLENT' | 'PASSING' | 'BELOW';
-type WorkItem = { assignmentId: string; title: string; type: AssignmentType; course: Ref; dueAt: string; status: WorkStatus };
+type WorkItem = {
+  assignmentId: string;
+  title: string;
+  type: AssignmentType;
+  course: Ref;
+  dueAt: string;
+  status: WorkStatus;
+};
 
 /** `GET /api/v1/home/parent/child/:studentId/account` (HOM-001 FR .22). */
 type ParentAccount = {
@@ -87,13 +109,13 @@ const ACCOUNT_STATUS: Record<ParentAccount['status'], { label: string; tone: Bad
 const shortDate = new Intl.DateTimeFormat('es', { weekday: 'short', day: 'numeric', month: 'short', timeZone: 'UTC' });
 const monthName = new Intl.DateTimeFormat('es', { month: 'long', timeZone: 'UTC' });
 
-const ALERT_ICONS: Record<AlertKind, string> = {
-  ABSENCE: 'event_busy',
-  OVERDUE_WORK: 'assignment_late',
-  BELOW_PASS: 'trending_down',
-  CHARGE_OVERDUE: 'payments',
-  CHARGE_DUE_SOON: 'payments',
-  LATE: 'schedule',
+const ALERT_ICONS: Record<AlertKind, UiIconName> = {
+  ABSENCE: 'calendar-x',
+  OVERDUE_WORK: 'clipboard-x',
+  BELOW_PASS: 'trending-down',
+  CHARGE_OVERDUE: 'banknote',
+  CHARGE_DUE_SOON: 'banknote',
+  LATE: 'clock',
 };
 
 const percent = new Intl.NumberFormat('es', { style: 'percent', maximumFractionDigits: 0 });
@@ -115,13 +137,14 @@ const grade = (n: number) => n.toFixed(1);
     EmptyState,
     RecentBroadcasts,
     TimeAgoPipe,
+    Icon,
   ],
   template: `
     <lib-page-header
       [title]="greeting()"
       subtitle="Esto es lo que necesitas saber de tus hijos hoy."
       actionLabel="Escribir a un docente"
-      actionIcon="edit_square"
+      actionIcon="square-pen"
       (action)="writeToTeacher()"
     />
 
@@ -138,7 +161,7 @@ const grade = (n: number) => n.toFixed(1);
           <lib-empty-state
             title="Sin hijos vinculados"
             description="Vincula a tus hijos con su código de matrícula para ver su progreso."
-            icon="group"
+            icon="users"
             actionLabel="Vincular hijo"
             (action)="linkChild()"
           />
@@ -162,22 +185,28 @@ const grade = (n: number) => n.toFixed(1);
             >
             <span class="flex flex-col">
               <span class="font-semibold text-ink-strong">{{ child.name }}</span>
-              <span class="text-xs text-ink-muted">{{ child.classGroup?.name ?? 'Sin grupo' }} · {{ child.school.name }}</span>
+              <span class="text-xs text-ink-muted"
+                >{{ child.classGroup?.name ?? 'Sin grupo' }} · {{ child.school.name }}</span
+              >
             </span>
             @if (child.alertCount > 0) {
-              <span uiBadge tone="danger" size="sm">{{ child.alertCount === 1 ? '1 alerta' : child.alertCount + ' alertas' }}</span>
+              <span uiBadge tone="danger" size="sm">{{
+                child.alertCount === 1 ? '1 alerta' : child.alertCount + ' alertas'
+              }}</span>
             }
           </button>
         }
       </div>
 
-      <section uiCard class="mt-6" aria-labelledby="alerts-title">
+      <section uiCard bleed class="mt-6" aria-labelledby="alerts-title">
         <div uiCardBody>
           <div class="flex flex-wrap items-center justify-between gap-2">
             <h2 id="alerts-title" class="text-base font-semibold text-ink-strong">
               Requiere tu atención{{ home.value() ? ' · ' + home.value()?.student?.firstName : '' }}
             </h2>
-            <a routerLink="/parent/progress" class="link link-primary text-sm" (click)="rememberSelection()">Ver progreso</a>
+            <a routerLink="/parent/progress" class="link link-primary text-sm" (click)="rememberSelection()"
+              >Ver progreso</a
+            >
           </div>
           @if (home.isLoading()) {
             <div class="flex justify-center py-8"><span uiSpinner></span></div>
@@ -187,23 +216,30 @@ const grade = (n: number) => n.toFixed(1);
               <button uiButton variant="ghost" size="sm" type="button" (click)="home.reload()">Reintentar</button>
             </div>
           } @else if (alerts().length === 0) {
-            <lib-empty-state title="Todo al día" description="No hay ausencias, tareas vencidas, notas bajas ni pagos pendientes." icon="task_alt" color="success" />
+            <lib-empty-state
+              title="Todo al día"
+              description="No hay ausencias, tareas vencidas, notas bajas ni pagos pendientes."
+              icon="circle-check-big"
+              color="success"
+            />
           } @else {
             <ul class="mt-2 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
               @for (alert of alerts(); track alert.kind + alert.title) {
                 <li class="flex gap-3 rounded-field border border-line p-3.5">
-                  <span
-                    class="material-symbols-outlined flex size-9 shrink-0 items-center justify-center rounded-field"
+                  <ui-icon
+                    [name]="alertIcon(alert.kind)"
+                    class="flex size-9 shrink-0 items-center justify-center rounded-field"
                     [class]="alert.tone === 'danger' ? 'bg-error/15 text-error' : 'bg-warning/15 text-warning'"
-                    aria-hidden="true"
-                    >{{ alertIcon(alert.kind) }}</span
-                  >
+                  />
                   <div class="flex min-w-0 flex-1 flex-col gap-0.5">
                     <strong class="text-ink-strong">{{ alert.title }}</strong>
                     <span class="text-sm text-ink-muted">{{ alert.detail }}</span>
-                    <a [routerLink]="alert.action.link" class="link link-primary mt-1 text-sm font-medium" (click)="rememberSelection()">{{
-                      alert.action.label
-                    }}</a>
+                    <a
+                      [routerLink]="alert.action.link"
+                      class="link link-primary mt-1 text-sm font-medium"
+                      (click)="rememberSelection()"
+                      >{{ alert.action.label }}</a
+                    >
                   </div>
                 </li>
               }
@@ -213,28 +249,54 @@ const grade = (n: number) => n.toFixed(1);
       </section>
 
       <div class="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <lib-stat-card label="Promedio del periodo" [value]="averageValue()" [helper]="averageHelper()" icon="grade" color="primary" />
-        <lib-stat-card label="Asistencia" [value]="attendanceValue()" [helper]="attendanceHelper()" icon="how_to_reg" color="success" />
-        <lib-stat-card label="Entregas pendientes" [value]="pendingValue()" [helper]="pendingHelper()" icon="assignment" color="warning" />
+        <lib-stat-card
+          label="Promedio del periodo"
+          [value]="averageValue()"
+          [helper]="averageHelper()"
+          icon="star"
+          color="primary"
+        />
+        <lib-stat-card
+          label="Asistencia"
+          [value]="attendanceValue()"
+          [helper]="attendanceHelper()"
+          icon="user-check"
+          color="success"
+        />
+        <lib-stat-card
+          label="Entregas pendientes"
+          [value]="pendingValue()"
+          [helper]="pendingHelper()"
+          icon="clipboard-list"
+          color="warning"
+        />
         @if (home.value()?.kpis?.balance !== null) {
-          <lib-stat-card label="Saldo" [value]="balanceValue()" [helper]="balanceHelper()" icon="account_balance_wallet" color="info" />
+          <lib-stat-card label="Saldo" [value]="balanceValue()" [helper]="balanceHelper()" icon="wallet" color="info" />
         }
       </div>
 
       @if (home.value(); as child) {
         <div class="mt-6 flex flex-wrap gap-6">
-          <section uiCard class="min-w-0 flex-[999_1_560px]" aria-labelledby="work-title">
+          <section uiCard bleed class="min-w-0 flex-[999_1_560px]" aria-labelledby="work-title">
             <div uiCardBody>
               <div class="flex items-center justify-between">
                 <h2 id="work-title" class="text-base font-semibold text-ink-strong">Próximas tareas y evaluaciones</h2>
-                <a routerLink="/parent/progress" class="link link-primary text-sm" (click)="rememberSelection()">Ver progreso</a>
+                <a routerLink="/parent/progress" class="link link-primary text-sm" (click)="rememberSelection()"
+                  >Ver progreso</a
+                >
               </div>
               @if (child.work.length === 0) {
-                <lib-empty-state title="Sin entregas próximas" description="Las tareas y evaluaciones de las próximas dos semanas aparecerán aquí." icon="assignment" />
+                <lib-empty-state
+                  title="Sin entregas próximas"
+                  description="Las tareas y evaluaciones de las próximas dos semanas aparecerán aquí."
+                  icon="clipboard-list"
+                />
               } @else {
                 <ul class="mt-1 flex flex-col">
                   @for (item of child.work; track item.assignmentId) {
-                    <li class="flex min-h-11 flex-wrap items-center gap-x-4 gap-y-2 border-t border-line py-2.5 first:border-t-0">
+                    <li
+                      class="flex min-h-11 flex-wrap items-center gap-x-4 gap-y-2 border-t border-line py-2.5 first:border-t-0"
+                    >
                       <div class="min-w-56 flex-[1_1_240px]">
                         <p class="flex flex-wrap items-center gap-2">
                           <span uiBadge [tone]="typeOf(item).tone" size="sm">{{ typeOf(item).label }}</span>
@@ -250,11 +312,15 @@ const grade = (n: number) => n.toFixed(1);
             </div>
           </section>
 
-          <section uiCard class="min-w-0 flex-[1_1_340px]" aria-labelledby="grades-title">
+          <section uiCard bleed class="min-w-0 flex-[1_1_340px]" aria-labelledby="grades-title">
             <div uiCardBody>
               <h2 id="grades-title" class="text-base font-semibold text-ink-strong">Calificaciones recientes</h2>
               @if (child.recentGrades.length === 0) {
-                <lib-empty-state title="Sin calificaciones publicadas" description="Las notas que publiquen sus docentes aparecerán aquí." icon="grade" />
+                <lib-empty-state
+                  title="Sin calificaciones publicadas"
+                  description="Las notas que publiquen sus docentes aparecerán aquí."
+                  icon="star"
+                />
               } @else {
                 <ul class="mt-1 flex flex-col">
                   @for (g of child.recentGrades; track g.id) {
@@ -275,7 +341,9 @@ const grade = (n: number) => n.toFixed(1);
         <div class="mt-6 flex flex-wrap gap-6">
           <section uiCard class="min-w-0 flex-[999_1_560px]" aria-labelledby="attendance-title">
             <div uiCardBody>
-              <h2 id="attendance-title" class="text-base font-semibold text-ink-strong">Asistencia de {{ currentMonth() }}</h2>
+              <h2 id="attendance-title" class="text-base font-semibold text-ink-strong">
+                Asistencia de {{ currentMonth() }}
+              </h2>
               <ui-chart-placeholder
                 class="mt-2"
                 kind="Calendario de calor"
@@ -299,7 +367,9 @@ const grade = (n: number) => n.toFixed(1);
                 } @else if (account.error()) {
                   <div uiAlert tone="danger" role="alert" class="mt-2">
                     <span>No se pudo cargar el estado de cuenta.</span>
-                    <button uiButton variant="ghost" size="sm" type="button" (click)="account.reload()">Reintentar</button>
+                    <button uiButton variant="ghost" size="sm" type="button" (click)="account.reload()">
+                      Reintentar
+                    </button>
                   </div>
                 } @else if (account.value(); as acc) {
                   <dl class="mt-1 flex flex-col">
@@ -307,8 +377,13 @@ const grade = (n: number) => n.toFixed(1);
                       <dt class="text-ink-muted">Próximo cargo</dt>
                       <dd class="text-right">
                         @if (acc.nextCharge) {
-                          <strong class="block text-ink-strong">{{ money(acc.nextCharge.outstanding, acc.currencyCode) }}</strong>
-                          <span class="block text-xs text-ink-muted">{{ acc.nextCharge.description || 'Cargo' }} · vence {{ chargeDate(acc.nextCharge.dueDate) }}</span>
+                          <strong class="block text-ink-strong">{{
+                            money(acc.nextCharge.outstanding, acc.currencyCode)
+                          }}</strong>
+                          <span class="block text-xs text-ink-muted"
+                            >{{ acc.nextCharge.description || 'Cargo' }} · vence
+                            {{ chargeDate(acc.nextCharge.dueDate) }}</span
+                          >
                         } @else {
                           <span class="text-ink-muted">Sin cargos pendientes</span>
                         }
@@ -318,7 +393,9 @@ const grade = (n: number) => n.toFixed(1);
                       <dt class="text-ink-muted">Último pago</dt>
                       <dd class="text-right">
                         @if (acc.lastPayment) {
-                          <strong class="block text-ink-strong">{{ money(acc.lastPayment.amount, acc.currencyCode) }}</strong>
+                          <strong class="block text-ink-strong">{{
+                            money(acc.lastPayment.amount, acc.currencyCode)
+                          }}</strong>
                           <span class="block text-xs text-ink-muted">{{ chargeDate(acc.lastPayment.paidAt) }}</span>
                         } @else {
                           <span class="text-ink-muted">Sin pagos registrados</span>
@@ -326,7 +403,14 @@ const grade = (n: number) => n.toFixed(1);
                       </dd>
                     </div>
                   </dl>
-                  <a uiButton variant="secondary" routerLink="/parent/finances" class="mt-2 w-full" (click)="rememberSelection()">Ver estado de cuenta</a>
+                  <a
+                    uiButton
+                    variant="secondary"
+                    routerLink="/parent/finances"
+                    class="mt-2 w-full"
+                    (click)="rememberSelection()"
+                    >Ver estado de cuenta</a
+                  >
                 }
               </div>
             </section>
@@ -334,19 +418,33 @@ const grade = (n: number) => n.toFixed(1);
         </div>
 
         <div class="mt-6 flex flex-wrap gap-6">
-          <section uiCard class="min-w-0 flex-[999_1_560px]" aria-labelledby="teacher-messages-title">
+          <section uiCard bleed class="min-w-0 flex-[999_1_560px]" aria-labelledby="teacher-messages-title">
             <div uiCardBody>
               <div class="flex items-center justify-between">
-                <h2 id="teacher-messages-title" class="text-base font-semibold text-ink-strong">Mensajes de docentes</h2>
-                <a routerLink="/parent/communication" class="link link-primary text-sm" (click)="rememberSelection()">Ir a mensajes</a>
+                <h2 id="teacher-messages-title" class="text-base font-semibold text-ink-strong">
+                  Mensajes de docentes
+                </h2>
+                <a routerLink="/parent/communication" class="link link-primary text-sm" (click)="rememberSelection()"
+                  >Ir a mensajes</a
+                >
               </div>
               @if (child.messages.length === 0) {
-                <lib-empty-state title="Sin mensajes" description="Cuando un docente te escriba sobre {{ child.student.firstName }}, el mensaje aparecerá aquí." icon="mail" />
+                <lib-empty-state
+                  title="Sin mensajes"
+                  description="Cuando un docente te escriba sobre {{
+                    child.student.firstName
+                  }}, el mensaje aparecerá aquí."
+                  icon="mail"
+                />
               } @else {
                 <ul class="mt-1 flex flex-col">
                   @for (m of child.messages; track m.id) {
                     <li class="border-t border-line first:border-t-0">
-                      <a routerLink="/parent/communication" class="flex min-h-11 items-start gap-3 py-2.5 text-ink hover:no-underline" (click)="rememberSelection()">
+                      <a
+                        routerLink="/parent/communication"
+                        class="flex min-h-11 items-start gap-3 py-2.5 text-ink hover:no-underline"
+                        (click)="rememberSelection()"
+                      >
                         <span
                           class="mt-1.5 size-2 shrink-0 rounded-full"
                           [class]="m.unread ? 'bg-primary' : 'bg-transparent'"
@@ -376,7 +474,9 @@ const grade = (n: number) => n.toFixed(1);
 
         <section uiCard class="mt-6" aria-labelledby="trend-title">
           <div uiCardBody>
-            <h2 id="trend-title" class="text-base font-semibold text-ink-strong">Evolución de {{ child.student.firstName }}</h2>
+            <h2 id="trend-title" class="text-base font-semibold text-ink-strong">
+              Evolución de {{ child.student.firstName }}
+            </h2>
             <ui-chart-placeholder
               class="mt-2 h-56"
               shape="line"
@@ -445,7 +545,9 @@ export default class ParentHome {
     return `${plural(a.absences, 'ausencia', 'ausencias')} · ${plural(a.late, 'tardanza', 'tardanzas')}`;
   });
 
-  public pendingValue = computed(() => (this.home.isLoading() ? '…' : String(this.home.value()?.kpis.pending.total ?? '—')));
+  public pendingValue = computed(() =>
+    this.home.isLoading() ? '…' : String(this.home.value()?.kpis.pending.total ?? '—'),
+  );
 
   public pendingHelper = computed(() => {
     const p = this.home.value()?.kpis.pending;
@@ -496,7 +598,7 @@ export default class ParentHome {
       .join('');
   }
 
-  alertIcon(kind: AlertKind): string {
+  alertIcon(kind: AlertKind): UiIconName {
     return ALERT_ICONS[kind];
   }
 
@@ -539,7 +641,9 @@ export default class ParentHome {
   }
 
   dueLabel(item: WorkItem): string {
-    const when = new Intl.DateTimeFormat('es', { weekday: 'short', day: 'numeric', month: 'short' }).format(new Date(item.dueAt));
+    const when = new Intl.DateTimeFormat('es', { weekday: 'short', day: 'numeric', month: 'short' }).format(
+      new Date(item.dueAt),
+    );
     return item.status === 'VENCIDA' ? `venció ${when}` : `vence ${when}`;
   }
 

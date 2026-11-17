@@ -4,15 +4,16 @@ import {
   Card,
   Confirmation,
   EmptyState,
+  Icon,
   Paginator,
   TimeAgoPipe,
   Toast,
   UiCheckbox,
   UiTab,
   UiTabContent,
+  UiTable,
   UiTabList,
   UiTabPanel,
-  UiTable,
   UiTabs,
 } from '#/ui';
 import { HttpClient, httpResource } from '@angular/common/http';
@@ -61,6 +62,7 @@ type MessageRecipientType = {
     UiTabList,
     UiTabPanel,
     UiTabs,
+    Icon,
   ],
   providers: [TimeAgoPipe],
   template: `<ui-breadcrumbs [items]="[{ label: 'Inicio', link: '/' }, { label: 'Mensajes' }]" />
@@ -131,7 +133,7 @@ type MessageRecipientType = {
                     </td>
                     <td>
                       <button class="hover:text-error cursor-pointer" (click)="deleteMessage(item)">
-                        <span class="material-symbols-outlined text-lg">delete</span>
+                        <ui-icon name="trash-2" class="text-lg" />
                       </button>
                     </td>
                   </tr>
@@ -219,7 +221,7 @@ type MessageRecipientType = {
                     </td>
                     <td>
                       <button class="hover:text-error cursor-pointer" (click)="deleteSentMessage(item)">
-                        <span class="material-symbols-outlined text-lg">delete</span>
+                        <ui-icon name="trash-2" class="text-lg" />
                       </button>
                     </td>
                   </tr>

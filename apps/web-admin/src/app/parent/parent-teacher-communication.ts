@@ -34,7 +34,7 @@ import { Component } from '@angular/core';
         <lib-empty-state
           title="Sin consultas abiertas"
           description="Cuando envíes un mensaje nuevo aparecerá aquí."
-          icon="question_answer"
+          icon="messages-square"
         />
       } @else {
         <ul class="list-disc pl-5 text-sm text-ink-muted">

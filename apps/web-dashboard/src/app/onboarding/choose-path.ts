@@ -1,10 +1,10 @@
 import { Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { Badge, BrandLogo, Card, CardBody, CardTitle } from '#/ui';
+import { Badge, BrandLogo, Card, CardBody, CardTitle, Icon } from '#/ui';
 
 @Component({
   selector: 'app-choose-path',
-  imports: [Badge, Card, CardBody, CardTitle, BrandLogo, RouterLink],
+  imports: [Badge, Card, CardBody, CardTitle, BrandLogo, RouterLink, Icon],
   template: `
     <div class="min-h-screen flex flex-col bg-surface-0">
       <header class="p-4 md:p-6 flex items-center justify-between">
@@ -15,7 +15,7 @@ import { Badge, BrandLogo, Card, CardBody, CardTitle } from '#/ui';
         <div class="w-full max-w-2xl text-center space-y-8 animate-fade-in">
           <div class="flex justify-center">
             <div class="w-20 h-20 rounded-full bg-action-subtle flex items-center justify-center">
-              <span class="material-symbols-outlined text-5xl text-primary">route</span>
+              <ui-icon name="route" class="text-5xl text-primary" />
             </div>
           </div>
 
@@ -29,7 +29,7 @@ import { Badge, BrandLogo, Card, CardBody, CardTitle } from '#/ui';
             <a uiCard routerLink="/onboarding/create-school">
               <div uiCardBody class="items-center text-center space-y-4">
                 <div class="w-16 h-16 rounded-full bg-action-subtle flex items-center justify-center">
-                  <span class="material-symbols-outlined text-4xl text-primary">add_business</span>
+                  <ui-icon name="building" class="text-4xl text-primary" />
                 </div>
                 <h2 uiCardTitle>Crear una Escuela</h2>
                 <p class="text-ink-muted text-sm">
@@ -43,7 +43,7 @@ import { Badge, BrandLogo, Card, CardBody, CardTitle } from '#/ui';
             <a uiCard routerLink="/onboarding/join-school">
               <div uiCardBody class="items-center text-center space-y-4">
                 <div class="w-16 h-16 rounded-full bg-secondary/10 flex items-center justify-center">
-                  <span class="material-symbols-outlined text-4xl text-secondary">group_add</span>
+                  <ui-icon name="user-round-plus" class="text-4xl text-secondary" />
                 </div>
                 <h2 uiCardTitle>Unirse a una Escuela</h2>
                 <p class="text-ink-muted text-sm">

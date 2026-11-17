@@ -1,4 +1,4 @@
-import { Badge, Card, CardBody, EmptyState, Spinner } from '#/ui';
+import { Badge, Card, CardBody, EmptyState, Icon, Spinner } from '#/ui';
 import { DatePipe } from '@angular/common';
 import { httpResource } from '@angular/common/http';
 import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
@@ -19,11 +19,11 @@ type BroadcastCardItem = {
 @Component({
   selector: 'app-broadcast-card',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [Badge, DatePipe],
+  imports: [Badge, DatePipe, Icon],
   template: `
     <div class="flex items-start justify-between gap-2">
       <p class="font-medium text-ink-strong flex items-center gap-2 min-w-0">
-        <span class="material-symbols-outlined text-primary text-lg shrink-0">campaign</span>
+        <ui-icon name="megaphone" class="text-primary text-lg shrink-0" />
         <span class="truncate">{{ item().title }}</span>
       </p>
       <span uiBadge tone="action" size="sm" class="shrink-0">Comunicado</span>
@@ -52,13 +52,13 @@ export class BroadcastCard {
 @Component({
   selector: 'app-recent-broadcasts',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [Spinner, Card, CardBody, RouterLink, EmptyState, BroadcastCard],
+  imports: [Spinner, Card, CardBody, RouterLink, EmptyState, BroadcastCard, Icon],
   template: `
     <div uiCard class="border-primary/25">
       <div uiCardBody>
         <div class="flex items-center justify-between gap-3">
           <h2 class="text-lg font-semibold text-ink-strong flex items-center gap-2">
-            <span class="material-symbols-outlined text-primary">campaign</span>
+            <ui-icon name="megaphone" class="text-primary" />
             Comunicados
           </h2>
           @if (inboxLink(); as link) {
@@ -73,7 +73,7 @@ export class BroadcastCard {
           <lib-empty-state
             title="Sin comunicados recientes"
             description="Los avisos institucionales aparecerán aquí."
-            icon="campaign"
+            icon="megaphone"
           />
         } @else {
           <div class="space-y-3 mt-1">

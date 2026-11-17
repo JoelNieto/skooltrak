@@ -1,4 +1,4 @@
-import { Button, Toast, UiField, UiSelect } from '#/ui';
+import { Button, Icon, Toast, UiField, UiSelect } from '#/ui';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { Component, computed, inject, output, signal } from '@angular/core';
 import { form, FormField, required } from '@angular/forms/signals';
@@ -6,13 +6,13 @@ import Store from '../../core/store';
 
 @Component({
   selector: 'app-school-basics-step',
-  imports: [UiField, UiSelect, Button, FormField],
+  imports: [UiField, UiSelect, Button, FormField, Icon],
   template: `
     <div class="w-full max-w-md text-center space-y-8 animate-fade-in">
       <!-- Icon -->
       <div class="flex justify-center">
         <div class="w-20 h-20 rounded-full bg-action-subtle flex items-center justify-center">
-          <span class="material-symbols-outlined text-5xl text-primary">settings</span>
+          <ui-icon name="settings" class="text-5xl text-primary" />
         </div>
       </div>
 
@@ -42,7 +42,7 @@ import Store from '../../core/store';
               Guardando...
             } @else {
               Guardar y Continuar
-              <span class="material-symbols-outlined text-xl">arrow_forward</span>
+              <ui-icon name="arrow-right" class="text-xl" />
             }
           </button>
         </div>

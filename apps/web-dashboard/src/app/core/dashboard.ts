@@ -6,10 +6,10 @@ import Auth from '../auth/auth';
 import { SchoolThemeService } from './school-theme.service';
 import { Sidebar } from './sidebar';
 import { ThemeService } from './theme.service';
-import { Button } from '#/ui';
+import { Button, Icon } from '#/ui';
 @Component({
   selector: 'app-dashboard',
-  imports: [Button, RouterOutlet, Sidebar],
+  imports: [Button, RouterOutlet, Sidebar, Icon],
   viewProviders: [],
   template: `<div class="flex h-screen overflow-hidden">
     <!-- Mobile sidebar overlay -->
@@ -43,11 +43,11 @@ import { Button } from '#/ui';
           (keydown)="openSidebar()"
           tabindex="0"
         >
-          <span class="material-symbols-outlined">menu</span>
+          <ui-icon name="menu" />
         </button>
       </div>
       <!-- Page content -->
-      <main class="flex-1 overflow-y-auto px-4 bg-surface-2">
+      <main class="ui-page flex-1 overflow-y-auto">
         <div class="mx-auto pt-2">
           <router-outlet />
         </div>

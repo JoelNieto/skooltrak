@@ -6,6 +6,7 @@ import {
   CardActions,
   CardBody,
   CardTitle,
+  Icon,
   Toast,
   UiField,
   UiInput,
@@ -34,6 +35,7 @@ import Store from '../../core/store';
     UiSelect,
     Button,
     FormsModule,
+    Icon,
   ],
   template: `
     <div class="flex flex-col gap-6 p-4 max-w-6xl mx-auto">
@@ -86,7 +88,7 @@ import Store from '../../core/store';
                 (click)="runDryRun()"
               >
                 @if (!loading()) {
-                  <span class="material-symbols-outlined">visibility</span>
+                  <ui-icon name="eye" />
                 }
                 Validar (dry-run)
               </button>
@@ -139,7 +141,7 @@ import Store from '../../core/store';
                   (click)="commit()"
                 >
                   @if (!loading()) {
-                    <span class="material-symbols-outlined">check</span>
+                    <ui-icon name="check" />
                   }
                   Confirmar importación
                 </button>

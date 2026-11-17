@@ -1,4 +1,4 @@
-import { Button, Toast, UiCheckbox, UiChoice, UiField, UiInput, UiSelect } from '#/ui';
+import { Button, Icon, Toast, UiCheckbox, UiChoice, UiField, UiInput, UiSelect } from '#/ui';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { afterRenderEffect, Component, inject, input, output, signal } from '@angular/core';
 import { applyEach, form, FormField, required } from '@angular/forms/signals';
@@ -23,7 +23,7 @@ const MONTH_LABELS: Record<number, string> = {
 
 @Component({
   selector: 'app-study-plan-form',
-  imports: [UiCheckbox, UiChoice, UiField, UiInput, UiSelect, Button, FormField],
+  imports: [UiCheckbox, UiChoice, UiField, UiInput, UiSelect, Button, FormField, Icon],
   template: `
     <form (submit)="onSubmit($event)">
       <div class="flex flex-col md:grid md:grid-cols-4 md:gap-4 gap-2">
@@ -93,13 +93,13 @@ const MONTH_LABELS: Record<number, string> = {
                     <input uiInput [formField]="item.name" class="flex-1" placeholder="Ej. Matrícula, Seguro" />
                     <input uiInput [formField]="item.amount" type="number" step="0.01" class="w-24!" placeholder="0" />
                     <button uiButton variant="ghost" size="sm" type="button" (click)="removeEnrollmentCost(i)">
-                      <span class="material-symbols-outlined text-lg">remove_circle</span>
+                      <ui-icon name="circle-minus" class="text-lg" />
                     </button>
                   </div>
                 }
               </div>
               <button uiButton variant="ghost" size="sm" type="button" class="mt-2" (click)="addEnrollmentCost()">
-                <span class="material-symbols-outlined text-lg">add_circle</span> Agregar costo
+                <ui-icon name="circle-plus" class="text-lg" /> Agregar costo
               </button>
             </fieldset>
           </div>

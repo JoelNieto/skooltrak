@@ -1,4 +1,4 @@
-import { Breadcrumbs, Button, Confirmation, Modal, Toast, UiTable } from '#/ui';
+import { Breadcrumbs, Button, Confirmation, Icon, Modal, Toast, UiTable } from '#/ui';
 import { Menu, MenuContent, MenuItem, MenuTrigger } from '@angular/aria/menu';
 import { OverlayModule } from '@angular/cdk/overlay';
 import { DatePipe } from '@angular/common';
@@ -9,7 +9,7 @@ import { RolesForm } from './roles-form';
 
 @Component({
   selector: 'app-roles',
-  imports: [Breadcrumbs, UiTable, Button, DatePipe, Menu, MenuContent, MenuItem, MenuTrigger, OverlayModule],
+  imports: [Breadcrumbs, UiTable, Button, DatePipe, Menu, MenuContent, MenuItem, MenuTrigger, OverlayModule, Icon],
   template: `<ui-breadcrumbs [items]="[{ label: 'Inicio', link: '/' }, { label: 'Roles' }]" />
     <div class="flex justify-between items-center mb-4">
       <div>
@@ -17,9 +17,7 @@ import { RolesForm } from './roles-form';
         <p class="text-sm text-ink-muted">Listado de roles</p>
       </div>
 
-      <button uiButton variant="primary" (click)="editRole()">
-        <span class="material-symbols-outlined">add_circle</span> Nuevo Rol
-      </button>
+      <button uiButton variant="primary" (click)="editRole()"><ui-icon name="circle-plus" /> Nuevo Rol</button>
     </div>
     <div class="overflow-x-auto">
       <table uiTable>
@@ -51,7 +49,7 @@ import { RolesForm } from './roles-form';
                   #trigger="ngMenuTrigger"
                   [menu]="formatMenu()"
                 >
-                  <span class="material-symbols-outlined text-xl">more_horiz</span>
+                  <ui-icon name="ellipsis" class="text-xl" />
                 </button>
                 <ng-template
                   [cdkConnectedOverlayOpen]="trigger.expanded()"
@@ -75,7 +73,7 @@ import { RolesForm } from './roles-form';
                         class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-surface-2 w-full"
                         (click)="editRole($any(role))"
                       >
-                        <span class="material-symbols-outlined text-lg">edit</span>
+                        <ui-icon name="pencil" class="text-lg" />
                         <span>Editar</span>
                       </button>
                       <button
@@ -84,7 +82,7 @@ import { RolesForm } from './roles-form';
                         class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-surface-2 w-full"
                         (click)="deleteRole($any(role))"
                       >
-                        <span class="material-symbols-outlined text-lg">delete</span>
+                        <ui-icon name="trash-2" class="text-lg" />
                         <span>Eliminar</span>
                       </button>
                     </ng-template>

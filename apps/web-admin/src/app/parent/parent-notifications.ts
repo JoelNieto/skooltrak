@@ -33,7 +33,7 @@ import { Component } from '@angular/core';
         <lib-empty-state
           title="Sin alertas resueltas"
           description="Las alertas revisadas quedarán aquí."
-          icon="done_all"
+          icon="check-check"
         />
       } @else {
         <ul class="list-disc pl-5 text-sm text-ink-muted">

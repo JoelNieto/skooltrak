@@ -1,4 +1,4 @@
-import { Button, Card, Confirmation, Modal, Pagination, PaginatorV2, Toast, UiInputGroup, UiTable } from '#/ui';
+import { Button, Card, Confirmation, Icon, Modal, Pagination, PaginatorV2, Toast, UiInputGroup, UiTable } from '#/ui';
 import { Menu, MenuContent, MenuItem, MenuTrigger } from '@angular/aria/menu';
 import { OverlayModule } from '@angular/cdk/overlay';
 import { DatePipe } from '@angular/common';
@@ -27,6 +27,7 @@ import SubjectsForm from '../forms/subjects-form';
     MenuTrigger,
     OverlayModule,
     UiInputGroup,
+    Icon,
   ],
   providers: [Pagination],
 
@@ -34,13 +35,13 @@ import SubjectsForm from '../forms/subjects-form';
     <div class="flex flex-col gap-4 md:flex-row md:justify-between">
       <div class="md:w-96 w-full">
         <label uiInputGroup>
-          <span class="material-symbols-outlined">search</span>
+          <ui-icon name="search" />
           <input class="pl-0" type="search" placeholder="Buscar..." [(ngModel)]="searchText" />
         </label>
       </div>
 
       <button uiButton variant="primary" (click)="editSubject()">
-        <span class="material-symbols-outlined">add_circle</span> Nueva asignatura
+        <ui-icon name="circle-plus" /> Nueva asignatura
       </button>
     </div>
     <div uiCard class="overflow-x-auto mt-4">
@@ -55,9 +56,7 @@ import SubjectsForm from '../forms/subjects-form';
               <div class="flex items-center gap-2">
                 Nombre
                 @if (pagination.sortBy() === 'name') {
-                  <span class="material-symbols-outlined text-xl">
-                    {{ pagination.sortOrder() === 'asc' ? 'arrow_upward' : 'arrow_downward' }}
-                  </span>
+                  <ui-icon [name]="pagination.sortOrder() === 'asc' ? 'arrow-up' : 'arrow-down'" class="text-xl" />
                 }
               </div>
             </th>
@@ -69,9 +68,7 @@ import SubjectsForm from '../forms/subjects-form';
               <div class="flex items-center gap-2">
                 Código
                 @if (pagination.sortBy() === 'code') {
-                  <span class="material-symbols-outlined text-xl">
-                    {{ pagination.sortOrder() === 'asc' ? 'arrow_upward' : 'arrow_downward' }}
-                  </span>
+                  <ui-icon [name]="pagination.sortOrder() === 'asc' ? 'arrow-up' : 'arrow-down'" class="text-xl" />
                 }
               </div>
             </th>
@@ -83,9 +80,7 @@ import SubjectsForm from '../forms/subjects-form';
               <div class="flex items-center gap-2">
                 Creado
                 @if (pagination.sortBy() === 'createdAt') {
-                  <span class="material-symbols-outlined text-xl">
-                    {{ pagination.sortOrder() === 'asc' ? 'arrow_upward' : 'arrow_downward' }}
-                  </span>
+                  <ui-icon [name]="pagination.sortOrder() === 'asc' ? 'arrow-up' : 'arrow-down'" class="text-xl" />
                 }
               </div>
             </th>
@@ -97,9 +92,7 @@ import SubjectsForm from '../forms/subjects-form';
               <div class="flex items-center gap-2">
                 Actualizado
                 @if (pagination.sortBy() === 'updatedAt') {
-                  <span class="material-symbols-outlined text-xl">
-                    {{ pagination.sortOrder() === 'asc' ? 'arrow_upward' : 'arrow_downward' }}
-                  </span>
+                  <ui-icon [name]="pagination.sortOrder() === 'asc' ? 'arrow-up' : 'arrow-down'" class="text-xl" />
                 }
               </div>
             </th>
@@ -121,7 +114,7 @@ import SubjectsForm from '../forms/subjects-form';
                   #trigger="ngMenuTrigger"
                   [menu]="actionsMenu()"
                 >
-                  <span class="material-symbols-outlined text-xl">more_horiz</span>
+                  <ui-icon name="ellipsis" class="text-xl" />
                 </button>
                 <ng-template
                   [cdkConnectedOverlayOpen]="trigger.expanded()"
@@ -145,7 +138,7 @@ import SubjectsForm from '../forms/subjects-form';
                         class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-surface-2 w-full"
                         (click)="editSubject(subject)"
                       >
-                        <span class="material-symbols-outlined text-lg">edit</span>
+                        <ui-icon name="pencil" class="text-lg" />
                         <span>Editar</span>
                       </button>
                       <button
@@ -154,7 +147,7 @@ import SubjectsForm from '../forms/subjects-form';
                         class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-surface-2 w-full"
                         (click)="deleteSubject(subject)"
                       >
-                        <span class="material-symbols-outlined text-lg">delete</span>
+                        <ui-icon name="trash-2" class="text-lg" />
                         <span>Eliminar</span>
                       </button>
                     </ng-template>

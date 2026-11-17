@@ -8,6 +8,7 @@ import {
   Confirmation,
   EditorViewer,
   Error,
+  Icon,
   Loader,
   Modal,
   Toast,
@@ -61,6 +62,7 @@ type GradeDetail = {
     Error,
     DecimalPipe,
     NgClass,
+    Icon,
   ],
   template: `
     @defer {
@@ -76,17 +78,17 @@ type GradeDetail = {
               <div class="flex items-center gap-2">
                 @if (grade.published) {
                   <span uiBadge tone="success">
-                    <span class="material-symbols-outlined">check_circle</span>
+                    <ui-icon name="circle-check" />
                     Publicada</span
                   >
                 } @else {
                   <button uiButton variant="primary" size="sm" (click)="publishGrade()">
-                    <span class="material-symbols-outlined">publish</span>
+                    <ui-icon name="send" />
                     Publicar
                   </button>
                 }
                 <button uiButton variant="danger" size="sm" (click)="deleteGrade()">
-                  <span class="material-symbols-outlined">delete</span> Eliminar
+                  <ui-icon name="trash-2" /> Eliminar
                 </button>
               </div>
             </div>
@@ -157,7 +159,7 @@ type GradeDetail = {
                           @if (studentGrade.score) {
                             {{ studentGrade.score | number: '1.1-1' }}
                           } @else {
-                            <span class="material-symbols-outlined text-2xl">more_horiz</span>
+                            <ui-icon name="ellipsis" class="text-2xl" />
                           }
                         </td>
                         <td class="overflow-hidden text-ellipsis whitespace-nowrap max-w-50 pl-2!">

@@ -1,5 +1,5 @@
 import { writeAccessTokenToStorage } from '#/client-auth';
-import { BrandLogo, Button, Loader, Toast, UiField, UiInput } from '#/ui';
+import { BrandLogo, Button, Icon, Loader, Toast, UiField, UiInput } from '#/ui';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { afterRenderEffect, Component, inject, signal } from '@angular/core';
 import { AbstractControl, NonNullableFormBuilder, ValidationErrors } from '@angular/forms';
@@ -9,7 +9,7 @@ import Auth from './auth';
 
 @Component({
   selector: 'app-register',
-  imports: [UiField, UiInput, Button, BrandLogo, FormField, Loader, RouterLink],
+  imports: [UiField, UiInput, Button, BrandLogo, FormField, Loader, RouterLink, Icon],
   template: `
     @defer {
       <div class="min-h-screen flex flex-col bg-surface-0">
@@ -26,7 +26,7 @@ import Auth from './auth';
               <div class="w-full max-w-md text-center space-y-8 animate-fade-in">
                 <div class="flex justify-center">
                   <div class="w-20 h-20 rounded-full bg-action-subtle flex items-center justify-center">
-                    <span class="material-symbols-outlined text-5xl text-primary">mail</span>
+                    <ui-icon name="mail" class="text-5xl text-primary" />
                   </div>
                 </div>
                 <div class="space-y-2">
@@ -52,12 +52,12 @@ import Auth from './auth';
                       Redirigiendo...
                     } @else {
                       Configurar mi cuenta
-                      <span class="material-symbols-outlined text-xl">arrow_forward</span>
+                      <ui-icon name="arrow-right" class="text-xl" />
                     }
                   </button>
                 </div>
                 <button uiButton variant="ghost" size="sm" (click)="step.set('email')">
-                  <span class="material-symbols-outlined text-lg">arrow_back</span>
+                  <ui-icon name="arrow-left" class="text-lg" />
                   Usar otro correo
                 </button>
               </div>
@@ -68,7 +68,7 @@ import Auth from './auth';
                 <div class="text-center space-y-8 animate-fade-in">
                   <div class="flex justify-center">
                     <div class="w-20 h-20 rounded-full bg-action-subtle flex items-center justify-center">
-                      <span class="material-symbols-outlined text-5xl text-primary">mail</span>
+                      <ui-icon name="mail" class="text-5xl text-primary" />
                     </div>
                   </div>
 
@@ -96,7 +96,7 @@ import Auth from './auth';
                         Enviando...
                       } @else {
                         Enviar enlace de verificación
-                        <span class="material-symbols-outlined text-xl">arrow_forward</span>
+                        <ui-icon name="arrow-right" class="text-xl" />
                       }
                     </button>
                   </div>
@@ -108,7 +108,7 @@ import Auth from './auth';
               <div class="w-full max-w-md text-center space-y-8 animate-fade-in">
                 <div class="flex justify-center">
                   <div class="w-20 h-20 rounded-full bg-action-subtle flex items-center justify-center">
-                    <span class="material-symbols-outlined text-5xl text-primary">mark_email_unread</span>
+                    <ui-icon name="mail-check" class="text-5xl text-primary" />
                   </div>
                 </div>
 
@@ -122,14 +122,14 @@ import Auth from './auth';
 
                 <div class="bg-surface-0 rounded-xl p-6 space-y-4">
                   <div class="flex items-start gap-3 text-left">
-                    <span class="material-symbols-outlined text-primary mt-0.5">inbox</span>
+                    <ui-icon name="inbox" class="text-primary mt-0.5" />
                     <div>
                       <p class="font-medium text-ink-strong">Revisa tu bandeja de entrada</p>
                       <p class="text-sm text-ink-muted">El correo puede tardar unos minutos en llegar</p>
                     </div>
                   </div>
                   <div class="flex items-start gap-3 text-left">
-                    <span class="material-symbols-outlined text-primary mt-0.5">folder</span>
+                    <ui-icon name="folder" class="text-primary mt-0.5" />
                     <div>
                       <p class="font-medium text-ink-strong">Revisa la carpeta de spam</p>
                       <p class="text-sm text-ink-muted">A veces los correos pueden llegar ahí</p>
@@ -150,12 +150,12 @@ import Auth from './auth';
                     } @else if (cooldown() > 0) {
                       Reenviar en {{ cooldown() }}s
                     } @else {
-                      <span class="material-symbols-outlined">refresh</span>
+                      <ui-icon name="refresh-cw" />
                       Reenviar enlace
                     }
                   </button>
                   <button uiButton variant="ghost" size="sm" (click)="step.set('email')">
-                    <span class="material-symbols-outlined text-lg">arrow_back</span>
+                    <ui-icon name="arrow-left" class="text-lg" />
                     Cambiar correo electrónico
                   </button>
                 </div>
@@ -179,7 +179,7 @@ import Auth from './auth';
                 <div class="text-center space-y-8 animate-fade-in">
                   <div class="flex justify-center">
                     <div class="w-20 h-20 rounded-full bg-success/10 flex items-center justify-center">
-                      <span class="material-symbols-outlined text-5xl text-success">check_circle</span>
+                      <ui-icon name="circle-check" class="text-5xl text-success" />
                     </div>
                   </div>
 
@@ -248,7 +248,7 @@ import Auth from './auth';
                         Creando cuenta...
                       } @else {
                         Crear Cuenta
-                        <span class="material-symbols-outlined text-xl">arrow_forward</span>
+                        <ui-icon name="arrow-right" class="text-xl" />
                       }
                     </button>
                   </div>
@@ -260,7 +260,7 @@ import Auth from './auth';
               <div class="w-full max-w-md text-center space-y-8 animate-fade-in">
                 <div class="flex justify-center">
                   <div class="w-20 h-20 rounded-full bg-error/10 flex items-center justify-center">
-                    <span class="material-symbols-outlined text-5xl text-error">error</span>
+                    <ui-icon name="circle-alert" class="text-5xl text-error" />
                   </div>
                 </div>
                 <div class="space-y-2">
@@ -270,7 +270,7 @@ import Auth from './auth';
                   </p>
                 </div>
                 <button uiButton variant="primary" (click)="step.set('email')">
-                  <span class="material-symbols-outlined">arrow_back</span>
+                  <ui-icon name="arrow-left" />
                   Intentar de nuevo
                 </button>
               </div>

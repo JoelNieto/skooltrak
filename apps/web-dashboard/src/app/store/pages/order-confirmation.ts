@@ -4,14 +4,14 @@ import { rxResource } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import { map } from 'rxjs';
 import { StoreApiService } from '../store-api.service';
-import { Button } from '#/ui';
+import { Button, Icon } from '#/ui';
 
 @Component({
   selector: 'app-order-confirmation',
-  imports: [Button, RouterLink],
+  imports: [Button, RouterLink, Icon],
   template: `
     <div class="max-w-lg mx-auto text-center space-y-4 py-8">
-      <span class="material-symbols-outlined text-6xl text-success">check_circle</span>
+      <ui-icon name="circle-check" class="text-6xl text-success" />
       <h1 class="text-2xl font-bold">¡Pedido confirmado!</h1>
       @if (order.value(); as o) {
         <p class="text-ink">

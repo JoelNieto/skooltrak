@@ -81,3 +81,27 @@ export const EdgeToEdge: Story = {
     `,
   }),
 };
+
+/** Below 640px a list card runs edge to edge inside the page gutter (resize the canvas to a phone). */
+export const BleedOnPhones: Story = {
+  render: () => ({
+    template: `
+      <main class="ui-page py-4 flex flex-col gap-4">
+        <h1 class="type-heading-lg text-ink-strong">Buenas tardes, Carmen</h1>
+        <section uiCard bleed>
+          <div uiCardBody>
+            <h2 uiCardTitle>Próximas tareas</h2>
+            <ul class="divide-y divide-line">
+              <li class="py-3 flex justify-between"><span>Matemáticas · Fracciones</span><span class="text-ink-muted">Vie 21</span></li>
+              <li class="py-3 flex justify-between"><span>Español · Resumen</span><span class="text-ink-muted">Lun 24</span></li>
+              <li class="py-3 flex justify-between"><span>Ciencias · Maqueta</span><span class="text-ink-muted">Mié 26</span></li>
+            </ul>
+          </div>
+        </section>
+        <div uiCard>
+          <div uiCardBody><h2 uiCardTitle>Tarjeta normal</h2><p class="text-ink-muted">Sin bleed: conserva bordes y esquinas.</p></div>
+        </div>
+      </main>
+    `,
+  }),
+};

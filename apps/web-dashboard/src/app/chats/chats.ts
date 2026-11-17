@@ -1,4 +1,4 @@
-import { Badge, Breadcrumbs, Button, EmptyState, Loader } from '#/ui';
+import { Badge, Breadcrumbs, Button, EmptyState, Icon, Loader, UiIconName } from '#/ui';
 import { httpResource } from '@angular/common/http';
 import { Component, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
@@ -26,7 +26,7 @@ type ChatRow = {
 
 @Component({
   selector: 'app-chats',
-  imports: [Breadcrumbs, Badge, Button, RouterLink, Loader, EmptyState],
+  imports: [Breadcrumbs, Badge, Button, RouterLink, Loader, EmptyState, Icon],
   template: `
     <ui-breadcrumbs [items]="[{ label: 'Inicio', link: '/' }, { label: 'Chats' }]" />
     <div class="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-4">
@@ -49,7 +49,7 @@ type ChatRow = {
               <div class="avatar avatar-placeholder">
                 @if (isContextualChat(chat.type)) {
                   <div class="flex items-center justify-center w-10 h-10 rounded-full text-primary-content bg-primary">
-                    <span class="material-symbols-outlined text-xl">{{ contextualChatIcon(chat.type) }}</span>
+                    <ui-icon [name]="contextualChatIcon(chat.type)" class="text-xl" />
                   </div>
                 } @else {
                   <div class="text-white w-10 rounded-full" [style.background]="participantStyle(chat).color">
@@ -74,7 +74,7 @@ type ChatRow = {
                   }
                 </div>
               </div>
-              <span class="material-symbols-outlined text-ink-subtle">chevron_right</span>
+              <ui-icon name="chevron-right" class="text-ink-subtle" />
             </a>
           }
         </div>
@@ -82,7 +82,7 @@ type ChatRow = {
         <lib-empty-state
           title="Sin chats"
           description="Inicia una conversación o crea un chat grupal"
-          icon="chat"
+          icon="message-circle"
           color="primary"
         />
       }
@@ -137,13 +137,13 @@ export default class Chats {
     return type === ChatType.COURSE || type === ChatType.ASSIGNMENT || type === ChatType.CLASS_GROUP;
   }
 
-  contextualChatIcon(type: ChatType) {
-    const icons: Record<string, string> = {
+  contextualChatIcon(type: ChatType): UiIconName {
+    const icons: Record<string, UiIconName> = {
       [ChatType.COURSE]: 'school',
-      [ChatType.ASSIGNMENT]: 'assignment',
-      [ChatType.CLASS_GROUP]: 'groups',
+      [ChatType.ASSIGNMENT]: 'clipboard-list',
+      [ChatType.CLASS_GROUP]: 'users',
     };
-    return icons[type] ?? 'chat';
+    return icons[type] ?? 'message-circle';
   }
 
   contextualChatColor(type: ChatType) {

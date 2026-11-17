@@ -1,4 +1,4 @@
-import { Button, Card, Confirmation, Pagination, Paginator, Toast, UiInputGroup, UiTable } from '#/ui';
+import { Button, Card, Confirmation, Icon, Pagination, Paginator, Toast, UiInputGroup, UiTable } from '#/ui';
 import { Menu, MenuContent, MenuItem, MenuTrigger } from '@angular/aria/menu';
 import { OverlayModule } from '@angular/cdk/overlay';
 import { DatePipe } from '@angular/common';
@@ -35,13 +35,14 @@ type SchoolRow = {
     MenuTrigger,
     OverlayModule,
     UiInputGroup,
+    Icon,
   ],
   providers: [Pagination],
   template: `
     <div class="flex flex-col gap-4 md:flex-row md:justify-between">
       <div class="md:w-96 w-full">
         <label uiInputGroup>
-          <span class="material-symbols-outlined">search</span>
+          <ui-icon name="search" />
           <input
             class="pl-0"
             type="search"
@@ -51,9 +52,7 @@ type SchoolRow = {
           />
         </label>
       </div>
-      <a uiButton variant="primary" routerLink="/schools/new">
-        <span class="material-symbols-outlined">add_circle</span> Agregar Colegio
-      </a>
+      <a uiButton variant="primary" routerLink="/schools/new"> <ui-icon name="circle-plus" /> Agregar Colegio </a>
     </div>
     <div uiCard class="overflow-x-auto mt-4">
       <table uiTable>
@@ -79,7 +78,7 @@ type SchoolRow = {
                     @if (school.logoUrl) {
                       <img [src]="school.logoUrl" [alt]="school.name" class="w-full h-auto object-contain" />
                     } @else {
-                      <span class="material-symbols-outlined text-xl text-ink-subtle">school</span>
+                      <ui-icon name="school" class="text-xl text-ink-subtle" />
                     }
                   </div>
                   <span class="link link-hover font-medium">{{ school.name }}</span>
@@ -98,7 +97,7 @@ type SchoolRow = {
                   #trigger="ngMenuTrigger"
                   [menu]="actionsMenu()"
                 >
-                  <span class="material-symbols-outlined text-xl">more_horiz</span>
+                  <ui-icon name="ellipsis" class="text-xl" />
                 </button>
                 <ng-template
                   [cdkConnectedOverlayOpen]="trigger.expanded()"
@@ -122,7 +121,7 @@ type SchoolRow = {
                         [routerLink]="['/schools', school.id]"
                         class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-surface-2 w-full"
                       >
-                        <span class="material-symbols-outlined text-lg">visibility</span>
+                        <ui-icon name="eye" class="text-lg" />
                         <span>Ver</span>
                       </a>
                       <a
@@ -131,7 +130,7 @@ type SchoolRow = {
                         [routerLink]="['/schools', school.id, 'edit']"
                         class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-surface-2 w-full"
                       >
-                        <span class="material-symbols-outlined text-lg">edit</span>
+                        <ui-icon name="pencil" class="text-lg" />
                         <span>Editar</span>
                       </a>
                       <button
@@ -140,7 +139,7 @@ type SchoolRow = {
                         class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-surface-2 w-full"
                         (click)="deleteSchool(school)"
                       >
-                        <span class="material-symbols-outlined text-lg">delete</span>
+                        <ui-icon name="trash-2" class="text-lg" />
                         <span>Eliminar</span>
                       </button>
                     </ng-template>

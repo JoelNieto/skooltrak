@@ -1,4 +1,4 @@
-import { Badge, Button, DecimalToNumber, Modal, UiSelect, UiTable } from '#/ui';
+import { Badge, Button, DecimalToNumber, Icon, Modal, UiSelect, UiTable } from '#/ui';
 import { DecimalPipe, NgClass } from '@angular/common';
 import { httpResource } from '@angular/common/http';
 import { afterRenderEffect, Component, computed, inject, input, signal } from '@angular/core';
@@ -19,7 +19,7 @@ export type StudentType = {
 
 @Component({
   selector: 'app-course-grades',
-  imports: [UiTable, Badge, UiSelect, Button, FormsModule, DecimalPipe, RouterLink, NgClass],
+  imports: [UiTable, Badge, UiSelect, Button, FormsModule, DecimalPipe, RouterLink, NgClass, Icon],
   template: ` <div class="flex justify-end gap-2">
       <select uiSelect class="w-64!" [ngModel]="periodId()" (ngModelChange)="periodId.set($event)">
         <option disabled selected value="">Selecciona un periodo...</option>
@@ -44,7 +44,7 @@ export type StudentType = {
                   <span class="block truncate w-full text-center">{{ grade.title }}</span>
                   @if (!grade.published) {
                     <span uiBadge size="sm" class="gap-0.5">
-                      <span class="material-symbols-outlined text-sm">visibility_off</span>
+                      <ui-icon name="eye-off" class="text-sm" />
                       Borrador
                     </span>
                   }

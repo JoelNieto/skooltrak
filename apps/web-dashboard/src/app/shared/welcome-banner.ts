@@ -1,6 +1,6 @@
 import { Component, computed, input, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { Button } from '#/ui';
+import { Button, Icon } from '#/ui';
 
 export type OnboardingSummary = {
   schoolName?: string;
@@ -12,7 +12,7 @@ export type OnboardingSummary = {
 
 @Component({
   selector: 'app-welcome-banner',
-  imports: [Button, RouterLink],
+  imports: [Button, RouterLink, Icon],
   template: `
     @if (!dismissed()) {
       <div class="bg-surface-1 border border-line rounded-2xl p-6 mb-6 relative overflow-hidden">
@@ -33,14 +33,14 @@ export type OnboardingSummary = {
               (click)="dismiss()"
               aria-label="Cerrar"
             >
-              <span class="material-symbols-outlined text-lg">close</span>
+              <ui-icon name="x" class="text-lg" />
             </button>
           }
 
           <!-- Header -->
           <div class="flex items-start gap-4 mb-6">
             <div class="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center shrink-0">
-              <span class="material-symbols-outlined text-2xl text-primary">celebration</span>
+              <ui-icon name="party-popper" class="text-2xl text-primary" />
             </div>
             <div>
               <h2 class="text-xl font-bold text-ink-strong">
@@ -75,15 +75,15 @@ export type OnboardingSummary = {
             <h3 class="text-sm font-medium text-ink-muted">Próximos pasos recomendados:</h3>
             <div class="flex flex-wrap gap-2">
               <a uiButton variant="primary" size="sm" routerLink="/teachers/new">
-                <span class="material-symbols-outlined text-lg">person_add</span>
+                <ui-icon name="user-plus" class="text-lg" />
                 Invitar Docentes
               </a>
               <a uiButton size="sm" routerLink="/students/new">
-                <span class="material-symbols-outlined text-lg">school</span>
+                <ui-icon name="school" class="text-lg" />
                 Registrar Estudiantes
               </a>
               <a uiButton variant="ghost" size="sm" routerLink="/admin/schools">
-                <span class="material-symbols-outlined text-lg">settings</span>
+                <ui-icon name="settings" class="text-lg" />
                 Personalizar Escuela
               </a>
               <a
@@ -94,7 +94,7 @@ export type OnboardingSummary = {
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                <span class="material-symbols-outlined text-lg">help</span>
+                <ui-icon name="circle-help" class="text-lg" />
                 Ver Guía
               </a>
             </div>

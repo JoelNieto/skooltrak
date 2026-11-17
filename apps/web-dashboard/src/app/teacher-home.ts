@@ -7,12 +7,14 @@ import {
   CardBody,
   ChartPlaceholder,
   EmptyState,
+  Icon,
   Meter,
   Modal,
   PageHeader,
   Spinner,
   StatCard,
   TimeAgoPipe,
+  UiIconName,
 } from '#/ui';
 import { httpResource } from '@angular/common/http';
 import { Component, computed, inject } from '@angular/core';
@@ -67,7 +69,12 @@ type TeacherSummary = {
     topCourseId: string | null;
   } | null;
   periodClose: { name: string; endDate: string; daysLeft: number } | null;
-  average: { value: number | null; max: number | null; studentsBelowPass: number | null; coursesWithoutScale: number } | null;
+  average: {
+    value: number | null;
+    max: number | null;
+    studentsBelowPass: number | null;
+    coursesWithoutScale: number;
+  } | null;
   familyMessages: { unanswered: number; stale: number };
 };
 
@@ -111,7 +118,13 @@ type TeacherWeekItem = {
 };
 type TeacherWeek = { timezone: string; weekStart: string; weekEnd: string; items: TeacherWeekItem[] };
 
-type PendingRow = { icon: string; iconClass: string; title: string; detail: string; link: (string | null)[] | string };
+type PendingRow = {
+  icon: UiIconName;
+  iconClass: string;
+  title: string;
+  detail: string;
+  link: (string | null)[] | string;
+};
 
 /** Labels as in the assignment form. */
 const ASSIGNMENT_TYPES: Record<AssignmentType, { label: string; tone: BadgeTone }> = {
@@ -145,19 +158,20 @@ const longDate = new Intl.DateTimeFormat('es', { weekday: 'long', day: 'numeric'
     Spinner,
     StatCard,
     TimeAgoPipe,
+    Icon,
   ],
   template: `
     <lib-page-header
       [title]="greeting()"
       [subtitle]="headerSubtitle()"
       [actionLabel]="nextPendingSlot() ? 'Tomar asistencia' : undefined"
-      actionIcon="fact_check"
+      actionIcon="clipboard-check"
       (action)="takeAttendance(nextPendingSlot()!)"
     />
 
     @if (summary.value()?.periodClose; as close) {
       <div uiAlert tone="info" class="mb-4">
-        <span class="material-symbols-outlined" aria-hidden="true">event_upcoming</span>
+        <ui-icon name="calendar-clock" />
         <span class="flex-1">
           <strong>{{ periodCloseTitle() }}</strong>
           @if (summary.value()?.grades; as grades) {
@@ -184,234 +198,269 @@ const longDate = new Intl.DateTimeFormat('es', { weekday: 'long', day: 'numeric'
         label="Asistencia de mis grupos"
         [value]="attendanceValue()"
         [helper]="attendanceHelper()"
-        icon="how_to_reg"
+        icon="user-check"
         color="success"
       />
       <lib-stat-card
         label="Promedio de mis cursos"
         [value]="averageValue()"
         [helper]="averageHelper()"
-        icon="grade"
+        icon="star"
         color="primary"
       />
       <lib-stat-card
         label="Mensajes de acudientes"
         [value]="messagesValue()"
         [helper]="messagesHelper()"
-        icon="forum"
+        icon="messages-square"
         color="info"
       />
     </div>
 
     <div class="mt-6 flex flex-wrap gap-6">
-    <section uiCard class="min-w-0 flex-[999_1_560px]" aria-labelledby="my-day-title">
-      <div uiCardBody>
-        <h2 id="my-day-title" class="text-base font-semibold text-ink-strong">Mi día</h2>
+      <section uiCard bleed class="min-w-0 flex-[999_1_560px]" aria-labelledby="my-day-title">
+        <div uiCardBody>
+          <h2 id="my-day-title" class="text-base font-semibold text-ink-strong">Mi día</h2>
 
-        @if (today.isLoading()) {
-          <div class="flex justify-center py-8"><span uiSpinner></span></div>
-        } @else if (today.error()) {
-          <div uiAlert tone="danger" role="alert" class="mt-2">
-            <span>No se pudo cargar tu horario de hoy.</span>
-            <button uiButton variant="ghost" size="sm" type="button" (click)="today.reload()">Reintentar</button>
-          </div>
-        } @else if (slots().length === 0) {
-          <lib-empty-state
-            title="No tienes clases hoy"
-            description="Las clases de tu horario semanal aparecerán aquí."
-            icon="event_available"
-          />
-        } @else {
-          <ol class="mt-2 flex flex-col gap-2">
-            @for (slot of slots(); track slot.id) {
-              <li
-                class="flex flex-wrap items-center gap-x-4 gap-y-2 rounded-field border p-3"
-                [class]="slotClass(slot)"
-                [attr.aria-current]="slot.state === 'NOW' ? 'time' : null"
-              >
-                <span class="w-28 shrink-0 text-sm tabular-nums" [class]="slot.state === 'NOW' ? 'font-semibold text-primary' : 'text-ink-muted'">
-                  {{ slot.startTime }} – {{ slot.endTime }}
-                </span>
-
-                @if (slot.recess) {
-                  <span class="flex-1 text-ink-muted">Recreo</span>
-                } @else {
-                  <div class="min-w-48 flex-1">
-                    <p class="flex flex-wrap items-center gap-2 font-medium text-ink-strong">
-                      {{ slot.course.name }} · {{ slot.classGroup.name }}
-                      @if (slot.state === 'NOW') {
-                        <span uiBadge tone="action" size="sm">Ahora</span>
-                      }
-                    </p>
-                    <p class="text-xs text-ink-muted">{{ slot.remote ? 'Clase virtual' : slot.location || 'Sin aula asignada' }}</p>
-                  </div>
-
-                  <div class="flex flex-wrap items-center gap-2">
-                    @if (slot.remote && slot.remoteLink) {
-                      <a uiButton variant="secondary" size="sm" [href]="slot.remoteLink" target="_blank" rel="noopener noreferrer">
-                        <span class="material-symbols-outlined" aria-hidden="true">videocam</span>
-                        Abrir enlace
-                      </a>
-                    }
-                    @if (slot.attendance) {
-                      <span uiBadge tone="success">
-                        <span class="material-symbols-outlined text-base" aria-hidden="true">check</span>
-                        Asistencia tomada · {{ slot.attendance.presentOrLate }}/{{ slot.attendance.total }}
-                      </span>
-                    } @else if (slot.state === 'NOW' || slot.state === 'MISSED') {
-                      <button uiButton [variant]="slot.state === 'NOW' ? 'primary' : 'secondary'" size="sm" type="button" (click)="takeAttendance(slot)">
-                        Tomar asistencia
-                      </button>
-                    } @else if (slot.state === 'LATER') {
-                      <span uiBadge tone="neutral">Más tarde</span>
-                    }
-                  </div>
-                }
-              </li>
-            }
-          </ol>
-        }
-      </div>
-    </section>
-
-    <section uiCard class="min-w-0 flex-[1_1_340px]" aria-labelledby="pending-title">
-      <div uiCardBody>
-        <h2 id="pending-title" class="text-base font-semibold text-ink-strong">Pendientes</h2>
-        @if (summary.isLoading()) {
-          <div class="flex justify-center py-8"><span uiSpinner></span></div>
-        } @else if (summary.error()) {
-          <div uiAlert tone="danger" role="alert" class="mt-2">
-            <span>No se pudieron cargar tus pendientes.</span>
-            <button uiButton variant="ghost" size="sm" type="button" (click)="summary.reload()">Reintentar</button>
-          </div>
-        } @else if (pendingRows().length === 0) {
-          <lib-empty-state title="Todo al día" description="No tienes entregas ni notas pendientes." icon="task_alt" color="success" />
-        } @else {
-          <ul class="mt-1 flex flex-col">
-            @for (row of pendingRows(); track row.title) {
-              <li class="border-t border-line first:border-t-0">
-                <a [routerLink]="row.link" class="flex min-h-11 items-center gap-3 py-2.5 text-ink hover:no-underline">
-                  <span class="material-symbols-outlined flex size-9 shrink-0 items-center justify-center rounded-field" [class]="row.iconClass" aria-hidden="true">{{ row.icon }}</span>
-                  <span class="min-w-0 flex-1">
-                    <span class="block font-medium text-ink-strong">{{ row.title }}</span>
-                    <span class="block text-xs text-ink-muted">{{ row.detail }}</span>
+          @if (today.isLoading()) {
+            <div class="flex justify-center py-8"><span uiSpinner></span></div>
+          } @else if (today.error()) {
+            <div uiAlert tone="danger" role="alert" class="mt-2">
+              <span>No se pudo cargar tu horario de hoy.</span>
+              <button uiButton variant="ghost" size="sm" type="button" (click)="today.reload()">Reintentar</button>
+            </div>
+          } @else if (slots().length === 0) {
+            <lib-empty-state
+              title="No tienes clases hoy"
+              description="Las clases de tu horario semanal aparecerán aquí."
+              icon="calendar-check"
+            />
+          } @else {
+            <ol class="mt-2 flex flex-col gap-2">
+              @for (slot of slots(); track slot.id) {
+                <li
+                  class="flex flex-wrap items-center gap-x-4 gap-y-2 rounded-field border p-3"
+                  [class]="slotClass(slot)"
+                  [attr.aria-current]="slot.state === 'NOW' ? 'time' : null"
+                >
+                  <span
+                    class="w-28 shrink-0 text-sm tabular-nums"
+                    [class]="slot.state === 'NOW' ? 'font-semibold text-primary' : 'text-ink-muted'"
+                  >
+                    {{ slot.startTime }} – {{ slot.endTime }}
                   </span>
-                  <span class="material-symbols-outlined text-ink-subtle" aria-hidden="true">chevron_right</span>
-                </a>
-              </li>
-            }
-          </ul>
-        }
-      </div>
-    </section>
+
+                  @if (slot.recess) {
+                    <span class="flex-1 text-ink-muted">Recreo</span>
+                  } @else {
+                    <div class="min-w-48 flex-1">
+                      <p class="flex flex-wrap items-center gap-2 font-medium text-ink-strong">
+                        {{ slot.course.name }} · {{ slot.classGroup.name }}
+                        @if (slot.state === 'NOW') {
+                          <span uiBadge tone="action" size="sm">Ahora</span>
+                        }
+                      </p>
+                      <p class="text-xs text-ink-muted">
+                        {{ slot.remote ? 'Clase virtual' : slot.location || 'Sin aula asignada' }}
+                      </p>
+                    </div>
+
+                    <div class="flex flex-wrap items-center gap-2">
+                      @if (slot.remote && slot.remoteLink) {
+                        <a
+                          uiButton
+                          variant="secondary"
+                          size="sm"
+                          [href]="slot.remoteLink"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          <ui-icon name="video" />
+                          Abrir enlace
+                        </a>
+                      }
+                      @if (slot.attendance) {
+                        <span uiBadge tone="success">
+                          <ui-icon name="check" class="text-base" />
+                          Asistencia tomada · {{ slot.attendance.presentOrLate }}/{{ slot.attendance.total }}
+                        </span>
+                      } @else if (slot.state === 'NOW' || slot.state === 'MISSED') {
+                        <button
+                          uiButton
+                          [variant]="slot.state === 'NOW' ? 'primary' : 'secondary'"
+                          size="sm"
+                          type="button"
+                          (click)="takeAttendance(slot)"
+                        >
+                          Tomar asistencia
+                        </button>
+                      } @else if (slot.state === 'LATER') {
+                        <span uiBadge tone="neutral">Más tarde</span>
+                      }
+                    </div>
+                  }
+                </li>
+              }
+            </ol>
+          }
+        </div>
+      </section>
+
+      <section uiCard bleed class="min-w-0 flex-[1_1_340px]" aria-labelledby="pending-title">
+        <div uiCardBody>
+          <h2 id="pending-title" class="text-base font-semibold text-ink-strong">Pendientes</h2>
+          @if (summary.isLoading()) {
+            <div class="flex justify-center py-8"><span uiSpinner></span></div>
+          } @else if (summary.error()) {
+            <div uiAlert tone="danger" role="alert" class="mt-2">
+              <span>No se pudieron cargar tus pendientes.</span>
+              <button uiButton variant="ghost" size="sm" type="button" (click)="summary.reload()">Reintentar</button>
+            </div>
+          } @else if (pendingRows().length === 0) {
+            <lib-empty-state
+              title="Todo al día"
+              description="No tienes entregas ni notas pendientes."
+              icon="circle-check-big"
+              color="success"
+            />
+          } @else {
+            <ul class="mt-1 flex flex-col">
+              @for (row of pendingRows(); track row.title) {
+                <li class="border-t border-line first:border-t-0">
+                  <a
+                    [routerLink]="row.link"
+                    class="flex min-h-11 items-center gap-3 py-2.5 text-ink hover:no-underline"
+                  >
+                    <ui-icon
+                      [name]="row.icon"
+                      class="flex size-9 shrink-0 items-center justify-center rounded-field"
+                      [class]="row.iconClass"
+                    />
+                    <span class="min-w-0 flex-1">
+                      <span class="block font-medium text-ink-strong">{{ row.title }}</span>
+                      <span class="block text-xs text-ink-muted">{{ row.detail }}</span>
+                    </span>
+                    <ui-icon name="chevron-right" class="text-ink-subtle" />
+                  </a>
+                </li>
+              }
+            </ul>
+          }
+        </div>
+      </section>
     </div>
 
     <div class="mt-6 flex flex-wrap gap-6">
-    <section uiCard class="min-w-0 flex-[999_1_560px]" aria-labelledby="week-title">
-      <div uiCardBody>
-        <div class="flex items-center justify-between">
-          <h2 id="week-title" class="text-base font-semibold text-ink-strong">Asignaciones de la semana</h2>
-          <a routerLink="/assignments" class="link link-primary text-sm">Ver todas</a>
-        </div>
-        @if (week.isLoading()) {
-          <div class="flex justify-center py-8"><span uiSpinner></span></div>
-        } @else if (week.error()) {
-          <div uiAlert tone="danger" role="alert" class="mt-2">
-            <span>No se pudieron cargar las asignaciones de la semana.</span>
-            <button uiButton variant="ghost" size="sm" type="button" (click)="week.reload()">Reintentar</button>
+      <section uiCard bleed class="min-w-0 flex-[999_1_560px]" aria-labelledby="week-title">
+        <div uiCardBody>
+          <div class="flex items-center justify-between">
+            <h2 id="week-title" class="text-base font-semibold text-ink-strong">Asignaciones de la semana</h2>
+            <a routerLink="/assignments" class="link link-primary text-sm">Ver todas</a>
           </div>
-        } @else if (weekItems().length === 0) {
-          <lib-empty-state
-            title="Sin asignaciones esta semana"
-            description="Las asignaciones de tus cursos con fecha esta semana aparecerán aquí."
-            icon="assignment"
-          />
-        } @else {
-          <ul class="mt-1 flex flex-col">
-            @for (item of weekItems(); track item.assignmentId + item.classGroup.id) {
-              <li class="border-t border-line first:border-t-0">
-                <a
-                  [routerLink]="['/assignments', item.assignmentId]"
-                  class="flex min-h-11 flex-wrap items-center gap-x-4 gap-y-2 py-2.5 text-ink hover:no-underline"
-                >
-                  <span class="min-w-56 flex-[1_1_240px]">
-                    <span class="flex flex-wrap items-center gap-2">
-                      <span uiBadge [tone]="typeOf(item).tone" size="sm">{{ typeOf(item).label }}</span>
-                      <span class="font-medium text-ink-strong">{{ item.title }}</span>
+          @if (week.isLoading()) {
+            <div class="flex justify-center py-8"><span uiSpinner></span></div>
+          } @else if (week.error()) {
+            <div uiAlert tone="danger" role="alert" class="mt-2">
+              <span>No se pudieron cargar las asignaciones de la semana.</span>
+              <button uiButton variant="ghost" size="sm" type="button" (click)="week.reload()">Reintentar</button>
+            </div>
+          } @else if (weekItems().length === 0) {
+            <lib-empty-state
+              title="Sin asignaciones esta semana"
+              description="Las asignaciones de tus cursos con fecha esta semana aparecerán aquí."
+              icon="clipboard-list"
+            />
+          } @else {
+            <ul class="mt-1 flex flex-col">
+              @for (item of weekItems(); track item.assignmentId + item.classGroup.id) {
+                <li class="border-t border-line first:border-t-0">
+                  <a
+                    [routerLink]="['/assignments', item.assignmentId]"
+                    class="flex min-h-11 flex-wrap items-center gap-x-4 gap-y-2 py-2.5 text-ink hover:no-underline"
+                  >
+                    <span class="min-w-56 flex-[1_1_240px]">
+                      <span class="flex flex-wrap items-center gap-2">
+                        <span uiBadge [tone]="typeOf(item).tone" size="sm">{{ typeOf(item).label }}</span>
+                        <span class="font-medium text-ink-strong">{{ item.title }}</span>
+                      </span>
+                      <span class="mt-0.5 block text-xs text-ink-muted">
+                        {{ item.course.name }} · {{ item.classGroup.name }} · vence {{ dueLabel(item) }}
+                      </span>
                     </span>
-                    <span class="mt-0.5 block text-xs text-ink-muted">
-                      {{ item.course.name }} · {{ item.classGroup.name }} · vence {{ dueLabel(item) }}
-                    </span>
-                  </span>
-                  @if (item.requireSubmission) {
-                    <ui-meter
-                      class="flex-[0_1_220px]"
-                      [value]="item.submitted"
-                      [max]="item.expected"
-                      [label]="item.submitted + '/' + item.expected + ' entregaron'"
-                    />
-                  } @else {
-                    <span uiBadge tone="neutral">Sin entrega en línea</span>
-                  }
-                </a>
-              </li>
-            }
-          </ul>
-        }
-      </div>
-    </section>
-
-    <section uiCard class="min-w-0 flex-[1_1_340px]" aria-labelledby="attention-title">
-      <div uiCardBody>
-        <h2 id="attention-title" class="text-base font-semibold text-ink-strong">Necesitan atención</h2>
-        @if (attention.isLoading()) {
-          <div class="flex justify-center py-8"><span uiSpinner></span></div>
-        } @else if (attention.error()) {
-          <div uiAlert tone="danger" role="alert" class="mt-2">
-            <span>No se pudo cargar el seguimiento.</span>
-            <button uiButton variant="ghost" size="sm" type="button" (click)="attention.reload()">Reintentar</button>
-          </div>
-        } @else if (attentionStudents().length === 0) {
-          <lib-empty-state
-            title="Nadie en riesgo"
-            description="Aquí aparecen estudiantes con notas bajo la mínima, ausencias o tardanzas frecuentes."
-            icon="sentiment_satisfied"
-            color="success"
-          />
-        } @else {
-          <ul class="mt-1 flex flex-col">
-            @for (student of attentionStudents(); track student.id) {
-              <li class="border-t border-line first:border-t-0">
-                <a [routerLink]="['/students', student.id]" class="flex min-h-11 flex-col gap-1 py-2.5 text-ink hover:no-underline">
-                  <span>
-                    <span class="font-medium text-ink-strong">{{ student.name }}</span>
-                    @if (student.classGroup) {
-                      <span class="text-xs text-ink-muted"> · {{ student.classGroup.name }}</span>
+                    @if (item.requireSubmission) {
+                      <ui-meter
+                        class="flex-[0_1_220px]"
+                        [value]="item.submitted"
+                        [max]="item.expected"
+                        [label]="item.submitted + '/' + item.expected + ' entregaron'"
+                      />
+                    } @else {
+                      <span uiBadge tone="neutral">Sin entrega en línea</span>
                     }
-                  </span>
-                  <span class="flex flex-wrap gap-1">
-                    @for (reason of student.reasons; track $index) {
-                      <span uiBadge size="sm" [tone]="reasonTone(reason)">{{ reasonLabel(reason) }}</span>
-                    }
-                  </span>
-                </a>
-              </li>
-            }
-          </ul>
-          @if ((attention.value()?.totalStudents ?? 0) > attentionStudents().length) {
-            <p class="mt-2 text-xs text-ink-muted">
-              y {{ (attention.value()?.totalStudents ?? 0) - attentionStudents().length }} más
-            </p>
+                  </a>
+                </li>
+              }
+            </ul>
           }
-        }
-      </div>
-    </section>
+        </div>
+      </section>
+
+      <section uiCard bleed class="min-w-0 flex-[1_1_340px]" aria-labelledby="attention-title">
+        <div uiCardBody>
+          <h2 id="attention-title" class="text-base font-semibold text-ink-strong">Necesitan atención</h2>
+          @if (attention.isLoading()) {
+            <div class="flex justify-center py-8"><span uiSpinner></span></div>
+          } @else if (attention.error()) {
+            <div uiAlert tone="danger" role="alert" class="mt-2">
+              <span>No se pudo cargar el seguimiento.</span>
+              <button uiButton variant="ghost" size="sm" type="button" (click)="attention.reload()">Reintentar</button>
+            </div>
+          } @else if (attentionStudents().length === 0) {
+            <lib-empty-state
+              title="Nadie en riesgo"
+              description="Aquí aparecen estudiantes con notas bajo la mínima, ausencias o tardanzas frecuentes."
+              icon="smile"
+              color="success"
+            />
+          } @else {
+            <ul class="mt-1 flex flex-col">
+              @for (student of attentionStudents(); track student.id) {
+                <li class="border-t border-line first:border-t-0">
+                  <a
+                    [routerLink]="['/students', student.id]"
+                    class="flex min-h-11 flex-col gap-1 py-2.5 text-ink hover:no-underline"
+                  >
+                    <span>
+                      <span class="font-medium text-ink-strong">{{ student.name }}</span>
+                      @if (student.classGroup) {
+                        <span class="text-xs text-ink-muted"> · {{ student.classGroup.name }}</span>
+                      }
+                    </span>
+                    <span class="flex flex-wrap gap-1">
+                      @for (reason of student.reasons; track $index) {
+                        <span uiBadge size="sm" [tone]="reasonTone(reason)">{{ reasonLabel(reason) }}</span>
+                      }
+                    </span>
+                  </a>
+                </li>
+              }
+            </ul>
+            @if ((attention.value()?.totalStudents ?? 0) > attentionStudents().length) {
+              <p class="mt-2 text-xs text-ink-muted">
+                y {{ (attention.value()?.totalStudents ?? 0) - attentionStudents().length }} más
+              </p>
+            }
+          }
+        </div>
+      </section>
     </div>
 
     <div class="mt-6 flex flex-wrap gap-6">
       <section uiCard class="min-w-0 flex-[999_1_560px]" aria-labelledby="distribution-title">
         <div uiCardBody>
-          <h2 id="distribution-title" class="text-base font-semibold text-ink-strong">Distribución de calificaciones</h2>
+          <h2 id="distribution-title" class="text-base font-semibold text-ink-strong">
+            Distribución de calificaciones
+          </h2>
           <ui-chart-placeholder
             class="mt-2"
             kind="Histograma"
@@ -421,7 +470,7 @@ const longDate = new Intl.DateTimeFormat('es', { weekday: 'long', day: 'numeric'
         </div>
       </section>
 
-      <section uiCard class="min-w-0 flex-[1_1_340px]" aria-labelledby="family-title">
+      <section uiCard bleed class="min-w-0 flex-[1_1_340px]" aria-labelledby="family-title">
         <div uiCardBody>
           <div class="flex items-center justify-between">
             <h2 id="family-title" class="text-base font-semibold text-ink-strong">Mensajes de acudientes</h2>
@@ -438,13 +487,16 @@ const longDate = new Intl.DateTimeFormat('es', { weekday: 'long', day: 'numeric'
             <lib-empty-state
               title="Sin mensajes por responder"
               description="Los mensajes de acudientes que esperan tu respuesta aparecerán aquí."
-              icon="mark_chat_read"
+              icon="message-circle-check"
             />
           } @else {
             <ul class="mt-1 flex flex-col">
               @for (thread of familyThreads(); track thread.id) {
                 <li class="border-t border-line first:border-t-0">
-                  <a routerLink="/teacher/communication" class="flex min-h-11 items-start gap-3 py-2.5 text-ink hover:no-underline">
+                  <a
+                    routerLink="/teacher/communication"
+                    class="flex min-h-11 items-start gap-3 py-2.5 text-ink hover:no-underline"
+                  >
                     <span
                       class="mt-1.5 size-2 shrink-0 rounded-full"
                       [class]="thread.unread ? 'bg-primary' : 'bg-transparent'"
@@ -474,7 +526,6 @@ const longDate = new Intl.DateTimeFormat('es', { weekday: 'long', day: 'numeric'
     <div class="mt-6">
       <app-recent-broadcasts />
     </div>
-
   `,
 })
 export default class TeacherHome {
@@ -517,7 +568,9 @@ export default class TeacherHome {
     if (this.summary.isLoading()) return '…';
     const average = this.summary.value()?.average;
     if (!average || average.value === null) return '—';
-    return average.max !== null ? `${decimal.format(average.value)} / ${decimal.format(average.max)}` : decimal.format(average.value);
+    return average.max !== null
+      ? `${decimal.format(average.value)} / ${decimal.format(average.max)}`
+      : decimal.format(average.value);
   });
 
   public averageHelper = computed(() => {
@@ -539,9 +592,7 @@ export default class TeacherHome {
     if (this.summary.error()) return 'No se pudo cargar';
     const messages = this.summary.value()?.familyMessages;
     if (!messages || messages.unanswered === 0) return 'Nada por responder';
-    return messages.stale > 0
-      ? `Sin responder · ${messages.stale} desde hace más de 48 h`
-      : 'Sin responder';
+    return messages.stale > 0 ? `Sin responder · ${messages.stale} desde hace más de 48 h` : 'Sin responder';
   });
 
   reasonLabel(reason: AttentionReason): string {
@@ -639,16 +690,18 @@ export default class TeacherHome {
     const { toReview, grades } = summary;
     if (toReview.submissions > 0) {
       rows.push({
-        icon: 'assignment_turned_in',
+        icon: 'clipboard-check',
         iconClass: 'bg-warning/15 text-warning',
         title: `Revisar ${plural(toReview.submissions, 'entrega', 'entregas')}`,
-        detail: toReview.top ? `${toReview.top.title} (${toReview.top.courseName}) · ${toReview.top.count} por revisar` : '',
+        detail: toReview.top
+          ? `${toReview.top.title} (${toReview.top.courseName}) · ${toReview.top.count} por revisar`
+          : '',
         link: toReview.top ? ['/assignments', toReview.top.assignmentId] : '/assignments',
       });
     }
     if (grades && grades.emptyCells > 0) {
       rows.push({
-        icon: 'edit_note',
+        icon: 'notebook-pen',
         iconClass: 'bg-error/15 text-error',
         title: `Completar notas en ${plural(grades.coursesWithEmptyCells, 'curso', 'cursos')}`,
         detail: `${plural(grades.emptyCells, 'casilla vacía', 'casillas vacías')} en el periodo`,
@@ -657,7 +710,7 @@ export default class TeacherHome {
     }
     if (summary.familyMessages.unanswered > 0) {
       rows.push({
-        icon: 'mark_chat_unread',
+        icon: 'message-circle-warning',
         iconClass: 'bg-info/15 text-info',
         title: `Responder ${plural(summary.familyMessages.unanswered, 'mensaje', 'mensajes')}`,
         detail: 'De acudientes',
@@ -666,7 +719,7 @@ export default class TeacherHome {
     }
     if (grades && grades.unpublished > 0) {
       rows.push({
-        icon: 'publish',
+        icon: 'send',
         iconClass: 'bg-action-subtle text-primary',
         title: `Publicar ${plural(grades.unpublished, 'calificación', 'calificaciones')}`,
         detail: `En ${plural(grades.coursesWithUnpublished, 'curso', 'cursos')}`,
@@ -711,7 +764,6 @@ export default class TeacherHome {
         this.today.reload();
         this.summary.reload();
       });
-
   }
 }
 

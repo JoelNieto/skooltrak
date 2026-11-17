@@ -1,4 +1,16 @@
-import { Breadcrumbs, Button, Confirmation, Error, Modal, Pagination, Paginator, Toast, UiInput, UiTable } from '#/ui';
+import {
+  Breadcrumbs,
+  Button,
+  Confirmation,
+  Error,
+  Icon,
+  Modal,
+  Pagination,
+  Paginator,
+  Toast,
+  UiInput,
+  UiTable,
+} from '#/ui';
 import { Menu, MenuContent, MenuItem, MenuTrigger } from '@angular/aria/menu';
 import { OverlayModule } from '@angular/cdk/overlay';
 import { DatePipe } from '@angular/common';
@@ -24,6 +36,7 @@ import { PermissionsForm } from './permissions-form';
     Paginator,
     FormsModule,
     Error,
+    Icon,
   ],
   providers: [Pagination],
   template: ` <ui-breadcrumbs [items]="[{ label: 'Inicio', link: '/' }, { label: 'Permisos' }]" />
@@ -34,7 +47,7 @@ import { PermissionsForm } from './permissions-form';
       </div>
 
       <button uiButton variant="primary" (click)="editPermission()">
-        <span class="material-symbols-outlined">add_circle</span> Nuevo Permiso
+        <ui-icon name="circle-plus" /> Nuevo Permiso
       </button>
     </div>
     <div class="flex justify-between items-center mb-4">
@@ -74,7 +87,7 @@ import { PermissionsForm } from './permissions-form';
                     #trigger="ngMenuTrigger"
                     [menu]="formatMenu()"
                   >
-                    <span class="material-symbols-outlined text-xl">more_horiz</span>
+                    <ui-icon name="ellipsis" class="text-xl" />
                   </button>
                   <ng-template
                     [cdkConnectedOverlayOpen]="trigger.expanded()"
@@ -98,7 +111,7 @@ import { PermissionsForm } from './permissions-form';
                           class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-surface-2 w-full"
                           (click)="editPermission($any(permission))"
                         >
-                          <span class="material-symbols-outlined text-lg">edit</span>
+                          <ui-icon name="pencil" class="text-lg" />
                           <span>Editar</span>
                         </button>
                         <button
@@ -107,7 +120,7 @@ import { PermissionsForm } from './permissions-form';
                           class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-surface-2 w-full"
                           (click)="deletePermission($any(permission))"
                         >
-                          <span class="material-symbols-outlined text-lg">delete</span>
+                          <ui-icon name="trash-2" class="text-lg" />
                           <span>Eliminar</span>
                         </button>
                       </ng-template>

@@ -25,7 +25,7 @@ import { Component } from '@angular/core';
           <lib-empty-state
             title="Sin estudiantes asignados"
             description="Cuando se asignen estudiantes aparecerán aquí."
-            icon="group"
+            icon="users"
           />
         } @else {
           <div class="overflow-x-auto">

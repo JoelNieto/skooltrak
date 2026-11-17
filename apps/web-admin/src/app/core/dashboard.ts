@@ -2,10 +2,10 @@ import { Component, ElementRef, viewChild } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 
 import { Sidebar } from './sidebar';
-import { Button } from '#/ui';
+import { Button, Icon } from '#/ui';
 @Component({
   selector: 'app-dashboard',
-  imports: [Button, RouterOutlet, Sidebar],
+  imports: [Button, RouterOutlet, Sidebar, Icon],
 
   template: ` <div class="flex h-screen overflow-hidden">
     <!-- Mobile sidebar overlay -->
@@ -29,7 +29,7 @@ import { Button } from '#/ui';
         (keydown)="openSidebar()"
         tabindex="0"
       >
-        <span class="material-symbols-outlined">menu</span>
+        <ui-icon name="menu" />
       </button>
     </div>
 
@@ -44,7 +44,7 @@ import { Button } from '#/ui';
     <!-- Main content -->
     <div class="flex-1 flex flex-col overflow-hidden lg:pt-0 pt-8">
       <!-- Page content -->
-      <main class="flex-1 overflow-y-auto px-4 bg-surface-1">
+      <main class="ui-page flex-1 overflow-y-auto">
         <div class="mx-auto">
           <router-outlet />
         </div>

@@ -1,11 +1,11 @@
-import { BrandLogo, Button, Toast } from '#/ui';
+import { BrandLogo, Button, Icon, Toast } from '#/ui';
 import { HttpClient } from '@angular/common/http';
 import { afterRenderEffect, Component, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 
 @Component({
   selector: 'app-confirm-request',
-  imports: [Button, BrandLogo],
+  imports: [Button, BrandLogo, Icon],
   template: `
     <div class="min-h-screen flex flex-col bg-surface-0">
       <header class="p-4 md:p-6 flex items-center justify-between">
@@ -16,7 +16,7 @@ import { ActivatedRoute, Router } from '@angular/router';
         <div class="w-full max-w-md text-center space-y-8 animate-fade-in">
           <div class="flex justify-center">
             <div class="w-20 h-20 rounded-full bg-action-subtle flex items-center justify-center">
-              <span class="material-symbols-outlined text-5xl text-primary">send</span>
+              <ui-icon name="send" class="text-5xl text-primary" />
             </div>
           </div>
 
@@ -43,12 +43,12 @@ import { ActivatedRoute, Router } from '@angular/router';
               @if (loading()) {
                 Enviando...
               } @else {
-                <span class="material-symbols-outlined">send</span>
+                <ui-icon name="send" />
                 Enviar Solicitud
               }
             </button>
             <button uiButton variant="ghost" size="sm" (click)="goBack()">
-              <span class="material-symbols-outlined text-lg">arrow_back</span>
+              <ui-icon name="arrow-left" class="text-lg" />
               Volver
             </button>
           </div>

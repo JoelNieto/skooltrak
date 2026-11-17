@@ -92,6 +92,7 @@ describe('check()', () => {
     ['tabs-box', 'rawPrimitive'],
     ['tab-active', 'rawPrimitive'],
     ['tab-content', 'rawPrimitive'],
+    ['material-symbols-outlined', 'rawPrimitive'],
     ['ring-offset-base-100', 'baseColour'],
     ['bg-primary/10', 'baseColour'],
     ['hover:bg-primary/5', 'baseColour'],

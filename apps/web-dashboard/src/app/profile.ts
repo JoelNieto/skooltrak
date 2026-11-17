@@ -6,10 +6,12 @@ import {
   Card,
   CardBody,
   CardTitle,
+  Icon,
   Loader,
   Spinner,
   Toast,
   UiField,
+  UiIconName,
   UiInput,
 } from '#/ui';
 import { HttpClient } from '@angular/common/http';
@@ -45,6 +47,7 @@ interface ProfileFormData {
     RouterLink,
     Loader,
     ImageCropperComponent,
+    Icon,
   ],
   template: `
     <div class="flex flex-col gap-6">
@@ -54,7 +57,7 @@ interface ProfileFormData {
         <lib-loader />
       } @else if (!auth.user()) {
         <div uiAlert tone="warning">
-          <span class="material-symbols-outlined">warning</span>
+          <ui-icon name="triangle-alert" />
           <span>No se pudo cargar la información de tu perfil.</span>
         </div>
       } @else {
@@ -87,7 +90,7 @@ interface ProfileFormData {
                 }
                 @if (auth.user()?.emailVerified) {
                   <span uiBadge tone="success" size="sm" class="gap-1">
-                    <span class="material-symbols-outlined text-sm">verified</span>
+                    <ui-icon name="badge-check" class="text-sm" />
                     Verificado
                   </span>
                 } @else {
@@ -108,14 +111,14 @@ interface ProfileFormData {
 
                 @if (saved()) {
                   <div uiAlert tone="success">
-                    <span class="material-symbols-outlined">check_circle</span>
+                    <ui-icon name="circle-check" />
                     <span>Perfil actualizado exitosamente.</span>
                   </div>
                 }
 
                 @if (errorMessage()) {
                   <div uiAlert tone="danger">
-                    <span class="material-symbols-outlined">error</span>
+                    <ui-icon name="circle-alert" />
                     <span>{{ errorMessage() }}</span>
                   </div>
                 }
@@ -145,7 +148,7 @@ interface ProfileFormData {
                           } @else if (avatarUrl()) {
                             <img [src]="avatarUrl()" alt="Avatar" class="w-full h-full object-cover" />
                           } @else {
-                            <span class="material-symbols-outlined text-4xl text-ink-subtle">person</span>
+                            <ui-icon name="user" class="text-4xl text-ink-subtle" />
                           }
                         </div>
                         @if (avatarUrl() && !isUploadingAvatar()) {
@@ -157,7 +160,7 @@ interface ProfileFormData {
                             class="text-error"
                             (click)="removeAvatar()"
                           >
-                            <span class="material-symbols-outlined text-sm">delete</span>
+                            <ui-icon name="trash-2" class="text-sm" />
                             Eliminar
                           </button>
                         }
@@ -177,7 +180,7 @@ interface ProfileFormData {
                           (click)="avatarFileInput.click()"
                           [disabled]="isUploadingAvatar()"
                         >
-                          <span class="material-symbols-outlined">upload</span>
+                          <ui-icon name="upload" />
                           {{ avatarUrl() ? 'Cambiar foto' : 'Subir foto' }}
                         </button>
                         <p class="text-sm text-ink-subtle mt-2">PNG, JPG o WEBP. Proporción 1:1. Máximo 5MB.</p>
@@ -210,7 +213,7 @@ interface ProfileFormData {
                               @if (avatarCropPreviewUrl()) {
                                 <img [src]="avatarCropPreviewUrl()" alt="Preview" class="w-full h-full object-cover" />
                               } @else {
-                                <span class="material-symbols-outlined text-4xl text-ink-subtle">crop</span>
+                                <ui-icon name="crop" class="text-4xl text-ink-subtle" />
                               }
                             </div>
                           </div>
@@ -241,7 +244,7 @@ interface ProfileFormData {
                           [attr.aria-pressed]="profileForm.themePreference().value() === option.value"
                           (click)="setTheme(option.value)"
                         >
-                          <span class="material-symbols-outlined">{{ option.icon }}</span>
+                          <ui-icon [name]="option.icon" />
                           {{ option.label }}
                         </button>
                       }
@@ -288,10 +291,10 @@ export default class Profile {
   private avatarCroppedBlob = signal<Blob | null>(null);
   private lastResolvedImage = signal<string | null>(null);
 
-  public themeOptions: { value: ThemePreference; label: string; icon: string }[] = [
-    { value: 'light', label: 'Claro', icon: 'light_mode' },
-    { value: 'dark', label: 'Oscuro', icon: 'dark_mode' },
-    { value: 'system', label: 'Sistema', icon: 'settings_brightness' },
+  public themeOptions: { value: ThemePreference; label: string; icon: UiIconName }[] = [
+    { value: 'light', label: 'Claro', icon: 'sun' },
+    { value: 'dark', label: 'Oscuro', icon: 'moon' },
+    { value: 'system', label: 'Sistema', icon: 'sun-moon' },
   ];
 
   public roleLabel = computed(() => {

@@ -36,7 +36,7 @@ import { Component } from '@angular/core';
         <lib-empty-state
           title="Sin notificaciones archivadas"
           description="Aquí aparecerán las notificaciones que marques como leídas."
-          icon="notifications_off"
+          icon="bell-off"
         />
       } @else {
         <ul class="list-disc pl-5 text-sm text-ink-muted">

@@ -1,7 +1,7 @@
 import { Component, computed, input, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { Prisma } from '@generated/prisma';
-import { Card, UiInputGroup } from '#/ui';
+import { Card, Icon, UiInputGroup } from '#/ui';
 
 type Student = Prisma.StudentGetPayload<{
   include: { user: true };
@@ -11,10 +11,10 @@ type Student = Prisma.StudentGetPayload<{
 };
 @Component({
   selector: 'app-group-students',
-  imports: [Card, RouterLink, UiInputGroup],
+  imports: [Card, RouterLink, UiInputGroup, Icon],
   template: `<h4 class="text-xl font-medium mb-2">Estudiantes</h4>
     <label uiInputGroup class="w-full md:w-96">
-      <span class="material-symbols-outlined">search</span>
+      <ui-icon name="search" />
       <input
         class="pl-0"
         type="search"

@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
+import { Icon } from './icon';
 
 export type ChartPlaceholderShape = 'bars' | 'line';
 
@@ -18,9 +19,11 @@ export type ChartPlaceholderShape = 'bars' | 'line';
  */
 @Component({
   selector: 'ui-chart-placeholder',
+  imports: [Icon],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
-    class: 'ui-chart-placeholder relative block h-60 overflow-hidden rounded-field border-2 border-dashed border-line-strong bg-surface-2/50',
+    class:
+      'ui-chart-placeholder relative block h-60 overflow-hidden rounded-field border-2 border-dashed border-line-strong bg-surface-2/50',
     role: 'img',
     '[attr.aria-label]': 'ariaLabel()',
   },
@@ -28,7 +31,12 @@ export type ChartPlaceholderShape = 'bars' | 'line';
     <div class="pointer-events-none absolute inset-x-6 bottom-14 top-12" aria-hidden="true">
       @if (shape() === 'line') {
         <svg class="h-full w-full text-line-strong" viewBox="0 0 600 160" preserveAspectRatio="none">
-          <polyline fill="none" stroke="currentColor" stroke-width="3" points="0,100 75,84 150,92 225,60 300,72 375,48 450,64 525,40 600,52" />
+          <polyline
+            fill="none"
+            stroke="currentColor"
+            stroke-width="3"
+            points="0,100 75,84 150,92 225,60 300,72 375,48 450,64 525,40 600,52"
+          />
           <line x1="0" y1="120" x2="600" y2="120" stroke="currentColor" stroke-dasharray="6 6" opacity="0.6" />
         </svg>
       } @else {
@@ -39,8 +47,11 @@ export type ChartPlaceholderShape = 'bars' | 'line';
         </div>
       }
     </div>
-    <span class="absolute right-3 top-3 inline-flex items-center gap-1 rounded-full bg-surface-2 px-2.5 py-0.5 text-xs font-medium text-ink" aria-hidden="true">
-      <span class="material-symbols-outlined text-base">{{ shape() === 'line' ? 'show_chart' : 'bar_chart' }}</span>
+    <span
+      class="absolute right-3 top-3 inline-flex items-center gap-1 rounded-full bg-surface-2 px-2.5 py-0.5 text-xs font-medium text-ink"
+      aria-hidden="true"
+    >
+      <ui-icon [name]="shape() === 'line' ? 'chart-line' : 'chart-column'" class="text-base" />
       Gráfico por desarrollar
     </span>
     <p class="absolute inset-x-4 bottom-3 text-xs text-ink-muted" aria-hidden="true">

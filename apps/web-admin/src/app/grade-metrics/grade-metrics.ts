@@ -1,4 +1,4 @@
-import { Breadcrumbs, Button, Confirmation, Error, Modal, Toast, UiTable } from '#/ui';
+import { Breadcrumbs, Button, Confirmation, Error, Icon, Modal, Toast, UiTable } from '#/ui';
 import { Menu, MenuContent, MenuItem, MenuTrigger } from '@angular/aria/menu';
 import { OverlayModule } from '@angular/cdk/overlay';
 import { DatePipe, DecimalPipe } from '@angular/common';
@@ -20,6 +20,7 @@ import GradeMetricsForm from './grade-metrics-form';
     MenuTrigger,
     OverlayModule,
     Error,
+    Icon,
   ],
   template: `
     <ui-breadcrumbs [items]="[{ label: 'Inicio', link: '/' }, { label: 'Metricas de calificaciones' }]" />
@@ -30,7 +31,7 @@ import GradeMetricsForm from './grade-metrics-form';
       </div>
 
       <button uiButton variant="primary" (click)="editGradeMetric()">
-        <span class="material-symbols-outlined">add_circle</span>
+        <ui-icon name="circle-plus" />
         Nueva métrica
       </button>
     </div>
@@ -68,7 +69,7 @@ import GradeMetricsForm from './grade-metrics-form';
                     #trigger="ngMenuTrigger"
                     [menu]="optionsMenu()"
                   >
-                    <span class="material-symbols-outlined text-xl">more_horiz</span>
+                    <ui-icon name="ellipsis" class="text-xl" />
                   </button>
                   <ng-template
                     [cdkConnectedOverlayOpen]="trigger.expanded()"
@@ -92,7 +93,7 @@ import GradeMetricsForm from './grade-metrics-form';
                           class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-surface-2 w-full"
                           (click)="editGradeMetric($any(metric))"
                         >
-                          <span class="material-symbols-outlined text-lg">edit</span>
+                          <ui-icon name="pencil" class="text-lg" />
                           <span>Editar</span>
                         </button>
                       </ng-template>

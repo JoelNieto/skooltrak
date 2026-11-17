@@ -1,11 +1,14 @@
 import type { Meta, StoryObj } from '@storybook/angular';
+import { moduleMetadata } from '@storybook/angular';
 import { Button } from './button';
+import { Icon } from './icon';
 
 type ButtonArgs = Button & { label: string };
 
 const meta: Meta<ButtonArgs> = {
   title: 'Primitives/Button',
   component: Button,
+  decorators: [moduleMetadata({ imports: [Button, Icon] })],
   argTypes: {
     variant: { control: 'inline-radio', options: ['primary', 'secondary', 'ghost', 'danger'] },
     size: { control: 'inline-radio', options: ['sm', 'md', 'lg'] },
@@ -55,13 +58,13 @@ export const WithIcon: Story = {
     template: `
       <div class="flex flex-wrap items-center gap-3">
         <button uiButton variant="primary" type="button">
-          <span class="material-symbols-outlined">add</span> Nuevo curso
+          <ui-icon name="plus" /> Nuevo curso
         </button>
         <button uiButton variant="ghost" iconOnly aria-label="Cerrar" type="button">
-          <span class="material-symbols-outlined">close</span>
+          <ui-icon name="x" />
         </button>
         <button uiButton variant="secondary" iconOnly aria-label="Editar" type="button">
-          <span class="material-symbols-outlined">edit</span>
+          <ui-icon name="pencil" />
         </button>
       </div>
     `,

@@ -1,4 +1,4 @@
-import { Alert, BrandLogo, Button, Loader, UiField, UiInput } from '#/ui';
+import { Alert, BrandLogo, Button, Icon, Loader, UiField, UiInput } from '#/ui';
 import { HttpClient } from '@angular/common/http';
 import { Component, inject, signal } from '@angular/core';
 import { email, form, FormField, required } from '@angular/forms/signals';
@@ -14,7 +14,7 @@ type LookupResult = {
 
 @Component({
   selector: 'app-forgot-password',
-  imports: [Alert, UiInput, Button, BrandLogo, FormField, RouterLink, Loader, UiField],
+  imports: [Alert, UiInput, Button, BrandLogo, FormField, RouterLink, Loader, UiField, Icon],
   template: `
     <div class="bg-surface-0 min-h-screen flex items-center justify-center p-4">
       @defer {
@@ -50,7 +50,7 @@ type LookupResult = {
             <div class="p-8 bg-surface-1">
               @if (step() === 'sent') {
                 <div uiAlert tone="success" class="mb-4">
-                  <span class="material-symbols-outlined">check_circle</span>
+                  <ui-icon name="circle-check" />
                   <span>Revisa tu correo electrónico. Te hemos enviado un enlace para restablecer tu contraseña.</span>
                 </div>
                 <div class="text-center">
@@ -84,7 +84,7 @@ type LookupResult = {
                       @if (loading()) {
                         Enviando...
                       } @else {
-                        <span class="material-symbols-outlined">check_circle</span>
+                        <ui-icon name="circle-check" />
                         Sí, enviar enlace
                       }
                     </button>
@@ -103,7 +103,7 @@ type LookupResult = {
               } @else if (step() === 'not-found') {
                 <div class="space-y-6">
                   <div uiAlert tone="warning">
-                    <span class="material-symbols-outlined">info</span>
+                    <ui-icon name="info" />
                     <span>
                       No encontramos ninguna cuenta con
                       <strong>{{ searchedEmail() }}</strong>
@@ -124,7 +124,7 @@ type LookupResult = {
                   <ui-field label="Correo Electrónico">
                     <div class="relative">
                       <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <span class="material-symbols-outlined">mail</span>
+                        <ui-icon name="mail" />
                       </div>
                       <input
                         uiInput

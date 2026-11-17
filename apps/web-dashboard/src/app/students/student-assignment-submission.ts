@@ -9,7 +9,7 @@ import { Component } from '@angular/core';
       title="Entrega de asignaciones"
       subtitle="Sube tus archivos y revisa el estado de entrega."
       actionLabel="Subir archivo"
-      actionIcon="upload_file"
+      actionIcon="file-up"
     />
 
     <div uiCard>
@@ -48,7 +48,7 @@ import { Component } from '@angular/core';
         <lib-empty-state
           title="Sin entregas recientes"
           description="Cuando subas un archivo aparecerá aquí."
-          icon="cloud_upload"
+          icon="cloud-upload"
         />
       } @else {
         <div class="space-y-3">

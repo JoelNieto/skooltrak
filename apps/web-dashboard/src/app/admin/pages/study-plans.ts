@@ -3,6 +3,7 @@ import {
   Card,
   Confirmation,
   EmptyState,
+  Icon,
   Modal,
   PaginatorV2,
   Toast,
@@ -54,13 +55,14 @@ type DegreeRow = {
     FormField,
     EmptyState,
     UiInputGroup,
+    Icon,
   ],
 
   template: `<div class="flex justify-between">
       <div class="flex gap-2">
         <div class="md:w-96 w-full">
           <label uiInputGroup>
-            <span class="material-symbols-outlined">search</span>
+            <ui-icon name="search" />
             <input class="pl-0" type="search" placeholder="Buscar..." [formField]="form.searchText" />
           </label>
         </div>
@@ -71,9 +73,7 @@ type DegreeRow = {
           }
         </select>
       </div>
-      <button uiButton variant="primary" (click)="editStudyPlan()">
-        <span class="material-symbols-outlined">add_circle</span> Nuevo plan
-      </button>
+      <button uiButton variant="primary" (click)="editStudyPlan()"><ui-icon name="circle-plus" /> Nuevo plan</button>
     </div>
     <div uiCard class="mt-4">
       <table uiTable>
@@ -105,7 +105,7 @@ type DegreeRow = {
                   #trigger="ngMenuTrigger"
                   [menu]="actionsMenu()"
                 >
-                  <span class="material-symbols-outlined text-xl">more_horiz</span>
+                  <ui-icon name="ellipsis" class="text-xl" />
                 </button>
                 <ng-template
                   [cdkConnectedOverlayOpen]="trigger.expanded()"
@@ -129,7 +129,7 @@ type DegreeRow = {
                         class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-surface-2 w-full"
                         (click)="editStudyPlan(studyPlan)"
                       >
-                        <span class="material-symbols-outlined text-lg">edit</span>
+                        <ui-icon name="pencil" class="text-lg" />
                         <span>Editar</span>
                       </button>
                       <button
@@ -138,7 +138,7 @@ type DegreeRow = {
                         class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-surface-2 w-full"
                         (click)="deleteStudyPlan(studyPlan)"
                       >
-                        <span class="material-symbols-outlined text-lg">delete</span>
+                        <ui-icon name="trash-2" class="text-lg" />
                         <span>Eliminar</span>
                       </button>
                     </ng-template>
@@ -152,7 +152,7 @@ type DegreeRow = {
                 <lib-empty-state
                   [title]="'No hay planes de estudio'"
                   [description]="'No hay planes de estudio para mostrar'"
-                  [icon]="'group'"
+                  [icon]="'users'"
                 />
               </td>
             </tr>

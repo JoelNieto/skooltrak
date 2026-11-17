@@ -3,9 +3,16 @@ import { CanActivateChildFn, CanActivateFn, CanMatchFn, Router, UrlTree } from '
 import Auth from './auth';
 import { OnboardingStep } from './onboarding-step';
 
-/** Session/token present but `me` failed or is absent — avoid mis-routing to onboarding. */
+/**
+ * Redirects to /login when there is no session, or a session/token exists but `me` failed.
+ *
+ * Role/permission `canMatch` guards must use this instead of returning `false` for anonymous
+ * users: `canMatch` runs before the parent's `canActivate: [authGuard]`, so if every `home`
+ * child rejects the match the parent never matches either and the router falls through to `**`
+ * (404) instead of reaching `authGuard`.
+ */
 function urlTreeIfMeMissing(auth: Auth, router: Router): UrlTree | null {
-  if (auth.isAuthenticated() && auth.user() == null) {
+  if (!auth.isAuthenticated() || auth.user() == null) {
     return router.createUrlTree(['/login']);
   }
   return null;

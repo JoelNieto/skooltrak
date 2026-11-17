@@ -74,6 +74,12 @@ export class BetterAuthGuard implements CanActivate {
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
+    // Registered as a global APP_GUARD, so it also sees WebSocket handlers. Gateways
+    // authenticate the socket in handleConnection (see *-ws-auth.service.ts); only HTTP is handled here.
+    if (context.getType() !== 'http') {
+      return true;
+    }
+
     // Check if route is marked as public
     const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
       context.getHandler(),
@@ -85,6 +91,12 @@ export class BetterAuthGuard implements CanActivate {
     }
 
     const request = getRequestFromExecutionContext(context);
+
+    // Already authenticated earlier in this request (global guard + controller-level
+    // @UseGuards(BetterAuthGuard)); skip the duplicate user/permissions lookup.
+    if (request.user?.userId) {
+      return true;
+    }
 
     // Check for session from better-auth
     const session = request.session as
@@ -168,6 +180,10 @@ export class PermissionsGuard implements CanActivate {
   constructor(private reflector: Reflector) {}
 
   canActivate(context: ExecutionContext): boolean {
+    if (context.getType() !== 'http') {
+      return true;
+    }
+
     const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
       context.getHandler(),
       context.getClass(),

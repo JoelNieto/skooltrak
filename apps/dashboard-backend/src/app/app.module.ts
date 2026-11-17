@@ -36,6 +36,7 @@ import { StudentsModule } from './students/students.module';
 import { StudyPlansModule } from './study-plans/study-plans.module';
 import { SubjectsModule } from './subjects/subjects.module';
 import { TeachersModule } from './teachers/teachers.module';
+import { HomeModule } from './home/home.module';
 
 const openApiExport = process.env['OPENAPI_EXPORT'] === 'true';
 
@@ -75,6 +76,7 @@ const openApiExport = process.env['OPENAPI_EXPORT'] === 'true';
     FinancialModule,
     StoreModule,
     ImportsModule,
+    HomeModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -33,4 +33,16 @@ export const data = {
     /** `teacher` is homeroom only; no course of theirs in this study plan. */
     homeroomOnly: '8°A E2E',
   },
+  /** Enrolled in `related` and in `teacher`'s course (HOM-001-S01 attendance). */
+  relatedStudents: ['Ana', 'Beto', 'Carla'],
+  /**
+   * Weekly slots seeded on **every** weekday, so the teacher home has classes whatever day the
+   * suite runs (HOM-001-S01). `early` has always ended (missed until attendance is taken), `late`
+   * is always still ahead, except when the suite runs within those half hours.
+   * `otherTeachers` course is scheduled in `homeroomOnly` and must never show on `teacher`'s home.
+   */
+  schedule: {
+    early: { startTime: '00:00', endTime: '00:30' },
+    late: { startTime: '23:30', endTime: '23:59' },
+  },
 } as const;

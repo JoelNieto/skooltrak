@@ -22,6 +22,7 @@ export class School {
     currencyCode: string;
     currentYear: number;
     schoolYearStartMonth: number;
+    timezone: string;
     createdAt: Date;
     updatedAt: Date;
 }

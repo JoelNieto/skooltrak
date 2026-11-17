@@ -1,6 +1,6 @@
 import { GetObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
-import { ForbiddenException, Inject, Injectable, Scope } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Inject, Injectable, Scope } from '@nestjs/common';
 import { REQUEST } from '@nestjs/core';
 import { ConfigService } from '@nestjs/config';
 import { Request } from 'express';
@@ -8,6 +8,16 @@ import { PrismaService } from '../prisma.service';
 import { CreateSchoolInput } from './dto/create-school.input';
 import { SchoolLogoUploadInput } from './dto/school-logo-upload.input';
 import { UpdateSchoolInput } from './dto/update-school.input';
+
+/** Rejects anything that isn't an IANA timezone the runtime knows (BR-HOM-001.4). */
+export function assertValidTimezone(timezone: string | undefined | null) {
+  if (timezone === undefined || timezone === null) return;
+  try {
+    new Intl.DateTimeFormat('en-US', { timeZone: timezone });
+  } catch {
+    throw new BadRequestException('Zona horaria inválida');
+  }
+}
 
 @Injectable({ scope: Scope.REQUEST })
 export class SchoolsService {
@@ -63,6 +73,7 @@ export class SchoolsService {
     const req = this.request;
     const { organizationId } = req.user as { organizationId: string };
     const { slug: inputSlug, ...rest } = createSchoolInput;
+    assertValidTimezone(rest.timezone);
     const slug =
       inputSlug?.trim() || (await this.ensureUniqueSlug(createSchoolInput.shortName || createSchoolInput.name));
 
@@ -88,6 +99,7 @@ export class SchoolsService {
   async update(id: string, updateSchoolInput: UpdateSchoolInput) {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { id: _id, slug, ...data } = updateSchoolInput;
+    assertValidTimezone(data.timezone);
     const nextData = { ...data } as Record<string, unknown>;
     if (slug !== undefined && slug !== null) {
       const trimmed = slug.trim();

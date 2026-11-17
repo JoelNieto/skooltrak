@@ -64,6 +64,8 @@ vitest.config.*.timestamp*
 graphify-out/cache
 # Playwright e2e auth state (contains access tokens)
 apps/web-dashboard-e2e/.auth/
+# Playwright resolves storageStatePath() from the project dir when run via nx, nesting the folder
+apps/web-dashboard-e2e/**/.auth/
 
 
 storybook-static

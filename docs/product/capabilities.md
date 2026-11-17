@@ -110,6 +110,17 @@ Code: `store`; routes `/store`, `/store/:schoolSlug`
 | Cart & orders | Live | — |
 | Store admin (products, order status) | Live | — |
 
+## HOM: Home dashboards
+Read-only views that combine data from the other contexts into one home per persona. HOM owns no data of its own.
+Code: `home` (planned); `web-dashboard` `/home` → `home.ts`, `teacher-home.ts`, `student-home.ts`, `parent-home.ts`
+
+| Capability | Status | FRD |
+|---|---|---|
+| Teacher home (my day, pending, week, attention) | Partial ("Mi día" + scoped attendance KPI in review: HOM-001-S01) | [HOM-001](frd/HOM-001-persona-home-dashboards.md) |
+| Student home (today, work, progress) | Partial (legacy home, unscoped assignments) | [HOM-001](frd/HOM-001-persona-home-dashboards.md) |
+| Parent home (per-child alerts, progress, account) | Partial (legacy home) | [HOM-001](frd/HOM-001-persona-home-dashboards.md) |
+| School admin home (attention, KPIs, academics, finance, reach) | Partial (legacy home) | [HOM-001](frd/HOM-001-persona-home-dashboards.md) |
+
 ## PLT: Platform Administration
 Code: `apps/web-admin`, `apps/admin-backend`
 

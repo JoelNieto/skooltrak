@@ -72,8 +72,8 @@ Sign-up requires email verification, so this must work before the first user sig
 
 ### 4. Server
 
-Any Ubuntu 24.04 VM in US East with **2 vCPU / 4 GB RAM** (e.g. Hetzner Cloud in Ashburn,
-DigitalOcean NYC, AWS Lightsail `us-east-1`).
+Any x86 Ubuntu 24.04 VM in US East with **2 vCPU / 4 GB RAM**. AWS Lightsail in `us-east-1`
+shares a region with Neon (about 1 ms per query); DigitalOcean NYC also works (about 5–7 ms).
 
 ```bash
 # as root
@@ -167,7 +167,7 @@ Deploys never overlap. A newer push waits for the running one to finish.
 
 | Item | Cost |
 | --- | --- |
-| Server (2 vCPU / 4 GB) | ~$10–25 |
+| Server (2 vCPU / 4 GB) | ~$20–25 |
 | Neon (Launch plan) | ~$19 |
 | Cloudflare R2 | ~$0–5 |
 | Resend | free tier to start |

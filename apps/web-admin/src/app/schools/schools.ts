@@ -19,7 +19,7 @@ import { DatePipe } from '@angular/common';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { Component, effect, inject } from '@angular/core';
 import { Prisma } from '@generated/prisma';
-import { toFetchQueryRecord } from '../core/fetch-query-params';
+import { toFetchQueryRecord, toPageQuery } from '../core/fetch-query-params';
 import { SchoolsForm } from './schools-form';
 @Component({
   selector: 'app-schools',
@@ -111,10 +111,7 @@ export class Schools {
   public schools = httpResource<Prisma.SchoolGetPayload<{ include: { organization: true } }>[]>(
     () => ({
       url: '/api/v1/schools',
-      params: toFetchQueryRecord({
-        skip: this.pagination.skip(),
-        take: this.pagination.take(),
-      }),
+      params: toFetchQueryRecord(toPageQuery(this.pagination)),
     }),
     { defaultValue: [] },
   );

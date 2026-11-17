@@ -21,7 +21,7 @@ import { HttpClient, httpResource } from '@angular/common/http';
 import { afterRenderEffect, Component, effect, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Prisma } from '@generated/prisma';
-import { toFetchQueryRecord } from '../core/fetch-query-params';
+import { toFetchQueryRecord, toPageQuery } from '../core/fetch-query-params';
 import { UsersForm } from './users-form';
 @Component({
   selector: 'app-users',
@@ -131,8 +131,7 @@ export class Users {
     () => ({
       url: '/api/v1/users',
       params: toFetchQueryRecord({
-        take: this.pagination.take(),
-        skip: this.pagination.skip(),
+        ...toPageQuery(this.pagination),
         search: this.pagination.search(),
       }),
     }),
@@ -143,11 +142,7 @@ export class Users {
 
   private readonly usersCount = httpResource<number>(() => ({
     url: '/api/v1/users/count',
-    params: toFetchQueryRecord({
-      take: this.pagination.take(),
-      skip: this.pagination.skip(),
-      search: this.pagination.search(),
-    }),
+    params: toFetchQueryRecord({ search: this.pagination.search() }),
   }));
 
   constructor() {

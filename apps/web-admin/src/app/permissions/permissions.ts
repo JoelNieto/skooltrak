@@ -21,7 +21,7 @@ import { HttpClient, httpResource } from '@angular/common/http';
 import { afterRenderEffect, Component, effect, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Prisma } from '@generated/prisma';
-import { toFetchQueryRecord } from '../core/fetch-query-params';
+import { toFetchQueryRecord, toPageQuery } from '../core/fetch-query-params';
 import { PermissionsForm } from './permissions-form';
 @Component({
   selector: 'app-permissions',
@@ -134,8 +134,7 @@ export class Permissions {
     () => ({
       url: '/api/v1/permissions',
       params: toFetchQueryRecord({
-        take: this.pagination.take(),
-        skip: this.pagination.skip(),
+        ...toPageQuery(this.pagination),
         search: this.pagination.search(),
       }),
     }),
@@ -146,11 +145,7 @@ export class Permissions {
 
   private readonly permissionsCount = httpResource<number>(() => ({
     url: '/api/v1/permissions/count',
-    params: toFetchQueryRecord({
-      take: this.pagination.take(),
-      skip: this.pagination.skip(),
-      search: this.pagination.search(),
-    }),
+    params: toFetchQueryRecord({ search: this.pagination.search() }),
   }));
 
   constructor() {

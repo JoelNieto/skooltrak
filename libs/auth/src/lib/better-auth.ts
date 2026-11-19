@@ -51,8 +51,9 @@ function createProductionAuth() {
         hash: async (password) => bcrypt.hash(password, 10),
       },
       sendResetPassword: async ({ user, url }) => {
+        // Never log `url`: it carries the reset token, and anyone who can read the logs
+        // could use it to take over the account.
         console.log('[Better Auth] sendResetPassword called for:', user.email);
-        console.log('[Better Auth] Reset URL:', url);
         try {
           await sendEmail({
             to: user.email,

@@ -62,7 +62,10 @@ services:
     env_file: []
     environment:
       PORT: 4200
-      NG_ALLOWED_HOSTS: ${APP_DOMAIN}
+      # localhost: the image's HEALTHCHECK calls http://localhost:4200/. Without it, every check
+      # logs "ERROR: Bad Request" twice a minute. Caddy always forwards the public Host, so
+      # outside requests can't present localhost.
+      NG_ALLOWED_HOSTS: ${APP_DOMAIN},localhost
       NG_TRUST_PROXY_HEADERS: x-forwarded-proto,x-forwarded-host
     depends_on:
       dashboard-backend:
@@ -74,7 +77,7 @@ services:
     env_file: []
     environment:
       PORT: 4300
-      NG_ALLOWED_HOSTS: ${ADMIN_DOMAIN}
+      NG_ALLOWED_HOSTS: ${ADMIN_DOMAIN},localhost # localhost: see web-dashboard
       NG_TRUST_PROXY_HEADERS: x-forwarded-proto,x-forwarded-host
     depends_on:
       admin-backend:

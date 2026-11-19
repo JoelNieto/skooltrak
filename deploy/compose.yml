@@ -1,6 +1,7 @@
 # Production stack: one Docker host, Caddy in front, managed Postgres (Neon) outside.
-# The deploy workflow copies this file and the Caddyfile to the server and runs
-#   IMAGE_TAG=<git sha> docker compose up -d
+# The deploy workflow copies this file and the Caddyfile to the server, writes the commit SHA
+# to IMAGE_TAG in .env, and runs `docker compose up -d`. There is no `latest`: what runs is
+# always the SHA pinned in .env.
 # Secrets live only in .env next to this file on the server (see .env.example).
 
 # Frontends override env_file with [], so the backend secrets never reach them.
@@ -37,7 +38,7 @@ services:
 
   dashboard-backend:
     <<: *app
-    image: ${REGISTRY:-ghcr.io/joelnieto}/skooltrak-dashboard-backend:${IMAGE_TAG:-latest}
+    image: ${REGISTRY:-ghcr.io/joelnieto}/skooltrak-dashboard-backend:${IMAGE_TAG:?IMAGE_TAG is written to .env by the deploy workflow}
     environment:
       PORT: 3000
       APP_URL: https://${APP_DOMAIN}
@@ -47,7 +48,7 @@ services:
 
   admin-backend:
     <<: *app
-    image: ${REGISTRY:-ghcr.io/joelnieto}/skooltrak-admin-backend:${IMAGE_TAG:-latest}
+    image: ${REGISTRY:-ghcr.io/joelnieto}/skooltrak-admin-backend:${IMAGE_TAG:?IMAGE_TAG is written to .env by the deploy workflow}
     environment:
       PORT: 5050
       APP_URL: https://${ADMIN_DOMAIN}
@@ -57,7 +58,7 @@ services:
 
   web-dashboard:
     <<: *app
-    image: ${REGISTRY:-ghcr.io/joelnieto}/skooltrak-web-dashboard:${IMAGE_TAG:-latest}
+    image: ${REGISTRY:-ghcr.io/joelnieto}/skooltrak-web-dashboard:${IMAGE_TAG:?IMAGE_TAG is written to .env by the deploy workflow}
     env_file: []
     environment:
       PORT: 4200
@@ -69,7 +70,7 @@ services:
 
   web-admin:
     <<: *app
-    image: ${REGISTRY:-ghcr.io/joelnieto}/skooltrak-web-admin:${IMAGE_TAG:-latest}
+    image: ${REGISTRY:-ghcr.io/joelnieto}/skooltrak-web-admin:${IMAGE_TAG:?IMAGE_TAG is written to .env by the deploy workflow}
     env_file: []
     environment:
       PORT: 4300

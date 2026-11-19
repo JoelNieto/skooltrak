@@ -17,8 +17,8 @@ describe('Modal', () => {
 
   beforeEach(() => {
     // jsdom does not implement <dialog> methods
-    HTMLDialogElement.prototype.showModal ??= function () {};
-    HTMLDialogElement.prototype.close ??= function () {};
+    HTMLDialogElement.prototype.showModal ??= vi.fn();
+    HTMLDialogElement.prototype.close ??= vi.fn();
     TestBed.configureTestingModule({});
     service = TestBed.inject(Modal);
   });

@@ -6,6 +6,7 @@ import {
   inject,
   Injectable,
   Injector,
+  OutputEmitterRef,
   runInInjectionContext,
   Type,
 } from '@angular/core';
@@ -17,16 +18,6 @@ type ModalRef<T> = {
   close: (result?: T) => void;
 };
 
-// A minimal shape for Angular output emitters used here
-type OutputLike = {
-  subscribe?: (fn: (value: unknown) => void) => unknown;
-};
-
-function isOutputEmitterRef(value: unknown): value is OutputLike {
-  if (typeof value !== 'object' || value === null) return false;
-  const v = value as { constructor?: { name?: string } };
-  return v.constructor?.name === 'OutputEmitterRef';
-}
 @Injectable({
   providedIn: 'root',
 })
@@ -83,19 +74,12 @@ export class Modal {
         contentComponentRef.setInput('data', data);
       }
 
-      const instance = contentComponentRef.instance;
-      const outputProperties = Object.entries(
-        instance as Record<string, unknown>
-      ).filter(([, value]) => isOutputEmitterRef(value));
-
-      outputProperties.forEach(([key, outputRef]) => {
-        const emitter = outputRef as OutputLike;
-        emitter.subscribe?.((value: unknown) => {
-          if (key === 'closeModal') {
-            this.close(value);
-          }
-        });
-      });
+      // Use instanceof rather than constructor.name: class names are mangled
+      // by the production minifier, which silently broke this check.
+      const closeOutput = (contentComponentRef.instance as Record<string, unknown>)['closeModal'];
+      if (closeOutput instanceof OutputEmitterRef) {
+        closeOutput.subscribe((value: unknown) => this.close(value));
+      }
 
       modalRef.setInput('title', title ?? '');
       modalRef.setInput('size', finalOptions.size);

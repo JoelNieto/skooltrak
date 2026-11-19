@@ -289,6 +289,12 @@ async function main() {
         console.log(`✓ Synced ${orgRoles.length} org-specific ${roleDef.name} role(s)`);
       }
     }
+  }, {
+    // Every statement above is a sequential round trip, and step 3 grows with the number of
+    // organizations. Against a remote database (Neon, from CI on each deploy) that outlasts
+    // Prisma's 5 s default, which then aborts the whole seed mid-way.
+    maxWait: 10_000,
+    timeout: 120_000,
   });
 
   console.log('\n========================================');

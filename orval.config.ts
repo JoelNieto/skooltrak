@@ -1,6 +1,9 @@
 import { defineConfig } from 'orval';
 
-/** Placeholder inputs — replace with real `/api/openapi.json` exports when available. */
+/**
+ * Inputs are written by `nx run <dashboard|admin>-backend:openapi`, which also runs this config for
+ * its project. Regenerate both with `bun run openapi`; see docs/api-clients.md.
+ */
 export default defineConfig({
   'api-client-dashboard': {
     input: './libs/api-client-dashboard/openapi.json',

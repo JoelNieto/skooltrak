@@ -55,7 +55,7 @@ Slice:  Proposed ──► Ready ──► In progress ──► Done
 - all acceptance criteria pass, including at least one Playwright test tagged with its FR IDs;
 - the API is behind `@RequirePermissions(...)` and scoped to the caller's organization, with a test proving cross-tenant access is refused;
 - the UI uses `libs/ui` components only, with no raw palette colours;
-- the OpenAPI client is regenerated (`bun run openapi:orval`) if the API changed;
+- the OpenAPI client is regenerated (`bun run openapi`) if the API changed;
 - the FRD's slice table and `capabilities.md` status are updated.
 
 ## Workflow

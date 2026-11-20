@@ -9,7 +9,7 @@
     "serve:dev:admin": "nx run-many --parallel --target=serve --projects=admin-backend,web-admin",
     "db:add-financial-permissions": "bun run prisma/scripts/add-financial-permissions-to-admins.ts",
     "db:add-roles-permissions": "bun run prisma/scripts/seed-roles-permissions.ts",
-    "openapi:orval": "orval --config orval.config.ts"
+    "openapi": "nx run-many -t openapi -p dashboard-backend admin-backend"
   },
   "private": true,
   "imports": {

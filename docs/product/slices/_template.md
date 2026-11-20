@@ -21,7 +21,7 @@ Then <observable result>
 ## Layers touched
 - [ ] Prisma migration: …
 - [ ] Nest (`apps/dashboard-backend/src/app/<module>`): service rule, controller + `@RequirePermissions(...)`, tenant filter
-- [ ] OpenAPI → `bun run openapi:orval`
+- [ ] OpenAPI → `bun run openapi`
 - [ ] Angular data-access / store
 - [ ] Angular UI (route, component, `libs/ui` primitives)
 - [ ] Tests: Nest unit (incl. cross-tenant refusal), Playwright e2e tagged `@FR-<CTX>-<NNN>.x`

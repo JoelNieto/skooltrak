@@ -87,7 +87,7 @@ Scenario: existing pages keep working
   - `@RequirePermissions` on every handler of the three controllers;
   - service queries filter by `organizationId`;
   - remove `GET /grades`.
-- [ ] **OpenAPI:** `bun run openapi:orval`, since the removed route and the 403 responses are documented.
+- [x] **OpenAPI:** `bun run openapi` (run for #35). The removed routes are gone from the spec; the `403`s are thrown, not declared, so they are not in it.
 - [ ] **Angular:** handle `403` in the affected pages with the standard error state. In `grades/grade.ts` and `grades/grades-form.ts`, the *Publicada* switch can no longer be turned off once a column is published unless the user is an admin.
 - [ ] **Tests:**
   - Nest unit tests per rule above, including cross-tenant refusal;
@@ -102,7 +102,7 @@ Scenario: existing pages keep working
 - [x] Acceptance criteria pass (`grade-access.spec.ts`, `student-access.spec.ts`; Playwright `@FR-ASM-001.15`)
 - [x] Cross-tenant / wrong-role access refused (test)
 - [x] FRD slice table + `capabilities.md` updated
-- [ ] OpenAPI client regeneration: `libs/api-client-dashboard/openapi.json` was still a placeholder at merge
+- [x] OpenAPI client regeneration: done for #35 (`bun run openapi`). The spec drops `GET /grades` and `GET /student-grades`; the `403`s are thrown, not declared with `@ApiForbiddenResponse`, so they are not in the spec
 
 ## What shipped beyond the plan
 - The unscoped `GET /api/v1/student-grades` list route was removed too; no client used it.

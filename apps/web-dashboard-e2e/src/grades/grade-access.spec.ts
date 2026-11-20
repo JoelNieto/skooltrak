@@ -191,6 +191,36 @@ test.describe('Students API: grades and enrollment codes @FR-ASM-001.15', () => 
   });
 });
 
+test.describe('No password hashes in responses @FR-PPL-001.1', () => {
+  /** Every value at any depth whose key is `password` (or an OAuth token). */
+  function secrets(value: unknown, path = '$'): string[] {
+    if (Array.isArray(value)) return value.flatMap((v, i) => secrets(v, `${path}[${i}]`));
+    if (!value || typeof value !== 'object') return [];
+    return Object.entries(value).flatMap(([key, v]) =>
+      ['password', 'accessToken', 'refreshToken', 'idToken'].includes(key) ? [`${path}.${key}`] : secrets(v, `${path}.${key}`),
+    );
+  }
+
+  test('student and teacher lists, records and grade rows carry no credentials', async ({ request }) => {
+    const { ana, courseId } = await loadCourse(request);
+    const teacher = await bearerFor(request, personas.teacher.email);
+    const admin = await bearerFor(request, personas.admin.email);
+
+    for (const [headers, url] of [
+      [teacher, '/api/v1/students'],
+      [teacher, `/api/v1/students/${ana.studentId}`],
+      [teacher, `/api/v1/students/by-course/${courseId}`],
+      [teacher, `/api/v1/grades/by-course/${courseId}`],
+      [admin, '/api/v1/teachers'],
+      [admin, `/api/v1/students/${ana.studentId}`],
+    ] as const) {
+      const res = await request.get(url, { headers });
+      expect(res.ok(), url).toBeTruthy();
+      expect(secrets(await res.json()), url).toEqual([]);
+    }
+  });
+});
+
 test.describe('Teacher grade pages keep working @FR-ASM-001.15', () => {
   test.use({ storageState: storageStatePath('teacher') });
 

@@ -106,6 +106,43 @@ export class GradeAccessService {
     return scope;
   }
 
+  /**
+   * Whose published grades across all of a student's courses the caller may read:
+   * `'all'` for an admin of the student's organization, the student, a linked parent or the
+   * student's homeroom teacher; otherwise, for a teacher, only the courses they teach.
+   * Throws 403 for anyone else.
+   */
+  async studentCoursesScope(user: AuthUserContext | undefined, studentId: string): Promise<'all' | Set<string>> {
+    if (!user?.userId) throw new ForbiddenException('Not authenticated');
+    const student = await this.prisma.student.findUnique({
+      where: { id: studentId },
+      select: {
+        organizationId: true,
+        userId: true,
+        parents: { select: { userId: true } },
+        classGroup: { select: { teacher: { select: { userId: true } } } },
+      },
+    });
+    if (!student) throw new NotFoundException('Estudiante no encontrado');
+    const role = user.role?.toUpperCase();
+
+    if (role === 'STUDENT' && student.userId === user.userId) return 'all';
+    if (role === 'PARENT' && student.parents.some((p) => p.userId === user.userId)) return 'all';
+    if (student.organizationId !== user.organizationId) throw new ForbiddenException(READ_DENIED);
+    if (this.isAdmin(user)) return 'all';
+
+    if (role === 'TEACHER') {
+      if (student.classGroup?.teacher?.userId === user.userId) return 'all';
+      const teacher = await this.prisma.teacher.findFirst({
+        where: { userId: user.userId, organizationId: student.organizationId },
+        select: { courses: { select: { id: true } } },
+      });
+      const taught = new Set((teacher?.courses ?? []).map((c) => c.id));
+      if (taught.size) return taught;
+    }
+    throw new ForbiddenException(READ_DENIED);
+  }
+
   /** Throws 403 when a non-admin tries to unpublish a published grade (BR-ASM-001.9). */
   assertCanChangePublished(user: AuthUserContext | undefined, wasPublished: boolean, published?: boolean): void {
     if (wasPublished && published === false && !this.isAdmin(user)) {

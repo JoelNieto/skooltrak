@@ -194,3 +194,12 @@ describe('students API — enrollment codes', () => {
     });
   });
 });
+
+describe('Prisma client — credentials are never part of a default result (PPL-001 Q1)', () => {
+  it('omits password hashes and OAuth tokens from every query', () => {
+    expect(OMITTED_BY_DEFAULT.user).toEqual({ password: true });
+    expect(OMITTED_BY_DEFAULT.account).toEqual({ password: true, accessToken: true, refreshToken: true, idToken: true });
+    const client = new PrismaService() as unknown as { options: { omit: typeof OMITTED_BY_DEFAULT } };
+    expect(client.options.omit.user.password).toBe(true);
+  });
+});

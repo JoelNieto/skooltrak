@@ -1,18 +1,12 @@
-import { Test, TestingModule } from '@nestjs/testing';
+jest.mock('../prisma.service', () => ({ PrismaService: class {} }));
+
 import { GradeBucketsService } from './grade-buckets.service';
 
 describe('GradeBucketsService', () => {
-  let service: GradeBucketsService;
-
-  beforeEach(async () => {
-    const module: TestingModule = await Test.createTestingModule({
-      providers: [GradeBucketsService],
-    }).compile();
-
-    service = module.get<GradeBucketsService>(GradeBucketsService);
-  });
-
-  it('should be defined', () => {
-    expect(service).toBeDefined();
+  it("lists one course's buckets", async () => {
+    const findMany = jest.fn().mockResolvedValue([{ id: 'B1' }]);
+    const service = new GradeBucketsService({ gradeBucket: { findMany } } as never);
+    await expect(service.findManyByCourseId('C1')).resolves.toEqual([{ id: 'B1' }]);
+    expect(findMany).toHaveBeenCalledWith({ where: { courseId: 'C1' } });
   });
 });

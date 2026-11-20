@@ -1,6 +1,6 @@
-import { Badge, Button, DecimalToNumber, Icon, Modal, UiSelect, UiTable } from '#/ui';
+import { Badge, Button, DecimalToNumber, EmptyState, Icon, Modal, UiSelect, UiTable } from '#/ui';
 import { DecimalPipe, NgClass } from '@angular/common';
-import { httpResource } from '@angular/common/http';
+import { HttpErrorResponse, httpResource } from '@angular/common/http';
 import { afterRenderEffect, Component, computed, inject, input, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
@@ -19,7 +19,7 @@ export type StudentType = {
 
 @Component({
   selector: 'app-course-grades',
-  imports: [UiTable, Badge, UiSelect, Button, FormsModule, DecimalPipe, RouterLink, NgClass, Icon],
+  imports: [UiTable, Badge, UiSelect, Button, FormsModule, DecimalPipe, RouterLink, NgClass, Icon, EmptyState],
   template: ` <div class="flex justify-end gap-2">
       <select uiSelect class="w-64!" [ngModel]="periodId()" (ngModelChange)="periodId.set($event)">
         <option disabled selected value="">Selecciona un periodo...</option>
@@ -29,6 +29,13 @@ export type StudentType = {
       </select>
       <button uiButton (click)="editGrade()">Nueva calificacion</button>
     </div>
+    @if (gradesResource.error()) {
+      <lib-empty-state
+        title="No se pudieron cargar las calificaciones"
+        [description]="gradesErrorMessage()"
+        icon="circle-alert"
+      />
+    }
     <div class="overflow-x-auto w-full">
       <table uiTable zebra class="table-fixed w-full">
         <thead>
@@ -168,6 +175,15 @@ export default class CourseGrades {
       return undefined;
     }
     return { url: `/api/v1/grades/by-course/${courseId}`, params: { periodId }, defaultValue: [] };
+  });
+
+  /** A 403 carries the API's reason (e.g. "Solo puedes calificar tus propios cursos"). */
+  protected gradesErrorMessage = computed(() => {
+    const error = this.gradesResource.error();
+    if (error instanceof HttpErrorResponse && error.status === 403) {
+      return error.error?.message ?? 'No tienes acceso a estas calificaciones.';
+    }
+    return 'Inténtalo de nuevo más tarde.';
   });
 
   public groupedGrades = computed(() => {

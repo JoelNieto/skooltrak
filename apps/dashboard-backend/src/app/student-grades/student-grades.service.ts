@@ -12,10 +12,6 @@ export class StudentGradesService {
     });
   }
 
-  findAll() {
-    return this.prisma.studentGrade.findMany();
-  }
-
   findByCourseId(courseId: string, periodId?: string, studentId?: string) {
     return this.prisma.studentGrade.findMany({
       where: { grade: { courseId, periodId, published: true }, studentId },

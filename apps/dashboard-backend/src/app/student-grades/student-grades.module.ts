@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { GradesModule } from '../grades/grades.module';
 import { PrismaModule } from '../prisma.module';
 import { StudentGradesController } from './student-grades.controller';
 import { StudentGradesService } from './student-grades.service';
@@ -8,6 +9,6 @@ import { StudentGradesService } from './student-grades.service';
   providers: [
     StudentGradesService,
   ],
-  imports: [PrismaModule],
+  imports: [PrismaModule, GradesModule],
 })
 export class StudentGradesModule {}

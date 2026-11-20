@@ -156,6 +156,29 @@
   --ui-ease: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
+/* Course color tags (ACA-001 BR .11): course covers and the course color dot.
+ * Deep shades, so the white cover icon keeps at least 3:1 and white text 4.5:1. They sit on both
+ * light and dark surfaces, so one set serves both themes; libs/ui checks the contrast in a spec.
+ * Use through ui-course-cover / courseColorVar(), never as raw hex. */
+:root {
+  --color-course-indigo: #4338ca;
+  --color-course-indigo-content: #ffffff;
+  --color-course-teal: #0f766e;
+  --color-course-teal-content: #ffffff;
+  --color-course-rose: #be185d;
+  --color-course-rose-content: #ffffff;
+  --color-course-violet: #6d28d9;
+  --color-course-violet-content: #ffffff;
+  --color-course-amber: #b45309;
+  --color-course-amber-content: #ffffff;
+  --color-course-slate: #334155;
+  --color-course-slate-content: #ffffff;
+  --color-course-fuchsia: #a21caf;
+  --color-course-fuchsia-content: #ffffff;
+  --color-course-green: #15803d;
+  --color-course-green-content: #ffffff;
+}
+
 /* ── 3a. DaisyUI themes (read the semantic layer) ──────────────────────── */
 @plugin "daisyui/theme" {
   name: 'light';

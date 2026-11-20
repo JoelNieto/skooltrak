@@ -81,6 +81,7 @@ export class SubjectsService {
       data: {
         name: createSubjectInput.name,
         code,
+        icon: createSubjectInput.icon ?? null,
         organizationId,
       },
       include: { organization: true },
@@ -140,10 +141,10 @@ export class SubjectsService {
   async update(id: string, updateSubjectInput: UpdateSubjectInput) {
     await this.assertInOrganization(id);
     // Only the editable fields; a subject never moves to another organization.
-    const { name, code } = updateSubjectInput;
+    const { name, code, icon } = updateSubjectInput;
     return this.prisma.subject.update({
       where: { id },
-      data: { name, code },
+      data: { name, code, icon },
     });
   }
 

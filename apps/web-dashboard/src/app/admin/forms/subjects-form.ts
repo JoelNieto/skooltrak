@@ -1,4 +1,5 @@
-import { Button, Toast, UiField, UiInput } from '#/ui';
+import { Button, Icon, Toast, UiField, UiInput } from '#/ui';
+import { DEFAULT_SUBJECT_ICON, SUBJECT_ICONS } from '@/shared';
 import { HttpClient } from '@angular/common/http';
 import { afterRenderEffect, Component, inject, input, output, signal } from '@angular/core';
 import { form, FormField, required, submit } from '@angular/forms/signals';
@@ -6,7 +7,7 @@ import { Prisma } from '@generated/prisma';
 
 @Component({
   selector: 'app-subjects-form',
-  imports: [UiField, UiInput, Button, FormField],
+  imports: [UiField, UiInput, Button, FormField, Icon],
   template: `<form (submit)="onSubmit($event)" novalidate="novalidate">
     <div class="flex flex-col gap-2">
       <ui-field label="Nombre" [field]="form.name">
@@ -15,6 +16,30 @@ import { Prisma } from '@generated/prisma';
       <ui-field label="Código" [field]="form.code">
         <input uiInput type="text" id="code" [formField]="form.code" />
       </ui-field>
+      <fieldset class="subject-icon-picker flex flex-col gap-2">
+        <legend class="mb-1 text-sm font-medium text-ink-strong">Ícono</legend>
+        <div class="grid grid-cols-7 gap-1">
+          @for (i of icons; track i.name) {
+            <label class="relative flex size-11 cursor-pointer items-center justify-center" [title]="i.label">
+              <input
+                type="radio"
+                name="subject-icon"
+                class="peer sr-only"
+                [value]="i.name"
+                [checked]="selectedIcon() === i.name"
+                (change)="setIcon(i.name)"
+                [attr.aria-label]="i.label"
+              />
+              <span
+                class="flex size-10 items-center justify-center rounded-lg border border-line text-ink peer-checked:border-action peer-checked:bg-action-subtle peer-checked:text-action peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-action"
+              >
+                <ui-icon [name]="i.name" class="text-xl" />
+              </span>
+            </label>
+          }
+        </div>
+        <p class="text-xs text-ink-muted">Se muestra en la portada de cada curso de esta asignatura.</p>
+      </fieldset>
     </div>
     <div class="flex justify-end gap-2 mt-4">
       <button uiButton variant="ghost" (click)="closeModal.emit()" type="button">Cancelar</button>
@@ -30,7 +55,15 @@ export default class SubjectsForm {
   #subject = signal<Omit<Prisma.SubjectUncheckedCreateInput, 'organizationId'>>({
     name: '',
     code: '',
+    icon: null,
   });
+  protected readonly icons = SUBJECT_ICONS;
+  /** No icon saved shows the default, so the picker marks it too. */
+  protected selectedIcon = () => this.#subject().icon ?? DEFAULT_SUBJECT_ICON;
+
+  protected setIcon(icon: string) {
+    this.#subject.update((subject) => ({ ...subject, icon }));
+  }
   public form = form(this.#subject, (schemaPath) => {
     required(schemaPath.name, { message: 'Nombre es requerido' });
   });
@@ -42,6 +75,7 @@ export default class SubjectsForm {
         this.#subject.set({
           name: subject.name,
           code: subject.code,
+          icon: subject.icon,
         });
       }
     });

@@ -141,6 +141,18 @@ model MessageRecipient {
 // Instant Messaging (Chat)
 // ==========================================
 
+/// The 8 course color tags (ACA-001 BR .11); rendered through libs/ui `--color-course-<key>` tokens.
+enum CourseColor {
+  INDIGO
+  TEAL
+  ROSE
+  VIOLET
+  AMBER
+  SLATE
+  FUCHSIA
+  GREEN
+}
+
 enum ChatType {
   DIRECT
   GROUP
@@ -395,6 +407,8 @@ model Subject {
   organizationId String
   name           String
   code           String
+  /// Lucide icon name from SUBJECT_ICONS (libs/shared). Null: "book-open".
+  icon           String?
   courses        Course[]
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
@@ -461,6 +475,8 @@ model Course {
   name               String
   code               String
   shortName          String
+  /// Color tag (ACA-001 BR .11). Null: the UI derives one from the id.
+  color              CourseColor?
   organizationId     String
   organization       Organization               @relation(fields: [organizationId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   schoolId           String

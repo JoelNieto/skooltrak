@@ -1,7 +1,11 @@
 import { ForbiddenException } from '@nestjs/common';
 
 jest.mock('../prisma.service', () => ({ PrismaService: class {} }));
+jest.mock('@/shared', () => jest.requireActual('../../../../../libs/shared/src/lib/course-appearance'));
 
+import { plainToInstance } from 'class-transformer';
+import { validate } from 'class-validator';
+import { UpdateSubjectInput } from './dto/update-subject.input';
 import { SUBJECT_DENIED, SubjectsService } from './subjects.service';
 
 /** Subject reads and writes are limited to the caller's organization. */
@@ -75,5 +79,21 @@ describe('SubjectsService organization scope', () => {
     const { service, subjects } = setup();
     await service.remove('SB1');
     expect(subjects.map((s) => s['id'])).toEqual(['SB2']);
+  });
+
+  it('saves an icon and clears it with null (ACA-001 FR .2)', async () => {
+    const { service, subjects } = setup();
+    await service.update('SB1', { id: 'SB1', icon: 'sigma' });
+    expect(subjects.find((s) => s['id'] === 'SB1')).toMatchObject({ icon: 'sigma', name: 'Matemáticas' });
+    await service.update('SB1', { id: 'SB1', icon: null });
+    expect(subjects.find((s) => s['id'] === 'SB1')?.['icon']).toBeNull();
+  });
+
+  it('rejects an icon outside SUBJECT_ICONS (400)', async () => {
+    const bad = await validate(plainToInstance(UpdateSubjectInput, { id: 'SB1', icon: 'not-an-icon' }));
+    expect(bad.map((e) => e.property)).toEqual(['icon']);
+    await expect(validate(plainToInstance(UpdateSubjectInput, { id: 'SB1', icon: 'flask-conical' }))).resolves.toEqual(
+      [],
+    );
   });
 });

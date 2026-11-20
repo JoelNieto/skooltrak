@@ -6,6 +6,7 @@ export class Subject
     id: string;
     code: string;
     name: string;
+    icon: string | null;
     organization: Organization;
     organizationId: string;
     createdAt: Date;

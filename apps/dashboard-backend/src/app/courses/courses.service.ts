@@ -1,19 +1,71 @@
 import { Prisma } from '@generated/prisma';
 
 import { FetchDataQueryDto, PaginatedResponseDto } from '@/api-contracts';
-import { ConflictException, Inject, Injectable, Scope } from '@nestjs/common';
+import type { AuthUserContext } from '@/auth';
+import { BadRequestException, ConflictException, ForbiddenException, Inject, Injectable, Scope } from '@nestjs/common';
 import { REQUEST } from '@nestjs/core';
 import { Request } from 'express';
 import { PrismaService } from '../prisma.service';
 import { DEFAULT_BUCKETS } from './default-buckets.constants';
 import { CreateCourseInput } from './dto/create-course.input';
 import { UpdateCourseInput } from './dto/update-course.input';
+
+export const COURSE_DENIED = 'No tienes acceso a este curso';
+export const STUDY_PLAN_NOT_FOUND = 'El plan de estudio seleccionado no existe';
+export const SUBJECT_NOT_FOUND = 'La asignatura seleccionada no existe';
+export const TEACHER_NOT_FOUND = 'El docente seleccionado no existe';
+
+/**
+ * Every course read and write is limited to the caller's organization. A course, study plan,
+ * subject or teacher of another organization is treated as if it did not exist.
+ */
 @Injectable({ scope: Scope.REQUEST })
 export class CoursesService {
   constructor(
     private readonly prisma: PrismaService,
     @Inject(REQUEST) private readonly request: Request,
   ) {}
+
+  /** The caller's organization; refuses callers without one. */
+  private organizationId(): string {
+    const user = this.request.user as AuthUserContext | undefined;
+    if (!user?.organizationId) throw new ForbiddenException(COURSE_DENIED);
+    return user.organizationId;
+  }
+
+  /** Throws 403 unless the course exists in the caller's organization. */
+  private async assertInOrganization(id: string, organizationId: string): Promise<void> {
+    const course = await this.prisma.course.findFirst({ where: { id, organizationId }, select: { id: true } });
+    if (!course) throw new ForbiddenException(COURSE_DENIED);
+  }
+
+  /** Loads a study plan of the caller's organization, or throws 409 as if it did not exist. */
+  private async studyPlanInOrganization(studyPlanId: string | undefined, organizationId: string) {
+    const studyPlan = studyPlanId
+      ? await this.prisma.studyPlan.findFirst({
+          where: { id: studyPlanId, school: { organizationId } },
+          include: { school: true },
+        })
+      : null;
+    if (!studyPlan) throw new ConflictException(STUDY_PLAN_NOT_FOUND);
+    return studyPlan;
+  }
+
+  private async subjectInOrganization(subjectId: string | undefined, organizationId: string) {
+    const subject = subjectId
+      ? await this.prisma.subject.findFirst({ where: { id: subjectId, organizationId } })
+      : null;
+    if (!subject) throw new BadRequestException(SUBJECT_NOT_FOUND);
+    return subject;
+  }
+
+  private async assertTeacherInOrganization(teacherId: string, organizationId: string): Promise<void> {
+    const teacher = await this.prisma.teacher.findFirst({
+      where: { id: teacherId, organizationId },
+      select: { id: true },
+    });
+    if (!teacher) throw new BadRequestException(TEACHER_NOT_FOUND);
+  }
 
   /**
    * Generates a unique course code starting with 3 letters.
@@ -56,26 +108,20 @@ export class CoursesService {
   }
 
   async create(createCourseInput: CreateCourseInput) {
-    const subject = await this.prisma.subject.findUnique({
-      where: { id: createCourseInput.subjectId },
-    });
-    const studyPlan = await this.prisma.studyPlan.findUnique({
-      where: { id: createCourseInput.studyPlanId },
-      include: { school: true },
-    });
-    if (!studyPlan) {
-      throw new ConflictException('El plan de estudio seleccionado no existe');
+    const callerOrganizationId = this.organizationId();
+    const studyPlan = await this.studyPlanInOrganization(createCourseInput.studyPlanId, callerOrganizationId);
+    const subject = await this.subjectInOrganization(createCourseInput.subjectId, callerOrganizationId);
+    if (createCourseInput.teacherId) {
+      await this.assertTeacherInOrganization(createCourseInput.teacherId, callerOrganizationId);
     }
-
-    // Use provided code or generate a unique one from subject name
-    const code = createCourseInput.code
-      ? createCourseInput.code
-      : await this.generateUniqueCode(createCourseInput.schoolId, subject?.name ?? 'CRS');
 
     // Derive school/org from the chosen study plan to avoid saving the
     // course under the wrong school when the client context is stale.
     const schoolId = studyPlan.schoolId;
     const organizationId = studyPlan.school.organizationId;
+
+    // Use provided code or generate a unique one from subject name
+    const code = createCourseInput.code ? createCourseInput.code : await this.generateUniqueCode(schoolId, subject.name);
 
     let course;
     try {
@@ -176,12 +222,14 @@ export class CoursesService {
   }
 
   async findAll(fetchDataInput: FetchDataQueryDto) {
+    const organizationId = this.organizationId();
     const req = this.request;
     const { role, userId } = req.user as any;
     const { skip, pageSize, page, schoolId, search, studyPlanId, orderBy, orderDirection } = fetchDataInput;
     const orderField = orderBy ?? 'createdAt';
     const orderDir = orderDirection ?? 'asc';
     let where: Prisma.CourseWhereInput = {
+      organizationId,
       schoolId,
       OR: [
         { name: { contains: search, mode: 'insensitive' } },
@@ -237,10 +285,12 @@ export class CoursesService {
   }
 
   count(fetchDataInput: FetchDataQueryDto) {
+    const organizationId = this.organizationId();
     const req = this.request;
     const { role, userId } = req.user as any;
     const { schoolId, search, studyPlanId } = fetchDataInput;
     let where: Prisma.CourseWhereInput = {
+      organizationId,
       schoolId,
       OR: [
         { name: { contains: search, mode: 'insensitive' } },
@@ -270,7 +320,7 @@ export class CoursesService {
 
   findManyBySchoolId(schoolId: string) {
     return this.prisma.course.findMany({
-      where: { schoolId },
+      where: { schoolId, organizationId: this.organizationId() },
       include: {
         school: true,
         subject: true,
@@ -281,7 +331,7 @@ export class CoursesService {
 
   findManyBySubjectId(subjectId: string) {
     return this.prisma.course.findMany({
-      where: { subjectId },
+      where: { subjectId, organizationId: this.organizationId() },
       include: {
         school: true,
         subject: true,
@@ -292,7 +342,7 @@ export class CoursesService {
 
   findManyByStudyPlanId(studyPlanId: string) {
     return this.prisma.course.findMany({
-      where: { studyPlanId },
+      where: { studyPlanId, organizationId: this.organizationId() },
       include: {
         school: true,
         subject: true,
@@ -301,40 +351,56 @@ export class CoursesService {
     });
   }
 
-  findOne(id: string) {
-    return this.prisma.course.findUnique({
-      where: { id },
+  // Grades are not included: they are read through the grade endpoints, which apply
+  // GradeAccessService (published-only and per-student rules).
+  async findOne(id: string) {
+    const course = await this.prisma.course.findFirst({
+      where: { id, organizationId: this.organizationId() },
       include: {
         school: true,
         subject: true,
         teacher: { include: { user: true } },
         studyPlan: { include: { gradeMetric: true } },
-        grades: { include: { studentGrades: { include: { student: true } } } },
       },
     });
+    if (!course) throw new ForbiddenException(COURSE_DENIED);
+    return course;
   }
 
   async findManyByGroupId(groupId: string) {
-    const group = await this.prisma.classGroup.findUnique({
-      where: { id: groupId },
+    const organizationId = this.organizationId();
+    const group = await this.prisma.classGroup.findFirst({
+      where: { id: groupId, organizationId },
       select: { studyPlanId: true },
     });
     if (!group) return [];
     return this.prisma.course.findMany({
-      where: { studyPlanId: group.studyPlanId },
+      where: { studyPlanId: group.studyPlanId, organizationId },
       orderBy: { name: 'asc' },
       include: {
         school: true,
         subject: true,
         teacher: { include: { user: true } },
         studyPlan: { include: { gradeMetric: true } },
-        grades: { include: { studentGrades: { include: { student: true } } } },
       },
     });
   }
 
-  update(id: string, updateCourseInput: UpdateCourseInput) {
+  async update(id: string, updateCourseInput: UpdateCourseInput) {
+    const organizationId = this.organizationId();
+    await this.assertInOrganization(id, organizationId);
     const data = this.toCourseUpdateData(updateCourseInput);
+    // A course never leaves its organization; its school follows its study plan.
+    if (updateCourseInput.studyPlanId !== undefined) {
+      const studyPlan = await this.studyPlanInOrganization(updateCourseInput.studyPlanId, organizationId);
+      data.schoolId = studyPlan.schoolId;
+    }
+    if (updateCourseInput.subjectId !== undefined) {
+      await this.subjectInOrganization(updateCourseInput.subjectId, organizationId);
+    }
+    if (updateCourseInput.teacherId) {
+      await this.assertTeacherInOrganization(updateCourseInput.teacherId, organizationId);
+    }
     return this.prisma.course.update({
       where: { id },
       data,
@@ -350,8 +416,6 @@ export class CoursesService {
       'name',
       'code',
       'shortName',
-      'organizationId',
-      'schoolId',
       'subjectId',
       'studyPlanId',
       'teacherId',
@@ -367,7 +431,8 @@ export class CoursesService {
     return data;
   }
 
-  remove(id: string) {
+  async remove(id: string) {
+    await this.assertInOrganization(id, this.organizationId());
     return this.prisma.course.delete({ where: { id } });
   }
 }

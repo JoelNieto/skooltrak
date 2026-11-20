@@ -1,16 +1,37 @@
 import { FetchDataQueryDto, PaginatedResponseDto } from '@/api-contracts';
-import { Inject, Injectable, Scope } from '@nestjs/common';
+import type { AuthUserContext } from '@/auth';
+import { ForbiddenException, Inject, Injectable, Scope } from '@nestjs/common';
 import { REQUEST } from '@nestjs/core';
 import { Request } from 'express';
 import { PrismaService } from '../prisma.service';
 import { CreateSubjectInput } from './dto/create-subject.input';
 import { UpdateSubjectInput } from './dto/update-subject.input';
+
+export const SUBJECT_DENIED = 'No tienes acceso a esta asignatura';
+
+/** Every subject read and write is limited to the caller's organization. */
 @Injectable({ scope: Scope.REQUEST })
 export class SubjectsService {
   constructor(
     private readonly prisma: PrismaService,
     @Inject(REQUEST) private readonly request: Request,
   ) {}
+
+  /** The caller's organization; refuses callers without one. */
+  private organizationId(): string {
+    const user = this.request.user as AuthUserContext | undefined;
+    if (!user?.organizationId) throw new ForbiddenException(SUBJECT_DENIED);
+    return user.organizationId;
+  }
+
+  /** Throws 403 unless the subject exists in the caller's organization. */
+  private async assertInOrganization(id: string): Promise<void> {
+    const subject = await this.prisma.subject.findFirst({
+      where: { id, organizationId: this.organizationId() },
+      select: { id: true },
+    });
+    if (!subject) throw new ForbiddenException(SUBJECT_DENIED);
+  }
 
   /**
    * Generates a unique subject code starting with 3 letters.
@@ -49,8 +70,7 @@ export class SubjectsService {
   }
 
   async create(createSubjectInput: CreateSubjectInput) {
-    const req = this.request;
-    const { organizationId } = req.user as any;
+    const organizationId = this.organizationId();
 
     // Use provided code or generate a unique one from subject name
     const code = createSubjectInput.code
@@ -59,7 +79,7 @@ export class SubjectsService {
 
     return this.prisma.subject.create({
       data: {
-        ...createSubjectInput,
+        name: createSubjectInput.name,
         code,
         organizationId,
       },
@@ -69,8 +89,7 @@ export class SubjectsService {
 
   async findAll(fetchDataInput: FetchDataQueryDto) {
     const { skip, page, pageSize, orderBy, orderDirection, search } = fetchDataInput;
-    const req = this.request;
-    const { organizationId } = req.user as any;
+    const organizationId = this.organizationId();
     const [data, count] = await this.prisma.$transaction([
       this.prisma.subject.findMany({
         where: {
@@ -101,8 +120,7 @@ export class SubjectsService {
 
   findCount(fetchDataInput: FetchDataQueryDto) {
     const { search } = fetchDataInput;
-    const req = this.request;
-    const { organizationId } = req.user as any;
+    const organizationId = this.organizationId();
     return this.prisma.subject.count({
       where: {
         organizationId,
@@ -111,20 +129,26 @@ export class SubjectsService {
     });
   }
 
-  findOne(id: string) {
-    return this.prisma.subject.findUnique({
-      where: { id },
+  async findOne(id: string) {
+    const subject = await this.prisma.subject.findFirst({
+      where: { id, organizationId: this.organizationId() },
     });
+    if (!subject) throw new ForbiddenException(SUBJECT_DENIED);
+    return subject;
   }
 
-  update(id: string, updateSubjectInput: UpdateSubjectInput) {
+  async update(id: string, updateSubjectInput: UpdateSubjectInput) {
+    await this.assertInOrganization(id);
+    // Only the editable fields; a subject never moves to another organization.
+    const { name, code } = updateSubjectInput;
     return this.prisma.subject.update({
       where: { id },
-      data: updateSubjectInput,
+      data: { name, code },
     });
   }
 
-  remove(id: string) {
+  async remove(id: string) {
+    await this.assertInOrganization(id);
     return this.prisma.subject.delete({ where: { id } });
   }
 }

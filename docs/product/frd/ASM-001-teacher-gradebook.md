@@ -5,7 +5,7 @@
 | **Status** | Ready (open questions answered 2026-11-19) |
 | **Context** | ASM — Assessment (see [capabilities](../capabilities.md#asm-assessment)) |
 | **Owner** | — |
-| **Last updated** | 2026-11-19 |
+| **Last updated** | 2026-11-20 |
 | **Related** | Design canvas "Skooltrak — Courses redesign (desktop)", board *Teacher — Gradebook* (claude.ai/artifact/MGaGctNuxxJd1rouLSYTaa) · [ACA-001](ACA-001-course-experience.md) (course page, student grades tab) · [HOM-001](HOM-001-persona-home-dashboards.md) (grade thresholds, published-only, teacher scope) · current code: `apps/web-dashboard/src/app/teacher/teacher-gradebook.ts` (mock), `grades/course-grades.ts`, `grades/grades-form.ts`, `grades/student-grade-form.ts`; `apps/dashboard-backend/src/app/grades/`, `student-grades/`, `grade-buckets/` |
 
 ## 1. Problem & outcome
@@ -13,7 +13,7 @@ Teachers can't enter grades efficiently today.
 - *Libro de calificaciones* in the sidebar (`/teacher/gradebook`) shows **hard-coded sample data**.
 - The real grid on the course page (`course-grades.ts`) is read-only. Each score is typed into a modal, one student at a time (`student-grade-form.ts`).
 - There is no "excused" mark. A score that is changed after publishing leaves no trace: `StudentGradeRevision` exists but nothing writes to it.
-- None of the grade endpoints check permissions or ownership, so any signed-in user can read or change any score (Q10).
+- Until 2026-11-20, none of the grade endpoints checked permissions or ownership (Q10). Fixed in S01 (PRs #32, #33).
 
 When this ships, a teacher grades a whole column from the keyboard. They see each student's weighted average and status update as they type, save a draft, and publish when ready. Families see only published grades. Every change after publishing is kept in a history.
 
@@ -184,14 +184,14 @@ All answered on 2026-11-19.
 - [x] **Q6: Unpublishing.** **Decided:** admins only (BR .9), enforced in S01.
 - [x] **Q7: Decimals.** **Decided:** one decimal (BR .2).
 - [x] **Q8: Sidebar entry.** **Decided:** open the course last graded, with a switcher (FR .1).
-- [x] **Q10: Unprotected grade endpoints (security).** `grades.controller.ts`, `student-grades.controller.ts` and `grade-buckets.controller.ts` have no `@RequirePermissions`, and the global `PermissionsGuard` lets such routes through (`libs/auth/src/lib/auth.guard.ts:200`). Their services don't filter by organization. Any signed-in user, including a student, can call `PATCH /api/v1/student-grades` with any id and score, and read any student's grades via `GET /student-grades/by-course/:courseId?studentId=`. Established from code, not reproduced against a running app. **Decided:** fix in S01 as a standalone PR, ahead of the rest.
+- [x] **Q10: Unprotected grade endpoints (security).** `grades.controller.ts`, `student-grades.controller.ts` and `grade-buckets.controller.ts` have no `@RequirePermissions`, and the global `PermissionsGuard` lets such routes through (`libs/auth/src/lib/auth.guard.ts:200`). Their services don't filter by organization. Any signed-in user, including a student, can call `PATCH /api/v1/student-grades` with any id and score, and read any student's grades via `GET /student-grades/by-course/:courseId?studentId=`. Established from code, not reproduced against a running app. **Decided:** fix in S01 as a standalone PR, ahead of the rest. **Fixed** 2026-11-20 in #32 (grade, student-grade and bucket endpoints) and #33 (`/students/:id/grades` and `/students/:id/average-score`).
 
 ## 11. Slices
 Listed in build order.
 
 | Slice | Title | FRs | Status |
 |---|---|---|---|
-| [ASM-001-S01](../slices/ASM-001-S01-lock-down-grade-endpoints.md) | Lock down grade, student-grade and bucket endpoints; unpublish for admins only | .15, BR .9 .13 | Ready |
+| [ASM-001-S01](../slices/ASM-001-S01-lock-down-grade-endpoints.md) | Lock down grade, student-grade and bucket endpoints; unpublish for admins only | .15, BR .9 .13 | Done (#32, #33) |
 | ASM-001-S09 | One average formula everywhere (API, home pages, grade report, course grid) | BR .4 | Proposed |
 | ASM-001-S02 | Gradebook grid, read-only: columns by bucket, averages, bands, group and period switchers; replaces the mock | .1 .2 .3 .5, BR .1 .4 .5 .6 | Proposed (after ACA-001-S11, S09) |
 | ASM-001-S03 | Inline entry, validation and bulk save draft | .4 .6, BR .2 .7 .10 | Proposed |

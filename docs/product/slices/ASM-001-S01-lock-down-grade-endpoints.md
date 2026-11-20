@@ -4,14 +4,14 @@
 |---|---|
 | **FRD** | [ASM-001](../frd/ASM-001-teacher-gradebook.md) |
 | **Implements** | FR-ASM-001.15, BR-ASM-001.1, BR-ASM-001.9 (unpublish), BR-ASM-001.13. Resolves Q10, Q6 |
-| **Status** | Ready |
+| **Status** | Done: merged 2026-11-20 in #32 and #33 |
 | **Branch** | `feat/ASM-001-S01-lock-down-grade-endpoints` |
 | **Estimate** | 2 days |
 
 ## User-visible outcome
 "As a school, I know that only a course's teacher or an admin can change its grades. Students and parents can read only their own or their children's published grades, even through the API."
 
-## The gap (from code, not reproduced against a running app)
+## The gap (from code, not reproduced against a running app; fixed)
 - `grades.controller.ts`, `student-grades.controller.ts` and `grade-buckets.controller.ts` have no `@RequirePermissions`. The global `PermissionsGuard` allows routes without metadata (`libs/auth/src/lib/auth.guard.ts:200`).
 - Their services read and write by id, with no `organizationId` and no ownership filter.
 - So any signed-in user can:
@@ -99,6 +99,13 @@ Scenario: existing pages keep working
 - The same audit for other modules. Record any finding as a new open question in its own context's FRD.
 
 ## Done checklist
-- [ ] Acceptance criteria pass
-- [ ] Cross-tenant / wrong-role access refused (test)
-- [ ] FRD slice table + `capabilities.md` updated
+- [x] Acceptance criteria pass (`grade-access.spec.ts`, `student-access.spec.ts`; Playwright `@FR-ASM-001.15`)
+- [x] Cross-tenant / wrong-role access refused (test)
+- [x] FRD slice table + `capabilities.md` updated
+- [ ] OpenAPI client regeneration: `libs/api-client-dashboard/openapi.json` was still a placeholder at merge
+
+## What shipped beyond the plan
+- The unscoped `GET /api/v1/student-grades` list route was removed too; no client used it.
+- Records can't be moved to another course or student, and a grade's bucket must belong to its course (`400`).
+- #33 applied the same rules to `GET /students/:id/grades` and `GET /students/:id/average-score`: other teachers see only the courses they teach.
+- Until ACA-001-S11 adds the stored roster, a student counts as enrolled through either the stored course link or the course's study plan, so CSV-imported students keep working.

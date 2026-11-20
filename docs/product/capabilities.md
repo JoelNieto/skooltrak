@@ -52,7 +52,7 @@ Code: `courses`, `assignments`, `assignment-submissions`, `quizzes`, `files`
 | Capability | Status | FRD |
 |---|---|---|
 | Courses (per study plan) | Live | — |
-| Course experience: colored course cards with progress, course page with assignments/grades/participants | Planned | [ACA-001](frd/ACA-001-course-experience.md) |
+| Course experience: colored course cards with progress, course page with assignments/grades/participants | Planned (S01 color and icon in review, #38) | [ACA-001](frd/ACA-001-course-experience.md) |
 | Assignments & submissions | Live | — |
 | Quizzes (questions, schedules, submissions) | Live | — |
 | Files & sharing (user / school / group / course) | Live | — |

@@ -4,7 +4,7 @@
 |---|---|
 | **FRD** | [ACA-001](../frd/ACA-001-course-experience.md) |
 | **Implements** | FR-ACA-001.1, FR-ACA-001.2 (color, icon), FR-ACA-001.9 (cover only), BR-ACA-001.11 |
-| **Status** | Ready |
+| **Status** | In review: #38 (stacked on #37) |
 | **Branch** | `feat/ACA-001-S01-course-color-icon` |
 | **Estimate** | 2 days |
 

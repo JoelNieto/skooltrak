@@ -52,6 +52,7 @@ Code: `courses`, `assignments`, `assignment-submissions`, `quizzes`, `files`
 | Capability | Status | FRD |
 |---|---|---|
 | Courses (per study plan) | Live | — |
+| Course experience: colored course cards with progress, course page with assignments/grades/participants | Planned | [ACA-001](frd/ACA-001-course-experience.md) |
 | Assignments & submissions | Live | — |
 | Quizzes (questions, schedules, submissions) | Live | — |
 | Files & sharing (user / school / group / course) | Live | — |
@@ -64,7 +65,7 @@ Code: `grade-metrics`, `grade-buckets`, `grades`, `student-grades`, `grade-repor
 | Grade metrics & buckets (weighting) | Live | — |
 | Grades: create, publish, notify | Live | — |
 | Student grades with revision history | Live | — |
-| Teacher gradebook | Live | — |
+| Teacher gradebook | Partial (`/teacher/gradebook` is sample data; course grid is read-only with modal entry; grade endpoints unguarded, ASM-001 Q10) | [ASM-001](frd/ASM-001-teacher-gradebook.md) |
 | Grade report per student | Live | — |
 | Habit metrics & evaluations | Live | — |
 | Unpublished-grades reminder (cron) | Live | — |

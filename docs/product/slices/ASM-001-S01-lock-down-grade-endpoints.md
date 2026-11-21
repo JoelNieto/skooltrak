@@ -4,7 +4,7 @@
 |---|---|
 | **FRD** | [ASM-001](../frd/ASM-001-teacher-gradebook.md) |
 | **Implements** | FR-ASM-001.15, BR-ASM-001.1, BR-ASM-001.9 (unpublish), BR-ASM-001.13. Resolves Q10, Q6 |
-| **Status** | Done: merged 2026-11-20 in #32 and #33 |
+| **Status** | Done: #32 on 2026-11-20; #33 merged into a stacked branch and reached `main` in #43 on 2026-11-21 |
 | **Branch** | `feat/ASM-001-S01-lock-down-grade-endpoints` |
 | **Estimate** | 2 days |
 
@@ -107,5 +107,5 @@ Scenario: existing pages keep working
 ## What shipped beyond the plan
 - The unscoped `GET /api/v1/student-grades` list route was removed too; no client used it.
 - Records can't be moved to another course or student, and a grade's bucket must belong to its course (`400`).
-- #33 applied the same rules to `GET /students/:id/grades` and `GET /students/:id/average-score`: other teachers see only the courses they teach.
+- #33 applied the same rules to `GET /students/:id/grades` and `GET /students/:id/average-score`: other teachers see only the courses they teach. It merged into #32's branch after #32 had shipped, so it reached `main` only in #43 (2026-11-21).
 - Until ACA-001-S11 adds the stored roster, a student counts as enrolled through either the stored course link or the course's study plan, so CSV-imported students keep working.

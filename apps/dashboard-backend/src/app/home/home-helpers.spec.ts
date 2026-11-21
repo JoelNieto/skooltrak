@@ -99,10 +99,16 @@ describe('HOM-001 helpers', () => {
   });
 
   describe('weightedAverages (BR-HOM-001.11)', () => {
+    it('averages each bucket first, then weights the buckets (ASM-001 BR .4)', () => {
+      // Trabajo diario 40 (4, 4, 4, 4) and Pruebas 60 (2): 2.8, not 3.5 (per score) or 3.6 (plain mean).
+      const avgs = weightedAverages([row(4, 40), row(4, 40), row(4, 40), row(4, 40), row(2, 60)]);
+      expect(avgs.get(averageKey('s', 'c', 'p'))).toBeCloseTo(2.8);
+    });
+
     const row = (score: number | null, weight: number, courseId = 'c', periodId = 'p', studentId = 's') => ({
       studentId,
       score,
-      grade: { courseId, periodId, bucket: { weight } },
+      grade: { courseId, periodId, bucketId: `b-${weight}`, bucket: { weight } },
     });
 
     it('weights scores by bucket and skips unscored rows', () => {

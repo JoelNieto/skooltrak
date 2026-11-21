@@ -279,26 +279,33 @@ export class AdminHomeService {
   }
 
   /**
-   * Weighted average of published scores per active student and course in one grouped query
-   * (same formula as grades.service.ts:getAverageScoreForStudent; NFR: no per-student queries).
+   * Published average per active student and course (ASM-001 BR .4, the formula of `courseAverage`
+   * in libs/shared): each bucket's mean, weighted by bucket weight. One grouped query; NFR: no
+   * per-student queries.
    */
   private async courseAverages(organizationId: string, schoolId: string, periodId: string): Promise<StudentCourseAverage[]> {
     const rows = await this.prisma.$queryRaw<{ studentId: string; courseId: string; average: Prisma.Decimal | number | null }[]>(
       Prisma.sql`
-        SELECT sg."studentId", g."courseId",
-               SUM(sg."score" * b."weight") / NULLIF(SUM(b."weight"), 0) AS "average"
-        FROM "student_grades" sg
-        JOIN "grades" g ON g."id" = sg."gradeId"
-        JOIN "grade_buckets" b ON b."id" = g."bucketId"
-        JOIN "courses" c ON c."id" = g."courseId"
-        JOIN "students" s ON s."id" = sg."studentId"
-        WHERE g."published" = true
-          AND g."periodId" = ${periodId}
-          AND sg."score" IS NOT NULL
-          AND c."schoolId" = ${schoolId}
-          AND c."organizationId" = ${organizationId}
-          AND s."enrollmentStatus" = 'ACTIVE'
-        GROUP BY sg."studentId", g."courseId"`,
+        WITH bucket_means AS (
+          SELECT sg."studentId", g."courseId", g."bucketId",
+                 AVG(sg."score") AS "mean", MAX(b."weight") AS "weight"
+          FROM "student_grades" sg
+          JOIN "grades" g ON g."id" = sg."gradeId"
+          JOIN "grade_buckets" b ON b."id" = g."bucketId"
+          JOIN "courses" c ON c."id" = g."courseId"
+          JOIN "students" s ON s."id" = sg."studentId"
+          WHERE g."published" = true
+            AND g."periodId" = ${periodId}
+            AND sg."score" IS NOT NULL
+            AND c."schoolId" = ${schoolId}
+            AND c."organizationId" = ${organizationId}
+            AND s."enrollmentStatus" = 'ACTIVE'
+          GROUP BY sg."studentId", g."courseId", g."bucketId"
+        )
+        SELECT "studentId", "courseId",
+               SUM("mean" * "weight") / NULLIF(SUM("weight"), 0) AS "average"
+        FROM bucket_means
+        GROUP BY "studentId", "courseId"`,
     );
     return rows
       .filter((r) => r.average !== null)

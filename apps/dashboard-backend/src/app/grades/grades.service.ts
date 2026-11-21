@@ -1,4 +1,5 @@
 import { sendGradePublishedEmail } from '@/auth';
+import { courseAverage } from '@/shared';
 import { Injectable } from '@nestjs/common';
 import { enrolledIn } from '../courses/course-roster';
 import { PrismaService } from '../prisma.service';
@@ -86,22 +87,9 @@ export class GradesService {
         },
       },
     });
-    return (
-      grades
-        .filter((grade) => grade.score !== null)
-        .reduce(
-          (acc, grade) =>
-            acc +
-            (grade.score?.toNumber() ?? 0) *
-              grade.grade.bucket.weight.toNumber(),
-          0
-        ) /
-        grades
-          .filter((grade) => grade.score !== null)
-          .reduce(
-            (acc, grade) => acc + grade.grade.bucket.weight.toNumber(),
-            0
-          ) || 0
+    // ASM-001 BR .4; null when the student has no scored grade (never 0).
+    return courseAverage(
+      grades.map((g) => ({ bucketId: g.grade.bucketId, weight: g.grade.bucket.weight.toNumber(), score: g.score?.toNumber() })),
     );
   }
 

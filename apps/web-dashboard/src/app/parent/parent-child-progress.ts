@@ -1,6 +1,7 @@
 import { Card, CardBody, PageHeader, Spinner, StatCard, UiTable } from '#/ui';
 import { HttpClient } from '@angular/common/http';
 import { Component, inject, OnInit, signal } from '@angular/core';
+import { courseAverage } from '@/shared';
 import { Router } from '@angular/router';
 import { ParentContext } from './parent-context.service';
 
@@ -98,9 +99,15 @@ export default class ParentChildProgress implements OnInit {
           const studentGrades = (course?.grades ?? [])
             .flatMap((g: any) => g?.studentGrades ?? [])
             .filter((sg: any) => sg?.studentId === selected.studentId);
-          const scores = studentGrades.map((sg: any) => parseFloat(sg?.score)).filter((n: number) => !isNaN(n));
-          if (scores.length > 0) {
-            const avg = scores.reduce((a: number, b: number) => a + b, 0) / scores.length;
+          // The product's one average (ASM-001 BR .4): each bucket's mean, weighted by bucket weight.
+          const avg = courseAverage(
+            (course?.grades ?? []).flatMap((g: any) =>
+              (g?.studentGrades ?? [])
+                .filter((sg: any) => sg?.studentId === selected.studentId)
+                .map((sg: any) => ({ bucketId: g.bucketId, weight: Number(g.bucket?.weight ?? 0), score: parseFloat(sg?.score) })),
+            ),
+          );
+          if (avg !== null) {
             total += avg;
             count += 1;
             const note = studentGrades.find((sg: any) => sg?.comment)?.comment ?? '';

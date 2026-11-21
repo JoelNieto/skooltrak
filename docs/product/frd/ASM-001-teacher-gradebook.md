@@ -192,7 +192,7 @@ Listed in build order.
 | Slice | Title | FRs | Status |
 |---|---|---|---|
 | [ASM-001-S01](../slices/ASM-001-S01-lock-down-grade-endpoints.md) | Lock down grade, student-grade and bucket endpoints; unpublish for admins only | .15, BR .9 .13 | Done (#32, #33 via #43) |
-| ASM-001-S09 | One average formula everywhere (API, home pages, grade report, course grid) | BR .4 | Proposed |
+| [ASM-001-S09](../slices/ASM-001-S09-one-average-formula.md) | One average formula everywhere (API, home pages, grade report, course grid) | BR .4 | In review (#48) |
 | ASM-001-S02 | Gradebook grid, read-only: columns by bucket, averages, bands, group and period switchers; replaces the mock | .1 .2 .3 .5, BR .1 .4 .5 .6 | Proposed (after ACA-001-S11, S09) |
 | ASM-001-S03 | Inline entry, validation and bulk save draft | .4 .6, BR .2 .7 .10 | Proposed |
 | ASM-001-S04 | Publish, revisions with a required reason, side panel with comment and history | .7 .8 .9, BR .8 .9 .14 | Proposed |

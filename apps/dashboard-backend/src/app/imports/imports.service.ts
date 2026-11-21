@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   ConflictException,
+  ForbiddenException,
   Injectable,
   Logger,
   NotFoundException,
@@ -29,6 +30,8 @@ export interface DryRunResult {
 }
 
 const MAX_ROWS = 500;
+
+export const IMPORT_DENIED = 'La escuela no pertenece a tu organización';
 
 /**
  * `Gender` in Prisma is `MALE | FEMALE` only. CSV files are authored by school
@@ -189,6 +192,11 @@ export class ImportService {
     csvText: string,
     userId: string,
   ): Promise<DryRunResult> {
+    // The organization comes from the caller (controller); the school must belong to it.
+    const school = organizationId
+      ? await this.prisma.school.findFirst({ where: { id: schoolId, organizationId }, select: { id: true } })
+      : null;
+    if (!school) throw new ForbiddenException(IMPORT_DENIED);
     const rows = this.parseCsv(csvText);
 
     const existingStudents = await this.prisma.student.findMany({
@@ -260,9 +268,10 @@ export class ImportService {
     };
   }
 
-  async commit(jobId: string, userId: string): Promise<DryRunResult> {
+  async commit(jobId: string, userId: string, organizationId: string): Promise<DryRunResult> {
     const job = await this.prisma.importJob.findUnique({ where: { id: jobId } });
-    if (!job) {
+    // Another organization's job is reported as missing, so job ids can't be probed.
+    if (!job || job.organizationId !== organizationId) {
       throw new NotFoundException('ImportJob no encontrado');
     }
     if (job.status === 'COMMITTED') {
@@ -727,10 +736,10 @@ export class ImportService {
     });
   }
 
-  async getJob(jobId: string) {
-    return this.prisma.importJob.findUnique({
-      where: { id: jobId },
-    });
+  async getJob(jobId: string, organizationId: string) {
+    const job = await this.prisma.importJob.findFirst({ where: { id: jobId, organizationId } });
+    if (!job) throw new NotFoundException('ImportJob no encontrado');
+    return job;
   }
 
 }

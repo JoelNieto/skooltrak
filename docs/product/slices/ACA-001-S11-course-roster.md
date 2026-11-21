@@ -4,7 +4,7 @@
 |---|---|
 | **FRD** | [ACA-001](../frd/ACA-001-course-experience.md) |
 | **Implements** | FR-ACA-001.20, BR-ACA-001.15 (sync rules; the admin add/remove/exclude actions are S12) |
-| **Status** | In review: #40 (stacked on #38) |
+| **Status** | Done: reviewed in #40, on `main` via #41 (2026-11-20) |
 | **Branch** | `feat/ACA-001-S11-course-roster` (stacked on #38) |
 | **Estimate** | 3 days |
 
@@ -90,6 +90,6 @@ Scenario: backfill keeps today's rosters
 - Parent-facing views (S05) and the participants tab (S08).
 
 ## Done checklist
-- [ ] Acceptance criteria pass
-- [ ] Cross-tenant / wrong-role access refused (test): plan sync never enrolls a student in another organization's course
-- [ ] FRD slice table + `capabilities.md` updated
+- [x] Acceptance criteria pass
+- [x] Cross-tenant / wrong-role access refused (test): plan sync never enrolls a student in another organization's course
+- [x] FRD slice table + `capabilities.md` updated

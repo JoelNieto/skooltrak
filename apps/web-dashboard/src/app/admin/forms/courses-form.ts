@@ -1,4 +1,5 @@
-import { Alert, Button, Toast, UiField, UiInput, UiSelect } from '#/ui';
+import { Alert, Button, courseColorVar, Icon, Toast, UiField, UiInput, UiSelect } from '#/ui';
+import { COURSE_COLORS, CourseColorKey } from '@/shared';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { afterRenderEffect, ChangeDetectionStrategy, Component, inject, input, output, signal } from '@angular/core';
 import { form, FormField, required } from '@angular/forms/signals';
@@ -16,6 +17,9 @@ interface CourseModel {
   subjectId: string;
   studyPlanId: string;
   teacherId: string;
+  /** Resolved by the API; `colorIsDefault` says whether it was chosen or derived. */
+  color?: string | null;
+  colorIsDefault?: boolean;
   subject: SubjectGetPayload<{ include: undefined }>;
 }
 @Component({
@@ -27,6 +31,7 @@ interface CourseModel {
     UiSelect,
     Button,
     FormField,
+    Icon,
     SubjectCombobox,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -54,6 +59,40 @@ interface CourseModel {
           }
         </select>
       </ui-field>
+      <fieldset class="course-color-picker flex flex-col gap-2">
+        <legend class="mb-1 text-sm font-medium text-ink-strong">Color</legend>
+        <div class="flex flex-wrap gap-1">
+          @for (c of colors; track c.key) {
+            <label class="relative flex size-11 cursor-pointer items-center justify-center" [title]="c.label">
+              <input
+                type="radio"
+                name="course-color"
+                class="peer sr-only"
+                [value]="c.key"
+                [checked]="formModel().color === c.key"
+                (change)="setColor(c.key)"
+                [attr.aria-label]="c.label"
+              />
+              <span
+                class="flex size-9 items-center justify-center rounded-full ring-ink-strong ring-offset-2 ring-offset-surface-1 peer-checked:ring-2 peer-focus-visible:outline-2 peer-focus-visible:outline-offset-4 peer-focus-visible:outline-action"
+                [style.background-color]="colorVar(c.key)"
+              >
+                @if (formModel().color === c.key) {
+                  <ui-icon name="check" class="text-lg text-white" />
+                }
+              </span>
+            </label>
+          }
+        </div>
+        <p class="text-xs text-ink-muted">
+          @if (selectedColorLabel(); as label) {
+            {{ label }} ·
+            <button type="button" class="link" (click)="setColor('')">Usar color automático</button>
+          } @else {
+            Automático: cada curso recibe un color fijo hasta que elijas uno.
+          }
+        </p>
+      </fieldset>
     </div>
     @if (errorMessage()) {
       <div uiAlert tone="danger" class="mt-3">
@@ -96,6 +135,9 @@ export default class CoursesForm {
     };
   });
 
+  protected readonly colors = COURSE_COLORS;
+  protected readonly colorVar = courseColorVar;
+
   public formModel = signal<{
     name: string;
     shortName: string;
@@ -103,7 +145,18 @@ export default class CoursesForm {
     subjectId: string;
     studyPlanId: string;
     teacherId: string;
-  }>({ name: '', shortName: '', code: '', subjectId: '', studyPlanId: '', teacherId: '' });
+    /** '' = automatic (derived from the course id). */
+    color: CourseColorKey | '';
+  }>({ name: '', shortName: '', code: '', subjectId: '', studyPlanId: '', teacherId: '', color: '' });
+
+  protected selectedColorLabel() {
+    const color = this.formModel().color;
+    return COURSE_COLORS.find((c) => c.key === color)?.label ?? '';
+  }
+
+  protected setColor(color: CourseColorKey | '') {
+    this.formModel.update((model) => ({ ...model, color }));
+  }
 
   public form = form(this.formModel, (schemaPath) => {
     required(schemaPath.subjectId, { message: 'Asignatura requerida' });
@@ -122,7 +175,17 @@ export default class CoursesForm {
   constructor() {
     afterRenderEffect(() => {
       const course = this.data()?.course;
-      if (course) this.formModel.set(course);
+      if (course) {
+        this.formModel.set({
+          name: course.name,
+          shortName: course.shortName,
+          code: course.code,
+          subjectId: course.subjectId,
+          studyPlanId: course.studyPlanId,
+          teacherId: course.teacherId,
+          color: course.colorIsDefault ? '' : ((course.color ?? '') as CourseColorKey | ''),
+        });
+      }
     });
   }
 
@@ -138,6 +201,7 @@ export default class CoursesForm {
       this.http
         .patch('/api/v1/courses', {
           ...req,
+          color: req.color || null,
           id: this.data()!.course!.id,
         })
         .subscribe({
@@ -154,6 +218,7 @@ export default class CoursesForm {
     this.http
       .post('/api/v1/courses', {
         ...req,
+        color: req.color || null,
         teacherId: req.teacherId || null,
         organizationId: this.store.currentOrganizationId() ?? '',
         schoolId: this.store.currentSchoolId() ?? '',

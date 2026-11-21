@@ -155,6 +155,7 @@ Use `bunx nx g` to generate code (apps, libs, components, etc.).
 ## Documentation
 
 - [Onboarding process analysis](docs/onboarding.md) — role onboarding flows (ORG_ADMIN, TEACHER, STUDENT, PARENT), state machine, pain points, and improvement opportunities.
+- [OpenAPI specs and generated clients](docs/api-clients.md) — how `libs/api-client-*` are regenerated (`bun run openapi`), the CI staleness check, and when to adopt the generated clients.
 
 ---
 

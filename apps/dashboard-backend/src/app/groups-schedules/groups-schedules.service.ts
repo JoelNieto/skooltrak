@@ -1,10 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { ClassGroup } from '../class-groups/entities/class-group.entity';
-import { Course } from '../courses/entities/course.entity';
 import { PrismaService } from '../prisma.service';
 import { CreateGroupsScheduleInput } from './dto/create-groups-schedule.input';
 import { UpdateGroupsScheduleInput } from './dto/update-groups-schedule.input';
-import { GroupsSchedule } from './entities/groups-schedule.entity';
 @Injectable()
 export class GroupsSchedulesService {
   constructor(private readonly prisma: PrismaService) {}
@@ -46,13 +43,9 @@ export class GroupsSchedulesService {
       if (!acc[schedule.weekday]) {
         acc[schedule.weekday] = [];
       }
-      acc[schedule.weekday].push({
-        ...schedule,
-        classGroup: schedule.classGroup as ClassGroup,
-        course: schedule.course as Course,
-      });
+      acc[schedule.weekday].push(schedule);
       return acc;
-    }, {} as Record<string, GroupsSchedule[]>);
+    }, {} as Record<string, typeof schedules>);
   }
 
   findAllByCourseId(courseId: string) {

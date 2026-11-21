@@ -1,7 +1,14 @@
 import { BadRequestException, ConflictException, ForbiddenException } from '@nestjs/common';
 
 jest.mock('../prisma.service', () => ({ PrismaService: class {} }));
+// The `@/shared` barrel also exports Angular code; the service needs only the course appearance helpers.
+jest.mock('@/shared', () => jest.requireActual('../../../../../libs/shared/src/lib/course-appearance'));
 
+import { resolveCourseColor } from '@/shared';
+import { plainToInstance } from 'class-transformer';
+import { validate } from 'class-validator';
+import { CreateCourseInput } from './dto/create-course.input';
+import { UpdateCourseInput } from './dto/update-course.input';
 import { COURSE_DENIED, CoursesService, STUDY_PLAN_NOT_FOUND, SUBJECT_NOT_FOUND, TEACHER_NOT_FOUND } from './courses.service';
 
 /**
@@ -38,6 +45,7 @@ const fixture = () => ({
   ],
   course: [
     { id: 'C1', organizationId: 'org-1', schoolId: 'SC1', subjectId: 'SB1', studyPlanId: 'P1', teacherId: 'T1', name: 'Mate 1' },
+    { id: 'C1c', organizationId: 'org-1', schoolId: 'SC1', subjectId: 'SB1', studyPlanId: 'P1', teacherId: 'T1', name: 'Mate 2', color: 'TEAL' },
     { id: 'C2', organizationId: 'org-2', schoolId: 'SC2', subjectId: 'SB2', studyPlanId: 'P2', teacherId: 'T2', name: 'Historia 2' },
   ] as Row[],
   student: [] as Row[],
@@ -127,11 +135,11 @@ describe('CoursesService organization scope', () => {
     it('lists and counts only the caller organization courses, even with another school id', async () => {
       const { service } = setup();
       const all = await service.findAll({ page: 1, pageSize: 10 } as never);
-      expect(all.data.map((c: Row) => c['id'])).toEqual(['C1']);
+      expect(all.data.map((c: Row) => c['id'])).toEqual(['C1', 'C1c']);
       const other = await service.findAll({ page: 1, pageSize: 10, schoolId: 'SC2' } as never);
       expect(other.data).toEqual([]);
       await expect(service.count({ schoolId: 'SC2' } as never)).resolves.toBe(0);
-      await expect(service.count({} as never)).resolves.toBe(1);
+      await expect(service.count({} as never)).resolves.toBe(2);
     });
 
     it('returns nothing for a school, subject, study plan or group of another organization', async () => {
@@ -140,7 +148,7 @@ describe('CoursesService organization scope', () => {
       await expect(service.findManyBySubjectId('SB2')).resolves.toEqual([]);
       await expect(service.findManyByStudyPlanId('P2')).resolves.toEqual([]);
       await expect(service.findManyByGroupId('G2')).resolves.toEqual([]);
-      await expect(service.findManyByGroupId('G1')).resolves.toHaveLength(1);
+      await expect(service.findManyByGroupId('G1')).resolves.toHaveLength(2);
     });
 
     it('does not include grades when listing a group courses', async () => {
@@ -192,7 +200,7 @@ describe('CoursesService organization scope', () => {
     it('deletes a course of the caller organization', async () => {
       const { service, db } = setup();
       await service.remove('C1');
-      expect(db.course.map((c) => c['id'])).toEqual(['C2']);
+      expect(db.course.map((c) => c['id'])).toEqual(['C1c', 'C2']);
     });
 
     const createInput = (overrides: Row = {}) =>
@@ -218,13 +226,44 @@ describe('CoursesService organization scope', () => {
       await expect(service.create(createInput({ teacherId: 'T2' }))).rejects.toThrow(
         new BadRequestException(TEACHER_NOT_FOUND),
       );
-      expect(db.course).toHaveLength(2);
+      expect(db.course).toHaveLength(3);
     });
 
     it('creates the course in the study plan organization and school, ignoring the body', async () => {
       const { service, db } = setup();
       await service.create(createInput());
-      expect(db.course[2]).toMatchObject({ organizationId: 'org-1', schoolId: 'SC1', studyPlanId: 'P1' });
+      expect(db.course[3]).toMatchObject({ organizationId: 'org-1', schoolId: 'SC1', studyPlanId: 'P1' });
     });
+  });
+});
+
+describe('Course color (ACA-001 BR .11)', () => {
+  it('returns the chosen color, or a derived one flagged as default', async () => {
+    const { service } = setup();
+    await expect(service.findOne('C1c')).resolves.toMatchObject({ color: 'TEAL', colorIsDefault: false });
+    await expect(service.findOne('C1')).resolves.toMatchObject({
+      color: resolveCourseColor('C1', null),
+      colorIsDefault: true,
+    });
+    const list = await service.findAll({ page: 1, pageSize: 10 } as never);
+    expect(list.data.every((c: Row) => typeof c['color'] === 'string')).toBe(true);
+  });
+
+  it('saves a color and clears it with null', async () => {
+    const { service, db } = setup();
+    await service.update('C1', { id: 'C1', color: 'ROSE' });
+    expect(db.course.find((c) => c['id'] === 'C1')).toMatchObject({ color: 'ROSE' });
+    await service.update('C1', { id: 'C1', color: null });
+    expect(db.course.find((c) => c['id'] === 'C1')?.['color']).toBeNull();
+  });
+
+  it('rejects any other color value (400)', async () => {
+    const bad = await validate(plainToInstance(UpdateCourseInput, { id: 'C1', color: 'PURPLE' }));
+    expect(bad.map((e) => e.property)).toEqual(['color']);
+    const lower = await validate(plainToInstance(CreateCourseInput, { color: 'indigo' }));
+    expect(lower.map((e) => e.property)).toEqual(['color']);
+    await expect(validate(plainToInstance(UpdateCourseInput, { id: 'C1', color: 'INDIGO' }))).resolves.toEqual([]);
+    await expect(validate(plainToInstance(UpdateCourseInput, { id: 'C1', color: null }))).resolves.toEqual([]);
+    await expect(validate(plainToInstance(UpdateCourseInput, { id: 'C1', name: 'x' }))).resolves.toEqual([]);
   });
 });

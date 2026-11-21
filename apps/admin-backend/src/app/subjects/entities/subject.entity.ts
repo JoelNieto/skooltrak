@@ -5,6 +5,7 @@ export class Subject implements Prisma.SubjectGetPayload<true> {
     id: string;
     name: string;
     code: string;
+    icon: string | null;
     shortName: string;
     createdAt: Date;
     updatedAt: Date;

@@ -1,3 +1,4 @@
+import { CourseColor } from '@generated/prisma';
 import { Grade } from '../../grades/entities/grade.entity';
 import { School } from '../../schools/entities/school.entity';
 import { StudyPlan } from '../../study-plans/entities/study-plan.entity';
@@ -17,6 +18,8 @@ export class Course {
     code: string;
 
     shortName: string;
+
+    color: CourseColor | null;
 
     organizationId: string;
 

@@ -617,15 +617,19 @@ export class Sidebar {
     },
   });
 
+  /**
+   * `value()` throws while the resource is in an error state (e.g. a 403 for roles that may not list
+   * schools), so read it only once it has one.
+   */
   protected get schoolsList(): SidebarSchool[] {
-    const s = this.schools.value();
+    const s = this.schools.hasValue() ? this.schools.value() : undefined;
     return Array.isArray(s) ? s : [];
   }
 
   constructor() {
     afterRenderEffect(() => {
-      const schools = this.schools.value();
-      if (schools?.length && !this.store.currentSchool()) {
+      const schools = this.schoolsList;
+      if (schools.length && !this.store.currentSchool()) {
         this.pickSchool(schools[0]);
       }
     });

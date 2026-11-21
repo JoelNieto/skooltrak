@@ -615,19 +615,23 @@ export default class Home {
     defaultValue: [],
   }));
 
-  public recentStudents = httpResource<RecentStudent[]>(() => {
-    const schoolId = this.store.currentSchoolId();
-    if (!schoolId) return undefined;
-    return {
-      url: `/api/v1/students`,
-      params: toFetchQueryParams({
-        take: 4,
-        orderBy: 'createdAt',
-        orderDirection: 'desc',
-        schoolId,
-      }),
-    };
-  });
+  /** The list endpoint is paginated (`{ data, ... }`); the card only needs the rows. */
+  public recentStudents = httpResource<RecentStudent[]>(
+    () => {
+      const schoolId = this.store.currentSchoolId();
+      if (!schoolId) return undefined;
+      return {
+        url: `/api/v1/students`,
+        params: toFetchQueryParams({
+          take: 4,
+          orderBy: 'createdAt',
+          orderDirection: 'desc',
+          schoolId,
+        }),
+      };
+    },
+    { parse: (raw) => pageRows<RecentStudent>(raw) },
+  );
 
   public recentNewsletters = httpResource<PublishedNewsletter[]>(() => {
     const schoolId = this.store.currentSchoolId();
@@ -644,19 +648,30 @@ export default class Home {
     return div.textContent?.trim() ?? '';
   }
 
-  public recentTeachers = httpResource<RecentTeacher[]>(() => {
-    const schoolId = this.store.currentSchoolId();
-    if (!schoolId) return undefined;
-    return {
-      url: `/api/v1/teachers`,
-      params: toFetchQueryParams({
-        take: 4,
-        orderBy: 'createdAt',
-        orderDirection: 'desc',
-        schoolId,
-      }),
-    };
-  });
+  /** The list endpoint is paginated (`{ data, ... }`); the card only needs the rows. */
+  public recentTeachers = httpResource<RecentTeacher[]>(
+    () => {
+      const schoolId = this.store.currentSchoolId();
+      if (!schoolId) return undefined;
+      return {
+        url: `/api/v1/teachers`,
+        params: toFetchQueryParams({
+          take: 4,
+          orderBy: 'createdAt',
+          orderDirection: 'desc',
+          schoolId,
+        }),
+      };
+    },
+    { parse: (raw) => pageRows<RecentTeacher>(raw) },
+  );
+}
+
+/** Rows of a paginated list response (`{ data: [...] }`); tolerates a plain array. */
+function pageRows<T>(raw: unknown): T[] {
+  if (Array.isArray(raw)) return raw as T[];
+  const data = (raw as { data?: unknown } | null)?.data;
+  return Array.isArray(data) ? (data as T[]) : [];
 }
 
 function plural(n: number, one: string, many: string) {

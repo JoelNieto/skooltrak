@@ -1,6 +1,7 @@
 import { AuthenticatedRequest, BetterAuthGuard, Perm, PermissionsGuard, RequirePermissions } from '@/auth';
-import { Body, Controller, Get, HttpCode, Param, Post, Put, Query, Req, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
+import { Body, Controller, Get, HttpCode, Param, Post, Put, Query, Req, Res, UseGuards } from '@nestjs/common';
+import type { Response } from 'express';
+import { ApiBearerAuth, ApiOperation, ApiProduces, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { PublishGradesInput } from './dto/publish-grades.input';
 import { SaveCellsInput } from './dto/save-cells.input';
 import {
@@ -29,6 +30,26 @@ export class GradebookController {
   @ApiOperation({ summary: "Gradebook course picker: the caller's courses, last graded first (FR-ASM-001.1)" })
   courses(@Req() req: AuthenticatedRequest, @Query('schoolId') schoolId: string): Promise<GradebookCourses> {
     return this.gradebook.courses(req.user, schoolId);
+  }
+
+  @Get(':courseId/export')
+  @ApiOperation({ summary: 'CSV of one group and period, as saved (FR-ASM-001.13)' })
+  @ApiProduces('text/csv')
+  @ApiQuery({ name: 'periodId', required: false, description: 'Defaults to the current period' })
+  @ApiQuery({ name: 'classGroupId', required: false, description: 'Defaults to the first group; "none" for students without one' })
+  async exportCsv(
+    @Req() req: AuthenticatedRequest,
+    @Res({ passthrough: true }) res: Response,
+    @Param('courseId') courseId: string,
+    @Query('periodId') periodId?: string,
+    @Query('classGroupId') classGroupId?: string,
+  ): Promise<string> {
+    const { filename, csv } = await this.gradebook.exportCsv(req.user, courseId, { periodId, classGroupId });
+    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    res.setHeader('Cache-Control', 'no-store');
+    // BOM: spreadsheet apps then read the accents as UTF-8.
+    return `\uFEFF${csv}`;
   }
 
   @Get(':courseId/assignments')

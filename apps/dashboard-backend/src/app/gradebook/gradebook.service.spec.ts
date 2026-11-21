@@ -150,7 +150,14 @@ function fakePrisma() {
         return students
           .filter((s) => s.active && s.courseIds.includes(courseId))
           .sort((a, b) => a.firstName.localeCompare(b.firstName))
-          .map((s) => ({ id: s.id, firstName: s.firstName, fatherName: s.fatherName, classGroup: s.classGroup, user: { color: '#123' } }));
+          .map((s) => ({
+            id: s.id,
+            firstName: s.firstName,
+            fatherName: s.fatherName,
+            documentId: `ID-${s.firstName}`,
+            classGroup: s.classGroup,
+            user: { color: '#123' },
+          }));
       }),
     },
     gradeBucket: {
@@ -296,4 +303,21 @@ describe('GradebookService (ASM-001-S02)', () => {
       await expect(service.courses(teacher, 'SCH9')).rejects.toThrow(new ForbiddenException(SCHOOL_DENIED));
     });
   });
+
+  describe('exportCsv (ASM-001-S07)', () => {
+    it('exports the saved view with a file name @FR-ASM-001.13', async () => {
+      const { service } = setup();
+      const { filename, csv } = await service.exportCsv(teacher, 'C1', {});
+      expect(filename).toBe('calificaciones-matematicas-trimestre-1-7-a.csv');
+      const lines = csv.split('\r\n');
+      expect(lines[0]).toBe('Estudiante,Cédula,Tarea 1,Tarea 2,Tarea 3,Tarea 4,Prueba 1,Prueba 2,Promedio,Estado');
+      expect(lines[1]).toBe('Ana Pérez,ID-Ana,4.0,4.0,4.0,4.0,2.0,,2.8,En riesgo');
+    });
+
+    it("refuses another teacher's course @BR-ASM-001.1", async () => {
+      const { service } = setup();
+      await expect(service.exportCsv(teacher2, 'C1', {})).rejects.toThrow(new ForbiddenException(WRITE_DENIED));
+    });
+  });
 });
+

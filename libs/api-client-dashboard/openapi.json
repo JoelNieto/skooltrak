@@ -6980,6 +6980,53 @@
         ]
       }
     },
+    "/api/v1/gradebook/{courseId}/export": {
+      "get": {
+        "operationId": "GradebookController_exportCsv",
+        "parameters": [
+          {
+            "name": "courseId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "periodId",
+            "required": false,
+            "in": "query",
+            "description": "Defaults to the current period",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "classGroupId",
+            "required": false,
+            "in": "query",
+            "description": "Defaults to the first group; \"none\" for students without one",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "CSV of one group and period, as saved (FR-ASM-001.13)",
+        "tags": [
+          "gradebook"
+        ]
+      }
+    },
     "/api/v1/gradebook/{courseId}/assignments": {
       "get": {
         "operationId": "GradebookController_assignments",

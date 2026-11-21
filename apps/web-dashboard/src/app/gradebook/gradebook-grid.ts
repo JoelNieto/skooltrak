@@ -8,6 +8,7 @@ import {
   Toast,
   UiField,
   UiInput,
+  UiInputGroup,
   UiSelect,
   UiTable,
   UiTableEmpty,
@@ -40,6 +41,7 @@ import {
   changedCells,
   CellEdit,
   Edits,
+  matchesStudent,
   readBackup,
   savedText,
   viewKey,
@@ -76,7 +78,7 @@ export interface Gradebook {
     }[];
   }[];
   rows: {
-    student: { id: string; firstName: string; name: string; initials: string; color: string | null };
+    student: { id: string; firstName: string; name: string; documentId: string; initials: string; color: string | null };
     cells: {
       gradeId: string;
       studentGradeId: string | null;
@@ -148,6 +150,7 @@ let nextId = 0;
     RouterLink,
     UiField,
     UiInput,
+    UiInputGroup,
     UiSelect,
     UiTable,
     UiTableEmpty,
@@ -203,7 +206,21 @@ let nextId = 0;
           </select>
         </ui-field>
       }
-      <div class="ms-auto">
+      <label uiInputGroup class="w-64">
+        <ui-icon name="search" />
+        <input
+          type="search"
+          placeholder="Buscar estudiante"
+          aria-label="Buscar estudiante por nombre o cédula"
+          [value]="query()"
+          (input)="query.set($any($event.target).value)"
+        />
+      </label>
+      <div class="ms-auto flex gap-2">
+        <button uiButton variant="ghost" [disabled]="!book?.rows?.length || exporting()" [loading]="exporting()" (click)="exportCsv()">
+          <ui-icon name="download" />
+          Exportar CSV
+        </button>
         <button uiButton variant="primary" [disabled]="!book?.periodId" (click)="newGrade()">
           <ui-icon name="plus" />
           Nueva calificación
@@ -333,7 +350,7 @@ let nextId = 0;
           </tbody>
         } @else if (book && v) {
           <tbody>
-            @for (row of v.rows; track row.student.id; let r = $index) {
+            @for (row of visibleRows(); track row.student.id; let r = $index) {
               <tr>
                 <th scope="row" class="sticky left-0 z-10 bg-surface-1 font-normal">
                   <a [routerLink]="['/students', row.student.id]" class="flex min-w-0 items-center gap-2">
@@ -388,7 +405,11 @@ let nextId = 0;
                 </td>
               </tr>
             } @empty {
-              <tr uiTableEmpty [columns]="columnCount()" icon="users" [title]="book.periodId ? 'No hay estudiantes en este curso' : 'No hay periodos en el año escolar'"></tr>
+              @if (v.rows.length) {
+                <tr uiTableEmpty [columns]="columnCount()" icon="search" [title]="'Ningún estudiante coincide con «' + query() + '»'"></tr>
+              } @else {
+                <tr uiTableEmpty [columns]="columnCount()" icon="users" [title]="book.periodId ? 'No hay estudiantes en este curso' : 'No hay periodos en el año escolar'"></tr>
+              }
             }
             @if (v.rows.length && !book.buckets.length) {
               <tr uiTableEmpty [columns]="columnCount()" icon="clipboard-list" title="Aún no hay calificaciones en este periodo">
@@ -531,6 +552,15 @@ export default class GradebookGrid {
   protected readonly publishing = signal(false);
   /** Columns saved in this session: ticked by default when publishing. */
   readonly #sessionColumns = new Set<string>();
+
+  /** FR-ASM-001.12: rows matching "Buscar estudiante"; averages and the footer stay group-wide. */
+  protected readonly query = signal('');
+  protected readonly visibleRows = computed(() => {
+    const view = this.view();
+    const query = this.query();
+    return (view?.rows ?? []).filter((row) => matchesStudent(row.student, query));
+  });
+  protected readonly exporting = signal(false);
 
   /** The cell whose side panel is open (FR-ASM-001.8). */
   protected readonly selected = signal<string | null>(null);
@@ -791,6 +821,34 @@ export default class GradebookGrid {
 
   protected scaleText(value: number): string {
     return formatScore(value);
+  }
+
+  /** FR-ASM-001.13: the CSV of this period and group, as saved (unsaved cells are not in it). */
+  protected async exportCsv(): Promise<void> {
+    const book = this.gradebook.value();
+    if (!book) return;
+    const params: Record<string, string> = {};
+    if (book.periodId) params['periodId'] = book.periodId;
+    if (book.classGroups.length) params['classGroupId'] = this.groupValue(book.classGroupId);
+    this.exporting.set(true);
+    try {
+      const res = await firstValueFrom(
+        this.#http.get(`/api/v1/gradebook/${book.course.id}/export`, { params, responseType: 'blob', observe: 'response' }),
+      );
+      const name = /filename="([^"]+)"/.exec(res.headers.get('Content-Disposition') ?? '')?.[1] ?? 'calificaciones.csv';
+      const url = URL.createObjectURL(res.body as Blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = name;
+      link.click();
+      URL.revokeObjectURL(url);
+      const unsaved = (this.view()?.changed ?? 0) + (this.view()?.invalid ?? 0);
+      if (unsaved) this.#toast.showSuccess('CSV descargado con las notas guardadas; tus cambios sin guardar no están incluidos');
+    } catch {
+      this.#toast.showError('No se pudo exportar el CSV');
+    } finally {
+      this.exporting.set(false);
+    }
   }
 
   protected scoreText(value: number | null): string {

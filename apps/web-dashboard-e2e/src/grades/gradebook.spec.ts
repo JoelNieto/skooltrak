@@ -1,3 +1,4 @@
+import { readFile } from 'node:fs/promises';
 import { APIRequestContext, expect, Page, test } from '@playwright/test';
 import { data, E2E_PASSWORD, personas, storageStatePath } from '../support/fixtures';
 
@@ -81,6 +82,41 @@ test.describe('Gradebook grid @FR-ASM-001.2', () => {
   });
 });
 
+test.describe('Gradebook search and export @FR-ASM-001.12 @FR-ASM-001.13', () => {
+  test.use({ storageState: storageStatePath('teacher') });
+
+  test('"Buscar estudiante" filters the rows; the footer stays group-wide', async ({ page, request }) => {
+    const id = await courseId(request, await bearerFor(request, personas.teacher.email), data.courses.teacherOwn.name);
+    await page.goto(`/courses/${id}`);
+    await page.getByRole('tab', { name: 'Libro de calificaciones' }).click();
+    const grid = page.getByRole('table', { name: 'Libro de calificaciones' });
+    await expect(grid.locator('tbody').getByRole('rowheader')).toHaveCount(3);
+
+    await page.getByRole('searchbox', { name: 'Buscar estudiante por nombre o cédula' }).fill('carl');
+    await expect(grid.locator('tbody').getByRole('rowheader')).toHaveText([new RegExp(`${CARLA} `)]);
+    await expect(grid.getByRole('row').filter({ has: page.getByRole('rowheader', { name: 'Promedio del grupo' }) })).toContainText('3.6');
+
+    await page.getByRole('searchbox', { name: 'Buscar estudiante por nombre o cédula' }).fill('zzz');
+    await expect(grid.getByText('Ningún estudiante coincide con «zzz»')).toBeVisible();
+  });
+
+  test('"Exportar CSV" downloads the saved view', async ({ page, request }) => {
+    const id = await courseId(request, await bearerFor(request, personas.teacher.email), data.courses.teacherOwn.name);
+    await page.goto(`/courses/${id}`);
+    await page.getByRole('tab', { name: 'Libro de calificaciones' }).click();
+    await expect(page.getByRole('columnheader', { name: data.publishedGrade.title })).toBeVisible();
+
+    const download = page.waitForEvent('download');
+    await page.getByRole('button', { name: 'Exportar CSV' }).click();
+    const file = await download;
+    expect(file.suggestedFilename()).toMatch(/^calificaciones-.+\.csv$/);
+    const csv = await readFile(await file.path(), 'utf8');
+    const lines = csv.replace(/^\uFEFF/, '').split('\r\n');
+    expect(lines[0]).toBe(`Estudiante,Cédula,${data.publishedGrade.title},${data.grade.title},Promedio,Estado`);
+    expect(lines.find((l) => l.startsWith(`${BETO} `))).toMatch(/,2\.0,,2\.0,En riesgo$/);
+  });
+});
+
 test.describe('Gradebook access @BR-ASM-001.1', () => {
   test("a teacher cannot open another teacher's gradebook; an admin can", async ({ request }) => {
     const admin = await bearerFor(request, personas.admin.email);
@@ -93,6 +129,7 @@ test.describe('Gradebook access @BR-ASM-001.1', () => {
 
     const asAdmin = await request.get(`/api/v1/gradebook/${otherCourse}`, { headers: admin });
     expect(asAdmin.ok()).toBeTruthy();
+    expect((await request.get(`/api/v1/gradebook/${otherCourse}/export`, { headers: teacher })).status()).toBe(403);
   });
 
   test('a student cannot open a gradebook', async ({ request }) => {

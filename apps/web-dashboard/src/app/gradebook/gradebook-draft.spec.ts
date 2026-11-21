@@ -1,4 +1,4 @@
-import { applyEdits, cellKey, cellsNeedingReason, changedCells } from './gradebook-draft';
+import { applyEdits, cellKey, cellsNeedingReason, changedCells, matchesStudent } from './gradebook-draft';
 import type { Gradebook } from './gradebook-grid';
 
 /** ASM-001-S03, S04: the grid with unsaved values applied (FR-ASM-001.4, .5, .8; BR .2, .4, .5, .8). */
@@ -16,7 +16,7 @@ const book = (): Gradebook => ({
   ],
   rows: [
     {
-      student: { id: 'S-ana', firstName: 'Ana', name: 'Ana Pérez', initials: 'AP', color: null },
+      student: { id: 'S-ana', firstName: 'Ana', name: 'Ana Pérez', documentId: '8-123-456', initials: 'AP', color: null },
       cells: [
         { gradeId: 'G-d', studentGradeId: 'sg1', score: 4, excused: false, comment: 'Bien', updatedAt: T },
         { gradeId: 'G-t', studentGradeId: 'sg2', score: 4, excused: false, comment: null, updatedAt: T },
@@ -25,7 +25,7 @@ const book = (): Gradebook => ({
       status: 'ON_TRACK',
     },
     {
-      student: { id: 'S-beto', firstName: 'Beto', name: 'Beto Ruiz', initials: 'BR', color: null },
+      student: { id: 'S-beto', firstName: 'Beto', name: 'Beto Ruiz', documentId: '8-222-333', initials: 'BR', color: null },
       cells: [
         { gradeId: 'G-d', studentGradeId: null, score: null, excused: false, comment: null, updatedAt: null },
         { gradeId: 'G-t', studentGradeId: null, score: null, excused: false, comment: null, updatedAt: null },
@@ -161,3 +161,20 @@ describe('excused cells (ASM-001-S05, BR .3)', () => {
     expect([view.rows[1].cells[1].excused, view.rows[1].cells[1].score, view.changed]).toEqual([false, 3, 1]);
   });
 });
+
+describe('matchesStudent (FR-ASM-001.12)', () => {
+  const ana = { name: 'Ana Pérez', documentId: '8-123-456' };
+  it.each([
+    ['', true],
+    ['ana', true],
+    ['PEREZ', true],
+    ['pér', true],
+    ['8-123', true],
+    ['8123456', true],
+    ['beto', false],
+    ['8-222', false],
+  ])('%j → %s', (query, expected) => {
+    expect(matchesStudent(ana, query)).toBe(expected);
+  });
+});
+

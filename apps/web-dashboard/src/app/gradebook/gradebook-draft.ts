@@ -193,3 +193,18 @@ export function writeBackup(key: string, edits: Edits): void {
     // Storage unavailable: the draft just isn't kept across reloads.
   }
 }
+
+const fold = (text: string) =>
+  text
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .trim();
+
+/** FR-ASM-001.12: "Buscar estudiante" matches the name or the cédula, ignoring case and accents. */
+export function matchesStudent(student: { name: string; documentId: string }, query: string): boolean {
+  const q = fold(query);
+  if (!q) return true;
+  return fold(student.name).includes(q) || fold(student.documentId).replace(/[^a-z0-9]/g, '').includes(q.replace(/[^a-z0-9]/g, '') || q);
+}
+

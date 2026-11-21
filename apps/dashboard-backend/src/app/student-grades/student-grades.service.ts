@@ -1,6 +1,7 @@
 import { courseAverage } from '@/shared';
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { cellChanged, recordRevisions, REASON_REQUIRED, validReason } from '../grades/grade-revisions';
+import { alertInBackground } from '../grades/homeroom-alerts';
 import { PrismaService } from '../prisma.service';
 import { CreateStudentGradeInput } from './dto/create-student-grade.input';
 import { UpdateStudentGradeInput } from './dto/update-student-grade.input';
@@ -12,9 +13,9 @@ export class StudentGradesService {
    * One row per (grade, student) (ASM-001 BR .10): creating an existing cell updates it. On a
    * published grade, a score change needs a reason and writes a revision (BR .8).
    */
-  create(createStudentGradeInput: CreateStudentGradeInput, published = false, actorId: string | null = null) {
+  async create(createStudentGradeInput: CreateStudentGradeInput, published = false, actorId: string | null = null) {
     const { gradeId, studentId, score, comments, reason } = createStudentGradeInput;
-    return this.prisma.$transaction(async (tx) => {
+    const row = await this.prisma.$transaction(async (tx) => {
       const before = await tx.studentGrade.findUnique({
         where: { gradeId_studentId: { gradeId, studentId } },
         select: { score: true, excused: true },
@@ -32,6 +33,9 @@ export class StudentGradesService {
       }
       return row;
     });
+    // BR-ASM-001.12
+    if (published) alertInBackground(this.prisma, gradeId, { studentIds: [studentId], actorUserId: actorId });
+    return row;
   }
 
   findByCourseId(courseId: string, periodId?: string, studentId?: string) {
@@ -76,9 +80,9 @@ export class StudentGradesService {
   }
 
   /** On a published grade, a score change needs a reason and writes a revision (BR-ASM-001.8). */
-  update(id: string, updateStudentGradeInput: UpdateStudentGradeInput, published = false, actorId: string | null = null) {
+  async update(id: string, updateStudentGradeInput: UpdateStudentGradeInput, published = false, actorId: string | null = null) {
     const { score, comments, reason } = updateStudentGradeInput;
-    return this.prisma.$transaction(async (tx) => {
+    const row = await this.prisma.$transaction(async (tx) => {
       const before = await tx.studentGrade.findUniqueOrThrow({ where: { id }, select: { score: true, excused: true } });
       const changing = score !== undefined && cellChanged(before, { score: toScore(score), excused: false });
       const why = published && changing ? requireReason(reason) : null;
@@ -95,6 +99,9 @@ export class StudentGradesService {
       }
       return row;
     });
+    // BR-ASM-001.12
+    if (published) alertInBackground(this.prisma, row.gradeId, { studentIds: [row.studentId], actorUserId: actorId });
+    return row;
   }
 
   remove(id: string) {

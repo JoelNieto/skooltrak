@@ -6,6 +6,7 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
 import { forkJoin, map, of, switchMap, timer } from 'rxjs';
 import Auth from '../auth/auth';
 import Store, { CurrentSchool } from './store';
+import { NotificationsBadge } from '../notifications/notifications-badge';
 import { ThemeService } from './theme.service';
 
 type SidebarSchool = {
@@ -243,16 +244,6 @@ type SidebarSchool = {
             </li>
             <li>
               <a
-                routerLink="student/notifications"
-                routerLinkActive="bg-action-subtle text-primary font-semibold"
-                class="flex items-center gap-3 px-3 py-2 text-ink rounded-lg transition-all duration-150 hover:bg-surface-2 hover:text-ink-strong group"
-              >
-                <ui-icon name="bell" class="text-xl" />
-                <span>Notificaciones</span>
-              </a>
-            </li>
-            <li>
-              <a
                 routerLink="student/communication"
                 routerLinkActive="bg-action-subtle text-primary font-semibold"
                 class="flex items-center gap-3 px-3 py-2 text-ink rounded-lg transition-all duration-150 hover:bg-surface-2 hover:text-ink-strong group"
@@ -308,16 +299,6 @@ type SidebarSchool = {
               >
                 <ui-icon name="message-circle" class="text-xl" />
                 <span>Mensajes</span>
-              </a>
-            </li>
-            <li>
-              <a
-                routerLink="parent/notifications"
-                routerLinkActive="bg-action-subtle text-primary font-semibold"
-                class="flex items-center gap-3 px-3 py-2 text-ink rounded-lg transition-all duration-150 hover:bg-surface-2 hover:text-ink-strong group"
-              >
-                <ui-icon name="bell-ring" class="text-xl" />
-                <span>Alertas</span>
               </a>
             </li>
             @if (auth.hasPermission('VIEW_FINANCIALS')) {
@@ -445,6 +426,17 @@ type SidebarSchool = {
           @if (count > 0) {
             <span uiBadge tone="new" size="sm" class="ml-auto">{{ count > 99 ? '99+' : count }}</span>
           }
+        }
+      </a>
+      <a
+        routerLink="notifications"
+        routerLinkActive="bg-action-subtle text-primary font-semibold"
+        class="flex items-center gap-3 px-3 py-2 text-ink rounded-lg transition-all duration-150 hover:bg-surface-2 hover:text-ink-strong group w-full"
+      >
+        <ui-icon name="bell" class="text-xl" />
+        <span>Notificaciones</span>
+        @if (notifications.unread.hasValue() && notifications.unread.value(); as count) {
+          <span uiBadge tone="new" size="sm" class="ml-auto" [attr.aria-label]="count + ' sin leer'">{{ count > 99 ? '99+' : count }}</span>
         }
       </a>
       <div class="flex gap-1 p-2 rounded-lg bg-surface-0/50" role="group" aria-label="Tema">
@@ -575,6 +567,9 @@ export class Sidebar {
         }),
       ),
   });
+
+  /** ASM-001-S08: unread notifications, for the sidebar badge. */
+  protected readonly notifications = inject(NotificationsBadge);
 
   protected unreadCount = rxResource({
     injector: this.#injector,

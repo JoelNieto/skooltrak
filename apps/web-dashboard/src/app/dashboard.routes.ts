@@ -303,9 +303,14 @@ export const DASHBOARD_ROUTES: Route[] = [
         loadComponent: () => import('./students/student-assignment-submission'),
       },
       {
+        // ASM-001-S08: every role's notifications live at /notifications.
         path: 'student/notifications',
-        canActivate: [permissionGuard('VIEW_MESSAGES')],
-        loadComponent: () => import('./students/student-notifications'),
+        redirectTo: 'notifications',
+      },
+      {
+        path: 'notifications',
+        loadComponent: () => import('./notifications/notifications-page'),
+        title: 'Notificaciones | Skooltrak',
       },
       {
         path: 'student/attendance',
@@ -368,8 +373,7 @@ export const DASHBOARD_ROUTES: Route[] = [
       },
       {
         path: 'parent/notifications',
-        canActivate: [permissionGuard('VIEW_MESSAGES')],
-        loadComponent: () => import('./parent/parent-notifications'),
+        redirectTo: 'notifications',
       },
       {
         path: 'parent/finances',

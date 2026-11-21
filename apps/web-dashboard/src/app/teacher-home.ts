@@ -453,6 +453,19 @@ const longDate = new Intl.DateTimeFormat('es', { weekday: 'long', day: 'numeric'
           }
         </div>
       </section>
+      @if (lowScores().length) {
+        <section uiCard bleed class="min-w-0 flex-[1_1_340px]" aria-labelledby="low-scores-title">
+          <div uiCardBody>
+            <h2 id="low-scores-title" class="text-base font-semibold text-ink-strong">Notas bajo la nota mínima en tu grupo</h2>
+            <ul class="mt-3 flex flex-col gap-2" aria-labelledby="low-scores-title">
+              @for (alert of lowScores(); track alert.id) {
+                <li class="text-sm text-ink">{{ alert.message }}</li>
+              }
+            </ul>
+            <a routerLink="/notifications" class="link link-primary mt-3 inline-block text-sm">Ver notificaciones</a>
+          </div>
+        </section>
+      }
     </div>
 
     <div class="mt-6 flex flex-wrap gap-6">
@@ -562,6 +575,13 @@ export default class TeacherHome {
   });
 
   public attentionStudents = computed(() => this.attention.value()?.students ?? []);
+
+  /** ASM-001-S08: unread alerts about the homeroom group's scores below the pass mark (BR-ASM-001.12). */
+  public lowScoreAlerts = httpResource<{ notifications: { id: string; message: string }[]; unread: number }>(() => ({
+    url: '/api/v1/notifications',
+    params: { type: 'LOW_GRADE_HOMEROOM', unread: 'true', take: '5' },
+  }));
+  public lowScores = computed(() => this.lowScoreAlerts.value()?.notifications ?? []);
   public familyThreads = computed(() => this.attention.value()?.threads ?? []);
 
   public averageValue = computed(() => {

@@ -5,6 +5,7 @@ import { BadRequestException, ConflictException, ForbiddenException, Inject, Inj
 import { enrolledIn } from '../courses/course-roster';
 import { GradeAccessService, NOT_ENROLLED } from '../grades/grade-access.service';
 import { GradesService } from '../grades/grades.service';
+import { alertInBackground } from '../grades/homeroom-alerts';
 import {
   cellChanged,
   COMMENT_MAX,
@@ -336,7 +337,7 @@ export class GradebookService {
     if (invalid.length) throw new BadRequestException({ message: CELLS_INVALID, cells: invalid });
 
     try {
-      return await this.prisma.$transaction(
+      const saved = await this.prisma.$transaction(
         async (tx) => {
           const pairs = { gradeId: { in: gradeIds }, studentId: { in: studentIds } };
           // Lock the rows this save touches, so the conflict check and the writes see the same state.
@@ -423,6 +424,16 @@ export class GradebookService {
         },
         { timeout: 15_000 },
       );
+      // BR-ASM-001.12: saved published cells below the pass mark alert the homeroom teacher.
+      const publishedCells = new Map<string, string[]>();
+      for (const cell of input.cells) {
+        if (!gradeById.get(cell.gradeId)?.published) continue;
+        publishedCells.set(cell.gradeId, [...(publishedCells.get(cell.gradeId) ?? []), cell.studentId]);
+      }
+      for (const [gradeId, ids] of publishedCells) {
+        alertInBackground(this.prisma, gradeId, { studentIds: ids, actorUserId: user?.userId ?? null });
+      }
+      return saved;
     } catch (error) {
       // A row created by someone else between our check and our insert (unique pair, BR .10).
       if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
@@ -453,8 +464,9 @@ export class GradebookService {
       where: { id: { in: drafts }, published: false },
       data: { published: true, publishedAt: new Date(), publishedById: user?.userId ?? null },
     });
-    // Emails go out after the response: the teacher doesn't wait on one email per student and parent.
+    // Emails and homeroom alerts go out after the response: the teacher doesn't wait on them.
     void this.notify(drafts);
+    for (const id of drafts) alertInBackground(this.prisma, id, { actorUserId: user?.userId ?? null });
     return { gradeIds: drafts };
   }
 

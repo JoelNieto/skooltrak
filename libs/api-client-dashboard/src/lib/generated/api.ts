@@ -114,6 +114,7 @@ import type {
   NewslettersControllerFindAllParams,
   NewslettersControllerFindManyNewslettersCountParams,
   NewslettersControllerFindPublishedParams,
+  NotificationsControllerListParams,
   OrganizationsControllerListInvitationsParams,
   OrganizationsControllerListMembersParams,
   ParentsControllerFindAllParams,
@@ -7679,6 +7680,110 @@ export class SkooltrakDashboardAPIService {
 
     return this.http.get<TData>(
       `/api/v1/gradebook/cells/${studentGradeId}/history`,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'body',
+      }
+    );
+  }
+
+/**
+ * @summary The caller's notifications, newest first, with the unread count
+ */
+ notificationsControllerList<TData = void>(params?: NotificationsControllerListParams, options?: HttpClientBodyOptions): Observable<TData>;
+ notificationsControllerList<TData = void>(params?: NotificationsControllerListParams, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
+ notificationsControllerList<TData = void>(params?: NotificationsControllerListParams, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
+  notificationsControllerList<TData = void>(
+    params?: NotificationsControllerListParams, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
+    const filteredParams = filterParams({...params, ...options?.params}, new Set<string>([]));
+
+    if (options?.observe === 'events') {
+      return this.http.get<TData>(
+      `/api/v1/notifications`,{
+    ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'events',
+        params: filteredParams,}
+    );
+    }
+
+    if (options?.observe === 'response') {
+      return this.http.get<TData>(
+      `/api/v1/notifications`,{
+    ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'response',
+        params: filteredParams,}
+    );
+    }
+
+    return this.http.get<TData>(
+      `/api/v1/notifications`,{
+    ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'body',
+        params: filteredParams,}
+    );
+  }
+
+/**
+ * @summary Mark all the caller's notifications read
+ */
+ notificationsControllerMarkAllRead<TData = void>( options?: HttpClientBodyOptions): Observable<TData>;
+ notificationsControllerMarkAllRead<TData = void>( options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
+ notificationsControllerMarkAllRead<TData = void>( options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
+  notificationsControllerMarkAllRead<TData = void>(
+     options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
+    if (options?.observe === 'events') {
+      return this.http.patch<TData>(
+      `/api/v1/notifications/read`,undefined,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'events',
+      }
+    );
+    }
+
+    if (options?.observe === 'response') {
+      return this.http.patch<TData>(
+      `/api/v1/notifications/read`,undefined,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'response',
+      }
+    );
+    }
+
+    return this.http.patch<TData>(
+      `/api/v1/notifications/read`,undefined,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'body',
+      }
+    );
+  }
+
+/**
+ * @summary Mark one of the caller’s notifications read
+ */
+ notificationsControllerMarkRead<TData = void>(id: string, options?: HttpClientBodyOptions): Observable<TData>;
+ notificationsControllerMarkRead<TData = void>(id: string, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
+ notificationsControllerMarkRead<TData = void>(id: string, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
+  notificationsControllerMarkRead<TData = void>(
+    id: string, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
+    if (options?.observe === 'events') {
+      return this.http.patch<TData>(
+      `/api/v1/notifications/${id}/read`,undefined,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'events',
+      }
+    );
+    }
+
+    if (options?.observe === 'response') {
+      return this.http.patch<TData>(
+      `/api/v1/notifications/${id}/read`,undefined,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'response',
+      }
+    );
+    }
+
+    return this.http.patch<TData>(
+      `/api/v1/notifications/${id}/read`,undefined,{
         ...(options as Omit<NonNullable<typeof options>, 'observe'>),
         observe: 'body',
       }

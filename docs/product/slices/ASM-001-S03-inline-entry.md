@@ -4,7 +4,7 @@
 |---|---|
 | **FRD** | [ASM-001](../frd/ASM-001-teacher-gradebook.md) |
 | **Implements** | FR-ASM-001.4, .5, .6, BR-ASM-001.2, .7, .10; §8 draft backup |
-| **Status** | In review: #54 |
+| **Status** | Done: #54 (2026-11-21) |
 | **Branch** | `feat/ASM-001-S03-inline-entry` |
 | **Estimate** | 3 days |
 
@@ -57,22 +57,22 @@ Scenario: discard, leave, reload
 - Switching period or group keeps the unsaved cells of the view left behind in the backup; they are restored when the teacher comes back.
 
 ## Layers touched
-- [ ] **Prisma migration:** `@@unique([gradeId, studentId])` on `StudentGrade`. Duplicates are merged first: the most recently updated row is kept, and revisions of the others move to it (BR .10).
-- [ ] **Nest** (`gradebook`):
+- [x] **Prisma migration:** `@@unique([gradeId, studentId])` on `StudentGrade`. Duplicates are merged first: the most recently updated row is kept, and revisions of the others move to it (BR .10).
+- [x] **Nest** (`gradebook`):
   - `PUT /api/v1/gradebook/:courseId/cells` `{ periodId, cells: [{ gradeId, studentId, score, updatedAt }] }`, `MANAGE_GRADES` + BR .1.
   - Refuses with 400 `{ message, cells: [{ gradeId, studentId, reason }] }`: a column of another course or period, a published column, a student not on the roster, a value outside BR .2, no grade metric.
   - Refuses with 409 `{ message, cells }` when a row changed since it was loaded (`updatedAt` differs, or a row now exists that didn't).
   - One transaction; missing rows are created. Returns the saved cells.
   - `POST /api/v1/student-grades` upserts on (grade, student), so the grade page keeps working with the unique pair.
-- [ ] **OpenAPI:** `bun run openapi`.
-- [ ] **Angular** (`gradebook/`):
+- [x] **OpenAPI:** `bun run openapi`.
+- [x] **Angular** (`gradebook/`):
   - Draft-column cells become inputs named *"{estudiante}, {columna}"*; Enter / Tab move down the column, Shift+Enter / Shift+Tab move up.
   - Changed and invalid states (`aria-invalid` + reason text); the legend *"Escala {min}–{max} · nota mínima {pass} · Tab pasa al siguiente estudiante"*.
   - Averages, statuses, the footer and *Incluye borradores* recalculate client-side (`courseAverage`, `gradeStatus`, `meanOf`).
   - Save bar: *"{n} cambios sin guardar"*, *"{n} valores inválidos"*, *"Guardado"*; *Guardar borrador*, *Descartar*. Conflict and error banners keep the teacher's values.
   - Leave confirmation (route guard + `beforeunload`) and the local-storage backup.
   - No grade metric: cells stay read-only with *"Escala de notas no configurada"*.
-- [ ] **Tests:**
+- [x] **Tests:**
   - Nest: valid save, row creation, 400 cases, 409, published refused, another teacher's course refused.
   - Angular: value parsing and validation.
   - Playwright `@FR-ASM-001.4 @FR-ASM-001.6 @BR-ASM-001.7`: keyboard entry, live average, save, invalid value, discard, reload restore, conflict. It runs in the `after` project and restores the scores it changes.
@@ -82,6 +82,6 @@ Scenario: discard, leave, reload
 - Excused cells, `EX` (S05).
 
 ## Done checklist
-- [ ] Acceptance criteria pass
-- [ ] Cross-tenant / wrong-role access refused (test)
-- [ ] FRD slice table + `capabilities.md` updated
+- [x] Acceptance criteria pass
+- [x] Cross-tenant / wrong-role access refused (test)
+- [x] FRD slice table + `capabilities.md` updated

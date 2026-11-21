@@ -4,8 +4,8 @@
 |---|---|
 | **FRD** | [ASM-001](../frd/ASM-001-teacher-gradebook.md) |
 | **Implements** | FR-ASM-001.7, .8, .9, BR-ASM-001.8, .9, .14 |
-| **Status** | In review |
-| **Branch** | `feat/ASM-001-S04-publish-revisions` (stacked on S03, #54) |
+| **Status** | Done: #56 (2026-11-21) |
+| **Branch** | `feat/ASM-001-S04-publish-revisions` |
 | **Estimate** | 3 days |
 
 ## User-visible outcome
@@ -56,23 +56,23 @@ These fill gaps in the FRD; each is easy to change.
 - The panel's band uses the plan's thresholds (BR-HOM-001.1): *Excelencia*, *Aprobado*, *Bajo la nota mínima*.
 
 ## Layers touched
-- [ ] **Prisma migration:**
+- [x] **Prisma migration:**
   - `Grade.publishedAt DateTime?`, `Grade.publishedById String?` (→ `User`, `SetNull`); backfill as above;
   - `StudentGradeRevision`: `previousScore Decimal?`, `score` nullable, `excused Boolean @default(false)` (for S05), `changedById String?` (→ `User`, `SetNull`).
-- [ ] **Nest:**
+- [x] **Nest:**
   - `grades/grade-revisions.ts`: `reasonError`, `REASON_REQUIRED`, and `recordRevisions(tx, …)`, used by the gradebook save and `PATCH` / `POST /student-grades`.
   - `PUT /gradebook/:courseId/cells` accepts published columns, a top-level `reason` and per-cell `reason` / `comment`. A changed published score without a valid reason → 400 with the cells. Comment > 500 → 400.
   - `POST /gradebook/:courseId/publish { gradeIds }`: the course's draft columns become published, with `publishedAt`, `publishedById` and the existing notifications.
   - `GET /gradebook/cells/:studentGradeId/history`: revisions, newest first, with the author's name.
   - `GET /gradebook/:courseId`: cells gain `comment`; columns gain `publishedAt`.
   - `PATCH /grades`: publishing stamps `publishedAt` / `publishedById`; unpublishing (admins) clears them.
-- [ ] **OpenAPI:** `bun run openapi`.
-- [ ] **Angular:**
+- [x] **OpenAPI:** `bun run openapi`.
+- [x] **Angular:**
   - Published cells become inputs. Saving with changed published cells asks once for *"Motivo del cambio"*.
   - *Publicar calificaciones* saves pending changes, then a dialog with the draft columns (changed ones ticked).
   - Side panel on cell focus: student, column, bucket, value and band, comment, per-cell reason when published, history.
   - The grade page's score dialog asks for a reason when the grade is published.
-- [ ] **Tests:**
+- [x] **Tests:**
   - Nest: revision on a published change (previous / new / author / reason), none on drafts, 400 without a reason or with a bad one, comment limit, publish stamps and notifies, history scope, `PATCH /student-grades` rule.
   - Angular: changed comment / reason in the draft logic.
   - Playwright `@FR-ASM-001.7 @FR-ASM-001.8 @FR-ASM-001.9 @BR-ASM-001.8`: correct a published score with a reason and see it in the history; publish a draft column. Runs in the `after` project and restores what it changes.
@@ -82,6 +82,6 @@ These fill gaps in the FRD; each is easy to change.
 - Homeroom alert on publish (S08).
 
 ## Done checklist
-- [ ] Acceptance criteria pass
-- [ ] Cross-tenant / wrong-role access refused (test)
-- [ ] FRD slice table + `capabilities.md` updated
+- [x] Acceptance criteria pass
+- [x] Cross-tenant / wrong-role access refused (test)
+- [x] FRD slice table + `capabilities.md` updated

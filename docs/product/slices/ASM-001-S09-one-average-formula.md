@@ -4,7 +4,7 @@
 |---|---|
 | **FRD** | [ASM-001](../frd/ASM-001-teacher-gradebook.md) |
 | **Implements** | BR-ASM-001.4 (decided 2026-11-19, Q2) |
-| **Status** | In progress |
+| **Status** | In review: #48 |
 | **Branch** | `feat/ASM-001-S09-one-average-formula` |
 | **Estimate** | 1–2 days |
 

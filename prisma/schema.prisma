@@ -885,6 +885,8 @@ model StudentGrade {
   updatedAt DateTime               @updatedAt
   revisions StudentGradeRevision[]
 
+  /// One cell per student and grade column (ASM-001 BR .10).
+  @@unique([gradeId, studentId])
   @@map("student_grades")
 }
 

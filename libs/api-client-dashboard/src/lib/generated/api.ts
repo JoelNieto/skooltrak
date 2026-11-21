@@ -127,6 +127,7 @@ import type {
   RemoveShareInput,
   RequestJoinSchoolInput,
   ReviewSubmissionInput,
+  SaveCellsInput,
   SaveHabitEvaluationInput,
   SchoolLogoUploadInput,
   SchoolsControllerGetSchoolLogoDownloadUrlParams,
@@ -7489,6 +7490,47 @@ export class SkooltrakDashboardAPIService {
     ...(options as Omit<NonNullable<typeof options>, 'observe'>),
         observe: 'body',
         params: filteredParams,}
+    );
+  }
+
+/**
+ * @summary Save changed draft cells of one period in one transaction (FR-ASM-001.6, BR .2, .7, .10)
+ */
+ gradebookControllerSaveCells<TData = void>(courseId: string,
+    saveCellsInput: SaveCellsInput, options?: HttpClientBodyOptions): Observable<TData>;
+ gradebookControllerSaveCells<TData = void>(courseId: string,
+    saveCellsInput: SaveCellsInput, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
+ gradebookControllerSaveCells<TData = void>(courseId: string,
+    saveCellsInput: SaveCellsInput, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
+  gradebookControllerSaveCells<TData = void>(
+    courseId: string,
+    saveCellsInput: SaveCellsInput, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
+    if (options?.observe === 'events') {
+      return this.http.put<TData>(
+      `/api/v1/gradebook/${courseId}/cells`,
+      saveCellsInput,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'events',
+      }
+    );
+    }
+
+    if (options?.observe === 'response') {
+      return this.http.put<TData>(
+      `/api/v1/gradebook/${courseId}/cells`,
+      saveCellsInput,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'response',
+      }
+    );
+    }
+
+    return this.http.put<TData>(
+      `/api/v1/gradebook/${courseId}/cells`,
+      saveCellsInput,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'body',
+      }
     );
   }
 

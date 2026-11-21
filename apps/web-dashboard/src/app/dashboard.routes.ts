@@ -10,6 +10,7 @@ import {
   teacherGuard,
 } from './auth/auth.guard';
 import { STORE_ROUTES } from './store/store.routes';
+import { unsavedChangesGuard } from './gradebook/unsaved-changes';
 
 export const DASHBOARD_ROUTES: Route[] = [
   {
@@ -159,6 +160,7 @@ export const DASHBOARD_ROUTES: Route[] = [
       {
         path: 'courses/:id',
         canActivate: [permissionGuard('VIEW_COURSES')],
+        canDeactivate: [unsavedChangesGuard],
         loadComponent: () => import('./courses/course'),
       },
       {
@@ -329,6 +331,7 @@ export const DASHBOARD_ROUTES: Route[] = [
       {
         path: 'teacher/gradebook',
         canActivate: [permissionGuard('MANAGE_GRADES')],
+        canDeactivate: [unsavedChangesGuard],
         loadComponent: () => import('./gradebook/gradebook-page'),
         title: 'Libro de calificaciones | Skooltrak',
       },

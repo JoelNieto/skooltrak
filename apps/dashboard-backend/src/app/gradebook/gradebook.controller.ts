@@ -1,11 +1,12 @@
 import { AuthenticatedRequest, BetterAuthGuard, Perm, PermissionsGuard, RequirePermissions } from '@/auth';
-import { Controller, Get, Param, Query, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Put, Query, Req, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
-import { Gradebook, GradebookCourses } from './entities/gradebook.entity';
+import { SaveCellsInput } from './dto/save-cells.input';
+import { Gradebook, GradebookCourses, GradebookSavedCells } from './entities/gradebook.entity';
 import { GradebookService } from './gradebook.service';
 
 /**
- * Teacher gradebook (ASM-001). Read-only in S02. Every route needs MANAGE_GRADES; a course's
+ * Teacher gradebook (ASM-001). Every route needs MANAGE_GRADES; a course's
  * gradebook is open to its teacher and to admins of its organization (BR-ASM-001.1).
  */
 @ApiTags('gradebook')
@@ -33,5 +34,15 @@ export class GradebookController {
     @Query('classGroupId') classGroupId?: string,
   ): Promise<Gradebook> {
     return this.gradebook.gradebook(req.user, courseId, { periodId, classGroupId });
+  }
+
+  @Put(':courseId/cells')
+  @ApiOperation({ summary: 'Save changed draft cells of one period in one transaction (FR-ASM-001.6, BR .2, .7, .10)' })
+  saveCells(
+    @Req() req: AuthenticatedRequest,
+    @Param('courseId') courseId: string,
+    @Body() input: SaveCellsInput,
+  ): Promise<GradebookSavedCells> {
+    return this.gradebook.saveCells(req.user, courseId, input);
   }
 }

@@ -7027,6 +7027,45 @@
         ]
       }
     },
+    "/api/v1/gradebook/{courseId}/cells": {
+      "put": {
+        "operationId": "GradebookController_saveCells",
+        "parameters": [
+          {
+            "name": "courseId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaveCellsInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Save changed draft cells of one period in one transaction (FR-ASM-001.6, BR .2, .7, .10)",
+        "tags": [
+          "gradebook"
+        ]
+      }
+    },
     "/api/v1/grade-buckets": {
       "post": {
         "operationId": "GradeBucketsController_create",
@@ -11728,6 +11767,10 @@
         "properties": {}
       },
       "UpdatePeriodInput": {
+        "type": "object",
+        "properties": {}
+      },
+      "SaveCellsInput": {
         "type": "object",
         "properties": {}
       },

@@ -2,7 +2,7 @@ import { APIRequestContext, expect, test } from '@playwright/test';
 import { data, E2E_PASSWORD, personas, storageStatePath } from '../support/fixtures';
 
 /**
- * ASM-001-S09: the course grid shows the product's one average (BR-ASM-001.4): each bucket's mean,
+ * ASM-001-S09: the course gradebook (ASM-001-S02) shows the product's one average (BR-ASM-001.4): each bucket's mean,
  * weighted by bucket weight.
  * docs/product/slices/ASM-001-S09-one-average-formula.md
  *
@@ -81,7 +81,7 @@ test.describe('Course grid average @BR-ASM-001.4', () => {
     const page = await context.newPage();
 
     await page.goto(`/courses/${courseId}`);
-    await page.getByRole('tab', { name: 'Calificaciones' }).click();
+    await page.getByRole('tab', { name: 'Libro de calificaciones' }).click();
     await expect(page.getByRole('columnheader', { name: 'Tarea 3 E2E' })).toBeVisible();
     const row = page.getByRole('row').filter({ hasText: CARLA }).first();
     await expect(row).toContainText(EXPECTED);

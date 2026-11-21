@@ -65,7 +65,7 @@ Code: `grade-metrics`, `grade-buckets`, `grades`, `student-grades`, `grade-repor
 | Grade metrics & buckets (weighting) | Live | — |
 | Grades: create, publish, notify | Live | — |
 | Student grades with revision history | Live | — |
-| Teacher gradebook | Partial (`/teacher/gradebook` is sample data; course grid is read-only with modal entry; grade endpoints scoped by role, organization and ownership in ASM-001-S01; one bucket-weighted average everywhere in ASM-001-S09) | [ASM-001](frd/ASM-001-teacher-gradebook.md) |
+| Teacher gradebook | Partial (read-only gradebook grid on the course tab and `/teacher/gradebook` in ASM-001-S02; scores are still entered per column on the grade page; grade endpoints scoped by role, organization and ownership in ASM-001-S01; one bucket-weighted average everywhere in ASM-001-S09) | [ASM-001](frd/ASM-001-teacher-gradebook.md) |
 | Grade report per student | Live | — |
 | Habit metrics & evaluations | Live | — |
 | Unpublished-grades reminder (cron) | Live | — |

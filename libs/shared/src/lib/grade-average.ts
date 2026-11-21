@@ -35,3 +35,36 @@ export function courseAverage(cells: Iterable<AverageCell>): number | null {
   }
   return totalWeight > 0 ? weighted / totalWeight : null;
 }
+
+/**
+ * ASM-001 BR .5 status band, from the student's course average and the study plan's pass mark:
+ * - `AT_RISK` ("En riesgo"): below the pass mark;
+ * - `WATCH` ("Atención"): below the pass mark + {@link WATCH_MARGIN};
+ * - `ON_TRACK` ("Al día"): otherwise.
+ *
+ * The band is taken from the average rounded to one decimal, as it is shown, so a "3.0" never reads
+ * "En riesgo" with a 3.0 pass mark. No average or no pass mark: no band.
+ */
+export type GradeStatus = 'AT_RISK' | 'WATCH' | 'ON_TRACK';
+
+export const WATCH_MARGIN = 0.5;
+
+export function gradeStatus(average: number | null | undefined, passMark: number | null | undefined): GradeStatus | null {
+  if (average === null || average === undefined || Number.isNaN(average)) return null;
+  if (passMark === null || passMark === undefined) return null;
+  const shown = Math.round(average * 10) / 10;
+  if (shown < passMark) return 'AT_RISK';
+  return shown < passMark + WATCH_MARGIN ? 'WATCH' : 'ON_TRACK';
+}
+
+/** Plain mean of the values that are numbers; null when there are none. */
+export function meanOf(values: Iterable<number | null | undefined>): number | null {
+  let sum = 0;
+  let count = 0;
+  for (const value of values) {
+    if (value === null || value === undefined || Number.isNaN(value)) continue;
+    sum += value;
+    count += 1;
+  }
+  return count ? sum / count : null;
+}

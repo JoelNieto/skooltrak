@@ -18,6 +18,7 @@ import { FinancialModule } from './financial/financial.module';
 import { GradeBucketsModule } from './grade-buckets/grade-buckets.module';
 import { GradeMetricsModule } from './grade-metrics/grade-metrics.module';
 import { GradeReportModule } from './grade-report/grade-report.module';
+import { GradebookModule } from './gradebook/gradebook.module';
 import { GradesModule } from './grades/grades.module';
 import { GroupsSchedulesModule } from './groups-schedules/groups-schedules.module';
 import { HabitEvaluationsModule } from './habit-evaluations/habit-evaluations.module';
@@ -61,6 +62,7 @@ const openApiExport = process.env['OPENAPI_EXPORT'] === 'true';
     GradeMetricsModule,
     PeriodsModule,
     GradesModule,
+    GradebookModule,
     GradeBucketsModule,
     StudentGradesModule,
     MessagesModule,

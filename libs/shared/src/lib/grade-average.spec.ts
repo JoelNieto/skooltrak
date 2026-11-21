@@ -1,4 +1,4 @@
-import { courseAverage } from './grade-average';
+import { courseAverage, gradeStatus, meanOf } from './grade-average';
 
 const cell = (bucketId: string, weight: number, score: number | null) => ({ bucketId, weight, score });
 
@@ -28,5 +28,35 @@ describe('courseAverage (ASM-001 BR .4)', () => {
 
   it('keeps a real zero', () => {
     expect(courseAverage([cell('tests', 100, 0)])).toBe(0);
+  });
+});
+
+describe('gradeStatus (ASM-001 BR .5)', () => {
+  it.each([
+    [2.9, 'AT_RISK'],
+    [3.0, 'WATCH'],
+    [3.4, 'WATCH'],
+    [3.5, 'ON_TRACK'],
+    [5, 'ON_TRACK'],
+  ])('%s with pass mark 3 is %s', (average, status) => {
+    expect(gradeStatus(average, 3)).toBe(status);
+  });
+
+  it('bands the average as shown, rounded to one decimal', () => {
+    expect(gradeStatus(2.96, 3)).toBe('WATCH');
+    expect(gradeStatus(2.94, 3)).toBe('AT_RISK');
+    expect(gradeStatus(3.46, 3)).toBe('ON_TRACK');
+  });
+
+  it('has no band without an average or a pass mark', () => {
+    expect(gradeStatus(null, 3)).toBeNull();
+    expect(gradeStatus(4, null)).toBeNull();
+  });
+});
+
+describe('meanOf', () => {
+  it('averages the numbers and skips the rest', () => {
+    expect(meanOf([4, null, 2, undefined])).toBe(3);
+    expect(meanOf([null])).toBeNull();
   });
 });

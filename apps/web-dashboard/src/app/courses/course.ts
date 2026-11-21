@@ -26,7 +26,7 @@ import AssignmentForm from '../assignments/assignment-form';
 import CourseAttendance from '../attendance/course-attendance';
 import Auth from '../auth/auth';
 import { isValidId } from '../core/validators';
-import CourseGrades from '../grades/course-grades';
+import GradebookGrid from '../gradebook/gradebook-grid';
 import CourseAssignments from './course-assignments';
 import CourseFiles from './course-files';
 import CourseGradeBuckets from './course-grade-buckets';
@@ -70,7 +70,7 @@ type CourseVm = {
     CourseAttendance,
     CourseFiles,
     CourseGradeBuckets,
-    CourseGrades,
+    GradebookGrid,
     CourseStudentGrades,
     Icon,
   ],
@@ -146,7 +146,11 @@ type CourseVm = {
           <div uiTabList [(selectedTab)]="tab" aria-label="Secciones del curso">
             <button uiTab value="grades">
               <ui-icon name="star" class="text-xl" />
-              Calificaciones
+              @if (auth.isTeacher() || auth.isAdmin()) {
+                Libro de calificaciones
+              } @else {
+                Calificaciones
+              }
             </button>
             <button uiTab value="calendar">
               <ui-icon name="calendar-days" class="text-xl" />
@@ -177,7 +181,7 @@ type CourseVm = {
           <div uiTabPanel uiCard value="grades" class="p-6">
             <ng-template uiTabContent>
               @if (auth.isTeacher() || auth.isAdmin()) {
-                <app-course-grades [courseId]="id()" [metric]="$any(course.studyPlan.gradeMetric)" />
+                <app-gradebook-grid [courseId]="id()" />
               }
               @if (auth.isStudent()) {
                 <app-course-student-grades [courseId]="id()" [metric]="$any(course.studyPlan.gradeMetric)" />

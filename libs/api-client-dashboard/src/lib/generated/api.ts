@@ -102,6 +102,8 @@ import type {
   FinancialControllerGetStudentBalanceParams,
   FinancialControllerGetStudentBalanceSummaryParams,
   GradeReportControllerGetGradeReportParams,
+  GradebookControllerCourseParams,
+  GradebookControllerCoursesParams,
   GradesControllerFindByCourseIdParams,
   HabitEvaluationsControllerFindByGroupParams,
   LinkChildInput,
@@ -7411,6 +7413,82 @@ export class SkooltrakDashboardAPIService {
         ...(options as Omit<NonNullable<typeof options>, 'observe'>),
         observe: 'body',
       }
+    );
+  }
+
+/**
+ * @summary Gradebook course picker: the caller's courses, last graded first (FR-ASM-001.1)
+ */
+ gradebookControllerCourses<TData = void>(params: GradebookControllerCoursesParams, options?: HttpClientBodyOptions): Observable<TData>;
+ gradebookControllerCourses<TData = void>(params: GradebookControllerCoursesParams, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
+ gradebookControllerCourses<TData = void>(params: GradebookControllerCoursesParams, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
+  gradebookControllerCourses<TData = void>(
+    params: GradebookControllerCoursesParams, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
+    const filteredParams = filterParams({...params, ...options?.params}, new Set<string>([]));
+
+    if (options?.observe === 'events') {
+      return this.http.get<TData>(
+      `/api/v1/gradebook/courses`,{
+    ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'events',
+        params: filteredParams,}
+    );
+    }
+
+    if (options?.observe === 'response') {
+      return this.http.get<TData>(
+      `/api/v1/gradebook/courses`,{
+    ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'response',
+        params: filteredParams,}
+    );
+    }
+
+    return this.http.get<TData>(
+      `/api/v1/gradebook/courses`,{
+    ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'body',
+        params: filteredParams,}
+    );
+  }
+
+/**
+ * @summary A course's gradebook for one group and period (FR-ASM-001.2, .3, .5)
+ */
+ gradebookControllerCourse<TData = void>(courseId: string,
+    params?: GradebookControllerCourseParams, options?: HttpClientBodyOptions): Observable<TData>;
+ gradebookControllerCourse<TData = void>(courseId: string,
+    params?: GradebookControllerCourseParams, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
+ gradebookControllerCourse<TData = void>(courseId: string,
+    params?: GradebookControllerCourseParams, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
+  gradebookControllerCourse<TData = void>(
+    courseId: string,
+    params?: GradebookControllerCourseParams, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
+    const filteredParams = filterParams({...params, ...options?.params}, new Set<string>([]));
+
+    if (options?.observe === 'events') {
+      return this.http.get<TData>(
+      `/api/v1/gradebook/${courseId}`,{
+    ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'events',
+        params: filteredParams,}
+    );
+    }
+
+    if (options?.observe === 'response') {
+      return this.http.get<TData>(
+      `/api/v1/gradebook/${courseId}`,{
+    ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'response',
+        params: filteredParams,}
+    );
+    }
+
+    return this.http.get<TData>(
+      `/api/v1/gradebook/${courseId}`,{
+    ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'body',
+        params: filteredParams,}
     );
   }
 

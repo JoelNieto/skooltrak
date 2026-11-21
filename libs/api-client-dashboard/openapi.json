@@ -6951,6 +6951,82 @@
         ]
       }
     },
+    "/api/v1/gradebook/courses": {
+      "get": {
+        "operationId": "GradebookController_courses",
+        "parameters": [
+          {
+            "name": "schoolId",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Gradebook course picker: the caller's courses, last graded first (FR-ASM-001.1)",
+        "tags": [
+          "gradebook"
+        ]
+      }
+    },
+    "/api/v1/gradebook/{courseId}": {
+      "get": {
+        "operationId": "GradebookController_course",
+        "parameters": [
+          {
+            "name": "courseId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "periodId",
+            "required": false,
+            "in": "query",
+            "description": "Defaults to the current period",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "classGroupId",
+            "required": false,
+            "in": "query",
+            "description": "Defaults to the first group; \"none\" for students without one",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "A course's gradebook for one group and period (FR-ASM-001.2, .3, .5)",
+        "tags": [
+          "gradebook"
+        ]
+      }
+    },
     "/api/v1/grade-buckets": {
       "post": {
         "operationId": "GradeBucketsController_create",

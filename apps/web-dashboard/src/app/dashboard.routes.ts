@@ -329,7 +329,8 @@ export const DASHBOARD_ROUTES: Route[] = [
       {
         path: 'teacher/gradebook',
         canActivate: [permissionGuard('MANAGE_GRADES')],
-        loadComponent: () => import('./teacher/teacher-gradebook'),
+        loadComponent: () => import('./gradebook/gradebook-page'),
+        title: 'Libro de calificaciones | Skooltrak',
       },
       {
         path: 'communication',

@@ -6980,6 +6980,35 @@
         ]
       }
     },
+    "/api/v1/gradebook/{courseId}/assignments": {
+      "get": {
+        "operationId": "GradebookController_assignments",
+        "parameters": [
+          {
+            "name": "courseId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "The course's assignments, with the column linked to each (FR-ASM-001.11)",
+        "tags": [
+          "gradebook"
+        ]
+      }
+    },
     "/api/v1/gradebook/{courseId}": {
       "get": {
         "operationId": "GradebookController_course",

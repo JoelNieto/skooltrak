@@ -102,6 +102,16 @@ function setup() {
         return { count: where.id.in.length };
       }),
     },
+    assignment: {
+      findMany: jest.fn(async ({ where }) =>
+        where.courseId === 'C1'
+          ? [
+              { id: 'A2', title: 'Ensayo', date: new Date('2026-11-21T12:00:00Z'), grade: { id: 'G-draft' } },
+              { id: 'A1', title: 'Proyecto', date: new Date('2026-11-10T12:00:00Z'), grade: null },
+            ]
+          : [],
+      ),
+    },
     studentGradeRevision: {
       findMany: jest.fn(async ({ where }) =>
         where.studentGradeId === 'sg-ana-pub'
@@ -448,3 +458,21 @@ describe('GradebookService.saveCells, excused cells (ASM-001-S05)', () => {
     ]);
   });
 });
+
+describe('GradebookService.assignments (ASM-001-S06)', () => {
+  it("lists the course's assignments with the column linked to each @FR-ASM-001.11", async () => {
+    const { service } = setup();
+    await expect(service.assignments(teacher, 'C1')).resolves.toEqual({
+      assignments: [
+        { id: 'A2', title: 'Ensayo', date: '2026-11-21T12:00:00.000Z', gradeId: 'G-draft' },
+        { id: 'A1', title: 'Proyecto', date: '2026-11-10T12:00:00.000Z', gradeId: null },
+      ],
+    });
+  });
+
+  it("refuses another teacher's course @BR-ASM-001.1", async () => {
+    const { service } = setup();
+    await expect(service.assignments(teacher2, 'C1')).rejects.toThrow(new ForbiddenException(WRITE_DENIED));
+  });
+});
+

@@ -5,6 +5,7 @@ import { PublishGradesInput } from './dto/publish-grades.input';
 import { SaveCellsInput } from './dto/save-cells.input';
 import {
   Gradebook,
+  GradebookAssignments,
   GradebookCourses,
   GradebookHistory,
   GradebookPublished,
@@ -28,6 +29,12 @@ export class GradebookController {
   @ApiOperation({ summary: "Gradebook course picker: the caller's courses, last graded first (FR-ASM-001.1)" })
   courses(@Req() req: AuthenticatedRequest, @Query('schoolId') schoolId: string): Promise<GradebookCourses> {
     return this.gradebook.courses(req.user, schoolId);
+  }
+
+  @Get(':courseId/assignments')
+  @ApiOperation({ summary: "The course's assignments, with the column linked to each (FR-ASM-001.11)" })
+  assignments(@Req() req: AuthenticatedRequest, @Param('courseId') courseId: string): Promise<GradebookAssignments> {
+    return this.gradebook.assignments(req.user, courseId);
   }
 
   @Get(':courseId')

@@ -65,7 +65,15 @@ export interface Gradebook {
     id: string;
     name: string;
     weight: number;
-    columns: { id: string; title: string; date: string; published: boolean; publishedAt: string | null }[];
+    columns: {
+      id: string;
+      title: string;
+      date: string;
+      published: boolean;
+      publishedAt: string | null;
+      /** BR-ASM-001.11 */
+      assignment: { id: string; title: string } | null;
+    }[];
   }[];
   rows: {
     student: { id: string; firstName: string; name: string; initials: string; color: string | null };
@@ -295,7 +303,19 @@ let nextId = 0;
                   <a [routerLink]="['/grades', column.id]" class="link link-hover block font-semibold text-ink-strong" [title]="column.title">
                     <span class="block max-w-32 truncate">{{ column.title }}</span>
                   </a>
-                  <span class="block text-xs text-ink-muted">{{ column.date | date: 'dd/MM' : 'UTC' }}</span>
+                  <span class="flex items-center justify-center gap-1 text-xs text-ink-muted">
+                    {{ column.date | date: 'dd/MM' : 'UTC' }}
+                    @if (column.assignment) {
+                      <a
+                        [routerLink]="['/assignments', column.assignment.id]"
+                        class="link link-hover inline-flex"
+                        [attr.aria-label]="'Ver la asignación ' + column.assignment.title"
+                        [title]="'Asignación: ' + column.assignment.title"
+                      >
+                        <ui-icon name="link" />
+                      </a>
+                    }
+                  </span>
                   @if (!column.published) {
                     <span uiBadge size="sm" class="mt-0.5">Borrador</span>
                   }

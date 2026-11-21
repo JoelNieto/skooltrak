@@ -48,6 +48,13 @@ export class GradebookColumn {
   published: boolean;
   /** When the column was published (BR-ASM-001.9); null for drafts. */
   publishedAt: string | null;
+  /** The assignment this column grades (BR-ASM-001.11). */
+  assignment: GradebookAssignmentRef | null;
+}
+
+export class GradebookAssignmentRef {
+  id: string;
+  title: string;
 }
 
 export class GradebookBucket {
@@ -162,4 +169,18 @@ export class GradebookRevision {
 
 export class GradebookHistory {
   revisions: GradebookRevision[];
+}
+
+/** A course assignment, for linking a column to it (FR-ASM-001.11). */
+export class GradebookAssignment {
+  id: string;
+  title: string;
+  date: string;
+  /** The column already linked to it; at most one (BR-ASM-001.11). */
+  gradeId: string | null;
+}
+
+export class GradebookAssignments {
+  /** Newest first. */
+  assignments: GradebookAssignment[];
 }

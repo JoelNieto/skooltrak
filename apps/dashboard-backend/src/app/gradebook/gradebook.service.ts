@@ -25,6 +25,7 @@ import {
   GradebookGroup,
   GradebookMetric,
   GradebookRow,
+  GradebookAssignments,
   GradebookHistory,
   GradebookPublished,
   GradebookSavedCell,
@@ -209,6 +210,7 @@ export class GradebookService {
           date: true,
           published: true,
           publishedAt: true,
+          assignment: { select: { id: true, title: true } },
           bucketId: true,
           studentGrades: {
             where: { studentId: { in: studentIds } },
@@ -233,6 +235,7 @@ export class GradebookService {
             date: g.date.toISOString(),
             published: g.published,
             publishedAt: g.publishedAt?.toISOString() ?? null,
+            assignment: g.assignment,
           })),
           grades: own,
         };
@@ -461,6 +464,24 @@ export class GradebookService {
         console.error(`[GradebookService] published-grade notifications failed for grade ${id}`, error);
       }
     }
+  }
+
+  /** FR-ASM-001.11: the course's assignments, newest first, with the column linked to each. */
+  async assignments(user: AuthUserContext | undefined, courseId: string): Promise<GradebookAssignments> {
+    await this.access.assertCanWriteCourse(user, courseId);
+    const assignments = await this.prisma.assignment.findMany({
+      where: { courseId },
+      select: { id: true, title: true, date: true, grade: { select: { id: true } } },
+      orderBy: { date: 'desc' },
+    });
+    return {
+      assignments: assignments.map((a) => ({
+        id: a.id,
+        title: a.title,
+        date: a.date.toISOString(),
+        gradeId: a.grade?.id ?? null,
+      })),
+    };
   }
 
   /** FR-ASM-001.8: a cell's revisions, newest first (BR .8). Staff of the course only. */

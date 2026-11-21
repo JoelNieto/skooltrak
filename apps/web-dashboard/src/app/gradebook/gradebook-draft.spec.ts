@@ -11,8 +11,8 @@ const book = (): Gradebook => ({
   classGroups: [],
   classGroupId: 'G1',
   buckets: [
-    { id: 'B-daily', name: 'Trabajo diario', weight: 40, columns: [{ id: 'G-d', title: 'Tarea', date: T, published: true, publishedAt: T }] },
-    { id: 'B-tests', name: 'Pruebas', weight: 60, columns: [{ id: 'G-t', title: 'Prueba', date: T, published: false, publishedAt: null }] },
+    { id: 'B-daily', name: 'Trabajo diario', weight: 40, columns: [{ id: 'G-d', title: 'Tarea', date: T, published: true, publishedAt: T, assignment: null }] },
+    { id: 'B-tests', name: 'Pruebas', weight: 60, columns: [{ id: 'G-t', title: 'Prueba', date: T, published: false, publishedAt: null, assignment: null }] },
   ],
   rows: [
     {

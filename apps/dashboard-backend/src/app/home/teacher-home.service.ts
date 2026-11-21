@@ -469,7 +469,7 @@ export class TeacherHomeService {
       select: {
         studentId: true,
         score: true,
-        grade: { select: { courseId: true, periodId: true, bucket: { select: { weight: true } } } },
+        grade: { select: { courseId: true, periodId: true, bucketId: true, bucket: { select: { weight: true } } } },
       },
     });
 

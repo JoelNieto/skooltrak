@@ -10,6 +10,8 @@ module.exports = {
   moduleNameMapper: {
     '^better-auth(/.*)?$': '<rootDir>/../../tools/jest/better-auth.stub.js',
     '^@thallesp/nestjs-better-auth$': '<rootDir>/../../tools/jest/better-auth.stub.js',
+    // The @/shared barrel exports a front-end service; see tools/jest/angular-core.stub.js.
+    '^@angular/core$': '<rootDir>/../../tools/jest/angular-core.stub.js',
   },
   moduleFileExtensions: ['ts', 'js', 'html'],
   coverageDirectory: '../../coverage/apps/dashboard-backend',

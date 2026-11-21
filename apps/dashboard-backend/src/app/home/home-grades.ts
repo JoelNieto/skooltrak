@@ -1,13 +1,15 @@
+import { courseAverage } from '@/shared';
+
 /**
  * Grade helpers for the home dashboards (BR-HOM-001.1, .2, .11).
- * Same formula as `grades.service.ts:getAverageScoreForStudent`: published scores weighted by bucket
- * weight. Unlike it, a student with no scored grade has no average (`undefined`), not 0.
+ * Averages use the product's one formula, `courseAverage` (ASM-001 BR .4): each bucket's mean,
+ * weighted by bucket weight. A student with no scored grade has no average (`undefined`), not 0.
  */
 
 export interface ScoredGradeRow {
   studentId: string;
   score: { toNumber(): number } | number | null;
-  grade: { courseId: string; periodId: string; bucket: { weight: { toNumber(): number } | number } };
+  grade: { courseId: string; periodId: string; bucketId: string; bucket: { weight: { toNumber(): number } | number } };
 }
 
 /** The study plan's grade metric, as numbers. */
@@ -22,21 +24,20 @@ const num = (v: { toNumber(): number } | number) => (typeof v === 'number' ? v :
 export const averageKey = (studentId: string, courseId: string, periodId: string) =>
   `${studentId}|${courseId}|${periodId}`;
 
-/** Weighted average per student, course and period, keyed by `averageKey`. */
+/** Average per student, course and period (ASM-001 BR .4), keyed by `averageKey`. */
 export function weightedAverages(rows: ScoredGradeRow[]): Map<string, number> {
-  const sums = new Map<string, { weighted: number; weight: number }>();
+  const cells = new Map<string, { bucketId: string; weight: number; score: number }[]>();
   for (const row of rows) {
     if (row.score === null) continue;
     const key = averageKey(row.studentId, row.grade.courseId, row.grade.periodId);
-    const weight = num(row.grade.bucket.weight);
-    const acc = sums.get(key) ?? { weighted: 0, weight: 0 };
-    acc.weighted += num(row.score) * weight;
-    acc.weight += weight;
-    sums.set(key, acc);
+    const list = cells.get(key) ?? [];
+    list.push({ bucketId: row.grade.bucketId, weight: num(row.grade.bucket.weight), score: num(row.score) });
+    cells.set(key, list);
   }
   const averages = new Map<string, number>();
-  for (const [key, { weighted, weight }] of sums) {
-    if (weight > 0) averages.set(key, weighted / weight);
+  for (const [key, list] of cells) {
+    const average = courseAverage(list);
+    if (average !== null) averages.set(key, average);
   }
   return averages;
 }

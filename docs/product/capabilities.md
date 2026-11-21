@@ -65,7 +65,7 @@ Code: `grade-metrics`, `grade-buckets`, `grades`, `student-grades`, `grade-repor
 | Grade metrics & buckets (weighting) | Live | — |
 | Grades: create, publish, notify | Live | — |
 | Student grades with revision history | Live | — |
-| Teacher gradebook | Partial (gradebook grid on the course tab and `/teacher/gradebook` (ASM-001-S02); scores are typed into and saved from the grid (S03); columns are published from it, and changes to published scores need a reason and are kept in each cell's history (S04); `EX` excuses a student from a grade (S05); a column can be linked to one of the course's assignments (S06); students are found by name or cédula and the view exports as CSV (S07); grade endpoints scoped by role, organization and ownership in ASM-001-S01; one bucket-weighted average everywhere in ASM-001-S09) | [ASM-001](frd/ASM-001-teacher-gradebook.md) |
+| Teacher gradebook | Partial (gradebook grid on the course tab and `/teacher/gradebook` (ASM-001-S02); scores are typed into and saved from the grid (S03); columns are published from it, and changes to published scores need a reason and are kept in each cell's history (S04); `EX` excuses a student from a grade (S05); a column can be linked to one of the course's assignments (S06); students are found by name or cédula and the view exports as CSV (S07); homeroom teachers are alerted to published scores below the pass mark (S08); grade endpoints scoped by role, organization and ownership in ASM-001-S01; one bucket-weighted average everywhere in ASM-001-S09) | [ASM-001](frd/ASM-001-teacher-gradebook.md) |
 | Grade report per student | Live | — |
 | Habit metrics & evaluations | Live | — |
 | Unpublished-grades reminder (cron) | Live | — |

@@ -105,6 +105,7 @@ export * from './newslettersControllerFindAllParams';
 export * from './newslettersControllerFindManyNewslettersCountOrderDirection';
 export * from './newslettersControllerFindManyNewslettersCountParams';
 export * from './newslettersControllerFindPublishedParams';
+export * from './notificationsControllerListParams';
 export * from './organizationsControllerListInvitationsParams';
 export * from './organizationsControllerListMembersParams';
 export * from './parentsControllerFindAllOrderDirection';

@@ -3,6 +3,7 @@ import { courseAverage } from '@/shared';
 import { ConflictException, Injectable } from '@nestjs/common';
 import { Prisma } from '@generated/prisma';
 import { ASSIGNMENT_TAKEN } from './grade-access.service';
+import { alertInBackground } from './homeroom-alerts';
 import { enrolledIn } from '../courses/course-roster';
 import { PrismaService } from '../prisma.service';
 import { CreateGradeInput } from './dto/create-grade.input';
@@ -42,7 +43,10 @@ export class GradesService {
         },
       }),
     );
-    if (created.published) await this.notifyPublished(created.id);
+    if (created.published) {
+      await this.notifyPublished(created.id);
+      alertInBackground(this.prisma, created.id, { actorUserId: actorId });
+    }
     return created;
   }
 
@@ -142,6 +146,8 @@ export class GradesService {
 
     if (publishing) {
       await this.notifyPublished(updated.id);
+      // BR-ASM-001.12: homeroom teachers of students below the pass mark.
+      alertInBackground(this.prisma, updated.id, { actorUserId: actorId });
     }
 
     return updated;

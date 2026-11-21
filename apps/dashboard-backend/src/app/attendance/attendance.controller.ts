@@ -72,6 +72,7 @@ export class AttendanceController {
   }
 
   @Get('students')
+  @RequirePermissions(Perm.MANAGE_ATTENDANCE)
   @ApiOperation({ summary: 'Students for attendance (course + class group)' })
   getStudentsForAttendance(@Query('courseId') courseId: string, @Query('classGroupId') classGroupId: string) {
     return this.attendanceService.getStudentsForAttendance(courseId, classGroupId);

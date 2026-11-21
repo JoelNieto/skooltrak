@@ -2,7 +2,16 @@ import { FetchDataQueryDto, PaginatedResponseDto } from '@/api-contracts';
 import type { AuthUserContext } from '@/auth';
 import { AuthService, OnboardingStep, sendUserInvitation } from '@/auth';
 import { Prisma } from '@generated/prisma';
-import { ConflictException, Inject, Injectable, Logger, Scope, UnauthorizedException } from '@nestjs/common';
+import {
+  ConflictException,
+  ForbiddenException,
+  Inject,
+  Injectable,
+  Logger,
+  NotFoundException,
+  Scope,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { REQUEST } from '@nestjs/core';
 import * as bcrypt from 'bcrypt';
 import { randomBytes, randomUUID } from 'crypto';
@@ -302,17 +311,29 @@ export class StudentsService {
    * Returns the student's current enrollment code (for school staff to share with the parent).
    */
   async getEnrollmentCode(id: string) {
-    const student = await this.prisma.student.findUniqueOrThrow({
+    await this.assertInCallerOrganization(id);
+    return this.prisma.student.findUniqueOrThrow({
       where: { id },
       select: { id: true, enrollmentCode: true, enrollmentCodeGeneratedAt: true },
     });
-    return student;
+  }
+
+  /** Enrollment codes are parent-linking credentials: only for students of the caller's organization. */
+  private async assertInCallerOrganization(id: string): Promise<void> {
+    const { organizationId } = this.requestActor();
+    if (!organizationId) throw new ForbiddenException('El estudiante no pertenece a tu organización');
+    const student = await this.prisma.student.findUnique({ where: { id }, select: { organizationId: true } });
+    if (!student) throw new NotFoundException('Estudiante no encontrado');
+    if (student.organizationId !== organizationId) {
+      throw new ForbiddenException('El estudiante no pertenece a tu organización');
+    }
   }
 
   /**
    * Regenerates (revokes) a student's enrollment code. The previous code becomes invalid.
    */
   async regenerateEnrollmentCode(id: string) {
+    await this.assertInCallerOrganization(id);
     const code = await this.generateEnrollmentCode();
     const updated = await this.prisma.student.update({
       where: { id },

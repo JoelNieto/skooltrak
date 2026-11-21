@@ -4288,7 +4288,7 @@ export class SkooltrakDashboardAPIService {
   }
 
 /**
- * @summary Student grades (period optional)
+ * @summary Student's published grades by course (period optional)
  */
  studentsControllerGetStudentsGrades<TData = void>(id: string,
     params: StudentsControllerGetStudentsGradesParams, options?: HttpClientBodyOptions): Observable<TData>;

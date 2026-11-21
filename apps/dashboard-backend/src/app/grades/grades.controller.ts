@@ -42,7 +42,10 @@ export class GradesController {
   async create(@Req() req: AuthenticatedRequest, @Body() createGradeInput: CreateGradeInput) {
     await this.access.assertCanWriteCourse(req.user, createGradeInput.courseId);
     await this.access.assertBucketInCourse(createGradeInput.bucketId, createGradeInput.courseId);
-    return this.gradesService.create(createGradeInput);
+    const link = createGradeInput.assignmentId
+      ? await this.access.assertAssignmentLinkable(createGradeInput.assignmentId, createGradeInput.courseId)
+      : null;
+    return this.gradesService.create(createGradeInput, req.user?.userId ?? null, link);
   }
 
   @Get('by-course/:courseId')
@@ -87,7 +90,10 @@ export class GradesController {
       await this.access.assertBucketInCourse(updateGradeInput.bucketId, existing.courseId);
     }
     this.access.assertCanChangePublished(req.user, existing.published, updateGradeInput.published);
-    return this.gradesService.update(existing.id, updateGradeInput, req.user?.userId ?? null);
+    const link = updateGradeInput.assignmentId
+      ? await this.access.assertAssignmentLinkable(updateGradeInput.assignmentId, existing.courseId, existing.id)
+      : null;
+    return this.gradesService.update(existing.id, updateGradeInput, req.user?.userId ?? null, link);
   }
 
   @Delete(':id')

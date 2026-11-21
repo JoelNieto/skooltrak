@@ -1,6 +1,8 @@
 import { sendGradePublishedEmail } from '@/auth';
 import { courseAverage } from '@/shared';
-import { Injectable } from '@nestjs/common';
+import { ConflictException, Injectable } from '@nestjs/common';
+import { Prisma } from '@generated/prisma';
+import { ASSIGNMENT_TAKEN } from './grade-access.service';
 import { enrolledIn } from '../courses/course-roster';
 import { PrismaService } from '../prisma.service';
 import { CreateGradeInput } from './dto/create-grade.input';
@@ -10,23 +12,38 @@ import { UpdateGradeInput } from './dto/update-grade.input';
 export class GradesService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async create(createGradeInput: CreateGradeInput) {
-    // One score cell per student on the roster (ACA-001 BR .15).
+  /**
+   * A new column, with one score cell per student on the roster (ACA-001 BR .15).
+   * - Linked to an assignment, it takes the assignment's title and date (BR-ASM-001.11).
+   * - Created already published, it is stamped and families are notified, as when published later
+   *   (BR-ASM-001.9).
+   */
+  async create(
+    createGradeInput: CreateGradeInput,
+    actorId: string | null = null,
+    link: { title: string; date: Date } | null = null,
+  ) {
     const students = await this.prisma.student.findMany({
       where: enrolledIn(createGradeInput.courseId),
       select: { id: true },
     });
 
-    return this.prisma.grade.create({
-      data: {
-        ...createGradeInput,
-        studentGrades: {
-          create: students.map((s) => ({
-            student: { connect: { id: s.id } },
-          })),
+    const created = await uniqueLink(() =>
+      this.prisma.grade.create({
+        data: {
+          ...createGradeInput,
+          ...(link ?? {}),
+          ...(createGradeInput.published ? { publishedAt: new Date(), publishedById: actorId } : {}),
+          studentGrades: {
+            create: students.map((s) => ({
+              student: { connect: { id: s.id } },
+            })),
+          },
         },
-      },
-    });
+      }),
+    );
+    if (created.published) await this.notifyPublished(created.id);
+    return created;
   }
 
   findOne(id: string) {
@@ -97,7 +114,12 @@ export class GradesService {
    * Publishing stamps when and by whom (BR-ASM-001.9) and notifies students and parents;
    * unpublishing (admins only, checked by the controller) clears the stamp and notifies no one.
    */
-  async update(id: string, updateGradeInput: UpdateGradeInput, actorId: string | null = null) {
+  async update(
+    id: string,
+    updateGradeInput: UpdateGradeInput,
+    actorId: string | null = null,
+    link: { title: string; date: Date } | null = null,
+  ) {
     const existing = await this.prisma.grade.findUnique({
       where: { id },
       select: { published: true },
@@ -105,14 +127,18 @@ export class GradesService {
     const publishing = updateGradeInput.published === true && existing?.published === false;
     const unpublishing = updateGradeInput.published === false && existing?.published === true;
 
-    const updated = await this.prisma.grade.update({
-      where: { id },
-      data: {
-        ...updateGradeInput,
-        ...(publishing ? { publishedAt: new Date(), publishedById: actorId } : {}),
-        ...(unpublishing ? { publishedAt: null, publishedById: null } : {}),
-      },
-    });
+    const updated = await uniqueLink(() =>
+      this.prisma.grade.update({
+        where: { id },
+        data: {
+          ...updateGradeInput,
+          // Linking takes the assignment's title and date (BR-ASM-001.11).
+          ...(link ?? {}),
+          ...(publishing ? { publishedAt: new Date(), publishedById: actorId } : {}),
+          ...(unpublishing ? { publishedAt: null, publishedById: null } : {}),
+        },
+      }),
+    );
 
     if (publishing) {
       await this.notifyPublished(updated.id);
@@ -199,5 +225,17 @@ export class GradesService {
 
   remove(id: string) {
     return this.prisma.grade.delete({ where: { id } });
+  }
+}
+
+/** Two columns linked to one assignment at once: the unique index refuses the second (BR-ASM-001.11). */
+async function uniqueLink<T>(write: () => Promise<T>): Promise<T> {
+  try {
+    return await write();
+  } catch (error) {
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+      throw new ConflictException(ASSIGNMENT_TAKEN);
+    }
+    throw error;
   }
 }

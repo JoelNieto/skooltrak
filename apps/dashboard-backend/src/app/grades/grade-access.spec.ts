@@ -284,7 +284,7 @@ describe('ASM-001-S01 — grade endpoints are scoped (BR-ASM-001.13)', () => {
       );
       expect(gradesService.update).not.toHaveBeenCalled();
       await gradesCtrl.update(ADMIN as never, { id: 'GR1', published: false } as never);
-      expect(gradesService.update).toHaveBeenCalledWith('GR1', { id: 'GR1', published: false }, 'u-admin');
+      expect(gradesService.update).toHaveBeenCalledWith('GR1', { id: 'GR1', published: false }, 'u-admin', null);
     });
 
     it('cannot move a record to another course or student, or use another course\'s bucket', async () => {

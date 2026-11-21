@@ -7455,6 +7455,40 @@ export class SkooltrakDashboardAPIService {
   }
 
 /**
+ * @summary The course's assignments, with the column linked to each (FR-ASM-001.11)
+ */
+ gradebookControllerAssignments<TData = void>(courseId: string, options?: HttpClientBodyOptions): Observable<TData>;
+ gradebookControllerAssignments<TData = void>(courseId: string, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
+ gradebookControllerAssignments<TData = void>(courseId: string, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
+  gradebookControllerAssignments<TData = void>(
+    courseId: string, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
+    if (options?.observe === 'events') {
+      return this.http.get<TData>(
+      `/api/v1/gradebook/${courseId}/assignments`,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'events',
+      }
+    );
+    }
+
+    if (options?.observe === 'response') {
+      return this.http.get<TData>(
+      `/api/v1/gradebook/${courseId}/assignments`,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'response',
+      }
+    );
+    }
+
+    return this.http.get<TData>(
+      `/api/v1/gradebook/${courseId}/assignments`,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'body',
+      }
+    );
+  }
+
+/**
  * @summary A course's gradebook for one group and period (FR-ASM-001.2, .3, .5)
  */
  gradebookControllerCourse<TData = void>(courseId: string,

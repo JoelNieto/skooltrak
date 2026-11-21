@@ -9,4 +9,6 @@ export class CreateGradeInput implements Prisma.GradeUncheckedCreateInput {
   @TransformDateToNoon()
     date: Date;
     published?: boolean;
+    /** Links the column to an assignment of the course (BR-ASM-001.11); null unlinks it. */
+    assignmentId?: string | null;
 }

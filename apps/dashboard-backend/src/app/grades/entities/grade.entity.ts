@@ -24,6 +24,7 @@ export class Grade
     published: boolean;
     publishedAt: Date | null;
     publishedById: string | null;
+    assignmentId: string | null;
     createdAt: Date;
     updatedAt: Date;
 

@@ -682,6 +682,8 @@ model Assignment {
   teacherId         String?
   submissions       AssignmentSubmission[]
   chats             Chat[]
+  /// The grade column linked to it, if any (BR-ASM-001.11).
+  grade             Grade?
   createdAt         DateTime               @default(now())
   updatedAt         DateTime               @updatedAt
 
@@ -872,6 +874,9 @@ model Grade {
   publishedAt   DateTime?
   publishedById String?
   publishedBy   User?          @relation("GradePublishedBy", fields: [publishedById], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  /// The assignment this column grades (BR-ASM-001.11): same course, at most one column per assignment.
+  assignmentId  String?        @unique
+  assignment    Assignment?    @relation(fields: [assignmentId], references: [id], onDelete: SetNull, onUpdate: Cascade)
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
   studentGrades StudentGrade[]

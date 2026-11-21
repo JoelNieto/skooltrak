@@ -4,7 +4,7 @@
 |---|---|
 | **FRD** | [ASM-001](../frd/ASM-001-teacher-gradebook.md) |
 | **Implements** | FR-ASM-001.10, BR-ASM-001.3 |
-| **Status** | In review: #57 |
+| **Status** | Done: #57 (2026-11-21) |
 | **Branch** | `feat/ASM-001-S05-excused` |
 | **Estimate** | 1 day |
 

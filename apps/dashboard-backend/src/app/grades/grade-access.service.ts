@@ -1,6 +1,6 @@
 import { AuthUserContext } from '@/auth';
 import { Prisma } from '@generated/prisma';
-import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { enrolledIn as onRoster } from '../courses/course-roster';
 import { PrismaService } from '../prisma.service';
 
@@ -18,6 +18,8 @@ export const UNPUBLISH_DENIED = 'Solo un administrador puede despublicar calific
 export const NOT_ENROLLED = 'El estudiante no pertenece a este curso';
 export const MOVE_DENIED = 'No se puede mover una calificación a otro curso o estudiante';
 export const BUCKET_MISMATCH = 'La ponderación no pertenece a este curso';
+export const ASSIGNMENT_MISMATCH = 'La asignación no pertenece a este curso';
+export const ASSIGNMENT_TAKEN = 'Esta asignación ya tiene una calificación';
 
 const ADMIN_ROLES = new Set(['ORG_ADMIN', 'ADMIN', 'SYSADMIN']);
 
@@ -179,6 +181,24 @@ export class GradeAccessService {
   async assertBucketInCourse(bucketId: string, courseId: string): Promise<void> {
     const found = await this.prisma.gradeBucket.count({ where: { id: bucketId, courseId } });
     if (!found) throw new BadRequestException(BUCKET_MISMATCH);
+  }
+
+  /**
+   * BR-ASM-001.11: a column may be linked to an assignment of the same course (400 otherwise) that no
+   * other column is linked to (409). Returns what the column takes from it: title and date.
+   */
+  async assertAssignmentLinkable(
+    assignmentId: string,
+    courseId: string,
+    gradeId?: string,
+  ): Promise<{ title: string; date: Date }> {
+    const assignment = await this.prisma.assignment.findUnique({
+      where: { id: assignmentId },
+      select: { courseId: true, title: true, date: true, grade: { select: { id: true } } },
+    });
+    if (!assignment || assignment.courseId !== courseId) throw new BadRequestException(ASSIGNMENT_MISMATCH);
+    if (assignment.grade && assignment.grade.id !== gradeId) throw new ConflictException(ASSIGNMENT_TAKEN);
+    return { title: assignment.title, date: assignment.date };
   }
 
   /** A grade row can only be written for a student enrolled in the course (400 otherwise). */

@@ -117,6 +117,7 @@ export * from './permissionsControllerFindAllOrderDirection';
 export * from './permissionsControllerFindAllParams';
 export * from './preferenceInput';
 export * from './processStorePaymentInput';
+export * from './publishGradesInput';
 export * from './quizzesControllerFindAllParams';
 export * from './regenerateStudyPlanChargesInput';
 export * from './removeShareInput';

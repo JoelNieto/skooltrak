@@ -254,7 +254,7 @@ describe('ASM-001-S01 — grade endpoints are scoped (BR-ASM-001.13)', () => {
     it('grades their own course', async () => {
       const { studentGradesCtrl, studentGradesService, gradesCtrl, gradesService } = build();
       await studentGradesCtrl.update(TEACHER as never, { id: 'SG1', score: 4 } as never);
-      expect(studentGradesService.update).toHaveBeenCalledWith('SG1', { id: 'SG1', score: 4 });
+      expect(studentGradesService.update).toHaveBeenCalledWith('SG1', { id: 'SG1', score: 4 }, true, 'u-teacher');
       await gradesCtrl.update(TEACHER as never, { id: 'GR2', published: true } as never);
       expect(gradesService.update).toHaveBeenCalled();
     });
@@ -284,7 +284,7 @@ describe('ASM-001-S01 — grade endpoints are scoped (BR-ASM-001.13)', () => {
       );
       expect(gradesService.update).not.toHaveBeenCalled();
       await gradesCtrl.update(ADMIN as never, { id: 'GR1', published: false } as never);
-      expect(gradesService.update).toHaveBeenCalledWith('GR1', { id: 'GR1', published: false });
+      expect(gradesService.update).toHaveBeenCalledWith('GR1', { id: 'GR1', published: false }, 'u-admin');
     });
 
     it('cannot move a record to another course or student, or use another course\'s bucket', async () => {

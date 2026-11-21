@@ -94,6 +94,8 @@ model User {
   communicationAuditLogs     CommunicationAuditLog[]
   storeCartItems    StoreCartItem[]
   courseEnrollmentsAdded CourseEnrollment[] @relation("CourseEnrollmentAddedBy")
+  gradesPublished   Grade[]                @relation("GradePublishedBy")
+  gradeRevisions    StudentGradeRevision[] @relation("StudentGradeRevisionChangedBy")
   storeOrders       StoreOrder[]
   // Better-auth relations
   sessions          Session[]
@@ -866,6 +868,10 @@ model Grade {
   period        Period         @relation(fields: [periodId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   date          DateTime
   published     Boolean        @default(false)
+  /// When and by whom the column was published (BR-ASM-001.9); cleared when an admin unpublishes.
+  publishedAt   DateTime?
+  publishedById String?
+  publishedBy   User?          @relation("GradePublishedBy", fields: [publishedById], references: [id], onDelete: SetNull, onUpdate: Cascade)
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
   studentGrades StudentGrade[]
@@ -890,15 +896,23 @@ model StudentGrade {
   @@map("student_grades")
 }
 
+/// A change to a published score (BR-ASM-001.8). Never edited or deleted.
 model StudentGradeRevision {
   id             String       @id @default(cuid())
+  /// Required, 3–300 characters (BR-ASM-001.8).
   reason         String
   studentGradeId String
   studentGrade   StudentGrade @relation(fields: [studentGradeId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  score          Decimal
+  previousScore  Decimal?
+  /// The new score; null when the score was cleared (or, from S05, excused).
+  score          Decimal?
+  excused        Boolean      @default(false)
+  changedById    String?
+  changedBy      User?        @relation("StudentGradeRevisionChangedBy", fields: [changedById], references: [id], onDelete: SetNull, onUpdate: Cascade)
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
 
+  @@index([studentGradeId, createdAt])
   @@map("student_grade_revisions")
 }
 

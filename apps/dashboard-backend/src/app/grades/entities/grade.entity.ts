@@ -22,6 +22,8 @@ export class Grade
     periodId: string;
     date: Date;
     published: boolean;
+    publishedAt: Date | null;
+    publishedById: string | null;
     createdAt: Date;
     updatedAt: Date;
 

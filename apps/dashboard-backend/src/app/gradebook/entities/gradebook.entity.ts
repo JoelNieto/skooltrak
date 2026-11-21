@@ -46,6 +46,8 @@ export class GradebookColumn {
   title: string;
   date: string;
   published: boolean;
+  /** When the column was published (BR-ASM-001.9); null for drafts. */
+  publishedAt: string | null;
 }
 
 export class GradebookBucket {
@@ -61,6 +63,8 @@ export class GradebookCell {
   /** Null until the first score is saved for this student and column. */
   studentGradeId: string | null;
   score: number | null;
+  /** Visible to the student and parents once the column is published (BR-ASM-001.14). */
+  comment: string | null;
   updatedAt: string | null;
 }
 
@@ -123,9 +127,36 @@ export class GradebookSavedCell {
   studentId: string;
   studentGradeId: string | null;
   score: number | null;
+  comment: string | null;
   updatedAt: string | null;
 }
 
 export class GradebookSavedCells {
   cells: GradebookSavedCell[];
+}
+
+/** `POST /v1/gradebook/:courseId/publish` (FR-ASM-001.7). */
+export class GradebookPublished {
+  /** The columns this request published; already published ones are left as they were. */
+  gradeIds: string[];
+}
+
+export class GradebookRevisionAuthor {
+  id: string;
+  name: string;
+}
+
+/** One change to a published score (BR-ASM-001.8), newest first. */
+export class GradebookRevision {
+  id: string;
+  previousScore: number | null;
+  score: number | null;
+  excused: boolean;
+  reason: string;
+  changedBy: GradebookRevisionAuthor | null;
+  createdAt: string;
+}
+
+export class GradebookHistory {
+  revisions: GradebookRevision[];
 }

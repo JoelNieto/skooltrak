@@ -1,7 +1,8 @@
 import { Type } from 'class-transformer';
 import { ArrayMaxSize, ArrayMinSize, IsArray, IsNumber, IsOptional, IsString, ValidateNested } from 'class-validator';
 
-/** One changed cell (ASM-001-S03). The value rules (BR-ASM-001.2) are checked by the service. */
+
+/** One changed cell (ASM-001-S03, S04). The value rules (BR-ASM-001.2, .8, .14) are checked by the service. */
 export class SaveCellInput {
   @IsString()
   gradeId: string;
@@ -18,12 +19,27 @@ export class SaveCellInput {
   @IsOptional()
   @IsString()
   updatedAt: string | null;
+
+  /** New comment (BR-ASM-001.14, max 500); omitted when unchanged, empty string clears it. */
+  @IsOptional()
+  @IsString()
+  comment?: string | null;
+
+  /** Reason for this cell only, overriding the save's `reason` (BR-ASM-001.8). */
+  @IsOptional()
+  @IsString()
+  reason?: string;
 }
 
 /** `PUT /v1/gradebook/:courseId/cells`: every changed cell of one period, saved together. */
 export class SaveCellsInput {
   @IsString()
   periodId: string;
+
+  /** Reason covering every changed published score of this save (BR-ASM-001.8, 3–300 characters). */
+  @IsOptional()
+  @IsString()
+  reason?: string;
 
   /** FRD §8: up to 40 students × 30 columns per save. */
   @IsArray()

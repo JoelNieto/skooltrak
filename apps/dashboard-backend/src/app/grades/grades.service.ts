@@ -93,28 +93,36 @@ export class GradesService {
     );
   }
 
-  async update(id: string, updateGradeInput: UpdateGradeInput) {
+  /**
+   * Publishing stamps when and by whom (BR-ASM-001.9) and notifies students and parents;
+   * unpublishing (admins only, checked by the controller) clears the stamp and notifies no one.
+   */
+  async update(id: string, updateGradeInput: UpdateGradeInput, actorId: string | null = null) {
     const existing = await this.prisma.grade.findUnique({
       where: { id },
       select: { published: true },
     });
+    const publishing = updateGradeInput.published === true && existing?.published === false;
+    const unpublishing = updateGradeInput.published === false && existing?.published === true;
 
     const updated = await this.prisma.grade.update({
       where: { id },
-      data: updateGradeInput,
+      data: {
+        ...updateGradeInput,
+        ...(publishing ? { publishedAt: new Date(), publishedById: actorId } : {}),
+        ...(unpublishing ? { publishedAt: null, publishedById: null } : {}),
+      },
     });
 
-    if (
-      updateGradeInput.published === true &&
-      existing?.published === false
-    ) {
-      await this.sendGradePublishedNotifications(updated.id);
+    if (publishing) {
+      await this.notifyPublished(updated.id);
     }
 
     return updated;
   }
 
-  private async sendGradePublishedNotifications(gradeId: string) {
+  /** The existing published-grade emails to each student and their parents (FR-ASM-001.7). */
+  async notifyPublished(gradeId: string) {
     const grade = await this.prisma.grade.findUnique({
       where: { id: gradeId },
       include: {

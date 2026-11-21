@@ -1,8 +1,15 @@
 import { AuthenticatedRequest, BetterAuthGuard, Perm, PermissionsGuard, RequirePermissions } from '@/auth';
-import { Body, Controller, Get, Param, Put, Query, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, Param, Post, Put, Query, Req, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
+import { PublishGradesInput } from './dto/publish-grades.input';
 import { SaveCellsInput } from './dto/save-cells.input';
-import { Gradebook, GradebookCourses, GradebookSavedCells } from './entities/gradebook.entity';
+import {
+  Gradebook,
+  GradebookCourses,
+  GradebookHistory,
+  GradebookPublished,
+  GradebookSavedCells,
+} from './entities/gradebook.entity';
 import { GradebookService } from './gradebook.service';
 
 /**
@@ -44,5 +51,22 @@ export class GradebookController {
     @Body() input: SaveCellsInput,
   ): Promise<GradebookSavedCells> {
     return this.gradebook.saveCells(req.user, courseId, input);
+  }
+
+  @Post(':courseId/publish')
+  @HttpCode(200)
+  @ApiOperation({ summary: "Publish the course's draft columns and notify families (FR-ASM-001.7, BR .9)" })
+  publish(
+    @Req() req: AuthenticatedRequest,
+    @Param('courseId') courseId: string,
+    @Body() input: PublishGradesInput,
+  ): Promise<GradebookPublished> {
+    return this.gradebook.publish(req.user, courseId, input.gradeIds);
+  }
+
+  @Get('cells/:studentGradeId/history')
+  @ApiOperation({ summary: "A cell's revisions, newest first (FR-ASM-001.8, BR .8)" })
+  history(@Req() req: AuthenticatedRequest, @Param('studentGradeId') studentGradeId: string): Promise<GradebookHistory> {
+    return this.gradebook.history(req.user, studentGradeId);
   }
 }

@@ -4,7 +4,7 @@
 |---|---|
 | **FRD** | [ASM-001](../frd/ASM-001-teacher-gradebook.md) |
 | **Implements** | FR-ASM-001.1, .2, .3, .5 (read-only), BR-ASM-001.1, .4, .5, .6 |
-| **Status** | In progress |
+| **Status** | In review: #51 |
 | **Branch** | `feat/ASM-001-S02-gradebook-grid` |
 | **Estimate** | 3 days |
 

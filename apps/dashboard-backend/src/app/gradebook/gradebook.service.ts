@@ -32,6 +32,7 @@ import {
   GradebookSavedCells,
 } from './entities/gradebook.entity';
 import { SaveCellInput, SaveCellsInput } from './dto/save-cells.input';
+import { gradebookCsv, gradebookCsvName } from './gradebook-csv';
 
 export const SCHOOL_DENIED = 'La escuela no pertenece a tu organización';
 export const PERIOD_INVALID = 'El periodo no pertenece al año escolar actual';
@@ -56,6 +57,7 @@ interface RosterStudent {
   id: string;
   firstName: string;
   fatherName: string;
+  documentId: string;
   classGroup: { id: string; name: string } | null;
   user: { color: string | null } | null;
 }
@@ -148,6 +150,7 @@ export class GradebookService {
           id: true,
           firstName: true,
           fatherName: true,
+          documentId: true,
           classGroup: { select: { id: true, name: true } },
           user: { select: { color: true } },
         },
@@ -466,6 +469,18 @@ export class GradebookService {
     }
   }
 
+  /** FR-ASM-001.13: the CSV of one view, as saved, with a file name naming the course, period and group. */
+  async exportCsv(
+    user: AuthUserContext | undefined,
+    courseId: string,
+    query: { periodId?: string; classGroupId?: string },
+  ): Promise<{ filename: string; csv: string }> {
+    const book = await this.gradebook(user, courseId, query);
+    const period = book.periods.find((p) => p.id === book.periodId)?.name;
+    const group = book.classGroups.find((g) => g.id === book.classGroupId)?.name;
+    return { filename: gradebookCsvName([book.course.name, period, group]), csv: gradebookCsv(book) };
+  }
+
   /** FR-ASM-001.11: the course's assignments, newest first, with the column linked to each. */
   async assignments(user: AuthUserContext | undefined, courseId: string): Promise<GradebookAssignments> {
     await this.access.assertCanWriteCourse(user, courseId);
@@ -571,6 +586,7 @@ function studentOf(s: RosterStudent) {
     id: s.id,
     firstName: s.firstName,
     name: `${s.firstName} ${s.fatherName}`,
+    documentId: s.documentId,
     initials: `${s.firstName.charAt(0)}${s.fatherName.charAt(0)}`,
     color: s.user?.color ?? null,
   };

@@ -90,6 +90,7 @@ export * from './financialControllerGetStudentBalanceParams';
 export * from './financialControllerGetStudentBalanceSummaryParams';
 export * from './gradebookControllerCourseParams';
 export * from './gradebookControllerCoursesParams';
+export * from './gradebookControllerExportCsvParams';
 export * from './gradeReportControllerGetGradeReportParams';
 export * from './gradesControllerFindByCourseIdParams';
 export * from './habitEvaluationsControllerFindByGroupParams';

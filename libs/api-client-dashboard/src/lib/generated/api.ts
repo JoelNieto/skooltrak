@@ -104,6 +104,7 @@ import type {
   GradeReportControllerGetGradeReportParams,
   GradebookControllerCourseParams,
   GradebookControllerCoursesParams,
+  GradebookControllerExportCsvParams,
   GradesControllerFindByCourseIdParams,
   HabitEvaluationsControllerFindByGroupParams,
   LinkChildInput,
@@ -7448,6 +7449,46 @@ export class SkooltrakDashboardAPIService {
 
     return this.http.get<TData>(
       `/api/v1/gradebook/courses`,{
+    ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'body',
+        params: filteredParams,}
+    );
+  }
+
+/**
+ * @summary CSV of one group and period, as saved (FR-ASM-001.13)
+ */
+ gradebookControllerExportCsv<TData = void>(courseId: string,
+    params?: GradebookControllerExportCsvParams, options?: HttpClientBodyOptions): Observable<TData>;
+ gradebookControllerExportCsv<TData = void>(courseId: string,
+    params?: GradebookControllerExportCsvParams, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
+ gradebookControllerExportCsv<TData = void>(courseId: string,
+    params?: GradebookControllerExportCsvParams, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
+  gradebookControllerExportCsv<TData = void>(
+    courseId: string,
+    params?: GradebookControllerExportCsvParams, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
+    const filteredParams = filterParams({...params, ...options?.params}, new Set<string>([]));
+
+    if (options?.observe === 'events') {
+      return this.http.get<TData>(
+      `/api/v1/gradebook/${courseId}/export`,{
+    ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'events',
+        params: filteredParams,}
+    );
+    }
+
+    if (options?.observe === 'response') {
+      return this.http.get<TData>(
+      `/api/v1/gradebook/${courseId}/export`,{
+    ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'response',
+        params: filteredParams,}
+    );
+    }
+
+    return this.http.get<TData>(
+      `/api/v1/gradebook/${courseId}/export`,{
     ...(options as Omit<NonNullable<typeof options>, 'observe'>),
         observe: 'body',
         params: filteredParams,}

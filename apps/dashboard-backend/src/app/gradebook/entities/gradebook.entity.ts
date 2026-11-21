@@ -81,6 +81,8 @@ export class GradebookStudent {
   id: string;
   firstName: string;
   name: string;
+  /** Cédula: searched in the grid and exported (FR-ASM-001.12, .13). */
+  documentId: string;
   initials: string;
   color: string | null;
 }

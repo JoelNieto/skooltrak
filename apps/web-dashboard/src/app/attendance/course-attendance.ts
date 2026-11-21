@@ -74,7 +74,7 @@ const STATUS_TONES: Record<string, BadgeTone> = {
           }
         </select>
       </div>
-      <button uiButton variant="primary" (click)="openForm()">
+      <button uiButton variant="primary" [disabled]="!groupsResource.hasValue()" (click)="openForm()">
         <ui-icon name="plus" />
         Nueva asistencia
       </button>
@@ -282,7 +282,12 @@ export default class CourseAttendance {
     return STATUS_TONES[status] || 'neutral';
   }
 
+  /**
+   * The form gets the course's groups once, when it opens. Until they have loaded it would show an
+   * empty "Grupo" list, so the button stays disabled and the form doesn't open.
+   */
   openForm(session?: AttendanceSessionType) {
+    if (!this.groupsResource.hasValue()) return;
     this.#modal
       .open(AttendanceForm, {
         title: session ? 'Editar asistencia' : 'Nueva asistencia',

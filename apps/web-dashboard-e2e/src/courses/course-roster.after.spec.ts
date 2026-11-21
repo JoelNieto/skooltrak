@@ -48,6 +48,15 @@ test.describe('Course roster: students imported by CSV @FR-ACA-001.20', () => {
     admin = await bearerFor(request, personas.admin.email);
     courseId = await teacherCourseId(request, admin);
 
+    // A run that failed before afterAll leaves its student behind, and the dialog would then list
+    // the name more than once. Remove students imported by earlier runs first.
+    const enrolled = (await (
+      await request.get(`/api/v1/students/by-course/${courseId}`, { headers: admin })
+    ).json()) as { id: string; documentId: string }[];
+    for (const leftover of enrolled.filter((s) => s.documentId.startsWith('E2E-IMP-'))) {
+      await request.delete(`/api/v1/students/${leftover.id}`, { headers: admin });
+    }
+
     const schools = (await (await request.get('/api/v1/schools', { headers: admin })).json()) as {
       id: string;
       name: string;

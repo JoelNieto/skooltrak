@@ -31,7 +31,17 @@ export interface RevisionInput {
   studentGradeId: string;
   previousScore: Decimalish | null;
   score: number | null;
+  /** The cell is now excused (BR .3). */
+  excused?: boolean;
   reason: string;
+}
+
+/** True when a cell's score or excused flag changes: what a published cell's revision records. */
+export function cellChanged(
+  previous: { score: Decimalish | null; excused: boolean } | null | undefined,
+  next: { score: number | null | undefined; excused?: boolean },
+): boolean {
+  return scoreChanged(previous?.score, next.score) || (previous?.excused ?? false) !== (next.excused ?? false);
 }
 
 /** Writes one revision per changed published cell, in the caller's transaction. */
@@ -46,6 +56,7 @@ export async function recordRevisions(
       studentGradeId: r.studentGradeId,
       previousScore: num(r.previousScore),
       score: r.score,
+      excused: r.excused ?? false,
       reason: r.reason,
       changedById,
     })),

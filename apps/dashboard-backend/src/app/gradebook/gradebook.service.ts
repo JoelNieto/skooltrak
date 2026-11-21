@@ -6,11 +6,11 @@ import { enrolledIn } from '../courses/course-roster';
 import { GradeAccessService, NOT_ENROLLED } from '../grades/grade-access.service';
 import { GradesService } from '../grades/grades.service';
 import {
+  cellChanged,
   COMMENT_MAX,
   COMMENT_TOO_LONG,
   REASON_REQUIRED,
   recordRevisions,
-  scoreChanged,
   validReason,
 } from '../grades/grade-revisions';
 import { pickCurrentPeriod } from '../home/home-period';
@@ -42,6 +42,7 @@ export const CELLS_CONFLICT = 'Otra persona cambió estas notas; revisa antes de
 export const METRIC_MISSING = 'Escala de notas no configurada';
 export const COLUMN_INVALID = 'La calificación no pertenece a este curso y periodo';
 export const CELL_REPEATED = 'Celda repetida';
+export const EXCUSED_WITH_SCORE = 'Una nota exenta no lleva calificación';
 
 /** `classGroupId` value that selects the roster's students without a class group. */
 export const NO_GROUP = 'none';
@@ -211,7 +212,7 @@ export class GradebookService {
           bucketId: true,
           studentGrades: {
             where: { studentId: { in: studentIds } },
-            select: { id: true, studentId: true, score: true, comments: true, updatedAt: true },
+            select: { id: true, studentId: true, score: true, excused: true, comments: true, updatedAt: true },
           },
         },
         orderBy: [{ date: 'asc' }, { title: 'asc' }],
@@ -320,6 +321,7 @@ export class GradebookService {
       if (seen.has(key)) reason = CELL_REPEATED;
       else if (!grade || grade.courseId !== courseId || grade.periodId !== input.periodId) reason = COLUMN_INVALID;
       else if (!onRoster.has(cell.studentId)) reason = NOT_ENROLLED;
+      else if (cell.excused && cell.score !== null && cell.score !== undefined) reason = EXCUSED_WITH_SCORE;
       else if (cell.score !== null && cell.score !== undefined) reason = scoreError(cell.score, scale);
       if (!reason && (cell.comment?.length ?? 0) > COMMENT_MAX) reason = COMMENT_TOO_LONG;
       seen.add(key);
@@ -338,7 +340,7 @@ export class GradebookService {
             FOR UPDATE`;
           const existing = await tx.studentGrade.findMany({
             where: pairs,
-            select: { id: true, gradeId: true, studentId: true, score: true, comments: true, updatedAt: true },
+            select: { id: true, gradeId: true, studentId: true, score: true, excused: true, comments: true, updatedAt: true },
           });
           const byKey = new Map(existing.map((row) => [cellKey(row), row]));
 
@@ -356,7 +358,7 @@ export class GradebookService {
 
           // BR .8: a changed published score needs a reason, for this cell or for the whole save.
           const corrections = input.cells
-            .filter((cell) => gradeById.get(cell.gradeId)?.published && scoreChanged(byKey.get(cellKey(cell))?.score, cell.score))
+            .filter((cell) => gradeById.get(cell.gradeId)?.published && cellChanged(byKey.get(cellKey(cell)), cell))
             .map((cell) => ({ cell, reason: validReason(cell.reason ?? input.reason) }));
           const unexplained = corrections.filter((c) => !c.reason);
           if (unexplained.length) {
@@ -372,14 +374,15 @@ export class GradebookService {
             // `setComment` false keeps the stored comment (the cell's comment was not part of the change).
             const values = updates.map(
               (cell) =>
-                Prisma.sql`(${byKey.get(cellKey(cell))?.id}, ${cell.score ?? null}::numeric, ${cell.comment !== undefined}::boolean, ${cell.comment || null}::text)`,
+                Prisma.sql`(${byKey.get(cellKey(cell))?.id}, ${cell.score ?? null}::numeric, ${cell.excused ?? false}::boolean, ${cell.comment !== undefined}::boolean, ${cell.comment || null}::text)`,
             );
             await tx.$executeRaw`
               UPDATE "student_grades" AS sg
               SET "score" = v."score",
+                  "excused" = v."excused",
                   "comments" = CASE WHEN v."setComment" THEN v."comments" ELSE sg."comments" END,
                   "updatedAt" = now()
-              FROM (VALUES ${Prisma.join(values)}) AS v("id", "score", "setComment", "comments")
+              FROM (VALUES ${Prisma.join(values)}) AS v("id", "score", "excused", "setComment", "comments")
               WHERE sg."id" = v."id"`;
           }
           if (creates.length) {
@@ -388,6 +391,7 @@ export class GradebookService {
                 gradeId: cell.gradeId,
                 studentId: cell.studentId,
                 score: cell.score ?? null,
+                excused: cell.excused ?? false,
                 comments: cell.comment || null,
               })),
             });
@@ -395,7 +399,7 @@ export class GradebookService {
 
           const saved = await tx.studentGrade.findMany({
             where: pairs,
-            select: { id: true, gradeId: true, studentId: true, score: true, comments: true, updatedAt: true },
+            select: { id: true, gradeId: true, studentId: true, score: true, excused: true, comments: true, updatedAt: true },
           });
           const savedByKey = new Map(saved.map((row) => [cellKey(row), row]));
           await recordRevisions(
@@ -404,6 +408,7 @@ export class GradebookService {
               studentGradeId: savedByKey.get(cellKey(cell))?.id as string,
               previousScore: byKey.get(cellKey(cell))?.score ?? null,
               score: cell.score ?? null,
+              excused: cell.excused ?? false,
               reason: reason as string,
             })),
             user?.userId ?? null,
@@ -523,7 +528,7 @@ function groupsOf(roster: RosterStudent[]): GradebookGroup[] {
 /** The student's cell in a column; the most recently updated row wins until S03 makes the pair unique. */
 function cellFor(
   gradeId: string,
-  rows: { id: string; studentId: string; score: Decimalish | null; comments: string | null; updatedAt: Date }[],
+  rows: { id: string; studentId: string; score: Decimalish | null; excused: boolean; comments: string | null; updatedAt: Date }[],
   studentId: string,
 ): GradebookCell {
   let found: (typeof rows)[number] | undefined;
@@ -534,6 +539,7 @@ function cellFor(
     gradeId,
     studentGradeId: found?.id ?? null,
     score: found?.score === null || found?.score === undefined ? null : num(found.score),
+    excused: found?.excused ?? false,
     comment: found?.comments ?? null,
     updatedAt: found?.updatedAt.toISOString() ?? null,
   };
@@ -569,13 +575,14 @@ const cellKey = (cell: { gradeId: string; studentId: string }) => `${cell.gradeI
 
 function savedCell(
   cell: Pick<SaveCellInput, 'gradeId' | 'studentId'>,
-  row: { id: string; score: Decimalish | null; comments?: string | null; updatedAt: Date } | undefined,
+  row: { id: string; score: Decimalish | null; excused?: boolean; comments?: string | null; updatedAt: Date } | undefined,
 ): GradebookSavedCell {
   return {
     gradeId: cell.gradeId,
     studentId: cell.studentId,
     studentGradeId: row?.id ?? null,
     score: row?.score === null || row?.score === undefined ? null : num(row.score),
+    excused: row?.excused ?? false,
     comment: row?.comments ?? null,
     updatedAt: row?.updatedAt.toISOString() ?? null,
   };

@@ -11,7 +11,7 @@ import { data, E2E_PASSWORD, personas, storageStatePath } from '../support/fixtu
  * Saving Beto's draft cell to 3 makes his "Pruebas" mean (2 + 3) / 2 = 2.5, "En riesgo".
  *
  * Runs in the `after` project: it changes a draft score that the HOM-001 specs count as empty.
- * Beto's cell is emptied again in afterAll.
+ * Beto's and Carla's cells are emptied again in afterAll.
  */
 
 // Every test here writes Beto's draft cell: one at a time, or they conflict with each other (BR .7).
@@ -44,13 +44,13 @@ async function courseId(request: APIRequestContext, headers: Bearer) {
   return course.id;
 }
 
-/** Beto's draft cell as the API has it now: ids and the `updatedAt` a save must carry. */
-async function betoDraftCell(request: APIRequestContext, headers: Bearer, id: string) {
+/** A student's draft cell as the API has it now: ids and the `updatedAt` a save must carry. */
+async function draftCell(request: APIRequestContext, headers: Bearer, id: string, firstName = BETO) {
   const book = (await (await request.get(`/api/v1/gradebook/${id}`, { headers })).json()) as Book;
   const columns = book.buckets.flatMap((b) => b.columns);
   const index = columns.findIndex((c) => c.title === DRAFT);
-  const row = book.rows.find((r) => r.student.firstName === BETO);
-  if (index < 0 || !row) throw new Error('draft column or Beto not found');
+  const row = book.rows.find((r) => r.student.firstName === firstName);
+  if (index < 0 || !row) throw new Error(`draft column or ${firstName} not found`);
   return { periodId: book.periodId, gradeId: columns[index].id, studentId: row.student.id, updatedAt: row.cells[index].updatedAt };
 }
 
@@ -70,11 +70,13 @@ test.describe('Gradebook entry @FR-ASM-001.4 @FR-ASM-001.6', () => {  test.use({
   });
 
   test.afterAll(async ({ request }) => {
-    const beto = await betoDraftCell(request, teacher, id);
-    await request.put(`/api/v1/gradebook/${id}/cells`, {
-      headers: teacher,
-      data: { periodId: beto.periodId, cells: [{ ...beto, score: null }] },
-    });
+    for (const student of [BETO, CARLA]) {
+      const draft = await draftCell(request, teacher, id, student);
+      await request.put(`/api/v1/gradebook/${id}/cells`, {
+        headers: teacher,
+        data: { periodId: draft.periodId, cells: [{ ...draft, score: null, excused: false }] },
+      });
+    }
   });
 
   test('types a column from the keyboard, recalculates and saves a draft @FR-ASM-001.5', async ({ page }) => {
@@ -83,7 +85,7 @@ test.describe('Gradebook entry @FR-ASM-001.4 @FR-ASM-001.6', () => {  test.use({
 
     await expect(cell(page, ANA, DRAFT)).toHaveValue('4.5');
     await expect(cell(page, ANA, PUBLISHED)).toHaveValue('4'); // published cells are inputs too (S04)
-    await expect(page.getByText('Escala 1–5 · nota mínima 3 · Tab pasa al siguiente estudiante')).toBeVisible();
+    await expect(page.getByText('Escala 1–5 · nota mínima 3 · escribe EX para exentar · Tab pasa al siguiente estudiante')).toBeVisible();
 
     await cell(page, BETO, DRAFT).fill('3');
     await cell(page, BETO, DRAFT).press('Enter');
@@ -114,6 +116,31 @@ test.describe('Gradebook entry @FR-ASM-001.4 @FR-ASM-001.6', () => {  test.use({
     await expect(cell(page, CARLA, DRAFT)).toHaveValue('');
   });
 
+  test('EX excuses a student, left out of the average @FR-ASM-001.10 @BR-ASM-001.3', async ({ page, request }) => {
+    await page.goto(`/courses/${id}`);
+    await page.getByRole('tab', { name: 'Libro de calificaciones' }).click();
+    await expect(page.getByText('escribe EX para exentar', { exact: false })).toBeVisible();
+
+    await cell(page, CARLA, DRAFT).fill('ex');
+    await expect(cell(page, CARLA, DRAFT)).not.toHaveAttribute('aria-invalid', 'true');
+    // Carla's only score is "Taller E2E" 4.5: being excused leaves it as her average.
+    await expect(row(page, CARLA)).toContainText('4.5');
+    await page.getByRole('button', { name: 'Guardar borrador' }).click();
+    await expect(page.getByText('Guardado', { exact: true })).toBeVisible();
+
+    await page.reload();
+    await page.getByRole('tab', { name: 'Libro de calificaciones' }).click();
+    await expect(cell(page, CARLA, DRAFT)).toHaveValue('EX');
+
+    // The API refuses a cell that is both excused and scored.
+    const carla = await draftCell(request, teacher, id, CARLA);
+    const res = await request.put(`/api/v1/gradebook/${id}/cells`, {
+      headers: teacher,
+      data: { periodId: carla.periodId, cells: [{ ...carla, score: 4, excused: true }] },
+    });
+    expect(res.status()).toBe(400);
+  });
+
   test('restores unsaved cells after a reload', async ({ page }) => {
     await page.goto(`/courses/${id}`);
     await page.getByRole('tab', { name: 'Libro de calificaciones' }).click();
@@ -127,7 +154,7 @@ test.describe('Gradebook entry @FR-ASM-001.4 @FR-ASM-001.6', () => {  test.use({
     await expect(cell(page, CARLA, DRAFT)).toHaveValue('4');
 
     await page.getByRole('button', { name: 'Descartar' }).click();
-    await expect(cell(page, CARLA, DRAFT)).toHaveValue('');
+    await expect(cell(page, CARLA, DRAFT)).toHaveValue('EX'); // back to its saved value (excused above)
   });
 });
 
@@ -135,7 +162,7 @@ test.describe('Gradebook save rules @BR-ASM-001.7 @BR-ASM-001.1', () => {
   test('a stale save is refused with 409, and another teacher with 403', async ({ request }) => {
     const teacher = await bearerFor(request, personas.teacher.email);
     const id = await courseId(request, teacher);
-    const beto = await betoDraftCell(request, teacher, id);
+    const beto = await draftCell(request, teacher, id);
     const save = (headers: Bearer, updatedAt: string | null, score: number | null) =>
       request.put(`/api/v1/gradebook/${id}/cells`, {
         headers,
@@ -151,7 +178,7 @@ test.describe('Gradebook save rules @BR-ASM-001.7 @BR-ASM-001.1', () => {
     const other = await bearerFor(request, personas.otherTeacher.email);
     expect((await save(other, null, 3)).status()).toBe(403);
 
-    const { updatedAt } = await betoDraftCell(request, teacher, id);
+    const { updatedAt } = await draftCell(request, teacher, id);
     expect((await save(teacher, updatedAt, null)).ok()).toBeTruthy();
   });
 });

@@ -12,6 +12,7 @@ export class StudentGrade
     gradeId: string;
     studentId: string;
     score: Prisma.Decimal;
+    excused: boolean;
     createdAt: Date;
     updatedAt: Date;
 

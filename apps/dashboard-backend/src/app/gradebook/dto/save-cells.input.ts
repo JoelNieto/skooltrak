@@ -1,5 +1,5 @@
 import { Type } from 'class-transformer';
-import { ArrayMaxSize, ArrayMinSize, IsArray, IsNumber, IsOptional, IsString, ValidateNested } from 'class-validator';
+import { ArrayMaxSize, ArrayMinSize, IsArray, IsBoolean, IsNumber, IsOptional, IsString, ValidateNested } from 'class-validator';
 
 
 /** One changed cell (ASM-001-S03, S04). The value rules (BR-ASM-001.2, .8, .14) are checked by the service. */
@@ -14,6 +14,11 @@ export class SaveCellInput {
   @IsOptional()
   @IsNumber({ allowNaN: false, allowInfinity: false })
   score: number | null;
+
+  /** Excused (BR-ASM-001.3): no score, left out of every average. Never together with a score. */
+  @IsOptional()
+  @IsBoolean()
+  excused?: boolean;
 
   /** `updatedAt` of the row as the client loaded it; null when there was no row (BR-ASM-001.7). */
   @IsOptional()

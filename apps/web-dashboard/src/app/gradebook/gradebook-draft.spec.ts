@@ -18,8 +18,8 @@ const book = (): Gradebook => ({
     {
       student: { id: 'S-ana', firstName: 'Ana', name: 'Ana Pérez', initials: 'AP', color: null },
       cells: [
-        { gradeId: 'G-d', studentGradeId: 'sg1', score: 4, comment: 'Bien', updatedAt: T },
-        { gradeId: 'G-t', studentGradeId: 'sg2', score: 4, comment: null, updatedAt: T },
+        { gradeId: 'G-d', studentGradeId: 'sg1', score: 4, excused: false, comment: 'Bien', updatedAt: T },
+        { gradeId: 'G-t', studentGradeId: 'sg2', score: 4, excused: false, comment: null, updatedAt: T },
       ],
       average: 4,
       status: 'ON_TRACK',
@@ -27,8 +27,8 @@ const book = (): Gradebook => ({
     {
       student: { id: 'S-beto', firstName: 'Beto', name: 'Beto Ruiz', initials: 'BR', color: null },
       cells: [
-        { gradeId: 'G-d', studentGradeId: null, score: null, comment: null, updatedAt: null },
-        { gradeId: 'G-t', studentGradeId: null, score: null, comment: null, updatedAt: null },
+        { gradeId: 'G-d', studentGradeId: null, score: null, excused: false, comment: null, updatedAt: null },
+        { gradeId: 'G-t', studentGradeId: null, score: null, excused: false, comment: null, updatedAt: null },
       ],
       average: null,
       status: null,
@@ -133,5 +133,31 @@ describe('changedCells with comments and reasons', () => {
       { gradeId: 'G-d', studentId: 'S-ana', score: 3, updatedAt: T, comment: '', reason: 'Recalificada' },
       { gradeId: 'G-t', studentId: 'S-ana', score: 4, updatedAt: T, comment: 'Revisar' },
     ]);
+  });
+});
+
+describe('excused cells (ASM-001-S05, BR .3)', () => {
+  it('typing EX excuses the cell and leaves it out of the average', () => {
+    const view = applyEdits(book(), { [cellKey('G-t', 'S-ana')]: { text: 'ex', updatedAt: T } });
+    const cell = view.rows[0].cells[1];
+    expect([cell.excused, cell.score, cell.changed, cell.error]).toEqual([true, null, true, null]);
+    // Only "Trabajo diario" (4) is left.
+    expect(view.rows[0].average).toBe(4);
+    expect(changedCells(book(), { [cellKey('G-t', 'S-ana')]: { text: 'EX', updatedAt: T } })).toEqual([
+      { gradeId: 'G-t', studentId: 'S-ana', score: null, excused: true, updatedAt: T },
+    ]);
+  });
+
+  it('excusing a published cell needs a reason', () => {
+    const view = applyEdits(book(), { [cellKey('G-d', 'S-ana')]: { text: 'EX', updatedAt: T } });
+    expect(view.rows[0].cells[0].needsReason).toBe(true);
+  });
+
+  it('shows a saved exemption as EX, and typing a score over it is a change', () => {
+    const b = book();
+    b.rows[1].cells[1] = { gradeId: 'G-t', studentGradeId: 'sg3', score: null, excused: true, comment: null, updatedAt: T };
+    expect(applyEdits(b, {}).rows[1].cells[1].text).toBe('EX');
+    const view = applyEdits(b, { [cellKey('G-t', 'S-beto')]: { text: '3', updatedAt: T } });
+    expect([view.rows[1].cells[1].excused, view.rows[1].cells[1].score, view.changed]).toEqual([false, 3, 1]);
   });
 });

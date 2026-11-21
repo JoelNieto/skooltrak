@@ -64,7 +64,9 @@ describe('StudentGradesService writes on published grades', () => {
   it('writes a revision with the previous and new score', async () => {
     const { service, revisions } = build(2);
     await service.update('SG1', { id: 'SG1', score: 3, reason: 'Recalificada' }, true, 'u-teacher');
-    expect(revisions).toEqual([{ studentGradeId: 'SG1', previousScore: 2, score: 3, reason: 'Recalificada', changedById: 'u-teacher' }]);
+    expect(revisions).toEqual([
+      { studentGradeId: 'SG1', previousScore: 2, score: 3, excused: false, reason: 'Recalificada', changedById: 'u-teacher' },
+    ]);
   });
 
   it('needs no reason for a draft, an unchanged score or a comment', async () => {
@@ -84,6 +86,8 @@ describe('StudentGradesService writes on published grades', () => {
     const input = { gradeId: 'GR1', studentId: 'S1', score: 4 };
     await expect(service.create(input, true, 'u-teacher')).rejects.toThrow('Indica el motivo del cambio');
     await service.create({ ...input, reason: 'Entregó tarde' }, true, 'u-teacher');
-    expect(revisions).toEqual([{ studentGradeId: 'SG1', previousScore: null, score: 4, reason: 'Entregó tarde', changedById: 'u-teacher' }]);
+    expect(revisions).toEqual([
+      { studentGradeId: 'SG1', previousScore: null, score: 4, excused: false, reason: 'Entregó tarde', changedById: 'u-teacher' },
+    ]);
   });
 });

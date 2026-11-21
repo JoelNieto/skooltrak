@@ -73,6 +73,8 @@ export interface Gradebook {
       gradeId: string;
       studentGradeId: string | null;
       score: number | null;
+      /** BR-ASM-001.3 */
+      excused: boolean;
       comment: string | null;
       updatedAt: string | null;
     }[];
@@ -230,7 +232,7 @@ let nextId = 0;
       <div class="mt-4 flex flex-wrap items-center gap-3 rounded-box border border-line bg-surface-0 px-4 py-2" role="status">
         <p class="text-sm text-ink-muted">
           Escala {{ scaleText(book!.metric!.minimum) }}–{{ scaleText(book!.metric!.maximum) }} · nota mínima
-          {{ scaleText(book!.metric!.minimumApproval) }} · Tab pasa al siguiente estudiante
+          {{ scaleText(book!.metric!.minimumApproval) }} · escribe EX para exentar · Tab pasa al siguiente estudiante
         </p>
         <p class="ms-auto text-sm font-semibold" aria-live="polite">
           @if (v.invalid) {
@@ -348,7 +350,7 @@ let nextId = 0;
                     </td>
                   } @else {
                     <td class="text-center tabular-nums" [class.text-error]="isBelowPass(cell.score, book)">
-                      {{ cell.score === null ? '—' : (cell.score | number: '1.1-1') }}
+                      {{ cell.excused ? 'EX' : cell.score === null ? '—' : (cell.score | number: '1.1-1') }}
                     </td>
                   }
                 }
@@ -405,8 +407,11 @@ let nextId = 0;
         </div>
         <p class="mt-3 flex flex-wrap items-center gap-2">
           <span class="text-2xl font-semibold tabular-nums text-ink-strong">
-            {{ p.cell.score === null ? '—' : (p.cell.score | number: '1.1-1') }}
+            {{ p.cell.excused ? 'EX' : p.cell.score === null ? '—' : (p.cell.score | number: '1.1-1') }}
           </span>
+          @if (p.cell.excused) {
+            <span uiBadge size="sm" tone="neutral">Exenta: no cuenta en el promedio</span>
+          }
           @if (p.band) {
             <span uiBadge size="sm" [tone]="p.band.tone">{{ p.band.label }}</span>
           }
@@ -440,7 +445,7 @@ let nextId = 0;
             @for (revision of history.value()?.revisions ?? []; track revision.id) {
               <li class="text-sm">
                 <p class="font-medium tabular-nums text-ink-strong">
-                  {{ scoreText(revision.previousScore) }} → {{ scoreText(revision.score) }}
+                  {{ scoreText(revision.previousScore) }} → {{ revision.excused ? 'Exenta' : scoreText(revision.score) }}
                 </p>
                 <p class="text-ink">{{ revision.reason }}</p>
                 <p class="text-xs text-ink-muted">
@@ -607,10 +612,13 @@ export default class GradebookGrid {
     if (!book?.metric || !draft) return;
     const saved = this.savedCell(book, key);
     const edits = { ...draft.edits };
-    const current: CellEdit = edits[key] ?? { text: savedText(saved?.score ?? null), updatedAt: saved?.updatedAt ?? null };
+    const current: CellEdit = edits[key] ?? {
+      text: savedText(saved?.score ?? null, saved?.excused ?? false),
+      updatedAt: saved?.updatedAt ?? null,
+    };
     const next: CellEdit = { ...current, ...patch };
     const parsed = parseCell(next.text, book.metric);
-    const sameScore = !parsed.error && parsed.score === (saved?.score ?? null);
+    const sameScore = !parsed.error && parsed.score === (saved?.score ?? null) && parsed.excused === (saved?.excused ?? false);
     const sameComment = next.comment === undefined || (next.comment || null) === (saved?.comment || null);
     if (sameScore && sameComment) delete edits[key];
     else edits[key] = next;

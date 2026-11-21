@@ -5,6 +5,7 @@ import { afterRenderEffect, Component, computed, inject, input, signal } from '@
 import { rxResource } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { Prisma } from '@generated/prisma';
+import { courseAverage } from '@/shared';
 import { map, of } from 'rxjs';
 import Store from '../core/store';
 
@@ -18,27 +19,27 @@ import Store from '../core/store';
           uiCard
           class="text-sm"
           [ngClass]="{
-            'bg-success/10': studentsResource.value().average >= metric().minimumApproval,
-            'bg-warning/10':
-              studentsResource.value().average >= metric().minimumApproval &&
-              studentsResource.value().average < metric().minimumExcellence,
-            'bg-error/10': studentsResource.value().average < metric().minimumApproval,
+            'bg-success/10': averageTone() === 'success',
+            'bg-warning/10': averageTone() === 'warning',
+            'bg-error/10': averageTone() === 'error',
           }"
         >
           <div uiCardBody>
             <div class="text-sm text-ink-muted">Promedio del periodo:</div>
             <div class="text-lg font-bold">
-              <span
-                [ngClass]="{
-                  'text-success!': studentsResource.value().average >= metric().minimumApproval,
-                  'text-warning!':
-                    studentsResource.value().average >= metric().minimumApproval &&
-                    studentsResource.value().average < metric().minimumExcellence,
-                  'text-error!': studentsResource.value().average < metric().minimumApproval,
-                }"
-              >
-                {{ studentsResource.value().average | number: '1.1-1' }}
-              </span>
+              @if (studentsResource.value().average === null) {
+                <span class="text-ink-muted">Sin notas</span>
+              } @else {
+                <span
+                  [ngClass]="{
+                    'text-success!': averageTone() === 'success',
+                    'text-warning!': averageTone() === 'warning',
+                    'text-error!': averageTone() === 'error',
+                  }"
+                >
+                  {{ studentsResource.value().average | number: '1.1-1' }}
+                </span>
+              }
             </div>
           </div>
         </div>
@@ -84,7 +85,11 @@ import Store from '../core/store';
                     'text-error! bg-error/10': item.score && item.score! < metric().minimumApproval,
                   }"
                 >
-                  {{ item.score | number: '1.1-1' }}
+                  @if (item.excused) {
+                    Exenta
+                  } @else {
+                    {{ item.score | number: '1.1-1' }}
+                  }
                 </td>
               </tr>
             } @empty {
@@ -136,7 +141,7 @@ export default class CourseStudentGrades {
       const { courseId, periodId, studentId } = params;
       if (!courseId || !periodId || !studentId) {
         return of({
-          average: 0,
+          average: null as number | null,
           studentGradesByCourseId: [],
         });
       }
@@ -149,18 +154,28 @@ export default class CourseStudentGrades {
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const studentGradesByCourseId = (rows ?? []) as any[];
             return {
-              average:
-                studentGradesByCourseId.length > 0
-                  ? studentGradesByCourseId.reduce(
-                      (acc: number, item: { score?: unknown }) => acc + (Number(item?.score) || 0),
-                      0,
-                    ) / studentGradesByCourseId.length
-                  : 0,
+              // The product's one average (ASM-001 BR .4); empty and excused cells (BR .3) are left out.
+              average: courseAverage(
+                studentGradesByCourseId.map((item) => ({
+                  bucketId: item.grade?.bucketId,
+                  weight: Number(item.grade?.bucket?.weight ?? 0),
+                  score: item.excused || item.score === null || item.score === undefined ? null : Number(item.score),
+                })),
+              ),
               studentGradesByCourseId,
             };
           }),
         );
     },
+  });
+
+  /** The period average's band on the plan's scale; none without an average. */
+  protected readonly averageTone = computed(() => {
+    const average = this.studentsResource.value().average;
+    const metric = this.metric();
+    if (average === null || !metric) return null;
+    if (average < metric.minimumApproval) return 'error';
+    return average < metric.minimumExcellence ? 'warning' : 'success';
   });
 
   constructor() {

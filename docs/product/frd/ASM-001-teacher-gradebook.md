@@ -196,7 +196,7 @@ Listed in build order.
 | [ASM-001-S02](../slices/ASM-001-S02-gradebook-grid.md) | Gradebook grid, read-only: columns by bucket, averages, bands, group and period switchers; replaces the mock | .1 .2 .3 .5, BR .1 .4 .5 .6 | Done (#51) |
 | [ASM-001-S03](../slices/ASM-001-S03-inline-entry.md) | Inline entry, validation and bulk save draft | .4 .6, BR .2 .7 .10 | In review (#54) |
 | [ASM-001-S04](../slices/ASM-001-S04-publish-revisions.md) | Publish, revisions with a required reason, side panel with comment and history | .7 .8 .9, BR .8 .9 .14 | In review |
-| ASM-001-S05 | Excused (EX) | .10, BR .3 | Proposed |
+| [ASM-001-S05](../slices/ASM-001-S05-excused.md) | Excused (EX) | .10, BR .3 | In review |
 | ASM-001-S06 | Columns linked to assignments | .11, BR .11 | Proposed |
 | ASM-001-S07 | Find student and CSV export | .12 .13 | Proposed |
 | ASM-001-S08 | Homeroom alert for scores below the pass mark | .14, BR .12 | Proposed |

@@ -47,7 +47,7 @@ type StudentToday = {
 };
 
 type AssignmentType = 'HOMEWORK' | 'EXAM' | 'QUIZ' | 'PROJECT' | 'PAPER' | 'NEW';
-type WorkStatus = 'PENDIENTE' | 'ENTREGADO' | 'VENCIDA' | 'PRESENCIAL';
+type WorkStatus = 'CALIFICADA' | 'EXENTA' | 'PENDIENTE' | 'ENTREGADO' | 'VENCIDA' | 'PRESENCIAL';
 
 /** `GET /api/v1/home/student/work` (HOM-001 FR .14). */
 type StudentWorkItem = {
@@ -58,6 +58,8 @@ type StudentWorkItem = {
   course: Ref;
   dueAt: string;
   status: WorkStatus;
+  /** The published score when CALIFICADA (FR-ACA-001.17). */
+  score: number | null;
   submittedAt: string | null;
 };
 type StudentWork = { timezone: string; today: string; classGroup: Ref | null; items: StudentWorkItem[] };
@@ -97,6 +99,9 @@ const ASSIGNMENT_TYPES: Record<AssignmentType, { label: string; tone: BadgeTone 
 };
 
 const WORK_STATUS: Record<WorkStatus, { label: string; tone: BadgeTone }> = {
+  // FR-ACA-001.17: the label of CALIFICADA gets the score ("Calificada · 4.5").
+  CALIFICADA: { label: 'Calificada', tone: 'success' },
+  EXENTA: { label: 'Exenta', tone: 'neutral' },
   PENDIENTE: { label: 'Pendiente', tone: 'warning' },
   ENTREGADO: { label: 'Entregado', tone: 'success' },
   VENCIDA: { label: 'Vencida', tone: 'danger' },
@@ -303,7 +308,7 @@ const longDate = new Intl.DateTimeFormat('es', { weekday: 'long', day: 'numeric'
                     >
                       Entregar
                     </a>
-                  } @else if (item.status === 'ENTREGADO') {
+                  } @else if (item.submittedAt) {
                     <a uiButton variant="ghost" size="sm" [routerLink]="['/assignments', item.assignmentId]"
                       >Ver entrega</a
                     >
@@ -567,7 +572,10 @@ export default class StudentHome {
   }
 
   statusOf(item: StudentWorkItem) {
-    return WORK_STATUS[item.status];
+    const status = WORK_STATUS[item.status];
+    return item.status === 'CALIFICADA' && item.score !== null
+      ? { ...status, label: `${status.label} · ${item.score.toFixed(1)}` }
+      : status;
   }
 
   dueLabel(item: StudentWorkItem): string {

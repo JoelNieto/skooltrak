@@ -26,9 +26,10 @@ async function bearerFor(request: APIRequestContext, email: string): Promise<Bea
   return { Authorization: `Bearer ${((await res.json()) as { accessToken: string }).accessToken}` };
 }
 
-async function alertsFor(request: APIRequestContext, headers: Bearer) {
+/** This run's alerts: earlier runs on a reused database left alerts for an older column of the same title. */
+async function alertsFor(request: APIRequestContext, headers: Bearer, gradeId: string | undefined) {
   const res = await request.get('/api/v1/notifications', { headers, params: { type: TYPE } });
-  return ((await res.json()) as Notifications).notifications.filter((n) => n.message.includes(COLUMN));
+  return ((await res.json()) as Notifications).notifications.filter((n) => n.relatedId?.startsWith(`${gradeId}:`));
 }
 
 test.describe('Homeroom alert @FR-ASM-001.14 @BR-ASM-001.12', () => {
@@ -93,12 +94,12 @@ test.describe('Homeroom alert @FR-ASM-001.14 @BR-ASM-001.12', () => {
   });
 
   test('the homeroom teacher gets one alert; the grading teacher none', async ({ request }) => {
-    await expect.poll(async () => (await alertsFor(request, homeroom)).length, { timeout: 15_000 }).toBe(1);
-    const [alert] = await alertsFor(request, homeroom);
+    await expect.poll(async () => (await alertsFor(request, homeroom, gradeId)).length, { timeout: 15_000 }).toBe(1);
+    const [alert] = await alertsFor(request, homeroom, gradeId);
     expect(alert.message).toBe(
       `${BETO} E2E (${data.classGroups.related}) obtuvo 2.0 en «${COLUMN}» de ${data.courses.teacherOwn.name}. Nota mínima: 3.0.`,
     );
-    expect(await alertsFor(request, teacher)).toEqual([]);
+    expect(await alertsFor(request, teacher, gradeId)).toEqual([]);
 
     // Corrected again, still below the pass mark: no second alert.
     const book = (await (await request.get(`/api/v1/gradebook/${courseId}`, { headers: teacher })).json()) as {
@@ -117,7 +118,7 @@ test.describe('Homeroom alert @FR-ASM-001.14 @BR-ASM-001.12', () => {
     });
     expect(again.ok()).toBeTruthy();
     await new Promise((resolve) => setTimeout(resolve, 1500));
-    expect(await alertsFor(request, homeroom)).toHaveLength(1);
+    expect(await alertsFor(request, homeroom, gradeId)).toHaveLength(1);
   });
 
   test('the alert is in the inbox and on the teacher home', async ({ browser }) => {
@@ -130,10 +131,10 @@ test.describe('Homeroom alert @FR-ASM-001.14 @BR-ASM-001.12', () => {
 
     await page.getByRole('link', { name: /^Notificaciones/ }).first().click();
     await expect(page).toHaveURL(/\/notifications$/);
-    const item = page.getByRole('button', { name: 'Sin leer: Nota bajo la nota mínima' }).filter({ hasText: COLUMN });
+    const item = page.getByRole('button', { name: 'Sin leer: Nota bajo la nota mínima' }).filter({ hasText: COLUMN }).first();
     await expect(item).toBeVisible();
     await item.click();
-    await expect(page.getByRole('button', { name: 'Nota bajo la nota mínima' }).filter({ hasText: COLUMN })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Nota bajo la nota mínima', exact: true }).filter({ hasText: COLUMN }).first()).toBeVisible();
     await context.close();
   });
 });

@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | Ready (open questions answered 2026-11-19) |
+| **Status** | Shipped (S01–S09 on `main`, 2026-11-21) |
 | **Context** | ASM — Assessment (see [capabilities](../capabilities.md#asm-assessment)) |
 | **Owner** | — |
 | **Last updated** | 2026-11-21 |
@@ -197,6 +197,6 @@ Listed in build order.
 | [ASM-001-S03](../slices/ASM-001-S03-inline-entry.md) | Inline entry, validation and bulk save draft | .4 .6, BR .2 .7 .10 | Done (#54) |
 | [ASM-001-S04](../slices/ASM-001-S04-publish-revisions.md) | Publish, revisions with a required reason, side panel with comment and history | .7 .8 .9, BR .8 .9 .14 | Done (#56) |
 | [ASM-001-S05](../slices/ASM-001-S05-excused.md) | Excused (EX) | .10, BR .3 | Done (#57) |
-| [ASM-001-S06](../slices/ASM-001-S06-assignment-columns.md) | Columns linked to assignments | .11, BR .11 | In review |
-| [ASM-001-S07](../slices/ASM-001-S07-search-export.md) | Find student and CSV export | .12 .13 | In review |
-| [ASM-001-S08](../slices/ASM-001-S08-homeroom-alert.md) | Homeroom alert for scores below the pass mark | .14, BR .12 | In review |
+| [ASM-001-S06](../slices/ASM-001-S06-assignment-columns.md) | Columns linked to assignments | .11, BR .11 | Done (#59) |
+| [ASM-001-S07](../slices/ASM-001-S07-search-export.md) | Find student and CSV export | .12 .13 | Done (#60) |
+| [ASM-001-S08](../slices/ASM-001-S08-homeroom-alert.md) | Homeroom alert for scores below the pass mark | .14, BR .12 | Done (#61) |

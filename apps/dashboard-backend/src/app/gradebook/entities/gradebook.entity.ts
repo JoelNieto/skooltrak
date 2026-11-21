@@ -116,3 +116,16 @@ export class Gradebook {
   /** A draft column has a score in this group, so averages include drafts (BR-ASM-001.6). */
   includesDrafts: boolean;
 }
+
+/** A cell as stored after a save, or as stored now when a save conflicts (ASM-001-S03). */
+export class GradebookSavedCell {
+  gradeId: string;
+  studentId: string;
+  studentGradeId: string | null;
+  score: number | null;
+  updatedAt: string | null;
+}
+
+export class GradebookSavedCells {
+  cells: GradebookSavedCell[];
+}

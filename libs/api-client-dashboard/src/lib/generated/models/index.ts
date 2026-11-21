@@ -122,6 +122,7 @@ export * from './regenerateStudyPlanChargesInput';
 export * from './removeShareInput';
 export * from './requestJoinSchoolInput';
 export * from './reviewSubmissionInput';
+export * from './saveCellsInput';
 export * from './saveHabitEvaluationInput';
 export * from './schoolLogoUploadInput';
 export * from './schoolsControllerGetSchoolLogoDownloadUrlParams';

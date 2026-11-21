@@ -7,9 +7,13 @@ import { UpdateStudentGradeInput } from './dto/update-student-grade.input';
 @Injectable()
 export class StudentGradesService {
   constructor(private readonly prisma: PrismaService) {}
+  /** One row per (grade, student) (ASM-001 BR .10): creating an existing cell updates it. */
   create(createStudentGradeInput: CreateStudentGradeInput) {
-    return this.prisma.studentGrade.create({
-      data: createStudentGradeInput,
+    const { gradeId, studentId, score, comments } = createStudentGradeInput;
+    return this.prisma.studentGrade.upsert({
+      where: { gradeId_studentId: { gradeId, studentId } },
+      create: createStudentGradeInput,
+      update: { score, comments },
     });
   }
 

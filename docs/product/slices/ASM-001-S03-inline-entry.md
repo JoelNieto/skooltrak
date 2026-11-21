@@ -4,7 +4,7 @@
 |---|---|
 | **FRD** | [ASM-001](../frd/ASM-001-teacher-gradebook.md) |
 | **Implements** | FR-ASM-001.4, .5, .6, BR-ASM-001.2, .7, .10; §8 draft backup |
-| **Status** | In review |
+| **Status** | In review: #54 |
 | **Branch** | `feat/ASM-001-S03-inline-entry` |
 | **Estimate** | 3 days |
 

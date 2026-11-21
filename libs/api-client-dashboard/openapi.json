@@ -4177,7 +4177,7 @@
             "bearer": []
           }
         ],
-        "summary": "Student grades (period optional)",
+        "summary": "Student's published grades by course (period optional)",
         "tags": [
           "students"
         ]

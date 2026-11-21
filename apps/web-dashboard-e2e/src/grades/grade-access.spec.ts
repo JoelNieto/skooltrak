@@ -138,6 +138,89 @@ test.describe('Grade endpoints are scoped @FR-ASM-001.15', () => {
   });
 });
 
+test.describe('Students API: grades and enrollment codes @FR-ASM-001.15', () => {
+  test("a student's grades reach the student, linked parents and staff only", async ({ request }) => {
+    const { ana, beto, carla } = await loadCourse(request);
+    const student = await bearerFor(request, personas.student.email);
+    const parent = await bearerFor(request, personas.parent.email);
+    const teacher = await bearerFor(request, personas.teacher.email);
+    const other = await bearerFor(request, personas.otherTeacher.email);
+
+    const status = async (headers: Record<string, string>, studentId: string) =>
+      (await request.get(`/api/v1/students/${studentId}/grades`, { headers })).status();
+
+    expect(await status(student, ana.studentId)).toBe(200);
+    expect(await status(student, beto.studentId)).toBe(403);
+    // Parents lacked VIEW_STUDENTS, so the parent progress page was refused before this change.
+    expect(await status(parent, ana.studentId)).toBe(200);
+    expect(await status(parent, carla.studentId)).toBe(403);
+    expect(await status(teacher, carla.studentId)).toBe(200);
+    expect(await status(other, carla.studentId)).toBe(403);
+  });
+
+  test('enrollment codes reach admins only', async ({ request }) => {
+    const { ana } = await loadCourse(request);
+    const teacher = await bearerFor(request, personas.teacher.email);
+    const admin = await bearerFor(request, personas.admin.email);
+
+    // Seeded students have no code yet: issue one the way the admin student page does.
+    const issued = await request.post(`/api/v1/students/${ana.studentId}/enrollment-code/regenerate`, { headers: admin });
+    expect(issued.status()).toBe(201);
+    const { enrollmentCode } = (await issued.json()) as { enrollmentCode: string };
+    expect(enrollmentCode).toMatch(/^[A-Z0-9]{4,}$/);
+
+    const asAdmin = (await (await request.get(`/api/v1/students/${ana.studentId}`, { headers: admin })).json()) as {
+      enrollmentCode?: string;
+    };
+    expect(asAdmin.enrollmentCode).toBe(enrollmentCode);
+
+    const asTeacher = (await (await request.get(`/api/v1/students/${ana.studentId}`, { headers: teacher })).json()) as {
+      enrollmentCode?: string;
+    };
+    expect(asTeacher).not.toHaveProperty('enrollmentCode');
+    expect(
+      (await request.get(`/api/v1/students/${ana.studentId}/enrollment-code`, { headers: teacher })).status(),
+    ).toBe(403);
+
+    const roster = (await (
+      await request.get(`/api/v1/grades/by-course/${(await loadCourse(request)).courseId}`, { headers: teacher })
+    ).json()) as { studentGrades: { student?: Record<string, unknown> }[] }[];
+    for (const sg of roster.flatMap((g) => g.studentGrades)) {
+      expect(sg.student).not.toHaveProperty('enrollmentCode');
+    }
+  });
+});
+
+test.describe('No password hashes in responses @FR-PPL-001.1', () => {
+  /** Every value at any depth whose key is `password` (or an OAuth token). */
+  function secrets(value: unknown, path = '$'): string[] {
+    if (Array.isArray(value)) return value.flatMap((v, i) => secrets(v, `${path}[${i}]`));
+    if (!value || typeof value !== 'object') return [];
+    return Object.entries(value).flatMap(([key, v]) =>
+      ['password', 'accessToken', 'refreshToken', 'idToken'].includes(key) ? [`${path}.${key}`] : secrets(v, `${path}.${key}`),
+    );
+  }
+
+  test('student and teacher lists, records and grade rows carry no credentials', async ({ request }) => {
+    const { ana, courseId } = await loadCourse(request);
+    const teacher = await bearerFor(request, personas.teacher.email);
+    const admin = await bearerFor(request, personas.admin.email);
+
+    for (const [headers, url] of [
+      [teacher, '/api/v1/students'],
+      [teacher, `/api/v1/students/${ana.studentId}`],
+      [teacher, `/api/v1/students/by-course/${courseId}`],
+      [teacher, `/api/v1/grades/by-course/${courseId}`],
+      [admin, '/api/v1/teachers'],
+      [admin, `/api/v1/students/${ana.studentId}`],
+    ] as const) {
+      const res = await request.get(url, { headers });
+      expect(res.ok(), url).toBeTruthy();
+      expect(secrets(await res.json()), url).toEqual([]);
+    }
+  });
+});
+
 test.describe('Teacher grade pages keep working @FR-ASM-001.15', () => {
   test.use({ storageState: storageStatePath('teacher') });
 

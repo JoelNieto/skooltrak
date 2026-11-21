@@ -1,3 +1,4 @@
+import type { AuthUserContext } from '@/auth';
 import { Prisma } from '@generated/prisma';
 import {
   BadRequestException,
@@ -15,6 +16,20 @@ import { AttendanceFilterInput } from './dto/attendance-filter.input';
 import { CreateAttendanceSessionInput } from './dto/create-attendance-session.input';
 import { UpdateAttendanceRecordInput } from './dto/update-attendance-record.input';
 
+export const ATTENDANCE_DENIED = 'No tienes acceso a la asistencia de este curso';
+export const STUDENT_ATTENDANCE_DENIED = 'No puedes ver la asistencia de este estudiante';
+export const RECORDS_NOT_ENROLLED = 'Hay estudiantes que no pertenecen a este curso y grupo';
+
+const ADMIN_ROLES = new Set(['ORG_ADMIN', 'ADMIN', 'SYSADMIN']);
+const STAFF_ROLES = new Set([...ADMIN_ROLES, 'TEACHER']);
+
+/**
+ * Who may see or change attendance:
+ * - a course's sessions and its attendance form: an admin of the course's organization or the
+ *   course's teacher (reads and writes alike: sessions hold every student's record);
+ * - one student's records and stats: staff of the student's organization, the student, or a
+ *   linked parent.
+ */
 @Injectable({ scope: Scope.REQUEST })
 export class AttendanceService {
   constructor(
@@ -22,33 +37,55 @@ export class AttendanceService {
     @Inject(REQUEST) private readonly request: Request,
   ) {}
 
-  private async validateTeacherAccess(courseId: string) {
-    const req = this.request;
-    const { userId, role } = req.user as { userId: string; role: string };
+  private caller(): AuthUserContext {
+    const user = (this.request as { user?: AuthUserContext }).user;
+    if (!user?.userId) throw new ForbiddenException(ATTENDANCE_DENIED);
+    return user;
+  }
 
-    if (role === 'ADMIN') return;
-
+  /** Throws 403 unless the caller is an admin of the course's organization or its teacher. */
+  private async assertCourseStaff(courseId: string | undefined): Promise<{ organizationId: string }> {
+    const user = this.caller();
+    if (!courseId) throw new BadRequestException('courseId es obligatorio');
     const course = await this.prisma.course.findUnique({
       where: { id: courseId },
-      include: { teacher: true },
+      select: { organizationId: true, teacher: { select: { userId: true } } },
     });
+    if (!course || course.organizationId !== user.organizationId) throw new ForbiddenException(ATTENDANCE_DENIED);
+    if (ADMIN_ROLES.has(user.role?.toUpperCase() ?? '')) return course;
+    if (course.teacher?.userId === user.userId) return course;
+    throw new ForbiddenException(ATTENDANCE_DENIED);
+  }
 
-    if (!course) {
-      throw new NotFoundException('Course not found');
-    }
-
-    if (course.teacher?.userId !== userId) {
-      throw new ForbiddenException(
-        'You do not have permission to manage attendance for this course',
-      );
-    }
+  /** Throws 403 unless the caller is staff of the student's organization, the student, or a linked parent. */
+  private async assertCanReadStudent(studentId: string): Promise<void> {
+    const user = this.caller();
+    const student = await this.prisma.student.findUnique({
+      where: { id: studentId },
+      select: { organizationId: true, userId: true, parents: { where: { userId: user.userId }, select: { id: true } } },
+    });
+    if (!student) throw new ForbiddenException(STUDENT_ATTENDANCE_DENIED);
+    const staff = STAFF_ROLES.has(user.role?.toUpperCase() ?? '');
+    if (staff && student.organizationId === user.organizationId) return;
+    if (student.userId === user.userId || student.parents.length) return;
+    throw new ForbiddenException(STUDENT_ATTENDANCE_DENIED);
   }
 
   async create(input: CreateAttendanceSessionInput) {
     const req = this.request;
     const { userId } = req.user as { userId: string };
 
-    await this.validateTeacherAccess(input.courseId);
+    const { organizationId } = await this.assertCourseStaff(input.courseId);
+    const group = await this.prisma.classGroup.findFirst({
+      where: { id: input.classGroupId, organizationId },
+      select: { id: true },
+    });
+    if (!group) throw new ForbiddenException(ATTENDANCE_DENIED);
+    const studentIds = [...new Set(input.records.map((r) => r.studentId))];
+    const enrolled = await this.prisma.student.count({
+      where: { id: { in: studentIds }, classGroupId: input.classGroupId, ...enrolledIn(input.courseId) },
+    });
+    if (enrolled !== studentIds.length) throw new BadRequestException(RECORDS_NOT_ENROLLED);
 
     // Get teacher ID from user
     const teacher = await this.prisma.teacher.findUnique({
@@ -57,16 +94,6 @@ export class AttendanceService {
 
     if (!teacher) {
       throw new BadRequestException('Teacher not found for this user');
-    }
-
-    // Get organization from course
-    const course = await this.prisma.course.findUnique({
-      where: { id: input.courseId },
-      select: { organizationId: true },
-    });
-
-    if (!course) {
-      throw new NotFoundException('Course not found');
     }
 
     // Check if session already exists for this course, group, and date
@@ -92,7 +119,7 @@ export class AttendanceService {
         courseId: input.courseId,
         classGroupId: input.classGroupId,
         teacherId: teacher.id,
-        organizationId: course.organizationId,
+        organizationId,
         records: {
           create: input.records.map((record) => ({
             studentId: record.studentId,
@@ -115,6 +142,7 @@ export class AttendanceService {
 
   async findAll(filter: AttendanceFilterInput) {
     const { courseId, classGroupId, startDate, endDate, skip, take } = filter;
+    await this.assertCourseStaff(courseId);
 
     const where: Prisma.AttendanceSessionWhereInput = {
       courseId,
@@ -147,6 +175,7 @@ export class AttendanceService {
 
   async count(filter: AttendanceFilterInput) {
     const { courseId, classGroupId, startDate, endDate } = filter;
+    await this.assertCourseStaff(courseId);
 
     const where: Prisma.AttendanceSessionWhereInput = {
       courseId,
@@ -163,7 +192,10 @@ export class AttendanceService {
     return this.prisma.attendanceSession.count({ where });
   }
 
-  findOne(id: string) {
+  async findOne(id: string) {
+    const session = await this.prisma.attendanceSession.findUnique({ where: { id }, select: { courseId: true } });
+    if (!session) throw new NotFoundException('Attendance session not found');
+    await this.assertCourseStaff(session.courseId);
     return this.prisma.attendanceSession.findUnique({
       where: { id },
       include: {
@@ -189,7 +221,7 @@ export class AttendanceService {
       throw new NotFoundException('Attendance record not found');
     }
 
-    await this.validateTeacherAccess(record.attendanceSession.courseId);
+    await this.assertCourseStaff(record.attendanceSession.courseId);
 
     return this.prisma.attendanceRecord.update({
       where: { id: input.id },
@@ -204,17 +236,18 @@ export class AttendanceService {
   async updateManyRecords(records: UpdateAttendanceRecordInput[]) {
     if (records.length === 0) return [];
 
-    // Validate teacher access for the first record's session
-    const firstRecord = await this.prisma.attendanceRecord.findUnique({
-      where: { id: records[0].id },
-      include: { attendanceSession: true },
+    // Every record must exist, and the caller must manage the course of each record's session.
+    const ids = [...new Set(records.map((r) => r.id))];
+    const found = await this.prisma.attendanceRecord.findMany({
+      where: { id: { in: ids } },
+      select: { attendanceSession: { select: { courseId: true } } },
     });
-
-    if (!firstRecord) {
+    if (found.length !== ids.length) {
       throw new NotFoundException('Attendance record not found');
     }
-
-    await this.validateTeacherAccess(firstRecord.attendanceSession.courseId);
+    for (const courseId of new Set(found.map((r) => r.attendanceSession.courseId))) {
+      await this.assertCourseStaff(courseId);
+    }
 
     // Update all records in a transaction
     return this.prisma.$transaction(
@@ -240,7 +273,7 @@ export class AttendanceService {
       throw new NotFoundException('Attendance session not found');
     }
 
-    await this.validateTeacherAccess(session.courseId);
+    await this.assertCourseStaff(session.courseId);
 
     return this.prisma.attendanceSession.delete({
       where: { id },
@@ -295,6 +328,7 @@ export class AttendanceService {
 
   // Get students for attendance form (by course and group)
   async getStudentsForAttendance(courseId: string, classGroupId: string) {
+    await this.assertCourseStaff(courseId);
     return this.prisma.student.findMany({
       where: {
         ...enrolledIn(courseId),
@@ -307,6 +341,7 @@ export class AttendanceService {
 
   // Get attendance records for a specific student
   async getAttendanceByStudentId(studentId: string, take?: number) {
+    await this.assertCanReadStudent(studentId);
     return this.prisma.attendanceRecord.findMany({
       where: { studentId },
       take: take || 50,
@@ -325,6 +360,7 @@ export class AttendanceService {
 
   // Get attendance statistics for a student
   async getStudentAttendanceStats(studentId: string) {
+    await this.assertCanReadStudent(studentId);
     const [total, present, absent, late, sickLeave, excused] = await Promise.all([
       this.prisma.attendanceRecord.count({ where: { studentId } }),
       this.prisma.attendanceRecord.count({ where: { studentId, status: 'PRESENT' } }),

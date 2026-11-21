@@ -25,8 +25,17 @@ function setup() {
     },
   };
   const prisma = {
+    // update() first checks the student, and a new group, are in the caller's organization.
+    student: {
+      findUnique: jest.fn(async () => ({ organizationId: 'org-1' })),
+      findUniqueOrThrow: jest.fn(async () => ({ schoolId: 'SC1' })),
+    },
+    school: { findFirst: jest.fn(async () => ({ id: 'SC1' })) },
     $transaction: jest.fn((fn: (client: typeof tx) => Promise<unknown>) => fn(tx)),
-    classGroup: { findUnique: jest.fn(async () => ({ studyPlanId: 'P2', schoolId: 'SC1', organizationId: 'org-1' })) },
+    classGroup: {
+      findUnique: jest.fn(async () => ({ studyPlanId: 'P2', schoolId: 'SC1', organizationId: 'org-1' })),
+      findFirst: jest.fn(async () => ({ id: 'G-NEW' })),
+    },
     studentClassGroupHistory: { updateMany: jest.fn(), create: jest.fn() },
   };
   const chatSync = { addUserToClassGroupChats: jest.fn(), addUserToCourseChats: jest.fn() };

@@ -424,7 +424,7 @@ describe('TeacherHomeService (HOM-001-S01)', () => {
     const score = (studentId: string, courseId: string, periodId: string, value: number, weight = 1) => ({
       studentId,
       score: value,
-      grade: { courseId, periodId, bucket: { weight } },
+      grade: { courseId, periodId, bucketId: `b-${weight}`, bucket: { weight } },
     });
     const people = [
       { id: 'st-low', firstName: 'Diego', fatherName: 'Herrera', classGroup: { id: 'cg-7a', name: '7°A' } },

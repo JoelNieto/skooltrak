@@ -2,6 +2,7 @@ import { Badge, Button, DecimalToNumber, EmptyState, Icon, Modal, UiSelect, UiTa
 import { DecimalPipe, NgClass } from '@angular/common';
 import { HttpErrorResponse, httpResource } from '@angular/common/http';
 import { afterRenderEffect, Component, computed, inject, input, signal } from '@angular/core';
+import { courseAverage } from '@/shared';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { Prisma } from '@generated/prisma';
@@ -13,7 +14,8 @@ export type StudentType = {
   name: string;
   initials: string;
   color: string;
-  averageScore: number;
+  /** ASM-001 BR .4; null without a scored grade. */
+  averageScore: number | null;
   classGroup: { id: string; name: string } | null;
 };
 
@@ -162,6 +164,9 @@ export default class CourseGrades {
       id: string;
       title: string;
       published: boolean;
+      bucketId: string;
+      /** Decimals arrive as strings. */
+      bucket?: { weight: number | string } | null;
       studentGrades?: Array<{
         id: string;
         score?: number | null;
@@ -197,8 +202,14 @@ export default class CourseGrades {
         ...grade,
         item: grade.studentGrades?.find((studentGrade) => studentGrade.student?.id === student.id),
       }));
-      const scores = gradeCells.map((g) => g.item?.score).filter((s): s is number => s != null);
-      const averageScore = scores.length ? scores.reduce((a, b) => a + b, 0) / scores.length : 0;
+      // The product's one average (ASM-001 BR .4): each bucket's mean, weighted by bucket weight.
+      const averageScore = courseAverage(
+        gradeCells.map((g) => ({
+          bucketId: g.bucketId,
+          weight: Number(g.bucket?.weight ?? 0),
+          score: g.item?.score == null ? null : Number(g.item.score),
+        })),
+      );
       return {
         ...student,
         averageScore,

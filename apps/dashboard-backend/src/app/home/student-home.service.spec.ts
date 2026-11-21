@@ -193,7 +193,7 @@ describe('StudentHomeService (HOM-001-S04)', () => {
     const score = (courseId: string, periodId: string, value: number, weight = 1) => ({
       studentId: 'st-1',
       score: value,
-      grade: { courseId, periodId, bucket: { weight } },
+      grade: { courseId, periodId, bucketId: `b-${weight}`, bucket: { weight } },
     });
     const COURSES = [
       { id: 'c-math', name: 'Matemáticas' },

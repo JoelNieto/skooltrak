@@ -14,13 +14,26 @@ describe('StudentGradesService', () => {
     );
   });
 
-  it('weights scores by bucket and skips empty scores', async () => {
+  it("weights each bucket's mean and skips empty scores (ASM-001 BR .4)", async () => {
+    const cell = (score: number | null, bucketId: string, weight: number) => ({
+      score: score === null ? null : decimal(score),
+      grade: { bucketId, bucket: { weight: decimal(weight) } },
+    });
     const findMany = jest.fn().mockResolvedValue([
-      { score: decimal(4), grade: { bucket: { weight: decimal(40) } } },
-      { score: decimal(2), grade: { bucket: { weight: decimal(60) } } },
-      { score: null, grade: { bucket: { weight: decimal(60) } } },
+      cell(4, 'daily', 40),
+      cell(4, 'daily', 40),
+      cell(4, 'daily', 40),
+      cell(4, 'daily', 40),
+      cell(2, 'tests', 60),
+      cell(null, 'tests', 60),
     ]);
     const service = new StudentGradesService({ studentGrade: { findMany } } as never);
     await expect(service.getAverageScoreForStudent('C1', 'P1', 'S1')).resolves.toBeCloseTo(2.8);
+  });
+
+  it('has no average without a scored grade, not 0', async () => {
+    const findMany = jest.fn().mockResolvedValue([]);
+    const service = new StudentGradesService({ studentGrade: { findMany } } as never);
+    await expect(service.getAverageScoreForStudent('C1', 'P1', 'S1')).resolves.toBeNull();
   });
 });

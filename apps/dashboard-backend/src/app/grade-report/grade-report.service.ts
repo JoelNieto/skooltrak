@@ -100,7 +100,7 @@ export class GradeReportService {
           periodAverages.push(null);
         } else {
           const avg = await this.gradesService.getAverageScoreForStudent(course.id, p.id, studentId);
-          if (avg > 0) {
+          if (avg !== null) {
             periodAverages.push(avg);
             validAverages.push(avg);
           } else {

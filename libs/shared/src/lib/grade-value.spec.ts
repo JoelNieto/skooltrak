@@ -11,7 +11,11 @@ describe('grade values (ASM-001 BR .2)', () => {
     ['1', 1],
     ['5.0', 5],
   ])('accepts %j', (text, score) => {
-    expect(parseCell(text, scale)).toEqual({ score, error: null });
+    expect(parseCell(text, scale)).toEqual({ score, excused: false, error: null });
+  });
+
+  it.each(['EX', 'ex', ' Ex '])('excuses with %j (BR .3)', (text) => {
+    expect(parseCell(text, scale)).toEqual({ score: null, excused: true, error: null });
   });
 
   it.each([
@@ -20,9 +24,9 @@ describe('grade values (ASM-001 BR .2)', () => {
     ['4.25', ONE_DECIMAL],
     ['abc', NOT_A_NUMBER],
     ['4,5,1', NOT_A_NUMBER],
-    ['EX', NOT_A_NUMBER],
+    ['EXX', NOT_A_NUMBER],
   ])('refuses %j: %s', (text, error) => {
-    expect(parseCell(text, scale)).toEqual({ score: null, error });
+    expect(parseCell(text, scale)).toEqual({ score: null, excused: false, error });
   });
 
   it('checks scores the API receives', () => {

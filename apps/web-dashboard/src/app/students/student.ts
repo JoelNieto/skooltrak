@@ -422,9 +422,13 @@ const ENROLLMENT_STATUS_TONES: Record<$Enums.EnrollmentStatus, BadgeTone> = {
                                   <td>{{ $safeNavigationMigration(grade.grade?.date) | date: 'dd/MM/yyyy' }}</td>
                                   <td>{{ grade.comments }}</td>
                                   <td>
-                                    <span uiBadge size="sm" [tone]="gradeTone(grade, metric)">
-                                      {{ grade.score | number: '1.1-1' }}
-                                    </span>
+                                    @if (grade.excused) {
+                                      <span uiBadge size="sm">Exenta</span>
+                                    } @else {
+                                      <span uiBadge size="sm" [tone]="gradeTone(grade, metric)">
+                                        {{ grade.score | number: '1.1-1' }}
+                                      </span>
+                                    }
                                   </td>
                                 </tr>
                               }

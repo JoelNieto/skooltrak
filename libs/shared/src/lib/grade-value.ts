@@ -1,6 +1,6 @@
 /**
  * ASM-001 BR .2: what a gradebook cell may hold. Shared by the API (refuses a save) and the grid
- * (flags the cell as the teacher types). `EX` (excused, BR .3) arrives in S05.
+ * (flags the cell as the teacher types). `EX`, any case, excuses the student (BR .3).
  */
 
 export interface GradeScale {
@@ -20,16 +20,22 @@ export function scoreError(score: number, scale: GradeScale): string | null {
   return null;
 }
 
-export type ParsedCell = { score: number | null; error: null } | { score: null; error: string };
+/** What the teacher types to excuse a student (BR .3). */
+export const EXCUSED_TEXT = 'EX';
 
-/** Reads what the teacher typed: empty is no score; `4,5` and `4.5` are the same. */
+export type ParsedCell =
+  | { score: number | null; excused: boolean; error: null }
+  | { score: null; excused: false; error: string };
+
+/** Reads what the teacher typed: empty is no score; `EX` excuses; `4,5` and `4.5` are the same. */
 export function parseCell(text: string, scale: GradeScale): ParsedCell {
   const value = text.trim().replace(',', '.');
-  if (value === '') return { score: null, error: null };
-  if (!/^[-+]?\d+(\.\d+)?$/.test(value) && !/^[-+]?\.\d+$/.test(value)) return { score: null, error: NOT_A_NUMBER };
+  if (value === '') return { score: null, excused: false, error: null };
+  if (value.toUpperCase() === EXCUSED_TEXT) return { score: null, excused: true, error: null };
+  if (!/^[-+]?\d+(\.\d+)?$/.test(value) && !/^[-+]?\.\d+$/.test(value)) return { score: null, excused: false, error: NOT_A_NUMBER };
   const score = Number(value);
   const error = scoreError(score, scale);
-  return error ? { score: null, error } : { score, error: null };
+  return error ? { score: null, excused: false, error } : { score, excused: false, error: null };
 }
 
 /** `4` → "4", `4.5` → "4.5"; how a saved score is shown in an input. */

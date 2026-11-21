@@ -63,6 +63,8 @@ export class GradebookCell {
   /** Null until the first score is saved for this student and column. */
   studentGradeId: string | null;
   score: number | null;
+  /** Excused (BR-ASM-001.3): no score, shown "EX" to staff and "Exenta" to families. */
+  excused: boolean;
   /** Visible to the student and parents once the column is published (BR-ASM-001.14). */
   comment: string | null;
   updatedAt: string | null;
@@ -127,6 +129,7 @@ export class GradebookSavedCell {
   studentId: string;
   studentGradeId: string | null;
   score: number | null;
+  excused: boolean;
   comment: string | null;
   updatedAt: string | null;
 }

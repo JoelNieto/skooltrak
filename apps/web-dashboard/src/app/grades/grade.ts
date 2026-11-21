@@ -39,6 +39,8 @@ type GradeDetail = {
   studentGrades?: Array<{
     id: string;
     score?: number | null;
+    /** ASM-001 BR .3 */
+    excused?: boolean;
     comments?: string | null;
     updatedAt?: string;
     student?: { firstName?: string; fatherName?: string; classGroup?: { id?: string; name?: string } | null };
@@ -156,7 +158,9 @@ type GradeDetail = {
                               studentGrade.score < (metric()?.minimumApproval ?? 0),
                           }"
                         >
-                          @if (studentGrade.score) {
+                          @if (studentGrade.excused) {
+                            EX
+                          } @else if (studentGrade.score !== null && studentGrade.score !== undefined) {
                             {{ studentGrade.score | number: '1.1-1' }}
                           } @else {
                             <ui-icon name="ellipsis" class="text-2xl" />

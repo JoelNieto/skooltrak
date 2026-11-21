@@ -1,6 +1,6 @@
 import { courseAverage } from '@/shared';
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { recordRevisions, REASON_REQUIRED, scoreChanged, validReason } from '../grades/grade-revisions';
+import { cellChanged, recordRevisions, REASON_REQUIRED, validReason } from '../grades/grade-revisions';
 import { PrismaService } from '../prisma.service';
 import { CreateStudentGradeInput } from './dto/create-student-grade.input';
 import { UpdateStudentGradeInput } from './dto/update-student-grade.input';
@@ -17,14 +17,15 @@ export class StudentGradesService {
     return this.prisma.$transaction(async (tx) => {
       const before = await tx.studentGrade.findUnique({
         where: { gradeId_studentId: { gradeId, studentId } },
-        select: { score: true },
+        select: { score: true, excused: true },
       });
       const next = toScore(score);
-      const why = published && scoreChanged(before?.score, next) ? requireReason(reason) : null;
+      // A score from the grade page ends an exemption (BR .3: never both).
+      const why = published && cellChanged(before, { score: next, excused: false }) ? requireReason(reason) : null;
       const row = await tx.studentGrade.upsert({
         where: { gradeId_studentId: { gradeId, studentId } },
         create: { gradeId, studentId, score: next, comments },
-        update: { score: next, comments },
+        update: { score: next, excused: false, comments },
       });
       if (why) {
         await recordRevisions(tx, [{ studentGradeId: row.id, previousScore: before?.score ?? null, score: next, reason: why }], actorId);
@@ -78,12 +79,16 @@ export class StudentGradesService {
   update(id: string, updateStudentGradeInput: UpdateStudentGradeInput, published = false, actorId: string | null = null) {
     const { score, comments, reason } = updateStudentGradeInput;
     return this.prisma.$transaction(async (tx) => {
-      const before = await tx.studentGrade.findUniqueOrThrow({ where: { id }, select: { score: true } });
-      const changing = score !== undefined && scoreChanged(before.score, toScore(score));
+      const before = await tx.studentGrade.findUniqueOrThrow({ where: { id }, select: { score: true, excused: true } });
+      const changing = score !== undefined && cellChanged(before, { score: toScore(score), excused: false });
       const why = published && changing ? requireReason(reason) : null;
       const row = await tx.studentGrade.update({
         where: { id },
-        data: { ...(score !== undefined ? { score: toScore(score) } : {}), ...(comments !== undefined ? { comments } : {}) },
+        data: {
+          // A score from the grade page ends an exemption (BR .3: never both).
+          ...(score !== undefined ? { score: toScore(score), excused: false } : {}),
+          ...(comments !== undefined ? { comments } : {}),
+        },
       });
       if (why) {
         await recordRevisions(tx, [{ studentGradeId: id, previousScore: before.score, score: toScore(score), reason: why }], actorId);

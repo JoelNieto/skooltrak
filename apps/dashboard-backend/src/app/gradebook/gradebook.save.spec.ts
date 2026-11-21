@@ -7,6 +7,7 @@ import { GradeAccessService, NOT_ENROLLED, WRITE_DENIED } from '../grades/grade-
 import { COMMENT_TOO_LONG, REASON_REQUIRED } from '../grades/grade-revisions';
 import {
   CELL_REPEATED,
+  EXCUSED_WITH_SCORE,
   CELLS_CONFLICT,
   CELLS_INVALID,
   COLUMN_INVALID,
@@ -45,16 +46,24 @@ type Row = {
   gradeId: string;
   studentId: string;
   score: Prisma.Decimal | null;
+  excused: boolean;
   comments: string | null;
   updatedAt: Date;
 };
-type Revision = { studentGradeId: string; previousScore: number | null; score: number | null; reason: string; changedById: string | null };
+type Revision = {
+  studentGradeId: string;
+  previousScore: number | null;
+  score: number | null;
+  excused: boolean;
+  reason: string;
+  changedById: string | null;
+};
 
 function setup() {
   // Ana has a row in G-draft and 4 in the published G-pub; Beto has none yet.
   let rows: Row[] = [
-    { id: 'sg-ana', gradeId: 'G-draft', studentId: 'S-ana', score: d(3), comments: null, updatedAt: T0 },
-    { id: 'sg-ana-pub', gradeId: 'G-pub', studentId: 'S-ana', score: d(4), comments: null, updatedAt: T0 },
+    { id: 'sg-ana', gradeId: 'G-draft', studentId: 'S-ana', score: d(3), excused: false, comments: null, updatedAt: T0 },
+    { id: 'sg-ana-pub', gradeId: 'G-pub', studentId: 'S-ana', score: d(4), excused: false, comments: null, updatedAt: T0 },
   ];
   let revisions: Revision[] = [];
   const published: string[] = [];
@@ -131,24 +140,32 @@ function setup() {
       ),
       createMany: jest.fn(async ({ data }) => {
         for (const row of data) {
-          rows.push({ id: `sg-new-${++seq}`, comments: null, ...row, score: row.score === null ? null : d(row.score), updatedAt: now() });
+          rows.push({
+            id: `sg-new-${++seq}`,
+            comments: null,
+            excused: false,
+            ...row,
+            score: row.score === null ? null : d(row.score),
+            updatedAt: now(),
+          });
         }
         return { count: data.length };
       }),
     },
     $queryRaw: jest.fn(async () => []),
-    // The bulk UPDATE: its VALUES list arrives as one joined Sql of (id, score, setComment, comment).
+    // The bulk UPDATE: its VALUES list arrives as one joined Sql of (id, score, excused, setComment, comment).
     $executeRaw: jest.fn(async (_strings: TemplateStringsArray, values: Prisma.Sql) => {
       const flat = values.values as (string | number | boolean | null)[];
-      for (let i = 0; i < flat.length; i += 4) {
+      for (let i = 0; i < flat.length; i += 5) {
         const row = rows.find((r) => r.id === flat[i]);
         if (row) {
           row.score = flat[i + 1] === null ? null : d(flat[i + 1] as number);
-          if (flat[i + 2]) row.comments = flat[i + 3] as string | null;
+          row.excused = flat[i + 2] as boolean;
+          if (flat[i + 3]) row.comments = flat[i + 4] as string | null;
           row.updatedAt = now();
         }
       }
-      return flat.length / 4;
+      return flat.length / 5;
     }),
     $transaction: jest.fn(async (fn: (tx: unknown) => Promise<unknown>) => {
       const snapshot = rows.map((r) => ({ ...r }));
@@ -286,7 +303,7 @@ describe('GradebookService.saveCells (ASM-001-S03)', () => {
     expect(error.getResponse()).toEqual({
       message: CELLS_CONFLICT,
       cells: [
-        { gradeId: 'G-draft', studentId: 'S-ana', studentGradeId: 'sg-ana', score: 3, comment: null, updatedAt: T0.toISOString() },
+        { gradeId: 'G-draft', studentId: 'S-ana', studentGradeId: 'sg-ana', score: 3, excused: false, comment: null, updatedAt: T0.toISOString() },
       ],
     });
     expect(rows()).toHaveLength(2);
@@ -335,8 +352,8 @@ describe('GradebookService.saveCells, published columns (ASM-001-S04)', () => {
     const betoRow = rows().find((r) => r.gradeId === 'G-pub' && r.studentId === 'S-beto');
     // The draft cell writes none (BR .8); a first score on a published column does.
     expect(revisions()).toEqual([
-      { studentGradeId: 'sg-ana-pub', previousScore: 4, score: 3, reason: 'Error de transcripción', changedById: 'u-teacher' },
-      { studentGradeId: betoRow?.id, previousScore: null, score: 2, reason: 'Error de transcripción', changedById: 'u-teacher' },
+      { studentGradeId: 'sg-ana-pub', previousScore: 4, score: 3, excused: false, reason: 'Error de transcripción', changedById: 'u-teacher' },
+      { studentGradeId: betoRow?.id, previousScore: null, score: 2, excused: false, reason: 'Error de transcripción', changedById: 'u-teacher' },
     ]);
   });
 
@@ -393,5 +410,41 @@ describe('GradebookService.history (ASM-001-S04)', () => {
   it("refuses another teacher's course @BR-ASM-001.1", async () => {
     const { service } = setup();
     await expect(service.history(teacher2, 'sg-ana-pub')).rejects.toThrow(new ForbiddenException(WRITE_DENIED));
+  });
+});
+
+describe('GradebookService.saveCells, excused cells (ASM-001-S05)', () => {
+  it('excuses a draft cell: no score, no revision @BR-ASM-001.3', async () => {
+    const { service, rows, revisions } = setup();
+    const { cells } = await service.saveCells(teacher, 'C1', {
+      periodId: 'T1',
+      cells: [{ ...cell('G-draft', 'S-ana', null, T0.toISOString()), excused: true }, { ...cell('G-draft', 'S-beto', null, null), excused: true }],
+    });
+    expect(cells.map((c) => [c.studentId, c.score, c.excused])).toEqual([
+      ['S-ana', null, true],
+      ['S-beto', null, true],
+    ]);
+    expect(rows().filter((r) => r.gradeId === 'G-draft').every((r) => r.excused && r.score === null)).toBe(true);
+    expect(revisions()).toEqual([]);
+  });
+
+  it('refuses a cell that is both excused and scored', async () => {
+    const { service } = setup();
+    const error = await refusal(
+      service.saveCells(teacher, 'C1', { periodId: 'T1', cells: [{ ...cell('G-draft', 'S-beto', 4, null), excused: true }] }),
+    );
+    expect(error.getResponse()).toMatchObject({ cells: [{ reason: EXCUSED_WITH_SCORE }] });
+  });
+
+  it('needs a reason to excuse a published cell, and records it @BR-ASM-001.8', async () => {
+    const { service, revisions } = setup();
+    const excuse = { ...cell('G-pub', 'S-ana', null, T0.toISOString()), excused: true };
+    const error = await refusal(service.saveCells(teacher, 'C1', { periodId: 'T1', cells: [excuse] }));
+    expect(error.getResponse()).toMatchObject({ message: REASON_REQUIRED });
+
+    await service.saveCells(teacher, 'C1', { periodId: 'T1', reason: 'Certificado médico', cells: [excuse] });
+    expect(revisions()).toEqual([
+      { studentGradeId: 'sg-ana-pub', previousScore: 4, score: null, excused: true, reason: 'Certificado médico', changedById: 'u-teacher' },
+    ]);
   });
 });

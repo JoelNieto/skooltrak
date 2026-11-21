@@ -1,4 +1,4 @@
-import { courseAverage, formatScore, gradeStatus, GradeStatus, meanOf, parseCell } from '@/shared';
+import { courseAverage, EXCUSED_TEXT, formatScore, gradeStatus, GradeStatus, meanOf, parseCell } from '@/shared';
 import type { Gradebook } from './gradebook-grid';
 
 /**
@@ -29,8 +29,8 @@ export const cellKey = (gradeId: string, studentId: string) => `${gradeId}|${stu
 export const viewKey = (book: Pick<Gradebook, 'course' | 'periodId' | 'classGroupId'>) =>
   `${book.course.id}:${book.periodId ?? '-'}:${book.classGroupId ?? 'none'}`;
 
-/** What an input shows for a saved score. */
-export const savedText = (score: number | null) => (score === null ? '' : formatScore(score));
+/** What an input shows for a saved cell: its score, `EX` when excused (BR-ASM-001.3), else empty. */
+export const savedText = (score: number | null, excused = false) => (excused ? EXCUSED_TEXT : score === null ? '' : formatScore(score));
 
 export interface ViewCell {
   key: string;
@@ -42,10 +42,12 @@ export interface ViewCell {
   text: string;
   /** Score counted in the averages: the typed one when valid, else the saved one. */
   score: number | null;
+  /** Excused (BR-ASM-001.3): no score, left out of the averages. */
+  excused: boolean;
   comment: string;
   /** The score or the comment differs from the saved cell. */
   changed: boolean;
-  /** A published score changes: the save needs a reason (BR-ASM-001.8). */
+  /** A published score (or exemption) changes: the save needs a reason (BR-ASM-001.8). */
   needsReason: boolean;
   reason: string;
   error: string | null;
@@ -88,15 +90,31 @@ export function applyEdits(book: Gradebook, edits: Edits): GradebookView {
         reason: edit?.reason ?? '',
       };
       if (!edit) {
-        return { ...base, text: savedText(saved.score), score: saved.score, changed: false, needsReason: false, error: null };
+        return {
+          ...base,
+          text: savedText(saved.score, saved.excused),
+          score: saved.score,
+          excused: saved.excused,
+          changed: false,
+          needsReason: false,
+          error: null,
+        };
       }
       const commentError = (edit.comment?.length ?? 0) > COMMENT_MAX ? `Máximo ${COMMENT_MAX} caracteres en el comentario` : null;
       const parsed = parseCell(edit.text, book.metric ?? { minimum: 0, maximum: 0 });
       if (parsed.error || commentError) {
         invalid += 1;
-        return { ...base, text: edit.text, score: saved.score, changed: true, needsReason: false, error: parsed.error ?? commentError };
+        return {
+          ...base,
+          text: edit.text,
+          score: saved.score,
+          excused: saved.excused,
+          changed: true,
+          needsReason: false,
+          error: parsed.error ?? commentError,
+        };
       }
-      const scoreChange = parsed.score !== saved.score;
+      const scoreChange = parsed.score !== saved.score || parsed.excused !== saved.excused;
       const commentChange = edit.comment !== undefined && (edit.comment || null) !== (saved.comment || null);
       const isChange = scoreChange || commentChange;
       if (isChange) changed += 1;
@@ -104,6 +122,7 @@ export function applyEdits(book: Gradebook, edits: Edits): GradebookView {
         ...base,
         text: edit.text,
         score: parsed.score,
+        excused: parsed.excused,
         changed: isChange,
         needsReason: column.published && scoreChange,
         error: null,
@@ -137,6 +156,7 @@ export function changedCells(book: Gradebook, edits: Edits) {
           gradeId: cell.gradeId,
           studentId: row.student.id,
           score: cell.score,
+          ...(cell.excused ? { excused: true } : {}),
           updatedAt: edit?.updatedAt ?? null,
           ...(edit?.comment !== undefined ? { comment: edit.comment } : {}),
           ...(cell.needsReason && isValidReason(edit?.reason) ? { reason: edit?.reason?.trim() } : {}),

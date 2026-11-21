@@ -4,7 +4,7 @@
 |---|---|
 | **FRD** | [ASM-001](../frd/ASM-001-teacher-gradebook.md) |
 | **Implements** | BR-ASM-001.4 (decided 2026-11-19, Q2) |
-| **Status** | In review: #48 |
+| **Status** | Done: #48 (2026-11-21) |
 | **Branch** | `feat/ASM-001-S09-one-average-formula` |
 | **Estimate** | 1–2 days |
 
@@ -38,14 +38,14 @@ Scenario: the course grid uses the formula
 ```
 
 ## Layers touched
-- [ ] **Shared** (`libs/shared`): `courseAverage(cells)`, BR .4 as one pure function, used by the API and the UI.
-- [ ] **Nest** (`apps/dashboard-backend`):
+- [x] **Shared** (`libs/shared`): `courseAverage(cells)`, BR .4 as one pure function, used by the API and the UI.
+- [x] **Nest** (`apps/dashboard-backend`):
   - `home/home-grades.ts` `weightedAverages` groups cells by bucket. Its callers select `grade.bucketId`. This covers the student, teacher and parent home pages.
   - `home/admin-home.service.ts`: the grouped SQL averages per bucket first, then weights. It is still one query (HOM-001 §8).
   - `grades.service.ts` and `student-grades.service.ts` `getAverageScoreForStudent` return `null` with no scored cell, instead of `0`. The grade report uses this to tell "no average" from a real 0.
-- [ ] **Angular:** `grades/course-grades.ts` (course grid) and `parent/parent-child-progress.ts` use `courseAverage`. Both endpoints already return each grade's bucket.
-- [ ] **OpenAPI:** no shape change expected (`bun run openapi`).
-- [ ] **Tests:**
+- [x] **Angular:** `grades/course-grades.ts` (course grid) and `parent/parent-child-progress.ts` use `courseAverage`. Both endpoints already return each grade's bucket.
+- [x] **OpenAPI:** no shape change expected (`bun run openapi`).
+- [x] **Tests:**
   - `libs/shared` unit tests for BR .4, including the 2.8 example;
   - updated home-service specs;
   - Playwright `@BR-ASM-001.4`: the teacher's course grid shows the bucket-weighted average. The spec creates its own unpublished bucket and grades and removes them afterwards. It runs in the `after` project, so other specs' figures don't change.
@@ -56,6 +56,6 @@ Scenario: the course grid uses the formula
 - How the grade report combines periods into a cumulative average, and how home pages combine courses into one KPI. Those aggregate course averages, which this slice fixes.
 
 ## Done checklist
-- [ ] Acceptance criteria pass
-- [ ] Cross-tenant / wrong-role access refused (test): no access rules change; the existing grade-access specs keep passing
-- [ ] FRD slice table + `capabilities.md` updated
+- [x] Acceptance criteria pass
+- [x] Cross-tenant / wrong-role access refused (test): no access rules change; the existing grade-access specs keep passing
+- [x] FRD slice table + `capabilities.md` updated

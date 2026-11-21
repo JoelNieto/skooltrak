@@ -1,6 +1,7 @@
 import type { AuthUserContext } from '@/auth';
 import { EnrollmentStatus, ImportJobStatus, Prisma, ThreadStatus } from '@generated/prisma';
 import { BadRequestException, ForbiddenException, Inject, Injectable } from '@nestjs/common';
+import { ACTIVE_ENROLLMENT } from '../courses/course-roster';
 import { PrismaService } from '../prisma.service';
 import { AdminAttention, AdminKpis } from './entities/admin-home.entity';
 import { addCount, attendanceRate, AttendanceStatusCounts } from './home-attendance';
@@ -186,7 +187,10 @@ export class AdminHomeService {
   private async gradeCompleteness({ organizationId, school }: AdminContext, period: PeriodRef) {
     const courses = await this.prisma.course.findMany({
       where: { organizationId, schoolId: school.id },
-      select: { id: true, _count: { select: { students: { where: { enrollmentStatus: EnrollmentStatus.ACTIVE } } } } },
+      select: {
+        id: true,
+        _count: { select: { enrollments: { where: { ...ACTIVE_ENROLLMENT, student: { enrollmentStatus: EnrollmentStatus.ACTIVE } } } } },
+      },
     });
     const grades = courses.length
       ? await this.prisma.grade.findMany({
@@ -201,7 +205,7 @@ export class AdminHomeService {
           },
         })
       : [];
-    const enrolled = new Map(courses.map((c) => [c.id, c._count.students]));
+    const enrolled = new Map(courses.map((c) => [c.id, c._count.enrollments]));
     const missing = new Set(grades.filter((g) => (enrolled.get(g.courseId) ?? 0) > g._count.studentGrades).map((g) => g.courseId));
     return { coursesWithMissingGrades: missing.size, totalCourses: courses.length };
   }

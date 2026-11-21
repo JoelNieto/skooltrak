@@ -36,7 +36,7 @@ describe('TeacherHomeService (HOM-001-S01)', () => {
       records?: { attendanceSessionId?: string; studentId?: string; status: AttendanceStatus; _count: { _all: number } }[];
       periods?: unknown[];
       toReview?: { assignmentId: string; _count: { _all: number }; _min: { submittedAt: Date | null } }[];
-      courses?: { id: string; name?: string; _count?: { students: number }; studyPlan?: unknown }[];
+      courses?: { id: string; name?: string; _count?: { enrollments: number }; studyPlan?: unknown }[];
       scores?: unknown[];
       threads?: unknown[];
       people?: unknown[];
@@ -285,8 +285,8 @@ describe('TeacherHomeService (HOM-001-S01)', () => {
     it('counts empty score cells and unpublished grades per course in the current period', async () => {
       const { service, prisma } = build({
         courses: [
-          { id: 'c-math', _count: { students: 3 } },
-          { id: 'c-alg', _count: { students: 30 } },
+          { id: 'c-math', _count: { enrollments: 3 } },
+          { id: 'c-alg', _count: { enrollments: 30 } },
         ],
         grades: [
           { courseId: 'c-math', published: false, _count: { studentGrades: 1 } },
@@ -364,10 +364,10 @@ describe('TeacherHomeService (HOM-001-S01)', () => {
       const { service, prisma } = build({
         assignmentDates: [date('as-1', 'cg-7a'), date('as-1', 'cg-7b'), date('as-2', 'cg-7a', false)],
         students: [
-          { id: 'st-1', classGroupId: 'cg-7a', courses: [{ id: 'c-math' }] },
-          { id: 'st-2', classGroupId: 'cg-7a', courses: [{ id: 'c-math' }] },
-          { id: 'st-3', classGroupId: 'cg-7a', courses: [] }, // not enrolled in the course
-          { id: 'st-4', classGroupId: 'cg-7b', courses: [{ id: 'c-math' }] },
+          { id: 'st-1', classGroupId: 'cg-7a', courseEnrollments: [{ courseId: 'c-math' }] },
+          { id: 'st-2', classGroupId: 'cg-7a', courseEnrollments: [{ courseId: 'c-math' }] },
+          { id: 'st-3', classGroupId: 'cg-7a', courseEnrollments: [] }, // not enrolled in the course
+          { id: 'st-4', classGroupId: 'cg-7b', courseEnrollments: [{ courseId: 'c-math' }] },
         ],
         submissions: [
           { assignmentId: 'as-1', studentId: 'st-1' },
@@ -463,7 +463,7 @@ describe('TeacherHomeService (HOM-001-S01)', () => {
               organizationId: ORG,
               enrollmentStatus: 'ACTIVE',
               classGroup: RELATED,
-              courses: { some: { id: { in: ['c-math'] } } },
+              courseEnrollments: { some: { excluded: false, courseId: { in: ['c-math'] } } },
             },
           },
         }),
@@ -513,8 +513,8 @@ describe('TeacherHomeService (HOM-001-S01)', () => {
       const { service } = build({
         periods: PERIODS,
         courses: [
-          { id: 'c-math', name: 'Matemáticas', _count: { students: 2 }, studyPlan: metric(5, 3) },
-          { id: 'c-alg', name: 'Álgebra', _count: { students: 1 }, studyPlan: metric(5, 3) },
+          { id: 'c-math', name: 'Matemáticas', _count: { enrollments: 2 }, studyPlan: metric(5, 3) },
+          { id: 'c-alg', name: 'Álgebra', _count: { enrollments: 1 }, studyPlan: metric(5, 3) },
         ],
         scores: [score('st-a', 'c-math', 'p2', 2.5), score('st-b', 'c-math', 'p2', 4.5), score('st-b', 'c-alg', 'p2', 4)],
       });
@@ -531,8 +531,8 @@ describe('TeacherHomeService (HOM-001-S01)', () => {
       const { service } = build({
         periods: PERIODS,
         courses: [
-          { id: 'c-math', name: 'Matemáticas', _count: { students: 1 }, studyPlan: metric(5, 3) },
-          { id: 'c-art', name: 'Arte', _count: { students: 1 }, studyPlan: metric(100, 70) },
+          { id: 'c-math', name: 'Matemáticas', _count: { enrollments: 1 }, studyPlan: metric(5, 3) },
+          { id: 'c-art', name: 'Arte', _count: { enrollments: 1 }, studyPlan: metric(100, 70) },
         ],
         scores: [score('st-a', 'c-math', 'p2', 4), score('st-a', 'c-art', 'p2', 65)],
       });
@@ -548,7 +548,7 @@ describe('TeacherHomeService (HOM-001-S01)', () => {
     it('has no below-pass count when no course has a scale', async () => {
       const { service } = build({
         periods: PERIODS,
-        courses: [{ id: 'c-math', name: 'Matemáticas', _count: { students: 1 } }],
+        courses: [{ id: 'c-math', name: 'Matemáticas', _count: { enrollments: 1 } }],
         scores: [score('st-a', 'c-math', 'p2', 1)],
       });
 

@@ -1,5 +1,6 @@
 import { sendGradePublishedEmail } from '@/auth';
 import { Injectable } from '@nestjs/common';
+import { enrolledIn } from '../courses/course-roster';
 import { PrismaService } from '../prisma.service';
 import { CreateGradeInput } from './dto/create-grade.input';
 import { UpdateGradeInput } from './dto/update-grade.input';
@@ -9,16 +10,17 @@ export class GradesService {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(createGradeInput: CreateGradeInput) {
-    const students = await this.prisma.course.findUnique({
-      where: { id: createGradeInput.courseId },
-      include: { students: true },
+    // One score cell per student on the roster (ACA-001 BR .15).
+    const students = await this.prisma.student.findMany({
+      where: enrolledIn(createGradeInput.courseId),
+      select: { id: true },
     });
 
     return this.prisma.grade.create({
       data: {
         ...createGradeInput,
         studentGrades: {
-          create: students.students.map((s) => ({
+          create: students.map((s) => ({
             student: { connect: { id: s.id } },
           })),
         },

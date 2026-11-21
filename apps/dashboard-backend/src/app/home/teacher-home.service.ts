@@ -1,6 +1,7 @@
 import { AuthUserContext } from '@/auth';
 import { AttendanceStatus, EnrollmentStatus, ThreadStatus } from '@generated/prisma';
 import { BadRequestException, ForbiddenException, Inject, Injectable } from '@nestjs/common';
+import { ACTIVE_ENROLLMENT, enrolledIn } from '../courses/course-roster';
 import { PrismaService } from '../prisma.service';
 import { teacherClassGroupWhere, teacherCourseWhere } from '../teachers/teacher-scope';
 import {
@@ -281,8 +282,12 @@ export class TeacherHomeService {
     const [students, submissions] = dates.length
       ? await Promise.all([
           this.prisma.student.findMany({
-            where: { organizationId, enrollmentStatus: ACTIVE, classGroupId: { in: groupIds }, courses: { some: { id: { in: courseIds } } } },
-            select: { id: true, classGroupId: true, courses: { where: { id: { in: courseIds } }, select: { id: true } } },
+            where: { organizationId, enrollmentStatus: ACTIVE, classGroupId: { in: groupIds }, ...enrolledIn(courseIds) },
+            select: {
+              id: true,
+              classGroupId: true,
+              courseEnrollments: { where: { ...ACTIVE_ENROLLMENT, courseId: { in: courseIds } }, select: { courseId: true } },
+            },
           }),
           assignmentIds.length
             ? this.prisma.assignmentSubmission.findMany({
@@ -302,7 +307,7 @@ export class TeacherHomeService {
 
     const items: TeacherWeekItem[] = dates.map((d) => {
       const enrolled = students.filter(
-        (st) => st.classGroupId === d.classGroup.id && st.courses.some((c) => c.id === d.assignment.course.id),
+        (st) => st.classGroupId === d.classGroup.id && st.courseEnrollments.some((e) => e.courseId === d.assignment.course.id),
       );
       const handedIn = submittedBy.get(d.assignment.id);
       return {
@@ -393,7 +398,7 @@ export class TeacherHomeService {
   private async gradeCompleteness({ organizationId, school, teacher }: TeacherContext, periodId: string): Promise<TeacherGrades> {
     const courses = await this.prisma.course.findMany({
       where: { organizationId, schoolId: school.id, ...teacherCourseWhere(teacher.id) },
-      select: { id: true, _count: { select: { students: { where: { enrollmentStatus: ACTIVE } } } } },
+      select: { id: true, _count: { select: { enrollments: { where: { ...ACTIVE_ENROLLMENT, student: { enrollmentStatus: ACTIVE } } } } } },
     });
     const grades = courses.length
       ? await this.prisma.grade.findMany({
@@ -406,7 +411,7 @@ export class TeacherHomeService {
         })
       : [];
 
-    const enrolled = new Map(courses.map((c) => [c.id, c._count.students]));
+    const enrolled = new Map(courses.map((c) => [c.id, c._count.enrollments]));
     const emptyByCourse = new Map<string, number>();
     const unpublishedByCourse = new Map<string, number>();
     for (const g of grades) {
@@ -458,7 +463,7 @@ export class TeacherHomeService {
           organizationId,
           enrollmentStatus: ACTIVE,
           classGroup: teacherClassGroupWhere(teacher.id),
-          courses: { some: { id: { in: courseIds } } },
+          ...enrolledIn(courseIds),
         },
       },
       select: {

@@ -5,7 +5,7 @@
 | **Status** | Ready (open questions answered 2026-11-19) |
 | **Context** | ACA — Academics (see [capabilities](../capabilities.md#aca-academics)) |
 | **Owner** | — |
-| **Last updated** | 2026-11-19 |
+| **Last updated** | 2026-11-20 |
 | **Related** | Design canvas "Skooltrak — Courses redesign (desktop)", boards *Courses — list* and *Course details — Mathematics* (claude.ai/artifact/MGaGctNuxxJd1rouLSYTaa) · [HOM-001](HOM-001-persona-home-dashboards.md) (reuses its grade, period, scope and work-status rules) · [ASM-001](ASM-001-teacher-gradebook.md) (gradebook, assignment-linked grades) · current code: `apps/web-dashboard/src/app/courses/courses.ts`, `courses/course.ts`, `apps/dashboard-backend/src/app/courses/` |
 
 ## 1. Problem & outcome
@@ -147,10 +147,12 @@ When this ships, every course has its own color and icon, so it is recognisable 
 
   Admins can also mark a plan enrollment *excluded*. Sync rules:
   - A class-group change removes the old plan's enrollments, exclusions included, and adds the new plan's.
+  - A change of a course's study plan does the same for the course: its plan enrollments, exclusions included, are replaced by the new plan's students *(decided 2026-11-20)*.
   - Manual enrollments are kept across group changes. An admin removes them explicitly.
   - Sync never touches manual enrollments or excluded flags within the same plan.
   - Removing a student from a course keeps their grades and submissions; they are hidden from the course, not deleted.
   - Only admins change enrollments (`MANAGE_COURSES`; `403` otherwise). A student from another organization or school gets `400`.
+  - **Backfill** *(decided 2026-11-20)*: the migration creates plan enrollments by the rule above and keeps every stored link it doesn't cover (a course outside the student's current plan) as **Manual**, so no student loses a course they see today.
 - **BR-ACA-001.16**: **Homeroom read-only view** *(decided 2026-11-19, Q8)*.
   - Applies to `ClassGroup.teacherId` of the group only. Teaching a group grants nothing here, unlike BR-HOM-001.7.
   - The teacher sees the course header, assignments, resources, and the published grades of enrolled students of their homeroom group. That includes the Calificaciones summary per student, chosen from a student picker.
@@ -238,7 +240,7 @@ Listed in build order.
 | Slice | Title | FRs | Status |
 |---|---|---|---|
 | [ACA-001-S01](../slices/ACA-001-S01-course-color-icon.md) | Course color and subject icon on cards and header | .1 .2, BR .11 | Ready |
-| ACA-001-S11 | Course roster: `CourseEnrollment`, backfill, plan sync incl. CSV import, all readers switched | .20, BR .15 | Proposed |
+| [ACA-001-S11](../slices/ACA-001-S11-course-roster.md) | Course roster: `CourseEnrollment`, backfill, plan sync incl. CSV import, all readers switched | .20, BR .15 | In progress |
 | ACA-001-S02 | Student *Mis cursos*: cards with schedule, teacher, average and period switcher | .4 (part) .5, BR .1 .4 .5 .9 | Proposed (after S11, ASM-001-S09) |
 | ACA-001-S03 | Próxima entrega, progress and stats row | .4 (rest) .6, BR .7 .8 .10 | Proposed |
 | ACA-001-S04 | Subject areas and filter chips | .2 (area) .7, BR .14 | Proposed |

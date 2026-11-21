@@ -9,6 +9,7 @@ import { randomBytes, randomUUID } from 'crypto';
 import { Request } from 'express';
 import * as QRCode from 'qrcode';
 import { ChatSyncService } from '../chats/chat-sync.service';
+import { ACTIVE_ENROLLMENT, enrolledCourses, enrolledIn, syncStudentPlan } from '../courses/course-roster';
 import { ChargesService } from '../financial/charges.service';
 import { PrismaService } from '../prisma.service';
 import { CreateStudentInput } from './dto/create-student.input';
@@ -152,20 +153,13 @@ export class StudentsService {
       }
     }
 
-    // Only connect courses if classGroupId is provided
-    let coursesToConnect: { id: string }[] = [];
+    // The study plan drives the auto-generated charges below; the roster is synced on create.
     let studyPlanId: string | undefined;
     if (classGroupId) {
       const group = await this.prisma.classGroup.findUnique({
         where: { id: classGroupId },
       });
-      if (group) {
-        studyPlanId = group.studyPlanId;
-        const courses = await this.prisma.course.findMany({
-          where: { studyPlanId: group.studyPlanId },
-        });
-        coursesToConnect = courses.map((course) => ({ id: course.id }));
-      }
+      studyPlanId = group?.studyPlanId;
     }
 
     // Convert birthDate properly - handle both Date and string
@@ -192,16 +186,19 @@ export class StudentsService {
       organizationId,
       schoolId,
       classGroupId: classGroupId || null,
-      courses: coursesToConnect.length > 0 ? { connect: coursesToConnect } : undefined,
       parents: parentIds?.length ? { connect: parentIds.map((id) => ({ id })) } : undefined,
     };
 
     this.logger.log(`Creating student with data: ${JSON.stringify(studentData, null, 2)}`);
 
     try {
-      const student = await this.prisma.student.create({
-        data: studentData,
-        include: { classGroup: true, user: true, parents: true },
+      // Enroll the student in their plan's courses in the same transaction (ACA-001 BR .15).
+      const { student, enrolledCourseIds } = await this.prisma.$transaction(async (tx) => {
+        const created = await tx.student.create({
+          data: studentData,
+          include: { classGroup: true, user: true, parents: true },
+        });
+        return { student: created, enrolledCourseIds: await syncStudentPlan(tx, created.id, created.classGroupId) };
       });
 
       if (classGroupId) {
@@ -256,8 +253,8 @@ export class StudentsService {
         if (classGroupId) {
           await this.chatSync.addUserToClassGroupChats(classGroupId, user.id);
         }
-        for (const course of coursesToConnect) {
-          await this.chatSync.addUserToCourseChats(course.id, user.id);
+        for (const courseId of enrolledCourseIds) {
+          await this.chatSync.addUserToCourseChats(courseId, user.id);
         }
       } catch (chatError) {
         this.logger.warn(`Failed to add student to contextual chats:`, chatError);
@@ -392,7 +389,7 @@ export class StudentsService {
 
   findManyByCourseId(courseId: string) {
     return this.prisma.student.findMany({
-      where: { courses: { some: { id: courseId } } },
+      where: enrolledIn(courseId),
       include: { classGroup: true, user: true },
       orderBy: { user: { firstName: 'asc' } },
     });
@@ -408,9 +405,7 @@ export class StudentsService {
 
   async getStudentsGrades(id: string, periodId?: string) {
     const courses = await this.prisma.course.findMany({
-      where: {
-        students: { some: { id } },
-      },
+      where: enrolledCourses({ id }),
       orderBy: {
         createdAt: 'asc',
       },
@@ -467,16 +462,18 @@ export class StudentsService {
     }));
   }
 
-  findOne(id: string) {
-    return this.prisma.student.findUniqueOrThrow({
+  /** The student with `courses` read from their active roster entries (ACA-001 BR .15). */
+  async findOne(id: string) {
+    const { courseEnrollments, ...student } = await this.prisma.student.findUniqueOrThrow({
       where: { id },
       include: {
         classGroup: {
           include: { studyPlan: { include: { gradeMetric: true } } },
         },
-        courses: {
-          include: { subject: true, teacher: { include: { user: true } } },
-          orderBy: { subject: { name: 'asc' } },
+        courseEnrollments: {
+          where: ACTIVE_ENROLLMENT,
+          include: { course: { include: { subject: true, teacher: { include: { user: true } } } } },
+          orderBy: { course: { subject: { name: 'asc' } } },
         },
         user: true,
         parents: true,
@@ -493,6 +490,7 @@ export class StudentsService {
         },
       },
     });
+    return { ...student, courses: courseEnrollments.map((e) => e.course) };
   }
 
   async update(id: string, updateStudentInput: UpdateStudentInput) {
@@ -526,32 +524,25 @@ export class StudentsService {
       };
     }
 
-    // Sync courses when classGroupId changes
+    // The new group's study plan drives the auto-generated charges below.
     let newStudyPlanId: string | undefined;
-    if (rest.classGroupId !== undefined) {
-      if (rest.classGroupId) {
-        const group = await this.prisma.classGroup.findUnique({
-          where: { id: rest.classGroupId },
-        });
-        if (group) {
-          newStudyPlanId = group.studyPlanId;
-          const courses = await this.prisma.course.findMany({
-            where: { studyPlanId: group.studyPlanId },
-          });
-          updateData.courses = {
-            set: courses.map((course) => ({ id: course.id })),
-          };
-        }
-      } else {
-        // If classGroupId is being cleared, disconnect all courses
-        updateData.courses = { set: [] };
-      }
+    if (rest.classGroupId) {
+      const group = await this.prisma.classGroup.findUnique({
+        where: { id: rest.classGroupId },
+      });
+      newStudyPlanId = group?.studyPlanId;
     }
 
-    const updated = await this.prisma.student.update({
-      where: { id },
-      data: updateData,
-      include: { classGroup: true, user: true, parents: true },
+    // A class-group change moves the student's plan enrollments in the same transaction
+    // (ACA-001 BR .15). `enrolledCourseIds` is null when the group didn't change.
+    const { updated, enrolledCourseIds } = await this.prisma.$transaction(async (tx) => {
+      const row = await tx.student.update({
+        where: { id },
+        data: updateData,
+        include: { classGroup: true, user: true, parents: true },
+      });
+      const courseIds = rest.classGroupId !== undefined ? await syncStudentPlan(tx, id, row.classGroupId) : null;
+      return { updated: row, enrolledCourseIds: courseIds };
     });
 
     // Auto-generate study-plan charges when the student is assigned a class group.
@@ -568,9 +559,8 @@ export class StudentsService {
       if (rest.classGroupId && updated.userId) {
         await this.chatSync.addUserToClassGroupChats(rest.classGroupId, updated.userId);
       }
-      if (updateData.courses && 'set' in (updateData.courses as object) && updated.userId) {
-        const courseIds = (updateData.courses as { set: { id: string }[] }).set.map((c) => c.id);
-        for (const courseId of courseIds) {
+      if (enrolledCourseIds && updated.userId) {
+        for (const courseId of enrolledCourseIds) {
           await this.chatSync.addUserToCourseChats(courseId, updated.userId);
         }
       }

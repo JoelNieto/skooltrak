@@ -2,6 +2,7 @@ import { ForbiddenException, Inject, Injectable, NotFoundException, Scope } from
 import { REQUEST } from '@nestjs/core';
 import type { Request } from 'express';
 import { GradesService } from '../grades/grades.service';
+import { ACTIVE_ENROLLMENT } from '../courses/course-roster';
 import { PrismaService } from '../prisma.service';
 import { SchoolsService } from '../schools/schools.service';
 import {
@@ -38,9 +39,10 @@ export class GradeReportService {
           },
         },
         user: true,
-        courses: {
-          include: { subject: true },
-          orderBy: { subject: { name: 'asc' } },
+        courseEnrollments: {
+          where: ACTIVE_ENROLLMENT,
+          include: { course: { include: { subject: true } } },
+          orderBy: { course: { subject: { name: 'asc' } } },
         },
       },
     });
@@ -48,6 +50,7 @@ export class GradeReportService {
     if (!student) {
       throw new NotFoundException('Student not found');
     }
+    const courses = student.courseEnrollments.map((e) => e.course);
 
     const isAdmin = role === 'ADMIN' || role === 'ORG_ADMIN' || role === 'SYSADMIN';
     if (!isAdmin) {
@@ -63,7 +66,7 @@ export class GradeReportService {
         });
         const hasAccess =
           teacher &&
-          (student.classGroup?.teacherId === teacher.id || student.courses.some((c) => c.teacherId === teacher.id));
+          (student.classGroup?.teacherId === teacher.id || courses.some((c) => c.teacherId === teacher.id));
         if (!hasAccess) {
           throw new ForbiddenException('You do not have permission to view this grade report');
         }
@@ -86,7 +89,7 @@ export class GradeReportService {
     }));
 
     const gradesRows: GradeReportGradesRow[] = [];
-    for (const course of student.courses) {
+    for (const course of courses) {
       const periodAverages: (number | null)[] = [];
       const validAverages: number[] = [];
 
@@ -143,7 +146,7 @@ export class GradeReportService {
       };
     }
 
-    const attendanceRows = await this.getAttendanceRows(studentId, student.courses, periods);
+    const attendanceRows = await this.getAttendanceRows(studentId, courses, periods);
 
     const habitRows = await this.getHabitRows(studentId, student.classGroupId, periods, selectedPeriodIndex);
 

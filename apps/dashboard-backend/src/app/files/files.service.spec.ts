@@ -3,13 +3,13 @@ import { FilesService } from './files.service';
 
 describe('FilesService access resolution', () => {
   const prismaMock = {} as any;
-  const contextMock = {
-    req: {
-      user: { userId: 'user-1', organizationId: 'org-1' },
-    },
+  // The constructor requires the R2 settings and builds an S3 client from them.
+  const configMock = { get: (key: string) => `test-${key}` } as any;
+  const requestMock = {
+    user: { userId: 'user-1', organizationId: 'org-1' },
   } as any;
 
-  const service = new FilesService(prismaMock, contextMock, {} as any);
+  const service = new FilesService(prismaMock, configMock, requestMock);
 
   const accessContext = {
     schoolIds: ['school-1'],

@@ -5,8 +5,9 @@
 
 import { Logger, ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
-import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app/app.module';
+import { createOpenApiDocument, writeOpenApiDocument } from './openapi';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
@@ -28,13 +29,16 @@ async function bootstrap() {
   const globalPrefix = 'api';
   app.setGlobalPrefix(globalPrefix);
 
-  const swaggerConfig = new DocumentBuilder()
-    .setTitle('Skooltrak Admin API')
-    .setDescription('REST API for admin web client')
-    .setVersion('1.0')
-    .addBearerAuth()
-    .build();
-  const document = SwaggerModule.createDocument(app, swaggerConfig);
+  const document = createOpenApiDocument(app);
+
+  // `nx run <app>:openapi` sets OPENAPI_EXPORT: write the spec and exit before
+  // the app initialises, so no database or port is needed.
+  if (process.env['OPENAPI_EXPORT'] === 'true') {
+    Logger.log(`📄 Wrote ${writeOpenApiDocument(document)}`);
+    await app.close();
+    process.exit(0);
+  }
+
   SwaggerModule.setup('docs', app, document, {
     jsonDocumentUrl: 'openapi.json',
     useGlobalPrefix: true,
@@ -42,9 +46,7 @@ async function bootstrap() {
 
   const port = process.env.PORT || 5050;
   await app.listen(port);
-  Logger.log(
-    `🚀 Application is running on: http://localhost:${port}/${globalPrefix}`
-  );
+  Logger.log(`🚀 Application is running on: http://localhost:${port}/${globalPrefix}`);
   Logger.log(`📘 Swagger UI: http://localhost:${port}/${globalPrefix}/docs`);
   Logger.log(`📄 OpenAPI JSON: http://localhost:${port}/${globalPrefix}/openapi.json`);
 }

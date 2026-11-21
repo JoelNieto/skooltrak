@@ -18,6 +18,27 @@
         }
       }
     },
+    "openapi": {
+      "executor": "nx:run-commands",
+      "dependsOn": ["build"],
+      "outputs": [
+        "{workspaceRoot}/libs/api-client-dashboard/openapi.json",
+        "{workspaceRoot}/libs/api-client-dashboard/src/lib/generated"
+      ],
+      "options": {
+        "commands": [
+          "node dist/apps/dashboard-backend/main.js",
+          "orval --config orval.config.ts --project api-client-dashboard --clean"
+        ],
+        "parallel": false,
+        "env": {
+          "OPENAPI_EXPORT": "true",
+          "OPENAPI_OUTPUT": "libs/api-client-dashboard/openapi.json",
+          "DATABASE_URL": "postgresql://openapi:openapi@127.0.0.1:5432/openapi",
+          "RESEND_API_KEY": "re_openapi_export"
+        }
+      }
+    },
     "prune-lockfile": {
       "dependsOn": ["build"],
       "cache": true,

@@ -28,6 +28,28 @@ jobs:
       - uses: nrwl/nx-set-shas@v4
       - run: bun nx affected -t lint build --parallel=3
 
+  openapi:
+    name: OpenAPI clients up to date
+    runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: postgresql://ci:ci@localhost:5432/ci
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.2.22
+      - run: bun install --frozen-lockfile
+      - run: bunx prisma generate
+      # Builds both backends, writes their specs and reruns orval. No database needed.
+      - run: bun run openapi
+      - name: Fail if the committed spec or client is stale
+        run: |
+          if [ -n "$(git status --porcelain -- libs/api-client-dashboard libs/api-client-admin)" ]; then
+            git status --short -- libs/api-client-dashboard libs/api-client-admin
+            echo "::error::OpenAPI spec or generated client is out of date. Run 'bun run openapi' and commit the result."
+            exit 1
+          fi
+
   test:
     name: Unit tests
     runs-on: ubuntu-latest

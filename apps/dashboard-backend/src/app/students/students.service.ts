@@ -24,6 +24,19 @@ import { PrismaService } from '../prisma.service';
 import { CreateStudentInput } from './dto/create-student.input';
 import { UpdateStudentInput } from './dto/update-student.input';
 
+export const STUDENT_DENIED = 'No tienes acceso a este estudiante';
+export const REFS_DENIED = 'La escuela o el grupo no pertenecen a tu organización';
+
+const STAFF_ROLES = new Set(['ORG_ADMIN', 'ADMIN', 'SYSADMIN', 'TEACHER']);
+
+/**
+ * Student lists and full records are for staff of the organization. Students and parents hold
+ * VIEW_STUDENTS for other features, so the permission alone doesn't decide.
+ */
+export function isStudentStaff(user: AuthUserContext | undefined): boolean {
+  return STAFF_ROLES.has(user?.role?.toUpperCase() ?? '');
+}
+
 @Injectable({ scope: Scope.REQUEST })
 export class StudentsService {
   private readonly logger = new Logger(StudentsService.name);
@@ -41,6 +54,13 @@ export class StudentsService {
    * populates `req.user` as an `AuthUserContext`, whose id field is `userId`
    * (not `id`) — reading `id` silently yielded `undefined` for every actor.
    */
+  /** The caller's organization; lists without one are refused. */
+  private callerOrganization(): string {
+    const { organizationId } = this.requestActor();
+    if (!organizationId) throw new ForbiddenException(STUDENT_DENIED);
+    return organizationId;
+  }
+
   private requestActor(): { userId?: string; organizationId?: string } {
     const user = (this.request as { user?: AuthUserContext } | undefined)?.user;
     return { userId: user?.userId, organizationId: user?.organizationId ?? undefined };
@@ -48,7 +68,6 @@ export class StudentsService {
   async create(createStudentInput: CreateStudentInput) {
     const {
       email,
-      organizationId,
       schoolId,
       classGroupId,
       parentIds,
@@ -68,6 +87,8 @@ export class StudentsService {
       emergencyContactName,
       emergencyContactPhone,
     } = createStudentInput;
+    // The caller's organization, never the body's; the school and group must belong to it.
+    const organizationId = await this.assertOrganizationRefs(schoolId, classGroupId);
 
     const role = await this.prisma.role.findFirstOrThrow({
       where: {
@@ -319,7 +340,40 @@ export class StudentsService {
   }
 
   /** Enrollment codes are parent-linking credentials: only for students of the caller's organization. */
-  private async assertInCallerOrganization(id: string): Promise<void> {
+  /** The caller's organization, after checking that the school (and class group) belong to it. */
+  private async assertOrganizationRefs(schoolId: string, classGroupId?: string | null): Promise<string> {
+    const { organizationId } = this.requestActor();
+    if (!organizationId) throw new ForbiddenException(REFS_DENIED);
+    const school = await this.prisma.school.findFirst({ where: { id: schoolId, organizationId }, select: { id: true } });
+    if (!school) throw new ForbiddenException(REFS_DENIED);
+    if (classGroupId) {
+      const group = await this.prisma.classGroup.findFirst({
+        where: { id: classGroupId, organizationId, schoolId },
+        select: { id: true },
+      });
+      if (!group) throw new ForbiddenException(REFS_DENIED);
+    }
+    return organizationId;
+  }
+
+  /**
+   * Throws 403 unless the caller may read this student's record: staff of the student's
+   * organization, the student, or a linked parent (parents can span organizations, BR-HOM-001.9).
+   */
+  async assertCanRead(id: string): Promise<void> {
+    const user = (this.request as { user?: AuthUserContext } | undefined)?.user;
+    if (!user?.userId) throw new ForbiddenException(STUDENT_DENIED);
+    const student = await this.prisma.student.findUnique({
+      where: { id },
+      select: { organizationId: true, userId: true, parents: { where: { userId: user.userId }, select: { id: true } } },
+    });
+    if (!student) throw new ForbiddenException(STUDENT_DENIED);
+    if (isStudentStaff(user) && student.organizationId === user.organizationId) return;
+    if (student.userId === user.userId || student.parents.length) return;
+    throw new ForbiddenException(STUDENT_DENIED);
+  }
+
+  async assertInCallerOrganization(id: string): Promise<void> {
     const { organizationId } = this.requestActor();
     if (!organizationId) throw new ForbiddenException('El estudiante no pertenece a tu organización');
     const student = await this.prisma.student.findUnique({ where: { id }, select: { organizationId: true } });
@@ -403,7 +457,7 @@ export class StudentsService {
 
   findManyBySchoolId(schoolId: string) {
     return this.prisma.student.findMany({
-      where: { schoolId },
+      where: { schoolId, organizationId: this.callerOrganization() },
       include: { classGroup: true, user: true },
     });
   }
@@ -418,7 +472,7 @@ export class StudentsService {
 
   findManyByClassGroupId(groupId: string) {
     return this.prisma.student.findMany({
-      where: { classGroupId: groupId },
+      where: { classGroupId: groupId, organizationId: this.callerOrganization() },
       include: { classGroup: true, user: true },
       orderBy: { user: { firstName: 'asc' } },
     });
@@ -515,7 +569,12 @@ export class StudentsService {
   }
 
   async update(id: string, updateStudentInput: UpdateStudentInput) {
+    await this.assertInCallerOrganization(id);
     const { email, parentIds, birthDate, ...rest } = updateStudentInput;
+    if (rest.classGroupId) {
+      const { schoolId } = await this.prisma.student.findUniqueOrThrow({ where: { id }, select: { schoolId: true } });
+      await this.assertOrganizationRefs(schoolId, rest.classGroupId);
+    }
 
     // Build update data, only including defined fields
     const updateData: Record<string, unknown> = {};
@@ -664,6 +723,7 @@ export class StudentsService {
    * because only the missing `userId` link is added (Phase 2.6 / task 31).
    */
   async attachUser(id: string, input: { email: string; firstName?: string; lastName?: string }) {
+    await this.assertInCallerOrganization(id);
     const email = input.email?.toLowerCase().trim();
     if (!email) {
       throw new ConflictException('El correo es obligatorio para crear el acceso');
@@ -745,6 +805,7 @@ export class StudentsService {
   }
 
   async remove(id: string) {
+    await this.assertInCallerOrganization(id);
     return this.prisma.student.delete({ where: { id } });
   }
 }

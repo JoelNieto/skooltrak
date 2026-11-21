@@ -17,12 +17,17 @@ import {
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import type { Response } from 'express';
-import { GradeAccessService, READ_DENIED } from '../grades/grade-access.service';
+import { canSeeStudent, GradeAccessService, READ_DENIED } from '../grades/grade-access.service';
 import { GradesService } from '../grades/grades.service';
 import { CreateStudentInput } from './dto/create-student.input';
 import { UpdateStudentInput } from './dto/update-student.input';
 import { Student } from './entities/student.entity';
-import { StudentsService } from './students.service';
+import { isStudentStaff, STUDENT_DENIED, StudentsService } from './students.service';
+
+/** Lists of students are for staff of the organization (see `isStudentStaff`). */
+function assertStaff(user: AuthUserContext | undefined): void {
+  if (!isStudentStaff(user)) throw new ForbiddenException(STUDENT_DENIED);
+}
 
 function enrichStudent(s: Student) {
   return {
@@ -55,34 +60,40 @@ export class StudentsController {
 
   @Get('count')
   @ApiOperation({ summary: 'Students count' })
-  findManyStudentsCount(@Query() query: FetchDataQueryDto) {
+  async findManyStudentsCount(@Req() req: AuthenticatedRequest, @Query() query: FetchDataQueryDto) {
+    assertStaff(req.user);
     return this.studentsService.getCount(query);
   }
 
   @Get('by-school/:schoolId')
   @ApiOperation({ summary: 'Students by school' })
-  async findManyBySchoolId(@Param('schoolId') schoolId: string) {
+  async findManyBySchoolId(@Req() req: AuthenticatedRequest, @Param('schoolId') schoolId: string) {
+    assertStaff(req.user);
     const list = await this.studentsService.findManyBySchoolId(schoolId);
     return list.map((s) => enrichStudent(s as Student));
   }
 
   @Get('by-course/:courseId')
   @ApiOperation({ summary: 'Students by course' })
-  async findManyByCourseId(@Param('courseId') courseId: string) {
+  async findManyByCourseId(@Req() req: AuthenticatedRequest, @Param('courseId') courseId: string) {
+    // Same rule as the course's grades: staff see the roster, others only the students they may see.
+    const scope = await this.gradeAccess.readScope(req.user, courseId);
     const list = await this.studentsService.findManyByCourseId(courseId);
-    return list.map((s) => enrichStudent(s as Student));
+    return list.filter((s) => canSeeStudent(scope, s.id)).map((s) => enrichStudent(s as Student));
   }
 
   @Get('by-group/:groupId')
   @ApiOperation({ summary: 'Students by class group' })
-  async findManyByClassGroupId(@Param('groupId') groupId: string) {
+  async findManyByClassGroupId(@Req() req: AuthenticatedRequest, @Param('groupId') groupId: string) {
+    assertStaff(req.user);
     const list = await this.studentsService.findManyByClassGroupId(groupId);
     return list.map((s) => enrichStudent(s as Student));
   }
 
   @Get()
   @ApiOperation({ summary: 'List students' })
-  async findAll(@Query() query: FetchDataQueryDto) {
+  async findAll(@Req() req: AuthenticatedRequest, @Query() query: FetchDataQueryDto) {
+    assertStaff(req.user);
     const resp = await this.studentsService.findAll(query);
     return { ...resp, data: resp.data.map((s) => enrichStudent(s as Student)) };
   }
@@ -160,6 +171,7 @@ export class StudentsController {
   @Get(':id')
   @ApiOperation({ summary: 'Get student by id' })
   async findOne(@Req() req: AuthenticatedRequest, @Param('id') id: string) {
+    await this.studentsService.assertCanRead(id);
     const s = enrichStudent((await this.studentsService.findOne(id)) as Student);
     // The enrollment code is omitted from every query by default (prisma.service.ts); admins of the
     // student's organization get it back for the student page.

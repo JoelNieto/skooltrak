@@ -122,6 +122,7 @@ import type {
   PermissionsControllerFindAllParams,
   PreferenceInput,
   ProcessStorePaymentInput,
+  PublishGradesInput,
   QuizzesControllerFindAllParams,
   RegenerateStudyPlanChargesInput,
   RemoveShareInput,
@@ -7528,6 +7529,81 @@ export class SkooltrakDashboardAPIService {
     return this.http.put<TData>(
       `/api/v1/gradebook/${courseId}/cells`,
       saveCellsInput,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'body',
+      }
+    );
+  }
+
+/**
+ * @summary Publish the course's draft columns and notify families (FR-ASM-001.7, BR .9)
+ */
+ gradebookControllerPublish<TData = void>(courseId: string,
+    publishGradesInput: PublishGradesInput, options?: HttpClientBodyOptions): Observable<TData>;
+ gradebookControllerPublish<TData = void>(courseId: string,
+    publishGradesInput: PublishGradesInput, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
+ gradebookControllerPublish<TData = void>(courseId: string,
+    publishGradesInput: PublishGradesInput, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
+  gradebookControllerPublish<TData = void>(
+    courseId: string,
+    publishGradesInput: PublishGradesInput, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
+    if (options?.observe === 'events') {
+      return this.http.post<TData>(
+      `/api/v1/gradebook/${courseId}/publish`,
+      publishGradesInput,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'events',
+      }
+    );
+    }
+
+    if (options?.observe === 'response') {
+      return this.http.post<TData>(
+      `/api/v1/gradebook/${courseId}/publish`,
+      publishGradesInput,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'response',
+      }
+    );
+    }
+
+    return this.http.post<TData>(
+      `/api/v1/gradebook/${courseId}/publish`,
+      publishGradesInput,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'body',
+      }
+    );
+  }
+
+/**
+ * @summary A cell's revisions, newest first (FR-ASM-001.8, BR .8)
+ */
+ gradebookControllerHistory<TData = void>(studentGradeId: string, options?: HttpClientBodyOptions): Observable<TData>;
+ gradebookControllerHistory<TData = void>(studentGradeId: string, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
+ gradebookControllerHistory<TData = void>(studentGradeId: string, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
+  gradebookControllerHistory<TData = void>(
+    studentGradeId: string, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
+    if (options?.observe === 'events') {
+      return this.http.get<TData>(
+      `/api/v1/gradebook/cells/${studentGradeId}/history`,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'events',
+      }
+    );
+    }
+
+    if (options?.observe === 'response') {
+      return this.http.get<TData>(
+      `/api/v1/gradebook/cells/${studentGradeId}/history`,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'response',
+      }
+    );
+    }
+
+    return this.http.get<TData>(
+      `/api/v1/gradebook/cells/${studentGradeId}/history`,{
         ...(options as Omit<NonNullable<typeof options>, 'observe'>),
         observe: 'body',
       }

@@ -9,4 +9,7 @@ export class CreateStudentGradeInput
     studentId: string;
 
     score: number | Prisma.Decimal;
+
+    /** Required when the grade is published and the score changes (BR-ASM-001.8, 3–300 characters). */
+    reason?: string;
 }

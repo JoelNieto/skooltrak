@@ -266,6 +266,8 @@ export default class Grade {
       data: {
         studentGrade,
         metric: this.metric(),
+        // BR-ASM-001.8: changing a published score asks for a reason.
+        published: !!this.gradeResource.value()?.published,
       },
       title: 'Editar calificacion',
     });

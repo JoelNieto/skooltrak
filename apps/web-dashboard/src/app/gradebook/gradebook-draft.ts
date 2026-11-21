@@ -2,13 +2,25 @@ import { courseAverage, formatScore, gradeStatus, GradeStatus, meanOf, parseCell
 import type { Gradebook } from './gradebook-grid';
 
 /**
- * Unsaved cells of one gradebook view (ASM-001-S03): what the teacher typed, keyed by
+ * Unsaved cells of one gradebook view (ASM-001-S03, S04): what the teacher typed, keyed by
  * `gradeId|studentId`, with the `updatedAt` the cell had when it was loaded (BR-ASM-001.7).
  */
 export interface CellEdit {
+  /** The score as typed. */
   text: string;
   updatedAt: string | null;
+  /** New comment (BR-ASM-001.14); undefined when not edited. */
+  comment?: string;
+  /** Reason for this cell only (BR-ASM-001.8); undefined uses the save's reason. */
+  reason?: string;
 }
+
+/** BR-ASM-001.8: 3–300 characters once trimmed. */
+export const isValidReason = (reason: string | null | undefined) => {
+  const length = reason?.trim().length ?? 0;
+  return length >= 3 && length <= 300;
+};
+export const COMMENT_MAX = 500;
 export type Edits = Record<string, CellEdit>;
 
 export const cellKey = (gradeId: string, studentId: string) => `${gradeId}|${studentId}`;
@@ -23,12 +35,19 @@ export const savedText = (score: number | null) => (score === null ? '' : format
 export interface ViewCell {
   key: string;
   gradeId: string;
-  /** The column is a draft and the course has a scale: the cell is an input (published ones wait for S04). */
+  studentGradeId: string | null;
+  /** The course has a scale: the cell is an input. */
   editable: boolean;
+  published: boolean;
   text: string;
   /** Score counted in the averages: the typed one when valid, else the saved one. */
   score: number | null;
+  comment: string;
+  /** The score or the comment differs from the saved cell. */
   changed: boolean;
+  /** A published score changes: the save needs a reason (BR-ASM-001.8). */
+  needsReason: boolean;
+  reason: string;
   error: string | null;
 }
 
@@ -57,19 +76,38 @@ export function applyEdits(book: Gradebook, edits: Edits): GradebookView {
     const cells = columns.map((column, i): ViewCell => {
       const saved = row.cells[i];
       const key = cellKey(column.id, row.student.id);
-      const editable = !!book.metric && !column.published;
+      const editable = !!book.metric;
       const edit = editable ? edits[key] : undefined;
+      const base = {
+        key,
+        gradeId: column.id,
+        studentGradeId: saved.studentGradeId,
+        editable,
+        published: column.published,
+        comment: edit?.comment ?? saved.comment ?? '',
+        reason: edit?.reason ?? '',
+      };
       if (!edit) {
-        return { key, gradeId: column.id, editable, text: savedText(saved.score), score: saved.score, changed: false, error: null };
+        return { ...base, text: savedText(saved.score), score: saved.score, changed: false, needsReason: false, error: null };
       }
+      const commentError = (edit.comment?.length ?? 0) > COMMENT_MAX ? `Máximo ${COMMENT_MAX} caracteres en el comentario` : null;
       const parsed = parseCell(edit.text, book.metric ?? { minimum: 0, maximum: 0 });
-      if (parsed.error) {
+      if (parsed.error || commentError) {
         invalid += 1;
-        return { key, gradeId: column.id, editable, text: edit.text, score: saved.score, changed: true, error: parsed.error };
+        return { ...base, text: edit.text, score: saved.score, changed: true, needsReason: false, error: parsed.error ?? commentError };
       }
-      const isChange = parsed.score !== saved.score;
+      const scoreChange = parsed.score !== saved.score;
+      const commentChange = edit.comment !== undefined && (edit.comment || null) !== (saved.comment || null);
+      const isChange = scoreChange || commentChange;
       if (isChange) changed += 1;
-      return { key, gradeId: column.id, editable, text: edit.text, score: parsed.score, changed: isChange, error: null };
+      return {
+        ...base,
+        text: edit.text,
+        score: parsed.score,
+        changed: isChange,
+        needsReason: column.published && scoreChange,
+        error: null,
+      };
     });
     const average = courseAverage(columns.map((c, i) => ({ bucketId: c.bucketId, weight: c.weight, score: cells[i].score })));
     return { student: row.student, cells, average, status: gradeStatus(average, book.metric?.minimumApproval) };
@@ -93,13 +131,23 @@ export function changedCells(book: Gradebook, edits: Edits) {
   return view.rows.flatMap((row) =>
     row.cells
       .filter((cell) => cell.changed && !cell.error)
-      .map((cell) => ({
-        gradeId: cell.gradeId,
-        studentId: row.student.id,
-        score: cell.score,
-        updatedAt: edits[cell.key]?.updatedAt ?? null,
-      })),
+      .map((cell) => {
+        const edit = edits[cell.key];
+        return {
+          gradeId: cell.gradeId,
+          studentId: row.student.id,
+          score: cell.score,
+          updatedAt: edit?.updatedAt ?? null,
+          ...(edit?.comment !== undefined ? { comment: edit.comment } : {}),
+          ...(cell.needsReason && isValidReason(edit?.reason) ? { reason: edit?.reason?.trim() } : {}),
+        };
+      }),
   );
+}
+
+/** Changed published scores that still lack their own reason: the save asks for one covering them. */
+export function cellsNeedingReason(view: GradebookView): ViewCell[] {
+  return view.rows.flatMap((row) => row.cells.filter((cell) => cell.needsReason && !isValidReason(cell.reason)));
 }
 
 // ── Local backup (FRD §8) ────────────────────────────────────────────────────────────────────

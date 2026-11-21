@@ -37,3 +37,53 @@ describe('StudentGradesService', () => {
     await expect(service.getAverageScoreForStudent('C1', 'P1', 'S1')).resolves.toBeNull();
   });
 });
+
+/** ASM-001-S04: the grade page's score dialog follows BR .8 too. */
+describe('StudentGradesService writes on published grades', () => {
+  function build(score: number | null) {
+    const revisions: unknown[] = [];
+    const tx = {
+      studentGrade: {
+        findUniqueOrThrow: jest.fn().mockResolvedValue({ score: score === null ? null : decimal(score) }),
+        findUnique: jest.fn().mockResolvedValue(score === null ? null : { score: decimal(score) }),
+        update: jest.fn().mockResolvedValue({ id: 'SG1' }),
+        upsert: jest.fn().mockResolvedValue({ id: 'SG1' }),
+      },
+      studentGradeRevision: { createMany: jest.fn(async ({ data }) => revisions.push(...data)) },
+    };
+    const prisma = { $transaction: jest.fn((fn: (t: typeof tx) => unknown) => fn(tx)) };
+    return { service: new StudentGradesService(prisma as never), tx, revisions };
+  }
+
+  it('refuses a changed published score without a reason (BR-ASM-001.8)', async () => {
+    const { service, tx } = build(2);
+    await expect(service.update('SG1', { id: 'SG1', score: 3 }, true, 'u-teacher')).rejects.toThrow('Indica el motivo del cambio');
+    expect(tx.studentGrade.update).not.toHaveBeenCalled();
+  });
+
+  it('writes a revision with the previous and new score', async () => {
+    const { service, revisions } = build(2);
+    await service.update('SG1', { id: 'SG1', score: 3, reason: 'Recalificada' }, true, 'u-teacher');
+    expect(revisions).toEqual([{ studentGradeId: 'SG1', previousScore: 2, score: 3, reason: 'Recalificada', changedById: 'u-teacher' }]);
+  });
+
+  it('needs no reason for a draft, an unchanged score or a comment', async () => {
+    for (const [input, published] of [
+      [{ id: 'SG1', score: 3 }, false],
+      [{ id: 'SG1', score: 2 }, true],
+      [{ id: 'SG1', comments: 'Bien' }, true],
+    ] as const) {
+      const { service, revisions } = build(2);
+      await service.update('SG1', input, published, 'u-teacher');
+      expect(revisions).toEqual([]);
+    }
+  });
+
+  it('asks for a reason when a first score is added to a published grade', async () => {
+    const { service, revisions } = build(null);
+    const input = { gradeId: 'GR1', studentId: 'S1', score: 4 };
+    await expect(service.create(input, true, 'u-teacher')).rejects.toThrow('Indica el motivo del cambio');
+    await service.create({ ...input, reason: 'Entregó tarde' }, true, 'u-teacher');
+    expect(revisions).toEqual([{ studentGradeId: 'SG1', previousScore: null, score: 4, reason: 'Entregó tarde', changedById: 'u-teacher' }]);
+  });
+});

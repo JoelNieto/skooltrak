@@ -6,7 +6,7 @@ import { data, E2E_PASSWORD, personas, storageStatePath } from '../support/fixtu
  * docs/product/slices/ASM-001-S03-inline-entry.md
  *
  * Seeded in `teacher`'s course (bucket "Pruebas", scale 1–5, pass mark 3.0):
- * - "Taller E2E", published: Ana 4, Beto 2, Carla 4.5 (read-only in the grid until S04);
+ * - "Taller E2E", published: Ana 4, Beto 2, Carla 4.5;
  * - "Prueba corta E2E", draft: Ana 4.5, Beto and Carla empty.
  * Saving Beto's draft cell to 3 makes his "Pruebas" mean (2 + 3) / 2 = 2.5, "En riesgo".
  *
@@ -82,7 +82,7 @@ test.describe('Gradebook entry @FR-ASM-001.4 @FR-ASM-001.6', () => {  test.use({
     await page.getByRole('tab', { name: 'Libro de calificaciones' }).click();
 
     await expect(cell(page, ANA, DRAFT)).toHaveValue('4.5');
-    await expect(cell(page, ANA, PUBLISHED)).toHaveCount(0); // published: read-only until S04
+    await expect(cell(page, ANA, PUBLISHED)).toHaveValue('4'); // published cells are inputs too (S04)
     await expect(page.getByText('Escala 1–5 · nota mínima 3 · Tab pasa al siguiente estudiante')).toBeVisible();
 
     await cell(page, BETO, DRAFT).fill('3');

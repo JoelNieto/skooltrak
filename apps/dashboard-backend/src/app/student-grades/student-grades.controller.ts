@@ -42,7 +42,7 @@ export class StudentGradesController {
     const grade = await this.access.gradeRef(createStudentGradeInput.gradeId);
     await this.access.assertCanWriteCourse(req.user, grade.courseId);
     await this.access.assertStudentEnrolled(grade.courseId, createStudentGradeInput.studentId);
-    return this.studentGradesService.create(createStudentGradeInput);
+    return this.studentGradesService.create(createStudentGradeInput, grade.published, req.user?.userId ?? null);
   }
 
   @Get('by-course/:courseId')
@@ -92,7 +92,7 @@ export class StudentGradesController {
     if ((gradeId && gradeId !== ref.gradeId) || (studentId && studentId !== ref.studentId)) {
       throw new BadRequestException(MOVE_DENIED);
     }
-    return this.studentGradesService.update(ref.id, updateStudentGradeInput);
+    return this.studentGradesService.update(ref.id, updateStudentGradeInput, ref.grade.published, req.user?.userId ?? null);
   }
 
   @Delete(':id')

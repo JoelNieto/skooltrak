@@ -7,6 +7,7 @@ import {
   Modal,
   Toast,
   UiField,
+  UiInput,
   UiSelect,
   UiTable,
   UiTableEmpty,
@@ -32,7 +33,20 @@ import { RouterLink } from '@angular/router';
 import { formatScore, parseCell } from '@/shared';
 import { firstValueFrom } from 'rxjs';
 import GradesForm from '../grades/grades-form';
-import { applyEdits, cellKey, changedCells, Edits, readBackup, viewKey, writeBackup } from './gradebook-draft';
+import {
+  applyEdits,
+  cellKey,
+  cellsNeedingReason,
+  changedCells,
+  CellEdit,
+  Edits,
+  readBackup,
+  savedText,
+  viewKey,
+  writeBackup,
+} from './gradebook-draft';
+import PublishDialog from './publish-dialog';
+import ReasonDialog from './reason-dialog';
 import { UnsavedChanges } from './unsaved-changes';
 
 /** BR-ASM-001.5 */
@@ -51,11 +65,17 @@ export interface Gradebook {
     id: string;
     name: string;
     weight: number;
-    columns: { id: string; title: string; date: string; published: boolean }[];
+    columns: { id: string; title: string; date: string; published: boolean; publishedAt: string | null }[];
   }[];
   rows: {
     student: { id: string; firstName: string; name: string; initials: string; color: string | null };
-    cells: { gradeId: string; studentGradeId: string | null; score: number | null; updatedAt: string | null }[];
+    cells: {
+      gradeId: string;
+      studentGradeId: string | null;
+      score: number | null;
+      comment: string | null;
+      updatedAt: string | null;
+    }[];
     average: number | null;
     status: GradebookStatus | null;
   }[];
@@ -69,6 +89,17 @@ type SaveRefusal = {
   cells: { gradeId: string; studentId: string; reason?: string; score?: number | null; updatedAt?: string | null }[];
 };
 
+/** `GET /api/v1/gradebook/cells/:id/history` (FR-ASM-001.8). */
+type Revision = {
+  id: string;
+  previousScore: number | null;
+  score: number | null;
+  excused: boolean;
+  reason: string;
+  changedBy: { id: string; name: string } | null;
+  createdAt: string;
+};
+
 type SaveState = { kind: 'idle' } | { kind: 'saving' } | { kind: 'saved' } | { kind: 'conflict' } | { kind: 'error'; message: string };
 
 const STATUS: Record<GradebookStatus, { label: string; tone: BadgeTone }> = {
@@ -77,13 +108,22 @@ const STATUS: Record<GradebookStatus, { label: string; tone: BadgeTone }> = {
   ON_TRACK: { label: 'Al día', tone: 'success' },
 };
 const NO_GROUP = 'none';
+
+/** BR-HOM-001.1 bands on the plan's scale, for the side panel. */
+function band(score: number | null, metric: Gradebook['metric']): { label: string; tone: BadgeTone } | null {
+  if (score === null || !metric) return null;
+  if (score >= metric.minimumExcellence) return { label: 'Excelencia', tone: 'success' };
+  if (score >= metric.minimumApproval) return { label: 'Aprobado', tone: 'info' };
+  return { label: 'Bajo la nota mínima', tone: 'danger' };
+}
 let nextId = 0;
 
 /**
  * A course's gradebook (ASM-001-S02, S03): one group's students for one period, the period's columns
  * grouped by bucket, each student's average (BR .4, drafts included) and status (BR .5), and the
- * group's averages. Draft columns are typed into from the keyboard and saved together as a draft;
- * published columns stay read-only until S04. Unsaved cells survive a reload (FRD §8).
+ * group's averages. Cells are typed into from the keyboard and saved together; a changed published
+ * score needs a reason and is kept in the cell's history (S04). Draft columns are published from
+ * here. Selecting a cell opens its side panel. Unsaved cells survive a reload (FRD §8).
  */
 @Component({
   selector: 'app-gradebook-grid',
@@ -97,6 +137,7 @@ let nextId = 0;
     Icon,
     RouterLink,
     UiField,
+    UiInput,
     UiSelect,
     UiTable,
     UiTableEmpty,
@@ -213,10 +254,21 @@ let nextId = 0;
         >
           Guardar borrador
         </button>
+        <button
+          uiButton
+          variant="secondary"
+          size="sm"
+          [disabled]="v.invalid > 0 || !draftColumns().length || saveState().kind === 'saving' || publishing()"
+          [loading]="publishing()"
+          (click)="publish()"
+        >
+          Publicar calificaciones
+        </button>
       </div>
     }
 
-    <div class="mt-4 overflow-x-auto rounded-box border border-line">
+    <div [class]="panel() ? 'mt-4 grid items-start gap-4 lg:grid-cols-[minmax(0,1fr)_20rem]' : 'mt-4'">
+    <div class="min-w-0 overflow-x-auto rounded-box border border-line">
       <table uiTable density="compact" class="gradebook" [attr.aria-busy]="gradebook.isLoading()" aria-label="Libro de calificaciones">
         <thead>
           <tr>
@@ -286,6 +338,7 @@ let nextId = 0;
                         [attr.aria-invalid]="cell.error ? 'true' : null"
                         [attr.aria-describedby]="cell.error ? errorId(cell.key) : null"
                         [value]="cell.text"
+                        (focus)="selected.set(cell.key)"
                         (input)="edit(cell.key, $any($event.target).value)"
                         (keydown)="move($event, r, c)"
                       />
@@ -338,6 +391,70 @@ let nextId = 0;
         }
       </table>
     </div>
+
+    @if (panel(); as p) {
+      <aside class="rounded-box border border-line bg-surface-1 p-4 lg:sticky lg:top-4" aria-label="Detalle de la celda">
+        <div class="flex items-start justify-between gap-2">
+          <div class="min-w-0">
+            <h3 class="font-semibold text-ink-strong">{{ p.student }}</h3>
+            <p class="text-sm text-ink-muted">{{ p.column }} · {{ p.bucket }}</p>
+          </div>
+          <button uiButton variant="ghost" size="sm" aria-label="Cerrar detalle" (click)="selected.set(null)">
+            <ui-icon name="x" />
+          </button>
+        </div>
+        <p class="mt-3 flex flex-wrap items-center gap-2">
+          <span class="text-2xl font-semibold tabular-nums text-ink-strong">
+            {{ p.cell.score === null ? '—' : (p.cell.score | number: '1.1-1') }}
+          </span>
+          @if (p.band) {
+            <span uiBadge size="sm" [tone]="p.band.tone">{{ p.band.label }}</span>
+          }
+          @if (p.cell.published) {
+            <span uiBadge size="sm" tone="info">Publicada</span>
+          } @else {
+            <span uiBadge size="sm">Borrador</span>
+          }
+        </p>
+        <ui-field
+          label="Comentario"
+          class="mt-3"
+          hint="Lo verán el estudiante y su familia cuando la calificación esté publicada. Máximo 500 caracteres."
+        >
+          <textarea uiInput rows="3" maxlength="500" [value]="p.cell.comment" (input)="setComment(p.cell.key, $any($event.target).value)"></textarea>
+        </ui-field>
+        @if (p.cell.needsReason) {
+          <ui-field label="Motivo de este cambio" class="mt-3" hint="Si lo dejas vacío, al guardar se pedirá un motivo para todos los cambios.">
+            <input uiInput maxlength="300" [value]="p.cell.reason" (input)="setReason(p.cell.key, $any($event.target).value)" />
+          </ui-field>
+        }
+        <h4 class="mt-4 text-sm font-semibold text-ink-strong">Historial de cambios</h4>
+        @if (!p.cell.studentGradeId) {
+          <p class="mt-1 text-sm text-ink-muted">Sin cambios registrados.</p>
+        } @else if (history.isLoading()) {
+          <p class="mt-1 text-sm text-ink-muted">Cargando…</p>
+        } @else if (history.error()) {
+          <p class="mt-1 text-sm text-error">No se pudo cargar el historial.</p>
+        } @else {
+          <ol class="mt-2 flex flex-col gap-3" aria-label="Historial de cambios">
+            @for (revision of history.value()?.revisions ?? []; track revision.id) {
+              <li class="text-sm">
+                <p class="font-medium tabular-nums text-ink-strong">
+                  {{ scoreText(revision.previousScore) }} → {{ scoreText(revision.score) }}
+                </p>
+                <p class="text-ink">{{ revision.reason }}</p>
+                <p class="text-xs text-ink-muted">
+                  {{ revision.changedBy?.name ?? 'Usuario eliminado' }} · {{ revision.createdAt | date: 'short' }}
+                </p>
+              </li>
+            } @empty {
+              <li class="text-sm text-ink-muted">Sin cambios registrados.</li>
+            }
+          </ol>
+        }
+      </aside>
+    }
+    </div>
   `,
 })
 export default class GradebookGrid {
@@ -380,7 +497,41 @@ export default class GradebookGrid {
   protected readonly hasEdits = computed(() => Object.keys(this.draft()?.edits ?? {}).length > 0);
   protected readonly editableColumns = computed(() => {
     const book = this.gradebook.value();
-    return book?.metric ? book.buckets.flatMap((b) => b.columns).filter((c) => !c.published).length : 0;
+    return book?.metric ? book.buckets.flatMap((b) => b.columns).length : 0;
+  });
+  /** Draft columns of the view, for "Publicar calificaciones" (FR-ASM-001.7). */
+  protected readonly draftColumns = computed(() =>
+    (this.gradebook.value()?.buckets ?? []).flatMap((b) => b.columns).filter((c) => !c.published),
+  );
+  protected readonly publishing = signal(false);
+  /** Columns saved in this session: ticked by default when publishing. */
+  readonly #sessionColumns = new Set<string>();
+
+  /** The cell whose side panel is open (FR-ASM-001.8). */
+  protected readonly selected = signal<string | null>(null);
+  protected readonly panel = computed(() => {
+    const key = this.selected();
+    const book = this.gradebook.value();
+    const view = this.view();
+    if (!key || !book || !view) return null;
+    const columns = book.buckets.flatMap((b) => b.columns.map((c) => ({ ...c, bucket: b.name })));
+    for (const row of view.rows) {
+      const index = row.cells.findIndex((c) => c.key === key);
+      if (index < 0) continue;
+      const cell = row.cells[index];
+      return {
+        student: row.student.name,
+        column: columns[index].title,
+        bucket: columns[index].bucket,
+        cell,
+        band: band(cell.score, book.metric),
+      };
+    }
+    return null;
+  });
+  protected readonly history = httpResource<{ revisions: Revision[] }>(() => {
+    const id = this.panel()?.cell.studentGradeId;
+    return id ? `/api/v1/gradebook/cells/${id}/history` : undefined;
   });
   protected readonly saveError = computed(() => {
     const state = this.saveState();
@@ -421,6 +572,7 @@ export default class GradebookGrid {
         this.restored.set(!!backup);
         this.conflicts.set(new Set());
         this.saveState.set({ kind: 'idle' });
+        this.selected.set(null);
       });
     });
     // Keep the backup and the leave guard in step with the unsaved cells.
@@ -435,17 +587,33 @@ export default class GradebookGrid {
 
   /** FR-ASM-001.4: what the teacher typed in a cell; typing the saved value back undoes the change. */
   protected edit(key: string, text: string): void {
+    this.updateEdit(key, { text });
+  }
+
+  /** FR-ASM-001.8: the cell's comment, saved with the draft (BR-ASM-001.14). */
+  protected setComment(key: string, comment: string): void {
+    this.updateEdit(key, { comment });
+  }
+
+  /** FR-ASM-001.8: a reason for this published cell only (BR-ASM-001.8). */
+  protected setReason(key: string, reason: string): void {
+    this.updateEdit(key, { reason });
+  }
+
+  /** Merges a change into the cell's edit, and drops the edit once the cell matches what is saved. */
+  private updateEdit(key: string, patch: Partial<CellEdit>): void {
     const book = this.gradebook.value();
     const draft = this.draft();
     if (!book?.metric || !draft) return;
     const saved = this.savedCell(book, key);
     const edits = { ...draft.edits };
-    const parsed = parseCell(text, book.metric);
-    if (!parsed.error && parsed.score === (saved?.score ?? null)) {
-      delete edits[key];
-    } else {
-      edits[key] = { text, updatedAt: edits[key]?.updatedAt ?? saved?.updatedAt ?? null };
-    }
+    const current: CellEdit = edits[key] ?? { text: savedText(saved?.score ?? null), updatedAt: saved?.updatedAt ?? null };
+    const next: CellEdit = { ...current, ...patch };
+    const parsed = parseCell(next.text, book.metric);
+    const sameScore = !parsed.error && parsed.score === (saved?.score ?? null);
+    const sameComment = next.comment === undefined || (next.comment || null) === (saved?.comment || null);
+    if (sameScore && sameComment) delete edits[key];
+    else edits[key] = next;
     this.draft.set({ ...draft, edits });
     if (this.saveState().kind === 'saved') this.saveState.set({ kind: 'idle' });
   }
@@ -462,25 +630,77 @@ export default class GradebookGrid {
     target.select();
   }
 
-  /** FR-ASM-001.6: every valid change in one request. */
-  protected async save(): Promise<void> {
+  /**
+   * FR-ASM-001.6: every valid change in one request. Changed published scores without their own
+   * reason are covered by one reason asked for here (BR-ASM-001.8). Resolves to true once saved.
+   */
+  protected async save(): Promise<boolean> {
     const book = this.gradebook.value();
     const draft = this.draft();
-    if (!book?.periodId || !draft) return;
+    const view = this.view();
+    if (!book?.periodId || !draft || !view) return false;
     const cells = changedCells(book, draft.edits);
-    if (!cells.length) return;
+    if (!cells.length) return true;
+
+    let reason: string | undefined;
+    const needing = cellsNeedingReason(view);
+    if (needing.length) {
+      const answer = await firstValueFrom(
+        this.#modal.open<string | false, ReasonDialog>(ReasonDialog, { title: 'Motivo del cambio', data: { count: needing.length } }).closed,
+      );
+      if (!answer) return false;
+      reason = answer;
+    }
 
     this.saveState.set({ kind: 'saving' });
     try {
-      await firstValueFrom(this.#http.put(`/api/v1/gradebook/${book.course.id}/cells`, { periodId: book.periodId, cells }));
+      await firstValueFrom(
+        this.#http.put(`/api/v1/gradebook/${book.course.id}/cells`, { periodId: book.periodId, ...(reason ? { reason } : {}), cells }),
+      );
+      for (const cell of cells) this.#sessionColumns.add(cell.gradeId);
       this.draft.set({ key: draft.key, edits: {} });
       this.conflicts.set(new Set());
       this.restored.set(false);
       this.saveState.set({ kind: 'saved' });
-      this.#toast.showSuccess('Notas guardadas como borrador');
+      this.#toast.showSuccess(needing.length ? 'Notas guardadas; los cambios a notas publicadas quedaron en el historial' : 'Notas guardadas como borrador');
       this.gradebook.reload();
+      this.history.reload();
+      return true;
     } catch (error) {
       this.handleSaveError(error, draft.key);
+      return false;
+    }
+  }
+
+  /**
+   * FR-ASM-001.7: saves pending changes, then asks which draft columns to publish (those changed in
+   * this session ticked) and publishes them, which notifies students and parents.
+   */
+  protected async publish(): Promise<void> {
+    const view = this.view();
+    if (!view || view.invalid) return;
+    if (view.changed && !(await this.save())) return;
+
+    const book = this.gradebook.value();
+    const drafts = this.draftColumns();
+    if (!book || !drafts.length) return;
+    const chosen = await firstValueFrom(
+      this.#modal.open<string[] | false, PublishDialog>(PublishDialog, {
+        title: 'Publicar calificaciones',
+        data: { columns: drafts.map((c) => ({ id: c.id, title: c.title, date: c.date, changed: this.#sessionColumns.has(c.id) })) },
+      }).closed,
+    );
+    if (!chosen || !chosen.length) return;
+
+    this.publishing.set(true);
+    try {
+      await firstValueFrom(this.#http.post(`/api/v1/gradebook/${book.course.id}/publish`, { gradeIds: chosen }));
+      this.#toast.showSuccess(chosen.length === 1 ? 'Calificación publicada' : `${chosen.length} calificaciones publicadas`);
+      this.gradebook.reload();
+    } catch {
+      this.saveState.set({ kind: 'error', message: 'No se pudieron publicar las calificaciones.' });
+    } finally {
+      this.publishing.set(false);
     }
   }
 
@@ -543,6 +763,10 @@ export default class GradebookGrid {
 
   protected scaleText(value: number): string {
     return formatScore(value);
+  }
+
+  protected scoreText(value: number | null): string {
+    return value === null ? 'Sin nota' : formatScore(value);
   }
 
   protected groupValue(id: string | null): string {

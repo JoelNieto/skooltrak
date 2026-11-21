@@ -87,7 +87,7 @@ export class GradesController {
       await this.access.assertBucketInCourse(updateGradeInput.bucketId, existing.courseId);
     }
     this.access.assertCanChangePublished(req.user, existing.published, updateGradeInput.published);
-    return this.gradesService.update(existing.id, updateGradeInput);
+    return this.gradesService.update(existing.id, updateGradeInput, req.user?.userId ?? null);
   }
 
   @Delete(':id')

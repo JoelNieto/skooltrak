@@ -1,7 +1,7 @@
-import { applyEdits, cellKey, changedCells } from './gradebook-draft';
+import { applyEdits, cellKey, cellsNeedingReason, changedCells } from './gradebook-draft';
 import type { Gradebook } from './gradebook-grid';
 
-/** ASM-001-S03: the grid with unsaved values applied (FR-ASM-001.4, .5; BR .2, .4, .5). */
+/** ASM-001-S03, S04: the grid with unsaved values applied (FR-ASM-001.4, .5, .8; BR .2, .4, .5, .8). */
 const T = '2026-11-20T10:00:00.000Z';
 const book = (): Gradebook => ({
   course: { id: 'C1', name: 'Matemáticas' },
@@ -11,15 +11,15 @@ const book = (): Gradebook => ({
   classGroups: [],
   classGroupId: 'G1',
   buckets: [
-    { id: 'B-daily', name: 'Trabajo diario', weight: 40, columns: [{ id: 'G-d', title: 'Tarea', date: T, published: true }] },
-    { id: 'B-tests', name: 'Pruebas', weight: 60, columns: [{ id: 'G-t', title: 'Prueba', date: T, published: false }] },
+    { id: 'B-daily', name: 'Trabajo diario', weight: 40, columns: [{ id: 'G-d', title: 'Tarea', date: T, published: true, publishedAt: T }] },
+    { id: 'B-tests', name: 'Pruebas', weight: 60, columns: [{ id: 'G-t', title: 'Prueba', date: T, published: false, publishedAt: null }] },
   ],
   rows: [
     {
       student: { id: 'S-ana', firstName: 'Ana', name: 'Ana Pérez', initials: 'AP', color: null },
       cells: [
-        { gradeId: 'G-d', studentGradeId: 'sg1', score: 4, updatedAt: T },
-        { gradeId: 'G-t', studentGradeId: 'sg2', score: 4, updatedAt: T },
+        { gradeId: 'G-d', studentGradeId: 'sg1', score: 4, comment: 'Bien', updatedAt: T },
+        { gradeId: 'G-t', studentGradeId: 'sg2', score: 4, comment: null, updatedAt: T },
       ],
       average: 4,
       status: 'ON_TRACK',
@@ -27,8 +27,8 @@ const book = (): Gradebook => ({
     {
       student: { id: 'S-beto', firstName: 'Beto', name: 'Beto Ruiz', initials: 'BR', color: null },
       cells: [
-        { gradeId: 'G-d', studentGradeId: null, score: null, updatedAt: null },
-        { gradeId: 'G-t', studentGradeId: null, score: null, updatedAt: null },
+        { gradeId: 'G-d', studentGradeId: null, score: null, comment: null, updatedAt: null },
+        { gradeId: 'G-t', studentGradeId: null, score: null, comment: null, updatedAt: null },
       ],
       average: null,
       status: null,
@@ -39,11 +39,11 @@ const book = (): Gradebook => ({
 });
 
 describe('applyEdits', () => {
-  it('shows saved values without edits; published cells are not inputs', () => {
+  it('shows saved values and comments; every cell is an input once a scale exists', () => {
     const view = applyEdits(book(), {});
-    expect(view.rows[0].cells.map((c) => [c.text, c.editable])).toEqual([
-      ['4', false],
-      ['4', true],
+    expect(view.rows[0].cells.map((c) => [c.text, c.editable, c.published, c.comment])).toEqual([
+      ['4', true, true, 'Bien'],
+      ['4', true, false, ''],
     ]);
     expect(view.rows[0].average).toBe(4);
     expect([view.changed, view.invalid]).toEqual([0, 0]);
@@ -69,10 +69,31 @@ describe('applyEdits', () => {
     expect([view.changed, view.invalid]).toEqual([0, 1]);
   });
 
-  it('ignores edits to published columns', () => {
-    const view = applyEdits(book(), { [cellKey('G-d', 'S-ana')]: { text: '1', updatedAt: T } });
-    expect(view.rows[0].cells[0].score).toBe(4);
-    expect(view.changed).toBe(0);
+  it('flags a changed published score as needing a reason @BR-ASM-001.8', () => {
+    const view = applyEdits(book(), {
+      [cellKey('G-d', 'S-ana')]: { text: '1', updatedAt: T },
+      [cellKey('G-t', 'S-ana')]: { text: '2', updatedAt: T },
+    });
+    expect(view.rows[0].cells.map((c) => [c.score, c.needsReason])).toEqual([
+      [1, true],
+      [2, false],
+    ]);
+    expect(cellsNeedingReason(view).map((c) => c.key)).toEqual([cellKey('G-d', 'S-ana')]);
+
+    const explained = applyEdits(book(), { [cellKey('G-d', 'S-ana')]: { text: '1', updatedAt: T, reason: 'Recalificada' } });
+    expect(cellsNeedingReason(explained)).toEqual([]);
+  });
+
+  it('counts a comment-only change, which needs no reason @BR-ASM-001.14', () => {
+    const view = applyEdits(book(), { [cellKey('G-d', 'S-ana')]: { text: '4', updatedAt: T, comment: 'Muy bien' } });
+    const cell = view.rows[0].cells[0];
+    expect([cell.changed, cell.needsReason, cell.comment]).toEqual([true, false, 'Muy bien']);
+    expect(view.changed).toBe(1);
+  });
+
+  it('flags a comment over 500 characters', () => {
+    const view = applyEdits(book(), { [cellKey('G-t', 'S-ana')]: { text: '4', updatedAt: T, comment: 'x'.repeat(501) } });
+    expect(view.invalid).toBe(1);
   });
 
   it('makes every cell read-only without a scale', () => {
@@ -97,6 +118,20 @@ describe('changedCells', () => {
     ).toEqual([
       { gradeId: 'G-t', studentId: 'S-ana', score: null, updatedAt: T },
       { gradeId: 'G-t', studentId: 'S-beto', score: 4.5, updatedAt: null },
+    ]);
+  });
+});
+
+describe('changedCells with comments and reasons', () => {
+  it("sends a cell's comment and its own valid reason", () => {
+    expect(
+      changedCells(book(), {
+        [cellKey('G-d', 'S-ana')]: { text: '3', updatedAt: T, comment: '', reason: '  Recalificada ' },
+        [cellKey('G-t', 'S-ana')]: { text: '4', updatedAt: T, comment: 'Revisar' },
+      }),
+    ).toEqual([
+      { gradeId: 'G-d', studentId: 'S-ana', score: 3, updatedAt: T, comment: '', reason: 'Recalificada' },
+      { gradeId: 'G-t', studentId: 'S-ana', score: 4, updatedAt: T, comment: 'Revisar' },
     ]);
   });
 });

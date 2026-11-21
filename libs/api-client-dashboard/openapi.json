@@ -7066,6 +7066,74 @@
         ]
       }
     },
+    "/api/v1/gradebook/{courseId}/publish": {
+      "post": {
+        "operationId": "GradebookController_publish",
+        "parameters": [
+          {
+            "name": "courseId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PublishGradesInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Publish the course's draft columns and notify families (FR-ASM-001.7, BR .9)",
+        "tags": [
+          "gradebook"
+        ]
+      }
+    },
+    "/api/v1/gradebook/cells/{studentGradeId}/history": {
+      "get": {
+        "operationId": "GradebookController_history",
+        "parameters": [
+          {
+            "name": "studentGradeId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "A cell's revisions, newest first (FR-ASM-001.8, BR .8)",
+        "tags": [
+          "gradebook"
+        ]
+      }
+    },
     "/api/v1/grade-buckets": {
       "post": {
         "operationId": "GradeBucketsController_create",
@@ -11771,6 +11839,10 @@
         "properties": {}
       },
       "SaveCellsInput": {
+        "type": "object",
+        "properties": {}
+      },
+      "PublishGradesInput": {
         "type": "object",
         "properties": {}
       },

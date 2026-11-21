@@ -179,7 +179,7 @@ const otherAdmin = { userId: 'u-admin9', organizationId: 'org-2', role: 'ORG_ADM
 
 function setup(now = new Date('2026-04-15T15:00:00Z')) {
   const prisma = fakePrisma();
-  const service = new GradebookService(prisma as never, new GradeAccessService(prisma as never), { now: () => now });
+  const service = new GradebookService(prisma as never, new GradeAccessService(prisma as never), { now: () => now }, {} as never);
   return { prisma, service };
 }
 

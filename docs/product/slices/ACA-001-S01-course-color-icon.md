@@ -4,7 +4,7 @@
 |---|---|
 | **FRD** | [ACA-001](../frd/ACA-001-course-experience.md) |
 | **Implements** | FR-ACA-001.1, FR-ACA-001.2 (color, icon), FR-ACA-001.9 (cover only), BR-ACA-001.11 |
-| **Status** | Ready |
+| **Status** | Done: reviewed in #38, on `main` via #41 (2026-11-20) |
 | **Branch** | `feat/ACA-001-S01-course-color-icon` |
 | **Estimate** | 2 days |
 
@@ -78,6 +78,6 @@ Scenario: readable in both themes
 - Showing the color in the calendar, channels or nav, which waits for those features.
 
 ## Done checklist
-- [ ] Acceptance criteria pass
-- [ ] Cross-tenant / wrong-role access refused (test)
-- [ ] FRD slice table + `capabilities.md` updated
+- [x] Acceptance criteria pass
+- [x] Cross-tenant / wrong-role access refused (test)
+- [x] FRD slice table + `capabilities.md` updated

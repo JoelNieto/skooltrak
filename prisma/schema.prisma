@@ -93,6 +93,7 @@ model User {
   recipientPreference       RecipientPreference?
   communicationAuditLogs     CommunicationAuditLog[]
   storeCartItems    StoreCartItem[]
+  courseEnrollmentsAdded CourseEnrollment[] @relation("CourseEnrollmentAddedBy")
   storeOrders       StoreOrder[]
   // Better-auth relations
   sessions          Session[]
@@ -140,6 +141,18 @@ model MessageRecipient {
 // ==========================================
 // Instant Messaging (Chat)
 // ==========================================
+
+/// The 8 course color tags (ACA-001 BR .11); rendered through libs/ui `--color-course-<key>` tokens.
+enum CourseColor {
+  INDIGO
+  TEAL
+  ROSE
+  VIOLET
+  AMBER
+  SLATE
+  FUCHSIA
+  GREEN
+}
 
 enum ChatType {
   DIRECT
@@ -395,6 +408,8 @@ model Subject {
   organizationId String
   name           String
   code           String
+  /// Lucide icon name from SUBJECT_ICONS (libs/shared). Null: "book-open".
+  icon           String?
   courses        Course[]
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
@@ -461,6 +476,8 @@ model Course {
   name               String
   code               String
   shortName          String
+  /// Color tag (ACA-001 BR .11). Null: the UI derives one from the id.
+  color              CourseColor?
   organizationId     String
   organization       Organization               @relation(fields: [organizationId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   schoolId           String
@@ -471,7 +488,8 @@ model Course {
   studyPlan          StudyPlan                  @relation(fields: [studyPlanId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   createdAt          DateTime                   @default(now())
   updatedAt          DateTime                   @updatedAt
-  students           Student[]
+  /// Roster (ACA-001 BR .15). Readers skip `excluded` rows; see courses/course-roster.ts.
+  enrollments        CourseEnrollment[]
   teacher            Teacher?                   @relation(fields: [teacherId], references: [id], onDelete: SetNull, onUpdate: Cascade)
   teacherId          String?
   assignments        Assignment[]
@@ -487,6 +505,32 @@ model Course {
   @@unique([schoolId, code])
   @@unique([schoolId, subjectId, studyPlanId])
   @@map("courses")
+}
+
+/// A student's place on a course roster (ACA-001 BR .15). PLAN rows follow the student's class
+/// group's study plan; MANUAL rows are added by an admin (S12) and survive plan sync.
+/// `excluded` hides a PLAN row (an exemption) without deleting it.
+model CourseEnrollment {
+  id        String           @id @default(cuid())
+  courseId  String
+  course    Course           @relation(fields: [courseId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  studentId String
+  student   Student          @relation(fields: [studentId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  source    EnrollmentSource
+  excluded  Boolean          @default(false)
+  addedById String?
+  addedBy   User?            @relation("CourseEnrollmentAddedBy", fields: [addedById], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+
+  @@unique([courseId, studentId])
+  @@index([studentId])
+  @@map("course_enrollments")
+}
+
+enum EnrollmentSource {
+  PLAN
+  MANUAL
 }
 
 model ClassGroup {
@@ -543,7 +587,7 @@ model Student {
   medicalNotes          String                   @default("")
   emergencyContactName  String                   @default("")
   emergencyContactPhone String                   @default("")
-  courses               Course[]
+  courseEnrollments     CourseEnrollment[]
   userId                String?                  @unique
   user                  User?                    @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   parents               Parent[]

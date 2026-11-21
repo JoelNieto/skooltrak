@@ -29,7 +29,6 @@ export class Student
       include: {
         classGroup: true;
         user: true;
-        courses: true;
         studentGrades: true;
         parents: true;
       };
@@ -70,6 +69,7 @@ export class Student
 
     user: User;
     userId: string;
+    /** Active roster entries (ACA-001 BR .15), as courses. */
     courses: Course[];
 
     parents: Parent[];

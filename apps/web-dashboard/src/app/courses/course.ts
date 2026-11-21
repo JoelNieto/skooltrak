@@ -4,6 +4,8 @@ import {
   Card,
   CardBody,
   CardTitle,
+  courseColorVar,
+  CourseCover,
   EmptyState,
   Icon,
   Loader,
@@ -34,6 +36,9 @@ type CourseVm = {
   id: string;
   name: string;
   code: string;
+  /** Resolved by the API: never null (ACA-001 BR .11). */
+  color: string;
+  subject?: { name?: string; icon?: string | null } | null;
   teacher?: {
     firstName?: string;
     fatherName?: string;
@@ -58,6 +63,7 @@ type CourseVm = {
     Card,
     CardBody,
     CardTitle,
+    CourseCover,
     Button,
     Loader,
     CourseAssignments,
@@ -82,10 +88,17 @@ type CourseVm = {
         />
         <div uiCard class="mt-4">
           <div uiCardBody class="flex md:flex-row md:gap-4 md:items-center">
-            <img src="course-default.jpg" alt="Course" class="h-18 w-18 rounded-lg" />
+            <ui-course-cover variant="tile" [color]="course.color" [icon]="course.subject?.icon" />
             <div class="flex justify-between items-center w-full">
               <div>
-                <h2 uiCardTitle class="text-xl">{{ course.name }}</h2>
+                <h2 uiCardTitle class="text-xl">
+                  <span
+                    class="course-color-dot inline-block size-3.5 shrink-0 rounded-full"
+                    [style.background-color]="colorVar(course.color)"
+                    aria-hidden="true"
+                  ></span>
+                  {{ course.name }}
+                </h2>
                 <div class="flex items-center gap-1 text-sm">
                   @if (course.teacher) {
                     <div class="avatar avatar-placeholder">
@@ -211,6 +224,7 @@ export default class Course {
   private modal = inject(Modal);
   private router = inject(Router);
   private toast = inject(Toast);
+  protected readonly colorVar = courseColorVar;
   /** Selected section; the tab list and panels follow it. */
   readonly tab = signal('grades');
   startingChat = signal(false);

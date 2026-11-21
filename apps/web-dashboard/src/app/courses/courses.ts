@@ -4,6 +4,7 @@ import {
   Card,
   CardBody,
   CardTitle,
+  CourseCover,
   debounceSignal,
   EmptyState,
   Icon,
@@ -22,7 +23,9 @@ import Store from '../core/store';
 
 type CourseRow = {
   id: string;
-  subject?: { name?: string };
+  /** Resolved by the API: never null (ACA-001 BR .11). */
+  color: string;
+  subject?: { name?: string; icon?: string | null };
   studyPlan?: { name?: string };
   teacher?: {
     firstName?: string;
@@ -42,6 +45,7 @@ type CourseRow = {
     Card,
     CardBody,
     CardTitle,
+    CourseCover,
     RouterLink,
     Loader,
     PaginatorV2,
@@ -69,12 +73,11 @@ type CourseRow = {
       <div class="flex flex-col md:grid md:grid-cols-2 lg:grid-cols-4 gap-5 mt-4">
         @for (course of courses(); track course.id) {
           <a uiCard [routerLink]="['/courses', course.id]" class="group overflow-hidden">
-            <figure class="relative overflow-hidden">
-              <img src="course-default.jpg" alt="Course" class="h-28 w-full object-cover" />
-              <span uiBadge tone="action" size="sm" class="absolute bottom-2 left-2">
+            <ui-course-cover [color]="course.color" [icon]="course.subject?.icon">
+              <span uiBadge size="sm" class="absolute top-2 right-2 bg-surface-1 text-ink-strong">
                 {{ course.studyPlan?.name }}
               </span>
-            </figure>
+            </ui-course-cover>
             <div uiCardBody class="p-3">
               <h2 uiCardTitle class="text-sm line-clamp-2">{{ course.subject?.name }}</h2>
               @if (course.teacher?.name) {

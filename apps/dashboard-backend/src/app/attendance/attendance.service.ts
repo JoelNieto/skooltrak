@@ -9,6 +9,7 @@ import {
 } from '@nestjs/common';
 import { REQUEST } from '@nestjs/core';
 import { Request } from 'express';
+import { enrolledIn } from '../courses/course-roster';
 import { PrismaService } from '../prisma.service';
 import { AttendanceFilterInput } from './dto/attendance-filter.input';
 import { CreateAttendanceSessionInput } from './dto/create-attendance-session.input';
@@ -296,7 +297,7 @@ export class AttendanceService {
   async getStudentsForAttendance(courseId: string, classGroupId: string) {
     return this.prisma.student.findMany({
       where: {
-        courses: { some: { id: courseId } },
+        ...enrolledIn(courseId),
         classGroupId,
       },
       orderBy: { firstName: 'asc' },

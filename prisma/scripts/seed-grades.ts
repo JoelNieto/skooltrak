@@ -94,7 +94,7 @@ async function main() {
       subject: true,
       studyPlan: { include: { gradeMetric: true } },
       gradeBuckets: true,
-      students: { select: { id: true } },
+      enrollments: { where: { excluded: false }, select: { studentId: true } },
     },
   });
 
@@ -126,7 +126,7 @@ async function main() {
 
   for (const course of coursesWithBuckets) {
     const buckets = course.gradeBuckets;
-    const students = course.students;
+    const students = course.enrollments.map((e) => ({ id: e.studentId }));
     const metric = course.studyPlan?.gradeMetric;
 
     const minScore = metric

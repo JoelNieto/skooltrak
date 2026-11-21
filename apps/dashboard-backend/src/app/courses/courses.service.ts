@@ -2,10 +2,12 @@ import { Prisma } from '@generated/prisma';
 
 import { FetchDataQueryDto, PaginatedResponseDto } from '@/api-contracts';
 import type { AuthUserContext } from '@/auth';
+import { resolveCourseColor } from '@/shared';
 import { BadRequestException, ConflictException, ForbiddenException, Inject, Injectable, Scope } from '@nestjs/common';
 import { REQUEST } from '@nestjs/core';
 import { Request } from 'express';
 import { PrismaService } from '../prisma.service';
+import { enrolledCourses, enrollPlanStudents, resyncCoursePlan } from './course-roster';
 import { DEFAULT_BUCKETS } from './default-buckets.constants';
 import { CreateCourseInput } from './dto/create-course.input';
 import { UpdateCourseInput } from './dto/update-course.input';
@@ -14,6 +16,14 @@ export const COURSE_DENIED = 'No tienes acceso a este curso';
 export const STUDY_PLAN_NOT_FOUND = 'El plan de estudio seleccionado no existe';
 export const SUBJECT_NOT_FOUND = 'La asignatura seleccionada no existe';
 export const TEACHER_NOT_FOUND = 'El docente seleccionado no existe';
+
+/**
+ * Adds the color to show (ACA-001 BR .11): the course's own, or one derived from its id.
+ * `colorIsDefault` tells the course form whether a color was actually chosen.
+ */
+export function withResolvedColor<T extends { id: string; color?: string | null }>(course: T) {
+  return { ...course, color: resolveCourseColor(course.id, course.color), colorIsDefault: !course.color };
+}
 
 /**
  * Every course read and write is limited to the caller's organization. A course, study plan,
@@ -34,9 +44,10 @@ export class CoursesService {
   }
 
   /** Throws 403 unless the course exists in the caller's organization. */
-  private async assertInOrganization(id: string, organizationId: string): Promise<void> {
-    const course = await this.prisma.course.findFirst({ where: { id, organizationId }, select: { id: true } });
+  private async assertInOrganization(id: string, organizationId: string) {
+    const course = await this.prisma.course.findFirst({ where: { id, organizationId }, select: { id: true, studyPlanId: true } });
     if (!course) throw new ForbiddenException(COURSE_DENIED);
+    return course;
   }
 
   /** Loads a study plan of the caller's organization, or throws 409 as if it did not exist. */
@@ -155,25 +166,8 @@ export class CoursesService {
       throw error;
     }
 
-    // Find all students in the same study plan (and school) to enroll in the new course
-    const studentsToConnect = await this.prisma.student.findMany({
-      where: {
-        classGroup: { studyPlanId: createCourseInput.studyPlanId },
-        schoolId,
-      },
-      select: { id: true },
-    });
-
-    if (studentsToConnect.length > 0) {
-      await this.prisma.course.update({
-        where: { id: course.id },
-        data: {
-          students: {
-            connect: studentsToConnect.map((s) => ({ id: s.id })),
-          },
-        },
-      });
-    }
+    // Enroll the study plan's students in the new course (ACA-001 BR .15).
+    await enrollPlanStudents(this.prisma, course);
 
     return this.prisma.course.findUnique({
       where: { id: course.id },
@@ -215,6 +209,7 @@ export class CoursesService {
           studyPlanId: targetStudyPlanId,
         },
       });
+      await enrollPlanStudents(this.prisma, newCourse);
       createdCourses.push(newCourse);
     }
 
@@ -241,7 +236,7 @@ export class CoursesService {
     if (role === 'STUDENT') {
       where = {
         ...where,
-        studyPlan: { classGroups: { some: { students: { some: { userId } } } } },
+        ...enrolledCourses({ userId }),
       };
     }
 
@@ -262,7 +257,7 @@ export class CoursesService {
           school: {
             select: { id: true, name: true },
           },
-          subject: { select: { id: true, name: true } },
+          subject: { select: { id: true, name: true, icon: true } },
           studyPlan: { select: { id: true, name: true, shortName: true } },
           teacher: {
             select: {
@@ -281,7 +276,7 @@ export class CoursesService {
       }),
       this.prisma.course.count({ where }),
     ]);
-    return new PaginatedResponseDto(data, total, page, pageSize);
+    return new PaginatedResponseDto(data.map(withResolvedColor), total, page, pageSize);
   }
 
   count(fetchDataInput: FetchDataQueryDto) {
@@ -302,7 +297,7 @@ export class CoursesService {
     if (role === 'STUDENT') {
       where = {
         ...where,
-        studyPlan: { classGroups: { some: { students: { some: { userId } } } } },
+        ...enrolledCourses({ userId }),
       };
     }
 
@@ -364,7 +359,7 @@ export class CoursesService {
       },
     });
     if (!course) throw new ForbiddenException(COURSE_DENIED);
-    return course;
+    return withResolvedColor(course);
   }
 
   async findManyByGroupId(groupId: string) {
@@ -388,7 +383,7 @@ export class CoursesService {
 
   async update(id: string, updateCourseInput: UpdateCourseInput) {
     const organizationId = this.organizationId();
-    await this.assertInOrganization(id, organizationId);
+    const current = await this.assertInOrganization(id, organizationId);
     const data = this.toCourseUpdateData(updateCourseInput);
     // A course never leaves its organization; its school follows its study plan.
     if (updateCourseInput.studyPlanId !== undefined) {
@@ -401,10 +396,16 @@ export class CoursesService {
     if (updateCourseInput.teacherId) {
       await this.assertTeacherInOrganization(updateCourseInput.teacherId, organizationId);
     }
-    return this.prisma.course.update({
-      where: { id },
-      data,
-      include: { school: true, subject: true, studyPlan: true },
+    // A new study plan re-syncs the course's plan enrollments in the same transaction (decided 2026-11-20).
+    const planChanged = updateCourseInput.studyPlanId !== undefined && updateCourseInput.studyPlanId !== current.studyPlanId;
+    return this.prisma.$transaction(async (tx) => {
+      const course = await tx.course.update({
+        where: { id },
+        data,
+        include: { school: true, subject: true, studyPlan: true },
+      });
+      if (planChanged) await resyncCoursePlan(tx, course);
+      return course;
     });
   }
 
@@ -416,6 +417,7 @@ export class CoursesService {
       'name',
       'code',
       'shortName',
+      'color',
       'subjectId',
       'studyPlanId',
       'teacherId',

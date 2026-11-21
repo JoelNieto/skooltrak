@@ -11,6 +11,7 @@ import {
 import { REQUEST } from '@nestjs/core';
 import { ConfigService } from '@nestjs/config';
 import { Request } from 'express';
+import { ACTIVE_ENROLLMENT, enrolledIn } from '../courses/course-roster';
 import { PrismaService } from '../prisma.service';
 import {
   CreateAssignmentSubmissionInput,
@@ -76,14 +77,14 @@ export class AssignmentSubmissionsService {
         course: { organizationId },
         requireSubmission: true,
       },
-      include: { course: { select: { students: { where: { id: student.id } } } } },
+      include: { course: { select: { enrollments: { where: { ...ACTIVE_ENROLLMENT, studentId: student.id }, select: { id: true } } } } },
     });
 
     if (!assignment) {
       throw new NotFoundException('Assignment not found or does not require submission.');
     }
 
-    if (assignment.course.students.length === 0) {
+    if (assignment.course.enrollments.length === 0) {
       throw new ForbiddenException('You are not enrolled in this course.');
     }
 
@@ -121,14 +122,14 @@ export class AssignmentSubmissionsService {
         course: { organizationId },
         requireSubmission: true,
       },
-      include: { course: { select: { students: { where: { id: student.id } } } } },
+      include: { course: { select: { enrollments: { where: { ...ACTIVE_ENROLLMENT, studentId: student.id }, select: { id: true } } } } },
     });
 
     if (!assignment) {
       throw new NotFoundException('Assignment not found or does not require submission.');
     }
 
-    if (assignment.course.students.length === 0) {
+    if (assignment.course.enrollments.length === 0) {
       throw new ForbiddenException('You are not enrolled in this course.');
     }
 
@@ -234,15 +235,7 @@ export class AssignmentSubmissionsService {
         id: assignmentId,
         course: { organizationId },
       },
-      include: {
-        course: {
-          include: {
-            students: {
-              orderBy: [{ fatherName: 'asc' }, { firstName: 'asc' }],
-            },
-          },
-        },
-      },
+      select: { id: true },
     });
 
     if (!assignment) {
@@ -279,9 +272,7 @@ export class AssignmentSubmissionsService {
 
     // Get students for the course
     const students = await this.prisma.student.findMany({
-      where: {
-        courses: { some: { id: assignment.courseId } },
-      },
+      where: enrolledIn(assignment.courseId),
       orderBy: [{ fatherName: 'asc' }, { firstName: 'asc' }],
     });
 

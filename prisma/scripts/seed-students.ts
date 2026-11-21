@@ -185,8 +185,9 @@ async function main() {
             address: data.address,
             phone: data.phone,
             userId: user.id,
-            courses: courseIds.length
-              ? { connect: courseIds.map((id) => ({ id })) }
+            // Course roster (ACA-001 BR .15): one PLAN enrollment per course of the group's plan.
+            courseEnrollments: courseIds.length
+              ? { create: courseIds.map((courseId) => ({ courseId, source: 'PLAN' as const })) }
               : undefined,
           },
         });

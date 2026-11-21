@@ -162,6 +162,16 @@ import {
   SearchX,
   Funnel,
   FunnelX,
+  // Subject icons (SUBJECT_ICONS in libs/shared, ACA-001 FR .2)
+  Sigma,
+  FlaskConical,
+  Languages,
+  Globe,
+  Palette,
+  Music,
+  Dumbbell,
+  Calculator,
+  Atom,
 } from 'lucide';
 
 /** Lucide's icon data: SVG child elements as [tag, attributes]. */
@@ -329,6 +339,16 @@ export const UI_ICONS = {
   'search-x': SearchX,
   funnel: Funnel,
   'funnel-x': FunnelX,
+  // Subject icons (SUBJECT_ICONS in libs/shared, ACA-001 FR .2)
+  sigma: Sigma,
+  'flask-conical': FlaskConical,
+  languages: Languages,
+  globe: Globe,
+  palette: Palette,
+  music: Music,
+  dumbbell: Dumbbell,
+  calculator: Calculator,
+  atom: Atom,
 } as const satisfies Record<string, UiIconNode>;
 
 /** Name of an icon in the registry: `<ui-icon name="calendar" />`. */

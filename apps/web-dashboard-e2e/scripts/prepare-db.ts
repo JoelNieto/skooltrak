@@ -171,7 +171,7 @@ async function seedFixtures(databaseUrl: string) {
           gender: i % 2 ? 'MALE' : 'FEMALE',
           address: 'Calle 1',
           phone: '000-0000',
-          courses: { connect: { id: teacherCourse.id } },
+          courseEnrollments: { create: { courseId: teacherCourse.id, source: 'PLAN' } },
         },
       });
       relatedStudentIds.push(student.id);

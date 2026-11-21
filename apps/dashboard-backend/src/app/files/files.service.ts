@@ -5,6 +5,7 @@ import { ForbiddenException, Inject, Injectable, Logger, Scope } from '@nestjs/c
 import { ConfigService } from '@nestjs/config';
 import { REQUEST } from '@nestjs/core';
 import { Request } from 'express';
+import { ACTIVE_ENROLLMENT } from '../courses/course-roster';
 import { PrismaService } from '../prisma.service';
 import { CreateFileInput } from './dto/create-file.input';
 
@@ -426,7 +427,7 @@ const files = await this.prisma.file.findMany({
           select: {
             schoolId: true,
             classGroupId: true,
-            courses: { select: { id: true } },
+            courseEnrollments: { where: ACTIVE_ENROLLMENT, select: { courseId: true } },
           },
         },
         teacher: {
@@ -447,7 +448,7 @@ const files = await this.prisma.file.findMany({
       if (user.student.classGroupId) {
         classGroupIds.add(user.student.classGroupId);
       }
-      user.student.courses.forEach((course) => courseIds.add(course.id));
+      user.student.courseEnrollments.forEach((e) => courseIds.add(e.courseId));
     }
 
     if (user?.teacher) {

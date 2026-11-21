@@ -240,7 +240,7 @@ Listed in build order.
 | Slice | Title | FRs | Status |
 |---|---|---|---|
 | [ACA-001-S01](../slices/ACA-001-S01-course-color-icon.md) | Course color and subject icon on cards and header | .1 .2, BR .11 | Ready |
-| [ACA-001-S11](../slices/ACA-001-S11-course-roster.md) | Course roster: `CourseEnrollment`, backfill, plan sync incl. CSV import, all readers switched | .20, BR .15 | In progress |
+| [ACA-001-S11](../slices/ACA-001-S11-course-roster.md) | Course roster: `CourseEnrollment`, backfill, plan sync incl. CSV import, all readers switched | .20, BR .15 | In review (#40) |
 | ACA-001-S02 | Student *Mis cursos*: cards with schedule, teacher, average and period switcher | .4 (part) .5, BR .1 .4 .5 .9 | Proposed (after S11, ASM-001-S09) |
 | ACA-001-S03 | Próxima entrega, progress and stats row | .4 (rest) .6, BR .7 .8 .10 | Proposed |
 | ACA-001-S04 | Subject areas and filter chips | .2 (area) .7, BR .14 | Proposed |

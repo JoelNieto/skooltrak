@@ -4,7 +4,7 @@
 |---|---|
 | **FRD** | [ACA-001](../frd/ACA-001-course-experience.md) |
 | **Implements** | FR-ACA-001.20, BR-ACA-001.15 (sync rules; the admin add/remove/exclude actions are S12) |
-| **Status** | In progress |
+| **Status** | In review: #40 (stacked on #38) |
 | **Branch** | `feat/ACA-001-S11-course-roster` (stacked on #38) |
 | **Estimate** | 3 days |
 

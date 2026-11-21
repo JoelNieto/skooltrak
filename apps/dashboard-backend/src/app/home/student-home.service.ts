@@ -1,6 +1,7 @@
 import { AuthUserContext } from '@/auth';
 import { AttendanceStatus, HabitValue, ThreadStatus } from '@generated/prisma';
 import { ForbiddenException, Inject, Injectable } from '@nestjs/common';
+import { enrolledCourses } from '../courses/course-roster';
 import { PrismaService } from '../prisma.service';
 import {
   StudentHabits,
@@ -178,7 +179,7 @@ export class StudentHomeService {
     const [{ current, previous }, enrolled, planRow] = await Promise.all([
       resolvePeriodPair(this.prisma, student.school.currentYear, local.date),
       this.prisma.course.findMany({
-        where: { organizationId, students: { some: { id: student.id } } },
+        where: { organizationId, ...enrolledCourses({ id: student.id }) },
         select: { id: true, name: true },
         orderBy: { name: 'asc' },
       }),

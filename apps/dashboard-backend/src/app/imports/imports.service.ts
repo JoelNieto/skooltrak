@@ -5,6 +5,7 @@ import {
   Logger,
   NotFoundException,
 } from '@nestjs/common';
+import { syncStudentPlan } from '../courses/course-roster';
 import { PrismaService } from '../prisma.service';
 import { OnboardingStep, sendUserInvitation } from '@/auth';
 import type { ImportEntityType } from '@generated/prisma';
@@ -466,6 +467,9 @@ export class ImportService {
         enrollmentCode: await this.generateEnrollmentCode(),
       },
     });
+
+    // Put the student on their plan's course rosters, as a hand-created student is (ACA-001 FR .20).
+    await syncStudentPlan(this.prisma, createdStudent.id, createdStudent.classGroupId);
 
     // Keep class-group progression history in sync (Phase 2.5) instead of
     // writing `classGroupId` without a history row.

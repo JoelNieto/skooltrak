@@ -9,6 +9,7 @@ import {
 } from '@nestjs/common';
 import { REQUEST } from '@nestjs/core';
 import { Request } from 'express';
+import { ACTIVE_ENROLLMENT } from '../courses/course-roster';
 import { PrismaService } from '../prisma.service';
 import { ChatSocketGateway } from './chat-socket.gateway';
 import { AddChatParticipantsInput } from './dto/add-chat-participants.input';
@@ -140,14 +141,14 @@ export class ChatsService {
         where: { id: contextId },
         include: {
           teacher: true,
-          students: { include: { user: true } },
+          enrollments: { where: ACTIVE_ENROLLMENT, include: { student: { include: { user: true } } } },
         },
       });
       if (!course) return [];
       if (course.teacher?.userId) {
         participants.push({ userId: course.teacher.userId, role: ChatParticipantRole.ADMIN });
       }
-      for (const student of course.students) {
+      for (const { student } of course.enrollments) {
         if (!student.userId) continue;
         participants.push({ userId: student.userId, role: ChatParticipantRole.MEMBER });
       }

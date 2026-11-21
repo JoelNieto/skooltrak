@@ -49,6 +49,7 @@ const fixture = () => ({
     { id: 'C2', organizationId: 'org-2', schoolId: 'SC2', subjectId: 'SB2', studyPlanId: 'P2', teacherId: 'T2', name: 'Historia 2' },
   ] as Row[],
   student: [] as Row[],
+  courseEnrollment: [] as Row[],
 });
 
 /** Matches the subset of Prisma `where` the service uses: equality, `OR` (ignored), `school.organizationId`. */
@@ -91,17 +92,32 @@ function prismaStub(db: ReturnType<typeof fixture>) {
         const index = rows().findIndex((r) => r['id'] === where['id']);
         return rows().splice(index, 1)[0];
       }),
+      createMany: jest.fn(async ({ data }: { data: Row[] }) => {
+        data.forEach((d, i) => rows().push({ id: `new-${rows().length + i}`, ...d }));
+        return { count: data.length };
+      }),
+      deleteMany: jest.fn(async ({ where }: { where?: Row } = {}) => {
+        const keep = rows().filter((r) => !matches(db, r, where));
+        const count = rows().length - keep.length;
+        rows().splice(0, rows().length, ...keep);
+        return { count };
+      }),
     };
   };
-  return {
+  const stub = {
     course: model('course'),
     subject: model('subject'),
     studyPlan: model('studyPlan'),
     teacher: model('teacher'),
     classGroup: model('classGroup'),
     student: model('student'),
-    $transaction: jest.fn((ops: Promise<unknown>[]) => Promise.all(ops)),
+    courseEnrollment: model('courseEnrollment'),
+    // Both forms: an array of queries, or an interactive callback that gets the same client.
+    $transaction: jest.fn((arg: Promise<unknown>[] | ((tx: unknown) => Promise<unknown>)) =>
+      typeof arg === 'function' ? arg(stub) : Promise.all(arg),
+    ),
   };
+  return stub;
 }
 
 const ADMIN_1 = { userId: 'u-admin1', organizationId: 'org-1', role: 'ORG_ADMIN' };
@@ -112,6 +128,19 @@ function setup(user: Row | undefined = ADMIN_1) {
   const service = new CoursesService(prisma as never, { user } as never);
   return { db, prisma, service };
 }
+
+/** A create body that tries to place the course in org 2; the service must ignore that. */
+const createInput = (overrides: Row = {}) =>
+  ({
+    name: '',
+    code: 'NEW',
+    shortName: '',
+    organizationId: 'org-2',
+    schoolId: 'SC2',
+    subjectId: 'SB1',
+    studyPlanId: 'P1',
+    ...overrides,
+  }) as never;
 
 describe('CoursesService organization scope', () => {
   it('refuses a caller without an organization', async () => {
@@ -203,18 +232,6 @@ describe('CoursesService organization scope', () => {
       expect(db.course.map((c) => c['id'])).toEqual(['C1c', 'C2']);
     });
 
-    const createInput = (overrides: Row = {}) =>
-      ({
-        name: '',
-        code: 'NEW',
-        shortName: '',
-        organizationId: 'org-2',
-        schoolId: 'SC2',
-        subjectId: 'SB1',
-        studyPlanId: 'P1',
-        ...overrides,
-      }) as never;
-
     it('refuses a study plan, subject or teacher of another organization on create', async () => {
       const { service, db } = setup();
       await expect(service.create(createInput({ studyPlanId: 'P2' }))).rejects.toThrow(
@@ -233,6 +250,43 @@ describe('CoursesService organization scope', () => {
       const { service, db } = setup();
       await service.create(createInput());
       expect(db.course[3]).toMatchObject({ organizationId: 'org-1', schoolId: 'SC1', studyPlanId: 'P1' });
+    });
+  });
+
+  // The rules themselves are covered in course-roster.spec.ts; these prove the writes trigger them.
+  describe('roster (ACA-001 BR .15)', () => {
+    it("enrolls the study plan's students in a new course", async () => {
+      const { service, db } = setup();
+      db.student.push({ id: 'ST1', organizationId: 'org-1', classGroupId: 'G1' });
+
+      await service.create(createInput());
+
+      expect(db.courseEnrollment).toEqual([
+        expect.objectContaining({ courseId: db.course[3]['id'], studentId: 'ST1', source: 'PLAN' }),
+      ]);
+    });
+
+    it('replaces PLAN enrollments and keeps MANUAL ones when the study plan changes', async () => {
+      const { service, db } = setup();
+      db.student.push({ id: 'ST1', organizationId: 'org-1', classGroupId: 'G1' });
+      db.courseEnrollment.push(
+        { id: 'e1', courseId: 'C1', studentId: 'OLD', source: 'PLAN', excluded: true },
+        { id: 'e2', courseId: 'C1', studentId: 'M', source: 'MANUAL', excluded: false },
+      );
+
+      await service.update('C1', { id: 'C1', studyPlanId: 'P1b' });
+
+      expect(db.courseEnrollment.map((e) => `${e['studentId']}:${e['source']}`).sort()).toEqual(['M:MANUAL', 'ST1:PLAN']);
+    });
+
+    it('leaves the roster alone when the study plan does not change', async () => {
+      const { service, db, prisma } = setup();
+      db.courseEnrollment.push({ id: 'e1', courseId: 'C1', studentId: 'S1', source: 'PLAN', excluded: true });
+
+      await service.update('C1', { id: 'C1', name: 'Mate', studyPlanId: 'P1' });
+
+      expect(prisma.courseEnrollment.deleteMany).not.toHaveBeenCalled();
+      expect(db.courseEnrollment).toHaveLength(1);
     });
   });
 });

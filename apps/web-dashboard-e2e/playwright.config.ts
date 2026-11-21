@@ -51,6 +51,16 @@ export default defineConfig({
       name: 'chromium',
       use: { ...devices['Desktop Chrome'] },
       dependencies: ['setup'],
+      testIgnore: /\.after\.spec\.ts$/,
+    },
+    // Specs that add organization-wide data (e.g. ACA-001-S11 imports a student) run once every other
+    // spec has finished, so the counts those specs assert (active students, group sizes) stay stable.
+    // Name them `*.after.spec.ts`. Playwright skips this project when `chromium` has failures.
+    {
+      name: 'after',
+      use: { ...devices['Desktop Chrome'] },
+      dependencies: ['chromium'],
+      testMatch: /\.after\.spec\.ts$/,
     },
   ],
 });

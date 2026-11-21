@@ -130,8 +130,8 @@ describe('AdminHomeService (HOM-001-S08)', () => {
     it('shows the period banner with courses missing grades while the period closes within 14 days', async () => {
       const { service } = build({
         courseCounts: [
-          { id: 'c1', _count: { students: 3 } },
-          { id: 'c2', _count: { students: 2 } },
+          { id: 'c1', _count: { enrollments: 3 } },
+          { id: 'c2', _count: { enrollments: 2 } },
         ],
         grades: [
           { courseId: 'c1', _count: { studentGrades: 1 } },

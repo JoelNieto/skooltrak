@@ -1,6 +1,7 @@
 import { AuthUserContext } from '@/auth';
 import { Prisma } from '@generated/prisma';
 import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { enrolledIn as onRoster } from '../courses/course-roster';
 import { PrismaService } from '../prisma.service';
 
 /**
@@ -181,15 +182,9 @@ export class GradeAccessService {
   }
 }
 
-/**
- * Students enrolled in a course. Until the CourseEnrollment roster lands (ACA-001-S11) the stored
- * course link and the study-plan rule can disagree (CSV imports skip the link), so either counts.
- */
+/** Students on the course's roster (ACA-001 BR .15), in the course's organization. */
 function enrolledIn(course: CourseRef): Prisma.StudentWhereInput {
-  return {
-    organizationId: course.organizationId,
-    OR: [{ courses: { some: { id: course.id } } }, { classGroup: { studyPlanId: course.studyPlanId } }],
-  };
+  return { organizationId: course.organizationId, ...onRoster(course.id) };
 }
 
 export function canSeeStudent(scope: CourseReadScope, studentId: string): boolean {

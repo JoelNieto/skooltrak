@@ -51,7 +51,7 @@ Scenario: deleting the assignment
   - The grade form gets *"Asignación (opcional)"*; picking one fills the title and date.
   - Gradebook column headers link to their assignment.
 - [x] **Tests:**
-  - Nest: link rules (400 / 409 / unlink), title and date copied, published-on-create stamps and notifies.
+  - Nest: link rules (400 / 409, the same column may keep its link), title and date copied, a race turned into 409, published-on-create stamps and notifies.
   - Playwright `@FR-ASM-001.11 @BR-ASM-001.11`: link "Proyecto E2E" from the form and see the header link; 409 and 400 through the API.
 
 ## Out of scope for this slice

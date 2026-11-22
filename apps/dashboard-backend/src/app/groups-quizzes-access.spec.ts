@@ -16,7 +16,13 @@ jest.mock('./quizzes/quizzes.service', () => ({ QuizzesService: class {} }));
 import { Perm, PERMISSIONS_KEY } from '@/auth';
 import { ClassGroupsController, GROUP_DENIED, PLAN_MISMATCH } from './class-groups/class-groups.controller';
 import { SCHOOL_DENIED } from './org-scope';
-import { QUIZ_DENIED, QuizzesController, TEACHER_MISMATCH, WRITE_DENIED } from './quizzes/quizzes.controller';
+import {
+  QUIZ_DENIED,
+  QuizzesController,
+  TEACHER_MISMATCH,
+  withoutAnswers,
+  WRITE_DENIED,
+} from './quizzes/quizzes.controller';
 
 /**
  * Class groups and quizzes check permission, organization and (quizzes) course ownership. Runs the
@@ -59,7 +65,13 @@ const byId =
 const countWhere = <T extends Record<string, unknown>>(rows: T[]) => async ({ where }: { where: any }) =>
   rows.filter((r) => Object.entries(where).every(([k, v]) => r[k] === v)).length;
 
+const students = [{ id: 'S1', userId: 'u-s1', organizationId: 'org-1', classGroupId: 'G1' }];
+
 const prisma = {
+  student: {
+    findFirst: async ({ where }: { where: { userId: string; organizationId: string } }) =>
+      students.find((st) => st.userId === where.userId && st.organizationId === where.organizationId) ?? null,
+  },
   school: { findUnique: byId(schools) },
   classGroup: { findUnique: byId(groups) },
   course: { findUnique: byId(courses) },
@@ -100,12 +112,12 @@ describe('Class group and quiz access', () => {
     );
     await expect(controller.findAllBySchoolId(student, 'SCH9')).rejects.toThrow(ForbiddenException);
     await expect(controller.findAllByCourseId(teacher, 'C9')).rejects.toThrow(ForbiddenException);
-    expect(() => controller.findAllByOrganizationId(admin, 'org-2')).toThrow(ForbiddenException);
+    await expect(controller.findAllByOrganizationId(admin, 'org-2')).rejects.toThrow(ForbiddenException);
 
     await controller.findAll(teacher, {} as never);
-    expect(service['findAll']).toHaveBeenCalledWith({}, 'org-1');
+    expect(service['findAll']).toHaveBeenCalledWith({}, 'org-1', undefined);
     await controller.count(teacher, { schoolId: 'SCH1' } as never);
-    expect(service['count']).toHaveBeenCalledWith({ schoolId: 'SCH1' }, 'org-1');
+    expect(service['count']).toHaveBeenCalledWith({ schoolId: 'SCH1' }, 'org-1', undefined);
   });
 
   it("class group writes keep the group, plan and teacher in the caller's organization", async () => {
@@ -134,6 +146,7 @@ describe('Class group and quiz access', () => {
 
   it("quizzes: reads stay in the caller's organization", async () => {
     const service = mockService();
+    service['findOne'] = jest.fn(async () => ({ id: 'Q1', questions: [] }));
     const controller = new QuizzesController(service as never, prisma as never);
     expect(perms(QuizzesController)).toEqual([Perm.VIEW_QUIZZES]);
     for (const write of [controller.create, controller.update, controller.remove]) {
@@ -171,5 +184,46 @@ describe('Class group and quiz access', () => {
     await controller.remove(teacher, 'Q1');
     expect(service['update']).toHaveBeenCalledTimes(1);
     expect(service['remove']).toHaveBeenCalledTimes(1);
+  });
+
+  it('students only see their own group, without classmates\' document ids', async () => {
+    const service = mockService();
+    service['findAllBySchoolId'] = jest.fn(async () => groups.filter((g) => g.organizationId === 'org-1').concat([
+      { id: 'G2', organizationId: 'org-1', schoolId: 'SCH1', studyPlanId: 'P1' },
+    ]));
+    const controller = new ClassGroupsController(service as never, prisma as never);
+
+    await controller.findOne(student, 'G1');
+    expect(service['findOne']).toHaveBeenCalledWith('G1', 'S1');
+    await controller.findOne(teacher, 'G1');
+    expect(service['findOne']).toHaveBeenLastCalledWith('G1', undefined);
+    groups.push({ id: 'G2', organizationId: 'org-1', schoolId: 'SCH1', studyPlanId: 'P1' });
+    try {
+      await expect(controller.findOne(student, 'G2')).rejects.toThrow(new ForbiddenException(GROUP_DENIED));
+    } finally {
+      groups.pop();
+    }
+    await expect(controller.findOne(user('u-nostudent', 'STUDENT'), 'G1')).rejects.toThrow(ForbiddenException);
+
+    await controller.findAll(student, {} as never);
+    expect(service['findAll']).toHaveBeenLastCalledWith({}, 'org-1', ['G1']);
+    await controller.findAll(teacher, {} as never);
+    expect(service['findAll']).toHaveBeenLastCalledWith({}, 'org-1', undefined);
+    expect((await controller.findAllBySchoolId(student, 'SCH1')).map((g) => g.id)).toEqual(['G1']);
+    expect((await controller.findAllBySchoolId(teacher, 'SCH1')).map((g) => g.id)).toEqual(['G1', 'G2']);
+  });
+
+  it("only the course's teacher and admins see a quiz's correct options", async () => {
+    const service = mockService();
+    const quiz = { id: 'Q1', questions: [{ id: 'q', options: [{ id: 'o1', option: 'A', isCorrect: true }] }] };
+    service['findOne'] = jest.fn(async () => quiz);
+    const controller = new QuizzesController(service as never, prisma as never);
+
+    for (const u of [teacher, admin]) expect(await controller.findOne(u, 'Q1')).toBe(quiz);
+    for (const u of [student, colleague]) {
+      const seen = await controller.findOne(u, 'Q1');
+      expect(seen).toEqual(withoutAnswers(quiz));
+      expect(seen?.questions[0].options[0]).not.toHaveProperty('isCorrect');
+    }
   });
 });

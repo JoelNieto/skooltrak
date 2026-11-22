@@ -249,6 +249,6 @@ Listed in build order.
 | [ACA-001-S07](../slices/ACA-001-S07-grades-tab.md) | Calificaciones tab | .14, BR .5 | Done (#71) |
 | [ACA-001-S08](../slices/ACA-001-S08-participants.md) | Participantes tab | .15, BR .13 | Done (#72) |
 | [ACA-001-S12](../slices/ACA-001-S12-course-roster-admin.md) | Admin manages a course roster (electives, exemptions) | .19, BR .15 | In review |
-| ACA-001-S13 | Homeroom teacher's read-only view of colleagues' courses | .18, BR .16 | Proposed (after S06, S07) |
+| [ACA-001-S13](../slices/ACA-001-S13-homeroom-view.md) | Homeroom teacher's read-only view of colleagues' courses | .18, BR .16 | In review |
 | [ACA-001-S09](../slices/ACA-001-S09-customize-course.md) | Teacher sets color and cover photo | .3, BR .12 | Done (#73) |
 | [ACA-001-S10](../slices/ACA-001-S10-graded-status.md) | *"Calificada · n"* status from linked grades | .17 | Done (#63) |

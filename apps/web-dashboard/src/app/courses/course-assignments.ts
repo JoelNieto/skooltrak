@@ -21,7 +21,7 @@ import Store from '../core/store';
         @for (marker of data; track marker.data.id + marker.data.groupId) {
           <div
             class="flex items-center gap-2 justify-between cursor-pointer"
-            [routerLink]="['/assignments', marker.data.assignmentId]"
+            [routerLink]="linkable() ? ['/assignments', marker.data.assignmentId] : null"
           >
             <div class="overflow-hidden text-ellipsis text-ink-strong whitespace-nowrap text-xs">
               {{ marker.data.title }}
@@ -44,6 +44,8 @@ export default class CourseAssignments {
 
   public currentMonth = signal({ start: new Date(), end: new Date() });
   public courseId = input.required<string>();
+  /** False for a homeroom teacher's read-only view (BR-ACA-001.16). */
+  public linkable = input(true);
 
   public isStudent = this.#auth.isStudent;
 

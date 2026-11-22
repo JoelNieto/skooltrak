@@ -15,6 +15,7 @@ describe('FilesService access resolution', () => {
     schoolIds: ['school-1'],
     classGroupIds: ['group-1'],
     courseIds: ['course-1'],
+    viewCourseIds: ['course-homeroom'],
   };
 
   const baseFile = {
@@ -25,12 +26,17 @@ describe('FilesService access resolution', () => {
     sharesCourses: [],
   } as any;
 
-  it('returns EDIT for the owner', () => {
+  it("opens a colleague's course file as VIEW for its homeroom teacher, even when shared with EDIT (ACA-001 BR .16)", () => {
     const permission = (service as any).resolvePermission(
-      { ...baseFile, ownerId: 'user-1' },
+      { ...baseFile, sharesCourses: [{ courseId: 'course-homeroom', permission: $Enums.FilePermission.EDIT }] },
       'user-1',
-      accessContext
+      accessContext,
     );
+    expect(permission).toBe($Enums.FilePermission.VIEW);
+  });
+
+  it('returns EDIT for the owner', () => {
+    const permission = (service as any).resolvePermission({ ...baseFile, ownerId: 'user-1' }, 'user-1', accessContext);
 
     expect(permission).toBe($Enums.FilePermission.EDIT);
   });
@@ -39,12 +45,10 @@ describe('FilesService access resolution', () => {
     const permission = (service as any).resolvePermission(
       {
         ...baseFile,
-        sharesUsers: [
-          { userId: 'user-1', permission: $Enums.FilePermission.VIEW },
-        ],
+        sharesUsers: [{ userId: 'user-1', permission: $Enums.FilePermission.VIEW }],
       },
       'user-1',
-      accessContext
+      accessContext,
     );
 
     expect(permission).toBe($Enums.FilePermission.VIEW);
@@ -54,15 +58,11 @@ describe('FilesService access resolution', () => {
     const permission = (service as any).resolvePermission(
       {
         ...baseFile,
-        sharesUsers: [
-          { userId: 'user-1', permission: $Enums.FilePermission.VIEW },
-        ],
-        sharesSchools: [
-          { schoolId: 'school-1', permission: $Enums.FilePermission.EDIT },
-        ],
+        sharesUsers: [{ userId: 'user-1', permission: $Enums.FilePermission.VIEW }],
+        sharesSchools: [{ schoolId: 'school-1', permission: $Enums.FilePermission.EDIT }],
       },
       'user-1',
-      accessContext
+      accessContext,
     );
 
     expect(permission).toBe($Enums.FilePermission.EDIT);
@@ -72,23 +72,17 @@ describe('FilesService access resolution', () => {
     const permission = (service as any).resolvePermission(
       {
         ...baseFile,
-        sharesClassGroups: [
-          { classGroupId: 'group-1', permission: $Enums.FilePermission.VIEW },
-        ],
+        sharesClassGroups: [{ classGroupId: 'group-1', permission: $Enums.FilePermission.VIEW }],
       },
       'user-1',
-      accessContext
+      accessContext,
     );
 
     expect(permission).toBe($Enums.FilePermission.VIEW);
   });
 
   it('returns null when no shares match', () => {
-    const permission = (service as any).resolvePermission(
-      baseFile,
-      'user-1',
-      accessContext
-    );
+    const permission = (service as any).resolvePermission(baseFile, 'user-1', accessContext);
 
     expect(permission).toBeNull();
   });

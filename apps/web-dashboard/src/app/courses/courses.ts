@@ -43,6 +43,20 @@ type CourseRow = {
   };
 };
 
+type HomeroomSection = {
+  group: { id: string; name: string };
+  courses: {
+    id: string;
+    name: string;
+    color: string;
+    coverUrl: string | null;
+    icon: string | null;
+    subject: { name: string };
+    teacher: { name: string } | null;
+    students: number;
+  }[];
+};
+
 @Component({
   selector: 'app-courses',
   imports: [
@@ -147,6 +161,35 @@ type CourseRow = {
           (pageSizeChange)="pageSize.set($event)"
         />
       </div>
+      @for (section of homeroomCourses.value() ?? []; track section.group.id) {
+        <!-- FR-ACA-001.18: a homeroom teacher's colleagues' courses, read-only (BR .16). -->
+        <section class="mt-8" [attr.aria-labelledby]="'homeroom-' + section.group.id">
+          <h2 [id]="'homeroom-' + section.group.id" class="text-lg font-semibold text-ink-strong">
+            Cursos de {{ section.group.name }}
+          </h2>
+          <p class="mb-3 text-sm text-ink-muted">
+            Eres docente consejero de este grupo: ves sus cursos en modo de solo lectura.
+          </p>
+          <div class="flex flex-col md:grid md:grid-cols-2 lg:grid-cols-4 gap-5">
+            @for (course of section.courses; track course.id) {
+              <a uiCard [routerLink]="['/courses', course.id]" class="group overflow-hidden">
+                <ui-course-cover [color]="course.color" [icon]="course.icon" [image]="course.coverUrl">
+                  <span uiBadge size="sm" class="absolute top-2 right-2 bg-surface-1 text-ink-strong">
+                    <ui-icon name="eye" /> Solo lectura
+                  </span>
+                </ui-course-cover>
+                <div uiCardBody class="p-3">
+                  <h3 uiCardTitle class="text-sm line-clamp-2">{{ course.subject.name }}</h3>
+                  <div class="text-xs text-ink-muted">
+                    {{ course.teacher?.name ?? 'Sin docente asignado' }} · {{ course.students }}
+                    {{ course.students === 1 ? 'estudiante' : 'estudiantes' }}
+                  </div>
+                </div>
+              </a>
+            }
+          </div>
+        </section>
+      }
     }
   `,
 })
@@ -159,6 +202,11 @@ export default class Courses {
 
   public page = signal<number>(1);
   public pageSize = signal<number>(12);
+
+  /** FR-ACA-001.18: "Cursos de {grupo}" for a homeroom teacher (empty for everyone else). */
+  protected homeroomCourses = httpResource<HomeroomSection[]>(() =>
+    this.auth.isTeacher() ? '/api/v1/courses/homeroom' : undefined,
+  );
 
   protected coursesListResource = httpResource<PaginatedResponse<CourseRow>>(() => {
     const schoolId = this.#store.currentSchoolId();

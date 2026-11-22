@@ -1,7 +1,9 @@
 import { FetchDataQueryDto } from '@/api-contracts';
-import { BetterAuthGuard, Perm, PermissionsGuard, RequirePermissions } from '@/auth';
-import { Body, Controller, Delete, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { AuthenticatedRequest, BetterAuthGuard, Perm, PermissionsGuard, RequirePermissions } from '@/auth';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query, Req, UseGuards } from '@nestjs/common';
+import { ApiBearerAuth, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
+import { CoursesMineService } from './courses-mine.service';
+import { MyCourses } from './entities/my-courses.entity';
 import { CoursesService } from './courses.service';
 import { CreateCourseInput } from './dto/create-course.input';
 import { UpdateCourseInput } from './dto/update-course.input';
@@ -12,7 +14,10 @@ import { UpdateCourseInput } from './dto/update-course.input';
 @RequirePermissions(Perm.VIEW_COURSES)
 @Controller('v1/courses')
 export class CoursesController {
-  constructor(private readonly coursesService: CoursesService) {}
+  constructor(
+    private readonly coursesService: CoursesService,
+    private readonly mineService: CoursesMineService,
+  ) {}
 
   @Post()
   @RequirePermissions(Perm.MANAGE_COURSES)
@@ -27,6 +32,13 @@ export class CoursesController {
     const resp = await this.coursesService.findAll(query);
 
     return { ...resp, data: resp.data.map((i) => ({ ...i, teacher: enrichTeacher(i.teacher) })) };
+  }
+
+  @Get('mine')
+  @ApiOperation({ summary: "The student's course cards for one period (FR-ACA-001.4, .5)" })
+  @ApiQuery({ name: 'periodId', required: false, description: 'Defaults to the current period' })
+  mine(@Req() req: AuthenticatedRequest, @Query('periodId') periodId?: string): Promise<MyCourses> {
+    return this.mineService.mine(req.user, { periodId });
   }
 
   @Get('count')

@@ -6,9 +6,11 @@ import { REQUEST } from '@nestjs/core';
 import * as bcrypt from 'bcrypt';
 import { randomBytes, randomUUID } from 'crypto';
 import { Request } from 'express';
-import { PrismaService } from '../prisma.service';
+import { PrismaService, TEACHER_PERSONAL_DETAILS } from '../prisma.service';
 import { CreateTeacherInput } from './dto/create-teacher.input';
 import { UpdateTeacherInput } from './dto/update-teacher.input';
+
+export const EMAIL_IN_OTHER_ORGANIZATION = 'Ese correo ya pertenece a una cuenta de otra organización';
 
 @Injectable({ scope: Scope.REQUEST })
 export class TeachersService {
@@ -47,6 +49,11 @@ export class TeachersService {
 
     if (existingUser?.teacher) {
       throw new ConflictException('Teacher already exists, contact support');
+    }
+    // An account of another organization is never taken over (its role, organization and password
+    // would all change).
+    if (existingUser?.organizationId && existingUser.organizationId !== createTeacherInput.organizationId) {
+      throw new ConflictException(EMAIL_IN_OTHER_ORGANIZATION);
     }
 
     let userId: string;
@@ -221,6 +228,8 @@ export class TeachersService {
   findOne(id: string) {
     return this.prisma.teacher.findUnique({
       where: { id },
+      // The profile page: the only read that brings back personal details (prisma.service.ts).
+      omit: TEACHER_PERSONAL_DETAILS,
       include: {
         user: { select: { id: true, email: true, color: true, emailVerified: true } },
         classGroups: true,

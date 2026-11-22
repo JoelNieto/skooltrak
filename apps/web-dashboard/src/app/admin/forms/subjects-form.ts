@@ -16,6 +16,14 @@ import { Prisma } from '@generated/prisma';
       <ui-field label="Código" [field]="form.code">
         <input uiInput type="text" id="code" [formField]="form.code" />
       </ui-field>
+      <ui-field
+        label="Área"
+        [field]="form.area"
+        optional
+        hint="Agrupa las asignaturas en Mis cursos, por ejemplo Ciencias o Humanidades."
+      >
+        <input uiInput type="text" id="area" [formField]="form.area" />
+      </ui-field>
       <fieldset class="subject-icon-picker flex flex-col gap-2">
         <legend class="mb-1 text-sm font-medium text-ink-strong">Ícono</legend>
         <div class="grid grid-cols-7 gap-1">
@@ -52,10 +60,11 @@ export default class SubjectsForm {
   public data = input<{ subject?: Prisma.SubjectGetPayload<false> }>();
   private toast = inject(Toast);
   #http = inject(HttpClient);
-  #subject = signal<Omit<Prisma.SubjectUncheckedCreateInput, 'organizationId'>>({
+  #subject = signal<{ name: string; code: string; icon: string | null; area: string }>({
     name: '',
     code: '',
     icon: null,
+    area: '',
   });
   protected readonly icons = SUBJECT_ICONS;
   /** No icon saved shows the default, so the picker marks it too. */
@@ -76,6 +85,7 @@ export default class SubjectsForm {
           name: subject.name,
           code: subject.code,
           icon: subject.icon,
+          area: subject.area ?? '',
         });
       }
     });

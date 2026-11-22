@@ -104,7 +104,7 @@ export class CoursesMineService {
         id: true,
         name: true,
         color: true,
-        subject: { select: { name: true, icon: true } },
+        subject: { select: { name: true, icon: true, area: true } },
         teacher: { select: { firstName: true, fatherName: true, user: { select: { color: true } } } },
         studyPlan: { select: { gradeMetric: { select: { maximum: true, minimumApproval: true } } } },
       },
@@ -189,7 +189,7 @@ export class CoursesMineService {
         id: course.id,
         name: course.name,
         color: resolveCourseColor(course.id, course.color),
-        subject: { name: course.subject.name, icon: course.subject.icon },
+        subject: { name: course.subject.name, icon: course.subject.icon, area: course.subject.area },
         teacher: teacher
           ? {
               name: `${teacher.firstName} ${teacher.fatherName}`,

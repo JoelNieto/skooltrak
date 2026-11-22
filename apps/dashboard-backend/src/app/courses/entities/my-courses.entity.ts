@@ -18,6 +18,8 @@ export class MyCourseRef {
 export class MyCourseSubject {
   name: string;
   icon: string | null;
+  /** ACA-001 BR .14; null: the "Otras" chip. */
+  area: string | null;
 }
 
 export class MyCourseTeacher {

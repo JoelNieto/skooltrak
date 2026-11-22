@@ -29,6 +29,7 @@ import { isValidId } from '../core/validators';
 import GradebookGrid from '../gradebook/gradebook-grid';
 import { ParentContext } from '../parent/parent-context.service';
 import CourseAssignments from './course-assignments';
+import CourseCalendarDialog from './course-calendar-dialog';
 import { CourseAssignmentsList } from './course-assignments-list';
 import CourseFiles from './course-files';
 import CourseGradeBuckets from './course-grade-buckets';
@@ -160,7 +161,7 @@ type CourseVm = {
 
               <div class="flex gap-2">
                 @if (family()) {
-                  <button uiButton variant="ghost" type="button" (click)="tab.set('calendar')">
+                  <button uiButton variant="ghost" type="button" (click)="openCalendar()">
                     <ui-icon name="calendar-days" />
                     Ver calendario
                   </button>
@@ -297,11 +298,14 @@ type CourseVm = {
               }
             </ng-template>
           </div>
-          <div uiTabPanel uiCard value="calendar" class="p-6">
-            <ng-template uiTabContent>
-              <app-course-assignments [courseId]="id()" (reload)="courseResource.reload()" />
-            </ng-template>
-          </div>
+          @if (!family()) {
+            <!-- Families open the calendar from the header (a panel without its tab would show under every tab). -->
+            <div uiTabPanel uiCard value="calendar" class="p-6">
+              <ng-template uiTabContent>
+                <app-course-assignments [courseId]="id()" (reload)="courseResource.reload()" />
+              </ng-template>
+            </div>
+          }
           @if (auth.isTeacher() || auth.isAdmin()) {
             <div uiTabPanel uiCard value="attendance" class="p-6">
               <ng-template uiTabContent><app-course-attendance [courseId]="id()" /></ng-template>
@@ -425,6 +429,11 @@ export default class Course {
     }
     return c;
   });
+
+  /** FR-ACA-001.10: "Ver calendario" for students and parents. */
+  public openCalendar() {
+    this.modal.open(CourseCalendarDialog, { title: 'Calendario del curso', size: 'large', data: { courseId: this.id() } });
+  }
 
   public addAssignment() {
     this.modal.open(AssignmentForm, {

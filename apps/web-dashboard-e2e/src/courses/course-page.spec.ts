@@ -48,6 +48,15 @@ test.describe('Course page for students @FR-ACA-001.10 @FR-ACA-001.11 @FR-ACA-00
     await expect(page.getByRole('tab', { name: /Asignaciones/ })).toContainText('pendientes');
   });
 
+  test('"Ver calendario" opens the calendar in a dialog @FR-ACA-001.10', async ({ page, request }) => {
+    const { id } = await course(request);
+    await page.goto(`/courses/${id}`);
+    await page.getByRole('tab', { name: /Recursos/ }).click();
+    await expect(page.locator('app-course-assignments')).toHaveCount(0);
+    await page.getByRole('button', { name: 'Ver calendario' }).click();
+    await expect(page.getByRole('dialog').locator('app-course-assignments')).toBeVisible();
+  });
+
   test('Calificaciones shows the average, a bar per category and the published grades @FR-ACA-001.14', async ({
     page,
     request,
@@ -87,6 +96,9 @@ test.describe('Participantes @FR-ACA-001.15 @BR-ACA-001.13', () => {
     await expect(teachers).toContainText('Docente');
     const students = page.getByRole('region', { name: /Estudiantes/ });
     for (const name of [ANA, BETO, CARLA]) await expect(students).toContainText(`${name} E2E`);
+
+    // The calendar is not a family tab: it never shows under another one.
+    await expect(page.locator('app-course-assignments')).toHaveCount(0);
 
     await page.getByRole('searchbox', { name: 'Buscar participante' }).fill('bet');
     await expect(students.getByRole('listitem')).toHaveCount(1);

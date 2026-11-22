@@ -19,6 +19,7 @@ import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOperation, ApiQuery, ApiTags } 
 import { CourseAppearanceService, UploadedCover } from './course-appearance.service';
 import { CourseAppearanceInput } from './dto/course-appearance.input';
 import { CourseCoverStorage } from './course-cover-storage';
+import { CourseHomeroomService } from './course-homeroom.service';
 import { CourseRosterAdminService } from './course-roster-admin.service';
 import { RosterAddInput } from './dto/roster-add.input';
 import { CourseAccessService } from './course-access.service';
@@ -44,6 +45,7 @@ export class CoursesController {
     private readonly appearance: CourseAppearanceService,
     private readonly covers: CourseCoverStorage,
     private readonly roster: CourseRosterAdminService,
+    private readonly homeroom: CourseHomeroomService,
   ) {}
 
   @Post()
@@ -66,6 +68,14 @@ export class CoursesController {
       })),
     );
     return { ...resp, data };
+  }
+
+  @Get('homeroom')
+  @ApiOperation({
+    summary: 'A homeroom teacher\'s "Cursos de {grupo}": colleagues\' courses of their groups (FR-ACA-001.18)',
+  })
+  homeroomCourses(@Req() req: AuthenticatedRequest) {
+    return this.homeroom.list(req.user);
   }
 
   @Get('mine')

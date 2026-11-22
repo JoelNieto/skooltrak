@@ -16,6 +16,8 @@ import {
   UiTabList,
   UiTabPanel,
   UiTabs,
+  Alert,
+  UiSelect,
 } from '#/ui';
 import { HttpClient, HttpErrorResponse, httpResource } from '@angular/common/http';
 import { Component, computed, inject, input, linkedSignal, signal } from '@angular/core';
@@ -73,6 +75,8 @@ type CourseVm = {
 
 @Component({
   imports: [
+    Alert,
+    UiSelect,
     EmptyState,
     UiTabs,
     UiTabList,
@@ -193,7 +197,7 @@ type CourseVm = {
                     Chat
                   </button>
                 }
-                @if (auth.hasPermission('MANAGE_ASSIGNMENTS')) {
+                @if (staff() && auth.hasPermission('MANAGE_ASSIGNMENTS')) {
                   <button uiButton variant="primary" (click)="addAssignment()">
                     <ui-icon name="clipboard-plus" />
                     Nueva asignacion
@@ -212,6 +216,29 @@ type CourseVm = {
             </div>
           </div>
         </div>
+        @if (homeroom()) {
+          <!-- FR-ACA-001.18, BR .16: read-only, one student of the homeroom group at a time. -->
+          <div uiAlert tone="info" class="mt-4 flex flex-wrap items-center justify-between gap-3">
+            <span class="flex items-center gap-2">
+              <ui-icon name="eye" />
+              Vista de docente consejero: solo lectura, con las calificaciones publicadas.
+            </span>
+            <label class="flex items-center gap-2 text-sm">
+              Estudiante
+              <select
+                uiSelect
+                size="sm"
+                aria-label="Estudiante del grupo"
+                [value]="homeroomStudentId() ?? ''"
+                (change)="homeroomStudentId.set($any($event.target).value)"
+              >
+                @for (s of participants.value()?.students ?? []; track s.id) {
+                  <option [value]="s.id" [selected]="s.id === homeroomStudentId()">{{ s.name }}</option>
+                }
+              </select>
+            </label>
+          </div>
+        }
         <div uiTabs class="mt-4 flex flex-col gap-4">
           <div uiTabList [(selectedTab)]="tab" aria-label="Secciones del curso">
             @if (family()) {
@@ -285,12 +312,13 @@ type CourseVm = {
             <div uiTabPanel uiCard value="overview" class="p-6">
               <ng-template uiTabContent>
                 @if (work.value(); as w) {
-                  <app-course-overview [work]="w" [teacher]="$any(course.teacher) ?? null" (seeAll)="tab.set('work')">
-                    <app-course-grades-summary
-                      [courseId]="id()"
-                      [studentId]="course.viewer?.kind === 'PARENT' ? (course.viewer?.student?.id ?? null) : null"
-                      [compact]="true"
-                    />
+                  <app-course-overview
+                    [work]="w"
+                    [teacher]="$any(course.teacher) ?? null"
+                    [linkable]="!homeroom()"
+                    (seeAll)="tab.set('work')"
+                  >
+                    <app-course-grades-summary [courseId]="id()" [studentId]="viewedStudentId()" [compact]="true" />
                   </app-course-overview>
                 }
               </ng-template>
@@ -298,7 +326,7 @@ type CourseVm = {
             <div uiTabPanel uiCard value="work" class="p-6">
               <ng-template uiTabContent>
                 @if (work.value(); as w) {
-                  <app-course-assignments-list [work]="w" />
+                  <app-course-assignments-list [work]="w" [linkable]="!homeroom()" />
                 }
               </ng-template>
             </div>
@@ -306,14 +334,11 @@ type CourseVm = {
 
           <div uiTabPanel uiCard value="grades" class="p-6">
             <ng-template uiTabContent>
-              @if (auth.isTeacher() || auth.isAdmin()) {
+              @if (staff()) {
                 <app-gradebook-grid [courseId]="id()" />
               }
               @if (family()) {
-                <app-course-grades-summary
-                  [courseId]="id()"
-                  [studentId]="course.viewer?.kind === 'PARENT' ? (course.viewer?.student?.id ?? null) : null"
-                />
+                <app-course-grades-summary [courseId]="id()" [studentId]="viewedStudentId()" />
               }
             </ng-template>
           </div>
@@ -325,7 +350,7 @@ type CourseVm = {
               </ng-template>
             </div>
           }
-          @if (auth.isTeacher() || auth.isAdmin()) {
+          @if (staff()) {
             <div uiTabPanel uiCard value="attendance" class="p-6">
               <ng-template uiTabContent><app-course-attendance [courseId]="id()" /></ng-template>
             </div>
@@ -349,9 +374,9 @@ type CourseVm = {
             </ng-template>
           </div>
           <div uiTabPanel uiCard value="files" class="p-6">
-            <ng-template uiTabContent><app-course-files [courseId]="id()" /></ng-template>
+            <ng-template uiTabContent><app-course-files [courseId]="id()" [readOnly]="homeroom()" /></ng-template>
           </div>
-          @if (auth.isTeacher() || auth.isAdmin()) {
+          @if (staff()) {
             <div uiTabPanel uiCard value="weights" class="p-6">
               <ng-template uiTabContent><app-course-grade-buckets [courseId]="id()" /></ng-template>
             </div>
@@ -372,10 +397,28 @@ export default class Course {
   protected readonly colorVar = courseColorVar;
   #ctx = inject(ParentContext);
 
-  /** BR-ACA-001.3: students and parents get the family view of the page (FR-ACA-001.11). */
+  protected readonly viewerKind = computed(() => this.courseResource.value()?.viewer?.kind);
+  /** The course's teacher or an admin: the only viewers with write actions (BR-ACA-001.3). */
+  protected readonly staff = computed(() => this.viewerKind() === 'STAFF');
+  /** A homeroom teacher's read-only view of a colleague's course (FR-ACA-001.18, BR .16). */
+  protected readonly homeroom = computed(() => this.viewerKind() === 'HOMEROOM');
+  /**
+   * BR-ACA-001.3: students and parents get the family view of the page (FR-ACA-001.11); so does a
+   * homeroom teacher, read-only, for one student of their group at a time (BR .16).
+   */
   protected readonly family = computed(() => {
-    const kind = this.courseResource.value()?.viewer?.kind;
-    return kind === 'STUDENT' || kind === 'PARENT';
+    const kind = this.viewerKind();
+    return kind === 'STUDENT' || kind === 'PARENT' || kind === 'HOMEROOM';
+  });
+  /** BR .16: the homeroom teacher's chosen student; starts on the one the API picked. */
+  protected readonly homeroomStudentId = linkedSignal(() =>
+    this.homeroom() ? (this.courseResource.value()?.viewer?.student?.id ?? null) : null,
+  );
+  /** Whose work and grades the family view shows: a parent's child, a homeroom teacher's pick, else the caller. */
+  protected readonly viewedStudentId = computed(() => {
+    const viewer = this.courseResource.value()?.viewer;
+    if (viewer?.kind === 'HOMEROOM') return this.homeroomStudentId();
+    return viewer?.kind === 'PARENT' ? (viewer.student?.id ?? null) : null;
   });
   /** Selected section; the tab list and panels follow it. Families start on Resumen. */
   readonly tab = linkedSignal<boolean, string>({
@@ -400,13 +443,15 @@ export default class Course {
   /** FR-ACA-001.12, .13: the student's work in this course. */
   public work = httpResource<CourseWork>(() => {
     if (!this.family()) return undefined;
-    const studentId = this.courseResource.value()?.viewer?.student?.id;
+    const studentId = this.viewedStudentId();
     const params: Record<string, string> = studentId ? { studentId } : {};
     return { url: `/api/v1/courses/${this.id()}/work`, params };
   });
   startingChat = signal(false);
 
   canStartCourseChat() {
+    // BR-ACA-001.16: a homeroom teacher's view has no write actions.
+    if (!this.staff()) return false;
     if (!this.auth.hasPermission('MANAGE_MESSAGES')) return false;
     const course = this.courseResource.value() as {
       teacher?: { user?: { id?: string }; userId?: string | null };
@@ -497,7 +542,7 @@ export default class Course {
     this.modal.open(CourseCalendarDialog, {
       title: 'Calendario del curso',
       size: 'large',
-      data: { courseId: this.id() },
+      data: { courseId: this.id(), linkable: !this.homeroom() },
     });
   }
 

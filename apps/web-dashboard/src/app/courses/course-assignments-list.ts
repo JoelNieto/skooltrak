@@ -19,7 +19,7 @@ import { CourseWork, CourseWorkItem, workDate, workPill, WORK_TYPES } from './co
             @for (item of section.items; track item.assignmentId + item.dueAt) {
               <li class="border-t border-line first:border-t-0">
                 <a
-                  [routerLink]="['/assignments', item.assignmentId]"
+                  [routerLink]="linkable() ? ['/assignments', item.assignmentId] : null"
                   class="flex items-center gap-3 py-2.5 hover:bg-surface-2"
                 >
                   <ui-icon [name]="type(item).icon" class="text-xl text-ink-muted" />
@@ -47,6 +47,8 @@ import { CourseWork, CourseWorkItem, workDate, workPill, WORK_TYPES } from './co
 })
 export class CourseAssignmentsList {
   readonly work = input.required<CourseWork>();
+  /** False for a homeroom teacher's read-only view (BR-ACA-001.16): items don't open the assignment. */
+  readonly linkable = input(true);
 
   protected sections() {
     const work = this.work();

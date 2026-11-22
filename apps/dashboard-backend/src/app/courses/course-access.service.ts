@@ -9,14 +9,16 @@ const ADMIN_ROLES = new Set(['ORG_ADMIN', 'ADMIN', 'SYSADMIN']);
 /**
  * Who is looking at a course page (ACA-001 BR .3):
  * - STAFF: an admin of the course's organization, or its teacher (full access);
- * - HOMEROOM: a homeroom teacher of a group with students enrolled in the course (read-only, BR .16);
+ * - HOMEROOM: a homeroom teacher of a group with students enrolled in the course (read-only, BR .16),
+ *   carrying one of those students (`studentId`, else the first by name), whose work and published
+ *   grades the page shows;
  * - STUDENT: the enrolled student; PARENT: a parent of an enrolled, linked child (any organization,
  *   BR-HOM-001.9). Both carry that student.
  */
 export type CourseViewer =
   | { kind: 'STAFF'; organizationId: string; student: null }
   /** `userId`: the homeroom teacher, whose group's students they may see (BR .16). */
-  | { kind: 'HOMEROOM'; organizationId: string; student: null; userId: string }
+  | { kind: 'HOMEROOM'; organizationId: string; student: CourseViewerStudent; userId: string }
   | { kind: 'STUDENT' | 'PARENT'; organizationId: string; student: CourseViewerStudent };
 
 export interface CourseViewerStudent {
@@ -51,10 +53,18 @@ export class CourseAccessService {
         select: { id: true },
       });
       if (teacher && teacher.id === course.teacherId) return { kind: 'STAFF', organizationId, student: null };
-      const homeroom = await this.prisma.student.count({
-        where: { organizationId, ...enrolledIn(courseId), classGroup: { teacher: { userId: user.userId } } },
+      // BR .16: the requested student of their homeroom group, else the first one enrolled.
+      const student = await this.prisma.student.findFirst({
+        where: {
+          ...(studentId ? { id: studentId } : {}),
+          organizationId,
+          ...enrolledIn(courseId),
+          classGroup: { teacher: { userId: user.userId } },
+        },
+        select: STUDENT_SELECT,
+        orderBy: [{ firstName: 'asc' }, { fatherName: 'asc' }],
       });
-      if (homeroom) return { kind: 'HOMEROOM', organizationId, student: null, userId: user.userId };
+      if (student) return { kind: 'HOMEROOM', organizationId, student, userId: user.userId };
       throw new ForbiddenException(COURSE_DENIED);
     }
 

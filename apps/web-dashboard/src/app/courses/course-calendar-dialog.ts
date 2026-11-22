@@ -8,9 +8,9 @@ import CourseAssignments from './course-assignments';
 @Component({
   selector: 'app-course-calendar-dialog',
   imports: [CourseAssignments],
-  template: `<app-course-assignments [courseId]="data().courseId" />`,
+  template: `<app-course-assignments [courseId]="data().courseId" [linkable]="data().linkable ?? true" />`,
 })
 export default class CourseCalendarDialog {
-  readonly data = input.required<{ courseId: string }>();
+  readonly data = input.required<{ courseId: string; linkable?: boolean }>();
   readonly closeModal = output<void>();
 }

@@ -173,11 +173,17 @@ describe('CourseAccessService.viewer (BR-ACA-001.3)', () => {
     await expect(access().viewer(user('u-teacher', 'TEACHER'), 'C1')).resolves.toMatchObject({ kind: 'STAFF' });
   });
 
-  it('lets a homeroom teacher of enrolled students in, read-only (BR .16)', async () => {
+  it('lets a homeroom teacher of enrolled students in, read-only, with one of their students (BR .16)', async () => {
     await expect(access().viewer(user('u-homeroom', 'TEACHER'), 'C1')).resolves.toMatchObject({
       kind: 'HOMEROOM',
-      student: null,
+      student: { id: 'S-ana' },
     });
+    await expect(access().viewer(user('u-homeroom', 'TEACHER'), 'C1', 'S-beto')).resolves.toMatchObject({
+      kind: 'HOMEROOM',
+      student: { id: 'S-beto', classGroup: { id: 'G7A' } },
+    });
+    // Not a student of their group (Félix is in 7°B): refused, never a fallback.
+    await expect(access().viewer(user('u-homeroom', 'TEACHER'), 'C1', 'S-felix')).rejects.toThrow(COURSE_DENIED);
   });
 
   it('lets in the enrolled student, and the parent of an enrolled linked child in any organization', async () => {
@@ -313,7 +319,7 @@ describe('CoursePageService.participants (FR-ACA-001.15, BR .13)', () => {
     const homeroom = await page().participants('C1', {
       kind: 'HOMEROOM',
       organizationId: 'org-1',
-      student: null,
+      student: { id: 'S-ana', firstName: 'Ana', classGroup: { id: 'G7A', name: '7°A' } },
       userId: 'u-nobody',
     });
     expect(homeroom.students).toEqual([]);

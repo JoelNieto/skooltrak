@@ -58,10 +58,12 @@ type CourseFile = {
           [(ngModel)]="searchText"
         />
       </label>
-      <button uiToolbarEnd uiButton variant="primary" size="sm" (click)="openUploadModal()">
-        <ui-icon name="file-up" class="text-base" />
-        Subir archivos
-      </button>
+      @if (!readOnly()) {
+        <button uiToolbarEnd uiButton variant="primary" size="sm" (click)="openUploadModal()">
+          <ui-icon name="file-up" class="text-base" />
+          Subir archivos
+        </button>
+      }
     </ui-table-toolbar>
     <div uiCard class="overflow-x-auto mt-4">
       <table uiTable [attr.aria-busy]="filesResource.isLoading()">
@@ -132,7 +134,9 @@ type CourseFile = {
                   </tr>
                 } @else {
                   <tr uiTableEmpty [columns]="6" icon="folder-open" title="Aún no hay archivos en este curso">
-                    <button uiButton size="sm" (click)="openUploadModal()">Subir archivos</button>
+                    @if (!readOnly()) {
+                      <button uiButton size="sm" (click)="openUploadModal()">Subir archivos</button>
+                    }
                   </tr>
                 }
               }
@@ -148,6 +152,8 @@ export default class CourseFiles {
   #modal = inject(Modal);
   #toast = inject(Toast);
   public courseId = input.required<string>();
+  /** A homeroom teacher's read-only view (BR-ACA-001.16): no uploads. */
+  public readOnly = input(false);
   public searchText = signal<string>('');
   #debouncedSearch: Signal<string>;
 

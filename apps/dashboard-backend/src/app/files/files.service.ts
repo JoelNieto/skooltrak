@@ -20,6 +20,12 @@ type AccessContext = {
   schoolIds: string[];
   classGroupIds: string[];
   courseIds: string[];
+  /**
+   * Colleagues' courses a homeroom teacher may read (ACA-001 BR .16): their group's students are
+   * enrolled. Files shared with these courses are listed on the course page and open as VIEW,
+   * whatever the share's permission; they never grant EDIT.
+   */
+  viewCourseIds: string[];
 };
 
 type AuthUserContext = {
@@ -229,16 +235,17 @@ export class FilesService {
       });
     }
 
-    if (accessContext.courseIds.length > 0) {
+    const readableCourseIds = [...accessContext.courseIds, ...accessContext.viewCourseIds];
+    if (readableCourseIds.length > 0) {
       orConditions.push({
-        sharesCourses: { some: { courseId: { in: accessContext.courseIds } } },
+        sharesCourses: { some: { courseId: { in: readableCourseIds } } },
       });
     }
 
     const orderByField = orderBy ?? 'createdAt';
     const orderDirection = query.orderDirection ?? 'desc';
 
-const files = await this.prisma.file.findMany({
+    const files = await this.prisma.file.findMany({
       where: {
         organizationId,
         deletedAt: null,
@@ -442,6 +449,7 @@ const files = await this.prisma.file.findMany({
     const schoolIds = new Set<string>();
     const classGroupIds = new Set<string>();
     const courseIds = new Set<string>();
+    let viewCourseIds: string[] = [];
 
     if (user?.student) {
       schoolIds.add(user.student.schoolId);
@@ -460,12 +468,24 @@ const files = await this.prisma.file.findMany({
         courseIds.add(course.id);
         schoolIds.add(course.schoolId);
       });
+      const homeroomGroupIds = user.teacher.classGroups.map((g) => g.id);
+      if (homeroomGroupIds.length) {
+        const homeroomCourses = await this.prisma.course.findMany({
+          where: {
+            id: { notIn: [...courseIds] },
+            enrollments: { some: { ...ACTIVE_ENROLLMENT, student: { classGroupId: { in: homeroomGroupIds } } } },
+          },
+          select: { id: true },
+        });
+        viewCourseIds = homeroomCourses.map((c) => c.id);
+      }
     }
 
     return {
       schoolIds: Array.from(schoolIds),
       classGroupIds: Array.from(classGroupIds),
       courseIds: Array.from(courseIds),
+      viewCourseIds,
     };
   }
 
@@ -488,6 +508,7 @@ const files = await this.prisma.file.findMany({
     const schoolIds = new Set(accessContext.schoolIds);
     const classGroupIds = new Set(accessContext.classGroupIds);
     const courseIds = new Set(accessContext.courseIds);
+    const viewCourseIds = new Set(accessContext.viewCourseIds);
 
     const hasEdit =
       file.sharesUsers.some((share) => share.userId === userId && share.permission === $Enums.FilePermission.EDIT) ||
@@ -515,7 +536,8 @@ const files = await this.prisma.file.findMany({
       ) ||
       file.sharesCourses.some(
         (share) => courseIds.has(share.courseId) && share.permission === $Enums.FilePermission.VIEW,
-      );
+      ) ||
+      file.sharesCourses.some((share) => viewCourseIds.has(share.courseId));
 
     return hasView ? $Enums.FilePermission.VIEW : null;
   }

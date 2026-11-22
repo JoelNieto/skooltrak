@@ -2803,6 +2803,26 @@
         ]
       }
     },
+    "/api/v1/courses/homeroom": {
+      "get": {
+        "operationId": "CoursesController_homeroomCourses",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "A homeroom teacher's \"Cursos de {grupo}\": colleagues' courses of their groups (FR-ACA-001.18)",
+        "tags": [
+          "courses"
+        ]
+      }
+    },
     "/api/v1/courses/mine": {
       "get": {
         "operationId": "CoursesController_mine",

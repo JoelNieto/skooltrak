@@ -3353,6 +3353,40 @@ export class SkooltrakDashboardAPIService {
   }
 
 /**
+ * @summary A homeroom teacher's "Cursos de {grupo}": colleagues' courses of their groups (FR-ACA-001.18)
+ */
+ coursesControllerHomeroomCourses<TData = void>( options?: HttpClientBodyOptions): Observable<TData>;
+ coursesControllerHomeroomCourses<TData = void>( options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
+ coursesControllerHomeroomCourses<TData = void>( options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
+  coursesControllerHomeroomCourses<TData = void>(
+     options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
+    if (options?.observe === 'events') {
+      return this.http.get<TData>(
+      `/api/v1/courses/homeroom`,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'events',
+      }
+    );
+    }
+
+    if (options?.observe === 'response') {
+      return this.http.get<TData>(
+      `/api/v1/courses/homeroom`,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'response',
+      }
+    );
+    }
+
+    return this.http.get<TData>(
+      `/api/v1/courses/homeroom`,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'body',
+      }
+    );
+  }
+
+/**
  * @summary A student's (or a parent's linked child's) course cards and stats for one period (FR-ACA-001.4–.8)
  */
  coursesControllerMine<TData = void>(params?: CoursesControllerMineParams, options?: HttpClientBodyOptions): Observable<TData>;

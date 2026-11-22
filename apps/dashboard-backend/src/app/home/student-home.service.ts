@@ -132,6 +132,13 @@ export class StudentHomeService {
             requireSubmission: true,
             course: { select: { id: true, name: true } },
             submissions: { where: { studentId: student.id }, select: { submittedAt: true } },
+            // FR-ACA-001.17: the linked grade, if any, and the student's cell in it.
+            grade: {
+              select: {
+                published: true,
+                studentGrades: { where: { studentId: student.id }, select: { score: true, excused: true } },
+              },
+            },
           },
         },
       },
@@ -141,6 +148,12 @@ export class StudentHomeService {
     const items: StudentWorkItem[] = dates
       .map(({ date, assignment }) => {
         const submission = assignment.submissions[0];
+        const cell = assignment.grade?.published ? assignment.grade.studentGrades[0] : undefined;
+        const graded = cell ? { score: cell.score === null ? null : cell.score.toNumber(), excused: cell.excused } : null;
+        const status = workStatus(
+          { dueAt: date, requireSubmission: assignment.requireSubmission, submitted: !!submission, graded },
+          now,
+        );
         return {
           assignmentId: assignment.id,
           title: assignment.title,
@@ -148,7 +161,8 @@ export class StudentHomeService {
           requireSubmission: assignment.requireSubmission,
           course: assignment.course,
           dueAt: date.toISOString(),
-          status: workStatus({ dueAt: date, requireSubmission: assignment.requireSubmission, submitted: !!submission }, now),
+          status,
+          score: status === 'CALIFICADA' ? (graded?.score ?? null) : null,
           submittedAt: submission ? submission.submittedAt.toISOString() : null,
         };
       })
@@ -371,11 +385,22 @@ export class StudentHomeService {
   }
 }
 
-/** BR-HOM-001.12 */
+/**
+ * BR-HOM-001.12, extended by BR-ACA-001.6: a published linked grade comes first (CALIFICADA with a
+ * score, EXENTA when excused); an empty cell falls through to the submission and due-date rules.
+ */
 export function workStatus(
-  item: { dueAt: Date; requireSubmission: boolean; submitted: boolean },
+  item: {
+    dueAt: Date;
+    requireSubmission: boolean;
+    submitted: boolean;
+    /** The student's cell in the assignment's published linked grade, if any. */
+    graded?: { score: number | null; excused: boolean } | null;
+  },
   now: Date,
 ): StudentWorkStatus {
+  if (item.graded?.excused) return 'EXENTA';
+  if (item.graded && item.graded.score !== null) return 'CALIFICADA';
   if (item.submitted) return 'ENTREGADO';
   if (!item.requireSubmission) return 'PRESENCIAL';
   return item.dueAt < now ? 'VENCIDA' : 'PENDIENTE';

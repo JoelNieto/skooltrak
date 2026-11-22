@@ -251,4 +251,4 @@ Listed in build order.
 | ACA-001-S12 | Admin manages a course roster (electives, exemptions) | .19, BR .15 | Proposed (after S11) |
 | ACA-001-S13 | Homeroom teacher's read-only view of colleagues' courses | .18, BR .16 | Proposed (after S06, S07) |
 | ACA-001-S09 | Teacher sets color and cover photo | .3, BR .12 | Proposed |
-| ACA-001-S10 | *"Calificada · n"* status from linked grades | .17 | Proposed (ASM-001-S06 in review) |
+| [ACA-001-S10](../slices/ACA-001-S10-graded-status.md) | *"Calificada · n"* status from linked grades | .17 | In review |

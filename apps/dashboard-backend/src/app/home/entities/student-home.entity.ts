@@ -37,8 +37,11 @@ export class StudentToday {
   slots: StudentSlot[];
 }
 
-/** BR-HOM-001.12 */
-export type StudentWorkStatus = 'PENDIENTE' | 'ENTREGADO' | 'VENCIDA' | 'PRESENCIAL';
+/**
+ * BR-HOM-001.12, extended by BR-ACA-001.6: CALIFICADA / EXENTA when the assignment's linked grade
+ * (ASM-001 FR .11) is published and the student is scored / excused in it (FR-ACA-001.17).
+ */
+export type StudentWorkStatus = 'CALIFICADA' | 'EXENTA' | 'PENDIENTE' | 'ENTREGADO' | 'VENCIDA' | 'PRESENCIAL';
 
 export class StudentWorkItem {
   assignmentId: string;
@@ -49,6 +52,8 @@ export class StudentWorkItem {
   /** ISO instant the work is due for the student's group (`AssignmentDate.date`). */
   dueAt: string;
   status: StudentWorkStatus;
+  /** The published score when CALIFICADA; null otherwise. */
+  score: number | null;
   /** ISO instant of the student's submission, if any. */
   submittedAt: string | null;
 }

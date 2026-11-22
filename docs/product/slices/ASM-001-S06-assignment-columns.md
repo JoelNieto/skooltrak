@@ -4,7 +4,7 @@
 |---|---|
 | **FRD** | [ASM-001](../frd/ASM-001-teacher-gradebook.md) |
 | **Implements** | FR-ASM-001.11, BR-ASM-001.11 |
-| **Status** | In review |
+| **Status** | Done: #59 (2026-11-21) |
 | **Branch** | `feat/ASM-001-S06-assignment-columns` |
 | **Estimate** | 1–2 days |
 

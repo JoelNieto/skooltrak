@@ -4,8 +4,8 @@
 |---|---|
 | **FRD** | [ASM-001](../frd/ASM-001-teacher-gradebook.md) |
 | **Implements** | FR-ASM-001.14, BR-ASM-001.12 |
-| **Status** | In review |
-| **Branch** | `feat/ASM-001-S08-homeroom-alert` (stacked on S07, #60) |
+| **Status** | Done: #61 (2026-11-21) |
+| **Branch** | `feat/ASM-001-S08-homeroom-alert` |
 | **Estimate** | 2–3 days |
 
 ## User-visible outcome

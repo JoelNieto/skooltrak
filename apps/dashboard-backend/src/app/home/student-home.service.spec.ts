@@ -353,5 +353,23 @@ describe('StudentHomeService (HOM-001-S04)', () => {
     ] as const)('due %s, requireSubmission=%s, submitted=%s → %s', (dueAt, requireSubmission, submitted, expected) => {
       expect(workStatus({ dueAt, requireSubmission, submitted }, NOW)).toBe(expected);
     });
+
+    it('puts a published linked grade first: CALIFICADA or EXENTA (BR-ACA-001.6, FR-ACA-001.17)', () => {
+      expect(workStatus({ dueAt: past, requireSubmission: true, submitted: true, graded: { score: 4.5, excused: false } }, NOW)).toBe(
+        'CALIFICADA',
+      );
+      expect(workStatus({ dueAt: past, requireSubmission: true, submitted: false, graded: { score: null, excused: true } }, NOW)).toBe(
+        'EXENTA',
+      );
+      expect(workStatus({ dueAt: future, requireSubmission: false, submitted: false, graded: { score: 3, excused: false } }, NOW)).toBe(
+        'CALIFICADA',
+      );
+    });
+
+    it('falls through to the usual rules when the linked cell is empty', () => {
+      expect(workStatus({ dueAt: past, requireSubmission: true, submitted: false, graded: { score: null, excused: false } }, NOW)).toBe(
+        'VENCIDA',
+      );
+    });
   });
 });

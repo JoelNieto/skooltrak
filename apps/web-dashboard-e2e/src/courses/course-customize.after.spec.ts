@@ -37,7 +37,7 @@ test.describe('Course customization @FR-ACA-001.3 @BR-ACA-001.12', () => {
   });
 
   test.afterAll(async ({ request }) => {
-    await request.patch(`/api/v1/courses/${courseId}/appearance`, { headers: teacher, data: { color: originalColor } });
+    await request.patch(`/api/v1/courses/${courseId}/appearance`, { headers: teacher, data: { color: originalColor, icon: null } });
   });
 
   test('the course teacher picks a color from "Personalizar"', async ({ browser }) => {
@@ -55,6 +55,26 @@ test.describe('Course customization @FR-ACA-001.3 @BR-ACA-001.12', () => {
     await dialog.getByRole('button', { name: 'Listo' }).click();
     await expect(page.locator('ui-course-cover[data-color="GREEN"]').first()).toBeVisible();
     await context.close();
+  });
+
+  test('the course teacher picks an icon instead of a photo', async ({ browser, request }) => {
+    const context = await browser.newContext({ storageState: storageStatePath('teacher') });
+    const page = await context.newPage();
+    await page.goto(`/courses/${courseId}`);
+    await page.getByRole('button', { name: 'Personalizar' }).click();
+    const dialog = page.getByRole('dialog');
+    await dialog.getByRole('tab', { name: /Ícono/ }).click();
+    const saved = page.waitForResponse((r) => r.url().endsWith(`/courses/${courseId}/appearance`));
+    await dialog.getByRole('radio', { name: 'Átomo' }).click();
+    const res = await saved;
+    expect(res.status(), await res.text()).toBe(200);
+    await expect(dialog.getByRole('radio', { name: 'Átomo' })).toHaveAttribute('aria-checked', 'true');
+    await context.close();
+
+    const course = (await (await request.get(`/api/v1/courses/${courseId}`, { headers: teacher })).json()) as { icon: string | null };
+    expect(course.icon).toBe('atom');
+    const bad = await request.patch(`/api/v1/courses/${courseId}/appearance`, { headers: teacher, data: { icon: 'skull' } });
+    expect(bad.status()).toBe(400);
   });
 
   test('refuses other teachers, students, and covers that are not images', async ({ request }) => {

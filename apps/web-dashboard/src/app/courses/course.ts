@@ -58,6 +58,8 @@ type CourseVm = {
   studyPlan: { name?: string; gradeMetric: unknown };
   /** FR-ACA-001.3: presigned cover photo; null keeps the color cover. */
   coverUrl?: string | null;
+  /** FR-ACA-001.3: the teacher's icon; null shows the subject's. */
+  icon?: string | null;
   /** FR-ACA-001.3: the course's teacher or an admin may set color and cover. */
   canCustomize?: boolean;
   /** BR-ACA-001.3: who is looking; students and parents carry the student. */
@@ -122,7 +124,7 @@ type CourseVm = {
             <ui-course-cover
               variant="tile"
               [color]="course.color"
-              [icon]="course.subject?.icon"
+              [icon]="course.icon ?? course.subject?.icon"
               [image]="course.coverUrl"
             />
             <div class="flex justify-between items-center w-full">
@@ -457,7 +459,8 @@ export default class Course {
         data: {
           courseId: course.id,
           color: course.color,
-          icon: course.subject?.icon ?? null,
+          icon: course.icon ?? null,
+          subjectIcon: course.subject?.icon ?? null,
           coverUrl: course.coverUrl ?? null,
         },
       })

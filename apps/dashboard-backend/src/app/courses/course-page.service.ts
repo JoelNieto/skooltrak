@@ -42,7 +42,9 @@ export class CoursePageService {
       include: {
         school: true,
         subject: true,
-        teacher: { include: { user: { select: { id: true, firstName: true, lastName: true, color: true, image: true } } } },
+        teacher: {
+          include: { user: { select: { id: true, firstName: true, lastName: true, color: true, image: true } } },
+        },
         studyPlan: { include: { gradeMetric: true } },
       },
     });
@@ -108,7 +110,12 @@ export class CoursePageService {
       const cell = assignment.grade?.published ? assignment.grade.studentGrades[0] : undefined;
       const graded = cell ? { score: cell.score === null ? null : num(cell.score), excused: cell.excused } : null;
       const status = workStatus(
-        { dueAt: date, requireSubmission: assignment.requireSubmission, submitted: assignment.submissions.length > 0, graded },
+        {
+          dueAt: date,
+          requireSubmission: assignment.requireSubmission,
+          submitted: assignment.submissions.length > 0,
+          graded,
+        },
         now,
       );
       return {
@@ -188,7 +195,9 @@ export class CoursePageService {
       };
     });
     const weights = new Map(course.gradeBuckets.map((b) => [b.id, num(b.weight)]));
-    const average = courseAverage(rows.map((r) => ({ bucketId: r.bucketId, weight: weights.get(r.bucketId) ?? 0, score: r.score })));
+    const average = courseAverage(
+      rows.map((r) => ({ bucketId: r.bucketId, weight: weights.get(r.bucketId) ?? 0, score: r.score })),
+    );
 
     return {
       periods: periods.map((p) => ({ id: p.id, name: p.name })),
@@ -202,7 +211,15 @@ export class CoursePageService {
         weight: num(b.weight),
         average: meanOf(rows.filter((r) => r.bucketId === b.id).map((r) => r.score)),
       })),
-      grades: rows.map((r) => ({ id: r.id, title: r.title, bucket: r.bucket, date: r.date, comment: r.comment, score: r.score, excused: r.excused })),
+      grades: rows.map((r) => ({
+        id: r.id,
+        title: r.title,
+        bucket: r.bucket,
+        date: r.date,
+        comment: r.comment,
+        score: r.score,
+        excused: r.excused,
+      })),
     };
   }
 
@@ -268,4 +285,3 @@ export class CoursePageService {
 
 const TEACHER_SELECT = { id: true, firstName: true, fatherName: true, user: { select: { color: true } } } as const;
 type TeacherRow = { id: string; firstName: string; fatherName: string; user: { color: string | null } | null };
-

@@ -54,7 +54,10 @@ export class CoursesService {
 
   /** Throws 403 unless the course exists in the caller's organization. */
   private async assertInOrganization(id: string, organizationId: string) {
-    const course = await this.prisma.course.findFirst({ where: { id, organizationId }, select: { id: true, studyPlanId: true } });
+    const course = await this.prisma.course.findFirst({
+      where: { id, organizationId },
+      select: { id: true, studyPlanId: true },
+    });
     if (!course) throw new ForbiddenException(COURSE_DENIED);
     return course;
   }
@@ -141,7 +144,9 @@ export class CoursesService {
     const organizationId = studyPlan.school.organizationId;
 
     // Use provided code or generate a unique one from subject name
-    const code = createCourseInput.code ? createCourseInput.code : await this.generateUniqueCode(schoolId, subject.name);
+    const code = createCourseInput.code
+      ? createCourseInput.code
+      : await this.generateUniqueCode(schoolId, subject.name);
 
     let course;
     try {
@@ -408,7 +413,8 @@ export class CoursesService {
       await this.assertTeacherInOrganization(updateCourseInput.teacherId, organizationId);
     }
     // A new study plan re-syncs the course's plan enrollments in the same transaction (decided 2026-11-20).
-    const planChanged = updateCourseInput.studyPlanId !== undefined && updateCourseInput.studyPlanId !== current.studyPlanId;
+    const planChanged =
+      updateCourseInput.studyPlanId !== undefined && updateCourseInput.studyPlanId !== current.studyPlanId;
     return this.prisma.$transaction(async (tx) => {
       const course = await tx.course.update({
         where: { id },

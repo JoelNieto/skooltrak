@@ -18,6 +18,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { CourseAppearanceService, UploadedCover } from './course-appearance.service';
 import { CourseAppearanceInput } from './dto/course-appearance.input';
+import { CourseCoverStorage } from './course-cover-storage';
 import { CourseAccessService } from './course-access.service';
 import { CoursePageService } from './course-page.service';
 import { CoursesMineService } from './courses-mine.service';
@@ -39,6 +40,7 @@ export class CoursesController {
     private readonly access: CourseAccessService,
     private readonly page: CoursePageService,
     private readonly appearance: CourseAppearanceService,
+    private readonly covers: CourseCoverStorage,
   ) {}
 
   @Post()
@@ -52,14 +54,27 @@ export class CoursesController {
   @ApiOperation({ summary: 'List courses' })
   async findAll(@Query() query: FetchDataQueryDto) {
     const resp = await this.coursesService.findAll(query);
-
-    return { ...resp, data: resp.data.map((i) => ({ ...i, teacher: enrichTeacher(i.teacher) })) };
+    const data = await Promise.all(
+      resp.data.map(async ({ coverKey, ...i }) => ({
+        ...i,
+        teacher: enrichTeacher(i.teacher),
+        /** FR-ACA-001.3: presigned cover photo; null keeps the color cover. */
+        coverUrl: await this.covers.url(coverKey),
+      })),
+    );
+    return { ...resp, data };
   }
 
   @Get('mine')
-  @ApiOperation({ summary: "A student's (or a parent's linked child's) course cards and stats for one period (FR-ACA-001.4–.8)" })
+  @ApiOperation({
+    summary: "A student's (or a parent's linked child's) course cards and stats for one period (FR-ACA-001.4–.8)",
+  })
   @ApiQuery({ name: 'periodId', required: false, description: 'Defaults to the current period' })
-  @ApiQuery({ name: 'studentId', required: false, description: 'Parents: a linked child (FR-ACA-001.8); ignored for students' })
+  @ApiQuery({
+    name: 'studentId',
+    required: false,
+    description: 'Parents: a linked child (FR-ACA-001.8); ignored for students',
+  })
   mine(
     @Req() req: AuthenticatedRequest,
     @Query('periodId') periodId?: string,
@@ -112,9 +127,9 @@ export class CoursesController {
 
   @Patch(':id/appearance')
   @RequirePermissions(Perm.CUSTOMIZE_COURSES)
-  @ApiOperation({ summary: "Set a course's color: its teacher or an admin (FR-ACA-001.3, BR .12)" })
+  @ApiOperation({ summary: "Set a course's color and icon: its teacher or an admin (FR-ACA-001.3, BR .12)" })
   setAppearance(@Req() req: AuthenticatedRequest, @Param('id') id: string, @Body() input: CourseAppearanceInput) {
-    return this.appearance.setColor(req.user, id, input.color ?? null);
+    return this.appearance.setAppearance(req.user, id, input);
   }
 
   @Post(':id/cover')

@@ -9,7 +9,13 @@ import { plainToInstance } from 'class-transformer';
 import { validate } from 'class-validator';
 import { CreateCourseInput } from './dto/create-course.input';
 import { UpdateCourseInput } from './dto/update-course.input';
-import { COURSE_DENIED, CoursesService, STUDY_PLAN_NOT_FOUND, SUBJECT_NOT_FOUND, TEACHER_NOT_FOUND } from './courses.service';
+import {
+  COURSE_DENIED,
+  CoursesService,
+  STUDY_PLAN_NOT_FOUND,
+  SUBJECT_NOT_FOUND,
+  TEACHER_NOT_FOUND,
+} from './courses.service';
 
 /**
  * Course reads and writes are limited to the caller's organization. Runs the real service against
@@ -44,9 +50,34 @@ const fixture = () => ({
     { id: 'G2', organizationId: 'org-2', studyPlanId: 'P2' },
   ],
   course: [
-    { id: 'C1', organizationId: 'org-1', schoolId: 'SC1', subjectId: 'SB1', studyPlanId: 'P1', teacherId: 'T1', name: 'Mate 1' },
-    { id: 'C1c', organizationId: 'org-1', schoolId: 'SC1', subjectId: 'SB1', studyPlanId: 'P1', teacherId: 'T1', name: 'Mate 2', color: 'TEAL' },
-    { id: 'C2', organizationId: 'org-2', schoolId: 'SC2', subjectId: 'SB2', studyPlanId: 'P2', teacherId: 'T2', name: 'Historia 2' },
+    {
+      id: 'C1',
+      organizationId: 'org-1',
+      schoolId: 'SC1',
+      subjectId: 'SB1',
+      studyPlanId: 'P1',
+      teacherId: 'T1',
+      name: 'Mate 1',
+    },
+    {
+      id: 'C1c',
+      organizationId: 'org-1',
+      schoolId: 'SC1',
+      subjectId: 'SB1',
+      studyPlanId: 'P1',
+      teacherId: 'T1',
+      name: 'Mate 2',
+      color: 'TEAL',
+    },
+    {
+      id: 'C2',
+      organizationId: 'org-2',
+      schoolId: 'SC2',
+      subjectId: 'SB2',
+      studyPlanId: 'P2',
+      teacherId: 'T2',
+      name: 'Historia 2',
+    },
   ] as Row[],
   student: [] as Row[],
   courseEnrollment: [] as Row[],
@@ -75,7 +106,9 @@ function prismaStub(db: ReturnType<typeof fixture>) {
         return include?.['school'] ? { ...row, school: db.school.find((s) => s.id === row['schoolId']) } : { ...row };
       }),
       findUnique: jest.fn(async ({ where }: { where: Row }) => rows().find((r) => r['id'] === where['id']) ?? null),
-      findMany: jest.fn(async ({ where }: { where?: Row; include?: Row } = {}) => rows().filter((r) => matches(db, r, where))),
+      findMany: jest.fn(async ({ where }: { where?: Row; include?: Row } = {}) =>
+        rows().filter((r) => matches(db, r, where)),
+      ),
       count: jest.fn(async ({ where }: { where?: Row } = {}) => rows().filter((r) => matches(db, r, where)).length),
       create: jest.fn(async ({ data }: { data: Row }) => {
         const row = { id: `new-${rows().length}`, ...data };
@@ -174,7 +207,9 @@ describe('CoursesService organization scope', () => {
       await expect(service.findAll({ page: 1, pageSize: 10, schoolId: 'SC2' } as never)).rejects.toThrow(
         'La escuela no pertenece a tu organización',
       );
-      await expect(service.count({ schoolId: 'SC2' } as never)).rejects.toThrow('La escuela no pertenece a tu organización');
+      await expect(service.count({ schoolId: 'SC2' } as never)).rejects.toThrow(
+        'La escuela no pertenece a tu organización',
+      );
     });
 
     it('returns nothing for a school, subject, study plan or group of another organization', async () => {
@@ -282,7 +317,10 @@ describe('CoursesService organization scope', () => {
 
       await service.update('C1', { id: 'C1', studyPlanId: 'P1b' });
 
-      expect(db.courseEnrollment.map((e) => `${e['studentId']}:${e['source']}`).sort()).toEqual(['M:MANUAL', 'ST1:PLAN']);
+      expect(db.courseEnrollment.map((e) => `${e['studentId']}:${e['source']}`).sort()).toEqual([
+        'M:MANUAL',
+        'ST1:PLAN',
+      ]);
     });
 
     it('leaves the roster alone when the study plan does not change', async () => {

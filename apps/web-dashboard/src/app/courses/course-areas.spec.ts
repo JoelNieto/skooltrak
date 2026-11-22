@@ -5,7 +5,14 @@ const course = (area: string | null) => ({ subject: { area } });
 
 describe('areaChips', () => {
   it('lists distinct areas alphabetically with counts, then "Otras", after "Todas"', () => {
-    const courses = [course('Ciencias'), course(' ciencias '), course('Humanidades'), course(null), course('  '), course('Artes')];
+    const courses = [
+      course('Ciencias'),
+      course(' ciencias '),
+      course('Humanidades'),
+      course(null),
+      course('  '),
+      course('Artes'),
+    ];
     expect(areaChips(courses)).toEqual([
       { key: ALL_AREAS, label: 'Todas', count: 6 },
       { key: 'artes', label: 'Artes', count: 1 },

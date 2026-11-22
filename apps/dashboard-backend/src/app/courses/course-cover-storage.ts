@@ -22,13 +22,20 @@ export class CourseCoverStorage {
     const secretAccessKey = config.get<string>('CLOUDFLARE_R2_SECRET_ACCESS_KEY');
     this.#bucket = config.get<string>('CLOUDFLARE_R2_BUCKET');
     if (endpoint && accessKeyId && secretAccessKey && this.#bucket) {
-      this.#client = new S3Client({ region: 'auto', endpoint, credentials: { accessKeyId, secretAccessKey }, forcePathStyle: true });
+      this.#client = new S3Client({
+        region: 'auto',
+        endpoint,
+        credentials: { accessKeyId, secretAccessKey },
+        forcePathStyle: true,
+      });
     }
   }
 
   async put(key: string, body: Buffer, contentType: string): Promise<void> {
     if (!this.#client) throw new ServiceUnavailableException(STORAGE_UNAVAILABLE);
-    await this.#client.send(new PutObjectCommand({ Bucket: this.#bucket, Key: key, Body: body, ContentType: contentType }));
+    await this.#client.send(
+      new PutObjectCommand({ Bucket: this.#bucket, Key: key, Body: body, ContentType: contentType }),
+    );
   }
 
   /** Best effort: a leftover object costs storage, never correctness. */
@@ -44,6 +51,8 @@ export class CourseCoverStorage {
   /** A presigned URL for the cover, or null without one or without storage. */
   async url(key: string | null | undefined): Promise<string | null> {
     if (!key || !this.#client) return null;
-    return getSignedUrl(this.#client, new GetObjectCommand({ Bucket: this.#bucket, Key: key }), { expiresIn: URL_TTL_SECONDS });
+    return getSignedUrl(this.#client, new GetObjectCommand({ Bucket: this.#bucket, Key: key }), {
+      expiresIn: URL_TTL_SECONDS,
+    });
   }
 }

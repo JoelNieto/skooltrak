@@ -1,5 +1,5 @@
 import { AuthUserContext } from '@/auth';
-import { isCourseColor } from '@/shared';
+import { isCourseColor, SUBJECT_ICON_NAMES } from '@/shared';
 import { CourseColor } from '@generated/prisma';
 import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { randomUUID } from 'node:crypto';
@@ -8,6 +8,7 @@ import { CourseCoverStorage } from './course-cover-storage';
 
 export const CUSTOMIZE_DENIED = 'Solo el docente del curso o un administrador puede personalizarlo';
 export const COLOR_INVALID = 'Color de curso inválido';
+export const ICON_INVALID = 'Ícono de curso inválido';
 export const COVER_INVALID = 'La portada debe ser una imagen JPEG, PNG o WebP de hasta 2 MB';
 export const COVER_MAX_BYTES = 2 * 1024 * 1024;
 const COVER_TYPES: Record<string, string> = { 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp' };
@@ -31,11 +32,26 @@ export class CourseAppearanceService {
     private readonly storage: CourseCoverStorage,
   ) {}
 
-  async setColor(user: AuthUserContext | undefined, courseId: string, color: string | null) {
+  /** A field left undefined stays as it is; null goes back to the derived color or the subject's icon. */
+  async setAppearance(
+    user: AuthUserContext | undefined,
+    courseId: string,
+    input: { color?: string | null; icon?: string | null },
+  ) {
     await this.assertCanCustomize(user, courseId);
-    if (color !== null && !isCourseColor(color)) throw new BadRequestException(COLOR_INVALID);
-    await this.prisma.course.update({ where: { id: courseId }, data: { color: color as CourseColor | null } });
-    return { color };
+    const { color, icon } = input;
+    if (color != null && !isCourseColor(color)) throw new BadRequestException(COLOR_INVALID);
+    if (icon != null && !(SUBJECT_ICON_NAMES as readonly string[]).includes(icon))
+      throw new BadRequestException(ICON_INVALID);
+    const updated = await this.prisma.course.update({
+      where: { id: courseId },
+      data: {
+        ...(color !== undefined ? { color: color as CourseColor | null } : {}),
+        ...(icon !== undefined ? { icon } : {}),
+      },
+      select: { color: true, icon: true },
+    });
+    return updated;
   }
 
   async uploadCover(user: AuthUserContext | undefined, courseId: string, file: UploadedCover | undefined) {

@@ -2,7 +2,15 @@ import { BadRequestException, ForbiddenException } from '@nestjs/common';
 
 jest.mock('../prisma.service', () => ({ PrismaService: class {} }));
 
-import { courseBand, CoursesMineService, isDone, nextDelivery, NO_STUDENT, NOT_LINKED, PERIOD_INVALID } from './courses-mine.service';
+import {
+  courseBand,
+  CoursesMineService,
+  isDone,
+  nextDelivery,
+  NO_STUDENT,
+  NOT_LINKED,
+  PERIOD_INVALID,
+} from './courses-mine.service';
 
 /** ACA-001-S02, S03 — the student's *Mis cursos* (FR-ACA-001.4, .5, .6; BR .1, .5, .7, .8, .9, .10). */
 const d = (n: number) => ({ toNumber: () => n });
@@ -54,12 +62,27 @@ const grade = (courseId: string, periodId: string, bucketId: string, weight: num
 
 // Work of group 7°A (now: Wed 2026-04-15, week Mon 13 – Sun 19). Matemáticas: one overdue, one handed
 // in, one graded, one due tomorrow. Arte: an in-class exam last week (done) and one due next week.
-type Due = { id: string; title: string; courseId: string; date: string; require: boolean; submitted?: boolean; graded?: { score: number | null; excused: boolean } };
+type Due = {
+  id: string;
+  title: string;
+  courseId: string;
+  date: string;
+  require: boolean;
+  submitted?: boolean;
+  graded?: { score: number | null; excused: boolean };
+};
 const work: Due[] = [
   { id: 'A-over', title: 'Ensayo', courseId: 'C-mat', date: '2026-04-14T17:00:00Z', require: true },
   { id: 'A-old-over', title: 'Taller viejo', courseId: 'C-mat', date: '2026-04-02T17:00:00Z', require: true },
   { id: 'A-sent', title: 'Tarea 1', courseId: 'C-mat', date: '2026-04-13T17:00:00Z', require: true, submitted: true },
-  { id: 'A-graded', title: 'Proyecto', courseId: 'C-mat', date: '2026-04-10T17:00:00Z', require: true, graded: { score: 4, excused: false } },
+  {
+    id: 'A-graded',
+    title: 'Proyecto',
+    courseId: 'C-mat',
+    date: '2026-04-10T17:00:00Z',
+    require: true,
+    graded: { score: 4, excused: false },
+  },
   { id: 'A-tomorrow', title: 'Quiz', courseId: 'C-mat', date: '2026-04-16T17:00:00Z', require: true },
   { id: 'A-exam', title: 'Examen', courseId: 'C-art', date: '2026-04-08T17:00:00Z', require: false },
   { id: 'A-next', title: 'Mural', courseId: 'C-art', date: '2026-04-21T17:00:00Z', require: false },
@@ -111,7 +134,14 @@ function setup(opts: { student?: object | null; now?: Date } = {}) {
             courseId: w.courseId,
             requireSubmission: w.require,
             submissions: w.submitted ? [{ id: 's' }] : [],
-            grade: w.graded ? { published: true, studentGrades: [{ score: w.graded.score === null ? null : d(w.graded.score), excused: w.graded.excused }] } : null,
+            grade: w.graded
+              ? {
+                  published: true,
+                  studentGrades: [
+                    { score: w.graded.score === null ? null : d(w.graded.score), excused: w.graded.excused },
+                  ],
+                }
+              : null,
           },
         }));
       }),
@@ -128,7 +158,11 @@ function setup(opts: { student?: object | null; now?: Date } = {}) {
       }),
     },
   };
-  const service = new CoursesMineService(prisma as never, { now: () => opts.now ?? new Date('2026-04-15T15:00:00Z') }, NO_COVERS);
+  const service = new CoursesMineService(
+    prisma as never,
+    { now: () => opts.now ?? new Date('2026-04-15T15:00:00Z') },
+    NO_COVERS,
+  );
   return { prisma, service };
 }
 
@@ -172,7 +206,12 @@ describe('CoursesMineService (ACA-001-S02)', () => {
 
   it('has no schedule without a class group @BR-ACA-001.1', async () => {
     const { service, prisma } = setup({
-      student: { id: 'S-ana', organizationId: 'org-1', classGroup: null, school: { currentYear: 2026, timezone: 'UTC' } },
+      student: {
+        id: 'S-ana',
+        organizationId: 'org-1',
+        classGroup: null,
+        school: { currentYear: 2026, timezone: 'UTC' },
+      },
     });
     const mine = await service.mine(ana, {});
     expect(mine.classGroup).toBeNull();
@@ -182,9 +221,9 @@ describe('CoursesMineService (ACA-001-S02)', () => {
 
   it('refuses a caller without a student record in the organization', async () => {
     const { service } = setup({ student: null });
-    await expect(service.mine({ userId: 'u-t', organizationId: 'org-1', role: 'TEACHER' } as never, {})).rejects.toThrow(
-      new ForbiddenException(NO_STUDENT),
-    );
+    await expect(
+      service.mine({ userId: 'u-t', organizationId: 'org-1', role: 'TEACHER' } as never, {}),
+    ).rejects.toThrow(new ForbiddenException(NO_STUDENT));
   });
 
   it('bands on the average as shown', () => {
@@ -210,7 +249,12 @@ describe('CoursesMineService (ACA-001-S02)', () => {
       const { service } = setup();
       const mine = await service.mine(ana, {});
       const byId = Object.fromEntries(mine.courses.map((c) => [c.id, c]));
-      expect(byId['C-mat'].next).toEqual({ assignmentId: 'A-old-over', title: 'Taller viejo', dueAt: '2026-04-02T17:00:00.000Z', overdue: true });
+      expect(byId['C-mat'].next).toEqual({
+        assignmentId: 'A-old-over',
+        title: 'Taller viejo',
+        dueAt: '2026-04-02T17:00:00.000Z',
+        overdue: true,
+      });
       expect(byId['C-art'].next).toMatchObject({ assignmentId: 'A-next', overdue: false });
       expect(byId['C-cie'].next).toBeNull();
       expect(mine.isCurrentPeriod).toBe(true);
@@ -268,11 +312,10 @@ describe('CoursesMineService (ACA-001-S02)', () => {
       await expect(service.mine(parent, {})).rejects.toThrow(new ForbiddenException(NO_STUDENT));
     });
 
-    it("ignores studentId for a student: always their own courses", async () => {
+    it('ignores studentId for a student: always their own courses', async () => {
       const { service, prisma } = setup();
       await service.mine(ana, { studentId: 'S-other' });
       expect(prisma.student.findFirst).toHaveBeenCalledTimes(1);
     });
   });
 });
-

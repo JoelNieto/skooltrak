@@ -1,5 +1,12 @@
 import { EnrollmentSource } from '@generated/prisma';
-import { enrolledCourses, enrolledIn, enrollPlanStudents, resyncCoursePlan, RosterDb, syncStudentPlan } from './course-roster';
+import {
+  enrolledCourses,
+  enrolledIn,
+  enrollPlanStudents,
+  resyncCoursePlan,
+  RosterDb,
+  syncStudentPlan,
+} from './course-roster';
 
 /**
  * Roster rules (ACA-001 BR .15), run against an in-memory stand-in for the queries the module makes.
@@ -54,7 +61,15 @@ function world() {
         return s;
       }),
       findMany: jest.fn(
-        async ({ where }: { where: { organizationId: string; classGroup: { studyPlanId: string }; courseEnrollments: { none: { courseId: string } } } }) =>
+        async ({
+          where,
+        }: {
+          where: {
+            organizationId: string;
+            classGroup: { studyPlanId: string };
+            courseEnrollments: { none: { courseId: string } };
+          };
+        }) =>
           students.filter(
             (s) =>
               s.organizationId === where.organizationId &&
@@ -81,7 +96,9 @@ function world() {
         enrollments.splice(0, enrollments.length, ...keep);
         return { count: before - keep.length };
       }),
-      findMany: jest.fn(async ({ where }: { where: Record<string, unknown> }) => enrollments.filter((e) => matchEnrollment(e, where))),
+      findMany: jest.fn(async ({ where }: { where: Record<string, unknown> }) =>
+        enrollments.filter((e) => matchEnrollment(e, where)),
+      ),
       createMany: jest.fn(async ({ data }: { data: Omit<Enrollment, 'excluded'>[] }) => {
         let count = 0;
         for (const d of data) {
@@ -212,8 +229,12 @@ describe('course roster (ACA-001 BR .15, FR .20)', () => {
   describe('read filters', () => {
     it('skip excluded rows', () => {
       expect(enrolledIn('C1')).toEqual({ courseEnrollments: { some: { excluded: false, courseId: 'C1' } } });
-      expect(enrolledIn(['C1', 'C2'])).toEqual({ courseEnrollments: { some: { excluded: false, courseId: { in: ['C1', 'C2'] } } } });
-      expect(enrolledCourses({ userId: 'u-1' })).toEqual({ enrollments: { some: { excluded: false, student: { userId: 'u-1' } } } });
+      expect(enrolledIn(['C1', 'C2'])).toEqual({
+        courseEnrollments: { some: { excluded: false, courseId: { in: ['C1', 'C2'] } } },
+      });
+      expect(enrolledCourses({ userId: 'u-1' })).toEqual({
+        enrollments: { some: { excluded: false, student: { userId: 'u-1' } } },
+      });
     });
   });
 });

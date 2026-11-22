@@ -3,18 +3,31 @@ import { BadRequestException, ForbiddenException } from '@nestjs/common';
 jest.mock('../prisma.service', () => ({ PrismaService: class {} }));
 
 import { Perm, PERMISSIONS_KEY } from '@/auth';
-import { COLOR_INVALID, COVER_INVALID, CourseAppearanceService, CUSTOMIZE_DENIED } from './course-appearance.service';
+import {
+  COLOR_INVALID,
+  COVER_INVALID,
+  CourseAppearanceService,
+  CUSTOMIZE_DENIED,
+  ICON_INVALID,
+} from './course-appearance.service';
 import { CoursesController } from './courses.controller';
 
 /** ACA-001-S09 — a course's color and cover photo (FR .3, BR .12). C1 (org-1) is taught by teacher-1. */
 function setup(coverKey: string | null = null) {
-  const course = { id: 'C1', organizationId: 'org-1', teacherId: 'teacher-1', coverKey, color: null as string | null };
+  const course = {
+    id: 'C1',
+    organizationId: 'org-1',
+    teacherId: 'teacher-1',
+    coverKey,
+    color: null as string | null,
+    icon: null as string | null,
+  };
   const stored: string[] = [];
   const removed: string[] = [];
   const prisma = {
     course: {
       findUnique: jest.fn(async ({ where }) => (where.id === 'C1' ? { ...course } : null)),
-      update: jest.fn(async ({ data }) => Object.assign(course, data)),
+      update: jest.fn(async ({ data }) => ({ ...Object.assign(course, data) })),
     },
     teacher: {
       findFirst: jest.fn(async ({ where }) =>
@@ -37,19 +50,38 @@ const image = (mimetype: string, size: number) => ({ mimetype, size, buffer: Buf
 describe('CourseAppearanceService (ACA-001-S09)', () => {
   it('the course teacher and an admin set the color; null goes back to the derived one @FR-ACA-001.3', async () => {
     const { course, service } = setup();
-    await service.setColor(teacher, 'C1', 'TEAL');
+    await service.setAppearance(teacher, 'C1', { color: 'TEAL' });
     expect(course.color).toBe('TEAL');
-    await service.setColor(user('u-admin', 'ORG_ADMIN'), 'C1', null);
+    await service.setAppearance(user('u-admin', 'ORG_ADMIN'), 'C1', { color: null });
     expect(course.color).toBeNull();
-    await expect(service.setColor(teacher, 'C1', 'PURPLE')).rejects.toThrow(new BadRequestException(COLOR_INVALID));
+    await expect(service.setAppearance(teacher, 'C1', { color: 'PURPLE' })).rejects.toThrow(
+      new BadRequestException(COLOR_INVALID),
+    );
+  });
+
+  it('sets the icon from the curated list without touching the color; null goes back to the subject icon @FR-ACA-001.3', async () => {
+    const { course, service } = setup();
+    course.color = 'ROSE';
+    await expect(service.setAppearance(teacher, 'C1', { icon: 'atom' })).resolves.toEqual(
+      expect.objectContaining({ icon: 'atom', color: 'ROSE' }),
+    );
+    await service.setAppearance(teacher, 'C1', { icon: null });
+    expect(course.icon).toBeNull();
+    await expect(service.setAppearance(teacher, 'C1', { icon: 'skull' })).rejects.toThrow(
+      new BadRequestException(ICON_INVALID),
+    );
   });
 
   it('refuses another teacher and another organization @BR-ACA-001.12', async () => {
     const { service } = setup();
     const denied = new ForbiddenException(CUSTOMIZE_DENIED);
-    await expect(service.setColor(user('u-teacher2', 'TEACHER'), 'C1', 'TEAL')).rejects.toThrow(denied);
-    await expect(service.setColor(user('u-admin9', 'ORG_ADMIN', 'org-2'), 'C1', 'TEAL')).rejects.toThrow(denied);
-    await expect(service.uploadCover(user('u-teacher2', 'TEACHER'), 'C1', image('image/png', 100))).rejects.toThrow(denied);
+    await expect(service.setAppearance(user('u-teacher2', 'TEACHER'), 'C1', { color: 'TEAL' })).rejects.toThrow(denied);
+    await expect(
+      service.setAppearance(user('u-admin9', 'ORG_ADMIN', 'org-2'), 'C1', { color: 'TEAL' }),
+    ).rejects.toThrow(denied);
+    await expect(service.uploadCover(user('u-teacher2', 'TEACHER'), 'C1', image('image/png', 100))).rejects.toThrow(
+      denied,
+    );
   });
 
   it('stores a JPEG, PNG or WebP cover up to 2 MB and replaces the previous one', async () => {
@@ -64,7 +96,12 @@ describe('CourseAppearanceService (ACA-001-S09)', () => {
 
   it('refuses other types, bigger files and no file with 400 @BR-ACA-001.12', async () => {
     const { stored, service } = setup();
-    for (const file of [image('image/gif', 100), image('application/pdf', 100), image('image/png', 2 * 1024 * 1024 + 1), undefined]) {
+    for (const file of [
+      image('image/gif', 100),
+      image('application/pdf', 100),
+      image('image/png', 2 * 1024 * 1024 + 1),
+      undefined,
+    ]) {
       await expect(service.uploadCover(teacher, 'C1', file)).rejects.toThrow(new BadRequestException(COVER_INVALID));
     }
     expect(stored).toEqual([]);
@@ -79,7 +116,9 @@ describe('CourseAppearanceService (ACA-001-S09)', () => {
 
   it('needs CUSTOMIZE_COURSES on the routes', () => {
     for (const handler of ['setAppearance', 'uploadCover', 'removeCover'] as const) {
-      expect(Reflect.getMetadata(PERMISSIONS_KEY, CoursesController.prototype[handler])).toEqual([Perm.CUSTOMIZE_COURSES]);
+      expect(Reflect.getMetadata(PERMISSIONS_KEY, CoursesController.prototype[handler])).toEqual([
+        Perm.CUSTOMIZE_COURSES,
+      ]);
     }
   });
 });

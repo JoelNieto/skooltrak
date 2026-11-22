@@ -40,6 +40,8 @@ export class MyCourseCard {
   color: string;
   /** Presigned cover photo (FR .3); null: the color cover. */
   coverUrl: string | null;
+  /** The course's icon (FR .3), else its subject's; null: "book-open". */
+  icon: string | null;
   subject: MyCourseSubject;
   teacher: MyCourseTeacher | null;
   /** BR-ACA-001.9, e.g. "Lun, Mié, Vie · Aula 7"; null without slots for the student's group. */

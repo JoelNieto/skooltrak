@@ -28,7 +28,7 @@ When this ships, every course has its own color and icon, so it is recognisable 
 ### Course appearance
 - **FR-ACA-001.1**: Every course has a color tag chosen from 8 (BR .11). With no cover image, the course's cover is that color plus the subject's icon. The color also shows as a dot next to the course name in the course page header.
 - **FR-ACA-001.2**: A school admin can set a course's color in the course form, and a subject's icon and area in the subject form.
-- **FR-ACA-001.3**: The teacher of a course, or an admin, can set its color and upload or remove a cover photo (BR .12). With a photo, the photo replaces the color cover, and the color stays as the dot.
+- **FR-ACA-001.3**: The teacher of a course, or an admin, can set its color, and choose either an icon (from the subject icon list; it overrides the subject's icon for this course) or a cover photo (BR .12). With a photo, the photo replaces the color cover, and the color stays as the dot.
 
 ### *Mis cursos* (student and parent)
 - **FR-ACA-001.4**: A student sees one card per course of their class group's study plan, ordered by subject name. Each card shows:

@@ -484,6 +484,8 @@ model Course {
   color              CourseColor?
   /// Private object-storage key of the cover photo (ACA-001 BR .12); null: the color cover.
   coverKey           String?
+  /// The teacher's icon for the course (SUBJECT_ICONS, FR-ACA-001.3); null: the subject's icon.
+  icon               String?
   organizationId     String
   organization       Organization               @relation(fields: [organizationId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   schoolId           String

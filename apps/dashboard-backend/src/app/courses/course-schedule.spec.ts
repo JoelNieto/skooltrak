@@ -21,9 +21,9 @@ describe('courseSchedule', () => {
   it('says "Todos los días" from Monday to Friday, weekend or not', () => {
     const weekdays = ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY'] as const;
     expect(courseSchedule(weekdays.map((d) => slot(d)))?.days).toBe('Todos los días');
-    expect(courseSchedule([...weekdays, 'SATURDAY', 'SUNDAY'].map((d) => slot(d as ScheduleSlot['weekday'])))?.days).toBe(
-      'Todos los días',
-    );
+    expect(
+      courseSchedule([...weekdays, 'SATURDAY', 'SUNDAY'].map((d) => slot(d as ScheduleSlot['weekday'])))?.days,
+    ).toBe('Todos los días');
   });
 
   it('takes the most frequent location, "Virtual" when all are remote, and no shared times when they differ', () => {

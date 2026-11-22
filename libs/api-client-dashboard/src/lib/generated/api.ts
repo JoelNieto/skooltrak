@@ -3599,7 +3599,7 @@ export class SkooltrakDashboardAPIService {
   }
 
 /**
- * @summary Set a course's color: its teacher or an admin (FR-ACA-001.3, BR .12)
+ * @summary Set a course's color and icon: its teacher or an admin (FR-ACA-001.3, BR .12)
  */
  coursesControllerSetAppearance<TData = void>(id: string,
     courseAppearanceInput: CourseAppearanceInput, options?: HttpClientBodyOptions): Observable<TData>;

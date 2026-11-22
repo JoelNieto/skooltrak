@@ -2467,6 +2467,11 @@
             "description": ""
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "summary": "Create degree",
         "tags": [
           "degrees"
@@ -2480,7 +2485,12 @@
             "description": ""
           }
         },
-        "summary": "List degrees",
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List the organization's degrees",
         "tags": [
           "degrees"
         ]
@@ -2503,6 +2513,11 @@
             "description": ""
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "summary": "Update degree",
         "tags": [
           "degrees"
@@ -2527,6 +2542,11 @@
             "description": ""
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "summary": "Degrees count by school",
         "tags": [
           "degrees"
@@ -2567,6 +2587,11 @@
             "description": ""
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "summary": "Degrees by school id",
         "tags": [
           "degrees"
@@ -2591,6 +2616,11 @@
             "description": ""
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "summary": "Get degree by id",
         "tags": [
           "degrees"
@@ -2613,6 +2643,11 @@
             "description": ""
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "summary": "Delete degree",
         "tags": [
           "degrees"
@@ -3564,6 +3599,11 @@
             "description": ""
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "summary": "Create study plan",
         "tags": [
           "study-plans"
@@ -3685,6 +3725,11 @@
             "description": ""
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "summary": "List study plans",
         "tags": [
           "study-plans"
@@ -3708,6 +3753,11 @@
             "description": ""
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "summary": "Update study plan",
         "tags": [
           "study-plans"
@@ -3740,6 +3790,11 @@
             "description": ""
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "summary": "Study plans by school (optional degreeId)",
         "tags": [
           "study-plans"
@@ -3764,6 +3819,11 @@
             "description": ""
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "summary": "Get study plan by id",
         "tags": [
           "study-plans"
@@ -3786,6 +3846,11 @@
             "description": ""
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "summary": "Delete study plan",
         "tags": [
           "study-plans"
@@ -8646,6 +8711,11 @@
             "description": ""
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "summary": "Create groups schedule",
         "tags": [
           "groups-schedules"
@@ -8659,7 +8729,12 @@
             "description": ""
           }
         },
-        "summary": "List groups schedules",
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List the organization's group schedules",
         "tags": [
           "groups-schedules"
         ]
@@ -8682,6 +8757,11 @@
             "description": ""
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "summary": "Update groups schedule",
         "tags": [
           "groups-schedules"
@@ -8706,6 +8786,11 @@
             "description": ""
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "summary": "Schedules by class group (grouped)",
         "tags": [
           "groups-schedules"
@@ -8730,6 +8815,11 @@
             "description": ""
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "summary": "Schedules by class group",
         "tags": [
           "groups-schedules"
@@ -8754,6 +8844,11 @@
             "description": ""
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "summary": "Get groups schedule by id",
         "tags": [
           "groups-schedules"
@@ -8776,6 +8871,11 @@
             "description": ""
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "summary": "Delete groups schedule",
         "tags": [
           "groups-schedules"

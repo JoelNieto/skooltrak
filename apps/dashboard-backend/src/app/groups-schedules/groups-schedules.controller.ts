@@ -1,53 +1,159 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { AuthenticatedRequest, AuthUserContext, BetterAuthGuard, Perm, PermissionsGuard, RequirePermissions } from '@/auth';
+import {
+  BadRequestException,
+  Body,
+  Controller,
+  Delete,
+  ForbiddenException,
+  Get,
+  NotFoundException,
+  Param,
+  Patch,
+  Post,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { requireOrganization } from '../org-scope';
+import { PrismaService } from '../prisma.service';
 import { CreateGroupsScheduleInput } from './dto/create-groups-schedule.input';
 import { UpdateGroupsScheduleInput } from './dto/update-groups-schedule.input';
 import { GroupsSchedulesService } from './groups-schedules.service';
 
+export const GROUP_DENIED = 'No tienes acceso al horario de este grupo';
+export const COURSE_MISMATCH = 'El curso no pertenece a la escuela del grupo';
+
+const STAFF_ROLES = new Set(['ORG_ADMIN', 'ADMIN', 'SYSADMIN', 'TEACHER']);
+
+/**
+ * A class group's weekly schedule. Reads need VIEW_SCHEDULES: staff of the group's organization,
+ * its students, and parents of its students. Writes need MANAGE_SCHEDULES, a group of the caller's
+ * organization and a course of the group's school.
+ */
 @ApiTags('groups-schedules')
+@ApiBearerAuth()
+@UseGuards(BetterAuthGuard, PermissionsGuard)
+@RequirePermissions(Perm.VIEW_SCHEDULES)
 @Controller('v1/groups-schedules')
 export class GroupsSchedulesController {
-  constructor(private readonly groupsSchedulesService: GroupsSchedulesService) {}
+  constructor(
+    private readonly groupsSchedulesService: GroupsSchedulesService,
+    private readonly prisma: PrismaService,
+  ) {}
 
   @Post()
+  @RequirePermissions(Perm.MANAGE_SCHEDULES)
   @ApiOperation({ summary: 'Create groups schedule' })
-  create(@Body() createGroupsScheduleInput: CreateGroupsScheduleInput) {
+  async create(@Req() req: AuthenticatedRequest, @Body() createGroupsScheduleInput: CreateGroupsScheduleInput) {
+    const group = await this.assertGroupInOrganization(req.user, createGroupsScheduleInput.classGroupId);
+    await this.assertCourseInSchool(createGroupsScheduleInput.courseId, group);
     return this.groupsSchedulesService.create(createGroupsScheduleInput);
   }
 
   @Get()
-  @ApiOperation({ summary: 'List groups schedules' })
-  findAll() {
-    return this.groupsSchedulesService.findAll();
+  @RequirePermissions(Perm.MANAGE_SCHEDULES)
+  @ApiOperation({ summary: "List the organization's group schedules" })
+  findAll(@Req() req: AuthenticatedRequest) {
+    return this.groupsSchedulesService.findAll(requireOrganization(req.user));
   }
 
   @Get('by-class-group/:classGroupId/grouped')
   @ApiOperation({ summary: 'Schedules by class group (grouped)' })
-  findAllByClassGroupIdGrouped(@Param('classGroupId') classGroupId: string) {
+  async findAllByClassGroupIdGrouped(@Req() req: AuthenticatedRequest, @Param('classGroupId') classGroupId: string) {
+    await this.assertCanReadGroup(req.user, classGroupId);
     return this.groupsSchedulesService.findAllByClassGroupIdGrouped(classGroupId);
   }
 
   @Get('by-class-group/:classGroupId')
   @ApiOperation({ summary: 'Schedules by class group' })
-  findAllByClassGroupId(@Param('classGroupId') classGroupId: string) {
+  async findAllByClassGroupId(@Req() req: AuthenticatedRequest, @Param('classGroupId') classGroupId: string) {
+    await this.assertCanReadGroup(req.user, classGroupId);
     return this.groupsSchedulesService.findAllByClassGroupId(classGroupId);
   }
 
   @Get(':id')
   @ApiOperation({ summary: 'Get groups schedule by id' })
-  findOne(@Param('id') id: string) {
-    return this.groupsSchedulesService.findOne(id);
+  async findOne(@Req() req: AuthenticatedRequest, @Param('id') id: string) {
+    const slot = await this.ref(id);
+    await this.assertCanReadGroup(req.user, slot.classGroupId);
+    return this.groupsSchedulesService.findOne(slot.id);
   }
 
   @Patch()
+  @RequirePermissions(Perm.MANAGE_SCHEDULES)
   @ApiOperation({ summary: 'Update groups schedule' })
-  update(@Body() updateGroupsScheduleInput: UpdateGroupsScheduleInput) {
-    return this.groupsSchedulesService.update(updateGroupsScheduleInput.id, updateGroupsScheduleInput);
+  async update(@Req() req: AuthenticatedRequest, @Body() updateGroupsScheduleInput: UpdateGroupsScheduleInput) {
+    const slot = await this.ref(updateGroupsScheduleInput.id);
+    let group = await this.assertGroupInOrganization(req.user, slot.classGroupId);
+    if (updateGroupsScheduleInput.classGroupId && updateGroupsScheduleInput.classGroupId !== slot.classGroupId) {
+      group = await this.assertGroupInOrganization(req.user, updateGroupsScheduleInput.classGroupId);
+    }
+    if (updateGroupsScheduleInput.courseId || group.id !== slot.classGroupId) {
+      await this.assertCourseInSchool(updateGroupsScheduleInput.courseId ?? slot.courseId, group);
+    }
+    return this.groupsSchedulesService.update(slot.id, updateGroupsScheduleInput);
   }
 
   @Delete(':id')
+  @RequirePermissions(Perm.MANAGE_SCHEDULES)
   @ApiOperation({ summary: 'Delete groups schedule' })
-  remove(@Param('id') id: string) {
-    return this.groupsSchedulesService.remove(id);
+  async remove(@Req() req: AuthenticatedRequest, @Param('id') id: string) {
+    const slot = await this.ref(id);
+    await this.assertGroupInOrganization(req.user, slot.classGroupId);
+    return this.groupsSchedulesService.remove(slot.id);
+  }
+
+  private async ref(id: string) {
+    const slot = await this.prisma.classGroupWeeklySchedule.findUnique({
+      where: { id },
+      select: { id: true, classGroupId: true, courseId: true },
+    });
+    if (!slot) throw new NotFoundException('Horario no encontrado');
+    return slot;
+  }
+
+  private async group(classGroupId: string) {
+    const group = await this.prisma.classGroup.findUnique({
+      where: { id: classGroupId },
+      select: { id: true, organizationId: true, schoolId: true },
+    });
+    if (!group) throw new NotFoundException('Grupo no encontrado');
+    return group;
+  }
+
+  private async assertGroupInOrganization(user: AuthUserContext | undefined, classGroupId: string) {
+    const organizationId = requireOrganization(user);
+    const group = await this.group(classGroupId);
+    if (group.organizationId !== organizationId) throw new ForbiddenException(GROUP_DENIED);
+    return group;
+  }
+
+  /** Staff of the group's organization, a student of the group, or a parent of one (any organization). */
+  private async assertCanReadGroup(user: AuthUserContext | undefined, classGroupId: string): Promise<void> {
+    if (!user?.userId) throw new ForbiddenException('Not authenticated');
+    const group = await this.group(classGroupId);
+    const role = user.role?.toUpperCase() ?? '';
+    const sameOrg = user.organizationId === group.organizationId;
+    if (sameOrg && STAFF_ROLES.has(role)) return;
+    if (role === 'STUDENT' && sameOrg) {
+      if (await this.prisma.student.count({ where: { classGroupId, userId: user.userId } })) return;
+    }
+    if (role === 'PARENT') {
+      if (await this.prisma.student.count({ where: { classGroupId, parents: { some: { userId: user.userId } } } })) {
+        return;
+      }
+    }
+    throw new ForbiddenException(GROUP_DENIED);
+  }
+
+  /** A slot's course must be taught in the group's school and organization (400 otherwise). */
+  private async assertCourseInSchool(
+    courseId: string,
+    group: { organizationId: string; schoolId: string },
+  ): Promise<void> {
+    const found = await this.prisma.course.count({
+      where: { id: courseId, organizationId: group.organizationId, schoolId: group.schoolId },
+    });
+    if (!found) throw new BadRequestException(COURSE_MISMATCH);
   }
 }

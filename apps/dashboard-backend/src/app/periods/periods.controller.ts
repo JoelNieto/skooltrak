@@ -1,8 +1,16 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from '@nestjs/common';
+import { AuthenticatedRequest, AuthUserContext } from '@/auth';
+import { Body, Controller, Delete, ForbiddenException, Get, Param, Patch, Post, Query, Req } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CreatePeriodInput } from './dto/create-period.input';
 import { UpdatePeriodInput } from './dto/update-period.input';
 import { PeriodsService } from './periods.service';
+
+export const PERIODS_PLATFORM_ONLY = 'Los periodos se gestionan desde la administración de la plataforma';
+
+/** Periods are shared by every organization: any signed-in user reads them, only SYSADMIN changes them. */
+function assertSysadmin(user: AuthUserContext | undefined): void {
+  if (user?.role?.toUpperCase() !== 'SYSADMIN') throw new ForbiddenException(PERIODS_PLATFORM_ONLY);
+}
 
 @ApiTags('periods')
 @Controller('v1/periods')
@@ -11,7 +19,8 @@ export class PeriodsController {
 
   @Post()
   @ApiOperation({ summary: 'Create period' })
-  create(@Body() createPeriodInput: CreatePeriodInput) {
+  async create(@Req() req: AuthenticatedRequest, @Body() createPeriodInput: CreatePeriodInput) {
+    assertSysadmin(req.user);
     return this.periodsService.create(createPeriodInput);
   }
 
@@ -35,13 +44,15 @@ export class PeriodsController {
 
   @Patch()
   @ApiOperation({ summary: 'Update period' })
-  update(@Body() updatePeriodInput: UpdatePeriodInput) {
+  async update(@Req() req: AuthenticatedRequest, @Body() updatePeriodInput: UpdatePeriodInput) {
+    assertSysadmin(req.user);
     return this.periodsService.update(updatePeriodInput.id, updatePeriodInput);
   }
 
   @Delete(':id')
   @ApiOperation({ summary: 'Delete period' })
-  remove(@Param('id') id: string) {
+  async remove(@Req() req: AuthenticatedRequest, @Param('id') id: string) {
+    assertSysadmin(req.user);
     return this.periodsService.remove(id);
   }
 }

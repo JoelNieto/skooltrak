@@ -150,7 +150,7 @@ export default class Degrees {
     const schoolId = this.store.currentSchoolId();
     if (!schoolId) return undefined;
     return {
-      url: `/api/v1/degrees/count`,
+      url: `/api/v1/degrees/by-school/count`,
       params: toFetchQueryRecord({ schoolId }),
     };
   });

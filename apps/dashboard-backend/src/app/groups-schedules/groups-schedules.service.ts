@@ -12,8 +12,8 @@ export class GroupsSchedulesService {
     });
   }
 
-  findAll() {
-    return this.prisma.classGroupWeeklySchedule.findMany();
+  findAll(organizationId: string) {
+    return this.prisma.classGroupWeeklySchedule.findMany({ where: { classGroup: { organizationId } } });
   }
 
   findAllByClassGroupId(classGroupId: string) {

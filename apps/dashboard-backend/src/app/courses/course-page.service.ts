@@ -1,14 +1,23 @@
 import { courseAverage, meanOf } from '@/shared';
 import { BadRequestException, ForbiddenException, Inject, Injectable } from '@nestjs/common';
 import { pickCurrentPeriod } from '../home/home-period';
+import { EnrollmentStatus } from '@generated/prisma';
 import { CLOCK, Clock, schoolLocalTime } from '../home/home-time';
 import { workStatus } from '../home/student-home.service';
 import { PrismaService } from '../prisma.service';
 import { CourseViewer } from './course-access.service';
+import { enrolledIn } from './course-roster';
 import { courseSchedule } from './course-schedule';
 import { courseBand, PERIOD_INVALID } from './courses-mine.service';
 import { COURSE_DENIED, withResolvedColor } from './courses.service';
-import { CourseGradesSummary, CoursePageSchedule, CourseWork, CourseWorkItem } from './entities/course-page.entity';
+import {
+  CourseGradesSummary,
+  CoursePageSchedule,
+  CourseParticipants,
+  CourseParticipantTeacher,
+  CourseWork,
+  CourseWorkItem,
+} from './entities/course-page.entity';
 
 type Decimalish = { toNumber(): number } | number;
 const num = (v: Decimalish) => (typeof v === 'number' ? v : v.toNumber());
@@ -190,5 +199,67 @@ export class CoursePageService {
       grades: rows.map((r) => ({ id: r.id, title: r.title, bucket: r.bucket, date: r.date, comment: r.comment, score: r.score, excused: r.excused })),
     };
   }
+
+  /**
+   * FR-ACA-001.15: the course's teacher and, for a student or parent, the student's homeroom teacher
+   * ("Docente consejero"); then the roster, names and initials only (BR .13). Parents get no students;
+   * a homeroom teacher gets their group's students only (BR .16).
+   */
+  async participants(courseId: string, viewer: CourseViewer): Promise<CourseParticipants> {
+    const course = await this.prisma.course.findUniqueOrThrow({
+      where: { id: courseId },
+      select: { teacher: { select: TEACHER_SELECT } },
+    });
+    const teachers = new Map<string, CourseParticipantTeacher>();
+    const add = (t: TeacherRow | null | undefined, role: string) => {
+      if (!t) return;
+      const entry = teachers.get(t.id) ?? {
+        id: t.id,
+        name: `${t.firstName} ${t.fatherName}`,
+        initials: `${t.firstName.charAt(0)}${t.fatherName.charAt(0)}`,
+        color: t.user?.color ?? null,
+        roles: [],
+      };
+      entry.roles.push(role);
+      teachers.set(t.id, entry);
+    };
+    add(course.teacher, 'Docente');
+    const group = viewer.student?.classGroup;
+    if (group) {
+      const homeroom = await this.prisma.classGroup.findUnique({
+        where: { id: group.id },
+        select: { teacher: { select: TEACHER_SELECT } },
+      });
+      add(homeroom?.teacher, 'Docente consejero');
+    }
+
+    const students =
+      viewer.kind === 'PARENT'
+        ? []
+        : await this.prisma.student.findMany({
+            where: {
+              organizationId: viewer.organizationId,
+              enrollmentStatus: EnrollmentStatus.ACTIVE,
+              ...enrolledIn(courseId),
+              ...(viewer.kind === 'HOMEROOM' ? { classGroup: { teacher: { userId: viewer.userId } } } : {}),
+            },
+            select: { id: true, firstName: true, fatherName: true },
+            orderBy: [{ firstName: 'asc' }, { fatherName: 'asc' }],
+          });
+
+    const list = [...teachers.values()];
+    return {
+      teachers: list,
+      students: students.map((st) => ({
+        id: st.id,
+        name: `${st.firstName} ${st.fatherName}`,
+        initials: `${st.firstName.charAt(0)}${st.fatherName.charAt(0)}`,
+      })),
+      count: list.length + students.length,
+    };
+  }
 }
+
+const TEACHER_SELECT = { id: true, firstName: true, fatherName: true, user: { select: { color: true } } } as const;
+type TeacherRow = { id: string; firstName: string; fatherName: string; user: { color: string | null } | null };
 

@@ -5,7 +5,7 @@ import { ApiBearerAuth, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger'
 import { CourseAccessService } from './course-access.service';
 import { CoursePageService } from './course-page.service';
 import { CoursesMineService } from './courses-mine.service';
-import { CourseGradesSummary, CourseWork } from './entities/course-page.entity';
+import { CourseGradesSummary, CourseParticipants, CourseWork } from './entities/course-page.entity';
 import { MyCourses } from './entities/my-courses.entity';
 import { CoursesService } from './courses.service';
 import { CreateCourseInput } from './dto/create-course.input';
@@ -91,6 +91,18 @@ export class CoursesController {
   ): Promise<CourseWork> {
     const viewer = await this.access.viewer(req.user, id, studentId);
     return this.page.work(id, viewer);
+  }
+
+  @Get(':id/participants')
+  @ApiOperation({ summary: "The course's teachers and students (FR-ACA-001.15, BR .13)" })
+  @ApiQuery({ name: 'studentId', required: false, description: 'Parents: a linked child enrolled in the course' })
+  async participants(
+    @Req() req: AuthenticatedRequest,
+    @Param('id') id: string,
+    @Query('studentId') studentId?: string,
+  ): Promise<CourseParticipants> {
+    const viewer = await this.access.viewer(req.user, id, studentId);
+    return this.page.participants(id, viewer);
   }
 
   @Get(':id/grades-summary')

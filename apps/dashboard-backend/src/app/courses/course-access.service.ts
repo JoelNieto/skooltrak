@@ -14,7 +14,9 @@ const ADMIN_ROLES = new Set(['ORG_ADMIN', 'ADMIN', 'SYSADMIN']);
  *   BR-HOM-001.9). Both carry that student.
  */
 export type CourseViewer =
-  | { kind: 'STAFF' | 'HOMEROOM'; organizationId: string; student: null }
+  | { kind: 'STAFF'; organizationId: string; student: null }
+  /** `userId`: the homeroom teacher, whose group's students they may see (BR .16). */
+  | { kind: 'HOMEROOM'; organizationId: string; student: null; userId: string }
   | { kind: 'STUDENT' | 'PARENT'; organizationId: string; student: CourseViewerStudent };
 
 export interface CourseViewerStudent {
@@ -52,7 +54,7 @@ export class CourseAccessService {
       const homeroom = await this.prisma.student.count({
         where: { organizationId, ...enrolledIn(courseId), classGroup: { teacher: { userId: user.userId } } },
       });
-      if (homeroom) return { kind: 'HOMEROOM', organizationId, student: null };
+      if (homeroom) return { kind: 'HOMEROOM', organizationId, student: null, userId: user.userId };
       throw new ForbiddenException(COURSE_DENIED);
     }
 

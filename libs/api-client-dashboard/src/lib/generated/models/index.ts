@@ -38,6 +38,7 @@ export * from './coursesControllerFindAllParams';
 export * from './coursesControllerFindOneParams';
 export * from './coursesControllerGradesSummaryParams';
 export * from './coursesControllerMineParams';
+export * from './coursesControllerParticipantsParams';
 export * from './coursesControllerWorkParams';
 export * from './createAssignmentInput';
 export * from './createAssignmentSubmissionInput';

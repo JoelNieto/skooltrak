@@ -32,6 +32,7 @@ function prismaFake() {
     course: {
       findUnique: jest.fn(async ({ where }) => (where.id === 'C1' ? { organizationId: 'org-1', teacherId: 'teacher-1' } : null)),
       findUniqueOrThrow: jest.fn(async () => ({
+        teacher: { id: 'teacher-1', firstName: 'Tomás', fatherName: 'Docente', user: { color: '#336' } },
         school: { timezone: 'America/Panama', currentYear: 2026 },
         studyPlan: { gradeMetric: { maximum: d(5), minimumApproval: d(3) } },
         gradeBuckets: [
@@ -72,7 +73,17 @@ function prismaFake() {
         where.userId === 'u-teacher' ? { id: 'teacher-1' } : where.userId === 'u-teacher2' || where.userId === 'u-homeroom' ? { id: 'teacher-x' } : null,
       ),
     },
+    classGroup: {
+      findUnique: jest.fn(async ({ where }) =>
+        where.id === 'G7A' ? { teacher: { id: 'teacher-h', firstName: 'Hilda', fatherName: 'Guía', user: null } } : { teacher: null },
+      ),
+    },
     student: {
+      findMany: jest.fn(async ({ where }) => {
+        expect(where.enrollmentStatus).toBe('ACTIVE');
+        expect(Object.keys(where)).not.toContain('select');
+        return STUDENTS.filter((s) => match(s, where)).map((s) => ({ id: s.id, firstName: s.firstName, fatherName: 'E2E' }));
+      }),
       count: jest.fn(async ({ where }) => STUDENTS.filter((s) => match(s, where)).length),
       findFirst: jest.fn(async ({ where }) => {
         const s = STUDENTS.find((x) => match(x, where));
@@ -186,6 +197,38 @@ describe('CoursePageService.gradesSummary (FR-ACA-001.14)', () => {
     await expect(page().gradesSummary('C1', { kind: 'STAFF', organizationId: 'org-1', student: null })).rejects.toThrow(
       new ForbiddenException(COURSE_DENIED),
     );
+  });
+});
+
+describe('CoursePageService.participants (FR-ACA-001.15, BR .13)', () => {
+  const page = () => new CoursePageService(prismaFake() as never, { now: () => new Date('2026-04-15T12:00:00Z') });
+  const student = { id: 'S-ana', firstName: 'Ana', classGroup: { id: 'G7A', name: '7°A' } };
+
+  it("a student sees the course teacher, their homeroom teacher, and classmates' names only", async () => {
+    const p = await page().participants('C1', { kind: 'STUDENT', organizationId: 'org-1', student });
+    expect(p.teachers).toEqual([
+      { id: 'teacher-1', name: 'Tomás Docente', initials: 'TD', color: '#336', roles: ['Docente'] },
+      { id: 'teacher-h', name: 'Hilda Guía', initials: 'HG', color: null, roles: ['Docente consejero'] },
+    ]);
+    expect(p.students).toEqual([
+      { id: 'S-ana', name: 'Ana E2E', initials: 'AE' },
+      { id: 'S-beto', name: 'Beto E2E', initials: 'BE' },
+    ]);
+    expect(p.count).toBe(4);
+  });
+
+  it('a parent sees teachers only @BR-ACA-001.13', async () => {
+    const p = await page().participants('C1', { kind: 'PARENT', organizationId: 'org-1', student });
+    expect(p.students).toEqual([]);
+    expect(p.count).toBe(2);
+  });
+
+  it("staff see the roster; a homeroom teacher only their group's students (BR .16)", async () => {
+    const staff = await page().participants('C1', { kind: 'STAFF', organizationId: 'org-1', student: null });
+    expect(staff.teachers.map((t) => t.roles)).toEqual([['Docente']]);
+    expect(staff.students).toHaveLength(2);
+    const homeroom = await page().participants('C1', { kind: 'HOMEROOM', organizationId: 'org-1', student: null, userId: 'u-nobody' });
+    expect(homeroom.students).toEqual([]);
   });
 });
 

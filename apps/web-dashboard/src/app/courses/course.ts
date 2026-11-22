@@ -33,6 +33,7 @@ import { CourseAssignmentsList } from './course-assignments-list';
 import CourseFiles from './course-files';
 import CourseGradeBuckets from './course-grade-buckets';
 import { CourseGradesSummaryView } from './course-grades-summary';
+import { CourseParticipants, CourseParticipantsList } from './course-participants';
 import { CourseOverview } from './course-overview';
 import { CourseWork } from './course-work';
 
@@ -82,6 +83,7 @@ type CourseVm = {
     CourseGradeBuckets,
     GradebookGrid,
     CourseGradesSummaryView,
+    CourseParticipantsList,
     CourseAssignmentsList,
     CourseOverview,
     Icon,
@@ -212,6 +214,9 @@ type CourseVm = {
               <button uiTab value="participants">
                 <ui-icon name="users" class="text-xl" />
                 Participantes
+                @if (participants.value()?.count) {
+                  <span class="text-xs text-ink-muted">· {{ participants.value()?.count }}</span>
+                }
               </button>
               <button uiTab value="files">
                 <ui-icon name="folder-heart" class="text-xl" />
@@ -239,6 +244,9 @@ type CourseVm = {
               <button uiTab value="participants">
                 <ui-icon name="users" class="text-xl" />
                 Participantes
+                @if (participants.value()?.count) {
+                  <span class="text-xs text-ink-muted">· {{ participants.value()?.count }}</span>
+                }
               </button>
               <button uiTab value="files">
                 <ui-icon name="folder-heart" class="text-xl" />
@@ -301,11 +309,11 @@ type CourseVm = {
           }
           <div uiTabPanel uiCard value="participants" class="p-6">
             <ng-template uiTabContent>
-              <lib-empty-state
-                title="Participantes"
-                description="La lista de participantes del curso estará disponible pronto."
-                icon="users"
-              />
+              @if (participants.value(); as p) {
+                <app-course-participants [data]="p" />
+              } @else if (participants.error()) {
+                <p class="text-sm text-ink-muted">No se pudieron cargar los participantes.</p>
+              }
             </ng-template>
           </div>
           <div uiTabPanel uiCard value="files" class="p-6">
@@ -346,6 +354,15 @@ export default class Course {
   protected readonly forbidden = computed(() => {
     const error = this.courseResource.error();
     return error instanceof HttpErrorResponse && error.status === 403;
+  });
+
+  /** FR-ACA-001.15: teachers and students; the tab shows the head count (FR .11). */
+  public participants = httpResource<CourseParticipants>(() => {
+    const course = this.courseResource.value();
+    if (!course?.id) return undefined;
+    const studentId = course.viewer?.kind === 'PARENT' ? course.viewer.student?.id : undefined;
+    const params: Record<string, string> = studentId ? { studentId } : {};
+    return { url: `/api/v1/courses/${course.id}/participants`, params };
   });
 
   /** FR-ACA-001.12, .13: the student's work in this course. */

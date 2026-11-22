@@ -8,7 +8,7 @@ import { data, E2E_PASSWORD, personas, storageStatePath } from '../support/fixtu
  * its students. `parent` is linked to Ana and Beto, not Carla. Read-only.
  */
 
-const [, BETO, CARLA] = data.relatedStudents;
+const [ANA, BETO, CARLA] = data.relatedStudents;
 
 async function bearerFor(request: APIRequestContext, email: string) {
   const res = await request.post('/api/v1/auth/login', { data: { email, password: E2E_PASSWORD } });
@@ -69,6 +69,38 @@ test.describe('Course page for students @FR-ACA-001.10 @FR-ACA-001.11 @FR-ACA-00
     await expect(table.getByRole('row').filter({ hasText: data.publishedGrade.title })).toContainText('4.0');
     // Drafts never reach students (BR-HOM-001.2).
     await expect(table).not.toContainText(data.grade.title);
+  });
+});
+
+test.describe('Participantes @FR-ACA-001.15 @BR-ACA-001.13', () => {
+  test.use({ storageState: storageStatePath('student') });
+
+  test("a student sees the teacher and classmates' names, with a search", async ({ page, request }) => {
+    const { id } = await course(request);
+    await page.goto(`/courses/${id}`);
+    const tab = page.getByRole('tab', { name: /Participantes/ });
+    await expect(tab).toContainText(/· \d+/);
+    await tab.click();
+
+    const teachers = page.getByRole('region', { name: 'Docentes' });
+    await expect(teachers).toContainText(`${personas.teacher.firstName} ${personas.teacher.lastName}`);
+    await expect(teachers).toContainText('Docente');
+    const students = page.getByRole('region', { name: /Estudiantes/ });
+    for (const name of [ANA, BETO, CARLA]) await expect(students).toContainText(`${name} E2E`);
+
+    await page.getByRole('searchbox', { name: 'Buscar participante' }).fill('bet');
+    await expect(students.getByRole('listitem')).toHaveCount(1);
+    await expect(students).toContainText(`${BETO} E2E`);
+  });
+
+  test('a parent gets teachers only, from the API too', async ({ request }) => {
+    const { id, studentId } = await course(request);
+    const parent = await bearerFor(request, personas.parent.email);
+    const res = await request.get(`/api/v1/courses/${id}/participants`, { headers: parent, params: { studentId: studentId(ANA) } });
+    expect(res.ok()).toBeTruthy();
+    const body = (await res.json()) as { teachers: unknown[]; students: unknown[] };
+    expect(body.teachers.length).toBeGreaterThan(0);
+    expect(body.students).toEqual([]);
   });
 });
 

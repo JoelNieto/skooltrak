@@ -4,8 +4,8 @@
 |---|---|
 | **FRD** | [ACA-001](../frd/ACA-001-course-experience.md) |
 | **Implements** | FR-ACA-001.14, .12 (grade summary); BR-ACA-001.5 |
-| **Status** | In review |
-| **Branch** | `feat/ACA-001-S07-grades-tab` (builds on S06, #70) |
+| **Status** | Done: #71 (2026-11-22) |
+| **Branch** | `feat/ACA-001-S07-grades-tab` |
 | **Estimate** | 1–2 days |
 
 ## User-visible outcome

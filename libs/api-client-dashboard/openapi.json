@@ -3124,6 +3124,44 @@
         ]
       }
     },
+    "/api/v1/courses/{id}/participants": {
+      "get": {
+        "operationId": "CoursesController_participants",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "studentId",
+            "required": false,
+            "in": "query",
+            "description": "Parents: a linked child enrolled in the course",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "The course's teachers and students (FR-ACA-001.15, BR .13)",
+        "tags": [
+          "courses"
+        ]
+      }
+    },
     "/api/v1/courses/{id}/grades-summary": {
       "get": {
         "operationId": "CoursesController_gradesSummary",

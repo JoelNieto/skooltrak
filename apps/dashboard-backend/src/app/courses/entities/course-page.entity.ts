@@ -78,3 +78,28 @@ export class CourseGradesSummary {
   /** The period's published grades, most recent first. */
   grades: CourseGradesRow[];
 }
+
+/** `GET /v1/courses/:id/participants` (ACA-001-S08, FR .15, BR .13). */
+export class CourseParticipantTeacher {
+  id: string;
+  name: string;
+  initials: string;
+  color: string | null;
+  /** "Docente" (the course's teacher) and/or "Docente consejero" (the student's homeroom teacher). */
+  roles: string[];
+}
+
+/** Names and initials only: never email, codes or contact details (BR .13). */
+export class CourseParticipantStudent {
+  id: string;
+  name: string;
+  initials: string;
+}
+
+export class CourseParticipants {
+  teachers: CourseParticipantTeacher[];
+  /** Empty for parents (BR .13); a homeroom teacher gets their group's students only (BR .16). */
+  students: CourseParticipantStudent[];
+  /** The head count on the tab: everyone listed. */
+  count: number;
+}

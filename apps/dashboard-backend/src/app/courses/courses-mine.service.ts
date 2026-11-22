@@ -12,6 +12,8 @@ import { enrolledCourses } from './course-roster';
 import { MyCourseBand, MyCourseNext, MyCourses } from './entities/my-courses.entity';
 
 export const NO_STUDENT = 'No student profile in this organization';
+/** BR-ACA-001.2 */
+export const NOT_LINKED = 'No puedes ver la información de este estudiante';
 export const PERIOD_INVALID = 'El periodo no pertenece al año escolar actual';
 
 type Decimalish = { toNumber(): number } | number;
@@ -65,21 +67,37 @@ export class CoursesMineService {
     @Inject(CLOCK) private readonly clock: Clock,
   ) {}
 
-  async mine(user: AuthUserContext | undefined, query: { periodId?: string }): Promise<MyCourses> {
-    if (!user?.userId) throw new ForbiddenException('Not authenticated');
-    if (!user.organizationId) throw new ForbiddenException('Organization context required');
-
-    // BR-HOM-001.8: the caller's own Student record in their organization.
-    const student = await this.prisma.student.findFirst({
-      where: { userId: user.userId, organizationId: user.organizationId },
-      select: {
-        id: true,
-        organizationId: true,
-        classGroup: { select: { id: true, name: true } },
-        school: { select: { currentYear: true, timezone: true } },
-      },
+  /**
+   * BR-HOM-001.8: the caller's own Student record in their organization; otherwise, with `studentId`,
+   * a child linked to the caller (BR-ACA-001.2, BR-HOM-001.9; children may be in another organization).
+   */
+  private async resolveStudent(user: AuthUserContext, studentId: string | undefined) {
+    const select = {
+      id: true,
+      organizationId: true,
+      classGroup: { select: { id: true, name: true } },
+      school: { select: { currentYear: true, timezone: true } },
+    } as const;
+    const own = user.organizationId
+      ? await this.prisma.student.findFirst({ where: { userId: user.userId, organizationId: user.organizationId }, select })
+      : null;
+    if (own) return own;
+    if (!studentId) throw new ForbiddenException(NO_STUDENT);
+    const child = await this.prisma.student.findFirst({
+      where: { id: studentId, parents: { some: { userId: user.userId } } },
+      select,
     });
-    if (!student) throw new ForbiddenException(NO_STUDENT);
+    if (!child) throw new ForbiddenException(NOT_LINKED);
+    return child;
+  }
+
+  /**
+   * A student's own courses, or, for a parent, those of the linked child `studentId` (S05). A student
+   * caller's `studentId` is ignored (BR-ACA-001.2).
+   */
+  async mine(user: AuthUserContext | undefined, query: { periodId?: string; studentId?: string }): Promise<MyCourses> {
+    if (!user?.userId) throw new ForbiddenException('Not authenticated');
+    const student = await this.resolveStudent(user, query.studentId);
 
     const now = this.clock.now();
     const local = schoolLocalTime(now, student.school.timezone);

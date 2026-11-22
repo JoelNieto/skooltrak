@@ -11,4 +11,8 @@ export type CoursesControllerMineParams = {
  * Defaults to the current period
  */
 periodId?: string;
+/**
+ * Parents: a linked child (FR-ACA-001.8); ignored for students
+ */
+studentId?: string;
 };

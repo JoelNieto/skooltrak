@@ -2,7 +2,7 @@ import { BadRequestException, ForbiddenException } from '@nestjs/common';
 
 jest.mock('../prisma.service', () => ({ PrismaService: class {} }));
 
-import { courseBand, CoursesMineService, isDone, nextDelivery, NO_STUDENT, PERIOD_INVALID } from './courses-mine.service';
+import { courseBand, CoursesMineService, isDone, nextDelivery, NO_STUDENT, NOT_LINKED, PERIOD_INVALID } from './courses-mine.service';
 
 /** ACA-001-S02, S03 — the student's *Mis cursos* (FR-ACA-001.4, .5, .6; BR .1, .5, .7, .8, .9, .10). */
 const d = (n: number) => ({ toNumber: () => n });
@@ -77,7 +77,14 @@ function setup(opts: { student?: object | null; now?: Date } = {}) {
         }
       : opts.student;
   const prisma = {
-    student: { findFirst: jest.fn(async () => student) },
+    student: {
+      // The caller's own record (where.userId), or a child linked to them (where.parents).
+      findFirst: jest.fn(async ({ where }) => {
+        if (where.userId) return where.userId === 'u-ana' ? student : null;
+        const linked = where.parents?.some?.userId === 'u-parent' && where.id === 'S-ana';
+        return linked ? student : null;
+      }),
+    },
     period: { findMany: jest.fn(async () => periods) },
     course: {
       findMany: jest.fn(async ({ where }) => {
@@ -241,6 +248,29 @@ describe('CoursesMineService (ACA-001-S02)', () => {
       expect(isDone('PRESENCIAL', new Date('2026-04-16T00:00:00Z'), now)).toBe(false);
       expect(isDone('EXENTA', new Date('2026-04-16T00:00:00Z'), now)).toBe(true);
       expect(nextDelivery([], now)).toBeNull();
+    });
+  });
+
+  describe('parents (ACA-001-S05)', () => {
+    const parent = { userId: 'u-parent', organizationId: 'org-9', role: 'PARENT' } as never;
+
+    it("shows a linked child's courses, whatever the parent's organization @FR-ACA-001.8", async () => {
+      const { service } = setup();
+      const mine = await service.mine(parent, { studentId: 'S-ana' });
+      expect(mine.courses.map((c) => c.id)).toEqual(['C-art', 'C-cie', 'C-mat']);
+      expect(mine.stats.total).toBe(7);
+    });
+
+    it('refuses a child who is not linked, and a parent without studentId @BR-ACA-001.2', async () => {
+      const { service } = setup();
+      await expect(service.mine(parent, { studentId: 'S-other' })).rejects.toThrow(new ForbiddenException(NOT_LINKED));
+      await expect(service.mine(parent, {})).rejects.toThrow(new ForbiddenException(NO_STUDENT));
+    });
+
+    it("ignores studentId for a student: always their own courses", async () => {
+      const { service, prisma } = setup();
+      await service.mine(ana, { studentId: 'S-other' });
+      expect(prisma.student.findFirst).toHaveBeenCalledTimes(1);
     });
   });
 });

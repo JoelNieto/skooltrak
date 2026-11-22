@@ -4,7 +4,7 @@
 |---|---|
 | **FRD** | [ACA-001](../frd/ACA-001-course-experience.md) |
 | **Implements** | FR-ACA-001.4 (cover, name, schedule, teacher, average), .5; BR-ACA-001.1, .4, .5, .9 |
-| **Status** | In review |
+| **Status** | Done: #64 (2026-11-22) |
 | **Branch** | `feat/ACA-001-S02-mis-cursos` |
 | **Estimate** | 2–3 days |
 

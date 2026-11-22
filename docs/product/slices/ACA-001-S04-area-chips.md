@@ -4,8 +4,8 @@
 |---|---|
 | **FRD** | [ACA-001](../frd/ACA-001-course-experience.md) |
 | **Implements** | FR-ACA-001.2 (area), .7; BR-ACA-001.14 |
-| **Status** | In review |
-| **Branch** | `feat/ACA-001-S04-area-chips` (on S03 #65) |
+| **Status** | Done: #68 (2026-11-22) |
+| **Branch** | `feat/ACA-001-S04-area-chips` |
 | **Estimate** | 1 day |
 
 ## User-visible outcome

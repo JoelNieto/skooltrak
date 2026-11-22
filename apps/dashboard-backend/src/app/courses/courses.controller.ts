@@ -2,7 +2,10 @@ import { FetchDataQueryDto } from '@/api-contracts';
 import { AuthenticatedRequest, BetterAuthGuard, Perm, PermissionsGuard, RequirePermissions } from '@/auth';
 import { Body, Controller, Delete, Get, Param, Patch, Post, Query, Req, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
+import { CourseAccessService } from './course-access.service';
+import { CoursePageService } from './course-page.service';
 import { CoursesMineService } from './courses-mine.service';
+import { CourseWork } from './entities/course-page.entity';
 import { MyCourses } from './entities/my-courses.entity';
 import { CoursesService } from './courses.service';
 import { CreateCourseInput } from './dto/create-course.input';
@@ -17,6 +20,8 @@ export class CoursesController {
   constructor(
     private readonly coursesService: CoursesService,
     private readonly mineService: CoursesMineService,
+    private readonly access: CourseAccessService,
+    private readonly page: CoursePageService,
   ) {}
 
   @Post()
@@ -76,10 +81,24 @@ export class CoursesController {
     return this.coursesService.findManyByGroupId(groupId);
   }
 
+  @Get(':id/work')
+  @ApiOperation({ summary: "The student's work in the course, with status (FR-ACA-001.12, .13)" })
+  @ApiQuery({ name: 'studentId', required: false, description: 'Parents: a linked child enrolled in the course' })
+  async work(
+    @Req() req: AuthenticatedRequest,
+    @Param('id') id: string,
+    @Query('studentId') studentId?: string,
+  ): Promise<CourseWork> {
+    const viewer = await this.access.viewer(req.user, id, studentId);
+    return this.page.work(id, viewer);
+  }
+
   @Get(':id')
-  @ApiOperation({ summary: 'Get course by id' })
-  findOne(@Param('id') id: string) {
-    return this.coursesService.findOne(id);
+  @ApiOperation({ summary: 'Get course by id, for the callers BR-ACA-001.3 allows (FR-ACA-001.10)' })
+  @ApiQuery({ name: 'studentId', required: false, description: 'Parents: a linked child enrolled in the course' })
+  async findOne(@Req() req: AuthenticatedRequest, @Param('id') id: string, @Query('studentId') studentId?: string) {
+    const viewer = await this.access.viewer(req.user, id, studentId);
+    return this.page.course(id, viewer);
   }
 
   @Patch()

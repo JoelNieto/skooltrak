@@ -4,8 +4,8 @@
 |---|---|
 | **FRD** | [ACA-001](../frd/ACA-001-course-experience.md) |
 | **Implements** | FR-ACA-001.8, BR-ACA-001.2 |
-| **Status** | In review |
-| **Branch** | `feat/ACA-001-S05-parent-courses` (builds on S04, #68) |
+| **Status** | Done: #69 (2026-11-22) |
+| **Branch** | `feat/ACA-001-S05-parent-courses` |
 | **Estimate** | 1 day |
 
 ## User-visible outcome

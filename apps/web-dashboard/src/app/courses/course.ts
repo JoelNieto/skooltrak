@@ -17,9 +17,9 @@ import {
   UiTabPanel,
   UiTabs,
 } from '#/ui';
-import { HttpClient, httpResource } from '@angular/common/http';
-import { Component, computed, inject, input, signal } from '@angular/core';
-import { Router } from '@angular/router';
+import { HttpClient, HttpErrorResponse, httpResource } from '@angular/common/http';
+import { Component, computed, inject, input, linkedSignal, signal } from '@angular/core';
+import { Router, RouterLink } from '@angular/router';
 import { ChatType } from '@generated/prisma';
 import { firstValueFrom } from 'rxjs';
 import AssignmentForm from '../assignments/assignment-form';
@@ -27,10 +27,14 @@ import CourseAttendance from '../attendance/course-attendance';
 import Auth from '../auth/auth';
 import { isValidId } from '../core/validators';
 import GradebookGrid from '../gradebook/gradebook-grid';
+import { ParentContext } from '../parent/parent-context.service';
 import CourseAssignments from './course-assignments';
+import { CourseAssignmentsList } from './course-assignments-list';
 import CourseFiles from './course-files';
 import CourseGradeBuckets from './course-grade-buckets';
 import CourseStudentGrades from './course-student-grades';
+import { CourseOverview } from './course-overview';
+import { CourseWork } from './course-work';
 
 type CourseVm = {
   id: string;
@@ -38,7 +42,7 @@ type CourseVm = {
   code: string;
   /** Resolved by the API: never null (ACA-001 BR .11). */
   color: string;
-  subject?: { name?: string; icon?: string | null } | null;
+  subject?: { name?: string; icon?: string | null; area?: string | null } | null;
   teacher?: {
     firstName?: string;
     fatherName?: string;
@@ -48,7 +52,13 @@ type CourseVm = {
     user?: { id?: string; firstName?: string; lastName?: string; color?: string | null };
     userId?: string | null;
   } | null;
-  studyPlan: { gradeMetric: unknown };
+  studyPlan: { name?: string; gradeMetric: unknown };
+  /** BR-ACA-001.3: who is looking; students and parents carry the student. */
+  viewer?: { kind: 'STAFF' | 'HOMEROOM' | 'STUDENT' | 'PARENT'; student: { id: string; firstName: string } | null };
+  /** The student's group (students and parents). */
+  classGroup?: { id: string; name: string } | null;
+  /** BR-ACA-001.9 for the student's group; null for staff. */
+  schedule?: { days: string; place: string | null; times: string | null } | null;
 };
 
 @Component({
@@ -72,13 +82,26 @@ type CourseVm = {
     CourseGradeBuckets,
     GradebookGrid,
     CourseStudentGrades,
+    CourseAssignmentsList,
+    CourseOverview,
     Icon,
+    RouterLink,
   ],
   template: ` @if (courseResource.isLoading()) {
       <lib-loader />
     }
     @if (courseResource.error()) {
-      <p>Error al cargar curso</p>
+      <!-- BR-ACA-001.3 -->
+      <div class="mt-4">
+        <lib-empty-state
+          [title]="forbidden() ? 'No tienes acceso a este curso' : 'No se pudo cargar el curso'"
+          [description]="
+            forbidden() ? 'Solo lo ven sus estudiantes, sus familias y su personal.' : 'Inténtalo de nuevo más tarde.'
+          "
+          icon="circle-alert"
+        />
+        <p class="mt-2 text-center"><a routerLink="/courses" class="link link-primary">Volver a Mis cursos</a></p>
+      </div>
     }
     @if (courseResource.hasValue() && courseResource.value()?.id) {
       @let course = transformedCourse()!;
@@ -111,10 +134,35 @@ type CourseVm = {
                     <span class="text-sm text-ink-subtle">No hay docente asignado</span>
                   }
                 </div>
-                <p class="text-ink-muted">{{ course.code }}</p>
+                <p class="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-ink-muted">
+                  @if (course.subject?.area) {
+                    <span uiBadge size="sm">{{ course.subject?.area }}</span>
+                  }
+                  @if (course.classGroup) {
+                    <span>{{ course.classGroup.name }}</span>
+                  } @else if (course.studyPlan.name) {
+                    <span>{{ course.studyPlan.name }}</span>
+                  }
+                  @if (course.schedule; as schedule) {
+                    <span class="flex items-center gap-1">
+                      <ui-icon name="calendar-days" class="text-base" />
+                      {{ schedule.days }}{{ schedule.times ? ' · ' + schedule.times : ''
+                      }}{{ schedule.place ? ' · ' + schedule.place : '' }}
+                    </span>
+                  }
+                  @if (!family()) {
+                    <span>{{ course.code }}</span>
+                  }
+                </p>
               </div>
 
               <div class="flex gap-2">
+                @if (family()) {
+                  <button uiButton variant="ghost" type="button" (click)="tab.set('calendar')">
+                    <ui-icon name="calendar-days" />
+                    Ver calendario
+                  </button>
+                }
                 @if (canStartCourseChat()) {
                   <button
                     uiButton
@@ -144,47 +192,95 @@ type CourseVm = {
         </div>
         <div uiTabs class="mt-4 flex flex-col gap-4">
           <div uiTabList [(selectedTab)]="tab" aria-label="Secciones del curso">
-            <button uiTab value="grades">
-              <ui-icon name="star" class="text-xl" />
-              @if (auth.isTeacher() || auth.isAdmin()) {
-                Libro de calificaciones
-              } @else {
+            @if (family()) {
+              <!-- FR-ACA-001.11: Resumen · Asignaciones · Calificaciones · Participantes · Recursos -->
+              <button uiTab value="overview">
+                <ui-icon name="house" class="text-xl" />
+                Resumen
+              </button>
+              <button uiTab value="work">
+                <ui-icon name="clipboard-list" class="text-xl" />
+                Asignaciones
+                @if (work.value()?.pending) {
+                  <span uiBadge size="sm" tone="warning">{{ work.value()?.pending }} pendientes</span>
+                }
+              </button>
+              <button uiTab value="grades">
+                <ui-icon name="star" class="text-xl" />
                 Calificaciones
+              </button>
+              <button uiTab value="participants">
+                <ui-icon name="users" class="text-xl" />
+                Participantes
+              </button>
+              <button uiTab value="files">
+                <ui-icon name="folder-heart" class="text-xl" />
+                Recursos
+              </button>
+            } @else {
+              <button uiTab value="grades">
+                <ui-icon name="star" class="text-xl" />
+                @if (auth.isTeacher() || auth.isAdmin()) {
+                  Libro de calificaciones
+                } @else {
+                  Calificaciones
+                }
+              </button>
+              <button uiTab value="calendar">
+                <ui-icon name="calendar-days" class="text-xl" />
+                Calendario
+              </button>
+              @if (auth.isTeacher() || auth.isAdmin()) {
+                <button uiTab value="attendance">
+                  <ui-icon name="user-check" class="text-xl" />
+                  Asistencia
+                </button>
               }
-            </button>
-            <button uiTab value="calendar">
-              <ui-icon name="calendar-days" class="text-xl" />
-              Calendario
-            </button>
-            @if (auth.isTeacher() || auth.isAdmin()) {
-              <button uiTab value="attendance">
-                <ui-icon name="user-check" class="text-xl" />
-                Asistencia
+              <button uiTab value="participants">
+                <ui-icon name="users" class="text-xl" />
+                Participantes
               </button>
-            }
-            <button uiTab value="participants">
-              <ui-icon name="users" class="text-xl" />
-              Participantes
-            </button>
-            <button uiTab value="files">
-              <ui-icon name="folder-heart" class="text-xl" />
-              Archivos
-            </button>
-            @if (auth.isTeacher() || auth.isAdmin()) {
-              <button uiTab value="weights">
-                <ui-icon name="scale" class="text-xl" />
-                Ponderación
+              <button uiTab value="files">
+                <ui-icon name="folder-heart" class="text-xl" />
+                Archivos
               </button>
+              @if (auth.isTeacher() || auth.isAdmin()) {
+                <button uiTab value="weights">
+                  <ui-icon name="scale" class="text-xl" />
+                  Ponderación
+                </button>
+              }
             }
           </div>
+
+          @if (family()) {
+            <div uiTabPanel uiCard value="overview" class="p-6">
+              <ng-template uiTabContent>
+                @if (work.value(); as w) {
+                  <app-course-overview [work]="w" [teacher]="$any(course.teacher) ?? null" (seeAll)="tab.set('work')" />
+                }
+              </ng-template>
+            </div>
+            <div uiTabPanel uiCard value="work" class="p-6">
+              <ng-template uiTabContent>
+                @if (work.value(); as w) {
+                  <app-course-assignments-list [work]="w" />
+                }
+              </ng-template>
+            </div>
+          }
 
           <div uiTabPanel uiCard value="grades" class="p-6">
             <ng-template uiTabContent>
               @if (auth.isTeacher() || auth.isAdmin()) {
                 <app-gradebook-grid [courseId]="id()" />
               }
-              @if (auth.isStudent()) {
-                <app-course-student-grades [courseId]="id()" [metric]="$any(course.studyPlan.gradeMetric)" />
+              @if (family()) {
+                <app-course-student-grades
+                  [courseId]="id()"
+                  [metric]="$any(course.studyPlan.gradeMetric)"
+                  [studentId]="course.viewer?.kind === 'PARENT' ? (course.viewer?.student?.id ?? null) : null"
+                />
               }
             </ng-template>
           </div>
@@ -229,8 +325,31 @@ export default class Course {
   private router = inject(Router);
   private toast = inject(Toast);
   protected readonly colorVar = courseColorVar;
-  /** Selected section; the tab list and panels follow it. */
-  readonly tab = signal('grades');
+  #ctx = inject(ParentContext);
+
+  /** BR-ACA-001.3: students and parents get the family view of the page (FR-ACA-001.11). */
+  protected readonly family = computed(() => {
+    const kind = this.courseResource.value()?.viewer?.kind;
+    return kind === 'STUDENT' || kind === 'PARENT';
+  });
+  /** Selected section; the tab list and panels follow it. Families start on Resumen. */
+  readonly tab = linkedSignal<boolean, string>({
+    source: this.family,
+    computation: (family) => (family ? 'overview' : 'grades'),
+  });
+
+  protected readonly forbidden = computed(() => {
+    const error = this.courseResource.error();
+    return error instanceof HttpErrorResponse && error.status === 403;
+  });
+
+  /** FR-ACA-001.12, .13: the student's work in this course. */
+  public work = httpResource<CourseWork>(() => {
+    if (!this.family()) return undefined;
+    const studentId = this.courseResource.value()?.viewer?.student?.id;
+    const params: Record<string, string> = studentId ? { studentId } : {};
+    return { url: `/api/v1/courses/${this.id()}/work`, params };
+  });
   startingChat = signal(false);
 
   canStartCourseChat() {
@@ -263,7 +382,10 @@ export default class Course {
     if (!isValidId(id)) {
       return undefined;
     }
-    return `/api/v1/courses/${id}`;
+    // Parents see the course for the child chosen in the shared switcher (BR-ACA-001.2).
+    const childId = this.auth.isParent() ? this.#ctx.selectedChild()?.studentId : undefined;
+    const params: Record<string, string> = childId ? { studentId: childId } : {};
+    return { url: `/api/v1/courses/${id}`, params };
   });
 
   public transformedCourse = computed(() => {

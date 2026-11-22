@@ -8,12 +8,13 @@ import { data, E2E_PASSWORD, personas, storageStatePath } from '../support/fixtu
  * docs/product/slices/ASM-001-S08-homeroom-alert.md
  *
  * Setup: `otherTeacher` becomes the homeroom teacher of `related` (7°A); `teacher` publishes a new
- * column where Beto has 2 (pass mark 3). afterAll clears the homeroom teacher and deletes the column.
+ * column where Ana has 2 (pass mark 3). afterAll clears the homeroom teacher and deletes the column.
  */
 
 test.describe.configure({ mode: 'serial' });
 
-const BETO = data.relatedStudents[1];
+// Ana: no other `after` spec asserts her average, which this column changes while it exists.
+const ANA = data.relatedStudents[0];
 const COLUMN = 'Alerta consejero E2E';
 const TYPE = 'LOW_GRADE_HOMEROOM';
 
@@ -66,22 +67,22 @@ test.describe('Homeroom alert @FR-ASM-001.14 @BR-ASM-001.12', () => {
     expect(other).toBeTruthy();
     expect((await request.patch('/api/v1/class-groups', { headers: admin, data: { id: groupId, teacherId: other?.id } })).ok()).toBeTruthy();
 
-    // A new draft column where Beto has 2, then published.
+    // A new draft column where Ana has 2, then published.
     const created = await request.post('/api/v1/grades', {
       headers: teacher,
       data: { title: COLUMN, courseId, bucketId: book.buckets[0].id, periodId: book.periodId, date: new Date().toISOString(), published: false },
     });
     expect(created.ok()).toBeTruthy();
     gradeId = ((await created.json()) as { id: string }).id;
-    const beto = book.rows.find((r) => r.student.firstName === BETO)?.student.id;
+    const ana = book.rows.find((r) => r.student.firstName === ANA)?.student.id;
     const fresh = (await (await request.get(`/api/v1/gradebook/${courseId}`, { headers: teacher })).json()) as {
       buckets: { columns: { id: string }[] }[];
       rows: { student: { id: string }; cells: { gradeId: string; updatedAt: string | null }[] }[];
     };
-    const cell = fresh.rows.find((r) => r.student.id === beto)?.cells.find((c) => c.gradeId === gradeId);
+    const cell = fresh.rows.find((r) => r.student.id === ana)?.cells.find((c) => c.gradeId === gradeId);
     const saved = await request.put(`/api/v1/gradebook/${courseId}/cells`, {
       headers: teacher,
-      data: { periodId: book.periodId, cells: [{ gradeId, studentId: beto, score: 2, updatedAt: cell?.updatedAt ?? null }] },
+      data: { periodId: book.periodId, cells: [{ gradeId, studentId: ana, score: 2, updatedAt: cell?.updatedAt ?? null }] },
     });
     expect(saved.ok()).toBeTruthy();
     expect((await request.post(`/api/v1/gradebook/${courseId}/publish`, { headers: teacher, data: { gradeIds: [gradeId] } })).ok()).toBeTruthy();
@@ -97,7 +98,7 @@ test.describe('Homeroom alert @FR-ASM-001.14 @BR-ASM-001.12', () => {
     await expect.poll(async () => (await alertsFor(request, homeroom, gradeId)).length, { timeout: 15_000 }).toBe(1);
     const [alert] = await alertsFor(request, homeroom, gradeId);
     expect(alert.message).toBe(
-      `${BETO} E2E (${data.classGroups.related}) obtuvo 2.0 en «${COLUMN}» de ${data.courses.teacherOwn.name}. Nota mínima: 3.0.`,
+      `${ANA} E2E (${data.classGroups.related}) obtuvo 2.0 en «${COLUMN}» de ${data.courses.teacherOwn.name}. Nota mínima: 3.0.`,
     );
     expect(await alertsFor(request, teacher, gradeId)).toEqual([]);
 
@@ -106,7 +107,7 @@ test.describe('Homeroom alert @FR-ASM-001.14 @BR-ASM-001.12', () => {
       periodId: string;
       rows: { student: { id: string; firstName: string }; cells: { gradeId: string; updatedAt: string | null }[] }[];
     };
-    const row = book.rows.find((r) => r.student.firstName === BETO);
+    const row = book.rows.find((r) => r.student.firstName === ANA);
     const cell = row?.cells.find((c) => c.gradeId === gradeId);
     const again = await request.put(`/api/v1/gradebook/${courseId}/cells`, {
       headers: teacher,

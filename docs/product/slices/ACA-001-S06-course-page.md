@@ -5,7 +5,7 @@
 | **FRD** | [ACA-001](../frd/ACA-001-course-experience.md) |
 | **Implements** | FR-ACA-001.10, .11, .12 (work and teacher), .13; BR-ACA-001.3, .6 |
 | **Status** | In review |
-| **Branch** | `feat/ACA-001-S06-course-page` (builds on S04 #68, S05 #69) |
+| **Branch** | `feat/ACA-001-S06-course-page` |
 | **Estimate** | 3 days |
 
 ## User-visible outcome

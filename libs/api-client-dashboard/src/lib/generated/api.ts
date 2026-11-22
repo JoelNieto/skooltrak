@@ -3032,7 +3032,7 @@ export class SkooltrakDashboardAPIService {
   }
 
 /**
- * @summary List degrees
+ * @summary List the organization's degrees
  */
  degreesControllerFindAll<TData = void>( options?: HttpClientBodyOptions): Observable<TData>;
  degreesControllerFindAll<TData = void>( options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
@@ -9083,7 +9083,7 @@ if(coursesControllerUploadCoverBody.file !== undefined) {
   }
 
 /**
- * @summary List groups schedules
+ * @summary List the organization's group schedules
  */
  groupsSchedulesControllerFindAll<TData = void>( options?: HttpClientBodyOptions): Observable<TData>;
  groupsSchedulesControllerFindAll<TData = void>( options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;

@@ -2,6 +2,7 @@ import { Button, Modal, Spinner, Toast } from '#/ui';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { Component, computed, inject, input, linkedSignal, signal } from '@angular/core';
 import { Prisma } from '@generated/prisma';
+import Auth from '../auth/auth';
 import { isValidId } from '../core/validators';
 import GroupScheduleForm from './group-schedule-form';
 
@@ -30,7 +31,9 @@ type ScheduleLayout = {
           <h4 class="text-lg font-semibold text-ink-strong">Horario semanal del grupo</h4>
           <p class="text-sm text-ink-muted">Visualiza las clases en un calendario semanal por horas.</p>
         </div>
-        <button uiButton variant="primary" size="sm" (click)="editSchedule()">Agregar clase</button>
+        @if (canEdit()) {
+          <button uiButton variant="primary" size="sm" (click)="editSchedule()">Agregar clase</button>
+        }
       </div>
       @if (schedulesResource.isLoading()) {
         <div class="flex items-center gap-2 text-sm text-ink-muted">
@@ -51,7 +54,9 @@ type ScheduleLayout = {
                   <div class="border-b border-line bg-surface-0 px-3 py-2 text-xs font-semibold">
                     <div class="flex items-center justify-between">
                       <span>{{ day.label }}</span>
-                      <button uiButton variant="ghost" size="sm" (click)="editSchedule(undefined, day.key)">+</button>
+                      @if (canEdit()) {
+                        <button uiButton variant="ghost" size="sm" (click)="editSchedule(undefined, day.key)">+</button>
+                      }
                     </div>
                   </div>
                 }
@@ -76,7 +81,8 @@ type ScheduleLayout = {
                   >
                     @for (entry of layoutByDay()[day.key]; track entry.id) {
                       <div
-                        class="absolute rounded-md bg-primary/70 text-primary-content p-2 text-xs cursor-move group"
+                        class="absolute rounded-md bg-primary/70 text-primary-content p-2 text-xs group"
+                        [class.cursor-move]="canEdit()"
                         [class.opacity-70]="draggingId() === entry.id"
                         [style.top.px]="entry.top"
                         [style.height.px]="entry.height"
@@ -89,15 +95,17 @@ type ScheduleLayout = {
                           <p class="font-semibold text-white">
                             {{ entry.schedule.course.subject.name }}
                           </p>
-                          <button
-                            uiButton
-                            variant="ghost"
-                            size="sm"
-                            type="button"
-                            (click)="editSchedule(entry.schedule); $event.stopPropagation()"
-                          >
-                            Editar
-                          </button>
+                          @if (canEdit()) {
+                            <button
+                              uiButton
+                              variant="ghost"
+                              size="sm"
+                              type="button"
+                              (click)="editSchedule(entry.schedule); $event.stopPropagation()"
+                            >
+                              Editar
+                            </button>
+                          }
                         </div>
                         <p class="text-[11px] text-ink-strong">
                           {{ entry.schedule.startTime }} - {{ entry.schedule.endTime }}
@@ -115,8 +123,10 @@ type ScheduleLayout = {
         } @else {
           <div class="rounded-xl border border-dashed border-line bg-surface-1 p-6">
             <h5 class="text-base font-semibold text-ink-strong">Aún no hay horario semanal</h5>
-            <p class="text-sm text-ink-muted mt-1">Empieza agregando las clases para cada día de la semana.</p>
-            <button uiButton variant="primary" size="sm" class="mt-4" (click)="editSchedule()">Crear horario</button>
+            @if (canEdit()) {
+              <p class="text-sm text-ink-muted mt-1">Empieza agregando las clases para cada día de la semana.</p>
+              <button uiButton variant="primary" size="sm" class="mt-4" (click)="editSchedule()">Crear horario</button>
+            }
           </div>
         }
       }
@@ -128,6 +138,9 @@ export default class GroupSchedule {
   #modal = inject(Modal);
   #http = inject(HttpClient);
   #toast = inject(Toast);
+  /** Adding, editing and moving classes needs MANAGE_SCHEDULES (the API refuses it otherwise). */
+  #auth = inject(Auth);
+  protected readonly canEdit = computed(() => this.#auth.hasPermission('MANAGE_SCHEDULES'));
   public draggingId = signal<string | null>(null);
 
   public weekdays: Array<{ key: WeekdayKey; label: string }> = [
@@ -218,6 +231,7 @@ export default class GroupSchedule {
   }
 
   public onEntryPointerDown(entry: ScheduleLayout, event: PointerEvent) {
+    if (!this.canEdit()) return;
     event.preventDefault();
     const target = event.currentTarget as HTMLElement | null;
     if (!target) return;

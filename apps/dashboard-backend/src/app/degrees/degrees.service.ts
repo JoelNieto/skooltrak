@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma.service';
 import { CreateDegreeInput } from './dto/create-degree.input';
 import { UpdateDegreeInput } from './dto/update-degree.input';
@@ -14,8 +14,9 @@ export class DegreesService {
     });
   }
 
-  findAll() {
+  findAll(organizationId: string) {
     return this.prisma.degree.findMany({
+      where: { school: { organizationId } },
       include: { school: true, studyPlans: true },
     });
   }
@@ -34,6 +35,13 @@ export class DegreesService {
     return this.prisma.degree.count({ where: { schoolId } });
   }
 
+  /** The degree's school, for the access check (404 when missing). */
+  async ref(id: string) {
+    const degree = await this.prisma.degree.findUnique({ where: { id }, select: { id: true, schoolId: true } });
+    if (!degree) throw new NotFoundException('Grado no encontrado');
+    return degree;
+  }
+
   findOne(id: string) {
     return this.prisma.degree.findUnique({
       where: { id },
@@ -48,7 +56,7 @@ export class DegreesService {
       data: {
         name,
         shortName,
-        school: { connect: { id: schoolId } },
+        ...(schoolId ? { school: { connect: { id: schoolId } } } : {}),
       },
     });
   }

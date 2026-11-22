@@ -52,7 +52,7 @@ Code: `courses`, `assignments`, `assignment-submissions`, `quizzes`, `files`
 | Capability | Status | FRD |
 |---|---|---|
 | Courses (per study plan) | Live | — |
-| Course experience: colored course cards with progress, course page with assignments/grades/participants | In build (color and icon S01, roster S11, students' *Mis cursos* cards with schedule, teacher and period average S02, next delivery, progress and stats row S03, subject areas and filter chips S04, the same view for parents per child S05, course page header, Resumen and Asignaciones with access limited to the course's people S06) | [ACA-001](frd/ACA-001-course-experience.md) |
+| Course experience: colored course cards with progress, course page with assignments/grades/participants | In build (color and icon S01, roster S11, students' *Mis cursos* cards with schedule, teacher and period average S02, next delivery, progress and stats row S03, subject areas and filter chips S04, the same view for parents per child S05, course page header, Resumen and Asignaciones with access limited to the course's people S06, Calificaciones with category bars S07) | [ACA-001](frd/ACA-001-course-experience.md) |
 | Assignments & submissions | Live (work reads *Calificada · n* / *Exenta* once its linked grade is published, ACA-001-S10) | — |
 | Quizzes (questions, schedules, submissions) | Live | — |
 | Files & sharing (user / school / group / course) | Live | — |

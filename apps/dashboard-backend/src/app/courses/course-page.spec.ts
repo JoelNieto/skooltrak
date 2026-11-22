@@ -4,7 +4,10 @@ jest.mock('../prisma.service', () => ({ PrismaService: class {} }));
 
 import { CourseAccessService } from './course-access.service';
 import { CoursePageService } from './course-page.service';
+import { PERIOD_INVALID } from './courses-mine.service';
 import { COURSE_DENIED } from './courses.service';
+
+const d = (n: number) => ({ toNumber: () => n });
 
 /**
  * ACA-001-S06 — course page access (BR .3) and the student's work list (FR .12, .13).
@@ -28,7 +31,41 @@ function prismaFake() {
   return {
     course: {
       findUnique: jest.fn(async ({ where }) => (where.id === 'C1' ? { organizationId: 'org-1', teacherId: 'teacher-1' } : null)),
-      findUniqueOrThrow: jest.fn(async () => ({ school: { timezone: 'America/Panama' } })),
+      findUniqueOrThrow: jest.fn(async () => ({
+        school: { timezone: 'America/Panama', currentYear: 2026 },
+        studyPlan: { gradeMetric: { maximum: d(5), minimumApproval: d(3) } },
+        gradeBuckets: [
+          { id: 'B-daily', name: 'Trabajo diario', weight: d(40) },
+          { id: 'B-tests', name: 'Pruebas', weight: d(60) },
+          { id: 'B-proj', name: 'Proyectos', weight: d(20) },
+        ],
+      })),
+    },
+    period: {
+      findMany: jest.fn(async () => [
+        { id: 'T1', name: 'Trimestre 1', startDate: new Date('2026-03-01'), endDate: new Date('2026-05-31') },
+        { id: 'T2', name: 'Trimestre 2', startDate: new Date('2026-06-01'), endDate: new Date('2026-08-31') },
+      ]),
+    },
+    grade: {
+      findMany: jest.fn(async ({ where }) => {
+        expect(where.published).toBe(true);
+        if (where.periodId !== 'T1') return [];
+        const g = (id: string, title: string, bucketId: string, bucket: string, date: string, cell: object | null) => ({
+          id,
+          title,
+          date: new Date(date),
+          bucketId,
+          bucket: { name: bucket },
+          studentGrades: cell ? [cell] : [],
+        });
+        return [
+          g('G4', 'Prueba 1', 'B-tests', 'Pruebas', '2026-04-12T12:00:00Z', { score: d(2), excused: false, comments: 'Repasar' }),
+          g('G3', 'Tarea 3', 'B-daily', 'Trabajo diario', '2026-04-10T12:00:00Z', { score: null, excused: true, comments: null }),
+          g('G2', 'Tarea 2', 'B-daily', 'Trabajo diario', '2026-04-05T12:00:00Z', { score: d(4), excused: false, comments: null }),
+          g('G1', 'Tarea 1', 'B-daily', 'Trabajo diario', '2026-04-01T12:00:00Z', null),
+        ];
+      }),
     },
     teacher: {
       findFirst: jest.fn(async ({ where }) =>
@@ -113,3 +150,42 @@ describe('CoursePageService.work (FR-ACA-001.12, .13)', () => {
     );
   });
 });
+
+describe('CoursePageService.gradesSummary (FR-ACA-001.14)', () => {
+  const page = () => new CoursePageService(prismaFake() as never, { now: () => new Date('2026-04-15T12:00:00Z') });
+  const ana = { kind: 'STUDENT' as const, organizationId: 'org-1', student: { id: 'S-ana', firstName: 'Ana', classGroup: { id: 'G7A', name: '7°A' } } };
+
+  it('averages the period, bands it, and gives one bar per category @BR-ACA-001.5', async () => {
+    const summary = await page().gradesSummary('C1', ana);
+    // Trabajo diario 4 (excused and empty skipped), Pruebas 2: (4 × 40 + 2 × 60) / 100 = 2.8.
+    expect(summary.periodId).toBe('T1');
+    expect(summary.average).toBeCloseTo(2.8, 10);
+    expect(summary.band).toBe('EN_RIESGO');
+    expect(summary.scale).toEqual({ maximum: 5, minimumApproval: 3 });
+    expect(summary.buckets.map((b) => [b.name, b.weight, b.average])).toEqual([
+      ['Trabajo diario', 40, 4],
+      ['Pruebas', 60, 2],
+      ['Proyectos', 20, null],
+    ]);
+  });
+
+  it('lists the published grades, most recent first, with comment, score or Exenta', async () => {
+    const { grades } = await page().gradesSummary('C1', ana);
+    expect(grades.map((g) => [g.title, g.bucket, g.score, g.excused, g.comment])).toEqual([
+      ['Prueba 1', 'Pruebas', 2, false, 'Repasar'],
+      ['Tarea 3', 'Trabajo diario', null, true, null],
+      ['Tarea 2', 'Trabajo diario', 4, false, null],
+      ['Tarea 1', 'Trabajo diario', null, false, null],
+    ]);
+  });
+
+  it('switches period, refuses one outside the year, and is for students and parents only', async () => {
+    const t2 = await page().gradesSummary('C1', ana, 'T2');
+    expect([t2.periodId, t2.average, t2.band, t2.grades]).toEqual(['T2', null, null, []]);
+    await expect(page().gradesSummary('C1', ana, 'OLD')).rejects.toThrow(PERIOD_INVALID);
+    await expect(page().gradesSummary('C1', { kind: 'STAFF', organizationId: 'org-1', student: null })).rejects.toThrow(
+      new ForbiddenException(COURSE_DENIED),
+    );
+  });
+});
+

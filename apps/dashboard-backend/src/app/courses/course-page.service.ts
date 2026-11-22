@@ -1,11 +1,14 @@
-import { ForbiddenException, Inject, Injectable } from '@nestjs/common';
+import { courseAverage, meanOf } from '@/shared';
+import { BadRequestException, ForbiddenException, Inject, Injectable } from '@nestjs/common';
+import { pickCurrentPeriod } from '../home/home-period';
 import { CLOCK, Clock, schoolLocalTime } from '../home/home-time';
 import { workStatus } from '../home/student-home.service';
 import { PrismaService } from '../prisma.service';
 import { CourseViewer } from './course-access.service';
 import { courseSchedule } from './course-schedule';
+import { courseBand, PERIOD_INVALID } from './courses-mine.service';
 import { COURSE_DENIED, withResolvedColor } from './courses.service';
-import { CoursePageSchedule, CourseWork, CourseWorkItem } from './entities/course-page.entity';
+import { CourseGradesSummary, CoursePageSchedule, CourseWork, CourseWorkItem } from './entities/course-page.entity';
 
 type Decimalish = { toNumber(): number } | number;
 const num = (v: Decimalish) => (typeof v === 'number' ? v : v.toNumber());
@@ -110,4 +113,82 @@ export class CoursePageService {
       past: items.filter((i) => i.dueAt < nowIso).sort((a, b) => b.dueAt.localeCompare(a.dueAt)),
     };
   }
+
+  /**
+   * FR-ACA-001.14: the student's grades in this course for one period: the average on the plan's
+   * scale and its band (BR .5), one bar per category, and the published grades, most recent first.
+   */
+  async gradesSummary(courseId: string, viewer: CourseViewer, periodId?: string): Promise<CourseGradesSummary> {
+    if (!viewer.student) throw new ForbiddenException(COURSE_DENIED);
+    const studentId = viewer.student.id;
+    const course = await this.prisma.course.findUniqueOrThrow({
+      where: { id: courseId },
+      select: {
+        school: { select: { currentYear: true, timezone: true } },
+        studyPlan: { select: { gradeMetric: { select: { maximum: true, minimumApproval: true } } } },
+        gradeBuckets: { select: { id: true, name: true, weight: true }, orderBy: { createdAt: 'asc' } },
+      },
+    });
+    const periods = await this.prisma.period.findMany({
+      where: { year: course.school.currentYear },
+      select: { id: true, name: true, startDate: true, endDate: true },
+      orderBy: { startDate: 'asc' },
+    });
+    let selected = pickCurrentPeriod(periods, schoolLocalTime(this.clock.now(), course.school.timezone).date);
+    if (periodId) {
+      selected = periods.find((p) => p.id === periodId) ?? null;
+      if (!selected) throw new BadRequestException(PERIOD_INVALID);
+    }
+
+    const metric = course.studyPlan.gradeMetric;
+    const scale = metric ? { maximum: num(metric.maximum), minimumApproval: num(metric.minimumApproval) } : null;
+    const grades = selected
+      ? await this.prisma.grade.findMany({
+          // Published only: students and parents never see drafts (BR-HOM-001.2).
+          where: { courseId, periodId: selected.id, published: true },
+          select: {
+            id: true,
+            title: true,
+            date: true,
+            bucketId: true,
+            bucket: { select: { name: true } },
+            studentGrades: { where: { studentId }, select: { score: true, excused: true, comments: true } },
+          },
+          orderBy: [{ date: 'desc' }, { title: 'asc' }],
+        })
+      : [];
+
+    const rows = grades.map((g) => {
+      const cell = g.studentGrades[0];
+      const excused = cell?.excused ?? false;
+      return {
+        id: g.id,
+        title: g.title,
+        bucketId: g.bucketId,
+        bucket: g.bucket.name,
+        date: g.date.toISOString(),
+        comment: cell?.comments ?? null,
+        score: excused || cell?.score === null || cell?.score === undefined ? null : num(cell.score),
+        excused,
+      };
+    });
+    const weights = new Map(course.gradeBuckets.map((b) => [b.id, num(b.weight)]));
+    const average = courseAverage(rows.map((r) => ({ bucketId: r.bucketId, weight: weights.get(r.bucketId) ?? 0, score: r.score })));
+
+    return {
+      periods: periods.map((p) => ({ id: p.id, name: p.name })),
+      periodId: selected?.id ?? null,
+      scale,
+      average,
+      band: courseBand(average, scale?.minimumApproval ?? null),
+      buckets: course.gradeBuckets.map((b) => ({
+        id: b.id,
+        name: b.name,
+        weight: num(b.weight),
+        average: meanOf(rows.filter((r) => r.bucketId === b.id).map((r) => r.score)),
+      })),
+      grades: rows.map((r) => ({ id: r.id, title: r.title, bucket: r.bucket, date: r.date, comment: r.comment, score: r.score, excused: r.excused })),
+    };
+  }
 }
+

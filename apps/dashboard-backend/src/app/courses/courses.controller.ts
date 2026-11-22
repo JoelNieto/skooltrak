@@ -5,7 +5,7 @@ import { ApiBearerAuth, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger'
 import { CourseAccessService } from './course-access.service';
 import { CoursePageService } from './course-page.service';
 import { CoursesMineService } from './courses-mine.service';
-import { CourseWork } from './entities/course-page.entity';
+import { CourseGradesSummary, CourseWork } from './entities/course-page.entity';
 import { MyCourses } from './entities/my-courses.entity';
 import { CoursesService } from './courses.service';
 import { CreateCourseInput } from './dto/create-course.input';
@@ -91,6 +91,20 @@ export class CoursesController {
   ): Promise<CourseWork> {
     const viewer = await this.access.viewer(req.user, id, studentId);
     return this.page.work(id, viewer);
+  }
+
+  @Get(':id/grades-summary')
+  @ApiOperation({ summary: "The student's grades in the course for one period (FR-ACA-001.14)" })
+  @ApiQuery({ name: 'periodId', required: false, description: 'Defaults to the current period' })
+  @ApiQuery({ name: 'studentId', required: false, description: 'Parents: a linked child enrolled in the course' })
+  async gradesSummary(
+    @Req() req: AuthenticatedRequest,
+    @Param('id') id: string,
+    @Query('periodId') periodId?: string,
+    @Query('studentId') studentId?: string,
+  ): Promise<CourseGradesSummary> {
+    const viewer = await this.access.viewer(req.user, id, studentId);
+    return this.page.gradesSummary(id, viewer, periodId);
   }
 
   @Get(':id')

@@ -4,13 +4,17 @@ import { RouterLink } from '@angular/router';
 import { CourseWork, CourseWorkItem, workDate, workPill, WORK_TYPES } from './course-work';
 
 /**
- * *Resumen* for students and parents (ACA-001 FR .12): the next 3 items of work and the course's
- * teacher. The grade summary joins it with the *Calificaciones* slice (S07).
+ * *Resumen* for students and parents (ACA-001 FR .12): the grade summary (projected), the next 3 items
+ * of work and the course's teacher.
  */
 @Component({
   selector: 'app-course-overview',
   imports: [Badge, Icon, RouterLink],
   template: `
+    <section aria-label="Resumen de calificaciones" class="mb-6">
+      <!-- FR .12: the grade summary from FR .14, without the table. -->
+      <ng-content />
+    </section>
     <div class="grid gap-6 md:grid-cols-[2fr_1fr]">
       <section aria-labelledby="overview-next">
         <div class="mb-2 flex items-center justify-between">

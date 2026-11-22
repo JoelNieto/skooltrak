@@ -7,7 +7,9 @@ import {
   Pagination,
   PaginatorV2,
   Toast,
+  UiIconName,
   UiInputGroup,
+  UI_ICONS,
   UiRowAction,
   UiRowActions,
   UiSortHeader,
@@ -25,6 +27,7 @@ import { FormsModule } from '@angular/forms';
 import { Prisma } from '@generated/prisma';
 
 import { filter, switchMap } from 'rxjs';
+import { DEFAULT_SUBJECT_ICON, SUBJECT_ICONS } from '@/shared';
 import { toFetchQueryRecord } from '../../core/fetch-query-params';
 import { PaginatedResponse } from '../../core/pagination-meta';
 import SubjectsForm from '../forms/subjects-form';
@@ -68,8 +71,10 @@ import SubjectsForm from '../forms/subjects-form';
       >
         <thead>
           <tr>
+            <th class="w-12"><span class="sr-only">Ícono</span></th>
             <th uiSortHeader="name" class="w-1/4">Nombre</th>
-            <th uiSortHeader="code" class="w-1/5">Código</th>
+            <th uiSortHeader="code" class="w-1/6">Código</th>
+            <th class="w-1/6">Área</th>
             <th uiSortHeader="createdAt">Creado</th>
             <th uiSortHeader="updatedAt">Actualizado</th>
             <th class="w-12"><span class="sr-only">Acciones</span></th>
@@ -77,19 +82,35 @@ import SubjectsForm from '../forms/subjects-form';
         </thead>
         @switch (subjectsList.phase()) {
           @case ('skeleton') {
-            <tbody uiTableSkeleton [rows]="pageSize()" [columns]="5"></tbody>
+            <tbody uiTableSkeleton [rows]="pageSize()" [columns]="7"></tbody>
           }
           @case ('error') {
             <tbody>
-              <tr uiTableError [columns]="5" (retry)="subjects.reload()"></tr>
+              <tr uiTableError [columns]="7" (retry)="subjects.reload()"></tr>
             </tbody>
           }
           @case ('ready') {
             <tbody>
               @for (subject of subjectsList.rows()?.data ?? []; track subject.id) {
                 <tr>
+                  <td>
+                    <span
+                      class="flex size-8 items-center justify-center rounded-lg bg-surface-2 text-ink"
+                      [title]="iconLabel(subject.icon)"
+                    >
+                      <ui-icon [name]="iconName(subject.icon)" class="text-lg" />
+                      <span class="sr-only">{{ iconLabel(subject.icon) }}</span>
+                    </span>
+                  </td>
                   <td>{{ subject.name }}</td>
                   <td>{{ subject.code }}</td>
+                  <td>
+                    @if (subject.area) {
+                      {{ subject.area }}
+                    } @else {
+                      <span class="text-ink-subtle">—</span>
+                    }
+                  </td>
                   <td>{{ subject.createdAt | date: 'short' }}</td>
                   <td>{{ subject.updatedAt | date: 'short' }}</td>
                   <td>
@@ -104,13 +125,13 @@ import SubjectsForm from '../forms/subjects-form';
                 @if (searchText()) {
                   <tr
                     uiTableEmpty
-                    [columns]="5"
+                    [columns]="7"
                     icon="search-x"
                     title="Sin resultados"
                     description="Ningún resultado coincide con la búsqueda."
                   ></tr>
                 } @else {
-                  <tr uiTableEmpty [columns]="5" icon="book-open" title="Aún no hay materias"></tr>
+                  <tr uiTableEmpty [columns]="7" icon="book-open" title="Aún no hay materias"></tr>
                 }
               }
             </tbody>
@@ -194,6 +215,16 @@ export default class Subjects {
     { id: 'edit', label: 'Editar', icon: 'pencil' },
     { id: 'delete', label: 'Eliminar', icon: 'trash-2', tone: 'danger' },
   ];
+
+  /** The subject's icon (ACA-001 FR .2), or the default one covers fall back to. */
+  protected iconName(icon: string | null): UiIconName {
+    return icon && icon in UI_ICONS ? (icon as UiIconName) : (DEFAULT_SUBJECT_ICON as UiIconName);
+  }
+
+  protected iconLabel(icon: string | null): string {
+    const name = icon ?? DEFAULT_SUBJECT_ICON;
+    return SUBJECT_ICONS.find((i) => i.name === name)?.label ?? name;
+  }
 
   protected onRowAction(action: string, subject: Prisma.SubjectGetPayload<false>): void {
     switch (action) {

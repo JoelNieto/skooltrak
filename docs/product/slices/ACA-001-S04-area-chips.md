@@ -40,7 +40,7 @@ Scenario: on the card
   - the admin backend's `Subject` entity gains `area`.
 - [x] **OpenAPI:** `bun run openapi`.
 - [x] **Angular:**
-  - the subject form's *Área*;
+  - the subject form's *Área*, and the admin subjects table's *Ícono* and *Área* columns;
   - `courses/course-areas.ts` (chips and filter);
   - the chips row and the area badge on *Mis cursos*.
 - [x] **Tests:**

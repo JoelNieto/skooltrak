@@ -4,8 +4,8 @@
 |---|---|
 | **FRD** | [ACA-001](../frd/ACA-001-course-experience.md) |
 | **Implements** | FR-ACA-001.4 (Próxima entrega, progress), .6; BR-ACA-001.7, .8, .10 |
-| **Status** | In review |
-| **Branch** | `feat/ACA-001-S03-progress` (on S02 #64, with S10 #63) |
+| **Status** | Done: #65 (2026-11-22) |
+| **Branch** | `feat/ACA-001-S03-progress` |
 | **Estimate** | 2 days |
 
 ## User-visible outcome

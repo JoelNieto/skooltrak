@@ -45,3 +45,44 @@ test.describe('Mis cursos @FR-ACA-001.4 @FR-ACA-001.5 @FR-ACA-001.6', () => {
     expect(res.status()).toBe(403);
   });
 });
+
+/**
+ * ACA-001-S05: a parent sees *Mis cursos* for the child chosen in the switcher (FR-ACA-001.8).
+ * `parent` is linked to Ana and Beto; Beto's only published score in `teacher`'s course is 2.
+ */
+test.describe('Mis cursos for parents @FR-ACA-001.8 @BR-ACA-001.2', () => {
+  test.use({ storageState: storageStatePath('parent') });
+  const [ANA, BETO, CARLA] = data.relatedStudents;
+
+  test("shows the chosen child's courses", async ({ page }) => {
+    await page.goto('/courses');
+    const switcher = page.getByRole('group', { name: 'Elegir hijo' });
+    await switcher.getByRole('button', { name: new RegExp(`^${BETO} `) }).click();
+    await expect(page.getByRole('heading', { name: `Cursos de ${BETO}` })).toBeVisible();
+    const card = page.getByRole('list', { name: 'Mis cursos' }).getByRole('link', { name: new RegExp(data.courses.teacherOwn.name) });
+    await expect(card).toContainText('2.0');
+    await expect(card).toContainText('En riesgo');
+
+    await switcher.getByRole('button', { name: new RegExp(`^${ANA} `) }).click();
+    await expect(page.getByRole('heading', { name: `Cursos de ${ANA}` })).toBeVisible();
+    await expect(card).toContainText('4.0');
+  });
+
+  test('refuses a child who is not linked', async ({ request }) => {
+    const login = await request.post('/api/v1/auth/login', { data: { email: personas.parent.email, password: E2E_PASSWORD } });
+    const headers = { Authorization: `Bearer ${((await login.json()) as { accessToken: string }).accessToken}` };
+    const teacherLogin = await request.post('/api/v1/auth/login', { data: { email: personas.teacher.email, password: E2E_PASSWORD } });
+    const teacher = { Authorization: `Bearer ${((await teacherLogin.json()) as { accessToken: string }).accessToken}` };
+    const courses = (await (
+      await request.get('/api/v1/courses', { headers: teacher, params: { search: data.courses.teacherOwn.name, pageSize: 10 } })
+    ).json()) as { data: { id: string; name: string }[] };
+    const id = courses.data.find((c) => c.name === data.courses.teacherOwn.name)?.id;
+    const book = (await (await request.get(`/api/v1/gradebook/${id}`, { headers: teacher })).json()) as {
+      rows: { student: { id: string; firstName: string } }[];
+    };
+    const carla = book.rows.find((r) => r.student.firstName === CARLA)?.student.id;
+    const res = await request.get('/api/v1/courses/mine', { headers, params: { studentId: carla as string } });
+    expect(res.status()).toBe(403);
+  });
+});
+

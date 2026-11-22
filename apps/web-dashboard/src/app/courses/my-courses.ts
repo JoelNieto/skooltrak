@@ -18,9 +18,11 @@ import {
 } from '#/ui';
 import { DecimalPipe } from '@angular/common';
 import { httpResource } from '@angular/common/http';
-import { Component, computed, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
+import Auth from '../auth/auth';
+import { ParentContext } from '../parent/parent-context.service';
 import { ALL_AREAS, areaChips, inArea } from './course-areas';
 
 /** `GET /api/v1/courses/mine` (ACA-001-S02, S03). */
@@ -51,14 +53,25 @@ interface MyCourses {
   };
 }
 
+/** `GET /api/v1/home/parent/children` (HOM-001 FR .18), shared with the parent home. */
+type ParentChild = {
+  studentId: string;
+  name: string;
+  organizationId: string;
+  classGroup: { id: string; name: string } | null;
+  school: { id: string; name: string };
+};
+type ParentChildren = { firstName: string; defaultStudentId: string | null; children: ParentChild[] };
+
 const BAND: Record<'AL_DIA' | 'EN_RIESGO', { label: string; tone: BadgeTone }> = {
   AL_DIA: { label: 'Al día', tone: 'success' },
   EN_RIESGO: { label: 'En riesgo', tone: 'danger' },
 };
 
 /**
- * A student's *Mis cursos* (ACA-001-S02, S03, FR .4 .5 .6): a stats row, then one card per enrolled
- * course with its schedule, teacher, period average, *Próxima entrega* and progress.
+ * A student's *Mis cursos* (ACA-001-S02–S04, FR .4–.7): a stats row, area chips, then one card per
+ * enrolled course with its schedule, teacher, period average, *Próxima entrega* and progress. Parents
+ * see the same for the child chosen in the switcher shared with the parent home (S05, FR .8).
  */
 @Component({
   selector: 'app-my-courses',
@@ -85,7 +98,7 @@ const BAND: Record<'AL_DIA' | 'EN_RIESGO', { label: string; tone: BadgeTone }> =
   template: `
     <ui-breadcrumbs [items]="[{ label: 'Inicio', link: '/' }, { label: 'Cursos' }]" />
     <div class="mb-4 flex flex-wrap items-end gap-3">
-      <h1 class="me-auto text-2xl font-semibold">Mis cursos</h1>
+      <h1 class="me-auto text-2xl font-semibold">{{ title() }}</h1>
       <label uiInputGroup class="w-64!">
         <ui-icon name="search" />
         <input type="search" placeholder="Buscar..." aria-label="Buscar curso" [(ngModel)]="search" />
@@ -101,6 +114,30 @@ const BAND: Record<'AL_DIA' | 'EN_RIESGO', { label: string; tone: BadgeTone }> =
       }
     </div>
 
+    @if (isParent()) {
+      @if (childrenRes.hasValue() && !children().length) {
+        <lib-empty-state
+          title="Sin hijos vinculados"
+          description="Vincula a tus hijos con su código de matrícula para ver sus cursos."
+          icon="users"
+        />
+      } @else if (children().length > 1) {
+        <div class="mb-4 flex flex-wrap gap-2" role="group" aria-label="Elegir hijo">
+          @for (child of children(); track child.studentId) {
+            <button
+              uiButton
+              size="sm"
+              type="button"
+              [variant]="child.studentId === childId() ? 'primary' : 'ghost'"
+              [attr.aria-pressed]="child.studentId === childId()"
+              (click)="selectChild(child)"
+            >
+              {{ child.name }}
+            </button>
+          }
+        </div>
+      }
+    }
     @if (mine.isLoading() && !mine.hasValue()) {
       <lib-loader />
     } @else if (mine.error()) {
@@ -266,11 +303,50 @@ export default class MyCoursesPage {
   protected readonly periodId = signal('');
   protected readonly search = signal('');
 
+  // ── ACA-001-S05: parents see the courses of the child chosen in the shared switcher (FR .8) ──
+  #auth = inject(Auth);
+  #ctx = inject(ParentContext);
+  protected readonly isParent = this.#auth.isParent;
+  protected readonly childrenRes = httpResource<ParentChildren>(() =>
+    this.isParent() ? '/api/v1/home/parent/children' : undefined,
+  );
+  protected readonly children = computed(() => this.childrenRes.value()?.children ?? []);
+  /** The context's child while still linked, else the parent home's default (BR-HOM-001.9). */
+  protected readonly childId = computed(() => {
+    const list = this.children();
+    const chosen = this.#ctx.selectedChild()?.studentId;
+    if (chosen && list.some((c) => c.studentId === chosen)) return chosen;
+    return this.childrenRes.value()?.defaultStudentId ?? list[0]?.studentId ?? null;
+  });
+  protected readonly title = computed(() => {
+    if (!this.isParent()) return 'Mis cursos';
+    const child = this.children().find((c) => c.studentId === this.childId());
+    return child ? `Cursos de ${child.name.split(' ')[0]}` : 'Cursos';
+  });
+
   protected readonly mine = httpResource<MyCourses>(() => {
     const params: Record<string, string> = {};
     if (this.periodId()) params['periodId'] = this.periodId();
+    if (this.isParent()) {
+      const childId = this.childId();
+      if (!childId) return undefined;
+      params['studentId'] = childId;
+    }
     return { url: '/api/v1/courses/mine', params };
   });
+
+  protected selectChild(child: ParentChild): void {
+    this.#ctx.select({
+      studentId: child.studentId,
+      name: child.name,
+      schoolId: child.school.id,
+      schoolName: child.school.name,
+      organizationId: child.organizationId,
+      classGroupName: child.classGroup?.name ?? null,
+    });
+    this.periodId.set('');
+    this.area.set(ALL_AREAS);
+  }
 
   /** BR-ACA-001.8: "Vencida desde lun 13 abr" / "Vence jue 16 abr, 12:00", in school time. */
   protected dueText(next: { dueAt: string; overdue: boolean }, timezone: string): string {

@@ -3345,7 +3345,7 @@ export class SkooltrakDashboardAPIService {
   }
 
 /**
- * @summary The student's course cards for one period (FR-ACA-001.4, .5)
+ * @summary A student's (or a parent's linked child's) course cards and stats for one period (FR-ACA-001.4–.8)
  */
  coursesControllerMine<TData = void>(params?: CoursesControllerMineParams, options?: HttpClientBodyOptions): Observable<TData>;
  coursesControllerMine<TData = void>(params?: CoursesControllerMineParams, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;

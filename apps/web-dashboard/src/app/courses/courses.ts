@@ -60,8 +60,8 @@ type CourseRow = {
   providers: [Pagination],
 
   template: `
-    @if (auth.isStudent()) {
-      <!-- ACA-001-S02: students get their Mis cursos; staff keep this list (FR .9 later). -->
+    @if (auth.isStudent() || auth.isParent()) {
+      <!-- ACA-001-S02, S05: students and parents get Mis cursos; staff keep this list (FR .9 later). -->
       <app-my-courses />
     } @else {
       <ui-breadcrumbs [items]="[{ label: 'Inicio', link: '/' }, { label: 'Cursos' }]" />
@@ -154,7 +154,7 @@ export default class Courses {
 
   protected coursesListResource = httpResource<PaginatedResponse<CourseRow>>(() => {
     const schoolId = this.#store.currentSchoolId();
-    if (!schoolId || this.auth.isStudent()) {
+    if (!schoolId || this.auth.isStudent() || this.auth.isParent()) {
       return undefined;
     }
     return {

@@ -35,10 +35,15 @@ export class CoursesController {
   }
 
   @Get('mine')
-  @ApiOperation({ summary: "The student's course cards for one period (FR-ACA-001.4, .5)" })
+  @ApiOperation({ summary: "A student's (or a parent's linked child's) course cards and stats for one period (FR-ACA-001.4–.8)" })
   @ApiQuery({ name: 'periodId', required: false, description: 'Defaults to the current period' })
-  mine(@Req() req: AuthenticatedRequest, @Query('periodId') periodId?: string): Promise<MyCourses> {
-    return this.mineService.mine(req.user, { periodId });
+  @ApiQuery({ name: 'studentId', required: false, description: 'Parents: a linked child (FR-ACA-001.8); ignored for students' })
+  mine(
+    @Req() req: AuthenticatedRequest,
+    @Query('periodId') periodId?: string,
+    @Query('studentId') studentId?: string,
+  ): Promise<MyCourses> {
+    return this.mineService.mine(req.user, { periodId, studentId });
   }
 
   @Get('count')

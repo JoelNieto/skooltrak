@@ -106,6 +106,8 @@ import Store from '../core/store';
 export default class CourseStudentGrades {
   public courseId = input.required<string>();
   public metric = input.required<DecimalToNumber<Prisma.GradeMetricGetPayload<undefined>>>();
+  /** Parents (ACA-001-S06): the child to show; students default to themselves. */
+  public studentId = input<string | null>(null);
   #store = inject(Store);
   #http = inject(HttpClient);
   public periodId = signal<string>('');
@@ -131,7 +133,7 @@ export default class CourseStudentGrades {
     params: () => ({
       courseId: this.courseId(),
       periodId: this.periodId(),
-      studentId: this.#store.currentStudentId(),
+      studentId: this.studentId() ?? this.#store.currentStudentId(),
     }),
     defaultValue: {
       average: 0,

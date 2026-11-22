@@ -84,7 +84,8 @@ test.describe('Gradebook entry @FR-ASM-001.4 @FR-ASM-001.6', () => {  test.use({
     await page.getByRole('tab', { name: 'Libro de calificaciones' }).click();
 
     await expect(cell(page, ANA, DRAFT)).toHaveValue('4.5');
-    await expect(cell(page, ANA, PUBLISHED)).toHaveValue('4'); // published cells are inputs too (S04)
+    // Published cells are inputs too (S04). Not their value: the publish spec corrects Ana's score in parallel.
+    await expect(cell(page, ANA, PUBLISHED)).toBeEditable();
     await expect(page.getByText('Escala 1–5 · nota mínima 3 · escribe EX para exentar · Tab pasa al siguiente estudiante')).toBeVisible();
 
     await cell(page, BETO, DRAFT).fill('3');

@@ -51,7 +51,9 @@ import type {
   CommunicationControllerListInboxBroadcastsParams,
   CoursesControllerCountParams,
   CoursesControllerFindAllParams,
+  CoursesControllerFindOneParams,
   CoursesControllerMineParams,
+  CoursesControllerWorkParams,
   CreateAssignmentInput,
   CreateAssignmentSubmissionInput,
   CreateAttendanceSessionInput,
@@ -3553,36 +3555,82 @@ export class SkooltrakDashboardAPIService {
   }
 
 /**
- * @summary Get course by id
+ * @summary The student's work in the course, with status (FR-ACA-001.12, .13)
  */
- coursesControllerFindOne<TData = void>(id: string, options?: HttpClientBodyOptions): Observable<TData>;
- coursesControllerFindOne<TData = void>(id: string, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
- coursesControllerFindOne<TData = void>(id: string, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
+ coursesControllerWork<TData = void>(id: string,
+    params?: CoursesControllerWorkParams, options?: HttpClientBodyOptions): Observable<TData>;
+ coursesControllerWork<TData = void>(id: string,
+    params?: CoursesControllerWorkParams, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
+ coursesControllerWork<TData = void>(id: string,
+    params?: CoursesControllerWorkParams, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
+  coursesControllerWork<TData = void>(
+    id: string,
+    params?: CoursesControllerWorkParams, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
+    const filteredParams = filterParams({...params, ...options?.params}, new Set<string>([]));
+
+    if (options?.observe === 'events') {
+      return this.http.get<TData>(
+      `/api/v1/courses/${id}/work`,{
+    ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'events',
+        params: filteredParams,}
+    );
+    }
+
+    if (options?.observe === 'response') {
+      return this.http.get<TData>(
+      `/api/v1/courses/${id}/work`,{
+    ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'response',
+        params: filteredParams,}
+    );
+    }
+
+    return this.http.get<TData>(
+      `/api/v1/courses/${id}/work`,{
+    ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'body',
+        params: filteredParams,}
+    );
+  }
+
+/**
+ * @summary Get course by id, for the callers BR-ACA-001.3 allows (FR-ACA-001.10)
+ */
+ coursesControllerFindOne<TData = void>(id: string,
+    params?: CoursesControllerFindOneParams, options?: HttpClientBodyOptions): Observable<TData>;
+ coursesControllerFindOne<TData = void>(id: string,
+    params?: CoursesControllerFindOneParams, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
+ coursesControllerFindOne<TData = void>(id: string,
+    params?: CoursesControllerFindOneParams, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
   coursesControllerFindOne<TData = void>(
-    id: string, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
+    id: string,
+    params?: CoursesControllerFindOneParams, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
+    const filteredParams = filterParams({...params, ...options?.params}, new Set<string>([]));
+
     if (options?.observe === 'events') {
       return this.http.get<TData>(
       `/api/v1/courses/${id}`,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+    ...(options as Omit<NonNullable<typeof options>, 'observe'>),
         observe: 'events',
-      }
+        params: filteredParams,}
     );
     }
 
     if (options?.observe === 'response') {
       return this.http.get<TData>(
       `/api/v1/courses/${id}`,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+    ...(options as Omit<NonNullable<typeof options>, 'observe'>),
         observe: 'response',
-      }
+        params: filteredParams,}
     );
     }
 
     return this.http.get<TData>(
       `/api/v1/courses/${id}`,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+    ...(options as Omit<NonNullable<typeof options>, 'observe'>),
         observe: 'body',
-      }
+        params: filteredParams,}
     );
   }
 

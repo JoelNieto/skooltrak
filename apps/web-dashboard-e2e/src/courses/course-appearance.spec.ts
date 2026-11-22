@@ -42,7 +42,7 @@ async function pageAs(browser: Browser, persona: 'admin' | 'student') {
   return context.newPage();
 }
 
-/** The cover of the course card whose title is `subjectName`. */
+/** The cover of the course card whose title is `subjectName` (staff) or the course's name (students). */
 const coverOf = (page: import('@playwright/test').Page, subjectName: string): Locator =>
   page.getByRole('link').filter({ has: page.getByRole('heading', { name: subjectName, exact: true }) }).locator('ui-course-cover');
 
@@ -115,11 +115,15 @@ test.describe('Course color and subject icon @FR-ACA-001.1 @FR-ACA-001.2', () =>
   test('the student sees them on Cursos and in the course header', async ({ browser }) => {
     const page = await pageAs(browser, 'student');
     await page.goto('/courses');
-    const cover = coverOf(page, SUBJECT);
+    // Students' Mis cursos cards (ACA-001-S02) are titled with the course's name.
+    const cover = coverOf(page, data.courses.teacherOwn.name);
     await expect(cover).toHaveAttribute('data-color', 'ROSE');
     expect(await coverIconPath(cover)).toBe(firstPath(Sigma));
 
-    await page.getByRole('link').filter({ has: page.getByRole('heading', { name: SUBJECT, exact: true }) }).click();
+    await page
+      .getByRole('link')
+      .filter({ has: page.getByRole('heading', { name: data.courses.teacherOwn.name, exact: true }) })
+      .click();
     const header = page.locator('ui-course-cover[data-color="ROSE"]');
     await expect(header).toBeVisible();
     await expect(page.locator('.course-color-dot')).toHaveCSS('background-color', 'rgb(190, 24, 93)');

@@ -3086,14 +3086,23 @@
         ]
       }
     },
-    "/api/v1/courses/{id}": {
+    "/api/v1/courses/{id}/work": {
       "get": {
-        "operationId": "CoursesController_findOne",
+        "operationId": "CoursesController_work",
         "parameters": [
           {
             "name": "id",
             "required": true,
             "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "studentId",
+            "required": false,
+            "in": "query",
+            "description": "Parents: a linked child enrolled in the course",
             "schema": {
               "type": "string"
             }
@@ -3109,7 +3118,45 @@
             "bearer": []
           }
         ],
-        "summary": "Get course by id",
+        "summary": "The student's work in the course, with status (FR-ACA-001.12, .13)",
+        "tags": [
+          "courses"
+        ]
+      }
+    },
+    "/api/v1/courses/{id}": {
+      "get": {
+        "operationId": "CoursesController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "studentId",
+            "required": false,
+            "in": "query",
+            "description": "Parents: a linked child enrolled in the course",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get course by id, for the callers BR-ACA-001.3 allows (FR-ACA-001.10)",
         "tags": [
           "courses"
         ]

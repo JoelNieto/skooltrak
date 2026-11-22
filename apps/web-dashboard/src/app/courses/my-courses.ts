@@ -35,6 +35,7 @@ interface MyCourses {
     id: string;
     name: string;
     color: string;
+    coverUrl: string | null;
     subject: { name: string; icon: string | null; area: string | null };
     teacher: { name: string; initials: string; color: string | null } | null;
     schedule: string | null;
@@ -206,7 +207,7 @@ const BAND: Record<'AL_DIA' | 'EN_RIESGO', { label: string; tone: BadgeTone }> =
           @for (course of visible(); track course.id) {
             <li>
               <a uiCard [routerLink]="['/courses', course.id]" class="group block h-full overflow-hidden">
-                <ui-course-cover [color]="course.color" [icon]="course.subject.icon">
+                <ui-course-cover [color]="course.color" [icon]="course.subject.icon" [image]="course.coverUrl">
                   @if (course.subject.area) {
                     <span uiBadge size="sm" class="absolute top-2 right-2 bg-surface-1 text-ink-strong">{{
                       course.subject.area

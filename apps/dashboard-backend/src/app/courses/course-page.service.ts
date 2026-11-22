@@ -6,6 +6,7 @@ import { CLOCK, Clock, schoolLocalTime } from '../home/home-time';
 import { workStatus } from '../home/student-home.service';
 import { PrismaService } from '../prisma.service';
 import { CourseViewer } from './course-access.service';
+import { CourseCoverStorage } from './course-cover-storage';
 import { enrolledIn } from './course-roster';
 import { courseSchedule } from './course-schedule';
 import { courseBand, PERIOD_INVALID } from './courses-mine.service';
@@ -28,6 +29,7 @@ export class CoursePageService {
   constructor(
     private readonly prisma: PrismaService,
     @Inject(CLOCK) private readonly clock: Clock,
+    private readonly covers: CourseCoverStorage,
   ) {}
 
   /**
@@ -58,6 +60,10 @@ export class CoursePageService {
 
     return {
       ...withResolvedColor(course),
+      /** FR-ACA-001.3: presigned; null keeps the color cover. */
+      coverUrl: await this.covers.url(course.coverKey),
+      /** FR-ACA-001.3: the course's teacher and admins may set its color and cover. */
+      canCustomize: viewer.kind === 'STAFF',
       viewer: { kind: viewer.kind, student: viewer.student },
       classGroup: group ?? null,
       schedule,

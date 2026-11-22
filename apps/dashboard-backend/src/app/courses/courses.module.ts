@@ -3,6 +3,8 @@ import { PrismaModule } from '../prisma.module';
 import { CoursesController } from './courses.controller';
 import { CLOCK, systemClock } from '../home/home-time';
 import { CourseAccessService } from './course-access.service';
+import { CourseAppearanceService } from './course-appearance.service';
+import { CourseCoverStorage } from './course-cover-storage';
 import { CoursePageService } from './course-page.service';
 import { CoursesMineService } from './courses-mine.service';
 import { CoursesService } from './courses.service';
@@ -14,6 +16,8 @@ import { CoursesService } from './courses.service';
     CoursesMineService,
     CourseAccessService,
     CoursePageService,
+    CourseAppearanceService,
+    CourseCoverStorage,
     { provide: CLOCK, useValue: systemClock },
   ],
   imports: [PrismaModule],

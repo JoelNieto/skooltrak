@@ -1,7 +1,23 @@
 import { FetchDataQueryDto } from '@/api-contracts';
 import { AuthenticatedRequest, BetterAuthGuard, Perm, PermissionsGuard, RequirePermissions } from '@/auth';
-import { Body, Controller, Delete, Get, Param, Patch, Post, Query, Req, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Query,
+  Req,
+  UploadedFile,
+  UseGuards,
+  UseInterceptors,
+} from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
+import { CourseAppearanceService, UploadedCover } from './course-appearance.service';
+import { CourseAppearanceInput } from './dto/course-appearance.input';
 import { CourseAccessService } from './course-access.service';
 import { CoursePageService } from './course-page.service';
 import { CoursesMineService } from './courses-mine.service';
@@ -22,6 +38,7 @@ export class CoursesController {
     private readonly mineService: CoursesMineService,
     private readonly access: CourseAccessService,
     private readonly page: CoursePageService,
+    private readonly appearance: CourseAppearanceService,
   ) {}
 
   @Post()
@@ -91,6 +108,31 @@ export class CoursesController {
   ): Promise<CourseWork> {
     const viewer = await this.access.viewer(req.user, id, studentId);
     return this.page.work(id, viewer);
+  }
+
+  @Patch(':id/appearance')
+  @RequirePermissions(Perm.CUSTOMIZE_COURSES)
+  @ApiOperation({ summary: "Set a course's color: its teacher or an admin (FR-ACA-001.3, BR .12)" })
+  setAppearance(@Req() req: AuthenticatedRequest, @Param('id') id: string, @Body() input: CourseAppearanceInput) {
+    return this.appearance.setColor(req.user, id, input.color ?? null);
+  }
+
+  @Post(':id/cover')
+  @RequirePermissions(Perm.CUSTOMIZE_COURSES)
+  // The 2 MB rule answers 400 in the service; this only stops absurd uploads early.
+  @UseInterceptors(FileInterceptor('file', { limits: { fileSize: 10 * 1024 * 1024, files: 1 } }))
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({ schema: { type: 'object', properties: { file: { type: 'string', format: 'binary' } } } })
+  @ApiOperation({ summary: 'Upload the cover photo: JPEG, PNG or WebP, at most 2 MB (FR-ACA-001.3, BR .12)' })
+  uploadCover(@Req() req: AuthenticatedRequest, @Param('id') id: string, @UploadedFile() file?: UploadedCover) {
+    return this.appearance.uploadCover(req.user, id, file);
+  }
+
+  @Delete(':id/cover')
+  @RequirePermissions(Perm.CUSTOMIZE_COURSES)
+  @ApiOperation({ summary: 'Remove the cover photo (FR-ACA-001.3, BR .12)' })
+  removeCover(@Req() req: AuthenticatedRequest, @Param('id') id: string) {
+    return this.appearance.removeCover(req.user, id);
   }
 
   @Get(':id/participants')

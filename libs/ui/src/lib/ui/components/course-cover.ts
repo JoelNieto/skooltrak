@@ -12,7 +12,8 @@ export function courseColorVar(color: CourseColorKey | string | null | undefined
 }
 
 /**
- * A course's cover when it has no photo: its color tag with its subject's icon (ACA-001 FR .1).
+ * A course's cover: its color tag with its subject's icon (ACA-001 FR .1), or its photo when it has
+ * one (`[image]`, FR .3).
  *
  *   <ui-course-cover [color]="course.color" [icon]="course.subject?.icon" />           card: full width, 128px
  *   <ui-course-cover variant="tile" [color]="course.color" [icon]="course.subject?.icon" />  72px square
@@ -35,7 +36,10 @@ export function courseColorVar(color: CourseColorKey | string | null | undefined
     '[attr.data-color]': 'colorKey()',
   },
   template: `
-    @if (variant() === 'card') {
+    @if (image()) {
+      <!-- FR .3: a cover photo replaces the color cover; the color stays as the course's dot. -->
+      <img [src]="image()" alt="" class="ui-course-cover__photo absolute inset-0 size-full object-cover" />
+    } @else if (variant() === 'card') {
       <ui-icon
         [name]="iconName()"
         class="ui-course-cover__watermark pointer-events-none absolute -right-7 -bottom-16 text-[200px] opacity-20"
@@ -53,6 +57,8 @@ export class CourseCover {
   /** The subject's icon (SUBJECT_ICONS); null or unknown shows "book-open". */
   readonly icon = input<string | null | undefined>(null);
   readonly variant = input<CourseCoverVariant>('card');
+  /** The course's cover photo URL (ACA-001 FR .3); when set it replaces the color and icon. */
+  readonly image = input<string | null | undefined>(null);
 
   protected readonly colorKey = computed<CourseColorKey>(() => {
     const color = this.color();

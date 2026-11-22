@@ -128,11 +128,12 @@ function setup(opts: { student?: object | null; now?: Date } = {}) {
       }),
     },
   };
-  const service = new CoursesMineService(prisma as never, { now: () => opts.now ?? new Date('2026-04-15T15:00:00Z') });
+  const service = new CoursesMineService(prisma as never, { now: () => opts.now ?? new Date('2026-04-15T15:00:00Z') }, NO_COVERS);
   return { prisma, service };
 }
 
 const ana = { userId: 'u-ana', organizationId: 'org-1', role: 'STUDENT' } as never;
+const NO_COVERS = { url: async () => null } as never;
 
 describe('CoursesMineService (ACA-001-S02)', () => {
   it("lists the student's courses by subject with schedule, teacher and color @FR-ACA-001.4", async () => {

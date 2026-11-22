@@ -7,6 +7,7 @@ import { addDays, CLOCK, Clock, localMidnight, schoolLocalTime } from '../home/h
 import { workStatus } from '../home/student-home.service';
 import { StudentWorkStatus } from '../home/entities/student-home.entity';
 import { PrismaService } from '../prisma.service';
+import { CourseCoverStorage } from './course-cover-storage';
 import { courseSchedule, scheduleText } from './course-schedule';
 import { enrolledCourses } from './course-roster';
 import { MyCourseBand, MyCourseNext, MyCourses } from './entities/my-courses.entity';
@@ -65,6 +66,7 @@ export class CoursesMineService {
   constructor(
     private readonly prisma: PrismaService,
     @Inject(CLOCK) private readonly clock: Clock,
+    private readonly covers: CourseCoverStorage,
   ) {}
 
   /**
@@ -122,6 +124,7 @@ export class CoursesMineService {
         id: true,
         name: true,
         color: true,
+        coverKey: true,
         subject: { select: { name: true, icon: true, area: true } },
         teacher: { select: { firstName: true, fatherName: true, user: { select: { color: true } } } },
         studyPlan: { select: { gradeMetric: { select: { maximum: true, minimumApproval: true } } } },
@@ -196,6 +199,7 @@ export class CoursesMineService {
     });
     const inSelected = (i: WorkItem) => !!selected && i.dueAt >= selected.startDate && i.dueAt <= selected.endDate;
 
+    const coverUrls = new Map(await Promise.all(courses.map(async (c) => [c.id, await this.covers.url(c.coverKey)] as const)));
     const cards = courses.map((course) => {
       const metric = course.studyPlan.gradeMetric;
       const scale = metric ? { maximum: num(metric.maximum), minimumApproval: num(metric.minimumApproval) } : null;
@@ -207,6 +211,7 @@ export class CoursesMineService {
         id: course.id,
         name: course.name,
         color: resolveCourseColor(course.id, course.color),
+        coverUrl: coverUrls.get(course.id) ?? null,
         subject: { name: course.subject.name, icon: course.subject.icon, area: course.subject.area },
         teacher: teacher
           ? {

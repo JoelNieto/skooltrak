@@ -20,6 +20,7 @@ export class Course {
     shortName: string;
 
     color: CourseColor | null;
+    coverKey: string | null;
 
     organizationId: string;
 

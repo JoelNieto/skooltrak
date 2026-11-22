@@ -139,7 +139,7 @@ describe('CourseAccessService.viewer (BR-ACA-001.3)', () => {
 });
 
 describe('CoursePageService.work (FR-ACA-001.12, .13)', () => {
-  const page = () => new CoursePageService(prismaFake() as never, { now: () => new Date('2026-04-15T12:00:00Z') });
+  const page = () => new CoursePageService(prismaFake() as never, { now: () => new Date('2026-04-15T12:00:00Z') }, { url: async () => null } as never);
   const ana = { kind: 'STUDENT' as const, organizationId: 'org-1', student: { id: 'S-ana', firstName: 'Ana', classGroup: { id: 'G7A', name: '7°A' } } };
 
   it('splits upcoming (soonest first) and past (most recent first), and counts what is pending', async () => {
@@ -163,7 +163,7 @@ describe('CoursePageService.work (FR-ACA-001.12, .13)', () => {
 });
 
 describe('CoursePageService.gradesSummary (FR-ACA-001.14)', () => {
-  const page = () => new CoursePageService(prismaFake() as never, { now: () => new Date('2026-04-15T12:00:00Z') });
+  const page = () => new CoursePageService(prismaFake() as never, { now: () => new Date('2026-04-15T12:00:00Z') }, { url: async () => null } as never);
   const ana = { kind: 'STUDENT' as const, organizationId: 'org-1', student: { id: 'S-ana', firstName: 'Ana', classGroup: { id: 'G7A', name: '7°A' } } };
 
   it('averages the period, bands it, and gives one bar per category @BR-ACA-001.5', async () => {
@@ -201,7 +201,7 @@ describe('CoursePageService.gradesSummary (FR-ACA-001.14)', () => {
 });
 
 describe('CoursePageService.participants (FR-ACA-001.15, BR .13)', () => {
-  const page = () => new CoursePageService(prismaFake() as never, { now: () => new Date('2026-04-15T12:00:00Z') });
+  const page = () => new CoursePageService(prismaFake() as never, { now: () => new Date('2026-04-15T12:00:00Z') }, { url: async () => null } as never);
   const student = { id: 'S-ana', firstName: 'Ana', classGroup: { id: 'G7A', name: '7°A' } };
 
   it("a student sees the course teacher, their homeroom teacher, and classmates' names only", async () => {

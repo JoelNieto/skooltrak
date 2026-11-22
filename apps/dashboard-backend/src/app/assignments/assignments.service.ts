@@ -1,3 +1,4 @@
+import { Prisma } from '@generated/prisma';
 import { Injectable } from '@nestjs/common';
 import { ChatSyncService } from '../chats/chat-sync.service';
 import { PrismaService } from '../prisma.service';
@@ -11,11 +12,13 @@ export class AssignmentsService {
     private readonly chatSync: ChatSyncService,
   ) {}
 
-  async create(createAssignmentInput: CreateAssignmentInput) {
+  /** `schoolId` comes from the course, never from the caller. */
+  async create(createAssignmentInput: CreateAssignmentInput, schoolId: string) {
     const { groupDates, ...assignmentData } = createAssignmentInput;
     const assignment = await this.prisma.assignment.create({
       data: {
         ...assignmentData,
+        schoolId,
         dates: groupDates?.length
           ? {
               create: groupDates,
@@ -32,15 +35,17 @@ export class AssignmentsService {
     return assignment;
   }
 
-  findAll() {
+  findAll(organizationId: string) {
     return this.prisma.assignment.findMany({
+      where: { course: { organizationId } },
       include: { course: true, teacher: true, dates: { include: { classGroup: true } } },
     });
   }
 
-  findAssignmentBySchoolId(schoolId: string, startDate: Date, endDate: Date) {
+  /** `classGroupIds`: only assignments dated for these groups; undefined means all. */
+  findAssignmentBySchoolId(schoolId: string, startDate: Date, endDate: Date, classGroupIds?: string[]) {
     return this.prisma.assignment.findMany({
-      where: { schoolId, date: { gte: startDate, lte: endDate } },
+      where: { schoolId, date: { gte: startDate, lte: endDate }, ...datedFor(classGroupIds) },
       include: {
         course: { include: { subject: true, studyPlan: true } },
         teacher: true,
@@ -50,30 +55,25 @@ export class AssignmentsService {
     });
   }
 
-  findAssignmentByCourseId(courseId: string, startDate: Date, endDate: Date) {
+  findAssignmentByCourseId(courseId: string, startDate: Date, endDate: Date, classGroupIds?: string[]) {
     return this.prisma.assignment.findMany({
-      where: { courseId, date: { gte: startDate, lte: endDate } },
-      include: { course: true, teacher: true, dates: { include: { classGroup: true } } },
+      where: { courseId, date: { gte: startDate, lte: endDate }, ...datedFor(classGroupIds) },
+      include: { course: true, teacher: true, dates: { where: inGroups(classGroupIds), include: { classGroup: true } } },
       orderBy: { date: 'asc' },
     });
   }
 
   /**
    * Find assignment dates by school ID for calendar display.
-   * If classGroupId is provided, filters to only that group's dates (for students).
-   * Otherwise returns all assignment dates (for teachers/admins).
+   * `classGroupIds`: only these groups' dates (students, parents, or a chosen group); undefined
+   * means every group (teachers, admins).
    */
-  findAssignmentDatesBySchoolId(
-    schoolId: string,
-    startDate: Date,
-    endDate: Date,
-    classGroupId?: string,
-  ) {
+  findAssignmentDatesBySchoolId(schoolId: string, startDate: Date, endDate: Date, classGroupIds?: string[]) {
     return this.prisma.assignmentDate.findMany({
       where: {
         date: { gte: startDate, lte: endDate },
         assignment: { schoolId },
-        ...(classGroupId ? { classGroupId } : {}),
+        ...inGroups(classGroupIds),
       },
       include: {
         classGroup: true,
@@ -87,20 +87,14 @@ export class AssignmentsService {
 
   /**
    * Find assignment dates by course ID for calendar display.
-   * If classGroupId is provided, filters to only that group's dates (for students).
-   * Otherwise returns all assignment dates (for teachers/admins).
+   * `classGroupIds`: as for the school calendar.
    */
-  findAssignmentDatesByCourseId(
-    courseId: string,
-    startDate: Date,
-    endDate: Date,
-    classGroupId?: string,
-  ) {
+  findAssignmentDatesByCourseId(courseId: string, startDate: Date, endDate: Date, classGroupIds?: string[]) {
     return this.prisma.assignmentDate.findMany({
       where: {
         date: { gte: startDate, lte: endDate },
         assignment: { courseId },
-        ...(classGroupId ? { classGroupId } : {}),
+        ...inGroups(classGroupIds),
       },
       include: {
         classGroup: true,
@@ -112,10 +106,11 @@ export class AssignmentsService {
     });
   }
 
-  findOne(id: string) {
+  /** `classGroupIds`: keep only these groups' dates; undefined keeps every date. */
+  findOne(id: string, classGroupIds?: string[]) {
     return this.prisma.assignment.findUnique({
       where: { id },
-      include: { course: true, teacher: true, dates: { include: { classGroup: true } } },
+      include: { course: true, teacher: true, dates: { where: inGroups(classGroupIds), include: { classGroup: true } } },
     });
   }
 
@@ -123,7 +118,8 @@ export class AssignmentsService {
     const input = updateAssignmentInput as UpdateAssignmentInput & {
       groupDates?: { date: Date; classGroupId: string }[];
     };
-    const { id: _id, groupDates, ...rest } = input;
+    // The course and school never change (the caller's access was checked against them).
+    const { id: _id, groupDates, courseId: _courseId, schoolId: _schoolId, ...rest } = input;
     const updateData: Record<string, unknown> = { ...rest };
     if (groupDates?.length) {
       (updateData as { dates?: { create: unknown[] } }).dates = { create: groupDates };
@@ -146,4 +142,12 @@ export class AssignmentsService {
   remove(id: string) {
     return this.prisma.assignment.delete({ where: { id } });
   }
+}
+
+function inGroups(classGroupIds?: string[]): Prisma.AssignmentDateWhereInput {
+  return classGroupIds ? { classGroupId: { in: classGroupIds } } : {};
+}
+
+function datedFor(classGroupIds?: string[]): Prisma.AssignmentWhereInput {
+  return classGroupIds ? { dates: { some: inGroups(classGroupIds) } } : {};
 }

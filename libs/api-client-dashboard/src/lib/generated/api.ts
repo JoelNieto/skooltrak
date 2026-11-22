@@ -6201,7 +6201,7 @@ if(coursesControllerUploadCoverBody.file !== undefined) {
   }
 
 /**
- * @summary List assignments
+ * @summary List the organization's assignments
  */
  assignmentsControllerFindAll<TData = void>( options?: HttpClientBodyOptions): Observable<TData>;
  assignmentsControllerFindAll<TData = void>( options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;

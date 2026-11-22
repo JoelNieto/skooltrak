@@ -5912,6 +5912,11 @@
             "description": ""
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "summary": "Create assignment",
         "tags": [
           "assignments"
@@ -5925,7 +5930,12 @@
             "description": ""
           }
         },
-        "summary": "List assignments",
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List the organization's assignments",
         "tags": [
           "assignments"
         ]
@@ -5948,6 +5958,11 @@
             "description": ""
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "summary": "Update assignment",
         "tags": [
           "assignments"
@@ -5988,6 +6003,11 @@
             "description": ""
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "summary": "Assignments by school and date range",
         "tags": [
           "assignments"
@@ -6028,6 +6048,11 @@
             "description": ""
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "summary": "Assignments by course and date range",
         "tags": [
           "assignments"
@@ -6076,6 +6101,11 @@
             "description": ""
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "summary": "Assignment dates by school",
         "tags": [
           "assignments"
@@ -6124,6 +6154,11 @@
             "description": ""
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "summary": "Assignment dates by course",
         "tags": [
           "assignments"
@@ -6148,6 +6183,11 @@
             "description": ""
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "summary": "Get assignment by id",
         "tags": [
           "assignments"
@@ -6170,6 +6210,11 @@
             "description": ""
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "summary": "Delete assignment",
         "tags": [
           "assignments"

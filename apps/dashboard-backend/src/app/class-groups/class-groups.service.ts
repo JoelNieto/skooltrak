@@ -14,9 +14,11 @@ export class ClassGroupsService {
     });
   }
 
-  async findAll(fetchDataInput: FetchDataQueryDto) {
+  /** `organizationId`: the caller's; the list never leaves it. */
+  async findAll(fetchDataInput: FetchDataQueryDto, organizationId: string) {
     const { skip, page, pageSize, schoolId, search, studyPlanId, teacherId } = fetchDataInput;
     let where: Prisma.ClassGroupWhereInput = {
+      organizationId,
       schoolId,
       studyPlanId,
       teacherId,
@@ -47,9 +49,10 @@ export class ClassGroupsService {
     return new PaginatedResponseDto(data, total, page, pageSize);
   }
 
-  count(fetchDataInput: FetchDataQueryDto) {
+  count(fetchDataInput: FetchDataQueryDto, organizationId: string) {
     const { schoolId, search, studyPlanId } = fetchDataInput;
     let where: Prisma.ClassGroupWhereInput = {
+      organizationId,
       schoolId,
       studyPlanId,
     };
@@ -143,7 +146,8 @@ export class ClassGroupsService {
   }
 
   update(id: string, updateClassGroupInput: UpdateClassGroupInput) {
-    const { name, studyPlanId, teacherId, active, organizationId, schoolId } = updateClassGroupInput;
+    // The organization never changes (the caller's access was checked against it).
+    const { name, studyPlanId, teacherId, active, schoolId } = updateClassGroupInput;
 
     const data: Prisma.ClassGroupUpdateInput = {};
     if (name !== undefined) data.name = name;
@@ -153,9 +157,6 @@ export class ClassGroupsService {
     }
     if (teacherId !== undefined) {
       data.teacher = teacherId ? { connect: { id: teacherId } } : { disconnect: true };
-    }
-    if (organizationId !== undefined) {
-      data.organization = { connect: { id: organizationId } };
     }
     if (schoolId !== undefined) {
       data.school = { connect: { id: schoolId } };

@@ -24,3 +24,32 @@ export async function assertSchoolInOrganization(
   if (school.organizationId !== organizationId) throw new ForbiddenException(SCHOOL_DENIED);
   return organizationId;
 }
+
+const ADMIN_ROLES = new Set(['ORG_ADMIN', 'ADMIN', 'SYSADMIN']);
+
+/**
+ * Throws 403 (`message`) unless the caller is an admin of the course's organization or the course's
+ * teacher. Returns the course.
+ */
+export async function assertCourseStaff(
+  prisma: PrismaService,
+  user: AuthUserContext | undefined,
+  courseId: string,
+  message: string,
+): Promise<{ id: string; organizationId: string; schoolId: string; teacherId: string | null }> {
+  const course = await prisma.course.findUnique({
+    where: { id: courseId },
+    select: { id: true, organizationId: true, schoolId: true, teacherId: true },
+  });
+  if (!course) throw new NotFoundException('Curso no encontrado');
+  if (!user?.userId || user.organizationId !== course.organizationId) throw new ForbiddenException(message);
+  if (ADMIN_ROLES.has(user.role?.toUpperCase() ?? '')) return course;
+  if (course.teacherId) {
+    const teacher = await prisma.teacher.findFirst({
+      where: { userId: user.userId, organizationId: course.organizationId },
+      select: { id: true },
+    });
+    if (teacher?.id === course.teacherId) return course;
+  }
+  throw new ForbiddenException(message);
+}

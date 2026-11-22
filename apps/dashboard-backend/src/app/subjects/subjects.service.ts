@@ -82,6 +82,7 @@ export class SubjectsService {
         name: createSubjectInput.name,
         code,
         icon: createSubjectInput.icon ?? null,
+        area: cleanArea(createSubjectInput.area),
         organizationId,
       },
       include: { organization: true },
@@ -141,10 +142,10 @@ export class SubjectsService {
   async update(id: string, updateSubjectInput: UpdateSubjectInput) {
     await this.assertInOrganization(id);
     // Only the editable fields; a subject never moves to another organization.
-    const { name, code, icon } = updateSubjectInput;
+    const { name, code, icon, area } = updateSubjectInput;
     return this.prisma.subject.update({
       where: { id },
-      data: { name, code, icon },
+      data: { name, code, icon, ...(area !== undefined ? { area: cleanArea(area) } : {}) },
     });
   }
 
@@ -152,4 +153,10 @@ export class SubjectsService {
     await this.assertInOrganization(id);
     return this.prisma.subject.delete({ where: { id } });
   }
+}
+
+/** ACA-001 BR .14: areas are trimmed; an empty one is no area ("Otras"). */
+export function cleanArea(area: string | null | undefined): string | null {
+  const trimmed = area?.trim();
+  return trimmed ? trimmed : null;
 }

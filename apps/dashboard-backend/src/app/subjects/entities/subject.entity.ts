@@ -7,6 +7,7 @@ export class Subject
     code: string;
     name: string;
     icon: string | null;
+    area: string | null;
     organization: Organization;
     organizationId: string;
     createdAt: Date;

@@ -33,3 +33,48 @@ export class CourseWork {
   /** Before now, most recent first. */
   past: CourseWorkItem[];
 }
+
+/** `GET /v1/courses/:id/grades-summary` (ACA-001-S07, FR .14). Published grades only (BR-HOM-001.2). */
+export class CourseGradesPeriod {
+  id: string;
+  name: string;
+}
+
+export class CourseGradesScale {
+  maximum: number;
+  minimumApproval: number;
+}
+
+export class CourseGradesBucket {
+  id: string;
+  name: string;
+  weight: number;
+  /** Mean of the student's scored cells in this category; null without one. */
+  average: number | null;
+}
+
+export class CourseGradesRow {
+  id: string;
+  title: string;
+  bucket: string;
+  date: string;
+  /** The teacher's comment on the student's cell. */
+  comment: string | null;
+  score: number | null;
+  excused: boolean;
+}
+
+export class CourseGradesSummary {
+  periods: CourseGradesPeriod[];
+  periodId: string | null;
+  /** Null: "Escala de notas no configurada". */
+  scale: CourseGradesScale | null;
+  /** BR-ASM-001.4 over the period's published grades; null: "Sin notas". */
+  average: number | null;
+  /** BR-ACA-001.5 */
+  band: 'AL_DIA' | 'EN_RIESGO' | null;
+  /** Every category of the course, in creation order. */
+  buckets: CourseGradesBucket[];
+  /** The period's published grades, most recent first. */
+  grades: CourseGradesRow[];
+}

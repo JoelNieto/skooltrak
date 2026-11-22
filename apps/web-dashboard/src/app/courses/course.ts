@@ -32,7 +32,7 @@ import CourseAssignments from './course-assignments';
 import { CourseAssignmentsList } from './course-assignments-list';
 import CourseFiles from './course-files';
 import CourseGradeBuckets from './course-grade-buckets';
-import CourseStudentGrades from './course-student-grades';
+import { CourseGradesSummaryView } from './course-grades-summary';
 import { CourseOverview } from './course-overview';
 import { CourseWork } from './course-work';
 
@@ -81,7 +81,7 @@ type CourseVm = {
     CourseFiles,
     CourseGradeBuckets,
     GradebookGrid,
-    CourseStudentGrades,
+    CourseGradesSummaryView,
     CourseAssignmentsList,
     CourseOverview,
     Icon,
@@ -257,7 +257,13 @@ type CourseVm = {
             <div uiTabPanel uiCard value="overview" class="p-6">
               <ng-template uiTabContent>
                 @if (work.value(); as w) {
-                  <app-course-overview [work]="w" [teacher]="$any(course.teacher) ?? null" (seeAll)="tab.set('work')" />
+                  <app-course-overview [work]="w" [teacher]="$any(course.teacher) ?? null" (seeAll)="tab.set('work')">
+                    <app-course-grades-summary
+                      [courseId]="id()"
+                      [studentId]="course.viewer?.kind === 'PARENT' ? (course.viewer?.student?.id ?? null) : null"
+                      [compact]="true"
+                    />
+                  </app-course-overview>
                 }
               </ng-template>
             </div>
@@ -276,9 +282,8 @@ type CourseVm = {
                 <app-gradebook-grid [courseId]="id()" />
               }
               @if (family()) {
-                <app-course-student-grades
+                <app-course-grades-summary
                   [courseId]="id()"
-                  [metric]="$any(course.studyPlan.gradeMetric)"
                   [studentId]="course.viewer?.kind === 'PARENT' ? (course.viewer?.student?.id ?? null) : null"
                 />
               }

@@ -47,6 +47,29 @@ test.describe('Course page for students @FR-ACA-001.10 @FR-ACA-001.11 @FR-ACA-00
     await expect(essay).toContainText('Vencida');
     await expect(page.getByRole('tab', { name: /Asignaciones/ })).toContainText('pendientes');
   });
+
+  test('Calificaciones shows the average, a bar per category and the published grades @FR-ACA-001.14', async ({
+    page,
+    request,
+  }) => {
+    const { id } = await course(request);
+    await page.goto(`/courses/${id}`);
+    // Resumen carries the summary without the table (FR .12).
+    const resumen = page.getByRole('region', { name: 'Resumen de calificaciones' });
+    await expect(resumen).toContainText('4.0');
+    await expect(resumen.getByRole('table')).toHaveCount(0);
+
+    await page.getByRole('tab', { name: 'Calificaciones' }).click();
+    const average = page.getByRole('region', { name: 'Promedio del periodo' });
+    await expect(average).toContainText('4.0');
+    await expect(average).toContainText('Al día');
+    await expect(average).toContainText('Nota mínima 3.0');
+    await expect(page.getByRole('region', { name: 'Por categoría' })).toContainText(`${data.grade.bucket} · 100 %`);
+    const table = page.getByRole('table', { name: 'Calificaciones publicadas' });
+    await expect(table.getByRole('row').filter({ hasText: data.publishedGrade.title })).toContainText('4.0');
+    // Drafts never reach students (BR-HOM-001.2).
+    await expect(table).not.toContainText(data.grade.title);
+  });
 });
 
 test.describe('Course page for parents @FR-ACA-001.8 @BR-ACA-001.3', () => {

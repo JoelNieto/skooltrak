@@ -4,7 +4,7 @@
 |---|---|
 | **FRD** | [ACA-001](../frd/ACA-001-course-experience.md) |
 | **Implements** | FR-ACA-001.17, BR-ACA-001.6 (first rule) |
-| **Status** | In review |
+| **Status** | Done: #63 (2026-11-22) |
 | **Branch** | `feat/ACA-001-S10-graded-status` |
 | **Estimate** | 1 day |
 

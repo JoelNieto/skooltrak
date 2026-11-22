@@ -51,6 +51,7 @@ import type {
   CommunicationControllerListInboxBroadcastsParams,
   CoursesControllerCountParams,
   CoursesControllerFindAllParams,
+  CoursesControllerMineParams,
   CreateAssignmentInput,
   CreateAssignmentSubmissionInput,
   CreateAttendanceSessionInput,
@@ -3340,6 +3341,42 @@ export class SkooltrakDashboardAPIService {
         ...(options as Omit<NonNullable<typeof options>, 'observe'>),
         observe: 'body',
       }
+    );
+  }
+
+/**
+ * @summary The student's course cards for one period (FR-ACA-001.4, .5)
+ */
+ coursesControllerMine<TData = void>(params?: CoursesControllerMineParams, options?: HttpClientBodyOptions): Observable<TData>;
+ coursesControllerMine<TData = void>(params?: CoursesControllerMineParams, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
+ coursesControllerMine<TData = void>(params?: CoursesControllerMineParams, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
+  coursesControllerMine<TData = void>(
+    params?: CoursesControllerMineParams, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
+    const filteredParams = filterParams({...params, ...options?.params}, new Set<string>([]));
+
+    if (options?.observe === 'events') {
+      return this.http.get<TData>(
+      `/api/v1/courses/mine`,{
+    ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'events',
+        params: filteredParams,}
+    );
+    }
+
+    if (options?.observe === 'response') {
+      return this.http.get<TData>(
+      `/api/v1/courses/mine`,{
+    ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'response',
+        params: filteredParams,}
+    );
+    }
+
+    return this.http.get<TData>(
+      `/api/v1/courses/mine`,{
+    ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'body',
+        params: filteredParams,}
     );
   }
 

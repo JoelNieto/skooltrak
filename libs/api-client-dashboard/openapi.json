@@ -2803,6 +2803,36 @@
         ]
       }
     },
+    "/api/v1/courses/mine": {
+      "get": {
+        "operationId": "CoursesController_mine",
+        "parameters": [
+          {
+            "name": "periodId",
+            "required": false,
+            "in": "query",
+            "description": "Defaults to the current period",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "The student's course cards for one period (FR-ACA-001.4, .5)",
+        "tags": [
+          "courses"
+        ]
+      }
+    },
     "/api/v1/courses/count": {
       "get": {
         "operationId": "CoursesController_count",

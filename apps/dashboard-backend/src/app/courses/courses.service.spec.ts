@@ -105,6 +105,7 @@ function prismaStub(db: ReturnType<typeof fixture>) {
     };
   };
   const stub = {
+    school: model('school'),
     course: model('course'),
     subject: model('subject'),
     studyPlan: model('studyPlan'),
@@ -161,14 +162,19 @@ describe('CoursesService organization scope', () => {
       await expect(service.findOne('C2')).rejects.toThrow(new ForbiddenException(COURSE_DENIED));
     });
 
-    it('lists and counts only the caller organization courses, even with another school id', async () => {
+    it('lists and counts only the caller organization courses', async () => {
       const { service } = setup();
       const all = await service.findAll({ page: 1, pageSize: 10 } as never);
       expect(all.data.map((c: Row) => c['id'])).toEqual(['C1', 'C1c']);
-      const other = await service.findAll({ page: 1, pageSize: 10, schoolId: 'SC2' } as never);
-      expect(other.data).toEqual([]);
-      await expect(service.count({ schoolId: 'SC2' } as never)).resolves.toBe(0);
       await expect(service.count({} as never)).resolves.toBe(2);
+    });
+
+    it("refuses another organization's school id with 403 (BR-ACA-001.4)", async () => {
+      const { service } = setup();
+      await expect(service.findAll({ page: 1, pageSize: 10, schoolId: 'SC2' } as never)).rejects.toThrow(
+        'La escuela no pertenece a tu organización',
+      );
+      await expect(service.count({ schoolId: 'SC2' } as never)).rejects.toThrow('La escuela no pertenece a tu organización');
     });
 
     it('returns nothing for a school, subject, study plan or group of another organization', async () => {

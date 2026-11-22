@@ -9,6 +9,8 @@ import { Request } from 'express';
 import { PrismaService } from '../prisma.service';
 import { enrolledCourses, enrollPlanStudents, resyncCoursePlan } from './course-roster';
 import { DEFAULT_BUCKETS } from './default-buckets.constants';
+
+export const SCHOOL_DENIED = 'La escuela no pertenece a tu organización';
 import { CreateCourseInput } from './dto/create-course.input';
 import { UpdateCourseInput } from './dto/update-course.input';
 
@@ -37,6 +39,13 @@ export class CoursesService {
   ) {}
 
   /** The caller's organization; refuses callers without one. */
+  /** BR-ACA-001.4: a `schoolId` given to the course lists must belong to the caller's organization. */
+  private async assertSchoolInOrganization(schoolId: string | undefined, organizationId: string): Promise<void> {
+    if (!schoolId) return;
+    const found = await this.prisma.school.count({ where: { id: schoolId, organizationId } });
+    if (!found) throw new ForbiddenException(SCHOOL_DENIED);
+  }
+
   private organizationId(): string {
     const user = this.request.user as AuthUserContext | undefined;
     if (!user?.organizationId) throw new ForbiddenException(COURSE_DENIED);
@@ -218,6 +227,7 @@ export class CoursesService {
 
   async findAll(fetchDataInput: FetchDataQueryDto) {
     const organizationId = this.organizationId();
+    await this.assertSchoolInOrganization(fetchDataInput.schoolId, organizationId);
     const req = this.request;
     const { role, userId } = req.user as any;
     const { skip, pageSize, page, schoolId, search, studyPlanId, orderBy, orderDirection } = fetchDataInput;
@@ -279,8 +289,9 @@ export class CoursesService {
     return new PaginatedResponseDto(data.map(withResolvedColor), total, page, pageSize);
   }
 
-  count(fetchDataInput: FetchDataQueryDto) {
+  async count(fetchDataInput: FetchDataQueryDto) {
     const organizationId = this.organizationId();
+    await this.assertSchoolInOrganization(fetchDataInput.schoolId, organizationId);
     const req = this.request;
     const { role, userId } = req.user as any;
     const { schoolId, search, studyPlanId } = fetchDataInput;

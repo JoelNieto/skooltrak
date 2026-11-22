@@ -19,7 +19,9 @@ import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { toFetchQueryRecord } from '../core/fetch-query-params';
 import { PaginatedResponse } from '../core/pagination-meta';
+import Auth from '../auth/auth';
 import Store from '../core/store';
+import MyCoursesPage from './my-courses';
 
 type CourseRow = {
   id: string;
@@ -51,91 +53,98 @@ type CourseRow = {
     PaginatorV2,
     FormsModule,
     EmptyState,
+    MyCoursesPage,
     UiInputGroup,
     Icon,
   ],
   providers: [Pagination],
 
   template: `
-    <ui-breadcrumbs [items]="[{ label: 'Inicio', link: '/' }, { label: 'Cursos' }]" />
-    <h1 class="text-2xl font-semibold mb-2">Cursos</h1>
-    <label uiInputGroup size="lg">
-      <ui-icon name="search" />
-      <input class="pl-0" type="search" placeholder="Buscar..." [(ngModel)]="searchText" />
-    </label>
-    @if (coursesListResource.isLoading()) {
-      <lib-loader />
-    }
-    @if (coursesListResource.error()) {
-      <p>Error al cargar cursos</p>
-    }
-    @if (coursesListResource.hasValue()) {
-      <div class="flex flex-col md:grid md:grid-cols-2 lg:grid-cols-4 gap-5 mt-4">
-        @for (course of courses(); track course.id) {
-          <a uiCard [routerLink]="['/courses', course.id]" class="group overflow-hidden">
-            <ui-course-cover [color]="course.color" [icon]="course.subject?.icon">
-              <span uiBadge size="sm" class="absolute top-2 right-2 bg-surface-1 text-ink-strong">
-                {{ course.studyPlan?.name }}
-              </span>
-            </ui-course-cover>
-            <div uiCardBody class="p-3">
-              <h2 uiCardTitle class="text-sm line-clamp-2">{{ course.subject?.name }}</h2>
-              @if (course.teacher?.name) {
-                <div class="text-xs text-ink-muted flex items-center gap-1">
-                  @if (course.teacher?.avatarUrl) {
-                    <img
-                      [src]="course.teacher.avatarUrl"
-                      [alt]="course.teacher.name"
-                      class="w-7 h-7 rounded-full object-cover"
-                    />
-                  } @else {
+    @if (auth.isStudent()) {
+      <!-- ACA-001-S02: students get their Mis cursos; staff keep this list (FR .9 later). -->
+      <app-my-courses />
+    } @else {
+      <ui-breadcrumbs [items]="[{ label: 'Inicio', link: '/' }, { label: 'Cursos' }]" />
+      <h1 class="text-2xl font-semibold mb-2">Cursos</h1>
+      <label uiInputGroup size="lg">
+        <ui-icon name="search" />
+        <input class="pl-0" type="search" placeholder="Buscar..." [(ngModel)]="searchText" />
+      </label>
+      @if (coursesListResource.isLoading()) {
+        <lib-loader />
+      }
+      @if (coursesListResource.error()) {
+        <p>Error al cargar cursos</p>
+      }
+      @if (coursesListResource.hasValue()) {
+        <div class="flex flex-col md:grid md:grid-cols-2 lg:grid-cols-4 gap-5 mt-4">
+          @for (course of courses(); track course.id) {
+            <a uiCard [routerLink]="['/courses', course.id]" class="group overflow-hidden">
+              <ui-course-cover [color]="course.color" [icon]="course.subject?.icon">
+                <span uiBadge size="sm" class="absolute top-2 right-2 bg-surface-1 text-ink-strong">
+                  {{ course.studyPlan?.name }}
+                </span>
+              </ui-course-cover>
+              <div uiCardBody class="p-3">
+                <h2 uiCardTitle class="text-sm line-clamp-2">{{ course.subject?.name }}</h2>
+                @if (course.teacher?.name) {
+                  <div class="text-xs text-ink-muted flex items-center gap-1">
+                    @if (course.teacher?.avatarUrl) {
+                      <img
+                        [src]="course.teacher.avatarUrl"
+                        [alt]="course.teacher.name"
+                        class="w-7 h-7 rounded-full object-cover"
+                      />
+                    } @else {
+                      <div class="avatar avatar-placeholder">
+                        <div class="text-white w-7 rounded-full" [style.background]="course.teacher.color">
+                          <span class="text-xs">{{ course.teacher.initials }}</span>
+                        </div>
+                      </div>
+                    }
+                    {{ course.teacher?.name }}
+                  </div>
+                } @else {
+                  <div class="text-xs text-ink-muted flex items-center gap-1">
                     <div class="avatar avatar-placeholder">
-                      <div class="text-white w-7 rounded-full" [style.background]="course.teacher.color">
-                        <span class="text-xs">{{ course.teacher.initials }}</span>
+                      <div
+                        class="text-white w-7 rounded-full"
+                        [style.background]="course.teacher?.color ?? 'var(--ui-ink-subtle)'"
+                      >
+                        <span class="text-xs">?</span>
                       </div>
                     </div>
-                  }
-                  {{ course.teacher?.name }}
-                </div>
-              } @else {
-                <div class="text-xs text-ink-muted flex items-center gap-1">
-                  <div class="avatar avatar-placeholder">
-                    <div
-                      class="text-white w-7 rounded-full"
-                      [style.background]="course.teacher?.color ?? 'var(--ui-ink-subtle)'"
-                    >
-                      <span class="text-xs">?</span>
-                    </div>
+                    Sin docente asignado
                   </div>
-                  Sin docente asignado
-                </div>
-              }
+                }
+              </div>
+            </a>
+          } @empty {
+            <div class="col-span-full">
+              <lib-empty-state
+                [title]="'No se encontraron cursos'"
+                [description]="'No se encontraron cursos para la búsqueda'"
+                [icon]="'search'"
+              />
             </div>
-          </a>
-        } @empty {
-          <div class="col-span-full">
-            <lib-empty-state
-              [title]="'No se encontraron cursos'"
-              [description]="'No se encontraron cursos para la búsqueda'"
-              [icon]="'search'"
-            />
-          </div>
-        }
+          }
+        </div>
+      }
+      <div class="flex justify-end mt-4">
+        <lib-paginator
+          [total]="total()"
+          [page]="page()"
+          [pageSize]="pageSize()"
+          (pageChange)="page.set($event)"
+          (pageSizeChange)="pageSize.set($event)"
+        />
       </div>
     }
-    <div class="flex justify-end mt-4">
-      <lib-paginator
-        [total]="total()"
-        [page]="page()"
-        [pageSize]="pageSize()"
-        (pageChange)="page.set($event)"
-        (pageSizeChange)="pageSize.set($event)"
-      />
-    </div>
   `,
 })
 export default class Courses {
   #store = inject(Store);
+  protected readonly auth = inject(Auth);
   public searchText = signal<string>('');
   #debouncedSearch: Signal<string>;
   total = computed(() => this.coursesListResource.value()?.meta.total ?? 0);
@@ -145,7 +154,7 @@ export default class Courses {
 
   protected coursesListResource = httpResource<PaginatedResponse<CourseRow>>(() => {
     const schoolId = this.#store.currentSchoolId();
-    if (!schoolId) {
+    if (!schoolId || this.auth.isStudent()) {
       return undefined;
     }
     return {

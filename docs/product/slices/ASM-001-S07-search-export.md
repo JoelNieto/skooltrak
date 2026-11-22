@@ -4,8 +4,8 @@
 |---|---|
 | **FRD** | [ASM-001](../frd/ASM-001-teacher-gradebook.md) |
 | **Implements** | FR-ASM-001.12, .13 |
-| **Status** | In review |
-| **Branch** | `feat/ASM-001-S07-search-export` (stacked on S06, #59) |
+| **Status** | Done: #60 (2026-11-21) |
+| **Branch** | `feat/ASM-001-S07-search-export` |
 | **Estimate** | 1 day |
 
 ## User-visible outcome

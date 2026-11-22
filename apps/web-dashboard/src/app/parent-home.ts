@@ -65,7 +65,7 @@ type ParentChildHome = {
 };
 
 type AssignmentType = 'HOMEWORK' | 'EXAM' | 'QUIZ' | 'PROJECT' | 'PAPER' | 'NEW';
-type WorkStatus = 'PENDIENTE' | 'ENTREGADO' | 'VENCIDA' | 'PRESENCIAL';
+type WorkStatus = 'CALIFICADA' | 'EXENTA' | 'PENDIENTE' | 'ENTREGADO' | 'VENCIDA' | 'PRESENCIAL';
 type GradeBand = 'EXCELLENT' | 'PASSING' | 'BELOW';
 type WorkItem = {
   assignmentId: string;
@@ -74,6 +74,8 @@ type WorkItem = {
   course: Ref;
   dueAt: string;
   status: WorkStatus;
+  /** The published score when CALIFICADA (FR-ACA-001.17). */
+  score: number | null;
 };
 
 /** `GET /api/v1/home/parent/child/:studentId/account` (HOM-001 FR .22). */
@@ -95,6 +97,9 @@ const ASSIGNMENT_TYPES: Record<AssignmentType, { label: string; tone: BadgeTone 
   PAPER: { label: 'Ensayo', tone: 'success' },
 };
 const WORK_STATUS: Record<WorkStatus, { label: string; tone: BadgeTone }> = {
+  // FR-ACA-001.17: the label of CALIFICADA gets the score ("Calificada · 4.5").
+  CALIFICADA: { label: 'Calificada', tone: 'success' },
+  EXENTA: { label: 'Exenta', tone: 'neutral' },
   PENDIENTE: { label: 'Pendiente', tone: 'warning' },
   ENTREGADO: { label: 'Entregado', tone: 'success' },
   VENCIDA: { label: 'Vencida', tone: 'danger' },
@@ -633,7 +638,10 @@ export default class ParentHome {
   }
 
   statusOf(item: WorkItem) {
-    return WORK_STATUS[item.status];
+    const status = WORK_STATUS[item.status];
+    return item.status === 'CALIFICADA' && item.score !== null
+      ? { ...status, label: `${status.label} · ${item.score.toFixed(1)}` }
+      : status;
   }
 
   accountStatus(acc: ParentAccount) {

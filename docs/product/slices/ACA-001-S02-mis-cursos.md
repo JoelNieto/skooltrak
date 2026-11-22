@@ -48,7 +48,7 @@ Scenario: list tenancy (BR .4)
 
 ## Layers touched
 - [x] **Nest** (`courses`):
-  - `GET /api/v1/courses/mine?periodId=` (`VIEW_COURSES` + `VIEW_GRADES`, students), in `courses-mine.service.ts`:
+  - `GET /api/v1/courses/mine?periodId=` (`VIEW_COURSES`; a caller without a student record gets 403), in `courses-mine.service.ts`:
     - the student is resolved as in BR-HOM-001.8;
     - courses come from the roster (BR .15);
     - the schedule follows BR .9 (`course-schedule.ts`);

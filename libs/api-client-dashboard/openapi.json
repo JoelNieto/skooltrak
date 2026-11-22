@@ -3124,6 +3124,117 @@
         ]
       }
     },
+    "/api/v1/courses/{id}/appearance": {
+      "patch": {
+        "operationId": "CoursesController_setAppearance",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CourseAppearanceInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Set a course's color and icon: its teacher or an admin (FR-ACA-001.3, BR .12)",
+        "tags": [
+          "courses"
+        ]
+      }
+    },
+    "/api/v1/courses/{id}/cover": {
+      "post": {
+        "operationId": "CoursesController_uploadCover",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Upload the cover photo: JPEG, PNG or WebP, at most 2 MB (FR-ACA-001.3, BR .12)",
+        "tags": [
+          "courses"
+        ]
+      },
+      "delete": {
+        "operationId": "CoursesController_removeCover",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Remove the cover photo (FR-ACA-001.3, BR .12)",
+        "tags": [
+          "courses"
+        ]
+      }
+    },
     "/api/v1/courses/{id}/participants": {
       "get": {
         "operationId": "CoursesController_participants",
@@ -12058,6 +12169,10 @@
         "properties": {}
       },
       "CreateCourseInput": {
+        "type": "object",
+        "properties": {}
+      },
+      "CourseAppearanceInput": {
         "type": "object",
         "properties": {}
       },

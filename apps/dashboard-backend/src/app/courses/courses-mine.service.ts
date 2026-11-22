@@ -7,6 +7,7 @@ import { addDays, CLOCK, Clock, localMidnight, schoolLocalTime } from '../home/h
 import { workStatus } from '../home/student-home.service';
 import { StudentWorkStatus } from '../home/entities/student-home.entity';
 import { PrismaService } from '../prisma.service';
+import { CourseCoverStorage } from './course-cover-storage';
 import { courseSchedule, scheduleText } from './course-schedule';
 import { enrolledCourses } from './course-roster';
 import { MyCourseBand, MyCourseNext, MyCourses } from './entities/my-courses.entity';
@@ -45,12 +46,23 @@ interface WorkItem {
  */
 export function nextDelivery(items: WorkItem[], now: Date): MyCourseNext | null {
   const overdue = items.filter((i) => i.status === 'VENCIDA').sort((a, b) => a.dueAt.getTime() - b.dueAt.getTime())[0];
-  if (overdue) return { assignmentId: overdue.assignmentId, title: overdue.title, dueAt: overdue.dueAt.toISOString(), overdue: true };
+  if (overdue)
+    return {
+      assignmentId: overdue.assignmentId,
+      title: overdue.title,
+      dueAt: overdue.dueAt.toISOString(),
+      overdue: true,
+    };
   const upcoming = items
     .filter((i) => i.dueAt >= now && (i.status === 'PENDIENTE' || i.status === 'PRESENCIAL'))
     .sort((a, b) => a.dueAt.getTime() - b.dueAt.getTime())[0];
   return upcoming
-    ? { assignmentId: upcoming.assignmentId, title: upcoming.title, dueAt: upcoming.dueAt.toISOString(), overdue: false }
+    ? {
+        assignmentId: upcoming.assignmentId,
+        title: upcoming.title,
+        dueAt: upcoming.dueAt.toISOString(),
+        overdue: false,
+      }
     : null;
 }
 
@@ -65,6 +77,7 @@ export class CoursesMineService {
   constructor(
     private readonly prisma: PrismaService,
     @Inject(CLOCK) private readonly clock: Clock,
+    private readonly covers: CourseCoverStorage,
   ) {}
 
   /**
@@ -79,7 +92,10 @@ export class CoursesMineService {
       school: { select: { currentYear: true, timezone: true } },
     } as const;
     const own = user.organizationId
-      ? await this.prisma.student.findFirst({ where: { userId: user.userId, organizationId: user.organizationId }, select })
+      ? await this.prisma.student.findFirst({
+          where: { userId: user.userId, organizationId: user.organizationId },
+          select,
+        })
       : null;
     if (own) return own;
     if (!studentId) throw new ForbiddenException(NO_STUDENT);
@@ -122,6 +138,8 @@ export class CoursesMineService {
         id: true,
         name: true,
         color: true,
+        coverKey: true,
+        icon: true,
         subject: { select: { name: true, icon: true, area: true } },
         teacher: { select: { firstName: true, fatherName: true, user: { select: { color: true } } } },
         studyPlan: { select: { gradeMetric: { select: { maximum: true, minimumApproval: true } } } },
@@ -135,17 +153,30 @@ export class CoursesMineService {
       group && courseIds.length
         ? this.prisma.classGroupWeeklySchedule.findMany({
             where: { classGroupId: group.id, courseId: { in: courseIds } },
-            select: { courseId: true, weekday: true, startTime: true, endTime: true, location: true, remote: true, recess: true },
+            select: {
+              courseId: true,
+              weekday: true,
+              startTime: true,
+              endTime: true,
+              location: true,
+              remote: true,
+              recess: true,
+            },
           })
         : Promise.resolve([]),
       periodIds.length && courseIds.length
         ? this.prisma.studentGrade.findMany({
             // Published grades only (BR-HOM-001.2).
-            where: { studentId: student.id, grade: { courseId: { in: courseIds }, periodId: { in: periodIds }, published: true } },
+            where: {
+              studentId: student.id,
+              grade: { courseId: { in: courseIds }, periodId: { in: periodIds }, published: true },
+            },
             select: {
               studentId: true,
               score: true,
-              grade: { select: { courseId: true, periodId: true, bucketId: true, bucket: { select: { weight: true } } } },
+              grade: {
+                select: { courseId: true, periodId: true, bucketId: true, bucket: { select: { weight: true } } },
+              },
             },
           })
         : Promise.resolve([]),
@@ -189,13 +220,21 @@ export class CoursesMineService {
         courseId: assignment.courseId,
         dueAt: date,
         status: workStatus(
-          { dueAt: date, requireSubmission: assignment.requireSubmission, submitted: assignment.submissions.length > 0, graded },
+          {
+            dueAt: date,
+            requireSubmission: assignment.requireSubmission,
+            submitted: assignment.submissions.length > 0,
+            graded,
+          },
           now,
         ),
       };
     });
     const inSelected = (i: WorkItem) => !!selected && i.dueAt >= selected.startDate && i.dueAt <= selected.endDate;
 
+    const coverUrls = new Map(
+      await Promise.all(courses.map(async (c) => [c.id, await this.covers.url(c.coverKey)] as const)),
+    );
     const cards = courses.map((course) => {
       const metric = course.studyPlan.gradeMetric;
       const scale = metric ? { maximum: num(metric.maximum), minimumApproval: num(metric.minimumApproval) } : null;
@@ -207,6 +246,9 @@ export class CoursesMineService {
         id: course.id,
         name: course.name,
         color: resolveCourseColor(course.id, course.color),
+        coverUrl: coverUrls.get(course.id) ?? null,
+        /** FR-ACA-001.3: the teacher's icon for the course, else the subject's. */
+        icon: course.icon ?? course.subject.icon,
         subject: { name: course.subject.name, icon: course.subject.icon, area: course.subject.area },
         teacher: teacher
           ? {

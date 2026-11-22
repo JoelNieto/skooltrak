@@ -21,11 +21,17 @@ export function areaChips(courses: { subject: { area: string | null } }[]): Area
   const byKey = new Map<string, AreaChip>();
   for (const course of courses) {
     const key = areaKey(course.subject.area);
-    const chip = byKey.get(key) ?? { key, label: key === OTHER_AREAS ? 'Otras' : (course.subject.area as string).trim(), count: 0 };
+    const chip = byKey.get(key) ?? {
+      key,
+      label: key === OTHER_AREAS ? 'Otras' : (course.subject.area as string).trim(),
+      count: 0,
+    };
     chip.count += 1;
     byKey.set(key, chip);
   }
-  const areas = [...byKey.values()].filter((c) => c.key !== OTHER_AREAS).sort((a, b) => a.label.localeCompare(b.label, 'es'));
+  const areas = [...byKey.values()]
+    .filter((c) => c.key !== OTHER_AREAS)
+    .sort((a, b) => a.label.localeCompare(b.label, 'es'));
   const other = byKey.get(OTHER_AREAS);
   return [{ key: ALL_AREAS, label: 'Todas', count: courses.length }, ...areas, ...(other ? [other] : [])];
 }

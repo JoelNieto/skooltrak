@@ -25,7 +25,10 @@ import { CourseWork, CourseWorkItem, workDate, workPill, WORK_TYPES } from './co
           <ul class="flex flex-col">
             @for (item of next(); track item.assignmentId + item.dueAt) {
               <li class="border-t border-line first:border-t-0">
-                <a [routerLink]="['/assignments', item.assignmentId]" class="flex items-center gap-3 py-2.5 hover:bg-surface-2">
+                <a
+                  [routerLink]="['/assignments', item.assignmentId]"
+                  class="flex items-center gap-3 py-2.5 hover:bg-surface-2"
+                >
                   <ui-icon [name]="type(item).icon" class="text-xl text-ink-muted" />
                   <span class="min-w-0 flex-1">
                     <span class="block truncate font-medium text-ink-strong">{{ item.title }}</span>

@@ -27,6 +27,10 @@ type CourseRow = {
   id: string;
   /** Resolved by the API: never null (ACA-001 BR .11). */
   color: string;
+  /** FR-ACA-001.3: the teacher's icon; null shows the subject's. */
+  icon?: string | null;
+  /** FR-ACA-001.3: presigned cover photo; null keeps the color cover. */
+  coverUrl?: string | null;
   subject?: { name?: string; icon?: string | null };
   studyPlan?: { name?: string };
   teacher?: {
@@ -80,7 +84,11 @@ type CourseRow = {
         <div class="flex flex-col md:grid md:grid-cols-2 lg:grid-cols-4 gap-5 mt-4">
           @for (course of courses(); track course.id) {
             <a uiCard [routerLink]="['/courses', course.id]" class="group overflow-hidden">
-              <ui-course-cover [color]="course.color" [icon]="course.subject?.icon">
+              <ui-course-cover
+                [color]="course.color"
+                [icon]="course.icon ?? course.subject?.icon"
+                [image]="course.coverUrl"
+              >
                 <span uiBadge size="sm" class="absolute top-2 right-2 bg-surface-1 text-ink-strong">
                   {{ course.studyPlan?.name }}
                 </span>

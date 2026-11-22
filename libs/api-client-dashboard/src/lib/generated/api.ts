@@ -49,12 +49,14 @@ import type {
   CommunicationControllerGetMessagesParams,
   CommunicationControllerListBroadcastAudiencesParams,
   CommunicationControllerListInboxBroadcastsParams,
+  CourseAppearanceInput,
   CoursesControllerCountParams,
   CoursesControllerFindAllParams,
   CoursesControllerFindOneParams,
   CoursesControllerGradesSummaryParams,
   CoursesControllerMineParams,
   CoursesControllerParticipantsParams,
+  CoursesControllerUploadCoverBody,
   CoursesControllerWorkParams,
   CreateAssignmentInput,
   CreateAssignmentSubmissionInput,
@@ -3593,6 +3595,126 @@ export class SkooltrakDashboardAPIService {
     ...(options as Omit<NonNullable<typeof options>, 'observe'>),
         observe: 'body',
         params: filteredParams,}
+    );
+  }
+
+/**
+ * @summary Set a course's color and icon: its teacher or an admin (FR-ACA-001.3, BR .12)
+ */
+ coursesControllerSetAppearance<TData = void>(id: string,
+    courseAppearanceInput: CourseAppearanceInput, options?: HttpClientBodyOptions): Observable<TData>;
+ coursesControllerSetAppearance<TData = void>(id: string,
+    courseAppearanceInput: CourseAppearanceInput, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
+ coursesControllerSetAppearance<TData = void>(id: string,
+    courseAppearanceInput: CourseAppearanceInput, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
+  coursesControllerSetAppearance<TData = void>(
+    id: string,
+    courseAppearanceInput: CourseAppearanceInput, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
+    if (options?.observe === 'events') {
+      return this.http.patch<TData>(
+      `/api/v1/courses/${id}/appearance`,
+      courseAppearanceInput,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'events',
+      }
+    );
+    }
+
+    if (options?.observe === 'response') {
+      return this.http.patch<TData>(
+      `/api/v1/courses/${id}/appearance`,
+      courseAppearanceInput,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'response',
+      }
+    );
+    }
+
+    return this.http.patch<TData>(
+      `/api/v1/courses/${id}/appearance`,
+      courseAppearanceInput,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'body',
+      }
+    );
+  }
+
+/**
+ * @summary Upload the cover photo: JPEG, PNG or WebP, at most 2 MB (FR-ACA-001.3, BR .12)
+ */
+ coursesControllerUploadCover<TData = void>(id: string,
+    coursesControllerUploadCoverBody: CoursesControllerUploadCoverBody, options?: HttpClientBodyOptions): Observable<TData>;
+ coursesControllerUploadCover<TData = void>(id: string,
+    coursesControllerUploadCoverBody: CoursesControllerUploadCoverBody, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
+ coursesControllerUploadCover<TData = void>(id: string,
+    coursesControllerUploadCoverBody: CoursesControllerUploadCoverBody, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
+  coursesControllerUploadCover<TData = void>(
+    id: string,
+    coursesControllerUploadCoverBody: CoursesControllerUploadCoverBody, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {const formData = new FormData();
+if(coursesControllerUploadCoverBody.file !== undefined) {
+ formData.append(`file`, coursesControllerUploadCoverBody.file);
+ }
+
+    if (options?.observe === 'events') {
+      return this.http.post<TData>(
+      `/api/v1/courses/${id}/cover`,
+      formData,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'events',
+      }
+    );
+    }
+
+    if (options?.observe === 'response') {
+      return this.http.post<TData>(
+      `/api/v1/courses/${id}/cover`,
+      formData,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'response',
+      }
+    );
+    }
+
+    return this.http.post<TData>(
+      `/api/v1/courses/${id}/cover`,
+      formData,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'body',
+      }
+    );
+  }
+
+/**
+ * @summary Remove the cover photo (FR-ACA-001.3, BR .12)
+ */
+ coursesControllerRemoveCover<TData = void>(id: string, options?: HttpClientBodyOptions): Observable<TData>;
+ coursesControllerRemoveCover<TData = void>(id: string, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
+ coursesControllerRemoveCover<TData = void>(id: string, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
+  coursesControllerRemoveCover<TData = void>(
+    id: string, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
+    if (options?.observe === 'events') {
+      return this.http.delete<TData>(
+      `/api/v1/courses/${id}/cover`,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'events',
+      }
+    );
+    }
+
+    if (options?.observe === 'response') {
+      return this.http.delete<TData>(
+      `/api/v1/courses/${id}/cover`,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'response',
+      }
+    );
+    }
+
+    return this.http.delete<TData>(
+      `/api/v1/courses/${id}/cover`,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'body',
+      }
     );
   }
 

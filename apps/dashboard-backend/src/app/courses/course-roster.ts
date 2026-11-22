@@ -41,7 +41,9 @@ export async function syncStudentPlan(db: RosterDb, studentId: string, classGrou
     ? await db.classGroup.findFirst({ where: { id: classGroupId, organizationId }, select: { studyPlanId: true } })
     : null;
   const planCourseIds = group
-    ? (await db.course.findMany({ where: { studyPlanId: group.studyPlanId, organizationId }, select: { id: true } })).map((c) => c.id)
+    ? (
+        await db.course.findMany({ where: { studyPlanId: group.studyPlanId, organizationId }, select: { id: true } })
+      ).map((c) => c.id)
     : [];
 
   await db.courseEnrollment.deleteMany({

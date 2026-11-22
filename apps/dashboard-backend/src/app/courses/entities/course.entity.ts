@@ -20,6 +20,8 @@ export class Course {
     shortName: string;
 
     color: CourseColor | null;
+    coverKey: string | null;
+    icon: string | null;
 
     organizationId: string;
 

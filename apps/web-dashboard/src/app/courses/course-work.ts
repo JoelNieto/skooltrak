@@ -20,7 +20,10 @@ export interface CourseWork {
   past: CourseWorkItem[];
 }
 
-export const WORK_TYPES: Record<AssignmentType, { label: string; icon: 'clipboard-list' | 'file-text' | 'notebook-pen' | 'book-open' }> = {
+export const WORK_TYPES: Record<
+  AssignmentType,
+  { label: string; icon: 'clipboard-list' | 'file-text' | 'notebook-pen' | 'book-open' }
+> = {
   NEW: { label: 'Asignación', icon: 'clipboard-list' },
   HOMEWORK: { label: 'Tarea', icon: 'notebook-pen' },
   EXAM: { label: 'Examen', icon: 'file-text' },

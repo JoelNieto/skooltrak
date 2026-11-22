@@ -3,24 +3,24 @@ import { CourseColor, Prisma } from '@generated/prisma';
 import { IsIn, IsOptional } from 'class-validator';
 
 export class CreateCourseInput implements Prisma.CourseUncheckedCreateInput {
-    name: string;
+  name: string;
 
-    code: string;
+  code: string;
 
-    shortName: string;
+  shortName: string;
 
-    organizationId: string;
+  organizationId: string;
 
-    schoolId: string;
+  schoolId: string;
 
-    subjectId: string;
+  subjectId: string;
 
-    studyPlanId: string;
+  studyPlanId: string;
 
-    teacherId?: string;
+  teacherId?: string;
 
-    /** One of the 8 color tags (ACA-001 BR .11); null clears it back to the derived default. */
-    @IsOptional()
-    @IsIn(COURSE_COLOR_KEYS, { message: 'Color de curso inválido' })
-    color?: CourseColor | null;
+  /** One of the 8 color tags (ACA-001 BR .11); null clears it back to the derived default. */
+  @IsOptional()
+  @IsIn(COURSE_COLOR_KEYS, { message: 'Color de curso inválido' })
+  color?: CourseColor | null;
 }

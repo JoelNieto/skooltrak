@@ -30,6 +30,7 @@ import GradebookGrid from '../gradebook/gradebook-grid';
 import { ParentContext } from '../parent/parent-context.service';
 import CourseAssignments from './course-assignments';
 import CourseCalendarDialog from './course-calendar-dialog';
+import CourseCustomizeDialog from './course-customize-dialog';
 import { CourseAssignmentsList } from './course-assignments-list';
 import CourseFiles from './course-files';
 import CourseGradeBuckets from './course-grade-buckets';
@@ -55,6 +56,12 @@ type CourseVm = {
     userId?: string | null;
   } | null;
   studyPlan: { name?: string; gradeMetric: unknown };
+  /** FR-ACA-001.3: presigned cover photo; null keeps the color cover. */
+  coverUrl?: string | null;
+  /** FR-ACA-001.3: the teacher's icon; null shows the subject's. */
+  icon?: string | null;
+  /** FR-ACA-001.3: the course's teacher or an admin may set color and cover. */
+  canCustomize?: boolean;
   /** BR-ACA-001.3: who is looking; students and parents carry the student. */
   viewer?: { kind: 'STAFF' | 'HOMEROOM' | 'STUDENT' | 'PARENT'; student: { id: string; firstName: string } | null };
   /** The student's group (students and parents). */
@@ -114,7 +121,12 @@ type CourseVm = {
         />
         <div uiCard class="mt-4">
           <div uiCardBody class="flex md:flex-row md:gap-4 md:items-center">
-            <ui-course-cover variant="tile" [color]="course.color" [icon]="course.subject?.icon" />
+            <ui-course-cover
+              variant="tile"
+              [color]="course.color"
+              [icon]="course.icon ?? course.subject?.icon"
+              [image]="course.coverUrl"
+            />
             <div class="flex justify-between items-center w-full">
               <div>
                 <h2 uiCardTitle class="text-xl">
@@ -184,6 +196,12 @@ type CourseVm = {
                   <button uiButton variant="primary" (click)="addAssignment()">
                     <ui-icon name="clipboard-plus" />
                     Nueva asignacion
+                  </button>
+                }
+                @if (course.canCustomize) {
+                  <button uiButton variant="ghost" type="button" (click)="customize()">
+                    <ui-icon name="palette" />
+                    Personalizar
                   </button>
                 }
                 @if (auth.hasPermission('MANAGE_COURSES')) {
@@ -430,9 +448,34 @@ export default class Course {
     return c;
   });
 
+  /** FR-ACA-001.3: color and cover, for the course's teacher or an admin. */
+  public customize() {
+    const course = this.courseResource.value();
+    if (!course) return;
+    this.modal
+      .open<boolean, CourseCustomizeDialog>(CourseCustomizeDialog, {
+        title: 'Personalizar curso',
+        size: 'medium',
+        data: {
+          courseId: course.id,
+          color: course.color,
+          icon: course.icon ?? null,
+          subjectIcon: course.subject?.icon ?? null,
+          coverUrl: course.coverUrl ?? null,
+        },
+      })
+      .closed.subscribe((changed) => {
+        if (changed) this.courseResource.reload();
+      });
+  }
+
   /** FR-ACA-001.10: "Ver calendario" for students and parents. */
   public openCalendar() {
-    this.modal.open(CourseCalendarDialog, { title: 'Calendario del curso', size: 'large', data: { courseId: this.id() } });
+    this.modal.open(CourseCalendarDialog, {
+      title: 'Calendario del curso',
+      size: 'large',
+      data: { courseId: this.id() },
+    });
   }
 
   public addAssignment() {

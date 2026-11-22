@@ -42,6 +42,7 @@ export enum Perm {
 
   // Grades
   MANAGE_GRADES = 'MANAGE_GRADES',
+  CUSTOMIZE_COURSES = 'CUSTOMIZE_COURSES',
   VIEW_GRADES = 'VIEW_GRADES',
 
   // Messages
@@ -116,6 +117,7 @@ export const PERMISSION_DESCRIPTIONS: Record<Perm, string> = {
   [Perm.MANAGE_ATTENDANCE]: 'Record and manage attendance',
   [Perm.VIEW_ATTENDANCE]: 'View attendance records',
   [Perm.MANAGE_GRADES]: 'Create, update, and delete grades',
+  [Perm.CUSTOMIZE_COURSES]: "Set the color and cover photo of one's own courses",
   [Perm.VIEW_GRADES]: 'View grade information',
   [Perm.MANAGE_MESSAGES]: 'Send and manage messages',
   [Perm.VIEW_MESSAGES]: 'View messages',
@@ -186,6 +188,7 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<DefaultRole, Perm[]> = {
     Perm.MANAGE_ASSIGNMENTS,
     Perm.MANAGE_ATTENDANCE,
     Perm.MANAGE_GRADES,
+    Perm.CUSTOMIZE_COURSES,
     Perm.MANAGE_MESSAGES,
     Perm.MANAGE_FILES,
     Perm.MANAGE_QUIZZES,

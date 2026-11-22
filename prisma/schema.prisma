@@ -412,6 +412,8 @@ model Subject {
   code           String
   /// Lucide icon name from SUBJECT_ICONS (libs/shared). Null: "book-open".
   icon           String?
+  /// Free-text area grouping subjects on Mis cursos, e.g. "Ciencias" (ACA-001 BR .14). Trimmed; null: "Otras".
+  area           String?
   courses        Course[]
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt

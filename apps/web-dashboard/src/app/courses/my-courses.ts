@@ -2,6 +2,7 @@ import {
   Badge,
   BadgeTone,
   Breadcrumbs,
+  Button,
   Card,
   CardBody,
   CardTitle,
@@ -20,6 +21,7 @@ import { httpResource } from '@angular/common/http';
 import { Component, computed, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
+import { ALL_AREAS, areaChips, inArea } from './course-areas';
 
 /** `GET /api/v1/courses/mine` (ACA-001-S02, S03). */
 interface MyCourses {
@@ -31,7 +33,7 @@ interface MyCourses {
     id: string;
     name: string;
     color: string;
-    subject: { name: string; icon: string | null };
+    subject: { name: string; icon: string | null; area: string | null };
     teacher: { name: string; initials: string; color: string | null } | null;
     schedule: string | null;
     average: number | null;
@@ -63,6 +65,7 @@ const BAND: Record<'AL_DIA' | 'EN_RIESGO', { label: string; tone: BadgeTone }> =
   imports: [
     Badge,
     Breadcrumbs,
+    Button,
     Card,
     CardBody,
     CardTitle,
@@ -145,11 +148,34 @@ const BAND: Record<'AL_DIA' | 'EN_RIESGO', { label: string; tone: BadgeTone }> =
             helper="asignaciones del periodo"
           />
         </div>
+        @if (chips().length > 2) {
+          <div class="mb-4 flex flex-wrap gap-2" role="group" aria-label="Filtrar por área">
+            @for (chip of chips(); track chip.key) {
+              <button
+                uiButton
+                size="sm"
+                type="button"
+                [variant]="area() === chip.key ? 'primary' : 'ghost'"
+                [attr.aria-pressed]="area() === chip.key"
+                (click)="area.set(chip.key)"
+              >
+                {{ chip.label }}
+                <span class="text-xs opacity-75">{{ chip.count }}</span>
+              </button>
+            }
+          </div>
+        }
         <ul class="grid gap-5 md:grid-cols-2 xl:grid-cols-3" aria-label="Mis cursos">
           @for (course of visible(); track course.id) {
             <li>
               <a uiCard [routerLink]="['/courses', course.id]" class="group block h-full overflow-hidden">
-                <ui-course-cover [color]="course.color" [icon]="course.subject.icon" />
+                <ui-course-cover [color]="course.color" [icon]="course.subject.icon">
+                  @if (course.subject.area) {
+                    <span uiBadge size="sm" class="absolute top-2 right-2 bg-surface-1 text-ink-strong">{{
+                      course.subject.area
+                    }}</span>
+                  }
+                </ui-course-cover>
                 <div uiCardBody class="gap-3 p-4">
                   <h2 uiCardTitle class="text-base">{{ course.name }}</h2>
                   @if (course.schedule) {
@@ -266,11 +292,15 @@ export default class MyCoursesPage {
     return `${sign}${Math.abs(average.delta).toFixed(1)} frente al periodo anterior (${average.previous.toFixed(1)})`;
   }
 
+  /** FR-ACA-001.7: "Todas" plus one chip per subject area, with counts (BR .14). */
+  protected readonly chips = computed(() => areaChips(this.mine.value()?.courses ?? []));
+  protected readonly area = signal(ALL_AREAS);
+
   protected readonly visible = computed(() => {
     const q = this.search().trim().toLowerCase();
-    const courses = this.mine.value()?.courses ?? [];
-    return q
-      ? courses.filter((c) => c.name.toLowerCase().includes(q) || c.subject.name.toLowerCase().includes(q))
-      : courses;
+    const area = this.area();
+    return (this.mine.value()?.courses ?? []).filter(
+      (c) => inArea(c, area) && (!q || c.name.toLowerCase().includes(q) || c.subject.name.toLowerCase().includes(q)),
+    );
   });
 }

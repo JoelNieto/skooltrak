@@ -9,6 +9,8 @@ import {
   EmptyState,
   Icon,
   Loader,
+  Meter,
+  StatCard,
   UiField,
   UiInputGroup,
   UiSelect,
@@ -19,8 +21,9 @@ import { Component, computed, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 
-/** `GET /api/v1/courses/mine` (ACA-001-S02). */
+/** `GET /api/v1/courses/mine` (ACA-001-S02, S03). */
 interface MyCourses {
+  timezone: string;
   periods: { id: string; name: string }[];
   periodId: string | null;
   classGroup: { id: string; name: string } | null;
@@ -34,7 +37,16 @@ interface MyCourses {
     average: number | null;
     band: 'AL_DIA' | 'EN_RIESGO' | null;
     scale: { maximum: number; minimumApproval: number } | null;
+    next: { assignmentId: string; title: string; dueAt: string; overdue: boolean } | null;
+    progress: { done: number; total: number };
   }[];
+  isCurrentPeriod: boolean;
+  stats: {
+    average: { value: number | null; previous: number | null; delta: number | null };
+    week: { due: number; overdue: number };
+    done: number;
+    total: number;
+  };
 }
 
 const BAND: Record<'AL_DIA' | 'EN_RIESGO', { label: string; tone: BadgeTone }> = {
@@ -43,8 +55,8 @@ const BAND: Record<'AL_DIA' | 'EN_RIESGO', { label: string; tone: BadgeTone }> =
 };
 
 /**
- * A student's *Mis cursos* (ACA-001-S02, FR .4 .5): one card per enrolled course with its schedule,
- * teacher and period average. *Próxima entrega* and progress come in S03.
+ * A student's *Mis cursos* (ACA-001-S02, S03, FR .4 .5 .6): a stats row, then one card per enrolled
+ * course with its schedule, teacher, period average, *Próxima entrega* and progress.
  */
 @Component({
   selector: 'app-my-courses',
@@ -60,7 +72,9 @@ const BAND: Record<'AL_DIA' | 'EN_RIESGO', { label: string; tone: BadgeTone }> =
     FormsModule,
     Icon,
     Loader,
+    Meter,
     RouterLink,
+    StatCard,
     UiField,
     UiInputGroup,
     UiSelect,
@@ -104,6 +118,33 @@ const BAND: Record<'AL_DIA' | 'EN_RIESGO', { label: string; tone: BadgeTone }> =
           icon="book-open"
         />
       } @else {
+        <div class="mb-5 grid gap-4 md:grid-cols-3" role="group" aria-label="Resumen del periodo">
+          <lib-stat-card
+            label="Promedio del periodo"
+            icon="chart-column"
+            [value]="data.stats.average.value === null ? '—' : (data.stats.average.value | number: '1.1-1')!"
+            [helper]="averageHelper(data.stats.average)"
+          />
+          <lib-stat-card
+            label="Esta semana"
+            icon="calendar-days"
+            [value]="data.stats.week.due + ''"
+            [helper]="
+              data.stats.week.overdue
+                ? data.stats.week.overdue === 1
+                  ? '1 vencida'
+                  : data.stats.week.overdue + ' vencidas'
+                : 'entregas esta semana'
+            "
+            [color]="data.stats.week.overdue ? 'error' : 'primary'"
+          />
+          <lib-stat-card
+            label="Completadas"
+            icon="check-check"
+            [value]="data.stats.done + ' de ' + data.stats.total"
+            helper="asignaciones del periodo"
+          />
+        </div>
         <ul class="grid gap-5 md:grid-cols-2 xl:grid-cols-3" aria-label="Mis cursos">
           @for (course of visible(); track course.id) {
             <li>
@@ -132,6 +173,32 @@ const BAND: Record<'AL_DIA' | 'EN_RIESGO', { label: string; tone: BadgeTone }> =
                       <span class="text-ink-muted">Sin docente asignado</span>
                     }
                   </div>
+                  @if (data.isCurrentPeriod) {
+                    <div class="rounded-box bg-surface-0 px-3 py-2 text-sm">
+                      <span class="block text-xs text-ink-muted">Próxima entrega</span>
+                      @if (course.next; as next) {
+                        <span class="block truncate font-medium text-ink-strong">{{ next.title }}</span>
+                        <span
+                          class="block text-xs"
+                          [class.text-error]="next.overdue"
+                          [class.font-medium]="next.overdue"
+                          [class.text-ink-muted]="!next.overdue"
+                        >
+                          {{ dueText(next, data.timezone) }}
+                        </span>
+                      } @else {
+                        <span class="block text-ink-muted">Nada pendiente</span>
+                      }
+                    </div>
+                  }
+                  @if (course.progress.total) {
+                    <ui-meter
+                      [value]="course.progress.done"
+                      [max]="course.progress.total"
+                      [label]="course.progress.done + ' de ' + course.progress.total + ' completadas'"
+                      tone="success"
+                    />
+                  }
                   <div class="mt-auto flex items-center justify-between gap-2 border-t border-line pt-3">
                     <span class="text-xs text-ink-muted">Promedio</span>
                     @if (!course.scale) {
@@ -178,6 +245,26 @@ export default class MyCoursesPage {
     if (this.periodId()) params['periodId'] = this.periodId();
     return { url: '/api/v1/courses/mine', params };
   });
+
+  /** BR-ACA-001.8: "Vencida desde lun 13 abr" / "Vence jue 16 abr, 12:00", in school time. */
+  protected dueText(next: { dueAt: string; overdue: boolean }, timezone: string): string {
+    const at = new Date(next.dueAt);
+    const day = new Intl.DateTimeFormat('es', {
+      weekday: 'short',
+      day: 'numeric',
+      month: 'short',
+      timeZone: timezone,
+    }).format(at);
+    if (next.overdue) return `Vencida desde ${day}`;
+    const time = new Intl.DateTimeFormat('es', { hour: 'numeric', minute: '2-digit', timeZone: timezone }).format(at);
+    return `Vence ${day}, ${time}`;
+  }
+
+  protected averageHelper(average: { previous: number | null; delta: number | null }): string {
+    if (average.delta === null || average.previous === null) return 'del periodo';
+    const sign = average.delta > 0 ? '+' : average.delta < 0 ? '−' : '±';
+    return `${sign}${Math.abs(average.delta).toFixed(1)} frente al periodo anterior (${average.previous.toFixed(1)})`;
+  }
 
   protected readonly visible = computed(() => {
     const q = this.search().trim().toLowerCase();

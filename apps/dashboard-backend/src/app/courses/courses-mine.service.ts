@@ -1,13 +1,15 @@
 import { AuthUserContext } from '@/auth';
 import { resolveCourseColor } from '@/shared';
 import { BadRequestException, ForbiddenException, Inject, Injectable } from '@nestjs/common';
-import { averageKey, weightedAverages } from '../home/home-grades';
-import { pickCurrentPeriod } from '../home/home-period';
-import { CLOCK, Clock, schoolLocalTime } from '../home/home-time';
+import { averageKey, round1, weightedAverages } from '../home/home-grades';
+import { pickCurrentPeriod, pickPreviousPeriod } from '../home/home-period';
+import { addDays, CLOCK, Clock, localMidnight, schoolLocalTime } from '../home/home-time';
+import { workStatus } from '../home/student-home.service';
+import { StudentWorkStatus } from '../home/entities/student-home.entity';
 import { PrismaService } from '../prisma.service';
 import { courseSchedule, scheduleText } from './course-schedule';
 import { enrolledCourses } from './course-roster';
-import { MyCourseBand, MyCourses } from './entities/my-courses.entity';
+import { MyCourseBand, MyCourseNext, MyCourses } from './entities/my-courses.entity';
 
 export const NO_STUDENT = 'No student profile in this organization';
 export const PERIOD_INVALID = 'El periodo no pertenece al año escolar actual';
@@ -21,7 +23,41 @@ export function courseBand(average: number | null, passMark: number | null): MyC
   return Math.round(average * 10) / 10 < passMark ? 'EN_RIESGO' : 'AL_DIA';
 }
 
-/** The student's *Mis cursos* (ACA-001-S02, FR .4 .5). Scope: BR-ACA-001.1. */
+/** BR-ACA-001.7: done is Entregada, Calificada or Exenta, or Presencial once its date has passed. */
+export function isDone(status: StudentWorkStatus, dueAt: Date, now: Date): boolean {
+  if (status === 'ENTREGADO' || status === 'CALIFICADA' || status === 'EXENTA') return true;
+  return status === 'PRESENCIAL' && dueAt < now;
+}
+
+interface WorkItem {
+  assignmentId: string;
+  title: string;
+  courseId: string;
+  dueAt: Date;
+  status: StudentWorkStatus;
+}
+
+/**
+ * BR-ACA-001.8: the oldest overdue item, else the nearest one still to do (due now or later), else
+ * none ("Nada pendiente").
+ */
+export function nextDelivery(items: WorkItem[], now: Date): MyCourseNext | null {
+  const overdue = items.filter((i) => i.status === 'VENCIDA').sort((a, b) => a.dueAt.getTime() - b.dueAt.getTime())[0];
+  if (overdue) return { assignmentId: overdue.assignmentId, title: overdue.title, dueAt: overdue.dueAt.toISOString(), overdue: true };
+  const upcoming = items
+    .filter((i) => i.dueAt >= now && (i.status === 'PENDIENTE' || i.status === 'PRESENCIAL'))
+    .sort((a, b) => a.dueAt.getTime() - b.dueAt.getTime())[0];
+  return upcoming
+    ? { assignmentId: upcoming.assignmentId, title: upcoming.title, dueAt: upcoming.dueAt.toISOString(), overdue: false }
+    : null;
+}
+
+const mean = (values: (number | null)[]) => {
+  const scored = values.filter((v): v is number => v !== null);
+  return scored.length ? scored.reduce((a, b) => a + b, 0) / scored.length : null;
+};
+
+/** The student's *Mis cursos* (ACA-001-S02, S03: FR .4 .5 .6). Scope: BR-ACA-001.1. */
 @Injectable()
 export class CoursesMineService {
   constructor(
@@ -45,18 +81,21 @@ export class CoursesMineService {
     });
     if (!student) throw new ForbiddenException(NO_STUDENT);
 
+    const now = this.clock.now();
+    const local = schoolLocalTime(now, student.school.timezone);
     const periods = await this.prisma.period.findMany({
       where: { year: student.school.currentYear },
       select: { id: true, name: true, startDate: true, endDate: true },
       orderBy: { startDate: 'asc' },
     });
-    let periodId: string | null;
+    const current = pickCurrentPeriod(periods, local.date);
+    let selected = current;
     if (query.periodId) {
-      if (!periods.some((p) => p.id === query.periodId)) throw new BadRequestException(PERIOD_INVALID);
-      periodId = query.periodId;
-    } else {
-      periodId = pickCurrentPeriod(periods, schoolLocalTime(this.clock.now(), student.school.timezone).date)?.id ?? null;
+      selected = periods.find((p) => p.id === query.periodId) ?? null;
+      if (!selected) throw new BadRequestException(PERIOD_INVALID);
     }
+    const previous = pickPreviousPeriod(periods, selected);
+    const isCurrentPeriod = !!selected && selected.id === current?.id;
 
     // BR-ACA-001.1 / .15: the courses the student is enrolled in.
     const courses = await this.prisma.course.findMany({
@@ -71,18 +110,20 @@ export class CoursesMineService {
       },
     });
     const courseIds = courses.map((c) => c.id);
+    const group = student.classGroup;
+    const periodIds = [selected?.id, previous?.id].filter((id): id is string => !!id);
 
-    const [slots, scores] = await Promise.all([
-      student.classGroup && courseIds.length
+    const [slots, scores, dates] = await Promise.all([
+      group && courseIds.length
         ? this.prisma.classGroupWeeklySchedule.findMany({
-            where: { classGroupId: student.classGroup.id, courseId: { in: courseIds } },
+            where: { classGroupId: group.id, courseId: { in: courseIds } },
             select: { courseId: true, weekday: true, startTime: true, endTime: true, location: true, remote: true, recess: true },
           })
         : Promise.resolve([]),
-      periodId && courseIds.length
+      periodIds.length && courseIds.length
         ? this.prisma.studentGrade.findMany({
             // Published grades only (BR-HOM-001.2).
-            where: { studentId: student.id, grade: { courseId: { in: courseIds }, periodId, published: true } },
+            where: { studentId: student.id, grade: { courseId: { in: courseIds }, periodId: { in: periodIds }, published: true } },
             select: {
               studentId: true,
               score: true,
@@ -90,14 +131,60 @@ export class CoursesMineService {
             },
           })
         : Promise.resolve([]),
+      // The group's work this school year (BR-ACA-001.7, .8, .10), with what the student did with it.
+      group && courseIds.length && periods.length
+        ? this.prisma.assignmentDate.findMany({
+            where: {
+              classGroupId: group.id,
+              date: { gte: periods[0].startDate },
+              assignment: { courseId: { in: courseIds } },
+            },
+            select: {
+              date: true,
+              assignment: {
+                select: {
+                  id: true,
+                  title: true,
+                  courseId: true,
+                  requireSubmission: true,
+                  submissions: { where: { studentId: student.id }, select: { id: true } },
+                  grade: {
+                    select: {
+                      published: true,
+                      studentGrades: { where: { studentId: student.id }, select: { score: true, excused: true } },
+                    },
+                  },
+                },
+              },
+            },
+          })
+        : Promise.resolve([]),
     ]);
     const averages = weightedAverages(scores);
+
+    const work: WorkItem[] = dates.map(({ date, assignment }) => {
+      const cell = assignment.grade?.published ? assignment.grade.studentGrades[0] : undefined;
+      const graded = cell ? { score: cell.score === null ? null : num(cell.score), excused: cell.excused } : null;
+      return {
+        assignmentId: assignment.id,
+        title: assignment.title,
+        courseId: assignment.courseId,
+        dueAt: date,
+        status: workStatus(
+          { dueAt: date, requireSubmission: assignment.requireSubmission, submitted: assignment.submissions.length > 0, graded },
+          now,
+        ),
+      };
+    });
+    const inSelected = (i: WorkItem) => !!selected && i.dueAt >= selected.startDate && i.dueAt <= selected.endDate;
 
     const cards = courses.map((course) => {
       const metric = course.studyPlan.gradeMetric;
       const scale = metric ? { maximum: num(metric.maximum), minimumApproval: num(metric.minimumApproval) } : null;
-      const average = periodId ? (averages.get(averageKey(student.id, course.id, periodId)) ?? null) : null;
+      const average = selected ? (averages.get(averageKey(student.id, course.id, selected.id)) ?? null) : null;
       const teacher = course.teacher;
+      const own = work.filter((i) => i.courseId === course.id);
+      const counted = own.filter(inSelected);
       return {
         id: course.id,
         name: course.name,
@@ -114,20 +201,44 @@ export class CoursesMineService {
         average,
         band: courseBand(average, scale?.minimumApproval ?? null),
         scale,
+        // FR-ACA-001.5: Próxima entrega only for the current period.
+        next: isCurrentPeriod ? nextDelivery(own, now) : null,
+        progress: { done: counted.filter((i) => isDone(i.status, i.dueAt, now)).length, total: counted.length },
       };
     });
     cards.sort((a, b) => a.subject.name.localeCompare(b.subject.name, 'es') || a.name.localeCompare(b.name, 'es'));
 
+    // FR-ACA-001.6: the stats row.
+    const periodMean = (periodId: string | undefined) =>
+      periodId ? mean(courses.map((c) => averages.get(averageKey(student.id, c.id, periodId)) ?? null)) : null;
+    const value = periodMean(selected?.id);
+    const before = periodMean(previous?.id);
+    const weekStart = localMidnight(local.weekStart, local.timezone);
+    const weekEnd = localMidnight(addDays(local.weekEnd, 1), local.timezone);
+    const thisWeek = work.filter((i) => i.dueAt >= weekStart && i.dueAt < weekEnd);
+
     return {
+      timezone: local.timezone,
       periods: periods.map((p) => ({
         id: p.id,
         name: p.name,
         startDate: p.startDate.toISOString(),
         endDate: p.endDate.toISOString(),
       })),
-      periodId,
-      classGroup: student.classGroup,
+      periodId: selected?.id ?? null,
+      isCurrentPeriod,
+      classGroup: group,
       courses: cards,
+      stats: {
+        average: {
+          value: value === null ? null : round1(value),
+          previous: before === null ? null : round1(before),
+          delta: value !== null && before !== null ? round1(value - before) : null,
+        },
+        week: { due: thisWeek.length, overdue: thisWeek.filter((i) => i.status === 'VENCIDA').length },
+        done: cards.reduce((n, c) => n + c.progress.done, 0),
+        total: cards.reduce((n, c) => n + c.progress.total, 0),
+      },
     };
   }
 }

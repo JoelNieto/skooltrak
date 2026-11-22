@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test';
 import { data, E2E_PASSWORD, personas, storageStatePath } from '../support/fixtures';
 
 /**
- * ACA-001-S02: a student's *Mis cursos* (FR-ACA-001.4, .5).
+ * ACA-001-S02, S03: a student's *Mis cursos* (FR-ACA-001.4, .5, .6).
  * docs/product/slices/ACA-001-S02-mis-cursos.md
  *
  * Ana (`student`) is enrolled in `teacher`'s course, which meets her group every day in "Aula 7"
@@ -10,7 +10,7 @@ import { data, E2E_PASSWORD, personas, storageStatePath } from '../support/fixtu
  * weight 100, pass mark 3), so the card reads 4.0 / 5 "Al día". Read-only.
  */
 
-test.describe('Mis cursos @FR-ACA-001.4 @FR-ACA-001.5', () => {
+test.describe('Mis cursos @FR-ACA-001.4 @FR-ACA-001.5 @FR-ACA-001.6', () => {
   test.use({ storageState: storageStatePath('student') });
 
   test("the student's card shows schedule, teacher and period average", async ({ page }) => {
@@ -24,6 +24,16 @@ test.describe('Mis cursos @FR-ACA-001.4 @FR-ACA-001.5', () => {
     await expect(card).toContainText('Al día');
 
     await expect(page.getByLabel('Periodo').locator('option:checked')).toHaveText(data.period.name);
+
+    // ACA-001-S03. Ana's group has 4 assignments this period; the oldest overdue one leads.
+    await expect(card).toContainText(data.studentWork.overdue.title);
+    await expect(card).toContainText('Vencida desde');
+    await expect(card.getByRole('progressbar', { name: /de 4 completadas$/ })).toBeVisible();
+    const stats = page.getByRole('group', { name: 'Resumen del periodo' });
+    await expect(stats).toContainText('Promedio del periodo');
+    await expect(stats).toContainText('Esta semana');
+    await expect(stats).toContainText(/\d de 4/);
+
     await card.click();
     await expect(page).toHaveURL(/\/courses\/.+/);
   });

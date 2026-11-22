@@ -242,7 +242,7 @@ Listed in build order.
 | [ACA-001-S01](../slices/ACA-001-S01-course-color-icon.md) | Course color and subject icon on cards and header | .1 .2, BR .11 | Done (#38, #41) |
 | [ACA-001-S11](../slices/ACA-001-S11-course-roster.md) | Course roster: `CourseEnrollment`, backfill, plan sync incl. CSV import, all readers switched | .20, BR .15 | Done (#40, #41) |
 | [ACA-001-S02](../slices/ACA-001-S02-mis-cursos.md) | Student *Mis cursos*: cards with schedule, teacher, average and period switcher | .4 (part) .5, BR .1 .4 .5 .9 | In review |
-| ACA-001-S03 | Próxima entrega, progress and stats row | .4 (rest) .6, BR .7 .8 .10 | Proposed |
+| [ACA-001-S03](../slices/ACA-001-S03-progress.md) | Próxima entrega, progress and stats row | .4 (rest) .6, BR .7 .8 .10 | In review |
 | ACA-001-S04 | Subject areas and filter chips | .2 (area) .7, BR .14 | Proposed |
 | ACA-001-S05 | Family view of *Mis cursos* | .8, BR .2 | Proposed |
 | ACA-001-S06 | Course page header, Resumen and Asignaciones with status; course access tightened | .10 .11 .12 .13, BR .3 .6 | Proposed |

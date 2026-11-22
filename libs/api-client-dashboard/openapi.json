@@ -6826,6 +6826,11 @@
             "description": ""
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "summary": "Create class group",
         "tags": [
           "class-groups"
@@ -6947,6 +6952,11 @@
             "description": ""
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "summary": "List class groups",
         "tags": [
           "class-groups"
@@ -6970,6 +6980,11 @@
             "description": ""
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "summary": "Update class group",
         "tags": [
           "class-groups"
@@ -7093,6 +7108,11 @@
             "description": ""
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "summary": "Class groups count",
         "tags": [
           "class-groups"
@@ -7117,6 +7137,11 @@
             "description": ""
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "summary": "Class groups by organization",
         "tags": [
           "class-groups"
@@ -7141,6 +7166,11 @@
             "description": ""
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "summary": "Class groups by school",
         "tags": [
           "class-groups"
@@ -7165,6 +7195,11 @@
             "description": ""
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "summary": "Class groups by course",
         "tags": [
           "class-groups"
@@ -7189,6 +7224,11 @@
             "description": ""
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "summary": "Get class group by id",
         "tags": [
           "class-groups"
@@ -7211,6 +7251,11 @@
             "description": ""
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "summary": "Delete class group",
         "tags": [
           "class-groups"
@@ -7236,6 +7281,11 @@
             "description": ""
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "summary": "Create quiz",
         "tags": [
           "quizzes"
@@ -7258,6 +7308,11 @@
             "description": ""
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "summary": "List quizzes for organization",
         "tags": [
           "quizzes"
@@ -7281,6 +7336,11 @@
             "description": ""
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "summary": "Update quiz",
         "tags": [
           "quizzes"
@@ -7305,6 +7365,11 @@
             "description": ""
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "summary": "Get quiz by id",
         "tags": [
           "quizzes"
@@ -7327,6 +7392,11 @@
             "description": ""
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "summary": "Delete quiz",
         "tags": [
           "quizzes"

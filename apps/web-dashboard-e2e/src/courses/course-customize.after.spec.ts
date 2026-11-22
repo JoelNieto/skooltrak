@@ -47,7 +47,10 @@ test.describe('Course customization @FR-ACA-001.3 @BR-ACA-001.12', () => {
     await page.getByRole('button', { name: 'Personalizar' }).click();
     const dialog = page.getByRole('dialog');
     // The radio is visually hidden behind its swatch; people click the swatch.
+    const saved = page.waitForResponse((r) => r.url().endsWith(`/courses/${courseId}/appearance`));
     await dialog.getByTitle('Verde', { exact: true }).click();
+    const res = await saved;
+    expect(res.status(), await res.text()).toBe(200);
     await expect(dialog.getByRole('radio', { name: 'Verde', exact: true })).toBeChecked();
     await dialog.getByRole('button', { name: 'Listo' }).click();
     await expect(page.locator('ui-course-cover[data-color="GREEN"]').first()).toBeVisible();

@@ -19,6 +19,8 @@ import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOperation, ApiQuery, ApiTags } 
 import { CourseAppearanceService, UploadedCover } from './course-appearance.service';
 import { CourseAppearanceInput } from './dto/course-appearance.input';
 import { CourseCoverStorage } from './course-cover-storage';
+import { CourseRosterAdminService } from './course-roster-admin.service';
+import { RosterAddInput } from './dto/roster-add.input';
 import { CourseAccessService } from './course-access.service';
 import { CoursePageService } from './course-page.service';
 import { CoursesMineService } from './courses-mine.service';
@@ -41,6 +43,7 @@ export class CoursesController {
     private readonly page: CoursePageService,
     private readonly appearance: CourseAppearanceService,
     private readonly covers: CourseCoverStorage,
+    private readonly roster: CourseRosterAdminService,
   ) {}
 
   @Post()
@@ -148,6 +151,37 @@ export class CoursesController {
   @ApiOperation({ summary: 'Remove the cover photo (FR-ACA-001.3, BR .12)' })
   removeCover(@Req() req: AuthenticatedRequest, @Param('id') id: string) {
     return this.appearance.removeCover(req.user, id);
+  }
+
+  @Get(':id/roster')
+  @RequirePermissions(Perm.MANAGE_COURSES)
+  @ApiOperation({ summary: "A course's enrollments with source and excluded flag, for admins (FR-ACA-001.19)" })
+  getRoster(@Req() req: AuthenticatedRequest, @Param('id') id: string) {
+    return this.roster.roster(req.user, id);
+  }
+
+  @Get(':id/roster/candidates')
+  @RequirePermissions(Perm.MANAGE_COURSES)
+  @ApiQuery({ name: 'search', required: false })
+  @ApiOperation({ summary: "Students of the course's school who can be added (FR-ACA-001.19)" })
+  getRosterCandidates(@Req() req: AuthenticatedRequest, @Param('id') id: string, @Query('search') search?: string) {
+    return this.roster.candidates(req.user, id, search);
+  }
+
+  @Post(':id/roster')
+  @RequirePermissions(Perm.MANAGE_COURSES)
+  @ApiOperation({ summary: 'Add a student (manual enrollment) or restore an excluded one (FR-ACA-001.19, BR .15)' })
+  addToRoster(@Req() req: AuthenticatedRequest, @Param('id') id: string, @Body() input: RosterAddInput) {
+    return this.roster.add(req.user, id, input.studentId);
+  }
+
+  @Delete(':id/roster/:studentId')
+  @RequirePermissions(Perm.MANAGE_COURSES)
+  @ApiOperation({
+    summary: 'Remove a student: deletes a manual enrollment, excludes a plan one (FR-ACA-001.19, BR .15)',
+  })
+  removeFromRoster(@Req() req: AuthenticatedRequest, @Param('id') id: string, @Param('studentId') studentId: string) {
+    return this.roster.remove(req.user, id, studentId);
   }
 
   @Get(':id/participants')

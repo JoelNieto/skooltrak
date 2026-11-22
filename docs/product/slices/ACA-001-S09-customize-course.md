@@ -4,7 +4,7 @@
 |---|---|
 | **FRD** | [ACA-001](../frd/ACA-001-course-experience.md) |
 | **Implements** | FR-ACA-001.3; BR-ACA-001.12 |
-| **Status** | In review |
+| **Status** | Done |
 | **Branch** | `feat/ACA-001-S09-customize-course` |
 | **Estimate** | 1.5 days |
 

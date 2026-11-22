@@ -247,8 +247,8 @@ Listed in build order.
 | [ACA-001-S05](../slices/ACA-001-S05-parent-courses.md) | Family view of *Mis cursos* | .8, BR .2 | Done (#69) |
 | [ACA-001-S06](../slices/ACA-001-S06-course-page.md) | Course page header, Resumen and Asignaciones with status; course access tightened | .10 .11 .12 .13, BR .3 .6 | Done (#70) |
 | [ACA-001-S07](../slices/ACA-001-S07-grades-tab.md) | Calificaciones tab | .14, BR .5 | Done (#71) |
-| [ACA-001-S08](../slices/ACA-001-S08-participants.md) | Participantes tab | .15, BR .13 | In review |
-| ACA-001-S12 | Admin manages a course roster (electives, exemptions) | .19, BR .15 | Proposed (after S11) |
+| [ACA-001-S08](../slices/ACA-001-S08-participants.md) | Participantes tab | .15, BR .13 | Done (#72) |
+| [ACA-001-S12](../slices/ACA-001-S12-course-roster-admin.md) | Admin manages a course roster (electives, exemptions) | .19, BR .15 | In review |
 | ACA-001-S13 | Homeroom teacher's read-only view of colleagues' courses | .18, BR .16 | Proposed (after S06, S07) |
-| [ACA-001-S09](../slices/ACA-001-S09-customize-course.md) | Teacher sets color and cover photo | .3, BR .12 | In review |
+| [ACA-001-S09](../slices/ACA-001-S09-customize-course.md) | Teacher sets color and cover photo | .3, BR .12 | Done (#73) |
 | [ACA-001-S10](../slices/ACA-001-S10-graded-status.md) | *"Calificada · n"* status from linked grades | .17 | Done (#63) |

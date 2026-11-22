@@ -31,6 +31,7 @@ import { ParentContext } from '../parent/parent-context.service';
 import CourseAssignments from './course-assignments';
 import CourseCalendarDialog from './course-calendar-dialog';
 import CourseCustomizeDialog from './course-customize-dialog';
+import CourseRosterDialog from './course-roster-dialog';
 import { CourseAssignmentsList } from './course-assignments-list';
 import CourseFiles from './course-files';
 import CourseGradeBuckets from './course-grade-buckets';
@@ -331,6 +332,15 @@ type CourseVm = {
           }
           <div uiTabPanel uiCard value="participants" class="p-6">
             <ng-template uiTabContent>
+              @if (auth.hasPermission('MANAGE_COURSES')) {
+                <!-- FR-ACA-001.19: admins add and remove students (electives, exemptions). -->
+                <div class="mb-4 flex justify-end">
+                  <button uiButton variant="secondary" size="sm" type="button" (click)="manageRoster()">
+                    <ui-icon name="user-cog" />
+                    Gestionar estudiantes
+                  </button>
+                </div>
+              }
               @if (participants.value(); as p) {
                 <app-course-participants [data]="p" />
               } @else if (participants.error()) {
@@ -466,6 +476,19 @@ export default class Course {
       })
       .closed.subscribe((changed) => {
         if (changed) this.courseResource.reload();
+      });
+  }
+
+  /** FR-ACA-001.19: an admin adds or removes students on this course. */
+  public manageRoster() {
+    this.modal
+      .open<boolean, CourseRosterDialog>(CourseRosterDialog, {
+        title: 'Estudiantes del curso',
+        size: 'large',
+        data: { courseId: this.id() },
+      })
+      .closed.subscribe((changed) => {
+        if (changed) this.participants.reload();
       });
   }
 

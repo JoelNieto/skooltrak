@@ -28,7 +28,7 @@ export const TEACHER_MISMATCH = 'El docente no pertenece a tu organización';
 
 /**
  * Class groups. Reads need VIEW_CLASS_GROUPS, writes MANAGE_CLASS_GROUPS; everything stays in the
- * caller's organization.
+ * caller's organization. Students only see their own group, without classmates' document ids.
  */
 @ApiTags('class-groups')
 @ApiBearerAuth()
@@ -53,27 +53,29 @@ export class ClassGroupsController {
   @Get()
   @ApiOperation({ summary: 'List class groups' })
   async findAll(@Req() req: AuthenticatedRequest, @Query() query: FetchDataQueryDto) {
-    return this.classGroupsService.findAll(query, await this.listScope(req.user, query));
+    const organizationId = await this.listScope(req.user, query);
+    return this.classGroupsService.findAll(query, organizationId, await this.studentGroupIds(req.user));
   }
 
   @Get('count')
   @ApiOperation({ summary: 'Class groups count' })
   async count(@Req() req: AuthenticatedRequest, @Query() query: FetchDataQueryDto) {
-    return this.classGroupsService.count(query, await this.listScope(req.user, query));
+    const organizationId = await this.listScope(req.user, query);
+    return this.classGroupsService.count(query, organizationId, await this.studentGroupIds(req.user));
   }
 
   @Get('by-organization/:organizationId')
   @ApiOperation({ summary: 'Class groups by organization' })
-  findAllByOrganizationId(@Req() req: AuthenticatedRequest, @Param('organizationId') organizationId: string) {
+  async findAllByOrganizationId(@Req() req: AuthenticatedRequest, @Param('organizationId') organizationId: string) {
     if (requireOrganization(req.user) !== organizationId) throw new ForbiddenException(GROUP_DENIED);
-    return this.classGroupsService.findAllByOrganizationId(organizationId);
+    return this.ownOnly(req.user, await this.classGroupsService.findAllByOrganizationId(organizationId));
   }
 
   @Get('by-school/:schoolId')
   @ApiOperation({ summary: 'Class groups by school' })
   async findAllBySchoolId(@Req() req: AuthenticatedRequest, @Param('schoolId') schoolId: string) {
     await assertSchoolInOrganization(this.prisma, req.user, schoolId);
-    return this.classGroupsService.findAllBySchoolId(schoolId);
+    return this.ownOnly(req.user, await this.classGroupsService.findAllBySchoolId(schoolId));
   }
 
   @Get('by-course/:courseId')
@@ -82,14 +84,16 @@ export class ClassGroupsController {
     const course = await this.prisma.course.findUnique({ where: { id: courseId }, select: { organizationId: true } });
     if (!course) throw new NotFoundException('Curso no encontrado');
     if (course.organizationId !== requireOrganization(req.user)) throw new ForbiddenException(GROUP_DENIED);
-    return this.classGroupsService.findAllByCourseId(courseId);
+    return this.ownOnly(req.user, await this.classGroupsService.findAllByCourseId(courseId));
   }
 
   @Get(':id')
   @ApiOperation({ summary: 'Get class group by id' })
   async findOne(@Req() req: AuthenticatedRequest, @Param('id') id: string) {
     const group = await this.groupInOrganization(req.user, id);
-    return this.classGroupsService.findOne(group.id);
+    const student = await this.viewerStudent(req.user);
+    if (student && student.classGroupId !== group.id) throw new ForbiddenException(GROUP_DENIED);
+    return this.classGroupsService.findOne(group.id, student?.id);
   }
 
   @Patch()
@@ -116,6 +120,29 @@ export class ClassGroupsController {
   async remove(@Req() req: AuthenticatedRequest, @Param('id') id: string) {
     const group = await this.groupInOrganization(req.user, id);
     return this.classGroupsService.remove(group.id);
+  }
+
+  /** A student caller's own student record (null for everyone else); 403 when they have none. */
+  private async viewerStudent(user: AuthUserContext | undefined) {
+    if (user?.role?.toUpperCase() !== 'STUDENT') return null;
+    const student = await this.prisma.student.findFirst({
+      where: { userId: user.userId, organizationId: requireOrganization(user) },
+      select: { id: true, classGroupId: true },
+    });
+    if (!student) throw new ForbiddenException(GROUP_DENIED);
+    return student;
+  }
+
+  /** Students only see their own group; undefined (no filter) for everyone else. */
+  private async studentGroupIds(user: AuthUserContext | undefined): Promise<string[] | undefined> {
+    const student = await this.viewerStudent(user);
+    if (!student) return undefined;
+    return student.classGroupId ? [student.classGroupId] : [];
+  }
+
+  private async ownOnly<G extends { id: string }>(user: AuthUserContext | undefined, groups: G[]): Promise<G[]> {
+    const own = await this.studentGroupIds(user);
+    return own ? groups.filter((g) => own.includes(g.id)) : groups;
   }
 
   /** The caller's organization, and the requested school when given (which must be in it). */

@@ -62,7 +62,13 @@ export class QuizzesController {
   async findOne(@Req() req: AuthenticatedRequest, @Param('id') id: string) {
     const quiz = await this.ref(id);
     if (quiz.organizationId !== requireOrganization(req.user)) throw new ForbiddenException(QUIZ_DENIED);
-    return this.quizzesService.findOne(quiz.id);
+    const full = await this.quizzesService.findOne(quiz.id);
+    // Only the course's teacher and admins see which options are correct.
+    const canManage = await assertCourseStaff(this.prisma, req.user, quiz.courseId, WRITE_DENIED).then(
+      () => true,
+      () => false,
+    );
+    return canManage || !full ? full : withoutAnswers(full);
   }
 
   @Patch()
@@ -105,4 +111,19 @@ export class QuizzesController {
     const found = await this.prisma.teacher.count({ where: { id: teacherId, organizationId } });
     if (!found) throw new BadRequestException(TEACHER_MISMATCH);
   }
+}
+
+/** A quiz with each option's `isCorrect` removed. */
+export function withoutAnswers<Q extends { questions: { options: { isCorrect: boolean }[] }[] }>(quiz: Q) {
+  return {
+    ...quiz,
+    questions: quiz.questions.map((q) => ({
+      ...q,
+      options: q.options.map((option) => {
+        const visible: Partial<typeof option> = { ...option };
+        delete visible.isCorrect;
+        return visible;
+      }),
+    })),
+  };
 }

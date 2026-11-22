@@ -14,11 +14,12 @@ export class ClassGroupsService {
     });
   }
 
-  /** `organizationId`: the caller's; the list never leaves it. */
-  async findAll(fetchDataInput: FetchDataQueryDto, organizationId: string) {
+  /** `organizationId`: the caller's; the list never leaves it. `onlyGroupIds`: a student's own group. */
+  async findAll(fetchDataInput: FetchDataQueryDto, organizationId: string, onlyGroupIds?: string[]) {
     const { skip, page, pageSize, schoolId, search, studyPlanId, teacherId } = fetchDataInput;
     let where: Prisma.ClassGroupWhereInput = {
       organizationId,
+      ...(onlyGroupIds ? { id: { in: onlyGroupIds } } : {}),
       schoolId,
       studyPlanId,
       teacherId,
@@ -33,7 +34,7 @@ export class ClassGroupsService {
     const [data, total] = await this.prisma.$transaction([
       this.prisma.classGroup.findMany({
         include: {
-          teacher: true,
+          teacher: { select: TEACHER_PUBLIC },
           studyPlan: {
             include: {
               degree: true,
@@ -49,10 +50,11 @@ export class ClassGroupsService {
     return new PaginatedResponseDto(data, total, page, pageSize);
   }
 
-  count(fetchDataInput: FetchDataQueryDto, organizationId: string) {
+  count(fetchDataInput: FetchDataQueryDto, organizationId: string, onlyGroupIds?: string[]) {
     const { schoolId, search, studyPlanId } = fetchDataInput;
     let where: Prisma.ClassGroupWhereInput = {
       organizationId,
+      ...(onlyGroupIds ? { id: { in: onlyGroupIds } } : {}),
       schoolId,
       studyPlanId,
     };
@@ -69,7 +71,7 @@ export class ClassGroupsService {
     return this.prisma.classGroup.findMany({
       where: { organizationId },
       include: {
-        teacher: true,
+        teacher: { select: TEACHER_PUBLIC },
         studyPlan: {
           include: {
             degree: true,
@@ -83,7 +85,7 @@ export class ClassGroupsService {
     return this.prisma.classGroup.findMany({
       where: { schoolId },
       include: {
-        teacher: true,
+        teacher: { select: TEACHER_PUBLIC },
         studyPlan: {
           include: {
             degree: true,
@@ -102,7 +104,7 @@ export class ClassGroupsService {
     return this.prisma.classGroup.findMany({
       where: { studyPlanId: course.studyPlanId },
       include: {
-        teacher: true,
+        teacher: { select: TEACHER_PUBLIC },
         studyPlan: {
           include: {
             degree: true,
@@ -113,17 +115,27 @@ export class ClassGroupsService {
     });
   }
 
-  async findOne(id: string) {
+  /**
+   * The group page: names, document ids and avatars only, never contact or medical details. A
+   * student viewer (`viewerStudentId`) also doesn't get classmates' document ids.
+   */
+  async findOne(id: string, viewerStudentId?: string) {
     const classGroup = await this.prisma.classGroup.findUnique({
       where: { id },
       include: {
-        teacher: {
-          include: {
-            user: true,
-          },
-        },
+        teacher: { select: { ...TEACHER_PUBLIC, user: { select: USER_PUBLIC } } },
         students: {
-          include: { user: true },
+          select: {
+            id: true,
+            firstName: true,
+            middleName: true,
+            fatherName: true,
+            motherName: true,
+            documentId: true,
+            classGroupId: true,
+            enrollmentStatus: true,
+            user: { select: USER_PUBLIC },
+          },
           orderBy: { firstName: 'asc' },
         },
         studyPlan: {
@@ -138,11 +150,14 @@ export class ClassGroupsService {
     // Fetch courses via studyPlan
     const courses = await this.prisma.course.findMany({
       where: { studyPlanId: classGroup.studyPlanId },
-      include: { teacher: true, subject: true },
+      include: { teacher: { select: TEACHER_PUBLIC }, subject: true },
       orderBy: { subject: { name: 'asc' } },
     });
 
-    return { ...classGroup, courses };
+    const students = viewerStudentId
+      ? classGroup.students.map((st) => (st.id === viewerStudentId ? st : { ...st, documentId: '' }))
+      : classGroup.students;
+    return { ...classGroup, students, courses };
   }
 
   update(id: string, updateClassGroupInput: UpdateClassGroupInput) {
@@ -172,3 +187,16 @@ export class ClassGroupsService {
     return this.prisma.classGroup.delete({ where: { id } });
   }
 }
+
+/** What a group's pages show of a teacher: never contact, address or document details. */
+const TEACHER_PUBLIC = {
+  id: true,
+  firstName: true,
+  middleName: true,
+  fatherName: true,
+  motherName: true,
+  userId: true,
+} as const;
+
+/** What a group's pages show of a user: never the email or account fields. */
+const USER_PUBLIC = { id: true, name: true, firstName: true, lastName: true, color: true, image: true } as const;

@@ -53,6 +53,7 @@ import type {
   CoursesControllerCountParams,
   CoursesControllerFindAllParams,
   CoursesControllerFindOneParams,
+  CoursesControllerGetRosterCandidatesParams,
   CoursesControllerGradesSummaryParams,
   CoursesControllerMineParams,
   CoursesControllerParticipantsParams,
@@ -137,6 +138,7 @@ import type {
   RemoveShareInput,
   RequestJoinSchoolInput,
   ReviewSubmissionInput,
+  RosterAddInput,
   SaveCellsInput,
   SaveHabitEvaluationInput,
   SchoolLogoUploadInput,
@@ -3712,6 +3714,159 @@ if(coursesControllerUploadCoverBody.file !== undefined) {
 
     return this.http.delete<TData>(
       `/api/v1/courses/${id}/cover`,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'body',
+      }
+    );
+  }
+
+/**
+ * @summary A course's enrollments with source and excluded flag, for admins (FR-ACA-001.19)
+ */
+ coursesControllerGetRoster<TData = void>(id: string, options?: HttpClientBodyOptions): Observable<TData>;
+ coursesControllerGetRoster<TData = void>(id: string, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
+ coursesControllerGetRoster<TData = void>(id: string, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
+  coursesControllerGetRoster<TData = void>(
+    id: string, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
+    if (options?.observe === 'events') {
+      return this.http.get<TData>(
+      `/api/v1/courses/${id}/roster`,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'events',
+      }
+    );
+    }
+
+    if (options?.observe === 'response') {
+      return this.http.get<TData>(
+      `/api/v1/courses/${id}/roster`,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'response',
+      }
+    );
+    }
+
+    return this.http.get<TData>(
+      `/api/v1/courses/${id}/roster`,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'body',
+      }
+    );
+  }
+
+/**
+ * @summary Add a student (manual enrollment) or restore an excluded one (FR-ACA-001.19, BR .15)
+ */
+ coursesControllerAddToRoster<TData = void>(id: string,
+    rosterAddInput: RosterAddInput, options?: HttpClientBodyOptions): Observable<TData>;
+ coursesControllerAddToRoster<TData = void>(id: string,
+    rosterAddInput: RosterAddInput, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
+ coursesControllerAddToRoster<TData = void>(id: string,
+    rosterAddInput: RosterAddInput, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
+  coursesControllerAddToRoster<TData = void>(
+    id: string,
+    rosterAddInput: RosterAddInput, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
+    if (options?.observe === 'events') {
+      return this.http.post<TData>(
+      `/api/v1/courses/${id}/roster`,
+      rosterAddInput,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'events',
+      }
+    );
+    }
+
+    if (options?.observe === 'response') {
+      return this.http.post<TData>(
+      `/api/v1/courses/${id}/roster`,
+      rosterAddInput,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'response',
+      }
+    );
+    }
+
+    return this.http.post<TData>(
+      `/api/v1/courses/${id}/roster`,
+      rosterAddInput,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'body',
+      }
+    );
+  }
+
+/**
+ * @summary Students of the course's school who can be added (FR-ACA-001.19)
+ */
+ coursesControllerGetRosterCandidates<TData = void>(id: string,
+    params?: CoursesControllerGetRosterCandidatesParams, options?: HttpClientBodyOptions): Observable<TData>;
+ coursesControllerGetRosterCandidates<TData = void>(id: string,
+    params?: CoursesControllerGetRosterCandidatesParams, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
+ coursesControllerGetRosterCandidates<TData = void>(id: string,
+    params?: CoursesControllerGetRosterCandidatesParams, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
+  coursesControllerGetRosterCandidates<TData = void>(
+    id: string,
+    params?: CoursesControllerGetRosterCandidatesParams, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
+    const filteredParams = filterParams({...params, ...options?.params}, new Set<string>([]));
+
+    if (options?.observe === 'events') {
+      return this.http.get<TData>(
+      `/api/v1/courses/${id}/roster/candidates`,{
+    ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'events',
+        params: filteredParams,}
+    );
+    }
+
+    if (options?.observe === 'response') {
+      return this.http.get<TData>(
+      `/api/v1/courses/${id}/roster/candidates`,{
+    ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'response',
+        params: filteredParams,}
+    );
+    }
+
+    return this.http.get<TData>(
+      `/api/v1/courses/${id}/roster/candidates`,{
+    ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'body',
+        params: filteredParams,}
+    );
+  }
+
+/**
+ * @summary Remove a student: deletes a manual enrollment, excludes a plan one (FR-ACA-001.19, BR .15)
+ */
+ coursesControllerRemoveFromRoster<TData = void>(id: string,
+    studentId: string, options?: HttpClientBodyOptions): Observable<TData>;
+ coursesControllerRemoveFromRoster<TData = void>(id: string,
+    studentId: string, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
+ coursesControllerRemoveFromRoster<TData = void>(id: string,
+    studentId: string, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
+  coursesControllerRemoveFromRoster<TData = void>(
+    id: string,
+    studentId: string, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
+    if (options?.observe === 'events') {
+      return this.http.delete<TData>(
+      `/api/v1/courses/${id}/roster/${studentId}`,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'events',
+      }
+    );
+    }
+
+    if (options?.observe === 'response') {
+      return this.http.delete<TData>(
+      `/api/v1/courses/${id}/roster/${studentId}`,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'response',
+      }
+    );
+    }
+
+    return this.http.delete<TData>(
+      `/api/v1/courses/${id}/roster/${studentId}`,{
         ...(options as Omit<NonNullable<typeof options>, 'observe'>),
         observe: 'body',
       }

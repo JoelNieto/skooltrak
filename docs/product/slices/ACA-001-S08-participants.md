@@ -4,7 +4,7 @@
 |---|---|
 | **FRD** | [ACA-001](../frd/ACA-001-course-experience.md) |
 | **Implements** | FR-ACA-001.15, .11 (head count); BR-ACA-001.13 |
-| **Status** | In review |
+| **Status** | Done |
 | **Branch** | `feat/ACA-001-S08-participants` |
 | **Estimate** | 1 day |
 

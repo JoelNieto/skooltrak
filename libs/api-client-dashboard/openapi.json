@@ -3235,6 +3235,146 @@
         ]
       }
     },
+    "/api/v1/courses/{id}/roster": {
+      "get": {
+        "operationId": "CoursesController_getRoster",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "A course's enrollments with source and excluded flag, for admins (FR-ACA-001.19)",
+        "tags": [
+          "courses"
+        ]
+      },
+      "post": {
+        "operationId": "CoursesController_addToRoster",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RosterAddInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Add a student (manual enrollment) or restore an excluded one (FR-ACA-001.19, BR .15)",
+        "tags": [
+          "courses"
+        ]
+      }
+    },
+    "/api/v1/courses/{id}/roster/candidates": {
+      "get": {
+        "operationId": "CoursesController_getRosterCandidates",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Students of the course's school who can be added (FR-ACA-001.19)",
+        "tags": [
+          "courses"
+        ]
+      }
+    },
+    "/api/v1/courses/{id}/roster/{studentId}": {
+      "delete": {
+        "operationId": "CoursesController_removeFromRoster",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "studentId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Remove a student: deletes a manual enrollment, excludes a plan one (FR-ACA-001.19, BR .15)",
+        "tags": [
+          "courses"
+        ]
+      }
+    },
     "/api/v1/courses/{id}/participants": {
       "get": {
         "operationId": "CoursesController_participants",
@@ -12173,6 +12313,10 @@
         "properties": {}
       },
       "CourseAppearanceInput": {
+        "type": "object",
+        "properties": {}
+      },
+      "RosterAddInput": {
         "type": "object",
         "properties": {}
       },

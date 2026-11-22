@@ -6,7 +6,7 @@ import {
   PermissionsGuard,
   RequirePermissions,
 } from '@/auth';
-import { ForbiddenException, NotFoundException, UseGuards } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, NotFoundException, UseGuards } from '@nestjs/common';
 import {
   Body,
   Controller,
@@ -18,6 +18,7 @@ import {
   Req,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { assertSchoolInOrganization, requireOrganization } from '../org-scope';
 import { PrismaService } from '../prisma.service';
 import { StudyPlansService } from '../study-plans/study-plans.service';
 import { ChargesService } from './charges.service';
@@ -39,9 +40,8 @@ export class FinancialController {
   ) {}
 
   /**
-   * Authorizes viewing a student's financials. Staff with VIEW_FINANCIALS may
-   * view anyone; a student may view their own; a parent may view their linked
-   * children. Throws otherwise.
+   * Authorizes viewing a student's financials: finance staff of the student's organization; the
+   * student themselves; a parent of the student (any organization, BR-HOM-001.9). Throws otherwise.
    */
   private async assertCanViewStudentFinancials(
     req: AuthenticatedRequest,
@@ -51,17 +51,17 @@ export class FinancialController {
     if (!user?.userId) {
       throw new ForbiddenException('No autenticado');
     }
-    if (user.permissions?.includes(Perm.VIEW_FINANCIALS)) {
-      return;
-    }
     const student = await this.prisma.student.findUnique({
       where: { id: studentId },
-      include: { user: true, parents: true },
+      select: { organizationId: true, userId: true, parents: { select: { userId: true } } },
     });
     if (!student) {
       throw new NotFoundException('Estudiante no encontrado');
     }
-    const isOwner = student.user?.id === user.userId;
+    if (isFinanceStaff(user) && student.organizationId === user.organizationId) {
+      return;
+    }
+    const isOwner = student.userId === user.userId;
     const isParent = (student.parents ?? []).some((p) => p.userId === user.userId);
     if (!isOwner && !isParent) {
       throw new ForbiddenException('No tienes acceso a este estado de cuenta');
@@ -120,7 +120,8 @@ export class FinancialController {
   @Get('charges/by-school')
   @RequirePermissions(Perm.VIEW_FINANCIALS)
   @ApiOperation({ summary: 'Charges by school (filtered + paginated)' })
-  getChargesBySchool(
+  async getChargesBySchool(
+    @Req() req: AuthenticatedRequest,
     @Query('schoolId') schoolId: string,
     @Query('year') year?: string,
     @Query('status') status?: string,
@@ -130,6 +131,7 @@ export class FinancialController {
     @Query('skip') skip?: string,
     @Query('take') take?: string,
   ) {
+    await this.assertFinanceStaffOfSchool(req.user, schoolId);
     return this.chargesService.findBySchool({
       schoolId,
       year: year != null ? Number(year) : undefined,
@@ -145,7 +147,8 @@ export class FinancialController {
   @Get('payments/by-school')
   @RequirePermissions(Perm.VIEW_FINANCIALS)
   @ApiOperation({ summary: 'Payments by school (filtered + paginated)' })
-  getPaymentsBySchool(
+  async getPaymentsBySchool(
+    @Req() req: AuthenticatedRequest,
     @Query('schoolId') schoolId: string,
     @Query('year') year?: string,
     @Query('studentId') studentId?: string,
@@ -153,6 +156,7 @@ export class FinancialController {
     @Query('skip') skip?: string,
     @Query('take') take?: string,
   ) {
+    await this.assertFinanceStaffOfSchool(req.user, schoolId);
     return this.paymentsService.findBySchool({
       schoolId,
       year: year != null ? Number(year) : undefined,
@@ -229,36 +233,90 @@ export class FinancialController {
   @Post('charges')
   @RequirePermissions(Perm.MANAGE_FINANCIALS)
   @ApiOperation({ summary: 'Create charges' })
-  createCharge(@Body() input: CreateChargeInput) {
+  async createCharge(@Req() req: AuthenticatedRequest, @Body() input: CreateChargeInput) {
+    await this.assertFinanceStaffOfSchool(req.user, input.schoolId);
+    if (input.studentId) {
+      const found = await this.prisma.student.count({ where: { id: input.studentId, schoolId: input.schoolId } });
+      if (!found) throw new BadRequestException(STUDENT_MISMATCH);
+    }
+    if (input.studyPlanId) {
+      const found = await this.prisma.studyPlan.count({ where: { id: input.studyPlanId, schoolId: input.schoolId } });
+      if (!found) throw new BadRequestException(PLAN_MISMATCH);
+    }
     return this.chargesService.create(input);
   }
 
   @Post('payments')
   @RequirePermissions(Perm.MANAGE_FINANCIALS)
   @ApiOperation({ summary: 'Create payment' })
-  createPayment(@Body() input: CreatePaymentInput) {
-    return this.paymentsService.create(input);
+  async createPayment(@Req() req: AuthenticatedRequest, @Body() input: CreatePaymentInput) {
+    await this.assertFinanceStaffOfStudent(req.user, input.studentId);
+    if (input.chargeId) {
+      const found = await this.prisma.charge.count({ where: { id: input.chargeId, studentId: input.studentId } });
+      if (!found) throw new BadRequestException(CHARGE_MISMATCH);
+    }
+    // Who recorded it comes from the session, never from the request.
+    return this.paymentsService.create({ ...input, createdBy: req.user?.userId });
   }
 
   @Delete('charges/:id')
   @RequirePermissions(Perm.MANAGE_FINANCIALS)
   @ApiOperation({ summary: 'Remove charge' })
-  removeCharge(@Param('id') id: string) {
-    return this.chargesService.remove(id);
+  async removeCharge(@Req() req: AuthenticatedRequest, @Param('id') id: string) {
+    const charge = await this.prisma.charge.findUnique({ where: { id }, select: { id: true, schoolId: true } });
+    if (!charge) throw new NotFoundException('Cargo no encontrado');
+    await this.assertFinanceStaffOfSchool(req.user, charge.schoolId);
+    return this.chargesService.remove(charge.id);
   }
 
   @Post('study-plan-config')
   @RequirePermissions(Perm.MANAGE_FINANCIALS)
   @ApiOperation({ summary: 'Update study plan financial config' })
-  updateStudyPlanFinancialConfig(@Body() input: UpdateStudyPlanFinancialInput) {
+  async updateStudyPlanFinancialConfig(@Req() req: AuthenticatedRequest, @Body() input: UpdateStudyPlanFinancialInput) {
+    const plan = await this.prisma.studyPlan.findUnique({ where: { id: input.studyPlanId }, select: { schoolId: true } });
+    if (!plan) throw new NotFoundException('Plan de estudio no encontrado');
+    await this.assertFinanceStaffOfSchool(req.user, plan.schoolId);
     return this.studyPlansService.updateFinancialConfig(input);
   }
 
   @Post('charges/regenerate-from-study-plan')
   @RequirePermissions(Perm.MANAGE_FINANCIALS)
   @ApiOperation({ summary: 'Regenerate study-plan charges for an existing student' })
-  regenerateFromStudyPlan(@Body() input: RegenerateStudyPlanChargesInput) {
+  async regenerateFromStudyPlan(@Req() req: AuthenticatedRequest, @Body() input: RegenerateStudyPlanChargesInput) {
+    await this.assertFinanceStaffOfStudent(req.user, input.studentId);
     return this.chargesService.regenerateFromStudyPlan(input.studentId, input.force ?? false);
   }
+
+  /** Throws 403 unless the caller is finance staff of the school's organization. */
+  private async assertFinanceStaffOfSchool(user: AuthUserContext | undefined, schoolId: string): Promise<void> {
+    if (!isFinanceStaff(user)) throw new ForbiddenException(FINANCE_DENIED);
+    await assertSchoolInOrganization(this.prisma, user, schoolId);
+  }
+
+  /** Throws 403 unless the caller is finance staff of the student's organization. */
+  private async assertFinanceStaffOfStudent(user: AuthUserContext | undefined, studentId: string): Promise<void> {
+    if (!isFinanceStaff(user)) throw new ForbiddenException(FINANCE_DENIED);
+    const student = await this.prisma.student.findUnique({ where: { id: studentId }, select: { organizationId: true } });
+    if (!student) throw new NotFoundException('Estudiante no encontrado');
+    if (student.organizationId !== requireOrganization(user)) throw new ForbiddenException(FINANCE_DENIED);
+  }
+}
+
+export const FINANCE_DENIED = 'No tienes acceso a las finanzas de esta organización';
+export const STUDENT_MISMATCH = 'El estudiante no pertenece a esta escuela';
+export const PLAN_MISMATCH = 'El plan de estudio no pertenece a esta escuela';
+export const CHARGE_MISMATCH = 'El cargo no pertenece a este estudiante';
+
+const ADMIN_ROLES = new Set(['ORG_ADMIN', 'ADMIN', 'SYSADMIN']);
+
+/**
+ * School finance staff: admins, or a staff role holding VIEW_FINANCIALS. Parents and students hold
+ * VIEW_FINANCIALS too, but only for their own or their children's accounts.
+ */
+export function isFinanceStaff(user: AuthUserContext | undefined): boolean {
+  const role = user?.role?.toUpperCase() ?? '';
+  if (ADMIN_ROLES.has(role)) return true;
+  if (role === 'PARENT' || role === 'STUDENT') return false;
+  return !!user?.permissions?.includes(Perm.VIEW_FINANCIALS);
 }
 

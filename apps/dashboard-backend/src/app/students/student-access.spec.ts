@@ -31,7 +31,12 @@ jest.mock('../grades/grades.service', () => ({ GradesService: class {} }));
 
 import { Perm, PERMISSIONS_KEY } from '@/auth';
 import { GradeAccessService, READ_DENIED } from '../grades/grade-access.service';
-import { OMITTED_BY_DEFAULT, PrismaService } from '../prisma.service';
+import {
+  OMITTED_BY_DEFAULT,
+  PrismaService,
+  STUDENT_PERSONAL_DETAILS,
+  TEACHER_PERSONAL_DETAILS,
+} from '../prisma.service';
 import { StudentsController } from './students.controller';
 import { REFS_DENIED, STUDENT_DENIED, StudentsService } from './students.service';
 
@@ -144,7 +149,7 @@ describe("students API — a student's grades across courses", () => {
 
 describe('students API — enrollment codes', () => {
   it('are omitted from every Prisma query by default', () => {
-    expect(OMITTED_BY_DEFAULT.student).toEqual({ enrollmentCode: true, enrollmentCodeGeneratedAt: true });
+    expect(OMITTED_BY_DEFAULT.student).toMatchObject({ enrollmentCode: true, enrollmentCodeGeneratedAt: true });
     const client = new PrismaService() as unknown as { options: { omit: unknown } };
     expect(client.options.omit).toBe(OMITTED_BY_DEFAULT);
   });
@@ -201,6 +206,20 @@ describe('students API — enrollment codes', () => {
       expect(prisma.student.findUniqueOrThrow).not.toHaveBeenCalled();
       expect(prisma.student.update).not.toHaveBeenCalled();
     });
+  });
+});
+
+describe('Prisma client — personal details ride along only on profile pages', () => {
+  it("omits students' and teachers' contact, birth and medical details by default", () => {
+    const student = Object.keys(STUDENT_PERSONAL_DETAILS);
+    expect(student.sort()).toEqual(
+      ['address', 'allergies', 'birthDate', 'bloodType', 'emergencyContactName', 'emergencyContactPhone', 'medicalNotes', 'phone'].sort(),
+    );
+    for (const field of student) expect(OMITTED_BY_DEFAULT.student).toHaveProperty(field, true);
+    for (const field of Object.keys(TEACHER_PERSONAL_DETAILS)) expect(OMITTED_BY_DEFAULT.teacher).toHaveProperty(field, true);
+    // The profile opt-ins only bring fields back; they never omit more.
+    expect(Object.values(STUDENT_PERSONAL_DETAILS).every((v) => v === false)).toBe(true);
+    expect(Object.values(TEACHER_PERSONAL_DETAILS).every((v) => v === false)).toBe(true);
   });
 });
 

@@ -12,6 +12,9 @@ import { PrismaPg } from '@prisma/adapter-pg';
  * - A student's enrollment code lets a new account link itself as that child's parent, so it must
  *   never ride along in an `include: { student: true }`. Only admins read it, through
  *   `StudentsService` (`MANAGE_STUDENTS`).
+ * - Personal details (contact, birth date, medical) of students and teachers. Rosters, grades,
+ *   chats, attendance and the rest include students and teachers everywhere; only their profile
+ *   pages read these, through `STUDENT_PERSONAL_DETAILS` / `TEACHER_PERSONAL_DETAILS`.
  *
  * Applied at runtime only: typing the client with it would ripple through every helper that takes
  * a plain `PrismaClient`. Result types therefore still list these fields; treat them as absent
@@ -20,7 +23,39 @@ import { PrismaPg } from '@prisma/adapter-pg';
 export const OMITTED_BY_DEFAULT = {
   user: { password: true },
   account: { password: true, accessToken: true, refreshToken: true, idToken: true },
-  student: { enrollmentCode: true, enrollmentCodeGeneratedAt: true },
+  student: {
+    enrollmentCode: true,
+    enrollmentCodeGeneratedAt: true,
+    birthDate: true,
+    address: true,
+    phone: true,
+    bloodType: true,
+    allergies: true,
+    medicalNotes: true,
+    emergencyContactName: true,
+    emergencyContactPhone: true,
+  },
+  teacher: { birthDate: true, address: true, phoneNumber: true, personalEmail: true },
+} as const;
+
+/** `omit` for a student profile: brings back the personal details omitted by default. */
+export const STUDENT_PERSONAL_DETAILS = {
+  birthDate: false,
+  address: false,
+  phone: false,
+  bloodType: false,
+  allergies: false,
+  medicalNotes: false,
+  emergencyContactName: false,
+  emergencyContactPhone: false,
+} as const;
+
+/** `omit` for a teacher profile: brings back the personal details omitted by default. */
+export const TEACHER_PERSONAL_DETAILS = {
+  birthDate: false,
+  address: false,
+  phoneNumber: false,
+  personalEmail: false,
 } as const;
 
 @Injectable()

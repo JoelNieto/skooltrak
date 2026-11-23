@@ -20,7 +20,7 @@ import * as QRCode from 'qrcode';
 import { ChatSyncService } from '../chats/chat-sync.service';
 import { ACTIVE_ENROLLMENT, enrolledCourses, enrolledIn, syncStudentPlan } from '../courses/course-roster';
 import { ChargesService } from '../financial/charges.service';
-import { PrismaService } from '../prisma.service';
+import { PrismaService, STUDENT_PERSONAL_DETAILS } from '../prisma.service';
 import { CreateStudentInput } from './dto/create-student.input';
 import { UpdateStudentInput } from './dto/update-student.input';
 
@@ -541,6 +541,8 @@ export class StudentsService {
   async findOne(id: string) {
     const { courseEnrollments, ...student } = await this.prisma.student.findUniqueOrThrow({
       where: { id },
+      // The profile page: the only read that brings back personal details (prisma.service.ts).
+      omit: STUDENT_PERSONAL_DETAILS,
       include: {
         classGroup: {
           include: { studyPlan: { include: { gradeMetric: true } } },

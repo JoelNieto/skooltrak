@@ -229,7 +229,8 @@ await prisma.course.findMany();
 - **User** - With role, can be student/teacher/parent (1:1)
 - **Role/Permission** - RBAC system
 - Educational: School, Course, ClassGroup, Teacher, Student, Parent
-- Communication: Message, Newsletter, File
+- Communication (COM-003): Channel, ChannelPost, ChannelReply, ChannelPostRead, DirectConversation, DirectMessage
+- Files: File
 
 ### Schema Changes Workflow
 

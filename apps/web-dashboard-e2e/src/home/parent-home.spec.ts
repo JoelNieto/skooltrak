@@ -1,6 +1,8 @@
 import { expect, test } from '@playwright/test';
 import { data, personas, storageStatePath } from '../support/fixtures';
 
+const teacherName = `${personas.teacher.firstName} ${personas.teacher.lastName}`;
+
 /**
  * HOM-001-S06 — parent home: switcher with alert counts, alerts and KPIs of the selected child,
  * and the link check (BR-HOM-001.9).
@@ -71,9 +73,10 @@ test.describe('Parent home', () => {
     await expect(grades.getByText(data.publishedGrade.title, { exact: false })).toBeVisible();
     await expect(grades.getByText(data.grade.title, { exact: false })).toHaveCount(0); // unpublished
 
-    // The family thread is about Ana; its last sender depends on whether the S03 reply ran first.
+    // The direct conversation is about Ana and titled with the teacher (COM-003); its last sender
+    // depends on whether the S03 reply ran first.
     const messages = page.getByRole('region', { name: 'Mensajes de docentes' });
-    await expect(messages.getByText(data.familyThread.title)).toBeVisible();
+    await expect(messages.getByText(teacherName).first()).toBeVisible();
 
     const account = page.getByRole('region', { name: 'Estado de cuenta' });
     await expect(account.getByText('Pendiente', { exact: true })).toBeVisible();
@@ -87,7 +90,7 @@ test.describe('Parent home', () => {
 
     await page.getByRole('group', { name: 'Elegir hijo' }).getByRole('button', { name: new RegExp(beto) }).click();
     await expect(page.getByRole('region', { name: `Requiere tu atención · ${data.relatedStudents[1]}` })).toBeVisible();
-    await expect(page.getByRole('region', { name: 'Mensajes de docentes' }).getByText(data.familyThread.title)).toHaveCount(0);
+    await expect(page.getByRole('region', { name: 'Mensajes de docentes' }).getByText(teacherName)).toHaveCount(0);
     await expect(page.getByRole('region', { name: 'Estado de cuenta' }).getByText('Al día', { exact: true })).toBeVisible();
   });
 

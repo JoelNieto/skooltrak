@@ -19,11 +19,9 @@ import {
   Alert,
   UiSelect,
 } from '#/ui';
-import { HttpClient, HttpErrorResponse, httpResource } from '@angular/common/http';
+import { HttpErrorResponse, httpResource } from '@angular/common/http';
 import { Component, computed, inject, input, linkedSignal, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
-import { ChatType } from '@generated/prisma';
-import { firstValueFrom } from 'rxjs';
 import AssignmentForm from '../assignments/assignment-form';
 import CourseAttendance from '../attendance/course-attendance';
 import Auth from '../auth/auth';
@@ -41,6 +39,7 @@ import { CourseGradesSummaryView } from './course-grades-summary';
 import { CourseParticipants, CourseParticipantsList } from './course-participants';
 import { CourseOverview } from './course-overview';
 import { CourseWork } from './course-work';
+import { CommunicationApi } from '../communication/communication-api';
 
 type CourseVm = {
   id: string;
@@ -183,18 +182,12 @@ type CourseVm = {
                     Ver calendario
                   </button>
                 }
-                @if (canStartCourseChat()) {
-                  <button
-                    uiButton
-                    [loading]="startingChat()"
-                    variant="ghost"
-                    (click)="startCourseChat()"
-                    [disabled]="startingChat()"
-                  >
-                    @if (!startingChat()) {
-                      <ui-icon name="message-circle" />
+                @if (canOpenChannel()) {
+                  <button uiButton variant="ghost" type="button" [loading]="openingChannel()" [disabled]="openingChannel()" (click)="openChannel()">
+                    @if (!openingChannel()) {
+                      <ui-icon name="megaphone" />
                     }
-                    Chat
+                    Canal
                   </button>
                 }
                 @if (staff() && auth.hasPermission('MANAGE_ASSIGNMENTS')) {
@@ -390,7 +383,6 @@ type CourseVm = {
 export default class Course {
   public id = input.required<string>();
   public auth = inject(Auth);
-  private http = inject(HttpClient);
   private modal = inject(Modal);
   private router = inject(Router);
   private toast = inject(Toast);
@@ -447,12 +439,14 @@ export default class Course {
     const params: Record<string, string> = studentId ? { studentId } : {};
     return { url: `/api/v1/courses/${this.id()}/work`, params };
   });
-  startingChat = signal(false);
+  private communication = inject(CommunicationApi);
+  openingChannel = signal(false);
 
-  canStartCourseChat() {
+  /** BR-COM-003.2: the course's teacher or an admin manages its channel. */
+  canOpenChannel() {
     // BR-ACA-001.16: a homeroom teacher's view has no write actions.
     if (!this.staff()) return false;
-    if (!this.auth.hasPermission('MANAGE_MESSAGES')) return false;
+    if (!this.auth.hasPermission('COMMUNICATION_CHANNELS')) return false;
     const course = this.courseResource.value() as {
       teacher?: { user?: { id?: string }; userId?: string | null };
     } | null;
@@ -460,20 +454,17 @@ export default class Course {
     return this.auth.isAdmin() || course.teacher?.user?.id === this.auth.user()?.id;
   }
 
-  async startCourseChat() {
-    this.startingChat.set(true);
+  /** COM-003: the course's channel, or the create form set to it. */
+  async openChannel() {
+    this.openingChannel.set(true);
     try {
-      const chat = await firstValueFrom(
-        this.http.post<{ id: string }>(`/api/v1/chats/contextual`, {
-          contextType: ChatType.COURSE,
-          contextId: this.id(),
-        }),
-      );
-      if (chat?.id) this.router.navigate(['/chats', chat.id]);
+      const id = await this.communication.managedChannelFor('COURSE', this.id());
+      if (id) this.router.navigate(['/communication/channels', id]);
+      else this.router.navigate(['/communication/channels/new'], { queryParams: { scope: 'COURSE', targetId: this.id() } });
     } catch {
-      this.toast.showError('Error al crear chat');
+      this.toast.showError('No se pudo abrir el canal');
     } finally {
-      this.startingChat.set(false);
+      this.openingChannel.set(false);
     }
   }
   public courseResource = httpResource<CourseVm>(() => {

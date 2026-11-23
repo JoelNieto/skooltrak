@@ -83,10 +83,6 @@ export const appRoutes: Route[] = [
         loadComponent: () => import('./teacher/teacher-gradebook'),
       },
       {
-        path: 'teacher/communication',
-        loadComponent: () => import('./teacher/teacher-parent-communication'),
-      },
-      {
         path: 'teacher/reports',
         loadComponent: () => import('./teacher/teacher-reports'),
       },
@@ -97,10 +93,6 @@ export const appRoutes: Route[] = [
       {
         path: 'parent/progress',
         loadComponent: () => import('./parent/parent-child-progress'),
-      },
-      {
-        path: 'parent/communication',
-        loadComponent: () => import('./parent/parent-teacher-communication'),
       },
       {
         path: 'parent/notifications',

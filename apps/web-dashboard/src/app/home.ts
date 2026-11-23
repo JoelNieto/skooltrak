@@ -6,7 +6,7 @@ import { Router, RouterLink } from '@angular/router';
 import { toFetchQueryParams } from './core/fetch-query-params';
 import Store from './core/store';
 import WelcomeBanner from './shared/welcome-banner';
-import { RecentBroadcasts } from './communication/recent-broadcasts';
+import { RecentChannelPosts } from './communication/recent-channel-posts';
 
 type Ref = { id: string; name: string };
 
@@ -28,7 +28,6 @@ type AdminAttention = {
   currencyCode: string;
   tiles: {
     joinRequests: { total: number; teachers: number; parents: number; others: number; oldestAt: string | null };
-    broadcastsToApprove: number;
     missedAttendance: number;
     overdueCharges: { count: number; amount: number; families: number } | null;
     failedImports: number;
@@ -72,23 +71,6 @@ type RecentTeacher = {
   user?: { email?: string | null } | null;
 };
 
-type InboxRow = {
-  id: string;
-  message: {
-    subject: string;
-    createdAt: string;
-    sender: { name?: string | null; firstName?: string; lastName?: string };
-  };
-};
-
-type PublishedNewsletter = {
-  id: string;
-  title: string;
-  content: string;
-  publishedAt: string | null;
-  author: { name?: string | null; firstName?: string; lastName?: string };
-};
-
 @Component({
   selector: 'app-home',
   imports: [
@@ -103,7 +85,7 @@ type PublishedNewsletter = {
     StatCard,
     EmptyState,
     WelcomeBanner,
-    RecentBroadcasts,
+    RecentChannelPosts,
     Icon,
   ],
   template: `
@@ -115,9 +97,9 @@ type PublishedNewsletter = {
     <lib-page-header
       [title]="greeting()"
       [subtitle]="headerSubtitle()"
-      actionLabel="Nuevo comunicado"
+      actionLabel="Nuevo canal"
       actionIcon="megaphone"
-      (action)="newBroadcast()"
+      (action)="newChannel()"
     />
 
     @if (attention.value()?.periodClose; as close) {
@@ -211,43 +193,8 @@ type PublishedNewsletter = {
       />
     </div>
 
-    <div class="mt-6">
-      <app-recent-broadcasts />
-    </div>
-
     <div class="mt-6 grid gap-5 lg:grid-cols-3">
-      <div uiCard class="lg:col-span-2">
-        <div uiCardBody>
-          <div class="flex items-center justify-between">
-            <h2 class="text-base font-semibold text-ink-strong">Mensajes recientes</h2>
-            <a uiButton variant="ghost" size="sm" routerLink="/messages" class="text-primary"> Ver todos </a>
-          </div>
-          @if ((recentMessages.value() ?? []).length === 0) {
-            <lib-empty-state
-              title="Sin mensajes recientes"
-              description="Las notificaciones nuevas aparecerán aquí."
-              icon="mail"
-              color="primary"
-            />
-          } @else {
-            <div class="space-y-2 mt-2">
-              @for (message of recentMessages.value() ?? []; track message.id) {
-                <div
-                  class="rounded-lg border border-line p-3 transition-colors duration-150 hover:bg-surface-2 cursor-pointer"
-                >
-                  <p class="font-medium text-ink-strong text-sm">
-                    {{ message.message.subject }}
-                  </p>
-                  <div class="text-xs text-ink-muted mt-1">
-                    {{ senderDisplayName(message.message.sender) }} ·
-                    {{ message.message.createdAt | date: 'short' }}
-                  </div>
-                </div>
-              }
-            </div>
-          }
-        </div>
-      </div>
+      <app-recent-channel-posts class="lg:col-span-2" />
 
       <div uiCard>
         <div uiCardBody>
@@ -284,57 +231,19 @@ type PublishedNewsletter = {
               </div>
             </a>
             <a
-              routerLink="/messages"
+              routerLink="/communication/direct"
               class="rounded-lg border border-line p-3 transition-colors duration-150 hover:bg-surface-2 flex items-center gap-3"
             >
               <ui-icon name="messages-square" class="text-xl text-success" />
               <div>
-                <p class="font-medium text-sm text-ink-strong">Mensajería</p>
-                <p class="text-xs text-ink-muted">Comunicación interna</p>
+                <p class="font-medium text-sm text-ink-strong">Mensajes directos</p>
+                <p class="text-xs text-ink-muted">Conversaciones con acudientes</p>
               </div>
             </a>
           </div>
         </div>
       </div>
     </div>
-
-    @if (!recentNewsletters.error()) {
-      <div class="mt-5">
-        <div uiCard>
-          <div uiCardBody>
-            <div class="flex items-center justify-between">
-              <h2 class="text-base font-semibold text-ink-strong">Boletines recientes</h2>
-              <a uiButton variant="ghost" size="sm" routerLink="/admin/newsletters" class="text-primary"> Ver todos </a>
-            </div>
-            @if ((recentNewsletters.value() ?? []).length === 0) {
-              <lib-empty-state
-                title="Sin boletines recientes"
-                description="Los boletines publicados aparecerán aquí."
-                icon="newspaper"
-                color="info"
-              />
-            } @else {
-              <div class="space-y-3">
-                @for (newsletter of recentNewsletters.value() ?? []; track newsletter.id) {
-                  <div class="rounded-lg border border-line p-4 transition-colors duration-150 hover:bg-surface-2">
-                    <p class="font-medium text-ink-strong text-sm">{{ newsletter.title }}</p>
-                    <p class="text-xs text-ink-muted mt-1 line-clamp-2">
-                      {{ stripHtml(newsletter.content) }}
-                    </p>
-                    <div class="flex items-center justify-between mt-2">
-                      <span class="text-xs text-ink-muted">
-                        {{ authorDisplayName(newsletter.author) }} · {{ newsletter.publishedAt | date: 'mediumDate' }}
-                      </span>
-                      <a [routerLink]="['/newsletters', newsletter.id]" class="link link-primary text-xs"> Ver más </a>
-                    </div>
-                  </div>
-                }
-              </div>
-            }
-          </div>
-        </div>
-      </div>
-    }
 
     <div class="mt-5 grid gap-5 lg:grid-cols-2">
       <div uiCard>
@@ -398,16 +307,6 @@ type PublishedNewsletter = {
 export default class Home {
   private store = inject(Store);
   private FIRST_VISIT_KEY = 'skooltrak_first_visit_shown';
-
-  senderDisplayName(sender: InboxRow['message']['sender']): string {
-    if (sender.name?.trim()) return sender.name;
-    return [sender.firstName, sender.lastName].filter(Boolean).join(' ').trim() || '—';
-  }
-
-  authorDisplayName(author: PublishedNewsletter['author']): string {
-    if (author.name?.trim()) return author.name;
-    return [author.firstName, author.lastName].filter(Boolean).join(' ').trim() || '—';
-  }
 
   // Onboarding status query
   public onboardingStatus = httpResource<{
@@ -500,16 +399,6 @@ export default class Home {
         label: 'Solicitudes de ingreso',
         detail: parts.join(' · '),
         link: '/admin/join-requests',
-      });
-    }
-    if (t.broadcastsToApprove) {
-      tiles.push({
-        icon: 'stamp',
-        iconClass: 'bg-action-subtle text-primary',
-        count: t.broadcastsToApprove,
-        label: 'Comunicados por aprobar',
-        detail: 'Enviados a toda la escuela',
-        link: '/communication',
       });
     }
     if (t.missedAttendance) {
@@ -605,15 +494,9 @@ export default class Home {
     return `${integer.format(p.belowPass)} bajo la nota mínima en al menos una materia · ${integer.format(p.allExcellent)} en excelencia`;
   });
 
-  newBroadcast() {
-    this.#router.navigate(['/communication']);
+  newChannel() {
+    this.#router.navigate(['/communication/channels/new']);
   }
-
-  public recentMessages = httpResource<InboxRow[]>(() => ({
-    url: '/api/v1/messages',
-    params: toFetchQueryParams({ take: 5, skip: 0 }),
-    defaultValue: [],
-  }));
 
   /** The list endpoint is paginated (`{ data, ... }`); the card only needs the rows. */
   public recentStudents = httpResource<RecentStudent[]>(
@@ -632,21 +515,6 @@ export default class Home {
     },
     { parse: (raw) => pageRows<RecentStudent>(raw) },
   );
-
-  public recentNewsletters = httpResource<PublishedNewsletter[]>(() => {
-    const schoolId = this.store.currentSchoolId();
-    if (!schoolId) return undefined;
-    return {
-      url: `/api/v1/newsletters/published`,
-      params: { schoolId, take: '3' },
-    };
-  });
-
-  stripHtml(html: string): string {
-    const div = document.createElement('div');
-    div.innerHTML = html;
-    return div.textContent?.trim() ?? '';
-  }
 
   /** The list endpoint is paginated (`{ data, ... }`); the card only needs the rows. */
   public recentTeachers = httpResource<RecentTeacher[]>(

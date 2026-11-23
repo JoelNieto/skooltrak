@@ -126,7 +126,8 @@ export class StudentProgress {
   recentGrades: StudentRecentGrade[];
   /** BR-HOM-001.5 over the period up to today; null without a period. */
   attendance: { rate: number | null; absences: number; late: number } | null;
-  messages: { unread: number; fromTeachers: number; broadcasts: number };
+  /** COM-003 FR .15: unread channel posts (students have no direct messages). */
+  messages: { unread: number };
   /** Published habit marks of the current period; null without a period or class group. */
   habits: StudentHabits | null;
 }

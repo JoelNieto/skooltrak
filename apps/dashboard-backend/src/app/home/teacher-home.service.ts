@@ -1,5 +1,6 @@
+import { personName, preview } from '@/shared';
 import { AuthUserContext } from '@/auth';
-import { AttendanceStatus, EnrollmentStatus, ThreadStatus } from '@generated/prisma';
+import { AttendanceStatus, EnrollmentStatus } from '@generated/prisma';
 import { BadRequestException, ForbiddenException, Inject, Injectable } from '@nestjs/common';
 import { ACTIVE_ENROLLMENT, enrolledIn } from '../courses/course-roster';
 import { PrismaService } from '../prisma.service';
@@ -504,51 +505,41 @@ export class TeacherHomeService {
     return byStudent;
   }
 
-  /** BR-HOM-001.13: the teacher's active non-broadcast threads whose last message is from a parent, newest first. */
+  /**
+   * BR-HOM-001.13 (COM-003): the teacher's direct conversations whose last message is from the
+   * parent, newest first.
+   */
   private async unansweredThreads({ organizationId, userId }: TeacherContext): Promise<FamilyThread[]> {
-    const threads = await this.prisma.communicationThread.findMany({
-      where: {
-        organizationId,
-        broadcast: false,
-        deletedAt: null,
-        status: ThreadStatus.ACTIVE,
-        participants: { some: { userId } },
-      },
+    const conversations = await this.prisma.directConversation.findMany({
+      where: { organizationId, staffUserId: userId, messages: { some: {} } },
+      orderBy: { lastMessageAt: 'desc' },
+      take: 50,
       select: {
         id: true,
-        title: true,
-        participants: { where: { userId }, select: { lastReadAt: true } },
-        messages: {
-          where: { deletedAt: null },
-          orderBy: { createdAt: 'desc' },
-          take: 1,
-          select: {
-            body: true,
-            createdAt: true,
-            sender: { select: { name: true, firstName: true, lastName: true, role: { select: { name: true } } } },
-          },
-        },
+        parentUserId: true,
+        staffLastReadAt: true,
+        student: { select: { firstName: true, fatherName: true } },
+        parentUser: { select: { name: true, firstName: true, lastName: true } },
+        messages: { orderBy: { createdAt: 'desc' }, take: 1, select: { body: true, createdAt: true, senderId: true } },
       },
     });
 
     const now = this.clock.now().getTime();
-    return threads
-      .filter((t) => t.messages[0]?.sender?.role?.name?.toUpperCase() === 'PARENT')
-      .map((t) => {
-        const last = t.messages[0];
-        const lastReadAt = t.participants[0]?.lastReadAt;
-        const sender = last.sender;
+    return conversations
+      .filter((c) => c.messages[0]?.senderId === c.parentUserId)
+      .map((c) => {
+        const last = c.messages[0];
+        const senderName = personName(c.parentUser);
         return {
-          id: t.id,
-          title: t.title,
-          senderName: (sender?.name?.trim() || [sender?.firstName, sender?.lastName].filter(Boolean).join(' ')).trim() || '—',
+          id: c.id,
+          title: c.student ? `${c.student.firstName} ${c.student.fatherName}`.trim() : senderName,
+          senderName,
           lastMessageAt: last.createdAt.toISOString(),
-          preview: last.body.length > PREVIEW_LENGTH ? `${last.body.slice(0, PREVIEW_LENGTH - 1)}…` : last.body,
-          unread: !lastReadAt || last.createdAt > lastReadAt,
+          preview: preview(last.body, PREVIEW_LENGTH),
+          unread: !c.staffLastReadAt || last.createdAt > c.staffLastReadAt,
           stale: now - last.createdAt.getTime() > STALE_THREAD_MS,
         };
-      })
-      .sort((a, b) => b.lastMessageAt.localeCompare(a.lastMessageAt));
+      });
   }
 
   /** BR-HOM-001.7 / .10: caller's org, a school of that org, and a teacher record in it. */

@@ -1,8 +1,10 @@
 import { ForbiddenException } from '@nestjs/common';
 import { AssignmentType, AttendanceStatus, HabitValue, WeekDay } from '@generated/prisma';
+import { unreadChannelPostCount } from '../communication/channel-audience';
 import { habitsSummary, StudentHomeService, workStatus } from './student-home.service';
 
 jest.mock('../prisma.service', () => ({ PrismaService: class {} }));
+jest.mock('../communication/channel-audience', () => ({ unreadChannelPostCount: jest.fn() }));
 
 /** HOM-001-S04: student "Ahora / Siguiente", today's classes and work (BR-HOM-001.8, .12). */
 describe('StudentHomeService (HOM-001-S04)', () => {
@@ -35,7 +37,7 @@ describe('StudentHomeService (HOM-001-S04)', () => {
       scores?: unknown[];
       recent?: unknown[];
       attendance?: unknown[];
-      threads?: unknown[];
+      unreadPosts?: number;
       habits?: unknown[];
     } = {},
   ) {
@@ -64,9 +66,9 @@ describe('StudentHomeService (HOM-001-S04)', () => {
         findMany: jest.fn().mockImplementation(({ take }) => Promise.resolve(take ? (opts.recent ?? []) : (opts.scores ?? []))),
       },
       attendanceRecord: { groupBy: jest.fn().mockResolvedValue(opts.attendance ?? []) },
-      communicationThread: { findMany: jest.fn().mockResolvedValue(opts.threads ?? []) },
       studentHabitEvaluation: { findMany: jest.fn().mockResolvedValue(opts.habits ?? []) },
     };
+    (unreadChannelPostCount as jest.Mock).mockReset().mockResolvedValue(opts.unreadPosts ?? 0);
     return { service: new StudentHomeService(prisma as never, { now: () => NOW }), prisma };
   }
 
@@ -264,7 +266,7 @@ describe('StudentHomeService (HOM-001-S04)', () => {
       ]);
     });
 
-    it('rates attendance from the period start to today and counts unread threads', async () => {
+    it('rates attendance from the period start to today and counts unread channel posts', async () => {
       const { service, prisma } = build({
         periods: PERIODS,
         attendance: [
@@ -273,13 +275,7 @@ describe('StudentHomeService (HOM-001-S04)', () => {
           { status: AttendanceStatus.ABSENT, _count: { _all: 2 } },
           { status: AttendanceStatus.EXCUSED, _count: { _all: 1 } },
         ],
-        threads: [
-          { broadcast: false, participants: [{ lastReadAt: null }], messages: [{ senderId: 'teacher', createdAt: new Date('2026-11-15') }] },
-          { broadcast: true, participants: [{ lastReadAt: new Date('2026-11-10') }], messages: [{ senderId: 'admin', createdAt: new Date('2026-11-14') }] },
-          { broadcast: false, participants: [{ lastReadAt: new Date('2026-11-16') }], messages: [{ senderId: 'teacher', createdAt: new Date('2026-11-14') }] },
-          { broadcast: false, participants: [{ lastReadAt: null }], messages: [{ senderId: 'user-student', createdAt: new Date('2026-11-15') }] },
-          { broadcast: false, participants: [{ lastReadAt: null }], messages: [] },
-        ],
+        unreadPosts: 3,
       });
 
       const progress = await service.progress(user);
@@ -296,7 +292,8 @@ describe('StudentHomeService (HOM-001-S04)', () => {
         }),
       );
       expect(progress.attendance).toEqual({ rate: 47 / 49, absences: 2, late: 1 });
-      expect(progress.messages).toEqual({ unread: 2, fromTeachers: 1, broadcasts: 1 });
+      expect(progress.messages).toEqual({ unread: 3 });
+      expect(unreadChannelPostCount).toHaveBeenCalledWith(prisma, 'user-student');
     });
 
     it('summarises published habits of the current period', async () => {

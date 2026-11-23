@@ -8,7 +8,6 @@ import { AuthModule } from '@/auth';
 import { AssignmentSubmissionsModule } from './assignment-submissions/assignment-submissions.module';
 import { AssignmentsModule } from './assignments/assignments.module';
 import { AttendanceModule } from './attendance/attendance.module';
-import { ChatsModule } from './chats/chats.module';
 import { ClassGroupsModule } from './class-groups/class-groups.module';
 import { CommunicationModule } from './communication/communication.module';
 import { CoursesModule } from './courses/courses.module';
@@ -25,8 +24,6 @@ import { GroupsSchedulesModule } from './groups-schedules/groups-schedules.modul
 import { HabitEvaluationsModule } from './habit-evaluations/habit-evaluations.module';
 import { HabitMetricsModule } from './habit-metrics/habit-metrics.module';
 import { ImportsModule } from './imports/imports.module';
-import { MessagesModule } from './messages/messages.module';
-import { NewslettersModule } from './newsletters/newsletters.module';
 import { ParentsModule } from './parents/parents.module';
 import { PeriodsModule } from './periods/periods.module';
 import { PrismaModule } from './prisma.module';
@@ -67,12 +64,9 @@ const openApiExport = process.env['OPENAPI_EXPORT'] === 'true';
     NotificationsModule,
     GradeBucketsModule,
     StudentGradesModule,
-    MessagesModule,
     GroupsSchedulesModule,
     FilesModule,
     ParentsModule,
-    NewslettersModule,
-    ChatsModule,
     CommunicationModule,
     HabitEvaluationsModule,
     HabitMetricsModule,

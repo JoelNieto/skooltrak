@@ -4,7 +4,7 @@
 |---|---|
 | **FRD** | [COM-002](../frd/COM-002-broadcasts.md) |
 | **Implements** | FR-COM-002.1; BR-COM-002.7 (revised), BR-COM-002.8 (new) |
-| **Status** | In review |
+| **Status** | Done (#83); superseded by [COM-003](../frd/COM-003-channels-and-direct.md) (#84): course channels reach the roster (BR-COM-003.4); teachers' groups use the study-plan rule (BR-COM-003.2) |
 | **Branch** | `feat/COM-002-S07-roster-audience` |
 | **Estimate** | 0.5 day |
 

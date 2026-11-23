@@ -214,7 +214,7 @@ Side effects: none. Regenerate the dashboard API client (`bun run openapi:orval`
 ## 9. Out of scope
 - **Channels:** unread badges on cards, the *"Nuevo en canales"* tile, the *"Preguntar en #general"* button and the course *Canales* tab. These wait for the channels FRD in COM (decided 2026-11-19, Q6).
 - Support teachers or more than one teacher per course: deferred to its own FRD (decided 2026-11-19, Q5).
-- **Switching HOM-001 and COM-002 to the enrollment roster.** They used the study-plan rule, and the two agree except for manual enrollments and exclusions. A follow-up slice in each FRD aligns them: COM-002 in [COM-002-S07](../slices/COM-002-S07-roster-audience.md); HOM-001 still to do.
+- **Switching HOM-001 and COM-002 to the enrollment roster.** They used the study-plan rule, and the two agree except for manual enrollments and exclusions. A follow-up slice in each FRD aligns them: COM-002 in [COM-002-S07](../slices/COM-002-S07-roster-audience.md), since replaced by [COM-003](COM-003-channels-and-direct.md), whose course channels use the roster; HOM-001 still to do.
 - The teacher assignment form redesign (step 5 of the plan), and assignment categories, late policy and hand-in modes.
 - A teacher's own *Mis cursos* with teaching metrics (to review, attendance), which HOM-001 covers on the home page.
 

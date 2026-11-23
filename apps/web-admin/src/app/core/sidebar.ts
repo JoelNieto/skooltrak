@@ -209,16 +209,6 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
         </li>
         <li>
           <a
-            routerLink="teacher/communication"
-            [routerLinkActive]="['bg-surface-0', 'text-primary']"
-            class="flex items-center p-2 text-ink-strong rounded-lg hover:bg-primary-50 hover:text-primary-600 group"
-          >
-            <ui-icon name="messages-square" class="text-xl" />
-            <span class="ml-3">Comunicación</span>
-          </a>
-        </li>
-        <li>
-          <a
             routerLink="teacher/reports"
             [routerLinkActive]="['bg-surface-0', 'text-primary']"
             class="flex items-center p-2 text-ink-strong rounded-lg hover:bg-primary-50 hover:text-primary-600 group"
@@ -246,16 +236,6 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
           >
             <ui-icon name="chart-column" class="text-xl" />
             <span class="ml-3">Progreso</span>
-          </a>
-        </li>
-        <li>
-          <a
-            routerLink="parent/communication"
-            [routerLinkActive]="['bg-surface-0', 'text-primary']"
-            class="flex items-center p-2 text-ink-strong rounded-lg hover:bg-primary-50 hover:text-primary-600 group"
-          >
-            <ui-icon name="message-circle" class="text-xl" />
-            <span class="ml-3">Mensajes</span>
           </a>
         </li>
         <li>

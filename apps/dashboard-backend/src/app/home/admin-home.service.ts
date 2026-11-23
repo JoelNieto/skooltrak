@@ -1,5 +1,5 @@
 import type { AuthUserContext } from '@/auth';
-import { EnrollmentStatus, ImportJobStatus, Prisma, ThreadStatus } from '@generated/prisma';
+import { EnrollmentStatus, ImportJobStatus, Prisma } from '@generated/prisma';
 import { BadRequestException, ForbiddenException, Inject, Injectable } from '@nestjs/common';
 import { ACTIVE_ENROLLMENT } from '../courses/course-roster';
 import { PrismaService } from '../prisma.service';
@@ -45,16 +45,13 @@ export class AdminHomeService {
     const { organizationId, school, local } = ctx;
     const today = utcDate(local.date);
 
-    const [me, { current }, joinRows, broadcastsToApprove, missedAttendance, overdueCharges, failedImports, plansWithoutScale] =
+    const [me, { current }, joinRows, missedAttendance, overdueCharges, failedImports, plansWithoutScale] =
       await Promise.all([
         this.prisma.user.findUnique({ where: { id: ctx.userId }, select: { firstName: true, name: true } }),
         resolvePeriodPair(this.prisma, school.currentYear, local.date),
         this.prisma.joinRequest.findMany({
           where: { schoolId: school.id, status: 'PENDING', school: { organizationId } },
           select: { requestedRole: true, createdAt: true },
-        }),
-        this.prisma.communicationThread.count({
-          where: { organizationId, broadcast: true, status: ThreadStatus.PENDING_APPROVAL, deletedAt: null },
         }),
         this.missedAttendance(ctx),
         ctx.finance ? this.overdueCharges(ctx, today) : Promise.resolve(null),
@@ -90,7 +87,6 @@ export class AdminHomeService {
           others: joinRows.length - role('TEACHER') - role('PARENT'),
           oldestAt: oldest ? oldest.toISOString() : null,
         },
-        broadcastsToApprove,
         missedAttendance,
         overdueCharges,
         failedImports,

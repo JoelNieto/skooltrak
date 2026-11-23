@@ -1,204 +1,177 @@
+import { AuthenticatedRequest, BetterAuthGuard, Perm, PermissionsGuard, RequirePermissions } from '@/auth';
+import { CHANNEL_SCOPES, ChannelScopeKey, CommunicationUnread } from '@/shared';
+import { BadRequestException, Body, Controller, Delete, Get, Param, Patch, Post, Query, Req, UseGuards } from '@nestjs/common';
+import { ApiBearerAuth, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
+import { ChannelsService } from './channels.service';
+import { DirectService } from './direct.service';
 import {
-  AllowAnonymous,
-  BetterAuthGuard,
-  Perm,
-  PermissionsGuard,
-  RequirePermissions,
-} from '@/auth';
-import {
-  Body,
-  Controller,
-  Get,
-  Headers,
-  Param,
-  Patch,
-  Post,
-  Query,
-  Req,
-  UseGuards,
-} from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { Request } from 'express';
-import { ThreadStatus } from '@generated/prisma';
-import { CanInitiateGuard } from './communication.guards';
-import { CommunicationService } from './communication.service';
-import {
-  AddParticipantBodyInput,
-  BroadcastInput,
-  CreateThreadInput,
-  DeliveryPreviewInput,
-  PreferenceInput,
-  SendMessageBodyInput,
-  SubscriberSyncInput,
-  UpdateBroadcastInput,
+  CreateChannelInput,
+  CreateChannelPostInput,
+  CreateChannelReplyInput,
+  SendDirectMessageInput,
+  StartDirectInput,
+  UpdateChannelInput,
 } from './dto/communication.input';
 
+/** COM-003: channels (one-to-many) and direct messages (staff ↔ parent). */
 @ApiTags('communication')
 @ApiBearerAuth()
 @UseGuards(BetterAuthGuard, PermissionsGuard)
 @RequirePermissions(Perm.COMMUNICATION_VIEW)
 @Controller('v1/communication')
 export class CommunicationController {
-  constructor(private readonly communication: CommunicationService) {}
+  constructor(
+    private readonly channels: ChannelsService,
+    private readonly direct: DirectService,
+  ) {}
 
-  // ── Threads ─────────────────────────────────────────────────────────────
-  @Post('threads')
-  @UseGuards(CanInitiateGuard)
-  @RequirePermissions(Perm.COMMUNICATION_VIEW)
-  @ApiOperation({ summary: 'Create a communication thread' })
-  createThread(@Body() input: CreateThreadInput) {
-    return this.communication.createThread(input);
+  @Get('unread')
+  @ApiOperation({ summary: 'Unread channel posts and direct messages (FR-COM-003.15)' })
+  async unread(@Req() req: AuthenticatedRequest): Promise<CommunicationUnread> {
+    const [channels, direct] = await Promise.all([
+      this.channels.unreadCount(req.user),
+      this.direct.unreadCount(req.user),
+    ]);
+    return { channels, direct };
   }
 
-  @Get('threads')
-  @ApiOperation({ summary: 'List threads visible to the caller' })
-  listThreads() {
-    return this.communication.listThreads();
+  // ── Channels ────────────────────────────────────────────────────────────
+
+  @Get('channels')
+  @ApiOperation({ summary: 'Channels the caller manages or belongs to (FR-COM-003.11)' })
+  listChannels(@Req() req: AuthenticatedRequest) {
+    return this.channels.list(req.user);
   }
 
-  @Get('inbox/broadcasts')
-  @ApiOperation({ summary: 'Latest approved broadcasts visible to the caller' })
-  listInboxBroadcasts(@Query('take') take?: string) {
-    return this.communication.listRecentBroadcasts(take ? Number(take) : 5);
+  @Get('channels/recent')
+  @ApiQuery({ name: 'take', required: false })
+  @ApiOperation({ summary: 'Latest channel posts for home pages (FR-COM-003.16)' })
+  recent(@Req() req: AuthenticatedRequest, @Query('take') take?: string) {
+    return this.channels.recent(req.user, take ? Number(take) : 5);
   }
 
-  @Get('threads/:id')
-  @ApiOperation({ summary: 'Get a thread' })
-  getThread(@Param('id') id: string) {
-    return this.communication.getThread(id);
+  @Get('channels/targets')
+  @RequirePermissions(Perm.COMMUNICATION_CHANNELS)
+  @ApiQuery({ name: 'scope', enum: CHANNEL_SCOPES })
+  @ApiQuery({ name: 'schoolId', required: false })
+  @ApiOperation({ summary: 'What the caller may target at a level (BR-COM-003.2)' })
+  targets(@Req() req: AuthenticatedRequest, @Query('scope') scope: string, @Query('schoolId') schoolId?: string) {
+    if (!(CHANNEL_SCOPES as readonly string[]).includes(scope)) throw new BadRequestException('Nivel inválido');
+    return this.channels.targets(req.user, scope as ChannelScopeKey, schoolId);
   }
 
-  @Get('threads/:id/messages')
-  @ApiOperation({ summary: 'List messages in a thread' })
-  getMessages(
+  @Post('channels')
+  @RequirePermissions(Perm.COMMUNICATION_CHANNELS)
+  @ApiOperation({ summary: 'Create a channel (FR-COM-003.1–.4)' })
+  createChannel(@Req() req: AuthenticatedRequest, @Body() input: CreateChannelInput) {
+    return this.channels.create(req.user, input);
+  }
+
+  @Get('channels/:id')
+  @ApiOperation({ summary: 'A channel with its latest posts (FR-COM-003.7, .9)' })
+  getChannel(@Req() req: AuthenticatedRequest, @Param('id') id: string) {
+    return this.channels.get(req.user, id);
+  }
+
+  @Patch('channels/:id')
+  @RequirePermissions(Perm.COMMUNICATION_CHANNELS)
+  @ApiOperation({ summary: 'Edit a channel or archive it (FR-COM-003.5)' })
+  updateChannel(@Req() req: AuthenticatedRequest, @Param('id') id: string, @Body() input: UpdateChannelInput) {
+    return this.channels.update(req.user, id, input);
+  }
+
+  @Post('channels/:id/read')
+  @ApiOperation({ summary: "Mark the channel's posts read (FR-COM-003.8)" })
+  markChannelRead(@Req() req: AuthenticatedRequest, @Param('id') id: string) {
+    return this.channels.markRead(req.user, id);
+  }
+
+  @Post('channels/:id/posts')
+  @RequirePermissions(Perm.COMMUNICATION_CHANNELS)
+  @ApiOperation({ summary: 'Publish a post (FR-COM-003.6)' })
+  createPost(@Req() req: AuthenticatedRequest, @Param('id') id: string, @Body() input: CreateChannelPostInput) {
+    return this.channels.createPost(req.user, id, input);
+  }
+
+  @Delete('channels/:id/posts/:postId')
+  @RequirePermissions(Perm.COMMUNICATION_CHANNELS)
+  @ApiOperation({ summary: 'Delete a post' })
+  deletePost(@Req() req: AuthenticatedRequest, @Param('id') id: string, @Param('postId') postId: string) {
+    return this.channels.deletePost(req.user, id, postId);
+  }
+
+  @Post('channels/:id/posts/:postId/confirm')
+  @ApiOperation({ summary: 'Confirm reading a post (FR-COM-003.8)' })
+  confirm(@Req() req: AuthenticatedRequest, @Param('id') id: string, @Param('postId') postId: string) {
+    return this.channels.confirm(req.user, id, postId);
+  }
+
+  @Get('channels/:id/posts/:postId/receipts')
+  @RequirePermissions(Perm.COMMUNICATION_CHANNELS)
+  @ApiOperation({ summary: 'Who read and confirmed a post (FR-COM-003.9)' })
+  receipts(@Req() req: AuthenticatedRequest, @Param('id') id: string, @Param('postId') postId: string) {
+    return this.channels.receipts(req.user, id, postId);
+  }
+
+  @Get('channels/:id/posts/:postId/replies')
+  @ApiQuery({ name: 'member', required: false })
+  @ApiOperation({ summary: 'Replies the caller may see (FR-COM-003.10)' })
+  replies(
+    @Req() req: AuthenticatedRequest,
     @Param('id') id: string,
-    @Query('cursor') cursor?: string,
-    @Query('limit') limit?: string,
+    @Param('postId') postId: string,
+    @Query('member') member?: string,
   ) {
-    return this.communication.getMessages(id, cursor, limit ? Number(limit) : 50);
+    return this.channels.replies(req.user, id, postId, member);
   }
 
-  @Post('threads/:id/messages')
-  @ApiOperation({ summary: 'Send a message (reply-only roles allowed)' })
-  sendMessage(@Param('id') id: string, @Body() body: SendMessageBodyInput, @Req() req?: Request) {
-    return this.communication.sendMessage({ ...body, threadId: id }, req?.ip);
-  }
-
-  @Post('threads/:id/messages/:mid/reply')
-  @ApiOperation({ summary: 'Reply within a thread' })
+  @Post('channels/:id/posts/:postId/replies')
+  @ApiOperation({ summary: 'Reply to a post (FR-COM-003.10)' })
   reply(
+    @Req() req: AuthenticatedRequest,
     @Param('id') id: string,
-    @Param('mid') _mid: string,
-    @Body() body: SendMessageBodyInput,
-    @Req() req?: Request,
+    @Param('postId') postId: string,
+    @Body() input: CreateChannelReplyInput,
   ) {
-    return this.communication.sendMessage({ ...body, threadId: id }, req?.ip);
+    return this.channels.reply(req.user, id, postId, input);
   }
 
-  @Patch('messages/:id/read')
-  @ApiOperation({ summary: 'Mark a message read (updates delivery receipt)' })
-  markRead(@Param('id') id: string) {
-    return this.communication.markRead(id);
+  // ── Direct ──────────────────────────────────────────────────────────────
+
+  @Get('direct')
+  @RequirePermissions(Perm.COMMUNICATION_DIRECT)
+  @ApiOperation({ summary: "The caller's direct conversations (FR-COM-003.14)" })
+  listDirect(@Req() req: AuthenticatedRequest) {
+    return this.direct.list(req.user);
   }
 
-  @Post('threads/:id/typing')
-  @ApiOperation({ summary: 'Emit typing indicator' })
-  typing(@Param('id') id: string) {
-    return this.communication.emitTyping(id);
+  @Get('direct/recipients')
+  @RequirePermissions(Perm.COMMUNICATION_DIRECT)
+  @ApiQuery({ name: 'q', required: false })
+  @ApiOperation({ summary: 'Parents the caller may message, by student (BR-COM-003.8)' })
+  recipients(@Req() req: AuthenticatedRequest, @Query('q') q?: string) {
+    return this.direct.recipients(req.user, q);
   }
 
-  // ── Roster & permissions ────────────────────────────────────────────────
-  @Get('roster/class-group/:id/recipients')
-  @ApiOperation({ summary: 'Recipients for a class group' })
-  classGroupRecipients(@Param('id') id: string) {
-    return this.communication.classGroupRecipients(id);
+  @Post('direct')
+  @RequirePermissions(Perm.COMMUNICATION_DIRECT)
+  @ApiOperation({ summary: 'Start or reopen a conversation with a parent (FR-COM-003.12)' })
+  startDirect(@Req() req: AuthenticatedRequest, @Body() input: StartDirectInput) {
+    return this.direct.start(req.user, input);
   }
 
-  @Get('roster/student/:id/guardians')
-  @ApiOperation({ summary: 'Guardians of a student' })
-  studentGuardians(@Param('id') id: string) {
-    return this.communication.studentGuardians(id);
+  @Get('direct/:id')
+  @RequirePermissions(Perm.COMMUNICATION_DIRECT)
+  @ApiOperation({ summary: 'A conversation with its messages; marks it read (FR-COM-003.13)' })
+  getDirect(@Req() req: AuthenticatedRequest, @Param('id') id: string) {
+    return this.direct.get(req.user, id);
   }
 
-  @Post('threads/:id/participants')
-  @UseGuards(CanInitiateGuard)
-  @ApiOperation({ summary: 'Add participants (parents blocked by guard)' })
-  addParticipants(@Param('id') id: string, @Body() input: AddParticipantBodyInput) {
-    return this.communication.addParticipants({ ...input, threadId: id });
-  }
-
-  // ── Delivery (Novu seam) ────────────────────────────────────────────────
-  @Post('subscribers/sync')
-  @ApiOperation({ summary: 'Sync a Novu subscriber + channel prefs' })
-  syncSubscriber(@Body() input: SubscriberSyncInput) {
-    return this.communication.syncSubscriber(input);
-  }
-
-  @Patch('recipients/:id/preference')
-  @ApiOperation({ summary: 'Set recipient preference (language seam)' })
-  setPreference(@Param('id') id: string, @Body() input: PreferenceInput) {
-    return this.communication.setPreference(id, input);
-  }
-
-  @Post('delivery/preview')
-  @ApiOperation({ summary: 'Preview which channels a message would hit' })
-  deliveryPreview(@Body() input: DeliveryPreviewInput) {
-    return this.communication.deliveryPreview(input);
-  }
-
-  @Get('messages/:id/deliveries')
-  @ApiOperation({ summary: 'Per-recipient/per-channel delivery receipts' })
-  getDeliveries(@Param('id') id: string) {
-    return this.communication.getDeliveries(id);
-  }
-
-  @Post('webhooks/novu')
-  @AllowAnonymous()
-  @ApiOperation({ summary: 'Novu webhook → reconcile MessageDelivery (HMAC)' })
-  novuWebhook(@Body() payload: unknown, @Headers('x-novu-signature') signature?: string) {
-    return this.communication.handleNovuWebhook(payload, signature);
-  }
-
-  // ── Admin console (broadcasts + audit) ──────────────────────────────────
-  @Get('broadcasts')
-  @RequirePermissions(Perm.COMMUNICATION_BROADCAST)
-  @ApiOperation({ summary: 'List organization broadcasts' })
-  listBroadcasts(@Query('status') status?: ThreadStatus) {
-    return this.communication.listBroadcasts(status);
-  }
-
-  @Get('broadcasts/audiences')
-  @RequirePermissions(Perm.COMMUNICATION_BROADCAST)
-  @ApiOperation({ summary: 'Class groups and courses the caller may target with a broadcast' })
-  listBroadcastAudiences(@Query('schoolId') schoolId?: string) {
-    return this.communication.listBroadcastAudiences(schoolId);
-  }
-
-  @Post('broadcasts')
-  @RequirePermissions(Perm.COMMUNICATION_BROADCAST)
-  @ApiOperation({ summary: 'Create a broadcast (pending approval if policy requires)' })
-  createBroadcast(@Body() input: BroadcastInput) {
-    return this.communication.createBroadcast(input);
-  }
-
-  @Post('broadcasts/:id/approve')
-  @RequirePermissions(Perm.COMMUNICATION_APPROVE)
-  @ApiOperation({ summary: 'Approve a pending broadcast and fan out' })
-  approveBroadcast(@Param('id') id: string) {
-    return this.communication.approveBroadcast(id);
-  }
-
-  @Patch('broadcasts/:id')
-  @RequirePermissions(Perm.COMMUNICATION_BROADCAST)
-  @ApiOperation({ summary: 'Update broadcast settings such as repliesAllowed' })
-  updateBroadcast(@Param('id') id: string, @Body() input: UpdateBroadcastInput) {
-    return this.communication.updateBroadcast(id, input);
-  }
-
-  @Get('admin/audit')
-  @RequirePermissions(Perm.COMMUNICATION_APPROVE)
-  @ApiOperation({ summary: 'Communication audit log' })
-  audit() {
-    return this.communication.listAudit();
+  @Post('direct/:id/messages')
+  @RequirePermissions(Perm.COMMUNICATION_DIRECT)
+  @ApiOperation({ summary: 'Send a direct message (FR-COM-003.13)' })
+  sendDirect(@Req() req: AuthenticatedRequest, @Param('id') id: string, @Body() input: SendDirectMessageInput) {
+    return this.direct.send(req.user, id, input);
   }
 }
+

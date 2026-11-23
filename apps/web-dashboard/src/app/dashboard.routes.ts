@@ -223,36 +223,6 @@ export const DASHBOARD_ROUTES: Route[] = [
         loadComponent: () => import('./quizzes/quiz-form'),
       },
       {
-        path: 'messages',
-        canActivate: [permissionGuard('VIEW_MESSAGES')],
-        loadComponent: () => import('./messages/messages'),
-      },
-      {
-        path: 'messages/compose',
-        canActivate: [permissionGuard('MANAGE_MESSAGES')],
-        loadComponent: () => import('./messages/compose'),
-      },
-      {
-        path: 'messages/:id',
-        canActivate: [permissionGuard('VIEW_MESSAGES')],
-        loadComponent: () => import('./messages/message'),
-      },
-      {
-        path: 'chats',
-        canActivate: [permissionGuard('VIEW_MESSAGES')],
-        loadComponent: () => import('./chats/chats'),
-      },
-      {
-        path: 'chats/new',
-        canActivate: [permissionGuard('MANAGE_MESSAGES')],
-        loadComponent: () => import('./chats/chat-new'),
-      },
-      {
-        path: 'chats/:id',
-        canActivate: [permissionGuard('VIEW_MESSAGES')],
-        loadComponent: () => import('./chats/chat-thread'),
-      },
-      {
         path: 'files',
         canActivate: [permissionGuard('VIEW_FILES')],
         loadComponent: () => import('./files/files'),
@@ -318,17 +288,6 @@ export const DASHBOARD_ROUTES: Route[] = [
         loadComponent: () => import('./students/student-attendance'),
       },
       {
-        path: 'student/communication',
-        canActivate: [permissionGuard('COMMUNICATION_VIEW', 'VIEW_MESSAGES')],
-        loadComponent: () => import('./parent/parent-teacher-communication'),
-        title: 'Mensajes | Skooltrak',
-        data: {
-          pageTitle: 'Comunicados y mensajes',
-          pageSubtitle: 'Avisos de la institución y mensajes del equipo académico.',
-          emptyMessage: 'Cuando haya un aviso o mensaje, aparecerá aquí.',
-        },
-      },
-      {
         path: 'teacher/attendance',
         canActivate: [permissionGuard('MANAGE_ATTENDANCE')],
         loadComponent: () => import('./teacher/teacher-attendance'),
@@ -340,16 +299,37 @@ export const DASHBOARD_ROUTES: Route[] = [
         loadComponent: () => import('./gradebook/gradebook-page'),
         title: 'Libro de calificaciones | Skooltrak',
       },
+      // COM-003: channels and direct messages, the only two ways to communicate.
+      { path: 'communication', redirectTo: 'communication/channels', pathMatch: 'full' },
       {
-        path: 'communication',
-        canActivate: [permissionGuard('COMMUNICATION_BROADCAST')],
-        loadComponent: () => import('./communication/broadcasts'),
-        title: 'Comunicados | Skooltrak',
+        path: 'communication/channels',
+        canActivate: [permissionGuard('COMMUNICATION_VIEW')],
+        loadComponent: () => import('./communication/channels'),
       },
       {
-        path: 'teacher/communication',
-        canActivate: [permissionGuard('COMMUNICATION_VIEW', 'MANAGE_MESSAGES')],
-        loadComponent: () => import('./teacher/teacher-parent-communication'),
+        path: 'communication/channels/new',
+        canActivate: [permissionGuard('COMMUNICATION_CHANNELS')],
+        loadComponent: () => import('./communication/channel-form'),
+      },
+      {
+        path: 'communication/channels/:id/edit',
+        canActivate: [permissionGuard('COMMUNICATION_CHANNELS')],
+        loadComponent: () => import('./communication/channel-form'),
+      },
+      {
+        path: 'communication/channels/:id',
+        canActivate: [permissionGuard('COMMUNICATION_VIEW')],
+        loadComponent: () => import('./communication/channel'),
+      },
+      {
+        path: 'communication/direct',
+        canActivate: [permissionGuard('COMMUNICATION_DIRECT')],
+        loadComponent: () => import('./communication/direct'),
+      },
+      {
+        path: 'communication/direct/:id',
+        canActivate: [permissionGuard('COMMUNICATION_DIRECT')],
+        loadComponent: () => import('./communication/direct'),
       },
       {
         path: 'teacher/reports',
@@ -365,11 +345,6 @@ export const DASHBOARD_ROUTES: Route[] = [
         path: 'parent/progress',
         canActivate: [permissionGuard('VIEW_GRADES')],
         loadComponent: () => import('./parent/parent-child-progress'),
-      },
-      {
-        path: 'parent/communication',
-        canActivate: [permissionGuard('COMMUNICATION_VIEW', 'VIEW_MESSAGES')],
-        loadComponent: () => import('./parent/parent-teacher-communication'),
       },
       {
         path: 'parent/notifications',
@@ -402,21 +377,6 @@ export const DASHBOARD_ROUTES: Route[] = [
         path: 'schools/:id/edit',
         canActivate: [permissionGuard('MANAGE_SCHOOLS')],
         loadComponent: () => import('./admin/pages/school-form'),
-      },
-      {
-        path: 'newsletters/:id',
-        canActivate: [permissionGuard('VIEW_NEWSLETTER')],
-        loadComponent: () => import('./newsletters/newsletter-view'),
-      },
-      {
-        path: 'admin/newsletters/new',
-        canActivate: [permissionGuard('MANAGE_NEWSLETTER')],
-        loadComponent: () => import('./admin/forms/newsletter-form'),
-      },
-      {
-        path: 'admin/newsletters/:id/edit',
-        canActivate: [permissionGuard('MANAGE_NEWSLETTER')],
-        loadComponent: () => import('./admin/forms/newsletter-form'),
       },
       {
         path: 'admin',
@@ -470,15 +430,6 @@ export const DASHBOARD_ROUTES: Route[] = [
           {
             path: 'events-calendar',
             loadComponent: () => import('./admin/pages/events-calendar'),
-          },
-          {
-            path: 'newsletters',
-            loadComponent: () => import('./admin/pages/newsletters'),
-          },
-          {
-            path: 'communication',
-            redirectTo: '/communication',
-            pathMatch: 'full',
           },
           { path: '', redirectTo: 'schools', pathMatch: 'full' },
         ],

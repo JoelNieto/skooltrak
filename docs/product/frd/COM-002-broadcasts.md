@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | Shipped (as-is, reverse-engineered from code on 2026-11-13) |
+| **Status** | Deprecated (2026-11-23): replaced by [COM-003](COM-003-channels-and-direct.md) |
 | **Context** | COM — Communication (see [capabilities](../capabilities.md#com-communication)) |
 | **Owner** | — |
 | **Last updated** | 2026-11-22 |
@@ -90,4 +90,4 @@ Found while reverse-engineering. Each is a candidate slice.
 | [COM-002-S04](../slices/COM-002-S04-teacher-audience-scope.md) | Teachers can only broadcast to groups/courses they teach | .1, BR .7 | Done (#2) |
 | COM-002-S05 | School-wide audience limited to that school's teachers | .2, Q2 | Proposed |
 | COM-002-S06 | Reject / withdraw a pending broadcast | Q5 | Proposed |
-| [COM-002-S07](../slices/COM-002-S07-roster-audience.md) | Course audiences follow the course roster | .1, BR .7 .8 | In review |
+| [COM-002-S07](../slices/COM-002-S07-roster-audience.md) | Course audiences follow the course roster | .1, BR .7 .8 | Done (#83); superseded by COM-003 |

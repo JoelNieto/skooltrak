@@ -21,7 +21,7 @@ export const storageStatePath = (persona: PersonaKey) => `apps/web-dashboard-e2e
 
 /**
  * Study plan "7°" holds `teacher`'s course; study plan "8°" holds `otherTeacher`'s course.
- * `teacher` is also the homeroom teacher of the 8° group (homeroom must NOT grant broadcast access).
+ * `teacher` is also the homeroom teacher of the 8° group (homeroom must NOT grant channel access, BR-COM-003.2).
  */
 export const data = {
   organization: 'Organización E2E',
@@ -67,7 +67,7 @@ export const data = {
   metric: { name: 'Escala 1–5 E2E', minimum: 1, maximum: 5, minimumApproval: 3, minimumExcellence: 4.5 },
   publishedGrade: { title: 'Taller E2E' },
   publishedScores: [4, 2, 4.5],
-  familyThread: { title: 'Consulta sobre Ana', parentMessage: '¿Podemos hablar sobre las notas de Ana?' },
+  familyThread: { parentMessage: '¿Podemos hablar sobre las notas de Ana?' },
   /**
    * HOM-001-S04 work of `related` in `teacher`'s course, relative to the seed time, plus one
    * assignment of the other teacher for `homeroomOnly` that the student must never see.
@@ -87,13 +87,11 @@ export const data = {
    */
   charge: { description: 'Mensualidad E2E', amount: 285, inDays: 3 },
   /**
-   * HOM-001-S08 admin attention: a pending teacher join request, a school-wide broadcast awaiting
-   * approval, an overdue charge of the third related student (not linked to `parent`) and a failed
+   * HOM-001-S08 admin attention: a pending teacher join request, an overdue charge of the third related student (not linked to `parent`) and a failed
    * import. The 8° study plan has no grade metric, and the 00:00 slots give classes without attendance.
    */
   admin: {
     applicant: { email: 'applicant.e2e@skooltrak.test', firstName: 'Pedro', lastName: 'Postulante' },
-    pendingBroadcast: 'Aviso por aprobar E2E',
     overdueCharge: { description: 'Matrícula E2E', amount: 150, inDays: -10 },
   },
 } as const;

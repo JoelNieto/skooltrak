@@ -1,195 +1,130 @@
-import { DeliveryChannel, ThreadType, UrgencyTier } from '@generated/prisma';
-import {
-  ArrayMinSize,
-  IsArray,
-  IsBoolean,
-  IsEnum,
-  IsIn,
-  IsNotEmpty,
-  IsObject,
-  IsOptional,
-  IsString,
-  MaxLength,
-} from 'class-validator';
+import { CHANNEL_SCOPES, ChannelScopeKey, ChannelReplyVisibilityKey } from '@/shared';
+import { IsBoolean, IsIn, IsNotEmpty, IsOptional, IsString, MaxLength } from 'class-validator';
 
-export class CreateThreadInput {
-  @IsEnum(ThreadType)
-  type: ThreadType;
+const VISIBILITIES: ChannelReplyVisibilityKey[] = ['PUBLIC', 'PRIVATE'];
 
+/** `PATCH /v1/communication/channels/:id` (FR-COM-003.5). Fields left out stay as they are. */
+export class UpdateChannelInput {
+  @IsOptional()
   @IsString()
-  @IsNotEmpty()
+  @IsNotEmpty({ message: 'El nombre es obligatorio' })
   @MaxLength(120)
-  title: string;
+  name?: string;
 
   @IsOptional()
   @IsString()
-  scopeId?: string | null;
-
-  @IsOptional()
-  @IsEnum(UrgencyTier)
-  urgencyDefault?: UrgencyTier;
-
-  @IsOptional()
-  @IsArray()
-  @IsString({ each: true })
-  participantUserIds?: string[];
-
-  @IsOptional()
-  @IsString()
-  @MaxLength(8000)
-  body?: string | null;
-}
-
-export class SendMessageInput {
-  @IsString()
-  @IsNotEmpty()
-  threadId: string;
-
-  @IsString()
-  @IsNotEmpty()
-  @MaxLength(8000)
-  body: string;
-
-  @IsOptional()
-  @IsEnum(UrgencyTier)
-  urgency?: UrgencyTier;
-
-  @IsOptional()
-  @IsString()
-  replyToId?: string | null;
-}
-
-/** Body for POST /threads/:id/messages — threadId comes from the route. */
-export class SendMessageBodyInput {
-  @IsString()
-  @IsNotEmpty()
-  @MaxLength(8000)
-  body: string;
-
-  @IsOptional()
-  @IsEnum(UrgencyTier)
-  urgency?: UrgencyTier;
-
-  @IsOptional()
-  @IsString()
-  replyToId?: string | null;
-}
-
-export class AddParticipantInput {
-  @IsString()
-  @IsNotEmpty()
-  threadId: string;
-
-  @IsArray()
-  @ArrayMinSize(1)
-  @IsString({ each: true })
-  userIds: string[];
-}
-
-export class AddParticipantBodyInput {
-  @IsArray()
-  @ArrayMinSize(1)
-  @IsString({ each: true })
-  userIds: string[];
-}
-
-export class SubscriberSyncInput {
-  @IsString()
-  @IsNotEmpty()
-  userId: string;
-
-  @IsOptional()
-  @IsObject()
-  channelPrefs?: Record<string, boolean> | null;
-
-  @IsOptional()
-  @IsString()
-  language?: string | null;
-
-  @IsOptional()
-  @IsString()
-  timezone?: string | null;
-
-  @IsOptional()
-  @IsString()
-  quietHoursStart?: string | null;
-
-  @IsOptional()
-  @IsString()
-  quietHoursEnd?: string | null;
-}
-
-export class DeliveryPreviewInput {
-  @IsString()
-  @IsNotEmpty()
-  threadId: string;
-
-  @IsString()
-  @IsNotEmpty()
-  body: string;
-
-  @IsOptional()
-  @IsEnum(UrgencyTier)
-  urgency?: UrgencyTier;
-}
-
-export class PreferenceInput {
-  @IsOptional()
-  @IsString()
-  language?: string | null;
-
-  @IsOptional()
-  @IsString()
-  timezone?: string | null;
-
-  @IsOptional()
-  @IsString()
-  quietHoursStart?: string | null;
-
-  @IsOptional()
-  @IsString()
-  quietHoursEnd?: string | null;
-
-  @IsOptional()
-  @IsObject()
-  channelPrefs?: Record<string, boolean> | null;
-}
-
-export class BroadcastInput {
-  @IsIn([ThreadType.CLASS_GROUP, ThreadType.SCHOOL_WIDE, ThreadType.COURSE])
-  type: ThreadType;
-
-  @IsString()
-  @IsNotEmpty()
-  @MaxLength(120)
-  title: string;
-
-  @IsString()
-  @IsNotEmpty()
-  @MaxLength(8000)
-  body: string;
-
-  @IsOptional()
-  @IsString()
-  scopeId?: string | null;
-
-  @IsOptional()
-  @IsEnum(UrgencyTier)
-  urgency?: UrgencyTier;
+  @MaxLength(1000)
+  description?: string;
 
   @IsOptional()
   @IsBoolean()
-  repliesAllowed?: boolean;
-}
+  audienceStudents?: boolean;
 
-export class UpdateBroadcastInput {
   @IsOptional()
   @IsBoolean()
-  repliesAllowed?: boolean;
+  audienceParents?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  studentsCanReply?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  parentsCanReply?: boolean;
+
+  @IsOptional()
+  @IsIn(VISIBILITIES)
+  replyVisibility?: ChannelReplyVisibilityKey;
+
+  /** True archives the channel (read-only); false reopens it. */
+  @IsOptional()
+  @IsBoolean()
+  archived?: boolean;
 }
 
-export const DEFAULT_DELIVERY_CHANNELS: DeliveryChannel[] = [
-  DeliveryChannel.IN_APP,
-  DeliveryChannel.PUSH,
-  DeliveryChannel.EMAIL,
-];
+/** `POST /v1/communication/channels` (FR-COM-003.1–.4). */
+export class CreateChannelInput {
+  @IsIn([...CHANNEL_SCOPES])
+  scope: ChannelScopeKey;
+
+  /** The school, study plan, class group or course id. Omitted for ORGANIZATION. */
+  @IsOptional()
+  @IsString()
+  targetId?: string;
+
+  @IsString()
+  @IsNotEmpty({ message: 'El nombre es obligatorio' })
+  @MaxLength(120)
+  name: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(1000)
+  description?: string;
+
+  @IsBoolean()
+  audienceStudents: boolean;
+
+  @IsBoolean()
+  audienceParents: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  studentsCanReply?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  parentsCanReply?: boolean;
+
+  @IsOptional()
+  @IsIn(VISIBILITIES)
+  replyVisibility?: ChannelReplyVisibilityKey;
+}
+
+export class CreateChannelPostInput {
+  @IsString()
+  @IsNotEmpty({ message: 'El mensaje no puede estar vacío' })
+  @MaxLength(10000)
+  body: string;
+
+  @IsOptional()
+  @IsBoolean()
+  requiresConfirmation?: boolean;
+}
+
+export class CreateChannelReplyInput {
+  @IsString()
+  @IsNotEmpty({ message: 'La respuesta no puede estar vacía' })
+  @MaxLength(5000)
+  body: string;
+
+  /** Managers in PRIVATE channels: the member whose conversation they answer. */
+  @IsOptional()
+  @IsString()
+  threadUserId?: string;
+}
+
+/** `POST /v1/communication/direct` (FR-COM-003.12). */
+export class StartDirectInput {
+  @IsString()
+  @IsNotEmpty()
+  parentUserId: string;
+
+  /** The child the conversation is about. */
+  @IsOptional()
+  @IsString()
+  studentId?: string;
+
+  /** Optional first message. */
+  @IsOptional()
+  @IsString()
+  @MaxLength(5000)
+  body?: string;
+}
+
+export class SendDirectMessageInput {
+  @IsString()
+  @IsNotEmpty({ message: 'El mensaje no puede estar vacío' })
+  @MaxLength(5000)
+  body: string;
+}

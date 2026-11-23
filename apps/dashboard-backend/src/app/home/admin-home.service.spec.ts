@@ -31,7 +31,6 @@ describe('AdminHomeService (HOM-001-S08)', () => {
       user: { findUnique: jest.fn().mockResolvedValue({ firstName: 'Ana', name: 'Ana Admin' }) },
       period: { findMany: jest.fn().mockResolvedValue(o['periods'] ?? [PERIOD]) },
       joinRequest: { findMany: jest.fn().mockResolvedValue(o['joinRequests'] ?? []) },
-      communicationThread: { count: jest.fn().mockResolvedValue(o['broadcasts'] ?? 0) },
       classGroupWeeklySchedule: { findMany: jest.fn().mockResolvedValue(o['slots'] ?? []) },
       attendanceSession: { findMany: jest.fn().mockResolvedValue(o['sessions'] ?? []) },
       charge: {
@@ -67,7 +66,6 @@ describe('AdminHomeService (HOM-001-S08)', () => {
           { requestedRole: 'TEACHER', createdAt: new Date('2026-11-15T10:00:00Z') },
           { requestedRole: 'PARENT', createdAt: new Date('2026-11-14T10:00:00Z') },
         ],
-        broadcasts: 2,
         slots: [
           { courseId: 'c1', classGroupId: 'g1' },
           { courseId: 'c1', classGroupId: 'g1' }, // same class twice today
@@ -94,7 +92,6 @@ describe('AdminHomeService (HOM-001-S08)', () => {
       expect(firstName).toBe('Ana');
       expect(tiles).toEqual({
         joinRequests: { total: 3, teachers: 2, parents: 1, others: 0, oldestAt: '2026-11-13T10:00:00.000Z' },
-        broadcastsToApprove: 2,
         missedAttendance: 2,
         overdueCharges: { count: 3, amount: 350, families: 2 },
         failedImports: 1,
@@ -113,9 +110,6 @@ describe('AdminHomeService (HOM-001-S08)', () => {
       expect(prisma.joinRequest.findMany).toHaveBeenCalledWith(
         expect.objectContaining({ where: { schoolId: SCHOOL, status: 'PENDING', school: { organizationId: ORG } } }),
       );
-      expect(prisma.communicationThread.count).toHaveBeenCalledWith({
-        where: { organizationId: ORG, broadcast: true, status: 'PENDING_APPROVAL', deletedAt: null },
-      });
     });
 
     it('omits overdue charges without VIEW_FINANCIALS', async () => {

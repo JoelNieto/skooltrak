@@ -79,19 +79,13 @@ Code: `attendance`; routes `/teacher/attendance`, `/student/attendance`, `/atten
 | Attendance reporting | Live | — |
 
 ## COM: Communication
-Code: `communication` (REST + Socket.IO `/communication`), legacy `chats`, `messages`, `newsletters`; plan `.kilo/plans/school-communication-platform-v2.md`
+Code: `communication` (REST `/v1/communication/channels`, `/v1/communication/direct`); routes `/communication/channels`, `/communication/direct`
 
 | Capability | Status | FRD |
 |---|---|---|
-| Teacher ↔ family threads (parents reply-only) | Live | — (COM-001) |
-| Broadcasts with approval & optional replies | Live | [COM-002](frd/COM-002-broadcasts.md) |
-| Org-admin communication console & audit | Live | — |
-| Delivery fan-out (email/push/SMS via Novu) | Partial (stub) | — |
-| Recipient preferences / quiet hours | Partial | — |
-| Translation | Planned (deferred) | — |
-| Emergency voice | Planned (deferred) | — |
-| Newsletters | Live | — |
-| Chats & messages (pre-v2) | Legacy | — |
+| Channels at org / school / plan / group / course level, with read counts and read confirmations | In build | [COM-003](frd/COM-003-channels-and-direct.md) |
+| Direct messages staff ↔ parents | In build | [COM-003](frd/COM-003-channels-and-direct.md) |
+| Broadcasts, v2 threads, chats, legacy messages, newsletters | Removed (replaced by COM-003) | [COM-002](frd/COM-002-broadcasts.md) |
 
 ## FIN: Finance
 Code: `financial`; routes `/financial-module`, `/parent/finances`; plans `student-balance`, `financial-filters-pagination`, `payment-registration-form`

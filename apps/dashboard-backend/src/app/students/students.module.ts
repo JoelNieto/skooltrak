@@ -1,6 +1,5 @@
 import { AuthModule } from '@/auth';
 import { Module } from '@nestjs/common';
-import { ChatsModule } from '../chats/chats.module';
 import { FinancialModule } from '../financial/financial.module';
 import { GradesModule } from '../grades/grades.module';
 import { PrismaModule } from '../prisma.module';
@@ -12,6 +11,6 @@ import { StudentsService } from './students.service';
   providers: [
     StudentsService,
   ],
-  imports: [PrismaModule, GradesModule, ChatsModule, AuthModule, FinancialModule],
+  imports: [PrismaModule, GradesModule, AuthModule, FinancialModule],
 })
 export class StudentsModule {}

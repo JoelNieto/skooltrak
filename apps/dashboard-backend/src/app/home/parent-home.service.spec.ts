@@ -25,7 +25,7 @@ describe('ParentHomeService (HOM-001-S06)', () => {
     courses: [{ id: 'c-math', name: 'Matemáticas', average: opts.below ? 2.8 : 4, band: opts.below ? 'BELOW' : 'PASSING' }],
     recentGrades: [],
     attendance: { rate: 0.92, absences: 1, late: 3 },
-    messages: { unread: 0, fromTeachers: 0, broadcasts: 0 },
+    messages: { unread: 0 },
     habits: null,
   });
   const work = (overdue: number) => ({
@@ -64,7 +64,7 @@ describe('ParentHomeService (HOM-001-S06)', () => {
       school: { findUnique: jest.fn().mockResolvedValue({ currencyCode: 'USD' }) },
       charge: { findMany: jest.fn().mockImplementation(({ where }) => Promise.resolve(facts[where.studentId]?.charges ?? [])) },
       payment: { findMany: jest.fn().mockImplementation(({ where }) => Promise.resolve(facts[where.studentId]?.payments ?? [])) },
-      communicationThread: { findMany: jest.fn().mockResolvedValue(opts.threads ?? []) },
+      directConversation: { findMany: jest.fn().mockResolvedValue(opts.threads ?? []) },
     };
     const studentHome = {
       contextForStudent: jest.fn().mockImplementation((id: string) => Promise.resolve(ctxFor(id))),
@@ -120,35 +120,30 @@ describe('ParentHomeService (HOM-001-S06)', () => {
   describe('child details (FR-HOM-001.21, .23)', () => {
     const linked = kid('st-sofia', 'Sofía');
 
-    it('asks for 4 recent grades and lists the teacher threads about this child', async () => {
+    it('asks for 4 recent grades and lists the direct conversations about this child', async () => {
       const msg = (senderId: string, createdAt: string, body = 'Hola') => ({
         body,
         createdAt: new Date(createdAt),
         senderId,
         sender: { name: senderId === 'user-parent' ? 'María Pérez' : 'Carlos Méndez', firstName: null, lastName: null },
       });
+      const staffUser = { name: 'Carlos Méndez', firstName: 'Carlos', lastName: 'Méndez' };
       const { service, prisma, studentHome } = build({
         linked,
         threads: [
-          { id: 't-old', title: 'Taller', participants: [{ lastReadAt: new Date('2026-11-15') }], messages: [msg('user-teacher', '2026-11-14T10:00:00Z')] },
-          { id: 't-new', title: 'Reunión', participants: [{ lastReadAt: null }], messages: [msg('user-teacher', '2026-11-16T10:00:00Z', 'x'.repeat(200))] },
-          { id: 't-mine', title: 'Respuesta', participants: [{ lastReadAt: null }], messages: [msg('user-parent', '2026-11-16T11:00:00Z')] },
-          { id: 't-empty', title: 'Vacío', participants: [], messages: [] },
+          { id: 't-mine', parentLastReadAt: null, staffUser, messages: [msg('user-parent', '2026-11-16T11:00:00Z')] },
+          { id: 't-new', parentLastReadAt: null, staffUser, messages: [msg('user-teacher', '2026-11-16T10:00:00Z', 'x'.repeat(200))] },
+          { id: 't-old', parentLastReadAt: new Date('2026-11-15'), staffUser, messages: [msg('user-teacher', '2026-11-14T10:00:00Z')] },
         ],
       });
 
       const home = await service.child(parentUser, 'st-sofia');
 
       expect(studentHome.progressFor).toHaveBeenCalledWith(expect.anything(), { recentGrades: 4 });
-      expect(prisma.communicationThread.findMany).toHaveBeenCalledWith(
+      expect(prisma.directConversation.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
-          where: {
-            type: 'STUDENT_GUARDIANS',
-            scopeId: 'st-sofia',
-            broadcast: false,
-            deletedAt: null,
-            participants: { some: { userId: 'user-parent' } },
-          },
+          where: { parentUserId: 'user-parent', studentId: 'st-sofia', messages: { some: {} } },
+          take: 4,
         }),
       );
       expect(home.messages.map((m) => [m.id, m.unread])).toEqual([
@@ -158,6 +153,7 @@ describe('ParentHomeService (HOM-001-S06)', () => {
       ]);
       expect(home.messages[1].preview).toHaveLength(140);
       expect(home.messages[1].senderName).toBe('Carlos Méndez');
+      expect(home.messages[1].title).toBe('Carlos Méndez');
       expect(home.work.map((w) => w.status)).toEqual(['PENDIENTE', 'ENTREGADO']);
     });
   });

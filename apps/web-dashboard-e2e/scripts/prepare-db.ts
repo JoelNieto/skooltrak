@@ -275,20 +275,16 @@ async function seedFixtures(databaseUrl: string) {
         students: { connect: [{ id: relatedStudentIds[0] }, { id: relatedStudentIds[1] }] },
       },
     });
-    await prisma.communicationThread.create({
+    // COM-003: the teacher's direct conversation with the guardian about the first related student,
+    // last written by the parent (HOM-001-S03 family message; parent home later).
+    await prisma.directConversation.create({
       data: {
         organizationId: org.id,
-        type: 'STUDENT_GUARDIANS',
-        scopeId: relatedStudentIds[0],
-        title: data.familyThread.title,
-        createdById: users.teacher.userId,
-        ownerRole: 'TEACHER',
-        participants: {
-          create: [
-            { userId: users.teacher.userId, role: 'OWNER', canInitiate: true },
-            { userId: users.parent.userId, role: 'MEMBER', canInitiate: false },
-          ],
-        },
+        staffUserId: users.teacher.userId,
+        parentUserId: users.parent.userId,
+        studentId: relatedStudentIds[0],
+        lastMessageAt: new Date(now - 3_600_000),
+        staffLastReadAt: new Date(now - 3 * day),
         messages: {
           create: [
             { senderId: users.teacher.userId, body: 'Buenos días, le escribo por el taller.', createdAt: new Date(now - 3 * day) },
@@ -324,18 +320,6 @@ async function seedFixtures(databaseUrl: string) {
       },
     });
     await prisma.joinRequest.create({ data: { userId: applicant.id, schoolId: school.id, requestedRole: 'TEACHER' } });
-    await prisma.communicationThread.create({
-      data: {
-        organizationId: org.id,
-        type: 'SCHOOL_WIDE',
-        scopeId: school.id,
-        title: data.admin.pendingBroadcast,
-        createdById: users.teacher.userId,
-        ownerRole: 'TEACHER',
-        broadcast: true,
-        status: 'PENDING_APPROVAL',
-      },
-    });
     const overdueDue = new Date(now + data.admin.overdueCharge.inDays * day);
     await prisma.charge.create({
       data: {

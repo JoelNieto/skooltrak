@@ -17,7 +17,7 @@ import {
 import { httpResource } from '@angular/common/http';
 import { Component, computed } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { RecentBroadcasts } from './communication/recent-broadcasts';
+import { RecentChannelPosts } from './communication/recent-channel-posts';
 
 type Ref = { id: string; name: string };
 
@@ -76,7 +76,8 @@ type StudentProgress = {
   courses: { id: string; name: string; average: number | null; band: GradeBand | null }[];
   recentGrades: { id: string; title: string; course: Ref; score: number; band: GradeBand | null; date: string }[];
   attendance: { rate: number | null; absences: number; late: number } | null;
-  messages: { unread: number; fromTeachers: number; broadcasts: number };
+  /** COM-003: unread channel posts. */
+  messages: { unread: number };
   habits: { total: number; satisfactory: number; flagged: { name: string; value: 'R' | 'X' }[] } | null;
 };
 
@@ -124,7 +125,7 @@ const longDate = new Intl.DateTimeFormat('es', { weekday: 'long', day: 'numeric'
     RouterLink,
     PageHeader,
     EmptyState,
-    RecentBroadcasts,
+    RecentChannelPosts,
     StatCard,
     Icon,
   ],
@@ -250,10 +251,10 @@ const longDate = new Intl.DateTimeFormat('es', { weekday: 'long', day: 'numeric'
         color="warning"
       />
       <lib-stat-card
-        label="Mensajes nuevos"
+        label="Avisos nuevos"
         [value]="messagesValue()"
         [helper]="messagesHelper()"
-        icon="mail"
+        icon="megaphone"
         color="info"
       />
     </div>
@@ -321,7 +322,7 @@ const longDate = new Intl.DateTimeFormat('es', { weekday: 'long', day: 'numeric'
       </section>
 
       <div class="min-w-0 flex-[1_1_340px]">
-        <app-recent-broadcasts />
+        <app-recent-channel-posts />
       </div>
     </div>
 
@@ -520,10 +521,7 @@ export default class StudentHome {
     if (this.progress.error()) return 'No se pudo cargar';
     const m = this.progress.value()?.messages;
     if (!m || m.unread === 0) return 'Estás al día';
-    const parts: string[] = [];
-    if (m.fromTeachers) parts.push(plural(m.fromTeachers, 'de un docente', 'de docentes'));
-    if (m.broadcasts) parts.push(plural(m.broadcasts, 'aviso escolar', 'avisos escolares'));
-    return parts.join(' · ');
+    return `${plural(m.unread, 'aviso', 'avisos')} en tus canales`;
   });
 
   public habitsText = computed(() => {

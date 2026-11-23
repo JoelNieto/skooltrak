@@ -16,7 +16,7 @@ Skooltrak is an educational platform for schools to manage academic processes, u
 
 ## Architecture
 
-Two standalone Angular frontends consume two NestJS backends. The **web-dashboard** app covers the school dashboard (auth, onboarding, classes, chats, and the public store under `/store/...`), and **web-admin** is the separate admin console.
+Two standalone Angular frontends consume two NestJS backends. The **web-dashboard** app covers the school dashboard (auth, onboarding, classes, channels and direct messages, and the public store under `/store/...`), and **web-admin** is the separate admin console.
 
 ```mermaid
 flowchart TB
@@ -139,7 +139,7 @@ E2E projects are colocated under `apps/*-e2e`.
 
 - **Nx 22** for monorepo orchestration
 - **Angular 21** for frontends (application builder + SSR)
-- **NestJS 11** for APIs (REST + OpenAPI/Swagger, Socket.IO for live chat)
+- **NestJS 11** for APIs (REST + OpenAPI/Swagger)
 - **Prisma 7** for database access
 - **Tailwind CSS 4** + **DaisyUI** for styling
 
@@ -179,7 +179,7 @@ Skooltrak es una plataforma educativa para escuelas que permite gestionar proces
 
 ## Arquitectura
 
-Dos frontends Angular independientes consumen dos backends NestJS. **web-dashboard** cubre el panel escolar (auth, onboarding, clases, chats y la tienda pública en `/store/...`) y **web-admin** es el panel de administración separado.
+Dos frontends Angular independientes consumen dos backends NestJS. **web-dashboard** cubre el panel escolar (auth, onboarding, clases, canales y mensajes directos, y la tienda pública en `/store/...`) y **web-admin** es el panel de administración separado.
 
 ```mermaid
 flowchart TB
@@ -302,7 +302,7 @@ Los proyectos E2E están en `apps/*-e2e`.
 
 - **Nx 22** para orquestación de monorepo
 - **Angular 21** para frontends (application builder + SSR)
-- **NestJS 11** para APIs (REST + OpenAPI/Swagger, Socket.IO para chat en vivo)
+- **NestJS 11** para APIs (REST + OpenAPI/Swagger)
 - **Prisma 7** para acceso a base de datos
 - **Tailwind CSS 4** + **DaisyUI** para estilos
 

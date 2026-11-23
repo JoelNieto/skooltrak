@@ -1,16 +1,12 @@
 import { Prisma } from '@generated/prisma';
 import { Injectable } from '@nestjs/common';
-import { ChatSyncService } from '../chats/chat-sync.service';
 import { PrismaService } from '../prisma.service';
 import { CreateAssignmentInput } from './dto/create-assignment.input';
 import { UpdateAssignmentInput } from './dto/update-assignment.input';
 
 @Injectable()
 export class AssignmentsService {
-  constructor(
-    private readonly prisma: PrismaService,
-    private readonly chatSync: ChatSyncService,
-  ) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   /** `schoolId` comes from the course, never from the caller. */
   async create(createAssignmentInput: CreateAssignmentInput, schoolId: string) {
@@ -27,10 +23,6 @@ export class AssignmentsService {
       },
       include: { course: true, teacher: true, dates: { include: { classGroup: true } } },
     });
-
-    for (const d of assignment.dates) {
-      await this.chatSync.addClassGroupStudentsToAssignmentChat(assignment.id, d.classGroupId);
-    }
 
     return assignment;
   }
@@ -129,12 +121,6 @@ export class AssignmentsService {
       data: updateData as never,
       include: { course: true, teacher: true, dates: { include: { classGroup: true } } },
     });
-
-    if (groupDates?.length) {
-      for (const d of groupDates) {
-        await this.chatSync.addClassGroupStudentsToAssignmentChat(id, d.classGroupId);
-      }
-    }
 
     return assignment;
   }

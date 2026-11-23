@@ -52,13 +52,13 @@ test.describe('Teacher home — attention and family messages', () => {
 
     const token = await page.evaluate(() => localStorage.getItem('access_token'));
     const headers = { Authorization: `Bearer ${token}` };
-    const threads = (await (await request.get('/api/v1/communication/threads', { headers })).json()) as {
+    const conversations = (await (await request.get('/api/v1/communication/direct', { headers })).json()) as {
       id: string;
-      title: string;
+      lastMessagePreview: string | null;
     }[];
-    const thread = threads.find((t) => t.title === data.familyThread.title);
-    expect(thread).toBeTruthy();
-    const reply = await request.post(`/api/v1/communication/threads/${thread?.id}/messages`, {
+    const conversation = conversations.find((c) => c.lastMessagePreview === data.familyThread.parentMessage);
+    expect(conversation).toBeTruthy();
+    const reply = await request.post(`/api/v1/communication/direct/${conversation?.id}/messages`, {
       headers,
       data: { body: 'Claro, ¿le parece el jueves a las 3?' },
     });

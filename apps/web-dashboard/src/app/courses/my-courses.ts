@@ -6,6 +6,8 @@ import {
   Card,
   CardBody,
   CardTitle,
+  Chip,
+  ChipCount,
   CourseCover,
   EmptyState,
   Icon,
@@ -83,6 +85,8 @@ const BAND: Record<'AL_DIA' | 'EN_RIESGO', { label: string; tone: BadgeTone }> =
     Card,
     CardBody,
     CardTitle,
+    Chip,
+    ChipCount,
     CourseCover,
     DecimalPipe,
     EmptyState,
@@ -178,16 +182,9 @@ const BAND: Record<'AL_DIA' | 'EN_RIESGO', { label: string; tone: BadgeTone }> =
         @if (chips().length > 2) {
           <div class="mb-4 flex flex-wrap gap-2" role="group" aria-label="Filtrar por área">
             @for (chip of chips(); track chip.key) {
-              <button
-                uiButton
-                size="sm"
-                type="button"
-                [variant]="area() === chip.key ? 'primary' : 'ghost'"
-                [attr.aria-pressed]="area() === chip.key"
-                (click)="area.set(chip.key)"
-              >
+              <button uiChip [pressed]="area() === chip.key" (click)="area.set(chip.key)">
                 {{ chip.label }}
-                <span class="text-xs opacity-75">{{ chip.count }}</span>
+                <span uiChipCount>{{ chip.count }}</span>
               </button>
             }
           </div>
@@ -195,7 +192,12 @@ const BAND: Record<'AL_DIA' | 'EN_RIESGO', { label: string; tone: BadgeTone }> =
         <ul class="grid gap-5 md:grid-cols-2 xl:grid-cols-3" aria-label="Mis cursos">
           @for (course of visible(); track course.id) {
             <li>
-              <a uiCard [routerLink]="['/courses', course.id]" class="group block h-full overflow-hidden">
+              <a
+                uiCard
+                [routerLink]="['/courses', course.id]"
+                [attr.aria-label]="cardLabel(course, data)"
+                class="group block h-full overflow-hidden"
+              >
                 <ui-course-cover [color]="course.color" [icon]="course.icon" [image]="course.coverUrl">
                   @if (course.subject.area) {
                     <span uiBadge size="sm" class="absolute top-2 right-2 bg-surface-1 text-ink-strong">{{
@@ -346,6 +348,27 @@ export default class MyCoursesPage {
     if (next.overdue) return `Vencida desde ${day}`;
     const time = new Intl.DateTimeFormat('es', { hour: 'numeric', minute: '2-digit', timeZone: timezone }).format(at);
     return `Vence ${day}, ${time}`;
+  }
+
+  /**
+   * §8: one accessible name that sums the card up, e.g. "Matemáticas, Prof. Ana Rodríguez. Promedio
+   * 4.6, Al día. Próxima: Taller 3, Vence jue 16 abr, 12:00. 3 de 4 completadas."
+   */
+  protected cardLabel(course: MyCourses['courses'][number], data: MyCourses): string {
+    const parts = [course.teacher ? `${course.name}, Prof. ${course.teacher.name}.` : `${course.name}.`];
+    if (!course.scale) parts.push('Escala de notas no configurada.');
+    else if (course.average === null) parts.push('Sin notas.');
+    else
+      parts.push(
+        `Promedio ${course.average.toFixed(1)}${course.band ? `, ${BAND[course.band].label}` : ''}.`,
+      );
+    if (data.isCurrentPeriod) {
+      parts.push(
+        course.next ? `Próxima: ${course.next.title}, ${this.dueText(course.next, data.timezone)}.` : 'Nada pendiente.',
+      );
+    }
+    if (course.progress.total) parts.push(`${course.progress.done} de ${course.progress.total} completadas.`);
+    return parts.join(' ');
   }
 
   protected averageHelper(average: { previous: number | null; delta: number | null }): string {

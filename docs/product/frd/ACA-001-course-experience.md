@@ -199,7 +199,7 @@ Side effects: none. Regenerate the dashboard API client (`bun run openapi:orval`
   - no class group: BR .1;
   - no access: BR .3;
   - a filter with no results: the existing *"No se encontraron cursos"* empty state.
-- **Components:** `libs/ui` only: `Card`, `Badge`, `Meter` (progress, category bars), `UiTabs`, `PageHeader`, `StatCard`, `Icon`, `EmptyState`, `Skeleton`, `UiTable`, `Breadcrumbs`. The design's filter chips and the *Calificaciones* period control become `libs/ui` primitives if they don't exist yet, never one-off markup.
+- **Components:** `libs/ui` only: `Card`, `Badge`, `Meter` (progress, category bars), `UiTabs`, `PageHeader`, `StatCard`, `Icon`, `EmptyState`, `Skeleton`, `UiTable`, `Breadcrumbs`. Filter chips use the `libs/ui` `Chip` toggle (`button[uiChip]`), and the course header uses `CourseCover`'s `banner` variant. The *Calificaciones* period control becomes a `libs/ui` primitive too, never one-off markup.
 - **Copy:** Spanish. The design canvas is in English and is the layout reference only.
 
 ## 8. Non-functional

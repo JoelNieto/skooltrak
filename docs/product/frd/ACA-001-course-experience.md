@@ -2,10 +2,10 @@
 
 | | |
 |---|---|
-| **Status** | In build |
+| **Status** | Shipped |
 | **Context** | ACA — Academics (see [capabilities](../capabilities.md#aca-academics)) |
 | **Owner** | — |
-| **Last updated** | 2026-11-20 |
+| **Last updated** | 2026-11-22 |
 | **Related** | Design canvas "Skooltrak — Courses redesign (desktop)", boards *Courses — list* and *Course details — Mathematics* (claude.ai/artifact/MGaGctNuxxJd1rouLSYTaa) · [HOM-001](HOM-001-persona-home-dashboards.md) (reuses its grade, period, scope and work-status rules) · [ASM-001](ASM-001-teacher-gradebook.md) (gradebook, assignment-linked grades) · current code: `apps/web-dashboard/src/app/courses/courses.ts`, `courses/course.ts`, `apps/dashboard-backend/src/app/courses/` |
 
 ## 1. Problem & outcome
@@ -248,7 +248,8 @@ Listed in build order.
 | [ACA-001-S06](../slices/ACA-001-S06-course-page.md) | Course page header, Resumen and Asignaciones with status; course access tightened | .10 .11 .12 .13, BR .3 .6 | Done (#70) |
 | [ACA-001-S07](../slices/ACA-001-S07-grades-tab.md) | Calificaciones tab | .14, BR .5 | Done (#71) |
 | [ACA-001-S08](../slices/ACA-001-S08-participants.md) | Participantes tab | .15, BR .13 | Done (#72) |
-| [ACA-001-S12](../slices/ACA-001-S12-course-roster-admin.md) | Admin manages a course roster (electives, exemptions) | .19, BR .15 | In review |
-| [ACA-001-S13](../slices/ACA-001-S13-homeroom-view.md) | Homeroom teacher's read-only view of colleagues' courses | .18, BR .16 | In review |
+| [ACA-001-S12](../slices/ACA-001-S12-course-roster-admin.md) | Admin manages a course roster (electives, exemptions) | .19, BR .15 | Done (#74) |
+| [ACA-001-S13](../slices/ACA-001-S13-homeroom-view.md) | Homeroom teacher's read-only view of colleagues' courses | .18, BR .16 | Done (#75) |
 | [ACA-001-S09](../slices/ACA-001-S09-customize-course.md) | Teacher sets color and cover photo | .3, BR .12 | Done (#73) |
 | [ACA-001-S10](../slices/ACA-001-S10-graded-status.md) | *"Calificada · n"* status from linked grades | .17 | Done (#63) |
+| [ACA-001-S14](../slices/ACA-001-S14-staff-cards.md) | Staff *Cursos* cards: area chip and course name | .9, BR .14 | In review |

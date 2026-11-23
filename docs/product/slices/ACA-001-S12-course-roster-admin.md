@@ -4,7 +4,7 @@
 |---|---|
 | **FRD** | [ACA-001](../frd/ACA-001-course-experience.md) |
 | **Implements** | FR-ACA-001.19; BR-ACA-001.15 (manual enrollments, exclusions) |
-| **Status** | In review |
+| **Status** | Done (#74) |
 | **Branch** | `feat/ACA-001-S12-course-roster-admin` |
 | **Estimate** | 1.5 days |
 

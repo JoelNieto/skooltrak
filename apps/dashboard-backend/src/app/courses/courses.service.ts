@@ -272,7 +272,8 @@ export class CoursesService {
           school: {
             select: { id: true, name: true },
           },
-          subject: { select: { id: true, name: true, icon: true } },
+          // FR-ACA-001.9: staff cards show the subject's area chip (BR .14).
+          subject: { select: { id: true, name: true, icon: true, area: true } },
           studyPlan: { select: { id: true, name: true, shortName: true } },
           teacher: {
             select: {

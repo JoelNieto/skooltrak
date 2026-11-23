@@ -4,7 +4,7 @@
 |---|---|
 | **FRD** | [ACA-001](../frd/ACA-001-course-experience.md) |
 | **Implements** | FR-ACA-001.18; BR-ACA-001.16 |
-| **Status** | In review |
+| **Status** | Done (#75) |
 | **Branch** | `feat/ACA-001-S13-homeroom-view` |
 | **Estimate** | 2 days |
 

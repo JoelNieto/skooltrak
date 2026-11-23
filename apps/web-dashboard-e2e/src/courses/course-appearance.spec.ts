@@ -12,7 +12,8 @@ import { data, E2E_PASSWORD, personas, storageStatePath } from '../support/fixtu
 
 const COURSE = data.courses.teacherOwn.name;
 const SUBJECT = 'Matemáticas';
-const OTHER_SUBJECT = 'Ciencias';
+/** The other teacher's course; every Cursos card is titled with the course's name (FR-ACA-001.9). */
+const OTHER_COURSE = data.courses.otherTeachers.name;
 
 const firstPath = (icon: readonly (readonly [string, Record<string, unknown>])[]) =>
   icon.find(([tag]) => tag === 'path')?.[1]['d'] as string;
@@ -42,9 +43,9 @@ async function pageAs(browser: Browser, persona: 'admin' | 'student') {
   return context.newPage();
 }
 
-/** The cover of the course card whose title is `subjectName` (staff) or the course's name (students). */
-const coverOf = (page: import('@playwright/test').Page, subjectName: string): Locator =>
-  page.getByRole('link').filter({ has: page.getByRole('heading', { name: subjectName, exact: true }) }).locator('ui-course-cover');
+/** The cover of the course card titled `courseName`. */
+const coverOf = (page: import('@playwright/test').Page, courseName: string): Locator =>
+  page.getByRole('link').filter({ has: page.getByRole('heading', { name: courseName, exact: true }) }).locator('ui-course-cover');
 
 /** Clicks Guardar in the open dialog and returns the status of the PATCH it sends. */
 async function save(page: import('@playwright/test').Page, path: string) {
@@ -71,19 +72,19 @@ test.describe('Course color and subject icon @FR-ACA-001.1 @FR-ACA-001.2', () =>
   test('without setup, a course shows a color derived from its id and the book-open icon', async ({ browser }) => {
     const page = await pageAs(browser, 'admin');
     await page.goto('/courses');
-    const cover = coverOf(page, OTHER_SUBJECT);
+    const cover = coverOf(page, OTHER_COURSE);
     await expect(cover).toBeVisible();
 
     const href = await page
       .getByRole('link')
-      .filter({ has: page.getByRole('heading', { name: OTHER_SUBJECT, exact: true }) })
+      .filter({ has: page.getByRole('heading', { name: OTHER_COURSE, exact: true }) })
       .getAttribute('href');
     const courseId = href?.split('/').pop() ?? '';
     await expect(cover).toHaveAttribute('data-color', resolveCourseColor(courseId, null));
     expect(await coverIconPath(cover)).toBe(firstPath(BookOpen));
 
     await page.reload();
-    await expect(coverOf(page, OTHER_SUBJECT)).toHaveAttribute('data-color', resolveCourseColor(courseId, null));
+    await expect(coverOf(page, OTHER_COURSE)).toHaveAttribute('data-color', resolveCourseColor(courseId, null));
   });
 
   test('an admin sets the course color and the subject icon in the forms', async ({ browser }) => {

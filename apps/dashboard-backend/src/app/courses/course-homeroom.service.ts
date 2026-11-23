@@ -19,7 +19,8 @@ export interface HomeroomCourse {
   coverUrl: string | null;
   /** The course's icon (FR .3), else its subject's. */
   icon: string | null;
-  subject: { name: string };
+  /** FR-ACA-001.9: `area` feeds the card's area chip (BR .14). */
+  subject: { name: string; area: string | null };
   teacher: { name: string } | null;
   /** The group's students actively enrolled in the course. */
   students: number;
@@ -65,7 +66,7 @@ export class CourseHomeroomService {
             color: true,
             icon: true,
             coverKey: true,
-            subject: { select: { name: true, icon: true } },
+            subject: { select: { name: true, icon: true, area: true } },
             teacher: { select: { firstName: true, fatherName: true } },
             _count: { select: { enrollments: { where: ofGroup } } },
           },
@@ -80,7 +81,7 @@ export class CourseHomeroomService {
               color: resolveCourseColor(c.id, c.color),
               coverUrl: await this.covers.url(c.coverKey),
               icon: c.icon ?? c.subject?.icon ?? null,
-              subject: { name: c.subject?.name ?? c.name },
+              subject: { name: c.subject?.name ?? c.name, area: c.subject?.area ?? null },
               teacher: c.teacher ? { name: `${c.teacher.firstName} ${c.teacher.fatherName}` } : null,
               students: c._count.enrollments,
             })),

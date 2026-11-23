@@ -25,13 +25,15 @@ import MyCoursesPage from './my-courses';
 
 type CourseRow = {
   id: string;
+  name?: string;
   /** Resolved by the API: never null (ACA-001 BR .11). */
   color: string;
   /** FR-ACA-001.3: the teacher's icon; null shows the subject's. */
   icon?: string | null;
   /** FR-ACA-001.3: presigned cover photo; null keeps the color cover. */
   coverUrl?: string | null;
-  subject?: { name?: string; icon?: string | null };
+  /** FR-ACA-001.9: `area` is the card's area chip (BR .14). */
+  subject?: { name?: string; icon?: string | null; area?: string | null };
   studyPlan?: { name?: string };
   teacher?: {
     firstName?: string;
@@ -51,7 +53,7 @@ type HomeroomSection = {
     color: string;
     coverUrl: string | null;
     icon: string | null;
-    subject: { name: string };
+    subject: { name: string; area: string | null };
     teacher: { name: string } | null;
     students: number;
   }[];
@@ -79,7 +81,7 @@ type HomeroomSection = {
 
   template: `
     @if (auth.isStudent() || auth.isParent()) {
-      <!-- ACA-001-S02, S05: students and parents get Mis cursos; staff keep this list (FR .9 later). -->
+      <!-- ACA-001-S02, S05: students and parents get Mis cursos; staff get this list (FR .9, S14). -->
       <app-my-courses />
     } @else {
       <ui-breadcrumbs [items]="[{ label: 'Inicio', link: '/' }, { label: 'Cursos' }]" />
@@ -103,12 +105,17 @@ type HomeroomSection = {
                 [icon]="course.icon ?? course.subject?.icon"
                 [image]="course.coverUrl"
               >
+                @if (course.subject?.area) {
+                  <span uiBadge size="sm" class="absolute top-2 left-2 bg-surface-1 text-ink-strong">
+                    {{ course.subject?.area }}
+                  </span>
+                }
                 <span uiBadge size="sm" class="absolute top-2 right-2 bg-surface-1 text-ink-strong">
                   {{ course.studyPlan?.name }}
                 </span>
               </ui-course-cover>
               <div uiCardBody class="p-3">
-                <h2 uiCardTitle class="text-sm line-clamp-2">{{ course.subject?.name }}</h2>
+                <h2 uiCardTitle class="text-sm line-clamp-2">{{ course.name || course.subject?.name }}</h2>
                 @if (course.teacher?.name) {
                   <div class="text-xs text-ink-muted flex items-center gap-1">
                     @if (course.teacher?.avatarUrl) {
@@ -174,12 +181,17 @@ type HomeroomSection = {
             @for (course of section.courses; track course.id) {
               <a uiCard [routerLink]="['/courses', course.id]" class="group overflow-hidden">
                 <ui-course-cover [color]="course.color" [icon]="course.icon" [image]="course.coverUrl">
+                  @if (course.subject.area) {
+                    <span uiBadge size="sm" class="absolute top-2 left-2 bg-surface-1 text-ink-strong">
+                      {{ course.subject.area }}
+                    </span>
+                  }
                   <span uiBadge size="sm" class="absolute top-2 right-2 bg-surface-1 text-ink-strong">
                     <ui-icon name="eye" /> Solo lectura
                   </span>
                 </ui-course-cover>
                 <div uiCardBody class="p-3">
-                  <h3 uiCardTitle class="text-sm line-clamp-2">{{ course.subject.name }}</h3>
+                  <h3 uiCardTitle class="text-sm line-clamp-2">{{ course.name || course.subject.name }}</h3>
                   <div class="text-xs text-ink-muted">
                     {{ course.teacher?.name ?? 'Sin docente asignado' }} · {{ course.students }}
                     {{ course.students === 1 ? 'estudiante' : 'estudiantes' }}

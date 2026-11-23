@@ -2,8 +2,8 @@ import { APIRequestContext, expect, test } from '@playwright/test';
 import { data, E2E_PASSWORD, personas, storageStatePath } from '../support/fixtures';
 
 /**
- * ACA-001-S04: an admin sets a subject's area, and the student's *Mis cursos* card shows it
- * (FR-ACA-001.2, .7; BR-ACA-001.14). Ana has a single course in the seed, so the filter chips (shown
+ * ACA-001-S04, S14: an admin sets a subject's area, and the student's *Mis cursos* card and the
+ * teacher's *Cursos* card show it (FR-ACA-001.2, .7, .9; BR-ACA-001.14). Ana has a single course in the seed, so the filter chips (shown
  * only when there is something to filter) are covered by unit tests.
  * Runs in the `after` project: it changes the subject; afterAll clears the area again.
  */
@@ -45,6 +45,17 @@ test.describe('Subject area @FR-ACA-001.7 @BR-ACA-001.14', () => {
     await expect(card).toContainText(AREA);
     // One area only: nothing to filter, so no chips.
     await expect(page.getByRole('group', { name: 'Filtrar por área' })).toHaveCount(0);
+    await context.close();
+  });
+
+  test("the teacher's Cursos card shows it too @FR-ACA-001.9", async ({ browser }) => {
+    const context = await browser.newContext({ storageState: storageStatePath('teacher') });
+    const page = await context.newPage();
+    await page.goto('/courses');
+    const card = page
+      .getByRole('link')
+      .filter({ has: page.getByRole('heading', { name: data.courses.teacherOwn.name, exact: true }) });
+    await expect(card).toContainText(AREA);
     await context.close();
   });
 });

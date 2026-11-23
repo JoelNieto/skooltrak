@@ -4,7 +4,7 @@
 |---|---|
 | **FRD** | [ACA-001](../frd/ACA-001-course-experience.md) |
 | **Implements** | FR-ACA-001.9; BR-ACA-001.14 |
-| **Status** | In review |
+| **Status** | Done (#82) |
 | **Branch** | `feat/ACA-001-S14-staff-cards` |
 | **Estimate** | 0.5 day |
 

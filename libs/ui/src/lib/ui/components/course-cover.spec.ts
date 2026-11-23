@@ -12,6 +12,7 @@ import { resolve } from 'node:path';
   template: `
     <ui-course-cover class="card" [color]="color()" [icon]="icon()"><span class="badge">1A</span></ui-course-cover>
     <ui-course-cover class="tile" variant="tile" color="TEAL" icon="flask-conical" />
+    <ui-course-cover class="banner" variant="banner" color="ROSE" icon="sigma"><span class="action">Editar</span></ui-course-cover>
   `,
 })
 class Host {
@@ -55,6 +56,19 @@ describe('ui-course-cover', () => {
     expect(tile.getAttribute('data-color')).toBe('TEAL');
     expect(firstPath(tile)).toBe(iconPath('flask-conical'));
     expect(tile.querySelector('.ui-course-cover__watermark')).toBeNull();
+  });
+
+  it('renders the full-width banner with the watermark and projected content (FR .10)', () => {
+    const { q } = setup();
+    const banner = q('.banner');
+
+    expect(banner.classList).toContain('h-46');
+    expect(banner.classList).toContain('w-full');
+    expect(banner.classList).not.toContain('h-32');
+    expect(banner.getAttribute('data-color')).toBe('ROSE');
+    expect(firstPath(banner)).toBe(iconPath('sigma'));
+    expect(banner.querySelector('.ui-course-cover__watermark')).not.toBeNull();
+    expect(q('.banner .action').textContent).toBe('Editar');
   });
 
   it('falls back to slate and book-open for missing or unknown values', () => {

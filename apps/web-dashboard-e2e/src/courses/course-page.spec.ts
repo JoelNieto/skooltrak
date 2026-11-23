@@ -37,7 +37,10 @@ test.describe('Course page for students @FR-ACA-001.10 @FR-ACA-001.11 @FR-ACA-00
     await page.goto(`/courses/${id}`);
 
     await expect(page.getByText(data.classGroups.related, { exact: true })).toBeVisible();
-    await expect(page.getByText(/Todos los días · Aula 7/)).toBeVisible();
+    // FR .10: the header shows the schedule and, separately, the room.
+    const header = page.getByRole('region', { name: data.courses.teacherOwn.name });
+    await expect(header).toContainText('Todos los días');
+    await expect(header).toContainText('Aula 7');
     await expect(page.getByRole('tab', { name: 'Resumen' })).toHaveAttribute('aria-selected', 'true');
     await expect(page.getByRole('region', { name: 'Próximas entregas' })).toContainText(data.studentWork.overdue.title);
 

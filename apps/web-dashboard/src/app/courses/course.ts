@@ -2,8 +2,6 @@ import {
   Breadcrumbs,
   Button,
   Card,
-  CardBody,
-  CardTitle,
   courseColorVar,
   CourseCover,
   EmptyState,
@@ -84,8 +82,6 @@ type CourseVm = {
     UiTabContent,
     Breadcrumbs,
     Card,
-    CardBody,
-    CardTitle,
     CourseCover,
     Button,
     Loader,
@@ -123,67 +119,93 @@ type CourseVm = {
         <ui-breadcrumbs
           [items]="[{ label: 'Inicio', link: '/' }, { label: 'Cursos', link: '/courses' }, { label: course.name }]"
         />
-        <div uiCard class="mt-4">
-          <div uiCardBody class="flex md:flex-row md:gap-4 md:items-center">
+        <div uiTabs class="mt-4 flex flex-col gap-4">
+          <!-- FR-ACA-001.10: the cover as a banner, then name, area, group, teacher, schedule and room. -->
+          <section uiCard class="overflow-hidden" aria-labelledby="course-title">
             <ui-course-cover
-              variant="tile"
+              variant="banner"
               [color]="course.color"
               [icon]="course.icon ?? course.subject?.icon"
               [image]="course.coverUrl"
-            />
-            <div class="flex justify-between items-center w-full">
-              <div>
-                <h2 uiCardTitle class="text-xl">
+            >
+              @if (course.canCustomize) {
+                <button
+                  uiButton
+                  size="sm"
+                  type="button"
+                  class="absolute right-5 bottom-5 rounded-full border-0 bg-surface-1 text-ink-strong hover:bg-surface-2"
+                  (click)="customize()"
+                >
+                  <ui-icon name="palette" />
+                  Personalizar
+                </button>
+              }
+            </ui-course-cover>
+            <div class="flex flex-wrap items-start justify-between gap-5 px-6 py-5 md:px-8">
+              <div class="flex min-w-0 flex-col gap-2.5">
+                <div class="flex flex-wrap items-center gap-3">
                   <span
                     class="course-color-dot inline-block size-3.5 shrink-0 rounded-full"
                     [style.background-color]="colorVar(course.color)"
                     aria-hidden="true"
                   ></span>
-                  {{ course.name }}
-                </h2>
-                <div class="flex items-center gap-1 text-sm">
-                  @if (course.teacher) {
-                    <div class="avatar avatar-placeholder">
-                      <div class="text-white w-7 rounded-full" [style.background]="course.teacher.color">
-                        <span class="text-xs">{{ course.teacher.initials }}</span>
-                      </div>
-                    </div>
-                    {{ course.teacher.name }}
-                  } @else {
-                    <span class="text-sm text-ink-subtle">No hay docente asignado</span>
-                  }
-                </div>
-                <p class="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-ink-muted">
+                  <h1 id="course-title" class="text-2xl font-bold text-ink-strong md:text-3xl">{{ course.name }}</h1>
                   @if (course.subject?.area) {
-                    <span uiBadge size="sm">{{ course.subject?.area }}</span>
+                    <span uiBadge>{{ course.subject?.area }}</span>
                   }
                   @if (course.classGroup) {
-                    <span>{{ course.classGroup.name }}</span>
+                    <span uiBadge>{{ course.classGroup.name }}</span>
                   } @else if (course.studyPlan.name) {
-                    <span>{{ course.studyPlan.name }}</span>
+                    <span uiBadge>{{ course.studyPlan.name }}</span>
+                  }
+                </div>
+                <div class="flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-ink">
+                  @if (course.teacher) {
+                    <span class="flex items-center gap-2">
+                      <span class="avatar avatar-placeholder" aria-hidden="true">
+                        <span class="w-7 rounded-full text-white" [style.background]="course.teacher.color">
+                          <span class="text-xs">{{ course.teacher.initials }}</span>
+                        </span>
+                      </span>
+                      Prof. {{ course.teacher.name }}
+                    </span>
+                  } @else {
+                    <span class="text-ink-subtle">No hay docente asignado</span>
                   }
                   @if (course.schedule; as schedule) {
-                    <span class="flex items-center gap-1">
-                      <ui-icon name="calendar-days" class="text-base" />
-                      {{ schedule.days }}{{ schedule.times ? ' · ' + schedule.times : ''
-                      }}{{ schedule.place ? ' · ' + schedule.place : '' }}
+                    <span class="flex items-center gap-1.5">
+                      <ui-icon name="calendar-days" class="text-base text-ink-muted" />
+                      {{ schedule.days }}{{ schedule.times ? ' · ' + schedule.times : '' }}
                     </span>
+                    @if (schedule.place) {
+                      <span class="flex items-center gap-1.5">
+                        <ui-icon name="map-pin" class="text-base text-ink-muted" />
+                        {{ schedule.place }}
+                      </span>
+                    }
                   }
                   @if (!family()) {
-                    <span>{{ course.code }}</span>
+                    <span class="text-ink-muted">{{ course.code }}</span>
                   }
-                </p>
+                </div>
               </div>
 
-              <div class="flex gap-2">
+              <div class="flex flex-wrap gap-2">
                 @if (family()) {
-                  <button uiButton variant="ghost" type="button" (click)="openCalendar()">
+                  <button uiButton variant="secondary" type="button" (click)="openCalendar()">
                     <ui-icon name="calendar-days" />
                     Ver calendario
                   </button>
                 }
                 @if (canOpenChannel()) {
-                  <button uiButton variant="ghost" type="button" [loading]="openingChannel()" [disabled]="openingChannel()" (click)="openChannel()">
+                  <button
+                    uiButton
+                    variant="ghost"
+                    type="button"
+                    [loading]="openingChannel()"
+                    [disabled]="openingChannel()"
+                    (click)="openChannel()"
+                  >
                     @if (!openingChannel()) {
                       <ui-icon name="megaphone" />
                     }
@@ -196,111 +218,109 @@ type CourseVm = {
                     Nueva asignacion
                   </button>
                 }
-                @if (course.canCustomize) {
-                  <button uiButton variant="ghost" type="button" (click)="customize()">
-                    <ui-icon name="palette" />
-                    Personalizar
-                  </button>
-                }
                 @if (auth.hasPermission('MANAGE_COURSES')) {
                   <button uiButton><ui-icon name="pencil" /> Editar</button>
                 }
               </div>
             </div>
-          </div>
-        </div>
-        @if (homeroom()) {
-          <!-- FR-ACA-001.18, BR .16: read-only, one student of the homeroom group at a time. -->
-          <div uiAlert tone="info" class="mt-4 flex flex-wrap items-center justify-between gap-3">
-            <span class="flex items-center gap-2">
-              <ui-icon name="eye" />
-              Vista de docente consejero: solo lectura, con las calificaciones publicadas.
-            </span>
-            <label class="flex items-center gap-2 text-sm">
-              Estudiante
-              <select
-                uiSelect
-                size="sm"
-                aria-label="Estudiante del grupo"
-                [value]="homeroomStudentId() ?? ''"
-                (change)="homeroomStudentId.set($any($event.target).value)"
-              >
-                @for (s of participants.value()?.students ?? []; track s.id) {
-                  <option [value]="s.id" [selected]="s.id === homeroomStudentId()">{{ s.name }}</option>
-                }
-              </select>
-            </label>
-          </div>
-        }
-        <div uiTabs class="mt-4 flex flex-col gap-4">
-          <div uiTabList [(selectedTab)]="tab" aria-label="Secciones del curso">
-            @if (family()) {
-              <!-- FR-ACA-001.11: Resumen · Asignaciones · Calificaciones · Participantes · Recursos -->
-              <button uiTab value="overview">
-                <ui-icon name="house" class="text-xl" />
-                Resumen
-              </button>
-              <button uiTab value="work">
-                <ui-icon name="clipboard-list" class="text-xl" />
-                Asignaciones
-                @if (work.value()?.pending) {
-                  <span uiBadge size="sm" tone="warning">{{ work.value()?.pending }} pendientes</span>
-                }
-              </button>
-              <button uiTab value="grades">
-                <ui-icon name="star" class="text-xl" />
-                Calificaciones
-              </button>
-              <button uiTab value="participants">
-                <ui-icon name="users" class="text-xl" />
-                Participantes
-                @if (participants.value()?.count) {
-                  <span class="text-xs text-ink-muted">· {{ participants.value()?.count }}</span>
-                }
-              </button>
-              <button uiTab value="files">
-                <ui-icon name="folder-heart" class="text-xl" />
-                Recursos
-              </button>
-            } @else {
-              <button uiTab value="grades">
-                <ui-icon name="star" class="text-xl" />
-                @if (auth.isTeacher() || auth.isAdmin()) {
-                  Libro de calificaciones
-                } @else {
+            <!-- FR-ACA-001.11: the section tabs close the header, as in the design. -->
+            <div
+              uiTabList
+              variant="line"
+              [(selectedTab)]="tab"
+              aria-label="Secciones del curso"
+              class="border-t border-line px-4 md:px-6"
+            >
+              @if (family()) {
+                <!-- FR-ACA-001.11: Resumen · Asignaciones · Calificaciones · Participantes · Recursos -->
+                <button uiTab value="overview">
+                  <ui-icon name="house" class="text-xl" />
+                  Resumen
+                </button>
+                <button uiTab value="work">
+                  <ui-icon name="clipboard-list" class="text-xl" />
+                  Asignaciones
+                  @if (work.value()?.pending) {
+                    <span uiBadge size="sm" tone="warning">{{ work.value()?.pending }} pendientes</span>
+                  }
+                </button>
+                <button uiTab value="grades">
+                  <ui-icon name="star" class="text-xl" />
                   Calificaciones
-                }
-              </button>
-              <button uiTab value="calendar">
-                <ui-icon name="calendar-days" class="text-xl" />
-                Calendario
-              </button>
-              @if (auth.isTeacher() || auth.isAdmin()) {
-                <button uiTab value="attendance">
-                  <ui-icon name="user-check" class="text-xl" />
-                  Asistencia
                 </button>
-              }
-              <button uiTab value="participants">
-                <ui-icon name="users" class="text-xl" />
-                Participantes
-                @if (participants.value()?.count) {
-                  <span class="text-xs text-ink-muted">· {{ participants.value()?.count }}</span>
-                }
-              </button>
-              <button uiTab value="files">
-                <ui-icon name="folder-heart" class="text-xl" />
-                Archivos
-              </button>
-              @if (auth.isTeacher() || auth.isAdmin()) {
-                <button uiTab value="weights">
-                  <ui-icon name="scale" class="text-xl" />
-                  Ponderación
+                <button uiTab value="participants">
+                  <ui-icon name="users" class="text-xl" />
+                  Participantes
+                  @if (participants.value()?.count) {
+                    <span class="text-xs text-ink-muted">· {{ participants.value()?.count }}</span>
+                  }
                 </button>
+                <button uiTab value="files">
+                  <ui-icon name="folder-heart" class="text-xl" />
+                  Recursos
+                </button>
+              } @else {
+                <button uiTab value="grades">
+                  <ui-icon name="star" class="text-xl" />
+                  @if (auth.isTeacher() || auth.isAdmin()) {
+                    Libro de calificaciones
+                  } @else {
+                    Calificaciones
+                  }
+                </button>
+                <button uiTab value="calendar">
+                  <ui-icon name="calendar-days" class="text-xl" />
+                  Calendario
+                </button>
+                @if (auth.isTeacher() || auth.isAdmin()) {
+                  <button uiTab value="attendance">
+                    <ui-icon name="user-check" class="text-xl" />
+                    Asistencia
+                  </button>
+                }
+                <button uiTab value="participants">
+                  <ui-icon name="users" class="text-xl" />
+                  Participantes
+                  @if (participants.value()?.count) {
+                    <span class="text-xs text-ink-muted">· {{ participants.value()?.count }}</span>
+                  }
+                </button>
+                <button uiTab value="files">
+                  <ui-icon name="folder-heart" class="text-xl" />
+                  Archivos
+                </button>
+                @if (auth.isTeacher() || auth.isAdmin()) {
+                  <button uiTab value="weights">
+                    <ui-icon name="scale" class="text-xl" />
+                    Ponderación
+                  </button>
+                }
               }
-            }
-          </div>
-
+            </div>
+          </section>
+          @if (homeroom()) {
+            <!-- FR-ACA-001.18, BR .16: read-only, one student of the homeroom group at a time. -->
+            <div uiAlert tone="info" class="flex flex-wrap items-center justify-between gap-3">
+              <span class="flex items-center gap-2">
+                <ui-icon name="eye" />
+                Vista de docente consejero: solo lectura, con las calificaciones publicadas.
+              </span>
+              <label class="flex items-center gap-2 text-sm">
+                Estudiante
+                <select
+                  uiSelect
+                  size="sm"
+                  aria-label="Estudiante del grupo"
+                  [value]="homeroomStudentId() ?? ''"
+                  (change)="homeroomStudentId.set($any($event.target).value)"
+                >
+                  @for (s of participants.value()?.students ?? []; track s.id) {
+                    <option [value]="s.id" [selected]="s.id === homeroomStudentId()">{{ s.name }}</option>
+                  }
+                </select>
+              </label>
+            </div>
+          }
           @if (family()) {
             <div uiTabPanel uiCard value="overview" class="p-6">
               <ng-template uiTabContent>
@@ -460,7 +480,10 @@ export default class Course {
     try {
       const id = await this.communication.managedChannelFor('COURSE', this.id());
       if (id) this.router.navigate(['/communication/channels', id]);
-      else this.router.navigate(['/communication/channels/new'], { queryParams: { scope: 'COURSE', targetId: this.id() } });
+      else
+        this.router.navigate(['/communication/channels/new'], {
+          queryParams: { scope: 'COURSE', targetId: this.id() },
+        });
     } catch {
       this.toast.showError('No se pudo abrir el canal');
     } finally {

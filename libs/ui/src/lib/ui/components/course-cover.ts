@@ -3,7 +3,7 @@ import { CourseColorKey, DEFAULT_SUBJECT_ICON, isCourseColor } from '@/shared';
 import { UI_ICONS, UiIconName } from '../icons/icons';
 import { Icon } from './icon';
 
-export type CourseCoverVariant = 'card' | 'tile';
+export type CourseCoverVariant = 'card' | 'banner' | 'tile';
 
 /** The CSS color of a course color tag, e.g. for the color dot next to a course name. */
 export function courseColorVar(color: CourseColorKey | string | null | undefined): string {
@@ -16,9 +16,10 @@ export function courseColorVar(color: CourseColorKey | string | null | undefined
  * one (`[image]`, FR .3).
  *
  *   <ui-course-cover [color]="course.color" [icon]="course.subject?.icon" />           card: full width, 128px
+ *   <ui-course-cover variant="banner" [color]="course.color" [icon]="course.icon" />          full width, 184px
  *   <ui-course-cover variant="tile" [color]="course.color" [icon]="course.subject?.icon" />  72px square
  *
- * Content projected into the card variant sits on top of the cover (e.g. a study-plan badge).
+ * The banner heads the course page (FR .10). Content projected into the card and banner variants sits on top of the cover (e.g. a study-plan badge).
  * The cover is decorative: the course name next to it says what it is. An unknown icon falls back
  * to "book-open", an unknown color to slate; the API already resolves a missing color.
  */
@@ -28,7 +29,8 @@ export function courseColorVar(color: CourseColorKey | string | null | undefined
   host: {
     class: 'ui-course-cover relative block shrink-0 overflow-hidden',
     '[class.h-32]': "variant() === 'card'",
-    '[class.w-full]': "variant() === 'card'",
+    '[class.w-full]': "variant() !== 'tile'",
+    '[class.h-46]': "variant() === 'banner'",
     '[class.size-18]': "variant() === 'tile'",
     '[class.rounded-lg]': "variant() === 'tile'",
     '[style.background-color]': 'background()',
@@ -39,6 +41,12 @@ export function courseColorVar(color: CourseColorKey | string | null | undefined
     @if (image()) {
       <!-- FR .3: a cover photo replaces the color cover; the color stays as the course's dot. -->
       <img [src]="image()" alt="" class="ui-course-cover__photo absolute inset-0 size-full object-cover" />
+    } @else if (variant() === 'banner') {
+      <ui-icon
+        [name]="iconName()"
+        class="ui-course-cover__watermark pointer-events-none absolute -bottom-20 right-10 text-[280px] opacity-20"
+      />
+      <ui-icon [name]="iconName()" class="ui-course-cover__icon absolute bottom-6 left-8 text-5xl" />
     } @else if (variant() === 'card') {
       <ui-icon
         [name]="iconName()"

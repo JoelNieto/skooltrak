@@ -5,7 +5,7 @@
 | **Status** | Shipped |
 | **Context** | ACA — Academics (see [capabilities](../capabilities.md#aca-academics)) |
 | **Owner** | — |
-| **Last updated** | 2026-11-22 |
+| **Last updated** | 2026-11-23 |
 | **Related** | Design canvas "Skooltrak — Courses redesign (desktop)", boards *Courses — list* and *Course details — Mathematics* (claude.ai/artifact/MGaGctNuxxJd1rouLSYTaa) · [HOM-001](HOM-001-persona-home-dashboards.md) (reuses its grade, period, scope and work-status rules) · [ASM-001](ASM-001-teacher-gradebook.md) (gradebook, assignment-linked grades) · current code: `apps/web-dashboard/src/app/courses/courses.ts`, `courses/course.ts`, `apps/dashboard-backend/src/app/courses/` |
 
 ## 1. Problem & outcome
@@ -40,7 +40,7 @@ When this ships, every course has its own color and icon, so it is recognisable 
   - a progress bar, *"{done} de {total} completadas"* (BR .7).
 
   The whole card links to the course page.
-- **FR-ACA-001.5**: A period switcher lists the periods of the school's current year and defaults to the current period (BR-HOM-001.3). Changing it reloads averages, progress and the stats row. *Próxima entrega* shows only for the current period.
+- **FR-ACA-001.5**: *Mis cursos* always shows the current period of the school's current year (BR-HOM-001.3), with no period switcher: averages, progress, *Próxima entrega* and the stats row are for that period. Other periods are reached through the course page's *Calificaciones* tab, which has its own switcher (FR .14) *(decided 2026-11-23)*.
 - **FR-ACA-001.6**: Above the cards, a stats row shows:
   - **Promedio del periodo**: as in FR-HOM-001.13;
   - **Esta semana**: the number of items due this week, with *"{n} vencida(s)"* when any are overdue (BR .10);
@@ -199,7 +199,7 @@ Side effects: none. Regenerate the dashboard API client (`bun run openapi:orval`
   - no class group: BR .1;
   - no access: BR .3;
   - a filter with no results: the existing *"No se encontraron cursos"* empty state.
-- **Components:** `libs/ui` only: `Card`, `Badge`, `Meter` (progress, category bars), `UiTabs`, `PageHeader`, `StatCard`, `Icon`, `EmptyState`, `Skeleton`, `UiTable`, `Breadcrumbs`. The design's segmented period control and filter chips become `libs/ui` primitives if they don't exist yet, never one-off markup.
+- **Components:** `libs/ui` only: `Card`, `Badge`, `Meter` (progress, category bars), `UiTabs`, `PageHeader`, `StatCard`, `Icon`, `EmptyState`, `Skeleton`, `UiTable`, `Breadcrumbs`. Filter chips use the `libs/ui` `Chip` toggle (`button[uiChip]`), and the course header uses `CourseCover`'s `banner` variant. The *Calificaciones* period control becomes a `libs/ui` primitive too, never one-off markup.
 - **Copy:** Spanish. The design canvas is in English and is the layout reference only.
 
 ## 8. Non-functional
@@ -252,4 +252,4 @@ Listed in build order.
 | [ACA-001-S13](../slices/ACA-001-S13-homeroom-view.md) | Homeroom teacher's read-only view of colleagues' courses | .18, BR .16 | Done (#75) |
 | [ACA-001-S09](../slices/ACA-001-S09-customize-course.md) | Teacher sets color and cover photo | .3, BR .12 | Done (#73) |
 | [ACA-001-S10](../slices/ACA-001-S10-graded-status.md) | *"Calificada · n"* status from linked grades | .17 | Done (#63) |
-| [ACA-001-S14](../slices/ACA-001-S14-staff-cards.md) | Staff *Cursos* cards: area chip and course name | .9, BR .14 | In review |
+| [ACA-001-S14](../slices/ACA-001-S14-staff-cards.md) | Staff *Cursos* cards: area chip and course name | .9, BR .14 | Done (#82) |

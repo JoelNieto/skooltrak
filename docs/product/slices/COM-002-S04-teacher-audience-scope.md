@@ -4,7 +4,7 @@
 |---|---|
 | **FRD** | [COM-002](../frd/COM-002-broadcasts.md) |
 | **Implements** | FR-COM-002.1 (tightened), resolves Q1. Adds BR-COM-002.7 |
-| **Status** | In review (code + unit tests done; e2e written, awaiting first run) |
+| **Status** | Done (#2); related groups follow the course roster since [S07](COM-002-S07-roster-audience.md) |
 | **Branch** | `feat/COM-002-S04-teacher-audience-scope` |
 | **Estimate** | 1 day |
 

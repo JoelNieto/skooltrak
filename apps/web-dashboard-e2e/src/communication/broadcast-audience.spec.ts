@@ -2,8 +2,9 @@ import { APIRequestContext, expect, Page, test } from '@playwright/test';
 import { data, E2E_PASSWORD, personas, storageStatePath } from '../support/fixtures';
 
 /**
- * COM-002-S04 — teachers can only broadcast to their courses and to class groups related to them.
- * docs/product/slices/COM-002-S04-teacher-audience-scope.md
+ * COM-002-S04, S07 — teachers can only broadcast to their courses and to class groups related to
+ * them; a course broadcast reaches the course's roster.
+ * docs/product/slices/COM-002-S04-teacher-audience-scope.md, COM-002-S07-roster-audience.md
  */
 
 interface Audiences {
@@ -49,6 +50,30 @@ test.describe('Teacher broadcast audience @FR-COM-002.1', () => {
     await page.getByRole('button', { name: 'Enviar comunicado' }).click();
 
     await expect(page.getByText('Comunicado enviado', { exact: true })).toBeVisible();
+  });
+
+  test("a course broadcast reaches the course's students @BR-COM-002.7", async ({ page, request }) => {
+    await page.goto('/communication');
+    const teacher = await bearerFromPage(page);
+    const own = (await (
+      await request.get('/api/v1/communication/broadcasts/audiences', { headers: teacher })
+    ).json()) as Audiences;
+    const course = own.courses.find((c) => c.name === data.courses.teacherOwn.name);
+    expect(course).toBeTruthy();
+
+    const title = `Tarea de curso ${Date.now()}`;
+    const res = await request.post('/api/v1/communication/broadcasts', {
+      headers: teacher,
+      data: { type: 'COURSE', scopeId: course?.id, title, body: 'Traer la calculadora' },
+    });
+    expect(res.status()).toBe(201);
+
+    // The student is on the course's roster (ACA-001 BR .15), so the broadcast reaches them.
+    const student = await bearerFor(request, personas.student.email);
+    const threads = (await (await request.get('/api/v1/communication/threads', { headers: student })).json()) as {
+      title: string | null;
+    }[];
+    expect(threads.map((t) => t.title)).toContain(title);
   });
 
   test('API lists only own targets and refuses the rest with 403', async ({ page, request }) => {

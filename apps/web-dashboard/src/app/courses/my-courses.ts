@@ -200,7 +200,7 @@ const BAND: Record<'AL_DIA' | 'EN_RIESGO', { label: string; tone: BadgeTone }> =
               >
                 <ui-course-cover [color]="course.color" [icon]="course.icon" [image]="course.coverUrl">
                   @if (course.subject.area) {
-                    <span uiBadge size="sm" class="absolute top-2 right-2 bg-surface-1 text-ink-strong">{{
+                    <span uiBadge size="sm" class="absolute top-2 left-2 bg-surface-1 text-ink-strong">{{
                       course.subject.area
                     }}</span>
                   }

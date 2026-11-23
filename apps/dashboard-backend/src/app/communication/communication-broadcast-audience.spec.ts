@@ -9,13 +9,15 @@ jest.mock('./communication-delivery.service', () => ({ CommunicationDeliveryServ
 jest.mock('./communication-socket.gateway', () => ({ CommunicationSocketGateway: class {} }));
 
 /**
- * COM-002-S04 / BR-COM-002.7 — teachers may only broadcast to their own courses and to class
- * groups related to those courses (group's study plan contains a course they teach).
+ * COM-002-S04, S07 / BR-COM-002.7 — teachers may only broadcast to their own courses and to class
+ * groups related to those courses (a student of the group is on one of their course rosters).
  */
 describe('CommunicationService — teacher broadcast audience (BR-COM-002.7)', () => {
   const ORG = 'org-1';
   const TEACHER_ID = 'teacher-1';
-  const RELATED_TEACHER_FILTER = { studyPlan: { courses: { some: { teacherId: TEACHER_ID } } } };
+  const RELATED_TEACHER_FILTER = {
+    students: { some: { courseEnrollments: { some: { excluded: false, course: { teacherId: TEACHER_ID } } } } },
+  };
 
   function build(role: string, opts: { teacher?: { id: string } | null; allowed?: boolean } = {}) {
     const prisma = {
@@ -115,6 +117,18 @@ describe('CommunicationService — teacher broadcast audience (BR-COM-002.7)', (
 
       expect(prisma.teacher.findFirst).not.toHaveBeenCalled();
       expect(thread.status).toBe(ThreadStatus.PENDING_APPROVAL);
+    });
+
+    it("reaches a course's roster, not a study plan (COM-002-S07)", async () => {
+      const { service, prisma } = build('TEACHER', { allowed: true });
+
+      await service.createBroadcast(broadcast(ThreadType.COURSE, 'c-1'));
+
+      expect(prisma.student.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { organizationId: ORG, courseEnrollments: { some: { excluded: false, courseId: 'c-1' } } },
+        }),
+      );
     });
 
     it('does not restrict school admins', async () => {

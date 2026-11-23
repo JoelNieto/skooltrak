@@ -17,7 +17,8 @@ import {
   UrgencyTier,
 } from '@generated/prisma';
 import { PrismaService } from '../prisma.service';
-import { teacherClassGroupWhere, teacherCourseWhere } from '../teachers/teacher-scope';
+import { enrolledIn } from '../courses/course-roster';
+import { teacherCourseWhere, teacherRosterClassGroupWhere } from '../teachers/teacher-scope';
 import { CommunicationDeliveryService } from './communication-delivery.service';
 import { CommunicationSocketGateway } from './communication-socket.gateway';
 import { TranslationService } from './translation.service';
@@ -136,12 +137,15 @@ export class CommunicationService {
       return [...ids];
     }
 
-    const scopeFilter =
+    // A course reaches its roster (ACA-001 BR .15): electives in, exclusions out (COM-002-S07).
+    const scopeFilter: Prisma.StudentWhereInput | null =
       type === ThreadType.CLASS_GROUP
         ? { classGroupId: scopeId }
-        : type === ThreadType.COURSE
-          ? { courseId: scopeId }
-          : null;
+        : type === ThreadType.COURSE && scopeId
+          ? enrolledIn(scopeId)
+          : type === ThreadType.COURSE
+            ? {}
+            : null;
 
     if (scopeFilter && !scopeId) {
       throw new BadRequestException(`${type} requires scopeId`);
@@ -710,10 +714,9 @@ export class CommunicationService {
   }
 
   // ── Teacher broadcast audience (BR-COM-002.7) ───────────────────────────
-  // A teacher may target only their own courses, and class groups related to those courses.
-  // Courses have no class-group link: a course belongs to a study plan and every class group of
-  // that plan takes its courses, so "related" = the group's study plan contains one of the
-  // teacher's courses. Being the homeroom teacher (ClassGroup.teacherId) alone does not count.
+  // A teacher may target only their own courses, and class groups related to those courses:
+  // groups with a student on one of the teacher's course rosters (COM-002-S07, ACA-001 BR .15).
+  // Being the homeroom teacher (ClassGroup.teacherId) alone does not count.
   // See docs/product/frd/COM-002-broadcasts.md.
 
   private findTeacher(userId: string, organizationId: string) {
@@ -740,7 +743,7 @@ export class CommunicationService {
               where: { id: scopeId, organizationId, ...teacherCourseWhere(teacher.id) },
             })) > 0
           : (await this.prisma.classGroup.count({
-              where: { id: scopeId, organizationId, ...teacherClassGroupWhere(teacher.id) },
+              where: { id: scopeId, organizationId, ...teacherRosterClassGroupWhere(teacher.id) },
             })) > 0;
     }
 
@@ -762,7 +765,7 @@ export class CommunicationService {
     if (!this.isOrgAdmin(role)) {
       const teacher = await this.findTeacher(userId, organizationId);
       if (!teacher) return { classGroups: [], courses: [] };
-      classGroupWhere = { ...classGroupWhere, ...teacherClassGroupWhere(teacher.id) };
+      classGroupWhere = { ...classGroupWhere, ...teacherRosterClassGroupWhere(teacher.id) };
       courseWhere = { ...courseWhere, ...teacherCourseWhere(teacher.id) };
     }
 

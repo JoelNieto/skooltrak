@@ -12,9 +12,7 @@ import {
   Loader,
   Meter,
   StatCard,
-  UiField,
   UiInputGroup,
-  UiSelect,
 } from '#/ui';
 import { DecimalPipe } from '@angular/common';
 import { httpResource } from '@angular/common/http';
@@ -94,9 +92,7 @@ const BAND: Record<'AL_DIA' | 'EN_RIESGO', { label: string; tone: BadgeTone }> =
     Meter,
     RouterLink,
     StatCard,
-    UiField,
-    UiInputGroup,
-    UiSelect,
+      UiInputGroup,
   ],
   template: `
     <ui-breadcrumbs [items]="[{ label: 'Inicio', link: '/' }, { label: 'Cursos' }]" />
@@ -106,15 +102,6 @@ const BAND: Record<'AL_DIA' | 'EN_RIESGO', { label: string; tone: BadgeTone }> =
         <ui-icon name="search" />
         <input type="search" placeholder="Buscar..." aria-label="Buscar curso" [(ngModel)]="search" />
       </label>
-      @if (mine.value()?.periods?.length) {
-        <ui-field label="Periodo" class="w-48">
-          <select uiSelect [ngModel]="mine.value()?.periodId ?? ''" (ngModelChange)="periodId.set($event)">
-            @for (period of mine.value()!.periods; track period.id) {
-              <option [value]="period.id">{{ period.name }}</option>
-            }
-          </select>
-        </ui-field>
-      }
     </div>
 
     @if (isParent()) {
@@ -302,8 +289,6 @@ const BAND: Record<'AL_DIA' | 'EN_RIESGO', { label: string; tone: BadgeTone }> =
 })
 export default class MyCoursesPage {
   protected readonly band = BAND;
-  /** '' = the API's default (the current period). */
-  protected readonly periodId = signal('');
   protected readonly search = signal('');
 
   // ── ACA-001-S05: parents see the courses of the child chosen in the shared switcher (FR .8) ──
@@ -329,7 +314,6 @@ export default class MyCoursesPage {
 
   protected readonly mine = httpResource<MyCourses>(() => {
     const params: Record<string, string> = {};
-    if (this.periodId()) params['periodId'] = this.periodId();
     if (this.isParent()) {
       const childId = this.childId();
       if (!childId) return undefined;
@@ -347,7 +331,6 @@ export default class MyCoursesPage {
       organizationId: child.organizationId,
       classGroupName: child.classGroup?.name ?? null,
     });
-    this.periodId.set('');
     this.area.set(ALL_AREAS);
   }
 

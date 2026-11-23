@@ -23,7 +23,8 @@ test.describe('Mis cursos @FR-ACA-001.4 @FR-ACA-001.5 @FR-ACA-001.6', () => {
     await expect(card).toContainText('4.0');
     await expect(card).toContainText('Al día');
 
-    await expect(page.getByLabel('Periodo').locator('option:checked')).toHaveText(data.period.name);
+    // FR-ACA-001.5: always the current period; the switcher lives only in Calificaciones (FR .14).
+    await expect(page.getByLabel('Periodo')).toHaveCount(0);
 
     // ACA-001-S03. Ana's group has 4 assignments this period; the oldest overdue one leads.
     await expect(card).toContainText(data.studentWork.overdue.title);

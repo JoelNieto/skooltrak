@@ -5087,316 +5087,6 @@
         ]
       }
     },
-    "/api/v1/chats/direct": {
-      "post": {
-        "operationId": "ChatsController_createDirectChat",
-        "parameters": [],
-        "responses": {
-          "201": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Create direct chat",
-        "tags": [
-          "chats"
-        ]
-      }
-    },
-    "/api/v1/chats/group": {
-      "post": {
-        "operationId": "ChatsController_createGroupChat",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateGroupChatInput"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Create group chat",
-        "tags": [
-          "chats"
-        ]
-      }
-    },
-    "/api/v1/chats/contextual": {
-      "post": {
-        "operationId": "ChatsController_createContextualChat",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateContextualChatInput"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Create contextual chat",
-        "tags": [
-          "chats"
-        ]
-      }
-    },
-    "/api/v1/chats": {
-      "get": {
-        "operationId": "ChatsController_myChats",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "My chats",
-        "tags": [
-          "chats"
-        ]
-      }
-    },
-    "/api/v1/chats/unread-count": {
-      "get": {
-        "operationId": "ChatsController_chatUnreadCount",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Unread chat count",
-        "tags": [
-          "chats"
-        ]
-      }
-    },
-    "/api/v1/chats/messages": {
-      "post": {
-        "operationId": "ChatsController_sendMessage",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/SendMessageInput"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Send chat message",
-        "tags": [
-          "chats"
-        ]
-      },
-      "get": {
-        "operationId": "ChatsController_chatMessages",
-        "parameters": [
-          {
-            "name": "chatId",
-            "required": true,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "cursor",
-            "required": true,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "limit",
-            "required": true,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Chat messages",
-        "tags": [
-          "chats"
-        ]
-      }
-    },
-    "/api/v1/chats/participants": {
-      "post": {
-        "operationId": "ChatsController_addChatParticipants",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/AddChatParticipantsInput"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Add chat participants",
-        "tags": [
-          "chats"
-        ]
-      }
-    },
-    "/api/v1/chats/{chatId}/leave": {
-      "post": {
-        "operationId": "ChatsController_leaveChat",
-        "parameters": [
-          {
-            "name": "chatId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "201": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Leave chat",
-        "tags": [
-          "chats"
-        ]
-      }
-    },
-    "/api/v1/chats/{chatId}/read": {
-      "patch": {
-        "operationId": "ChatsController_markChatRead",
-        "parameters": [
-          {
-            "name": "chatId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Mark chat read",
-        "tags": [
-          "chats"
-        ]
-      }
-    },
-    "/api/v1/chats/{id}": {
-      "get": {
-        "operationId": "ChatsController_chat",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Get chat by id",
-        "tags": [
-          "chats"
-        ]
-      }
-    },
     "/api/v1/financial/student-balance-summary": {
       "get": {
         "operationId": "FinancialController_getStudentBalanceSummary",
@@ -8275,493 +7965,6 @@
         ]
       }
     },
-    "/api/v1/messages": {
-      "post": {
-        "operationId": "MessagesController_createMessage",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateMessageInput"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Create message",
-        "tags": [
-          "messages"
-        ]
-      },
-      "get": {
-        "operationId": "MessagesController_findManyMessages",
-        "parameters": [
-          {
-            "name": "page",
-            "required": false,
-            "in": "query",
-            "description": "Page",
-            "schema": {
-              "default": 1,
-              "type": "integer"
-            }
-          },
-          {
-            "name": "pageSize",
-            "required": false,
-            "in": "query",
-            "description": "Take / page size",
-            "schema": {
-              "default": 10,
-              "type": "integer"
-            }
-          },
-          {
-            "name": "orderBy",
-            "required": false,
-            "in": "query",
-            "description": "Order by field",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "orderDirection",
-            "required": false,
-            "in": "query",
-            "description": "Order direction",
-            "schema": {
-              "default": "asc",
-              "type": "string",
-              "enum": [
-                "asc",
-                "desc"
-              ]
-            }
-          },
-          {
-            "name": "schoolId",
-            "required": false,
-            "in": "query",
-            "description": "School ID filter",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "organizationId",
-            "required": false,
-            "in": "query",
-            "description": "Organization ID filter (admin)",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "search",
-            "required": false,
-            "in": "query",
-            "description": "Search query",
-            "schema": {
-              "default": "",
-              "type": "string"
-            }
-          },
-          {
-            "name": "studyPlanId",
-            "required": false,
-            "in": "query",
-            "description": "Study plan ID filter",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "courseId",
-            "required": false,
-            "in": "query",
-            "description": "Course ID filter (e.g. files for course)",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "degreeId",
-            "required": false,
-            "in": "query",
-            "description": "Degree ID filter (e.g. files for course)",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "teacherId",
-            "required": false,
-            "in": "query",
-            "description": "Teacher ID filter (e.g. files for teacher)",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Inbox messages",
-        "tags": [
-          "messages"
-        ]
-      }
-    },
-    "/api/v1/messages/mine": {
-      "get": {
-        "operationId": "MessagesController_findMyMessages",
-        "parameters": [
-          {
-            "name": "page",
-            "required": false,
-            "in": "query",
-            "description": "Page",
-            "schema": {
-              "default": 1,
-              "type": "integer"
-            }
-          },
-          {
-            "name": "pageSize",
-            "required": false,
-            "in": "query",
-            "description": "Take / page size",
-            "schema": {
-              "default": 10,
-              "type": "integer"
-            }
-          },
-          {
-            "name": "orderBy",
-            "required": false,
-            "in": "query",
-            "description": "Order by field",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "orderDirection",
-            "required": false,
-            "in": "query",
-            "description": "Order direction",
-            "schema": {
-              "default": "asc",
-              "type": "string",
-              "enum": [
-                "asc",
-                "desc"
-              ]
-            }
-          },
-          {
-            "name": "schoolId",
-            "required": false,
-            "in": "query",
-            "description": "School ID filter",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "organizationId",
-            "required": false,
-            "in": "query",
-            "description": "Organization ID filter (admin)",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "search",
-            "required": false,
-            "in": "query",
-            "description": "Search query",
-            "schema": {
-              "default": "",
-              "type": "string"
-            }
-          },
-          {
-            "name": "studyPlanId",
-            "required": false,
-            "in": "query",
-            "description": "Study plan ID filter",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "courseId",
-            "required": false,
-            "in": "query",
-            "description": "Course ID filter (e.g. files for course)",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "degreeId",
-            "required": false,
-            "in": "query",
-            "description": "Degree ID filter (e.g. files for course)",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "teacherId",
-            "required": false,
-            "in": "query",
-            "description": "Teacher ID filter (e.g. files for teacher)",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Messages sent by me",
-        "tags": [
-          "messages"
-        ]
-      }
-    },
-    "/api/v1/messages/count": {
-      "get": {
-        "operationId": "MessagesController_findManyMessagesCount",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Inbox count",
-        "tags": [
-          "messages"
-        ]
-      }
-    },
-    "/api/v1/messages/sent-count": {
-      "get": {
-        "operationId": "MessagesController_findSentMessagesCount",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Sent count",
-        "tags": [
-          "messages"
-        ]
-      }
-    },
-    "/api/v1/messages/contacts": {
-      "get": {
-        "operationId": "MessagesController_findContacts",
-        "parameters": [
-          {
-            "name": "queryText",
-            "required": true,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Contacts for messaging",
-        "tags": [
-          "messages"
-        ]
-      }
-    },
-    "/api/v1/messages/unread-count": {
-      "get": {
-        "operationId": "MessagesController_unreadMessagesCount",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Unread messages count",
-        "tags": [
-          "messages"
-        ]
-      }
-    },
-    "/api/v1/messages/{messageId}/read": {
-      "patch": {
-        "operationId": "MessagesController_markMessageAsRead",
-        "parameters": [
-          {
-            "name": "messageId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Mark message as read",
-        "tags": [
-          "messages"
-        ]
-      }
-    },
-    "/api/v1/messages/{id}": {
-      "get": {
-        "operationId": "MessagesController_findMessageById",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Message by id",
-        "tags": [
-          "messages"
-        ]
-      },
-      "delete": {
-        "operationId": "MessagesController_removeMessage",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Remove message",
-        "tags": [
-          "messages"
-        ]
-      }
-    },
-    "/api/v1/messages/recipients/{id}": {
-      "delete": {
-        "operationId": "MessagesController_removeMessageRecipient",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Remove message recipient",
-        "tags": [
-          "messages"
-        ]
-      }
-    },
     "/api/v1/groups-schedules": {
       "post": {
         "operationId": "GroupsSchedulesController_create",
@@ -10010,16 +9213,54 @@
         ]
       }
     },
-    "/api/v1/newsletters": {
+    "/api/v1/communication/unread": {
+      "get": {
+        "operationId": "CommunicationController_unread",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Unread channel posts and direct messages (FR-COM-003.15)",
+        "tags": [
+          "communication"
+        ]
+      }
+    },
+    "/api/v1/communication/channels": {
+      "get": {
+        "operationId": "CommunicationController_listChannels",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Channels the caller manages or belongs to (FR-COM-003.11)",
+        "tags": [
+          "communication"
+        ]
+      },
       "post": {
-        "operationId": "NewslettersController_create",
+        "operationId": "CommunicationController_createChannel",
         "parameters": [],
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/CreateNewsletterInput"
+                "$ref": "#/components/schemas/CreateChannelInput"
               }
             }
           }
@@ -10034,117 +9275,20 @@
             "bearer": []
           }
         ],
-        "summary": "Create newsletter",
+        "summary": "Create a channel (FR-COM-003.1–.4)",
         "tags": [
-          "newsletters"
+          "communication"
         ]
-      },
+      }
+    },
+    "/api/v1/communication/channels/recent": {
       "get": {
-        "operationId": "NewslettersController_findAll",
+        "operationId": "CommunicationController_recent",
         "parameters": [
           {
-            "name": "page",
+            "name": "take",
             "required": false,
             "in": "query",
-            "description": "Page",
-            "schema": {
-              "default": 1,
-              "type": "integer"
-            }
-          },
-          {
-            "name": "pageSize",
-            "required": false,
-            "in": "query",
-            "description": "Take / page size",
-            "schema": {
-              "default": 10,
-              "type": "integer"
-            }
-          },
-          {
-            "name": "orderBy",
-            "required": false,
-            "in": "query",
-            "description": "Order by field",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "orderDirection",
-            "required": false,
-            "in": "query",
-            "description": "Order direction",
-            "schema": {
-              "default": "asc",
-              "type": "string",
-              "enum": [
-                "asc",
-                "desc"
-              ]
-            }
-          },
-          {
-            "name": "schoolId",
-            "required": false,
-            "in": "query",
-            "description": "School ID filter",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "organizationId",
-            "required": false,
-            "in": "query",
-            "description": "Organization ID filter (admin)",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "search",
-            "required": false,
-            "in": "query",
-            "description": "Search query",
-            "schema": {
-              "default": "",
-              "type": "string"
-            }
-          },
-          {
-            "name": "studyPlanId",
-            "required": false,
-            "in": "query",
-            "description": "Study plan ID filter",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "courseId",
-            "required": false,
-            "in": "query",
-            "description": "Course ID filter (e.g. files for course)",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "degreeId",
-            "required": false,
-            "in": "query",
-            "description": "Degree ID filter (e.g. files for course)",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "teacherId",
-            "required": false,
-            "in": "query",
-            "description": "Teacher ID filter (e.g. files for teacher)",
             "schema": {
               "type": "string"
             }
@@ -10160,20 +9304,102 @@
             "bearer": []
           }
         ],
-        "summary": "List newsletters",
+        "summary": "Latest channel posts for home pages (FR-COM-003.16)",
         "tags": [
-          "newsletters"
+          "communication"
+        ]
+      }
+    },
+    "/api/v1/communication/channels/targets": {
+      "get": {
+        "operationId": "CommunicationController_targets",
+        "parameters": [
+          {
+            "name": "scope",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "enum": [
+                "ORGANIZATION",
+                "SCHOOL",
+                "STUDY_PLAN",
+                "CLASS_GROUP",
+                "COURSE"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "schoolId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "What the caller may target at a level (BR-COM-003.2)",
+        "tags": [
+          "communication"
+        ]
+      }
+    },
+    "/api/v1/communication/channels/{id}": {
+      "get": {
+        "operationId": "CommunicationController_getChannel",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "A channel with its latest posts (FR-COM-003.7, .9)",
+        "tags": [
+          "communication"
         ]
       },
       "patch": {
-        "operationId": "NewslettersController_update",
-        "parameters": [],
+        "operationId": "CommunicationController_updateChannel",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/UpdateNewsletterInput"
+                "$ref": "#/components/schemas/UpdateChannelInput"
               }
             }
           }
@@ -10188,180 +9414,15 @@
             "bearer": []
           }
         ],
-        "summary": "Update newsletter",
+        "summary": "Edit a channel or archive it (FR-COM-003.5)",
         "tags": [
-          "newsletters"
+          "communication"
         ]
       }
     },
-    "/api/v1/newsletters/count": {
-      "get": {
-        "operationId": "NewslettersController_findManyNewslettersCount",
-        "parameters": [
-          {
-            "name": "page",
-            "required": false,
-            "in": "query",
-            "description": "Page",
-            "schema": {
-              "default": 1,
-              "type": "integer"
-            }
-          },
-          {
-            "name": "pageSize",
-            "required": false,
-            "in": "query",
-            "description": "Take / page size",
-            "schema": {
-              "default": 10,
-              "type": "integer"
-            }
-          },
-          {
-            "name": "orderBy",
-            "required": false,
-            "in": "query",
-            "description": "Order by field",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "orderDirection",
-            "required": false,
-            "in": "query",
-            "description": "Order direction",
-            "schema": {
-              "default": "asc",
-              "type": "string",
-              "enum": [
-                "asc",
-                "desc"
-              ]
-            }
-          },
-          {
-            "name": "schoolId",
-            "required": false,
-            "in": "query",
-            "description": "School ID filter",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "organizationId",
-            "required": false,
-            "in": "query",
-            "description": "Organization ID filter (admin)",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "search",
-            "required": false,
-            "in": "query",
-            "description": "Search query",
-            "schema": {
-              "default": "",
-              "type": "string"
-            }
-          },
-          {
-            "name": "studyPlanId",
-            "required": false,
-            "in": "query",
-            "description": "Study plan ID filter",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "courseId",
-            "required": false,
-            "in": "query",
-            "description": "Course ID filter (e.g. files for course)",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "degreeId",
-            "required": false,
-            "in": "query",
-            "description": "Degree ID filter (e.g. files for course)",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "teacherId",
-            "required": false,
-            "in": "query",
-            "description": "Teacher ID filter (e.g. files for teacher)",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Newsletters count",
-        "tags": [
-          "newsletters"
-        ]
-      }
-    },
-    "/api/v1/newsletters/published": {
-      "get": {
-        "operationId": "NewslettersController_findPublished",
-        "parameters": [
-          {
-            "name": "schoolId",
-            "required": true,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "take",
-            "required": true,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Published newsletters for school",
-        "tags": [
-          "newsletters"
-        ]
-      }
-    },
-    "/api/v1/newsletters/{id}": {
-      "get": {
-        "operationId": "NewslettersController_findOne",
+    "/api/v1/communication/channels/{id}/read": {
+      "post": {
+        "operationId": "CommunicationController_markChannelRead",
         "parameters": [
           {
             "name": "id",
@@ -10373,7 +9434,7 @@
           }
         ],
         "responses": {
-          "200": {
+          "201": {
             "description": ""
           }
         },
@@ -10382,148 +9443,54 @@
             "bearer": []
           }
         ],
-        "summary": "Get newsletter by id",
+        "summary": "Mark the channel's posts read (FR-COM-003.8)",
         "tags": [
-          "newsletters"
+          "communication"
         ]
-      },
+      }
+    },
+    "/api/v1/communication/channels/{id}/posts": {
+      "post": {
+        "operationId": "CommunicationController_createPost",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateChannelPostInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Publish a post (FR-COM-003.6)",
+        "tags": [
+          "communication"
+        ]
+      }
+    },
+    "/api/v1/communication/channels/{id}/posts/{postId}": {
       "delete": {
-        "operationId": "NewslettersController_remove",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Delete newsletter",
-        "tags": [
-          "newsletters"
-        ]
-      }
-    },
-    "/api/v1/communication/threads": {
-      "post": {
-        "operationId": "CommunicationController_createThread",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateThreadInput"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Create a communication thread",
-        "tags": [
-          "communication"
-        ]
-      },
-      "get": {
-        "operationId": "CommunicationController_listThreads",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "List threads visible to the caller",
-        "tags": [
-          "communication"
-        ]
-      }
-    },
-    "/api/v1/communication/inbox/broadcasts": {
-      "get": {
-        "operationId": "CommunicationController_listInboxBroadcasts",
-        "parameters": [
-          {
-            "name": "take",
-            "required": true,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Latest approved broadcasts visible to the caller",
-        "tags": [
-          "communication"
-        ]
-      }
-    },
-    "/api/v1/communication/threads/{id}": {
-      "get": {
-        "operationId": "CommunicationController_getThread",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Get a thread",
-        "tags": [
-          "communication"
-        ]
-      }
-    },
-    "/api/v1/communication/threads/{id}/messages": {
-      "get": {
-        "operationId": "CommunicationController_getMessages",
+        "operationId": "CommunicationController_deletePost",
         "parameters": [
           {
             "name": "id",
@@ -10534,16 +9501,127 @@
             }
           },
           {
-            "name": "cursor",
+            "name": "postId",
             "required": true,
-            "in": "query",
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Delete a post",
+        "tags": [
+          "communication"
+        ]
+      }
+    },
+    "/api/v1/communication/channels/{id}/posts/{postId}/confirm": {
+      "post": {
+        "operationId": "CommunicationController_confirm",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
             "schema": {
               "type": "string"
             }
           },
           {
-            "name": "limit",
+            "name": "postId",
             "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Confirm reading a post (FR-COM-003.8)",
+        "tags": [
+          "communication"
+        ]
+      }
+    },
+    "/api/v1/communication/channels/{id}/posts/{postId}/receipts": {
+      "get": {
+        "operationId": "CommunicationController_receipts",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "postId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Who read and confirmed a post (FR-COM-003.9)",
+        "tags": [
+          "communication"
+        ]
+      }
+    },
+    "/api/v1/communication/channels/{id}/posts/{postId}/replies": {
+      "get": {
+        "operationId": "CommunicationController_replies",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "postId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "member",
+            "required": false,
             "in": "query",
             "schema": {
               "type": "string"
@@ -10560,50 +9638,11 @@
             "bearer": []
           }
         ],
-        "summary": "List messages in a thread",
+        "summary": "Replies the caller may see (FR-COM-003.10)",
         "tags": [
           "communication"
         ]
       },
-      "post": {
-        "operationId": "CommunicationController_sendMessage",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/SendMessageBodyInput"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Send a message (reply-only roles allowed)",
-        "tags": [
-          "communication"
-        ]
-      }
-    },
-    "/api/v1/communication/threads/{id}/messages/{mid}/reply": {
       "post": {
         "operationId": "CommunicationController_reply",
         "parameters": [
@@ -10616,7 +9655,7 @@
             }
           },
           {
-            "name": "mid",
+            "name": "postId",
             "required": true,
             "in": "path",
             "schema": {
@@ -10629,7 +9668,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/SendMessageBodyInput"
+                "$ref": "#/components/schemas/CreateChannelReplyInput"
               }
             }
           }
@@ -10644,327 +9683,15 @@
             "bearer": []
           }
         ],
-        "summary": "Reply within a thread",
+        "summary": "Reply to a post (FR-COM-003.10)",
         "tags": [
           "communication"
         ]
       }
     },
-    "/api/v1/communication/messages/{id}/read": {
-      "patch": {
-        "operationId": "CommunicationController_markRead",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Mark a message read (updates delivery receipt)",
-        "tags": [
-          "communication"
-        ]
-      }
-    },
-    "/api/v1/communication/threads/{id}/typing": {
-      "post": {
-        "operationId": "CommunicationController_typing",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "201": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Emit typing indicator",
-        "tags": [
-          "communication"
-        ]
-      }
-    },
-    "/api/v1/communication/roster/class-group/{id}/recipients": {
+    "/api/v1/communication/direct": {
       "get": {
-        "operationId": "CommunicationController_classGroupRecipients",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Recipients for a class group",
-        "tags": [
-          "communication"
-        ]
-      }
-    },
-    "/api/v1/communication/roster/student/{id}/guardians": {
-      "get": {
-        "operationId": "CommunicationController_studentGuardians",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Guardians of a student",
-        "tags": [
-          "communication"
-        ]
-      }
-    },
-    "/api/v1/communication/threads/{id}/participants": {
-      "post": {
-        "operationId": "CommunicationController_addParticipants",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/AddParticipantBodyInput"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Add participants (parents blocked by guard)",
-        "tags": [
-          "communication"
-        ]
-      }
-    },
-    "/api/v1/communication/subscribers/sync": {
-      "post": {
-        "operationId": "CommunicationController_syncSubscriber",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/SubscriberSyncInput"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Sync a Novu subscriber + channel prefs",
-        "tags": [
-          "communication"
-        ]
-      }
-    },
-    "/api/v1/communication/recipients/{id}/preference": {
-      "patch": {
-        "operationId": "CommunicationController_setPreference",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/PreferenceInput"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Set recipient preference (language seam)",
-        "tags": [
-          "communication"
-        ]
-      }
-    },
-    "/api/v1/communication/delivery/preview": {
-      "post": {
-        "operationId": "CommunicationController_deliveryPreview",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/DeliveryPreviewInput"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Preview which channels a message would hit",
-        "tags": [
-          "communication"
-        ]
-      }
-    },
-    "/api/v1/communication/messages/{id}/deliveries": {
-      "get": {
-        "operationId": "CommunicationController_getDeliveries",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Per-recipient/per-channel delivery receipts",
-        "tags": [
-          "communication"
-        ]
-      }
-    },
-    "/api/v1/communication/webhooks/novu": {
-      "post": {
-        "operationId": "CommunicationController_novuWebhook",
-        "parameters": [
-          {
-            "name": "x-novu-signature",
-            "required": true,
-            "in": "header",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "201": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Novu webhook → reconcile MessageDelivery (HMAC)",
-        "tags": [
-          "communication"
-        ]
-      }
-    },
-    "/api/v1/communication/broadcasts": {
-      "get": {
-        "operationId": "CommunicationController_listBroadcasts",
+        "operationId": "CommunicationController_listDirect",
         "parameters": [],
         "responses": {
           "200": {
@@ -10976,20 +9703,20 @@
             "bearer": []
           }
         ],
-        "summary": "List organization broadcasts",
+        "summary": "The caller's direct conversations (FR-COM-003.14)",
         "tags": [
           "communication"
         ]
       },
       "post": {
-        "operationId": "CommunicationController_createBroadcast",
+        "operationId": "CommunicationController_startDirect",
         "parameters": [],
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/BroadcastInput"
+                "$ref": "#/components/schemas/StartDirectInput"
               }
             }
           }
@@ -11004,19 +9731,19 @@
             "bearer": []
           }
         ],
-        "summary": "Create a broadcast (pending approval if policy requires)",
+        "summary": "Start or reopen a conversation with a parent (FR-COM-003.12)",
         "tags": [
           "communication"
         ]
       }
     },
-    "/api/v1/communication/broadcasts/audiences": {
+    "/api/v1/communication/direct/recipients": {
       "get": {
-        "operationId": "CommunicationController_listBroadcastAudiences",
+        "operationId": "CommunicationController_recipients",
         "parameters": [
           {
-            "name": "schoolId",
-            "required": true,
+            "name": "q",
+            "required": false,
             "in": "query",
             "schema": {
               "type": "string"
@@ -11033,15 +9760,15 @@
             "bearer": []
           }
         ],
-        "summary": "Class groups and courses the caller may target with a broadcast",
+        "summary": "Parents the caller may message, by student (BR-COM-003.8)",
         "tags": [
           "communication"
         ]
       }
     },
-    "/api/v1/communication/broadcasts/{id}/approve": {
-      "post": {
-        "operationId": "CommunicationController_approveBroadcast",
+    "/api/v1/communication/direct/{id}": {
+      "get": {
+        "operationId": "CommunicationController_getDirect",
         "parameters": [
           {
             "name": "id",
@@ -11053,7 +9780,7 @@
           }
         ],
         "responses": {
-          "201": {
+          "200": {
             "description": ""
           }
         },
@@ -11062,15 +9789,15 @@
             "bearer": []
           }
         ],
-        "summary": "Approve a pending broadcast and fan out",
+        "summary": "A conversation with its messages; marks it read (FR-COM-003.13)",
         "tags": [
           "communication"
         ]
       }
     },
-    "/api/v1/communication/broadcasts/{id}": {
-      "patch": {
-        "operationId": "CommunicationController_updateBroadcast",
+    "/api/v1/communication/direct/{id}/messages": {
+      "post": {
+        "operationId": "CommunicationController_sendDirect",
         "parameters": [
           {
             "name": "id",
@@ -11086,13 +9813,13 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/UpdateBroadcastInput"
+                "$ref": "#/components/schemas/SendDirectMessageInput"
               }
             }
           }
         },
         "responses": {
-          "200": {
+          "201": {
             "description": ""
           }
         },
@@ -11101,27 +9828,7 @@
             "bearer": []
           }
         ],
-        "summary": "Update broadcast settings such as repliesAllowed",
-        "tags": [
-          "communication"
-        ]
-      }
-    },
-    "/api/v1/communication/admin/audit": {
-      "get": {
-        "operationId": "CommunicationController_audit",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Communication audit log",
+        "summary": "Send a direct message (FR-COM-003.13)",
         "tags": [
           "communication"
         ]
@@ -12591,22 +11298,6 @@
         "type": "object",
         "properties": {}
       },
-      "CreateGroupChatInput": {
-        "type": "object",
-        "properties": {}
-      },
-      "CreateContextualChatInput": {
-        "type": "object",
-        "properties": {}
-      },
-      "SendMessageInput": {
-        "type": "object",
-        "properties": {}
-      },
-      "AddChatParticipantsInput": {
-        "type": "object",
-        "properties": {}
-      },
       "CreateChargeInput": {
         "type": "object",
         "properties": {}
@@ -12699,10 +11390,6 @@
         "type": "object",
         "properties": {}
       },
-      "CreateMessageInput": {
-        "type": "object",
-        "properties": {}
-      },
       "CreateGroupsScheduleInput": {
         "type": "object",
         "properties": {}
@@ -12743,43 +11430,27 @@
         "type": "object",
         "properties": {}
       },
-      "CreateNewsletterInput": {
+      "CreateChannelInput": {
         "type": "object",
         "properties": {}
       },
-      "UpdateNewsletterInput": {
+      "UpdateChannelInput": {
         "type": "object",
         "properties": {}
       },
-      "CreateThreadInput": {
+      "CreateChannelPostInput": {
         "type": "object",
         "properties": {}
       },
-      "SendMessageBodyInput": {
+      "CreateChannelReplyInput": {
         "type": "object",
         "properties": {}
       },
-      "AddParticipantBodyInput": {
+      "StartDirectInput": {
         "type": "object",
         "properties": {}
       },
-      "SubscriberSyncInput": {
-        "type": "object",
-        "properties": {}
-      },
-      "PreferenceInput": {
-        "type": "object",
-        "properties": {}
-      },
-      "DeliveryPreviewInput": {
-        "type": "object",
-        "properties": {}
-      },
-      "BroadcastInput": {
-        "type": "object",
-        "properties": {}
-      },
-      "UpdateBroadcastInput": {
+      "SendDirectMessageInput": {
         "type": "object",
         "properties": {}
       },

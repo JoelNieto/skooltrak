@@ -1,7 +1,8 @@
 import { AuthUserContext } from '@/auth';
-import { AttendanceStatus, HabitValue, ThreadStatus } from '@generated/prisma';
+import { AttendanceStatus, HabitValue } from '@generated/prisma';
 import { ForbiddenException, Inject, Injectable } from '@nestjs/common';
 import { enrolledCourses } from '../courses/course-roster';
+import { unreadChannelPostCount } from '../communication/channel-audience';
 import { PrismaService } from '../prisma.service';
 import {
   StudentHabits,
@@ -212,7 +213,7 @@ export class StudentHomeService {
     const periodIds = [current?.id, previous?.id].filter((id): id is string => Boolean(id));
     const attendanceTo = current ? minDate(current.endDate.toISOString().slice(0, 10), local.date) : null;
 
-    const [scores, recent, attendanceRows, threads, habitMarks] = await Promise.all([
+    const [scores, recent, attendanceRows, unreadPosts, habitMarks] = await Promise.all([
       periodIds.length
         ? this.prisma.studentGrade.findMany({
             where: {
@@ -250,26 +251,7 @@ export class StudentHomeService {
             _count: { _all: true },
           })
         : Promise.resolve(null),
-      !userId
-        ? Promise.resolve([])
-        : this.prisma.communicationThread.findMany({
-        where: {
-          organizationId,
-          deletedAt: null,
-          status: { in: [ThreadStatus.ACTIVE, ThreadStatus.APPROVED] },
-          participants: { some: { userId } },
-        },
-        select: {
-          broadcast: true,
-          participants: { where: { userId }, select: { lastReadAt: true } },
-          messages: {
-            where: { deletedAt: null },
-            orderBy: { createdAt: 'desc' },
-            take: 1,
-            select: { senderId: true, createdAt: true },
-          },
-        },
-      }),
+      userId ? unreadChannelPostCount(this.prisma, userId) : Promise.resolve(0),
       current && group
         ? this.prisma.studentHabitEvaluation.findMany({
             where: {
@@ -311,13 +293,6 @@ export class StudentHomeService {
       };
     }
 
-    const unread = threads.filter((t) => {
-      const last = t.messages[0];
-      if (!last || last.senderId === userId) return false;
-      const lastReadAt = t.participants[0]?.lastReadAt;
-      return !lastReadAt || last.createdAt > lastReadAt;
-    });
-
     return {
       studentId: student.id,
       period: current ? { id: current.id, name: current.name } : null,
@@ -341,11 +316,7 @@ export class StudentHomeService {
         };
       }),
       attendance,
-      messages: {
-        unread: unread.length,
-        fromTeachers: unread.filter((t) => !t.broadcast).length,
-        broadcasts: unread.filter((t) => t.broadcast).length,
-      },
+      messages: { unread: unreadPosts },
       habits: habitMarks ? habitsSummary(habitMarks) : null,
     };
   }

@@ -93,7 +93,7 @@ describe('TeacherHomeService (HOM-001-S01)', () => {
         ),
       },
       studentGrade: { findMany: jest.fn().mockResolvedValue(opts.scores ?? []) },
-      communicationThread: { findMany: jest.fn().mockResolvedValue(opts.threads ?? []) },
+      directConversation: { findMany: jest.fn().mockResolvedValue(opts.threads ?? []) },
     };
     const service = new TeacherHomeService(prisma as never, { now: () => NOW });
     return { service, prisma };
@@ -561,40 +561,42 @@ describe('TeacherHomeService (HOM-001-S01)', () => {
     });
   });
 
-  describe('family threads (FR-HOM-001.11, BR-HOM-001.13)', () => {
-    const thread = (id: string, role: string, createdAt: string, opts: { lastReadAt?: string; body?: string } = {}) => ({
+  describe('family threads (FR-HOM-001.11, BR-HOM-001.13, COM-003)', () => {
+    const conversation = (
+      id: string,
+      lastFrom: 'parent' | 'teacher',
+      createdAt: string,
+      opts: { lastReadAt?: string; body?: string; student?: boolean } = {},
+    ) => ({
       id,
-      title: `Hilo ${id}`,
-      participants: [{ lastReadAt: opts.lastReadAt ? new Date(opts.lastReadAt) : null }],
+      parentUserId: 'user-parent',
+      staffLastReadAt: opts.lastReadAt ? new Date(opts.lastReadAt) : null,
+      student: opts.student === false ? null : { firstName: 'Ana', fatherName: 'Pérez' },
+      parentUser: { name: 'María Pérez', firstName: 'María', lastName: 'Pérez' },
       messages: [
         {
           body: opts.body ?? 'Hola profesor',
           createdAt: new Date(createdAt),
-          sender: { name: `${role} user`, firstName: null, lastName: null, role: { name: role } },
+          senderId: lastFrom === 'parent' ? 'user-parent' : 'user-1',
         },
       ],
     });
 
-    it('lists threads whose last message is from a parent, newest first, with unread and stale flags', async () => {
+    it('lists direct conversations whose last message is from the parent, with unread and stale flags', async () => {
       const { service, prisma } = build({
         threads: [
-          thread('old', 'PARENT', '2026-11-13T14:00:00Z', { lastReadAt: '2026-11-14T00:00:00Z' }),
-          thread('mine', 'TEACHER', '2026-11-16T13:00:00Z'),
-          thread('new', 'PARENT', '2026-11-16T12:00:00Z', { body: 'x'.repeat(200) }),
+          conversation('new', 'parent', '2026-11-16T12:00:00Z', { body: 'x'.repeat(200) }),
+          conversation('mine', 'teacher', '2026-11-16T11:00:00Z'),
+          conversation('old', 'parent', '2026-11-13T14:00:00Z', { lastReadAt: '2026-11-14T00:00:00Z', student: false }),
         ],
       });
 
       const { threads } = await service.attention(user, SCHOOL);
 
-      expect(prisma.communicationThread.findMany).toHaveBeenCalledWith(
+      expect(prisma.directConversation.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
-          where: {
-            organizationId: ORG,
-            broadcast: false,
-            deletedAt: null,
-            status: 'ACTIVE',
-            participants: { some: { userId: 'user-1' } },
-          },
+          where: { organizationId: ORG, staffUserId: 'user-1', messages: { some: {} } },
+          orderBy: { lastMessageAt: 'desc' },
         }),
       );
       expect(threads.map((t) => [t.id, t.unread, t.stale])).toEqual([
@@ -602,7 +604,9 @@ describe('TeacherHomeService (HOM-001-S01)', () => {
         ['old', false, true],
       ]);
       expect(threads[0].preview).toHaveLength(140);
-      expect(threads[0].senderName).toBe('PARENT user');
+      expect(threads[0].title).toBe('Ana Pérez');
+      expect(threads[0].senderName).toBe('María Pérez');
+      expect(threads[1].title).toBe('María Pérez');
 
       const summary = await service.summary(user, SCHOOL);
       expect(summary.familyMessages).toEqual({ unanswered: 2, stale: 1 });

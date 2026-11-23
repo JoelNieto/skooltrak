@@ -20,10 +20,10 @@ async function bearerFor(request: APIRequestContext, email: string) {
 /** The teacher's course, its two grade columns and the related students' rows, as the teacher sees them. */
 async function loadCourse(request: APIRequestContext) {
   const teacher = await bearerFor(request, personas.teacher.email);
-  const audiences = (await (
-    await request.get('/api/v1/communication/broadcasts/audiences', { headers: teacher })
-  ).json()) as { courses: { id: string; name: string }[] };
-  const courseId = audiences.courses.find((c) => c.name === data.courses.teacherOwn.name)?.id;
+  const courses = (await (
+    await request.get('/api/v1/communication/channels/targets?scope=COURSE', { headers: teacher })
+  ).json()) as { id: string; name: string }[];
+  const courseId = courses.find((c) => c.name === data.courses.teacherOwn.name)?.id;
   expect(courseId).toBeTruthy();
 
   const columns = (await (

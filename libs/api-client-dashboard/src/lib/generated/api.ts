@@ -26,8 +26,6 @@ import {
 } from 'rxjs';
 
 import type {
-  AddChatParticipantsInput,
-  AddParticipantBodyInput,
   AddToCartInput,
   AdminHomeControllerAttentionParams,
   AdminHomeControllerKpisParams,
@@ -41,14 +39,13 @@ import type {
   AuthSessionControllerAvailableSchoolsParams,
   AuthSessionControllerLoginBody,
   AvatarUploadUrlInput,
-  BroadcastInput,
-  ChatsControllerChatMessagesParams,
   CheckoutStoreInput,
   ClassGroupsControllerCountParams,
   ClassGroupsControllerFindAllParams,
-  CommunicationControllerGetMessagesParams,
-  CommunicationControllerListBroadcastAudiencesParams,
-  CommunicationControllerListInboxBroadcastsParams,
+  CommunicationControllerRecentParams,
+  CommunicationControllerRecipientsParams,
+  CommunicationControllerRepliesParams,
+  CommunicationControllerTargetsParams,
   CourseAppearanceInput,
   CoursesControllerCountParams,
   CoursesControllerFindAllParams,
@@ -62,9 +59,11 @@ import type {
   CreateAssignmentInput,
   CreateAssignmentSubmissionInput,
   CreateAttendanceSessionInput,
+  CreateChannelInput,
+  CreateChannelPostInput,
+  CreateChannelReplyInput,
   CreateChargeInput,
   CreateClassGroupInput,
-  CreateContextualChatInput,
   CreateCourseInput,
   CreateDegreeInput,
   CreateFileDownloadInput,
@@ -72,10 +71,7 @@ import type {
   CreateFileUploadInput,
   CreateGradeBucketInput,
   CreateGradeInput,
-  CreateGroupChatInput,
   CreateGroupsScheduleInput,
-  CreateMessageInput,
-  CreateNewsletterInput,
   CreateOrganizationInput,
   CreateParentInput,
   CreatePaymentInput,
@@ -93,11 +89,9 @@ import type {
   CreateSubjectInput,
   CreateSubmissionUploadInput,
   CreateTeacherInput,
-  CreateThreadInput,
   CreateUserInput,
   DegreesControllerDegreesBySchoolIdCountParams,
   DegreesControllerFindManyBySchoolIdParams,
-  DeliveryPreviewInput,
   FilesControllerFilesAccessibleParams,
   FilesControllerFilesOwnedParams,
   FilesControllerFilesSharedWithMeParams,
@@ -116,12 +110,6 @@ import type {
   GradesControllerFindByCourseIdParams,
   HabitEvaluationsControllerFindByGroupParams,
   LinkChildInput,
-  MessagesControllerFindContactsParams,
-  MessagesControllerFindManyMessagesParams,
-  MessagesControllerFindMyMessagesParams,
-  NewslettersControllerFindAllParams,
-  NewslettersControllerFindManyNewslettersCountParams,
-  NewslettersControllerFindPublishedParams,
   NotificationsControllerListParams,
   OrganizationsControllerListInvitationsParams,
   OrganizationsControllerListMembersParams,
@@ -130,7 +118,6 @@ import type {
   PeriodsControllerFindManyByYearParams,
   PermissionsControllerCountParams,
   PermissionsControllerFindAllParams,
-  PreferenceInput,
   ProcessStorePaymentInput,
   PublishGradesInput,
   QuizzesControllerFindAllParams,
@@ -143,10 +130,10 @@ import type {
   SaveHabitEvaluationInput,
   SchoolLogoUploadInput,
   SchoolsControllerGetSchoolLogoDownloadUrlParams,
-  SendMessageBodyInput,
-  SendMessageInput,
+  SendDirectMessageInput,
   ShareFileInput,
   SignUpInput,
+  StartDirectInput,
   StoreControllerMyStoreCartParams,
   StoreControllerMyStoreOrdersParams,
   StoreControllerStoreCategoriesAdminParams,
@@ -166,7 +153,6 @@ import type {
   StudyPlansControllerFindAllParams,
   SubjectsControllerFindAllParams,
   SubjectsControllerFindManySubjectsCountParams,
-  SubscriberSyncInput,
   TeacherHomeControllerAttentionParams,
   TeacherHomeControllerSummaryParams,
   TeacherHomeControllerTodayParams,
@@ -175,15 +161,14 @@ import type {
   TeachersControllerFindManyTeachersCountParams,
   UpdateAssignmentInput,
   UpdateAttendanceRecordInput,
-  UpdateBroadcastInput,
   UpdateCartItemInput,
+  UpdateChannelInput,
   UpdateClassGroupInput,
   UpdateCourseInput,
   UpdateDegreeInput,
   UpdateGradeBucketInput,
   UpdateGradeInput,
   UpdateGroupsScheduleInput,
-  UpdateNewsletterInput,
   UpdateOrganizationInput,
   UpdateParentInput,
   UpdatePeriodInput,
@@ -5272,394 +5257,6 @@ if(coursesControllerUploadCoverBody.file !== undefined) {
   }
 
 /**
- * @summary Create direct chat
- */
- chatsControllerCreateDirectChat<TData = void>( options?: HttpClientBodyOptions): Observable<TData>;
- chatsControllerCreateDirectChat<TData = void>( options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
- chatsControllerCreateDirectChat<TData = void>( options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
-  chatsControllerCreateDirectChat<TData = void>(
-     options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
-    if (options?.observe === 'events') {
-      return this.http.post<TData>(
-      `/api/v1/chats/direct`,undefined,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'events',
-      }
-    );
-    }
-
-    if (options?.observe === 'response') {
-      return this.http.post<TData>(
-      `/api/v1/chats/direct`,undefined,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'response',
-      }
-    );
-    }
-
-    return this.http.post<TData>(
-      `/api/v1/chats/direct`,undefined,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'body',
-      }
-    );
-  }
-
-/**
- * @summary Create group chat
- */
- chatsControllerCreateGroupChat<TData = void>(createGroupChatInput: CreateGroupChatInput, options?: HttpClientBodyOptions): Observable<TData>;
- chatsControllerCreateGroupChat<TData = void>(createGroupChatInput: CreateGroupChatInput, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
- chatsControllerCreateGroupChat<TData = void>(createGroupChatInput: CreateGroupChatInput, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
-  chatsControllerCreateGroupChat<TData = void>(
-    createGroupChatInput: CreateGroupChatInput, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
-    if (options?.observe === 'events') {
-      return this.http.post<TData>(
-      `/api/v1/chats/group`,
-      createGroupChatInput,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'events',
-      }
-    );
-    }
-
-    if (options?.observe === 'response') {
-      return this.http.post<TData>(
-      `/api/v1/chats/group`,
-      createGroupChatInput,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'response',
-      }
-    );
-    }
-
-    return this.http.post<TData>(
-      `/api/v1/chats/group`,
-      createGroupChatInput,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'body',
-      }
-    );
-  }
-
-/**
- * @summary Create contextual chat
- */
- chatsControllerCreateContextualChat<TData = void>(createContextualChatInput: CreateContextualChatInput, options?: HttpClientBodyOptions): Observable<TData>;
- chatsControllerCreateContextualChat<TData = void>(createContextualChatInput: CreateContextualChatInput, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
- chatsControllerCreateContextualChat<TData = void>(createContextualChatInput: CreateContextualChatInput, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
-  chatsControllerCreateContextualChat<TData = void>(
-    createContextualChatInput: CreateContextualChatInput, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
-    if (options?.observe === 'events') {
-      return this.http.post<TData>(
-      `/api/v1/chats/contextual`,
-      createContextualChatInput,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'events',
-      }
-    );
-    }
-
-    if (options?.observe === 'response') {
-      return this.http.post<TData>(
-      `/api/v1/chats/contextual`,
-      createContextualChatInput,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'response',
-      }
-    );
-    }
-
-    return this.http.post<TData>(
-      `/api/v1/chats/contextual`,
-      createContextualChatInput,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'body',
-      }
-    );
-  }
-
-/**
- * @summary My chats
- */
- chatsControllerMyChats<TData = void>( options?: HttpClientBodyOptions): Observable<TData>;
- chatsControllerMyChats<TData = void>( options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
- chatsControllerMyChats<TData = void>( options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
-  chatsControllerMyChats<TData = void>(
-     options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
-    if (options?.observe === 'events') {
-      return this.http.get<TData>(
-      `/api/v1/chats`,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'events',
-      }
-    );
-    }
-
-    if (options?.observe === 'response') {
-      return this.http.get<TData>(
-      `/api/v1/chats`,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'response',
-      }
-    );
-    }
-
-    return this.http.get<TData>(
-      `/api/v1/chats`,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'body',
-      }
-    );
-  }
-
-/**
- * @summary Unread chat count
- */
- chatsControllerChatUnreadCount<TData = void>( options?: HttpClientBodyOptions): Observable<TData>;
- chatsControllerChatUnreadCount<TData = void>( options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
- chatsControllerChatUnreadCount<TData = void>( options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
-  chatsControllerChatUnreadCount<TData = void>(
-     options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
-    if (options?.observe === 'events') {
-      return this.http.get<TData>(
-      `/api/v1/chats/unread-count`,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'events',
-      }
-    );
-    }
-
-    if (options?.observe === 'response') {
-      return this.http.get<TData>(
-      `/api/v1/chats/unread-count`,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'response',
-      }
-    );
-    }
-
-    return this.http.get<TData>(
-      `/api/v1/chats/unread-count`,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'body',
-      }
-    );
-  }
-
-/**
- * @summary Send chat message
- */
- chatsControllerSendMessage<TData = void>(sendMessageInput: SendMessageInput, options?: HttpClientBodyOptions): Observable<TData>;
- chatsControllerSendMessage<TData = void>(sendMessageInput: SendMessageInput, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
- chatsControllerSendMessage<TData = void>(sendMessageInput: SendMessageInput, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
-  chatsControllerSendMessage<TData = void>(
-    sendMessageInput: SendMessageInput, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
-    if (options?.observe === 'events') {
-      return this.http.post<TData>(
-      `/api/v1/chats/messages`,
-      sendMessageInput,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'events',
-      }
-    );
-    }
-
-    if (options?.observe === 'response') {
-      return this.http.post<TData>(
-      `/api/v1/chats/messages`,
-      sendMessageInput,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'response',
-      }
-    );
-    }
-
-    return this.http.post<TData>(
-      `/api/v1/chats/messages`,
-      sendMessageInput,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'body',
-      }
-    );
-  }
-
-/**
- * @summary Chat messages
- */
- chatsControllerChatMessages<TData = void>(params: ChatsControllerChatMessagesParams, options?: HttpClientBodyOptions): Observable<TData>;
- chatsControllerChatMessages<TData = void>(params: ChatsControllerChatMessagesParams, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
- chatsControllerChatMessages<TData = void>(params: ChatsControllerChatMessagesParams, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
-  chatsControllerChatMessages<TData = void>(
-    params: ChatsControllerChatMessagesParams, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
-    const filteredParams = filterParams({...params, ...options?.params}, new Set<string>([]));
-
-    if (options?.observe === 'events') {
-      return this.http.get<TData>(
-      `/api/v1/chats/messages`,{
-    ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'events',
-        params: filteredParams,}
-    );
-    }
-
-    if (options?.observe === 'response') {
-      return this.http.get<TData>(
-      `/api/v1/chats/messages`,{
-    ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'response',
-        params: filteredParams,}
-    );
-    }
-
-    return this.http.get<TData>(
-      `/api/v1/chats/messages`,{
-    ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'body',
-        params: filteredParams,}
-    );
-  }
-
-/**
- * @summary Add chat participants
- */
- chatsControllerAddChatParticipants<TData = void>(addChatParticipantsInput: AddChatParticipantsInput, options?: HttpClientBodyOptions): Observable<TData>;
- chatsControllerAddChatParticipants<TData = void>(addChatParticipantsInput: AddChatParticipantsInput, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
- chatsControllerAddChatParticipants<TData = void>(addChatParticipantsInput: AddChatParticipantsInput, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
-  chatsControllerAddChatParticipants<TData = void>(
-    addChatParticipantsInput: AddChatParticipantsInput, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
-    if (options?.observe === 'events') {
-      return this.http.post<TData>(
-      `/api/v1/chats/participants`,
-      addChatParticipantsInput,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'events',
-      }
-    );
-    }
-
-    if (options?.observe === 'response') {
-      return this.http.post<TData>(
-      `/api/v1/chats/participants`,
-      addChatParticipantsInput,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'response',
-      }
-    );
-    }
-
-    return this.http.post<TData>(
-      `/api/v1/chats/participants`,
-      addChatParticipantsInput,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'body',
-      }
-    );
-  }
-
-/**
- * @summary Leave chat
- */
- chatsControllerLeaveChat<TData = void>(chatId: string, options?: HttpClientBodyOptions): Observable<TData>;
- chatsControllerLeaveChat<TData = void>(chatId: string, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
- chatsControllerLeaveChat<TData = void>(chatId: string, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
-  chatsControllerLeaveChat<TData = void>(
-    chatId: string, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
-    if (options?.observe === 'events') {
-      return this.http.post<TData>(
-      `/api/v1/chats/${chatId}/leave`,undefined,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'events',
-      }
-    );
-    }
-
-    if (options?.observe === 'response') {
-      return this.http.post<TData>(
-      `/api/v1/chats/${chatId}/leave`,undefined,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'response',
-      }
-    );
-    }
-
-    return this.http.post<TData>(
-      `/api/v1/chats/${chatId}/leave`,undefined,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'body',
-      }
-    );
-  }
-
-/**
- * @summary Mark chat read
- */
- chatsControllerMarkChatRead<TData = void>(chatId: string, options?: HttpClientBodyOptions): Observable<TData>;
- chatsControllerMarkChatRead<TData = void>(chatId: string, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
- chatsControllerMarkChatRead<TData = void>(chatId: string, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
-  chatsControllerMarkChatRead<TData = void>(
-    chatId: string, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
-    if (options?.observe === 'events') {
-      return this.http.patch<TData>(
-      `/api/v1/chats/${chatId}/read`,undefined,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'events',
-      }
-    );
-    }
-
-    if (options?.observe === 'response') {
-      return this.http.patch<TData>(
-      `/api/v1/chats/${chatId}/read`,undefined,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'response',
-      }
-    );
-    }
-
-    return this.http.patch<TData>(
-      `/api/v1/chats/${chatId}/read`,undefined,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'body',
-      }
-    );
-  }
-
-/**
- * @summary Get chat by id
- */
- chatsControllerChat<TData = void>(id: string, options?: HttpClientBodyOptions): Observable<TData>;
- chatsControllerChat<TData = void>(id: string, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
- chatsControllerChat<TData = void>(id: string, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
-  chatsControllerChat<TData = void>(
-    id: string, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
-    if (options?.observe === 'events') {
-      return this.http.get<TData>(
-      `/api/v1/chats/${id}`,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'events',
-      }
-    );
-    }
-
-    if (options?.observe === 'response') {
-      return this.http.get<TData>(
-      `/api/v1/chats/${id}`,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'response',
-      }
-    );
-    }
-
-    return this.http.get<TData>(
-      `/api/v1/chats/${id}`,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'body',
-      }
-    );
-  }
-
-/**
  * @summary Student balance breakdown (overdue/active/paid)
  */
  financialControllerGetStudentBalanceSummary<TData = void>(params: FinancialControllerGetStudentBalanceSummaryParams, options?: HttpClientBodyOptions): Observable<TData>;
@@ -8663,389 +8260,6 @@ if(coursesControllerUploadCoverBody.file !== undefined) {
   }
 
 /**
- * @summary Create message
- */
- messagesControllerCreateMessage<TData = void>(createMessageInput: CreateMessageInput, options?: HttpClientBodyOptions): Observable<TData>;
- messagesControllerCreateMessage<TData = void>(createMessageInput: CreateMessageInput, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
- messagesControllerCreateMessage<TData = void>(createMessageInput: CreateMessageInput, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
-  messagesControllerCreateMessage<TData = void>(
-    createMessageInput: CreateMessageInput, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
-    if (options?.observe === 'events') {
-      return this.http.post<TData>(
-      `/api/v1/messages`,
-      createMessageInput,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'events',
-      }
-    );
-    }
-
-    if (options?.observe === 'response') {
-      return this.http.post<TData>(
-      `/api/v1/messages`,
-      createMessageInput,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'response',
-      }
-    );
-    }
-
-    return this.http.post<TData>(
-      `/api/v1/messages`,
-      createMessageInput,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'body',
-      }
-    );
-  }
-
-/**
- * @summary Inbox messages
- */
- messagesControllerFindManyMessages<TData = void>(params?: MessagesControllerFindManyMessagesParams, options?: HttpClientBodyOptions): Observable<TData>;
- messagesControllerFindManyMessages<TData = void>(params?: MessagesControllerFindManyMessagesParams, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
- messagesControllerFindManyMessages<TData = void>(params?: MessagesControllerFindManyMessagesParams, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
-  messagesControllerFindManyMessages<TData = void>(
-    params?: MessagesControllerFindManyMessagesParams, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
-    const filteredParams = filterParams({...params, ...options?.params}, new Set<string>([]));
-
-    if (options?.observe === 'events') {
-      return this.http.get<TData>(
-      `/api/v1/messages`,{
-    ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'events',
-        params: filteredParams,}
-    );
-    }
-
-    if (options?.observe === 'response') {
-      return this.http.get<TData>(
-      `/api/v1/messages`,{
-    ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'response',
-        params: filteredParams,}
-    );
-    }
-
-    return this.http.get<TData>(
-      `/api/v1/messages`,{
-    ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'body',
-        params: filteredParams,}
-    );
-  }
-
-/**
- * @summary Messages sent by me
- */
- messagesControllerFindMyMessages<TData = void>(params?: MessagesControllerFindMyMessagesParams, options?: HttpClientBodyOptions): Observable<TData>;
- messagesControllerFindMyMessages<TData = void>(params?: MessagesControllerFindMyMessagesParams, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
- messagesControllerFindMyMessages<TData = void>(params?: MessagesControllerFindMyMessagesParams, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
-  messagesControllerFindMyMessages<TData = void>(
-    params?: MessagesControllerFindMyMessagesParams, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
-    const filteredParams = filterParams({...params, ...options?.params}, new Set<string>([]));
-
-    if (options?.observe === 'events') {
-      return this.http.get<TData>(
-      `/api/v1/messages/mine`,{
-    ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'events',
-        params: filteredParams,}
-    );
-    }
-
-    if (options?.observe === 'response') {
-      return this.http.get<TData>(
-      `/api/v1/messages/mine`,{
-    ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'response',
-        params: filteredParams,}
-    );
-    }
-
-    return this.http.get<TData>(
-      `/api/v1/messages/mine`,{
-    ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'body',
-        params: filteredParams,}
-    );
-  }
-
-/**
- * @summary Inbox count
- */
- messagesControllerFindManyMessagesCount<TData = void>( options?: HttpClientBodyOptions): Observable<TData>;
- messagesControllerFindManyMessagesCount<TData = void>( options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
- messagesControllerFindManyMessagesCount<TData = void>( options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
-  messagesControllerFindManyMessagesCount<TData = void>(
-     options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
-    if (options?.observe === 'events') {
-      return this.http.get<TData>(
-      `/api/v1/messages/count`,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'events',
-      }
-    );
-    }
-
-    if (options?.observe === 'response') {
-      return this.http.get<TData>(
-      `/api/v1/messages/count`,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'response',
-      }
-    );
-    }
-
-    return this.http.get<TData>(
-      `/api/v1/messages/count`,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'body',
-      }
-    );
-  }
-
-/**
- * @summary Sent count
- */
- messagesControllerFindSentMessagesCount<TData = void>( options?: HttpClientBodyOptions): Observable<TData>;
- messagesControllerFindSentMessagesCount<TData = void>( options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
- messagesControllerFindSentMessagesCount<TData = void>( options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
-  messagesControllerFindSentMessagesCount<TData = void>(
-     options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
-    if (options?.observe === 'events') {
-      return this.http.get<TData>(
-      `/api/v1/messages/sent-count`,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'events',
-      }
-    );
-    }
-
-    if (options?.observe === 'response') {
-      return this.http.get<TData>(
-      `/api/v1/messages/sent-count`,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'response',
-      }
-    );
-    }
-
-    return this.http.get<TData>(
-      `/api/v1/messages/sent-count`,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'body',
-      }
-    );
-  }
-
-/**
- * @summary Contacts for messaging
- */
- messagesControllerFindContacts<TData = void>(params: MessagesControllerFindContactsParams, options?: HttpClientBodyOptions): Observable<TData>;
- messagesControllerFindContacts<TData = void>(params: MessagesControllerFindContactsParams, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
- messagesControllerFindContacts<TData = void>(params: MessagesControllerFindContactsParams, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
-  messagesControllerFindContacts<TData = void>(
-    params: MessagesControllerFindContactsParams, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
-    const filteredParams = filterParams({...params, ...options?.params}, new Set<string>([]));
-
-    if (options?.observe === 'events') {
-      return this.http.get<TData>(
-      `/api/v1/messages/contacts`,{
-    ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'events',
-        params: filteredParams,}
-    );
-    }
-
-    if (options?.observe === 'response') {
-      return this.http.get<TData>(
-      `/api/v1/messages/contacts`,{
-    ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'response',
-        params: filteredParams,}
-    );
-    }
-
-    return this.http.get<TData>(
-      `/api/v1/messages/contacts`,{
-    ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'body',
-        params: filteredParams,}
-    );
-  }
-
-/**
- * @summary Unread messages count
- */
- messagesControllerUnreadMessagesCount<TData = void>( options?: HttpClientBodyOptions): Observable<TData>;
- messagesControllerUnreadMessagesCount<TData = void>( options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
- messagesControllerUnreadMessagesCount<TData = void>( options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
-  messagesControllerUnreadMessagesCount<TData = void>(
-     options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
-    if (options?.observe === 'events') {
-      return this.http.get<TData>(
-      `/api/v1/messages/unread-count`,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'events',
-      }
-    );
-    }
-
-    if (options?.observe === 'response') {
-      return this.http.get<TData>(
-      `/api/v1/messages/unread-count`,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'response',
-      }
-    );
-    }
-
-    return this.http.get<TData>(
-      `/api/v1/messages/unread-count`,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'body',
-      }
-    );
-  }
-
-/**
- * @summary Mark message as read
- */
- messagesControllerMarkMessageAsRead<TData = void>(messageId: string, options?: HttpClientBodyOptions): Observable<TData>;
- messagesControllerMarkMessageAsRead<TData = void>(messageId: string, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
- messagesControllerMarkMessageAsRead<TData = void>(messageId: string, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
-  messagesControllerMarkMessageAsRead<TData = void>(
-    messageId: string, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
-    if (options?.observe === 'events') {
-      return this.http.patch<TData>(
-      `/api/v1/messages/${messageId}/read`,undefined,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'events',
-      }
-    );
-    }
-
-    if (options?.observe === 'response') {
-      return this.http.patch<TData>(
-      `/api/v1/messages/${messageId}/read`,undefined,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'response',
-      }
-    );
-    }
-
-    return this.http.patch<TData>(
-      `/api/v1/messages/${messageId}/read`,undefined,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'body',
-      }
-    );
-  }
-
-/**
- * @summary Message by id
- */
- messagesControllerFindMessageById<TData = void>(id: string, options?: HttpClientBodyOptions): Observable<TData>;
- messagesControllerFindMessageById<TData = void>(id: string, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
- messagesControllerFindMessageById<TData = void>(id: string, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
-  messagesControllerFindMessageById<TData = void>(
-    id: string, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
-    if (options?.observe === 'events') {
-      return this.http.get<TData>(
-      `/api/v1/messages/${id}`,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'events',
-      }
-    );
-    }
-
-    if (options?.observe === 'response') {
-      return this.http.get<TData>(
-      `/api/v1/messages/${id}`,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'response',
-      }
-    );
-    }
-
-    return this.http.get<TData>(
-      `/api/v1/messages/${id}`,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'body',
-      }
-    );
-  }
-
-/**
- * @summary Remove message
- */
- messagesControllerRemoveMessage<TData = void>(id: string, options?: HttpClientBodyOptions): Observable<TData>;
- messagesControllerRemoveMessage<TData = void>(id: string, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
- messagesControllerRemoveMessage<TData = void>(id: string, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
-  messagesControllerRemoveMessage<TData = void>(
-    id: string, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
-    if (options?.observe === 'events') {
-      return this.http.delete<TData>(
-      `/api/v1/messages/${id}`,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'events',
-      }
-    );
-    }
-
-    if (options?.observe === 'response') {
-      return this.http.delete<TData>(
-      `/api/v1/messages/${id}`,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'response',
-      }
-    );
-    }
-
-    return this.http.delete<TData>(
-      `/api/v1/messages/${id}`,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'body',
-      }
-    );
-  }
-
-/**
- * @summary Remove message recipient
- */
- messagesControllerRemoveMessageRecipient<TData = void>(id: string, options?: HttpClientBodyOptions): Observable<TData>;
- messagesControllerRemoveMessageRecipient<TData = void>(id: string, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
- messagesControllerRemoveMessageRecipient<TData = void>(id: string, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
-  messagesControllerRemoveMessageRecipient<TData = void>(
-    id: string, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
-    if (options?.observe === 'events') {
-      return this.http.delete<TData>(
-      `/api/v1/messages/recipients/${id}`,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'events',
-      }
-    );
-    }
-
-    if (options?.observe === 'response') {
-      return this.http.delete<TData>(
-      `/api/v1/messages/recipients/${id}`,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'response',
-      }
-    );
-    }
-
-    return this.http.delete<TData>(
-      `/api/v1/messages/recipients/${id}`,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'body',
-      }
-    );
-  }
-
-/**
  * @summary Create groups schedule
  */
  groupsSchedulesControllerCreate<TData = void>(createGroupsScheduleInput: CreateGroupsScheduleInput, options?: HttpClientBodyOptions): Observable<TData>;
@@ -10007,17 +9221,85 @@ if(coursesControllerUploadCoverBody.file !== undefined) {
   }
 
 /**
- * @summary Create newsletter
+ * @summary Unread channel posts and direct messages (FR-COM-003.15)
  */
- newslettersControllerCreate<TData = void>(createNewsletterInput: CreateNewsletterInput, options?: HttpClientBodyOptions): Observable<TData>;
- newslettersControllerCreate<TData = void>(createNewsletterInput: CreateNewsletterInput, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
- newslettersControllerCreate<TData = void>(createNewsletterInput: CreateNewsletterInput, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
-  newslettersControllerCreate<TData = void>(
-    createNewsletterInput: CreateNewsletterInput, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
+ communicationControllerUnread<TData = void>( options?: HttpClientBodyOptions): Observable<TData>;
+ communicationControllerUnread<TData = void>( options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
+ communicationControllerUnread<TData = void>( options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
+  communicationControllerUnread<TData = void>(
+     options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
+    if (options?.observe === 'events') {
+      return this.http.get<TData>(
+      `/api/v1/communication/unread`,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'events',
+      }
+    );
+    }
+
+    if (options?.observe === 'response') {
+      return this.http.get<TData>(
+      `/api/v1/communication/unread`,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'response',
+      }
+    );
+    }
+
+    return this.http.get<TData>(
+      `/api/v1/communication/unread`,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'body',
+      }
+    );
+  }
+
+/**
+ * @summary Channels the caller manages or belongs to (FR-COM-003.11)
+ */
+ communicationControllerListChannels<TData = void>( options?: HttpClientBodyOptions): Observable<TData>;
+ communicationControllerListChannels<TData = void>( options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
+ communicationControllerListChannels<TData = void>( options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
+  communicationControllerListChannels<TData = void>(
+     options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
+    if (options?.observe === 'events') {
+      return this.http.get<TData>(
+      `/api/v1/communication/channels`,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'events',
+      }
+    );
+    }
+
+    if (options?.observe === 'response') {
+      return this.http.get<TData>(
+      `/api/v1/communication/channels`,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'response',
+      }
+    );
+    }
+
+    return this.http.get<TData>(
+      `/api/v1/communication/channels`,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'body',
+      }
+    );
+  }
+
+/**
+ * @summary Create a channel (FR-COM-003.1–.4)
+ */
+ communicationControllerCreateChannel<TData = void>(createChannelInput: CreateChannelInput, options?: HttpClientBodyOptions): Observable<TData>;
+ communicationControllerCreateChannel<TData = void>(createChannelInput: CreateChannelInput, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
+ communicationControllerCreateChannel<TData = void>(createChannelInput: CreateChannelInput, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
+  communicationControllerCreateChannel<TData = void>(
+    createChannelInput: CreateChannelInput, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
     if (options?.observe === 'events') {
       return this.http.post<TData>(
-      `/api/v1/newsletters`,
-      createNewsletterInput,{
+      `/api/v1/communication/channels`,
+      createChannelInput,{
         ...(options as Omit<NonNullable<typeof options>, 'observe'>),
         observe: 'events',
       }
@@ -10026,8 +9308,8 @@ if(coursesControllerUploadCoverBody.file !== undefined) {
 
     if (options?.observe === 'response') {
       return this.http.post<TData>(
-      `/api/v1/newsletters`,
-      createNewsletterInput,{
+      `/api/v1/communication/channels`,
+      createChannelInput,{
         ...(options as Omit<NonNullable<typeof options>, 'observe'>),
         observe: 'response',
       }
@@ -10035,8 +9317,8 @@ if(coursesControllerUploadCoverBody.file !== undefined) {
     }
 
     return this.http.post<TData>(
-      `/api/v1/newsletters`,
-      createNewsletterInput,{
+      `/api/v1/communication/channels`,
+      createChannelInput,{
         ...(options as Omit<NonNullable<typeof options>, 'observe'>),
         observe: 'body',
       }
@@ -10044,18 +9326,18 @@ if(coursesControllerUploadCoverBody.file !== undefined) {
   }
 
 /**
- * @summary List newsletters
+ * @summary Latest channel posts for home pages (FR-COM-003.16)
  */
- newslettersControllerFindAll<TData = void>(params?: NewslettersControllerFindAllParams, options?: HttpClientBodyOptions): Observable<TData>;
- newslettersControllerFindAll<TData = void>(params?: NewslettersControllerFindAllParams, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
- newslettersControllerFindAll<TData = void>(params?: NewslettersControllerFindAllParams, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
-  newslettersControllerFindAll<TData = void>(
-    params?: NewslettersControllerFindAllParams, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
+ communicationControllerRecent<TData = void>(params?: CommunicationControllerRecentParams, options?: HttpClientBodyOptions): Observable<TData>;
+ communicationControllerRecent<TData = void>(params?: CommunicationControllerRecentParams, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
+ communicationControllerRecent<TData = void>(params?: CommunicationControllerRecentParams, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
+  communicationControllerRecent<TData = void>(
+    params?: CommunicationControllerRecentParams, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
     const filteredParams = filterParams({...params, ...options?.params}, new Set<string>([]));
 
     if (options?.observe === 'events') {
       return this.http.get<TData>(
-      `/api/v1/newsletters`,{
+      `/api/v1/communication/channels/recent`,{
     ...(options as Omit<NonNullable<typeof options>, 'observe'>),
         observe: 'events',
         params: filteredParams,}
@@ -10064,7 +9346,7 @@ if(coursesControllerUploadCoverBody.file !== undefined) {
 
     if (options?.observe === 'response') {
       return this.http.get<TData>(
-      `/api/v1/newsletters`,{
+      `/api/v1/communication/channels/recent`,{
     ...(options as Omit<NonNullable<typeof options>, 'observe'>),
         observe: 'response',
         params: filteredParams,}
@@ -10072,7 +9354,7 @@ if(coursesControllerUploadCoverBody.file !== undefined) {
     }
 
     return this.http.get<TData>(
-      `/api/v1/newsletters`,{
+      `/api/v1/communication/channels/recent`,{
     ...(options as Omit<NonNullable<typeof options>, 'observe'>),
         observe: 'body',
         params: filteredParams,}
@@ -10080,17 +9362,91 @@ if(coursesControllerUploadCoverBody.file !== undefined) {
   }
 
 /**
- * @summary Update newsletter
+ * @summary What the caller may target at a level (BR-COM-003.2)
  */
- newslettersControllerUpdate<TData = void>(updateNewsletterInput: UpdateNewsletterInput, options?: HttpClientBodyOptions): Observable<TData>;
- newslettersControllerUpdate<TData = void>(updateNewsletterInput: UpdateNewsletterInput, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
- newslettersControllerUpdate<TData = void>(updateNewsletterInput: UpdateNewsletterInput, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
-  newslettersControllerUpdate<TData = void>(
-    updateNewsletterInput: UpdateNewsletterInput, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
+ communicationControllerTargets<TData = void>(params: CommunicationControllerTargetsParams, options?: HttpClientBodyOptions): Observable<TData>;
+ communicationControllerTargets<TData = void>(params: CommunicationControllerTargetsParams, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
+ communicationControllerTargets<TData = void>(params: CommunicationControllerTargetsParams, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
+  communicationControllerTargets<TData = void>(
+    params: CommunicationControllerTargetsParams, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
+    const filteredParams = filterParams({...params, ...options?.params}, new Set<string>([]));
+
+    if (options?.observe === 'events') {
+      return this.http.get<TData>(
+      `/api/v1/communication/channels/targets`,{
+    ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'events',
+        params: filteredParams,}
+    );
+    }
+
+    if (options?.observe === 'response') {
+      return this.http.get<TData>(
+      `/api/v1/communication/channels/targets`,{
+    ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'response',
+        params: filteredParams,}
+    );
+    }
+
+    return this.http.get<TData>(
+      `/api/v1/communication/channels/targets`,{
+    ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'body',
+        params: filteredParams,}
+    );
+  }
+
+/**
+ * @summary A channel with its latest posts (FR-COM-003.7, .9)
+ */
+ communicationControllerGetChannel<TData = void>(id: string, options?: HttpClientBodyOptions): Observable<TData>;
+ communicationControllerGetChannel<TData = void>(id: string, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
+ communicationControllerGetChannel<TData = void>(id: string, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
+  communicationControllerGetChannel<TData = void>(
+    id: string, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
+    if (options?.observe === 'events') {
+      return this.http.get<TData>(
+      `/api/v1/communication/channels/${id}`,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'events',
+      }
+    );
+    }
+
+    if (options?.observe === 'response') {
+      return this.http.get<TData>(
+      `/api/v1/communication/channels/${id}`,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'response',
+      }
+    );
+    }
+
+    return this.http.get<TData>(
+      `/api/v1/communication/channels/${id}`,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'body',
+      }
+    );
+  }
+
+/**
+ * @summary Edit a channel or archive it (FR-COM-003.5)
+ */
+ communicationControllerUpdateChannel<TData = void>(id: string,
+    updateChannelInput: UpdateChannelInput, options?: HttpClientBodyOptions): Observable<TData>;
+ communicationControllerUpdateChannel<TData = void>(id: string,
+    updateChannelInput: UpdateChannelInput, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
+ communicationControllerUpdateChannel<TData = void>(id: string,
+    updateChannelInput: UpdateChannelInput, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
+  communicationControllerUpdateChannel<TData = void>(
+    id: string,
+    updateChannelInput: UpdateChannelInput, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
     if (options?.observe === 'events') {
       return this.http.patch<TData>(
-      `/api/v1/newsletters`,
-      updateNewsletterInput,{
+      `/api/v1/communication/channels/${id}`,
+      updateChannelInput,{
         ...(options as Omit<NonNullable<typeof options>, 'observe'>),
         observe: 'events',
       }
@@ -10099,8 +9455,8 @@ if(coursesControllerUploadCoverBody.file !== undefined) {
 
     if (options?.observe === 'response') {
       return this.http.patch<TData>(
-      `/api/v1/newsletters`,
-      updateNewsletterInput,{
+      `/api/v1/communication/channels/${id}`,
+      updateChannelInput,{
         ...(options as Omit<NonNullable<typeof options>, 'observe'>),
         observe: 'response',
       }
@@ -10108,8 +9464,8 @@ if(coursesControllerUploadCoverBody.file !== undefined) {
     }
 
     return this.http.patch<TData>(
-      `/api/v1/newsletters`,
-      updateNewsletterInput,{
+      `/api/v1/communication/channels/${id}`,
+      updateChannelInput,{
         ...(options as Omit<NonNullable<typeof options>, 'observe'>),
         observe: 'body',
       }
@@ -10117,88 +9473,16 @@ if(coursesControllerUploadCoverBody.file !== undefined) {
   }
 
 /**
- * @summary Newsletters count
+ * @summary Mark the channel's posts read (FR-COM-003.8)
  */
- newslettersControllerFindManyNewslettersCount<TData = void>(params?: NewslettersControllerFindManyNewslettersCountParams, options?: HttpClientBodyOptions): Observable<TData>;
- newslettersControllerFindManyNewslettersCount<TData = void>(params?: NewslettersControllerFindManyNewslettersCountParams, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
- newslettersControllerFindManyNewslettersCount<TData = void>(params?: NewslettersControllerFindManyNewslettersCountParams, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
-  newslettersControllerFindManyNewslettersCount<TData = void>(
-    params?: NewslettersControllerFindManyNewslettersCountParams, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
-    const filteredParams = filterParams({...params, ...options?.params}, new Set<string>([]));
-
-    if (options?.observe === 'events') {
-      return this.http.get<TData>(
-      `/api/v1/newsletters/count`,{
-    ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'events',
-        params: filteredParams,}
-    );
-    }
-
-    if (options?.observe === 'response') {
-      return this.http.get<TData>(
-      `/api/v1/newsletters/count`,{
-    ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'response',
-        params: filteredParams,}
-    );
-    }
-
-    return this.http.get<TData>(
-      `/api/v1/newsletters/count`,{
-    ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'body',
-        params: filteredParams,}
-    );
-  }
-
-/**
- * @summary Published newsletters for school
- */
- newslettersControllerFindPublished<TData = void>(params: NewslettersControllerFindPublishedParams, options?: HttpClientBodyOptions): Observable<TData>;
- newslettersControllerFindPublished<TData = void>(params: NewslettersControllerFindPublishedParams, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
- newslettersControllerFindPublished<TData = void>(params: NewslettersControllerFindPublishedParams, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
-  newslettersControllerFindPublished<TData = void>(
-    params: NewslettersControllerFindPublishedParams, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
-    const filteredParams = filterParams({...params, ...options?.params}, new Set<string>([]));
-
-    if (options?.observe === 'events') {
-      return this.http.get<TData>(
-      `/api/v1/newsletters/published`,{
-    ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'events',
-        params: filteredParams,}
-    );
-    }
-
-    if (options?.observe === 'response') {
-      return this.http.get<TData>(
-      `/api/v1/newsletters/published`,{
-    ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'response',
-        params: filteredParams,}
-    );
-    }
-
-    return this.http.get<TData>(
-      `/api/v1/newsletters/published`,{
-    ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'body',
-        params: filteredParams,}
-    );
-  }
-
-/**
- * @summary Get newsletter by id
- */
- newslettersControllerFindOne<TData = void>(id: string, options?: HttpClientBodyOptions): Observable<TData>;
- newslettersControllerFindOne<TData = void>(id: string, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
- newslettersControllerFindOne<TData = void>(id: string, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
-  newslettersControllerFindOne<TData = void>(
+ communicationControllerMarkChannelRead<TData = void>(id: string, options?: HttpClientBodyOptions): Observable<TData>;
+ communicationControllerMarkChannelRead<TData = void>(id: string, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
+ communicationControllerMarkChannelRead<TData = void>(id: string, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
+  communicationControllerMarkChannelRead<TData = void>(
     id: string, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
     if (options?.observe === 'events') {
-      return this.http.get<TData>(
-      `/api/v1/newsletters/${id}`,{
+      return this.http.post<TData>(
+      `/api/v1/communication/channels/${id}/read`,undefined,{
         ...(options as Omit<NonNullable<typeof options>, 'observe'>),
         observe: 'events',
       }
@@ -10206,16 +9490,16 @@ if(coursesControllerUploadCoverBody.file !== undefined) {
     }
 
     if (options?.observe === 'response') {
-      return this.http.get<TData>(
-      `/api/v1/newsletters/${id}`,{
+      return this.http.post<TData>(
+      `/api/v1/communication/channels/${id}/read`,undefined,{
         ...(options as Omit<NonNullable<typeof options>, 'observe'>),
         observe: 'response',
       }
     );
     }
 
-    return this.http.get<TData>(
-      `/api/v1/newsletters/${id}`,{
+    return this.http.post<TData>(
+      `/api/v1/communication/channels/${id}/read`,undefined,{
         ...(options as Omit<NonNullable<typeof options>, 'observe'>),
         observe: 'body',
       }
@@ -10223,16 +9507,61 @@ if(coursesControllerUploadCoverBody.file !== undefined) {
   }
 
 /**
- * @summary Delete newsletter
+ * @summary Publish a post (FR-COM-003.6)
  */
- newslettersControllerRemove<TData = void>(id: string, options?: HttpClientBodyOptions): Observable<TData>;
- newslettersControllerRemove<TData = void>(id: string, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
- newslettersControllerRemove<TData = void>(id: string, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
-  newslettersControllerRemove<TData = void>(
-    id: string, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
+ communicationControllerCreatePost<TData = void>(id: string,
+    createChannelPostInput: CreateChannelPostInput, options?: HttpClientBodyOptions): Observable<TData>;
+ communicationControllerCreatePost<TData = void>(id: string,
+    createChannelPostInput: CreateChannelPostInput, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
+ communicationControllerCreatePost<TData = void>(id: string,
+    createChannelPostInput: CreateChannelPostInput, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
+  communicationControllerCreatePost<TData = void>(
+    id: string,
+    createChannelPostInput: CreateChannelPostInput, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
+    if (options?.observe === 'events') {
+      return this.http.post<TData>(
+      `/api/v1/communication/channels/${id}/posts`,
+      createChannelPostInput,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'events',
+      }
+    );
+    }
+
+    if (options?.observe === 'response') {
+      return this.http.post<TData>(
+      `/api/v1/communication/channels/${id}/posts`,
+      createChannelPostInput,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'response',
+      }
+    );
+    }
+
+    return this.http.post<TData>(
+      `/api/v1/communication/channels/${id}/posts`,
+      createChannelPostInput,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'body',
+      }
+    );
+  }
+
+/**
+ * @summary Delete a post
+ */
+ communicationControllerDeletePost<TData = void>(id: string,
+    postId: string, options?: HttpClientBodyOptions): Observable<TData>;
+ communicationControllerDeletePost<TData = void>(id: string,
+    postId: string, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
+ communicationControllerDeletePost<TData = void>(id: string,
+    postId: string, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
+  communicationControllerDeletePost<TData = void>(
+    id: string,
+    postId: string, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
     if (options?.observe === 'events') {
       return this.http.delete<TData>(
-      `/api/v1/newsletters/${id}`,{
+      `/api/v1/communication/channels/${id}/posts/${postId}`,{
         ...(options as Omit<NonNullable<typeof options>, 'observe'>),
         observe: 'events',
       }
@@ -10241,7 +9570,7 @@ if(coursesControllerUploadCoverBody.file !== undefined) {
 
     if (options?.observe === 'response') {
       return this.http.delete<TData>(
-      `/api/v1/newsletters/${id}`,{
+      `/api/v1/communication/channels/${id}/posts/${postId}`,{
         ...(options as Omit<NonNullable<typeof options>, 'observe'>),
         observe: 'response',
       }
@@ -10249,7 +9578,7 @@ if(coursesControllerUploadCoverBody.file !== undefined) {
     }
 
     return this.http.delete<TData>(
-      `/api/v1/newsletters/${id}`,{
+      `/api/v1/communication/channels/${id}/posts/${postId}`,{
         ...(options as Omit<NonNullable<typeof options>, 'observe'>),
         observe: 'body',
       }
@@ -10257,17 +9586,20 @@ if(coursesControllerUploadCoverBody.file !== undefined) {
   }
 
 /**
- * @summary Create a communication thread
+ * @summary Confirm reading a post (FR-COM-003.8)
  */
- communicationControllerCreateThread<TData = void>(createThreadInput: CreateThreadInput, options?: HttpClientBodyOptions): Observable<TData>;
- communicationControllerCreateThread<TData = void>(createThreadInput: CreateThreadInput, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
- communicationControllerCreateThread<TData = void>(createThreadInput: CreateThreadInput, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
-  communicationControllerCreateThread<TData = void>(
-    createThreadInput: CreateThreadInput, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
+ communicationControllerConfirm<TData = void>(id: string,
+    postId: string, options?: HttpClientBodyOptions): Observable<TData>;
+ communicationControllerConfirm<TData = void>(id: string,
+    postId: string, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
+ communicationControllerConfirm<TData = void>(id: string,
+    postId: string, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
+  communicationControllerConfirm<TData = void>(
+    id: string,
+    postId: string, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
     if (options?.observe === 'events') {
       return this.http.post<TData>(
-      `/api/v1/communication/threads`,
-      createThreadInput,{
+      `/api/v1/communication/channels/${id}/posts/${postId}/confirm`,undefined,{
         ...(options as Omit<NonNullable<typeof options>, 'observe'>),
         observe: 'events',
       }
@@ -10276,8 +9608,7 @@ if(coursesControllerUploadCoverBody.file !== undefined) {
 
     if (options?.observe === 'response') {
       return this.http.post<TData>(
-      `/api/v1/communication/threads`,
-      createThreadInput,{
+      `/api/v1/communication/channels/${id}/posts/${postId}/confirm`,undefined,{
         ...(options as Omit<NonNullable<typeof options>, 'observe'>),
         observe: 'response',
       }
@@ -10285,8 +9616,7 @@ if(coursesControllerUploadCoverBody.file !== undefined) {
     }
 
     return this.http.post<TData>(
-      `/api/v1/communication/threads`,
-      createThreadInput,{
+      `/api/v1/communication/channels/${id}/posts/${postId}/confirm`,undefined,{
         ...(options as Omit<NonNullable<typeof options>, 'observe'>),
         observe: 'body',
       }
@@ -10294,16 +9624,20 @@ if(coursesControllerUploadCoverBody.file !== undefined) {
   }
 
 /**
- * @summary List threads visible to the caller
+ * @summary Who read and confirmed a post (FR-COM-003.9)
  */
- communicationControllerListThreads<TData = void>( options?: HttpClientBodyOptions): Observable<TData>;
- communicationControllerListThreads<TData = void>( options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
- communicationControllerListThreads<TData = void>( options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
-  communicationControllerListThreads<TData = void>(
-     options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
+ communicationControllerReceipts<TData = void>(id: string,
+    postId: string, options?: HttpClientBodyOptions): Observable<TData>;
+ communicationControllerReceipts<TData = void>(id: string,
+    postId: string, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
+ communicationControllerReceipts<TData = void>(id: string,
+    postId: string, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
+  communicationControllerReceipts<TData = void>(
+    id: string,
+    postId: string, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
     if (options?.observe === 'events') {
       return this.http.get<TData>(
-      `/api/v1/communication/threads`,{
+      `/api/v1/communication/channels/${id}/posts/${postId}/receipts`,{
         ...(options as Omit<NonNullable<typeof options>, 'observe'>),
         observe: 'events',
       }
@@ -10312,7 +9646,7 @@ if(coursesControllerUploadCoverBody.file !== undefined) {
 
     if (options?.observe === 'response') {
       return this.http.get<TData>(
-      `/api/v1/communication/threads`,{
+      `/api/v1/communication/channels/${id}/posts/${postId}/receipts`,{
         ...(options as Omit<NonNullable<typeof options>, 'observe'>),
         observe: 'response',
       }
@@ -10320,7 +9654,7 @@ if(coursesControllerUploadCoverBody.file !== undefined) {
     }
 
     return this.http.get<TData>(
-      `/api/v1/communication/threads`,{
+      `/api/v1/communication/channels/${id}/posts/${postId}/receipts`,{
         ...(options as Omit<NonNullable<typeof options>, 'observe'>),
         observe: 'body',
       }
@@ -10328,18 +9662,26 @@ if(coursesControllerUploadCoverBody.file !== undefined) {
   }
 
 /**
- * @summary Latest approved broadcasts visible to the caller
+ * @summary Replies the caller may see (FR-COM-003.10)
  */
- communicationControllerListInboxBroadcasts<TData = void>(params: CommunicationControllerListInboxBroadcastsParams, options?: HttpClientBodyOptions): Observable<TData>;
- communicationControllerListInboxBroadcasts<TData = void>(params: CommunicationControllerListInboxBroadcastsParams, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
- communicationControllerListInboxBroadcasts<TData = void>(params: CommunicationControllerListInboxBroadcastsParams, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
-  communicationControllerListInboxBroadcasts<TData = void>(
-    params: CommunicationControllerListInboxBroadcastsParams, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
+ communicationControllerReplies<TData = void>(id: string,
+    postId: string,
+    params?: CommunicationControllerRepliesParams, options?: HttpClientBodyOptions): Observable<TData>;
+ communicationControllerReplies<TData = void>(id: string,
+    postId: string,
+    params?: CommunicationControllerRepliesParams, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
+ communicationControllerReplies<TData = void>(id: string,
+    postId: string,
+    params?: CommunicationControllerRepliesParams, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
+  communicationControllerReplies<TData = void>(
+    id: string,
+    postId: string,
+    params?: CommunicationControllerRepliesParams, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
     const filteredParams = filterParams({...params, ...options?.params}, new Set<string>([]));
 
     if (options?.observe === 'events') {
       return this.http.get<TData>(
-      `/api/v1/communication/inbox/broadcasts`,{
+      `/api/v1/communication/channels/${id}/posts/${postId}/replies`,{
     ...(options as Omit<NonNullable<typeof options>, 'observe'>),
         observe: 'events',
         params: filteredParams,}
@@ -10348,7 +9690,7 @@ if(coursesControllerUploadCoverBody.file !== undefined) {
 
     if (options?.observe === 'response') {
       return this.http.get<TData>(
-      `/api/v1/communication/inbox/broadcasts`,{
+      `/api/v1/communication/channels/${id}/posts/${postId}/replies`,{
     ...(options as Omit<NonNullable<typeof options>, 'observe'>),
         observe: 'response',
         params: filteredParams,}
@@ -10356,7 +9698,7 @@ if(coursesControllerUploadCoverBody.file !== undefined) {
     }
 
     return this.http.get<TData>(
-      `/api/v1/communication/inbox/broadcasts`,{
+      `/api/v1/communication/channels/${id}/posts/${postId}/replies`,{
     ...(options as Omit<NonNullable<typeof options>, 'observe'>),
         observe: 'body',
         params: filteredParams,}
@@ -10364,140 +9706,25 @@ if(coursesControllerUploadCoverBody.file !== undefined) {
   }
 
 /**
- * @summary Get a thread
- */
- communicationControllerGetThread<TData = void>(id: string, options?: HttpClientBodyOptions): Observable<TData>;
- communicationControllerGetThread<TData = void>(id: string, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
- communicationControllerGetThread<TData = void>(id: string, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
-  communicationControllerGetThread<TData = void>(
-    id: string, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
-    if (options?.observe === 'events') {
-      return this.http.get<TData>(
-      `/api/v1/communication/threads/${id}`,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'events',
-      }
-    );
-    }
-
-    if (options?.observe === 'response') {
-      return this.http.get<TData>(
-      `/api/v1/communication/threads/${id}`,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'response',
-      }
-    );
-    }
-
-    return this.http.get<TData>(
-      `/api/v1/communication/threads/${id}`,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'body',
-      }
-    );
-  }
-
-/**
- * @summary List messages in a thread
- */
- communicationControllerGetMessages<TData = void>(id: string,
-    params: CommunicationControllerGetMessagesParams, options?: HttpClientBodyOptions): Observable<TData>;
- communicationControllerGetMessages<TData = void>(id: string,
-    params: CommunicationControllerGetMessagesParams, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
- communicationControllerGetMessages<TData = void>(id: string,
-    params: CommunicationControllerGetMessagesParams, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
-  communicationControllerGetMessages<TData = void>(
-    id: string,
-    params: CommunicationControllerGetMessagesParams, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
-    const filteredParams = filterParams({...params, ...options?.params}, new Set<string>([]));
-
-    if (options?.observe === 'events') {
-      return this.http.get<TData>(
-      `/api/v1/communication/threads/${id}/messages`,{
-    ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'events',
-        params: filteredParams,}
-    );
-    }
-
-    if (options?.observe === 'response') {
-      return this.http.get<TData>(
-      `/api/v1/communication/threads/${id}/messages`,{
-    ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'response',
-        params: filteredParams,}
-    );
-    }
-
-    return this.http.get<TData>(
-      `/api/v1/communication/threads/${id}/messages`,{
-    ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'body',
-        params: filteredParams,}
-    );
-  }
-
-/**
- * @summary Send a message (reply-only roles allowed)
- */
- communicationControllerSendMessage<TData = void>(id: string,
-    sendMessageBodyInput: SendMessageBodyInput, options?: HttpClientBodyOptions): Observable<TData>;
- communicationControllerSendMessage<TData = void>(id: string,
-    sendMessageBodyInput: SendMessageBodyInput, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
- communicationControllerSendMessage<TData = void>(id: string,
-    sendMessageBodyInput: SendMessageBodyInput, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
-  communicationControllerSendMessage<TData = void>(
-    id: string,
-    sendMessageBodyInput: SendMessageBodyInput, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
-    if (options?.observe === 'events') {
-      return this.http.post<TData>(
-      `/api/v1/communication/threads/${id}/messages`,
-      sendMessageBodyInput,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'events',
-      }
-    );
-    }
-
-    if (options?.observe === 'response') {
-      return this.http.post<TData>(
-      `/api/v1/communication/threads/${id}/messages`,
-      sendMessageBodyInput,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'response',
-      }
-    );
-    }
-
-    return this.http.post<TData>(
-      `/api/v1/communication/threads/${id}/messages`,
-      sendMessageBodyInput,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'body',
-      }
-    );
-  }
-
-/**
- * @summary Reply within a thread
+ * @summary Reply to a post (FR-COM-003.10)
  */
  communicationControllerReply<TData = void>(id: string,
-    mid: string,
-    sendMessageBodyInput: SendMessageBodyInput, options?: HttpClientBodyOptions): Observable<TData>;
+    postId: string,
+    createChannelReplyInput: CreateChannelReplyInput, options?: HttpClientBodyOptions): Observable<TData>;
  communicationControllerReply<TData = void>(id: string,
-    mid: string,
-    sendMessageBodyInput: SendMessageBodyInput, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
+    postId: string,
+    createChannelReplyInput: CreateChannelReplyInput, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
  communicationControllerReply<TData = void>(id: string,
-    mid: string,
-    sendMessageBodyInput: SendMessageBodyInput, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
+    postId: string,
+    createChannelReplyInput: CreateChannelReplyInput, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
   communicationControllerReply<TData = void>(
     id: string,
-    mid: string,
-    sendMessageBodyInput: SendMessageBodyInput, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
+    postId: string,
+    createChannelReplyInput: CreateChannelReplyInput, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
     if (options?.observe === 'events') {
       return this.http.post<TData>(
-      `/api/v1/communication/threads/${id}/messages/${mid}/reply`,
-      sendMessageBodyInput,{
+      `/api/v1/communication/channels/${id}/posts/${postId}/replies`,
+      createChannelReplyInput,{
         ...(options as Omit<NonNullable<typeof options>, 'observe'>),
         observe: 'events',
       }
@@ -10506,8 +9733,8 @@ if(coursesControllerUploadCoverBody.file !== undefined) {
 
     if (options?.observe === 'response') {
       return this.http.post<TData>(
-      `/api/v1/communication/threads/${id}/messages/${mid}/reply`,
-      sendMessageBodyInput,{
+      `/api/v1/communication/channels/${id}/posts/${postId}/replies`,
+      createChannelReplyInput,{
         ...(options as Omit<NonNullable<typeof options>, 'observe'>),
         observe: 'response',
       }
@@ -10515,8 +9742,8 @@ if(coursesControllerUploadCoverBody.file !== undefined) {
     }
 
     return this.http.post<TData>(
-      `/api/v1/communication/threads/${id}/messages/${mid}/reply`,
-      sendMessageBodyInput,{
+      `/api/v1/communication/channels/${id}/posts/${postId}/replies`,
+      createChannelReplyInput,{
         ...(options as Omit<NonNullable<typeof options>, 'observe'>),
         observe: 'body',
       }
@@ -10524,376 +9751,16 @@ if(coursesControllerUploadCoverBody.file !== undefined) {
   }
 
 /**
- * @summary Mark a message read (updates delivery receipt)
+ * @summary The caller's direct conversations (FR-COM-003.14)
  */
- communicationControllerMarkRead<TData = void>(id: string, options?: HttpClientBodyOptions): Observable<TData>;
- communicationControllerMarkRead<TData = void>(id: string, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
- communicationControllerMarkRead<TData = void>(id: string, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
-  communicationControllerMarkRead<TData = void>(
-    id: string, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
-    if (options?.observe === 'events') {
-      return this.http.patch<TData>(
-      `/api/v1/communication/messages/${id}/read`,undefined,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'events',
-      }
-    );
-    }
-
-    if (options?.observe === 'response') {
-      return this.http.patch<TData>(
-      `/api/v1/communication/messages/${id}/read`,undefined,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'response',
-      }
-    );
-    }
-
-    return this.http.patch<TData>(
-      `/api/v1/communication/messages/${id}/read`,undefined,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'body',
-      }
-    );
-  }
-
-/**
- * @summary Emit typing indicator
- */
- communicationControllerTyping<TData = void>(id: string, options?: HttpClientBodyOptions): Observable<TData>;
- communicationControllerTyping<TData = void>(id: string, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
- communicationControllerTyping<TData = void>(id: string, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
-  communicationControllerTyping<TData = void>(
-    id: string, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
-    if (options?.observe === 'events') {
-      return this.http.post<TData>(
-      `/api/v1/communication/threads/${id}/typing`,undefined,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'events',
-      }
-    );
-    }
-
-    if (options?.observe === 'response') {
-      return this.http.post<TData>(
-      `/api/v1/communication/threads/${id}/typing`,undefined,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'response',
-      }
-    );
-    }
-
-    return this.http.post<TData>(
-      `/api/v1/communication/threads/${id}/typing`,undefined,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'body',
-      }
-    );
-  }
-
-/**
- * @summary Recipients for a class group
- */
- communicationControllerClassGroupRecipients<TData = void>(id: string, options?: HttpClientBodyOptions): Observable<TData>;
- communicationControllerClassGroupRecipients<TData = void>(id: string, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
- communicationControllerClassGroupRecipients<TData = void>(id: string, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
-  communicationControllerClassGroupRecipients<TData = void>(
-    id: string, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
-    if (options?.observe === 'events') {
-      return this.http.get<TData>(
-      `/api/v1/communication/roster/class-group/${id}/recipients`,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'events',
-      }
-    );
-    }
-
-    if (options?.observe === 'response') {
-      return this.http.get<TData>(
-      `/api/v1/communication/roster/class-group/${id}/recipients`,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'response',
-      }
-    );
-    }
-
-    return this.http.get<TData>(
-      `/api/v1/communication/roster/class-group/${id}/recipients`,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'body',
-      }
-    );
-  }
-
-/**
- * @summary Guardians of a student
- */
- communicationControllerStudentGuardians<TData = void>(id: string, options?: HttpClientBodyOptions): Observable<TData>;
- communicationControllerStudentGuardians<TData = void>(id: string, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
- communicationControllerStudentGuardians<TData = void>(id: string, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
-  communicationControllerStudentGuardians<TData = void>(
-    id: string, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
-    if (options?.observe === 'events') {
-      return this.http.get<TData>(
-      `/api/v1/communication/roster/student/${id}/guardians`,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'events',
-      }
-    );
-    }
-
-    if (options?.observe === 'response') {
-      return this.http.get<TData>(
-      `/api/v1/communication/roster/student/${id}/guardians`,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'response',
-      }
-    );
-    }
-
-    return this.http.get<TData>(
-      `/api/v1/communication/roster/student/${id}/guardians`,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'body',
-      }
-    );
-  }
-
-/**
- * @summary Add participants (parents blocked by guard)
- */
- communicationControllerAddParticipants<TData = void>(id: string,
-    addParticipantBodyInput: AddParticipantBodyInput, options?: HttpClientBodyOptions): Observable<TData>;
- communicationControllerAddParticipants<TData = void>(id: string,
-    addParticipantBodyInput: AddParticipantBodyInput, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
- communicationControllerAddParticipants<TData = void>(id: string,
-    addParticipantBodyInput: AddParticipantBodyInput, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
-  communicationControllerAddParticipants<TData = void>(
-    id: string,
-    addParticipantBodyInput: AddParticipantBodyInput, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
-    if (options?.observe === 'events') {
-      return this.http.post<TData>(
-      `/api/v1/communication/threads/${id}/participants`,
-      addParticipantBodyInput,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'events',
-      }
-    );
-    }
-
-    if (options?.observe === 'response') {
-      return this.http.post<TData>(
-      `/api/v1/communication/threads/${id}/participants`,
-      addParticipantBodyInput,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'response',
-      }
-    );
-    }
-
-    return this.http.post<TData>(
-      `/api/v1/communication/threads/${id}/participants`,
-      addParticipantBodyInput,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'body',
-      }
-    );
-  }
-
-/**
- * @summary Sync a Novu subscriber + channel prefs
- */
- communicationControllerSyncSubscriber<TData = void>(subscriberSyncInput: SubscriberSyncInput, options?: HttpClientBodyOptions): Observable<TData>;
- communicationControllerSyncSubscriber<TData = void>(subscriberSyncInput: SubscriberSyncInput, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
- communicationControllerSyncSubscriber<TData = void>(subscriberSyncInput: SubscriberSyncInput, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
-  communicationControllerSyncSubscriber<TData = void>(
-    subscriberSyncInput: SubscriberSyncInput, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
-    if (options?.observe === 'events') {
-      return this.http.post<TData>(
-      `/api/v1/communication/subscribers/sync`,
-      subscriberSyncInput,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'events',
-      }
-    );
-    }
-
-    if (options?.observe === 'response') {
-      return this.http.post<TData>(
-      `/api/v1/communication/subscribers/sync`,
-      subscriberSyncInput,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'response',
-      }
-    );
-    }
-
-    return this.http.post<TData>(
-      `/api/v1/communication/subscribers/sync`,
-      subscriberSyncInput,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'body',
-      }
-    );
-  }
-
-/**
- * @summary Set recipient preference (language seam)
- */
- communicationControllerSetPreference<TData = void>(id: string,
-    preferenceInput: PreferenceInput, options?: HttpClientBodyOptions): Observable<TData>;
- communicationControllerSetPreference<TData = void>(id: string,
-    preferenceInput: PreferenceInput, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
- communicationControllerSetPreference<TData = void>(id: string,
-    preferenceInput: PreferenceInput, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
-  communicationControllerSetPreference<TData = void>(
-    id: string,
-    preferenceInput: PreferenceInput, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
-    if (options?.observe === 'events') {
-      return this.http.patch<TData>(
-      `/api/v1/communication/recipients/${id}/preference`,
-      preferenceInput,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'events',
-      }
-    );
-    }
-
-    if (options?.observe === 'response') {
-      return this.http.patch<TData>(
-      `/api/v1/communication/recipients/${id}/preference`,
-      preferenceInput,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'response',
-      }
-    );
-    }
-
-    return this.http.patch<TData>(
-      `/api/v1/communication/recipients/${id}/preference`,
-      preferenceInput,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'body',
-      }
-    );
-  }
-
-/**
- * @summary Preview which channels a message would hit
- */
- communicationControllerDeliveryPreview<TData = void>(deliveryPreviewInput: DeliveryPreviewInput, options?: HttpClientBodyOptions): Observable<TData>;
- communicationControllerDeliveryPreview<TData = void>(deliveryPreviewInput: DeliveryPreviewInput, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
- communicationControllerDeliveryPreview<TData = void>(deliveryPreviewInput: DeliveryPreviewInput, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
-  communicationControllerDeliveryPreview<TData = void>(
-    deliveryPreviewInput: DeliveryPreviewInput, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
-    if (options?.observe === 'events') {
-      return this.http.post<TData>(
-      `/api/v1/communication/delivery/preview`,
-      deliveryPreviewInput,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'events',
-      }
-    );
-    }
-
-    if (options?.observe === 'response') {
-      return this.http.post<TData>(
-      `/api/v1/communication/delivery/preview`,
-      deliveryPreviewInput,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'response',
-      }
-    );
-    }
-
-    return this.http.post<TData>(
-      `/api/v1/communication/delivery/preview`,
-      deliveryPreviewInput,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'body',
-      }
-    );
-  }
-
-/**
- * @summary Per-recipient/per-channel delivery receipts
- */
- communicationControllerGetDeliveries<TData = void>(id: string, options?: HttpClientBodyOptions): Observable<TData>;
- communicationControllerGetDeliveries<TData = void>(id: string, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
- communicationControllerGetDeliveries<TData = void>(id: string, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
-  communicationControllerGetDeliveries<TData = void>(
-    id: string, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
-    if (options?.observe === 'events') {
-      return this.http.get<TData>(
-      `/api/v1/communication/messages/${id}/deliveries`,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'events',
-      }
-    );
-    }
-
-    if (options?.observe === 'response') {
-      return this.http.get<TData>(
-      `/api/v1/communication/messages/${id}/deliveries`,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'response',
-      }
-    );
-    }
-
-    return this.http.get<TData>(
-      `/api/v1/communication/messages/${id}/deliveries`,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'body',
-      }
-    );
-  }
-
-/**
- * @summary Novu webhook → reconcile MessageDelivery (HMAC)
- */
- communicationControllerNovuWebhook<TData = void>( options?: HttpClientBodyOptions): Observable<TData>;
- communicationControllerNovuWebhook<TData = void>( options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
- communicationControllerNovuWebhook<TData = void>( options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
-  communicationControllerNovuWebhook<TData = void>(
-     options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
-    if (options?.observe === 'events') {
-      return this.http.post<TData>(
-      `/api/v1/communication/webhooks/novu`,undefined,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'events',
-      }
-    );
-    }
-
-    if (options?.observe === 'response') {
-      return this.http.post<TData>(
-      `/api/v1/communication/webhooks/novu`,undefined,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'response',
-      }
-    );
-    }
-
-    return this.http.post<TData>(
-      `/api/v1/communication/webhooks/novu`,undefined,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'body',
-      }
-    );
-  }
-
-/**
- * @summary List organization broadcasts
- */
- communicationControllerListBroadcasts<TData = void>( options?: HttpClientBodyOptions): Observable<TData>;
- communicationControllerListBroadcasts<TData = void>( options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
- communicationControllerListBroadcasts<TData = void>( options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
-  communicationControllerListBroadcasts<TData = void>(
+ communicationControllerListDirect<TData = void>( options?: HttpClientBodyOptions): Observable<TData>;
+ communicationControllerListDirect<TData = void>( options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
+ communicationControllerListDirect<TData = void>( options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
+  communicationControllerListDirect<TData = void>(
      options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
     if (options?.observe === 'events') {
       return this.http.get<TData>(
-      `/api/v1/communication/broadcasts`,{
+      `/api/v1/communication/direct`,{
         ...(options as Omit<NonNullable<typeof options>, 'observe'>),
         observe: 'events',
       }
@@ -10902,7 +9769,7 @@ if(coursesControllerUploadCoverBody.file !== undefined) {
 
     if (options?.observe === 'response') {
       return this.http.get<TData>(
-      `/api/v1/communication/broadcasts`,{
+      `/api/v1/communication/direct`,{
         ...(options as Omit<NonNullable<typeof options>, 'observe'>),
         observe: 'response',
       }
@@ -10910,7 +9777,7 @@ if(coursesControllerUploadCoverBody.file !== undefined) {
     }
 
     return this.http.get<TData>(
-      `/api/v1/communication/broadcasts`,{
+      `/api/v1/communication/direct`,{
         ...(options as Omit<NonNullable<typeof options>, 'observe'>),
         observe: 'body',
       }
@@ -10918,17 +9785,17 @@ if(coursesControllerUploadCoverBody.file !== undefined) {
   }
 
 /**
- * @summary Create a broadcast (pending approval if policy requires)
+ * @summary Start or reopen a conversation with a parent (FR-COM-003.12)
  */
- communicationControllerCreateBroadcast<TData = void>(broadcastInput: BroadcastInput, options?: HttpClientBodyOptions): Observable<TData>;
- communicationControllerCreateBroadcast<TData = void>(broadcastInput: BroadcastInput, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
- communicationControllerCreateBroadcast<TData = void>(broadcastInput: BroadcastInput, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
-  communicationControllerCreateBroadcast<TData = void>(
-    broadcastInput: BroadcastInput, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
+ communicationControllerStartDirect<TData = void>(startDirectInput: StartDirectInput, options?: HttpClientBodyOptions): Observable<TData>;
+ communicationControllerStartDirect<TData = void>(startDirectInput: StartDirectInput, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
+ communicationControllerStartDirect<TData = void>(startDirectInput: StartDirectInput, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
+  communicationControllerStartDirect<TData = void>(
+    startDirectInput: StartDirectInput, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
     if (options?.observe === 'events') {
       return this.http.post<TData>(
-      `/api/v1/communication/broadcasts`,
-      broadcastInput,{
+      `/api/v1/communication/direct`,
+      startDirectInput,{
         ...(options as Omit<NonNullable<typeof options>, 'observe'>),
         observe: 'events',
       }
@@ -10937,8 +9804,8 @@ if(coursesControllerUploadCoverBody.file !== undefined) {
 
     if (options?.observe === 'response') {
       return this.http.post<TData>(
-      `/api/v1/communication/broadcasts`,
-      broadcastInput,{
+      `/api/v1/communication/direct`,
+      startDirectInput,{
         ...(options as Omit<NonNullable<typeof options>, 'observe'>),
         observe: 'response',
       }
@@ -10946,8 +9813,8 @@ if(coursesControllerUploadCoverBody.file !== undefined) {
     }
 
     return this.http.post<TData>(
-      `/api/v1/communication/broadcasts`,
-      broadcastInput,{
+      `/api/v1/communication/direct`,
+      startDirectInput,{
         ...(options as Omit<NonNullable<typeof options>, 'observe'>),
         observe: 'body',
       }
@@ -10955,18 +9822,18 @@ if(coursesControllerUploadCoverBody.file !== undefined) {
   }
 
 /**
- * @summary Class groups and courses the caller may target with a broadcast
+ * @summary Parents the caller may message, by student (BR-COM-003.8)
  */
- communicationControllerListBroadcastAudiences<TData = void>(params: CommunicationControllerListBroadcastAudiencesParams, options?: HttpClientBodyOptions): Observable<TData>;
- communicationControllerListBroadcastAudiences<TData = void>(params: CommunicationControllerListBroadcastAudiencesParams, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
- communicationControllerListBroadcastAudiences<TData = void>(params: CommunicationControllerListBroadcastAudiencesParams, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
-  communicationControllerListBroadcastAudiences<TData = void>(
-    params: CommunicationControllerListBroadcastAudiencesParams, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
+ communicationControllerRecipients<TData = void>(params?: CommunicationControllerRecipientsParams, options?: HttpClientBodyOptions): Observable<TData>;
+ communicationControllerRecipients<TData = void>(params?: CommunicationControllerRecipientsParams, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
+ communicationControllerRecipients<TData = void>(params?: CommunicationControllerRecipientsParams, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
+  communicationControllerRecipients<TData = void>(
+    params?: CommunicationControllerRecipientsParams, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
     const filteredParams = filterParams({...params, ...options?.params}, new Set<string>([]));
 
     if (options?.observe === 'events') {
       return this.http.get<TData>(
-      `/api/v1/communication/broadcasts/audiences`,{
+      `/api/v1/communication/direct/recipients`,{
     ...(options as Omit<NonNullable<typeof options>, 'observe'>),
         observe: 'events',
         params: filteredParams,}
@@ -10975,7 +9842,7 @@ if(coursesControllerUploadCoverBody.file !== undefined) {
 
     if (options?.observe === 'response') {
       return this.http.get<TData>(
-      `/api/v1/communication/broadcasts/audiences`,{
+      `/api/v1/communication/direct/recipients`,{
     ...(options as Omit<NonNullable<typeof options>, 'observe'>),
         observe: 'response',
         params: filteredParams,}
@@ -10983,7 +9850,7 @@ if(coursesControllerUploadCoverBody.file !== undefined) {
     }
 
     return this.http.get<TData>(
-      `/api/v1/communication/broadcasts/audiences`,{
+      `/api/v1/communication/direct/recipients`,{
     ...(options as Omit<NonNullable<typeof options>, 'observe'>),
         observe: 'body',
         params: filteredParams,}
@@ -10991,16 +9858,55 @@ if(coursesControllerUploadCoverBody.file !== undefined) {
   }
 
 /**
- * @summary Approve a pending broadcast and fan out
+ * @summary A conversation with its messages; marks it read (FR-COM-003.13)
  */
- communicationControllerApproveBroadcast<TData = void>(id: string, options?: HttpClientBodyOptions): Observable<TData>;
- communicationControllerApproveBroadcast<TData = void>(id: string, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
- communicationControllerApproveBroadcast<TData = void>(id: string, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
-  communicationControllerApproveBroadcast<TData = void>(
+ communicationControllerGetDirect<TData = void>(id: string, options?: HttpClientBodyOptions): Observable<TData>;
+ communicationControllerGetDirect<TData = void>(id: string, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
+ communicationControllerGetDirect<TData = void>(id: string, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
+  communicationControllerGetDirect<TData = void>(
     id: string, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
     if (options?.observe === 'events') {
+      return this.http.get<TData>(
+      `/api/v1/communication/direct/${id}`,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'events',
+      }
+    );
+    }
+
+    if (options?.observe === 'response') {
+      return this.http.get<TData>(
+      `/api/v1/communication/direct/${id}`,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'response',
+      }
+    );
+    }
+
+    return this.http.get<TData>(
+      `/api/v1/communication/direct/${id}`,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'body',
+      }
+    );
+  }
+
+/**
+ * @summary Send a direct message (FR-COM-003.13)
+ */
+ communicationControllerSendDirect<TData = void>(id: string,
+    sendDirectMessageInput: SendDirectMessageInput, options?: HttpClientBodyOptions): Observable<TData>;
+ communicationControllerSendDirect<TData = void>(id: string,
+    sendDirectMessageInput: SendDirectMessageInput, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
+ communicationControllerSendDirect<TData = void>(id: string,
+    sendDirectMessageInput: SendDirectMessageInput, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
+  communicationControllerSendDirect<TData = void>(
+    id: string,
+    sendDirectMessageInput: SendDirectMessageInput, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
+    if (options?.observe === 'events') {
       return this.http.post<TData>(
-      `/api/v1/communication/broadcasts/${id}/approve`,undefined,{
+      `/api/v1/communication/direct/${id}/messages`,
+      sendDirectMessageInput,{
         ...(options as Omit<NonNullable<typeof options>, 'observe'>),
         observe: 'events',
       }
@@ -11009,7 +9915,8 @@ if(coursesControllerUploadCoverBody.file !== undefined) {
 
     if (options?.observe === 'response') {
       return this.http.post<TData>(
-      `/api/v1/communication/broadcasts/${id}/approve`,undefined,{
+      `/api/v1/communication/direct/${id}/messages`,
+      sendDirectMessageInput,{
         ...(options as Omit<NonNullable<typeof options>, 'observe'>),
         observe: 'response',
       }
@@ -11017,82 +9924,8 @@ if(coursesControllerUploadCoverBody.file !== undefined) {
     }
 
     return this.http.post<TData>(
-      `/api/v1/communication/broadcasts/${id}/approve`,undefined,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'body',
-      }
-    );
-  }
-
-/**
- * @summary Update broadcast settings such as repliesAllowed
- */
- communicationControllerUpdateBroadcast<TData = void>(id: string,
-    updateBroadcastInput: UpdateBroadcastInput, options?: HttpClientBodyOptions): Observable<TData>;
- communicationControllerUpdateBroadcast<TData = void>(id: string,
-    updateBroadcastInput: UpdateBroadcastInput, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
- communicationControllerUpdateBroadcast<TData = void>(id: string,
-    updateBroadcastInput: UpdateBroadcastInput, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
-  communicationControllerUpdateBroadcast<TData = void>(
-    id: string,
-    updateBroadcastInput: UpdateBroadcastInput, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
-    if (options?.observe === 'events') {
-      return this.http.patch<TData>(
-      `/api/v1/communication/broadcasts/${id}`,
-      updateBroadcastInput,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'events',
-      }
-    );
-    }
-
-    if (options?.observe === 'response') {
-      return this.http.patch<TData>(
-      `/api/v1/communication/broadcasts/${id}`,
-      updateBroadcastInput,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'response',
-      }
-    );
-    }
-
-    return this.http.patch<TData>(
-      `/api/v1/communication/broadcasts/${id}`,
-      updateBroadcastInput,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'body',
-      }
-    );
-  }
-
-/**
- * @summary Communication audit log
- */
- communicationControllerAudit<TData = void>( options?: HttpClientBodyOptions): Observable<TData>;
- communicationControllerAudit<TData = void>( options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
- communicationControllerAudit<TData = void>( options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
-  communicationControllerAudit<TData = void>(
-     options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
-    if (options?.observe === 'events') {
-      return this.http.get<TData>(
-      `/api/v1/communication/admin/audit`,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'events',
-      }
-    );
-    }
-
-    if (options?.observe === 'response') {
-      return this.http.get<TData>(
-      `/api/v1/communication/admin/audit`,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'response',
-      }
-    );
-    }
-
-    return this.http.get<TData>(
-      `/api/v1/communication/admin/audit`,{
+      `/api/v1/communication/direct/${id}/messages`,
+      sendDirectMessageInput,{
         ...(options as Omit<NonNullable<typeof options>, 'observe'>),
         observe: 'body',
       }

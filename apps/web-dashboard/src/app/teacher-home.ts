@@ -21,7 +21,7 @@ import { Component, computed, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import AttendanceForm from './attendance/attendance-form';
 import Store from './core/store';
-import { RecentBroadcasts } from './communication/recent-broadcasts';
+import { RecentChannelPosts } from './communication/recent-channel-posts';
 
 /** `GET /api/v1/home/teacher/today` (HOM-001 FR .6). */
 type TeacherSlotState = 'DONE' | 'NOW' | 'LATER' | 'MISSED' | 'PAST';
@@ -152,7 +152,7 @@ const longDate = new Intl.DateTimeFormat('es', { weekday: 'long', day: 'numeric'
     ChartPlaceholder,
     EmptyState,
     PageHeader,
-    RecentBroadcasts,
+    RecentChannelPosts,
     RouterLink,
     Meter,
     Spinner,
@@ -487,7 +487,7 @@ const longDate = new Intl.DateTimeFormat('es', { weekday: 'long', day: 'numeric'
         <div uiCardBody>
           <div class="flex items-center justify-between">
             <h2 id="family-title" class="text-base font-semibold text-ink-strong">Mensajes de acudientes</h2>
-            <a routerLink="/teacher/communication" class="link link-primary text-sm">Ir a mensajes</a>
+            <a routerLink="/communication/direct" class="link link-primary text-sm">Ir a mensajes</a>
           </div>
           @if (attention.isLoading()) {
             <div class="flex justify-center py-8"><span uiSpinner></span></div>
@@ -507,7 +507,7 @@ const longDate = new Intl.DateTimeFormat('es', { weekday: 'long', day: 'numeric'
               @for (thread of familyThreads(); track thread.id) {
                 <li class="border-t border-line first:border-t-0">
                   <a
-                    routerLink="/teacher/communication"
+                    [routerLink]="['/communication/direct', thread.id]"
                     class="flex min-h-11 items-start gap-3 py-2.5 text-ink hover:no-underline"
                   >
                     <span
@@ -537,7 +537,7 @@ const longDate = new Intl.DateTimeFormat('es', { weekday: 'long', day: 'numeric'
     </div>
 
     <div class="mt-6">
-      <app-recent-broadcasts />
+      <app-recent-channel-posts />
     </div>
   `,
 })
@@ -734,7 +734,7 @@ export default class TeacherHome {
         iconClass: 'bg-info/15 text-info',
         title: `Responder ${plural(summary.familyMessages.unanswered, 'mensaje', 'mensajes')}`,
         detail: 'De acudientes',
-        link: '/teacher/communication',
+        link: '/communication/direct',
       });
     }
     if (grades && grades.unpublished > 0) {

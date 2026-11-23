@@ -24,7 +24,6 @@ test.describe('Admin home', () => {
 
     await expect(tile(page, 'Solicitudes de ingreso')).toContainText('1 docente');
     await expect(tile(page, 'Solicitudes de ingreso')).toHaveAttribute('href', '/admin/join-requests');
-    await expect(tile(page, 'Comunicados por aprobar')).toHaveAttribute('href', '/communication');
     await expect(tile(page, 'Clases sin asistencia hoy')).toHaveAttribute('href', '/admin/attendance-reporting');
     await expect(tile(page, 'Cargos vencidos')).toContainText('1 familia');
     await expect(tile(page, 'Cargos vencidos')).toContainText(String(data.admin.overdueCharge.amount));

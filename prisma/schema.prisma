@@ -15,134 +15,92 @@ datasource db {
 }
 
 model Organization {
-  id                  String              @id @default(cuid())
-  name                String
-  slug                String?             @unique
-  logo                String?
-  metadata            String?
-  description         String
-  active              Boolean             @default(true)
-  onboardingCompleted Boolean             @default(false)
-  users               User[]
-  roles               Role[]
-  schools             School[]
-  subjects            Subject[]
-  createdAt           DateTime            @default(now())
-  updatedAt           DateTime            @updatedAt
-  groups              ClassGroup[]
-  courses             Course[]
-  Teacher             Teacher[]
-  Student             Student[]
-  Parent              Parent[]
-  quizzes             Quiz[]
-  messages            Message[]
-  files               File[]
-  attendanceSessions  AttendanceSession[]
-  newsletters         Newsletter[]
-  habitEvaluations    HabitEvaluation[]
-  chats               Chat[]
+  id                       String                     @id @default(cuid())
+  name                     String
+  slug                     String?                    @unique
+  logo                     String?
+  metadata                 String?
+  description              String
+  active                   Boolean                    @default(true)
+  onboardingCompleted      Boolean                    @default(false)
+  users                    User[]
+  roles                    Role[]
+  schools                  School[]
+  subjects                 Subject[]
+  createdAt                DateTime                   @default(now())
+  updatedAt                DateTime                   @updatedAt
+  groups                   ClassGroup[]
+  courses                  Course[]
+  Teacher                  Teacher[]
+  Student                  Student[]
+  Parent                   Parent[]
+  quizzes                  Quiz[]
+  files                    File[]
+  attendanceSessions       AttendanceSession[]
+  habitEvaluations         HabitEvaluation[]
   // Better-auth organization plugin
-  members             Member[]
-  invitations         Invitation[]
-  importJobs          ImportJob[]
-  authTokens          AuthToken[]
+  members                  Member[]
+  invitations              Invitation[]
+  importJobs               ImportJob[]
+  authTokens               AuthToken[]
   studentClassGroupHistory StudentClassGroupHistory[]
+  channels                 Channel[]
+  directConversations      DirectConversation[]
 
   @@map("organizations")
 }
 
 model User {
-  id                String             @id @default(cuid())
-  email             String             @unique
-  name              String?
-  firstName         String
-  lastName          String
-  password          String
-  color             String?
-  image             String?
-  emailVerified     Boolean            @default(false)
-  banned            Boolean            @default(false)
-  banReason         String?
-  banExpires        DateTime?
-  role              Role?              @relation(fields: [roleId], references: [id])
-  roleId            String?
-  organization      Organization?      @relation(fields: [organizationId], references: [id], onDelete: SetNull, onUpdate: Cascade)
-  organizationId    String?
-  onboardingStep    String? // 'choose-path', 'school-setup', 'waiting-approval', 'completed'
-  themePreference   String? // 'light' | 'dark' | 'system'
-  lastLogin         DateTime?
-  isBlocked         Boolean            @default(false)
-  createdAt         DateTime           @default(now())
-  updatedAt         DateTime           @updatedAt
-  student           Student?
-  teacher           Teacher?
-  parents           Parent[]
-  sentMessages      Message[]
-  messageRecipients MessageRecipient[]
-  filesOwned        File[]
-  fileShares        FileShareUser[]
-  notifications     Notification[]
-  joinRequests      JoinRequest[]
-  newsletters       Newsletter[]
-  chatParticipants  ChatParticipant[]
-  sentChatMessages  ChatMessage[]
-  createdChats      Chat[]
-  communicationParticipants ThreadParticipant[]
-  sentCommunicationMessages CommunicationMessage[]
-  communicationDeliveries   MessageDelivery[]
-  recipientPreference       RecipientPreference?
-  communicationAuditLogs     CommunicationAuditLog[]
-  storeCartItems    StoreCartItem[]
-  courseEnrollmentsAdded CourseEnrollment[] @relation("CourseEnrollmentAddedBy")
-  gradesPublished   Grade[]                @relation("GradePublishedBy")
-  gradeRevisions    StudentGradeRevision[] @relation("StudentGradeRevisionChangedBy")
-  storeOrders       StoreOrder[]
+  id                     String                 @id @default(cuid())
+  email                  String                 @unique
+  name                   String?
+  firstName              String
+  lastName               String
+  password               String
+  color                  String?
+  image                  String?
+  emailVerified          Boolean                @default(false)
+  banned                 Boolean                @default(false)
+  banReason              String?
+  banExpires             DateTime?
+  role                   Role?                  @relation(fields: [roleId], references: [id])
+  roleId                 String?
+  organization           Organization?          @relation(fields: [organizationId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  organizationId         String?
+  onboardingStep         String? // 'choose-path', 'school-setup', 'waiting-approval', 'completed'
+  themePreference        String? // 'light' | 'dark' | 'system'
+  lastLogin              DateTime?
+  isBlocked              Boolean                @default(false)
+  createdAt              DateTime               @default(now())
+  updatedAt              DateTime               @updatedAt
+  student                Student?
+  teacher                Teacher?
+  parents                Parent[]
+  filesOwned             File[]
+  fileShares             FileShareUser[]
+  notifications          Notification[]
+  joinRequests           JoinRequest[]
+  storeCartItems         StoreCartItem[]
+  courseEnrollmentsAdded CourseEnrollment[]     @relation("CourseEnrollmentAddedBy")
+  gradesPublished        Grade[]                @relation("GradePublishedBy")
+  gradeRevisions         StudentGradeRevision[] @relation("StudentGradeRevisionChangedBy")
+  storeOrders            StoreOrder[]
   // Better-auth relations
-  sessions          Session[]
-  accounts          Account[]
-  members           Member[]
-  authTokens        AuthToken[]
+  sessions               Session[]
+  accounts               Account[]
+  members                Member[]
+  authTokens             AuthToken[]
+  channelsCreated        Channel[]              @relation("ChannelCreatedBy")
+  channelPosts           ChannelPost[]
+  channelReplies         ChannelReply[]         @relation("ChannelReplyAuthor")
+  channelReplyThreads    ChannelReply[]         @relation("ChannelReplyThread")
+  channelPostReads       ChannelPostRead[]
+  directAsStaff          DirectConversation[]   @relation("DirectStaff")
+  directAsParent         DirectConversation[]   @relation("DirectParent")
+  directMessages         DirectMessage[]
 
   @@map("users")
 }
-
-model Message {
-  id              String             @id @default(cuid())
-  subject         String
-  content         String
-  organization    Organization       @relation(fields: [organizationId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  organizationId  String
-  sender          User?              @relation(fields: [senderId], references: [id], onDelete: SetNull, onUpdate: Cascade)
-  senderId        String?
-  recipients      MessageRecipient[]
-  parentMessageId String?
-  parentMessage   Message?           @relation("MessageReplies", fields: [parentMessageId], references: [id], onDelete: Cascade)
-  replies         Message[]          @relation("MessageReplies")
-  createdAt       DateTime           @default(now())
-  updatedAt       DateTime           @updatedAt
-  deletedAt       DateTime?
-
-  @@map("messages")
-}
-
-model MessageRecipient {
-  id        String    @id @default(cuid())
-  messageId String
-  userId    String
-  message   Message   @relation(fields: [messageId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  readAt    DateTime?
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  deletedAt DateTime?
-
-  @@unique([messageId, userId])
-  @@map("message_recipients")
-}
-
-// ==========================================
-// Instant Messaging (Chat)
-// ==========================================
 
 /// The 8 course color tags (ACA-001 BR .11); rendered through libs/ui `--color-course-<key>` tokens.
 enum CourseColor {
@@ -154,81 +112,6 @@ enum CourseColor {
   SLATE
   FUCHSIA
   GREEN
-}
-
-enum ChatType {
-  DIRECT
-  GROUP
-  COURSE
-  ASSIGNMENT
-  CLASS_GROUP
-}
-
-enum ChatParticipantRole {
-  MEMBER
-  ADMIN
-}
-
-model Chat {
-  id             String            @id @default(cuid())
-  organizationId String
-  organization   Organization      @relation(fields: [organizationId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  name           String?
-  type           ChatType
-  courseId       String?
-  course         Course?           @relation(fields: [courseId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  assignmentId   String?
-  assignment     Assignment?       @relation(fields: [assignmentId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  classGroupId   String?
-  classGroup     ClassGroup?       @relation(fields: [classGroupId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  createdById    String?
-  createdBy      User?             @relation(fields: [createdById], references: [id], onDelete: SetNull, onUpdate: Cascade)
-  participants   ChatParticipant[]
-  messages       ChatMessage[]
-  createdAt      DateTime          @default(now())
-  updatedAt      DateTime          @updatedAt
-  deletedAt      DateTime?
-
-  @@index([organizationId])
-  @@index([courseId])
-  @@index([assignmentId])
-  @@index([classGroupId])
-  @@map("chats")
-}
-
-model ChatParticipant {
-  id         String              @id @default(cuid())
-  chatId     String
-  chat       Chat                @relation(fields: [chatId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  userId     String
-  user       User                @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  role       ChatParticipantRole @default(MEMBER)
-  joinedAt   DateTime            @default(now())
-  lastReadAt DateTime?
-  createdAt  DateTime            @default(now())
-  updatedAt  DateTime            @updatedAt
-
-  @@unique([chatId, userId])
-  @@index([userId])
-  @@map("chat_participants")
-}
-
-model ChatMessage {
-  id        String        @id @default(cuid())
-  chatId    String
-  chat      Chat          @relation(fields: [chatId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  senderId  String?
-  sender    User?         @relation(fields: [senderId], references: [id], onDelete: SetNull, onUpdate: Cascade)
-  content   String
-  replyToId String?
-  replyTo   ChatMessage?  @relation("ChatMessageReplies", fields: [replyToId], references: [id], onDelete: SetNull, onUpdate: Cascade)
-  replies   ChatMessage[] @relation("ChatMessageReplies")
-  createdAt DateTime      @default(now())
-  deletedAt DateTime?
-
-  @@index([chatId])
-  @@index([senderId])
-  @@map("chat_messages")
 }
 
 model File {
@@ -342,47 +225,47 @@ model Permission {
 }
 
 model School {
-  id             String            @id @default(cuid())
-  organization   Organization      @relation(fields: [organizationId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  organizationId String
+  id                       String                     @id @default(cuid())
+  organization             Organization               @relation(fields: [organizationId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  organizationId           String
   /// Public URL segment for the school store (e.g. /store/my-school)
-  slug           String?           @unique
-  name           String
-  shortName      String
-  logo           String
-  currencyCode   String            @default("USD")
-  address        String
-  city           String
-  state          String
-  zip            String
-  country        String
-  email          String
-  phone          String
-  website        String
-  primaryColor   String?
-  secondaryColor String?
-  tertiaryColor  String?
-  createdAt      DateTime          @default(now())
-  updatedAt      DateTime          @updatedAt
-  studyPlans     StudyPlan[]
-  degrees        Degree[]
-  courses        Course[]
-  classGroups    ClassGroup[]
-  students       Student[]
+  slug                     String?                    @unique
+  name                     String
+  shortName                String
+  logo                     String
+  currencyCode             String                     @default("USD")
+  address                  String
+  city                     String
+  state                    String
+  zip                      String
+  country                  String
+  email                    String
+  phone                    String
+  website                  String
+  primaryColor             String?
+  secondaryColor           String?
+  tertiaryColor            String?
+  createdAt                DateTime                   @default(now())
+  updatedAt                DateTime                   @updatedAt
+  studyPlans               StudyPlan[]
+  degrees                  Degree[]
+  courses                  Course[]
+  classGroups              ClassGroup[]
+  students                 Student[]
   studentClassGroupHistory StudentClassGroupHistory[]
-  assignments    Assignment[]
-  currentYear    Int               @default(2025)
-  schoolYearStartMonth Int          @default(3)
+  assignments              Assignment[]
+  currentYear              Int                        @default(2025)
+  schoolYearStartMonth     Int                        @default(3)
   /// IANA timezone (e.g. "America/Panama"). Home dashboards evaluate "today"/"now" in it (BR-HOM-001.4).
-  timezone       String            @default("America/Panama")
-  fileShares     FileShareSchool[]
-  joinRequests   JoinRequest[]
-  newsletters    Newsletter[]
-  charges        Charge[]
-  storeCategories StoreCategory[]
-  storeProducts   StoreProduct[]
-  storeOrders     StoreOrder[]
-  importJobs      ImportJob[]
+  timezone                 String                     @default("America/Panama")
+  fileShares               FileShareSchool[]
+  joinRequests             JoinRequest[]
+  charges                  Charge[]
+  storeCategories          StoreCategory[]
+  storeProducts            StoreProduct[]
+  storeOrders              StoreOrder[]
+  importJobs               ImportJob[]
+  channels                 Channel[]
 
   @@map("schools")
 }
@@ -456,6 +339,7 @@ model StudyPlan {
   monthlyTuitionAmount Decimal?
   tuitionMonths        Int[]                     @default([])
   enrollmentCosts      StudyPlanEnrollmentCost[]
+  channels             Channel[]
 
   @@unique([schoolId, name])
   @@map("study_plans")
@@ -507,7 +391,7 @@ model Course {
   weeklySchedules    ClassGroupWeeklySchedule[]
   fileShares         FileShareCourse[]
   attendanceSessions AttendanceSession[]
-  chats              Chat[]
+  channels           Channel[]
 
   @@unique([schoolId, name])
   @@unique([schoolId, code])
@@ -561,55 +445,56 @@ model ClassGroup {
   fileShares         FileShareClassGroup[]
   attendanceSessions AttendanceSession[]
   habitEvaluations   HabitEvaluation[]
-  chats              Chat[]
   studentHistory     StudentClassGroupHistory[]
   createdAt          DateTime                   @default(now())
   updatedAt          DateTime                   @updatedAt
+  channels           Channel[]
 
   @@map("class_groups")
 }
 
 model Student {
-  id                    String                   @id @default(cuid())
-  firstName             String
-  middleName            String
-  fatherName            String
-  motherName            String
-  documentId            String
+  id                        String                     @id @default(cuid())
+  firstName                 String
+  middleName                String
+  fatherName                String
+  motherName                String
+  documentId                String
   /// Per-student enrollment/invite code used by parents to self-link (reusable, regenerable)
-  enrollmentCode        String?                  @unique
-  enrollmentCodeGeneratedAt DateTime?             @default(now())
-  organizationId        String
-  organization          Organization             @relation(fields: [organizationId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  school                School                   @relation(fields: [schoolId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  schoolId              String
-  classGroup            ClassGroup?              @relation(fields: [classGroupId], references: [id], onDelete: SetNull, onUpdate: Cascade)
-  classGroupId          String?
-  birthDate             DateTime
-  gender                Gender
-  address               String
-  phone                 String
-  enrollmentStatus      EnrollmentStatus         @default(ACTIVE)
-  bloodType             String                   @default("")
-  allergies             String                   @default("")
-  medicalNotes          String                   @default("")
-  emergencyContactName  String                   @default("")
-  emergencyContactPhone String                   @default("")
-  courseEnrollments     CourseEnrollment[]
-  userId                String?                  @unique
-  user                  User?                    @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  parents               Parent[]
-  createdAt             DateTime                 @default(now())
-  updatedAt             DateTime                 @updatedAt
-  quizSubmissions       QuizSubmission[]
-  studentGrades         StudentGrade[]
-  attendanceRecords     AttendanceRecord[]
-  assignmentSubmissions AssignmentSubmission[]
-  habitEvaluations      StudentHabitEvaluation[]
-  charges               Charge[]
-  payments              Payment[]
-  classGroupHistory     StudentClassGroupHistory[]
-  authTokens            AuthToken[]
+  enrollmentCode            String?                    @unique
+  enrollmentCodeGeneratedAt DateTime?                  @default(now())
+  organizationId            String
+  organization              Organization               @relation(fields: [organizationId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  school                    School                     @relation(fields: [schoolId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  schoolId                  String
+  classGroup                ClassGroup?                @relation(fields: [classGroupId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  classGroupId              String?
+  birthDate                 DateTime
+  gender                    Gender
+  address                   String
+  phone                     String
+  enrollmentStatus          EnrollmentStatus           @default(ACTIVE)
+  bloodType                 String                     @default("")
+  allergies                 String                     @default("")
+  medicalNotes              String                     @default("")
+  emergencyContactName      String                     @default("")
+  emergencyContactPhone     String                     @default("")
+  courseEnrollments         CourseEnrollment[]
+  userId                    String?                    @unique
+  user                      User?                      @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  parents                   Parent[]
+  createdAt                 DateTime                   @default(now())
+  updatedAt                 DateTime                   @updatedAt
+  quizSubmissions           QuizSubmission[]
+  studentGrades             StudentGrade[]
+  attendanceRecords         AttendanceRecord[]
+  assignmentSubmissions     AssignmentSubmission[]
+  habitEvaluations          StudentHabitEvaluation[]
+  charges                   Charge[]
+  payments                  Payment[]
+  classGroupHistory         StudentClassGroupHistory[]
+  authTokens                AuthToken[]
+  directConversations       DirectConversation[]
 
   @@map("students")
 }
@@ -687,7 +572,6 @@ model Assignment {
   teacher           Teacher?               @relation(fields: [teacherId], references: [id], onDelete: SetNull, onUpdate: Cascade)
   teacherId         String?
   submissions       AssignmentSubmission[]
-  chats             Chat[]
   /// The grade column linked to it, if any (BR-ASM-001.11).
   grade             Grade?
   createdAt         DateTime               @default(now())
@@ -986,23 +870,23 @@ enum ImportJobStatus {
 }
 
 model AuthToken {
-  id             String       @id @default(cuid())
-  type           AuthTokenType
-  tokenHash      String       @unique
-  userId         String?
-  user           User?        @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  studentId      String?
-  student        Student?     @relation(fields: [studentId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  organizationId String?
-  organization   Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  metadata       Json?
-  expiresAt      DateTime
-  consumedAt     DateTime?
+  id               String        @id @default(cuid())
+  type             AuthTokenType
+  tokenHash        String        @unique
+  userId           String?
+  user             User?         @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  studentId        String?
+  student          Student?      @relation(fields: [studentId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  organizationId   String?
+  organization     Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  metadata         Json?
+  expiresAt        DateTime
+  consumedAt       DateTime?
   consumedByUserId String?
-  createdById    String?
-  attempts       Int          @default(0)
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
+  createdById      String?
+  attempts         Int           @default(0)
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
 
   @@index([type, expiresAt])
   @@index([userId])
@@ -1054,16 +938,15 @@ model ImportJob {
   @@map("import_jobs")
 }
 
-
 model OnboardingAuditLog {
-  id             String               @id @default(cuid())
+  id             String                @id @default(cuid())
   actorId        String? // user who performed the action (admin or the user themselves)
   userId         String? // affected user
   organizationId String?
   action         OnboardingAuditAction
   detail         String?
   ip             String?
-  createdAt      DateTime             @default(now())
+  createdAt      DateTime              @default(now())
 
   @@index([userId])
   @@index([organizationId])
@@ -1095,156 +978,150 @@ model Notification {
   @@map("notifications")
 }
 
+// per-recipient, per-channel receipt — the read-receipt source of truth mirror
+
 // ==========================================
-// Communication Platform (Phase 0 — foundations)
+// Communication (COM-003): channels and direct messages
 // ==========================================
 
-enum ThreadType {
+/// The level a channel addresses (COM-003 FR .1). The matching target id is set on the channel.
+enum ChannelScope {
+  ORGANIZATION
+  SCHOOL
+  STUDY_PLAN
   CLASS_GROUP
   COURSE
-  STUDENT_GUARDIANS
-  SCHOOL_WIDE
-  DIRECT
 }
 
-enum ThreadStatus {
-  ACTIVE
-  ARCHIVED
-  PENDING_APPROVAL
-  APPROVED
+/// Who sees a member's replies (COM-003 FR .4 / BR .5).
+enum ChannelReplyVisibility {
+  /// Every member and manager sees every reply.
+  PUBLIC
+  /// Each member's replies are a private conversation with the channel's managers.
+  PRIVATE
 }
 
-enum UrgencyTier {
-  ROUTINE
-  IMPORTANT
-  EMERGENCY
+/// One-to-many communication at one level of the school (COM-003). Membership is computed live
+/// from the level and the audience flags (BR .4), so there is no member table.
+model Channel {
+  id               String                 @id @default(cuid())
+  organizationId   String
+  organization     Organization           @relation(fields: [organizationId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  scope            ChannelScope
+  /// Set for every scope below ORGANIZATION, so channels can be filtered by school.
+  schoolId         String?
+  school           School?                @relation(fields: [schoolId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  studyPlanId      String?
+  studyPlan        StudyPlan?             @relation(fields: [studyPlanId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  classGroupId     String?
+  classGroup       ClassGroup?            @relation(fields: [classGroupId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  courseId         String?
+  course           Course?                @relation(fields: [courseId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  name             String
+  description      String                 @default("")
+  audienceStudents Boolean                @default(true)
+  audienceParents  Boolean                @default(true)
+  studentsCanReply Boolean                @default(false)
+  parentsCanReply  Boolean                @default(false)
+  replyVisibility  ChannelReplyVisibility @default(PRIVATE)
+  createdById      String?
+  createdBy        User?                  @relation("ChannelCreatedBy", fields: [createdById], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  archivedAt       DateTime?
+  createdAt        DateTime               @default(now())
+  updatedAt        DateTime               @updatedAt
+  posts            ChannelPost[]
+
+  @@index([organizationId, scope])
+  @@index([schoolId])
+  @@index([studyPlanId])
+  @@index([classGroupId])
+  @@index([courseId])
+  @@map("channels")
 }
 
-enum DeliveryChannel {
-  IN_APP
-  PUSH
-  EMAIL
-  SMS
-  VOICE // deferred seam (Phase 5)
+model ChannelPost {
+  id                   String            @id @default(cuid())
+  channelId            String
+  channel              Channel           @relation(fields: [channelId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  authorId             String?
+  author               User?             @relation(fields: [authorId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  body                 String
+  /// Members are asked to press "Confirmar lectura" (COM-003 FR .6 / .8).
+  requiresConfirmation Boolean           @default(false)
+  createdAt            DateTime          @default(now())
+  deletedAt            DateTime?
+  replies              ChannelReply[]
+  reads                ChannelPostRead[]
+
+  @@index([channelId, createdAt])
+  @@map("channel_posts")
 }
 
-enum DeliveryStatus {
-  PENDING
-  SENT
-  DELIVERED
-  READ
-  FAILED
-  BOUNCED
+model ChannelReply {
+  id           String      @id @default(cuid())
+  postId       String
+  post         ChannelPost @relation(fields: [postId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  authorId     String?
+  author       User?       @relation("ChannelReplyAuthor", fields: [authorId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  /// PRIVATE channels: the member whose conversation this reply belongs to. Null in PUBLIC channels.
+  threadUserId String?
+  threadUser   User?       @relation("ChannelReplyThread", fields: [threadUserId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  body         String
+  createdAt    DateTime    @default(now())
+  deletedAt    DateTime?
+
+  @@index([postId, threadUserId])
+  @@map("channel_replies")
 }
 
-model CommunicationThread {
-  id              String        @id @default(cuid())
-  organizationId  String
-  type            ThreadType
-  scopeId         String? // courseId | classGroupId | schoolId | studentId depending on type
-  title           String
-  createdById     String // User id of owner (teacher or admin)
-  ownerRole       String // TEACHER | ORG_ADMIN  (parents never owners)
-  urgencyDefault  UrgencyTier   @default(ROUTINE)
-  status          ThreadStatus  @default(ACTIVE)
-  approvedById    String?
-  approvedAt      DateTime?
-  broadcast       Boolean       @default(false)
-  repliesAllowed  Boolean       @default(true)
-  createdAt       DateTime      @default(now())
-  updatedAt       DateTime      @updatedAt
-  deletedAt       DateTime?
-  participants    ThreadParticipant[]
-  messages        CommunicationMessage[]
+/// A member's read (and optional confirmation) of a post (COM-003 FR .8 / .9).
+model ChannelPostRead {
+  postId      String
+  post        ChannelPost @relation(fields: [postId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  userId      String
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  readAt      DateTime    @default(now())
+  confirmedAt DateTime?
 
-  @@index([organizationId])
-  @@index([scopeId])
-  @@index([status])
-  @@map("communication_threads")
-}
-
-model ThreadParticipant {
-  id         String   @id @default(cuid())
-  threadId   String
-  userId     String // recipient User (parent/student/teacher/admin)
-  role       String   @default("MEMBER") // OWNER | MEMBER
-  canInitiate Boolean @default(false) // false for parents (reply-only)
-  addedById  String?
-  joinedAt   DateTime @default(now())
-  lastReadAt DateTime?
-  thread     CommunicationThread @relation(fields: [threadId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  user       User                @relation(fields: [userId], references: [id], onDelete: SetNull, onUpdate: Cascade)
-
-  @@unique([threadId, userId])
+  @@id([postId, userId])
   @@index([userId])
-  @@map("thread_participants")
+  @@map("channel_post_reads")
 }
 
-model CommunicationMessage {
-  id         String      @id @default(cuid())
-  threadId   String
-  senderId   String // User id
-  body       String // original-language body (v1)
-  urgency    UrgencyTier @default(ROUTINE)
-  createdAt  DateTime    @default(now())
-  editedAt   DateTime?
-  deletedAt  DateTime?
-  deliveries MessageDelivery[]
-  thread     CommunicationThread @relation(fields: [threadId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  sender     User                @relation(fields: [senderId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+/// One-to-one conversation started by staff with a parent, optionally about one child (COM-003 FR .12).
+model DirectConversation {
+  id               String          @id @default(cuid())
+  organizationId   String
+  organization     Organization    @relation(fields: [organizationId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  staffUserId      String
+  staffUser        User            @relation("DirectStaff", fields: [staffUserId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  parentUserId     String
+  parentUser       User            @relation("DirectParent", fields: [parentUserId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  studentId        String?
+  student          Student?        @relation(fields: [studentId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  staffLastReadAt  DateTime?
+  parentLastReadAt DateTime?
+  lastMessageAt    DateTime        @default(now())
+  createdAt        DateTime        @default(now())
+  messages         DirectMessage[]
 
-  @@index([threadId])
-  @@map("communication_messages")
+  @@index([staffUserId, lastMessageAt])
+  @@index([parentUserId, lastMessageAt])
+  @@index([studentId])
+  @@map("direct_conversations")
 }
 
-// per-recipient, per-channel receipt — the read-receipt source of truth mirror
-model MessageDelivery {
-  id              String         @id @default(cuid())
-  messageId       String
-  recipientUserId String
-  channel         DeliveryChannel
-  status          DeliveryStatus @default(PENDING)
-  novuEventId     String? // links to Novu notification for webhook reconciliation
-  deliveredAt     DateTime?
-  readAt          DateTime?
-  failureReason   String?
-  message         CommunicationMessage @relation(fields: [messageId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  recipientUser   User                @relation(fields: [recipientUserId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+model DirectMessage {
+  id             String             @id @default(cuid())
+  conversationId String
+  conversation   DirectConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  senderId       String?
+  sender         User?              @relation(fields: [senderId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  body           String
+  createdAt      DateTime           @default(now())
 
-  @@unique([messageId, recipientUserId, channel])
-  @@index([recipientUserId])
-  @@unique([novuEventId])
-  @@map("message_deliveries")
-}
-
-model RecipientPreference {
-  userId          String  @id
-  language        String? // deferred translation; null = org default
-  timezone        String  @default("UTC")
-  quietHoursStart String? // "21:00"
-  quietHoursEnd   String? // "07:00"
-  channelPrefs    Json? // { push:true, email:true, sms:false }
-  novuSubscriberId String?
-  user            User    @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-
-  @@map("recipient_preferences")
-}
-
-model CommunicationAuditLog {
-  id             String   @id @default(cuid())
-  actorId        String?
-  organizationId String?
-  action         String // THREAD_CREATED, MESSAGE_SENT, BROADCAST_APPROVED, PARTICIPANT_ADDED, ...
-  threadId       String?
-  messageId      String?
-  detail         String?
-  ip             String?
-  createdAt      DateTime @default(now())
-  actor          User?    @relation(fields: [actorId], references: [id], onDelete: SetNull, onUpdate: Cascade)
-
-  @@index([organizationId])
-  @@index([action])
-  @@map("communication_audit_logs")
+  @@index([conversationId, createdAt])
+  @@map("direct_messages")
 }
 
 // ==========================================
@@ -1374,24 +1251,6 @@ model Invitation {
   @@index([organizationId])
   @@index([email])
   @@map("invitations")
-}
-
-model Newsletter {
-  id             String       @id @default(cuid())
-  title          String
-  content        String
-  published      Boolean      @default(false)
-  publishedAt    DateTime?
-  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  organizationId String
-  school         School       @relation(fields: [schoolId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  schoolId       String
-  author         User?        @relation(fields: [authorId], references: [id], onDelete: SetNull, onUpdate: Cascade)
-  authorId       String?
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
-
-  @@map("newsletters")
 }
 
 // ==========================================
@@ -1617,15 +1476,15 @@ model StoreProduct {
 }
 
 model StoreProductVariant {
-  id        String   @id @default(cuid())
-  productId String
-  product   StoreProduct @relation(fields: [productId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  label     String
-  stock     Int      @default(0)
-  sortOrder Int      @default(0)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  cartItems StoreCartItem[]
+  id         String           @id @default(cuid())
+  productId  String
+  product    StoreProduct     @relation(fields: [productId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  label      String
+  stock      Int              @default(0)
+  sortOrder  Int              @default(0)
+  createdAt  DateTime         @default(now())
+  updatedAt  DateTime         @updatedAt
+  cartItems  StoreCartItem[]
   orderItems StoreOrderItem[]
 
   @@unique([productId, label])
@@ -1649,18 +1508,18 @@ model StoreCartItem {
 }
 
 model StoreOrder {
-  id             String             @id @default(cuid())
-  schoolId       String
-  school         School             @relation(fields: [schoolId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  userId         String
-  user           User               @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  total          Decimal            @db.Decimal(12, 2)
-  status         StoreOrderStatus   @default(PENDING)
-  paymentStatus  StorePaymentStatus @default(PENDING)
-  notes          String?
-  createdAt      DateTime           @default(now())
-  updatedAt      DateTime           @updatedAt
-  items          StoreOrderItem[]
+  id            String             @id @default(cuid())
+  schoolId      String
+  school        School             @relation(fields: [schoolId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  userId        String
+  user          User               @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  total         Decimal            @db.Decimal(12, 2)
+  status        StoreOrderStatus   @default(PENDING)
+  paymentStatus StorePaymentStatus @default(PENDING)
+  notes         String?
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
+  items         StoreOrderItem[]
 
   @@index([schoolId, createdAt])
   @@index([userId, createdAt])

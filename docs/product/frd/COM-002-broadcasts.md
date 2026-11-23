@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | Shipped (as-is, reverse-engineered from code on 2026-11-13) |
+| **Status** | Deprecated (2026-11-23): replaced by [COM-003](COM-003-channels-and-direct.md) |
 | **Context** | COM — Communication (see [capabilities](../capabilities.md#com-communication)) |
 | **Owner** | — |
 | **Last updated** | 2026-11-13 |

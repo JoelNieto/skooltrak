@@ -17,7 +17,6 @@ import * as bcrypt from 'bcrypt';
 import { randomBytes, randomUUID } from 'crypto';
 import { Request } from 'express';
 import * as QRCode from 'qrcode';
-import { ChatSyncService } from '../chats/chat-sync.service';
 import { ACTIVE_ENROLLMENT, enrolledCourses, enrolledIn, syncStudentPlan } from '../courses/course-roster';
 import { ChargesService } from '../financial/charges.service';
 import { PrismaService, STUDENT_PERSONAL_DETAILS } from '../prisma.service';
@@ -43,7 +42,6 @@ export class StudentsService {
 
   constructor(
     private readonly prisma: PrismaService,
-    private readonly chatSync: ChatSyncService,
     private readonly authService: AuthService,
     private readonly chargesService: ChargesService,
     @Inject(REQUEST) private readonly request: Request,
@@ -223,12 +221,13 @@ export class StudentsService {
 
     try {
       // Enroll the student in their plan's courses in the same transaction (ACA-001 BR .15).
-      const { student, enrolledCourseIds } = await this.prisma.$transaction(async (tx) => {
+      const student = await this.prisma.$transaction(async (tx) => {
         const created = await tx.student.create({
           data: studentData,
           include: { classGroup: true, user: true, parents: true },
         });
-        return { student: created, enrolledCourseIds: await syncStudentPlan(tx, created.id, created.classGroupId) };
+        await syncStudentPlan(tx, created.id, created.classGroupId);
+        return created;
       });
 
       if (classGroupId) {
@@ -278,17 +277,6 @@ export class StudentsService {
         }
       }
 
-      // Add student to contextual chats for class group and courses
-      try {
-        if (classGroupId) {
-          await this.chatSync.addUserToClassGroupChats(classGroupId, user.id);
-        }
-        for (const courseId of enrolledCourseIds) {
-          await this.chatSync.addUserToCourseChats(courseId, user.id);
-        }
-      } catch (chatError) {
-        this.logger.warn(`Failed to add student to contextual chats:`, chatError);
-      }
 
       // Auto-generate study-plan charges (enrollment + tuition) for the student.
       if (studyPlanId) {
@@ -616,15 +604,15 @@ export class StudentsService {
     }
 
     // A class-group change moves the student's plan enrollments in the same transaction
-    // (ACA-001 BR .15). `enrolledCourseIds` is null when the group didn't change.
-    const { updated, enrolledCourseIds } = await this.prisma.$transaction(async (tx) => {
+    // (ACA-001 BR .15).
+    const updated = await this.prisma.$transaction(async (tx) => {
       const row = await tx.student.update({
         where: { id },
         data: updateData,
         include: { classGroup: true, user: true, parents: true },
       });
-      const courseIds = rest.classGroupId !== undefined ? await syncStudentPlan(tx, id, row.classGroupId) : null;
-      return { updated: row, enrolledCourseIds: courseIds };
+      if (rest.classGroupId !== undefined) await syncStudentPlan(tx, id, row.classGroupId);
+      return row;
     });
 
     // Auto-generate study-plan charges when the student is assigned a class group.
@@ -636,19 +624,6 @@ export class StudentsService {
       }
     }
 
-    // Add student to contextual chats when class group or courses change
-    try {
-      if (rest.classGroupId && updated.userId) {
-        await this.chatSync.addUserToClassGroupChats(rest.classGroupId, updated.userId);
-      }
-      if (enrolledCourseIds && updated.userId) {
-        for (const courseId of enrolledCourseIds) {
-          await this.chatSync.addUserToCourseChats(courseId, updated.userId);
-        }
-      }
-    } catch (chatError) {
-      this.logger.warn(`Failed to add student to contextual chats on update:`, chatError);
-    }
 
     if (rest.classGroupId !== undefined) {
       const actorId = this.requestActor().userId;

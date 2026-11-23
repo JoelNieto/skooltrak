@@ -6,6 +6,7 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
 import { forkJoin, map, of, switchMap, timer } from 'rxjs';
 import Auth from '../auth/auth';
 import Store, { CurrentSchool } from './store';
+import { CommunicationApi } from '../communication/communication-api';
 import { NotificationsBadge } from '../notifications/notifications-badge';
 import { ThemeService } from './theme.service';
 
@@ -188,29 +189,32 @@ type SidebarSchool = {
             </a>
           </li>
         }
-        @if (auth.hasPermission('VIEW_MESSAGES')) {
+        @if (auth.hasPermission('COMMUNICATION_VIEW')) {
           <li>
             <a
-              routerLink="messages"
+              routerLink="communication/channels"
               routerLinkActive="bg-action-subtle text-primary font-semibold"
               class="flex items-center gap-3 px-3 py-2 text-ink rounded-lg transition-all duration-150 hover:bg-surface-2 hover:text-ink-strong group"
             >
-              <ui-icon name="mail" class="text-xl" />
-              <span>Mensajes</span>
+              <ui-icon name="megaphone" class="text-xl" />
+              <span>Canales</span>
+              @if (unread.value().channels; as count) {
+                <span uiBadge tone="new" size="sm" class="ml-auto">{{ count > 99 ? '99+' : count }}</span>
+              }
             </a>
           </li>
+        }
+        @if (auth.hasPermission('COMMUNICATION_DIRECT') && !auth.isStudent()) {
           <li>
             <a
-              routerLink="chats"
+              routerLink="communication/direct"
               routerLinkActive="bg-action-subtle text-primary font-semibold"
               class="flex items-center gap-3 px-3 py-2 text-ink rounded-lg transition-all duration-150 hover:bg-surface-2 hover:text-ink-strong group"
             >
               <ui-icon name="message-circle" class="text-xl" />
-              <span>Chats</span>
-              @if (chatUnreadCount.value(); as count) {
-                @if (count > 0) {
-                  <span uiBadge tone="new" size="sm" class="ml-auto">{{ count > 99 ? '99+' : count }}</span>
-                }
+              <span>Mensajes directos</span>
+              @if (unread.value().direct; as count) {
+                <span uiBadge tone="new" size="sm" class="ml-auto">{{ count > 99 ? '99+' : count }}</span>
               }
             </a>
           </li>
@@ -240,16 +244,6 @@ type SidebarSchool = {
               >
                 <ui-icon name="file-up" class="text-xl" />
                 <span>Entregas</span>
-              </a>
-            </li>
-            <li>
-              <a
-                routerLink="student/communication"
-                routerLinkActive="bg-action-subtle text-primary font-semibold"
-                class="flex items-center gap-3 px-3 py-2 text-ink rounded-lg transition-all duration-150 hover:bg-surface-2 hover:text-ink-strong group"
-              >
-                <ui-icon name="megaphone" class="text-xl" />
-                <span>Comunicados</span>
               </a>
             </li>
             <li>
@@ -291,16 +285,6 @@ type SidebarSchool = {
                 <span>Progreso</span>
               </a>
             </li>
-            <li>
-              <a
-                routerLink="parent/communication"
-                routerLinkActive="bg-action-subtle text-primary font-semibold"
-                class="flex items-center gap-3 px-3 py-2 text-ink rounded-lg transition-all duration-150 hover:bg-surface-2 hover:text-ink-strong group"
-              >
-                <ui-icon name="message-circle" class="text-xl" />
-                <span>Mensajes</span>
-              </a>
-            </li>
             @if (auth.hasPermission('VIEW_FINANCIALS')) {
               <li>
                 <a
@@ -322,16 +306,6 @@ type SidebarSchool = {
         <div>
           <p class="px-3 py-1.5 text-[11px] uppercase font-semibold text-ink-subtle tracking-wider">Docentes</p>
           <ul class="space-y-0.5 mt-1">
-            <li>
-              <a
-                routerLink="teacher/communication"
-                routerLinkActive="bg-action-subtle text-primary font-semibold"
-                class="flex items-center gap-3 px-3 py-2 text-ink rounded-lg transition-all duration-150 hover:bg-surface-2 hover:text-ink-strong group"
-              >
-                <ui-icon name="message-circle" class="text-xl" />
-                <span>Comunicación</span>
-              </a>
-            </li>
             <li>
               <a
                 routerLink="teacher/attendance"
@@ -382,16 +356,6 @@ type SidebarSchool = {
                 <span>Panel de admin</span>
               </a>
             </li>
-            <li>
-              <a
-                routerLink="communication"
-                routerLinkActive="bg-action-subtle text-primary font-semibold"
-                class="flex items-center gap-3 px-3 py-2 text-ink rounded-lg transition-all duration-150 hover:bg-surface-2 hover:text-ink-strong group"
-              >
-                <ui-icon name="megaphone" class="text-xl" />
-                <span>Comunicados</span>
-              </a>
-            </li>
           </ul>
         </div>
       }
@@ -416,18 +380,6 @@ type SidebarSchool = {
     </nav>
     <!-- User section at bottom -->
     <div class="shrink-0 p-3 border-t border-line space-y-2">
-      <a
-        routerLink="messages"
-        class="flex items-center gap-3 px-3 py-2 text-ink rounded-lg transition-all duration-150 hover:bg-surface-2 hover:text-ink-strong group w-full"
-      >
-        <ui-icon name="mail" class="text-xl" />
-        <span>Mensajes</span>
-        @if (unreadCount.value(); as count) {
-          @if (count > 0) {
-            <span uiBadge tone="new" size="sm" class="ml-auto">{{ count > 99 ? '99+' : count }}</span>
-          }
-        }
-      </a>
       <a
         routerLink="notifications"
         routerLinkActive="bg-action-subtle text-primary font-semibold"
@@ -571,15 +523,8 @@ export class Sidebar {
   /** ASM-001-S08: unread notifications, for the sidebar badge. */
   protected readonly notifications = inject(NotificationsBadge);
 
-  protected unreadCount = rxResource({
-    injector: this.#injector,
-    stream: () => timer(0, 60000).pipe(switchMap(() => this.#http.get<number>('/api/v1/messages/unread-count'))),
-  });
-
-  protected chatUnreadCount = rxResource({
-    injector: this.#injector,
-    stream: () => timer(0, 60000).pipe(switchMap(() => this.#http.get<number>('/api/v1/chats/unread-count'))),
-  });
+  /** COM-003 FR .15: unread channel posts and direct messages. */
+  protected readonly unread = inject(CommunicationApi).unread;
 
   protected storeCartCount = rxResource({
     injector: this.#injector,

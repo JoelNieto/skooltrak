@@ -1,5 +1,6 @@
+import { personName, preview } from '@/shared';
 import type { AuthUserContext } from '@/auth';
-import { AttendanceStatus, ThreadType } from '@generated/prisma';
+import { AttendanceStatus } from '@generated/prisma';
 import { ForbiddenException, Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma.service';
 import { StudentProgress, StudentWork } from './entities/student-home.entity';
@@ -196,51 +197,35 @@ export class ParentHomeService {
     return linked;
   }
 
-  /** FR-HOM-001.23: STUDENT_GUARDIANS threads about this child that the parent is in, newest first. */
+  /** FR-HOM-001.23 (COM-003): the parent's direct conversations about this child, newest first. */
   private async childThreads(userId: string, studentId: string): Promise<ParentThread[]> {
-    const threads = await this.prisma.communicationThread.findMany({
-      where: {
-        type: ThreadType.STUDENT_GUARDIANS,
-        scopeId: studentId,
-        broadcast: false,
-        deletedAt: null,
-        participants: { some: { userId } },
-      },
+    const conversations = await this.prisma.directConversation.findMany({
+      where: { parentUserId: userId, studentId, messages: { some: {} } },
+      orderBy: { lastMessageAt: 'desc' },
+      take: PARENT_LISTS.messages,
       select: {
         id: true,
-        title: true,
-        participants: { where: { userId }, select: { lastReadAt: true } },
+        parentLastReadAt: true,
+        staffUser: { select: { name: true, firstName: true, lastName: true } },
         messages: {
-          where: { deletedAt: null },
           orderBy: { createdAt: 'desc' },
           take: 1,
-          select: {
-            body: true,
-            createdAt: true,
-            senderId: true,
-            sender: { select: { name: true, firstName: true, lastName: true } },
-          },
+          select: { body: true, createdAt: true, senderId: true, sender: { select: { name: true, firstName: true, lastName: true } } },
         },
       },
     });
 
-    return threads
-      .filter((t) => t.messages.length > 0)
-      .map((t) => {
-        const last = t.messages[0];
-        const lastReadAt = t.participants[0]?.lastReadAt;
-        const sender = last.sender;
-        return {
-          id: t.id,
-          title: t.title,
-          senderName: (sender?.name?.trim() || [sender?.firstName, sender?.lastName].filter(Boolean).join(' ')).trim() || '—',
-          lastMessageAt: last.createdAt.toISOString(),
-          preview: last.body.length > PREVIEW_LENGTH ? `${last.body.slice(0, PREVIEW_LENGTH - 1)}…` : last.body,
-          unread: last.senderId !== userId && (!lastReadAt || last.createdAt > lastReadAt),
-        };
-      })
-      .sort((a, b) => b.lastMessageAt.localeCompare(a.lastMessageAt))
-      .slice(0, PARENT_LISTS.messages);
+    return conversations.map((c) => {
+      const last = c.messages[0];
+      return {
+        id: c.id,
+        title: personName(c.staffUser),
+        senderName: personName(last.sender),
+        lastMessageAt: last.createdAt.toISOString(),
+        preview: preview(last.body, PREVIEW_LENGTH),
+        unread: last.senderId !== userId && (!c.parentLastReadAt || last.createdAt > c.parentLastReadAt),
+      };
+    });
   }
 
   private async finance(studentId: string, today: string): Promise<FinanceFacts> {
@@ -328,7 +313,8 @@ export function buildAlerts(facts: ChildFacts): ParentAlert[] {
   const alerts: ParentAlert[] = [];
   const money = new Intl.NumberFormat('es-MX', { style: 'currency', currency: facts.currencyCode });
   const day = new Intl.DateTimeFormat('es', { weekday: 'long', day: 'numeric', month: 'short', timeZone: 'UTC' });
-  const write = { label: 'Escribir al docente', link: '/parent/communication' };
+  // COM-003: parents answer direct messages; staff start them (BR .1).
+  const write = { label: 'Ver mensajes', link: '/communication/direct' };
   const progressLink = { label: 'Ver progreso', link: '/parent/progress' };
   const account = { label: 'Ver estado de cuenta', link: '/parent/finances' };
 

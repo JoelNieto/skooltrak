@@ -1,24 +1,14 @@
 import { Module } from '@nestjs/common';
 import { PrismaModule } from '../prisma.module';
+import { ChannelsService } from './channels.service';
 import { CommunicationController } from './communication.controller';
-import { CommunicationDeliveryService } from './communication-delivery.service';
-import { CommunicationRetentionService } from './communication-retention.service';
-import { CommunicationService } from './communication.service';
-import { CommunicationSocketGateway } from './communication-socket.gateway';
-import { CommunicationWsAuthService } from './communication-ws-auth.service';
-import { TranslationService } from './translation.service';
+import { DirectService } from './direct.service';
 
+/** COM-003: channels and direct messages, the only two ways to communicate. */
 @Module({
   controllers: [CommunicationController],
   imports: [PrismaModule],
-  providers: [
-    CommunicationService,
-    CommunicationDeliveryService,
-    CommunicationRetentionService,
-    CommunicationSocketGateway,
-    CommunicationWsAuthService,
-    TranslationService,
-  ],
-  exports: [CommunicationService, CommunicationDeliveryService],
+  providers: [ChannelsService, DirectService],
+  exports: [ChannelsService, DirectService],
 })
 export class CommunicationModule {}

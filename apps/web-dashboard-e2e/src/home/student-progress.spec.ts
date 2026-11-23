@@ -9,7 +9,7 @@ import { data, storageStatePath } from '../support/fixtures';
  * `student` is the first related student: their only published score is `data.publishedScores[0]`
  * (4.0) in `data.publishedGrade`; the unpublished `data.grade` (4.5) must not count. The 7° plan uses
  * `data.metric` (pass 3.0, excellence 4.5, max 5.0). Attendance and message counts depend on other
- * specs (attendance taken, broadcasts sent), so they are not asserted here.
+ * specs (attendance taken, channel posts published), so they are not asserted here.
  */
 
 const course = data.courses.teacherOwn.name;
@@ -40,7 +40,7 @@ test.describe('Student home — progress', () => {
     await expect(toDo).toContainText('2'); // pending + overdue
     await expect(toDo).toContainText('1 vencida');
     await expect(page.locator('lib-stat-card', { hasText: 'Asistencia' })).toBeVisible();
-    await expect(page.locator('lib-stat-card', { hasText: 'Mensajes nuevos' })).toBeVisible();
+    await expect(page.locator('lib-stat-card', { hasText: 'Avisos nuevos' })).toBeVisible();
 
     const progress = page.getByRole('region', { name: 'Mi progreso' });
     await expect(progress.getByRole('img', { name: /Gráfico por desarrollar: Línea/ })).toBeVisible();

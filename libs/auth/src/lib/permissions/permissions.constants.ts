@@ -45,10 +45,6 @@ export enum Perm {
   CUSTOMIZE_COURSES = 'CUSTOMIZE_COURSES',
   VIEW_GRADES = 'VIEW_GRADES',
 
-  // Messages
-  MANAGE_MESSAGES = 'MANAGE_MESSAGES',
-  VIEW_MESSAGES = 'VIEW_MESSAGES',
-
   // Files
   MANAGE_FILES = 'MANAGE_FILES',
   VIEW_FILES = 'VIEW_FILES',
@@ -69,10 +65,6 @@ export enum Perm {
   MANAGE_PERIODS = 'MANAGE_PERIODS',
   VIEW_PERIODS = 'VIEW_PERIODS',
 
-  // Newsletters
-  MANAGE_NEWSLETTER = 'MANAGE_NEWSLETTER',
-  VIEW_NEWSLETTER = 'VIEW_NEWSLETTER',
-
   // Financial
   MANAGE_FINANCIALS = 'MANAGE_FINANCIALS',
   VIEW_FINANCIALS = 'VIEW_FINANCIALS',
@@ -87,8 +79,8 @@ export enum Perm {
 
   // Communication platform
   COMMUNICATION_VIEW = 'COMMUNICATION_VIEW',
-  COMMUNICATION_BROADCAST = 'COMMUNICATION_BROADCAST',
-  COMMUNICATION_APPROVE = 'COMMUNICATION_APPROVE',
+  COMMUNICATION_CHANNELS = 'COMMUNICATION_CHANNELS',
+  COMMUNICATION_DIRECT = 'COMMUNICATION_DIRECT',
   // Home dashboards (HOM-001)
   VIEW_SCHOOL_DASHBOARD = 'VIEW_SCHOOL_DASHBOARD',
 }
@@ -119,8 +111,6 @@ export const PERMISSION_DESCRIPTIONS: Record<Perm, string> = {
   [Perm.MANAGE_GRADES]: 'Create, update, and delete grades',
   [Perm.CUSTOMIZE_COURSES]: "Set the color and cover photo of one's own courses",
   [Perm.VIEW_GRADES]: 'View grade information',
-  [Perm.MANAGE_MESSAGES]: 'Send and manage messages',
-  [Perm.VIEW_MESSAGES]: 'View messages',
   [Perm.MANAGE_FILES]: 'Upload and manage files',
   [Perm.VIEW_FILES]: 'View and download files',
   [Perm.MANAGE_QUIZZES]: 'Create, update, and delete quizzes',
@@ -131,17 +121,15 @@ export const PERMISSION_DESCRIPTIONS: Record<Perm, string> = {
   [Perm.VIEW_STUDY_PLANS]: 'View study plans',
   [Perm.MANAGE_PERIODS]: 'Create, update, and delete periods',
   [Perm.VIEW_PERIODS]: 'View periods',
-  [Perm.MANAGE_NEWSLETTER]: 'Create, update, and delete newsletters',
-  [Perm.VIEW_NEWSLETTER]: 'View newsletters',
   [Perm.MANAGE_FINANCIALS]: 'Create, update, and delete charges and payments',
   [Perm.VIEW_FINANCIALS]: 'View financial balance and payment history',
   [Perm.MANAGE_STORE]: 'Manage school store products, categories, and orders',
   [Perm.VIEW_STORE]: 'Browse the school store and place orders',
   [Perm.MANAGE_ROLES]: 'Create, update, and delete roles',
   [Perm.MANAGE_PERMISSIONS]: 'Manage permission assignments',
-  [Perm.COMMUNICATION_VIEW]: 'View communication threads and messages',
-  [Perm.COMMUNICATION_BROADCAST]: 'Create broadcasts to class or school',
-  [Perm.COMMUNICATION_APPROVE]: 'Approve pending broadcasts before fan-out',
+  [Perm.COMMUNICATION_VIEW]: 'Read channels and reply where allowed',
+  [Perm.COMMUNICATION_CHANNELS]: 'Create and manage channels',
+  [Perm.COMMUNICATION_DIRECT]: 'Use direct messages between staff and parents',
   [Perm.VIEW_SCHOOL_DASHBOARD]: 'View the school dashboard on the home page',
 };
 
@@ -181,7 +169,6 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<DefaultRole, Perm[]> = {
     Perm.VIEW_ASSIGNMENTS,
     Perm.VIEW_ATTENDANCE,
     Perm.VIEW_GRADES,
-    Perm.VIEW_MESSAGES,
     Perm.VIEW_FILES,
     Perm.VIEW_QUIZZES,
     // Manage
@@ -189,13 +176,12 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<DefaultRole, Perm[]> = {
     Perm.MANAGE_ATTENDANCE,
     Perm.MANAGE_GRADES,
     Perm.CUSTOMIZE_COURSES,
-    Perm.MANAGE_MESSAGES,
     Perm.MANAGE_FILES,
     Perm.MANAGE_QUIZZES,
-    Perm.VIEW_NEWSLETTER,
     Perm.VIEW_STORE,
     Perm.COMMUNICATION_VIEW,
-    Perm.COMMUNICATION_BROADCAST,
+    Perm.COMMUNICATION_CHANNELS,
+    Perm.COMMUNICATION_DIRECT,
   ],
 
   [DefaultRole.STUDENT]: [
@@ -207,14 +193,11 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<DefaultRole, Perm[]> = {
     Perm.SUBMIT_ASSIGNMENTS,
     Perm.VIEW_ATTENDANCE,
     Perm.VIEW_GRADES,
-    Perm.VIEW_MESSAGES,
-    Perm.MANAGE_MESSAGES,
     Perm.VIEW_FILES,
     Perm.VIEW_QUIZZES,
     Perm.VIEW_SCHEDULES,
     Perm.VIEW_STUDY_PLANS,
     Perm.VIEW_PERIODS,
-    Perm.VIEW_NEWSLETTER,
     Perm.VIEW_STORE,
     Perm.COMMUNICATION_VIEW,
   ],
@@ -225,10 +208,10 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<DefaultRole, Perm[]> = {
     Perm.VIEW_ASSIGNMENTS,
     Perm.VIEW_ATTENDANCE,
     Perm.VIEW_GRADES,
-    Perm.VIEW_MESSAGES,
     Perm.VIEW_SCHEDULES,
-    Perm.VIEW_NEWSLETTER,
     Perm.VIEW_STORE,
+    Perm.COMMUNICATION_VIEW,
+    Perm.COMMUNICATION_DIRECT,
   ],
 };
 

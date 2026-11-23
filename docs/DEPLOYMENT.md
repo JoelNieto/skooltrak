@@ -195,9 +195,9 @@ schema. Keep each migration backward-compatible with the release before it:
 
 - [ ] Sign up → verification email arrives → log in → log out.
 - [ ] Password reset email and link.
-- [ ] Students and messages page through correctly.
+- [ ] Students page through correctly.
 - [ ] File upload and download (R2).
-- [ ] Chat updates live (Socket.IO through Caddy).
+- [ ] A channel post reaches a parent, and a direct message gets a reply (COM-003).
 - [ ] Public store at `/store/<slug>`.
 - [ ] Admin: log in, page users / permissions / schools, open the roles form.
 - [ ] View source on a dashboard page shows rendered HTML (SSR), not an empty shell.

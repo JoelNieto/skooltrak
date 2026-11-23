@@ -43,7 +43,6 @@ import { Breadcrumbs } from '#/ui';
           <a routerLink="join-requests" routerLinkActive="bg-primary text-primary-content">Solicitudes</a>
         </li>
         <li>
-          <a routerLink="newsletters" routerLinkActive="bg-primary text-primary-content">Boletines</a>
         </li>
       </ul>
     </div>

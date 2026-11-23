@@ -1,7 +1,6 @@
 import {
   Badge,
   Breadcrumbs,
-  Button,
   Card,
   CardBody,
   CardTitle,
@@ -9,14 +8,11 @@ import {
   Error as ErrorComponent,
   Icon,
   Loader,
-  Toast,
 } from '#/ui';
 import { DatePipe } from '@angular/common';
-import { HttpClient, httpResource } from '@angular/common/http';
-import { Component, inject, input, signal } from '@angular/core';
-import { Router, RouterLink } from '@angular/router';
-import { ChatType } from '@generated/prisma';
-import { firstValueFrom } from 'rxjs';
+import { httpResource } from '@angular/common/http';
+import { Component, inject, input } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import Auth from '../auth/auth';
 import { isValidId } from '../core/validators';
 import AssignmentSubmissionForm from './assignment-submission-form';
@@ -39,7 +35,6 @@ type AssignmentDetail = {
     Card,
     CardBody,
     CardTitle,
-    Button,
     RouterLink,
     DatePipe,
     Loader,
@@ -72,21 +67,6 @@ type AssignmentDetail = {
                 {{ assignment.date | date: 'medium' }}
               </p>
             </div>
-            @if (canStartAssignmentChat()) {
-              <button
-                uiButton
-                [loading]="startingChat()"
-                variant="ghost"
-                size="sm"
-                (click)="startAssignmentChat()"
-                [disabled]="startingChat()"
-              >
-                @if (!startingChat()) {
-                  <ui-icon name="message-circle" />
-                }
-                Chat
-              </button>
-            }
           </div>
         </div>
         <div uiCard class="mt-4">
@@ -129,38 +109,7 @@ type AssignmentDetail = {
 })
 export default class Assignment {
   public id = input.required<string>();
-  private http = inject(HttpClient);
-  private router = inject(Router);
-  private toast = inject(Toast);
   public auth = inject(Auth);
-  startingChat = signal(false);
-
-  canStartAssignmentChat() {
-    if (!this.auth.hasPermission('MANAGE_MESSAGES')) return false;
-    const assignment = this.assignmentResource.value() as {
-      teacher?: { user?: { id?: string }; userId?: string | null };
-    } | null;
-    if (!assignment) return false;
-    const uid = this.auth.user()?.id;
-    return this.auth.isAdmin() || assignment.teacher?.user?.id === uid || assignment.teacher?.userId === uid;
-  }
-
-  async startAssignmentChat() {
-    this.startingChat.set(true);
-    try {
-      const chat = await firstValueFrom(
-        this.http.post<{ id: string }>(`/api/v1/chats/contextual`, {
-          contextType: ChatType.ASSIGNMENT,
-          contextId: this.id(),
-        }),
-      );
-      if (chat?.id) this.router.navigate(['/chats', chat.id]);
-    } catch {
-      this.toast.showError('Error al crear chat');
-    } finally {
-      this.startingChat.set(false);
-    }
-  }
 
   public assignmentResource = httpResource<AssignmentDetail>(() => {
     if (!isValidId(this.id())) return undefined;

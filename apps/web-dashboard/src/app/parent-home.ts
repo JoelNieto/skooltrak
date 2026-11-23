@@ -18,7 +18,7 @@ import { httpResource } from '@angular/common/http';
 import { Component, computed, inject } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { LinkedChild, ParentContext } from './parent/parent-context.service';
-import { RecentBroadcasts } from './communication/recent-broadcasts';
+import { RecentChannelPosts } from './communication/recent-channel-posts';
 
 type Ref = { id: string; name: string };
 
@@ -140,7 +140,7 @@ const grade = (n: number) => n.toFixed(1);
     PageHeader,
     StatCard,
     EmptyState,
-    RecentBroadcasts,
+    RecentChannelPosts,
     TimeAgoPipe,
     Icon,
   ],
@@ -429,7 +429,7 @@ const grade = (n: number) => n.toFixed(1);
                 <h2 id="teacher-messages-title" class="text-base font-semibold text-ink-strong">
                   Mensajes de docentes
                 </h2>
-                <a routerLink="/parent/communication" class="link link-primary text-sm" (click)="rememberSelection()"
+                <a routerLink="/communication/direct" class="link link-primary text-sm" (click)="rememberSelection()"
                   >Ir a mensajes</a
                 >
               </div>
@@ -446,7 +446,7 @@ const grade = (n: number) => n.toFixed(1);
                   @for (m of child.messages; track m.id) {
                     <li class="border-t border-line first:border-t-0">
                       <a
-                        routerLink="/parent/communication"
+                        [routerLink]="['/communication/direct', m.id]"
                         class="flex min-h-11 items-start gap-3 py-2.5 text-ink hover:no-underline"
                         (click)="rememberSelection()"
                       >
@@ -473,7 +473,7 @@ const grade = (n: number) => n.toFixed(1);
           </section>
 
           <div class="min-w-0 flex-[1_1_340px]">
-            <app-recent-broadcasts />
+            <app-recent-channel-posts />
           </div>
         </div>
 
@@ -587,7 +587,7 @@ export default class ParentHome {
 
   writeToTeacher() {
     this.rememberSelection();
-    this.#router.navigate(['/parent/communication']);
+    this.#router.navigate(['/communication/direct']);
   }
 
   linkChild() {

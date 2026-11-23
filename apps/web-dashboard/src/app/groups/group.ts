@@ -12,17 +12,16 @@ import {
   UiTabPanel,
   UiTabs,
 } from '#/ui';
-import { HttpClient, httpResource } from '@angular/common/http';
+import { httpResource } from '@angular/common/http';
 import { Component, computed, inject, input, signal } from '@angular/core';
 import { Router } from '@angular/router';
-import { ChatType } from '@generated/prisma';
-import { firstValueFrom } from 'rxjs';
 import Auth from '../auth/auth';
 import { isValidId } from '../core/validators';
 import GroupCourses from './group-courses';
 import GroupHabits from './group-habits';
 import GroupSchedule from './group-schedule';
 import GroupStudents from './group-students';
+import { CommunicationApi } from '../communication/communication-api';
 
 @Component({
   imports: [
@@ -65,19 +64,12 @@ import GroupStudents from './group-students';
                 {{ group.teacher?.name }}
               </div>
             </div>
-            @if (canStartGroupChat()) {
-              <button
-                uiButton
-                [loading]="startingChat()"
-                variant="ghost"
-                size="sm"
-                (click)="startGroupChat()"
-                [disabled]="startingChat()"
-              >
-                @if (!startingChat()) {
-                  <ui-icon name="message-circle" />
+            @if (canOpenChannel()) {
+              <button uiButton variant="ghost" type="button" [loading]="openingChannel()" [disabled]="openingChannel()" (click)="openChannel()">
+                @if (!openingChannel()) {
+                  <ui-icon name="megaphone" />
                 }
-                Chat
+                Canal
               </button>
             }
           </div>
@@ -137,33 +129,29 @@ export default class Group {
   /** Selected section; the tab list and panels follow it. */
   readonly tab = signal('estudiantes');
   public id = input.required<string>();
-  private http = inject(HttpClient);
   private router = inject(Router);
   private toast = inject(Toast);
   private auth = inject(Auth);
-  startingChat = signal(false);
+  private communication = inject(CommunicationApi);
+  openingChannel = signal(false);
 
-  canStartGroupChat() {
-    if (!this.auth.hasPermission('MANAGE_MESSAGES')) return false;
-    const group = this.groupResource.value();
-    if (!group) return false;
-    return this.auth.isAdmin() || group.teacher?.user?.id === this.auth.user()?.id;
+  /** BR-COM-003.2: admins, and teachers of a course in the group's plan (the API decides which). */
+  canOpenChannel() {
+    if (!this.auth.hasPermission('COMMUNICATION_CHANNELS')) return false;
+    return this.auth.isAdmin() || this.auth.isTeacher();
   }
 
-  async startGroupChat() {
-    this.startingChat.set(true);
+  /** COM-003: the group's channel, or the create form set to it. */
+  async openChannel() {
+    this.openingChannel.set(true);
     try {
-      const chat = await firstValueFrom(
-        this.http.post<{ id: string }>('/api/v1/chats/contextual', {
-          contextType: ChatType.CLASS_GROUP,
-          contextId: this.id(),
-        }),
-      );
-      if (chat?.id) this.router.navigate(['/chats', chat.id]);
+      const id = await this.communication.managedChannelFor('CLASS_GROUP', this.id());
+      if (id) this.router.navigate(['/communication/channels', id]);
+      else this.router.navigate(['/communication/channels/new'], { queryParams: { scope: 'CLASS_GROUP', targetId: this.id() } });
     } catch {
-      this.toast.showError('Error al crear chat');
+      this.toast.showError('No se pudo abrir el canal');
     } finally {
-      this.startingChat.set(false);
+      this.openingChannel.set(false);
     }
   }
 

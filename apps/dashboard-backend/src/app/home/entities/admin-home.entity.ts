@@ -14,7 +14,6 @@ export class AdminPeriodClose {
 /** FR-HOM-001.24. Counts are 0 when there is nothing to do; the UI hides those tiles. */
 export class AdminAttentionTiles {
   joinRequests: { total: number; teachers: number; parents: number; others: number; oldestAt: string | null };
-  broadcastsToApprove: number;
   /** Today's classes already started without attendance (BR-HOM-001.15). */
   missedAttendance: number;
   /** Null without VIEW_FINANCIALS (BR-HOM-001.16). */

@@ -4,7 +4,7 @@
 |---|---|
 | **FRD** | [COM-002](../frd/COM-002-broadcasts.md) |
 | **Implements** | FR-COM-002.1 (tightened), resolves Q1. Adds BR-COM-002.7 |
-| **Status** | Superseded by COM-003 (BR-COM-003.2 keeps the same rule) |
+| **Status** | Done (#2); superseded by COM-003 (BR-COM-003.2 keeps the same rule) |
 | **Branch** | `feat/COM-002-S04-teacher-audience-scope` |
 | **Estimate** | 1 day |
 

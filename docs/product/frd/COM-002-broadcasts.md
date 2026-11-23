@@ -5,7 +5,7 @@
 | **Status** | Deprecated (2026-11-23): replaced by [COM-003](COM-003-channels-and-direct.md) |
 | **Context** | COM — Communication (see [capabilities](../capabilities.md#com-communication)) |
 | **Owner** | — |
-| **Last updated** | 2026-11-13 |
+| **Last updated** | 2026-11-22 |
 | **Related** | `.kilo/plans/school-communication-platform-v2.md` · commit `758e28d` · `apps/dashboard-backend/src/app/communication/` · `apps/web-dashboard/src/app/communication/broadcasts.ts`, `recent-broadcasts.ts` |
 
 ## 1. Problem & outcome
@@ -39,7 +39,8 @@ Schools need to send one announcement (an *aviso* or *comunicado*) to a whole cl
 - **BR-COM-002.4**: Only `PENDING_APPROVAL` broadcasts can be approved (`400` otherwise).
 - **BR-COM-002.5**: `CLASS_GROUP`, `COURSE` and `SCHOOL_WIDE` all require a `scopeId` (`400`).
 - **BR-COM-002.6**: Parents never own threads. They are reply-only participants (platform rule from the v2 plan).
-- **BR-COM-002.7** *(built in [S04](../slices/COM-002-S04-teacher-audience-scope.md), in review)*: A teacher can only target their own courses, and class groups related to those courses (groups whose study plan contains a course the teacher teaches). Homeroom alone doesn't count. Admins are unrestricted. Violations get `403`.
+- **BR-COM-002.7** *(built in [S04](../slices/COM-002-S04-teacher-audience-scope.md); roster since [S07](../slices/COM-002-S07-roster-audience.md))*: A teacher can only target their own courses, and class groups related to those courses: groups with at least one student on the roster of a course the teacher teaches ([ACA-001](ACA-001-course-experience.md) BR .15). Homeroom alone doesn't count. Admins are unrestricted. Violations get `403`.
+- **BR-COM-002.8** *(S07)*: A `COURSE` broadcast reaches the course's roster (ACA-001 BR .15) and their parents: students added to the course are included, excluded students are not. A `CLASS_GROUP` broadcast reaches the group's students and their parents.
 
 ## 5. Data
 - `CommunicationThread` with `broadcast = true`, `type`, `scopeId`, `status`, `repliesAllowed`, `urgencyDefault`, `approvedById` / `approvedAt`, `ownerRole`.
@@ -86,6 +87,7 @@ Found while reverse-engineering. Each is a candidate slice.
 | COM-002-S01 | Staff creates group/course broadcast, recipients receive it | .1 .2 .3 | Done (pre-FRD) |
 | COM-002-S02 | School-wide approval flow + audit | .4 .7 .8 | Done (pre-FRD) |
 | COM-002-S03 | Optional replies + latest broadcasts on every home | .5 .6 | Done (`758e28d`) |
-| [COM-002-S04](../slices/COM-002-S04-teacher-audience-scope.md) | Teachers can only broadcast to groups/courses they teach | .1, BR .7 | In review (e2e awaiting first run) |
+| [COM-002-S04](../slices/COM-002-S04-teacher-audience-scope.md) | Teachers can only broadcast to groups/courses they teach | .1, BR .7 | Done (#2) |
 | COM-002-S05 | School-wide audience limited to that school's teachers | .2, Q2 | Proposed |
 | COM-002-S06 | Reject / withdraw a pending broadcast | Q5 | Proposed |
+| [COM-002-S07](../slices/COM-002-S07-roster-audience.md) | Course audiences follow the course roster | .1, BR .7 .8 | Done (#83); superseded by COM-003 |

@@ -36,8 +36,11 @@ import CourseGradeBuckets from './course-grade-buckets';
 import { CourseGradesSummaryView } from './course-grades-summary';
 import { CourseParticipants, CourseParticipantsList } from './course-participants';
 import { CourseOverview } from './course-overview';
+import { CourseChannelsList } from './course-channels-list';
+import { courseChannels, newCount } from './course-channels';
 import { CourseWork } from './course-work';
 import { CommunicationApi } from '../communication/communication-api';
+import type { ChannelSummary } from '@/shared';
 
 type CourseVm = {
   id: string;
@@ -94,6 +97,7 @@ type CourseVm = {
     CourseParticipantsList,
     CourseAssignmentsList,
     CourseOverview,
+    CourseChannelsList,
     Icon,
     RouterLink,
   ],
@@ -248,6 +252,16 @@ type CourseVm = {
                   <ui-icon name="star" class="text-xl" />
                   Calificaciones
                 </button>
+                @if (showChannels()) {
+                  <!-- FR-ACA-001.21 -->
+                  <button uiTab value="channels">
+                    <ui-icon name="message-circle" class="text-xl" />
+                    Canales
+                    @if (channelsUnread()) {
+                      <span uiBadge tone="new" size="sm">{{ newCount(channelsUnread()) }}</span>
+                    }
+                  </button>
+                }
                 <button uiTab value="participants">
                   <ui-icon name="users" class="text-xl" />
                   Participantes
@@ -332,6 +346,23 @@ type CourseVm = {
                     (seeAll)="tab.set('work')"
                   >
                     <app-course-grades-summary [courseId]="id()" [studentId]="viewedStudentId()" [compact]="true" />
+                    @if (showChannels() && (channelsRes.error() || hasOpenChannels())) {
+                      <!-- FR-ACA-001.22: hidden when the course has no open channels. -->
+                      <section courseOverviewAside aria-labelledby="overview-channels">
+                        <div class="mb-2 flex items-center justify-between">
+                          <h3 id="overview-channels" class="text-sm font-semibold text-ink-strong">Canales</h3>
+                          <button type="button" class="link link-primary text-sm" (click)="tab.set('channels')">
+                            Ver todos
+                          </button>
+                        </div>
+                        <app-course-channels-list
+                          [channels]="channels()"
+                          [error]="!!channelsRes.error()"
+                          [compact]="true"
+                          (retry)="channelsRes.reload()"
+                        />
+                      </section>
+                    }
                   </app-course-overview>
                 }
               </ng-template>
@@ -343,6 +374,18 @@ type CourseVm = {
                 }
               </ng-template>
             </div>
+            @if (showChannels()) {
+              <div uiTabPanel uiCard value="channels" class="p-6">
+                <ng-template uiTabContent>
+                  <app-course-channels-list
+                    [channels]="channels()"
+                    [loading]="channelsRes.isLoading()"
+                    [error]="!!channelsRes.error()"
+                    (retry)="channelsRes.reload()"
+                  />
+                </ng-template>
+              </div>
+            }
           }
 
           <div uiTabPanel uiCard value="grades" class="p-6">
@@ -460,6 +503,30 @@ export default class Course {
     return { url: `/api/v1/courses/${this.id()}/work`, params };
   });
   private communication = inject(CommunicationApi);
+
+  /**
+   * FR-ACA-001.21, .22: students and parents read the course's channels from COM-003. Staff manage
+   * them through *Canal* and a homeroom teacher is neither manager nor member (BR-ACA-001.19); without
+   * COMMUNICATION_VIEW nothing is requested (BR .17).
+   */
+  protected readonly showChannels = computed(() => {
+    const kind = this.viewerKind();
+    return (kind === 'STUDENT' || kind === 'PARENT') && this.auth.hasPermission('COMMUNICATION_VIEW');
+  });
+  protected readonly channelsRes = httpResource<ChannelSummary[]>(() =>
+    this.showChannels() ? '/api/v1/communication/channels' : undefined,
+  );
+  protected readonly channels = computed(() => {
+    const kind = this.viewerKind();
+    if (kind !== 'STUDENT' && kind !== 'PARENT') return [];
+    return courseChannels(this.channelsRes.value() ?? [], this.id(), kind);
+  });
+  protected readonly hasOpenChannels = computed(() => this.channels().some((c) => !c.archived));
+  /** The tab's count: unread posts in the course's open channels. */
+  protected readonly channelsUnread = computed(() =>
+    this.channels().reduce((sum, c) => sum + (c.archived ? 0 : c.unread), 0),
+  );
+  protected readonly newCount = newCount;
   openingChannel = signal(false);
 
   /** BR-COM-003.2: the course's teacher or an admin manages its channel. */

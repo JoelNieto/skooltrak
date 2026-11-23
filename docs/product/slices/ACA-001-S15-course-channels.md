@@ -4,7 +4,7 @@
 |---|---|
 | **FRD** | [ACA-001](../frd/ACA-001-course-experience.md) |
 | **Implements** | FR-ACA-001.21, FR-ACA-001.22; BR-ACA-001.17, BR-ACA-001.18, BR-ACA-001.19 |
-| **Status** | Ready |
+| **Status** | In progress |
 | **Branch** | `feat/ACA-001-S15-course-channels` |
 | **Estimate** | 1.5 days |
 
@@ -14,6 +14,7 @@
 ## Acceptance criteria
 ```gherkin
 Background:
+  # The spec creates these through the COM-003 API; the course may hold other channels too.
   Given the course "Matemáticas 7° E2E" has the COURSE channels
     | name     | audience          | students can reply | visibility | posts |
     | Anuncios | students, parents | no                 | PRIVATE    | 1     |
@@ -24,7 +25,7 @@ Background:
 Scenario: the Canales tab lists the course's channels @FR-ACA-001.21
   When Ana opens the course page
   Then the tabs read "Resumen · Asignaciones · Calificaciones · Canales · Participantes · Recursos"
-  And the "Canales" tab shows "3 nuevos"
+  And the "Canales" tab shows the course's unread count, at least "3 nuevos"
   When she opens "Canales"
   Then she sees "Anuncios" with "Solo anuncios" and "1 nuevo"
   And she sees "General" with "Conversación del curso" and "2 nuevos"
@@ -35,7 +36,8 @@ Scenario: opening a channel clears its count @FR-ACA-001.21
   When Ana opens "General" from the Canales tab
   Then she is on /communication/channels/<General's id>
   When she goes back to the course page
-  Then the "Canales" tab shows "1 nuevo"
+  Then the "Canales" tab count has dropped by 2
+  And "General" shows no unread count
 
 Scenario: archived channels come last @FR-ACA-001.21
   Given the "Anuncios" channel is archived
@@ -87,8 +89,8 @@ Scenario: the list fails to load
   - Hidden for staff and the homeroom view (BR .19).
 - [ ] Tests:
   - Web unit (`course-channels.spec.ts`): the filter excludes other scopes and other courses; ordering; the three kind labels per viewer.
-  - Playwright `apps/web-dashboard-e2e/src/courses/course-channels.spec.ts` tagged `@FR-ACA-001.21 @FR-ACA-001.22`, covering the scenarios above.
-  - Fixtures: add the two COURSE channels and the CLASS_GROUP channel, with their posts, to `src/support/fixtures.ts` and `scripts/prepare-db.ts`.
+  - Playwright `apps/web-dashboard-e2e/src/courses/course-channels.after.spec.ts` tagged `@FR-ACA-001.21 @FR-ACA-001.22`, covering the scenarios above. The homeroom view is asserted in `course-homeroom.after.spec.ts`.
+  - Data: the spec creates its channels and posts through the COM-003 API, as `channels.spec.ts` does, instead of seeding them. It is an `after` spec because `channels.spec.ts` adds a channel to the same course while it runs, so the counts it asserts come from the API. *No channels* and *the list fails* stub `GET /communication/channels` with `page.route`.
 
 ## Out of scope for this slice
 - Card badges and the *Nuevo en canales* stat on *Mis cursos* (S16).

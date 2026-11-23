@@ -125,6 +125,7 @@ Removed endpoints: `/v1/messages/*`, `/v1/chats/*`, `/v1/newsletters/*`, and eve
 ## 10. Open questions
 - [ ] Should admins be able to read teachers' direct conversations for safeguarding?
 - [ ] Do we need email/push for posts that require confirmation?
+- [ ] **Assignment Q&A channels** (from ACA-001 Q10, decided 2026-11-23: each assignment gets one). To specify: a new `ASSIGNMENT` level and its audience (the assignment's class groups on the course roster), who may post (are students members who can start questions, or do they only reply?), and closing 3 days after the due date. Proposed slice: COM-003-S02.
 
 ## 11. Slices
 | Slice | Title | FRs | Status |

@@ -93,7 +93,7 @@ These read the course's channels from [COM-003](COM-003-channels-and-direct.md).
 - **FR-ACA-001.22**: **Resumen** gains a *Canales* card with up to 3 of the course's non-archived channels, by latest post, and *"Ver todos"*, which opens the *Canales* tab. The card is hidden when the course has no channels.
 - **FR-ACA-001.23**: A *Mis cursos* card whose course has unread channel posts shows *"{n} nuevos"* on its cover, and its accessible name gains *"{n} mensajes nuevos."*
 - **FR-ACA-001.24**: The *Mis cursos* stats row gains **Nuevo en canales**: the unread posts across the shown courses' channels, with *"en {k} curso(s)"*, or *"Nada nuevo"* at 0.
-- **FR-ACA-001.25** *(blocked on Q9)*: a student can ask a question to the class from the course header (the design's *"Ask in #general"*).
+- **FR-ACA-001.25**: a student sees *"Preguntar en el curso"* in the course header when the course has an open *Conversación del curso* channel (BR .18). It opens that channel, where the student replies under the latest post (FR-COM-003.10). With several such channels it opens the one with the latest post. With none, the button is hidden *(decided 2026-11-23, Q9 (a))*.
 
 ## 4. Business rules
 - **BR-ACA-001.1**: **Student scope.**
@@ -237,7 +237,7 @@ Side effects: none. Regenerate the dashboard API client (`bun run openapi:orval`
 - **Mobile:** cards stack to one column, and the stats row and chips wrap or scroll horizontally.
 
 ## 9. Out of scope
-- **Assignment Q&A channels** (the design's `#fractions-worksheet` and the per-assignment question count), and channels closing 3 days after the due date. COM-003 has no assignment channels (Q10).
+- **Assignment Q&A channels** (the design's `#fractions-worksheet`, the per-assignment question count, and closing 3 days after the due date). Decided in Q10, but specified in COM-003 first; ACA-001 links to them afterwards.
 - Creating, posting to or moderating channels from the course page: that stays in COM-003 (the *Canal* button).
 - Support teachers or more than one teacher per course: deferred to its own FRD (decided 2026-11-19, Q5).
 - **Switching HOM-001 and COM-002 to the enrollment roster.** They used the study-plan rule, and the two agree except for manual enrollments and exclusions. A follow-up slice in each FRD aligns them: COM-002 in [COM-002-S07](../slices/COM-002-S07-roster-audience.md), since replaced by [COM-003](COM-003-channels-and-direct.md), whose course channels use the roster; HOM-001 still to do.
@@ -245,7 +245,7 @@ Side effects: none. Regenerate the dashboard API client (`bun run openapi:orval`
 - A teacher's own *Mis cursos* with teaching metrics (to review, attendance), which HOM-001 covers on the home page.
 
 ## 10. Open questions
-Q1–Q8 answered on 2026-11-19. Q9 and Q10 are open (2026-11-23).
+Q1–Q8 answered on 2026-11-19; Q9 and Q10 on 2026-11-23.
 - [x] **Q1: Course roster.** The code had two answers that drift apart.
   - **Stored link.** `Course.students` is written on course creation (`courses.service.ts:112`), on student creation (`students.service.ts:155`) and on a class-group change (`students.service.ts:529`, which *replaces* the student's courses).
   - **Study-plan rule.** HOM-001 and COM-002-S04 derive a course's students from the class groups of its study plan.
@@ -258,13 +258,8 @@ Q1–Q8 answered on 2026-11-19. Q9 and Q10 are open (2026-11-23).
 - [x] **Q5: Support teacher.** **Decided:** deferred to its own FRD. One teacher per course.
 - [x] **Q6: Channels.** **Decided:** every channel element waits for the COM channels FRD.
 - [x] **Q7: Classmates for parents.** **Decided:** parents see teachers only (BR .13).
-- [ ] **Q9: "Ask in #general".** In COM-003 only managers post; members can only reply under a post (FR-COM-003.6, BR-COM-003.5). So a student can't start a question. Options:
-  - **(a)** the button opens the course's *Conversación del curso* channel, where the student replies under the latest post;
-  - **(b)** COM-003 lets members start posts in channels that allow it (a COM-003 change);
-  - **(c)** drop the button.
-
-  Blocks S17 only.
-- [ ] **Q10: Assignment Q&A channels.** Should an assignment get its own channel (a new `ASSIGNMENT` level in COM-003, closing 3 days after the due date as in the design), or should questions stay in the course channel? This is a COM-003 decision. Until it is made, ACA-001 shows no per-assignment questions.
+- [x] **Q9: "Ask in #general".** In COM-003 only managers post; members can only reply under a post (FR-COM-003.6, BR-COM-003.5). **Decided (2026-11-23):** option (a). The button opens the course's *Conversación del curso* channel, and the student replies under the latest post (FR .25). COM-003 is unchanged.
+- [x] **Q10: Assignment Q&A channels.** **Decided (2026-11-23):** yes, each assignment gets its own Q&A channel. That is a new channel level in COM-003, closing 3 days after the due date as in the design. It is specified in COM-003 first; ACA-001 adds the per-assignment question count and the link once that exists.
 - [x] **Q6 follow-up (2026-11-23).** COM-003 shipped in #84, so the course channel elements Q6 held back are specified as FR .21–.25.
 - [x] **Q8: Teachers opening other courses.** **Decided:** full access to their own courses, plus read-only access to colleagues' courses limited to their **homeroom** group's students (BR .3, .16, FR .18).
 
@@ -287,6 +282,6 @@ Listed in build order.
 | [ACA-001-S09](../slices/ACA-001-S09-customize-course.md) | Teacher sets color and cover photo | .3, BR .12 | Done (#73) |
 | [ACA-001-S10](../slices/ACA-001-S10-graded-status.md) | *"Calificada · n"* status from linked grades | .17 | Done (#63) |
 | [ACA-001-S14](../slices/ACA-001-S14-staff-cards.md) | Staff *Cursos* cards: area chip and course name | .9, BR .14 | Done (#82) |
-| [ACA-001-S15](../slices/ACA-001-S15-course-channels.md) | Canales tab and Resumen card on the course page | .21 .22, BR .17 .18 .19 | Ready |
+| [ACA-001-S15](../slices/ACA-001-S15-course-channels.md) | Canales tab and Resumen card on the course page | .21 .22, BR .17 .18 .19 | In progress |
 | ACA-001-S16 | Unread channel badges on *Mis cursos* cards and the *Nuevo en canales* stat | .23 .24, BR .17 | Proposed |
-| ACA-001-S17 | *"Preguntar en #general"* | .25 | Proposed (blocked on Q9) |
+| ACA-001-S17 | *"Preguntar en el curso"* opens the course conversation channel | .25 | Proposed |

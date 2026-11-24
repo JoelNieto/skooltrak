@@ -81,6 +81,15 @@ describe('Channel', () => {
     expect(el.textContent).toContain('Traigan compás el viernes.');
   });
 
+  it('embedded, for a manager: "Configurar" and the composer @FR-ACA-001.27', async () => {
+    api.channel.mockResolvedValueOnce({ ...detail, role: 'MANAGER', unread: 0 });
+    const el = await setup(true);
+    const buttons = [...el.querySelectorAll('button')].map((b) => b.textContent?.trim());
+    expect(buttons).toContain('Configurar');
+    expect(el.textContent).toContain('Nueva publicación');
+    expect(api.markChannelRead).not.toHaveBeenCalled();
+  });
+
   it('on its own page keeps the page header', async () => {
     const el = await setup(false);
     expect(el.querySelector('lib-page-header')).not.toBeNull();

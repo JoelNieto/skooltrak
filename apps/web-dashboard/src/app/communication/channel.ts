@@ -84,10 +84,18 @@ const REFRESH_MS = 30_000;
               <p class="text-sm text-ink-muted">{{ c.description }}</p>
             }
           </div>
-          <a uiButton variant="ghost" size="sm" [routerLink]="['/communication/channels', c.id]">
-            <ui-icon name="external-link" />
-            Abrir en pantalla completa
-          </a>
+          <div class="flex flex-wrap gap-2">
+            @if (manager()) {
+              <button uiButton variant="ghost" size="sm" type="button" (click)="edit()">
+                <ui-icon name="settings" />
+                Configurar
+              </button>
+            }
+            <a uiButton variant="ghost" size="sm" [routerLink]="['/communication/channels', c.id]">
+              <ui-icon name="external-link" />
+              Abrir en pantalla completa
+            </a>
+          </div>
         </header>
       } @else {
         <lib-page-header

@@ -37,7 +37,7 @@ import { CourseGradesSummaryView } from './course-grades-summary';
 import { CourseParticipants, CourseParticipantsList } from './course-participants';
 import { CourseOverview } from './course-overview';
 import { CourseChannelsList } from './course-channels-list';
-import { askChannel, courseChannels, newCount, openChannelId } from './course-channels';
+import { askChannel, ChannelViewer, courseChannels, newCount, openChannelId } from './course-channels';
 import Channel from '../communication/channel';
 import { CourseWork } from './course-work';
 import { CommunicationApi } from '../communication/communication-api';
@@ -210,7 +210,8 @@ type CourseVm = {
                     Preguntar en el curso
                   </button>
                 }
-                @if (canOpenChannel()) {
+                @if (canOpenChannel() && !showChannels()) {
+                  <!-- Without COMMUNICATION_VIEW managers keep the Canal button (BR-ACA-001.19). -->
                   <button
                     uiButton
                     variant="ghost"
@@ -301,6 +302,13 @@ type CourseVm = {
                     Asistencia
                   </button>
                 }
+                @if (showChannels()) {
+                  <!-- FR-ACA-001.27: managers post, see receipts and answer here. -->
+                  <button uiTab value="channels">
+                    <ui-icon name="message-circle" class="text-xl" />
+                    Canales
+                  </button>
+                }
                 <button uiTab value="participants">
                   <ui-icon name="users" class="text-xl" />
                   Participantes
@@ -384,47 +392,70 @@ type CourseVm = {
                 }
               </ng-template>
             </div>
-            @if (showChannels()) {
-              <div uiTabPanel uiCard value="channels" class="p-6">
-                <ng-template uiTabContent>
-                  <!-- FR-ACA-001.26: the list, and the chosen channel beside it; stacked on a phone. -->
-                  <div class="grid gap-6 md:grid-cols-[minmax(16rem,20rem)_minmax(0,1fr)]">
-                    <div class="md:block" [class.hidden]="phoneShowsChannel()">
-                      <app-course-channels-list
-                        [channels]="channels()"
-                        [loading]="channelsRes.isLoading()"
-                        [error]="!!channelsRes.error()"
-                        [selectedId]="shownChannelId()"
-                        (retry)="channelsRes.reload()"
-                        (choose)="openInTab($event)"
-                      />
-                    </div>
-                    <div class="min-w-0 md:block" [class.hidden]="!phoneShowsChannel()">
-                      @if (shownChannelId(); as channelId) {
-                        <button
-                          uiButton
-                          variant="ghost"
-                          size="sm"
-                          type="button"
-                          class="mb-3 md:hidden"
-                          (click)="phoneShowsChannel.set(false)"
-                        >
-                          <ui-icon name="arrow-left" />
-                          Volver a canales
-                        </button>
-                        <app-channel [id]="channelId" [embedded]="true" (read)="channelsRes.reload()" />
-                      } @else if (channels().length) {
-                        <lib-empty-state
-                          title="Elige un canal para leerlo"
-                          description="Sus publicaciones y respuestas se abren aquí, sin salir del curso."
-                          icon="message-circle"
-                        />
-                      }
-                    </div>
+          }
+
+          @if (showChannels()) {
+            <div uiTabPanel uiCard value="channels" class="p-6">
+              <ng-template uiTabContent>
+                <!-- FR-ACA-001.26, .27: the list, and the chosen channel beside it; stacked on a phone. -->
+                <div class="grid gap-6 md:grid-cols-[minmax(16rem,20rem)_minmax(0,1fr)]">
+                  <div class="md:block" [class.hidden]="phoneShowsChannel()">
+                    @if (channelsViewer() === 'MANAGER') {
+                      <button
+                        uiButton
+                        variant="secondary"
+                        size="sm"
+                        type="button"
+                        class="mb-3 w-full"
+                        (click)="newCourseChannel()"
+                      >
+                        <ui-icon name="plus" />
+                        Nuevo canal para este curso
+                      </button>
+                    }
+                    <app-course-channels-list
+                      [channels]="channels()"
+                      [loading]="channelsRes.isLoading()"
+                      [error]="!!channelsRes.error()"
+                      [selectedId]="shownChannelId()"
+                      [emptyDescription]="
+                        channelsViewer() === 'MANAGER'
+                          ? 'Crea el primero con «Nuevo canal para este curso».'
+                          : 'Cuando tu docente cree un canal para el curso, aparecerá aquí.'
+                      "
+                      (retry)="channelsRes.reload()"
+                      (choose)="openInTab($event)"
+                    />
                   </div>
-                </ng-template>
-              </div>
-            }
+                  <div class="min-w-0 md:block" [class.hidden]="!phoneShowsChannel()">
+                    @if (shownChannelId(); as channelId) {
+                      <button
+                        uiButton
+                        variant="ghost"
+                        size="sm"
+                        type="button"
+                        class="mb-3 md:hidden"
+                        (click)="phoneShowsChannel.set(false)"
+                      >
+                        <ui-icon name="arrow-left" />
+                        Volver a canales
+                      </button>
+                      <app-channel [id]="channelId" [embedded]="true" (read)="channelsRes.reload()" />
+                    } @else if (channels().length) {
+                      <lib-empty-state
+                        [title]="
+                          channelsViewer() === 'MANAGER'
+                            ? 'Elige un canal para publicar o responder'
+                            : 'Elige un canal para leerlo'
+                        "
+                        description="Sus publicaciones y respuestas se abren aquí, sin salir del curso."
+                        icon="message-circle"
+                      />
+                    }
+                  </div>
+                </div>
+              </ng-template>
+            </div>
           }
 
           <div uiTabPanel uiCard value="grades" class="p-6">
@@ -519,9 +550,9 @@ export default class Course {
   });
   /** Selected section; the tab list and panels follow it. Families start on Resumen. */
   readonly tab = linkedSignal<{ family: boolean; canal: boolean }, string>({
-    source: () => ({ family: this.family(), canal: !!this.canal() }),
-    // FR-ACA-001.26: a `?canal=` link opens on the Canales tab.
-    computation: ({ family, canal }) => (family ? (canal ? 'channels' : 'overview') : 'grades'),
+    source: () => ({ family: this.family(), canal: !!this.canal() && this.showChannels() }),
+    // FR-ACA-001.26, .27: a `?canal=` link opens on the Canales tab.
+    computation: ({ family, canal }) => (canal ? 'channels' : family ? 'overview' : 'grades'),
   });
 
   protected readonly forbidden = computed(() => {
@@ -548,21 +579,24 @@ export default class Course {
   private communication = inject(CommunicationApi);
 
   /**
-   * FR-ACA-001.21, .22: students and parents read the course's channels from COM-003. Staff manage
-   * them through *Canal* and a homeroom teacher is neither manager nor member (BR-ACA-001.19); without
-   * COMMUNICATION_VIEW nothing is requested (BR .17).
+   * FR-ACA-001.21, .22, .27: students and parents read the course's channels from COM-003, and its
+   * teacher or an admin manage them in the same tab. A homeroom teacher is neither manager nor member
+   * (BR-ACA-001.19); without COMMUNICATION_VIEW nothing is requested (BR .17).
    */
-  protected readonly showChannels = computed(() => {
+  protected readonly channelsViewer = computed<ChannelViewer | null>(() => {
+    if (!this.auth.hasPermission('COMMUNICATION_VIEW')) return null;
     const kind = this.viewerKind();
-    return (kind === 'STUDENT' || kind === 'PARENT') && this.auth.hasPermission('COMMUNICATION_VIEW');
+    if (kind === 'STUDENT' || kind === 'PARENT') return kind;
+    // FR-ACA-001.27: the course's teacher or an admin, who manage its channels (BR-COM-003.3).
+    return this.canOpenChannel() ? 'MANAGER' : null;
   });
+  protected readonly showChannels = computed(() => !!this.channelsViewer());
   protected readonly channelsRes = httpResource<ChannelSummary[]>(() =>
     this.showChannels() ? '/api/v1/communication/channels' : undefined,
   );
   protected readonly channels = computed(() => {
-    const kind = this.viewerKind();
-    if (kind !== 'STUDENT' && kind !== 'PARENT') return [];
-    return courseChannels(this.channelsRes.value() ?? [], this.id(), kind);
+    const viewer = this.channelsViewer();
+    return viewer ? courseChannels(this.channelsRes.value() ?? [], this.id(), viewer) : [];
   });
   /** FR-ACA-001.25: students only; hidden without an open course conversation. */
   protected readonly ask = computed(() => (this.viewerKind() === 'STUDENT' ? askChannel(this.channels()) : null));
@@ -590,6 +624,13 @@ export default class Course {
     });
   }
   openingChannel = signal(false);
+
+  /** FR-ACA-001.27: the channel form, already set to this course (COM-003 §7). */
+  protected newCourseChannel() {
+    void this.router.navigate(['/communication/channels/new'], {
+      queryParams: { scope: 'COURSE', targetId: this.id() },
+    });
+  }
 
   /** BR-COM-003.2: the course's teacher or an admin manages its channel. */
   canOpenChannel() {

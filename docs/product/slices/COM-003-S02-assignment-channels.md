@@ -4,7 +4,7 @@
 |---|---|
 | **FRD** | [COM-003](../frd/COM-003-channels-and-direct.md) |
 | **Implements** | FR-COM-003.17, FR-COM-003.18; BR-COM-003.10, BR-COM-003.11, BR-COM-003.13 |
-| **Status** | Ready |
+| **Status** | In review |
 | **Branch** | `feat/COM-003-S02-assignment-channels` |
 | **Estimate** | 2.5 days |
 | **Decided** | 2026-11-25 (ACA-001 Q10): every assignment gets one; students reply under a pinned post; it closes 3 days after the latest due date |
@@ -65,17 +65,17 @@ Scenario: another organization
   - `ChannelScope` gains `ASSIGNMENT`;
   - `Channel` gains `assignmentId String? @unique` (relation to `Assignment`, `onDelete: Cascade`) and `closesAt DateTime?`;
   - `ChannelPost` gains `pinned Boolean @default(false)`.
-  - **Backfill (BR-COM-003.13, decided 2026-11-25):** a Q&A channel and pinned post for each assignment whose latest date + 3 days is still ahead, by the same idempotent `ensureFor`.
+  - **Backfill (BR-COM-003.13, decided 2026-11-25):** a second migration, `20261125120100_assignment_channels_backfill`, inserts a Q&A channel and pinned post (same text as `ensureFor`) for each assignment whose latest date + 3 days is still ahead, skipping assignments that have one. It is separate because Postgres can't use a new enum value in the transaction that added it.
 - [ ] Nest, COM (`apps/dashboard-backend/src/app/communication`):
   - `channel-audience.ts`: the `ASSIGNMENT` case in `channelStudentWhere`, `memberChannelWhere` and the manager checks (as `COURSE`, for the assignment's course).
   - A single `isClosed(channel)` = `archivedAt || closesAt <= now`, replacing each `archivedAt` check (post, reply, `canReply`, `memberCanReply`). `summary()` lists a closed channel as `archived`.
-  - `ChannelsService.create` refuses `ASSIGNMENT` (`400`). A new `AssignmentChannels` service, `ensureFor(assignmentId, authorUserId)`, creates the channel and its pinned post in one transaction and is idempotent (`assignmentId` is unique). `syncCloseTime(assignmentId)` recomputes `closesAt`.
+  - `ChannelsService.create` refuses `ASSIGNMENT` (`400`). A new `AssignmentChannelsService.ensureFor(assignmentId)` creates the channel and its pinned post in one transaction, authored by the assignment's teacher, and is idempotent (`assignmentId` is unique; a concurrent duplicate returns the existing channel). `syncCloseTime(assignmentId)` recomputes `closesAt`.
   - `channels/targets` never offers `ASSIGNMENT`.
   - Posts come back pinned first, then newest first.
 - [ ] Nest, ASM (`assignments.service.ts`): after `create`, call `ensureFor`; after `update` (which may add dates), call `syncCloseTime`. Deleting cascades. This is the only change outside COM.
 - [ ] Shared (`libs/shared/src/lib/communication.ts`): `ChannelScopeKey` and `CHANNEL_SCOPE_LABELS` gain `ASSIGNMENT: 'Asignación'`; `ChannelSummary` gains `assignmentId` and `closesAt`; `ChannelPost` gains `pinned`.
-- [ ] OpenAPI → `bun run openapi:orval`.
-- [ ] Angular (`communication/`): the channel page shows *"Fijado"* on the pinned post and *"Cierra el {día}"* / *"Cerrado"* in the header; the create form never offers `ASSIGNMENT`. Nothing in ACA yet (that's ACA-001-S21).
+- [ ] OpenAPI: no change. The communication contracts are the shared types in `libs/shared`, not OpenAPI schemas; regenerating only reorders paths.
+- [ ] Angular (`communication/`): the channel page shows *"Fijado"* on the pinned post, *"Cierra el dd/mm/aaaa"* while open, and *"Este canal de preguntas cerró el dd/mm/aaaa"* once closed; the create form never offers `ASSIGNMENT`. Nothing in ACA yet (that's ACA-001-S21).
 - [ ] Tests:
   - Nest unit: audience by assignment groups; `400` on direct create; idempotent `ensureFor`; `closesAt` from the latest date + 3 days and recomputed on update; closed refuses posts and replies; cross-tenant refusal.
   - Playwright `communication/assignment-channels.after.spec.ts` (`@FR-COM-003.17 @FR-COM-003.18`). It creates its assignments through the API. Use an `after` spec, because new channels change channel counts other specs assert.

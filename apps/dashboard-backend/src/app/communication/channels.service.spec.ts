@@ -1,8 +1,10 @@
 import { BadRequestException, ForbiddenException, NotFoundException } from '@nestjs/common';
+import { plainToInstance } from 'class-transformer';
+import { validate } from 'class-validator';
 
 jest.mock('../prisma.service', () => ({ PrismaService: class {} }));
 
-import { memberCanReply, memberChannelWhere, MemberContext, memberKinds } from './channel-audience';
+import { channelStudentWhere, isClosed, memberCanReply, memberChannelWhere, MemberContext, memberKinds } from './channel-audience';
 import {
   ADMIN_LEVEL_ONLY,
   ARCHIVED,
@@ -13,7 +15,8 @@ import {
   REPLIES_DISABLED,
   TARGET_DENIED,
 } from './channels.service';
-import { STAFF_ONLY } from './communication-access';
+import { managedChannelWhere, STAFF_ONLY } from './communication-access';
+import { CreateChannelInput } from './dto/communication.input';
 
 /**
  * COM-003 channels. Org org-1 has school S1, plan P1, group G1 (plan P1) and course C1 (plan P1),
@@ -242,6 +245,96 @@ describe('ChannelsService (COM-003)', () => {
     it('does not post to an archived channel @FR-COM-003.5', async () => {
       const { service } = setup({ manages: true, channel: channel({ archivedAt: new Date() }) });
       await expect(service.createPost(admin, 'CH1', { body: 'Hola' })).rejects.toThrow(new ForbiddenException(ARCHIVED));
+    });
+  });
+
+  describe('assignment Q&A channels (COM-003-S02)', () => {
+    const qa = (over: Record<string, unknown> = {}) =>
+      channel({
+        scope: 'ASSIGNMENT',
+        classGroupId: null,
+        courseId: 'C1',
+        assignmentId: 'A1',
+        audienceParents: false,
+        studentsCanReply: true,
+        parentsCanReply: false,
+        replyVisibility: 'PUBLIC',
+        closesAt: new Date(Date.now() + 86_400_000),
+        assignment: { title: 'Fracciones', dates: [{ classGroupId: 'G1' }] },
+        course: { name: 'Matemáticas 7' },
+        ...over,
+      });
+    const asStudent: MemberContext = {
+      userId: 'u-student',
+      asStudent: [
+        { organizationId: 'org-1', schoolId: 'S1', studyPlanId: 'P1', classGroupId: 'G1', courseIds: ['C1'] },
+      ],
+      asParent: [],
+    };
+
+    it("reaches students of the course in the assignment's groups only @BR-COM-003.10", () => {
+      expect(memberKinds(qa() as never, asStudent)).toEqual(new Set(['STUDENT']));
+      expect(
+        memberKinds(qa({ assignment: { title: 'x', dates: [{ classGroupId: 'G9' }] } }) as never, asStudent),
+      ).toEqual(new Set());
+      expect(memberKinds(qa({ courseId: 'C2' }) as never, asStudent)).toEqual(new Set());
+      // Students only: parents are never in an assignment channel's audience.
+      expect(memberKinds(qa() as never, { userId: 'u-parent', asStudent: [], asParent: asStudent.asStudent })).toEqual(
+        new Set(),
+      );
+
+      expect(channelStudentWhere(qa() as never)).toMatchObject({
+        classGroup: { assignmentDates: { some: { assignmentId: 'A1' } } },
+        courseEnrollments: { some: expect.objectContaining({ courseId: 'C1' }) },
+      });
+      expect(JSON.stringify(memberChannelWhere(asStudent))).toContain('"scope":"ASSIGNMENT"');
+    });
+
+    it('is managed like its course: by the course teacher and the admins @BR-COM-003.10', () => {
+      const where = managedChannelWhere({
+        userId: 'u-teacher',
+        organizationId: 'org-1',
+        admin: false,
+        teacherId: 'T1',
+      });
+      expect(where.OR).toContainEqual({ scope: 'ASSIGNMENT', course: { teacherId: 'T1' } });
+    });
+
+    it('is closed once its close time passes, like an archived channel @FR-COM-003.18 @BR-COM-003.11', async () => {
+      expect(isClosed({ archivedAt: null, closesAt: new Date(Date.now() + 60_000) })).toBe(false);
+      expect(isClosed({ archivedAt: null, closesAt: new Date(Date.now() - 60_000) })).toBe(true);
+      expect(isClosed({ archivedAt: null, closesAt: null })).toBe(false);
+      expect(
+        memberCanReply(qa({ closesAt: new Date(Date.now() - 60_000) }) as never, new Set(['STUDENT'] as const)),
+      ).toBe(false);
+
+      const closed = qa({ closesAt: new Date(Date.now() - 60_000) });
+      await expect(setup({ channel: closed }).service.reply(student, 'CH1', 'POST1', { body: 'Hola' })).rejects.toThrow(
+        new ForbiddenException(ARCHIVED),
+      );
+      await expect(
+        setup({ manages: true, channel: closed }).service.createPost(admin, 'CH1', { body: 'Hola' }),
+      ).rejects.toThrow(new ForbiddenException(ARCHIVED));
+    });
+
+    it('lets students reply in public under the opening post while open @FR-COM-003.17', async () => {
+      const { service, replies } = setup({ channel: qa() });
+      await service.reply(student, 'CH1', 'POST1', { body: '¿Se simplifica?' });
+      expect(replies).toEqual([
+        { postId: 'POST1', authorId: 'u-student', threadUserId: null, body: '¿Se simplifica?' },
+      ]);
+    });
+
+    it('is never created directly: POST /channels refuses the ASSIGNMENT level with 400 @BR-COM-003.10', async () => {
+      const dto = plainToInstance(CreateChannelInput, {
+        scope: 'ASSIGNMENT',
+        targetId: 'A1',
+        name: 'x',
+        audienceStudents: true,
+        audienceParents: false,
+      });
+      const errors = await validate(dto);
+      expect(errors.map((e) => e.property)).toContain('scope');
     });
   });
 });

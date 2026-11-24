@@ -66,7 +66,7 @@ export function isAdminRole(role: string): boolean {
 
 /**
  * Channels the staff member manages (BR .3): every channel of the organization for admins; for
- * teachers, the channels of their courses and of class groups related to them.
+ * teachers, the channels of their courses (and their assignments) and of class groups related to them.
  */
 export function managedChannelWhere(staff: StaffCaller): Prisma.ChannelWhereInput {
   if (staff.admin) return { organizationId: staff.organizationId };
@@ -75,6 +75,8 @@ export function managedChannelWhere(staff: StaffCaller): Prisma.ChannelWhereInpu
     organizationId: staff.organizationId,
     OR: [
       { scope: 'COURSE', course: { teacherId: staff.teacherId } },
+      // BR-COM-003.10: an assignment's Q&A channel is managed like its course's channels.
+      { scope: 'ASSIGNMENT', course: { teacherId: staff.teacherId } },
       { scope: 'CLASS_GROUP', classGroup: teacherClassGroupWhere(staff.teacherId) },
     ],
   };

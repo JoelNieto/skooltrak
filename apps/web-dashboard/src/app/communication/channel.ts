@@ -114,6 +114,10 @@ const REFRESH_MS = 30_000;
 
       <div class="flex flex-wrap gap-2 mb-4">
         <span uiBadge size="sm">{{ audienceLabel(c) }}</span>
+        @if (c.closesAt && !c.archived) {
+          <!-- COM-003 FR .18: an assignment's Q&A channel closes 3 days after its latest due date. -->
+          <span uiBadge tone="warning" size="sm">Cierra el {{ c.closesAt | date: 'dd/MM/yyyy' }}</span>
+        }
         <span uiBadge size="sm">{{ repliesLabel(c) }}</span>
         @if (c.studentsCanReply || c.parentsCanReply) {
           <span uiBadge size="sm">{{
@@ -124,7 +128,12 @@ const REFRESH_MS = 30_000;
 
       @if (c.archived) {
         <div uiAlert tone="warning" class="mb-4">
-          Este canal está archivado: se puede leer, pero no admite publicaciones ni respuestas.
+          @if (closedOn(c); as closed) {
+            Este canal de preguntas cerró el {{ closed | date: 'dd/MM/yyyy' }}: se puede leer, pero no admite
+            publicaciones ni respuestas.
+          } @else {
+            Este canal está archivado: se puede leer, pero no admite publicaciones ni respuestas.
+          }
         </div>
       }
 
@@ -176,6 +185,10 @@ const REFRESH_MS = 30_000;
                 <span class="text-ink-muted">{{ p.createdAt | date: 'medium' }}</span>
                 @if (!manager() && !p.readAt && unreadIds().has(p.id)) {
                   <span uiBadge tone="new" size="sm">Nuevo</span>
+                }
+                @if (p.pinned) {
+                  <!-- COM-003 FR .17: the opening post of an assignment's Q&A channel. -->
+                  <span uiBadge tone="action" size="sm"><ui-icon name="pin" /> Fijado</span>
                 }
                 @if (p.requiresConfirmation) {
                   <span uiBadge tone="info" size="sm">Requiere confirmación</span>
@@ -328,6 +341,11 @@ export default class Channel {
     });
     const timer = setInterval(() => this.detail.reload(), REFRESH_MS);
     inject(DestroyRef).onDestroy(() => clearInterval(timer));
+  }
+
+  /** COM-003 BR .11: when a closed channel closed by its close time (not by being archived). */
+  closedOn(c: ChannelDetail): string | null {
+    return c.closesAt && new Date(c.closesAt) <= new Date() ? c.closesAt : null;
   }
 
   audienceLabel(c: ChannelDetail) {

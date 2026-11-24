@@ -1,4 +1,4 @@
-import { CHANNEL_SCOPES, ChannelScopeKey, ChannelReplyVisibilityKey } from '@/shared';
+import { ChannelReplyVisibilityKey, CREATABLE_CHANNEL_SCOPES, CreatableChannelScopeKey } from '@/shared';
 import { IsBoolean, IsIn, IsNotEmpty, IsOptional, IsString, MaxLength } from 'class-validator';
 
 const VISIBILITIES: ChannelReplyVisibilityKey[] = ['PUBLIC', 'PRIVATE'];
@@ -44,8 +44,9 @@ export class UpdateChannelInput {
 
 /** `POST /v1/communication/channels` (FR-COM-003.1–.4). */
 export class CreateChannelInput {
-  @IsIn([...CHANNEL_SCOPES])
-  scope: ChannelScopeKey;
+  /** ASSIGNMENT channels are only created with their assignment (BR-COM-003.10): 400 here. */
+  @IsIn([...CREATABLE_CHANNEL_SCOPES])
+  scope: CreatableChannelScopeKey;
 
   /** The school, study plan, class group or course id. Omitted for ORGANIZATION. */
   @IsOptional()

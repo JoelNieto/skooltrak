@@ -17,6 +17,8 @@ const channel = (over: Partial<ChannelSummary>): ChannelSummary => ({
   studyPlanId: null,
   classGroupId: null,
   courseId: 'math',
+  assignmentId: null,
+  closesAt: null,
   name: 'Canal',
   description: '',
   audienceStudents: true,

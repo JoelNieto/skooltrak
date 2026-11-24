@@ -4,9 +4,9 @@ import {
   ChannelPost,
   ChannelReceipt,
   ChannelReplyThread,
-  ChannelScopeKey,
   ChannelSummary,
   ChannelTarget,
+  CreatableChannelScopeKey,
   personName,
   preview,
   RecentChannelPost,
@@ -17,6 +17,7 @@ import { PrismaService } from '../prisma.service';
 import { teacherClassGroupWhere } from '../teachers/teacher-scope';
 import {
   audienceMembers,
+  isClosed,
   MemberContext,
   memberCanReply,
   memberChannelWhere,
@@ -47,6 +48,8 @@ const CHANNEL_INCLUDE = {
   studyPlan: { select: { name: true } },
   classGroup: { select: { name: true } },
   course: { select: { name: true } },
+  // ASSIGNMENT channels (BR-COM-003.10): the groups that put students in the audience.
+  assignment: { select: { title: true, dates: { select: { classGroupId: true } } } },
 } satisfies Prisma.ChannelInclude;
 
 type ChannelRow = Prisma.ChannelGetPayload<{ include: typeof CHANNEL_INCLUDE }>;
@@ -70,6 +73,7 @@ function targetName(c: ChannelRow): string {
     case 'CLASS_GROUP':
       return c.classGroup?.name ?? '—';
     case 'COURSE':
+    case 'ASSIGNMENT':
       return c.course?.name ?? '—';
   }
 }
@@ -166,7 +170,7 @@ export class ChannelsService {
   }
 
   /** BR .2: what the caller may target at a level, for the create form. */
-  async targets(user: AuthUserContext | undefined, scope: ChannelScopeKey, schoolId?: string): Promise<ChannelTarget[]> {
+  async targets(user: AuthUserContext | undefined, scope: CreatableChannelScopeKey, schoolId?: string): Promise<ChannelTarget[]> {
     const staff = await requireStaff(this.prisma, user);
     const org = staff.organizationId;
     const school = schoolId ? { schoolId } : {};
@@ -271,7 +275,7 @@ export class ChannelsService {
   /** FR .6. */
   async createPost(user: AuthUserContext | undefined, channelId: string, input: CreateChannelPostInput): Promise<ChannelPost> {
     const { channel, staff } = await this.manage(user, channelId);
-    if (channel.archivedAt) throw new ForbiddenException(ARCHIVED);
+    if (isClosed(channel)) throw new ForbiddenException(ARCHIVED);
     const post = await this.prisma.channelPost.create({
       data: {
         channelId,
@@ -327,7 +331,8 @@ export class ChannelsService {
 
     const posts = await this.prisma.channelPost.findMany({
       where: { channelId, deletedAt: null },
-      orderBy: { createdAt: 'desc' },
+      // FR-COM-003.17: an assignment channel's opening post comes first.
+      orderBy: [{ pinned: 'desc' }, { createdAt: 'desc' }],
       take: MAX_POSTS,
       include: {
         author: PERSON,
@@ -370,7 +375,7 @@ export class ChannelsService {
     }
 
     const unread = manager ? 0 : posts.filter((p) => p.reads.length === 0 && p.authorId !== me.userId).length;
-    const canReply = manager ? !channel.archivedAt : memberCanReply(channel, access.kinds);
+    const canReply = manager ? !isClosed(channel) : memberCanReply(channel, access.kinds);
     return {
       ...this.summary(channel, access.role, unread, posts[0]),
       canReply,
@@ -475,7 +480,7 @@ export class ChannelsService {
     const access = await this.access(me, channelId);
     await this.findPost(channelId, postId);
     const { channel } = access;
-    if (channel.archivedAt) throw new ForbiddenException(ARCHIVED);
+    if (isClosed(channel)) throw new ForbiddenException(ARCHIVED);
     const isPrivate = channel.replyVisibility === 'PRIVATE';
 
     let threadUserId: string | null = null;
@@ -516,6 +521,8 @@ export class ChannelsService {
       studyPlanId: c.studyPlanId,
       classGroupId: c.classGroupId,
       courseId: c.courseId,
+      assignmentId: c.assignmentId,
+      closesAt: c.closesAt?.toISOString() ?? null,
       name: c.name,
       description: c.description,
       audienceStudents: c.audienceStudents,
@@ -523,7 +530,7 @@ export class ChannelsService {
       studentsCanReply: c.studentsCanReply,
       parentsCanReply: c.parentsCanReply,
       replyVisibility: c.replyVisibility,
-      archived: !!c.archivedAt,
+      archived: isClosed(c),
       role,
       unread,
       lastPostAt: last?.createdAt.toISOString() ?? null,
@@ -537,6 +544,7 @@ export class ChannelsService {
       body: string;
       createdAt: Date;
       requiresConfirmation: boolean;
+      pinned: boolean;
       author: { id: string; name: string | null; firstName: string; lastName: string } | null;
     },
     read: { readAt: Date; confirmedAt: Date | null } | null,
@@ -549,6 +557,7 @@ export class ChannelsService {
       author: person(p.author),
       createdAt: p.createdAt.toISOString(),
       requiresConfirmation: p.requiresConfirmation,
+      pinned: p.pinned,
       readAt: read?.readAt.toISOString() ?? null,
       confirmedAt: read?.confirmedAt?.toISOString() ?? null,
       replyCount,
@@ -627,7 +636,7 @@ export class ChannelsService {
   /** BR .2: the target exists in the caller's organization and the caller may address it. */
   private async resolveTarget(
     staff: StaffCaller,
-    scope: ChannelScopeKey,
+    scope: CreatableChannelScopeKey,
     targetId: string | undefined,
   ): Promise<Pick<Prisma.ChannelUncheckedCreateInput, 'schoolId' | 'studyPlanId' | 'classGroupId' | 'courseId'>> {
     const org = staff.organizationId;

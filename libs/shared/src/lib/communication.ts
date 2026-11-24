@@ -4,8 +4,13 @@
  * (staff ↔ parent). Dates are ISO strings.
  */
 
-export const CHANNEL_SCOPES = ['ORGANIZATION', 'SCHOOL', 'STUDY_PLAN', 'CLASS_GROUP', 'COURSE'] as const;
+/** Every channel level. ASSIGNMENT channels are created with their assignment only (BR-COM-003.10). */
+export const CHANNEL_SCOPES = ['ORGANIZATION', 'SCHOOL', 'STUDY_PLAN', 'CLASS_GROUP', 'COURSE', 'ASSIGNMENT'] as const;
 export type ChannelScopeKey = (typeof CHANNEL_SCOPES)[number];
+
+/** The levels staff may create a channel at (FR-COM-003.1). */
+export const CREATABLE_CHANNEL_SCOPES = ['ORGANIZATION', 'SCHOOL', 'STUDY_PLAN', 'CLASS_GROUP', 'COURSE'] as const;
+export type CreatableChannelScopeKey = (typeof CREATABLE_CHANNEL_SCOPES)[number];
 
 export const CHANNEL_SCOPE_LABELS: Record<ChannelScopeKey, string> = {
   ORGANIZATION: 'Organización',
@@ -13,6 +18,7 @@ export const CHANNEL_SCOPE_LABELS: Record<ChannelScopeKey, string> = {
   STUDY_PLAN: 'Plan de estudio',
   CLASS_GROUP: 'Grupo',
   COURSE: 'Curso',
+  ASSIGNMENT: 'Asignación',
 };
 
 export type ChannelReplyVisibilityKey = 'PUBLIC' | 'PRIVATE';
@@ -44,6 +50,11 @@ export interface ChannelSummary extends ChannelSettings {
   studyPlanId: string | null;
   classGroupId: string | null;
   courseId: string | null;
+  /** ASSIGNMENT channels: their assignment (FR-COM-003.17). */
+  assignmentId: string | null;
+  /** ASSIGNMENT channels: when they close, 3 days after the latest due date (BR-COM-003.11). */
+  closesAt: string | null;
+  /** Archived, or closed (BR-COM-003.11): readable, no new posts or replies. */
   archived: boolean;
   role: ChannelRole;
   /** Posts the caller hasn't read (always 0 for managers). */
@@ -65,6 +76,8 @@ export interface ChannelPost {
   author: CommPerson | null;
   createdAt: string;
   requiresConfirmation: boolean;
+  /** The opening post of an ASSIGNMENT channel, listed first (FR-COM-003.17). */
+  pinned: boolean;
   /** The caller's own read / confirmation (members). */
   readAt: string | null;
   confirmedAt: string | null;

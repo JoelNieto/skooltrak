@@ -116,6 +116,17 @@ Code: `home` (planned); `web-dashboard` `/home` → `home.ts`, `teacher-home.ts`
 | Parent home (per-child alerts, progress, account) | Partial (HOM-001 S06–S07 in review) | [HOM-001](frd/HOM-001-persona-home-dashboards.md) |
 | School admin home (attention, KPIs, academics, finance, reach) | Partial (HOM-001 S08 in review; S09–S10 proposed) | [HOM-001](frd/HOM-001-persona-home-dashboards.md) |
 
+## MOB: Mobile app
+A phone client (iOS/Android) for parents, students and teachers. It uses the `dashboard-backend` API and owns only device and push-preference data.
+Code: `apps/mobile` (planned, Angular + Capacitor); push and devices in `dashboard-backend` (planned)
+
+| Capability | Status | FRD |
+|---|---|---|
+| App shell, login, role tabs, release pipeline | Planned | [MOB-001](frd/MOB-001-mobile-app.md) |
+| Parent screens (home, courses, course detail, messages, announcements, payments) | Planned | [MOB-001](frd/MOB-001-mobile-app.md) |
+| Teacher screens (home, attendance, messages) and student screens (home, courses, work) | Planned (needs design) | [MOB-001](frd/MOB-001-mobile-app.md) |
+| Push notifications (devices, preferences, direct / confirmation / absence events) | Planned | [MOB-001](frd/MOB-001-mobile-app.md) |
+
 ## PLT: Platform Administration
 Code: `apps/web-admin`, `apps/admin-backend`
 

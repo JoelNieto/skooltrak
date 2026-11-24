@@ -4,7 +4,7 @@
 |---|---|
 | **FRD** | [ACA-001](../frd/ACA-001-course-experience.md) |
 | **Implements** | FR-ACA-001.25 (Q9 (a)); BR-ACA-001.18 |
-| **Status** | In review |
+| **Status** | Done (#87) |
 | **Branch** | `feat/ACA-001-S17-ask-in-course` (built on S15) |
 | **Estimate** | 0.5 day |
 

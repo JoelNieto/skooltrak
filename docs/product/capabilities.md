@@ -52,7 +52,7 @@ Code: `courses`, `assignments`, `assignment-submissions`, `quizzes`, `files`
 | Capability | Status | FRD |
 |---|---|---|
 | Courses (per study plan) | Live | — |
-| Course experience: colored course cards with progress, course page with assignments/grades/participants | Shipped (color and icon S01, roster S11, students' *Mis cursos* cards with schedule, teacher and period average S02, next delivery, progress and stats row S03, subject areas and filter chips S04, the same view for parents per child S05, course page header, Resumen and Asignaciones with access limited to the course's people S06, Calificaciones with category bars S07, Participantes S08, teachers set color, icon or cover photo S09, admins add and remove students on a course S12, the homeroom teacher's read-only Cursos de {grupo} S13, staff cards with area chip and course name S14; course channels on the course page S15; in review: unread badges on Mis cursos S16, "Preguntar en el curso" S17; channels read and written inside the course S18–S19 (in review), "por responder" S20, assignment Q&A S21) | [ACA-001](frd/ACA-001-course-experience.md) |
+| Course experience: colored course cards with progress, course page with assignments/grades/participants | Shipped (color and icon S01, roster S11, students' *Mis cursos* cards with schedule, teacher and period average S02, next delivery, progress and stats row S03, subject areas and filter chips S04, the same view for parents per child S05, course page header, Resumen and Asignaciones with access limited to the course's people S06, Calificaciones with category bars S07, Participantes S08, teachers set color, icon or cover photo S09, admins add and remove students on a course S12, the homeroom teacher's read-only Cursos de {grupo} S13, staff cards with area chip and course name S14; course channels on the course page S15, unread badges on Mis cursos S16, "Preguntar en el curso" S17, channels read and written inside the course S18–S19; next: "por responder" S20, assignment Q&A S21) | [ACA-001](frd/ACA-001-course-experience.md) |
 | Assignments & submissions | Live (work reads *Calificada · n* / *Exenta* once its linked grade is published, ACA-001-S10) | — |
 | Quizzes (questions, schedules, submissions) | Live | — |
 | Files & sharing (user / school / group / course) | Live | — |
@@ -83,7 +83,7 @@ Code: `communication` (REST `/v1/communication/channels`, `/v1/communication/dir
 
 | Capability | Status | FRD |
 |---|---|---|
-| Channels at org / school / plan / group / course level, with read counts and read confirmations | In build | [COM-003](frd/COM-003-channels-and-direct.md) |
+| Channels at org / school / plan / group / course level, with read counts and read confirmations | In build (next: assignment Q&A channels S02, *por responder* for managers S03) | [COM-003](frd/COM-003-channels-and-direct.md) |
 | Direct messages staff ↔ parents | In build | [COM-003](frd/COM-003-channels-and-direct.md) |
 | Broadcasts, v2 threads, chats, legacy messages, newsletters | Removed (replaced by COM-003) | [COM-002](frd/COM-002-broadcasts.md) |
 

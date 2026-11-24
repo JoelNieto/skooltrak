@@ -5,7 +5,7 @@
 | **Status** | In build |
 | **Context** | COM — Communication (see [capabilities](../capabilities.md#com-communication)) |
 | **Owner** | — |
-| **Last updated** | 2026-11-23 |
+| **Last updated** | 2026-11-25 |
 | **Related** | Replaces [COM-002](COM-002-broadcasts.md) (broadcasts), the v2 communication threads, legacy chats, legacy messages and newsletters · `apps/dashboard-backend/src/app/communication/` · `apps/web-dashboard/src/app/communication/` |
 
 ## 1. Problem & outcome
@@ -52,6 +52,11 @@ Everything else is removed.
 - **FR-COM-003.15**: The sidebar shows the unread count for channels and for direct messages.
 - **FR-COM-003.16**: Home pages show the latest channel posts (every role), the teacher's direct conversations waiting for an answer, and each child's direct conversations on the parent home.
 
+### Assignment Q&A channels *(decided 2026-11-25, from ACA-001 Q10)*
+- **FR-COM-003.17**: Creating an assignment creates its **Q&A channel**, at the new level `ASSIGNMENT`. It is named after the assignment, its audience is students only, students may reply, and replies are public. It opens with a pinned post by the assignment's teacher: *"Preguntas sobre «{título}». Pregunten aquí; todos ven las respuestas."* Students ask by replying under it (FR .10); only managers post, as for every channel (BR .1, .3).
+- **FR-COM-003.18**: The Q&A channel **closes** 3 days after the assignment's latest due date across its class groups (BR .11). A closed channel behaves like an archived one: it stays readable and accepts no posts or replies (FR .5). Changing the assignment's dates moves the close time. Managers can still archive it earlier, or change its reply settings and visibility (FR .5).
+- **FR-COM-003.19**: Managers see, per channel, how many replies are **por responder** (BR .12): on `GET channels`, and as *"{n} por responder"* in the channels list.
+
 ## 4. Business rules
 - **BR-COM-003.1**: Only staff create channels and start direct conversations. Parents and students never can (`403`).
 - **BR-COM-003.2**: A teacher can only create or manage a `COURSE` channel for a course they teach, or a `CLASS_GROUP` channel for a group related to one of their courses (the group's study plan contains a course they teach; homeroom alone doesn't count, same as BR-COM-002.7). `ORGANIZATION`, `SCHOOL` and `STUDY_PLAN` channels are for school admins only (`403`).
@@ -69,12 +74,20 @@ Everything else is removed.
 - **BR-COM-003.7**: Direct messages are only between staff and parents. A student, or a user with the student role, gets `403` on every direct endpoint, even if their role was granted the permission.
 - **BR-COM-003.8**: Admins can message any parent of their organization. Teachers can only message parents of students who are on the roster of one of their courses or in a group related to them (`403`). When a child is chosen, the parent must be linked to that child (`400`).
 - **BR-COM-003.9**: Only the two participants can see a direct conversation (`404` for anyone else, so its existence isn't revealed).
+- **BR-COM-003.10**: **Assignment channel audience.** Active students on the course roster (ACA-001 BR .15) whose class group has a date for the assignment (`AssignmentDate`). Its managers are those of a `COURSE` channel of the assignment's course (BR .2, .3). An `ASSIGNMENT` channel is only ever created with its assignment (`400` on `POST channels`), its assignment can't change, and it is deleted with the assignment. An assignment has at most one.
+- **BR-COM-003.11**: **Closing.** `closesAt` = the latest `AssignmentDate.date` + 3 days, recomputed whenever the assignment's dates change; an assignment with no dates has no `closesAt` (never closes). A channel is closed when it is archived or `closesAt` has passed. Every rule that refuses posts or replies on an archived channel refuses them on a closed one (`403` with the same message), and the channel is listed as archived.
+- **BR-COM-003.12**: **Por responder** *(decided 2026-11-25, ACA-001 Q11)*, counted for managers only (members get `0`), on open channels:
+  - `PRIVATE`: each member conversation whose latest reply is from the member;
+  - `PUBLIC`: each member reply newer than the latest manager reply in that post's thread (or than the post, with no manager reply).
+
+  Any manager's reply answers it, not only the post's author.
 
 ## 5. Data
 - `Channel` (`scope`, `schoolId` / `studyPlanId` / `classGroupId` / `courseId`, `audienceStudents`, `audienceParents`, `studentsCanReply`, `parentsCanReply`, `replyVisibility`, `archivedAt`, `createdById`).
 - `ChannelPost` (`body`, `requiresConfirmation`, `authorId`, soft delete).
 - `ChannelReply` (`postId`, `authorId`, `body`, `threadUserId`: in `PRIVATE` channels the member whose conversation it belongs to; `null` in `PUBLIC`).
 - `ChannelPostRead` (`postId`, `userId`, `readAt`, `confirmedAt`): one row per member per post.
+- *(S02)* `ChannelScope` gains `ASSIGNMENT`; `Channel` gains `assignmentId String? @unique` (cascade on delete) and `closesAt DateTime?`; `ChannelPost` gains `pinned Boolean @default(false)` for the opening post.
 - `DirectConversation` (`staffUserId`, `parentUserId`, optional `studentId`, `staffLastReadAt`, `parentLastReadAt`, `lastMessageAt`) and `DirectMessage`.
 - Removed: `Message`, `MessageRecipient`, `Chat*`, `CommunicationThread`, `ThreadParticipant`, `CommunicationMessage`, `MessageDelivery`, `RecipientPreference`, `CommunicationAuditLog`, `Newsletter`. Existing data in them is dropped.
 - Tenancy: channels and conversations belong to one organization. Staff only see their own organization. Parents see the channels and conversations of every organization where they have a linked child.
@@ -125,9 +138,13 @@ Removed endpoints: `/v1/messages/*`, `/v1/chats/*`, `/v1/newsletters/*`, and eve
 ## 10. Open questions
 - [ ] Should admins be able to read teachers' direct conversations for safeguarding?
 - [ ] Do we need email/push for posts that require confirmation?
-- [ ] **Assignment Q&A channels** (from ACA-001 Q10, decided 2026-11-23: each assignment gets one). To specify: a new `ASSIGNMENT` level and its audience (the assignment's class groups on the course roster), who may post (are students members who can start questions, or do they only reply?), and closing 3 days after the due date. Proposed slice: COM-003-S02.
+- [x] **Assignment Q&A channels** (from ACA-001 Q10). **Decided (2026-11-25):** every assignment gets one, created automatically (FR .17); students reply under a pinned opening post, so only managers post (BR .1 unchanged); with dates per group, it closes 3 days after the latest (FR .18, BR .11).
+- [x] **Por responder** (from ACA-001 Q11). **Decided (2026-11-25):** private conversations awaiting the managers, plus public replies newer than the latest manager reply in their thread (BR .12).
+- [ ] Should existing assignments get a Q&A channel when S02 ships? *Proposal:* yes, for assignments whose channel would still be open (latest date + 3 days in the future), created by the migration's backfill.
 
 ## 11. Slices
 | Slice | Title | FRs | Status |
 |---|---|---|---|
 | COM-003-S01 | Replace every legacy channel with Channels + Direct (schema, API, UI, homes) | .1–.16 | In review (unit tests pass; e2e `communication/channels.spec.ts` and `direct.after.spec.ts` written, awaiting first run) |
+| [COM-003-S02](../slices/COM-003-S02-assignment-channels.md) | Assignment Q&A channels: created with the assignment, pinned post, closing | .17 .18, BR .10 .11 | Ready |
+| [COM-003-S03](../slices/COM-003-S03-to-answer.md) | *Por responder* for managers | .19, BR .12 | Ready |

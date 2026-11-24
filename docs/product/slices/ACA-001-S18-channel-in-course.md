@@ -4,7 +4,7 @@
 |---|---|
 | **FRD** | [ACA-001](../frd/ACA-001-course-experience.md) |
 | **Implements** | FR-ACA-001.26; BR-ACA-001.17, BR-ACA-001.20 |
-| **Status** | In review |
+| **Status** | Done (#87) |
 | **Branch** | `feat/ACA-001-S18-channel-in-course` |
 | **Estimate** | 2 days |
 | **Design** | Canvas "Skooltrak — Courses redesign (desktop)", board *Course channels — student* |

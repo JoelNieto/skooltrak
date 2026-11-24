@@ -81,6 +81,7 @@ Everything else is removed.
   - `PUBLIC`: each member reply newer than the latest manager reply in that post's thread (or than the post, with no manager reply).
 
   Any manager's reply answers it, not only the post's author.
+- **BR-COM-003.13**: **Backfill** *(decided 2026-11-25)*. When S02 ships, every existing assignment whose latest date + 3 days is still ahead gets its Q&A channel and pinned post, as if just created. Older assignments get none.
 
 ## 5. Data
 - `Channel` (`scope`, `schoolId` / `studyPlanId` / `classGroupId` / `courseId`, `audienceStudents`, `audienceParents`, `studentsCanReply`, `parentsCanReply`, `replyVisibility`, `archivedAt`, `createdById`).
@@ -140,11 +141,11 @@ Removed endpoints: `/v1/messages/*`, `/v1/chats/*`, `/v1/newsletters/*`, and eve
 - [ ] Do we need email/push for posts that require confirmation?
 - [x] **Assignment Q&A channels** (from ACA-001 Q10). **Decided (2026-11-25):** every assignment gets one, created automatically (FR .17); students reply under a pinned opening post, so only managers post (BR .1 unchanged); with dates per group, it closes 3 days after the latest (FR .18, BR .11).
 - [x] **Por responder** (from ACA-001 Q11). **Decided (2026-11-25):** private conversations awaiting the managers, plus public replies newer than the latest manager reply in their thread (BR .12).
-- [ ] Should existing assignments get a Q&A channel when S02 ships? *Proposal:* yes, for assignments whose channel would still be open (latest date + 3 days in the future), created by the migration's backfill.
+- [x] Should existing assignments get a Q&A channel when S02 ships? **Decided (2026-11-25):** yes, for assignments whose channel would still be open (latest date + 3 days in the future), created by a backfill when S02 ships (BR .13).
 
 ## 11. Slices
 | Slice | Title | FRs | Status |
 |---|---|---|---|
 | COM-003-S01 | Replace every legacy channel with Channels + Direct (schema, API, UI, homes) | .1–.16 | In review (unit tests pass; e2e `communication/channels.spec.ts` and `direct.after.spec.ts` written, awaiting first run) |
-| [COM-003-S02](../slices/COM-003-S02-assignment-channels.md) | Assignment Q&A channels: created with the assignment, pinned post, closing | .17 .18, BR .10 .11 | Ready |
+| [COM-003-S02](../slices/COM-003-S02-assignment-channels.md) | Assignment Q&A channels: created with the assignment, pinned post, closing, backfill | .17 .18, BR .10 .11 .13 | Ready |
 | [COM-003-S03](../slices/COM-003-S03-to-answer.md) | *Por responder* for managers | .19, BR .12 | Ready |

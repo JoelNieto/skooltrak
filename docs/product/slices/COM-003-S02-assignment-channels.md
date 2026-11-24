@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **FRD** | [COM-003](../frd/COM-003-channels-and-direct.md) |
-| **Implements** | FR-COM-003.17, FR-COM-003.18; BR-COM-003.10, BR-COM-003.11 |
+| **Implements** | FR-COM-003.17, FR-COM-003.18; BR-COM-003.10, BR-COM-003.11, BR-COM-003.13 |
 | **Status** | Ready |
 | **Branch** | `feat/COM-003-S02-assignment-channels` |
 | **Estimate** | 2.5 days |
@@ -43,6 +43,12 @@ Scenario: managers keep control @FR-COM-003.18
   When the teacher archives the channel early, or turns replies private
   Then that applies as for any channel (FR-COM-003.5)
 
+Scenario: existing assignments get one @BR-COM-003.13
+  Given an assignment created before S02 shipped, due tomorrow, and another due a week ago
+  When the backfill runs
+  Then the first has its Q&A channel and pinned post, and the second has none
+  And running it again creates nothing new
+
 Scenario: only through its assignment @BR-COM-003.10
   When anyone POSTs /channels with scope ASSIGNMENT
   Then they get 400
@@ -59,7 +65,7 @@ Scenario: another organization
   - `ChannelScope` gains `ASSIGNMENT`;
   - `Channel` gains `assignmentId String? @unique` (relation to `Assignment`, `onDelete: Cascade`) and `closesAt DateTime?`;
   - `ChannelPost` gains `pinned Boolean @default(false)`.
-  - **Backfill (proposal, open question in COM-003 §10):** a Q&A channel and pinned post for each assignment whose latest date + 3 days is still ahead.
+  - **Backfill (BR-COM-003.13, decided 2026-11-25):** a Q&A channel and pinned post for each assignment whose latest date + 3 days is still ahead, by the same idempotent `ensureFor`.
 - [ ] Nest, COM (`apps/dashboard-backend/src/app/communication`):
   - `channel-audience.ts`: the `ASSIGNMENT` case in `channelStudentWhere`, `memberChannelWhere` and the manager checks (as `COURSE`, for the assignment's course).
   - A single `isClosed(channel)` = `archivedAt || closesAt <= now`, replacing each `archivedAt` check (post, reply, `canReply`, `memberCanReply`). `summary()` lists a closed channel as `archived`.

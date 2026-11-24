@@ -82,7 +82,7 @@ The *Canales* tab becomes the place where a course's channels are read and writt
   - the replies under each post, as BR-COM-003.5 allows, and a reply box where the viewer's audience may reply (FR-COM-003.10).
 
   Opening a channel marks its posts read, and the list's and the tab's counts update. The open channel is in the URL (`?canal=<id>`), so a link or a reload reopens it. With none in the URL, or one that isn't among the course's channels (BR .17), no channel opens and the pane says *"Elige un canal para leerlo"*. Nothing opens by itself, because opening marks posts read and would count in the teacher's *"Leído por"* for posts nobody chose to read *(decided 2026-11-25)*. On a phone the list and the channel stack; choosing a channel shows it with *"Volver a canales"*. The Resumen card's rows (FR .22) and *"Preguntar en el curso"* (FR .25) open the tab with that channel.
-- **FR-ACA-001.27**: Teachers and admins who manage the course's channels (BR-COM-003.3) get the same *Canales* tab, between *Calendario* and *Participantes*. The open channel adds what managers see on the channel page:
+- **FR-ACA-001.27**: Teachers and admins who manage the course's channels (BR-COM-003.3) get the same *Canales* tab, after *Asistencia* and before *Participantes*. The open channel adds what managers see on the channel page:
   - the composer, with *"Requiere confirmación de lectura"*;
   - per post, *"Leído por {x} de {y}"* and *"Confirmado por {x} de {y}"*, and the receipts list (FR-COM-003.9);
   - in private-reply channels, one conversation per member who replied (FR-COM-003.10);
@@ -200,7 +200,7 @@ These read the course's channels from [COM-003](COM-003-channels-and-direct.md).
   - the viewer's audience can't reply: *"Solo anuncios"*;
   - it can reply and `replyVisibility = PUBLIC`: *"Conversación del curso"*;
   - it can reply and `replyVisibility = PRIVATE`: *"Preguntas al docente"*.
-- **BR-ACA-001.19**: **Staff and homeroom.** Until S19, teachers and admins keep the header's *Canal* button (COM-003 §7) and get no *Canales* tab or badges. From S19 they get the tab as managers (FR .27): no unread counts, since COM-003 counts them only for members. The homeroom read-only view (BR .16) never shows channel elements: a homeroom teacher is neither a manager nor a member of a colleague's course channels (BR-COM-003.2).
+- **BR-ACA-001.19**: **Staff and homeroom.** Until S19, teachers and admins keep the header's *Canal* button (COM-003 §7) and get no *Canales* tab or badges. From S19 they get the tab as managers (FR .27): no unread counts, since COM-003 counts them only for members. Without `COMMUNICATION_VIEW` they keep the *Canal* button instead. The homeroom read-only view (BR .16) never shows channel elements: a homeroom teacher is neither a manager nor a member of a colleague's course channels (BR-COM-003.2).
 - **BR-ACA-001.20**: **Embedded channel.** The channel opened inside the course is COM-003's channel view in an embedded mode: no page header or breadcrumbs, under the course page's own heading. Every rule is COM-003's: who may read, post, reply or confirm (BR-COM-003.3–.6), the error for a channel the caller can't see (*"Canal no disponible"*), marking read on open, and the refresh interval. ACA-001 adds no endpoint and no rule of its own beyond choosing the course's channels (BR .17).
 
 ## 5. Data
@@ -307,6 +307,6 @@ Listed in build order.
 | [ACA-001-S16](../slices/ACA-001-S16-mis-cursos-channels.md) | Unread channel badges on *Mis cursos* cards and the *Nuevo en canales* stat | .23 .24, BR .17 | In review |
 | [ACA-001-S17](../slices/ACA-001-S17-ask-in-course.md) | *"Preguntar en el curso"* opens the course conversation channel | .25 | In review |
 | [ACA-001-S18](../slices/ACA-001-S18-channel-in-course.md) | Students and parents read, confirm and reply inside the *Canales* tab | .26, BR .20 | In review |
-| ACA-001-S19 | Teachers post, see receipts and answer inside the *Canales* tab; *Nuevo canal para este curso* | .27, BR .19 .20 | Proposed |
+| [ACA-001-S19](../slices/ACA-001-S19-manage-channels-in-course.md) | Teachers post, see receipts and answer inside the *Canales* tab; *Nuevo canal para este curso* | .27, BR .19 .20 | In review |
 | ACA-001-S20 | *"{n} por responder"* for managers | .28 | Proposed (blocked on Q11 and a COM-003 field) |
 | ACA-001-S21 | Assignment Q&A group and assignment card in *Canales* | .29 | Proposed (after COM-003-S02) |

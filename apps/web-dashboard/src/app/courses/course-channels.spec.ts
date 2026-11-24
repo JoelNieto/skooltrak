@@ -66,6 +66,18 @@ describe('channelKind (BR-ACA-001.18)', () => {
   });
 });
 
+describe('channelKind for managers @FR-ACA-001.27', () => {
+  it('reads whether anyone may reply', () => {
+    expect(channelKind(channel({}), 'MANAGER')).toBe('Solo anuncios');
+    expect(channelKind(channel({ parentsCanReply: true, replyVisibility: 'PUBLIC' }), 'MANAGER')).toBe(
+      'Conversación del curso',
+    );
+    expect(channelKind(channel({ studentsCanReply: true, replyVisibility: 'PRIVATE' }), 'MANAGER')).toBe(
+      'Preguntas al docente',
+    );
+  });
+});
+
 describe('newCount', () => {
   it('agrees in number', () => {
     expect(newCount(1)).toBe('1 nuevo');

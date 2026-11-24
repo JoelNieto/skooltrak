@@ -62,7 +62,7 @@ import { CourseChannel, newCount } from './course-channels';
     } @else if (!compact()) {
       <lib-empty-state
         title="Este curso aún no tiene canales"
-        description="Cuando tu docente cree un canal para el curso, aparecerá aquí."
+        [description]="emptyDescription()"
         icon="message-circle"
       />
     }
@@ -74,6 +74,8 @@ export class CourseChannelsList {
   readonly error = input(false);
   /** The Resumen card (FR .22). */
   readonly compact = input(false);
+  /** Students and parents wait for a teacher; managers create the first one (FR .27). */
+  readonly emptyDescription = input('Cuando tu docente cree un canal para el curso, aparecerá aquí.');
   /** The channel open beside the list (FR .26). */
   readonly selectedId = input<string | null>(null);
   readonly retry = output<void>();

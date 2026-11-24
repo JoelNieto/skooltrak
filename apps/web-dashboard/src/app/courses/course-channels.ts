@@ -1,7 +1,10 @@
 import type { ChannelSummary } from '@/shared';
 
-/** Who is looking: their audience type decides whether they may reply (BR-ACA-001.18). */
-export type ChannelViewer = 'STUDENT' | 'PARENT';
+/**
+ * Who is looking: a member's audience type decides whether they may reply (BR-ACA-001.18); a manager
+ * (the course's teacher or an admin, FR-ACA-001.27) sees whether anyone may.
+ */
+export type ChannelViewer = 'STUDENT' | 'PARENT' | 'MANAGER';
 
 export interface CourseChannel extends ChannelSummary {
   /** BR-ACA-001.18, from the viewer's side. */
@@ -10,7 +13,12 @@ export interface CourseChannel extends ChannelSummary {
 
 /** BR-ACA-001.18: "Solo anuncios", "Conversación del curso" or "Preguntas al docente". */
 export function channelKind(channel: ChannelSummary, viewer: ChannelViewer): string {
-  const canReply = viewer === 'STUDENT' ? channel.studentsCanReply : channel.parentsCanReply;
+  const canReply =
+    viewer === 'STUDENT'
+      ? channel.studentsCanReply
+      : viewer === 'PARENT'
+        ? channel.parentsCanReply
+        : channel.studentsCanReply || channel.parentsCanReply;
   if (!canReply) return 'Solo anuncios';
   return channel.replyVisibility === 'PUBLIC' ? 'Conversación del curso' : 'Preguntas al docente';
 }

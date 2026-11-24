@@ -6,6 +6,7 @@ import { data, E2E_PASSWORD, personas, storageStatePath } from '../support/fixtu
  * ACA-001-S16: their unread counts on Mis cursos (FR-ACA-001.23, .24).
  * ACA-001-S17: "Preguntar en el curso" opens the course conversation (FR-ACA-001.25).
  * ACA-001-S18: the chosen channel opens inside the Canales tab (FR-ACA-001.26).
+ * ACA-001-S19: the course's teacher manages its channels in the same tab (FR-ACA-001.27).
  * docs/product/slices/ACA-001-S15-course-channels.md, ACA-001-S16-mis-cursos-channels.md
  *
  * Channels are created here through the COM-003 API, as `channels.spec.ts` does. This file is an
@@ -347,6 +348,86 @@ test.describe('as a parent @FR-ACA-001.21 @BR-ACA-001.17', () => {
   });
 });
 
+test.describe('the course teacher @FR-ACA-001.27 @BR-ACA-001.19', () => {
+  test.use({ storageState: storageStatePath('teacher') });
+  const QUESTIONS = 'Preguntas S19 E2E';
+  const QUESTION = '¿El ejercicio 4 es fracción mixta? (S19)';
+
+  test('gets the Canales tab instead of the "Canal" button', async ({ page }) => {
+    await page.goto(`/courses/${courseId}`);
+    await expect(channelsTab(page)).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Canal', exact: true })).toHaveCount(0);
+    await channelsTab(page).click();
+    await expect(page.getByText('Elige un canal para publicar o responder')).toBeVisible();
+  });
+
+  test('publishes with a read confirmation and sees who read it, inside the course', async ({ page }) => {
+    const body = 'Recuerden traer la guía resuelta. (S19)';
+    await page.goto(`/courses/${courseId}?canal=${ids[ANNOUNCEMENTS]}`);
+    await expect(channelsTab(page)).toHaveAttribute('aria-selected', 'true');
+    await page.getByRole('textbox', { name: 'Mensaje' }).fill(body);
+    await page.getByLabel('Requiere confirmación de lectura').check();
+    await page.getByRole('button', { name: 'Publicar' }).click();
+
+    const post = page.getByRole('article').filter({ hasText: body });
+    await expect(post).toContainText(/Leído por 0 de \d+/);
+    await expect(post).toContainText(/Confirmado por 0 de \d+/);
+    await post.getByRole('button', { name: 'Ver detalle' }).click();
+    await expect(post.locator('app-channel-receipts')).toBeVisible();
+    await expect(page).toHaveURL(new RegExp(`/courses/${courseId}`));
+  });
+
+  test('answers a private question inside the course', async ({ page, request }) => {
+    const teacher = await bearer(request, 'teacher');
+    ids[QUESTIONS] = await createChannel(
+      request,
+      teacher,
+      {
+        scope: 'COURSE',
+        targetId: courseId,
+        name: QUESTIONS,
+        audienceStudents: true,
+        audienceParents: false,
+        studentsCanReply: true,
+        replyVisibility: 'PRIVATE',
+      },
+      ['Pregunten aquí; solo yo veo sus preguntas.'],
+    );
+    const detail = (await (
+      await request.get(`${API}/channels/${ids[QUESTIONS]}`, { headers: await bearer(request, 'student') })
+    ).json()) as { posts: { id: string }[] };
+    expect(
+      (
+        await request.post(`${API}/channels/${ids[QUESTIONS]}/posts/${detail.posts[0].id}/replies`, {
+          headers: await bearer(request, 'student'),
+          data: { body: QUESTION },
+        })
+      ).ok(),
+    ).toBeTruthy();
+
+    await page.goto(`/courses/${courseId}`);
+    await channelsTab(page).click();
+    const row = channelsList(page).getByRole('button', { name: new RegExp(QUESTIONS) });
+    await expect(row).toContainText('Preguntas al docente');
+    await row.click();
+    const post = page.getByRole('article').first();
+    await post.getByRole('button', { name: /Respuestas/ }).click();
+    await expect(post).toContainText(QUESTION);
+    await expect(post).toContainText(data.relatedStudents[0]);
+  });
+
+  test('"Nuevo canal para este curso" and "Configurar" open the COM-003 forms', async ({ page }) => {
+    await page.goto(`/courses/${courseId}`);
+    await channelsTab(page).click();
+    await page.getByRole('button', { name: 'Nuevo canal para este curso' }).click();
+    await expect(page).toHaveURL(new RegExp(`/communication/channels/new\\?scope=COURSE&targetId=${courseId}`));
+
+    await page.goto(`/courses/${courseId}?canal=${ids[GENERAL]}`);
+    await page.getByRole('button', { name: 'Configurar' }).click();
+    await expect(page).toHaveURL(new RegExp(`/communication/channels/${ids[GENERAL]}/edit`));
+  });
+});
+
 test.describe('archived channels @FR-ACA-001.21', () => {
   test.use({ storageState: storageStatePath('student') });
 
@@ -366,16 +447,6 @@ test.describe('archived channels @FR-ACA-001.21', () => {
     const last = channelsList(page).getByRole('listitem').last();
     await expect(last).toContainText(ANNOUNCEMENTS);
     await expect(last).toContainText('Archivado');
-  });
-});
-
-test.describe('staff @BR-ACA-001.19', () => {
-  test.use({ storageState: storageStatePath('teacher') });
-
-  test('the course teacher keeps "Canal" and gets no Canales tab', async ({ page }) => {
-    await page.goto(`/courses/${courseId}`);
-    await expect(page.getByRole('button', { name: 'Canal' })).toBeVisible();
-    await expect(channelsTab(page)).toHaveCount(0);
   });
 });
 

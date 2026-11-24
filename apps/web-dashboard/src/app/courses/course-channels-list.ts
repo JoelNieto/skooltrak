@@ -1,16 +1,16 @@
 import { Alert, Badge, Button, EmptyState, Icon, Skeleton, TimeAgoPipe } from '#/ui';
 import { Component, computed, input, output } from '@angular/core';
-import { RouterLink } from '@angular/router';
 import { CourseChannel, newCount } from './course-channels';
 
 /**
  * A course's channels for students and parents (ACA-001 FR .21): name and kind, the latest post and
- * its time, and the unread count. A row opens the COM-003 channel page, which marks its posts read.
- * `compact` is the Resumen card (FR .22): at most 3 open channels and no empty state.
+ * its time, and the unread count. A row is a toggle that asks the course page to open that channel
+ * inside its Canales tab (FR .26). `compact` is the Resumen card (FR .22): at most 3 open channels and
+ * no empty state.
  */
 @Component({
   selector: 'app-course-channels-list',
-  imports: [Alert, Badge, Button, EmptyState, Icon, RouterLink, Skeleton, TimeAgoPipe],
+  imports: [Alert, Badge, Button, EmptyState, Icon, Skeleton, TimeAgoPipe],
   template: `
     @if (error()) {
       <div uiAlert tone="danger" role="alert">
@@ -27,9 +27,12 @@ import { CourseChannel, newCount } from './course-channels';
       <ul class="flex flex-col" aria-label="Canales del curso">
         @for (channel of shown(); track channel.id) {
           <li class="border-t border-line first:border-t-0">
-            <a
-              [routerLink]="['/communication/channels', channel.id]"
-              class="flex items-start gap-3 py-2.5 hover:bg-surface-2"
+            <button
+              type="button"
+              class="flex w-full cursor-pointer items-start gap-3 rounded-box px-2 py-2.5 text-left hover:bg-surface-2"
+              [class.bg-surface-2]="channel.id === selectedId()"
+              [attr.aria-pressed]="channel.id === selectedId()"
+              (click)="choose.emit(channel.id)"
             >
               <ui-icon
                 [name]="channel.kind === 'Solo anuncios' ? 'megaphone' : 'message-circle'"
@@ -52,7 +55,7 @@ import { CourseChannel, newCount } from './course-channels';
                   }
                 </span>
               </span>
-            </a>
+            </button>
           </li>
         }
       </ul>
@@ -71,7 +74,11 @@ export class CourseChannelsList {
   readonly error = input(false);
   /** The Resumen card (FR .22). */
   readonly compact = input(false);
+  /** The channel open beside the list (FR .26). */
+  readonly selectedId = input<string | null>(null);
   readonly retry = output<void>();
+  /** A row was chosen: open that channel (FR .26). */
+  readonly choose = output<string>();
 
   protected readonly shown = computed(() =>
     this.compact()

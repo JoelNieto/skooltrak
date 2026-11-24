@@ -16,9 +16,20 @@ import {
 } from '#/ui';
 import { CHANNEL_SCOPE_LABELS, ChannelDetail, ChannelPost } from '@/shared';
 import { DatePipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, computed, DestroyRef, effect, inject, input, resource, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  DestroyRef,
+  effect,
+  inject,
+  input,
+  output,
+  resource,
+  signal,
+} from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { errorMessage } from './channel-form';
 import { ChannelReceipts, ChannelReplies } from './channel-replies';
@@ -29,6 +40,8 @@ const REFRESH_MS = 30_000;
 /**
  * COM-003 channel page. Managers publish posts (optionally asking for a read confirmation) and see
  * read and confirmation counts per post (FR .6, .9). Members read, confirm and reply (FR .8, .10).
+ * `embedded` shows it inside another page, e.g. a course's Canales tab (ACA-001 FR .26, BR .20): a
+ * compact header with "Abrir en pantalla completa" instead of the page header and breadcrumbs.
  */
 @Component({
   selector: 'app-channel',
@@ -50,32 +63,61 @@ const REFRESH_MS = 30_000;
     DatePipe,
     ChannelReplies,
     ChannelReceipts,
+    RouterLink,
   ],
   template: `
     @if (detail.isLoading() && !detail.hasValue()) {
       <div class="flex justify-center py-12"><span uiSpinner></span></div>
     } @else if (detail.error()) {
-      <lib-empty-state title="Canal no disponible" description="No existe o ya no formas parte de él." icon="circle-alert" color="warning" />
-    } @else if (detail.value(); as c) {
-      <lib-page-header
-        [breadcrumbs]="[{ label: 'Inicio', link: '/' }, { label: 'Canales', link: '/communication/channels' }, { label: c.name }]"
-        [title]="c.name"
-        [subtitle]="scopeLabels[c.scope] + ' · ' + c.targetName + (c.description ? ' — ' + c.description : '')"
-        [actionLabel]="manager() ? 'Configurar' : undefined"
-        actionIcon="settings"
-        (action)="edit()"
+      <lib-empty-state
+        title="Canal no disponible"
+        description="No existe o ya no formas parte de él."
+        icon="circle-alert"
+        color="warning"
       />
+    } @else if (detail.value(); as c) {
+      @if (embedded()) {
+        <header class="mb-3 flex flex-wrap items-start justify-between gap-2">
+          <div class="min-w-0">
+            <h2 class="text-lg font-semibold text-ink-strong">{{ c.name }}</h2>
+            @if (c.description) {
+              <p class="text-sm text-ink-muted">{{ c.description }}</p>
+            }
+          </div>
+          <a uiButton variant="ghost" size="sm" [routerLink]="['/communication/channels', c.id]">
+            <ui-icon name="external-link" />
+            Abrir en pantalla completa
+          </a>
+        </header>
+      } @else {
+        <lib-page-header
+          [breadcrumbs]="[
+            { label: 'Inicio', link: '/' },
+            { label: 'Canales', link: '/communication/channels' },
+            { label: c.name },
+          ]"
+          [title]="c.name"
+          [subtitle]="scopeLabels[c.scope] + ' · ' + c.targetName + (c.description ? ' — ' + c.description : '')"
+          [actionLabel]="manager() ? 'Configurar' : undefined"
+          actionIcon="settings"
+          (action)="edit()"
+        />
+      }
 
       <div class="flex flex-wrap gap-2 mb-4">
         <span uiBadge size="sm">{{ audienceLabel(c) }}</span>
         <span uiBadge size="sm">{{ repliesLabel(c) }}</span>
         @if (c.studentsCanReply || c.parentsCanReply) {
-          <span uiBadge size="sm">{{ c.replyVisibility === 'PRIVATE' ? 'Respuestas privadas' : 'Respuestas públicas' }}</span>
+          <span uiBadge size="sm">{{
+            c.replyVisibility === 'PRIVATE' ? 'Respuestas privadas' : 'Respuestas públicas'
+          }}</span>
         }
       </div>
 
       @if (c.archived) {
-        <div uiAlert tone="warning" class="mb-4">Este canal está archivado: se puede leer, pero no admite publicaciones ni respuestas.</div>
+        <div uiAlert tone="warning" class="mb-4">
+          Este canal está archivado: se puede leer, pero no admite publicaciones ni respuestas.
+        </div>
       }
 
       @if (manager() && !c.archived) {
@@ -94,9 +136,22 @@ const REFRESH_MS = 30_000;
             ></textarea>
             <div class="flex flex-wrap items-center justify-between gap-3">
               <ui-choice label="Requiere confirmación de lectura">
-                <input uiCheckbox type="checkbox" id="post-confirm" name="confirm" [ngModel]="requireConfirmation()" (ngModelChange)="requireConfirmation.set($event)" />
+                <input
+                  uiCheckbox
+                  type="checkbox"
+                  id="post-confirm"
+                  name="confirm"
+                  [ngModel]="requireConfirmation()"
+                  (ngModelChange)="requireConfirmation.set($event)"
+                />
               </ui-choice>
-              <button uiButton variant="primary" type="submit" [disabled]="!draft().trim() || publishing()" [loading]="publishing()">
+              <button
+                uiButton
+                variant="primary"
+                type="submit"
+                [disabled]="!draft().trim() || publishing()"
+                [loading]="publishing()"
+              >
                 <ui-icon name="send" /> Publicar
               </button>
             </div>
@@ -118,7 +173,16 @@ const REFRESH_MS = 30_000;
                   <span uiBadge tone="info" size="sm">Requiere confirmación</span>
                 }
                 @if (manager()) {
-                  <button uiButton variant="ghost" size="sm" iconOnly type="button" class="ml-auto" aria-label="Eliminar publicación" (click)="remove(p)">
+                  <button
+                    uiButton
+                    variant="ghost"
+                    size="sm"
+                    iconOnly
+                    type="button"
+                    class="ml-auto"
+                    aria-label="Eliminar publicación"
+                    (click)="remove(p)"
+                  >
                     <ui-icon name="trash-2" />
                   </button>
                 }
@@ -135,12 +199,23 @@ const REFRESH_MS = 30_000;
                       <ui-icon name="check-check" /> Confirmado por {{ s.confirmed }} de {{ s.audience }}
                     </span>
                   }
-                  <button uiButton variant="ghost" size="sm" type="button" [attr.aria-expanded]="openReceipts() === p.id" (click)="toggle(openReceipts, p.id)">
+                  <button
+                    uiButton
+                    variant="ghost"
+                    size="sm"
+                    type="button"
+                    [attr.aria-expanded]="openReceipts() === p.id"
+                    (click)="toggle(openReceipts, p.id)"
+                  >
                     {{ openReceipts() === p.id ? 'Ocultar detalle' : 'Ver detalle' }}
                   </button>
                 </div>
                 @if (openReceipts() === p.id) {
-                  <app-channel-receipts [channelId]="c.id" [postId]="p.id" [requiresConfirmation]="p.requiresConfirmation" />
+                  <app-channel-receipts
+                    [channelId]="c.id"
+                    [postId]="p.id"
+                    [requiresConfirmation]="p.requiresConfirmation"
+                  />
                 }
               } @else if (p.requiresConfirmation) {
                 @if (p.confirmedAt) {
@@ -149,7 +224,14 @@ const REFRESH_MS = 30_000;
                   </p>
                 } @else {
                   <div>
-                    <button uiButton variant="primary" size="sm" type="button" [loading]="confirming() === p.id" (click)="confirm(p)">
+                    <button
+                      uiButton
+                      variant="primary"
+                      size="sm"
+                      type="button"
+                      [loading]="confirming() === p.id"
+                      (click)="confirm(p)"
+                    >
                       <ui-icon name="check" /> Confirmar lectura
                     </button>
                   </div>
@@ -158,7 +240,14 @@ const REFRESH_MS = 30_000;
 
               @if (p.replyCount || c.canReply) {
                 <div>
-                  <button uiButton variant="ghost" size="sm" type="button" [attr.aria-expanded]="openReplies() === p.id" (click)="toggle(openReplies, p.id)">
+                  <button
+                    uiButton
+                    variant="ghost"
+                    size="sm"
+                    type="button"
+                    [attr.aria-expanded]="openReplies() === p.id"
+                    (click)="toggle(openReplies, p.id)"
+                  >
                     <ui-icon name="message-circle" />
                     {{ p.replyCount ? 'Respuestas (' + p.replyCount + ')' : 'Responder' }}
                   </button>
@@ -179,7 +268,9 @@ const REFRESH_MS = 30_000;
         } @empty {
           <lib-empty-state
             title="Sin publicaciones"
-            [description]="manager() ? 'Escribe el primer aviso para este canal.' : 'Cuando haya avisos, aparecerán aquí.'"
+            [description]="
+              manager() ? 'Escribe el primer aviso para este canal.' : 'Cuando haya avisos, aparecerán aquí.'
+            "
             icon="megaphone"
           />
         }
@@ -193,8 +284,12 @@ export default class Channel {
   #toast = inject(Toast);
   #confirmation = inject(Confirmation);
 
-  /** Route param. */
+  /** Route param, or the host's chosen channel when embedded. */
   readonly id = input.required<string>();
+  /** ACA-001 BR .20: shown inside another page (no page header or breadcrumbs). */
+  readonly embedded = input(false);
+  /** Fires once the posts were marked read, so a host can refresh its counts (ACA-001 FR .26). */
+  readonly read = output<void>();
 
   readonly scopeLabels = CHANNEL_SCOPE_LABELS;
   readonly draft = signal('');
@@ -221,7 +316,7 @@ export default class Channel {
       if (!c || c.role !== 'MEMBER' || markedFor === c.id) return;
       markedFor = c.id;
       this.unreadIds.set(new Set(c.posts.filter((p) => !p.readAt).map((p) => p.id)));
-      if (c.unread > 0) void this.#api.markChannelRead(c.id);
+      if (c.unread > 0) void this.#api.markChannelRead(c.id).then(() => this.read.emit());
     });
     const timer = setInterval(() => this.detail.reload(), REFRESH_MS);
     inject(DestroyRef).onDestroy(() => clearInterval(timer));

@@ -22,9 +22,9 @@ test.describe('Mis cursos @FR-ACA-001.4 @FR-ACA-001.5 @FR-ACA-001.6', () => {
     await expect(card).toContainText(`${personas.teacher.firstName} ${personas.teacher.lastName}`);
     await expect(card).toContainText('4.0');
     await expect(card).toContainText('Al día');
-    // §8: the card's one accessible name sums it up.
+    // §8: the card's one accessible name sums it up; unread channel posts may close it (FR .23).
     await expect(card).toHaveAccessibleName(
-      new RegExp(`^${data.courses.teacherOwn.name}, Prof\\. .+\\. Promedio 4\\.0, Al día\\. Próxima: .+, Vencida desde .+\\. \\d de 4 completadas\\.$`),
+      new RegExp(`^${data.courses.teacherOwn.name}, Prof\\. .+\\. Promedio 4\\.0, Al día\\. Próxima: .+, Vencida desde .+\\. \\d de 4 completadas\\.( \\d+ mensajes? nuevos?\\.)?$`),
     );
 
     // FR-ACA-001.5: always the current period; the switcher lives only in Calificaciones (FR .14).

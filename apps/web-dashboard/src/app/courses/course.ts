@@ -19,7 +19,7 @@ import {
 } from '#/ui';
 import { HttpErrorResponse, httpResource } from '@angular/common/http';
 import { Component, computed, inject, input, linkedSignal, signal } from '@angular/core';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import AssignmentForm from '../assignments/assignment-form';
 import CourseAttendance from '../attendance/course-attendance';
 import Auth from '../auth/auth';
@@ -37,7 +37,8 @@ import { CourseGradesSummaryView } from './course-grades-summary';
 import { CourseParticipants, CourseParticipantsList } from './course-participants';
 import { CourseOverview } from './course-overview';
 import { CourseChannelsList } from './course-channels-list';
-import { courseChannels, newCount } from './course-channels';
+import { askChannel, courseChannels, newCount, openChannelId } from './course-channels';
+import Channel from '../communication/channel';
 import { CourseWork } from './course-work';
 import { CommunicationApi } from '../communication/communication-api';
 import type { ChannelSummary } from '@/shared';
@@ -98,6 +99,7 @@ type CourseVm = {
     CourseAssignmentsList,
     CourseOverview,
     CourseChannelsList,
+    Channel,
     Icon,
     RouterLink,
   ],
@@ -199,6 +201,13 @@ type CourseVm = {
                   <button uiButton variant="secondary" type="button" (click)="openCalendar()">
                     <ui-icon name="calendar-days" />
                     Ver calendario
+                  </button>
+                }
+                @if (ask(); as channel) {
+                  <!-- FR-ACA-001.25: the course conversation, where the student replies under the latest post. -->
+                  <button uiButton variant="primary" type="button" (click)="openInTab(channel.id)">
+                    <ui-icon name="message-circle" />
+                    Preguntar en el curso
                   </button>
                 }
                 @if (canOpenChannel()) {
@@ -360,6 +369,7 @@ type CourseVm = {
                           [error]="!!channelsRes.error()"
                           [compact]="true"
                           (retry)="channelsRes.reload()"
+                          (choose)="openInTab($event)"
                         />
                       </section>
                     }
@@ -377,12 +387,41 @@ type CourseVm = {
             @if (showChannels()) {
               <div uiTabPanel uiCard value="channels" class="p-6">
                 <ng-template uiTabContent>
-                  <app-course-channels-list
-                    [channels]="channels()"
-                    [loading]="channelsRes.isLoading()"
-                    [error]="!!channelsRes.error()"
-                    (retry)="channelsRes.reload()"
-                  />
+                  <!-- FR-ACA-001.26: the list, and the chosen channel beside it; stacked on a phone. -->
+                  <div class="grid gap-6 md:grid-cols-[minmax(16rem,20rem)_minmax(0,1fr)]">
+                    <div class="md:block" [class.hidden]="phoneShowsChannel()">
+                      <app-course-channels-list
+                        [channels]="channels()"
+                        [loading]="channelsRes.isLoading()"
+                        [error]="!!channelsRes.error()"
+                        [selectedId]="shownChannelId()"
+                        (retry)="channelsRes.reload()"
+                        (choose)="openInTab($event)"
+                      />
+                    </div>
+                    <div class="min-w-0 md:block" [class.hidden]="!phoneShowsChannel()">
+                      @if (shownChannelId(); as channelId) {
+                        <button
+                          uiButton
+                          variant="ghost"
+                          size="sm"
+                          type="button"
+                          class="mb-3 md:hidden"
+                          (click)="phoneShowsChannel.set(false)"
+                        >
+                          <ui-icon name="arrow-left" />
+                          Volver a canales
+                        </button>
+                        <app-channel [id]="channelId" [embedded]="true" (read)="channelsRes.reload()" />
+                      } @else if (channels().length) {
+                        <lib-empty-state
+                          title="Elige un canal para leerlo"
+                          description="Sus publicaciones y respuestas se abren aquí, sin salir del curso."
+                          icon="message-circle"
+                        />
+                      }
+                    </div>
+                  </div>
                 </ng-template>
               </div>
             }
@@ -445,9 +484,12 @@ type CourseVm = {
 })
 export default class Course {
   public id = input.required<string>();
+  /** FR-ACA-001.26: `?canal=<id>`, the channel open in the Canales tab. */
+  readonly canal = input<string>();
   public auth = inject(Auth);
   private modal = inject(Modal);
   private router = inject(Router);
+  #route = inject(ActivatedRoute);
   private toast = inject(Toast);
   protected readonly colorVar = courseColorVar;
   #ctx = inject(ParentContext);
@@ -476,9 +518,10 @@ export default class Course {
     return viewer?.kind === 'PARENT' ? (viewer.student?.id ?? null) : null;
   });
   /** Selected section; the tab list and panels follow it. Families start on Resumen. */
-  readonly tab = linkedSignal<boolean, string>({
-    source: this.family,
-    computation: (family) => (family ? 'overview' : 'grades'),
+  readonly tab = linkedSignal<{ family: boolean; canal: boolean }, string>({
+    source: () => ({ family: this.family(), canal: !!this.canal() }),
+    // FR-ACA-001.26: a `?canal=` link opens on the Canales tab.
+    computation: ({ family, canal }) => (family ? (canal ? 'channels' : 'overview') : 'grades'),
   });
 
   protected readonly forbidden = computed(() => {
@@ -521,12 +564,31 @@ export default class Course {
     if (kind !== 'STUDENT' && kind !== 'PARENT') return [];
     return courseChannels(this.channelsRes.value() ?? [], this.id(), kind);
   });
+  /** FR-ACA-001.25: students only; hidden without an open course conversation. */
+  protected readonly ask = computed(() => (this.viewerKind() === 'STUDENT' ? askChannel(this.channels()) : null));
   protected readonly hasOpenChannels = computed(() => this.channels().some((c) => !c.archived));
   /** The tab's count: unread posts in the course's open channels. */
   protected readonly channelsUnread = computed(() =>
     this.channels().reduce((sum, c) => sum + (c.archived ? 0 : c.unread), 0),
   );
   protected readonly newCount = newCount;
+
+  /** FR-ACA-001.26: the channel open beside the list; only one of the course's, never by itself. */
+  protected readonly shownChannelId = computed(() => openChannelId(this.channels(), this.canal()));
+  /** On a phone the open channel replaces the list until "Volver a canales". */
+  protected readonly phoneShowsChannel = linkedSignal(() => !!this.canal());
+
+  /** FR-ACA-001.26: open a channel inside the Canales tab and keep it in the URL. */
+  protected openInTab(channelId: string) {
+    this.tab.set('channels');
+    this.phoneShowsChannel.set(true);
+    void this.router.navigate([], {
+      relativeTo: this.#route,
+      queryParams: { canal: channelId },
+      queryParamsHandling: 'merge',
+      replaceUrl: true,
+    });
+  }
   openingChannel = signal(false);
 
   /** BR-COM-003.2: the course's teacher or an admin manages its channel. */

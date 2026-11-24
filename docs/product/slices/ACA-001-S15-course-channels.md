@@ -4,7 +4,7 @@
 |---|---|
 | **FRD** | [ACA-001](../frd/ACA-001-course-experience.md) |
 | **Implements** | FR-ACA-001.21, FR-ACA-001.22; BR-ACA-001.17, BR-ACA-001.18, BR-ACA-001.19 |
-| **Status** | In progress |
+| **Status** | Done (#86) |
 | **Branch** | `feat/ACA-001-S15-course-channels` |
 | **Estimate** | 1.5 days |
 

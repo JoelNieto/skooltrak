@@ -3,7 +3,10 @@ import { data, E2E_PASSWORD, personas, storageStatePath } from '../support/fixtu
 
 /**
  * ACA-001-S15: the course's channels on the course page (FR-ACA-001.21, .22; BR .17–.19).
- * docs/product/slices/ACA-001-S15-course-channels.md
+ * ACA-001-S16: their unread counts on Mis cursos (FR-ACA-001.23, .24).
+ * ACA-001-S17: "Preguntar en el curso" opens the course conversation (FR-ACA-001.25).
+ * ACA-001-S18: the chosen channel opens inside the Canales tab (FR-ACA-001.26).
+ * docs/product/slices/ACA-001-S15-course-channels.md, ACA-001-S16-mis-cursos-channels.md
  *
  * Channels are created here through the COM-003 API, as `channels.spec.ts` does. This file is an
  * `after` spec so that spec's channel on the same course already exists and no longer changes. So
@@ -26,7 +29,9 @@ let courseId: string;
 const ids: Record<string, string> = {};
 
 async function bearer(request: APIRequestContext, persona: keyof typeof personas): Promise<Headers> {
-  const res = await request.post('/api/v1/auth/login', { data: { email: personas[persona].email, password: E2E_PASSWORD } });
+  const res = await request.post('/api/v1/auth/login', {
+    data: { email: personas[persona].email, password: E2E_PASSWORD },
+  });
   expect(res.ok()).toBeTruthy();
   return { Authorization: `Bearer ${((await res.json()) as { accessToken: string }).accessToken}` };
 }
@@ -51,15 +56,18 @@ async function createChannel(request: APIRequestContext, headers: Headers, body:
   return id;
 }
 
-/** What the Canales tab should count for `persona`: unread posts in the course's open channels. */
-async function expectedUnread(request: APIRequestContext, persona: 'student' | 'parent') {
-  const list = (await (await request.get(`${API}/channels`, { headers: await bearer(request, persona) })).json()) as Summary[];
+/** Unread posts in open COURSE channels for `persona`: of this course, or of every course. */
+async function expectedUnread(request: APIRequestContext, persona: 'student' | 'parent', anyCourse = false) {
+  const list = (await (
+    await request.get(`${API}/channels`, { headers: await bearer(request, persona) })
+  ).json()) as Summary[];
   return list
-    .filter((c) => c.scope === 'COURSE' && c.courseId === courseId && !c.archived)
+    .filter((c) => c.scope === 'COURSE' && (anyCourse || c.courseId === courseId) && !c.archived)
     .reduce((sum, c) => sum + c.unread, 0);
 }
 
 const nuevos = (n: number) => (n === 1 ? '1 nuevo' : `${n} nuevos`);
+const mensajes = (n: number) => (n === 1 ? '1 mensaje nuevo.' : `${n} mensajes nuevos.`);
 const channelsTab = (page: Page) => page.getByRole('tab', { name: /^Canales/ });
 const channelsList = (page: Page) => page.getByRole('list', { name: 'Canales del curso' });
 
@@ -106,51 +114,61 @@ test.describe('as a student @FR-ACA-001.21 @FR-ACA-001.22', () => {
 
     await page.goto(`/courses/${courseId}`);
     const tabs = page.getByRole('tablist', { name: 'Secciones del curso' }).getByRole('tab');
-    await expect(tabs).toHaveText([/Resumen/, /Asignaciones/, /Calificaciones/, /Canales/, /Participantes/, /Recursos/]);
+    await expect(tabs).toHaveText([
+      /Resumen/,
+      /Asignaciones/,
+      /Calificaciones/,
+      /Canales/,
+      /Participantes/,
+      /Recursos/,
+    ]);
     await expect(channelsTab(page)).toContainText(nuevos(unread));
 
     await channelsTab(page).click();
     const list = channelsList(page);
-    const announcements = list.getByRole('link', { name: new RegExp(ANNOUNCEMENTS) });
+    const announcements = list.getByRole('button', { name: new RegExp(ANNOUNCEMENTS) });
     await expect(announcements).toContainText('Solo anuncios');
     await expect(announcements).toContainText('1 nuevo');
     await expect(announcements).toContainText(ANNOUNCEMENT_POST);
 
-    const general = list.getByRole('link', { name: new RegExp(GENERAL) });
+    const general = list.getByRole('button', { name: new RegExp(GENERAL) });
     await expect(general).toContainText('Conversación del curso');
     await expect(general).toContainText('2 nuevos');
     await expect(general).toContainText(GENERAL_POSTS[1]);
 
-    await expect(list.getByRole('link', { name: new RegExp(GROUP) })).toHaveCount(0);
+    await expect(list.getByRole('button', { name: new RegExp(GROUP) })).toHaveCount(0);
   });
 
   test('Resumen shows a Canales card, latest post first, and "Ver todos" opens the tab', async ({ page }) => {
     await page.goto(`/courses/${courseId}`);
     const card = page.getByRole('region', { name: 'Canales' });
-    const names = await card.getByRole('link').allTextContents();
+    const names = await card.getByRole('list').getByRole('button').allTextContents();
     const general = names.findIndex((t) => t.includes(GENERAL));
     const announcements = names.findIndex((t) => t.includes(ANNOUNCEMENTS));
     expect(general).toBeGreaterThanOrEqual(0);
     // Its posts are newer, unless a newer channel pushed Anuncios past the card's 3 rows.
-    if (announcements >= 0) expect(general).toBeLessThan(announcements);
+    expect(announcements === -1 || general < announcements).toBe(true);
 
     await card.getByRole('button', { name: 'Ver todos' }).click();
     await expect(channelsTab(page)).toHaveAttribute('aria-selected', 'true');
   });
 
-  test('opening a channel marks it read, and the course page counts it', async ({ page, request }) => {
+  test('opening a channel marks it read, and the course page counts it @FR-ACA-001.26', async ({ page, request }) => {
     const before = await expectedUnread(request, 'student');
     await page.goto(`/courses/${courseId}`);
     await channelsTab(page).click();
-    await channelsList(page).getByRole('link', { name: new RegExp(GENERAL) }).click();
-    await expect(page).toHaveURL(new RegExp(`/communication/channels/${ids[GENERAL]}`));
+    await channelsList(page)
+      .getByRole('button', { name: new RegExp(GENERAL) })
+      .click();
+    // S18: it opens beside the list, and the course page stays.
+    await expect(page).toHaveURL(new RegExp(`/courses/${courseId}\\?canal=${ids[GENERAL]}`));
     await expect(page.getByText(GENERAL_POSTS[1])).toBeVisible();
 
     await expect.poll(() => expectedUnread(request, 'student')).toBe(before - 2);
     await page.goto(`/courses/${courseId}`);
     await expect(channelsTab(page)).toContainText(nuevos(before - 2));
     await channelsTab(page).click();
-    await expect(channelsList(page).getByRole('link', { name: new RegExp(GENERAL) })).not.toContainText('nuevo');
+    await expect(channelsList(page).getByRole('button', { name: new RegExp(GENERAL) })).not.toContainText('nuevo');
   });
 
   test('with no channels the tab says so and Resumen has no card', async ({ page }) => {
@@ -174,6 +192,141 @@ test.describe('as a student @FR-ACA-001.21 @FR-ACA-001.22', () => {
   });
 });
 
+test.describe('on Mis cursos @FR-ACA-001.23 @FR-ACA-001.24', () => {
+  test.use({ storageState: storageStatePath('student') });
+  const card = (page: Page) =>
+    page
+      .getByRole('list', { name: 'Mis cursos' })
+      .getByRole('link', { name: new RegExp(data.courses.teacherOwn.name) });
+  const stats = (page: Page) => page.getByRole('group', { name: 'Resumen del periodo' });
+
+  test("the card shows the course's unread posts and says so in its name; the stat sums them", async ({
+    page,
+    request,
+  }) => {
+    const unread = await expectedUnread(request, 'student');
+    const total = await expectedUnread(request, 'student', true);
+    expect(unread).toBeGreaterThan(0);
+
+    await page.goto('/courses');
+    await expect(card(page).locator('ui-course-cover')).toContainText(nuevos(unread));
+    await expect(card(page)).toHaveAccessibleName(new RegExp(`${mensajes(unread).replace('.', '\\.')}$`));
+    const stat = stats(page).locator('lib-stat-card', { hasText: 'Nuevo en canales' });
+    await expect(stat).toContainText(`${total}`);
+    await expect(stat).toContainText(/en \d+ cursos?/);
+  });
+
+  test('nothing unread: no badge and "Nada nuevo"', async ({ page }) => {
+    await page.route(`**${API}/channels`, (route) => route.fulfill({ json: [] }));
+    await page.goto('/courses');
+    await expect(card(page).locator('ui-course-cover')).not.toContainText('nuevo');
+    await expect(card(page)).not.toHaveAccessibleName(/mensajes? nuevos?/);
+    await expect(stats(page).locator('lib-stat-card', { hasText: 'Nuevo en canales' })).toContainText('Nada nuevo');
+  });
+
+  test('a failed list keeps the cards and shows "—"', async ({ page }) => {
+    await page.route(`**${API}/channels`, (route) => route.fulfill({ status: 500, json: { message: 'boom' } }));
+    await page.goto('/courses');
+    await expect(card(page)).toBeVisible();
+    const stat = stats(page).locator('lib-stat-card', { hasText: 'Nuevo en canales' });
+    await expect(stat).toContainText('—');
+    await expect(stat).toContainText('No se pudieron cargar los canales');
+  });
+});
+
+test.describe('inside the Canales tab @FR-ACA-001.26', () => {
+  test.use({ storageState: storageStatePath('student') });
+  const opened = (page: Page) => page.getByRole('heading', { level: 2 });
+
+  test('nothing opens until a channel is chosen; then it opens beside the list', async ({ page }) => {
+    await page.goto(`/courses/${courseId}`);
+    await channelsTab(page).click();
+    await expect(page.getByText('Elige un canal para leerlo')).toBeVisible();
+
+    await channelsList(page)
+      .getByRole('button', { name: new RegExp(ANNOUNCEMENTS) })
+      .click();
+    await expect(page).toHaveURL(new RegExp(`/courses/${courseId}\\?canal=${ids[ANNOUNCEMENTS]}`));
+    await expect(opened(page).filter({ hasText: ANNOUNCEMENTS })).toBeVisible();
+    await expect(channelsList(page).getByRole('button', { name: new RegExp(ANNOUNCEMENTS) })).toHaveAttribute(
+      'aria-pressed',
+      'true',
+    );
+    await expect(page.getByRole('link', { name: 'Abrir en pantalla completa' })).toHaveAttribute(
+      'href',
+      `/communication/channels/${ids[ANNOUNCEMENTS]}`,
+    );
+    // Announcements only: no reply box.
+    await expect(page.getByRole('button', { name: 'Responder' })).toHaveCount(0);
+  });
+
+  test('confirms an announcement without leaving the course', async ({ page, request }) => {
+    const teacher = await bearer(request, 'teacher');
+    const body = 'Confirmen que leyeron la guía S18.';
+    expect(
+      (
+        await request.post(`${API}/channels/${ids[ANNOUNCEMENTS]}/posts`, {
+          headers: teacher,
+          data: { body, requiresConfirmation: true },
+        })
+      ).ok(),
+    ).toBeTruthy();
+
+    await page.goto(`/courses/${courseId}?canal=${ids[ANNOUNCEMENTS]}`);
+    await expect(channelsTab(page)).toHaveAttribute('aria-selected', 'true');
+    const post = page.getByRole('article').filter({ hasText: body });
+    await post.getByRole('button', { name: 'Confirmar lectura' }).click();
+    await expect(post).toContainText('Confirmaste la lectura');
+    await expect(page).toHaveURL(new RegExp(`/courses/${courseId}`));
+
+    const detail = (await (
+      await request.get(`${API}/channels/${ids[ANNOUNCEMENTS]}`, { headers: await bearer(request, 'student') })
+    ).json()) as { posts: { body: string; confirmedAt: string | null }[] };
+    expect(detail.posts.find((p) => p.body === body)?.confirmedAt).toBeTruthy();
+  });
+
+  test('replies in a public channel without leaving the course', async ({ page }) => {
+    const reply = '¿Sirve un compás de plástico? (S18)';
+    await page.goto(`/courses/${courseId}?canal=${ids[GENERAL]}`);
+    const latest = page.getByRole('article').filter({ hasText: GENERAL_POSTS[1] });
+    await latest.getByRole('button', { name: /Responder|Respuestas/ }).click();
+    await latest.getByRole('textbox', { name: 'Escribe una respuesta…' }).fill(reply);
+    await latest.getByRole('button', { name: 'Enviar' }).click();
+    await expect(latest).toContainText(reply);
+    await expect(page).toHaveURL(new RegExp(`/courses/${courseId}`));
+  });
+
+  test('never opens a channel outside the course (BR-ACA-001.17)', async ({ page }) => {
+    await page.goto(`/courses/${courseId}?canal=${ids[GROUP]}`);
+    await expect(channelsTab(page)).toHaveAttribute('aria-selected', 'true');
+    await expect(page.getByText('Elige un canal para leerlo')).toBeVisible();
+    await expect(opened(page).filter({ hasText: GROUP })).toHaveCount(0);
+  });
+
+  test('the Resumen card opens the channel in the tab', async ({ page }) => {
+    await page.goto(`/courses/${courseId}`);
+    await page
+      .getByRole('region', { name: 'Canales' })
+      .getByRole('button', { name: new RegExp(GENERAL) })
+      .click();
+    await expect(channelsTab(page)).toHaveAttribute('aria-selected', 'true');
+    await expect(page).toHaveURL(new RegExp(`\\?canal=${ids[GENERAL]}`));
+    await expect(opened(page).filter({ hasText: GENERAL })).toBeVisible();
+  });
+
+  test('on a phone the channel replaces the list until "Volver a canales"', async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto(`/courses/${courseId}`);
+    await channelsTab(page).click();
+    await channelsList(page)
+      .getByRole('button', { name: new RegExp(GENERAL) })
+      .click();
+    await expect(channelsList(page)).toBeHidden();
+    await page.getByRole('button', { name: 'Volver a canales' }).click();
+    await expect(channelsList(page)).toBeVisible();
+  });
+});
+
 test.describe('as a parent @FR-ACA-001.21 @BR-ACA-001.17', () => {
   test.use({ storageState: storageStatePath('parent') });
 
@@ -183,11 +336,14 @@ test.describe('as a parent @FR-ACA-001.21 @BR-ACA-001.17', () => {
       .getByRole('group', { name: 'Elegir hijo' })
       .getByRole('button', { name: new RegExp(`^${data.relatedStudents[0]} `) })
       .click();
-    await page.getByRole('list', { name: 'Mis cursos' }).getByRole('link', { name: new RegExp(data.courses.teacherOwn.name) }).click();
+    await page
+      .getByRole('list', { name: 'Mis cursos' })
+      .getByRole('link', { name: new RegExp(data.courses.teacherOwn.name) })
+      .click();
     await channelsTab(page).click();
     const list = channelsList(page);
-    await expect(list.getByRole('link', { name: new RegExp(ANNOUNCEMENTS) })).toContainText('Solo anuncios');
-    await expect(list.getByRole('link', { name: new RegExp(GENERAL) })).toHaveCount(0);
+    await expect(list.getByRole('button', { name: new RegExp(ANNOUNCEMENTS) })).toContainText('Solo anuncios');
+    await expect(list.getByRole('button', { name: new RegExp(GENERAL) })).toHaveCount(0);
   });
 });
 
@@ -197,11 +353,15 @@ test.describe('archived channels @FR-ACA-001.21', () => {
   test('come last with "Archivado" and leave the Resumen card', async ({ page, request }) => {
     const teacher = await bearer(request, 'teacher');
     expect(
-      (await request.patch(`${API}/channels/${ids[ANNOUNCEMENTS]}`, { headers: teacher, data: { archived: true } })).ok(),
+      (
+        await request.patch(`${API}/channels/${ids[ANNOUNCEMENTS]}`, { headers: teacher, data: { archived: true } })
+      ).ok(),
     ).toBeTruthy();
 
     await page.goto(`/courses/${courseId}`);
-    await expect(page.getByRole('region', { name: 'Canales' }).getByRole('link', { name: new RegExp(ANNOUNCEMENTS) })).toHaveCount(0);
+    await expect(
+      page.getByRole('region', { name: 'Canales' }).getByRole('button', { name: new RegExp(ANNOUNCEMENTS) }),
+    ).toHaveCount(0);
     await channelsTab(page).click();
     const last = channelsList(page).getByRole('listitem').last();
     await expect(last).toContainText(ANNOUNCEMENTS);
@@ -216,5 +376,96 @@ test.describe('staff @BR-ACA-001.19', () => {
     await page.goto(`/courses/${courseId}`);
     await expect(page.getByRole('button', { name: 'Canal' })).toBeVisible();
     await expect(channelsTab(page)).toHaveCount(0);
+  });
+});
+
+test.describe('"Preguntar en el curso" @FR-ACA-001.25', () => {
+  const ask = (page: Page) => page.getByRole('button', { name: 'Preguntar en el curso' });
+  /** A COURSE channel of this course as COM-003 lists it, for stubbed lists. */
+  const summary = (id: string, over: Record<string, unknown>) => ({
+    id,
+    scope: 'COURSE',
+    targetName: data.courses.teacherOwn.name,
+    schoolId: null,
+    studyPlanId: null,
+    classGroupId: null,
+    courseId,
+    name: id,
+    description: '',
+    audienceStudents: true,
+    audienceParents: false,
+    studentsCanReply: false,
+    parentsCanReply: false,
+    replyVisibility: 'PRIVATE',
+    archived: false,
+    role: 'MEMBER',
+    unread: 0,
+    lastPostAt: '2026-11-01T10:00:00.000Z',
+    lastPostPreview: 'Hola',
+    ...over,
+  });
+  const talk = { studentsCanReply: true, replyVisibility: 'PUBLIC' };
+
+  test.describe('as a student', () => {
+    test.use({ storageState: storageStatePath('student') });
+
+    test('opens a course conversation channel', async ({ page }) => {
+      await page.goto(`/courses/${courseId}`);
+      await expect(ask(page)).toBeVisible();
+      await ask(page).click();
+      // S18: it opens inside the Canales tab.
+      await expect(page).toHaveURL(new RegExp(`/courses/${courseId}\\?canal=[^&]+$`));
+      await expect(channelsTab(page)).toHaveAttribute('aria-selected', 'true');
+    });
+
+    test('goes to the open conversation with the latest post', async ({ page }) => {
+      const list = [
+        summary('announcements', { lastPostAt: '2026-11-23T10:00:00.000Z' }),
+        summary('older-talk', { ...talk, lastPostAt: '2026-11-01T10:00:00.000Z' }),
+        summary('newer-talk', { ...talk, lastPostAt: '2026-11-20T10:00:00.000Z' }),
+        summary('archived-talk', { ...talk, archived: true, lastPostAt: '2026-11-24T10:00:00.000Z' }),
+      ];
+      await page.route(`**${API}/channels`, (route) => route.fulfill({ json: list }));
+      await page.goto(`/courses/${courseId}`);
+      await ask(page).click();
+      await expect(page).toHaveURL(/\?canal=newer-talk$/);
+    });
+
+    test('falls back to a channel with private replies', async ({ page }) => {
+      const list = [
+        summary('announcements', { lastPostAt: '2026-11-23T10:00:00.000Z' }),
+        summary('questions', { studentsCanReply: true, replyVisibility: 'PRIVATE' }),
+      ];
+      await page.route(`**${API}/channels`, (route) => route.fulfill({ json: list }));
+      await page.goto(`/courses/${courseId}`);
+      await ask(page).click();
+      await expect(page).toHaveURL(/\?canal=questions$/);
+    });
+
+    test('is hidden when students can reply in no open channel', async ({ page }) => {
+      const list = [summary('announcements', {}), summary('archived-talk', { ...talk, archived: true })];
+      await page.route(`**${API}/channels`, (route) => route.fulfill({ json: list }));
+      await page.goto(`/courses/${courseId}`);
+      await expect(page.getByRole('tab', { name: 'Resumen' })).toHaveAttribute('aria-selected', 'true');
+      await expect(ask(page)).toHaveCount(0);
+    });
+  });
+
+  test.describe('as a parent', () => {
+    test.use({ storageState: storageStatePath('parent') });
+
+    test('is for students only', async ({ page }) => {
+      await page.goto('/courses');
+      await page
+        .getByRole('group', { name: 'Elegir hijo' })
+        .getByRole('button', { name: new RegExp(`^${data.relatedStudents[0]} `) })
+        .click();
+      await page
+        .getByRole('list', { name: 'Mis cursos' })
+        .getByRole('link', { name: new RegExp(data.courses.teacherOwn.name) })
+        .click();
+      await expect(page.getByRole('tab', { name: 'Resumen' })).toBeVisible();
+      await expect(ask(page)).toHaveCount(0);
+    });
   });
 });

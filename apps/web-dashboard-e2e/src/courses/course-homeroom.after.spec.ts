@@ -88,7 +88,10 @@ test.describe('Homeroom teacher read-only course view @FR-ACA-001.18 @BR-ACA-001
       await expect(page.getByRole('tab', { name: new RegExp(tab) })).toBeVisible();
     }
     // No write actions, no gradebook, attendance or weights (BR .16).
-    for (const tab of ['Asistencia', 'Ponderación']) await expect(page.getByRole('tab', { name: new RegExp(tab) })).toHaveCount(0);
+    for (const tab of ['Asistencia', 'Ponderación', 'Canales']) await expect(page.getByRole('tab', { name: new RegExp(tab) })).toHaveCount(0);
+    // BR-ACA-001.19: a homeroom teacher is neither manager nor member of a colleague's course channels.
+    await expect(page.getByRole('button', { name: 'Canal' })).toHaveCount(0);
+    await expect(page.getByRole('heading', { name: 'Canales' })).toHaveCount(0);
     await expect(page.getByRole('button', { name: /Nueva asignaci/ })).toHaveCount(0);
     await expect(page.getByRole('button', { name: 'Personalizar' })).toHaveCount(0);
     await expect(page.locator('app-gradebook-grid')).toHaveCount(0);

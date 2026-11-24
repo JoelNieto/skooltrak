@@ -2,11 +2,11 @@
 
 | | |
 |---|---|
-| **Status** | Shipped |
+| **Status** | In build (course channels, S15–S17) |
 | **Context** | ACA — Academics (see [capabilities](../capabilities.md#aca-academics)) |
 | **Owner** | — |
 | **Last updated** | 2026-11-23 |
-| **Related** | Design canvas "Skooltrak — Courses redesign (desktop)", boards *Courses — list* and *Course details — Mathematics* (claude.ai/artifact/MGaGctNuxxJd1rouLSYTaa) · [HOM-001](HOM-001-persona-home-dashboards.md) (reuses its grade, period, scope and work-status rules) · [ASM-001](ASM-001-teacher-gradebook.md) (gradebook, assignment-linked grades) · current code: `apps/web-dashboard/src/app/courses/courses.ts`, `courses/course.ts`, `apps/dashboard-backend/src/app/courses/` |
+| **Related** | Design canvas "Skooltrak — Courses redesign (desktop)", boards *Courses — list* and *Course details — Mathematics* (claude.ai/artifact/MGaGctNuxxJd1rouLSYTaa) · [HOM-001](HOM-001-persona-home-dashboards.md) (reuses its grade, period, scope and work-status rules) · [ASM-001](ASM-001-teacher-gradebook.md) (gradebook, assignment-linked grades) · [COM-003](COM-003-channels-and-direct.md) (channels, membership and unread counts used by FR .21–.25) · current code: `apps/web-dashboard/src/app/courses/courses.ts`, `courses/course.ts`, `apps/dashboard-backend/src/app/courses/` |
 
 ## 1. Problem & outcome
 Today *Cursos* is a grid of identical cards: the same stock photo, the subject name and the teacher. A student can't tell from it how a course is going, what's due next or when the class meets. They have to open each course and then each tab. Parents have no course view for their child at all. The course page leads with tabs, and its Participants tab is a placeholder.
@@ -81,6 +81,19 @@ When this ships, every course has its own color and icon, so it is recognisable 
   - add a student who is not in the course's study plan, for example for an elective;
   - remove a student from a course of their plan, for example for an exemption.
 - **FR-ACA-001.20**: Every course list, page, roster and gradebook uses the same roster (BR .15). This includes students created by CSV import.
+
+### Course channels (students and parents)
+These read the course's channels from [COM-003](COM-003-channels-and-direct.md). Nothing here creates, posts to or changes a channel.
+- **FR-ACA-001.21**: The course page gains a **Canales** tab, between *Calificaciones* and *Participantes*, that lists the course's channels (BR .17). Each row shows:
+  - the channel's name and its kind (BR .18);
+  - the latest post's preview and time, or *"Sin publicaciones"*;
+  - *"{n} nuevo(s)"* when it has unread posts.
+
+  Archived channels come last with an *"Archivado"* badge. A row opens `/communication/channels/:id`, which marks its posts read (FR-COM-003.8). The tab label shows *"{n} nuevos"* when the course has unread posts. With no channels the tab shows *"Este curso aún no tiene canales"*.
+- **FR-ACA-001.22**: **Resumen** gains a *Canales* card with up to 3 of the course's non-archived channels, by latest post, and *"Ver todos"*, which opens the *Canales* tab. The card is hidden when the course has no channels.
+- **FR-ACA-001.23**: A *Mis cursos* card whose course has unread channel posts shows *"{n} nuevos"* on its cover, and its accessible name gains *"{n} mensajes nuevos."*
+- **FR-ACA-001.24**: The *Mis cursos* stats row gains **Nuevo en canales**: the unread posts across the shown courses' channels, with *"en {k} curso(s)"*, or *"Nada nuevo"* at 0.
+- **FR-ACA-001.25**: a student sees *"Preguntar en el curso"* in the course header when the course has an open *Conversación del curso* channel (BR .18). It opens that channel, where the student replies under the latest post (FR-COM-003.10). With several such channels it opens the one with the latest post. With none, the button is hidden *(decided 2026-11-23, Q9 (a))*.
 
 ## 4. Business rules
 - **BR-ACA-001.1**: **Student scope.**
@@ -158,6 +171,17 @@ When this ships, every course has its own color and icon, so it is recognisable 
   - The teacher sees the course header, assignments, resources, and the published grades of enrolled students of their homeroom group. That includes the Calificaciones summary per student, chosen from a student picker.
   - They never see drafts, the gradebook, attendance taking or weights, and they get no write actions.
   - Participants shows the teachers and their homeroom group's students only.
+- **BR-ACA-001.17**: **A course's channels.**
+  - They are the channels in the caller's `GET /communication/channels` list with `scope = COURSE` and `courseId` = the course. Membership, and so who sees which channel, is COM-003's (BR-COM-003.4, the course roster). Class-group, study-plan, school and organization channels never show on a course.
+  - A parent sees the channels whose audience includes parents. One list covers every linked child; *Mis cursos* and the course page filter it by the child's courses.
+  - Unread counts are COM-003's per-channel `unread` (FR-COM-003.11).
+  - Without `COMMUNICATION_VIEW` the tab, the Resumen card, the card badges and the stat are hidden, and the list is not requested.
+  - If the list fails to load, the tab and the Resumen card show an inline error with *"Reintentar"*. *Mis cursos* still renders its cards without badges, and the stat shows "—".
+- **BR-ACA-001.18**: **Channel kind**, from the viewer's side (the reply settings in FR-COM-003.3–.4):
+  - the viewer's audience can't reply: *"Solo anuncios"*;
+  - it can reply and `replyVisibility = PUBLIC`: *"Conversación del curso"*;
+  - it can reply and `replyVisibility = PRIVATE`: *"Preguntas al docente"*.
+- **BR-ACA-001.19**: **Staff and homeroom.** Teachers and admins keep the header's *Canal* button (COM-003 §7) and get no *Canales* tab or badges: they manage these channels, and COM-003 counts unread only for members. The homeroom read-only view (BR .16) shows no channel elements: a homeroom teacher is neither a manager nor a member of a colleague's course channels (BR-COM-003.2).
 
 ## 5. Data
 - **Schema changes:**
@@ -188,6 +212,7 @@ When this ships, every course has its own color and icon, so it is recognisable 
 | `GET /api/v1/courses/:id/roster` | Enrollments with source and excluded flag | `MANAGE_COURSES` | .19 |
 | `POST /api/v1/courses/:id/roster` · `DELETE /api/v1/courses/:id/roster/:studentId` | Add a manual enrollment / remove (manual: delete; plan: exclude) | `MANAGE_COURSES` | .19, BR .15 |
 | `GET /api/v1/courses/homeroom?schoolId=` | *"Cursos de {grupo}"* for a homeroom teacher | `VIEW_COURSES` + teacher record | .18, BR .16 |
+| `GET /api/v1/communication/channels` (COM-003, existing) | The caller's channels with unread counts; filtered by course on the client | `COMMUNICATION_VIEW` | .21–.24, BR .17 |
 
 Side effects: none. Regenerate the dashboard API client (`bun run openapi:orval`) in every slice that changes the API.
 
@@ -212,14 +237,15 @@ Side effects: none. Regenerate the dashboard API client (`bun run openapi:orval`
 - **Mobile:** cards stack to one column, and the stats row and chips wrap or scroll horizontally.
 
 ## 9. Out of scope
-- **Channels:** unread badges on cards, the *"Nuevo en canales"* tile, the *"Preguntar en #general"* button and the course *Canales* tab. These wait for the channels FRD in COM (decided 2026-11-19, Q6).
+- **Assignment Q&A channels** (the design's `#fractions-worksheet`, the per-assignment question count, and closing 3 days after the due date). Decided in Q10, but specified in COM-003 first; ACA-001 links to them afterwards.
+- Creating, posting to or moderating channels from the course page: that stays in COM-003 (the *Canal* button).
 - Support teachers or more than one teacher per course: deferred to its own FRD (decided 2026-11-19, Q5).
 - **Switching HOM-001 and COM-002 to the enrollment roster.** They used the study-plan rule, and the two agree except for manual enrollments and exclusions. A follow-up slice in each FRD aligns them: COM-002 in [COM-002-S07](../slices/COM-002-S07-roster-audience.md), since replaced by [COM-003](COM-003-channels-and-direct.md), whose course channels use the roster; HOM-001 still to do.
 - The teacher assignment form redesign (step 5 of the plan), and assignment categories, late policy and hand-in modes.
 - A teacher's own *Mis cursos* with teaching metrics (to review, attendance), which HOM-001 covers on the home page.
 
 ## 10. Open questions
-All answered on 2026-11-19.
+Q1–Q8 answered on 2026-11-19; Q9 and Q10 on 2026-11-23.
 - [x] **Q1: Course roster.** The code had two answers that drift apart.
   - **Stored link.** `Course.students` is written on course creation (`courses.service.ts:112`), on student creation (`students.service.ts:155`) and on a class-group change (`students.service.ts:529`, which *replaces* the student's courses).
   - **Study-plan rule.** HOM-001 and COM-002-S04 derive a course's students from the class groups of its study plan.
@@ -232,6 +258,9 @@ All answered on 2026-11-19.
 - [x] **Q5: Support teacher.** **Decided:** deferred to its own FRD. One teacher per course.
 - [x] **Q6: Channels.** **Decided:** every channel element waits for the COM channels FRD.
 - [x] **Q7: Classmates for parents.** **Decided:** parents see teachers only (BR .13).
+- [x] **Q9: "Ask in #general".** In COM-003 only managers post; members can only reply under a post (FR-COM-003.6, BR-COM-003.5). **Decided (2026-11-23):** option (a). The button opens the course's *Conversación del curso* channel, and the student replies under the latest post (FR .25). COM-003 is unchanged.
+- [x] **Q10: Assignment Q&A channels.** **Decided (2026-11-23):** yes, each assignment gets its own Q&A channel. That is a new channel level in COM-003, closing 3 days after the due date as in the design. It is specified in COM-003 first; ACA-001 adds the per-assignment question count and the link once that exists.
+- [x] **Q6 follow-up (2026-11-23).** COM-003 shipped in #84, so the course channel elements Q6 held back are specified as FR .21–.25.
 - [x] **Q8: Teachers opening other courses.** **Decided:** full access to their own courses, plus read-only access to colleagues' courses limited to their **homeroom** group's students (BR .3, .16, FR .18).
 
 ## 11. Slices
@@ -253,3 +282,6 @@ Listed in build order.
 | [ACA-001-S09](../slices/ACA-001-S09-customize-course.md) | Teacher sets color and cover photo | .3, BR .12 | Done (#73) |
 | [ACA-001-S10](../slices/ACA-001-S10-graded-status.md) | *"Calificada · n"* status from linked grades | .17 | Done (#63) |
 | [ACA-001-S14](../slices/ACA-001-S14-staff-cards.md) | Staff *Cursos* cards: area chip and course name | .9, BR .14 | Done (#82) |
+| [ACA-001-S15](../slices/ACA-001-S15-course-channels.md) | Canales tab and Resumen card on the course page | .21 .22, BR .17 .18 .19 | In progress |
+| ACA-001-S16 | Unread channel badges on *Mis cursos* cards and the *Nuevo en canales* stat | .23 .24, BR .17 | Proposed |
+| ACA-001-S17 | *"Preguntar en el curso"* opens the course conversation channel | .25 | Proposed |

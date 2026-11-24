@@ -1,0 +1,66 @@
+import type { ChannelSummary } from '@/shared';
+import { channelKind, courseChannels, newCount } from './course-channels';
+
+const channel = (over: Partial<ChannelSummary>): ChannelSummary => ({
+  id: 'c',
+  scope: 'COURSE',
+  targetName: 'Matemáticas 7°',
+  schoolId: 's',
+  studyPlanId: null,
+  classGroupId: null,
+  courseId: 'math',
+  name: 'Canal',
+  description: '',
+  audienceStudents: true,
+  audienceParents: true,
+  studentsCanReply: false,
+  parentsCanReply: false,
+  replyVisibility: 'PRIVATE',
+  archived: false,
+  role: 'MEMBER',
+  unread: 0,
+  lastPostAt: null,
+  lastPostPreview: null,
+  ...over,
+});
+
+describe('courseChannels @FR-ACA-001.21', () => {
+  it('keeps only COURSE channels of this course (BR-ACA-001.17)', () => {
+    const list = [
+      channel({ id: 'mine' }),
+      channel({ id: 'other-course', courseId: 'spanish' }),
+      channel({ id: 'group', scope: 'CLASS_GROUP', courseId: null, classGroupId: 'g' }),
+      channel({ id: 'school', scope: 'SCHOOL', courseId: null }),
+    ];
+    expect(courseChannels(list, 'math', 'STUDENT').map((c) => c.id)).toEqual(['mine']);
+  });
+
+  it('puts open channels first by latest post, archived ones last', () => {
+    const list = [
+      channel({ id: 'old', lastPostAt: '2026-11-01T10:00:00Z' }),
+      channel({ id: 'archived', archived: true, lastPostAt: '2026-11-22T10:00:00Z' }),
+      channel({ id: 'empty', lastPostAt: null }),
+      channel({ id: 'new', lastPostAt: '2026-11-20T10:00:00Z' }),
+    ];
+    expect(courseChannels(list, 'math', 'STUDENT').map((c) => c.id)).toEqual(['new', 'old', 'empty', 'archived']);
+  });
+});
+
+describe('channelKind (BR-ACA-001.18)', () => {
+  it('reads the reply setting of the viewer’s own audience', () => {
+    const studentsTalk = channel({ studentsCanReply: true, replyVisibility: 'PUBLIC' });
+    expect(channelKind(studentsTalk, 'STUDENT')).toBe('Conversación del curso');
+    expect(channelKind(studentsTalk, 'PARENT')).toBe('Solo anuncios');
+
+    const parentsAsk = channel({ parentsCanReply: true, replyVisibility: 'PRIVATE' });
+    expect(channelKind(parentsAsk, 'PARENT')).toBe('Preguntas al docente');
+    expect(channelKind(parentsAsk, 'STUDENT')).toBe('Solo anuncios');
+  });
+});
+
+describe('newCount', () => {
+  it('agrees in number', () => {
+    expect(newCount(1)).toBe('1 nuevo');
+    expect(newCount(3)).toBe('3 nuevos');
+  });
+});

@@ -5,7 +5,7 @@ import { CourseWork, CourseWorkItem, workDate, workPill, WORK_TYPES } from './co
 
 /**
  * *Resumen* for students and parents (ACA-001 FR .12): the grade summary (projected), the next 3 items
- * of work and the course's teacher.
+ * of work, the course's teacher and, projected with `courseOverviewAside`, its Canales card (FR .22).
  */
 @Component({
   selector: 'app-course-overview',
@@ -43,21 +43,25 @@ import { CourseWork, CourseWorkItem, workDate, workPill, WORK_TYPES } from './co
           <p class="text-sm text-ink-muted">Nada pendiente.</p>
         }
       </section>
-      <section aria-labelledby="overview-teachers">
-        <h3 id="overview-teachers" class="mb-2 text-sm font-semibold text-ink-strong">Docente</h3>
-        @if (teacher(); as t) {
-          <div class="flex items-center gap-2 text-sm text-ink">
-            <div class="avatar avatar-placeholder" aria-hidden="true">
-              <div class="w-8 rounded-full text-white" [style.background]="t.color">
-                <span class="text-xs">{{ t.initials }}</span>
+      <div class="flex flex-col gap-6">
+        <section aria-labelledby="overview-teachers">
+          <h3 id="overview-teachers" class="mb-2 text-sm font-semibold text-ink-strong">Docente</h3>
+          @if (teacher(); as t) {
+            <div class="flex items-center gap-2 text-sm text-ink">
+              <div class="avatar avatar-placeholder" aria-hidden="true">
+                <div class="w-8 rounded-full text-white" [style.background]="t.color">
+                  <span class="text-xs">{{ t.initials }}</span>
+                </div>
               </div>
+              {{ t.name }}
             </div>
-            {{ t.name }}
-          </div>
-        } @else {
-          <p class="text-sm text-ink-muted">No hay docente asignado.</p>
-        }
-      </section>
+          } @else {
+            <p class="text-sm text-ink-muted">No hay docente asignado.</p>
+          }
+        </section>
+        <!-- FR-ACA-001.22: the course page projects its Canales card here, under the teacher. -->
+        <ng-content select="[courseOverviewAside]" />
+      </div>
     </div>
   `,
 })

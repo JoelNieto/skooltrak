@@ -146,7 +146,7 @@ test.describe('as a student @FR-ACA-001.21 @FR-ACA-001.22', () => {
     const announcements = names.findIndex((t) => t.includes(ANNOUNCEMENTS));
     expect(general).toBeGreaterThanOrEqual(0);
     // Its posts are newer, unless a newer channel pushed Anuncios past the card's 3 rows.
-    if (announcements >= 0) expect(general).toBeLessThan(announcements);
+    expect(announcements === -1 || general < announcements).toBe(true);
 
     await card.getByRole('button', { name: 'Ver todos' }).click();
     await expect(channelsTab(page)).toHaveAttribute('aria-selected', 'true');
@@ -333,7 +333,17 @@ test.describe('"Preguntar en el curso" @FR-ACA-001.25', () => {
       await expect(ask(page)).toHaveAttribute('href', '/communication/channels/newer-talk');
     });
 
-    test('is hidden without an open course conversation', async ({ page }) => {
+    test('falls back to a channel with private replies', async ({ page }) => {
+      const list = [
+        summary('announcements', { lastPostAt: '2026-11-23T10:00:00.000Z' }),
+        summary('questions', { studentsCanReply: true, replyVisibility: 'PRIVATE' }),
+      ];
+      await page.route(`**${API}/channels`, (route) => route.fulfill({ json: list }));
+      await page.goto(`/courses/${courseId}`);
+      await expect(ask(page)).toHaveAttribute('href', '/communication/channels/questions');
+    });
+
+    test('is hidden when students can reply in no open channel', async ({ page }) => {
       const list = [summary('announcements', {}), summary('archived-talk', { ...talk, archived: true })];
       await page.route(`**${API}/channels`, (route) => route.fulfill({ json: list }));
       await page.goto(`/courses/${courseId}`);

@@ -24,8 +24,12 @@ Scenario: several conversations
   Given the course has two open course conversations and an archived one with a newer post
   Then "Preguntar en el curso" opens the open one with the latest post
 
+Scenario: only private questions (decided 2026-11-24)
+  Given the course's only channel students may reply in has private replies ("Preguntas al docente")
+  Then "Preguntar en el curso" opens that channel
+
 Scenario: none
-  Given the course has only announcement channels, or only archived conversations
+  Given the course has only announcement channels, archived channels, or channels only parents may reply in
   Then the header shows no "Preguntar en el curso"
 
 Scenario: students only
@@ -35,10 +39,10 @@ Scenario: students only
 
 ## Layers touched
 - [ ] Prisma, Nest, OpenAPI: **none**. It uses S15's channel list.
-- [ ] Angular: `askChannel()` in `courses/course-channels.ts`: the first non-archived *Conversación del curso* channel of S15's sorted list. `course.ts` renders an `<a uiButton variant="primary">` next to *Ver calendario*, for `STUDENT` viewers only.
+- [ ] Angular: `askChannel()` in `courses/course-channels.ts`, picking from S15's sorted list: the first non-archived *Conversación del curso* channel, else the first non-archived *Preguntas al docente* channel. `course.ts` renders an `<a uiButton variant="primary">` next to *Ver calendario*, for `STUDENT` viewers only.
 - [ ] Tests:
-  - Web unit (`course-channels.spec.ts`): latest open conversation wins; archived and private-reply channels are skipped; null when none.
-  - Playwright: a block in `courses/course-channels.after.spec.ts` (`@FR-ACA-001.25`). It covers the real channel, a stubbed list for "latest wins" and "none", and the parent.
+  - Web unit (`course-channels.spec.ts`): latest open conversation wins; private-reply channels are the fallback; archived channels and channels only parents may reply in are skipped; null when none.
+  - Playwright: a block in `courses/course-channels.after.spec.ts` (`@FR-ACA-001.25`). It covers the real channel, stubbed lists for "latest wins", "private fallback" and "none", and the parent.
 
 ## Out of scope for this slice
 - Starting a new post as a student: COM-003 keeps posting for managers (Q9 decided (a)).

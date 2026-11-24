@@ -93,7 +93,7 @@ These read the course's channels from [COM-003](COM-003-channels-and-direct.md).
 - **FR-ACA-001.22**: **Resumen** gains a *Canales* card with up to 3 of the course's non-archived channels, by latest post, and *"Ver todos"*, which opens the *Canales* tab. The card is hidden when the course has no channels.
 - **FR-ACA-001.23**: A *Mis cursos* card whose course has unread channel posts shows *"{n} nuevos"* on its cover, and its accessible name gains *"{n} mensajes nuevos."*
 - **FR-ACA-001.24**: The *Mis cursos* stats row gains **Nuevo en canales**: the unread posts across the shown courses' channels, with *"en {k} curso(s)"*, or *"Nada nuevo"* at 0.
-- **FR-ACA-001.25**: a student sees *"Preguntar en el curso"* in the course header when the course has an open *Conversación del curso* channel (BR .18). It opens that channel, where the student replies under the latest post (FR-COM-003.10). With several such channels it opens the one with the latest post. With none, the button is hidden *(decided 2026-11-23, Q9 (a))*.
+- **FR-ACA-001.25**: a student sees *"Preguntar en el curso"* in the course header when the course has an open channel where students may reply (BR .18). It opens the course's *Conversación del curso* channel if there is one, otherwise its *Preguntas al docente* channel, where the question reaches only the teachers. Among several of a kind it opens the one with the latest post. There the student replies under the latest post (FR-COM-003.10). With no such channel the button is hidden *(decided 2026-11-23, Q9 (a); widened to private-reply channels 2026-11-24)*.
 
 ## 4. Business rules
 - **BR-ACA-001.1**: **Student scope.**

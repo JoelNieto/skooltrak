@@ -86,7 +86,7 @@ describe('unreadByCourse @FR-ACA-001.23 @FR-ACA-001.24', () => {
 describe('askChannel @FR-ACA-001.25', () => {
   const talk = { studentsCanReply: true, replyVisibility: 'PUBLIC' as const };
 
-  it('picks the open course conversation with the latest post', () => {
+  it('prefers the open course conversation with the latest post', () => {
     const list = [
       channel({ id: 'announcements', lastPostAt: '2026-11-23T10:00:00Z' }),
       channel({ id: 'older-talk', ...talk, lastPostAt: '2026-11-01T10:00:00Z' }),
@@ -102,8 +102,24 @@ describe('askChannel @FR-ACA-001.25', () => {
     expect(askChannel(courseChannels(list, 'math', 'STUDENT'))?.id).toBe('newer-talk');
   });
 
-  it('is null without an open course conversation', () => {
-    const list = [channel({ id: 'announcements' }), channel({ id: 'archived-talk', ...talk, archived: true })];
+  it('falls back to the latest open channel with private replies', () => {
+    const ask = { studentsCanReply: true, replyVisibility: 'PRIVATE' as const };
+    const list = [
+      channel({ id: 'announcements', lastPostAt: '2026-11-23T10:00:00Z' }),
+      channel({ id: 'older-questions', ...ask, lastPostAt: '2026-11-01T10:00:00Z' }),
+      channel({ id: 'newer-questions', ...ask, lastPostAt: '2026-11-20T10:00:00Z' }),
+      channel({ id: 'archived-talk', ...talk, archived: true, lastPostAt: '2026-11-24T10:00:00Z' }),
+    ];
+    expect(askChannel(courseChannels(list, 'math', 'STUDENT'))?.id).toBe('newer-questions');
+  });
+
+  it('is null when students can reply in no open channel', () => {
+    const list = [
+      channel({ id: 'announcements' }),
+      channel({ id: 'archived-talk', ...talk, archived: true }),
+      // Parents may reply here, students may not.
+      channel({ id: 'parents-ask', parentsCanReply: true, replyVisibility: 'PRIVATE' }),
+    ];
     expect(askChannel(courseChannels(list, 'math', 'STUDENT'))).toBeNull();
   });
 });

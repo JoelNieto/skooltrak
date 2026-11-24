@@ -54,10 +54,14 @@ export function newMessages(n: number): string {
 }
 
 /**
- * FR-ACA-001.25 (Q9 (a)): where "Preguntar en el curso" goes. The course's open channel where the
- * viewer may reply in public (*Conversación del curso*, BR-ACA-001.18), the one with the latest post
- * when there are several. `channels` comes sorted from `courseChannels`; null hides the button.
+ * FR-ACA-001.25 (Q9 (a)): where "Preguntar en el curso" goes. The course's open channels where the
+ * viewer may reply: a *Conversación del curso* (public replies) first, else a *Preguntas al docente*
+ * (private replies, seen only by the course's managers), BR-ACA-001.18. Among several of a kind, the
+ * one with the latest post: `channels` comes sorted from `courseChannels`. Null hides the button.
  */
 export function askChannel(channels: readonly CourseChannel[]): CourseChannel | null {
-  return channels.find((c) => !c.archived && c.kind === 'Conversación del curso') ?? null;
+  const open = channels.filter((c) => !c.archived);
+  return (
+    open.find((c) => c.kind === 'Conversación del curso') ?? open.find((c) => c.kind === 'Preguntas al docente') ?? null
+  );
 }

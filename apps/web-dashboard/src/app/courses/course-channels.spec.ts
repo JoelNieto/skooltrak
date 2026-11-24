@@ -1,5 +1,13 @@
 import type { ChannelSummary } from '@/shared';
-import { askChannel, channelKind, courseChannels, newCount, newMessages, unreadByCourse } from './course-channels';
+import {
+  askChannel,
+  channelKind,
+  courseChannels,
+  newCount,
+  newMessages,
+  openChannelId,
+  unreadByCourse,
+} from './course-channels';
 
 const channel = (over: Partial<ChannelSummary>): ChannelSummary => ({
   id: 'c',
@@ -121,5 +129,19 @@ describe('askChannel @FR-ACA-001.25', () => {
       channel({ id: 'parents-ask', parentsCanReply: true, replyVisibility: 'PRIVATE' }),
     ];
     expect(askChannel(courseChannels(list, 'math', 'STUDENT'))).toBeNull();
+  });
+});
+
+describe('openChannelId @FR-ACA-001.26', () => {
+  const list = courseChannels([channel({ id: 'general' }), channel({ id: 'announcements' })], 'math', 'STUDENT');
+
+  it("opens the channel in the URL when it is one of the course's", () => {
+    expect(openChannelId(list, 'announcements')).toBe('announcements');
+  });
+
+  it('opens nothing by itself, nor a channel outside the course (BR-ACA-001.17)', () => {
+    expect(openChannelId(list, null)).toBeNull();
+    expect(openChannelId(list, undefined)).toBeNull();
+    expect(openChannelId(list, 'class-group-channel')).toBeNull();
   });
 });

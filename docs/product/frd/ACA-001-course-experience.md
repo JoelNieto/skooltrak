@@ -81,7 +81,7 @@ The *Canales* tab becomes the place where a course's channels are read and writt
   - *"Confirmar lectura"* on posts that require it (FR-COM-003.8);
   - the replies under each post, as BR-COM-003.5 allows, and a reply box where the viewer's audience may reply (FR-COM-003.10).
 
-  Opening a channel marks its posts read, and the list's and the tab's counts update. The open channel is in the URL (`?canal=<id>`), so a link or a reload reopens it. With none in the URL, or one that isn't among the course's channels (BR .17), the first channel of the list opens. On a phone the list and the channel stack; choosing a channel shows it with *"Volver a canales"*. The Resumen card's rows (FR .22) and *"Preguntar en el curso"* (FR .25) open the tab with that channel.
+  Opening a channel marks its posts read, and the list's and the tab's counts update. The open channel is in the URL (`?canal=<id>`), so a link or a reload reopens it. With none in the URL, or one that isn't among the course's channels (BR .17), no channel opens and the pane says *"Elige un canal para leerlo"*. Nothing opens by itself, because opening marks posts read and would count in the teacher's *"Leído por"* for posts nobody chose to read *(decided 2026-11-25)*. On a phone the list and the channel stack; choosing a channel shows it with *"Volver a canales"*. The Resumen card's rows (FR .22) and *"Preguntar en el curso"* (FR .25) open the tab with that channel.
 - **FR-ACA-001.27**: Teachers and admins who manage the course's channels (BR-COM-003.3) get the same *Canales* tab, between *Calendario* and *Participantes*. The open channel adds what managers see on the channel page:
   - the composer, with *"Requiere confirmación de lectura"*;
   - per post, *"Leído por {x} de {y}"* and *"Confirmado por {x} de {y}"*, and the receipts list (FR-COM-003.9);
@@ -306,7 +306,7 @@ Listed in build order.
 | [ACA-001-S15](../slices/ACA-001-S15-course-channels.md) | Canales tab and Resumen card on the course page | .21 .22, BR .17 .18 .19 | Done (#86) |
 | [ACA-001-S16](../slices/ACA-001-S16-mis-cursos-channels.md) | Unread channel badges on *Mis cursos* cards and the *Nuevo en canales* stat | .23 .24, BR .17 | In review |
 | [ACA-001-S17](../slices/ACA-001-S17-ask-in-course.md) | *"Preguntar en el curso"* opens the course conversation channel | .25 | In review |
-| [ACA-001-S18](../slices/ACA-001-S18-channel-in-course.md) | Students and parents read, confirm and reply inside the *Canales* tab | .26, BR .20 | Ready |
+| [ACA-001-S18](../slices/ACA-001-S18-channel-in-course.md) | Students and parents read, confirm and reply inside the *Canales* tab | .26, BR .20 | In review |
 | ACA-001-S19 | Teachers post, see receipts and answer inside the *Canales* tab; *Nuevo canal para este curso* | .27, BR .19 .20 | Proposed |
 | ACA-001-S20 | *"{n} por responder"* for managers | .28 | Proposed (blocked on Q11 and a COM-003 field) |
 | ACA-001-S21 | Assignment Q&A group and assignment card in *Canales* | .29 | Proposed (after COM-003-S02) |

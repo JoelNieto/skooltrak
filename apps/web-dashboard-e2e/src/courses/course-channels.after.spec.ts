@@ -5,6 +5,7 @@ import { data, E2E_PASSWORD, personas, storageStatePath } from '../support/fixtu
  * ACA-001-S15: the course's channels on the course page (FR-ACA-001.21, .22; BR .17–.19).
  * ACA-001-S16: their unread counts on Mis cursos (FR-ACA-001.23, .24).
  * ACA-001-S17: "Preguntar en el curso" opens the course conversation (FR-ACA-001.25).
+ * ACA-001-S18: the chosen channel opens inside the Canales tab (FR-ACA-001.26).
  * docs/product/slices/ACA-001-S15-course-channels.md, ACA-001-S16-mis-cursos-channels.md
  *
  * Channels are created here through the COM-003 API, as `channels.spec.ts` does. This file is an
@@ -125,23 +126,23 @@ test.describe('as a student @FR-ACA-001.21 @FR-ACA-001.22', () => {
 
     await channelsTab(page).click();
     const list = channelsList(page);
-    const announcements = list.getByRole('link', { name: new RegExp(ANNOUNCEMENTS) });
+    const announcements = list.getByRole('button', { name: new RegExp(ANNOUNCEMENTS) });
     await expect(announcements).toContainText('Solo anuncios');
     await expect(announcements).toContainText('1 nuevo');
     await expect(announcements).toContainText(ANNOUNCEMENT_POST);
 
-    const general = list.getByRole('link', { name: new RegExp(GENERAL) });
+    const general = list.getByRole('button', { name: new RegExp(GENERAL) });
     await expect(general).toContainText('Conversación del curso');
     await expect(general).toContainText('2 nuevos');
     await expect(general).toContainText(GENERAL_POSTS[1]);
 
-    await expect(list.getByRole('link', { name: new RegExp(GROUP) })).toHaveCount(0);
+    await expect(list.getByRole('button', { name: new RegExp(GROUP) })).toHaveCount(0);
   });
 
   test('Resumen shows a Canales card, latest post first, and "Ver todos" opens the tab', async ({ page }) => {
     await page.goto(`/courses/${courseId}`);
     const card = page.getByRole('region', { name: 'Canales' });
-    const names = await card.getByRole('link').allTextContents();
+    const names = await card.getByRole('list').getByRole('button').allTextContents();
     const general = names.findIndex((t) => t.includes(GENERAL));
     const announcements = names.findIndex((t) => t.includes(ANNOUNCEMENTS));
     expect(general).toBeGreaterThanOrEqual(0);
@@ -152,21 +153,22 @@ test.describe('as a student @FR-ACA-001.21 @FR-ACA-001.22', () => {
     await expect(channelsTab(page)).toHaveAttribute('aria-selected', 'true');
   });
 
-  test('opening a channel marks it read, and the course page counts it', async ({ page, request }) => {
+  test('opening a channel marks it read, and the course page counts it @FR-ACA-001.26', async ({ page, request }) => {
     const before = await expectedUnread(request, 'student');
     await page.goto(`/courses/${courseId}`);
     await channelsTab(page).click();
     await channelsList(page)
-      .getByRole('link', { name: new RegExp(GENERAL) })
+      .getByRole('button', { name: new RegExp(GENERAL) })
       .click();
-    await expect(page).toHaveURL(new RegExp(`/communication/channels/${ids[GENERAL]}`));
+    // S18: it opens beside the list, and the course page stays.
+    await expect(page).toHaveURL(new RegExp(`/courses/${courseId}\\?canal=${ids[GENERAL]}`));
     await expect(page.getByText(GENERAL_POSTS[1])).toBeVisible();
 
     await expect.poll(() => expectedUnread(request, 'student')).toBe(before - 2);
     await page.goto(`/courses/${courseId}`);
     await expect(channelsTab(page)).toContainText(nuevos(before - 2));
     await channelsTab(page).click();
-    await expect(channelsList(page).getByRole('link', { name: new RegExp(GENERAL) })).not.toContainText('nuevo');
+    await expect(channelsList(page).getByRole('button', { name: new RegExp(GENERAL) })).not.toContainText('nuevo');
   });
 
   test('with no channels the tab says so and Resumen has no card', async ({ page }) => {
@@ -232,6 +234,99 @@ test.describe('on Mis cursos @FR-ACA-001.23 @FR-ACA-001.24', () => {
   });
 });
 
+test.describe('inside the Canales tab @FR-ACA-001.26', () => {
+  test.use({ storageState: storageStatePath('student') });
+  const opened = (page: Page) => page.getByRole('heading', { level: 2 });
+
+  test('nothing opens until a channel is chosen; then it opens beside the list', async ({ page }) => {
+    await page.goto(`/courses/${courseId}`);
+    await channelsTab(page).click();
+    await expect(page.getByText('Elige un canal para leerlo')).toBeVisible();
+
+    await channelsList(page)
+      .getByRole('button', { name: new RegExp(ANNOUNCEMENTS) })
+      .click();
+    await expect(page).toHaveURL(new RegExp(`/courses/${courseId}\\?canal=${ids[ANNOUNCEMENTS]}`));
+    await expect(opened(page).filter({ hasText: ANNOUNCEMENTS })).toBeVisible();
+    await expect(channelsList(page).getByRole('button', { name: new RegExp(ANNOUNCEMENTS) })).toHaveAttribute(
+      'aria-pressed',
+      'true',
+    );
+    await expect(page.getByRole('link', { name: 'Abrir en pantalla completa' })).toHaveAttribute(
+      'href',
+      `/communication/channels/${ids[ANNOUNCEMENTS]}`,
+    );
+    // Announcements only: no reply box.
+    await expect(page.getByRole('button', { name: 'Responder' })).toHaveCount(0);
+  });
+
+  test('confirms an announcement without leaving the course', async ({ page, request }) => {
+    const teacher = await bearer(request, 'teacher');
+    const body = 'Confirmen que leyeron la guía S18.';
+    expect(
+      (
+        await request.post(`${API}/channels/${ids[ANNOUNCEMENTS]}/posts`, {
+          headers: teacher,
+          data: { body, requiresConfirmation: true },
+        })
+      ).ok(),
+    ).toBeTruthy();
+
+    await page.goto(`/courses/${courseId}?canal=${ids[ANNOUNCEMENTS]}`);
+    await expect(channelsTab(page)).toHaveAttribute('aria-selected', 'true');
+    const post = page.getByRole('article').filter({ hasText: body });
+    await post.getByRole('button', { name: 'Confirmar lectura' }).click();
+    await expect(post).toContainText('Confirmaste la lectura');
+    await expect(page).toHaveURL(new RegExp(`/courses/${courseId}`));
+
+    const detail = (await (
+      await request.get(`${API}/channels/${ids[ANNOUNCEMENTS]}`, { headers: await bearer(request, 'student') })
+    ).json()) as { posts: { body: string; confirmedAt: string | null }[] };
+    expect(detail.posts.find((p) => p.body === body)?.confirmedAt).toBeTruthy();
+  });
+
+  test('replies in a public channel without leaving the course', async ({ page }) => {
+    const reply = '¿Sirve un compás de plástico? (S18)';
+    await page.goto(`/courses/${courseId}?canal=${ids[GENERAL]}`);
+    const latest = page.getByRole('article').filter({ hasText: GENERAL_POSTS[1] });
+    await latest.getByRole('button', { name: /Responder|Respuestas/ }).click();
+    await latest.getByRole('textbox', { name: 'Escribe una respuesta…' }).fill(reply);
+    await latest.getByRole('button', { name: 'Enviar' }).click();
+    await expect(latest).toContainText(reply);
+    await expect(page).toHaveURL(new RegExp(`/courses/${courseId}`));
+  });
+
+  test('never opens a channel outside the course (BR-ACA-001.17)', async ({ page }) => {
+    await page.goto(`/courses/${courseId}?canal=${ids[GROUP]}`);
+    await expect(channelsTab(page)).toHaveAttribute('aria-selected', 'true');
+    await expect(page.getByText('Elige un canal para leerlo')).toBeVisible();
+    await expect(opened(page).filter({ hasText: GROUP })).toHaveCount(0);
+  });
+
+  test('the Resumen card opens the channel in the tab', async ({ page }) => {
+    await page.goto(`/courses/${courseId}`);
+    await page
+      .getByRole('region', { name: 'Canales' })
+      .getByRole('button', { name: new RegExp(GENERAL) })
+      .click();
+    await expect(channelsTab(page)).toHaveAttribute('aria-selected', 'true');
+    await expect(page).toHaveURL(new RegExp(`\\?canal=${ids[GENERAL]}`));
+    await expect(opened(page).filter({ hasText: GENERAL })).toBeVisible();
+  });
+
+  test('on a phone the channel replaces the list until "Volver a canales"', async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto(`/courses/${courseId}`);
+    await channelsTab(page).click();
+    await channelsList(page)
+      .getByRole('button', { name: new RegExp(GENERAL) })
+      .click();
+    await expect(channelsList(page)).toBeHidden();
+    await page.getByRole('button', { name: 'Volver a canales' }).click();
+    await expect(channelsList(page)).toBeVisible();
+  });
+});
+
 test.describe('as a parent @FR-ACA-001.21 @BR-ACA-001.17', () => {
   test.use({ storageState: storageStatePath('parent') });
 
@@ -247,8 +342,8 @@ test.describe('as a parent @FR-ACA-001.21 @BR-ACA-001.17', () => {
       .click();
     await channelsTab(page).click();
     const list = channelsList(page);
-    await expect(list.getByRole('link', { name: new RegExp(ANNOUNCEMENTS) })).toContainText('Solo anuncios');
-    await expect(list.getByRole('link', { name: new RegExp(GENERAL) })).toHaveCount(0);
+    await expect(list.getByRole('button', { name: new RegExp(ANNOUNCEMENTS) })).toContainText('Solo anuncios');
+    await expect(list.getByRole('button', { name: new RegExp(GENERAL) })).toHaveCount(0);
   });
 });
 
@@ -265,7 +360,7 @@ test.describe('archived channels @FR-ACA-001.21', () => {
 
     await page.goto(`/courses/${courseId}`);
     await expect(
-      page.getByRole('region', { name: 'Canales' }).getByRole('link', { name: new RegExp(ANNOUNCEMENTS) }),
+      page.getByRole('region', { name: 'Canales' }).getByRole('button', { name: new RegExp(ANNOUNCEMENTS) }),
     ).toHaveCount(0);
     await channelsTab(page).click();
     const last = channelsList(page).getByRole('listitem').last();
@@ -285,7 +380,7 @@ test.describe('staff @BR-ACA-001.19', () => {
 });
 
 test.describe('"Preguntar en el curso" @FR-ACA-001.25', () => {
-  const ask = (page: Page) => page.getByRole('link', { name: 'Preguntar en el curso' });
+  const ask = (page: Page) => page.getByRole('button', { name: 'Preguntar en el curso' });
   /** A COURSE channel of this course as COM-003 lists it, for stubbed lists. */
   const summary = (id: string, over: Record<string, unknown>) => ({
     id,
@@ -318,7 +413,9 @@ test.describe('"Preguntar en el curso" @FR-ACA-001.25', () => {
       await page.goto(`/courses/${courseId}`);
       await expect(ask(page)).toBeVisible();
       await ask(page).click();
-      await expect(page).toHaveURL(/\/communication\/channels\/[^/]+$/);
+      // S18: it opens inside the Canales tab.
+      await expect(page).toHaveURL(new RegExp(`/courses/${courseId}\\?canal=[^&]+$`));
+      await expect(channelsTab(page)).toHaveAttribute('aria-selected', 'true');
     });
 
     test('goes to the open conversation with the latest post', async ({ page }) => {
@@ -330,7 +427,8 @@ test.describe('"Preguntar en el curso" @FR-ACA-001.25', () => {
       ];
       await page.route(`**${API}/channels`, (route) => route.fulfill({ json: list }));
       await page.goto(`/courses/${courseId}`);
-      await expect(ask(page)).toHaveAttribute('href', '/communication/channels/newer-talk');
+      await ask(page).click();
+      await expect(page).toHaveURL(/\?canal=newer-talk$/);
     });
 
     test('falls back to a channel with private replies', async ({ page }) => {
@@ -340,7 +438,8 @@ test.describe('"Preguntar en el curso" @FR-ACA-001.25', () => {
       ];
       await page.route(`**${API}/channels`, (route) => route.fulfill({ json: list }));
       await page.goto(`/courses/${courseId}`);
-      await expect(ask(page)).toHaveAttribute('href', '/communication/channels/questions');
+      await ask(page).click();
+      await expect(page).toHaveURL(/\?canal=questions$/);
     });
 
     test('is hidden when students can reply in no open channel', async ({ page }) => {

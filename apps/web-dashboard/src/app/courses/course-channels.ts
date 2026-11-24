@@ -65,3 +65,12 @@ export function askChannel(channels: readonly CourseChannel[]): CourseChannel | 
     open.find((c) => c.kind === 'Conversación del curso') ?? open.find((c) => c.kind === 'Preguntas al docente') ?? null
   );
 }
+
+/**
+ * FR-ACA-001.26: the channel open beside the list: the one in the URL when it is one of the course's
+ * channels (BR-ACA-001.17), else none. Nothing opens by itself, because opening marks posts read and
+ * would count in the teacher's "Leído por" for posts the viewer never chose to read.
+ */
+export function openChannelId(channels: readonly CourseChannel[], wanted: string | null | undefined): string | null {
+  return wanted && channels.some((c) => c.id === wanted) ? wanted : null;
+}

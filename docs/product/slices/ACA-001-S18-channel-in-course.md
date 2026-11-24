@@ -4,7 +4,7 @@
 |---|---|
 | **FRD** | [ACA-001](../frd/ACA-001-course-experience.md) |
 | **Implements** | FR-ACA-001.26; BR-ACA-001.17, BR-ACA-001.20 |
-| **Status** | Ready |
+| **Status** | In review |
 | **Branch** | `feat/ACA-001-S18-channel-in-course` |
 | **Estimate** | 2 days |
 | **Design** | Canvas "Skooltrak — Courses redesign (desktop)", board *Course channels — student* |
@@ -22,7 +22,8 @@ Background:
 
 Scenario: choosing a channel opens it beside the list @FR-ACA-001.26
   When Ana opens the course's "Canales" tab
-  Then the first channel of the list is open beside it
+  Then no channel is open, and the pane says "Elige un canal para leerlo"
+  # Opening marks posts read, so nothing opens by itself (decided 2026-11-25).
   When she chooses "General S15 E2E"
   Then its posts show beside the list, newest first, with "Nuevo" on the unread ones
   And the URL has "?canal=<General's id>"
@@ -49,7 +50,7 @@ Scenario: deep links @FR-ACA-001.26
   When Ana opens /courses/<id>?canal=<General's id>
   Then the "Canales" tab is selected with "General S15 E2E" open
   When she opens /courses/<id>?canal=<a class-group channel's id>
-  Then the first course channel opens instead (BR-ACA-001.17)
+  Then no channel opens, and the pane says "Elige un canal para leerlo" (BR-ACA-001.17)
 
 Scenario: the Resumen card and "Preguntar en el curso" open it in place @FR-ACA-001.26
   When Ana chooses "General S15 E2E" on the Resumen card
@@ -80,13 +81,13 @@ Scenario: phone width
 
   This is the only change outside ACA, and it doesn't change the channel page.
 - [ ] Angular, ACA:
-  - `courses/course-channels-list.ts` gets a `selectable` mode: rows are `button`s with `aria-pressed` instead of links, and a `select` output.
+  - `courses/course-channels-list.ts`: rows become `button`s with `aria-pressed`, a `selectedId` input and a `choose` output. Every use of the list now opens the channel in place.
   - `course.ts`: the *Canales* panel becomes a two-column layout, the list on the left and `<app-channel [id]="openChannelId()" [embedded]="true" />` on the right. It stacks on a phone with *"Volver a canales"*.
-  - `openChannelId` comes from the `canal` query param, validated against `courseChannels()`, else the first channel of the list. Choosing a channel updates the query param (`router.navigate` with `queryParamsHandling: 'merge'`, `replaceUrl`).
+  - `openChannelId()` (in `course-channels.ts`) takes the `canal` query param, bound as a component input, when it is one of `courseChannels()`; otherwise it returns none. Choosing a channel updates the query param (`router.navigate` relative to the route, with `queryParamsHandling: 'merge'` and `replaceUrl`). A `?canal=` link opens the page on the *Canales* tab.
   - After `read`, reload the course's channel list (S15's `channelsRes`) and call `CommunicationApi.refreshUnread()` for the sidebar.
   - The Resumen card's rows and *"Preguntar en el curso"* switch to the tab with `canal` set, instead of routing to `/communication/channels/:id`.
 - [ ] Tests:
-  - Web unit: a new `communication/channel.spec.ts` (the channel page has none yet) covers the embedded mode: no page header, and an *Abrir en pantalla completa* link. `course-channels.spec.ts` covers picking the open channel: the URL id if it is a course channel, else the first one.
+  - Web unit: a new `communication/channel.spec.ts` (the channel page has none yet) covers the embedded mode: no page header, and an *Abrir en pantalla completa* link. `course-channels.spec.ts` covers picking the open channel: the URL id if it is a course channel, else none.
   - Playwright: `courses/course-channels.after.spec.ts`, a new block tagged `@FR-ACA-001.26`, in the same serial file as S15–S17. Replace S15's "opening a channel" test, which expects to land on `/communication/channels/:id`.
 
 ## Out of scope for this slice

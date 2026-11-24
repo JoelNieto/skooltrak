@@ -24,6 +24,8 @@ import { RouterLink } from '@angular/router';
 import Auth from '../auth/auth';
 import { ParentContext } from '../parent/parent-context.service';
 import { ALL_AREAS, areaChips, inArea } from './course-areas';
+import { newCount, newMessages, unreadByCourse } from './course-channels';
+import type { ChannelSummary } from '@/shared';
 
 /** `GET /api/v1/courses/mine` (ACA-001-S02, S03). */
 interface MyCourses {
@@ -96,7 +98,7 @@ const BAND: Record<'AL_DIA' | 'EN_RIESGO', { label: string; tone: BadgeTone }> =
     Meter,
     RouterLink,
     StatCard,
-      UiInputGroup,
+    UiInputGroup,
   ],
   template: `
     <ui-breadcrumbs [items]="[{ label: 'Inicio', link: '/' }, { label: 'Cursos' }]" />
@@ -152,7 +154,12 @@ const BAND: Record<'AL_DIA' | 'EN_RIESGO', { label: string; tone: BadgeTone }> =
           icon="book-open"
         />
       } @else {
-        <div class="mb-5 grid gap-4 md:grid-cols-3" role="group" aria-label="Resumen del periodo">
+        <div
+          class="mb-5 grid gap-4 md:grid-cols-3"
+          [class.xl:grid-cols-4]="showChannels()"
+          role="group"
+          aria-label="Resumen del periodo"
+        >
           <lib-stat-card
             label="Promedio del periodo"
             icon="chart-column"
@@ -178,6 +185,16 @@ const BAND: Record<'AL_DIA' | 'EN_RIESGO', { label: string; tone: BadgeTone }> =
             [value]="data.stats.done + ' de ' + data.stats.total"
             helper="asignaciones del periodo"
           />
+          @if (showChannels()) {
+            <!-- FR-ACA-001.24 -->
+            <lib-stat-card
+              label="Nuevo en canales"
+              icon="message-circle"
+              [value]="channelsRes.error() ? '—' : channelStat(data).value"
+              [helper]="channelsRes.error() ? 'No se pudieron cargar los canales' : channelStat(data).helper"
+              [color]="channelStat(data).total && !channelsRes.error() ? 'warning' : 'primary'"
+            />
+          }
         </div>
         @if (chips().length > 2) {
           <div class="mb-4 flex flex-wrap gap-2" role="group" aria-label="Filtrar por área">
@@ -203,6 +220,10 @@ const BAND: Record<'AL_DIA' | 'EN_RIESGO', { label: string; tone: BadgeTone }> =
                     <span uiBadge size="sm" class="absolute top-2 left-2 bg-surface-1 text-ink-strong">{{
                       course.subject.area
                     }}</span>
+                  }
+                  @if (unread().get(course.id); as n) {
+                    <!-- FR-ACA-001.23 -->
+                    <span uiBadge tone="new" size="sm" class="absolute top-2 right-2">{{ newCount(n) }}</span>
                   }
                 </ui-course-cover>
                 <div uiCardBody class="gap-3 p-4">
@@ -358,16 +379,15 @@ export default class MyCoursesPage {
     const parts = [course.teacher ? `${course.name}, Prof. ${course.teacher.name}.` : `${course.name}.`];
     if (!course.scale) parts.push('Escala de notas no configurada.');
     else if (course.average === null) parts.push('Sin notas.');
-    else
-      parts.push(
-        `Promedio ${course.average.toFixed(1)}${course.band ? `, ${BAND[course.band].label}` : ''}.`,
-      );
+    else parts.push(`Promedio ${course.average.toFixed(1)}${course.band ? `, ${BAND[course.band].label}` : ''}.`);
     if (data.isCurrentPeriod) {
       parts.push(
         course.next ? `Próxima: ${course.next.title}, ${this.dueText(course.next, data.timezone)}.` : 'Nada pendiente.',
       );
     }
     if (course.progress.total) parts.push(`${course.progress.done} de ${course.progress.total} completadas.`);
+    const unread = this.unread().get(course.id);
+    if (unread) parts.push(newMessages(unread));
     return parts.join(' ');
   }
 
@@ -380,6 +400,26 @@ export default class MyCoursesPage {
   /** FR-ACA-001.7: "Todas" plus one chip per subject area, with counts (BR .14). */
   protected readonly chips = computed(() => areaChips(this.mine.value()?.courses ?? []));
   protected readonly area = signal(ALL_AREAS);
+
+  /**
+   * FR-ACA-001.23, .24: unread channel posts per course, from COM-003's channel list (BR-ACA-001.17).
+   * A parent's list covers every linked child; only this child's courses are read from it. Without
+   * COMMUNICATION_VIEW nothing is requested and no badge or stat shows.
+   */
+  protected readonly showChannels = computed(() => this.#auth.hasPermission('COMMUNICATION_VIEW'));
+  protected readonly channelsRes = httpResource<ChannelSummary[]>(() =>
+    this.showChannels() ? '/api/v1/communication/channels' : undefined,
+  );
+  protected readonly unread = computed(() => unreadByCourse(this.channelsRes.value() ?? []));
+  protected readonly newCount = newCount;
+
+  /** FR-ACA-001.24: unread posts across this page's courses, "en {k} curso(s)" or "Nada nuevo". */
+  protected channelStat(data: MyCourses): { total: number; value: string; helper: string } {
+    const counts = data.courses.map((c) => this.unread().get(c.id) ?? 0).filter((n) => n > 0);
+    const total = counts.reduce((sum, n) => sum + n, 0);
+    if (!total) return { total, value: '0', helper: 'Nada nuevo' };
+    return { total, value: `${total}`, helper: counts.length === 1 ? 'en 1 curso' : `en ${counts.length} cursos` };
+  }
 
   protected readonly visible = computed(() => {
     const q = this.search().trim().toLowerCase();

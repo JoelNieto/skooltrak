@@ -34,3 +34,21 @@ export function courseChannels(
 export function newCount(n: number): string {
   return n === 1 ? '1 nuevo' : `${n} nuevos`;
 }
+
+/**
+ * FR-ACA-001.23, .24: unread posts per course, from the caller's channel list (BR-ACA-001.17).
+ * Only COURSE channels count, and archived ones don't. Courses with nothing unread are left out.
+ */
+export function unreadByCourse(list: readonly ChannelSummary[]): Map<string, number> {
+  const byCourse = new Map<string, number>();
+  for (const c of list) {
+    if (c.scope !== 'COURSE' || !c.courseId || c.archived || !c.unread) continue;
+    byCourse.set(c.courseId, (byCourse.get(c.courseId) ?? 0) + c.unread);
+  }
+  return byCourse;
+}
+
+/** FR-ACA-001.23: "1 mensaje nuevo." / "3 mensajes nuevos." for a card's accessible name. */
+export function newMessages(n: number): string {
+  return n === 1 ? '1 mensaje nuevo.' : `${n} mensajes nuevos.`;
+}

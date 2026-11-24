@@ -1,5 +1,5 @@
 import type { ChannelSummary } from '@/shared';
-import { channelKind, courseChannels, newCount } from './course-channels';
+import { channelKind, courseChannels, newCount, newMessages, unreadByCourse } from './course-channels';
 
 const channel = (over: Partial<ChannelSummary>): ChannelSummary => ({
   id: 'c',
@@ -62,5 +62,23 @@ describe('newCount', () => {
   it('agrees in number', () => {
     expect(newCount(1)).toBe('1 nuevo');
     expect(newCount(3)).toBe('3 nuevos');
+  });
+});
+
+describe('unreadByCourse @FR-ACA-001.23 @FR-ACA-001.24', () => {
+  it('sums unread posts of open COURSE channels per course', () => {
+    const list = [
+      channel({ id: 'a', courseId: 'math', unread: 2 }),
+      channel({ id: 'b', courseId: 'math', unread: 1 }),
+      channel({ id: 'c', courseId: 'math', unread: 5, archived: true }),
+      channel({ id: 'd', courseId: 'spanish', unread: 0 }),
+      channel({ id: 'e', scope: 'CLASS_GROUP', courseId: null, classGroupId: 'g', unread: 4 }),
+    ];
+    expect([...unreadByCourse(list)]).toEqual([['math', 3]]);
+  });
+
+  it('agrees in number for the accessible name', () => {
+    expect(newMessages(1)).toBe('1 mensaje nuevo.');
+    expect(newMessages(4)).toBe('4 mensajes nuevos.');
   });
 });

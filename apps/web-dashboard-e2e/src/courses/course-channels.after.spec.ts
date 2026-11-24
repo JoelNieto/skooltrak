@@ -3,7 +3,8 @@ import { data, E2E_PASSWORD, personas, storageStatePath } from '../support/fixtu
 
 /**
  * ACA-001-S15: the course's channels on the course page (FR-ACA-001.21, .22; BR .17–.19).
- * docs/product/slices/ACA-001-S15-course-channels.md
+ * ACA-001-S16: their unread counts on Mis cursos (FR-ACA-001.23, .24).
+ * docs/product/slices/ACA-001-S15-course-channels.md, ACA-001-S16-mis-cursos-channels.md
  *
  * Channels are created here through the COM-003 API, as `channels.spec.ts` does. This file is an
  * `after` spec so that spec's channel on the same course already exists and no longer changes. So
@@ -26,7 +27,9 @@ let courseId: string;
 const ids: Record<string, string> = {};
 
 async function bearer(request: APIRequestContext, persona: keyof typeof personas): Promise<Headers> {
-  const res = await request.post('/api/v1/auth/login', { data: { email: personas[persona].email, password: E2E_PASSWORD } });
+  const res = await request.post('/api/v1/auth/login', {
+    data: { email: personas[persona].email, password: E2E_PASSWORD },
+  });
   expect(res.ok()).toBeTruthy();
   return { Authorization: `Bearer ${((await res.json()) as { accessToken: string }).accessToken}` };
 }
@@ -51,15 +54,18 @@ async function createChannel(request: APIRequestContext, headers: Headers, body:
   return id;
 }
 
-/** What the Canales tab should count for `persona`: unread posts in the course's open channels. */
-async function expectedUnread(request: APIRequestContext, persona: 'student' | 'parent') {
-  const list = (await (await request.get(`${API}/channels`, { headers: await bearer(request, persona) })).json()) as Summary[];
+/** Unread posts in open COURSE channels for `persona`: of this course, or of every course. */
+async function expectedUnread(request: APIRequestContext, persona: 'student' | 'parent', anyCourse = false) {
+  const list = (await (
+    await request.get(`${API}/channels`, { headers: await bearer(request, persona) })
+  ).json()) as Summary[];
   return list
-    .filter((c) => c.scope === 'COURSE' && c.courseId === courseId && !c.archived)
+    .filter((c) => c.scope === 'COURSE' && (anyCourse || c.courseId === courseId) && !c.archived)
     .reduce((sum, c) => sum + c.unread, 0);
 }
 
 const nuevos = (n: number) => (n === 1 ? '1 nuevo' : `${n} nuevos`);
+const mensajes = (n: number) => (n === 1 ? '1 mensaje nuevo.' : `${n} mensajes nuevos.`);
 const channelsTab = (page: Page) => page.getByRole('tab', { name: /^Canales/ });
 const channelsList = (page: Page) => page.getByRole('list', { name: 'Canales del curso' });
 
@@ -106,7 +112,14 @@ test.describe('as a student @FR-ACA-001.21 @FR-ACA-001.22', () => {
 
     await page.goto(`/courses/${courseId}`);
     const tabs = page.getByRole('tablist', { name: 'Secciones del curso' }).getByRole('tab');
-    await expect(tabs).toHaveText([/Resumen/, /Asignaciones/, /Calificaciones/, /Canales/, /Participantes/, /Recursos/]);
+    await expect(tabs).toHaveText([
+      /Resumen/,
+      /Asignaciones/,
+      /Calificaciones/,
+      /Canales/,
+      /Participantes/,
+      /Recursos/,
+    ]);
     await expect(channelsTab(page)).toContainText(nuevos(unread));
 
     await channelsTab(page).click();
@@ -142,7 +155,9 @@ test.describe('as a student @FR-ACA-001.21 @FR-ACA-001.22', () => {
     const before = await expectedUnread(request, 'student');
     await page.goto(`/courses/${courseId}`);
     await channelsTab(page).click();
-    await channelsList(page).getByRole('link', { name: new RegExp(GENERAL) }).click();
+    await channelsList(page)
+      .getByRole('link', { name: new RegExp(GENERAL) })
+      .click();
     await expect(page).toHaveURL(new RegExp(`/communication/channels/${ids[GENERAL]}`));
     await expect(page.getByText(GENERAL_POSTS[1])).toBeVisible();
 
@@ -174,6 +189,48 @@ test.describe('as a student @FR-ACA-001.21 @FR-ACA-001.22', () => {
   });
 });
 
+test.describe('on Mis cursos @FR-ACA-001.23 @FR-ACA-001.24', () => {
+  test.use({ storageState: storageStatePath('student') });
+  const card = (page: Page) =>
+    page
+      .getByRole('list', { name: 'Mis cursos' })
+      .getByRole('link', { name: new RegExp(data.courses.teacherOwn.name) });
+  const stats = (page: Page) => page.getByRole('group', { name: 'Resumen del periodo' });
+
+  test("the card shows the course's unread posts and says so in its name; the stat sums them", async ({
+    page,
+    request,
+  }) => {
+    const unread = await expectedUnread(request, 'student');
+    const total = await expectedUnread(request, 'student', true);
+    expect(unread).toBeGreaterThan(0);
+
+    await page.goto('/courses');
+    await expect(card(page).locator('ui-course-cover')).toContainText(nuevos(unread));
+    await expect(card(page)).toHaveAccessibleName(new RegExp(`${mensajes(unread).replace('.', '\\.')}$`));
+    const stat = stats(page).locator('lib-stat-card', { hasText: 'Nuevo en canales' });
+    await expect(stat).toContainText(`${total}`);
+    await expect(stat).toContainText(/en \d+ cursos?/);
+  });
+
+  test('nothing unread: no badge and "Nada nuevo"', async ({ page }) => {
+    await page.route(`**${API}/channels`, (route) => route.fulfill({ json: [] }));
+    await page.goto('/courses');
+    await expect(card(page).locator('ui-course-cover')).not.toContainText('nuevo');
+    await expect(card(page)).not.toHaveAccessibleName(/mensajes? nuevos?/);
+    await expect(stats(page).locator('lib-stat-card', { hasText: 'Nuevo en canales' })).toContainText('Nada nuevo');
+  });
+
+  test('a failed list keeps the cards and shows "—"', async ({ page }) => {
+    await page.route(`**${API}/channels`, (route) => route.fulfill({ status: 500, json: { message: 'boom' } }));
+    await page.goto('/courses');
+    await expect(card(page)).toBeVisible();
+    const stat = stats(page).locator('lib-stat-card', { hasText: 'Nuevo en canales' });
+    await expect(stat).toContainText('—');
+    await expect(stat).toContainText('No se pudieron cargar los canales');
+  });
+});
+
 test.describe('as a parent @FR-ACA-001.21 @BR-ACA-001.17', () => {
   test.use({ storageState: storageStatePath('parent') });
 
@@ -183,7 +240,10 @@ test.describe('as a parent @FR-ACA-001.21 @BR-ACA-001.17', () => {
       .getByRole('group', { name: 'Elegir hijo' })
       .getByRole('button', { name: new RegExp(`^${data.relatedStudents[0]} `) })
       .click();
-    await page.getByRole('list', { name: 'Mis cursos' }).getByRole('link', { name: new RegExp(data.courses.teacherOwn.name) }).click();
+    await page
+      .getByRole('list', { name: 'Mis cursos' })
+      .getByRole('link', { name: new RegExp(data.courses.teacherOwn.name) })
+      .click();
     await channelsTab(page).click();
     const list = channelsList(page);
     await expect(list.getByRole('link', { name: new RegExp(ANNOUNCEMENTS) })).toContainText('Solo anuncios');
@@ -197,11 +257,15 @@ test.describe('archived channels @FR-ACA-001.21', () => {
   test('come last with "Archivado" and leave the Resumen card', async ({ page, request }) => {
     const teacher = await bearer(request, 'teacher');
     expect(
-      (await request.patch(`${API}/channels/${ids[ANNOUNCEMENTS]}`, { headers: teacher, data: { archived: true } })).ok(),
+      (
+        await request.patch(`${API}/channels/${ids[ANNOUNCEMENTS]}`, { headers: teacher, data: { archived: true } })
+      ).ok(),
     ).toBeTruthy();
 
     await page.goto(`/courses/${courseId}`);
-    await expect(page.getByRole('region', { name: 'Canales' }).getByRole('link', { name: new RegExp(ANNOUNCEMENTS) })).toHaveCount(0);
+    await expect(
+      page.getByRole('region', { name: 'Canales' }).getByRole('link', { name: new RegExp(ANNOUNCEMENTS) }),
+    ).toHaveCount(0);
     await channelsTab(page).click();
     const last = channelsList(page).getByRole('listitem').last();
     await expect(last).toContainText(ANNOUNCEMENTS);

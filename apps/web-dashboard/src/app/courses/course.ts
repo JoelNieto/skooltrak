@@ -37,7 +37,7 @@ import { CourseGradesSummaryView } from './course-grades-summary';
 import { CourseParticipants, CourseParticipantsList } from './course-participants';
 import { CourseOverview } from './course-overview';
 import { CourseChannelsList } from './course-channels-list';
-import { courseChannels, newCount } from './course-channels';
+import { askChannel, courseChannels, newCount } from './course-channels';
 import { CourseWork } from './course-work';
 import { CommunicationApi } from '../communication/communication-api';
 import type { ChannelSummary } from '@/shared';
@@ -200,6 +200,13 @@ type CourseVm = {
                     <ui-icon name="calendar-days" />
                     Ver calendario
                   </button>
+                }
+                @if (ask(); as channel) {
+                  <!-- FR-ACA-001.25: the course conversation, where the student replies under the latest post. -->
+                  <a uiButton variant="primary" [routerLink]="['/communication/channels', channel.id]">
+                    <ui-icon name="message-circle" />
+                    Preguntar en el curso
+                  </a>
                 }
                 @if (canOpenChannel()) {
                   <button
@@ -521,6 +528,8 @@ export default class Course {
     if (kind !== 'STUDENT' && kind !== 'PARENT') return [];
     return courseChannels(this.channelsRes.value() ?? [], this.id(), kind);
   });
+  /** FR-ACA-001.25: students only; hidden without an open course conversation. */
+  protected readonly ask = computed(() => (this.viewerKind() === 'STUDENT' ? askChannel(this.channels()) : null));
   protected readonly hasOpenChannels = computed(() => this.channels().some((c) => !c.archived));
   /** The tab's count: unread posts in the course's open channels. */
   protected readonly channelsUnread = computed(() =>

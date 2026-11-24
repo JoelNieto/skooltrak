@@ -1,5 +1,5 @@
 import type { ChannelSummary } from '@/shared';
-import { channelKind, courseChannels, newCount, newMessages, unreadByCourse } from './course-channels';
+import { askChannel, channelKind, courseChannels, newCount, newMessages, unreadByCourse } from './course-channels';
 
 const channel = (over: Partial<ChannelSummary>): ChannelSummary => ({
   id: 'c',
@@ -80,5 +80,30 @@ describe('unreadByCourse @FR-ACA-001.23 @FR-ACA-001.24', () => {
   it('agrees in number for the accessible name', () => {
     expect(newMessages(1)).toBe('1 mensaje nuevo.');
     expect(newMessages(4)).toBe('4 mensajes nuevos.');
+  });
+});
+
+describe('askChannel @FR-ACA-001.25', () => {
+  const talk = { studentsCanReply: true, replyVisibility: 'PUBLIC' as const };
+
+  it('picks the open course conversation with the latest post', () => {
+    const list = [
+      channel({ id: 'announcements', lastPostAt: '2026-11-23T10:00:00Z' }),
+      channel({ id: 'older-talk', ...talk, lastPostAt: '2026-11-01T10:00:00Z' }),
+      channel({ id: 'newer-talk', ...talk, lastPostAt: '2026-11-20T10:00:00Z' }),
+      channel({ id: 'archived-talk', ...talk, archived: true, lastPostAt: '2026-11-24T10:00:00Z' }),
+      channel({
+        id: 'private-questions',
+        studentsCanReply: true,
+        replyVisibility: 'PRIVATE',
+        lastPostAt: '2026-11-24T10:00:00Z',
+      }),
+    ];
+    expect(askChannel(courseChannels(list, 'math', 'STUDENT'))?.id).toBe('newer-talk');
+  });
+
+  it('is null without an open course conversation', () => {
+    const list = [channel({ id: 'announcements' }), channel({ id: 'archived-talk', ...talk, archived: true })];
+    expect(askChannel(courseChannels(list, 'math', 'STUDENT'))).toBeNull();
   });
 });

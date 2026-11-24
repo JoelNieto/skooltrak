@@ -4,6 +4,7 @@ import { data, E2E_PASSWORD, personas, storageStatePath } from '../support/fixtu
 /**
  * ACA-001-S15: the course's channels on the course page (FR-ACA-001.21, .22; BR .17–.19).
  * ACA-001-S16: their unread counts on Mis cursos (FR-ACA-001.23, .24).
+ * ACA-001-S17: "Preguntar en el curso" opens the course conversation (FR-ACA-001.25).
  * docs/product/slices/ACA-001-S15-course-channels.md, ACA-001-S16-mis-cursos-channels.md
  *
  * Channels are created here through the COM-003 API, as `channels.spec.ts` does. This file is an
@@ -280,5 +281,82 @@ test.describe('staff @BR-ACA-001.19', () => {
     await page.goto(`/courses/${courseId}`);
     await expect(page.getByRole('button', { name: 'Canal' })).toBeVisible();
     await expect(channelsTab(page)).toHaveCount(0);
+  });
+});
+
+test.describe('"Preguntar en el curso" @FR-ACA-001.25', () => {
+  const ask = (page: Page) => page.getByRole('link', { name: 'Preguntar en el curso' });
+  /** A COURSE channel of this course as COM-003 lists it, for stubbed lists. */
+  const summary = (id: string, over: Record<string, unknown>) => ({
+    id,
+    scope: 'COURSE',
+    targetName: data.courses.teacherOwn.name,
+    schoolId: null,
+    studyPlanId: null,
+    classGroupId: null,
+    courseId,
+    name: id,
+    description: '',
+    audienceStudents: true,
+    audienceParents: false,
+    studentsCanReply: false,
+    parentsCanReply: false,
+    replyVisibility: 'PRIVATE',
+    archived: false,
+    role: 'MEMBER',
+    unread: 0,
+    lastPostAt: '2026-11-01T10:00:00.000Z',
+    lastPostPreview: 'Hola',
+    ...over,
+  });
+  const talk = { studentsCanReply: true, replyVisibility: 'PUBLIC' };
+
+  test.describe('as a student', () => {
+    test.use({ storageState: storageStatePath('student') });
+
+    test('opens a course conversation channel', async ({ page }) => {
+      await page.goto(`/courses/${courseId}`);
+      await expect(ask(page)).toBeVisible();
+      await ask(page).click();
+      await expect(page).toHaveURL(/\/communication\/channels\/[^/]+$/);
+    });
+
+    test('goes to the open conversation with the latest post', async ({ page }) => {
+      const list = [
+        summary('announcements', { lastPostAt: '2026-11-23T10:00:00.000Z' }),
+        summary('older-talk', { ...talk, lastPostAt: '2026-11-01T10:00:00.000Z' }),
+        summary('newer-talk', { ...talk, lastPostAt: '2026-11-20T10:00:00.000Z' }),
+        summary('archived-talk', { ...talk, archived: true, lastPostAt: '2026-11-24T10:00:00.000Z' }),
+      ];
+      await page.route(`**${API}/channels`, (route) => route.fulfill({ json: list }));
+      await page.goto(`/courses/${courseId}`);
+      await expect(ask(page)).toHaveAttribute('href', '/communication/channels/newer-talk');
+    });
+
+    test('is hidden without an open course conversation', async ({ page }) => {
+      const list = [summary('announcements', {}), summary('archived-talk', { ...talk, archived: true })];
+      await page.route(`**${API}/channels`, (route) => route.fulfill({ json: list }));
+      await page.goto(`/courses/${courseId}`);
+      await expect(page.getByRole('tab', { name: 'Resumen' })).toHaveAttribute('aria-selected', 'true');
+      await expect(ask(page)).toHaveCount(0);
+    });
+  });
+
+  test.describe('as a parent', () => {
+    test.use({ storageState: storageStatePath('parent') });
+
+    test('is for students only', async ({ page }) => {
+      await page.goto('/courses');
+      await page
+        .getByRole('group', { name: 'Elegir hijo' })
+        .getByRole('button', { name: new RegExp(`^${data.relatedStudents[0]} `) })
+        .click();
+      await page
+        .getByRole('list', { name: 'Mis cursos' })
+        .getByRole('link', { name: new RegExp(data.courses.teacherOwn.name) })
+        .click();
+      await expect(page.getByRole('tab', { name: 'Resumen' })).toBeVisible();
+      await expect(ask(page)).toHaveCount(0);
+    });
   });
 });

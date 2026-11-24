@@ -4,7 +4,7 @@
 |---|---|
 | **FRD** | [ACA-001](../frd/ACA-001-course-experience.md) |
 | **Implements** | FR-ACA-001.23, FR-ACA-001.24; BR-ACA-001.17 |
-| **Status** | In progress |
+| **Status** | In review |
 | **Branch** | `feat/ACA-001-S16-mis-cursos-channels` (built on S15) |
 | **Estimate** | 1 day |
 

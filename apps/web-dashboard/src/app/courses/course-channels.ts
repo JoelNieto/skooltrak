@@ -52,3 +52,12 @@ export function unreadByCourse(list: readonly ChannelSummary[]): Map<string, num
 export function newMessages(n: number): string {
   return n === 1 ? '1 mensaje nuevo.' : `${n} mensajes nuevos.`;
 }
+
+/**
+ * FR-ACA-001.25 (Q9 (a)): where "Preguntar en el curso" goes. The course's open channel where the
+ * viewer may reply in public (*Conversación del curso*, BR-ACA-001.18), the one with the latest post
+ * when there are several. `channels` comes sorted from `courseChannels`; null hides the button.
+ */
+export function askChannel(channels: readonly CourseChannel[]): CourseChannel | null {
+  return channels.find((c) => !c.archived && c.kind === 'Conversación del curso') ?? null;
+}

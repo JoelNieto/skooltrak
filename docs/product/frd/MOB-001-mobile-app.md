@@ -120,7 +120,7 @@ CORS / auth origins: add the Capacitor origins (`capacitor://localhost` for iOS,
 - States per screen: loading (skeleton rows), empty (one line + action), error (retry), offline (BR .11), no permission (FR .4's screen).
 - Native touches: pull-to-refresh on every list, iOS swipe-back, Android back button follows the nav stack, safe areas, status bar matches the surface, dynamic type up to 130 % without clipping.
 - Language: Spanish (es-PA formats: `B/. 85.00`, "martes 17 de noviembre").
-- Still to design: login, *Pagos*, *Más* (profile, notifications, sign out), "use the web" screen, update screen, and every student and teacher screen.
+- Designed for parents: login (7), *Pagos* (8), *Más* (9). Still to design: "use the web" screen, update screen, and every student and teacher screen.
 
 ## 8. Non-functional
 - **Stack:** Angular (same version as `web-dashboard`) + Capacitor 7, a new Nx app `apps/mobile` (`@nx/angular`), standalone components, signals, zoneless. Shares `libs/ui` tokens, `libs/client-auth` (bearer interceptor, adapted to async secure storage) and `libs/shared`. Plugins: `@capacitor/push-notifications`, `@capacitor/app`, `@capacitor/network`, `@capacitor/status-bar`, a secure-storage plugin.
@@ -141,7 +141,7 @@ CORS / auth origins: add the Capacitor origins (`capacitor://localhost` for iOS,
 
 ## 10. Open questions
 - [x] **Q1 — Session lifetime.** The legacy bearer JWT lasts 7 days (`auth.service.ts:141`), has no refresh and can't be revoked. **Decided 2026-11-24:** enable better-auth's `bearer` plugin. Mobile holds a better-auth session token (revocable, sliding expiry, same session table as web) and sends it as `Authorization: Bearer`. Ships in S01.
-- [x] **Q2 — Design for student and teacher.** **Decided 2026-11-24:** Claude adds the missing screens to the existing design canvas with the Skooltrak design system, for review: first parent login, *Pagos* and *Más*, then teacher *Inicio/Asistencia/Mensajes*, then student *Inicio/Tareas*. S12–S16 become Ready as their screens are approved.
+- [x] **Q2 — Design for student and teacher.** **Decided 2026-11-24:** Claude adds the missing screens to the existing design canvas with the Skooltrak design system, for review: first parent login, *Pagos* and *Más*, then teacher *Inicio/Asistencia/Mensajes*, then student *Inicio/Tareas*. S12–S16 become Ready as their screens are approved. Parent login, *Pagos* and *Más* are on the canvas (screens 7–9, 2026-11-24), awaiting review.
 - [x] **Q3 — "Firma el permiso".** **Decided 2026-11-24:** the existing channel post confirmation is enough. The record is who confirmed and when (COM-003 receipt); the button reads *Confirmar* (BR .8).
 - [x] **Q4 — Child name in pushes.** **Decided 2026-11-24:** generic text only ("Nuevo registro de asistencia"). No child names on the lock screen (BR .5).
 - [x] **Q5 — Store accounts.** **Decided 2026-11-24:** the owner's personal Apple Developer and Google Play accounts (seller name is the person's name). They can be transferred to an organization account later; Apple app transfer keeps reviews and users.
@@ -166,7 +166,7 @@ Ordered so the app is installable by testers after S02, and parents have a compl
 | MOB-001-S09 | Offline snapshot and error/empty states across parent screens | BR .11 | Proposed |
 | MOB-001-S10 | Push foundation: `PushDevice` model, `POST/DELETE /v1/devices`, permission prompt, FCM/APNs setup, push on direct message, tap → conversation | .22 .23 (direct), BR .5 .6 | Proposed |
 | MOB-001-S11 | Push for announcements needing confirmation and for absences; `NotifyService` | .23, BR .5 | Proposed |
-| MOB-001-S12 | *Más* (profile, notification preferences, sign out), password reset, *Pagos* (read-only) | .5 .15 .24 | Proposed (needs design) |
+| MOB-001-S12 | *Más* (profile, notification preferences, sign out), password reset, *Pagos* (read-only) | .5 .15 .24 | Proposed (design in review: canvas screens 7–9) |
 | MOB-001-S13 | Teacher *Inicio*: today's classes with attendance state, pending to review | .19 | Proposed (needs design) |
 | MOB-001-S14 | Teacher *Asistencia*: take attendance for today's class, batch save | .20 | Proposed (needs design) |
 | MOB-001-S15 | Teacher *Mensajes*: reply to families, read channels (reuses S06–S07) | .21 | Proposed (needs design) |

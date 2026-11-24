@@ -4,7 +4,7 @@
 |---|---|
 | **FRD** | [MOB-001](../frd/MOB-001-mobile-app.md) |
 | **Implements** | FR-MOB-001.1, .2, .3, .4, BR-MOB-001.1, .3, .10 |
-| **Status** | Proposed (blocked by MOB-001 Q1: session lifetime) |
+| **Status** | Ready |
 | **Branch** | `feat/MOB-001-S01-app-shell-login` |
 | **Estimate** | ≤ 3 days |
 
@@ -50,15 +50,17 @@ Scenario: Expired session
 Scenario: Sign out
   Given a signed-in parent
   When she taps "Más" › "Cerrar sesión" and confirms
-  Then the stored token is deleted and the login screen is shown
+  Then the session is revoked on the server, the stored token is deleted and the login screen is shown
+  And a request with the old token gets 401
 ```
 
 Tabs other than *Inicio* and *Más* show a placeholder ("Próximamente") in this slice; S03+ fill them. *Inicio* shows only the greeting in this slice.
 
 ## Layers touched
 - [ ] Prisma migration: none
-- [ ] Nest: no new endpoint. Add the Capacitor origins (`capacitor://localhost`, `https://localhost`) to the dev CORS fallback in `apps/dashboard-backend/src/main.ts` and document them for `CORS_ORIGINS` / `TRUSTED_ORIGINS` in `deploy/.env.example`. If Q1 picks better-auth's `bearer` plugin, enable it in `libs/auth/src/lib/better-auth.ts` here.
-- [ ] OpenAPI → `bun run openapi` only if Q1 changes the login response
+- [ ] Auth (`libs/auth`): enable better-auth's `bearer` plugin in `better-auth.ts` (MOB-001 Q1). `POST /v1/auth/login` returns the session token for clients that ask for it (the web keeps its cookie + JWT unchanged); `BetterAuthGuard` resolves `Authorization: Bearer <session token>` as a better-auth session before falling back to the legacy JWT. Sign-out revokes the session. Unit tests: revoked token → 401; web cookie login unchanged.
+- [ ] Nest: add the Capacitor origins (`capacitor://localhost`, `https://localhost`) to the dev CORS fallback in `apps/dashboard-backend/src/main.ts` and document them for `CORS_ORIGINS` / `TRUSTED_ORIGINS` in `deploy/.env.example`.
+- [ ] OpenAPI → `bun run openapi` (login response gains the session token)
 - [ ] New Nx app `apps/mobile` with `@nx/angular` (use the `nx-generate` skill), standalone + zoneless + signals, then `@capacitor/core`, `@capacitor/cli`, `ios/` and `android/` projects, a secure-storage plugin, `@capacitor/status-bar`, `@capacitor/app`. Nx targets: `serve`, `build`, `cap-sync`, `run-ios`, `run-android`.
 - [ ] Data-access: an `AuthSession` service (login, restore, sign-out) and a bearer interceptor that reads the token from secure storage and clears it on 401 (reuse `libs/client-auth`'s interceptor pattern; it reads `localStorage` today, so add an async token source rather than changing web's).
 - [ ] UI: login screen, tab shell per role (`BR .3`), "use the web" screen, placeholder tabs, *Más* with sign out. Design tokens from the Skooltrak design system (`libs/ui` tokens), fonts Geist / Space Grotesk bundled locally (no Google Fonts at runtime).

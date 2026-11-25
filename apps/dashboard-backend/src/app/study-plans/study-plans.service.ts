@@ -5,9 +5,11 @@ import { BadRequestException, ConflictException, Inject, Injectable, NotFoundExc
 import { REQUEST } from '@nestjs/core';
 import { Request } from 'express';
 import { uniqueCourseCode } from '../courses/course-code';
+import { enrollPlanStudents } from '../courses/course-roster';
 import { DEFAULT_BUCKETS } from '../courses/default-buckets.constants';
 import { PrismaService } from '../prisma.service';
 import { BulkCreateStudyPlansInput } from './dto/bulk-create-study-plans.input';
+import { CopyCoursesInput } from './dto/copy-courses.input';
 import { CreateStudyPlanInput } from './dto/create-study-plan.input';
 import { DuplicateStudyPlanInput } from './dto/duplicate-study-plan.input';
 import { PlanSettingsInput } from './dto/plan-settings.input';
@@ -15,6 +17,8 @@ import { UpdateStudyPlanInput } from './dto/update-study-plan.input';
 import { costRows, settingsScalars } from './plan-settings-writes';
 
 export const PLAN_NAME_TAKEN = 'Ya existe un plan de estudio con ese nombre en la escuela';
+export const COPY_SAME_PLAN = 'Elige un plan de origen distinto';
+export const COPY_OTHER_SCHOOL = 'El plan de origen debe ser de la misma escuela';
 export const BULK_RANGE_INVALID = 'El rango de grados no es válido (máximo 20 planes a la vez)';
 const MAX_BULK_PLANS = 20;
 
@@ -136,35 +140,50 @@ export class StudyPlansService {
           },
         });
 
-        let courses = 0;
-        if (input.copyCourses !== false) {
-          for (const course of source.courses) {
-            await tx.course.create({
-              data: {
-                name: `${course.subject.name} - ${plan.name}`,
-                shortName: `${course.subject.code} - ${plan.shortName}`,
-                code: await uniqueCourseCode(tx, plan.schoolId, course.subject.name),
-                color: course.color,
-                icon: course.icon,
-                organizationId: course.organizationId,
-                schoolId: plan.schoolId,
-                subjectId: course.subjectId,
-                studyPlanId: plan.id,
-                gradeBuckets: {
-                  createMany: {
-                    data: course.gradeBuckets.length
-                      ? course.gradeBuckets.map((b) => ({ name: b.name, weight: b.weight }))
-                      : DEFAULT_BUCKETS.map((b) => ({ name: b.name, weight: b.weighting })),
-                  },
-                },
-              },
-            });
-            courses++;
-          }
-        }
-        return { ...plan, copiedCourses: courses };
+        const courses = input.copyCourses !== false ? await copyCoursesInto(tx, source.courses, plan) : [];
+        return { ...plan, copiedCourses: courses.length };
       }),
     );
+  }
+
+  /**
+   * Copies courses of another plan of the same school into an existing plan: the given subjects,
+   * or all of them. Subjects the target already has are skipped. The copies take the subject,
+   * color, icon and grade categories (not the teacher), and the target plan's students are
+   * enrolled in them (ACA-001 BR .15). One transaction.
+   */
+  async copyCourses(targetId: string, input: CopyCoursesInput) {
+    if (input.sourceStudyPlanId === targetId) throw new BadRequestException(COPY_SAME_PLAN);
+    const [target, source] = await Promise.all([
+      this.prisma.studyPlan.findUnique({
+        where: { id: targetId },
+        select: { id: true, name: true, shortName: true, schoolId: true, courses: { select: { subjectId: true } } },
+      }),
+      this.prisma.studyPlan.findUnique({
+        where: { id: input.sourceStudyPlanId },
+        select: {
+          schoolId: true,
+          courses: {
+            where: input.subjectIds?.length ? { subjectId: { in: input.subjectIds } } : {},
+            include: { subject: true, gradeBuckets: { orderBy: { createdAt: 'asc' } } },
+            orderBy: { createdAt: 'asc' },
+          },
+        },
+      }),
+    ]);
+    if (!target || !source) throw new NotFoundException('Plan de estudio no encontrado');
+    if (source.schoolId !== target.schoolId) throw new BadRequestException(COPY_OTHER_SCHOOL);
+
+    const existing = new Set(target.courses.map((c) => c.subjectId));
+    const toCopy = source.courses.filter((c) => !existing.has(c.subjectId));
+    const skipped = source.courses.filter((c) => existing.has(c.subjectId)).map((c) => c.subject.name);
+
+    const copied = await this.prisma.$transaction(async (tx) => {
+      const created = await copyCoursesInto(tx, toCopy, target);
+      for (const course of created) await enrollPlanStudents(tx, course);
+      return created;
+    });
+    return { copied: copied.map((c) => ({ id: c.id, name: c.name })), skipped };
   }
 
   findAll() {
@@ -275,4 +294,43 @@ export class StudyPlansService {
       throw error;
     }
   }
+}
+
+type SourceCourse = Prisma.CourseGetPayload<{ include: { subject: true; gradeBuckets: true } }>;
+
+/**
+ * Creates a copy of each course in the plan, named after it ("Matemáticas - 3° Primaria"): its
+ * subject, color, icon and grade categories (the default ones when it has none). No teacher.
+ */
+async function copyCoursesInto(
+  tx: Prisma.TransactionClient,
+  courses: SourceCourse[],
+  plan: { id: string; name: string; shortName: string; schoolId: string },
+) {
+  const created = [];
+  for (const course of courses) {
+    created.push(
+      await tx.course.create({
+        data: {
+          name: `${course.subject.name} - ${plan.name}`,
+          shortName: `${course.subject.code} - ${plan.shortName}`,
+          code: await uniqueCourseCode(tx, plan.schoolId, course.subject.name),
+          color: course.color,
+          icon: course.icon,
+          organizationId: course.organizationId,
+          schoolId: plan.schoolId,
+          subjectId: course.subjectId,
+          studyPlanId: plan.id,
+          gradeBuckets: {
+            createMany: {
+              data: course.gradeBuckets.length
+                ? course.gradeBuckets.map((b) => ({ name: b.name, weight: b.weight }))
+                : DEFAULT_BUCKETS.map((b) => ({ name: b.name, weight: b.weighting })),
+            },
+          },
+        },
+      }),
+    );
+  }
+  return created;
 }

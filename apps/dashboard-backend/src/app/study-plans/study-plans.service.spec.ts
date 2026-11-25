@@ -13,9 +13,16 @@ describe('StudyPlansService', () => {
       findMany: jest.fn(),
       findUnique: jest.fn(),
       create: jest.fn(),
-      createManyAndReturn: jest.fn(async ({ data }) => data.map((d: { name: string }, i: number) => ({ id: `n${i}`, ...d }))),
+      createManyAndReturn: jest.fn(async ({ data }) =>
+        data.map((d: { name: string }, i: number) => ({ id: `n${i}`, ...d })),
+      ),
     },
-    course: { create: jest.fn(), findUnique: jest.fn().mockResolvedValue(null) },
+    course: {
+      create: jest.fn(async ({ data }) => ({ id: `c-${data.subjectId}`, ...data })),
+      findUnique: jest.fn().mockResolvedValue(null),
+    },
+    student: { findMany: jest.fn().mockResolvedValue([{ id: 'st1' }]) },
+    courseEnrollment: { createMany: jest.fn() },
     $transaction: jest.fn(async (fn: (tx: unknown) => unknown) => fn(prisma)),
   };
 
@@ -139,6 +146,58 @@ describe('StudyPlansService', () => {
       const result = await service.duplicate('src', { name: 'x', shortName: 'x', level: 2, copyCourses: false });
       expect(prisma.course.create).not.toHaveBeenCalled();
       expect(result.copiedCourses).toBe(0);
+    });
+  });
+
+  describe('copyCourses', () => {
+    const course = (subjectId: string, name: string) => ({
+      organizationId: 'o',
+      subjectId,
+      color: null,
+      icon: null,
+      subject: { name, code: name.slice(0, 3).toUpperCase() },
+      gradeBuckets: [],
+    });
+
+    beforeEach(() => {
+      prisma.studyPlan.findUnique.mockImplementation(async ({ where }: { where: { id: string } }) =>
+        where.id === 'target'
+          ? { id: 'target', name: '4° Primaria', shortName: '4° P', schoolId: 's', courses: [{ subjectId: 'mat' }] }
+          : { schoolId: 's', courses: [course('mat', 'Matemáticas'), course('cie', 'Ciencias')] },
+      );
+    });
+
+    it('copies the subjects the target lacks, enrolls its students and reports the skipped ones', async () => {
+      const result = await service.copyCourses('target', { sourceStudyPlanId: 'src' });
+
+      expect(prisma.course.create).toHaveBeenCalledTimes(1);
+      expect(prisma.course.create.mock.calls[0][0].data).toMatchObject({
+        name: 'Ciencias - 4° Primaria',
+        studyPlanId: 'target',
+        subjectId: 'cie',
+      });
+      expect(prisma.courseEnrollment.createMany).toHaveBeenCalledWith(
+        expect.objectContaining({ data: [expect.objectContaining({ courseId: 'c-cie', studentId: 'st1' })] }),
+      );
+      expect(result).toEqual({ copied: [{ id: 'c-cie', name: 'Ciencias - 4° Primaria' }], skipped: ['Matemáticas'] });
+    });
+
+    it('filters the source courses by the chosen subjects', async () => {
+      await service.copyCourses('target', { sourceStudyPlanId: 'src', subjectIds: ['cie'] });
+      const sourceQuery = prisma.studyPlan.findUnique.mock.calls.find(
+        ([q]: [{ where: { id: string } }]) => q.where.id === 'src',
+      )[0];
+      expect(sourceQuery.select.courses.where).toEqual({ subjectId: { in: ['cie'] } });
+    });
+
+    it('refuses the same plan and plans of another school', async () => {
+      await expect(service.copyCourses('target', { sourceStudyPlanId: 'target' })).rejects.toThrow(BadRequestException);
+      prisma.studyPlan.findUnique.mockImplementation(async ({ where }: { where: { id: string } }) =>
+        where.id === 'target'
+          ? { id: 'target', name: 'x', shortName: 'x', schoolId: 's', courses: [] }
+          : { schoolId: 'other', courses: [] },
+      );
+      await expect(service.copyCourses('target', { sourceStudyPlanId: 'src' })).rejects.toThrow(BadRequestException);
     });
   });
 });

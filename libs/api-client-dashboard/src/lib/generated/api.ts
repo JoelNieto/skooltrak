@@ -47,6 +47,7 @@ import type {
   CommunicationControllerRecipientsParams,
   CommunicationControllerRepliesParams,
   CommunicationControllerTargetsParams,
+  CopyCoursesInput,
   CourseAppearanceInput,
   CoursesControllerCountParams,
   CoursesControllerFindAllParams,
@@ -4232,6 +4233,47 @@ if(coursesControllerUploadCoverBody.file !== undefined) {
     return this.http.post<TData>(
       `/api/v1/study-plans/${id}/duplicate`,
       duplicateStudyPlanInput,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'body',
+      }
+    );
+  }
+
+/**
+ * @summary Copy courses from another study plan of the same school
+ */
+ studyPlansControllerCopyCourses<TData = void>(id: string,
+    copyCoursesInput: CopyCoursesInput, options?: HttpClientBodyOptions): Observable<TData>;
+ studyPlansControllerCopyCourses<TData = void>(id: string,
+    copyCoursesInput: CopyCoursesInput, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
+ studyPlansControllerCopyCourses<TData = void>(id: string,
+    copyCoursesInput: CopyCoursesInput, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
+  studyPlansControllerCopyCourses<TData = void>(
+    id: string,
+    copyCoursesInput: CopyCoursesInput, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
+    if (options?.observe === 'events') {
+      return this.http.post<TData>(
+      `/api/v1/study-plans/${id}/copy-courses`,
+      copyCoursesInput,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'events',
+      }
+    );
+    }
+
+    if (options?.observe === 'response') {
+      return this.http.post<TData>(
+      `/api/v1/study-plans/${id}/copy-courses`,
+      copyCoursesInput,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'response',
+      }
+    );
+    }
+
+    return this.http.post<TData>(
+      `/api/v1/study-plans/${id}/copy-courses`,
+      copyCoursesInput,{
         ...(options as Omit<NonNullable<typeof options>, 'observe'>),
         observe: 'body',
       }

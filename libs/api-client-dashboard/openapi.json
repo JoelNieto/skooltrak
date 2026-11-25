@@ -3833,6 +3833,45 @@
         ]
       }
     },
+    "/api/v1/study-plans/{id}/copy-courses": {
+      "post": {
+        "operationId": "StudyPlansController_copyCourses",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CopyCoursesInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Copy courses from another study plan of the same school",
+        "tags": [
+          "study-plans"
+        ]
+      }
+    },
     "/api/v1/study-plans/by-school": {
       "get": {
         "operationId": "StudyPlansController_findAllBySchoolId",
@@ -11471,6 +11510,10 @@
         "properties": {}
       },
       "DuplicateStudyPlanInput": {
+        "type": "object",
+        "properties": {}
+      },
+      "CopyCoursesInput": {
         "type": "object",
         "properties": {}
       },

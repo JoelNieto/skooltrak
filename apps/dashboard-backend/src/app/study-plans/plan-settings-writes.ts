@@ -54,7 +54,5 @@ export function settingsScalars(input: PlanSettingsInput) {
 
 /** Enrollment cost rows in the given order, without blank names. */
 export function costRows(costs: EnrollmentCostInput[]) {
-  return costs
-    .filter((c) => c.name?.trim())
-    .map((c, i) => ({ name: c.name.trim(), amount: c.amount, order: i }));
+  return costs.filter((c) => c.name?.trim()).map((c, i) => ({ name: c.name.trim(), amount: c.amount, order: i }));
 }

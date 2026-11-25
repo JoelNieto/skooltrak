@@ -62,7 +62,8 @@ test.describe('as the parent', () => {
     await page.getByRole('button', { name: 'Reportar conversación' }).click();
     await page.getByRole('textbox', { name: 'Motivo del reporte' }).fill(REASON);
     await page.getByRole('button', { name: 'Enviar reporte' }).click();
-    await expect(page.getByText('Reportada')).toBeVisible();
+    // exact: the success toast reads "Conversación reportada".
+    await expect(page.getByText('Reportada', { exact: true })).toBeVisible();
   });
 });
 

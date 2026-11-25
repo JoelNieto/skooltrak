@@ -56,7 +56,7 @@ Scenario: the admin resolves it @FR-COM-003.20
   - `GET direct/:id` gains `reported` for the participants.
   - Logs carry ids only (§8). Admins never write: there is no admin send path.
 - [ ] Shared: `DirectReport`, `DirectReview`; `DirectConversationDetail.reported`.
-- [ ] OpenAPI: no change (shared types, as in S02).
+- [ ] OpenAPI: regenerate (`bun run openapi`). The new request bodies `ReportDirectInput` and `ResolveDirectReportInput` are DTO classes, so they appear in the spec; the responses stay shared types.
 - [ ] Angular:
   - `communication/direct.ts`: *"Reportar conversación"* with a reason, and *"Reportada"* once reported.
   - New `communication/direct-reports.ts` page at `/communication/direct-reports[/:id]` (`adminGuard`): the reports list, the read-only conversation, the reports with a resolve form, and *"Accesos registrados"*.

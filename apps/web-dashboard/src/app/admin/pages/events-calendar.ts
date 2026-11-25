@@ -1,17 +1,13 @@
-import { Card, CardBody, EmptyState, PageHeader } from '#/ui';
+import { Button, Card, CardBody, EmptyState, Icon } from '#/ui';
 import { Component } from '@angular/core';
 
 @Component({
   selector: 'app-events-calendar',
-  imports: [Card, CardBody, EmptyState, PageHeader],
+  imports: [Card, CardBody, EmptyState, Button, Icon],
   template: `
-    <lib-page-header
-      [breadcrumbs]="[{ label: 'Inicio', link: '/' }, { label: 'Admin', link: '/admin' }, { label: 'Eventos' }]"
-      title="Calendario de eventos"
-      subtitle="Eventos escolares y fechas importantes."
-      actionLabel="Nuevo evento"
-      actionIcon="calendar-check"
-    />
+    <div class="mb-4 flex justify-end">
+      <button uiButton variant="primary" type="button"><ui-icon name="calendar-check" /> Nuevo evento</button>
+    </div>
 
     <div uiCard>
       <div uiCardBody>

@@ -1,17 +1,13 @@
-import { Badge, Card, CardBody, EmptyState, PageHeader, UiTable } from '#/ui';
+import { Badge, Button, Card, CardBody, EmptyState, Icon, UiTable } from '#/ui';
 import { Component } from '@angular/core';
 
 @Component({
   selector: 'app-parent-management',
-  imports: [UiTable, Badge, Card, CardBody, EmptyState, PageHeader],
+  imports: [UiTable, Badge, Card, CardBody, EmptyState, Button, Icon],
   template: `
-    <lib-page-header
-      [breadcrumbs]="[{ label: 'Inicio', link: '/' }, { label: 'Admin', link: '/admin' }, { label: 'Padres' }]"
-      title="Gestión de padres"
-      subtitle="Crea cuentas y vincula estudiantes."
-      actionLabel="Invitar padre"
-      actionIcon="user-plus"
-    />
+    <div class="mb-4 flex justify-end">
+      <button uiButton variant="primary" type="button"><ui-icon name="user-plus" /> Invitar padre</button>
+    </div>
 
     <div uiCard>
       <div uiCardBody>

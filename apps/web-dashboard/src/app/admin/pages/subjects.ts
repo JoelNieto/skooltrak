@@ -24,6 +24,7 @@ import { DatePipe } from '@angular/common';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { Component, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import { Prisma } from '@generated/prisma';
 
 import { filter, switchMap } from 'rxjs';
@@ -40,7 +41,7 @@ import SubjectsForm from '../forms/subjects-form';
     UiTable,
     Button,
     DatePipe,
-    DatePipe,
+    RouterLink,
     PaginatorV2,
     FormsModule,
     UiInputGroup,
@@ -53,16 +54,30 @@ import SubjectsForm from '../forms/subjects-form';
   providers: [Pagination],
 
   template: `
-    <ui-table-toolbar>
-      <label uiInputGroup size="sm">
-        <ui-icon name="search" class="text-base text-ink-subtle" />
-        <input aria-label="Buscar" class="pl-0" type="search" placeholder="Buscar..." [(ngModel)]="searchText" />
-      </label>
-      <button uiToolbarEnd uiButton variant="primary" size="sm" (click)="editSubject()">
-        <ui-icon name="circle-plus" class="text-base" /> Nueva asignatura
+    <div class="flex justify-end">
+      <button uiButton variant="primary" (click)="editSubject()">
+        <ui-icon name="plus" class="text-base" /> Nueva asignatura
       </button>
-    </ui-table-toolbar>
-    <div uiCard class="overflow-x-auto mt-4">
+    </div>
+    <div uiCard class="overflow-hidden">
+      <div class="border-b border-line px-4 py-3.5">
+        <ui-table-toolbar>
+          <label uiInputGroup size="sm" class="w-full sm:w-70">
+            <ui-icon name="search" class="text-base text-ink-subtle" />
+            <input
+              aria-label="Buscar asignaturas"
+              class="pl-0"
+              type="search"
+              placeholder="Buscar por nombre o código"
+              [(ngModel)]="searchText"
+            />
+          </label>
+          <span uiToolbarEnd class="text-[13px] text-ink-subtle" aria-live="polite">
+            {{ total() }} {{ total() === 1 ? 'asignatura' : 'asignaturas' }}
+          </span>
+        </ui-table-toolbar>
+      </div>
+      <div class="overflow-x-auto">
       <table
         uiTable
         [sort]="pagination.sort()"
@@ -75,18 +90,17 @@ import SubjectsForm from '../forms/subjects-form';
             <th uiSortHeader="name" class="w-1/4">Nombre</th>
             <th uiSortHeader="code" class="w-1/6">Código</th>
             <th class="w-1/6">Área</th>
-            <th uiSortHeader="createdAt">Creado</th>
             <th uiSortHeader="updatedAt">Actualizado</th>
             <th class="w-12"><span class="sr-only">Acciones</span></th>
           </tr>
         </thead>
         @switch (subjectsList.phase()) {
           @case ('skeleton') {
-            <tbody uiTableSkeleton [rows]="pageSize()" [columns]="7"></tbody>
+            <tbody uiTableSkeleton [rows]="pageSize()" [columns]="6"></tbody>
           }
           @case ('error') {
             <tbody>
-              <tr uiTableError [columns]="7" (retry)="subjects.reload()"></tr>
+              <tr uiTableError [columns]="6" (retry)="subjects.reload()"></tr>
             </tbody>
           }
           @case ('ready') {
@@ -102,8 +116,14 @@ import SubjectsForm from '../forms/subjects-form';
                       <span class="sr-only">{{ iconLabel(subject.icon) }}</span>
                     </span>
                   </td>
-                  <td>{{ subject.name }}</td>
-                  <td>{{ subject.code }}</td>
+                  <td class="font-medium text-ink-strong">{{ subject.name }}</td>
+                  <td>
+                    @if (subject.code) {
+                      <span class="rounded-md border border-line bg-surface-0 px-1.5 py-0.5 font-mono text-[13px] text-ink">{{
+                        subject.code
+                      }}</span>
+                    }
+                  </td>
                   <td>
                     @if (subject.area) {
                       {{ subject.area }}
@@ -111,8 +131,7 @@ import SubjectsForm from '../forms/subjects-form';
                       <span class="text-ink-subtle">—</span>
                     }
                   </td>
-                  <td>{{ subject.createdAt | date: 'short' }}</td>
-                  <td>{{ subject.updatedAt | date: 'short' }}</td>
+                  <td class="text-ink-muted">{{ subject.updatedAt | date: 'd MMM y' }}</td>
                   <td>
                     <ui-row-actions
                       [actions]="rowActions"
@@ -125,20 +144,21 @@ import SubjectsForm from '../forms/subjects-form';
                 @if (searchText()) {
                   <tr
                     uiTableEmpty
-                    [columns]="7"
+                    [columns]="6"
                     icon="search-x"
                     title="Sin resultados"
                     description="Ningún resultado coincide con la búsqueda."
                   ></tr>
                 } @else {
-                  <tr uiTableEmpty [columns]="7" icon="book-open" title="Aún no hay materias"></tr>
+                  <tr uiTableEmpty [columns]="6" icon="book-open" title="Aún no hay materias"></tr>
                 }
               }
             </tbody>
           }
         }
       </table>
-      <div class="p-4 rounded-b-lg ">
+      </div>
+      <div class="border-t border-line p-4">
         <lib-paginator
           [total]="total()"
           [page]="page()"
@@ -148,6 +168,29 @@ import SubjectsForm from '../forms/subjects-form';
         />
       </div>
     </div>
+
+    <a
+      routerLink="/admin/courses"
+      class="flex flex-wrap items-center gap-3.5 rounded-2xl border border-line bg-surface-1 px-4 py-3.5 text-ink no-underline hover:border-line-strong hover:no-underline"
+    >
+      <span class="flex size-9 flex-none items-center justify-center rounded-full bg-action-subtle text-primary">
+        <ui-icon name="graduation-cap" class="text-lg" />
+      </span>
+      <span class="flex min-w-0 flex-1 flex-col gap-0.5">
+        <span class="font-semibold text-ink-strong">Siguiente paso: crea los cursos</span>
+        <span class="text-[13px] text-ink-muted">Asigna estas materias a cada plan de estudio y a un docente.</span>
+      </span>
+      <span class="inline-flex items-center gap-1.5 font-semibold text-primary">
+        Ir a Cursos <ui-icon name="arrow-right" class="text-base" />
+      </span>
+    </a>
+  `,
+  styles: `
+    :host {
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
   `,
 })
 export default class Subjects {

@@ -150,6 +150,8 @@ test.describe('as a student @FR-ACA-001.21 @FR-ACA-001.22', () => {
   test('Resumen shows a Canales card, latest post first, and "Ver todos" opens the tab', async ({ page }) => {
     await page.goto(`/courses/${courseId}`);
     const card = page.getByRole('region', { name: 'Canales' });
+    // allTextContents doesn't wait: let the card's rows load first.
+    await expect(card.getByRole('button', { name: new RegExp(GENERAL) })).toBeVisible();
     const names = await card.getByRole('list').getByRole('button').allTextContents();
     const general = names.findIndex((t) => t.includes(GENERAL));
     const announcements = names.findIndex((t) => t.includes(ANNOUNCEMENTS));

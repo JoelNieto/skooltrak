@@ -86,7 +86,7 @@ export class TeacherHomeService {
     const { organizationId, school, teacher, local } = await this.context(user, schoolId);
 
     const [period, rows] = await Promise.all([
-      resolveCurrentPeriod(this.prisma, school.currentYear, local.date),
+      resolveCurrentPeriod(this.prisma, school, local.date),
       this.prisma.classGroupWeeklySchedule.findMany({
         where: {
           weekday: local.weekday,
@@ -157,7 +157,7 @@ export class TeacherHomeService {
    */
   async summary(user: AuthUserContext | undefined, schoolId: string | undefined): Promise<TeacherSummary> {
     const ctx = await this.context(user, schoolId);
-    const period = await resolveCurrentPeriod(this.prisma, ctx.school.currentYear, ctx.local.date);
+    const period = await resolveCurrentPeriod(this.prisma, ctx.school, ctx.local.date);
     const [attendance, toReview, grades, insights, threads] = await Promise.all([
       this.weekAttendance(ctx),
       this.toReview(ctx),
@@ -440,7 +440,7 @@ export class TeacherHomeService {
    */
   private async gradeInsights({ organizationId, school, teacher, local }: TeacherContext): Promise<GradeInsights> {
     const [{ current, previous }, rawCourses] = await Promise.all([
-      resolvePeriodPair(this.prisma, school.currentYear, local.date),
+      resolvePeriodPair(this.prisma, school, local.date),
       this.prisma.course.findMany({
         where: { organizationId, schoolId: school.id, ...teacherCourseWhere(teacher.id) },
         select: {

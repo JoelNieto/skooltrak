@@ -13,8 +13,12 @@ export class PeriodsService {
     });
   }
 
+  /** Newest year first; within a year, by start date. `_count.schoolOverrides`: schools that adjusted it. */
   findAll() {
-    return this.prisma.period.findMany();
+    return this.prisma.period.findMany({
+      orderBy: [{ year: 'desc' }, { startDate: 'asc' }],
+      include: { _count: { select: { schoolOverrides: true } } },
+    });
   }
 
   findOne(id: string) {

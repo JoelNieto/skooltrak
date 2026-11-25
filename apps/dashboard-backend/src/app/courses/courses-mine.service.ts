@@ -6,6 +6,7 @@ import { pickCurrentPeriod, pickPreviousPeriod } from '../home/home-period';
 import { addDays, CLOCK, Clock, localMidnight, schoolLocalTime } from '../home/home-time';
 import { workStatus } from '../home/student-home.service';
 import { StudentWorkStatus } from '../home/entities/student-home.entity';
+import { loadSchoolPeriods } from '../periods/school-periods';
 import { PrismaService } from '../prisma.service';
 import { CourseCoverStorage } from './course-cover-storage';
 import { courseSchedule, scheduleText } from './course-schedule';
@@ -90,7 +91,7 @@ export class CoursesMineService {
       id: true,
       organizationId: true,
       classGroup: { select: { id: true, name: true } },
-      school: { select: { currentYear: true, timezone: true } },
+      school: { select: { id: true, currentYear: true, timezone: true } },
     } as const;
     const own = user.organizationId
       ? await this.prisma.student.findFirst({
@@ -118,11 +119,7 @@ export class CoursesMineService {
 
     const now = this.clock.now();
     const local = schoolLocalTime(now, student.school.timezone);
-    const periods = await this.prisma.period.findMany({
-      where: { year: student.school.currentYear },
-      select: { id: true, name: true, startDate: true, endDate: true },
-      orderBy: { startDate: 'asc' },
-    });
+    const periods = await loadSchoolPeriods(this.prisma, student.school.id, student.school.currentYear);
     const current = pickCurrentPeriod(periods, local.date);
     let selected = current;
     if (query.periodId) {

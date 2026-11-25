@@ -17,6 +17,7 @@ import { httpResource } from '@angular/common/http';
 import { Component, input } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { isValidId } from '../../core/validators';
+import { SchoolPeriods } from '../components/school-periods';
 
 type SchoolDetail = {
   id: string;
@@ -53,6 +54,7 @@ type SchoolDetail = {
     UiTabPanel,
     UiTabContent,
     Icon,
+    SchoolPeriods,
   ],
   template: `
     @if (schoolResource.isLoading()) {
@@ -110,6 +112,7 @@ type SchoolDetail = {
               <button uiTab value="info">Información General</button>
               <button uiTab value="contact">Contacto</button>
               <button uiTab value="location">Ubicación</button>
+              <button uiTab value="periods">Periodos</button>
             </div>
           </div>
           <div class="p-1">
@@ -266,6 +269,13 @@ type SchoolDetail = {
                     </div>
                   }
                 </div>
+              </ng-template>
+            </div>
+
+            <!-- Periods Tab -->
+            <div uiTabPanel value="periods">
+              <ng-template uiTabContent>
+                <app-school-periods [schoolId]="school.id" [currentYear]="school.currentYear" />
               </ng-template>
             </div>
           </div>

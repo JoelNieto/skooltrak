@@ -3,6 +3,7 @@ import { HttpClient, httpResource } from '@angular/common/http';
 import { Component, computed, inject, input, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Prisma } from '@generated/prisma';
+import Store from '../core/store';
 
 type Student = Prisma.StudentGetPayload<{
   include: { user: true };
@@ -191,6 +192,7 @@ export default class GroupHabits {
 
   private http = inject(HttpClient);
   private toast = inject(Toast);
+  private store = inject(Store);
 
   // State
   public selectedPeriodId = signal<string | null>(null);
@@ -199,7 +201,15 @@ export default class GroupHabits {
   public evaluationsLoading = signal(false);
   public saving = signal(false);
 
-  public periods = httpResource<Period[]>(() => '/api/v1/periods', { defaultValue: [] });
+  /** Periods as the current school sees them (its overrides applied). */
+  public periods = httpResource<Period[]>(
+    () => {
+      const schoolId = this.store.currentSchoolId();
+      const params: Record<string, string> = schoolId ? { schoolId } : {};
+      return { url: '/api/v1/periods', params };
+    },
+    { defaultValue: [] },
+  );
 
   public habitMetrics = httpResource<HabitMetric[]>(() => '/api/v1/habit-metrics', { defaultValue: [] });
 

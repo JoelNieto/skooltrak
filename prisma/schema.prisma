@@ -269,6 +269,7 @@ model School {
   storeProducts            StoreProduct[]
   storeOrders              StoreOrder[]
   importJobs               ImportJob[]
+  periodOverrides          SchoolPeriod[]
   channels                 Channel[]
 
   @@map("schools")
@@ -285,10 +286,31 @@ model Period {
   updatedAt        DateTime          @updatedAt
   grades           Grade[]
   habitEvaluations HabitEvaluation[]
+  schoolOverrides  SchoolPeriod[]
 
   @@index([year, name])
   @@index([year, shortName])
   @@map("periods")
+}
+
+/// A school's adjustment of one global period (name, short name, dates). Null fields fall back to the
+/// global period. Grades and habit evaluations keep pointing at the global period id.
+model SchoolPeriod {
+  id        String    @id @default(cuid())
+  school    School    @relation(fields: [schoolId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  schoolId  String
+  period    Period    @relation(fields: [periodId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  periodId  String
+  name      String?
+  shortName String?
+  startDate DateTime?
+  endDate   DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@unique([schoolId, periodId])
+  @@index([periodId])
+  @@map("school_periods")
 }
 
 model Subject {

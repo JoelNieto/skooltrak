@@ -105,7 +105,7 @@ const perms = (target: object) => Reflect.getMetadata(PERMISSIONS_KEY, target) a
 describe('Academic setup access', () => {
   it('periods: anyone signed in reads, only SYSADMIN writes', async () => {
     const service = mockService();
-    const controller = new PeriodsController(service as never);
+    const controller = new PeriodsController(service as never, prisma as never);
     for (const req of [admin, teacher]) {
       await expect(controller.create(req, {} as never)).rejects.toThrow(new ForbiddenException(PERIODS_PLATFORM_ONLY));
       await expect(controller.update(req, { id: 'x' } as never)).rejects.toThrow(ForbiddenException);
@@ -113,6 +113,25 @@ describe('Academic setup access', () => {
     }
     await controller.create(sysadmin, {} as never);
     expect(service['create']).toHaveBeenCalledTimes(1);
+  });
+
+  it('school period overrides: VIEW/MANAGE_PERIODS, own organization only', async () => {
+    const service = mockService();
+    const controller = new PeriodsController(service as never, prisma as never);
+    expect(perms(controller.schoolPeriods)).toEqual([Perm.VIEW_PERIODS]);
+    expect(perms(controller.setOverride)).toEqual([Perm.MANAGE_PERIODS]);
+    expect(perms(controller.clearOverride)).toEqual([Perm.MANAGE_PERIODS]);
+
+    await expect(controller.schoolPeriods(admin, 'SCH9', '2026')).rejects.toThrow(new ForbiddenException(SCHOOL_DENIED));
+    await expect(controller.setOverride(admin, 'SCH9', 'p1', {})).rejects.toThrow(ForbiddenException);
+    await expect(controller.clearOverride(admin, 'SCH9', 'p1')).rejects.toThrow(ForbiddenException);
+    await expect(controller.findManyByYear(teacher, '2026', 'SCH9')).rejects.toThrow(ForbiddenException);
+    expect(service['setOverride']).not.toHaveBeenCalled();
+
+    await controller.setOverride(admin, 'SCH1', 'p1', { name: 'T1' });
+    expect(service['setOverride']).toHaveBeenCalledWith('SCH1', 'p1', { name: 'T1' });
+    await controller.findManyByYear(teacher, '2026', 'SCH1');
+    expect(service['findManyByYear']).toHaveBeenCalledWith(2026, 'SCH1');
   });
 
   it('degrees: VIEW/MANAGE_STUDY_PLANS, own organization only', async () => {

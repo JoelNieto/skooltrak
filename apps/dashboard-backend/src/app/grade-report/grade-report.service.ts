@@ -3,6 +3,7 @@ import { REQUEST } from '@nestjs/core';
 import type { Request } from 'express';
 import { GradesService } from '../grades/grades.service';
 import { ACTIVE_ENROLLMENT } from '../courses/course-roster';
+import { loadSchoolPeriods } from '../periods/school-periods';
 import { PrismaService } from '../prisma.service';
 import { SchoolsService } from '../schools/schools.service';
 import {
@@ -74,10 +75,7 @@ export class GradeReportService {
     }
 
     const year = student.school.currentYear;
-    const periods = await this.prisma.period.findMany({
-      where: { year },
-      orderBy: { startDate: 'asc' },
-    });
+    const periods = await loadSchoolPeriods(this.prisma, student.school.id, year);
 
     const selectedPeriod = periods.find((p) => p.id === periodId);
     const selectedPeriodIndex = selectedPeriod ? periods.indexOf(selectedPeriod) : -1;

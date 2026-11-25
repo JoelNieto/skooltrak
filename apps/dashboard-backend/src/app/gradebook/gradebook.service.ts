@@ -16,6 +16,7 @@ import {
 } from '../grades/grade-revisions';
 import { pickCurrentPeriod } from '../home/home-period';
 import { CLOCK, Clock, schoolLocalTime } from '../home/home-time';
+import { loadSchoolPeriods } from '../periods/school-periods';
 import { PrismaService } from '../prisma.service';
 import {
   Gradebook,
@@ -131,7 +132,7 @@ export class GradebookService {
         id: true,
         name: true,
         organizationId: true,
-        school: { select: { currentYear: true, timezone: true } },
+        school: { select: { id: true, currentYear: true, timezone: true } },
         studyPlan: {
           select: planMetricSelect({ minimum: true, maximum: true, minimumApproval: true, minimumExcellence: true }),
         },
@@ -139,11 +140,7 @@ export class GradebookService {
     });
 
     const [periods, roster] = await Promise.all([
-      this.prisma.period.findMany({
-        where: { year: course.school.currentYear },
-        select: { id: true, name: true, startDate: true, endDate: true },
-        orderBy: { startDate: 'asc' },
-      }),
+      loadSchoolPeriods(this.prisma, course.school.id, course.school.currentYear),
       this.prisma.student.findMany({
         where: { organizationId: course.organizationId, enrollmentStatus: EnrollmentStatus.ACTIVE, ...enrolledIn(courseId) },
         select: {

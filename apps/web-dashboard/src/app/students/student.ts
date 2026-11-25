@@ -477,13 +477,13 @@ export default class Student {
 
   public periodsResource = httpResource<Array<{ id: string; name: string; startDate: string; endDate: string }>>(
     () => {
-      const year = this.store.currentSchool()?.currentYear;
-      if (!year) {
+      const school = this.store.currentSchool();
+      if (!school?.currentYear) {
         return undefined;
       }
       return {
         url: '/api/v1/periods/by-year',
-        params: { year: String(year) },
+        params: { year: String(school.currentYear), schoolId: school.id },
       };
     },
     { defaultValue: [] },

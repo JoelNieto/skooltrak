@@ -11,8 +11,19 @@ export interface CourseChannel extends ChannelSummary {
   kind: string;
 }
 
-/** BR-ACA-001.18: "Solo anuncios", "Conversación del curso" or "Preguntas al docente". */
+/** "04/12/2026", in the viewer's time zone. */
+const shortDate = (iso: string) =>
+  new Date(iso).toLocaleDateString('es', { day: '2-digit', month: '2-digit', year: 'numeric' });
+
+/**
+ * BR-ACA-001.18: "Solo anuncios", "Conversación del curso" or "Preguntas al docente". An assignment's
+ * Q&A channel (FR-ACA-001.29) says when it closes instead: "Cierra el 04/12/2026" or "Preguntas cerradas".
+ */
 export function channelKind(channel: ChannelSummary, viewer: ChannelViewer): string {
+  if (channel.scope === 'ASSIGNMENT') {
+    if (channel.archived) return 'Preguntas cerradas';
+    return channel.closesAt ? `Cierra el ${shortDate(channel.closesAt)}` : 'Preguntas de la asignación';
+  }
   const canReply =
     viewer === 'STUDENT'
       ? channel.studentsCanReply
@@ -24,8 +35,9 @@ export function channelKind(channel: ChannelSummary, viewer: ChannelViewer): str
 }
 
 /**
- * BR-ACA-001.17: the course's channels out of the caller's channel list (COM-003): COURSE level for
- * this course only. Open channels come first, by latest post; archived ones last (FR-ACA-001.21).
+ * BR-ACA-001.17: the course's channels out of the caller's channel list (COM-003): the COURSE level and
+ * its assignments' Q&A channels (ASSIGNMENT, FR-ACA-001.29), for this course only. Open channels come
+ * first, by latest post; archived or closed ones last (FR-ACA-001.21).
  */
 export function courseChannels(
   list: readonly ChannelSummary[],
@@ -33,9 +45,25 @@ export function courseChannels(
   viewer: ChannelViewer,
 ): CourseChannel[] {
   return list
-    .filter((c) => c.scope === 'COURSE' && c.courseId === courseId)
+    .filter((c) => (c.scope === 'COURSE' || c.scope === 'ASSIGNMENT') && c.courseId === courseId)
     .sort((a, b) => Number(a.archived) - Number(b.archived) || (b.lastPostAt ?? '').localeCompare(a.lastPostAt ?? ''))
     .map((c) => ({ ...c, kind: channelKind(c, viewer) }));
+}
+
+/** FR-ACA-001.28: replies waiting for a manager across the course's open channels (BR-COM-003.12). */
+export function toAnswerTotal(channels: readonly CourseChannel[]): number {
+  return channels.reduce((sum, c) => sum + (c.archived ? 0 : c.toAnswer), 0);
+}
+
+/** FR-ACA-001.29: the list's two groups, "Canales del curso" and "Preguntas por asignación", each kept in order. */
+export function groupChannels(channels: readonly CourseChannel[]): {
+  course: CourseChannel[];
+  assignments: CourseChannel[];
+} {
+  return {
+    course: channels.filter((c) => c.scope !== 'ASSIGNMENT'),
+    assignments: channels.filter((c) => c.scope === 'ASSIGNMENT'),
+  };
 }
 
 /** FR-ACA-001.21: "1 nuevo" / "3 nuevos". */
@@ -68,7 +96,8 @@ export function newMessages(n: number): string {
  * one with the latest post: `channels` comes sorted from `courseChannels`. Null hides the button.
  */
 export function askChannel(channels: readonly CourseChannel[]): CourseChannel | null {
-  const open = channels.filter((c) => !c.archived);
+  // An assignment's Q&A channel is for that assignment, not the course's general questions.
+  const open = channels.filter((c) => !c.archived && c.scope === 'COURSE');
   return (
     open.find((c) => c.kind === 'Conversación del curso') ?? open.find((c) => c.kind === 'Preguntas al docente') ?? null
   );
@@ -81,4 +110,24 @@ export function askChannel(channels: readonly CourseChannel[]): CourseChannel | 
  */
 export function openChannelId(channels: readonly CourseChannel[], wanted: string | null | undefined): string | null {
   return wanted && channels.some((c) => c.id === wanted) ? wanted : null;
+}
+
+/** `GET /api/v1/assignments/:id`, as the Q&A channel's assignment card reads it (FR-ACA-001.29). */
+export interface ChannelAssignment {
+  id: string;
+  title: string;
+  type: string;
+  /** Students and parents get their group's date only; staff get every group's. */
+  dates: { date: string; classGroup?: { name: string } | null }[];
+}
+
+/**
+ * FR-ACA-001.29: "Entrega: 04/12/2026" for one date, else one per group, soonest first:
+ * "Entregas: 7°A 01/12/2026 · 7°B 04/12/2026". No dates: "Sin fecha de entrega".
+ */
+export function assignmentDueText(dates: ChannelAssignment['dates']): string {
+  if (!dates.length) return 'Sin fecha de entrega';
+  const sorted = [...dates].sort((a, b) => a.date.localeCompare(b.date));
+  if (sorted.length === 1) return `Entrega: ${shortDate(sorted[0].date)}`;
+  return `Entregas: ${sorted.map((d) => `${d.classGroup?.name ?? '—'} ${shortDate(d.date)}`).join(' · ')}`;
 }

@@ -37,9 +37,18 @@ import { CourseGradesSummaryView } from './course-grades-summary';
 import { CourseParticipants, CourseParticipantsList } from './course-participants';
 import { CourseOverview } from './course-overview';
 import { CourseChannelsList } from './course-channels-list';
-import { askChannel, ChannelViewer, courseChannels, newCount, openChannelId } from './course-channels';
+import {
+  askChannel,
+  assignmentDueText,
+  ChannelAssignment,
+  ChannelViewer,
+  courseChannels,
+  newCount,
+  openChannelId,
+  toAnswerTotal,
+} from './course-channels';
 import Channel from '../communication/channel';
-import { CourseWork } from './course-work';
+import { CourseWork, WORK_TYPES } from './course-work';
 import { CommunicationApi } from '../communication/communication-api';
 import type { ChannelSummary } from '@/shared';
 
@@ -307,6 +316,10 @@ type CourseVm = {
                   <button uiTab value="channels">
                     <ui-icon name="message-circle" class="text-xl" />
                     Canales
+                    @if (channelsToAnswer()) {
+                      <!-- FR-ACA-001.28 -->
+                      <span uiBadge tone="new" size="sm">{{ channelsToAnswer() }} por responder</span>
+                    }
                   </button>
                 }
                 <button uiTab value="participants">
@@ -440,7 +453,30 @@ type CourseVm = {
                         <ui-icon name="arrow-left" />
                         Volver a canales
                       </button>
-                      <app-channel [id]="channelId" [embedded]="true" (read)="channelsRes.reload()" />
+                      @if (shownAssignment(); as assignment) {
+                        <!-- FR-ACA-001.29: the Q&A channel's assignment, above its posts. -->
+                        <div
+                          class="mb-4 flex flex-wrap items-center gap-3 rounded-box border border-line bg-surface-1 p-4"
+                        >
+                          <ui-icon [name]="workType(assignment.type).icon" class="text-2xl text-primary" />
+                          <div class="min-w-0 flex-1">
+                            <p class="font-semibold text-ink-strong">{{ assignment.title }}</p>
+                            <p class="text-sm text-ink-muted">
+                              {{ workType(assignment.type).label }} · {{ dueText(assignment.dates) }}
+                            </p>
+                            <p class="text-xs text-ink-muted">{{ shownChannel()?.kind }}</p>
+                          </div>
+                          <a uiButton variant="ghost" size="sm" [routerLink]="['/assignments', assignment.id]">
+                            Ver asignación
+                          </a>
+                        </div>
+                      }
+                      <app-channel
+                        [id]="channelId"
+                        [embedded]="true"
+                        (read)="channelsRes.reload()"
+                        (changed)="channelsRes.reload()"
+                      />
                     } @else if (channels().length) {
                       <lib-empty-state
                         [title]="
@@ -596,7 +632,9 @@ export default class Course {
   );
   protected readonly channels = computed(() => {
     const viewer = this.channelsViewer();
-    return viewer ? courseChannels(this.channelsRes.value() ?? [], this.id(), viewer) : [];
+    // value() throws while the resource is in error (BR-ACA-001.17's inline error must still render).
+    const list = this.channelsRes.hasValue() ? this.channelsRes.value() : [];
+    return viewer ? courseChannels(list, this.id(), viewer) : [];
   });
   /** FR-ACA-001.25: students only; hidden without an open course conversation. */
   protected readonly ask = computed(() => (this.viewerKind() === 'STUDENT' ? askChannel(this.channels()) : null));
@@ -606,9 +644,28 @@ export default class Course {
     this.channels().reduce((sum, c) => sum + (c.archived ? 0 : c.unread), 0),
   );
   protected readonly newCount = newCount;
+  /** FR-ACA-001.28: managers' "por responder" across the course's open channels. */
+  protected readonly channelsToAnswer = computed(() =>
+    this.channelsViewer() === 'MANAGER' ? toAnswerTotal(this.channels()) : 0,
+  );
 
   /** FR-ACA-001.26: the channel open beside the list; only one of the course's, never by itself. */
   protected readonly shownChannelId = computed(() => openChannelId(this.channels(), this.canal()));
+  /** FR-ACA-001.29: the open channel, and its assignment when it is an assignment's Q&A channel. */
+  protected readonly shownChannel = computed(() => this.channels().find((c) => c.id === this.shownChannelId()) ?? null);
+  protected readonly assignmentRes = httpResource<ChannelAssignment>(() => {
+    const channel = this.shownChannel();
+    return channel?.scope === 'ASSIGNMENT' && channel.assignmentId
+      ? `/api/v1/assignments/${channel.assignmentId}`
+      : undefined;
+  });
+  protected readonly shownAssignment = computed(() =>
+    this.shownChannel()?.scope === 'ASSIGNMENT' && this.assignmentRes.hasValue() ? this.assignmentRes.value() : null,
+  );
+  protected readonly dueText = assignmentDueText;
+  protected workType(type: string) {
+    return WORK_TYPES[type as keyof typeof WORK_TYPES] ?? WORK_TYPES.NEW;
+  }
   /** On a phone the open channel replaces the list until "Volver a canales". */
   protected readonly phoneShowsChannel = linkedSignal(() => !!this.canal());
 

@@ -64,7 +64,9 @@ test.describe('Channels', () => {
       // Teachers only get the course and group levels.
       await expect(page.locator('#scope option')).toHaveText(['Curso', 'Grupo']);
       await page.locator('#scope').selectOption({ label: 'Curso' });
-      await page.locator('#target').selectOption({ label: new RegExp(data.courses.teacherOwn.name) });
+      // selectOption's label takes a string only: pick the option whose text names the course.
+      const target = page.locator('#target option', { hasText: data.courses.teacherOwn.name });
+      await page.locator('#target').selectOption((await target.getAttribute('value')) as string);
       await page.locator('#name').fill(channelName);
       await page.getByLabel('Los acudientes pueden responder').check();
       await expect(page.getByLabel('Privadas')).toBeChecked();
@@ -97,8 +99,8 @@ test.describe('Channels', () => {
 
       await post.getByRole('button', { name: 'Responder' }).click();
       await expect(post.getByText('Tu respuesta solo la ven los administradores del canal.')).toBeVisible();
-      await post.getByPlaceholder('Escribe una respuesta…').fill('Enterada, gracias.');
-      await post.getByPlaceholder('Escribe una respuesta…').press('Enter');
+      await post.getByRole('textbox', { name: 'Escribe una respuesta…' }).fill('Enterada, gracias.');
+      await post.getByRole('textbox', { name: 'Escribe una respuesta…' }).press('Enter');
       await expect(post.getByText('Enterada, gracias.')).toBeVisible();
     });
   });
@@ -135,7 +137,7 @@ test.describe('Channels', () => {
 
       await post.getByRole('button', { name: /Respuestas \(1\)/ }).click();
       await expect(post.getByText('Enterada, gracias.')).toBeVisible();
-      const composer = post.getByPlaceholder(`Responder a ${parentName}…`);
+      const composer = post.getByRole('textbox', { name: `Responder a ${parentName}…` });
       await composer.fill('Gracias a usted.');
       await composer.press('Enter');
       await expect(post.getByText('Gracias a usted.')).toBeVisible();

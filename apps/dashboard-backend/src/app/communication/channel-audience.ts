@@ -3,11 +3,22 @@ import { Channel, EnrollmentStatus, Prisma } from '@generated/prisma';
 import { ACTIVE_ENROLLMENT, enrolledIn } from '../courses/course-roster';
 import { PrismaService } from '../prisma.service';
 
-/** The part of a channel that decides its audience (BR-COM-003.4). */
+/**
+ * The part of a channel that decides its audience (BR-COM-003.4, .10). ASSIGNMENT channels also carry
+ * their assignment's class groups, when loaded, for checks that don't query (`memberKinds`).
+ */
 export type AudienceChannel = Pick<
   Channel,
-  'organizationId' | 'scope' | 'schoolId' | 'studyPlanId' | 'classGroupId' | 'courseId' | 'audienceStudents' | 'audienceParents'
->;
+  'organizationId' | 'scope' | 'schoolId' | 'studyPlanId' | 'classGroupId' | 'courseId' | 'assignmentId' | 'audienceStudents' | 'audienceParents'
+> & { assignment?: { dates: { classGroupId: string }[] } | null };
+
+/**
+ * BR-COM-003.11: archived, or an ASSIGNMENT channel past its close time. A closed channel stays
+ * readable and takes no posts or replies.
+ */
+export function isClosed(channel: Pick<Channel, 'archivedAt' | 'closesAt'>, now = new Date()): boolean {
+  return !!channel.archivedAt || (!!channel.closesAt && channel.closesAt <= now);
+}
 
 export type MemberKind = 'STUDENT' | 'PARENT';
 
@@ -36,6 +47,13 @@ export function channelStudentWhere(channel: AudienceChannel): Prisma.StudentWhe
       return { ...base, classGroupId: channel.classGroupId ?? '' };
     case 'COURSE':
       return { ...base, ...enrolledIn(channel.courseId ?? '') };
+    case 'ASSIGNMENT':
+      // BR .10: on the course roster, in a class group the assignment has a date for.
+      return {
+        ...base,
+        ...enrolledIn(channel.courseId ?? ''),
+        classGroup: { assignmentDates: { some: { assignmentId: channel.assignmentId ?? '' } } },
+      };
   }
 }
 
@@ -129,6 +147,9 @@ function placementWhere(p: StudentPlacement): Prisma.ChannelWhereInput {
   if (p.studyPlanId) levels.push({ scope: 'STUDY_PLAN', studyPlanId: p.studyPlanId });
   if (p.classGroupId) levels.push({ scope: 'CLASS_GROUP', classGroupId: p.classGroupId });
   if (p.courseIds.length) levels.push({ scope: 'COURSE', courseId: { in: p.courseIds } });
+  if (p.courseIds.length && p.classGroupId) {
+    levels.push({ scope: 'ASSIGNMENT', courseId: { in: p.courseIds }, assignment: { dates: { some: { classGroupId: p.classGroupId } } } });
+  }
   return { organizationId: p.organizationId, OR: levels };
 }
 
@@ -154,6 +175,13 @@ function placed(channel: AudienceChannel, p: StudentPlacement): boolean {
       return !!p.classGroupId && channel.classGroupId === p.classGroupId;
     case 'COURSE':
       return !!channel.courseId && p.courseIds.includes(channel.courseId);
+    case 'ASSIGNMENT':
+      return (
+        !!channel.courseId &&
+        p.courseIds.includes(channel.courseId) &&
+        !!p.classGroupId &&
+        (channel.assignment?.dates ?? []).some((d) => d.classGroupId === p.classGroupId)
+      );
   }
 }
 
@@ -167,10 +195,10 @@ export function memberKinds(channel: AudienceChannel, ctx: MemberContext): Set<M
 
 /** BR .5: whether a member may reply. */
 export function memberCanReply(
-  channel: AudienceChannel & Pick<Channel, 'studentsCanReply' | 'parentsCanReply' | 'archivedAt'>,
+  channel: AudienceChannel & Pick<Channel, 'studentsCanReply' | 'parentsCanReply' | 'archivedAt' | 'closesAt'>,
   kinds: Set<MemberKind>,
 ): boolean {
-  if (channel.archivedAt) return false;
+  if (isClosed(channel)) return false;
   return (kinds.has('STUDENT') && channel.studentsCanReply) || (kinds.has('PARENT') && channel.parentsCanReply);
 }
 

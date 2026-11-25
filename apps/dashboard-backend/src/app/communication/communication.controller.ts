@@ -1,5 +1,5 @@
 import { AuthenticatedRequest, BetterAuthGuard, Perm, PermissionsGuard, RequirePermissions } from '@/auth';
-import { CHANNEL_SCOPES, ChannelScopeKey, CommunicationUnread } from '@/shared';
+import { CommunicationUnread, CREATABLE_CHANNEL_SCOPES, CreatableChannelScopeKey } from '@/shared';
 import { BadRequestException, Body, Controller, Delete, Get, Param, Patch, Post, Query, Req, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { ChannelsService } from './channels.service';
@@ -52,12 +52,12 @@ export class CommunicationController {
 
   @Get('channels/targets')
   @RequirePermissions(Perm.COMMUNICATION_CHANNELS)
-  @ApiQuery({ name: 'scope', enum: CHANNEL_SCOPES })
+  @ApiQuery({ name: 'scope', enum: CREATABLE_CHANNEL_SCOPES })
   @ApiQuery({ name: 'schoolId', required: false })
   @ApiOperation({ summary: 'What the caller may target at a level (BR-COM-003.2)' })
   targets(@Req() req: AuthenticatedRequest, @Query('scope') scope: string, @Query('schoolId') schoolId?: string) {
-    if (!(CHANNEL_SCOPES as readonly string[]).includes(scope)) throw new BadRequestException('Nivel inválido');
-    return this.channels.targets(req.user, scope as ChannelScopeKey, schoolId);
+    if (!(CREATABLE_CHANNEL_SCOPES as readonly string[]).includes(scope)) throw new BadRequestException('Nivel inválido');
+    return this.channels.targets(req.user, scope as CreatableChannelScopeKey, schoolId);
   }
 
   @Post('channels')

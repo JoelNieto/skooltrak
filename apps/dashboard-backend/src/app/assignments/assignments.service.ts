@@ -1,12 +1,16 @@
 import { Prisma } from '@generated/prisma';
 import { Injectable } from '@nestjs/common';
+import { AssignmentChannelsService } from '../communication/assignment-channels.service';
 import { PrismaService } from '../prisma.service';
 import { CreateAssignmentInput } from './dto/create-assignment.input';
 import { UpdateAssignmentInput } from './dto/update-assignment.input';
 
 @Injectable()
 export class AssignmentsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly channels: AssignmentChannelsService,
+  ) {}
 
   /** `schoolId` comes from the course, never from the caller. */
   async create(createAssignmentInput: CreateAssignmentInput, schoolId: string) {
@@ -23,6 +27,8 @@ export class AssignmentsService {
       },
       include: { course: true, teacher: true, dates: { include: { classGroup: true } } },
     });
+    // COM-003 FR .17: its Q&A channel, with the pinned opening post.
+    await this.channels.ensureFor(assignment.id);
 
     return assignment;
   }
@@ -121,6 +127,8 @@ export class AssignmentsService {
       data: updateData as never,
       include: { course: true, teacher: true, dates: { include: { classGroup: true } } },
     });
+    // COM-003 FR .18: new dates move when its Q&A channel closes.
+    if (groupDates?.length) await this.channels.syncCloseTime(id);
 
     return assignment;
   }

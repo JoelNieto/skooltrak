@@ -14,6 +14,8 @@ const detail: ChannelDetail = {
   studyPlanId: null,
   classGroupId: null,
   courseId: 'math',
+  assignmentId: null,
+  closesAt: null,
   name: 'General',
   description: 'Dudas de la clase',
   audienceStudents: true,
@@ -24,6 +26,7 @@ const detail: ChannelDetail = {
   archived: false,
   role: 'MEMBER',
   unread: 1,
+  toAnswer: 0,
   lastPostAt: '2026-11-20T10:00:00Z',
   lastPostPreview: 'Traigan compás',
   canReply: true,
@@ -34,6 +37,7 @@ const detail: ChannelDetail = {
       author: null,
       createdAt: '2026-11-20T10:00:00Z',
       requiresConfirmation: false,
+      pinned: false,
       readAt: null,
       confirmedAt: null,
       replyCount: 0,
@@ -88,6 +92,30 @@ describe('Channel', () => {
     expect(buttons).toContain('Configurar');
     expect(el.textContent).toContain('Nueva publicación');
     expect(api.markChannelRead).not.toHaveBeenCalled();
+  });
+
+  it("shows an assignment channel's pinned post and when it closes @FR-COM-003.17 @FR-COM-003.18", async () => {
+    api.channel.mockResolvedValueOnce({
+      ...detail,
+      scope: 'ASSIGNMENT',
+      assignmentId: 'a1',
+      closesAt: '2099-12-04T12:00:00Z',
+      posts: [{ ...detail.posts[0], pinned: true, body: 'Preguntas sobre «Fracciones».' }],
+    });
+    const el = await setup(false);
+    expect(el.textContent).toContain('Fijado');
+    expect(el.textContent).toContain('Cierra el 04/12/2099');
+  });
+
+  it('says when a closed Q&A channel closed @FR-COM-003.18', async () => {
+    api.channel.mockResolvedValueOnce({
+      ...detail,
+      scope: 'ASSIGNMENT',
+      archived: true,
+      closesAt: '2020-03-02T12:00:00Z',
+    });
+    const el = await setup(false);
+    expect(el.textContent).toContain('Este canal de preguntas cerró el 02/03/2020');
   });
 
   it('on its own page keeps the page header', async () => {

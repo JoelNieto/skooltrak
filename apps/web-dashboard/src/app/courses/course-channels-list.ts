@@ -1,6 +1,7 @@
 import { Alert, Badge, Button, EmptyState, Icon, Skeleton, TimeAgoPipe } from '#/ui';
+import { NgTemplateOutlet } from '@angular/common';
 import { Component, computed, input, output } from '@angular/core';
-import { CourseChannel, newCount } from './course-channels';
+import { CourseChannel, groupChannels, newCount } from './course-channels';
 
 /**
  * A course's channels for students and parents (ACA-001 FR .21): name and kind, the latest post and
@@ -10,7 +11,7 @@ import { CourseChannel, newCount } from './course-channels';
  */
 @Component({
   selector: 'app-course-channels-list',
-  imports: [Alert, Badge, Button, EmptyState, Icon, Skeleton, TimeAgoPipe],
+  imports: [Alert, Badge, Button, EmptyState, Icon, NgTemplateOutlet, Skeleton, TimeAgoPipe],
   template: `
     @if (error()) {
       <div uiAlert tone="danger" role="alert">
@@ -24,41 +25,81 @@ import { CourseChannel, newCount } from './course-channels';
         }
       </div>
     } @else if (shown().length) {
-      <ul class="flex flex-col" aria-label="Canales del curso">
-        @for (channel of shown(); track channel.id) {
-          <li class="border-t border-line first:border-t-0">
-            <button
-              type="button"
-              class="flex w-full cursor-pointer items-start gap-3 rounded-box px-2 py-2.5 text-left hover:bg-surface-2"
-              [class.bg-surface-2]="channel.id === selectedId()"
-              [attr.aria-pressed]="channel.id === selectedId()"
-              (click)="choose.emit(channel.id)"
-            >
-              <ui-icon
-                [name]="channel.kind === 'Solo anuncios' ? 'megaphone' : 'message-circle'"
-                class="mt-0.5 text-xl text-ink-muted"
-              />
-              <span class="min-w-0 flex-1">
-                <span class="flex items-baseline justify-between gap-2">
-                  <span class="truncate font-medium text-ink-strong">{{ channel.name }}</span>
-                  @if (channel.lastPostAt) {
-                    <span class="shrink-0 text-xs text-ink-muted">{{ channel.lastPostAt | timeAgo }}</span>
-                  }
-                </span>
-                <span class="block text-xs text-ink-muted">{{ channel.kind }}</span>
-                <span class="flex items-center justify-between gap-2">
-                  <span class="truncate text-sm text-ink">{{ channel.lastPostPreview ?? 'Sin publicaciones' }}</span>
-                  @if (channel.archived) {
-                    <span uiBadge size="sm">Archivado</span>
-                  } @else if (channel.unread) {
-                    <span uiBadge tone="new" size="sm">{{ count(channel.unread) }}</span>
-                  }
-                </span>
-              </span>
-            </button>
-          </li>
+      @if (compact()) {
+        <ul class="flex flex-col" aria-label="Canales del curso">
+          @for (channel of shown(); track channel.id) {
+            <li class="border-t border-line first:border-t-0">
+              <ng-container *ngTemplateOutlet="rowTpl; context: { $implicit: channel }" />
+            </li>
+          }
+        </ul>
+      } @else {
+        @if (groups().course.length) {
+          <ul class="flex flex-col" aria-label="Canales del curso">
+            @for (channel of groups().course; track channel.id) {
+              <li class="border-t border-line first:border-t-0">
+                <ng-container *ngTemplateOutlet="rowTpl; context: { $implicit: channel }" />
+              </li>
+            }
+          </ul>
         }
-      </ul>
+        @if (groups().assignments.length) {
+          <!-- FR-ACA-001.29 -->
+          <h3
+            id="assignment-channels"
+            class="mt-4 mb-1 px-2 text-xs font-semibold tracking-wide text-ink-muted uppercase"
+          >
+            Preguntas por asignación
+          </h3>
+          <ul class="flex flex-col" aria-labelledby="assignment-channels">
+            @for (channel of groups().assignments; track channel.id) {
+              <li class="border-t border-line first:border-t-0">
+                <ng-container *ngTemplateOutlet="rowTpl; context: { $implicit: channel }" />
+              </li>
+            }
+          </ul>
+        }
+      }
+      <ng-template #rowTpl let-channel>
+        <button
+          type="button"
+          class="flex w-full cursor-pointer items-start gap-3 rounded-box px-2 py-2.5 text-left hover:bg-surface-2"
+          [class.bg-surface-2]="channel.id === selectedId()"
+          [attr.aria-pressed]="channel.id === selectedId()"
+          (click)="choose.emit(channel.id)"
+        >
+          <ui-icon
+            [name]="
+              channel.scope === 'ASSIGNMENT'
+                ? 'clipboard-list'
+                : channel.kind === 'Solo anuncios'
+                  ? 'megaphone'
+                  : 'message-circle'
+            "
+            class="mt-0.5 text-xl text-ink-muted"
+          />
+          <span class="min-w-0 flex-1">
+            <span class="flex items-baseline justify-between gap-2">
+              <span class="truncate font-medium text-ink-strong">{{ channel.name }}</span>
+              @if (channel.lastPostAt) {
+                <span class="shrink-0 text-xs text-ink-muted">{{ channel.lastPostAt | timeAgo }}</span>
+              }
+            </span>
+            <span class="block text-xs text-ink-muted">{{ channel.kind }}</span>
+            <span class="flex items-center justify-between gap-2">
+              <span class="truncate text-sm text-ink">{{ channel.lastPostPreview ?? 'Sin publicaciones' }}</span>
+              @if (channel.archived) {
+                <span uiBadge size="sm">Archivado</span>
+              } @else if (channel.toAnswer) {
+                <!-- FR-ACA-001.28: managers see what waits for them (members always get 0). -->
+                <span uiBadge tone="new" size="sm">{{ channel.toAnswer }} por responder</span>
+              } @else if (channel.unread) {
+                <span uiBadge tone="new" size="sm">{{ count(channel.unread) }}</span>
+              }
+            </span>
+          </span>
+        </button>
+      </ng-template>
     } @else if (!compact()) {
       <lib-empty-state
         title="Este curso aún no tiene canales"
@@ -89,5 +130,7 @@ export class CourseChannelsList {
           .slice(0, 3)
       : this.channels(),
   );
+  /** FR-ACA-001.29: the tab groups course channels and assignment Q&A channels. */
+  protected readonly groups = computed(() => groupChannels(this.channels()));
   protected readonly count = newCount;
 }

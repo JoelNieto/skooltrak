@@ -574,6 +574,8 @@ model Assignment {
   submissions       AssignmentSubmission[]
   /// The grade column linked to it, if any (BR-ASM-001.11).
   grade             Grade?
+  /// Its Q&A channel (COM-003 FR .17).
+  channel           Channel?
   createdAt         DateTime               @default(now())
   updatedAt         DateTime               @updatedAt
 
@@ -991,6 +993,8 @@ enum ChannelScope {
   STUDY_PLAN
   CLASS_GROUP
   COURSE
+  /// An assignment's Q&A channel, created with it (COM-003 FR .17).
+  ASSIGNMENT
 }
 
 /// Who sees a member's replies (COM-003 FR .4 / BR .5).
@@ -1017,6 +1021,11 @@ model Channel {
   classGroup       ClassGroup?            @relation(fields: [classGroupId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   courseId         String?
   course           Course?                @relation(fields: [courseId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  /// ASSIGNMENT channels: their assignment, at most one channel each (COM-003 BR .10). Also sets courseId.
+  assignmentId     String?                @unique
+  assignment       Assignment?            @relation(fields: [assignmentId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  /// ASSIGNMENT channels close 3 days after the assignment's latest date (COM-003 BR .11).
+  closesAt         DateTime?
   name             String
   description      String                 @default("")
   audienceStudents Boolean                @default(true)
@@ -1048,6 +1057,8 @@ model ChannelPost {
   body                 String
   /// Members are asked to press "Confirmar lectura" (COM-003 FR .6 / .8).
   requiresConfirmation Boolean           @default(false)
+  /// The opening post of an ASSIGNMENT channel, shown first (COM-003 FR .17).
+  pinned               Boolean           @default(false)
   createdAt            DateTime          @default(now())
   deletedAt            DateTime?
   replies              ChannelReply[]

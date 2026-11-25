@@ -89,8 +89,8 @@ The *Canales* tab becomes the place where a course's channels are read and writt
   - *"Configurar"* (FR-COM-003.5).
 
   Above the list, *"Nuevo canal para este curso"* opens the channel form already set to this course (COM-003 §7). The tab replaces the header's *Canal* button. The homeroom view still shows no channel elements (BR .19).
-- **FR-ACA-001.28** *(blocked on Q11)*: for managers, each channel in the list and the tab show *"{n} por responder"*.
-- **FR-ACA-001.29** *(after COM-003-S02, assignment Q&A channels)*: the list groups channels into *"Canales del curso"* and *"Preguntas por asignación"*. An assignment channel shows, above its posts, its assignment (title, type, due date and *"Ver asignación"*) and *"Cierra el {día}"*.
+- **FR-ACA-001.28** *(after COM-003-S03)*: for managers, each channel in the list shows *"{n} por responder"* (BR-COM-003.12), and the *Canales* tab shows their total.
+- **FR-ACA-001.29**: the *Canales* tab groups channels into *"Canales del curso"* and *"Preguntas por asignación"* (the Resumen card keeps one list). An open assignment channel shows, above its posts, its assignment (title, type, due date — one per class group for staff — and *"Ver asignación"*) and when it closes. *"Preguntar en el curso"* (FR .25) only ever opens a course channel.
 
 ### Homeroom teacher
 - **FR-ACA-001.18**: A teacher who is homeroom teacher (*docente consejero*) of a class group sees a *"Cursos de {grupo}"* section on *Cursos*. It lists the group's courses taught by colleagues. Each course opens read-only, with the data limited to that group's students (BR .16).
@@ -191,12 +191,12 @@ These read the course's channels from [COM-003](COM-003-channels-and-direct.md).
   - They never see drafts, the gradebook, attendance taking or weights, and they get no write actions.
   - Participants shows the teachers and their homeroom group's students only.
 - **BR-ACA-001.17**: **A course's channels.**
-  - They are the channels in the caller's `GET /communication/channels` list with `scope = COURSE` and `courseId` = the course. Membership, and so who sees which channel, is COM-003's (BR-COM-003.4, the course roster). Class-group, study-plan, school and organization channels never show on a course.
+  - They are the channels in the caller's `GET /communication/channels` list with `scope = COURSE`, or `ASSIGNMENT` (its assignments' Q&A channels, FR .29), and `courseId` = the course. Membership, and so who sees which channel, is COM-003's (BR-COM-003.4, .10). Class-group, study-plan, school and organization channels never show on a course. *Mis cursos* (FR .23, .24) still counts `COURSE` channels only.
   - A parent sees the channels whose audience includes parents. One list covers every linked child; *Mis cursos* and the course page filter it by the child's courses.
   - Unread counts are COM-003's per-channel `unread` (FR-COM-003.11).
   - Without `COMMUNICATION_VIEW` the tab, the Resumen card, the card badges and the stat are hidden, and the list is not requested.
   - If the list fails to load, the tab and the Resumen card show an inline error with *"Reintentar"*. *Mis cursos* still renders its cards without badges, and the stat shows "—".
-- **BR-ACA-001.18**: **Channel kind**, from the viewer's side (the reply settings in FR-COM-003.3–.4):
+- **BR-ACA-001.18**: **Channel kind**, from the viewer's side (the reply settings in FR-COM-003.3–.4). An assignment's Q&A channel says *"Cierra el {dd/mm/aaaa}"*, *"Preguntas cerradas"* or *"Preguntas de la asignación"* instead (FR .29):
   - the viewer's audience can't reply: *"Solo anuncios"*;
   - it can reply and `replyVisibility = PUBLIC`: *"Conversación del curso"*;
   - it can reply and `replyVisibility = PRIVATE`: *"Preguntas al docente"*.
@@ -265,7 +265,7 @@ Side effects: none. Regenerate the dashboard API client (`bun run openapi:orval`
 - A teacher's own *Mis cursos* with teaching metrics (to review, attendance), which HOM-001 covers on the home page.
 
 ## 10. Open questions
-Q1–Q8 answered on 2026-11-19; Q9 and Q10 on 2026-11-23. Q11 is open (2026-11-25).
+Q1–Q8 answered on 2026-11-19; Q9 and Q10 on 2026-11-23; Q11 on 2026-11-25.
 - [x] **Q1: Course roster.** The code had two answers that drift apart.
   - **Stored link.** `Course.students` is written on course creation (`courses.service.ts:112`), on student creation (`students.service.ts:155`) and on a class-group change (`students.service.ts:529`, which *replaces* the student's courses).
   - **Study-plan rule.** HOM-001 and COM-002-S04 derive a course's students from the class groups of its study plan.
@@ -280,7 +280,7 @@ Q1–Q8 answered on 2026-11-19; Q9 and Q10 on 2026-11-23. Q11 is open (2026-11-2
 - [x] **Q7: Classmates for parents.** **Decided:** parents see teachers only (BR .13).
 - [x] **Q9: "Ask in #general".** In COM-003 only managers post; members can only reply under a post (FR-COM-003.6, BR-COM-003.5). **Decided (2026-11-23):** option (a). The button opens the course's *Conversación del curso* channel, and the student replies under the latest post (FR .25). COM-003 is unchanged.
 - [x] **Q10: Assignment Q&A channels.** **Decided (2026-11-23):** yes, each assignment gets its own Q&A channel. That is a new channel level in COM-003, closing 3 days after the due date as in the design. It is specified in COM-003 first; ACA-001 adds the per-assignment question count and the link once that exists.
-- [ ] **Q11: What counts as "por responder"?** COM-003 counts unread posts only for members, so managers have no signal today. Proposal: a private conversation whose latest reply is from the member, and a public reply newer than the managers' latest post or reply in that post's thread. Either way it needs a COM-003 field (e.g. `toAnswer` on `GET channels` for managers). Blocks S20.
+- [x] **Q11: What counts as "por responder"?** **Decided (2026-11-25):** a private conversation whose latest reply is from the member, plus a public reply newer than the latest manager reply in that post's thread (BR-COM-003.12). COM-003-S03 adds the count to `GET channels` for managers; S20 shows it.
 - [x] **Q6 follow-up (2026-11-23).** COM-003 shipped in #84, so the course channel elements Q6 held back are specified as FR .21–.25.
 - [x] **Q8: Teachers opening other courses.** **Decided:** full access to their own courses, plus read-only access to colleagues' courses limited to their **homeroom** group's students (BR .3, .16, FR .18).
 
@@ -304,9 +304,9 @@ Listed in build order.
 | [ACA-001-S10](../slices/ACA-001-S10-graded-status.md) | *"Calificada · n"* status from linked grades | .17 | Done (#63) |
 | [ACA-001-S14](../slices/ACA-001-S14-staff-cards.md) | Staff *Cursos* cards: area chip and course name | .9, BR .14 | Done (#82) |
 | [ACA-001-S15](../slices/ACA-001-S15-course-channels.md) | Canales tab and Resumen card on the course page | .21 .22, BR .17 .18 .19 | Done (#86) |
-| [ACA-001-S16](../slices/ACA-001-S16-mis-cursos-channels.md) | Unread channel badges on *Mis cursos* cards and the *Nuevo en canales* stat | .23 .24, BR .17 | In review |
-| [ACA-001-S17](../slices/ACA-001-S17-ask-in-course.md) | *"Preguntar en el curso"* opens the course conversation channel | .25 | In review |
-| [ACA-001-S18](../slices/ACA-001-S18-channel-in-course.md) | Students and parents read, confirm and reply inside the *Canales* tab | .26, BR .20 | In review |
-| [ACA-001-S19](../slices/ACA-001-S19-manage-channels-in-course.md) | Teachers post, see receipts and answer inside the *Canales* tab; *Nuevo canal para este curso* | .27, BR .19 .20 | In review |
-| ACA-001-S20 | *"{n} por responder"* for managers | .28 | Proposed (blocked on Q11 and a COM-003 field) |
-| ACA-001-S21 | Assignment Q&A group and assignment card in *Canales* | .29 | Proposed (after COM-003-S02) |
+| [ACA-001-S16](../slices/ACA-001-S16-mis-cursos-channels.md) | Unread channel badges on *Mis cursos* cards and the *Nuevo en canales* stat | .23 .24, BR .17 | Done (#87) |
+| [ACA-001-S17](../slices/ACA-001-S17-ask-in-course.md) | *"Preguntar en el curso"* opens the course conversation channel | .25 | Done (#87) |
+| [ACA-001-S18](../slices/ACA-001-S18-channel-in-course.md) | Students and parents read, confirm and reply inside the *Canales* tab | .26, BR .20 | Done (#87) |
+| [ACA-001-S19](../slices/ACA-001-S19-manage-channels-in-course.md) | Teachers post, see receipts and answer inside the *Canales* tab; *Nuevo canal para este curso* | .27, BR .19 .20 | Done (#88) |
+| [ACA-001-S20](../slices/ACA-001-S20-to-answer.md) | *"{n} por responder"* for managers | .28 | In review |
+| [ACA-001-S21](../slices/ACA-001-S21-assignment-channels-in-course.md) | Assignment Q&A group and assignment card in *Canales* | .29, BR .17 .18 | In review |

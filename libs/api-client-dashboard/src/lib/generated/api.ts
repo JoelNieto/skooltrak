@@ -6081,6 +6081,718 @@ if(coursesControllerUploadCoverBody.file !== undefined) {
   }
 
 /**
+ * @summary Unread channel posts and direct messages (FR-COM-003.15)
+ */
+ communicationControllerUnread<TData = void>( options?: HttpClientBodyOptions): Observable<TData>;
+ communicationControllerUnread<TData = void>( options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
+ communicationControllerUnread<TData = void>( options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
+  communicationControllerUnread<TData = void>(
+     options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
+    if (options?.observe === 'events') {
+      return this.http.get<TData>(
+      `/api/v1/communication/unread`,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'events',
+      }
+    );
+    }
+
+    if (options?.observe === 'response') {
+      return this.http.get<TData>(
+      `/api/v1/communication/unread`,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'response',
+      }
+    );
+    }
+
+    return this.http.get<TData>(
+      `/api/v1/communication/unread`,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'body',
+      }
+    );
+  }
+
+/**
+ * @summary Channels the caller manages or belongs to (FR-COM-003.11)
+ */
+ communicationControllerListChannels<TData = void>( options?: HttpClientBodyOptions): Observable<TData>;
+ communicationControllerListChannels<TData = void>( options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
+ communicationControllerListChannels<TData = void>( options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
+  communicationControllerListChannels<TData = void>(
+     options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
+    if (options?.observe === 'events') {
+      return this.http.get<TData>(
+      `/api/v1/communication/channels`,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'events',
+      }
+    );
+    }
+
+    if (options?.observe === 'response') {
+      return this.http.get<TData>(
+      `/api/v1/communication/channels`,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'response',
+      }
+    );
+    }
+
+    return this.http.get<TData>(
+      `/api/v1/communication/channels`,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'body',
+      }
+    );
+  }
+
+/**
+ * @summary Create a channel (FR-COM-003.1–.4)
+ */
+ communicationControllerCreateChannel<TData = void>(createChannelInput: CreateChannelInput, options?: HttpClientBodyOptions): Observable<TData>;
+ communicationControllerCreateChannel<TData = void>(createChannelInput: CreateChannelInput, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
+ communicationControllerCreateChannel<TData = void>(createChannelInput: CreateChannelInput, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
+  communicationControllerCreateChannel<TData = void>(
+    createChannelInput: CreateChannelInput, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
+    if (options?.observe === 'events') {
+      return this.http.post<TData>(
+      `/api/v1/communication/channels`,
+      createChannelInput,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'events',
+      }
+    );
+    }
+
+    if (options?.observe === 'response') {
+      return this.http.post<TData>(
+      `/api/v1/communication/channels`,
+      createChannelInput,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'response',
+      }
+    );
+    }
+
+    return this.http.post<TData>(
+      `/api/v1/communication/channels`,
+      createChannelInput,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'body',
+      }
+    );
+  }
+
+/**
+ * @summary Latest channel posts for home pages (FR-COM-003.16)
+ */
+ communicationControllerRecent<TData = void>(params?: CommunicationControllerRecentParams, options?: HttpClientBodyOptions): Observable<TData>;
+ communicationControllerRecent<TData = void>(params?: CommunicationControllerRecentParams, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
+ communicationControllerRecent<TData = void>(params?: CommunicationControllerRecentParams, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
+  communicationControllerRecent<TData = void>(
+    params?: CommunicationControllerRecentParams, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
+    const filteredParams = filterParams({...params, ...options?.params}, new Set<string>([]));
+
+    if (options?.observe === 'events') {
+      return this.http.get<TData>(
+      `/api/v1/communication/channels/recent`,{
+    ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'events',
+        params: filteredParams,}
+    );
+    }
+
+    if (options?.observe === 'response') {
+      return this.http.get<TData>(
+      `/api/v1/communication/channels/recent`,{
+    ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'response',
+        params: filteredParams,}
+    );
+    }
+
+    return this.http.get<TData>(
+      `/api/v1/communication/channels/recent`,{
+    ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'body',
+        params: filteredParams,}
+    );
+  }
+
+/**
+ * @summary What the caller may target at a level (BR-COM-003.2)
+ */
+ communicationControllerTargets<TData = void>(params: CommunicationControllerTargetsParams, options?: HttpClientBodyOptions): Observable<TData>;
+ communicationControllerTargets<TData = void>(params: CommunicationControllerTargetsParams, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
+ communicationControllerTargets<TData = void>(params: CommunicationControllerTargetsParams, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
+  communicationControllerTargets<TData = void>(
+    params: CommunicationControllerTargetsParams, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
+    const filteredParams = filterParams({...params, ...options?.params}, new Set<string>([]));
+
+    if (options?.observe === 'events') {
+      return this.http.get<TData>(
+      `/api/v1/communication/channels/targets`,{
+    ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'events',
+        params: filteredParams,}
+    );
+    }
+
+    if (options?.observe === 'response') {
+      return this.http.get<TData>(
+      `/api/v1/communication/channels/targets`,{
+    ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'response',
+        params: filteredParams,}
+    );
+    }
+
+    return this.http.get<TData>(
+      `/api/v1/communication/channels/targets`,{
+    ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'body',
+        params: filteredParams,}
+    );
+  }
+
+/**
+ * @summary A channel with its latest posts (FR-COM-003.7, .9)
+ */
+ communicationControllerGetChannel<TData = void>(id: string, options?: HttpClientBodyOptions): Observable<TData>;
+ communicationControllerGetChannel<TData = void>(id: string, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
+ communicationControllerGetChannel<TData = void>(id: string, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
+  communicationControllerGetChannel<TData = void>(
+    id: string, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
+    if (options?.observe === 'events') {
+      return this.http.get<TData>(
+      `/api/v1/communication/channels/${id}`,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'events',
+      }
+    );
+    }
+
+    if (options?.observe === 'response') {
+      return this.http.get<TData>(
+      `/api/v1/communication/channels/${id}`,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'response',
+      }
+    );
+    }
+
+    return this.http.get<TData>(
+      `/api/v1/communication/channels/${id}`,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'body',
+      }
+    );
+  }
+
+/**
+ * @summary Edit a channel or archive it (FR-COM-003.5)
+ */
+ communicationControllerUpdateChannel<TData = void>(id: string,
+    updateChannelInput: UpdateChannelInput, options?: HttpClientBodyOptions): Observable<TData>;
+ communicationControllerUpdateChannel<TData = void>(id: string,
+    updateChannelInput: UpdateChannelInput, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
+ communicationControllerUpdateChannel<TData = void>(id: string,
+    updateChannelInput: UpdateChannelInput, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
+  communicationControllerUpdateChannel<TData = void>(
+    id: string,
+    updateChannelInput: UpdateChannelInput, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
+    if (options?.observe === 'events') {
+      return this.http.patch<TData>(
+      `/api/v1/communication/channels/${id}`,
+      updateChannelInput,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'events',
+      }
+    );
+    }
+
+    if (options?.observe === 'response') {
+      return this.http.patch<TData>(
+      `/api/v1/communication/channels/${id}`,
+      updateChannelInput,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'response',
+      }
+    );
+    }
+
+    return this.http.patch<TData>(
+      `/api/v1/communication/channels/${id}`,
+      updateChannelInput,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'body',
+      }
+    );
+  }
+
+/**
+ * @summary Mark the channel's posts read (FR-COM-003.8)
+ */
+ communicationControllerMarkChannelRead<TData = void>(id: string, options?: HttpClientBodyOptions): Observable<TData>;
+ communicationControllerMarkChannelRead<TData = void>(id: string, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
+ communicationControllerMarkChannelRead<TData = void>(id: string, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
+  communicationControllerMarkChannelRead<TData = void>(
+    id: string, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
+    if (options?.observe === 'events') {
+      return this.http.post<TData>(
+      `/api/v1/communication/channels/${id}/read`,undefined,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'events',
+      }
+    );
+    }
+
+    if (options?.observe === 'response') {
+      return this.http.post<TData>(
+      `/api/v1/communication/channels/${id}/read`,undefined,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'response',
+      }
+    );
+    }
+
+    return this.http.post<TData>(
+      `/api/v1/communication/channels/${id}/read`,undefined,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'body',
+      }
+    );
+  }
+
+/**
+ * @summary Publish a post (FR-COM-003.6)
+ */
+ communicationControllerCreatePost<TData = void>(id: string,
+    createChannelPostInput: CreateChannelPostInput, options?: HttpClientBodyOptions): Observable<TData>;
+ communicationControllerCreatePost<TData = void>(id: string,
+    createChannelPostInput: CreateChannelPostInput, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
+ communicationControllerCreatePost<TData = void>(id: string,
+    createChannelPostInput: CreateChannelPostInput, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
+  communicationControllerCreatePost<TData = void>(
+    id: string,
+    createChannelPostInput: CreateChannelPostInput, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
+    if (options?.observe === 'events') {
+      return this.http.post<TData>(
+      `/api/v1/communication/channels/${id}/posts`,
+      createChannelPostInput,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'events',
+      }
+    );
+    }
+
+    if (options?.observe === 'response') {
+      return this.http.post<TData>(
+      `/api/v1/communication/channels/${id}/posts`,
+      createChannelPostInput,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'response',
+      }
+    );
+    }
+
+    return this.http.post<TData>(
+      `/api/v1/communication/channels/${id}/posts`,
+      createChannelPostInput,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'body',
+      }
+    );
+  }
+
+/**
+ * @summary Delete a post
+ */
+ communicationControllerDeletePost<TData = void>(id: string,
+    postId: string, options?: HttpClientBodyOptions): Observable<TData>;
+ communicationControllerDeletePost<TData = void>(id: string,
+    postId: string, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
+ communicationControllerDeletePost<TData = void>(id: string,
+    postId: string, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
+  communicationControllerDeletePost<TData = void>(
+    id: string,
+    postId: string, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
+    if (options?.observe === 'events') {
+      return this.http.delete<TData>(
+      `/api/v1/communication/channels/${id}/posts/${postId}`,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'events',
+      }
+    );
+    }
+
+    if (options?.observe === 'response') {
+      return this.http.delete<TData>(
+      `/api/v1/communication/channels/${id}/posts/${postId}`,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'response',
+      }
+    );
+    }
+
+    return this.http.delete<TData>(
+      `/api/v1/communication/channels/${id}/posts/${postId}`,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'body',
+      }
+    );
+  }
+
+/**
+ * @summary Confirm reading a post (FR-COM-003.8)
+ */
+ communicationControllerConfirm<TData = void>(id: string,
+    postId: string, options?: HttpClientBodyOptions): Observable<TData>;
+ communicationControllerConfirm<TData = void>(id: string,
+    postId: string, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
+ communicationControllerConfirm<TData = void>(id: string,
+    postId: string, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
+  communicationControllerConfirm<TData = void>(
+    id: string,
+    postId: string, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
+    if (options?.observe === 'events') {
+      return this.http.post<TData>(
+      `/api/v1/communication/channels/${id}/posts/${postId}/confirm`,undefined,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'events',
+      }
+    );
+    }
+
+    if (options?.observe === 'response') {
+      return this.http.post<TData>(
+      `/api/v1/communication/channels/${id}/posts/${postId}/confirm`,undefined,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'response',
+      }
+    );
+    }
+
+    return this.http.post<TData>(
+      `/api/v1/communication/channels/${id}/posts/${postId}/confirm`,undefined,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'body',
+      }
+    );
+  }
+
+/**
+ * @summary Who read and confirmed a post (FR-COM-003.9)
+ */
+ communicationControllerReceipts<TData = void>(id: string,
+    postId: string, options?: HttpClientBodyOptions): Observable<TData>;
+ communicationControllerReceipts<TData = void>(id: string,
+    postId: string, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
+ communicationControllerReceipts<TData = void>(id: string,
+    postId: string, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
+  communicationControllerReceipts<TData = void>(
+    id: string,
+    postId: string, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
+    if (options?.observe === 'events') {
+      return this.http.get<TData>(
+      `/api/v1/communication/channels/${id}/posts/${postId}/receipts`,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'events',
+      }
+    );
+    }
+
+    if (options?.observe === 'response') {
+      return this.http.get<TData>(
+      `/api/v1/communication/channels/${id}/posts/${postId}/receipts`,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'response',
+      }
+    );
+    }
+
+    return this.http.get<TData>(
+      `/api/v1/communication/channels/${id}/posts/${postId}/receipts`,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'body',
+      }
+    );
+  }
+
+/**
+ * @summary Replies the caller may see (FR-COM-003.10)
+ */
+ communicationControllerReplies<TData = void>(id: string,
+    postId: string,
+    params?: CommunicationControllerRepliesParams, options?: HttpClientBodyOptions): Observable<TData>;
+ communicationControllerReplies<TData = void>(id: string,
+    postId: string,
+    params?: CommunicationControllerRepliesParams, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
+ communicationControllerReplies<TData = void>(id: string,
+    postId: string,
+    params?: CommunicationControllerRepliesParams, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
+  communicationControllerReplies<TData = void>(
+    id: string,
+    postId: string,
+    params?: CommunicationControllerRepliesParams, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
+    const filteredParams = filterParams({...params, ...options?.params}, new Set<string>([]));
+
+    if (options?.observe === 'events') {
+      return this.http.get<TData>(
+      `/api/v1/communication/channels/${id}/posts/${postId}/replies`,{
+    ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'events',
+        params: filteredParams,}
+    );
+    }
+
+    if (options?.observe === 'response') {
+      return this.http.get<TData>(
+      `/api/v1/communication/channels/${id}/posts/${postId}/replies`,{
+    ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'response',
+        params: filteredParams,}
+    );
+    }
+
+    return this.http.get<TData>(
+      `/api/v1/communication/channels/${id}/posts/${postId}/replies`,{
+    ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'body',
+        params: filteredParams,}
+    );
+  }
+
+/**
+ * @summary Reply to a post (FR-COM-003.10)
+ */
+ communicationControllerReply<TData = void>(id: string,
+    postId: string,
+    createChannelReplyInput: CreateChannelReplyInput, options?: HttpClientBodyOptions): Observable<TData>;
+ communicationControllerReply<TData = void>(id: string,
+    postId: string,
+    createChannelReplyInput: CreateChannelReplyInput, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
+ communicationControllerReply<TData = void>(id: string,
+    postId: string,
+    createChannelReplyInput: CreateChannelReplyInput, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
+  communicationControllerReply<TData = void>(
+    id: string,
+    postId: string,
+    createChannelReplyInput: CreateChannelReplyInput, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
+    if (options?.observe === 'events') {
+      return this.http.post<TData>(
+      `/api/v1/communication/channels/${id}/posts/${postId}/replies`,
+      createChannelReplyInput,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'events',
+      }
+    );
+    }
+
+    if (options?.observe === 'response') {
+      return this.http.post<TData>(
+      `/api/v1/communication/channels/${id}/posts/${postId}/replies`,
+      createChannelReplyInput,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'response',
+      }
+    );
+    }
+
+    return this.http.post<TData>(
+      `/api/v1/communication/channels/${id}/posts/${postId}/replies`,
+      createChannelReplyInput,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'body',
+      }
+    );
+  }
+
+/**
+ * @summary The caller's direct conversations (FR-COM-003.14)
+ */
+ communicationControllerListDirect<TData = void>( options?: HttpClientBodyOptions): Observable<TData>;
+ communicationControllerListDirect<TData = void>( options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
+ communicationControllerListDirect<TData = void>( options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
+  communicationControllerListDirect<TData = void>(
+     options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
+    if (options?.observe === 'events') {
+      return this.http.get<TData>(
+      `/api/v1/communication/direct`,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'events',
+      }
+    );
+    }
+
+    if (options?.observe === 'response') {
+      return this.http.get<TData>(
+      `/api/v1/communication/direct`,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'response',
+      }
+    );
+    }
+
+    return this.http.get<TData>(
+      `/api/v1/communication/direct`,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'body',
+      }
+    );
+  }
+
+/**
+ * @summary Start or reopen a conversation with a parent (FR-COM-003.12)
+ */
+ communicationControllerStartDirect<TData = void>(startDirectInput: StartDirectInput, options?: HttpClientBodyOptions): Observable<TData>;
+ communicationControllerStartDirect<TData = void>(startDirectInput: StartDirectInput, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
+ communicationControllerStartDirect<TData = void>(startDirectInput: StartDirectInput, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
+  communicationControllerStartDirect<TData = void>(
+    startDirectInput: StartDirectInput, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
+    if (options?.observe === 'events') {
+      return this.http.post<TData>(
+      `/api/v1/communication/direct`,
+      startDirectInput,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'events',
+      }
+    );
+    }
+
+    if (options?.observe === 'response') {
+      return this.http.post<TData>(
+      `/api/v1/communication/direct`,
+      startDirectInput,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'response',
+      }
+    );
+    }
+
+    return this.http.post<TData>(
+      `/api/v1/communication/direct`,
+      startDirectInput,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'body',
+      }
+    );
+  }
+
+/**
+ * @summary Parents the caller may message, by student (BR-COM-003.8)
+ */
+ communicationControllerRecipients<TData = void>(params?: CommunicationControllerRecipientsParams, options?: HttpClientBodyOptions): Observable<TData>;
+ communicationControllerRecipients<TData = void>(params?: CommunicationControllerRecipientsParams, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
+ communicationControllerRecipients<TData = void>(params?: CommunicationControllerRecipientsParams, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
+  communicationControllerRecipients<TData = void>(
+    params?: CommunicationControllerRecipientsParams, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
+    const filteredParams = filterParams({...params, ...options?.params}, new Set<string>([]));
+
+    if (options?.observe === 'events') {
+      return this.http.get<TData>(
+      `/api/v1/communication/direct/recipients`,{
+    ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'events',
+        params: filteredParams,}
+    );
+    }
+
+    if (options?.observe === 'response') {
+      return this.http.get<TData>(
+      `/api/v1/communication/direct/recipients`,{
+    ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'response',
+        params: filteredParams,}
+    );
+    }
+
+    return this.http.get<TData>(
+      `/api/v1/communication/direct/recipients`,{
+    ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'body',
+        params: filteredParams,}
+    );
+  }
+
+/**
+ * @summary A conversation with its messages; marks it read (FR-COM-003.13)
+ */
+ communicationControllerGetDirect<TData = void>(id: string, options?: HttpClientBodyOptions): Observable<TData>;
+ communicationControllerGetDirect<TData = void>(id: string, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
+ communicationControllerGetDirect<TData = void>(id: string, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
+  communicationControllerGetDirect<TData = void>(
+    id: string, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
+    if (options?.observe === 'events') {
+      return this.http.get<TData>(
+      `/api/v1/communication/direct/${id}`,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'events',
+      }
+    );
+    }
+
+    if (options?.observe === 'response') {
+      return this.http.get<TData>(
+      `/api/v1/communication/direct/${id}`,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'response',
+      }
+    );
+    }
+
+    return this.http.get<TData>(
+      `/api/v1/communication/direct/${id}`,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'body',
+      }
+    );
+  }
+
+/**
+ * @summary Send a direct message (FR-COM-003.13)
+ */
+ communicationControllerSendDirect<TData = void>(id: string,
+    sendDirectMessageInput: SendDirectMessageInput, options?: HttpClientBodyOptions): Observable<TData>;
+ communicationControllerSendDirect<TData = void>(id: string,
+    sendDirectMessageInput: SendDirectMessageInput, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
+ communicationControllerSendDirect<TData = void>(id: string,
+    sendDirectMessageInput: SendDirectMessageInput, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
+  communicationControllerSendDirect<TData = void>(
+    id: string,
+    sendDirectMessageInput: SendDirectMessageInput, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
+    if (options?.observe === 'events') {
+      return this.http.post<TData>(
+      `/api/v1/communication/direct/${id}/messages`,
+      sendDirectMessageInput,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'events',
+      }
+    );
+    }
+
+    if (options?.observe === 'response') {
+      return this.http.post<TData>(
+      `/api/v1/communication/direct/${id}/messages`,
+      sendDirectMessageInput,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'response',
+      }
+    );
+    }
+
+    return this.http.post<TData>(
+      `/api/v1/communication/direct/${id}/messages`,
+      sendDirectMessageInput,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'body',
+      }
+    );
+  }
+
+/**
  * @summary Presigned upload URL for submission
  */
  assignmentSubmissionsControllerCreateSubmissionUploadUrl<TData = void>(createSubmissionUploadInput: CreateSubmissionUploadInput, options?: HttpClientBodyOptions): Observable<TData>;
@@ -9214,718 +9926,6 @@ if(coursesControllerUploadCoverBody.file !== undefined) {
 
     return this.http.delete<TData>(
       `/api/v1/parents/${id}`,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'body',
-      }
-    );
-  }
-
-/**
- * @summary Unread channel posts and direct messages (FR-COM-003.15)
- */
- communicationControllerUnread<TData = void>( options?: HttpClientBodyOptions): Observable<TData>;
- communicationControllerUnread<TData = void>( options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
- communicationControllerUnread<TData = void>( options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
-  communicationControllerUnread<TData = void>(
-     options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
-    if (options?.observe === 'events') {
-      return this.http.get<TData>(
-      `/api/v1/communication/unread`,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'events',
-      }
-    );
-    }
-
-    if (options?.observe === 'response') {
-      return this.http.get<TData>(
-      `/api/v1/communication/unread`,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'response',
-      }
-    );
-    }
-
-    return this.http.get<TData>(
-      `/api/v1/communication/unread`,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'body',
-      }
-    );
-  }
-
-/**
- * @summary Channels the caller manages or belongs to (FR-COM-003.11)
- */
- communicationControllerListChannels<TData = void>( options?: HttpClientBodyOptions): Observable<TData>;
- communicationControllerListChannels<TData = void>( options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
- communicationControllerListChannels<TData = void>( options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
-  communicationControllerListChannels<TData = void>(
-     options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
-    if (options?.observe === 'events') {
-      return this.http.get<TData>(
-      `/api/v1/communication/channels`,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'events',
-      }
-    );
-    }
-
-    if (options?.observe === 'response') {
-      return this.http.get<TData>(
-      `/api/v1/communication/channels`,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'response',
-      }
-    );
-    }
-
-    return this.http.get<TData>(
-      `/api/v1/communication/channels`,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'body',
-      }
-    );
-  }
-
-/**
- * @summary Create a channel (FR-COM-003.1–.4)
- */
- communicationControllerCreateChannel<TData = void>(createChannelInput: CreateChannelInput, options?: HttpClientBodyOptions): Observable<TData>;
- communicationControllerCreateChannel<TData = void>(createChannelInput: CreateChannelInput, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
- communicationControllerCreateChannel<TData = void>(createChannelInput: CreateChannelInput, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
-  communicationControllerCreateChannel<TData = void>(
-    createChannelInput: CreateChannelInput, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
-    if (options?.observe === 'events') {
-      return this.http.post<TData>(
-      `/api/v1/communication/channels`,
-      createChannelInput,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'events',
-      }
-    );
-    }
-
-    if (options?.observe === 'response') {
-      return this.http.post<TData>(
-      `/api/v1/communication/channels`,
-      createChannelInput,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'response',
-      }
-    );
-    }
-
-    return this.http.post<TData>(
-      `/api/v1/communication/channels`,
-      createChannelInput,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'body',
-      }
-    );
-  }
-
-/**
- * @summary Latest channel posts for home pages (FR-COM-003.16)
- */
- communicationControllerRecent<TData = void>(params?: CommunicationControllerRecentParams, options?: HttpClientBodyOptions): Observable<TData>;
- communicationControllerRecent<TData = void>(params?: CommunicationControllerRecentParams, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
- communicationControllerRecent<TData = void>(params?: CommunicationControllerRecentParams, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
-  communicationControllerRecent<TData = void>(
-    params?: CommunicationControllerRecentParams, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
-    const filteredParams = filterParams({...params, ...options?.params}, new Set<string>([]));
-
-    if (options?.observe === 'events') {
-      return this.http.get<TData>(
-      `/api/v1/communication/channels/recent`,{
-    ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'events',
-        params: filteredParams,}
-    );
-    }
-
-    if (options?.observe === 'response') {
-      return this.http.get<TData>(
-      `/api/v1/communication/channels/recent`,{
-    ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'response',
-        params: filteredParams,}
-    );
-    }
-
-    return this.http.get<TData>(
-      `/api/v1/communication/channels/recent`,{
-    ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'body',
-        params: filteredParams,}
-    );
-  }
-
-/**
- * @summary What the caller may target at a level (BR-COM-003.2)
- */
- communicationControllerTargets<TData = void>(params: CommunicationControllerTargetsParams, options?: HttpClientBodyOptions): Observable<TData>;
- communicationControllerTargets<TData = void>(params: CommunicationControllerTargetsParams, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
- communicationControllerTargets<TData = void>(params: CommunicationControllerTargetsParams, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
-  communicationControllerTargets<TData = void>(
-    params: CommunicationControllerTargetsParams, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
-    const filteredParams = filterParams({...params, ...options?.params}, new Set<string>([]));
-
-    if (options?.observe === 'events') {
-      return this.http.get<TData>(
-      `/api/v1/communication/channels/targets`,{
-    ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'events',
-        params: filteredParams,}
-    );
-    }
-
-    if (options?.observe === 'response') {
-      return this.http.get<TData>(
-      `/api/v1/communication/channels/targets`,{
-    ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'response',
-        params: filteredParams,}
-    );
-    }
-
-    return this.http.get<TData>(
-      `/api/v1/communication/channels/targets`,{
-    ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'body',
-        params: filteredParams,}
-    );
-  }
-
-/**
- * @summary A channel with its latest posts (FR-COM-003.7, .9)
- */
- communicationControllerGetChannel<TData = void>(id: string, options?: HttpClientBodyOptions): Observable<TData>;
- communicationControllerGetChannel<TData = void>(id: string, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
- communicationControllerGetChannel<TData = void>(id: string, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
-  communicationControllerGetChannel<TData = void>(
-    id: string, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
-    if (options?.observe === 'events') {
-      return this.http.get<TData>(
-      `/api/v1/communication/channels/${id}`,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'events',
-      }
-    );
-    }
-
-    if (options?.observe === 'response') {
-      return this.http.get<TData>(
-      `/api/v1/communication/channels/${id}`,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'response',
-      }
-    );
-    }
-
-    return this.http.get<TData>(
-      `/api/v1/communication/channels/${id}`,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'body',
-      }
-    );
-  }
-
-/**
- * @summary Edit a channel or archive it (FR-COM-003.5)
- */
- communicationControllerUpdateChannel<TData = void>(id: string,
-    updateChannelInput: UpdateChannelInput, options?: HttpClientBodyOptions): Observable<TData>;
- communicationControllerUpdateChannel<TData = void>(id: string,
-    updateChannelInput: UpdateChannelInput, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
- communicationControllerUpdateChannel<TData = void>(id: string,
-    updateChannelInput: UpdateChannelInput, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
-  communicationControllerUpdateChannel<TData = void>(
-    id: string,
-    updateChannelInput: UpdateChannelInput, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
-    if (options?.observe === 'events') {
-      return this.http.patch<TData>(
-      `/api/v1/communication/channels/${id}`,
-      updateChannelInput,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'events',
-      }
-    );
-    }
-
-    if (options?.observe === 'response') {
-      return this.http.patch<TData>(
-      `/api/v1/communication/channels/${id}`,
-      updateChannelInput,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'response',
-      }
-    );
-    }
-
-    return this.http.patch<TData>(
-      `/api/v1/communication/channels/${id}`,
-      updateChannelInput,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'body',
-      }
-    );
-  }
-
-/**
- * @summary Mark the channel's posts read (FR-COM-003.8)
- */
- communicationControllerMarkChannelRead<TData = void>(id: string, options?: HttpClientBodyOptions): Observable<TData>;
- communicationControllerMarkChannelRead<TData = void>(id: string, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
- communicationControllerMarkChannelRead<TData = void>(id: string, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
-  communicationControllerMarkChannelRead<TData = void>(
-    id: string, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
-    if (options?.observe === 'events') {
-      return this.http.post<TData>(
-      `/api/v1/communication/channels/${id}/read`,undefined,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'events',
-      }
-    );
-    }
-
-    if (options?.observe === 'response') {
-      return this.http.post<TData>(
-      `/api/v1/communication/channels/${id}/read`,undefined,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'response',
-      }
-    );
-    }
-
-    return this.http.post<TData>(
-      `/api/v1/communication/channels/${id}/read`,undefined,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'body',
-      }
-    );
-  }
-
-/**
- * @summary Publish a post (FR-COM-003.6)
- */
- communicationControllerCreatePost<TData = void>(id: string,
-    createChannelPostInput: CreateChannelPostInput, options?: HttpClientBodyOptions): Observable<TData>;
- communicationControllerCreatePost<TData = void>(id: string,
-    createChannelPostInput: CreateChannelPostInput, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
- communicationControllerCreatePost<TData = void>(id: string,
-    createChannelPostInput: CreateChannelPostInput, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
-  communicationControllerCreatePost<TData = void>(
-    id: string,
-    createChannelPostInput: CreateChannelPostInput, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
-    if (options?.observe === 'events') {
-      return this.http.post<TData>(
-      `/api/v1/communication/channels/${id}/posts`,
-      createChannelPostInput,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'events',
-      }
-    );
-    }
-
-    if (options?.observe === 'response') {
-      return this.http.post<TData>(
-      `/api/v1/communication/channels/${id}/posts`,
-      createChannelPostInput,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'response',
-      }
-    );
-    }
-
-    return this.http.post<TData>(
-      `/api/v1/communication/channels/${id}/posts`,
-      createChannelPostInput,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'body',
-      }
-    );
-  }
-
-/**
- * @summary Delete a post
- */
- communicationControllerDeletePost<TData = void>(id: string,
-    postId: string, options?: HttpClientBodyOptions): Observable<TData>;
- communicationControllerDeletePost<TData = void>(id: string,
-    postId: string, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
- communicationControllerDeletePost<TData = void>(id: string,
-    postId: string, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
-  communicationControllerDeletePost<TData = void>(
-    id: string,
-    postId: string, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
-    if (options?.observe === 'events') {
-      return this.http.delete<TData>(
-      `/api/v1/communication/channels/${id}/posts/${postId}`,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'events',
-      }
-    );
-    }
-
-    if (options?.observe === 'response') {
-      return this.http.delete<TData>(
-      `/api/v1/communication/channels/${id}/posts/${postId}`,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'response',
-      }
-    );
-    }
-
-    return this.http.delete<TData>(
-      `/api/v1/communication/channels/${id}/posts/${postId}`,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'body',
-      }
-    );
-  }
-
-/**
- * @summary Confirm reading a post (FR-COM-003.8)
- */
- communicationControllerConfirm<TData = void>(id: string,
-    postId: string, options?: HttpClientBodyOptions): Observable<TData>;
- communicationControllerConfirm<TData = void>(id: string,
-    postId: string, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
- communicationControllerConfirm<TData = void>(id: string,
-    postId: string, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
-  communicationControllerConfirm<TData = void>(
-    id: string,
-    postId: string, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
-    if (options?.observe === 'events') {
-      return this.http.post<TData>(
-      `/api/v1/communication/channels/${id}/posts/${postId}/confirm`,undefined,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'events',
-      }
-    );
-    }
-
-    if (options?.observe === 'response') {
-      return this.http.post<TData>(
-      `/api/v1/communication/channels/${id}/posts/${postId}/confirm`,undefined,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'response',
-      }
-    );
-    }
-
-    return this.http.post<TData>(
-      `/api/v1/communication/channels/${id}/posts/${postId}/confirm`,undefined,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'body',
-      }
-    );
-  }
-
-/**
- * @summary Who read and confirmed a post (FR-COM-003.9)
- */
- communicationControllerReceipts<TData = void>(id: string,
-    postId: string, options?: HttpClientBodyOptions): Observable<TData>;
- communicationControllerReceipts<TData = void>(id: string,
-    postId: string, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
- communicationControllerReceipts<TData = void>(id: string,
-    postId: string, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
-  communicationControllerReceipts<TData = void>(
-    id: string,
-    postId: string, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
-    if (options?.observe === 'events') {
-      return this.http.get<TData>(
-      `/api/v1/communication/channels/${id}/posts/${postId}/receipts`,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'events',
-      }
-    );
-    }
-
-    if (options?.observe === 'response') {
-      return this.http.get<TData>(
-      `/api/v1/communication/channels/${id}/posts/${postId}/receipts`,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'response',
-      }
-    );
-    }
-
-    return this.http.get<TData>(
-      `/api/v1/communication/channels/${id}/posts/${postId}/receipts`,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'body',
-      }
-    );
-  }
-
-/**
- * @summary Replies the caller may see (FR-COM-003.10)
- */
- communicationControllerReplies<TData = void>(id: string,
-    postId: string,
-    params?: CommunicationControllerRepliesParams, options?: HttpClientBodyOptions): Observable<TData>;
- communicationControllerReplies<TData = void>(id: string,
-    postId: string,
-    params?: CommunicationControllerRepliesParams, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
- communicationControllerReplies<TData = void>(id: string,
-    postId: string,
-    params?: CommunicationControllerRepliesParams, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
-  communicationControllerReplies<TData = void>(
-    id: string,
-    postId: string,
-    params?: CommunicationControllerRepliesParams, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
-    const filteredParams = filterParams({...params, ...options?.params}, new Set<string>([]));
-
-    if (options?.observe === 'events') {
-      return this.http.get<TData>(
-      `/api/v1/communication/channels/${id}/posts/${postId}/replies`,{
-    ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'events',
-        params: filteredParams,}
-    );
-    }
-
-    if (options?.observe === 'response') {
-      return this.http.get<TData>(
-      `/api/v1/communication/channels/${id}/posts/${postId}/replies`,{
-    ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'response',
-        params: filteredParams,}
-    );
-    }
-
-    return this.http.get<TData>(
-      `/api/v1/communication/channels/${id}/posts/${postId}/replies`,{
-    ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'body',
-        params: filteredParams,}
-    );
-  }
-
-/**
- * @summary Reply to a post (FR-COM-003.10)
- */
- communicationControllerReply<TData = void>(id: string,
-    postId: string,
-    createChannelReplyInput: CreateChannelReplyInput, options?: HttpClientBodyOptions): Observable<TData>;
- communicationControllerReply<TData = void>(id: string,
-    postId: string,
-    createChannelReplyInput: CreateChannelReplyInput, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
- communicationControllerReply<TData = void>(id: string,
-    postId: string,
-    createChannelReplyInput: CreateChannelReplyInput, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
-  communicationControllerReply<TData = void>(
-    id: string,
-    postId: string,
-    createChannelReplyInput: CreateChannelReplyInput, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
-    if (options?.observe === 'events') {
-      return this.http.post<TData>(
-      `/api/v1/communication/channels/${id}/posts/${postId}/replies`,
-      createChannelReplyInput,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'events',
-      }
-    );
-    }
-
-    if (options?.observe === 'response') {
-      return this.http.post<TData>(
-      `/api/v1/communication/channels/${id}/posts/${postId}/replies`,
-      createChannelReplyInput,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'response',
-      }
-    );
-    }
-
-    return this.http.post<TData>(
-      `/api/v1/communication/channels/${id}/posts/${postId}/replies`,
-      createChannelReplyInput,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'body',
-      }
-    );
-  }
-
-/**
- * @summary The caller's direct conversations (FR-COM-003.14)
- */
- communicationControllerListDirect<TData = void>( options?: HttpClientBodyOptions): Observable<TData>;
- communicationControllerListDirect<TData = void>( options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
- communicationControllerListDirect<TData = void>( options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
-  communicationControllerListDirect<TData = void>(
-     options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
-    if (options?.observe === 'events') {
-      return this.http.get<TData>(
-      `/api/v1/communication/direct`,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'events',
-      }
-    );
-    }
-
-    if (options?.observe === 'response') {
-      return this.http.get<TData>(
-      `/api/v1/communication/direct`,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'response',
-      }
-    );
-    }
-
-    return this.http.get<TData>(
-      `/api/v1/communication/direct`,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'body',
-      }
-    );
-  }
-
-/**
- * @summary Start or reopen a conversation with a parent (FR-COM-003.12)
- */
- communicationControllerStartDirect<TData = void>(startDirectInput: StartDirectInput, options?: HttpClientBodyOptions): Observable<TData>;
- communicationControllerStartDirect<TData = void>(startDirectInput: StartDirectInput, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
- communicationControllerStartDirect<TData = void>(startDirectInput: StartDirectInput, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
-  communicationControllerStartDirect<TData = void>(
-    startDirectInput: StartDirectInput, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
-    if (options?.observe === 'events') {
-      return this.http.post<TData>(
-      `/api/v1/communication/direct`,
-      startDirectInput,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'events',
-      }
-    );
-    }
-
-    if (options?.observe === 'response') {
-      return this.http.post<TData>(
-      `/api/v1/communication/direct`,
-      startDirectInput,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'response',
-      }
-    );
-    }
-
-    return this.http.post<TData>(
-      `/api/v1/communication/direct`,
-      startDirectInput,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'body',
-      }
-    );
-  }
-
-/**
- * @summary Parents the caller may message, by student (BR-COM-003.8)
- */
- communicationControllerRecipients<TData = void>(params?: CommunicationControllerRecipientsParams, options?: HttpClientBodyOptions): Observable<TData>;
- communicationControllerRecipients<TData = void>(params?: CommunicationControllerRecipientsParams, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
- communicationControllerRecipients<TData = void>(params?: CommunicationControllerRecipientsParams, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
-  communicationControllerRecipients<TData = void>(
-    params?: CommunicationControllerRecipientsParams, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
-    const filteredParams = filterParams({...params, ...options?.params}, new Set<string>([]));
-
-    if (options?.observe === 'events') {
-      return this.http.get<TData>(
-      `/api/v1/communication/direct/recipients`,{
-    ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'events',
-        params: filteredParams,}
-    );
-    }
-
-    if (options?.observe === 'response') {
-      return this.http.get<TData>(
-      `/api/v1/communication/direct/recipients`,{
-    ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'response',
-        params: filteredParams,}
-    );
-    }
-
-    return this.http.get<TData>(
-      `/api/v1/communication/direct/recipients`,{
-    ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'body',
-        params: filteredParams,}
-    );
-  }
-
-/**
- * @summary A conversation with its messages; marks it read (FR-COM-003.13)
- */
- communicationControllerGetDirect<TData = void>(id: string, options?: HttpClientBodyOptions): Observable<TData>;
- communicationControllerGetDirect<TData = void>(id: string, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
- communicationControllerGetDirect<TData = void>(id: string, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
-  communicationControllerGetDirect<TData = void>(
-    id: string, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
-    if (options?.observe === 'events') {
-      return this.http.get<TData>(
-      `/api/v1/communication/direct/${id}`,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'events',
-      }
-    );
-    }
-
-    if (options?.observe === 'response') {
-      return this.http.get<TData>(
-      `/api/v1/communication/direct/${id}`,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'response',
-      }
-    );
-    }
-
-    return this.http.get<TData>(
-      `/api/v1/communication/direct/${id}`,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'body',
-      }
-    );
-  }
-
-/**
- * @summary Send a direct message (FR-COM-003.13)
- */
- communicationControllerSendDirect<TData = void>(id: string,
-    sendDirectMessageInput: SendDirectMessageInput, options?: HttpClientBodyOptions): Observable<TData>;
- communicationControllerSendDirect<TData = void>(id: string,
-    sendDirectMessageInput: SendDirectMessageInput, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
- communicationControllerSendDirect<TData = void>(id: string,
-    sendDirectMessageInput: SendDirectMessageInput, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
-  communicationControllerSendDirect<TData = void>(
-    id: string,
-    sendDirectMessageInput: SendDirectMessageInput, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
-    if (options?.observe === 'events') {
-      return this.http.post<TData>(
-      `/api/v1/communication/direct/${id}/messages`,
-      sendDirectMessageInput,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'events',
-      }
-    );
-    }
-
-    if (options?.observe === 'response') {
-      return this.http.post<TData>(
-      `/api/v1/communication/direct/${id}/messages`,
-      sendDirectMessageInput,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'response',
-      }
-    );
-    }
-
-    return this.http.post<TData>(
-      `/api/v1/communication/direct/${id}/messages`,
-      sendDirectMessageInput,{
         ...(options as Omit<NonNullable<typeof options>, 'observe'>),
         observe: 'body',
       }

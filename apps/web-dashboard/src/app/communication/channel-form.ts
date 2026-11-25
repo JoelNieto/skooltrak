@@ -1,5 +1,5 @@
 import { Button, Card, CardBody, PageHeader, Toast, UiCheckbox, UiChoice, UiField, UiInput, UiRadio, UiSelect } from '#/ui';
-import { CHANNEL_SCOPE_LABELS, CHANNEL_SCOPES, ChannelReplyVisibilityKey, ChannelScopeKey, ChannelTarget } from '@/shared';
+import { CHANNEL_SCOPE_LABELS, ChannelReplyVisibilityKey, ChannelScopeKey, ChannelTarget, CREATABLE_CHANNEL_SCOPES } from '@/shared';
 import { HttpErrorResponse } from '@angular/common/http';
 import { ChangeDetectionStrategy, Component, computed, effect, inject, input, resource, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -119,7 +119,8 @@ export default class ChannelForm {
 
   readonly scopeLabels = CHANNEL_SCOPE_LABELS;
   readonly scopes = computed<ChannelScopeKey[]>(() =>
-    this.#auth.isTeacher() ? TEACHER_SCOPES : [...CHANNEL_SCOPES],
+    // COM-003 BR .10: ASSIGNMENT channels come only with their assignment.
+    this.#auth.isTeacher() ? TEACHER_SCOPES : [...CREATABLE_CHANNEL_SCOPES],
   );
 
   readonly scope = signal<ChannelScopeKey>('COURSE');
@@ -154,7 +155,7 @@ export default class ChannelForm {
   constructor() {
     const query = this.#route.snapshot.queryParamMap;
     const presetScope = query.get('scope') as ChannelScopeKey | null;
-    if (presetScope && (CHANNEL_SCOPES as readonly string[]).includes(presetScope)) this.scope.set(presetScope);
+    if (presetScope && (CREATABLE_CHANNEL_SCOPES as readonly string[]).includes(presetScope)) this.scope.set(presetScope);
     if (query.get('targetId')) this.targetId.set(query.get('targetId') ?? '');
 
     // A teacher only has course and group levels.

@@ -7,6 +7,8 @@ import { data, E2E_PASSWORD, personas, storageStatePath } from '../support/fixtu
  * ACA-001-S17: "Preguntar en el curso" opens the course conversation (FR-ACA-001.25).
  * ACA-001-S18: the chosen channel opens inside the Canales tab (FR-ACA-001.26).
  * ACA-001-S19: the course's teacher manages its channels in the same tab (FR-ACA-001.27).
+ * ACA-001-S20: "por responder" for the teacher, per channel and on the tab (FR-ACA-001.28).
+ * ACA-001-S21: assignment Q&A channels grouped in the tab, with their assignment card (FR-ACA-001.29).
  * docs/product/slices/ACA-001-S15-course-channels.md, ACA-001-S16-mis-cursos-channels.md
  *
  * Channels are created here through the COM-003 API, as `channels.spec.ts` does. This file is an
@@ -63,7 +65,12 @@ async function expectedUnread(request: APIRequestContext, persona: 'student' | '
     await request.get(`${API}/channels`, { headers: await bearer(request, persona) })
   ).json()) as Summary[];
   return list
-    .filter((c) => c.scope === 'COURSE' && (anyCourse || c.courseId === courseId) && !c.archived)
+    .filter((c) =>
+      // Mis cursos (S16) counts COURSE channels of every course; the Canales tab also counts its
+      // assignments' Q&A channels (FR-ACA-001.29).
+      anyCourse ? c.scope === 'COURSE' : (c.scope === 'COURSE' || c.scope === 'ASSIGNMENT') && c.courseId === courseId,
+    )
+    .filter((c) => !c.archived)
     .reduce((sum, c) => sum + c.unread, 0);
 }
 
@@ -143,6 +150,8 @@ test.describe('as a student @FR-ACA-001.21 @FR-ACA-001.22', () => {
   test('Resumen shows a Canales card, latest post first, and "Ver todos" opens the tab', async ({ page }) => {
     await page.goto(`/courses/${courseId}`);
     const card = page.getByRole('region', { name: 'Canales' });
+    // allTextContents doesn't wait: let the card's rows load first.
+    await expect(card.getByRole('button', { name: new RegExp(GENERAL) })).toBeVisible();
     const names = await card.getByRole('list').getByRole('button').allTextContents();
     const general = names.findIndex((t) => t.includes(GENERAL));
     const announcements = names.findIndex((t) => t.includes(ANNOUNCEMENTS));
@@ -163,7 +172,8 @@ test.describe('as a student @FR-ACA-001.21 @FR-ACA-001.22', () => {
       .click();
     // S18: it opens beside the list, and the course page stays.
     await expect(page).toHaveURL(new RegExp(`/courses/${courseId}\\?canal=${ids[GENERAL]}`));
-    await expect(page.getByText(GENERAL_POSTS[1])).toBeVisible();
+    // The post itself (its text is also the row's preview in the list).
+    await expect(page.getByRole('article').filter({ hasText: GENERAL_POSTS[1] })).toBeVisible();
 
     await expect.poll(() => expectedUnread(request, 'student')).toBe(before - 2);
     await page.goto(`/courses/${courseId}`);
@@ -416,6 +426,45 @@ test.describe('the course teacher @FR-ACA-001.27 @BR-ACA-001.19', () => {
     await expect(post).toContainText(data.relatedStudents[0]);
   });
 
+  test('shows "por responder" on the tab and the rows, and clears it on answering @FR-ACA-001.28', async ({
+    page,
+    request,
+  }) => {
+    const waiting = async () => {
+      const list = (await (
+        await request.get(`${API}/channels`, { headers: await bearer(request, 'teacher') })
+      ).json()) as (Summary & {
+        toAnswer: number;
+      })[];
+      const course = list.filter((c) => c.scope === 'COURSE' && c.courseId === courseId && !c.archived);
+      return {
+        total: course.reduce((n, c) => n + c.toAnswer, 0),
+        questions: course.find((c) => c.id === ids[QUESTIONS])?.toAnswer,
+      };
+    };
+    const before = await waiting();
+    // Ana's question in the previous test has no answer yet.
+    expect(before.questions).toBe(1);
+
+    await page.goto(`/courses/${courseId}`);
+    await expect(channelsTab(page)).toContainText(`${before.total} por responder`);
+    await channelsTab(page).click();
+    const row = channelsList(page).getByRole('button', { name: new RegExp(QUESTIONS) });
+    await expect(row).toContainText('1 por responder');
+
+    await row.click();
+    const post = page.getByRole('article').first();
+    await post.getByRole('button', { name: /Respuestas/ }).click();
+    await post.getByRole('textbox', { name: /^Responder a / }).fill('Sí, es fracción mixta. (S20)');
+    await post.getByRole('button', { name: 'Enviar' }).click();
+
+    // The tab refreshes its counts after the reply (BR-COM-003.12: a manager's reply answers it).
+    await expect(row).not.toContainText('por responder');
+    const after = before.total - 1;
+    await expect(channelsTab(page)).toContainText(after ? `${after} por responder` : 'Canales');
+    expect((await waiting()).questions).toBe(0);
+  });
+
   test('"Nuevo canal para este curso" and "Configurar" open the COM-003 forms', async ({ page }) => {
     await page.goto(`/courses/${courseId}`);
     await channelsTab(page).click();
@@ -537,6 +586,86 @@ test.describe('"Preguntar en el curso" @FR-ACA-001.25', () => {
         .click();
       await expect(page.getByRole('tab', { name: 'Resumen' })).toBeVisible();
       await expect(ask(page)).toHaveCount(0);
+    });
+  });
+});
+
+test.describe('assignment Q&A channels @FR-ACA-001.29', () => {
+  const TITLE = 'Guía S21 E2E';
+  let assignmentId: string;
+
+  test.beforeAll(async ({ request }) => {
+    const teacher = await bearer(request, 'teacher');
+    const groupId = await targetId(request, teacher, 'CLASS_GROUP', data.classGroups.related);
+    const courses = (await (
+      await request.get('/api/v1/courses', {
+        headers: teacher,
+        params: { search: data.courses.teacherOwn.name, pageSize: 10 },
+      })
+    ).json()) as { data: { id: string; teacherId?: string | null }[] };
+    const res = await request.post('/api/v1/assignments', {
+      headers: teacher,
+      data: {
+        title: TITLE,
+        details: '',
+        type: 'HOMEWORK',
+        date: new Date().toISOString(),
+        courseId,
+        schoolId: 'ignored',
+        requireSubmission: false,
+        teacherId: courses.data.find((c) => c.id === courseId)?.teacherId ?? undefined,
+        groupDates: [{ date: new Date(Date.now() + 2 * 86_400_000).toISOString(), classGroupId: groupId }],
+      },
+    });
+    expect(res.ok(), await res.text()).toBeTruthy();
+    assignmentId = ((await res.json()) as { id: string }).id;
+  });
+
+  test.describe('as a student', () => {
+    test.use({ storageState: storageStatePath('student') });
+
+    test('groups it under "Preguntas por asignación" and opens it with its assignment', async ({ page }) => {
+      await page.goto(`/courses/${courseId}`);
+      await channelsTab(page).click();
+      const group = page.getByRole('list', { name: 'Preguntas por asignación' });
+      const row = group.getByRole('button', { name: new RegExp(TITLE) });
+      await expect(row).toContainText(/Cierra el \d{2}\/\d{2}\/\d{4}/);
+      // Not among the course channels.
+      await expect(channelsList(page).getByRole('button', { name: new RegExp(TITLE) })).toHaveCount(0);
+
+      await row.click();
+      // The card, above the posts (the row's name is the same title, so scope to the card).
+      const card = page.locator('div', { has: page.getByRole('link', { name: 'Ver asignación' }) }).last();
+      await expect(card).toContainText(TITLE);
+      await expect(page.getByText(/Tarea · Entrega: \d{2}\/\d{2}\/\d{4}/)).toBeVisible();
+      await expect(page.getByRole('link', { name: 'Ver asignación' })).toHaveAttribute(
+        'href',
+        `/assignments/${assignmentId}`,
+      );
+      await expect(page.getByRole('article').first()).toContainText('Fijado');
+    });
+
+    test('"Preguntar en el curso" still goes to a course channel', async ({ page }) => {
+      await page.goto(`/courses/${courseId}`);
+      await page.getByRole('button', { name: 'Preguntar en el curso' }).click();
+      await expect(
+        page.getByRole('list', { name: 'Canales del curso' }).getByRole('button', { pressed: true }),
+      ).toHaveCount(1);
+    });
+  });
+
+  test.describe('as the teacher', () => {
+    test.use({ storageState: storageStatePath('teacher') });
+
+    test('sees the same group and card', async ({ page }) => {
+      await page.goto(`/courses/${courseId}`);
+      await channelsTab(page).click();
+      await page
+        .getByRole('list', { name: 'Preguntas por asignación' })
+        .getByRole('button', { name: new RegExp(TITLE) })
+        .click();
+      await expect(page.getByRole('link', { name: 'Ver asignación' })).toBeVisible();
+      await expect(page.getByText(/Tarea · Entrega/)).toBeVisible();
     });
   });
 });

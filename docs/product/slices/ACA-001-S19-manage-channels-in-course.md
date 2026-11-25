@@ -4,7 +4,7 @@
 |---|---|
 | **FRD** | [ACA-001](../frd/ACA-001-course-experience.md) |
 | **Implements** | FR-ACA-001.27; BR-ACA-001.19, BR-ACA-001.20 |
-| **Status** | In review |
+| **Status** | Done (#88) |
 | **Branch** | `feat/ACA-001-S19-manage-channels-in-course` (built on S18) |
 | **Estimate** | 1.5 days |
 | **Design** | Canvas "Skooltrak — Courses redesign (desktop)", board *Course channels — teacher* |

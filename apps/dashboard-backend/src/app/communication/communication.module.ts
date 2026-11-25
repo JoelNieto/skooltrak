@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { PrismaModule } from '../prisma.module';
+import { AssignmentChannelsService } from './assignment-channels.service';
 import { ChannelsService } from './channels.service';
 import { CommunicationController } from './communication.controller';
 import { DirectService } from './direct.service';
@@ -8,7 +9,7 @@ import { DirectService } from './direct.service';
 @Module({
   controllers: [CommunicationController],
   imports: [PrismaModule],
-  providers: [ChannelsService, DirectService],
-  exports: [ChannelsService, DirectService],
+  providers: [ChannelsService, DirectService, AssignmentChannelsService],
+  exports: [ChannelsService, DirectService, AssignmentChannelsService],
 })
 export class CommunicationModule {}

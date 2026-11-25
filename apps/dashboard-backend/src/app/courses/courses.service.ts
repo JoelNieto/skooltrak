@@ -160,43 +160,6 @@ export class CoursesService {
     return created && { ...created, studyPlan: withEffectiveMetric(created.studyPlan) };
   }
 
-  async replicate(targetStudyPlanId: string, sourceStudyPlanId: string) {
-    const [courses, targetStudyPlan] = await Promise.all([
-      this.prisma.course.findMany({
-        where: { studyPlanId: sourceStudyPlanId },
-        include: { subject: true },
-      }),
-      this.prisma.studyPlan.findUnique({
-        where: { id: targetStudyPlanId },
-      }),
-    ]);
-
-    if (!targetStudyPlan) {
-      throw new ConflictException('Target study plan not found');
-    }
-
-    const createdCourses = [];
-    for (const course of courses) {
-      const code = await this.generateUniqueCode(course.schoolId, course.subject.name);
-
-      const newCourse = await this.prisma.course.create({
-        data: {
-          name: `${course.subject.name} - ${targetStudyPlan.name}`,
-          code,
-          shortName: `${course.subject.code} - ${targetStudyPlan.shortName}`,
-          organizationId: course.organizationId,
-          schoolId: course.schoolId,
-          subjectId: course.subjectId,
-          studyPlanId: targetStudyPlanId,
-        },
-      });
-      await enrollPlanStudents(this.prisma, newCourse);
-      createdCourses.push(newCourse);
-    }
-
-    return { count: createdCourses.length };
-  }
-
   async findAll(fetchDataInput: FetchDataQueryDto) {
     const organizationId = this.organizationId();
     await this.assertSchoolInOrganization(fetchDataInput.schoolId, organizationId);

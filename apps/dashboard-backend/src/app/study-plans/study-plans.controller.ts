@@ -18,6 +18,7 @@ import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { assertSchoolInOrganization } from '../org-scope';
 import { PrismaService } from '../prisma.service';
 import { BulkCreateStudyPlansInput } from './dto/bulk-create-study-plans.input';
+import { CopyCoursesInput } from './dto/copy-courses.input';
 import { CreateStudyPlanInput } from './dto/create-study-plan.input';
 import { DuplicateStudyPlanInput } from './dto/duplicate-study-plan.input';
 import { UpdateStudyPlanInput } from './dto/update-study-plan.input';
@@ -69,6 +70,15 @@ export class StudyPlansController {
     await assertSchoolInOrganization(this.prisma, req.user, plan.schoolId);
     if (input.degreeId) await this.assertDegreeInSchool(input.degreeId, plan.schoolId);
     return this.studyPlansService.duplicate(plan.id, input);
+  }
+
+  @Post(':id/copy-courses')
+  @RequirePermissions(Perm.MANAGE_COURSES)
+  @ApiOperation({ summary: 'Copy courses from another study plan of the same school' })
+  async copyCourses(@Req() req: AuthenticatedRequest, @Param('id') id: string, @Body() input: CopyCoursesInput) {
+    const plan = await this.ref(id);
+    await assertSchoolInOrganization(this.prisma, req.user, plan.schoolId);
+    return this.studyPlansService.copyCourses(plan.id, input);
   }
 
   @Get()

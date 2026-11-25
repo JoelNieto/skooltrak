@@ -28,6 +28,8 @@ import { filter, switchMap } from 'rxjs';
 import { toFetchQueryRecord } from '../../core/fetch-query-params';
 import { PaginatedResponse } from '../../core/pagination-meta';
 import Store from '../../core/store';
+import Auth from '../../auth/auth';
+import StudyPlanCopyCoursesForm from '../forms/study-plan-copy-courses-form';
 import StudyPlanDuplicateForm from '../forms/study-plan-duplicate-form';
 import StudyPlansBulkForm from '../forms/study-plans-bulk-form';
 import StudyPlanForm, { StudyPlanFormRow } from '../forms/study-plans-forms';
@@ -278,12 +280,25 @@ export default class StudyPlans {
       });
   }
 
-  /** The actions in each row's menu (ui-row-actions). */
+  /** The actions in each row's menu (ui-row-actions). Copying courses needs MANAGE_COURSES. */
   protected readonly rowActions: UiRowAction[] = [
     { id: 'edit', label: 'Editar', icon: 'pencil' },
     { id: 'duplicate', label: 'Duplicar', icon: 'copy' },
+    {
+      id: 'copy-courses',
+      label: 'Copiar materias',
+      icon: 'book-open',
+      hidden: !inject(Auth).hasPermission('MANAGE_COURSES'),
+    },
     { id: 'delete', label: 'Eliminar', icon: 'trash-2', tone: 'danger' },
   ];
+
+  /** Courses of another plan, copied into this one. */
+  public copyCourses(studyPlan: StudyPlanRow) {
+    this.modal
+      .open(StudyPlanCopyCoursesForm, { title: 'Copiar materias', data: { studyPlan } })
+      .closed.subscribe(() => this.studyPlans.reload());
+  }
 
   protected onRowAction(action: string, studyPlan: StudyPlanRow): void {
     switch (action) {
@@ -292,6 +307,9 @@ export default class StudyPlans {
         break;
       case 'duplicate':
         this.duplicateStudyPlan(studyPlan);
+        break;
+      case 'copy-courses':
+        this.copyCourses(studyPlan);
         break;
       case 'delete':
         this.deleteStudyPlan(studyPlan);

@@ -10,7 +10,9 @@ describe('assertCanWriteSettings', () => {
   });
 
   it('lets admins and finance managers write financial fields', () => {
-    expect(() => assertCanWriteSettings({ userId: 'u', role: 'ADMIN' } as never, { monthlyTuitionAmount: 1 })).not.toThrow();
+    expect(() =>
+      assertCanWriteSettings({ userId: 'u', role: 'ADMIN' } as never, { monthlyTuitionAmount: 1 }),
+    ).not.toThrow();
     expect(() =>
       assertCanWriteSettings(staff([Perm.VIEW_FINANCIALS, Perm.MANAGE_FINANCIALS]), { enrollmentCosts: [] }),
     ).not.toThrow();

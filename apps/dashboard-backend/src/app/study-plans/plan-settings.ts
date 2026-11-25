@@ -26,10 +26,13 @@ export const PLAN_METRIC_INCLUDE = {
   degree: { include: { gradeMetric: true } },
 } as const;
 
-type MetricSource<M> = {
-  gradeMetric?: M | null;
-  degree?: { gradeMetric?: M | null } | null;
-} | null | undefined;
+type MetricSource<M> =
+  | {
+      gradeMetric?: M | null;
+      degree?: { gradeMetric?: M | null } | null;
+    }
+  | null
+  | undefined;
 
 /** The plan's grade metric, else its degree's (null when neither has one). */
 export function effectiveGradeMetric<M>(plan: MetricSource<M>): M | null {

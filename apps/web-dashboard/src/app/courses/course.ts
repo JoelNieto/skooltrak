@@ -632,7 +632,9 @@ export default class Course {
   );
   protected readonly channels = computed(() => {
     const viewer = this.channelsViewer();
-    return viewer ? courseChannels(this.channelsRes.value() ?? [], this.id(), viewer) : [];
+    // value() throws while the resource is in error (BR-ACA-001.17's inline error must still render).
+    const list = this.channelsRes.hasValue() ? this.channelsRes.value() : [];
+    return viewer ? courseChannels(list, this.id(), viewer) : [];
   });
   /** FR-ACA-001.25: students only; hidden without an open course conversation. */
   protected readonly ask = computed(() => (this.viewerKind() === 'STUDENT' ? askChannel(this.channels()) : null));
@@ -658,7 +660,7 @@ export default class Course {
       : undefined;
   });
   protected readonly shownAssignment = computed(() =>
-    this.shownChannel()?.scope === 'ASSIGNMENT' ? (this.assignmentRes.value() ?? null) : null,
+    this.shownChannel()?.scope === 'ASSIGNMENT' && this.assignmentRes.hasValue() ? this.assignmentRes.value() : null,
   );
   protected readonly dueText = assignmentDueText;
   protected workType(type: string) {

@@ -410,7 +410,10 @@ export default class MyCoursesPage {
   protected readonly channelsRes = httpResource<ChannelSummary[]>(() =>
     this.showChannels() ? '/api/v1/communication/channels' : undefined,
   );
-  protected readonly unread = computed(() => unreadByCourse(this.channelsRes.value() ?? []));
+  // value() throws while the resource is in error; the cards must still render (BR-ACA-001.17).
+  protected readonly unread = computed(() =>
+    unreadByCourse(this.channelsRes.hasValue() ? this.channelsRes.value() : []),
+  );
   protected readonly newCount = newCount;
 
   /** FR-ACA-001.24: unread posts across this page's courses, "en {k} curso(s)" or "Nada nuevo". */

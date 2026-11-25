@@ -30,6 +30,7 @@ export * from './communicationControllerRecipientsParams';
 export * from './communicationControllerRepliesParams';
 export * from './communicationControllerTargetsParams';
 export * from './communicationControllerTargetsScope';
+export * from './copyCoursesInput';
 export * from './courseAppearanceInput';
 export * from './coursesControllerCountOrderDirection';
 export * from './coursesControllerCountParams';

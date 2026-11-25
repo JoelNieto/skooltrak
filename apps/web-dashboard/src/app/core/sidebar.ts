@@ -219,6 +219,19 @@ type SidebarSchool = {
             </a>
           </li>
         }
+        @if (auth.isAdmin()) {
+          <!-- COM-003 FR .20 -->
+          <li>
+            <a
+              routerLink="communication/direct-reports"
+              routerLinkActive="bg-action-subtle text-primary font-semibold"
+              class="flex items-center gap-3 px-3 py-2 text-ink rounded-lg transition-all duration-150 hover:bg-surface-2 hover:text-ink-strong group"
+            >
+              <ui-icon name="flag" class="text-xl" />
+              <span>Conversaciones reportadas</span>
+            </a>
+          </li>
+        }
       </ul>
 
       <!-- Student Section -->

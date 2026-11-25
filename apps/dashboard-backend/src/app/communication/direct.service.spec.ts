@@ -67,6 +67,8 @@ function setup(opts: { existing?: boolean } = {}) {
       findMany: jest.fn(async () => []),
     },
     directMessage: { findMany: jest.fn(async () => []), count: jest.fn(async () => 0), create: jest.fn() },
+    // COM-003-S04: get() tells whether the conversation has an open report.
+    directConversationReport: { count: jest.fn(async () => 0) },
     $transaction: jest.fn(async (ops: unknown[]) => [{ id: 'M1', createdAt: new Date() }, ops[1]]),
   };
   return { service: new DirectService(prisma as never), prisma, created };

@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | In build (S01–S03 shipped; S04, S05 proposed) |
+| **Status** | In build (S01–S03 shipped; S04 in review; S05 proposed) |
 | **Context** | COM — Communication (see [capabilities](../capabilities.md#com-communication)) |
 | **Owner** | — |
 | **Last updated** | 2026-11-25 |
@@ -86,7 +86,7 @@ Everything else is removed.
 
   Any manager's reply answers it, not only the post's author.
 - **BR-COM-003.13**: **Backfill** *(decided 2026-11-25)*. When S02 ships, every existing assignment whose latest date + 3 days is still ahead gets its Q&A channel and pinned post, as if just created. Older assignments get none.
-- **BR-COM-003.14**: **Reported conversations.** Only the two participants may report a conversation (`403` otherwise). Admins of the conversation's organization may read it only while it has a report (`404` otherwise, so BR .9 still holds for every other conversation), and only read: sending is refused (`403`). Each admin read records who, when and which conversation; the log is kept even after the report is resolved. Message bodies stay out of the application logs (§8).
+- **BR-COM-003.14**: **Reported conversations.** Only the two participants may report a conversation; anyone else gets `404`, so its existence isn't revealed (BR .9). Only the organization's admins see the reports (`403` otherwise). Admins of the conversation's organization may read it only while it has a report (`404` otherwise, so BR .9 still holds for every other conversation), and only read: sending is refused (`403`). Each admin read records who, when and which conversation; the log is kept even after the report is resolved. Message bodies stay out of the application logs (§8).
 - **BR-COM-003.15**: **Confirmation reminders.** A job runs hourly and emails each audience member (BR .4) who has an email address, hasn't confirmed, and hasn't been reminded about that post, for posts that asked for confirmation more than 24 hours ago, in channels that aren't archived or closed (BR .11). At most one reminder per member per post. If sending fails, the job tries again next hour; it never sends twice once a send succeeds.
 
 ## 5. Data
@@ -157,5 +157,5 @@ Removed endpoints: `/v1/messages/*`, `/v1/chats/*`, `/v1/newsletters/*`, and eve
 | COM-003-S01 | Replace every legacy channel with Channels + Direct (schema, API, UI, homes) | .1–.16 | Done (#84; its e2e first ran green with #89) |
 | [COM-003-S02](../slices/COM-003-S02-assignment-channels.md) | Assignment Q&A channels: created with the assignment, pinned post, closing, backfill | .17 .18, BR .10 .11 .13 | Done (#89) |
 | [COM-003-S03](../slices/COM-003-S03-to-answer.md) | *Por responder* for managers | .19, BR .12 | Done (#89) |
-| COM-003-S04 | Report a direct conversation; admins read reported ones read-only, logged | .20, BR .14 | Proposed |
+| [COM-003-S04](../slices/COM-003-S04-report-direct.md) | Report a direct conversation; admins read reported ones read-only, logged | .20, BR .14 | In review |
 | COM-003-S05 | Email reminder for unconfirmed posts after 24 h (adds the email sender) | .21, BR .15 | Proposed |

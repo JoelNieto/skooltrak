@@ -164,6 +164,34 @@ export interface DirectConversationDetail extends DirectConversationSummary {
   /** Staff side or parent side. */
   side: 'STAFF' | 'PARENT';
   messages: DirectMessage[];
+  /** FR-COM-003.20: the conversation has an open report, so its organization's admins may read it. */
+  reported: boolean;
+}
+
+/** FR-COM-003.20: a report on a direct conversation, as admins see it. */
+export interface DirectReport {
+  id: string;
+  conversationId: string;
+  staff: CommPerson;
+  parent: CommPerson;
+  student: { id: string; name: string } | null;
+  reportedBy: CommPerson;
+  reason: string;
+  createdAt: string;
+  resolvedAt: string | null;
+  resolvedBy: CommPerson | null;
+  resolution: string | null;
+}
+
+/** FR-COM-003.20, BR .14: a reported conversation, read-only for admins, with its reports and access log. */
+export interface DirectReview {
+  conversationId: string;
+  staff: CommPerson;
+  parent: CommPerson;
+  student: { id: string; name: string } | null;
+  messages: { id: string; body: string; sender: CommPerson | null; createdAt: string }[];
+  reports: DirectReport[];
+  accesses: { admin: CommPerson; accessedAt: string }[];
 }
 
 export interface DirectRecipient {

@@ -3,6 +3,8 @@ import {
   DirectConversationDetail,
   DirectConversationSummary,
   DirectRecipient,
+  DirectReport,
+  DirectReview,
   personName,
   preview,
 } from '@/shared';
@@ -10,17 +12,21 @@ import { Prisma } from '@generated/prisma';
 import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma.service';
 import {
+  isAdminRole,
   NO_STUDENTS_DIRECT,
   reachableStudentWhere,
   requireStaff,
   requireUser,
   roleOf,
 } from './communication-access';
-import { SendDirectMessageInput, StartDirectInput } from './dto/communication.input';
+import { ReportDirectInput, ResolveDirectReportInput, SendDirectMessageInput, StartDirectInput } from './dto/communication.input';
 
 export const CONVERSATION_NOT_FOUND = 'Conversación no encontrada';
 export const PARENT_NOT_REACHABLE = 'Solo puedes escribir a acudientes de tus estudiantes';
 export const PARENT_NOT_LINKED = 'El acudiente no está vinculado a ese estudiante';
+export const ADMINS_ONLY = 'Solo los administradores revisan conversaciones reportadas';
+export const REPORT_NOT_FOUND = 'Reporte no encontrado';
+export const ALREADY_RESOLVED = 'Este reporte ya fue resuelto';
 
 const PERSON = { select: { id: true, name: true, firstName: true, lastName: true } } as const;
 const MAX_CONVERSATIONS = 100;
@@ -35,6 +41,22 @@ const CONVERSATION_INCLUDE = {
 } satisfies Prisma.DirectConversationInclude;
 
 type ConversationRow = Prisma.DirectConversationGetPayload<{ include: typeof CONVERSATION_INCLUDE }>;
+
+const STUDENT_NAME = { select: { id: true, firstName: true, fatherName: true } } as const;
+const PARTIES = { staffUser: PERSON, parentUser: PERSON, student: STUDENT_NAME } as const;
+const REPORT_INCLUDE = {
+  reportedBy: PERSON,
+  resolvedBy: PERSON,
+  conversation: { select: { id: true, ...PARTIES } },
+} satisfies Prisma.DirectConversationReportInclude;
+type ReportRow = Prisma.DirectConversationReportGetPayload<{ include: typeof REPORT_INCLUDE }>;
+const MAX_REPORTS = 200;
+const MAX_ACCESSES = 50;
+
+const who = (u: { id: string; name: string | null; firstName: string; lastName: string } | null) =>
+  u ? { id: u.id, name: personName(u) } : null;
+const studentOf = (s: { id: string; firstName: string; fatherName: string } | null) =>
+  s ? { id: s.id, name: `${s.firstName} ${s.fatherName}`.trim() } : null;
 
 /**
  * COM-003 direct messages: one-to-one between staff and a parent. Staff start them, parents reply,
@@ -159,9 +181,11 @@ export class DirectService {
       take: MAX_MESSAGES,
       include: { sender: PERSON },
     });
+    const openReports = await this.prisma.directConversationReport.count({ where: { conversationId, resolvedAt: null } });
     return {
       ...this.summary(conversation, me.userId, 0),
       side,
+      reported: openReports > 0,
       messages: messages.reverse().map((m) => ({
         id: m.id,
         body: m.body,
@@ -197,7 +221,123 @@ export class DirectService {
     return { id: message.id, createdAt: message.createdAt.toISOString() };
   }
 
+  // ── Reports (COM-003-S04) ───────────────────────────────────────────────
+
+  /** FR .20, BR .14: either participant reports the conversation. Anyone else gets 404 (BR .9). */
+  async report(user: AuthUserContext | undefined, conversationId: string, input: ReportDirectInput): Promise<DirectReport> {
+    const me = this.requireDirectUser(user);
+    await this.participantConversation(me.userId, conversationId);
+    const reason = input.reason.trim();
+    if (!reason) throw new BadRequestException('Indica el motivo del reporte');
+    const row = await this.prisma.directConversationReport.create({
+      data: { conversationId, reportedById: me.userId, reason },
+      include: REPORT_INCLUDE,
+    });
+    // §8: ids only, never the reason or the messages.
+    console.log(`[Direct] conversation ${conversationId} reported by user ${me.userId} (report ${row.id})`);
+    return this.toReport(row);
+  }
+
+  /** FR .20: the organization's reports, open ones first, for its admins. */
+  async reports(user: AuthUserContext | undefined): Promise<DirectReport[]> {
+    const admin = this.requireAdmin(user);
+    const rows = await this.prisma.directConversationReport.findMany({
+      where: { conversation: { organizationId: admin.organizationId } },
+      orderBy: [{ resolvedAt: { sort: 'asc', nulls: 'first' } }, { createdAt: 'desc' }],
+      take: MAX_REPORTS,
+      include: REPORT_INCLUDE,
+    });
+    return rows.map((r) => this.toReport(r));
+  }
+
+  /**
+   * FR .20, BR .14: a reported conversation, read-only, for its organization's admins. Only while it
+   * has an open report (404 otherwise, so BR .9 holds for every other conversation). Every opening is
+   * logged; nothing is marked read for the participants.
+   */
+  async review(user: AuthUserContext | undefined, conversationId: string): Promise<DirectReview> {
+    const admin = this.requireAdmin(user);
+    const conversation = await this.prisma.directConversation.findFirst({
+      where: { id: conversationId, organizationId: admin.organizationId, reports: { some: { resolvedAt: null } } },
+      include: PARTIES,
+    });
+    if (!conversation) throw new NotFoundException(CONVERSATION_NOT_FOUND);
+    await this.prisma.directConversationAccess.create({ data: { conversationId, adminUserId: admin.userId } });
+    console.log(`[Direct] reported conversation ${conversationId} opened by admin ${admin.userId}`);
+
+    const [messages, reports, accesses] = await Promise.all([
+      this.prisma.directMessage.findMany({
+        where: { conversationId },
+        orderBy: { createdAt: 'asc' },
+        take: MAX_MESSAGES,
+        include: { sender: PERSON },
+      }),
+      this.prisma.directConversationReport.findMany({
+        where: { conversationId },
+        orderBy: { createdAt: 'desc' },
+        include: REPORT_INCLUDE,
+      }),
+      this.prisma.directConversationAccess.findMany({
+        where: { conversationId },
+        orderBy: { accessedAt: 'desc' },
+        take: MAX_ACCESSES,
+        include: { adminUser: PERSON },
+      }),
+    ]);
+    return {
+      conversationId,
+      staff: who(conversation.staffUser) as { id: string; name: string },
+      parent: who(conversation.parentUser) as { id: string; name: string },
+      student: studentOf(conversation.student),
+      messages: messages.map((m) => ({ id: m.id, body: m.body, sender: who(m.sender), createdAt: m.createdAt.toISOString() })),
+      reports: reports.map((r) => this.toReport(r)),
+      accesses: accesses.map((a) => ({ admin: who(a.adminUser) as { id: string; name: string }, accessedAt: a.accessedAt.toISOString() })),
+    };
+  }
+
+  /** FR .20: an admin resolves a report with a note. Once resolved it stays resolved (400). */
+  async resolve(user: AuthUserContext | undefined, reportId: string, input: ResolveDirectReportInput): Promise<DirectReport> {
+    const admin = this.requireAdmin(user);
+    const report = await this.prisma.directConversationReport.findFirst({
+      where: { id: reportId, conversation: { organizationId: admin.organizationId } },
+      select: { id: true, resolvedAt: true },
+    });
+    if (!report) throw new NotFoundException(REPORT_NOT_FOUND);
+    if (report.resolvedAt) throw new BadRequestException(ALREADY_RESOLVED);
+    const resolution = input.resolution.trim();
+    if (!resolution) throw new BadRequestException('Indica cómo se resolvió el reporte');
+    const row = await this.prisma.directConversationReport.update({
+      where: { id: reportId },
+      data: { resolvedAt: new Date(), resolvedById: admin.userId, resolution },
+      include: REPORT_INCLUDE,
+    });
+    return this.toReport(row);
+  }
+
   // ── Internals ───────────────────────────────────────────────────────────
+
+  /** BR .14: only the organization's admins review reported conversations. */
+  private requireAdmin(user: AuthUserContext | undefined): { userId: string; organizationId: string } {
+    const me = requireUser(user);
+    if (!isAdminRole(roleOf(me)) || !me.organizationId) throw new ForbiddenException(ADMINS_ONLY);
+    return { userId: me.userId, organizationId: me.organizationId };
+  }
+
+  private toReport(r: ReportRow): DirectReport {
+    return {
+      id: r.id,
+      conversationId: r.conversationId,
+      staff: who(r.conversation.staffUser) as { id: string; name: string },
+      parent: who(r.conversation.parentUser) as { id: string; name: string },
+      student: studentOf(r.conversation.student),
+      reportedBy: who(r.reportedBy) as { id: string; name: string },
+      reason: r.reason,
+      createdAt: r.createdAt.toISOString(),
+      resolvedAt: r.resolvedAt?.toISOString() ?? null,
+      resolvedBy: who(r.resolvedBy),
+      resolution: r.resolution,
+    };
+  }
 
   /** BR .7: students never reach direct messages, whatever their role was granted. */
   private requireDirectUser(user: AuthUserContext | undefined) {

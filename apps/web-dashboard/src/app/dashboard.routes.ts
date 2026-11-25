@@ -331,6 +331,17 @@ export const DASHBOARD_ROUTES: Route[] = [
         canActivate: [permissionGuard('COMMUNICATION_DIRECT')],
         loadComponent: () => import('./communication/direct'),
       },
+      // COM-003 FR .20, BR .14: reported conversations, read-only, for admins.
+      {
+        path: 'communication/direct-reports',
+        canMatch: [adminGuard],
+        loadComponent: () => import('./communication/direct-reports'),
+      },
+      {
+        path: 'communication/direct-reports/:id',
+        canMatch: [adminGuard],
+        loadComponent: () => import('./communication/direct-reports'),
+      },
       {
         path: 'teacher/reports',
         canActivate: [permissionGuard('VIEW_GRADES')],

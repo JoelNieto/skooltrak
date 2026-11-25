@@ -53,7 +53,7 @@ Scenario: not for closed, archived, deleted or old posts @BR-COM-003.15 @BR-COM-
 ## Out of scope for this slice
 - Push notifications (decided: none).
 - Per-user email preferences or unsubscribe.
-- The existing `sendEmail()` logs each recipient's address. That predates this slice and should go in a follow-up (§8).
+- `sendEmail()` used to log each recipient's address and subject. Fixed alongside this slice: the email logs now carry the Resend id or error name only (§8).
 
 ## Done checklist
 - [ ] Acceptance criteria pass (unit level; see Playwright above)

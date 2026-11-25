@@ -13,9 +13,7 @@ const resend = new Resend(apiKey);
 export async function sendEmail({ to, subject, html }: { to: string; subject: string; html: string }) {
   const from = process.env['EMAIL_FROM'] || 'noreply@skooltrak.com';
 
-  console.log(`[Email Service] Sending email to: ${to}, subject: ${subject}`);
-  console.log(`[Email Service] From: ${from}`);
-
+  // §8: never log recipients, subjects or bodies: they carry names and addresses of minors and families.
   try {
     const result = await resend.emails.send({
       from,
@@ -24,10 +22,12 @@ export async function sendEmail({ to, subject, html }: { to: string; subject: st
       html,
     });
 
-    console.log('[Email Service] Email sent successfully:', result);
+    // Resend reports API failures in `error` instead of throwing.
+    if (result.error) console.error(`[Email Service] Send failed: ${result.error.name}`);
+    else console.log(`[Email Service] Sent: ${result.data?.id}`);
     return result;
   } catch (error) {
-    console.error('[Email Service] Failed to send email:', error);
+    console.error(`[Email Service] Send failed: ${error instanceof Error ? error.name : 'unknown error'}`);
     throw error;
   }
 }
@@ -82,8 +82,6 @@ export async function sendWelcomeEmail({
     </html>
   `;
 
-  console.log(`[Email Service] Sending welcome email to ${role}: ${to}`);
-
   return sendEmail({ to, subject, html });
 }
 
@@ -125,7 +123,7 @@ export async function sendUserInvitation({
   const resetPasswordUrl = `${appUrl}/reset-password?token=${token}&email=${encodeURIComponent(email)}`;
 
   // Don't log resetPasswordUrl: the token in it lets anyone set this account's password.
-  console.log(`[Email Service] Generated invitation for ${role} ${email}`);
+  console.log(`[Email Service] Generated invitation for a ${role}`);
 
   // Send the welcome email
   return sendWelcomeEmail({

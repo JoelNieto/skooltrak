@@ -72,13 +72,14 @@ export function newCount(n: number): string {
 }
 
 /**
- * FR-ACA-001.23, .24: unread posts per course, from the caller's channel list (BR-ACA-001.17).
- * Only COURSE channels count, and archived ones don't. Courses with nothing unread are left out.
+ * FR-ACA-001.23, .24: unread posts per course, from the caller's channel list (BR-ACA-001.17): its
+ * COURSE channels and its assignments' Q&A channels (S22, decided 2026-11-25), as the Canales tab
+ * counts them. Archived or closed ones don't count. Courses with nothing unread are left out.
  */
 export function unreadByCourse(list: readonly ChannelSummary[]): Map<string, number> {
   const byCourse = new Map<string, number>();
   for (const c of list) {
-    if (c.scope !== 'COURSE' || !c.courseId || c.archived || !c.unread) continue;
+    if ((c.scope !== 'COURSE' && c.scope !== 'ASSIGNMENT') || !c.courseId || c.archived || !c.unread) continue;
     byCourse.set(c.courseId, (byCourse.get(c.courseId) ?? 0) + c.unread);
   }
   return byCourse;

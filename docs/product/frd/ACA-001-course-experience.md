@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | In build (S01–S21 shipped; S22 proposed) |
+| **Status** | In build (S01–S21 shipped; S22 in review) |
 | **Context** | ACA — Academics (see [capabilities](../capabilities.md#aca-academics)) |
 | **Owner** | — |
 | **Last updated** | 2026-11-25 |
@@ -310,4 +310,4 @@ Listed in build order.
 | [ACA-001-S19](../slices/ACA-001-S19-manage-channels-in-course.md) | Teachers post, see receipts and answer inside the *Canales* tab; *Nuevo canal para este curso* | .27, BR .19 .20 | Done (#88) |
 | [ACA-001-S20](../slices/ACA-001-S20-to-answer.md) | *"{n} por responder"* for managers | .28 | Done (#89) |
 | [ACA-001-S21](../slices/ACA-001-S21-assignment-channels-in-course.md) | Assignment Q&A group and assignment card in *Canales* | .29, BR .17 .18 | Done (#89) |
-| ACA-001-S22 | *Mis cursos* badges and *Nuevo en canales* also count assignment Q&A channels | .23 .24, BR .17 | Proposed |
+| [ACA-001-S22](../slices/ACA-001-S22-mis-cursos-qa-channels.md) | *Mis cursos* badges and *Nuevo en canales* also count assignment Q&A channels | .23 .24, BR .17 | In review |

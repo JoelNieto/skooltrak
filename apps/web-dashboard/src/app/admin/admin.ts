@@ -1,5 +1,15 @@
 import { Breadcrumbs, Icon, UiInputGroup } from '#/ui';
-import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, signal, viewChild } from '@angular/core';
+import {
+  afterNextRender,
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  DestroyRef,
+  ElementRef,
+  inject,
+  signal,
+  viewChild,
+} from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { filter, map } from 'rxjs';
@@ -18,15 +28,22 @@ import { AdminSettingsRail } from './components/admin-settings-rail';
   providers: [AdminCounts],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
+    class: 'block',
     '(document:keydown)': 'onKeydown($event)',
+    '[style.--admin-header-h.px]': 'headerHeight()',
   },
   template: `
-    <div class="mx-auto flex max-w-280 flex-col gap-7">
-      <header class="flex flex-wrap items-end justify-between gap-4">
-        <div class="flex min-w-0 flex-col gap-1.5">
+    <!-- Sticky inside the dashboard's scrolling <main>; bleeds over the page gutter so content
+         scrolling underneath never shows at its sides. -->
+    <header
+      #header
+      class="sticky top-0 z-20 mx-[calc(-1*var(--ui-page-gutter,1rem))] border-b border-line bg-surface-0/95 px-(--ui-page-gutter) py-3 backdrop-blur supports-[backdrop-filter]:bg-surface-0/80"
+    >
+      <div class="mx-auto flex max-w-400 flex-wrap items-end justify-between gap-x-4 gap-y-3">
+        <div class="flex min-w-0 flex-col gap-1">
           <ui-breadcrumbs [items]="breadcrumbs()" />
           <h1 class="type-heading-lg text-ink-strong">Administración</h1>
-          <p class="text-[15px] text-ink-muted">
+          <p class="hidden text-[15px] text-ink-muted sm:block">
             Configura la estructura de tu colegio, su comunidad y la operación diaria.
           </p>
         </div>
@@ -50,12 +67,14 @@ import { AdminSettingsRail } from './components/admin-settings-rail';
             >Ctrl K</kbd
           >
         </label>
-      </header>
+      </div>
+    </header>
 
+    <div class="mx-auto flex max-w-400 flex-col gap-7 pt-6">
       <div class="flex flex-col items-start gap-8 lg:flex-row">
         <!-- Wide screens: the rail sits beside the content. -->
         <app-admin-settings-rail
-          class="hidden w-62 shrink-0 lg:sticky lg:top-6 lg:block"
+          class="hidden w-62 shrink-0 lg:sticky lg:top-[calc(var(--admin-header-h,0px)+1.5rem)] lg:block lg:max-h-[calc(100dvh-var(--admin-header-h,0px)-3rem)] lg:overflow-y-auto"
           [groups]="visibleGroups()"
           [active]="activePath()"
           [badges]="badges()"
@@ -97,6 +116,20 @@ export default class Admin {
   #counts = inject(AdminCounts);
 
   private readonly searchInput = viewChild<ElementRef<HTMLInputElement>>('search');
+  private readonly header = viewChild.required<ElementRef<HTMLElement>>('header');
+
+  /** The sticky header's height, so the rail can stick just below it. */
+  protected readonly headerHeight = signal(0);
+
+  constructor() {
+    const destroyRef = inject(DestroyRef);
+    afterNextRender(() => {
+      const el = this.header().nativeElement;
+      const observer = new ResizeObserver(() => this.headerHeight.set(el.offsetHeight));
+      observer.observe(el);
+      destroyRef.onDestroy(() => observer.disconnect());
+    });
+  }
 
   readonly #url = toSignal(
     this.#router.events.pipe(

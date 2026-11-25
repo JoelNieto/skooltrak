@@ -47,7 +47,7 @@ Scenario: members and closed channels @BR-COM-003.12
   - PRIVATE conversations are a post's replies under one member (`threadUserId`, or the author for replies from before the channel turned private);
   - members and closed channels get `0`.
 - [ ] Shared: `ChannelSummary.toAnswer: number`.
-- [ ] OpenAPI → `bun run openapi:orval`.
+- [ ] OpenAPI: no change (the channel contracts are the shared types in `libs/shared`, as in S02).
 - [ ] Angular (`communication/channels.ts`): managers' rows show `<span uiBadge tone="new" size="sm">{n} por responder</span>`. (The course page's *Canales* tab shows it in ACA-001-S20.)
 - [ ] Tests:
   - Nest unit: both kinds; any manager answers; a member's newer reply reopens; members `0`; closed `0`; cross-tenant.

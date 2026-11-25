@@ -61,6 +61,15 @@ export default defineConfig({
       use: { ...devices['Desktop Chrome'] },
       dependencies: ['chromium'],
       testMatch: /\.after\.spec\.ts$/,
+      testIgnore: /assignment-channels\.after\.spec\.ts$/,
+    },
+    // COM-003-S02 creates assignment Q&A channels on the teacher's course, which the course page's
+    // Canales tab counts (ACA-001 FR .29); it runs once `after` is done so those counts stay stable.
+    {
+      name: 'after-assignments',
+      use: { ...devices['Desktop Chrome'] },
+      dependencies: ['after'],
+      testMatch: /assignment-channels\.after\.spec\.ts$/,
     },
   ],
 });

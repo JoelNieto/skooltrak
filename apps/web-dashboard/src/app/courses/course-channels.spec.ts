@@ -1,6 +1,8 @@
 import type { ChannelSummary } from '@/shared';
 import {
   askChannel,
+  assignmentDueText,
+  groupChannels,
   channelKind,
   courseChannels,
   newCount,
@@ -176,5 +178,50 @@ describe('toAnswerTotal @FR-ACA-001.28', () => {
     );
     expect(toAnswerTotal(list)).toBe(3);
     expect(toAnswerTotal([])).toBe(0);
+  });
+});
+
+describe('assignment Q&A channels on the course page @FR-ACA-001.29', () => {
+  const qa = (over: Partial<ChannelSummary> = {}) =>
+    channel({
+      scope: 'ASSIGNMENT',
+      assignmentId: 'a1',
+      studentsCanReply: true,
+      replyVisibility: 'PUBLIC',
+      closesAt: '2026-12-04T12:00:00Z',
+      ...over,
+    });
+
+  it("lists the course's assignment channels with the course channels, in their own group (BR-ACA-001.17)", () => {
+    const list = courseChannels(
+      [channel({ id: 'general' }), qa({ id: 'qa' }), qa({ id: 'other-course', courseId: 'spanish' })],
+      'math',
+      'STUDENT',
+    );
+    expect(list.map((c) => c.id).sort()).toEqual(['general', 'qa']);
+    const groups = groupChannels(list);
+    expect(groups.course.map((c) => c.id)).toEqual(['general']);
+    expect(groups.assignments.map((c) => c.id)).toEqual(['qa']);
+  });
+
+  it('says when it closes, or that it closed, instead of a reply kind', () => {
+    expect(channelKind(qa(), 'STUDENT')).toBe('Cierra el 04/12/2026');
+    expect(channelKind(qa({ archived: true }), 'STUDENT')).toBe('Preguntas cerradas');
+    expect(channelKind(qa({ closesAt: null }), 'MANAGER')).toBe('Preguntas de la asignación');
+  });
+
+  it('is never where "Preguntar en el curso" goes (FR-ACA-001.25)', () => {
+    expect(askChannel(courseChannels([qa({ lastPostAt: '2026-11-24T10:00:00Z' })], 'math', 'STUDENT'))).toBeNull();
+  });
+
+  it("describes the due dates: one for a student's group, one per group for staff", () => {
+    expect(assignmentDueText([])).toBe('Sin fecha de entrega');
+    expect(assignmentDueText([{ date: '2026-12-01T12:00:00Z' }])).toBe('Entrega: 01/12/2026');
+    expect(
+      assignmentDueText([
+        { date: '2026-12-04T12:00:00Z', classGroup: { name: '7°B' } },
+        { date: '2026-12-01T12:00:00Z', classGroup: { name: '7°A' } },
+      ]),
+    ).toBe('Entregas: 7°A 01/12/2026 · 7°B 04/12/2026');
   });
 });

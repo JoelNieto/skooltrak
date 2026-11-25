@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | In build |
+| **Status** | In build (S01–S03 shipped; S04, S05 in review) |
 | **Context** | COM — Communication (see [capabilities](../capabilities.md#com-communication)) |
 | **Owner** | — |
 | **Last updated** | 2026-11-25 |
@@ -57,6 +57,10 @@ Everything else is removed.
 - **FR-COM-003.18**: The Q&A channel **closes** 3 days after the assignment's latest due date across its class groups (BR .11). A closed channel behaves like an archived one: it stays readable and accepts no posts or replies (FR .5). Changing the assignment's dates moves the close time. Managers can still archive it earlier, or change its reply settings and visibility (FR .5).
 - **FR-COM-003.19**: Managers see, per channel, how many replies are **por responder** (BR .12): on `GET channels`, and as *"{n} por responder"* in the channels list.
 
+### Oversight and reminders *(decided 2026-11-25)*
+- **FR-COM-003.20**: Either participant of a direct conversation can **report** it (*"Reportar conversación"*) with a reason. The organization's admins get a list of reported conversations and can open a reported one **read-only**; they resolve the report with a note. Every time an admin opens one, the access is logged (BR .14).
+- **FR-COM-003.21**: A member who hasn't confirmed a post that asks for confirmation (FR .6, .8) **24 hours** after it was published gets **one email reminder** naming the channel and when the post was published, with a link to the channel. The email never copies the post itself (§8) (BR .15).
+
 ## 4. Business rules
 - **BR-COM-003.1**: Only staff create channels and start direct conversations. Parents and students never can (`403`).
 - **BR-COM-003.2**: A teacher can only create or manage a `COURSE` channel for a course they teach, or a `CLASS_GROUP` channel for a group related to one of their courses (the group's study plan contains a course they teach; homeroom alone doesn't count, same as BR-COM-002.7). `ORGANIZATION`, `SCHOOL` and `STUDY_PLAN` channels are for school admins only (`403`).
@@ -82,12 +86,16 @@ Everything else is removed.
 
   Any manager's reply answers it, not only the post's author.
 - **BR-COM-003.13**: **Backfill** *(decided 2026-11-25)*. When S02 ships, every existing assignment whose latest date + 3 days is still ahead gets its Q&A channel and pinned post, as if just created. Older assignments get none.
+- **BR-COM-003.14**: **Reported conversations.** Only the two participants may report a conversation; anyone else gets `404`, so its existence isn't revealed (BR .9). Only the organization's admins see the reports (`403` otherwise). Admins of the conversation's organization may read it only while it has a report (`404` otherwise, so BR .9 still holds for every other conversation), and only read: sending is refused (`403`). Each admin read records who, when and which conversation; the log is kept even after the report is resolved. Message bodies stay out of the application logs (§8).
+- **BR-COM-003.15**: **Confirmation reminders.** A job runs hourly and emails each audience member (BR .4, .10) who has an email address, hasn't confirmed, hasn't been reminded about that post and isn't its author, for posts that asked for confirmation more than 24 hours and at most 30 days ago, aren't deleted, and are in channels that aren't archived or closed (BR .11). At most one reminder per member per post. If sending fails, the job tries again next hour; it never sends twice once a send succeeds.
 
 ## 5. Data
 - `Channel` (`scope`, `schoolId` / `studyPlanId` / `classGroupId` / `courseId`, `audienceStudents`, `audienceParents`, `studentsCanReply`, `parentsCanReply`, `replyVisibility`, `archivedAt`, `createdById`).
 - `ChannelPost` (`body`, `requiresConfirmation`, `authorId`, soft delete).
 - `ChannelReply` (`postId`, `authorId`, `body`, `threadUserId`: in `PRIVATE` channels the member whose conversation it belongs to; `null` in `PUBLIC`).
 - `ChannelPostRead` (`postId`, `userId`, `readAt`, `confirmedAt`): one row per member per post.
+- *(S04)* `DirectConversationReport` (`conversationId`, `reportedById`, `reason`, `createdAt`, `resolvedAt`, `resolvedById`, `resolution`) and `DirectConversationAccess` (`conversationId`, `adminUserId`, `accessedAt`).
+- *(S05)* `ChannelPostReminder` (`postId`, `userId`, `sentAt`), unique per post and member.
 - *(S02)* `ChannelScope` gains `ASSIGNMENT`; `Channel` gains `assignmentId String? @unique` (cascade on delete) and `closesAt DateTime?`; `ChannelPost` gains `pinned Boolean @default(false)` for the opening post.
 - `DirectConversation` (`staffUserId`, `parentUserId`, optional `studentId`, `staffLastReadAt`, `parentLastReadAt`, `lastMessageAt`) and `DirectMessage`.
 - Removed: `Message`, `MessageRecipient`, `Chat*`, `CommunicationThread`, `ThreadParticipant`, `CommunicationMessage`, `MessageDelivery`, `RecipientPreference`, `CommunicationAuditLog`, `Newsletter`. Existing data in them is dropped.
@@ -137,8 +145,8 @@ Removed endpoints: `/v1/messages/*`, `/v1/chats/*`, `/v1/newsletters/*`, and eve
 - Teachers as a channel audience (staff-to-staff channels).
 
 ## 10. Open questions
-- [ ] Should admins be able to read teachers' direct conversations for safeguarding?
-- [ ] Do we need email/push for posts that require confirmation?
+- [x] Should admins be able to read teachers' direct conversations for safeguarding? **Decided (2026-11-25):** only after a participant reports the conversation; read-only and logged (FR .20, BR .14).
+- [x] Do we need email/push for posts that require confirmation? **Decided (2026-11-25):** one email reminder to members who haven't confirmed after 24 hours; no push (FR .21, BR .15). S05 reuses the existing Resend sender in `libs/auth` (`sendEmail()`, already used for invitations and grade emails).
 - [x] **Assignment Q&A channels** (from ACA-001 Q10). **Decided (2026-11-25):** every assignment gets one, created automatically (FR .17); students reply under a pinned opening post, so only managers post (BR .1 unchanged); with dates per group, it closes 3 days after the latest (FR .18, BR .11).
 - [x] **Por responder** (from ACA-001 Q11). **Decided (2026-11-25):** private conversations awaiting the managers, plus public replies newer than the latest manager reply in their thread (BR .12).
 - [x] Should existing assignments get a Q&A channel when S02 ships? **Decided (2026-11-25):** yes, for assignments whose channel would still be open (latest date + 3 days in the future), created by a backfill when S02 ships (BR .13).
@@ -146,6 +154,8 @@ Removed endpoints: `/v1/messages/*`, `/v1/chats/*`, `/v1/newsletters/*`, and eve
 ## 11. Slices
 | Slice | Title | FRs | Status |
 |---|---|---|---|
-| COM-003-S01 | Replace every legacy channel with Channels + Direct (schema, API, UI, homes) | .1–.16 | In review (unit tests pass; e2e `communication/channels.spec.ts` and `direct.after.spec.ts` written, awaiting first run) |
-| [COM-003-S02](../slices/COM-003-S02-assignment-channels.md) | Assignment Q&A channels: created with the assignment, pinned post, closing, backfill | .17 .18, BR .10 .11 .13 | In review |
-| [COM-003-S03](../slices/COM-003-S03-to-answer.md) | *Por responder* for managers | .19, BR .12 | In review |
+| COM-003-S01 | Replace every legacy channel with Channels + Direct (schema, API, UI, homes) | .1–.16 | Done (#84; its e2e first ran green with #89) |
+| [COM-003-S02](../slices/COM-003-S02-assignment-channels.md) | Assignment Q&A channels: created with the assignment, pinned post, closing, backfill | .17 .18, BR .10 .11 .13 | Done (#89) |
+| [COM-003-S03](../slices/COM-003-S03-to-answer.md) | *Por responder* for managers | .19, BR .12 | Done (#89) |
+| [COM-003-S04](../slices/COM-003-S04-report-direct.md) | Report a direct conversation; admins read reported ones read-only, logged | .20, BR .14 | In review |
+| [COM-003-S05](../slices/COM-003-S05-confirmation-reminders.md) | Email reminder for unconfirmed posts after 24 h | .21, BR .15 | In review |

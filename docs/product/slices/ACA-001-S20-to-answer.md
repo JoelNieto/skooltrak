@@ -4,7 +4,7 @@
 |---|---|
 | **FRD** | [ACA-001](../frd/ACA-001-course-experience.md) |
 | **Implements** | FR-ACA-001.28; BR-ACA-001.17 |
-| **Status** | In review (built on [COM-003-S03](COM-003-S03-to-answer.md)) |
+| **Status** | Done (#89) |
 | **Branch** | `feat/ACA-001-S20-to-answer` |
 | **Estimate** | 0.5 day |
 | **Design** | Canvas "Skooltrak — Courses redesign (desktop)", board *Course channels — teacher* |

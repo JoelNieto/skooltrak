@@ -123,6 +123,22 @@ export class StartDirectInput {
   body?: string;
 }
 
+/** `POST /v1/communication/direct/:id/report` (FR-COM-003.20). */
+export class ReportDirectInput {
+  @IsString()
+  @IsNotEmpty({ message: 'Indica el motivo del reporte' })
+  @MaxLength(1000)
+  reason: string;
+}
+
+/** `POST /v1/communication/direct/reports/:reportId/resolve` (FR-COM-003.20). */
+export class ResolveDirectReportInput {
+  @IsString()
+  @IsNotEmpty({ message: 'Indica cómo se resolvió el reporte' })
+  @MaxLength(1000)
+  resolution: string;
+}
+
 export class SendDirectMessageInput {
   @IsString()
   @IsNotEmpty({ message: 'El mensaje no puede estar vacío' })

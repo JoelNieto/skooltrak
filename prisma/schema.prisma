@@ -51,28 +51,28 @@ model Organization {
 }
 
 model User {
-  id                     String                 @id @default(cuid())
-  email                  String                 @unique
+  id                     String                     @id @default(cuid())
+  email                  String                     @unique
   name                   String?
   firstName              String
   lastName               String
   password               String
   color                  String?
   image                  String?
-  emailVerified          Boolean                @default(false)
-  banned                 Boolean                @default(false)
+  emailVerified          Boolean                    @default(false)
+  banned                 Boolean                    @default(false)
   banReason              String?
   banExpires             DateTime?
-  role                   Role?                  @relation(fields: [roleId], references: [id])
+  role                   Role?                      @relation(fields: [roleId], references: [id])
   roleId                 String?
-  organization           Organization?          @relation(fields: [organizationId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  organization           Organization?              @relation(fields: [organizationId], references: [id], onDelete: SetNull, onUpdate: Cascade)
   organizationId         String?
   onboardingStep         String? // 'choose-path', 'school-setup', 'waiting-approval', 'completed'
   themePreference        String? // 'light' | 'dark' | 'system'
   lastLogin              DateTime?
-  isBlocked              Boolean                @default(false)
-  createdAt              DateTime               @default(now())
-  updatedAt              DateTime               @updatedAt
+  isBlocked              Boolean                    @default(false)
+  createdAt              DateTime                   @default(now())
+  updatedAt              DateTime                   @updatedAt
   student                Student?
   teacher                Teacher?
   parents                Parent[]
@@ -81,22 +81,26 @@ model User {
   notifications          Notification[]
   joinRequests           JoinRequest[]
   storeCartItems         StoreCartItem[]
-  courseEnrollmentsAdded CourseEnrollment[]     @relation("CourseEnrollmentAddedBy")
-  gradesPublished        Grade[]                @relation("GradePublishedBy")
-  gradeRevisions         StudentGradeRevision[] @relation("StudentGradeRevisionChangedBy")
+  courseEnrollmentsAdded CourseEnrollment[]         @relation("CourseEnrollmentAddedBy")
+  gradesPublished        Grade[]                    @relation("GradePublishedBy")
+  gradeRevisions         StudentGradeRevision[]     @relation("StudentGradeRevisionChangedBy")
   storeOrders            StoreOrder[]
   // Better-auth relations
   sessions               Session[]
   accounts               Account[]
   members                Member[]
   authTokens             AuthToken[]
-  channelsCreated        Channel[]              @relation("ChannelCreatedBy")
+  channelsCreated        Channel[]                  @relation("ChannelCreatedBy")
   channelPosts           ChannelPost[]
-  channelReplies         ChannelReply[]         @relation("ChannelReplyAuthor")
-  channelReplyThreads    ChannelReply[]         @relation("ChannelReplyThread")
+  channelReplies         ChannelReply[]             @relation("ChannelReplyAuthor")
+  channelReplyThreads    ChannelReply[]             @relation("ChannelReplyThread")
   channelPostReads       ChannelPostRead[]
-  directAsStaff          DirectConversation[]   @relation("DirectStaff")
-  directAsParent         DirectConversation[]   @relation("DirectParent")
+  directAsStaff          DirectConversation[]       @relation("DirectStaff")
+  directAsParent         DirectConversation[]       @relation("DirectParent")
+  directReportsFiled     DirectConversationReport[] @relation("DirectReportBy")
+  directReportsResolved  DirectConversationReport[] @relation("DirectReportResolver")
+  directReviews          DirectConversationAccess[]
+  channelPostReminders   ChannelPostReminder[]
   directMessages         DirectMessage[]
 
   @@map("users")
@@ -1076,20 +1080,21 @@ model Channel {
 }
 
 model ChannelPost {
-  id                   String            @id @default(cuid())
+  id                   String                @id @default(cuid())
   channelId            String
-  channel              Channel           @relation(fields: [channelId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  channel              Channel               @relation(fields: [channelId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   authorId             String?
-  author               User?             @relation(fields: [authorId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  author               User?                 @relation(fields: [authorId], references: [id], onDelete: SetNull, onUpdate: Cascade)
   body                 String
   /// Members are asked to press "Confirmar lectura" (COM-003 FR .6 / .8).
-  requiresConfirmation Boolean           @default(false)
+  requiresConfirmation Boolean               @default(false)
   /// The opening post of an ASSIGNMENT channel, shown first (COM-003 FR .17).
-  pinned               Boolean           @default(false)
-  createdAt            DateTime          @default(now())
+  pinned               Boolean               @default(false)
+  createdAt            DateTime              @default(now())
   deletedAt            DateTime?
   replies              ChannelReply[]
   reads                ChannelPostRead[]
+  reminders            ChannelPostReminder[]
 
   @@index([channelId, createdAt])
   @@map("channel_posts")
@@ -1126,22 +1131,37 @@ model ChannelPostRead {
   @@map("channel_post_reads")
 }
 
+/// COM-003 FR .21, BR .15: the one email reminder a member got to confirm a post; never sent twice.
+model ChannelPostReminder {
+  id     String      @id @default(cuid())
+  postId String
+  post   ChannelPost @relation(fields: [postId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  userId String
+  user   User        @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  sentAt DateTime    @default(now())
+
+  @@unique([postId, userId])
+  @@map("channel_post_reminders")
+}
+
 /// One-to-one conversation started by staff with a parent, optionally about one child (COM-003 FR .12).
 model DirectConversation {
-  id               String          @id @default(cuid())
+  id               String                     @id @default(cuid())
   organizationId   String
-  organization     Organization    @relation(fields: [organizationId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  organization     Organization               @relation(fields: [organizationId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   staffUserId      String
-  staffUser        User            @relation("DirectStaff", fields: [staffUserId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  staffUser        User                       @relation("DirectStaff", fields: [staffUserId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   parentUserId     String
-  parentUser       User            @relation("DirectParent", fields: [parentUserId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  parentUser       User                       @relation("DirectParent", fields: [parentUserId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   studentId        String?
-  student          Student?        @relation(fields: [studentId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  student          Student?                   @relation(fields: [studentId], references: [id], onDelete: SetNull, onUpdate: Cascade)
   staffLastReadAt  DateTime?
   parentLastReadAt DateTime?
-  lastMessageAt    DateTime        @default(now())
-  createdAt        DateTime        @default(now())
+  lastMessageAt    DateTime                   @default(now())
+  createdAt        DateTime                   @default(now())
   messages         DirectMessage[]
+  reports          DirectConversationReport[]
+  accesses         DirectConversationAccess[]
 
   @@index([staffUserId, lastMessageAt])
   @@index([parentUserId, lastMessageAt])
@@ -1160,6 +1180,37 @@ model DirectMessage {
 
   @@index([conversationId, createdAt])
   @@map("direct_messages")
+}
+
+/// COM-003 FR .20, BR .14: a participant reports a direct conversation; admins then review it read-only.
+model DirectConversationReport {
+  id             String             @id @default(cuid())
+  conversationId String
+  conversation   DirectConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  reportedById   String
+  reportedBy     User               @relation("DirectReportBy", fields: [reportedById], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  reason         String
+  createdAt      DateTime           @default(now())
+  resolvedAt     DateTime?
+  resolvedById   String?
+  resolvedBy     User?              @relation("DirectReportResolver", fields: [resolvedById], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  resolution     String?
+
+  @@index([conversationId, resolvedAt])
+  @@map("direct_conversation_reports")
+}
+
+/// COM-003 BR .14: every time an admin opens a reported conversation. Kept after the report is resolved.
+model DirectConversationAccess {
+  id             String             @id @default(cuid())
+  conversationId String
+  conversation   DirectConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  adminUserId    String
+  adminUser      User               @relation(fields: [adminUserId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  accessedAt     DateTime           @default(now())
+
+  @@index([conversationId, accessedAt])
+  @@map("direct_conversation_accesses")
 }
 
 // ==========================================

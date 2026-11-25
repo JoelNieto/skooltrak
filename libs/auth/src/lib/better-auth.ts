@@ -53,7 +53,7 @@ function createProductionAuth() {
       sendResetPassword: async ({ user, url }) => {
         // Never log `url`: it carries the reset token, and anyone who can read the logs
         // could use it to take over the account.
-        console.log('[Better Auth] sendResetPassword called for:', user.email);
+        console.log('[Better Auth] sendResetPassword called');
         try {
           await sendEmail({
             to: user.email,
@@ -89,7 +89,7 @@ function createProductionAuth() {
     },
     emailVerification: {
       sendVerificationEmail: async ({ user, url }) => {
-        console.log('[Better Auth] sendVerificationEmail called for:', user.email);
+        console.log('[Better Auth] sendVerificationEmail called');
         try {
           await sendEmail({
             to: user.email,
@@ -137,15 +137,15 @@ function createProductionAuth() {
       magicLink({
         expiresIn: 30,
         disableSignUp: true,
-        sendMagicLink: async ({ email }) => {
+        sendMagicLink: async () => {
           console.warn(
-            `[Better Auth] Ignoring built-in magic-link issuance for ${email}; use POST /v1/auth/magic-link/request instead.`,
+            `[Better Auth] Ignoring built-in magic-link issuance; use POST /v1/auth/magic-link/request instead.`,
           );
         },
       }),
       organization({
         sendInvitationEmail: async (data) => {
-          console.log('[Better Auth] sendInvitationEmail called for:', data.email);
+          console.log('[Better Auth] sendInvitationEmail called');
           const inviteLink = `${process.env['APP_URL']}/accept-invitation/${data.id}`;
           try {
             await sendEmail({

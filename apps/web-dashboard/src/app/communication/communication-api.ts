@@ -10,6 +10,7 @@ import type {
   CommunicationUnread,
   DirectConversationDetail,
   DirectRecipient,
+  DirectReport,
 } from '@/shared';
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
@@ -125,6 +126,16 @@ export class CommunicationApi {
     return firstValueFrom(
       this.#http.post<DirectConversationDetail>(`${API}/direct`, { parentUserId, ...(studentId ? { studentId } : {}) }),
     );
+  }
+
+  /** COM-003 FR .20: a participant reports the conversation. */
+  reportDirect(conversationId: string, reason: string) {
+    return firstValueFrom(this.#http.post<DirectReport>(`${API}/direct/${conversationId}/report`, { reason }));
+  }
+
+  /** COM-003 FR .20: an admin resolves a report with a note. */
+  resolveDirectReport(reportId: string, resolution: string) {
+    return firstValueFrom(this.#http.post<DirectReport>(`${API}/direct/reports/${reportId}/resolve`, { resolution }));
   }
 
   sendDirect(conversationId: string, body: string) {

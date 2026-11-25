@@ -8,6 +8,8 @@ import {
   CreateChannelInput,
   CreateChannelPostInput,
   CreateChannelReplyInput,
+  ReportDirectInput,
+  ResolveDirectReportInput,
   SendDirectMessageInput,
   StartDirectInput,
   UpdateChannelInput,
@@ -158,6 +160,39 @@ export class CommunicationController {
   @ApiOperation({ summary: 'Start or reopen a conversation with a parent (FR-COM-003.12)' })
   startDirect(@Req() req: AuthenticatedRequest, @Body() input: StartDirectInput) {
     return this.direct.start(req.user, input);
+  }
+
+  // FR-COM-003.20, BR .14 (S04). Declared before `direct/:id` so "reports" isn't read as an id.
+  @Get('direct/reports')
+  @RequirePermissions(Perm.COMMUNICATION_DIRECT)
+  @ApiOperation({ summary: "The organization's reported direct conversations, for admins (FR-COM-003.20)" })
+  listDirectReports(@Req() req: AuthenticatedRequest) {
+    return this.direct.reports(req.user);
+  }
+
+  @Get('direct/reports/conversations/:id')
+  @RequirePermissions(Perm.COMMUNICATION_DIRECT)
+  @ApiOperation({ summary: 'A reported conversation, read-only and logged, for admins (BR-COM-003.14)' })
+  reviewDirect(@Req() req: AuthenticatedRequest, @Param('id') id: string) {
+    return this.direct.review(req.user, id);
+  }
+
+  @Post('direct/reports/:reportId/resolve')
+  @RequirePermissions(Perm.COMMUNICATION_DIRECT)
+  @ApiOperation({ summary: 'Resolve a report with a note (FR-COM-003.20)' })
+  resolveDirectReport(
+    @Req() req: AuthenticatedRequest,
+    @Param('reportId') reportId: string,
+    @Body() input: ResolveDirectReportInput,
+  ) {
+    return this.direct.resolve(req.user, reportId, input);
+  }
+
+  @Post('direct/:id/report')
+  @RequirePermissions(Perm.COMMUNICATION_DIRECT)
+  @ApiOperation({ summary: 'Report a direct conversation, as a participant (FR-COM-003.20)' })
+  reportDirect(@Req() req: AuthenticatedRequest, @Param('id') id: string, @Body() input: ReportDirectInput) {
+    return this.direct.report(req.user, id, input);
   }
 
   @Get('direct/:id')

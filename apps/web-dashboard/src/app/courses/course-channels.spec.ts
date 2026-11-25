@@ -103,6 +103,23 @@ describe('unreadByCourse @FR-ACA-001.23 @FR-ACA-001.24', () => {
     expect([...unreadByCourse(list)]).toEqual([['math', 3]]);
   });
 
+  it("also counts the course's open assignment Q&A channels (S22) @BR-ACA-001.17", () => {
+    const list = [
+      channel({ id: 'general', courseId: 'math', unread: 1 }),
+      channel({ id: 'qa', scope: 'ASSIGNMENT', assignmentId: 'a1', courseId: 'math', unread: 2 }),
+      channel({
+        id: 'closed-qa',
+        scope: 'ASSIGNMENT',
+        assignmentId: 'a2',
+        courseId: 'math',
+        unread: 4,
+        archived: true,
+      }),
+      channel({ id: 'qa-spanish', scope: 'ASSIGNMENT', assignmentId: 'a3', courseId: 'spanish', unread: 1 }),
+    ];
+    expect(Object.fromEntries(unreadByCourse(list))).toEqual({ math: 3, spanish: 1 });
+  });
+
   it('agrees in number for the accessible name', () => {
     expect(newMessages(1)).toBe('1 mensaje nuevo.');
     expect(newMessages(4)).toBe('4 mensajes nuevos.');

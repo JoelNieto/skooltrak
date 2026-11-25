@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | In build (course channels, S15–S21) |
+| **Status** | In build (S01–S21 shipped; S22 in review) |
 | **Context** | ACA — Academics (see [capabilities](../capabilities.md#aca-academics)) |
 | **Owner** | — |
 | **Last updated** | 2026-11-25 |
@@ -191,7 +191,7 @@ These read the course's channels from [COM-003](COM-003-channels-and-direct.md).
   - They never see drafts, the gradebook, attendance taking or weights, and they get no write actions.
   - Participants shows the teachers and their homeroom group's students only.
 - **BR-ACA-001.17**: **A course's channels.**
-  - They are the channels in the caller's `GET /communication/channels` list with `scope = COURSE`, or `ASSIGNMENT` (its assignments' Q&A channels, FR .29), and `courseId` = the course. Membership, and so who sees which channel, is COM-003's (BR-COM-003.4, .10). Class-group, study-plan, school and organization channels never show on a course. *Mis cursos* (FR .23, .24) still counts `COURSE` channels only.
+  - They are the channels in the caller's `GET /communication/channels` list with `scope = COURSE`, or `ASSIGNMENT` (its assignments' Q&A channels, FR .29), and `courseId` = the course. Membership, and so who sees which channel, is COM-003's (BR-COM-003.4, .10). Class-group, study-plan, school and organization channels never show on a course. *Mis cursos* (FR .23, .24) counts the same channels: `COURSE` and the course's open `ASSIGNMENT` channels *(decided 2026-11-25; S22)*.
   - A parent sees the channels whose audience includes parents. One list covers every linked child; *Mis cursos* and the course page filter it by the child's courses.
   - Unread counts are COM-003's per-channel `unread` (FR-COM-003.11).
   - Without `COMMUNICATION_VIEW` the tab, the Resumen card, the card badges and the stat are hidden, and the list is not requested.
@@ -308,5 +308,6 @@ Listed in build order.
 | [ACA-001-S17](../slices/ACA-001-S17-ask-in-course.md) | *"Preguntar en el curso"* opens the course conversation channel | .25 | Done (#87) |
 | [ACA-001-S18](../slices/ACA-001-S18-channel-in-course.md) | Students and parents read, confirm and reply inside the *Canales* tab | .26, BR .20 | Done (#87) |
 | [ACA-001-S19](../slices/ACA-001-S19-manage-channels-in-course.md) | Teachers post, see receipts and answer inside the *Canales* tab; *Nuevo canal para este curso* | .27, BR .19 .20 | Done (#88) |
-| [ACA-001-S20](../slices/ACA-001-S20-to-answer.md) | *"{n} por responder"* for managers | .28 | In review |
-| [ACA-001-S21](../slices/ACA-001-S21-assignment-channels-in-course.md) | Assignment Q&A group and assignment card in *Canales* | .29, BR .17 .18 | In review |
+| [ACA-001-S20](../slices/ACA-001-S20-to-answer.md) | *"{n} por responder"* for managers | .28 | Done (#89) |
+| [ACA-001-S21](../slices/ACA-001-S21-assignment-channels-in-course.md) | Assignment Q&A group and assignment card in *Canales* | .29, BR .17 .18 | Done (#89) |
+| [ACA-001-S22](../slices/ACA-001-S22-mis-cursos-qa-channels.md) | *Mis cursos* badges and *Nuevo en canales* also count assignment Q&A channels | .23 .24, BR .17 | In review |

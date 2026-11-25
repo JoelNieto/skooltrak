@@ -9,6 +9,7 @@ import { data, E2E_PASSWORD, personas, storageStatePath } from '../support/fixtu
  * ACA-001-S19: the course's teacher manages its channels in the same tab (FR-ACA-001.27).
  * ACA-001-S20: "por responder" for the teacher, per channel and on the tab (FR-ACA-001.28).
  * ACA-001-S21: assignment Q&A channels grouped in the tab, with their assignment card (FR-ACA-001.29).
+ * ACA-001-S22: Mis cursos counts them too.
  * docs/product/slices/ACA-001-S15-course-channels.md, ACA-001-S16-mis-cursos-channels.md
  *
  * Channels are created here through the COM-003 API, as `channels.spec.ts` does. This file is an
@@ -65,10 +66,11 @@ async function expectedUnread(request: APIRequestContext, persona: 'student' | '
     await request.get(`${API}/channels`, { headers: await bearer(request, persona) })
   ).json()) as Summary[];
   return list
-    .filter((c) =>
-      // Mis cursos (S16) counts COURSE channels of every course; the Canales tab also counts its
-      // assignments' Q&A channels (FR-ACA-001.29).
-      anyCourse ? c.scope === 'COURSE' : (c.scope === 'COURSE' || c.scope === 'ASSIGNMENT') && c.courseId === courseId,
+    .filter(
+      (c) =>
+        // Mis cursos (S16, S22) and the Canales tab both count COURSE channels and the courses'
+        // assignment Q&A channels (FR-ACA-001.29).
+        (c.scope === 'COURSE' || c.scope === 'ASSIGNMENT') && (anyCourse || c.courseId === courseId),
     )
     .filter((c) => !c.archived)
     .reduce((sum, c) => sum + c.unread, 0);
@@ -77,7 +79,10 @@ async function expectedUnread(request: APIRequestContext, persona: 'student' | '
 const nuevos = (n: number) => (n === 1 ? '1 nuevo' : `${n} nuevos`);
 const mensajes = (n: number) => (n === 1 ? '1 mensaje nuevo.' : `${n} mensajes nuevos.`);
 const channelsTab = (page: Page) => page.getByRole('tab', { name: /^Canales/ });
-const channelsList = (page: Page) => page.getByRole('list', { name: 'Canales del curso' });
+// Scoped to the Canales tab panel: the Resumen card has a list with the same name, and right after
+// the tab is clicked a lookup could otherwise grab that soon-hidden list and wait on it forever.
+const channelsList = (page: Page) =>
+  page.getByRole('tabpanel', { name: 'Canales' }).getByRole('list', { name: 'Canales del curso' });
 
 test.beforeAll(async ({ request }) => {
   const teacher = await bearer(request, 'teacher');
@@ -624,6 +629,20 @@ test.describe('assignment Q&A channels @FR-ACA-001.29', () => {
   test.describe('as a student', () => {
     test.use({ storageState: storageStatePath('student') });
 
+    test("Mis cursos counts the Q&A channel's unread post too (S22) @FR-ACA-001.23 @BR-ACA-001.17", async ({
+      page,
+      request,
+    }) => {
+      // The pinned opening post of the new assignment's channel is unread for Ana.
+      const unread = await expectedUnread(request, 'student');
+      expect(unread).toBeGreaterThan(0);
+      await page.goto('/courses');
+      const card = page
+        .getByRole('list', { name: 'Mis cursos' })
+        .getByRole('link', { name: new RegExp(data.courses.teacherOwn.name) });
+      await expect(card.locator('ui-course-cover')).toContainText(nuevos(unread));
+    });
+
     test('groups it under "Preguntas por asignación" and opens it with its assignment', async ({ page }) => {
       await page.goto(`/courses/${courseId}`);
       await channelsTab(page).click();
@@ -648,9 +667,7 @@ test.describe('assignment Q&A channels @FR-ACA-001.29', () => {
     test('"Preguntar en el curso" still goes to a course channel', async ({ page }) => {
       await page.goto(`/courses/${courseId}`);
       await page.getByRole('button', { name: 'Preguntar en el curso' }).click();
-      await expect(
-        page.getByRole('list', { name: 'Canales del curso' }).getByRole('button', { pressed: true }),
-      ).toHaveCount(1);
+      await expect(channelsList(page).getByRole('button', { pressed: true })).toHaveCount(1);
     });
   });
 

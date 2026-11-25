@@ -142,9 +142,43 @@ const REFRESH_MS = 15_000;
             </div>
           } @else if (conversation.value(); as c) {
             <header class="p-3 border-b border-line">
-              <h2 class="font-semibold text-ink-strong">{{ c.counterpart.name }}</h2>
-              @if (c.student) {
-                <p class="text-sm text-ink-muted">Sobre {{ c.student.name }}</p>
+              <div class="flex flex-wrap items-start justify-between gap-2">
+                <div>
+                  <h2 class="font-semibold text-ink-strong">{{ c.counterpart.name }}</h2>
+                  @if (c.student) {
+                    <p class="text-sm text-ink-muted">Sobre {{ c.student.name }}</p>
+                  }
+                </div>
+                <!-- COM-003 FR .20: either participant can report it; admins may then review it. -->
+                @if (c.reported) {
+                  <span uiBadge tone="warning" size="sm"><ui-icon name="flag" /> Reportada</span>
+                } @else if (!reporting()) {
+                  <button uiButton variant="ghost" size="sm" type="button" (click)="reporting.set(true)">
+                    <ui-icon name="flag" /> Reportar conversación
+                  </button>
+                }
+              </div>
+              @if (reporting() && !c.reported) {
+                <form class="mt-3 grid gap-2" (submit)="report($event)" aria-label="Reportar conversación">
+                  <p class="text-sm text-ink-muted">
+                    Los administradores de la escuela podrán leer esta conversación para revisarla.
+                  </p>
+                  <textarea
+                    uiInput
+                    rows="2"
+                    name="reason"
+                    aria-label="Motivo del reporte"
+                    placeholder="¿Por qué la reportas?"
+                    [ngModel]="reportReason()"
+                    (ngModelChange)="reportReason.set($event)"
+                  ></textarea>
+                  <div class="flex justify-end gap-2">
+                    <button uiButton variant="ghost" size="sm" type="button" (click)="reporting.set(false)">Cancelar</button>
+                    <button uiButton variant="primary" size="sm" type="submit" [disabled]="!reportReason().trim() || sendingReport()">
+                      Enviar reporte
+                    </button>
+                  </div>
+                </form>
               }
             </header>
             <lib-thread-scroll-pane [itemCount]="c.messages.length" [lastIsMine]="lastIsMine()" [resetKey]="c.id">
@@ -192,6 +226,10 @@ export default class Direct {
   readonly query = signal('');
   readonly starting = signal(false);
   readonly sending = signal(false);
+  /** COM-003 FR .20. */
+  readonly reporting = signal(false);
+  readonly reportReason = signal('');
+  readonly sendingReport = signal(false);
 
   readonly list = httpResource<DirectConversationSummary[]>(() => `${API}/direct`, { defaultValue: [] });
 
@@ -244,6 +282,26 @@ export default class Direct {
       this.#toast.showError(errorMessage(e));
     } finally {
       this.starting.set(false);
+    }
+  }
+
+  /** COM-003 FR .20: report the open conversation. */
+  async report(event: Event) {
+    event.preventDefault();
+    const id = this.id();
+    const reason = this.reportReason().trim();
+    if (!id || !reason) return;
+    this.sendingReport.set(true);
+    try {
+      await this.#api.reportDirect(id, reason);
+      this.reporting.set(false);
+      this.reportReason.set('');
+      this.#toast.showSuccess('Conversación reportada');
+      this.conversation.reload();
+    } catch (e) {
+      this.#toast.showError(errorMessage(e));
+    } finally {
+      this.sendingReport.set(false);
     }
   }
 

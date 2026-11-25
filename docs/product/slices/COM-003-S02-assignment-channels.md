@@ -4,7 +4,7 @@
 |---|---|
 | **FRD** | [COM-003](../frd/COM-003-channels-and-direct.md) |
 | **Implements** | FR-COM-003.17, FR-COM-003.18; BR-COM-003.10, BR-COM-003.11, BR-COM-003.13 |
-| **Status** | In review |
+| **Status** | Done (#89) |
 | **Branch** | `feat/COM-003-S02-assignment-channels` |
 | **Estimate** | 2.5 days |
 | **Decided** | 2026-11-25 (ACA-001 Q10): every assignment gets one; students reply under a pinned post; it closes 3 days after the latest due date |

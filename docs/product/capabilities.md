@@ -83,7 +83,7 @@ Code: `communication` (REST `/v1/communication/channels`, `/v1/communication/dir
 
 | Capability | Status | FRD |
 |---|---|---|
-| Channels at org / school / plan / group / course level, with read counts and read confirmations | Shipped (assignment Q&A channels S02, *por responder* for managers S03); in review: reporting direct conversations S04; proposed: email reminders for unconfirmed posts S05 | [COM-003](frd/COM-003-channels-and-direct.md) |
+| Channels at org / school / plan / group / course level, with read counts and read confirmations | Shipped (assignment Q&A channels S02, *por responder* for managers S03); in review: reporting direct conversations S04, email reminders for unconfirmed posts S05 | [COM-003](frd/COM-003-channels-and-direct.md) |
 | Direct messages staff ↔ parents | Shipped | [COM-003](frd/COM-003-channels-and-direct.md) |
 | Broadcasts, v2 threads, chats, legacy messages, newsletters | Removed (replaced by COM-003) | [COM-002](frd/COM-002-broadcasts.md) |
 

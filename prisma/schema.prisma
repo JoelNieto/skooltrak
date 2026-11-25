@@ -100,6 +100,7 @@ model User {
   directReportsFiled     DirectConversationReport[] @relation("DirectReportBy")
   directReportsResolved  DirectConversationReport[] @relation("DirectReportResolver")
   directReviews          DirectConversationAccess[]
+  channelPostReminders   ChannelPostReminder[]
   directMessages         DirectMessage[]
 
   @@map("users")
@@ -1052,20 +1053,21 @@ model Channel {
 }
 
 model ChannelPost {
-  id                   String            @id @default(cuid())
+  id                   String                @id @default(cuid())
   channelId            String
-  channel              Channel           @relation(fields: [channelId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  channel              Channel               @relation(fields: [channelId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   authorId             String?
-  author               User?             @relation(fields: [authorId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  author               User?                 @relation(fields: [authorId], references: [id], onDelete: SetNull, onUpdate: Cascade)
   body                 String
   /// Members are asked to press "Confirmar lectura" (COM-003 FR .6 / .8).
-  requiresConfirmation Boolean           @default(false)
+  requiresConfirmation Boolean               @default(false)
   /// The opening post of an ASSIGNMENT channel, shown first (COM-003 FR .17).
-  pinned               Boolean           @default(false)
-  createdAt            DateTime          @default(now())
+  pinned               Boolean               @default(false)
+  createdAt            DateTime              @default(now())
   deletedAt            DateTime?
   replies              ChannelReply[]
   reads                ChannelPostRead[]
+  reminders            ChannelPostReminder[]
 
   @@index([channelId, createdAt])
   @@map("channel_posts")
@@ -1100,6 +1102,19 @@ model ChannelPostRead {
   @@id([postId, userId])
   @@index([userId])
   @@map("channel_post_reads")
+}
+
+/// COM-003 FR .21, BR .15: the one email reminder a member got to confirm a post; never sent twice.
+model ChannelPostReminder {
+  id     String      @id @default(cuid())
+  postId String
+  post   ChannelPost @relation(fields: [postId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  userId String
+  user   User        @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  sentAt DateTime    @default(now())
+
+  @@unique([postId, userId])
+  @@map("channel_post_reminders")
 }
 
 /// One-to-one conversation started by staff with a parent, optionally about one child (COM-003 FR .12).

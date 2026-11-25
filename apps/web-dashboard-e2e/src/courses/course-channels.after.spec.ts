@@ -79,7 +79,10 @@ async function expectedUnread(request: APIRequestContext, persona: 'student' | '
 const nuevos = (n: number) => (n === 1 ? '1 nuevo' : `${n} nuevos`);
 const mensajes = (n: number) => (n === 1 ? '1 mensaje nuevo.' : `${n} mensajes nuevos.`);
 const channelsTab = (page: Page) => page.getByRole('tab', { name: /^Canales/ });
-const channelsList = (page: Page) => page.getByRole('list', { name: 'Canales del curso' });
+// Scoped to the Canales tab panel: the Resumen card has a list with the same name, and right after
+// the tab is clicked a lookup could otherwise grab that soon-hidden list and wait on it forever.
+const channelsList = (page: Page) =>
+  page.getByRole('tabpanel', { name: 'Canales' }).getByRole('list', { name: 'Canales del curso' });
 
 test.beforeAll(async ({ request }) => {
   const teacher = await bearer(request, 'teacher');
@@ -664,9 +667,7 @@ test.describe('assignment Q&A channels @FR-ACA-001.29', () => {
     test('"Preguntar en el curso" still goes to a course channel', async ({ page }) => {
       await page.goto(`/courses/${courseId}`);
       await page.getByRole('button', { name: 'Preguntar en el curso' }).click();
-      await expect(
-        page.getByRole('list', { name: 'Canales del curso' }).getByRole('button', { pressed: true }),
-      ).toHaveCount(1);
+      await expect(channelsList(page).getByRole('button', { pressed: true })).toHaveCount(1);
     });
   });
 

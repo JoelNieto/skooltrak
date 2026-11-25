@@ -99,8 +99,8 @@ test.describe('Channels', () => {
 
       await post.getByRole('button', { name: 'Responder' }).click();
       await expect(post.getByText('Tu respuesta solo la ven los administradores del canal.')).toBeVisible();
-      await post.getByPlaceholder('Escribe una respuesta…').fill('Enterada, gracias.');
-      await post.getByPlaceholder('Escribe una respuesta…').press('Enter');
+      await post.getByRole('textbox', { name: 'Escribe una respuesta…' }).fill('Enterada, gracias.');
+      await post.getByRole('textbox', { name: 'Escribe una respuesta…' }).press('Enter');
       await expect(post.getByText('Enterada, gracias.')).toBeVisible();
     });
   });
@@ -137,7 +137,7 @@ test.describe('Channels', () => {
 
       await post.getByRole('button', { name: /Respuestas \(1\)/ }).click();
       await expect(post.getByText('Enterada, gracias.')).toBeVisible();
-      const composer = post.getByPlaceholder(`Responder a ${parentName}…`);
+      const composer = post.getByRole('textbox', { name: `Responder a ${parentName}…` });
       await composer.fill('Gracias a usted.');
       await composer.press('Enter');
       await expect(post.getByText('Gracias a usted.')).toBeVisible();

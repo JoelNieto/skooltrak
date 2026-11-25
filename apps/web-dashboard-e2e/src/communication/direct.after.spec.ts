@@ -29,8 +29,8 @@ test.describe('Direct messages', () => {
 
       await expect(page.getByRole('heading', { name: parentName })).toBeVisible();
       await expect(page.getByText('Sobre Beto E2E').first()).toBeVisible();
-      await page.getByPlaceholder('Escribe un mensaje…').fill('Beto entregó un trabajo excelente hoy.');
-      await page.getByPlaceholder('Escribe un mensaje…').press('Enter');
+      await page.getByRole('textbox', { name: 'Escribe un mensaje…' }).fill('Beto entregó un trabajo excelente hoy.');
+      await page.getByRole('textbox', { name: 'Escribe un mensaje…' }).press('Enter');
       await expect(page.getByText('Beto entregó un trabajo excelente hoy.')).toBeVisible();
     });
   });
@@ -43,8 +43,8 @@ test.describe('Direct messages', () => {
       await expect(page.getByRole('button', { name: 'Nuevo mensaje' })).toHaveCount(0);
       await page.getByRole('link', { name: /Sobre Beto E2E/ }).click();
       await expect(page.getByText('Beto entregó un trabajo excelente hoy.')).toBeVisible();
-      await page.getByPlaceholder('Escribe un mensaje…').fill('¡Qué buena noticia, gracias!');
-      await page.getByPlaceholder('Escribe un mensaje…').press('Enter');
+      await page.getByRole('textbox', { name: 'Escribe un mensaje…' }).fill('¡Qué buena noticia, gracias!');
+      await page.getByRole('textbox', { name: 'Escribe un mensaje…' }).press('Enter');
       await expect(page.getByText('¡Qué buena noticia, gracias!')).toBeVisible();
 
       const parent = await bearer(request, 'parent');

@@ -172,7 +172,8 @@ test.describe('as a student @FR-ACA-001.21 @FR-ACA-001.22', () => {
       .click();
     // S18: it opens beside the list, and the course page stays.
     await expect(page).toHaveURL(new RegExp(`/courses/${courseId}\\?canal=${ids[GENERAL]}`));
-    await expect(page.getByText(GENERAL_POSTS[1])).toBeVisible();
+    // The post itself (its text is also the row's preview in the list).
+    await expect(page.getByRole('article').filter({ hasText: GENERAL_POSTS[1] })).toBeVisible();
 
     await expect.poll(() => expectedUnread(request, 'student')).toBe(before - 2);
     await page.goto(`/courses/${courseId}`);

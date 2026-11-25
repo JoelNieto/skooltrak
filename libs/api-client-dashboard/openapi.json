@@ -5976,6 +5976,627 @@
         ]
       }
     },
+    "/api/v1/communication/unread": {
+      "get": {
+        "operationId": "CommunicationController_unread",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Unread channel posts and direct messages (FR-COM-003.15)",
+        "tags": [
+          "communication"
+        ]
+      }
+    },
+    "/api/v1/communication/channels": {
+      "get": {
+        "operationId": "CommunicationController_listChannels",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Channels the caller manages or belongs to (FR-COM-003.11)",
+        "tags": [
+          "communication"
+        ]
+      },
+      "post": {
+        "operationId": "CommunicationController_createChannel",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateChannelInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create a channel (FR-COM-003.1–.4)",
+        "tags": [
+          "communication"
+        ]
+      }
+    },
+    "/api/v1/communication/channels/recent": {
+      "get": {
+        "operationId": "CommunicationController_recent",
+        "parameters": [
+          {
+            "name": "take",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Latest channel posts for home pages (FR-COM-003.16)",
+        "tags": [
+          "communication"
+        ]
+      }
+    },
+    "/api/v1/communication/channels/targets": {
+      "get": {
+        "operationId": "CommunicationController_targets",
+        "parameters": [
+          {
+            "name": "scope",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "enum": [
+                "ORGANIZATION",
+                "SCHOOL",
+                "STUDY_PLAN",
+                "CLASS_GROUP",
+                "COURSE"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "schoolId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "What the caller may target at a level (BR-COM-003.2)",
+        "tags": [
+          "communication"
+        ]
+      }
+    },
+    "/api/v1/communication/channels/{id}": {
+      "get": {
+        "operationId": "CommunicationController_getChannel",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "A channel with its latest posts (FR-COM-003.7, .9)",
+        "tags": [
+          "communication"
+        ]
+      },
+      "patch": {
+        "operationId": "CommunicationController_updateChannel",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateChannelInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Edit a channel or archive it (FR-COM-003.5)",
+        "tags": [
+          "communication"
+        ]
+      }
+    },
+    "/api/v1/communication/channels/{id}/read": {
+      "post": {
+        "operationId": "CommunicationController_markChannelRead",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Mark the channel's posts read (FR-COM-003.8)",
+        "tags": [
+          "communication"
+        ]
+      }
+    },
+    "/api/v1/communication/channels/{id}/posts": {
+      "post": {
+        "operationId": "CommunicationController_createPost",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateChannelPostInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Publish a post (FR-COM-003.6)",
+        "tags": [
+          "communication"
+        ]
+      }
+    },
+    "/api/v1/communication/channels/{id}/posts/{postId}": {
+      "delete": {
+        "operationId": "CommunicationController_deletePost",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "postId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Delete a post",
+        "tags": [
+          "communication"
+        ]
+      }
+    },
+    "/api/v1/communication/channels/{id}/posts/{postId}/confirm": {
+      "post": {
+        "operationId": "CommunicationController_confirm",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "postId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Confirm reading a post (FR-COM-003.8)",
+        "tags": [
+          "communication"
+        ]
+      }
+    },
+    "/api/v1/communication/channels/{id}/posts/{postId}/receipts": {
+      "get": {
+        "operationId": "CommunicationController_receipts",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "postId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Who read and confirmed a post (FR-COM-003.9)",
+        "tags": [
+          "communication"
+        ]
+      }
+    },
+    "/api/v1/communication/channels/{id}/posts/{postId}/replies": {
+      "get": {
+        "operationId": "CommunicationController_replies",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "postId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "member",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Replies the caller may see (FR-COM-003.10)",
+        "tags": [
+          "communication"
+        ]
+      },
+      "post": {
+        "operationId": "CommunicationController_reply",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "postId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateChannelReplyInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Reply to a post (FR-COM-003.10)",
+        "tags": [
+          "communication"
+        ]
+      }
+    },
+    "/api/v1/communication/direct": {
+      "get": {
+        "operationId": "CommunicationController_listDirect",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "The caller's direct conversations (FR-COM-003.14)",
+        "tags": [
+          "communication"
+        ]
+      },
+      "post": {
+        "operationId": "CommunicationController_startDirect",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StartDirectInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Start or reopen a conversation with a parent (FR-COM-003.12)",
+        "tags": [
+          "communication"
+        ]
+      }
+    },
+    "/api/v1/communication/direct/recipients": {
+      "get": {
+        "operationId": "CommunicationController_recipients",
+        "parameters": [
+          {
+            "name": "q",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Parents the caller may message, by student (BR-COM-003.8)",
+        "tags": [
+          "communication"
+        ]
+      }
+    },
+    "/api/v1/communication/direct/{id}": {
+      "get": {
+        "operationId": "CommunicationController_getDirect",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "A conversation with its messages; marks it read (FR-COM-003.13)",
+        "tags": [
+          "communication"
+        ]
+      }
+    },
+    "/api/v1/communication/direct/{id}/messages": {
+      "post": {
+        "operationId": "CommunicationController_sendDirect",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SendDirectMessageInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Send a direct message (FR-COM-003.13)",
+        "tags": [
+          "communication"
+        ]
+      }
+    },
     "/api/v1/assignment-submissions/upload-url": {
       "post": {
         "operationId": "AssignmentSubmissionsController_createSubmissionUploadUrl",
@@ -9213,627 +9834,6 @@
         ]
       }
     },
-    "/api/v1/communication/unread": {
-      "get": {
-        "operationId": "CommunicationController_unread",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Unread channel posts and direct messages (FR-COM-003.15)",
-        "tags": [
-          "communication"
-        ]
-      }
-    },
-    "/api/v1/communication/channels": {
-      "get": {
-        "operationId": "CommunicationController_listChannels",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Channels the caller manages or belongs to (FR-COM-003.11)",
-        "tags": [
-          "communication"
-        ]
-      },
-      "post": {
-        "operationId": "CommunicationController_createChannel",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateChannelInput"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Create a channel (FR-COM-003.1–.4)",
-        "tags": [
-          "communication"
-        ]
-      }
-    },
-    "/api/v1/communication/channels/recent": {
-      "get": {
-        "operationId": "CommunicationController_recent",
-        "parameters": [
-          {
-            "name": "take",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Latest channel posts for home pages (FR-COM-003.16)",
-        "tags": [
-          "communication"
-        ]
-      }
-    },
-    "/api/v1/communication/channels/targets": {
-      "get": {
-        "operationId": "CommunicationController_targets",
-        "parameters": [
-          {
-            "name": "scope",
-            "required": true,
-            "in": "query",
-            "schema": {
-              "enum": [
-                "ORGANIZATION",
-                "SCHOOL",
-                "STUDY_PLAN",
-                "CLASS_GROUP",
-                "COURSE"
-              ],
-              "type": "string"
-            }
-          },
-          {
-            "name": "schoolId",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "What the caller may target at a level (BR-COM-003.2)",
-        "tags": [
-          "communication"
-        ]
-      }
-    },
-    "/api/v1/communication/channels/{id}": {
-      "get": {
-        "operationId": "CommunicationController_getChannel",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "A channel with its latest posts (FR-COM-003.7, .9)",
-        "tags": [
-          "communication"
-        ]
-      },
-      "patch": {
-        "operationId": "CommunicationController_updateChannel",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateChannelInput"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Edit a channel or archive it (FR-COM-003.5)",
-        "tags": [
-          "communication"
-        ]
-      }
-    },
-    "/api/v1/communication/channels/{id}/read": {
-      "post": {
-        "operationId": "CommunicationController_markChannelRead",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "201": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Mark the channel's posts read (FR-COM-003.8)",
-        "tags": [
-          "communication"
-        ]
-      }
-    },
-    "/api/v1/communication/channels/{id}/posts": {
-      "post": {
-        "operationId": "CommunicationController_createPost",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateChannelPostInput"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Publish a post (FR-COM-003.6)",
-        "tags": [
-          "communication"
-        ]
-      }
-    },
-    "/api/v1/communication/channels/{id}/posts/{postId}": {
-      "delete": {
-        "operationId": "CommunicationController_deletePost",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "postId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Delete a post",
-        "tags": [
-          "communication"
-        ]
-      }
-    },
-    "/api/v1/communication/channels/{id}/posts/{postId}/confirm": {
-      "post": {
-        "operationId": "CommunicationController_confirm",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "postId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "201": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Confirm reading a post (FR-COM-003.8)",
-        "tags": [
-          "communication"
-        ]
-      }
-    },
-    "/api/v1/communication/channels/{id}/posts/{postId}/receipts": {
-      "get": {
-        "operationId": "CommunicationController_receipts",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "postId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Who read and confirmed a post (FR-COM-003.9)",
-        "tags": [
-          "communication"
-        ]
-      }
-    },
-    "/api/v1/communication/channels/{id}/posts/{postId}/replies": {
-      "get": {
-        "operationId": "CommunicationController_replies",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "postId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "member",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Replies the caller may see (FR-COM-003.10)",
-        "tags": [
-          "communication"
-        ]
-      },
-      "post": {
-        "operationId": "CommunicationController_reply",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "postId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateChannelReplyInput"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Reply to a post (FR-COM-003.10)",
-        "tags": [
-          "communication"
-        ]
-      }
-    },
-    "/api/v1/communication/direct": {
-      "get": {
-        "operationId": "CommunicationController_listDirect",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "The caller's direct conversations (FR-COM-003.14)",
-        "tags": [
-          "communication"
-        ]
-      },
-      "post": {
-        "operationId": "CommunicationController_startDirect",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/StartDirectInput"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Start or reopen a conversation with a parent (FR-COM-003.12)",
-        "tags": [
-          "communication"
-        ]
-      }
-    },
-    "/api/v1/communication/direct/recipients": {
-      "get": {
-        "operationId": "CommunicationController_recipients",
-        "parameters": [
-          {
-            "name": "q",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Parents the caller may message, by student (BR-COM-003.8)",
-        "tags": [
-          "communication"
-        ]
-      }
-    },
-    "/api/v1/communication/direct/{id}": {
-      "get": {
-        "operationId": "CommunicationController_getDirect",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "A conversation with its messages; marks it read (FR-COM-003.13)",
-        "tags": [
-          "communication"
-        ]
-      }
-    },
-    "/api/v1/communication/direct/{id}/messages": {
-      "post": {
-        "operationId": "CommunicationController_sendDirect",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/SendDirectMessageInput"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Send a direct message (FR-COM-003.13)",
-        "tags": [
-          "communication"
-        ]
-      }
-    },
     "/api/v1/habit-evaluations": {
       "post": {
         "operationId": "HabitEvaluationsController_saveHabitEvaluation",
@@ -11322,6 +11322,30 @@
         "type": "object",
         "properties": {}
       },
+      "CreateChannelInput": {
+        "type": "object",
+        "properties": {}
+      },
+      "UpdateChannelInput": {
+        "type": "object",
+        "properties": {}
+      },
+      "CreateChannelPostInput": {
+        "type": "object",
+        "properties": {}
+      },
+      "CreateChannelReplyInput": {
+        "type": "object",
+        "properties": {}
+      },
+      "StartDirectInput": {
+        "type": "object",
+        "properties": {}
+      },
+      "SendDirectMessageInput": {
+        "type": "object",
+        "properties": {}
+      },
       "CreateSubmissionUploadInput": {
         "type": "object",
         "properties": {}
@@ -11427,30 +11451,6 @@
         "properties": {}
       },
       "CreateParentInput": {
-        "type": "object",
-        "properties": {}
-      },
-      "CreateChannelInput": {
-        "type": "object",
-        "properties": {}
-      },
-      "UpdateChannelInput": {
-        "type": "object",
-        "properties": {}
-      },
-      "CreateChannelPostInput": {
-        "type": "object",
-        "properties": {}
-      },
-      "CreateChannelReplyInput": {
-        "type": "object",
-        "properties": {}
-      },
-      "StartDirectInput": {
-        "type": "object",
-        "properties": {}
-      },
-      "SendDirectMessageInput": {
         "type": "object",
         "properties": {}
       },

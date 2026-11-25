@@ -1,4 +1,4 @@
-import { Button, Icon, Toast, UiField, UiInput } from '#/ui';
+import { Button, Icon, Toast, UiField, UiInput, UiSelect } from '#/ui';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { Component, computed, inject, input, output, signal } from '@angular/core';
 import { form, FormField, required } from '@angular/forms/signals';
@@ -7,7 +7,7 @@ import { CreatedEntity } from '../setup-wizard';
 
 @Component({
   selector: 'app-degrees-step',
-  imports: [UiField, UiInput, Button, FormField, Icon],
+  imports: [UiField, UiInput, UiSelect, Button, FormField, Icon],
   template: `
     <div class="w-full max-w-md text-center space-y-8 animate-fade-in">
       <!-- Icon -->
@@ -48,6 +48,20 @@ import { CreatedEntity } from '../setup-wizard';
 
         <ui-field label="Nombre Corto / Siglas" [field]="form.shortName">
           <input uiInput type="text" id="shortName" [formField]="form.shortName" placeholder="Ej: PRIM" />
+        </ui-field>
+
+        <ui-field
+          label="Métrica de Calificaciones"
+          [field]="form.gradeMetricId"
+          hint="La usan todos los planes de estudio del nivel."
+          optional
+        >
+          <select uiSelect id="gradeMetricId" [formField]="form.gradeMetricId">
+            <option value="">Sin métrica por ahora</option>
+            @for (metric of gradeMetrics.value(); track metric.id) {
+              <option [value]="metric.id">{{ metric.name }}</option>
+            }
+          </select>
         </ui-field>
 
         <div class="flex gap-3 pt-4">
@@ -134,7 +148,11 @@ export default class DegreesStep {
     return this.schools.value()?.[0]?.id;
   });
 
-  private formModel = signal({ name: '', shortName: '' });
+  public gradeMetrics = httpResource<Array<{ id: string; name: string }>>(() => '/api/v1/grade-metrics', {
+    defaultValue: [],
+  });
+
+  private formModel = signal({ name: '', shortName: '', gradeMetricId: '' });
 
   public form = form(this.formModel, (schemaPath) => {
     required(schemaPath.name, { message: 'El nombre es requerido' });
@@ -155,13 +173,14 @@ export default class DegreesStep {
 
     this.saving.set(true);
 
-    const { name, shortName } = this.formModel();
+    const { name, shortName, gradeMetricId } = this.formModel();
 
     this.#http
       .post<{ id: string; name: string }>('/api/v1/degrees', {
         name,
         shortName,
         schoolId,
+        gradeMetricId: gradeMetricId || null,
       })
       .subscribe({
         next: (degree) => {

@@ -3764,6 +3764,75 @@
         ]
       }
     },
+    "/api/v1/study-plans/bulk": {
+      "post": {
+        "operationId": "StudyPlansController_bulkCreate",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BulkCreateStudyPlansInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create one study plan per grade of a degree",
+        "tags": [
+          "study-plans"
+        ]
+      }
+    },
+    "/api/v1/study-plans/{id}/duplicate": {
+      "post": {
+        "operationId": "StudyPlansController_duplicate",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DuplicateStudyPlanInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Duplicate a study plan, with its courses",
+        "tags": [
+          "study-plans"
+        ]
+      }
+    },
     "/api/v1/study-plans/by-school": {
       "get": {
         "operationId": "StudyPlansController_findAllBySchoolId",
@@ -11267,6 +11336,14 @@
         "properties": {}
       },
       "CreateStudyPlanInput": {
+        "type": "object",
+        "properties": {}
+      },
+      "BulkCreateStudyPlansInput": {
+        "type": "object",
+        "properties": {}
+      },
+      "DuplicateStudyPlanInput": {
         "type": "object",
         "properties": {}
       },

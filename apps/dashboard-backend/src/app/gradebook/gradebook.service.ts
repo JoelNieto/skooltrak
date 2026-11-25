@@ -34,6 +34,7 @@ import {
 } from './entities/gradebook.entity';
 import { SaveCellInput, SaveCellsInput } from './dto/save-cells.input';
 import { gradebookCsv, gradebookCsvName } from './gradebook-csv';
+import { effectiveGradeMetric, planMetricSelect } from '../study-plans/plan-settings';
 
 export const SCHOOL_DENIED = 'La escuela no pertenece a tu organización';
 export const PERIOD_INVALID = 'El periodo no pertenece al año escolar actual';
@@ -132,9 +133,7 @@ export class GradebookService {
         organizationId: true,
         school: { select: { currentYear: true, timezone: true } },
         studyPlan: {
-          select: {
-            gradeMetric: { select: { minimum: true, maximum: true, minimumApproval: true, minimumExcellence: true } },
-          },
+          select: planMetricSelect({ minimum: true, maximum: true, minimumApproval: true, minimumExcellence: true }),
         },
       },
     });
@@ -181,7 +180,7 @@ export class GradebookService {
     }
     const students = selected ? roster.filter((s) => (s.classGroup?.id ?? null) === selected.id) : [];
 
-    const metric = toMetric(course.studyPlan.gradeMetric);
+    const metric = toMetric(effectiveGradeMetric(course.studyPlan));
     const base = {
       course: { id: course.id, name: course.name },
       metric,
@@ -292,10 +291,10 @@ export class GradebookService {
       where: { id: courseId },
       select: {
         organizationId: true,
-        studyPlan: { select: { gradeMetric: { select: { minimum: true, maximum: true } } } },
+        studyPlan: { select: planMetricSelect({ minimum: true, maximum: true }) },
       },
     });
-    const metric = course.studyPlan.gradeMetric;
+    const metric = effectiveGradeMetric(course.studyPlan);
     if (!metric) throw new BadRequestException({ message: METRIC_MISSING, cells: [] });
     const scale = { minimum: num(metric.minimum), maximum: num(metric.maximum) };
 

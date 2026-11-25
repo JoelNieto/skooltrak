@@ -316,7 +316,30 @@ model Degree {
   updatedAt  DateTime    @updatedAt
   studyPlans StudyPlan[]
 
+  // Defaults every study plan of the level inherits; a plan's own non-null value overrides them.
+  gradeMetric          GradeMetric?           @relation(fields: [gradeMetricId], references: [id], onDelete: SetNull)
+  gradeMetricId        String?
+  monthlyTuitionAmount Decimal?
+  /// Tuition period, months 1-12 inclusive. An end before the start wraps over New Year (Aug → May).
+  tuitionStartMonth    Int?
+  tuitionEndMonth      Int?
+  enrollmentCosts      DegreeEnrollmentCost[]
+
   @@map("degrees")
+}
+
+model DegreeEnrollmentCost {
+  id        String   @id @default(cuid())
+  degreeId  String
+  degree    Degree   @relation(fields: [degreeId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  name      String
+  amount    Decimal
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([degreeId])
+  @@map("degree_enrollment_costs")
 }
 
 model StudyPlan {
@@ -326,7 +349,7 @@ model StudyPlan {
   level                Int
   degreeId             String
   degree               Degree                    @relation(fields: [degreeId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  description          String
+  description          String                    @default("")
   schoolId             String
   school               School                    @relation(fields: [schoolId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   courses              Course[]
@@ -334,10 +357,13 @@ model StudyPlan {
   updatedAt            DateTime                  @updatedAt
   classGroups          ClassGroup[]
   charges              Charge[]
+  // Overrides of the degree's defaults: null (or no enrollment costs) inherits the degree's value.
+  // Resolve them with study-plans/plan-settings.ts, never by reading these columns alone.
   gradeMetric          GradeMetric?              @relation(fields: [gradeMetricId], references: [id], onDelete: SetNull)
   gradeMetricId        String?
   monthlyTuitionAmount Decimal?
-  tuitionMonths        Int[]                     @default([])
+  tuitionStartMonth    Int?
+  tuitionEndMonth      Int?
   enrollmentCosts      StudyPlanEnrollmentCost[]
   channels             Channel[]
 
@@ -733,6 +759,7 @@ model GradeMetric {
   createdAt         DateTime    @default(now())
   updatedAt         DateTime    @updatedAt
   studyPlans        StudyPlan[]
+  degrees           Degree[]
 
   @@map("grade_metrics")
 }

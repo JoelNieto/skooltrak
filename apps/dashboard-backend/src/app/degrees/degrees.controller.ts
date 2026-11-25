@@ -6,10 +6,12 @@ import { PrismaService } from '../prisma.service';
 import { DegreesService } from './degrees.service';
 import { CreateDegreeInput } from './dto/create-degree.input';
 import { UpdateDegreeInput } from './dto/update-degree.input';
+import { assertCanWriteSettings } from '../study-plans/plan-settings-writes';
 
 /**
  * Degrees belong to a school. Reads need VIEW_STUDY_PLANS, writes MANAGE_STUDY_PLANS, and the
- * school must be in the caller's organization.
+ * school must be in the caller's organization. A degree holds the grade metric and financial
+ * settings its study plans inherit; writing tuition or enrollment costs also needs MANAGE_FINANCIALS.
  */
 @ApiTags('degrees')
 @ApiBearerAuth()
@@ -26,6 +28,7 @@ export class DegreesController {
   @RequirePermissions(Perm.MANAGE_STUDY_PLANS)
   @ApiOperation({ summary: 'Create degree' })
   async create(@Req() req: AuthenticatedRequest, @Body() createDegreeInput: CreateDegreeInput) {
+    assertCanWriteSettings(req.user, createDegreeInput);
     await assertSchoolInOrganization(this.prisma, req.user, createDegreeInput.schoolId);
     return this.degreesService.create(createDegreeInput);
   }
@@ -70,6 +73,7 @@ export class DegreesController {
   @RequirePermissions(Perm.MANAGE_STUDY_PLANS)
   @ApiOperation({ summary: 'Update degree' })
   async update(@Req() req: AuthenticatedRequest, @Body() updateDegreeInput: UpdateDegreeInput) {
+    assertCanWriteSettings(req.user, updateDegreeInput);
     const degree = await this.degreesService.ref(updateDegreeInput.id);
     await assertSchoolInOrganization(this.prisma, req.user, degree.schoolId);
     if (updateDegreeInput.schoolId) {

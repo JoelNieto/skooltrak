@@ -8,6 +8,7 @@ import { enrolledIn } from '../courses/course-roster';
 import { PrismaService } from '../prisma.service';
 import { CreateGradeInput } from './dto/create-grade.input';
 import { UpdateGradeInput } from './dto/update-grade.input';
+import { PLAN_METRIC_INCLUDE, withEffectiveMetric } from '../study-plans/plan-settings';
 
 @Injectable()
 export class GradesService {
@@ -50,13 +51,13 @@ export class GradesService {
     return created;
   }
 
-  findOne(id: string) {
-    return this.prisma.grade.findUnique({
+  async findOne(id: string) {
+    const grade = await this.prisma.grade.findUnique({
       where: { id },
       include: {
         period: true,
         bucket: true,
-        course: { include: { studyPlan: { include: { gradeMetric: true } } } },
+        course: { include: { studyPlan: { include: PLAN_METRIC_INCLUDE } } },
         studentGrades: {
           include: {
             student: { include: { classGroup: true } },
@@ -69,6 +70,8 @@ export class GradesService {
         },
       },
     });
+    if (!grade) return grade;
+    return { ...grade, course: { ...grade.course, studyPlan: withEffectiveMetric(grade.course.studyPlan) } };
   }
 
   findByCourseId(courseId: string, periodId?: string) {

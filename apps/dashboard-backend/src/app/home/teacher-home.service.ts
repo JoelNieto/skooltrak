@@ -36,6 +36,7 @@ import {
   schoolLocalTime,
   utcDate,
 } from './home-time';
+import { effectiveGradeMetric, planMetricSelect } from '../study-plans/plan-settings';
 
 /** FR-HOM-001.5: the period-close banner shows from this many days before the period ends. */
 export const PERIOD_CLOSE_WINDOW_DAYS = 14;
@@ -445,11 +446,11 @@ export class TeacherHomeService {
         select: {
           id: true,
           name: true,
-          studyPlan: { select: { gradeMetric: { select: { maximum: true, minimumApproval: true, minimumExcellence: true } } } },
+          studyPlan: { select: planMetricSelect({ maximum: true, minimumApproval: true, minimumExcellence: true }) },
         },
       }),
     ]);
-    const courses = rawCourses.map((c) => ({ id: c.id, name: c.name, thresholds: toThresholds(c.studyPlan?.gradeMetric) }));
+    const courses = rawCourses.map((c) => ({ id: c.id, name: c.name, thresholds: toThresholds(effectiveGradeMetric(c.studyPlan)) }));
     const periodIds = [current?.id, previous?.id].filter((id): id is string => Boolean(id));
     if (!current || !courses.length) {
       return { current, previous, courses, averages: new Map(), studentIds: new Set() };

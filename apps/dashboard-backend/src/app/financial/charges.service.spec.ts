@@ -45,7 +45,9 @@ describe('ChargesService', () => {
       id: 'sp1',
       enrollmentCosts: [{ name: 'Inscripción', amount: new Prisma.Decimal(500), order: 1 }],
       monthlyTuitionAmount: new Prisma.Decimal(1000),
-      tuitionMonths: [8, 9, 10],
+      tuitionStartMonth: 8,
+      tuitionEndMonth: 10,
+      degree: null,
     });
     prisma.school.findUnique.mockResolvedValue({ currentYear: 2026, schoolYearStartMonth: 8 });
 
@@ -67,7 +69,9 @@ describe('ChargesService', () => {
       id: 'sp1',
       enrollmentCosts: [],
       monthlyTuitionAmount: new Prisma.Decimal(1000),
-      tuitionMonths: [1, 6],
+      tuitionStartMonth: 1,
+      tuitionEndMonth: 6,
+      degree: null,
     });
     prisma.school.findUnique.mockResolvedValue({ currentYear: 2026, schoolYearStartMonth: 8 });
 
@@ -75,6 +79,62 @@ describe('ChargesService', () => {
 
     const data = prisma.charge.createMany.mock.calls[0][0].data as Prisma.ChargeCreateManyInput[];
     expect(data.every((c) => (c.year as number) === 2027)).toBe(true);
+  });
+
+  it('inherits the degree settings the plan does not override', async () => {
+    prisma.charge.count.mockResolvedValue(0);
+    prisma.studyPlan.findUnique.mockResolvedValue({
+      id: 'sp1',
+      enrollmentCosts: [],
+      monthlyTuitionAmount: new Prisma.Decimal(1200),
+      tuitionStartMonth: null,
+      tuitionEndMonth: null,
+      degree: {
+        enrollmentCosts: [{ name: 'Matrícula', amount: new Prisma.Decimal(300), order: 0 }],
+        monthlyTuitionAmount: new Prisma.Decimal(900),
+        tuitionStartMonth: 11,
+        tuitionEndMonth: 2,
+      },
+    });
+    prisma.school.findUnique.mockResolvedValue({ currentYear: 2026, schoolYearStartMonth: 8 });
+
+    await service.generateFromStudyPlan('s1', 'sp1', 'sch1', 2026);
+
+    const data = prisma.charge.createMany.mock.calls[0][0].data as Prisma.ChargeCreateManyInput[];
+    const enrollment = data.filter((c) => c.chargeType === $Enums.ChargeType.ENROLLMENT);
+    const tuition = data.filter((c) => c.chargeType === $Enums.ChargeType.TUITION);
+    expect(enrollment.map((c) => c.description)).toEqual(['Matrícula']);
+    // The plan's own tuition amount wins; the period comes from the degree and wraps over New Year.
+    expect(tuition.every((c) => (c.amount as Prisma.Decimal).equals(1200))).toBe(true);
+    expect(tuition.map((c) => [c.description, c.year])).toEqual([
+      ['Colegiatura Noviembre', 2026],
+      ['Colegiatura Diciembre', 2026],
+      ['Colegiatura Enero', 2027],
+      ['Colegiatura Febrero', 2027],
+    ]);
+  });
+
+  it('uses the plan enrollment costs over the degree ones', async () => {
+    prisma.charge.count.mockResolvedValue(0);
+    prisma.studyPlan.findUnique.mockResolvedValue({
+      id: 'sp1',
+      enrollmentCosts: [{ name: 'Propio', amount: new Prisma.Decimal(10), order: 0 }],
+      monthlyTuitionAmount: null,
+      tuitionStartMonth: null,
+      tuitionEndMonth: null,
+      degree: {
+        enrollmentCosts: [{ name: 'Del nivel', amount: new Prisma.Decimal(300), order: 0 }],
+        monthlyTuitionAmount: null,
+        tuitionStartMonth: null,
+        tuitionEndMonth: null,
+      },
+    });
+    prisma.school.findUnique.mockResolvedValue({ currentYear: 2026, schoolYearStartMonth: 8 });
+
+    await service.generateFromStudyPlan('s1', 'sp1', 'sch1', 2026);
+
+    const data = prisma.charge.createMany.mock.calls[0][0].data as Prisma.ChargeCreateManyInput[];
+    expect(data.map((c) => c.description)).toEqual(['Propio']);
   });
 
   describe('regenerateFromStudyPlan', () => {
@@ -92,7 +152,9 @@ describe('ChargesService', () => {
         id: 'sp1',
         enrollmentCosts: [{ name: 'Inscripción', amount: new Prisma.Decimal(500), order: 1 }],
         monthlyTuitionAmount: new Prisma.Decimal(1000),
-        tuitionMonths: [8, 9],
+        tuitionStartMonth: 8,
+        tuitionEndMonth: 9,
+        degree: null,
       });
       prisma.school.findUnique.mockResolvedValue({ currentYear: 2026, schoolYearStartMonth: 8 });
 
@@ -110,7 +172,9 @@ describe('ChargesService', () => {
         id: 'sp1',
         enrollmentCosts: [],
         monthlyTuitionAmount: new Prisma.Decimal(1000),
-        tuitionMonths: [8],
+        tuitionStartMonth: 8,
+        tuitionEndMonth: 8,
+        degree: null,
       });
       prisma.school.findUnique.mockResolvedValue({ currentYear: 2026, schoolYearStartMonth: 8 });
 
@@ -132,7 +196,9 @@ describe('ChargesService', () => {
         id: 'sp1',
         enrollmentCosts: [],
         monthlyTuitionAmount: new Prisma.Decimal(1000),
-        tuitionMonths: [8],
+        tuitionStartMonth: 8,
+        tuitionEndMonth: 8,
+        degree: null,
       });
       prisma.school.findUnique.mockResolvedValue({ currentYear: 2026, schoolYearStartMonth: 8 });
 

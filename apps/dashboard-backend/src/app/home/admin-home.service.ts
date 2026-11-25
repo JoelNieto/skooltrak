@@ -9,6 +9,7 @@ import { toThresholds } from './home-grades';
 import { PeriodRef, resolvePeriodPair } from './home-period';
 import { addDays, CLOCK, Clock, SchoolLocalTime, schoolLocalTime, utcDate } from './home-time';
 import { periodClose } from './teacher-home.service';
+import { effectiveGradeMetric, PLAN_WITHOUT_METRIC, planMetricSelect } from '../study-plans/plan-settings';
 
 /** `Perm.VIEW_FINANCIALS`, as a string to keep the auth guard stack out of unit tests. */
 const VIEW_FINANCIALS = 'VIEW_FINANCIALS';
@@ -63,7 +64,7 @@ export class AdminHomeService {
             OR: [{ status: ImportJobStatus.FAILED }, { errorCount: { gt: 0 } }],
           },
         }),
-        this.prisma.studyPlan.count({ where: { schoolId: school.id, gradeMetricId: null } }),
+        this.prisma.studyPlan.count({ where: { schoolId: school.id, ...PLAN_WITHOUT_METRIC } }),
       ]);
 
     const close = periodClose(current, local.date);
@@ -249,11 +250,11 @@ export class AdminHomeService {
         where: { organizationId, schoolId: school.id },
         select: {
           id: true,
-          studyPlan: { select: { gradeMetric: { select: { maximum: true, minimumApproval: true, minimumExcellence: true } } } },
+          studyPlan: { select: planMetricSelect({ maximum: true, minimumApproval: true, minimumExcellence: true }) },
         },
       }),
     ]);
-    const scales = new Map(courses.map((c) => [c.id, toThresholds(c.studyPlan?.gradeMetric)]));
+    const scales = new Map(courses.map((c) => [c.id, toThresholds(effectiveGradeMetric(c.studyPlan))]));
 
     const byStudent = new Map<string, { below: boolean; allExcellent: boolean }>();
     for (const row of averages) {

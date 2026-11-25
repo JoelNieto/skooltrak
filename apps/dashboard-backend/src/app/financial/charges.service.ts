@@ -1,24 +1,11 @@
+import { MONTH_NAMES } from '@/shared';
 import { $Enums, Prisma } from '@generated/prisma';
 import { BadRequestException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma.service';
+import { effectiveFinancials, PLAN_FINANCIAL_INCLUDE } from '../study-plans/plan-settings';
 import { CreateChargeInput } from './dto/create-charge.input';
 
 type ChargeWithRelations = Prisma.ChargeGetPayload<{ include: { student: true; studyPlan: true } }>;
-
-const MONTH_LABELS: Record<number, string> = {
-  1: 'Enero',
-  2: 'Febrero',
-  3: 'Marzo',
-  4: 'Abril',
-  5: 'Mayo',
-  6: 'Junio',
-  7: 'Julio',
-  8: 'Agosto',
-  9: 'Septiembre',
-  10: 'Octubre',
-  11: 'Noviembre',
-  12: 'Diciembre',
-};
 
 @Injectable()
 export class ChargesService {
@@ -205,11 +192,13 @@ export class ChargesService {
     });
     if (existing > 0) return 0;
 
-    const studyPlan = await this.prisma.studyPlan.findUnique({
+    const plan = await this.prisma.studyPlan.findUnique({
       where: { id: studyPlanId },
-      include: { enrollmentCosts: { orderBy: { order: 'asc' } } },
+      include: PLAN_FINANCIAL_INCLUDE,
     });
-    if (!studyPlan) return 0;
+    if (!plan) return 0;
+    // The plan's own settings, else its degree's (study-plans/plan-settings.ts).
+    const settings = effectiveFinancials(plan);
 
     const school = await this.prisma.school.findUnique({
       where: { id: schoolId },
@@ -222,7 +211,7 @@ export class ChargesService {
 
     // Enrollment costs are due at the start of the academic year.
     const enrollmentDue = new Date(baseYear, startMonth - 1, 1);
-    for (const cost of studyPlan.enrollmentCosts) {
+    for (const cost of settings.enrollmentCosts) {
       data.push({
         schoolId,
         year: baseYear,
@@ -236,9 +225,10 @@ export class ChargesService {
       });
     }
 
-    // One tuition charge per configured month.
-    const tuitionAmount = studyPlan.monthlyTuitionAmount;
-    const tuitionMonths = studyPlan.tuitionMonths ?? [];
+    // One tuition charge per month of the tuition period; months before the school year's start
+    // month fall in the next calendar year.
+    const tuitionAmount = settings.monthlyTuitionAmount;
+    const tuitionMonths = settings.tuitionMonths;
     if (tuitionAmount && tuitionAmount.gt(0) && tuitionMonths.length > 0) {
       for (const m of tuitionMonths) {
         const y = m >= startMonth ? baseYear : baseYear + 1;
@@ -249,7 +239,7 @@ export class ChargesService {
           studyPlanId,
           amount: tuitionAmount,
           dueDate: new Date(y, m - 1, 1),
-          description: `Colegiatura ${MONTH_LABELS[m] ?? m}`,
+          description: `Colegiatura ${MONTH_NAMES[m] ?? m}`,
           chargeType: $Enums.ChargeType.TUITION,
           status: $Enums.ChargeStatus.PENDING,
         });

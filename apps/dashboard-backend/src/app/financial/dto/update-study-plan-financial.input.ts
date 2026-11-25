@@ -1,19 +1,10 @@
-export class EnrollmentCostInput {
-    id?: string;
+import { IsString } from 'class-validator';
+import { PlanSettingsInput } from '../../study-plans/dto/plan-settings.input';
 
-    name: string;
+export { EnrollmentCostInput } from '../../study-plans/dto/plan-settings.input';
 
-    amount: number;
-
-    order: number;
-}
-
-export class UpdateStudyPlanFinancialInput {
-    studyPlanId: string;
-
-    monthlyTuitionAmount?: number;
-
-    tuitionMonths?: number[];
-
-    enrollmentCosts?: EnrollmentCostInput[];
+/** A plan's financial overrides; `gradeMetricId` is ignored here. */
+export class UpdateStudyPlanFinancialInput extends PlanSettingsInput {
+  @IsString()
+  studyPlanId: string;
 }

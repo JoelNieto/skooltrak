@@ -1,7 +1,8 @@
 import { Button, Icon, Toast, UiField, UiInput, UiSelect } from '#/ui';
 import { HttpClient, httpResource } from '@angular/common/http';
-import { Component, computed, inject, input, output, signal } from '@angular/core';
-import { form, FormField, required } from '@angular/forms/signals';
+import { suggestedPlanName } from '#/shared';
+import { Component, computed, effect, inject, input, output, signal, untracked } from '@angular/core';
+import { form, FormField, min, required, validate } from '@angular/forms/signals';
 import Store from '../../core/store';
 import { CreatedEntity } from '../setup-wizard';
 
@@ -20,7 +21,9 @@ import { CreatedEntity } from '../setup-wizard';
       <!-- Title & Subtitle -->
       <div class="space-y-2">
         <h1 class="text-2xl md:text-3xl font-bold text-ink-strong">Configura Planes de Estudio</h1>
-        <p class="text-ink-muted">Los planes de estudio definen el currículo dentro de cada nivel académico.</p>
+        <p class="text-ink-muted">
+          Un plan por grado de cada nivel (por ejemplo, 1° a 6° de Primaria). Usan la métrica y los costos del nivel.
+        </p>
       </div>
 
       <!-- Created Study Plans List -->
@@ -63,28 +66,20 @@ import { CreatedEntity } from '../setup-wizard';
             </select>
           </ui-field>
 
-          <ui-field label="Nombre del Plan" [field]="form.name">
-            <input uiInput type="text" id="name" [formField]="form.name" placeholder="Ej: Primer Grado" />
-          </ui-field>
-
           <div class="grid grid-cols-2 gap-4">
-            <ui-field label="Nombre Corto" [field]="form.shortName">
-              <input uiInput type="text" id="shortName" [formField]="form.shortName" placeholder="1ro" />
+            <ui-field label="Desde el grado" [field]="form.fromLevel">
+              <input uiInput type="number" id="fromLevel" [formField]="form.fromLevel" />
             </ui-field>
-
-            <ui-field label="Grado/Nivel" [field]="form.level">
-              <input uiInput type="number" id="level" [formField]="form.level" placeholder="1" />
+            <ui-field label="Hasta el grado" [field]="form.toLevel">
+              <input uiInput type="number" id="toLevel" [formField]="form.toLevel" />
             </ui-field>
           </div>
 
-          <ui-field label="Métrica de Calificaciones" [field]="form.gradeMetricId">
-            <select uiSelect id="gradeMetricId" [formField]="form.gradeMetricId">
-              <option value="" disabled>Selecciona una métrica...</option>
-              @for (metric of gradeMetrics.value(); track metric.id) {
-                <option [value]="metric.id">{{ metric.name }}</option>
-              }
-            </select>
-          </ui-field>
+          @if (preview().length) {
+            <p class="text-sm text-ink-muted">
+              Se crearán: <span class="text-ink-strong">{{ preview().join(', ') }}</span>
+            </p>
+          }
 
           <div class="flex gap-3 pt-4">
             <button
@@ -98,7 +93,7 @@ import { CreatedEntity } from '../setup-wizard';
               @if (!(saving() && addAnother)) {
                 <ui-icon name="plus" class="text-xl" />
               }
-              Agregar otro
+              Crear y agregar otro nivel
             </button>
             <button
               uiButton
@@ -112,7 +107,7 @@ import { CreatedEntity } from '../setup-wizard';
               @if (saving() && !addAnother) {
                 Guardando...
               } @else {
-                Guardar y Continuar
+                Crear y Continuar
                 <ui-icon name="arrow-right" class="text-xl" />
               }
             </button>
@@ -172,7 +167,7 @@ export default class StudyPlansStep {
     return this.schools.value()?.[0]?.id;
   });
 
-  public degrees = httpResource<Array<{ id: string; name: string }>>(
+  public degrees = httpResource<Array<{ id: string; name: string; studyPlans?: { level: number }[] }>>(
     () => {
       const schoolId = this.schoolId();
       if (!schoolId) {
@@ -183,37 +178,55 @@ export default class StudyPlansStep {
     { defaultValue: [] },
   );
 
-  public gradeMetrics = httpResource<Array<{ id: string; name: string }>>(() => '/api/v1/grade-metrics', {
-    defaultValue: [],
-  });
-
   // Combine API degrees with newly created ones
   public allDegrees = () => {
     const apiDegrees = this.degrees.value() ?? [];
-    const newDegrees = this.createdDegrees().map((d) => ({ id: d.id, name: d.name }));
+    const newDegrees = this.createdDegrees().map((d) => ({ id: d.id, name: d.name, studyPlans: [] }));
     return [...apiDegrees, ...newDegrees.filter((nd) => !apiDegrees.some((ad) => ad.id === nd.id))];
   };
 
-  private formModel = signal({
-    name: '',
-    shortName: '',
-    level: 1,
-    degreeId: '',
-    gradeMetricId: '',
-  });
+  private formModel = signal({ degreeId: '', fromLevel: 1, toLevel: 6 });
 
   public form = form(this.formModel, (schemaPath) => {
-    required(schemaPath.name, { message: 'El nombre es requerido' });
-    required(schemaPath.shortName, { message: 'El nombre corto es requerido' });
-    required(schemaPath.level, { message: 'El nivel es requerido' });
     required(schemaPath.degreeId, { message: 'El nivel es requerido' });
-    required(schemaPath.gradeMetricId, { message: 'Metrica requerido' });
+    required(schemaPath.fromLevel, { message: 'El grado es requerido' });
+    required(schemaPath.toLevel, { message: 'El grado es requerido' });
+    min(schemaPath.fromLevel, 0, { message: 'El grado no puede ser negativo' });
+    validate(schemaPath.toLevel, ({ value, valueOf }) => {
+      const span = Number(value()) - Number(valueOf(schemaPath.fromLevel)) + 1;
+      if (span < 1) return { kind: 'range', message: 'Debe ser mayor o igual al grado inicial' };
+      if (span > 20) return { kind: 'range', message: 'Máximo 20 planes a la vez' };
+      return null;
+    });
   });
+
+  /** The plan names the range creates ("1° Primaria"...). */
+  public preview = computed(() => {
+    const degree = this.allDegrees().find((d) => d.id === this.form.degreeId().value());
+    const from = Number(this.form.fromLevel().value());
+    const to = Number(this.form.toLevel().value());
+    if (!degree || !Number.isInteger(from) || !Number.isInteger(to) || to < from || to - from + 1 > 20) return [];
+    return Array.from({ length: to - from + 1 }, (_, i) => suggestedPlanName(from + i, degree.name));
+  });
+
+  constructor() {
+    // A degree that already has plans continues after its highest grade.
+    effect(() => {
+      const degree = this.allDegrees().find((d) => d.id === this.form.degreeId().value());
+      if (!degree) return;
+      untracked(() => {
+        const from = (degree.studyPlans?.[0]?.level ?? 0) + 1;
+        this.formModel.update((m) => ({ ...m, fromLevel: from, toLevel: Math.max(from, m.toLevel) }));
+      });
+    });
+  }
 
   public onSubmit(event: Event) {
     event.preventDefault();
     if (this.form().invalid()) {
-      this.toasts.showError('Por favor, completa todos los campos');
+      this.form.degreeId().markAsTouched();
+      this.form.toLevel().markAsTouched();
+      this.toasts.showError('Revisa el nivel y el rango de grados');
       return;
     }
 
@@ -224,31 +237,35 @@ export default class StudyPlansStep {
     }
 
     this.saving.set(true);
-
-    const formValue = this.formModel();
+    const { degreeId, fromLevel, toLevel } = this.formModel();
 
     this.#http
-      .post<{ id: string; name: string }>('/api/v1/study-plans', {
-        ...formValue,
-        description: '',
+      .post<{ created: { id: string; name: string }[]; skipped: number[] }>('/api/v1/study-plans/bulk', {
         schoolId,
+        degreeId,
+        fromLevel: Number(fromLevel),
+        toLevel: Number(toLevel),
       })
       .subscribe({
-        next: (studyPlan) => {
+        next: ({ created }) => {
           this.saving.set(false);
-          if (studyPlan) {
-            this.entityCreated.emit({ id: studyPlan.id, name: studyPlan.name, type: 'studyPlan' });
-            this.toasts.showSuccess(`Plan "${studyPlan.name}" creado`);
+          for (const plan of created) {
+            this.entityCreated.emit({ id: plan.id, name: plan.name, type: 'studyPlan' });
           }
-          this.form().value.set({ name: '', shortName: '', level: 1, degreeId: '', gradeMetricId: '' });
+          if (created.length) {
+            this.toasts.showSuccess(created.length === 1 ? 'Plan creado' : `${created.length} planes creados`);
+          } else {
+            this.toasts.showError('El nivel ya tiene esos grados');
+          }
+          this.form().value.set({ degreeId: '', fromLevel: 1, toLevel: 6 });
 
-          if (!this.addAnother) {
+          if (!this.addAnother && created.length) {
             this.completed.emit();
           }
         },
         error: (err) => {
           this.saving.set(false);
-          this.toasts.showError(err.message || 'Error al crear el plan de estudio');
+          this.toasts.showError(err.error?.message || err.message || 'Error al crear los planes de estudio');
         },
       });
   }

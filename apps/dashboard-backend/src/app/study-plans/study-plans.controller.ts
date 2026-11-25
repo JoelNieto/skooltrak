@@ -17,15 +17,19 @@ import {
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { assertSchoolInOrganization } from '../org-scope';
 import { PrismaService } from '../prisma.service';
+import { BulkCreateStudyPlansInput } from './dto/bulk-create-study-plans.input';
 import { CreateStudyPlanInput } from './dto/create-study-plan.input';
+import { DuplicateStudyPlanInput } from './dto/duplicate-study-plan.input';
 import { UpdateStudyPlanInput } from './dto/update-study-plan.input';
+import { assertCanWriteSettings } from './plan-settings-writes';
 import { StudyPlansService } from './study-plans.service';
 
 export const DEGREE_MISMATCH = 'El grado no pertenece a la escuela del plan de estudio';
 
 /**
  * Study plans belong to a school. Reads need VIEW_STUDY_PLANS, writes MANAGE_STUDY_PLANS, and the
- * school must be in the caller's organization.
+ * school must be in the caller's organization. A write that sets tuition or enrollment costs also
+ * needs MANAGE_FINANCIALS (plan-settings-writes.ts).
  */
 @ApiTags('study-plans')
 @ApiBearerAuth()
@@ -42,9 +46,29 @@ export class StudyPlansController {
   @RequirePermissions(Perm.MANAGE_STUDY_PLANS)
   @ApiOperation({ summary: 'Create study plan' })
   async create(@Req() req: AuthenticatedRequest, @Body() createStudyPlanInput: CreateStudyPlanInput) {
+    assertCanWriteSettings(req.user, createStudyPlanInput);
     await assertSchoolInOrganization(this.prisma, req.user, createStudyPlanInput.schoolId);
     await this.assertDegreeInSchool(createStudyPlanInput.degreeId, createStudyPlanInput.schoolId);
     return this.studyPlansService.create(createStudyPlanInput);
+  }
+
+  @Post('bulk')
+  @RequirePermissions(Perm.MANAGE_STUDY_PLANS)
+  @ApiOperation({ summary: 'Create one study plan per grade of a degree' })
+  async bulkCreate(@Req() req: AuthenticatedRequest, @Body() input: BulkCreateStudyPlansInput) {
+    await assertSchoolInOrganization(this.prisma, req.user, input.schoolId);
+    await this.assertDegreeInSchool(input.degreeId, input.schoolId);
+    return this.studyPlansService.bulkCreate(input);
+  }
+
+  @Post(':id/duplicate')
+  @RequirePermissions(Perm.MANAGE_STUDY_PLANS)
+  @ApiOperation({ summary: 'Duplicate a study plan, with its courses' })
+  async duplicate(@Req() req: AuthenticatedRequest, @Param('id') id: string, @Body() input: DuplicateStudyPlanInput) {
+    const plan = await this.ref(id);
+    await assertSchoolInOrganization(this.prisma, req.user, plan.schoolId);
+    if (input.degreeId) await this.assertDegreeInSchool(input.degreeId, plan.schoolId);
+    return this.studyPlansService.duplicate(plan.id, input);
   }
 
   @Get()
@@ -78,6 +102,7 @@ export class StudyPlansController {
   @RequirePermissions(Perm.MANAGE_STUDY_PLANS)
   @ApiOperation({ summary: 'Update study plan' })
   async update(@Req() req: AuthenticatedRequest, @Body() updateStudyPlanInput: UpdateStudyPlanInput) {
+    assertCanWriteSettings(req.user, updateStudyPlanInput);
     const plan = await this.ref(updateStudyPlanInput.id);
     await assertSchoolInOrganization(this.prisma, req.user, plan.schoolId);
     const schoolId = updateStudyPlanInput.schoolId ?? plan.schoolId;

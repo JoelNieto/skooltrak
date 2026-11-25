@@ -22,6 +22,7 @@ import { ChargesService } from '../financial/charges.service';
 import { PrismaService, STUDENT_PERSONAL_DETAILS } from '../prisma.service';
 import { CreateStudentInput } from './dto/create-student.input';
 import { UpdateStudentInput } from './dto/update-student.input';
+import { PLAN_METRIC_INCLUDE, withEffectiveMetric } from '../study-plans/plan-settings';
 
 export const STUDENT_DENIED = 'No tienes acceso a este estudiante';
 export const REFS_DENIED = 'La escuela o el grupo no pertenecen a tu organización';
@@ -533,7 +534,7 @@ export class StudentsService {
       omit: STUDENT_PERSONAL_DETAILS,
       include: {
         classGroup: {
-          include: { studyPlan: { include: { gradeMetric: true } } },
+          include: { studyPlan: { include: PLAN_METRIC_INCLUDE } },
         },
         courseEnrollments: {
           where: ACTIVE_ENROLLMENT,
@@ -555,7 +556,11 @@ export class StudentsService {
         },
       },
     });
-    return { ...student, courses: courseEnrollments.map((e) => e.course) };
+    const classGroup = student.classGroup && {
+      ...student.classGroup,
+      studyPlan: withEffectiveMetric(student.classGroup.studyPlan),
+    };
+    return { ...student, classGroup, courses: courseEnrollments.map((e) => e.course) };
   }
 
   async update(id: string, updateStudentInput: UpdateStudentInput) {

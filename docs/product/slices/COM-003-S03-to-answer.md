@@ -4,7 +4,7 @@
 |---|---|
 | **FRD** | [COM-003](../frd/COM-003-channels-and-direct.md) |
 | **Implements** | FR-COM-003.19; BR-COM-003.12 |
-| **Status** | In review |
+| **Status** | Done (#89) |
 | **Branch** | `feat/COM-003-S03-to-answer` |
 | **Estimate** | 1.5 days |
 | **Decided** | 2026-11-25 (ACA-001 Q11) |

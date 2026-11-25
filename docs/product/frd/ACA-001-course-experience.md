@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | In build (course channels, S15–S21) |
+| **Status** | Shipped |
 | **Context** | ACA — Academics (see [capabilities](../capabilities.md#aca-academics)) |
 | **Owner** | — |
 | **Last updated** | 2026-11-25 |
@@ -308,5 +308,5 @@ Listed in build order.
 | [ACA-001-S17](../slices/ACA-001-S17-ask-in-course.md) | *"Preguntar en el curso"* opens the course conversation channel | .25 | Done (#87) |
 | [ACA-001-S18](../slices/ACA-001-S18-channel-in-course.md) | Students and parents read, confirm and reply inside the *Canales* tab | .26, BR .20 | Done (#87) |
 | [ACA-001-S19](../slices/ACA-001-S19-manage-channels-in-course.md) | Teachers post, see receipts and answer inside the *Canales* tab; *Nuevo canal para este curso* | .27, BR .19 .20 | Done (#88) |
-| [ACA-001-S20](../slices/ACA-001-S20-to-answer.md) | *"{n} por responder"* for managers | .28 | In review |
-| [ACA-001-S21](../slices/ACA-001-S21-assignment-channels-in-course.md) | Assignment Q&A group and assignment card in *Canales* | .29, BR .17 .18 | In review |
+| [ACA-001-S20](../slices/ACA-001-S20-to-answer.md) | *"{n} por responder"* for managers | .28 | Done (#89) |
+| [ACA-001-S21](../slices/ACA-001-S21-assignment-channels-in-course.md) | Assignment Q&A group and assignment card in *Canales* | .29, BR .17 .18 | Done (#89) |

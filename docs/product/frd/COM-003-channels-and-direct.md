@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | In build |
+| **Status** | Shipped |
 | **Context** | COM — Communication (see [capabilities](../capabilities.md#com-communication)) |
 | **Owner** | — |
 | **Last updated** | 2026-11-25 |
@@ -146,6 +146,6 @@ Removed endpoints: `/v1/messages/*`, `/v1/chats/*`, `/v1/newsletters/*`, and eve
 ## 11. Slices
 | Slice | Title | FRs | Status |
 |---|---|---|---|
-| COM-003-S01 | Replace every legacy channel with Channels + Direct (schema, API, UI, homes) | .1–.16 | In review (unit tests pass; e2e `communication/channels.spec.ts` and `direct.after.spec.ts` written, awaiting first run) |
-| [COM-003-S02](../slices/COM-003-S02-assignment-channels.md) | Assignment Q&A channels: created with the assignment, pinned post, closing, backfill | .17 .18, BR .10 .11 .13 | In review |
-| [COM-003-S03](../slices/COM-003-S03-to-answer.md) | *Por responder* for managers | .19, BR .12 | In review |
+| COM-003-S01 | Replace every legacy channel with Channels + Direct (schema, API, UI, homes) | .1–.16 | Done (#84; its e2e first ran green with #89) |
+| [COM-003-S02](../slices/COM-003-S02-assignment-channels.md) | Assignment Q&A channels: created with the assignment, pinned post, closing, backfill | .17 .18, BR .10 .11 .13 | Done (#89) |
+| [COM-003-S03](../slices/COM-003-S03-to-answer.md) | *Por responder* for managers | .19, BR .12 | Done (#89) |

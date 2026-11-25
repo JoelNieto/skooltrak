@@ -123,7 +123,9 @@ import type {
   QuizzesControllerFindAllParams,
   RegenerateStudyPlanChargesInput,
   RemoveShareInput,
+  ReportDirectInput,
   RequestJoinSchoolInput,
+  ResolveDirectReportInput,
   ReviewSubmissionInput,
   RosterAddInput,
   SaveCellsInput,
@@ -6714,6 +6716,156 @@ if(coursesControllerUploadCoverBody.file !== undefined) {
     ...(options as Omit<NonNullable<typeof options>, 'observe'>),
         observe: 'body',
         params: filteredParams,}
+    );
+  }
+
+/**
+ * @summary The organization's reported direct conversations, for admins (FR-COM-003.20)
+ */
+ communicationControllerListDirectReports<TData = void>( options?: HttpClientBodyOptions): Observable<TData>;
+ communicationControllerListDirectReports<TData = void>( options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
+ communicationControllerListDirectReports<TData = void>( options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
+  communicationControllerListDirectReports<TData = void>(
+     options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
+    if (options?.observe === 'events') {
+      return this.http.get<TData>(
+      `/api/v1/communication/direct/reports`,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'events',
+      }
+    );
+    }
+
+    if (options?.observe === 'response') {
+      return this.http.get<TData>(
+      `/api/v1/communication/direct/reports`,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'response',
+      }
+    );
+    }
+
+    return this.http.get<TData>(
+      `/api/v1/communication/direct/reports`,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'body',
+      }
+    );
+  }
+
+/**
+ * @summary A reported conversation, read-only and logged, for admins (BR-COM-003.14)
+ */
+ communicationControllerReviewDirect<TData = void>(id: string, options?: HttpClientBodyOptions): Observable<TData>;
+ communicationControllerReviewDirect<TData = void>(id: string, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
+ communicationControllerReviewDirect<TData = void>(id: string, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
+  communicationControllerReviewDirect<TData = void>(
+    id: string, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
+    if (options?.observe === 'events') {
+      return this.http.get<TData>(
+      `/api/v1/communication/direct/reports/conversations/${id}`,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'events',
+      }
+    );
+    }
+
+    if (options?.observe === 'response') {
+      return this.http.get<TData>(
+      `/api/v1/communication/direct/reports/conversations/${id}`,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'response',
+      }
+    );
+    }
+
+    return this.http.get<TData>(
+      `/api/v1/communication/direct/reports/conversations/${id}`,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'body',
+      }
+    );
+  }
+
+/**
+ * @summary Resolve a report with a note (FR-COM-003.20)
+ */
+ communicationControllerResolveDirectReport<TData = void>(reportId: string,
+    resolveDirectReportInput: ResolveDirectReportInput, options?: HttpClientBodyOptions): Observable<TData>;
+ communicationControllerResolveDirectReport<TData = void>(reportId: string,
+    resolveDirectReportInput: ResolveDirectReportInput, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
+ communicationControllerResolveDirectReport<TData = void>(reportId: string,
+    resolveDirectReportInput: ResolveDirectReportInput, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
+  communicationControllerResolveDirectReport<TData = void>(
+    reportId: string,
+    resolveDirectReportInput: ResolveDirectReportInput, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
+    if (options?.observe === 'events') {
+      return this.http.post<TData>(
+      `/api/v1/communication/direct/reports/${reportId}/resolve`,
+      resolveDirectReportInput,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'events',
+      }
+    );
+    }
+
+    if (options?.observe === 'response') {
+      return this.http.post<TData>(
+      `/api/v1/communication/direct/reports/${reportId}/resolve`,
+      resolveDirectReportInput,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'response',
+      }
+    );
+    }
+
+    return this.http.post<TData>(
+      `/api/v1/communication/direct/reports/${reportId}/resolve`,
+      resolveDirectReportInput,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'body',
+      }
+    );
+  }
+
+/**
+ * @summary Report a direct conversation, as a participant (FR-COM-003.20)
+ */
+ communicationControllerReportDirect<TData = void>(id: string,
+    reportDirectInput: ReportDirectInput, options?: HttpClientBodyOptions): Observable<TData>;
+ communicationControllerReportDirect<TData = void>(id: string,
+    reportDirectInput: ReportDirectInput, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
+ communicationControllerReportDirect<TData = void>(id: string,
+    reportDirectInput: ReportDirectInput, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
+  communicationControllerReportDirect<TData = void>(
+    id: string,
+    reportDirectInput: ReportDirectInput, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
+    if (options?.observe === 'events') {
+      return this.http.post<TData>(
+      `/api/v1/communication/direct/${id}/report`,
+      reportDirectInput,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'events',
+      }
+    );
+    }
+
+    if (options?.observe === 'response') {
+      return this.http.post<TData>(
+      `/api/v1/communication/direct/${id}/report`,
+      reportDirectInput,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'response',
+      }
+    );
+    }
+
+    return this.http.post<TData>(
+      `/api/v1/communication/direct/${id}/report`,
+      reportDirectInput,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'body',
+      }
     );
   }
 

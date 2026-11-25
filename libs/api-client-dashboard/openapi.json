@@ -6529,6 +6529,133 @@
         ]
       }
     },
+    "/api/v1/communication/direct/reports": {
+      "get": {
+        "operationId": "CommunicationController_listDirectReports",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "The organization's reported direct conversations, for admins (FR-COM-003.20)",
+        "tags": [
+          "communication"
+        ]
+      }
+    },
+    "/api/v1/communication/direct/reports/conversations/{id}": {
+      "get": {
+        "operationId": "CommunicationController_reviewDirect",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "A reported conversation, read-only and logged, for admins (BR-COM-003.14)",
+        "tags": [
+          "communication"
+        ]
+      }
+    },
+    "/api/v1/communication/direct/reports/{reportId}/resolve": {
+      "post": {
+        "operationId": "CommunicationController_resolveDirectReport",
+        "parameters": [
+          {
+            "name": "reportId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResolveDirectReportInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Resolve a report with a note (FR-COM-003.20)",
+        "tags": [
+          "communication"
+        ]
+      }
+    },
+    "/api/v1/communication/direct/{id}/report": {
+      "post": {
+        "operationId": "CommunicationController_reportDirect",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReportDirectInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Report a direct conversation, as a participant (FR-COM-003.20)",
+        "tags": [
+          "communication"
+        ]
+      }
+    },
     "/api/v1/communication/direct/{id}": {
       "get": {
         "operationId": "CommunicationController_getDirect",
@@ -11339,6 +11466,14 @@
         "properties": {}
       },
       "StartDirectInput": {
+        "type": "object",
+        "properties": {}
+      },
+      "ResolveDirectReportInput": {
+        "type": "object",
+        "properties": {}
+      },
+      "ReportDirectInput": {
         "type": "object",
         "properties": {}
       },

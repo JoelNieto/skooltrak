@@ -18,6 +18,7 @@ import { averageKey, gradeBand, round1, toThresholds, weightedAverages } from '.
 import { resolveCurrentPeriod, resolvePeriodPair, toHomePeriod } from './home-period';
 import { timeState } from './home-schedule';
 import { addDays, CLOCK, Clock, localMidnight, SchoolLocalTime, schoolLocalTime, utcDate } from './home-time';
+import { effectiveGradeMetric, planMetricSelect } from '../study-plans/plan-settings';
 
 /** FR-HOM-001.14 window. */
 export const WORK_WINDOW = { aheadDays: 14, overdueDays: 7 } as const;
@@ -203,13 +204,13 @@ export class StudentHomeService {
             where: { id: group.id },
             select: {
               studyPlan: {
-                select: { gradeMetric: { select: { maximum: true, minimumApproval: true, minimumExcellence: true } } },
+                select: planMetricSelect({ maximum: true, minimumApproval: true, minimumExcellence: true }),
               },
             },
           })
         : Promise.resolve(null),
     ]);
-    const scale = toThresholds(planRow?.studyPlan?.gradeMetric);
+    const scale = toThresholds(effectiveGradeMetric(planRow?.studyPlan));
     const periodIds = [current?.id, previous?.id].filter((id): id is string => Boolean(id));
     const attendanceTo = current ? minDate(current.endDate.toISOString().slice(0, 10), local.date) : null;
 

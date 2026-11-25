@@ -19,6 +19,7 @@ import {
   CourseWork,
   CourseWorkItem,
 } from './entities/course-page.entity';
+import { effectiveGradeMetric, PLAN_METRIC_INCLUDE, planMetricSelect, withEffectiveMetric } from '../study-plans/plan-settings';
 
 type Decimalish = { toNumber(): number } | number;
 const num = (v: Decimalish) => (typeof v === 'number' ? v : v.toNumber());
@@ -45,7 +46,7 @@ export class CoursePageService {
         teacher: {
           include: { user: { select: { id: true, firstName: true, lastName: true, color: true, image: true } } },
         },
-        studyPlan: { include: { gradeMetric: true } },
+        studyPlan: { include: PLAN_METRIC_INCLUDE },
       },
     });
     if (!course) throw new ForbiddenException(COURSE_DENIED);
@@ -61,7 +62,7 @@ export class CoursePageService {
     }
 
     return {
-      ...withResolvedColor(course),
+      ...withResolvedColor({ ...course, studyPlan: withEffectiveMetric(course.studyPlan) }),
       /** FR-ACA-001.3: presigned; null keeps the color cover. */
       coverUrl: await this.covers.url(course.coverKey),
       /** FR-ACA-001.3: the course's teacher and admins may set its color and cover. */
@@ -147,7 +148,7 @@ export class CoursePageService {
       where: { id: courseId },
       select: {
         school: { select: { currentYear: true, timezone: true } },
-        studyPlan: { select: { gradeMetric: { select: { maximum: true, minimumApproval: true } } } },
+        studyPlan: { select: planMetricSelect({ maximum: true, minimumApproval: true }) },
         gradeBuckets: { select: { id: true, name: true, weight: true }, orderBy: { createdAt: 'asc' } },
       },
     });
@@ -162,7 +163,7 @@ export class CoursePageService {
       if (!selected) throw new BadRequestException(PERIOD_INVALID);
     }
 
-    const metric = course.studyPlan.gradeMetric;
+    const metric = effectiveGradeMetric(course.studyPlan);
     const scale = metric ? { maximum: num(metric.maximum), minimumApproval: num(metric.minimumApproval) } : null;
     const grades = selected
       ? await this.prisma.grade.findMany({

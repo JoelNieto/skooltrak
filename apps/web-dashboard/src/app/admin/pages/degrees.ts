@@ -168,6 +168,7 @@ export default class Degrees {
     this.modal
       .open(DegreesForm, {
         title: degree ? 'Editar Nivel' : 'Agregar Nivel',
+        size: 'large',
         data: {
           degree,
         },

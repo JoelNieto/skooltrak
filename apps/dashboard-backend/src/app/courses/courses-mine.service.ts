@@ -11,6 +11,7 @@ import { CourseCoverStorage } from './course-cover-storage';
 import { courseSchedule, scheduleText } from './course-schedule';
 import { enrolledCourses } from './course-roster';
 import { MyCourseBand, MyCourseNext, MyCourses } from './entities/my-courses.entity';
+import { effectiveGradeMetric, planMetricSelect } from '../study-plans/plan-settings';
 
 export const NO_STUDENT = 'No student profile in this organization';
 /** BR-ACA-001.2 */
@@ -142,7 +143,7 @@ export class CoursesMineService {
         icon: true,
         subject: { select: { name: true, icon: true, area: true } },
         teacher: { select: { firstName: true, fatherName: true, user: { select: { color: true } } } },
-        studyPlan: { select: { gradeMetric: { select: { maximum: true, minimumApproval: true } } } },
+        studyPlan: { select: planMetricSelect({ maximum: true, minimumApproval: true }) },
       },
     });
     const courseIds = courses.map((c) => c.id);
@@ -236,7 +237,7 @@ export class CoursesMineService {
       await Promise.all(courses.map(async (c) => [c.id, await this.covers.url(c.coverKey)] as const)),
     );
     const cards = courses.map((course) => {
-      const metric = course.studyPlan.gradeMetric;
+      const metric = effectiveGradeMetric(course.studyPlan);
       const scale = metric ? { maximum: num(metric.maximum), minimumApproval: num(metric.minimumApproval) } : null;
       const average = selected ? (averages.get(averageKey(student.id, course.id, selected.id)) ?? null) : null;
       const teacher = course.teacher;

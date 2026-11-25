@@ -13,6 +13,8 @@ import { DEFAULT_BUCKETS } from './default-buckets.constants';
 export const SCHOOL_DENIED = 'La escuela no pertenece a tu organización';
 import { CreateCourseInput } from './dto/create-course.input';
 import { UpdateCourseInput } from './dto/update-course.input';
+import { PLAN_METRIC_INCLUDE, withEffectiveMetric } from '../study-plans/plan-settings';
+import { uniqueCourseCode } from './course-code';
 
 export const COURSE_DENIED = 'No tienes acceso a este curso';
 export const STUDY_PLAN_NOT_FOUND = 'El plan de estudio seleccionado no existe';
@@ -90,44 +92,8 @@ export class CoursesService {
     if (!teacher) throw new BadRequestException(TEACHER_NOT_FOUND);
   }
 
-  /**
-   * Generates a unique course code starting with 3 letters.
-   * If the code already exists, it adds more letters until unique.
-   */
-  private async generateUniqueCode(schoolId: string, baseName: string): Promise<string> {
-    // Remove non-alphabetic characters and convert to uppercase
-    const cleanName = baseName.replace(/[^a-zA-Z]/g, '').toUpperCase();
-
-    // Start with 3 letters minimum
-    for (let length = 3; length <= cleanName.length; length++) {
-      const code = cleanName.substring(0, length);
-
-      const existing = await this.prisma.course.findUnique({
-        where: {
-          schoolId_code: { schoolId, code },
-        },
-      });
-
-      if (!existing) {
-        return code;
-      }
-    }
-
-    // If all substrings are taken, append a number
-    let counter = 1;
-    while (true) {
-      const code = `${cleanName.substring(0, 3)}${counter}`;
-      const existing = await this.prisma.course.findUnique({
-        where: {
-          schoolId_code: { schoolId, code },
-        },
-      });
-
-      if (!existing) {
-        return code;
-      }
-      counter++;
-    }
+  private generateUniqueCode(schoolId: string, baseName: string): Promise<string> {
+    return uniqueCourseCode(this.prisma, schoolId, baseName);
   }
 
   async create(createCourseInput: CreateCourseInput) {
@@ -183,14 +149,15 @@ export class CoursesService {
     // Enroll the study plan's students in the new course (ACA-001 BR .15).
     await enrollPlanStudents(this.prisma, course);
 
-    return this.prisma.course.findUnique({
+    const created = await this.prisma.course.findUnique({
       where: { id: course.id },
       include: {
         school: true,
         subject: true,
-        studyPlan: { include: { gradeMetric: true } },
+        studyPlan: { include: PLAN_METRIC_INCLUDE },
       },
     });
+    return created && { ...created, studyPlan: withEffectiveMetric(created.studyPlan) };
   }
 
   async replicate(targetStudyPlanId: string, sourceStudyPlanId: string) {
@@ -372,11 +339,11 @@ export class CoursesService {
         school: true,
         subject: true,
         teacher: { include: { user: true } },
-        studyPlan: { include: { gradeMetric: true } },
+        studyPlan: { include: PLAN_METRIC_INCLUDE },
       },
     });
     if (!course) throw new ForbiddenException(COURSE_DENIED);
-    return withResolvedColor(course);
+    return withResolvedColor({ ...course, studyPlan: withEffectiveMetric(course.studyPlan) });
   }
 
   async findManyByGroupId(groupId: string) {
@@ -386,16 +353,17 @@ export class CoursesService {
       select: { studyPlanId: true },
     });
     if (!group) return [];
-    return this.prisma.course.findMany({
+    const courses = await this.prisma.course.findMany({
       where: { studyPlanId: group.studyPlanId, organizationId },
       orderBy: { name: 'asc' },
       include: {
         school: true,
         subject: true,
         teacher: { include: { user: true } },
-        studyPlan: { include: { gradeMetric: true } },
+        studyPlan: { include: PLAN_METRIC_INCLUDE },
       },
     });
+    return courses.map((c) => ({ ...c, studyPlan: withEffectiveMetric(c.studyPlan) }));
   }
 
   async update(id: string, updateCourseInput: UpdateCourseInput) {

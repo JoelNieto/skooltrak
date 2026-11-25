@@ -27,7 +27,7 @@
   | Clases sin asistencia hoy | today's non-recess slots of the school whose start time has passed and that have no `AttendanceSession` for (course, group, today) (BR .15) | `/admin/attendance-reporting` |
   | Cargos vencidos | the school's charges with an outstanding amount and due date before today: count, amount, families (BR .14) | `/financial-module` |
   | Importaciones con errores | the school's `ImportJob`s with `FAILED` status, or `errorCount > 0`, in the last 30 days | `/admin/imports` |
-  | Planes sin escala de notas | the school's study plans with no `gradeMetricId` (BR .1) | `/admin/study-plans` |
+  | Planes sin escala de notas | the school's study plans with no grade metric of their own or from their degree (BR .1) | `/admin/study-plans` |
 
   The overdue-charges tile needs `VIEW_FINANCIALS` (BR .16). **Families** = distinct sets of parents of those students; students with no linked parent count one each.
 - **Period banner** (FR .5): shown while the current period ends within 14 days. It reads *"Cierre del {period} en N días · X de Y cursos tienen calificaciones incompletas"*, where incomplete means at least one enrolled active student has no score in a grade of the period.

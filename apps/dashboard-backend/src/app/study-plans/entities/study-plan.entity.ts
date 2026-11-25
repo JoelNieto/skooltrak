@@ -15,11 +15,12 @@ export class StudyPlan {
     description: string;
     schoolId: string;
 
-    gradeMetric: GradeMetric;
-    gradeMetricId: string;
+    // Overrides of the degree's settings; null inherits (plan-settings.ts).
+    gradeMetric?: GradeMetric | null;
+    gradeMetricId: string | null;
     monthlyTuitionAmount?: Prisma.Decimal | null;
-
-    tuitionMonths: number[];
+    tuitionStartMonth: number | null;
+    tuitionEndMonth: number | null;
 
     enrollmentCosts?: StudyPlanEnrollmentCost[];
 

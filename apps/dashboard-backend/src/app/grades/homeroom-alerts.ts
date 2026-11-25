@@ -1,4 +1,5 @@
 import { Prisma } from '@generated/prisma';
+import { effectiveGradeMetric, planMetricSelect } from '../study-plans/plan-settings';
 
 /**
  * ASM-001 BR .12: when a published score is below the pass mark, the homeroom teacher of the
@@ -37,7 +38,7 @@ export async function alertHomeroomTeachers(
         select: {
           name: true,
           teacher: { select: { userId: true } },
-          studyPlan: { select: { gradeMetric: { select: { minimumApproval: true } } } },
+          studyPlan: { select: planMetricSelect({ minimumApproval: true }) },
         },
       },
       studentGrades: {
@@ -60,7 +61,7 @@ export async function alertHomeroomTeachers(
       },
     },
   });
-  const passMark = grade?.course.studyPlan.gradeMetric?.minimumApproval;
+  const passMark = effectiveGradeMetric(grade?.course.studyPlan)?.minimumApproval;
   if (!grade?.published || passMark === undefined || passMark === null) return 0;
   const pass = num(passMark);
   const graders = new Set([grade.course.teacher?.userId, opts.actorUserId].filter((id): id is string => !!id));

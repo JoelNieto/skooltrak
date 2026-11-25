@@ -28,13 +28,11 @@ import { filter, switchMap } from 'rxjs';
 import { toFetchQueryRecord } from '../../core/fetch-query-params';
 import { PaginatedResponse } from '../../core/pagination-meta';
 import Store from '../../core/store';
-import StudyPlanForm from '../forms/study-plans-forms';
+import StudyPlanDuplicateForm from '../forms/study-plan-duplicate-form';
+import StudyPlansBulkForm from '../forms/study-plans-bulk-form';
+import StudyPlanForm, { StudyPlanFormRow } from '../forms/study-plans-forms';
 
-type StudyPlanRow = {
-  id: string;
-  name: string;
-  shortName?: string;
-  level?: number;
+type StudyPlanRow = StudyPlanFormRow & {
   degree: { name: string };
   createdAt?: string;
   updatedAt?: string;
@@ -82,6 +80,9 @@ type DegreeRow = {
           </select>
         </ui-field>
       </ui-filter-menu>
+      <button uiToolbarEnd uiButton variant="ghost" size="sm" type="button" (click)="bulkCreate()">
+        <ui-icon name="list-ordered" class="text-base" /> Crear varios
+      </button>
       <button uiToolbarEnd uiButton variant="primary" size="sm" type="button" (click)="editStudyPlan()">
         <ui-icon name="circle-plus" class="text-base" /> Nuevo plan
       </button>
@@ -97,8 +98,8 @@ type DegreeRow = {
           <tr>
             <th>Nombre</th>
             <th>Nombre corto</th>
-            <th>Nivel</th>
             <th>Grado</th>
+            <th>Nivel</th>
             <th>Creado</th>
             <th>Actualizado</th>
             <th>Acciones</th>
@@ -224,11 +225,33 @@ export default class StudyPlans {
         size: 'large',
         data: {
           studyPlan,
+          degreeId: this.form.degreeId().value() || undefined,
         },
       })
       .closed.subscribe(() => {
         this.studyPlans.reload();
       });
+  }
+
+  /** One plan per grade of a degree, in one step. */
+  public bulkCreate() {
+    this.modal
+      .open(StudyPlansBulkForm, {
+        title: 'Crear varios planes de estudio',
+        data: { degreeId: this.form.degreeId().value() || undefined },
+      })
+      .closed.subscribe(() => this.studyPlans.reload());
+  }
+
+  /** A copy of the plan, with its courses, as another grade. */
+  public duplicateStudyPlan(studyPlan: StudyPlanRow) {
+    this.modal
+      .open(StudyPlanDuplicateForm, {
+        title: 'Duplicar plan de estudio',
+        size: 'large',
+        data: { studyPlan },
+      })
+      .closed.subscribe(() => this.studyPlans.reload());
   }
 
   deleteStudyPlan(studyPlan: StudyPlanRow) {
@@ -258,6 +281,7 @@ export default class StudyPlans {
   /** The actions in each row's menu (ui-row-actions). */
   protected readonly rowActions: UiRowAction[] = [
     { id: 'edit', label: 'Editar', icon: 'pencil' },
+    { id: 'duplicate', label: 'Duplicar', icon: 'copy' },
     { id: 'delete', label: 'Eliminar', icon: 'trash-2', tone: 'danger' },
   ];
 
@@ -265,6 +289,9 @@ export default class StudyPlans {
     switch (action) {
       case 'edit':
         this.editStudyPlan(studyPlan);
+        break;
+      case 'duplicate':
+        this.duplicateStudyPlan(studyPlan);
         break;
       case 'delete':
         this.deleteStudyPlan(studyPlan);

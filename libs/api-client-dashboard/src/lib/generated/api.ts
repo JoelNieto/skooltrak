@@ -39,6 +39,7 @@ import type {
   AuthSessionControllerAvailableSchoolsParams,
   AuthSessionControllerLoginBody,
   AvatarUploadUrlInput,
+  BulkCreateStudyPlansInput,
   CheckoutStoreInput,
   ClassGroupsControllerCountParams,
   ClassGroupsControllerFindAllParams,
@@ -92,6 +93,7 @@ import type {
   CreateUserInput,
   DegreesControllerDegreesBySchoolIdCountParams,
   DegreesControllerFindManyBySchoolIdParams,
+  DuplicateStudyPlanInput,
   FilesControllerFilesAccessibleParams,
   FilesControllerFilesOwnedParams,
   FilesControllerFilesSharedWithMeParams,
@@ -4150,6 +4152,84 @@ if(coursesControllerUploadCoverBody.file !== undefined) {
     return this.http.patch<TData>(
       `/api/v1/study-plans`,
       updateStudyPlanInput,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'body',
+      }
+    );
+  }
+
+/**
+ * @summary Create one study plan per grade of a degree
+ */
+ studyPlansControllerBulkCreate<TData = void>(bulkCreateStudyPlansInput: BulkCreateStudyPlansInput, options?: HttpClientBodyOptions): Observable<TData>;
+ studyPlansControllerBulkCreate<TData = void>(bulkCreateStudyPlansInput: BulkCreateStudyPlansInput, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
+ studyPlansControllerBulkCreate<TData = void>(bulkCreateStudyPlansInput: BulkCreateStudyPlansInput, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
+  studyPlansControllerBulkCreate<TData = void>(
+    bulkCreateStudyPlansInput: BulkCreateStudyPlansInput, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
+    if (options?.observe === 'events') {
+      return this.http.post<TData>(
+      `/api/v1/study-plans/bulk`,
+      bulkCreateStudyPlansInput,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'events',
+      }
+    );
+    }
+
+    if (options?.observe === 'response') {
+      return this.http.post<TData>(
+      `/api/v1/study-plans/bulk`,
+      bulkCreateStudyPlansInput,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'response',
+      }
+    );
+    }
+
+    return this.http.post<TData>(
+      `/api/v1/study-plans/bulk`,
+      bulkCreateStudyPlansInput,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'body',
+      }
+    );
+  }
+
+/**
+ * @summary Duplicate a study plan, with its courses
+ */
+ studyPlansControllerDuplicate<TData = void>(id: string,
+    duplicateStudyPlanInput: DuplicateStudyPlanInput, options?: HttpClientBodyOptions): Observable<TData>;
+ studyPlansControllerDuplicate<TData = void>(id: string,
+    duplicateStudyPlanInput: DuplicateStudyPlanInput, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
+ studyPlansControllerDuplicate<TData = void>(id: string,
+    duplicateStudyPlanInput: DuplicateStudyPlanInput, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
+  studyPlansControllerDuplicate<TData = void>(
+    id: string,
+    duplicateStudyPlanInput: DuplicateStudyPlanInput, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
+    if (options?.observe === 'events') {
+      return this.http.post<TData>(
+      `/api/v1/study-plans/${id}/duplicate`,
+      duplicateStudyPlanInput,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'events',
+      }
+    );
+    }
+
+    if (options?.observe === 'response') {
+      return this.http.post<TData>(
+      `/api/v1/study-plans/${id}/duplicate`,
+      duplicateStudyPlanInput,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'response',
+      }
+    );
+    }
+
+    return this.http.post<TData>(
+      `/api/v1/study-plans/${id}/duplicate`,
+      duplicateStudyPlanInput,{
         ...(options as Omit<NonNullable<typeof options>, 'observe'>),
         observe: 'body',
       }

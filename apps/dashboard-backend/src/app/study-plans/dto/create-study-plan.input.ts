@@ -1,18 +1,25 @@
-import { Prisma } from '@generated/prisma';
-export class CreateStudyPlanInput
-  implements Prisma.StudyPlanUncheckedCreateInput
-{
-    name: string;
+import { IsInt, IsOptional, IsString, Min } from 'class-validator';
+import { PlanSettingsInput } from './plan-settings.input';
 
-    shortName: string;
+/** A study plan; the settings it does not set are inherited from its degree. */
+export class CreateStudyPlanInput extends PlanSettingsInput {
+  @IsString()
+  name: string;
 
-    level: number;
+  @IsString()
+  shortName: string;
 
-    degreeId: string;
+  @IsInt()
+  @Min(0)
+  level: number;
 
-    description: string;
+  @IsString()
+  degreeId: string;
 
-    schoolId: string;
+  @IsOptional()
+  @IsString()
+  description?: string;
 
-    gradeMetricId: string;
+  @IsString()
+  schoolId: string;
 }

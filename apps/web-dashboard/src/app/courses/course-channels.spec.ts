@@ -6,6 +6,7 @@ import {
   newCount,
   newMessages,
   openChannelId,
+  toAnswerTotal,
   unreadByCourse,
 } from './course-channels';
 
@@ -158,5 +159,22 @@ describe('openChannelId @FR-ACA-001.26', () => {
     expect(openChannelId(list, null)).toBeNull();
     expect(openChannelId(list, undefined)).toBeNull();
     expect(openChannelId(list, 'class-group-channel')).toBeNull();
+  });
+});
+
+describe('toAnswerTotal @FR-ACA-001.28', () => {
+  it("sums what waits for a manager in the course's open channels", () => {
+    const list = courseChannels(
+      [
+        channel({ id: 'a', toAnswer: 2 }),
+        channel({ id: 'b', toAnswer: 1 }),
+        channel({ id: 'c', toAnswer: 4, archived: true }),
+        channel({ id: 'other', courseId: 'spanish', toAnswer: 5 }),
+      ],
+      'math',
+      'MANAGER',
+    );
+    expect(toAnswerTotal(list)).toBe(3);
+    expect(toAnswerTotal([])).toBe(0);
   });
 });

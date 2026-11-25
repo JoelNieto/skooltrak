@@ -4,7 +4,7 @@
 |---|---|
 | **FRD** | [ACA-001](../frd/ACA-001-course-experience.md) |
 | **Implements** | FR-ACA-001.28; BR-ACA-001.17 |
-| **Status** | Ready (after [COM-003-S03](COM-003-S03-to-answer.md)) |
+| **Status** | In review (built on [COM-003-S03](COM-003-S03-to-answer.md)) |
 | **Branch** | `feat/ACA-001-S20-to-answer` |
 | **Estimate** | 0.5 day |
 | **Design** | Canvas "Skooltrak — Courses redesign (desktop)", board *Course channels — teacher* |
@@ -33,8 +33,9 @@ Scenario: only managers @FR-ACA-001.28
   - `course-channels.ts`: a `toAnswerTotal(channels)` helper, open channels only.
   - `course-channels-list.ts`: managers' rows show `{n} por responder` (`tone="new"`) where members see unread counts.
   - `course.ts`: the staff *Canales* tab label shows the total.
-  - Reload the list when the embedded channel's replies change: `app-channel` re-emits `ChannelReplies.changed` as a new `changed` output.
-- [ ] Tests: web unit for `toAnswerTotal`; Playwright in `courses/course-channels.after.spec.ts`, teacher block (`@FR-ACA-001.28`).
+  - Reload the list when the embedded channel's replies change: `app-channel` re-emits `ChannelReplies.changed` as a new `changed` output, and the course page reloads its channel list on it.
+  - A row shows *"{n} por responder"* in place of the unread count, so it never shows both (members always get `toAnswer: 0`).
+- [ ] Tests: web unit for `toAnswerTotal`; Playwright in `courses/course-channels.after.spec.ts`, teacher block (`@FR-ACA-001.28`). It follows S19's unanswered private question, checks the tab and row counts against the API's, answers inside the tab, and sees the row clear.
 
 ## Out of scope for this slice
 - Counts on the staff *Cursos* cards.

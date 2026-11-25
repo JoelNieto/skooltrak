@@ -38,6 +38,11 @@ export function courseChannels(
     .map((c) => ({ ...c, kind: channelKind(c, viewer) }));
 }
 
+/** FR-ACA-001.28: replies waiting for a manager across the course's open channels (BR-COM-003.12). */
+export function toAnswerTotal(channels: readonly CourseChannel[]): number {
+  return channels.reduce((sum, c) => sum + (c.archived ? 0 : c.toAnswer), 0);
+}
+
 /** FR-ACA-001.21: "1 nuevo" / "3 nuevos". */
 export function newCount(n: number): string {
   return n === 1 ? '1 nuevo' : `${n} nuevos`;

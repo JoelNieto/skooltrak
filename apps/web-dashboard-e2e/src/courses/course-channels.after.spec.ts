@@ -7,6 +7,7 @@ import { data, E2E_PASSWORD, personas, storageStatePath } from '../support/fixtu
  * ACA-001-S17: "Preguntar en el curso" opens the course conversation (FR-ACA-001.25).
  * ACA-001-S18: the chosen channel opens inside the Canales tab (FR-ACA-001.26).
  * ACA-001-S19: the course's teacher manages its channels in the same tab (FR-ACA-001.27).
+ * ACA-001-S20: "por responder" for the teacher, per channel and on the tab (FR-ACA-001.28).
  * docs/product/slices/ACA-001-S15-course-channels.md, ACA-001-S16-mis-cursos-channels.md
  *
  * Channels are created here through the COM-003 API, as `channels.spec.ts` does. This file is an
@@ -414,6 +415,45 @@ test.describe('the course teacher @FR-ACA-001.27 @BR-ACA-001.19', () => {
     await post.getByRole('button', { name: /Respuestas/ }).click();
     await expect(post).toContainText(QUESTION);
     await expect(post).toContainText(data.relatedStudents[0]);
+  });
+
+  test('shows "por responder" on the tab and the rows, and clears it on answering @FR-ACA-001.28', async ({
+    page,
+    request,
+  }) => {
+    const waiting = async () => {
+      const list = (await (
+        await request.get(`${API}/channels`, { headers: await bearer(request, 'teacher') })
+      ).json()) as (Summary & {
+        toAnswer: number;
+      })[];
+      const course = list.filter((c) => c.scope === 'COURSE' && c.courseId === courseId && !c.archived);
+      return {
+        total: course.reduce((n, c) => n + c.toAnswer, 0),
+        questions: course.find((c) => c.id === ids[QUESTIONS])?.toAnswer,
+      };
+    };
+    const before = await waiting();
+    // Ana's question in the previous test has no answer yet.
+    expect(before.questions).toBe(1);
+
+    await page.goto(`/courses/${courseId}`);
+    await expect(channelsTab(page)).toContainText(`${before.total} por responder`);
+    await channelsTab(page).click();
+    const row = channelsList(page).getByRole('button', { name: new RegExp(QUESTIONS) });
+    await expect(row).toContainText('1 por responder');
+
+    await row.click();
+    const post = page.getByRole('article').first();
+    await post.getByRole('button', { name: /Respuestas/ }).click();
+    await post.getByRole('textbox', { name: /^Responder a / }).fill('Sí, es fracción mixta. (S20)');
+    await post.getByRole('button', { name: 'Enviar' }).click();
+
+    // The tab refreshes its counts after the reply (BR-COM-003.12: a manager's reply answers it).
+    await expect(row).not.toContainText('por responder');
+    const after = before.total - 1;
+    await expect(channelsTab(page)).toContainText(after ? `${after} por responder` : 'Canales');
+    expect((await waiting()).questions).toBe(0);
   });
 
   test('"Nuevo canal para este curso" and "Configurar" open the COM-003 forms', async ({ page }) => {

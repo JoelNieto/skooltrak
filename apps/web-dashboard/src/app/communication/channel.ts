@@ -280,7 +280,7 @@ const REFRESH_MS = 30_000;
                     [manager]="manager()"
                     [canReply]="c.canReply"
                     [visibility]="c.replyVisibility"
-                    (changed)="detail.reload()"
+                    (changed)="detail.reload(); changed.emit()"
                   />
                 }
               }
@@ -311,6 +311,8 @@ export default class Channel {
   readonly embedded = input(false);
   /** Fires once the posts were marked read, so a host can refresh its counts (ACA-001 FR .26). */
   readonly read = output<void>();
+  /** Fires after a reply is sent, so a host can refresh counts such as "por responder" (ACA-001 FR .28). */
+  readonly changed = output<void>();
 
   readonly scopeLabels = CHANNEL_SCOPE_LABELS;
   readonly draft = signal('');

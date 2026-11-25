@@ -37,7 +37,7 @@ import { CourseGradesSummaryView } from './course-grades-summary';
 import { CourseParticipants, CourseParticipantsList } from './course-participants';
 import { CourseOverview } from './course-overview';
 import { CourseChannelsList } from './course-channels-list';
-import { askChannel, ChannelViewer, courseChannels, newCount, openChannelId } from './course-channels';
+import { askChannel, ChannelViewer, courseChannels, newCount, openChannelId, toAnswerTotal } from './course-channels';
 import Channel from '../communication/channel';
 import { CourseWork } from './course-work';
 import { CommunicationApi } from '../communication/communication-api';
@@ -307,6 +307,10 @@ type CourseVm = {
                   <button uiTab value="channels">
                     <ui-icon name="message-circle" class="text-xl" />
                     Canales
+                    @if (channelsToAnswer()) {
+                      <!-- FR-ACA-001.28 -->
+                      <span uiBadge tone="new" size="sm">{{ channelsToAnswer() }} por responder</span>
+                    }
                   </button>
                 }
                 <button uiTab value="participants">
@@ -440,7 +444,12 @@ type CourseVm = {
                         <ui-icon name="arrow-left" />
                         Volver a canales
                       </button>
-                      <app-channel [id]="channelId" [embedded]="true" (read)="channelsRes.reload()" />
+                      <app-channel
+                        [id]="channelId"
+                        [embedded]="true"
+                        (read)="channelsRes.reload()"
+                        (changed)="channelsRes.reload()"
+                      />
                     } @else if (channels().length) {
                       <lib-empty-state
                         [title]="
@@ -606,6 +615,10 @@ export default class Course {
     this.channels().reduce((sum, c) => sum + (c.archived ? 0 : c.unread), 0),
   );
   protected readonly newCount = newCount;
+  /** FR-ACA-001.28: managers' "por responder" across the course's open channels. */
+  protected readonly channelsToAnswer = computed(() =>
+    this.channelsViewer() === 'MANAGER' ? toAnswerTotal(this.channels()) : 0,
+  );
 
   /** FR-ACA-001.26: the channel open beside the list; only one of the course's, never by itself. */
   protected readonly shownChannelId = computed(() => openChannelId(this.channels(), this.canal()));

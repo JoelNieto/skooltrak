@@ -50,6 +50,9 @@ import { CourseChannel, newCount } from './course-channels';
                   <span class="truncate text-sm text-ink">{{ channel.lastPostPreview ?? 'Sin publicaciones' }}</span>
                   @if (channel.archived) {
                     <span uiBadge size="sm">Archivado</span>
+                  } @else if (channel.toAnswer) {
+                    <!-- FR-ACA-001.28: managers see what waits for them (members always get 0). -->
+                    <span uiBadge tone="new" size="sm">{{ channel.toAnswer }} por responder</span>
                   } @else if (channel.unread) {
                     <span uiBadge tone="new" size="sm">{{ count(channel.unread) }}</span>
                   }

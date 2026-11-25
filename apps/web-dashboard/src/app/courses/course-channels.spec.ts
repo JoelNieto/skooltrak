@@ -29,6 +29,7 @@ const channel = (over: Partial<ChannelSummary>): ChannelSummary => ({
   archived: false,
   role: 'MEMBER',
   unread: 0,
+  toAnswer: 0,
   lastPostAt: null,
   lastPostPreview: null,
   ...over,

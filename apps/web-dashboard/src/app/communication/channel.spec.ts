@@ -26,6 +26,7 @@ const detail: ChannelDetail = {
   archived: false,
   role: 'MEMBER',
   unread: 1,
+  toAnswer: 0,
   lastPostAt: '2026-11-20T10:00:00Z',
   lastPostPreview: 'Traigan compás',
   canReply: true,

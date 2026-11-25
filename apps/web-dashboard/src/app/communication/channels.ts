@@ -72,6 +72,10 @@ import Auth from '../auth/auth';
                       @if (c.unread > 0) {
                         <span uiBadge tone="new" size="sm" [attr.aria-label]="c.unread + ' sin leer'">{{ c.unread }}</span>
                       }
+                      @if (c.toAnswer > 0) {
+                        <!-- COM-003 FR .19: managers see what is waiting for their answer. -->
+                        <span uiBadge tone="new" size="sm">{{ c.toAnswer }} por responder</span>
+                      }
                     </span>
                   </a>
                 </li>

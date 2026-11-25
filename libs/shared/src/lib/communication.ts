@@ -59,6 +59,8 @@ export interface ChannelSummary extends ChannelSettings {
   role: ChannelRole;
   /** Posts the caller hasn't read (always 0 for managers). */
   unread: number;
+  /** Managers: replies waiting for a manager's answer (BR-COM-003.12); always 0 for members. */
+  toAnswer: number;
   lastPostAt: string | null;
   lastPostPreview: string | null;
 }

@@ -28,6 +28,7 @@ import {
 } from './channel-audience';
 import { managedChannelWhere, requireStaff, requireUser, StaffCaller, staffCaller } from './communication-access';
 import { CreateChannelInput, CreateChannelPostInput, CreateChannelReplyInput, UpdateChannelInput } from './dto/communication.input';
+import { countToAnswer, replyAuthor } from './to-answer';
 
 export const CHANNEL_NOT_FOUND = 'Canal no encontrado';
 export const POST_NOT_FOUND = 'Publicación no encontrada';
@@ -108,7 +109,7 @@ export class ChannelsService {
     if (!all.length) return [];
     const ids = all.map((c) => c.id);
     const memberIds = member.map((c) => c.id);
-    const [lastPosts, unread] = await Promise.all([
+    const [lastPosts, unread, toAnswer] = await Promise.all([
       this.prisma.channelPost.findMany({
         where: { channelId: { in: ids }, deletedAt: null },
         orderBy: { createdAt: 'desc' },
@@ -116,11 +117,14 @@ export class ChannelsService {
         select: { channelId: true, body: true, createdAt: true },
       }),
       memberIds.length ? this.unreadByChannel(me.userId, memberIds) : Promise.resolve(new Map<string, number>()),
+      this.toAnswerByChannel(managed),
     ]);
     const last = new Map(lastPosts.map((p) => [p.channelId, p]));
 
     return all
-      .map((c) => this.summary(c, managedIds.has(c.id) ? 'MANAGER' : 'MEMBER', unread.get(c.id) ?? 0, last.get(c.id)))
+      .map((c) =>
+        this.summary(c, managedIds.has(c.id) ? 'MANAGER' : 'MEMBER', unread.get(c.id) ?? 0, last.get(c.id), toAnswer.get(c.id)),
+      )
       .sort((a, b) => Number(a.archived) - Number(b.archived) || (b.lastPostAt ?? '').localeCompare(a.lastPostAt ?? ''));
   }
 
@@ -377,7 +381,7 @@ export class ChannelsService {
     const unread = manager ? 0 : posts.filter((p) => p.reads.length === 0 && p.authorId !== me.userId).length;
     const canReply = manager ? !isClosed(channel) : memberCanReply(channel, access.kinds);
     return {
-      ...this.summary(channel, access.role, unread, posts[0]),
+      ...this.summary(channel, access.role, unread, posts[0], manager ? (await this.toAnswerByChannel([channel])).get(channel.id) : 0),
       canReply,
       posts: posts.map((p) => this.toPost(p, p.reads[0] ?? null, repliesBy.get(p.id) ?? 0, stats?.get(p.id) ?? null)),
     };
@@ -512,6 +516,7 @@ export class ChannelsService {
     role: 'MANAGER' | 'MEMBER',
     unread: number,
     last: { body: string; createdAt: Date } | undefined,
+    toAnswer = 0,
   ): ChannelSummary {
     return {
       id: c.id,
@@ -533,6 +538,7 @@ export class ChannelsService {
       archived: isClosed(c),
       role,
       unread,
+      toAnswer: role === 'MANAGER' ? toAnswer : 0,
       lastPostAt: last?.createdAt.toISOString() ?? null,
       lastPostPreview: last ? preview(last.body) : null,
     };
@@ -563,6 +569,36 @@ export class ChannelsService {
       replyCount,
       stats,
     };
+  }
+
+  /**
+   * FR-COM-003.19, BR .12: replies waiting for a manager, per open channel the caller manages. One
+   * query for every channel's replies, counted in memory (`countToAnswer`).
+   */
+  private async toAnswerByChannel(channels: ChannelRow[]): Promise<Map<string, number>> {
+    const open = channels.filter((c) => !isClosed(c));
+    if (!open.length) return new Map();
+    const rows = await this.prisma.channelReply.findMany({
+      where: { deletedAt: null, post: { deletedAt: null, channelId: { in: open.map((c) => c.id) } } },
+      orderBy: { createdAt: 'asc' },
+      select: {
+        postId: true,
+        authorId: true,
+        threadUserId: true,
+        post: { select: { channelId: true } },
+        author: { select: { role: { select: { name: true } } } },
+      },
+    });
+    return countToAnswer(
+      open,
+      rows.map((r) => ({
+        channelId: r.post.channelId,
+        postId: r.postId,
+        threadUserId: r.threadUserId,
+        authorId: r.authorId,
+        author: replyAuthor(r.author?.role?.name, !!r.author),
+      })),
+    );
   }
 
   private async unreadByChannel(userId: string, channelIds: string[]): Promise<Map<string, number>> {

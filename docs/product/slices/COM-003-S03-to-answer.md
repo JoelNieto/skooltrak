@@ -4,7 +4,7 @@
 |---|---|
 | **FRD** | [COM-003](../frd/COM-003-channels-and-direct.md) |
 | **Implements** | FR-COM-003.19; BR-COM-003.12 |
-| **Status** | Ready |
+| **Status** | In review |
 | **Branch** | `feat/COM-003-S03-to-answer` |
 | **Estimate** | 1.5 days |
 | **Decided** | 2026-11-25 (ACA-001 Q11) |
@@ -18,6 +18,7 @@ Background:
   Given the teacher manages a PRIVATE channel "Preguntas S03 E2E" and a PUBLIC channel "General S03 E2E", each with one post
 
 Scenario: private conversations waiting for a manager @FR-COM-003.19 @BR-COM-003.12
+  # In the e2e, the second member is Ana's parent Paula: the only other family login.
   When Ana and Beto each reply in "Preguntas S03 E2E"
   Then the teacher's channels list shows "2 por responder" on it
   When the teacher answers Ana's conversation
@@ -41,15 +42,16 @@ Scenario: members and closed channels @BR-COM-003.12
 ## Layers touched
 - [ ] Prisma migration: **none**. Optional index on `ChannelReply (postId, createdAt)` if the query plan needs it.
 - [ ] Nest (`communication/channels.service.ts`):
-  - `list()` computes `toAnswer` for the channels the caller manages, in one grouped query per kind (private threads, public threads), not one per channel (COM-003 §8);
-  - a manager reply is one by any user who is a manager of that channel when it is counted (`managerIdsAmong`);
+  - `list()` (and `get()` for managers) computes `toAnswer` for the open channels the caller manages: **one** query for their replies, oldest first, counted in memory by the pure `countToAnswer()` (`communication/to-answer.ts`), not one query per channel (COM-003 §8);
+  - a reply's author tells manager from member: only managers and members may reply (BR .3, .5), and members are students and parents, so any other author is a manager. That is why any manager's reply answers. A deleted author neither asks nor answers;
+  - PRIVATE conversations are a post's replies under one member (`threadUserId`, or the author for replies from before the channel turned private);
   - members and closed channels get `0`.
 - [ ] Shared: `ChannelSummary.toAnswer: number`.
 - [ ] OpenAPI → `bun run openapi:orval`.
 - [ ] Angular (`communication/channels.ts`): managers' rows show `<span uiBadge tone="new" size="sm">{n} por responder</span>`. (The course page's *Canales* tab shows it in ACA-001-S20.)
 - [ ] Tests:
   - Nest unit: both kinds; any manager answers; a member's newer reply reopens; members `0`; closed `0`; cross-tenant.
-  - Playwright `communication/to-answer.after.spec.ts` (`@FR-COM-003.19`).
+  - Playwright `communication/to-answer.after.spec.ts` (`@FR-COM-003.19 @BR-COM-003.12`). It uses Ana and her parent Paula as the two members (the only family logins), and CLASS_GROUP channels, so the course-channel specs running alongside never count them.
 
 ## Out of scope for this slice
 - The sidebar's unread badge stays member-only (FR-COM-003.15).

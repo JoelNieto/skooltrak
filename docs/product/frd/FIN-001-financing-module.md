@@ -92,7 +92,7 @@ New permission: **`Perm.PAY_FINANCIALS`** — "Pay family account charges online
 New models (legacy `Charge`, `Payment`, `ChargeType`, `ChargeStatus`, `StudyPlan.monthlyTuitionAmount/tuitionStartMonth/tuitionEndMonth`, `DegreeEnrollmentCost`, `StudyPlanEnrollmentCost` are **dropped**, see Q1):
 
 - `FamilyAccount` — `id, organizationId, schoolId, number (per school), creditBalance` (cached), timestamps. `Student.familyAccounts` via `FamilyAccountStudent (accountId, studentId, schoolId)` with `@@unique([studentId, schoolId])`.
-- `FeeItem` — `schoolId, name, kind (ENROLLMENT|TUITION|OTHER), amount, schedule (ONE_TIME|MONTHLY), dueDate?, startMonth?, endMonth?, dueDay?, active`.
+- `FeeItem` — `schoolId, name, kind (ENROLLMENT|TUITION|OTHER), amount, schedule (ONE_TIME|MONTHLY), dueMonth? (ONE_TIME), startMonth?, endMonth? (MONTHLY), dueDay, active`. Months resolve to dates per academic year: a month ≥ the school's `schoolYearStartMonth` is in year *Y*, earlier months in *Y + 1*; the due day is clamped to the month's last day (S02).
 - `FeeAssignment` — `feeItemId, year, degreeId? | studyPlanId?, amountOverride?`.
 - `DiscountType` — `schoolId, name, mode (PERCENT|FIXED), value, appliesTo FeeKind[] , active`; `StudentDiscount` — `studentId, discountTypeId, year, endsAt?, note`.
 - `Charge` (new) — `organizationId, schoolId, accountId, studentId?, year, source (FEE|MANUAL|LATE_FEE|STORE_ORDER), feeItemId?, installment?, parentChargeId? (late fee), storeOrderId?, description, grossAmount, discountAmount, netAmount, dueDate, status, cancelledAt/By/Reason`; `ChargeDiscount` lines.
@@ -114,7 +114,8 @@ Base `/api/v1/finance` (new controller; legacy `/api/v1/financial/*` removed).
 | `GET /accounts/:id` | Account detail + ledger | `VIEW_FINANCIALS` (staff, or guardian of account) | .3 .12 |
 | `POST /accounts/:id/students/:studentId/move` | Move student | `MANAGE_FINANCIALS` | .3 |
 | `GET/POST/PATCH /fee-items` | Fee catalog | `MANAGE_FINANCIALS` | .4 |
-| `GET/POST/DELETE /fee-assignments` | Assign to degree/plan | `MANAGE_FINANCIALS` | .5 |
+| `GET/POST/DELETE /fee-assignments`, `GET /fee-targets` | Assign to degree/plan; degrees → plans → groups of the school | `MANAGE_FINANCIALS` | .5 |
+| `GET /students?schoolId&search` | Active students by name or cédula (charge and generation pickers) | `MANAGE_FINANCIALS` | .6 .7 |
 | `POST /charges/generate/preview`, `POST /charges/generate` | Generate | `MANAGE_FINANCIALS` | .6 |
 | `POST /charges` | Manual charge (student or group) | `MANAGE_FINANCIALS` | .7 |
 | `POST /charges/:id/cancel` | Cancel | `MANAGE_FINANCIALS` | .8 .19 |
@@ -172,7 +173,7 @@ States everywhere: empty ("No hay cargos pendientes"), loading (`lib-loader`), e
 | Slice | Title | FRs | Status |
 |---|---|---|---|
 | [FIN-001-S01](../slices/FIN-001-S01-ledger-foundation.md) | Ledger foundation: family accounts, manual charge, parent Estado de cuenta | .1 .2 .3 (read) .7 .12 | In review |
-| FIN-001-S02 | Fee catalog, assignments and charge generation | .4 .5 .6 | Proposed |
+| [FIN-001-S02](../slices/FIN-001-S02-fee-catalog-generation.md) | Fee catalog, assignments and charge generation | .4 .5 .6 | In review |
 | FIN-001-S03 | Register offline payment (Transfer/ACH, Yappy) + receipt | .14 .15 | Proposed |
 | FIN-001-S04 | Parent family checkout with mock card | .13 .15 | Proposed |
 | FIN-001-S05 | Void payment + cancel charge | .8 .16 | Proposed |

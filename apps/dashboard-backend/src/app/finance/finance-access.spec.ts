@@ -73,9 +73,17 @@ function setup() {
   const accountsService = new AccountsService(prisma as never, { now: () => new Date('2026-11-26T15:00:00Z') });
   jest.spyOn(accountsService, 'sync').mockResolvedValue();
   const list = jest.spyOn(accountsService, 'list').mockResolvedValue({ items: [], total: 0, page: 1, take: 25, currencyCode: 'USD' });
-  const charges = { createManual: jest.fn().mockResolvedValue({ created: 1, chargeIds: ['c'] }) };
-  const controller = new FinanceController(accountsService, charges as never, prisma as never);
-  return { controller, list, charges, accountsService };
+  const charges = { createManual: jest.fn().mockResolvedValue({ created: 1, chargeIds: ['c'] }), searchStudents: jest.fn().mockResolvedValue([]) };
+  const fees = {
+    listItems: jest.fn().mockResolvedValue({ items: [], currencyCode: 'USD' }),
+    createItem: jest.fn().mockResolvedValue({}),
+    updateItem: jest.fn().mockResolvedValue({}),
+    itemSchool: jest.fn().mockImplementation(async (id: string) => (id === 'fee-9' ? 'SCH9' : 'SCH1')),
+    createAssignment: jest.fn().mockResolvedValue({}),
+  };
+  const generation = { preview: jest.fn().mockResolvedValue({}), generate: jest.fn().mockResolvedValue({ created: 0, skipped: 0 }) };
+  const controller = new FinanceController(accountsService, charges as never, fees as never, generation as never, prisma as never);
+  return { controller, list, charges, accountsService, fees, generation };
 }
 
 const req = (u: unknown) => ({ user: u }) as never;
@@ -152,6 +160,56 @@ describe('finance access (FIN-001-S01)', () => {
         new ForbiddenException(SCHOOL_DENIED),
       );
       expect(charges.createManual).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('fee catalog and generation (FIN-001-S02)', () => {
+    const feeInput = (schoolId: string) =>
+      ({ schoolId, name: 'Mensualidad', kind: 'TUITION', amount: 120, schedule: 'MONTHLY', startMonth: 3, endMonth: 12, dueDay: 5 }) as never;
+    const genInput = (schoolId: string) => ({ schoolId, year: 2027, studyPlanId: 'sp-1' });
+
+    it('lets finance managers of the school manage the catalog and generate', async () => {
+      const { controller, fees, generation } = setup();
+      await controller.feeItems(req(manager), 'SCH1');
+      await controller.createFeeItem(req(admin), feeInput('SCH1'));
+      await controller.updateFeeItem(req(manager), 'fee-1', { amount: 130 });
+      await controller.createFeeAssignment(req(manager), { feeItemId: 'fee-1', year: 2027, degreeId: 'd-1' });
+      await controller.previewGeneration(req(manager), genInput('SCH1'));
+      await controller.generateCharges(req(manager), genInput('SCH1'));
+      expect(fees.listItems).toHaveBeenCalledWith('SCH1');
+      expect(fees.createItem).toHaveBeenCalledWith(admin, 'org-1', feeInput('SCH1'));
+      expect(fees.updateItem).toHaveBeenCalledWith(manager, 'org-1', 'fee-1', { amount: 130 });
+      expect(fees.createAssignment).toHaveBeenCalledWith(manager, 'org-1', 'SCH1', { feeItemId: 'fee-1', year: 2027, degreeId: 'd-1' });
+      expect(generation.preview).toHaveBeenCalledWith(genInput('SCH1'));
+      expect(generation.generate).toHaveBeenCalledWith(manager, 'org-1', genInput('SCH1'));
+    });
+
+    it('refuses staff without MANAGE_FINANCIALS, parents and teachers', async () => {
+      const { controller, fees, generation } = setup();
+      for (const u of [accountant, parent, teacher]) {
+        await expect(controller.feeItems(req(u), 'SCH1')).rejects.toThrow(new ForbiddenException(FINANCE_DENIED));
+        await expect(controller.createFeeItem(req(u), feeInput('SCH1'))).rejects.toThrow(new ForbiddenException(FINANCE_DENIED));
+        await expect(controller.previewGeneration(req(u), genInput('SCH1'))).rejects.toThrow(new ForbiddenException(FINANCE_DENIED));
+        await expect(controller.students(req(u), 'SCH1', 'ana')).rejects.toThrow(new ForbiddenException(FINANCE_DENIED));
+      }
+      expect(fees.listItems).not.toHaveBeenCalled();
+      expect(fees.createItem).not.toHaveBeenCalled();
+      expect(generation.preview).not.toHaveBeenCalled();
+    });
+
+    it("refuses another organization's school, fee item or generation", async () => {
+      const { controller, fees, generation } = setup();
+      await expect(controller.feeItems(req(admin), 'SCH9')).rejects.toThrow(new ForbiddenException(SCHOOL_DENIED));
+      await expect(controller.createFeeItem(req(admin), feeInput('SCH9'))).rejects.toThrow(new ForbiddenException(SCHOOL_DENIED));
+      await expect(controller.updateFeeItem(req(admin), 'fee-9', { amount: 1 })).rejects.toThrow(new ForbiddenException(SCHOOL_DENIED));
+      await expect(controller.createFeeAssignment(req(admin), { feeItemId: 'fee-9', year: 2027, degreeId: 'd-9' })).rejects.toThrow(
+        new ForbiddenException(SCHOOL_DENIED),
+      );
+      await expect(controller.generateCharges(req(admin), genInput('SCH9'))).rejects.toThrow(new ForbiddenException(SCHOOL_DENIED));
+      await expect(controller.students(req(admin), 'SCH9', 'ana')).rejects.toThrow(new ForbiddenException(SCHOOL_DENIED));
+      expect(fees.updateItem).not.toHaveBeenCalled();
+      expect(fees.createAssignment).not.toHaveBeenCalled();
+      expect(generation.generate).not.toHaveBeenCalled();
     });
   });
 });

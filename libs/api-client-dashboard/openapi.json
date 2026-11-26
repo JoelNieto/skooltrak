@@ -10296,6 +10296,322 @@
         ]
       }
     },
+    "/api/v1/finance/students": {
+      "get": {
+        "operationId": "FinanceController_students",
+        "parameters": [
+          {
+            "name": "schoolId",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "take",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Active students of a school by name or cédula, for charge and generation pickers",
+        "tags": [
+          "finance"
+        ]
+      }
+    },
+    "/api/v1/finance/fee-items": {
+      "get": {
+        "operationId": "FinanceController_feeItems",
+        "parameters": [
+          {
+            "name": "schoolId",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "The school's fee catalog (FR-FIN-001.4)",
+        "tags": [
+          "finance"
+        ]
+      },
+      "post": {
+        "operationId": "FinanceController_createFeeItem",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateFeeItemInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create a fee item (FR-FIN-001.4)",
+        "tags": [
+          "finance"
+        ]
+      }
+    },
+    "/api/v1/finance/fee-items/{id}": {
+      "patch": {
+        "operationId": "FinanceController_updateFeeItem",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateFeeItemInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Edit or deactivate a fee item; generated charges are not changed (FR-FIN-001.4)",
+        "tags": [
+          "finance"
+        ]
+      }
+    },
+    "/api/v1/finance/fee-targets": {
+      "get": {
+        "operationId": "FinanceController_feeTargets",
+        "parameters": [
+          {
+            "name": "schoolId",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Degrees, study plans and class groups of the school, for fee assignment and generation",
+        "tags": [
+          "finance"
+        ]
+      }
+    },
+    "/api/v1/finance/fee-assignments": {
+      "get": {
+        "operationId": "FinanceController_feeAssignments",
+        "parameters": [
+          {
+            "name": "schoolId",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "year",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Fee assignments of a school for a year (FR-FIN-001.5)",
+        "tags": [
+          "finance"
+        ]
+      },
+      "post": {
+        "operationId": "FinanceController_createFeeAssignment",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateFeeAssignmentInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Assign a fee item to a degree or a study plan for a year (FR-FIN-001.5)",
+        "tags": [
+          "finance"
+        ]
+      }
+    },
+    "/api/v1/finance/fee-assignments/{id}": {
+      "delete": {
+        "operationId": "FinanceController_deleteFeeAssignment",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Remove a fee assignment; charges already generated stay (FR-FIN-001.5)",
+        "tags": [
+          "finance"
+        ]
+      }
+    },
+    "/api/v1/finance/charges/generate/preview": {
+      "post": {
+        "operationId": "FinanceController_previewGeneration",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GenerateChargesInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Preview the charges a generation would create (FR-FIN-001.6)",
+        "tags": [
+          "finance"
+        ]
+      }
+    },
+    "/api/v1/finance/charges/generate": {
+      "post": {
+        "operationId": "FinanceController_generateCharges",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GenerateChargesInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Generate the missing charges of a year for a study plan, group or student (FR-FIN-001.6)",
+        "tags": [
+          "finance"
+        ]
+      }
+    },
     "/api/v1/store/categories": {
       "get": {
         "operationId": "StoreController_storeCategories",
@@ -11978,6 +12294,71 @@
         }
       },
       "CreateChargeInput": {
+        "type": "object",
+        "properties": {}
+      },
+      "FeeKind": {
+        "type": "string",
+        "enum": [
+          "ENROLLMENT",
+          "TUITION",
+          "OTHER"
+        ]
+      },
+      "FeeSchedule": {
+        "type": "string",
+        "enum": [
+          "ONE_TIME",
+          "MONTHLY"
+        ]
+      },
+      "CreateFeeItemInput": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/FeeKind"
+              }
+            ]
+          },
+          "schedule": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/FeeSchedule"
+              }
+            ]
+          }
+        },
+        "required": [
+          "kind",
+          "schedule"
+        ]
+      },
+      "UpdateFeeItemInput": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/FeeKind"
+              }
+            ]
+          },
+          "schedule": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/FeeSchedule"
+              }
+            ]
+          }
+        }
+      },
+      "CreateFeeAssignmentInput": {
+        "type": "object",
+        "properties": {}
+      },
+      "GenerateChargesInput": {
         "type": "object",
         "properties": {}
       },

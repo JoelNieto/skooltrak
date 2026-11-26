@@ -4,6 +4,7 @@ import { BadRequestException, Injectable, NotFoundException } from '@nestjs/comm
 import { PrismaService } from '../prisma.service';
 import { AccountsService } from './accounts.service';
 import { CreateChargeInput, CreateChargeResult } from './dto/create-charge.input';
+import { FinanceStudentHit } from './entities/finance.entity';
 
 export const CHARGE_TARGET_REQUIRED = 'Indica un estudiante o un grupo, no ambos';
 export const STUDENT_NOT_IN_SCHOOL = 'El estudiante no pertenece a esta escuela';
@@ -98,5 +99,33 @@ export class ChargesService {
       return created;
     });
     return { created: ids.length, chargeIds: ids };
+  }
+
+  /**
+   * Active students of the school whose names or cédula match every word of `q`, for the charge
+   * and generation pickers. The caller must be a finance manager of the school.
+   */
+  async searchStudents(schoolId: string, q: string, take = 10): Promise<FinanceStudentHit[]> {
+    const words = q.trim().split(/\s+/).filter((w) => w.length > 0).slice(0, 5);
+    if (!words.length) return [];
+    const rows = await this.prisma.student.findMany({
+      where: {
+        schoolId,
+        enrollmentStatus: EnrollmentStatus.ACTIVE,
+        AND: words.map((w) => ({
+          OR: [
+            { firstName: { contains: w, mode: 'insensitive' as const } },
+            { middleName: { contains: w, mode: 'insensitive' as const } },
+            { fatherName: { contains: w, mode: 'insensitive' as const } },
+            { motherName: { contains: w, mode: 'insensitive' as const } },
+            { documentId: { contains: w, mode: 'insensitive' as const } },
+          ],
+        })),
+      },
+      orderBy: [{ fatherName: 'asc' }, { firstName: 'asc' }],
+      take: Math.min(Math.max(1, take), 25),
+      select: { id: true, firstName: true, fatherName: true, classGroup: { select: { id: true, name: true } } },
+    });
+    return rows.map((s) => ({ id: s.id, name: `${s.firstName} ${s.fatherName}`.trim(), classGroup: s.classGroup }));
   }
 }

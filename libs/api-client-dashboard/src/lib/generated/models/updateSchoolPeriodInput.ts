@@ -6,9 +6,9 @@
  * OpenAPI spec version: 1.0
  */
 
-export interface SchoolPeriodDefaults {
-  name: string;
-  shortName: string;
-  startDate: string;
-  endDate: string;
+export interface UpdateSchoolPeriodInput {
+  name?: string;
+  shortName?: string;
+  startDate?: string;
+  endDate?: string;
 }

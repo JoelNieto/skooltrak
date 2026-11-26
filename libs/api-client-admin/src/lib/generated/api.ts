@@ -3169,6 +3169,40 @@ export class SkooltrakAdminAPIService {
   }
 
 /**
+ * @summary Per year, the schools that use their own periods
+ */
+ periodsControllerCustomSchools<TData = void>( options?: HttpClientBodyOptions): Observable<TData>;
+ periodsControllerCustomSchools<TData = void>( options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
+ periodsControllerCustomSchools<TData = void>( options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
+  periodsControllerCustomSchools<TData = void>(
+     options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
+    if (options?.observe === 'events') {
+      return this.http.get<TData>(
+      `/api/v1/periods/custom-schools`,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'events',
+      }
+    );
+    }
+
+    if (options?.observe === 'response') {
+      return this.http.get<TData>(
+      `/api/v1/periods/custom-schools`,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'response',
+      }
+    );
+    }
+
+    return this.http.get<TData>(
+      `/api/v1/periods/custom-schools`,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'body',
+      }
+    );
+  }
+
+/**
  * @summary Get period by id
  */
  periodsControllerFindOne<TData = void>(id: string, options?: HttpClientBodyOptions): Observable<TData>;

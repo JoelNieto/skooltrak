@@ -21,6 +21,12 @@ export class PeriodsController {
     return this.periodsService.findAll();
   }
 
+  @Get('custom-schools')
+  @ApiOperation({ summary: 'Per year, the schools that use their own periods' })
+  customSchools() {
+    return this.periodsService.customSchools();
+  }
+
   @Get(':id')
   @ApiOperation({ summary: 'Get period by id' })
   findOne(@Param('id') id: string) {

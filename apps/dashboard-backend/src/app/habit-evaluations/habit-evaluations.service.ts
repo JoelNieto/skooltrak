@@ -7,6 +7,7 @@ import {
 } from '@nestjs/common';
 import { REQUEST } from '@nestjs/core';
 import { Request } from 'express';
+import { assertPeriodForSchool } from '../periods/school-periods';
 import { PrismaService } from '../prisma.service';
 import { SaveHabitEvaluationInput } from './dto/save-habit-evaluation.input';
 
@@ -59,12 +60,13 @@ export class HabitEvaluationsService {
     // Get organization from class group
     const classGroup = await this.prisma.classGroup.findUnique({
       where: { id: input.classGroupId },
-      select: { organizationId: true },
+      select: { organizationId: true, schoolId: true },
     });
 
     if (!classGroup) {
       throw new NotFoundException('Class group not found');
     }
+    await assertPeriodForSchool(this.prisma, input.periodId, classGroup.schoolId);
 
     // Check if evaluation already exists
     const existingEvaluation = await this.prisma.habitEvaluation.findUnique({

@@ -28,7 +28,7 @@ Code: `schools`, `periods`, `degrees`, `study-plans`, `subjects`, `class-groups`
 | Capability | Status | FRD |
 |---|---|---|
 | Schools (create, edit, branding/theme) | Live | — |
-| Academic periods: global per year (admin console, grouped by year); each school can override name, short name and dates (school page → Periodos) | Live | — |
+| Academic periods: global per year (admin console, grouped by year); a school on another calendar (e.g. American, Aug–Jun) uses its own periods per year — add, edit, delete; existing grades move with it (school page → Periodos) | Live | — |
 | Degrees & study plans (incl. enrolment cost) | Live | — |
 | Subjects | Live | — |
 | Class groups | Live | — |

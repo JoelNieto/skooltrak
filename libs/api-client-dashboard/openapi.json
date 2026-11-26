@@ -8029,7 +8029,7 @@
             "description": ""
           }
         },
-        "summary": "List periods (with schoolId: as that school sees them)",
+        "summary": "List global periods (with schoolId: the periods that school uses)",
         "tags": [
           "periods"
         ]
@@ -8084,7 +8084,7 @@
             "description": ""
           }
         },
-        "summary": "Periods by year (with schoolId: as that school sees them)",
+        "summary": "Global periods by year (with schoolId: the periods that school uses)",
         "tags": [
           "periods"
         ]
@@ -8092,7 +8092,7 @@
     },
     "/api/v1/periods/schools/{schoolId}": {
       "get": {
-        "operationId": "PeriodsController_schoolPeriods",
+        "operationId": "PeriodsController_schoolYear",
         "parameters": [
           {
             "name": "schoolId",
@@ -8117,24 +8117,142 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/SchoolPeriod"
-                  }
+                  "$ref": "#/components/schemas/SchoolPeriodsYear"
                 }
               }
             }
           }
         },
-        "summary": "A school's periods of one year, with global defaults and the school's overrides",
+        "summary": "The periods a school uses in one year (its own or the global ones)",
+        "tags": [
+          "periods"
+        ]
+      },
+      "post": {
+        "operationId": "PeriodsController_createForSchool",
+        "parameters": [
+          {
+            "name": "schoolId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateSchoolPeriodInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SchoolPeriod"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Add one of a school's own periods",
+        "tags": [
+          "periods"
+        ]
+      }
+    },
+    "/api/v1/periods/schools/{schoolId}/customize": {
+      "post": {
+        "operationId": "PeriodsController_customize",
+        "parameters": [
+          {
+            "name": "schoolId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SchoolPeriodsYearInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SchoolPeriodsYear"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Switch a school year to its own periods, starting from a copy of the global ones",
+        "tags": [
+          "periods"
+        ]
+      }
+    },
+    "/api/v1/periods/schools/{schoolId}/restore": {
+      "post": {
+        "operationId": "PeriodsController_restoreGlobal",
+        "parameters": [
+          {
+            "name": "schoolId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SchoolPeriodsYearInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SchoolPeriodsYear"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Switch a school year back to the global periods",
         "tags": [
           "periods"
         ]
       }
     },
     "/api/v1/periods/schools/{schoolId}/{periodId}": {
-      "put": {
-        "operationId": "PeriodsController_setOverride",
+      "patch": {
+        "operationId": "PeriodsController_updateForSchool",
         "parameters": [
           {
             "name": "schoolId",
@@ -8158,7 +8276,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/SchoolPeriodOverrideInput"
+                "$ref": "#/components/schemas/UpdateSchoolPeriodInput"
               }
             }
           }
@@ -8175,13 +8293,13 @@
             }
           }
         },
-        "summary": "Set a school's override of one period",
+        "summary": "Edit one of a school's own periods",
         "tags": [
           "periods"
         ]
       },
       "delete": {
-        "operationId": "PeriodsController_clearOverride",
+        "operationId": "PeriodsController_removeForSchool",
         "parameters": [
           {
             "name": "schoolId",
@@ -8202,17 +8320,10 @@
         ],
         "responses": {
           "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/SchoolPeriod"
-                }
-              }
-            }
+            "description": ""
           }
         },
-        "summary": "Remove a school's override of one period",
+        "summary": "Delete one of a school's own periods (only while it holds no grades)",
         "tags": [
           "periods"
         ]
@@ -11786,60 +11897,6 @@
         "type": "object",
         "properties": {}
       },
-      "SchoolPeriodDefaults": {
-        "type": "object",
-        "properties": {
-          "name": {
-            "type": "string"
-          },
-          "shortName": {
-            "type": "string"
-          },
-          "startDate": {
-            "format": "date-time",
-            "type": "string"
-          },
-          "endDate": {
-            "format": "date-time",
-            "type": "string"
-          }
-        },
-        "required": [
-          "name",
-          "shortName",
-          "startDate",
-          "endDate"
-        ]
-      },
-      "SchoolPeriodOverride": {
-        "type": "object",
-        "properties": {
-          "name": {
-            "type": "string",
-            "nullable": true
-          },
-          "shortName": {
-            "type": "string",
-            "nullable": true
-          },
-          "startDate": {
-            "format": "date-time",
-            "type": "string",
-            "nullable": true
-          },
-          "endDate": {
-            "format": "date-time",
-            "type": "string",
-            "nullable": true
-          }
-        },
-        "required": [
-          "name",
-          "shortName",
-          "startDate",
-          "endDate"
-        ]
-      },
       "SchoolPeriod": {
         "type": "object",
         "properties": {
@@ -11863,21 +11920,13 @@
             "format": "date-time",
             "type": "string"
           },
-          "overridden": {
+          "custom": {
             "type": "boolean",
-            "description": "True when the school changed at least one field"
+            "description": "True for the school's own period, false for a global one"
           },
-          "defaults": {
-            "$ref": "#/components/schemas/SchoolPeriodDefaults"
-          },
-          "override": {
-            "nullable": true,
-            "type": "object",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/SchoolPeriodOverride"
-              }
-            ]
+          "usage": {
+            "type": "number",
+            "description": "This school's grade columns and habit evaluations in the period"
           }
         },
         "required": [
@@ -11887,31 +11936,91 @@
           "shortName",
           "startDate",
           "endDate",
-          "overridden",
-          "defaults",
-          "override"
+          "custom",
+          "usage"
         ]
       },
-      "SchoolPeriodOverrideInput": {
+      "SchoolPeriodsYear": {
         "type": "object",
         "properties": {
+          "year": {
+            "type": "number"
+          },
+          "custom": {
+            "type": "boolean",
+            "description": "True when the school uses its own periods this year"
+          },
+          "periods": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SchoolPeriod"
+            }
+          }
+        },
+        "required": [
+          "year",
+          "custom",
+          "periods"
+        ]
+      },
+      "SchoolPeriodsYearInput": {
+        "type": "object",
+        "properties": {
+          "year": {
+            "type": "number",
+            "example": 2026
+          }
+        },
+        "required": [
+          "year"
+        ]
+      },
+      "CreateSchoolPeriodInput": {
+        "type": "object",
+        "properties": {
+          "year": {
+            "type": "number",
+            "example": 2026,
+            "description": "School year label; dates may cross calendar years"
+          },
           "name": {
-            "type": "string",
-            "nullable": true
+            "type": "string"
           },
           "shortName": {
-            "type": "string",
-            "nullable": true
+            "type": "string"
           },
           "startDate": {
             "type": "string",
-            "format": "date",
-            "nullable": true
+            "format": "date"
           },
           "endDate": {
             "type": "string",
-            "format": "date",
-            "nullable": true
+            "format": "date"
+          }
+        },
+        "required": [
+          "year",
+          "name",
+          "startDate",
+          "endDate"
+        ]
+      },
+      "UpdateSchoolPeriodInput": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "shortName": {
+            "type": "string"
+          },
+          "startDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "endDate": {
+            "type": "string",
+            "format": "date"
           }
         }
       },

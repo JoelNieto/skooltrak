@@ -115,21 +115,30 @@ describe('Academic setup access', () => {
     expect(service['create']).toHaveBeenCalledTimes(1);
   });
 
-  it('school period overrides: VIEW/MANAGE_PERIODS, own organization only', async () => {
+  it("school periods: VIEW/MANAGE_PERIODS, own organization only", async () => {
     const service = mockService();
     const controller = new PeriodsController(service as never, prisma as never);
-    expect(perms(controller.schoolPeriods)).toEqual([Perm.VIEW_PERIODS]);
-    expect(perms(controller.setOverride)).toEqual([Perm.MANAGE_PERIODS]);
-    expect(perms(controller.clearOverride)).toEqual([Perm.MANAGE_PERIODS]);
+    expect(perms(controller.schoolYear)).toEqual([Perm.VIEW_PERIODS]);
+    for (const write of [
+      controller.customize,
+      controller.restoreGlobal,
+      controller.createForSchool,
+      controller.updateForSchool,
+      controller.removeForSchool,
+    ]) {
+      expect(perms(write)).toEqual([Perm.MANAGE_PERIODS]);
+    }
 
-    await expect(controller.schoolPeriods(admin, 'SCH9', '2026')).rejects.toThrow(new ForbiddenException(SCHOOL_DENIED));
-    await expect(controller.setOverride(admin, 'SCH9', 'p1', {})).rejects.toThrow(ForbiddenException);
-    await expect(controller.clearOverride(admin, 'SCH9', 'p1')).rejects.toThrow(ForbiddenException);
+    await expect(controller.schoolYear(admin, 'SCH9', '2026')).rejects.toThrow(new ForbiddenException(SCHOOL_DENIED));
+    await expect(controller.customize(admin, 'SCH9', { year: 2026 })).rejects.toThrow(ForbiddenException);
+    await expect(controller.createForSchool(admin, 'SCH9', {} as never)).rejects.toThrow(ForbiddenException);
+    await expect(controller.updateForSchool(admin, 'SCH9', 'p1', {})).rejects.toThrow(ForbiddenException);
+    await expect(controller.removeForSchool(admin, 'SCH9', 'p1')).rejects.toThrow(ForbiddenException);
     await expect(controller.findManyByYear(teacher, '2026', 'SCH9')).rejects.toThrow(ForbiddenException);
-    expect(service['setOverride']).not.toHaveBeenCalled();
+    expect(service['createForSchool']).not.toHaveBeenCalled();
 
-    await controller.setOverride(admin, 'SCH1', 'p1', { name: 'T1' });
-    expect(service['setOverride']).toHaveBeenCalledWith('SCH1', 'p1', { name: 'T1' });
+    await controller.customize(admin, 'SCH1', { year: 2026 });
+    expect(service['customize']).toHaveBeenCalledWith('SCH1', 2026);
     await controller.findManyByYear(teacher, '2026', 'SCH1');
     expect(service['findManyByYear']).toHaveBeenCalledWith(2026, 'SCH1');
   });

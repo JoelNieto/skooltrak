@@ -6,6 +6,6 @@
  * OpenAPI spec version: 1.0
  */
 
-export type PeriodsControllerSchoolPeriodsParams = {
-year: string;
-};
+export interface SchoolPeriodsYearInput {
+  year: number;
+}

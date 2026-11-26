@@ -82,6 +82,7 @@ import type {
   CreateQuizInput,
   CreateRoleInput,
   CreateSchoolInput,
+  CreateSchoolPeriodInput,
   CreateSchoolWithOrgInput,
   CreateStoreCategoryInput,
   CreateStoreProductInput,
@@ -120,7 +121,7 @@ import type {
   ParentsControllerGetCountParams,
   PeriodsControllerFindAllParams,
   PeriodsControllerFindManyByYearParams,
-  PeriodsControllerSchoolPeriodsParams,
+  PeriodsControllerSchoolYearParams,
   PermissionsControllerCountParams,
   PermissionsControllerFindAllParams,
   ProcessStorePaymentInput,
@@ -137,7 +138,8 @@ import type {
   SaveHabitEvaluationInput,
   SchoolLogoUploadInput,
   SchoolPeriod,
-  SchoolPeriodOverrideInput,
+  SchoolPeriodsYear,
+  SchoolPeriodsYearInput,
   SchoolsControllerGetSchoolLogoDownloadUrlParams,
   SendDirectMessageInput,
   ShareFileInput,
@@ -185,6 +187,7 @@ import type {
   UpdateQuizInput,
   UpdateRoleInput,
   UpdateSchoolInput,
+  UpdateSchoolPeriodInput,
   UpdateShareInput,
   UpdateStoreCategoryInput,
   UpdateStoreOrderStatusInput,
@@ -8311,7 +8314,7 @@ if(coursesControllerUploadCoverBody.file !== undefined) {
   }
 
 /**
- * @summary List periods (with schoolId: as that school sees them)
+ * @summary List global periods (with schoolId: the periods that school uses)
  */
  periodsControllerFindAll<TData = void>(params?: PeriodsControllerFindAllParams, options?: HttpClientBodyOptions): Observable<TData>;
  periodsControllerFindAll<TData = void>(params?: PeriodsControllerFindAllParams, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
@@ -8384,7 +8387,7 @@ if(coursesControllerUploadCoverBody.file !== undefined) {
   }
 
 /**
- * @summary Periods by year (with schoolId: as that school sees them)
+ * @summary Global periods by year (with schoolId: the periods that school uses)
  */
  periodsControllerFindManyByYear<TData = void>(params: PeriodsControllerFindManyByYearParams, options?: HttpClientBodyOptions): Observable<TData>;
  periodsControllerFindManyByYear<TData = void>(params: PeriodsControllerFindManyByYearParams, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
@@ -8420,17 +8423,17 @@ if(coursesControllerUploadCoverBody.file !== undefined) {
   }
 
 /**
- * @summary A school's periods of one year, with global defaults and the school's overrides
+ * @summary The periods a school uses in one year (its own or the global ones)
  */
- periodsControllerSchoolPeriods<TData = SchoolPeriod[]>(schoolId: string,
-    params: PeriodsControllerSchoolPeriodsParams, options?: HttpClientBodyOptions): Observable<TData>;
- periodsControllerSchoolPeriods<TData = SchoolPeriod[]>(schoolId: string,
-    params: PeriodsControllerSchoolPeriodsParams, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
- periodsControllerSchoolPeriods<TData = SchoolPeriod[]>(schoolId: string,
-    params: PeriodsControllerSchoolPeriodsParams, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
-  periodsControllerSchoolPeriods<TData = SchoolPeriod[]>(
+ periodsControllerSchoolYear<TData = SchoolPeriodsYear>(schoolId: string,
+    params: PeriodsControllerSchoolYearParams, options?: HttpClientBodyOptions): Observable<TData>;
+ periodsControllerSchoolYear<TData = SchoolPeriodsYear>(schoolId: string,
+    params: PeriodsControllerSchoolYearParams, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
+ periodsControllerSchoolYear<TData = SchoolPeriodsYear>(schoolId: string,
+    params: PeriodsControllerSchoolYearParams, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
+  periodsControllerSchoolYear<TData = SchoolPeriodsYear>(
     schoolId: string,
-    params: PeriodsControllerSchoolPeriodsParams, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
+    params: PeriodsControllerSchoolYearParams, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
     const filteredParams = filterParams({...params, ...options?.params}, new Set<string>([]));
 
     if (options?.observe === 'events') {
@@ -8460,25 +8463,21 @@ if(coursesControllerUploadCoverBody.file !== undefined) {
   }
 
 /**
- * @summary Set a school's override of one period
+ * @summary Add one of a school's own periods
  */
- periodsControllerSetOverride<TData = SchoolPeriod>(schoolId: string,
-    periodId: string,
-    schoolPeriodOverrideInput: SchoolPeriodOverrideInput, options?: HttpClientBodyOptions): Observable<TData>;
- periodsControllerSetOverride<TData = SchoolPeriod>(schoolId: string,
-    periodId: string,
-    schoolPeriodOverrideInput: SchoolPeriodOverrideInput, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
- periodsControllerSetOverride<TData = SchoolPeriod>(schoolId: string,
-    periodId: string,
-    schoolPeriodOverrideInput: SchoolPeriodOverrideInput, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
-  periodsControllerSetOverride<TData = SchoolPeriod>(
+ periodsControllerCreateForSchool<TData = SchoolPeriod>(schoolId: string,
+    createSchoolPeriodInput: CreateSchoolPeriodInput, options?: HttpClientBodyOptions): Observable<TData>;
+ periodsControllerCreateForSchool<TData = SchoolPeriod>(schoolId: string,
+    createSchoolPeriodInput: CreateSchoolPeriodInput, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
+ periodsControllerCreateForSchool<TData = SchoolPeriod>(schoolId: string,
+    createSchoolPeriodInput: CreateSchoolPeriodInput, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
+  periodsControllerCreateForSchool<TData = SchoolPeriod>(
     schoolId: string,
-    periodId: string,
-    schoolPeriodOverrideInput: SchoolPeriodOverrideInput, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
+    createSchoolPeriodInput: CreateSchoolPeriodInput, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
     if (options?.observe === 'events') {
-      return this.http.put<TData>(
-      `/api/v1/periods/schools/${schoolId}/${periodId}`,
-      schoolPeriodOverrideInput,{
+      return this.http.post<TData>(
+      `/api/v1/periods/schools/${schoolId}`,
+      createSchoolPeriodInput,{
         ...(options as Omit<NonNullable<typeof options>, 'observe'>),
         observe: 'events',
       }
@@ -8486,18 +8485,18 @@ if(coursesControllerUploadCoverBody.file !== undefined) {
     }
 
     if (options?.observe === 'response') {
-      return this.http.put<TData>(
-      `/api/v1/periods/schools/${schoolId}/${periodId}`,
-      schoolPeriodOverrideInput,{
+      return this.http.post<TData>(
+      `/api/v1/periods/schools/${schoolId}`,
+      createSchoolPeriodInput,{
         ...(options as Omit<NonNullable<typeof options>, 'observe'>),
         observe: 'response',
       }
     );
     }
 
-    return this.http.put<TData>(
-      `/api/v1/periods/schools/${schoolId}/${periodId}`,
-      schoolPeriodOverrideInput,{
+    return this.http.post<TData>(
+      `/api/v1/periods/schools/${schoolId}`,
+      createSchoolPeriodInput,{
         ...(options as Omit<NonNullable<typeof options>, 'observe'>),
         observe: 'body',
       }
@@ -8505,15 +8504,142 @@ if(coursesControllerUploadCoverBody.file !== undefined) {
   }
 
 /**
- * @summary Remove a school's override of one period
+ * @summary Switch a school year to its own periods, starting from a copy of the global ones
  */
- periodsControllerClearOverride<TData = SchoolPeriod>(schoolId: string,
+ periodsControllerCustomize<TData = SchoolPeriodsYear>(schoolId: string,
+    schoolPeriodsYearInput: SchoolPeriodsYearInput, options?: HttpClientBodyOptions): Observable<TData>;
+ periodsControllerCustomize<TData = SchoolPeriodsYear>(schoolId: string,
+    schoolPeriodsYearInput: SchoolPeriodsYearInput, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
+ periodsControllerCustomize<TData = SchoolPeriodsYear>(schoolId: string,
+    schoolPeriodsYearInput: SchoolPeriodsYearInput, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
+  periodsControllerCustomize<TData = SchoolPeriodsYear>(
+    schoolId: string,
+    schoolPeriodsYearInput: SchoolPeriodsYearInput, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
+    if (options?.observe === 'events') {
+      return this.http.post<TData>(
+      `/api/v1/periods/schools/${schoolId}/customize`,
+      schoolPeriodsYearInput,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'events',
+      }
+    );
+    }
+
+    if (options?.observe === 'response') {
+      return this.http.post<TData>(
+      `/api/v1/periods/schools/${schoolId}/customize`,
+      schoolPeriodsYearInput,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'response',
+      }
+    );
+    }
+
+    return this.http.post<TData>(
+      `/api/v1/periods/schools/${schoolId}/customize`,
+      schoolPeriodsYearInput,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'body',
+      }
+    );
+  }
+
+/**
+ * @summary Switch a school year back to the global periods
+ */
+ periodsControllerRestoreGlobal<TData = SchoolPeriodsYear>(schoolId: string,
+    schoolPeriodsYearInput: SchoolPeriodsYearInput, options?: HttpClientBodyOptions): Observable<TData>;
+ periodsControllerRestoreGlobal<TData = SchoolPeriodsYear>(schoolId: string,
+    schoolPeriodsYearInput: SchoolPeriodsYearInput, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
+ periodsControllerRestoreGlobal<TData = SchoolPeriodsYear>(schoolId: string,
+    schoolPeriodsYearInput: SchoolPeriodsYearInput, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
+  periodsControllerRestoreGlobal<TData = SchoolPeriodsYear>(
+    schoolId: string,
+    schoolPeriodsYearInput: SchoolPeriodsYearInput, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
+    if (options?.observe === 'events') {
+      return this.http.post<TData>(
+      `/api/v1/periods/schools/${schoolId}/restore`,
+      schoolPeriodsYearInput,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'events',
+      }
+    );
+    }
+
+    if (options?.observe === 'response') {
+      return this.http.post<TData>(
+      `/api/v1/periods/schools/${schoolId}/restore`,
+      schoolPeriodsYearInput,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'response',
+      }
+    );
+    }
+
+    return this.http.post<TData>(
+      `/api/v1/periods/schools/${schoolId}/restore`,
+      schoolPeriodsYearInput,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'body',
+      }
+    );
+  }
+
+/**
+ * @summary Edit one of a school's own periods
+ */
+ periodsControllerUpdateForSchool<TData = SchoolPeriod>(schoolId: string,
+    periodId: string,
+    updateSchoolPeriodInput: UpdateSchoolPeriodInput, options?: HttpClientBodyOptions): Observable<TData>;
+ periodsControllerUpdateForSchool<TData = SchoolPeriod>(schoolId: string,
+    periodId: string,
+    updateSchoolPeriodInput: UpdateSchoolPeriodInput, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
+ periodsControllerUpdateForSchool<TData = SchoolPeriod>(schoolId: string,
+    periodId: string,
+    updateSchoolPeriodInput: UpdateSchoolPeriodInput, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
+  periodsControllerUpdateForSchool<TData = SchoolPeriod>(
+    schoolId: string,
+    periodId: string,
+    updateSchoolPeriodInput: UpdateSchoolPeriodInput, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
+    if (options?.observe === 'events') {
+      return this.http.patch<TData>(
+      `/api/v1/periods/schools/${schoolId}/${periodId}`,
+      updateSchoolPeriodInput,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'events',
+      }
+    );
+    }
+
+    if (options?.observe === 'response') {
+      return this.http.patch<TData>(
+      `/api/v1/periods/schools/${schoolId}/${periodId}`,
+      updateSchoolPeriodInput,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'response',
+      }
+    );
+    }
+
+    return this.http.patch<TData>(
+      `/api/v1/periods/schools/${schoolId}/${periodId}`,
+      updateSchoolPeriodInput,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'body',
+      }
+    );
+  }
+
+/**
+ * @summary Delete one of a school's own periods (only while it holds no grades)
+ */
+ periodsControllerRemoveForSchool<TData = void>(schoolId: string,
     periodId: string, options?: HttpClientBodyOptions): Observable<TData>;
- periodsControllerClearOverride<TData = SchoolPeriod>(schoolId: string,
+ periodsControllerRemoveForSchool<TData = void>(schoolId: string,
     periodId: string, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
- periodsControllerClearOverride<TData = SchoolPeriod>(schoolId: string,
+ periodsControllerRemoveForSchool<TData = void>(schoolId: string,
     periodId: string, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
-  periodsControllerClearOverride<TData = SchoolPeriod>(
+  periodsControllerRemoveForSchool<TData = void>(
     schoolId: string,
     periodId: string, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
     if (options?.observe === 'events') {

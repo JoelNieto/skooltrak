@@ -21,13 +21,21 @@ import { Prisma } from '@generated/prisma';
 import { filter, switchMap } from 'rxjs';
 import PeriodsForm from './periods-form';
 
-type PeriodRow = Prisma.PeriodGetPayload<{ include: undefined }> & { _count?: { schoolOverrides: number } };
+type PeriodRow = Prisma.PeriodGetPayload<{ include: undefined }>;
+
+interface CustomSchoolsYear {
+  year: number;
+  schools: { id: string; name: string }[];
+}
 
 interface YearGroup {
   year: number;
   periods: PeriodRow[];
   first: Date | string | null;
   last: Date | string | null;
+  /** Schools that use their own periods this year. */
+  customSchools: { id: string; name: string }[];
+  customSchoolNames: string;
 }
 
 @Component({
@@ -39,7 +47,8 @@ interface YearGroup {
       <div>
         <h1 class="text-2xl text-ink-strong font-medium">Periodos</h1>
         <p class="text-sm text-ink-muted">
-          Periodos globales agrupados por año. Cada colegio puede ajustar nombres y fechas desde su panel.
+          Periodos globales agrupados por año. Un colegio con otro calendario (p. ej. americano) puede usar
+          sus propios periodos desde su panel.
         </p>
       </div>
       <button uiButton variant="primary" (click)="editPeriod()">
@@ -50,13 +59,13 @@ interface YearGroup {
     @switch (periodsList.phase()) {
       @case ('skeleton') {
         <table uiTable aria-busy="true">
-          <tbody uiTableSkeleton [columns]="6"></tbody>
+          <tbody uiTableSkeleton [columns]="5"></tbody>
         </table>
       }
       @case ('error') {
         <table uiTable>
           <tbody>
-            <tr uiTableError [columns]="6" (retry)="periods.reload()"></tr>
+            <tr uiTableError [columns]="5" (retry)="periods.reload()"></tr>
           </tbody>
         </table>
       }
@@ -73,7 +82,18 @@ interface YearGroup {
                   }
                 </span>
               </h2>
-              <button uiButton variant="ghost" size="sm" (click)="editPeriod(undefined, group.year)">
+              @if (group.customSchools.length) {
+                <span
+                  uiBadge
+                  tone="warning"
+                  size="sm"
+                  [title]="'Usan periodos propios: ' + group.customSchoolNames"
+                >
+                  {{ group.customSchools.length }}
+                  {{ group.customSchools.length === 1 ? 'colegio usa' : 'colegios usan' }} periodos propios
+                </span>
+              }
+              <button uiButton variant="ghost" size="sm" class="ms-auto" (click)="editPeriod(undefined, group.year)">
                 <ui-icon name="circle-plus" />
                 Agregar a {{ group.year }}
               </button>
@@ -86,7 +106,6 @@ interface YearGroup {
                     <th>Nombre corto</th>
                     <th>Fecha de inicio</th>
                     <th>Fecha de fin</th>
-                    <th>Colegios con ajustes</th>
                     <th>Acciones</th>
                   </tr>
                 </thead>
@@ -97,13 +116,6 @@ interface YearGroup {
                       <td>{{ period.shortName }}</td>
                       <td>{{ period.startDate | date: 'dd/MM/yyyy' : 'UTC' }}</td>
                       <td>{{ period.endDate | date: 'dd/MM/yyyy' : 'UTC' }}</td>
-                      <td>
-                        @if (period._count?.schoolOverrides) {
-                          <span uiBadge tone="warning" size="sm">{{ period._count?.schoolOverrides }}</span>
-                        } @else {
-                          <span class="text-ink-subtle">—</span>
-                        }
-                      </td>
                       <td class="flex gap-2">
                         <ui-row-actions
                           [actions]="rowActions"
@@ -112,6 +124,8 @@ interface YearGroup {
                         />
                       </td>
                     </tr>
+                  } @empty {
+                    <tr uiTableEmpty [columns]="5" icon="calendar" title="Sin periodos globales este año"></tr>
                   }
                 </tbody>
               </table>
@@ -120,7 +134,7 @@ interface YearGroup {
         } @empty {
           <table uiTable>
             <tbody>
-              <tr uiTableEmpty [columns]="6" icon="calendar" title="Aún no hay periodos"></tr>
+              <tr uiTableEmpty [columns]="5" icon="calendar" title="Aún no hay periodos"></tr>
             </tbody>
           </table>
         }
@@ -139,17 +153,35 @@ export default class Periods {
   /** periods with smooth loading: previous rows stay while the next page / sort / search loads. */
   protected readonly periodsList = listState(this.periods);
 
-  /** Periods grouped by year, newest year first; each year's periods by start date. */
+  /** Per year, the schools on their own calendar. */
+  public customSchools = httpResource<CustomSchoolsYear[]>(() => '/api/v1/periods/custom-schools', {
+    defaultValue: [],
+  });
+
+  /**
+   * Global periods grouped by year, newest year first; each year's periods by start date. A year
+   * where only schools have their own periods still shows, empty.
+   */
   protected readonly years = computed<YearGroup[]>(() => {
     const groups = new Map<number, PeriodRow[]>();
     for (const p of this.periodsList.rows() ?? []) groups.set(p.year, [...(groups.get(p.year) ?? []), p]);
+    const custom = new Map((this.customSchools.value() ?? []).map((c) => [c.year, c.schools]));
+    for (const year of custom.keys()) if (!groups.has(year)) groups.set(year, []);
     const time = (d: Date | string) => new Date(d).getTime();
     return [...groups.entries()]
       .sort(([a], [b]) => b - a)
       .map(([year, periods]) => {
         const sorted = [...periods].sort((a, b) => time(a.startDate) - time(b.startDate));
         const last = sorted.reduce<PeriodRow | null>((m, p) => (!m || time(p.endDate) > time(m.endDate) ? p : m), null);
-        return { year, periods: sorted, first: sorted[0]?.startDate ?? null, last: last?.endDate ?? null };
+        const schools = custom.get(year) ?? [];
+        return {
+          year,
+          periods: sorted,
+          first: sorted[0]?.startDate ?? null,
+          last: last?.endDate ?? null,
+          customSchools: schools,
+          customSchoolNames: schools.map((x) => x.name).join(', '),
+        };
       });
   });
 

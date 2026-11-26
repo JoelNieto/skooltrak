@@ -2551,6 +2551,21 @@
         ]
       }
     },
+    "/api/v1/periods/custom-schools": {
+      "get": {
+        "operationId": "PeriodsController_customSchools",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Per year, the schools that use their own periods",
+        "tags": [
+          "periods"
+        ]
+      }
+    },
     "/api/v1/periods/{id}": {
       "get": {
         "operationId": "PeriodsController_findOne",

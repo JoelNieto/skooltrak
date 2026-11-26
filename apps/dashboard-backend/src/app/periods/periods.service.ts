@@ -1,28 +1,27 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { Prisma } from '@generated/prisma';
 import { PrismaService } from '../prisma.service';
 import { CreatePeriodInput } from './dto/create-period.input';
-import { SchoolPeriodOverrideInput } from './dto/school-period-override.input';
+import { CreateSchoolPeriodInput, UpdateSchoolPeriodInput } from './dto/school-period.input';
 import { UpdatePeriodInput } from './dto/update-period.input';
-import { SchoolPeriod } from './entities/school-period.entity';
-import { applyPeriodOverride, assertPeriodDates, loadSchoolPeriods, PeriodOverrideFields } from './school-periods';
+import { SchoolPeriod, SchoolPeriodsYear } from './entities/school-period.entity';
+import {
+  assertNoOverlap,
+  assertPeriodDates,
+  loadSchoolPeriods,
+  usesCustomPeriods,
+} from './school-periods';
 
 export const PERIOD_NOT_FOUND = 'Periodo no encontrado';
+export const PERIOD_NAME_REQUIRED = 'El nombre del periodo es obligatorio';
+export const PERIODS_ALREADY_CUSTOM = 'El colegio ya usa periodos propios este año';
+export const PERIOD_IN_USE = 'El periodo tiene calificaciones o evaluaciones de hábitos; no se puede eliminar';
+export const RESTORE_IN_USE =
+  'Hay calificaciones en los periodos propios y no coinciden uno a uno con los globales; no se puede volver a los globales';
 
-const periodSelect = { id: true, year: true, name: true, shortName: true, startDate: true, endDate: true } as const;
-const overrideSelect = { name: true, shortName: true, startDate: true, endDate: true } as const;
+type Tx = Prisma.TransactionClient;
 
-/** Trimmed text, or null when empty or equal to the global value. */
-function textOverride(value: string | null | undefined, fallback: string): string | null {
-  const v = value?.trim();
-  return v && v !== fallback ? v : null;
-}
-
-/** The date, or null when missing or on the same day as the global value. */
-function dateOverride(value: Date | null | undefined, fallback: Date): Date | null {
-  if (!value) return null;
-  const date = value instanceof Date ? value : new Date(value);
-  return date.toISOString().slice(0, 10) === fallback.toISOString().slice(0, 10) ? null : date;
-}
+const ownSelect = { id: true, year: true, name: true, shortName: true, startDate: true, endDate: true } as const;
 
 @Injectable()
 export class PeriodsService {
@@ -30,23 +29,18 @@ export class PeriodsService {
 
   create(createPeriodInput: CreatePeriodInput) {
     return this.prisma.period.create({
-      data: createPeriodInput,
+      data: { ...createPeriodInput, schoolId: null },
     });
   }
 
-  /** All periods; with `schoolId`, as that school sees them. */
+  /** All global periods; with `schoolId`, the periods that school uses each year. */
   findAll(schoolId?: string) {
-    if (schoolId) return loadSchoolPeriods(this.prisma, schoolId);
-    return this.prisma.period.findMany({ orderBy: [{ year: 'desc' }, { startDate: 'asc' }] });
+    return loadSchoolPeriods(this.prisma, schoolId);
   }
 
-  /** The periods of `year`; with `schoolId`, as that school sees them (overrides applied). */
+  /** The global periods of `year`; with `schoolId`, the ones that school uses. */
   findManyByYear(year: number, schoolId?: string) {
-    if (schoolId) return loadSchoolPeriods(this.prisma, schoolId, year);
-    return this.prisma.period.findMany({
-      where: { year },
-      orderBy: { startDate: 'asc' },
-    });
+    return loadSchoolPeriods(this.prisma, schoolId, year);
   }
 
   findOne(id: string) {
@@ -66,68 +60,157 @@ export class PeriodsService {
     return this.prisma.period.delete({ where: { id } });
   }
 
-  /** The year's periods for one school: effective values, global defaults and the school's override. */
-  async schoolPeriods(schoolId: string, year: number): Promise<SchoolPeriod[]> {
-    const rows = await this.prisma.period.findMany({
-      where: { year },
-      select: { ...periodSelect, schoolOverrides: { where: { schoolId }, select: overrideSelect } },
-    });
-    return rows
-      .map(({ schoolOverrides, ...period }) => this.toSchoolPeriod(period, schoolOverrides[0] ?? null))
-      .sort((a, b) => a.startDate.getTime() - b.startDate.getTime() || a.name.localeCompare(b.name));
+  // ── A school's own periods ─────────────────────────────────────────────────────────────────
+
+  /** The periods the school uses in `year`, with how much of its work each one holds. */
+  async schoolYear(schoolId: string, year: number, db: Tx | PrismaService = this.prisma): Promise<SchoolPeriodsYear> {
+    const periods = await loadSchoolPeriods(db, schoolId, year);
+    const usage = await this.usage(db, schoolId, periods.map((p) => p.id));
+    return {
+      year,
+      custom: periods.some((p) => p.custom),
+      periods: periods.map((p) => ({ ...p, usage: usage.get(p.id) ?? 0 })),
+    };
   }
 
   /**
-   * Sets the school's override of one period. Fields left empty or equal to the global value fall back
-   * to it; when nothing differs, the override is removed.
+   * Switches the school to its own periods for `year`: copies the global ones as a starting point
+   * and moves the school's grades and habit evaluations onto the copies.
    */
-  async setOverride(schoolId: string, periodId: string, input: SchoolPeriodOverrideInput): Promise<SchoolPeriod> {
-    const period = await this.prisma.period.findUnique({ where: { id: periodId }, select: periodSelect });
-    if (!period) throw new NotFoundException(PERIOD_NOT_FOUND);
-
-    const data: PeriodOverrideFields = {
-      name: textOverride(input.name, period.name),
-      shortName: textOverride(input.shortName, period.shortName),
-      startDate: dateOverride(input.startDate, period.startDate),
-      endDate: dateOverride(input.endDate, period.endDate),
-    };
-    assertPeriodDates(data.startDate ?? period.startDate, data.endDate ?? period.endDate);
-
-    const empty = Object.values(data).every((v) => v === null);
-    if (empty) {
-      await this.prisma.schoolPeriod.deleteMany({ where: { schoolId, periodId } });
-      return this.toSchoolPeriod(period, null);
-    }
-    const saved = await this.prisma.schoolPeriod.upsert({
-      where: { schoolId_periodId: { schoolId, periodId } },
-      create: { schoolId, periodId, ...data },
-      update: data,
-      select: overrideSelect,
+  async customize(schoolId: string, year: number): Promise<SchoolPeriodsYear> {
+    return this.prisma.$transaction(async (tx) => {
+      if (await usesCustomPeriods(tx, schoolId, year)) throw new ConflictException(PERIODS_ALREADY_CUSTOM);
+      await this.copyGlobals(tx, schoolId, year);
+      return this.schoolYear(schoolId, year, tx);
     });
-    return this.toSchoolPeriod(period, saved);
   }
 
-  /** Removes the school's override of one period: it uses the global values again. */
-  async clearOverride(schoolId: string, periodId: string): Promise<SchoolPeriod> {
-    const period = await this.prisma.period.findUnique({ where: { id: periodId }, select: periodSelect });
-    if (!period) throw new NotFoundException(PERIOD_NOT_FOUND);
-    await this.prisma.schoolPeriod.deleteMany({ where: { schoolId, periodId } });
-    return this.toSchoolPeriod(period, null);
+  /**
+   * Back to the global periods for `year`: deletes the school's own periods. Grades and habit
+   * evaluations in them move to the global period in the same position, which requires as many own
+   * periods as global ones; otherwise only allowed while the own periods hold nothing.
+   */
+  async restoreGlobal(schoolId: string, year: number): Promise<SchoolPeriodsYear> {
+    return this.prisma.$transaction(async (tx) => {
+      const own = await tx.period.findMany({ where: { schoolId, year }, select: ownSelect, orderBy: { startDate: 'asc' } });
+      if (!own.length) return this.schoolYear(schoolId, year, tx);
+      const globals = await tx.period.findMany({
+        where: { schoolId: null, year },
+        select: { id: true },
+        orderBy: { startDate: 'asc' },
+      });
+      const usage = await this.usage(tx, schoolId, own.map((p) => p.id));
+      const used = [...usage.values()].some((n) => n > 0);
+      if (used) {
+        if (own.length !== globals.length) throw new BadRequestException(RESTORE_IN_USE);
+        for (const [i, p] of own.entries()) await this.movePeriodWork(tx, schoolId, p.id, globals[i].id);
+      }
+      await tx.period.deleteMany({ where: { schoolId, year } });
+      return this.schoolYear(schoolId, year, tx);
+    });
   }
 
-  private toSchoolPeriod(
-    period: { id: string; year: number; name: string; shortName: string; startDate: Date; endDate: Date },
-    override: PeriodOverrideFields | null,
-  ): SchoolPeriod {
-    return {
-      ...applyPeriodOverride(period, override),
-      defaults: {
-        name: period.name,
-        shortName: period.shortName,
-        startDate: period.startDate,
-        endDate: period.endDate,
-      },
-      override,
+  /** Adds one of the school's own periods (switching the year to own periods first if needed). */
+  async createForSchool(schoolId: string, input: CreateSchoolPeriodInput): Promise<SchoolPeriod> {
+    const year = Number(input.year);
+    if (!Number.isInteger(year)) throw new BadRequestException('Año inválido');
+    const name = input.name?.trim();
+    if (!name) throw new BadRequestException(PERIOD_NAME_REQUIRED);
+    assertPeriodDates(input.startDate, input.endDate);
+
+    return this.prisma.$transaction(async (tx) => {
+      if (!(await usesCustomPeriods(tx, schoolId, year))) await this.copyGlobals(tx, schoolId, year);
+      const siblings = await tx.period.findMany({ where: { schoolId, year }, select: ownSelect });
+      assertNoOverlap(input, siblings);
+      const created = await tx.period.create({
+        data: {
+          schoolId,
+          year,
+          name,
+          shortName: input.shortName?.trim() ?? '',
+          startDate: input.startDate,
+          endDate: input.endDate,
+        },
+        select: ownSelect,
+      });
+      return { ...created, custom: true, usage: 0 };
+    });
+  }
+
+  /** Edits one of the school's own periods. */
+  async updateForSchool(schoolId: string, periodId: string, input: UpdateSchoolPeriodInput): Promise<SchoolPeriod> {
+    const period = await this.ownPeriod(schoolId, periodId);
+    const name = input.name === undefined ? period.name : input.name.trim();
+    if (!name) throw new BadRequestException(PERIOD_NAME_REQUIRED);
+    const next = {
+      id: period.id,
+      name,
+      shortName: input.shortName === undefined ? period.shortName : input.shortName.trim(),
+      startDate: input.startDate ?? period.startDate,
+      endDate: input.endDate ?? period.endDate,
     };
+    assertPeriodDates(next.startDate, next.endDate);
+    const siblings = await this.prisma.period.findMany({ where: { schoolId, year: period.year }, select: ownSelect });
+    assertNoOverlap(next, siblings);
+
+    const { id, ...data } = next;
+    const saved = await this.prisma.period.update({ where: { id }, data, select: ownSelect });
+    const usage = await this.usage(this.prisma, schoolId, [id]);
+    return { ...saved, custom: true, usage: usage.get(id) ?? 0 };
+  }
+
+  /** Deletes one of the school's own periods while it holds no grades or habit evaluations. */
+  async removeForSchool(schoolId: string, periodId: string): Promise<void> {
+    const period = await this.ownPeriod(schoolId, periodId);
+    const usage = await this.usage(this.prisma, schoolId, [period.id]);
+    if (usage.get(period.id)) throw new BadRequestException(PERIOD_IN_USE);
+    await this.prisma.period.delete({ where: { id: period.id } });
+  }
+
+  private async ownPeriod(schoolId: string, periodId: string) {
+    const period = await this.prisma.period.findFirst({ where: { id: periodId, schoolId }, select: ownSelect });
+    if (!period) throw new NotFoundException(PERIOD_NOT_FOUND);
+    return period;
+  }
+
+  /** Copies the year's global periods into the school and moves its work onto the copies. */
+  private async copyGlobals(tx: Tx, schoolId: string, year: number): Promise<void> {
+    const globals = await tx.period.findMany({ where: { schoolId: null, year }, select: ownSelect });
+    for (const g of globals) {
+      const copy = await tx.period.create({
+        data: { schoolId, year, name: g.name, shortName: g.shortName, startDate: g.startDate, endDate: g.endDate },
+        select: { id: true },
+      });
+      await this.movePeriodWork(tx, schoolId, g.id, copy.id);
+    }
+  }
+
+  /** Moves the school's grade columns and habit evaluations from one period to another. */
+  private async movePeriodWork(tx: Tx, schoolId: string, from: string, to: string): Promise<void> {
+    await tx.grade.updateMany({ where: { periodId: from, course: { schoolId } }, data: { periodId: to } });
+    await tx.habitEvaluation.updateMany({
+      where: { periodId: from, classGroup: { schoolId } },
+      data: { periodId: to },
+    });
+  }
+
+  /** Per period: the school's grade columns plus habit evaluations in it. */
+  private async usage(db: Tx | PrismaService, schoolId: string, periodIds: string[]): Promise<Map<string, number>> {
+    const counts = new Map<string, number>();
+    if (!periodIds.length) return counts;
+    const [grades, habits] = await Promise.all([
+      db.grade.groupBy({
+        by: ['periodId'],
+        where: { periodId: { in: periodIds }, course: { schoolId } },
+        _count: { _all: true },
+      }),
+      db.habitEvaluation.groupBy({
+        by: ['periodId'],
+        where: { periodId: { in: periodIds }, classGroup: { schoolId } },
+        _count: { _all: true },
+      }),
+    ]);
+    for (const row of [...grades, ...habits]) counts.set(row.periodId, (counts.get(row.periodId) ?? 0) + row._count._all);
+    return counts;
   }
 }

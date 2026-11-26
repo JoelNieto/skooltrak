@@ -5,8 +5,6 @@
  * REST API for dashboard, shell, and store clients
  * OpenAPI spec version: 1.0
  */
-import type { SchoolPeriodDefaults } from './schoolPeriodDefaults';
-import type { SchoolPeriodOverride } from './schoolPeriodOverride';
 
 export interface SchoolPeriod {
   id: string;
@@ -15,9 +13,8 @@ export interface SchoolPeriod {
   shortName: string;
   startDate: string;
   endDate: string;
-  /** True when the school changed at least one field */
-  overridden: boolean;
-  defaults: SchoolPeriodDefaults;
-  /** @nullable */
-  override: SchoolPeriodOverride | null;
+  /** True for the school's own period, false for a global one */
+  custom: boolean;
+  /** This school's grade columns and habit evaluations in the period */
+  usage: number;
 }

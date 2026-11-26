@@ -6,6 +6,7 @@ export class Period implements Prisma.PeriodGetPayload<{ include: undefined }> {
     year: number;
     startDate: Date;
     endDate: Date;
+    schoolId: string | null;
     createdAt: Date;
     updatedAt: Date;
 }

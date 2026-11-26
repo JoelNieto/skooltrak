@@ -49,7 +49,7 @@ export class AdminHomeService {
     const [me, { current }, joinRows, missedAttendance, overdueCharges, failedImports, plansWithoutScale] =
       await Promise.all([
         this.prisma.user.findUnique({ where: { id: ctx.userId }, select: { firstName: true, name: true } }),
-        resolvePeriodPair(this.prisma, school.currentYear, local.date),
+        resolvePeriodPair(this.prisma, school, local.date),
         this.prisma.joinRequest.findMany({
           where: { schoolId: school.id, status: 'PENDING', school: { organizationId } },
           select: { requestedRole: true, createdAt: true },
@@ -111,7 +111,7 @@ export class AdminHomeService {
       this.attendanceCounts(ctx, local.date, local.date),
       this.attendanceCounts(ctx, lastWeekStart, addDays(lastWeekStart, 6)),
       ctx.finance ? this.monthCollection(ctx) : Promise.resolve(null),
-      resolvePeriodPair(this.prisma, school.currentYear, local.date),
+      resolvePeriodPair(this.prisma, school, local.date),
     ]);
     const count = (s: EnrollmentStatus) => statusRows.find((r) => r.enrollmentStatus === s)?._count._all ?? 0;
 

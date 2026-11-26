@@ -1,5 +1,6 @@
 import { HomePeriod } from './entities/teacher-home.entity';
 import { PrismaService } from '../prisma.service';
+import { loadSchoolPeriods } from '../periods/school-periods';
 import { addDays, utcDate } from './home-time';
 
 export interface PeriodRef {
@@ -35,31 +36,23 @@ export function pickPreviousPeriod(periods: PeriodRef[], current: PeriodRef | nu
   return before[0] ?? null;
 }
 
-/** Current (BR-HOM-001.3) and previous period of the school year. */
+/** Current (BR-HOM-001.3) and previous period of the school year, with the school's overrides. */
 export async function resolvePeriodPair(
   prisma: PrismaService,
-  year: number,
+  school: { id: string; currentYear: number },
   today: string,
 ): Promise<{ current: PeriodRef | null; previous: PeriodRef | null }> {
-  const periods = await loadPeriods(prisma, year);
+  const periods = await loadSchoolPeriods(prisma, school.id, school.currentYear);
   const current = pickCurrentPeriod(periods, today);
   return { current, previous: pickPreviousPeriod(periods, current) };
 }
 
-function loadPeriods(prisma: PrismaService, year: number) {
-  return prisma.period.findMany({
-    where: { year },
-    select: { id: true, name: true, startDate: true, endDate: true },
-    orderBy: { startDate: 'asc' },
-  });
-}
-
 export async function resolveCurrentPeriod(
   prisma: PrismaService,
-  year: number,
+  school: { id: string; currentYear: number },
   today: string,
 ): Promise<PeriodRef | null> {
-  return pickCurrentPeriod(await loadPeriods(prisma, year), today);
+  return pickCurrentPeriod(await loadSchoolPeriods(prisma, school.id, school.currentYear), today);
 }
 
 /** API shape of a period: id, name and its last day (`YYYY-MM-DD`). */

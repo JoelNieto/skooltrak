@@ -338,9 +338,9 @@ export default class GradeReport {
     Array<{ id: string; name?: string; shortName?: string; startDate?: string; endDate?: string }>
   >(
     () => {
-      const year = this.#store.currentSchool()?.currentYear;
-      if (!year) return undefined;
-      return { url: '/api/v1/periods/by-year', params: { year: String(year) } };
+      const school = this.#store.currentSchool();
+      if (!school?.currentYear) return undefined;
+      return { url: '/api/v1/periods/by-year', params: { year: String(school.currentYear), schoolId: school.id } };
     },
     { defaultValue: [] },
   );

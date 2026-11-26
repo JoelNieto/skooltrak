@@ -12,6 +12,8 @@ export class HabitMetric
 
     order: number;
 
+    schoolId: string | null;
+
     createdAt: Date;
 
     updatedAt: Date;

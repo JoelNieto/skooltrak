@@ -105,7 +105,7 @@ const perms = (target: object) => Reflect.getMetadata(PERMISSIONS_KEY, target) a
 describe('Academic setup access', () => {
   it('periods: anyone signed in reads, only SYSADMIN writes', async () => {
     const service = mockService();
-    const controller = new PeriodsController(service as never);
+    const controller = new PeriodsController(service as never, prisma as never);
     for (const req of [admin, teacher]) {
       await expect(controller.create(req, {} as never)).rejects.toThrow(new ForbiddenException(PERIODS_PLATFORM_ONLY));
       await expect(controller.update(req, { id: 'x' } as never)).rejects.toThrow(ForbiddenException);
@@ -113,6 +113,34 @@ describe('Academic setup access', () => {
     }
     await controller.create(sysadmin, {} as never);
     expect(service['create']).toHaveBeenCalledTimes(1);
+  });
+
+  it("school periods: VIEW/MANAGE_PERIODS, own organization only", async () => {
+    const service = mockService();
+    const controller = new PeriodsController(service as never, prisma as never);
+    expect(perms(controller.schoolYear)).toEqual([Perm.VIEW_PERIODS]);
+    for (const write of [
+      controller.customize,
+      controller.restoreGlobal,
+      controller.createForSchool,
+      controller.updateForSchool,
+      controller.removeForSchool,
+    ]) {
+      expect(perms(write)).toEqual([Perm.MANAGE_PERIODS]);
+    }
+
+    await expect(controller.schoolYear(admin, 'SCH9', '2026')).rejects.toThrow(new ForbiddenException(SCHOOL_DENIED));
+    await expect(controller.customize(admin, 'SCH9', { year: 2026 })).rejects.toThrow(ForbiddenException);
+    await expect(controller.createForSchool(admin, 'SCH9', {} as never)).rejects.toThrow(ForbiddenException);
+    await expect(controller.updateForSchool(admin, 'SCH9', 'p1', {})).rejects.toThrow(ForbiddenException);
+    await expect(controller.removeForSchool(admin, 'SCH9', 'p1')).rejects.toThrow(ForbiddenException);
+    await expect(controller.findManyByYear(teacher, '2026', 'SCH9')).rejects.toThrow(ForbiddenException);
+    expect(service['createForSchool']).not.toHaveBeenCalled();
+
+    await controller.customize(admin, 'SCH1', { year: 2026 });
+    expect(service['customize']).toHaveBeenCalledWith('SCH1', 2026);
+    await controller.findManyByYear(teacher, '2026', 'SCH1');
+    expect(service['findManyByYear']).toHaveBeenCalledWith(2026, 'SCH1');
   });
 
   it('degrees: VIEW/MANAGE_STUDY_PLANS, own organization only', async () => {

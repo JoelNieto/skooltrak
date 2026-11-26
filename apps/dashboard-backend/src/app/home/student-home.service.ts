@@ -61,7 +61,7 @@ export class StudentHomeService {
     const group = student.classGroup;
 
     const [period, rows] = await Promise.all([
-      resolveCurrentPeriod(this.prisma, student.school.currentYear, local.date),
+      resolveCurrentPeriod(this.prisma, student.school, local.date),
       group
         ? this.prisma.classGroupWeeklySchedule.findMany({
             where: { classGroupId: group.id, weekday: local.weekday, classGroup: { organizationId } },
@@ -193,7 +193,7 @@ export class StudentHomeService {
     const group = student.classGroup;
 
     const [{ current, previous }, enrolled, planRow] = await Promise.all([
-      resolvePeriodPair(this.prisma, student.school.currentYear, local.date),
+      resolvePeriodPair(this.prisma, student.school, local.date),
       this.prisma.course.findMany({
         where: { organizationId, ...enrolledCourses({ id: student.id }) },
         select: { id: true, name: true },

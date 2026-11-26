@@ -4,6 +4,7 @@ import { pickCurrentPeriod } from '../home/home-period';
 import { EnrollmentStatus } from '@generated/prisma';
 import { CLOCK, Clock, schoolLocalTime } from '../home/home-time';
 import { workStatus } from '../home/student-home.service';
+import { loadSchoolPeriods } from '../periods/school-periods';
 import { PrismaService } from '../prisma.service';
 import { CourseViewer } from './course-access.service';
 import { CourseCoverStorage } from './course-cover-storage';
@@ -147,16 +148,12 @@ export class CoursePageService {
     const course = await this.prisma.course.findUniqueOrThrow({
       where: { id: courseId },
       select: {
-        school: { select: { currentYear: true, timezone: true } },
+        school: { select: { id: true, currentYear: true, timezone: true } },
         studyPlan: { select: planMetricSelect({ maximum: true, minimumApproval: true }) },
         gradeBuckets: { select: { id: true, name: true, weight: true }, orderBy: { createdAt: 'asc' } },
       },
     });
-    const periods = await this.prisma.period.findMany({
-      where: { year: course.school.currentYear },
-      select: { id: true, name: true, startDate: true, endDate: true },
-      orderBy: { startDate: 'asc' },
-    });
+    const periods = await loadSchoolPeriods(this.prisma, course.school.id, course.school.currentYear);
     let selected = pickCurrentPeriod(periods, schoolLocalTime(this.clock.now(), course.school.timezone).date);
     if (periodId) {
       selected = periods.find((p) => p.id === periodId) ?? null;

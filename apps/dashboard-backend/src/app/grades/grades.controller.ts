@@ -42,6 +42,7 @@ export class GradesController {
   async create(@Req() req: AuthenticatedRequest, @Body() createGradeInput: CreateGradeInput) {
     await this.access.assertCanWriteCourse(req.user, createGradeInput.courseId);
     await this.access.assertBucketInCourse(createGradeInput.bucketId, createGradeInput.courseId);
+    await this.access.assertPeriodForCourse(createGradeInput.periodId, createGradeInput.courseId);
     const link = createGradeInput.assignmentId
       ? await this.access.assertAssignmentLinkable(createGradeInput.assignmentId, createGradeInput.courseId)
       : null;
@@ -88,6 +89,9 @@ export class GradesController {
     }
     if (updateGradeInput.bucketId) {
       await this.access.assertBucketInCourse(updateGradeInput.bucketId, existing.courseId);
+    }
+    if (updateGradeInput.periodId) {
+      await this.access.assertPeriodForCourse(updateGradeInput.periodId, existing.courseId);
     }
     this.access.assertCanChangePublished(req.user, existing.published, updateGradeInput.published);
     const link = updateGradeInput.assignmentId

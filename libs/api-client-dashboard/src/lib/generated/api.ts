@@ -81,7 +81,9 @@ import type {
   CreatePermissionInput,
   CreateQuizInput,
   CreateRoleInput,
+  CreateSchoolHabitMetricInput,
   CreateSchoolInput,
+  CreateSchoolPeriodInput,
   CreateSchoolWithOrgInput,
   CreateStoreCategoryInput,
   CreateStoreProductInput,
@@ -112,13 +114,16 @@ import type {
   GradebookControllerExportCsvParams,
   GradesControllerFindByCourseIdParams,
   HabitEvaluationsControllerFindByGroupParams,
+  HabitMetricsControllerFindAllParams,
   LinkChildInput,
   NotificationsControllerListParams,
   OrganizationsControllerListInvitationsParams,
   OrganizationsControllerListMembersParams,
   ParentsControllerFindAllParams,
   ParentsControllerGetCountParams,
+  PeriodsControllerFindAllParams,
   PeriodsControllerFindManyByYearParams,
+  PeriodsControllerSchoolYearParams,
   PermissionsControllerCountParams,
   PermissionsControllerFindAllParams,
   ProcessStorePaymentInput,
@@ -133,7 +138,12 @@ import type {
   RosterAddInput,
   SaveCellsInput,
   SaveHabitEvaluationInput,
+  SchoolHabitMetric,
+  SchoolHabitMetrics,
   SchoolLogoUploadInput,
+  SchoolPeriod,
+  SchoolPeriodsYear,
+  SchoolPeriodsYearInput,
   SchoolsControllerGetSchoolLogoDownloadUrlParams,
   SendDirectMessageInput,
   ShareFileInput,
@@ -180,7 +190,9 @@ import type {
   UpdatePermissionInput,
   UpdateQuizInput,
   UpdateRoleInput,
+  UpdateSchoolHabitMetricInput,
   UpdateSchoolInput,
+  UpdateSchoolPeriodInput,
   UpdateShareInput,
   UpdateStoreCategoryInput,
   UpdateStoreOrderStatusInput,
@@ -8307,36 +8319,38 @@ if(coursesControllerUploadCoverBody.file !== undefined) {
   }
 
 /**
- * @summary List periods
+ * @summary List global periods (with schoolId: the periods that school uses)
  */
- periodsControllerFindAll<TData = void>( options?: HttpClientBodyOptions): Observable<TData>;
- periodsControllerFindAll<TData = void>( options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
- periodsControllerFindAll<TData = void>( options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
+ periodsControllerFindAll<TData = void>(params?: PeriodsControllerFindAllParams, options?: HttpClientBodyOptions): Observable<TData>;
+ periodsControllerFindAll<TData = void>(params?: PeriodsControllerFindAllParams, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
+ periodsControllerFindAll<TData = void>(params?: PeriodsControllerFindAllParams, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
   periodsControllerFindAll<TData = void>(
-     options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
+    params?: PeriodsControllerFindAllParams, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
+    const filteredParams = filterParams({...params, ...options?.params}, new Set<string>([]));
+
     if (options?.observe === 'events') {
       return this.http.get<TData>(
       `/api/v1/periods`,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+    ...(options as Omit<NonNullable<typeof options>, 'observe'>),
         observe: 'events',
-      }
+        params: filteredParams,}
     );
     }
 
     if (options?.observe === 'response') {
       return this.http.get<TData>(
       `/api/v1/periods`,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+    ...(options as Omit<NonNullable<typeof options>, 'observe'>),
         observe: 'response',
-      }
+        params: filteredParams,}
     );
     }
 
     return this.http.get<TData>(
       `/api/v1/periods`,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+    ...(options as Omit<NonNullable<typeof options>, 'observe'>),
         observe: 'body',
-      }
+        params: filteredParams,}
     );
   }
 
@@ -8378,7 +8392,7 @@ if(coursesControllerUploadCoverBody.file !== undefined) {
   }
 
 /**
- * @summary Periods by year
+ * @summary Global periods by year (with schoolId: the periods that school uses)
  */
  periodsControllerFindManyByYear<TData = void>(params: PeriodsControllerFindManyByYearParams, options?: HttpClientBodyOptions): Observable<TData>;
  periodsControllerFindManyByYear<TData = void>(params: PeriodsControllerFindManyByYearParams, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
@@ -8410,6 +8424,252 @@ if(coursesControllerUploadCoverBody.file !== undefined) {
     ...(options as Omit<NonNullable<typeof options>, 'observe'>),
         observe: 'body',
         params: filteredParams,}
+    );
+  }
+
+/**
+ * @summary The periods a school uses in one year (its own or the global ones)
+ */
+ periodsControllerSchoolYear<TData = SchoolPeriodsYear>(schoolId: string,
+    params: PeriodsControllerSchoolYearParams, options?: HttpClientBodyOptions): Observable<TData>;
+ periodsControllerSchoolYear<TData = SchoolPeriodsYear>(schoolId: string,
+    params: PeriodsControllerSchoolYearParams, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
+ periodsControllerSchoolYear<TData = SchoolPeriodsYear>(schoolId: string,
+    params: PeriodsControllerSchoolYearParams, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
+  periodsControllerSchoolYear<TData = SchoolPeriodsYear>(
+    schoolId: string,
+    params: PeriodsControllerSchoolYearParams, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
+    const filteredParams = filterParams({...params, ...options?.params}, new Set<string>([]));
+
+    if (options?.observe === 'events') {
+      return this.http.get<TData>(
+      `/api/v1/periods/schools/${schoolId}`,{
+    ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'events',
+        params: filteredParams,}
+    );
+    }
+
+    if (options?.observe === 'response') {
+      return this.http.get<TData>(
+      `/api/v1/periods/schools/${schoolId}`,{
+    ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'response',
+        params: filteredParams,}
+    );
+    }
+
+    return this.http.get<TData>(
+      `/api/v1/periods/schools/${schoolId}`,{
+    ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'body',
+        params: filteredParams,}
+    );
+  }
+
+/**
+ * @summary Add one of a school's own periods
+ */
+ periodsControllerCreateForSchool<TData = SchoolPeriod>(schoolId: string,
+    createSchoolPeriodInput: CreateSchoolPeriodInput, options?: HttpClientBodyOptions): Observable<TData>;
+ periodsControllerCreateForSchool<TData = SchoolPeriod>(schoolId: string,
+    createSchoolPeriodInput: CreateSchoolPeriodInput, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
+ periodsControllerCreateForSchool<TData = SchoolPeriod>(schoolId: string,
+    createSchoolPeriodInput: CreateSchoolPeriodInput, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
+  periodsControllerCreateForSchool<TData = SchoolPeriod>(
+    schoolId: string,
+    createSchoolPeriodInput: CreateSchoolPeriodInput, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
+    if (options?.observe === 'events') {
+      return this.http.post<TData>(
+      `/api/v1/periods/schools/${schoolId}`,
+      createSchoolPeriodInput,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'events',
+      }
+    );
+    }
+
+    if (options?.observe === 'response') {
+      return this.http.post<TData>(
+      `/api/v1/periods/schools/${schoolId}`,
+      createSchoolPeriodInput,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'response',
+      }
+    );
+    }
+
+    return this.http.post<TData>(
+      `/api/v1/periods/schools/${schoolId}`,
+      createSchoolPeriodInput,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'body',
+      }
+    );
+  }
+
+/**
+ * @summary Switch a school year to its own periods, starting from a copy of the global ones
+ */
+ periodsControllerCustomize<TData = SchoolPeriodsYear>(schoolId: string,
+    schoolPeriodsYearInput: SchoolPeriodsYearInput, options?: HttpClientBodyOptions): Observable<TData>;
+ periodsControllerCustomize<TData = SchoolPeriodsYear>(schoolId: string,
+    schoolPeriodsYearInput: SchoolPeriodsYearInput, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
+ periodsControllerCustomize<TData = SchoolPeriodsYear>(schoolId: string,
+    schoolPeriodsYearInput: SchoolPeriodsYearInput, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
+  periodsControllerCustomize<TData = SchoolPeriodsYear>(
+    schoolId: string,
+    schoolPeriodsYearInput: SchoolPeriodsYearInput, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
+    if (options?.observe === 'events') {
+      return this.http.post<TData>(
+      `/api/v1/periods/schools/${schoolId}/customize`,
+      schoolPeriodsYearInput,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'events',
+      }
+    );
+    }
+
+    if (options?.observe === 'response') {
+      return this.http.post<TData>(
+      `/api/v1/periods/schools/${schoolId}/customize`,
+      schoolPeriodsYearInput,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'response',
+      }
+    );
+    }
+
+    return this.http.post<TData>(
+      `/api/v1/periods/schools/${schoolId}/customize`,
+      schoolPeriodsYearInput,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'body',
+      }
+    );
+  }
+
+/**
+ * @summary Switch a school year back to the global periods
+ */
+ periodsControllerRestoreGlobal<TData = SchoolPeriodsYear>(schoolId: string,
+    schoolPeriodsYearInput: SchoolPeriodsYearInput, options?: HttpClientBodyOptions): Observable<TData>;
+ periodsControllerRestoreGlobal<TData = SchoolPeriodsYear>(schoolId: string,
+    schoolPeriodsYearInput: SchoolPeriodsYearInput, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
+ periodsControllerRestoreGlobal<TData = SchoolPeriodsYear>(schoolId: string,
+    schoolPeriodsYearInput: SchoolPeriodsYearInput, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
+  periodsControllerRestoreGlobal<TData = SchoolPeriodsYear>(
+    schoolId: string,
+    schoolPeriodsYearInput: SchoolPeriodsYearInput, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
+    if (options?.observe === 'events') {
+      return this.http.post<TData>(
+      `/api/v1/periods/schools/${schoolId}/restore`,
+      schoolPeriodsYearInput,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'events',
+      }
+    );
+    }
+
+    if (options?.observe === 'response') {
+      return this.http.post<TData>(
+      `/api/v1/periods/schools/${schoolId}/restore`,
+      schoolPeriodsYearInput,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'response',
+      }
+    );
+    }
+
+    return this.http.post<TData>(
+      `/api/v1/periods/schools/${schoolId}/restore`,
+      schoolPeriodsYearInput,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'body',
+      }
+    );
+  }
+
+/**
+ * @summary Edit one of a school's own periods
+ */
+ periodsControllerUpdateForSchool<TData = SchoolPeriod>(schoolId: string,
+    periodId: string,
+    updateSchoolPeriodInput: UpdateSchoolPeriodInput, options?: HttpClientBodyOptions): Observable<TData>;
+ periodsControllerUpdateForSchool<TData = SchoolPeriod>(schoolId: string,
+    periodId: string,
+    updateSchoolPeriodInput: UpdateSchoolPeriodInput, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
+ periodsControllerUpdateForSchool<TData = SchoolPeriod>(schoolId: string,
+    periodId: string,
+    updateSchoolPeriodInput: UpdateSchoolPeriodInput, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
+  periodsControllerUpdateForSchool<TData = SchoolPeriod>(
+    schoolId: string,
+    periodId: string,
+    updateSchoolPeriodInput: UpdateSchoolPeriodInput, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
+    if (options?.observe === 'events') {
+      return this.http.patch<TData>(
+      `/api/v1/periods/schools/${schoolId}/${periodId}`,
+      updateSchoolPeriodInput,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'events',
+      }
+    );
+    }
+
+    if (options?.observe === 'response') {
+      return this.http.patch<TData>(
+      `/api/v1/periods/schools/${schoolId}/${periodId}`,
+      updateSchoolPeriodInput,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'response',
+      }
+    );
+    }
+
+    return this.http.patch<TData>(
+      `/api/v1/periods/schools/${schoolId}/${periodId}`,
+      updateSchoolPeriodInput,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'body',
+      }
+    );
+  }
+
+/**
+ * @summary Delete one of a school's own periods (only while it holds no grades)
+ */
+ periodsControllerRemoveForSchool<TData = void>(schoolId: string,
+    periodId: string, options?: HttpClientBodyOptions): Observable<TData>;
+ periodsControllerRemoveForSchool<TData = void>(schoolId: string,
+    periodId: string, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
+ periodsControllerRemoveForSchool<TData = void>(schoolId: string,
+    periodId: string, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
+  periodsControllerRemoveForSchool<TData = void>(
+    schoolId: string,
+    periodId: string, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
+    if (options?.observe === 'events') {
+      return this.http.delete<TData>(
+      `/api/v1/periods/schools/${schoolId}/${periodId}`,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'events',
+      }
+    );
+    }
+
+    if (options?.observe === 'response') {
+      return this.http.delete<TData>(
+      `/api/v1/periods/schools/${schoolId}/${periodId}`,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'response',
+      }
+    );
+    }
+
+    return this.http.delete<TData>(
+      `/api/v1/periods/schools/${schoolId}/${periodId}`,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'body',
+      }
     );
   }
 
@@ -10314,16 +10574,52 @@ if(coursesControllerUploadCoverBody.file !== undefined) {
   }
 
 /**
- * @summary List habit metrics
+ * @summary List global habit metrics (with schoolId: the ones that school uses)
  */
- habitMetricsControllerFindAll<TData = void>( options?: HttpClientBodyOptions): Observable<TData>;
- habitMetricsControllerFindAll<TData = void>( options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
- habitMetricsControllerFindAll<TData = void>( options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
+ habitMetricsControllerFindAll<TData = void>(params?: HabitMetricsControllerFindAllParams, options?: HttpClientBodyOptions): Observable<TData>;
+ habitMetricsControllerFindAll<TData = void>(params?: HabitMetricsControllerFindAllParams, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
+ habitMetricsControllerFindAll<TData = void>(params?: HabitMetricsControllerFindAllParams, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
   habitMetricsControllerFindAll<TData = void>(
-     options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
+    params?: HabitMetricsControllerFindAllParams, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
+    const filteredParams = filterParams({...params, ...options?.params}, new Set<string>([]));
+
     if (options?.observe === 'events') {
       return this.http.get<TData>(
       `/api/v1/habit-metrics`,{
+    ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'events',
+        params: filteredParams,}
+    );
+    }
+
+    if (options?.observe === 'response') {
+      return this.http.get<TData>(
+      `/api/v1/habit-metrics`,{
+    ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'response',
+        params: filteredParams,}
+    );
+    }
+
+    return this.http.get<TData>(
+      `/api/v1/habit-metrics`,{
+    ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'body',
+        params: filteredParams,}
+    );
+  }
+
+/**
+ * @summary The habit metrics a school uses (its own or the global ones), with usage
+ */
+ habitMetricsControllerSchoolMetrics<TData = SchoolHabitMetrics>(schoolId: string, options?: HttpClientBodyOptions): Observable<TData>;
+ habitMetricsControllerSchoolMetrics<TData = SchoolHabitMetrics>(schoolId: string, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
+ habitMetricsControllerSchoolMetrics<TData = SchoolHabitMetrics>(schoolId: string, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
+  habitMetricsControllerSchoolMetrics<TData = SchoolHabitMetrics>(
+    schoolId: string, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
+    if (options?.observe === 'events') {
+      return this.http.get<TData>(
+      `/api/v1/habit-metrics/schools/${schoolId}`,{
         ...(options as Omit<NonNullable<typeof options>, 'observe'>),
         observe: 'events',
       }
@@ -10332,7 +10628,7 @@ if(coursesControllerUploadCoverBody.file !== undefined) {
 
     if (options?.observe === 'response') {
       return this.http.get<TData>(
-      `/api/v1/habit-metrics`,{
+      `/api/v1/habit-metrics/schools/${schoolId}`,{
         ...(options as Omit<NonNullable<typeof options>, 'observe'>),
         observe: 'response',
       }
@@ -10340,7 +10636,199 @@ if(coursesControllerUploadCoverBody.file !== undefined) {
     }
 
     return this.http.get<TData>(
-      `/api/v1/habit-metrics`,{
+      `/api/v1/habit-metrics/schools/${schoolId}`,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'body',
+      }
+    );
+  }
+
+/**
+ * @summary Add one of a school's own habit metrics
+ */
+ habitMetricsControllerCreateForSchool<TData = SchoolHabitMetric>(schoolId: string,
+    createSchoolHabitMetricInput: CreateSchoolHabitMetricInput, options?: HttpClientBodyOptions): Observable<TData>;
+ habitMetricsControllerCreateForSchool<TData = SchoolHabitMetric>(schoolId: string,
+    createSchoolHabitMetricInput: CreateSchoolHabitMetricInput, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
+ habitMetricsControllerCreateForSchool<TData = SchoolHabitMetric>(schoolId: string,
+    createSchoolHabitMetricInput: CreateSchoolHabitMetricInput, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
+  habitMetricsControllerCreateForSchool<TData = SchoolHabitMetric>(
+    schoolId: string,
+    createSchoolHabitMetricInput: CreateSchoolHabitMetricInput, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
+    if (options?.observe === 'events') {
+      return this.http.post<TData>(
+      `/api/v1/habit-metrics/schools/${schoolId}`,
+      createSchoolHabitMetricInput,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'events',
+      }
+    );
+    }
+
+    if (options?.observe === 'response') {
+      return this.http.post<TData>(
+      `/api/v1/habit-metrics/schools/${schoolId}`,
+      createSchoolHabitMetricInput,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'response',
+      }
+    );
+    }
+
+    return this.http.post<TData>(
+      `/api/v1/habit-metrics/schools/${schoolId}`,
+      createSchoolHabitMetricInput,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'body',
+      }
+    );
+  }
+
+/**
+ * @summary Switch a school to its own habit metrics, starting from a copy of the global ones
+ */
+ habitMetricsControllerCustomize<TData = SchoolHabitMetrics>(schoolId: string, options?: HttpClientBodyOptions): Observable<TData>;
+ habitMetricsControllerCustomize<TData = SchoolHabitMetrics>(schoolId: string, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
+ habitMetricsControllerCustomize<TData = SchoolHabitMetrics>(schoolId: string, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
+  habitMetricsControllerCustomize<TData = SchoolHabitMetrics>(
+    schoolId: string, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
+    if (options?.observe === 'events') {
+      return this.http.post<TData>(
+      `/api/v1/habit-metrics/schools/${schoolId}/customize`,undefined,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'events',
+      }
+    );
+    }
+
+    if (options?.observe === 'response') {
+      return this.http.post<TData>(
+      `/api/v1/habit-metrics/schools/${schoolId}/customize`,undefined,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'response',
+      }
+    );
+    }
+
+    return this.http.post<TData>(
+      `/api/v1/habit-metrics/schools/${schoolId}/customize`,undefined,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'body',
+      }
+    );
+  }
+
+/**
+ * @summary Switch a school back to the global habit metrics
+ */
+ habitMetricsControllerRestoreGlobal<TData = SchoolHabitMetrics>(schoolId: string, options?: HttpClientBodyOptions): Observable<TData>;
+ habitMetricsControllerRestoreGlobal<TData = SchoolHabitMetrics>(schoolId: string, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
+ habitMetricsControllerRestoreGlobal<TData = SchoolHabitMetrics>(schoolId: string, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
+  habitMetricsControllerRestoreGlobal<TData = SchoolHabitMetrics>(
+    schoolId: string, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
+    if (options?.observe === 'events') {
+      return this.http.post<TData>(
+      `/api/v1/habit-metrics/schools/${schoolId}/restore`,undefined,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'events',
+      }
+    );
+    }
+
+    if (options?.observe === 'response') {
+      return this.http.post<TData>(
+      `/api/v1/habit-metrics/schools/${schoolId}/restore`,undefined,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'response',
+      }
+    );
+    }
+
+    return this.http.post<TData>(
+      `/api/v1/habit-metrics/schools/${schoolId}/restore`,undefined,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'body',
+      }
+    );
+  }
+
+/**
+ * @summary Edit one of a school's own habit metrics
+ */
+ habitMetricsControllerUpdateForSchool<TData = SchoolHabitMetric>(schoolId: string,
+    metricId: string,
+    updateSchoolHabitMetricInput: UpdateSchoolHabitMetricInput, options?: HttpClientBodyOptions): Observable<TData>;
+ habitMetricsControllerUpdateForSchool<TData = SchoolHabitMetric>(schoolId: string,
+    metricId: string,
+    updateSchoolHabitMetricInput: UpdateSchoolHabitMetricInput, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
+ habitMetricsControllerUpdateForSchool<TData = SchoolHabitMetric>(schoolId: string,
+    metricId: string,
+    updateSchoolHabitMetricInput: UpdateSchoolHabitMetricInput, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
+  habitMetricsControllerUpdateForSchool<TData = SchoolHabitMetric>(
+    schoolId: string,
+    metricId: string,
+    updateSchoolHabitMetricInput: UpdateSchoolHabitMetricInput, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
+    if (options?.observe === 'events') {
+      return this.http.patch<TData>(
+      `/api/v1/habit-metrics/schools/${schoolId}/${metricId}`,
+      updateSchoolHabitMetricInput,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'events',
+      }
+    );
+    }
+
+    if (options?.observe === 'response') {
+      return this.http.patch<TData>(
+      `/api/v1/habit-metrics/schools/${schoolId}/${metricId}`,
+      updateSchoolHabitMetricInput,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'response',
+      }
+    );
+    }
+
+    return this.http.patch<TData>(
+      `/api/v1/habit-metrics/schools/${schoolId}/${metricId}`,
+      updateSchoolHabitMetricInput,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'body',
+      }
+    );
+  }
+
+/**
+ * @summary Delete one of a school's own habit metrics (only while it has no evaluations)
+ */
+ habitMetricsControllerRemoveForSchool<TData = void>(schoolId: string,
+    metricId: string, options?: HttpClientBodyOptions): Observable<TData>;
+ habitMetricsControllerRemoveForSchool<TData = void>(schoolId: string,
+    metricId: string, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
+ habitMetricsControllerRemoveForSchool<TData = void>(schoolId: string,
+    metricId: string, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
+  habitMetricsControllerRemoveForSchool<TData = void>(
+    schoolId: string,
+    metricId: string, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
+    if (options?.observe === 'events') {
+      return this.http.delete<TData>(
+      `/api/v1/habit-metrics/schools/${schoolId}/${metricId}`,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'events',
+      }
+    );
+    }
+
+    if (options?.observe === 'response') {
+      return this.http.delete<TData>(
+      `/api/v1/habit-metrics/schools/${schoolId}/${metricId}`,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'response',
+      }
+    );
+    }
+
+    return this.http.delete<TData>(
+      `/api/v1/habit-metrics/schools/${schoolId}/${metricId}`,{
         ...(options as Omit<NonNullable<typeof options>, 'observe'>),
         observe: 'body',
       }

@@ -8,4 +8,5 @@
 
 export type PeriodsControllerFindManyByYearParams = {
 year: string;
+schoolId?: string;
 };

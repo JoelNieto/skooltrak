@@ -37,6 +37,8 @@ export default class PeriodsForm {
   public closeModal = output<boolean>();
   public data = input<{
     period?: Prisma.PeriodGetPayload<{ include: undefined }>;
+    /** Prefills the year of a new period. */
+    year?: number;
   }>();
   private toast = inject(Toast);
   private http = inject(HttpClient);
@@ -59,13 +61,17 @@ export default class PeriodsForm {
 
   constructor() {
     afterRenderEffect(() => {
-      if (this.data()?.period) {
-        const period = this.data()!.period!;
+      const { period, year } = this.data() ?? {};
+      if (period) {
         this.formModel.set({
-          ...period,
+          name: period.name,
+          shortName: period.shortName,
+          year: period.year,
           startDate: format(period.startDate, 'yyyy-MM-dd'),
           endDate: format(period.endDate, 'yyyy-MM-dd'),
         });
+      } else if (year) {
+        this.formModel.update((m) => ({ ...m, year }));
       }
     });
   }

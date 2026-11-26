@@ -2,6 +2,7 @@ import { AuthUserContext } from '@/auth';
 import { Prisma } from '@generated/prisma';
 import { BadRequestException, ConflictException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { enrolledIn as onRoster } from '../courses/course-roster';
+import { assertPeriodForSchool } from '../periods/school-periods';
 import { PrismaService } from '../prisma.service';
 
 /**
@@ -181,6 +182,13 @@ export class GradeAccessService {
   async assertBucketInCourse(bucketId: string, courseId: string): Promise<void> {
     const found = await this.prisma.gradeBucket.count({ where: { id: bucketId, courseId } });
     if (!found) throw new BadRequestException(BUCKET_MISMATCH);
+  }
+
+  /** A grade's period must be one the course's school uses (its own or the global ones; 400 otherwise). */
+  async assertPeriodForCourse(periodId: string, courseId: string): Promise<void> {
+    const course = await this.prisma.course.findUnique({ where: { id: courseId }, select: { schoolId: true } });
+    if (!course) throw new NotFoundException('Curso no encontrado');
+    await assertPeriodForSchool(this.prisma, periodId, course.schoolId);
   }
 
   /**

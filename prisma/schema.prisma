@@ -269,18 +269,26 @@ model School {
   storeProducts            StoreProduct[]
   storeOrders              StoreOrder[]
   importJobs               ImportJob[]
+  periods                  Period[]
+  habitMetrics             HabitMetric[]
   channels                 Channel[]
 
   @@map("schools")
 }
 
+/// A grading period. Global (schoolId null) periods are the platform default for a year; a school
+/// that uses its own calendar (e.g. an American Aug–Jun year) owns its periods for that year instead.
 model Period {
   id               String            @id @default(cuid())
   name             String
   shortName        String            @default("")
+  /// School year label (e.g. 2026 for Aug 2026 – Jun 2027); dates may cross calendar years.
   year             Int
   startDate        DateTime
   endDate          DateTime
+  school           School?           @relation(fields: [schoolId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  /// Null: global period. Set: one school's own period, which replaces the global ones for its year.
+  schoolId         String?
   createdAt        DateTime          @default(now())
   updatedAt        DateTime          @updatedAt
   grades           Grade[]
@@ -288,6 +296,7 @@ model Period {
 
   @@index([year, name])
   @@index([year, shortName])
+  @@index([schoolId, year])
   @@map("periods")
 }
 
@@ -1460,16 +1469,23 @@ model AttendanceRecord {
   @@map("attendance_records")
 }
 
+/// A habit or aptitude evaluated per group and period. Global (schoolId null) metrics are the platform
+/// default; a school can use its own set instead (once it has any, only those).
 model HabitMetric {
   id          String            @id @default(cuid())
-  name        String            @unique
+  name        String
   description String?
   active      Boolean           @default(true)
   order       Int               @default(0)
+  school      School?           @relation(fields: [schoolId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  /// Null: global metric. Set: one school's own metric.
+  schoolId    String?
   createdAt   DateTime          @default(now())
   updatedAt   DateTime          @updatedAt
   evaluations HabitEvaluation[]
 
+  /// Unique per school; global names are kept unique by the admin API (NULLs don't collide here).
+  @@unique([schoolId, name])
   @@index([active])
   @@map("habit_metrics")
 }

@@ -2,6 +2,7 @@ import { Badge, BadgeTone, Button, Card, CardBody, EmptyState, Icon, Loader, Toa
 import { DatePipe } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { Component, inject, signal } from '@angular/core';
+import { AdminCounts } from '../admin-counts';
 
 type JoinRequestRow = {
   id: string;
@@ -23,11 +24,7 @@ type JoinRequestRow = {
   imports: [Badge, Card, CardBody, Button, Loader, DatePipe, EmptyState, Icon],
   template: `
     <div class="space-y-6">
-      <div class="flex items-center justify-between">
-        <div>
-          <h1 class="text-2xl font-bold text-ink-strong">Solicitudes de Acceso</h1>
-          <p class="text-ink-muted">Administra las solicitudes de usuarios que desean unirse a tu escuela.</p>
-        </div>
+      <div class="flex justify-end">
         <button uiButton variant="ghost" size="sm" (click)="loadRequests()">
           <ui-icon name="refresh-cw" />
           Actualizar
@@ -105,6 +102,8 @@ type JoinRequestRow = {
 export default class JoinRequests {
   private http = inject(HttpClient);
   private toasts = inject(Toast);
+  /** The admin shell's counts, so the rail's badge follows approvals. */
+  private counts = inject(AdminCounts, { optional: true });
 
   public loading = signal(true);
   public processing = signal(false);
@@ -168,6 +167,7 @@ export default class JoinRequests {
         this.processing.set(false);
         this.toasts.showSuccess(approve ? 'Solicitud aprobada' : 'Solicitud rechazada');
         this.requests.update((reqs) => reqs.filter((r) => r.id !== requestId));
+        this.counts?.reloadJoinRequests();
       },
       error: (err) => {
         this.processing.set(false);

@@ -442,7 +442,12 @@ export const DASHBOARD_ROUTES: Route[] = [
             path: 'events-calendar',
             loadComponent: () => import('./admin/pages/events-calendar'),
           },
-          { path: '', redirectTo: 'schools', pathMatch: 'full' },
+          {
+            path: '',
+            pathMatch: 'full',
+            loadComponent: () => import('./admin/pages/overview'),
+            title: 'Administración | Skooltrak',
+          },
         ],
       },
       {

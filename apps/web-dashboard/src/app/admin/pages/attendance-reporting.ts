@@ -1,17 +1,13 @@
-import { Card, CardBody, PageHeader, StatCard, UiTable } from '#/ui';
+import { Button, Card, CardBody, Icon, StatCard, UiTable } from '#/ui';
 import { Component } from '@angular/core';
 
 @Component({
   selector: 'app-attendance-reporting',
-  imports: [UiTable, Card, CardBody, PageHeader, StatCard],
+  imports: [UiTable, Card, CardBody, StatCard, Button, Icon],
   template: `
-    <lib-page-header
-      [breadcrumbs]="[{ label: 'Inicio', link: '/' }, { label: 'Admin', link: '/admin' }, { label: 'Asistencia' }]"
-      title="Reporte de asistencia"
-      subtitle="Indicadores generales por curso y nivel."
-      actionLabel="Exportar"
-      actionIcon="download"
-    />
+    <div class="mb-4 flex justify-end">
+      <button uiButton variant="primary" type="button"><ui-icon name="download" /> Exportar</button>
+    </div>
 
     <div class="grid gap-4 md:grid-cols-3">
       <lib-stat-card label="Asistencia global" value="94%" helper="Últimos 30 días" />

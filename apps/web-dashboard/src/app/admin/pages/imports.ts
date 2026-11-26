@@ -40,8 +40,7 @@ import Store from '../../core/store';
     Icon,
   ],
   template: `
-    <div class="flex flex-col gap-6 p-4 max-w-6xl mx-auto">
-      <h1 class="text-2xl font-bold">Importación masiva</h1>
+    <div class="flex flex-col gap-6">
 
       @if (!store.currentSchoolId()) {
         <div uiAlert tone="warning">Selecciona una escuela antes de importar.</div>

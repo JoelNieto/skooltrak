@@ -17,6 +17,7 @@ import { httpResource } from '@angular/common/http';
 import { Component, input } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { isValidId } from '../../core/validators';
+import { SchoolHabitMetrics } from '../components/school-habit-metrics';
 import { SchoolPeriods } from '../components/school-periods';
 
 type SchoolDetail = {
@@ -55,6 +56,7 @@ type SchoolDetail = {
     UiTabContent,
     Icon,
     SchoolPeriods,
+    SchoolHabitMetrics,
   ],
   template: `
     @if (schoolResource.isLoading()) {
@@ -113,6 +115,7 @@ type SchoolDetail = {
               <button uiTab value="contact">Contacto</button>
               <button uiTab value="location">Ubicación</button>
               <button uiTab value="periods">Periodos</button>
+              <button uiTab value="habits">Hábitos</button>
             </div>
           </div>
           <div class="p-1">
@@ -276,6 +279,13 @@ type SchoolDetail = {
             <div uiTabPanel value="periods">
               <ng-template uiTabContent>
                 <app-school-periods [schoolId]="school.id" [currentYear]="school.currentYear" />
+              </ng-template>
+            </div>
+
+            <!-- Habits Tab -->
+            <div uiTabPanel value="habits">
+              <ng-template uiTabContent>
+                <app-school-habit-metrics [schoolId]="school.id" />
               </ng-template>
             </div>
           </div>

@@ -10424,13 +10424,233 @@
     "/api/v1/habit-metrics": {
       "get": {
         "operationId": "HabitMetricsController_findAll",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "schoolId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": ""
           }
         },
-        "summary": "List habit metrics",
+        "summary": "List global habit metrics (with schoolId: the ones that school uses)",
+        "tags": [
+          "habit-metrics"
+        ]
+      }
+    },
+    "/api/v1/habit-metrics/schools/{schoolId}": {
+      "get": {
+        "operationId": "HabitMetricsController_schoolMetrics",
+        "parameters": [
+          {
+            "name": "schoolId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SchoolHabitMetrics"
+                }
+              }
+            }
+          }
+        },
+        "summary": "The habit metrics a school uses (its own or the global ones), with usage",
+        "tags": [
+          "habit-metrics"
+        ]
+      },
+      "post": {
+        "operationId": "HabitMetricsController_createForSchool",
+        "parameters": [
+          {
+            "name": "schoolId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateSchoolHabitMetricInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SchoolHabitMetric"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Add one of a school's own habit metrics",
+        "tags": [
+          "habit-metrics"
+        ]
+      }
+    },
+    "/api/v1/habit-metrics/schools/{schoolId}/customize": {
+      "post": {
+        "operationId": "HabitMetricsController_customize",
+        "parameters": [
+          {
+            "name": "schoolId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SchoolHabitMetrics"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Switch a school to its own habit metrics, starting from a copy of the global ones",
+        "tags": [
+          "habit-metrics"
+        ]
+      }
+    },
+    "/api/v1/habit-metrics/schools/{schoolId}/restore": {
+      "post": {
+        "operationId": "HabitMetricsController_restoreGlobal",
+        "parameters": [
+          {
+            "name": "schoolId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SchoolHabitMetrics"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Switch a school back to the global habit metrics",
+        "tags": [
+          "habit-metrics"
+        ]
+      }
+    },
+    "/api/v1/habit-metrics/schools/{schoolId}/{metricId}": {
+      "patch": {
+        "operationId": "HabitMetricsController_updateForSchool",
+        "parameters": [
+          {
+            "name": "schoolId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "metricId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateSchoolHabitMetricInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SchoolHabitMetric"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Edit one of a school's own habit metrics",
+        "tags": [
+          "habit-metrics"
+        ]
+      },
+      "delete": {
+        "operationId": "HabitMetricsController_removeForSchool",
+        "parameters": [
+          {
+            "name": "schoolId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "metricId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Delete one of a school's own habit metrics (only while it has no evaluations)",
         "tags": [
           "habit-metrics"
         ]
@@ -12095,6 +12315,104 @@
       "SaveHabitEvaluationInput": {
         "type": "object",
         "properties": {}
+      },
+      "SchoolHabitMetric": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "active": {
+            "type": "boolean"
+          },
+          "order": {
+            "type": "number"
+          },
+          "custom": {
+            "type": "boolean",
+            "description": "True for the school's own metric, false for a global one"
+          },
+          "usage": {
+            "type": "number",
+            "description": "This school's habit evaluations of the metric"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "description",
+          "active",
+          "order",
+          "custom",
+          "usage"
+        ]
+      },
+      "SchoolHabitMetrics": {
+        "type": "object",
+        "properties": {
+          "custom": {
+            "type": "boolean",
+            "description": "True when the school uses its own habit metrics"
+          },
+          "metrics": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SchoolHabitMetric"
+            }
+          }
+        },
+        "required": [
+          "custom",
+          "metrics"
+        ]
+      },
+      "CreateSchoolHabitMetricInput": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "active": {
+            "type": "boolean",
+            "default": true
+          },
+          "order": {
+            "type": "number",
+            "description": "Position in lists and the report card; defaults to last"
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "UpdateSchoolHabitMetricInput": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "active": {
+            "type": "boolean"
+          },
+          "order": {
+            "type": "number"
+          }
+        }
       },
       "AddToCartInput": {
         "type": "object",

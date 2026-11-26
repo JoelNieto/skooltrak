@@ -81,6 +81,7 @@ import type {
   CreatePermissionInput,
   CreateQuizInput,
   CreateRoleInput,
+  CreateSchoolHabitMetricInput,
   CreateSchoolInput,
   CreateSchoolPeriodInput,
   CreateSchoolWithOrgInput,
@@ -113,6 +114,7 @@ import type {
   GradebookControllerExportCsvParams,
   GradesControllerFindByCourseIdParams,
   HabitEvaluationsControllerFindByGroupParams,
+  HabitMetricsControllerFindAllParams,
   LinkChildInput,
   NotificationsControllerListParams,
   OrganizationsControllerListInvitationsParams,
@@ -136,6 +138,8 @@ import type {
   RosterAddInput,
   SaveCellsInput,
   SaveHabitEvaluationInput,
+  SchoolHabitMetric,
+  SchoolHabitMetrics,
   SchoolLogoUploadInput,
   SchoolPeriod,
   SchoolPeriodsYear,
@@ -186,6 +190,7 @@ import type {
   UpdatePermissionInput,
   UpdateQuizInput,
   UpdateRoleInput,
+  UpdateSchoolHabitMetricInput,
   UpdateSchoolInput,
   UpdateSchoolPeriodInput,
   UpdateShareInput,
@@ -10569,16 +10574,52 @@ if(coursesControllerUploadCoverBody.file !== undefined) {
   }
 
 /**
- * @summary List habit metrics
+ * @summary List global habit metrics (with schoolId: the ones that school uses)
  */
- habitMetricsControllerFindAll<TData = void>( options?: HttpClientBodyOptions): Observable<TData>;
- habitMetricsControllerFindAll<TData = void>( options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
- habitMetricsControllerFindAll<TData = void>( options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
+ habitMetricsControllerFindAll<TData = void>(params?: HabitMetricsControllerFindAllParams, options?: HttpClientBodyOptions): Observable<TData>;
+ habitMetricsControllerFindAll<TData = void>(params?: HabitMetricsControllerFindAllParams, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
+ habitMetricsControllerFindAll<TData = void>(params?: HabitMetricsControllerFindAllParams, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
   habitMetricsControllerFindAll<TData = void>(
-     options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
+    params?: HabitMetricsControllerFindAllParams, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
+    const filteredParams = filterParams({...params, ...options?.params}, new Set<string>([]));
+
     if (options?.observe === 'events') {
       return this.http.get<TData>(
       `/api/v1/habit-metrics`,{
+    ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'events',
+        params: filteredParams,}
+    );
+    }
+
+    if (options?.observe === 'response') {
+      return this.http.get<TData>(
+      `/api/v1/habit-metrics`,{
+    ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'response',
+        params: filteredParams,}
+    );
+    }
+
+    return this.http.get<TData>(
+      `/api/v1/habit-metrics`,{
+    ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'body',
+        params: filteredParams,}
+    );
+  }
+
+/**
+ * @summary The habit metrics a school uses (its own or the global ones), with usage
+ */
+ habitMetricsControllerSchoolMetrics<TData = SchoolHabitMetrics>(schoolId: string, options?: HttpClientBodyOptions): Observable<TData>;
+ habitMetricsControllerSchoolMetrics<TData = SchoolHabitMetrics>(schoolId: string, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
+ habitMetricsControllerSchoolMetrics<TData = SchoolHabitMetrics>(schoolId: string, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
+  habitMetricsControllerSchoolMetrics<TData = SchoolHabitMetrics>(
+    schoolId: string, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
+    if (options?.observe === 'events') {
+      return this.http.get<TData>(
+      `/api/v1/habit-metrics/schools/${schoolId}`,{
         ...(options as Omit<NonNullable<typeof options>, 'observe'>),
         observe: 'events',
       }
@@ -10587,7 +10628,7 @@ if(coursesControllerUploadCoverBody.file !== undefined) {
 
     if (options?.observe === 'response') {
       return this.http.get<TData>(
-      `/api/v1/habit-metrics`,{
+      `/api/v1/habit-metrics/schools/${schoolId}`,{
         ...(options as Omit<NonNullable<typeof options>, 'observe'>),
         observe: 'response',
       }
@@ -10595,7 +10636,199 @@ if(coursesControllerUploadCoverBody.file !== undefined) {
     }
 
     return this.http.get<TData>(
-      `/api/v1/habit-metrics`,{
+      `/api/v1/habit-metrics/schools/${schoolId}`,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'body',
+      }
+    );
+  }
+
+/**
+ * @summary Add one of a school's own habit metrics
+ */
+ habitMetricsControllerCreateForSchool<TData = SchoolHabitMetric>(schoolId: string,
+    createSchoolHabitMetricInput: CreateSchoolHabitMetricInput, options?: HttpClientBodyOptions): Observable<TData>;
+ habitMetricsControllerCreateForSchool<TData = SchoolHabitMetric>(schoolId: string,
+    createSchoolHabitMetricInput: CreateSchoolHabitMetricInput, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
+ habitMetricsControllerCreateForSchool<TData = SchoolHabitMetric>(schoolId: string,
+    createSchoolHabitMetricInput: CreateSchoolHabitMetricInput, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
+  habitMetricsControllerCreateForSchool<TData = SchoolHabitMetric>(
+    schoolId: string,
+    createSchoolHabitMetricInput: CreateSchoolHabitMetricInput, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
+    if (options?.observe === 'events') {
+      return this.http.post<TData>(
+      `/api/v1/habit-metrics/schools/${schoolId}`,
+      createSchoolHabitMetricInput,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'events',
+      }
+    );
+    }
+
+    if (options?.observe === 'response') {
+      return this.http.post<TData>(
+      `/api/v1/habit-metrics/schools/${schoolId}`,
+      createSchoolHabitMetricInput,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'response',
+      }
+    );
+    }
+
+    return this.http.post<TData>(
+      `/api/v1/habit-metrics/schools/${schoolId}`,
+      createSchoolHabitMetricInput,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'body',
+      }
+    );
+  }
+
+/**
+ * @summary Switch a school to its own habit metrics, starting from a copy of the global ones
+ */
+ habitMetricsControllerCustomize<TData = SchoolHabitMetrics>(schoolId: string, options?: HttpClientBodyOptions): Observable<TData>;
+ habitMetricsControllerCustomize<TData = SchoolHabitMetrics>(schoolId: string, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
+ habitMetricsControllerCustomize<TData = SchoolHabitMetrics>(schoolId: string, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
+  habitMetricsControllerCustomize<TData = SchoolHabitMetrics>(
+    schoolId: string, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
+    if (options?.observe === 'events') {
+      return this.http.post<TData>(
+      `/api/v1/habit-metrics/schools/${schoolId}/customize`,undefined,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'events',
+      }
+    );
+    }
+
+    if (options?.observe === 'response') {
+      return this.http.post<TData>(
+      `/api/v1/habit-metrics/schools/${schoolId}/customize`,undefined,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'response',
+      }
+    );
+    }
+
+    return this.http.post<TData>(
+      `/api/v1/habit-metrics/schools/${schoolId}/customize`,undefined,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'body',
+      }
+    );
+  }
+
+/**
+ * @summary Switch a school back to the global habit metrics
+ */
+ habitMetricsControllerRestoreGlobal<TData = SchoolHabitMetrics>(schoolId: string, options?: HttpClientBodyOptions): Observable<TData>;
+ habitMetricsControllerRestoreGlobal<TData = SchoolHabitMetrics>(schoolId: string, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
+ habitMetricsControllerRestoreGlobal<TData = SchoolHabitMetrics>(schoolId: string, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
+  habitMetricsControllerRestoreGlobal<TData = SchoolHabitMetrics>(
+    schoolId: string, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
+    if (options?.observe === 'events') {
+      return this.http.post<TData>(
+      `/api/v1/habit-metrics/schools/${schoolId}/restore`,undefined,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'events',
+      }
+    );
+    }
+
+    if (options?.observe === 'response') {
+      return this.http.post<TData>(
+      `/api/v1/habit-metrics/schools/${schoolId}/restore`,undefined,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'response',
+      }
+    );
+    }
+
+    return this.http.post<TData>(
+      `/api/v1/habit-metrics/schools/${schoolId}/restore`,undefined,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'body',
+      }
+    );
+  }
+
+/**
+ * @summary Edit one of a school's own habit metrics
+ */
+ habitMetricsControllerUpdateForSchool<TData = SchoolHabitMetric>(schoolId: string,
+    metricId: string,
+    updateSchoolHabitMetricInput: UpdateSchoolHabitMetricInput, options?: HttpClientBodyOptions): Observable<TData>;
+ habitMetricsControllerUpdateForSchool<TData = SchoolHabitMetric>(schoolId: string,
+    metricId: string,
+    updateSchoolHabitMetricInput: UpdateSchoolHabitMetricInput, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
+ habitMetricsControllerUpdateForSchool<TData = SchoolHabitMetric>(schoolId: string,
+    metricId: string,
+    updateSchoolHabitMetricInput: UpdateSchoolHabitMetricInput, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
+  habitMetricsControllerUpdateForSchool<TData = SchoolHabitMetric>(
+    schoolId: string,
+    metricId: string,
+    updateSchoolHabitMetricInput: UpdateSchoolHabitMetricInput, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
+    if (options?.observe === 'events') {
+      return this.http.patch<TData>(
+      `/api/v1/habit-metrics/schools/${schoolId}/${metricId}`,
+      updateSchoolHabitMetricInput,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'events',
+      }
+    );
+    }
+
+    if (options?.observe === 'response') {
+      return this.http.patch<TData>(
+      `/api/v1/habit-metrics/schools/${schoolId}/${metricId}`,
+      updateSchoolHabitMetricInput,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'response',
+      }
+    );
+    }
+
+    return this.http.patch<TData>(
+      `/api/v1/habit-metrics/schools/${schoolId}/${metricId}`,
+      updateSchoolHabitMetricInput,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'body',
+      }
+    );
+  }
+
+/**
+ * @summary Delete one of a school's own habit metrics (only while it has no evaluations)
+ */
+ habitMetricsControllerRemoveForSchool<TData = void>(schoolId: string,
+    metricId: string, options?: HttpClientBodyOptions): Observable<TData>;
+ habitMetricsControllerRemoveForSchool<TData = void>(schoolId: string,
+    metricId: string, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
+ habitMetricsControllerRemoveForSchool<TData = void>(schoolId: string,
+    metricId: string, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
+  habitMetricsControllerRemoveForSchool<TData = void>(
+    schoolId: string,
+    metricId: string, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
+    if (options?.observe === 'events') {
+      return this.http.delete<TData>(
+      `/api/v1/habit-metrics/schools/${schoolId}/${metricId}`,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'events',
+      }
+    );
+    }
+
+    if (options?.observe === 'response') {
+      return this.http.delete<TData>(
+      `/api/v1/habit-metrics/schools/${schoolId}/${metricId}`,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'response',
+      }
+    );
+    }
+
+    return this.http.delete<TData>(
+      `/api/v1/habit-metrics/schools/${schoolId}/${metricId}`,{
         ...(options as Omit<NonNullable<typeof options>, 'observe'>),
         observe: 'body',
       }

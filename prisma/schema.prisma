@@ -270,6 +270,7 @@ model School {
   storeOrders              StoreOrder[]
   importJobs               ImportJob[]
   periods                  Period[]
+  habitMetrics             HabitMetric[]
   channels                 Channel[]
 
   @@map("schools")
@@ -1468,16 +1469,23 @@ model AttendanceRecord {
   @@map("attendance_records")
 }
 
+/// A habit or aptitude evaluated per group and period. Global (schoolId null) metrics are the platform
+/// default; a school can use its own set instead (once it has any, only those).
 model HabitMetric {
   id          String            @id @default(cuid())
-  name        String            @unique
+  name        String
   description String?
   active      Boolean           @default(true)
   order       Int               @default(0)
+  school      School?           @relation(fields: [schoolId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  /// Null: global metric. Set: one school's own metric.
+  schoolId    String?
   createdAt   DateTime          @default(now())
   updatedAt   DateTime          @updatedAt
   evaluations HabitEvaluation[]
 
+  /// Unique per school; global names are kept unique by the admin API (NULLs don't collide here).
+  @@unique([schoolId, name])
   @@index([active])
   @@map("habit_metrics")
 }

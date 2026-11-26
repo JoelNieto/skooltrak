@@ -28,7 +28,7 @@ Code: `schools`, `periods`, `degrees`, `study-plans`, `subjects`, `class-groups`
 | Capability | Status | FRD |
 |---|---|---|
 | Schools (create, edit, branding/theme) | Live | — |
-| Academic periods: global per year (admin console, grouped by year); a school on another calendar (e.g. American, Aug–Jun) uses its own periods per year — add, edit, delete; existing grades move with it (school page → Periodos) | Live | — |
+| Academic periods: global per year (admin console, grouped by year); a school on another calendar (e.g. American, Aug–Jun) uses its own periods per year — add, edit, delete; existing grades move with it (school page → Periodos); likewise habits and aptitudes (school page → Hábitos) | Live | — |
 | Degrees & study plans (incl. enrolment cost) | Live | — |
 | Subjects | Live | — |
 | Class groups | Live | — |
@@ -123,5 +123,5 @@ Code: `apps/web-admin`, `apps/admin-backend`
 |---|---|---|
 | Organizations management | Live | — |
 | Global users, roles, permissions | Live | — |
-| Global grade/habit metrics, periods, subjects | Live | — |
+| Global grade/habit metrics, periods, subjects (periods grouped by year; schools can replace periods and habits with their own) | Live | — |
 | Restrict admin API to `SYSADMIN` | Planned | — |

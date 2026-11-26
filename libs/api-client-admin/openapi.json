@@ -2444,6 +2444,21 @@
         ]
       }
     },
+    "/api/v1/habit-metrics/custom-schools": {
+      "get": {
+        "operationId": "HabitMetricsController_customSchools",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Schools that use their own habit metrics",
+        "tags": [
+          "habit-metrics"
+        ]
+      }
+    },
     "/api/v1/habit-metrics/{id}": {
       "get": {
         "operationId": "HabitMetricsController_findOne",

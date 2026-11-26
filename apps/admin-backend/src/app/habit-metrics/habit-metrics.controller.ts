@@ -21,6 +21,12 @@ export class HabitMetricsController {
     return this.habitMetricsService.findAll();
   }
 
+  @Get('custom-schools')
+  @ApiOperation({ summary: 'Schools that use their own habit metrics' })
+  customSchools() {
+    return this.habitMetricsService.customSchools();
+  }
+
   @Get(':id')
   @ApiOperation({ summary: 'Get habit metric by id' })
   findOne(@Param('id') id: string) {

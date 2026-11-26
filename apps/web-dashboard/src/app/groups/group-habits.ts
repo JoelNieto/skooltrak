@@ -211,7 +211,15 @@ export default class GroupHabits {
     { defaultValue: [] },
   );
 
-  public habitMetrics = httpResource<HabitMetric[]>(() => '/api/v1/habit-metrics', { defaultValue: [] });
+  /** The habits the current school uses (its own or the global ones). */
+  public habitMetrics = httpResource<HabitMetric[]>(
+    () => {
+      const schoolId = this.store.currentSchoolId();
+      const params: Record<string, string> = schoolId ? { schoolId } : {};
+      return { url: '/api/v1/habit-metrics', params };
+    },
+    { defaultValue: [] },
+  );
 
   // Filter active metrics only
   public activeMetrics = computed(() => {

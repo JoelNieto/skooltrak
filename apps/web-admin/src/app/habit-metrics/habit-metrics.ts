@@ -16,7 +16,7 @@ import {
 } from '#/ui';
 import { DatePipe } from '@angular/common';
 import { HttpClient, httpResource } from '@angular/common/http';
-import { Component, inject } from '@angular/core';
+import { Component, computed, inject } from '@angular/core';
 import { Prisma } from '@generated/prisma';
 import HabitMetricsForm from './habit-metrics-form';
 
@@ -39,7 +39,19 @@ import HabitMetricsForm from './habit-metrics-form';
     <div class="flex justify-between items-center mb-4">
       <div>
         <h1 class="text-2xl text-ink-strong font-medium">Criterios de hábitos y actitudes</h1>
-        <p class="text-sm text-ink-muted">Listado de criterios para evaluación de hábitos y actitudes</p>
+        <p class="text-sm text-ink-muted">
+          Criterios globales para la evaluación de hábitos y actitudes. Un colegio puede usar los suyos propios desde
+          su panel.
+        </p>
+        @if (customSchools.value()?.length) {
+          <p class="mt-1 text-sm">
+            <span uiBadge tone="warning" size="sm">{{ customSchools.value()?.length }}</span>
+            <span class="text-ink-muted">
+              {{ customSchools.value()?.length === 1 ? 'colegio usa' : 'colegios usan' }} hábitos propios:
+              {{ customSchoolNames() }}
+            </span>
+          </p>
+        }
       </div>
 
       <button uiButton variant="primary" (click)="editHabitMetric()">
@@ -105,6 +117,14 @@ export default class HabitMetrics {
   private confirmation = inject(Confirmation);
   private modal = inject(Modal);
 
+  /** Schools on their own habit metrics. */
+  public customSchools = httpResource<{ id: string; name: string; metrics: number }[]>(
+    () => '/api/v1/habit-metrics/custom-schools',
+    { defaultValue: [] },
+  );
+  protected readonly customSchoolNames = computed(() =>
+    (this.customSchools.value() ?? []).map((s) => s.name).join(', '),
+  );
   public metrics = httpResource<Prisma.HabitMetricGetPayload<{ include: undefined }>[]>(() => '/api/v1/habit-metrics', {
     defaultValue: [],
   });

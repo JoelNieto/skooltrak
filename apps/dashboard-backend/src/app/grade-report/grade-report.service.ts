@@ -3,6 +3,7 @@ import { REQUEST } from '@nestjs/core';
 import type { Request } from 'express';
 import { GradesService } from '../grades/grades.service';
 import { ACTIVE_ENROLLMENT } from '../courses/course-roster';
+import { loadSchoolHabitMetrics } from '../habit-metrics/school-habit-metrics';
 import { loadSchoolPeriods } from '../periods/school-periods';
 import { PrismaService } from '../prisma.service';
 import { SchoolsService } from '../schools/schools.service';
@@ -146,7 +147,13 @@ export class GradeReportService {
 
     const attendanceRows = await this.getAttendanceRows(studentId, courses, periods);
 
-    const habitRows = await this.getHabitRows(studentId, student.classGroupId, periods, selectedPeriodIndex);
+    const habitRows = await this.getHabitRows(
+      studentId,
+      student.school.id,
+      student.classGroupId,
+      periods,
+      selectedPeriodIndex,
+    );
 
     const fullName =
       `${student.firstName} ${student.middleName || ''} ${student.fatherName} ${student.motherName || ''}`.trim();
@@ -242,6 +249,7 @@ export class GradeReportService {
 
   private async getHabitRows(
     studentId: string,
+    schoolId: string,
     classGroupId: string | null,
     periods: { id: string }[],
     selectedPeriodIndex: number,
@@ -283,10 +291,7 @@ export class GradeReportService {
       }
     }
 
-    const habitMetrics = await this.prisma.habitMetric.findMany({
-      where: { active: true },
-      orderBy: { order: 'asc' },
-    });
+    const habitMetrics = await loadSchoolHabitMetrics(this.prisma, schoolId, { activeOnly: true });
 
     return habitMetrics.map((m) => ({
       metricName: m.name,

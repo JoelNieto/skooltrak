@@ -12,6 +12,7 @@ import {
   FinanceCharge,
 } from './entities/finance.entity';
 import { ACCOUNT_DENIED, FINANCE_DENIED, isFinanceStaff } from './finance-access';
+import { accountPayments } from './payments.service';
 
 const ACCOUNT_INCLUDE = {
   school: { select: { id: true, name: true, currencyCode: true, timezone: true } },
@@ -88,14 +89,15 @@ export class AccountsService {
       }),
       this.prisma.familyAccount.findMany({
         where: { schoolId },
-        select: { id: true, number: true, _count: { select: { charges: true } } },
+        select: { id: true, number: true, _count: { select: { charges: true, payments: true, creditEntries: true } } },
       }),
       this.prisma.familyAccountStudent.findMany({ where: { schoolId }, select: { studentId: true, accountId: true } }),
     ]);
     if (!school) throw new NotFoundException('Escuela no encontrada');
     const plan = planAccountSync(
       students.map((s) => ({ id: s.id, createdAt: s.createdAt, parentIds: s.parents.map((p) => p.id) })),
-      accounts.map((a) => ({ id: a.id, number: a.number, chargeCount: a._count.charges })),
+      // Payments and saldo a favor pin an account like charges do (FIN-001-S03).
+      accounts.map((a) => ({ id: a.id, number: a.number, chargeCount: a._count.charges + a._count.payments + a._count.creditEntries })),
       links,
     );
     if (!plan.create.length && !plan.assign.length && !plan.remove.length) return;
@@ -118,7 +120,9 @@ export class AccountsService {
         });
       }
       if (plan.remove.length) {
-        await tx.familyAccount.deleteMany({ where: { id: { in: plan.remove }, schoolId, charges: { none: {} } } });
+        await tx.familyAccount.deleteMany({
+          where: { id: { in: plan.remove }, schoolId, charges: { none: {} }, payments: { none: {} }, creditEntries: { none: {} } },
+        });
       }
     });
     this.logger.log(
@@ -207,10 +211,13 @@ export class AccountsService {
 
   private async detailOf(account: AccountRow): Promise<FinanceAccountDetail> {
     const today = this.today(account.school.timezone);
-    const charges = await this.prisma.charge.findMany({
-      where: { accountId: account.id },
-      orderBy: [{ dueDate: 'asc' }, { createdAt: 'asc' }],
-    });
+    const [charges, payments] = await Promise.all([
+      this.prisma.charge.findMany({
+        where: { accountId: account.id },
+        orderBy: [{ dueDate: 'asc' }, { createdAt: 'asc' }],
+      }),
+      accountPayments(this.prisma, account.id),
+    ]);
     const rows: FinanceCharge[] = charges.map((c) => ({
       id: c.id,
       studentId: c.studentId,
@@ -233,6 +240,7 @@ export class AccountsService {
       ...summary,
       school: { id: account.school.id, name: account.school.name, currencyCode: account.school.currencyCode },
       charges: rows,
+      payments,
     };
   }
 
@@ -256,7 +264,7 @@ export class AccountsService {
       dueAmount: fromCents(totals?.due ?? 0),
       overdueAmount: fromCents(totals?.overdue ?? 0),
       overdueDays: totals?.oldestOverdue ? daysBetween(totals.oldestOverdue, today) : null,
-      creditAmount: 0,
+      creditAmount: fromCents(cents(account.creditBalance)),
     };
   }
 

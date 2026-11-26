@@ -6,11 +6,12 @@ import { ChargesService } from './charges.service';
 import { FeesService } from './fees.service';
 import { FinanceController } from './finance.controller';
 import { GenerationService } from './generation.service';
+import { PaymentsService } from './payments.service';
 
 @Module({
   imports: [PrismaModule],
   controllers: [FinanceController],
-  providers: [AccountsService, ChargesService, FeesService, GenerationService, { provide: CLOCK, useValue: systemClock }],
+  providers: [AccountsService, ChargesService, FeesService, GenerationService, PaymentsService, { provide: CLOCK, useValue: systemClock }],
   exports: [AccountsService],
 })
 export class FinanceModule {}

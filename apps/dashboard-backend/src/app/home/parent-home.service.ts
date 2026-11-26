@@ -3,7 +3,7 @@ import type { AuthUserContext } from '@/auth';
 import { AttendanceStatus } from '@generated/prisma';
 import { ForbiddenException, Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma.service';
-import { fromCents, outstandingCents } from '../finance/charge-status';
+import { cents, fromCents, outstandingCents } from '../finance/charge-status';
 import { StudentProgress, StudentWork } from './entities/student-home.entity';
 import {
   AccountStatus,
@@ -229,13 +229,20 @@ export class ParentHomeService {
     });
   }
 
-  /** The child's charges on its family account (FIN-001); payments ship with FIN-001-S03. */
+  /** The child's charges and the last payment on its family account (FIN-001). */
   private async finance(studentId: string, today: string): Promise<FinanceFacts> {
-    const charges = await this.prisma.charge.findMany({
-      where: { studentId, cancelledAt: null },
-      select: { netAmount: true, paidAmount: true, dueDate: true, description: true, cancelledAt: true },
-      orderBy: { dueDate: 'asc' },
-    });
+    const [charges, lastPayment] = await Promise.all([
+      this.prisma.charge.findMany({
+        where: { studentId, cancelledAt: null },
+        select: { netAmount: true, paidAmount: true, dueDate: true, description: true, cancelledAt: true },
+        orderBy: { dueDate: 'asc' },
+      }),
+      this.prisma.payment.findFirst({
+        where: { status: 'COMPLETED', account: { students: { some: { studentId } } } },
+        select: { amount: true, receivedAt: true },
+        orderBy: [{ receivedAt: 'desc' }, { createdAt: 'desc' }],
+      }),
+    ]);
     const todayDate = utcDate(today);
     const soonLimit = utcDate(addDays(today, PARENT_ALERTS.chargeDueDays));
     const open = charges
@@ -246,7 +253,7 @@ export class ParentHomeService {
       open,
       overdue: open.filter((c) => c.dueDate < todayDate),
       dueSoon: open.filter((c) => c.dueDate >= todayDate && c.dueDate <= soonLimit),
-      lastPayment: null,
+      lastPayment: lastPayment ? { amount: fromCents(cents(lastPayment.amount)), paidAt: lastPayment.receivedAt } : null,
     };
   }
 

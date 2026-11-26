@@ -57,6 +57,7 @@ const prisma = {
     findUnique: async ({ where }: { where: { id: string } }) => accounts.find((a) => a.id === where.id) ?? null,
   },
   charge: { findMany: async () => [] },
+  payment: { findMany: async () => [] },
 };
 
 const user = (userId: string, role: string, organizationId: string | null = 'org-1', permissions: string[] = []) =>
@@ -82,8 +83,21 @@ function setup() {
     createAssignment: jest.fn().mockResolvedValue({}),
   };
   const generation = { preview: jest.fn().mockResolvedValue({}), generate: jest.fn().mockResolvedValue({ created: 0, skipped: 0 }) };
-  const controller = new FinanceController(accountsService, charges as never, fees as never, generation as never, prisma as never);
-  return { controller, list, charges, accountsService, fees, generation };
+  const payments = {
+    accountSchool: jest.fn().mockImplementation(async (id: string) => (id === 'A9' ? 'SCH9' : 'SCH1')),
+    register: jest.fn().mockResolvedValue({}),
+    list: jest.fn().mockResolvedValue({ items: [], total: 0, page: 1, take: 25, currencyCode: 'USD' }),
+    receipt: jest.fn().mockResolvedValue({}),
+  };
+  const controller = new FinanceController(
+    accountsService,
+    charges as never,
+    fees as never,
+    generation as never,
+    payments as never,
+    prisma as never,
+  );
+  return { controller, list, charges, accountsService, fees, generation, payments };
 }
 
 const req = (u: unknown) => ({ user: u }) as never;
@@ -210,6 +224,35 @@ describe('finance access (FIN-001-S01)', () => {
       expect(fees.updateItem).not.toHaveBeenCalled();
       expect(fees.createAssignment).not.toHaveBeenCalled();
       expect(generation.generate).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('payments (FIN-001-S03)', () => {
+    const paymentInput = (accountId: string) =>
+      ({ accountId, method: 'BANK_TRANSFER', amount: 150, receivedAt: '2026-11-26', reference: 'TRX-1', allocations: [] }) as never;
+
+    it('lets finance managers register payments and staff list them', async () => {
+      const { controller, payments } = setup();
+      await controller.registerPayment(req(manager), paymentInput('A1'));
+      expect(payments.register).toHaveBeenCalledWith(manager, 'org-1', paymentInput('A1'));
+      await controller.listPayments(req(accountant), 'SCH1', 'YAPPY', '2026-11-01', '2026-11-30');
+      expect(payments.list).toHaveBeenCalledWith('SCH1', { method: 'YAPPY', from: '2026-11-01', to: '2026-11-30', page: 1, take: undefined });
+    });
+
+    it('refuses registering to staff without MANAGE_FINANCIALS, parents and other organizations', async () => {
+      const { controller, payments } = setup();
+      await expect(controller.registerPayment(req(accountant), paymentInput('A1'))).rejects.toThrow(new ForbiddenException(FINANCE_DENIED));
+      await expect(controller.registerPayment(req(parent), paymentInput('A1'))).rejects.toThrow(new ForbiddenException(FINANCE_DENIED));
+      await expect(controller.registerPayment(req(teacher), paymentInput('A1'))).rejects.toThrow(new ForbiddenException(FINANCE_DENIED));
+      await expect(controller.registerPayment(req(admin), paymentInput('A9'))).rejects.toThrow(new ForbiddenException(SCHOOL_DENIED));
+      expect(payments.register).not.toHaveBeenCalled();
+    });
+
+    it("refuses the payments list to parents and to another organization's school", async () => {
+      const { controller, payments } = setup();
+      await expect(controller.listPayments(req(parent), 'SCH1')).rejects.toThrow(new ForbiddenException(FINANCE_DENIED));
+      await expect(controller.listPayments(req(admin), 'SCH9')).rejects.toThrow(new ForbiddenException(SCHOOL_DENIED));
+      expect(payments.list).not.toHaveBeenCalled();
     });
   });
 });

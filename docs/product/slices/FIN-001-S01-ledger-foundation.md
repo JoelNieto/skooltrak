@@ -4,7 +4,7 @@
 |---|---|
 | **FRD** | [FIN-001](../frd/FIN-001-financing-module.md) |
 | **Implements** | FR-FIN-001.1, .2, .3 (read-only), .7, .12 · BR-FIN-001.1, .3, .10 |
-| **Status** | In review |
+| **Status** | Done |
 | **Branch** | `feat/FIN-001-S01-ledger-foundation` |
 | **Estimate** | 3 days |
 

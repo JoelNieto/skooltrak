@@ -10,11 +10,13 @@ import {
   groupCharges,
   money,
   overdueLabel,
+  PAYMENT_METHOD_LABEL,
   shortDate,
   statusLabel,
   statusTone,
 } from '../finance.types';
 import ChargeForm from './charge-form';
+import PaymentForm from './payment-form';
 import { FinanceRefresh } from './finance-shell';
 
 /** Finanzas › Cuenta (FR-FIN-001.3, read): who is on the account and every charge, by student. */
@@ -70,11 +72,11 @@ import { FinanceRefresh } from './finance-shell';
           </div>
           <div>
             <dt class="text-sm text-ink-muted">Vencido</dt>
-            <dd class="type-heading-md font-bold" [class.text-warning]="a.overdueAmount > 0">{{ fmt(a.overdueAmount) }}</dd>
+            <dd class="type-heading-md font-bold" [class.text-warning]="a.overdueAmount > 0" data-testid="overdue-amount">{{ fmt(a.overdueAmount) }}</dd>
           </div>
           <div>
             <dt class="text-sm text-ink-muted">Saldo a favor</dt>
-            <dd class="type-heading-md font-bold text-ink-strong">{{ fmt(a.creditAmount) }}</dd>
+            <dd class="type-heading-md font-bold" [class.text-success]="a.creditAmount > 0" [class.text-ink-strong]="!a.creditAmount" data-testid="credit-amount">{{ fmt(a.creditAmount) }}</dd>
           </div>
         </dl>
       </section>
@@ -83,9 +85,14 @@ import { FinanceRefresh } from './finance-shell';
         <div class="flex flex-wrap gap-3 justify-between items-center px-5 py-3 border-b border-line">
           <h3 class="type-heading-md text-ink-strong">Cargos</h3>
           @if (canManage()) {
-            <button uiButton variant="primary" size="sm" type="button" (click)="newCharge(a)">
-              <ui-icon name="plus" /> Nuevo cargo
-            </button>
+            <div class="flex flex-wrap gap-2">
+              <button uiButton variant="secondary" size="sm" type="button" (click)="newCharge(a)">
+                <ui-icon name="plus" /> Nuevo cargo
+              </button>
+              <button uiButton variant="primary" size="sm" type="button" (click)="registerPayment(a)">
+                <ui-icon name="banknote" /> Registrar pago
+              </button>
+            </div>
           }
         </div>
         <div class="overflow-x-auto">
@@ -135,6 +142,45 @@ import { FinanceRefresh } from './finance-shell';
           </table>
         </div>
       </section>
+
+      <section uiCard class="mt-6 overflow-hidden" aria-labelledby="account-payments-title">
+        <h3 id="account-payments-title" class="type-heading-md text-ink-strong px-5 py-3 border-b border-line">Pagos</h3>
+        <div class="overflow-x-auto">
+          <table uiTable>
+            <thead>
+              <tr>
+                <th>Recibo</th>
+                <th>Fecha</th>
+                <th>Método</th>
+                <th>Referencia</th>
+                <th class="text-right">Saldo a favor</th>
+                <th class="text-right">Monto</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (p of a.payments; track p.id) {
+                <tr data-testid="account-payment-row">
+                  <td>
+                    <a class="link link-primary font-mono" [routerLink]="['/financial-module/payments', p.id]">{{ p.receiptNumber }}</a>
+                    @if (p.status === 'VOIDED') {
+                      <span uiBadge size="sm" tone="danger" class="ml-2">Anulado</span>
+                    }
+                  </td>
+                  <td class="whitespace-nowrap">{{ date(p.receivedAt) }}</td>
+                  <td>{{ methodLabel[p.method] }}</td>
+                  <td class="font-mono text-sm">{{ p.reference ?? '—' }}</td>
+                  <td class="text-right">{{ p.creditAmount > 0 ? fmt(p.creditAmount) : '—' }}</td>
+                  <td class="text-right font-semibold" [class.line-through]="p.status === 'VOIDED'">{{ fmt(p.amount) }}</td>
+                </tr>
+              } @empty {
+                <tr>
+                  <td colspan="6" class="py-8 text-center text-ink-muted">Sin pagos registrados.</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </section>
     }
   `,
 })
@@ -147,6 +193,7 @@ export default class AccountPage {
   private refresh = inject(FinanceRefresh);
 
   protected readonly canManage = computed(() => this.auth.hasPermission('MANAGE_FINANCIALS'));
+  protected readonly methodLabel = PAYMENT_METHOD_LABEL;
 
   protected readonly account = httpResource<FinanceAccountDetail>(() => {
     this.refresh.version();
@@ -174,6 +221,10 @@ export default class AccountPage {
 
   protected tone(c: FinanceCharge) {
     return statusTone(c.status);
+  }
+
+  protected registerPayment(a: FinanceAccountDetail) {
+    this.modal.open(PaymentForm, { title: 'Registrar pago', size: 'large', data: { account: a } }).closed.subscribe(() => this.refresh.bump());
   }
 
   protected newCharge(a: FinanceAccountDetail) {

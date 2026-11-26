@@ -171,6 +171,8 @@ export const DASHBOARD_ROUTES: Route[] = [
           { path: '', pathMatch: 'full', redirectTo: 'accounts' },
           { path: 'accounts', loadComponent: () => import('./finance/admin/accounts-page') },
           { path: 'accounts/:id', loadComponent: () => import('./finance/admin/account-page') },
+          { path: 'payments', loadComponent: () => import('./finance/admin/payments-page') },
+          { path: 'payments/:id', loadComponent: () => import('./finance/receipt-view') },
           {
             path: 'catalog',
             canActivate: [permissionGuard('MANAGE_FINANCIALS')],
@@ -381,6 +383,12 @@ export const DASHBOARD_ROUTES: Route[] = [
         path: 'parent/finances',
         canActivate: [permissionGuard('VIEW_FINANCIALS')],
         loadComponent: () => import('./parent/parent-finances'),
+      },
+      {
+        path: 'parent/finances/receipts/:id',
+        canActivate: [permissionGuard('VIEW_FINANCIALS')],
+        loadComponent: () => import('./finance/receipt-view'),
+        data: { backLink: '/parent/finances', backLabel: 'Estado de cuenta' },
       },
       {
         path: 'profile',

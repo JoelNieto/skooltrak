@@ -50,6 +50,7 @@ describe('ParentHomeService (HOM-001-S06)', () => {
       linked?: unknown;
       facts?: Record<string, { below?: boolean; overdue?: number; absences?: unknown[]; late?: number; charges?: unknown[] }>;
       threads?: unknown[];
+      lastPayment?: { amount: unknown; receivedAt: Date } | null;
     } = {},
   ) {
     const facts = opts.facts ?? {};
@@ -64,6 +65,7 @@ describe('ParentHomeService (HOM-001-S06)', () => {
       school: { findUnique: jest.fn().mockResolvedValue({ currencyCode: 'USD' }) },
       charge: { findMany: jest.fn().mockImplementation(({ where }) => Promise.resolve(facts[where.studentId]?.charges ?? [])) },
       directConversation: { findMany: jest.fn().mockResolvedValue(opts.threads ?? []) },
+      payment: { findFirst: jest.fn().mockResolvedValue(opts.lastPayment ?? null) },
     };
     const studentHome = {
       contextForStudent: jest.fn().mockImplementation((id: string) => Promise.resolve(ctxFor(id))),
@@ -185,19 +187,23 @@ describe('ParentHomeService (HOM-001-S06)', () => {
     });
 
     it('is "Vencido" when a charge is overdue, and still shows the next upcoming one', async () => {
-      const { service } = build({
+      const { service, prisma } = build({
         linked,
         facts: {
           'st-sofia': {
             charges: [charge('nov', 285, '2026-11-01', 'nov', 85), charge('dic', 285, '2026-12-01')],
           },
         },
+        lastPayment: { amount: decimal(85), receivedAt: new Date('2026-11-05T00:00:00Z') },
       });
 
       const account = await service.account(parentUser, 'st-sofia');
 
-      // The last payment comes back with payments (FIN-001-S03).
-      expect(account).toMatchObject({ status: 'VENCIDO', balance: 485, overdue: 200, lastPayment: null });
+      // The last completed payment on the child's family account (FIN-001-S03).
+      expect(account).toMatchObject({ status: 'VENCIDO', balance: 485, overdue: 200, lastPayment: { amount: 85, paidAt: '2026-11-05' } });
+      expect(prisma.payment.findFirst).toHaveBeenCalledWith(
+        expect.objectContaining({ where: { status: 'COMPLETED', account: { students: { some: { studentId: 'st-sofia' } } } } }),
+      );
       expect(account.nextCharge?.description).toBe('dic');
     });
 

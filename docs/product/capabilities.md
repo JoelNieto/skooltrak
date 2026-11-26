@@ -29,7 +29,7 @@ Code: `schools`, `periods`, `degrees`, `study-plans`, `subjects`, `class-groups`
 |---|---|---|
 | Schools (create, edit, branding/theme) | Live | — |
 | Academic periods: global per year (admin console, grouped by year); a school on another calendar (e.g. American, Aug–Jun) uses its own periods per year — add, edit, delete; existing grades move with it (school page → Periodos); likewise habits and aptitudes (school page → Hábitos) | Live | — |
-| Degrees & study plans (incl. enrolment cost) | Live | — |
+| Degrees & study plans (fees moved to FIN-001) | Live | — |
 | Subjects | Live | — |
 | Class groups | Live | — |
 | Weekly group schedules | Live | — |
@@ -88,13 +88,13 @@ Code: `communication` (REST `/v1/communication/channels`, `/v1/communication/dir
 | Broadcasts, v2 threads, chats, legacy messages, newsletters | Removed (replaced by COM-003) | [COM-002](frd/COM-002-broadcasts.md) |
 
 ## FIN: Finance
-Code: `financial`; routes `/financial-module`, `/parent/finances`; plans `student-balance`, `financial-filters-pagination`, `payment-registration-form`
+Code: `finance` (REST `/v1/finance`); routes `/financial-module` (staff), `/parent/finances` (guardians)
 
 | Capability | Status | FRD |
 |---|---|---|
-| Charges (incl. auto-generated study-plan charges) | Live | — |
-| Payment registration | Live | — |
-| Student / child balance | Live | — |
+| Family accounts (one per school and family), manual charges, guardian Estado de cuenta | In review (S01) | [FIN-001](frd/FIN-001-financing-module.md) |
+| Fee catalog, charge generation, family checkout (mock card), offline payments (Transferencia/ACH, Yappy), receipts, void, saldo a favor, discounts & scholarships, late fees, store orders in ledger, reminders, morosidad | Planned (S02–S12) | [FIN-001](frd/FIN-001-financing-module.md) |
+| Legacy charges, payment registration, study-plan tuition and enrolment costs, student balance | Removed (FIN-001-S01) | — |
 
 ## STO: School Store
 Code: `store`; routes `/store`, `/store/:schoolSlug`

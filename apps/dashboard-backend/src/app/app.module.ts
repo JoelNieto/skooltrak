@@ -13,7 +13,7 @@ import { CommunicationModule } from './communication/communication.module';
 import { CoursesModule } from './courses/courses.module';
 import { DegreesModule } from './degrees/degrees.module';
 import { FilesModule } from './files/files.module';
-import { FinancialModule } from './financial/financial.module';
+import { FinanceModule } from './finance/finance.module';
 import { GradeBucketsModule } from './grade-buckets/grade-buckets.module';
 import { GradeMetricsModule } from './grade-metrics/grade-metrics.module';
 import { GradeReportModule } from './grade-report/grade-report.module';
@@ -71,7 +71,7 @@ const openApiExport = process.env['OPENAPI_EXPORT'] === 'true';
     HabitEvaluationsModule,
     HabitMetricsModule,
     GradeReportModule,
-    FinancialModule,
+    FinanceModule,
     StoreModule,
     ImportsModule,
     HomeModule,

@@ -1,14 +1,13 @@
 import { Prisma } from '@generated/prisma';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma.service';
-import { costRows, settingsScalars } from '../study-plans/plan-settings-writes';
+import { settingsScalars } from '../study-plans/plan-settings-writes';
 import { CreateDegreeInput } from './dto/create-degree.input';
 import { UpdateDegreeInput } from './dto/update-degree.input';
 
 /** A degree with the settings its study plans inherit. */
 const DEGREE_SETTINGS_INCLUDE = {
   gradeMetric: true,
-  enrollmentCosts: { orderBy: { order: 'asc' } },
 } as const satisfies Prisma.DegreeInclude;
 
 @Injectable()
@@ -16,14 +15,12 @@ export class DegreesService {
   constructor(private readonly prisma: PrismaService) {}
 
   create(input: CreateDegreeInput) {
-    const costs = input.enrollmentCosts ? costRows(input.enrollmentCosts) : [];
     return this.prisma.degree.create({
       data: {
         name: input.name,
         shortName: input.shortName,
         schoolId: input.schoolId,
         ...settingsScalars(input),
-        ...(costs.length ? { enrollmentCosts: { createMany: { data: costs } } } : {}),
       },
       include: { school: true, studyPlans: true, ...DEGREE_SETTINGS_INCLUDE },
     });
@@ -70,25 +67,18 @@ export class DegreesService {
     });
   }
 
-  /** Updates the degree and the settings its plans inherit, in one transaction. */
+  /** Updates the degree and the grade metric its plans inherit. */
   update(id: string, input: UpdateDegreeInput) {
     const { name, shortName, schoolId } = input;
-    return this.prisma.$transaction(async (tx) => {
-      if (input.enrollmentCosts !== undefined) {
-        await tx.degreeEnrollmentCost.deleteMany({ where: { degreeId: id } });
-        const rows = costRows(input.enrollmentCosts);
-        if (rows.length) await tx.degreeEnrollmentCost.createMany({ data: rows.map((r) => ({ ...r, degreeId: id })) });
-      }
-      return tx.degree.update({
-        where: { id },
-        data: {
-          name,
-          shortName,
-          ...(schoolId ? { schoolId } : {}),
-          ...settingsScalars(input),
-        },
-        include: DEGREE_SETTINGS_INCLUDE,
-      });
+    return this.prisma.degree.update({
+      where: { id },
+      data: {
+        name,
+        shortName,
+        ...(schoolId ? { schoolId } : {}),
+        ...settingsScalars(input),
+      },
+      include: DEGREE_SETTINGS_INCLUDE,
     });
   }
 

@@ -46,6 +46,8 @@ model Organization {
   studentClassGroupHistory StudentClassGroupHistory[]
   channels                 Channel[]
   directConversations      DirectConversation[]
+  familyAccounts           FamilyAccount[]
+  charges                  Charge[]
 
   @@map("organizations")
 }
@@ -265,6 +267,7 @@ model School {
   fileShares               FileShareSchool[]
   joinRequests             JoinRequest[]
   charges                  Charge[]
+  familyAccounts           FamilyAccount[]
   storeCategories          StoreCategory[]
   storeProducts            StoreProduct[]
   storeOrders              StoreOrder[]
@@ -329,30 +332,11 @@ model Degree {
   updatedAt  DateTime    @updatedAt
   studyPlans StudyPlan[]
 
-  // Defaults every study plan of the level inherits; a plan's own non-null value overrides them.
+  // Defaults every study plan of the level inherits; a plan's own non-null value overrides it.
   gradeMetric          GradeMetric?           @relation(fields: [gradeMetricId], references: [id], onDelete: SetNull)
   gradeMetricId        String?
-  monthlyTuitionAmount Decimal?
-  /// Tuition period, months 1-12 inclusive. An end before the start wraps over New Year (Aug → May).
-  tuitionStartMonth    Int?
-  tuitionEndMonth      Int?
-  enrollmentCosts      DegreeEnrollmentCost[]
 
   @@map("degrees")
-}
-
-model DegreeEnrollmentCost {
-  id        String   @id @default(cuid())
-  degreeId  String
-  degree    Degree   @relation(fields: [degreeId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  name      String
-  amount    Decimal
-  order     Int      @default(0)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([degreeId])
-  @@map("degree_enrollment_costs")
 }
 
 model StudyPlan {
@@ -369,33 +353,14 @@ model StudyPlan {
   createdAt            DateTime                  @default(now())
   updatedAt            DateTime                  @updatedAt
   classGroups          ClassGroup[]
-  charges              Charge[]
-  // Overrides of the degree's defaults: null (or no enrollment costs) inherits the degree's value.
+  // Overrides of the degree's defaults: null inherits the degree's value.
   // Resolve them with study-plans/plan-settings.ts, never by reading these columns alone.
   gradeMetric          GradeMetric?              @relation(fields: [gradeMetricId], references: [id], onDelete: SetNull)
   gradeMetricId        String?
-  monthlyTuitionAmount Decimal?
-  tuitionStartMonth    Int?
-  tuitionEndMonth      Int?
-  enrollmentCosts      StudyPlanEnrollmentCost[]
   channels             Channel[]
 
   @@unique([schoolId, name])
   @@map("study_plans")
-}
-
-model StudyPlanEnrollmentCost {
-  id          String    @id @default(cuid())
-  studyPlanId String
-  studyPlan   StudyPlan @relation(fields: [studyPlanId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  name        String
-  amount      Decimal
-  order       Int       @default(0)
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-
-  @@index([studyPlanId])
-  @@map("study_plan_enrollment_costs")
 }
 
 model Course {
@@ -530,7 +495,7 @@ model Student {
   assignmentSubmissions     AssignmentSubmission[]
   habitEvaluations          StudentHabitEvaluation[]
   charges                   Charge[]
-  payments                  Payment[]
+  familyAccountLink         FamilyAccountStudent[]
   classGroupHistory         StudentClassGroupHistory[]
   authTokens                AuthToken[]
   directConversations       DirectConversation[]
@@ -1226,47 +1191,102 @@ model DirectConversationAccess {
 // Financial
 // ==========================================
 
-model Charge {
-  id          String       @id @default(cuid())
-  schoolId    String
-  school      School       @relation(fields: [schoolId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  year        Int
-  studentId   String
-  student     Student      @relation(fields: [studentId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  studyPlanId String?
-  studyPlan   StudyPlan?   @relation(fields: [studyPlanId], references: [id], onDelete: SetNull, onUpdate: Cascade)
-  payments    Payment[]
-  amount      Decimal
-  dueDate     DateTime     @db.Date
-  description String       @default("")
-  chargeType  ChargeType   @default(CUSTOM)
-  status      ChargeStatus @default(PENDING)
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
+// ==========================================
+// Finance (FIN-001)
+// ==========================================
 
-  @@index([schoolId])
-  @@index([schoolId, year])
+/// One family account per (school, family): it holds the charges of the family's students in that
+/// school (BR-FIN-001.1). Its guardians are the parents linked to its students.
+model FamilyAccount {
+  id             String                 @id @default(cuid())
+  organizationId String
+  organization   Organization           @relation(fields: [organizationId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  schoolId       String
+  school         School                 @relation(fields: [schoolId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  /// Sequential per school; shown as C-0001.
+  number         Int
+  students       FamilyAccountStudent[]
+  charges        Charge[]
+  createdAt      DateTime               @default(now())
+  updatedAt      DateTime               @updatedAt
+
+  @@unique([schoolId, number])
+  @@index([organizationId, schoolId])
+  @@map("family_accounts")
+}
+
+/// A student belongs to exactly one family account per school.
+model FamilyAccountStudent {
+  id        String        @id @default(cuid())
+  accountId String
+  account   FamilyAccount @relation(fields: [accountId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  studentId String
+  student   Student       @relation(fields: [studentId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  schoolId  String
+  createdAt DateTime      @default(now())
+
+  @@unique([studentId, schoolId])
+  @@index([accountId])
+  @@map("family_account_students")
+}
+
+enum ChargeSource {
+  FEE
+  MANUAL
+  LATE_FEE
+  STORE_ORDER
+}
+
+/// A charge on a family account. Status is derived (BR-FIN-001.10), never stored: see
+/// finance/charge-status.ts. Charges are never deleted; they are cancelled with a reason.
+model Charge {
+  id             String        @id @default(cuid())
+  organizationId String
+  organization   Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  schoolId       String
+  school         School        @relation(fields: [schoolId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  accountId      String
+  account        FamilyAccount @relation(fields: [accountId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  /// Null for account-level charges (store orders).
+  studentId      String?
+  student        Student?      @relation(fields: [studentId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  year           Int
+  source         ChargeSource  @default(MANUAL)
+  description    String
+  grossAmount    Decimal       @db.Decimal(12, 2)
+  discountAmount Decimal       @default(0) @db.Decimal(12, 2)
+  netAmount      Decimal       @db.Decimal(12, 2)
+  /// Sum of active payment allocations (kept in step by the payments service).
+  paidAmount     Decimal       @default(0) @db.Decimal(12, 2)
+  dueDate        DateTime      @db.Date
+  createdById    String?
+  cancelledAt    DateTime?
+  cancelledById  String?
+  cancelReason   String?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  @@index([organizationId, schoolId, dueDate])
+  @@index([accountId])
   @@index([studentId])
-  @@index([studyPlanId])
   @@map("charges")
 }
 
-model Payment {
-  id        String   @id @default(cuid())
-  studentId String
-  student   Student  @relation(fields: [studentId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  chargeId  String?
-  charge    Charge?  @relation(fields: [chargeId], references: [id], onDelete: SetNull, onUpdate: Cascade)
-  amount    Decimal
-  paidAt    DateTime @db.Date
-  reference String?  @default("")
-  createdBy String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+/// Who changed what in finance (FIN-001 §5).
+model FinanceAuditLog {
+  id             String   @id @default(cuid())
+  organizationId String
+  schoolId       String
+  actorId        String?
+  action         String
+  entity         String
+  entityId       String
+  payload        Json?
+  createdAt      DateTime @default(now())
 
-  @@index([studentId])
-  @@index([chargeId])
-  @@map("payments")
+  @@index([organizationId, schoolId, createdAt])
+  @@index([entity, entityId])
+  @@map("finance_audit_logs")
 }
 
 // ==========================================
@@ -1416,19 +1436,6 @@ enum HabitValue {
   X // Bad performance
   R // Regular performance
   S // Good performance (Satisfactorio)
-}
-
-enum ChargeType {
-  ENROLLMENT
-  TUITION
-  CUSTOM
-}
-
-enum ChargeStatus {
-  PENDING
-  PAID
-  PARTIAL
-  OVERDUE
 }
 
 model AttendanceSession {

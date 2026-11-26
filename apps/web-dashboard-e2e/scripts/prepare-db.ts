@@ -295,15 +295,45 @@ async function seedFixtures(databaseUrl: string) {
     });
     console.log(`  guardian ${guardian.id} linked to the first related student`);
 
+    // FIN-001: Ana and Beto share the guardian, so one family account; Carla has her own. (The API
+    // would create these on the first finance read; seeding them lets the charges below exist.)
+    const familyAccount = await prisma.familyAccount.create({
+      data: {
+        organizationId: org.id,
+        schoolId: school.id,
+        number: 1,
+        students: {
+          create: [
+            { studentId: relatedStudentIds[0], schoolId: school.id },
+            { studentId: relatedStudentIds[1], schoolId: school.id },
+          ],
+        },
+      },
+    });
+    const soloAccount = await prisma.familyAccount.create({
+      data: {
+        organizationId: org.id,
+        schoolId: school.id,
+        number: 2,
+        students: { create: [{ studentId: relatedStudentIds[2], schoolId: school.id }] },
+      },
+    });
+    const utcDay = (offsetDays: number) => {
+      const d = new Date(now + offsetDays * day);
+      return new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()));
+    };
+
     // HOM-001-S06: a charge of the first related student due soon.
-    const chargeDue = new Date(now + data.charge.inDays * day);
     await prisma.charge.create({
       data: {
+        organizationId: org.id,
         schoolId: school.id,
+        accountId: familyAccount.id,
         year: new Date().getFullYear(),
         studentId: relatedStudentIds[0],
-        amount: data.charge.amount,
-        dueDate: new Date(Date.UTC(chargeDue.getUTCFullYear(), chargeDue.getUTCMonth(), chargeDue.getUTCDate())),
+        grossAmount: data.charge.amount,
+        netAmount: data.charge.amount,
+        dueDate: utcDay(data.charge.inDays),
         description: data.charge.description,
       },
     });
@@ -320,14 +350,16 @@ async function seedFixtures(databaseUrl: string) {
       },
     });
     await prisma.joinRequest.create({ data: { userId: applicant.id, schoolId: school.id, requestedRole: 'TEACHER' } });
-    const overdueDue = new Date(now + data.admin.overdueCharge.inDays * day);
     await prisma.charge.create({
       data: {
+        organizationId: org.id,
         schoolId: school.id,
+        accountId: soloAccount.id,
         year: new Date().getFullYear(),
         studentId: relatedStudentIds[2],
-        amount: data.admin.overdueCharge.amount,
-        dueDate: new Date(Date.UTC(overdueDue.getUTCFullYear(), overdueDue.getUTCMonth(), overdueDue.getUTCDate())),
+        grossAmount: data.admin.overdueCharge.amount,
+        netAmount: data.admin.overdueCharge.amount,
+        dueDate: utcDay(data.admin.overdueCharge.inDays),
         description: data.admin.overdueCharge.description,
       },
     });

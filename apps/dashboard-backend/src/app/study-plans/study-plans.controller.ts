@@ -22,15 +22,13 @@ import { CopyCoursesInput } from './dto/copy-courses.input';
 import { CreateStudyPlanInput } from './dto/create-study-plan.input';
 import { DuplicateStudyPlanInput } from './dto/duplicate-study-plan.input';
 import { UpdateStudyPlanInput } from './dto/update-study-plan.input';
-import { assertCanWriteSettings } from './plan-settings-writes';
 import { StudyPlansService } from './study-plans.service';
 
 export const DEGREE_MISMATCH = 'El grado no pertenece a la escuela del plan de estudio';
 
 /**
  * Study plans belong to a school. Reads need VIEW_STUDY_PLANS, writes MANAGE_STUDY_PLANS, and the
- * school must be in the caller's organization. A write that sets tuition or enrollment costs also
- * needs MANAGE_FINANCIALS (plan-settings-writes.ts).
+ * school must be in the caller's organization.
  */
 @ApiTags('study-plans')
 @ApiBearerAuth()
@@ -47,7 +45,6 @@ export class StudyPlansController {
   @RequirePermissions(Perm.MANAGE_STUDY_PLANS)
   @ApiOperation({ summary: 'Create study plan' })
   async create(@Req() req: AuthenticatedRequest, @Body() createStudyPlanInput: CreateStudyPlanInput) {
-    assertCanWriteSettings(req.user, createStudyPlanInput);
     await assertSchoolInOrganization(this.prisma, req.user, createStudyPlanInput.schoolId);
     await this.assertDegreeInSchool(createStudyPlanInput.degreeId, createStudyPlanInput.schoolId);
     return this.studyPlansService.create(createStudyPlanInput);
@@ -112,7 +109,6 @@ export class StudyPlansController {
   @RequirePermissions(Perm.MANAGE_STUDY_PLANS)
   @ApiOperation({ summary: 'Update study plan' })
   async update(@Req() req: AuthenticatedRequest, @Body() updateStudyPlanInput: UpdateStudyPlanInput) {
-    assertCanWriteSettings(req.user, updateStudyPlanInput);
     const plan = await this.ref(updateStudyPlanInput.id);
     await assertSchoolInOrganization(this.prisma, req.user, plan.schoolId);
     const schoolId = updateStudyPlanInput.schoolId ?? plan.schoolId;

@@ -94,4 +94,12 @@ export const data = {
     applicant: { email: 'applicant.e2e@skooltrak.test', firstName: 'Pedro', lastName: 'Postulante' },
     overdueCharge: { description: 'Matrícula E2E', amount: 150, inDays: -10 },
   },
+  /**
+   * FIN-001-S01. Ana and Beto share `parent`, so one family account ("Familia E2E", C-0001) holding
+   * `charge`; Carla's own account holds `admin.overdueCharge`. The admin adds `manualCharge` to Beto.
+   */
+  finance: {
+    familyName: 'Familia E2E',
+    manualCharge: { description: 'Excursión E2E', amount: 25, inDays: 40 },
+  },
 } as const;

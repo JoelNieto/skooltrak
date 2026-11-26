@@ -38,9 +38,8 @@ function setup() {
     },
     studentClassGroupHistory: { updateMany: jest.fn(), create: jest.fn() },
   };
-  const charges = { generateFromStudyPlan: jest.fn() };
   const request = { user: { userId: 'u-admin', organizationId: 'org-1' } };
-  const service = new StudentsService(prisma as never, {} as never, charges as never, request as never);
+  const service = new StudentsService(prisma as never, {} as never, request as never);
   return { service, prisma, tx };
 }
 

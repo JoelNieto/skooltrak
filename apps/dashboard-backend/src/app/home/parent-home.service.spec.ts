@@ -48,7 +48,7 @@ describe('ParentHomeService (HOM-001-S06)', () => {
     opts: {
       parents?: unknown[];
       linked?: unknown;
-      facts?: Record<string, { below?: boolean; overdue?: number; absences?: unknown[]; late?: number; charges?: unknown[]; payments?: unknown[] }>;
+      facts?: Record<string, { below?: boolean; overdue?: number; absences?: unknown[]; late?: number; charges?: unknown[] }>;
       threads?: unknown[];
     } = {},
   ) {
@@ -63,7 +63,6 @@ describe('ParentHomeService (HOM-001-S06)', () => {
       },
       school: { findUnique: jest.fn().mockResolvedValue({ currencyCode: 'USD' }) },
       charge: { findMany: jest.fn().mockImplementation(({ where }) => Promise.resolve(facts[where.studentId]?.charges ?? [])) },
-      payment: { findMany: jest.fn().mockImplementation(({ where }) => Promise.resolve(facts[where.studentId]?.payments ?? [])) },
       directConversation: { findMany: jest.fn().mockResolvedValue(opts.threads ?? []) },
     };
     const studentHome = {
@@ -160,17 +159,19 @@ describe('ParentHomeService (HOM-001-S06)', () => {
 
   describe('account (FR-HOM-001.22)', () => {
     const linked = kid('st-sofia', 'Sofía');
-    const charge = (id: string, amount: number, due: string, description = id) => ({
+    const charge = (id: string, amount: number, due: string, description = id, paid = 0) => ({
       id,
-      amount: decimal(amount),
+      netAmount: decimal(amount),
+      paidAmount: decimal(paid),
       dueDate: new Date(`${due}T00:00:00Z`),
       description,
+      cancelledAt: null,
     });
 
     it('is "Pendiente" with the next charge when nothing is overdue', async () => {
       const { service } = build({
         linked,
-        facts: { 'st-sofia': { charges: [charge('dic', 285, '2026-12-01', 'Mensualidad diciembre')], payments: [] } },
+        facts: { 'st-sofia': { charges: [charge('dic', 285, '2026-12-01', 'Mensualidad diciembre')] } },
       });
 
       expect(await service.account(parentUser, 'st-sofia')).toEqual({
@@ -188,15 +189,15 @@ describe('ParentHomeService (HOM-001-S06)', () => {
         linked,
         facts: {
           'st-sofia': {
-            charges: [charge('nov', 285, '2026-11-01'), charge('dic', 285, '2026-12-01')],
-            payments: [{ chargeId: 'nov', amount: decimal(85), paidAt: new Date('2026-11-03T00:00:00Z') }],
+            charges: [charge('nov', 285, '2026-11-01', 'nov', 85), charge('dic', 285, '2026-12-01')],
           },
         },
       });
 
       const account = await service.account(parentUser, 'st-sofia');
 
-      expect(account).toMatchObject({ status: 'VENCIDO', balance: 485, overdue: 200, lastPayment: { amount: 85, paidAt: '2026-11-03' } });
+      // The last payment comes back with payments (FIN-001-S03).
+      expect(account).toMatchObject({ status: 'VENCIDO', balance: 485, overdue: 200, lastPayment: null });
       expect(account.nextCharge?.description).toBe('dic');
     });
 
@@ -205,8 +206,7 @@ describe('ParentHomeService (HOM-001-S06)', () => {
         linked,
         facts: {
           'st-sofia': {
-            charges: [charge('nov', 285, '2026-11-01')],
-            payments: [{ chargeId: 'nov', amount: decimal(285), paidAt: new Date('2026-11-02T00:00:00Z') }],
+            charges: [charge('nov', 285, '2026-11-01', 'nov', 285)],
           },
         },
       });
@@ -247,14 +247,10 @@ describe('ParentHomeService (HOM-001-S06)', () => {
             late: 3,
             absences: [{ attendanceSession: { date: new Date('2026-11-13T00:00:00Z'), course: { name: 'Ciencias' } } }],
             charges: [
-              { id: 'ch-past', amount: decimal(285), dueDate: new Date('2026-11-01T00:00:00Z'), description: 'Mensualidad noviembre' },
-              { id: 'ch-soon', amount: decimal(285), dueDate: new Date('2026-11-19T00:00:00Z'), description: 'Mensualidad diciembre' },
-              { id: 'ch-later', amount: decimal(285), dueDate: new Date('2026-12-30T00:00:00Z'), description: 'Enero' },
-              { id: 'ch-paid', amount: decimal(100), dueDate: new Date('2026-10-01T00:00:00Z'), description: 'Matrícula' },
-            ],
-            payments: [
-              { chargeId: 'ch-paid', amount: decimal(100) },
-              { chargeId: 'ch-past', amount: decimal(85) },
+              { netAmount: decimal(285), paidAmount: decimal(85), cancelledAt: null, dueDate: new Date('2026-11-01T00:00:00Z'), description: 'Mensualidad noviembre' },
+              { netAmount: decimal(285), paidAmount: decimal(0), cancelledAt: null, dueDate: new Date('2026-11-19T00:00:00Z'), description: 'Mensualidad diciembre' },
+              { netAmount: decimal(285), paidAmount: decimal(0), cancelledAt: null, dueDate: new Date('2026-12-30T00:00:00Z'), description: 'Enero' },
+              { netAmount: decimal(100), paidAmount: decimal(100), cancelledAt: null, dueDate: new Date('2026-10-01T00:00:00Z'), description: 'Matrícula' },
             ],
           },
         },
@@ -284,7 +280,7 @@ describe('ParentHomeService (HOM-001-S06)', () => {
     it('omits finance alerts and balance without VIEW_FINANCIALS', async () => {
       const { service, prisma } = build({
         linked,
-        facts: { 'st-sofia': { charges: [{ id: 'c', amount: decimal(10), dueDate: new Date('2026-11-01'), description: 'x' }] } },
+        facts: { 'st-sofia': { charges: [{ netAmount: decimal(10), paidAmount: decimal(0), cancelledAt: null, dueDate: new Date('2026-11-01'), description: 'x' }] } },
       });
 
       const home = await service.child({ ...parentUser, permissions: ['VIEW_GRADES'] }, 'st-sofia');

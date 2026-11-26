@@ -12,9 +12,8 @@ import { BulkCreateStudyPlansInput } from './dto/bulk-create-study-plans.input';
 import { CopyCoursesInput } from './dto/copy-courses.input';
 import { CreateStudyPlanInput } from './dto/create-study-plan.input';
 import { DuplicateStudyPlanInput } from './dto/duplicate-study-plan.input';
-import { PlanSettingsInput } from './dto/plan-settings.input';
 import { UpdateStudyPlanInput } from './dto/update-study-plan.input';
-import { costRows, settingsScalars } from './plan-settings-writes';
+import { settingsScalars } from './plan-settings-writes';
 
 export const PLAN_NAME_TAKEN = 'Ya existe un plan de estudio con ese nombre en la escuela';
 export const COPY_SAME_PLAN = 'Elige un plan de origen distinto';
@@ -24,10 +23,9 @@ const MAX_BULK_PLANS = 20;
 
 /** A plan with its overrides and its degree's defaults, for the forms to show what it inherits. */
 const PLAN_INCLUDE = {
-  degree: { include: { gradeMetric: true, enrollmentCosts: { orderBy: { order: 'asc' } } } },
+  degree: { include: { gradeMetric: true } },
   school: true,
   gradeMetric: true,
-  enrollmentCosts: { orderBy: { order: 'asc' } },
 } as const satisfies Prisma.StudyPlanInclude;
 
 @Injectable()
@@ -39,7 +37,6 @@ export class StudyPlansService {
 
   /** Creates the plan with its settings overrides in one write. */
   create(input: CreateStudyPlanInput) {
-    const costs = input.enrollmentCosts ? costRows(input.enrollmentCosts) : [];
     return this.uniqueName(() =>
       this.prisma.studyPlan.create({
         data: {
@@ -50,7 +47,6 @@ export class StudyPlansService {
           degreeId: input.degreeId,
           schoolId: input.schoolId,
           ...settingsScalars(input),
-          ...(costs.length ? { enrollmentCosts: { createMany: { data: costs } } } : {}),
         },
         include: PLAN_INCLUDE,
       }),
@@ -101,7 +97,7 @@ export class StudyPlansService {
   }
 
   /**
-   * A copy of the plan: its overrides, enrollment costs and, unless `copyCourses` is false, its
+   * A copy of the plan: its overrides and, unless `copyCourses` is false, its
    * courses (subject, color, icon and grade categories, else the default ones; no teacher, no
    * students). One transaction.
    */
@@ -109,7 +105,6 @@ export class StudyPlansService {
     const source = await this.prisma.studyPlan.findUnique({
       where: { id: sourceId },
       include: {
-        enrollmentCosts: { orderBy: { order: 'asc' } },
         courses: {
           include: { subject: true, gradeBuckets: { orderBy: { createdAt: 'asc' } } },
           orderBy: { createdAt: 'asc' },
@@ -129,14 +124,6 @@ export class StudyPlansService {
             degreeId: input.degreeId ?? source.degreeId,
             schoolId: source.schoolId,
             gradeMetricId: source.gradeMetricId,
-            monthlyTuitionAmount: source.monthlyTuitionAmount,
-            tuitionStartMonth: source.tuitionStartMonth,
-            tuitionEndMonth: source.tuitionEndMonth,
-            enrollmentCosts: {
-              createMany: {
-                data: source.enrollmentCosts.map((c) => ({ name: c.name, amount: c.amount, order: c.order })),
-              },
-            },
           },
         });
 
@@ -238,49 +225,24 @@ export class StudyPlansService {
   /** Updates the plan and its settings overrides in one transaction. */
   update(id: string, input: UpdateStudyPlanInput) {
     return this.uniqueName(() =>
-      this.prisma.$transaction(async (tx) => {
-        await this.replaceCosts(tx, id, input);
-        return tx.studyPlan.update({
-          where: { id },
-          data: {
-            ...(input.name !== undefined ? { name: input.name.trim() } : {}),
-            ...(input.shortName !== undefined ? { shortName: input.shortName.trim() } : {}),
-            ...(input.level !== undefined ? { level: input.level } : {}),
-            ...(input.description !== undefined ? { description: input.description } : {}),
-            ...(input.degreeId !== undefined ? { degreeId: input.degreeId } : {}),
-            ...(input.schoolId !== undefined ? { schoolId: input.schoolId } : {}),
-            ...settingsScalars(input),
-          },
-          include: PLAN_INCLUDE,
-        });
+      this.prisma.studyPlan.update({
+        where: { id },
+        data: {
+          ...(input.name !== undefined ? { name: input.name.trim() } : {}),
+          ...(input.shortName !== undefined ? { shortName: input.shortName.trim() } : {}),
+          ...(input.level !== undefined ? { level: input.level } : {}),
+          ...(input.description !== undefined ? { description: input.description } : {}),
+          ...(input.degreeId !== undefined ? { degreeId: input.degreeId } : {}),
+          ...(input.schoolId !== undefined ? { schoolId: input.schoolId } : {}),
+          ...settingsScalars(input),
+        },
+        include: PLAN_INCLUDE,
       }),
     );
   }
 
   remove(id: string) {
     return this.prisma.studyPlan.delete({ where: { id } });
-  }
-
-  /** The financial overrides alone (POST /financial/study-plan-config). */
-  updateFinancialConfig(input: PlanSettingsInput & { studyPlanId: string }) {
-    const { studyPlanId, monthlyTuitionAmount, tuitionStartMonth, tuitionEndMonth, enrollmentCosts } = input;
-    return this.update(studyPlanId, {
-      id: studyPlanId,
-      monthlyTuitionAmount,
-      tuitionStartMonth,
-      tuitionEndMonth,
-      enrollmentCosts,
-    });
-  }
-
-  /** Replaces the plan's enrollment costs when the input sets them; an empty list inherits. */
-  private async replaceCosts(tx: Prisma.TransactionClient, studyPlanId: string, input: PlanSettingsInput) {
-    if (input.enrollmentCosts === undefined) return;
-    await tx.studyPlanEnrollmentCost.deleteMany({ where: { studyPlanId } });
-    const rows = costRows(input.enrollmentCosts);
-    if (rows.length) {
-      await tx.studyPlanEnrollmentCost.createMany({ data: rows.map((r) => ({ ...r, studyPlanId })) });
-    }
   }
 
   /** Turns the unique (school, name) violation into a 409 the form can show. */

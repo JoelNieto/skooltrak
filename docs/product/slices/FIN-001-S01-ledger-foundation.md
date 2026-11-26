@@ -58,6 +58,6 @@ Then I get 403
 - Fee catalog/generation (S02), any payment (S03/S04), cancel (S05), move student (S07).
 
 ## Done checklist
-- [ ] Acceptance criteria pass
-- [ ] Cross-tenant / wrong-role access refused (test)
-- [ ] FRD slice table + `capabilities.md` updated
+- [x] Acceptance criteria pass
+- [x] Cross-tenant / wrong-role access refused (test)
+- [x] FRD slice table + `capabilities.md` updated

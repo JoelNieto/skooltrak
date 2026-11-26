@@ -9,6 +9,9 @@ import { data, storageStatePath } from '../support/fixtures';
  * family account that the parent home spec reads.
  */
 
+// The parent's Estado de cuenta expects the manual charge the admin adds, so the file runs in order.
+test.describe.configure({ mode: 'serial' });
+
 const [ana, beto, carla] = data.relatedStudents;
 
 function isoDay(offsetDays: number) {

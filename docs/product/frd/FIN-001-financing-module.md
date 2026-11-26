@@ -99,7 +99,7 @@ New models (legacy `Charge`, `Payment`, `ChargeType`, `ChargeStatus`, `StudyPlan
 - `Payment` (new) — `organizationId, schoolId, accountId, method (CARD|BANK_TRANSFER|YAPPY|CREDIT), status (PENDING|COMPLETED|FAILED|VOIDED), amount, receivedAt, reference, cardBrand?, cardLast4?, provider, providerRef, idempotencyKey (unique), receiptNumber, payerUserId?, createdById, voidedAt/By/Reason`.
 - `PaymentAllocation` — `paymentId, chargeId, amount, reversedAt?`.
 - `CreditEntry` — `accountId, paymentId?, amount (+ generated / − applied / ± reversal), chargeId?, reason`.
-- `FinanceSettings` *(from S03)* — per school: `receiptSeq, lateFeeEnabled, lateFeeGraceDays, lateFeeMode, lateFeeValue, lateFeeAppliesTo, reminderDaysBefore`.
+- `FinanceSettings` *(from S03, which adds `receiptSeq` only; later slices add their fields)* — per school: `receiptSeq, lateFeeEnabled, lateFeeGraceDays, lateFeeMode, lateFeeValue, lateFeeAppliesTo, reminderDaysBefore`.
 - `FinanceAuditLog` — `organizationId, schoolId, actorId, action, entity, entityId, payload, createdAt`: charge generation/cancel, payment create/void, credit apply, discount assign, settings change.
 - Account membership is kept by `finance/account-sync.ts` (S01): every account read first syncs the school's accounts with its parent ↔ student links, so links made anywhere (onboarding, imports, the parents directory) are picked up without hooks. A solo account with no charges folds into a sibling's account once a guardian is linked; accounts with charges or several students are only changed by an admin.
 - Tenancy: every query filters by caller's `organizationId` and the requested `schoolId` (validated against the org). Parent reads/writes additionally require the account to contain a student linked to the caller's `Parent` profile.
@@ -172,9 +172,9 @@ States everywhere: empty ("No hay cargos pendientes"), loading (`lib-loader`), e
 ## 11. Slices
 | Slice | Title | FRs | Status |
 |---|---|---|---|
-| [FIN-001-S01](../slices/FIN-001-S01-ledger-foundation.md) | Ledger foundation: family accounts, manual charge, parent Estado de cuenta | .1 .2 .3 (read) .7 .12 | In review |
-| [FIN-001-S02](../slices/FIN-001-S02-fee-catalog-generation.md) | Fee catalog, assignments and charge generation | .4 .5 .6 | In review |
-| FIN-001-S03 | Register offline payment (Transfer/ACH, Yappy) + receipt | .14 .15 | Proposed |
+| [FIN-001-S01](../slices/FIN-001-S01-ledger-foundation.md) | Ledger foundation: family accounts, manual charge, parent Estado de cuenta | .1 .2 .3 (read) .7 .12 | Done |
+| [FIN-001-S02](../slices/FIN-001-S02-fee-catalog-generation.md) | Fee catalog, assignments and charge generation | .4 .5 .6 | Done |
+| [FIN-001-S03](../slices/FIN-001-S03-offline-payments-receipts.md) | Register offline payment (Transfer/ACH, Yappy) + receipt | .14 .15 | In review |
 | FIN-001-S04 | Parent family checkout with mock card | .13 .15 | Proposed |
 | FIN-001-S05 | Void payment + cancel charge | .8 .16 | Proposed |
 | FIN-001-S06 | Saldo a favor: apply by admin and at checkout | .17 | Proposed |

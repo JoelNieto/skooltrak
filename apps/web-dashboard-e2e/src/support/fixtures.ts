@@ -108,5 +108,11 @@ export const data = {
      * 7° plan at `planAmount`, then generated for Carla only (3 installments).
      */
     fee: { name: 'Transporte E2E', amount: 30, planAmount: 20, dueDay: 5 },
+    /**
+     * FIN-001-S03, run after S01/S02: a transfer paying Carla's `admin.overdueCharge` in full, then
+     * a Yappy on "Familia E2E" paying `manualCharge` with 5.00 left as saldo a favor.
+     */
+    transfer: { reference: 'TRX-E2E-001', amount: 150 },
+    yappy: { reference: 'YAP-E2E-001', amount: 30, credit: 5 },
   },
 } as const;

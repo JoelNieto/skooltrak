@@ -1,5 +1,6 @@
 import { ChargeSource } from '@generated/prisma';
 import type { ChargeStatus } from '../charge-status';
+import { FinancePaymentSummary } from './payments.entity';
 
 /** Responses of `/v1/finance/*` (FIN-001). Amounts are numbers in the school's currency. */
 
@@ -35,7 +36,7 @@ export class FinanceAccountSummary {
   overdueAmount: number;
   /** Days since the oldest overdue charge fell due; null when nothing is overdue. */
   overdueDays: number | null;
-  /** Saldo a favor (FR-FIN-001.17); always 0 until payments ship. */
+  /** Saldo a favor (FR-FIN-001.17): overpayments not yet applied to charges. */
   creditAmount: number;
 }
 
@@ -71,6 +72,8 @@ export class FinanceCharge {
 export class FinanceAccountDetail extends FinanceAccountSummary {
   school: FinanceRef & { currencyCode: string };
   charges: FinanceCharge[];
+  /** Newest first (FR-FIN-001.15). */
+  payments: FinancePaymentSummary[];
 }
 
 /** A student picked for a charge or a generation (FIN-001-S02). */

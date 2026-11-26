@@ -1,11 +1,14 @@
 import { AuthenticatedRequest, BetterAuthGuard, Perm, PermissionsGuard, RequirePermissions } from '@/auth';
 import { Body, Controller, Delete, Get, HttpCode, Param, ParseIntPipe, Patch, Post, Query, Req, UseGuards } from '@nestjs/common';
+import { PaymentMethod } from '@generated/prisma';
 import { ApiBearerAuth, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { PrismaService } from '../prisma.service';
 import { AccountsService } from './accounts.service';
 import { ChargesService } from './charges.service';
 import { CreateChargeInput, CreateChargeResult } from './dto/create-charge.input';
 import { CreateFeeAssignmentInput, CreateFeeItemInput, GenerateChargesInput, UpdateFeeItemInput } from './dto/fees.input';
+import { RegisterPaymentInput } from './dto/payments.input';
+import { FinancePaymentList, PaymentReceipt } from './entities/payments.entity';
 import { FinanceAccountDetail, FinanceAccountList, FinanceStudentHit } from './entities/finance.entity';
 import {
   FeeAssignmentView,
@@ -18,6 +21,7 @@ import {
 import { assertFinanceStaffOfSchool } from './finance-access';
 import { FeesService } from './fees.service';
 import { GenerationService } from './generation.service';
+import { PaymentsService } from './payments.service';
 
 /**
  * Family accounts and charges (FIN-001). Staff routes are scoped to a school of the caller's
@@ -33,6 +37,7 @@ export class FinanceController {
     private readonly charges: ChargesService,
     private readonly fees: FeesService,
     private readonly generation: GenerationService,
+    private readonly payments: PaymentsService,
     private readonly prisma: PrismaService,
   ) {}
 
@@ -180,5 +185,50 @@ export class FinanceController {
   async generateCharges(@Req() req: AuthenticatedRequest, @Body() input: GenerateChargesInput): Promise<GenerationResult> {
     const organizationId = await assertFinanceStaffOfSchool(this.prisma, req.user, input.schoolId, true);
     return this.generation.generate(req.user, organizationId, input);
+  }
+
+  // Payments (FR-FIN-001.14, .15)
+
+  @Post('payments')
+  @RequirePermissions(Perm.MANAGE_FINANCIALS)
+  @ApiOperation({ summary: 'Register a transfer/ACH or Yappy payment on a family account (FR-FIN-001.14)' })
+  async registerPayment(@Req() req: AuthenticatedRequest, @Body() input: RegisterPaymentInput): Promise<PaymentReceipt> {
+    const schoolId = await this.payments.accountSchool(input.accountId);
+    const organizationId = await assertFinanceStaffOfSchool(this.prisma, req.user, schoolId, true);
+    return this.payments.register(req.user, organizationId, input);
+  }
+
+  @Get('payments')
+  @RequirePermissions(Perm.VIEW_FINANCIALS)
+  @ApiOperation({ summary: 'Payments of a school (FR-FIN-001.15)' })
+  @ApiQuery({ name: 'method', required: false, enum: PaymentMethod })
+  @ApiQuery({ name: 'from', required: false })
+  @ApiQuery({ name: 'to', required: false })
+  @ApiQuery({ name: 'page', required: false, type: Number })
+  @ApiQuery({ name: 'take', required: false, type: Number })
+  async listPayments(
+    @Req() req: AuthenticatedRequest,
+    @Query('schoolId') schoolId: string,
+    @Query('method') method?: string,
+    @Query('from') from?: string,
+    @Query('to') to?: string,
+    @Query('page') page?: string,
+    @Query('take') take?: string,
+  ): Promise<FinancePaymentList> {
+    await assertFinanceStaffOfSchool(this.prisma, req.user, schoolId);
+    return this.payments.list(schoolId, {
+      method: method && method in PaymentMethod ? (method as PaymentMethod) : undefined,
+      from,
+      to,
+      page: page ? Number(page) || 1 : 1,
+      take: take ? Number(take) || undefined : undefined,
+    });
+  }
+
+  @Get('payments/:id/receipt')
+  @RequirePermissions(Perm.VIEW_FINANCIALS)
+  @ApiOperation({ summary: "A payment's receipt: staff of the organization or guardians of the account (FR-FIN-001.15)" })
+  receipt(@Req() req: AuthenticatedRequest, @Param('id') id: string): Promise<PaymentReceipt> {
+    return this.payments.receipt(req.user, id);
   }
 }

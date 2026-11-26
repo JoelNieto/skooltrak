@@ -10612,6 +10612,138 @@
         ]
       }
     },
+    "/api/v1/finance/payments": {
+      "post": {
+        "operationId": "FinanceController_registerPayment",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterPaymentInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Register a transfer/ACH or Yappy payment on a family account (FR-FIN-001.14)",
+        "tags": [
+          "finance"
+        ]
+      },
+      "get": {
+        "operationId": "FinanceController_listPayments",
+        "parameters": [
+          {
+            "name": "schoolId",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "method",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "enum": [
+                "CARD",
+                "BANK_TRANSFER",
+                "YAPPY",
+                "CREDIT"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "from",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "to",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "take",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Payments of a school (FR-FIN-001.15)",
+        "tags": [
+          "finance"
+        ]
+      }
+    },
+    "/api/v1/finance/payments/{id}/receipt": {
+      "get": {
+        "operationId": "FinanceController_receipt",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "A payment's receipt: staff of the organization or guardians of the account (FR-FIN-001.15)",
+        "tags": [
+          "finance"
+        ]
+      }
+    },
     "/api/v1/store/categories": {
       "get": {
         "operationId": "StoreController_storeCategories",
@@ -12361,6 +12493,21 @@
       "GenerateChargesInput": {
         "type": "object",
         "properties": {}
+      },
+      "RegisterPaymentInput": {
+        "type": "object",
+        "properties": {
+          "method": {
+            "type": "string",
+            "enum": [
+              "BANK_TRANSFER",
+              "YAPPY"
+            ]
+          }
+        },
+        "required": [
+          "method"
+        ]
       },
       "AddToCartInput": {
         "type": "object",

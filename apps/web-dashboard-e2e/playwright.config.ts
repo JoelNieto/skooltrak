@@ -61,7 +61,7 @@ export default defineConfig({
       use: { ...devices['Desktop Chrome'] },
       dependencies: ['chromium'],
       testMatch: /\.after\.spec\.ts$/,
-      testIgnore: /assignment-channels\.after\.spec\.ts$/,
+      testIgnore: [/assignment-channels\.after\.spec\.ts$/, /finance-payments\.after\.spec\.ts$/],
     },
     // COM-003-S02 creates assignment Q&A channels on the teacher's course, which the course page's
     // Canales tab counts (ACA-001 FR .29); it runs once `after` is done so those counts stay stable.
@@ -70,6 +70,14 @@ export default defineConfig({
       use: { ...devices['Desktop Chrome'] },
       dependencies: ['after'],
       testMatch: /assignment-channels\.after\.spec\.ts$/,
+    },
+    // FIN-001-S03 pays charges whose balances the FIN-001-S01/S02 specs assert, so it runs once
+    // `after` is done.
+    {
+      name: 'after-finance',
+      use: { ...devices['Desktop Chrome'] },
+      dependencies: ['after'],
+      testMatch: /finance-payments\.after\.spec\.ts$/,
     },
   ],
 });

@@ -1,12 +1,14 @@
 import { Badge, Button, Card, Loader, PageHeader, UiTable, UiTableError } from '#/ui';
 import { httpResource } from '@angular/common/http';
 import { Component, computed, linkedSignal } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import {
   FinanceAccountDetail,
   FinanceCharge,
   groupCharges,
   localToday,
   money,
+  PAYMENT_METHOD_LABEL,
   shortDate,
   statusLabel,
   statusTone,
@@ -14,11 +16,12 @@ import {
 
 /**
  * Estado de cuenta (FR-FIN-001.12): one family account per school where the guardian has a linked
- * child, with its charges grouped by child. Paying online arrives with FIN-001-S04.
+ * child, with its charges grouped by child and its payments with receipts (FIN-001-S03). Paying
+ * online arrives with FIN-001-S04.
  */
 @Component({
   selector: 'app-parent-finances',
-  imports: [Badge, Button, Card, Loader, PageHeader, UiTable, UiTableError],
+  imports: [Badge, Button, Card, Loader, PageHeader, RouterLink, UiTable, UiTableError],
   template: `
     <lib-page-header title="Estado de cuenta" subtitle="Lo que tienes pendiente con el colegio de tus hijos." />
 
@@ -77,7 +80,7 @@ import {
                 </div>
                 <div class="rounded-box p-3 bg-surface-0">
                   <div class="text-xs font-semibold text-ink-muted">Saldo a favor</div>
-                  <div class="font-semibold text-ink-strong">{{ fmt(a, a.creditAmount) }}</div>
+                  <div class="font-semibold text-ink-strong" data-testid="parent-credit">{{ fmt(a, a.creditAmount) }}</div>
                 </div>
               </div>
             </section>
@@ -108,6 +111,30 @@ import {
             } @empty {
               <div uiCard class="p-8 text-center text-ink-muted">No hay cargos en esta cuenta.</div>
             }
+
+            @if (a.payments.length) {
+              <section uiCard class="overflow-hidden" aria-labelledby="parent-payments-title">
+                <h2 id="parent-payments-title" class="px-4 py-3 font-semibold text-ink-strong border-b border-line">Pagos y recibos</h2>
+                <ul>
+                  @for (p of a.payments; track p.id) {
+                    <li class="border-t border-line first:border-t-0" data-testid="parent-payment">
+                      <a class="flex gap-3 items-center px-4 py-3 hover:bg-surface-0" [routerLink]="['/parent/finances/receipts', p.id]">
+                        <div class="flex-1 min-w-0">
+                          <div class="font-medium text-ink-strong font-mono">{{ p.receiptNumber }}</div>
+                          <div class="text-sm text-ink-muted">
+                            {{ day(p.receivedAt) }} · {{ methodLabel[p.method] }}
+                            @if (p.status === 'VOIDED') {
+                              · <span uiBadge size="sm" tone="danger">Anulado</span>
+                            }
+                          </div>
+                        </div>
+                        <div class="font-semibold text-ink-strong">{{ fmt(a, p.amount) }}</div>
+                      </a>
+                    </li>
+                  }
+                </ul>
+              </section>
+            }
           }
         </div>
       }
@@ -131,6 +158,12 @@ export default class ParentFinances {
     const a = this.selected();
     return a ? groupCharges(a, { hideCancelled: true }) : [];
   });
+
+  protected readonly methodLabel = PAYMENT_METHOD_LABEL;
+
+  protected day(d: string) {
+    return shortDate(d);
+  }
 
   protected fmt(a: FinanceAccountDetail, amount: number) {
     return money(amount, a.school.currencyCode);

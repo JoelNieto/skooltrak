@@ -50,6 +50,8 @@ export interface FinanceCharge {
 export interface FinanceAccountDetail extends FinanceAccountSummary {
   school: FinanceRef & { currencyCode: string };
   charges: FinanceCharge[];
+  /** Newest first (FIN-001-S03). */
+  payments: FinancePayment[];
 }
 
 /** Charges of one account, grouped by student, store orders last (FR-FIN-001.3, .12). */
@@ -192,3 +194,66 @@ export function apiError(err: unknown, fallback: string): string {
   const message = (err as { error?: { message?: string | string[] } })?.error?.message;
   return (Array.isArray(message) ? message[0] : message) ?? fallback;
 }
+
+// Payments and receipts (FIN-001-S03; finance/entities/payments.entity.ts)
+
+export type PaymentMethod = 'CARD' | 'BANK_TRANSFER' | 'YAPPY' | 'CREDIT';
+export type PaymentStatus = 'PENDING' | 'COMPLETED' | 'FAILED' | 'VOIDED';
+
+export interface FinancePayment {
+  id: string;
+  receiptNumber: string | null;
+  method: PaymentMethod;
+  status: PaymentStatus;
+  amount: number;
+  receivedAt: string;
+  reference: string | null;
+  creditAmount: number;
+  account: { id: string; number: string; name: string };
+}
+
+export interface FinancePaymentList {
+  items: FinancePayment[];
+  total: number;
+  page: number;
+  take: number;
+  currencyCode: string;
+}
+
+export interface PaymentReceipt extends FinancePayment {
+  school: { id: string; name: string; logo: string; currencyCode: string };
+  payers: string[];
+  note: string | null;
+  cardBrand: string | null;
+  cardLast4: string | null;
+  lines: { chargeId: string; student: string | null; description: string; amount: number }[];
+  createdAt: string;
+  createdBy: string | null;
+  voidedAt: string | null;
+  voidReason: string | null;
+}
+
+export const PAYMENT_METHOD_LABEL: Record<PaymentMethod, string> = {
+  CARD: 'Tarjeta',
+  BANK_TRANSFER: 'Transferencia / ACH',
+  YAPPY: 'Yappy',
+  CREDIT: 'Saldo a favor',
+};
+
+/**
+ * Suggested allocation of a payment (FR-FIN-001.14): open charges, oldest due first, each up to
+ * what it owes, until the amount runs out. In cents; the server re-validates every allocation.
+ */
+export function suggestAllocation(amountCents: number, charges: { id: string; outstandingCents: number; dueDate: string }[]): Map<string, number> {
+  const out = new Map<string, number>();
+  let left = Math.max(0, amountCents);
+  for (const c of [...charges].sort((a, b) => a.dueDate.localeCompare(b.dueDate))) {
+    if (left <= 0) break;
+    const take = Math.min(left, c.outstandingCents);
+    if (take > 0) out.set(c.id, take);
+    left -= take;
+  }
+  return out;
+}
+
+export const toCents = (amount: number) => Math.round((Number(amount) || 0) * 100);

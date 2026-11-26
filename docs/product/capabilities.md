@@ -93,7 +93,8 @@ Code: `finance` (REST `/v1/finance`); routes `/financial-module` (staff), `/pare
 | Capability | Status | FRD |
 |---|---|---|
 | Family accounts (one per school and family), manual charges, guardian Estado de cuenta | In review (S01) | [FIN-001](frd/FIN-001-financing-module.md) |
-| Fee catalog, charge generation, family checkout (mock card), offline payments (Transferencia/ACH, Yappy), receipts, void, saldo a favor, discounts & scholarships, late fees, store orders in ledger, reminders, morosidad | Planned (S02–S12) | [FIN-001](frd/FIN-001-financing-module.md) |
+| Fee catalog, assignments and charge generation | In review (S02) | [FIN-001](frd/FIN-001-financing-module.md) |
+| Family checkout (mock card), offline payments (Transferencia/ACH, Yappy), receipts, void, saldo a favor, discounts & scholarships, late fees, store orders in ledger, reminders, morosidad | Planned (S03–S12) | [FIN-001](frd/FIN-001-financing-module.md) |
 | Legacy charges, payment registration, study-plan tuition and enrolment costs, student balance | Removed (FIN-001-S01) | — |
 
 ## STO: School Store

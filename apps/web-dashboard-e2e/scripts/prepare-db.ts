@@ -97,7 +97,7 @@ async function seedFixtures(databaseUrl: string) {
     }
 
     const degree = await prisma.degree.create({
-      data: { name: 'Premedia E2E', shortName: 'PRE', schoolId: school.id },
+      data: { name: data.finance.degree, shortName: 'PRE', schoolId: school.id },
     });
     const plan = (name: string, level: number) =>
       prisma.studyPlan.create({

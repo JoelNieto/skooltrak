@@ -171,6 +171,16 @@ export const DASHBOARD_ROUTES: Route[] = [
           { path: '', pathMatch: 'full', redirectTo: 'accounts' },
           { path: 'accounts', loadComponent: () => import('./finance/admin/accounts-page') },
           { path: 'accounts/:id', loadComponent: () => import('./finance/admin/account-page') },
+          {
+            path: 'catalog',
+            canActivate: [permissionGuard('MANAGE_FINANCIALS')],
+            loadComponent: () => import('./finance/admin/catalog-page'),
+          },
+          {
+            path: 'charges/generate',
+            canActivate: [permissionGuard('MANAGE_FINANCIALS')],
+            loadComponent: () => import('./finance/admin/generate-page'),
+          },
         ],
       },
       {

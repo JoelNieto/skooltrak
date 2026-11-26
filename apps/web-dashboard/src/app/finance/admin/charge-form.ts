@@ -54,7 +54,7 @@ type Target = 'student' | 'group';
           </div>
         </fieldset>
         @if (target() === 'student') {
-          <app-student-search (selected)="form.studentId().value.set($event.id)" />
+          <app-student-search endpoint="/api/v1/finance/students" [params]="{ schoolId: store.currentSchoolId() ?? '' }" (selected)="form.studentId().value.set($event.id)" />
         } @else {
           <ui-field label="Grupo" [field]="form.classGroupId" hint="Se crea un cargo para cada estudiante activo del grupo.">
             <select uiSelect [formField]="form.classGroupId">
@@ -92,7 +92,7 @@ export default class ChargeForm {
 
   private http = inject(HttpClient);
   private toast = inject(Toast);
-  private store = inject(Store);
+  protected store = inject(Store);
 
   protected readonly accountStudents = computed(() => this.data()?.students ?? []);
   protected readonly target = signal<Target>('student');

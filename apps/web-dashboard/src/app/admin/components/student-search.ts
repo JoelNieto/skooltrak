@@ -1,6 +1,6 @@
 import { OverlayModule } from '@angular/cdk/overlay';
 import { httpResource } from '@angular/common/http';
-import { Component, effect, output, signal, viewChild } from '@angular/core';
+import { Component, effect, input, output, signal, viewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Badge, Button, Icon, UiInputGroup } from '#/ui';
 
@@ -79,6 +79,9 @@ type StudentSearchItem = {
 })
 export default class StudentSearch {
   public selected = output<{ id: string; name: string }>();
+  /** Search endpoint; it gets `search` and `take`, plus `params`. Finance uses its own (FIN-001-S02). */
+  public endpoint = input('/api/v1/students');
+  public params = input<Record<string, string>>({});
 
   public query = signal('');
   public debouncedQuery = signal('');
@@ -92,9 +95,13 @@ export default class StudentSearch {
     () => {
       const q = this.debouncedQuery().trim();
       if (q.length < 2) return undefined;
-      return { url: '/api/v1/students', params: { search: q, take: 10 } };
+      return { url: this.endpoint(), params: { ...this.params(), search: q, take: 10 } };
     },
-    { defaultValue: [] },
+    {
+      defaultValue: [],
+      // `/api/v1/students` is paginated (`{ data, meta }`); other endpoints may return a plain list.
+      parse: (body) => (Array.isArray(body) ? body : ((body as { data?: StudentSearchItem[] })?.data ?? [])) as StudentSearchItem[],
+    },
   );
 
   constructor() {

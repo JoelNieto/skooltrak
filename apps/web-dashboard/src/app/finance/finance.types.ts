@@ -123,3 +123,72 @@ export function overdueLabel(days: number | null): string {
   if (days == null) return '';
   return days === 1 ? '1 día' : `${days} días`;
 }
+
+// Fee catalog and charge generation (FIN-001-S02; finance/entities/fees.entity.ts)
+
+export type FeeKind = 'ENROLLMENT' | 'TUITION' | 'OTHER';
+export type FeeSchedule = 'ONE_TIME' | 'MONTHLY';
+
+export interface FeeItem {
+  id: string;
+  name: string;
+  kind: FeeKind;
+  amount: number;
+  schedule: FeeSchedule;
+  dueMonth: number | null;
+  startMonth: number | null;
+  endMonth: number | null;
+  dueDay: number;
+  active: boolean;
+  scheduleLabel: string;
+  chargeCount: number;
+}
+
+export interface FeeItemList {
+  items: FeeItem[];
+  currencyCode: string;
+}
+
+export interface FeeAssignment {
+  id: string;
+  year: number;
+  feeItem: FinanceRef;
+  degree: FinanceRef | null;
+  studyPlan: (FinanceRef & { degreeId: string }) | null;
+  amountOverride: number | null;
+  amount: number;
+}
+
+export interface FeeTargets {
+  degrees: (FinanceRef & { studyPlans: (FinanceRef & { classGroups: FinanceRef[] })[] })[];
+  currentYear: number;
+  currencyCode: string;
+}
+
+export interface GenerationPreview {
+  year: number;
+  students: number;
+  newCount: number;
+  newTotal: number;
+  existingCount: number;
+  items: { feeItemId: string; name: string; installments: number; students: number; newCount: number; newTotal: number }[];
+  studentLines: { id: string; name: string; classGroup: string | null; newCount: number; newTotal: number; existingCount: number }[];
+  currencyCode: string;
+}
+
+export const FEE_KIND_LABEL: Record<FeeKind, string> = { ENROLLMENT: 'Matrícula', TUITION: 'Mensualidad', OTHER: 'Otro' };
+
+export const MONTH_NAMES = [
+  'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre',
+];
+
+/** The current school year and the next two, plus the previous one. */
+export function yearOptions(currentYear: number): number[] {
+  return [currentYear - 1, currentYear, currentYear + 1, currentYear + 2];
+}
+
+/** The first message of an API error, or `fallback`. */
+export function apiError(err: unknown, fallback: string): string {
+  const message = (err as { error?: { message?: string | string[] } })?.error?.message;
+  return (Array.isArray(message) ? message[0] : message) ?? fallback;
+}

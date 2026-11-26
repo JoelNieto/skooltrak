@@ -72,3 +72,10 @@ export class FinanceAccountDetail extends FinanceAccountSummary {
   school: FinanceRef & { currencyCode: string };
   charges: FinanceCharge[];
 }
+
+/** A student picked for a charge or a generation (FIN-001-S02). */
+export class FinanceStudentHit {
+  id: string;
+  name: string;
+  classGroup: FinanceRef | null;
+}

@@ -15,7 +15,7 @@ export class FinanceRefresh {
 
 /**
  * `/financial-module` (FIN-001): page header, the tabs of the finance sections and the routed
- * section. Each slice adds its tab: Cuentas ships first (FIN-001-S01).
+ * section. Each slice adds its tab: Cuentas (FIN-001-S01), Catálogo (S02).
  */
 @Component({
   selector: 'app-finance-shell',
@@ -30,7 +30,7 @@ export class FinanceRefresh {
       (action)="newCharge()"
     />
     <nav class="flex flex-wrap gap-1 border-b border-line mb-6" aria-label="Secciones de finanzas">
-      @for (tab of tabs; track tab.link) {
+      @for (tab of tabs(); track tab.link) {
         <a
           [routerLink]="tab.link"
           routerLinkActive="border-primary! text-primary font-semibold"
@@ -50,8 +50,12 @@ export default class FinanceShell {
   private modal = inject(Modal);
   private refresh = inject(FinanceRefresh);
 
-  protected readonly tabs = [{ label: 'Cuentas', link: '/financial-module/accounts' }];
   protected readonly canManage = computed(() => this.auth.hasPermission('MANAGE_FINANCIALS'));
+  protected readonly tabs = computed(() => [
+    { label: 'Cuentas', link: '/financial-module/accounts' },
+    // FIN-001-S02: the fee catalog and charge generation are for finance managers only.
+    ...(this.canManage() ? [{ label: 'Catálogo', link: '/financial-module/catalog' }] : []),
+  ]);
 
   protected newCharge() {
     this.modal.open(ChargeForm, { title: 'Nuevo cargo', size: 'medium' }).closed.subscribe(() => this.refresh.bump());

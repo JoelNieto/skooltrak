@@ -94,3 +94,18 @@ describe('ChargesService.createManual (FR-FIN-001.7)', () => {
     );
   });
 });
+
+describe('ChargesService.searchStudents (FIN-001-S02 pickers)', () => {
+  it('matches every word against names and cédula, active students of the school only', async () => {
+    const findMany = jest.fn().mockResolvedValue([{ id: 'st-1', firstName: 'Carla', fatherName: 'E2E', classGroup: { id: 'g', name: '7°A' } }]);
+    const service = new ChargesService({ student: { findMany } } as never, {} as never);
+
+    await expect(service.searchStudents('SCH1', ' carla  e2e ')).resolves.toEqual([{ id: 'st-1', name: 'Carla E2E', classGroup: { id: 'g', name: '7°A' } }]);
+    const { where, take } = findMany.mock.calls[0][0];
+    expect(where).toMatchObject({ schoolId: 'SCH1', enrollmentStatus: 'ACTIVE' });
+    expect(where.AND).toHaveLength(2);
+    expect(where.AND[0].OR).toContainEqual({ documentId: { contains: 'carla', mode: 'insensitive' } });
+    expect(take).toBe(10);
+    await expect(service.searchStudents('SCH1', '   ')).resolves.toEqual([]);
+  });
+});

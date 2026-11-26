@@ -101,5 +101,12 @@ export const data = {
   finance: {
     familyName: 'Familia E2E',
     manualCharge: { description: 'Excursión E2E', amount: 25, inDays: 40 },
+    /** The degree of both study plans (prepare-db). */
+    degree: 'Premedia E2E',
+    /**
+     * FIN-001-S02: created by the admin, assigned for next year to `degree` at `amount` and to the
+     * 7° plan at `planAmount`, then generated for Carla only (3 installments).
+     */
+    fee: { name: 'Transporte E2E', amount: 30, planAmount: 20, dueDay: 5 },
   },
 } as const;

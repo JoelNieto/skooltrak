@@ -35,7 +35,7 @@ describe('StudyPlansService', () => {
   });
 
   describe('create', () => {
-    it('writes the plan, its overrides and its enrollment costs in one create', async () => {
+    it('writes the plan and its overrides in one create', async () => {
       await service.create({
         name: ' 1° Primaria ',
         shortName: '1° P',
@@ -43,20 +43,13 @@ describe('StudyPlansService', () => {
         degreeId: 'd',
         schoolId: 's',
         gradeMetricId: '',
-        tuitionStartMonth: 3,
-        tuitionEndMonth: 12,
-        enrollmentCosts: [{ name: 'Matrícula', amount: 50 }],
       });
       const { data } = prisma.studyPlan.create.mock.calls[0][0];
       expect(data).toMatchObject({
         name: '1° Primaria',
         description: '',
         gradeMetricId: null,
-        tuitionStartMonth: 3,
-        tuitionEndMonth: 12,
-        enrollmentCosts: { createMany: { data: [{ name: 'Matrícula', amount: 50, order: 0 }] } },
       });
-      expect(data).not.toHaveProperty('monthlyTuitionAmount');
     });
   });
 
@@ -98,11 +91,7 @@ describe('StudyPlansService', () => {
       schoolId: 's',
       degreeId: 'd',
       description: 'desc',
-      gradeMetricId: null,
-      monthlyTuitionAmount: null,
-      tuitionStartMonth: 3,
-      tuitionEndMonth: 12,
-      enrollmentCosts: [{ name: 'Matrícula', amount: 50, order: 0 }],
+      gradeMetricId: 'gm',
       courses: [
         {
           organizationId: 'o',
@@ -121,13 +110,12 @@ describe('StudyPlansService', () => {
       prisma.studyPlan.create.mockResolvedValue({ id: 'new', schoolId: 's', name: '2° Primaria', shortName: '2° P' });
     });
 
-    it('copies the overrides, costs and courses (without teacher) into the new plan', async () => {
+    it('copies the overrides and courses (without teacher) into the new plan', async () => {
       const result = await service.duplicate('src', { name: '2° Primaria', shortName: '2° P', level: 2 });
 
       expect(prisma.studyPlan.create.mock.calls[0][0].data).toMatchObject({
         degreeId: 'd',
-        tuitionStartMonth: 3,
-        enrollmentCosts: { createMany: { data: [{ name: 'Matrícula', amount: 50, order: 0 }] } },
+        gradeMetricId: 'gm',
       });
       const course = prisma.course.create.mock.calls[0][0].data;
       expect(course).toMatchObject({

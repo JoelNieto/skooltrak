@@ -76,7 +76,6 @@ import type {
   CreateGroupsScheduleInput,
   CreateOrganizationInput,
   CreateParentInput,
-  CreatePaymentInput,
   CreatePeriodInput,
   CreatePermissionInput,
   CreateQuizInput,
@@ -100,14 +99,7 @@ import type {
   FilesControllerFilesAccessibleParams,
   FilesControllerFilesOwnedParams,
   FilesControllerFilesSharedWithMeParams,
-  FinancialControllerGetChargesBySchoolParams,
-  FinancialControllerGetChargesByStudentParams,
-  FinancialControllerGetChargesForStudentParams,
-  FinancialControllerGetPaymentsBySchoolParams,
-  FinancialControllerGetPaymentsByStudentParams,
-  FinancialControllerGetPaymentsForStudentParams,
-  FinancialControllerGetStudentBalanceParams,
-  FinancialControllerGetStudentBalanceSummaryParams,
+  FinanceControllerListAccountsParams,
   GradeReportControllerGetGradeReportParams,
   GradebookControllerCourseParams,
   GradebookControllerCoursesParams,
@@ -129,7 +121,6 @@ import type {
   ProcessStorePaymentInput,
   PublishGradesInput,
   QuizzesControllerFindAllParams,
-  RegenerateStudyPlanChargesInput,
   RemoveShareInput,
   ReportDirectInput,
   RequestJoinSchoolInput,
@@ -199,7 +190,6 @@ import type {
   UpdateStoreProductInput,
   UpdateStudentGradeInput,
   UpdateStudentInput,
-  UpdateStudyPlanFinancialInput,
   UpdateStudyPlanInput,
   UpdateSubjectInput,
   UpdateTeacherInput,
@@ -5393,510 +5383,6 @@ if(coursesControllerUploadCoverBody.file !== undefined) {
   }
 
 /**
- * @summary Student balance breakdown (overdue/active/paid)
- */
- financialControllerGetStudentBalanceSummary<TData = void>(params: FinancialControllerGetStudentBalanceSummaryParams, options?: HttpClientBodyOptions): Observable<TData>;
- financialControllerGetStudentBalanceSummary<TData = void>(params: FinancialControllerGetStudentBalanceSummaryParams, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
- financialControllerGetStudentBalanceSummary<TData = void>(params: FinancialControllerGetStudentBalanceSummaryParams, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
-  financialControllerGetStudentBalanceSummary<TData = void>(
-    params: FinancialControllerGetStudentBalanceSummaryParams, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
-    const filteredParams = filterParams({...params, ...options?.params}, new Set<string>([]));
-
-    if (options?.observe === 'events') {
-      return this.http.get<TData>(
-      `/api/v1/financial/student-balance-summary`,{
-    ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'events',
-        params: filteredParams,}
-    );
-    }
-
-    if (options?.observe === 'response') {
-      return this.http.get<TData>(
-      `/api/v1/financial/student-balance-summary`,{
-    ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'response',
-        params: filteredParams,}
-    );
-    }
-
-    return this.http.get<TData>(
-      `/api/v1/financial/student-balance-summary`,{
-    ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'body',
-        params: filteredParams,}
-    );
-  }
-
-/**
- * @summary Student balance
- */
- financialControllerGetStudentBalance<TData = void>(params: FinancialControllerGetStudentBalanceParams, options?: HttpClientBodyOptions): Observable<TData>;
- financialControllerGetStudentBalance<TData = void>(params: FinancialControllerGetStudentBalanceParams, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
- financialControllerGetStudentBalance<TData = void>(params: FinancialControllerGetStudentBalanceParams, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
-  financialControllerGetStudentBalance<TData = void>(
-    params: FinancialControllerGetStudentBalanceParams, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
-    const filteredParams = filterParams({...params, ...options?.params}, new Set<string>([]));
-
-    if (options?.observe === 'events') {
-      return this.http.get<TData>(
-      `/api/v1/financial/student-balance`,{
-    ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'events',
-        params: filteredParams,}
-    );
-    }
-
-    if (options?.observe === 'response') {
-      return this.http.get<TData>(
-      `/api/v1/financial/student-balance`,{
-    ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'response',
-        params: filteredParams,}
-    );
-    }
-
-    return this.http.get<TData>(
-      `/api/v1/financial/student-balance`,{
-    ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'body',
-        params: filteredParams,}
-    );
-  }
-
-/**
- * @summary Charges by student
- */
- financialControllerGetChargesByStudent<TData = void>(params: FinancialControllerGetChargesByStudentParams, options?: HttpClientBodyOptions): Observable<TData>;
- financialControllerGetChargesByStudent<TData = void>(params: FinancialControllerGetChargesByStudentParams, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
- financialControllerGetChargesByStudent<TData = void>(params: FinancialControllerGetChargesByStudentParams, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
-  financialControllerGetChargesByStudent<TData = void>(
-    params: FinancialControllerGetChargesByStudentParams, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
-    const filteredParams = filterParams({...params, ...options?.params}, new Set<string>([]));
-
-    if (options?.observe === 'events') {
-      return this.http.get<TData>(
-      `/api/v1/financial/charges/by-student`,{
-    ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'events',
-        params: filteredParams,}
-    );
-    }
-
-    if (options?.observe === 'response') {
-      return this.http.get<TData>(
-      `/api/v1/financial/charges/by-student`,{
-    ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'response',
-        params: filteredParams,}
-    );
-    }
-
-    return this.http.get<TData>(
-      `/api/v1/financial/charges/by-student`,{
-    ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'body',
-        params: filteredParams,}
-    );
-  }
-
-/**
- * @summary Payments by student
- */
- financialControllerGetPaymentsByStudent<TData = void>(params: FinancialControllerGetPaymentsByStudentParams, options?: HttpClientBodyOptions): Observable<TData>;
- financialControllerGetPaymentsByStudent<TData = void>(params: FinancialControllerGetPaymentsByStudentParams, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
- financialControllerGetPaymentsByStudent<TData = void>(params: FinancialControllerGetPaymentsByStudentParams, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
-  financialControllerGetPaymentsByStudent<TData = void>(
-    params: FinancialControllerGetPaymentsByStudentParams, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
-    const filteredParams = filterParams({...params, ...options?.params}, new Set<string>([]));
-
-    if (options?.observe === 'events') {
-      return this.http.get<TData>(
-      `/api/v1/financial/payments/by-student`,{
-    ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'events',
-        params: filteredParams,}
-    );
-    }
-
-    if (options?.observe === 'response') {
-      return this.http.get<TData>(
-      `/api/v1/financial/payments/by-student`,{
-    ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'response',
-        params: filteredParams,}
-    );
-    }
-
-    return this.http.get<TData>(
-      `/api/v1/financial/payments/by-student`,{
-    ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'body',
-        params: filteredParams,}
-    );
-  }
-
-/**
- * @summary Linked students financial summary (parent)
- */
- financialControllerGetLinkedStudentsFinancialSummary<TData = void>( options?: HttpClientBodyOptions): Observable<TData>;
- financialControllerGetLinkedStudentsFinancialSummary<TData = void>( options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
- financialControllerGetLinkedStudentsFinancialSummary<TData = void>( options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
-  financialControllerGetLinkedStudentsFinancialSummary<TData = void>(
-     options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
-    if (options?.observe === 'events') {
-      return this.http.get<TData>(
-      `/api/v1/financial/linked-students-summary`,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'events',
-      }
-    );
-    }
-
-    if (options?.observe === 'response') {
-      return this.http.get<TData>(
-      `/api/v1/financial/linked-students-summary`,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'response',
-      }
-    );
-    }
-
-    return this.http.get<TData>(
-      `/api/v1/financial/linked-students-summary`,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'body',
-      }
-    );
-  }
-
-/**
- * @summary Charges by school (filtered + paginated)
- */
- financialControllerGetChargesBySchool<TData = void>(params: FinancialControllerGetChargesBySchoolParams, options?: HttpClientBodyOptions): Observable<TData>;
- financialControllerGetChargesBySchool<TData = void>(params: FinancialControllerGetChargesBySchoolParams, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
- financialControllerGetChargesBySchool<TData = void>(params: FinancialControllerGetChargesBySchoolParams, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
-  financialControllerGetChargesBySchool<TData = void>(
-    params: FinancialControllerGetChargesBySchoolParams, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
-    const filteredParams = filterParams({...params, ...options?.params}, new Set<string>([]));
-
-    if (options?.observe === 'events') {
-      return this.http.get<TData>(
-      `/api/v1/financial/charges/by-school`,{
-    ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'events',
-        params: filteredParams,}
-    );
-    }
-
-    if (options?.observe === 'response') {
-      return this.http.get<TData>(
-      `/api/v1/financial/charges/by-school`,{
-    ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'response',
-        params: filteredParams,}
-    );
-    }
-
-    return this.http.get<TData>(
-      `/api/v1/financial/charges/by-school`,{
-    ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'body',
-        params: filteredParams,}
-    );
-  }
-
-/**
- * @summary Payments by school (filtered + paginated)
- */
- financialControllerGetPaymentsBySchool<TData = void>(params: FinancialControllerGetPaymentsBySchoolParams, options?: HttpClientBodyOptions): Observable<TData>;
- financialControllerGetPaymentsBySchool<TData = void>(params: FinancialControllerGetPaymentsBySchoolParams, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
- financialControllerGetPaymentsBySchool<TData = void>(params: FinancialControllerGetPaymentsBySchoolParams, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
-  financialControllerGetPaymentsBySchool<TData = void>(
-    params: FinancialControllerGetPaymentsBySchoolParams, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
-    const filteredParams = filterParams({...params, ...options?.params}, new Set<string>([]));
-
-    if (options?.observe === 'events') {
-      return this.http.get<TData>(
-      `/api/v1/financial/payments/by-school`,{
-    ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'events',
-        params: filteredParams,}
-    );
-    }
-
-    if (options?.observe === 'response') {
-      return this.http.get<TData>(
-      `/api/v1/financial/payments/by-school`,{
-    ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'response',
-        params: filteredParams,}
-    );
-    }
-
-    return this.http.get<TData>(
-      `/api/v1/financial/payments/by-school`,{
-    ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'body',
-        params: filteredParams,}
-    );
-  }
-
-/**
- * @summary Charges for the current student (filtered + paginated)
- */
- financialControllerGetChargesForStudent<TData = void>(params: FinancialControllerGetChargesForStudentParams, options?: HttpClientBodyOptions): Observable<TData>;
- financialControllerGetChargesForStudent<TData = void>(params: FinancialControllerGetChargesForStudentParams, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
- financialControllerGetChargesForStudent<TData = void>(params: FinancialControllerGetChargesForStudentParams, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
-  financialControllerGetChargesForStudent<TData = void>(
-    params: FinancialControllerGetChargesForStudentParams, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
-    const filteredParams = filterParams({...params, ...options?.params}, new Set<string>([]));
-
-    if (options?.observe === 'events') {
-      return this.http.get<TData>(
-      `/api/v1/financial/charges/student`,{
-    ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'events',
-        params: filteredParams,}
-    );
-    }
-
-    if (options?.observe === 'response') {
-      return this.http.get<TData>(
-      `/api/v1/financial/charges/student`,{
-    ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'response',
-        params: filteredParams,}
-    );
-    }
-
-    return this.http.get<TData>(
-      `/api/v1/financial/charges/student`,{
-    ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'body',
-        params: filteredParams,}
-    );
-  }
-
-/**
- * @summary Payments for the current student (filtered + paginated)
- */
- financialControllerGetPaymentsForStudent<TData = void>(params: FinancialControllerGetPaymentsForStudentParams, options?: HttpClientBodyOptions): Observable<TData>;
- financialControllerGetPaymentsForStudent<TData = void>(params: FinancialControllerGetPaymentsForStudentParams, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
- financialControllerGetPaymentsForStudent<TData = void>(params: FinancialControllerGetPaymentsForStudentParams, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
-  financialControllerGetPaymentsForStudent<TData = void>(
-    params: FinancialControllerGetPaymentsForStudentParams, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
-    const filteredParams = filterParams({...params, ...options?.params}, new Set<string>([]));
-
-    if (options?.observe === 'events') {
-      return this.http.get<TData>(
-      `/api/v1/financial/payments/student`,{
-    ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'events',
-        params: filteredParams,}
-    );
-    }
-
-    if (options?.observe === 'response') {
-      return this.http.get<TData>(
-      `/api/v1/financial/payments/student`,{
-    ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'response',
-        params: filteredParams,}
-    );
-    }
-
-    return this.http.get<TData>(
-      `/api/v1/financial/payments/student`,{
-    ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'body',
-        params: filteredParams,}
-    );
-  }
-
-/**
- * @summary Create charges
- */
- financialControllerCreateCharge<TData = void>(createChargeInput: CreateChargeInput, options?: HttpClientBodyOptions): Observable<TData>;
- financialControllerCreateCharge<TData = void>(createChargeInput: CreateChargeInput, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
- financialControllerCreateCharge<TData = void>(createChargeInput: CreateChargeInput, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
-  financialControllerCreateCharge<TData = void>(
-    createChargeInput: CreateChargeInput, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
-    if (options?.observe === 'events') {
-      return this.http.post<TData>(
-      `/api/v1/financial/charges`,
-      createChargeInput,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'events',
-      }
-    );
-    }
-
-    if (options?.observe === 'response') {
-      return this.http.post<TData>(
-      `/api/v1/financial/charges`,
-      createChargeInput,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'response',
-      }
-    );
-    }
-
-    return this.http.post<TData>(
-      `/api/v1/financial/charges`,
-      createChargeInput,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'body',
-      }
-    );
-  }
-
-/**
- * @summary Create payment
- */
- financialControllerCreatePayment<TData = void>(createPaymentInput: CreatePaymentInput, options?: HttpClientBodyOptions): Observable<TData>;
- financialControllerCreatePayment<TData = void>(createPaymentInput: CreatePaymentInput, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
- financialControllerCreatePayment<TData = void>(createPaymentInput: CreatePaymentInput, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
-  financialControllerCreatePayment<TData = void>(
-    createPaymentInput: CreatePaymentInput, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
-    if (options?.observe === 'events') {
-      return this.http.post<TData>(
-      `/api/v1/financial/payments`,
-      createPaymentInput,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'events',
-      }
-    );
-    }
-
-    if (options?.observe === 'response') {
-      return this.http.post<TData>(
-      `/api/v1/financial/payments`,
-      createPaymentInput,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'response',
-      }
-    );
-    }
-
-    return this.http.post<TData>(
-      `/api/v1/financial/payments`,
-      createPaymentInput,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'body',
-      }
-    );
-  }
-
-/**
- * @summary Remove charge
- */
- financialControllerRemoveCharge<TData = void>(id: string, options?: HttpClientBodyOptions): Observable<TData>;
- financialControllerRemoveCharge<TData = void>(id: string, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
- financialControllerRemoveCharge<TData = void>(id: string, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
-  financialControllerRemoveCharge<TData = void>(
-    id: string, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
-    if (options?.observe === 'events') {
-      return this.http.delete<TData>(
-      `/api/v1/financial/charges/${id}`,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'events',
-      }
-    );
-    }
-
-    if (options?.observe === 'response') {
-      return this.http.delete<TData>(
-      `/api/v1/financial/charges/${id}`,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'response',
-      }
-    );
-    }
-
-    return this.http.delete<TData>(
-      `/api/v1/financial/charges/${id}`,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'body',
-      }
-    );
-  }
-
-/**
- * @summary Update study plan financial config
- */
- financialControllerUpdateStudyPlanFinancialConfig<TData = void>(updateStudyPlanFinancialInput: UpdateStudyPlanFinancialInput, options?: HttpClientBodyOptions): Observable<TData>;
- financialControllerUpdateStudyPlanFinancialConfig<TData = void>(updateStudyPlanFinancialInput: UpdateStudyPlanFinancialInput, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
- financialControllerUpdateStudyPlanFinancialConfig<TData = void>(updateStudyPlanFinancialInput: UpdateStudyPlanFinancialInput, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
-  financialControllerUpdateStudyPlanFinancialConfig<TData = void>(
-    updateStudyPlanFinancialInput: UpdateStudyPlanFinancialInput, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
-    if (options?.observe === 'events') {
-      return this.http.post<TData>(
-      `/api/v1/financial/study-plan-config`,
-      updateStudyPlanFinancialInput,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'events',
-      }
-    );
-    }
-
-    if (options?.observe === 'response') {
-      return this.http.post<TData>(
-      `/api/v1/financial/study-plan-config`,
-      updateStudyPlanFinancialInput,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'response',
-      }
-    );
-    }
-
-    return this.http.post<TData>(
-      `/api/v1/financial/study-plan-config`,
-      updateStudyPlanFinancialInput,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'body',
-      }
-    );
-  }
-
-/**
- * @summary Regenerate study-plan charges for an existing student
- */
- financialControllerRegenerateFromStudyPlan<TData = void>(regenerateStudyPlanChargesInput: RegenerateStudyPlanChargesInput, options?: HttpClientBodyOptions): Observable<TData>;
- financialControllerRegenerateFromStudyPlan<TData = void>(regenerateStudyPlanChargesInput: RegenerateStudyPlanChargesInput, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
- financialControllerRegenerateFromStudyPlan<TData = void>(regenerateStudyPlanChargesInput: RegenerateStudyPlanChargesInput, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
-  financialControllerRegenerateFromStudyPlan<TData = void>(
-    regenerateStudyPlanChargesInput: RegenerateStudyPlanChargesInput, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
-    if (options?.observe === 'events') {
-      return this.http.post<TData>(
-      `/api/v1/financial/charges/regenerate-from-study-plan`,
-      regenerateStudyPlanChargesInput,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'events',
-      }
-    );
-    }
-
-    if (options?.observe === 'response') {
-      return this.http.post<TData>(
-      `/api/v1/financial/charges/regenerate-from-study-plan`,
-      regenerateStudyPlanChargesInput,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'response',
-      }
-    );
-    }
-
-    return this.http.post<TData>(
-      `/api/v1/financial/charges/regenerate-from-study-plan`,
-      regenerateStudyPlanChargesInput,{
-        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
-        observe: 'body',
-      }
-    );
-  }
-
-/**
  * @summary Create assignment
  */
  assignmentsControllerCreate<TData = void>(createAssignmentInput: CreateAssignmentInput, options?: HttpClientBodyOptions): Observable<TData>;
@@ -10902,6 +10388,147 @@ if(coursesControllerUploadCoverBody.file !== undefined) {
     ...(options as Omit<NonNullable<typeof options>, 'observe'>),
         observe: 'body',
         params: filteredParams,}
+    );
+  }
+
+/**
+ * @summary Family accounts of a school (FR-FIN-001.2)
+ */
+ financeControllerListAccounts<TData = void>(params: FinanceControllerListAccountsParams, options?: HttpClientBodyOptions): Observable<TData>;
+ financeControllerListAccounts<TData = void>(params: FinanceControllerListAccountsParams, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
+ financeControllerListAccounts<TData = void>(params: FinanceControllerListAccountsParams, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
+  financeControllerListAccounts<TData = void>(
+    params: FinanceControllerListAccountsParams, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
+    const filteredParams = filterParams({...params, ...options?.params}, new Set<string>([]));
+
+    if (options?.observe === 'events') {
+      return this.http.get<TData>(
+      `/api/v1/finance/accounts`,{
+    ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'events',
+        params: filteredParams,}
+    );
+    }
+
+    if (options?.observe === 'response') {
+      return this.http.get<TData>(
+      `/api/v1/finance/accounts`,{
+    ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'response',
+        params: filteredParams,}
+    );
+    }
+
+    return this.http.get<TData>(
+      `/api/v1/finance/accounts`,{
+    ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'body',
+        params: filteredParams,}
+    );
+  }
+
+/**
+ * @summary Family account with its charges (FR-FIN-001.3, .12)
+ */
+ financeControllerAccount<TData = void>(id: string, options?: HttpClientBodyOptions): Observable<TData>;
+ financeControllerAccount<TData = void>(id: string, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
+ financeControllerAccount<TData = void>(id: string, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
+  financeControllerAccount<TData = void>(
+    id: string, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
+    if (options?.observe === 'events') {
+      return this.http.get<TData>(
+      `/api/v1/finance/accounts/${id}`,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'events',
+      }
+    );
+    }
+
+    if (options?.observe === 'response') {
+      return this.http.get<TData>(
+      `/api/v1/finance/accounts/${id}`,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'response',
+      }
+    );
+    }
+
+    return this.http.get<TData>(
+      `/api/v1/finance/accounts/${id}`,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'body',
+      }
+    );
+  }
+
+/**
+ * @summary The caller's family accounts, one per school of a linked child (FR-FIN-001.12)
+ */
+ financeControllerMyAccounts<TData = void>( options?: HttpClientBodyOptions): Observable<TData>;
+ financeControllerMyAccounts<TData = void>( options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
+ financeControllerMyAccounts<TData = void>( options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
+  financeControllerMyAccounts<TData = void>(
+     options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
+    if (options?.observe === 'events') {
+      return this.http.get<TData>(
+      `/api/v1/finance/me/accounts`,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'events',
+      }
+    );
+    }
+
+    if (options?.observe === 'response') {
+      return this.http.get<TData>(
+      `/api/v1/finance/me/accounts`,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'response',
+      }
+    );
+    }
+
+    return this.http.get<TData>(
+      `/api/v1/finance/me/accounts`,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'body',
+      }
+    );
+  }
+
+/**
+ * @summary Manual charge for a student or a class group (FR-FIN-001.7)
+ */
+ financeControllerCreateCharge<TData = void>(createChargeInput: CreateChargeInput, options?: HttpClientBodyOptions): Observable<TData>;
+ financeControllerCreateCharge<TData = void>(createChargeInput: CreateChargeInput, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
+ financeControllerCreateCharge<TData = void>(createChargeInput: CreateChargeInput, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
+  financeControllerCreateCharge<TData = void>(
+    createChargeInput: CreateChargeInput, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
+    if (options?.observe === 'events') {
+      return this.http.post<TData>(
+      `/api/v1/finance/charges`,
+      createChargeInput,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'events',
+      }
+    );
+    }
+
+    if (options?.observe === 'response') {
+      return this.http.post<TData>(
+      `/api/v1/finance/charges`,
+      createChargeInput,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'response',
+      }
+    );
+    }
+
+    return this.http.post<TData>(
+      `/api/v1/finance/charges`,
+      createChargeInput,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'body',
+      }
     );
   }
 

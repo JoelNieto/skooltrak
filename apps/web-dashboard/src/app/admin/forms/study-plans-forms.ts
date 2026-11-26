@@ -1,17 +1,13 @@
 import { suggestedPlanName, suggestedPlanShortName } from '#/shared';
 import { Alert, Button, Icon, Toast, UiField, UiInput, UiSelect } from '#/ui';
-import { DecimalPipe } from '@angular/common';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { afterRenderEffect, Component, computed, effect, inject, input, output, signal, untracked } from '@angular/core';
 import { form, FormField, min, required } from '@angular/forms/signals';
 import { firstValueFrom } from 'rxjs';
-import Auth from '../../auth/auth';
 import Store from '../../core/store';
 import {
   EMPTY_PLAN_SETTINGS,
   hasOverrides,
-  periodIncomplete,
-  periodLabel,
   PlanSettingsFields,
   PlanSettingsRow,
   PlanSettingsValue,
@@ -40,12 +36,12 @@ export function nextLevel(degree: DegreeOption | undefined): number {
 
 /**
  * A study plan: its degree, grade and names. The grade and names are suggested from the degree
- * ("3° Primaria"); the grade metric and financial settings come from the degree unless the plan
+ * ("3° Primaria"); the grade metric comes from the degree unless the plan
  * overrides them under "Personalizar este plan".
  */
 @Component({
   selector: 'app-study-plan-form',
-  imports: [Alert, UiField, UiInput, UiSelect, Button, FormField, Icon, PlanSettingsFields, DecimalPipe],
+  imports: [Alert, UiField, UiInput, UiSelect, Button, FormField, Icon, PlanSettingsFields],
   template: `
     <form (submit)="onSubmit($event)">
       <div class="flex flex-col md:grid md:grid-cols-4 md:gap-4 gap-2">
@@ -80,21 +76,6 @@ export function nextLevel(degree: DegreeOption | undefined): number {
               </p>
               <ul class="mt-1 space-y-0.5">
                 <li>Métrica: {{ effectiveMetricName() ?? 'sin métrica' }}</li>
-                @if (canManageFinancials) {
-                  <li>
-                    Colegiatura:
-                    @if (effective().monthlyTuitionAmount !== null) {
-                      {{ effective().monthlyTuitionAmount | number: '1.2-2' }}
-                      {{ effectivePeriod() ? '· ' + effectivePeriod() : '· sin periodo' }}
-                    } @else {
-                      sin colegiatura
-                    }
-                  </li>
-                  <li>
-                    Matrícula:
-                    {{ effective().enrollmentCosts.length ? effective().enrollmentCosts.length + ' costo(s)' : 'sin costos' }}
-                  </li>
-                }
               </ul>
               @if (!effectiveMetricName()) {
                 <p class="text-warning mt-1">Sin métrica, las materias del plan no pueden calificarse.</p>
@@ -116,7 +97,6 @@ export function nextLevel(degree: DegreeOption | undefined): number {
               [(value)]="settings"
               [metrics]="metrics.value()"
               [inherited]="inherited()"
-              [financial]="canManageFinancials"
             />
           </div>
         </details>
@@ -135,7 +115,6 @@ export default class StudyPlanForm {
   private http = inject(HttpClient);
   private toast = inject(Toast);
   private store = inject(Store);
-  protected readonly canManageFinancials = inject(Auth).hasPermission('MANAGE_FINANCIALS');
   public metrics = httpResource<{ id: string; name: string }[]>(() => '/api/v1/grade-metrics', { defaultValue: [] });
 
   public degrees = httpResource<DegreeOption[]>(
@@ -176,19 +155,6 @@ export default class StudyPlanForm {
     return { ...settingsFromRow(degree), metricName: degree.gradeMetric?.name ?? null };
   });
 
-  /** The settings the plan ends up with: its overrides, else the degree's. */
-  protected readonly effective = computed(() => {
-    const own = this.settings();
-    const parent = this.inherited() ?? EMPTY_PLAN_SETTINGS;
-    const ownPeriod = own.tuitionStartMonth != null;
-    return {
-      monthlyTuitionAmount: own.monthlyTuitionAmount ?? parent.monthlyTuitionAmount,
-      tuitionStartMonth: ownPeriod ? own.tuitionStartMonth : parent.tuitionStartMonth,
-      tuitionEndMonth: ownPeriod ? own.tuitionEndMonth : parent.tuitionEndMonth,
-      enrollmentCosts: own.enrollmentCosts.length ? own.enrollmentCosts : parent.enrollmentCosts,
-    };
-  });
-
   protected readonly customized = computed(() => hasOverrides(this.settings()));
 
   protected readonly effectiveMetricName = computed(() => {
@@ -196,10 +162,6 @@ export default class StudyPlanForm {
     if (own) return this.metrics.value().find((m) => m.id === own)?.name ?? null;
     return this.inherited()?.metricName ?? null;
   });
-
-  protected readonly effectivePeriod = computed(() =>
-    periodLabel(this.effective().tuitionStartMonth, this.effective().tuitionEndMonth),
-  );
 
   private populatedPlanId: string | null = null;
 
@@ -259,11 +221,6 @@ export default class StudyPlanForm {
       this.toast.showError('Por favor, completa todos los campos');
       return;
     }
-    if (periodIncomplete(this.settings())) {
-      this.overridesOpen.set(true);
-      this.toast.showError('El periodo de colegiatura necesita un mes de inicio y uno de fin');
-      return;
-    }
     const plan = this.data()?.studyPlan;
     const schoolId = this.store.currentSchoolId();
     if (!plan && !schoolId) return;
@@ -275,7 +232,7 @@ export default class StudyPlanForm {
       description,
       level: Number(level),
       degreeId,
-      ...settingsPayload(this.settings(), this.canManageFinancials),
+      ...settingsPayload(this.settings()),
     };
 
     this.saving.set(true);

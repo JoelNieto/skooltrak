@@ -18,7 +18,6 @@ import { randomBytes, randomUUID } from 'crypto';
 import { Request } from 'express';
 import * as QRCode from 'qrcode';
 import { ACTIVE_ENROLLMENT, enrolledCourses, enrolledIn, syncStudentPlan } from '../courses/course-roster';
-import { ChargesService } from '../financial/charges.service';
 import { PrismaService, STUDENT_PERSONAL_DETAILS } from '../prisma.service';
 import { CreateStudentInput } from './dto/create-student.input';
 import { UpdateStudentInput } from './dto/update-student.input';
@@ -44,7 +43,6 @@ export class StudentsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly authService: AuthService,
-    private readonly chargesService: ChargesService,
     @Inject(REQUEST) private readonly request: Request,
   ) {}
 
@@ -182,15 +180,6 @@ export class StudentsService {
       }
     }
 
-    // The study plan drives the auto-generated charges below; the roster is synced on create.
-    let studyPlanId: string | undefined;
-    if (classGroupId) {
-      const group = await this.prisma.classGroup.findUnique({
-        where: { id: classGroupId },
-      });
-      studyPlanId = group?.studyPlanId;
-    }
-
     // Convert birthDate properly - handle both Date and string
     const parsedBirthDate = birthDate instanceof Date ? birthDate : new Date(birthDate);
 
@@ -278,15 +267,6 @@ export class StudentsService {
         }
       }
 
-
-      // Auto-generate study-plan charges (enrollment + tuition) for the student.
-      if (studyPlanId) {
-        try {
-          await this.chargesService.generateFromStudyPlan(student.id, studyPlanId, schoolId, new Date().getFullYear());
-        } catch (chargeError) {
-          this.logger.warn(`Failed to generate study-plan charges for student ${student.id}:`, chargeError);
-        }
-      }
 
       return student;
     } catch (error) {
@@ -599,15 +579,6 @@ export class StudentsService {
       };
     }
 
-    // The new group's study plan drives the auto-generated charges below.
-    let newStudyPlanId: string | undefined;
-    if (rest.classGroupId) {
-      const group = await this.prisma.classGroup.findUnique({
-        where: { id: rest.classGroupId },
-      });
-      newStudyPlanId = group?.studyPlanId;
-    }
-
     // A class-group change moves the student's plan enrollments in the same transaction
     // (ACA-001 BR .15).
     const updated = await this.prisma.$transaction(async (tx) => {
@@ -620,14 +591,6 @@ export class StudentsService {
       return row;
     });
 
-    // Auto-generate study-plan charges when the student is assigned a class group.
-    if (newStudyPlanId) {
-      try {
-        await this.chargesService.generateFromStudyPlan(id, newStudyPlanId, updated.schoolId, new Date().getFullYear());
-      } catch (chargeError) {
-        this.logger.warn(`Failed to generate study-plan charges for student ${id}:`, chargeError);
-      }
-    }
 
 
     if (rest.classGroupId !== undefined) {

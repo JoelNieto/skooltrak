@@ -25,7 +25,6 @@ jest.mock('@generated/prisma', () => ({
 }));
 jest.mock('bcrypt', () => ({}));
 jest.mock('qrcode', () => ({}));
-jest.mock('../financial/charges.service', () => ({ ChargesService: class {} }));
 jest.mock('../grades/grades.service', () => ({ GradesService: class {} }));
 
 import { Perm, PERMISSIONS_KEY } from '@/auth';
@@ -189,7 +188,7 @@ describe('students API — enrollment codes', () => {
         },
       };
       const request = { user: { userId: 'u-admin', organizationId } };
-      const service = new StudentsService(prisma as never, {} as never, {} as never, request as never);
+      const service = new StudentsService(prisma as never, {} as never, request as never);
       return { service, prisma };
     }
 
@@ -295,7 +294,7 @@ describe('students API — lists and records are scoped to staff, self and linke
           where.id === 'G1' && where.organizationId === 'org-1' ? { id: 'G1' } : null) },
         role: { findFirstOrThrow: jest.fn() },
       };
-      const service = new StudentsService(prisma as never, {} as never, {} as never, { user } as never);
+      const service = new StudentsService(prisma as never, {} as never, { user } as never);
       return { service, prisma };
     }
 

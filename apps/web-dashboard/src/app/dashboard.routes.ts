@@ -165,7 +165,13 @@ export const DASHBOARD_ROUTES: Route[] = [
       },
       {
         path: 'financial-module',
-        loadComponent: () => import('./admin/pages/financial-module'),
+        canActivate: [permissionGuard('VIEW_FINANCIALS')],
+        loadComponent: () => import('./finance/admin/finance-shell'),
+        children: [
+          { path: '', pathMatch: 'full', redirectTo: 'accounts' },
+          { path: 'accounts', loadComponent: () => import('./finance/admin/accounts-page') },
+          { path: 'accounts/:id', loadComponent: () => import('./finance/admin/account-page') },
+        ],
       },
       {
         path: 'assignments',
@@ -363,6 +369,7 @@ export const DASHBOARD_ROUTES: Route[] = [
       },
       {
         path: 'parent/finances',
+        canActivate: [permissionGuard('VIEW_FINANCIALS')],
         loadComponent: () => import('./parent/parent-finances'),
       },
       {

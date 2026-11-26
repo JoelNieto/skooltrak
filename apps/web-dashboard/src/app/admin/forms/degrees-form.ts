@@ -2,11 +2,9 @@ import { Button, Toast, UiField, UiInput, UiSelect } from '#/ui';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { afterRenderEffect, Component, inject, input, output, signal } from '@angular/core';
 import { disabled, form, FormField, required } from '@angular/forms/signals';
-import Auth from '../../auth/auth';
 import Store from '../../core/store';
 import {
   EMPTY_PLAN_SETTINGS,
-  periodIncomplete,
   PlanSettingsFields,
   PlanSettingsRow,
   PlanSettingsValue,
@@ -42,7 +40,6 @@ import {
         <app-plan-settings-fields
           [(value)]="settings"
           [metrics]="metrics.value()"
-          [financial]="canManageFinancials"
         />
       </section>
     </div>
@@ -60,7 +57,6 @@ export default class DegreesForm {
   public closeModal = output<void>();
   #http = inject(HttpClient);
   private toasts = inject(Toast);
-  protected readonly canManageFinancials = inject(Auth).hasPermission('MANAGE_FINANCIALS');
   public schools = httpResource<Array<{ id: string; name: string }>>(() => '/api/v1/schools', { defaultValue: [] });
   public metrics = httpResource<{ id: string; name: string }[]>(() => '/api/v1/grade-metrics', { defaultValue: [] });
 
@@ -105,11 +101,7 @@ export default class DegreesForm {
       this.toasts.showError('Llenar todos los campos');
       return;
     }
-    if (periodIncomplete(this.settings())) {
-      this.toasts.showError('El periodo de colegiatura necesita un mes de inicio y uno de fin');
-      return;
-    }
-    const request = { ...this.formModel(), ...settingsPayload(this.settings(), this.canManageFinancials) };
+    const request = { ...this.formModel(), ...settingsPayload(this.settings()) };
     const degree = this.data()?.degree;
     const save$ = degree
       ? this.#http.patch('/api/v1/degrees', { ...request, id: degree.id })

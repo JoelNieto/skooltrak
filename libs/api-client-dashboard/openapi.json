@@ -5195,567 +5195,6 @@
         ]
       }
     },
-    "/api/v1/financial/student-balance-summary": {
-      "get": {
-        "operationId": "FinancialController_getStudentBalanceSummary",
-        "parameters": [
-          {
-            "name": "studentId",
-            "required": true,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Student balance breakdown (overdue/active/paid)",
-        "tags": [
-          "financial"
-        ]
-      }
-    },
-    "/api/v1/financial/student-balance": {
-      "get": {
-        "operationId": "FinancialController_getStudentBalance",
-        "parameters": [
-          {
-            "name": "studentId",
-            "required": true,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Student balance",
-        "tags": [
-          "financial"
-        ]
-      }
-    },
-    "/api/v1/financial/charges/by-student": {
-      "get": {
-        "operationId": "FinancialController_getChargesByStudent",
-        "parameters": [
-          {
-            "name": "studentId",
-            "required": true,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Charges by student",
-        "tags": [
-          "financial"
-        ]
-      }
-    },
-    "/api/v1/financial/payments/by-student": {
-      "get": {
-        "operationId": "FinancialController_getPaymentsByStudent",
-        "parameters": [
-          {
-            "name": "studentId",
-            "required": true,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Payments by student",
-        "tags": [
-          "financial"
-        ]
-      }
-    },
-    "/api/v1/financial/linked-students-summary": {
-      "get": {
-        "operationId": "FinancialController_getLinkedStudentsFinancialSummary",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Linked students financial summary (parent)",
-        "tags": [
-          "financial"
-        ]
-      }
-    },
-    "/api/v1/financial/charges/by-school": {
-      "get": {
-        "operationId": "FinancialController_getChargesBySchool",
-        "parameters": [
-          {
-            "name": "schoolId",
-            "required": true,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "year",
-            "required": true,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "status",
-            "required": true,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "chargeType",
-            "required": true,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "studentId",
-            "required": true,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "description",
-            "required": true,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "skip",
-            "required": true,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "take",
-            "required": true,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Charges by school (filtered + paginated)",
-        "tags": [
-          "financial"
-        ]
-      }
-    },
-    "/api/v1/financial/payments/by-school": {
-      "get": {
-        "operationId": "FinancialController_getPaymentsBySchool",
-        "parameters": [
-          {
-            "name": "schoolId",
-            "required": true,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "year",
-            "required": true,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "studentId",
-            "required": true,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "reference",
-            "required": true,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "skip",
-            "required": true,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "take",
-            "required": true,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Payments by school (filtered + paginated)",
-        "tags": [
-          "financial"
-        ]
-      }
-    },
-    "/api/v1/financial/charges/student": {
-      "get": {
-        "operationId": "FinancialController_getChargesForStudent",
-        "parameters": [
-          {
-            "name": "year",
-            "required": true,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "status",
-            "required": true,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "chargeType",
-            "required": true,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "description",
-            "required": true,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "skip",
-            "required": true,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "take",
-            "required": true,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Charges for the current student (filtered + paginated)",
-        "tags": [
-          "financial"
-        ]
-      }
-    },
-    "/api/v1/financial/payments/student": {
-      "get": {
-        "operationId": "FinancialController_getPaymentsForStudent",
-        "parameters": [
-          {
-            "name": "year",
-            "required": true,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "reference",
-            "required": true,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "skip",
-            "required": true,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "take",
-            "required": true,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Payments for the current student (filtered + paginated)",
-        "tags": [
-          "financial"
-        ]
-      }
-    },
-    "/api/v1/financial/charges": {
-      "post": {
-        "operationId": "FinancialController_createCharge",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateChargeInput"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Create charges",
-        "tags": [
-          "financial"
-        ]
-      }
-    },
-    "/api/v1/financial/payments": {
-      "post": {
-        "operationId": "FinancialController_createPayment",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreatePaymentInput"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Create payment",
-        "tags": [
-          "financial"
-        ]
-      }
-    },
-    "/api/v1/financial/charges/{id}": {
-      "delete": {
-        "operationId": "FinancialController_removeCharge",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Remove charge",
-        "tags": [
-          "financial"
-        ]
-      }
-    },
-    "/api/v1/financial/study-plan-config": {
-      "post": {
-        "operationId": "FinancialController_updateStudyPlanFinancialConfig",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateStudyPlanFinancialInput"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Update study plan financial config",
-        "tags": [
-          "financial"
-        ]
-      }
-    },
-    "/api/v1/financial/charges/regenerate-from-study-plan": {
-      "post": {
-        "operationId": "FinancialController_regenerateFromStudyPlan",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/RegenerateStudyPlanChargesInput"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Regenerate study-plan charges for an existing student",
-        "tags": [
-          "financial"
-        ]
-      }
-    },
     "/api/v1/assignments": {
       "post": {
         "operationId": "AssignmentsController_create",
@@ -10717,6 +10156,146 @@
         ]
       }
     },
+    "/api/v1/finance/accounts": {
+      "get": {
+        "operationId": "FinanceController_listAccounts",
+        "parameters": [
+          {
+            "name": "schoolId",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "q",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "overdue",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "take",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Family accounts of a school (FR-FIN-001.2)",
+        "tags": [
+          "finance"
+        ]
+      }
+    },
+    "/api/v1/finance/accounts/{id}": {
+      "get": {
+        "operationId": "FinanceController_account",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Family account with its charges (FR-FIN-001.3, .12)",
+        "tags": [
+          "finance"
+        ]
+      }
+    },
+    "/api/v1/finance/me/accounts": {
+      "get": {
+        "operationId": "FinanceController_myAccounts",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "The caller's family accounts, one per school of a linked child (FR-FIN-001.12)",
+        "tags": [
+          "finance"
+        ]
+      }
+    },
+    "/api/v1/finance/charges": {
+      "post": {
+        "operationId": "FinanceController_createCharge",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateChargeInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Manual charge for a student or a class group (FR-FIN-001.7)",
+        "tags": [
+          "finance"
+        ]
+      }
+    },
     "/api/v1/store/categories": {
       "get": {
         "operationId": "StoreController_storeCategories",
@@ -12021,22 +11600,6 @@
         "type": "object",
         "properties": {}
       },
-      "CreateChargeInput": {
-        "type": "object",
-        "properties": {}
-      },
-      "CreatePaymentInput": {
-        "type": "object",
-        "properties": {}
-      },
-      "UpdateStudyPlanFinancialInput": {
-        "type": "object",
-        "properties": {}
-      },
-      "RegenerateStudyPlanChargesInput": {
-        "type": "object",
-        "properties": {}
-      },
       "CreateAssignmentInput": {
         "type": "object",
         "properties": {}
@@ -12413,6 +11976,10 @@
             "type": "number"
           }
         }
+      },
+      "CreateChargeInput": {
+        "type": "object",
+        "properties": {}
       },
       "AddToCartInput": {
         "type": "object",

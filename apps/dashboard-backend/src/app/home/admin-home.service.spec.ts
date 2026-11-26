@@ -74,14 +74,14 @@ describe('AdminHomeService (HOM-001-S08)', () => {
         ],
         sessions: [{ courseId: 'c2', classGroupId: 'g1' }],
         overdueCharges: [
-          // 285 − 85 = 200 owed; parents p1 + p2
-          { amount: decimal(285), studentId: 's1', payments: [{ amount: decimal(85) }], student: { parents: [{ id: 'p2' }, { id: 'p1' }] } },
-          // sibling of s1: same parents → same family
-          { amount: decimal(100), studentId: 's2', payments: [], student: { parents: [{ id: 'p1' }, { id: 'p2' }] } },
-          // no parents → one family by itself
-          { amount: decimal(50), studentId: 's3', payments: [], student: { parents: [] } },
+          // 285 − 85 = 200 owed, account A1
+          { accountId: 'A1', netAmount: decimal(285), paidAmount: decimal(85), dueDate: new Date('2026-11-01'), cancelledAt: null },
+          // sibling of s1: same family account
+          { accountId: 'A1', netAmount: decimal(100), paidAmount: decimal(0), dueDate: new Date('2026-11-01'), cancelledAt: null },
+          // another family
+          { accountId: 'A2', netAmount: decimal(50), paidAmount: decimal(0), dueDate: new Date('2026-11-01'), cancelledAt: null },
           // fully paid → not overdue
-          { amount: decimal(70), studentId: 's4', payments: [{ amount: decimal(70) }], student: { parents: [{ id: 'p9' }] } },
+          { accountId: 'A3', netAmount: decimal(70), paidAmount: decimal(70), dueDate: new Date('2026-11-01'), cancelledAt: null },
         ],
         imports: 1,
         plans: 3,
@@ -178,9 +178,9 @@ describe('AdminHomeService (HOM-001-S08)', () => {
         ],
         lastWeek: [{ status: AttendanceStatus.PRESENT, _count: { _all: 10 } }],
         monthCharges: [
-          { amount: decimal(285), payments: [{ amount: decimal(285) }] },
-          { amount: decimal(285), payments: [{ amount: decimal(300) }] }, // overpaid counts up to the charge
-          { amount: decimal(430), payments: [] },
+          { netAmount: decimal(285), paidAmount: decimal(285) },
+          { netAmount: decimal(285), paidAmount: decimal(300) }, // overpaid counts up to the charge
+          { netAmount: decimal(430), paidAmount: decimal(0) },
         ],
         courseScales: [
           { id: 'c-math', ...metric(3, 4.5) },
@@ -214,7 +214,11 @@ describe('AdminHomeService (HOM-001-S08)', () => {
       );
       expect(prisma.charge.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
-          where: { schoolId: SCHOOL, dueDate: { gte: new Date('2026-11-01T00:00:00Z'), lt: new Date('2026-12-01T00:00:00Z') } },
+          where: {
+            schoolId: SCHOOL,
+            cancelledAt: null,
+            dueDate: { gte: new Date('2026-11-01T00:00:00Z'), lt: new Date('2026-12-01T00:00:00Z') },
+          },
         }),
       );
     });

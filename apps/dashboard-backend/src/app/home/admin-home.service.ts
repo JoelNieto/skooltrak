@@ -3,6 +3,7 @@ import { EnrollmentStatus, ImportJobStatus, Prisma } from '@generated/prisma';
 import { BadRequestException, ForbiddenException, Inject, Injectable } from '@nestjs/common';
 import { ACTIVE_ENROLLMENT } from '../courses/course-roster';
 import { PrismaService } from '../prisma.service';
+import { cents, fromCents, outstandingCents } from '../finance/charge-status';
 import { AdminAttention, AdminKpis } from './entities/admin-home.entity';
 import { addCount, attendanceRate, AttendanceStatusCounts } from './home-attendance';
 import { toThresholds } from './home-grades';
@@ -153,30 +154,14 @@ export class AdminHomeService {
   /** BR-HOM-001.14: the school's charges past due with an outstanding amount. */
   private async overdueCharges({ school }: AdminContext, today: Date) {
     const charges = await this.prisma.charge.findMany({
-      where: { schoolId: school.id, dueDate: { lt: today } },
-      select: {
-        amount: true,
-        studentId: true,
-        payments: { select: { amount: true } },
-        student: { select: { parents: { select: { id: true } } } },
-      },
+      where: { schoolId: school.id, cancelledAt: null, dueDate: { lt: today } },
+      select: { accountId: true, netAmount: true, paidAmount: true, dueDate: true, cancelledAt: true },
     });
-    const open = charges
-      .map((c) => ({
-        ...c,
-        outstanding: c.amount.toNumber() - c.payments.reduce((sum, p) => sum + p.amount.toNumber(), 0),
-      }))
-      .filter((c) => c.outstanding > 0);
-    const families = new Set(
-      open.map((c) => {
-        const parents = c.student.parents.map((p) => p.id).sort();
-        return parents.length ? parents.join('+') : `student:${c.studentId}`;
-      }),
-    );
+    const open = charges.map((c) => ({ accountId: c.accountId, outstanding: outstandingCents(c) })).filter((c) => c.outstanding > 0);
     return {
       count: open.length,
-      amount: Math.round(open.reduce((sum, c) => sum + c.outstanding, 0) * 100) / 100,
-      families: families.size,
+      amount: fromCents(open.reduce((sum, c) => sum + c.outstanding, 0)),
+      families: new Set(open.map((c) => c.accountId)).size,
     };
   }
 
@@ -231,15 +216,12 @@ export class AdminHomeService {
     const next = new Date(`${monthStart}T00:00:00Z`);
     next.setUTCMonth(next.getUTCMonth() + 1);
     const charges = await this.prisma.charge.findMany({
-      where: { schoolId: school.id, dueDate: { gte: utcDate(monthStart), lt: next } },
-      select: { amount: true, payments: { select: { amount: true } } },
+      where: { schoolId: school.id, cancelledAt: null, dueDate: { gte: utcDate(monthStart), lt: next } },
+      select: { netAmount: true, paidAmount: true },
     });
-    const billed = charges.reduce((sum, c) => sum + c.amount.toNumber(), 0);
-    const collected = charges.reduce(
-      (sum, c) => sum + Math.min(c.amount.toNumber(), c.payments.reduce((s, p) => s + p.amount.toNumber(), 0)),
-      0,
-    );
-    return { rate: billed > 0 ? collected / billed : null, collected: round2(collected), billed: round2(billed) };
+    const billed = charges.reduce((sum, c) => sum + cents(c.netAmount), 0);
+    const collected = charges.reduce((sum, c) => sum + Math.min(cents(c.netAmount), cents(c.paidAmount)), 0);
+    return { rate: billed > 0 ? collected / billed : null, collected: fromCents(collected), billed: fromCents(billed) };
   }
 
   /** FR-HOM-001.25 "Aprobando todas las materias" against each course's plan scale (BR-HOM-001.1). */
@@ -333,6 +315,3 @@ export class AdminHomeService {
   }
 }
 
-function round2(n: number) {
-  return Math.round(n * 100) / 100;
-}

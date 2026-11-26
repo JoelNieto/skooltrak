@@ -3,6 +3,7 @@ import type { AuthUserContext } from '@/auth';
 import { AttendanceStatus } from '@generated/prisma';
 import { ForbiddenException, Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma.service';
+import { fromCents, outstandingCents } from '../finance/charge-status';
 import { StudentProgress, StudentWork } from './entities/student-home.entity';
 import {
   AccountStatus,
@@ -28,7 +29,7 @@ interface OpenCharge {
   dueDate: Date;
 }
 
-/** BR-HOM-001.14, same arithmetic as payments.service.ts:getStudentBalanceSummary. */
+/** BR-HOM-001.14: outstanding on the child's non-cancelled charges (FIN-001). */
 interface FinanceFacts {
   balance: number;
   /** Charges with an outstanding amount, by due date. */
@@ -228,40 +229,27 @@ export class ParentHomeService {
     });
   }
 
+  /** The child's charges on its family account (FIN-001); payments ship with FIN-001-S03. */
   private async finance(studentId: string, today: string): Promise<FinanceFacts> {
-    const [charges, payments] = await Promise.all([
-      this.prisma.charge.findMany({
-        where: { studentId },
-        select: { id: true, amount: true, dueDate: true, description: true },
-        orderBy: { dueDate: 'asc' },
-      }),
-      this.prisma.payment.findMany({
-        where: { studentId },
-        select: { chargeId: true, amount: true, paidAt: true },
-        orderBy: { paidAt: 'desc' },
-      }),
-    ]);
-    const paidByCharge = new Map<string, number>();
-    for (const p of payments) {
-      if (p.chargeId) paidByCharge.set(p.chargeId, (paidByCharge.get(p.chargeId) ?? 0) + p.amount.toNumber());
-    }
+    const charges = await this.prisma.charge.findMany({
+      where: { studentId, cancelledAt: null },
+      select: { netAmount: true, paidAmount: true, dueDate: true, description: true, cancelledAt: true },
+      orderBy: { dueDate: 'asc' },
+    });
     const todayDate = utcDate(today);
     const soonLimit = utcDate(addDays(today, PARENT_ALERTS.chargeDueDays));
     const open = charges
-      .map((c) => ({ description: c.description, dueDate: c.dueDate, outstanding: c.amount.toNumber() - (paidByCharge.get(c.id) ?? 0) }))
+      .map((c) => ({ description: c.description, dueDate: c.dueDate, outstanding: fromCents(outstandingCents(c)) }))
       .filter((c) => c.outstanding > 0);
-    const last = payments[0];
     return {
-      balance:
-        charges.reduce((sum, c) => sum + c.amount.toNumber(), 0) - payments.reduce((sum, p) => sum + p.amount.toNumber(), 0),
+      balance: fromCents(charges.reduce((sum, c) => sum + outstandingCents(c), 0)),
       open,
       overdue: open.filter((c) => c.dueDate < todayDate),
       dueSoon: open.filter((c) => c.dueDate >= todayDate && c.dueDate <= soonLimit),
-      lastPayment: last ? { amount: last.amount.toNumber(), paidAt: last.paidAt } : null,
+      lastPayment: null,
     };
   }
 
-  /** Everything the alerts and KPIs need for one child, from the child's own school. */
   private async facts(studentId: string, withFinance: boolean): Promise<ChildFacts> {
     const ctx = await this.studentHome.contextForStudent(studentId);
     const { local } = ctx;

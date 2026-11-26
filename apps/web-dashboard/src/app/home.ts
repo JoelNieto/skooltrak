@@ -51,6 +51,7 @@ type AttentionTile = {
   label: string;
   detail: string;
   link: string;
+  queryParams?: Record<string, string>;
 };
 
 const percent = new Intl.NumberFormat('es', { style: 'percent', maximumFractionDigits: 1 });
@@ -140,6 +141,7 @@ type RecentTeacher = {
               <li>
                 <a
                   [routerLink]="tile.link"
+                  [queryParams]="tile.queryParams"
                   class="flex h-full flex-col gap-1.5 rounded-field border border-line p-3.5 text-ink hover:border-line-strong hover:no-underline"
                 >
                   <span class="flex items-center gap-2">
@@ -421,7 +423,8 @@ export default class Home {
         count: t.overdueCharges.count,
         label: 'Cargos vencidos',
         detail: `${amount} sin cobrar · ${plural(t.overdueCharges.families, 'familia', 'familias')}`,
-        link: '/financial-module',
+        link: '/financial-module/accounts',
+        queryParams: { overdue: 'true' },
       });
     }
     if (t.failedImports) {

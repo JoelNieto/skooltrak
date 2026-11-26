@@ -372,7 +372,7 @@ type SidebarSchool = {
         </div>
       }
 
-      @if (auth.isAdmin() || auth.isStudent()) {
+      @if (isFinanceStaff()) {
         <div>
           <p class="px-3 py-1.5 text-[11px] uppercase font-semibold text-ink-subtle tracking-wider">Finanzas</p>
           <ul class="space-y-0.5 mt-1">
@@ -383,7 +383,7 @@ type SidebarSchool = {
                 class="flex items-center gap-3 px-3 py-2 text-ink rounded-lg transition-all duration-150 hover:bg-surface-2 hover:text-ink-strong group"
               >
                 <ui-icon name="landmark" class="text-xl" />
-                <span>Panel de financiero</span>
+                <span>Cuentas y cobros</span>
               </a>
             </li>
           </ul>
@@ -497,6 +497,11 @@ export class Sidebar {
   protected readonly auth = inject(Auth);
   protected readonly store = inject(Store);
   protected readonly theme = inject(ThemeService);
+
+  /** Finance staff: admins, or staff holding VIEW_FINANCIALS (parents see their own account instead). */
+  protected readonly isFinanceStaff = computed(
+    () => this.auth.isAdmin() || (this.auth.hasPermission('VIEW_FINANCIALS') && !this.auth.isParent() && !this.auth.isStudent()),
+  );
 
   /** Shell hosts the store at `/store` (directory) and `/store/:slug` (catalog). */
   protected readonly storeLink = computed((): string[] => {

@@ -1,15 +1,8 @@
-import { tuitionMonthsInRange } from '@/shared';
 import { Prisma } from '@generated/prisma';
 
 /**
- * A study plan inherits its grade metric and financial settings from its degree (level). A plan's
- * own value overrides the degree's when it is set:
- *
- * - grade metric and monthly tuition: the plan's non-null value;
- * - tuition period: the plan's start-end pair, when its start is set;
- * - enrollment costs: the plan's list, when it has at least one cost.
- *
- * Read these settings through the helpers below, never from the plan's columns alone.
+ * A study plan inherits its grade metric from its degree (level); the plan's non-null value
+ * overrides the degree's. Read it through the helpers below, never from the plan's column alone.
  */
 
 /** Selects a plan's grade metric and its degree's, with the same metric fields. */
@@ -51,41 +44,3 @@ export const PLAN_WITHOUT_METRIC: Prisma.StudyPlanWhereInput = {
   gradeMetricId: null,
   degree: { gradeMetricId: null },
 };
-
-/** The financial settings a plan resolves, plus the degree's for the fallback. */
-export const PLAN_FINANCIAL_INCLUDE = {
-  enrollmentCosts: { orderBy: { order: 'asc' } },
-  degree: { include: { enrollmentCosts: { orderBy: { order: 'asc' } } } },
-} as const satisfies Prisma.StudyPlanInclude;
-
-type Cost = { name: string; amount: Prisma.Decimal; order: number };
-type FinancialFields = {
-  monthlyTuitionAmount: Prisma.Decimal | null;
-  tuitionStartMonth: number | null;
-  tuitionEndMonth: number | null;
-  enrollmentCosts: Cost[];
-};
-
-export interface EffectiveFinancials {
-  monthlyTuitionAmount: Prisma.Decimal | null;
-  tuitionStartMonth: number | null;
-  tuitionEndMonth: number | null;
-  /** The billed months, in billing order (see `tuitionMonthsInRange`). */
-  tuitionMonths: number[];
-  enrollmentCosts: Cost[];
-}
-
-/** The plan's financial settings after inheriting from its degree. */
-export function effectiveFinancials(plan: FinancialFields & { degree: FinancialFields | null }): EffectiveFinancials {
-  const degree = plan.degree;
-  const ownPeriod = plan.tuitionStartMonth != null;
-  const tuitionStartMonth = ownPeriod ? plan.tuitionStartMonth : (degree?.tuitionStartMonth ?? null);
-  const tuitionEndMonth = ownPeriod ? plan.tuitionEndMonth : (degree?.tuitionEndMonth ?? null);
-  return {
-    monthlyTuitionAmount: plan.monthlyTuitionAmount ?? degree?.monthlyTuitionAmount ?? null,
-    tuitionStartMonth,
-    tuitionEndMonth,
-    tuitionMonths: tuitionMonthsInRange(tuitionStartMonth, tuitionEndMonth),
-    enrollmentCosts: plan.enrollmentCosts.length > 0 ? plan.enrollmentCosts : (degree?.enrollmentCosts ?? []),
-  };
-}

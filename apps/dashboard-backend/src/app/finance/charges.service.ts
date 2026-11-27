@@ -1,6 +1,6 @@
 import { AuthUserContext } from '@/auth';
 import { ChargeSource, EnrollmentStatus } from '@generated/prisma';
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma.service';
 import { AccountsService } from './accounts.service';
 import { CreateChargeInput, CreateChargeResult } from './dto/create-charge.input';
@@ -11,6 +11,9 @@ export const STUDENT_NOT_IN_SCHOOL = 'El estudiante no pertenece a esta escuela'
 export const GROUP_NOT_IN_SCHOOL = 'El grupo no pertenece a esta escuela';
 export const GROUP_EMPTY = 'El grupo no tiene estudiantes activos';
 export const DUE_DATE_INVALID = 'La fecha de vencimiento no es válida';
+export const CANCEL_REASON_REQUIRED = 'Indica el motivo de la cancelación';
+export const CHARGE_ALREADY_CANCELLED = 'El cargo ya está cancelado';
+export const CHARGE_HAS_PAYMENTS = 'El cargo tiene pagos aplicados; anule el pago primero';
 
 @Injectable()
 export class ChargesService {
@@ -127,5 +130,61 @@ export class ChargesService {
       select: { id: true, firstName: true, fatherName: true, classGroup: { select: { id: true, name: true } } },
     });
     return rows.map((s) => ({ id: s.id, name: `${s.firstName} ${s.fatherName}`.trim(), classGroup: s.classGroup }));
+  }
+
+  /** The charge's school, for the controller's access check (404 when it doesn't exist). */
+  async chargeSchool(chargeId: string): Promise<string> {
+    const charge = await this.prisma.charge.findUnique({ where: { id: chargeId }, select: { schoolId: true } });
+    if (!charge) throw new NotFoundException('Cargo no encontrado');
+    return charge.schoolId;
+  }
+
+  /**
+   * FR-FIN-001.8: cancels a charge with a reason. Refused while a payment is applied to it
+   * (BR-FIN-001.6): the payment has to be voided first. The charge row is locked so a payment can't
+   * land on it meanwhile. It stays listed, struck through, and owes nothing. The caller must be a
+   * finance manager of the charge's school.
+   */
+  async cancel(
+    user: AuthUserContext | undefined,
+    organizationId: string,
+    chargeId: string,
+    reasonInput: string,
+  ): Promise<{ id: string; cancelledAt: string; cancelReason: string }> {
+    const reason = (reasonInput ?? '').trim();
+    if (!reason) throw new BadRequestException(CANCEL_REASON_REQUIRED);
+    return this.prisma.$transaction(async (tx) => {
+      await tx.$queryRaw`SELECT "id" FROM "charges" WHERE "id" = ${chargeId} FOR UPDATE`;
+      const charge = await tx.charge.findUnique({
+        where: { id: chargeId },
+        select: {
+          organizationId: true,
+          schoolId: true,
+          description: true,
+          cancelledAt: true,
+          _count: { select: { allocations: { where: { reversedAt: null } } } },
+        },
+      });
+      if (!charge || charge.organizationId !== organizationId) throw new NotFoundException('Cargo no encontrado');
+      if (charge.cancelledAt) throw new ConflictException(CHARGE_ALREADY_CANCELLED);
+      if (charge._count.allocations > 0) throw new ConflictException(CHARGE_HAS_PAYMENTS);
+      const updated = await tx.charge.update({
+        where: { id: chargeId },
+        data: { cancelledAt: new Date(), cancelledById: user?.userId ?? null, cancelReason: reason },
+        select: { id: true, cancelledAt: true, cancelReason: true },
+      });
+      await tx.financeAuditLog.create({
+        data: {
+          organizationId,
+          schoolId: charge.schoolId,
+          actorId: user?.userId ?? null,
+          action: 'CHARGE_CANCEL',
+          entity: 'Charge',
+          entityId: chargeId,
+          payload: { reason, description: charge.description },
+        },
+      });
+      return { id: updated.id, cancelledAt: updated.cancelledAt!.toISOString(), cancelReason: updated.cancelReason! };
+    });
   }
 }

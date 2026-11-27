@@ -1,8 +1,16 @@
-import { BadRequestException } from '@nestjs/common';
+import { BadRequestException, ConflictException, NotFoundException } from '@nestjs/common';
 
 jest.mock('../prisma.service', () => ({ PrismaService: class {} }));
 
-import { ChargesService, CHARGE_TARGET_REQUIRED, GROUP_EMPTY, STUDENT_NOT_IN_SCHOOL } from './charges.service';
+import {
+  CANCEL_REASON_REQUIRED,
+  CHARGE_ALREADY_CANCELLED,
+  CHARGE_HAS_PAYMENTS,
+  ChargesService,
+  CHARGE_TARGET_REQUIRED,
+  GROUP_EMPTY,
+  STUDENT_NOT_IN_SCHOOL,
+} from './charges.service';
 
 /** FR-FIN-001.7 manual charges, against an in-memory stand-in for Prisma. */
 function setup(o: { students?: { id: string }[] } = {}) {
@@ -107,5 +115,53 @@ describe('ChargesService.searchStudents (FIN-001-S02 pickers)', () => {
     expect(where.AND[0].OR).toContainEqual({ documentId: { contains: 'carla', mode: 'insensitive' } });
     expect(take).toBe(10);
     await expect(service.searchStudents('SCH1', '   ')).resolves.toEqual([]);
+  });
+});
+
+describe('ChargesService.cancel (FR-FIN-001.8)', () => {
+  function cancelSetup(o: { cancelledAt?: Date | null; activeAllocations?: number; organizationId?: string } = {}) {
+    const writes: { op: string; args: { where?: unknown; data?: unknown } }[] = [];
+    const tx = {
+      $queryRaw: jest.fn().mockResolvedValue([]),
+      charge: {
+        findUnique: jest.fn().mockResolvedValue({
+          organizationId: o.organizationId ?? 'org-1',
+          schoolId: 'SCH1',
+          description: 'Matrícula',
+          cancelledAt: o.cancelledAt ?? null,
+          _count: { allocations: o.activeAllocations ?? 0 },
+        }),
+        update: jest.fn().mockImplementation((args) => {
+          writes.push({ op: 'charge.update', args });
+          return Promise.resolve({ id: 'ch-1', cancelledAt: args.data.cancelledAt, cancelReason: args.data.cancelReason });
+        }),
+      },
+      financeAuditLog: { create: jest.fn().mockImplementation((args) => (writes.push({ op: 'audit', args }), Promise.resolve({}))) },
+    };
+    const prisma = { $transaction: jest.fn().mockImplementation((fn) => fn(tx)) };
+    return { service: new ChargesService(prisma as never, {} as never), tx, writes };
+  }
+
+  it('cancels a charge with no payment applied, keeping the reason, under a row lock', async () => {
+    const { service, tx, writes } = cancelSetup();
+    const result = await service.cancel(admin, 'org-1', 'ch-1', ' Beca acordada ');
+    expect((tx.$queryRaw.mock.calls[0][0] as TemplateStringsArray).join('?')).toContain('FOR UPDATE');
+    expect(tx.charge.findUnique).toHaveBeenCalledWith(
+      expect.objectContaining({ select: expect.objectContaining({ _count: { select: { allocations: { where: { reversedAt: null } } } } }) }),
+    );
+    expect(writes[0].args.data).toMatchObject({ cancelledById: 'u-admin', cancelReason: 'Beca acordada' });
+    expect(writes[1].args).toMatchObject({ data: { action: 'CHARGE_CANCEL', entityId: 'ch-1' } });
+    expect(result).toMatchObject({ id: 'ch-1', cancelReason: 'Beca acordada' });
+  });
+
+  it('refuses while a payment is applied (BR-FIN-001.6), twice, without a reason or across organizations', async () => {
+    await expect(cancelSetup({ activeAllocations: 1 }).service.cancel(admin, 'org-1', 'ch-1', 'x')).rejects.toThrow(
+      new ConflictException(CHARGE_HAS_PAYMENTS),
+    );
+    await expect(cancelSetup({ cancelledAt: new Date() }).service.cancel(admin, 'org-1', 'ch-1', 'x')).rejects.toThrow(
+      new ConflictException(CHARGE_ALREADY_CANCELLED),
+    );
+    await expect(cancelSetup().service.cancel(admin, 'org-1', 'ch-1', ' ')).rejects.toThrow(new BadRequestException(CANCEL_REASON_REQUIRED));
+    await expect(cancelSetup({ organizationId: 'org-2' }).service.cancel(admin, 'org-1', 'ch-1', 'x')).rejects.toThrow(NotFoundException);
   });
 });

@@ -10,4 +10,8 @@ describe('MockCardProvider', () => {
     await expect(charge('9995')).resolves.toEqual({ approved: false, message: INSUFFICIENT_FUNDS });
     await expect(charge('4242')).resolves.toEqual({ approved: true, providerRef: expect.stringMatching(/^mock_[0-9a-f]{16}$/) });
   });
+
+  it('refunds with a mock reference', async () => {
+    await expect(provider.refund()).resolves.toEqual({ refundRef: expect.stringMatching(/^mock_refund_[0-9a-f]{12}$/) });
+  });
 });

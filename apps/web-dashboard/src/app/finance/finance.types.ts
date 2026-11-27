@@ -230,7 +230,9 @@ export interface PaymentReceipt extends FinancePayment {
   createdAt: string;
   createdBy: string | null;
   voidedAt: string | null;
+  voidedBy: string | null;
   voidReason: string | null;
+  refundRef: string | null;
 }
 
 export const PAYMENT_METHOD_LABEL: Record<PaymentMethod, string> = {

@@ -8,11 +8,16 @@ import { RegisterPaymentInput } from './dto/payments.input';
 import { FinancePaymentList, FinancePaymentSummary, PaymentReceipt } from './entities/payments.entity';
 import { ACCOUNT_DENIED, FINANCE_DENIED, isFinanceStaff } from './finance-access';
 import { AllocationError, planAllocation, receiptNumber } from './payment-allocation';
+import { PAYMENT_PROVIDER, PaymentProvider } from './payment-provider';
 
 export const REFERENCE_TAKEN = 'Referencia ya registrada';
 export const REFERENCE_REQUIRED = 'La referencia es obligatoria';
 export const RECEIVED_AT_FUTURE = 'La fecha de recepción no puede ser futura';
 export const RECEIVED_AT_INVALID = 'La fecha de recepción no es válida';
+export const VOID_REASON_REQUIRED = 'Indica el motivo de la anulación';
+export const PAYMENT_ALREADY_VOIDED = 'El pago ya está anulado';
+export const PAYMENT_NOT_COMPLETED = 'Solo se anulan pagos completados';
+export const PAYMENT_CREDIT_USED = 'El saldo a favor de este pago ya fue usado';
 
 const PAGE_SIZE = 25;
 
@@ -73,6 +78,7 @@ export class PaymentsService {
   constructor(
     private readonly prisma: PrismaService,
     @Inject(CLOCK) private readonly clock: Clock,
+    @Inject(PAYMENT_PROVIDER) private readonly provider: PaymentProvider,
   ) {}
 
   /** The account's school, for the controller's access check (404 when it doesn't exist). */
@@ -196,6 +202,105 @@ export class PaymentsService {
     return this.receipt(user, paymentId);
   }
 
+  /** The payment's school, for the controller's access check (404 when it doesn't exist). */
+  async paymentSchool(paymentId: string): Promise<string> {
+    const payment = await this.prisma.payment.findUnique({ where: { id: paymentId }, select: { schoolId: true } });
+    if (!payment) throw new NotFoundException('Pago no encontrado');
+    return payment.schoolId;
+  }
+
+  /**
+   * FR-FIN-001.16: voids a completed payment. Its allocations are reversed (the charges owe again),
+   * the saldo a favor it created is taken back (BR-FIN-001.17), card payments get a (mock) refund,
+   * and the receipt keeps its number with "ANULADO". Nothing is deleted. Locks the school's receipt
+   * row, the charges and the account, in the order payments use. The caller must be a finance
+   * manager of the payment's school.
+   */
+  async voidPayment(user: AuthUserContext | undefined, organizationId: string, paymentId: string, reasonInput: string): Promise<PaymentReceipt> {
+    const reason = (reasonInput ?? '').trim();
+    if (!reason) throw new BadRequestException(VOID_REASON_REQUIRED);
+    const found = await this.prisma.payment.findUnique({ where: { id: paymentId }, select: { schoolId: true, organizationId: true } });
+    if (!found || found.organizationId !== organizationId) throw new NotFoundException('Pago no encontrado');
+    const { schoolId } = found;
+
+    await this.prisma.$transaction(async (tx) => {
+      await tx.$executeRaw`INSERT INTO "finance_settings" ("id", "schoolId", "receiptSeq", "updatedAt")
+        VALUES (${`fs_${schoolId}`}, ${schoolId}, 0, now()) ON CONFLICT ("schoolId") DO NOTHING`;
+      await tx.$queryRaw`SELECT "id" FROM "finance_settings" WHERE "schoolId" = ${schoolId} FOR UPDATE`;
+      await tx.$queryRaw`SELECT "id" FROM "payments" WHERE "id" = ${paymentId} FOR UPDATE`;
+      const payment = await tx.payment.findUniqueOrThrow({
+        where: { id: paymentId },
+        select: {
+          status: true,
+          method: true,
+          amount: true,
+          accountId: true,
+          providerRef: true,
+          receiptNumber: true,
+          allocations: { where: { reversedAt: null }, select: { id: true, chargeId: true, amount: true } },
+          creditEntries: { select: { amount: true } },
+        },
+      });
+      if (payment.status === PaymentStatus.VOIDED) throw new ConflictException(PAYMENT_ALREADY_VOIDED);
+      if (payment.status !== PaymentStatus.COMPLETED) throw new BadRequestException(PAYMENT_NOT_COMPLETED);
+
+      const chargeIds = [...new Set(payment.allocations.map((a) => a.chargeId))];
+      if (chargeIds.length) await tx.$queryRaw`SELECT "id" FROM "charges" WHERE "id" IN (${Prisma.join(chargeIds)}) FOR UPDATE`;
+      const [account] = await tx.$queryRaw<{ creditBalance: Prisma.Decimal }[]>`SELECT "creditBalance" FROM "family_accounts"
+        WHERE "id" = ${payment.accountId} FOR UPDATE`;
+
+      // Saldo a favor this payment still holds; it must still be on the account (BR-FIN-001.17).
+      const credit = payment.creditEntries.reduce((sum, c) => sum + cents(c.amount), 0);
+      if (credit > 0 && cents(account.creditBalance) < credit) throw new ConflictException(PAYMENT_CREDIT_USED);
+
+      const now = this.clock.now();
+      if (payment.allocations.length) {
+        await tx.paymentAllocation.updateMany({ where: { id: { in: payment.allocations.map((a) => a.id) } }, data: { reversedAt: now } });
+      }
+      for (const a of payment.allocations) {
+        await tx.charge.update({ where: { id: a.chargeId }, data: { paidAmount: { decrement: fromCents(cents(a.amount)) } } });
+      }
+      if (credit > 0) {
+        await tx.creditEntry.create({
+          data: {
+            accountId: payment.accountId,
+            paymentId,
+            amount: fromCents(-credit),
+            reason: `Anulación del pago ${receiptNumber(payment.receiptNumber ?? 0)}`,
+            createdById: user?.userId ?? null,
+          },
+        });
+        await tx.familyAccount.update({ where: { id: payment.accountId }, data: { creditBalance: { decrement: fromCents(credit) } } });
+      }
+      const refund =
+        payment.method === PaymentMethod.CARD && payment.providerRef
+          ? await this.provider.refund({ providerRef: payment.providerRef, amount: cents(payment.amount) })
+          : null;
+      await tx.payment.update({
+        where: { id: paymentId },
+        data: { status: PaymentStatus.VOIDED, voidedAt: now, voidedById: user?.userId ?? null, voidReason: reason, refundRef: refund?.refundRef ?? null },
+      });
+      await tx.financeAuditLog.create({
+        data: {
+          organizationId,
+          schoolId,
+          actorId: user?.userId ?? null,
+          action: 'PAYMENT_VOID',
+          entity: 'Payment',
+          entityId: paymentId,
+          payload: {
+            reason,
+            receiptNumber: payment.receiptNumber,
+            reversed: payment.allocations.map((a) => ({ chargeId: a.chargeId, amount: fromCents(cents(a.amount)) })),
+            creditRemoved: fromCents(credit),
+            refundRef: refund?.refundRef ?? null,
+          },
+        },
+      });
+    });
+    return this.receipt(user, paymentId);
+  }
+
   /** FR-FIN-001.15: finance staff of the payment's organization, or a guardian of its account. */
   async receipt(user: AuthUserContext | undefined, paymentId: string): Promise<PaymentReceipt> {
     const row = await this.prisma.payment.findUnique({
@@ -228,11 +333,13 @@ export class PaymentsService {
             },
           },
         },
+        voidedById: true,
+        refundRef: true,
         allocations: {
-          where: { reversedAt: null },
           orderBy: { createdAt: 'asc' },
           select: {
             amount: true,
+            reversedAt: true,
             charge: { select: { id: true, description: true, dueDate: true, student: { select: { firstName: true, fatherName: true } } } },
           },
         },
@@ -248,10 +355,17 @@ export class PaymentsService {
       throw new ForbiddenException(ACCOUNT_DENIED);
     }
 
-    const createdBy = row.createdById
-      ? await this.prisma.user.findUnique({ where: { id: row.createdById }, select: { firstName: true, lastName: true, name: true } })
-      : null;
-    const lines = [...row.allocations]
+    const [createdBy, voidedBy] = await Promise.all(
+      [row.createdById, row.voidedById].map((id) =>
+        id ? this.prisma.user.findUnique({ where: { id }, select: { firstName: true, lastName: true, name: true } }) : null,
+      ),
+    );
+    const userName = (u: { firstName: string | null; lastName: string | null; name: string } | null) =>
+      u ? `${u.firstName ?? ''} ${u.lastName ?? ''}`.trim() || u.name : null;
+    // A voided payment keeps the lines it paid (now reversed) on its receipt (FR-FIN-001.16).
+    const voided = row.status === PaymentStatus.VOIDED;
+    const lines = row.allocations
+      .filter((a) => voided || !a.reversedAt)
       .sort((a, b) => a.charge.dueDate.getTime() - b.charge.dueDate.getTime())
       .map((a) => ({
         chargeId: a.charge.id,
@@ -268,9 +382,11 @@ export class PaymentsService {
       cardLast4: row.cardLast4,
       lines,
       createdAt: row.createdAt.toISOString(),
-      createdBy: createdBy ? (`${createdBy.firstName ?? ''} ${createdBy.lastName ?? ''}`.trim() || createdBy.name) : null,
+      createdBy: userName(createdBy),
       voidedAt: row.voidedAt?.toISOString() ?? null,
+      voidedBy: userName(voidedBy),
       voidReason: row.voidReason,
+      refundRef: row.refundRef,
     };
   }
 

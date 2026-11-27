@@ -27,7 +27,7 @@ import { Button, Icon } from '#/ui';
       #sidebar
       id="sidebar"
       appSidebar
-      class="fixed flex flex-col lg:relative z-50 w-64 h-screen bg-surface-1 transform -translate-x-full lg:translate-x-0 transition-transform duration-200 ease-in-out"
+      class="fixed flex flex-col lg:relative z-50 w-64 lg:data-[compact=true]:w-18 shrink-0 h-screen bg-surface-1 border-r border-line transform -translate-x-full lg:translate-x-0 transition-[width,translate] duration-200 ease-standard motion-reduce:transition-none"
     ></aside>
     <div class="flex-1 flex flex-col overflow-hidden min-w-0">
       <!-- Mobile menu toggle only -->

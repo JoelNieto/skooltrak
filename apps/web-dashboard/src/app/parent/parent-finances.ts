@@ -1,7 +1,8 @@
-import { Badge, Button, Card, Loader, PageHeader, UiTable, UiTableError } from '#/ui';
+import { Badge, Button, Card, Loader, PageHeader, UiCheckbox, UiTable, UiTableError } from '#/ui';
 import { httpResource } from '@angular/common/http';
-import { Component, computed, linkedSignal } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { Component, computed, inject, linkedSignal } from '@angular/core';
+import { Router, RouterLink } from '@angular/router';
+import Auth from '../auth/auth';
 import {
   FinanceAccountDetail,
   FinanceCharge,
@@ -21,7 +22,7 @@ import {
  */
 @Component({
   selector: 'app-parent-finances',
-  imports: [Badge, Button, Card, Loader, PageHeader, RouterLink, UiTable, UiTableError],
+  imports: [Badge, Button, Card, Loader, PageHeader, RouterLink, UiCheckbox, UiTable, UiTableError],
   template: `
     <lib-page-header title="Estado de cuenta" subtitle="Lo que tienes pendiente con el colegio de tus hijos." />
 
@@ -91,6 +92,16 @@ import {
                 <ul>
                   @for (c of group.charges; track c.id) {
                     <li class="flex gap-3 items-start px-4 py-3 border-t border-line first:border-t-0" data-testid="parent-charge">
+                      @if (canPay() && c.outstanding > 0) {
+                        <input
+                          uiCheckbox
+                          type="checkbox"
+                          class="mt-1"
+                          [attr.aria-label]="'Seleccionar ' + c.description"
+                          [checked]="picked().has(c.id)"
+                          (change)="toggle(c.id, $any($event.target).checked)"
+                        />
+                      }
                       <div class="flex-1 min-w-0">
                         <div class="font-medium text-ink-strong">{{ c.description }}</div>
                         <div class="text-sm text-ink-muted mt-0.5">
@@ -110,6 +121,18 @@ import {
               </section>
             } @empty {
               <div uiCard class="p-8 text-center text-ink-muted">No hay cargos en esta cuenta.</div>
+            }
+
+            @if (picked().size) {
+              <div
+                class="sticky bottom-4 z-10 flex items-center justify-between gap-3 rounded-box bg-surface-1 border border-line shadow-lg px-4 py-3"
+                data-testid="pay-bar"
+              >
+                <span class="text-sm text-ink-muted">{{ picked().size === 1 ? '1 cargo' : picked().size + ' cargos' }}</span>
+                <button uiButton variant="primary" type="button" (click)="pay(a)">
+                  Pagar ({{ picked().size }}) · {{ fmt(a, selectedTotal()) }}
+                </button>
+              </div>
             }
 
             @if (a.payments.length) {
@@ -160,6 +183,34 @@ export default class ParentFinances {
   });
 
   protected readonly methodLabel = PAYMENT_METHOD_LABEL;
+
+  private auth = inject(Auth);
+  private router = inject(Router);
+  /** FIN-001-S04: guardians with PAY_FINANCIALS pick charges to pay by card. */
+  protected readonly canPay = computed(() => this.auth.hasPermission('PAY_FINANCIALS'));
+  /** Selected charge ids of the shown account; cleared when another school is picked. */
+  protected readonly picked = linkedSignal<string | null, Set<string>>({
+    source: () => this.selectedId(),
+    computation: () => new Set<string>(),
+  });
+  protected readonly selectedTotal = computed(() => {
+    const a = this.picked();
+    const charges = this.selectedAccountCharges();
+    return charges.filter((c) => a.has(c.id)).reduce((sum, c) => sum + Math.round(c.outstanding * 100), 0) / 100;
+  });
+  private readonly selectedAccountCharges = computed(() => this.accounts.value()?.find((x) => x.id === this.selectedId())?.charges ?? []);
+
+  protected toggle(id: string, checked: boolean) {
+    const next = new Set(this.picked());
+    if (checked) next.add(id);
+    else next.delete(id);
+    this.picked.set(next);
+  }
+
+  protected pay(a: FinanceAccountDetail) {
+    const charges = a.charges.filter((c) => this.picked().has(c.id)).map((c) => c.id);
+    this.router.navigate(['/parent/finances/pay'], { queryParams: { account: a.id, charges: charges.join(',') } });
+  }
 
   protected day(d: string) {
     return shortDate(d);

@@ -1,5 +1,5 @@
 import { AuthenticatedRequest, BetterAuthGuard, Perm, PermissionsGuard, RequirePermissions } from '@/auth';
-import { Body, Controller, Delete, Get, HttpCode, Param, ParseIntPipe, Patch, Post, Query, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, Param, ParseIntPipe, Patch, Post, Query, Req, UseGuards, ValidationPipe } from '@nestjs/common';
 import { PaymentMethod } from '@generated/prisma';
 import { ApiBearerAuth, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { PrismaService } from '../prisma.service';
@@ -7,8 +7,9 @@ import { AccountsService } from './accounts.service';
 import { ChargesService } from './charges.service';
 import { CreateChargeInput, CreateChargeResult } from './dto/create-charge.input';
 import { CreateFeeAssignmentInput, CreateFeeItemInput, GenerateChargesInput, UpdateFeeItemInput } from './dto/fees.input';
+import { CheckoutInput } from './dto/checkout.input';
 import { RegisterPaymentInput } from './dto/payments.input';
-import { FinancePaymentList, PaymentReceipt } from './entities/payments.entity';
+import { CheckoutResult, FinancePaymentList, PaymentReceipt } from './entities/payments.entity';
 import { FinanceAccountDetail, FinanceAccountList, FinanceStudentHit } from './entities/finance.entity';
 import {
   FeeAssignmentView,
@@ -22,6 +23,7 @@ import { assertFinanceStaffOfSchool } from './finance-access';
 import { FeesService } from './fees.service';
 import { GenerationService } from './generation.service';
 import { PaymentsService } from './payments.service';
+import { CheckoutService } from './checkout.service';
 
 /**
  * Family accounts and charges (FIN-001). Staff routes are scoped to a school of the caller's
@@ -38,6 +40,7 @@ export class FinanceController {
     private readonly fees: FeesService,
     private readonly generation: GenerationService,
     private readonly payments: PaymentsService,
+    private readonly checkouts: CheckoutService,
     private readonly prisma: PrismaService,
   ) {}
 
@@ -230,5 +233,19 @@ export class FinanceController {
   @ApiOperation({ summary: "A payment's receipt: staff of the organization or guardians of the account (FR-FIN-001.15)" })
   receipt(@Req() req: AuthenticatedRequest, @Param('id') id: string): Promise<PaymentReceipt> {
     return this.payments.receipt(req.user, id);
+  }
+
+  // Family checkout (FR-FIN-001.13)
+
+  @Post('me/checkout')
+  @HttpCode(200)
+  @RequirePermissions(Perm.PAY_FINANCIALS)
+  @ApiOperation({ summary: "Pay charges of the caller's family account by card (mock provider) (FR-FIN-001.13)" })
+  checkout(
+    @Req() req: AuthenticatedRequest,
+    // Unknown properties are refused, so a card number or CVV can never be sent (BR-FIN-001.12).
+    @Body(new ValidationPipe({ transform: true, whitelist: true, forbidNonWhitelisted: true })) input: CheckoutInput,
+  ): Promise<CheckoutResult> {
+    return this.checkouts.checkout(req.user, input);
   }
 }

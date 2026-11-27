@@ -66,3 +66,12 @@ export class PaymentReceipt extends FinancePaymentSummary {
   voidedAt: string | null;
   voidReason: string | null;
 }
+
+/** FR-FIN-001.13: a checkout ends with a receipt or a decline message. */
+export class CheckoutResult {
+  @ApiProperty({ enum: ['COMPLETED', 'DECLINED'] })
+  status: 'COMPLETED' | 'DECLINED';
+  /** Why the card was declined. */
+  message?: string;
+  receipt?: PaymentReceipt;
+}

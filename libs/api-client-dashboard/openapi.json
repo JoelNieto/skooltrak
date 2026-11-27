@@ -10744,6 +10744,36 @@
         ]
       }
     },
+    "/api/v1/finance/me/checkout": {
+      "post": {
+        "operationId": "FinanceController_checkout",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CheckoutInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Pay charges of the caller's family account by card (mock provider) (FR-FIN-001.13)",
+        "tags": [
+          "finance"
+        ]
+      }
+    },
     "/api/v1/store/categories": {
       "get": {
         "operationId": "StoreController_storeCategories",
@@ -12508,6 +12538,10 @@
         "required": [
           "method"
         ]
+      },
+      "CheckoutInput": {
+        "type": "object",
+        "properties": {}
       },
       "AddToCartInput": {
         "type": "object",

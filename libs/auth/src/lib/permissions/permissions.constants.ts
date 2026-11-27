@@ -68,6 +68,7 @@ export enum Perm {
   // Financial
   MANAGE_FINANCIALS = 'MANAGE_FINANCIALS',
   VIEW_FINANCIALS = 'VIEW_FINANCIALS',
+  PAY_FINANCIALS = 'PAY_FINANCIALS',
 
   // School store
   MANAGE_STORE = 'MANAGE_STORE',
@@ -123,6 +124,7 @@ export const PERMISSION_DESCRIPTIONS: Record<Perm, string> = {
   [Perm.VIEW_PERIODS]: 'View periods',
   [Perm.MANAGE_FINANCIALS]: 'Create, update, and delete charges and payments',
   [Perm.VIEW_FINANCIALS]: 'View financial balance and payment history',
+  [Perm.PAY_FINANCIALS]: 'Pay family account charges online',
   [Perm.MANAGE_STORE]: 'Manage school store products, categories, and orders',
   [Perm.VIEW_STORE]: 'Browse the school store and place orders',
   [Perm.MANAGE_ROLES]: 'Create, update, and delete roles',
@@ -204,6 +206,8 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<DefaultRole, Perm[]> = {
 
   [DefaultRole.PARENT]: [
     Perm.VIEW_FINANCIALS,
+    // FIN-001-S04: family checkout.
+    Perm.PAY_FINANCIALS,
     Perm.VIEW_COURSES,
     Perm.VIEW_ASSIGNMENTS,
     Perm.VIEW_ATTENDANCE,

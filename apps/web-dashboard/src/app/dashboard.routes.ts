@@ -385,6 +385,11 @@ export const DASHBOARD_ROUTES: Route[] = [
         loadComponent: () => import('./parent/parent-finances'),
       },
       {
+        path: 'parent/finances/pay',
+        canActivate: [permissionGuard('PAY_FINANCIALS')],
+        loadComponent: () => import('./parent/parent-pay'),
+      },
+      {
         path: 'parent/finances/receipts/:id',
         canActivate: [permissionGuard('VIEW_FINANCIALS')],
         loadComponent: () => import('./finance/receipt-view'),

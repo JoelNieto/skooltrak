@@ -40,6 +40,7 @@ import type {
   AuthSessionControllerLoginBody,
   AvatarUploadUrlInput,
   BulkCreateStudyPlansInput,
+  CheckoutInput,
   CheckoutStoreInput,
   ClassGroupsControllerCountParams,
   ClassGroupsControllerFindAllParams,
@@ -11010,6 +11011,43 @@ if(coursesControllerUploadCoverBody.file !== undefined) {
 
     return this.http.get<TData>(
       `/api/v1/finance/payments/${id}/receipt`,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'body',
+      }
+    );
+  }
+
+/**
+ * @summary Pay charges of the caller's family account by card (mock provider) (FR-FIN-001.13)
+ */
+ financeControllerCheckout<TData = void>(checkoutInput: CheckoutInput, options?: HttpClientBodyOptions): Observable<TData>;
+ financeControllerCheckout<TData = void>(checkoutInput: CheckoutInput, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
+ financeControllerCheckout<TData = void>(checkoutInput: CheckoutInput, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
+  financeControllerCheckout<TData = void>(
+    checkoutInput: CheckoutInput, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
+    if (options?.observe === 'events') {
+      return this.http.post<TData>(
+      `/api/v1/finance/me/checkout`,
+      checkoutInput,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'events',
+      }
+    );
+    }
+
+    if (options?.observe === 'response') {
+      return this.http.post<TData>(
+      `/api/v1/finance/me/checkout`,
+      checkoutInput,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'response',
+      }
+    );
+    }
+
+    return this.http.post<TData>(
+      `/api/v1/finance/me/checkout`,
+      checkoutInput,{
         ...(options as Omit<NonNullable<typeof options>, 'observe'>),
         observe: 'body',
       }

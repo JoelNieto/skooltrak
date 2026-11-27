@@ -125,6 +125,7 @@ export * from './permissionsControllerFindAllParams';
 export * from './processStorePaymentInput';
 export * from './publishGradesInput';
 export * from './quizzesControllerFindAllParams';
+export * from './reasonInput';
 export * from './registerPaymentInput';
 export * from './registerPaymentInputMethod';
 export * from './removeShareInput';

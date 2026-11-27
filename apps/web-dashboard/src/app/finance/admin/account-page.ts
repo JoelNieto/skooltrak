@@ -1,7 +1,9 @@
-import { Badge, Button, Card, Icon, Loader, Modal, UiTable, UiTableError } from '#/ui';
-import { httpResource } from '@angular/common/http';
+import { Badge, Button, Card, Icon, Loader, Modal, UiRowActions, UiTable, UiTableError } from '#/ui';
+import { HttpClient, httpResource } from '@angular/common/http';
 import { Component, computed, inject, input } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { firstValueFrom } from 'rxjs';
+import ReasonDialog from '../reason-dialog';
 import Auth from '../../auth/auth';
 import {
   daysSince,
@@ -22,7 +24,7 @@ import { FinanceRefresh } from './finance-shell';
 /** Finanzas › Cuenta (FR-FIN-001.3, read): who is on the account and every charge, by student. */
 @Component({
   selector: 'app-finance-account',
-  imports: [Badge, Button, Card, Icon, Loader, RouterLink, UiTable, UiTableError],
+  imports: [Badge, Button, Card, Icon, Loader, RouterLink, UiRowActions, UiTable, UiTableError],
   template: `
     <nav class="flex gap-1.5 text-sm text-ink-muted mb-4" aria-label="Ruta">
       <a class="link link-primary" routerLink="/financial-module/accounts">Cuentas</a>
@@ -105,12 +107,15 @@ import { FinanceRefresh } from './finance-shell';
                 <th class="text-right">Monto</th>
                 <th class="text-right">Descuento</th>
                 <th class="text-right">Pendiente</th>
+                @if (canManage()) {
+                  <th><span class="sr-only">Acciones</span></th>
+                }
               </tr>
             </thead>
             @for (group of groups(); track group.key) {
               <tbody>
                 <tr>
-                  <th colspan="6" scope="colgroup" class="bg-surface-0 text-ink-strong font-semibold">{{ group.title }}</th>
+                  <th [attr.colspan]="cols()" scope="colgroup" class="bg-surface-0 text-ink-strong font-semibold">{{ group.title }}</th>
                 </tr>
                 @for (c of group.charges; track c.id) {
                   <tr data-testid="charge-row" [class.text-ink-subtle]="c.status === 'CANCELLED'">
@@ -129,13 +134,20 @@ import { FinanceRefresh } from './finance-shell';
                     <td class="text-right font-semibold text-ink-strong">
                       {{ c.status === 'CANCELLED' ? '—' : fmt(c.outstanding) }}
                     </td>
+                    @if (canManage()) {
+                      <td class="text-right">
+                        @if (c.status !== 'CANCELLED') {
+                          <ui-row-actions [actions]="chargeActions" [label]="'Acciones para ' + c.description" (action)="cancelCharge(c)" />
+                        }
+                      </td>
+                    }
                   </tr>
                 }
               </tbody>
             } @empty {
               <tbody>
                 <tr>
-                  <td colspan="6" class="py-10 text-center text-ink-muted">Esta cuenta aún no tiene cargos.</td>
+                  <td [attr.colspan]="cols()" class="py-10 text-center text-ink-muted">Esta cuenta aún no tiene cargos.</td>
                 </tr>
               </tbody>
             }
@@ -194,6 +206,9 @@ export default class AccountPage {
 
   protected readonly canManage = computed(() => this.auth.hasPermission('MANAGE_FINANCIALS'));
   protected readonly methodLabel = PAYMENT_METHOD_LABEL;
+  protected readonly cols = computed(() => (this.canManage() ? 7 : 6));
+  protected readonly chargeActions = [{ id: 'cancel', label: 'Cancelar cargo', icon: 'circle-x' as const, tone: 'danger' as const }];
+  private http = inject(HttpClient);
 
   protected readonly account = httpResource<FinanceAccountDetail>(() => {
     this.refresh.version();
@@ -221,6 +236,23 @@ export default class AccountPage {
 
   protected tone(c: FinanceCharge) {
     return statusTone(c.status);
+  }
+
+  /** FR-FIN-001.8: refused by the API while a payment is applied (BR-FIN-001.6). */
+  protected cancelCharge(c: FinanceCharge) {
+    this.modal
+      .open(ReasonDialog, {
+        title: 'Cancelar cargo',
+        size: 'medium',
+        data: {
+          message: `“${c.description}” quedará cancelado y no se cobrará. Seguirá visible en la cuenta con el motivo.`,
+          confirmText: 'Cancelar cargo',
+          submit: async (reason: string) => {
+            await firstValueFrom(this.http.post(`/api/v1/finance/charges/${c.id}/cancel`, { reason }));
+            this.refresh.bump();
+          },
+        },
+      });
   }
 
   protected registerPayment(a: FinanceAccountDetail) {

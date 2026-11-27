@@ -95,8 +95,9 @@ Code: `finance` (REST `/v1/finance`); routes `/financial-module` (staff), `/pare
 | Family accounts (one per school and family), manual charges, guardian Estado de cuenta | Live (S01) | [FIN-001](frd/FIN-001-financing-module.md) |
 | Fee catalog, assignments and charge generation | Live (S02) | [FIN-001](frd/FIN-001-financing-module.md) |
 | Offline payments (Transferencia/ACH, Yappy) and receipts | Live (S03) | [FIN-001](frd/FIN-001-financing-module.md) |
-| Family checkout (mock card) | In review (S04) | [FIN-001](frd/FIN-001-financing-module.md) |
-| Void, saldo a favor, discounts & scholarships, late fees, store orders in ledger, reminders, morosidad | Planned (S05–S12) | [FIN-001](frd/FIN-001-financing-module.md) |
+| Family checkout (mock card) | Live (S04) | [FIN-001](frd/FIN-001-financing-module.md) |
+| Void payments and cancel charges | In review (S05) | [FIN-001](frd/FIN-001-financing-module.md) |
+| Saldo a favor, discounts & scholarships, late fees, store orders in ledger, reminders, morosidad | Planned (S06–S12) | [FIN-001](frd/FIN-001-financing-module.md) |
 | Legacy charges, payment registration, study-plan tuition and enrolment costs, student balance | Removed (FIN-001-S01) | — |
 
 ## STO: School Store

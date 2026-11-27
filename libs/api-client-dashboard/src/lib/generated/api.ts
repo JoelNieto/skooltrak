@@ -130,6 +130,7 @@ import type {
   ProcessStorePaymentInput,
   PublishGradesInput,
   QuizzesControllerFindAllParams,
+  ReasonInput,
   RegisterPaymentInput,
   RemoveShareInput,
   ReportDirectInput,
@@ -10580,6 +10581,47 @@ if(coursesControllerUploadCoverBody.file !== undefined) {
   }
 
 /**
+ * @summary Cancel a charge with a reason; refused while a payment is applied to it (FR-FIN-001.8)
+ */
+ financeControllerCancelCharge<TData = void>(id: string,
+    reasonInput: ReasonInput, options?: HttpClientBodyOptions): Observable<TData>;
+ financeControllerCancelCharge<TData = void>(id: string,
+    reasonInput: ReasonInput, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
+ financeControllerCancelCharge<TData = void>(id: string,
+    reasonInput: ReasonInput, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
+  financeControllerCancelCharge<TData = void>(
+    id: string,
+    reasonInput: ReasonInput, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
+    if (options?.observe === 'events') {
+      return this.http.post<TData>(
+      `/api/v1/finance/charges/${id}/cancel`,
+      reasonInput,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'events',
+      }
+    );
+    }
+
+    if (options?.observe === 'response') {
+      return this.http.post<TData>(
+      `/api/v1/finance/charges/${id}/cancel`,
+      reasonInput,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'response',
+      }
+    );
+    }
+
+    return this.http.post<TData>(
+      `/api/v1/finance/charges/${id}/cancel`,
+      reasonInput,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'body',
+      }
+    );
+  }
+
+/**
  * @summary The school's fee catalog (FR-FIN-001.4)
  */
  financeControllerFeeItems<TData = void>(params: FinanceControllerFeeItemsParams, options?: HttpClientBodyOptions): Observable<TData>;
@@ -10980,6 +11022,47 @@ if(coursesControllerUploadCoverBody.file !== undefined) {
     ...(options as Omit<NonNullable<typeof options>, 'observe'>),
         observe: 'body',
         params: filteredParams,}
+    );
+  }
+
+/**
+ * @summary Void a completed payment with a reason; its charges owe again (FR-FIN-001.16)
+ */
+ financeControllerVoidPayment<TData = void>(id: string,
+    reasonInput: ReasonInput, options?: HttpClientBodyOptions): Observable<TData>;
+ financeControllerVoidPayment<TData = void>(id: string,
+    reasonInput: ReasonInput, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
+ financeControllerVoidPayment<TData = void>(id: string,
+    reasonInput: ReasonInput, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
+  financeControllerVoidPayment<TData = void>(
+    id: string,
+    reasonInput: ReasonInput, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
+    if (options?.observe === 'events') {
+      return this.http.post<TData>(
+      `/api/v1/finance/payments/${id}/void`,
+      reasonInput,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'events',
+      }
+    );
+    }
+
+    if (options?.observe === 'response') {
+      return this.http.post<TData>(
+      `/api/v1/finance/payments/${id}/void`,
+      reasonInput,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'response',
+      }
+    );
+    }
+
+    return this.http.post<TData>(
+      `/api/v1/finance/payments/${id}/void`,
+      reasonInput,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'body',
+      }
     );
   }
 

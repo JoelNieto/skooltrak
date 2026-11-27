@@ -9,6 +9,7 @@ import { CreateChargeInput, CreateChargeResult } from './dto/create-charge.input
 import { CreateFeeAssignmentInput, CreateFeeItemInput, GenerateChargesInput, UpdateFeeItemInput } from './dto/fees.input';
 import { CheckoutInput } from './dto/checkout.input';
 import { RegisterPaymentInput } from './dto/payments.input';
+import { CancelledCharge, ReasonInput } from './dto/reason.input';
 import { CheckoutResult, FinancePaymentList, PaymentReceipt } from './entities/payments.entity';
 import { FinanceAccountDetail, FinanceAccountList, FinanceStudentHit } from './entities/finance.entity';
 import {
@@ -102,6 +103,15 @@ export class FinanceController {
   ): Promise<FinanceStudentHit[]> {
     await assertFinanceStaffOfSchool(this.prisma, req.user, schoolId, true);
     return this.charges.searchStudents(schoolId, search, take ? Number(take) || 10 : 10);
+  }
+
+  @Post('charges/:id/cancel')
+  @HttpCode(200)
+  @RequirePermissions(Perm.MANAGE_FINANCIALS)
+  @ApiOperation({ summary: 'Cancel a charge with a reason; refused while a payment is applied to it (FR-FIN-001.8)' })
+  async cancelCharge(@Req() req: AuthenticatedRequest, @Param('id') id: string, @Body() input: ReasonInput): Promise<CancelledCharge> {
+    const organizationId = await assertFinanceStaffOfSchool(this.prisma, req.user, await this.charges.chargeSchool(id), true);
+    return this.charges.cancel(req.user, organizationId, id, input.reason);
   }
 
   // Fee catalog (FR-FIN-001.4)
@@ -226,6 +236,15 @@ export class FinanceController {
       page: page ? Number(page) || 1 : 1,
       take: take ? Number(take) || undefined : undefined,
     });
+  }
+
+  @Post('payments/:id/void')
+  @HttpCode(200)
+  @RequirePermissions(Perm.MANAGE_FINANCIALS)
+  @ApiOperation({ summary: 'Void a completed payment with a reason; its charges owe again (FR-FIN-001.16)' })
+  async voidPayment(@Req() req: AuthenticatedRequest, @Param('id') id: string, @Body() input: ReasonInput): Promise<PaymentReceipt> {
+    const organizationId = await assertFinanceStaffOfSchool(this.prisma, req.user, await this.payments.paymentSchool(id), true);
+    return this.payments.voidPayment(req.user, organizationId, id, input.reason);
   }
 
   @Get('payments/:id/receipt')

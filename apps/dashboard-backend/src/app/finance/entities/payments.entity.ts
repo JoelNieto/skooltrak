@@ -64,7 +64,11 @@ export class PaymentReceipt extends FinancePaymentSummary {
   createdAt: string;
   createdBy: string | null;
   voidedAt: string | null;
+  /** Who voided it. */
+  voidedBy: string | null;
   voidReason: string | null;
+  /** Card payments voided: the (mock) refund reference. */
+  refundRef: string | null;
 }
 
 /** FR-FIN-001.13: a checkout ends with a receipt or a decline message. */

@@ -1393,6 +1393,8 @@ model Payment {
   voidedAt       DateTime?
   voidedById     String?
   voidReason     String?
+  /// Card payments: the provider's refund reference when voided (FR-FIN-001.16; mocked in v1).
+  refundRef      String?
   allocations    PaymentAllocation[]
   creditEntries  CreditEntry[]
   createdAt      DateTime            @default(now())

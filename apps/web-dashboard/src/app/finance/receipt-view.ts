@@ -1,7 +1,10 @@
-import { Badge, Button, Card, Icon, Loader, UiTable, UiTableError } from '#/ui';
-import { httpResource } from '@angular/common/http';
-import { Component, input } from '@angular/core';
+import { Alert, Badge, Button, Card, Icon, Loader, Modal, UiTable, UiTableError } from '#/ui';
+import { HttpClient, httpResource } from '@angular/common/http';
+import { Component, computed, inject, input } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { firstValueFrom } from 'rxjs';
+import Auth from '../auth/auth';
+import ReasonDialog from './reason-dialog';
 import { money, PAYMENT_METHOD_LABEL, PaymentReceipt, shortDate } from './finance.types';
 
 /**
@@ -11,7 +14,7 @@ import { money, PAYMENT_METHOD_LABEL, PaymentReceipt, shortDate } from './financ
  */
 @Component({
   selector: 'app-finance-receipt',
-  imports: [Badge, Button, Card, Icon, Loader, RouterLink, UiTable, UiTableError],
+  imports: [Alert, Badge, Button, Card, Icon, Loader, RouterLink, UiTable, UiTableError],
   styles: `
     @media print {
       :host .no-print {
@@ -21,9 +24,14 @@ import { money, PAYMENT_METHOD_LABEL, PaymentReceipt, shortDate } from './financ
   `,
   template: `
     <nav class="no-print flex flex-wrap gap-3 justify-between items-center mb-4" aria-label="Ruta">
-      <a class="link link-primary text-sm" [routerLink]="backLink()">← {{ backLabel() }}</a>
-      @if (receipt.hasValue()) {
-        <button uiButton variant="secondary" size="sm" type="button" (click)="print()"><ui-icon name="printer" /> Imprimir</button>
+      <a class="link link-primary text-sm" [routerLink]="back().link">← {{ back().label }}</a>
+      @if (receipt.value(); as r) {
+        <div class="flex gap-2">
+          @if (canVoid() && r.status === 'COMPLETED') {
+            <button uiButton variant="danger" size="sm" type="button" (click)="voidPayment(r)"><ui-icon name="circle-x" /> Anular pago</button>
+          }
+          <button uiButton variant="secondary" size="sm" type="button" (click)="print()"><ui-icon name="printer" /> Imprimir</button>
+        </div>
       }
     </nav>
 
@@ -56,7 +64,14 @@ import { money, PAYMENT_METHOD_LABEL, PaymentReceipt, shortDate } from './financ
         </header>
 
         @if (r.status === 'VOIDED') {
-          <p class="text-sm text-danger" role="note">Anulado el {{ day(r.voidedAt!) }}: “{{ r.voidReason }}”</p>
+          <div uiAlert tone="danger" data-testid="receipt-void">
+            <p>
+              Anulado el {{ day(r.voidedAt!) }}{{ r.voidedBy ? ' por ' + r.voidedBy : '' }}: “{{ r.voidReason }}”.
+              @if (r.refundRef) {
+                Reembolso de prueba <span class="font-mono break-all">{{ r.refundRef }}</span>.
+              }
+            </p>
+          </div>
         }
 
         <dl class="grid grid-cols-2 gap-x-6 gap-y-3 text-sm">
@@ -128,10 +143,39 @@ import { money, PAYMENT_METHOD_LABEL, PaymentReceipt, shortDate } from './financ
 export default class ReceiptView {
   /** Payment id (route param). */
   readonly id = input.required<string>();
-  readonly backLink = input<string>('/financial-module/payments');
-  readonly backLabel = input<string>('Pagos');
+  /** From the route's data (guardians); route input binding leaves them undefined on the staff route. */
+  readonly backLink = input<string>();
+  readonly backLabel = input<string>();
+  protected readonly back = computed(() => ({
+    link: this.backLink() ?? '/financial-module/payments',
+    label: this.backLabel() ?? 'Pagos',
+  }));
 
   protected readonly receipt = httpResource<PaymentReceipt>(() => `/api/v1/finance/payments/${this.id()}/receipt`);
+
+  private auth = inject(Auth);
+  private modal = inject(Modal);
+  private http = inject(HttpClient);
+  /** FR-FIN-001.16: finance managers void payments; guardians never see the action. */
+  protected readonly canVoid = computed(() => this.auth.hasPermission('MANAGE_FINANCIALS') && !this.auth.isParent());
+
+  protected voidPayment(r: PaymentReceipt) {
+    this.modal.open(ReasonDialog, {
+      title: `Anular pago ${r.receiptNumber}`,
+      size: 'medium',
+      data: {
+        message:
+          'Los cargos que pagó vuelven a quedar pendientes y se quita el saldo a favor que generó.' +
+          (r.method === 'CARD' ? ' Se registrará un reembolso de prueba a la tarjeta.' : '') +
+          ' El recibo conserva su número y se marca como ANULADO.',
+        confirmText: 'Anular pago',
+        submit: async (reason: string) => {
+          await firstValueFrom(this.http.post(`/api/v1/finance/payments/${r.id}/void`, { reason }));
+          this.receipt.reload();
+        },
+      },
+    });
+  }
 
   protected fmt(r: PaymentReceipt, amount: number) {
     return money(amount, r.school.currencyCode);

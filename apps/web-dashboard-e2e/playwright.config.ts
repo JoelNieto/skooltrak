@@ -61,7 +61,7 @@ export default defineConfig({
       use: { ...devices['Desktop Chrome'] },
       dependencies: ['chromium'],
       testMatch: /\.after\.spec\.ts$/,
-      testIgnore: [/assignment-channels\.after\.spec\.ts$/, /finance-(payments|checkout)\.after\.spec\.ts$/],
+      testIgnore: [/assignment-channels\.after\.spec\.ts$/, /finance-(payments|checkout|void)\.after\.spec\.ts$/],
     },
     // COM-003-S02 creates assignment Q&A channels on the teacher's course, which the course page's
     // Canales tab counts (ACA-001 FR .29); it runs once `after` is done so those counts stay stable.
@@ -85,6 +85,13 @@ export default defineConfig({
       use: { ...devices['Desktop Chrome'] },
       dependencies: ['after-finance'],
       testMatch: /finance-checkout\.after\.spec\.ts$/,
+    },
+    // FIN-001-S05 voids the payments S03/S04 made and cancels a charge they paid.
+    {
+      name: 'after-void',
+      use: { ...devices['Desktop Chrome'] },
+      dependencies: ['after-checkout'],
+      testMatch: /finance-void\.after\.spec\.ts$/,
     },
   ],
 });

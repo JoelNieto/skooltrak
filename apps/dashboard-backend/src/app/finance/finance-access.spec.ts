@@ -74,7 +74,12 @@ function setup() {
   const accountsService = new AccountsService(prisma as never, { now: () => new Date('2026-11-26T15:00:00Z') });
   jest.spyOn(accountsService, 'sync').mockResolvedValue();
   const list = jest.spyOn(accountsService, 'list').mockResolvedValue({ items: [], total: 0, page: 1, take: 25, currencyCode: 'USD' });
-  const charges = { createManual: jest.fn().mockResolvedValue({ created: 1, chargeIds: ['c'] }), searchStudents: jest.fn().mockResolvedValue([]) };
+  const charges = {
+    createManual: jest.fn().mockResolvedValue({ created: 1, chargeIds: ['c'] }),
+    searchStudents: jest.fn().mockResolvedValue([]),
+    chargeSchool: jest.fn().mockImplementation(async (id: string) => (id === 'ch-9' ? 'SCH9' : 'SCH1')),
+    cancel: jest.fn().mockResolvedValue({}),
+  };
   const fees = {
     listItems: jest.fn().mockResolvedValue({ items: [], currencyCode: 'USD' }),
     createItem: jest.fn().mockResolvedValue({}),
@@ -88,6 +93,8 @@ function setup() {
     register: jest.fn().mockResolvedValue({}),
     list: jest.fn().mockResolvedValue({ items: [], total: 0, page: 1, take: 25, currencyCode: 'USD' }),
     receipt: jest.fn().mockResolvedValue({}),
+    paymentSchool: jest.fn().mockImplementation(async (id: string) => (id === 'pay-9' ? 'SCH9' : 'SCH1')),
+    voidPayment: jest.fn().mockResolvedValue({}),
   };
   const checkouts = { checkout: jest.fn().mockResolvedValue({ status: 'COMPLETED' }) };
   const controller = new FinanceController(
@@ -271,6 +278,28 @@ describe('finance access (FIN-001-S01)', () => {
       const body = { accountId: 'A1', idempotencyKey: 'key-12345', lines: [], card: {} } as never;
       await controller.checkout(req(parent), body);
       expect(checkouts.checkout).toHaveBeenCalledWith(parent, body);
+    });
+  });
+
+  describe('void and cancel (FIN-001-S05)', () => {
+    it('lets finance managers void payments and cancel charges of their organization', async () => {
+      const { controller, payments, charges } = setup();
+      await controller.voidPayment(req(manager), 'pay-1', { reason: 'Duplicado' });
+      await controller.cancelCharge(req(admin), 'ch-1', { reason: 'Beca' });
+      expect(payments.voidPayment).toHaveBeenCalledWith(manager, 'org-1', 'pay-1', 'Duplicado');
+      expect(charges.cancel).toHaveBeenCalledWith(admin, 'org-1', 'ch-1', 'Beca');
+    });
+
+    it('refuses staff without MANAGE_FINANCIALS, parents, teachers and other organizations', async () => {
+      const { controller, payments, charges } = setup();
+      for (const u of [accountant, parent, teacher]) {
+        await expect(controller.voidPayment(req(u), 'pay-1', { reason: 'x' })).rejects.toThrow(new ForbiddenException(FINANCE_DENIED));
+        await expect(controller.cancelCharge(req(u), 'ch-1', { reason: 'x' })).rejects.toThrow(new ForbiddenException(FINANCE_DENIED));
+      }
+      await expect(controller.voidPayment(req(admin), 'pay-9', { reason: 'x' })).rejects.toThrow(new ForbiddenException(SCHOOL_DENIED));
+      await expect(controller.cancelCharge(req(admin), 'ch-9', { reason: 'x' })).rejects.toThrow(new ForbiddenException(SCHOOL_DENIED));
+      expect(payments.voidPayment).not.toHaveBeenCalled();
+      expect(charges.cancel).not.toHaveBeenCalled();
     });
   });
 });

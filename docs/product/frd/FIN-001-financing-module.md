@@ -175,8 +175,8 @@ States everywhere: empty ("No hay cargos pendientes"), loading (`lib-loader`), e
 | [FIN-001-S01](../slices/FIN-001-S01-ledger-foundation.md) | Ledger foundation: family accounts, manual charge, parent Estado de cuenta | .1 .2 .3 (read) .7 .12 | Done |
 | [FIN-001-S02](../slices/FIN-001-S02-fee-catalog-generation.md) | Fee catalog, assignments and charge generation | .4 .5 .6 | Done |
 | [FIN-001-S03](../slices/FIN-001-S03-offline-payments-receipts.md) | Register offline payment (Transfer/ACH, Yappy) + receipt | .14 .15 | Done |
-| [FIN-001-S04](../slices/FIN-001-S04-family-checkout-mock-card.md) | Parent family checkout with mock card | .13 .15 | In review |
-| FIN-001-S05 | Void payment + cancel charge | .8 .16 | Proposed |
+| [FIN-001-S04](../slices/FIN-001-S04-family-checkout-mock-card.md) | Parent family checkout with mock card | .13 .15 | Done |
+| [FIN-001-S05](../slices/FIN-001-S05-void-payment-cancel-charge.md) | Void payment + cancel charge | .8 .16 | In review |
 | FIN-001-S06 | Saldo a favor: apply by admin and at checkout | .17 | Proposed |
 | FIN-001-S07 | Account detail actions: move student, ledger tab | .3 | Proposed |
 | FIN-001-S08 | Discounts & scholarships | .9 .10 .11 | Proposed |

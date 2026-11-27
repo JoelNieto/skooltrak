@@ -10333,6 +10333,45 @@
         ]
       }
     },
+    "/api/v1/finance/charges/{id}/cancel": {
+      "post": {
+        "operationId": "FinanceController_cancelCharge",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReasonInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Cancel a charge with a reason; refused while a payment is applied to it (FR-FIN-001.8)",
+        "tags": [
+          "finance"
+        ]
+      }
+    },
     "/api/v1/finance/fee-items": {
       "get": {
         "operationId": "FinanceController_feeItems",
@@ -10710,6 +10749,45 @@
           }
         ],
         "summary": "Payments of a school (FR-FIN-001.15)",
+        "tags": [
+          "finance"
+        ]
+      }
+    },
+    "/api/v1/finance/payments/{id}/void": {
+      "post": {
+        "operationId": "FinanceController_voidPayment",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReasonInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Void a completed payment with a reason; its charges owe again (FR-FIN-001.16)",
         "tags": [
           "finance"
         ]
@@ -12456,6 +12534,10 @@
         }
       },
       "CreateChargeInput": {
+        "type": "object",
+        "properties": {}
+      },
+      "ReasonInput": {
         "type": "object",
         "properties": {}
       },

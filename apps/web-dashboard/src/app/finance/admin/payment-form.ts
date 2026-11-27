@@ -33,7 +33,7 @@ interface OpenCharge {
   imports: [Button, FormsModule, UiCheckbox, UiField, UiInput, UiSelect],
   template: `
     <form class="flex flex-col gap-4" (submit)="onSubmit($event)">
-      <div class="grid grid-cols-2 gap-4">
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <ui-field label="Método">
           <select uiSelect name="method" [ngModel]="method()" (ngModelChange)="method.set($event)">
             <option value="BANK_TRANSFER">Transferencia / ACH</option>
@@ -66,7 +66,10 @@ interface OpenCharge {
         } @else {
           <ul class="flex flex-col border border-line rounded-box divide-y divide-line max-h-72 overflow-auto">
             @for (c of openCharges(); track c.id) {
-              <li class="flex items-center gap-3 px-3 py-2" data-testid="allocation-row">
+              <li
+                class="grid grid-cols-[auto_minmax(0,1fr)] sm:grid-cols-[auto_minmax(0,1fr)_8rem] items-center gap-x-3 gap-y-2 px-3 py-2.5"
+                data-testid="allocation-row"
+              >
                 <input
                   uiCheckbox
                   type="checkbox"
@@ -74,23 +77,27 @@ interface OpenCharge {
                   [checked]="allocations().has(c.id)"
                   (change)="toggle(c, $any($event.target).checked)"
                 />
-                <div class="flex-1 min-w-0">
-                  <div class="text-sm font-medium text-ink-strong truncate">{{ c.description }}</div>
+                <div class="min-w-0">
+                  <div class="text-sm font-medium text-ink-strong break-words">{{ c.description }}</div>
                   <div class="text-xs text-ink-muted">
                     {{ c.student ?? 'Cuenta' }} · vence {{ date(c.dueDate) }} · debe {{ fmt(c.outstandingCents) }}
                   </div>
                 </div>
-                <input
-                  uiInput
-                  type="number"
-                  step="0.01"
-                  inputmode="decimal"
-                  class="w-28 text-right"
-                  [attr.aria-label]="'Monto para ' + c.description"
-                  [disabled]="!allocations().has(c.id)"
-                  [value]="allocations().has(c.id) ? (allocations().get(c.id)! / 100).toFixed(2) : ''"
-                  (change)="setRow(c, $any($event.target).value)"
-                />
+                <!-- The width lives on the wrapper: the input's own width (from .input) beats utility classes. -->
+                <div class="col-start-2 sm:col-start-auto">
+                  <input
+                    uiInput
+                    size="sm"
+                    type="number"
+                    step="0.01"
+                    inputmode="decimal"
+                    class="w-full! text-right"
+                    [attr.aria-label]="'Monto para ' + c.description"
+                    [disabled]="!allocations().has(c.id)"
+                    [value]="allocations().has(c.id) ? (allocations().get(c.id)! / 100).toFixed(2) : ''"
+                    (change)="setRow(c, $any($event.target).value)"
+                  />
+                </div>
               </li>
             }
           </ul>

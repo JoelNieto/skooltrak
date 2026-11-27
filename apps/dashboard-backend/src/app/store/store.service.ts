@@ -1,5 +1,5 @@
 import { $Enums, Prisma } from '@generated/prisma';
-import { ForbiddenException, Injectable, NotFoundException, Scope } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable, NotFoundException, Scope } from '@nestjs/common';
 import { REQUEST } from '@nestjs/core';
 import { Inject } from '@nestjs/common';
 import { Request } from 'express';
@@ -13,6 +13,7 @@ import { UpdateCartItemInput } from './dto/update-cart-item.input';
 import { UpdateStoreCategoryInput } from './dto/update-store-category.input';
 import { UpdateStoreOrderStatusInput } from './dto/update-store-order-status.input';
 import { UpdateStoreProductInput } from './dto/update-store-product.input';
+import { normalizeVariants, withStock, withStockOrNull } from './store-stock';
 
 const variantOrder = { sortOrder: 'asc' as const };
 
@@ -30,6 +31,7 @@ const cartInclude = {
 } as const;
 
 const orderInclude = {
+  user: { select: { id: true, firstName: true, lastName: true, email: true } },
   items: {
     include: {
       product: { include: productInclude },
@@ -51,6 +53,14 @@ export class StoreService {
       userId: string;
       permissions?: string[];
     };
+  }
+
+  /** ORG_ADMIN / ADMIN / SYSADMIN pass permission checks like PermissionsGuard does. */
+  private get canManageStore(): boolean {
+    const role = (this.request.user as { role?: string } | undefined)?.role?.toUpperCase();
+    return (
+      role === 'ORG_ADMIN' || role === 'ADMIN' || role === 'SYSADMIN' || !!this.ctx.permissions?.includes('MANAGE_STORE')
+    );
   }
 
   private get orgId(): string {
@@ -86,13 +96,29 @@ export class StoreService {
     return product;
   }
 
+  /** Category names are unique per school (case-insensitive), so the catalogue chips stay distinct. */
+  private async ensureCategoryNameFree(schoolId: string, name: string, exceptId?: string) {
+    const clash = await this.prisma.storeCategory.findFirst({
+      where: {
+        schoolId,
+        name: { equals: name, mode: 'insensitive' },
+        ...(exceptId ? { id: { not: exceptId } } : {}),
+      },
+      select: { id: true },
+    });
+    if (clash) throw new BadRequestException(`Ya existe la categoría "${name}".`);
+  }
+
   // --- Categories (admin) ---
   async createCategory(input: CreateStoreCategoryInput) {
     await this.ensureSchoolInOrg(input.schoolId);
+    const name = input.name.trim();
+    if (!name) throw new BadRequestException('Escribe el nombre de la categoría.');
+    await this.ensureCategoryNameFree(input.schoolId, name);
     return this.prisma.storeCategory.create({
       data: {
         schoolId: input.schoolId,
-        name: input.name,
+        name,
         description: input.description ?? null,
         sortOrder: input.sortOrder ?? 0,
       },
@@ -107,10 +133,15 @@ export class StoreService {
       },
     });
     if (!existing) throw new NotFoundException('Categoría no encontrada.');
+    const name = input.name?.trim();
+    if (input.name !== undefined) {
+      if (!name) throw new BadRequestException('Escribe el nombre de la categoría.');
+      await this.ensureCategoryNameFree(existing.schoolId, name, existing.id);
+    }
     return this.prisma.storeCategory.update({
       where: { id: input.id },
       data: {
-        ...(input.name !== undefined ? { name: input.name } : {}),
+        ...(name !== undefined ? { name } : {}),
         ...(input.description !== undefined ? { description: input.description } : {}),
         ...(input.sortOrder !== undefined ? { sortOrder: input.sortOrder } : {}),
         ...(input.active !== undefined ? { active: input.active } : {}),
@@ -144,13 +175,14 @@ export class StoreService {
         schoolId,
         school: { organizationId: this.orgId },
       },
+      include: { _count: { select: { products: true } } },
       orderBy: [{ sortOrder: 'asc' }, { name: 'asc' }],
     });
   }
 
   // --- Products ---
-  storeProducts(schoolId: string, search?: string | null, categoryId?: string | null) {
-    return this.prisma.storeProduct.findMany({
+  async storeProducts(schoolId: string, search?: string | null, categoryId?: string | null) {
+    const rows = await this.prisma.storeProduct.findMany({
       where: {
         schoolId,
         school: { organizationId: this.orgId },
@@ -169,6 +201,7 @@ export class StoreService {
       include: productInclude,
       orderBy: { name: 'asc' },
     });
+    return rows.map(withStock);
   }
 
   async storeProduct(id: string) {
@@ -180,47 +213,52 @@ export class StoreService {
       },
       include: productInclude,
     });
-    return p;
+    return withStockOrNull(p);
   }
 
-  storeProductsAdmin(schoolId: string) {
-    return this.prisma.storeProduct.findMany({
+  /** Every product of the school, inactive ones included, with how many order lines use it. */
+  async storeProductsAdmin(schoolId: string) {
+    const rows = await this.prisma.storeProduct.findMany({
       where: {
         schoolId,
         school: { organizationId: this.orgId },
       },
-      include: productInclude,
+      include: { ...productInclude, _count: { select: { orderItems: true } } },
       orderBy: { name: 'asc' },
     });
+    return rows.map(withStock);
+  }
+
+  /** One product for the edit form, active or not (the shopper endpoint hides inactive ones). */
+  async storeProductAdmin(id: string) {
+    return withStock(await this.ensureProductInOrg(id));
+  }
+
+  private async ensureCategoryInSchool(categoryId: string, schoolId: string) {
+    const cat = await this.prisma.storeCategory.findFirst({ where: { id: categoryId, schoolId } });
+    if (!cat) throw new BadRequestException('Categoría inválida para esta escuela.');
   }
 
   async createProduct(input: CreateStoreProductInput) {
     await this.ensureSchoolInOrg(input.schoolId);
-    if (input.categoryId) {
-      const cat = await this.prisma.storeCategory.findFirst({
-        where: { id: input.categoryId, schoolId: input.schoolId },
-      });
-      if (!cat) throw new ForbiddenException('Categoría inválida para esta escuela.');
-    }
-    return this.prisma.storeProduct.create({
+    if (input.categoryId) await this.ensureCategoryInSchool(input.categoryId, input.schoolId);
+    const variants = normalizeVariants(input.variants);
+    const created = await this.prisma.storeProduct.create({
       data: {
         schoolId: input.schoolId,
-        categoryId: input.categoryId ?? null,
-        name: input.name,
-        description: input.description ?? null,
+        categoryId: input.categoryId || null,
+        name: input.name.trim(),
+        description: input.description?.trim() || null,
         price: new Prisma.Decimal(input.price),
-        imageUrl: input.imageUrl ?? null,
+        imageUrl: input.imageUrl?.trim() || null,
         active: input.active ?? true,
         variants: {
-          create: input.variants.map((v, i) => ({
-            label: v.label.trim(),
-            stock: v.stock,
-            sortOrder: v.sortOrder ?? i,
-          })),
+          create: variants.map((v) => ({ label: v.label, stock: v.stock, sortOrder: v.sortOrder })),
         },
       },
       include: productInclude,
     });
+    return withStock(created);
   }
 
   async updateProduct(input: UpdateStoreProductInput) {
@@ -229,67 +267,70 @@ export class StoreService {
       include: { variants: true },
     });
     if (!existing) throw new NotFoundException('Producto no encontrado.');
-    if (input.categoryId !== undefined && input.categoryId !== null) {
-      const cat = await this.prisma.storeCategory.findFirst({
-        where: { id: input.categoryId, schoolId: existing.schoolId },
-      });
-      if (!cat) throw new ForbiddenException('Categoría inválida.');
+    if (input.categoryId) await this.ensureCategoryInSchool(input.categoryId, existing.schoolId);
+    const variants = input.variants !== undefined ? normalizeVariants(input.variants) : undefined;
+    const existingIds = new Set(existing.variants.map((v) => v.id));
+    if (variants?.some((v) => v.id && !existingIds.has(v.id))) {
+      throw new BadRequestException('Variante inválida.');
     }
-    if (input.variants !== undefined) {
-      if (input.variants.length < 1) {
-        throw new ForbiddenException('Debe haber al menos una talla o variante con stock.');
-      }
-      await this.prisma.$transaction(async (tx) => {
-        const incomingIds = new Set(input.variants!.filter((v) => v.id).map((v) => v.id!));
-        const toDelete = existing.variants.filter((v) => !incomingIds.has(v.id)).map((v) => v.id);
+
+    const updated = await this.prisma.$transaction(async (tx) => {
+      if (variants) {
+        const keptIds = new Set(variants.flatMap((v) => (v.id ? [v.id] : [])));
+        const toDelete = existing.variants.filter((v) => !keptIds.has(v.id)).map((v) => v.id);
         if (toDelete.length) {
-          await tx.storeProductVariant.deleteMany({
-            where: { id: { in: toDelete }, productId: input.id },
-          });
+          await tx.storeProductVariant.deleteMany({ where: { id: { in: toDelete }, productId: input.id } });
         }
-        let i = 0;
-        for (const v of input.variants!) {
-          const label = v.label.trim();
-          const sortOrder = v.sortOrder ?? i;
-          i += 1;
+        // Two passes so swapping or reusing labels (S ↔ M) never trips the product + label index.
+        for (const v of variants) {
           if (v.id) {
-            const row = await tx.storeProductVariant.findFirst({
-              where: { id: v.id, productId: input.id },
-            });
-            if (!row) throw new ForbiddenException('Variante inválida.');
-            await tx.storeProductVariant.update({
-              where: { id: v.id },
-              data: { label, stock: v.stock, sortOrder },
-            });
-          } else {
-            await tx.storeProductVariant.create({
-              data: { productId: input.id, label, stock: v.stock, sortOrder },
-            });
+            await tx.storeProductVariant.update({ where: { id: v.id }, data: { label: `__tmp__${v.id}` } });
           }
         }
+        for (const v of variants) {
+          const data = { label: v.label, stock: v.stock, sortOrder: v.sortOrder };
+          if (v.id) {
+            await tx.storeProductVariant.update({ where: { id: v.id }, data });
+          } else {
+            await tx.storeProductVariant.create({ data: { productId: input.id, ...data } });
+          }
+        }
+      }
+      return tx.storeProduct.update({
+        where: { id: input.id },
+        data: {
+          ...(input.name !== undefined ? { name: input.name.trim() } : {}),
+          ...(input.description !== undefined ? { description: input.description?.trim() || null } : {}),
+          ...(input.price !== undefined ? { price: new Prisma.Decimal(input.price) } : {}),
+          ...(input.imageUrl !== undefined ? { imageUrl: input.imageUrl?.trim() || null } : {}),
+          ...(input.active !== undefined ? { active: input.active } : {}),
+          ...(input.categoryId !== undefined ? { categoryId: input.categoryId || null } : {}),
+        },
+        include: productInclude,
       });
-    }
-    return this.prisma.storeProduct.update({
-      where: { id: input.id },
-      data: {
-        ...(input.name !== undefined ? { name: input.name } : {}),
-        ...(input.description !== undefined ? { description: input.description } : {}),
-        ...(input.price !== undefined ? { price: new Prisma.Decimal(input.price) } : {}),
-        ...(input.imageUrl !== undefined ? { imageUrl: input.imageUrl } : {}),
-        ...(input.active !== undefined ? { active: input.active } : {}),
-        ...(input.categoryId !== undefined ? { categoryId: input.categoryId } : {}),
-      },
-      include: productInclude,
     });
+    return withStock(updated);
   }
 
+  /**
+   * Deletes a product nobody ordered. A product with orders keeps its order history
+   * (order lines reference it), so it is deactivated instead: `{ archived: true }`.
+   */
   async deleteProduct(id: string) {
     const existing = await this.prisma.storeProduct.findFirst({
       where: { id, school: { organizationId: this.orgId } },
+      include: { _count: { select: { orderItems: true } } },
     });
     if (!existing) throw new NotFoundException('Producto no encontrado.');
+    if (existing._count.orderItems > 0) {
+      await this.prisma.$transaction([
+        this.prisma.storeProduct.update({ where: { id }, data: { active: false } }),
+        this.prisma.storeCartItem.deleteMany({ where: { variant: { productId: id } } }),
+      ]);
+      return { deleted: false, archived: true };
+    }
     await this.prisma.storeProduct.delete({ where: { id } });
-    return true;
+    return { deleted: true, archived: false };
   }
 
   // --- Cart ---
@@ -486,7 +527,7 @@ export class StoreService {
       include: orderInclude,
     });
     if (!order) throw new NotFoundException('Pedido no encontrado.');
-    if (order.userId !== this.ctx.userId && !this.ctx.permissions?.includes('MANAGE_STORE')) {
+    if (order.userId !== this.ctx.userId && !this.canManageStore) {
       throw new ForbiddenException('No autorizado.');
     }
     return order;

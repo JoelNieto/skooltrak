@@ -11737,6 +11737,40 @@ if(coursesControllerUploadCoverBody.file !== undefined) {
   }
 
 /**
+ * @summary Admin product by id (inactive included)
+ */
+ storeControllerStoreProductAdmin<TData = void>(id: string, options?: HttpClientBodyOptions): Observable<TData>;
+ storeControllerStoreProductAdmin<TData = void>(id: string, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
+ storeControllerStoreProductAdmin<TData = void>(id: string, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
+  storeControllerStoreProductAdmin<TData = void>(
+    id: string, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
+    if (options?.observe === 'events') {
+      return this.http.get<TData>(
+      `/api/v1/store/admin/products/${id}`,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'events',
+      }
+    );
+    }
+
+    if (options?.observe === 'response') {
+      return this.http.get<TData>(
+      `/api/v1/store/admin/products/${id}`,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'response',
+      }
+    );
+    }
+
+    return this.http.get<TData>(
+      `/api/v1/store/admin/products/${id}`,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'body',
+      }
+    );
+  }
+
+/**
  * @summary Delete product
  */
  storeControllerDeleteStoreProduct<TData = void>(id: string, options?: HttpClientBodyOptions): Observable<TData>;

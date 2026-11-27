@@ -1,7 +1,7 @@
 import { SchoolContext } from '#/shared';
 import { Component, computed, DestroyRef, effect, inject, signal } from '@angular/core';
-import { rxResource, takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { ActivatedRoute, RouterLink, RouterOutlet } from '@angular/router';
+import { rxResource, takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
+import { ActivatedRoute, NavigationEnd, Router, RouterLink, RouterOutlet } from '@angular/router';
 import { catchError, distinctUntilChanged, filter, map, of, switchMap } from 'rxjs';
 import { CartService } from '../cart.service';
 import { StoreApiService } from '../store-api.service';
@@ -37,9 +37,10 @@ import { Badge, BreadcrumbItem, Breadcrumbs, Button, Icon } from '#/ui';
         </div>
         <div class="flex flex-wrap items-center gap-2">
           <app-store-theme-toggle />
-          @if (canManage()) {
+          @if (canManage() && !inAdmin()) {
             <a uiButton size="sm" routerLink="admin">Administrar tienda</a>
           }
+          @if (!inAdmin()) {
           <a uiButton variant="primary" size="sm" routerLink="cart" class="gap-1">
             <ui-icon name="shopping-cart" class="text-lg" />
             Carrito
@@ -47,6 +48,7 @@ import { Badge, BreadcrumbItem, Breadcrumbs, Button, Icon } from '#/ui';
               <span uiBadge>{{ cartCount() }}</span>
             }
           </a>
+          }
         </div>
       </div>
       <router-outlet />
@@ -59,7 +61,8 @@ export default class StoreLayout {
     return [
       { label: 'Inicio', link: '/' },
       { label: 'Tiendas', link: '/store' },
-      ...(school ? [{ label: school }] : []),
+      ...(school ? [this.inAdmin() ? { label: school, link: this.storeHome() } : { label: school }] : []),
+      ...(this.inAdmin() ? [{ label: 'Administrar' }] : []),
     ];
   });
 
@@ -69,6 +72,21 @@ export default class StoreLayout {
   private readonly destroyRef = inject(DestroyRef);
   protected readonly cartService = inject(CartService);
   private readonly storeTheme = inject(StoreThemeService);
+  private readonly router = inject(Router);
+
+  private readonly url = toSignal(
+    this.router.events.pipe(
+      filter((e): e is NavigationEnd => e instanceof NavigationEnd),
+      map((e) => e.urlAfterRedirects),
+    ),
+    { initialValue: this.router.url },
+  );
+  /** On /store/:slug/admin… the shopper actions (cart, "Administrar tienda") step aside. */
+  protected readonly inAdmin = computed(() => /\/store\/[^/]+\/admin(\/|$|\?)/.test(this.url()));
+  protected readonly storeHome = computed(() => {
+    const slug = this.schoolContext.currentSchoolSlug();
+    return slug ? `/store/${slug}` : '/store';
+  });
 
   constructor() {
     effect(() => {

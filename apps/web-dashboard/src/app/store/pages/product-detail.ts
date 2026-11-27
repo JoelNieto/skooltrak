@@ -1,12 +1,13 @@
 import { SchoolContext } from '#/shared';
 import { Alert, Badge, Button, Icon, Toast, UiField, UiSelect } from '#/ui';
-import { Component, effect, inject, input, signal } from '@angular/core';
+import { Component, computed, effect, inject, input, signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { map } from 'rxjs';
 import { CartService } from '../cart.service';
 import { StoreApiService } from '../store-api.service';
+import { isSingleVariant } from '../store.types';
 
 @Component({
   selector: 'app-product-detail',
@@ -41,7 +42,11 @@ import { StoreApiService } from '../store-api.service';
           @if (p.description) {
             <p class="text-ink whitespace-pre-wrap">{{ p.description }}</p>
           }
-          @if (p.variants?.length) {
+          @if (single()) {
+            <p class="text-sm text-ink-muted">
+              {{ (p.variants[0]?.stock ?? 0) > 0 ? p.variants[0].stock + ' disponibles' : 'Agotado' }}
+            </p>
+          } @else if (p.variants?.length) {
             <ui-field label="Talla / variante" class="w-full max-w-xs">
               <select uiSelect [ngModel]="selectedVariantId()" (ngModelChange)="selectedVariantId.set($event)">
                 @for (v of p.variants; track v.id) {
@@ -53,7 +58,7 @@ import { StoreApiService } from '../store-api.service';
             </ui-field>
           }
           @if (!selectedVariant() || (selectedVariant()?.stock ?? 0) <= 0) {
-            <div uiBadge tone="danger">Sin stock en la talla seleccionada</div>
+            <div uiBadge tone="danger">{{ single() ? 'Agotado' : 'Sin stock en la talla seleccionada' }}</div>
           } @else {
             <div class="flex flex-wrap gap-2 mt-4">
               <button uiButton variant="primary" type="button" (click)="add(1)">Agregar al carrito</button>
@@ -72,6 +77,8 @@ export default class ProductDetail {
   private readonly toast = inject(Toast);
 
   protected selectedVariantId = signal<string | null>(null);
+  /** Products without sizes have one "Única" variant: no picker, just the stock. */
+  protected readonly single = computed(() => isSingleVariant(this.product.value()?.variants));
 
   protected product = rxResource({
     params: () => ({ id: this.id() }),

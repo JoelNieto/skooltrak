@@ -39,7 +39,7 @@ import { Alert, Badge, Button, UiTable } from '#/ui';
             @for (it of o.items; track it.id) {
               <tr>
                 <td>{{ it.product?.name }}</td>
-                <td>{{ it.variantLabel || '—' }}</td>
+                <td>{{ it.variantLabel && it.variantLabel !== 'Única' ? it.variantLabel : '—' }}</td>
                 <td>{{ it.quantity }}</td>
                 <td>{{ formatPrice(it.unitPrice) }}</td>
                 <td>{{ formatPrice(itemLineTotal(it)) }}</td>

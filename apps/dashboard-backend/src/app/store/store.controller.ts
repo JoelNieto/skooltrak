@@ -142,6 +142,13 @@ export class StoreController {
     return this.storeService.storeProductsAdmin(schoolId);
   }
 
+  @Get('admin/products/:id')
+  @RequirePermissions(Perm.MANAGE_STORE)
+  @ApiOperation({ summary: 'Admin product by id (inactive included)' })
+  storeProductAdmin(@Param('id') id: string) {
+    return this.storeService.storeProductAdmin(id);
+  }
+
   @Post('admin/products')
   @RequirePermissions(Perm.MANAGE_STORE)
   @ApiOperation({ summary: 'Create product' })

@@ -26,6 +26,8 @@ export const storageStatePath = (persona: PersonaKey) => `apps/web-dashboard-e2e
 export const data = {
   organization: 'Organización E2E',
   school: 'Colegio E2E',
+  /** The school's store lives at /store/<schoolSlug> (STO). */
+  schoolSlug: 'colegio-e2e',
   studyPlans: { seventh: '7° E2E', eighth: '8° E2E' },
   courses: {
     teacherOwn: { name: 'Matemáticas 7° E2E', code: 'MATE2E7' },
@@ -114,5 +116,12 @@ export const data = {
      */
     transfer: { reference: 'TRX-E2E-001', amount: 150 },
     yappy: { reference: 'YAP-E2E-001', amount: 30, credit: 5 },
+  },
+  /** School store: products and a category the admin creates in store/store-admin.spec.ts. */
+  store: {
+    category: 'Útiles E2E',
+    single: { name: 'Cuaderno E2E', price: 3.5, stock: 40 },
+    sized: { name: 'Polo uniforme E2E', price: 18, stockPerSize: 6 },
+    hidden: { name: 'Termo E2E', price: 12, stock: 0 },
   },
 } as const;

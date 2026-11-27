@@ -132,6 +132,11 @@ export class StoreApiService {
     return this.http.delete<Json>(`/api/v1/store/admin/categories/${encodeURIComponent(id)}`);
   }
 
+  /** One product for the edit form, inactive ones included. */
+  storeProductAdmin(id: string): Observable<Json> {
+    return this.http.get<Json>(`/api/v1/store/admin/products/${encodeURIComponent(id)}`);
+  }
+
   createStoreProduct(input: Record<string, unknown>): Observable<Json> {
     return this.http.post<Json>('/api/v1/store/admin/products', input);
   }
@@ -140,7 +145,8 @@ export class StoreApiService {
     return this.http.patch<Json>('/api/v1/store/admin/products', input);
   }
 
-  deleteStoreProduct(id: string): Observable<Json> {
+  /** `{ deleted: true }`, or `{ archived: true }` when the product has orders (it is deactivated). */
+  deleteStoreProduct(id: string): Observable<{ deleted: boolean; archived: boolean }> {
     return this.http.delete<Json>(`/api/v1/store/admin/products/${encodeURIComponent(id)}`);
   }
 

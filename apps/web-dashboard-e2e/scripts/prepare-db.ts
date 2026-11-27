@@ -40,6 +40,7 @@ async function seedFixtures(databaseUrl: string) {
       data: {
         organizationId: org.id,
         name: data.school,
+        slug: data.schoolSlug,
         shortName: 'E2E',
         logo: '',
         address: 'Calle 1',

@@ -24,7 +24,7 @@ import { StoreApiService } from '../store-api.service';
               <li class="flex justify-between gap-2">
                 <span>
                   {{ line.product?.name }}
-                  @if (line.variant?.label) {
+                  @if (line.variant?.label && line.variant?.label !== 'Única') {
                     <span class="text-ink-muted"> ({{ line.variant?.label }})</span>
                   }
                   × {{ line.quantity }}

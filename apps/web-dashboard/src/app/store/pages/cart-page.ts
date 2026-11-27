@@ -32,7 +32,7 @@ import { StoreApiService } from '../store-api.service';
               <tr>
                 <td>
                   <div class="font-medium">{{ line.product?.name }}</div>
-                  @if (line.variant?.label) {
+                  @if (line.variant?.label && line.variant?.label !== 'Única') {
                     <div class="text-sm text-ink-muted">Talla: {{ line.variant?.label }}</div>
                   }
                 </td>

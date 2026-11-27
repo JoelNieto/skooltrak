@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma.service';
 import { SchoolsService } from '../schools/schools.service';
+import { withStock, withStockOrNull } from './store-stock';
 
 const productInclude = {
   category: true,
@@ -68,8 +69,8 @@ export class StorePublicService {
     });
   }
 
-  publicStoreProducts(schoolId: string, search?: string | null, categoryId?: string | null) {
-    return this.prisma.storeProduct.findMany({
+  async publicStoreProducts(schoolId: string, search?: string | null, categoryId?: string | null) {
+    const rows = await this.prisma.storeProduct.findMany({
       where: {
         schoolId,
         active: true,
@@ -87,6 +88,7 @@ export class StorePublicService {
       include: productInclude,
       orderBy: { name: 'asc' },
     });
+    return rows.map(withStock);
   }
 
   async publicStoreProduct(id: string) {
@@ -97,6 +99,6 @@ export class StorePublicService {
       },
       include: productInclude,
     });
-    return p ?? null;
+    return withStockOrNull(p);
   }
 }

@@ -11331,6 +11331,33 @@
       }
     },
     "/api/v1/store/admin/products/{id}": {
+      "get": {
+        "operationId": "StoreController_storeProductAdmin",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Admin product by id (inactive included)",
+        "tags": [
+          "store"
+        ]
+      },
       "delete": {
         "operationId": "StoreController_deleteStoreProduct",
         "parameters": [

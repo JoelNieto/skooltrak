@@ -104,9 +104,9 @@ Code: `store`; routes `/store`, `/store/:schoolSlug`
 
 | Capability | Status | FRD |
 |---|---|---|
-| Public catalogue (categories, products, variants) | Live | — |
+| Public catalogue (categories, products, variants, stock badges) | Live | — |
 | Cart & orders | Live | — |
-| Store admin (products, order status) | Live | — |
+| Store admin: products (single item or per-size stock, preview, hide/show, delete or archive when ordered), categories (unique names, ordering), orders (buyer, items, status) | Live | — |
 
 ## HOM: Home dashboards
 Read-only views that combine data from the other contexts into one home per persona. HOM owns no data of its own.

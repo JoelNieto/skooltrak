@@ -10,6 +10,39 @@
 @source '../../../libs/shared/src/**/*.ts';
 @source '../../../libs/client-auth/src/**/*.ts';
 
+/* School branding (core/school-theme.service.ts). The service sets the school's primary colour and a
+ * dark-theme variant lightened to stay readable; the action colour follows whichever fits the theme.
+ * --app-school is the raw school colour, for tints such as the sidebar's school band. */
+:root {
+  --app-school: var(--color-primary);
+}
+:root[data-school-brand] {
+  --color-primary: var(--app-school-primary);
+  --color-primary-content: var(--app-school-primary-content);
+}
+:root[data-school-brand][data-theme='dark'] {
+  --color-primary: var(--app-school-primary-dark);
+  --color-primary-content: var(--app-school-primary-dark-content);
+}
+@media (prefers-color-scheme: dark) {
+  :root[data-school-brand]:not([data-theme]) {
+    --color-primary: var(--app-school-primary-dark);
+    --color-primary-content: var(--app-school-primary-dark-content);
+  }
+}
+
+/* The sidebar's school header: a tint of the school's own colour behind its crest. */
+.app-school-band {
+  background-color: color-mix(in oklab, var(--app-school) 10%, var(--ui-surface-1));
+  border-color: color-mix(in oklab, var(--app-school) 16%, var(--ui-line));
+}
+:root[data-theme='dark'] .app-school-band {
+  background-color: color-mix(in oklab, var(--app-school) 22%, var(--ui-surface-1));
+}
+.app-school-hover:hover {
+  background-color: color-mix(in oklab, var(--app-school) 9%, transparent);
+}
+
 .message-quote {
   @apply mt-3 rounded-md border-l-4 border-primary/60 bg-base-200 px-3 py-2;
 }

@@ -20,6 +20,7 @@ export * from './authSessionControllerAvailableSchoolsParams';
 export * from './authSessionControllerLoginBody';
 export * from './avatarUploadUrlInput';
 export * from './bulkCreateStudyPlansInput';
+export * from './checkoutInput';
 export * from './checkoutStoreInput';
 export * from './classGroupsControllerCountOrderDirection';
 export * from './classGroupsControllerCountParams';

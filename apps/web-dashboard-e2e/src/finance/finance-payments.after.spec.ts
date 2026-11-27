@@ -69,6 +69,7 @@ test.describe('Offline payments (admin)', () => {
     const dialog = await openPaymentDialog(page);
     await dialog.getByLabel('Monto', { exact: true }).fill('10');
     await dialog.getByLabel('Referencia').fill(transfer.reference);
+    await dialog.getByLabel('Fecha de recepción').fill(receivedAt);
     await dialog.getByRole('button', { name: 'Registrar pago' }).click();
     await expect(page.getByText('Referencia ya registrada')).toBeVisible();
     await dialog.getByRole('button', { name: 'Cancelar' }).click();

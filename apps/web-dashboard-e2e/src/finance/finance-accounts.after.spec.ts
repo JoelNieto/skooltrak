@@ -14,6 +14,17 @@ test.describe.configure({ mode: 'serial' });
 
 const [ana, beto, carla] = data.relatedStudents;
 
+/**
+ * Days the seeded charge is overdue, as the API counts them: the seed sets the due date in UTC
+ * (`inDays` from the seed), the API counts from the school's today (America/Panama). Between 00:00
+ * and 05:00 UTC the two dates differ by one.
+ */
+function overdueDays(inDays: number) {
+  const due = new Date(Date.now() + inDays * 86_400_000).toISOString().slice(0, 10);
+  const today = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Panama' }).format(new Date());
+  return Math.round((Date.parse(today) - Date.parse(due)) / 86_400_000);
+}
+
 function isoDay(offsetDays: number) {
   const d = new Date(Date.now() + offsetDays * 86_400_000);
   return d.toISOString().slice(0, 10);
@@ -45,7 +56,7 @@ test.describe('Finance accounts (admin)', () => {
     const rows = page.getByTestId('account-row');
     await expect(rows).toHaveCount(1);
     await expect(rows.first()).toContainText(carla);
-    await expect(rows.first()).toContainText('10 días');
+    await expect(rows.first()).toContainText(`${overdueDays(data.admin.overdueCharge.inDays)} días`);
   });
 
   test('adds a manual charge to one student of the account @FR-FIN-001.7 @FR-FIN-001.3', async ({ page }) => {

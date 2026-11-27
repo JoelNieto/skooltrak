@@ -52,6 +52,7 @@ enum Perm {
   VIEW_PERIODS = 'VIEW_PERIODS',
   MANAGE_FINANCIALS = 'MANAGE_FINANCIALS',
   VIEW_FINANCIALS = 'VIEW_FINANCIALS',
+  PAY_FINANCIALS = 'PAY_FINANCIALS',
   MANAGE_ROLES = 'MANAGE_ROLES',
   MANAGE_PERMISSIONS = 'MANAGE_PERMISSIONS',
   COMMUNICATION_VIEW = 'COMMUNICATION_VIEW',
@@ -96,6 +97,7 @@ const PERMISSION_DESCRIPTIONS: Record<Perm, string> = {
   [Perm.VIEW_PERIODS]: 'View periods',
   [Perm.MANAGE_FINANCIALS]: 'Create, update, and delete charges and payments',
   [Perm.VIEW_FINANCIALS]: 'View financial balance and payment history',
+  [Perm.PAY_FINANCIALS]: 'Pay family account charges online',
   [Perm.MANAGE_ROLES]: 'Create, update, and delete roles',
   [Perm.MANAGE_PERMISSIONS]: 'Manage permission assignments',
   [Perm.COMMUNICATION_VIEW]: 'Read channels and reply where allowed',
@@ -181,6 +183,7 @@ const DEFAULT_ROLES: RoleDef[] = [
     description: 'Parent or Guardian',
     permissions: [
       Perm.VIEW_FINANCIALS,
+      Perm.PAY_FINANCIALS,
       Perm.VIEW_COURSES,
       Perm.VIEW_ASSIGNMENTS,
       Perm.VIEW_ATTENDANCE,

@@ -10,7 +10,7 @@ jest.mock('@/auth', () => ({
 }));
 jest.mock('../prisma.service', () => ({ PrismaService: class {} }));
 
-import { Perm } from '@/auth';
+import { DEFAULT_ROLE_PERMISSIONS, Perm } from '@/auth';
 import { SCHOOL_DENIED } from '../org-scope';
 import { AccountsService } from './accounts.service';
 import { FinanceController } from './finance.controller';
@@ -89,15 +89,17 @@ function setup() {
     list: jest.fn().mockResolvedValue({ items: [], total: 0, page: 1, take: 25, currencyCode: 'USD' }),
     receipt: jest.fn().mockResolvedValue({}),
   };
+  const checkouts = { checkout: jest.fn().mockResolvedValue({ status: 'COMPLETED' }) };
   const controller = new FinanceController(
     accountsService,
     charges as never,
     fees as never,
     generation as never,
     payments as never,
+    checkouts as never,
     prisma as never,
   );
-  return { controller, list, charges, accountsService, fees, generation, payments };
+  return { controller, list, charges, accountsService, fees, generation, payments, checkouts };
 }
 
 const req = (u: unknown) => ({ user: u }) as never;
@@ -253,6 +255,22 @@ describe('finance access (FIN-001-S01)', () => {
       await expect(controller.listPayments(req(parent), 'SCH1')).rejects.toThrow(new ForbiddenException(FINANCE_DENIED));
       await expect(controller.listPayments(req(admin), 'SCH9')).rejects.toThrow(new ForbiddenException(SCHOOL_DENIED));
       expect(payments.list).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('checkout (FIN-001-S04)', () => {
+    it('needs PAY_FINANCIALS, which parents have and teachers do not', () => {
+      expect(Reflect.getMetadata('requiredPermissions', FinanceController.prototype.checkout)).toEqual([Perm.PAY_FINANCIALS]);
+      expect(DEFAULT_ROLE_PERMISSIONS.PARENT).toContain(Perm.PAY_FINANCIALS);
+      expect(DEFAULT_ROLE_PERMISSIONS.TEACHER).not.toContain(Perm.PAY_FINANCIALS);
+      expect(DEFAULT_ROLE_PERMISSIONS.STUDENT).not.toContain(Perm.PAY_FINANCIALS);
+    });
+
+    it('hands the caller to the checkout, which checks the guardian', async () => {
+      const { controller, checkouts } = setup();
+      const body = { accountId: 'A1', idempotencyKey: 'key-12345', lines: [], card: {} } as never;
+      await controller.checkout(req(parent), body);
+      expect(checkouts.checkout).toHaveBeenCalledWith(parent, body);
     });
   });
 });

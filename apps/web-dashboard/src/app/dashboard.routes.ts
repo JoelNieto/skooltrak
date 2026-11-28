@@ -39,6 +39,12 @@ export const DASHBOARD_ROUTES: Route[] = [
     title: 'Aceptar invitación | Skooltrak',
   },
   {
+    // IAM-001: organization admin invitation link (public; the token is the credential).
+    path: 'invitacion/:token',
+    loadComponent: () => import('./auth/accept-org-invitation'),
+    title: 'Invitación de administrador | Skooltrak',
+  },
+  {
     path: 'auth/magic-link',
     loadComponent: () => import('./auth/magic-link-request'),
     title: 'Acceso sin contraseña | Skooltrak',

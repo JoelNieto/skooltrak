@@ -6,6 +6,7 @@
  * OpenAPI spec version: 1.0
  */
 
+export * from './acceptOrgInvitationInput';
 export * from './addToCartInput';
 export * from './adminHomeControllerAttentionParams';
 export * from './adminHomeControllerKpisParams';
@@ -59,10 +60,12 @@ export * from './createFeeItemInput';
 export * from './createFileDownloadInput';
 export * from './createFileInput';
 export * from './createFileUploadInput';
+export * from './createFirstSchoolInput';
 export * from './createGradeBucketInput';
 export * from './createGradeInput';
 export * from './createGroupsScheduleInput';
 export * from './createOrganizationInput';
+export * from './createOrganizationWithInvitationInput';
 export * from './createParentInput';
 export * from './createPeriodInput';
 export * from './createPermissionInput';
@@ -107,6 +110,7 @@ export * from './gradeReportControllerGetGradeReportParams';
 export * from './gradesControllerFindByCourseIdParams';
 export * from './habitEvaluationsControllerFindByGroupParams';
 export * from './habitMetricsControllerFindAllParams';
+export * from './invitedAdminInput';
 export * from './linkChildInput';
 export * from './notificationsControllerListParams';
 export * from './organizationsControllerListInvitationsParams';

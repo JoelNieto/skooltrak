@@ -49,6 +49,7 @@ model Organization {
   familyAccounts           FamilyAccount[]
   payments                 Payment[]
   charges                  Charge[]
+  adminInvitations         OrganizationInvitation[]
 
   @@map("organizations")
 }
@@ -856,6 +857,8 @@ enum OnboardingAuditAction {
   INVITATION_CREATED
   INVITATION_EMAIL_FAILED
   ENROLLMENT_CODE_REGENERATED
+  ORG_INVITATION_CREATED
+  ORG_INVITATION_ACCEPTED
   MAGIC_LINK_ISSUED
   MAGIC_LINK_CONSUMED
   MAGIC_LINK_REJECTED
@@ -965,6 +968,47 @@ model OnboardingAuditLog {
   @@index([organizationId])
   @@index([action])
   @@map("onboarding_audit_logs")
+}
+
+/// IAM-001: lifecycle of an organization-admin invitation sent from web-admin.
+/// "Expired" is not stored: it is derived from `expiresAt` (BR-IAM-001.5).
+enum OrganizationInvitationStatus {
+  SENT
+  DELIVERY_FAILED
+  ACCEPTED
+  REVOKED
+  SUPERSEDED
+}
+
+/// IAM-001: invitation for an organization's administrator, created by a SYSADMIN.
+/// Only the SHA-256 hash of the link token is stored (BR-IAM-001.4).
+model OrganizationInvitation {
+  id               String                       @id @default(cuid())
+  organizationId   String
+  organization     Organization                 @relation(fields: [organizationId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  email            String // lower-cased
+  firstName        String
+  lastName         String
+  tokenHash        String                       @unique
+  status           OrganizationInvitationStatus @default(SENT)
+  expiresAt        DateTime
+  sentAt           DateTime?
+  lastSendError    String?
+  sendAttempts     Int                          @default(0)
+  invitedById      String
+  acceptedAt       DateTime?
+  acceptedByUserId String?
+  revokedAt        DateTime?
+  revokedById      String?
+  supersededById   String?
+  linkRequestedAt  DateTime?
+  createdAt        DateTime                     @default(now())
+  updatedAt        DateTime                     @updatedAt
+
+  @@index([organizationId])
+  @@index([email])
+  @@index([organizationId, status])
+  @@map("organization_invitations")
 }
 
 model InvitationStatus {

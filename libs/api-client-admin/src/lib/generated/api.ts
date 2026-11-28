@@ -26,12 +26,15 @@ import {
 } from 'rxjs';
 
 import type {
+  AcceptOrgInvitationInput,
   AuthSessionControllerAvailableSchoolsParams,
   AuthSessionControllerLoginBody,
   AvatarUploadUrlInput,
+  CreateFirstSchoolInput,
   CreateGradeMetricInput,
   CreateHabitMetricInput,
   CreateOrganizationInput,
+  CreateOrganizationWithInvitationInput,
   CreatePeriodInput,
   CreatePermissionInput,
   CreateRoleInput,
@@ -1437,6 +1440,155 @@ export class SkooltrakAdminAPIService {
 
     return this.http.post<TData>(
       `/api/v1/auth/complete-onboarding`,undefined,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'body',
+      }
+    );
+  }
+
+/**
+ * @summary Preview an organization invitation link (IAM-001)
+ */
+ orgInvitationsControllerPreview<TData = void>(token: string, options?: HttpClientBodyOptions): Observable<TData>;
+ orgInvitationsControllerPreview<TData = void>(token: string, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
+ orgInvitationsControllerPreview<TData = void>(token: string, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
+  orgInvitationsControllerPreview<TData = void>(
+    token: string, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
+    if (options?.observe === 'events') {
+      return this.http.get<TData>(
+      `/api/v1/auth/org-invitations/${token}`,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'events',
+      }
+    );
+    }
+
+    if (options?.observe === 'response') {
+      return this.http.get<TData>(
+      `/api/v1/auth/org-invitations/${token}`,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'response',
+      }
+    );
+    }
+
+    return this.http.get<TData>(
+      `/api/v1/auth/org-invitations/${token}`,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'body',
+      }
+    );
+  }
+
+/**
+ * @summary Accept an organization invitation with a new account (returns JWT)
+ */
+ orgInvitationsControllerAccept<TData = void>(token: string,
+    acceptOrgInvitationInput: AcceptOrgInvitationInput, options?: HttpClientBodyOptions): Observable<TData>;
+ orgInvitationsControllerAccept<TData = void>(token: string,
+    acceptOrgInvitationInput: AcceptOrgInvitationInput, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
+ orgInvitationsControllerAccept<TData = void>(token: string,
+    acceptOrgInvitationInput: AcceptOrgInvitationInput, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
+  orgInvitationsControllerAccept<TData = void>(
+    token: string,
+    acceptOrgInvitationInput: AcceptOrgInvitationInput, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
+    if (options?.observe === 'events') {
+      return this.http.post<TData>(
+      `/api/v1/auth/org-invitations/${token}/accept`,
+      acceptOrgInvitationInput,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'events',
+      }
+    );
+    }
+
+    if (options?.observe === 'response') {
+      return this.http.post<TData>(
+      `/api/v1/auth/org-invitations/${token}/accept`,
+      acceptOrgInvitationInput,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'response',
+      }
+    );
+    }
+
+    return this.http.post<TData>(
+      `/api/v1/auth/org-invitations/${token}/accept`,
+      acceptOrgInvitationInput,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'body',
+      }
+    );
+  }
+
+/**
+ * @summary Create the first school of the caller's organization (IAM-001)
+ */
+ orgInvitationsControllerCreateFirstSchool<TData = void>(createFirstSchoolInput: CreateFirstSchoolInput, options?: HttpClientBodyOptions): Observable<TData>;
+ orgInvitationsControllerCreateFirstSchool<TData = void>(createFirstSchoolInput: CreateFirstSchoolInput, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
+ orgInvitationsControllerCreateFirstSchool<TData = void>(createFirstSchoolInput: CreateFirstSchoolInput, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
+  orgInvitationsControllerCreateFirstSchool<TData = void>(
+    createFirstSchoolInput: CreateFirstSchoolInput, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
+    if (options?.observe === 'events') {
+      return this.http.post<TData>(
+      `/api/v1/auth/setup/first-school`,
+      createFirstSchoolInput,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'events',
+      }
+    );
+    }
+
+    if (options?.observe === 'response') {
+      return this.http.post<TData>(
+      `/api/v1/auth/setup/first-school`,
+      createFirstSchoolInput,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'response',
+      }
+    );
+    }
+
+    return this.http.post<TData>(
+      `/api/v1/auth/setup/first-school`,
+      createFirstSchoolInput,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'body',
+      }
+    );
+  }
+
+/**
+ * @summary Create an organization and invite its first administrator (IAM-001)
+ */
+ orgInvitationsAdminControllerCreateWithInvitation<TData = void>(createOrganizationWithInvitationInput: CreateOrganizationWithInvitationInput, options?: HttpClientBodyOptions): Observable<TData>;
+ orgInvitationsAdminControllerCreateWithInvitation<TData = void>(createOrganizationWithInvitationInput: CreateOrganizationWithInvitationInput, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
+ orgInvitationsAdminControllerCreateWithInvitation<TData = void>(createOrganizationWithInvitationInput: CreateOrganizationWithInvitationInput, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
+  orgInvitationsAdminControllerCreateWithInvitation<TData = void>(
+    createOrganizationWithInvitationInput: CreateOrganizationWithInvitationInput, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
+    if (options?.observe === 'events') {
+      return this.http.post<TData>(
+      `/api/v1/organizations/with-invitation`,
+      createOrganizationWithInvitationInput,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'events',
+      }
+    );
+    }
+
+    if (options?.observe === 'response') {
+      return this.http.post<TData>(
+      `/api/v1/organizations/with-invitation`,
+      createOrganizationWithInvitationInput,{
+        ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'response',
+      }
+    );
+    }
+
+    return this.http.post<TData>(
+      `/api/v1/organizations/with-invitation`,
+      createOrganizationWithInvitationInput,{
         ...(options as Omit<NonNullable<typeof options>, 'observe'>),
         observe: 'body',
       }

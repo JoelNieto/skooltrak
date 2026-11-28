@@ -1,10 +1,13 @@
 import {
+  Badge,
+  BadgeTone,
   Breadcrumbs,
   Button,
   Confirmation,
   Icon,
   Modal,
   Toast,
+  UiIconName,
   UiRowAction,
   UiRowActions,
   UiTable,
@@ -18,9 +21,34 @@ import { HttpClient, httpResource } from '@angular/common/http';
 import { Component, inject } from '@angular/core';
 import { Prisma } from '@generated/prisma';
 import { OrganizationsForm } from './organizations-form';
+
+/** Latest admin invitation as returned by `GET /api/v1/organizations` (IAM-001 FR .4). */
+export interface AdminInvitationSummary {
+  email: string;
+  firstName: string;
+  lastName: string;
+  status: string;
+  state: 'VALID' | 'EXPIRED' | 'REVOKED' | 'SUPERSEDED' | 'ACCEPTED';
+  expiresAt: string;
+}
+
+export type OrganizationRow = Prisma.OrganizationCreateInput & { adminInvitation: AdminInvitationSummary | null };
+
+/** S01 shows the first two console states; the full set (expired, failed, setup n/5, active) is IAM-001-S04/S06. */
+export function invitationBadge(invitation: AdminInvitationSummary | null): { label: string; tone: BadgeTone; icon: UiIconName } | null {
+  if (!invitation) return null;
+  switch (invitation.state) {
+    case 'ACCEPTED':
+      return { label: 'Aceptada', tone: 'success', icon: 'circle-check' };
+    case 'VALID':
+      return { label: 'Invitación enviada', tone: 'info', icon: 'mail-check' };
+    default:
+      return null;
+  }
+}
 @Component({
   selector: 'app-organizations',
-  imports: [Breadcrumbs, UiTable, Button, DatePipe, Icon, UiRowActions, UiTableEmpty, UiTableError, UiTableSkeleton],
+  imports: [Badge, Breadcrumbs, UiTable, Button, DatePipe, Icon, UiRowActions, UiTableEmpty, UiTableError, UiTableSkeleton],
 
   template: `<ui-breadcrumbs [items]="[{ label: 'Inicio', link: '/' }, { label: 'Organizaciones' }]" />
     <div class="flex justify-between items-center mb-4">
@@ -30,17 +58,17 @@ import { OrganizationsForm } from './organizations-form';
       </div>
 
       <button uiButton variant="primary" (click)="editOrganization()">
-        <ui-icon name="circle-plus" /> Nueva Organizacións
+        <ui-icon name="circle-plus" /> Nueva organización
       </button>
     </div>
     <div class="overflow-x-auto">
       <table uiTable [attr.aria-busy]="organizations.isLoading()">
         <thead>
           <tr>
-            <th>Nombre</th>
-            <th>Descripción</th>
+            <th>Organización</th>
+            <th>Administrador invitado</th>
+            <th>Estado</th>
             <th>Fecha de creación</th>
-            <th>Fecha de actualización</th>
             <th class="w-12"><span class="sr-only">Acciones</span></th>
           </tr>
         </thead>
@@ -57,10 +85,26 @@ import { OrganizationsForm } from './organizations-form';
             <tbody>
               @for (organization of organizationsList.rows(); track organization.id) {
                 <tr>
-                  <td>{{ organization.name }}</td>
-                  <td>{{ organization.description }}</td>
+                  <td>
+                    <div class="font-semibold text-ink-strong">{{ organization.name }}</div>
+                    @if (organization.description) {
+                      <div class="type-caption text-ink-muted">{{ organization.description }}</div>
+                    }
+                  </td>
+                  <td>
+                    @if (organization.adminInvitation; as invitation) {
+                      <div>{{ invitation.firstName }} {{ invitation.lastName }}</div>
+                      <div class="type-caption text-ink-muted">{{ invitation.email }}</div>
+                    } @else {
+                      <span class="text-ink-subtle">—</span>
+                    }
+                  </td>
+                  <td>
+                    @if (badge(organization); as b) {
+                      <span uiBadge size="sm" [tone]="b.tone"><ui-icon [name]="b.icon" /> {{ b.label }}</span>
+                    }
+                  </td>
                   <td>{{ organization.createdAt | date: 'medium' }}</td>
-                  <td>{{ organization.updatedAt | date: 'medium' }}</td>
                   <td>
                     <ui-row-actions
                       [actions]="rowActions"
@@ -84,7 +128,7 @@ export class Organizations {
   private confirmation = inject(Confirmation);
   private toasts = inject(Toast);
 
-  public organizations = httpResource<Prisma.OrganizationCreateInput[]>(() => '/api/v1/organizations', {
+  public organizations = httpResource<OrganizationRow[]>(() => '/api/v1/organizations', {
     defaultValue: [],
   });
   /** organizations with smooth loading: previous rows stay while the next page / sort / search loads. */
@@ -123,6 +167,10 @@ export class Organizations {
           });
         }
       });
+  }
+
+  protected badge(organization: OrganizationRow) {
+    return invitationBadge(organization.adminInvitation);
   }
 
   /** The actions in each row's menu (ui-row-actions). */

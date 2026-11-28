@@ -4,7 +4,7 @@
 |---|---|
 | **FRD** | [IAM-001](../frd/IAM-001-org-invitation-onboarding.md) |
 | **Implements** | FR-IAM-001.1, FR-IAM-001.2, FR-IAM-001.11, FR-IAM-001.12, FR-IAM-001.15 · BR-IAM-001.1 (new endpoints only), .3 (first-school endpoint), .4, .5, .6, .11, .12 · FR-IAM-001.4 partially (badges *Invitación enviada* / *Aceptada* only) |
-| **Status** | Ready |
+| **Status** | In progress |
 | **Branch** | `feat/IAM-001-S01-create-and-accept-invitation` |
 | **Estimate** | 3 days |
 
@@ -51,19 +51,20 @@ And submitting step 1 again returns 409 "La organización ya tiene escuelas"
 ```
 
 ## Layers touched
-- [ ] Prisma migration: `OrganizationInvitation` model + `OrganizationInvitationStatus` enum (FRD §5); `OnboardingAuditAction` += `ORG_INVITATION_CREATED`, `ORG_INVITATION_ACCEPTED`.
-- [ ] Nest (`libs/auth`):
-  - `OrganizationsController` `POST v1/organizations/with-invitation` with `@UseGuards(RoleGuard)` + `@RequireRoles('SYSADMIN')`. In one transaction it creates the `Organization` (`onboardingCompleted=false`), its per-org `ORG_ADMIN` role with all permissions (extract the role-creation block from `AuthService.createSchoolWithOrganization` into a shared helper) and the invitation (hashed token). It sends the email outside the transaction. `GET v1/organizations` returns the latest invitation email and status for the badge.
-  - `resend.service.ts` `sendOrganizationInvitation({ to, firstName, organizationName, link, expiresAt })` (copy from board 5).
-  - `AuthSessionController` `GET v1/auth/org-invitations/:token` and `POST …/:token/accept` (`@AllowAnonymous`): look up by SHA-256 of the token, check the state (BR .5) and email (BR .6). Create the user (`emailVerified=true`, `onboardingStep` via `transitionOnboardingStep` → `school-setup`), assign role + org + `Member`, mark the invitation `ACCEPTED`, and return a JWT, all in one transaction.
-  - `POST v1/auth/setup/first-school`: the caller must be `ORG_ADMIN` with `organizationId`, and the org must have 0 schools (409 otherwise).
-- [ ] OpenAPI → `bun run openapi` (admin + dashboard clients).
-- [ ] Angular web-admin: replace `organizations-form.ts` with the board 3 form (org + admin; expiry fixed at 7 days in this slice); show the email and badge columns in `organizations.ts`.
-- [ ] Angular web-dashboard: public route `/invitacion/:token` (board 6; any unusable state shows one generic "Este enlace ya no es válido" card until S03); `setup-wizard` step 1 posts to `setup/first-school` with the name prefilled from the org (board 8).
-- [ ] Tests:
-  - Nest unit: token hashing, state checks (expired / accepted / wrong email), SYSADMIN-only refusal for `ORG_ADMIN` and anonymous callers, first-school refused for another org's admin and when a school exists.
-  - Playwright in `web-dashboard-e2e`: seed an invitation in `fixtures.ts` + `scripts/prepare-db.ts` (known plain token), then accept → wizard step 1, tagged `@FR-IAM-001.11 @FR-IAM-001.12 @FR-IAM-001.15`.
-  - Console create path: `web-admin-e2e` has no persona setup yet. Add a `sysadmin` persona there, or cover `@FR-IAM-001.1` with an API-level Playwright test against `admin-backend`. Decide at build start; adding the persona is part of this slice either way.
+- [x] Prisma migration `20261130120000_iam001_org_invitations`: `OrganizationInvitation` + `OrganizationInvitationStatus`; `OnboardingAuditAction` += `ORG_INVITATION_CREATED`, `ORG_INVITATION_ACCEPTED`.
+- [x] Nest (`libs/auth`):
+  - `org-onboarding/org-onboarding.service.ts`: create with invitation, preview, accept, first school.
+  - `org-onboarding/org-onboarding.controller.ts`: `OrgInvitationsAdminController` (`POST v1/organizations/with-invitation`, `RoleGuard` + `@RequireRoles('SYSADMIN')`) and `OrgInvitationsController` (`GET v1/auth/org-invitations/:token`, `POST …/:token/accept`, both `@AllowAnonymous`; `POST v1/auth/setup/first-school`).
+  - `organizations/org-admin-role.ts`: the ORG_ADMIN role helper, now shared with the legacy `createSchoolWithOrganization`. `organizations/org-invitation-state.ts`: derived state (BR .5) and token hashing (BR .4).
+  - `OrganizationsService.findAll` returns `adminInvitation` (latest invitation plus derived state).
+  - `resend.service.ts` `sendOrganizationInvitationEmail` (HTML-escaped names). The link base is `DASHBOARD_URL`, falling back to `APP_URL`.
+- [x] OpenAPI regenerated (`bun run openapi`, admin + dashboard clients).
+- [x] web-admin: `organizations-form.ts` (organization + admin; edit keeps name and description only). `organizations.ts` has the *Administrador invitado* and *Estado* columns (*Invitación enviada* / *Aceptada*).
+- [x] web-dashboard: public route `/invitacion/:token` (`auth/accept-org-invitation.ts`). Wizard step 1 (`onboarding/steps/school-basics.ts`) creates "Tu primera escuela" when the organization has none; the legacy path is unchanged.
+- [x] Tests:
+  - Nest unit: `org-onboarding.service.spec.ts` (state, hashing, create/send/failed send, preview, accept and its 410/409 refusals, the accept race, first-school scoping). `org-onboarding.controller.spec.ts` (SYSADMIN-only guard: ORG_ADMIN, ADMIN, TEACHER and member get 403, anonymous gets 401; which routes are public).
+  - web-admin unit: `organizations-form.spec.ts` (`@FR-IAM-001.1` request shape, no submit without email).
+  - Playwright: `web-dashboard-e2e/src/onboarding/org-invitation.spec.ts`. The console create path is tested at API level against the e2e API (no web-admin e2e harness yet), with a seeded SYSADMIN user (`data.orgInvitation.sysadmin`).
 
 ## Out of scope for this slice
 - Removing "Crear una Escuela" and locking the existing `/organizations` CRUD (S02). Self-service creation keeps working until S02 ships.

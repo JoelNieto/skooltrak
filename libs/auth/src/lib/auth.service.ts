@@ -11,6 +11,7 @@ import { randomBytes, randomUUID } from 'crypto';
 import * as jwt from 'jsonwebtoken';
 import { auth, verifyMagicLinkInternally } from './better-auth';
 import { OnboardingStep, assertTransition } from './onboarding-step';
+import { createOrgAdminRole } from './organizations/org-admin-role';
 import type { Prisma } from '@generated/prisma';
 import { RateLimiter } from './rate-limiter';
 import { CreateSchoolWithOrgInput } from './dto/create-school-with-org.input';
@@ -612,21 +613,7 @@ export class AuthService {
       });
 
       // 2. Create ORG_ADMIN Role for this organization with all permissions
-      const allPermissions = await tx.permission.findMany({
-        select: { id: true },
-      });
-
-      const role = await tx.role.create({
-        data: {
-          name: 'ORG_ADMIN',
-          description: 'Organization Administrator',
-          organizationId: organization.id,
-          permissions: {
-            connect: allPermissions.map((p) => ({ id: p.id })),
-          },
-        },
-        include: { permissions: true },
-      });
+      const role = await createOrgAdminRole(tx, organization.id);
 
       // 3. Assign role and org to user
       const updatedUser = await tx.user.update({

@@ -534,6 +534,124 @@
         ]
       }
     },
+    "/api/v1/auth/org-invitations/{token}": {
+      "get": {
+        "operationId": "OrgInvitationsController_preview",
+        "parameters": [
+          {
+            "name": "token",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Preview an organization invitation link (IAM-001)",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/api/v1/auth/org-invitations/{token}/accept": {
+      "post": {
+        "operationId": "OrgInvitationsController_accept",
+        "parameters": [
+          {
+            "name": "token",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AcceptOrgInvitationInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "summary": "Accept an organization invitation with a new account (returns JWT)",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/api/v1/auth/setup/first-school": {
+      "post": {
+        "operationId": "OrgInvitationsController_createFirstSchool",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateFirstSchoolInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create the first school of the caller's organization (IAM-001)",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/api/v1/organizations/with-invitation": {
+      "post": {
+        "operationId": "OrgInvitationsAdminController_createWithInvitation",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateOrganizationWithInvitationInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create an organization and invite its first administrator (IAM-001)",
+        "tags": [
+          "organizations"
+        ]
+      }
+    },
     "/api/v1/users": {
       "post": {
         "operationId": "UsersController_create",
@@ -12031,6 +12149,88 @@
       "LinkChildInput": {
         "type": "object",
         "properties": {}
+      },
+      "AcceptOrgInvitationInput": {
+        "type": "object",
+        "properties": {
+          "firstName": {
+            "type": "string"
+          },
+          "lastName": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          },
+          "acceptTerms": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "firstName",
+          "lastName",
+          "password",
+          "acceptTerms"
+        ]
+      },
+      "CreateFirstSchoolInput": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "shortName": {
+            "type": "string"
+          },
+          "currentYear": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "name",
+          "shortName"
+        ]
+      },
+      "InvitedAdminInput": {
+        "type": "object",
+        "properties": {
+          "firstName": {
+            "type": "string"
+          },
+          "lastName": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "firstName",
+          "lastName",
+          "email"
+        ]
+      },
+      "CreateOrganizationWithInvitationInput": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "admin": {
+            "$ref": "#/components/schemas/InvitedAdminInput"
+          },
+          "sendEmail": {
+            "type": "boolean",
+            "default": true
+          }
+        },
+        "required": [
+          "name",
+          "admin"
+        ]
       },
       "CreateUserInput": {
         "type": "object",

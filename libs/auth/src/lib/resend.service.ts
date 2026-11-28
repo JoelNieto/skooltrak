@@ -233,3 +233,69 @@ export async function sendMagicLinkEmail({
 
   return sendEmail({ to, subject, html });
 }
+
+/** Escape text interpolated into email HTML (names and org names are admin-entered). */
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+/**
+ * IAM-001 FR .2: invitation for an organization's first administrator.
+ * The link carries the plain single-use token; never log it.
+ */
+export async function sendOrganizationInvitationEmail({
+  to,
+  firstName,
+  organizationName,
+  link,
+  expiresAt,
+}: {
+  to: string;
+  firstName: string;
+  organizationName: string;
+  link: string;
+  expiresAt: Date;
+}) {
+  const org = escapeHtml(organizationName);
+  const name = escapeHtml(firstName);
+  const expires = new Intl.DateTimeFormat('es-PA', { weekday: 'long', day: 'numeric', month: 'long' }).format(expiresAt);
+  const subject = `Te invitamos a administrar ${organizationName} en Skooltrak`;
+
+  const html = `
+    <!DOCTYPE html>
+    <html lang="es">
+    <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+    <body style="font-family: Geist, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; margin: 0; padding: 0; background-color: #E9EDF6;">
+      <div style="max-width: 600px; margin: 0 auto; padding: 32px 16px;">
+        <div style="background-color: #FFFFFF; border: 1px solid #DCE2EF; border-radius: 16px; padding: 40px;">
+          <p style="margin: 0 0 24px 0; font-size: 18px; letter-spacing: 0.02em; color: #0B1530;"><strong>SKOOL</strong>TRAK</p>
+          <h1 style="margin: 0 0 16px 0; font-size: 26px; line-height: 32px; color: #0B1530;">Hola ${name}, tu escuela ya tiene un lugar en Skooltrak</h1>
+          <p style="margin: 0 0 24px 0; font-size: 17px; line-height: 27px; color: #26314F;">
+            Te invitamos a administrar <strong>${org}</strong>. Con el enlace crearás tu acceso y configurarás tu primera escuela: grados, planes de estudio, cursos y grupos. Toma unos 15 minutos.
+          </p>
+          <a href="${link}" style="display: inline-block; padding: 14px 28px; background-color: #1D4ED8; color: #FFFFFF; text-decoration: none; border-radius: 999px; font-size: 16px; font-weight: 600;">Aceptar invitación</a>
+          <div style="margin: 24px 0; padding: 16px; background-color: #F4F6FB; border-radius: 8px; font-size: 14px; line-height: 20px; color: #26314F;">
+            El enlace es personal y vence el <strong>${expires}</strong>.<br>Si vence, pide uno nuevo a quien te invitó.
+          </div>
+          <p style="margin: 0 0 4px 0; font-size: 13px; color: #475069;">¿El botón no funciona? Copia este enlace:</p>
+          <p style="margin: 0 0 24px 0; font-family: 'Geist Mono', monospace; font-size: 12px; color: #26314F; word-break: break-all;">${link}</p>
+          <hr style="border: none; border-top: 1px solid #DCE2EF; margin: 24px 0;">
+          <p style="margin: 0; font-size: 12px; line-height: 18px; color: #475069;">
+            Recibiste este correo porque el equipo de Skooltrak registró tu institución. Si no esperabas esta invitación, ignórala: nadie podrá entrar sin el enlace.
+          </p>
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+
+  return sendEmail({ to, subject, html });
+}

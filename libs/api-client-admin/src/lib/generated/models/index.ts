@@ -6,12 +6,15 @@
  * OpenAPI spec version: 1.0
  */
 
+export * from './acceptOrgInvitationInput';
 export * from './authSessionControllerAvailableSchoolsParams';
 export * from './authSessionControllerLoginBody';
 export * from './avatarUploadUrlInput';
+export * from './createFirstSchoolInput';
 export * from './createGradeMetricInput';
 export * from './createHabitMetricInput';
 export * from './createOrganizationInput';
+export * from './createOrganizationWithInvitationInput';
 export * from './createPeriodInput';
 export * from './createPermissionInput';
 export * from './createRoleInput';
@@ -19,6 +22,7 @@ export * from './createSchoolInput';
 export * from './createSchoolWithOrgInput';
 export * from './createSubjectInput';
 export * from './createUserInput';
+export * from './invitedAdminInput';
 export * from './linkChildInput';
 export * from './organizationsControllerListInvitationsParams';
 export * from './organizationsControllerListMembersParams';

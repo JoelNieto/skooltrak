@@ -115,4 +115,20 @@ export const data = {
     transfer: { reference: 'TRX-E2E-001', amount: 150 },
     yappy: { reference: 'YAP-E2E-001', amount: 30, credit: 5 },
   },
+  /**
+   * IAM-001-S01. `invited` is an organization created by a platform admin with no school yet and
+   * one pending admin invitation per link below (prepare-db stores only the tokens' hashes).
+   * `validToken` is accepted by the spec, which then creates the first school; `expiredToken`
+   * expired yesterday. `sysadmin` is a platform admin used by the API-level console tests; it is
+   * not a browser persona (web-dashboard is not its app).
+   */
+  orgInvitation: {
+    organization: 'Instituto Invitado E2E',
+    invitee: { email: 'invitada.e2e@skooltrak.test', firstName: 'Inés', lastName: 'Invitada' },
+    expiredInvitee: { email: 'vencida.e2e@skooltrak.test', firstName: 'Vera', lastName: 'Vencida' },
+    validToken: 'e2e-org-invitation-valid-token-0001',
+    expiredToken: 'e2e-org-invitation-expired-token-0001',
+    school: { name: 'Sede Central E2E', shortName: 'SCE2E' },
+    sysadmin: { email: 'sysadmin.e2e@skooltrak.test', firstName: 'Sara', lastName: 'Plataforma' },
+  },
 } as const;

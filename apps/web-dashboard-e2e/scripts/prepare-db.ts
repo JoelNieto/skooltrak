@@ -8,7 +8,7 @@
 import { PrismaPg } from '@prisma/adapter-pg';
 import * as bcrypt from 'bcrypt';
 import { execFileSync } from 'child_process';
-import { randomUUID } from 'crypto';
+import { createHash, randomUUID } from 'crypto';
 import { resolve } from 'path';
 import { PrismaClient } from '@generated/prisma';
 import { data, E2E_PASSWORD, personas } from '../src/support/fixtures';
@@ -387,10 +387,71 @@ async function seedFixtures(databaseUrl: string) {
       });
     }
 
+    await seedOrgInvitation(prisma, passwordHash, roleId);
+
     console.log(`✓ Seeded e2e fixtures (org ${org.id})`);
   } finally {
     await prisma.$disconnect();
   }
+}
+
+/** IAM-001-S01: an invited organization (no school, ORG_ADMIN role) with a valid and an expired link. */
+async function seedOrgInvitation(
+  prisma: PrismaClient,
+  passwordHash: string,
+  roleId: (name: string) => Promise<string>,
+) {
+  const fx = data.orgInvitation;
+  const sysadmin = await prisma.user.create({
+    data: {
+      email: fx.sysadmin.email,
+      name: `${fx.sysadmin.firstName} ${fx.sysadmin.lastName}`,
+      firstName: fx.sysadmin.firstName,
+      lastName: fx.sysadmin.lastName,
+      password: passwordHash,
+      emailVerified: true,
+      roleId: await roleId('SYSADMIN'),
+      onboardingStep: 'completed',
+    },
+  });
+  await prisma.account.create({
+    data: { id: randomUUID(), accountId: sysadmin.id, providerId: 'credential', userId: sysadmin.id, password: passwordHash },
+  });
+
+  const invited = await prisma.organization.create({
+    data: { name: fx.organization, slug: 'instituto-invitado-e2e', description: '', onboardingCompleted: false },
+  });
+  const permissions = await prisma.permission.findMany({ select: { id: true } });
+  await prisma.role.create({
+    data: {
+      name: 'ORG_ADMIN',
+      description: 'Organization Administrator',
+      organizationId: invited.id,
+      permissions: { connect: permissions },
+    },
+  });
+
+  const day = 24 * 60 * 60 * 1000;
+  const sha256 = (token: string) => createHash('sha256').update(token, 'utf8').digest('hex');
+  await prisma.organizationInvitation.createMany({
+    data: [
+      // The valid one is the latest, so the console shows its state for the organization.
+      { ...fx.invitee, token: fx.validToken, expiresAt: new Date(Date.now() + 7 * day), createdAt: new Date() },
+      {
+        ...fx.expiredInvitee,
+        token: fx.expiredToken,
+        expiresAt: new Date(Date.now() - day),
+        createdAt: new Date(Date.now() - 8 * day),
+      },
+    ].map(({ token, ...row }) => ({
+      ...row,
+      organizationId: invited.id,
+      tokenHash: sha256(token),
+      invitedById: sysadmin.id,
+      sentAt: new Date(),
+      sendAttempts: 1,
+    })),
+  });
 }
 
 async function main() {

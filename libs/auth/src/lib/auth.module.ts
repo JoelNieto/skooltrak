@@ -11,12 +11,15 @@ import { PrismaModule } from './prisma.module';
 import { RolesModule } from './roles/roles.module';
 import { UsersModule } from './users/users.module';
 import { AuthSessionController } from './auth-session.controller';
+import { OrgInvitationsAdminController, OrgInvitationsController } from './org-onboarding/org-onboarding.controller';
+import { OrgOnboardingService } from './org-onboarding/org-onboarding.service';
 
 @Module({
-  controllers: [AuthSessionController],
+  controllers: [AuthSessionController, OrgInvitationsController, OrgInvitationsAdminController],
   providers: [
     AuthService,
     AuthTokenService,
+    OrgOnboardingService,
     // Deny by default: every HTTP route in any app importing AuthModule requires an
     // authenticated user unless marked @AllowAnonymous(). Order matters — APP_GUARDs run in
     // registration order, so authentication populates req.user before permissions are checked.

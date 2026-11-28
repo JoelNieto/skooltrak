@@ -8621,6 +8621,35 @@
         ]
       }
     },
+    "/api/v1/groups-schedules/by-class-group/{classGroupId}/teacher-busy": {
+      "get": {
+        "operationId": "GroupsSchedulesController_findTeacherBusy",
+        "parameters": [
+          {
+            "name": "classGroupId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Other groups' slots taught by this group's teachers (editor clash check)",
+        "tags": [
+          "groups-schedules"
+        ]
+      }
+    },
     "/api/v1/groups-schedules/by-class-group/{classGroupId}": {
       "get": {
         "operationId": "GroupsSchedulesController_findAllByClassGroupId",

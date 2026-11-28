@@ -16,7 +16,8 @@ Code: `libs/auth` (better-auth, guards, users, roles, permissions, organizations
 | Sign-up with email verification | Live | — |
 | Password reset | Live | — |
 | Invitations (accept invitation) | Live | — |
-| Onboarding: choose path → join school / create school / connect child | Live | — (see `docs/onboarding.md`) |
+| Onboarding: choose path → join school / create school / connect child | Live (create school is being replaced by IAM-001) | — (see `docs/onboarding.md`) |
+| Organization onboarding by invitation: platform admin creates the org and invites its admin from web-admin; invitation status and setup progress in the console; self-service org creation removed | Planned | [IAM-001](frd/IAM-001-org-invitation-onboarding.md) |
 | Join requests & approval | Live | — |
 | Roles & permissions management | Live | — |
 | API authentication by default (deny-by-default guard) | Live | — |

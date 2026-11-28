@@ -17,15 +17,17 @@ import {
   Param,
   Patch,
   Post,
+  Query,
   Req,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { requireOrganization } from '../org-scope';
 import { PrismaService } from '../prisma.service';
 import { CreateGroupsScheduleInput } from './dto/create-groups-schedule.input';
 import { UpdateGroupsScheduleInput } from './dto/update-groups-schedule.input';
 import { GroupsSchedulesService } from './groups-schedules.service';
+import { MySchedule, MyScheduleService } from './my-schedule.service';
 
 export const GROUP_DENIED = 'No tienes acceso al horario de este grupo';
 export const COURSE_MISMATCH = 'El curso no pertenece a la escuela del grupo';
@@ -46,7 +48,17 @@ export class GroupsSchedulesController {
   constructor(
     private readonly groupsSchedulesService: GroupsSchedulesService,
     private readonly prisma: PrismaService,
+    private readonly myScheduleService: MyScheduleService,
   ) {}
+
+  @Get('mine')
+  @ApiOperation({
+    summary: "The caller's weekly schedule: a student's group, a parent's linked child, or a teacher's classes",
+  })
+  @ApiQuery({ name: 'studentId', required: false, description: 'Parents: a linked child' })
+  mine(@Req() req: AuthenticatedRequest, @Query('studentId') studentId?: string): Promise<MySchedule> {
+    return this.myScheduleService.mine(req.user, studentId);
+  }
 
   @Post()
   @RequirePermissions(Perm.MANAGE_SCHEDULES)

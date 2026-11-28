@@ -114,6 +114,7 @@ import type {
   GradebookControllerCoursesParams,
   GradebookControllerExportCsvParams,
   GradesControllerFindByCourseIdParams,
+  GroupsSchedulesControllerMineParams,
   HabitEvaluationsControllerFindByGroupParams,
   HabitMetricsControllerFindAllParams,
   LinkChildInput,
@@ -9000,6 +9001,42 @@ if(coursesControllerUploadCoverBody.file !== undefined) {
         ...(options as Omit<NonNullable<typeof options>, 'observe'>),
         observe: 'body',
       }
+    );
+  }
+
+/**
+ * @summary The caller's weekly schedule: a student's group, a parent's linked child, or a teacher's classes
+ */
+ groupsSchedulesControllerMine<TData = void>(params?: GroupsSchedulesControllerMineParams, options?: HttpClientBodyOptions): Observable<TData>;
+ groupsSchedulesControllerMine<TData = void>(params?: GroupsSchedulesControllerMineParams, options?: HttpClientEventOptions): Observable<HttpEvent<TData>>;
+ groupsSchedulesControllerMine<TData = void>(params?: GroupsSchedulesControllerMineParams, options?: HttpClientResponseOptions): Observable<AngularHttpResponse<TData>>;
+  groupsSchedulesControllerMine<TData = void>(
+    params?: GroupsSchedulesControllerMineParams, options?: HttpClientObserveOptions): Observable<TData | HttpEvent<TData> | AngularHttpResponse<TData>> {
+    const filteredParams = filterParams({...params, ...options?.params}, new Set<string>([]));
+
+    if (options?.observe === 'events') {
+      return this.http.get<TData>(
+      `/api/v1/groups-schedules/mine`,{
+    ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'events',
+        params: filteredParams,}
+    );
+    }
+
+    if (options?.observe === 'response') {
+      return this.http.get<TData>(
+      `/api/v1/groups-schedules/mine`,{
+    ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'response',
+        params: filteredParams,}
+    );
+    }
+
+    return this.http.get<TData>(
+      `/api/v1/groups-schedules/mine`,{
+    ...(options as Omit<NonNullable<typeof options>, 'observe'>),
+        observe: 'body',
+        params: filteredParams,}
     );
   }
 

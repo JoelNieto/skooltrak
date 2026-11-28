@@ -283,7 +283,23 @@ export const DASHBOARD_ROUTES: Route[] = [
       {
         path: 'student/schedule',
         canActivate: [permissionGuard('VIEW_SCHEDULES')],
-        loadComponent: () => import('./students/student-schedule'),
+        loadComponent: () => import('./schedule/my-schedule-page'),
+        data: { audience: 'student' },
+        title: 'Mi horario | Skooltrak',
+      },
+      {
+        path: 'teacher/schedule',
+        canActivate: [permissionGuard('VIEW_SCHEDULES')],
+        loadComponent: () => import('./schedule/my-schedule-page'),
+        data: { audience: 'teacher' },
+        title: 'Mi horario | Skooltrak',
+      },
+      {
+        path: 'parent/schedule',
+        canActivate: [permissionGuard('VIEW_SCHEDULES')],
+        loadComponent: () => import('./schedule/my-schedule-page'),
+        data: { audience: 'parent' },
+        title: 'Horario | Skooltrak',
       },
       {
         path: 'student/assignments',

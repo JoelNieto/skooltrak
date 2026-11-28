@@ -105,6 +105,7 @@ export * from './gradebookControllerCoursesParams';
 export * from './gradebookControllerExportCsvParams';
 export * from './gradeReportControllerGetGradeReportParams';
 export * from './gradesControllerFindByCourseIdParams';
+export * from './groupsSchedulesControllerMineParams';
 export * from './habitEvaluationsControllerFindByGroupParams';
 export * from './habitMetricsControllerFindAllParams';
 export * from './linkChildInput';

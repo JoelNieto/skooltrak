@@ -195,7 +195,7 @@ describe('Academic setup access', () => {
 
   it("group schedules: staff, the group's students and their parents read; writes stay in the group's school", async () => {
     const service = mockService();
-    const controller = new GroupsSchedulesController(service as never, prisma as never);
+    const controller = new GroupsSchedulesController(service as never, prisma as never, mockService() as never);
     expect(perms(GroupsSchedulesController)).toEqual([Perm.VIEW_SCHEDULES]);
     expect(perms(controller.create)).toEqual([Perm.MANAGE_SCHEDULES]);
     expect(perms(controller.findAll)).toEqual([Perm.MANAGE_SCHEDULES]);

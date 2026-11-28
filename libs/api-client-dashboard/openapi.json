@@ -8516,6 +8516,36 @@
         ]
       }
     },
+    "/api/v1/groups-schedules/mine": {
+      "get": {
+        "operationId": "GroupsSchedulesController_mine",
+        "parameters": [
+          {
+            "name": "studentId",
+            "required": false,
+            "in": "query",
+            "description": "Parents: a linked child",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "The caller's weekly schedule: a student's group, a parent's linked child, or a teacher's classes",
+        "tags": [
+          "groups-schedules"
+        ]
+      }
+    },
     "/api/v1/groups-schedules": {
       "post": {
         "operationId": "GroupsSchedulesController_create",

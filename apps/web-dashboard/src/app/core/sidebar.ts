@@ -614,7 +614,7 @@ export class Sidebar {
       sections.push({
         title: 'Estudiante',
         items: [
-          { label: 'Agenda', icon: 'calendar', link: 'student/schedule' },
+          { label: 'Horario', icon: 'calendar-days', link: 'student/schedule' },
           { label: 'Entregas', icon: 'file-up', link: 'student/assignments' },
           { label: 'Asistencia', icon: 'clipboard-check', link: 'student/attendance' },
         ],
@@ -625,6 +625,9 @@ export class Sidebar {
         title: 'Padres',
         items: [
           { label: 'Portal', icon: 'users-round', link: 'parent/portal' },
+          ...(can('VIEW_SCHEDULES')
+            ? [{ label: 'Horario', icon: 'calendar-days', link: 'parent/schedule' } as NavItem]
+            : []),
           { label: 'Progreso', icon: 'chart-column', link: 'parent/progress' },
           ...(can('VIEW_FINANCIALS')
             ? [{ label: 'Estado de cuenta', icon: 'wallet', link: 'parent/finances' } as NavItem]
@@ -636,6 +639,9 @@ export class Sidebar {
       sections.push({
         title: 'Docentes',
         items: [
+          ...(can('VIEW_SCHEDULES')
+            ? [{ label: 'Mi horario', icon: 'calendar-days', link: 'teacher/schedule' } as NavItem]
+            : []),
           { label: 'Asistencia', icon: 'clipboard-check', link: 'teacher/attendance' },
           { label: 'Libro de calificaciones', icon: 'star', link: 'teacher/gradebook' },
           { label: 'Reportes', icon: 'chart-line', link: 'teacher/reports' },
